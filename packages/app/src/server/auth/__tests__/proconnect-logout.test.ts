@@ -24,7 +24,10 @@ vi.mock("~/server/db/schema", () => ({
 	accounts: { userId: "userId" },
 }));
 
-import { buildProConnectLogoutUrl } from "../proconnect-logout";
+import {
+	buildProConnectLogoutUrl,
+	resetEndSessionCache,
+} from "../proconnect-logout";
 
 describe("buildProConnectLogoutUrl", () => {
 	let originalFetch: typeof globalThis.fetch;
@@ -32,6 +35,7 @@ describe("buildProConnectLogoutUrl", () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		resetEndSessionCache();
 		originalFetch = globalThis.fetch;
 		mockFetch = vi.fn();
 		globalThis.fetch = mockFetch as unknown as typeof fetch;
@@ -68,6 +72,7 @@ describe("buildProConnectLogoutUrl", () => {
 	it("returns end_session URL via Charon with post_logout_redirect_uri", async () => {
 		mockFindFirst.mockResolvedValue({ id_token: "test-id-token" });
 		mockFetch.mockResolvedValueOnce({
+			ok: true,
 			json: () =>
 				Promise.resolve({
 					end_session_endpoint:
@@ -91,9 +96,26 @@ describe("buildProConnectLogoutUrl", () => {
 		);
 	});
 
+	it("returns null when discovery responds with HTTP error", async () => {
+		mockFindFirst.mockResolvedValue({ id_token: "test-id-token" });
+		mockFetch.mockResolvedValueOnce({
+			ok: false,
+			status: 500,
+			statusText: "Internal Server Error",
+		});
+
+		const result = await buildProConnectLogoutUrl(
+			"user-123",
+			"http://localhost:3000/",
+		);
+
+		expect(result).toBeNull();
+	});
+
 	it("returns null when end_session_endpoint is missing from discovery", async () => {
 		mockFindFirst.mockResolvedValue({ id_token: "test-id-token" });
 		mockFetch.mockResolvedValueOnce({
+			ok: true,
 			json: () => Promise.resolve({}),
 		});
 

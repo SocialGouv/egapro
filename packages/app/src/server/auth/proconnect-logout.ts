@@ -10,6 +10,30 @@ const oidcConfigSchema = z.object({
 	end_session_endpoint: z.string().url(),
 });
 
+let cachedEndSessionEndpoint: string | undefined;
+
+async function getEndSessionEndpoint(): Promise<string> {
+	if (cachedEndSessionEndpoint) return cachedEndSessionEndpoint;
+
+	const wellKnownUrl = `${env.EGAPRO_PROCONNECT_ISSUER}/.well-known/openid-configuration`;
+	const response = await fetch(wellKnownUrl);
+
+	if (!response.ok) {
+		throw new Error(
+			`OIDC discovery failed: ${response.status} ${response.statusText}`,
+		);
+	}
+
+	const config = oidcConfigSchema.parse(await response.json());
+	cachedEndSessionEndpoint = config.end_session_endpoint;
+	return cachedEndSessionEndpoint;
+}
+
+/** @internal Reset cached OIDC discovery — for tests only. */
+export function resetEndSessionCache(): void {
+	cachedEndSessionEndpoint = undefined;
+}
+
 /**
  * Build the ProConnect OIDC end_session URL for browser-side redirect.
  *
@@ -29,7 +53,6 @@ export async function buildProConnectLogoutUrl(
 		return null;
 	}
 
-	// Fetch the stored id_token for this user's ProConnect account
 	const account = await db.query.accounts.findFirst({
 		where: eq(accounts.userId, userId),
 		columns: { id_token: true },
@@ -40,26 +63,17 @@ export async function buildProConnectLogoutUrl(
 		return null;
 	}
 
-	// Discover the end_session_endpoint via Charon's well-known.
-	// Charon rewrites it to point to itself and handles the OIDC logout flow:
-	// it rewrites post_logout_redirect_uri to its own /oauth/logout-callback,
-	// stores the original URI in session, and redirects back after logout.
-	const wellKnownUrl = `${env.EGAPRO_PROCONNECT_ISSUER}/.well-known/openid-configuration`;
-
 	try {
-		const response = await fetch(wellKnownUrl);
-		const config = oidcConfigSchema.parse(await response.json());
-
+		const endSessionEndpoint = await getEndSessionEndpoint();
 		const state = crypto.randomBytes(32).toString("hex");
 
-		const logoutUrl = new URL(config.end_session_endpoint);
+		const logoutUrl = new URL(endSessionEndpoint);
 		logoutUrl.searchParams.set("id_token_hint", idToken);
 		logoutUrl.searchParams.set("state", state);
 		logoutUrl.searchParams.set("post_logout_redirect_uri", appRedirectUri);
 
 		return logoutUrl.toString();
 	} catch {
-		// Silently fail — local session cookie is still cleared by the caller
 		return null;
 	}
 }
