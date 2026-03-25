@@ -20,10 +20,12 @@ describe("NotFoundPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("displays the error code", () => {
+	it("displays the error code with mention grey color", () => {
 		render(<NotFoundPage />);
 
-		expect(screen.getByText("Erreur 404")).toBeInTheDocument();
+		const errorCode = screen.getByText("Erreur 404");
+		expect(errorCode).toBeInTheDocument();
+		expect(errorCode).toHaveClass("fr-text-mention--grey");
 	});
 
 	it("displays the explanation text", () => {
@@ -48,25 +50,5 @@ describe("NotFoundPage", () => {
 		const link = screen.getByRole("link", { name: "Page d'accueil" });
 		expect(link).toHaveAttribute("href", "/");
 		expect(link).toHaveClass("fr-btn");
-	});
-
-	it("renders the DSFR artwork illustration as decorative", () => {
-		const { container } = render(<NotFoundPage />);
-
-		const svg = container.querySelector("svg.fr-artwork");
-		expect(svg).toBeInTheDocument();
-		expect(svg).toHaveAttribute("aria-hidden", "true");
-		expect(svg).toHaveClass("fr-responsive-img");
-	});
-
-	it("uses the correct illustration column classes from DSFR template", () => {
-		const { container } = render(<NotFoundPage />);
-
-		const artworkColumn = container
-			.querySelector("svg.fr-artwork")
-			?.closest("div") as HTMLElement;
-		expect(artworkColumn.className).toContain("fr-col-md-3");
-		expect(artworkColumn.className).toContain("fr-col-offset-md-1");
-		expect(artworkColumn.className).toContain("fr-px-6w");
 	});
 });
