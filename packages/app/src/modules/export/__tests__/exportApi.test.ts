@@ -13,6 +13,8 @@ vi.mock("~/modules/export/queries", () => ({
 	fetchIndicatorGByDeclaration: (...args: unknown[]) =>
 		mockFetchIndicatorG(...args),
 	fetchCseOpinionsByDeclaration: (...args: unknown[]) => mockFetchCse(...args),
+	fetchCseFilesByDeclaration: vi.fn().mockResolvedValue(new Map()),
+	fetchJointEvaluationFilesByDeclaration: vi.fn().mockResolvedValue(new Map()),
 }));
 
 describe("GET /api/v1/export/declarations", () => {

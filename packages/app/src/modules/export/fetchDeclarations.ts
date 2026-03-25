@@ -1,14 +1,17 @@
 // Types and pure functions for building the declaration JSON response.
 // DB queries are in queries.ts (server-only, not unit-testable).
 
+export type { DeclarationRow } from "./queries";
 // Re-export queries for route handler convenience
 export {
 	fetchCategoriesByDeclaration,
+	fetchCseFilesByDeclaration,
 	fetchCseOpinionsByDeclaration,
+	fetchFileById,
 	fetchIndicatorGByDeclaration,
+	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,
 } from "./queries";
-export type { DeclarationRow } from "./queries";
 
 import type { DeclarationRow } from "./queries";
 
@@ -45,6 +48,15 @@ export type CseRow = {
 	type: string;
 	opinion: string | null;
 	opinionDate: string | null;
+};
+
+export type FileRow = {
+	id: string;
+	siren: string;
+	year: number;
+	fileName: string;
+	filePath: string;
+	uploadedAt: Date;
 };
 
 // ── Build indicators from raw rows ───────────────────────────────────

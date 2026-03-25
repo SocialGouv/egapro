@@ -5,14 +5,21 @@ import { and, eq, gte, inArray, lt, or } from "drizzle-orm";
 import { db } from "~/server/db";
 import {
 	companies,
+	cseOpinionFiles,
 	cseOpinions,
 	declarationCategories,
 	declarations,
 	employeeCategories,
 	jobCategories,
+	jointEvaluationFiles,
 	users,
 } from "~/server/db/schema";
-import type { CategoryRow, CseRow, IndicatorGEntry } from "./fetchDeclarations";
+import type {
+	CategoryRow,
+	CseRow,
+	FileRow,
+	IndicatorGEntry,
+} from "./fetchDeclarations";
 
 // ── Shared helper ────────────────────────────────────────────────────
 
@@ -169,4 +176,94 @@ export async function fetchCseOpinionsByDeclaration(
 		);
 
 	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+}
+
+// ── CSE opinion files ────────────────────────────────────────────────
+
+export async function fetchCseFilesByDeclaration(
+	keys: Array<{ siren: string; year: number }>,
+): Promise<Map<string, FileRow[]>> {
+	if (keys.length === 0) return new Map();
+
+	const rows = await db
+		.select({
+			id: cseOpinionFiles.id,
+			siren: cseOpinionFiles.siren,
+			year: cseOpinionFiles.year,
+			fileName: cseOpinionFiles.fileName,
+			filePath: cseOpinionFiles.filePath,
+			uploadedAt: cseOpinionFiles.uploadedAt,
+		})
+		.from(cseOpinionFiles)
+		.where(
+			or(
+				...keys.map((k) =>
+					and(
+						eq(cseOpinionFiles.siren, k.siren),
+						eq(cseOpinionFiles.year, k.year),
+					),
+				),
+			),
+		);
+
+	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+}
+
+// ── Joint evaluation files ───────────────────────────────────────────
+
+export async function fetchJointEvaluationFilesByDeclaration(
+	keys: Array<{ siren: string; year: number }>,
+): Promise<Map<string, FileRow[]>> {
+	if (keys.length === 0) return new Map();
+
+	const rows = await db
+		.select({
+			id: jointEvaluationFiles.id,
+			siren: jointEvaluationFiles.siren,
+			year: jointEvaluationFiles.year,
+			fileName: jointEvaluationFiles.fileName,
+			filePath: jointEvaluationFiles.filePath,
+			uploadedAt: jointEvaluationFiles.uploadedAt,
+		})
+		.from(jointEvaluationFiles)
+		.where(
+			or(
+				...keys.map((k) =>
+					and(
+						eq(jointEvaluationFiles.siren, k.siren),
+						eq(jointEvaluationFiles.year, k.year),
+					),
+				),
+			),
+		);
+
+	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+}
+
+// ── Single file lookup (for download) ────────────────────────────────
+
+export async function fetchFileById(
+	fileId: string,
+): Promise<{ filePath: string; fileName: string } | undefined> {
+	const [cseFile] = await db
+		.select({
+			filePath: cseOpinionFiles.filePath,
+			fileName: cseOpinionFiles.fileName,
+		})
+		.from(cseOpinionFiles)
+		.where(eq(cseOpinionFiles.id, fileId))
+		.limit(1);
+
+	if (cseFile) return cseFile;
+
+	const [jointFile] = await db
+		.select({
+			filePath: jointEvaluationFiles.filePath,
+			fileName: jointEvaluationFiles.fileName,
+		})
+		.from(jointEvaluationFiles)
+		.where(eq(jointEvaluationFiles.id, fileId))
+		.limit(1);
+
+	return jointFile;
 }

@@ -1,11 +1,11 @@
 import {
 	assembleDeclaration,
+	exportDeclarationsQuerySchema,
 	fetchCategoriesByDeclaration,
 	fetchCseOpinionsByDeclaration,
 	fetchIndicatorGByDeclaration,
 	fetchSubmittedDeclarations,
-} from "~/modules/export/fetchDeclarations";
-import { exportDeclarationsQuerySchema } from "~/modules/export/schemas";
+} from "~/modules/export";
 
 /**
  * GET /api/v1/export/declarations?date_begin=YYYY-MM-DD&date_end=YYYY-MM-DD

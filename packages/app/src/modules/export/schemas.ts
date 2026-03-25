@@ -24,3 +24,11 @@ export const exportDeclarationsQuerySchema = z.object({
 		.regex(/^\d{4}-\d{2}-\d{2}$/, "date_end must be YYYY-MM-DD format")
 		.optional(),
 });
+
+export const exportFilesQuerySchema = z.object({
+	siren: z.string().regex(/^\d{9}$/, "siren must be 9 digits"),
+	year: z
+		.string()
+		.regex(/^\d{4}$/, "year must be YYYY format")
+		.transform(Number),
+});
