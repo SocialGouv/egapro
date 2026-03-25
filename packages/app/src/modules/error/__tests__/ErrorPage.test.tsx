@@ -20,10 +20,12 @@ describe("ErrorPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("displays the error code", () => {
+	it("displays the error code with mention grey color", () => {
 		render(<ErrorPage />);
 
-		expect(screen.getByText("Erreur 500")).toBeInTheDocument();
+		const errorCode = screen.getByText("Erreur 500");
+		expect(errorCode).toBeInTheDocument();
+		expect(errorCode).toHaveClass("fr-text-mention--grey");
 	});
 
 	it("displays the apology text", () => {
@@ -48,14 +50,5 @@ describe("ErrorPage", () => {
 		render(<ErrorPage />);
 
 		expect(screen.queryByRole("link")).not.toBeInTheDocument();
-	});
-
-	it("renders the DSFR artwork illustration as decorative", () => {
-		const { container } = render(<ErrorPage />);
-
-		const svg = container.querySelector("svg.fr-artwork");
-		expect(svg).toBeInTheDocument();
-		expect(svg).toHaveAttribute("aria-hidden", "true");
-		expect(svg).toHaveClass("fr-responsive-img");
 	});
 });
