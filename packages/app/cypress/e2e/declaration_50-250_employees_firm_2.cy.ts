@@ -16,6 +16,7 @@ describe("Declaration", () => {
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
+    cy.get("#content", { timeout: 30000 }).should("be.visible");
 
     cy.contains("a", "Calculer - Déclarer mon Index").click();
 
@@ -135,7 +136,7 @@ describe("Declaration", () => {
       cy.contains("span", "75").should("exist");
     });
     cy.contains("button", "Valider et transmettre les résultats").click();
-    cy.contains("Votre déclaration a été transmise");
+    cy.contains("Votre déclaration a été transmise", { timeout: 60000 });
     cy.contains("button", Cypress.env("E2E_USERNAME")).click();
     cy.contains("a", "Mes déclarations").click();
 
@@ -165,7 +166,7 @@ describe("Declaration", () => {
       .clear()
       .type("Affichage au sein de l'entreprise");
     cy.contains("button", "Valider et transmettre les informations").click();
-    cy.contains("Votre déclaration a été validée et transmise");
+    cy.contains("Votre déclaration a été validée et transmise", { timeout: 60000 });
     cy.contains("button", "Retour").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");

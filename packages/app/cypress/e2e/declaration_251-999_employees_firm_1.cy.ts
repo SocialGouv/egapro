@@ -16,6 +16,7 @@ describe("Declaration", () => {
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
+    cy.get("#content", { timeout: 30000 }).should("be.visible");
 
     cy.contains("a", "Calculer - Déclarer mon Index").click();
 
@@ -146,13 +147,13 @@ describe("Declaration", () => {
       cy.contains("span", "78").should("exist");
     });
     cy.contains("button", "Valider et transmettre les résultats").click();
-    cy.contains("Votre déclaration a été transmise");
+    cy.contains("Votre déclaration a été transmise", { timeout: 60000 });
     cy.contains("button", Cypress.env("E2E_USERNAME")).click();
     cy.contains("a", "Mes déclarations").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");
     cy.selectByLabel("Numéro Siren de l'entreprise").select("384964508");
-    cy.contains("a", "384964508");
+    cy.contains("a", "384964508", { timeout: 30000 });
     cy.contains("De 251 à 999 inclus");
 
     // Déclaration progression
@@ -181,7 +182,7 @@ describe("Declaration", () => {
     });
     cy.selectByLabel("Date de publication des objectifs de progression").clear().type("2026-01-15");
     cy.contains("button", "Valider et transmettre les informations").click();
-    cy.contains("Votre déclaration a été validée et transmise");
+    cy.contains("Votre déclaration a été validée et transmise", { timeout: 60000 });
     cy.contains("button", "Retour").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");

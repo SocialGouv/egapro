@@ -16,6 +16,7 @@ describe("Declaration", () => {
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
+    cy.get("#content", { timeout: 30000 }).should("be.visible");
 
     cy.contains("a", "Calculer - Déclarer mon Index").click();
 
@@ -156,13 +157,13 @@ describe("Declaration", () => {
       cy.contains("span", "69").should("exist");
     });
     cy.contains("button", "Valider et transmettre les résultats").click();
-    cy.contains("Votre déclaration a été transmise");
+    cy.contains("Votre déclaration a été transmise", { timeout: 60000 });
     cy.contains("button", Cypress.env("E2E_USERNAME")).click();
     cy.contains("a", "Mes déclarations").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");
     cy.selectByLabel("Numéro Siren de l'entreprise").select("820709046");
-    cy.contains("a", "820709046");
+    cy.contains("a", "820709046", { timeout: 30000 });
     cy.contains("De 1000 à plus");
 
     // Déclaration progression
@@ -197,7 +198,7 @@ describe("Declaration", () => {
       "Note de service envoyé aux salariés",
     );
     cy.contains("button", "Valider et transmettre les informations").click();
-    cy.contains("Votre déclaration a été validée et transmise");
+    cy.contains("Votre déclaration a été validée et transmise", { timeout: 60000 });
     cy.contains("button", "Retour").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");

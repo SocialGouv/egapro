@@ -16,6 +16,7 @@ describe("Declaration", () => {
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
+    cy.get("#content", { timeout: 30000 }).should("be.visible");
 
     cy.contains("a", "Déclarer mes Écarts").click();
 
@@ -73,7 +74,7 @@ describe("Declaration", () => {
 
     cy.checkUrl("/representation-equilibree/validation");
     cy.contains("button", "Valider et transmettre les résultats").click();
-    cy.contains("Votre déclaration a été transmise");
+    cy.contains("Votre déclaration a été transmise", { timeout: 60000 });
     cy.contains("button", Cypress.env("E2E_USERNAME")).click();
     cy.contains("a", "Mes déclarations").click();
 

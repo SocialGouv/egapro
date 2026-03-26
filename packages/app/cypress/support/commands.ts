@@ -54,7 +54,14 @@ Cypress.Commands.add("clickRadio", (legendText, radioLabel) => {
 
 Cypress.Commands.add("checkUrl", url => {
   cy.url().should("include", url);
+  // Wait for Next.js hydration to complete before interacting with the page.
+  // The __next div gets a data-reactroot-like structure only after hydration,
+  // but the most reliable signal is that buttons/inputs become interactive.
+  cy.get("#content", { timeout: 10000 }).should("be.visible");
   cy.get("#content").click({ force: true });
+  // Small stability wait to let React finish any pending state updates
+  // after hydration (useEffect, data fetching, etc.)
+  cy.wait(300);
 });
 
 Cypress.Commands.add("loginWithKeycloak", () => {
