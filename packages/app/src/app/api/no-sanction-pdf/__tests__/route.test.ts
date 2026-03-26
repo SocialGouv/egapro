@@ -49,7 +49,7 @@ vi.mock("@react-pdf/renderer", () => ({
 	Page: vi.fn(),
 	Text: vi.fn(),
 	View: vi.fn(),
-	StyleSheet: { create: <T,>(s: T) => s },
+	StyleSheet: { create: <T>(s: T) => s },
 }));
 
 vi.mock("~/modules/declarationPdf/pdfFonts", () => ({
@@ -141,9 +141,7 @@ describe("GET /api/no-sanction-pdf", () => {
 			validityDate: null,
 		});
 		mockDbResult([{ name: "Acme Corp", address: "1 rue de Paris" }]);
-		mocks.renderToBuffer.mockResolvedValue(
-			new Uint8Array([37, 80, 68, 70]),
-		);
+		mocks.renderToBuffer.mockResolvedValue(new Uint8Array([37, 80, 68, 70]));
 
 		const response = await GET();
 

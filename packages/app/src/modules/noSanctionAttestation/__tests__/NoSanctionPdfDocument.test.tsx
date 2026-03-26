@@ -58,9 +58,7 @@ describe("NoSanctionPdfDocument", () => {
 		render(<NoSanctionPdfDocument data={baseData} />);
 
 		expect(screen.getByText("RÉPUBLIQUE FRANÇAISE")).toBeInTheDocument();
-		expect(
-			screen.getByText("Attestation de non sanction"),
-		).toBeInTheDocument();
+		expect(screen.getByText("Attestation de non sanction")).toBeInTheDocument();
 	});
 
 	it("renders the certification body text", () => {
@@ -74,9 +72,7 @@ describe("NoSanctionPdfDocument", () => {
 	it("renders company information", () => {
 		render(<NoSanctionPdfDocument data={baseData} />);
 
-		expect(
-			screen.getByText("Raison sociale : Acme Corp"),
-		).toBeInTheDocument();
+		expect(screen.getByText("Raison sociale : Acme Corp")).toBeInTheDocument();
 		expect(screen.getByText("SIREN : 123456789")).toBeInTheDocument();
 		expect(
 			screen.getByText("Adresse : 1 rue de Paris, 75001 Paris"),
@@ -84,9 +80,7 @@ describe("NoSanctionPdfDocument", () => {
 	});
 
 	it("does not render address when it is null", () => {
-		render(
-			<NoSanctionPdfDocument data={{ ...baseData, address: null }} />,
-		);
+		render(<NoSanctionPdfDocument data={{ ...baseData, address: null }} />);
 
 		expect(screen.queryByText(/Adresse/)).not.toBeInTheDocument();
 	});
