@@ -19,6 +19,7 @@ type Props = {
 	declarations: DeclarationItem[];
 	userPhone: string | null;
 	hasCse: boolean | null;
+	hasNoSanction: boolean;
 };
 
 function formatDate(date: Date | null): string {
@@ -47,6 +48,7 @@ export function DeclarationsSection({
 	declarations,
 	userPhone,
 	hasCse,
+	hasNoSanction,
 }: Props) {
 	const currentYear = getCurrentYear();
 	const currentYearDeclarations = declarations.filter(
@@ -87,15 +89,17 @@ export function DeclarationsSection({
 				<div className="fr-col">
 					<h2 className="fr-mb-0">En cours</h2>
 				</div>
-				<div className="fr-col-auto">
-					<a
-						className="fr-btn fr-btn--secondary fr-btn--icon-left fr-icon-download-line"
-						download
-						href="/api/no-sanction-pdf"
-					>
-						Télécharger l'attestation de non sanction (PDF)
-					</a>
-				</div>
+				{hasNoSanction && (
+					<div className="fr-col-auto">
+						<a
+							className="fr-btn fr-btn--secondary fr-btn--icon-left fr-icon-download-line"
+							download
+							href="/api/no-sanction-pdf"
+						>
+							Télécharger l'attestation de non sanction (PDF)
+						</a>
+					</div>
+				)}
 			</div>
 			<div className="fr-table">
 				<div className="fr-table__wrapper">

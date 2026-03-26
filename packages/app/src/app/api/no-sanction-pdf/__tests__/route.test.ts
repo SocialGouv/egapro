@@ -111,16 +111,13 @@ describe("GET /api/no-sanction-pdf", () => {
 		expect(await response.text()).toContain("sanction est en cours");
 	});
 
-	it("generates PDF when SUIT is unavailable (null)", async () => {
+	it("returns 403 when SUIT returns null", async () => {
 		mockSession("12345678901234");
 		mocks.fetchSanctionBySiren.mockResolvedValue(null);
-		mockDbResult([{ name: "Acme Corp", address: null }]);
-		mocks.renderToBuffer.mockResolvedValue(new Uint8Array([37, 80, 68, 70]));
 
 		const response = await GET();
 
-		expect(response.status).toBe(200);
-		expect(response.headers.get("Content-Type")).toBe("application/pdf");
+		expect(response.status).toBe(403);
 	});
 
 	it("returns 404 when company is not found", async () => {

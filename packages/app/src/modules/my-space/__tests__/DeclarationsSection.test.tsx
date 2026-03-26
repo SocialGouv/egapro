@@ -41,6 +41,7 @@ function renderSection(
 		<DeclarationsSection
 			declarations={overrides?.declarations ?? declarations}
 			hasCse={true}
+			hasNoSanction={false}
 			siren="532847196"
 			userPhone="0122334455"
 		/>,
