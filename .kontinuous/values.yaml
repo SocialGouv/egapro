@@ -20,6 +20,8 @@ app:
     - configMapRef:
         name: "suit"
     - secretRef:
+        name: "suit-api-key"
+    - secretRef:
         name: "next-auth"
     - configMapRef:
         name: "s3"

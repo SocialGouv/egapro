@@ -13,8 +13,7 @@ async function goToStep(page: Page, step: number) {
 test.describe("Declaration workflow", () => {
 	test.describe.configure({ mode: "serial" });
 
-	// Reset DB state before this suite runs — guards against compliance tests
-	// interleaving and setting the declaration to 'submitted'.
+	// Reset DB state before this suite runs so it starts from a clean slate.
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 	});
