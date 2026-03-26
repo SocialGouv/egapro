@@ -16,7 +16,7 @@ describe("Declaration", () => {
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
-    cy.get("#content", { timeout: 30000 }).should("be.visible");
+    cy.checkUrl("/");
 
     cy.contains("a", "Déclarer mes Écarts").click();
 
