@@ -6,6 +6,7 @@ tmp/
 htmlcov/
 site/
 venv/
+.venv/
 .env
 .history/
 settings.json

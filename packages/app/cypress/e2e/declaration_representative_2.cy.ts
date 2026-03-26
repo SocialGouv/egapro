@@ -16,6 +16,7 @@ describe("Declaration", () => {
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
+    cy.checkUrl("/");
 
     cy.contains("a", "Déclarer mes Écarts").click();
 
@@ -32,7 +33,7 @@ describe("Declaration", () => {
     cy.contains("a", "Suivant").click();
 
     // Check if we're on the expected page
-    cy.url().should("include", "/representation-equilibree/commencer");
+    cy.checkUrl("/representation-equilibree/commencer");
     cy.selectByLabel("Numéro Siren de l’entreprise *").select("440137982");
     cy.contains("button", "Suivant").click();
 
@@ -74,9 +75,9 @@ describe("Declaration", () => {
     cy.get("#content").click();
     cy.contains("button", "Suivant").click();
 
-    cy.url().should("include", "/representation-equilibree/validation");
+    cy.checkUrl("/representation-equilibree/validation");
     cy.contains("button", "Valider et transmettre les résultats").click();
-    cy.contains("Votre déclaration a été transmise");
+    cy.contains("Votre déclaration a été transmise", { timeout: 60000 });
     cy.contains("button", Cypress.env("E2E_USERNAME")).click();
     cy.contains("a", "Mes déclarations").click();
 

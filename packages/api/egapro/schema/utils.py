@@ -3,19 +3,19 @@ from naf import DB as NAF
 
 
 def regions():
-    return {"type": "string", "enum": constants.REGIONS.keys()}
+    return {"type": "string", "enum": list(constants.REGIONS.keys())}
 
 
 def departements():
-    return {"type": "string", "enum": constants.DEPARTEMENTS.keys()}
+    return {"type": "string", "enum": list(constants.DEPARTEMENTS.keys())}
 
 
 def naf():
-    return {"type": "string", "enum": NAF.keys()}
+    return {"type": "string", "enum": list(NAF.keys())}
 
 
 def code_pays():
-    return {"type": "string", "enum": constants.PAYS_ISO_TO_LIB.keys()}
+    return {"type": "string", "enum": list(constants.PAYS_ISO_TO_LIB.keys())}
 
 
 def years():

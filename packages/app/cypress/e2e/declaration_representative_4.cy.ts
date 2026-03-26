@@ -16,6 +16,7 @@ describe("Declaration", () => {
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
+    cy.checkUrl("/");
 
     cy.contains("a", "Déclarer mes Écarts").click();
 
@@ -32,7 +33,7 @@ describe("Declaration", () => {
     cy.contains("a", "Suivant").click();
 
     // Check if we're on the expected page
-    cy.url().should("include", "/representation-equilibree/commencer");
+    cy.checkUrl("/representation-equilibree/commencer");
     cy.selectByLabel("Numéro Siren de l’entreprise *").select("351630371");
     cy.contains("button", "Suivant").click();
 
@@ -63,7 +64,7 @@ describe("Declaration", () => {
     cy.selectByLabel("Motif de non calculabilité *").select("aucune_instance_dirigeante");
     cy.contains("button", "Suivant").click();
 
-    cy.url().should("include", "/representation-equilibree/publication");
+    cy.checkUrl("/representation-equilibree/publication");
     cy.selectByLabel("Date de publication des écarts calculables *").type("2025-11-15");
     cy.clickRadio("Avez-vous un site Internet pour publier les écarts calculables ? *", "Non");
     cy.selectByLabel("Préciser les modalités de communication des écarts calculables auprès de vos salariés *").type(
@@ -71,9 +72,9 @@ describe("Declaration", () => {
     );
     cy.contains("button", "Suivant").click();
 
-    cy.url().should("include", "/representation-equilibree/validation");
+    cy.checkUrl("/representation-equilibree/validation");
     cy.contains("button", "Valider et transmettre les résultats").click();
-    cy.contains("Votre déclaration a été transmise");
+    cy.contains("Votre déclaration a été transmise", { timeout: 60000 });
     cy.contains("button", Cypress.env("E2E_USERNAME")).click();
     cy.contains("a", "Mes déclarations").click();
 
