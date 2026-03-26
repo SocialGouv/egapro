@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, gte, inArray, lt, or } from "drizzle-orm";
+import { and, eq, gte, inArray, lt, or, sql } from "drizzle-orm";
 
 import { db } from "~/server/db";
 import {
@@ -245,25 +245,18 @@ export async function fetchJointEvaluationFilesByDeclaration(
 export async function fetchFileById(
 	fileId: string,
 ): Promise<{ filePath: string; fileName: string } | undefined> {
-	const [cseFile] = await db
-		.select({
-			filePath: cseOpinionFiles.filePath,
-			fileName: cseOpinionFiles.fileName,
-		})
-		.from(cseOpinionFiles)
-		.where(eq(cseOpinionFiles.id, fileId))
-		.limit(1);
+	const result = await db.execute<{ filePath: string; fileName: string }>(
+		sql`
+			SELECT file_path AS "filePath", file_name AS "fileName"
+			FROM app_cse_opinion_file
+			WHERE id = ${fileId}
+			UNION ALL
+			SELECT file_path AS "filePath", file_name AS "fileName"
+			FROM app_joint_evaluation_file
+			WHERE id = ${fileId}
+			LIMIT 1
+		`,
+	);
 
-	if (cseFile) return cseFile;
-
-	const [jointFile] = await db
-		.select({
-			filePath: jointEvaluationFiles.filePath,
-			fileName: jointEvaluationFiles.fileName,
-		})
-		.from(jointEvaluationFiles)
-		.where(eq(jointEvaluationFiles.id, fileId))
-		.limit(1);
-
-	return jointFile;
+	return result[0];
 }
