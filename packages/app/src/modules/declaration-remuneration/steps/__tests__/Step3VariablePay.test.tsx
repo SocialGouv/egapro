@@ -131,11 +131,11 @@ describe("Step3VariablePay", () => {
 
 		await user.clear(womenInput);
 		await user.type(womenInput, "10");
-		expect(womenInput).toHaveValue(10);
+		expect(womenInput).toHaveValue("10");
 
 		await user.clear(menInput);
 		await user.type(menInput, "20");
-		expect(menInput).toHaveValue(20);
+		expect(menInput).toHaveValue("20");
 	});
 
 	it("blocks beneficiary count exceeding max workforce", async () => {

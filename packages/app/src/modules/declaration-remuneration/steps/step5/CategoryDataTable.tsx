@@ -86,10 +86,10 @@ export function CategoryDataTable({
 												aria-label={`Effectif femmes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
 												id={id("women-count")}
-												min="0"
+												inputMode="numeric"
 												onChange={pos(catIndex, "womenCount", true)}
-												step="1"
-												type="number"
+												pattern="[0-9]*"
+												type="text"
 												value={cat.womenCount}
 											/>
 											<span className="fr-text--sm">nb</span>
@@ -101,10 +101,10 @@ export function CategoryDataTable({
 												aria-label={`Effectif hommes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
 												id={id("men-count")}
-												min="0"
+												inputMode="numeric"
 												onChange={pos(catIndex, "menCount", true)}
-												step="1"
-												type="number"
+												pattern="[0-9]*"
+												type="text"
 												value={cat.menCount}
 											/>
 											<span className="fr-text--sm">nb</span>
