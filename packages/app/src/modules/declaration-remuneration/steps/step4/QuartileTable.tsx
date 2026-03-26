@@ -135,7 +135,7 @@ export function QuartileTable({
 													/>
 												</td>
 											))}
-											<td>{totalWomen || "-"}</td>
+											<td>{totalAll > 0 ? totalWomen : "-"}</td>
 										</tr>
 										{/* Row 3: Women percentage */}
 										<tr>
@@ -184,7 +184,7 @@ export function QuartileTable({
 													/>
 												</td>
 											))}
-											<td>{totalMen || "-"}</td>
+											<td>{totalAll > 0 ? totalMen : "-"}</td>
 										</tr>
 										{/* Row 5: Men percentage */}
 										<tr>

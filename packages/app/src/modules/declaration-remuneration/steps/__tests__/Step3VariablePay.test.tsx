@@ -48,10 +48,13 @@ describe("Step3VariablePay", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders table headers", () => {
-		render(<Step3VariablePay />);
+	it("renders table headers with line break in column header", () => {
+		const { container } = render(<Step3VariablePay />);
 		expect(screen.getByText(/Rémunération variable/)).toBeInTheDocument();
 		expect(screen.getByText("Seuil réglementaire : 5%")).toBeInTheDocument();
+
+		const headerBr = container.querySelector("th br");
+		expect(headerBr).toBeInTheDocument();
 	});
 
 	it("shows SavedIndicator when initialData has data", () => {
@@ -154,5 +157,158 @@ describe("Step3VariablePay", () => {
 			"href",
 			"/declaration-remuneration/etape/2",
 		);
+	});
+
+	it("uses gipPrefillData when no initialData", () => {
+		render(
+			<Step3VariablePay
+				gipPrefillData={{
+					step1: { totalWomen: 80, totalMen: 100 },
+					step2: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+					},
+					step3: {
+						annualMeanWomen: "5000",
+						annualMeanMen: "7000",
+						hourlyMeanWomen: "2.50",
+						hourlyMeanMen: "3.50",
+						annualMedianWomen: "4000",
+						annualMedianMen: "6000",
+						hourlyMedianWomen: "2.00",
+						hourlyMedianMen: "3.00",
+						beneficiaryCountWomen: 45,
+						beneficiaryCountMen: 60,
+					},
+					step4: {
+						annual: {
+							thresholds: [null, null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+						hourly: {
+							thresholds: [null, null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+					},
+					confidenceIndex: null,
+					periodEnd: "2026-12-31",
+				}}
+			/>,
+		);
+		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
+		expect(womenInput).toHaveValue("5\u202f000");
+		const benefWomenInput = screen.getByLabelText("Bénéficiaires femmes");
+		expect(benefWomenInput).toHaveValue(45);
+		const benefMenInput = screen.getByLabelText("Bénéficiaires hommes");
+		expect(benefMenInput).toHaveValue(60);
+	});
+
+	it("uses gipPrefillData with null beneficiary counts", () => {
+		render(
+			<Step3VariablePay
+				gipPrefillData={{
+					step1: { totalWomen: 80, totalMen: 100 },
+					step2: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+					},
+					step3: {
+						annualMeanWomen: "900",
+						annualMeanMen: "1000",
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+						beneficiaryCountWomen: null,
+						beneficiaryCountMen: null,
+					},
+					step4: {
+						annual: {
+							thresholds: [null, null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+						hourly: {
+							thresholds: [null, null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+					},
+					confidenceIndex: null,
+					periodEnd: null,
+				}}
+			/>,
+		);
+		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
+		expect(womenInput).toHaveValue("900");
+		// Beneficiary inputs should be empty (null converted to "")
+		const benefWomenInput = screen.getByLabelText("Bénéficiaires femmes");
+		expect(benefWomenInput).toHaveValue(null);
+	});
+
+	it("uses gipPrefillData with zero beneficiary counts", () => {
+		render(
+			<Step3VariablePay
+				gipPrefillData={{
+					step1: { totalWomen: 80, totalMen: 100 },
+					step2: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+					},
+					step3: {
+						annualMeanWomen: "900",
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+						beneficiaryCountWomen: 0,
+						beneficiaryCountMen: 0,
+					},
+					step4: {
+						annual: {
+							thresholds: [null, null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+						hourly: {
+							thresholds: [null, null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+					},
+					confidenceIndex: null,
+					periodEnd: null,
+				}}
+			/>,
+		);
+		const benefWomenInput = screen.getByLabelText("Bénéficiaires femmes");
+		expect(benefWomenInput).toHaveValue(0);
+		const benefMenInput = screen.getByLabelText("Bénéficiaires hommes");
+		expect(benefMenInput).toHaveValue(0);
 	});
 });

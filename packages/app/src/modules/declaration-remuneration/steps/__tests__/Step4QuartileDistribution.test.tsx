@@ -200,4 +200,217 @@ describe("Step4QuartileDistribution", () => {
 			"/declaration-remuneration/etape/3",
 		);
 	});
+
+	it("uses gipPrefillData when no initialCategories", () => {
+		render(
+			<Step4QuartileDistribution
+				gipPrefillData={{
+					step1: { totalWomen: 100, totalMen: 100 },
+					step2: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+					},
+					step3: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+						beneficiaryCountWomen: null,
+						beneficiaryCountMen: null,
+					},
+					step4: {
+						annual: {
+							thresholds: ["25000", "32000", "40000", "55000"],
+							womenCounts: [30, 25, 20, 15],
+							menCounts: [20, 25, 30, 35],
+						},
+						hourly: {
+							thresholds: ["13.74", "17.58", "21.98", "30.22"],
+							womenCounts: [28, 22, 18, 12],
+							menCounts: [22, 28, 32, 38],
+						},
+					},
+					confidenceIndex: "0.85",
+					periodEnd: "2026-12-31",
+				}}
+			/>,
+		);
+		// Check annual remuneration inputs have prefilled values
+		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
+		expect(remuInputs[0]).toHaveValue("25\u202f000");
+		// Check women count inputs
+		const womenCountInputs = screen.getAllByLabelText(/Nombre de femmes/);
+		expect(womenCountInputs[0]).toHaveValue(30);
+		// Check men count inputs
+		const menCountInputs = screen.getAllByLabelText(/Nombre d'hommes/);
+		expect(menCountInputs[0]).toHaveValue(20);
+	});
+
+	it("uses gipPrefillData with null Q4 threshold", () => {
+		render(
+			<Step4QuartileDistribution
+				gipPrefillData={{
+					step1: { totalWomen: 100, totalMen: 100 },
+					step2: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+					},
+					step3: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+						beneficiaryCountWomen: null,
+						beneficiaryCountMen: null,
+					},
+					step4: {
+						annual: {
+							thresholds: ["25000", "32000", "40000", null],
+							womenCounts: [30, 25, 20, null],
+							menCounts: [20, 25, 30, null],
+						},
+						hourly: {
+							thresholds: ["13.74", "17.58", "21.98", null],
+							womenCounts: [28, 22, 18, null],
+							menCounts: [22, 28, 32, null],
+						},
+					},
+					confidenceIndex: null,
+					periodEnd: null,
+				}}
+			/>,
+		);
+		// First 3 quartiles should be prefilled
+		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
+		expect(remuInputs[0]).toHaveValue("25\u202f000");
+		expect(remuInputs[2]).toHaveValue("40\u202f000");
+		// Q4 should be empty (null threshold)
+		expect(remuInputs[3]).toHaveValue("");
+	});
+
+	it("uses gipPrefillData with all null quartile data", () => {
+		render(
+			<Step4QuartileDistribution
+				gipPrefillData={{
+					step1: { totalWomen: null, totalMen: null },
+					step2: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+					},
+					step3: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+						beneficiaryCountWomen: null,
+						beneficiaryCountMen: null,
+					},
+					step4: {
+						annual: {
+							thresholds: [null, null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+						hourly: {
+							thresholds: [null, null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+					},
+					confidenceIndex: null,
+					periodEnd: null,
+				}}
+			/>,
+		);
+		// All inputs should be empty
+		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
+		for (const input of remuInputs) {
+			expect(input).toHaveValue("");
+		}
+	});
+
+	it("uses gipPrefillData with mono-gender quartiles (100% women)", () => {
+		render(
+			<Step4QuartileDistribution
+				gipPrefillData={{
+					step1: { totalWomen: 200, totalMen: 0 },
+					step2: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+					},
+					step3: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+						beneficiaryCountWomen: null,
+						beneficiaryCountMen: null,
+					},
+					step4: {
+						annual: {
+							thresholds: ["25000", "32000", "40000", "55000"],
+							womenCounts: [50, 50, 50, 50],
+							menCounts: [0, 0, 0, 0],
+						},
+						hourly: {
+							thresholds: ["13.74", "17.58", "21.98", "30.22"],
+							womenCounts: [50, 50, 50, 50],
+							menCounts: [0, 0, 0, 0],
+						},
+					},
+					confidenceIndex: null,
+					periodEnd: null,
+				}}
+			/>,
+		);
+		const womenCountInputs = screen.getAllByLabelText(/Nombre de femmes/);
+		expect(womenCountInputs[0]).toHaveValue(50);
+		const menCountInputs = screen.getAllByLabelText(/Nombre d'hommes/);
+		expect(menCountInputs[0]).toHaveValue(0);
+
+		// Total men column should display "0", not "-" (0 is valid data, not absence)
+		const totalCells = screen.getAllByRole("cell");
+		const menTotalCells = totalCells.filter((cell) => cell.textContent === "0");
+		expect(menTotalCells.length).toBeGreaterThanOrEqual(1);
+	});
 });
