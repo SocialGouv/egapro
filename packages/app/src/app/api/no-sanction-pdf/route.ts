@@ -17,7 +17,7 @@ export async function GET() {
 
 	try {
 		const sanctionStatus = await fetchSanctionBySiren(siren);
-		if (!sanctionStatus || sanctionStatus.hasSanction) {
+		if (sanctionStatus?.hasSanction) {
 			return new Response(
 				"Attestation non disponible : une sanction est en cours",
 				{ status: 403 },
