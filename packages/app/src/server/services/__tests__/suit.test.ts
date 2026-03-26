@@ -72,21 +72,27 @@ describe("fetchSanctionBySiren", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("returns no sanction when the company has a CSE", async () => {
+	it("returns no sanction when SUIT says sanction is false", async () => {
 		fetchSpy.mockResolvedValueOnce({
 			ok: true,
-			json: async () => ({ siren: "339787277", CSE: true }),
+			json: async () => ({ siren: "339787277", sanction: false }),
 		});
 
 		const result = await fetchSanctionBySiren("339787277");
 
 		expect(result).toEqual({ hasSanction: false, validityDate: null });
+		expect(fetchSpy).toHaveBeenCalledWith(
+			"https://api.suit.example.com/suit/api/externe/portail/sanction/339787277",
+			expect.objectContaining({
+				headers: { Accept: "application/json" },
+			}),
+		);
 	});
 
-	it("returns sanction when the company has no CSE", async () => {
+	it("returns sanction when SUIT says sanction is true", async () => {
 		fetchSpy.mockResolvedValueOnce({
 			ok: true,
-			json: async () => ({ siren: "123456789", CSE: false }),
+			json: async () => ({ siren: "123456789", sanction: true }),
 		});
 
 		const result = await fetchSanctionBySiren("123456789");
