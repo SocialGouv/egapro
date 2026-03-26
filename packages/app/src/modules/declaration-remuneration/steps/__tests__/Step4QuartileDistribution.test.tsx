@@ -250,10 +250,10 @@ describe("Step4QuartileDistribution", () => {
 		expect(remuInputs[0]).toHaveValue("25\u202f000");
 		// Check women count inputs
 		const womenCountInputs = screen.getAllByLabelText(/Nombre de femmes/);
-		expect(womenCountInputs[0]).toHaveValue(30);
+		expect(womenCountInputs[0]).toHaveValue("30");
 		// Check men count inputs
 		const menCountInputs = screen.getAllByLabelText(/Nombre d'hommes/);
-		expect(menCountInputs[0]).toHaveValue(20);
+		expect(menCountInputs[0]).toHaveValue("20");
 	});
 
 	it("uses gipPrefillData with null Q4 threshold", () => {
@@ -404,9 +404,9 @@ describe("Step4QuartileDistribution", () => {
 			/>,
 		);
 		const womenCountInputs = screen.getAllByLabelText(/Nombre de femmes/);
-		expect(womenCountInputs[0]).toHaveValue(50);
+		expect(womenCountInputs[0]).toHaveValue("50");
 		const menCountInputs = screen.getAllByLabelText(/Nombre d'hommes/);
-		expect(menCountInputs[0]).toHaveValue(0);
+		expect(menCountInputs[0]).toHaveValue("0");
 
 		// Total men column should display "0", not "-" (0 is valid data, not absence)
 		const totalCells = screen.getAllByRole("cell");
