@@ -120,6 +120,176 @@ describe("parseGipCsv", () => {
 		expect(result.rows[0]).toHaveProperty("siren", "123456789");
 		expect(result.rows[0]).toHaveProperty("workforceEma", "200");
 	});
+
+	it("preserves SIREN starting with 0 as string", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;2026-03-01;2026-01-01;2026-12-31;1",
+			"SIREN;Effectif_RCD",
+			"012345678;200",
+		].join("\n");
+
+		const result = parseGipCsv(csv);
+		expect(result.rows).toHaveLength(1);
+		expect(result.rows[0]?.siren).toBe("012345678");
+	});
+
+	it("preserves SIREN with multiple leading zeros", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;2026-03-01;2026-01-01;2026-12-31;1",
+			"SIREN;Effectif_RCD",
+			"001234567;180",
+		].join("\n");
+
+		const result = parseGipCsv(csv);
+		expect(result.rows[0]?.siren).toBe("001234567");
+	});
+
+	it("handles row with only SIREN and EMA (all indicators empty)", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;2026-03-01;2026-01-01;2026-12-31;1",
+			"SIREN;Effectif_RCD;Rem_globale_annuelle_moyenne_F;Rem_globale_annuelle_moyenne_H;Taux_horaire_global_moyen_ecart",
+			"123456789;200;;;",
+		].join("\n");
+
+		const result = parseGipCsv(csv);
+		expect(result.rows).toHaveLength(1);
+		expect(result.rows[0]).toEqual({
+			siren: "123456789",
+			workforceEma: "200",
+		});
+	});
+
+	it("handles partially filled indicators (A-D filled, E-F empty)", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;2026-03-01;2026-01-01;2026-12-31;1",
+			"SIREN;Effectif_RCD;Rem_globale_annuelle_moyenne_F;Proportion_variable_F;Seuil_Q1_Rem_globale",
+			"123456789;250;35000,00;;",
+		].join("\n");
+
+		const result = parseGipCsv(csv);
+		expect(result.rows[0]).toEqual({
+			siren: "123456789",
+			workforceEma: "250",
+			globalAnnualMeanWomen: "35000.00",
+		});
+		expect(result.rows[0]).not.toHaveProperty("variableProportionWomen");
+		expect(result.rows[0]).not.toHaveProperty("annualQuartileThreshold1");
+	});
+
+	it("handles zero values in effectifs", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;2026-03-01;2026-01-01;2026-12-31;1",
+			"SIREN;Effectif_H_rem_annuelle_variable;Effectif_F_rem_annuelle_variable",
+			"123456789;0;30",
+		].join("\n");
+
+		const result = parseGipCsv(csv);
+		expect(result.rows[0]).toHaveProperty("menCountAnnualVariable", "0");
+		expect(result.rows[0]).toHaveProperty("womenCountAnnualVariable", "30");
+	});
+
+	it("handles negative gap values with French comma", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;2026-03-01;2026-01-01;2026-12-31;1",
+			"SIREN;Rem_globale_annuelle_moyenne_ecart;Rem_variable_annuelle_moyenne_ecart",
+			"123456789;-0,3500;-0,9999",
+		].join("\n");
+
+		const result = parseGipCsv(csv);
+		expect(result.rows[0]).toHaveProperty("globalAnnualMeanGap", "-0.3500");
+		expect(result.rows[0]).toHaveProperty("variableAnnualMeanGap", "-0.9999");
+	});
+
+	it("handles zero gap values", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;2026-03-01;2026-01-01;2026-12-31;1",
+			"SIREN;Rem_globale_annuelle_moyenne_ecart",
+			"123456789;0,0000",
+		].join("\n");
+
+		const result = parseGipCsv(csv);
+		expect(result.rows[0]).toHaveProperty("globalAnnualMeanGap", "0.0000");
+	});
+
+	it("handles proportion boundary values (0 and 1)", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;2026-03-01;2026-01-01;2026-12-31;1",
+			"SIREN;Proportion_variable_F;Proportion_variable_H;Quartile1_Rem_globale_annuelle_proportion_F;Quartile1_Rem_globale_annuelle_proportion_H",
+			"123456789;0,0000;0,6000;1,0000;0,0000",
+		].join("\n");
+
+		const result = parseGipCsv(csv);
+		expect(result.rows[0]).toHaveProperty("variableProportionWomen", "0.0000");
+		expect(result.rows[0]).toHaveProperty(
+			"annualQuartile1ProportionWomen",
+			"1.0000",
+		);
+		expect(result.rows[0]).toHaveProperty(
+			"annualQuartile1ProportionMen",
+			"0.0000",
+		);
+	});
+
+	it("handles EMA at boundary values", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;2026-03-01;2026-01-01;2026-12-31;2",
+			"SIREN;Effectif_RCD",
+			"111111111;50,00",
+			"222222222;399999,99",
+		].join("\n");
+
+		const result = parseGipCsv(csv);
+		expect(result.rows[0]).toHaveProperty("workforceEma", "50.00");
+		expect(result.rows[1]).toHaveProperty("workforceEma", "399999.99");
+	});
+
+	it("handles confidence index at 0", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;2026-03-01;2026-01-01;2026-12-31;1",
+			"SIREN;indice;indice_nature_exo",
+			"123456789;0,0000;",
+		].join("\n");
+
+		const result = parseGipCsv(csv);
+		expect(result.rows[0]).toHaveProperty("confidenceIndex", "0.0000");
+		expect(result.rows[0]).not.toHaveProperty("confidenceExoticContracts");
+	});
+
+	it("trims whitespace from header names (trailing space on column)", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;2026-03-01;2026-01-01;2026-12-31;1",
+			"SIREN;Taux_horaire_variable_médian_F ;Taux_horaire_variable_médian_H",
+			"123456789;0,47;0,51",
+		].join("\n");
+
+		const result = parseGipCsv(csv);
+		expect(result.rows[0]).toHaveProperty("variableHourlyMedianWomen", "0.47");
+		expect(result.rows[0]).toHaveProperty("variableHourlyMedianMen", "0.51");
+	});
+
+	it("ignores reserve columns not in CSV_TO_SCHEMA_MAP", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;2026-03-01;2026-01-01;2026-12-31;1",
+			"SIREN;indice_reserve_1;reserve_1;reserve_2",
+			"123456789;0,5;1,0;2,0",
+		].join("\n");
+
+		const result = parseGipCsv(csv);
+		expect(result.rows).toHaveLength(1);
+		expect(Object.keys(result.rows[0] ?? {})).toEqual(["siren"]);
+	});
 });
 
 describe("fetchGipCsv", () => {

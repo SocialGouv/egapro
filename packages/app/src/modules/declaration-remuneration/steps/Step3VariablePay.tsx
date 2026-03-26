@@ -126,6 +126,7 @@ export function Step3VariablePay({
 			setBenefValidationError(null);
 			return;
 		}
+		if (/\D/.test(value)) return;
 		const n = Number.parseInt(value, 10);
 		if (Number.isNaN(n) || n < 0) return;
 		if (max !== undefined && n > max) {
@@ -218,7 +219,13 @@ export function Step3VariablePay({
 					<PayGapTable
 						caption="Écart de rémunération variable ou complémentaire"
 						className={stepStyles.payGapTable}
-						columnHeader={"Rémunération variable\nou complémentaire"}
+						columnHeader={
+							<>
+								Rémunération variable
+								<br />
+								ou complémentaire
+							</>
+						}
 						onRowChange={handleRowChange}
 						rows={rows}
 					/>
@@ -272,8 +279,7 @@ export function Step3VariablePay({
 													<input
 														aria-label="Bénéficiaires femmes"
 														className="fr-input"
-														max={maxWomen}
-														min="0"
+														inputMode="numeric"
 														onChange={(e) =>
 															handleBenefChange(
 																"womenValue",
@@ -281,7 +287,8 @@ export function Step3VariablePay({
 																e.target.value,
 															)
 														}
-														type="number"
+														pattern="[0-9]*"
+														type="text"
 														value={beneficiaryWomen}
 													/>
 												</td>
@@ -302,8 +309,7 @@ export function Step3VariablePay({
 													<input
 														aria-label="Bénéficiaires hommes"
 														className="fr-input"
-														max={maxMen}
-														min="0"
+														inputMode="numeric"
 														onChange={(e) =>
 															handleBenefChange(
 																"menValue",
@@ -311,7 +317,8 @@ export function Step3VariablePay({
 																e.target.value,
 															)
 														}
-														type="number"
+														pattern="[0-9]*"
+														type="text"
 														value={beneficiaryMen}
 													/>
 												</td>

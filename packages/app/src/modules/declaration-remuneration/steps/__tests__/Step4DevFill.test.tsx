@@ -34,6 +34,6 @@ describe("Step4QuartileDistribution dev fill", () => {
 		expect(firstRemuInput.value.replace(/\s/g, " ")).toBe("22 000");
 
 		const womenInputs = screen.getAllByLabelText(/Nombre de femmes/);
-		expect(womenInputs[0]).toHaveValue(35);
+		expect(womenInputs[0]).toHaveValue("35");
 	});
 });

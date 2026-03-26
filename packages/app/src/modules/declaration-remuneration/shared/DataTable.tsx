@@ -67,7 +67,9 @@ export function DataTable({
 														<input
 															aria-label={`${col.label} - ${row[columns[0]?.key ?? ""] ?? `Ligne ${rowIndex + 1}`}`}
 															className="fr-input"
-															min={col.type === "number" ? 0 : undefined}
+															inputMode={
+																col.type === "number" ? "numeric" : undefined
+															}
 															onChange={(e) =>
 																onCellChange?.(
 																	rowIndex,
@@ -75,7 +77,10 @@ export function DataTable({
 																	e.target.value,
 																)
 															}
-															type={col.type === "number" ? "number" : "text"}
+															pattern={
+																col.type === "number" ? "[0-9]*" : undefined
+															}
+															type="text"
 															value={row[col.key] ?? ""}
 														/>
 													</div>

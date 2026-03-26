@@ -55,8 +55,8 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 
 		// Fill workforce data directly in the table
-		await page.getByRole("spinbutton", { name: "Nombre de femmes" }).fill("10");
-		await page.getByRole("spinbutton", { name: "Nombre d'hommes" }).fill("15");
+		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("10");
+		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("15");
 
 		// Verify total is computed
 		await expect(page.getByText("25", { exact: true })).toBeVisible();
@@ -104,10 +104,10 @@ test.describe("Declaration workflow", () => {
 
 		// Verify beneficiary inputs are present
 		await expect(
-			page.getByRole("spinbutton", { name: "Bénéficiaires femmes" }),
+			page.getByRole("textbox", { name: "Bénéficiaires femmes" }),
 		).toBeVisible();
 		await expect(
-			page.getByRole("spinbutton", { name: "Bénéficiaires hommes" }),
+			page.getByRole("textbox", { name: "Bénéficiaires hommes" }),
 		).toBeVisible();
 	});
 
@@ -140,7 +140,7 @@ test.describe("Declaration workflow", () => {
 		// Verify category 1 form fields
 		await expect(page.getByRole("textbox", { name: "Nom" })).toBeVisible();
 		await expect(
-			page.getByRole("spinbutton", { name: "Effectif femmes, catégorie 1" }),
+			page.getByRole("textbox", { name: "Effectif femmes, catégorie 1" }),
 		).toBeVisible();
 		await expect(
 			page.getByRole("textbox", {
