@@ -38,6 +38,17 @@ const thousandFormatter = new Intl.NumberFormat("fr-FR", {
 });
 
 /**
+ * Display a stored decimal for use inside an `<input>` element:
+ * dot → comma (French decimal separator), no thousand grouping.
+ *
+ * Example: `"25000.5"` → `"25000,5"`.
+ */
+export function displayInputDecimal(value: string): string {
+	if (!value) return value;
+	return value.replace(".", ",");
+}
+
+/**
  * Display a stored decimal value with French locale conventions:
  * comma as decimal separator and narrow no-break spaces between thousands.
  *

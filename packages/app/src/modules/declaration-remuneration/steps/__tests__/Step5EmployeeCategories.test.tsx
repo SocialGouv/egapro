@@ -184,8 +184,7 @@ describe("Step5EmployeeCategories", () => {
 		);
 
 		await user.type(input, "25000");
-		// displayDecimal uses narrow no-break space (U+202F) as thousand separator
-		expect(input).toHaveValue("25\u202F000");
+		expect(input).toHaveValue("25000");
 	});
 
 	it("rejects negative values in number inputs", async () => {
