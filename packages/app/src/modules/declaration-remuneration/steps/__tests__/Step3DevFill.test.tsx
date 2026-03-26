@@ -33,7 +33,7 @@ describe("Step3VariablePay dev fill", () => {
 			"Annuelle brute moyenne — Femmes",
 		) as HTMLInputElement;
 		expect(womenInput.value.replace(/\s/g, " ")).toBe("2 500");
-		expect(screen.getByLabelText("Bénéficiaires femmes")).toHaveValue(95);
-		expect(screen.getByLabelText("Bénéficiaires hommes")).toHaveValue(110);
+		expect(screen.getByLabelText("Bénéficiaires femmes")).toHaveValue("95");
+		expect(screen.getByLabelText("Bénéficiaires hommes")).toHaveValue("110");
 	});
 });
