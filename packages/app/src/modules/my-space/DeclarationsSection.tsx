@@ -83,7 +83,20 @@ export function DeclarationsSection({
 
 	return (
 		<div className="fr-container fr-my-6w">
-			<h2>Déclarations</h2>
+			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters fr-mb-3w">
+				<div className="fr-col">
+					<h2 className="fr-mb-0">En cours</h2>
+				</div>
+				<div className="fr-col-auto">
+					<a
+						className="fr-btn fr-btn--secondary fr-btn--icon-left fr-icon-download-line"
+						download
+						href="/api/no-sanction-pdf"
+					>
+						Télécharger l'attestation de non sanction (PDF)
+					</a>
+				</div>
+			</div>
 			<div className="fr-table">
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">

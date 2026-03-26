@@ -48,10 +48,10 @@ function renderSection(
 }
 
 describe("DeclarationsSection", () => {
-	it("renders the 'Déclarations' heading", () => {
+	it("renders the 'En cours' heading", () => {
 		renderSection();
 		expect(
-			screen.getByRole("heading", { level: 2, name: "Déclarations" }),
+			screen.getByRole("heading", { level: 2, name: "En cours" }),
 		).toBeInTheDocument();
 	});
 

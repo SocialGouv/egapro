@@ -85,7 +85,7 @@ describe("CompanyDeclarationsPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the 'Déclarations' heading", () => {
+	it("renders the 'En cours' heading", () => {
 		render(
 			<CompanyDeclarationsPage
 				company={company}
@@ -94,7 +94,7 @@ describe("CompanyDeclarationsPage", () => {
 			/>,
 		);
 		expect(
-			screen.getByRole("heading", { level: 2, name: "Déclarations" }),
+			screen.getByRole("heading", { level: 2, name: "En cours" }),
 		).toBeInTheDocument();
 	});
 
