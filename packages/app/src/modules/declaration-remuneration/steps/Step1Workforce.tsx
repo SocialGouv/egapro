@@ -177,7 +177,7 @@ export function Step1Workforce({
 														onChange={handleWomenChange}
 														pattern="[0-9]*"
 														type="text"
-														value={totalWomen || ""}
+														value={totalWomen > 0 ? String(totalWomen) : ""}
 													/>
 												</td>
 												<td>
@@ -188,7 +188,7 @@ export function Step1Workforce({
 														onChange={handleMenChange}
 														pattern="[0-9]*"
 														type="text"
-														value={totalMen || ""}
+														value={totalMen > 0 ? String(totalMen) : ""}
 													/>
 												</td>
 												<td>
