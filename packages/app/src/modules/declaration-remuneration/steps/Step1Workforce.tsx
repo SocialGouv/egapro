@@ -56,8 +56,13 @@ export function Step1Workforce({
 		onSuccess: () => router.push("/declaration-remuneration/etape/2"),
 	});
 
+	function parseIntegerInput(raw: string): number {
+		const digits = raw.replace(/\D/g, "");
+		return digits === "" ? 0 : Number.parseInt(digits, 10);
+	}
+
 	function handleWomenChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const value = Math.max(0, Number.parseInt(e.target.value, 10) || 0);
+		const value = parseIntegerInput(e.target.value);
 		form.setValue("categories", [
 			{ name: "Nombre de salariés", women: value, men: totalMen },
 		]);
@@ -65,7 +70,7 @@ export function Step1Workforce({
 	}
 
 	function handleMenChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const value = Math.max(0, Number.parseInt(e.target.value, 10) || 0);
+		const value = parseIntegerInput(e.target.value);
 		form.setValue("categories", [
 			{ name: "Nombre de salariés", women: totalWomen, men: value },
 		]);
@@ -168,20 +173,22 @@ export function Step1Workforce({
 													<input
 														aria-label="Nombre de femmes"
 														className="fr-input"
-														min={0}
+														inputMode="numeric"
 														onChange={handleWomenChange}
-														type="number"
-														value={totalWomen}
+														pattern="[0-9]*"
+														type="text"
+														value={totalWomen || ""}
 													/>
 												</td>
 												<td>
 													<input
 														aria-label="Nombre d'hommes"
 														className="fr-input"
-														min={0}
+														inputMode="numeric"
 														onChange={handleMenChange}
-														type="number"
-														value={totalMen}
+														pattern="[0-9]*"
+														type="text"
+														value={totalMen || ""}
 													/>
 												</td>
 												<td>

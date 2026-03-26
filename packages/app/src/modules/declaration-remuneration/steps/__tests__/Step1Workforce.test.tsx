@@ -27,9 +27,9 @@ describe("Step1Workforce", () => {
 		expect(within(table).getByText("Femmes")).toBeInTheDocument();
 		expect(within(table).getByText("Hommes")).toBeInTheDocument();
 		expect(within(table).getByText("Total")).toBeInTheDocument();
-		// Inputs should be 0
-		expect(screen.getByLabelText("Nombre de femmes")).toHaveValue(0);
-		expect(screen.getByLabelText("Nombre d'hommes")).toHaveValue(0);
+		// Inputs should be empty when value is 0
+		expect(screen.getByLabelText("Nombre de femmes")).toHaveValue("");
+		expect(screen.getByLabelText("Nombre d'hommes")).toHaveValue("");
 	});
 
 	it("renders reference period and mandatory fields notice", () => {
@@ -48,8 +48,8 @@ describe("Step1Workforce", () => {
 				initialCategories={[{ name: "Nombre de salariés", women: 10, men: 20 }]}
 			/>,
 		);
-		expect(screen.getByLabelText("Nombre de femmes")).toHaveValue(10);
-		expect(screen.getByLabelText("Nombre d'hommes")).toHaveValue(20);
+		expect(screen.getByLabelText("Nombre de femmes")).toHaveValue("10");
+		expect(screen.getByLabelText("Nombre d'hommes")).toHaveValue("20");
 		const row = screen
 			.getByText("Nombre de salariés")
 			.closest("tr") as HTMLElement;
@@ -80,11 +80,11 @@ describe("Step1Workforce", () => {
 
 		await user.clear(womenInput);
 		await user.type(womenInput, "15");
-		expect(womenInput).toHaveValue(15);
+		expect(womenInput).toHaveValue("15");
 
 		await user.clear(menInput);
 		await user.type(menInput, "25");
-		expect(menInput).toHaveValue(25);
+		expect(menInput).toHaveValue("25");
 
 		// Total should update
 		const row = screen
