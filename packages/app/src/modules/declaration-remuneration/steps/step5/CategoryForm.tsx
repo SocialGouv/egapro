@@ -142,6 +142,7 @@ export function CategoryForm({
 				setSaved(false);
 				return;
 			}
+			if (isInteger && /\D/.test(raw)) return;
 			const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
 			if (Number.isNaN(n) || n < 0) return;
 			form.setValue(`categories.${index}.${formField}`, raw);

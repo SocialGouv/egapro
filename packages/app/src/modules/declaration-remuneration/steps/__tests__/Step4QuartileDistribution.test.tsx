@@ -115,7 +115,7 @@ describe("Step4QuartileDistribution", () => {
 
 		// Check annual women count inputs
 		const womenCountInputs = screen.getAllByLabelText(/Nombre de femmes/);
-		expect(womenCountInputs[0]).toHaveValue(19);
+		expect(womenCountInputs[0]).toHaveValue("19");
 
 		// Check annual total column (55 women, 68 men)
 		expect(screen.getAllByText("55").length).toBeGreaterThanOrEqual(1);
