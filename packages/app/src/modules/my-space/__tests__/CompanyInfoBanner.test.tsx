@@ -65,4 +65,31 @@ describe("CompanyInfoBanner", () => {
 		render(<CompanyInfoBanner company={{ ...baseCompany, hasCse: true }} />);
 		expect(screen.getByText("Oui")).toBeInTheDocument();
 	});
+
+	it("renders 'Non' when hasCse is false", () => {
+		render(<CompanyInfoBanner company={{ ...baseCompany, hasCse: false }} />);
+		expect(screen.getByText("Non")).toBeInTheDocument();
+	});
+
+	it("does not render address when null", () => {
+		render(<CompanyInfoBanner company={baseCompany} />);
+		expect(screen.queryByText(/rue|avenue|boulevard/i)).not.toBeInTheDocument();
+	});
+
+	it("does not render NAF code section when nafCode is null", () => {
+		render(<CompanyInfoBanner company={baseCompany} />);
+		expect(screen.queryByText("Code NAF :")).not.toBeInTheDocument();
+	});
+
+	it("does not render workforce section when workforce is null", () => {
+		render(<CompanyInfoBanner company={baseCompany} />);
+		expect(screen.queryByText(/Effectif annuel moyen/)).not.toBeInTheDocument();
+	});
+
+	it("renders the 'Modifier les informations' button", () => {
+		render(<CompanyInfoBanner company={baseCompany} />);
+		expect(
+			screen.getByRole("button", { name: "Modifier les informations" }),
+		).toBeInTheDocument();
+	});
 });
