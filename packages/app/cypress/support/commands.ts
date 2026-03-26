@@ -55,10 +55,11 @@ Cypress.Commands.add("clickRadio", (legendText, radioLabel) => {
 Cypress.Commands.add("checkUrl", url => {
   cy.url().should("include", url);
   // Wait for Next.js hydration: #content must be visible and contain
-  // at least one interactive element (link or button), which proves
-  // React has mounted and attached event handlers.
+  // at least one visible link, which proves React has mounted.
+  // Note: we use "a:visible" instead of "a, button" because DSFR
+  // breadcrumb buttons are hidden on desktop viewports.
   cy.get("#content", { timeout: 30000 }).should("be.visible");
-  cy.get("#content").find("a, button", { timeout: 10000 }).first().should("be.visible");
+  cy.get("#content").find("a:visible", { timeout: 10000 }).first().should("exist");
   cy.get("#content").click({ force: true });
 });
 
