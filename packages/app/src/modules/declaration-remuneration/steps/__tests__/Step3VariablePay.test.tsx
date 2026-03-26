@@ -206,9 +206,9 @@ describe("Step3VariablePay", () => {
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
 		expect(womenInput).toHaveValue("5\u202f000");
 		const benefWomenInput = screen.getByLabelText("Bénéficiaires femmes");
-		expect(benefWomenInput).toHaveValue(45);
+		expect(benefWomenInput).toHaveValue("45");
 		const benefMenInput = screen.getByLabelText("Bénéficiaires hommes");
-		expect(benefMenInput).toHaveValue(60);
+		expect(benefMenInput).toHaveValue("60");
 	});
 
 	it("uses gipPrefillData with null beneficiary counts", () => {
@@ -259,7 +259,7 @@ describe("Step3VariablePay", () => {
 		expect(womenInput).toHaveValue("900");
 		// Beneficiary inputs should be empty (null converted to "")
 		const benefWomenInput = screen.getByLabelText("Bénéficiaires femmes");
-		expect(benefWomenInput).toHaveValue(null);
+		expect(benefWomenInput).toHaveValue("");
 	});
 
 	it("uses gipPrefillData with zero beneficiary counts", () => {
@@ -307,8 +307,8 @@ describe("Step3VariablePay", () => {
 			/>,
 		);
 		const benefWomenInput = screen.getByLabelText("Bénéficiaires femmes");
-		expect(benefWomenInput).toHaveValue(0);
+		expect(benefWomenInput).toHaveValue("0");
 		const benefMenInput = screen.getByLabelText("Bénéficiaires hommes");
-		expect(benefMenInput).toHaveValue(0);
+		expect(benefMenInput).toHaveValue("0");
 	});
 });
