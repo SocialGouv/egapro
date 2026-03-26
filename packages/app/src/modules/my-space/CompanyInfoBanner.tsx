@@ -36,7 +36,7 @@ export function CompanyInfoBanner({ company }: Props) {
 								data-fr-opened="false"
 								type="button"
 							>
-								Modifier
+								Modifier les informations
 							</button>
 						</div>
 					</div>

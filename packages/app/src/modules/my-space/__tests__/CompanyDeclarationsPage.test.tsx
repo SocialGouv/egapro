@@ -108,4 +108,39 @@ describe("CompanyDeclarationsPage", () => {
 		);
 		expect(screen.getByText("Archives")).toBeInTheDocument();
 	});
+
+	it("does not show MissingInfoModal when userPhone and hasCse are provided", () => {
+		const { container } = render(
+			<CompanyDeclarationsPage
+				company={{ ...company, hasCse: true }}
+				declarations={declarations}
+				userPhone="0122334455"
+			/>,
+		);
+		expect(
+			container.querySelector("#missing-info-modal"),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders MissingInfoModal when userPhone is null", () => {
+		const { container } = render(
+			<CompanyDeclarationsPage
+				company={{ ...company, hasCse: true }}
+				declarations={declarations}
+				userPhone={null}
+			/>,
+		);
+		expect(container.querySelector("#missing-info-modal")).toBeInTheDocument();
+	});
+
+	it("renders MissingInfoModal when hasCse is null", () => {
+		const { container } = render(
+			<CompanyDeclarationsPage
+				company={{ ...company, hasCse: null }}
+				declarations={declarations}
+				userPhone="0122334455"
+			/>,
+		);
+		expect(container.querySelector("#missing-info-modal")).toBeInTheDocument();
+	});
 });

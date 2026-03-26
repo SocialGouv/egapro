@@ -1,9 +1,12 @@
+import { ResourceBanner } from "~/modules/layout";
+
 import { ArchivesSection } from "./ArchivesSection";
 import { CompanyEditModal } from "./CompanyEditModal";
 import { CompanyInfoBanner } from "./CompanyInfoBanner";
 import { DeclarationsSection } from "./DeclarationsSection";
 import { MissingInfoModal } from "./MissingInfoModal";
 import type { CompanyDetail, DeclarationItem } from "./types";
+import { WelcomeBanner } from "./WelcomeBanner";
 
 type Props = {
 	company: CompanyDetail;
@@ -18,6 +21,7 @@ export function CompanyDeclarationsPage({
 }: Props) {
 	return (
 		<main id="content">
+			<WelcomeBanner />
 			<CompanyInfoBanner company={company} />
 			<DeclarationsSection
 				declarations={declarations}
@@ -26,6 +30,7 @@ export function CompanyDeclarationsPage({
 				userPhone={userPhone}
 			/>
 			<ArchivesSection />
+			<ResourceBanner />
 			<CompanyEditModal company={company} />
 			{(!userPhone || company.hasCse === null) && (
 				<MissingInfoModal
