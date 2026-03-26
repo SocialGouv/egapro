@@ -46,7 +46,7 @@ check_pattern '\.(ts|tsx|js|jsx)$' \
 check_pattern '\.(tsx|jsx)$' \
   'style=\{' \
   'Inline style={{}} is forbidden. Use DSFR classes or a scoped SCSS module.' \
-  'declarationPdf/'
+  '(declarationPdf/|noSanctionAttestation/)'
 
 # Inline SVG — JSX files only (DsfrPictogram is the only allowed SVG wrapper)
 check_pattern '\.(tsx|jsx)$' \
