@@ -125,17 +125,17 @@ export function QuartileTable({
 													<input
 														aria-label={`Nombre de femmes ${c.name}`}
 														className="fr-input"
-														max={maxWomen}
-														min="0"
+														inputMode="numeric"
 														onChange={(e) =>
 															onCategoryChange(i, "womenCount", e.target.value)
 														}
-														type="number"
+														pattern="[0-9]*"
+														type="text"
 														value={c.womenCount ?? ""}
 													/>
 												</td>
 											))}
-											<td>{totalWomen || "-"}</td>
+											<td>{totalAll > 0 ? totalWomen : "-"}</td>
 										</tr>
 										{/* Row 3: Women percentage */}
 										<tr>
@@ -174,17 +174,17 @@ export function QuartileTable({
 													<input
 														aria-label={`Nombre d'hommes ${c.name}`}
 														className="fr-input"
-														max={maxMen}
-														min="0"
+														inputMode="numeric"
 														onChange={(e) =>
 															onCategoryChange(i, "menCount", e.target.value)
 														}
-														type="number"
+														pattern="[0-9]*"
+														type="text"
 														value={c.menCount ?? ""}
 													/>
 												</td>
 											))}
-											<td>{totalMen || "-"}</td>
+											<td>{totalAll > 0 ? totalMen : "-"}</td>
 										</tr>
 										{/* Row 5: Men percentage */}
 										<tr>

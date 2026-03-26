@@ -1,5 +1,3 @@
-import { ResourceBanner } from "~/modules/layout";
-
 import { ArchivesSection } from "./ArchivesSection";
 import { CompanyEditModal } from "./CompanyEditModal";
 import { CompanyInfoBanner } from "./CompanyInfoBanner";
@@ -33,7 +31,6 @@ export function CompanyDeclarationsPage({
 				userPhone={userPhone}
 			/>
 			<ArchivesSection />
-			<ResourceBanner />
 			<CompanyEditModal company={company} />
 			{(!userPhone || company.hasCse === null) && (
 				<MissingInfoModal

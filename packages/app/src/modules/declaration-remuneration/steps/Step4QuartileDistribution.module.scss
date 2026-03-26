@@ -34,16 +34,6 @@
 		white-space: normal;
 	}
 
-	input[type="number"] {
-		appearance: textfield;
-		-moz-appearance: textfield;
-
-		&::-webkit-outer-spin-button,
-		&::-webkit-inner-spin-button {
-			appearance: none;
-			margin: 0;
-		}
-	}
 }
 
 .inputWithUnit {

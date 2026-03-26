@@ -21,8 +21,8 @@ export function FooterBody() {
 			</div>
 			<div className="fr-footer__content">
 				<p className="fr-footer__content-desc">
-					Egapro est développé et maintenu par les équipes de la fabrique
-					numérique des ministères sociaux.
+					Egapro permet aux entreprises de déclarer leurs indicateurs de
+					rémunération et de représentation entre les femmes et les hommes.
 				</p>
 				<ul className="fr-footer__content-list">
 					<li className="fr-footer__content-item">

@@ -162,6 +162,7 @@ export function Step4QuartileDistribution({
 				setSaved(false);
 				return;
 			}
+			if (/\D/.test(value)) return;
 			const n = Number.parseInt(value, 10);
 			if (Number.isNaN(n) || n < 0) return;
 			const max = field === "womenCount" ? maxWomen : maxMen;
