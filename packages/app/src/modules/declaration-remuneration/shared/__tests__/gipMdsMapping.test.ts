@@ -223,6 +223,168 @@ describe("mapGipToFormData", () => {
 		expect(result?.step4.annual.womenCounts[0]).toBe(0);
 		expect(result?.step4.annual.menCounts[0]).toBe(0);
 	});
+
+	it("returns all null step2 fields when row has no indicator A/C data", () => {
+		const row = makeRow();
+		const result = mapGipToFormData(row);
+		expect(result?.step2).toEqual({
+			annualMeanWomen: null,
+			annualMeanMen: null,
+			hourlyMeanWomen: null,
+			hourlyMeanMen: null,
+			annualMedianWomen: null,
+			annualMedianMen: null,
+			hourlyMedianWomen: null,
+			hourlyMedianMen: null,
+		});
+	});
+
+	it("returns all null step3 fields when row has no indicator B/D/E data", () => {
+		const row = makeRow();
+		const result = mapGipToFormData(row);
+		expect(result?.step3).toEqual({
+			annualMeanWomen: null,
+			annualMeanMen: null,
+			hourlyMeanWomen: null,
+			hourlyMeanMen: null,
+			annualMedianWomen: null,
+			annualMedianMen: null,
+			hourlyMedianWomen: null,
+			hourlyMedianMen: null,
+			beneficiaryCountWomen: null,
+			beneficiaryCountMen: null,
+		});
+	});
+
+	it("handles zero workforce for variable pay beneficiaries", () => {
+		const row = makeRow({
+			womenCountAnnualVariable: "0",
+			menCountAnnualVariable: "0",
+		});
+		const result = mapGipToFormData(row);
+		expect(result?.step3.beneficiaryCountWomen).toBe(0);
+		expect(result?.step3.beneficiaryCountMen).toBe(0);
+	});
+
+	it("maps hourly quartile data from proportions", () => {
+		const row = makeRow({
+			womenCountHourlyGlobal: "80",
+			menCountHourlyGlobal: "120",
+			hourlyQuartileThreshold1: "13.74",
+			hourlyQuartileThreshold2: "17.58",
+			hourlyQuartileThreshold3: "21.98",
+			hourlyQuartileThreshold4: "30.22",
+			hourlyQuartile1ProportionWomen: "0.6",
+			hourlyQuartile2ProportionWomen: "0.4",
+			hourlyQuartile3ProportionWomen: "0.3",
+			hourlyQuartile4ProportionWomen: "0.2",
+			hourlyQuartile1ProportionMen: "0.4",
+			hourlyQuartile2ProportionMen: "0.6",
+			hourlyQuartile3ProportionMen: "0.7",
+			hourlyQuartile4ProportionMen: "0.8",
+		});
+		const result = mapGipToFormData(row);
+		// totalAll = 200, quartileSize = 50
+		expect(result?.step4.hourly.thresholds).toEqual([
+			"13.74",
+			"17.58",
+			"21.98",
+			"30.22",
+		]);
+		expect(result?.step4.hourly.womenCounts).toEqual([30, 20, 15, 10]);
+		expect(result?.step4.hourly.menCounts).toEqual([20, 30, 35, 40]);
+	});
+
+	it("handles null Q4 threshold (only Q1-Q3 present)", () => {
+		const row = makeRow({
+			womenCountAnnualGlobal: "100",
+			menCountAnnualGlobal: "100",
+			annualQuartileThreshold1: "25000",
+			annualQuartileThreshold2: "32000",
+			annualQuartileThreshold3: "40000",
+			// annualQuartileThreshold4 remains null
+			annualQuartile1ProportionWomen: "0.5",
+			annualQuartile1ProportionMen: "0.5",
+		});
+		const result = mapGipToFormData(row);
+		expect(result?.step4.annual.thresholds).toEqual([
+			"25000",
+			"32000",
+			"40000",
+			null,
+		]);
+	});
+
+	it("handles proportions at boundary 0 (mono-gender quartile: all men)", () => {
+		const row = makeRow({
+			womenCountAnnualGlobal: "0",
+			menCountAnnualGlobal: "200",
+			annualQuartile1ProportionWomen: "0",
+			annualQuartile1ProportionMen: "1",
+			annualQuartile2ProportionWomen: "0",
+			annualQuartile2ProportionMen: "1",
+			annualQuartile3ProportionWomen: "0",
+			annualQuartile3ProportionMen: "1",
+			annualQuartile4ProportionWomen: "0",
+			annualQuartile4ProportionMen: "1",
+		});
+		const result = mapGipToFormData(row);
+		// totalAll = 200, quartileSize = 50
+		expect(result?.step4.annual.womenCounts).toEqual([0, 0, 0, 0]);
+		expect(result?.step4.annual.menCounts).toEqual([50, 50, 50, 50]);
+	});
+
+	it("handles proportions at boundary 1 (mono-gender quartile: all women)", () => {
+		const row = makeRow({
+			womenCountAnnualGlobal: "200",
+			menCountAnnualGlobal: "0",
+			annualQuartile1ProportionWomen: "1",
+			annualQuartile1ProportionMen: "0",
+		});
+		const result = mapGipToFormData(row);
+		// totalAll = 200, quartileSize = 50
+		expect(result?.step4.annual.womenCounts[0]).toBe(50);
+		expect(result?.step4.annual.menCounts[0]).toBe(0);
+	});
+
+	it("handles proportions that do not sum to exactly 1 (floating point)", () => {
+		const row = makeRow({
+			womenCountAnnualGlobal: "100",
+			menCountAnnualGlobal: "100",
+			annualQuartile1ProportionWomen: "0.5347",
+			annualQuartile1ProportionMen: "0.4652",
+		});
+		const result = mapGipToFormData(row);
+		// quartileSize = 50, womenCount = round(0.5347 * 50) = 27
+		expect(result?.step4.annual.womenCounts[0]).toBe(27);
+		// menCount = round(0.4652 * 50) = 23
+		expect(result?.step4.annual.menCounts[0]).toBe(23);
+		// 27 + 23 = 50 = quartileSize, rounding works out
+	});
+
+	it("maps step1 with zero workforce", () => {
+		const row = makeRow({
+			womenCountAnnualGlobal: "0",
+			menCountAnnualGlobal: "180",
+		});
+		const result = mapGipToFormData(row);
+		expect(result?.step1).toEqual({
+			totalWomen: 0,
+			totalMen: 180,
+		});
+	});
+
+	it("handles confidence index at 0", () => {
+		const row = makeRow({ confidenceIndex: "0" });
+		const result = mapGipToFormData(row);
+		expect(result?.confidenceIndex).toBe("0");
+	});
+
+	it("handles confidence index at 1", () => {
+		const row = makeRow({ confidenceIndex: "1" });
+		const result = mapGipToFormData(row);
+		expect(result?.confidenceIndex).toBe("1");
+	});
 });
 
 describe("CSV_TO_SCHEMA_MAP", () => {
