@@ -40,11 +40,23 @@ export async function resetDeclarationToDraft() {
 }
 
 /** Toggle the hasCse flag on the test company. */
-export async function setCompanyHasCse(hasCse: boolean) {
+export async function setCompanyHasCse(hasCse: boolean | null) {
 	const sql = createConnection();
 	try {
 		await sql`
 			UPDATE app_company SET has_cse = ${hasCse} WHERE siren = ${TEST_SIREN}
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Clear or set the phone number for the test user (identified by siret starting with TEST_SIREN). */
+export async function setUserPhone(phone: string | null) {
+	const sql = createConnection();
+	try {
+		await sql`
+			UPDATE app_user SET phone = ${phone} WHERE siret LIKE ${TEST_SIREN + "%"}
 		`;
 	} finally {
 		await sql.end();

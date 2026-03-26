@@ -11,7 +11,15 @@ export const updateHasCseSchema = z.object({
 	hasCse: z.boolean(),
 });
 
-export const missingInfoSchema = z.object({
-	phone: phoneSchema.or(z.literal("")),
-	hasCse: z.boolean().optional(),
-});
+/** Radio buttons always produce strings — transform "true"/"false" to boolean. */
+const hasCseFromRadio = z
+	.union([z.boolean(), z.literal("true"), z.literal("false")])
+	.transform((v): boolean => (typeof v === "string" ? v === "true" : v))
+	.optional();
+
+export function createMissingInfoSchema(needsPhone: boolean) {
+	return z.object({
+		phone: needsPhone ? phoneSchema : z.string(),
+		hasCse: hasCseFromRadio,
+	});
+}
