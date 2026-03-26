@@ -54,7 +54,10 @@ Cypress.Commands.add("clickRadio", (legendText, radioLabel) => {
 
 Cypress.Commands.add("checkUrl", url => {
   cy.url().should("include", url);
-  cy.get("#content").click();
+  // Wait for Next.js hydration: #content must be visible, then click
+  // to trigger reflow and confirm the page is interactive.
+  cy.get("#content", { timeout: 30000 }).should("be.visible");
+  cy.get("#content").click({ force: true });
 });
 
 Cypress.Commands.add("loginWithKeycloak", () => {

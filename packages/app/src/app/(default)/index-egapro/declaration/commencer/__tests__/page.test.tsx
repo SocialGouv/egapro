@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { type ReactElement } from "react";
 
@@ -28,10 +29,14 @@ describe("CommencerPage", () => {
     mockGetServerSession.mockReset();
   });
 
-  it("should return null when no session", async () => {
+  it("should redirect to login when no session", async () => {
     mockGetServerSession.mockResolvedValue(null);
-    const { container } = render((await CommencerPage()) as ReactElement);
-    expect(container).toBeEmptyDOMElement();
+    (redirect as jest.Mock).mockImplementation(() => {
+      throw new Error("NEXT_REDIRECT");
+    });
+
+    await expect(CommencerPage()).rejects.toThrow("NEXT_REDIRECT");
+    expect(redirect).toHaveBeenCalledWith("/login");
   });
 
   it("should show email login alert when no companies and email login", async () => {

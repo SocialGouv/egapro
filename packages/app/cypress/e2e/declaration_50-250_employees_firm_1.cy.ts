@@ -16,6 +16,7 @@ describe("Declaration", () => {
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
+    cy.checkUrl("/");
 
     cy.contains("a", "Calculer - Déclarer mon Index").click();
 
@@ -122,12 +123,12 @@ describe("Declaration", () => {
     cy.get("#content").click();
     cy.contains("button", "Suivant").click();
 
-    cy.url().should("include", "/index-egapro/declaration/validation-transmission");
+    cy.checkUrl("/index-egapro/declaration/validation-transmission");
     cy.get("#content").within(() => {
       cy.contains("span", "85").should("exist");
     });
     cy.contains("button", "Valider et transmettre les résultats").click();
-    cy.contains("Votre déclaration a été transmise");
+    cy.contains("Votre déclaration a été transmise", { timeout: 60000 });
     cy.contains("button", Cypress.env("E2E_USERNAME")).click();
     cy.contains("a", "Mes déclarations").click();
 

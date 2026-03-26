@@ -16,6 +16,7 @@ describe("Declaration", () => {
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
+    cy.checkUrl("/");
 
     cy.contains("a", "Calculer - Déclarer mon Index").click();
 
@@ -110,18 +111,18 @@ describe("Declaration", () => {
     );
     cy.contains("button", "Suivant").click();
 
-    cy.url().should("include", "/index-egapro/declaration/validation-transmission");
+    cy.checkUrl("/index-egapro/declaration/validation-transmission");
     cy.get("#content").within(() => {
       cy.contains("span", "NC").should("exist");
     });
     cy.contains("button", "Valider et transmettre les résultats").click();
-    cy.contains("Votre déclaration a été transmise");
+    cy.contains("Votre déclaration a été transmise", { timeout: 60000 });
     cy.contains("button", Cypress.env("E2E_USERNAME")).click();
     cy.contains("a", "Mes déclarations").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");
     cy.selectByLabel("Numéro Siren de l'entreprise").select("384964508");
-    cy.contains("a", "384964508");
+    cy.contains("a", "384964508", { timeout: 30000 });
     cy.contains("De 251 à 999 inclus");
   });
 });

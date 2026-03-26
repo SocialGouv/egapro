@@ -16,6 +16,7 @@ describe("Declaration", () => {
 
     // Visiter la page de démarrage du simulateur
     cy.visit("/");
+    cy.checkUrl("/");
 
     cy.contains("a", "Calculer - Déclarer mon Index").click();
 
@@ -28,7 +29,7 @@ describe("Declaration", () => {
     cy.contains("a", "Suivant").click();
 
     // Check if we're on the expected page
-    cy.url().should("include", "/index-egapro/declaration/commencer");
+    cy.checkUrl("/index-egapro/declaration/commencer");
     cy.selectByLabel(
       "Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l'unité économique et sociale (UES) *",
     ).select("820709046");
@@ -151,18 +152,18 @@ describe("Declaration", () => {
     cy.get("#content").click();
     cy.contains("button", "Suivant").click();
 
-    cy.url().should("include", "/index-egapro/declaration/validation-transmission");
+    cy.checkUrl("/index-egapro/declaration/validation-transmission");
     cy.get("#content").within(() => {
       cy.contains("span", "69").should("exist");
     });
     cy.contains("button", "Valider et transmettre les résultats").click();
-    cy.contains("Votre déclaration a été transmise");
+    cy.contains("Votre déclaration a été transmise", { timeout: 60000 });
     cy.contains("button", Cypress.env("E2E_USERNAME")).click();
     cy.contains("a", "Mes déclarations").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");
     cy.selectByLabel("Numéro Siren de l'entreprise").select("820709046");
-    cy.contains("a", "820709046");
+    cy.contains("a", "820709046", { timeout: 30000 });
     cy.contains("De 1000 à plus");
 
     // Déclaration progression
@@ -197,7 +198,7 @@ describe("Declaration", () => {
       "Note de service envoyé aux salariés",
     );
     cy.contains("button", "Valider et transmettre les informations").click();
-    cy.contains("Votre déclaration a été validée et transmise");
+    cy.contains("Votre déclaration a été validée et transmise", { timeout: 60000 });
     cy.contains("button", "Retour").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");

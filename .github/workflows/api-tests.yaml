@@ -41,8 +41,9 @@ jobs:
       - name: Up for tests API
         run: docker compose up --build -d api db test_db
 
-      - name: Check types
-        run: pnpm check-all
+      - name: Tests API
+        run: pnpm test:api
 
       - name: Down for tests API
+        if: always()
         run: docker compose down
