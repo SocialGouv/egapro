@@ -124,7 +124,7 @@ describe("MissingInfoModal", () => {
 	});
 
 	it("renders Enregistrer and Retour buttons", () => {
-		const { container } = render(
+		render(
 			<MissingInfoModal hasCse={null} siren="532847196" userPhone={null} />,
 		);
 		expect(
@@ -141,7 +141,7 @@ describe("MissingInfoModal", () => {
 	});
 
 	it("Enregistrer button is not disabled when mutations are idle", () => {
-		const { container } = render(
+		render(
 			<MissingInfoModal hasCse={null} siren="532847196" userPhone={null} />,
 		);
 		expect(

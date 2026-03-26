@@ -136,7 +136,6 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 										<div className="fr-fieldset__element">
 											<div className="fr-radio-group fr-radio-rich">
 												<input
-													aria-required="true"
 													id="missing-info-cse-yes"
 													type="radio"
 													value="true"
@@ -153,7 +152,6 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 										<div className="fr-fieldset__element">
 											<div className="fr-radio-group fr-radio-rich">
 												<input
-													aria-required="true"
 													id="missing-info-cse-no"
 													type="radio"
 													value="false"
@@ -184,7 +182,6 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 									<div
 										aria-live="polite"
 										className="fr-alert fr-alert--error fr-mt-2w"
-										role="status"
 									>
 										<p>{submitError}</p>
 									</div>

@@ -56,7 +56,7 @@ export async function setUserPhone(phone: string | null) {
 	const sql = createConnection();
 	try {
 		await sql`
-			UPDATE app_user SET phone = ${phone} WHERE siret LIKE ${TEST_SIREN + "%"}
+			UPDATE app_user SET phone = ${phone} WHERE siret LIKE ${`${TEST_SIREN}%`}
 		`;
 	} finally {
 		await sql.end();
