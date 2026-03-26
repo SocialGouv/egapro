@@ -3,6 +3,10 @@ name: 🧪 E2E Tests
 on:
   deployment_status:
 
+concurrency:
+  group: e2e-${{ github.event.deployment.environment }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 

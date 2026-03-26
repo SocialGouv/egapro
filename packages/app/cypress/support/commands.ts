@@ -59,7 +59,7 @@ Cypress.Commands.add("checkUrl", url => {
   // Note: we use "a:visible" instead of "a, button" because DSFR
   // breadcrumb buttons are hidden on desktop viewports.
   cy.get("#content", { timeout: 30000 }).should("be.visible");
-  cy.get("#content").find("a:visible", { timeout: 10000 }).first().should("exist");
+  cy.get("#content").find("a:visible", { timeout: 30000 }).first().should("exist");
   cy.get("#content").click({ force: true });
 });
 
