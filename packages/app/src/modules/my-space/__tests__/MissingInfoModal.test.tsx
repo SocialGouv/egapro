@@ -124,12 +124,12 @@ describe("MissingInfoModal", () => {
 	});
 
 	it("renders Enregistrer and Retour buttons", () => {
-		const { container } = render(
+		render(
 			<MissingInfoModal hasCse={null} siren="532847196" userPhone={null} />,
 		);
-		expect(container.querySelector("button[type='submit']")).toHaveTextContent(
-			"Enregistrer",
-		);
+		expect(
+			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
+		).toHaveTextContent("Enregistrer");
 		expect(screen.getByText("Retour")).toBeInTheDocument();
 	});
 
@@ -141,9 +141,11 @@ describe("MissingInfoModal", () => {
 	});
 
 	it("Enregistrer button is not disabled when mutations are idle", () => {
-		const { container } = render(
+		render(
 			<MissingInfoModal hasCse={null} siren="532847196" userPhone={null} />,
 		);
-		expect(container.querySelector("button[type='submit']")).not.toBeDisabled();
+		expect(
+			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
+		).not.toBeDisabled();
 	});
 });
