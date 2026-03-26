@@ -120,13 +120,23 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 									/>
 								)}
 								{needsCse && (
-									<fieldset className="fr-fieldset">
+									<fieldset
+										aria-describedby={
+											cseError ? "missing-info-cse-error" : undefined
+										}
+										className={
+											cseError
+												? "fr-fieldset fr-fieldset--error"
+												: "fr-fieldset"
+										}
+									>
 										<legend className="fr-fieldset__legend fr-text--regular">
 											Un CSE a-t-il été mis en place dans votre entreprise ?
 										</legend>
 										<div className="fr-fieldset__element">
 											<div className="fr-radio-group fr-radio-rich">
 												<input
+													aria-required="true"
 													id="missing-info-cse-yes"
 													type="radio"
 													value="true"
@@ -143,6 +153,7 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 										<div className="fr-fieldset__element">
 											<div className="fr-radio-group fr-radio-rich">
 												<input
+													aria-required="true"
 													id="missing-info-cse-no"
 													type="radio"
 													value="false"
@@ -156,17 +167,24 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 												</label>
 											</div>
 										</div>
+										{cseError && (
+											<div
+												className="fr-messages-group"
+												id="missing-info-cse-error"
+												role="alert"
+											>
+												<p className="fr-message fr-message--error">
+													{cseError}
+												</p>
+											</div>
+										)}
 									</fieldset>
-								)}
-								{cseError && (
-									<p className="fr-error-text" role="alert">
-										{cseError}
-									</p>
 								)}
 								{submitError && (
 									<div
+										aria-live="polite"
 										className="fr-alert fr-alert--error fr-mt-2w"
-										role="alert"
+										role="status"
 									>
 										<p>{submitError}</p>
 									</div>
