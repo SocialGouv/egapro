@@ -135,17 +135,17 @@ export function CategoryForm({
 		isInteger: boolean,
 	) {
 		return (e: React.ChangeEvent<HTMLInputElement>) => {
-			const raw = e.target.value.replace(/\s/g, "").replace(",", ".");
+			const val = e.target.value;
 			const formField = field as Exclude<keyof EmployeeCategory, "id">;
-			if (raw === "") {
-				form.setValue(`categories.${index}.${formField}`, raw);
+			if (val === "") {
+				form.setValue(`categories.${index}.${formField}`, val);
 				setSaved(false);
 				return;
 			}
-			if (isInteger && /\D/.test(raw)) return;
-			const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
+			if (isInteger && /\D/.test(val)) return;
+			const n = isInteger ? Number.parseInt(val, 10) : Number.parseFloat(val);
 			if (Number.isNaN(n) || n < 0) return;
-			form.setValue(`categories.${index}.${formField}`, raw);
+			form.setValue(`categories.${index}.${formField}`, val);
 			setSaved(false);
 		};
 	}
