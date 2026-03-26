@@ -104,7 +104,9 @@ test.describe("Missing info modal", () => {
 
 			await modal.getByRole("button", { name: "Enregistrer" }).click();
 
-			await expect(modal.getByText("Format attendu")).toBeVisible();
+			await expect(
+				modal.locator(".fr-message--error", { hasText: "Format attendu" }),
+			).toBeVisible();
 			expect(page.url()).toContain("/mon-espace");
 		});
 	});
