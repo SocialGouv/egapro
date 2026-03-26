@@ -9,12 +9,14 @@ import { WelcomeBanner } from "./WelcomeBanner";
 type Props = {
 	company: CompanyDetail;
 	declarations: DeclarationItem[];
+	hasNoSanction: boolean;
 	userPhone: string | null;
 };
 
 export function CompanyDeclarationsPage({
 	company,
 	declarations,
+	hasNoSanction,
 	userPhone,
 }: Props) {
 	return (
@@ -24,6 +26,7 @@ export function CompanyDeclarationsPage({
 			<DeclarationsSection
 				declarations={declarations}
 				hasCse={company.hasCse}
+				hasNoSanction={hasNoSanction}
 				siren={company.siren}
 				userPhone={userPhone}
 			/>

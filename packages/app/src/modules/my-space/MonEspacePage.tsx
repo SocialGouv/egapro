@@ -19,12 +19,18 @@ export async function MonEspacePage({ siret, userPhone }: Props) {
 	}
 
 	const siren = siret.slice(0, SIREN_LENGTH);
-	const data = await api.company.getWithDeclarations({ siren });
+	const [data, sanctionStatus] = await Promise.all([
+		api.company.getWithDeclarations({ siren }),
+		api.company.getSanctionStatus({ siren }),
+	]);
+
+	const hasNoSanction = sanctionStatus !== null && !sanctionStatus.hasSanction;
 
 	return (
 		<CompanyDeclarationsPage
 			company={data.company}
 			declarations={data.declarations}
+			hasNoSanction={hasNoSanction}
 			userPhone={userPhone}
 		/>
 	);

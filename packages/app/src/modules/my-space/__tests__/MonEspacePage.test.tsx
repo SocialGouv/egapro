@@ -62,6 +62,9 @@ vi.mock("~/trpc/server", () => ({
 					},
 				],
 			}),
+			getSanctionStatus: vi
+				.fn()
+				.mockResolvedValue({ hasSanction: false, validityDate: null }),
 		},
 	},
 	HydrateClient: ({ children }: { children: React.ReactNode }) => (

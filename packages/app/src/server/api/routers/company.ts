@@ -8,7 +8,7 @@ import {
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import type { DB } from "~/server/db";
 import { companies, declarations, userCompanies } from "~/server/db/schema";
-import { fetchCseBySiren } from "~/server/services/suit";
+import { fetchCseBySiren, fetchSanctionBySiren } from "~/server/services/suit";
 
 async function findUserCompany(db: DB, userId: string, siren: string) {
 	const rows = await db
@@ -149,5 +149,13 @@ export const companyRouter = createTRPCRouter({
 				.update(companies)
 				.set({ hasCse: input.hasCse })
 				.where(eq(companies.siren, input.siren));
+		}),
+
+	getSanctionStatus: protectedProcedure
+		.input(sirenInputSchema)
+		.query(async ({ ctx, input }) => {
+			await findUserCompany(ctx.db, ctx.session.user.id, input.siren);
+			const result = await fetchSanctionBySiren(input.siren);
+			return result ?? { hasSanction: false, validityDate: null };
 		}),
 });

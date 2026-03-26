@@ -64,6 +64,7 @@ describe("CompanyDeclarationsPage", () => {
 			<CompanyDeclarationsPage
 				company={company}
 				declarations={declarations}
+				hasNoSanction={false}
 				userPhone="0122334455"
 			/>,
 		);
@@ -77,6 +78,7 @@ describe("CompanyDeclarationsPage", () => {
 			<CompanyDeclarationsPage
 				company={company}
 				declarations={declarations}
+				hasNoSanction={false}
 				userPhone="0122334455"
 			/>,
 		);
@@ -85,16 +87,17 @@ describe("CompanyDeclarationsPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the 'Déclarations' heading", () => {
+	it("renders the 'En cours' heading", () => {
 		render(
 			<CompanyDeclarationsPage
 				company={company}
 				declarations={declarations}
+				hasNoSanction={false}
 				userPhone="0122334455"
 			/>,
 		);
 		expect(
-			screen.getByRole("heading", { level: 2, name: "Déclarations" }),
+			screen.getByRole("heading", { level: 2, name: "En cours" }),
 		).toBeInTheDocument();
 	});
 
@@ -103,6 +106,7 @@ describe("CompanyDeclarationsPage", () => {
 			<CompanyDeclarationsPage
 				company={company}
 				declarations={declarations}
+				hasNoSanction={false}
 				userPhone="0122334455"
 			/>,
 		);
@@ -114,6 +118,7 @@ describe("CompanyDeclarationsPage", () => {
 			<CompanyDeclarationsPage
 				company={{ ...company, hasCse: true }}
 				declarations={declarations}
+				hasNoSanction={false}
 				userPhone="0122334455"
 			/>,
 		);
@@ -127,6 +132,7 @@ describe("CompanyDeclarationsPage", () => {
 			<CompanyDeclarationsPage
 				company={{ ...company, hasCse: true }}
 				declarations={declarations}
+				hasNoSanction={false}
 				userPhone={null}
 			/>,
 		);
@@ -138,6 +144,7 @@ describe("CompanyDeclarationsPage", () => {
 			<CompanyDeclarationsPage
 				company={{ ...company, hasCse: null }}
 				declarations={declarations}
+				hasNoSanction={false}
 				userPhone="0122334455"
 			/>,
 		);
