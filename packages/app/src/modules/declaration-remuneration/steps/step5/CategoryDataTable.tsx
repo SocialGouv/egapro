@@ -4,7 +4,7 @@ import common from "~/modules/declaration-remuneration/shared/common.module.scss
 import {
 	computeGap,
 	computeTotal,
-	displayDecimal,
+	displayInputDecimal,
 	formatTotal,
 } from "~/modules/domain";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
@@ -130,7 +130,7 @@ export function CategoryDataTable({
 												inputMode="decimal"
 												onChange={pos(catIndex, "annualBaseWomen", false)}
 												type="text"
-												value={displayDecimal(cat.annualBaseWomen)}
+												value={displayInputDecimal(cat.annualBaseWomen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -144,7 +144,7 @@ export function CategoryDataTable({
 												inputMode="decimal"
 												onChange={pos(catIndex, "annualBaseMen", false)}
 												type="text"
-												value={displayDecimal(cat.annualBaseMen)}
+												value={displayInputDecimal(cat.annualBaseMen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -170,7 +170,7 @@ export function CategoryDataTable({
 												inputMode="decimal"
 												onChange={pos(catIndex, "annualVariableWomen", false)}
 												type="text"
-												value={displayDecimal(cat.annualVariableWomen)}
+												value={displayInputDecimal(cat.annualVariableWomen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -184,7 +184,7 @@ export function CategoryDataTable({
 												inputMode="decimal"
 												onChange={pos(catIndex, "annualVariableMen", false)}
 												type="text"
-												value={displayDecimal(cat.annualVariableMen)}
+												value={displayInputDecimal(cat.annualVariableMen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -227,7 +227,7 @@ export function CategoryDataTable({
 												inputMode="decimal"
 												onChange={pos(catIndex, "hourlyBaseWomen", false)}
 												type="text"
-												value={displayDecimal(cat.hourlyBaseWomen)}
+												value={displayInputDecimal(cat.hourlyBaseWomen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -241,7 +241,7 @@ export function CategoryDataTable({
 												inputMode="decimal"
 												onChange={pos(catIndex, "hourlyBaseMen", false)}
 												type="text"
-												value={displayDecimal(cat.hourlyBaseMen)}
+												value={displayInputDecimal(cat.hourlyBaseMen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -267,7 +267,7 @@ export function CategoryDataTable({
 												inputMode="decimal"
 												onChange={pos(catIndex, "hourlyVariableWomen", false)}
 												type="text"
-												value={displayDecimal(cat.hourlyVariableWomen)}
+												value={displayInputDecimal(cat.hourlyVariableWomen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -281,7 +281,7 @@ export function CategoryDataTable({
 												inputMode="decimal"
 												onChange={pos(catIndex, "hourlyVariableMen", false)}
 												type="text"
-												value={displayDecimal(cat.hourlyVariableMen)}
+												value={displayInputDecimal(cat.hourlyVariableMen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>

@@ -41,6 +41,7 @@ export {
 // Number parsing & normalization (French locale)
 export {
 	displayDecimal,
+	displayInputDecimal,
 	normalizeDecimalInput,
 	parseNumber,
 } from "./shared/number";

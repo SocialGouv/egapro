@@ -175,6 +175,18 @@ describe("Step5EmployeeCategories", () => {
 		expect(screen.getAllByText(/5,0/).length).toBeGreaterThanOrEqual(1);
 	});
 
+	it("accepts salary values above 9999", async () => {
+		const user = userEvent.setup();
+		render(<Step5EmployeeCategories />);
+
+		const input = screen.getByLabelText(
+			"Salaire de base annuel femmes, catégorie 1",
+		);
+
+		await user.type(input, "25000");
+		expect(input).toHaveValue("25000");
+	});
+
 	it("rejects negative values in number inputs", async () => {
 		const user = userEvent.setup();
 		render(<Step5EmployeeCategories />);
