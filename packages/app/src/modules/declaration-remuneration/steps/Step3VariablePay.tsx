@@ -218,7 +218,13 @@ export function Step3VariablePay({
 					<PayGapTable
 						caption="Écart de rémunération variable ou complémentaire"
 						className={stepStyles.payGapTable}
-						columnHeader={"Rémunération variable\nou complémentaire"}
+						columnHeader={
+							<>
+								Rémunération variable
+								<br />
+								ou complémentaire
+							</>
+						}
 						onRowChange={handleRowChange}
 						rows={rows}
 					/>
