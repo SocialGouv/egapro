@@ -56,13 +56,15 @@ export function Step1Workforce({
 		onSuccess: () => router.push("/declaration-remuneration/etape/2"),
 	});
 
-	function parseIntegerInput(raw: string): number {
-		const digits = raw.replace(/\D/g, "");
-		return digits === "" ? 0 : Number.parseInt(digits, 10);
+	function parseIntegerInput(raw: string): number | null {
+		if (raw === "") return 0;
+		if (/\D/.test(raw)) return null;
+		return Number.parseInt(raw, 10);
 	}
 
 	function handleWomenChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const value = parseIntegerInput(e.target.value);
+		if (value === null) return;
 		form.setValue("categories", [
 			{ name: "Nombre de salariés", women: value, men: totalMen },
 		]);
@@ -71,6 +73,7 @@ export function Step1Workforce({
 
 	function handleMenChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const value = parseIntegerInput(e.target.value);
+		if (value === null) return;
 		form.setValue("categories", [
 			{ name: "Nombre de salariés", women: totalWomen, men: value },
 		]);
