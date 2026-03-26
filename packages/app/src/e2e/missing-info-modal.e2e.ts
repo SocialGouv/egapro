@@ -34,9 +34,7 @@ test.describe("Missing info modal", () => {
 				),
 			).toBeVisible();
 
-			await expect(
-				modal.getByLabel(/Numéro de téléphone/),
-			).not.toBeVisible();
+			await expect(modal.getByLabel(/Numéro de téléphone/)).not.toBeVisible();
 
 			await modal.locator("label[for='missing-info-cse-yes']").click();
 			await modal.getByRole("button", { name: "Enregistrer" }).click();
