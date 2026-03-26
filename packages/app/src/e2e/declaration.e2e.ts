@@ -55,8 +55,8 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 
 		// Fill workforce data directly in the table
-		await page.getByRole("spinbutton", { name: "Nombre de femmes" }).fill("10");
-		await page.getByRole("spinbutton", { name: "Nombre d'hommes" }).fill("15");
+		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("10");
+		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("15");
 
 		// Verify total is computed
 		await expect(page.getByText("25", { exact: true })).toBeVisible();

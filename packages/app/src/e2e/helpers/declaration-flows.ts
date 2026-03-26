@@ -71,8 +71,8 @@ export async function completeDeclaration(
 	await page.waitForURL("**/declaration-remuneration/etape/1");
 
 	// Step 1: Fill workforce (10 women + 15 men = 25 total)
-	await page.getByRole("spinbutton", { name: "Nombre de femmes" }).fill("10");
-	await page.getByRole("spinbutton", { name: "Nombre d'hommes" }).fill("15");
+	await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("10");
+	await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("15");
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL("**/declaration-remuneration/etape/2");
 
