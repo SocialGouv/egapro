@@ -1,3 +1,11 @@
+## [3.17.2](https://github.com/SocialGouv/egapro/compare/v3.17.1...v3.17.2) (2026-03-25)
+
+
+### Bug Fixes
+
+* add rgaa user in keycloak ([#3027](https://github.com/SocialGouv/egapro/issues/3027)) ([dd1227b](https://github.com/SocialGouv/egapro/commit/dd1227b4c57360208b3d2c2007104de2610840f8))
+* files traefik ingressroutes ([#3080](https://github.com/SocialGouv/egapro/issues/3080)) ([720fe66](https://github.com/SocialGouv/egapro/commit/720fe6673ee8bb36df8dbf42bd416b006080fdfb))
+
 ## [3.17.1](https://github.com/SocialGouv/egapro/compare/v3.17.0...v3.17.1) (2026-03-19)
 
 
