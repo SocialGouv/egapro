@@ -129,11 +129,8 @@ These agents are **read-only** — they report findings but never modify files. 
 
 ## Skills (manual)
 
-Skills in `.claude/skills/` can be triggered explicitly with `/command`:
+Single smart skill for the full lifecycle:
 
-| Skill | When to use |
+| Command | When to use |
 |---|---|
-| `/validate` | Force a full quality pass — all 4 agents + auto-fix + loop until zero. Accepts optional focus: `rgaa`, `security`, `structure` |
-| `/review-pr` | Deep PR review with structural-auditor + GH comments |
-| `/process-issue` | Process a GitHub issue end-to-end with mandatory quality gates |
-| `/split-pr` | Split the current branch into multiple focused PRs |
+| `/ship [#N]` | End-to-end: implement -> validate -> PR -> review -> done. Auto-detects phase from branch/PR state. |
