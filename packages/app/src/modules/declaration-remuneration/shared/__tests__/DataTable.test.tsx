@@ -30,7 +30,7 @@ describe("DataTable", () => {
 	it("renders editable inputs for non-readOnly columns", () => {
 		render(<DataTable caption="Effectifs" columns={columns} rows={rows} />);
 
-		const inputs = screen.getAllByRole("spinbutton");
+		const inputs = screen.getAllByRole("textbox");
 		// 2 rows x 2 editable columns = 4 inputs
 		expect(inputs).toHaveLength(4);
 	});
@@ -58,7 +58,7 @@ describe("DataTable", () => {
 			/>,
 		);
 
-		const inputs = screen.getAllByRole("spinbutton");
+		const inputs = screen.getAllByRole("textbox");
 		await user.clear(inputs[0] as HTMLElement);
 
 		// clear triggers onChange with empty string

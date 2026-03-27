@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import {
 	computeGap,
 	displayDecimal,
@@ -33,7 +34,7 @@ export function handlePayGapRowChange(
 
 type PayGapTableProps = {
 	caption: string;
-	columnHeader: string;
+	columnHeader: string | ReactElement;
 	rows: PayGapRow[];
 	onRowChange: (index: number, field: PayGapField, value: string) => void;
 	className?: string;

@@ -41,6 +41,7 @@ function renderSection(
 		<DeclarationsSection
 			declarations={overrides?.declarations ?? declarations}
 			hasCse={true}
+			hasNoSanction={false}
 			siren="532847196"
 			userPhone="0122334455"
 		/>,
@@ -48,10 +49,10 @@ function renderSection(
 }
 
 describe("DeclarationsSection", () => {
-	it("renders the 'Déclarations' heading", () => {
+	it("renders the 'En cours' heading", () => {
 		renderSection();
 		expect(
-			screen.getByRole("heading", { level: 2, name: "Déclarations" }),
+			screen.getByRole("heading", { level: 2, name: "En cours" }),
 		).toBeInTheDocument();
 	});
 

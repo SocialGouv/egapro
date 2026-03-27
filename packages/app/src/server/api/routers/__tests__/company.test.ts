@@ -403,3 +403,88 @@ describe("companyRouter.updateHasCse", () => {
 		expect(mockSet).toHaveBeenCalledWith({ hasCse: true });
 	});
 });
+
+describe("companyRouter.getSanctionStatus", () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it("returns sanction status from SUIT API", async () => {
+		const { fetchSanctionBySiren } = await import("~/server/services/suit");
+		const fetchSanctionMock = vi.mocked(fetchSanctionBySiren);
+		fetchSanctionMock.mockResolvedValue({
+			hasSanction: false,
+			validityDate: null,
+		});
+
+		const companyRow = {
+			siren: "339787277",
+			name: "Test Company",
+			address: "1 rue de Paris",
+			nafCode: "6202A",
+			workforce: 100,
+			hasCse: true,
+		};
+
+		const mockDb = createMockDb([companyRow]);
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getSanctionStatus({ siren: "339787277" });
+
+		expect(fetchSanctionMock).toHaveBeenCalledWith("339787277");
+		expect(result).toEqual({ hasSanction: false, validityDate: null });
+	});
+
+	it("returns default no-sanction when SUIT returns null", async () => {
+		const { fetchSanctionBySiren } = await import("~/server/services/suit");
+		const fetchSanctionMock = vi.mocked(fetchSanctionBySiren);
+		fetchSanctionMock.mockResolvedValue(null);
+
+		const companyRow = {
+			siren: "339787277",
+			name: "Test Company",
+			address: "1 rue de Paris",
+			nafCode: "6202A",
+			workforce: 100,
+			hasCse: true,
+		};
+
+		const mockDb = createMockDb([companyRow]);
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getSanctionStatus({ siren: "339787277" });
+
+		expect(result).toEqual({ hasSanction: false, validityDate: null });
+	});
+
+	it("throws when company is not found", async () => {
+		const mockDb = createMockDb([]);
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getSanctionStatus({ siren: "000000000" }),
+		).rejects.toThrow("Company not found or access denied");
+	});
+});
