@@ -6,17 +6,18 @@ vi.mock("~/server/auth", () => ({
 }));
 
 vi.mock("~/server/auth/proconnect-logout", () => ({
-	terminateProConnectSession: vi.fn(),
+	buildProConnectLogoutUrl: vi.fn(),
 }));
 
 import { auth } from "~/server/auth";
-import { terminateProConnectSession } from "~/server/auth/proconnect-logout";
+import { buildProConnectLogoutUrl } from "~/server/auth/proconnect-logout";
 
 const mockAuth = vi.mocked(auth);
-const mockTerminate = vi.mocked(terminateProConnectSession);
+const mockBuildUrl = vi.mocked(buildProConnectLogoutUrl);
 
-// Dynamic import to ensure mocks are registered before the module loads
-const { GET } = await import("~/app/api/auth/logout/route");
+const { GET, LOGOUT_STATE_COOKIE } = await import(
+	"~/app/api/auth/logout/route"
+);
 
 function buildRequest() {
 	return new Request(
@@ -36,7 +37,7 @@ describe("GET /api/auth/logout", () => {
 		vi.clearAllMocks();
 	});
 
-	it("redirects to the home page", async () => {
+	it("redirects to the home page when no session", async () => {
 		mockAuth.mockResolvedValue(null);
 
 		const response = await GET(buildRequest());
@@ -55,34 +56,95 @@ describe("GET /api/auth/logout", () => {
 		expect(setCookie).toContain("Expires=Thu, 01 Jan 1970");
 	});
 
-	it("calls terminateProConnectSession when user is logged in", async () => {
+	it("redirects to ProConnect end_session URL when available", async () => {
 		mockSession({ id: "user-123", email: "test@example.com", name: "Test" });
+		mockBuildUrl.mockResolvedValue(
+			"https://proconnect.example.com/session/end?id_token_hint=tok",
+		);
+
+		const response = await GET(buildRequest());
+
+		expect(response.status).toBe(307);
+		expect(response.headers.get("Location")).toBe(
+			"https://proconnect.example.com/session/end?id_token_hint=tok",
+		);
+	});
+
+	it("passes logout-callback URI and state to buildProConnectLogoutUrl", async () => {
+		mockSession({ id: "user-123", email: "test@example.com" });
+		mockBuildUrl.mockResolvedValue(
+			"https://proconnect.example.com/session/end",
+		);
 
 		await GET(buildRequest());
 
-		expect(mockTerminate).toHaveBeenCalledWith("user-123");
+		expect(mockBuildUrl).toHaveBeenCalledWith(
+			"user-123",
+			"http://localhost:3000/api/auth/logout-callback",
+			expect.stringMatching(/^[a-f0-9]{64}$/),
+		);
 	});
 
-	it("does not call terminateProConnectSession when no session", async () => {
+	it("sets state cookie when redirecting to ProConnect", async () => {
+		mockSession({ id: "user-123" });
+		mockBuildUrl.mockResolvedValue(
+			"https://proconnect.example.com/session/end",
+		);
+
+		const response = await GET(buildRequest());
+
+		const setCookie = response.headers.get("set-cookie") ?? "";
+		expect(setCookie).toContain(LOGOUT_STATE_COOKIE);
+		expect(setCookie).toContain("Path=/api/auth/logout-callback");
+		expect(setCookie).toContain("HttpOnly");
+	});
+
+	it("does not set state cookie when no ProConnect URL", async () => {
+		mockSession({ id: "user-123" });
+		mockBuildUrl.mockResolvedValue(null);
+
+		const response = await GET(buildRequest());
+
+		const setCookie = response.headers.get("set-cookie") ?? "";
+		expect(setCookie).not.toContain(LOGOUT_STATE_COOKIE);
+	});
+
+	it("falls back to home page when ProConnect URL is null", async () => {
+		mockSession({ id: "user-123", email: "test@example.com" });
+		mockBuildUrl.mockResolvedValue(null);
+
+		const response = await GET(buildRequest());
+
+		expect(response.status).toBe(307);
+		expect(response.headers.get("Location")).toBe("http://localhost:3000/");
+	});
+
+	it("still deletes session cookie when redirecting to ProConnect", async () => {
+		mockSession({ id: "user-123" });
+		mockBuildUrl.mockResolvedValue(
+			"https://proconnect.example.com/session/end",
+		);
+
+		const response = await GET(buildRequest());
+
+		const setCookie = response.headers.get("set-cookie") ?? "";
+		expect(setCookie).toContain("next-auth.session-token");
+		expect(setCookie).toContain("Expires=Thu, 01 Jan 1970");
+	});
+
+	it("does not call buildProConnectLogoutUrl when no session", async () => {
 		mockAuth.mockResolvedValue(null);
 
 		await GET(buildRequest());
 
-		expect(mockTerminate).not.toHaveBeenCalled();
+		expect(mockBuildUrl).not.toHaveBeenCalled();
 	});
 
-	it("does not call terminateProConnectSession when session has no user id", async () => {
+	it("does not call buildProConnectLogoutUrl when session has no user id", async () => {
 		mockSession({ id: "", email: "test@example.com" });
 
 		await GET(buildRequest());
 
-		expect(mockTerminate).not.toHaveBeenCalled();
-	});
-
-	it("propagates error when terminateProConnectSession fails", async () => {
-		mockSession({ id: "user-123" });
-		mockTerminate.mockRejectedValue(new Error("Network error"));
-
-		await expect(GET(buildRequest())).rejects.toThrow("Network error");
+		expect(mockBuildUrl).not.toHaveBeenCalled();
 	});
 });

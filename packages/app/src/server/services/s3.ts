@@ -33,7 +33,10 @@ const s3Client =
 
 if (env.NODE_ENV !== "production") globalForS3.s3Client = s3Client;
 
-export async function ensureBucket(): Promise<void> {
+let bucketReady = false;
+
+async function ensureBucket(): Promise<void> {
+	if (bucketReady) return;
 	try {
 		await s3Client.send(new HeadBucketCommand({ Bucket: env.S3_BUCKET_NAME }));
 	} catch (error: unknown) {
@@ -51,6 +54,7 @@ export async function ensureBucket(): Promise<void> {
 			throw error;
 		}
 	}
+	bucketReady = true;
 }
 
 export function buildObjectKey(
@@ -66,6 +70,7 @@ export async function uploadFile(
 	buffer: Buffer,
 	contentType: string,
 ): Promise<void> {
+	await ensureBucket();
 	await s3Client.send(
 		new PutObjectCommand({
 			Bucket: env.S3_BUCKET_NAME,
@@ -119,6 +124,7 @@ export function createMultipartUpload(key: string, contentType: string) {
 
 	return {
 		async init() {
+			await ensureBucket();
 			const res = await s3Client.send(
 				new CreateMultipartUploadCommand({
 					Bucket: env.S3_BUCKET_NAME,

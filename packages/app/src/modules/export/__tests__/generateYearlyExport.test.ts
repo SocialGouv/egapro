@@ -3,10 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 const mockUploadFile = vi.fn();
-const mockEnsureBucket = vi.fn();
 vi.mock("~/server/services/s3", () => ({
 	uploadFile: (...args: unknown[]) => mockUploadFile(...args),
-	ensureBucket: () => mockEnsureBucket(),
 }));
 
 const mockBuildExportRows = vi.fn();
@@ -59,7 +57,6 @@ describe("generateYearlyExport", () => {
 		expect(result.rowCount).toBe(1);
 		expect(result.indicatorGRowCount).toBe(1);
 		expect(result.fileName).toBe("egapro_export_2027.xlsx");
-		expect(mockEnsureBucket).toHaveBeenCalledOnce();
 		expect(mockUploadFile).toHaveBeenCalledWith(
 			"exports/v1/2027.xlsx",
 			expect.any(Buffer),

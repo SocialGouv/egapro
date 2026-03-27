@@ -8,61 +8,6 @@ import {
 	vi,
 } from "vitest";
 
-// Build a minimal JWT with the given payload (no signature verification needed)
-function buildJwt(payload: Record<string, unknown>): string {
-	const header = Buffer.from(
-		JSON.stringify({ alg: "RS256", typ: "JWT" }),
-	).toString("base64url");
-	const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-	return `${header}.${body}.fake-signature`;
-}
-
-// Re-implement extractIssuerFromIdToken inline since it's not exported.
-// This tests the same logic used in the module.
-function extractIssuerFromIdToken(idToken: string): string | undefined {
-	const parts = idToken.split(".");
-	const payload = parts[1];
-	if (!payload) return undefined;
-
-	try {
-		const decoded = JSON.parse(
-			Buffer.from(payload, "base64url").toString(),
-		) as { iss?: string };
-		return decoded.iss;
-	} catch {
-		return undefined;
-	}
-}
-
-describe("extractIssuerFromIdToken", () => {
-	it("extracts the iss claim from a valid JWT", () => {
-		const jwt = buildJwt({
-			iss: "https://fca.integ01.dev-agentconnect.fr/api/v2",
-			sub: "user-123",
-		});
-		expect(extractIssuerFromIdToken(jwt)).toBe(
-			"https://fca.integ01.dev-agentconnect.fr/api/v2",
-		);
-	});
-
-	it("returns undefined when iss is missing from the payload", () => {
-		const jwt = buildJwt({ sub: "user-123" });
-		expect(extractIssuerFromIdToken(jwt)).toBeUndefined();
-	});
-
-	it("returns undefined for a malformed JWT with no payload", () => {
-		expect(extractIssuerFromIdToken("header-only")).toBeUndefined();
-	});
-
-	it("returns undefined for an invalid base64 payload", () => {
-		expect(
-			extractIssuerFromIdToken("header.!!!invalid!!!.sig"),
-		).toBeUndefined();
-	});
-});
-
-// --- Tests for terminateProConnectSession ---
-
 const mockFindFirst = vi.fn();
 
 vi.mock("~/server/db", () => ({
@@ -79,14 +24,18 @@ vi.mock("~/server/db/schema", () => ({
 	accounts: { userId: "userId" },
 }));
 
-import { terminateProConnectSession } from "../proconnect-logout";
+import {
+	buildProConnectLogoutUrl,
+	resetEndSessionCache,
+} from "../proconnect-logout";
 
-describe("terminateProConnectSession", () => {
+describe("buildProConnectLogoutUrl", () => {
 	let originalFetch: typeof globalThis.fetch;
 	let mockFetch: MockInstance;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		resetEndSessionCache();
 		originalFetch = globalThis.fetch;
 		mockFetch = vi.fn();
 		globalThis.fetch = mockFetch as unknown as typeof fetch;
@@ -96,82 +45,105 @@ describe("terminateProConnectSession", () => {
 		globalThis.fetch = originalFetch;
 	});
 
-	it("returns early when no account is found for the user", async () => {
+	it("returns null when no account is found for the user", async () => {
 		mockFindFirst.mockResolvedValue(undefined);
 
-		await terminateProConnectSession("user-123");
+		const result = await buildProConnectLogoutUrl(
+			"user-123",
+			"http://localhost:3000/",
+			"test-state-value-with-at-least-32-characters-long",
+		);
 
+		expect(result).toBeNull();
 		expect(mockFetch).not.toHaveBeenCalled();
 	});
 
-	it("returns early when account has no id_token", async () => {
+	it("returns null when account has no id_token", async () => {
 		mockFindFirst.mockResolvedValue({ id_token: null });
 
-		await terminateProConnectSession("user-123");
+		const result = await buildProConnectLogoutUrl(
+			"user-123",
+			"http://localhost:3000/",
+			"test-state-value-with-at-least-32-characters-long",
+		);
 
+		expect(result).toBeNull();
 		expect(mockFetch).not.toHaveBeenCalled();
 	});
 
-	it("calls end_session_endpoint with id_token_hint", async () => {
-		mockFindFirst.mockResolvedValue({ id_token: "test-id-token" });
-		mockFetch
-			.mockResolvedValueOnce({
-				json: () =>
-					Promise.resolve({
-						end_session_endpoint:
-							"https://proconnect.example.com/api/v2/session/end",
-					}),
-			})
-			.mockResolvedValueOnce(new Response());
-
-		await terminateProConnectSession("user-123");
-
-		expect(mockFetch).toHaveBeenCalledTimes(2);
-		// First call: OIDC discovery
-		expect(mockFetch.mock.calls[0]?.[0]).toContain(
-			".well-known/openid-configuration",
-		);
-		// Second call: end_session_endpoint with id_token_hint
-		const logoutUrl = new URL(mockFetch.mock.calls[1]?.[0] as string);
-		expect(logoutUrl.origin).toBe("https://proconnect.example.com");
-		expect(logoutUrl.searchParams.get("id_token_hint")).toBe("test-id-token");
-	});
-
-	it("returns early when end_session_endpoint is missing from discovery", async () => {
+	it("returns end_session URL via Charon with post_logout_redirect_uri", async () => {
 		mockFindFirst.mockResolvedValue({ id_token: "test-id-token" });
 		mockFetch.mockResolvedValueOnce({
+			ok: true,
+			json: () =>
+				Promise.resolve({
+					end_session_endpoint:
+						"https://proconnect.example.com/api/v2/session/end",
+				}),
+		});
+
+		const result = await buildProConnectLogoutUrl(
+			"user-123",
+			"http://localhost:3000/",
+			"test-state-value-with-at-least-32-characters-long",
+		);
+
+		expect(result).not.toBeNull();
+		const url = new URL(result as string);
+		expect(url.origin).toBe("https://proconnect.example.com");
+		expect(url.pathname).toBe("/api/v2/session/end");
+		expect(url.searchParams.get("id_token_hint")).toBe("test-id-token");
+		expect(url.searchParams.get("state")).toBe(
+			"test-state-value-with-at-least-32-characters-long",
+		);
+		expect(url.searchParams.get("post_logout_redirect_uri")).toBe(
+			"http://localhost:3000/",
+		);
+	});
+
+	it("returns null when discovery responds with HTTP error", async () => {
+		mockFindFirst.mockResolvedValue({ id_token: "test-id-token" });
+		mockFetch.mockResolvedValueOnce({
+			ok: false,
+			status: 500,
+			statusText: "Internal Server Error",
+		});
+
+		const result = await buildProConnectLogoutUrl(
+			"user-123",
+			"http://localhost:3000/",
+			"test-state-value-with-at-least-32-characters-long",
+		);
+
+		expect(result).toBeNull();
+	});
+
+	it("returns null when end_session_endpoint is missing from discovery", async () => {
+		mockFindFirst.mockResolvedValue({ id_token: "test-id-token" });
+		mockFetch.mockResolvedValueOnce({
+			ok: true,
 			json: () => Promise.resolve({}),
 		});
 
-		await terminateProConnectSession("user-123");
+		const result = await buildProConnectLogoutUrl(
+			"user-123",
+			"http://localhost:3000/",
+			"test-state-value-with-at-least-32-characters-long",
+		);
 
-		// Only the discovery call, no logout call
-		expect(mockFetch).toHaveBeenCalledTimes(1);
+		expect(result).toBeNull();
 	});
 
-	it("silently fails when OIDC discovery fetch throws", async () => {
+	it("returns null when OIDC discovery fetch throws", async () => {
 		mockFindFirst.mockResolvedValue({ id_token: "test-id-token" });
 		mockFetch.mockRejectedValue(new Error("Network error"));
 
-		await expect(
-			terminateProConnectSession("user-123"),
-		).resolves.toBeUndefined();
-	});
+		const result = await buildProConnectLogoutUrl(
+			"user-123",
+			"http://localhost:3000/",
+			"test-state-value-with-at-least-32-characters-long",
+		);
 
-	it("silently fails when end_session fetch throws", async () => {
-		mockFindFirst.mockResolvedValue({ id_token: "test-id-token" });
-		mockFetch
-			.mockResolvedValueOnce({
-				json: () =>
-					Promise.resolve({
-						end_session_endpoint:
-							"https://proconnect.example.com/api/v2/session/end",
-					}),
-			})
-			.mockRejectedValueOnce(new Error("Connection refused"));
-
-		await expect(
-			terminateProConnectSession("user-123"),
-		).resolves.toBeUndefined();
+		expect(result).toBeNull();
 	});
 });
