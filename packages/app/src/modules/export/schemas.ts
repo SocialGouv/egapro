@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { FIRST_DECLARATION_YEAR, getCseYear } from "~/modules/domain";
+
 export const exportYearQuerySchema = z.object({
 	year: z
 		.string()
@@ -23,4 +25,22 @@ export const exportDeclarationsQuerySchema = z.object({
 		.string()
 		.regex(/^\d{4}-\d{2}-\d{2}$/, "date_end must be YYYY-MM-DD format")
 		.optional(),
+});
+
+export const exportFilesQuerySchema = z.object({
+	siren: z.string().regex(/^\d{9}$/, "siren must be 9 digits"),
+	year: z
+		.string()
+		.regex(/^\d{4}$/, "year must be YYYY format")
+		.transform(Number)
+		.pipe(
+			z
+				.number()
+				.int()
+				.min(
+					FIRST_DECLARATION_YEAR,
+					`year must be >= ${FIRST_DECLARATION_YEAR}`,
+				)
+				.max(getCseYear(), `year must be <= ${getCseYear()}`),
+		),
 });
