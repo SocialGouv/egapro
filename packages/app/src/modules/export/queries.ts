@@ -13,6 +13,53 @@ import {
 } from "~/server/db/schema";
 import type { CseRow, IndicatorGEntry } from "./fetchDeclarations";
 
+// ── Shared select columns for indicators A–F ───────────────────────
+
+export const indicatorColumns = {
+	indicatorAAnnualWomen: declarations.indicatorAAnnualWomen,
+	indicatorAAnnualMen: declarations.indicatorAAnnualMen,
+	indicatorAHourlyWomen: declarations.indicatorAHourlyWomen,
+	indicatorAHourlyMen: declarations.indicatorAHourlyMen,
+	indicatorBAnnualWomen: declarations.indicatorBAnnualWomen,
+	indicatorBAnnualMen: declarations.indicatorBAnnualMen,
+	indicatorBHourlyWomen: declarations.indicatorBHourlyWomen,
+	indicatorBHourlyMen: declarations.indicatorBHourlyMen,
+	indicatorCAnnualWomen: declarations.indicatorCAnnualWomen,
+	indicatorCAnnualMen: declarations.indicatorCAnnualMen,
+	indicatorCHourlyWomen: declarations.indicatorCHourlyWomen,
+	indicatorCHourlyMen: declarations.indicatorCHourlyMen,
+	indicatorDAnnualWomen: declarations.indicatorDAnnualWomen,
+	indicatorDAnnualMen: declarations.indicatorDAnnualMen,
+	indicatorDHourlyWomen: declarations.indicatorDHourlyWomen,
+	indicatorDHourlyMen: declarations.indicatorDHourlyMen,
+	indicatorEWomen: declarations.indicatorEWomen,
+	indicatorEMen: declarations.indicatorEMen,
+	indicatorFAnnualThreshold1: declarations.indicatorFAnnualThreshold1,
+	indicatorFAnnualThreshold2: declarations.indicatorFAnnualThreshold2,
+	indicatorFAnnualThreshold3: declarations.indicatorFAnnualThreshold3,
+	indicatorFAnnualThreshold4: declarations.indicatorFAnnualThreshold4,
+	indicatorFAnnualWomen1: declarations.indicatorFAnnualWomen1,
+	indicatorFAnnualWomen2: declarations.indicatorFAnnualWomen2,
+	indicatorFAnnualWomen3: declarations.indicatorFAnnualWomen3,
+	indicatorFAnnualWomen4: declarations.indicatorFAnnualWomen4,
+	indicatorFAnnualMen1: declarations.indicatorFAnnualMen1,
+	indicatorFAnnualMen2: declarations.indicatorFAnnualMen2,
+	indicatorFAnnualMen3: declarations.indicatorFAnnualMen3,
+	indicatorFAnnualMen4: declarations.indicatorFAnnualMen4,
+	indicatorFHourlyThreshold1: declarations.indicatorFHourlyThreshold1,
+	indicatorFHourlyThreshold2: declarations.indicatorFHourlyThreshold2,
+	indicatorFHourlyThreshold3: declarations.indicatorFHourlyThreshold3,
+	indicatorFHourlyThreshold4: declarations.indicatorFHourlyThreshold4,
+	indicatorFHourlyWomen1: declarations.indicatorFHourlyWomen1,
+	indicatorFHourlyWomen2: declarations.indicatorFHourlyWomen2,
+	indicatorFHourlyWomen3: declarations.indicatorFHourlyWomen3,
+	indicatorFHourlyWomen4: declarations.indicatorFHourlyWomen4,
+	indicatorFHourlyMen1: declarations.indicatorFHourlyMen1,
+	indicatorFHourlyMen2: declarations.indicatorFHourlyMen2,
+	indicatorFHourlyMen3: declarations.indicatorFHourlyMen3,
+	indicatorFHourlyMen4: declarations.indicatorFHourlyMen4,
+};
+
 // ── Shared helper ────────────────────────────────────────────────────
 
 function groupByKey<T>(rows: T[], keyFn: (row: T) => string): Map<string, T[]> {
@@ -60,55 +107,7 @@ export async function fetchSubmittedDeclarations(
 			declarantLastName: users.lastName,
 			declarantEmail: users.email,
 			declarantPhone: users.phone,
-			// Indicator A — Global remuneration gap (mean)
-			indicatorAAnnualWomen: declarations.indicatorAAnnualWomen,
-			indicatorAAnnualMen: declarations.indicatorAAnnualMen,
-			indicatorAHourlyWomen: declarations.indicatorAHourlyWomen,
-			indicatorAHourlyMen: declarations.indicatorAHourlyMen,
-			// Indicator B — Variable remuneration gap (mean)
-			indicatorBAnnualWomen: declarations.indicatorBAnnualWomen,
-			indicatorBAnnualMen: declarations.indicatorBAnnualMen,
-			indicatorBHourlyWomen: declarations.indicatorBHourlyWomen,
-			indicatorBHourlyMen: declarations.indicatorBHourlyMen,
-			// Indicator C — Global remuneration gap (median)
-			indicatorCAnnualWomen: declarations.indicatorCAnnualWomen,
-			indicatorCAnnualMen: declarations.indicatorCAnnualMen,
-			indicatorCHourlyWomen: declarations.indicatorCHourlyWomen,
-			indicatorCHourlyMen: declarations.indicatorCHourlyMen,
-			// Indicator D — Variable remuneration gap (median)
-			indicatorDAnnualWomen: declarations.indicatorDAnnualWomen,
-			indicatorDAnnualMen: declarations.indicatorDAnnualMen,
-			indicatorDHourlyWomen: declarations.indicatorDHourlyWomen,
-			indicatorDHourlyMen: declarations.indicatorDHourlyMen,
-			// Indicator E — Variable pay beneficiary count
-			indicatorEWomen: declarations.indicatorEWomen,
-			indicatorEMen: declarations.indicatorEMen,
-			// Indicator F — Quartile distribution (annual)
-			indicatorFAnnualThreshold1: declarations.indicatorFAnnualThreshold1,
-			indicatorFAnnualThreshold2: declarations.indicatorFAnnualThreshold2,
-			indicatorFAnnualThreshold3: declarations.indicatorFAnnualThreshold3,
-			indicatorFAnnualThreshold4: declarations.indicatorFAnnualThreshold4,
-			indicatorFAnnualWomen1: declarations.indicatorFAnnualWomen1,
-			indicatorFAnnualWomen2: declarations.indicatorFAnnualWomen2,
-			indicatorFAnnualWomen3: declarations.indicatorFAnnualWomen3,
-			indicatorFAnnualWomen4: declarations.indicatorFAnnualWomen4,
-			indicatorFAnnualMen1: declarations.indicatorFAnnualMen1,
-			indicatorFAnnualMen2: declarations.indicatorFAnnualMen2,
-			indicatorFAnnualMen3: declarations.indicatorFAnnualMen3,
-			indicatorFAnnualMen4: declarations.indicatorFAnnualMen4,
-			// Indicator F — Quartile distribution (hourly)
-			indicatorFHourlyThreshold1: declarations.indicatorFHourlyThreshold1,
-			indicatorFHourlyThreshold2: declarations.indicatorFHourlyThreshold2,
-			indicatorFHourlyThreshold3: declarations.indicatorFHourlyThreshold3,
-			indicatorFHourlyThreshold4: declarations.indicatorFHourlyThreshold4,
-			indicatorFHourlyWomen1: declarations.indicatorFHourlyWomen1,
-			indicatorFHourlyWomen2: declarations.indicatorFHourlyWomen2,
-			indicatorFHourlyWomen3: declarations.indicatorFHourlyWomen3,
-			indicatorFHourlyWomen4: declarations.indicatorFHourlyWomen4,
-			indicatorFHourlyMen1: declarations.indicatorFHourlyMen1,
-			indicatorFHourlyMen2: declarations.indicatorFHourlyMen2,
-			indicatorFHourlyMen3: declarations.indicatorFHourlyMen3,
-			indicatorFHourlyMen4: declarations.indicatorFHourlyMen4,
+			...indicatorColumns,
 		})
 		.from(declarations)
 		.innerJoin(companies, eq(declarations.siren, companies.siren))
@@ -116,7 +115,6 @@ export async function fetchSubmittedDeclarations(
 		.where(
 			and(
 				eq(declarations.status, "submitted"),
-				// Timestamps are stored in UTC (withTimezone: true)
 				gte(declarations.updatedAt, new Date(`${dateBegin}T00:00:00Z`)),
 				lt(declarations.updatedAt, new Date(`${dateEnd}T00:00:00Z`)),
 			),
