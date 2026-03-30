@@ -125,13 +125,14 @@ Quality checks run **automatically** after every code change — no command need
 | `rgaa-auditor` | 13-theme RGAA accessibility audit |
 | `security-auditor` | OWASP Top 10 + RGS security review |
 
-### Skills (`.claude/skills/`) — `/ship`
+### Skills (`.claude/skills/`) — `/implement` + `/ship`
 
 | Skill | Purpose |
 |---|---|
-| `/ship [#N]` | Smart end-to-end: auto-detects phase and picks up where you left off |
+| `/implement [#N]` | Fetch issue, create branch, code, run 4 validation agents. The "I code" phase. |
+| `/ship` | Create PR (single/split), watch reviews, wrap up. The "I deliver" phase. |
 
-Phases: **Implement** -> **Validate** (4 agents) -> **PR** (single or split) -> **Review** (watch comments, fix) -> **Done**. No arg needed to resume — detects state from branch, PR, and review status.
+Workflow: `/implement #42` to code and validate, then `/ship` to create the PR and handle reviews. Each skill auto-detects its current phase from branch/PR state.
 
 ---
 

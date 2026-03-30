@@ -129,8 +129,9 @@ These agents are **read-only** — they report findings but never modify files. 
 
 ## Skills (manual)
 
-Single smart skill for the full lifecycle:
+Two skills split the lifecycle into "code" and "deliver":
 
 | Command | When to use |
 |---|---|
-| `/ship [#N]` | End-to-end: implement -> validate -> PR -> review -> done. Auto-detects phase from branch/PR state. |
+| `/implement [#N]` | Fetch issue, create branch, code, validate (4 agents). |
+| `/ship` | Create PR (single/split), watch reviews, wrap up. Run after `/implement`. |
