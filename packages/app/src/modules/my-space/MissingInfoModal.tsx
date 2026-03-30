@@ -8,6 +8,7 @@ import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
+import { DECLARATION_PROCESS_PANEL_ID } from "./DeclarationProcessPanel";
 import { createMissingInfoSchema } from "./schemas";
 
 const MODAL_ID = "missing-info-modal";
@@ -29,8 +30,25 @@ function getDescription(needsPhone: boolean, needsCse: boolean): string {
 	return "Pour continuer, vous devez indiquer si un CSE a été mis en place dans votre entreprise.";
 }
 
+/**
+ * Read which declaration type triggered this modal from the opener button's
+ * data-declaration-type attribute. Falls back to "remuneration".
+ */
+function getOpenerDeclarationType(): "remuneration" | "representation" {
+	const opener = document.querySelector<HTMLElement>(
+		`[aria-controls="${MODAL_ID}"][data-declaration-type]`,
+	);
+	if (opener?.dataset.declarationType === "representation") {
+		return "representation";
+	}
+	return "remuneration";
+}
+
 export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
+	const openerTypeRef = useRef<"remuneration" | "representation">(
+		"remuneration",
+	);
 	const needsPhone = !userPhone;
 	const needsCse = hasCse === null;
 
@@ -56,7 +74,10 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 
 	useDsfrDialogOpen(
 		dialogRef,
-		useCallback(() => form.reset({ phone: "", hasCse: undefined }), [form]),
+		useCallback(() => {
+			form.reset({ phone: "", hasCse: undefined });
+			openerTypeRef.current = getOpenerDeclarationType();
+		}, [form]),
 	);
 
 	const [submitError, setSubmitError] = useState<string | null>(null);
@@ -72,7 +93,17 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 				await updateHasCseMutation.mutateAsync({ siren, hasCse: hasCseValue });
 			}
 			closeModal();
-			window.location.href = `/declaration-remuneration?siren=${siren}`;
+
+			if (openerTypeRef.current === "representation") {
+				// Open the representation side panel after a small delay
+				// to let the modal close animation finish
+				requestAnimationFrame(() => {
+					const panel = document.getElementById(DECLARATION_PROCESS_PANEL_ID);
+					if (panel) getDsfrModal(panel)?.disclose();
+				});
+			} else {
+				window.location.href = `/declaration-remuneration?siren=${siren}`;
+			}
 		} catch {
 			setSubmitError(
 				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",

@@ -1,15 +1,9 @@
 "use client";
 
-import Link from "next/link";
-
+import { DECLARATION_PROCESS_PANEL_ID } from "./DeclarationProcessPanel";
 import type { DeclarationType } from "./types";
 
 const MISSING_INFO_MODAL_ID = "missing-info-modal";
-
-const TYPE_HREFS: Record<DeclarationType, (siren: string) => string> = {
-	remuneration: (siren) => `/declaration-remuneration?siren=${siren}`,
-	representation: () => "#",
-};
 
 type Props = {
 	siren: string;
@@ -19,7 +13,7 @@ type Props = {
 	children: React.ReactNode;
 };
 
-/** Link that opens the missing info modal if phone or CSE is missing, or navigates directly. */
+/** Link that opens the missing info modal if phone or CSE is missing, or navigates/opens panel directly. */
 export function DeclarationLink({
 	siren,
 	type,
@@ -27,17 +21,40 @@ export function DeclarationLink({
 	hasCse,
 	children,
 }: Props) {
-	if (userPhone && hasCse !== null) {
-		return <Link href={TYPE_HREFS[type](siren)}>{children}</Link>;
+	const hasMissingInfo = !userPhone || hasCse === null;
+
+	// When info is missing, open missing-info modal (for both types)
+	if (hasMissingInfo) {
+		return (
+			<button
+				aria-controls={MISSING_INFO_MODAL_ID}
+				className="fr-link"
+				data-declaration-type={type}
+				data-fr-opened="false"
+				type="button"
+			>
+				{children}
+			</button>
+		);
 	}
 
+	// Remuneration: open the declaration process side panel
+	if (type === "remuneration") {
+		return (
+			<button
+				aria-controls={DECLARATION_PROCESS_PANEL_ID}
+				className="fr-link"
+				data-fr-opened="false"
+				type="button"
+			>
+				{children}
+			</button>
+		);
+	}
+
+	// Representation: placeholder (no route yet)
 	return (
-		<button
-			aria-controls={MISSING_INFO_MODAL_ID}
-			className="fr-link"
-			data-fr-opened="false"
-			type="button"
-		>
+		<button className="fr-link" type="button">
 			{children}
 		</button>
 	);
