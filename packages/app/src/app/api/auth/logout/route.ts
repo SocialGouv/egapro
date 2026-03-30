@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 import { env } from "~/env";
-import { auth } from "~/server/auth";
 import { terminateProConnectSession } from "~/server/auth/proconnect-logout";
 
 /**
@@ -11,14 +11,14 @@ import { terminateProConnectSession } from "~/server/auth/proconnect-logout";
  * The browser is always redirected to / (home page) — the ProConnect end_session
  * is called server-side to avoid post_logout_redirect_uri registration issues.
  */
-export async function GET(_request: NextRequest) {
-	const session = await auth();
+export async function GET(request: NextRequest) {
+	const token = await getToken({ req: request });
 	// Use the public origin from NEXTAUTH_URL to avoid localhost redirects behind reverse proxies
 	const baseUrl = new URL(env.NEXTAUTH_URL).origin;
 
-	if (session?.user?.id) {
+	if (token?.id_token) {
 		// Terminate ProConnect OIDC session server-side (fire-and-forget)
-		await terminateProConnectSession(session.user.id);
+		await terminateProConnectSession(token.id_token);
 	}
 
 	const response = NextResponse.redirect(new URL("/", baseUrl));
@@ -26,10 +26,19 @@ export async function GET(_request: NextRequest) {
 	// Delete the NextAuth session cookie directly on the redirect response
 	// to ensure the Set-Cookie header is included in the 307 response.
 	// Using cookies() from next/headers does not propagate to NextResponse.redirect().
-	const sessionCookieName = baseUrl.startsWith("https://")
+	const isSecure = baseUrl.startsWith("https://");
+	const sessionCookieName = isSecure
 		? "__Secure-next-auth.session-token"
 		: "next-auth.session-token";
-	response.cookies.delete(sessionCookieName);
+	// Explicit set with matching attributes — cookies.delete() omits the Secure
+	// flag, so browsers silently ignore the deletion for __Secure- prefixed cookies.
+	response.cookies.set(sessionCookieName, "", {
+		expires: new Date(0),
+		path: "/",
+		secure: isSecure,
+		httpOnly: true,
+		sameSite: "lax",
+	});
 
 	return response;
 }
