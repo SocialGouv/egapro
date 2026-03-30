@@ -92,10 +92,8 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 				const hasCseValue = data.hasCse as boolean;
 				await updateHasCseMutation.mutateAsync({ siren, hasCse: hasCseValue });
 			}
-			closeModal();
-
 			if (openerTypeRef.current === "remuneration") {
-				// Open the declaration process panel after modal close animation
+				// Register listener BEFORE closing so we catch the dsfr.conceal event
 				const dialog = dialogRef.current;
 				if (dialog) {
 					dialog.addEventListener(
@@ -109,7 +107,9 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 						{ once: true },
 					);
 				}
+				closeModal();
 			} else {
+				closeModal();
 				window.location.href = `/declaration-remuneration?siren=${siren}`;
 			}
 		} catch {
