@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 import { env } from "~/env";
-import { auth } from "~/server/auth";
 import { terminateProConnectSession } from "~/server/auth/proconnect-logout";
 
 /**
@@ -11,14 +11,14 @@ import { terminateProConnectSession } from "~/server/auth/proconnect-logout";
  * The browser is always redirected to / (home page) — the ProConnect end_session
  * is called server-side to avoid post_logout_redirect_uri registration issues.
  */
-export async function GET(_request: NextRequest) {
-	const session = await auth();
+export async function GET(request: NextRequest) {
+	const token = await getToken({ req: request });
 	// Use the public origin from NEXTAUTH_URL to avoid localhost redirects behind reverse proxies
 	const baseUrl = new URL(env.NEXTAUTH_URL).origin;
 
-	if (session?.user?.id) {
+	if (token?.id_token) {
 		// Terminate ProConnect OIDC session server-side (fire-and-forget)
-		await terminateProConnectSession(session.user.id);
+		await terminateProConnectSession(token.id_token);
 	}
 
 	const response = NextResponse.redirect(new URL("/", baseUrl));

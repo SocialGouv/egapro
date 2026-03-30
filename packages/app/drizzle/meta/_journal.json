@@ -106,6 +106,13 @@
 			"when": 1774195200000,
 			"tag": "0014_drop_session_tables",
 			"breakpoints": true
+		},
+		{
+			"idx": 15,
+			"version": "7",
+			"when": 1774281600000,
+			"tag": "0015_drop_account_table",
+			"breakpoints": true
 		}
 	]
 }
