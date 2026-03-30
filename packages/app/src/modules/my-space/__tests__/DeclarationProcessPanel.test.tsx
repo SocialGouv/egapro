@@ -7,7 +7,7 @@ import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
 const BASE_PROPS = {
 	year: 2027,
 	siren: "532847196",
-	lastActionDate: "12 mars 2026",
+	lastActionDate: "12 mars 2026" as string | null,
 	ctaHref: "/declaration-remuneration?siren=532847196",
 };
 
