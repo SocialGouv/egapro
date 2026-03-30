@@ -45,9 +45,9 @@ describe("computePanelVariant", () => {
 	});
 
 	it('returns "start" when done but no compliance path', () => {
-		expect(
-			computePanelVariant(makeDeclaration({ compliancePath: null })),
-		).toBe("start");
+		expect(computePanelVariant(makeDeclaration({ compliancePath: null }))).toBe(
+			"start",
+		);
 	});
 
 	it('returns "compliance" for corrective_action without second declaration', () => {
@@ -93,9 +93,7 @@ describe("computePanelVariant", () => {
 
 	it('returns "cse" for justify path', () => {
 		expect(
-			computePanelVariant(
-				makeDeclaration({ compliancePath: "justify" }),
-			),
+			computePanelVariant(makeDeclaration({ compliancePath: "justify" })),
 		).toBe("cse");
 	});
 
@@ -191,10 +189,7 @@ describe("computeCtaHref", () => {
 
 	it("returns CSE URL for justify path", () => {
 		expect(
-			computeCtaHref(
-				makeDeclaration({ compliancePath: "justify" }),
-				SIREN,
-			),
+			computeCtaHref(makeDeclaration({ compliancePath: "justify" }), SIREN),
 		).toBe(`/avis-cse?siren=${SIREN}`);
 	});
 
