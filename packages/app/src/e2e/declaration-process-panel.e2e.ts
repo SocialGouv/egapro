@@ -45,7 +45,7 @@ test.describe("Declaration process panel", () => {
 			await expect(remuButton.first()).toBeVisible();
 			await remuButton.first().click();
 
-			await expect(panel).toHaveAttribute("open");
+			await expect(panel).toHaveAttribute("open", "", { timeout: 10_000 });
 			await expect(
 				panel.getByText(
 					`Démarche des indicateurs de rémunération ${CURRENT_YEAR}`,
@@ -82,7 +82,7 @@ test.describe("Declaration process panel", () => {
 			const panel = page.locator(`#${PANEL_ID}`);
 			await page.getByRole("button", { name: "Rémunération" }).first().click();
 
-			await expect(panel).toHaveAttribute("open");
+			await expect(panel).toHaveAttribute("open", "", { timeout: 10_000 });
 			await expect(
 				panel.getByText("Votre déclaration a été transmise"),
 			).toBeVisible();
@@ -109,7 +109,7 @@ test.describe("Declaration process panel", () => {
 			const panel = page.locator(`#${PANEL_ID}`);
 			await page.getByRole("button", { name: "Rémunération" }).first().click();
 
-			await expect(panel).toHaveAttribute("open");
+			await expect(panel).toHaveAttribute("open", "", { timeout: 10_000 });
 			await expect(
 				panel.getByText("Évaluation conjointe des rémunérations"),
 			).toBeVisible();
@@ -136,7 +136,7 @@ test.describe("Declaration process panel", () => {
 			const panel = page.locator(`#${PANEL_ID}`);
 			await page.getByRole("button", { name: "Rémunération" }).first().click();
 
-			await expect(panel).toHaveAttribute("open");
+			await expect(panel).toHaveAttribute("open", "", { timeout: 10_000 });
 			await expect(
 				panel.getByText("Déposer le ou les avis du CSE"),
 			).toBeVisible();
@@ -167,7 +167,7 @@ test.describe("Declaration process panel", () => {
 			const panel = page.locator(`#${PANEL_ID}`);
 			await page.getByRole("button", { name: "Rémunération" }).first().click();
 
-			await expect(panel).toHaveAttribute("open");
+			await expect(panel).toHaveAttribute("open", "", { timeout: 10_000 });
 			await expect(panel.getByText("Démarche close")).toBeVisible();
 			await expect(
 				panel.getByText(
@@ -198,7 +198,7 @@ test.describe("Declaration process panel", () => {
 			const panel = page.locator(`#${PANEL_ID}`);
 
 			await page.getByRole("button", { name: "Rémunération" }).first().click();
-			await expect(modal).toHaveAttribute("open");
+			await expect(modal).toHaveAttribute("open", "", { timeout: 10_000 });
 
 			await modal.locator("label[for='missing-info-cse-yes']").click();
 			await modal.getByRole("button", { name: "Enregistrer" }).click();

@@ -94,13 +94,21 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 			}
 			closeModal();
 
-			if (openerTypeRef.current === "representation") {
-				// Open the representation side panel after a small delay
-				// to let the modal close animation finish
-				requestAnimationFrame(() => {
-					const panel = document.getElementById(DECLARATION_PROCESS_PANEL_ID);
-					if (panel) getDsfrModal(panel)?.disclose();
-				});
+			if (openerTypeRef.current === "remuneration") {
+				// Open the declaration process panel after modal close animation
+				const dialog = dialogRef.current;
+				if (dialog) {
+					dialog.addEventListener(
+						"dsfr.conceal",
+						() => {
+							const panel = document.getElementById(
+								DECLARATION_PROCESS_PANEL_ID,
+							);
+							if (panel) getDsfrModal(panel)?.disclose();
+						},
+						{ once: true },
+					);
+				}
 			} else {
 				window.location.href = `/declaration-remuneration?siren=${siren}`;
 			}
