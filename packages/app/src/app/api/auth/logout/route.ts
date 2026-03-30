@@ -26,10 +26,19 @@ export async function GET(request: NextRequest) {
 	// Delete the NextAuth session cookie directly on the redirect response
 	// to ensure the Set-Cookie header is included in the 307 response.
 	// Using cookies() from next/headers does not propagate to NextResponse.redirect().
-	const sessionCookieName = baseUrl.startsWith("https://")
+	const isSecure = baseUrl.startsWith("https://");
+	const sessionCookieName = isSecure
 		? "__Secure-next-auth.session-token"
 		: "next-auth.session-token";
-	response.cookies.delete(sessionCookieName);
+	// Explicit set with matching attributes — cookies.delete() omits the Secure
+	// flag, so browsers silently ignore the deletion for __Secure- prefixed cookies.
+	response.cookies.set(sessionCookieName, "", {
+		expires: new Date(0),
+		path: "/",
+		secure: isSecure,
+		httpOnly: true,
+		sameSite: "lax",
+	});
 
 	return response;
 }
