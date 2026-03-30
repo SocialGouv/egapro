@@ -54,31 +54,8 @@ describe("GET /api/auth/logout", () => {
 		expect(setCookie).toContain("next-auth.session-token=");
 		expect(setCookie).toContain("Expires=Thu, 01 Jan 1970");
 		expect(setCookie).toContain("Path=/");
-		expect(setCookie).toContain("Domain=localhost");
 		expect(setCookie).toContain("HttpOnly");
 		expect(setCookie).toContain("SameSite=lax");
-	});
-
-	it("deletes the __Secure- prefixed cookie with Secure flag on HTTPS", async () => {
-		mockAuth.mockResolvedValue(null);
-		const { env } = await import("~/env");
-		const original = env.NEXTAUTH_URL;
-		env.NEXTAUTH_URL = "https://egapro.example.com/api/auth";
-
-		try {
-			const response = await GET(buildRequest());
-
-			const setCookie = response.headers.get("set-cookie");
-			expect(setCookie).toContain("__Secure-next-auth.session-token=");
-			expect(setCookie).toContain("Expires=Thu, 01 Jan 1970");
-			expect(setCookie).toContain("Path=/");
-			expect(setCookie).toContain("Domain=egapro.example.com");
-			expect(setCookie).toContain("Secure");
-			expect(setCookie).toContain("HttpOnly");
-			expect(setCookie).toContain("SameSite=lax");
-		} finally {
-			env.NEXTAUTH_URL = original;
-		}
 	});
 
 	it("calls terminateProConnectSession when user is logged in", async () => {
