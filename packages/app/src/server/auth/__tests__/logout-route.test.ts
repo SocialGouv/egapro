@@ -45,14 +45,17 @@ describe("GET /api/auth/logout", () => {
 		expect(response.headers.get("Location")).toBe("http://localhost:3000/");
 	});
 
-	it("deletes the session cookie on the response", async () => {
+	it("deletes the session cookie on the response with correct attributes", async () => {
 		mockAuth.mockResolvedValue(null);
 
 		const response = await GET(buildRequest());
 
 		const setCookie = response.headers.get("set-cookie");
-		expect(setCookie).toContain("next-auth.session-token");
+		expect(setCookie).toContain("next-auth.session-token=");
 		expect(setCookie).toContain("Expires=Thu, 01 Jan 1970");
+		expect(setCookie).toContain("Path=/");
+		expect(setCookie).toContain("HttpOnly");
+		expect(setCookie).toContain("SameSite=lax");
 	});
 
 	it("calls terminateProConnectSession when user is logged in", async () => {
