@@ -31,7 +31,6 @@
 		"generate:mock-gip": "tsx scripts/generate-mock-gip-data.ts"
 	},
 	"dependencies": {
-		"@auth/drizzle-adapter": "^1.11.1",
 		"@aws-sdk/client-s3": "^3.1006.0",
 		"@gouvfr/dsfr": "^1.14.3",
 		"@hookform/resolvers": "^5.2.2",

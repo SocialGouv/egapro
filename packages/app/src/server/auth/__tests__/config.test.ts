@@ -2,15 +2,32 @@ import type { Account, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("~/server/db", () => ({ db: {} }));
-vi.mock("~/server/db/schema", () => ({
-	users: {},
-	accounts: {},
-	companies: {},
-	userCompanies: {},
+const mockFindFirst = vi.fn();
+const mockInsert = vi.fn();
+const mockUpdate = vi.fn();
+const mockTransaction = vi.fn();
+
+vi.mock("~/server/db", () => ({
+	db: {
+		query: {
+			users: {
+				findFirst: (...args: unknown[]) => mockFindFirst(...args),
+			},
+		},
+		insert: (...args: unknown[]) => mockInsert(...args),
+		update: (...args: unknown[]) =>
+			mockUpdate(...args) ?? {
+				set: vi.fn().mockReturnValue({
+					where: vi.fn().mockResolvedValue(undefined),
+				}),
+			},
+		transaction: (fn: (tx: unknown) => unknown) => mockTransaction(fn),
+	},
 }));
-vi.mock("@auth/drizzle-adapter", () => ({
-	DrizzleAdapter: () => ({}),
+vi.mock("~/server/db/schema", () => ({
+	users: { email: "email", id: "id" },
+	companies: { siren: "siren" },
+	userCompanies: {},
 }));
 vi.mock("~/server/services/weez", () => ({
 	fetchCompanyBySiren: vi.fn(),
@@ -35,29 +52,57 @@ function callSession(params: Record<string, unknown>) {
 
 describe("auth config", () => {
 	describe("jwt callback", () => {
-		it("populates token with user data on sign-in", async () => {
-			const token = { sub: "sub-123" } as JWT;
-			const user = {
-				id: "user-123",
+		it("upserts user and populates token on sign-in (existing user)", async () => {
+			const dbUser = {
+				id: "uuid-123",
 				siret: "12345678901234",
 				phone: "0123456789",
-			} as User & { siret: string; phone: string };
+			};
+			mockFindFirst.mockResolvedValue(dbUser);
+
+			const token = { sub: "sub-123" } as JWT;
+			const user = {
+				id: "proconnect-sub",
+				email: "test@example.com",
+				name: "Test",
+				siret: "12345678901234",
+				firstName: "Test",
+				lastName: "User",
+			} as User & { siret: string; firstName: string; lastName: string };
 
 			const result = await callJwt({
 				token,
 				user,
-				account: {} as Account,
+				account: { id_token: "oidc-id-token" } as Account,
 				trigger: "signIn",
 			});
 
-			expect(result.id).toBe("user-123");
+			expect(result.id).toBe("uuid-123");
 			expect(result.siret).toBe("12345678901234");
 			expect(result.phone).toBe("0123456789");
+			expect(result.id_token).toBe("oidc-id-token");
 		});
 
-		it("sets siret and phone to null when user has no extra fields", async () => {
+		it("creates user when not found in DB", async () => {
+			mockFindFirst.mockResolvedValue(undefined);
+			mockInsert.mockReturnValue({
+				values: vi.fn().mockReturnValue({
+					returning: vi.fn().mockResolvedValue([
+						{
+							id: "new-uuid",
+							siret: null,
+							phone: null,
+						},
+					]),
+				}),
+			});
+
 			const token = { sub: "sub-123" } as JWT;
-			const user = { id: "user-456" } as User;
+			const user = {
+				id: "proconnect-sub",
+				email: "new@example.com",
+				name: "New User",
+			} as User;
 
 			const result = await callJwt({
 				token,
@@ -66,9 +111,31 @@ describe("auth config", () => {
 				trigger: "signIn",
 			});
 
-			expect(result.id).toBe("user-456");
-			expect(result.siret).toBeNull();
-			expect(result.phone).toBeNull();
+			expect(result.id).toBe("new-uuid");
+			expect(mockInsert).toHaveBeenCalled();
+		});
+
+		it("stores id_token as null when account has none", async () => {
+			mockFindFirst.mockResolvedValue({
+				id: "uuid-123",
+				siret: null,
+				phone: null,
+			});
+
+			const token = { sub: "sub-123" } as JWT;
+			const user = {
+				id: "proconnect-sub",
+				email: "test@example.com",
+			} as User;
+
+			const result = await callJwt({
+				token,
+				user,
+				account: {} as Account,
+				trigger: "signIn",
+			});
+
+			expect(result.id_token).toBeNull();
 		});
 
 		it("preserves existing token data when no user is provided", async () => {
@@ -77,6 +144,7 @@ describe("auth config", () => {
 				id: "user-123",
 				siret: "12345678901234",
 				phone: "0123456789",
+				id_token: "stored-token",
 			} as JWT;
 
 			const result = await callJwt({ token, account: null });
@@ -84,6 +152,7 @@ describe("auth config", () => {
 			expect(result.id).toBe("user-123");
 			expect(result.siret).toBe("12345678901234");
 			expect(result.phone).toBe("0123456789");
+			expect(result.id_token).toBe("stored-token");
 		});
 	});
 

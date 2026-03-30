@@ -385,6 +385,4 @@ pnpm db:studio    # opens Drizzle Studio (UI to inspect the database)
 
 All schema properties are **camelCase** in TypeScript, automatically mapped to `snake_case` in the database via `casing: "snake_case"` in both `src/server/db/index.ts` and `drizzle.config.ts`. Never specify explicit column names.
 
-**Exception:** the `accounts` table uses snake_case properties (`refresh_token`, `access_token`, etc.) because `@auth/drizzle-adapter` requires these exact names.
-
 > Full DB rules (transactions, no module-scope Date) → `.claude/rules/database-drizzle.md`
