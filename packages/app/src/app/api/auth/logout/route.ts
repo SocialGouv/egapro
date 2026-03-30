@@ -27,6 +27,7 @@ export async function GET(_request: NextRequest) {
 	// to ensure the Set-Cookie header is included in the 307 response.
 	// Using cookies() from next/headers does not propagate to NextResponse.redirect().
 	const isSecure = baseUrl.startsWith("https://");
+	const domain = new URL(baseUrl).hostname;
 	const sessionCookieName = isSecure
 		? "__Secure-next-auth.session-token"
 		: "next-auth.session-token";
@@ -35,6 +36,7 @@ export async function GET(_request: NextRequest) {
 	response.cookies.set(sessionCookieName, "", {
 		expires: new Date(0),
 		path: "/",
+		domain,
 		secure: isSecure,
 		httpOnly: true,
 		sameSite: "lax",
