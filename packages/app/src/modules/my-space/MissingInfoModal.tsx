@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import { getDsfrModal } from "~/modules/shared";
 import { PhoneField } from "~/modules/shared/PhoneField";
@@ -8,7 +8,7 @@ import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
-import { missingInfoSchema } from "./schemas";
+import { createMissingInfoSchema } from "./schemas";
 
 const MODAL_ID = "missing-info-modal";
 const MODAL_TITLE_ID = "missing-info-modal-title";
@@ -34,11 +34,17 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 	const needsPhone = !userPhone;
 	const needsCse = hasCse === null;
 
-	const form = useZodForm(missingInfoSchema, {
+	const schema = useMemo(
+		() => createMissingInfoSchema(needsPhone, needsCse),
+		[needsPhone, needsCse],
+	);
+
+	const form = useZodForm(schema, {
 		defaultValues: { phone: "", hasCse: undefined },
 	});
 
 	const phoneError = form.formState.errors.phone?.message ?? null;
+	const cseError = form.formState.errors.hasCse?.message ?? null;
 
 	const updatePhoneMutation = api.profile.updatePhone.useMutation();
 	const updateHasCseMutation = api.company.updateHasCse.useMutation();
@@ -53,15 +59,25 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 		useCallback(() => form.reset({ phone: "", hasCse: undefined }), [form]),
 	);
 
-	const onSubmit = form.handleSubmit(async (data) => {
-		if (needsPhone) {
-			await updatePhoneMutation.mutateAsync({ phone: data.phone });
+	const [submitError, setSubmitError] = useState<string | null>(null);
+
+	const handleSave = form.handleSubmit(async (data) => {
+		try {
+			setSubmitError(null);
+			if (needsPhone) {
+				await updatePhoneMutation.mutateAsync({ phone: data.phone });
+			}
+			if (needsCse) {
+				const hasCseValue = data.hasCse as boolean;
+				await updateHasCseMutation.mutateAsync({ siren, hasCse: hasCseValue });
+			}
+			closeModal();
+			window.location.href = `/declaration-remuneration?siren=${siren}`;
+		} catch {
+			setSubmitError(
+				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
+			);
 		}
-		if (needsCse && data.hasCse !== undefined) {
-			await updateHasCseMutation.mutateAsync({ siren, hasCse: data.hasCse });
-		}
-		closeModal();
-		window.location.href = `/declaration-remuneration?siren=${siren}`;
 	});
 
 	const isPending =
@@ -70,6 +86,7 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 	return (
 		<dialog
 			aria-labelledby={MODAL_TITLE_ID}
+			aria-modal="true"
 			className="fr-modal"
 			id={MODAL_ID}
 			ref={dialogRef}
@@ -95,58 +112,80 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 								<p className="fr-text--regular fr-mb-3w">
 									{getDescription(needsPhone, needsCse)}
 								</p>
-								<form id="missing-info-form" onSubmit={onSubmit}>
-									{needsPhone && (
-										<PhoneField
-											error={phoneError}
-											inputId="missing-info-phone"
-											registration={form.register("phone")}
-										/>
-									)}
-									{needsCse && (
-										<fieldset className="fr-fieldset">
-											<legend className="fr-fieldset__legend fr-text--regular">
-												Un CSE a-t-il été mis en place dans votre entreprise ?
-											</legend>
-											<div className="fr-fieldset__element">
-												<div className="fr-radio-group fr-radio-rich">
-													<input
-														id="missing-info-cse-yes"
-														type="radio"
-														value="true"
-														{...form.register("hasCse", {
-															setValueAs: (v: string) => v === "true",
-														})}
-													/>
-													<label
-														className="fr-label"
-														htmlFor="missing-info-cse-yes"
-													>
-														Oui
-													</label>
-												</div>
+								{needsPhone && (
+									<PhoneField
+										error={phoneError}
+										inputId="missing-info-phone"
+										registration={form.register("phone")}
+									/>
+								)}
+								{needsCse && (
+									<fieldset
+										aria-describedby={
+											cseError ? "missing-info-cse-error" : undefined
+										}
+										className={
+											cseError
+												? "fr-fieldset fr-fieldset--error"
+												: "fr-fieldset"
+										}
+									>
+										<legend className="fr-fieldset__legend fr-text--regular">
+											Un CSE a-t-il été mis en place dans votre entreprise ?
+										</legend>
+										<div className="fr-fieldset__element">
+											<div className="fr-radio-group fr-radio-rich">
+												<input
+													id="missing-info-cse-yes"
+													type="radio"
+													value="true"
+													{...form.register("hasCse")}
+												/>
+												<label
+													className="fr-label"
+													htmlFor="missing-info-cse-yes"
+												>
+													Oui
+												</label>
 											</div>
-											<div className="fr-fieldset__element">
-												<div className="fr-radio-group fr-radio-rich">
-													<input
-														id="missing-info-cse-no"
-														type="radio"
-														value="false"
-														{...form.register("hasCse", {
-															setValueAs: (v: string) => v === "true",
-														})}
-													/>
-													<label
-														className="fr-label"
-														htmlFor="missing-info-cse-no"
-													>
-														Non
-													</label>
-												</div>
+										</div>
+										<div className="fr-fieldset__element">
+											<div className="fr-radio-group fr-radio-rich">
+												<input
+													id="missing-info-cse-no"
+													type="radio"
+													value="false"
+													{...form.register("hasCse")}
+												/>
+												<label
+													className="fr-label"
+													htmlFor="missing-info-cse-no"
+												>
+													Non
+												</label>
 											</div>
-										</fieldset>
-									)}
-								</form>
+										</div>
+										{cseError && (
+											<div
+												className="fr-messages-group"
+												id="missing-info-cse-error"
+												role="alert"
+											>
+												<p className="fr-message fr-message--error">
+													{cseError}
+												</p>
+											</div>
+										)}
+									</fieldset>
+								)}
+								{submitError && (
+									<div
+										aria-live="polite"
+										className="fr-alert fr-alert--error fr-mt-2w"
+									>
+										<p>{submitError}</p>
+									</div>
+								)}
 							</div>
 							<div className="fr-modal__footer">
 								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
@@ -154,8 +193,8 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 										<button
 											className="fr-btn"
 											disabled={isPending}
-											form="missing-info-form"
-											type="submit"
+											onClick={handleSave}
+											type="button"
 										>
 											Enregistrer
 										</button>

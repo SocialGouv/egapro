@@ -216,21 +216,18 @@ Les agents sont des sous-processus specialises avec leur propre checklist. Ils t
 
 | Agent | Checklist | Utilise par |
 |---|---|---|
-| `validator` | Typecheck + tests + lint + format en parallele | Toutes les gates, tous les skills |
-| `structural-auditor` | 16 regles : forms, schemas, DRY, imports, file size, naming, domain layer... | Gate automatique, `/validate`, `/review-pr` |
-| `rgaa-auditor` | 13 themes RGAA complets : images, formulaires, navigation, structure, couleurs, modales... | Gate automatique, `/validate` |
-| `security-auditor` | OWASP Top 10 + RGS : injection, auth, acces, secrets, headers, SSRF... | Gate automatique, `/validate` |
+| `validator` | Typecheck + tests + lint + format en parallele | Toutes les gates, `/ship` |
+| `structural-auditor` | 16 regles : forms, schemas, DRY, imports, file size, naming, domain layer... | Gate automatique, `/ship` |
+| `rgaa-auditor` | 13 themes RGAA complets : images, formulaires, navigation, structure, couleurs, modales... | Gate automatique, `/ship` |
+| `security-auditor` | OWASP Top 10 + RGS : injection, auth, acces, secrets, headers, SSRF... | Gate automatique, `/ship` |
 
 ### Skills (`.claude/skills/`)
 
-Les skills sont des workflows complexes invocables avec `/commande`. Ils orchestrent des agents en parallele pour aller vite.
+Un seul skill smart `/ship` qui orchestre tout le cycle de vie d'une issue. Il detecte automatiquement ou on en est (branche, PR, reviews) et reprend la ou on s'est arrete.
 
 | Commande | Ce que ca fait |
 |---|---|
-| `/validate` | Lance **4 agents en parallele** (validator + structural + RGAA + security), auto-fix, boucle jusqu'a zero violation. Argument optionnel : `rgaa`, `security`, `structure`. |
-| `/review-pr` | Detecte la PR de la branche, fetch les commentaires GH, lance le structural-auditor, applique les fixes, valide. |
-| `/process-issue` | Traite une issue GitHub (parent + sub-issues) end-to-end avec quality gates obligatoires. |
-| `/split-pr` | Decoupe la branche en plusieurs PRs focalisees pour faciliter la review. |
+| `/ship [#N]` | **Implement** -> **Validate** (4 agents) -> **PR** (single ou split) -> **Review** (watch, fix, re-validate) -> **Done**. Sans argument, detecte l'etat depuis la branche/PR. |
 
 ### Gates automatiques (`.claude/rules/automation.md`)
 

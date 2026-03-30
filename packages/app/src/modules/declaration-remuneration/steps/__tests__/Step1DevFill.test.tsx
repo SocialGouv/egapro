@@ -28,7 +28,7 @@ describe("Step1Workforce dev fill", () => {
 
 		await user.click(screen.getByRole("button", { name: "[DEV] Remplir" }));
 
-		expect(screen.getByLabelText("Nombre de femmes")).toHaveValue(120);
-		expect(screen.getByLabelText("Nombre d'hommes")).toHaveValue(130);
+		expect(screen.getByLabelText("Nombre de femmes")).toHaveValue("120");
+		expect(screen.getByLabelText("Nombre d'hommes")).toHaveValue("130");
 	});
 });

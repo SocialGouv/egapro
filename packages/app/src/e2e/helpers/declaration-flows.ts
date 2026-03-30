@@ -28,11 +28,11 @@ async function fillStep4Quartiles(page: Page) {
 	for (const q of quartiles) {
 		// Each quartile appears twice (annual table + hourly table) — fill both
 		await page
-			.getByRole("spinbutton", { name: `Nombre de femmes ${q.name}` })
+			.getByRole("textbox", { name: `Nombre de femmes ${q.name}` })
 			.nth(0)
 			.fill(q.women);
 		await page
-			.getByRole("spinbutton", { name: `Nombre d'hommes ${q.name}` })
+			.getByRole("textbox", { name: `Nombre d'hommes ${q.name}` })
 			.nth(0)
 			.fill(q.men);
 		await page
@@ -44,11 +44,11 @@ async function fillStep4Quartiles(page: Page) {
 	// Hourly table (same quartile names, second occurrence)
 	for (const q of quartiles) {
 		await page
-			.getByRole("spinbutton", { name: `Nombre de femmes ${q.name}` })
+			.getByRole("textbox", { name: `Nombre de femmes ${q.name}` })
 			.nth(1)
 			.fill(q.women);
 		await page
-			.getByRole("spinbutton", { name: `Nombre d'hommes ${q.name}` })
+			.getByRole("textbox", { name: `Nombre d'hommes ${q.name}` })
 			.nth(1)
 			.fill(q.men);
 		await page
@@ -71,8 +71,8 @@ export async function completeDeclaration(
 	await page.waitForURL("**/declaration-remuneration/etape/1");
 
 	// Step 1: Fill workforce (10 women + 15 men = 25 total)
-	await page.getByRole("spinbutton", { name: "Nombre de femmes" }).fill("10");
-	await page.getByRole("spinbutton", { name: "Nombre d'hommes" }).fill("15");
+	await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("10");
+	await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("15");
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL("**/declaration-remuneration/etape/2");
 
@@ -83,12 +83,8 @@ export async function completeDeclaration(
 
 	// Step 3: Variable pay — same table + beneficiary counts
 	await fillPayGapTable(page);
-	await page
-		.getByRole("spinbutton", { name: "Bénéficiaires femmes" })
-		.fill("5");
-	await page
-		.getByRole("spinbutton", { name: "Bénéficiaires hommes" })
-		.fill("5");
+	await page.getByRole("textbox", { name: "Bénéficiaires femmes" }).fill("5");
+	await page.getByRole("textbox", { name: "Bénéficiaires hommes" }).fill("5");
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL("**/declaration-remuneration/etape/4");
 
@@ -112,10 +108,10 @@ export async function completeDeclaration(
 		await sourceSelect.selectOption("convention-collective");
 		await page.getByRole("textbox", { name: "Nom" }).fill("Catégorie test");
 		await page
-			.getByRole("spinbutton", { name: "Effectif femmes, catégorie 1" })
+			.getByRole("textbox", { name: "Effectif femmes, catégorie 1" })
 			.fill("10");
 		await page
-			.getByRole("spinbutton", { name: "Effectif hommes, catégorie 1" })
+			.getByRole("textbox", { name: "Effectif hommes, catégorie 1" })
 			.fill("15");
 	}
 

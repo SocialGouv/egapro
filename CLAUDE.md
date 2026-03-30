@@ -125,14 +125,13 @@ Quality checks run **automatically** after every code change — no command need
 | `rgaa-auditor` | 13-theme RGAA accessibility audit |
 | `security-auditor` | OWASP Top 10 + RGS security review |
 
-### Skills (`.claude/skills/`) — 4 manual commands
+### Skills (`.claude/skills/`) — `/ship`
 
 | Skill | Purpose |
 |---|---|
-| `/validate` | Force all 4 agents + auto-fix + loop until zero. Optional focus: `rgaa`, `security`, `structure` |
-| `/review-pr` | PR review: GH comments + structural-auditor + all quality gates |
-| `/process-issue` | Process a GitHub issue end-to-end with mandatory quality gates |
-| `/split-pr` | Split the current branch into multiple focused PRs |
+| `/ship [#N]` | Smart end-to-end: auto-detects phase and picks up where you left off |
+
+Phases: **Implement** -> **Validate** (4 agents) -> **PR** (single or split) -> **Review** (watch comments, fix) -> **Done**. No arg needed to resume — detects state from branch, PR, and review status.
 
 ---
 
