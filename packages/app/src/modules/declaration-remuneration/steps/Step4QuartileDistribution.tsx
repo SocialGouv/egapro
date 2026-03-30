@@ -5,7 +5,7 @@ import { useState } from "react";
 import { getCurrentYear, normalizeDecimalInput } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
-import { updateStepCategoriesSchema } from "../schemas";
+import { updateStep4Schema } from "../schemas";
 import { QUARTILE_NAMES } from "../shared/constants";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY } from "../shared/devFillData";
@@ -16,148 +16,129 @@ import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
 import { TooltipButton } from "../shared/TooltipButton";
-import type { StepCategoryData } from "../types";
+import type { QuartileData, Step4Data } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
 import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCallout";
 import { QuartileReadingNote } from "./step4/QuartileReadingNote";
 import { QuartileTable } from "./step4/QuartileTable";
 
-function buildGipQuartileCategories(
-	quartile: GipQuartileData,
-): StepCategoryData[] {
-	return QUARTILE_NAMES.map((name, i) => ({
-		name,
-		womenValue: quartile.thresholds[i] ?? undefined,
-		womenCount: quartile.womenCounts[i] ?? undefined,
-		menCount: quartile.menCounts[i] ?? undefined,
+function gipToQuartiles(gip: GipQuartileData): QuartileData[] {
+	return QUARTILE_NAMES.map((_, i) => ({
+		threshold: gip.thresholds[i] ?? "",
+		women: gip.womenCounts[i] ?? undefined,
+		men: gip.menCounts[i] ?? undefined,
 	}));
 }
 
-function stepToFormCategories(
-	annual: StepCategoryData[],
-	hourly: StepCategoryData[],
-) {
+function emptyQuartiles(): [
+	QuartileData,
+	QuartileData,
+	QuartileData,
+	QuartileData,
+] {
 	return [
-		...annual.map((c) => ({
-			name: `annual:${c.name}`,
-			womenCount: c.womenCount,
-			menCount: c.menCount,
-			womenValue: c.womenValue,
-		})),
-		...hourly.map((c) => ({
-			name: `hourly:${c.name}`,
-			womenCount: c.womenCount,
-			menCount: c.menCount,
-			womenValue: c.womenValue,
-		})),
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
 	];
 }
 
-function formToStepCategories(
-	categories: {
-		name?: string;
-		womenCount?: number;
-		menCount?: number;
-		womenValue?: string;
-	}[],
-	prefix: "annual" | "hourly",
-): StepCategoryData[] {
-	return categories
-		.filter((c) => c.name?.startsWith(`${prefix}:`))
-		.map((c) => ({
-			name: c.name?.replace(`${prefix}:`, "") ?? "",
-			womenCount: c.womenCount,
-			menCount: c.menCount,
-			womenValue: c.womenValue,
-		}));
-}
-
 type Step4QuartileDistributionProps = {
-	initialAnnualCategories?: StepCategoryData[];
-	initialHourlyCategories?: StepCategoryData[];
+	initialData: Step4Data;
 	gipPrefillData?: GipPrefillData;
 	maxWomen?: number;
 	maxMen?: number;
 };
 
 export function Step4QuartileDistribution({
-	initialAnnualCategories,
-	initialHourlyCategories,
+	initialData,
 	gipPrefillData,
 	maxWomen,
 	maxMen,
 }: Step4QuartileDistributionProps) {
 	const router = useRouter();
 
-	const emptyCategories = () =>
-		QUARTILE_NAMES.map((name) => ({ name })) as StepCategoryData[];
+	const hasSavedData =
+		initialData.annual.some(
+			(q) => q.threshold || q.women !== undefined || q.men !== undefined,
+		) ||
+		initialData.hourly.some(
+			(q) => q.threshold || q.women !== undefined || q.men !== undefined,
+		);
 
-	const defaultAnnual = initialAnnualCategories?.length
-		? initialAnnualCategories
+	const defaultAnnual = hasSavedData
+		? initialData.annual
 		: gipPrefillData
-			? buildGipQuartileCategories(gipPrefillData.step4.annual)
-			: emptyCategories();
+			? gipToQuartiles(gipPrefillData.step4.annual)
+			: emptyQuartiles();
 
-	const defaultHourly = initialHourlyCategories?.length
-		? initialHourlyCategories
+	const defaultHourly = hasSavedData
+		? initialData.hourly
 		: gipPrefillData
-			? buildGipQuartileCategories(gipPrefillData.step4.hourly)
-			: emptyCategories();
+			? gipToQuartiles(gipPrefillData.step4.hourly)
+			: emptyQuartiles();
 
-	const hasInitialData = [
-		...(initialAnnualCategories ?? []),
-		...(initialHourlyCategories ?? []),
-	].some(
-		(c) =>
-			c.womenCount !== undefined ||
-			c.menCount !== undefined ||
-			c.womenValue !== undefined ||
-			c.menValue !== undefined,
-	);
-
-	const form = useZodForm(updateStepCategoriesSchema, {
+	const form = useZodForm(updateStep4Schema, {
 		defaultValues: {
-			step: 4,
-			categories: stepToFormCategories(defaultAnnual, defaultHourly),
+			annual: defaultAnnual as [
+				QuartileData,
+				QuartileData,
+				QuartileData,
+				QuartileData,
+			],
+			hourly: defaultHourly as [
+				QuartileData,
+				QuartileData,
+				QuartileData,
+				QuartileData,
+			],
 		},
 	});
 
-	const categories = form.watch("categories");
-	const annualCategories = formToStepCategories(categories, "annual");
-	const hourlyCategories = formToStepCategories(categories, "hourly");
+	const annual = form.watch("annual");
+	const hourly = form.watch("hourly");
 
 	const [validationError, setValidationError] = useState<string | null>(null);
-	const [saved, setSaved] = useState(hasInitialData);
+	const [saved, setSaved] = useState(hasSavedData);
 	const [formValidationError, setFormValidationError] = useState<string | null>(
 		null,
 	);
 
 	const currentYear = getCurrentYear();
 
-	const mutation = api.declaration.updateStepCategories.useMutation({
+	const mutation = api.declaration.updateStep4.useMutation({
 		onSuccess: () => router.push("/declaration-remuneration/etape/5"),
 	});
 
-	function handleCategoryChange(
+	function setQuartileField(
 		tableType: "annual" | "hourly",
 		index: number,
-		field: "womenValue" | "womenCount" | "menCount",
+		field: "threshold" | "women" | "men",
+		value: string | number | undefined,
+	) {
+		const arr = tableType === "annual" ? [...annual] : [...hourly];
+		arr[index] = { ...arr[index]!, [field]: value };
+		form.setValue(
+			tableType,
+			arr as [QuartileData, QuartileData, QuartileData, QuartileData],
+		);
+	}
+
+	function handleQuartileChange(
+		tableType: "annual" | "hourly",
+		index: number,
+		field: "threshold" | "women" | "men",
 		value: string,
 	) {
-		const formIndex =
-			tableType === "annual" ? index : index + QUARTILE_NAMES.length;
-
-		if (field === "womenValue") {
+		if (field === "threshold") {
 			const normalized = normalizeDecimalInput(value);
 			if (normalized === null) return;
 			if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
-			form.setValue(
-				`categories.${formIndex}.womenValue`,
-				normalized || undefined,
-			);
+			setQuartileField(tableType, index, field, normalized || undefined);
 		} else {
 			if (value === "") {
-				form.setValue(`categories.${formIndex}.${field}`, undefined);
+				setQuartileField(tableType, index, field, undefined);
 				setValidationError(null);
 				setSaved(false);
 				return;
@@ -165,7 +146,7 @@ export function Step4QuartileDistribution({
 			if (/\D/.test(value)) return;
 			const n = Number.parseInt(value, 10);
 			if (Number.isNaN(n) || n < 0) return;
-			const max = field === "womenCount" ? maxWomen : maxMen;
+			const max = field === "women" ? maxWomen : maxMen;
 			if (max !== undefined && n > max) {
 				setValidationError(
 					`Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
@@ -173,16 +154,15 @@ export function Step4QuartileDistribution({
 				return;
 			}
 			setValidationError(null);
-			form.setValue(`categories.${formIndex}.${field}`, n);
+			setQuartileField(tableType, index, field, n);
 		}
 		setSaved(false);
 	}
 
 	const onSubmit = form.handleSubmit(() => {
-		const allStepCategories = [...annualCategories, ...hourlyCategories];
-		const incomplete = allStepCategories.some(
-			(c) =>
-				c.womenCount === undefined || c.menCount === undefined || !c.womenValue,
+		const allQuartiles = [...annual, ...hourly];
+		const incomplete = allQuartiles.some(
+			(q) => q.women === undefined || q.men === undefined || !q.threshold,
 		);
 		if (incomplete) {
 			setFormValidationError(
@@ -191,19 +171,40 @@ export function Step4QuartileDistribution({
 			return;
 		}
 		setFormValidationError(null);
-		mutation.mutate({
-			step: 4,
-			categories: stepToFormCategories(annualCategories, hourlyCategories),
-		});
+		mutation.mutate(form.getValues());
 	});
 
 	return (
 		<form className={stepStyles.formColumn} onSubmit={onSubmit}>
 			<StepTitleRow
 				onDevFill={() => {
+					const devAnnual = DEV_STEP4_ANNUAL.map((c) => ({
+						threshold: c.womenValue ?? "",
+						women: c.womenCount,
+						men: c.menCount,
+					}));
+					const devHourly = DEV_STEP4_HOURLY.map((c) => ({
+						threshold: c.womenValue ?? "",
+						women: c.womenCount,
+						men: c.menCount,
+					}));
 					form.setValue(
-						"categories",
-						stepToFormCategories(DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY),
+						"annual",
+						devAnnual as [
+							QuartileData,
+							QuartileData,
+							QuartileData,
+							QuartileData,
+						],
+					);
+					form.setValue(
+						"hourly",
+						devHourly as [
+							QuartileData,
+							QuartileData,
+							QuartileData,
+							QuartileData,
+						],
 					);
 					setSaved(false);
 				}}
@@ -249,16 +250,16 @@ export function Step4QuartileDistribution({
 			{/* Tables */}
 			<div className={stepStyles.dataContainer}>
 				<QuartileTable
-					categories={annualCategories}
 					maxMen={maxMen}
 					maxWomen={maxWomen}
-					onCategoryChange={(index, field, value) =>
-						handleCategoryChange("annual", index, field, value)
+					onQuartileChange={(index, field, value) =>
+						handleQuartileChange("annual", index, field, value)
 					}
+					quartiles={annual}
 					readingNote={
 						gipPrefillData ? (
 							<QuartileReadingNote
-								categories={annualCategories}
+								categories={annual}
 								tableType="annual"
 								year={currentYear}
 							/>
@@ -278,16 +279,16 @@ export function Step4QuartileDistribution({
 				/>
 
 				<QuartileTable
-					categories={hourlyCategories}
 					maxMen={maxMen}
 					maxWomen={maxWomen}
-					onCategoryChange={(index, field, value) =>
-						handleCategoryChange("hourly", index, field, value)
+					onQuartileChange={(index, field, value) =>
+						handleQuartileChange("hourly", index, field, value)
 					}
+					quartiles={hourly}
 					readingNote={
 						gipPrefillData ? (
 							<QuartileReadingNote
-								categories={hourlyCategories}
+								categories={hourly}
 								tableType="hourly"
 								year={currentYear}
 							/>
@@ -314,8 +315,8 @@ export function Step4QuartileDistribution({
 
 			{gipPrefillData && (
 				<QuartileInterpretationCallout
-					annualCategories={annualCategories}
-					hourlyCategories={hourlyCategories}
+					annualCategories={annual}
+					hourlyCategories={hourly}
 				/>
 			)}
 

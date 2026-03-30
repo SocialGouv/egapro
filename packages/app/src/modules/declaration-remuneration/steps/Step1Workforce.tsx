@@ -17,36 +17,32 @@ import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
 import { TooltipButton } from "../shared/TooltipButton";
-import type { CategoryData } from "../types";
-import { DEFAULT_CATEGORIES } from "../types";
+import type { Step1Data } from "../types";
 import styles from "./Step1Workforce.module.scss";
 
 type Step1WorkforceProps = {
-	initialCategories?: CategoryData[];
+	initialData: Step1Data;
 	gipPrefillData?: GipPrefillData;
 };
 
 export function Step1Workforce({
-	initialCategories,
+	initialData,
 	gipPrefillData,
 }: Step1WorkforceProps) {
 	const router = useRouter();
 	const isPrefilled = !!gipPrefillData;
 
-	const hasInitialData =
-		initialCategories?.some((c) => c.women > 0 || c.men > 0) ?? false;
-
-	const defaultCategories = initialCategories?.length
-		? initialCategories
-		: DEFAULT_CATEGORIES.map((name) => ({ name, women: 0, men: 0 }));
+	const hasInitialData = initialData.totalWomen > 0 || initialData.totalMen > 0;
 
 	const form = useZodForm(updateStep1Schema, {
-		defaultValues: { categories: defaultCategories },
+		defaultValues: {
+			totalWomen: initialData.totalWomen,
+			totalMen: initialData.totalMen,
+		},
 	});
 
-	const categories = form.watch("categories");
-	const totalWomen = categories.reduce((sum, c) => sum + c.women, 0);
-	const totalMen = categories.reduce((sum, c) => sum + c.men, 0);
+	const totalWomen = form.watch("totalWomen");
+	const totalMen = form.watch("totalMen");
 	const total = totalWomen + totalMen;
 
 	const [saved, setSaved] = useState(hasInitialData);
@@ -65,27 +61,19 @@ export function Step1Workforce({
 	function handleWomenChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const value = parseIntegerInput(e.target.value);
 		if (value === null) return;
-		form.setValue("categories", [
-			{ name: "Nombre de salariés", women: value, men: totalMen },
-		]);
+		form.setValue("totalWomen", value);
 		setSaved(false);
 	}
 
 	function handleMenChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const value = parseIntegerInput(e.target.value);
 		if (value === null) return;
-		form.setValue("categories", [
-			{ name: "Nombre de salariés", women: totalWomen, men: value },
-		]);
+		form.setValue("totalMen", value);
 		setSaved(false);
 	}
 
 	const onSubmit = form.handleSubmit((data) => {
-		const formTotal = data.categories.reduce(
-			(sum, c) => sum + c.women + c.men,
-			0,
-		);
-		if (formTotal === 0) {
+		if (data.totalWomen + data.totalMen === 0) {
 			setValidationError(
 				"Veuillez renseigner les effectifs avant de passer à l'étape suivante.",
 			);
@@ -99,7 +87,8 @@ export function Step1Workforce({
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
 				onDevFill={() => {
-					form.setValue("categories", DEV_STEP1_CATEGORIES);
+					form.setValue("totalWomen", DEV_STEP1_CATEGORIES[0]?.women ?? 50);
+					form.setValue("totalMen", DEV_STEP1_CATEGORIES[0]?.men ?? 50);
 					setSaved(false);
 				}}
 				saved={saved}

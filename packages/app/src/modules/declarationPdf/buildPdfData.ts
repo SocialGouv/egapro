@@ -1,37 +1,140 @@
 import "server-only";
 
 import { and, eq } from "drizzle-orm";
-import type { StepCategoryData } from "~/modules/declaration-remuneration";
 import { formatLongDate } from "~/modules/domain";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { db } from "~/server/db";
 import {
 	companies,
-	declarationCategories,
 	declarations,
 	employeeCategories,
 	jobCategories,
 } from "~/server/db/schema";
 
-import type { DeclarationPdfData } from "./types";
+import type { DeclarationPdfData, QuartileCategory } from "./types";
 
-type CategoryRow = typeof declarationCategories.$inferSelect;
+const QUARTILE_NAMES = [
+	"1er quartile",
+	"2e quartile",
+	"3e quartile",
+	"4e quartile",
+] as const;
 
-function mapStepCategories(
-	categories: CategoryRow[],
-	step: number,
-): StepCategoryData[] {
-	return categories
-		.filter((c) => c.step === step)
-		.map((c) => ({
-			name: c.categoryName,
-			womenCount: c.womenCount ?? undefined,
-			menCount: c.menCount ?? undefined,
-			womenValue: c.womenValue ?? undefined,
-			menValue: c.menValue ?? undefined,
-			womenMedianValue: c.womenMedianValue ?? undefined,
-			menMedianValue: c.menMedianValue ?? undefined,
-		}));
+type Declaration = typeof declarations.$inferSelect;
+
+function buildStep2Rows(d: Declaration) {
+	return [
+		{
+			label: "Annuelle brute moyenne",
+			womenValue: d.indicatorAAnnualWomen ?? "",
+			menValue: d.indicatorAAnnualMen ?? "",
+		},
+		{
+			label: "Horaire brute moyenne",
+			womenValue: d.indicatorAHourlyWomen ?? "",
+			menValue: d.indicatorAHourlyMen ?? "",
+		},
+		{
+			label: "Annuelle brute médiane",
+			womenValue: d.indicatorCAnnualWomen ?? "",
+			menValue: d.indicatorCAnnualMen ?? "",
+		},
+		{
+			label: "Horaire brute médiane",
+			womenValue: d.indicatorCHourlyWomen ?? "",
+			menValue: d.indicatorCHourlyMen ?? "",
+		},
+	];
+}
+
+function buildStep3Data(d: Declaration) {
+	const rows = [
+		{
+			label: "Annuelle brute moyenne",
+			womenValue: d.indicatorBAnnualWomen ?? "",
+			menValue: d.indicatorBAnnualMen ?? "",
+		},
+		{
+			label: "Horaire brute moyenne",
+			womenValue: d.indicatorBHourlyWomen ?? "",
+			menValue: d.indicatorBHourlyMen ?? "",
+		},
+		{
+			label: "Annuelle brute médiane",
+			womenValue: d.indicatorDAnnualWomen ?? "",
+			menValue: d.indicatorDAnnualMen ?? "",
+		},
+		{
+			label: "Horaire brute médiane",
+			womenValue: d.indicatorDHourlyWomen ?? "",
+			menValue: d.indicatorDHourlyMen ?? "",
+		},
+	];
+	return {
+		rows,
+		beneficiaryWomen: d.indicatorEWomen ?? "",
+		beneficiaryMen: d.indicatorEMen ?? "",
+	};
+}
+
+function buildQuartileCategories(d: Declaration): QuartileCategory[] {
+	const annualThresholds = [
+		d.indicatorFAnnualThreshold1,
+		d.indicatorFAnnualThreshold2,
+		d.indicatorFAnnualThreshold3,
+		d.indicatorFAnnualThreshold4,
+	];
+	const annualWomen = [
+		d.indicatorFAnnualWomen1,
+		d.indicatorFAnnualWomen2,
+		d.indicatorFAnnualWomen3,
+		d.indicatorFAnnualWomen4,
+	];
+	const annualMen = [
+		d.indicatorFAnnualMen1,
+		d.indicatorFAnnualMen2,
+		d.indicatorFAnnualMen3,
+		d.indicatorFAnnualMen4,
+	];
+
+	const hourlyThresholds = [
+		d.indicatorFHourlyThreshold1,
+		d.indicatorFHourlyThreshold2,
+		d.indicatorFHourlyThreshold3,
+		d.indicatorFHourlyThreshold4,
+	];
+	const hourlyWomen = [
+		d.indicatorFHourlyWomen1,
+		d.indicatorFHourlyWomen2,
+		d.indicatorFHourlyWomen3,
+		d.indicatorFHourlyWomen4,
+	];
+	const hourlyMen = [
+		d.indicatorFHourlyMen1,
+		d.indicatorFHourlyMen2,
+		d.indicatorFHourlyMen3,
+		d.indicatorFHourlyMen4,
+	];
+
+	const annualCategories: QuartileCategory[] = QUARTILE_NAMES.map(
+		(quartileName, i) => ({
+			name: `annual:${quartileName}`,
+			womenCount: annualWomen[i] ?? undefined,
+			menCount: annualMen[i] ?? undefined,
+			womenValue: annualThresholds[i] ?? undefined,
+		}),
+	);
+
+	const hourlyCategories: QuartileCategory[] = QUARTILE_NAMES.map(
+		(quartileName, i) => ({
+			name: `hourly:${quartileName}`,
+			womenCount: hourlyWomen[i] ?? undefined,
+			menCount: hourlyMen[i] ?? undefined,
+			womenValue: hourlyThresholds[i] ?? undefined,
+		}),
+	);
+
+	return [...annualCategories, ...hourlyCategories];
 }
 
 export async function buildPdfData(
@@ -60,16 +163,6 @@ export async function buildPdfData(
 		.where(eq(companies.siren, siren))
 		.limit(1);
 
-	const categories = await db
-		.select()
-		.from(declarationCategories)
-		.where(
-			and(
-				eq(declarationCategories.siren, siren),
-				eq(declarationCategories.year, year),
-			),
-		);
-
 	const jobs = await db
 		.select()
 		.from(jobCategories)
@@ -89,38 +182,6 @@ export async function buildPdfData(
 		empCats = results.flat();
 	}
 
-	const step1Categories = categories
-		.filter((c) => c.step === 1)
-		.map((c) => ({
-			name: c.categoryName,
-			women: c.womenCount ?? 0,
-			men: c.menCount ?? 0,
-		}));
-
-	const step2Rows = categories
-		.filter((c) => c.step === 2)
-		.map((c) => ({
-			label: c.categoryName,
-			womenValue: c.womenValue ?? "",
-			menValue: c.menValue ?? "",
-		}));
-
-	const beneficiaryRow = categories.find(
-		(c) => c.step === 3 && c.categoryName === "Bénéficiaires",
-	);
-	const step3Data = {
-		rows: categories
-			.filter((c) => c.step === 3 && c.categoryName !== "Bénéficiaires")
-			.map((c) => ({
-				label: c.categoryName,
-				womenValue: c.womenValue ?? "",
-				menValue: c.menValue ?? "",
-			})),
-		beneficiaryWomen: beneficiaryRow?.womenValue ?? "",
-		beneficiaryMen: beneficiaryRow?.menValue ?? "",
-	};
-
-	const step4Categories = mapStepCategories(categories, 4);
 	const step5Categories = mapToEmployeeCategoryRows(
 		jobs,
 		empCats,
@@ -135,10 +196,10 @@ export async function buildPdfData(
 		isSecondDeclaration: declarationType === "correction",
 		totalWomen: declaration.totalWomen ?? 0,
 		totalMen: declaration.totalMen ?? 0,
-		step1Categories,
-		step2Rows,
-		step3Data,
-		step4Categories,
+		step1Categories: [],
+		step2Rows: buildStep2Rows(declaration),
+		step3Data: buildStep3Data(declaration),
+		step4Categories: buildQuartileCategories(declaration),
 		step5Categories,
 	};
 }

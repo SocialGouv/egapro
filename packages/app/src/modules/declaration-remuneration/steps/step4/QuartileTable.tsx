@@ -1,22 +1,22 @@
 "use client";
 
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
-import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
+import type { QuartileData } from "~/modules/declaration-remuneration/types";
 import { computePercentage, displayDecimal } from "~/modules/domain";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
 
 type Props = {
 	title: string;
 	tableType: "annual" | "hourly";
-	categories: StepCategoryData[];
+	quartiles: QuartileData[];
 	maxWomen?: number;
 	maxMen?: number;
 	validationError: string | null;
 	readingNote?: React.ReactNode;
 	sourceNote?: React.ReactNode;
-	onCategoryChange: (
+	onQuartileChange: (
 		index: number,
-		field: "womenValue" | "womenCount" | "menCount",
+		field: "threshold" | "women" | "men",
 		value: string,
 	) => void;
 };
@@ -37,19 +37,16 @@ function OrdinalLabel({ text }: { text: string }) {
 export function QuartileTable({
 	title,
 	tableType,
-	categories,
+	quartiles,
 	maxWomen,
 	maxMen,
 	validationError,
 	readingNote,
 	sourceNote,
-	onCategoryChange,
+	onQuartileChange,
 }: Props) {
-	const totalWomen = categories.reduce(
-		(sum, c) => sum + (c.womenCount ?? 0),
-		0,
-	);
-	const totalMen = categories.reduce((sum, c) => sum + (c.menCount ?? 0), 0);
+	const totalWomen = quartiles.reduce((sum, q) => sum + (q.women ?? 0), 0);
+	const totalMen = quartiles.reduce((sum, q) => sum + (q.men ?? 0), 0);
 	const totalAll = totalWomen + totalMen;
 
 	return (
@@ -90,22 +87,18 @@ export function QuartileTable({
 													? "annuelle brute"
 													: "horaire brute"}
 											</td>
-											{categories.map((c, i) => (
-												<td key={c.name}>
+											{quartiles.map((q, i) => (
+												<td key={QUARTILE_NAMES[i]}>
 													<span className={stepStyles.inputWithUnit}>
 														<input
-															aria-label={`Rémunération brute ${c.name}`}
+															aria-label={`Rémunération brute ${QUARTILE_NAMES[i]}`}
 															className="fr-input"
 															inputMode="decimal"
 															onChange={(e) =>
-																onCategoryChange(
-																	i,
-																	"womenValue",
-																	e.target.value,
-																)
+																onQuartileChange(i, "threshold", e.target.value)
 															}
 															type="text"
-															value={displayDecimal(c.womenValue ?? "")}
+															value={displayDecimal(q.threshold ?? "")}
 														/>
 														<span aria-hidden="true">€</span>
 													</span>
@@ -120,18 +113,18 @@ export function QuartileTable({
 												<br />
 												de femmes
 											</td>
-											{categories.map((c, i) => (
-												<td key={c.name}>
+											{quartiles.map((q, i) => (
+												<td key={QUARTILE_NAMES[i]}>
 													<input
-														aria-label={`Nombre de femmes ${c.name}`}
+														aria-label={`Nombre de femmes ${QUARTILE_NAMES[i]}`}
 														className="fr-input"
 														inputMode="numeric"
 														onChange={(e) =>
-															onCategoryChange(i, "womenCount", e.target.value)
+															onQuartileChange(i, "women", e.target.value)
 														}
 														pattern="[0-9]*"
 														type="text"
-														value={c.womenCount ?? ""}
+														value={q.women ?? ""}
 													/>
 												</td>
 											))}
@@ -146,12 +139,12 @@ export function QuartileTable({
 													de femmes
 												</strong>
 											</td>
-											{categories.map((c) => {
-												const total = (c.womenCount ?? 0) + (c.menCount ?? 0);
+											{quartiles.map((q, i) => {
+												const total = (q.women ?? 0) + (q.men ?? 0);
 												return (
-													<td key={c.name}>
+													<td key={QUARTILE_NAMES[i]}>
 														<strong>
-															{computePercentage(c.womenCount ?? 0, total)}
+															{computePercentage(q.women ?? 0, total)}
 														</strong>
 													</td>
 												);
@@ -169,18 +162,18 @@ export function QuartileTable({
 												<br />
 												d&apos;hommes
 											</td>
-											{categories.map((c, i) => (
-												<td key={c.name}>
+											{quartiles.map((q, i) => (
+												<td key={QUARTILE_NAMES[i]}>
 													<input
-														aria-label={`Nombre d'hommes ${c.name}`}
+														aria-label={`Nombre d'hommes ${QUARTILE_NAMES[i]}`}
 														className="fr-input"
 														inputMode="numeric"
 														onChange={(e) =>
-															onCategoryChange(i, "menCount", e.target.value)
+															onQuartileChange(i, "men", e.target.value)
 														}
 														pattern="[0-9]*"
 														type="text"
-														value={c.menCount ?? ""}
+														value={q.men ?? ""}
 													/>
 												</td>
 											))}
@@ -195,12 +188,12 @@ export function QuartileTable({
 													d&apos;hommes
 												</strong>
 											</td>
-											{categories.map((c) => {
-												const total = (c.womenCount ?? 0) + (c.menCount ?? 0);
+											{quartiles.map((q, i) => {
+												const total = (q.women ?? 0) + (q.men ?? 0);
 												return (
-													<td key={c.name}>
+													<td key={QUARTILE_NAMES[i]}>
 														<strong>
-															{computePercentage(c.menCount ?? 0, total)}
+															{computePercentage(q.men ?? 0, total)}
 														</strong>
 													</td>
 												);

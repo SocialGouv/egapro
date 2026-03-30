@@ -13,12 +13,9 @@ describe("buildExportRows", () => {
 	const mockJobFrom = vi.fn(() => ({ where: mockJobWhere }));
 	const mockSelectDistinct = vi.fn(() => ({ from: mockJobFrom }));
 
-	// Mock for getCseOpinionsByDeclaration + getCategoriesByDeclaration
+	// Mock for getCseOpinionsByDeclaration
 	const mockCseWhere = vi.fn();
 	const mockCseFrom = vi.fn(() => ({ where: mockCseWhere }));
-
-	const mockCatWhere = vi.fn();
-	const mockCatFrom = vi.fn(() => ({ where: mockCatWhere }));
 
 	const mockSelectGeneric = vi.fn<(...args: unknown[]) => unknown>();
 
@@ -33,12 +30,11 @@ describe("buildExportRows", () => {
 		vi.clearAllMocks();
 		callCount = 0;
 
-		// Call order: 1) declarations query, 2) CSE query, 3) categories query
+		// Call order: 1) declarations query, 2) CSE query
 		mockSelectGeneric.mockImplementation(() => {
 			callCount++;
 			if (callCount === 1) return { from: mockFrom };
-			if (callCount === 2) return { from: mockCseFrom };
-			return { from: mockCatFrom };
+			return { from: mockCseFrom };
 		});
 	});
 
@@ -46,7 +42,6 @@ describe("buildExportRows", () => {
 		mockWhere.mockResolvedValue([]);
 		mockJobWhere.mockResolvedValue([]);
 		mockCseWhere.mockResolvedValue([]);
-		mockCatWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -82,12 +77,60 @@ describe("buildExportRows", () => {
 			declarantLastName: "Dupont",
 			declarantEmail: "jean@acme.fr",
 			declarantPhone: "0612345678",
+			// Indicator A
+			indicatorAAnnualWomen: "35000",
+			indicatorAAnnualMen: "38000",
+			indicatorAHourlyWomen: null,
+			indicatorAHourlyMen: null,
+			// Indicator B
+			indicatorBAnnualWomen: null,
+			indicatorBAnnualMen: null,
+			indicatorBHourlyWomen: null,
+			indicatorBHourlyMen: null,
+			// Indicator C
+			indicatorCAnnualWomen: null,
+			indicatorCAnnualMen: null,
+			indicatorCHourlyWomen: null,
+			indicatorCHourlyMen: null,
+			// Indicator D
+			indicatorDAnnualWomen: null,
+			indicatorDAnnualMen: null,
+			indicatorDHourlyWomen: null,
+			indicatorDHourlyMen: null,
+			// Indicator E
+			indicatorEWomen: null,
+			indicatorEMen: null,
+			// Indicator F — annual
+			indicatorFAnnualThreshold1: null,
+			indicatorFAnnualWomen1: null,
+			indicatorFAnnualMen1: null,
+			indicatorFAnnualThreshold2: null,
+			indicatorFAnnualWomen2: null,
+			indicatorFAnnualMen2: null,
+			indicatorFAnnualThreshold3: null,
+			indicatorFAnnualWomen3: null,
+			indicatorFAnnualMen3: null,
+			indicatorFAnnualThreshold4: null,
+			indicatorFAnnualWomen4: null,
+			indicatorFAnnualMen4: null,
+			// Indicator F — hourly
+			indicatorFHourlyThreshold1: null,
+			indicatorFHourlyWomen1: null,
+			indicatorFHourlyMen1: null,
+			indicatorFHourlyThreshold2: null,
+			indicatorFHourlyWomen2: null,
+			indicatorFHourlyMen2: null,
+			indicatorFHourlyThreshold3: null,
+			indicatorFHourlyWomen3: null,
+			indicatorFHourlyMen3: null,
+			indicatorFHourlyThreshold4: null,
+			indicatorFHourlyWomen4: null,
+			indicatorFHourlyMen4: null,
 		};
 
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([]);
 		mockCseWhere.mockResolvedValue([]);
-		mockCatWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -99,9 +142,9 @@ describe("buildExportRows", () => {
 			declarationType: "6_indicateurs",
 			year: 2027,
 			declarantEmail: "jean@acme.fr",
-			// Indicator fields should be null when no categories
-			indAAnnualMeanWomen: null,
-			indBAnnualMeanWomen: null,
+			indAAnnualWomen: "35000",
+			indAAnnualMen: "38000",
+			indAHourlyWomen: null,
 			indFAnnualQ1Women: null,
 		});
 	});
@@ -133,12 +176,53 @@ describe("buildExportRows", () => {
 			declarantLastName: "Martin",
 			declarantEmail: "marie@bigco.fr",
 			declarantPhone: null,
+			indicatorAAnnualWomen: null,
+			indicatorAAnnualMen: null,
+			indicatorAHourlyWomen: null,
+			indicatorAHourlyMen: null,
+			indicatorBAnnualWomen: null,
+			indicatorBAnnualMen: null,
+			indicatorBHourlyWomen: null,
+			indicatorBHourlyMen: null,
+			indicatorCAnnualWomen: null,
+			indicatorCAnnualMen: null,
+			indicatorCHourlyWomen: null,
+			indicatorCHourlyMen: null,
+			indicatorDAnnualWomen: null,
+			indicatorDAnnualMen: null,
+			indicatorDHourlyWomen: null,
+			indicatorDHourlyMen: null,
+			indicatorEWomen: null,
+			indicatorEMen: null,
+			indicatorFAnnualThreshold1: null,
+			indicatorFAnnualWomen1: null,
+			indicatorFAnnualMen1: null,
+			indicatorFAnnualThreshold2: null,
+			indicatorFAnnualWomen2: null,
+			indicatorFAnnualMen2: null,
+			indicatorFAnnualThreshold3: null,
+			indicatorFAnnualWomen3: null,
+			indicatorFAnnualMen3: null,
+			indicatorFAnnualThreshold4: null,
+			indicatorFAnnualWomen4: null,
+			indicatorFAnnualMen4: null,
+			indicatorFHourlyThreshold1: null,
+			indicatorFHourlyWomen1: null,
+			indicatorFHourlyMen1: null,
+			indicatorFHourlyThreshold2: null,
+			indicatorFHourlyWomen2: null,
+			indicatorFHourlyMen2: null,
+			indicatorFHourlyThreshold3: null,
+			indicatorFHourlyWomen3: null,
+			indicatorFHourlyMen3: null,
+			indicatorFHourlyThreshold4: null,
+			indicatorFHourlyWomen4: null,
+			indicatorFHourlyMen4: null,
 		};
 
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([{ declarationId: "decl-1" }]);
 		mockCseWhere.mockResolvedValue([]);
-		mockCatWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -173,6 +257,48 @@ describe("buildExportRows", () => {
 			declarantLastName: "Dupont",
 			declarantEmail: "jean@acme.fr",
 			declarantPhone: "0612345678",
+			indicatorAAnnualWomen: null,
+			indicatorAAnnualMen: null,
+			indicatorAHourlyWomen: null,
+			indicatorAHourlyMen: null,
+			indicatorBAnnualWomen: null,
+			indicatorBAnnualMen: null,
+			indicatorBHourlyWomen: null,
+			indicatorBHourlyMen: null,
+			indicatorCAnnualWomen: null,
+			indicatorCAnnualMen: null,
+			indicatorCHourlyWomen: null,
+			indicatorCHourlyMen: null,
+			indicatorDAnnualWomen: null,
+			indicatorDAnnualMen: null,
+			indicatorDHourlyWomen: null,
+			indicatorDHourlyMen: null,
+			indicatorEWomen: null,
+			indicatorEMen: null,
+			indicatorFAnnualThreshold1: null,
+			indicatorFAnnualWomen1: null,
+			indicatorFAnnualMen1: null,
+			indicatorFAnnualThreshold2: null,
+			indicatorFAnnualWomen2: null,
+			indicatorFAnnualMen2: null,
+			indicatorFAnnualThreshold3: null,
+			indicatorFAnnualWomen3: null,
+			indicatorFAnnualMen3: null,
+			indicatorFAnnualThreshold4: null,
+			indicatorFAnnualWomen4: null,
+			indicatorFAnnualMen4: null,
+			indicatorFHourlyThreshold1: null,
+			indicatorFHourlyWomen1: null,
+			indicatorFHourlyMen1: null,
+			indicatorFHourlyThreshold2: null,
+			indicatorFHourlyWomen2: null,
+			indicatorFHourlyMen2: null,
+			indicatorFHourlyThreshold3: null,
+			indicatorFHourlyWomen3: null,
+			indicatorFHourlyMen3: null,
+			indicatorFHourlyThreshold4: null,
+			indicatorFHourlyWomen4: null,
+			indicatorFHourlyMen4: null,
 		};
 
 		mockWhere.mockResolvedValue([dbRow]);
@@ -191,7 +317,6 @@ describe("buildExportRows", () => {
 				opinionDate: "2027-02-20",
 			},
 		]);
-		mockCatWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -235,12 +360,53 @@ describe("buildExportRows", () => {
 			declarantLastName: null,
 			declarantEmail: "null@co.fr",
 			declarantPhone: null,
+			indicatorAAnnualWomen: null,
+			indicatorAAnnualMen: null,
+			indicatorAHourlyWomen: null,
+			indicatorAHourlyMen: null,
+			indicatorBAnnualWomen: null,
+			indicatorBAnnualMen: null,
+			indicatorBHourlyWomen: null,
+			indicatorBHourlyMen: null,
+			indicatorCAnnualWomen: null,
+			indicatorCAnnualMen: null,
+			indicatorCHourlyWomen: null,
+			indicatorCHourlyMen: null,
+			indicatorDAnnualWomen: null,
+			indicatorDAnnualMen: null,
+			indicatorDHourlyWomen: null,
+			indicatorDHourlyMen: null,
+			indicatorEWomen: null,
+			indicatorEMen: null,
+			indicatorFAnnualThreshold1: null,
+			indicatorFAnnualWomen1: null,
+			indicatorFAnnualMen1: null,
+			indicatorFAnnualThreshold2: null,
+			indicatorFAnnualWomen2: null,
+			indicatorFAnnualMen2: null,
+			indicatorFAnnualThreshold3: null,
+			indicatorFAnnualWomen3: null,
+			indicatorFAnnualMen3: null,
+			indicatorFAnnualThreshold4: null,
+			indicatorFAnnualWomen4: null,
+			indicatorFAnnualMen4: null,
+			indicatorFHourlyThreshold1: null,
+			indicatorFHourlyWomen1: null,
+			indicatorFHourlyMen1: null,
+			indicatorFHourlyThreshold2: null,
+			indicatorFHourlyWomen2: null,
+			indicatorFHourlyMen2: null,
+			indicatorFHourlyThreshold3: null,
+			indicatorFHourlyWomen3: null,
+			indicatorFHourlyMen3: null,
+			indicatorFHourlyThreshold4: null,
+			indicatorFHourlyWomen4: null,
+			indicatorFHourlyMen4: null,
 		};
 
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([]);
 		mockCseWhere.mockResolvedValue([]);
-		mockCatWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);

@@ -1,13 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
+import type { QuartileData } from "~/modules/declaration-remuneration/types";
 import { QuartileReadingNote } from "../step4/QuartileReadingNote";
 
-const categories: StepCategoryData[] = [
-	{ name: "1er quartile", womenCount: 19, menCount: 22, womenValue: "980" },
-	{ name: "2e quartile", womenCount: 17, menCount: 19, womenValue: "1450" },
-	{ name: "3e quartile", womenCount: 14, menCount: 17, womenValue: "1750" },
-	{ name: "4e quartile", womenCount: 5, menCount: 10, womenValue: "2300" },
+const categories: QuartileData[] = [
+	{ threshold: "980", women: 19, men: 22 },
+	{ threshold: "1450", women: 17, men: 19 },
+	{ threshold: "1750", women: 14, men: 17 },
+	{ threshold: "2300", women: 5, men: 10 },
 ];
 
 describe("QuartileReadingNote", () => {
@@ -52,9 +52,9 @@ describe("QuartileReadingNote", () => {
 	});
 
 	it("returns null when total is 0", () => {
-		const zeroCategories: StepCategoryData[] = [
-			{ name: "1er quartile", womenCount: 0, menCount: 0, womenValue: "980" },
-			{ name: "2e quartile", womenCount: 0, menCount: 0, womenValue: "1450" },
+		const zeroCategories: QuartileData[] = [
+			{ threshold: "980", women: 0, men: 0 },
+			{ threshold: "1450", women: 0, men: 0 },
 		];
 
 		const { container } = render(

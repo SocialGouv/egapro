@@ -1,17 +1,41 @@
-export type CategoryData = {
-	name: string;
-	women: number;
-	men: number;
+export type Step1Data = {
+	totalWomen: number;
+	totalMen: number;
 };
 
-export type StepCategoryData = {
-	name: string;
-	womenCount?: number;
-	menCount?: number;
-	womenValue?: string;
-	menValue?: string;
-	womenMedianValue?: string;
-	menMedianValue?: string;
+export type Step2Data = {
+	indicatorAAnnualWomen: string;
+	indicatorAAnnualMen: string;
+	indicatorAHourlyWomen: string;
+	indicatorAHourlyMen: string;
+	indicatorCAnnualWomen: string;
+	indicatorCAnnualMen: string;
+	indicatorCHourlyWomen: string;
+	indicatorCHourlyMen: string;
+};
+
+export type Step3Data = {
+	indicatorBAnnualWomen: string;
+	indicatorBAnnualMen: string;
+	indicatorBHourlyWomen: string;
+	indicatorBHourlyMen: string;
+	indicatorDAnnualWomen: string;
+	indicatorDAnnualMen: string;
+	indicatorDHourlyWomen: string;
+	indicatorDHourlyMen: string;
+	indicatorEWomen: string;
+	indicatorEMen: string;
+};
+
+export type QuartileData = {
+	threshold?: string;
+	women?: number;
+	men?: number;
+};
+
+export type Step4Data = {
+	annual: QuartileData[];
+	hourly: QuartileData[];
 };
 
 export type PayGapField = "womenValue" | "menValue";
@@ -20,12 +44,6 @@ export type PayGapRow = {
 	label: string;
 	womenValue: string;
 	menValue: string;
-};
-
-export type VariablePayData = {
-	rows: PayGapRow[];
-	beneficiaryWomen: string;
-	beneficiaryMen: string;
 };
 
 export type EmployeeCategoryRow = {

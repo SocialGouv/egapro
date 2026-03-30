@@ -8,7 +8,7 @@ const mockMutate = vi.fn();
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
-			updateStepCategories: {
+			updateStep2: {
 				useMutation: () => ({
 					mutate: mockMutate,
 					isPending: false,
@@ -19,9 +19,20 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+const emptyStep2Data = () => ({
+	indicatorAAnnualWomen: "",
+	indicatorAAnnualMen: "",
+	indicatorAHourlyWomen: "",
+	indicatorAHourlyMen: "",
+	indicatorCAnnualWomen: "",
+	indicatorCAnnualMen: "",
+	indicatorCHourlyWomen: "",
+	indicatorCHourlyMen: "",
+});
+
 describe("Step2PayGap", () => {
 	it("renders the table with 4 remuneration rows", () => {
-		render(<Step2PayGap />);
+		render(<Step2PayGap initialData={emptyStep2Data()} />);
 		expect(screen.getByText("Annuelle brute moyenne")).toBeInTheDocument();
 		expect(screen.getByText("Horaire brute moyenne")).toBeInTheDocument();
 		expect(screen.getByText("Annuelle brute médiane")).toBeInTheDocument();
@@ -29,7 +40,7 @@ describe("Step2PayGap", () => {
 	});
 
 	it("renders instruction text and mandatory fields notice", () => {
-		render(<Step2PayGap />);
+		render(<Step2PayGap initialData={emptyStep2Data()} />);
 		expect(
 			screen.getByText(
 				"Renseignez les informations avant de valider vos indicateurs.",
@@ -41,7 +52,7 @@ describe("Step2PayGap", () => {
 	});
 
 	it("renders table headers", () => {
-		render(<Step2PayGap />);
+		render(<Step2PayGap initialData={emptyStep2Data()} />);
 		expect(screen.getByText("Rémunération")).toBeInTheDocument();
 		expect(screen.getByText("Femmes")).toBeInTheDocument();
 		expect(screen.getByText("Hommes")).toBeInTheDocument();
@@ -51,32 +62,32 @@ describe("Step2PayGap", () => {
 		expect(screen.getByText("Seuil réglementaire : 5%")).toBeInTheDocument();
 	});
 
-	it("shows SavedIndicator when initialRows have data", () => {
+	it("shows SavedIndicator when initialData has data", () => {
 		render(
 			<Step2PayGap
-				initialRows={[
-					{
-						label: "Annuelle brute moyenne",
-						womenValue: "100",
-						menValue: "200",
-					},
-					{ label: "Horaire brute moyenne", womenValue: "", menValue: "" },
-					{ label: "Annuelle brute médiane", womenValue: "", menValue: "" },
-					{ label: "Horaire brute médiane", womenValue: "", menValue: "" },
-				]}
+				initialData={{
+					indicatorAAnnualWomen: "100",
+					indicatorAAnnualMen: "200",
+					indicatorAHourlyWomen: "",
+					indicatorAHourlyMen: "",
+					indicatorCAnnualWomen: "",
+					indicatorCAnnualMen: "",
+					indicatorCHourlyWomen: "",
+					indicatorCHourlyMen: "",
+				}}
 			/>,
 		);
 		expect(screen.getByText("Enregistré")).toBeInTheDocument();
 	});
 
-	it("does not show SavedIndicator when initialRows are empty", () => {
-		render(<Step2PayGap />);
+	it("does not show SavedIndicator when initialData is empty", () => {
+		render(<Step2PayGap initialData={emptyStep2Data()} />);
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
 	});
 
 	it("updates values via inline inputs and rejects negative values", async () => {
 		const user = userEvent.setup();
-		render(<Step2PayGap />);
+		render(<Step2PayGap initialData={emptyStep2Data()} />);
 
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
 		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
@@ -97,7 +108,7 @@ describe("Step2PayGap", () => {
 
 	it("computes gap and shows badge after entering values", async () => {
 		const user = userEvent.setup();
-		render(<Step2PayGap />);
+		render(<Step2PayGap initialData={emptyStep2Data()} />);
 
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
 		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
@@ -114,7 +125,7 @@ describe("Step2PayGap", () => {
 
 	it("shows no badge when gap is less than 5%", async () => {
 		const user = userEvent.setup();
-		render(<Step2PayGap />);
+		render(<Step2PayGap initialData={emptyStep2Data()} />);
 
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
 		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
@@ -131,14 +142,14 @@ describe("Step2PayGap", () => {
 	});
 
 	it("renders previous link pointing to step 1", () => {
-		render(<Step2PayGap />);
+		render(<Step2PayGap initialData={emptyStep2Data()} />);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
 			"/declaration-remuneration/etape/1",
 		);
 	});
 
-	it("uses gipPrefillData when no initialRows", () => {
+	it("uses gipPrefillData when no initialData", () => {
 		render(
 			<Step2PayGap
 				gipPrefillData={{
@@ -180,6 +191,7 @@ describe("Step2PayGap", () => {
 					confidenceIndex: null,
 					periodEnd: "2026-12-31",
 				}}
+				initialData={emptyStep2Data()}
 			/>,
 		);
 		// GIP rows should be used — check prefilled values
@@ -189,7 +201,7 @@ describe("Step2PayGap", () => {
 
 	it("shows validation error on submit when fields are incomplete", async () => {
 		const user = userEvent.setup();
-		render(<Step2PayGap />);
+		render(<Step2PayGap initialData={emptyStep2Data()} />);
 
 		const submitButton = screen.getByRole("button", { name: /suivant/i });
 		await user.click(submitButton);

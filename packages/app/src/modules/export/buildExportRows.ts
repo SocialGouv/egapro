@@ -4,20 +4,13 @@ import type { DB } from "~/server/db";
 import {
 	companies,
 	cseOpinions,
-	declarationCategories,
 	declarations,
 	employeeCategories,
 	jobCategories,
 	users,
 } from "~/server/db/schema";
-
-import type { CategoryRow, CseOpinionRow } from "./mapIndicators";
-import {
-	mapCseOpinions,
-	mapIndicatorA,
-	mapIndicatorB,
-	mapIndicatorF,
-} from "./mapIndicators";
+import type { CseOpinionRow } from "./mapIndicators";
+import { mapCseOpinions } from "./mapIndicators";
 import type { ExportRow, IndicatorGRow } from "./types";
 
 /**
@@ -56,6 +49,55 @@ export async function buildExportRows(
 			declarantLastName: users.lastName,
 			declarantEmail: users.email,
 			declarantPhone: users.phone,
+			// Indicator A
+			indicatorAAnnualWomen: declarations.indicatorAAnnualWomen,
+			indicatorAAnnualMen: declarations.indicatorAAnnualMen,
+			indicatorAHourlyWomen: declarations.indicatorAHourlyWomen,
+			indicatorAHourlyMen: declarations.indicatorAHourlyMen,
+			// Indicator B
+			indicatorBAnnualWomen: declarations.indicatorBAnnualWomen,
+			indicatorBAnnualMen: declarations.indicatorBAnnualMen,
+			indicatorBHourlyWomen: declarations.indicatorBHourlyWomen,
+			indicatorBHourlyMen: declarations.indicatorBHourlyMen,
+			// Indicator C
+			indicatorCAnnualWomen: declarations.indicatorCAnnualWomen,
+			indicatorCAnnualMen: declarations.indicatorCAnnualMen,
+			indicatorCHourlyWomen: declarations.indicatorCHourlyWomen,
+			indicatorCHourlyMen: declarations.indicatorCHourlyMen,
+			// Indicator D
+			indicatorDAnnualWomen: declarations.indicatorDAnnualWomen,
+			indicatorDAnnualMen: declarations.indicatorDAnnualMen,
+			indicatorDHourlyWomen: declarations.indicatorDHourlyWomen,
+			indicatorDHourlyMen: declarations.indicatorDHourlyMen,
+			// Indicator E
+			indicatorEWomen: declarations.indicatorEWomen,
+			indicatorEMen: declarations.indicatorEMen,
+			// Indicator F — annual
+			indicatorFAnnualThreshold1: declarations.indicatorFAnnualThreshold1,
+			indicatorFAnnualThreshold2: declarations.indicatorFAnnualThreshold2,
+			indicatorFAnnualThreshold3: declarations.indicatorFAnnualThreshold3,
+			indicatorFAnnualThreshold4: declarations.indicatorFAnnualThreshold4,
+			indicatorFAnnualWomen1: declarations.indicatorFAnnualWomen1,
+			indicatorFAnnualWomen2: declarations.indicatorFAnnualWomen2,
+			indicatorFAnnualWomen3: declarations.indicatorFAnnualWomen3,
+			indicatorFAnnualWomen4: declarations.indicatorFAnnualWomen4,
+			indicatorFAnnualMen1: declarations.indicatorFAnnualMen1,
+			indicatorFAnnualMen2: declarations.indicatorFAnnualMen2,
+			indicatorFAnnualMen3: declarations.indicatorFAnnualMen3,
+			indicatorFAnnualMen4: declarations.indicatorFAnnualMen4,
+			// Indicator F — hourly
+			indicatorFHourlyThreshold1: declarations.indicatorFHourlyThreshold1,
+			indicatorFHourlyThreshold2: declarations.indicatorFHourlyThreshold2,
+			indicatorFHourlyThreshold3: declarations.indicatorFHourlyThreshold3,
+			indicatorFHourlyThreshold4: declarations.indicatorFHourlyThreshold4,
+			indicatorFHourlyWomen1: declarations.indicatorFHourlyWomen1,
+			indicatorFHourlyWomen2: declarations.indicatorFHourlyWomen2,
+			indicatorFHourlyWomen3: declarations.indicatorFHourlyWomen3,
+			indicatorFHourlyWomen4: declarations.indicatorFHourlyWomen4,
+			indicatorFHourlyMen1: declarations.indicatorFHourlyMen1,
+			indicatorFHourlyMen2: declarations.indicatorFHourlyMen2,
+			indicatorFHourlyMen3: declarations.indicatorFHourlyMen3,
+			indicatorFHourlyMen4: declarations.indicatorFHourlyMen4,
 		})
 		.from(declarations)
 		.innerJoin(companies, eq(declarations.siren, companies.siren))
@@ -67,15 +109,13 @@ export async function buildExportRows(
 	const declarationIds = rows.map((r) => r.declarationId);
 	const sirenYears = rows.map((r) => ({ siren: r.siren, year: r.year }));
 
-	const [hasIndicatorG, cseMap, categoriesMap] = await Promise.all([
+	const [hasIndicatorG, cseMap] = await Promise.all([
 		getDeclarationsWithIndicatorG(db, declarationIds),
-		getCseOpinionsByDeclaration(db, declarationIds),
-		getCategoriesByDeclaration(db, sirenYears),
+		getCseOpinionsByDeclaration(db, sirenYears),
 	]);
 
 	return rows.map((row) => {
 		const key = `${row.siren}-${row.year}`;
-		const categories = categoriesMap.get(key) ?? [];
 
 		return {
 			siren: row.siren,
@@ -98,9 +138,55 @@ export async function buildExportRows(
 			variableRemunerationScore: row.variableRemunerationScore,
 			quartileScore: row.quartileScore,
 			categoryScore: row.categoryScore,
-			...mapIndicatorA(categories),
-			...mapIndicatorB(categories),
-			...mapIndicatorF(categories),
+			// Indicator A
+			indAAnnualWomen: row.indicatorAAnnualWomen,
+			indAAnnualMen: row.indicatorAAnnualMen,
+			indAHourlyWomen: row.indicatorAHourlyWomen,
+			indAHourlyMen: row.indicatorAHourlyMen,
+			// Indicator B
+			indBAnnualWomen: row.indicatorBAnnualWomen,
+			indBAnnualMen: row.indicatorBAnnualMen,
+			indBHourlyWomen: row.indicatorBHourlyWomen,
+			indBHourlyMen: row.indicatorBHourlyMen,
+			// Indicator C
+			indCAnnualWomen: row.indicatorCAnnualWomen,
+			indCAnnualMen: row.indicatorCAnnualMen,
+			indCHourlyWomen: row.indicatorCHourlyWomen,
+			indCHourlyMen: row.indicatorCHourlyMen,
+			// Indicator D
+			indDAnnualWomen: row.indicatorDAnnualWomen,
+			indDAnnualMen: row.indicatorDAnnualMen,
+			indDHourlyWomen: row.indicatorDHourlyWomen,
+			indDHourlyMen: row.indicatorDHourlyMen,
+			// Indicator E
+			indEWomen: row.indicatorEWomen,
+			indEMen: row.indicatorEMen,
+			// Indicator F — annual
+			indFAnnualQ1Threshold: row.indicatorFAnnualThreshold1,
+			indFAnnualQ1Women: row.indicatorFAnnualWomen1,
+			indFAnnualQ1Men: row.indicatorFAnnualMen1,
+			indFAnnualQ2Threshold: row.indicatorFAnnualThreshold2,
+			indFAnnualQ2Women: row.indicatorFAnnualWomen2,
+			indFAnnualQ2Men: row.indicatorFAnnualMen2,
+			indFAnnualQ3Threshold: row.indicatorFAnnualThreshold3,
+			indFAnnualQ3Women: row.indicatorFAnnualWomen3,
+			indFAnnualQ3Men: row.indicatorFAnnualMen3,
+			indFAnnualQ4Threshold: row.indicatorFAnnualThreshold4,
+			indFAnnualQ4Women: row.indicatorFAnnualWomen4,
+			indFAnnualQ4Men: row.indicatorFAnnualMen4,
+			// Indicator F — hourly
+			indFHourlyQ1Threshold: row.indicatorFHourlyThreshold1,
+			indFHourlyQ1Women: row.indicatorFHourlyWomen1,
+			indFHourlyQ1Men: row.indicatorFHourlyMen1,
+			indFHourlyQ2Threshold: row.indicatorFHourlyThreshold2,
+			indFHourlyQ2Women: row.indicatorFHourlyWomen2,
+			indFHourlyQ2Men: row.indicatorFHourlyMen2,
+			indFHourlyQ3Threshold: row.indicatorFHourlyThreshold3,
+			indFHourlyQ3Women: row.indicatorFHourlyWomen3,
+			indFHourlyQ3Men: row.indicatorFHourlyMen3,
+			indFHourlyQ4Threshold: row.indicatorFHourlyThreshold4,
+			indFHourlyQ4Women: row.indicatorFHourlyWomen4,
+			indFHourlyQ4Men: row.indicatorFHourlyMen4,
 			secondDeclarationStatus: row.secondDeclarationStatus,
 			secondDeclReferencePeriodStart: row.secondDeclReferencePeriodStart,
 			secondDeclReferencePeriodEnd: row.secondDeclReferencePeriodEnd,
@@ -170,48 +256,6 @@ async function getDeclarationsWithIndicatorG(
 		.where(inArray(jobCategories.declarationId, declarationIds));
 
 	return new Set(rows.map((r) => r.declarationId));
-}
-
-async function getCategoriesByDeclaration(
-	db: DB,
-	keys: Array<{ siren: string; year: number }>,
-): Promise<Map<string, CategoryRow[]>> {
-	if (keys.length === 0) return new Map();
-
-	const pairConditions = keys.map((k) =>
-		and(
-			eq(declarationCategories.siren, k.siren),
-			eq(declarationCategories.year, k.year),
-		),
-	);
-
-	const rows = await db
-		.select({
-			siren: declarationCategories.siren,
-			year: declarationCategories.year,
-			step: declarationCategories.step,
-			categoryName: declarationCategories.categoryName,
-			womenCount: declarationCategories.womenCount,
-			menCount: declarationCategories.menCount,
-			womenValue: declarationCategories.womenValue,
-			menValue: declarationCategories.menValue,
-		})
-		.from(declarationCategories)
-		.where(
-			and(
-				or(...pairConditions),
-				inArray(declarationCategories.step, [2, 3, 4]),
-			),
-		);
-
-	const map = new Map<string, CategoryRow[]>();
-	for (const row of rows) {
-		const key = `${row.siren}-${row.year}`;
-		const existing = map.get(key) ?? [];
-		existing.push(row);
-		map.set(key, existing);
-	}
-	return map;
 }
 
 async function getCseOpinionsByDeclaration(

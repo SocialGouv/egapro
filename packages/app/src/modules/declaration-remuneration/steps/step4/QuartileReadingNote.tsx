@@ -1,8 +1,8 @@
-import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
+import type { QuartileData } from "~/modules/declaration-remuneration/types";
 import { computePercentage } from "~/modules/domain";
 
 type Props = {
-	categories: StepCategoryData[];
+	categories: QuartileData[];
 	tableType: "annual" | "hourly";
 	year: number;
 };
@@ -18,9 +18,9 @@ export function QuartileReadingNote({ categories, tableType, year }: Props) {
 	const quartile = isAnnual ? categories[0] : categories[1];
 	if (!quartile) return null;
 
-	const threshold = quartile.womenValue;
-	const womenCount = quartile.womenCount ?? 0;
-	const menCount = quartile.menCount ?? 0;
+	const threshold = quartile.threshold;
+	const womenCount = quartile.women ?? 0;
+	const menCount = quartile.men ?? 0;
 	const total = womenCount + menCount;
 
 	if (!threshold || total === 0) return null;

@@ -26,53 +26,61 @@ export type ExportRow = {
 	quartileScore: number | null;
 	categoryScore: number | null;
 
-	// Indicator A — Pay gap (step 2)
-	indAAnnualMeanWomen: string | null;
-	indAAnnualMeanMen: string | null;
-	indAHourlyMeanWomen: string | null;
-	indAHourlyMeanMen: string | null;
-	indAAnnualMedianWomen: string | null;
-	indAAnnualMedianMen: string | null;
-	indAHourlyMedianWomen: string | null;
-	indAHourlyMedianMen: string | null;
+	// Indicator A — Global remuneration gap (mean)
+	indAAnnualWomen: string | null;
+	indAAnnualMen: string | null;
+	indAHourlyWomen: string | null;
+	indAHourlyMen: string | null;
 
-	// Indicator B — Variable pay gap (step 3)
-	indBAnnualMeanWomen: string | null;
-	indBAnnualMeanMen: string | null;
-	indBHourlyMeanWomen: string | null;
-	indBHourlyMeanMen: string | null;
-	indBAnnualMedianWomen: string | null;
-	indBAnnualMedianMen: string | null;
-	indBHourlyMedianWomen: string | null;
-	indBHourlyMedianMen: string | null;
-	indBBeneficiariesWomen: string | null;
-	indBBeneficiariesMen: string | null;
+	// Indicator B — Variable remuneration gap (mean)
+	indBAnnualWomen: string | null;
+	indBAnnualMen: string | null;
+	indBHourlyWomen: string | null;
+	indBHourlyMen: string | null;
 
-	// Indicator F — Quartile distribution (step 4)
+	// Indicator C — Global remuneration gap (median)
+	indCAnnualWomen: string | null;
+	indCAnnualMen: string | null;
+	indCHourlyWomen: string | null;
+	indCHourlyMen: string | null;
+
+	// Indicator D — Variable remuneration gap (median)
+	indDAnnualWomen: string | null;
+	indDAnnualMen: string | null;
+	indDHourlyWomen: string | null;
+	indDHourlyMen: string | null;
+
+	// Indicator E — Variable pay beneficiary count
+	indEWomen: string | null;
+	indEMen: string | null;
+
+	// Indicator F — Quartile distribution (annual)
+	indFAnnualQ1Threshold: string | null;
 	indFAnnualQ1Women: number | null;
 	indFAnnualQ1Men: number | null;
-	indFAnnualQ1Threshold: string | null;
+	indFAnnualQ2Threshold: string | null;
 	indFAnnualQ2Women: number | null;
 	indFAnnualQ2Men: number | null;
-	indFAnnualQ2Threshold: string | null;
+	indFAnnualQ3Threshold: string | null;
 	indFAnnualQ3Women: number | null;
 	indFAnnualQ3Men: number | null;
-	indFAnnualQ3Threshold: string | null;
+	indFAnnualQ4Threshold: string | null;
 	indFAnnualQ4Women: number | null;
 	indFAnnualQ4Men: number | null;
-	indFAnnualQ4Threshold: string | null;
+
+	// Indicator F — Quartile distribution (hourly)
+	indFHourlyQ1Threshold: string | null;
 	indFHourlyQ1Women: number | null;
 	indFHourlyQ1Men: number | null;
-	indFHourlyQ1Threshold: string | null;
+	indFHourlyQ2Threshold: string | null;
 	indFHourlyQ2Women: number | null;
 	indFHourlyQ2Men: number | null;
-	indFHourlyQ2Threshold: string | null;
+	indFHourlyQ3Threshold: string | null;
 	indFHourlyQ3Women: number | null;
 	indFHourlyQ3Men: number | null;
-	indFHourlyQ3Threshold: string | null;
+	indFHourlyQ4Threshold: string | null;
 	indFHourlyQ4Women: number | null;
 	indFHourlyQ4Men: number | null;
-	indFHourlyQ4Threshold: string | null;
 
 	// Second declaration
 	secondDeclarationStatus: string | null;

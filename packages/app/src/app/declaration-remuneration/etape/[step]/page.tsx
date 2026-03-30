@@ -19,24 +19,90 @@ export default async function StepPage({ params }: StepPageProps) {
 	}
 
 	const data = await api.declaration.getOrCreate();
+	const d = data.declaration;
 
 	// If declaration is already submitted, redirect non-recap steps to the recap
-	if (data.declaration.status === "submitted" && step !== 6) {
+	if (d.status === "submitted" && step !== 6) {
 		redirect("/declaration-remuneration/etape/6");
 	}
 
-	const stepCategories = (s: number) =>
-		data.categories
-			.filter((c) => c.step === s)
-			.map((c) => ({
-				name: c.categoryName,
-				womenCount: c.womenCount ?? undefined,
-				menCount: c.menCount ?? undefined,
-				womenValue: c.womenValue ?? undefined,
-				menValue: c.menValue ?? undefined,
-				womenMedianValue: c.womenMedianValue ?? undefined,
-				menMedianValue: c.menMedianValue ?? undefined,
-			}));
+	const gip = data.gipPrefillData;
+
+	const step1Data = {
+		totalWomen: d.totalWomen ?? gip?.step1.totalWomen ?? 0,
+		totalMen: d.totalMen ?? gip?.step1.totalMen ?? 0,
+	};
+
+	const step2Data = {
+		indicatorAAnnualWomen: d.indicatorAAnnualWomen ?? "",
+		indicatorAAnnualMen: d.indicatorAAnnualMen ?? "",
+		indicatorAHourlyWomen: d.indicatorAHourlyWomen ?? "",
+		indicatorAHourlyMen: d.indicatorAHourlyMen ?? "",
+		indicatorCAnnualWomen: d.indicatorCAnnualWomen ?? "",
+		indicatorCAnnualMen: d.indicatorCAnnualMen ?? "",
+		indicatorCHourlyWomen: d.indicatorCHourlyWomen ?? "",
+		indicatorCHourlyMen: d.indicatorCHourlyMen ?? "",
+	};
+
+	const step3Data = {
+		indicatorBAnnualWomen: d.indicatorBAnnualWomen ?? "",
+		indicatorBAnnualMen: d.indicatorBAnnualMen ?? "",
+		indicatorBHourlyWomen: d.indicatorBHourlyWomen ?? "",
+		indicatorBHourlyMen: d.indicatorBHourlyMen ?? "",
+		indicatorDAnnualWomen: d.indicatorDAnnualWomen ?? "",
+		indicatorDAnnualMen: d.indicatorDAnnualMen ?? "",
+		indicatorDHourlyWomen: d.indicatorDHourlyWomen ?? "",
+		indicatorDHourlyMen: d.indicatorDHourlyMen ?? "",
+		indicatorEWomen: d.indicatorEWomen ?? "",
+		indicatorEMen: d.indicatorEMen ?? "",
+	};
+
+	const step4Data = {
+		annual: [
+			{
+				threshold: d.indicatorFAnnualThreshold1 ?? "",
+				women: d.indicatorFAnnualWomen1 ?? undefined,
+				men: d.indicatorFAnnualMen1 ?? undefined,
+			},
+			{
+				threshold: d.indicatorFAnnualThreshold2 ?? "",
+				women: d.indicatorFAnnualWomen2 ?? undefined,
+				men: d.indicatorFAnnualMen2 ?? undefined,
+			},
+			{
+				threshold: d.indicatorFAnnualThreshold3 ?? "",
+				women: d.indicatorFAnnualWomen3 ?? undefined,
+				men: d.indicatorFAnnualMen3 ?? undefined,
+			},
+			{
+				threshold: d.indicatorFAnnualThreshold4 ?? "",
+				women: d.indicatorFAnnualWomen4 ?? undefined,
+				men: d.indicatorFAnnualMen4 ?? undefined,
+			},
+		],
+		hourly: [
+			{
+				threshold: d.indicatorFHourlyThreshold1 ?? "",
+				women: d.indicatorFHourlyWomen1 ?? undefined,
+				men: d.indicatorFHourlyMen1 ?? undefined,
+			},
+			{
+				threshold: d.indicatorFHourlyThreshold2 ?? "",
+				women: d.indicatorFHourlyWomen2 ?? undefined,
+				men: d.indicatorFHourlyMen2 ?? undefined,
+			},
+			{
+				threshold: d.indicatorFHourlyThreshold3 ?? "",
+				women: d.indicatorFHourlyWomen3 ?? undefined,
+				men: d.indicatorFHourlyMen3 ?? undefined,
+			},
+			{
+				threshold: d.indicatorFHourlyThreshold4 ?? "",
+				women: d.indicatorFHourlyWomen4 ?? undefined,
+				men: d.indicatorFHourlyMen4 ?? undefined,
+			},
+		],
+	};
 
 	const step5Categories = mapToEmployeeCategoryRows(
 		data.jobCategories,
@@ -46,62 +112,17 @@ export default async function StepPage({ params }: StepPageProps) {
 
 	const initialSource = data.jobCategories[0]?.source;
 
-	const savedStep1 = data.categories
-		.filter((c) => c.step === 1)
-		.map((c) => ({
-			name: c.categoryName,
-			women: c.womenCount ?? 0,
-			men: c.menCount ?? 0,
-		}));
-
-	const gip = data.gipPrefillData;
-	const step1Categories =
-		savedStep1.length > 0
-			? savedStep1
-			: gip?.step1
-				? [
-						{
-							name: "Nombre de salariés",
-							women: gip.step1.totalWomen ?? 0,
-							men: gip.step1.totalMen ?? 0,
-						},
-					]
-				: [];
-
-	const step2Rows = data.categories
-		.filter((c) => c.step === 2)
-		.map((c) => ({
-			label: c.categoryName,
-			womenValue: c.womenValue ?? "",
-			menValue: c.menValue ?? "",
-		}));
-
-	const beneficiaryRow = data.categories.find(
-		(c) => c.step === 3 && c.categoryName === "Bénéficiaires",
-	);
-	const step3Data = {
-		rows: data.categories
-			.filter((c) => c.step === 3 && c.categoryName !== "Bénéficiaires")
-			.map((c) => ({
-				label: c.categoryName,
-				womenValue: c.womenValue ?? "",
-				menValue: c.menValue ?? "",
-			})),
-		beneficiaryWomen: beneficiaryRow?.womenValue ?? "",
-		beneficiaryMen: beneficiaryRow?.menValue ?? "",
-	};
-
 	return (
 		<HydrateClient>
 			<StepPageClient
-				declaration={data.declaration}
+				declaration={d}
 				gipPrefillData={data.gipPrefillData ?? undefined}
 				initialSource={initialSource}
 				step={step}
-				step1Categories={step1Categories}
-				step2Rows={step2Rows}
+				step1Data={step1Data}
+				step2Data={step2Data}
 				step3Data={step3Data}
-				step4Categories={stepCategories(4)}
+				step4Data={step4Data}
 				step5Categories={step5Categories}
 			/>
 		</HydrateClient>

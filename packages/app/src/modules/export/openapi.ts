@@ -10,31 +10,6 @@ const declarantSchema = {
 	},
 } as const;
 
-const payValueSchema = {
-	type: "object",
-	properties: {
-		category: {
-			type: "string",
-			description: "Category label (e.g. 'Annuelle brute moyenne')",
-		},
-		womenValue: { type: ["string", "null"] },
-		menValue: { type: ["string", "null"] },
-	},
-} as const;
-
-const quartileSchema = {
-	type: "object",
-	properties: {
-		category: {
-			type: "string",
-			description: "Quartile label (e.g. 'annual:1er quartile')",
-		},
-		womenCount: { type: ["integer", "null"] },
-		menCount: { type: ["integer", "null"] },
-		womenValue: { type: ["string", "null"] },
-	},
-} as const;
-
 const indicatorGCategorySchema = {
 	type: "object",
 	properties: {
@@ -65,41 +40,96 @@ const cseOpinionSchema = {
 	},
 } as const;
 
+const indicatorFQuartileSchema = {
+	type: "object",
+	description: "Quartile breakdown with salary threshold and headcounts",
+	properties: {
+		threshold: {
+			type: ["string", "null"],
+			description: "Upper salary threshold for this quartile (numeric string)",
+		},
+		women: { type: ["integer", "null"], description: "Women headcount" },
+		men: { type: ["integer", "null"], description: "Men headcount" },
+	},
+} as const;
+
+const indicatorFSchema = {
+	type: "object",
+	description:
+		"Pay quartile distribution. Each array has 4 entries (Q1–Q4). Null values indicate the indicator was not provided.",
+	properties: {
+		annual: {
+			type: "array",
+			items: indicatorFQuartileSchema,
+			description: "Annual salary quartile distribution (Q1 to Q4)",
+		},
+		hourly: {
+			type: "array",
+			items: indicatorFQuartileSchema,
+			description: "Hourly salary quartile distribution (Q1 to Q4)",
+		},
+	},
+} as const;
+
+const indicatorPayGapSchema = {
+	type: "object",
+	description: "Pay gap values split by pay period (annual / hourly)",
+	properties: {
+		annualWomen: {
+			type: ["string", "null"],
+			description: "Annual pay — women (numeric string)",
+		},
+		annualMen: {
+			type: ["string", "null"],
+			description: "Annual pay — men (numeric string)",
+		},
+		hourlyWomen: {
+			type: ["string", "null"],
+			description: "Hourly pay — women (numeric string)",
+		},
+		hourlyMen: {
+			type: ["string", "null"],
+			description: "Hourly pay — men (numeric string)",
+		},
+	},
+} as const;
+
 const indicatorsSchema = {
 	type: "object",
 	description:
 		"Pre-calculated indicators A–F (from GIP-MDS DSN data) and company-declared indicator G",
 	properties: {
 		A: {
-			type: "array",
-			items: payValueSchema,
+			...indicatorPayGapSchema,
 			description: "Mean gross pay gap (annual + hourly)",
 		},
 		B: {
-			type: "array",
-			items: payValueSchema,
-			description: "Mean gross bonus gap (annual + hourly)",
+			...indicatorPayGapSchema,
+			description: "Mean gross variable pay gap (annual + hourly)",
 		},
 		C: {
-			type: "array",
-			items: payValueSchema,
+			...indicatorPayGapSchema,
 			description: "Median gross pay gap (annual + hourly)",
 		},
 		D: {
-			type: "array",
-			items: payValueSchema,
-			description: "Median gross bonus gap (annual + hourly)",
+			...indicatorPayGapSchema,
+			description: "Median gross variable pay gap (annual + hourly)",
 		},
 		E: {
-			type: "array",
-			items: payValueSchema,
-			description: "Beneficiaries count",
+			type: "object",
+			description: "Variable pay beneficiary count",
+			properties: {
+				women: {
+					type: ["string", "null"],
+					description: "Women beneficiary count (numeric string)",
+				},
+				men: {
+					type: ["string", "null"],
+					description: "Men beneficiary count (numeric string)",
+				},
+			},
 		},
-		F: {
-			type: "array",
-			items: quartileSchema,
-			description: "Pay distribution by quartile (annual + hourly)",
-		},
+		F: indicatorFSchema,
 		G: {
 			oneOf: [
 				{ type: "array", items: indicatorGCategorySchema },

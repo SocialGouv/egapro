@@ -53,9 +53,62 @@ function makeCategory(
 	};
 }
 
+const emptyDeclaration = () => ({
+	siren: "",
+	totalWomen: null,
+	totalMen: null,
+	status: null,
+});
+
+const emptyStep2Data = () => ({
+	indicatorAAnnualWomen: "",
+	indicatorAAnnualMen: "",
+	indicatorAHourlyWomen: "",
+	indicatorAHourlyMen: "",
+	indicatorCAnnualWomen: "",
+	indicatorCAnnualMen: "",
+	indicatorCHourlyWomen: "",
+	indicatorCHourlyMen: "",
+});
+
+const emptyStep3Data = () => ({
+	indicatorBAnnualWomen: "",
+	indicatorBAnnualMen: "",
+	indicatorBHourlyWomen: "",
+	indicatorBHourlyMen: "",
+	indicatorDAnnualWomen: "",
+	indicatorDAnnualMen: "",
+	indicatorDHourlyWomen: "",
+	indicatorDHourlyMen: "",
+	indicatorEWomen: "",
+	indicatorEMen: "",
+});
+
+const emptyStep4Data = () => ({
+	annual: [
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
+	],
+	hourly: [
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
+	],
+});
+
 describe("Step6Review", () => {
 	it("renders title and stepper at step 6", () => {
-		render(<Step6Review />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		expect(screen.getByText("Étape 6 sur 6")).toBeInTheDocument();
 		expect(
 			screen.getByText(/Déclaration des indicateurs de rémunération/),
@@ -63,14 +116,28 @@ describe("Step6Review", () => {
 	});
 
 	it("renders description text", () => {
-		render(<Step6Review />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		expect(
 			screen.getByText(/Vérifiez que toutes les informations/),
 		).toBeInTheDocument();
 	});
 
 	it("renders section headings", () => {
-		render(<Step6Review />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		expect(
 			screen.getByText("Indicateurs pour l'ensemble de vos salariés"),
 		).toBeInTheDocument();
@@ -80,12 +147,26 @@ describe("Step6Review", () => {
 	});
 
 	it("renders SavedIndicator", () => {
-		render(<Step6Review />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		expect(screen.getByText("Enregistré")).toBeInTheDocument();
 	});
 
 	it("renders all 4 recap card titles", () => {
-		render(<Step6Review />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		expect(
 			screen.getAllByText("Écart de rémunération").length,
 		).toBeGreaterThanOrEqual(1);
@@ -105,18 +186,39 @@ describe("Step6Review", () => {
 	});
 
 	it("does not render Modifier buttons", () => {
-		render(<Step6Review />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		expect(screen.queryAllByText("Modifier")).toHaveLength(0);
 	});
 
 	it("does not render check icons on cards", () => {
-		const { container } = render(<Step6Review />);
+		const { container } = render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		const checkIcons = container.querySelectorAll(".fr-icon-check-line");
 		expect(checkIcons).toHaveLength(0);
 	});
 
 	it("renders tooltip buttons on cards 3 and 4 only", () => {
-		const { container } = render(<Step6Review />);
+		const { container } = render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		const tooltipButtons = container.querySelectorAll(".fr-icon-question-line");
 		expect(tooltipButtons).toHaveLength(2);
 	});
@@ -124,28 +226,19 @@ describe("Step6Review", () => {
 	it("shows side-by-side Annuelle/Horaire brute with gaps for step 2", () => {
 		render(
 			<Step6Review
-				step2Rows={[
-					{
-						label: "Annuelle brute moyenne",
-						womenValue: "95",
-						menValue: "100",
-					},
-					{
-						label: "Horaire brute moyenne",
-						womenValue: "90",
-						menValue: "100",
-					},
-					{
-						label: "Annuelle brute médiane",
-						womenValue: "97",
-						menValue: "100",
-					},
-					{
-						label: "Horaire brute médiane",
-						womenValue: "80",
-						menValue: "100",
-					},
-				]}
+				declaration={emptyDeclaration()}
+				step2Data={{
+					indicatorAAnnualWomen: "95",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "90",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "97",
+					indicatorCAnnualMen: "100",
+					indicatorCHourlyWomen: "80",
+					indicatorCHourlyMen: "100",
+				}}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
 			/>,
 		);
 		expect(screen.getAllByText("Annuelle brute").length).toBeGreaterThanOrEqual(
@@ -163,7 +256,14 @@ describe("Step6Review", () => {
 	});
 
 	it("shows 'Aucune donnée renseignée' for empty steps", () => {
-		render(<Step6Review />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		const emptyMessages = screen.getAllByText("Aucune donnée renseignée.");
 		expect(emptyMessages.length).toBe(4);
 	});
@@ -171,22 +271,21 @@ describe("Step6Review", () => {
 	it("renders step 3 with side-by-side gaps and proportion", () => {
 		render(
 			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
 				step3Data={{
-					rows: [
-						{
-							label: "Annuelle brute moyenne",
-							womenValue: "95",
-							menValue: "100",
-						},
-						{
-							label: "Annuelle brute médiane",
-							womenValue: "",
-							menValue: "",
-						},
-					],
-					beneficiaryWomen: "45",
-					beneficiaryMen: "55",
+					indicatorBAnnualWomen: "95",
+					indicatorBAnnualMen: "100",
+					indicatorBHourlyWomen: "",
+					indicatorBHourlyMen: "",
+					indicatorDAnnualWomen: "",
+					indicatorDAnnualMen: "",
+					indicatorDHourlyWomen: "",
+					indicatorDHourlyMen: "",
+					indicatorEWomen: "45",
+					indicatorEMen: "55",
 				}}
+				step4Data={emptyStep4Data()}
 			/>,
 		);
 		expect(screen.getByText("45 %")).toBeInTheDocument();
@@ -197,28 +296,23 @@ describe("Step6Review", () => {
 	it("renders quartile data stacked annual then hourly", () => {
 		render(
 			<Step6Review
-				step4Categories={[
-					{
-						name: "annual:1er quartile",
-						womenCount: 46,
-						menCount: 54,
-					},
-					{
-						name: "annual:2e quartile",
-						womenCount: 47,
-						menCount: 53,
-					},
-					{
-						name: "hourly:1er quartile",
-						womenCount: 40,
-						menCount: 60,
-					},
-					{
-						name: "hourly:2e quartile",
-						womenCount: 50,
-						menCount: 50,
-					},
-				]}
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={{
+					annual: [
+						{ threshold: "1000", women: 46, men: 54 },
+						{ threshold: "1500", women: 47, men: 53 },
+						{ threshold: "2000" },
+						{ threshold: "3000" },
+					],
+					hourly: [
+						{ threshold: "10", women: 40, men: 60 },
+						{ threshold: "15", women: 50, men: 50 },
+						{ threshold: "20" },
+						{ threshold: "30" },
+					],
+				}}
 			/>,
 		);
 		expect(
@@ -235,6 +329,10 @@ describe("Step6Review", () => {
 	it("renders step 5 category gaps side-by-side", () => {
 		render(
 			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
 				step5Categories={[
 					makeCategory({
 						name: "Ingénieurs",
@@ -266,7 +364,14 @@ describe("Step6Review", () => {
 	});
 
 	it("renders previous link pointing to step 5", () => {
-		render(<Step6Review />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
 			"/declaration-remuneration/etape/5",
@@ -274,14 +379,29 @@ describe("Step6Review", () => {
 	});
 
 	it("renders next as a submit button when not submitted", () => {
-		render(<Step6Review />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		expect(
 			screen.getByRole("button", { name: /suivant/i }),
 		).toBeInTheDocument();
 	});
 
 	it("renders next link pointing to compliance path when already submitted", () => {
-		render(<Step6Review isSubmitted />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				isSubmitted
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
 			"href",
 			"/declaration-remuneration/parcours-conformite",
@@ -289,7 +409,15 @@ describe("Step6Review", () => {
 	});
 
 	it("renders previous link to home and next link to compliance path when already submitted", () => {
-		render(<Step6Review isSubmitted />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				isSubmitted
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
 			"/",
@@ -301,14 +429,29 @@ describe("Step6Review", () => {
 	});
 
 	it("renders PDF download button when submitted", () => {
-		render(<Step6Review isSubmitted />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				isSubmitted
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		expect(
 			screen.getByRole("link", { name: /télécharger le récapitulatif/i }),
 		).toHaveAttribute("href", "/api/declaration-pdf");
 	});
 
 	it("does not render PDF download button when not submitted", () => {
-		render(<Step6Review />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		expect(
 			screen.queryByRole("link", { name: /télécharger le récapitulatif/i }),
 		).not.toBeInTheDocument();
@@ -317,29 +460,24 @@ describe("Step6Review", () => {
 	it("shows 'Prochaines étapes' callout when a gap >= 5%", () => {
 		render(
 			<Step6Review
-				siren="532847196"
-				step2Rows={[
-					{
-						label: "Annuelle brute moyenne",
-						womenValue: "90",
-						menValue: "100",
-					},
-					{
-						label: "Horaire brute moyenne",
-						womenValue: "100",
-						menValue: "100",
-					},
-					{
-						label: "Annuelle brute médiane",
-						womenValue: "100",
-						menValue: "100",
-					},
-					{
-						label: "Horaire brute médiane",
-						womenValue: "100",
-						menValue: "100",
-					},
-				]}
+				declaration={{
+					siren: "532847196",
+					totalWomen: null,
+					totalMen: null,
+					status: null,
+				}}
+				step2Data={{
+					indicatorAAnnualWomen: "90",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "100",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "100",
+					indicatorCHourlyWomen: "100",
+					indicatorCHourlyMen: "100",
+				}}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
 			/>,
 		);
 		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
@@ -360,7 +498,14 @@ describe("Step6Review", () => {
 	});
 
 	it("renders 'Modèles d'avis CSE' link", () => {
-		render(<Step6Review />);
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
 		expect(
 			screen.getByRole("link", { name: /Modèles d.*avis CSE/ }),
 		).toHaveAttribute("href", "/avis-cse");
@@ -369,28 +514,19 @@ describe("Step6Review", () => {
 	it("does not show 'Prochaines étapes' callout when all gaps < 5%", () => {
 		render(
 			<Step6Review
-				step2Rows={[
-					{
-						label: "Annuelle brute moyenne",
-						womenValue: "98",
-						menValue: "100",
-					},
-					{
-						label: "Horaire brute moyenne",
-						womenValue: "99",
-						menValue: "100",
-					},
-					{
-						label: "Annuelle brute médiane",
-						womenValue: "97",
-						menValue: "100",
-					},
-					{
-						label: "Horaire brute médiane",
-						womenValue: "99",
-						menValue: "100",
-					},
-				]}
+				declaration={emptyDeclaration()}
+				step2Data={{
+					indicatorAAnnualWomen: "98",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "99",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "97",
+					indicatorCAnnualMen: "100",
+					indicatorCHourlyWomen: "99",
+					indicatorCHourlyMen: "100",
+				}}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
 			/>,
 		);
 		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();

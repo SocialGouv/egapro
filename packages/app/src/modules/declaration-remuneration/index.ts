@@ -8,7 +8,9 @@ export {
 	saveCompliancePathSchema,
 	updateEmployeeCategoriesSchema,
 	updateStep1Schema,
-	updateStepCategoriesSchema,
+	updateStep2Schema,
+	updateStep3Schema,
+	updateStep4Schema,
 } from "./schemas";
 export { ComplianceCompletionEffect } from "./shared/ComplianceCompletionEffect";
 export { DevFillButton } from "./shared/DevFillButton";
@@ -19,7 +21,6 @@ export type {
 	GipQuartileData,
 } from "./shared/gipMdsMapping";
 export { CSV_TO_SCHEMA_MAP, mapGipToFormData } from "./shared/gipMdsMapping";
-export { mapDbCategories } from "./shared/mapDbCategories";
 export { ComplianceConfirmation } from "./steps/ComplianceConfirmation";
 export { CompliancePathChoice } from "./steps/CompliancePathChoice";
 export { CompliancePathPage } from "./steps/CompliancePathPage";
@@ -39,10 +40,12 @@ export {
 } from "./steps/secondDeclaration";
 export { parseEmployeeCategories } from "./steps/step6/parseStep5Categories";
 export type {
-	CategoryData,
 	EmployeeCategoryRow,
 	PayGapRow,
-	StepCategoryData,
-	VariablePayData,
+	QuartileData,
+	Step1Data,
+	Step2Data,
+	Step3Data,
+	Step4Data,
 } from "./types";
 export { DEFAULT_CATEGORIES, STEP_TITLES, TOTAL_STEPS } from "./types";

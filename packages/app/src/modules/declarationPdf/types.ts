@@ -1,10 +1,29 @@
 import type {
-	CategoryData,
 	EmployeeCategoryRow,
 	PayGapRow,
-	StepCategoryData,
-	VariablePayData,
 } from "~/modules/declaration-remuneration/types";
+
+export type CategoryData = {
+	name: string;
+	women: number;
+	men: number;
+};
+
+export type VariablePayData = {
+	rows: PayGapRow[];
+	beneficiaryWomen: string;
+	beneficiaryMen: string;
+};
+
+export type QuartileCategory = {
+	name: string;
+	womenCount?: number;
+	menCount?: number;
+	womenValue?: string;
+	menValue?: string;
+	womenMedianValue?: string;
+	menMedianValue?: string;
+};
 
 export type DeclarationPdfData = {
 	companyName: string;
@@ -17,6 +36,6 @@ export type DeclarationPdfData = {
 	step1Categories: CategoryData[];
 	step2Rows: PayGapRow[];
 	step3Data: VariablePayData;
-	step4Categories: StepCategoryData[];
+	step4Categories: QuartileCategory[];
 	step5Categories: EmployeeCategoryRow[];
 };
