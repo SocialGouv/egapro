@@ -47,6 +47,11 @@ const declarations: DeclarationItem[] = [
 		status: "to_complete",
 		currentStep: 0,
 		updatedAt: null,
+		compliancePath: null,
+		secondDeclarationStatus: null,
+		complianceCompletedAt: null,
+		hasCseOpinion: false,
+		hasJointEvaluationFile: false,
 	},
 	{
 		type: "representation",
@@ -55,6 +60,11 @@ const declarations: DeclarationItem[] = [
 		status: "to_complete",
 		currentStep: 0,
 		updatedAt: null,
+		compliancePath: null,
+		secondDeclarationStatus: null,
+		complianceCompletedAt: null,
+		hasCseOpinion: false,
+		hasJointEvaluationFile: false,
 	},
 ];
 
