@@ -8,6 +8,17 @@ vi.mock("~/server/db", () => ({
 	db: {},
 }));
 
+vi.mock("~/server/db/schema", () => ({
+	declarations: { id: "id", siren: "siren", year: "year" },
+	jointEvaluationFiles: {
+		id: "id",
+		declarationId: "declarationId",
+		fileName: "fileName",
+		filePath: "filePath",
+		uploadedAt: "uploadedAt",
+	},
+}));
+
 const mockWhere = vi.fn();
 const mockFrom = vi.fn();
 const mockSelect = vi.fn();
@@ -18,11 +29,24 @@ const mockValues = vi.fn();
 const mockLimit = vi.fn();
 const mockTransaction = vi.fn();
 
+// Track select call order: 1st = declaration lookup, 2nd+ = procedure queries
+let selectCallCount = 0;
+
 function createMockDb(rows: unknown[] = []) {
-	mockLimit.mockResolvedValue(rows);
+	selectCallCount = 0;
+
+	// Declaration lookup: always returns a valid declaration
+	const declarationResult = [{ id: "decl-1" }];
+
+	mockLimit.mockImplementation(() => {
+		return Promise.resolve(selectCallCount <= 1 ? declarationResult : rows);
+	});
 	mockWhere.mockReturnValue({ limit: mockLimit });
 	mockFrom.mockReturnValue({ where: mockWhere });
-	mockSelect.mockReturnValue({ from: mockFrom });
+	mockSelect.mockImplementation(() => {
+		selectCallCount++;
+		return { from: mockFrom };
+	});
 
 	mockDeleteWhere.mockResolvedValue(undefined);
 	mockDelete.mockReturnValue({ where: mockDeleteWhere });
@@ -81,10 +105,9 @@ describe("jointEvaluationRouter", () => {
 			expect(mockInsert).toHaveBeenCalled();
 			expect(mockValues).toHaveBeenCalledWith(
 				expect.objectContaining({
-					siren: "339787277",
+					declarationId: "decl-1",
 					fileName: "evaluation.pdf",
 					filePath: "/uploads/evaluation.pdf",
-					declarantId: "user-1",
 				}),
 			);
 		});

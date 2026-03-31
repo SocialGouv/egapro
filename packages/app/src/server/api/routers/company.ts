@@ -133,13 +133,21 @@ export const companyRouter = createTRPCRouter({
 						.where(eq(declarations.siren, input.siren))
 						.orderBy(desc(declarations.year)),
 					ctx.db
-						.select({ year: cseOpinions.year })
+						.select({ year: declarations.year })
 						.from(cseOpinions)
-						.where(eq(cseOpinions.siren, input.siren)),
+						.innerJoin(
+							declarations,
+							eq(cseOpinions.declarationId, declarations.id),
+						)
+						.where(eq(declarations.siren, input.siren)),
 					ctx.db
-						.select({ year: jointEvaluationFiles.year })
+						.select({ year: declarations.year })
 						.from(jointEvaluationFiles)
-						.where(eq(jointEvaluationFiles.siren, input.siren)),
+						.innerJoin(
+							declarations,
+							eq(jointEvaluationFiles.declarationId, declarations.id),
+						)
+						.where(eq(declarations.siren, input.siren)),
 				]);
 
 			const yearsWithCseOpinion = new Set(cseOpinionRows.map((r) => r.year));

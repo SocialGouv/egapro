@@ -79,13 +79,13 @@ export async function setDeclarationComplianceState(state: {
 export async function insertJointEvaluationFile(year: number) {
 	const sql = createConnection();
 	try {
-		const declarantId = await sql`
-			SELECT u.id FROM app_user u WHERE u.siret LIKE ${`${TEST_SIREN}%`} LIMIT 1
+		const decl = await sql`
+			SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year} LIMIT 1
 		`;
-		if (declarantId.length === 0) return;
+		if (decl.length === 0) return;
 		await sql`
-			INSERT INTO app_joint_evaluation_file (id, siren, year, file_name, file_path, declarant_id, uploaded_at, created_at)
-			VALUES (gen_random_uuid(), ${TEST_SIREN}, ${year}, 'dummy.pdf', '/tmp/dummy.pdf', ${declarantId[0]?.id}, NOW(), NOW())
+			INSERT INTO app_joint_evaluation_file (id, declaration_id, file_name, file_path, uploaded_at, created_at)
+			VALUES (gen_random_uuid(), ${decl[0]?.id}, 'dummy.pdf', '/tmp/dummy.pdf', NOW(), NOW())
 			ON CONFLICT DO NOTHING
 		`;
 	} finally {
@@ -97,7 +97,12 @@ export async function insertJointEvaluationFile(year: number) {
 export async function deleteJointEvaluationFiles() {
 	const sql = createConnection();
 	try {
-		await sql`DELETE FROM app_joint_evaluation_file WHERE siren = ${TEST_SIREN}`;
+		await sql`
+			DELETE FROM app_joint_evaluation_file
+			WHERE declaration_id IN (
+				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
+			)
+		`;
 	} finally {
 		await sql.end();
 	}
@@ -107,13 +112,13 @@ export async function deleteJointEvaluationFiles() {
 export async function insertCseOpinion(year: number) {
 	const sql = createConnection();
 	try {
-		const declarantId = await sql`
-			SELECT u.id FROM app_user u WHERE u.siret LIKE ${`${TEST_SIREN}%`} LIMIT 1
+		const decl = await sql`
+			SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year} LIMIT 1
 		`;
-		if (declarantId.length === 0) return;
+		if (decl.length === 0) return;
 		await sql`
-			INSERT INTO app_cse_opinion (id, siren, year, declaration_number, type, declarant_id, created_at, updated_at)
-			VALUES (gen_random_uuid(), ${TEST_SIREN}, ${year}, 1, 'remuneration', ${declarantId[0]?.id}, NOW(), NOW())
+			INSERT INTO app_cse_opinion (id, declaration_id, declaration_number, type, created_at, updated_at)
+			VALUES (gen_random_uuid(), ${decl[0]?.id}, 1, 'remuneration', NOW(), NOW())
 			ON CONFLICT DO NOTHING
 		`;
 	} finally {
@@ -125,7 +130,12 @@ export async function insertCseOpinion(year: number) {
 export async function deleteCseOpinions() {
 	const sql = createConnection();
 	try {
-		await sql`DELETE FROM app_cse_opinion WHERE siren = ${TEST_SIREN}`;
+		await sql`
+			DELETE FROM app_cse_opinion
+			WHERE declaration_id IN (
+				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
+			)
+		`;
 	} finally {
 		await sql.end();
 	}

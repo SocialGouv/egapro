@@ -193,10 +193,7 @@ describe("GET /api/v1/export/declarations", () => {
 			{ siren: "222222222", year: 2027 },
 		]);
 		expect(mockFetchIndicatorG).toHaveBeenCalledWith(["decl-1", "decl-2"]);
-		expect(mockFetchCse).toHaveBeenCalledWith([
-			{ siren: "111111111", year: 2027 },
-			{ siren: "222222222", year: 2027 },
-		]);
+		expect(mockFetchCse).toHaveBeenCalledWith(["decl-1", "decl-2"]);
 	});
 
 	it("should return assembled declarations with indicators", async () => {

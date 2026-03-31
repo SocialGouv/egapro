@@ -14,6 +14,33 @@ import {
  */
 export const createTable = pgTableCreator((name) => `app_${name}`);
 
+type ColumnBuilder = Parameters<Parameters<typeof createTable>[1]>[0];
+
+/**
+ * Shared columns for file upload tables linked to a declaration.
+ * Used by cseOpinionFiles and jointEvaluationFiles.
+ */
+function declarationFileColumns(d: ColumnBuilder) {
+	return {
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		declarationId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => declarations.id),
+		fileName: d.varchar({ length: 255 }).notNull(),
+		filePath: d.varchar({ length: 500 }).notNull(),
+		uploadedAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	};
+}
+
 export const users = createTable("user", (d) => ({
 	id: d
 		.varchar({ length: 255 })
@@ -85,6 +112,9 @@ export const declarationsRelations = relations(
 		}),
 		categories: many(declarationCategories),
 		jobCategories: many(jobCategories),
+		cseOpinions: many(cseOpinions),
+		cseOpinionFiles: many(cseOpinionFiles),
+		jointEvaluationFiles: many(jointEvaluationFiles),
 	}),
 );
 
@@ -356,14 +386,10 @@ export const userCompaniesRelations = relations(userCompanies, ({ one }) => ({
 export const companiesRelations = relations(companies, ({ many }) => ({
 	userCompanies: many(userCompanies),
 	declarations: many(declarations),
-	cseOpinions: many(cseOpinions),
-	cseOpinionFiles: many(cseOpinionFiles),
-	jointEvaluationFiles: many(jointEvaluationFiles),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
 	userCompanies: many(userCompanies),
-	jointEvaluationFiles: many(jointEvaluationFiles),
 }));
 
 // ── CSE Opinion tables ──────────────────────────────────────────────
@@ -376,84 +402,48 @@ export const cseOpinions = createTable(
 			.notNull()
 			.primaryKey()
 			.$defaultFn(() => crypto.randomUUID()),
-		siren: d
-			.varchar({ length: 9 })
+		declarationId: d
+			.varchar({ length: 255 })
 			.notNull()
-			.references(() => companies.siren),
-		year: d.integer().notNull(),
+			.references(() => declarations.id),
 		declarationNumber: d.integer().notNull(),
 		type: d.varchar({ length: 20 }).notNull(),
 		gapConsulted: d.boolean(),
 		opinion: d.varchar({ length: 20 }),
 		opinionDate: d.varchar({ length: 10 }),
-		declarantId: d
-			.varchar({ length: 255 })
-			.notNull()
-			.references(() => users.id),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 	}),
 	(t) => [
-		unique("cse_opinion_siren_year_decl_type_idx").on(
-			t.siren,
-			t.year,
+		unique("cse_opinion_decl_number_type_idx").on(
+			t.declarationId,
 			t.declarationNumber,
 			t.type,
 		),
-		index("cse_opinion_siren_year_idx").on(t.siren, t.year),
+		index("cse_opinion_declaration_idx").on(t.declarationId),
 	],
 );
 
 export const cseOpinionsRelations = relations(cseOpinions, ({ one, many }) => ({
-	company: one(companies, {
-		fields: [cseOpinions.siren],
-		references: [companies.siren],
-	}),
-	declarant: one(users, {
-		fields: [cseOpinions.declarantId],
-		references: [users.id],
+	declaration: one(declarations, {
+		fields: [cseOpinions.declarationId],
+		references: [declarations.id],
 	}),
 	fileLinks: many(cseOpinionFileLinks),
 }));
 
 export const cseOpinionFiles = createTable(
 	"cse_opinion_file",
-	(d) => ({
-		id: d
-			.varchar({ length: 255 })
-			.notNull()
-			.primaryKey()
-			.$defaultFn(() => crypto.randomUUID()),
-		siren: d
-			.varchar({ length: 9 })
-			.notNull()
-			.references(() => companies.siren),
-		year: d.integer().notNull(),
-		fileName: d.varchar({ length: 255 }).notNull(),
-		filePath: d.varchar({ length: 500 }).notNull(),
-		declarantId: d
-			.varchar({ length: 255 })
-			.notNull()
-			.references(() => users.id),
-		uploadedAt: d
-			.timestamp({ withTimezone: true })
-			.notNull()
-			.$defaultFn(() => new Date()),
-		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
-	}),
-	(t) => [index("cse_opinion_file_siren_year_idx").on(t.siren, t.year)],
+	(d) => declarationFileColumns(d),
+	(t) => [index("cse_opinion_file_declaration_idx").on(t.declarationId)],
 );
 
 export const cseOpinionFilesRelations = relations(
 	cseOpinionFiles,
 	({ one, many }) => ({
-		company: one(companies, {
-			fields: [cseOpinionFiles.siren],
-			references: [companies.siren],
-		}),
-		declarant: one(users, {
-			fields: [cseOpinionFiles.declarantId],
-			references: [users.id],
+		declaration: one(declarations, {
+			fields: [cseOpinionFiles.declarationId],
+			references: [declarations.id],
 		}),
 		opinionLinks: many(cseOpinionFileLinks),
 	}),
@@ -490,42 +480,16 @@ export const cseOpinionFileLinksRelations = relations(
 
 export const jointEvaluationFiles = createTable(
 	"joint_evaluation_file",
-	(d) => ({
-		id: d
-			.varchar({ length: 255 })
-			.notNull()
-			.primaryKey()
-			.$defaultFn(() => crypto.randomUUID()),
-		siren: d
-			.varchar({ length: 9 })
-			.notNull()
-			.references(() => companies.siren),
-		year: d.integer().notNull(),
-		fileName: d.varchar({ length: 255 }).notNull(),
-		filePath: d.varchar({ length: 500 }).notNull(),
-		declarantId: d
-			.varchar({ length: 255 })
-			.notNull()
-			.references(() => users.id),
-		uploadedAt: d
-			.timestamp({ withTimezone: true })
-			.notNull()
-			.$defaultFn(() => new Date()),
-		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
-	}),
-	(t) => [index("joint_eval_file_siren_year_idx").on(t.siren, t.year)],
+	(d) => declarationFileColumns(d),
+	(t) => [unique("joint_eval_file_declaration_idx").on(t.declarationId)],
 );
 
 export const jointEvaluationFilesRelations = relations(
 	jointEvaluationFiles,
 	({ one }) => ({
-		company: one(companies, {
-			fields: [jointEvaluationFiles.siren],
-			references: [companies.siren],
-		}),
-		declarant: one(users, {
-			fields: [jointEvaluationFiles.declarantId],
-			references: [users.id],
+		declaration: one(declarations, {
+			fields: [jointEvaluationFiles.declarationId],
+			references: [declarations.id],
 		}),
 	}),
 );

@@ -347,10 +347,12 @@ describe("companyRouter.getWithDeclarations", () => {
 					}),
 				};
 			}
-			// cseOpinions + jointEvaluationFiles queries
+			// cseOpinions + jointEvaluationFiles queries (join through declarations)
 			return {
 				from: vi.fn().mockReturnValue({
-					where: vi.fn().mockResolvedValue([]),
+					innerJoin: vi.fn().mockReturnValue({
+						where: vi.fn().mockResolvedValue([]),
+					}),
 				}),
 			};
 		});
