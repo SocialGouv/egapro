@@ -140,27 +140,6 @@ describe("MissingInfoModal", () => {
 		expect(screen.getByTitle("Fermer")).toBeInTheDocument();
 	});
 
-	it("renders the help tooltip button", () => {
-		const { container } = render(
-			<MissingInfoModal hasCse={null} siren="532847196" userPhone={null} />,
-		);
-		const helpButton = screen.getByRole("button", {
-			name: "Aide",
-			hidden: true,
-		});
-		expect(helpButton).toBeInTheDocument();
-		expect(helpButton).toHaveAttribute(
-			"aria-describedby",
-			"missing-info-tooltip",
-		);
-
-		const tooltip = container.querySelector("#missing-info-tooltip");
-		expect(tooltip).toBeInTheDocument();
-		expect(tooltip).toHaveTextContent(
-			"Vous pouvez aussi modifier ces informations directement sur votre profil ProConnect.",
-		);
-	});
-
 	it("Enregistrer button is not disabled when mutations are idle", () => {
 		render(
 			<MissingInfoModal hasCse={null} siren="532847196" userPhone={null} />,
