@@ -37,7 +37,7 @@ ALTER TABLE "app_cse_opinion_file" ADD CONSTRAINT "app_cse_opinion_file_declarat
 ALTER TABLE "app_joint_evaluation_file" ADD CONSTRAINT "app_joint_evaluation_file_declaration_id_app_declaration_id_fk" FOREIGN KEY ("declaration_id") REFERENCES "public"."app_declaration"("id") ON DELETE no action ON UPDATE no action;
 
 -- Step 5: Drop old constraints and indexes
-DROP INDEX IF EXISTS "cse_opinion_siren_year_decl_type_idx";
+ALTER TABLE "app_cse_opinion" DROP CONSTRAINT IF EXISTS "cse_opinion_siren_year_decl_type_idx";
 DROP INDEX IF EXISTS "cse_opinion_siren_year_idx";
 DROP INDEX IF EXISTS "cse_opinion_file_siren_year_idx";
 DROP INDEX IF EXISTS "joint_eval_file_siren_year_idx";
