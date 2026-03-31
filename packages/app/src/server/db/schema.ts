@@ -14,6 +14,33 @@ import {
  */
 export const createTable = pgTableCreator((name) => `app_${name}`);
 
+type ColumnBuilder = Parameters<Parameters<typeof createTable>[1]>[0];
+
+/**
+ * Shared columns for file upload tables linked to a declaration.
+ * Used by cseOpinionFiles and jointEvaluationFiles.
+ */
+function declarationFileColumns(d: ColumnBuilder) {
+	return {
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		declarationId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => declarations.id),
+		fileName: d.varchar({ length: 255 }).notNull(),
+		filePath: d.varchar({ length: 500 }).notNull(),
+		uploadedAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	};
+}
+
 export const users = createTable("user", (d) => ({
 	id: d
 		.varchar({ length: 255 })
@@ -407,24 +434,7 @@ export const cseOpinionsRelations = relations(cseOpinions, ({ one, many }) => ({
 
 export const cseOpinionFiles = createTable(
 	"cse_opinion_file",
-	(d) => ({
-		id: d
-			.varchar({ length: 255 })
-			.notNull()
-			.primaryKey()
-			.$defaultFn(() => crypto.randomUUID()),
-		declarationId: d
-			.varchar({ length: 255 })
-			.notNull()
-			.references(() => declarations.id),
-		fileName: d.varchar({ length: 255 }).notNull(),
-		filePath: d.varchar({ length: 500 }).notNull(),
-		uploadedAt: d
-			.timestamp({ withTimezone: true })
-			.notNull()
-			.$defaultFn(() => new Date()),
-		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
-	}),
+	(d) => declarationFileColumns(d),
 	(t) => [index("cse_opinion_file_declaration_idx").on(t.declarationId)],
 );
 
@@ -470,24 +480,7 @@ export const cseOpinionFileLinksRelations = relations(
 
 export const jointEvaluationFiles = createTable(
 	"joint_evaluation_file",
-	(d) => ({
-		id: d
-			.varchar({ length: 255 })
-			.notNull()
-			.primaryKey()
-			.$defaultFn(() => crypto.randomUUID()),
-		declarationId: d
-			.varchar({ length: 255 })
-			.notNull()
-			.references(() => declarations.id),
-		fileName: d.varchar({ length: 255 }).notNull(),
-		filePath: d.varchar({ length: 500 }).notNull(),
-		uploadedAt: d
-			.timestamp({ withTimezone: true })
-			.notNull()
-			.$defaultFn(() => new Date()),
-		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
-	}),
+	(d) => declarationFileColumns(d),
 	(t) => [unique("joint_eval_file_declaration_idx").on(t.declarationId)],
 );
 
