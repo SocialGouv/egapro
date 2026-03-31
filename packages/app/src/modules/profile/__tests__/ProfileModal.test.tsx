@@ -93,6 +93,22 @@ describe("ProfileModal", () => {
 		expect(closeButton).toHaveAttribute("aria-controls", "profile-modal");
 	});
 
+	it("renders the help tooltip button", () => {
+		const { container } = render(<ProfileModal />);
+		const helpButton = screen.getByRole("button", {
+			name: "Aide",
+			...hiddenOpt,
+		});
+		expect(helpButton).toBeInTheDocument();
+		expect(helpButton).toHaveAttribute("aria-describedby", "profile-tooltip");
+
+		const tooltip = container.querySelector("#profile-tooltip");
+		expect(tooltip).toBeInTheDocument();
+		expect(tooltip).toHaveTextContent(
+			"Vous pouvez aussi modifier ces informations directement sur votre profil ProConnect.",
+		);
+	});
+
 	it("renders the readonly Nom field with label and edit icon", () => {
 		render(<ProfileModal />);
 		expect(screen.getByText("Nom")).toBeInTheDocument();
