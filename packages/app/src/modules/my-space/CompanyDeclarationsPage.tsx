@@ -1,4 +1,4 @@
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, hasRequiredDeclarationInfo } from "~/modules/domain";
 
 import { ArchivesSection } from "./ArchivesSection";
 import { CompanyEditModal } from "./CompanyEditModal";
@@ -60,7 +60,7 @@ export function CompanyDeclarationsPage({
 			/>
 			<ArchivesSection />
 			<CompanyEditModal company={company} />
-			{(!userPhone || company.hasCse === null) && (
+			{!hasRequiredDeclarationInfo(userPhone, company.hasCse) && (
 				<MissingInfoModal
 					hasCse={company.hasCse}
 					siren={company.siren}

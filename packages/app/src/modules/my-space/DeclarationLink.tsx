@@ -1,5 +1,7 @@
 "use client";
 
+import { hasRequiredDeclarationInfo } from "~/modules/domain";
+
 import { DECLARATION_PROCESS_PANEL_ID } from "./DeclarationProcessPanel";
 import type { DeclarationType } from "./types";
 
@@ -21,7 +23,7 @@ export function DeclarationLink({
 	hasCse,
 	children,
 }: Props) {
-	const hasMissingInfo = !userPhone || hasCse === null;
+	const hasMissingInfo = !hasRequiredDeclarationInfo(userPhone, hasCse);
 
 	// When info is missing, open missing-info modal (for both types)
 	if (hasMissingInfo) {
