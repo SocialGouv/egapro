@@ -19,6 +19,8 @@ export {
 	GAP_ALERT_THRESHOLD,
 	MAX_CSE_FILES,
 } from "./shared/constants";
+// Declaration prerequisites
+export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";
 // Declaration status
 export { computeDeclarationStatus } from "./shared/declarationStatus";
 // Display formatting (%, €, units)
