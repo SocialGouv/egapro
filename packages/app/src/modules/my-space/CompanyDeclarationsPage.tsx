@@ -5,8 +5,8 @@ import { CompanyEditModal } from "./CompanyEditModal";
 import { CompanyInfoBanner } from "./CompanyInfoBanner";
 import { DeclarationProcessPanel } from "./DeclarationProcessPanel";
 import { DeclarationsSection } from "./DeclarationsSection";
-import { MissingInfoModal } from "./MissingInfoModal";
 import { computeCtaHref, computePanelVariant } from "./declarationProcessState";
+import { MissingInfoModal } from "./MissingInfoModal";
 import type { CompanyDetail, DeclarationItem } from "./types";
 import { WelcomeBanner } from "./WelcomeBanner";
 
@@ -17,25 +17,20 @@ type Props = {
 	userPhone: string | null;
 };
 
-function getLastActionDate(declarations: DeclarationItem[]): string | null {
-	const remunerationDeclarations = declarations.filter(
-		(d) => d.type === "remuneration" && d.updatedAt,
+function getLastActionDate(
+	declarations: DeclarationItem[],
+	year: number,
+): string | null {
+	const currentYearDeclaration = declarations.find(
+		(d) => d.type === "remuneration" && d.year === year && d.updatedAt,
 	);
-	if (remunerationDeclarations.length === 0) return null;
-
-	const mostRecent = remunerationDeclarations.reduce((latest, d) =>
-		d.updatedAt && (!latest.updatedAt || d.updatedAt > latest.updatedAt)
-			? d
-			: latest,
-	);
-
-	if (!mostRecent.updatedAt) return null;
+	if (!currentYearDeclaration?.updatedAt) return null;
 
 	return new Intl.DateTimeFormat("fr-FR", {
 		day: "numeric",
 		month: "long",
 		year: "numeric",
-	}).format(mostRecent.updatedAt);
+	}).format(currentYearDeclaration.updatedAt);
 }
 
 export function CompanyDeclarationsPage({
@@ -45,7 +40,7 @@ export function CompanyDeclarationsPage({
 	userPhone,
 }: Props) {
 	const currentYear = getCurrentYear();
-	const lastActionDate = getLastActionDate(declarations);
+	const lastActionDate = getLastActionDate(declarations, currentYear);
 	const currentDeclaration = declarations.find(
 		(d) => d.type === "remuneration" && d.year === currentYear,
 	);
@@ -75,7 +70,6 @@ export function CompanyDeclarationsPage({
 			<DeclarationProcessPanel
 				ctaHref={ctaHref}
 				lastActionDate={lastActionDate}
-				siren={company.siren}
 				variant={panelVariant}
 				year={currentYear}
 			/>

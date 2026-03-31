@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { getDsfrModal } from "~/modules/shared";
 import { PhoneField } from "~/modules/shared/PhoneField";
@@ -30,25 +30,11 @@ function getDescription(needsPhone: boolean, needsCse: boolean): string {
 	return "Pour continuer, vous devez indiquer si un CSE a été mis en place dans votre entreprise.";
 }
 
-/**
- * Read which declaration type triggered this modal from the opener button's
- * data-declaration-type attribute. Falls back to "remuneration".
- */
-function getOpenerDeclarationType(): "remuneration" | "representation" {
-	const opener = document.querySelector<HTMLElement>(
-		`[aria-controls="${MODAL_ID}"][data-declaration-type]`,
-	);
-	if (opener?.dataset.declarationType === "representation") {
-		return "representation";
-	}
-	return "remuneration";
-}
+type OpenerType = "remuneration" | "representation";
 
 export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
-	const openerTypeRef = useRef<"remuneration" | "representation">(
-		"remuneration",
-	);
+	const openerTypeRef = useRef<OpenerType>("remuneration");
 	const needsPhone = !userPhone;
 	const needsCse = hasCse === null;
 
@@ -72,11 +58,27 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 		if (dialog) getDsfrModal(dialog)?.conceal();
 	}, []);
 
+	// Capture the opener type at click time (before the DSFR dialog opens),
+	// which is more reliable than querying the DOM after the dialog animation.
+	useEffect(() => {
+		const handler = (e: Event) => {
+			const target = (e.target as HTMLElement).closest<HTMLElement>(
+				`[aria-controls="${MODAL_ID}"]`,
+			);
+			if (!target) return;
+			openerTypeRef.current =
+				target.dataset.declarationType === "representation"
+					? "representation"
+					: "remuneration";
+		};
+		document.addEventListener("click", handler, true);
+		return () => document.removeEventListener("click", handler, true);
+	}, []);
+
 	useDsfrDialogOpen(
 		dialogRef,
 		useCallback(() => {
 			form.reset({ phone: "", hasCse: undefined });
-			openerTypeRef.current = getOpenerDeclarationType();
 		}, [form]),
 	);
 

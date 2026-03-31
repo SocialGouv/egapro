@@ -18,7 +18,6 @@ type StepStatus = "pending" | "current" | "complete";
 
 type Props = {
 	year: number;
-	siren: string;
 	lastActionDate: string | null;
 	variant: PanelVariant;
 	ctaHref: string;
@@ -42,7 +41,6 @@ function getStepStatuses(
 
 export function DeclarationProcessPanel({
 	year,
-	siren,
 	lastActionDate,
 	variant,
 	ctaHref,
