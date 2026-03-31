@@ -7,6 +7,9 @@ import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
 const BASE_PROPS = {
 	year: 2027,
 	lastActionDate: "12 mars 2026" as string | null,
+	compliancePath: null as string | null,
+	secondDeclarationStatus: null as string | null,
+	siren: "532847196",
 	ctaHref: "/declaration-remuneration?siren=532847196",
 };
 
@@ -120,10 +123,63 @@ describe("DeclarationProcessPanel", () => {
 
 	describe("variant: cse", () => {
 		it("renders CSE deposit step with deadline", () => {
-			const { panel } = renderPanel("cse");
+			const { panel } = renderPanel("cse", {
+				compliancePath: "corrective_action",
+			});
 			expect(
 				panel.getByText("Déposer le ou les avis du CSE"),
 			).toBeInTheDocument();
+		});
+
+		it("renders justification bullet for justify path", () => {
+			const { panel } = renderPanel("cse", { compliancePath: "justify" });
+			expect(
+				panel.getByText("Justification des écarts de rémunération"),
+			).toBeInTheDocument();
+		});
+
+		it("renders second declaration when submitted, even with justify path", () => {
+			const { panel } = renderPanel("cse", {
+				compliancePath: "justify",
+				secondDeclarationStatus: "submitted",
+			});
+			expect(
+				panel.getByText("Votre seconde déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(
+				panel.getByText("Justification des écarts de rémunération"),
+			).toBeInTheDocument();
+		});
+
+		it("renders evaluation conjointe for joint_evaluation path", () => {
+			const { panel } = renderPanel("cse", {
+				compliancePath: "joint_evaluation",
+			});
+			expect(
+				panel.getByText(
+					"Votre rapport de l'évaluation conjointe a été transmis",
+				),
+			).toBeInTheDocument();
+		});
+
+		it("renders second declaration and evaluation conjointe for corrective_action path", () => {
+			const { panel } = renderPanel("cse", {
+				compliancePath: "corrective_action",
+				secondDeclarationStatus: "submitted",
+			});
+			expect(
+				panel.getByText("Votre seconde déclaration a été transmise"),
+			).toBeInTheDocument();
+		});
+
+		it("does not render second declaration when not submitted", () => {
+			const { panel } = renderPanel("cse", {
+				compliancePath: "corrective_action",
+				secondDeclarationStatus: null,
+			});
+			expect(
+				panel.queryByText("Votre seconde déclaration a été transmise"),
+			).not.toBeInTheDocument();
 		});
 	});
 
