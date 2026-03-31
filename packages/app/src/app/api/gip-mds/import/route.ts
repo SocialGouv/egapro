@@ -6,9 +6,17 @@ import { fetchGipCsv, importGipCsvToDb } from "~/server/services/gipMds";
  * POST /api/gip-mds/import
  *
  * Trigger GIP MDS CSV import from the configured API URL.
- * Called by the deployment job (dev/review environments) or manually.
+ * Called by the K8s CronJob with a Bearer token for authentication.
  */
-export async function POST() {
+export async function POST(request: Request) {
+	const token = env.EGAPRO_GIP_MDS_API_TOKEN;
+	if (token) {
+		const authHeader = request.headers.get("authorization");
+		if (authHeader !== `Bearer ${token}`) {
+			return Response.json({ error: "Unauthorized" }, { status: 401 });
+		}
+	}
+
 	const url = env.EGAPRO_GIP_MDS_API_URL;
 	if (!url) {
 		return Response.json(

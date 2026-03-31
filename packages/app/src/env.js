@@ -55,6 +55,7 @@ export const env = createEnv({
 		CLAMAV_PORT: z.coerce.number(),
 		NEXTAUTH_URL: z.string().url(),
 		EGAPRO_GIP_MDS_API_URL: z.string().url().optional(),
+		EGAPRO_GIP_MDS_API_TOKEN: z.string().optional(),
 		EGAPRO_MOCK_SUIT_SANCTION: z.coerce.boolean().optional().default(false),
 	},
 
@@ -97,6 +98,7 @@ export const env = createEnv({
 		CLAMAV_PORT: process.env.CLAMAV_PORT,
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 		EGAPRO_GIP_MDS_API_URL: process.env.EGAPRO_GIP_MDS_API_URL,
+		EGAPRO_GIP_MDS_API_TOKEN: process.env.EGAPRO_GIP_MDS_API_TOKEN,
 		EGAPRO_MOCK_SUIT_SANCTION: process.env.EGAPRO_MOCK_SUIT_SANCTION,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,

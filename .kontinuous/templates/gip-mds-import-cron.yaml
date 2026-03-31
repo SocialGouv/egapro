@@ -25,11 +25,18 @@ spec:
               image: curlimages/curl:8.12.1
               securityContext:
                 allowPrivilegeEscalation: false
+              env:
+                - name: GIP_MDS_API_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: gip-mds-import
+                      key: token
               command:
                 - /bin/sh
                 - -c
                 - |
                   curl -X POST "http://app:3000/api/gip-mds/import" \
+                    -H "Authorization: Bearer ${GIP_MDS_API_TOKEN}" \
                     --connect-timeout 10 \
                     --max-time 120 \
                     --fail \
