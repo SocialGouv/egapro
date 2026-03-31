@@ -8,11 +8,11 @@ import { Step4QuartileDistribution } from "./steps/Step4QuartileDistribution";
 import { Step5EmployeeCategories } from "./steps/Step5EmployeeCategories";
 import { Step6Review } from "./steps/Step6Review";
 import type {
-	CategoryData,
 	EmployeeCategoryRow,
-	PayGapRow,
-	StepCategoryData,
-	VariablePayData,
+	Step1Data,
+	Step2Data,
+	Step3Data,
+	Step4Data,
 } from "./types";
 
 type StepPageClientProps = {
@@ -24,10 +24,10 @@ type StepPageClientProps = {
 		status: string | null;
 	};
 	gipPrefillData?: GipPrefillData;
-	step1Categories: CategoryData[];
-	step2Rows: PayGapRow[];
-	step3Data: VariablePayData;
-	step4Categories: StepCategoryData[];
+	step1Data: Step1Data;
+	step2Data: Step2Data;
+	step3Data: Step3Data;
+	step4Data: Step4Data;
 	step5Categories: EmployeeCategoryRow[];
 	initialSource?: string;
 };
@@ -36,10 +36,10 @@ export function StepPageClient({
 	step,
 	declaration,
 	gipPrefillData,
-	step1Categories,
-	step2Rows,
+	step1Data,
+	step2Data,
 	step3Data,
-	step4Categories,
+	step4Data,
 	step5Categories,
 	initialSource,
 }: StepPageClientProps) {
@@ -48,12 +48,12 @@ export function StepPageClient({
 			return (
 				<Step1Workforce
 					gipPrefillData={gipPrefillData}
-					initialCategories={step1Categories}
+					initialData={step1Data}
 				/>
 			);
 		case 2:
 			return (
-				<Step2PayGap gipPrefillData={gipPrefillData} initialRows={step2Rows} />
+				<Step2PayGap gipPrefillData={gipPrefillData} initialData={step2Data} />
 			);
 		case 3:
 			return (
@@ -64,23 +64,15 @@ export function StepPageClient({
 					maxWomen={declaration.totalWomen ?? undefined}
 				/>
 			);
-		case 4: {
-			const annualCats = step4Categories
-				.filter((c) => c.name.startsWith("annual:"))
-				.map((c) => ({ ...c, name: c.name.replace("annual:", "") }));
-			const hourlyCats = step4Categories
-				.filter((c) => c.name.startsWith("hourly:"))
-				.map((c) => ({ ...c, name: c.name.replace("hourly:", "") }));
+		case 4:
 			return (
 				<Step4QuartileDistribution
 					gipPrefillData={gipPrefillData}
-					initialAnnualCategories={annualCats.length ? annualCats : undefined}
-					initialHourlyCategories={hourlyCats.length ? hourlyCats : undefined}
+					initialData={step4Data}
 					maxMen={declaration.totalMen ?? undefined}
 					maxWomen={declaration.totalWomen ?? undefined}
 				/>
 			);
-		}
 		case 5:
 			return (
 				<Step5EmployeeCategories
@@ -93,11 +85,11 @@ export function StepPageClient({
 		case 6:
 			return (
 				<Step6Review
+					declaration={declaration}
 					isSubmitted={declaration.status === "submitted"}
-					siren={declaration.siren}
-					step2Rows={step2Rows}
+					step2Data={step2Data}
 					step3Data={step3Data}
-					step4Categories={step4Categories}
+					step4Data={step4Data}
 					step5Categories={step5Categories}
 				/>
 			);

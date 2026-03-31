@@ -4,13 +4,14 @@ import {
 	saveCompliancePathSchema,
 	updateEmployeeCategoriesSchema,
 	updateStep1Schema,
-	updateStepCategoriesSchema,
+	updateStep2Schema,
+	updateStep3Schema,
+	updateStep4Schema,
 } from "~/modules/declaration-remuneration/schemas";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import { getCurrentYear } from "~/modules/domain";
 import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
-	declarationCategories,
 	declarations,
 	employeeCategories,
 	gipMdsData,
@@ -43,7 +44,7 @@ export const declarationRouter = createTRPCRouter({
 					});
 				return {
 					declaration,
-					...(await fetchAllCategories(tx, siren, year, declaration.id)),
+					...(await fetchAllCategories(tx, declaration.id)),
 				};
 			}
 
@@ -76,7 +77,7 @@ export const declarationRouter = createTRPCRouter({
 					});
 				return {
 					declaration,
-					...(await fetchAllCategories(tx, siren, year, declaration.id)),
+					...(await fetchAllCategories(tx, declaration.id)),
 				};
 			}
 
@@ -88,7 +89,6 @@ export const declarationRouter = createTRPCRouter({
 				});
 			return {
 				declaration,
-				categories: [],
 				jobCategories: [],
 				employeeCategories: [],
 			};
@@ -115,9 +115,6 @@ export const declarationRouter = createTRPCRouter({
 			const siren = ctx.siren;
 			const year = getCurrentYear();
 
-			const totalWomen = input.categories.reduce((sum, c) => sum + c.women, 0);
-			const totalMen = input.categories.reduce((sum, c) => sum + c.men, 0);
-
 			await ctx.db.transaction(async (tx) => {
 				const existing = await tx
 					.select()
@@ -128,19 +125,10 @@ export const declarationRouter = createTRPCRouter({
 					.limit(1);
 
 				const hasChanged =
-					existing[0]?.totalWomen !== totalWomen ||
-					existing[0]?.totalMen !== totalMen;
+					existing[0]?.totalWomen !== input.totalWomen ||
+					existing[0]?.totalMen !== input.totalMen;
 
 				if (hasChanged) {
-					await tx
-						.delete(declarationCategories)
-						.where(
-							and(
-								eq(declarationCategories.siren, siren),
-								eq(declarationCategories.year, year),
-							),
-						);
-
 					const declarationId = existing[0]?.id;
 					if (declarationId) {
 						await deleteJobAndEmployeeCategories(tx, declarationId);
@@ -150,12 +138,54 @@ export const declarationRouter = createTRPCRouter({
 				await tx
 					.update(declarations)
 					.set({
-						totalWomen,
-						totalMen,
+						totalWomen: input.totalWomen,
+						totalMen: input.totalMen,
 						currentStep: 1,
 						updatedAt: new Date(),
 						...(hasChanged
 							? {
+									indicatorAAnnualWomen: null,
+									indicatorAAnnualMen: null,
+									indicatorAHourlyWomen: null,
+									indicatorAHourlyMen: null,
+									indicatorBAnnualWomen: null,
+									indicatorBAnnualMen: null,
+									indicatorBHourlyWomen: null,
+									indicatorBHourlyMen: null,
+									indicatorCAnnualWomen: null,
+									indicatorCAnnualMen: null,
+									indicatorCHourlyWomen: null,
+									indicatorCHourlyMen: null,
+									indicatorDAnnualWomen: null,
+									indicatorDAnnualMen: null,
+									indicatorDHourlyWomen: null,
+									indicatorDHourlyMen: null,
+									indicatorEWomen: null,
+									indicatorEMen: null,
+									indicatorFAnnualThreshold1: null,
+									indicatorFAnnualThreshold2: null,
+									indicatorFAnnualThreshold3: null,
+									indicatorFAnnualThreshold4: null,
+									indicatorFAnnualWomen1: null,
+									indicatorFAnnualWomen2: null,
+									indicatorFAnnualWomen3: null,
+									indicatorFAnnualWomen4: null,
+									indicatorFAnnualMen1: null,
+									indicatorFAnnualMen2: null,
+									indicatorFAnnualMen3: null,
+									indicatorFAnnualMen4: null,
+									indicatorFHourlyThreshold1: null,
+									indicatorFHourlyThreshold2: null,
+									indicatorFHourlyThreshold3: null,
+									indicatorFHourlyThreshold4: null,
+									indicatorFHourlyWomen1: null,
+									indicatorFHourlyWomen2: null,
+									indicatorFHourlyWomen3: null,
+									indicatorFHourlyWomen4: null,
+									indicatorFHourlyMen1: null,
+									indicatorFHourlyMen2: null,
+									indicatorFHourlyMen3: null,
+									indicatorFHourlyMen4: null,
 									remunerationScore: null,
 									variableRemunerationScore: null,
 									quartileScore: null,
@@ -166,81 +196,100 @@ export const declarationRouter = createTRPCRouter({
 					.where(
 						and(eq(declarations.siren, siren), eq(declarations.year, year)),
 					);
-
-				// Upsert step 1 categories
-				await tx
-					.delete(declarationCategories)
-					.where(
-						and(
-							eq(declarationCategories.siren, siren),
-							eq(declarationCategories.year, year),
-							eq(declarationCategories.step, 1),
-						),
-					);
-
-				if (input.categories.length > 0) {
-					await tx.insert(declarationCategories).values(
-						input.categories.map((c) => ({
-							siren,
-							year,
-							step: 1,
-							categoryName: c.name,
-							womenCount: c.women,
-							menCount: c.men,
-						})),
-					);
-				}
 			});
 
 			return { success: true };
 		}),
 
-	updateStepCategories: companyProcedure
-		.input(updateStepCategoriesSchema)
+	updateStep2: companyProcedure
+		.input(updateStep2Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
 			const year = getCurrentYear();
 
-			await ctx.db.transaction(async (tx) => {
-				// Delete existing categories for this step
-				await tx
-					.delete(declarationCategories)
-					.where(
-						and(
-							eq(declarationCategories.siren, siren),
-							eq(declarationCategories.year, year),
-							eq(declarationCategories.step, input.step),
-						),
-					);
+			await ctx.db
+				.update(declarations)
+				.set({
+					indicatorAAnnualWomen: input.indicatorAAnnualWomen ?? null,
+					indicatorAAnnualMen: input.indicatorAAnnualMen ?? null,
+					indicatorAHourlyWomen: input.indicatorAHourlyWomen ?? null,
+					indicatorAHourlyMen: input.indicatorAHourlyMen ?? null,
+					indicatorCAnnualWomen: input.indicatorCAnnualWomen ?? null,
+					indicatorCAnnualMen: input.indicatorCAnnualMen ?? null,
+					indicatorCHourlyWomen: input.indicatorCHourlyWomen ?? null,
+					indicatorCHourlyMen: input.indicatorCHourlyMen ?? null,
+					currentStep: 2,
+					updatedAt: new Date(),
+				})
+				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
 
-				if (input.categories.length > 0) {
-					await tx.insert(declarationCategories).values(
-						input.categories.map((c) => ({
-							siren,
-							year,
-							step: input.step,
-							categoryName: c.name,
-							womenCount: c.womenCount ?? null,
-							menCount: c.menCount ?? null,
-							womenValue: c.womenValue || null,
-							menValue: c.menValue || null,
-							womenMedianValue: c.womenMedianValue || null,
-							menMedianValue: c.menMedianValue || null,
-						})),
-					);
-				}
+			return { success: true };
+		}),
 
-				// Update current step
-				await tx
-					.update(declarations)
-					.set({
-						currentStep: input.step,
-						updatedAt: new Date(),
-					})
-					.where(
-						and(eq(declarations.siren, siren), eq(declarations.year, year)),
-					);
-			});
+	updateStep3: companyProcedure
+		.input(updateStep3Schema)
+		.mutation(async ({ ctx, input }) => {
+			const siren = ctx.siren;
+			const year = getCurrentYear();
+
+			await ctx.db
+				.update(declarations)
+				.set({
+					indicatorBAnnualWomen: input.indicatorBAnnualWomen ?? null,
+					indicatorBAnnualMen: input.indicatorBAnnualMen ?? null,
+					indicatorBHourlyWomen: input.indicatorBHourlyWomen ?? null,
+					indicatorBHourlyMen: input.indicatorBHourlyMen ?? null,
+					indicatorDAnnualWomen: input.indicatorDAnnualWomen ?? null,
+					indicatorDAnnualMen: input.indicatorDAnnualMen ?? null,
+					indicatorDHourlyWomen: input.indicatorDHourlyWomen ?? null,
+					indicatorDHourlyMen: input.indicatorDHourlyMen ?? null,
+					indicatorEWomen: input.indicatorEWomen ?? null,
+					indicatorEMen: input.indicatorEMen ?? null,
+					currentStep: 3,
+					updatedAt: new Date(),
+				})
+				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+
+			return { success: true };
+		}),
+
+	updateStep4: companyProcedure
+		.input(updateStep4Schema)
+		.mutation(async ({ ctx, input }) => {
+			const siren = ctx.siren;
+			const year = getCurrentYear();
+
+			await ctx.db
+				.update(declarations)
+				.set({
+					indicatorFAnnualThreshold1: input.annual[0].threshold ?? null,
+					indicatorFAnnualThreshold2: input.annual[1].threshold ?? null,
+					indicatorFAnnualThreshold3: input.annual[2].threshold ?? null,
+					indicatorFAnnualThreshold4: input.annual[3].threshold ?? null,
+					indicatorFAnnualWomen1: input.annual[0].women ?? null,
+					indicatorFAnnualWomen2: input.annual[1].women ?? null,
+					indicatorFAnnualWomen3: input.annual[2].women ?? null,
+					indicatorFAnnualWomen4: input.annual[3].women ?? null,
+					indicatorFAnnualMen1: input.annual[0].men ?? null,
+					indicatorFAnnualMen2: input.annual[1].men ?? null,
+					indicatorFAnnualMen3: input.annual[2].men ?? null,
+					indicatorFAnnualMen4: input.annual[3].men ?? null,
+					indicatorFHourlyThreshold1: input.hourly[0].threshold ?? null,
+					indicatorFHourlyThreshold2: input.hourly[1].threshold ?? null,
+					indicatorFHourlyThreshold3: input.hourly[2].threshold ?? null,
+					indicatorFHourlyThreshold4: input.hourly[3].threshold ?? null,
+					indicatorFHourlyWomen1: input.hourly[0].women ?? null,
+					indicatorFHourlyWomen2: input.hourly[1].women ?? null,
+					indicatorFHourlyWomen3: input.hourly[2].women ?? null,
+					indicatorFHourlyWomen4: input.hourly[3].women ?? null,
+					indicatorFHourlyMen1: input.hourly[0].men ?? null,
+					indicatorFHourlyMen2: input.hourly[1].men ?? null,
+					indicatorFHourlyMen3: input.hourly[2].men ?? null,
+					indicatorFHourlyMen4: input.hourly[3].men ?? null,
+					currentStep: 4,
+					updatedAt: new Date(),
+				})
+				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
 
 			return { success: true };
 		}),

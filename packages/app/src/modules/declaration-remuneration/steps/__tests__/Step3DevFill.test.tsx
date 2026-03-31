@@ -10,7 +10,7 @@ vi.mock("~/env", () => ({
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
-			updateStepCategories: {
+			updateStep3: {
 				useMutation: () => ({
 					mutate: vi.fn(),
 					isPending: false,
@@ -21,10 +21,23 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+const emptyStep3Data = () => ({
+	indicatorBAnnualWomen: "",
+	indicatorBAnnualMen: "",
+	indicatorBHourlyWomen: "",
+	indicatorBHourlyMen: "",
+	indicatorDAnnualWomen: "",
+	indicatorDAnnualMen: "",
+	indicatorDHourlyWomen: "",
+	indicatorDHourlyMen: "",
+	indicatorEWomen: "",
+	indicatorEMen: "",
+});
+
 describe("Step3VariablePay dev fill", () => {
 	it("fills rows and beneficiaries when dev fill button is clicked", async () => {
 		const user = userEvent.setup();
-		render(<Step3VariablePay />);
+		render(<Step3VariablePay initialData={emptyStep3Data()} />);
 
 		await user.click(screen.getByRole("button", { name: "[DEV] Remplir" }));
 

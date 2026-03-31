@@ -8,7 +8,7 @@ const mockMutate = vi.fn();
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
-			updateStepCategories: {
+			updateStep4: {
 				useMutation: () => ({
 					mutate: mockMutate,
 					isPending: false,
@@ -19,9 +19,24 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+const emptyStep4Data = () => ({
+	annual: [
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
+	],
+	hourly: [
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
+	],
+});
+
 describe("Step4QuartileDistribution", () => {
 	it("renders two tables with quartile columns", () => {
-		render(<Step4QuartileDistribution />);
+		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
 		expect(
 			screen.getByText("Rémunération annuelle brute moyenne", {
 				selector: "h3",
@@ -41,7 +56,7 @@ describe("Step4QuartileDistribution", () => {
 	});
 
 	it("renders all row labels in both tables", () => {
-		render(<Step4QuartileDistribution />);
+		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
 		expect(screen.getAllByText(/annuelle brute/).length).toBeGreaterThanOrEqual(
 			1,
 		);
@@ -53,14 +68,14 @@ describe("Step4QuartileDistribution", () => {
 	});
 
 	it("renders description text about quartiles", () => {
-		render(<Step4QuartileDistribution />);
+		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
 		expect(
 			screen.getByText(/compare la proportion de femmes et d'hommes/),
 		).toBeInTheDocument();
 	});
 
 	it("renders instruction text and mandatory fields notice", () => {
-		render(<Step4QuartileDistribution />);
+		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
 		expect(
 			screen.getByText(
 				"Renseignez les informations avant de valider vos indicateurs.",
@@ -74,38 +89,20 @@ describe("Step4QuartileDistribution", () => {
 	it("displays pre-filled data with computed percentages", () => {
 		render(
 			<Step4QuartileDistribution
-				initialAnnualCategories={[
-					{
-						name: "1er quartile",
-						womenCount: 19,
-						menCount: 22,
-						womenValue: "980",
-					},
-					{
-						name: "2e quartile",
-						womenCount: 17,
-						menCount: 19,
-						womenValue: "1450",
-					},
-					{
-						name: "3e quartile",
-						womenCount: 14,
-						menCount: 17,
-						womenValue: "1750",
-					},
-					{
-						name: "4e quartile",
-						womenCount: 5,
-						menCount: 10,
-						womenValue: "2300",
-					},
-				]}
-				initialHourlyCategories={[
-					{ name: "1er quartile", womenValue: "7.2" },
-					{ name: "2e quartile", womenValue: "10.12" },
-					{ name: "3e quartile", womenValue: "12.92" },
-					{ name: "4e quartile", womenValue: "14.93" },
-				]}
+				initialData={{
+					annual: [
+						{ threshold: "980", women: 19, men: 22 },
+						{ threshold: "1450", women: 17, men: 19 },
+						{ threshold: "1750", women: 14, men: 17 },
+						{ threshold: "2300", women: 5, men: 10 },
+					],
+					hourly: [
+						{ threshold: "7.2" },
+						{ threshold: "10.12" },
+						{ threshold: "12.92" },
+						{ threshold: "14.93" },
+					],
+				}}
 			/>,
 		);
 
@@ -122,27 +119,35 @@ describe("Step4QuartileDistribution", () => {
 		expect(screen.getAllByText("68").length).toBeGreaterThanOrEqual(1);
 	});
 
-	it("shows SavedIndicator when initialCategories have data", () => {
+	it("shows SavedIndicator when initialData has data", () => {
 		render(
 			<Step4QuartileDistribution
-				initialAnnualCategories={[
-					{ name: "1er quartile", womenCount: 10, menCount: 15 },
-					{ name: "2e quartile" },
-					{ name: "3e quartile" },
-					{ name: "4e quartile" },
-				]}
+				initialData={{
+					annual: [
+						{ threshold: "", women: 10, men: 15 },
+						{ threshold: "" },
+						{ threshold: "" },
+						{ threshold: "" },
+					],
+					hourly: [
+						{ threshold: "" },
+						{ threshold: "" },
+						{ threshold: "" },
+						{ threshold: "" },
+					],
+				}}
 			/>,
 		);
 		expect(screen.getByText("Enregistré")).toBeInTheDocument();
 	});
 
 	it("does not show SavedIndicator when no initial data", () => {
-		render(<Step4QuartileDistribution />);
+		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
 	});
 
 	it("renders inline inputs for remuneration, women count, and men count", () => {
-		render(<Step4QuartileDistribution />);
+		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
 		// 4 quartiles × 2 tables = 8 inputs per row type
 		expect(screen.getAllByLabelText(/Rémunération brute/).length).toBe(8);
 		expect(screen.getAllByLabelText(/Nombre de femmes/).length).toBe(8);
@@ -151,7 +156,7 @@ describe("Step4QuartileDistribution", () => {
 
 	it("updates remuneration values via inline inputs", async () => {
 		const user = userEvent.setup();
-		render(<Step4QuartileDistribution />);
+		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
 
 		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
 		const q1Input = remuInputs[0] as HTMLInputElement;
@@ -163,7 +168,7 @@ describe("Step4QuartileDistribution", () => {
 
 	it("rejects negative values in remuneration inputs", async () => {
 		const user = userEvent.setup();
-		render(<Step4QuartileDistribution />);
+		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
 
 		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
 		const q1Input = remuInputs[0] as HTMLInputElement;
@@ -175,7 +180,13 @@ describe("Step4QuartileDistribution", () => {
 
 	it("blocks count exceeding max workforce", async () => {
 		const user = userEvent.setup();
-		render(<Step4QuartileDistribution maxMen={25} maxWomen={15} />);
+		render(
+			<Step4QuartileDistribution
+				initialData={emptyStep4Data()}
+				maxMen={25}
+				maxWomen={15}
+			/>,
+		);
 
 		const womenInputs = screen.getAllByLabelText(/Nombre de femmes/);
 		const q1Input = womenInputs[0] as HTMLInputElement;
@@ -187,14 +198,14 @@ describe("Step4QuartileDistribution", () => {
 	});
 
 	it("renders accordion", () => {
-		render(<Step4QuartileDistribution />);
+		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
 		expect(
 			screen.getByText("Définitions et méthode de calcul"),
 		).toBeInTheDocument();
 	});
 
 	it("renders previous link pointing to step 3", () => {
-		render(<Step4QuartileDistribution />);
+		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
 			"/declaration-remuneration/etape/3",
@@ -243,6 +254,7 @@ describe("Step4QuartileDistribution", () => {
 					confidenceIndex: "0.85",
 					periodEnd: "2026-12-31",
 				}}
+				initialData={emptyStep4Data()}
 			/>,
 		);
 		// Check annual remuneration inputs have prefilled values
@@ -298,6 +310,7 @@ describe("Step4QuartileDistribution", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				initialData={emptyStep4Data()}
 			/>,
 		);
 		// First 3 quartiles should be prefilled
@@ -350,6 +363,7 @@ describe("Step4QuartileDistribution", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				initialData={emptyStep4Data()}
 			/>,
 		);
 		// All inputs should be empty
@@ -401,6 +415,7 @@ describe("Step4QuartileDistribution", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				initialData={emptyStep4Data()}
 			/>,
 		);
 		const womenCountInputs = screen.getAllByLabelText(/Nombre de femmes/);

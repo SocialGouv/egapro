@@ -1,10 +1,10 @@
 import styles from "~/modules/declaration-remuneration/shared/InterpretationCallout.module.scss";
-import type { StepCategoryData } from "~/modules/declaration-remuneration/types";
+import type { QuartileData } from "~/modules/declaration-remuneration/types";
 import { computePercentage } from "~/modules/domain";
 
 type Props = {
-	annualCategories: StepCategoryData[];
-	hourlyCategories: StepCategoryData[];
+	annualCategories: QuartileData[];
+	hourlyCategories: QuartileData[];
 };
 
 /**
@@ -20,12 +20,12 @@ export function QuartileInterpretationCallout({
 	const hourlyQ4 = hourlyCategories[3];
 	if (!annualQ4 || !hourlyQ4) return null;
 
-	const annualQ4Women = annualQ4.womenCount ?? 0;
-	const annualQ4Men = annualQ4.menCount ?? 0;
+	const annualQ4Women = annualQ4.women ?? 0;
+	const annualQ4Men = annualQ4.men ?? 0;
 	const annualQ4Total = annualQ4Women + annualQ4Men;
 
-	const hourlyQ4Women = hourlyQ4.womenCount ?? 0;
-	const hourlyQ4Men = hourlyQ4.menCount ?? 0;
+	const hourlyQ4Women = hourlyQ4.women ?? 0;
+	const hourlyQ4Men = hourlyQ4.men ?? 0;
 	const hourlyQ4Total = hourlyQ4Women + hourlyQ4Men;
 
 	if (annualQ4Total === 0 && hourlyQ4Total === 0) return null;

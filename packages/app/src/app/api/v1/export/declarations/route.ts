@@ -1,6 +1,5 @@
 import {
 	assembleDeclaration,
-	fetchCategoriesByDeclaration,
 	fetchCseOpinionsByDeclaration,
 	fetchIndicatorGByDeclaration,
 	fetchSubmittedDeclarations,
@@ -46,8 +45,7 @@ export async function GET(request: Request) {
 		const sirenYearKeys = rows.map((r) => ({ siren: r.siren, year: r.year }));
 		const declarationIds = rows.map((r) => r.declarationId);
 
-		const [categoriesMap, indicatorGMap, cseMap] = await Promise.all([
-			fetchCategoriesByDeclaration(sirenYearKeys),
+		const [indicatorGMap, cseMap] = await Promise.all([
 			fetchIndicatorGByDeclaration(declarationIds),
 			fetchCseOpinionsByDeclaration(declarationIds),
 		]);
@@ -56,7 +54,6 @@ export async function GET(request: Request) {
 			const key = `${row.siren}-${row.year}`;
 			return assembleDeclaration(
 				row,
-				categoriesMap.get(key) ?? [],
 				indicatorGMap.get(row.declarationId) ?? [],
 				cseMap.get(row.declarationId) ?? [],
 			);

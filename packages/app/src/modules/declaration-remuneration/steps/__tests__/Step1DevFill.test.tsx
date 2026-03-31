@@ -21,10 +21,12 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+const emptyStep1Data = () => ({ totalWomen: 0, totalMen: 0 });
+
 describe("Step1Workforce dev fill", () => {
 	it("fills workforce when dev fill button is clicked", async () => {
 		const user = userEvent.setup();
-		render(<Step1Workforce />);
+		render(<Step1Workforce initialData={emptyStep1Data()} />);
 
 		await user.click(screen.getByRole("button", { name: "[DEV] Remplir" }));
 

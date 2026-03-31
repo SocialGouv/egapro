@@ -4,7 +4,6 @@
 export type { DeclarationRow } from "./queries";
 // Re-export queries for route handler convenience
 export {
-	fetchCategoriesByDeclaration,
 	fetchCseOpinionsByDeclaration,
 	fetchIndicatorGByDeclaration,
 	fetchSubmittedDeclarations,
@@ -13,17 +12,6 @@ export {
 import type { DeclarationRow } from "./queries";
 
 // ── Types ────────────────────────────────────────────────────────────
-
-export type CategoryRow = {
-	step: number;
-	categoryName: string;
-	womenCount: number | null;
-	menCount: number | null;
-	womenValue: string | null;
-	menValue: string | null;
-	womenMedianValue: string | null;
-	menMedianValue: string | null;
-};
 
 export type IndicatorGEntry = {
 	categoryName: string;
@@ -47,49 +35,84 @@ export type CseRow = {
 	opinionDate: string | null;
 };
 
-// ── Build indicators from raw rows ───────────────────────────────────
+// ── Build indicators from declaration columns ─────────────────────────
 
-const MEAN_CATEGORIES = ["Annuelle brute moyenne", "Horaire brute moyenne"];
-const MEDIAN_CATEGORIES = ["Annuelle brute médiane", "Horaire brute médiane"];
-const BENEFICIARY_CATEGORY = "Bénéficiaires";
-
-export function buildIndicators(categories: CategoryRow[]) {
-	const step2 = categories.filter((c) => c.step === 2);
-	const step3 = categories.filter((c) => c.step === 3);
-	const step4 = categories.filter((c) => c.step === 4);
-
-	const payValue = (c: CategoryRow) => ({
-		category: c.categoryName,
-		womenValue: c.womenValue,
-		menValue: c.menValue,
-	});
-
+export function buildIndicators(row: DeclarationRow) {
 	return {
-		A: step2
-			.filter((c) => MEAN_CATEGORIES.includes(c.categoryName))
-			.map(payValue),
-		B: step3
-			.filter(
-				(c) =>
-					MEAN_CATEGORIES.includes(c.categoryName) &&
-					c.categoryName !== BENEFICIARY_CATEGORY,
-			)
-			.map(payValue),
-		C: step2
-			.filter((c) => MEDIAN_CATEGORIES.includes(c.categoryName))
-			.map(payValue),
-		D: step3
-			.filter((c) => MEDIAN_CATEGORIES.includes(c.categoryName))
-			.map(payValue),
-		E: step3
-			.filter((c) => c.categoryName === BENEFICIARY_CATEGORY)
-			.map(payValue),
-		F: step4.map((c) => ({
-			category: c.categoryName,
-			womenCount: c.womenCount,
-			menCount: c.menCount,
-			womenValue: c.womenValue,
-		})),
+		A: {
+			annualWomen: row.indicatorAAnnualWomen,
+			annualMen: row.indicatorAAnnualMen,
+			hourlyWomen: row.indicatorAHourlyWomen,
+			hourlyMen: row.indicatorAHourlyMen,
+		},
+		B: {
+			annualWomen: row.indicatorBAnnualWomen,
+			annualMen: row.indicatorBAnnualMen,
+			hourlyWomen: row.indicatorBHourlyWomen,
+			hourlyMen: row.indicatorBHourlyMen,
+		},
+		C: {
+			annualWomen: row.indicatorCAnnualWomen,
+			annualMen: row.indicatorCAnnualMen,
+			hourlyWomen: row.indicatorCHourlyWomen,
+			hourlyMen: row.indicatorCHourlyMen,
+		},
+		D: {
+			annualWomen: row.indicatorDAnnualWomen,
+			annualMen: row.indicatorDAnnualMen,
+			hourlyWomen: row.indicatorDHourlyWomen,
+			hourlyMen: row.indicatorDHourlyMen,
+		},
+		E: {
+			women: row.indicatorEWomen,
+			men: row.indicatorEMen,
+		},
+		F: {
+			annual: [
+				{
+					threshold: row.indicatorFAnnualThreshold1,
+					women: row.indicatorFAnnualWomen1,
+					men: row.indicatorFAnnualMen1,
+				},
+				{
+					threshold: row.indicatorFAnnualThreshold2,
+					women: row.indicatorFAnnualWomen2,
+					men: row.indicatorFAnnualMen2,
+				},
+				{
+					threshold: row.indicatorFAnnualThreshold3,
+					women: row.indicatorFAnnualWomen3,
+					men: row.indicatorFAnnualMen3,
+				},
+				{
+					threshold: row.indicatorFAnnualThreshold4,
+					women: row.indicatorFAnnualWomen4,
+					men: row.indicatorFAnnualMen4,
+				},
+			],
+			hourly: [
+				{
+					threshold: row.indicatorFHourlyThreshold1,
+					women: row.indicatorFHourlyWomen1,
+					men: row.indicatorFHourlyMen1,
+				},
+				{
+					threshold: row.indicatorFHourlyThreshold2,
+					women: row.indicatorFHourlyWomen2,
+					men: row.indicatorFHourlyMen2,
+				},
+				{
+					threshold: row.indicatorFHourlyThreshold3,
+					women: row.indicatorFHourlyWomen3,
+					men: row.indicatorFHourlyMen3,
+				},
+				{
+					threshold: row.indicatorFHourlyThreshold4,
+					women: row.indicatorFHourlyWomen4,
+					men: row.indicatorFHourlyMen4,
+				},
+			],
+		},
 	};
 }
 
@@ -115,7 +138,6 @@ export function buildIndicatorG(entries: IndicatorGEntry[]): {
 
 export function assembleDeclaration(
 	row: DeclarationRow,
-	categories: CategoryRow[],
 	indicatorGEntries: IndicatorGEntry[],
 	opinions: CseRow[],
 ) {
@@ -136,7 +158,7 @@ export function assembleDeclaration(
 		totalWomen: row.totalWomen,
 		totalMen: row.totalMen,
 		indicators: {
-			...buildIndicators(categories),
+			...buildIndicators(row),
 			G: initial.length > 0 ? initial : null,
 		},
 		secondDeclaration: {

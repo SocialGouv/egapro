@@ -1,10 +1,6 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
-import {
-	declarationCategories,
-	employeeCategories,
-	jobCategories,
-} from "~/server/db/schema";
+import { employeeCategories, jobCategories } from "~/server/db/schema";
 
 export type Tx = Parameters<
 	Parameters<import("~/server/db").DB["transaction"]>[0]
@@ -64,27 +60,11 @@ export async function deleteJobAndEmployeeCategories(
 	}
 }
 
-export async function fetchAllCategories(
-	tx: Tx,
-	siren: string,
-	year: number,
-	declarationId: string,
-) {
-	const [categories, jobs] = await Promise.all([
-		tx
-			.select()
-			.from(declarationCategories)
-			.where(
-				and(
-					eq(declarationCategories.siren, siren),
-					eq(declarationCategories.year, year),
-				),
-			),
-		tx
-			.select()
-			.from(jobCategories)
-			.where(eq(jobCategories.declarationId, declarationId)),
-	]);
+export async function fetchAllCategories(tx: Tx, declarationId: string) {
+	const jobs = await tx
+		.select()
+		.from(jobCategories)
+		.where(eq(jobCategories.declarationId, declarationId));
 
 	const jobIds = jobs.map((j) => j.id);
 	let empCategories: (typeof employeeCategories.$inferSelect)[] = [];
@@ -101,7 +81,6 @@ export async function fetchAllCategories(
 	}
 
 	return {
-		categories,
 		jobCategories: jobs,
 		employeeCategories: empCategories,
 	};

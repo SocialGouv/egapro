@@ -3,28 +3,53 @@ import { z } from "zod";
 import { COMPLIANCE_PATHS } from "./steps/compliancePath/constants";
 
 export const updateStep1Schema = z.object({
-	categories: z.array(
-		z.object({
-			name: z.string(),
-			women: z.number().int().min(0),
-			men: z.number().int().min(0),
-		}),
-	),
+	totalWomen: z.number().int().min(0),
+	totalMen: z.number().int().min(0),
 });
 
-export const updateStepCategoriesSchema = z.object({
-	step: z.number().int().min(2).max(4),
-	categories: z.array(
-		z.object({
-			name: z.string(),
-			womenCount: z.number().int().min(0).optional(),
-			menCount: z.number().int().min(0).optional(),
-			womenValue: z.string().optional(),
-			menValue: z.string().optional(),
-			womenMedianValue: z.string().optional(),
-			menMedianValue: z.string().optional(),
-		}),
-	),
+export const updateStep2Schema = z.object({
+	indicatorAAnnualWomen: z.string().optional(),
+	indicatorAAnnualMen: z.string().optional(),
+	indicatorAHourlyWomen: z.string().optional(),
+	indicatorAHourlyMen: z.string().optional(),
+	indicatorCAnnualWomen: z.string().optional(),
+	indicatorCAnnualMen: z.string().optional(),
+	indicatorCHourlyWomen: z.string().optional(),
+	indicatorCHourlyMen: z.string().optional(),
+});
+
+export const updateStep3Schema = z.object({
+	indicatorBAnnualWomen: z.string().optional(),
+	indicatorBAnnualMen: z.string().optional(),
+	indicatorBHourlyWomen: z.string().optional(),
+	indicatorBHourlyMen: z.string().optional(),
+	indicatorDAnnualWomen: z.string().optional(),
+	indicatorDAnnualMen: z.string().optional(),
+	indicatorDHourlyWomen: z.string().optional(),
+	indicatorDHourlyMen: z.string().optional(),
+	indicatorEWomen: z.string().optional(),
+	indicatorEMen: z.string().optional(),
+});
+
+const quartileSchema = z.object({
+	threshold: z.string().optional(),
+	women: z.number().int().min(0).optional(),
+	men: z.number().int().min(0).optional(),
+});
+
+export const updateStep4Schema = z.object({
+	annual: z.tuple([
+		quartileSchema,
+		quartileSchema,
+		quartileSchema,
+		quartileSchema,
+	]),
+	hourly: z.tuple([
+		quartileSchema,
+		quartileSchema,
+		quartileSchema,
+		quartileSchema,
+	]),
 });
 
 const employeeCategoryDataSchema = z.object({
