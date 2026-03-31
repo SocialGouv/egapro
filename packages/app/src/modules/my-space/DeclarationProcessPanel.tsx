@@ -10,6 +10,7 @@ const PANEL_TITLE_ID = "declaration-process-panel-title";
 
 export type PanelVariant =
 	| "start"
+	| "compliance_choice"
 	| "compliance"
 	| "evaluation"
 	| "cse"
@@ -19,6 +20,9 @@ type Props = {
 	year: number;
 	lastActionDate: string | null;
 	variant: PanelVariant;
+	compliancePath: string | null;
+	secondDeclarationStatus: string | null;
+	siren: string;
 	ctaHref: string;
 };
 
@@ -26,6 +30,9 @@ export function DeclarationProcessPanel({
 	year,
 	lastActionDate,
 	variant,
+	compliancePath,
+	secondDeclarationStatus,
+	siren,
 	ctaHref,
 }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
@@ -54,8 +61,15 @@ export function DeclarationProcessPanel({
 				<div className={styles.panelContent}>
 					<div>
 						<PanelHeader lastActionDate={lastActionDate} year={year} />
-						{variant === "start" && <StartAlert />}
+						{(variant === "start" || variant === "compliance_choice") && (
+							<StartAlert />
+						)}
 						<VerticalStepper
+							compliancePath={compliancePath}
+							secondDeclarationSubmitted={
+								secondDeclarationStatus === "submitted"
+							}
+							siren={siren}
 							step1={step1}
 							step2={step2}
 							step3={step3}

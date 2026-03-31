@@ -9,6 +9,7 @@ export function getStepStatuses(
 	switch (variant) {
 		case "start":
 			return ["current", "pending", "pending"];
+		case "compliance_choice":
 		case "compliance":
 		case "evaluation":
 			return ["complete", "current", "pending"];
@@ -20,12 +21,18 @@ export function getStepStatuses(
 }
 
 export function VerticalStepper({
+	compliancePath,
+	secondDeclarationSubmitted,
+	siren,
 	step1,
 	step2,
 	step3,
 	variant,
 	year,
 }: {
+	compliancePath: string | null;
+	secondDeclarationSubmitted: boolean;
+	siren: string;
 	step1: StepStatus;
 	step2: StepStatus;
 	step3: StepStatus;
@@ -34,16 +41,29 @@ export function VerticalStepper({
 }) {
 	return (
 		<div className={`${styles.stepper} fr-mb-4w`}>
-			<div className={styles.stepIndicators}>
+			<div className={styles.stepRow}>
 				<StepCircle number={1} status={step1} />
-				<div className={styles.stepLine} />
-				<StepCircle number={2} status={step2} />
-				<div className={styles.stepLine} />
-				<StepCircle number={3} status={step3} />
+				<Step1Content
+					siren={siren}
+					status={step1}
+					variant={variant}
+					year={year}
+				/>
 			</div>
-			<div className={styles.stepContents}>
-				<Step1Content status={step1} variant={variant} year={year} />
-				<Step2Content variant={variant} year={year} />
+			<div className={styles.stepLine} />
+			<div className={styles.stepRow}>
+				<StepCircle number={2} status={step2} />
+				<Step2Content
+					compliancePath={compliancePath}
+					secondDeclarationSubmitted={secondDeclarationSubmitted}
+					siren={siren}
+					variant={variant}
+					year={year}
+				/>
+			</div>
+			<div className={styles.stepLine} />
+			<div className={styles.stepRow}>
+				<StepCircle number={3} status={step3} />
 				<Step3Content variant={variant} year={year} />
 			</div>
 		</div>
@@ -64,22 +84,32 @@ function StepCircle({
 				? styles.stepCircleCurrent
 				: styles.stepCirclePending;
 
+	const statusLabel =
+		status === "complete"
+			? "Étape terminée"
+			: status === "current"
+				? "Étape en cours"
+				: "Étape à venir";
+
 	return (
 		<div className={`${styles.stepCircle} ${statusClass}`}>
+			<span className="fr-sr-only">{statusLabel}</span>
 			{status === "complete" ? (
 				<span aria-hidden="true" className="fr-icon-check-line fr-icon--sm" />
 			) : (
-				number
+				<span aria-hidden="true">{number}</span>
 			)}
 		</div>
 	);
 }
 
 function Step1Content({
+	siren,
 	status,
 	variant,
 	year,
 }: {
+	siren: string;
 	status: StepStatus;
 	variant: PanelVariant;
 	year: number;
@@ -123,8 +153,10 @@ function Step1Content({
 				</p>
 				{variant !== "closed" && (
 					<TransmittedRow
+						downloadHref="/api/declaration-pdf"
 						label="Votre déclaration a été transmise"
 						modifiableUntil={`1er juin ${year}`}
+						modifyHref={`/declaration-remuneration/etape/1?siren=${siren}`}
 					/>
 				)}
 			</div>
@@ -139,9 +171,15 @@ function Step1Content({
 }
 
 function Step2Content({
+	compliancePath,
+	secondDeclarationSubmitted,
+	siren,
 	variant,
 	year,
 }: {
+	compliancePath: string | null;
+	secondDeclarationSubmitted: boolean;
+	siren: string;
 	variant: PanelVariant;
 	year: number;
 }) {
@@ -154,6 +192,10 @@ function Step2Content({
 
 	if (variant === "closed" || variant === "start") {
 		return title;
+	}
+
+	if (variant === "compliance_choice") {
+		return <div className={styles.stepContent}>{title}</div>;
 	}
 
 	if (variant === "compliance") {
@@ -174,8 +216,10 @@ function Step2Content({
 			<div className={styles.stepContent}>
 				{title}
 				<TransmittedRow
+					downloadHref="/api/declaration-pdf?type=correction"
 					label="Votre seconde déclaration a été transmise"
 					modifiableUntil={`1er décembre ${year}`}
+					modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
 				/>
 				<div className={styles.bulletItem}>
 					<span aria-hidden="true" className={styles.bullet} />
@@ -186,19 +230,31 @@ function Step2Content({
 		);
 	}
 
-	// cse variant: step 2 is complete
+	// cse variant: step 2 is complete — show what was actually done
 	return (
 		<div className={styles.stepContent}>
 			{title}
-			<TransmittedRow
-				label="Votre seconde déclaration a été transmise"
-				modifiableUntil={`1er décembre ${year}`}
-			/>
-			<TransmittedRow
-				hideDownload
-				label="Votre rapport de l'évaluation conjointe a été transmise"
-				modifiableUntil={`1er décembre ${year}`}
-			/>
+			{secondDeclarationSubmitted && (
+				<TransmittedRow
+					downloadHref="/api/declaration-pdf?type=correction"
+					label="Votre seconde déclaration a été transmise"
+					modifiableUntil={`1er décembre ${year}`}
+					modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
+				/>
+			)}
+			{compliancePath === "joint_evaluation" && (
+				<TransmittedRow
+					label="Votre rapport de l'évaluation conjointe a été transmis"
+					modifiableUntil={`1er décembre ${year}`}
+					modifyHref={`/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=${siren}`}
+				/>
+			)}
+			{compliancePath === "justify" && (
+				<div className={styles.bulletItem}>
+					<span aria-hidden="true" className={styles.bullet} />
+					<p className="fr-mb-0">Justification des écarts de rémunération</p>
+				</div>
+			)}
 		</div>
 	);
 }
@@ -217,6 +273,7 @@ function Step3Content({
 	if (
 		variant === "closed" ||
 		variant === "start" ||
+		variant === "compliance_choice" ||
 		variant === "compliance" ||
 		variant === "evaluation"
 	) {
@@ -235,11 +292,13 @@ function Step3Content({
 function TransmittedRow({
 	label,
 	modifiableUntil,
-	hideDownload,
+	modifyHref,
+	downloadHref,
 }: {
 	label: string;
 	modifiableUntil: string;
-	hideDownload?: boolean;
+	modifyHref: string;
+	downloadHref?: string;
 }) {
 	return (
 		<div className={styles.transmittedRow}>
@@ -254,18 +313,19 @@ function TransmittedRow({
 				</p>
 			</div>
 			<div className={styles.transmittedActions}>
-				{!hideDownload && (
-					<button
+				{downloadHref && (
+					<a
 						className="fr-btn fr-btn--secondary fr-icon-download-line"
+						download
+						href={downloadHref}
 						title="Télécharger"
-						type="button"
 					>
 						Télécharger
-					</button>
+					</a>
 				)}
-				<button className="fr-btn fr-btn--secondary" type="button">
+				<a className="fr-btn fr-btn--secondary" href={modifyHref}>
 					Modifier
-				</button>
+				</a>
 			</div>
 		</div>
 	);

@@ -68,8 +68,13 @@ export function CompanyDeclarationsPage({
 				/>
 			)}
 			<DeclarationProcessPanel
+				compliancePath={currentDeclaration?.compliancePath ?? null}
 				ctaHref={ctaHref}
 				lastActionDate={lastActionDate}
+				secondDeclarationStatus={
+					currentDeclaration?.secondDeclarationStatus ?? null
+				}
+				siren={company.siren}
 				variant={panelVariant}
 				year={currentYear}
 			/>

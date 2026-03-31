@@ -79,7 +79,17 @@ export function Step1Opinions({
 			data.secondDeclaration?.gapConsulted === true &&
 			(!data.secondDeclaration?.gapOpinion || !data.secondDeclaration?.gapDate);
 
-		if (firstGapIncomplete || secondGapIncomplete) {
+		if (firstGapIncomplete) {
+			form.setError("firstDeclaration.gapOpinion", {
+				message: "Veuillez remplir tous les champs de consultation.",
+			});
+			return;
+		}
+
+		if (secondGapIncomplete) {
+			form.setError("secondDeclaration.gapOpinion", {
+				message: "Veuillez remplir tous les champs de consultation.",
+			});
 			return;
 		}
 
@@ -211,7 +221,8 @@ export function Step1Opinions({
 			)}
 
 			<div aria-live="polite">
-				{form.formState.errors.firstDeclaration && (
+				{(form.formState.errors.firstDeclaration ||
+					form.formState.errors.secondDeclaration) && (
 					<div className="fr-alert fr-alert--error fr-mt-3w">
 						<p>Veuillez remplir tous les champs obligatoires.</p>
 					</div>
