@@ -12,6 +12,7 @@ import {
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
+import { QUARTILE_NAMES } from "../shared/constants";
 import { FormActions } from "../shared/FormActions";
 import { NextStepsBox } from "../shared/NextStepsBox";
 import { SavedIndicator } from "../shared/SavedIndicator";
@@ -19,9 +20,9 @@ import { StepIndicator } from "../shared/StepIndicator";
 import { SubmitDeclarationModal } from "../shared/SubmitDeclarationModal";
 import type {
 	EmployeeCategoryRow,
-	PayGapRow,
-	StepCategoryData,
-	VariablePayData,
+	Step2Data,
+	Step3Data,
+	Step4Data,
 } from "../types";
 import stepStyles from "./Step6Review.module.scss";
 import { CardTitle } from "./step6/CardTitle";
@@ -30,36 +31,32 @@ import { GapSideBySide } from "./step6/GapSideBySide";
 import { parseEmployeeCategories } from "./step6/parseStep5Categories";
 import { QuartileColumn } from "./step6/QuartileColumn";
 
-// -- Helper to extract gap from a row list --
-
-function findGap(rows: PayGapRow[], label: string): number | null {
-	const row = rows.find((r) => r.label === label);
-	return row ? computeGap(row.womenValue, row.menValue) : null;
-}
-
 /** Check if any gap value is >= the regulatory threshold */
 function hasAnyHighGap(gaps: (number | null)[]): boolean {
 	return gaps.some((g) => g !== null && Math.abs(g) >= GAP_ALERT_THRESHOLD);
 }
 
-// -- Component --
-
 type Props = {
-	step2Rows?: PayGapRow[];
-	step3Data?: VariablePayData;
-	step4Categories?: StepCategoryData[];
+	declaration: {
+		siren: string;
+		totalWomen: number | null;
+		totalMen: number | null;
+		status: string | null;
+	};
+	step2Data: Step2Data;
+	step3Data: Step3Data;
+	step4Data: Step4Data;
 	step5Categories?: EmployeeCategoryRow[];
 	isSubmitted?: boolean;
-	siren?: string;
 };
 
 export function Step6Review({
-	step2Rows = [],
+	declaration,
+	step2Data,
 	step3Data,
-	step4Categories = [],
+	step4Data,
 	step5Categories = [],
 	isSubmitted = false,
-	siren,
 }: Props) {
 	const currentYear = getCurrentYear();
 	const router = useRouter();
@@ -82,28 +79,52 @@ export function Step6Review({
 		}
 	}, []);
 
-	// Parse step 2 gaps
-	const annualMeanGap = findGap(step2Rows, "Annuelle brute moyenne");
-	const hourlyMeanGap = findGap(step2Rows, "Horaire brute moyenne");
-	const annualMedianGap = findGap(step2Rows, "Annuelle brute médiane");
-	const hourlyMedianGap = findGap(step2Rows, "Horaire brute médiane");
-
-	// Parse step 3 gaps
-	const step3Rows = step3Data?.rows ?? [];
-	const step3AnnualMeanGap = findGap(step3Rows, "Annuelle brute moyenne");
-	const step3AnnualMedianGap = findGap(step3Rows, "Annuelle brute médiane");
-	const step3HourlyMeanGap = findGap(step3Rows, "Horaire brute moyenne");
-	const step3HourlyMedianGap = findGap(step3Rows, "Horaire brute médiane");
-
-	// Parse step 4 quartile data
-	const annualQuartiles = step4Categories.filter((c) =>
-		c.name.startsWith("annual:"),
+	// Step 2 gaps
+	const annualMeanGap = computeGap(
+		step2Data.indicatorAAnnualWomen,
+		step2Data.indicatorAAnnualMen,
 	);
-	const hourlyQuartiles = step4Categories.filter((c) =>
-		c.name.startsWith("hourly:"),
+	const hourlyMeanGap = computeGap(
+		step2Data.indicatorAHourlyWomen,
+		step2Data.indicatorAHourlyMen,
+	);
+	const annualMedianGap = computeGap(
+		step2Data.indicatorCAnnualWomen,
+		step2Data.indicatorCAnnualMen,
+	);
+	const hourlyMedianGap = computeGap(
+		step2Data.indicatorCHourlyWomen,
+		step2Data.indicatorCHourlyMen,
 	);
 
-	// Parse step 5 categories
+	const hasStep2Data = Object.values(step2Data).some((v) => v !== "");
+
+	// Step 3 gaps
+	const step3AnnualMeanGap = computeGap(
+		step3Data.indicatorBAnnualWomen,
+		step3Data.indicatorBAnnualMen,
+	);
+	const step3HourlyMeanGap = computeGap(
+		step3Data.indicatorBHourlyWomen,
+		step3Data.indicatorBHourlyMen,
+	);
+	const step3AnnualMedianGap = computeGap(
+		step3Data.indicatorDAnnualWomen,
+		step3Data.indicatorDAnnualMen,
+	);
+	const step3HourlyMedianGap = computeGap(
+		step3Data.indicatorDHourlyWomen,
+		step3Data.indicatorDHourlyMen,
+	);
+
+	const hasStep3Data = Object.values(step3Data).some((v) => v !== "");
+
+	// Step 4 quartile data
+	const hasStep4Data =
+		step4Data.annual.some((q) => q.threshold || q.women !== undefined) ||
+		step4Data.hourly.some((q) => q.threshold || q.women !== undefined);
+
+	// Step 5 categories
 	const step5Parsed = parseEmployeeCategories(step5Categories);
 
 	// Check if any gap exceeds the regulatory threshold
@@ -162,7 +183,7 @@ export function Step6Review({
 				{/* Card 1: Pay gap (Step 2) */}
 				<div className={stepStyles.card}>
 					<CardTitle>Écart de rémunération</CardTitle>
-					{step2Rows.length > 0 ? (
+					{hasStep2Data ? (
 						<GapSideBySide
 							annualMeanGap={annualMeanGap}
 							annualMedianGap={annualMedianGap}
@@ -181,7 +202,7 @@ export function Step6Review({
 					<CardTitle>
 						Écart de rémunération variable ou complémentaire
 					</CardTitle>
-					{step3Data?.rows && step3Data.rows.length > 0 ? (
+					{hasStep3Data ? (
 						<>
 							<GapSideBySide
 								annualMeanGap={step3AnnualMeanGap}
@@ -202,8 +223,8 @@ export function Step6Review({
 												Femmes
 											</p>
 											<strong>
-												{step3Data.beneficiaryWomen
-													? `${step3Data.beneficiaryWomen} %`
+												{step3Data.indicatorEWomen
+													? `${step3Data.indicatorEWomen} %`
 													: "-"}
 											</strong>
 										</div>
@@ -214,8 +235,8 @@ export function Step6Review({
 												Hommes
 											</p>
 											<strong>
-												{step3Data.beneficiaryMen
-													? `${step3Data.beneficiaryMen} %`
+												{step3Data.indicatorEMen
+													? `${step3Data.indicatorEMen} %`
 													: "-"}
 											</strong>
 										</div>
@@ -237,28 +258,24 @@ export function Step6Review({
 					<CardTitle tooltipId="tooltip-quartile">
 						Proportion de femmes et d&apos;hommes dans chaque quartile salarial
 					</CardTitle>
-					{annualQuartiles.length > 0 || hourlyQuartiles.length > 0 ? (
+					{hasStep4Data ? (
 						<>
-							{annualQuartiles.length > 0 && (
-								<QuartileColumn
-									quartiles={annualQuartiles.map((q) => ({
-										label: q.name.replace("annual:", ""),
-										womenCount: q.womenCount ?? 0,
-										menCount: q.menCount ?? 0,
-									}))}
-									title="Rémunération annuelle brute moyenne"
-								/>
-							)}
-							{hourlyQuartiles.length > 0 && (
-								<QuartileColumn
-									quartiles={hourlyQuartiles.map((q) => ({
-										label: q.name.replace("hourly:", ""),
-										womenCount: q.womenCount ?? 0,
-										menCount: q.menCount ?? 0,
-									}))}
-									title="Rémunération horaire brute moyenne"
-								/>
-							)}
+							<QuartileColumn
+								quartiles={step4Data.annual.map((q, i) => ({
+									label: QUARTILE_NAMES[i] ?? "",
+									womenCount: q.women ?? 0,
+									menCount: q.men ?? 0,
+								}))}
+								title="Rémunération annuelle brute moyenne"
+							/>
+							<QuartileColumn
+								quartiles={step4Data.hourly.map((q, i) => ({
+									label: QUARTILE_NAMES[i] ?? "",
+									womenCount: q.women ?? 0,
+									menCount: q.men ?? 0,
+								}))}
+								title="Rémunération horaire brute moyenne"
+							/>
 						</>
 					) : (
 						<p className={`fr-mb-0 ${common.mentionGrey}`}>
@@ -315,8 +332,11 @@ export function Step6Review({
 			{isSubmitted && <DownloadDeclarationPdfButton />}
 
 			{/* Next steps callout when high gap detected */}
-			{highGap && siren && (
-				<NextStepsBox hasGapsAboveThreshold={highGap} siren={siren} />
+			{highGap && declaration.siren && (
+				<NextStepsBox
+					hasGapsAboveThreshold={highGap}
+					siren={declaration.siren}
+				/>
 			)}
 
 			{isSubmitted ? (

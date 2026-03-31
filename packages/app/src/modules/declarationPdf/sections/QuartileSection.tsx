@@ -1,17 +1,16 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import type { StepCategoryData } from "~/modules/declaration-remuneration";
 import { computePercentage } from "~/modules/domain";
 
 import { styles } from "../pdfStyles";
-import type { DeclarationPdfData } from "../types";
+import type { DeclarationPdfData, QuartileCategory } from "../types";
 
 function QuartileTable({
 	quartiles,
 	prefix,
 	title,
 }: {
-	quartiles: StepCategoryData[];
+	quartiles: QuartileCategory[];
 	prefix: string;
 	title: string;
 }) {

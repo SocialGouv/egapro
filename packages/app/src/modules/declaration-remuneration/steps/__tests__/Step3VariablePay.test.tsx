@@ -8,7 +8,7 @@ const mockMutate = vi.fn();
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
-			updateStepCategories: {
+			updateStep3: {
 				useMutation: () => ({
 					mutate: mockMutate,
 					isPending: false,
@@ -19,9 +19,22 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+const emptyStep3Data = () => ({
+	indicatorBAnnualWomen: "",
+	indicatorBAnnualMen: "",
+	indicatorBHourlyWomen: "",
+	indicatorBHourlyMen: "",
+	indicatorDAnnualWomen: "",
+	indicatorDAnnualMen: "",
+	indicatorDHourlyWomen: "",
+	indicatorDHourlyMen: "",
+	indicatorEWomen: "",
+	indicatorEMen: "",
+});
+
 describe("Step3VariablePay", () => {
 	it("renders the pay gap table with 4 rows", () => {
-		render(<Step3VariablePay />);
+		render(<Step3VariablePay initialData={emptyStep3Data()} />);
 		expect(screen.getByText("Annuelle brute moyenne")).toBeInTheDocument();
 		expect(screen.getByText("Horaire brute moyenne")).toBeInTheDocument();
 		expect(screen.getByText("Annuelle brute médiane")).toBeInTheDocument();
@@ -29,7 +42,13 @@ describe("Step3VariablePay", () => {
 	});
 
 	it("renders the beneficiaries table with workforce totals", () => {
-		render(<Step3VariablePay maxMen={60} maxWomen={50} />);
+		render(
+			<Step3VariablePay
+				initialData={emptyStep3Data()}
+				maxMen={60}
+				maxWomen={50}
+			/>,
+		);
 		expect(screen.getByText(/Total de salariés\s*:\s*110/)).toBeInTheDocument();
 		expect(screen.getByText("Proportion")).toBeInTheDocument();
 		expect(screen.getByText("50")).toBeInTheDocument();
@@ -37,7 +56,7 @@ describe("Step3VariablePay", () => {
 	});
 
 	it("renders instruction text and mandatory fields notice", () => {
-		render(<Step3VariablePay />);
+		render(<Step3VariablePay initialData={emptyStep3Data()} />);
 		expect(
 			screen.getByText(
 				"Renseignez les informations avant de valider vos indicateurs.",
@@ -49,7 +68,9 @@ describe("Step3VariablePay", () => {
 	});
 
 	it("renders table headers with line break in column header", () => {
-		const { container } = render(<Step3VariablePay />);
+		const { container } = render(
+			<Step3VariablePay initialData={emptyStep3Data()} />,
+		);
 		expect(screen.getByText(/Rémunération variable/)).toBeInTheDocument();
 		expect(screen.getByText("Seuil réglementaire : 5%")).toBeInTheDocument();
 
@@ -61,18 +82,16 @@ describe("Step3VariablePay", () => {
 		render(
 			<Step3VariablePay
 				initialData={{
-					rows: [
-						{
-							label: "Annuelle brute moyenne",
-							womenValue: "100",
-							menValue: "200",
-						},
-						{ label: "Horaire brute moyenne", womenValue: "", menValue: "" },
-						{ label: "Annuelle brute médiane", womenValue: "", menValue: "" },
-						{ label: "Horaire brute médiane", womenValue: "", menValue: "" },
-					],
-					beneficiaryWomen: "",
-					beneficiaryMen: "",
+					indicatorBAnnualWomen: "100",
+					indicatorBAnnualMen: "200",
+					indicatorBHourlyWomen: "",
+					indicatorBHourlyMen: "",
+					indicatorDAnnualWomen: "",
+					indicatorDAnnualMen: "",
+					indicatorDHourlyWomen: "",
+					indicatorDHourlyMen: "",
+					indicatorEWomen: "",
+					indicatorEMen: "",
 				}}
 			/>,
 		);
@@ -80,13 +99,13 @@ describe("Step3VariablePay", () => {
 	});
 
 	it("does not show SavedIndicator when initialData is empty", () => {
-		render(<Step3VariablePay />);
+		render(<Step3VariablePay initialData={emptyStep3Data()} />);
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
 	});
 
 	it("updates pay gap values via inline inputs and rejects negative values", async () => {
 		const user = userEvent.setup();
-		render(<Step3VariablePay />);
+		render(<Step3VariablePay initialData={emptyStep3Data()} />);
 
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
 		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
@@ -107,7 +126,7 @@ describe("Step3VariablePay", () => {
 
 	it("computes gap and shows badge after entering values", async () => {
 		const user = userEvent.setup();
-		render(<Step3VariablePay />);
+		render(<Step3VariablePay initialData={emptyStep3Data()} />);
 
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
 		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
@@ -124,7 +143,7 @@ describe("Step3VariablePay", () => {
 
 	it("updates beneficiary values via inline inputs", async () => {
 		const user = userEvent.setup();
-		render(<Step3VariablePay />);
+		render(<Step3VariablePay initialData={emptyStep3Data()} />);
 
 		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
 		const menInput = screen.getByLabelText("Bénéficiaires hommes");
@@ -140,7 +159,13 @@ describe("Step3VariablePay", () => {
 
 	it("blocks beneficiary count exceeding max workforce", async () => {
 		const user = userEvent.setup();
-		render(<Step3VariablePay maxMen={25} maxWomen={15} />);
+		render(
+			<Step3VariablePay
+				initialData={emptyStep3Data()}
+				maxMen={25}
+				maxWomen={15}
+			/>,
+		);
 
 		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
 
@@ -152,7 +177,7 @@ describe("Step3VariablePay", () => {
 	});
 
 	it("renders previous link pointing to step 2", () => {
-		render(<Step3VariablePay />);
+		render(<Step3VariablePay initialData={emptyStep3Data()} />);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
 			"/declaration-remuneration/etape/2",
@@ -201,6 +226,7 @@ describe("Step3VariablePay", () => {
 					confidenceIndex: null,
 					periodEnd: "2026-12-31",
 				}}
+				initialData={emptyStep3Data()}
 			/>,
 		);
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
@@ -253,6 +279,7 @@ describe("Step3VariablePay", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				initialData={emptyStep3Data()}
 			/>,
 		);
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
@@ -304,6 +331,7 @@ describe("Step3VariablePay", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				initialData={emptyStep3Data()}
 			/>,
 		);
 		const benefWomenInput = screen.getByLabelText("Bénéficiaires femmes");

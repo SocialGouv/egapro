@@ -10,7 +10,7 @@ vi.mock("~/env", () => ({
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
-			updateStepCategories: {
+			updateStep4: {
 				useMutation: () => ({
 					mutate: vi.fn(),
 					isPending: false,
@@ -21,10 +21,25 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+const emptyStep4Data = () => ({
+	annual: [
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
+	],
+	hourly: [
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
+		{ threshold: "" },
+	],
+});
+
 describe("Step4QuartileDistribution dev fill", () => {
 	it("fills both tables when dev fill button is clicked", async () => {
 		const user = userEvent.setup();
-		render(<Step4QuartileDistribution />);
+		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
 
 		await user.click(screen.getByRole("button", { name: "[DEV] Remplir" }));
 

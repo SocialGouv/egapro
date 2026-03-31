@@ -3,15 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, normalizeDecimalInput } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
-import { updateStepCategoriesSchema } from "../schemas";
-import { buildGipRows } from "../shared/buildGipRows";
-import {
-	categoriesToRows,
-	rowsToCategories,
-} from "../shared/categoryRowMapping";
+import { updateStep2Schema } from "../schemas";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP2_ROWS } from "../shared/devFillData";
@@ -19,58 +14,52 @@ import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
-import {
-	DEFAULT_PAY_GAP_ROWS,
-	handlePayGapRowChange,
-	PayGapTable,
-} from "../shared/PayGapTable";
+import { gipToStep2 } from "../shared/gipToStepData";
+import { getStep2FieldName, step2ToRows } from "../shared/indicatorRowMapping";
+import { DEFAULT_PAY_GAP_ROWS, PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
 import { TooltipButton } from "../shared/TooltipButton";
-import type { PayGapField, PayGapRow } from "../types";
+import type { PayGapField, Step2Data } from "../types";
 
 type Step2PayGapProps = {
-	initialRows?: PayGapRow[];
+	initialData: Step2Data;
 	gipPrefillData?: GipPrefillData;
 };
 
-export function Step2PayGap({ initialRows, gipPrefillData }: Step2PayGapProps) {
+export function Step2PayGap({ initialData, gipPrefillData }: Step2PayGapProps) {
 	const router = useRouter();
 
-	const hasSavedRows = !!initialRows?.length;
-	const defaultRows = hasSavedRows
-		? initialRows
+	const hasSavedData = Object.values(initialData).some((v) => v !== "");
+	const defaultValues = hasSavedData
+		? initialData
 		: gipPrefillData
-			? buildGipRows(gipPrefillData.step2)
-			: DEFAULT_PAY_GAP_ROWS;
+			? gipToStep2(gipPrefillData.step2)
+			: initialData;
 
-	const hasInitialData =
-		initialRows?.some((r) => r.womenValue || r.menValue) ?? false;
+	const hasInitialData = hasSavedData;
 
-	const form = useZodForm(updateStepCategoriesSchema, {
-		defaultValues: {
-			step: 2,
-			categories: rowsToCategories(defaultRows),
-		},
-	});
+	const form = useZodForm(updateStep2Schema, { defaultValues });
 
-	const categories = form.watch("categories");
-	const rows = categoriesToRows(categories);
+	const formData = form.watch();
+	const rows = step2ToRows(formData as Step2Data);
 
 	const [saved, setSaved] = useState(hasInitialData);
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const currentYear = getCurrentYear();
 
-	const mutation = api.declaration.updateStepCategories.useMutation({
+	const mutation = api.declaration.updateStep2.useMutation({
 		onSuccess: () => router.push("/declaration-remuneration/etape/3"),
 	});
 
 	function handleRowChange(index: number, field: PayGapField, value: string) {
-		const updated = handlePayGapRowChange(rows, index, field, value);
-		if (!updated) return;
-		form.setValue("categories", rowsToCategories(updated));
+		const normalized = normalizeDecimalInput(value);
+		if (normalized === null) return;
+		if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
+		const fieldName = getStep2FieldName(index, field);
+		form.setValue(fieldName, normalized);
 		setSaved(false);
 	}
 
@@ -83,17 +72,19 @@ export function Step2PayGap({ initialRows, gipPrefillData }: Step2PayGapProps) {
 			return;
 		}
 		setValidationError(null);
-		mutation.mutate({
-			step: 2,
-			categories: rowsToCategories(rows),
-		});
+		mutation.mutate(form.getValues() as Step2Data);
 	});
 
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
 				onDevFill={() => {
-					form.setValue("categories", rowsToCategories(DEV_STEP2_ROWS));
+					DEV_STEP2_ROWS.forEach((row, i) => {
+						const womenField = getStep2FieldName(i, "womenValue");
+						const menField = getStep2FieldName(i, "menValue");
+						form.setValue(womenField, row.womenValue);
+						form.setValue(menField, row.menValue);
+					});
 					setSaved(false);
 				}}
 				saved={saved}
