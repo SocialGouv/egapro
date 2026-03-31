@@ -1,3 +1,9 @@
+export type WorkforceRow = {
+	name: string;
+	women: number;
+	men: number;
+};
+
 export type Step1Data = {
 	totalWomen: number;
 	totalMen: number;

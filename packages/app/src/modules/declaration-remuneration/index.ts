@@ -48,5 +48,6 @@ export type {
 	Step2Data,
 	Step3Data,
 	Step4Data,
+	WorkforceRow,
 } from "./types";
 export { DEFAULT_CATEGORIES, STEP_TITLES, TOTAL_STEPS } from "./types";

@@ -1,8 +1,8 @@
 import type { EmployeeCategory } from "../steps/step5/categorySerializer";
-import type { PayGapRow } from "../types";
+import type { PayGapRow, WorkforceRow } from "../types";
 
 // Step 1 - Workforce (120 women + 130 men = 250 total)
-export const DEV_STEP1_CATEGORIES = [
+export const DEV_STEP1_CATEGORIES: WorkforceRow[] = [
 	{ name: "Nombre de salariés", women: 120, men: 130 },
 ];
 
