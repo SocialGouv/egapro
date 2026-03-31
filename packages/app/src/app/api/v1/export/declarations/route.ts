@@ -44,7 +44,7 @@ export async function GET(request: Request) {
 		const [categoriesMap, indicatorGMap, cseMap] = await Promise.all([
 			fetchCategoriesByDeclaration(sirenYearKeys),
 			fetchIndicatorGByDeclaration(declarationIds),
-			fetchCseOpinionsByDeclaration(sirenYearKeys),
+			fetchCseOpinionsByDeclaration(declarationIds),
 		]);
 
 		const data = rows.map((row) => {
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
 				row,
 				categoriesMap.get(key) ?? [],
 				indicatorGMap.get(row.declarationId) ?? [],
-				cseMap.get(key) ?? [],
+				cseMap.get(row.declarationId) ?? [],
 			);
 		});
 

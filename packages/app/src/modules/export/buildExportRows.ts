@@ -10,6 +10,7 @@ import {
 	jobCategories,
 	users,
 } from "~/server/db/schema";
+
 import type { CategoryRow, CseOpinionRow } from "./mapIndicators";
 import {
 	mapCseOpinions,
@@ -65,9 +66,9 @@ export async function buildExportRows(
 
 	const declarationIds = rows.map((r) => r.declarationId);
 	const hasIndicatorG = await getDeclarationsWithIndicatorG(db, declarationIds);
+	const cseMap = await getCseOpinionsByDeclaration(db, declarationIds);
 
 	const sirenYears = rows.map((r) => ({ siren: r.siren, year: r.year }));
-	const cseMap = await getCseOpinionsByDeclaration(db, sirenYears);
 	const categoriesMap = await getCategoriesByDeclaration(db, sirenYears);
 
 	return rows.map((row) => {
@@ -105,7 +106,7 @@ export async function buildExportRows(
 			declarantLastName: row.declarantLastName,
 			declarantEmail: row.declarantEmail,
 			declarantPhone: row.declarantPhone,
-			...mapCseOpinions(cseMap.get(key) ?? []),
+			...mapCseOpinions(cseMap.get(row.declarationId) ?? []),
 		};
 	});
 }
@@ -213,28 +214,23 @@ async function getCategoriesByDeclaration(
 
 async function getCseOpinionsByDeclaration(
 	db: DB,
-	keys: Array<{ siren: string; year: number }>,
+	declarationIds: string[],
 ): Promise<Map<string, CseOpinionRow[]>> {
-	if (keys.length === 0) return new Map();
-
-	const pairConditions = keys.map((k) =>
-		and(eq(cseOpinions.siren, k.siren), eq(cseOpinions.year, k.year)),
-	);
+	if (declarationIds.length === 0) return new Map();
 
 	const rows = await db
 		.select({
-			siren: cseOpinions.siren,
-			year: cseOpinions.year,
+			declarationId: cseOpinions.declarationId,
 			type: cseOpinions.type,
 			opinion: cseOpinions.opinion,
 			opinionDate: cseOpinions.opinionDate,
 		})
 		.from(cseOpinions)
-		.where(or(...pairConditions));
+		.where(inArray(cseOpinions.declarationId, declarationIds));
 
 	const map = new Map<string, CseOpinionRow[]>();
 	for (const row of rows) {
-		const key = `${row.siren}-${row.year}`;
+		const key = row.declarationId;
 		const existing = map.get(key) ?? [];
 		existing.push(row);
 		map.set(key, existing);

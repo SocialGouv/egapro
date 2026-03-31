@@ -8,6 +8,26 @@ vi.mock("~/server/db", () => ({
 	db: {},
 }));
 
+vi.mock("~/server/db/schema", () => ({
+	declarations: { id: "id", siren: "siren", year: "year" },
+	cseOpinions: {
+		id: "id",
+		declarationId: "declarationId",
+		declarationNumber: "declarationNumber",
+		type: "type",
+		opinion: "opinion",
+		opinionDate: "opinionDate",
+		gapConsulted: "gapConsulted",
+	},
+	cseOpinionFiles: {
+		id: "id",
+		declarationId: "declarationId",
+		fileName: "fileName",
+		filePath: "filePath",
+		uploadedAt: "uploadedAt",
+	},
+}));
+
 const mockDeleteS3File = vi.fn();
 
 vi.mock("~/server/services/s3", () => ({
@@ -24,14 +44,29 @@ const mockValues = vi.fn();
 const mockLimit = vi.fn();
 const mockTransaction = vi.fn();
 
+// Track select call order: 1st = declaration lookup, 2nd+ = procedure queries
+let selectCallCount = 0;
+
 function createMockDb(rows: unknown[] = []) {
-	mockLimit.mockResolvedValue(rows);
-	mockWhere.mockResolvedValue(rows);
-	mockWhere.mockReturnValue(
-		Object.assign(Promise.resolve(rows), { limit: mockLimit }),
-	);
+	selectCallCount = 0;
+
+	// Declaration lookup: always returns a valid declaration
+	const declarationResult = [{ id: "decl-1" }];
+
+	mockLimit.mockImplementation(() => {
+		// If this is the declaration lookup (first select chain), return declaration
+		// Otherwise return the test-specific rows
+		return Promise.resolve(selectCallCount <= 1 ? declarationResult : rows);
+	});
+	mockWhere.mockImplementation(() => {
+		const result = selectCallCount <= 1 ? declarationResult : rows;
+		return Object.assign(Promise.resolve(result), { limit: mockLimit });
+	});
 	mockFrom.mockReturnValue({ where: mockWhere });
-	mockSelect.mockReturnValue({ from: mockFrom });
+	mockSelect.mockImplementation(() => {
+		selectCallCount++;
+		return { from: mockFrom };
+	});
 
 	mockDeleteWhere.mockResolvedValue(undefined);
 	mockDelete.mockReturnValue({ where: mockDeleteWhere });
@@ -76,7 +111,7 @@ describe("cseOpinionRouter", () => {
 	});
 
 	describe("get", () => {
-		it("returns opinions for the current siren and year", async () => {
+		it("returns opinions for the current declaration", async () => {
 			const opinions = [
 				{
 					declarationNumber: 1,
@@ -138,13 +173,13 @@ describe("cseOpinionRouter", () => {
 			expect(mockValues).toHaveBeenCalledWith(
 				expect.arrayContaining([
 					expect.objectContaining({
-						siren: "339787277",
+						declarationId: "decl-1",
 						declarationNumber: 1,
 						type: "accuracy",
 						opinion: "favorable",
 					}),
 					expect.objectContaining({
-						siren: "339787277",
+						declarationId: "decl-1",
 						declarationNumber: 1,
 						type: "gap",
 						gapConsulted: true,
@@ -199,7 +234,7 @@ describe("cseOpinionRouter", () => {
 	});
 
 	describe("getFiles", () => {
-		it("returns files for the current siren and year", async () => {
+		it("returns files for the current declaration", async () => {
 			const files = [
 				{
 					id: "file-1",
@@ -252,10 +287,9 @@ describe("cseOpinionRouter", () => {
 			expect(mockInsert).toHaveBeenCalled();
 			expect(mockValues).toHaveBeenCalledWith(
 				expect.objectContaining({
-					siren: "339787277",
+					declarationId: "decl-1",
 					fileName: "avis-cse.pdf",
 					filePath: "339787277/2027/test-uuid.pdf",
-					declarantId: "user-1",
 				}),
 			);
 		});

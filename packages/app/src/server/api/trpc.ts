@@ -11,9 +11,12 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import { and, eq } from "drizzle-orm";
+import { getCurrentYear } from "~/modules/domain";
 import { parseSiren } from "~/modules/shared/parseSiren";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
+import { declarations } from "~/server/db/schema";
 
 /**
  * 1. CONTEXT
@@ -141,3 +144,33 @@ export const companyProcedure = protectedProcedure.use(({ ctx, next }) => {
 	}
 	return next({ ctx: { ...ctx, siren } });
 });
+
+/**
+ * Declaration procedure — company + current declaration resolved.
+ *
+ * Guarantees `ctx.declarationId` is the ID of the current year's declaration.
+ * Use this for any procedure that operates on declaration-scoped data
+ * (CSE opinions, joint evaluation files, etc.).
+ */
+export const declarationProcedure = companyProcedure.use(
+	async ({ ctx, next }) => {
+		const year = getCurrentYear();
+		const rows = await ctx.db
+			.select({ id: declarations.id })
+			.from(declarations)
+			.where(
+				and(eq(declarations.siren, ctx.siren), eq(declarations.year, year)),
+			)
+			.limit(1);
+
+		const declaration = rows[0];
+		if (!declaration) {
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: "Déclaration introuvable pour l'année en cours",
+			});
+		}
+
+		return next({ ctx: { ...ctx, declarationId: declaration.id } });
+	},
+);

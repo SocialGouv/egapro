@@ -1,42 +1,29 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { jointEvaluationUploadSchema } from "~/modules/declaration-remuneration/schemas";
-import { getCurrentYear } from "~/modules/domain";
-import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
+import { createTRPCRouter, declarationProcedure } from "~/server/api/trpc";
 import { jointEvaluationFiles } from "~/server/db/schema";
 
 export const jointEvaluationRouter = createTRPCRouter({
-	uploadFile: companyProcedure
+	uploadFile: declarationProcedure
 		.input(jointEvaluationUploadSchema)
 		.mutation(async ({ ctx, input }) => {
-			const year = getCurrentYear();
-			const declarantId = ctx.session.user.id;
-
-			// Upsert: one file per company/year — any declarant of the company can replace it
+			// Upsert: one file per declaration — any declarant of the company can replace it
 			await ctx.db.transaction(async (tx) => {
 				await tx
 					.delete(jointEvaluationFiles)
-					.where(
-						and(
-							eq(jointEvaluationFiles.siren, ctx.siren),
-							eq(jointEvaluationFiles.year, year),
-						),
-					);
+					.where(eq(jointEvaluationFiles.declarationId, ctx.declarationId));
 
 				await tx.insert(jointEvaluationFiles).values({
-					siren: ctx.siren,
-					year,
+					declarationId: ctx.declarationId,
 					fileName: input.fileName,
 					filePath: input.filePath,
-					declarantId,
 				});
 			});
 
 			return { success: true };
 		}),
 
-	getFile: companyProcedure.query(async ({ ctx }) => {
-		const year = getCurrentYear();
-
+	getFile: declarationProcedure.query(async ({ ctx }) => {
 		const rows = await ctx.db
 			.select({
 				fileName: jointEvaluationFiles.fileName,
@@ -44,12 +31,7 @@ export const jointEvaluationRouter = createTRPCRouter({
 				uploadedAt: jointEvaluationFiles.uploadedAt,
 			})
 			.from(jointEvaluationFiles)
-			.where(
-				and(
-					eq(jointEvaluationFiles.siren, ctx.siren),
-					eq(jointEvaluationFiles.year, year),
-				),
-			)
+			.where(eq(jointEvaluationFiles.declarationId, ctx.declarationId))
 			.limit(1);
 
 		return rows[0] ?? null;
