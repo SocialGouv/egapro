@@ -1,18 +1,18 @@
 import type { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("~/server/auth", () => ({
-	auth: vi.fn(),
+const mockGetToken = vi.fn();
+
+vi.mock("next-auth/jwt", () => ({
+	getToken: (...args: unknown[]) => mockGetToken(...args),
 }));
 
 vi.mock("~/server/auth/proconnect-logout", () => ({
 	terminateProConnectSession: vi.fn(),
 }));
 
-import { auth } from "~/server/auth";
 import { terminateProConnectSession } from "~/server/auth/proconnect-logout";
 
-const mockAuth = vi.mocked(auth);
 const mockTerminate = vi.mocked(terminateProConnectSession);
 
 // Dynamic import to ensure mocks are registered before the module loads
@@ -24,20 +24,13 @@ function buildRequest() {
 	) as unknown as NextRequest;
 }
 
-function mockSession(user: Record<string, unknown>) {
-	mockAuth.mockResolvedValue({
-		user: { id: "", siret: null, phone: null, ...user },
-		expires: "2026-12-31T00:00:00.000Z",
-	});
-}
-
 describe("GET /api/auth/logout", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
 	it("redirects to the home page", async () => {
-		mockAuth.mockResolvedValue(null);
+		mockGetToken.mockResolvedValue(null);
 
 		const response = await GET(buildRequest());
 
@@ -46,7 +39,7 @@ describe("GET /api/auth/logout", () => {
 	});
 
 	it("deletes the session cookie on the response with correct attributes", async () => {
-		mockAuth.mockResolvedValue(null);
+		mockGetToken.mockResolvedValue(null);
 
 		const response = await GET(buildRequest());
 
@@ -58,24 +51,27 @@ describe("GET /api/auth/logout", () => {
 		expect(setCookie).toContain("SameSite=lax");
 	});
 
-	it("calls terminateProConnectSession when user is logged in", async () => {
-		mockSession({ id: "user-123", email: "test@example.com", name: "Test" });
+	it("calls terminateProConnectSession with id_token when present", async () => {
+		mockGetToken.mockResolvedValue({
+			id: "user-123",
+			id_token: "oidc-id-token",
+		});
 
 		await GET(buildRequest());
 
-		expect(mockTerminate).toHaveBeenCalledWith("user-123");
+		expect(mockTerminate).toHaveBeenCalledWith("oidc-id-token");
 	});
 
-	it("does not call terminateProConnectSession when no session", async () => {
-		mockAuth.mockResolvedValue(null);
+	it("does not call terminateProConnectSession when no token", async () => {
+		mockGetToken.mockResolvedValue(null);
 
 		await GET(buildRequest());
 
 		expect(mockTerminate).not.toHaveBeenCalled();
 	});
 
-	it("does not call terminateProConnectSession when session has no user id", async () => {
-		mockSession({ id: "", email: "test@example.com" });
+	it("does not call terminateProConnectSession when token has no id_token", async () => {
+		mockGetToken.mockResolvedValue({ id: "user-123" });
 
 		await GET(buildRequest());
 
@@ -83,7 +79,10 @@ describe("GET /api/auth/logout", () => {
 	});
 
 	it("propagates error when terminateProConnectSession fails", async () => {
-		mockSession({ id: "user-123" });
+		mockGetToken.mockResolvedValue({
+			id: "user-123",
+			id_token: "oidc-id-token",
+		});
 		mockTerminate.mockRejectedValue(new Error("Network error"));
 
 		await expect(GET(buildRequest())).rejects.toThrow("Network error");

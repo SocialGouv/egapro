@@ -1,6 +1,7 @@
 // Types and pure functions for building the declaration JSON response.
 // DB queries are in queries.ts (server-only, not unit-testable).
 
+export type { DeclarationRow } from "./queries";
 // Re-export queries for route handler convenience
 export {
 	fetchCategoriesByDeclaration,
@@ -8,7 +9,6 @@ export {
 	fetchIndicatorGByDeclaration,
 	fetchSubmittedDeclarations,
 } from "./queries";
-export type { DeclarationRow } from "./queries";
 
 import type { DeclarationRow } from "./queries";
 

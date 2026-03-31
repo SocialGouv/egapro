@@ -1,11 +1,10 @@
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import type { DefaultSession, NextAuthOptions } from "next-auth";
 import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
 import { extractSiren } from "~/modules/domain";
 import { db } from "~/server/db";
-import { accounts, companies, userCompanies, users } from "~/server/db/schema";
+import { companies, userCompanies, users } from "~/server/db/schema";
 import { fetchCompanyBySiren } from "~/server/services/weez";
 
 declare module "next-auth" {
@@ -23,6 +22,7 @@ declare module "next-auth/jwt" {
 		id: string;
 		siret?: string | null;
 		phone?: string | null;
+		id_token?: string | null;
 	}
 }
 
@@ -98,31 +98,59 @@ export const authConfig = {
 		maxAge: 30 * 24 * 60 * 60, // 30 days
 	},
 	providers: getProviders(),
-	adapter: DrizzleAdapter(db, {
-		usersTable: users,
-		accountsTable: accounts,
-	}),
-	events: {
-		async signIn({ user, profile }) {
-			const p = profile as Record<string, unknown> | undefined;
-			const siret = p?.siret ? (p.siret as string) : null;
-			const firstName = p?.firstName ? (p.firstName as string) : null;
-			const lastName = p?.lastName ? (p.lastName as string) : null;
+	callbacks: {
+		redirect({ url, baseUrl }) {
+			if (url.startsWith(baseUrl)) {
+				const path = url.slice(baseUrl.length);
+				if (!path || path === "/") return `${baseUrl}/mon-espace`;
+				return url;
+			}
+			if (url.startsWith("/")) {
+				if (url === "/") return `${baseUrl}/mon-espace`;
+				return `${baseUrl}${url}`;
+			}
+			return `${baseUrl}/mon-espace`;
+		},
+		async jwt({ token, user, account }) {
+			if (user) {
+				const profileData = user as typeof user & {
+					siret?: string | null;
+					firstName?: string | null;
+					lastName?: string | null;
+				};
 
-			if (!user.id) return;
+				// Find or create user by email (replaces DrizzleAdapter)
+				let dbUser = await db.query.users.findFirst({
+					where: eq(users.email, user.email!),
+				});
 
-			await db.transaction(async (tx) => {
-				const updates: Record<string, string | null> = {};
-				if (siret) updates.siret = siret;
-				if (firstName) updates.firstName = firstName;
-				if (lastName) updates.lastName = lastName;
+				if (!dbUser) {
+					const rows = await db
+						.insert(users)
+						.values({
+							name: user.name ?? "",
+							email: user.email!,
+							firstName: profileData.firstName ?? null,
+							lastName: profileData.lastName ?? null,
+							siret: profileData.siret ?? null,
+						})
+						.returning();
+					dbUser = rows[0]!;
+				} else {
+					const updates: Record<string, string | null> = {};
+					if (profileData.siret) updates.siret = profileData.siret;
+					if (profileData.firstName) updates.firstName = profileData.firstName;
+					if (profileData.lastName) updates.lastName = profileData.lastName;
 
-				if (Object.keys(updates).length > 0) {
-					await tx.update(users).set(updates).where(eq(users.id, user.id));
+					if (Object.keys(updates).length > 0) {
+						await db.update(users).set(updates).where(eq(users.id, dbUser.id));
+						dbUser = { ...dbUser, ...updates } as typeof dbUser;
+					}
 				}
 
-				if (siret) {
-					const siren = extractSiren(siret);
+				// Link company (HTTP call outside transaction to avoid long locks)
+				if (profileData.siret) {
+					const siren = extractSiren(profileData.siret);
 
 					let companyValues: {
 						siren: string;
@@ -146,41 +174,26 @@ export const authConfig = {
 						companyValues = { siren, name: `Entreprise ${siren}` };
 					}
 
-					await tx
-						.insert(companies)
-						.values(companyValues)
-						.onConflictDoUpdate({
-							target: companies.siren,
-							set: { ...companyValues, updatedAt: new Date() },
-						});
+					await db.transaction(async (tx) => {
+						await tx
+							.insert(companies)
+							.values(companyValues)
+							.onConflictDoUpdate({
+								target: companies.siren,
+								set: { ...companyValues, updatedAt: new Date() },
+							});
 
-					await tx
-						.insert(userCompanies)
-						.values({ userId: user.id, siren })
-						.onConflictDoNothing();
+						await tx
+							.insert(userCompanies)
+							.values({ userId: dbUser.id, siren })
+							.onConflictDoNothing();
+					});
 				}
-			});
-		},
-	},
-	callbacks: {
-		redirect({ url, baseUrl }) {
-			if (url.startsWith(baseUrl)) {
-				const path = url.slice(baseUrl.length);
-				if (!path || path === "/") return `${baseUrl}/mon-espace`;
-				return url;
-			}
-			if (url.startsWith("/")) {
-				if (url === "/") return `${baseUrl}/mon-espace`;
-				return `${baseUrl}${url}`;
-			}
-			return `${baseUrl}/mon-espace`;
-		},
-		async jwt({ token, user }) {
-			if (user) {
-				token.id = user.id;
-				const dbUser = user as { siret?: string | null; phone?: string | null };
+
+				token.id = dbUser.id;
 				token.siret = dbUser.siret ?? null;
 				token.phone = dbUser.phone ?? null;
+				token.id_token = account?.id_token ?? null;
 			}
 			return token;
 		},

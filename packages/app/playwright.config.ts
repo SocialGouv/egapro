@@ -12,7 +12,9 @@ export default defineConfig({
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
-	workers: process.env.CI ? 1 : undefined,
+	// All tests share the same database record (SIREN 130025265), so parallel
+	// execution causes race conditions between declaration and compliance tests.
+	workers: 1,
 	reporter: process.env.CI ? "github" : "list",
 	timeout: 60_000,
 	use: {
