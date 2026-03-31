@@ -7,7 +7,13 @@ import {
 } from "~/modules/my-space/schemas";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import type { DB } from "~/server/db";
-import { companies, declarations, userCompanies } from "~/server/db/schema";
+import {
+	companies,
+	cseOpinions,
+	declarations,
+	jointEvaluationFiles,
+	userCompanies,
+} from "~/server/db/schema";
 import { fetchCseBySiren, fetchSanctionBySiren } from "~/server/services/suit";
 
 async function findUserCompany(db: DB, userId: string, siren: string) {
@@ -110,17 +116,34 @@ export const companyRouter = createTRPCRouter({
 				input.siren,
 			);
 
-			const declarationRows = await ctx.db
-				.select({
-					siren: declarations.siren,
-					year: declarations.year,
-					status: declarations.status,
-					currentStep: declarations.currentStep,
-					updatedAt: declarations.updatedAt,
-				})
-				.from(declarations)
-				.where(eq(declarations.siren, input.siren))
-				.orderBy(desc(declarations.year));
+			const [declarationRows, cseOpinionRows, jointEvalRows] =
+				await Promise.all([
+					ctx.db
+						.select({
+							siren: declarations.siren,
+							year: declarations.year,
+							status: declarations.status,
+							currentStep: declarations.currentStep,
+							updatedAt: declarations.updatedAt,
+							compliancePath: declarations.compliancePath,
+							secondDeclarationStatus: declarations.secondDeclarationStatus,
+							complianceCompletedAt: declarations.complianceCompletedAt,
+						})
+						.from(declarations)
+						.where(eq(declarations.siren, input.siren))
+						.orderBy(desc(declarations.year)),
+					ctx.db
+						.select({ year: cseOpinions.year })
+						.from(cseOpinions)
+						.where(eq(cseOpinions.siren, input.siren)),
+					ctx.db
+						.select({ year: jointEvaluationFiles.year })
+						.from(jointEvaluationFiles)
+						.where(eq(jointEvaluationFiles.siren, input.siren)),
+				]);
+
+			const yearsWithCseOpinion = new Set(cseOpinionRows.map((r) => r.year));
+			const yearsWithJointEval = new Set(jointEvalRows.map((r) => r.year));
 
 			const year = getCurrentYear();
 			const declarationItems = buildDeclarationList(
@@ -134,6 +157,11 @@ export const companyRouter = createTRPCRouter({
 					}),
 					currentStep: d.currentStep ?? 0,
 					updatedAt: d.updatedAt,
+					compliancePath: d.compliancePath,
+					secondDeclarationStatus: d.secondDeclarationStatus,
+					complianceCompletedAt: d.complianceCompletedAt,
+					hasCseOpinion: yearsWithCseOpinion.has(d.year),
+					hasJointEvaluationFile: yearsWithJointEval.has(d.year),
 				})),
 				year,
 			);

@@ -27,4 +27,9 @@ export type DeclarationItem = {
 	status: DeclarationStatus;
 	currentStep: number;
 	updatedAt: Date | null;
+	compliancePath: string | null;
+	secondDeclarationStatus: string | null;
+	complianceCompletedAt: Date | null;
+	hasCseOpinion: boolean;
+	hasJointEvaluationFile: boolean;
 };

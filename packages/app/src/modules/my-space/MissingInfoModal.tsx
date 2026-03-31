@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { getDsfrModal } from "~/modules/shared";
 import { PhoneField } from "~/modules/shared/PhoneField";
@@ -8,6 +8,7 @@ import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
+import { DECLARATION_PROCESS_PANEL_ID } from "./DeclarationProcessPanel";
 import { createMissingInfoSchema } from "./schemas";
 
 const MODAL_ID = "missing-info-modal";
@@ -29,8 +30,11 @@ function getDescription(needsPhone: boolean, needsCse: boolean): string {
 	return "Pour continuer, vous devez indiquer si un CSE a été mis en place dans votre entreprise.";
 }
 
+type OpenerType = "remuneration" | "representation";
+
 export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
+	const openerTypeRef = useRef<OpenerType>("remuneration");
 	const needsPhone = !userPhone;
 	const needsCse = hasCse === null;
 
@@ -54,9 +58,28 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 		if (dialog) getDsfrModal(dialog)?.conceal();
 	}, []);
 
+	// Capture the opener type at click time (before the DSFR dialog opens),
+	// which is more reliable than querying the DOM after the dialog animation.
+	useEffect(() => {
+		const handler = (e: Event) => {
+			const target = (e.target as HTMLElement).closest<HTMLElement>(
+				`[aria-controls="${MODAL_ID}"]`,
+			);
+			if (!target) return;
+			openerTypeRef.current =
+				target.dataset.declarationType === "representation"
+					? "representation"
+					: "remuneration";
+		};
+		document.addEventListener("click", handler, true);
+		return () => document.removeEventListener("click", handler, true);
+	}, []);
+
 	useDsfrDialogOpen(
 		dialogRef,
-		useCallback(() => form.reset({ phone: "", hasCse: undefined }), [form]),
+		useCallback(() => {
+			form.reset({ phone: "", hasCse: undefined });
+		}, [form]),
 	);
 
 	const [submitError, setSubmitError] = useState<string | null>(null);
@@ -71,8 +94,26 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 				const hasCseValue = data.hasCse as boolean;
 				await updateHasCseMutation.mutateAsync({ siren, hasCse: hasCseValue });
 			}
-			closeModal();
-			window.location.href = `/declaration-remuneration?siren=${siren}`;
+			if (openerTypeRef.current === "remuneration") {
+				// Register listener BEFORE closing so we catch the dsfr.conceal event
+				const dialog = dialogRef.current;
+				if (dialog) {
+					dialog.addEventListener(
+						"dsfr.conceal",
+						() => {
+							const panel = document.getElementById(
+								DECLARATION_PROCESS_PANEL_ID,
+							);
+							if (panel) getDsfrModal(panel)?.disclose();
+						},
+						{ once: true },
+					);
+				}
+				closeModal();
+			} else {
+				closeModal();
+				window.location.href = `/declaration-remuneration?siren=${siren}`;
+			}
 		} catch {
 			setSubmitError(
 				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
