@@ -106,9 +106,29 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 								</button>
 							</div>
 							<div className="fr-modal__content">
-								<h2 className="fr-modal__title" id={MODAL_TITLE_ID}>
-									Informations manquantes
-								</h2>
+								<div className="fr-grid-row fr-grid-row--middle">
+									<div className="fr-col">
+										<h2 className="fr-modal__title fr-mb-0" id={MODAL_TITLE_ID}>
+											Informations manquantes
+										</h2>
+									</div>
+									<div className="fr-col-auto">
+										<button
+											aria-describedby="missing-info-tooltip"
+											aria-label="Aide"
+											className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-question-line"
+											type="button"
+										/>
+										<span
+											className="fr-tooltip fr-placement"
+											id="missing-info-tooltip"
+											role="tooltip"
+										>
+											Vous pouvez aussi modifier ces informations directement
+											sur votre profil ProConnect.
+										</span>
+									</div>
+								</div>
 								<p className="fr-text--regular fr-mb-3w">
 									{getDescription(needsPhone, needsCse)}
 								</p>
