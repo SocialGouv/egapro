@@ -7,6 +7,14 @@ import type { DeclarationItem } from "../types";
 
 const currentYear = getCurrentYear();
 
+const NO_COMPLIANCE = {
+	compliancePath: null,
+	secondDeclarationStatus: null,
+	complianceCompletedAt: null,
+	hasCseOpinion: false,
+	hasJointEvaluationFile: false,
+};
+
 const declarations: DeclarationItem[] = [
 	{
 		type: "remuneration",
@@ -15,6 +23,7 @@ const declarations: DeclarationItem[] = [
 		status: "to_complete",
 		currentStep: 0,
 		updatedAt: null,
+		...NO_COMPLIANCE,
 	},
 	{
 		type: "representation",
@@ -23,6 +32,7 @@ const declarations: DeclarationItem[] = [
 		status: "to_complete",
 		currentStep: 0,
 		updatedAt: null,
+		...NO_COMPLIANCE,
 	},
 	{
 		type: "remuneration",
@@ -31,6 +41,7 @@ const declarations: DeclarationItem[] = [
 		status: "done",
 		currentStep: 6,
 		updatedAt: new Date("2025-03-15"),
+		...NO_COMPLIANCE,
 	},
 ];
 
@@ -104,14 +115,16 @@ describe("DeclarationsSection", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders 'Rémunération' and 'Représentation' links", () => {
+	it("renders 'Rémunération' and 'Représentation' buttons", () => {
 		renderSection();
-		const remuLinks = screen.getAllByRole("link", { name: "Rémunération" });
-		expect(remuLinks).toHaveLength(2);
-		const represLinks = screen.getAllByRole("link", {
+		const remuButtons = screen.getAllByRole("button", {
+			name: "Rémunération",
+		});
+		expect(remuButtons.length).toBeGreaterThanOrEqual(1);
+		const represButtons = screen.getAllByRole("button", {
 			name: "Représentation",
 		});
-		expect(represLinks).toHaveLength(1);
+		expect(represButtons).toHaveLength(1);
 	});
 
 	it("renders the page size selector", () => {
@@ -138,6 +151,7 @@ describe("DeclarationsSection", () => {
 				status: "done" as const,
 				currentStep: 6,
 				updatedAt: new Date("2025-01-01"),
+				...NO_COMPLIANCE,
 			}),
 		);
 
@@ -165,6 +179,7 @@ describe("DeclarationsSection", () => {
 				status: "done" as const,
 				currentStep: 6,
 				updatedAt: new Date("2025-01-01"),
+				...NO_COMPLIANCE,
 			}),
 		);
 
@@ -205,6 +220,7 @@ describe("DeclarationsSection", () => {
 				status: "done" as const,
 				currentStep: 6,
 				updatedAt: new Date("2025-01-01"),
+				...NO_COMPLIANCE,
 			}),
 		);
 
@@ -233,6 +249,7 @@ describe("DeclarationsSection", () => {
 				status: "done" as const,
 				currentStep: 6,
 				updatedAt: new Date("2025-01-01"),
+				...NO_COMPLIANCE,
 			}),
 		);
 

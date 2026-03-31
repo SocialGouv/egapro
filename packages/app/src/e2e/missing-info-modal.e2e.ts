@@ -38,9 +38,9 @@ test.describe("Missing info modal", () => {
 			await modal.locator("label[for='missing-info-cse-yes']").click();
 			await modal.getByRole("button", { name: "Enregistrer" }).click();
 
-			await page.waitForURL("**/declaration-remuneration**", {
-				timeout: 10_000,
-			});
+			// After save for remuneration, the declaration process panel opens
+			const panel = page.locator("#declaration-process-panel");
+			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
 		});
 	});
 
@@ -72,9 +72,9 @@ test.describe("Missing info modal", () => {
 			await modal.getByLabel(/Numéro de téléphone/).fill("01 22 33 44 55");
 			await modal.getByRole("button", { name: "Enregistrer" }).click();
 
-			await page.waitForURL("**/declaration-remuneration**", {
-				timeout: 10_000,
-			});
+			// After save for remuneration, the declaration process panel opens
+			const panel = page.locator("#declaration-process-panel");
+			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
 		});
 	});
 
