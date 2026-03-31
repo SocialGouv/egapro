@@ -40,14 +40,13 @@
 // Vertical stepper
 .stepper {
 	display: flex;
-	gap: 1rem;
+	flex-direction: column;
 }
 
-.stepIndicators {
+.stepRow {
 	display: flex;
-	flex-direction: column;
-	align-items: center;
-	flex-shrink: 0;
+	gap: 1rem;
+	align-items: flex-start;
 }
 
 .stepCircle {
@@ -78,17 +77,9 @@
 
 .stepLine {
 	width: 1px;
-	flex: 1;
 	min-height: 1rem;
+	margin-left: 14px;
 	background-color: var(--border-default-grey);
-}
-
-.stepContents {
-	display: flex;
-	flex-direction: column;
-	gap: 1.5rem;
-	flex: 1;
-	min-width: 0;
 }
 
 .stepContent {
