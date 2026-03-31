@@ -43,7 +43,7 @@ export async function buildTransmittedPdfData(
 	const [companyResults, declarationResults] = await Promise.all([
 		db.select().from(companies).where(eq(companies.siren, siren)).limit(1),
 		db
-			.select({ id: declarations.id })
+			.select({ id: declarations.id, year: declarations.year })
 			.from(declarations)
 			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
 			.limit(1),
@@ -90,7 +90,7 @@ export async function buildTransmittedPdfData(
 	return {
 		companyName: company.name,
 		siren,
-		year,
+		year: declaration.year,
 		generatedAt: formatLongDate(now),
 		opinions,
 		cseFiles,

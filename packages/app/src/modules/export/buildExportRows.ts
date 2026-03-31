@@ -65,11 +65,13 @@ export async function buildExportRows(
 		);
 
 	const declarationIds = rows.map((r) => r.declarationId);
-	const hasIndicatorG = await getDeclarationsWithIndicatorG(db, declarationIds);
-	const cseMap = await getCseOpinionsByDeclaration(db, declarationIds);
-
 	const sirenYears = rows.map((r) => ({ siren: r.siren, year: r.year }));
-	const categoriesMap = await getCategoriesByDeclaration(db, sirenYears);
+
+	const [hasIndicatorG, cseMap, categoriesMap] = await Promise.all([
+		getDeclarationsWithIndicatorG(db, declarationIds),
+		getCseOpinionsByDeclaration(db, declarationIds),
+		getCategoriesByDeclaration(db, sirenYears),
+	]);
 
 	return rows.map((row) => {
 		const key = `${row.siren}-${row.year}`;
