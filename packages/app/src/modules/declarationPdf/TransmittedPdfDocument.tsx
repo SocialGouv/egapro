@@ -1,10 +1,9 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
-
+import { formatLongDate } from "~/modules/domain";
 import type {
 	TransmittedPdfData,
 	TransmittedPdfOpinion,
 } from "./buildTransmittedPdfData";
-import { formatLongDate } from "~/modules/domain";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
 import { styles } from "./pdfStyles";
 

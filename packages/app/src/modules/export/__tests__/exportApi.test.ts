@@ -15,6 +15,14 @@ vi.mock("~/modules/export/queries", () => ({
 	fetchCseOpinionsByDeclaration: (...args: unknown[]) => mockFetchCse(...args),
 }));
 
+const VALID_AUTH_HEADER = "Bearer test-suit-api-key-that-is-at-least-32-chars";
+
+function authedRequest(url: string): Request {
+	return new Request(url, {
+		headers: { Authorization: VALID_AUTH_HEADER },
+	});
+}
+
 describe("GET /api/v1/export/declarations", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -24,9 +32,30 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchCse.mockResolvedValue(new Map());
 	});
 
-	it("should return 400 when date_begin param is missing", async () => {
+	it("should return 401 when Authorization header is missing", async () => {
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
 		const request = new Request("http://localhost/api/v1/export/declarations");
+		const response = await GET(request);
+
+		expect(response.status).toBe(401);
+	});
+
+	it("should return 401 when API key is invalid", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = new Request(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+			{ headers: { Authorization: "Bearer wrong-key" } },
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(401);
+	});
+
+	it("should return 400 when date_begin param is missing", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = authedRequest(
+			"http://localhost/api/v1/export/declarations",
+		);
 		const response = await GET(request);
 
 		expect(response.status).toBe(400);
@@ -36,7 +65,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 	it("should return 400 when date_begin format is invalid", async () => {
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = new Request(
+		const request = authedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-3-5",
 		);
 		const response = await GET(request);
@@ -46,7 +75,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 	it("should return 400 when date_end format is invalid", async () => {
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = new Request(
+		const request = authedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15&date_end=bad",
 		);
 		const response = await GET(request);
@@ -58,7 +87,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 	it("should return empty declarations when no match", async () => {
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = new Request(
+		const request = authedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
 		);
 		const response = await GET(request);
@@ -74,7 +103,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 	it("should use date_end when provided", async () => {
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = new Request(
+		const request = authedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15&date_end=2027-03-20",
 		);
 		const response = await GET(request);
@@ -89,7 +118,7 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchSubmitted.mockRejectedValue(new Error("DB connection failed"));
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = new Request(
+		const request = authedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
 		);
 		const response = await GET(request);
@@ -150,7 +179,7 @@ describe("GET /api/v1/export/declarations", () => {
 		]);
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = new Request(
+		const request = authedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-01-01&date_end=2027-01-03",
 		);
 		const response = await GET(request);
@@ -195,7 +224,7 @@ describe("GET /api/v1/export/declarations", () => {
 		]);
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = new Request(
+		const request = authedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
 		);
 		const response = await GET(request);

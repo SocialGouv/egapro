@@ -12,6 +12,11 @@ type DbDeclaration = {
 	status: DeclarationStatus;
 	currentStep: number;
 	updatedAt: Date | null;
+	compliancePath: string | null;
+	secondDeclarationStatus: string | null;
+	complianceCompletedAt: Date | null;
+	hasCseOpinion: boolean;
+	hasJointEvaluationFile: boolean;
 };
 
 /**
@@ -43,6 +48,11 @@ export function buildDeclarationList(
 				status: existing.status,
 				currentStep: existing.currentStep,
 				updatedAt: existing.updatedAt,
+				compliancePath: existing.compliancePath,
+				secondDeclarationStatus: existing.secondDeclarationStatus,
+				complianceCompletedAt: existing.complianceCompletedAt,
+				hasCseOpinion: existing.hasCseOpinion,
+				hasJointEvaluationFile: existing.hasJointEvaluationFile,
 			});
 		} else {
 			rows.push({
@@ -52,6 +62,11 @@ export function buildDeclarationList(
 				status: "to_complete",
 				currentStep: 0,
 				updatedAt: null,
+				compliancePath: null,
+				secondDeclarationStatus: null,
+				complianceCompletedAt: null,
+				hasCseOpinion: false,
+				hasJointEvaluationFile: false,
 			});
 		}
 	}
@@ -69,6 +84,11 @@ export function buildDeclarationList(
 			status: d.status,
 			currentStep: d.currentStep,
 			updatedAt: d.updatedAt,
+			compliancePath: d.compliancePath,
+			secondDeclarationStatus: d.secondDeclarationStatus,
+			complianceCompletedAt: d.complianceCompletedAt,
+			hasCseOpinion: d.hasCseOpinion,
+			hasJointEvaluationFile: d.hasJointEvaluationFile,
 		});
 	}
 
