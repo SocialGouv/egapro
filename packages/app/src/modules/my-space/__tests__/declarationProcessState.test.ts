@@ -44,9 +44,9 @@ describe("computePanelVariant", () => {
 		).toBe("start");
 	});
 
-	it('returns "start" when done but no compliance path', () => {
+	it('returns "compliance_choice" when done but no compliance path', () => {
 		expect(computePanelVariant(makeDeclaration({ compliancePath: null }))).toBe(
-			"start",
+			"compliance_choice",
 		);
 	});
 
@@ -115,6 +115,17 @@ describe("computePanelVariant", () => {
 				makeDeclaration({
 					compliancePath: "corrective_action",
 					complianceCompletedAt: new Date(),
+					hasCseOpinion: true,
+				}),
+			),
+		).toBe("closed");
+	});
+
+	it('returns "closed" for justify path with CSE opinion deposited', () => {
+		expect(
+			computePanelVariant(
+				makeDeclaration({
+					compliancePath: "justify",
 					hasCseOpinion: true,
 				}),
 			),

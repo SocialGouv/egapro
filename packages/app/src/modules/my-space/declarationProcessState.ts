@@ -30,11 +30,15 @@ export function computePanelVariant(
 	} = declaration;
 
 	if (!compliancePath) {
-		return "start";
+		return "compliance_choice";
+	}
+
+	if (hasCseOpinion) {
+		return "closed";
 	}
 
 	if (complianceCompletedAt) {
-		return hasCseOpinion ? "closed" : "cse";
+		return "cse";
 	}
 
 	if (compliancePath === "corrective_action") {
