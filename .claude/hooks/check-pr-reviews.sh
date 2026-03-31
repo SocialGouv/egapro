@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Hook: UserPromptSubmit
-# Checks if the current branch has an open PR with unresolved review comments.
+# Checks if the current branch has an open PR with pending reviews.
 # Runs only once per conversation (creates a temp marker file).
 
 set -euo pipefail
@@ -11,7 +11,7 @@ if ! git rev-parse --is-inside-work-tree &>/dev/null; then
 fi
 
 BRANCH=$(git branch --show-current 2>/dev/null || echo "")
-if [[ -z "$BRANCH" || "$BRANCH" == "master" || "$BRANCH" == "alpha" ]]; then
+if [[ -z "$BRANCH" || "$BRANCH" == "alpha" ]]; then
   exit 0
 fi
 
@@ -24,7 +24,7 @@ fi
 touch "$SESSION_MARKER"
 
 # Check if there's an open PR for this branch
-PR_JSON=$(gh pr view --json number,url,reviewDecision,reviews,comments 2>/dev/null || echo "")
+PR_JSON=$(gh pr view --json number,url,reviewDecision,reviews 2>/dev/null || echo "")
 if [[ -z "$PR_JSON" ]]; then
   exit 0
 fi
@@ -37,13 +37,13 @@ fi
 PR_URL=$(echo "$PR_JSON" | jq -r '.url // empty')
 REVIEW_DECISION=$(echo "$PR_JSON" | jq -r '.reviewDecision // "NONE"')
 
-# Count top-level review comments (not replies)
-REVIEW_COMMENTS=$(gh api "repos/{owner}/{repo}/pulls/$PR_NUMBER/comments" 2>/dev/null || echo "[]")
-UNRESOLVED_COUNT=$(echo "$REVIEW_COMMENTS" | jq '[.[] | select(.in_reply_to_id == null)] | length' 2>/dev/null || echo "0")
+# Count reviews that need attention (CHANGES_REQUESTED or COMMENTED from bots)
+# Excludes APPROVED and DISMISSED reviews
+PENDING_REVIEWS=$(echo "$PR_JSON" | jq '[.reviews[] | select(.state == "CHANGES_REQUESTED" or .state == "COMMENTED")] | length' 2>/dev/null || echo "0")
 
-if [[ "$REVIEW_DECISION" == "CHANGES_REQUESTED" ]] || [[ "$UNRESOLVED_COUNT" -gt 0 ]]; then
-  echo "WARN: PR #$PR_NUMBER ($PR_URL) has unresolved reviews."
+if [[ "$REVIEW_DECISION" == "CHANGES_REQUESTED" ]] || [[ "$PENDING_REVIEWS" -gt 0 ]]; then
+  echo "WARN: PR #$PR_NUMBER ($PR_URL) has pending reviews."
   echo "  Review decision: $REVIEW_DECISION"
-  echo "  Unresolved comments: $UNRESOLVED_COUNT"
+  echo "  Reviews needing attention: $PENDING_REVIEWS"
   echo "  Consider running /review to address them."
 fi

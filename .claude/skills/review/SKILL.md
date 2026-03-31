@@ -41,9 +41,7 @@ For each unresolved comment:
 
 # Step 3 — Re-validate
 
-Run the quality gates defined in `.claude/rules/automation.md`: 4 parallel agents (validator, structural, RGAA, security).
-
-**Fix loop**: fix all violations, re-run only the failing agents, and if auto-fixes were applied also re-run the validator. Loop until zero violations.
+Run the quality gates and fix loop as defined in `.claude/rules/automation.md`.
 
 ---
 
