@@ -13,6 +13,15 @@ Implements a GitHub issue end-to-end: understand the issue, code it, validate it
 
 ---
 
+# Step 0 — Detect state
+
+Check if there are already commits on the branch vs `origin/alpha`:
+
+- **No changes on branch** -> Step 1 (start from scratch)
+- **Changes already exist** -> Step 4 (skip to validate)
+
+---
+
 # Step 1 — Understand the issue
 
 Extract `{owner}/{repo}` from `git remote get-url origin` (needed for API calls below).
@@ -31,7 +40,7 @@ Present the task list and confirm with the user before starting.
 
 # Step 2 — Branch
 
-Create `feat/issue-{N}-{slug}` from `origin/master`. If the current branch already tracks this issue, stay on it.
+Create `feat/issue-{N}-{slug}` from `origin/alpha`. If the current branch already tracks this issue, stay on it.
 
 ---
 

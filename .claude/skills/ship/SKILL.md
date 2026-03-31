@@ -22,7 +22,7 @@ Check branch, commits, and existing PR. Route accordingly:
 - **Open PR, nothing unresolved** -> done, report status
 - **No commits on branch** -> nothing to ship, suggest `/implement`
 
-Announce what was detected before proceeding.
+Infer issue number from branch name (`feat/issue-{N}-*`). Announce what was detected before proceeding.
 
 ---
 
@@ -52,7 +52,7 @@ Generated with [Claude Code](https://claude.com/claude-code)
 Group commits by logical concern. Present the plan as a table and ask confirmation. For each group in dependency order:
 
 - Branch naming: `split/{original-branch}/{short-name}`
-- First branch from `origin/master`, each subsequent branch from the previous one
+- First branch from `origin/alpha`, each subsequent branch from the previous one
 - Cherry-pick commits, validate via the validator agent, push, create PR
 
 Cross-link all PRs in their bodies.
