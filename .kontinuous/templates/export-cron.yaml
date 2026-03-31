@@ -20,6 +20,8 @@ spec:
           containers:
             - name: trigger
               image: curlimages/curl:8.12.1
+              securityContext:
+                runAsUser: 100
               command:
                 - /bin/sh
                 - -c
