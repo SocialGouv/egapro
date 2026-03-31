@@ -33,6 +33,13 @@ export type QuartileData = {
 	men?: number;
 };
 
+export type QuartileTuple = [
+	QuartileData,
+	QuartileData,
+	QuartileData,
+	QuartileData,
+];
+
 export type Step4Data = {
 	annual: QuartileData[];
 	hourly: QuartileData[];

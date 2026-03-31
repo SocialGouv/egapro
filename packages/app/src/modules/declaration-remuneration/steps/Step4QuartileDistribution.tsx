@@ -16,11 +16,23 @@ import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
 import { TooltipButton } from "../shared/TooltipButton";
-import type { QuartileData, Step4Data } from "../types";
+import type { QuartileData, QuartileTuple, Step4Data } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
 import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCallout";
 import { QuartileReadingNote } from "./step4/QuartileReadingNote";
 import { QuartileTable } from "./step4/QuartileTable";
+
+function toQuartileData(c: {
+	womenValue?: string | null;
+	womenCount: number;
+	menCount: number;
+}): QuartileData {
+	return {
+		threshold: c.womenValue ?? "",
+		women: c.womenCount,
+		men: c.menCount,
+	};
+}
 
 function gipToQuartiles(gip: GipQuartileData): QuartileData[] {
 	return QUARTILE_NAMES.map((_, i) => ({
@@ -30,12 +42,7 @@ function gipToQuartiles(gip: GipQuartileData): QuartileData[] {
 	}));
 }
 
-function emptyQuartiles(): [
-	QuartileData,
-	QuartileData,
-	QuartileData,
-	QuartileData,
-] {
+function emptyQuartiles(): QuartileTuple {
 	return [
 		{ threshold: "" },
 		{ threshold: "" },
@@ -81,18 +88,8 @@ export function Step4QuartileDistribution({
 
 	const form = useZodForm(updateStep4Schema, {
 		defaultValues: {
-			annual: defaultAnnual as [
-				QuartileData,
-				QuartileData,
-				QuartileData,
-				QuartileData,
-			],
-			hourly: defaultHourly as [
-				QuartileData,
-				QuartileData,
-				QuartileData,
-				QuartileData,
-			],
+			annual: defaultAnnual as QuartileTuple,
+			hourly: defaultHourly as QuartileTuple,
 		},
 	});
 
@@ -118,11 +115,11 @@ export function Step4QuartileDistribution({
 		value: string | number | undefined,
 	) {
 		const arr = tableType === "annual" ? [...annual] : [...hourly];
-		arr[index] = { ...arr[index]!, [field]: value };
-		form.setValue(
-			tableType,
-			arr as [QuartileData, QuartileData, QuartileData, QuartileData],
-		);
+		const current = arr[index];
+		if (current) {
+			arr[index] = { ...current, [field]: value };
+		}
+		form.setValue(tableType, arr as QuartileTuple);
 	}
 
 	function handleQuartileChange(
@@ -178,33 +175,13 @@ export function Step4QuartileDistribution({
 		<form className={stepStyles.formColumn} onSubmit={onSubmit}>
 			<StepTitleRow
 				onDevFill={() => {
-					const devAnnual = DEV_STEP4_ANNUAL.map((c) => ({
-						threshold: c.womenValue ?? "",
-						women: c.womenCount,
-						men: c.menCount,
-					}));
-					const devHourly = DEV_STEP4_HOURLY.map((c) => ({
-						threshold: c.womenValue ?? "",
-						women: c.womenCount,
-						men: c.menCount,
-					}));
 					form.setValue(
 						"annual",
-						devAnnual as [
-							QuartileData,
-							QuartileData,
-							QuartileData,
-							QuartileData,
-						],
+						DEV_STEP4_ANNUAL.map(toQuartileData) as QuartileTuple,
 					);
 					form.setValue(
 						"hourly",
-						devHourly as [
-							QuartileData,
-							QuartileData,
-							QuartileData,
-							QuartileData,
-						],
+						DEV_STEP4_HOURLY.map(toQuartileData) as QuartileTuple,
 					);
 					setSaved(false);
 				}}

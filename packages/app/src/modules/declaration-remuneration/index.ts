@@ -43,6 +43,7 @@ export type {
 	EmployeeCategoryRow,
 	PayGapRow,
 	QuartileData,
+	QuartileTuple,
 	Step1Data,
 	Step2Data,
 	Step3Data,
