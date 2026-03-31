@@ -153,10 +153,9 @@ describe("mapToEmployeeCategoryRows", () => {
 });
 
 describe("fetchAllCategories", () => {
-	it("returns categories, jobCategories and employeeCategories", async () => {
+	it("returns jobCategories and employeeCategories", async () => {
 		const { fetchAllCategories } = await import("../declarationHelpers");
 
-		const mockCategories = [{ id: "cat-1", siren: "123456789", year: 2026 }];
 		const mockJobs = [{ id: "job-1" }, { id: "job-2" }];
 		const mockEmpCats = [
 			[{ id: "emp-1", jobCategoryId: "job-1" }],
@@ -166,19 +165,17 @@ describe("fetchAllCategories", () => {
 		let selectCallCount = 0;
 		const mockSelectWhere = vi.fn().mockImplementation(() => {
 			selectCallCount++;
-			if (selectCallCount === 1) return Promise.resolve(mockCategories);
-			if (selectCallCount === 2) return Promise.resolve(mockJobs);
-			// Employee category queries
-			return Promise.resolve(mockEmpCats[selectCallCount - 3] ?? []);
+			if (selectCallCount === 1) return Promise.resolve(mockJobs);
+			// Employee category queries (one per job)
+			return Promise.resolve(mockEmpCats[selectCallCount - 2] ?? []);
 		});
 		const mockSelectFrom = vi.fn().mockReturnValue({ where: mockSelectWhere });
 		const mockSelect = vi.fn().mockReturnValue({ from: mockSelectFrom });
 
 		const tx = { select: mockSelect } as never;
 
-		const result = await fetchAllCategories(tx, "123456789", 2026, "decl-1");
+		const result = await fetchAllCategories(tx, "decl-1");
 
-		expect(result.categories).toEqual(mockCategories);
 		expect(result.jobCategories).toEqual(mockJobs);
 		expect(result.employeeCategories).toHaveLength(2);
 	});
@@ -194,9 +191,8 @@ describe("fetchAllCategories", () => {
 
 		const tx = { select: mockSelect } as never;
 
-		const result = await fetchAllCategories(tx, "123456789", 2026, "decl-1");
+		const result = await fetchAllCategories(tx, "decl-1");
 
-		expect(result.categories).toEqual([]);
 		expect(result.jobCategories).toEqual([]);
 		expect(result.employeeCategories).toEqual([]);
 	});

@@ -6,13 +6,59 @@ import { db } from "~/server/db";
 import {
 	companies,
 	cseOpinions,
-	declarationCategories,
 	declarations,
 	employeeCategories,
 	jobCategories,
 	users,
 } from "~/server/db/schema";
-import type { CategoryRow, CseRow, IndicatorGEntry } from "./fetchDeclarations";
+import type { CseRow, IndicatorGEntry } from "./fetchDeclarations";
+
+// ── Shared select columns for indicators A–F ───────────────────────
+
+export const indicatorColumns = {
+	indicatorAAnnualWomen: declarations.indicatorAAnnualWomen,
+	indicatorAAnnualMen: declarations.indicatorAAnnualMen,
+	indicatorAHourlyWomen: declarations.indicatorAHourlyWomen,
+	indicatorAHourlyMen: declarations.indicatorAHourlyMen,
+	indicatorBAnnualWomen: declarations.indicatorBAnnualWomen,
+	indicatorBAnnualMen: declarations.indicatorBAnnualMen,
+	indicatorBHourlyWomen: declarations.indicatorBHourlyWomen,
+	indicatorBHourlyMen: declarations.indicatorBHourlyMen,
+	indicatorCAnnualWomen: declarations.indicatorCAnnualWomen,
+	indicatorCAnnualMen: declarations.indicatorCAnnualMen,
+	indicatorCHourlyWomen: declarations.indicatorCHourlyWomen,
+	indicatorCHourlyMen: declarations.indicatorCHourlyMen,
+	indicatorDAnnualWomen: declarations.indicatorDAnnualWomen,
+	indicatorDAnnualMen: declarations.indicatorDAnnualMen,
+	indicatorDHourlyWomen: declarations.indicatorDHourlyWomen,
+	indicatorDHourlyMen: declarations.indicatorDHourlyMen,
+	indicatorEWomen: declarations.indicatorEWomen,
+	indicatorEMen: declarations.indicatorEMen,
+	indicatorFAnnualThreshold1: declarations.indicatorFAnnualThreshold1,
+	indicatorFAnnualThreshold2: declarations.indicatorFAnnualThreshold2,
+	indicatorFAnnualThreshold3: declarations.indicatorFAnnualThreshold3,
+	indicatorFAnnualThreshold4: declarations.indicatorFAnnualThreshold4,
+	indicatorFAnnualWomen1: declarations.indicatorFAnnualWomen1,
+	indicatorFAnnualWomen2: declarations.indicatorFAnnualWomen2,
+	indicatorFAnnualWomen3: declarations.indicatorFAnnualWomen3,
+	indicatorFAnnualWomen4: declarations.indicatorFAnnualWomen4,
+	indicatorFAnnualMen1: declarations.indicatorFAnnualMen1,
+	indicatorFAnnualMen2: declarations.indicatorFAnnualMen2,
+	indicatorFAnnualMen3: declarations.indicatorFAnnualMen3,
+	indicatorFAnnualMen4: declarations.indicatorFAnnualMen4,
+	indicatorFHourlyThreshold1: declarations.indicatorFHourlyThreshold1,
+	indicatorFHourlyThreshold2: declarations.indicatorFHourlyThreshold2,
+	indicatorFHourlyThreshold3: declarations.indicatorFHourlyThreshold3,
+	indicatorFHourlyThreshold4: declarations.indicatorFHourlyThreshold4,
+	indicatorFHourlyWomen1: declarations.indicatorFHourlyWomen1,
+	indicatorFHourlyWomen2: declarations.indicatorFHourlyWomen2,
+	indicatorFHourlyWomen3: declarations.indicatorFHourlyWomen3,
+	indicatorFHourlyWomen4: declarations.indicatorFHourlyWomen4,
+	indicatorFHourlyMen1: declarations.indicatorFHourlyMen1,
+	indicatorFHourlyMen2: declarations.indicatorFHourlyMen2,
+	indicatorFHourlyMen3: declarations.indicatorFHourlyMen3,
+	indicatorFHourlyMen4: declarations.indicatorFHourlyMen4,
+};
 
 // ── Shared helper ────────────────────────────────────────────────────
 
@@ -61,6 +107,7 @@ export async function fetchSubmittedDeclarations(
 			declarantLastName: users.lastName,
 			declarantEmail: users.email,
 			declarantPhone: users.phone,
+			...indicatorColumns,
 		})
 		.from(declarations)
 		.innerJoin(companies, eq(declarations.siren, companies.siren))
@@ -68,46 +115,10 @@ export async function fetchSubmittedDeclarations(
 		.where(
 			and(
 				eq(declarations.status, "submitted"),
-				// Timestamps are stored in UTC (withTimezone: true)
 				gte(declarations.updatedAt, new Date(`${dateBegin}T00:00:00Z`)),
 				lt(declarations.updatedAt, new Date(`${dateEnd}T00:00:00Z`)),
 			),
 		);
-}
-
-// ── Indicators A–F (declarationCategories, steps 2–4) ────────────────
-
-export async function fetchCategoriesByDeclaration(
-	keys: Array<{ siren: string; year: number }>,
-): Promise<Map<string, CategoryRow[]>> {
-	if (keys.length === 0) return new Map();
-
-	const rows = await db
-		.select({
-			siren: declarationCategories.siren,
-			year: declarationCategories.year,
-			step: declarationCategories.step,
-			categoryName: declarationCategories.categoryName,
-			womenCount: declarationCategories.womenCount,
-			menCount: declarationCategories.menCount,
-			womenValue: declarationCategories.womenValue,
-			menValue: declarationCategories.menValue,
-			womenMedianValue: declarationCategories.womenMedianValue,
-			menMedianValue: declarationCategories.menMedianValue,
-		})
-		.from(declarationCategories)
-		.where(
-			or(
-				...keys.map((k) =>
-					and(
-						eq(declarationCategories.siren, k.siren),
-						eq(declarationCategories.year, k.year),
-					),
-				),
-			),
-		);
-
-	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
 }
 
 // ── Indicator G (jobCategories + employeeCategories) ─────────────────

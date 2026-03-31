@@ -124,8 +124,15 @@
 		{
 			"idx": 17,
 			"version": "7",
+			"when": 1774874768051,
+			"tag": "0017_flatten-indicator-columns",
+			"breakpoints": true
+		},
+		{
+			"idx": 18,
+			"version": "7",
 			"when": 1774945983953,
-			"tag": "0017_rare_next_avengers",
+			"tag": "0018_rare_next_avengers",
 			"breakpoints": true
 		}
 	]

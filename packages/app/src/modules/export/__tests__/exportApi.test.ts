@@ -1,15 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
 const mockFetchSubmitted = vi.fn().mockResolvedValue([]);
-const mockFetchCategories = vi.fn().mockResolvedValue(new Map());
 const mockFetchIndicatorG = vi.fn().mockResolvedValue(new Map());
 const mockFetchCse = vi.fn().mockResolvedValue(new Map());
 
 vi.mock("~/modules/export/queries", () => ({
 	fetchSubmittedDeclarations: (...args: unknown[]) =>
 		mockFetchSubmitted(...args),
-	fetchCategoriesByDeclaration: (...args: unknown[]) =>
-		mockFetchCategories(...args),
 	fetchIndicatorGByDeclaration: (...args: unknown[]) =>
 		mockFetchIndicatorG(...args),
 	fetchCseOpinionsByDeclaration: (...args: unknown[]) => mockFetchCse(...args),
@@ -23,11 +20,56 @@ function authedRequest(url: string): Request {
 	});
 }
 
+// Full indicator columns for a declaration row stub (all null)
+const nullIndicators = {
+	indicatorAAnnualWomen: null,
+	indicatorAAnnualMen: null,
+	indicatorAHourlyWomen: null,
+	indicatorAHourlyMen: null,
+	indicatorBAnnualWomen: null,
+	indicatorBAnnualMen: null,
+	indicatorBHourlyWomen: null,
+	indicatorBHourlyMen: null,
+	indicatorCAnnualWomen: null,
+	indicatorCAnnualMen: null,
+	indicatorCHourlyWomen: null,
+	indicatorCHourlyMen: null,
+	indicatorDAnnualWomen: null,
+	indicatorDAnnualMen: null,
+	indicatorDHourlyWomen: null,
+	indicatorDHourlyMen: null,
+	indicatorEWomen: null,
+	indicatorEMen: null,
+	indicatorFAnnualThreshold1: null,
+	indicatorFAnnualWomen1: null,
+	indicatorFAnnualMen1: null,
+	indicatorFAnnualThreshold2: null,
+	indicatorFAnnualWomen2: null,
+	indicatorFAnnualMen2: null,
+	indicatorFAnnualThreshold3: null,
+	indicatorFAnnualWomen3: null,
+	indicatorFAnnualMen3: null,
+	indicatorFAnnualThreshold4: null,
+	indicatorFAnnualWomen4: null,
+	indicatorFAnnualMen4: null,
+	indicatorFHourlyThreshold1: null,
+	indicatorFHourlyWomen1: null,
+	indicatorFHourlyMen1: null,
+	indicatorFHourlyThreshold2: null,
+	indicatorFHourlyWomen2: null,
+	indicatorFHourlyMen2: null,
+	indicatorFHourlyThreshold3: null,
+	indicatorFHourlyWomen3: null,
+	indicatorFHourlyMen3: null,
+	indicatorFHourlyThreshold4: null,
+	indicatorFHourlyWomen4: null,
+	indicatorFHourlyMen4: null,
+};
+
 describe("GET /api/v1/export/declarations", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockFetchSubmitted.mockResolvedValue([]);
-		mockFetchCategories.mockResolvedValue(new Map());
 		mockFetchIndicatorG.mockResolvedValue(new Map());
 		mockFetchCse.mockResolvedValue(new Map());
 	});
@@ -152,6 +194,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarantLastName: "B",
 				declarantEmail: "a@b.fr",
 				declarantPhone: "0100000000",
+				...nullIndicators,
 			},
 			{
 				declarationId: "decl-2",
@@ -175,6 +218,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarantLastName: "D",
 				declarantEmail: "c@d.fr",
 				declarantPhone: "0200000000",
+				...nullIndicators,
 			},
 		]);
 
@@ -188,15 +232,11 @@ describe("GET /api/v1/export/declarations", () => {
 		const body = await response.json();
 		expect(body.count).toBe(2);
 
-		expect(mockFetchCategories).toHaveBeenCalledWith([
-			{ siren: "111111111", year: 2027 },
-			{ siren: "222222222", year: 2027 },
-		]);
 		expect(mockFetchIndicatorG).toHaveBeenCalledWith(["decl-1", "decl-2"]);
 		expect(mockFetchCse).toHaveBeenCalledWith(["decl-1", "decl-2"]);
 	});
 
-	it("should return assembled declarations with indicators", async () => {
+	it("should return assembled declarations with flat indicator columns", async () => {
 		mockFetchSubmitted.mockResolvedValue([
 			{
 				declarationId: "decl-1",
@@ -220,6 +260,15 @@ describe("GET /api/v1/export/declarations", () => {
 				declarantLastName: "Dupont",
 				declarantEmail: "jean@acme.fr",
 				declarantPhone: "0612345678",
+				// Populate a few indicator values
+				indicatorAAnnualWomen: "35000",
+				indicatorAAnnualMen: "38000",
+				...Object.fromEntries(
+					Object.entries(nullIndicators).filter(
+						([k]) =>
+							k !== "indicatorAAnnualWomen" && k !== "indicatorAAnnualMen",
+					),
+				),
 			},
 		]);
 
@@ -236,15 +285,11 @@ describe("GET /api/v1/export/declarations", () => {
 		const decl = body.declarations[0];
 		expect(decl.siren).toBe("123456789");
 		expect(decl.declarant.email).toBe("jean@acme.fr");
-		expect(decl.indicators).toEqual({
-			A: [],
-			B: [],
-			C: [],
-			D: [],
-			E: [],
-			F: [],
-			G: null,
-		});
+		expect(decl.indicators.A.annualWomen).toBe("35000");
+		expect(decl.indicators.A.annualMen).toBe("38000");
+		expect(decl.indicators.A.hourlyWomen).toBeNull();
+		expect(decl.indicators.G).toBeNull();
+		expect(decl.indicators.F.annual).toHaveLength(4);
 		expect(decl.secondDeclaration.correction).toBeNull();
 		expect(decl.cseOpinions).toEqual([]);
 	});

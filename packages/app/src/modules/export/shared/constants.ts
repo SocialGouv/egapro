@@ -33,29 +33,35 @@ export const DECLARATION_COLUMNS: Array<{
 	{ key: "quartileScore", header: "Score_quartile" },
 	{ key: "categoryScore", header: "Score_categorie" },
 
-	// Indicator A — Pay gap (step 2)
-	{ key: "indAAnnualMeanWomen", header: "Ind_A_Annuel_Moy_F" },
-	{ key: "indAAnnualMeanMen", header: "Ind_A_Annuel_Moy_H" },
-	{ key: "indAHourlyMeanWomen", header: "Ind_A_Horaire_Moy_F" },
-	{ key: "indAHourlyMeanMen", header: "Ind_A_Horaire_Moy_H" },
-	{ key: "indAAnnualMedianWomen", header: "Ind_A_Annuel_Med_F" },
-	{ key: "indAAnnualMedianMen", header: "Ind_A_Annuel_Med_H" },
-	{ key: "indAHourlyMedianWomen", header: "Ind_A_Horaire_Med_F" },
-	{ key: "indAHourlyMedianMen", header: "Ind_A_Horaire_Med_H" },
+	// Indicator A — Global remuneration gap (mean)
+	{ key: "indAAnnualWomen", header: "Ind_A_Annuel_F" },
+	{ key: "indAAnnualMen", header: "Ind_A_Annuel_H" },
+	{ key: "indAHourlyWomen", header: "Ind_A_Horaire_F" },
+	{ key: "indAHourlyMen", header: "Ind_A_Horaire_H" },
 
-	// Indicator B — Variable pay gap (step 3)
-	{ key: "indBAnnualMeanWomen", header: "Ind_B_Annuel_Moy_F" },
-	{ key: "indBAnnualMeanMen", header: "Ind_B_Annuel_Moy_H" },
-	{ key: "indBHourlyMeanWomen", header: "Ind_B_Horaire_Moy_F" },
-	{ key: "indBHourlyMeanMen", header: "Ind_B_Horaire_Moy_H" },
-	{ key: "indBAnnualMedianWomen", header: "Ind_B_Annuel_Med_F" },
-	{ key: "indBAnnualMedianMen", header: "Ind_B_Annuel_Med_H" },
-	{ key: "indBHourlyMedianWomen", header: "Ind_B_Horaire_Med_F" },
-	{ key: "indBHourlyMedianMen", header: "Ind_B_Horaire_Med_H" },
-	{ key: "indBBeneficiariesWomen", header: "Ind_B_Benef_F" },
-	{ key: "indBBeneficiariesMen", header: "Ind_B_Benef_H" },
+	// Indicator B — Variable remuneration gap (mean)
+	{ key: "indBAnnualWomen", header: "Ind_B_Annuel_F" },
+	{ key: "indBAnnualMen", header: "Ind_B_Annuel_H" },
+	{ key: "indBHourlyWomen", header: "Ind_B_Horaire_F" },
+	{ key: "indBHourlyMen", header: "Ind_B_Horaire_H" },
 
-	// Indicator F — Quartile distribution (step 4)
+	// Indicator C — Global remuneration gap (median)
+	{ key: "indCAnnualWomen", header: "Ind_C_Annuel_F" },
+	{ key: "indCAnnualMen", header: "Ind_C_Annuel_H" },
+	{ key: "indCHourlyWomen", header: "Ind_C_Horaire_F" },
+	{ key: "indCHourlyMen", header: "Ind_C_Horaire_H" },
+
+	// Indicator D — Variable remuneration gap (median)
+	{ key: "indDAnnualWomen", header: "Ind_D_Annuel_F" },
+	{ key: "indDAnnualMen", header: "Ind_D_Annuel_H" },
+	{ key: "indDHourlyWomen", header: "Ind_D_Horaire_F" },
+	{ key: "indDHourlyMen", header: "Ind_D_Horaire_H" },
+
+	// Indicator E — Variable pay beneficiary count
+	{ key: "indEWomen", header: "Ind_E_F" },
+	{ key: "indEMen", header: "Ind_E_H" },
+
+	// Indicator F — Quartile distribution (annual)
 	{ key: "indFAnnualQ1Women", header: "Ind_F_Annuel_Q1_F" },
 	{ key: "indFAnnualQ1Men", header: "Ind_F_Annuel_Q1_H" },
 	{ key: "indFAnnualQ1Threshold", header: "Ind_F_Annuel_Q1_seuil" },
@@ -68,6 +74,8 @@ export const DECLARATION_COLUMNS: Array<{
 	{ key: "indFAnnualQ4Women", header: "Ind_F_Annuel_Q4_F" },
 	{ key: "indFAnnualQ4Men", header: "Ind_F_Annuel_Q4_H" },
 	{ key: "indFAnnualQ4Threshold", header: "Ind_F_Annuel_Q4_seuil" },
+
+	// Indicator F — Quartile distribution (hourly)
 	{ key: "indFHourlyQ1Women", header: "Ind_F_Horaire_Q1_F" },
 	{ key: "indFHourlyQ1Men", header: "Ind_F_Horaire_Q1_H" },
 	{ key: "indFHourlyQ1Threshold", header: "Ind_F_Horaire_Q1_seuil" },

@@ -83,6 +83,55 @@ export const declarations = createTable(
 		quartileScore: d.integer(),
 		categoryScore: d.integer(),
 		compliancePath: d.varchar({ length: 30 }),
+		// ── Indicator A — Global remuneration gap (mean) ──
+		indicatorAAnnualWomen: d.numeric(),
+		indicatorAAnnualMen: d.numeric(),
+		indicatorAHourlyWomen: d.numeric(),
+		indicatorAHourlyMen: d.numeric(),
+		// ── Indicator B — Variable remuneration gap (mean) ──
+		indicatorBAnnualWomen: d.numeric(),
+		indicatorBAnnualMen: d.numeric(),
+		indicatorBHourlyWomen: d.numeric(),
+		indicatorBHourlyMen: d.numeric(),
+		// ── Indicator C — Global remuneration gap (median) ──
+		indicatorCAnnualWomen: d.numeric(),
+		indicatorCAnnualMen: d.numeric(),
+		indicatorCHourlyWomen: d.numeric(),
+		indicatorCHourlyMen: d.numeric(),
+		// ── Indicator D — Variable remuneration gap (median) ──
+		indicatorDAnnualWomen: d.numeric(),
+		indicatorDAnnualMen: d.numeric(),
+		indicatorDHourlyWomen: d.numeric(),
+		indicatorDHourlyMen: d.numeric(),
+		// ── Indicator E — Variable pay beneficiary count ──
+		indicatorEWomen: d.numeric(),
+		indicatorEMen: d.numeric(),
+		// ── Indicator F — Quartile distribution (annual) ──
+		indicatorFAnnualThreshold1: d.numeric(),
+		indicatorFAnnualThreshold2: d.numeric(),
+		indicatorFAnnualThreshold3: d.numeric(),
+		indicatorFAnnualThreshold4: d.numeric(),
+		indicatorFAnnualWomen1: d.integer(),
+		indicatorFAnnualWomen2: d.integer(),
+		indicatorFAnnualWomen3: d.integer(),
+		indicatorFAnnualWomen4: d.integer(),
+		indicatorFAnnualMen1: d.integer(),
+		indicatorFAnnualMen2: d.integer(),
+		indicatorFAnnualMen3: d.integer(),
+		indicatorFAnnualMen4: d.integer(),
+		// ── Indicator F — Quartile distribution (hourly) ──
+		indicatorFHourlyThreshold1: d.numeric(),
+		indicatorFHourlyThreshold2: d.numeric(),
+		indicatorFHourlyThreshold3: d.numeric(),
+		indicatorFHourlyThreshold4: d.numeric(),
+		indicatorFHourlyWomen1: d.integer(),
+		indicatorFHourlyWomen2: d.integer(),
+		indicatorFHourlyWomen3: d.integer(),
+		indicatorFHourlyWomen4: d.integer(),
+		indicatorFHourlyMen1: d.integer(),
+		indicatorFHourlyMen2: d.integer(),
+		indicatorFHourlyMen3: d.integer(),
+		indicatorFHourlyMen4: d.integer(),
 		currentStep: d.integer().default(0),
 		status: d.varchar({ length: 20 }).default("draft"),
 		secondDeclarationStep: d.integer(),
@@ -110,45 +159,10 @@ export const declarationsRelations = relations(
 			fields: [declarations.siren],
 			references: [companies.siren],
 		}),
-		categories: many(declarationCategories),
 		jobCategories: many(jobCategories),
 		cseOpinions: many(cseOpinions),
 		cseOpinionFiles: many(cseOpinionFiles),
 		jointEvaluationFiles: many(jointEvaluationFiles),
-	}),
-);
-
-export const declarationCategories = createTable(
-	"declaration_category",
-	(d) => ({
-		id: d
-			.varchar({ length: 255 })
-			.notNull()
-			.primaryKey()
-			.$defaultFn(() => crypto.randomUUID()),
-		siren: d.varchar({ length: 9 }).notNull(),
-		year: d.integer().notNull(),
-		step: d.integer().notNull(),
-		categoryName: d.varchar({ length: 255 }).notNull(),
-		womenCount: d.integer(),
-		menCount: d.integer(),
-		womenValue: d.numeric(),
-		menValue: d.numeric(),
-		womenMedianValue: d.numeric(),
-		menMedianValue: d.numeric(),
-	}),
-	(t) => [
-		index("declaration_cat_siren_year_step_idx").on(t.siren, t.year, t.step),
-	],
-);
-
-export const declarationCategoriesRelations = relations(
-	declarationCategories,
-	({ one }) => ({
-		declaration: one(declarations, {
-			fields: [declarationCategories.siren, declarationCategories.year],
-			references: [declarations.siren, declarations.year],
-		}),
 	}),
 );
 

@@ -14,7 +14,6 @@ vi.mock("../declarationHelpers", async (importOriginal) => {
 	return {
 		...original,
 		fetchAllCategories: vi.fn().mockResolvedValue({
-			categories: [],
 			jobCategories: [],
 			employeeCategories: [],
 		}),
@@ -183,7 +182,6 @@ describe("declarationRouter", () => {
 			const result = await caller.getOrCreate();
 
 			expect(result.declaration).toBeDefined();
-			expect(result.categories).toEqual([]);
 			expect(result.jobCategories).toEqual([]);
 			expect(result.employeeCategories).toEqual([]);
 		});
@@ -345,7 +343,7 @@ describe("declarationRouter", () => {
 	});
 
 	describe("updateStep1", () => {
-		it("updates totals and inserts categories", async () => {
+		it("updates totalWomen and totalMen", async () => {
 			const tx = createMockTx([mockDeclaration]);
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
 				fn(tx),
@@ -354,10 +352,8 @@ describe("declarationRouter", () => {
 			const caller = await createCaller(mockDb);
 
 			const result = await caller.updateStep1({
-				categories: [
-					{ name: "Cadres", women: 10, men: 15 },
-					{ name: "Employés", women: 20, men: 25 },
-				],
+				totalWomen: 30,
+				totalMen: 40,
 			});
 
 			expect(result).toEqual({ success: true });
@@ -378,10 +374,8 @@ describe("declarationRouter", () => {
 			const caller = await createCaller(mockDb);
 
 			const result = await caller.updateStep1({
-				categories: [
-					{ name: "Cadres", women: 10, men: 15 },
-					{ name: "Employés", women: 20, men: 25 },
-				],
+				totalWomen: 30,
+				totalMen: 40,
 			});
 
 			expect(result).toEqual({ success: true });
@@ -391,7 +385,7 @@ describe("declarationRouter", () => {
 			);
 		});
 
-		it("saves with empty categories array", async () => {
+		it("resets downstream scores when totals change", async () => {
 			const tx = createMockTx([mockDeclaration]);
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
 				fn(tx),
@@ -399,7 +393,54 @@ describe("declarationRouter", () => {
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createCaller(mockDb);
 
-			const result = await caller.updateStep1({ categories: [] });
+			const result = await caller.updateStep1({
+				totalWomen: 50,
+				totalMen: 60,
+			});
+
+			expect(result).toEqual({ success: true });
+			expect(mockSet).toHaveBeenCalledWith(
+				expect.objectContaining({ remunerationScore: null }),
+			);
+		});
+
+		it("throws when siret is missing", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb, null as never);
+
+			await expect(
+				caller.updateStep1({ totalWomen: 10, totalMen: 20 }),
+			).rejects.toThrow("SIRET manquant ou invalide dans la session");
+		});
+	});
+
+	describe("updateStep2", () => {
+		it("saves indicator A and C values", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.updateStep2({
+				indicatorAAnnualWomen: "30000",
+				indicatorAAnnualMen: "32000",
+				indicatorAHourlyWomen: "18.5",
+				indicatorAHourlyMen: "19.0",
+				indicatorCAnnualWomen: "28000",
+				indicatorCAnnualMen: "29000",
+				indicatorCHourlyWomen: "17.0",
+				indicatorCHourlyMen: "17.5",
+			});
+
+			expect(result).toEqual({ success: true });
+			expect(mockSet).toHaveBeenCalledWith(
+				expect.objectContaining({ currentStep: 2 }),
+			);
+		});
+
+		it("saves with all optional fields undefined", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.updateStep2({});
 
 			expect(result).toEqual({ success: true });
 		});
@@ -408,74 +449,95 @@ describe("declarationRouter", () => {
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb, null as never);
 
-			await expect(caller.updateStep1({ categories: [] })).rejects.toThrow(
+			await expect(caller.updateStep2({})).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
 			);
 		});
 	});
 
-	describe("updateStepCategories", () => {
-		it("saves empty categories for a given step", async () => {
-			const tx = createMockTx();
-			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-				fn(tx),
-			);
-			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
-
-			const result = await caller.updateStepCategories({
-				step: 3,
-				categories: [],
-			});
-
-			expect(result).toEqual({ success: true });
-		});
-
-		it("saves categories with all optional fields undefined", async () => {
-			const tx = createMockTx();
-			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-				fn(tx),
-			);
-			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
-
-			const result = await caller.updateStepCategories({
-				step: 4,
-				categories: [{ name: "Cadres" }],
-			});
-
-			expect(result).toEqual({ success: true });
-		});
-
-		it("saves categories for a given step", async () => {
-			const tx = createMockTx();
-			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-				fn(tx),
-			);
-			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
-
-			const result = await caller.updateStepCategories({
-				step: 2,
-				categories: [{ name: "Cadres", womenCount: 10, menCount: 15 }],
-			});
-
-			expect(result).toEqual({ success: true });
-			expect(mockTransaction).toHaveBeenCalled();
-			expect(mockDelete).toHaveBeenCalled();
-		});
-
-		it("rejects step outside 2-4 range", async () => {
+	describe("updateStep3", () => {
+		it("saves indicator B, D and E values", async () => {
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb);
 
-			await expect(
-				caller.updateStepCategories({ step: 1, categories: [] }),
-			).rejects.toThrow();
+			const result = await caller.updateStep3({
+				indicatorBAnnualWomen: "31000",
+				indicatorBAnnualMen: "33000",
+				indicatorBHourlyWomen: "17.5",
+				indicatorBHourlyMen: "18.0",
+				indicatorDAnnualWomen: "27000",
+				indicatorDAnnualMen: "28000",
+				indicatorDHourlyWomen: "16.0",
+				indicatorDHourlyMen: "16.5",
+				indicatorEWomen: "5000",
+				indicatorEMen: "6000",
+			});
 
-			await expect(
-				caller.updateStepCategories({ step: 5, categories: [] }),
-			).rejects.toThrow();
+			expect(result).toEqual({ success: true });
+			expect(mockSet).toHaveBeenCalledWith(
+				expect.objectContaining({ currentStep: 3 }),
+			);
+		});
+
+		it("saves with all optional fields undefined", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.updateStep3({});
+
+			expect(result).toEqual({ success: true });
+		});
+
+		it("throws when siret is missing", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb, null as never);
+
+			await expect(caller.updateStep3({})).rejects.toThrow(
+				"SIRET manquant ou invalide dans la session",
+			);
+		});
+	});
+
+	describe("updateStep4", () => {
+		type Quartile = { threshold?: string; women?: number; men?: number };
+		type Step4Input = {
+			annual: [Quartile, Quartile, Quartile, Quartile];
+			hourly: [Quartile, Quartile, Quartile, Quartile];
+		};
+		const step4Input: Step4Input = {
+			annual: [
+				{ threshold: "25000", women: 10, men: 12 },
+				{ threshold: "35000", women: 8, men: 9 },
+				{ threshold: "50000", women: 5, men: 6 },
+				{},
+			],
+			hourly: [
+				{ threshold: "15", women: 20, men: 22 },
+				{ threshold: "20", women: 15, men: 18 },
+				{ threshold: "30", women: 10, men: 11 },
+				{},
+			],
+		};
+
+		it("saves indicator F annual and hourly thresholds", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.updateStep4(step4Input);
+
+			expect(result).toEqual({ success: true });
+			expect(mockSet).toHaveBeenCalledWith(
+				expect.objectContaining({ currentStep: 4 }),
+			);
+		});
+
+		it("throws when siret is missing", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb, null as never);
+
+			await expect(caller.updateStep4(step4Input)).rejects.toThrow(
+				"SIRET manquant ou invalide dans la session",
+			);
 		});
 	});
 

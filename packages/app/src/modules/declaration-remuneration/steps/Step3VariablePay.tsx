@@ -2,15 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { computeProportion, getCurrentYear } from "~/modules/domain";
+import {
+	computeProportion,
+	getCurrentYear,
+	normalizeDecimalInput,
+} from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
-import { updateStepCategoriesSchema } from "../schemas";
-import { buildGipRows } from "../shared/buildGipRows";
-import {
-	categoriesToRows,
-	rowsToCategories,
-} from "../shared/categoryRowMapping";
+import { updateStep3Schema } from "../schemas";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import {
@@ -22,20 +21,18 @@ import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
-import {
-	DEFAULT_PAY_GAP_ROWS,
-	handlePayGapRowChange,
-	PayGapTable,
-} from "../shared/PayGapTable";
+import { gipToStep3 } from "../shared/gipToStepData";
+import { getStep3FieldName, step3ToRows } from "../shared/indicatorRowMapping";
+import { DEFAULT_PAY_GAP_ROWS, PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
 import { TooltipButton } from "../shared/TooltipButton";
-import type { PayGapField, VariablePayData } from "../types";
+import type { PayGapField, Step3Data } from "../types";
 import stepStyles from "./Step3VariablePay.module.scss";
 
 type Step3VariablePayProps = {
-	initialData?: VariablePayData;
+	initialData: Step3Data;
 	gipPrefillData?: GipPrefillData;
 	maxWomen?: number;
 	maxMen?: number;
@@ -49,46 +46,21 @@ export function Step3VariablePay({
 }: Step3VariablePayProps) {
 	const router = useRouter();
 
-	const hasSavedRows = !!initialData?.rows?.length;
-	const defaultRows = hasSavedRows
-		? initialData.rows
+	const hasSavedData = Object.values(initialData).some((v) => v !== "");
+	const defaultValues = hasSavedData
+		? initialData
 		: gipPrefillData
-			? buildGipRows(gipPrefillData.step3)
-			: DEFAULT_PAY_GAP_ROWS;
+			? gipToStep3(gipPrefillData.step3)
+			: initialData;
 
-	const defaultBenefWomen =
-		initialData?.beneficiaryWomen ||
-		(gipPrefillData?.step3.beneficiaryCountWomen?.toString() ?? "");
-	const defaultBenefMen =
-		initialData?.beneficiaryMen ||
-		(gipPrefillData?.step3.beneficiaryCountMen?.toString() ?? "");
+	const hasInitialData = hasSavedData;
 
-	const hasInitialData = !!(
-		initialData?.rows?.some((r) => r.womenValue || r.menValue) ||
-		initialData?.beneficiaryWomen ||
-		initialData?.beneficiaryMen
-	);
+	const form = useZodForm(updateStep3Schema, { defaultValues });
 
-	const form = useZodForm(updateStepCategoriesSchema, {
-		defaultValues: {
-			step: 3,
-			categories: [
-				...rowsToCategories(defaultRows),
-				{
-					name: "Bénéficiaires",
-					womenValue: defaultBenefWomen,
-					menValue: defaultBenefMen,
-				},
-			],
-		},
-	});
-
-	const allCategories = form.watch("categories");
-	const payGapCategories = allCategories.slice(0, -1);
-	const benefCategory = allCategories[allCategories.length - 1];
-	const rows = categoriesToRows(payGapCategories);
-	const beneficiaryWomen = benefCategory?.womenValue ?? "";
-	const beneficiaryMen = benefCategory?.menValue ?? "";
+	const formData = form.watch();
+	const rows = step3ToRows(formData as Step3Data);
+	const beneficiaryWomen = formData.indicatorEWomen ?? "";
+	const beneficiaryMen = formData.indicatorEMen ?? "";
 
 	const [benefValidationError, setBenefValidationError] = useState<
 		string | null
@@ -98,31 +70,26 @@ export function Step3VariablePay({
 
 	const currentYear = getCurrentYear();
 
-	const mutation = api.declaration.updateStepCategories.useMutation({
+	const mutation = api.declaration.updateStep3.useMutation({
 		onSuccess: () => router.push("/declaration-remuneration/etape/4"),
 	});
 
 	function handleRowChange(index: number, field: PayGapField, value: string) {
-		const updated = handlePayGapRowChange(rows, index, field, value);
-		if (!updated) return;
-		form.setValue("categories", [
-			...rowsToCategories(updated),
-			{
-				name: "Bénéficiaires",
-				womenValue: beneficiaryWomen,
-				menValue: beneficiaryMen,
-			},
-		]);
+		const normalized = normalizeDecimalInput(value);
+		if (normalized === null) return;
+		if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
+		const fieldName = getStep3FieldName(index, field);
+		form.setValue(fieldName, normalized);
 		setSaved(false);
 	}
 
 	function handleBenefChange(
-		field: "womenValue" | "menValue",
+		field: "indicatorEWomen" | "indicatorEMen",
 		max: number | undefined,
 		value: string,
 	) {
 		if (value === "") {
-			form.setValue(`categories.${allCategories.length - 1}.${field}`, "");
+			form.setValue(field, "");
 			setBenefValidationError(null);
 			return;
 		}
@@ -136,7 +103,7 @@ export function Step3VariablePay({
 			return;
 		}
 		setBenefValidationError(null);
-		form.setValue(`categories.${allCategories.length - 1}.${field}`, value);
+		form.setValue(field, value);
 		setSaved(false);
 	}
 
@@ -150,31 +117,21 @@ export function Step3VariablePay({
 			return;
 		}
 		setValidationError(null);
-		mutation.mutate({
-			step: 3,
-			categories: [
-				...rowsToCategories(rows),
-				{
-					name: "Bénéficiaires",
-					womenValue: beneficiaryWomen,
-					menValue: beneficiaryMen,
-				},
-			],
-		});
+		mutation.mutate(form.getValues() as Step3Data);
 	});
 
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
 				onDevFill={() => {
-					form.setValue("categories", [
-						...rowsToCategories(DEV_STEP3_ROWS),
-						{
-							name: "Bénéficiaires",
-							womenValue: DEV_STEP3_BENEFICIARY_WOMEN,
-							menValue: DEV_STEP3_BENEFICIARY_MEN,
-						},
-					]);
+					DEV_STEP3_ROWS.forEach((row, i) => {
+						const womenField = getStep3FieldName(i, "womenValue");
+						const menField = getStep3FieldName(i, "menValue");
+						form.setValue(womenField, row.womenValue);
+						form.setValue(menField, row.menValue);
+					});
+					form.setValue("indicatorEWomen", DEV_STEP3_BENEFICIARY_WOMEN);
+					form.setValue("indicatorEMen", DEV_STEP3_BENEFICIARY_MEN);
 					setSaved(false);
 				}}
 				saved={saved}
@@ -282,7 +239,7 @@ export function Step3VariablePay({
 														inputMode="numeric"
 														onChange={(e) =>
 															handleBenefChange(
-																"womenValue",
+																"indicatorEWomen",
 																maxWomen,
 																e.target.value,
 															)
@@ -312,7 +269,7 @@ export function Step3VariablePay({
 														inputMode="numeric"
 														onChange={(e) =>
 															handleBenefChange(
-																"menValue",
+																"indicatorEMen",
 																maxMen,
 																e.target.value,
 															)
