@@ -1,7 +1,21 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 import { setCompanyHasCse, setUserPhone } from "./helpers/db";
 import { loginWithProConnect } from "./helpers/login";
+
+const MISSING_INFO_MODAL_ID = "missing-info-modal";
+
+/** Wait for DSFR JS to finish initializing modals (it adds data-fr-js-modal). */
+async function waitForDsfrReady(page: Page) {
+	await page.waitForFunction(
+		(id) => {
+			const el = document.getElementById(id);
+			return el?.getAttribute("data-fr-js-modal") === "true";
+		},
+		MISSING_INFO_MODAL_ID,
+		{ timeout: 10_000 },
+	);
+}
 
 test.describe("Missing info modal", () => {
 	test.describe.configure({ mode: "serial" });
@@ -21,8 +35,9 @@ test.describe("Missing info modal", () => {
 			// Re-login so session JWT picks up phone from DB
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await waitForDsfrReady(page);
 
-			const modal = page.locator("#missing-info-modal");
+			const modal = page.locator(`#${MISSING_INFO_MODAL_ID}`);
 
 			const declarationButton = page.getByRole("button", {
 				name: "Rémunération",
@@ -57,8 +72,9 @@ test.describe("Missing info modal", () => {
 		test("opens modal and submits phone number", async ({ page }) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await waitForDsfrReady(page);
 
-			const modal = page.locator("#missing-info-modal");
+			const modal = page.locator(`#${MISSING_INFO_MODAL_ID}`);
 
 			const declarationButton = page.getByRole("button", {
 				name: "Rémunération",
@@ -91,8 +107,9 @@ test.describe("Missing info modal", () => {
 		test("shows validation error when phone is empty", async ({ page }) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await waitForDsfrReady(page);
 
-			const modal = page.locator("#missing-info-modal");
+			const modal = page.locator(`#${MISSING_INFO_MODAL_ID}`);
 
 			const declarationButton = page.getByRole("button", {
 				name: "Rémunération",

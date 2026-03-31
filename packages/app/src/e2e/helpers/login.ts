@@ -11,19 +11,27 @@ export async function dismissCookieBanner(page: Page) {
 }
 
 /** Log in via ProConnect using the FIA1V2 test identity provider. */
-export async function loginWithProConnect(page: Page) {
-	await page.goto("/login");
-	await dismissCookieBanner(page);
+export async function loginWithProConnect(page: Page, retries = 2) {
+	for (let attempt = 0; attempt <= retries; attempt++) {
+		try {
+			await page.goto("/login");
+			await dismissCookieBanner(page);
 
-	await page
-		.getByRole("button", { name: /s.identifier avec\s*proconnect/i })
-		.click();
+			await page
+				.getByRole("button", { name: /s.identifier avec\s*proconnect/i })
+				.click();
 
-	// ProConnect FIA1V2 flow
-	await page.getByLabel("Email").fill("test@fia1.fr");
-	await page.getByRole("button", { name: /continuer|connexion/i }).click();
-	await page.getByRole("button", { name: "Se connecter" }).click();
+			// ProConnect FIA1V2 flow
+			await page.getByLabel("Email").fill("test@fia1.fr");
+			await page.getByRole("button", { name: /continuer|connexion/i }).click();
+			await page.getByRole("button", { name: "Se connecter" }).click();
 
-	// Wait for redirect to mon espace (slow ProConnect in CI)
-	await page.waitForURL("**/mon-espace", { timeout: 50_000 });
+			// Wait for redirect to mon espace (slow ProConnect in CI)
+			await page.waitForURL("**/mon-espace", { timeout: 30_000 });
+			return;
+		} catch (error) {
+			if (attempt === retries) throw error;
+			await page.context().clearCookies();
+		}
+	}
 }
