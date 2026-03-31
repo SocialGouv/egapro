@@ -3,6 +3,13 @@ import { describe, expect, it } from "vitest";
 import { buildDeclarationList } from "../buildDeclarationList";
 
 const SIREN = "532847196";
+const NO_COMPLIANCE = {
+	compliancePath: null,
+	secondDeclarationStatus: null,
+	complianceCompletedAt: null,
+	hasCseOpinion: false,
+	hasJointEvaluationFile: false,
+};
 
 describe("buildDeclarationList", () => {
 	it("returns two rows (remuneration + representation) for the current year when no DB records exist", () => {
@@ -16,6 +23,7 @@ describe("buildDeclarationList", () => {
 				status: "to_complete",
 				currentStep: 0,
 				updatedAt: null,
+				...NO_COMPLIANCE,
 			},
 			{
 				type: "representation",
@@ -24,6 +32,7 @@ describe("buildDeclarationList", () => {
 				status: "to_complete",
 				currentStep: 0,
 				updatedAt: null,
+				...NO_COMPLIANCE,
 			},
 		]);
 	});
@@ -39,6 +48,7 @@ describe("buildDeclarationList", () => {
 					status: "in_progress",
 					currentStep: 3,
 					updatedAt,
+					...NO_COMPLIANCE,
 				},
 			],
 			2026,
@@ -52,6 +62,7 @@ describe("buildDeclarationList", () => {
 			status: "in_progress",
 			currentStep: 3,
 			updatedAt,
+			...NO_COMPLIANCE,
 		});
 		expect(result[1]).toMatchObject({
 			type: "representation",
@@ -71,6 +82,7 @@ describe("buildDeclarationList", () => {
 					status: "done",
 					currentStep: 6,
 					updatedAt: updatedAt2025,
+					...NO_COMPLIANCE,
 				},
 			],
 			2026,
@@ -104,6 +116,7 @@ describe("buildDeclarationList", () => {
 					status: "done",
 					currentStep: 6,
 					updatedAt: null,
+					...NO_COMPLIANCE,
 				},
 				{
 					type: "remuneration",
@@ -111,6 +124,7 @@ describe("buildDeclarationList", () => {
 					status: "done",
 					currentStep: 6,
 					updatedAt: null,
+					...NO_COMPLIANCE,
 				},
 				{
 					type: "remuneration",
@@ -118,6 +132,7 @@ describe("buildDeclarationList", () => {
 					status: "done",
 					currentStep: 6,
 					updatedAt: null,
+					...NO_COMPLIANCE,
 				},
 			],
 			2026,
@@ -142,6 +157,7 @@ describe("buildDeclarationList", () => {
 					status: "done",
 					currentStep: 6,
 					updatedAt,
+					...NO_COMPLIANCE,
 				},
 				{
 					type: "remuneration",
@@ -149,6 +165,7 @@ describe("buildDeclarationList", () => {
 					status: "done",
 					currentStep: 6,
 					updatedAt: null,
+					...NO_COMPLIANCE,
 				},
 			],
 			2026,

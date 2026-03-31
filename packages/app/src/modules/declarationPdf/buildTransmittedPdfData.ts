@@ -1,12 +1,13 @@
 import "server-only";
 
 import { and, eq } from "drizzle-orm";
-import { formatLongDate, getCseYear } from "~/modules/domain";
+import { formatLongDate, getCurrentYear } from "~/modules/domain";
 import { db } from "~/server/db";
 import {
 	companies,
 	cseOpinionFiles,
 	cseOpinions,
+	declarations,
 	jointEvaluationFiles,
 } from "~/server/db/schema";
 
@@ -37,10 +38,28 @@ export async function buildTransmittedPdfData(
 	siren: string,
 	now: Date,
 ): Promise<TransmittedPdfData> {
-	const year = getCseYear();
+	const year = getCurrentYear();
 
-	const [companyResults, opinions, cseFiles, jointFiles] = await Promise.all([
+	const [companyResults, declarationResults] = await Promise.all([
 		db.select().from(companies).where(eq(companies.siren, siren)).limit(1),
+		db
+			.select({ id: declarations.id, year: declarations.year })
+			.from(declarations)
+			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+			.limit(1),
+	]);
+
+	const company = companyResults[0];
+	if (!company) {
+		throw new Error("Entreprise introuvable");
+	}
+
+	const declaration = declarationResults[0];
+	if (!declaration) {
+		throw new Error("Déclaration introuvable");
+	}
+
+	const [opinions, cseFiles, jointFiles] = await Promise.all([
 		db
 			.select({
 				declarationNumber: cseOpinions.declarationNumber,
@@ -50,40 +69,28 @@ export async function buildTransmittedPdfData(
 				gapConsulted: cseOpinions.gapConsulted,
 			})
 			.from(cseOpinions)
-			.where(and(eq(cseOpinions.siren, siren), eq(cseOpinions.year, year))),
+			.where(eq(cseOpinions.declarationId, declaration.id)),
 		db
 			.select({
 				fileName: cseOpinionFiles.fileName,
 				uploadedAt: cseOpinionFiles.uploadedAt,
 			})
 			.from(cseOpinionFiles)
-			.where(
-				and(eq(cseOpinionFiles.siren, siren), eq(cseOpinionFiles.year, year)),
-			),
+			.where(eq(cseOpinionFiles.declarationId, declaration.id)),
 		db
 			.select({
 				fileName: jointEvaluationFiles.fileName,
 				uploadedAt: jointEvaluationFiles.uploadedAt,
 			})
 			.from(jointEvaluationFiles)
-			.where(
-				and(
-					eq(jointEvaluationFiles.siren, siren),
-					eq(jointEvaluationFiles.year, year),
-				),
-			)
+			.where(eq(jointEvaluationFiles.declarationId, declaration.id))
 			.limit(1),
 	]);
-
-	const company = companyResults[0];
-	if (!company) {
-		throw new Error("Entreprise introuvable");
-	}
 
 	return {
 		companyName: company.name,
 		siren,
-		year,
+		year: declaration.year,
 		generatedAt: formatLongDate(now),
 		opinions,
 		cseFiles,

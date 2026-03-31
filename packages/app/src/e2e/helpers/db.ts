@@ -51,6 +51,96 @@ export async function setCompanyHasCse(hasCse: boolean | null) {
 	}
 }
 
+/** Set the compliance state on the test declaration. */
+export async function setDeclarationComplianceState(state: {
+	status?: string;
+	currentStep?: number;
+	compliancePath?: string | null;
+	secondDeclarationStatus?: string | null;
+	complianceCompletedAt?: Date | null;
+}) {
+	const sql = createConnection();
+	try {
+		await sql`
+			UPDATE app_declaration
+			SET status = ${state.status ?? "submitted"},
+			    current_step = ${state.currentStep ?? 6},
+			    compliance_path = ${state.compliancePath ?? null},
+			    second_declaration_status = ${state.secondDeclarationStatus ?? null},
+			    compliance_completed_at = ${state.complianceCompletedAt ?? null}
+			WHERE siren = ${TEST_SIREN}
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Insert a dummy joint evaluation file for the test declaration. */
+export async function insertJointEvaluationFile(year: number) {
+	const sql = createConnection();
+	try {
+		const decl = await sql`
+			SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year} LIMIT 1
+		`;
+		if (decl.length === 0) return;
+		await sql`
+			INSERT INTO app_joint_evaluation_file (id, declaration_id, file_name, file_path, uploaded_at, created_at)
+			VALUES (gen_random_uuid(), ${decl[0]?.id}, 'dummy.pdf', '/tmp/dummy.pdf', NOW(), NOW())
+			ON CONFLICT DO NOTHING
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Remove dummy joint evaluation files for the test declaration. */
+export async function deleteJointEvaluationFiles() {
+	const sql = createConnection();
+	try {
+		await sql`
+			DELETE FROM app_joint_evaluation_file
+			WHERE declaration_id IN (
+				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
+			)
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Insert a dummy CSE opinion for the test declaration. */
+export async function insertCseOpinion(year: number) {
+	const sql = createConnection();
+	try {
+		const decl = await sql`
+			SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year} LIMIT 1
+		`;
+		if (decl.length === 0) return;
+		await sql`
+			INSERT INTO app_cse_opinion (id, declaration_id, declaration_number, type, created_at, updated_at)
+			VALUES (gen_random_uuid(), ${decl[0]?.id}, 1, 'remuneration', NOW(), NOW())
+			ON CONFLICT DO NOTHING
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Remove dummy CSE opinions for the test declaration. */
+export async function deleteCseOpinions() {
+	const sql = createConnection();
+	try {
+		await sql`
+			DELETE FROM app_cse_opinion
+			WHERE declaration_id IN (
+				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
+			)
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
 /** Clear or set the phone number for the test user (identified by siret starting with TEST_SIREN). */
 export async function setUserPhone(phone: string | null) {
 	const sql = createConnection();

@@ -6,15 +6,20 @@ import {
 	fetchSubmittedDeclarations,
 } from "~/modules/export/fetchDeclarations";
 import { exportDeclarationsQuerySchema } from "~/modules/export/schemas";
+import { verifySuitApiKey } from "~/server/services/suitApiAuth";
 
 /**
  * GET /api/v1/export/declarations?date_begin=YYYY-MM-DD&date_end=YYYY-MM-DD
  *
- * Public REST API returning submitted declarations as JSON.
+ * Secured REST API returning submitted declarations as JSON.
+ * Requires a valid SUIT API key in the Authorization: Bearer header.
  * - date_begin (required): start date (inclusive), filters on submission date (updatedAt, UTC)
  * - date_end (optional): end date (exclusive). If omitted, returns only date_begin day.
  */
 export async function GET(request: Request) {
+	const authResult = verifySuitApiKey(request);
+	if (authResult !== true) return authResult;
+
 	try {
 		const url = new URL(request.url);
 		const parsed = exportDeclarationsQuerySchema.safeParse({
@@ -44,7 +49,7 @@ export async function GET(request: Request) {
 		const [categoriesMap, indicatorGMap, cseMap] = await Promise.all([
 			fetchCategoriesByDeclaration(sirenYearKeys),
 			fetchIndicatorGByDeclaration(declarationIds),
-			fetchCseOpinionsByDeclaration(sirenYearKeys),
+			fetchCseOpinionsByDeclaration(declarationIds),
 		]);
 
 		const data = rows.map((row) => {
@@ -53,7 +58,7 @@ export async function GET(request: Request) {
 				row,
 				categoriesMap.get(key) ?? [],
 				indicatorGMap.get(row.declarationId) ?? [],
-				cseMap.get(key) ?? [],
+				cseMap.get(row.declarationId) ?? [],
 			);
 		});
 

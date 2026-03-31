@@ -316,6 +316,9 @@ describe("companyRouter.getWithDeclarations", () => {
 				status: "submitted",
 				currentStep: 6,
 				updatedAt: new Date(),
+				compliancePath: null,
+				secondDeclarationStatus: null,
+				complianceCompletedAt: null,
 			},
 		];
 
@@ -334,11 +337,21 @@ describe("companyRouter.getWithDeclarations", () => {
 					}),
 				};
 			}
-			// declarations query
+			if (selectCallCount === 2) {
+				// declarations query
+				return {
+					from: vi.fn().mockReturnValue({
+						where: vi.fn().mockReturnValue({
+							orderBy: vi.fn().mockResolvedValue(declRows),
+						}),
+					}),
+				};
+			}
+			// cseOpinions + jointEvaluationFiles queries (join through declarations)
 			return {
 				from: vi.fn().mockReturnValue({
-					where: vi.fn().mockReturnValue({
-						orderBy: vi.fn().mockResolvedValue(declRows),
+					innerJoin: vi.fn().mockReturnValue({
+						where: vi.fn().mockResolvedValue([]),
 					}),
 				}),
 			};

@@ -10,7 +10,11 @@ Everything below is **automatic**. No commands needed — the rules trigger them
 
 ## Hooks (`.claude/settings.json`)
 
-Two hooks enforce rules at edit time:
+Three hooks enforce rules automatically:
+
+### UserPromptSubmit — `check-pr-reviews.sh`
+
+Runs once per session when the user sends their first message. If the current branch has an open PR with unresolved review comments or changes requested, warns and suggests `/review`. Skips on `alpha` branches.
 
 ### PreToolUse — `block-bad-patterns.sh` (matcher: `Edit|Write`)
 
@@ -98,14 +102,6 @@ Apply these rules **as you write code**, before any agent runs:
 - Env vars → `~/env.js` (never `process.env`)
 - No secrets in client code
 
-### PR review (when on a PR branch)
-
-When the current git branch has an open PR, **before starting work**:
-
-1. `gh pr view --json comments,reviews,reviewDecision`
-2. Identify unresolved comments
-3. Mention them to the user before proceeding
-
 ### E2E tests (when relevant)
 
 Write or update Playwright E2E tests when a user journey is created, modified, or its underlying API/data changes.
@@ -129,8 +125,11 @@ These agents are **read-only** — they report findings but never modify files. 
 
 ## Skills (manual)
 
-Single smart skill for the full lifecycle:
+Four skills split the lifecycle:
 
 | Command | When to use |
 |---|---|
-| `/ship [#N]` | End-to-end: implement -> validate -> PR -> review -> done. Auto-detects phase from branch/PR state. |
+| `/analyse [#N]` | Analyze issue, explore codebase, generate implementation plan. Run before `/implement`. |
+| `/implement [#N]` | Fetch issue, create branch, code, validate (4 agents). |
+| `/ship` | Create PR (single/split). Run after `/implement`. |
+| `/review` | Address PR review comments (human + bots). Run after `/ship`. |

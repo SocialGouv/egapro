@@ -191,13 +191,24 @@ export const openApiSpec = {
 	info: {
 		title: "EGAPRO — API d'export des déclarations",
 		description:
-			"API REST publique permettant de consulter les déclarations d'égalité professionnelle soumises sur la plateforme EGAPRO, filtrées par date de soumission.",
+			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle soumises sur la plateforme EGAPRO, filtrées par date de soumission. L'accès nécessite une clé API (Bearer token).",
 		version: "1.0.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},
 	},
 	servers: [{ url: "/" }],
+	components: {
+		securitySchemes: {
+			bearerAuth: {
+				type: "http",
+				scheme: "bearer",
+				description:
+					"Clé API SUIT. Utiliser le header : Authorization: Bearer <clé>",
+			},
+		},
+	},
+	security: [{ bearerAuth: [] }],
 	paths: {
 		"/api/v1/export/declarations": {
 			get: {
@@ -249,6 +260,22 @@ export const openApiSpec = {
 											example: 5,
 										},
 										declarations: { type: "array", items: declarationSchema },
+									},
+								},
+							},
+						},
+					},
+					"401": {
+						description: "Clé API manquante ou invalide",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Clé API invalide",
+										},
 									},
 								},
 							},

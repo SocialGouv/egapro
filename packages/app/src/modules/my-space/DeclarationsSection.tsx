@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
 
 import { getCurrentYear } from "~/modules/domain";
@@ -56,27 +57,28 @@ export function DeclarationsSection({
 	);
 	const previousDeclarations = declarations.filter((d) => d.year < currentYear);
 
-	const allRows = [
-		...currentYearDeclarations.map((d) => ({
-			kind: "row" as const,
-			declaration: d,
-		})),
-		...(previousDeclarations.length > 0
-			? [{ kind: "separator" as const, declaration: null }]
-			: []),
-		...previousDeclarations.map((d) => ({
-			kind: "row" as const,
-			declaration: d,
-		})),
-	];
-
 	const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0] ?? 10);
 	const [currentPage, setCurrentPage] = useState(1);
 
-	const totalPages = Math.max(1, Math.ceil(allRows.length / pageSize));
+	const totalRows =
+		currentYearDeclarations.length + previousDeclarations.length;
+	const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
 	const safePage = Math.min(currentPage, totalPages);
 	const startIndex = (safePage - 1) * pageSize;
-	const visibleRows = allRows.slice(startIndex, startIndex + pageSize);
+	const endIndex = startIndex + pageSize;
+
+	const visibleCurrentDeclarations = currentYearDeclarations.slice(
+		startIndex,
+		endIndex,
+	);
+	const remainingSlots = endIndex - currentYearDeclarations.length;
+	const visiblePreviousDeclarations =
+		remainingSlots > 0
+			? previousDeclarations.slice(
+					Math.max(0, startIndex - currentYearDeclarations.length),
+					remainingSlots,
+				)
+			: [];
 
 	function handlePageSizeChange(newSize: number) {
 		setPageSize(newSize);
@@ -101,47 +103,46 @@ export function DeclarationsSection({
 					</div>
 				)}
 			</div>
+			{visibleCurrentDeclarations.length > 0 && (
+				<DeclarationsTable
+					caption={
+						<>
+							Ce tableau présente la liste des démarches en cours.
+							<br />
+							Chaque ligne correspond à une démarche, avec les informations
+							suivantes : le type de démarche, l'année concernée, l'étape
+							actuelle, la date d'échéance, l'état d'avancement et les
+							ressources disponibles.
+						</>
+					}
+					declarations={visibleCurrentDeclarations}
+					hasCse={hasCse}
+					siren={siren}
+					userPhone={userPhone}
+				/>
+			)}
+			{visiblePreviousDeclarations.length > 0 && (
+				<>
+					<h2 className="fr-mt-6w fr-mb-3w">Années précédentes</h2>
+					<DeclarationsTable
+						caption={
+							<>
+								Ce tableau présente l'historique des démarches.
+								<br />
+								Chaque ligne correspond à une démarche passée, avec les
+								informations suivantes : le type de démarche, l'année concernée,
+								les différentes étapes, les échéances, l'état final et les
+								ressources associées.
+							</>
+						}
+						declarations={visiblePreviousDeclarations}
+						hasCse={hasCse}
+						siren={siren}
+						userPhone={userPhone}
+					/>
+				</>
+			)}
 			<div className="fr-table">
-				<div className="fr-table__wrapper">
-					<div className="fr-table__container">
-						<div className="fr-table__content">
-							<table>
-								<caption className="fr-sr-only">
-									Liste des déclarations de l'entreprise
-								</caption>
-								<thead>
-									<tr>
-										<th scope="col">Déclaration</th>
-										<th scope="col">Année</th>
-										<th scope="col">Étape</th>
-										<th scope="col">Statut</th>
-										<th scope="col">Échéance</th>
-										<th scope="col">Mise à jour</th>
-									</tr>
-								</thead>
-								<tbody>
-									{visibleRows.map((row, i) =>
-										row.kind === "separator" ? (
-											<tr key="separator">
-												<td className="fr-text--bold" colSpan={6}>
-													Années précédentes
-												</td>
-											</tr>
-										) : row.declaration ? (
-											<DeclarationRow
-												declaration={row.declaration}
-												hasCse={hasCse}
-												key={`${row.declaration.type}-${row.declaration.year}-${i}`}
-												siren={siren}
-												userPhone={userPhone}
-											/>
-										) : null,
-									)}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
 				<div className="fr-table__footer--start">
 					<div className="fr-select-group">
 						<label className="fr-sr-only fr-label" htmlFor="table-page-size">
@@ -173,39 +174,66 @@ export function DeclarationsSection({
 	);
 }
 
-type DeclarationRowProps = {
-	declaration: DeclarationItem;
+type DeclarationsTableProps = {
+	declarations: DeclarationItem[];
+	caption: ReactNode;
 	siren: string;
 	userPhone: string | null;
 	hasCse: boolean | null;
 };
 
-function DeclarationRow({
-	declaration,
+function DeclarationsTable({
+	declarations,
+	caption,
 	siren,
 	userPhone,
 	hasCse,
-}: DeclarationRowProps) {
+}: DeclarationsTableProps) {
 	return (
-		<tr>
-			<td>
-				<DeclarationLink
-					hasCse={hasCse}
-					siren={siren}
-					type={declaration.type}
-					userPhone={userPhone}
-				>
-					{TYPE_LABELS[declaration.type]}
-				</DeclarationLink>
-			</td>
-			<td>{declaration.year}</td>
-			<td>{getDeclarationStepLabel(declaration.currentStep)}</td>
-			<td>
-				<StatusBadge status={declaration.status} />
-			</td>
-			<td>{getDeadline(declaration)}</td>
-			<td>{formatDate(declaration.updatedAt)}</td>
-		</tr>
+		<div className="fr-table">
+			<div className="fr-table__wrapper">
+				<div className="fr-table__container">
+					<div className="fr-table__content">
+						<table>
+							<caption className="fr-sr-only">{caption}</caption>
+							<thead>
+								<tr>
+									<th scope="col">Déclaration</th>
+									<th scope="col">Année</th>
+									<th scope="col">Étape</th>
+									<th scope="col">Statut</th>
+									<th scope="col">Échéance</th>
+									<th scope="col">Mise à jour</th>
+								</tr>
+							</thead>
+							<tbody>
+								{declarations.map((declaration) => (
+									<tr key={`${declaration.type}-${declaration.year}`}>
+										<td>
+											<DeclarationLink
+												hasCse={hasCse}
+												siren={siren}
+												type={declaration.type}
+												userPhone={userPhone}
+											>
+												{TYPE_LABELS[declaration.type]}
+											</DeclarationLink>
+										</td>
+										<td>{declaration.year}</td>
+										<td>{getDeclarationStepLabel(declaration.currentStep)}</td>
+										<td>
+											<StatusBadge status={declaration.status} />
+										</td>
+										<td>{getDeadline(declaration)}</td>
+										<td>{formatDate(declaration.updatedAt)}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
 	);
 }
 

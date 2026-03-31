@@ -179,15 +179,13 @@ describe("buildExportRows", () => {
 		mockJobWhere.mockResolvedValue([]);
 		mockCseWhere.mockResolvedValue([
 			{
-				siren: "123456789",
-				year: 2027,
+				declarationId: "decl-1",
 				type: "accuracy",
 				opinion: "favorable",
 				opinionDate: "2027-01-15",
 			},
 			{
-				siren: "123456789",
-				year: 2027,
+				declarationId: "decl-1",
 				type: "gap",
 				opinion: "unfavorable",
 				opinionDate: "2027-02-20",

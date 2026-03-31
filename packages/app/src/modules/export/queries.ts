@@ -147,26 +147,19 @@ export async function fetchIndicatorGByDeclaration(
 // ── CSE opinions ─────────────────────────────────────────────────────
 
 export async function fetchCseOpinionsByDeclaration(
-	keys: Array<{ siren: string; year: number }>,
+	declarationIds: string[],
 ): Promise<Map<string, CseRow[]>> {
-	if (keys.length === 0) return new Map();
+	if (declarationIds.length === 0) return new Map();
 
 	const rows = await db
 		.select({
-			siren: cseOpinions.siren,
-			year: cseOpinions.year,
+			declarationId: cseOpinions.declarationId,
 			type: cseOpinions.type,
 			opinion: cseOpinions.opinion,
 			opinionDate: cseOpinions.opinionDate,
 		})
 		.from(cseOpinions)
-		.where(
-			or(
-				...keys.map((k) =>
-					and(eq(cseOpinions.siren, k.siren), eq(cseOpinions.year, k.year)),
-				),
-			),
-		);
+		.where(inArray(cseOpinions.declarationId, declarationIds));
 
-	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+	return groupByKey(rows, (r) => r.declarationId);
 }

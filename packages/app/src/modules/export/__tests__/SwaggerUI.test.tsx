@@ -13,7 +13,7 @@ vi.mock("next/script", () => ({
 		strategy?: string;
 	}) => {
 		if (onLoad) onLoadCallbacks.push(onLoad);
-		return <script data-testid="next-script" data-src={src} />;
+		return <script data-src={src} data-testid="next-script" />;
 	},
 }));
 

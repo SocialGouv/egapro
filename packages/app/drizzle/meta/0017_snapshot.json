@@ -1,6 +1,6 @@
 {
 	"id": "57c81c63-5404-4033-a540-553a29470bfe",
-	"prevId": "0014_drop_session_tables",
+	"prevId": "0016_link_cse_joint_eval_to_declaration",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
