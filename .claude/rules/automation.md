@@ -134,4 +134,4 @@ Two skills split the lifecycle into "code" and "deliver":
 | Command | When to use |
 |---|---|
 | `/implement [#N]` | Fetch issue, create branch, code, validate (4 agents). |
-| `/ship` | Create PR (single/split), watch reviews, wrap up. Run after `/implement`. |
+| `/ship` | Create PR (single/split), handle review cycle. Run after `/implement`. |

@@ -130,9 +130,9 @@ Quality checks run **automatically** after every code change — no command need
 | Skill | Purpose |
 |---|---|
 | `/implement [#N]` | Fetch issue, create branch, code, run 4 validation agents. The "I code" phase. |
-| `/ship` | Create PR (single/split), watch reviews, wrap up. The "I deliver" phase. |
+| `/ship` | Create PR (single/split), handle review cycle. The "I deliver" phase. |
 
-Workflow: `/implement #42` to code and validate, then `/ship` to create the PR and handle reviews. Each skill auto-detects its current phase from branch/PR state.
+Workflow: `/implement #42` to code and validate, then `/ship` to create the PR and handle reviews.
 
 ---
 
