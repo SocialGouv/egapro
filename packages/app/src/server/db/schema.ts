@@ -214,7 +214,10 @@ export const employeeCategoriesRelations = relations(
 export const gipMdsData = createTable(
 	"gip_mds_data",
 	(d) => ({
-		siren: d.varchar({ length: 9 }).notNull(),
+		siren: d
+			.varchar({ length: 9 })
+			.notNull()
+			.references(() => companies.siren),
 		year: d.integer().notNull(),
 		// File-level metadata
 		importedAt: d
@@ -310,6 +313,13 @@ export const gipMdsData = createTable(
 	],
 );
 
+export const gipMdsDataRelations = relations(gipMdsData, ({ one }) => ({
+	company: one(companies, {
+		fields: [gipMdsData.siren],
+		references: [companies.siren],
+	}),
+}));
+
 // ── Company tables ─────────────────────────────────────────────────
 
 export const companies = createTable("company", (d) => ({
@@ -356,6 +366,7 @@ export const userCompaniesRelations = relations(userCompanies, ({ one }) => ({
 export const companiesRelations = relations(companies, ({ many }) => ({
 	userCompanies: many(userCompanies),
 	declarations: many(declarations),
+	gipMdsData: many(gipMdsData),
 	cseOpinions: many(cseOpinions),
 	cseOpinionFiles: many(cseOpinionFiles),
 	jointEvaluationFiles: many(jointEvaluationFiles),

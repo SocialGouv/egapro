@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: gip-mds-import-daily
+  namespace: {{ .Values.global.namespace }}
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app: gip-mds-import-daily
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsUser: 100
+            runAsNonRoot: true
+          containers:
+            - name: trigger
+              image: curlimages/curl:8.12.1
+              securityContext:
+                allowPrivilegeEscalation: false
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  curl -X POST "http://app:3000/api/gip-mds/import" \
+                    --connect-timeout 10 \
+                    --max-time 120 \
+                    --fail \
+                    --silent \
+                    --show-error
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 32Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi
