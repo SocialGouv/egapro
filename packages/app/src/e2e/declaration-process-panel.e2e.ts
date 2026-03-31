@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 import {
 	deleteCseOpinions,
@@ -14,6 +14,18 @@ import { loginWithProConnect } from "./helpers/login";
 
 const PANEL_ID = "declaration-process-panel";
 const CURRENT_YEAR = 2026;
+
+/** Wait for DSFR JS to finish initializing modals (it adds data-fr-js-modal). */
+async function waitForDsfrReady(page: Page) {
+	await page.waitForFunction(
+		(id) => {
+			const el = document.getElementById(id);
+			return el?.getAttribute("data-fr-js-modal") === "true";
+		},
+		PANEL_ID,
+		{ timeout: 10_000 },
+	);
+}
 
 test.describe("Declaration process panel", () => {
 	test.describe.configure({ mode: "serial" });
@@ -39,6 +51,7 @@ test.describe("Declaration process panel", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
 			const remuButton = page.getByRole("button", { name: "Rémunération" });
@@ -78,6 +91,7 @@ test.describe("Declaration process panel", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
 			await page.getByRole("button", { name: "Rémunération" }).first().click();
@@ -105,6 +119,7 @@ test.describe("Declaration process panel", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
 			await page.getByRole("button", { name: "Rémunération" }).first().click();
@@ -132,6 +147,7 @@ test.describe("Declaration process panel", () => {
 		test("shows cse variant with CSE deposit step", async ({ page }) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
 			await page.getByRole("button", { name: "Rémunération" }).first().click();
@@ -163,6 +179,7 @@ test.describe("Declaration process panel", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
 			await page.getByRole("button", { name: "Rémunération" }).first().click();
@@ -193,6 +210,7 @@ test.describe("Declaration process panel", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await waitForDsfrReady(page);
 
 			const modal = page.locator("#missing-info-modal");
 			const panel = page.locator(`#${PANEL_ID}`);
