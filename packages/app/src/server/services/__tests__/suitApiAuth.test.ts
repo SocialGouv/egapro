@@ -29,7 +29,7 @@ describe("verifySuitApiKey", () => {
 		const response = result as Response;
 		expect(response.status).toBe(401);
 		const body = await response.json();
-		expect(body.error).toBe("En-tête Authorization manquant");
+		expect(body.error).toBe("Clé API manquante ou invalide");
 	});
 
 	it("returns 401 when header format is not Bearer", async () => {
@@ -40,7 +40,7 @@ describe("verifySuitApiKey", () => {
 		const response = result as Response;
 		expect(response.status).toBe(401);
 		const body = await response.json();
-		expect(body.error).toContain("Format invalide");
+		expect(body.error).toBe("Clé API manquante ou invalide");
 	});
 
 	it("returns 401 when Bearer token is empty", async () => {
@@ -62,7 +62,7 @@ describe("verifySuitApiKey", () => {
 		const response = result as Response;
 		expect(response.status).toBe(401);
 		const body = await response.json();
-		expect(body.error).toBe("Clé API invalide");
+		expect(body.error).toBe("Clé API manquante ou invalide");
 	});
 
 	it("is case-insensitive for the Bearer prefix", () => {

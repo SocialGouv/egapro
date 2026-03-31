@@ -14,21 +14,19 @@ export function verifySuitApiKey(request: Request): true | Response {
 	const authorization = request.headers.get("authorization");
 
 	if (!authorization) {
-		return unauthorizedResponse("En-tête Authorization manquant");
+		return unauthorizedResponse();
 	}
 
 	const match = /^Bearer\s(\S+)$/i.exec(authorization);
 	if (!match?.[1]) {
-		return unauthorizedResponse(
-			"Format invalide. Attendu : Authorization: Bearer <clé>",
-		);
+		return unauthorizedResponse();
 	}
 
 	const provided = match[1];
 	const expected = env.EGAPRO_SUIT_API_KEY;
 
 	if (!constantTimeEqual(provided, expected)) {
-		return unauthorizedResponse("Clé API invalide");
+		return unauthorizedResponse();
 	}
 
 	return true;
@@ -36,21 +34,22 @@ export function verifySuitApiKey(request: Request): true | Response {
 
 /**
  * Constant-time string comparison to prevent timing attacks.
- * Uses Node.js crypto.timingSafeEqual with equal-length buffers.
+ * Always compares equal-length buffers to avoid leaking length via timing.
  */
 function constantTimeEqual(a: string, b: string): boolean {
 	const bufA = Buffer.from(a, "utf8");
 	const bufB = Buffer.from(b, "utf8");
 
-	if (bufA.byteLength !== bufB.byteLength) {
-		// Compare bufA with itself to keep constant time, then return false.
-		timingSafeEqual(bufA, bufA);
-		return false;
-	}
+	const paddedA = Buffer.alloc(bufB.byteLength);
+	bufA.copy(paddedA, 0, 0, bufB.byteLength);
+	const equal = timingSafeEqual(paddedA, bufB);
 
-	return timingSafeEqual(bufA, bufB);
+	return equal && bufA.byteLength === bufB.byteLength;
 }
 
-function unauthorizedResponse(message: string): Response {
-	return Response.json({ error: message }, { status: 401 });
+function unauthorizedResponse(): Response {
+	return Response.json(
+		{ error: "Clé API manquante ou invalide" },
+		{ status: 401 },
+	);
 }
