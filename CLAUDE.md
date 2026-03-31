@@ -53,6 +53,11 @@ React/TypeScript rules, DSFR, accessibility, tests, environment variables, scrip
 
 Never create a git commit, unless the user explicitly requests it.
 
+## Git hygiene
+
+- **No `Co-Authored-By`** in commits or PR bodies.
+- **No sensitive data** committed: `.env`, credentials, secrets, API keys. Verify before every push.
+
 ---
 
 ## Language policy
@@ -112,7 +117,7 @@ Quality checks run **automatically** after every code change — no command need
 | **RGAA** | After every task | `rgaa-auditor` agent on modified `.tsx` files |
 | **Security** | After every task | `security-auditor` agent on modified server files |
 | **Domain layer** | While writing | Inline rules (also enforced by hooks + structural-auditor) |
-| **PR review** | When on a PR branch | Auto-fetch unresolved comments before starting work |
+| **PR review** | When on a PR branch | `check-pr-reviews.sh` hook at session start + `/review` skill |
 
 ## Agents and skills
 
@@ -125,14 +130,16 @@ Quality checks run **automatically** after every code change — no command need
 | `rgaa-auditor` | 13-theme RGAA accessibility audit |
 | `security-auditor` | OWASP Top 10 + RGS security review |
 
-### Skills (`.claude/skills/`) — `/implement` + `/ship`
+### Skills (`.claude/skills/`) — `/analyse` + `/implement` + `/ship` + `/review`
 
 | Skill | Purpose |
 |---|---|
-| `/implement [#N]` | Fetch issue, create branch, code, run 4 validation agents. The "I code" phase. |
-| `/ship` | Create PR (single/split), handle review cycle. The "I deliver" phase. |
+| `/analyse [#N]` | Analyze issue, explore codebase, generate implementation plan. |
+| `/implement [#N]` | Fetch issue, create branch, code, run 4 validation agents. |
+| `/ship` | Create PR (single/split). |
+| `/review` | Address PR review comments (human + bots), fix, re-validate. |
 
-Workflow: `/implement #42` to code and validate, then `/ship` to create the PR and handle reviews.
+Workflow: `/analyse #42` to plan, then `/implement` to code and validate, then `/ship` to create the PR, then `/review` to handle review comments.
 
 ---
 

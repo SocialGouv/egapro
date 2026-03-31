@@ -1,11 +1,11 @@
 ---
 name: ship
-description: "Ship validated code: create PR, watch reviews. Usage: /ship"
+description: "Ship validated code: create PR (single/split). Usage: /ship"
 ---
 
 # /ship
 
-Ships validated code to GitHub. Creates the PR and handles the review cycle. Run after `/implement`.
+Creates a PR from validated code. Run after `/implement`. For review handling, use `/review`.
 
 ## Arguments
 
@@ -18,21 +18,30 @@ Ships validated code to GitHub. Creates the PR and handles the review cycle. Run
 Check branch, commits, and existing PR. Route accordingly:
 
 - **Commits on branch, no open PR** -> Step 1 (create PR)
-- **Open PR with unresolved review comments** -> Step 2 (review)
-- **Open PR, nothing unresolved** -> done, report status
+- **Open PR exists** -> already shipped, suggest `/review` if there are comments
 - **No commits on branch** -> nothing to ship, suggest `/implement`
 
 Infer issue number from branch name (`feat/issue-{N}-*`). Announce what was detected before proceeding.
 
 ---
 
-# Step 1 — Create PR
+# Step 1 — Analyze and decide
 
-Analyze commits on the branch, then ask: **single PR** or **split**?
+Analyze commits on the branch. Decide whether to **split** into multiple PRs based on:
+
+- Multiple sub-tasks / issues addressed in separate commits
+- Unrelated concerns mixed together (e.g. refactor + feature + bugfix)
+- Large diff that would be hard to review as a single PR
+
+If the commits form a single cohesive change, create one PR. If not, split.
+
+---
+
+# Step 2 — Create PR(s)
 
 ### Single PR
 
-Push and create PR. Use this body template:
+Push and create PR targeting `alpha` (`--base alpha`). Use this body template:
 
 ```
 ## Summary
@@ -49,31 +58,10 @@ Generated with [Claude Code](https://claude.com/claude-code)
 
 ### Split PRs
 
-Group commits by logical concern. Present the plan as a table and ask confirmation. For each group in dependency order:
+Group commits by logical concern. Present the plan as a table and ask confirmation before creating. For each group in dependency order:
 
 - Branch naming: `split/{original-branch}/{short-name}`
 - First branch from `origin/alpha`, each subsequent branch from the previous one
-- Cherry-pick commits, validate via the validator agent, push, create PR
+- Cherry-pick commits (if conflicts, ask the user), validate via the validator agent, push, create PR targeting `alpha`
 
-Cross-link all PRs in their bodies.
-
----
-
-# Step 2 — Review cycle
-
-Gather context in parallel:
-1. Fetch PR comments and review status
-2. Run structural auditor on the PR diff
-
-For each unresolved comment:
-1. Categorize: code change needed / clarification / style fix / already resolved
-2. **Check if already addressed** in a subsequent commit before re-fixing
-3. Fix what needs fixing
-4. Re-validate (quality gates from `.claude/rules/automation.md`)
-
-After fixes:
-- **Never reply to comments automatically** — ask the user first
-- Reply via `gh api repos/{owner}/{repo}/pulls/{number}/comments/{id}/replies`
-- Push fixes
-
-Ask whether to keep watching for new reviews. Loop if yes.
+Cross-link all PRs in their bodies. Return to original branch when done.
