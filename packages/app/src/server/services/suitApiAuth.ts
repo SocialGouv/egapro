@@ -40,11 +40,10 @@ function constantTimeEqual(a: string, b: string): boolean {
 	const bufA = Buffer.from(a, "utf8");
 	const bufB = Buffer.from(b, "utf8");
 
-	const paddedA = Buffer.alloc(bufB.byteLength);
-	bufA.copy(paddedA, 0, 0, bufB.byteLength);
-	const equal = timingSafeEqual(paddedA, bufB);
-
-	return equal && bufA.byteLength === bufB.byteLength;
+	const lengthMatch = bufA.byteLength === bufB.byteLength;
+	// Always compare same-length buffers: use bufA when lengths match, bufB against itself otherwise.
+	const compareBuf = lengthMatch ? bufA : bufB;
+	return timingSafeEqual(compareBuf, bufB) && lengthMatch;
 }
 
 function unauthorizedResponse(): Response {
