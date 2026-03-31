@@ -134,16 +134,25 @@ async function ensureCompaniesExist(db: DB, sirens: string[]): Promise<void> {
 	// Fetch company info from Weez with limited concurrency
 	const companyValues = await fetchCompanyInfoBatch(missing);
 
-	await db
-		.insert(companies)
-		.values(companyValues)
-		.onConflictDoNothing();
+	await db.insert(companies).values(companyValues).onConflictDoNothing();
 }
 
-async function fetchCompanyInfoBatch(
-	sirens: string[],
-): Promise<Array<{ siren: string; name: string; address?: string | null; nafCode?: string | null; workforce?: number | null }>> {
-	const results: Array<{ siren: string; name: string; address?: string | null; nafCode?: string | null; workforce?: number | null }> = [];
+async function fetchCompanyInfoBatch(sirens: string[]): Promise<
+	Array<{
+		siren: string;
+		name: string;
+		address?: string | null;
+		nafCode?: string | null;
+		workforce?: number | null;
+	}>
+> {
+	const results: Array<{
+		siren: string;
+		name: string;
+		address?: string | null;
+		nafCode?: string | null;
+		workforce?: number | null;
+	}> = [];
 
 	for (let i = 0; i < sirens.length; i += WEEZ_CONCURRENCY) {
 		const batch = sirens.slice(i, i + WEEZ_CONCURRENCY);
@@ -152,7 +161,13 @@ async function fetchCompanyInfoBatch(
 				try {
 					const info = await fetchCompanyBySiren(siren);
 					return info
-						? { siren, name: info.name, address: info.address, nafCode: info.nafCode, workforce: info.workforce }
+						? {
+								siren,
+								name: info.name,
+								address: info.address,
+								nafCode: info.nafCode,
+								workforce: info.workforce,
+							}
 						: { siren, name: `Entreprise ${siren}` };
 				} catch {
 					return { siren, name: `Entreprise ${siren}` };
@@ -188,7 +203,9 @@ export async function importGipCsvToDb(
 	}
 
 	// Ensure all referenced companies exist (outside transaction to avoid long locks on Weez calls)
-	const uniqueSirens = [...new Set(rows.map((r) => r.siren).filter(Boolean))] as string[];
+	const uniqueSirens = [
+		...new Set(rows.map((r) => r.siren).filter(Boolean)),
+	] as string[];
 	await ensureCompaniesExist(db, uniqueSirens);
 
 	await db.transaction(async (tx) => {
