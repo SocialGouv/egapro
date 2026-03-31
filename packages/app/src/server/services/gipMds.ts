@@ -1,10 +1,11 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import type { GipMdsRow } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import { CSV_TO_SCHEMA_MAP } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import type { DB } from "~/server/db";
-import { gipMdsData } from "~/server/db/schema";
+import { companies, gipMdsData } from "~/server/db/schema";
+import { fetchCompanyBySiren } from "./weez";
 
 /**
  * CSV metadata extracted from the first 2 lines of a GIP MDS file.
@@ -111,9 +112,79 @@ export async function fetchGipCsv(url: string): Promise<string> {
 	return response.text();
 }
 
+const WEEZ_CONCURRENCY = 10;
+
+/**
+ * Ensure all SIRENs exist in the company table.
+ * Fetches company info from Weez for unknown SIRENs, with a fallback name.
+ */
+async function ensureCompaniesExist(db: DB, sirens: string[]): Promise<void> {
+	if (sirens.length === 0) return;
+
+	const existing = await db
+		.select({ siren: companies.siren })
+		.from(companies)
+		.where(inArray(companies.siren, sirens));
+
+	const existingSet = new Set(existing.map((r) => r.siren));
+	const missing = sirens.filter((s) => !existingSet.has(s));
+
+	if (missing.length === 0) return;
+
+	// Fetch company info from Weez with limited concurrency
+	const companyValues = await fetchCompanyInfoBatch(missing);
+
+	await db.insert(companies).values(companyValues).onConflictDoNothing();
+}
+
+type CompanyInsert = {
+	siren: string;
+	name: string;
+	address?: string | null;
+	nafCode?: string | null;
+	workforce?: number | null;
+};
+
+async function fetchCompanyInfoBatch(
+	sirens: string[],
+): Promise<Array<CompanyInsert>> {
+	const results: Array<CompanyInsert> = [];
+
+	for (let i = 0; i < sirens.length; i += WEEZ_CONCURRENCY) {
+		const batch = sirens.slice(i, i + WEEZ_CONCURRENCY);
+		const settled = await Promise.allSettled(
+			batch.map(async (siren) => {
+				try {
+					const info = await fetchCompanyBySiren(siren);
+					return info
+						? {
+								siren,
+								name: info.name,
+								address: info.address,
+								nafCode: info.nafCode,
+								workforce: info.workforce,
+							}
+						: { siren, name: `Entreprise ${siren}` };
+				} catch {
+					return { siren, name: `Entreprise ${siren}` };
+				}
+			}),
+		);
+
+		for (const result of settled) {
+			if (result.status === "fulfilled") {
+				results.push(result.value);
+			}
+		}
+	}
+
+	return results;
+}
+
 /**
  * Import GIP MDS CSV content into the database.
  * Parses the CSV and upserts all rows for the given year.
+ * Creates missing companies before inserting GIP data.
  * Returns the number of rows imported.
  */
 export async function importGipCsvToDb(
@@ -126,6 +197,12 @@ export async function importGipCsvToDb(
 	if (rows.length === 0) {
 		return { year, rowCount: 0 };
 	}
+
+	// Ensure all referenced companies exist (outside transaction to avoid long locks on Weez calls)
+	const uniqueSirens = [
+		...new Set(rows.map((r) => r.siren).filter((s): s is string => !!s)),
+	];
+	await ensureCompaniesExist(db, uniqueSirens);
 
 	await db.transaction(async (tx) => {
 		// Delete existing data for this year before inserting
