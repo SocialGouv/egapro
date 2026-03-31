@@ -59,23 +59,23 @@ describe("DeclarationsSection", () => {
 	it("renders the table column headers including Échéance and Mise à jour", () => {
 		renderSection();
 		expect(
-			screen.getByRole("columnheader", { name: "Déclaration" }),
-		).toBeInTheDocument();
+			screen.getAllByRole("columnheader", { name: "Déclaration" }),
+		).toHaveLength(2);
+		expect(screen.getAllByRole("columnheader", { name: "Année" })).toHaveLength(
+			2,
+		);
+		expect(screen.getAllByRole("columnheader", { name: "Étape" })).toHaveLength(
+			2,
+		);
 		expect(
-			screen.getByRole("columnheader", { name: "Année" }),
-		).toBeInTheDocument();
+			screen.getAllByRole("columnheader", { name: "Statut" }),
+		).toHaveLength(2);
 		expect(
-			screen.getByRole("columnheader", { name: "Étape" }),
-		).toBeInTheDocument();
+			screen.getAllByRole("columnheader", { name: "Échéance" }),
+		).toHaveLength(2);
 		expect(
-			screen.getByRole("columnheader", { name: "Statut" }),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("columnheader", { name: "Échéance" }),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("columnheader", { name: "Mise à jour" }),
-		).toBeInTheDocument();
+			screen.getAllByRole("columnheader", { name: "Mise à jour" }),
+		).toHaveLength(2);
 	});
 
 	it("renders declaration rows with year, status badge, and step label", () => {
@@ -97,9 +97,11 @@ describe("DeclarationsSection", () => {
 		expect(screen.getByText("15/03/2025")).toBeInTheDocument();
 	});
 
-	it("renders 'Années précédentes' separator when there are past declarations", () => {
+	it("renders 'Années précédentes' heading when there are past declarations", () => {
 		renderSection();
-		expect(screen.getByText("Années précédentes")).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", { level: 2, name: "Années précédentes" }),
+		).toBeInTheDocument();
 	});
 
 	it("renders 'Rémunération' and 'Représentation' links", () => {
@@ -144,8 +146,8 @@ describe("DeclarationsSection", () => {
 		const pagination = screen.getByRole("navigation", { name: "Pagination" });
 		expect(pagination).toBeInTheDocument();
 
-		// Page 1: 1 header + 10 visible entries (1 current + 1 separator + 8 previous)
-		expect(screen.getAllByRole("row")).toHaveLength(1 + 10);
+		// 2 headers (current + previous tables) + 10 data rows (1 current + 9 previous)
+		expect(screen.getAllByRole("row")).toHaveLength(2 + 10);
 
 		// Navigate to page 2
 		fireEvent.click(screen.getByTitle("Page 2"));
