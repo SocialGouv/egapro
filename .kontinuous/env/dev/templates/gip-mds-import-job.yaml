@@ -22,6 +22,12 @@ spec:
           image: curlimages/curl:8.12.1
           securityContext:
             allowPrivilegeEscalation: false
+          env:
+            - name: EGAPRO_GIP_MDS_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gip-mds-import
+                  key: EGAPRO_GIP_MDS_API_TOKEN
           command:
             - /bin/sh
             - -c
@@ -31,6 +37,7 @@ spec:
                 if curl -sf "http://app/api/healthz" > /dev/null 2>&1; then
                   echo "App is ready, importing GIP MDS data..."
                   curl -X POST "http://app/api/gip-mds/import" \
+                    -H "Authorization: Bearer ${EGAPRO_GIP_MDS_API_TOKEN}" \
                     --connect-timeout 10 \
                     --max-time 60 \
                     --fail \
