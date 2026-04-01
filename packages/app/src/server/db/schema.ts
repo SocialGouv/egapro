@@ -70,7 +70,10 @@ export const declarations = createTable(
 			.notNull()
 			.primaryKey()
 			.$defaultFn(() => crypto.randomUUID()),
-		siren: d.varchar({ length: 9 }).notNull(),
+		siren: d
+			.varchar({ length: 9 })
+			.notNull()
+			.references(() => companies.siren),
 		year: d.integer().notNull(),
 		declarantId: d
 			.varchar({ length: 255 })
