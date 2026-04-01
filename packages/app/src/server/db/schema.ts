@@ -47,7 +47,6 @@ export const users = createTable("user", (d) => ({
 		.notNull()
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
-	name: d.varchar({ length: 255 }),
 	firstName: d.varchar({ length: 255 }),
 	lastName: d.varchar({ length: 255 }),
 	email: d.varchar({ length: 255 }).notNull(),
@@ -57,9 +56,7 @@ export const users = createTable("user", (d) => ({
 			withTimezone: true,
 		})
 		.$defaultFn(() => /* @__PURE__ */ new Date()),
-	image: d.varchar({ length: 255 }),
 	phone: d.varchar({ length: 20 }),
-	siret: d.varchar({ length: 14 }),
 }));
 
 export const declarations = createTable(

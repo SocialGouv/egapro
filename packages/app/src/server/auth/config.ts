@@ -22,6 +22,7 @@ declare module "next-auth/jwt" {
 		id: string;
 		siret?: string | null;
 		phone?: string | null;
+		lastName?: string | null;
 		id_token?: string | null;
 	}
 }
@@ -128,17 +129,14 @@ export const authConfig = {
 					const rows = await db
 						.insert(users)
 						.values({
-							name: user.name ?? "",
 							email: user.email!,
 							firstName: profileData.firstName ?? null,
 							lastName: profileData.lastName ?? null,
-							siret: profileData.siret ?? null,
 						})
 						.returning();
 					dbUser = rows[0]!;
 				} else {
 					const updates: Record<string, string | null> = {};
-					if (profileData.siret) updates.siret = profileData.siret;
 					if (profileData.firstName) updates.firstName = profileData.firstName;
 					if (profileData.lastName) updates.lastName = profileData.lastName;
 
@@ -191,7 +189,7 @@ export const authConfig = {
 				}
 
 				token.id = dbUser.id;
-				token.siret = dbUser.siret ?? null;
+				token.siret = profileData.siret ?? null;
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
 			}

@@ -141,6 +141,13 @@
 			"when": 1775050635448,
 			"tag": "0019_declaration_siren_fk",
 			"breakpoints": true
+		},
+		{
+			"idx": 20,
+			"version": "7",
+			"when": 1775200000000,
+			"tag": "0020_clean-user-columns",
+			"breakpoints": true
 		}
 	]
 }
