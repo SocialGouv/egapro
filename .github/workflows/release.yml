@@ -35,7 +35,7 @@ jobs:
           audience: socialgouv
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
 
       - name: Set up Node
         uses: actions/setup-node@v4
