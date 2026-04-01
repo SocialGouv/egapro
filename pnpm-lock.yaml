@@ -21,7 +21,7 @@ importers:
   packages/app:
     dependencies:
       '@aws-sdk/client-s3':
-        specifier: ^3.1016.0
+        specifier: ^3.1006.0
         version: 3.1016.0
       '@gouvfr/dsfr':
         specifier: ^1.14.3
