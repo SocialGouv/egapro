@@ -19,7 +19,9 @@ describe("ConfirmationPage", () => {
 		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
 
 		expect(
-			screen.getByText(`Démarche des indicateurs de rémunération ${DECLARATION_YEAR}`),
+			screen.getByText(
+				`Démarche des indicateurs de rémunération ${DECLARATION_YEAR}`,
+			),
 		).toBeInTheDocument();
 	});
 
@@ -27,7 +29,9 @@ describe("ConfirmationPage", () => {
 		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
 
 		expect(
-			screen.getByText(`Votre parcours ${DECLARATION_YEAR} est désormais terminé`),
+			screen.getByText(
+				`Votre parcours ${DECLARATION_YEAR} est désormais terminé`,
+			),
 		).toBeInTheDocument();
 	});
 
