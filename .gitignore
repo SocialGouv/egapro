@@ -42,3 +42,8 @@ build/
 !.claude/rules/
 !.claude/skills/
 !.claude/settings.json
+
+
+suit-mtls-certs/
+*.crt
+*.key
