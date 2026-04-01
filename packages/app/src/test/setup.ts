@@ -65,6 +65,7 @@ vi.mock("~/env", () => ({
 		EGAPRO_WEEZ_API_URL: "https://weez.example.com/api",
 		EGAPRO_SUIT_API_URL: "https://api.suit.example.com",
 		EGAPRO_SUIT_API_KEY: "test-suit-api-key-that-is-at-least-32-chars",
+		EGAPRO_SUIT_MTLS_CA_PEM: undefined,
 		NEXTAUTH_URL: "http://localhost:3000/api/auth",
 	},
 }));

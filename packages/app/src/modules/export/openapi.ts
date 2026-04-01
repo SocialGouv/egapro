@@ -221,8 +221,8 @@ export const openApiSpec = {
 	info: {
 		title: "EGAPRO — API d'export des déclarations",
 		description:
-			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle soumises sur la plateforme EGAPRO, filtrées par date de soumission. L'accès nécessite une clé API (Bearer token).",
-		version: "1.0.0",
+			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle soumises sur la plateforme EGAPRO, filtrées par date de soumission. L'accès nécessite un certificat client mTLS et une clé API (Bearer token).",
+		version: "1.1.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},
@@ -236,9 +236,16 @@ export const openApiSpec = {
 				description:
 					"Clé API SUIT. Utiliser le header : Authorization: Bearer <clé>",
 			},
+			clientCert: {
+				type: "apiKey",
+				in: "header",
+				name: "X-Client-Cert",
+				description:
+					"Certificat client X.509 signé par la CA EGAPRO, encodé en base64. Header : X-Client-Cert: <base64 du PEM>",
+			},
 		},
 	},
-	security: [{ bearerAuth: [] }],
+	security: [{ clientCert: [], bearerAuth: [] }],
 	paths: {
 		"/api/v1/export/declarations": {
 			get: {
@@ -290,6 +297,22 @@ export const openApiSpec = {
 											example: 5,
 										},
 										declarations: { type: "array", items: declarationSchema },
+									},
+								},
+							},
+						},
+					},
+					"403": {
+						description: "Certificat client manquant ou invalide (mTLS)",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Certificat client manquant ou invalide",
+										},
 									},
 								},
 							},
