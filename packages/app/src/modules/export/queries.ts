@@ -1,7 +1,7 @@
 import "server-only";
 
 import { and, eq, gte, inArray, lt, or } from "drizzle-orm";
-
+import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
 	companies,
@@ -161,10 +161,11 @@ export async function fetchIndicatorGByDeclaration(
 
 export async function fetchCseOpinionsByDeclaration(
 	declarationIds: string[],
+	injectedDb: DB = db,
 ): Promise<Map<string, CseRow[]>> {
 	if (declarationIds.length === 0) return new Map();
 
-	const rows = await db
+	const rows = await injectedDb
 		.select({
 			declarationId: cseOpinions.declarationId,
 			type: cseOpinions.type,
