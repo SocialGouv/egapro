@@ -13,14 +13,13 @@ vi.mock("~/trpc/react", () => ({
 }));
 
 const DECLARATION_YEAR = 2025;
-const CSE_YEAR = DECLARATION_YEAR + 1;
 
 describe("ConfirmationPage", () => {
 	it("renders the page title", () => {
 		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
 
 		expect(
-			screen.getByText(`Démarche des indicateurs de rémunération ${CSE_YEAR}`),
+			screen.getByText(`Démarche des indicateurs de rémunération ${DECLARATION_YEAR}`),
 		).toBeInTheDocument();
 	});
 
@@ -28,7 +27,7 @@ describe("ConfirmationPage", () => {
 		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
 
 		expect(
-			screen.getByText(`Votre parcours ${CSE_YEAR} est désormais terminé`),
+			screen.getByText(`Votre parcours ${DECLARATION_YEAR} est désormais terminé`),
 		).toBeInTheDocument();
 	});
 
