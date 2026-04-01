@@ -83,6 +83,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders the title and step indicator", () => {
 		render(
 			<SecondDeclarationStep3Review
+				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 				siren="532847196"
@@ -99,6 +100,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders category gap card with category name", () => {
 		render(
 			<SecondDeclarationStep3Review
+				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 				siren="532847196"
@@ -110,6 +112,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders gap columns", () => {
 		render(
 			<SecondDeclarationStep3Review
+				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 				siren="532847196"
@@ -126,6 +129,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders the next steps section", () => {
 		render(
 			<SecondDeclarationStep3Review
+				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 				siren="532847196"
@@ -137,6 +141,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders Soumettre button", () => {
 		render(
 			<SecondDeclarationStep3Review
+				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 				siren="532847196"
@@ -150,6 +155,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders modal with certification checkbox", () => {
 		render(
 			<SecondDeclarationStep3Review
+				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 				siren="532847196"
@@ -167,6 +173,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders previous link to step 2", () => {
 		render(
 			<SecondDeclarationStep3Review
+				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
 				siren="532847196"
@@ -197,6 +204,7 @@ describe("SecondDeclarationStep3Review", () => {
 
 		render(
 			<SecondDeclarationStep3Review
+				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={categoriesWithHighGaps}
 				siren="532847196"
@@ -224,6 +232,7 @@ describe("SecondDeclarationStep3Review", () => {
 
 		render(
 			<SecondDeclarationStep3Review
+				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={categoriesWithLowGaps}
 				siren="532847196"
@@ -245,6 +254,7 @@ describe("SecondDeclarationStep3Review", () => {
 
 		render(
 			<SecondDeclarationStep3Review
+				declarationYear={2025}
 				hasCse={true}
 				secondDeclarationCategories={categoriesWithHighGaps}
 				siren="532847196"
@@ -281,6 +291,7 @@ describe("SecondDeclarationStep3Review", () => {
 
 		render(
 			<SecondDeclarationStep3Review
+				declarationYear={2025}
 				hasCse={true}
 				secondDeclarationCategories={categoriesNoGaps}
 				siren="532847196"
@@ -313,6 +324,7 @@ describe("SecondDeclarationStep3Review", () => {
 
 		render(
 			<SecondDeclarationStep3Review
+				declarationYear={2025}
 				hasCse={false}
 				secondDeclarationCategories={categoriesNoGaps}
 				siren="532847196"
@@ -339,6 +351,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders empty state when no categories", () => {
 		render(
 			<SecondDeclarationStep3Review
+				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={[]}
 				siren="532847196"

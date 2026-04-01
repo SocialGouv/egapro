@@ -13,7 +13,11 @@ const defaultCompany = {
 describe("CompanyBanner", () => {
 	it("renders breadcrumb with 'Mon espace' link and current page label", () => {
 		render(
-			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
+			<CompanyBanner
+				company={defaultCompany}
+				currentPageLabel="Déclaration"
+				declarationYear={2025}
+			/>,
 		);
 
 		const link = screen.getByRole("link", { name: "Mon espace" });
@@ -24,7 +28,11 @@ describe("CompanyBanner", () => {
 
 	it("renders formatted SIREN", () => {
 		render(
-			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
+			<CompanyBanner
+				company={defaultCompany}
+				currentPageLabel="Déclaration"
+				declarationYear={2025}
+			/>,
 		);
 
 		expect(screen.getByText(/123 456 789/)).toBeInTheDocument();
@@ -32,7 +40,11 @@ describe("CompanyBanner", () => {
 
 	it("renders company name", () => {
 		render(
-			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
+			<CompanyBanner
+				company={defaultCompany}
+				currentPageLabel="Déclaration"
+				declarationYear={2025}
+			/>,
 		);
 
 		expect(screen.getByText(/Alpha Solutions/)).toBeInTheDocument();
@@ -40,7 +52,11 @@ describe("CompanyBanner", () => {
 
 	it("renders workforce and CSE values", () => {
 		render(
-			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
+			<CompanyBanner
+				company={defaultCompany}
+				currentPageLabel="Déclaration"
+				declarationYear={2025}
+			/>,
 		);
 
 		expect(screen.getByText("256")).toBeInTheDocument();
@@ -52,6 +68,7 @@ describe("CompanyBanner", () => {
 			<CompanyBanner
 				company={{ ...defaultCompany, workforce: null }}
 				currentPageLabel="Déclaration"
+				declarationYear={2025}
 			/>,
 		);
 
@@ -63,6 +80,7 @@ describe("CompanyBanner", () => {
 			<CompanyBanner
 				company={{ ...defaultCompany, hasCse: null }}
 				currentPageLabel="Déclaration"
+				declarationYear={2025}
 			/>,
 		);
 
@@ -74,6 +92,7 @@ describe("CompanyBanner", () => {
 			<CompanyBanner
 				company={{ ...defaultCompany, hasCse: false }}
 				currentPageLabel="Déclaration"
+				declarationYear={2025}
 			/>,
 		);
 

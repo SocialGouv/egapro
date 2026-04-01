@@ -4,11 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
-import {
-	computeGap,
-	GAP_ALERT_THRESHOLD,
-	getCurrentYear,
-} from "~/modules/domain";
+import { computeGap, GAP_ALERT_THRESHOLD } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
@@ -43,6 +39,7 @@ type Props = {
 		totalMen: number | null;
 		status: string | null;
 	};
+	declarationYear: number;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
@@ -52,13 +49,13 @@ type Props = {
 
 export function Step6Review({
 	declaration,
+	declarationYear,
 	step2Data,
 	step3Data,
 	step4Data,
 	step5Categories = [],
 	isSubmitted = false,
 }: Props) {
-	const currentYear = getCurrentYear();
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const submitMutation = api.declaration.submit.useMutation({
@@ -159,7 +156,7 @@ export function Step6Review({
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 				<div className="fr-col">
 					<h1 className="fr-h4 fr-mb-0">
-						Déclaration des indicateurs de rémunération {currentYear}
+						Déclaration des indicateurs de rémunération {declarationYear}
 					</h1>
 				</div>
 				<div className="fr-col-auto">
@@ -329,7 +326,7 @@ export function Step6Review({
 				)}
 			</div>
 
-			{isSubmitted && <DownloadDeclarationPdfButton />}
+			{isSubmitted && <DownloadDeclarationPdfButton year={declarationYear} />}
 
 			{/* Next steps callout when high gap detected */}
 			{highGap && declaration.siren && (
@@ -362,7 +359,7 @@ export function Step6Review({
 					modalRef={modalRef}
 					onClose={closeModal}
 					onSubmit={() => submitMutation.mutate()}
-					year={currentYear}
+					year={declarationYear}
 				/>
 			)}
 		</form>

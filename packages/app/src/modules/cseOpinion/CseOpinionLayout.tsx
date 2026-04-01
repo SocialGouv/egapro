@@ -1,4 +1,3 @@
-import { getCurrentYear } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
 
@@ -13,12 +12,15 @@ type CompanyData = {
 
 type Props = {
 	company: CompanyData;
+	declarationYear: number;
 	children: React.ReactNode;
 };
 
-export function CseOpinionLayout({ company, children }: Props) {
-	const currentYear = getCurrentYear();
-
+export function CseOpinionLayout({
+	company,
+	declarationYear,
+	children,
+}: Props) {
 	return (
 		<>
 			<div className={`fr-py-3w ${styles.banner}`}>
@@ -31,7 +33,7 @@ export function CseOpinionLayout({ company, children }: Props) {
 								href: "/mon-espace",
 							},
 							{
-								label: `Démarche des indicateurs de rémunération ${currentYear + 1}`,
+								label: `Démarche des indicateurs de rémunération ${declarationYear + 1}`,
 							},
 						]}
 					/>
@@ -48,7 +50,7 @@ export function CseOpinionLayout({ company, children }: Props) {
 						{company.workforce !== null && (
 							<div className="fr-col-auto">
 								<p className="fr-mb-0 fr-text--sm">
-									Effectif annuel moyen en {currentYear - 1} :{" "}
+									Effectif annuel moyen en {declarationYear - 1} :{" "}
 									<strong>{company.workforce}</strong>
 								</p>
 							</div>

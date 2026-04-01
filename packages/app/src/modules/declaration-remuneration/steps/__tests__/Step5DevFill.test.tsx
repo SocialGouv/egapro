@@ -29,7 +29,7 @@ beforeEach(() => {
 describe("Step5EmployeeCategories dev fill", () => {
 	it("fills categories when dev fill button is clicked", async () => {
 		const user = userEvent.setup();
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 
 		await user.click(screen.getByRole("button", { name: "[DEV] Remplir" }));
 

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { getCurrentYear, normalizeDecimalInput } from "~/modules/domain";
+import { normalizeDecimalInput } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep4Schema } from "../schemas";
@@ -52,6 +52,7 @@ function emptyQuartiles(): QuartileTuple {
 }
 
 type Step4QuartileDistributionProps = {
+	declarationYear: number;
 	initialData: Step4Data;
 	gipPrefillData?: GipPrefillData;
 	maxWomen?: number;
@@ -59,6 +60,7 @@ type Step4QuartileDistributionProps = {
 };
 
 export function Step4QuartileDistribution({
+	declarationYear,
 	initialData,
 	gipPrefillData,
 	maxWomen,
@@ -101,8 +103,6 @@ export function Step4QuartileDistribution({
 	const [formValidationError, setFormValidationError] = useState<string | null>(
 		null,
 	);
-
-	const currentYear = getCurrentYear();
 
 	const mutation = api.declaration.updateStep4.useMutation({
 		onSuccess: () => router.push("/declaration-remuneration/etape/5"),
@@ -188,7 +188,7 @@ export function Step4QuartileDistribution({
 				saved={saved}
 				title={
 					<h1 className="fr-h4 fr-mb-0">
-						Déclaration des indicateurs de rémunération {currentYear}
+						Déclaration des indicateurs de rémunération {declarationYear}
 					</h1>
 				}
 			/>
@@ -238,7 +238,7 @@ export function Step4QuartileDistribution({
 							<QuartileReadingNote
 								categories={annual}
 								tableType="annual"
-								year={currentYear}
+								year={declarationYear}
 							/>
 						) : undefined
 					}
@@ -267,7 +267,7 @@ export function Step4QuartileDistribution({
 							<QuartileReadingNote
 								categories={hourly}
 								tableType="hourly"
-								year={currentYear}
+								year={declarationYear}
 							/>
 						) : undefined
 					}

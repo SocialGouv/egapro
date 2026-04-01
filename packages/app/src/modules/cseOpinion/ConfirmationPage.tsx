@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ComplianceCompletionEffect } from "~/modules/declaration-remuneration";
-import { getCurrentYear } from "~/modules/domain";
 import { DsfrPictogram } from "~/modules/layout";
 import styles from "./ConfirmationPage.module.scss";
 import formStyles from "./shared/formActions.module.scss";
@@ -28,17 +27,19 @@ function DownloadCard({ dataYear, href, title, year }: DownloadCardProps) {
 }
 
 type Props = {
+	declarationYear: number;
 	email?: string;
 	hasSecondDeclaration?: boolean;
 };
 
 export function ConfirmationPage({
+	declarationYear,
 	email,
 	hasSecondDeclaration = false,
 }: Props) {
 	const displayEmail = email ?? "adresse@exemple.fr";
-	const dataYear = getCurrentYear();
-	const year = dataYear + 1;
+	const dataYear = declarationYear;
+	const year = declarationYear + 1;
 	return (
 		<div>
 			<ComplianceCompletionEffect />
@@ -75,21 +76,21 @@ export function ConfirmationPage({
 			<div className={`fr-mb-4w ${styles.downloadCards}`}>
 				<DownloadCard
 					dataYear={dataYear}
-					href="/api/declaration-pdf"
+					href={`/api/declaration-pdf?year=${dataYear}`}
 					title="Télécharger le récapitulatif de la déclaration des indicateurs"
 					year={year}
 				/>
 				{hasSecondDeclaration && (
 					<DownloadCard
 						dataYear={dataYear}
-						href="/api/declaration-pdf?type=correction"
+						href={`/api/declaration-pdf?type=correction&year=${dataYear}`}
 						title="Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie de salariés"
 						year={year}
 					/>
 				)}
 				<DownloadCard
 					dataYear={dataYear}
-					href="/api/transmitted-pdf"
+					href={`/api/transmitted-pdf?year=${dataYear}`}
 					title="Télécharger le récapitulatif des éléments transmis"
 					year={year}
 				/>

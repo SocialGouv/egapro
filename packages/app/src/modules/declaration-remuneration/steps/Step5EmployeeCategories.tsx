@@ -2,13 +2,13 @@
 
 import { useRouter } from "next/navigation";
 
-import { getCurrentYear } from "~/modules/domain";
 import { api } from "~/trpc/react";
 import { StepIndicator } from "../shared/StepIndicator";
 import type { EmployeeCategoryRow } from "../types";
 import { CategoryForm } from "./step5/CategoryForm";
 
 type Props = {
+	declarationYear: number;
 	initialCategories?: EmployeeCategoryRow[];
 	initialSource?: string;
 	maxWomen?: number;
@@ -16,12 +16,12 @@ type Props = {
 };
 
 export function Step5EmployeeCategories({
+	declarationYear,
 	initialCategories,
 	initialSource,
 	maxWomen,
 	maxMen,
 }: Props) {
-	const currentYear = getCurrentYear();
 	const router = useRouter();
 
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
@@ -31,6 +31,7 @@ export function Step5EmployeeCategories({
 	return (
 		<CategoryForm
 			accordionId="accordion-step5"
+			declarationYear={declarationYear}
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
 			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
@@ -49,7 +50,7 @@ export function Step5EmployeeCategories({
 			submitError={mutation.error?.message}
 			title={
 				<h1 className="fr-h4 fr-mb-0">
-					Déclaration des indicateurs de rémunération {currentYear}
+					Déclaration des indicateurs de rémunération {declarationYear}
 				</h1>
 			}
 			tooltipPrefix="tooltip-step5"

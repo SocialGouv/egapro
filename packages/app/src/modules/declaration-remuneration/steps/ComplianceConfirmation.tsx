@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
-import { getCurrentYear } from "~/modules/domain";
 import { DsfrPictogram } from "~/modules/layout";
+import { api } from "~/trpc/server";
 import { ComplianceCompletionEffect } from "../shared/ComplianceCompletionEffect";
 import common from "../shared/common.module.scss";
 
-export function ComplianceConfirmation() {
-	const currentYear = getCurrentYear();
+export async function ComplianceConfirmation() {
+	const data = await api.declaration.getOrCreate();
+	const currentYear = data.declaration.year;
 
 	return (
 		<div className={common.flexColumnGap2}>
@@ -32,7 +33,7 @@ export function ComplianceConfirmation() {
 				requis.
 			</p>
 
-			<DownloadDeclarationPdfButton />
+			<DownloadDeclarationPdfButton year={currentYear} />
 
 			<div className="fr-mt-4w">
 				<Link className="fr-btn" href="/mon-espace">

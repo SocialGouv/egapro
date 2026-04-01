@@ -75,6 +75,7 @@ describe("buildTransmittedPdfData", () => {
 		);
 		const result = await buildTransmittedPdfData(
 			"123456789",
+			2025,
 			new Date("2026-03-15"),
 		);
 
@@ -94,7 +95,7 @@ describe("buildTransmittedPdfData", () => {
 		);
 
 		await expect(
-			buildTransmittedPdfData("999999999", new Date()),
+			buildTransmittedPdfData("999999999", 2025, new Date()),
 		).rejects.toThrow("Entreprise introuvable");
 	});
 
@@ -106,7 +107,7 @@ describe("buildTransmittedPdfData", () => {
 		);
 
 		await expect(
-			buildTransmittedPdfData("123456789", new Date()),
+			buildTransmittedPdfData("123456789", 2025, new Date()),
 		).rejects.toThrow("Déclaration introuvable");
 	});
 
@@ -124,6 +125,7 @@ describe("buildTransmittedPdfData", () => {
 		);
 		const result = await buildTransmittedPdfData(
 			"123456789",
+			2025,
 			new Date("2026-03-15"),
 		);
 

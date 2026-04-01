@@ -24,7 +24,17 @@ export default async function DeclarationRootLayout({
 	}
 
 	const siren = extractSiren(siret);
-	const company = await api.company.get({ siren });
+	const [company, declarationData] = await Promise.all([
+		api.company.get({ siren }),
+		api.declaration.getOrCreate(),
+	]);
 
-	return <DeclarationLayout company={company}>{children}</DeclarationLayout>;
+	return (
+		<DeclarationLayout
+			company={company}
+			declarationYear={declarationData.declaration.year}
+		>
+			{children}
+		</DeclarationLayout>
+	);
 }

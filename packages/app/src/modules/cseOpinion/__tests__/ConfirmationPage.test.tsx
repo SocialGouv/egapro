@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { getCseYear } from "~/modules/domain";
 import { ConfirmationPage } from "../ConfirmationPage";
 
 vi.mock("~/trpc/react", () => ({
@@ -13,39 +12,45 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
-describe("ConfirmationPage", () => {
-	const year = getCseYear();
+const DECLARATION_YEAR = 2025;
+const CSE_YEAR = DECLARATION_YEAR + 1;
 
+describe("ConfirmationPage", () => {
 	it("renders the page title", () => {
-		render(<ConfirmationPage />);
+		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
 
 		expect(
-			screen.getByText(`Démarche des indicateurs de rémunération ${year}`),
+			screen.getByText(`Démarche des indicateurs de rémunération ${CSE_YEAR}`),
 		).toBeInTheDocument();
 	});
 
 	it("renders the success message", () => {
-		render(<ConfirmationPage />);
+		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
 
 		expect(
-			screen.getByText(`Votre parcours ${year} est désormais terminé`),
+			screen.getByText(`Votre parcours ${CSE_YEAR} est désormais terminé`),
 		).toBeInTheDocument();
 	});
 
 	it("renders the default email in receipt card", () => {
-		render(<ConfirmationPage />);
+		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
 
 		expect(screen.getByText("adresse@exemple.fr")).toBeInTheDocument();
 	});
 
 	it("renders the provided email in receipt card", () => {
-		render(<ConfirmationPage email="test@example.com" />);
+		render(
+			<ConfirmationPage
+				declarationYear={DECLARATION_YEAR}
+				email="test@example.com"
+			/>,
+		);
 
 		expect(screen.getByText("test@example.com")).toBeInTheDocument();
 	});
 
 	it("renders the resend button", () => {
-		render(<ConfirmationPage />);
+		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
 
 		expect(
 			screen.getByRole("button", {
@@ -55,7 +60,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders document download section without second declaration card", () => {
-		render(<ConfirmationPage />);
+		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
 
 		expect(
 			screen.getByText("Documents récapitulatifs de votre déclaration"),
@@ -72,7 +77,12 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders second declaration card when hasSecondDeclaration is true", () => {
-		render(<ConfirmationPage hasSecondDeclaration />);
+		render(
+			<ConfirmationPage
+				declarationYear={DECLARATION_YEAR}
+				hasSecondDeclaration
+			/>,
+		);
 
 		expect(
 			screen.getByText(/récapitulatif de la déclaration des indicateurs/),
@@ -86,36 +96,47 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders download cards as links with correct hrefs", () => {
-		render(<ConfirmationPage />);
+		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
 
 		const declarationLink = screen
 			.getByText(/récapitulatif de la déclaration des indicateurs/)
 			.closest("a");
-		expect(declarationLink).toHaveAttribute("href", "/api/declaration-pdf");
+		expect(declarationLink).toHaveAttribute(
+			"href",
+			`/api/declaration-pdf?year=${DECLARATION_YEAR}`,
+		);
 		expect(declarationLink).toHaveAttribute("download");
 
 		const transmittedLink = screen
 			.getByText(/récapitulatif des éléments transmis/)
 			.closest("a");
-		expect(transmittedLink).toHaveAttribute("href", "/api/transmitted-pdf");
+		expect(transmittedLink).toHaveAttribute(
+			"href",
+			`/api/transmitted-pdf?year=${DECLARATION_YEAR}`,
+		);
 		expect(transmittedLink).toHaveAttribute("download");
 	});
 
 	it("renders second declaration download card with correction href", () => {
-		render(<ConfirmationPage hasSecondDeclaration />);
+		render(
+			<ConfirmationPage
+				declarationYear={DECLARATION_YEAR}
+				hasSecondDeclaration
+			/>,
+		);
 
 		const secondDeclLink = screen
 			.getByText(/récapitulatif de la seconde déclaration/)
 			.closest("a");
 		expect(secondDeclLink).toHaveAttribute(
 			"href",
-			"/api/declaration-pdf?type=correction",
+			`/api/declaration-pdf?type=correction&year=${DECLARATION_YEAR}`,
 		);
 		expect(secondDeclLink).toHaveAttribute("download");
 	});
 
 	it("renders the feedback banner", () => {
-		render(<ConfirmationPage />);
+		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
 
 		expect(
 			screen.getByText("Comment s'est passée votre démarche ?"),
@@ -123,7 +144,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders navigation links", () => {
-		render(<ConfirmationPage />);
+		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
 
 		const modifyLink = screen.getByRole("link", {
 			name: /Modifier mes dépôts/,

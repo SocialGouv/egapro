@@ -39,7 +39,7 @@ function makeFile(name: string, id: string) {
 
 describe("Step2Upload", () => {
 	it("renders the page title", () => {
-		render(<Step2Upload />);
+		render(<Step2Upload declarationYear={2025} />);
 
 		expect(
 			screen.getByText("Transmettre l'avis ou les avis du CSE"),
@@ -47,13 +47,13 @@ describe("Step2Upload", () => {
 	});
 
 	it("renders the stepper at step 2", () => {
-		render(<Step2Upload />);
+		render(<Step2Upload declarationYear={2025} />);
 
 		expect(screen.getByText(/Étape 2 sur 2/)).toBeInTheDocument();
 	});
 
 	it("renders the file upload instructions", () => {
-		render(<Step2Upload />);
+		render(<Step2Upload declarationYear={2025} />);
 
 		expect(
 			screen.getByText(/Veuillez importer l'ensemble des avis de votre CSE/),
@@ -62,7 +62,7 @@ describe("Step2Upload", () => {
 	});
 
 	it("renders the dropzone with select button", () => {
-		render(<Step2Upload />);
+		render(<Step2Upload declarationYear={2025} />);
 
 		expect(
 			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
@@ -71,7 +71,7 @@ describe("Step2Upload", () => {
 	});
 
 	it("renders a hidden file input", () => {
-		render(<Step2Upload />);
+		render(<Step2Upload declarationYear={2025} />);
 
 		const fileInput = getFileInput();
 		expect(fileInput).toBeInTheDocument();
@@ -80,7 +80,7 @@ describe("Step2Upload", () => {
 	});
 
 	it("renders the opinion summary box", () => {
-		render(<Step2Upload />);
+		render(<Step2Upload declarationYear={2025} />);
 
 		expect(screen.getByText("Avis CSE à transmettre :")).toBeInTheDocument();
 		expect(screen.getByText("Première déclaration")).toBeInTheDocument();
@@ -88,7 +88,7 @@ describe("Step2Upload", () => {
 	});
 
 	it("renders previous link and add file button", () => {
-		render(<Step2Upload />);
+		render(<Step2Upload declarationYear={2025} />);
 
 		const previousLink = screen.getByRole("link", { name: /Précédent/ });
 		expect(previousLink).toBeInTheDocument();
@@ -101,7 +101,7 @@ describe("Step2Upload", () => {
 
 	it("shows error when submitting without file", async () => {
 		const user = userEvent.setup();
-		render(<Step2Upload />);
+		render(<Step2Upload declarationYear={2025} />);
 
 		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
 
@@ -114,7 +114,7 @@ describe("Step2Upload", () => {
 
 	it("sets aria-invalid on file input when error occurs", async () => {
 		const user = userEvent.setup();
-		render(<Step2Upload />);
+		render(<Step2Upload declarationYear={2025} />);
 
 		const fileInput = getFileInput();
 		expect(fileInput).toHaveAttribute("aria-invalid", "false");
@@ -125,7 +125,7 @@ describe("Step2Upload", () => {
 	});
 
 	it("shows error for non-PDF file", () => {
-		render(<Step2Upload />);
+		render(<Step2Upload declarationYear={2025} />);
 
 		const file = new File(["content"], "test.txt", { type: "text/plain" });
 		const fileInput = getFileInput();
@@ -140,7 +140,7 @@ describe("Step2Upload", () => {
 	});
 
 	it("shows error for file exceeding 10 MB", () => {
-		render(<Step2Upload />);
+		render(<Step2Upload declarationYear={2025} />);
 
 		const largeContent = new ArrayBuffer(11 * 1024 * 1024);
 		const file = new File([largeContent], "large.pdf", {
@@ -156,7 +156,7 @@ describe("Step2Upload", () => {
 	});
 
 	it("renders the confirmation modal dialog", () => {
-		const { container } = render(<Step2Upload />);
+		const { container } = render(<Step2Upload declarationYear={2025} />);
 
 		const dialog = container.querySelector("dialog");
 		expect(dialog).toBeInTheDocument();
@@ -164,7 +164,7 @@ describe("Step2Upload", () => {
 	});
 
 	it("accepts PDF file and shows file card", () => {
-		render(<Step2Upload />);
+		render(<Step2Upload declarationYear={2025} />);
 
 		const file = new File(["content"], "avis-cse.pdf", {
 			type: "application/pdf",
@@ -182,7 +182,7 @@ describe("Step2Upload", () => {
 
 	it("removes file when delete button is clicked", async () => {
 		const user = userEvent.setup();
-		render(<Step2Upload />);
+		render(<Step2Upload declarationYear={2025} />);
 
 		const file = new File(["content"], "avis-cse.pdf", {
 			type: "application/pdf",
@@ -204,6 +204,7 @@ describe("Step2Upload", () => {
 	it("shows existing file cards when files are provided", () => {
 		render(
 			<Step2Upload
+				declarationYear={2025}
 				existingFiles={[
 					makeFile("avis-1.pdf", "file-1"),
 					makeFile("avis-2.pdf", "file-2"),
@@ -217,7 +218,12 @@ describe("Step2Upload", () => {
 	});
 
 	it("shows submit button when files exist but under limit", () => {
-		render(<Step2Upload existingFiles={[makeFile("avis-1.pdf", "file-1")]} />);
+		render(
+			<Step2Upload
+				declarationYear={2025}
+				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
+			/>,
+		);
 
 		expect(
 			screen.getByRole("button", { name: /Soumettre/ }),
@@ -227,6 +233,7 @@ describe("Step2Upload", () => {
 	it("shows file count in hint text", () => {
 		render(
 			<Step2Upload
+				declarationYear={2025}
 				existingFiles={[
 					makeFile("avis-1.pdf", "file-1"),
 					makeFile("avis-2.pdf", "file-2"),
@@ -240,6 +247,7 @@ describe("Step2Upload", () => {
 	it("disables dropzone when max files reached", () => {
 		render(
 			<Step2Upload
+				declarationYear={2025}
 				existingFiles={[
 					makeFile("avis-1.pdf", "f1"),
 					makeFile("avis-2.pdf", "f2"),

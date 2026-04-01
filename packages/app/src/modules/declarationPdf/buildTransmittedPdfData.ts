@@ -1,7 +1,7 @@
 import "server-only";
 
 import { and, eq } from "drizzle-orm";
-import { formatLongDate, getCurrentYear } from "~/modules/domain";
+import { formatLongDate } from "~/modules/domain";
 import { db } from "~/server/db";
 import {
 	companies,
@@ -36,10 +36,9 @@ export type TransmittedPdfData = {
 
 export async function buildTransmittedPdfData(
 	siren: string,
+	year: number,
 	now: Date,
 ): Promise<TransmittedPdfData> {
-	const year = getCurrentYear();
-
 	const [companyResults, declarationResults] = await Promise.all([
 		db.select().from(companies).where(eq(companies.siren, siren)).limit(1),
 		db
