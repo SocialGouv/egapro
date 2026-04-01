@@ -38,7 +38,7 @@ export function ConfirmationPage({
 	hasSecondDeclaration = false,
 }: Props) {
 	const displayEmail = email ?? "adresse@exemple.fr";
-	const dataYear = declarationYear;
+	const dataYear = declarationYear - 1;
 	const year = declarationYear;
 	return (
 		<div>
@@ -76,21 +76,21 @@ export function ConfirmationPage({
 			<div className={`fr-mb-4w ${styles.downloadCards}`}>
 				<DownloadCard
 					dataYear={dataYear}
-					href={`/api/declaration-pdf?year=${dataYear}`}
+					href={`/api/declaration-pdf?year=${declarationYear}`}
 					title="Télécharger le récapitulatif de la déclaration des indicateurs"
 					year={year}
 				/>
 				{hasSecondDeclaration && (
 					<DownloadCard
 						dataYear={dataYear}
-						href={`/api/declaration-pdf?type=correction&year=${dataYear}`}
+						href={`/api/declaration-pdf?type=correction&year=${declarationYear}`}
 						title="Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie de salariés"
 						year={year}
 					/>
 				)}
 				<DownloadCard
 					dataYear={dataYear}
-					href={`/api/transmitted-pdf?year=${dataYear}`}
+					href={`/api/transmitted-pdf?year=${declarationYear}`}
 					title="Télécharger le récapitulatif des éléments transmis"
 					year={year}
 				/>

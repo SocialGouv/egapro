@@ -87,7 +87,7 @@ describe("TransmittedPdfDocument", () => {
 		expect(
 			screen.getByText("Récapitulatif des éléments transmis 2026"),
 		).toBeInTheDocument();
-		expect(screen.getByText("Au titre des données 2025")).toBeInTheDocument();
+		expect(screen.getByText("Au titre des données 2024")).toBeInTheDocument();
 		expect(screen.getByText("Acme Corp — SIREN 123456789")).toBeInTheDocument();
 	});
 
