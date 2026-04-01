@@ -15,7 +15,7 @@ import {
  *
  * Secured REST API returning submitted declarations as JSON.
  * Requires:
- * 1. A valid client certificate (mTLS, verified by nginx ingress)
+ * 1. A valid client certificate (verified via X-Client-Cert header)
  * 2. A valid SUIT API key in the Authorization: Bearer header
  *
  * - date_begin (required): start date (inclusive), filters on submission date (updatedAt, UTC)

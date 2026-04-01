@@ -95,19 +95,19 @@ describe("verifySuitApiKey", () => {
 });
 
 describe("verifySuitClientCert", () => {
-	it("returns true when CA PEM is not configured (mTLS disabled)", () => {
+	it("returns true when CA PEM is not configured (client cert verification disabled)", () => {
 		const request = makeRequestWithCert();
 		const result = verifySuitClientCert(request);
 		expect(result).toBe(true);
 	});
 
-	describe("when EGAPRO_SUIT_MTLS_CA_PEM is set", () => {
+	describe("when EGAPRO_SUIT_CLIENT_CA_PEM is set", () => {
 		async function importWithCaPem() {
 			vi.resetModules();
 			vi.doMock("server-only", () => ({}));
 			vi.doMock("~/env", () => ({
 				env: {
-					EGAPRO_SUIT_MTLS_CA_PEM: TEST_CA_PEM_B64,
+					EGAPRO_SUIT_CLIENT_CA_PEM: TEST_CA_PEM_B64,
 					EGAPRO_SUIT_API_KEY: "test-suit-api-key-that-is-at-least-32-chars",
 				},
 			}));

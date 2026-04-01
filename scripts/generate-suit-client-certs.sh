@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# Generate a self-signed CA + client certificate pair for SUIT API mTLS.
+# Generate a self-signed CA + client certificate pair for SUIT API client certificate verification.
 #
 # Usage:
-#   ./scripts/generate-suit-mtls-certs.sh <env> [output-dir]
+#   ./scripts/generate-suit-client-certs.sh <env> [output-dir]
 #
 #   env: dev | prod | all
 #
 # Examples:
-#   ./scripts/generate-suit-mtls-certs.sh dev              # → ./suit-mtls-certs/dev/
-#   ./scripts/generate-suit-mtls-certs.sh prod             # → ./suit-mtls-certs/prod/
-#   ./scripts/generate-suit-mtls-certs.sh all              # → both dev + prod
-#   ./scripts/generate-suit-mtls-certs.sh dev ./my-certs   # → ./my-certs/dev/
+#   ./scripts/generate-suit-client-certs.sh dev              # → ./suit-client-certs/dev/
+#   ./scripts/generate-suit-client-certs.sh prod             # → ./suit-client-certs/prod/
+#   ./scripts/generate-suit-client-certs.sh all              # → both dev + prod
+#   ./scripts/generate-suit-client-certs.sh dev ./my-certs   # → ./my-certs/dev/
 #
 # Output files (per env):
 #   ca.key       — CA private key (keep secure, never distribute)
-#   ca.crt       — CA certificate (base64 → K8s secret EGAPRO_SUIT_MTLS_CA_PEM)
+#   ca.crt       — CA certificate (base64 → K8s secret EGAPRO_SUIT_CLIENT_CA_PEM)
 #   client.crt   — Client certificate / public key (give to SUIT)
 
 set -euo pipefail
@@ -30,8 +30,8 @@ ENV_HOSTS[dev]="egapro-dev.ovh.fabrique.social.gouv.fr"
 ENV_HOSTS[prod]="egapro.travail.gouv.fr"
 
 declare -A ENV_CA_CN
-ENV_CA_CN[dev]="EgaPro SUIT mTLS CA (dev)"
-ENV_CA_CN[prod]="EgaPro SUIT mTLS CA (prod)"
+ENV_CA_CN[dev]="EgaPro SUIT Client CA (dev)"
+ENV_CA_CN[prod]="EgaPro SUIT Client CA (prod)"
 
 declare -A ENV_CLIENT_CN
 ENV_CLIENT_CN[dev]="SUIT API Client (dev)"
@@ -47,8 +47,8 @@ usage() {
   echo "  env:  dev | prod | all"
   echo ""
   echo "Examples:"
-  echo "  $0 dev              # generate dev certs in ./suit-mtls-certs/dev/"
-  echo "  $0 prod             # generate prod certs in ./suit-mtls-certs/prod/"
+  echo "  $0 dev              # generate dev certs in ./suit-client-certs/dev/"
+  echo "  $0 prod             # generate prod certs in ./suit-client-certs/prod/"
   echo "  $0 all              # generate certs for both environments"
   echo "  $0 dev ./my-certs   # generate dev certs in ./my-certs/dev/"
   exit 1
@@ -88,7 +88,7 @@ generate_certs() {
     -days "$VALIDITY_CLIENT" \
     2>/dev/null
 
-  # Base64-encode the CA cert (for the EGAPRO_SUIT_MTLS_CA_PEM env var)
+  # Base64-encode the CA cert (for the EGAPRO_SUIT_CLIENT_CA_PEM env var)
   local ca_pem_b64
   ca_pem_b64=$(base64 < "$output_dir/ca.crt" | tr -d '\n')
 
@@ -110,7 +110,7 @@ generate_certs() {
   echo "=== [$env_name] Next steps ==="
   echo ""
   echo "1. Add the CA cert to the K8s sealed-secret for $env_name."
-  echo "   Value for EGAPRO_SUIT_MTLS_CA_PEM (base64 of ca.crt):"
+  echo "   Value for EGAPRO_SUIT_CLIENT_CA_PEM (base64 of ca.crt):"
   echo ""
   echo "   $ca_pem_b64"
   echo ""
@@ -133,7 +133,7 @@ if [[ $# -lt 1 ]]; then
 fi
 
 ENV_ARG="$1"
-BASE_DIR="${2:-./suit-mtls-certs}"
+BASE_DIR="${2:-./suit-client-certs}"
 
 if [[ "$ENV_ARG" == "all" ]]; then
   for env_name in "${VALID_ENVS[@]}"; do

@@ -37,14 +37,14 @@ export function verifySuitApiKey(request: Request): true | Response {
  *
  * The client sends its X.509 certificate as a base64-encoded PEM in the
  * `X-Client-Cert` header. The app verifies:
- * 1. The certificate is signed by our CA (EGAPRO_SUIT_MTLS_CA_PEM)
+ * 1. The certificate is signed by our CA (EGAPRO_SUIT_CLIENT_CA_PEM)
  * 2. The certificate is not expired
  *
- * Only active when `EGAPRO_SUIT_MTLS_CA_PEM` is set. When absent, mTLS
- * verification is skipped (dev / environments without certs).
+ * Only active when `EGAPRO_SUIT_CLIENT_CA_PEM` is set. When absent, client
+ * certificate verification is skipped (dev / environments without certs).
  */
 export function verifySuitClientCert(request: Request): true | Response {
-	if (!env.EGAPRO_SUIT_MTLS_CA_PEM) return true;
+	if (!env.EGAPRO_SUIT_CLIENT_CA_PEM) return true;
 
 	const clientCertB64 = request.headers.get("x-client-cert");
 	if (!clientCertB64) {
@@ -53,7 +53,7 @@ export function verifySuitClientCert(request: Request): true | Response {
 
 	try {
 		const clientPem = Buffer.from(clientCertB64, "base64").toString("utf-8");
-		const caPem = Buffer.from(env.EGAPRO_SUIT_MTLS_CA_PEM, "base64").toString(
+		const caPem = Buffer.from(env.EGAPRO_SUIT_CLIENT_CA_PEM, "base64").toString(
 			"utf-8",
 		);
 

@@ -58,7 +58,7 @@ export const env = createEnv({
 		EGAPRO_GIP_MDS_API_URL: z.string().url().optional(),
 		EGAPRO_GIP_MDS_API_TOKEN: z.string().optional(),
 		EGAPRO_MOCK_SUIT_SANCTION: z.coerce.boolean().optional().default(false),
-		EGAPRO_SUIT_MTLS_CA_PEM: z.string().optional(),
+		EGAPRO_SUIT_CLIENT_CA_PEM: z.string().optional(),
 	},
 
 	/**
@@ -103,7 +103,7 @@ export const env = createEnv({
 		EGAPRO_GIP_MDS_API_URL: process.env.EGAPRO_GIP_MDS_API_URL,
 		EGAPRO_GIP_MDS_API_TOKEN: process.env.EGAPRO_GIP_MDS_API_TOKEN,
 		EGAPRO_MOCK_SUIT_SANCTION: process.env.EGAPRO_MOCK_SUIT_SANCTION,
-		EGAPRO_SUIT_MTLS_CA_PEM: process.env.EGAPRO_SUIT_MTLS_CA_PEM,
+		EGAPRO_SUIT_CLIENT_CA_PEM: process.env.EGAPRO_SUIT_CLIENT_CA_PEM,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,

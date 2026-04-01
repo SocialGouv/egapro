@@ -44,6 +44,6 @@ build/
 !.claude/settings.json
 
 
-suit-mtls-certs/
+suit-client-certs/
 *.crt
 *.key

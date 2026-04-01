@@ -153,39 +153,39 @@ En développement local, l'authentification utilise le fournisseur d'identité d
 | `pnpm db:migrate` | Migrations Drizzle |
 | `pnpm db:studio` | Drizzle Studio |
 
-## Certificats mTLS pour l'API SUIT
+## Vérification par certificat client pour l'API SUIT
 
-L'API d'export des déclarations vers SUIT est protégée par **mTLS** (mutual TLS). Le script `scripts/generate-suit-mtls-certs.sh` génère une CA auto-signée et un certificat client pour chaque environnement.
+L'API d'export des déclarations vers SUIT est protégée par **vérification de certificat client** (header `X-Client-Cert`). Le script `scripts/generate-suit-client-certs.sh` génère une CA auto-signée et un certificat client pour chaque environnement.
 
 ### Utilisation
 
 ```bash
 # Générer les certificats pour le cluster de dev
-./scripts/generate-suit-mtls-certs.sh dev
+./scripts/generate-suit-client-certs.sh dev
 
 # Générer les certificats pour la prod
-./scripts/generate-suit-mtls-certs.sh prod
+./scripts/generate-suit-client-certs.sh prod
 
 # Générer les deux d'un coup
-./scripts/generate-suit-mtls-certs.sh all
+./scripts/generate-suit-client-certs.sh all
 
 # Spécifier un répertoire de sortie personnalisé
-./scripts/generate-suit-mtls-certs.sh dev ./my-certs
+./scripts/generate-suit-client-certs.sh dev ./my-certs
 ```
 
 ### Fichiers générés (par environnement)
 
-Les fichiers sont créés dans `./suit-mtls-certs/<env>/` :
+Les fichiers sont créés dans `./suit-client-certs/<env>/` :
 
 | Fichier | Description | Destinataire |
 |---|---|---|
 | `ca.key` | Clé privée de la CA | **Ne pas distribuer** |
-| `ca.crt` | Certificat de la CA | EgaPro (secret K8s `EGAPRO_SUIT_MTLS_CA_PEM` en base64) |
+| `ca.crt` | Certificat de la CA | EgaPro (secret K8s `EGAPRO_SUIT_CLIENT_CA_PEM` en base64) |
 | `client.crt` | Certificat client (clé publique) | SUIT |
 
 ### Mise en place
 
-1. **Côté EgaPro** : encoder `ca.crt` en base64 et le placer dans le sealed-secret K8s de l'environnement correspondant (`EGAPRO_SUIT_MTLS_CA_PEM`).
+1. **Côté EgaPro** : encoder `ca.crt` en base64 et le placer dans le sealed-secret K8s de l'environnement correspondant (`EGAPRO_SUIT_CLIENT_CA_PEM`).
 2. **Côté SUIT** : transmettre `client.crt` et la valeur base64 correspondante à utiliser dans le header `X-Client-Cert`.
 3. **Appel API** :
    ```bash
@@ -194,7 +194,7 @@ Les fichiers sont créés dans `./suit-mtls-certs/<env>/` :
         https://<host>/api/v1/export/declarations?date_begin=2026-01-01
    ```
 
-Les CN des certificats incluent l'environnement (ex: `EgaPro SUIT mTLS CA (dev)`) pour distinguer les paires dev/prod.
+Les CN des certificats incluent l'environnement (ex: `EgaPro SUIT Client CA (dev)`) pour distinguer les paires dev/prod.
 
 ## Configuration AI (Claude Code)
 
