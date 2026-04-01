@@ -1,4 +1,4 @@
-export { buildExportRows, buildIndicatorGRows } from "./buildExportRows";
+export { buildExportRows } from "./buildExportRows";
 export { downloadExport } from "./downloadExport";
 export type { FileRow } from "./fetchDeclarations";
 export {
@@ -16,6 +16,7 @@ export {
 	generateYearlyExport,
 } from "./generateYearlyExport";
 export { openApiSpec } from "./openapi";
+export { buildIndicatorGRows } from "./queries";
 export { SwaggerUI } from "./SwaggerUI";
 export {
 	exportDeclarationsQuerySchema,
