@@ -1,6 +1,6 @@
 {
-	"id": "57c81c63-5404-4033-a540-553a29470bfe",
-	"prevId": "0017_flatten-indicator-columns",
+	"id": "ce556b36-26fe-4e6b-a0e3-4e7406c301d2",
+	"prevId": "57c81c63-5404-4033-a540-553a29470bfe",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
