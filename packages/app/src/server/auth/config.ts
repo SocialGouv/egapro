@@ -22,7 +22,6 @@ declare module "next-auth/jwt" {
 		id: string;
 		siret?: string | null;
 		phone?: string | null;
-		lastName?: string | null;
 		id_token?: string | null;
 	}
 }
