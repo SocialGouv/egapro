@@ -1,5 +1,6 @@
 import { fetchFileById } from "~/modules/export";
 import { getFile } from "~/server/services/s3";
+import { verifySuitApiKey } from "~/server/services/suitApiAuth";
 
 function buildContentDisposition(fileName: string): string {
 	const asciiFallback = fileName
@@ -13,13 +14,16 @@ function buildContentDisposition(fileName: string): string {
 /**
  * GET /api/v1/files/:fileId
  *
- * Streams the file (PDF) from S3 for the given file ID.
- * Looks up in both CSE opinion files and joint evaluation files.
+ * Secured REST API streaming the file (PDF) from S3.
+ * Requires a valid SUIT API key in the Authorization: Bearer header.
  */
 export async function GET(
-	_request: Request,
+	request: Request,
 	{ params }: { params: Promise<{ fileId: string }> },
 ) {
+	const authResult = verifySuitApiKey(request);
+	if (authResult !== true) return authResult;
+
 	try {
 		const { fileId } = await params;
 

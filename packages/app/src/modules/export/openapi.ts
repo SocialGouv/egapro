@@ -430,6 +430,10 @@ export const openApiSpec = {
 							},
 						},
 					},
+					"401": {
+						description: "Clé API manquante ou invalide",
+						content: { "application/json": { schema: errorSchema } },
+					},
 					"400": {
 						description: "Paramètres invalides",
 						content: { "application/json": { schema: errorSchema } },
@@ -464,6 +468,10 @@ export const openApiSpec = {
 								schema: { type: "string", format: "binary" },
 							},
 						},
+					},
+					"401": {
+						description: "Clé API manquante ou invalide",
+						content: { "application/json": { schema: errorSchema } },
 					},
 					"404": {
 						description: "Fichier non trouvé",

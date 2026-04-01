@@ -3,7 +3,6 @@ export { downloadExport } from "./downloadExport";
 export type { FileRow } from "./fetchDeclarations";
 export {
 	assembleDeclaration,
-	fetchCategoriesByDeclaration,
 	fetchCseFilesByDeclaration,
 	fetchCseOpinionsByDeclaration,
 	fetchFileById,

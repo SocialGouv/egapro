@@ -187,20 +187,18 @@ export async function fetchCseFilesByDeclaration(
 	const rows = await db
 		.select({
 			id: cseOpinionFiles.id,
-			siren: cseOpinionFiles.siren,
-			year: cseOpinionFiles.year,
+			siren: declarations.siren,
+			year: declarations.year,
 			fileName: cseOpinionFiles.fileName,
 			filePath: cseOpinionFiles.filePath,
 			uploadedAt: cseOpinionFiles.uploadedAt,
 		})
 		.from(cseOpinionFiles)
+		.innerJoin(declarations, eq(cseOpinionFiles.declarationId, declarations.id))
 		.where(
 			or(
 				...keys.map((k) =>
-					and(
-						eq(cseOpinionFiles.siren, k.siren),
-						eq(cseOpinionFiles.year, k.year),
-					),
+					and(eq(declarations.siren, k.siren), eq(declarations.year, k.year)),
 				),
 			),
 		);
@@ -218,20 +216,21 @@ export async function fetchJointEvaluationFilesByDeclaration(
 	const rows = await db
 		.select({
 			id: jointEvaluationFiles.id,
-			siren: jointEvaluationFiles.siren,
-			year: jointEvaluationFiles.year,
+			siren: declarations.siren,
+			year: declarations.year,
 			fileName: jointEvaluationFiles.fileName,
 			filePath: jointEvaluationFiles.filePath,
 			uploadedAt: jointEvaluationFiles.uploadedAt,
 		})
 		.from(jointEvaluationFiles)
+		.innerJoin(
+			declarations,
+			eq(jointEvaluationFiles.declarationId, declarations.id),
+		)
 		.where(
 			or(
 				...keys.map((k) =>
-					and(
-						eq(jointEvaluationFiles.siren, k.siren),
-						eq(jointEvaluationFiles.year, k.year),
-					),
+					and(eq(declarations.siren, k.siren), eq(declarations.year, k.year)),
 				),
 			),
 		);

@@ -11,7 +11,6 @@ vi.mock("~/modules/export/queries", () => ({
 		mockFetchJointFiles(...args),
 	fetchFileById: (...args: unknown[]) => mockFetchFileById(...args),
 	fetchSubmittedDeclarations: vi.fn().mockResolvedValue([]),
-	fetchCategoriesByDeclaration: vi.fn().mockResolvedValue(new Map()),
 	fetchIndicatorGByDeclaration: vi.fn().mockResolvedValue(new Map()),
 	fetchCseOpinionsByDeclaration: vi.fn().mockResolvedValue(new Map()),
 }));
@@ -23,6 +22,14 @@ vi.mock("~/server/services/s3", () => ({
 	}),
 }));
 
+const VALID_AUTH_HEADER = "Bearer test-suit-api-key-that-is-at-least-32-chars";
+
+function authedRequest(url: string): Request {
+	return new Request(url, {
+		headers: { Authorization: VALID_AUTH_HEADER },
+	});
+}
+
 describe("GET /api/v1/files", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -30,9 +37,19 @@ describe("GET /api/v1/files", () => {
 		mockFetchJointFiles.mockResolvedValue(new Map());
 	});
 
+	it("should return 401 when Authorization header is missing", async () => {
+		const { GET } = await import("~/app/api/v1/files/route");
+		const request = new Request(
+			"http://localhost/api/v1/files?siren=123456789&year=2027",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(401);
+	});
+
 	it("should return 400 when siren is missing", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = new Request("http://localhost/api/v1/files?year=2027");
+		const request = authedRequest("http://localhost/api/v1/files?year=2027");
 		const response = await GET(request);
 
 		expect(response.status).toBe(400);
@@ -42,7 +59,7 @@ describe("GET /api/v1/files", () => {
 
 	it("should return 400 when siren format is invalid", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = new Request(
+		const request = authedRequest(
 			"http://localhost/api/v1/files?siren=123&year=2027",
 		);
 		const response = await GET(request);
@@ -52,7 +69,7 @@ describe("GET /api/v1/files", () => {
 
 	it("should return 400 when year is missing", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = new Request(
+		const request = authedRequest(
 			"http://localhost/api/v1/files?siren=123456789",
 		);
 		const response = await GET(request);
@@ -62,7 +79,7 @@ describe("GET /api/v1/files", () => {
 
 	it("should return 400 when year is outside the allowed range", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = new Request(
+		const request = authedRequest(
 			"http://localhost/api/v1/files?siren=123456789&year=0000",
 		);
 		const response = await GET(request);
@@ -72,7 +89,7 @@ describe("GET /api/v1/files", () => {
 
 	it("should return empty files array when no files exist", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = new Request(
+		const request = authedRequest(
 			"http://localhost/api/v1/files?siren=123456789&year=2027",
 		);
 		const response = await GET(request);
@@ -121,7 +138,7 @@ describe("GET /api/v1/files", () => {
 		);
 
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = new Request(
+		const request = authedRequest(
 			"http://localhost/api/v1/files?siren=123456789&year=2027",
 		);
 		const response = await GET(request);
@@ -145,7 +162,7 @@ describe("GET /api/v1/files", () => {
 
 	it("should call queries with correct siren and year", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = new Request(
+		const request = authedRequest(
 			"http://localhost/api/v1/files?siren=987654321&year=2026",
 		);
 		await GET(request);
@@ -162,9 +179,19 @@ describe("GET /api/v1/files/:fileId", () => {
 		mockFetchFileById.mockResolvedValue(undefined);
 	});
 
+	it("should return 401 when Authorization header is missing", async () => {
+		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
+		const request = new Request("http://localhost/api/v1/files/file-1");
+		const response = await GET(request, {
+			params: Promise.resolve({ fileId: "file-1" }),
+		});
+
+		expect(response.status).toBe(401);
+	});
+
 	it("should return 404 when file does not exist", async () => {
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = new Request("http://localhost/api/v1/files/nonexistent");
+		const request = authedRequest("http://localhost/api/v1/files/nonexistent");
 		const response = await GET(request, {
 			params: Promise.resolve({ fileId: "nonexistent" }),
 		});
@@ -181,7 +208,7 @@ describe("GET /api/v1/files/:fileId", () => {
 		});
 
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = new Request("http://localhost/api/v1/files/file-1");
+		const request = authedRequest("http://localhost/api/v1/files/file-1");
 		const response = await GET(request, {
 			params: Promise.resolve({ fileId: "file-1" }),
 		});
@@ -200,7 +227,7 @@ describe("GET /api/v1/files/:fileId", () => {
 		});
 
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = new Request("http://localhost/api/v1/files/file-1");
+		const request = authedRequest("http://localhost/api/v1/files/file-1");
 		const response = await GET(request, {
 			params: Promise.resolve({ fileId: "file-1" }),
 		});
@@ -221,7 +248,7 @@ describe("GET /api/v1/files/:fileId", () => {
 		vi.mocked(getFile).mockRejectedValueOnce(new Error("S3 error"));
 
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = new Request("http://localhost/api/v1/files/file-1");
+		const request = authedRequest("http://localhost/api/v1/files/file-1");
 		const response = await GET(request, {
 			params: Promise.resolve({ fileId: "file-1" }),
 		});

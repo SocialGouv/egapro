@@ -3,14 +3,18 @@ import {
 	fetchCseFilesByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 } from "~/modules/export";
+import { verifySuitApiKey } from "~/server/services/suitApiAuth";
 
 /**
  * GET /api/v1/files?siren=123456789&year=2027
  *
- * Returns metadata for CSE opinion files and joint evaluation files
- * uploaded for a given company (siren) and year.
+ * Secured REST API returning file metadata for CSE opinions and joint evaluations.
+ * Requires a valid SUIT API key in the Authorization: Bearer header.
  */
 export async function GET(request: Request) {
+	const authResult = verifySuitApiKey(request);
+	if (authResult !== true) return authResult;
+
 	try {
 		const url = new URL(request.url);
 		const parsed = exportFilesQuerySchema.safeParse({
