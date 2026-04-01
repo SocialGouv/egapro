@@ -25,3 +25,6 @@ export const EXPECTED_DECLARATION_TYPES = [
 // Limits
 /** Maximum number of CSE opinion files per company per year. */
 export const MAX_CSE_FILES = 4;
+
+/** First year the Egapro platform started collecting declarations. */
+export const FIRST_DECLARATION_YEAR = 2018;

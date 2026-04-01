@@ -6,7 +6,7 @@ describe("openApiSpec", () => {
 	it("should be a valid OpenAPI 3.1 structure", () => {
 		expect(openApiSpec.openapi).toBe("3.1.0");
 		expect(openApiSpec.info.title).toBeDefined();
-		expect(openApiSpec.info.version).toBe("1.0.0");
+		expect(openApiSpec.info.version).toBe("1.1.0");
 		expect(openApiSpec.paths).toBeDefined();
 	});
 
