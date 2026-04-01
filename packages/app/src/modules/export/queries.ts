@@ -5,13 +5,15 @@ import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
 	companies,
+	cseOpinionFiles,
 	cseOpinions,
 	declarations,
 	employeeCategories,
 	jobCategories,
+	jointEvaluationFiles,
 	users,
 } from "~/server/db/schema";
-import type { CseRow, IndicatorGEntry } from "./fetchDeclarations";
+import type { CseRow, FileRow, IndicatorGEntry } from "./fetchDeclarations";
 import type { IndicatorGRow } from "./types";
 
 // ── Shared select columns for indicators A–F ───────────────────────
@@ -166,11 +168,11 @@ export async function fetchIndicatorGByDeclaration(
 
 export async function fetchCseOpinionsByDeclaration(
 	declarationIds: string[],
-	injectedDb: DB = db,
+	database: DB = db,
 ): Promise<Map<string, CseRow[]>> {
 	if (declarationIds.length === 0) return new Map();
 
-	const rows = await injectedDb
+	const rows = await database
 		.select({
 			declarationId: cseOpinions.declarationId,
 			type: cseOpinions.type,
@@ -186,10 +188,10 @@ export async function fetchCseOpinionsByDeclaration(
 // ── Indicator G rows (for XLSX export) ──────────────────────────────
 
 export async function buildIndicatorGRows(
-	injectedDb: DB,
+	database: DB,
 	year: number,
 ): Promise<IndicatorGRow[]> {
-	return injectedDb
+	return database
 		.select({
 			siren: declarations.siren,
 			companyName: companies.name,
@@ -225,15 +227,104 @@ export async function buildIndicatorGRows(
 // ── Indicator G presence check ──────────────────────────────────────
 
 export async function getDeclarationsWithIndicatorG(
-	injectedDb: DB,
+	database: DB,
 	declarationIds: string[],
 ): Promise<Set<string>> {
 	if (declarationIds.length === 0) return new Set();
 
-	const rows = await injectedDb
+	const rows = await database
 		.selectDistinct({ declarationId: jobCategories.declarationId })
 		.from(jobCategories)
 		.where(inArray(jobCategories.declarationId, declarationIds));
 
 	return new Set(rows.map((r) => r.declarationId));
+}
+
+// ── CSE opinion files ────────────────────────────────────────────────
+
+export async function fetchCseFilesByDeclaration(
+	keys: Array<{ siren: string; year: number }>,
+): Promise<Map<string, FileRow[]>> {
+	if (keys.length === 0) return new Map();
+
+	const rows = await db
+		.select({
+			id: cseOpinionFiles.id,
+			siren: declarations.siren,
+			year: declarations.year,
+			fileName: cseOpinionFiles.fileName,
+			filePath: cseOpinionFiles.filePath,
+			uploadedAt: cseOpinionFiles.uploadedAt,
+		})
+		.from(cseOpinionFiles)
+		.innerJoin(declarations, eq(cseOpinionFiles.declarationId, declarations.id))
+		.where(
+			or(
+				...keys.map((k) =>
+					and(eq(declarations.siren, k.siren), eq(declarations.year, k.year)),
+				),
+			),
+		);
+
+	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+}
+
+// ── Joint evaluation files ───────────────────────────────────────────
+
+export async function fetchJointEvaluationFilesByDeclaration(
+	keys: Array<{ siren: string; year: number }>,
+): Promise<Map<string, FileRow[]>> {
+	if (keys.length === 0) return new Map();
+
+	const rows = await db
+		.select({
+			id: jointEvaluationFiles.id,
+			siren: declarations.siren,
+			year: declarations.year,
+			fileName: jointEvaluationFiles.fileName,
+			filePath: jointEvaluationFiles.filePath,
+			uploadedAt: jointEvaluationFiles.uploadedAt,
+		})
+		.from(jointEvaluationFiles)
+		.innerJoin(
+			declarations,
+			eq(jointEvaluationFiles.declarationId, declarations.id),
+		)
+		.where(
+			or(
+				...keys.map((k) =>
+					and(eq(declarations.siren, k.siren), eq(declarations.year, k.year)),
+				),
+			),
+		);
+
+	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+}
+
+// ── Single file lookup (for download) ────────────────────────────────
+
+export async function fetchFileById(
+	fileId: string,
+): Promise<{ filePath: string; fileName: string } | undefined> {
+	const cseRows = await db
+		.select({
+			filePath: cseOpinionFiles.filePath,
+			fileName: cseOpinionFiles.fileName,
+		})
+		.from(cseOpinionFiles)
+		.where(eq(cseOpinionFiles.id, fileId))
+		.limit(1);
+
+	if (cseRows[0]) return cseRows[0];
+
+	const jointRows = await db
+		.select({
+			filePath: jointEvaluationFiles.filePath,
+			fileName: jointEvaluationFiles.fileName,
+		})
+		.from(jointEvaluationFiles)
+		.where(eq(jointEvaluationFiles.id, fileId))
+		.limit(1);
+
+	return jointRows[0];
 }
