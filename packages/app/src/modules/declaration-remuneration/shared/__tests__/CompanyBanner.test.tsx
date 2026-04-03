@@ -13,10 +13,7 @@ const defaultCompany = {
 describe("CompanyBanner", () => {
 	it("renders breadcrumb with 'Mon espace' link and current page label", () => {
 		render(
-			<CompanyBanner
-				company={defaultCompany}
-				currentPageLabel="Déclaration"
-			/>,
+			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
 		);
 
 		const link = screen.getByRole("link", { name: "Mon espace" });
@@ -27,10 +24,7 @@ describe("CompanyBanner", () => {
 
 	it("renders formatted SIREN", () => {
 		render(
-			<CompanyBanner
-				company={defaultCompany}
-				currentPageLabel="Déclaration"
-			/>,
+			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
 		);
 
 		expect(screen.getByText(/123 456 789/)).toBeInTheDocument();
@@ -38,10 +32,7 @@ describe("CompanyBanner", () => {
 
 	it("renders company name", () => {
 		render(
-			<CompanyBanner
-				company={defaultCompany}
-				currentPageLabel="Déclaration"
-			/>,
+			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
 		);
 
 		expect(screen.getByText(/Alpha Solutions/)).toBeInTheDocument();
@@ -49,10 +40,7 @@ describe("CompanyBanner", () => {
 
 	it("renders workforce and CSE values", () => {
 		render(
-			<CompanyBanner
-				company={defaultCompany}
-				currentPageLabel="Déclaration"
-			/>,
+			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
 		);
 
 		expect(screen.getByText("256")).toBeInTheDocument();
