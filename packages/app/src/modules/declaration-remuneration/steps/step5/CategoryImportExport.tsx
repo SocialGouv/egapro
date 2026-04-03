@@ -133,7 +133,7 @@ export function CategoryImportExport({
 									</p>
 								</div>
 								<div className="fr-modal__footer">
-									<ul className="fr-btns-group fr-btns-group--inline fr-btns-group--icon-left fr-btns-group--equisized">
+									<ul className="fr-btns-group fr-btns-group--inline fr-btns-group--right fr-btns-group--icon-left fr-btns-group--equisized">
 										<li>
 											<button
 												className="fr-btn fr-btn--secondary fr-icon-download-line fr-btn--icon-left"
