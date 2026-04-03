@@ -9,3 +9,13 @@ export type DeclarationType = "remuneration" | "representation";
 
 /** Company size classification for declaration obligations. */
 export type CompanySize = "voluntary" | "triennial" | "annual";
+
+/** Configurable campaign deadlines (formatted as display strings). */
+export type CampaignDeadlines = {
+	decl1ModificationDeadline: string;
+	decl1JustificationDeadline: string;
+	decl1JointEvaluationDeadline: string;
+	decl2ModificationDeadline: string;
+	decl2JustificationDeadline: string;
+	decl2JointEvaluationDeadline: string;
+};

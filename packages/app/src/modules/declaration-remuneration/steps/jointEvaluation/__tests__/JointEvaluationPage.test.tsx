@@ -6,6 +6,15 @@ vi.mock("next/navigation", async (importOriginal) => {
 	return { ...actual, redirect: vi.fn() };
 });
 
+vi.mock("~/server/db/getCampaignDeadlines", async () => {
+	const { getDefaultCampaignDeadlines } = await import("~/modules/domain");
+	return {
+		getCampaignDeadlines: vi
+			.fn()
+			.mockResolvedValue(getDefaultCampaignDeadlines(2025)),
+	};
+});
+
 vi.mock("~/trpc/server", () => ({
 	api: {
 		declaration: {
@@ -20,27 +29,28 @@ vi.mock("~/trpc/server", () => ({
 // JointEvaluationForm is a client component — render it as a stub in unit tests
 vi.mock("../JointEvaluationForm", () => ({
 	JointEvaluationForm: ({
-		currentYear,
+		jointEvaluationDeadline,
 		declarationDate,
 	}: {
-		currentYear: number;
+		jointEvaluationDeadline: string;
 		declarationDate: string;
 	}) => (
 		<div>
-			<span data-testid="current-year">{currentYear}</span>
+			<span data-testid="joint-evaluation-deadline">
+				{jointEvaluationDeadline}
+			</span>
 			<span data-testid="declaration-date">{declarationDate}</span>
 		</div>
 	),
 }));
 
 import { redirect } from "next/navigation";
-import { getCurrentYear } from "~/modules/domain";
 import { api } from "~/trpc/server";
 import { JointEvaluationPage } from "../JointEvaluationPage";
 
 function mockDeclaration(compliancePath: string, updatedAt: Date | null) {
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
-		declaration: { compliancePath, updatedAt },
+		declaration: { compliancePath, updatedAt, year: 2025, siren: "123456789" },
 	} as never);
 	vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
 }
@@ -56,14 +66,14 @@ describe("JointEvaluationPage", () => {
 		);
 	});
 
-	it("renders the form with current year when compliancePath is joint_evaluation", async () => {
+	it("renders the form with deadline when compliancePath is joint_evaluation", async () => {
 		mockDeclaration("joint_evaluation", new Date("2025-06-15"));
 
 		const page = await JointEvaluationPage();
 		render(page);
 
-		expect(screen.getByTestId("current-year")).toHaveTextContent(
-			String(getCurrentYear()),
+		expect(screen.getByTestId("joint-evaluation-deadline")).toHaveTextContent(
+			/août 2025/,
 		);
 	});
 

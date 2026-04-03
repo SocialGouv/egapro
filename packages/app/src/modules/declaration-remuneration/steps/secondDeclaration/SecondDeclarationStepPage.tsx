@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
-
-import { getCurrentYear } from "~/modules/domain";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
+import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
 
 import { SECOND_DECLARATION_TOTAL_STEPS } from "./constants";
@@ -20,7 +19,8 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 
 	const data = await api.declaration.getOrCreate();
 	const company = await api.company.get({ siren: data.declaration.siren });
-	const currentYear = getCurrentYear();
+	const currentYear = data.declaration.year;
+	const campaignDeadlines = await getCampaignDeadlines(currentYear);
 
 	const initialCategories = mapToEmployeeCategoryRows(
 		data.jobCategories,
@@ -48,8 +48,8 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 	if (step === 1) {
 		return (
 			<SecondDeclarationStep1Info
-				currentYear={currentYear}
 				declarationDate={declarationDate}
+				modificationDeadline={campaignDeadlines.decl2ModificationDeadline}
 			/>
 		);
 	}

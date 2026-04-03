@@ -1,25 +1,16 @@
-import {
-	getDeclarationDeadline,
-	getSecondDeclarationDeadline,
-} from "~/modules/domain";
-
 type Props = {
-	currentYear: number;
 	email: string;
 	isSecondDeclaration?: boolean;
+	modificationDeadline: string;
 	pdfDownloadHref?: string;
 };
 
 export function DeclarationSuccessBanner({
-	currentYear,
 	email,
 	isSecondDeclaration = false,
+	modificationDeadline,
 	pdfDownloadHref,
 }: Props) {
-	const deadline = isSecondDeclaration
-		? getSecondDeclarationDeadline(currentYear)
-		: getDeclarationDeadline(currentYear);
-
 	return (
 		<div className="fr-grid-row fr-grid-row--gutters fr-p-4w fr-background-alt--blue-france">
 			<div className="fr-col-12 fr-col-md-6">
@@ -38,7 +29,7 @@ export function DeclarationSuccessBanner({
 						</p>
 						<p className="fr-mb-1w">
 							Vous pouvez modifier votre déclaration jusqu'au{" "}
-							<strong>{deadline}</strong>
+							<strong>{modificationDeadline}</strong>
 						</p>
 						{pdfDownloadHref && (
 							<a

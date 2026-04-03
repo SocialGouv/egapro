@@ -41,7 +41,12 @@ beforeEach(() => {
 
 describe("Step1Opinions", () => {
 	it("renders compliance path title when compliancePath is joint_evaluation", () => {
-		render(<Step1Opinions compliancePath="joint_evaluation" />);
+		render(
+			<Step1Opinions
+				compliancePath="joint_evaluation"
+				cseDeadline="1ᵉʳ février 2028"
+			/>,
+		);
 
 		expect(
 			screen.getByText(
@@ -51,7 +56,9 @@ describe("Step1Opinions", () => {
 	});
 
 	it("does not render compliance path title for other paths", () => {
-		render(<Step1Opinions compliancePath="justify" />);
+		render(
+			<Step1Opinions compliancePath="justify" cseDeadline="1ᵉʳ février 2028" />,
+		);
 
 		expect(
 			screen.queryByText(
@@ -61,34 +68,49 @@ describe("Step1Opinions", () => {
 	});
 
 	it("renders h1 as CSE opinion title when no compliance path banner", () => {
-		render(<Step1Opinions />);
+		render(<Step1Opinions cseDeadline="1ᵉʳ février 2028" />);
 
 		const heading = screen.getByRole("heading", { level: 1 });
 		expect(heading).toHaveTextContent("Transmettre l'avis ou les avis du CSE");
 	});
 
 	it("renders the stepper at step 1", () => {
-		render(<Step1Opinions />);
+		render(<Step1Opinions cseDeadline="1ᵉʳ février 2028" />);
 
 		expect(screen.getByText(/Étape 1 sur 2/)).toBeInTheDocument();
 	});
 
 	it("renders both declaration sections when hasSecondDeclaration is true", () => {
-		render(<Step1Opinions hasSecondDeclaration={true} />);
+		render(
+			<Step1Opinions
+				cseDeadline="1ᵉʳ février 2028"
+				hasSecondDeclaration={true}
+			/>,
+		);
 
 		expect(screen.getByText("Première déclaration")).toBeInTheDocument();
 		expect(screen.getByText("Deuxième déclaration")).toBeInTheDocument();
 	});
 
 	it("hides second declaration section when hasSecondDeclaration is false", () => {
-		render(<Step1Opinions hasSecondDeclaration={false} />);
+		render(
+			<Step1Opinions
+				cseDeadline="1ᵉʳ février 2028"
+				hasSecondDeclaration={false}
+			/>,
+		);
 
 		expect(screen.getByText("Première déclaration")).toBeInTheDocument();
 		expect(screen.queryByText("Deuxième déclaration")).not.toBeInTheDocument();
 	});
 
 	it("renders the submission banner for joint_evaluation path", () => {
-		render(<Step1Opinions compliancePath="joint_evaluation" />);
+		render(
+			<Step1Opinions
+				compliancePath="joint_evaluation"
+				cseDeadline="1ᵉʳ février 2028"
+			/>,
+		);
 
 		expect(
 			screen.getByText(
@@ -98,7 +120,7 @@ describe("Step1Opinions", () => {
 	});
 
 	it("does not render the submission banner for other paths", () => {
-		render(<Step1Opinions />);
+		render(<Step1Opinions cseDeadline="1ᵉʳ février 2028" />);
 
 		expect(
 			screen.queryByText(
@@ -108,7 +130,7 @@ describe("Step1Opinions", () => {
 	});
 
 	it("renders previous and next buttons", () => {
-		render(<Step1Opinions />);
+		render(<Step1Opinions cseDeadline="1ᵉʳ février 2028" />);
 
 		expect(
 			screen.getByRole("button", { name: /Précédent/ }),
@@ -118,7 +140,7 @@ describe("Step1Opinions", () => {
 
 	it("shows validation error when submitting empty form", async () => {
 		const user = userEvent.setup();
-		render(<Step1Opinions />);
+		render(<Step1Opinions cseDeadline="1ᵉʳ février 2028" />);
 
 		await user.click(screen.getByRole("button", { name: /Suivant/ }));
 
@@ -132,6 +154,7 @@ describe("Step1Opinions", () => {
 		const user = userEvent.setup();
 		render(
 			<Step1Opinions
+				cseDeadline="1ᵉʳ février 2028"
 				hasSecondDeclaration={true}
 				initialData={{
 					firstDeclAccuracyOpinion: "favorable",
@@ -173,6 +196,7 @@ describe("Step1Opinions", () => {
 		const user = userEvent.setup();
 		render(
 			<Step1Opinions
+				cseDeadline="1ᵉʳ février 2028"
 				hasSecondDeclaration={false}
 				initialData={{
 					firstDeclAccuracyOpinion: "favorable",
@@ -207,6 +231,7 @@ describe("Step1Opinions", () => {
 	it("renders with initial data pre-filled", () => {
 		render(
 			<Step1Opinions
+				cseDeadline="1ᵉʳ février 2028"
 				initialData={{
 					firstDeclAccuracyOpinion: "favorable",
 					firstDeclAccuracyDate: "2026-01-15",
@@ -235,6 +260,7 @@ describe("Step1Opinions", () => {
 		render(
 			<Step1Opinions
 				compliancePath="joint_evaluation"
+				cseDeadline="1ᵉʳ février 2028"
 				email="test@example.fr"
 			/>,
 		);
@@ -243,7 +269,12 @@ describe("Step1Opinions", () => {
 	});
 
 	it("uses default email when none provided for joint_evaluation path", () => {
-		render(<Step1Opinions compliancePath="joint_evaluation" />);
+		render(
+			<Step1Opinions
+				compliancePath="joint_evaluation"
+				cseDeadline="1ᵉʳ février 2028"
+			/>,
+		);
 
 		expect(screen.getByText("adresse@exemple.fr")).toBeInTheDocument();
 	});

@@ -2,6 +2,8 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 
+import { getCurrentYear } from "~/modules/domain";
+import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
 
 import { CompanyDeclarationsPage } from "./CompanyDeclarationsPage";
@@ -19,15 +21,17 @@ export async function MonEspacePage({ siret, userPhone }: Props) {
 	}
 
 	const siren = siret.slice(0, SIREN_LENGTH);
-	const [data, sanctionStatus] = await Promise.all([
+	const [data, sanctionStatus, campaignDeadlines] = await Promise.all([
 		api.company.getWithDeclarations({ siren }),
 		api.company.getSanctionStatus({ siren }),
+		getCampaignDeadlines(getCurrentYear()),
 	]);
 
 	const hasNoSanction = sanctionStatus !== null && !sanctionStatus.hasSanction;
 
 	return (
 		<CompanyDeclarationsPage
+			campaignDeadlines={campaignDeadlines}
 			company={data.company}
 			declarations={data.declarations}
 			hasNoSanction={hasNoSanction}

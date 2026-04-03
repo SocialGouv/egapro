@@ -12,15 +12,15 @@ import { api } from "~/trpc/react";
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
 type Props = {
-	currentYear: number;
 	declarationDate: string;
 	hasCse: boolean | null;
+	jointEvaluationDeadline: string;
 };
 
 export function JointEvaluationForm({
-	currentYear,
 	declarationDate,
 	hasCse,
+	jointEvaluationDeadline,
 }: Props) {
 	const router = useRouter();
 
@@ -78,9 +78,7 @@ export function JointEvaluationForm({
 
 				<div className="fr-highlight">
 					<p className="fr-mb-1v fr-text--md">Date limite</p>
-					<p className="fr-h6 fr-mb-1v">
-						1<sup>er</sup> août {currentYear}
-					</p>
+					<p className="fr-h6 fr-mb-1v">{jointEvaluationDeadline}</p>
 					<p className="fr-mb-0 fr-text--sm fr-text--mention-grey">
 						Déclaration effectuée le {declarationDate}
 					</p>

@@ -5,16 +5,14 @@ import { BASE_PATH } from "./constants";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
-	currentYear: number;
 	declarationDate: string;
+	modificationDeadline: string;
 };
 
 export function SecondDeclarationStep1Info({
-	currentYear,
 	declarationDate,
+	modificationDeadline,
 }: Props) {
-	const deadline = `1\u1D49\u02B3 décembre ${currentYear}`;
-
 	return (
 		<div className={common.flexColumnGap2}>
 			<div className={common.flexBetween}>
@@ -36,7 +34,10 @@ export function SecondDeclarationStep1Info({
 				.
 			</p>
 
-			<DeadlineBlock deadline={deadline} declarationDate={declarationDate} />
+			<DeadlineBlock
+				deadline={modificationDeadline}
+				declarationDate={declarationDate}
+			/>
 
 			<ObligationsCallout />
 

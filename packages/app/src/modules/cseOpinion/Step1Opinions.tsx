@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { Controller } from "react-hook-form";
 
-import { getCseYear } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
@@ -17,6 +16,7 @@ import formStyles from "./shared/formActions.module.scss";
 import type { OpinionType } from "./types";
 
 type Props = {
+	cseDeadline: string;
 	initialData?: {
 		firstDeclAccuracyOpinion: OpinionType | null;
 		firstDeclAccuracyDate: string | null;
@@ -35,6 +35,7 @@ type Props = {
 };
 
 export function Step1Opinions({
+	cseDeadline,
 	initialData,
 	email,
 	compliancePath,
@@ -121,7 +122,7 @@ export function Step1Opinions({
 
 			{isJointEvaluation && (
 				<SubmissionBanner
-					deadline={`1er février ${getCseYear()}`}
+					deadline={cseDeadline}
 					email={email ?? "adresse@exemple.fr"}
 				/>
 			)}
