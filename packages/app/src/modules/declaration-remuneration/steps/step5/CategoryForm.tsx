@@ -325,11 +325,11 @@ export function CategoryForm({
 
 			{!readOnlyNameDetail && (
 				<CategoryImportExport
-					categories={
-						categories.map((cat, i) => ({
+					getCategories={() =>
+						form.getValues("categories").map((cat, i) => ({
 							id: i,
 							...cat,
-						})) as EmployeeCategory[]
+						}))
 					}
 					onImport={handleImportCategories}
 					siren={siren}

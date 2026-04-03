@@ -9,14 +9,14 @@ import {
 import type { EmployeeCategory } from "./categorySerializer";
 
 type Props = {
-	categories: EmployeeCategory[];
+	getCategories: () => EmployeeCategory[];
 	onImport: (categories: EmployeeCategory[]) => void;
 	siren?: string;
 	year?: number;
 };
 
 export function CategoryImportExport({
-	categories,
+	getCategories,
 	onImport,
 	siren,
 	year,
@@ -39,7 +39,7 @@ export function CategoryImportExport({
 	async function handleDownload(format: "xlsx" | "csv") {
 		setIsDownloading(true);
 		try {
-			const blob = await generateTemplate(categories, format);
+			const blob = await generateTemplate(getCategories(), format);
 			const url = URL.createObjectURL(blob);
 			const link = document.createElement("a");
 			link.href = url;
