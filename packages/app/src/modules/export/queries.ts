@@ -240,64 +240,45 @@ export async function getDeclarationsWithIndicatorG(
 	return new Set(rows.map((r) => r.declarationId));
 }
 
-// ── CSE opinion files ────────────────────────────────────────────────
+// ── File queries (CSE opinion files + joint evaluation files) ────────
+
+function fetchFilesByDeclaration(
+	keys: Array<{ siren: string; year: number }>,
+	fileTable: typeof cseOpinionFiles | typeof jointEvaluationFiles,
+): Promise<FileRow[]> {
+	return db
+		.select({
+			id: fileTable.id,
+			siren: declarations.siren,
+			year: declarations.year,
+			fileName: fileTable.fileName,
+			filePath: fileTable.filePath,
+			uploadedAt: fileTable.uploadedAt,
+		})
+		.from(fileTable)
+		.innerJoin(declarations, eq(fileTable.declarationId, declarations.id))
+		.where(
+			or(
+				...keys.map((k) =>
+					and(eq(declarations.siren, k.siren), eq(declarations.year, k.year)),
+				),
+			),
+		);
+}
 
 export async function fetchCseFilesByDeclaration(
 	keys: Array<{ siren: string; year: number }>,
 ): Promise<Map<string, FileRow[]>> {
 	if (keys.length === 0) return new Map();
-
-	const rows = await db
-		.select({
-			id: cseOpinionFiles.id,
-			siren: declarations.siren,
-			year: declarations.year,
-			fileName: cseOpinionFiles.fileName,
-			filePath: cseOpinionFiles.filePath,
-			uploadedAt: cseOpinionFiles.uploadedAt,
-		})
-		.from(cseOpinionFiles)
-		.innerJoin(declarations, eq(cseOpinionFiles.declarationId, declarations.id))
-		.where(
-			or(
-				...keys.map((k) =>
-					and(eq(declarations.siren, k.siren), eq(declarations.year, k.year)),
-				),
-			),
-		);
-
+	const rows = await fetchFilesByDeclaration(keys, cseOpinionFiles);
 	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
 }
-
-// ── Joint evaluation files ───────────────────────────────────────────
 
 export async function fetchJointEvaluationFilesByDeclaration(
 	keys: Array<{ siren: string; year: number }>,
 ): Promise<Map<string, FileRow[]>> {
 	if (keys.length === 0) return new Map();
-
-	const rows = await db
-		.select({
-			id: jointEvaluationFiles.id,
-			siren: declarations.siren,
-			year: declarations.year,
-			fileName: jointEvaluationFiles.fileName,
-			filePath: jointEvaluationFiles.filePath,
-			uploadedAt: jointEvaluationFiles.uploadedAt,
-		})
-		.from(jointEvaluationFiles)
-		.innerJoin(
-			declarations,
-			eq(jointEvaluationFiles.declarationId, declarations.id),
-		)
-		.where(
-			or(
-				...keys.map((k) =>
-					and(eq(declarations.siren, k.siren), eq(declarations.year, k.year)),
-				),
-			),
-		);
-
+	const rows = await fetchFilesByDeclaration(keys, jointEvaluationFiles);
 	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
 }
 
