@@ -32,6 +32,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		return (
 			<Step1Opinions
 				compliancePath={declarationData.declaration.compliancePath}
+				declarationYear={declarationData.declaration.year}
 				email={session?.user?.email ?? undefined}
 				hasSecondDeclaration={hasSecondDeclaration}
 				initialData={initialData}
@@ -48,6 +49,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 			declarationData.declaration.secondDeclarationStatus === "submitted";
 		return (
 			<Step2Upload
+				declarationYear={declarationData.declaration.year}
 				existingFiles={files}
 				hasSecondDeclaration={hasSecondDeclaration}
 			/>

@@ -39,6 +39,7 @@ import { TransmittedPdfDocument } from "../TransmittedPdfDocument";
 const transmittedPdfData: TransmittedPdfData = {
 	companyName: "Acme Corp",
 	siren: "123456789",
+	dataYear: 2024,
 	year: 2025,
 	generatedAt: "10 mars 2026",
 	opinions: [
@@ -87,7 +88,7 @@ describe("TransmittedPdfDocument", () => {
 		expect(
 			screen.getByText("Récapitulatif des éléments transmis 2026"),
 		).toBeInTheDocument();
-		expect(screen.getByText("Au titre des données 2025")).toBeInTheDocument();
+		expect(screen.getByText("Au titre des données 2024")).toBeInTheDocument();
 		expect(screen.getByText("Acme Corp — SIREN 123456789")).toBeInTheDocument();
 	});
 
@@ -128,6 +129,7 @@ describe("TransmittedPdfDocument", () => {
 		const emptyData: TransmittedPdfData = {
 			companyName: "Empty Corp",
 			siren: "987654321",
+			dataYear: 2024,
 			year: 2025,
 			generatedAt: "15 mars 2026",
 			opinions: [],

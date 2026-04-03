@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { getCurrentYear, normalizeDecimalInput } from "~/modules/domain";
+import { normalizeDecimalInput } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep2Schema } from "../schemas";
@@ -24,11 +24,16 @@ import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapField, Step2Data } from "../types";
 
 type Step2PayGapProps = {
+	declarationYear: number;
 	initialData: Step2Data;
 	gipPrefillData?: GipPrefillData;
 };
 
-export function Step2PayGap({ initialData, gipPrefillData }: Step2PayGapProps) {
+export function Step2PayGap({
+	declarationYear,
+	initialData,
+	gipPrefillData,
+}: Step2PayGapProps) {
 	const router = useRouter();
 
 	const hasSavedData = Object.values(initialData).some((v) => v !== "");
@@ -47,8 +52,6 @@ export function Step2PayGap({ initialData, gipPrefillData }: Step2PayGapProps) {
 
 	const [saved, setSaved] = useState(hasInitialData);
 	const [validationError, setValidationError] = useState<string | null>(null);
-
-	const currentYear = getCurrentYear();
 
 	const mutation = api.declaration.updateStep2.useMutation({
 		onSuccess: () => router.push("/declaration-remuneration/etape/3"),
@@ -90,7 +93,7 @@ export function Step2PayGap({ initialData, gipPrefillData }: Step2PayGapProps) {
 				saved={saved}
 				title={
 					<h1 className="fr-h4 fr-mb-0">
-						Déclaration des indicateurs de rémunération {currentYear}
+						Déclaration des indicateurs de rémunération {declarationYear}
 					</h1>
 				}
 			/>

@@ -14,11 +14,13 @@ import formStyles from "./shared/formActions.module.scss";
 import { MAX_CSE_FILES, type UploadedFile } from "./types";
 
 type Props = {
+	declarationYear: number;
 	hasSecondDeclaration?: boolean;
 	existingFiles?: UploadedFile[];
 };
 
 export function Step2Upload({
+	declarationYear,
 	hasSecondDeclaration = true,
 	existingFiles = [],
 }: Props) {
@@ -132,6 +134,7 @@ export function Step2Upload({
 			</form>
 
 			<SubmitConfirmationModal
+				declarationYear={declarationYear}
 				modalRef={modalRef}
 				onClose={closeModal}
 				onSubmit={handleConfirm}

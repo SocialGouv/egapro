@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { Controller } from "react-hook-form";
 
-import { getCseYear } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
@@ -29,6 +28,7 @@ type Props = {
 		secondDeclGapOpinion: OpinionType | null;
 		secondDeclGapDate: string | null;
 	};
+	declarationYear: number;
 	email?: string;
 	compliancePath?: string | null;
 	hasSecondDeclaration?: boolean;
@@ -36,6 +36,7 @@ type Props = {
 
 export function Step1Opinions({
 	initialData,
+	declarationYear,
 	email,
 	compliancePath,
 	hasSecondDeclaration = true,
@@ -121,7 +122,7 @@ export function Step1Opinions({
 
 			{isJointEvaluation && (
 				<SubmissionBanner
-					deadline={`1er février ${getCseYear()}`}
+					deadline={`1er février ${declarationYear}`}
 					email={email ?? "adresse@exemple.fr"}
 				/>
 			)}
