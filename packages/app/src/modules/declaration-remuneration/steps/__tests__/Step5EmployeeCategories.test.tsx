@@ -146,7 +146,9 @@ describe("Step5EmployeeCategories", () => {
 		await user.click(deleteButtons[0] as HTMLElement);
 
 		// Confirm deletion in dialog
-		const dialog = document.querySelector("dialog") as HTMLElement;
+		const dialog = document.querySelector(
+			'dialog[aria-labelledby="delete-category-title"]',
+		) as HTMLElement;
 		expect(dialog).toBeInTheDocument();
 		const dialogScope = within(dialog);
 		await user.click(dialogScope.getByText("Supprimer"));

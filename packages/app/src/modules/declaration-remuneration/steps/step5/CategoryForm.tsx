@@ -21,6 +21,7 @@ import type {
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./CategoryDataTable";
+import { CategoryImportExport } from "./CategoryImportExport";
 import {
 	createEmptyCategory,
 	type EmployeeCategory,
@@ -153,6 +154,11 @@ export function CategoryForm({
 		const empty = createEmptyCategory(nextId());
 		const formEntry = toFormValues([empty])[0];
 		if (formEntry) append(formEntry);
+		setSaved(false);
+	}
+
+	function handleImportCategories(imported: EmployeeCategory[]) {
+		form.setValue("categories", toFormValues(imported));
 		setSaved(false);
 	}
 
@@ -314,6 +320,18 @@ export function CategoryForm({
 				</div>
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 			</div>
+
+			{!readOnlyNameDetail && (
+				<CategoryImportExport
+					categories={
+						categories.map((cat, i) => ({
+							id: i,
+							...cat,
+						})) as EmployeeCategory[]
+					}
+					onImport={handleImportCategories}
+				/>
+			)}
 
 			<div className="fr-accordions-group" data-fr-group="false">
 				{fields.map((field, index) => {
