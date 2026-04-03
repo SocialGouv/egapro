@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Start services
         run: docker compose up -d
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
