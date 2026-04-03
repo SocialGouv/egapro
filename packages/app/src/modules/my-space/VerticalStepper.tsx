@@ -1,3 +1,5 @@
+import type { CampaignDeadlines } from "~/modules/domain";
+import { formatLongDate } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 
@@ -21,6 +23,7 @@ export function getStepStatuses(
 }
 
 export function VerticalStepper({
+	campaignDeadlines,
 	compliancePath,
 	secondDeclarationSubmitted,
 	siren,
@@ -30,6 +33,7 @@ export function VerticalStepper({
 	variant,
 	year,
 }: {
+	campaignDeadlines: CampaignDeadlines;
 	compliancePath: string | null;
 	secondDeclarationSubmitted: boolean;
 	siren: string;
@@ -44,6 +48,7 @@ export function VerticalStepper({
 			<div className={styles.stepRow}>
 				<StepCircle number={1} status={step1} />
 				<Step1Content
+					campaignDeadlines={campaignDeadlines}
 					siren={siren}
 					status={step1}
 					variant={variant}
@@ -54,17 +59,17 @@ export function VerticalStepper({
 			<div className={styles.stepRow}>
 				<StepCircle number={2} status={step2} />
 				<Step2Content
+					campaignDeadlines={campaignDeadlines}
 					compliancePath={compliancePath}
 					secondDeclarationSubmitted={secondDeclarationSubmitted}
 					siren={siren}
 					variant={variant}
-					year={year}
 				/>
 			</div>
 			<div className={styles.stepLine} />
 			<div className={styles.stepRow}>
 				<StepCircle number={3} status={step3} />
-				<Step3Content variant={variant} year={year} />
+				<Step3Content campaignDeadlines={campaignDeadlines} variant={variant} />
 			</div>
 		</div>
 	);
@@ -104,11 +109,13 @@ function StepCircle({
 }
 
 function Step1Content({
+	campaignDeadlines,
 	siren,
 	status,
 	variant,
 	year,
 }: {
+	campaignDeadlines: CampaignDeadlines;
 	siren: string;
 	status: StepStatus;
 	variant: PanelVariant;
@@ -140,7 +147,7 @@ function Step1Content({
 						Indicateurs de rémunération par catégorie de salariés à remplir
 					</p>
 				</div>
-				<DeadlineRow date={`1er juin ${year}`} />
+				<DeadlineRow date={campaignDeadlines.decl1ModificationDeadline} />
 			</div>
 		);
 	}
@@ -155,7 +162,7 @@ function Step1Content({
 					<TransmittedRow
 						downloadHref="/api/declaration-pdf"
 						label="Votre déclaration a été transmise"
-						modifiableUntil={`1er juin ${year}`}
+						modifiableUntil={campaignDeadlines.decl1ModificationDeadline}
 						modifyHref={`/declaration-remuneration/etape/1?siren=${siren}`}
 					/>
 				)}
@@ -171,17 +178,17 @@ function Step1Content({
 }
 
 function Step2Content({
+	campaignDeadlines,
 	compliancePath,
 	secondDeclarationSubmitted,
 	siren,
 	variant,
-	year,
 }: {
+	campaignDeadlines: CampaignDeadlines;
 	compliancePath: string | null;
 	secondDeclarationSubmitted: boolean;
 	siren: string;
 	variant: PanelVariant;
-	year: number;
 }) {
 	const title = (
 		<p className="fr-text--bold fr-mb-0">
@@ -206,7 +213,7 @@ function Step2Content({
 					<span aria-hidden="true" className={styles.bullet} />
 					<p className="fr-mb-0">Actions correctives et seconde déclaration</p>
 				</div>
-				<DeadlineRow date={`1er décembre ${year}`} />
+				<DeadlineRow date={campaignDeadlines.decl2ModificationDeadline} />
 			</div>
 		);
 	}
@@ -218,14 +225,14 @@ function Step2Content({
 				<TransmittedRow
 					downloadHref="/api/declaration-pdf?type=correction"
 					label="Votre seconde déclaration a été transmise"
-					modifiableUntil={`1er décembre ${year}`}
+					modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
 					modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
 				/>
 				<div className={styles.bulletItem}>
 					<span aria-hidden="true" className={styles.bullet} />
 					<p className="fr-mb-0">Évaluation conjointe des rémunérations</p>
 				</div>
-				<DeadlineRow date={`1er février ${year + 1}`} />
+				<DeadlineRow date={campaignDeadlines.decl2JointEvaluationDeadline} />
 			</div>
 		);
 	}
@@ -238,14 +245,14 @@ function Step2Content({
 				<TransmittedRow
 					downloadHref="/api/declaration-pdf?type=correction"
 					label="Votre seconde déclaration a été transmise"
-					modifiableUntil={`1er décembre ${year}`}
+					modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
 					modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
 				/>
 			)}
 			{compliancePath === "joint_evaluation" && (
 				<TransmittedRow
 					label="Votre rapport de l'évaluation conjointe a été transmis"
-					modifiableUntil={`1er décembre ${year}`}
+					modifiableUntil={campaignDeadlines.decl2JointEvaluationDeadline}
 					modifyHref={`/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=${siren}`}
 				/>
 			)}
@@ -260,11 +267,11 @@ function Step2Content({
 }
 
 function Step3Content({
+	campaignDeadlines,
 	variant,
-	year,
 }: {
+	campaignDeadlines: CampaignDeadlines;
 	variant: PanelVariant;
-	year: number;
 }) {
 	const title = (
 		<p className="fr-text--bold fr-mb-0">Déposer le ou les avis du CSE</p>
@@ -284,7 +291,7 @@ function Step3Content({
 	return (
 		<div className={styles.stepContent}>
 			{title}
-			<DeadlineRow date={`1er février ${year + 1}`} />
+			<DeadlineRow date={campaignDeadlines.decl2JointEvaluationDeadline} />
 		</div>
 	);
 }
@@ -296,7 +303,7 @@ function TransmittedRow({
 	downloadHref,
 }: {
 	label: string;
-	modifiableUntil: string;
+	modifiableUntil: Date;
 	modifyHref: string;
 	downloadHref?: string;
 }) {
@@ -309,7 +316,7 @@ function TransmittedRow({
 			<div className={styles.transmittedInfo}>
 				<p className="fr-mb-0">{label}</p>
 				<p className="fr-text-mention--grey fr-mb-0">
-					Modifiable jusqu'au {modifiableUntil}
+					Modifiable jusqu'au {formatLongDate(modifiableUntil)}
 				</p>
 			</div>
 			<div className={styles.transmittedActions}>
@@ -331,12 +338,12 @@ function TransmittedRow({
 	);
 }
 
-function DeadlineRow({ date }: { date: string }) {
+function DeadlineRow({ date }: { date: Date }) {
 	return (
 		<div className={styles.deadlineRow}>
 			<span aria-hidden="true" className="fr-icon-calendar-line fr-icon--sm" />
 			<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
-				Échéance : {date}
+				Échéance : {formatLongDate(date)}
 			</p>
 		</div>
 	);

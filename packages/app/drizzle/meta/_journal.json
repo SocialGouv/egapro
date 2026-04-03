@@ -148,6 +148,13 @@
 			"when": 1775200000000,
 			"tag": "0020_clean-user-columns",
 			"breakpoints": true
+		},
+		{
+			"idx": 21,
+			"version": "7",
+			"when": 1775400000000,
+			"tag": "0021_add-campaign-deadlines",
+			"breakpoints": true
 		}
 	]
 }

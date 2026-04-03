@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 
 import styles from "./CompliancePathOption.module.scss";
@@ -12,7 +13,7 @@ type Props = {
 	onChange: (value: string) => void;
 	title: string;
 	children: ReactNode;
-	deadline: string;
+	deadline: Date;
 	learnMoreHref?: string;
 	learnMoreLabel?: string;
 	disabled?: boolean;
@@ -54,7 +55,7 @@ export function CompliancePathOption({
 						aria-hidden="true"
 						className="fr-icon-calendar-line fr-icon--sm fr-mr-1w"
 					/>
-					Échéance au {deadline}
+					Échéance au {formatLongDate(deadline)}
 				</p>
 				{learnMoreHref && (
 					<a

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { hasGapsAboveThreshold } from "~/modules/domain";
 import { auth } from "~/server/auth";
+import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
 import { getPostComplianceDestination } from "../shared/complianceNavigation";
 import { CompliancePathChoice } from "./CompliancePathChoice";
@@ -64,10 +65,12 @@ export async function CompliancePathPage() {
 
 	const email = session?.user?.email ?? "";
 	const currentYear = data.declaration.year;
+	const campaignDeadlines = await getCampaignDeadlines(currentYear);
 
 	return (
 		<HydrateClient>
 			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
 				currentYear={currentYear}
 				email={email}
 				hasCse={company.hasCse}

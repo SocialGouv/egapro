@@ -1,20 +1,19 @@
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
+import { formatLongDate } from "~/modules/domain";
 import { BASE_PATH } from "./constants";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
-	currentYear: number;
 	declarationDate: string;
+	modificationDeadline: Date;
 };
 
 export function SecondDeclarationStep1Info({
-	currentYear,
 	declarationDate,
+	modificationDeadline,
 }: Props) {
-	const deadline = `1\u1D49\u02B3 décembre ${currentYear}`;
-
 	return (
 		<div className={common.flexColumnGap2}>
 			<div className={common.flexBetween}>
@@ -36,7 +35,10 @@ export function SecondDeclarationStep1Info({
 				.
 			</p>
 
-			<DeadlineBlock deadline={deadline} declarationDate={declarationDate} />
+			<DeadlineBlock
+				deadline={modificationDeadline}
+				declarationDate={declarationDate}
+			/>
 
 			<ObligationsCallout />
 
@@ -55,13 +57,13 @@ function DeadlineBlock({
 	deadline,
 	declarationDate,
 }: {
-	deadline: string;
+	deadline: Date;
 	declarationDate: string;
 }) {
 	return (
 		<div className="fr-pl-3w">
 			<p className="fr-mb-0 fr-text--sm fr-text--mention-grey">Date limite</p>
-			<p className="fr-h5 fr-mb-0">{deadline}</p>
+			<p className="fr-h5 fr-mb-0">{formatLongDate(deadline)}</p>
 			<p className="fr-mb-0 fr-text--sm fr-text--mention-grey">
 				Déclaration effectuée le {declarationDate}
 			</p>

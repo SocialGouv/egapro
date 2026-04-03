@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 
+import type { CampaignDeadlines } from "~/modules/domain";
 import styles from "./DeclarationProcessPanel.module.scss";
 import { getStepStatuses, VerticalStepper } from "./VerticalStepper";
 
@@ -17,6 +18,7 @@ export type PanelVariant =
 	| "closed";
 
 type Props = {
+	campaignDeadlines: CampaignDeadlines;
 	year: number;
 	lastActionDate: string | null;
 	variant: PanelVariant;
@@ -27,6 +29,7 @@ type Props = {
 };
 
 export function DeclarationProcessPanel({
+	campaignDeadlines,
 	year,
 	lastActionDate,
 	variant,
@@ -65,6 +68,7 @@ export function DeclarationProcessPanel({
 							<StartAlert />
 						)}
 						<VerticalStepper
+							campaignDeadlines={campaignDeadlines}
 							compliancePath={compliancePath}
 							secondDeclarationSubmitted={
 								secondDeclarationStatus === "submitted"

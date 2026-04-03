@@ -39,6 +39,15 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+vi.mock("~/server/db/getCampaignDeadlines", async () => {
+	const { getDefaultCampaignDeadlines } = await import("~/modules/domain");
+	return {
+		getCampaignDeadlines: vi
+			.fn()
+			.mockResolvedValue(getDefaultCampaignDeadlines(2026)),
+	};
+});
+
 vi.mock("~/trpc/server", () => ({
 	api: {
 		company: {

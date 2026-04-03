@@ -16,6 +16,7 @@ import formStyles from "./shared/formActions.module.scss";
 import type { OpinionType } from "./types";
 
 type Props = {
+	cseDeadline: Date;
 	initialData?: {
 		firstDeclAccuracyOpinion: OpinionType | null;
 		firstDeclAccuracyDate: string | null;
@@ -28,15 +29,14 @@ type Props = {
 		secondDeclGapOpinion: OpinionType | null;
 		secondDeclGapDate: string | null;
 	};
-	declarationYear: number;
 	email?: string;
 	compliancePath?: string | null;
 	hasSecondDeclaration?: boolean;
 };
 
 export function Step1Opinions({
+	cseDeadline,
 	initialData,
-	declarationYear,
 	email,
 	compliancePath,
 	hasSecondDeclaration = true,
@@ -122,7 +122,7 @@ export function Step1Opinions({
 
 			{isJointEvaluation && (
 				<SubmissionBanner
-					deadline={`1er février ${declarationYear}`}
+					deadline={cseDeadline}
 					email={email ?? "adresse@exemple.fr"}
 				/>
 			)}
