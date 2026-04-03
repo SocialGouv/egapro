@@ -56,7 +56,7 @@ describe("buildTransmittedPdfData", () => {
 	it("returns assembled PDF data with declaration lookup", async () => {
 		setupMockDb(
 			{ name: "ACME Corp", siren: "123456789" },
-			{ id: "decl-1" },
+			{ id: "decl-1", year: 2025 },
 			[
 				{
 					declarationNumber: 1,
@@ -81,6 +81,8 @@ describe("buildTransmittedPdfData", () => {
 
 		expect(result.companyName).toBe("ACME Corp");
 		expect(result.siren).toBe("123456789");
+		expect(result.year).toBe(2025);
+		expect(result.dataYear).toBe(2024);
 		expect(result.opinions).toHaveLength(1);
 		expect(result.cseFiles).toHaveLength(1);
 		expect(result.jointEvaluationFile).not.toBeNull();
@@ -88,7 +90,7 @@ describe("buildTransmittedPdfData", () => {
 	});
 
 	it("throws when company is not found", async () => {
-		setupMockDb(null, { id: "decl-1" });
+		setupMockDb(null, { id: "decl-1", year: 2025 });
 
 		const { buildTransmittedPdfData } = await import(
 			"../buildTransmittedPdfData"
@@ -114,7 +116,7 @@ describe("buildTransmittedPdfData", () => {
 	it("returns null jointEvaluationFile when none exists", async () => {
 		setupMockDb(
 			{ name: "ACME", siren: "123456789" },
-			{ id: "decl-1" },
+			{ id: "decl-1", year: 2025 },
 			[],
 			[],
 			[],
