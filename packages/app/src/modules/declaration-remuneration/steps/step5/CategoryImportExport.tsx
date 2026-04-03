@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { getDsfrModal } from "~/modules/shared";
 import {
 	generateTemplate,
 	type ImportError,
@@ -27,8 +28,6 @@ export function CategoryImportExport({
 	const [importErrors, setImportErrors] = useState<ImportError[]>([]);
 	const [isDownloading, setIsDownloading] = useState(false);
 	const [isImporting, setIsImporting] = useState(false);
-	const [importSuccess, setImportSuccess] = useState(false);
-
 	const exportModalId = `${baseId}-export-modal`;
 	const exportTitleId = `${baseId}-export-title`;
 	const importModalId = `${baseId}-import-modal`;
@@ -60,14 +59,16 @@ export function CategoryImportExport({
 		if (!file) return;
 
 		setImportErrors([]);
-		setImportSuccess(false);
 		setIsImporting(true);
 
 		try {
 			const result = await parseImportFile(file);
 			if (result.ok) {
 				onImport(result.categories);
-				setImportSuccess(true);
+				const modal = document.getElementById(importModalId);
+				if (modal) {
+					getDsfrModal(modal)?.conceal();
+				}
 			} else {
 				setImportErrors(result.errors);
 			}
@@ -227,11 +228,6 @@ export function CategoryImportExport({
 															{error.message}
 														</p>
 													))}
-													{importSuccess && (
-														<p className="fr-message fr-message--valid">
-															Données importées avec succès.
-														</p>
-													)}
 												</div>
 											</div>
 										</div>
