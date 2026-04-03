@@ -3,11 +3,13 @@ import { describe, expect, it } from "vitest";
 import { SecondDeclarationStep1Info } from "../SecondDeclarationStep1Info";
 
 describe("SecondDeclarationStep1Info", () => {
+	const modificationDeadline = new Date("2027-12-01T00:00:00");
+
 	it("renders the main title", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
-				modificationDeadline="2027-12-01"
+				modificationDeadline={modificationDeadline}
 			/>,
 		);
 		expect(
@@ -21,7 +23,7 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
-				modificationDeadline="2027-12-01"
+				modificationDeadline={modificationDeadline}
 			/>,
 		);
 		expect(screen.getByText("Étape 1 sur 3")).toBeInTheDocument();
@@ -34,17 +36,17 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
-				modificationDeadline="2027-12-01"
+				modificationDeadline={modificationDeadline}
 			/>,
 		);
-		expect(screen.getByText(/1\u1D49\u02B3 décembre 2027/)).toBeInTheDocument();
+		expect(screen.getByText(/1 décembre 2027/)).toBeInTheDocument();
 	});
 
 	it("displays the declaration date", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
-				modificationDeadline="2027-12-01"
+				modificationDeadline={modificationDeadline}
 			/>,
 		);
 		expect(
@@ -56,7 +58,7 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
-				modificationDeadline="2027-12-01"
+				modificationDeadline={modificationDeadline}
 			/>,
 		);
 		expect(
@@ -71,7 +73,7 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
-				modificationDeadline="2027-12-01"
+				modificationDeadline={modificationDeadline}
 			/>,
 		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(

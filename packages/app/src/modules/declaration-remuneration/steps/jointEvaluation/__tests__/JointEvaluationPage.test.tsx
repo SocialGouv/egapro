@@ -32,12 +32,12 @@ vi.mock("../JointEvaluationForm", () => ({
 		jointEvaluationDeadline,
 		declarationDate,
 	}: {
-		jointEvaluationDeadline: string;
+		jointEvaluationDeadline: Date;
 		declarationDate: string;
 	}) => (
 		<div>
 			<span data-testid="joint-evaluation-deadline">
-				{jointEvaluationDeadline}
+				{jointEvaluationDeadline.toLocaleDateString("fr-FR")}
 			</span>
 			<span data-testid="declaration-date">{declarationDate}</span>
 		</div>
@@ -80,7 +80,7 @@ describe("JointEvaluationPage", () => {
 		render(page);
 
 		expect(screen.getByTestId("joint-evaluation-deadline")).toHaveTextContent(
-			"2025-08-01",
+			new Date("2025-08-01T00:00:00").toLocaleDateString("fr-FR"),
 		);
 	});
 
