@@ -1,18 +1,14 @@
-import { and, eq, inArray, or } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import type { DB } from "~/server/db";
-import {
-	companies,
-	cseOpinions,
-	declarations,
-	employeeCategories,
-	jobCategories,
-	users,
-} from "~/server/db/schema";
-import type { CseOpinionRow } from "./mapIndicators";
+import { companies, declarations, users } from "~/server/db/schema";
 import { mapCseOpinions } from "./mapIndicators";
-import { indicatorColumns } from "./queries";
-import type { ExportRow, IndicatorGRow } from "./types";
+import {
+	fetchCseOpinionsByDeclaration,
+	getDeclarationsWithIndicatorG,
+	indicatorColumns,
+} from "./queries";
+import type { ExportRow } from "./types";
 
 /**
  * Query all submitted declarations for a given year
@@ -63,12 +59,10 @@ export async function buildExportRows(
 
 	const [hasIndicatorG, cseMap] = await Promise.all([
 		getDeclarationsWithIndicatorG(db, declarationIds),
-		getCseOpinionsByDeclaration(db, declarationIds),
+		fetchCseOpinionsByDeclaration(declarationIds, db),
 	]);
 
 	return rows.map((row) => {
-		const key = `${row.siren}-${row.year}`;
-
 		return {
 			siren: row.siren,
 			companyName: row.companyName,
@@ -149,89 +143,4 @@ export async function buildExportRows(
 			...mapCseOpinions(cseMap.get(row.declarationId) ?? []),
 		};
 	});
-}
-
-/**
- * Query all indicator G data (job categories + employee categories)
- * for submitted declarations of a given year.
- */
-export async function buildIndicatorGRows(
-	db: DB,
-	year: number,
-): Promise<IndicatorGRow[]> {
-	const rows = await db
-		.select({
-			siren: declarations.siren,
-			companyName: companies.name,
-			year: declarations.year,
-			declarationType: employeeCategories.declarationType,
-			categoryIndex: jobCategories.categoryIndex,
-			categoryName: jobCategories.name,
-			categoryDetail: jobCategories.detail,
-			categorySource: jobCategories.source,
-			womenCount: employeeCategories.womenCount,
-			menCount: employeeCategories.menCount,
-			annualBaseWomen: employeeCategories.annualBaseWomen,
-			annualBaseMen: employeeCategories.annualBaseMen,
-			annualVariableWomen: employeeCategories.annualVariableWomen,
-			annualVariableMen: employeeCategories.annualVariableMen,
-			hourlyBaseWomen: employeeCategories.hourlyBaseWomen,
-			hourlyBaseMen: employeeCategories.hourlyBaseMen,
-			hourlyVariableWomen: employeeCategories.hourlyVariableWomen,
-			hourlyVariableMen: employeeCategories.hourlyVariableMen,
-		})
-		.from(declarations)
-		.innerJoin(companies, eq(declarations.siren, companies.siren))
-		.innerJoin(jobCategories, eq(jobCategories.declarationId, declarations.id))
-		.innerJoin(
-			employeeCategories,
-			eq(employeeCategories.jobCategoryId, jobCategories.id),
-		)
-		.where(
-			and(eq(declarations.status, "submitted"), eq(declarations.year, year)),
-		);
-
-	return rows;
-}
-
-// ── DB queries ───────────────────────────────────────────────────────
-
-async function getDeclarationsWithIndicatorG(
-	db: DB,
-	declarationIds: string[],
-): Promise<Set<string>> {
-	if (declarationIds.length === 0) return new Set();
-
-	const rows = await db
-		.selectDistinct({ declarationId: jobCategories.declarationId })
-		.from(jobCategories)
-		.where(inArray(jobCategories.declarationId, declarationIds));
-
-	return new Set(rows.map((r) => r.declarationId));
-}
-
-async function getCseOpinionsByDeclaration(
-	db: DB,
-	declarationIds: string[],
-): Promise<Map<string, CseOpinionRow[]>> {
-	if (declarationIds.length === 0) return new Map();
-
-	const rows = await db
-		.select({
-			declarationId: cseOpinions.declarationId,
-			type: cseOpinions.type,
-			opinion: cseOpinions.opinion,
-			opinionDate: cseOpinions.opinionDate,
-		})
-		.from(cseOpinions)
-		.where(inArray(cseOpinions.declarationId, declarationIds));
-
-	const map = new Map<string, CseOpinionRow[]>();
-	for (const row of rows) {
-		const key = row.declarationId;
-		const existing = map.get(key) ?? [];
-		existing.push(row);
-		map.set(key, existing);
-	}
-	return map;
 }
