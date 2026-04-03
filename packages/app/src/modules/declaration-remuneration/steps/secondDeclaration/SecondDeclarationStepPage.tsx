@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
@@ -58,6 +59,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 		return (
 			<HydrateClient>
 				<SecondDeclarationStep2Form
+					declarationYear={currentYear}
 					initialEndDate={
 						data.declaration.secondDeclReferencePeriodEnd ?? undefined
 					}
@@ -81,6 +83,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 	return (
 		<HydrateClient>
 			<SecondDeclarationStep3Review
+				declarationYear={currentYear}
 				hasCse={company.hasCse}
 				secondDeclarationCategories={reviewCategories}
 				siren={data.declaration.siren}

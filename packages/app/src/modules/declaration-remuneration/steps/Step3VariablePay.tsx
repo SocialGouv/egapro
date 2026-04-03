@@ -2,11 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import {
-	computeProportion,
-	getCurrentYear,
-	normalizeDecimalInput,
-} from "~/modules/domain";
+import { computeProportion, normalizeDecimalInput } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep3Schema } from "../schemas";
@@ -32,6 +28,7 @@ import type { PayGapField, Step3Data } from "../types";
 import stepStyles from "./Step3VariablePay.module.scss";
 
 type Step3VariablePayProps = {
+	declarationYear: number;
 	initialData: Step3Data;
 	gipPrefillData?: GipPrefillData;
 	maxWomen?: number;
@@ -39,6 +36,7 @@ type Step3VariablePayProps = {
 };
 
 export function Step3VariablePay({
+	declarationYear,
 	initialData,
 	gipPrefillData,
 	maxWomen,
@@ -67,8 +65,6 @@ export function Step3VariablePay({
 	>(null);
 	const [saved, setSaved] = useState(hasInitialData);
 	const [validationError, setValidationError] = useState<string | null>(null);
-
-	const currentYear = getCurrentYear();
 
 	const mutation = api.declaration.updateStep3.useMutation({
 		onSuccess: () => router.push("/declaration-remuneration/etape/4"),
@@ -137,7 +133,7 @@ export function Step3VariablePay({
 				saved={saved}
 				title={
 					<h1 className="fr-h4 fr-mb-0">
-						Déclaration des indicateurs de rémunération {currentYear}
+						Déclaration des indicateurs de rémunération {declarationYear}
 					</h1>
 				}
 			/>

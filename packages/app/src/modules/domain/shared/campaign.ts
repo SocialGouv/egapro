@@ -20,9 +20,9 @@ export function getCurrentYear(): number {
 	return new Date().getFullYear();
 }
 
-/** Returns the CSE opinion year (next calendar year). */
-export function getCseYear(): number {
-	return new Date().getFullYear() + 1;
+/** Returns the workforce reference year (previous calendar year, as INSEE publishes N-1 data). */
+export function getWorkforceYear(): number {
+	return new Date().getFullYear() - 1;
 }
 
 /** Returns the declaration modification deadline for a given year. */

@@ -3,11 +3,11 @@
 // Campaign
 export {
 	formatFrenchDate,
-	getCseYear,
 	getCurrentYear,
 	getDeclarationDeadline,
 	getDefaultCampaignDeadlines,
 	getSecondDeclarationDeadline,
+	getWorkforceYear,
 } from "./shared/campaign";
 // Company size
 export { classifyCompanySize, isCseRequired } from "./shared/companySize";

@@ -5,6 +5,7 @@ import { SubmitConfirmationModal } from "../components/SubmitConfirmationModal";
 
 function renderOpenModal(props = {}) {
 	const defaultProps = {
+		declarationYear: 2025,
 		modalRef: { current: null },
 		onClose: vi.fn(),
 		onSubmit: vi.fn(),

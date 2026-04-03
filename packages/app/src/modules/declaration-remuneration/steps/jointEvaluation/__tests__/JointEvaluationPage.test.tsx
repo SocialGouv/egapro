@@ -48,9 +48,16 @@ import { redirect } from "next/navigation";
 import { api } from "~/trpc/server";
 import { JointEvaluationPage } from "../JointEvaluationPage";
 
+const DECLARATION_YEAR = 2025;
+
 function mockDeclaration(compliancePath: string, updatedAt: Date | null) {
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
-		declaration: { compliancePath, updatedAt, year: 2025, siren: "123456789" },
+		declaration: {
+			compliancePath,
+			updatedAt,
+			siren: "123456789",
+			year: DECLARATION_YEAR,
+		},
 	} as never);
 	vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
 }

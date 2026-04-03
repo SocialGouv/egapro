@@ -53,6 +53,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 			declarationData.declaration.secondDeclarationStatus === "submitted";
 		return (
 			<Step2Upload
+				declarationYear={declarationData.declaration.year}
 				existingFiles={files}
 				hasSecondDeclaration={hasSecondDeclaration}
 			/>

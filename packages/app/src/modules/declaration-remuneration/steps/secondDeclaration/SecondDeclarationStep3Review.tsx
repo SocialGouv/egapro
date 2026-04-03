@@ -9,7 +9,7 @@ import { NextStepsBox } from "~/modules/declaration-remuneration/shared/NextStep
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { SubmitDeclarationModal } from "~/modules/declaration-remuneration/shared/SubmitDeclarationModal";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
-import { GAP_ALERT_THRESHOLD, getCurrentYear } from "~/modules/domain";
+import { GAP_ALERT_THRESHOLD } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import stepStyles from "../Step6Review.module.scss";
@@ -20,19 +20,20 @@ import { BASE_PATH } from "./constants";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
+	declarationYear: number;
 	hasCse: boolean | null;
 	secondDeclarationCategories: EmployeeCategoryRow[];
 	siren: string;
 };
 
 export function SecondDeclarationStep3Review({
+	declarationYear,
 	hasCse,
 	secondDeclarationCategories,
 	siren,
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
-	const currentYear = getCurrentYear();
 
 	const parsed = parseEmployeeCategories(secondDeclarationCategories);
 	const gapsExist = parsed.some(
@@ -154,7 +155,7 @@ export function SecondDeclarationStep3Review({
 				modalRef={modalRef}
 				onClose={closeModal}
 				onSubmit={() => mutation.mutate()}
-				year={currentYear}
+				year={declarationYear}
 			/>
 		</form>
 	);

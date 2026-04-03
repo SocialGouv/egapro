@@ -1,4 +1,4 @@
-import { getCurrentYear } from "~/modules/domain";
+import { getWorkforceYear } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
 
@@ -18,8 +18,6 @@ export function CompanyBanner({
 	company,
 	currentPageLabel,
 }: CompanyBannerProps) {
-	const currentYear = getCurrentYear();
-
 	return (
 		<div className={`fr-py-3w ${styles.banner}`}>
 			<div className="fr-container">
@@ -42,7 +40,7 @@ export function CompanyBanner({
 					{company.workforce !== null && (
 						<div className="fr-col-auto">
 							<p className="fr-mb-0 fr-text--sm">
-								Effectif annuel moyen en {currentYear - 1} :{" "}
+								Effectif annuel moyen en {getWorkforceYear()} :{" "}
 								<strong>{company.workforce}</strong>
 							</p>
 						</div>

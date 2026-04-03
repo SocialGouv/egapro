@@ -84,8 +84,8 @@ export async function CompliancePathPage() {
 				isSecondRound={state.type === "second_round"}
 				pdfDownloadHref={
 					state.type === "second_round"
-						? "/api/declaration-pdf?type=correction"
-						: "/api/declaration-pdf"
+						? `/api/declaration-pdf?type=correction&year=${currentYear}`
+						: `/api/declaration-pdf?year=${currentYear}`
 				}
 			/>
 		</HydrateClient>
