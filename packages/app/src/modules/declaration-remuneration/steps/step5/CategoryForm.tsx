@@ -21,6 +21,7 @@ import type {
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./CategoryDataTable";
+import { CategoryImportExport } from "./CategoryImportExport";
 import {
 	createEmptyCategory,
 	type EmployeeCategory,
@@ -76,6 +77,7 @@ type Props = {
 	readOnlyNameDetail?: boolean;
 	referencePeriodPicker?: ReactNode;
 	descriptionText?: string;
+	siren?: string;
 };
 
 export function CategoryForm({
@@ -96,6 +98,7 @@ export function CategoryForm({
 	readOnlyNameDetail = false,
 	referencePeriodPicker,
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
+	siren,
 }: Props) {
 	const baseId = useId();
 	const nextId = useRef(createIdGenerator()).current;
@@ -153,6 +156,11 @@ export function CategoryForm({
 		const empty = createEmptyCategory(nextId());
 		const formEntry = toFormValues([empty])[0];
 		if (formEntry) append(formEntry);
+		setSaved(false);
+	}
+
+	function handleImportCategories(imported: EmployeeCategory[]) {
+		form.setValue("categories", toFormValues(imported));
 		setSaved(false);
 	}
 
@@ -314,6 +322,20 @@ export function CategoryForm({
 				</div>
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 			</div>
+
+			{!readOnlyNameDetail && (
+				<CategoryImportExport
+					getCategories={() =>
+						form.getValues("categories").map((cat, i) => ({
+							id: i,
+							...cat,
+						}))
+					}
+					onImport={handleImportCategories}
+					siren={siren}
+					year={referenceYear + 1}
+				/>
+			)}
 
 			<div className="fr-accordions-group" data-fr-group="false">
 				{fields.map((field, index) => {
