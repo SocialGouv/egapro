@@ -76,7 +76,7 @@ export function SecondDeclarationStep2Form({
 					startDate={startDate}
 				/>
 			}
-			referenceYear={declarationYear}
+			referenceYear={declarationYear - 1}
 			stepper={<SecondDeclarationStepIndicator currentStep={2} />}
 			submitError={periodError || mutation.error?.message}
 			title={
