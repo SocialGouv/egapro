@@ -52,8 +52,16 @@ export async function generateTemplate(
 
 type TemplateRow = Record<TemplateKey, string | number>;
 
+type MinimalCategory = { name: string; detail: string };
+
+function isFullCategory(
+	cat: EmployeeCategory | MinimalCategory,
+): cat is EmployeeCategory {
+	return "womenCount" in cat;
+}
+
 function buildTemplateRows(categories: EmployeeCategory[]): TemplateRow[] {
-	const cats =
+	const cats: Array<EmployeeCategory | MinimalCategory> =
 		categories.length > 0 && categories.some((c) => c.name.trim())
 			? categories
 			: DEFAULT_CATEGORIES.map((name) => ({ name, detail: "" }));
@@ -61,7 +69,7 @@ function buildTemplateRows(categories: EmployeeCategory[]): TemplateRow[] {
 	return cats.map((cat) => {
 		const row: TemplateRow = {
 			name: cat.name,
-			detail: "detail" in cat ? cat.detail : "",
+			detail: cat.detail,
 			womenCount: "",
 			menCount: "",
 			annualBaseWomen: "",
@@ -74,18 +82,17 @@ function buildTemplateRows(categories: EmployeeCategory[]): TemplateRow[] {
 			hourlyVariableMen: "",
 		};
 
-		if ("womenCount" in cat) {
-			const full = cat as EmployeeCategory;
-			row.womenCount = full.womenCount;
-			row.menCount = full.menCount;
-			row.annualBaseWomen = full.annualBaseWomen;
-			row.annualBaseMen = full.annualBaseMen;
-			row.annualVariableWomen = full.annualVariableWomen;
-			row.annualVariableMen = full.annualVariableMen;
-			row.hourlyBaseWomen = full.hourlyBaseWomen;
-			row.hourlyBaseMen = full.hourlyBaseMen;
-			row.hourlyVariableWomen = full.hourlyVariableWomen;
-			row.hourlyVariableMen = full.hourlyVariableMen;
+		if (isFullCategory(cat)) {
+			row.womenCount = cat.womenCount;
+			row.menCount = cat.menCount;
+			row.annualBaseWomen = cat.annualBaseWomen;
+			row.annualBaseMen = cat.annualBaseMen;
+			row.annualVariableWomen = cat.annualVariableWomen;
+			row.annualVariableMen = cat.annualVariableMen;
+			row.hourlyBaseWomen = cat.hourlyBaseWomen;
+			row.hourlyBaseMen = cat.hourlyBaseMen;
+			row.hourlyVariableWomen = cat.hourlyVariableWomen;
+			row.hourlyVariableMen = cat.hourlyVariableMen;
 		}
 
 		return row;
@@ -138,14 +145,37 @@ function generateCsvBlob(rows: TemplateRow[]): Blob {
 /**
  * Parse an imported file (XLSX or CSV) and return categories for the form.
  */
-export async function parseImportFile(file: File): Promise<ImportResult> {
-	const extension = file.name.split(".").pop()?.toLowerCase();
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 
-	if (extension === "csv") {
+export async function parseImportFile(file: File): Promise<ImportResult> {
+	if (file.size > MAX_FILE_SIZE_BYTES) {
+		return {
+			ok: false,
+			errors: [
+				{
+					type: "invalid-value",
+					message:
+						"Le fichier est trop volumineux (maximum 5 Mo). Vérifiez que vous utilisez le bon fichier.",
+				},
+			],
+		};
+	}
+
+	const extension = file.name.split(".").pop()?.toLowerCase();
+	const mime = file.type;
+
+	if (
+		extension === "csv" ||
+		mime === "text/csv" ||
+		mime === "application/csv"
+	) {
 		return parseCsv(await file.text());
 	}
 
-	if (extension === "xlsx") {
+	if (
+		extension === "xlsx" ||
+		mime === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	) {
 		return parseXlsx(await file.arrayBuffer());
 	}
 
@@ -355,7 +385,7 @@ function cellToString(value: unknown): string {
 }
 
 function normalizeDecimal(value: string): string {
-	return value.replace(",", ".").replace(/\s/g, "");
+	return value.replace(/,/g, ".").replace(/\s/g, "");
 }
 
 function buildCategoryFromRow(
