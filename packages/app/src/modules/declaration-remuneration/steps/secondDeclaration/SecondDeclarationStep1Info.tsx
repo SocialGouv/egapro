@@ -1,6 +1,7 @@
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
+import { formatFrenchDate } from "~/modules/domain";
 import { BASE_PATH } from "./constants";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
@@ -62,7 +63,7 @@ function DeadlineBlock({
 	return (
 		<div className="fr-pl-3w">
 			<p className="fr-mb-0 fr-text--sm fr-text--mention-grey">Date limite</p>
-			<p className="fr-h5 fr-mb-0">{deadline}</p>
+			<p className="fr-h5 fr-mb-0">{formatFrenchDate(deadline)}</p>
 			<p className="fr-mb-0 fr-text--sm fr-text--mention-grey">
 				Déclaration effectuée le {declarationDate}
 			</p>

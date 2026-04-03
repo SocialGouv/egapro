@@ -1,9 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { CampaignDeadlines } from "~/modules/domain";
-import {
-	formatFrenchDate,
-	getDefaultCampaignDeadlines,
-} from "~/modules/domain";
+import { getDefaultCampaignDeadlines } from "~/modules/domain";
 
 import { db } from ".";
 import { campaignDeadlines } from "./schema";
@@ -24,19 +21,11 @@ export async function getCampaignDeadlines(
 	}
 
 	return {
-		decl1ModificationDeadline: formatFrenchDate(row.decl1ModificationDeadline),
-		decl1JustificationDeadline: formatFrenchDate(
-			row.decl1JustificationDeadline,
-		),
-		decl1JointEvaluationDeadline: formatFrenchDate(
-			row.decl1JointEvaluationDeadline,
-		),
-		decl2ModificationDeadline: formatFrenchDate(row.decl2ModificationDeadline),
-		decl2JustificationDeadline: formatFrenchDate(
-			row.decl2JustificationDeadline,
-		),
-		decl2JointEvaluationDeadline: formatFrenchDate(
-			row.decl2JointEvaluationDeadline,
-		),
+		decl1ModificationDeadline: row.decl1ModificationDeadline,
+		decl1JustificationDeadline: row.decl1JustificationDeadline,
+		decl1JointEvaluationDeadline: row.decl1JointEvaluationDeadline,
+		decl2ModificationDeadline: row.decl2ModificationDeadline,
+		decl2JustificationDeadline: row.decl2JustificationDeadline,
+		decl2JointEvaluationDeadline: row.decl2JointEvaluationDeadline,
 	};
 }

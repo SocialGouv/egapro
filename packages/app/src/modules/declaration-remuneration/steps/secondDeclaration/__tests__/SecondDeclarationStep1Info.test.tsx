@@ -7,7 +7,7 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
-				modificationDeadline="1ᵉʳ décembre 2027"
+				modificationDeadline="2027-12-01"
 			/>,
 		);
 		expect(
@@ -21,7 +21,7 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
-				modificationDeadline="1ᵉʳ décembre 2027"
+				modificationDeadline="2027-12-01"
 			/>,
 		);
 		expect(screen.getByText("Étape 1 sur 3")).toBeInTheDocument();
@@ -34,7 +34,7 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
-				modificationDeadline="1ᵉʳ décembre 2027"
+				modificationDeadline="2027-12-01"
 			/>,
 		);
 		expect(screen.getByText(/1\u1D49\u02B3 décembre 2027/)).toBeInTheDocument();
@@ -44,7 +44,7 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
-				modificationDeadline="1ᵉʳ décembre 2027"
+				modificationDeadline="2027-12-01"
 			/>,
 		);
 		expect(
@@ -56,7 +56,7 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
-				modificationDeadline="1ᵉʳ décembre 2027"
+				modificationDeadline="2027-12-01"
 			/>,
 		);
 		expect(
@@ -71,7 +71,7 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
-				modificationDeadline="1ᵉʳ décembre 2027"
+				modificationDeadline="2027-12-01"
 			/>,
 		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(

@@ -1,4 +1,5 @@
 import type { CampaignDeadlines } from "~/modules/domain";
+import { formatFrenchDate } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 
@@ -315,7 +316,7 @@ function TransmittedRow({
 			<div className={styles.transmittedInfo}>
 				<p className="fr-mb-0">{label}</p>
 				<p className="fr-text-mention--grey fr-mb-0">
-					Modifiable jusqu'au {modifiableUntil}
+					Modifiable jusqu'au {formatFrenchDate(modifiableUntil)}
 				</p>
 			</div>
 			<div className={styles.transmittedActions}>
@@ -342,7 +343,7 @@ function DeadlineRow({ date }: { date: string }) {
 		<div className={styles.deadlineRow}>
 			<span aria-hidden="true" className="fr-icon-calendar-line fr-icon--sm" />
 			<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
-				Échéance : {date}
+				Échéance : {formatFrenchDate(date)}
 			</p>
 		</div>
 	);

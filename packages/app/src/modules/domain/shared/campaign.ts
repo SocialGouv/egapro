@@ -46,14 +46,14 @@ export function formatFrenchDate(dateStr: string): string {
 	return `${dayLabel} ${month} ${year}`;
 }
 
-/** Returns default campaign deadlines for a given year (fallback when no DB config exists). */
+/** Returns default campaign deadlines as ISO dates for a given year (fallback when no DB config exists). */
 export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 	return {
-		decl1ModificationDeadline: `1\u1D49\u02B3 juin ${year}`,
-		decl1JustificationDeadline: `1\u1D49\u02B3 juin ${year}`,
-		decl1JointEvaluationDeadline: `1\u1D49\u02B3 août ${year}`,
-		decl2ModificationDeadline: `1\u1D49\u02B3 décembre ${year}`,
-		decl2JustificationDeadline: `1\u1D49\u02B3 décembre ${year}`,
-		decl2JointEvaluationDeadline: `1\u1D49\u02B3 février ${year + 1}`,
+		decl1ModificationDeadline: `${year}-06-01`,
+		decl1JustificationDeadline: `${year}-06-01`,
+		decl1JointEvaluationDeadline: `${year}-08-01`,
+		decl2ModificationDeadline: `${year}-12-01`,
+		decl2JustificationDeadline: `${year}-12-01`,
+		decl2JointEvaluationDeadline: `${year + 1}-02-01`,
 	};
 }

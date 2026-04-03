@@ -71,23 +71,13 @@ describe("formatFrenchDate", () => {
 });
 
 describe("getDefaultCampaignDeadlines", () => {
-	it("returns default deadlines for a given year", () => {
+	it("returns default deadlines as ISO dates for a given year", () => {
 		const deadlines = getDefaultCampaignDeadlines(2027);
-		expect(deadlines.decl1ModificationDeadline).toBe("1\u1D49\u02B3 juin 2027");
-		expect(deadlines.decl1JustificationDeadline).toBe(
-			"1\u1D49\u02B3 juin 2027",
-		);
-		expect(deadlines.decl1JointEvaluationDeadline).toBe(
-			"1\u1D49\u02B3 août 2027",
-		);
-		expect(deadlines.decl2ModificationDeadline).toBe(
-			"1\u1D49\u02B3 décembre 2027",
-		);
-		expect(deadlines.decl2JustificationDeadline).toBe(
-			"1\u1D49\u02B3 décembre 2027",
-		);
-		expect(deadlines.decl2JointEvaluationDeadline).toBe(
-			"1\u1D49\u02B3 février 2028",
-		);
+		expect(deadlines.decl1ModificationDeadline).toBe("2027-06-01");
+		expect(deadlines.decl1JustificationDeadline).toBe("2027-06-01");
+		expect(deadlines.decl1JointEvaluationDeadline).toBe("2027-08-01");
+		expect(deadlines.decl2ModificationDeadline).toBe("2027-12-01");
+		expect(deadlines.decl2JustificationDeadline).toBe("2027-12-01");
+		expect(deadlines.decl2JointEvaluationDeadline).toBe("2028-02-01");
 	});
 });

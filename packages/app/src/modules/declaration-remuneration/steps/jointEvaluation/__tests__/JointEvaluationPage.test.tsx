@@ -73,7 +73,7 @@ describe("JointEvaluationPage", () => {
 		render(page);
 
 		expect(screen.getByTestId("joint-evaluation-deadline")).toHaveTextContent(
-			/août 2025/,
+			"2025-08-01",
 		);
 	});
 
