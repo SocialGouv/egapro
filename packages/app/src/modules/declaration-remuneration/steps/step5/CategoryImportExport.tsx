@@ -136,7 +136,7 @@ export function CategoryImportExport({
 									<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left">
 										<li>
 											<button
-												className="fr-btn fr-icon-download-line fr-btn--icon-left"
+												className="fr-btn fr-btn--secondary fr-icon-download-line fr-btn--icon-left"
 												disabled={isDownloading}
 												onClick={() => handleDownload("xlsx")}
 												type="button"
