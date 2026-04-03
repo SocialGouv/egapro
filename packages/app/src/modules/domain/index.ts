@@ -2,7 +2,6 @@
 
 // Campaign
 export {
-	formatFrenchDate,
 	getCurrentYear,
 	getDeclarationDeadline,
 	getDefaultCampaignDeadlines,

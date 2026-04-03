@@ -56,28 +56,18 @@ describe("getSecondDeclarationDeadline", () => {
 	});
 });
 
-describe("formatFrenchDate", () => {
-	it("formats the 1st of a month with superscript", () => {
-		expect(formatFrenchDate("2027-06-01")).toBe("1\u1D49\u02B3 juin 2027");
-	});
-
-	it("formats other days without superscript", () => {
-		expect(formatFrenchDate("2027-12-15")).toBe("15 décembre 2027");
-	});
-
-	it("formats February correctly", () => {
-		expect(formatFrenchDate("2028-02-01")).toBe("1\u1D49\u02B3 février 2028");
-	});
-});
-
 describe("getDefaultCampaignDeadlines", () => {
-	it("returns default deadlines as ISO dates for a given year", () => {
+	it("returns Date objects for a given year", () => {
 		const deadlines = getDefaultCampaignDeadlines(2027);
-		expect(deadlines.decl1ModificationDeadline).toBe("2027-06-01");
-		expect(deadlines.decl1JustificationDeadline).toBe("2027-06-01");
-		expect(deadlines.decl1JointEvaluationDeadline).toBe("2027-08-01");
-		expect(deadlines.decl2ModificationDeadline).toBe("2027-12-01");
-		expect(deadlines.decl2JustificationDeadline).toBe("2027-12-01");
-		expect(deadlines.decl2JointEvaluationDeadline).toBe("2028-02-01");
+		expect(deadlines.decl1ModificationDeadline).toEqual(new Date(2027, 5, 1));
+		expect(deadlines.decl1JustificationDeadline).toEqual(new Date(2027, 5, 1));
+		expect(deadlines.decl1JointEvaluationDeadline).toEqual(
+			new Date(2027, 7, 1),
+		);
+		expect(deadlines.decl2ModificationDeadline).toEqual(new Date(2027, 11, 1));
+		expect(deadlines.decl2JustificationDeadline).toEqual(new Date(2027, 11, 1));
+		expect(deadlines.decl2JointEvaluationDeadline).toEqual(
+			new Date(2028, 1, 1),
+		);
 	});
 });

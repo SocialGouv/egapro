@@ -1,9 +1,9 @@
-import { formatFrenchDate } from "~/modules/domain";
+import { formatLongDate } from "~/modules/domain";
 import styles from "./SubmissionBanner.module.scss";
 
 type Props = {
 	email: string;
-	deadline: string;
+	deadline: Date;
 };
 
 export function SubmissionBanner({ email, deadline }: Props) {
@@ -25,7 +25,7 @@ export function SubmissionBanner({ email, deadline }: Props) {
 						</p>
 						<p className="fr-mb-0">
 							Vous pouvez modifier votre dépôt jusqu'au{" "}
-							<strong>{formatFrenchDate(deadline)}</strong>
+							<strong>{formatLongDate(deadline)}</strong>
 						</p>
 					</div>
 				</div>

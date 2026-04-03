@@ -1,5 +1,5 @@
 import type { CampaignDeadlines } from "~/modules/domain";
-import { formatFrenchDate } from "~/modules/domain";
+import { formatLongDate } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 
@@ -303,7 +303,7 @@ function TransmittedRow({
 	downloadHref,
 }: {
 	label: string;
-	modifiableUntil: string;
+	modifiableUntil: Date;
 	modifyHref: string;
 	downloadHref?: string;
 }) {
@@ -316,7 +316,7 @@ function TransmittedRow({
 			<div className={styles.transmittedInfo}>
 				<p className="fr-mb-0">{label}</p>
 				<p className="fr-text-mention--grey fr-mb-0">
-					Modifiable jusqu'au {formatFrenchDate(modifiableUntil)}
+					Modifiable jusqu'au {formatLongDate(modifiableUntil)}
 				</p>
 			</div>
 			<div className={styles.transmittedActions}>
@@ -338,12 +338,12 @@ function TransmittedRow({
 	);
 }
 
-function DeadlineRow({ date }: { date: string }) {
+function DeadlineRow({ date }: { date: Date }) {
 	return (
 		<div className={styles.deadlineRow}>
 			<span aria-hidden="true" className="fr-icon-calendar-line fr-icon--sm" />
 			<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
-				Échéance : {formatFrenchDate(date)}
+				Échéance : {formatLongDate(date)}
 			</p>
 		</div>
 	);

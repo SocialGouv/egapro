@@ -5,6 +5,10 @@ import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { db } from ".";
 import { campaignDeadlines } from "./schema";
 
+function parseDate(dateStr: string): Date {
+	return new Date(`${dateStr}T00:00:00`);
+}
+
 /** Fetches campaign deadlines for a given year from the DB, falling back to hardcoded defaults. */
 export async function getCampaignDeadlines(
 	year: number,
@@ -21,11 +25,11 @@ export async function getCampaignDeadlines(
 	}
 
 	return {
-		decl1ModificationDeadline: row.decl1ModificationDeadline,
-		decl1JustificationDeadline: row.decl1JustificationDeadline,
-		decl1JointEvaluationDeadline: row.decl1JointEvaluationDeadline,
-		decl2ModificationDeadline: row.decl2ModificationDeadline,
-		decl2JustificationDeadline: row.decl2JustificationDeadline,
-		decl2JointEvaluationDeadline: row.decl2JointEvaluationDeadline,
+		decl1ModificationDeadline: parseDate(row.decl1ModificationDeadline),
+		decl1JustificationDeadline: parseDate(row.decl1JustificationDeadline),
+		decl1JointEvaluationDeadline: parseDate(row.decl1JointEvaluationDeadline),
+		decl2ModificationDeadline: parseDate(row.decl2ModificationDeadline),
+		decl2JustificationDeadline: parseDate(row.decl2JustificationDeadline),
+		decl2JointEvaluationDeadline: parseDate(row.decl2JointEvaluationDeadline),
 	};
 }

@@ -1,9 +1,9 @@
-import { formatFrenchDate } from "~/modules/domain";
+import { formatLongDate } from "~/modules/domain";
 
 type Props = {
 	email: string;
 	isSecondDeclaration?: boolean;
-	modificationDeadline: string;
+	modificationDeadline: Date;
 	pdfDownloadHref?: string;
 };
 
@@ -31,7 +31,7 @@ export function DeclarationSuccessBanner({
 						</p>
 						<p className="fr-mb-1w">
 							Vous pouvez modifier votre déclaration jusqu'au{" "}
-							<strong>{formatFrenchDate(modificationDeadline)}</strong>
+							<strong>{formatLongDate(modificationDeadline)}</strong>
 						</p>
 						{pdfDownloadHref && (
 							<a

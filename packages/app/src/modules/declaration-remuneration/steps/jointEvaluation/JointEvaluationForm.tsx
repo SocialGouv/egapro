@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
-import { formatFrenchDate } from "~/modules/domain";
+import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { FileUpload, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -15,7 +15,7 @@ import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 type Props = {
 	declarationDate: string;
 	hasCse: boolean | null;
-	jointEvaluationDeadline: string;
+	jointEvaluationDeadline: Date;
 };
 
 export function JointEvaluationForm({
@@ -80,7 +80,7 @@ export function JointEvaluationForm({
 				<div className="fr-highlight">
 					<p className="fr-mb-1v fr-text--md">Date limite</p>
 					<p className="fr-h6 fr-mb-1v">
-						{formatFrenchDate(jointEvaluationDeadline)}
+						{formatLongDate(jointEvaluationDeadline)}
 					</p>
 					<p className="fr-mb-0 fr-text--sm fr-text--mention-grey">
 						Déclaration effectuée le {declarationDate}

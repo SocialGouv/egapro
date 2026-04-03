@@ -16,7 +16,7 @@ import formStyles from "./shared/formActions.module.scss";
 import type { OpinionType } from "./types";
 
 type Props = {
-	cseDeadline: string;
+	cseDeadline: Date;
 	initialData?: {
 		firstDeclAccuracyOpinion: OpinionType | null;
 		firstDeclAccuracyDate: string | null;

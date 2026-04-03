@@ -31,7 +31,7 @@ function JointEvaluationOption({
 	onChange,
 }: {
 	checked: boolean;
-	deadline: string;
+	deadline: Date;
 	onChange: () => void;
 }) {
 	return (
@@ -73,7 +73,7 @@ function JustifyOption({
 	onChange,
 }: {
 	checked: boolean;
-	deadline: string;
+	deadline: Date;
 	onChange: () => void;
 }) {
 	return (
@@ -106,8 +106,8 @@ function SecondRoundOptions({
 	selectedPath,
 	setSelectedPath,
 }: {
-	justificationDeadline: string;
-	jointEvaluationDeadline: string;
+	justificationDeadline: Date;
+	jointEvaluationDeadline: Date;
 	selectedPath: CompliancePathValue | undefined;
 	setSelectedPath: (path: CompliancePathValue) => void;
 }) {
@@ -134,9 +134,9 @@ function FirstRoundOptions({
 	selectedPath,
 	setSelectedPath,
 }: {
-	correctiveActionDeadline: string;
-	jointEvaluationDeadline: string;
-	justificationDeadline: string;
+	correctiveActionDeadline: Date;
+	jointEvaluationDeadline: Date;
+	justificationDeadline: Date;
 	selectedPath: CompliancePathValue | undefined;
 	setSelectedPath: (path: CompliancePathValue) => void;
 }) {
