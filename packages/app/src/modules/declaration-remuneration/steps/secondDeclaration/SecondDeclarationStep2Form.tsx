@@ -45,7 +45,6 @@ export function SecondDeclarationStep2Form({
 	return (
 		<CategoryForm
 			accordionId="accordion-second-decl"
-			declarationYear={declarationYear}
 			descriptionText="Cette seconde déclaration reprend les catégories de salariés définies lors de la première déclaration. Elle permet de mesurer les écarts de rémunération entre les femmes et les hommes au sein de chaque catégorie, en distinguant le salaire de base des composantes variables ou complémentaires."
 			initialCategories={sourceData}
 			initialSource={initialSource}
@@ -77,6 +76,7 @@ export function SecondDeclarationStep2Form({
 					startDate={startDate}
 				/>
 			}
+			referenceYear={declarationYear}
 			stepper={<SecondDeclarationStepIndicator currentStep={2} />}
 			submitError={periodError || mutation.error?.message}
 			title={

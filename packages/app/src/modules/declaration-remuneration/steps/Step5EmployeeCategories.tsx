@@ -31,7 +31,6 @@ export function Step5EmployeeCategories({
 	return (
 		<CategoryForm
 			accordionId="accordion-step5"
-			declarationYear={declarationYear}
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
 			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
@@ -46,6 +45,7 @@ export function Step5EmployeeCategories({
 				})
 			}
 			previousHref="/declaration-remuneration/etape/4"
+			referenceYear={declarationYear - 1}
 			stepper={<StepIndicator currentStep={5} />}
 			submitError={mutation.error?.message}
 			title={

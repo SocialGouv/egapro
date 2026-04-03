@@ -16,7 +16,7 @@ const DECLARATION_YEAR = 2025;
 
 describe("ConfirmationPage", () => {
 	it("renders the page title", () => {
-		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
+		render(<ConfirmationPage dataYear={DECLARATION_YEAR - 1} declarationYear={DECLARATION_YEAR} />);
 
 		expect(
 			screen.getByText(
@@ -26,7 +26,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders the success message", () => {
-		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
+		render(<ConfirmationPage dataYear={DECLARATION_YEAR - 1} declarationYear={DECLARATION_YEAR} />);
 
 		expect(
 			screen.getByText(
@@ -36,7 +36,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders the default email in receipt card", () => {
-		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
+		render(<ConfirmationPage dataYear={DECLARATION_YEAR - 1} declarationYear={DECLARATION_YEAR} />);
 
 		expect(screen.getByText("adresse@exemple.fr")).toBeInTheDocument();
 	});
@@ -44,6 +44,7 @@ describe("ConfirmationPage", () => {
 	it("renders the provided email in receipt card", () => {
 		render(
 			<ConfirmationPage
+				dataYear={DECLARATION_YEAR - 1}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.com"
 			/>,
@@ -53,7 +54,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders the resend button", () => {
-		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
+		render(<ConfirmationPage dataYear={DECLARATION_YEAR - 1} declarationYear={DECLARATION_YEAR} />);
 
 		expect(
 			screen.getByRole("button", {
@@ -63,7 +64,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders document download section without second declaration card", () => {
-		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
+		render(<ConfirmationPage dataYear={DECLARATION_YEAR - 1} declarationYear={DECLARATION_YEAR} />);
 
 		expect(
 			screen.getByText("Documents récapitulatifs de votre déclaration"),
@@ -82,6 +83,7 @@ describe("ConfirmationPage", () => {
 	it("renders second declaration card when hasSecondDeclaration is true", () => {
 		render(
 			<ConfirmationPage
+				dataYear={DECLARATION_YEAR - 1}
 				declarationYear={DECLARATION_YEAR}
 				hasSecondDeclaration
 			/>,
@@ -99,7 +101,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders download cards as links with correct hrefs", () => {
-		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
+		render(<ConfirmationPage dataYear={DECLARATION_YEAR - 1} declarationYear={DECLARATION_YEAR} />);
 
 		const declarationLink = screen
 			.getByText(/récapitulatif de la déclaration des indicateurs/)
@@ -123,6 +125,7 @@ describe("ConfirmationPage", () => {
 	it("renders second declaration download card with correction href", () => {
 		render(
 			<ConfirmationPage
+				dataYear={DECLARATION_YEAR - 1}
 				declarationYear={DECLARATION_YEAR}
 				hasSecondDeclaration
 			/>,
@@ -139,7 +142,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders the feedback banner", () => {
-		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
+		render(<ConfirmationPage dataYear={DECLARATION_YEAR - 1} declarationYear={DECLARATION_YEAR} />);
 
 		expect(
 			screen.getByText("Comment s'est passée votre démarche ?"),
@@ -147,7 +150,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders navigation links", () => {
-		render(<ConfirmationPage declarationYear={DECLARATION_YEAR} />);
+		render(<ConfirmationPage dataYear={DECLARATION_YEAR - 1} declarationYear={DECLARATION_YEAR} />);
 
 		const modifyLink = screen.getByRole("link", {
 			name: /Modifier mes dépôts/,

@@ -39,6 +39,7 @@ import { TransmittedPdfDocument } from "../TransmittedPdfDocument";
 const transmittedPdfData: TransmittedPdfData = {
 	companyName: "Acme Corp",
 	siren: "123456789",
+	dataYear: 2024,
 	year: 2025,
 	generatedAt: "10 mars 2026",
 	opinions: [
@@ -128,6 +129,7 @@ describe("TransmittedPdfDocument", () => {
 		const emptyData: TransmittedPdfData = {
 			companyName: "Empty Corp",
 			siren: "987654321",
+			dataYear: 2024,
 			year: 2025,
 			generatedAt: "15 mars 2026",
 			opinions: [],

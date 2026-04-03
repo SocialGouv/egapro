@@ -27,24 +27,24 @@ function DownloadCard({ dataYear, href, title, year }: DownloadCardProps) {
 }
 
 type Props = {
+	dataYear: number;
 	declarationYear: number;
 	email?: string;
 	hasSecondDeclaration?: boolean;
 };
 
 export function ConfirmationPage({
+	dataYear,
 	declarationYear,
 	email,
 	hasSecondDeclaration = false,
 }: Props) {
 	const displayEmail = email ?? "adresse@exemple.fr";
-	const dataYear = declarationYear - 1;
-	const year = declarationYear;
 	return (
 		<div>
 			<ComplianceCompletionEffect />
 			<h1 className="fr-h4 fr-mb-4w">
-				Démarche des indicateurs de rémunération {year}
+				Démarche des indicateurs de rémunération {declarationYear}
 			</h1>
 			<div className={`fr-mb-4w ${styles.successRow}`}>
 				<DsfrPictogram
@@ -52,7 +52,7 @@ export function ConfirmationPage({
 					size={64}
 				/>
 				<p className="fr-text--lg fr-text--bold fr-mb-0">
-					Votre parcours {year} est désormais terminé
+					Votre parcours {declarationYear} est désormais terminé
 				</p>
 			</div>
 			<div className={styles.receiptCard}>
@@ -78,21 +78,21 @@ export function ConfirmationPage({
 					dataYear={dataYear}
 					href={`/api/declaration-pdf?year=${declarationYear}`}
 					title="Télécharger le récapitulatif de la déclaration des indicateurs"
-					year={year}
+					year={declarationYear}
 				/>
 				{hasSecondDeclaration && (
 					<DownloadCard
 						dataYear={dataYear}
 						href={`/api/declaration-pdf?type=correction&year=${declarationYear}`}
 						title="Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie de salariés"
-						year={year}
+						year={declarationYear}
 					/>
 				)}
 				<DownloadCard
 					dataYear={dataYear}
 					href={`/api/transmitted-pdf?year=${declarationYear}`}
 					title="Télécharger le récapitulatif des éléments transmis"
-					year={year}
+					year={declarationYear}
 				/>
 			</div>
 

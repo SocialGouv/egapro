@@ -93,7 +93,7 @@ export function TransmittedPdfDocument({ data }: Props) {
 						Récapitulatif des éléments transmis {data.year + 1}
 					</Text>
 					<Text style={styles.subtitle}>
-						Au titre des données {data.year - 1}
+						Au titre des données {data.dataYear}
 					</Text>
 					<Text style={styles.companyInfo}>
 						{data.companyName} — SIREN {data.siren}

@@ -23,7 +23,6 @@ export function DeclarationLayout({
 			<CompanyBanner
 				company={company}
 				currentPageLabel={`Démarche des indicateurs de rémunération ${declarationYear}`}
-				declarationYear={declarationYear}
 			/>
 			<main className="fr-container fr-py-7w" id="content">
 				<div className="fr-grid-row fr-grid-row--center">

@@ -1,3 +1,4 @@
+import { getCurrentYear } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
 
@@ -11,13 +12,11 @@ type CompanyBannerProps = {
 		hasCse: boolean | null;
 	};
 	currentPageLabel: string;
-	declarationYear: number;
 };
 
 export function CompanyBanner({
 	company,
 	currentPageLabel,
-	declarationYear,
 }: CompanyBannerProps) {
 	return (
 		<div className={`fr-py-3w ${styles.banner}`}>
@@ -41,7 +40,7 @@ export function CompanyBanner({
 					{company.workforce !== null && (
 						<div className="fr-col-auto">
 							<p className="fr-mb-0 fr-text--sm">
-								Effectif annuel moyen en {declarationYear - 1} :{" "}
+								Effectif annuel moyen en {getCurrentYear() - 1} :{" "}
 								<strong>{company.workforce}</strong>
 							</p>
 						</div>

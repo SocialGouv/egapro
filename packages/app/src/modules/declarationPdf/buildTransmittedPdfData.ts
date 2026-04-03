@@ -27,6 +27,7 @@ export type TransmittedPdfFile = {
 export type TransmittedPdfData = {
 	companyName: string;
 	siren: string;
+	dataYear: number;
 	year: number;
 	generatedAt: string;
 	opinions: TransmittedPdfOpinion[];
@@ -89,6 +90,7 @@ export async function buildTransmittedPdfData(
 	return {
 		companyName: company.name,
 		siren,
+		dataYear: declaration.year - 1,
 		year: declaration.year,
 		generatedAt: formatLongDate(now),
 		opinions,

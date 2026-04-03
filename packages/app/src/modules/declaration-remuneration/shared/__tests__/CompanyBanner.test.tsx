@@ -16,7 +16,6 @@ describe("CompanyBanner", () => {
 			<CompanyBanner
 				company={defaultCompany}
 				currentPageLabel="Déclaration"
-				declarationYear={2025}
 			/>,
 		);
 
@@ -31,7 +30,6 @@ describe("CompanyBanner", () => {
 			<CompanyBanner
 				company={defaultCompany}
 				currentPageLabel="Déclaration"
-				declarationYear={2025}
 			/>,
 		);
 
@@ -43,7 +41,6 @@ describe("CompanyBanner", () => {
 			<CompanyBanner
 				company={defaultCompany}
 				currentPageLabel="Déclaration"
-				declarationYear={2025}
 			/>,
 		);
 
@@ -55,7 +52,6 @@ describe("CompanyBanner", () => {
 			<CompanyBanner
 				company={defaultCompany}
 				currentPageLabel="Déclaration"
-				declarationYear={2025}
 			/>,
 		);
 
@@ -68,7 +64,6 @@ describe("CompanyBanner", () => {
 			<CompanyBanner
 				company={{ ...defaultCompany, workforce: null }}
 				currentPageLabel="Déclaration"
-				declarationYear={2025}
 			/>,
 		);
 
@@ -80,7 +75,6 @@ describe("CompanyBanner", () => {
 			<CompanyBanner
 				company={{ ...defaultCompany, hasCse: null }}
 				currentPageLabel="Déclaration"
-				declarationYear={2025}
 			/>,
 		);
 
@@ -92,7 +86,6 @@ describe("CompanyBanner", () => {
 			<CompanyBanner
 				company={{ ...defaultCompany, hasCse: false }}
 				currentPageLabel="Déclaration"
-				declarationYear={2025}
 			/>,
 		);
 

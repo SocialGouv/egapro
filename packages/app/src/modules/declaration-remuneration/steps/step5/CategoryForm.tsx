@@ -59,7 +59,7 @@ function toFormValues(cats: EmployeeCategory[]) {
 }
 
 type Props = {
-	declarationYear: number;
+	referenceYear: number;
 	title: ReactNode;
 	stepper: ReactNode;
 	instructionText: string;
@@ -79,7 +79,7 @@ type Props = {
 };
 
 export function CategoryForm({
-	declarationYear,
+	referenceYear,
 	title,
 	stepper,
 	instructionText,
@@ -97,7 +97,6 @@ export function CategoryForm({
 	referencePeriodPicker,
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
 }: Props) {
-	const referenceYear = declarationYear - 1;
 	const baseId = useId();
 	const nextId = useRef(createIdGenerator()).current;
 
