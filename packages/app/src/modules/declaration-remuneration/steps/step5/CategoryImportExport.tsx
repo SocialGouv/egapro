@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
 	generateTemplate,
 	type ImportError,
@@ -103,140 +104,145 @@ export function CategoryImportExport({
 				</li>
 			</ul>
 
-			<dialog
-				aria-labelledby={exportTitleId}
-				className="fr-modal"
-				id={exportModalId}
-				role="dialog"
-			>
-				<div className="fr-container fr-container--fluid fr-container-md">
-					<div className="fr-grid-row fr-grid-row--center">
-						<div className="fr-col-12 fr-col-md-6 fr-col-lg-4">
-							<div className="fr-modal__body">
-								<div className="fr-modal__header">
-									<button
-										aria-controls={exportModalId}
-										className="fr-btn--close fr-btn"
-										title="Fermer"
-										type="button"
-									>
-										Fermer
-									</button>
-								</div>
-								<div className="fr-modal__content">
-									<h2 className="fr-modal__title" id={exportTitleId}>
-										Télécharger le modèle
-									</h2>
-									<p>
-										Choisissez le format du fichier modèle. Il contiendra les
-										catégories actuelles du formulaire.
-									</p>
-								</div>
-								<div className="fr-modal__footer">
-									<ul className="fr-btns-group fr-btns-group--inline fr-btns-group--right fr-btns-group--icon-left fr-btns-group--equisized">
-										<li>
+			{createPortal(
+				<>
+					<dialog
+						aria-labelledby={exportTitleId}
+						className="fr-modal"
+						id={exportModalId}
+						role="dialog"
+					>
+						<div className="fr-container fr-container--fluid fr-container-md">
+							<div className="fr-grid-row fr-grid-row--center">
+								<div className="fr-col-12 fr-col-md-6 fr-col-lg-4">
+									<div className="fr-modal__body">
+										<div className="fr-modal__header">
 											<button
-												className="fr-btn fr-btn--secondary fr-icon-download-line fr-btn--icon-left"
-												disabled={isDownloading}
-												onClick={() => handleDownload("xlsx")}
+												aria-controls={exportModalId}
+												className="fr-btn--close fr-btn"
+												title="Fermer"
 												type="button"
 											>
-												Format Excel (.xlsx)
+												Fermer
 											</button>
-										</li>
-										<li>
-											<button
-												className="fr-btn fr-btn--secondary fr-icon-download-line fr-btn--icon-left"
-												disabled={isDownloading}
-												onClick={() => handleDownload("csv")}
-												type="button"
-											>
-												Format CSV (.csv)
-											</button>
-										</li>
-									</ul>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</dialog>
-
-			<dialog
-				aria-labelledby={importTitleId}
-				className="fr-modal"
-				id={importModalId}
-				role="dialog"
-			>
-				<div className="fr-container fr-container--fluid fr-container-md">
-					<div className="fr-grid-row fr-grid-row--center">
-						<div className="fr-col-12 fr-col-md-8 fr-col-lg-6">
-							<div className="fr-modal__body">
-								<div className="fr-modal__header">
-									<button
-										aria-controls={importModalId}
-										className="fr-btn--close fr-btn"
-										title="Fermer"
-										type="button"
-									>
-										Fermer
-									</button>
-								</div>
-								<div className="fr-modal__content">
-									<h2 className="fr-modal__title" id={importTitleId}>
-										Importer un fichier
-									</h2>
-									<p>
-										Le fichier importé remplacera toutes les données du
-										formulaire. Formats acceptés : .xlsx et .csv (séparateur
-										point-virgule).
-									</p>
-									<div
-										className={`fr-upload-group${hasErrors ? "fr-upload-group--error" : ""}`}
-									>
-										<label className="fr-label" htmlFor={uploadId}>
-											Sélectionner un fichier
-											<span className="fr-hint-text">
-												Formats : .xlsx ou .csv
-											</span>
-										</label>
-										<input
-											accept=".xlsx,.csv"
-											aria-describedby={messagesId}
-											className="fr-upload"
-											disabled={isImporting}
-											id={uploadId}
-											name="import-file"
-											onChange={handleFileChange}
-											ref={fileInputRef}
-											type="file"
-										/>
-										<div
-											aria-live="polite"
-											className="fr-messages-group"
-											id={messagesId}
-										>
-											{importErrors.map((error) => (
-												<p
-													className="fr-message fr-message--error"
-													key={error.message}
-												>
-													{error.message}
-												</p>
-											))}
-											{importSuccess && (
-												<p className="fr-message fr-message--valid">
-													Données importées avec succès.
-												</p>
-											)}
+										</div>
+										<div className="fr-modal__content">
+											<h2 className="fr-modal__title" id={exportTitleId}>
+												Télécharger le modèle
+											</h2>
+											<p>
+												Choisissez le format du fichier modèle. Il contiendra
+												les catégories actuelles du formulaire.
+											</p>
+										</div>
+										<div className="fr-modal__footer">
+											<ul className="fr-btns-group fr-btns-group--inline fr-btns-group--right fr-btns-group--icon-left fr-btns-group--equisized">
+												<li>
+													<button
+														className="fr-btn fr-btn--secondary fr-icon-download-line fr-btn--icon-left"
+														disabled={isDownloading}
+														onClick={() => handleDownload("xlsx")}
+														type="button"
+													>
+														Format Excel (.xlsx)
+													</button>
+												</li>
+												<li>
+													<button
+														className="fr-btn fr-btn--secondary fr-icon-download-line fr-btn--icon-left"
+														disabled={isDownloading}
+														onClick={() => handleDownload("csv")}
+														type="button"
+													>
+														Format CSV (.csv)
+													</button>
+												</li>
+											</ul>
 										</div>
 									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-				</div>
-			</dialog>
+					</dialog>
+
+					<dialog
+						aria-labelledby={importTitleId}
+						className="fr-modal"
+						id={importModalId}
+						role="dialog"
+					>
+						<div className="fr-container fr-container--fluid fr-container-md">
+							<div className="fr-grid-row fr-grid-row--center">
+								<div className="fr-col-12 fr-col-md-8 fr-col-lg-6">
+									<div className="fr-modal__body">
+										<div className="fr-modal__header">
+											<button
+												aria-controls={importModalId}
+												className="fr-btn--close fr-btn"
+												title="Fermer"
+												type="button"
+											>
+												Fermer
+											</button>
+										</div>
+										<div className="fr-modal__content">
+											<h2 className="fr-modal__title" id={importTitleId}>
+												Importer un fichier
+											</h2>
+											<p>
+												Le fichier importé remplacera toutes les données du
+												formulaire. Formats acceptés : .xlsx et .csv (séparateur
+												point-virgule).
+											</p>
+											<div
+												className={`fr-upload-group${hasErrors ? "fr-upload-group--error" : ""}`}
+											>
+												<label className="fr-label" htmlFor={uploadId}>
+													Sélectionner un fichier
+													<span className="fr-hint-text">
+														Formats : .xlsx ou .csv
+													</span>
+												</label>
+												<input
+													accept=".xlsx,.csv"
+													aria-describedby={messagesId}
+													className="fr-upload"
+													disabled={isImporting}
+													id={uploadId}
+													name="import-file"
+													onChange={handleFileChange}
+													ref={fileInputRef}
+													type="file"
+												/>
+												<div
+													aria-live="polite"
+													className="fr-messages-group"
+													id={messagesId}
+												>
+													{importErrors.map((error) => (
+														<p
+															className="fr-message fr-message--error"
+															key={error.message}
+														>
+															{error.message}
+														</p>
+													))}
+													{importSuccess && (
+														<p className="fr-message fr-message--valid">
+															Données importées avec succès.
+														</p>
+													)}
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</dialog>
+				</>,
+				document.body,
+			)}
 		</>
 	);
 }
