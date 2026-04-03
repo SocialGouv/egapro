@@ -11,9 +11,16 @@ import type { EmployeeCategory } from "./categorySerializer";
 type Props = {
 	categories: EmployeeCategory[];
 	onImport: (categories: EmployeeCategory[]) => void;
+	siren?: string;
+	year?: number;
 };
 
-export function CategoryImportExport({ categories, onImport }: Props) {
+export function CategoryImportExport({
+	categories,
+	onImport,
+	siren,
+	year,
+}: Props) {
 	const baseId = useId();
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [importErrors, setImportErrors] = useState<ImportError[]>([]);
@@ -36,8 +43,11 @@ export function CategoryImportExport({ categories, onImport }: Props) {
 			const url = URL.createObjectURL(blob);
 			const link = document.createElement("a");
 			link.href = url;
-			link.download = `indicateur-g-template.${format}`;
+			const parts = ["indicateur-g", siren, year].filter(Boolean).join("-");
+			link.download = `${parts}.${format}`;
+			document.body.appendChild(link);
 			link.click();
+			document.body.removeChild(link);
 			URL.revokeObjectURL(url);
 		} finally {
 			setIsDownloading(false);
