@@ -57,7 +57,9 @@ describe("Step1Opinions", () => {
 	});
 
 	it("does not render compliance path title for other paths", () => {
-		render(<Step1Opinions compliancePath="justify" cseDeadline={cseDeadline} />);
+		render(
+			<Step1Opinions compliancePath="justify" cseDeadline={cseDeadline} />,
+		);
 
 		expect(
 			screen.queryByText(
