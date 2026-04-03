@@ -333,7 +333,7 @@ export function CategoryForm({
 					}
 					onImport={handleImportCategories}
 					siren={siren}
-					year={currentYear}
+					year={referenceYear + 1}
 				/>
 			)}
 
