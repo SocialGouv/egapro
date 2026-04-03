@@ -111,7 +111,6 @@ export function CategoryImportExport({
 						aria-labelledby={exportTitleId}
 						className="fr-modal"
 						id={exportModalId}
-						role="dialog"
 					>
 						<div className="fr-container fr-container--fluid fr-container-md">
 							<div className="fr-grid-row fr-grid-row--center">
@@ -170,7 +169,6 @@ export function CategoryImportExport({
 						aria-labelledby={importTitleId}
 						className="fr-modal"
 						id={importModalId}
-						role="dialog"
 					>
 						<div className="fr-container fr-container--fluid fr-container-md">
 							<div className="fr-grid-row fr-grid-row--center">
