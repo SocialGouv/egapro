@@ -11,6 +11,7 @@ import { ReferencePeriodPicker } from "./ReferencePeriodPicker";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
+	declarationYear: number;
 	initialFirstDeclarationCategories: EmployeeCategoryRow[];
 	initialSecondDeclarationCategories?: EmployeeCategoryRow[];
 	initialSource?: string;
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export function SecondDeclarationStep2Form({
+	declarationYear,
 	initialFirstDeclarationCategories,
 	initialSecondDeclarationCategories,
 	initialSource,
@@ -74,6 +76,7 @@ export function SecondDeclarationStep2Form({
 					startDate={startDate}
 				/>
 			}
+			referenceYear={declarationYear - 1}
 			stepper={<SecondDeclarationStepIndicator currentStep={2} />}
 			submitError={periodError || mutation.error?.message}
 			title={

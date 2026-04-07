@@ -19,6 +19,8 @@ export default async function CseOpinionConfirmationPage() {
 
 	return (
 		<ConfirmationPage
+			dataYear={declarationData.declaration.year - 1}
+			declarationYear={declarationData.declaration.year}
 			email={session?.user?.email ?? undefined}
 			hasSecondDeclaration={hasSubmittedSecondDeclaration(
 				declarationData.declaration.secondDeclarationStatus,

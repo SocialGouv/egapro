@@ -1,19 +1,22 @@
 import { renderToBuffer } from "@react-pdf/renderer";
 import { buildTransmittedPdfData } from "~/modules/declarationPdf/buildTransmittedPdfData";
 import { TransmittedPdfDocument } from "~/modules/declarationPdf/TransmittedPdfDocument";
-import { extractSiren } from "~/modules/domain";
+import { extractSiren, getCurrentYear } from "~/modules/domain";
 import { auth } from "~/server/auth";
 
-export async function GET() {
+export async function GET(request: Request) {
 	const session = await auth();
 	if (!session?.user?.siret) {
 		return new Response("Non autorisé", { status: 401 });
 	}
 
 	const siren = extractSiren(session.user.siret);
+	const url = new URL(request.url);
+	const yearParam = url.searchParams.get("year");
+	const year = yearParam ? Number.parseInt(yearParam, 10) : getCurrentYear();
 
 	try {
-		const data = await buildTransmittedPdfData(siren, new Date());
+		const data = await buildTransmittedPdfData(siren, year, new Date());
 		const buffer = await renderToBuffer(TransmittedPdfDocument({ data }));
 		const filename = `recapitulatif-elements-transmis-${siren}-${data.year + 1}.pdf`;
 

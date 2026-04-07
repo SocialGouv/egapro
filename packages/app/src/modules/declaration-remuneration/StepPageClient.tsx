@@ -19,6 +19,7 @@ type StepPageClientProps = {
 	step: number;
 	declaration: {
 		siren: string;
+		year: number;
 		totalWomen: number | null;
 		totalMen: number | null;
 		status: string | null;
@@ -53,11 +54,16 @@ export function StepPageClient({
 			);
 		case 2:
 			return (
-				<Step2PayGap gipPrefillData={gipPrefillData} initialData={step2Data} />
+				<Step2PayGap
+					declarationYear={declaration.year}
+					gipPrefillData={gipPrefillData}
+					initialData={step2Data}
+				/>
 			);
 		case 3:
 			return (
 				<Step3VariablePay
+					declarationYear={declaration.year}
 					gipPrefillData={gipPrefillData}
 					initialData={step3Data}
 					maxMen={declaration.totalMen ?? undefined}
@@ -67,6 +73,7 @@ export function StepPageClient({
 		case 4:
 			return (
 				<Step4QuartileDistribution
+					declarationYear={declaration.year}
 					gipPrefillData={gipPrefillData}
 					initialData={step4Data}
 					maxMen={declaration.totalMen ?? undefined}
@@ -76,6 +83,7 @@ export function StepPageClient({
 		case 5:
 			return (
 				<Step5EmployeeCategories
+					declarationYear={declaration.year}
 					initialCategories={step5Categories}
 					initialSource={initialSource}
 					maxMen={declaration.totalMen ?? undefined}
@@ -86,6 +94,7 @@ export function StepPageClient({
 			return (
 				<Step6Review
 					declaration={declaration}
+					declarationYear={declaration.year}
 					isSubmitted={declaration.status === "submitted"}
 					step2Data={step2Data}
 					step3Data={step3Data}

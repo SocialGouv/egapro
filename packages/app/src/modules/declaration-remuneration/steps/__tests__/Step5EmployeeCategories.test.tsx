@@ -48,7 +48,7 @@ function makeCategory(
 
 describe("Step5EmployeeCategories", () => {
 	it("renders with 1 empty category by default", () => {
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 		expect(
 			screen.getByRole("button", { name: "Catégorie d'emplois n°1" }),
 		).toBeInTheDocument();
@@ -59,12 +59,12 @@ describe("Step5EmployeeCategories", () => {
 	});
 
 	it("renders stepper at step 5", () => {
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 		expect(screen.getByText("Étape 5 sur 6")).toBeInTheDocument();
 	});
 
 	it("renders description text and reference period", () => {
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 		expect(
 			screen.getByText(/mesurer l'écart de rémunération/),
 		).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe("Step5EmployeeCategories", () => {
 	});
 
 	it("renders source dropdown", () => {
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 		expect(
 			screen.getByLabelText(/Quelle est la source utilisée/),
 		).toBeInTheDocument();
@@ -80,7 +80,7 @@ describe("Step5EmployeeCategories", () => {
 	});
 
 	it("renders instruction text", () => {
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 		expect(
 			screen.getByText(/Saisissez les données manquantes/),
 		).toBeInTheDocument();
@@ -90,7 +90,7 @@ describe("Step5EmployeeCategories", () => {
 	});
 
 	it("renders table headers for the category", () => {
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 		expect(screen.getAllByText("Femmes").length).toBeGreaterThanOrEqual(1);
 		expect(screen.getAllByText("Hommes").length).toBeGreaterThanOrEqual(1);
 		expect(
@@ -99,7 +99,7 @@ describe("Step5EmployeeCategories", () => {
 	});
 
 	it("renders table section headers", () => {
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 		expect(
 			screen.getAllByText("Nombre de salariés [Nombre total]").length,
 		).toBe(1);
@@ -108,14 +108,14 @@ describe("Step5EmployeeCategories", () => {
 	});
 
 	it("renders name and detail input fields for category", () => {
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 		expect(document.getElementById("cat-0-name")).toBeInTheDocument();
 		expect(document.getElementById("cat-0-detail")).toBeInTheDocument();
 	});
 
 	it("can add a new category", async () => {
 		const user = userEvent.setup();
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 
 		await user.click(
 			screen.getByRole("button", {
@@ -131,7 +131,7 @@ describe("Step5EmployeeCategories", () => {
 
 	it("can remove a category after confirmation", async () => {
 		const user = userEvent.setup();
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 
 		// Add a second category first
 		await user.click(
@@ -159,7 +159,7 @@ describe("Step5EmployeeCategories", () => {
 
 	it("updates input fields and computes gap", async () => {
 		const user = userEvent.setup();
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 
 		const annualBaseWomenInput = screen.getByLabelText(
 			"Salaire de base annuel femmes, catégorie 1",
@@ -177,7 +177,7 @@ describe("Step5EmployeeCategories", () => {
 
 	it("accepts salary values above 9999", async () => {
 		const user = userEvent.setup();
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 
 		const input = screen.getByLabelText(
 			"Salaire de base annuel femmes, catégorie 1",
@@ -189,7 +189,7 @@ describe("Step5EmployeeCategories", () => {
 
 	it("rejects negative values in number inputs", async () => {
 		const user = userEvent.setup();
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 
 		const input = screen.getByLabelText(
 			"Salaire de base annuel femmes, catégorie 1",
@@ -205,7 +205,7 @@ describe("Step5EmployeeCategories", () => {
 
 	it("computes annual total from base and variable", async () => {
 		const user = userEvent.setup();
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 
 		await user.type(
 			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
@@ -224,6 +224,7 @@ describe("Step5EmployeeCategories", () => {
 	it("shows SavedIndicator when initial data exists", () => {
 		render(
 			<Step5EmployeeCategories
+				declarationYear={2025}
 				initialCategories={[
 					makeCategory({
 						name: "Ingénieurs",
@@ -241,13 +242,14 @@ describe("Step5EmployeeCategories", () => {
 	});
 
 	it("does not show SavedIndicator with empty initial data", () => {
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
 	});
 
 	it("deserializes initial data into form fields", () => {
 		render(
 			<Step5EmployeeCategories
+				declarationYear={2025}
 				initialCategories={[
 					makeCategory({
 						name: "Cadres",
@@ -273,7 +275,7 @@ describe("Step5EmployeeCategories", () => {
 
 	it("submits data on form submit", async () => {
 		const user = userEvent.setup();
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 
 		const nameInput = screen.getByLabelText("Nom", {
 			selector: "#cat-0-name",
@@ -297,7 +299,13 @@ describe("Step5EmployeeCategories", () => {
 
 	it("shows error when workforce totals do not match step 1", async () => {
 		const user = userEvent.setup();
-		render(<Step5EmployeeCategories maxMen={20} maxWomen={10} />);
+		render(
+			<Step5EmployeeCategories
+				declarationYear={2025}
+				maxMen={20}
+				maxWomen={10}
+			/>,
+		);
 
 		// Fill required name first
 		const nameInput = document.getElementById("cat-0-name") as HTMLElement;
@@ -319,7 +327,7 @@ describe("Step5EmployeeCategories", () => {
 
 	it("shows error when category name is empty on submit", async () => {
 		const user = userEvent.setup();
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
@@ -331,7 +339,7 @@ describe("Step5EmployeeCategories", () => {
 
 	it("shows error when category names are duplicated", async () => {
 		const user = userEvent.setup();
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 
 		// Fill first category name
 		const nameInput = document.getElementById("cat-0-name") as HTMLElement;
@@ -353,7 +361,7 @@ describe("Step5EmployeeCategories", () => {
 	});
 
 	it("renders previous link pointing to step 4", () => {
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
 			"/declaration-remuneration/etape/4",
@@ -361,7 +369,7 @@ describe("Step5EmployeeCategories", () => {
 	});
 
 	it("renders accordion for definitions", () => {
-		render(<Step5EmployeeCategories />);
+		render(<Step5EmployeeCategories declarationYear={2025} />);
 		expect(
 			screen.getByText("Définitions et méthode de calcul"),
 		).toBeInTheDocument();

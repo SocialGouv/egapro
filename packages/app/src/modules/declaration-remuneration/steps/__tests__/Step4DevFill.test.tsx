@@ -39,7 +39,12 @@ const emptyStep4Data = () => ({
 describe("Step4QuartileDistribution dev fill", () => {
 	it("fills both tables when dev fill button is clicked", async () => {
 		const user = userEvent.setup();
-		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
+		render(
+			<Step4QuartileDistribution
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
 
 		await user.click(screen.getByRole("button", { name: "[DEV] Remplir" }));
 

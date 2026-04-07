@@ -141,12 +141,15 @@ export async function deleteCseOpinions() {
 	}
 }
 
-/** Clear or set the phone number for the test user (identified by siret starting with TEST_SIREN). */
+/** Clear or set the phone number for the test user (identified via user_company link to TEST_SIREN). */
 export async function setUserPhone(phone: string | null) {
 	const sql = createConnection();
 	try {
 		await sql`
-			UPDATE app_user SET phone = ${phone} WHERE siret LIKE ${`${TEST_SIREN}%`}
+			UPDATE app_user SET phone = ${phone}
+			WHERE id IN (
+				SELECT user_id FROM app_user_company WHERE siren = ${TEST_SIREN}
+			)
 		`;
 	} finally {
 		await sql.end();

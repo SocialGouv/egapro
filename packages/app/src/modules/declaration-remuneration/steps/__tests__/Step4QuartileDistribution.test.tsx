@@ -36,7 +36,12 @@ const emptyStep4Data = () => ({
 
 describe("Step4QuartileDistribution", () => {
 	it("renders two tables with quartile columns", () => {
-		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
+		render(
+			<Step4QuartileDistribution
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
 		expect(
 			screen.getByText("Rémunération annuelle brute moyenne", {
 				selector: "h3",
@@ -56,7 +61,12 @@ describe("Step4QuartileDistribution", () => {
 	});
 
 	it("renders all row labels in both tables", () => {
-		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
+		render(
+			<Step4QuartileDistribution
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
 		expect(screen.getAllByText(/annuelle brute/).length).toBeGreaterThanOrEqual(
 			1,
 		);
@@ -68,14 +78,24 @@ describe("Step4QuartileDistribution", () => {
 	});
 
 	it("renders description text about quartiles", () => {
-		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
+		render(
+			<Step4QuartileDistribution
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
 		expect(
 			screen.getByText(/compare la proportion de femmes et d'hommes/),
 		).toBeInTheDocument();
 	});
 
 	it("renders instruction text and mandatory fields notice", () => {
-		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
+		render(
+			<Step4QuartileDistribution
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
 		expect(
 			screen.getByText(
 				"Renseignez les informations avant de valider vos indicateurs.",
@@ -89,6 +109,7 @@ describe("Step4QuartileDistribution", () => {
 	it("displays pre-filled data with computed percentages", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationYear={2025}
 				initialData={{
 					annual: [
 						{ threshold: "980", women: 19, men: 22 },
@@ -122,6 +143,7 @@ describe("Step4QuartileDistribution", () => {
 	it("shows SavedIndicator when initialData has data", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationYear={2025}
 				initialData={{
 					annual: [
 						{ threshold: "", women: 10, men: 15 },
@@ -142,12 +164,22 @@ describe("Step4QuartileDistribution", () => {
 	});
 
 	it("does not show SavedIndicator when no initial data", () => {
-		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
+		render(
+			<Step4QuartileDistribution
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
 	});
 
 	it("renders inline inputs for remuneration, women count, and men count", () => {
-		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
+		render(
+			<Step4QuartileDistribution
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
 		// 4 quartiles × 2 tables = 8 inputs per row type
 		expect(screen.getAllByLabelText(/Rémunération brute/).length).toBe(8);
 		expect(screen.getAllByLabelText(/Nombre de femmes/).length).toBe(8);
@@ -156,7 +188,12 @@ describe("Step4QuartileDistribution", () => {
 
 	it("updates remuneration values via inline inputs", async () => {
 		const user = userEvent.setup();
-		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
+		render(
+			<Step4QuartileDistribution
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
 
 		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
 		const q1Input = remuInputs[0] as HTMLInputElement;
@@ -168,7 +205,12 @@ describe("Step4QuartileDistribution", () => {
 
 	it("rejects negative values in remuneration inputs", async () => {
 		const user = userEvent.setup();
-		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
+		render(
+			<Step4QuartileDistribution
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
 
 		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
 		const q1Input = remuInputs[0] as HTMLInputElement;
@@ -182,6 +224,7 @@ describe("Step4QuartileDistribution", () => {
 		const user = userEvent.setup();
 		render(
 			<Step4QuartileDistribution
+				declarationYear={2025}
 				initialData={emptyStep4Data()}
 				maxMen={25}
 				maxWomen={15}
@@ -198,14 +241,24 @@ describe("Step4QuartileDistribution", () => {
 	});
 
 	it("renders accordion", () => {
-		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
+		render(
+			<Step4QuartileDistribution
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
 		expect(
 			screen.getByText("Définitions et méthode de calcul"),
 		).toBeInTheDocument();
 	});
 
 	it("renders previous link pointing to step 3", () => {
-		render(<Step4QuartileDistribution initialData={emptyStep4Data()} />);
+		render(
+			<Step4QuartileDistribution
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
 			"/declaration-remuneration/etape/3",
@@ -215,6 +268,7 @@ describe("Step4QuartileDistribution", () => {
 	it("uses gipPrefillData when no initialCategories", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 100, totalMen: 100 },
 					step2: {
@@ -271,6 +325,7 @@ describe("Step4QuartileDistribution", () => {
 	it("uses gipPrefillData with null Q4 threshold", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 100, totalMen: 100 },
 					step2: {
@@ -324,6 +379,7 @@ describe("Step4QuartileDistribution", () => {
 	it("uses gipPrefillData with all null quartile data", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: null, totalMen: null },
 					step2: {
@@ -376,6 +432,7 @@ describe("Step4QuartileDistribution", () => {
 	it("uses gipPrefillData with mono-gender quartiles (100% women)", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 200, totalMen: 0 },
 					step2: {

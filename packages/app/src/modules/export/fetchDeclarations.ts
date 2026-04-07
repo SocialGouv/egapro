@@ -4,8 +4,11 @@
 export type { DeclarationRow } from "./queries";
 // Re-export queries for route handler convenience
 export {
+	fetchCseFilesByDeclaration,
 	fetchCseOpinionsByDeclaration,
+	fetchFileById,
 	fetchIndicatorGByDeclaration,
+	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,
 } from "./queries";
 
@@ -33,6 +36,15 @@ export type CseRow = {
 	type: string;
 	opinion: string | null;
 	opinionDate: string | null;
+};
+
+export type FileRow = {
+	id: string;
+	siren: string;
+	year: number;
+	fileName: string;
+	filePath: string;
+	uploadedAt: Date;
 };
 
 // ── Build indicators from declaration columns ─────────────────────────

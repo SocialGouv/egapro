@@ -1,4 +1,3 @@
-import { getCurrentYear } from "~/modules/domain";
 import { CompanyBanner } from "./shared/CompanyBanner";
 
 type CompanyData = {
@@ -10,19 +9,20 @@ type CompanyData = {
 
 type DeclarationLayoutProps = {
 	company: CompanyData;
+	declarationYear: number;
 	children: React.ReactNode;
 };
 
 export function DeclarationLayout({
 	company,
+	declarationYear,
 	children,
 }: DeclarationLayoutProps) {
-	const currentYear = getCurrentYear();
 	return (
 		<>
 			<CompanyBanner
 				company={company}
-				currentPageLabel={`Démarche des indicateurs de rémunération ${currentYear}`}
+				currentPageLabel={`Démarche des indicateurs de rémunération ${declarationYear}`}
 			/>
 			<main className="fr-container fr-py-7w" id="content">
 				<div className="fr-grid-row fr-grid-row--center">

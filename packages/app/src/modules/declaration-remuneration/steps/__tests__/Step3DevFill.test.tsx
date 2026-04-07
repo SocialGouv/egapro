@@ -37,7 +37,12 @@ const emptyStep3Data = () => ({
 describe("Step3VariablePay dev fill", () => {
 	it("fills rows and beneficiaries when dev fill button is clicked", async () => {
 		const user = userEvent.setup();
-		render(<Step3VariablePay initialData={emptyStep3Data()} />);
+		render(
+			<Step3VariablePay
+				declarationYear={2025}
+				initialData={emptyStep3Data()}
+			/>,
+		);
 
 		await user.click(screen.getByRole("button", { name: "[DEV] Remplir" }));
 

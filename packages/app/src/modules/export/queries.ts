@@ -1,17 +1,20 @@
 import "server-only";
 
 import { and, eq, gte, inArray, lt, or } from "drizzle-orm";
-
+import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
 	companies,
+	cseOpinionFiles,
 	cseOpinions,
 	declarations,
 	employeeCategories,
 	jobCategories,
+	jointEvaluationFiles,
 	users,
 } from "~/server/db/schema";
-import type { CseRow, IndicatorGEntry } from "./fetchDeclarations";
+import type { CseRow, FileRow, IndicatorGEntry } from "./fetchDeclarations";
+import type { IndicatorGRow } from "./types";
 
 // ── Shared select columns for indicators A–F ───────────────────────
 
@@ -60,6 +63,16 @@ export const indicatorColumns = {
 	indicatorFHourlyMen4: declarations.indicatorFHourlyMen4,
 };
 
+// ── Shared select columns for export queries ────────────────────────
+
+export const sharedExportColumns = {
+	declarantFirstName: users.firstName,
+	declarantLastName: users.lastName,
+	declarantEmail: users.email,
+	declarantPhone: users.phone,
+	...indicatorColumns,
+};
+
 // ── Shared helper ────────────────────────────────────────────────────
 
 function groupByKey<T>(rows: T[], keyFn: (row: T) => string): Map<string, T[]> {
@@ -103,11 +116,7 @@ export async function fetchSubmittedDeclarations(
 			nafCode: companies.nafCode,
 			address: companies.address,
 			hasCse: companies.hasCse,
-			declarantFirstName: users.firstName,
-			declarantLastName: users.lastName,
-			declarantEmail: users.email,
-			declarantPhone: users.phone,
-			...indicatorColumns,
+			...sharedExportColumns,
 		})
 		.from(declarations)
 		.innerJoin(companies, eq(declarations.siren, companies.siren))
@@ -159,10 +168,11 @@ export async function fetchIndicatorGByDeclaration(
 
 export async function fetchCseOpinionsByDeclaration(
 	declarationIds: string[],
+	database: DB = db,
 ): Promise<Map<string, CseRow[]>> {
 	if (declarationIds.length === 0) return new Map();
 
-	const rows = await db
+	const rows = await database
 		.select({
 			declarationId: cseOpinions.declarationId,
 			type: cseOpinions.type,
@@ -173,4 +183,129 @@ export async function fetchCseOpinionsByDeclaration(
 		.where(inArray(cseOpinions.declarationId, declarationIds));
 
 	return groupByKey(rows, (r) => r.declarationId);
+}
+
+// ── Indicator G rows (for XLSX export) ──────────────────────────────
+
+export async function buildIndicatorGRows(
+	database: DB,
+	year: number,
+): Promise<IndicatorGRow[]> {
+	return database
+		.select({
+			siren: declarations.siren,
+			companyName: companies.name,
+			year: declarations.year,
+			declarationType: employeeCategories.declarationType,
+			categoryIndex: jobCategories.categoryIndex,
+			categoryName: jobCategories.name,
+			categoryDetail: jobCategories.detail,
+			categorySource: jobCategories.source,
+			womenCount: employeeCategories.womenCount,
+			menCount: employeeCategories.menCount,
+			annualBaseWomen: employeeCategories.annualBaseWomen,
+			annualBaseMen: employeeCategories.annualBaseMen,
+			annualVariableWomen: employeeCategories.annualVariableWomen,
+			annualVariableMen: employeeCategories.annualVariableMen,
+			hourlyBaseWomen: employeeCategories.hourlyBaseWomen,
+			hourlyBaseMen: employeeCategories.hourlyBaseMen,
+			hourlyVariableWomen: employeeCategories.hourlyVariableWomen,
+			hourlyVariableMen: employeeCategories.hourlyVariableMen,
+		})
+		.from(declarations)
+		.innerJoin(companies, eq(declarations.siren, companies.siren))
+		.innerJoin(jobCategories, eq(jobCategories.declarationId, declarations.id))
+		.innerJoin(
+			employeeCategories,
+			eq(employeeCategories.jobCategoryId, jobCategories.id),
+		)
+		.where(
+			and(eq(declarations.status, "submitted"), eq(declarations.year, year)),
+		);
+}
+
+// ── Indicator G presence check ──────────────────────────────────────
+
+export async function getDeclarationsWithIndicatorG(
+	database: DB,
+	declarationIds: string[],
+): Promise<Set<string>> {
+	if (declarationIds.length === 0) return new Set();
+
+	const rows = await database
+		.selectDistinct({ declarationId: jobCategories.declarationId })
+		.from(jobCategories)
+		.where(inArray(jobCategories.declarationId, declarationIds));
+
+	return new Set(rows.map((r) => r.declarationId));
+}
+
+// ── File queries (CSE opinion files + joint evaluation files) ────────
+
+function fetchFilesByDeclaration(
+	keys: Array<{ siren: string; year: number }>,
+	fileTable: typeof cseOpinionFiles | typeof jointEvaluationFiles,
+): Promise<FileRow[]> {
+	return db
+		.select({
+			id: fileTable.id,
+			siren: declarations.siren,
+			year: declarations.year,
+			fileName: fileTable.fileName,
+			filePath: fileTable.filePath,
+			uploadedAt: fileTable.uploadedAt,
+		})
+		.from(fileTable)
+		.innerJoin(declarations, eq(fileTable.declarationId, declarations.id))
+		.where(
+			or(
+				...keys.map((k) =>
+					and(eq(declarations.siren, k.siren), eq(declarations.year, k.year)),
+				),
+			),
+		);
+}
+
+export async function fetchCseFilesByDeclaration(
+	keys: Array<{ siren: string; year: number }>,
+): Promise<Map<string, FileRow[]>> {
+	if (keys.length === 0) return new Map();
+	const rows = await fetchFilesByDeclaration(keys, cseOpinionFiles);
+	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+}
+
+export async function fetchJointEvaluationFilesByDeclaration(
+	keys: Array<{ siren: string; year: number }>,
+): Promise<Map<string, FileRow[]>> {
+	if (keys.length === 0) return new Map();
+	const rows = await fetchFilesByDeclaration(keys, jointEvaluationFiles);
+	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+}
+
+// ── Single file lookup (for download) ────────────────────────────────
+
+export async function fetchFileById(
+	fileId: string,
+): Promise<{ filePath: string; fileName: string } | undefined> {
+	const cseRows = await db
+		.select({
+			filePath: cseOpinionFiles.filePath,
+			fileName: cseOpinionFiles.fileName,
+		})
+		.from(cseOpinionFiles)
+		.where(eq(cseOpinionFiles.id, fileId))
+		.limit(1);
+
+	if (cseRows[0]) return cseRows[0];
+
+	const jointRows = await db
+		.select({
+			filePath: jointEvaluationFiles.filePath,
+			fileName: jointEvaluationFiles.fileName,
+		})
+		.from(jointEvaluationFiles)
+		.where(eq(jointEvaluationFiles.id, fileId))
+		.limit(1);
+
+	return jointRows[0];
 }

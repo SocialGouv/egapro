@@ -58,6 +58,7 @@ describe("SecondDeclarationStep2Form", () => {
 	it("renders the title and step indicator", () => {
 		render(
 			<SecondDeclarationStep2Form
+				declarationYear={2025}
 				initialFirstDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -72,6 +73,7 @@ describe("SecondDeclarationStep2Form", () => {
 	it("displays category name as read-only text", () => {
 		render(
 			<SecondDeclarationStep2Form
+				declarationYear={2025}
 				initialFirstDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -88,6 +90,7 @@ describe("SecondDeclarationStep2Form", () => {
 	it("displays detail as read-only text", () => {
 		render(
 			<SecondDeclarationStep2Form
+				declarationYear={2025}
 				initialFirstDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -100,6 +103,7 @@ describe("SecondDeclarationStep2Form", () => {
 	it("displays source as read-only text", () => {
 		render(
 			<SecondDeclarationStep2Form
+				declarationYear={2025}
 				initialFirstDeclarationCategories={mockCategories}
 				initialSource="convention-collective"
 			/>,
@@ -116,6 +120,7 @@ describe("SecondDeclarationStep2Form", () => {
 	it("renders reference period date pickers", () => {
 		render(
 			<SecondDeclarationStep2Form
+				declarationYear={2025}
 				initialFirstDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -129,6 +134,7 @@ describe("SecondDeclarationStep2Form", () => {
 	it("does not render add category button (read-only categories)", () => {
 		render(
 			<SecondDeclarationStep2Form
+				declarationYear={2025}
 				initialFirstDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -140,6 +146,7 @@ describe("SecondDeclarationStep2Form", () => {
 	it("renders previous link to step 1", () => {
 		render(
 			<SecondDeclarationStep2Form
+				declarationYear={2025}
 				initialFirstDeclarationCategories={mockCategories}
 			/>,
 		);
@@ -169,6 +176,7 @@ describe("SecondDeclarationStep2Form", () => {
 
 		render(
 			<SecondDeclarationStep2Form
+				declarationYear={2025}
 				initialFirstDeclarationCategories={mockCategories}
 				initialSecondDeclarationCategories={secondDeclData}
 			/>,

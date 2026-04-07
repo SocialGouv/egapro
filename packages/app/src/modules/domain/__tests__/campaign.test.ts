@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-	getCseYear,
 	getCurrentYear,
 	getDeclarationDeadline,
 	getSecondDeclarationDeadline,
+	getWorkforceYear,
 } from "../shared/campaign";
 
 describe("getCurrentYear", () => {
@@ -27,7 +27,7 @@ describe("getCurrentYear", () => {
 	});
 });
 
-describe("getCseYear", () => {
+describe("getWorkforceYear", () => {
 	beforeEach(() => {
 		vi.useFakeTimers();
 	});
@@ -36,9 +36,9 @@ describe("getCseYear", () => {
 		vi.useRealTimers();
 	});
 
-	it("returns current year + 1", () => {
+	it("returns current year - 1", () => {
 		vi.setSystemTime(new Date("2025-06-15"));
-		expect(getCseYear()).toBe(2026);
+		expect(getWorkforceYear()).toBe(2024);
 	});
 });
 

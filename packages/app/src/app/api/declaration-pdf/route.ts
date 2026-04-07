@@ -11,8 +11,9 @@ export async function GET(request: Request) {
 	}
 
 	const siren = extractSiren(session.user.siret);
-	const year = getCurrentYear();
 	const url = new URL(request.url);
+	const yearParam = url.searchParams.get("year");
+	const year = yearParam ? Number.parseInt(yearParam, 10) : getCurrentYear();
 	const declarationType =
 		url.searchParams.get("type") === "correction" ? "correction" : "initial";
 

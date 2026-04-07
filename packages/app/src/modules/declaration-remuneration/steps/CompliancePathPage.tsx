@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentYear, hasGapsAboveThreshold } from "~/modules/domain";
+import { hasGapsAboveThreshold } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
 import { getPostComplianceDestination } from "../shared/complianceNavigation";
@@ -63,7 +63,7 @@ export async function CompliancePathPage() {
 	}
 
 	const email = session?.user?.email ?? "";
-	const currentYear = getCurrentYear();
+	const currentYear = data.declaration.year;
 
 	return (
 		<HydrateClient>
@@ -81,8 +81,8 @@ export async function CompliancePathPage() {
 				isSecondRound={state.type === "second_round"}
 				pdfDownloadHref={
 					state.type === "second_round"
-						? "/api/declaration-pdf?type=correction"
-						: "/api/declaration-pdf"
+						? `/api/declaration-pdf?type=correction&year=${currentYear}`
+						: `/api/declaration-pdf?year=${currentYear}`
 				}
 			/>
 		</HydrateClient>

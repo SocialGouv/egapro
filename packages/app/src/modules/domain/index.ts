@@ -2,10 +2,10 @@
 
 // Campaign
 export {
-	getCseYear,
 	getCurrentYear,
 	getDeclarationDeadline,
 	getSecondDeclarationDeadline,
+	getWorkforceYear,
 } from "./shared/campaign";
 // Company size
 export { classifyCompanySize, isCseRequired } from "./shared/companySize";
@@ -16,6 +16,7 @@ export {
 	DECLARATION_DEADLINE,
 	DECLARATION_YEAR,
 	EXPECTED_DECLARATION_TYPES,
+	FIRST_DECLARATION_YEAR,
 	GAP_ALERT_THRESHOLD,
 	MAX_CSE_FILES,
 } from "./shared/constants";

@@ -4,8 +4,12 @@ import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/typ
 import { Step6Review } from "../Step6Review";
 
 vi.mock("~/modules/declarationPdf", () => ({
-	DownloadDeclarationPdfButton: () => (
-		<a href="/api/declaration-pdf">Télécharger le récapitulatif (PDF)</a>
+	DownloadDeclarationPdfButton: ({ year }: { year?: number }) => (
+		<a
+			href={year ? `/api/declaration-pdf?year=${year}` : "/api/declaration-pdf"}
+		>
+			Télécharger le récapitulatif (PDF)
+		</a>
 	),
 }));
 
@@ -104,6 +108,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -119,6 +124,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -133,6 +139,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -150,6 +157,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -162,6 +170,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -189,6 +198,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -201,6 +211,7 @@ describe("Step6Review", () => {
 		const { container } = render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -214,6 +225,7 @@ describe("Step6Review", () => {
 		const { container } = render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -227,6 +239,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={{
 					indicatorAAnnualWomen: "95",
 					indicatorAAnnualMen: "100",
@@ -259,6 +272,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -272,6 +286,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={{
 					indicatorBAnnualWomen: "95",
@@ -297,6 +312,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={{
@@ -330,6 +346,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -367,6 +384,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -382,6 +400,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -396,6 +415,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				isSubmitted
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
@@ -412,6 +432,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				isSubmitted
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
@@ -432,6 +453,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				isSubmitted
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
@@ -440,13 +462,14 @@ describe("Step6Review", () => {
 		);
 		expect(
 			screen.getByRole("link", { name: /télécharger le récapitulatif/i }),
-		).toHaveAttribute("href", "/api/declaration-pdf");
+		).toHaveAttribute("href", "/api/declaration-pdf?year=2025");
 	});
 
 	it("does not render PDF download button when not submitted", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -466,6 +489,7 @@ describe("Step6Review", () => {
 					totalMen: null,
 					status: null,
 				}}
+				declarationYear={2025}
 				step2Data={{
 					indicatorAAnnualWomen: "90",
 					indicatorAAnnualMen: "100",
@@ -501,6 +525,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -515,6 +540,7 @@ describe("Step6Review", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
+				declarationYear={2025}
 				step2Data={{
 					indicatorAAnnualWomen: "98",
 					indicatorAAnnualMen: "100",

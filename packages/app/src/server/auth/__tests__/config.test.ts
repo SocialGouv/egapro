@@ -55,7 +55,6 @@ describe("auth config", () => {
 		it("upserts user and populates token on sign-in (existing user)", async () => {
 			const dbUser = {
 				id: "uuid-123",
-				siret: "12345678901234",
 				phone: "0123456789",
 			};
 			mockFindFirst.mockResolvedValue(dbUser);
@@ -90,7 +89,6 @@ describe("auth config", () => {
 					returning: vi.fn().mockResolvedValue([
 						{
 							id: "new-uuid",
-							siret: null,
 							phone: null,
 						},
 					]),
@@ -118,7 +116,6 @@ describe("auth config", () => {
 		it("stores id_token as null when account has none", async () => {
 			mockFindFirst.mockResolvedValue({
 				id: "uuid-123",
-				siret: null,
 				phone: null,
 			});
 

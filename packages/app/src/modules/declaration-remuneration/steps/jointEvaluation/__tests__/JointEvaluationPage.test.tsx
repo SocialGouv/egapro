@@ -34,13 +34,19 @@ vi.mock("../JointEvaluationForm", () => ({
 }));
 
 import { redirect } from "next/navigation";
-import { getCurrentYear } from "~/modules/domain";
 import { api } from "~/trpc/server";
 import { JointEvaluationPage } from "../JointEvaluationPage";
 
+const DECLARATION_YEAR = 2025;
+
 function mockDeclaration(compliancePath: string, updatedAt: Date | null) {
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
-		declaration: { compliancePath, updatedAt },
+		declaration: {
+			compliancePath,
+			updatedAt,
+			siren: "123456789",
+			year: DECLARATION_YEAR,
+		},
 	} as never);
 	vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
 }
@@ -63,7 +69,7 @@ describe("JointEvaluationPage", () => {
 		render(page);
 
 		expect(screen.getByTestId("current-year")).toHaveTextContent(
-			String(getCurrentYear()),
+			String(DECLARATION_YEAR),
 		);
 	});
 

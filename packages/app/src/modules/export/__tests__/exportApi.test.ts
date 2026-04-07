@@ -10,6 +10,8 @@ vi.mock("~/modules/export/queries", () => ({
 	fetchIndicatorGByDeclaration: (...args: unknown[]) =>
 		mockFetchIndicatorG(...args),
 	fetchCseOpinionsByDeclaration: (...args: unknown[]) => mockFetchCse(...args),
+	fetchCseFilesByDeclaration: vi.fn().mockResolvedValue(new Map()),
+	fetchJointEvaluationFilesByDeclaration: vi.fn().mockResolvedValue(new Map()),
 }));
 
 const VALID_AUTH_HEADER = "Bearer test-suit-api-key-that-is-at-least-32-chars";

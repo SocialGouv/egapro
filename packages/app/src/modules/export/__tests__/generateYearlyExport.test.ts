@@ -10,9 +10,12 @@ vi.mock("~/server/services/s3", () => ({
 }));
 
 const mockBuildExportRows = vi.fn();
-const mockBuildIndicatorGRows = vi.fn();
 vi.mock("../buildExportRows", () => ({
 	buildExportRows: (...args: unknown[]) => mockBuildExportRows(...args),
+}));
+
+const mockBuildIndicatorGRows = vi.fn();
+vi.mock("../queries", () => ({
 	buildIndicatorGRows: (...args: unknown[]) => mockBuildIndicatorGRows(...args),
 }));
 

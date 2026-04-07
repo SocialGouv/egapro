@@ -18,7 +18,6 @@ import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
-import { getCurrentYear } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./CategoryDataTable";
@@ -60,6 +59,7 @@ function toFormValues(cats: EmployeeCategory[]) {
 }
 
 type Props = {
+	referenceYear: number;
 	title: ReactNode;
 	stepper: ReactNode;
 	instructionText: string;
@@ -79,6 +79,7 @@ type Props = {
 };
 
 export function CategoryForm({
+	referenceYear,
 	title,
 	stepper,
 	instructionText,
@@ -96,8 +97,6 @@ export function CategoryForm({
 	referencePeriodPicker,
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
 }: Props) {
-	const currentYear = getCurrentYear();
-	const referenceYear = currentYear - 1;
 	const baseId = useId();
 	const nextId = useRef(createIdGenerator()).current;
 

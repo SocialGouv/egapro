@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 
-import { getCurrentYear } from "~/modules/domain";
 import { api } from "~/trpc/server";
 
 import { JointEvaluationForm } from "./JointEvaluationForm";
@@ -13,7 +12,7 @@ export async function JointEvaluationPage() {
 	}
 
 	const company = await api.company.get({ siren: data.declaration.siren });
-	const currentYear = getCurrentYear();
+	const currentYear = data.declaration.year;
 	const declarationDate = data.declaration.updatedAt
 		? new Date(data.declaration.updatedAt).toLocaleDateString("fr-FR")
 		: new Date().toLocaleDateString("fr-FR");

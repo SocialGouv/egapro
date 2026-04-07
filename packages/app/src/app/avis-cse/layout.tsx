@@ -21,7 +21,17 @@ export default async function CseOpinionRootLayout({
 	}
 
 	const siren = extractSiren(siret);
-	const company = await api.company.get({ siren });
+	const [company, declarationData] = await Promise.all([
+		api.company.get({ siren }),
+		api.declaration.getOrCreate(),
+	]);
 
-	return <CseOpinionLayout company={company}>{children}</CseOpinionLayout>;
+	return (
+		<CseOpinionLayout
+			company={company}
+			declarationYear={declarationData.declaration.year}
+		>
+			{children}
+		</CseOpinionLayout>
+	);
 }
