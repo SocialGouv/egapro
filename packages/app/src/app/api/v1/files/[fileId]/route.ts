@@ -1,6 +1,6 @@
 import { fetchFileById } from "~/modules/export";
 import { getFile } from "~/server/services/s3";
-import { verifySuitApiKey } from "~/server/services/suitApiAuth";
+import { verifySuitAuth } from "~/server/services/suitApiAuth";
 
 function buildContentDisposition(fileName: string): string {
 	const asciiFallback = fileName
@@ -15,14 +15,16 @@ function buildContentDisposition(fileName: string): string {
  * GET /api/v1/files/:fileId
  *
  * Secured REST API streaming the file (PDF) from S3.
- * Requires a valid SUIT API key in the Authorization: Bearer header.
+ * Requires:
+ * 1. A valid request signature (RSA-SHA256, verified via X-Signature + X-Timestamp headers)
+ * 2. A valid SUIT API key in the Authorization: Bearer header
  */
 export async function GET(
 	request: Request,
 	{ params }: { params: Promise<{ fileId: string }> },
 ) {
-	const authResult = verifySuitApiKey(request);
-	if (authResult !== true) return authResult;
+	const authError = verifySuitAuth(request);
+	if (authError) return authError;
 
 	try {
 		const { fileId } = await params;
