@@ -141,6 +141,111 @@ export async function deleteCseOpinions() {
 	}
 }
 
+/**
+ * Insert a submitted declaration for the previous year (N-1) with job categories,
+ * so the "Reprendre les catégories de l'année précédente" button appears.
+ */
+export async function insertPreviousYearDeclaration() {
+	const sql = createConnection();
+	const yearResult =
+		await sql`SELECT EXTRACT(YEAR FROM CURRENT_DATE)::int - 1 AS previous_year`;
+	const previousYear = yearResult[0]?.previous_year as number;
+	const declId = "e2e-prev-year-decl-0000-000000000000";
+
+	try {
+		// Get test user id
+		const users = await sql`
+			SELECT user_id FROM app_user_company WHERE siren = ${TEST_SIREN} LIMIT 1
+		`;
+		const userId = users[0]?.user_id;
+		if (!userId) return;
+
+		// Insert submitted declaration for previous year
+		await sql`
+			INSERT INTO app_declaration (id, siren, year, declarant_id, total_women, total_men, current_step, status, created_at, updated_at)
+			VALUES (${declId}, ${TEST_SIREN}, ${previousYear}, ${userId}, 150, 200, 6, 'submitted', NOW(), NOW())
+			ON CONFLICT DO NOTHING
+		`;
+
+		// Insert 3 job categories
+		const categories = [
+			{
+				id: "e2e-jobcat-1111-0000-000000000000",
+				index: 0,
+				name: "Cadres dirigeants",
+				detail: "Directeurs et cadres supérieurs",
+			},
+			{
+				id: "e2e-jobcat-2222-0000-000000000000",
+				index: 1,
+				name: "Ingénieurs et cadres",
+				detail: "Ingénieurs, chefs de projet, managers",
+			},
+			{
+				id: "e2e-jobcat-3333-0000-000000000000",
+				index: 2,
+				name: "Techniciens",
+				detail: "Techniciens qualifiés",
+			},
+		];
+
+		for (const cat of categories) {
+			await sql`
+				INSERT INTO app_job_category (id, declaration_id, category_index, name, detail, source)
+				VALUES (${cat.id}, ${declId}, ${cat.index}, ${cat.name}, ${cat.detail}, 'convention-collective')
+				ON CONFLICT DO NOTHING
+			`;
+		}
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Remove the previous year test declaration and its job categories. */
+export async function deletePreviousYearDeclaration() {
+	const sql = createConnection();
+	const declId = "e2e-prev-year-decl-0000-000000000000";
+
+	try {
+		const jobIds = [
+			"e2e-jobcat-1111-0000-000000000000",
+			"e2e-jobcat-2222-0000-000000000000",
+			"e2e-jobcat-3333-0000-000000000000",
+		];
+		await sql`DELETE FROM app_employee_category WHERE job_category_id = ANY(${jobIds})`;
+		await sql`DELETE FROM app_job_category WHERE declaration_id = ${declId}`;
+		await sql`DELETE FROM app_declaration WHERE id = ${declId}`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Delete all job categories and employee categories for the test SIREN's current year declaration. */
+export async function deleteCurrentYearCategories() {
+	const sql = createConnection();
+	try {
+		await sql`
+			DELETE FROM app_employee_category
+			WHERE job_category_id IN (
+				SELECT jc.id FROM app_job_category jc
+				INNER JOIN app_declaration d ON d.id = jc.declaration_id
+				WHERE d.siren = ${TEST_SIREN}
+				  AND d.year = EXTRACT(YEAR FROM CURRENT_DATE)::int
+			)
+		`;
+		await sql`
+			DELETE FROM app_job_category
+			WHERE declaration_id IN (
+				SELECT id FROM app_declaration
+				WHERE siren = ${TEST_SIREN}
+				  AND year = EXTRACT(YEAR FROM CURRENT_DATE)::int
+			)
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
 /** Clear or set the phone number for the test user (identified via user_company link to TEST_SIREN). */
 export async function setUserPhone(phone: string | null) {
 	const sql = createConnection();
