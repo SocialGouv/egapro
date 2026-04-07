@@ -188,6 +188,7 @@ export function CategoryForm({
 	}
 
 	const categories = form.watch("categories");
+	const hasExistingData = categories.some((cat) => cat?.name?.trim() !== "");
 
 	const handleFormSubmit = form.handleSubmit((data) => {
 		setWorkforceError("");
@@ -337,9 +338,7 @@ export function CategoryForm({
 				<CategoryImportExport
 					extraButtons={
 						<PreviousYearCategoriesButton
-							hasExistingData={categories.some(
-								(cat) => cat?.name?.trim() !== "",
-							)}
+							hasExistingData={hasExistingData}
 							nextId={nextId}
 							onImport={handleImportPreviousYear}
 						/>
