@@ -125,8 +125,8 @@ export async function fetchPreviousYearJobCategories(
 
 	if (jobs.length === 0) return null;
 
-	const source = jobs[0]?.source ?? "";
-	const sorted = jobs.sort((a, b) => a.categoryIndex - b.categoryIndex);
+	const sorted = [...jobs].sort((a, b) => a.categoryIndex - b.categoryIndex);
+	const source = sorted[0]?.source ?? "";
 
 	return {
 		source,
