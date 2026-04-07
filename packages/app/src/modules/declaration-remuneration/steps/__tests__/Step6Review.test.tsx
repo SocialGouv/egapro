@@ -380,6 +380,29 @@ describe("Step6Review", () => {
 		expect(screen.getAllByText("élevé").length).toBeGreaterThanOrEqual(1);
 	});
 
+	it("displays total employee count per category", () => {
+		render(
+			<Step6Review
+				declaration={emptyDeclaration()}
+				declarationYear={2025}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({
+						name: "Cadres",
+						womenCount: 10,
+						menCount: 15,
+						annualBaseWomen: "3000",
+						annualBaseMen: "3200",
+					}),
+				]}
+			/>,
+		);
+		expect(screen.getByText(/Nombre total de salariés/)).toBeInTheDocument();
+		expect(screen.getByText("25")).toBeInTheDocument();
+	});
+
 	it("renders previous link pointing to step 5", () => {
 		render(
 			<Step6Review
