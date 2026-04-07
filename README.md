@@ -153,6 +153,74 @@ En développement local, l'authentification utilise le fournisseur d'identité d
 | `pnpm db:migrate` | Migrations Drizzle |
 | `pnpm db:studio` | Drizzle Studio |
 
+## Vérification par signature de requête pour l'API SUIT
+
+L'API privée SUIT est protégée par **signature de requête RSA-SHA256**. SUIT signe chaque requête avec sa clé privée, et EgaPro vérifie la signature avec la clé publique correspondante.
+
+### Fonctionnement
+
+```
+SUIT                                          EgaPro
+─────                                         ──────
+1. Construit le payload :
+   "{timestamp}|{METHOD}|{pathname}"
+
+2. Signe avec sa clé privée (RSA-SHA256)
+
+3. Envoie la requête avec :
+   X-Timestamp: {timestamp}                 4. Reconstruit le même payload
+   X-Signature: {base64 signature}
+   Authorization: Bearer {api-key}          5. Vérifie la signature avec
+                                               la clé publique de SUIT
+
+                                            6. Vérifie que le timestamp
+                                               date de moins de 30s
+```
+
+### Génération et rotation des clés
+
+```bash
+# Première génération
+./scripts/generate-suit-signing-keys.sh generate dev       # → ./suit-signing-keys/dev/
+./scripts/generate-suit-signing-keys.sh generate prod      # → ./suit-signing-keys/prod/
+./scripts/generate-suit-signing-keys.sh generate all       # → les deux
+
+# Rotation (sauvegarde les anciennes clés, génère de nouvelles)
+./scripts/generate-suit-signing-keys.sh renew prod
+```
+
+`generate` refuse d'écraser des clés existantes. `renew` les sauvegarde dans un dossier `backup-{date}` avant de regénérer.
+
+### Fichiers générés (par environnement)
+
+| Fichier | Description | Destinataire |
+|---|---|---|
+| `suit-signing.key` | Clé privée RSA | SUIT (signe les requêtes) |
+| `suit-signing.pub` | Clé publique RSA | EgaPro (secret K8s `EGAPRO_SUIT_PUBLIC_KEY_PEM` en base64) |
+
+### Mise en place
+
+1. **Côté EgaPro** : encoder `suit-signing.pub` en base64 et le placer dans le sealed-secret K8s (`EGAPRO_SUIT_PUBLIC_KEY_PEM`).
+2. **Côté SUIT** : conserver `suit-signing.key` de manière sécurisée et signer chaque requête.
+3. **Appel API** :
+   ```bash
+   TIMESTAMP=$(date +%s)
+   PAYLOAD="$TIMESTAMP|GET|/api/v1/export/declarations"
+   SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -sign suit-signing.key | base64 | tr -d '\n')
+   curl -H "X-Timestamp: $TIMESTAMP" \
+        -H "X-Signature: $SIGNATURE" \
+        -H 'Authorization: Bearer <api-key>' \
+        https://<host>/api/v1/export/declarations?date_begin=2026-01-01
+   ```
+
+### Procédure de rotation
+
+1. `./scripts/generate-suit-signing-keys.sh renew <env>` — génère une nouvelle paire, sauvegarde l'ancienne
+2. Mettre à jour le sealed-secret K8s avec la nouvelle clé publique
+3. Déployer EgaPro
+4. Transmettre la nouvelle clé privée à SUIT — ils doivent basculer juste après le déploiement
+5. Les anciennes clés sont dans `backup-{date}/` en cas de rollback
+
 ## Configuration AI (Claude Code)
 
 Le projet est entierement configure pour [Claude Code](https://claude.com/claude-code). Toute la configuration est versionnee dans `.claude/` et `.mcp.json`, ce qui signifie que chaque developpeur qui clone le repo beneficie automatiquement de toute l'intelligence du projet.
