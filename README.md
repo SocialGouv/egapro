@@ -177,13 +177,19 @@ SUIT                                          EgaPro
                                                date de moins de 30s
 ```
 
-### Génération des clés
+### Génération et rotation des clés
 
 ```bash
-./scripts/generate-suit-signing-keys.sh dev       # → ./suit-signing-keys/dev/
-./scripts/generate-suit-signing-keys.sh prod      # → ./suit-signing-keys/prod/
-./scripts/generate-suit-signing-keys.sh all       # → les deux
+# Première génération
+./scripts/generate-suit-signing-keys.sh generate dev       # → ./suit-signing-keys/dev/
+./scripts/generate-suit-signing-keys.sh generate prod      # → ./suit-signing-keys/prod/
+./scripts/generate-suit-signing-keys.sh generate all       # → les deux
+
+# Rotation (sauvegarde les anciennes clés, génère de nouvelles)
+./scripts/generate-suit-signing-keys.sh renew prod
 ```
+
+`generate` refuse d'écraser des clés existantes. `renew` les sauvegarde dans un dossier `backup-{date}` avant de regénérer.
 
 ### Fichiers générés (par environnement)
 
@@ -206,6 +212,14 @@ SUIT                                          EgaPro
         -H 'Authorization: Bearer <api-key>' \
         https://<host>/api/v1/export/declarations?date_begin=2026-01-01
    ```
+
+### Procédure de rotation
+
+1. `./scripts/generate-suit-signing-keys.sh renew <env>` — génère une nouvelle paire, sauvegarde l'ancienne
+2. Mettre à jour le sealed-secret K8s avec la nouvelle clé publique
+3. Déployer EgaPro
+4. Transmettre la nouvelle clé privée à SUIT — ils doivent basculer juste après le déploiement
+5. Les anciennes clés sont dans `backup-{date}/` en cas de rollback
 
 ## Configuration AI (Claude Code)
 

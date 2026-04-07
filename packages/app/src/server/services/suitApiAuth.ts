@@ -7,19 +7,20 @@ import { env } from "~/env";
 const SIGNATURE_WINDOW_SECONDS = 30;
 
 // Cache the public key at module level — parsed once, reused on every request.
-const suitPublicKey = env.EGAPRO_SUIT_PUBLIC_KEY_PEM
-	? createPublicKey(
+const suitPublicKey = (() => {
+	if (!env.EGAPRO_SUIT_PUBLIC_KEY_PEM) return null;
+	try {
+		return createPublicKey(
 			Buffer.from(env.EGAPRO_SUIT_PUBLIC_KEY_PEM, "base64").toString("utf-8"),
-		)
-	: null;
+		);
+	} catch (err) {
+		throw new Error(
+			`[suitApiAuth] Failed to parse EGAPRO_SUIT_PUBLIC_KEY_PEM: ${err instanceof Error ? err.message : String(err)}`,
+		);
+	}
+})();
 
-if (!suitPublicKey && env.NODE_ENV === "production") {
-	throw new Error(
-		"[suitApiAuth] EGAPRO_SUIT_PUBLIC_KEY_PEM is required in production",
-	);
-}
-
-if (!suitPublicKey && env.NODE_ENV !== "development") {
+if (!suitPublicKey && env.NODE_ENV === "development") {
 	console.warn(
 		"[suitApiAuth] EGAPRO_SUIT_PUBLIC_KEY_PEM is not set — request signature verification is disabled",
 	);

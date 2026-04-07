@@ -44,7 +44,6 @@ build/
 !.claude/settings.json
 
 # SUIT signing keys
+suit-client-certs/
 suit-signing-keys/
 *.key
-*.pub
-*.crt
