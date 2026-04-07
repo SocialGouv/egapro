@@ -1,0 +1,50 @@
+name: DB Schema Documentation
+
+on:
+  push:
+    branches: [master, alpha]
+    paths:
+      - "packages/app/src/server/db/schema.ts"
+  workflow_dispatch:
+
+concurrency:
+  cancel-in-progress: true
+  group: "${{ github.workflow }}"
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    name: Generate & publish to wiki
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate schema documentation
+        run: npx db-schema-toolkit export packages/app/src/server/db/schema.ts -f markdown -o schema-doc.md
+
+      - name: Publish to GitHub Wiki
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git clone "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git" /tmp/wiki
+          cp schema-doc.md /tmp/wiki/Schema-Egapro-V2.md
+          cd /tmp/wiki
+          git add Schema-Egapro-V2.md
+          git diff --cached --quiet || git commit -m "Update DB schema documentation — $(date -u +%Y-%m-%d)"
+          git push
