@@ -1,10 +1,12 @@
 import { render, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import type { PanelVariant } from "../DeclarationProcessPanel";
 import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
 
 const BASE_PROPS = {
+	campaignDeadlines: getDefaultCampaignDeadlines(2027),
 	year: 2027,
 	lastActionDate: "12 mars 2026" as string | null,
 	compliancePath: null as string | null,

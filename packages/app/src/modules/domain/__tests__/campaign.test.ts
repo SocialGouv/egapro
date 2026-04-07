@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	getCurrentYear,
 	getDeclarationDeadline,
+	getDefaultCampaignDeadlines,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
 } from "../shared/campaign";
@@ -51,5 +52,21 @@ describe("getDeclarationDeadline", () => {
 describe("getSecondDeclarationDeadline", () => {
 	it("returns 1 décembre for the given year", () => {
 		expect(getSecondDeclarationDeadline(2027)).toBe("1 décembre 2027");
+	});
+});
+
+describe("getDefaultCampaignDeadlines", () => {
+	it("returns Date objects for a given year", () => {
+		const deadlines = getDefaultCampaignDeadlines(2027);
+		expect(deadlines.decl1ModificationDeadline).toEqual(new Date(2027, 5, 1));
+		expect(deadlines.decl1JustificationDeadline).toEqual(new Date(2027, 5, 1));
+		expect(deadlines.decl1JointEvaluationDeadline).toEqual(
+			new Date(2027, 7, 1),
+		);
+		expect(deadlines.decl2ModificationDeadline).toEqual(new Date(2027, 11, 1));
+		expect(deadlines.decl2JustificationDeadline).toEqual(new Date(2027, 11, 1));
+		expect(deadlines.decl2JointEvaluationDeadline).toEqual(
+			new Date(2028, 1, 1),
+		);
 	});
 });
