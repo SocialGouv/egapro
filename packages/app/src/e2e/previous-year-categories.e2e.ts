@@ -14,7 +14,7 @@ async function goToStep5(page: Page) {
 	await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
 }
 
-test.describe("Previous year categories import", () => {
+test.describe("Previous year categories prefill", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await deleteCurrentYearCategories();
@@ -25,21 +25,17 @@ test.describe("Previous year categories import", () => {
 		await deletePreviousYearDeclaration();
 	});
 
-	test("imports N-1 categories with names, details and source, numeric fields empty", async ({
+	test("pre-fills N-1 category names, details and source with empty numeric fields", async ({
 		page,
 	}) => {
 		await goToStep5(page);
-
-		await page
-			.getByRole("button", { name: /reprendre les catégories/i })
-			.click();
 
 		// Source pre-filled from N-1
 		await expect(
 			page.getByRole("combobox", { name: /source utilisée/i }),
 		).toHaveValue("convention-collective");
 
-		// 3 categories imported
+		// 3 categories pre-filled
 		await expect(page.getByText("Nombre de catégories : 3")).toBeVisible();
 		await expect(
 			page.getByRole("button", { name: /Cadres dirigeants/ }),

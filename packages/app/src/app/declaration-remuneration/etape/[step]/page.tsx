@@ -104,13 +104,32 @@ export default async function StepPage({ params }: StepPageProps) {
 		],
 	};
 
-	const step5Categories = mapToEmployeeCategoryRows(
-		data.jobCategories,
-		data.employeeCategories,
-		"initial",
-	);
+	const hasCurrentYearCategories = data.jobCategories.length > 0;
 
-	const initialSource = data.jobCategories[0]?.source;
+	const step5Categories = hasCurrentYearCategories
+		? mapToEmployeeCategoryRows(
+				data.jobCategories,
+				data.employeeCategories,
+				"initial",
+			)
+		: (data.previousYearCategories?.categories.map((cat) => ({
+				name: cat.name,
+				detail: cat.detail,
+				womenCount: null,
+				menCount: null,
+				annualBaseWomen: null,
+				annualBaseMen: null,
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			})) ?? []);
+
+	const initialSource = hasCurrentYearCategories
+		? data.jobCategories[0]?.source
+		: (data.previousYearCategories?.source ?? undefined);
 
 	return (
 		<HydrateClient>

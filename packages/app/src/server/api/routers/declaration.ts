@@ -25,15 +25,6 @@ import {
 } from "./declarationHelpers";
 
 export const declarationRouter = createTRPCRouter({
-	getPreviousYearCategories: companyProcedure.query(async ({ ctx }) => {
-		const siren = ctx.siren;
-		const year = getCurrentYear();
-
-		return ctx.db.transaction(async (tx) => {
-			return fetchPreviousYearJobCategories(tx, siren, year);
-		});
-	}),
-
 	getOrCreate: companyProcedure.query(async ({ ctx }) => {
 		const siren = ctx.siren;
 		const year = getCurrentYear();
@@ -113,9 +104,16 @@ export const declarationRouter = createTRPCRouter({
 
 		const gipPrefillData = gipRow[0] ? mapGipToFormData(gipRow[0]) : null;
 
+		// Fetch N-1 categories for automatic prefilling when step 5 is empty
+		const hasCurrentCategories = (result.jobCategories ?? []).length > 0;
+		const previousYearCategories = hasCurrentCategories
+			? null
+			: await fetchPreviousYearJobCategories(ctx.db, siren, year);
+
 		return {
 			...result,
 			gipPrefillData,
+			previousYearCategories,
 		};
 	}),
 

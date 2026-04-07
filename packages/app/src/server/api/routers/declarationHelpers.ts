@@ -10,6 +10,8 @@ export type Tx = Parameters<
 	Parameters<import("~/server/db").DB["transaction"]>[0]
 >[0];
 
+type DbOrTx = Tx | import("~/server/db").DB;
+
 type EmployeeCategoryData = {
 	womenCount?: number;
 	menCount?: number;
@@ -91,7 +93,7 @@ export async function fetchAllCategories(tx: Tx, declarationId: string) {
 }
 
 export async function fetchPreviousYearJobCategories(
-	tx: Tx,
+	tx: DbOrTx,
 	siren: string,
 	currentYear: number,
 ) {

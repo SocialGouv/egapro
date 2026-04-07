@@ -15,7 +15,6 @@ type Props = {
 	onImport: (categories: EmployeeCategory[]) => void;
 	siren?: string;
 	year?: number;
-	extraButtons?: React.ReactNode;
 };
 
 export function CategoryImportExport({
@@ -23,7 +22,6 @@ export function CategoryImportExport({
 	onImport,
 	siren,
 	year,
-	extraButtons,
 }: Props) {
 	const baseId = useId();
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -105,7 +103,6 @@ export function CategoryImportExport({
 						Importer un fichier
 					</button>
 				</li>
-				{extraButtons}
 			</ul>
 
 			{createPortal(
