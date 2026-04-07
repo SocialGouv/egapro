@@ -153,48 +153,59 @@ En développement local, l'authentification utilise le fournisseur d'identité d
 | `pnpm db:migrate` | Migrations Drizzle |
 | `pnpm db:studio` | Drizzle Studio |
 
-## Vérification par certificat client pour l'API SUIT
+## Vérification par signature de requête pour l'API SUIT
 
-L'API d'export des déclarations vers SUIT est protégée par **vérification de certificat client** (header `X-Client-Cert`). Le script `scripts/generate-suit-client-certs.sh` génère une CA auto-signée et un certificat client pour chaque environnement.
+L'API privée SUIT est protégée par **signature de requête RSA-SHA256**. SUIT signe chaque requête avec sa clé privée, et EgaPro vérifie la signature avec la clé publique correspondante.
 
-### Utilisation
+### Fonctionnement
+
+```
+SUIT                                          EgaPro
+─────                                         ──────
+1. Construit le payload :
+   "{timestamp}|{METHOD}|{pathname}"
+
+2. Signe avec sa clé privée (RSA-SHA256)
+
+3. Envoie la requête avec :
+   X-Timestamp: {timestamp}                 4. Reconstruit le même payload
+   X-Signature: {base64 signature}
+   Authorization: Bearer {api-key}          5. Vérifie la signature avec
+                                               la clé publique de SUIT
+
+                                            6. Vérifie que le timestamp
+                                               date de moins de 30s
+```
+
+### Génération des clés
 
 ```bash
-# Générer les certificats pour le cluster de dev
-./scripts/generate-suit-client-certs.sh dev
-
-# Générer les certificats pour la prod
-./scripts/generate-suit-client-certs.sh prod
-
-# Générer les deux d'un coup
-./scripts/generate-suit-client-certs.sh all
-
-# Spécifier un répertoire de sortie personnalisé
-./scripts/generate-suit-client-certs.sh dev ./my-certs
+./scripts/generate-suit-signing-keys.sh dev       # → ./suit-signing-keys/dev/
+./scripts/generate-suit-signing-keys.sh prod      # → ./suit-signing-keys/prod/
+./scripts/generate-suit-signing-keys.sh all       # → les deux
 ```
 
 ### Fichiers générés (par environnement)
 
-Les fichiers sont créés dans `./suit-client-certs/<env>/` :
-
 | Fichier | Description | Destinataire |
 |---|---|---|
-| `ca.key` | Clé privée de la CA | **Ne pas distribuer** |
-| `ca.crt` | Certificat de la CA | EgaPro (secret K8s `EGAPRO_SUIT_CLIENT_CA_PEM` en base64) |
-| `client.crt` | Certificat client (clé publique) | SUIT |
+| `suit-signing.key` | Clé privée RSA | SUIT (signe les requêtes) |
+| `suit-signing.pub` | Clé publique RSA | EgaPro (secret K8s `EGAPRO_SUIT_PUBLIC_KEY_PEM` en base64) |
 
 ### Mise en place
 
-1. **Côté EgaPro** : encoder `ca.crt` en base64 et le placer dans le sealed-secret K8s de l'environnement correspondant (`EGAPRO_SUIT_CLIENT_CA_PEM`).
-2. **Côté SUIT** : transmettre `client.crt` et la valeur base64 correspondante à utiliser dans le header `X-Client-Cert`.
+1. **Côté EgaPro** : encoder `suit-signing.pub` en base64 et le placer dans le sealed-secret K8s (`EGAPRO_SUIT_PUBLIC_KEY_PEM`).
+2. **Côté SUIT** : conserver `suit-signing.key` de manière sécurisée et signer chaque requête.
 3. **Appel API** :
    ```bash
-   curl -H 'X-Client-Cert: <base64 de client.crt>' \
+   TIMESTAMP=$(date +%s)
+   PAYLOAD="$TIMESTAMP|GET|/api/v1/export/declarations"
+   SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -sign suit-signing.key | base64 | tr -d '\n')
+   curl -H "X-Timestamp: $TIMESTAMP" \
+        -H "X-Signature: $SIGNATURE" \
         -H 'Authorization: Bearer <api-key>' \
         https://<host>/api/v1/export/declarations?date_begin=2026-01-01
    ```
-
-Les CN des certificats incluent l'environnement (ex: `EgaPro SUIT Client CA (dev)`) pour distinguer les paires dev/prod.
 
 ## Configuration AI (Claude Code)
 

@@ -45,5 +45,7 @@ build/
 
 
 suit-client-certs/
-*.crt
+suit-signing-keys/
 *.key
+*.pub
+*.crt

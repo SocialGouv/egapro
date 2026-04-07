@@ -252,8 +252,8 @@ export const openApiSpec = {
 	info: {
 		title: "EGAPRO — API d'export",
 		description:
-			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes).L'accès nécessite un certificat client et une clé API (Bearer token).",
-		version: "1.0.0",
+			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une signature de requête (RSA-SHA256) et une clé API (Bearer token).",
+		version: "1.2.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},
@@ -267,16 +267,23 @@ export const openApiSpec = {
 				description:
 					"Clé API SUIT. Utiliser le header : Authorization: Bearer <clé>",
 			},
-			clientCert: {
+			requestSignature: {
 				type: "apiKey",
 				in: "header",
-				name: "X-Client-Cert",
+				name: "X-Signature",
 				description:
-					"Certificat client X.509 signé par la CA EGAPRO, encodé en base64. Header : X-Client-Cert: <base64 du PEM>",
+					"Signature RSA-SHA256 du payload `{timestamp}|{METHOD}|{pathname}`, encodée en base64.",
+			},
+			requestTimestamp: {
+				type: "apiKey",
+				in: "header",
+				name: "X-Timestamp",
+				description:
+					"Horodatage Unix (secondes) utilisé pour construire le payload signé. Doit être à moins de 30 secondes de l'heure serveur.",
 			},
 		},
 	},
-	security: [{ clientCert: [], bearerAuth: [] }],
+	security: [{ requestSignature: [], requestTimestamp: [], bearerAuth: [] }],
 	paths: {
 		"/api/v1/export/declarations": {
 			get: {
@@ -334,7 +341,7 @@ export const openApiSpec = {
 						},
 					},
 					"403": {
-						description: "Certificat client manquant ou invalide",
+						description: "Signature manquante ou invalide",
 						content: {
 							"application/json": {
 								schema: {
@@ -342,7 +349,7 @@ export const openApiSpec = {
 									properties: {
 										error: {
 											type: "string",
-											example: "Certificat client manquant ou invalide",
+											example: "Signature manquante ou invalide",
 										},
 									},
 								},
@@ -453,6 +460,10 @@ export const openApiSpec = {
 							},
 						},
 					},
+					"403": {
+						description: "Signature manquante ou invalide",
+						content: { "application/json": { schema: errorSchema } },
+					},
 					"401": {
 						description: "Clé API manquante ou invalide",
 						content: { "application/json": { schema: errorSchema } },
@@ -491,6 +502,10 @@ export const openApiSpec = {
 								schema: { type: "string", format: "binary" },
 							},
 						},
+					},
+					"403": {
+						description: "Signature manquante ou invalide",
+						content: { "application/json": { schema: errorSchema } },
 					},
 					"401": {
 						description: "Clé API manquante ou invalide",

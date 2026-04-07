@@ -1,8 +1,29 @@
 import "server-only";
 
-import { timingSafeEqual, X509Certificate } from "node:crypto";
+import { createPublicKey, timingSafeEqual, verify } from "node:crypto";
 
 import { env } from "~/env";
+
+const SIGNATURE_WINDOW_SECONDS = 30;
+
+// Cache the public key at module level — parsed once, reused on every request.
+const suitPublicKey = env.EGAPRO_SUIT_PUBLIC_KEY_PEM
+	? createPublicKey(
+			Buffer.from(env.EGAPRO_SUIT_PUBLIC_KEY_PEM, "base64").toString("utf-8"),
+		)
+	: null;
+
+if (!suitPublicKey && env.NODE_ENV === "production") {
+	throw new Error(
+		"[suitApiAuth] EGAPRO_SUIT_PUBLIC_KEY_PEM is required in production",
+	);
+}
+
+if (!suitPublicKey && env.NODE_ENV !== "development") {
+	console.warn(
+		"[suitApiAuth] EGAPRO_SUIT_PUBLIC_KEY_PEM is not set — request signature verification is disabled",
+	);
+}
 
 /**
  * Verify that the incoming request carries a valid SUIT API key
@@ -33,42 +54,48 @@ export function verifySuitApiKey(request: Request): true | Response {
 }
 
 /**
- * Verify the client certificate sent in the `X-Client-Cert` header.
+ * Verify the request signature sent in the `X-Signature` header.
  *
- * The client sends its X.509 certificate as a base64-encoded PEM in the
- * `X-Client-Cert` header. The app verifies:
- * 1. The certificate is signed by our CA (EGAPRO_SUIT_CLIENT_CA_PEM)
- * 2. The certificate is not expired
+ * SUIT signs `{timestamp}|{METHOD}|{pathname}` with its RSA private key.
+ * The app verifies:
+ * 1. The signature matches using SUIT's public key (EGAPRO_SUIT_PUBLIC_KEY_PEM)
+ * 2. The timestamp is within a 30-second window (anti-replay)
  *
- * Only active when `EGAPRO_SUIT_CLIENT_CA_PEM` is set. When absent, client
- * certificate verification is skipped (dev / environments without certs).
+ * Only active when `EGAPRO_SUIT_PUBLIC_KEY_PEM` is set. When absent, signature
+ * verification is skipped (dev / environments without keys).
  */
-export function verifySuitClientCert(request: Request): true | Response {
-	if (!env.EGAPRO_SUIT_CLIENT_CA_PEM) return true;
+export function verifySuitSignature(request: Request): true | Response {
+	if (!suitPublicKey) return true;
 
-	const clientCertB64 = request.headers.get("x-client-cert");
-	if (!clientCertB64) {
+	const timestamp = request.headers.get("x-timestamp");
+	const signature = request.headers.get("x-signature");
+
+	if (!timestamp || !signature) {
+		return forbiddenResponse();
+	}
+
+	const ts = Number(timestamp);
+	if (Number.isNaN(ts)) {
+		return forbiddenResponse();
+	}
+
+	const now = Math.floor(Date.now() / 1000);
+	if (Math.abs(now - ts) > SIGNATURE_WINDOW_SECONDS) {
 		return forbiddenResponse();
 	}
 
 	try {
-		const clientPem = Buffer.from(clientCertB64, "base64").toString("utf-8");
-		const caPem = Buffer.from(env.EGAPRO_SUIT_CLIENT_CA_PEM, "base64").toString(
-			"utf-8",
+		const url = new URL(request.url);
+		const payload = `${timestamp}|${request.method}|${url.pathname}`;
+
+		const isValid = verify(
+			"RSA-SHA256",
+			Buffer.from(payload),
+			suitPublicKey,
+			Buffer.from(signature, "base64"),
 		);
 
-		const clientCert = new X509Certificate(clientPem);
-		const caCert = new X509Certificate(caPem);
-
-		if (!clientCert.verify(caCert.publicKey)) {
-			return forbiddenResponse();
-		}
-
-		const now = new Date();
-		if (
-			now < new Date(clientCert.validFrom) ||
-			now > new Date(clientCert.validTo)
-		) {
+		if (!isValid) {
 			return forbiddenResponse();
 		}
 
@@ -76,6 +103,20 @@ export function verifySuitClientCert(request: Request): true | Response {
 	} catch {
 		return forbiddenResponse();
 	}
+}
+
+/**
+ * Run both SUIT auth checks: signature verification then API key.
+ * Returns `null` on success, or a Response to send back on failure.
+ */
+export function verifySuitAuth(request: Request): Response | null {
+	const signatureResult = verifySuitSignature(request);
+	if (signatureResult !== true) return signatureResult;
+
+	const apiKeyResult = verifySuitApiKey(request);
+	if (apiKeyResult !== true) return apiKeyResult;
+
+	return null;
 }
 
 /**
@@ -101,7 +142,7 @@ function unauthorizedResponse(): Response {
 
 function forbiddenResponse(): Response {
 	return Response.json(
-		{ error: "Certificat client manquant ou invalide" },
+		{ error: "Signature manquante ou invalide" },
 		{ status: 403 },
 	);
 }
