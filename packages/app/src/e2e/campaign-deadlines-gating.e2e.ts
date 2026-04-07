@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+import { getCurrentYear } from "~/modules/domain";
+
 import {
 	deleteCampaignDeadlines,
-	getTestDeclarationYear,
 	resetDeclarationToDraft,
 	setCampaignDeadlines,
 	setCompanyHasCse,
@@ -11,7 +12,8 @@ import {
 import { loginWithProConnect } from "./helpers/login";
 
 const PANEL_ID = "declaration-process-panel";
-let testDeclarationYear: number;
+// Match the year that api.declaration.getOrCreate() uses on first login.
+const testDeclarationYear = getCurrentYear();
 
 const FUTURE_DEADLINES = {
 	decl1ModificationDeadline: "2099-06-01",
@@ -43,7 +45,6 @@ test.describe("Campaign deadlines gating", () => {
 			currentStep: 6,
 			compliancePath: "corrective_action",
 		});
-		testDeclarationYear = await getTestDeclarationYear();
 	});
 
 	test.afterAll(async () => {
