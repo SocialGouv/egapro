@@ -472,6 +472,20 @@ export const filesRelations = relations(files, ({ one }) => ({
 	}),
 }));
 
+// ── Campaign deadlines (configurable per year) ────────────────────
+
+export const campaignDeadlines = createTable("campaign_deadline", (d) => ({
+	year: d.integer().notNull().primaryKey(),
+	// Declaration 1
+	decl1ModificationDeadline: d.date().notNull(),
+	decl1JustificationDeadline: d.date().notNull(),
+	decl1JointEvaluationDeadline: d.date().notNull(),
+	// Declaration 2
+	decl2ModificationDeadline: d.date().notNull(),
+	decl2JustificationDeadline: d.date().notNull(),
+	decl2JointEvaluationDeadline: d.date().notNull(),
+}));
+
 // ── Export tables ───────────────────────────────────────────────────
 
 export const exports = createTable(

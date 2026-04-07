@@ -4,6 +4,7 @@
 export {
 	getCurrentYear,
 	getDeclarationDeadline,
+	getDefaultCampaignDeadlines,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
 } from "./shared/campaign";
@@ -51,6 +52,7 @@ export {
 // SIREN utilities
 export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
 export type {
+	CampaignDeadlines,
 	CompanySize,
 	DeclarationStatus,
 	DeclarationType,
