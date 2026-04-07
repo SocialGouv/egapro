@@ -5,9 +5,13 @@ import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import type { PanelVariant } from "../DeclarationProcessPanel";
 import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
 
+// Use a far-future year so "future deadline" assertions stay valid regardless
+// of when the tests run.
+const FUTURE_YEAR = 2099;
+
 const BASE_PROPS = {
-	campaignDeadlines: getDefaultCampaignDeadlines(2027),
-	year: 2027,
+	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
+	year: FUTURE_YEAR,
 	lastActionDate: "12 mars 2026" as string | null,
 	compliancePath: null as string | null,
 	secondDeclarationStatus: null as string | null,
@@ -35,7 +39,9 @@ describe("DeclarationProcessPanel", () => {
 		it("renders the title with year", () => {
 			const { panel } = renderPanel("start");
 			expect(
-				panel.getByText("Démarche des indicateurs de rémunération 2027"),
+				panel.getByText(
+					`Démarche des indicateurs de rémunération ${FUTURE_YEAR}`,
+				),
 			).toBeInTheDocument();
 		});
 

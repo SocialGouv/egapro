@@ -141,6 +141,21 @@ export async function deleteCseOpinions() {
 	}
 }
 
+/** Returns the year of the test declaration (whatever the seed created). */
+export async function getTestDeclarationYear(): Promise<number> {
+	const sql = createConnection();
+	try {
+		const rows = await sql<
+			{ year: number }[]
+		>`SELECT year FROM app_declaration WHERE siren = ${TEST_SIREN} ORDER BY year DESC LIMIT 1`;
+		const row = rows[0];
+		if (!row) throw new Error("No test declaration found");
+		return row.year;
+	} finally {
+		await sql.end();
+	}
+}
+
 type CampaignDeadlineDates = {
 	decl1ModificationDeadline: string;
 	decl1JustificationDeadline: string;

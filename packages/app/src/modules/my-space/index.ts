@@ -6,5 +6,4 @@ export {
 export { extractSiren, formatSiren } from "./formatSiren";
 export { MonEspacePage } from "./MonEspacePage";
 export { MyCompaniesPage } from "./MyCompaniesPage";
-export { PanelPlayground } from "./PanelPlayground";
 export { sirenInputSchema, updateHasCseSchema } from "./schemas";

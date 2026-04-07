@@ -1,7 +1,11 @@
+import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 
 import { env } from "~/env.js";
-import { PanelPlayground } from "~/modules/my-space";
+
+const PanelPlayground = dynamic(() =>
+	import("~/modules/my-space/PanelPlayground").then((m) => m.PanelPlayground),
+);
 
 export default function TestPanelPage() {
 	if (env.NODE_ENV === "production") {

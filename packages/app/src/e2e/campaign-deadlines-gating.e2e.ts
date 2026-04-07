@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import {
 	deleteCampaignDeadlines,
+	getTestDeclarationYear,
 	resetDeclarationToDraft,
 	setCampaignDeadlines,
 	setCompanyHasCse,
@@ -10,7 +11,7 @@ import {
 import { loginWithProConnect } from "./helpers/login";
 
 const PANEL_ID = "declaration-process-panel";
-const CURRENT_YEAR = 2026;
+let testDeclarationYear: number;
 
 const FUTURE_DEADLINES = {
 	decl1ModificationDeadline: "2099-06-01",
@@ -42,17 +43,18 @@ test.describe("Campaign deadlines gating", () => {
 			currentStep: 6,
 			compliancePath: "corrective_action",
 		});
+		testDeclarationYear = await getTestDeclarationYear();
 	});
 
 	test.afterAll(async () => {
-		await deleteCampaignDeadlines(CURRENT_YEAR);
+		await deleteCampaignDeadlines(testDeclarationYear);
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
 	});
 
 	test.describe("Deadline in the future", () => {
 		test.beforeAll(async () => {
-			await setCampaignDeadlines(CURRENT_YEAR, FUTURE_DEADLINES);
+			await setCampaignDeadlines(testDeclarationYear, FUTURE_DEADLINES);
 		});
 
 		test("panel shows Modifier link and 'Modifiable jusqu'au' text", async ({
@@ -91,7 +93,7 @@ test.describe("Campaign deadlines gating", () => {
 
 	test.describe("Deadline in the past", () => {
 		test.beforeAll(async () => {
-			await setCampaignDeadlines(CURRENT_YEAR, PAST_DEADLINES);
+			await setCampaignDeadlines(testDeclarationYear, PAST_DEADLINES);
 		});
 
 		test("panel hides Modifier link and shows 'Modification close depuis'", async ({
