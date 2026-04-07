@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { DEFAULT_CATEGORIES } from "~/modules/declaration-remuneration/types";
-import { generateTemplate, parseImportFile } from "../categoryImportExport";
+import { generateTemplate, parseImportFile } from "../categoryFileHandler";
 import type { EmployeeCategory } from "../categorySerializer";
 
 function makeCategory(

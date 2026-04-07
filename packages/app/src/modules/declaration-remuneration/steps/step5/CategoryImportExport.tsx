@@ -7,7 +7,7 @@ import {
 	generateTemplate,
 	type ImportError,
 	parseImportFile,
-} from "./categoryImportExport";
+} from "./categoryFileHandler";
 import type { EmployeeCategory } from "./categorySerializer";
 
 type Props = {
