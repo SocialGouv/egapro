@@ -207,4 +207,22 @@ describe("DeclarationProcessPanel", () => {
 		const { panel } = renderPanel("start", { lastActionDate: null });
 		expect(panel.queryByText(/Dernière action/)).not.toBeInTheDocument();
 	});
+
+	describe("modify button gating by deadline", () => {
+		it("renders the Modifier link when deadline is in the future", () => {
+			const { panel } = renderPanel("compliance");
+			expect(panel.getByText("Modifier")).toBeInTheDocument();
+			expect(panel.getByText(/Modifiable jusqu'au/)).toBeInTheDocument();
+		});
+
+		it("hides the Modifier link when the deadline has passed", () => {
+			const { panel } = renderPanel("compliance", {
+				campaignDeadlines: getDefaultCampaignDeadlines(2020),
+			});
+			expect(panel.queryByText("Modifier")).not.toBeInTheDocument();
+			expect(
+				panel.getByText(/Modification close depuis le/),
+			).toBeInTheDocument();
+		});
+	});
 });

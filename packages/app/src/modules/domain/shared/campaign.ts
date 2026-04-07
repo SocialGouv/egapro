@@ -31,3 +31,11 @@ export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 		decl2JointEvaluationDeadline: new Date(year + 1, 1, 1),
 	};
 }
+
+/** Returns true if the given deadline is strictly in the past. */
+export function isDeadlinePassed(
+	deadline: Date,
+	now: Date = new Date(),
+): boolean {
+	return now.getTime() > deadline.getTime();
+}

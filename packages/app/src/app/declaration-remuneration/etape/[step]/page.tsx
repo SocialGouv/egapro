@@ -3,7 +3,9 @@ import {
 	StepPageClient,
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
+import { isDeadlinePassed } from "~/modules/domain";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
+import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
 
 type StepPageProps = {
@@ -21,9 +23,13 @@ export default async function StepPage({ params }: StepPageProps) {
 	const data = await api.declaration.getOrCreate();
 	const d = data.declaration;
 
-	// If declaration is already submitted, redirect non-recap steps to the recap
+	// If declaration is submitted AND the modification deadline has passed,
+	// lock editing by redirecting non-recap steps to the recap.
 	if (d.status === "submitted" && step !== 6) {
-		redirect("/declaration-remuneration/etape/6");
+		const { decl1ModificationDeadline } = await getCampaignDeadlines(d.year);
+		if (isDeadlinePassed(decl1ModificationDeadline)) {
+			redirect("/declaration-remuneration/etape/6");
+		}
 	}
 
 	const gip = data.gipPrefillData;

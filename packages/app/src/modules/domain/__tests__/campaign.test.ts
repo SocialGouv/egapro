@@ -6,6 +6,7 @@ import {
 	getDefaultCampaignDeadlines,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
+	isDeadlinePassed,
 } from "../shared/campaign";
 
 describe("getCurrentYear", () => {
@@ -67,6 +68,28 @@ describe("getDefaultCampaignDeadlines", () => {
 		expect(deadlines.decl2JustificationDeadline).toEqual(new Date(2027, 11, 1));
 		expect(deadlines.decl2JointEvaluationDeadline).toEqual(
 			new Date(2028, 1, 1),
+		);
+	});
+});
+
+describe("isDeadlinePassed", () => {
+	const deadline = new Date("2026-06-01T00:00:00");
+
+	it("returns false when now is before the deadline", () => {
+		expect(isDeadlinePassed(deadline, new Date("2026-05-31T23:59:59"))).toBe(
+			false,
+		);
+	});
+
+	it("returns false when now equals the deadline", () => {
+		expect(isDeadlinePassed(deadline, new Date("2026-06-01T00:00:00"))).toBe(
+			false,
+		);
+	});
+
+	it("returns true when now is after the deadline", () => {
+		expect(isDeadlinePassed(deadline, new Date("2026-06-01T00:00:01"))).toBe(
+			true,
 		);
 	});
 });
