@@ -43,8 +43,7 @@ build/
 !.claude/skills/
 !.claude/settings.json
 
-
-suit-client-certs/
+# SUIT signing keys
 suit-signing-keys/
 *.key
 *.pub
