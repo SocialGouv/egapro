@@ -7,7 +7,7 @@ import {
 } from "~/modules/cseOpinion/schemas";
 import { MAX_CSE_FILES } from "~/modules/cseOpinion/types";
 import { createTRPCRouter, declarationProcedure } from "~/server/api/trpc";
-import { cseOpinionFiles, cseOpinions } from "~/server/db/schema";
+import { cseOpinions, files } from "~/server/db/schema";
 import { deleteFile as deleteS3File } from "~/server/services/s3";
 
 export const cseOpinionRouter = createTRPCRouter({
@@ -81,12 +81,17 @@ export const cseOpinionRouter = createTRPCRouter({
 	getFiles: declarationProcedure.query(async ({ ctx }) => {
 		const rows = await ctx.db
 			.select({
-				id: cseOpinionFiles.id,
-				fileName: cseOpinionFiles.fileName,
-				uploadedAt: cseOpinionFiles.uploadedAt,
+				id: files.id,
+				fileName: files.fileName,
+				uploadedAt: files.uploadedAt,
 			})
-			.from(cseOpinionFiles)
-			.where(eq(cseOpinionFiles.declarationId, ctx.declarationId));
+			.from(files)
+			.where(
+				and(
+					eq(files.declarationId, ctx.declarationId),
+					eq(files.type, "cse_opinion"),
+				),
+			);
 
 		return { files: rows };
 	}),
@@ -96,9 +101,14 @@ export const cseOpinionRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			await ctx.db.transaction(async (tx) => {
 				const existingFiles = await tx
-					.select({ id: cseOpinionFiles.id })
-					.from(cseOpinionFiles)
-					.where(eq(cseOpinionFiles.declarationId, ctx.declarationId));
+					.select({ id: files.id })
+					.from(files)
+					.where(
+						and(
+							eq(files.declarationId, ctx.declarationId),
+							eq(files.type, "cse_opinion"),
+						),
+					);
 
 				if (existingFiles.length >= MAX_CSE_FILES) {
 					throw new TRPCError({
@@ -107,10 +117,11 @@ export const cseOpinionRouter = createTRPCRouter({
 					});
 				}
 
-				await tx.insert(cseOpinionFiles).values({
+				await tx.insert(files).values({
 					declarationId: ctx.declarationId,
 					fileName: input.fileName,
 					filePath: input.filePath,
+					type: "cse_opinion",
 				});
 			});
 
@@ -121,12 +132,13 @@ export const cseOpinionRouter = createTRPCRouter({
 		.input(deleteFileSchema)
 		.mutation(async ({ ctx, input }) => {
 			const rows = await ctx.db
-				.select({ filePath: cseOpinionFiles.filePath })
-				.from(cseOpinionFiles)
+				.select({ filePath: files.filePath })
+				.from(files)
 				.where(
 					and(
-						eq(cseOpinionFiles.id, input.fileId),
-						eq(cseOpinionFiles.declarationId, ctx.declarationId),
+						eq(files.id, input.fileId),
+						eq(files.declarationId, ctx.declarationId),
+						eq(files.type, "cse_opinion"),
 					),
 				)
 				.limit(1);
@@ -140,11 +152,12 @@ export const cseOpinionRouter = createTRPCRouter({
 			}
 
 			await ctx.db
-				.delete(cseOpinionFiles)
+				.delete(files)
 				.where(
 					and(
-						eq(cseOpinionFiles.id, input.fileId),
-						eq(cseOpinionFiles.declarationId, ctx.declarationId),
+						eq(files.id, input.fileId),
+						eq(files.declarationId, ctx.declarationId),
+						eq(files.type, "cse_opinion"),
 					),
 				);
 

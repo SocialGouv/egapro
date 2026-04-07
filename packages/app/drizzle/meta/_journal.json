@@ -155,6 +155,13 @@
 			"when": 1775400000000,
 			"tag": "0021_add-campaign-deadlines",
 			"breakpoints": true
+		},
+		{
+			"idx": 22,
+			"version": "7",
+			"when": 1775450000000,
+			"tag": "0022_merge_file_tables",
+			"breakpoints": true
 		}
 	]
 }

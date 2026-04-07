@@ -19,12 +19,13 @@ vi.mock("~/server/db/schema", () => ({
 		opinionDate: "opinionDate",
 		gapConsulted: "gapConsulted",
 	},
-	cseOpinionFiles: {
+	files: {
 		id: "id",
 		declarationId: "declarationId",
 		fileName: "fileName",
 		filePath: "filePath",
 		uploadedAt: "uploadedAt",
+		type: "type",
 	},
 }));
 

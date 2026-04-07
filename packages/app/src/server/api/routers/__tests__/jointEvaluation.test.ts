@@ -10,12 +10,13 @@ vi.mock("~/server/db", () => ({
 
 vi.mock("~/server/db/schema", () => ({
 	declarations: { id: "id", siren: "siren", year: "year" },
-	jointEvaluationFiles: {
+	files: {
 		id: "id",
 		declarationId: "declarationId",
 		fileName: "fileName",
 		filePath: "filePath",
 		uploadedAt: "uploadedAt",
+		type: "type",
 	},
 }));
 
