@@ -252,8 +252,8 @@ export const openApiSpec = {
 	info: {
 		title: "EGAPRO — API d'export",
 		description:
-			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une clé API (Bearer token).",
-		version: "1.1.0",
+			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une signature de requête (RSA-SHA256) et une clé API (Bearer token).",
+		version: "1.2.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},
@@ -267,9 +267,23 @@ export const openApiSpec = {
 				description:
 					"Clé API SUIT. Utiliser le header : Authorization: Bearer <clé>",
 			},
+			requestSignature: {
+				type: "apiKey",
+				in: "header",
+				name: "X-Signature",
+				description:
+					"Signature RSA-SHA256 du payload `{timestamp}|{METHOD}|{pathname}`, encodée en base64.",
+			},
+			requestTimestamp: {
+				type: "apiKey",
+				in: "header",
+				name: "X-Timestamp",
+				description:
+					"Horodatage Unix (secondes) utilisé pour construire le payload signé. Doit être à moins de 30 secondes de l'heure serveur.",
+			},
 		},
 	},
-	security: [{ bearerAuth: [] }],
+	security: [{ requestSignature: [], requestTimestamp: [], bearerAuth: [] }],
 	paths: {
 		"/api/v1/export/declarations": {
 			get: {
@@ -321,6 +335,22 @@ export const openApiSpec = {
 											example: 5,
 										},
 										declarations: { type: "array", items: declarationSchema },
+									},
+								},
+							},
+						},
+					},
+					"403": {
+						description: "Signature manquante ou invalide",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Signature manquante ou invalide",
+										},
 									},
 								},
 							},
@@ -430,6 +460,10 @@ export const openApiSpec = {
 							},
 						},
 					},
+					"403": {
+						description: "Signature manquante ou invalide",
+						content: { "application/json": { schema: errorSchema } },
+					},
 					"401": {
 						description: "Clé API manquante ou invalide",
 						content: { "application/json": { schema: errorSchema } },
@@ -468,6 +502,10 @@ export const openApiSpec = {
 								schema: { type: "string", format: "binary" },
 							},
 						},
+					},
+					"403": {
+						description: "Signature manquante ou invalide",
+						content: { "application/json": { schema: errorSchema } },
 					},
 					"401": {
 						description: "Clé API manquante ou invalide",

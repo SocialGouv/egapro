@@ -3,17 +3,19 @@ import {
 	fetchCseFilesByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 } from "~/modules/export";
-import { verifySuitApiKey } from "~/server/services/suitApiAuth";
+import { verifySuitAuth } from "~/server/services/suitApiAuth";
 
 /**
  * GET /api/v1/files?siren=123456789&year=2027
  *
  * Secured REST API returning file metadata for CSE opinions and joint evaluations.
- * Requires a valid SUIT API key in the Authorization: Bearer header.
+ * Requires:
+ * 1. A valid request signature (RSA-SHA256, verified via X-Signature + X-Timestamp headers)
+ * 2. A valid SUIT API key in the Authorization: Bearer header
  */
 export async function GET(request: Request) {
-	const authResult = verifySuitApiKey(request);
-	if (authResult !== true) return authResult;
+	const authError = verifySuitAuth(request);
+	if (authError) return authError;
 
 	try {
 		const url = new URL(request.url);
