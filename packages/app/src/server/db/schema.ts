@@ -1,10 +1,11 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
 	index,
 	pgEnum,
 	pgTableCreator,
 	primaryKey,
 	unique,
+	uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -456,7 +457,12 @@ export const files = createTable(
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		type: fileTypeEnum().notNull(),
 	}),
-	(t) => [index("file_declaration_idx").on(t.declarationId)],
+	(t) => [
+		index("file_declaration_idx").on(t.declarationId),
+		uniqueIndex("file_joint_eval_unique")
+			.on(t.declarationId)
+			.where(sql`"type" = 'joint_evaluation'`),
+	],
 );
 
 export const filesRelations = relations(files, ({ one }) => ({

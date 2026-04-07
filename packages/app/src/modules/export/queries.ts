@@ -241,10 +241,11 @@ export async function getDeclarationsWithIndicatorG(
 
 // ── File queries (CSE opinion files + joint evaluation files) ────────
 
-function fetchFilesByDeclaration(
+async function fetchFilesByDeclaration(
 	keys: Array<{ siren: string; year: number }>,
 	type: "cse_opinion" | "joint_evaluation",
 ): Promise<FileRow[]> {
+	if (keys.length === 0) return [];
 	return db
 		.select({
 			id: files.id,

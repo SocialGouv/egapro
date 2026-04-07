@@ -35,11 +35,11 @@ ALTER TABLE "app_file"
 CREATE INDEX "file_declaration_idx" ON "app_file" USING btree ("declaration_id");
 
 -- Step 7: Create partial unique index (one joint_evaluation file per declaration)
-CREATE UNIQUE INDEX "file_joint_eval_unique" ON "app_file" ("declaration_id") WHERE "type" = 'joint_evaluation';
+CREATE UNIQUE INDEX "file_joint_eval_unique" ON "app_file" USING btree ("declaration_id") WHERE "type" = 'joint_evaluation';
 
 -- Step 8: Drop the junction table (never queried in application code)
 DROP TABLE "app_cse_opinion_file_link";
 
--- Step 9: Drop old tables
-DROP TABLE "app_cse_opinion_file";
-DROP TABLE "app_joint_evaluation_file";
+-- Step 9: Drop old tables (cascade removes any remaining FK references)
+DROP TABLE "app_cse_opinion_file" CASCADE;
+DROP TABLE "app_joint_evaluation_file" CASCADE;
