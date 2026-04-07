@@ -11,7 +11,7 @@ import {
 	companies,
 	cseOpinions,
 	declarations,
-	jointEvaluationFiles,
+	files,
 	userCompanies,
 } from "~/server/db/schema";
 import { fetchCseBySiren, fetchSanctionBySiren } from "~/server/services/suit";
@@ -142,12 +142,14 @@ export const companyRouter = createTRPCRouter({
 						.where(eq(declarations.siren, input.siren)),
 					ctx.db
 						.select({ year: declarations.year })
-						.from(jointEvaluationFiles)
-						.innerJoin(
-							declarations,
-							eq(jointEvaluationFiles.declarationId, declarations.id),
-						)
-						.where(eq(declarations.siren, input.siren)),
+						.from(files)
+						.innerJoin(declarations, eq(files.declarationId, declarations.id))
+						.where(
+							and(
+								eq(declarations.siren, input.siren),
+								eq(files.type, "joint_evaluation"),
+							),
+						),
 				]);
 
 			const yearsWithCseOpinion = new Set(cseOpinionRows.map((r) => r.year));

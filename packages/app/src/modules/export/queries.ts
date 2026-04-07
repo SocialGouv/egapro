@@ -5,12 +5,11 @@ import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
 	companies,
-	cseOpinionFiles,
 	cseOpinions,
 	declarations,
 	employeeCategories,
+	files,
 	jobCategories,
-	jointEvaluationFiles,
 	users,
 } from "~/server/db/schema";
 import type { CseRow, FileRow, IndicatorGEntry } from "./fetchDeclarations";
@@ -244,23 +243,26 @@ export async function getDeclarationsWithIndicatorG(
 
 function fetchFilesByDeclaration(
 	keys: Array<{ siren: string; year: number }>,
-	fileTable: typeof cseOpinionFiles | typeof jointEvaluationFiles,
+	type: "cse_opinion" | "joint_evaluation",
 ): Promise<FileRow[]> {
 	return db
 		.select({
-			id: fileTable.id,
+			id: files.id,
 			siren: declarations.siren,
 			year: declarations.year,
-			fileName: fileTable.fileName,
-			filePath: fileTable.filePath,
-			uploadedAt: fileTable.uploadedAt,
+			fileName: files.fileName,
+			filePath: files.filePath,
+			uploadedAt: files.uploadedAt,
 		})
-		.from(fileTable)
-		.innerJoin(declarations, eq(fileTable.declarationId, declarations.id))
+		.from(files)
+		.innerJoin(declarations, eq(files.declarationId, declarations.id))
 		.where(
-			or(
-				...keys.map((k) =>
-					and(eq(declarations.siren, k.siren), eq(declarations.year, k.year)),
+			and(
+				eq(files.type, type),
+				or(
+					...keys.map((k) =>
+						and(eq(declarations.siren, k.siren), eq(declarations.year, k.year)),
+					),
 				),
 			),
 		);
@@ -270,7 +272,7 @@ export async function fetchCseFilesByDeclaration(
 	keys: Array<{ siren: string; year: number }>,
 ): Promise<Map<string, FileRow[]>> {
 	if (keys.length === 0) return new Map();
-	const rows = await fetchFilesByDeclaration(keys, cseOpinionFiles);
+	const rows = await fetchFilesByDeclaration(keys, "cse_opinion");
 	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
 }
 
@@ -278,7 +280,7 @@ export async function fetchJointEvaluationFilesByDeclaration(
 	keys: Array<{ siren: string; year: number }>,
 ): Promise<Map<string, FileRow[]>> {
 	if (keys.length === 0) return new Map();
-	const rows = await fetchFilesByDeclaration(keys, jointEvaluationFiles);
+	const rows = await fetchFilesByDeclaration(keys, "joint_evaluation");
 	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
 }
 
@@ -287,25 +289,14 @@ export async function fetchJointEvaluationFilesByDeclaration(
 export async function fetchFileById(
 	fileId: string,
 ): Promise<{ filePath: string; fileName: string } | undefined> {
-	const cseRows = await db
+	const rows = await db
 		.select({
-			filePath: cseOpinionFiles.filePath,
-			fileName: cseOpinionFiles.fileName,
+			filePath: files.filePath,
+			fileName: files.fileName,
 		})
-		.from(cseOpinionFiles)
-		.where(eq(cseOpinionFiles.id, fileId))
+		.from(files)
+		.where(eq(files.id, fileId))
 		.limit(1);
 
-	if (cseRows[0]) return cseRows[0];
-
-	const jointRows = await db
-		.select({
-			filePath: jointEvaluationFiles.filePath,
-			fileName: jointEvaluationFiles.fileName,
-		})
-		.from(jointEvaluationFiles)
-		.where(eq(jointEvaluationFiles.id, fileId))
-		.limit(1);
-
-	return jointRows[0];
+	return rows[0];
 }

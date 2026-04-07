@@ -14,33 +14,6 @@ import {
  */
 export const createTable = pgTableCreator((name) => `app_${name}`);
 
-type ColumnBuilder = Parameters<Parameters<typeof createTable>[1]>[0];
-
-/**
- * Shared columns for file upload tables linked to a declaration.
- * Used by cseOpinionFiles and jointEvaluationFiles.
- */
-function declarationFileColumns(d: ColumnBuilder) {
-	return {
-		id: d
-			.varchar({ length: 255 })
-			.notNull()
-			.primaryKey()
-			.$defaultFn(() => crypto.randomUUID()),
-		declarationId: d
-			.varchar({ length: 255 })
-			.notNull()
-			.references(() => declarations.id),
-		fileName: d.varchar({ length: 255 }).notNull(),
-		filePath: d.varchar({ length: 500 }).notNull(),
-		uploadedAt: d
-			.timestamp({ withTimezone: true })
-			.notNull()
-			.$defaultFn(() => new Date()),
-		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
-	};
-}
-
 export const users = createTable("user", (d) => ({
 	id: d
 		.varchar({ length: 255 })
@@ -161,8 +134,7 @@ export const declarationsRelations = relations(
 		}),
 		jobCategories: many(jobCategories),
 		cseOpinions: many(cseOpinions),
-		cseOpinionFiles: many(cseOpinionFiles),
-		jointEvaluationFiles: many(jointEvaluationFiles),
+		files: many(files),
 	}),
 );
 
@@ -449,75 +421,50 @@ export const cseOpinions = createTable(
 	],
 );
 
-export const cseOpinionsRelations = relations(cseOpinions, ({ one, many }) => ({
+export const cseOpinionsRelations = relations(cseOpinions, ({ one }) => ({
 	declaration: one(declarations, {
 		fields: [cseOpinions.declarationId],
 		references: [declarations.id],
 	}),
-	fileLinks: many(cseOpinionFileLinks),
 }));
 
-export const cseOpinionFiles = createTable(
-	"cse_opinion_file",
-	(d) => declarationFileColumns(d),
-	(t) => [index("cse_opinion_file_declaration_idx").on(t.declarationId)],
-);
+// ── Files (CSE opinion + joint evaluation) ─────────────────────────
 
-export const cseOpinionFilesRelations = relations(
-	cseOpinionFiles,
-	({ one, many }) => ({
-		declaration: one(declarations, {
-			fields: [cseOpinionFiles.declarationId],
-			references: [declarations.id],
-		}),
-		opinionLinks: many(cseOpinionFileLinks),
-	}),
-);
+export const fileTypeEnum = pgEnum("file_type", [
+	"cse_opinion",
+	"joint_evaluation",
+]);
 
-export const cseOpinionFileLinks = createTable(
-	"cse_opinion_file_link",
+export const files = createTable(
+	"file",
 	(d) => ({
-		fileId: d
+		id: d
 			.varchar({ length: 255 })
 			.notNull()
-			.references(() => cseOpinionFiles.id),
-		opinionId: d
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		declarationId: d
 			.varchar({ length: 255 })
 			.notNull()
-			.references(() => cseOpinions.id),
+			.references(() => declarations.id),
+		fileName: d.varchar({ length: 255 }).notNull(),
+		filePath: d.varchar({ length: 500 }).notNull(),
+		uploadedAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		type: fileTypeEnum().notNull(),
 	}),
-	(t) => [primaryKey({ columns: [t.fileId, t.opinionId] })],
+	(t) => [index("file_declaration_idx").on(t.declarationId)],
 );
 
-export const cseOpinionFileLinksRelations = relations(
-	cseOpinionFileLinks,
-	({ one }) => ({
-		file: one(cseOpinionFiles, {
-			fields: [cseOpinionFileLinks.fileId],
-			references: [cseOpinionFiles.id],
-		}),
-		opinion: one(cseOpinions, {
-			fields: [cseOpinionFileLinks.opinionId],
-			references: [cseOpinions.id],
-		}),
+export const filesRelations = relations(files, ({ one }) => ({
+	declaration: one(declarations, {
+		fields: [files.declarationId],
+		references: [declarations.id],
 	}),
-);
-
-export const jointEvaluationFiles = createTable(
-	"joint_evaluation_file",
-	(d) => declarationFileColumns(d),
-	(t) => [unique("joint_eval_file_declaration_idx").on(t.declarationId)],
-);
-
-export const jointEvaluationFilesRelations = relations(
-	jointEvaluationFiles,
-	({ one }) => ({
-		declaration: one(declarations, {
-			fields: [jointEvaluationFiles.declarationId],
-			references: [declarations.id],
-		}),
-	}),
-);
+}));
 
 // ── Export tables ───────────────────────────────────────────────────
 

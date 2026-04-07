@@ -5,10 +5,9 @@ import { formatLongDate } from "~/modules/domain";
 import { db } from "~/server/db";
 import {
 	companies,
-	cseOpinionFiles,
 	cseOpinions,
 	declarations,
-	jointEvaluationFiles,
+	files,
 } from "~/server/db/schema";
 
 export type TransmittedPdfOpinion = {
@@ -72,18 +71,28 @@ export async function buildTransmittedPdfData(
 			.where(eq(cseOpinions.declarationId, declaration.id)),
 		db
 			.select({
-				fileName: cseOpinionFiles.fileName,
-				uploadedAt: cseOpinionFiles.uploadedAt,
+				fileName: files.fileName,
+				uploadedAt: files.uploadedAt,
 			})
-			.from(cseOpinionFiles)
-			.where(eq(cseOpinionFiles.declarationId, declaration.id)),
+			.from(files)
+			.where(
+				and(
+					eq(files.declarationId, declaration.id),
+					eq(files.type, "cse_opinion"),
+				),
+			),
 		db
 			.select({
-				fileName: jointEvaluationFiles.fileName,
-				uploadedAt: jointEvaluationFiles.uploadedAt,
+				fileName: files.fileName,
+				uploadedAt: files.uploadedAt,
 			})
-			.from(jointEvaluationFiles)
-			.where(eq(jointEvaluationFiles.declarationId, declaration.id))
+			.from(files)
+			.where(
+				and(
+					eq(files.declarationId, declaration.id),
+					eq(files.type, "joint_evaluation"),
+				),
+			)
 			.limit(1),
 	]);
 
