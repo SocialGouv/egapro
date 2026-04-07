@@ -4,8 +4,6 @@ import { computeGap } from "~/modules/domain";
 export type ParsedCategory = {
 	index: number;
 	name: string;
-	womenCount: number | null;
-	menCount: number | null;
 	annualBaseGap: number | null;
 	annualVariableGap: number | null;
 	hourlyBaseGap: number | null;
@@ -23,8 +21,6 @@ export function parseEmployeeCategories(
 	return categories.map((cat, index) => ({
 		index,
 		name: cat.name,
-		womenCount: cat.womenCount,
-		menCount: cat.menCount,
 		annualBaseGap: gapOrNull(cat.annualBaseWomen, cat.annualBaseMen),
 		annualVariableGap: gapOrNull(
 			cat.annualVariableWomen,

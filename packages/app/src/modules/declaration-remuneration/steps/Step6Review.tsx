@@ -294,16 +294,6 @@ export function Step6Review({
 					step5Parsed.map((cat) => (
 						<div key={cat.index}>
 							<p className="fr-text--bold fr-mb-0">{cat.name}</p>
-							<p className="fr-text--sm fr-mb-0">
-								Nombre total de salariés :{" "}
-								<strong>
-									{cat.womenCount !== null && cat.menCount !== null
-										? cat.womenCount + cat.menCount
-										: "-"}
-								</strong>{" "}
-								(Femmes : {cat.womenCount ?? "-"}, Hommes :{" "}
-								{cat.menCount ?? "-"})
-							</p>
 							<div className={stepStyles.sideBySide}>
 								<GapColumn
 									columns={[
