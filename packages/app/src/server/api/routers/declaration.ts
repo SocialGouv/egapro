@@ -21,9 +21,19 @@ import {
 	buildEmployeeCategoryValues,
 	deleteJobAndEmployeeCategories,
 	fetchAllCategories,
+	fetchPreviousYearJobCategories,
 } from "./declarationHelpers";
 
 export const declarationRouter = createTRPCRouter({
+	getPreviousYearCategories: companyProcedure.query(async ({ ctx }) => {
+		const siren = ctx.siren;
+		const year = getCurrentYear();
+
+		return ctx.db.transaction(async (tx) => {
+			return fetchPreviousYearJobCategories(tx, siren, year);
+		});
+	}),
+
 	getOrCreate: companyProcedure.query(async ({ ctx }) => {
 		const siren = ctx.siren;
 		const year = getCurrentYear();

@@ -17,6 +17,9 @@ vi.mock("~/trpc/react", () => ({
 					error: null,
 				}),
 			},
+			getPreviousYearCategories: {
+				useQuery: () => ({ data: null }),
+			},
 		},
 	},
 }));

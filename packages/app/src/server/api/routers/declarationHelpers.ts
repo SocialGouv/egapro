@@ -1,6 +1,10 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
-import { employeeCategories, jobCategories } from "~/server/db/schema";
+import {
+	declarations,
+	employeeCategories,
+	jobCategories,
+} from "~/server/db/schema";
 
 export type Tx = Parameters<
 	Parameters<import("~/server/db").DB["transaction"]>[0]
@@ -83,6 +87,51 @@ export async function fetchAllCategories(tx: Tx, declarationId: string) {
 	return {
 		jobCategories: jobs,
 		employeeCategories: empCategories,
+	};
+}
+
+export async function fetchPreviousYearJobCategories(
+	tx: Tx,
+	siren: string,
+	currentYear: number,
+) {
+	const previousYear = currentYear - 1;
+
+	const [previousDeclaration] = await tx
+		.select({ id: declarations.id })
+		.from(declarations)
+		.where(
+			and(
+				eq(declarations.siren, siren),
+				eq(declarations.year, previousYear),
+				eq(declarations.status, "submitted"),
+			),
+		)
+		.limit(1);
+
+	if (!previousDeclaration) return null;
+
+	const jobs = await tx
+		.select({
+			name: jobCategories.name,
+			detail: jobCategories.detail,
+			source: jobCategories.source,
+			categoryIndex: jobCategories.categoryIndex,
+		})
+		.from(jobCategories)
+		.where(eq(jobCategories.declarationId, previousDeclaration.id));
+
+	if (jobs.length === 0) return null;
+
+	const source = jobs[0]?.source ?? "";
+	const sorted = jobs.sort((a, b) => a.categoryIndex - b.categoryIndex);
+
+	return {
+		source,
+		categories: sorted.map((j) => ({
+			name: j.name,
+			detail: j.detail ?? "",
+		})),
 	};
 }
 

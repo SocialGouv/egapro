@@ -29,6 +29,7 @@ import {
 	toSubmitData,
 } from "./categorySerializer";
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
+import { PreviousYearCategoriesButton } from "./PreviousYearCategoriesButton";
 
 const SOURCE_LABELS: Record<string, string> = {
 	"convention-collective": "Convention collective",
@@ -161,6 +162,15 @@ export function CategoryForm({
 
 	function handleImportCategories(imported: EmployeeCategory[]) {
 		form.setValue("categories", toFormValues(imported));
+		setSaved(false);
+	}
+
+	function handleImportPreviousYear(
+		imported: EmployeeCategory[],
+		source: string,
+	) {
+		form.setValue("categories", toFormValues(imported));
+		form.setValue("source", source);
 		setSaved(false);
 	}
 
@@ -325,6 +335,15 @@ export function CategoryForm({
 
 			{!readOnlyNameDetail && (
 				<CategoryImportExport
+					extraButtons={
+						<PreviousYearCategoriesButton
+							hasExistingData={categories.some(
+								(cat) => cat?.name?.trim() !== "",
+							)}
+							nextId={nextId}
+							onImport={handleImportPreviousYear}
+						/>
+					}
 					getCategories={() =>
 						form.getValues("categories").map((cat, i) => ({
 							id: i,
