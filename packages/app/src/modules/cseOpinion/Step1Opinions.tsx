@@ -28,7 +28,7 @@ type Props = {
 		secondDeclGapOpinion: OpinionType | null;
 		secondDeclGapDate: string | null;
 	};
-	declarationYear: number;
+	cseDeadline: Date;
 	email?: string;
 	compliancePath?: string | null;
 	hasSecondDeclaration?: boolean;
@@ -36,7 +36,7 @@ type Props = {
 
 export function Step1Opinions({
 	initialData,
-	declarationYear,
+	cseDeadline,
 	email,
 	compliancePath,
 	hasSecondDeclaration = true,
@@ -122,7 +122,7 @@ export function Step1Opinions({
 
 			{isJointEvaluation && (
 				<SubmissionBanner
-					deadline={`1er février ${declarationYear}`}
+					deadline={cseDeadline}
 					email={email ?? "adresse@exemple.fr"}
 				/>
 			)}

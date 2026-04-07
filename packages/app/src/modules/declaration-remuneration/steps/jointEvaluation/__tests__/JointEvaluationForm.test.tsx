@@ -26,9 +26,9 @@ vi.mock("~/trpc/react", () => ({
 }));
 
 const defaultProps = {
-	currentYear: 2026,
 	declarationDate: "01/06/2026",
 	hasCse: null as boolean | null,
+	jointEvaluationDeadline: new Date(2026, 7, 1),
 };
 
 describe("JointEvaluationForm", () => {

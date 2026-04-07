@@ -6,6 +6,7 @@ import {
 	TOTAL_STEPS,
 } from "~/modules/cseOpinion";
 import { auth } from "~/server/auth";
+import { getCampaignDeadlines } from "~/server/getCampaignDeadlines";
 import { api } from "~/trpc/server";
 
 type StepPageProps = {
@@ -32,7 +33,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		return (
 			<Step1Opinions
 				compliancePath={declarationData.declaration.compliancePath}
-				declarationYear={declarationData.declaration.year}
+				cseDeadline={getCampaignDeadlines().decl2JointEvaluationDeadline}
 				email={session?.user?.email ?? undefined}
 				hasSecondDeclaration={hasSecondDeclaration}
 				initialData={initialData}

@@ -17,17 +17,30 @@ vi.mock("~/trpc/server", () => ({
 	},
 }));
 
+vi.mock("~/server/getCampaignDeadlines", () => ({
+	getCampaignDeadlines: () => ({
+		decl1ModificationDeadline: new Date(2025, 5, 1),
+		decl1JustificationDeadline: new Date(2025, 5, 1),
+		decl1JointEvaluationDeadline: new Date(2025, 7, 1),
+		decl2ModificationDeadline: new Date(2025, 11, 1),
+		decl2JustificationDeadline: new Date(2025, 11, 1),
+		decl2JointEvaluationDeadline: new Date(2026, 1, 1),
+	}),
+}));
+
 // JointEvaluationForm is a client component — render it as a stub in unit tests
 vi.mock("../JointEvaluationForm", () => ({
 	JointEvaluationForm: ({
-		currentYear,
+		jointEvaluationDeadline,
 		declarationDate,
 	}: {
-		currentYear: number;
+		jointEvaluationDeadline: Date;
 		declarationDate: string;
 	}) => (
 		<div>
-			<span data-testid="current-year">{currentYear}</span>
+			<span data-testid="joint-evaluation-deadline">
+				{jointEvaluationDeadline.toISOString()}
+			</span>
 			<span data-testid="declaration-date">{declarationDate}</span>
 		</div>
 	),
@@ -62,15 +75,13 @@ describe("JointEvaluationPage", () => {
 		);
 	});
 
-	it("renders the form with current year when compliancePath is joint_evaluation", async () => {
+	it("renders the form with the joint evaluation deadline", async () => {
 		mockDeclaration("joint_evaluation", new Date("2025-06-15"));
 
 		const page = await JointEvaluationPage();
 		render(page);
 
-		expect(screen.getByTestId("current-year")).toHaveTextContent(
-			String(DECLARATION_YEAR),
-		);
+		expect(screen.getByTestId("joint-evaluation-deadline")).toBeInTheDocument();
 	});
 
 	it("formats declarationDate from updatedAt when available", async () => {

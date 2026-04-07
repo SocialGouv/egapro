@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
+import { getCampaignDeadlines } from "~/server/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
 
 import { SECOND_DECLARATION_TOTAL_STEPS } from "./constants";
@@ -47,8 +48,8 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 	if (step === 1) {
 		return (
 			<SecondDeclarationStep1Info
-				currentYear={currentYear}
 				declarationDate={declarationDate}
+				modificationDeadline={getCampaignDeadlines().decl2ModificationDeadline}
 			/>
 		);
 	}

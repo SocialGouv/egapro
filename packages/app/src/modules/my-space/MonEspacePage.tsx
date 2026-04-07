@@ -2,6 +2,7 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 
+import { getCampaignDeadlines } from "~/server/getCampaignDeadlines";
 import { api } from "~/trpc/server";
 
 import { CompanyDeclarationsPage } from "./CompanyDeclarationsPage";
@@ -28,6 +29,7 @@ export async function MonEspacePage({ siret, userPhone }: Props) {
 
 	return (
 		<CompanyDeclarationsPage
+			campaignDeadlines={getCampaignDeadlines()}
 			company={data.company}
 			declarations={data.declarations}
 			hasNoSanction={hasNoSanction}

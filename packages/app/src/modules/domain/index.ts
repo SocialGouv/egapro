@@ -51,6 +51,7 @@ export {
 // SIREN utilities
 export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
 export type {
+	CampaignDeadlines,
 	CompanySize,
 	DeclarationStatus,
 	DeclarationType,

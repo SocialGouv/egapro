@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Controller } from "react-hook-form";
 
 import { saveCompliancePathSchema } from "~/modules/declaration-remuneration/schemas";
+import type { CampaignDeadlines } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -16,6 +17,7 @@ import type { CompliancePathValue } from "./compliancePath/constants";
 import { DeclarationSuccessBanner } from "./compliancePath/DeclarationSuccessBanner";
 
 type Props = {
+	campaignDeadlines: CampaignDeadlines;
 	currentYear: number;
 	email: string;
 	hasCse: boolean | null;
@@ -26,18 +28,18 @@ type Props = {
 
 function JointEvaluationOption({
 	checked,
-	currentYear,
+	deadline,
 	onChange,
 }: {
 	checked: boolean;
-	currentYear: number;
+	deadline: Date;
 	onChange: () => void;
 }) {
 	return (
 		<div className="fr-fieldset__element">
 			<CompliancePathOption
 				checked={checked}
-				deadline={`1\u1D49\u02B3 août ${currentYear}`}
+				deadline={deadline}
 				id="path-joint"
 				learnMoreHref="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 				learnMoreLabel="En savoir plus sur évaluation conjointe des rémunérations"
@@ -68,18 +70,18 @@ function JointEvaluationOption({
 
 function JustifyOption({
 	checked,
-	currentYear,
+	deadline,
 	onChange,
 }: {
 	checked: boolean;
-	currentYear: number;
+	deadline: Date;
 	onChange: () => void;
 }) {
 	return (
 		<div className="fr-fieldset__element">
 			<CompliancePathOption
 				checked={checked}
-				deadline={`1\u1D49\u02B3 juin ${currentYear}`}
+				deadline={deadline}
 				id="path-justify"
 				name="compliance-path"
 				onChange={onChange}
@@ -100,11 +102,13 @@ function JustifyOption({
 }
 
 function SecondRoundOptions({
-	currentYear,
+	jointEvaluationDeadline,
+	justificationDeadline,
 	selectedPath,
 	setSelectedPath,
 }: {
-	currentYear: number;
+	jointEvaluationDeadline: Date;
+	justificationDeadline: Date;
 	selectedPath: CompliancePathValue | undefined;
 	setSelectedPath: (path: CompliancePathValue) => void;
 }) {
@@ -112,12 +116,12 @@ function SecondRoundOptions({
 		<>
 			<JustifyOption
 				checked={selectedPath === "justify"}
-				currentYear={currentYear}
+				deadline={justificationDeadline}
 				onChange={() => setSelectedPath("justify")}
 			/>
 			<JointEvaluationOption
 				checked={selectedPath === "joint_evaluation"}
-				currentYear={currentYear}
+				deadline={jointEvaluationDeadline}
 				onChange={() => setSelectedPath("joint_evaluation")}
 			/>
 		</>
@@ -125,11 +129,15 @@ function SecondRoundOptions({
 }
 
 function FirstRoundOptions({
-	currentYear,
+	correctiveActionDeadline,
+	jointEvaluationDeadline,
+	justificationDeadline,
 	selectedPath,
 	setSelectedPath,
 }: {
-	currentYear: number;
+	correctiveActionDeadline: Date;
+	jointEvaluationDeadline: Date;
+	justificationDeadline: Date;
 	selectedPath: CompliancePathValue | undefined;
 	setSelectedPath: (path: CompliancePathValue) => void;
 }) {
@@ -137,7 +145,7 @@ function FirstRoundOptions({
 		<>
 			<JustifyOption
 				checked={selectedPath === "justify"}
-				currentYear={currentYear}
+				deadline={justificationDeadline}
 				onChange={() => setSelectedPath("justify")}
 			/>
 
@@ -149,7 +157,7 @@ function FirstRoundOptions({
 			<div className="fr-fieldset__element fr-mt-2w">
 				<CompliancePathOption
 					checked={selectedPath === "corrective_action"}
-					deadline={`1\u1D49\u02B3 décembre ${currentYear}`}
+					deadline={correctiveActionDeadline}
 					id="path-corrective"
 					learnMoreHref="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 					learnMoreLabel="En savoir plus sur actions correctives et seconde déclaration"
@@ -187,7 +195,7 @@ function FirstRoundOptions({
 
 			<JointEvaluationOption
 				checked={selectedPath === "joint_evaluation"}
-				currentYear={currentYear}
+				deadline={jointEvaluationDeadline}
 				onChange={() => setSelectedPath("joint_evaluation")}
 			/>
 		</>
@@ -195,6 +203,7 @@ function FirstRoundOptions({
 }
 
 export function CompliancePathChoice({
+	campaignDeadlines,
 	currentYear,
 	email,
 	hasCse,
@@ -239,9 +248,13 @@ export function CompliancePathChoice({
 			</div>
 
 			<DeclarationSuccessBanner
-				currentYear={currentYear}
 				email={email}
 				isSecondDeclaration={isSecondRound}
+				modificationDeadline={
+					isSecondRound
+						? campaignDeadlines.decl2ModificationDeadline
+						: campaignDeadlines.decl1ModificationDeadline
+				}
 				pdfDownloadHref={pdfDownloadHref}
 			/>
 
@@ -289,13 +302,26 @@ export function CompliancePathChoice({
 
 						{isSecondRound ? (
 							<SecondRoundOptions
-								currentYear={currentYear}
+								jointEvaluationDeadline={
+									campaignDeadlines.decl2JointEvaluationDeadline
+								}
+								justificationDeadline={
+									campaignDeadlines.decl2JustificationDeadline
+								}
 								selectedPath={field.value}
 								setSelectedPath={field.onChange}
 							/>
 						) : (
 							<FirstRoundOptions
-								currentYear={currentYear}
+								correctiveActionDeadline={
+									campaignDeadlines.decl2ModificationDeadline
+								}
+								jointEvaluationDeadline={
+									campaignDeadlines.decl1JointEvaluationDeadline
+								}
+								justificationDeadline={
+									campaignDeadlines.decl1JustificationDeadline
+								}
 								selectedPath={field.value}
 								setSelectedPath={field.onChange}
 							/>

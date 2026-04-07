@@ -6,8 +6,8 @@ describe("SecondDeclarationStep1Info", () => {
 	it("renders the main title", () => {
 		render(
 			<SecondDeclarationStep1Info
-				currentYear={2027}
 				declarationDate="01/06/2027"
+				modificationDeadline={new Date(2027, 11, 1)}
 			/>,
 		);
 		expect(
@@ -20,8 +20,8 @@ describe("SecondDeclarationStep1Info", () => {
 	it("renders stepper at step 1 of 3", () => {
 		render(
 			<SecondDeclarationStep1Info
-				currentYear={2027}
 				declarationDate="01/06/2027"
+				modificationDeadline={new Date(2027, 11, 1)}
 			/>,
 		);
 		expect(screen.getByText("Étape 1 sur 3")).toBeInTheDocument();
@@ -33,18 +33,18 @@ describe("SecondDeclarationStep1Info", () => {
 	it("displays the deadline", () => {
 		render(
 			<SecondDeclarationStep1Info
-				currentYear={2027}
 				declarationDate="01/06/2027"
+				modificationDeadline={new Date(2027, 11, 1)}
 			/>,
 		);
-		expect(screen.getByText(/1\u1D49\u02B3 décembre 2027/)).toBeInTheDocument();
+		expect(screen.getByText(/1 décembre 2027/)).toBeInTheDocument();
 	});
 
 	it("displays the declaration date", () => {
 		render(
 			<SecondDeclarationStep1Info
-				currentYear={2027}
 				declarationDate="01/06/2027"
+				modificationDeadline={new Date(2027, 11, 1)}
 			/>,
 		);
 		expect(
@@ -55,8 +55,8 @@ describe("SecondDeclarationStep1Info", () => {
 	it("renders the obligations callout", () => {
 		render(
 			<SecondDeclarationStep1Info
-				currentYear={2027}
 				declarationDate="01/06/2027"
+				modificationDeadline={new Date(2027, 11, 1)}
 			/>,
 		);
 		expect(
@@ -70,8 +70,8 @@ describe("SecondDeclarationStep1Info", () => {
 	it("renders previous link to parcours-conformite and next to step 2", () => {
 		render(
 			<SecondDeclarationStep1Info
-				currentYear={2027}
 				declarationDate="01/06/2027"
+				modificationDeadline={new Date(2027, 11, 1)}
 			/>,
 		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(

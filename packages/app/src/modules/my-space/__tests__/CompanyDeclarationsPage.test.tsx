@@ -24,9 +24,19 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+import type { CampaignDeadlines } from "~/modules/domain";
 import { getCurrentYear } from "~/modules/domain";
 import { CompanyDeclarationsPage } from "../CompanyDeclarationsPage";
 import type { CompanyDetail, DeclarationItem } from "../types";
+
+const campaignDeadlines: CampaignDeadlines = {
+	decl1ModificationDeadline: new Date(2027, 5, 1),
+	decl1JustificationDeadline: new Date(2027, 5, 1),
+	decl1JointEvaluationDeadline: new Date(2027, 7, 1),
+	decl2ModificationDeadline: new Date(2027, 11, 1),
+	decl2JustificationDeadline: new Date(2027, 11, 1),
+	decl2JointEvaluationDeadline: new Date(2028, 1, 1),
+};
 
 const company: CompanyDetail = {
 	siren: "532847196",
@@ -72,6 +82,7 @@ describe("CompanyDeclarationsPage", () => {
 	it("renders the main landmark with id 'content'", () => {
 		render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={company}
 				declarations={declarations}
 				hasNoSanction={false}
@@ -86,6 +97,7 @@ describe("CompanyDeclarationsPage", () => {
 	it("renders the company name", () => {
 		render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={company}
 				declarations={declarations}
 				hasNoSanction={false}
@@ -100,6 +112,7 @@ describe("CompanyDeclarationsPage", () => {
 	it("renders the 'En cours' heading", () => {
 		render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={company}
 				declarations={declarations}
 				hasNoSanction={false}
@@ -114,6 +127,7 @@ describe("CompanyDeclarationsPage", () => {
 	it("renders the 'Archives' section", () => {
 		render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={company}
 				declarations={declarations}
 				hasNoSanction={false}
@@ -126,6 +140,7 @@ describe("CompanyDeclarationsPage", () => {
 	it("does not show MissingInfoModal when userPhone and hasCse are provided", () => {
 		const { container } = render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={{ ...company, hasCse: true }}
 				declarations={declarations}
 				hasNoSanction={false}
@@ -140,6 +155,7 @@ describe("CompanyDeclarationsPage", () => {
 	it("renders MissingInfoModal when userPhone is null", () => {
 		const { container } = render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={{ ...company, hasCse: true }}
 				declarations={declarations}
 				hasNoSanction={false}
@@ -152,6 +168,7 @@ describe("CompanyDeclarationsPage", () => {
 	it("renders MissingInfoModal when hasCse is null", () => {
 		const { container } = render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={{ ...company, hasCse: null }}
 				declarations={declarations}
 				hasNoSanction={false}
