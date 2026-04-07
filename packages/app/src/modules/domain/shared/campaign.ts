@@ -39,3 +39,24 @@ export function isDeadlinePassed(
 ): boolean {
 	return now.getTime() > deadline.getTime();
 }
+
+/**
+ * Decides whether a submitted declaration step should redirect to its recap.
+ *
+ * Redirect happens only when:
+ * - the declaration is submitted,
+ * - the user is not already on the recap step,
+ * - the modification deadline has passed.
+ */
+export function shouldRedirectSubmittedToRecap(params: {
+	status: string | null;
+	step: number;
+	recapStep: number;
+	modificationDeadline: Date;
+	now?: Date;
+}): boolean {
+	const { status, step, recapStep, modificationDeadline, now } = params;
+	if (status !== "submitted") return false;
+	if (step === recapStep) return false;
+	return isDeadlinePassed(modificationDeadline, now);
+}

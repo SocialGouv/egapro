@@ -8,6 +8,7 @@ export {
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
 	isDeadlinePassed,
+	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
 // Company size
 export { classifyCompanySize, isCseRequired } from "./shared/companySize";

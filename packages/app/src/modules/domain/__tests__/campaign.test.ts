@@ -7,6 +7,7 @@ import {
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
 	isDeadlinePassed,
+	shouldRedirectSubmittedToRecap,
 } from "../shared/campaign";
 
 describe("getCurrentYear", () => {
@@ -91,5 +92,71 @@ describe("isDeadlinePassed", () => {
 		expect(isDeadlinePassed(deadline, new Date("2026-06-01T00:00:01"))).toBe(
 			true,
 		);
+	});
+});
+
+describe("shouldRedirectSubmittedToRecap", () => {
+	const past = new Date("2020-06-01T00:00:00");
+	const future = new Date("2099-06-01T00:00:00");
+	const now = new Date("2026-04-07T12:00:00");
+
+	it("returns false when status is not submitted", () => {
+		expect(
+			shouldRedirectSubmittedToRecap({
+				status: "draft",
+				step: 2,
+				recapStep: 6,
+				modificationDeadline: past,
+				now,
+			}),
+		).toBe(false);
+	});
+
+	it("returns false when status is null", () => {
+		expect(
+			shouldRedirectSubmittedToRecap({
+				status: null,
+				step: 2,
+				recapStep: 6,
+				modificationDeadline: past,
+				now,
+			}),
+		).toBe(false);
+	});
+
+	it("returns false when already on the recap step", () => {
+		expect(
+			shouldRedirectSubmittedToRecap({
+				status: "submitted",
+				step: 6,
+				recapStep: 6,
+				modificationDeadline: past,
+				now,
+			}),
+		).toBe(false);
+	});
+
+	it("returns false when the deadline is in the future", () => {
+		expect(
+			shouldRedirectSubmittedToRecap({
+				status: "submitted",
+				step: 2,
+				recapStep: 6,
+				modificationDeadline: future,
+				now,
+			}),
+		).toBe(false);
+	});
+
+	it("returns true when submitted, off-recap, and deadline is past", () => {
+		expect(
+			shouldRedirectSubmittedToRecap({
+				status: "submitted",
+				step: 2,
+				recapStep: 6,
+				modificationDeadline: past,
+				now,
+			}),
+		).toBe(true);
 	});
 });
