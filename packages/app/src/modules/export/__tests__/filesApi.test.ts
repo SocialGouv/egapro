@@ -151,12 +151,14 @@ describe("GET /api/v1/files", () => {
 			type: "cse_opinion",
 			fileName: "avis-cse.pdf",
 			uploadedAt: "2027-03-10T08:00:00.000Z",
+			downloadUrl: "/api/v1/files/cse-1",
 		});
 		expect(body.files[1]).toEqual({
 			id: "joint-1",
 			type: "joint_evaluation",
 			fileName: "evaluation.pdf",
 			uploadedAt: "2027-03-12T09:00:00.000Z",
+			downloadUrl: "/api/v1/files/joint-1",
 		});
 	});
 
