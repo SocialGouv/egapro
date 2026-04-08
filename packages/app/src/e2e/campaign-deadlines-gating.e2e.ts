@@ -8,6 +8,7 @@ import {
 	setCampaignDeadlines,
 	setCompanyHasCse,
 	setDeclarationComplianceState,
+	setUserPhone,
 } from "./helpers/db";
 import { loginWithProConnect } from "./helpers/login";
 
@@ -52,6 +53,7 @@ test.describe("Campaign deadlines gating", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
+		await setUserPhone("0122334455");
 		await setDeclarationComplianceState({
 			status: "submitted",
 			currentStep: 6,
