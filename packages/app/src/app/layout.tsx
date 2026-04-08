@@ -2,7 +2,14 @@ import type { Metadata } from "next";
 import Script from "next/script";
 
 import { MatomoAnalytics } from "~/modules/analytics";
-import { Footer, Header, ResourceBanner, SkipLinks } from "~/modules/layout";
+import { SessionProviderWrapper } from "~/modules/auth";
+import {
+	Footer,
+	Header,
+	ImpersonateBanner,
+	ResourceBanner,
+	SkipLinks,
+} from "~/modules/layout";
 import { ProfileModal } from "~/modules/profile";
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -47,13 +54,16 @@ export default function RootLayout({
 			<body>
 				<MatomoAnalytics />
 				<SkipLinks />
-				<TRPCReactProvider>
-					<Header />
-					{children}
-					<ResourceBanner />
-					<Footer />
-					<ProfileModal />
-				</TRPCReactProvider>
+				<SessionProviderWrapper>
+					<TRPCReactProvider>
+						<ImpersonateBanner />
+						<Header />
+						{children}
+						<ResourceBanner />
+						<Footer />
+						<ProfileModal />
+					</TRPCReactProvider>
+				</SessionProviderWrapper>
 				<Script
 					src="/dsfr/dsfr.module.min.js"
 					strategy="afterInteractive"
