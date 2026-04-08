@@ -215,22 +215,13 @@ export const authConfig = {
 					});
 				}
 
-				// Sync the admin flag with `ADMIN_EMAILS` on every login.
-				// Listing an email promotes the user; removing it demotes them.
-				const shouldBeAdmin = ADMIN_EMAILS.has(email.toLowerCase());
-				if (shouldBeAdmin !== dbUser.isAdmin) {
-					await db
-						.update(users)
-						.set({ isAdmin: shouldBeAdmin })
-						.where(eq(users.id, dbUser.id));
-					dbUser = { ...dbUser, isAdmin: shouldBeAdmin };
-				}
-
 				token.id = dbUser.id;
 				token.siret = profileData.siret ?? null;
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
-				token.isAdmin = dbUser.isAdmin;
+				// Admin role is purely env-driven: the `ADMIN_EMAILS` env var
+				// is the single source of truth, re-evaluated at each sign-in.
+				token.isAdmin = ADMIN_EMAILS.has(email.toLowerCase());
 			}
 			return token;
 		},
