@@ -47,6 +47,11 @@ export function CategoryDataTable({
 			? computeGap(hourlyTotalWomen.toString(), hourlyTotalMen.toString())
 			: null;
 
+	const womenInt = cat.womenCount ? Number.parseInt(cat.womenCount, 10) : NaN;
+	const menInt = cat.menCount ? Number.parseInt(cat.menCount, 10) : NaN;
+	const totalEmployees =
+		!Number.isNaN(womenInt) && !Number.isNaN(menInt) ? womenInt + menInt : null;
+
 	const id = (suffix: string) => `cat-${catIndex}-${suffix}`;
 	return (
 		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
@@ -75,7 +80,10 @@ export function CategoryDataTable({
 								{/* Section: Nombre de salariés */}
 								<tr>
 									<td className={stepStyles.sectionHeader} colSpan={4}>
-										<strong>Nombre de salariés [Nombre total]</strong>
+										<strong>
+											Nombre de salariés{" "}
+											{totalEmployees !== null ? `[${totalEmployees}]` : ""}
+										</strong>
 									</td>
 								</tr>
 								<tr>
