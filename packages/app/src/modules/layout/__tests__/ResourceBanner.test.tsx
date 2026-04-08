@@ -13,7 +13,7 @@ describe("ResourceBanner", () => {
 		expect(faqLink).toHaveAttribute("href", "/faq");
 
 		const aideLink = screen.getByRole("link", {
-			name: /aides et ressources/i,
+			name: /centre d'aide/i,
 		});
 		expect(aideLink).toHaveAttribute("href", "/aide");
 
@@ -30,7 +30,7 @@ describe("ResourceBanner", () => {
 			screen.getByText("Réponses aux questions les plus courantes"),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Guides, ressources et textes de référence"),
+			screen.getByText("Recherchez et accédez à toutes nos ressources"),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText("Besoin d'aide ? Contactez nos services d'assistance"),
