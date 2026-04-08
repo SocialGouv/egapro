@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
-import { NewTabNotice } from "~/modules/layout";
+import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { FileUpload, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
