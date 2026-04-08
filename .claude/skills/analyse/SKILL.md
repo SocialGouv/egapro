@@ -71,4 +71,4 @@ Present a structured plan:
 
 # Step 4 — Validate
 
-Ask the user to validate, adjust, or ask questions about the plan. Once approved, the user runs `/implement` to execute it.
+Ask the user to validate, adjust, or ask questions about the plan. Once approved, run `/implement` next to execute it.
