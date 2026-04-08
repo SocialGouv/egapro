@@ -49,7 +49,7 @@ export async function MobileMenu() {
 						</li>
 					</ul>
 				</div>
-				<Navigation />
+				{!session?.user && <Navigation />}
 			</div>
 		</div>
 	);
