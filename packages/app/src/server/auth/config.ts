@@ -8,6 +8,16 @@ import { companies, userCompanies, users } from "~/server/db/schema";
 import { fetchCompanyBySiren } from "~/server/services/weez";
 import { parseAdminEmails } from "./parseAdminEmails";
 
+/**
+ * Active impersonation targeted by an admin. When set, the admin is browsing
+ * the app as if they were the referent of the given company. Only meaningful
+ * when `user.isAdmin === true`; the `jwt` callback guards the trigger.
+ */
+export type Impersonation = {
+	siren: string;
+	name: string;
+};
+
 declare module "next-auth" {
 	interface Session extends DefaultSession {
 		user: {
@@ -15,6 +25,7 @@ declare module "next-auth" {
 			siret?: string | null;
 			phone?: string | null;
 			isAdmin: boolean;
+			impersonation?: Impersonation | null;
 		} & DefaultSession["user"];
 	}
 }
@@ -26,6 +37,7 @@ declare module "next-auth/jwt" {
 		phone?: string | null;
 		id_token?: string | null;
 		isAdmin: boolean;
+		impersonation?: Impersonation | null;
 	}
 }
 
@@ -120,7 +132,30 @@ export const authConfig = {
 			}
 			return `${baseUrl}/mon-espace`;
 		},
-		async jwt({ token, user, account }) {
+		async jwt({ token, user, account, trigger, session: sessionUpdate }) {
+			// Admin-triggered impersonation update. Guarded server-side: only
+			// admins can set `impersonation`, and the only accepted shape is
+			// either a full `{ siren, name }` object or `null` to stop.
+			if (trigger === "update" && token.isAdmin && sessionUpdate) {
+				const raw = (sessionUpdate as { impersonation?: unknown })
+					.impersonation;
+				if (raw === null) {
+					token.impersonation = null;
+				} else if (
+					raw &&
+					typeof raw === "object" &&
+					typeof (raw as Impersonation).siren === "string" &&
+					/^\d{9}$/.test((raw as Impersonation).siren) &&
+					typeof (raw as Impersonation).name === "string"
+				) {
+					token.impersonation = {
+						siren: (raw as Impersonation).siren,
+						name: (raw as Impersonation).name,
+					};
+				}
+				return token;
+			}
+
 			if (user) {
 				const profileData = user as typeof user & {
 					siret?: string | null;
@@ -229,6 +264,7 @@ export const authConfig = {
 				siret: token.siret ?? null,
 				phone: token.phone ?? null,
 				isAdmin: token.isAdmin ?? false,
+				impersonation: token.impersonation ?? null,
 			},
 		}),
 	},
