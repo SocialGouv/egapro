@@ -16,8 +16,7 @@ vi.mock("~/modules/export/queries", () => ({
 }));
 
 vi.mock("~/server/services/s3", async (importOriginal) => {
-	const actual =
-		await importOriginal<typeof import("~/server/services/s3")>();
+	const actual = await importOriginal<typeof import("~/server/services/s3")>();
 	return {
 		...actual,
 		getFile: vi.fn().mockResolvedValue({
