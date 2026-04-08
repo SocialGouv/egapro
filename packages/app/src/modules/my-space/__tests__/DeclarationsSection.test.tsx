@@ -13,6 +13,7 @@ const NO_COMPLIANCE = {
 	complianceCompletedAt: null,
 	hasCseOpinion: false,
 	hasJointEvaluationFile: false,
+	hasPrefillData: false,
 };
 
 const declarations: DeclarationItem[] = [
@@ -67,7 +68,7 @@ describe("DeclarationsSection", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the table column headers including Échéance and Mise à jour", () => {
+	it("renders the table column headers including Échéance and Ressources", () => {
 		renderSection();
 		expect(
 			screen.getAllByRole("columnheader", { name: "Déclaration" }),
@@ -85,7 +86,7 @@ describe("DeclarationsSection", () => {
 			screen.getAllByRole("columnheader", { name: "Échéance" }),
 		).toHaveLength(2);
 		expect(
-			screen.getAllByRole("columnheader", { name: "Mise à jour" }),
+			screen.getAllByRole("columnheader", { name: "Ressources" }),
 		).toHaveLength(2);
 	});
 
@@ -98,14 +99,16 @@ describe("DeclarationsSection", () => {
 		expect(screen.getByText("Effectué")).toBeInTheDocument();
 	});
 
-	it("renders 'Aucune' for declarations with no update date", () => {
+	it("renders 'Aucune' for declarations with no resources", () => {
 		renderSection();
 		expect(screen.getAllByText("Aucune")).toHaveLength(2);
 	});
 
-	it("renders formatted date for declarations with an update date", () => {
+	it("renders a Documents link for completed declarations", () => {
 		renderSection();
-		expect(screen.getByText("15/03/2025")).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Documents (2)" }),
+		).toBeInTheDocument();
 	});
 
 	it("renders 'Années précédentes' heading when there are past declarations", () => {

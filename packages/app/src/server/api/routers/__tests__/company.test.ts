@@ -347,6 +347,14 @@ describe("companyRouter.getWithDeclarations", () => {
 					}),
 				};
 			}
+			if (selectCallCount === 5) {
+				// gipMdsData query (simple .from().where(), no join)
+				return {
+					from: vi.fn().mockReturnValue({
+						where: vi.fn().mockResolvedValue([]),
+					}),
+				};
+			}
 			// cseOpinions + jointEvaluationFiles queries (join through declarations)
 			return {
 				from: vi.fn().mockReturnValue({
