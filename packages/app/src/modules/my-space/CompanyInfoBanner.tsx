@@ -3,6 +3,7 @@ import { Breadcrumb } from "~/modules/layout";
 
 import { MODAL_ID as COMPANY_EDIT_MODAL_ID } from "./CompanyEditModal";
 import styles from "./CompanyInfoBanner.module.scss";
+import { formatAddress } from "./formatAddress";
 import { formatSiren } from "./formatSiren";
 import { StatusBadge } from "./StatusBadge";
 import type { CompanyDetail } from "./types";
@@ -15,7 +16,7 @@ export function CompanyInfoBanner({ company }: Props) {
 	const currentYear = getCurrentYear();
 
 	return (
-		<div className={`fr-py-4w ${styles.banner}`}>
+		<div className={`fr-pt-3w fr-pb-4w ${styles.banner}`}>
 			<div className="fr-container">
 				<Breadcrumb
 					items={[
@@ -24,59 +25,54 @@ export function CompanyInfoBanner({ company }: Props) {
 					]}
 				/>
 
-				<div className="fr-mt-3w">
+				<div className="fr-mt-4w">
 					<div className="fr-grid-row fr-grid-row--middle fr-mb-1w">
 						<div className="fr-col">
-							<h2 className="fr-mb-0">{company.name}</h2>
+							<h2 className="fr-h4 fr-mb-0">{company.name}</h2>
 						</div>
 						<div className="fr-col-auto">
 							<button
 								aria-controls={COMPANY_EDIT_MODAL_ID}
-								className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-edit-line fr-btn--icon-left"
+								className="fr-btn fr-btn--tertiary-no-outline fr-icon-edit-line fr-btn--icon-left"
 								data-fr-opened="false"
 								type="button"
 							>
-								Modifier les informations
+								Modifier
 							</button>
 						</div>
 					</div>
 
-					<p className="fr-text--bold fr-mb-1w">{formatSiren(company.siren)}</p>
+					<div className={`${styles.infoRow} fr-mb-1w`}>
+						<p className={styles.datapoint}>
+							SIREN : <strong>{formatSiren(company.siren)}</strong>
+						</p>
+						{company.address && (
+							<p className={styles.datapoint}>
+								Adresse : <strong>{formatAddress(company.address)}</strong>
+							</p>
+						)}
+					</div>
 
-					{company.address && (
-						<p className="fr-text--bold fr-mb-1w">{company.address}</p>
-					)}
-
-					<div className="fr-grid-row fr-grid-row--gutters fr-mt-1w">
+					<div className={styles.infoRow}>
 						{company.nafCode && (
-							<div className="fr-col-auto">
-								<p className="fr-mb-0">
-									Code NAF : <strong>{company.nafCode}</strong>
-								</p>
-							</div>
+							<p className={styles.datapoint}>
+								Code NAF : <strong>{company.nafCode}</strong>
+							</p>
 						)}
 						{company.workforce !== null && (
-							<div className="fr-col-auto">
-								<p className="fr-mb-0">
-									Effectif annuel moyen en {currentYear} :{" "}
-									<strong>{company.workforce}</strong>
-								</p>
-							</div>
-						)}
-						<div className="fr-col-auto">
-							<p className="fr-mb-0 fr-flex fr-flex--align-center">
-								Existence d'un CSE :{" "}
-								{company.hasCse !== null ? (
-									<strong className="fr-ml-1v">
-										{company.hasCse ? "Oui" : "Non"}
-									</strong>
-								) : (
-									<span className="fr-ml-1v">
-										<StatusBadge status="to_complete" />
-									</span>
-								)}
+							<p className={styles.datapoint}>
+								Effectif annuel moyen en {currentYear} :{" "}
+								<strong>{company.workforce}</strong>
 							</p>
-						</div>
+						)}
+						<p className={styles.datapoint}>
+							Existence d'un CSE :{" "}
+							{company.hasCse !== null ? (
+								<strong>{company.hasCse ? "Oui" : "Non"}</strong>
+							) : (
+								<StatusBadge status="to_complete" />
+							)}
+						</p>
 					</div>
 				</div>
 			</div>
