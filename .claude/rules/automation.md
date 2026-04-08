@@ -65,6 +65,10 @@ Before reporting ANY task as done, launch **4 parallel agents**:
 
 If any fails → fix → re-run. Only report completion when all 4 pass.
 
+### Before every push — format & lint check
+
+Before pushing code (`git push`), **always** run `pnpm check:write` (or `pnpm lint:check && pnpm format:check` to verify). The auto-lint hook catches most issues after individual edits, but does not guarantee the final state is clean. A final check before push prevents CI failures.
+
 **Bonus: Next.js runtime check** — if the dev server is running, also call `nextjs_call(get_errors)` via the `next-devtools` MCP to catch runtime/compilation errors not visible in `pnpm typecheck`.
 
 > **Junior-proof policy:** Agents are always in the pipeline — a junior cannot "forget" to run them. The agent itself decides if there is work to do based on the modified files. Zero overhead when not relevant, zero chance of skipping when relevant.
