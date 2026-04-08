@@ -195,11 +195,10 @@
 	font-weight: 700;
 	line-height: 1.75rem;
 	color: var(--text-title-blue-france);
-	overflow-wrap: anywhere !important;
-	word-break: break-word !important;
-	white-space: normal !important;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	white-space: normal;
 	background-image: none;
-	text-wrap: wrap;
 }
 
 .documentCardFooter {

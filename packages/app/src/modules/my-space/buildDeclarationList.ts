@@ -33,6 +33,7 @@ export function buildDeclarationList(
 	siren: string,
 	dbDeclarations: DbDeclaration[],
 	currentYear: number,
+	yearsWithPrefill: Set<number> = new Set(),
 ): DeclarationItem[] {
 	const rows: DeclarationItem[] = [];
 
@@ -57,9 +58,6 @@ export function buildDeclarationList(
 				hasPrefillData: existing.hasPrefillData,
 			});
 		} else {
-			const prefillOnly = dbDeclarations.find(
-				(d) => d.year === currentYear && d.type === type && d.hasPrefillData,
-			);
 			rows.push({
 				type,
 				siren,
@@ -72,7 +70,8 @@ export function buildDeclarationList(
 				complianceCompletedAt: null,
 				hasCseOpinion: false,
 				hasJointEvaluationFile: false,
-				hasPrefillData: prefillOnly?.hasPrefillData ?? false,
+				hasPrefillData:
+					type === "remuneration" && yearsWithPrefill.has(currentYear),
 			});
 		}
 	}

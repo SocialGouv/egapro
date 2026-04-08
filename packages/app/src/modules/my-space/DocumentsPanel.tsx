@@ -1,7 +1,5 @@
 "use client";
 
-import { useRef } from "react";
-
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { DeclarationItem } from "./types";
 
@@ -65,7 +63,6 @@ type Props = {
 };
 
 export function DocumentsPanel({ declaration }: Props) {
-	const dialogRef = useRef<HTMLDialogElement>(null);
 	const panelId = getDocumentsPanelId(declaration);
 	const titleId = `${panelId}-title`;
 	const resources = getResources(declaration);
@@ -80,7 +77,6 @@ export function DocumentsPanel({ declaration }: Props) {
 			aria-modal="true"
 			className={`fr-modal ${styles.sidePanel}`}
 			id={panelId}
-			ref={dialogRef}
 		>
 			<div className={styles.panelContainer}>
 				<div className={styles.panelHeader}>

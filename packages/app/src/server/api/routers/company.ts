@@ -179,31 +179,11 @@ export const companyRouter = createTRPCRouter({
 				hasPrefillData: yearsWithPrefill.has(d.year),
 			}));
 
-			// Inject virtual entries for years that have prefill data but no declaration yet,
-			// so the declaration row can expose the "Documents" resource.
-			const declaredYears = new Set(mappedDeclarations.map((d) => d.year));
-			for (const prefillYear of yearsWithPrefill) {
-				if (!declaredYears.has(prefillYear)) {
-					mappedDeclarations.push({
-						type: "remuneration" as const,
-						year: prefillYear,
-						status: "to_complete",
-						currentStep: 0,
-						updatedAt: null,
-						compliancePath: null,
-						secondDeclarationStatus: null,
-						complianceCompletedAt: null,
-						hasCseOpinion: false,
-						hasJointEvaluationFile: false,
-						hasPrefillData: true,
-					});
-				}
-			}
-
 			const declarationItems = buildDeclarationList(
 				input.siren,
 				mappedDeclarations,
 				year,
+				yearsWithPrefill,
 			);
 
 			return { company, declarations: declarationItems };

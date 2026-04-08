@@ -19,7 +19,14 @@ export async function GET(request: Request) {
 	const siren = extractSiren(session.user.siret);
 	const url = new URL(request.url);
 	const yearParam = url.searchParams.get("year");
-	const year = yearParam ? Number.parseInt(yearParam, 10) : getCurrentYear();
+	const parsedYear = yearParam ? Number.parseInt(yearParam, 10) : null;
+	if (
+		parsedYear !== null &&
+		(Number.isNaN(parsedYear) || parsedYear < 2000 || parsedYear > 2100)
+	) {
+		return new Response("Paramètre 'year' invalide", { status: 400 });
+	}
+	const year = parsedYear ?? getCurrentYear();
 
 	try {
 		const [row] = await db
@@ -58,6 +65,6 @@ export async function GET(request: Request) {
 		});
 	} catch (error) {
 		console.error("[prefill-pdf]", error);
-		return new Response("Impossible de générer le PDF", { status: 400 });
+		return new Response("Impossible de générer le PDF", { status: 500 });
 	}
 }
