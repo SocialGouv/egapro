@@ -149,7 +149,16 @@ export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
  * Use this for any procedure that operates on company-scoped data.
  */
 export const companyProcedure = protectedProcedure.use(({ ctx, next }) => {
-	const siren = parseSiren(ctx.session.user.siret);
+	// Admin impersonation short-circuit: when an admin is currently mimoquing
+	// a company, every company-scoped procedure operates on the impersonated
+	// SIREN instead of the admin's own SIRET from ProConnect. The admin flag
+	// is checked to prevent a non-admin from ever resolving a foreign SIREN.
+	const impersonatedSiren =
+		ctx.session.user.isAdmin && ctx.session.user.impersonation
+			? ctx.session.user.impersonation.siren
+			: null;
+
+	const siren = impersonatedSiren ?? parseSiren(ctx.session.user.siret);
 	if (!siren) {
 		throw new TRPCError({
 			code: "BAD_REQUEST",
