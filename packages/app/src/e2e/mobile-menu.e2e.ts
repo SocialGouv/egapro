@@ -5,7 +5,7 @@ import { devices, expect, test } from "@playwright/test";
 test.use({ ...devices["Pixel 5"] });
 
 test.describe("Mobile header menu", () => {
-	test("opens the user account menu inside the mobile modal", async ({
+	test("shows user info and logout directly inside the mobile modal", async ({
 		page,
 	}) => {
 		await page.goto("/mon-espace");
@@ -24,19 +24,29 @@ test.describe("Mobile header menu", () => {
 		const modal = page.locator("#modal-menu.fr-modal--opened");
 		await expect(modal).toBeVisible();
 
-		// Click "Mon espace" inside the modal to open the dropdown.
-		await modal.getByRole("button", { name: "Mon espace" }).click();
+		// Visual proof under real mobile device emulation.
+		await page.screenshot({
+			path: "test-results/mobile-menu-opened.png",
+			fullPage: false,
+		});
 
-		// Dropdown content must be reachable inside the modal.
+		// User info and actions must be visible directly, without having to
+		// open any nested dropdown.
 		await expect(modal.getByText("test@fia1.fr")).toBeVisible();
 		await expect(
-			modal.getByRole("menuitem", { name: "Mes entreprises" }),
+			modal.getByRole("link", { name: "Mes entreprises" }),
 		).toBeVisible();
 		await expect(
-			modal.getByRole("menuitem", { name: "Voir mon profil" }),
+			modal.getByRole("button", { name: "Voir mon profil" }),
 		).toBeVisible();
-		const logoutLink = modal.getByRole("menuitem", { name: "Se déconnecter" });
+		const logoutLink = modal.getByRole("link", { name: "Se déconnecter" });
 		await expect(logoutLink).toBeVisible();
 		await expect(logoutLink).toHaveAttribute("href", "/api/auth/logout");
+
+		// The desktop dropdown trigger ("Mon espace") must be hidden in the
+		// mobile modal — there is only one set of user actions, the inline one.
+		await expect(
+			modal.getByRole("button", { name: "Mon espace" }),
+		).toBeHidden();
 	});
 });

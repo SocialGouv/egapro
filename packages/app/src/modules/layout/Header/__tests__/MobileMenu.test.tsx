@@ -30,7 +30,7 @@ describe("MobileMenu", () => {
 		).toBeInTheDocument();
 	});
 
-	it("hides the main navigation and renders the user account menu when signed in", async () => {
+	it("hides the main navigation and renders the inline user block when signed in", async () => {
 		mocks.auth.mockResolvedValue({
 			user: {
 				email: "jean.dupont@example.fr",
@@ -47,8 +47,18 @@ describe("MobileMenu", () => {
 		expect(
 			screen.queryByRole("link", { name: "Se connecter" }),
 		).not.toBeInTheDocument();
+
+		// User info and actions are rendered inline.
+		expect(screen.getByText("Jean Dupont")).toBeInTheDocument();
+		expect(screen.getByText("jean.dupont@example.fr")).toBeInTheDocument();
 		expect(
-			screen.getByRole("button", { name: "Mon espace" }),
+			screen.getByRole("link", { name: "Mes entreprises" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Voir mon profil" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: "Se déconnecter" }),
 		).toBeInTheDocument();
 	});
 });

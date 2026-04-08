@@ -2,6 +2,14 @@
 	position: relative;
 }
 
+// Inside the mobile DSFR header modal, the desktop dropdown is replaced by
+// `MobileUserBlock` (rendered as a sibling). The wrapper still has to be
+// rendered there so the DSFR `HeaderLinks` equality check (innerHTML
+// comparison with the desktop tools bar) passes — we just hide it visually.
+:global(.fr-header__menu) .wrapper {
+	display: none;
+}
+
 .dropdown {
 	position: absolute;
 	right: 0;
