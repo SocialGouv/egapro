@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: audit-cleanup-daily
+  namespace: {{ .Values.global.namespace }}
+spec:
+  schedule: "0 4 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app: audit-cleanup-daily
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsUser: 100
+            runAsNonRoot: true
+          containers:
+            - name: trigger
+              image: curlimages/curl:8.12.1
+              securityContext:
+                allowPrivilegeEscalation: false
+              env:
+                - name: EGAPRO_AUDIT_CLEANUP_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: audit-cleanup
+                      key: EGAPRO_AUDIT_CLEANUP_TOKEN
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  curl -X POST "http://app:3000/api/audit/cleanup" \
+                    -H "Authorization: Bearer ${EGAPRO_AUDIT_CLEANUP_TOKEN}" \
+                    --connect-timeout 10 \
+                    --max-time 300 \
+                    --fail \
+                    --silent \
+                    --show-error
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 32Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi
