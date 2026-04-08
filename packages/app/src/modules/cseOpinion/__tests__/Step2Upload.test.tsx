@@ -217,6 +217,24 @@ describe("Step2Upload", () => {
 		expect(screen.getAllByText("Fichier transmis")).toHaveLength(2);
 	});
 
+	it("renders a view link for each existing file", () => {
+		render(
+			<Step2Upload
+				declarationYear={2025}
+				existingFiles={[
+					makeFile("avis-1.pdf", "file-1"),
+					makeFile("avis-2.pdf", "file-2"),
+				]}
+			/>,
+		);
+
+		const viewLinks = screen.getAllByRole("link", { name: /Visualiser/ });
+		expect(viewLinks).toHaveLength(2);
+		expect(viewLinks[0]).toHaveAttribute("href", "/api/download/file-1");
+		expect(viewLinks[1]).toHaveAttribute("href", "/api/download/file-2");
+		expect(viewLinks[0]).toHaveAttribute("target", "_blank");
+	});
+
 	it("shows submit button when files exist but under limit", () => {
 		render(
 			<Step2Upload

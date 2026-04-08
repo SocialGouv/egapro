@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
+import { NewTabNotice } from "~/modules/layout";
 import { FileUpload, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
@@ -162,15 +163,27 @@ function ExistingFileCard({
 			</p>
 			<div>
 				<p className="fr-message fr-message--valid fr-mb-0">Fichier transmis</p>
-				<button
-					className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line fr-mt-1w"
-					disabled={isDeleting}
-					onClick={() => onDelete(file.id)}
-					title={`Supprimer ${file.fileName}`}
-					type="button"
-				>
-					{isDeleting ? "Suppression\u2026" : "Supprimer"}
-				</button>
+				<div className="fr-mt-1w">
+					<a
+						className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-eye-line"
+						href={`/api/download/${file.id}`}
+						rel="noopener noreferrer"
+						target="_blank"
+						title={`Visualiser ${file.fileName}`}
+					>
+						Visualiser
+						<NewTabNotice />
+					</a>
+					<button
+						className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line fr-ml-1w"
+						disabled={isDeleting}
+						onClick={() => onDelete(file.id)}
+						title={`Supprimer ${file.fileName}`}
+						type="button"
+					>
+						{isDeleting ? "Suppression\u2026" : "Supprimer"}
+					</button>
+				</div>
 			</div>
 		</div>
 	);
