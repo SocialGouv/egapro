@@ -1,10 +1,31 @@
+import { AUDIT_ACTIONS } from "~/modules/audit";
 import { getCurrentYear } from "~/modules/domain";
 import { parseSiren } from "~/modules/shared/parseSiren";
 import { ALLOWED_UPLOAD_MIME_TYPES } from "~/modules/shared/uploadConfig";
 import { auth } from "~/server/auth";
+import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { handleStreamingUpload } from "~/server/services/fileUpload";
 
-export async function POST(request: Request) {
+export const POST = withAuditedRoute(
+	{
+		action: AUDIT_ACTIONS.FILE_UPLOAD,
+		resolveContext: async (request) => {
+			const session = await auth();
+			return {
+				userId: session?.user?.id ?? null,
+				userEmail: session?.user?.email ?? null,
+				siren: parseSiren(session?.user?.siret),
+				metadata: {
+					fileName: request.headers.get("x-filename") ?? null,
+					contentType: request.headers.get("content-type") ?? null,
+				},
+			};
+		},
+	},
+	uploadHandler,
+);
+
+async function uploadHandler(request: Request): Promise<Response> {
 	const session = await auth();
 	const siren = parseSiren(session?.user?.siret);
 

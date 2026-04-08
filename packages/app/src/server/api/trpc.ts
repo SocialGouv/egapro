@@ -14,6 +14,7 @@ import { ZodError } from "zod";
 import { getCurrentYear } from "~/modules/domain";
 import { parseSiren } from "~/modules/shared/parseSiren";
 import { auth } from "~/server/auth";
+import { auditMiddleware as runAuditMiddleware } from "~/server/audit/trpcMiddleware";
 import { db } from "~/server/db";
 import { declarations } from "~/server/db/schema";
 
@@ -97,13 +98,25 @@ const timingMiddleware = t.middleware(async ({ next }) => {
 });
 
 /**
+ * Audit middleware — records every mutation and every explicitly-listed
+ * sensitive query in `audit.action_log` (issue #3174). The actual logic lives
+ * in `~/server/audit/trpcMiddleware` and is wrapped here so it integrates
+ * with the tRPC middleware pipeline (correct return type).
+ */
+const auditMiddleware = t.middleware(({ ctx, path, getRawInput, next }) =>
+	runAuditMiddleware({ ctx, path, getRawInput, next }),
+);
+
+/**
  * Public (unauthenticated) procedure
  *
  * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure.use(timingMiddleware);
+export const publicProcedure = t.procedure
+	.use(timingMiddleware)
+	.use(auditMiddleware);
 
 /**
  * Protected (authenticated) procedure
@@ -115,6 +128,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  */
 export const protectedProcedure = t.procedure
 	.use(timingMiddleware)
+	.use(auditMiddleware)
 	.use(({ ctx, next }) => {
 		if (!ctx.session?.user) {
 			throw new TRPCError({ code: "UNAUTHORIZED" });

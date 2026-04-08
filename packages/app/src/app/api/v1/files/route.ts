@@ -1,8 +1,11 @@
+import { AUDIT_ACTIONS } from "~/modules/audit";
+import { parseSiren } from "~/modules/domain";
 import {
 	exportFilesQuerySchema,
 	fetchCseFilesByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 } from "~/modules/export";
+import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { verifySuitAuth } from "~/server/services/suitApiAuth";
 
 /**
@@ -13,7 +16,27 @@ import { verifySuitAuth } from "~/server/services/suitApiAuth";
  * 1. A valid request signature (RSA-SHA256, verified via X-Signature + X-Timestamp headers)
  * 2. A valid SUIT API key in the Authorization: Bearer header
  */
-export async function GET(request: Request) {
+export const GET = withAuditedRoute(
+	{
+		action: AUDIT_ACTIONS.EXPORT_API_FILES,
+		resolveContext: (request) => {
+			const url = new URL(request.url);
+			// Validate siren before storing it: the audit `siren` column is
+			// `varchar(9)` and must contain a real SIREN, not arbitrary input.
+			const siren = parseSiren(url.searchParams.get("siren"));
+			return {
+				siren,
+				metadata: {
+					siren,
+					year: url.searchParams.get("year") ?? null,
+				},
+			};
+		},
+	},
+	apiFilesHandler,
+);
+
+async function apiFilesHandler(request: Request): Promise<Response> {
 	const authError = verifySuitAuth(request);
 	if (authError) return authError;
 

@@ -1,4 +1,6 @@
 import { env } from "~/env.js";
+import { AUDIT_ACTIONS } from "~/modules/audit";
+import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 import { fetchGipCsv, importGipCsvToDb } from "~/server/services/gipMds";
 
@@ -8,7 +10,12 @@ import { fetchGipCsv, importGipCsvToDb } from "~/server/services/gipMds";
  * Trigger GIP MDS CSV import from the configured API URL.
  * Called by the K8s CronJob with a Bearer token for authentication.
  */
-export async function POST(request: Request) {
+export const POST = withAuditedRoute(
+	{ action: AUDIT_ACTIONS.GIP_MDS_IMPORT },
+	gipMdsImportHandler,
+);
+
+async function gipMdsImportHandler(request: Request): Promise<Response> {
 	const token = env.EGAPRO_GIP_MDS_API_TOKEN;
 	if (token) {
 		const authHeader = request.headers.get("authorization");

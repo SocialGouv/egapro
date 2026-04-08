@@ -2,6 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 import { env } from "~/env";
+import { AUDIT_ACTIONS } from "~/modules/audit";
+import { parseSiren } from "~/modules/domain";
+import { logAction } from "~/server/audit/log";
+import { buildRequestContext } from "~/server/audit/requestContext";
 import { terminateProConnectSession } from "~/server/auth/proconnect-logout";
 
 /**
@@ -15,6 +19,24 @@ export async function GET(request: NextRequest) {
 	const token = await getToken({ req: request });
 	// Use the public origin from NEXTAUTH_URL to avoid localhost redirects behind reverse proxies
 	const baseUrl = new URL(env.NEXTAUTH_URL).origin;
+
+	// Capture user identity BEFORE terminating the session — issue #3174
+	const requestContext = buildRequestContext(request.headers);
+	const tokenWithEmail = token as
+		| (typeof token & {
+				email?: string | null;
+				siret?: string | null;
+		  })
+		| null;
+	void logAction({
+		action: AUDIT_ACTIONS.AUTH_LOGOUT,
+		status: "success",
+		userId: token?.id ?? null,
+		userEmail: tokenWithEmail?.email ?? null,
+		siren: parseSiren(tokenWithEmail?.siret),
+		ipAddress: requestContext.ipAddress,
+		userAgent: requestContext.userAgent,
+	});
 
 	if (token?.id_token) {
 		// Terminate ProConnect OIDC session server-side (fire-and-forget)
