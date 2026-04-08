@@ -1,15 +1,6 @@
 import { fetchFileById } from "~/modules/export";
-import { getFile } from "~/server/services/s3";
+import { buildContentDisposition, getFile } from "~/server/services/s3";
 import { verifySuitAuth } from "~/server/services/suitApiAuth";
-
-function buildContentDisposition(fileName: string): string {
-	const asciiFallback = fileName
-		.replace(/[^\x20-\x7E]/g, "_")
-		.replace(/["\\;\r\n]/g, "_");
-	const encodedFileName = encodeURIComponent(fileName);
-
-	return `attachment; filename="${asciiFallback}"; filename*=UTF-8''${encodedFileName}`;
-}
 
 /**
  * GET /api/v1/files/:fileId
@@ -35,7 +26,10 @@ export async function GET(
 		}
 
 		const { body, contentType } = await getFile(file.filePath);
-		const contentDisposition = buildContentDisposition(file.fileName);
+		const contentDisposition = buildContentDisposition(
+			file.fileName,
+			"attachment",
+		);
 
 		return new Response(body, {
 			headers: {

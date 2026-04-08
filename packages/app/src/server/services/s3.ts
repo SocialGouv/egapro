@@ -96,6 +96,21 @@ export async function getFile(
 	};
 }
 
+/**
+ * Build a RFC 5987-compliant Content-Disposition header with ASCII fallback.
+ */
+export function buildContentDisposition(
+	fileName: string,
+	disposition: "inline" | "attachment",
+): string {
+	const asciiFallback = fileName
+		.replace(/[^\x20-\x7E]/g, "_")
+		.replace(/["\\;\r\n]/g, "_");
+	const encodedFileName = encodeURIComponent(fileName);
+
+	return `${disposition}; filename="${asciiFallback}"; filename*=UTF-8''${encodedFileName}`;
+}
+
 export async function deleteFile(key: string): Promise<void> {
 	await s3Client.send(
 		new DeleteObjectCommand({

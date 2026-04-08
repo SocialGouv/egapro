@@ -2,20 +2,11 @@ import { fetchFileBySiren } from "~/modules/export";
 import { parseSiren } from "~/modules/shared";
 import { ALLOWED_UPLOAD_MIME_TYPES } from "~/modules/shared/uploadConfig";
 import { auth } from "~/server/auth";
-import { getFile } from "~/server/services/s3";
+import { buildContentDisposition, getFile } from "~/server/services/s3";
 
 const ALLOWED_CONTENT_TYPES: ReadonlySet<string> = new Set(
 	ALLOWED_UPLOAD_MIME_TYPES,
 );
-
-function buildContentDisposition(fileName: string): string {
-	const asciiFallback = fileName
-		.replace(/[^\x20-\x7E]/g, "_")
-		.replace(/["\\;\r\n]/g, "_");
-	const encodedFileName = encodeURIComponent(fileName);
-
-	return `inline; filename="${asciiFallback}"; filename*=UTF-8''${encodedFileName}`;
-}
 
 /**
  * GET /api/download/:fileId
@@ -51,7 +42,7 @@ export async function GET(
 		const safeContentType = ALLOWED_CONTENT_TYPES.has(contentType)
 			? contentType
 			: "application/octet-stream";
-		const contentDisposition = buildContentDisposition(file.fileName);
+		const contentDisposition = buildContentDisposition(file.fileName, "inline");
 
 		return new Response(body, {
 			headers: {

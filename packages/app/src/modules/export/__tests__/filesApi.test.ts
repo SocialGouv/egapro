@@ -15,12 +15,17 @@ vi.mock("~/modules/export/queries", () => ({
 	fetchCseOpinionsByDeclaration: vi.fn().mockResolvedValue(new Map()),
 }));
 
-vi.mock("~/server/services/s3", () => ({
-	getFile: vi.fn().mockResolvedValue({
-		body: new ReadableStream(),
-		contentType: "application/pdf",
-	}),
-}));
+vi.mock("~/server/services/s3", async (importOriginal) => {
+	const actual =
+		await importOriginal<typeof import("~/server/services/s3")>();
+	return {
+		...actual,
+		getFile: vi.fn().mockResolvedValue({
+			body: new ReadableStream(),
+			contentType: "application/pdf",
+		}),
+	};
+});
 
 const VALID_AUTH_HEADER = "Bearer test-suit-api-key-that-is-at-least-32-chars";
 
