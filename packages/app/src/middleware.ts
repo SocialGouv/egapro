@@ -17,7 +17,11 @@ import { env } from "~/env";
 export async function middleware(request: NextRequest) {
 	const token = await getToken({ req: request, secret: env.AUTH_SECRET });
 
-	if (!token) {
+	// Force re-login when there is no token OR when the token predates the
+	// `isAdmin` field (users signed in before this PR). The DB sync runs in
+	// the `jwt` callback on sign-in, so a fresh token is the only way to get
+	// the correct flag.
+	if (!token || token.isAdmin === undefined) {
 		const loginUrl = new URL("/login", request.url);
 		loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
 		return NextResponse.redirect(loginUrl);

@@ -8,7 +8,10 @@ export default async function Page() {
 
 	// Defense in depth — the layout already guards this route, but we keep the
 	// check here so the page cannot render for a non-admin session.
-	if (!session?.user?.isAdmin) {
+	if (!session?.user) {
+		redirect("/login");
+	}
+	if (!session.user.isAdmin) {
 		redirect("/mon-espace");
 	}
 
