@@ -154,16 +154,15 @@ declare module "next-auth/jwt" {
 }
 
 /**
- * Parse the `ADMIN_EMAILS` env var (comma-separated) into a normalized set.
+ * Normalized set of admin emails parsed once from `ADMIN_EMAILS`.
+ * The env var never changes at runtime, so we memoize it at module load.
  */
-function getAdminEmails(): Set<string> {
-	return new Set(
-		(env.ADMIN_EMAILS ?? "")
-			.split(",")
-			.map((email) => email.trim().toLowerCase())
-			.filter(Boolean),
-	);
-}
+const ADMIN_EMAILS: Set<string> = new Set(
+	(env.ADMIN_EMAILS ?? "")
+		.split(",")
+		.map((email) => email.trim().toLowerCase())
+		.filter(Boolean),
+);
 
 function getProviders(): Provider[] {
 	const providers: Provider[] = [];
@@ -378,8 +377,7 @@ export const authConfig = {
 
 				// Sync the admin flag with `ADMIN_EMAILS` on every login.
 				// Listing an email promotes the user; removing it demotes them.
-				const adminEmails = getAdminEmails();
-				const shouldBeAdmin = adminEmails.has(email.toLowerCase());
+				const shouldBeAdmin = ADMIN_EMAILS.has(email.toLowerCase());
 				if (shouldBeAdmin !== dbUser.isAdmin) {
 					await db
 						.update(users)
