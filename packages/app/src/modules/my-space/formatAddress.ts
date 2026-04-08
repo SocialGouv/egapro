@@ -16,6 +16,14 @@ const LOWERCASE_WORDS = new Set([
 	"l",
 ]);
 
+/**
+ * Converts a fully-uppercased INSEE/Weez address to title case.
+ * Short French connector words (de, du, la, le, …) are kept lowercase
+ * unless they appear as the first word of the address.
+ *
+ * @param address - The raw uppercase address string.
+ * @returns The address formatted in title case.
+ */
 export function formatAddress(address: string): string {
 	return address
 		.toLocaleLowerCase("fr-FR")
