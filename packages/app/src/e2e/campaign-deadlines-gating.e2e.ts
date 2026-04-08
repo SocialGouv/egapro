@@ -50,7 +50,11 @@ test.describe("Campaign deadlines gating", () => {
 	test.describe.configure({ mode: "serial" });
 	test.setTimeout(90_000);
 
-	test.beforeAll(async () => {
+	// Ensure the declaration row exists and is in the expected compliance state.
+	// Runs before each test since the DB helpers are UPDATE-only — the row must
+	// first be created by api.declaration.getOrCreate() at login time, which the
+	// shared auth.setup project handles.
+	async function seedSubmittedCompliance() {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
 		await setUserPhone("0122334455");
@@ -59,7 +63,7 @@ test.describe("Campaign deadlines gating", () => {
 			currentStep: 6,
 			compliancePath: "corrective_action",
 		});
-	});
+	}
 
 	test.afterAll(async () => {
 		await deleteCampaignDeadlines(testDeclarationYear);
@@ -77,6 +81,10 @@ test.describe("Campaign deadlines gating", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			// Declaration row is created by getOrCreate() at login — seed AFTER login,
+			// then reload so the server components see the submitted state.
+			await seedSubmittedCompliance();
+			await page.reload();
 			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
@@ -101,6 +109,7 @@ test.describe("Campaign deadlines gating", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await seedSubmittedCompliance();
 
 			await page.goto("/declaration-remuneration/etape/2");
 			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/2$/);
@@ -117,6 +126,8 @@ test.describe("Campaign deadlines gating", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await seedSubmittedCompliance();
+			await page.reload();
 			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
@@ -139,6 +150,7 @@ test.describe("Campaign deadlines gating", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await seedSubmittedCompliance();
 
 			await page.goto("/declaration-remuneration/etape/2");
 			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/6$/);
