@@ -1,3 +1,17 @@
 .banner {
 	background-color: var(--background-alt-blue-france);
 }
+
+.infoRow {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem 1.5rem;
+	align-items: center;
+}
+
+.datapoint {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	margin: 0;
+}
