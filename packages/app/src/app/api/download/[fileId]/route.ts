@@ -1,5 +1,5 @@
 import { fetchFileBySiren } from "~/modules/export";
-import { parseSiren } from "~/modules/shared/parseSiren";
+import { parseSiren } from "~/modules/shared";
 import { auth } from "~/server/auth";
 import { getFile } from "~/server/services/s3";
 
