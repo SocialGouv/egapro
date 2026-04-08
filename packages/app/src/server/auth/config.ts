@@ -13,6 +13,7 @@ declare module "next-auth" {
 			id: string;
 			siret?: string | null;
 			phone?: string | null;
+			isAdmin: boolean;
 		} & DefaultSession["user"];
 	}
 }
@@ -23,7 +24,20 @@ declare module "next-auth/jwt" {
 		siret?: string | null;
 		phone?: string | null;
 		id_token?: string | null;
+		isAdmin: boolean;
 	}
+}
+
+/**
+ * Parse the `ADMIN_EMAILS` env var (comma-separated) into a normalized set.
+ */
+function getAdminEmails(): Set<string> {
+	return new Set(
+		(env.ADMIN_EMAILS ?? "")
+			.split(",")
+			.map((email) => email.trim().toLowerCase())
+			.filter(Boolean),
+	);
 }
 
 function getProviders(): Provider[] {
@@ -120,28 +134,43 @@ export const authConfig = {
 				};
 
 				// Find or create user by email (replaces DrizzleAdapter)
-				let dbUser = await db.query.users.findFirst({
-					where: eq(users.email, user.email!),
+				const email = user.email;
+				if (!email) {
+					throw new Error("Missing email from auth profile");
+				}
+
+				const existingUser = await db.query.users.findFirst({
+					where: eq(users.email, email),
 				});
 
-				if (!dbUser) {
+				let dbUser: NonNullable<typeof existingUser>;
+				if (!existingUser) {
 					const rows = await db
 						.insert(users)
 						.values({
-							email: user.email!,
+							email,
 							firstName: profileData.firstName ?? null,
 							lastName: profileData.lastName ?? null,
 						})
 						.returning();
-					dbUser = rows[0]!;
+					const inserted = rows[0];
+					if (!inserted) {
+						throw new Error("Failed to create user");
+					}
+					dbUser = inserted;
 				} else {
 					const updates: Record<string, string | null> = {};
 					if (profileData.firstName) updates.firstName = profileData.firstName;
 					if (profileData.lastName) updates.lastName = profileData.lastName;
 
 					if (Object.keys(updates).length > 0) {
-						await db.update(users).set(updates).where(eq(users.id, dbUser.id));
-						dbUser = { ...dbUser, ...updates } as typeof dbUser;
+						await db
+							.update(users)
+							.set(updates)
+							.where(eq(users.id, existingUser.id));
+						dbUser = { ...existingUser, ...updates } as typeof existingUser;
+					} else {
+						dbUser = existingUser;
 					}
 				}
 
@@ -187,10 +216,23 @@ export const authConfig = {
 					});
 				}
 
+				// Sync the admin flag with `ADMIN_EMAILS` on every login.
+				// Listing an email promotes the user; removing it demotes them.
+				const adminEmails = getAdminEmails();
+				const shouldBeAdmin = adminEmails.has(email.toLowerCase());
+				if (shouldBeAdmin !== dbUser.isAdmin) {
+					await db
+						.update(users)
+						.set({ isAdmin: shouldBeAdmin })
+						.where(eq(users.id, dbUser.id));
+					dbUser = { ...dbUser, isAdmin: shouldBeAdmin };
+				}
+
 				token.id = dbUser.id;
 				token.siret = profileData.siret ?? null;
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
+				token.isAdmin = dbUser.isAdmin;
 			}
 			return token;
 		},
@@ -201,6 +243,7 @@ export const authConfig = {
 				id: token.id,
 				siret: token.siret ?? null,
 				phone: token.phone ?? null,
+				isAdmin: token.isAdmin ?? false,
 			},
 		}),
 	},

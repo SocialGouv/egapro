@@ -59,6 +59,11 @@ export const env = createEnv({
 		EGAPRO_GIP_MDS_API_TOKEN: z.string().optional(),
 		EGAPRO_MOCK_SUIT_SANCTION: z.coerce.boolean().optional().default(false),
 		EGAPRO_SUIT_PUBLIC_KEY_PEM: z.string().optional(),
+		/**
+		 * Comma-separated list of emails that should be granted the admin role
+		 * on login. The flag is then persisted in the `app_user.is_admin` column.
+		 */
+		ADMIN_EMAILS: z.string().optional().default(""),
 	},
 
 	/**
@@ -104,6 +109,7 @@ export const env = createEnv({
 		EGAPRO_GIP_MDS_API_TOKEN: process.env.EGAPRO_GIP_MDS_API_TOKEN,
 		EGAPRO_MOCK_SUIT_SANCTION: process.env.EGAPRO_MOCK_SUIT_SANCTION,
 		EGAPRO_SUIT_PUBLIC_KEY_PEM: process.env.EGAPRO_SUIT_PUBLIC_KEY_PEM,
+		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
