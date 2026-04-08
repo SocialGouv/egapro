@@ -154,10 +154,16 @@ declare module "next-auth/jwt" {
 }
 
 /**
- * Normalized set of admin emails parsed once from `ADMIN_EMAILS`.
- * The env var never changes at runtime, so we memoize it at module load.
+ * Parse the `ADMIN_EMAILS` env var (comma-separated) into a normalized set.
  */
-const ADMIN_EMAILS: Set<string> = parseAdminEmails(env.ADMIN_EMAILS);
+function getAdminEmails(): Set<string> {
+	return new Set(
+		(env.ADMIN_EMAILS ?? "")
+			.split(",")
+			.map((email) => email.trim().toLowerCase())
+			.filter(Boolean),
+	);
+}
 
 function getProviders(): Provider[] {
 	const providers: Provider[] = [];
@@ -370,13 +376,23 @@ export const authConfig = {
 					});
 				}
 
+				// Sync the admin flag with `ADMIN_EMAILS` on every login.
+				// Listing an email promotes the user; removing it demotes them.
+				const adminEmails = getAdminEmails();
+				const shouldBeAdmin = adminEmails.has(email.toLowerCase());
+				if (shouldBeAdmin !== dbUser.isAdmin) {
+					await db
+						.update(users)
+						.set({ isAdmin: shouldBeAdmin })
+						.where(eq(users.id, dbUser.id));
+					dbUser = { ...dbUser, isAdmin: shouldBeAdmin };
+				}
+
 				token.id = dbUser.id;
 				token.siret = profileData.siret ?? null;
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
-				// Admin role is purely env-driven: the `ADMIN_EMAILS` env var
-				// is the single source of truth, re-evaluated at each sign-in.
-				token.isAdmin = ADMIN_EMAILS.has(email.toLowerCase());
+				token.isAdmin = dbUser.isAdmin;
 			}
 			return token;
 		},

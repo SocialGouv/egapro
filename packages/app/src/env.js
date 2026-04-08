@@ -61,9 +61,9 @@ export const env = createEnv({
 		EGAPRO_SUIT_PUBLIC_KEY_PEM: z.string().optional(),
 		/**
 		 * Comma-separated list of emails that should be granted the admin role
-		 * on login. The flag is resolved in the NextAuth JWT callback.
+		 * on login. The flag is then persisted in the `app_user.is_admin` column.
 		 */
-		ADMIN_EMAILS: z.string().min(1),
+		ADMIN_EMAILS: z.string().optional().default(""),
 		// Audit log (issue #3174) — bearer token for the cleanup cron + retention
 		// thresholds (CNIL: 6 months for access logs, 12 months for security logs).
 		// Required (not optional): the /api/audit/cleanup route destroys data, so
