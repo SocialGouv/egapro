@@ -32,8 +32,8 @@ export const jointEvaluationRouter = createTRPCRouter({
 	getFile: declarationProcedure.query(async ({ ctx }) => {
 		const rows = await ctx.db
 			.select({
+				id: files.id,
 				fileName: files.fileName,
-				filePath: files.filePath,
 				uploadedAt: files.uploadedAt,
 			})
 			.from(files)
