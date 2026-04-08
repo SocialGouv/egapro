@@ -31,6 +31,7 @@ export const users = createTable("user", (d) => ({
 		})
 		.$defaultFn(() => /* @__PURE__ */ new Date()),
 	phone: d.varchar({ length: 20 }),
+	isAdmin: d.boolean().notNull().default(false),
 }));
 
 export const declarations = createTable(
