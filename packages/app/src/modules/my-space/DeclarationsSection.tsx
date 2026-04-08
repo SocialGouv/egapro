@@ -43,6 +43,7 @@ function getDeadline(declaration: DeclarationItem): string {
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
+const PAGE_SIZE_SELECTOR_THRESHOLD = 20;
 
 export function DeclarationsSection({
 	siren,
@@ -142,27 +143,29 @@ export function DeclarationsSection({
 					/>
 				</>
 			)}
-			<div className="fr-table">
-				<div className="fr-table__footer--start">
-					<div className="fr-select-group">
-						<label className="fr-sr-only fr-label" htmlFor="table-page-size">
-							Nombre de lignes par page
-						</label>
-						<select
-							className="fr-select"
-							id="table-page-size"
-							onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-							value={pageSize}
-						>
-							{PAGE_SIZE_OPTIONS.map((size) => (
-								<option key={size} value={size}>
-									{size} lignes par page
-								</option>
-							))}
-						</select>
+			{totalRows > PAGE_SIZE_SELECTOR_THRESHOLD && (
+				<div className="fr-table">
+					<div className="fr-table__footer--start">
+						<div className="fr-select-group">
+							<label className="fr-sr-only fr-label" htmlFor="table-page-size">
+								Nombre de lignes par page
+							</label>
+							<select
+								className="fr-select"
+								id="table-page-size"
+								onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+								value={pageSize}
+							>
+								{PAGE_SIZE_OPTIONS.map((size) => (
+									<option key={size} value={size}>
+										{size} lignes par page
+									</option>
+								))}
+							</select>
+						</div>
 					</div>
 				</div>
-			</div>
+			)}
 			{totalPages > 1 && (
 				<Pagination
 					currentPage={safePage}

@@ -84,8 +84,8 @@ export async function insertJointEvaluationFile(year: number) {
 		`;
 		if (decl.length === 0) return;
 		await sql`
-			INSERT INTO app_joint_evaluation_file (id, declaration_id, file_name, file_path, uploaded_at, created_at)
-			VALUES (gen_random_uuid(), ${decl[0]?.id}, 'dummy.pdf', '/tmp/dummy.pdf', NOW(), NOW())
+			INSERT INTO app_file (id, declaration_id, file_name, file_path, uploaded_at, created_at, type)
+			VALUES (gen_random_uuid(), ${decl[0]?.id}, 'dummy.pdf', '/tmp/dummy.pdf', NOW(), NOW(), 'joint_evaluation')
 			ON CONFLICT DO NOTHING
 		`;
 	} finally {
@@ -98,8 +98,9 @@ export async function deleteJointEvaluationFiles() {
 	const sql = createConnection();
 	try {
 		await sql`
-			DELETE FROM app_joint_evaluation_file
-			WHERE declaration_id IN (
+			DELETE FROM app_file
+			WHERE type = 'joint_evaluation'
+			AND declaration_id IN (
 				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
 			)
 		`;

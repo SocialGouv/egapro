@@ -127,8 +127,29 @@ describe("DeclarationsSection", () => {
 		expect(represButtons).toHaveLength(1);
 	});
 
-	it("renders the page size selector", () => {
+	it("does not render the page size selector when there are 20 rows or fewer", () => {
 		renderSection();
+		expect(
+			screen.queryByRole("combobox", { name: "Nombre de lignes par page" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders the page size selector when there are more than 20 rows", () => {
+		const manyDeclarations: DeclarationItem[] = Array.from(
+			{ length: 21 },
+			(_, i) => ({
+				type: "remuneration" as const,
+				siren: "532847196",
+				year: currentYear - i,
+				status: "done" as const,
+				currentStep: 6,
+				updatedAt: new Date("2025-01-01"),
+				...NO_COMPLIANCE,
+			}),
+		);
+
+		renderSection({ declarations: manyDeclarations });
+
 		expect(
 			screen.getByRole("combobox", { name: "Nombre de lignes par page" }),
 		).toBeInTheDocument();
@@ -241,7 +262,7 @@ describe("DeclarationsSection", () => {
 
 	it("resets to page 1 when page size changes", () => {
 		const manyDeclarations: DeclarationItem[] = Array.from(
-			{ length: 15 },
+			{ length: 25 },
 			(_, i) => ({
 				type: "remuneration" as const,
 				siren: "532847196",
@@ -258,10 +279,10 @@ describe("DeclarationsSection", () => {
 		// Go to page 2
 		fireEvent.click(screen.getByTitle("Page 2"));
 
-		// Change page size to 25
+		// Change page size to 50
 		fireEvent.change(
 			screen.getByRole("combobox", { name: "Nombre de lignes par page" }),
-			{ target: { value: "25" } },
+			{ target: { value: "50" } },
 		);
 
 		// Should be back on page 1 with all rows visible, no pagination
