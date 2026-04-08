@@ -1,13 +1,46 @@
 import type { JWT } from "next-auth/jwt";
 import { describe, expect, it, vi } from "vitest";
 
-// Reuse the same mocks the main config test uses, stripped down to what
-// the impersonation-update branch needs (it never touches the DB).
-vi.mock("~/server/db", () => ({ db: {} }));
+// The impersonation-update branch of the jwt callback writes to the audit
+// log inside a transaction. Factory returns self-contained stubs.
+vi.mock("~/server/db", () => {
+	const chain = () => ({
+		values: () => ({
+			onConflictDoNothing: () => Promise.resolve(),
+		}),
+	});
+	const plainValues = () => ({ values: () => Promise.resolve() });
+	const setWhere = () => ({
+		set: () => ({ where: () => Promise.resolve() }),
+	});
+	return {
+		db: {
+			transaction: async (fn: (tx: unknown) => unknown) =>
+				fn({
+					insert: (() => {
+						let first = true;
+						return () => {
+							if (first) {
+								first = false;
+								return chain();
+							}
+							return plainValues();
+						};
+					})(),
+					update: () => setWhere(),
+				}),
+			update: () => setWhere(),
+		},
+	};
+});
 vi.mock("~/server/db/schema", () => ({
 	users: {},
-	companies: {},
+	companies: { siren: "siren" },
 	userCompanies: {},
+	adminImpersonationEvents: {
+		adminUserId: "adminUserId",
+		stoppedAt: "stoppedAt",
+	},
 }));
 vi.mock("~/server/services/weez", () => ({
 	fetchCompanyBySiren: vi.fn(),

@@ -3,35 +3,30 @@
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-import { api } from "~/trpc/react";
-
 /**
  * Global banner shown on every page when an admin is currently
  * impersonating a company. Lets them return to their own account in one
  * click from anywhere in the app.
  *
- * Rendered near the top of `<body>` — the `fr-notice` DSFR component is
- * picked because it survives layout changes across the whole app.
+ * The impersonation state lives entirely in the NextAuth JWT — stopping
+ * it is a single `session.update({ impersonation: null })` call, which
+ * the server-side `jwt` callback handles (clearing the token and closing
+ * the audit event).
  */
 export function ImpersonateBanner() {
 	const session = useSession();
 	const router = useRouter();
 
-	const stopMutation = api.admin.stopImpersonate.useMutation({
-		onSuccess: async () => {
-			await session.update({ impersonation: null });
-			router.refresh();
-		},
-	});
-
 	const impersonation = session.data?.user.impersonation;
 	if (!impersonation) return null;
 
+	const onStop = async () => {
+		await session.update({ impersonation: null });
+		router.refresh();
+	};
+
 	return (
-		<section
-			aria-label="Mimoquage en cours"
-			className="fr-notice fr-notice--info"
-		>
+		<div className="fr-notice fr-notice--info">
 			<div className="fr-container">
 				<div className="fr-notice__body">
 					<p>
@@ -41,15 +36,15 @@ export function ImpersonateBanner() {
 						</span>
 					</p>
 					<button
-						className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm"
-						disabled={stopMutation.isPending}
-						onClick={() => stopMutation.mutate()}
+						className="fr-btn--close fr-btn"
+						onClick={onStop}
+						title="Arrêter le mimoquage"
 						type="button"
 					>
 						Arrêter le mimoquage
 					</button>
 				</div>
 			</div>
-		</section>
+		</div>
 	);
 }

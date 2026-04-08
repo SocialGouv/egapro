@@ -10,92 +10,56 @@ import { api } from "~/trpc/react";
 
 import { CompanyPreviewCard } from "./CompanyPreviewCard";
 
-type SearchResult = {
-	siren: string;
-	name: string;
-	address: string | null;
-	nafCode: string | null;
-	workforce: number | null;
-};
-
 /**
  * Search + preview + start/stop impersonation.
  *
- * Flow:
- *   1. admin types SIREN → `admin.searchCompany` query resolves it
- *   2. preview card is shown, "Valider" starts the audit log + mutates
- *      the NextAuth JWT via `session.update({ impersonation: ... })`
- *   3. on success, redirect to `/mon-espace` where the banner is shown
- *      globally.
+ * The impersonation state is stored in the NextAuth JWT. Starting is a
+ * single `session.update({ impersonation: { siren, name } })` call: the
+ * server-side `jwt` callback writes the audit row and mutates the token
+ * atomically. Stopping is the same call with `null`.
  */
 export function ImpersonateForm() {
 	const session = useSession();
 	const router = useRouter();
-	const [preview, setPreview] = useState<SearchResult | null>(null);
 	const [serverError, setServerError] = useState<string | null>(null);
+	const [starting, setStarting] = useState(false);
 
 	const form = useZodForm(impersonateSearchSchema, {
 		defaultValues: { siren: "" },
 	});
 
 	const lastImpersonated = api.admin.getLastImpersonated.useQuery(undefined, {
-		// only useful for logged-in admins, matches the procedure guard
 		enabled: session.data?.user.isAdmin === true,
 	});
 
 	const searchMutation = api.admin.searchCompany.useMutation({
-		onSuccess: (data) => {
-			setPreview(data);
-			setServerError(null);
-		},
-		onError: (err) => {
-			setPreview(null);
-			setServerError(err.message);
-		},
-	});
-
-	const startMutation = api.admin.startImpersonate.useMutation({
-		onSuccess: async (data) => {
-			await session.update({ impersonation: data });
-			router.push("/mon-espace");
-		},
+		onSuccess: () => setServerError(null),
 		onError: (err) => setServerError(err.message),
 	});
 
-	const stopMutation = api.admin.stopImpersonate.useMutation({
-		onSuccess: async () => {
-			await session.update({ impersonation: null });
-			router.refresh();
-		},
-	});
+	const preview = searchMutation.data ?? null;
 
 	const onSearch = form.handleSubmit((values) => {
 		searchMutation.mutate(values);
 	});
 
-	const onStart = () => {
-		if (preview) startMutation.mutate({ siren: preview.siren });
+	const onStart = async () => {
+		if (!preview) return;
+		setStarting(true);
+		try {
+			await session.update({
+				impersonation: { siren: preview.siren, name: preview.name },
+			});
+			router.push("/mon-espace");
+		} finally {
+			setStarting(false);
+		}
 	};
 
-	const isImpersonating = Boolean(session.data?.user.impersonation);
 	const sirenError = form.formState.errors.siren?.message;
 
 	return (
 		<div className="fr-mt-4w">
-			{isImpersonating && (
-				<section
-					aria-label="Mimoquage en cours"
-					className="fr-alert fr-alert--info fr-mb-2w"
-				>
-					<p className="fr-alert__title">Mimoquage en cours</p>
-					<p>
-						Vous êtes actuellement sous l'identité de l'entreprise{" "}
-						<strong>{session.data?.user.impersonation?.name}</strong> (
-						{session.data?.user.impersonation?.siren}).
-					</p>
-				</section>
-			)}
-
 			<form noValidate onSubmit={onSearch}>
 				<div
 					className={
@@ -111,6 +75,8 @@ export function ImpersonateForm() {
 						aria-describedby={
 							sirenError ? "impersonate-siren-error" : undefined
 						}
+						aria-invalid={Boolean(sirenError)}
+						aria-required="true"
 						autoComplete="off"
 						className="fr-input"
 						id="impersonate-siren"
@@ -127,11 +93,7 @@ export function ImpersonateForm() {
 						))}
 					</datalist>
 					{sirenError && (
-						<p
-							aria-live="polite"
-							className="fr-error-text"
-							id="impersonate-siren-error"
-						>
+						<p className="fr-error-text" id="impersonate-siren-error">
 							{sirenError}
 						</p>
 					)}
@@ -147,27 +109,12 @@ export function ImpersonateForm() {
 							Rechercher
 						</button>
 					</li>
-					{isImpersonating && (
-						<li>
-							<button
-								className="fr-btn fr-btn--secondary"
-								disabled={stopMutation.isPending}
-								onClick={() => stopMutation.mutate()}
-								type="button"
-							>
-								Arrêter le mimoquage
-							</button>
-						</li>
-					)}
 				</ul>
 			</form>
 
 			{serverError && (
-				<div
-					aria-live="polite"
-					className="fr-alert fr-alert--error fr-mt-2w"
-					role="alert"
-				>
+				<div className="fr-alert fr-alert--error fr-mt-2w" role="alert">
+					<h3 className="fr-alert__title">Erreur</h3>
 					<p>{serverError}</p>
 				</div>
 			)}
@@ -179,7 +126,7 @@ export function ImpersonateForm() {
 						<li>
 							<button
 								className="fr-btn"
-								disabled={startMutation.isPending}
+								disabled={starting}
 								onClick={onStart}
 								type="button"
 							>

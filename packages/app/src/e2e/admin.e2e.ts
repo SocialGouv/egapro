@@ -7,3 +7,11 @@ test("non-admin authenticated user visiting /admin is redirected to /mon-espace"
 	await page.waitForURL("**/mon-espace");
 	expect(page.url()).toContain("/mon-espace");
 });
+
+test("non-admin authenticated user visiting /admin/impersonate is redirected to /mon-espace", async ({
+	page,
+}) => {
+	await page.goto("/admin/impersonate");
+	await page.waitForURL("**/mon-espace");
+	expect(page.url()).toContain("/mon-espace");
+});
