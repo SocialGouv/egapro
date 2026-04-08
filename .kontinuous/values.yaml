@@ -35,6 +35,9 @@ app:
     - secretRef:
         name: "gip-mds-import"
         optional: true
+    - configMapRef:
+        name: "admin"
+        optional: true
   env:
     - name: POSTGRES_HOST
       valueFrom:

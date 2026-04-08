@@ -6,6 +6,7 @@ import { extractSiren } from "~/modules/domain";
 import { db } from "~/server/db";
 import { companies, userCompanies, users } from "~/server/db/schema";
 import { fetchCompanyBySiren } from "~/server/services/weez";
+import { parseAdminEmails } from "./parseAdminEmails";
 
 declare module "next-auth" {
 	interface Session extends DefaultSession {
@@ -32,12 +33,7 @@ declare module "next-auth/jwt" {
  * Normalized set of admin emails parsed once from `ADMIN_EMAILS`.
  * The env var never changes at runtime, so we memoize it at module load.
  */
-const ADMIN_EMAILS: Set<string> = new Set(
-	(env.ADMIN_EMAILS ?? "")
-		.split(",")
-		.map((email) => email.trim().toLowerCase())
-		.filter(Boolean),
-);
+const ADMIN_EMAILS: Set<string> = parseAdminEmails(env.ADMIN_EMAILS);
 
 function getProviders(): Provider[] {
 	const providers: Provider[] = [];

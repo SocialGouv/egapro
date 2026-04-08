@@ -1,24 +1,16 @@
-import { redirect } from "next/navigation";
-
 import { AdminHomePage } from "~/modules/admin";
 import { auth } from "~/server/auth";
 
 export default async function Page() {
+	// Access control is handled by the edge middleware and the admin layout;
+	// when this page renders we are guaranteed to have an admin session.
 	const session = await auth();
-
-	// Defense in depth — the layout already guards this route, but we keep the
-	// check here so the page cannot render for a non-admin session.
-	if (!session?.user) {
-		redirect("/login");
-	}
-	if (!session.user.isAdmin) {
-		redirect("/mon-espace");
-	}
+	const user = session?.user;
 
 	return (
 		<AdminHomePage
-			userEmail={session.user.email ?? ""}
-			userName={session.user.name ?? session.user.email ?? ""}
+			userEmail={user?.email ?? ""}
+			userName={user?.name ?? user?.email ?? ""}
 		/>
 	);
 }
