@@ -17,6 +17,7 @@ type DbDeclaration = {
 	complianceCompletedAt: Date | null;
 	hasCseOpinion: boolean;
 	hasJointEvaluationFile: boolean;
+	hasPrefillData: boolean;
 };
 
 /**
@@ -53,8 +54,12 @@ export function buildDeclarationList(
 				complianceCompletedAt: existing.complianceCompletedAt,
 				hasCseOpinion: existing.hasCseOpinion,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
+				hasPrefillData: existing.hasPrefillData,
 			});
 		} else {
+			const prefillOnly = dbDeclarations.find(
+				(d) => d.year === currentYear && d.type === type && d.hasPrefillData,
+			);
 			rows.push({
 				type,
 				siren,
@@ -67,6 +72,7 @@ export function buildDeclarationList(
 				complianceCompletedAt: null,
 				hasCseOpinion: false,
 				hasJointEvaluationFile: false,
+				hasPrefillData: prefillOnly?.hasPrefillData ?? false,
 			});
 		}
 	}
@@ -89,6 +95,7 @@ export function buildDeclarationList(
 			complianceCompletedAt: d.complianceCompletedAt,
 			hasCseOpinion: d.hasCseOpinion,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
+			hasPrefillData: d.hasPrefillData,
 		});
 	}
 

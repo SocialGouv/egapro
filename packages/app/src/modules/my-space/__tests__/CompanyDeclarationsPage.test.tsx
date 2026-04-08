@@ -53,6 +53,7 @@ const declarations: DeclarationItem[] = [
 		complianceCompletedAt: null,
 		hasCseOpinion: false,
 		hasJointEvaluationFile: false,
+		hasPrefillData: false,
 	},
 	{
 		type: "representation",
@@ -66,6 +67,7 @@ const declarations: DeclarationItem[] = [
 		complianceCompletedAt: null,
 		hasCseOpinion: false,
 		hasJointEvaluationFile: false,
+		hasPrefillData: false,
 	},
 ];
 
