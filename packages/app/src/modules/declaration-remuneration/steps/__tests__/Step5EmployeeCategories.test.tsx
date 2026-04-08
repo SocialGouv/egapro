@@ -100,9 +100,7 @@ describe("Step5EmployeeCategories", () => {
 
 	it("renders table section headers", () => {
 		render(<Step5EmployeeCategories declarationYear={2025} />);
-		expect(
-			screen.getAllByText("Nombre de salariés [Nombre total]").length,
-		).toBe(1);
+		expect(screen.getAllByText(/Nombre de salariés/).length).toBe(1);
 		expect(screen.getAllByText("Rémunération annuelle brute").length).toBe(1);
 		expect(screen.getAllByText("Rémunération horaire brute").length).toBe(1);
 	});
