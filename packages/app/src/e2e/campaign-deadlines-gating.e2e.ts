@@ -81,10 +81,12 @@ test.describe("Campaign deadlines gating", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
-			// Declaration row is created by getOrCreate() at login — seed AFTER login,
-			// then reload so the server components see the submitted state.
+			// The declaration row is only created by getOrCreate() when visiting a
+			// /declaration-remuneration page. /mon-espace does not trigger it, so we
+			// navigate there once before seeding, then go back to /mon-espace.
+			await page.goto("/declaration-remuneration");
 			await seedSubmittedCompliance();
-			await page.reload();
+			await page.goto("/mon-espace");
 			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
@@ -109,6 +111,7 @@ test.describe("Campaign deadlines gating", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await page.goto("/declaration-remuneration");
 			await seedSubmittedCompliance();
 
 			await page.goto("/declaration-remuneration/etape/2");
@@ -126,8 +129,9 @@ test.describe("Campaign deadlines gating", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await page.goto("/declaration-remuneration");
 			await seedSubmittedCompliance();
-			await page.reload();
+			await page.goto("/mon-espace");
 			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
@@ -150,6 +154,7 @@ test.describe("Campaign deadlines gating", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
+			await page.goto("/declaration-remuneration");
 			await seedSubmittedCompliance();
 
 			await page.goto("/declaration-remuneration/etape/2");
