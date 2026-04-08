@@ -162,6 +162,13 @@
 			"when": 1775450000000,
 			"tag": "0022_merge_file_tables",
 			"breakpoints": true
+		},
+		{
+			"idx": 23,
+			"version": "7",
+			"when": 1775600000000,
+			"tag": "0023_add_admin_impersonation_events",
+			"breakpoints": true
 		}
 	]
 }
