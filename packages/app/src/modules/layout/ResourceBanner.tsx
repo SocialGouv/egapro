@@ -48,18 +48,18 @@ export function ResourceBanner() {
 						<div className="fr-grid-row fr-grid-row--gutters">
 							<div className="fr-col-12 fr-col-md-4">
 								<ResourceTile
-									detail="Réponses aux questions les plus courantes"
-									href="/faq"
-									pictogramPath="/dsfr/artwork/pictograms/system/information.svg"
-									title="Questions fréquentes (FAQ)"
+									detail="Recherchez et accédez à toutes nos ressources"
+									href="/aide"
+									pictogramPath="/dsfr/artwork/pictograms/document/document-search.svg"
+									title="Centre d'aide"
 								/>
 							</div>
 							<div className="fr-col-12 fr-col-md-4">
 								<ResourceTile
-									detail="Guides, ressources et textes de référence"
-									href="/aide"
-									pictogramPath="/dsfr/artwork/pictograms/document/document.svg"
-									title="Aides et ressources"
+									detail="Réponses aux questions les plus courantes"
+									href="/faq"
+									pictogramPath="/dsfr/artwork/pictograms/system/information.svg"
+									title="Questions fréquentes (FAQ)"
 								/>
 							</div>
 							<div className="fr-col-12 fr-col-md-4">
