@@ -1,7 +1,12 @@
 import { fetchFileBySiren } from "~/modules/export";
 import { parseSiren } from "~/modules/shared";
+import { ALLOWED_UPLOAD_MIME_TYPES } from "~/modules/shared/uploadConfig";
 import { auth } from "~/server/auth";
 import { getFile } from "~/server/services/s3";
+
+const ALLOWED_CONTENT_TYPES: ReadonlySet<string> = new Set(
+	ALLOWED_UPLOAD_MIME_TYPES,
+);
 
 function buildContentDisposition(fileName: string): string {
 	const asciiFallback = fileName
@@ -25,9 +30,12 @@ export async function GET(
 	{ params }: { params: Promise<{ fileId: string }> },
 ) {
 	const session = await auth();
-	const siren = parseSiren(session?.user?.siret);
+	if (!session?.user) {
+		return Response.json({ error: "Non authentifié" }, { status: 401 });
+	}
 
-	if (!session?.user || !siren) {
+	const siren = parseSiren(session.user.siret);
+	if (!siren) {
 		return Response.json({ error: "Non authentifié" }, { status: 401 });
 	}
 
@@ -40,11 +48,14 @@ export async function GET(
 		}
 
 		const { body, contentType } = await getFile(file.filePath);
+		const safeContentType = ALLOWED_CONTENT_TYPES.has(contentType)
+			? contentType
+			: "application/octet-stream";
 		const contentDisposition = buildContentDisposition(file.fileName);
 
 		return new Response(body, {
 			headers: {
-				"Content-Type": contentType,
+				"Content-Type": safeContentType,
 				"Content-Disposition": contentDisposition,
 				"Cache-Control": "private, no-store",
 			},
