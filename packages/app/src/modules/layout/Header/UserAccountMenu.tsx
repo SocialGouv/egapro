@@ -105,6 +105,11 @@ export function UserAccountMenu({
 				aria-expanded={isOpen}
 				aria-haspopup="menu"
 				className="fr-btn fr-btn--tertiary-no-outline fr-icon-account-circle-line fr-btn--icon-left"
+				// Prevent the surrounding DSFR mobile header modal from auto-closing
+				// when this button is clicked. Without this, clicking "Mon espace"
+				// inside the mobile modal would close the entire menu instead of
+				// opening the dropdown.
+				data-fr-prevent-conceal=""
 				onClick={() => setIsOpen((prev) => !prev)}
 				ref={buttonRef}
 				type="button"

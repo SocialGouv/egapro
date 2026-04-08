@@ -1,12 +1,15 @@
-import Link from "next/link";
-
 import { auth } from "~/server/auth";
-import { MobileUserMenu } from "./MobileUserMenu";
+import { HeaderQuickAccessLinks } from "./HeaderQuickAccessLinks";
 import { Navigation } from "./Navigation";
 
 /**
  * Header menu: visible as nav bar on desktop, modal dialog on mobile.
  * DSFR JS manages role="dialog" and aria-modal dynamically on mobile open.
+ *
+ * The `.fr-header__menu-links` block must render the **same** content as
+ * `.fr-header__tools-links` (in HeaderQuickAccess), otherwise the DSFR
+ * `HeaderLinks` script overwrites it via `innerHTML` — which strips React
+ * event listeners and breaks the user account menu on mobile.
  */
 export async function MobileMenu() {
 	const session = await auth();
@@ -22,33 +25,7 @@ export async function MobileMenu() {
 					Fermer
 				</button>
 				<div className="fr-header__menu-links">
-					<ul className="fr-btns-group">
-						<li>
-							<Link
-								className="fr-btn fr-btn--tertiary-no-outline fr-icon-information-line fr-btn--icon-left"
-								href="/aide"
-							>
-								Aide
-							</Link>
-						</li>
-						{!session?.user && (
-							<li>
-								<Link
-									className="fr-btn fr-btn--secondary fr-icon-account-circle-fill"
-									href="/login"
-								>
-									Se connecter
-								</Link>
-							</li>
-						)}
-					</ul>
-					{session?.user && (
-						<MobileUserMenu
-							userEmail={session.user.email ?? ""}
-							userName={session.user.name ?? "Utilisateur"}
-							userPhone={session.user.phone ?? undefined}
-						/>
-					)}
+					<HeaderQuickAccessLinks session={session} />
 				</div>
 				{!session?.user && <Navigation />}
 			</div>
