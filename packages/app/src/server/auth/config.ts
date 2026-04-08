@@ -18,6 +18,8 @@ import {
 import { fetchCompanyBySiren } from "~/server/services/weez";
 import { parseAdminEmails } from "./parseAdminEmails";
 
+<<<<<<< HEAD
+
 /** Cap on the `name` field of an impersonation payload — avoids oversized
  *  tokens if an admin forges a huge string in the `session.update` call. */
 const IMPERSONATION_NAME_MAX = 255;
@@ -157,12 +159,7 @@ declare module "next-auth/jwt" {
  * Normalized set of admin emails parsed once from `ADMIN_EMAILS`.
  * The env var never changes at runtime, so we memoize it at module load.
  */
-const ADMIN_EMAILS: Set<string> = new Set(
-	(env.ADMIN_EMAILS ?? "")
-		.split(",")
-		.map((email) => email.trim().toLowerCase())
-		.filter(Boolean),
-);
+const ADMIN_EMAILS: Set<string> = parseAdminEmails(env.ADMIN_EMAILS);
 
 function getProviders(): Provider[] {
 	const providers: Provider[] = [];
