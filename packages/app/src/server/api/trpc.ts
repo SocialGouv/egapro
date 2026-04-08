@@ -128,6 +128,21 @@ export const protectedProcedure = t.procedure
 	});
 
 /**
+ * Admin procedure — authenticated + `session.user.isAdmin === true`.
+ *
+ * Use this for any backoffice procedure that must be restricted to staff.
+ */
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+	if (!ctx.session.user.isAdmin) {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: "Accès réservé aux administrateurs.",
+		});
+	}
+	return next({ ctx });
+});
+
+/**
  * Company procedure — authenticated + SIREN extracted from session.
  *
  * Guarantees `ctx.siren` is a valid 9-digit SIREN.
