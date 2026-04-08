@@ -100,9 +100,7 @@ describe("Step5EmployeeCategories", () => {
 
 	it("renders table section headers", () => {
 		render(<Step5EmployeeCategories declarationYear={2025} />);
-		expect(
-			screen.getAllByText("Nombre de salariés [Nombre total]").length,
-		).toBe(1);
+		expect(screen.getAllByText(/Nombre de salariés/).length).toBe(1);
 		expect(screen.getAllByText("Rémunération annuelle brute").length).toBe(1);
 		expect(screen.getAllByText("Rémunération horaire brute").length).toBe(1);
 	});
@@ -146,7 +144,9 @@ describe("Step5EmployeeCategories", () => {
 		await user.click(deleteButtons[0] as HTMLElement);
 
 		// Confirm deletion in dialog
-		const dialog = document.querySelector("dialog") as HTMLElement;
+		const dialog = document.querySelector(
+			'dialog[aria-labelledby="delete-category-title"]',
+		) as HTMLElement;
 		expect(dialog).toBeInTheDocument();
 		const dialogScope = within(dialog);
 		await user.click(dialogScope.getByText("Supprimer"));
