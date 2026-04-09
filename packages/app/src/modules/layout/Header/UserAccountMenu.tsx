@@ -10,6 +10,7 @@ interface UserAccountMenuProps {
 	userName: string;
 	userEmail: string;
 	userPhone?: string;
+	isAdmin?: boolean;
 }
 
 /** Dropdown menu in the header for authenticated users. */
@@ -17,6 +18,7 @@ export function UserAccountMenu({
 	userName,
 	userEmail,
 	userPhone,
+	isAdmin,
 }: UserAccountMenuProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const wrapperRef = useRef<HTMLDivElement>(null);
@@ -121,6 +123,16 @@ export function UserAccountMenu({
 					</div>
 
 					<div className={styles.links}>
+						{isAdmin && (
+							<Link
+								className={styles.menuLink}
+								href="/admin"
+								onClick={close}
+								role="menuitem"
+							>
+								Administration
+							</Link>
+						)}
 						<Link
 							className={styles.menuLink}
 							href="/mon-espace/mes-entreprises"

@@ -18,8 +18,6 @@ import {
 import { fetchCompanyBySiren } from "~/server/services/weez";
 import { parseAdminEmails } from "./parseAdminEmails";
 
-<<<<<<< HEAD
-
 /** Cap on the `name` field of an impersonation payload — avoids oversized
  *  tokens if an admin forges a huge string in the `session.update` call. */
 const IMPERSONATION_NAME_MAX = 255;
