@@ -102,6 +102,16 @@ Apply these rules **as you write code**, before any agent runs:
 - Env vars → `~/env.js` (never `process.env`)
 - No secrets in client code
 
+**Audit logging** (full details → `.claude/rules/audit-logging.md`):
+
+- New tRPC mutation → add to `PROCEDURE_TO_ACTION` in `trpcMiddleware.ts` (category `mutation`)
+- New tRPC query exposing PII / GIP data / PDF / company-scoped data → add to `PROCEDURE_TO_ACTION` (category `read_sensitive`)
+- New Next.js Route Handler (`src/app/api/**/route.ts`) → wrap with `withAuditedRoute(...)` and use `cachedAuth(request)` for session
+- New auth event / cron → direct `logAction` call; `logger.error` must stay synchronous (`void (async () => {...})()`)
+- Every new action requires **3 wire-up points**: `AUDIT_ACTIONS.*` constant, `AUDIT_ACTION_CATEGORIES` mapping, and the surface-specific wire (tRPC map / wrapper / direct call)
+- `metadata` jsonb must not contain secrets (auto-stripped keys: `password`, `token`, `refresh_token`, `secret`, `client_secret`, `authorization`, `apikey`, `api_key`, `accesskey`, `access_key`, `private_key`)
+- DB-layer changes in `~/server/audit/cleanup.ts` → add an integration test (`*.integration.test.ts`, runs via `pnpm test:integration`) — unit tests mock drizzle and miss driver bugs
+
 ### E2E tests (when relevant)
 
 Write or update Playwright E2E tests when a user journey is created, modified, or its underlying API/data changes.
