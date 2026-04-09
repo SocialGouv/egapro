@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 
-import { getCurrentYear } from "~/modules/domain";
+import { formatShortDate, getCurrentYear } from "~/modules/domain";
 
 import { Pagination } from "~/modules/shared/Pagination";
 

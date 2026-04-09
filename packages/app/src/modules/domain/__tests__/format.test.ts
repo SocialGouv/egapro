@@ -6,6 +6,8 @@ import {
 	formatCurrency,
 	formatGap,
 	formatGapCompact,
+	formatShortDate,
+	formatShortDateTime,
 	formatTotal,
 } from "../shared/format";
 
@@ -66,5 +68,33 @@ describe("formatTotal", () => {
 
 	it("returns dash for null", () => {
 		expect(formatTotal(null, "€")).toBe("-");
+	});
+});
+
+describe("formatShortDate", () => {
+	it("formats a date in dd/mm/yyyy", () => {
+		expect(formatShortDate(new Date("2024-06-15T10:00:00Z"))).toBe(
+			"15/06/2024",
+		);
+	});
+
+	it("returns dash for null", () => {
+		expect(formatShortDate(null)).toBe("—");
+	});
+
+	it("returns dash for undefined", () => {
+		expect(formatShortDate(undefined)).toBe("—");
+	});
+});
+
+describe("formatShortDateTime", () => {
+	it("formats a date with time", () => {
+		const result = formatShortDateTime(new Date("2024-06-15T10:30:00Z"));
+		expect(result).toMatch(/15\/06\/2024/);
+		expect(result).toMatch(/\d{2}:\d{2}/);
+	});
+
+	it("returns dash for null", () => {
+		expect(formatShortDateTime(null)).toBe("—");
 	});
 });

@@ -1,4 +1,6 @@
-import { formatDate, formatDateTime, STATUS_LABELS } from "./shared/constants";
+import { formatShortDate, formatShortDateTime } from "~/modules/domain";
+
+import { STATUS_LABELS } from "./shared/constants";
 import { DsfrTable } from "./shared/DsfrTable";
 import type { DeclarationDetail } from "./types";
 
@@ -44,11 +46,11 @@ export function DeclarationSummary({
 				</tr>
 				<tr>
 					<th scope="row">Date de création</th>
-					<td>{formatDateTime(declaration.createdAt)}</td>
+					<td>{formatShortDateTime(declaration.createdAt)}</td>
 				</tr>
 				<tr>
 					<th scope="row">Dernière modification</th>
-					<td>{formatDateTime(declaration.updatedAt)}</td>
+					<td>{formatShortDateTime(declaration.updatedAt)}</td>
 				</tr>
 			</tbody>
 		</DsfrTable>
@@ -180,7 +182,7 @@ export function FilesSection({ files }: { files: DeclarationDetail["files"] }) {
 									? "Avis CSE"
 									: "Évaluation conjointe"}
 							</td>
-							<td>{formatDate(file.uploadedAt)}</td>
+							<td>{formatShortDate(file.uploadedAt)}</td>
 							<td>
 								<a
 									aria-label={`Télécharger ${file.fileName}`}

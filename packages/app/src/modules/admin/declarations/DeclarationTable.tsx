@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+import { formatShortDate } from "~/modules/domain";
 import { Pagination } from "~/modules/shared/Pagination";
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
-import { formatDate, STATUS_LABELS } from "./shared/constants";
+
+import { STATUS_LABELS } from "./shared/constants";
 import { DsfrTable } from "./shared/DsfrTable";
 import type { DeclarationSearchRow } from "./types";
 
@@ -139,7 +141,7 @@ export function DeclarationTable({
 							<td>{row.year}</td>
 							<td>{STATUS_LABELS[row.status ?? ""] ?? row.status}</td>
 							<td>{row.declarantEmail}</td>
-							<td>{formatDate(row.createdAt)}</td>
+							<td>{formatShortDate(row.createdAt)}</td>
 						</tr>
 					))}
 					{rows.length === 0 && (
