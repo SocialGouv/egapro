@@ -1,7 +1,6 @@
 import { formatShortDate, formatShortDateTime } from "~/modules/domain";
-
+import { DsfrTable } from "~/modules/shared/DsfrTable";
 import { STATUS_LABELS } from "./shared/constants";
-import { DsfrTable } from "./shared/DsfrTable";
 import type { DeclarationDetail } from "./types";
 
 export function DeclarationSummary({

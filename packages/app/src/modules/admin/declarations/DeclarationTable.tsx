@@ -4,12 +4,11 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { formatShortDate } from "~/modules/domain";
+import { DsfrTable } from "~/modules/shared/DsfrTable";
 import { Pagination } from "~/modules/shared/Pagination";
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
-
 import { STATUS_LABELS } from "./shared/constants";
-import { DsfrTable } from "./shared/DsfrTable";
 import type { DeclarationSearchRow } from "./types";
 
 type Props = {
