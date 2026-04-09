@@ -33,11 +33,12 @@ export function AdminNavigation() {
 									? pathname === "/admin"
 									: pathname.startsWith(href);
 
+							const itemClass = isActive
+								? "fr-sidemenu__item fr-sidemenu__item--active"
+								: "fr-sidemenu__item";
+
 							return (
-								<li
-									className={`fr-sidemenu__item${isActive ? "fr-sidemenu__item--active" : ""}`}
-									key={href}
-								>
+								<li className={itemClass} key={href}>
 									<Link
 										aria-current={isActive ? "page" : undefined}
 										className="fr-sidemenu__link"

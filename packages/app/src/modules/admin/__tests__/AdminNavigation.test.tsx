@@ -27,9 +27,11 @@ describe("AdminNavigation", () => {
 	it("marks /admin as active when on /admin", () => {
 		(usePathname as Mock).mockReturnValue("/admin");
 		render(<AdminNavigation />);
-		expect(screen.getByRole("link", { name: "Accueil" })).toHaveAttribute(
-			"aria-current",
-			"page",
+		const activeLink = screen.getByRole("link", { name: "Accueil" });
+		expect(activeLink).toHaveAttribute("aria-current", "page");
+		expect(activeLink.closest("li")).toHaveClass(
+			"fr-sidemenu__item",
+			"fr-sidemenu__item--active",
 		);
 		expect(
 			screen.getByRole("link", { name: "Mimoquer un Siren" }),
