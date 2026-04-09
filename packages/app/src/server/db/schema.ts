@@ -486,6 +486,32 @@ export const campaignDeadlines = createTable("campaign_deadline", (d) => ({
 	decl2JointEvaluationDeadline: d.date().notNull(),
 }));
 
+// ── Referent tables ───────────────────────────────────────────────
+
+export const referentTypeEnum = pgEnum("referent_type", ["email", "url"]);
+
+export const referents = createTable(
+	"referent",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		region: d.varchar({ length: 3 }).notNull(),
+		county: d.varchar({ length: 3 }),
+		name: d.varchar({ length: 255 }).notNull(),
+		type: referentTypeEnum().notNull(),
+		value: d.varchar({ length: 500 }).notNull(),
+		principal: d.boolean().notNull().default(false),
+		substituteName: d.varchar({ length: 255 }),
+		substituteEmail: d.varchar({ length: 255 }),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [index("referent_region_idx").on(t.region)],
+);
+
 // ── Export tables ───────────────────────────────────────────────────
 
 export const exports = createTable(
