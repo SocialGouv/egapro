@@ -1,5 +1,4 @@
 import { AdminDeclarationDetailPage } from "~/modules/admin/declarations";
-import { HydrateClient } from "~/trpc/server";
 
 type Props = {
 	params: Promise<{ declarationId: string }>;
@@ -8,9 +7,5 @@ type Props = {
 export default async function Page({ params }: Props) {
 	const { declarationId } = await params;
 
-	return (
-		<HydrateClient>
-			<AdminDeclarationDetailPage declarationId={declarationId} />
-		</HydrateClient>
-	);
+	return <AdminDeclarationDetailPage declarationId={declarationId} />;
 }
