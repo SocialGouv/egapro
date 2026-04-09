@@ -90,7 +90,10 @@ export function Pagination({
 
 type PageItem = number | "ellipsis-start" | "ellipsis-end";
 
-function buildPageNumbers(currentPage: number, totalPages: number): PageItem[] {
+export function buildPageNumbers(
+	currentPage: number,
+	totalPages: number,
+): PageItem[] {
 	if (totalPages <= 7) {
 		return Array.from({ length: totalPages }, (_, i) => i + 1);
 	}

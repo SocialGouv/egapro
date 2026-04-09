@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-
+import { Pagination } from "~/modules/shared/Pagination";
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
 import { formatDate, STATUS_LABELS } from "./shared/constants";
 import { DsfrTable } from "./shared/DsfrTable";
-import { Pagination } from "./shared/Pagination";
 import type { DeclarationSearchRow } from "./types";
 
 type Props = {
