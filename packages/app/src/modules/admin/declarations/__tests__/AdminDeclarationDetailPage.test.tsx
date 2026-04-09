@@ -94,7 +94,9 @@ describe("AdminDeclarationDetailPage", () => {
 			screen.getByRole("heading", { level: 2, name: "Fichiers" }),
 		).toBeInTheDocument();
 		expect(screen.getByText("avis-cse.pdf")).toBeInTheDocument();
-		const downloadLink = screen.getByRole("link", { name: /Télécharger/ });
+		const downloadLink = screen.getByRole("link", {
+			name: "Télécharger avis-cse.pdf",
+		});
 		expect(downloadLink).toHaveAttribute("href", "/api/admin/files/file-1");
 	});
 

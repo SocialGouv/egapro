@@ -298,6 +298,7 @@ function FilesSection({ files }: { files: DeclarationDetail["files"] }) {
 											<td>{formatDate(file.uploadedAt)}</td>
 											<td>
 												<a
+													aria-label={`Télécharger ${file.fileName}`}
 													className="fr-btn fr-btn--sm fr-btn--secondary fr-btn--icon-left fr-icon-download-line"
 													download
 													href={`/api/admin/files/${file.id}`}
