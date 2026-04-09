@@ -29,6 +29,7 @@ jobs:
       S3_BUCKET_NAME: egapro-dev-app
       CLAMAV_HOST: localhost
       CLAMAV_PORT: 3310
+      ADMIN_EMAILS: test@fia1.fr
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
