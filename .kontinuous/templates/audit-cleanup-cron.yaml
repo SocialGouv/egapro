@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: audit-cleanup-daily
+  namespace: {{ .Values.global.namespace }}
+spec:
+  schedule: "0 4 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      # Fail fast: a failure here is either a transient 5xx (next daily run
+      # will retry naturally) or a permanent auth error (retry is pointless
+      # and noisy). Either way a single attempt is enough.
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app: audit-cleanup-daily
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsUser: 100
+            runAsNonRoot: true
+          containers:
+            - name: trigger
+              image: curlimages/curl:8.12.1
+              securityContext:
+                allowPrivilegeEscalation: false
+              env:
+                - name: EGAPRO_AUDIT_CLEANUP_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: audit-cleanup
+                      key: EGAPRO_AUDIT_CLEANUP_TOKEN
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  # Capture the HTTP status explicitly so the failure reason
+                  # (auth vs. server vs. network) lands in stderr for
+                  # observability instead of the opaque "curl: exit 22".
+                  HTTP_STATUS=$(curl -s -o /dev/stderr \
+                    -w "%{http_code}" \
+                    -X POST "http://app:3000/api/audit/cleanup" \
+                    -H "Authorization: Bearer ${EGAPRO_AUDIT_CLEANUP_TOKEN}" \
+                    --connect-timeout 10 \
+                    --max-time 300)
+                  if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+                    echo "Cleanup request failed with HTTP $HTTP_STATUS" >&2
+                    exit 1
+                  fi
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 32Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi

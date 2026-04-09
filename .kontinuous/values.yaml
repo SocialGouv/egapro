@@ -35,6 +35,9 @@ app:
     - secretRef:
         name: "gip-mds-import"
         optional: true
+    - secretRef:
+        name: "audit-cleanup"
+        optional: true
   env:
     - name: POSTGRES_HOST
       valueFrom:
