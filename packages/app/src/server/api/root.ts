@@ -1,3 +1,4 @@
+import { adminDeclarationsRouter } from "~/server/api/routers/adminDeclarations";
 import { companyRouter } from "~/server/api/routers/company";
 import { cseOpinionRouter } from "~/server/api/routers/cseOpinion";
 import { declarationRouter } from "~/server/api/routers/declaration";
@@ -12,6 +13,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+	adminDeclarations: adminDeclarationsRouter,
 	company: companyRouter,
 	cseOpinion: cseOpinionRouter,
 	declaration: declarationRouter,
