@@ -97,7 +97,7 @@ export function DeclarationTable({
 			>
 				<thead>
 					<tr>
-						<th className="fr-cell--fixed" role="columnheader">
+						<th className="fr-cell--fixed" scope="col">
 							<span className="fr-sr-only">Sélectionner</span>
 						</th>
 						{SORT_COLUMNS.map((col) => (
