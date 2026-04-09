@@ -38,7 +38,6 @@ const defaultProps = {
 	rows: [baseRow],
 	total: 1,
 	page: 1,
-	pageSize: 20,
 	totalPages: 1,
 	sortBy: "createdAt",
 	sortOrder: "desc",

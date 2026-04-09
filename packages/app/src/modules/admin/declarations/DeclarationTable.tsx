@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
@@ -12,7 +12,6 @@ type Props = {
 	rows: DeclarationSearchRow[];
 	total: number;
 	page: number;
-	pageSize: number;
 	totalPages: number;
 	sortBy: string;
 	sortOrder: string;
@@ -47,7 +46,6 @@ export function DeclarationTable({
 	rows,
 	total,
 	page,
-	pageSize,
 	totalPages,
 	sortBy,
 	sortOrder,
