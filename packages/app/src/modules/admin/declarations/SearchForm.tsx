@@ -2,31 +2,36 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { useForm } from "react-hook-form";
 
-import type { SearchDeclarationsInput } from "./schemas";
+import { useZodForm } from "~/modules/shared/useZodForm";
+
+import type { SearchDeclarationsFormValues } from "./schemas";
+import { searchDeclarationsFormSchema } from "./schemas";
 
 export function SearchForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
-	const { register, handleSubmit, reset } = useForm<SearchDeclarationsInput>({
-		defaultValues: {
-			query: searchParams.get("query") ?? "",
-			email: searchParams.get("email") ?? "",
-			year: searchParams.get("year") ?? undefined,
-			dateFrom: searchParams.get("dateFrom") ?? "",
-			dateTo: searchParams.get("dateTo") ?? "",
-			status:
-				(searchParams.get("status") as "draft" | "submitted") ?? undefined,
-			index: searchParams.get("index") ?? undefined,
-			indexOperator:
-				(searchParams.get("indexOperator") as "gt" | "lt" | "eq") ?? undefined,
+	const { register, handleSubmit, reset } = useZodForm(
+		searchDeclarationsFormSchema,
+		{
+			defaultValues: {
+				query: searchParams.get("query") ?? "",
+				email: searchParams.get("email") ?? "",
+				year: searchParams.get("year") ?? "",
+				dateFrom: searchParams.get("dateFrom") ?? "",
+				dateTo: searchParams.get("dateTo") ?? "",
+				status:
+					(searchParams.get("status") as "" | "draft" | "submitted") ?? "",
+				index: searchParams.get("index") ?? "",
+				indexOperator:
+					(searchParams.get("indexOperator") as "" | "gt" | "lt" | "eq") ?? "",
+			},
 		},
-	});
+	);
 
 	const onSubmit = useCallback(
-		(data: SearchDeclarationsInput) => {
+		(data: SearchDeclarationsFormValues) => {
 			const params = new URLSearchParams();
 			for (const [key, value] of Object.entries(data)) {
 				if (value !== undefined && value !== "") {
@@ -43,12 +48,12 @@ export function SearchForm() {
 		reset({
 			query: "",
 			email: "",
-			year: undefined,
+			year: "",
 			dateFrom: "",
 			dateTo: "",
-			status: undefined,
-			index: undefined,
-			indexOperator: undefined,
+			status: "",
+			index: "",
+			indexOperator: "",
 		});
 		router.push("/admin/declarations");
 	}, [reset, router]);

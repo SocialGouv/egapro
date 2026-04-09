@@ -37,6 +37,21 @@ export type SearchDeclarationsOutput = z.output<
 	typeof searchDeclarationsSchema
 >;
 
+export const searchDeclarationsFormSchema = z.object({
+	query: z.string().optional(),
+	email: z.string().optional(),
+	year: z.string().optional(),
+	dateFrom: z.string().optional(),
+	dateTo: z.string().optional(),
+	index: z.string().optional(),
+	indexOperator: z.enum(["", ...INDEX_OPERATORS]).optional(),
+	status: z.enum(["", "draft", "submitted"]).optional(),
+});
+
+export type SearchDeclarationsFormValues = z.infer<
+	typeof searchDeclarationsFormSchema
+>;
+
 export const getDeclarationByIdSchema = z.object({
 	id: z.string().uuid(),
 });
