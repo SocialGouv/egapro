@@ -8,10 +8,15 @@ import { z } from "zod";
  * never inline in routers).
  */
 
-/** Strict 9-digit SIREN. */
+/** 9-digit SIREN — tolerates spaces (e.g. "775 670 417"). */
 export const sirenSchema = z
 	.string()
-	.regex(/^\d{9}$/, "Le SIREN doit contenir exactement 9 chiffres.");
+	.transform((v) => v.replace(/\s/g, ""))
+	.pipe(
+		z
+			.string()
+			.regex(/^\d{9}$/, "Le SIREN doit contenir exactement 9 chiffres."),
+	);
 
 export const impersonateSearchSchema = z.object({
 	siren: sirenSchema,

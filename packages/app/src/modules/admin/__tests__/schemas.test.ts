@@ -12,6 +12,16 @@ describe("admin schemas", () => {
 		).toBe(true);
 	});
 
+	it("strips spaces before validating (e.g. '775 670 417')", () => {
+		const result = impersonateSearchSchema.safeParse({
+			siren: "775 670 417",
+		});
+		expect(result.success).toBe(true);
+		if (result.success) {
+			expect(result.data.siren).toBe("775670417");
+		}
+	});
+
 	it.each([
 		"",
 		"12345678",
