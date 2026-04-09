@@ -268,24 +268,30 @@ export const authConfig = {
 		},
 	},
 	logger: {
-		async error(code, metadata) {
+		// NextAuth v4 expects a synchronous `(code, metadata) => void` logger.
+		// We keep the signature synchronous and dispatch the async audit write
+		// inside a detached promise so NextAuth never awaits our side-effect.
+		error(code, metadata) {
 			// Log NextAuth-level errors that match a sign-in/callback failure
 			// — issue #3174 (failed login auditing).
 			if (
-				code.includes("SIGNIN") ||
-				code.includes("CALLBACK") ||
-				code.includes("OAUTH") ||
-				code.includes("JWT_SESSION")
+				!code.includes("SIGNIN") &&
+				!code.includes("CALLBACK") &&
+				!code.includes("OAUTH") &&
+				!code.includes("JWT_SESSION")
 			) {
+				return;
+			}
+			void (async () => {
 				const requestContext = await safeRequestContext();
-				void logAction({
+				await logAction({
 					action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
 					status: "failure",
 					errorMessage: buildAuthErrorMessage(code, metadata),
 					ipAddress: requestContext.ipAddress,
 					userAgent: requestContext.userAgent,
 				});
-			}
+			})();
 		},
 		warn() {},
 		debug() {},

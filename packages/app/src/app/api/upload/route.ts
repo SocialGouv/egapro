@@ -2,7 +2,7 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import { getCurrentYear } from "~/modules/domain";
 import { parseSiren } from "~/modules/shared/parseSiren";
 import { ALLOWED_UPLOAD_MIME_TYPES } from "~/modules/shared/uploadConfig";
-import { auth } from "~/server/auth";
+import { cachedAuth } from "~/server/audit/cachedAuth";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { handleStreamingUpload } from "~/server/services/fileUpload";
 
@@ -10,7 +10,7 @@ export const POST = withAuditedRoute(
 	{
 		action: AUDIT_ACTIONS.FILE_UPLOAD,
 		resolveContext: async (request) => {
-			const session = await auth();
+			const session = await cachedAuth(request);
 			return {
 				userId: session?.user?.id ?? null,
 				userEmail: session?.user?.email ?? null,
@@ -26,7 +26,7 @@ export const POST = withAuditedRoute(
 );
 
 async function uploadHandler(request: Request): Promise<Response> {
-	const session = await auth();
+	const session = await cachedAuth(request);
 	const siren = parseSiren(session?.user?.siret);
 
 	if (!session?.user || !siren) {

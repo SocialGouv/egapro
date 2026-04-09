@@ -3,14 +3,14 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import { buildPdfData } from "~/modules/declarationPdf/buildPdfData";
 import { DeclarationPdfDocument } from "~/modules/declarationPdf/DeclarationPdfDocument";
 import { extractSiren, getCurrentYear } from "~/modules/domain";
-import { auth } from "~/server/auth";
+import { cachedAuth } from "~/server/audit/cachedAuth";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 
 export const GET = withAuditedRoute(
 	{
 		action: AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD,
 		resolveContext: async (request) => {
-			const session = await auth();
+			const session = await cachedAuth(request);
 			const url = new URL(request.url);
 			return {
 				userId: session?.user?.id ?? null,
@@ -24,7 +24,7 @@ export const GET = withAuditedRoute(
 		},
 	},
 	async (request) => {
-		const session = await auth();
+		const session = await cachedAuth(request);
 		if (!session?.user?.siret) {
 			return new Response("Non autorisé", { status: 401 });
 		}
