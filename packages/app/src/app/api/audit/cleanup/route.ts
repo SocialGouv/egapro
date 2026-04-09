@@ -13,17 +13,10 @@ import { logAction } from "~/server/audit/log";
  * authentication. Issue #3174.
  */
 export async function POST(request: Request) {
-	// Fail-closed: refuse the request if no token is configured. This route
-	// destroys data — a missing secret should never make it world-readable.
-	const token = env.EGAPRO_AUDIT_CLEANUP_TOKEN;
-	if (!token) {
-		console.error(
-			"[audit/cleanup] EGAPRO_AUDIT_CLEANUP_TOKEN is not configured — refusing request",
-		);
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
+	// Token presence is enforced at startup by `env.js` (required, min length 32).
+	// We only need to compare the bearer header against the expected value here.
 	const authHeader = request.headers.get("authorization");
-	if (authHeader !== `Bearer ${token}`) {
+	if (authHeader !== `Bearer ${env.EGAPRO_AUDIT_CLEANUP_TOKEN}`) {
 		return Response.json({ error: "Unauthorized" }, { status: 401 });
 	}
 

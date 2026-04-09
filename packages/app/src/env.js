@@ -60,8 +60,11 @@ export const env = createEnv({
 		EGAPRO_MOCK_SUIT_SANCTION: z.coerce.boolean().optional().default(false),
 		EGAPRO_SUIT_PUBLIC_KEY_PEM: z.string().optional(),
 		// Audit log (issue #3174) — bearer token for the cleanup cron + retention
-		// thresholds (CNIL: 6 months for access logs, 12 months for security logs)
-		EGAPRO_AUDIT_CLEANUP_TOKEN: z.string().optional(),
+		// thresholds (CNIL: 6 months for access logs, 12 months for security logs).
+		// Required (not optional): the /api/audit/cleanup route destroys data, so
+		// a missing secret must crash startup rather than silently expose the
+		// endpoint. Must be sealed per environment (dev / preprod / prod).
+		EGAPRO_AUDIT_CLEANUP_TOKEN: z.string().min(32),
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS: z.coerce
 			.number()
 			.int()
