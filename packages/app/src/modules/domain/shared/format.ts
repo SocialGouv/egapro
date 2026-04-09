@@ -48,6 +48,28 @@ export function formatTotal(value: number | null, unit: string): string {
 	return `${value.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${unit}`;
 }
 
+/** Format a date in short French format: `new Date("2026-03-10")` → `"10/03/2026"`. Returns `"—"` for nullish values. */
+export function formatShortDate(date: Date | null | undefined): string {
+	if (!date) return "—";
+	return new Intl.DateTimeFormat("fr-FR", {
+		day: "2-digit",
+		month: "2-digit",
+		year: "numeric",
+	}).format(new Date(date));
+}
+
+/** Format a date with time in short French format: `new Date(…)` → `"10/03/2026 14:30"`. Returns `"—"` for nullish values. */
+export function formatShortDateTime(date: Date | null | undefined): string {
+	if (!date) return "—";
+	return new Intl.DateTimeFormat("fr-FR", {
+		day: "2-digit",
+		month: "2-digit",
+		year: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+	}).format(new Date(date));
+}
+
 /** Format a date in long French format: `new Date("2026-03-10")` → `"10 mars 2026"`. */
 export function formatLongDate(date: Date): string {
 	return date.toLocaleDateString("fr-FR", {

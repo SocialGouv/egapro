@@ -33,6 +33,8 @@ export {
 	formatGap,
 	formatGapCompact,
 	formatLongDate,
+	formatShortDate,
+	formatShortDateTime,
 	formatTotal,
 } from "./shared/format";
 // Gap business rules (calculations & threshold classification)

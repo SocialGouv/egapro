@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 
-import { getCurrentYear } from "~/modules/domain";
+import { formatShortDate, getCurrentYear } from "~/modules/domain";
 
 import { Pagination } from "~/modules/shared/Pagination";
 
@@ -27,11 +27,7 @@ type Props = {
 
 function formatDate(date: Date | null): string {
 	if (!date) return "Aucune";
-	return new Intl.DateTimeFormat("fr-FR", {
-		day: "2-digit",
-		month: "2-digit",
-		year: "numeric",
-	}).format(date);
+	return formatShortDate(date);
 }
 
 const TYPE_DEADLINES: Record<DeclarationType, string> = {
