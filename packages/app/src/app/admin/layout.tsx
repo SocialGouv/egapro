@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { AdminNavigation } from "~/modules/admin";
 import { auth } from "~/server/auth";
 
 export default async function AdminLayout({
@@ -18,5 +19,14 @@ export default async function AdminLayout({
 		redirect("/mon-espace");
 	}
 
-	return <>{children}</>;
+	return (
+		<div className="fr-container fr-py-4w">
+			<div className="fr-grid-row fr-grid-row--gutters">
+				<div className="fr-col-12 fr-col-md-3">
+					<AdminNavigation />
+				</div>
+				<div className="fr-col-12 fr-col-md-9">{children}</div>
+			</div>
+		</div>
+	);
 }

@@ -23,7 +23,7 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 
 	if (isLoading) {
 		return (
-			<div className="fr-container fr-py-4w">
+			<div>
 				<p>Chargement...</p>
 			</div>
 		);
@@ -31,7 +31,7 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 
 	if (!data) {
 		return (
-			<div className="fr-container fr-py-4w">
+			<div>
 				<div className="fr-alert fr-alert--error">
 					<p>Déclaration introuvable.</p>
 				</div>
@@ -43,7 +43,7 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 	}
 
 	return (
-		<div className="fr-container fr-py-4w">
+		<div>
 			<Link
 				className="fr-link fr-icon-arrow-left-line fr-link--icon-left fr-mb-4w"
 				href="/admin/declarations"

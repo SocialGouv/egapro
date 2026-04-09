@@ -92,11 +92,11 @@ function DeclarationsContent() {
 
 export function AdminDeclarationsPage() {
 	return (
-		<div className="fr-container fr-py-4w">
+		<>
 			<h1 className="fr-h3 fr-mb-4w">Déclarations</h1>
 			<Suspense fallback={<p>Chargement...</p>}>
 				<DeclarationsContent />
 			</Suspense>
-		</div>
+		</>
 	);
 }
