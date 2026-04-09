@@ -1,6 +1,6 @@
 import "server-only";
 
-import { sql } from "drizzle-orm";
+import { and, eq, lt, ne } from "drizzle-orm";
 import { db } from "~/server/db";
 import { actionLogs } from "~/server/db/auditSchema";
 
@@ -38,12 +38,18 @@ export async function cleanupAuditLogs({
 		const short = await tx
 			.delete(actionLogs)
 			.where(
-				sql`${actionLogs.category} = 'read_sensitive' AND ${actionLogs.createdAt} < ${shortThreshold}`,
+				and(
+					eq(actionLogs.category, "read_sensitive"),
+					lt(actionLogs.createdAt, shortThreshold),
+				),
 			);
 		const long = await tx
 			.delete(actionLogs)
 			.where(
-				sql`${actionLogs.category} <> 'read_sensitive' AND ${actionLogs.createdAt} < ${longThreshold}`,
+				and(
+					ne(actionLogs.category, "read_sensitive"),
+					lt(actionLogs.createdAt, longThreshold),
+				),
 			);
 		return [short, long] as const;
 	});
