@@ -202,8 +202,13 @@ function sanitizeValue(value: unknown): unknown {
 const SENSITIVE_KEYS = new Set([
 	"password",
 	"token",
+	"refresh_token",
 	"secret",
+	"client_secret",
 	"authorization",
 	"apikey",
 	"api_key",
+	"accesskey",
+	"access_key",
+	"private_key",
 ]);

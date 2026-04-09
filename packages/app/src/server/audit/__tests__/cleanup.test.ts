@@ -1,13 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockDeleteWhere, mockDelete } = vi.hoisted(() => {
+const { mockDeleteWhere, mockDelete, mockTransaction } = vi.hoisted(() => {
 	const mockDeleteWhere = vi.fn();
 	const mockDelete = vi.fn(() => ({ where: mockDeleteWhere }));
-	return { mockDeleteWhere, mockDelete };
+	// Mirror drizzle's `db.transaction(fn)` — call `fn` with a tx object that
+	// exposes the same `delete` builder we expose on `db`.
+	const mockTransaction = vi.fn(
+		async (fn: (tx: { delete: typeof mockDelete }) => Promise<unknown>) =>
+			fn({ delete: mockDelete }),
+	);
+	return { mockDeleteWhere, mockDelete, mockTransaction };
 });
 
 vi.mock("~/server/db", () => ({
-	db: { delete: mockDelete },
+	db: { delete: mockDelete, transaction: mockTransaction },
 }));
 
 vi.mock("~/server/db/auditSchema", () => ({
@@ -23,6 +29,36 @@ describe("cleanupAuditLogs", () => {
 	beforeEach(() => {
 		mockDelete.mockClear();
 		mockDeleteWhere.mockReset();
+		mockTransaction.mockClear();
+	});
+
+	it("wraps both DELETEs in a single transaction", async () => {
+		mockDeleteWhere
+			.mockResolvedValueOnce({ count: 0 })
+			.mockResolvedValueOnce({ count: 0 });
+
+		await cleanupAuditLogs({
+			shortRetentionDays: 180,
+			longRetentionDays: 365,
+		});
+
+		expect(mockTransaction).toHaveBeenCalledTimes(1);
+	});
+
+	it("coerces string count values returned by postgres-js v3 to numbers", async () => {
+		mockDeleteWhere
+			.mockResolvedValueOnce({ count: "12" })
+			.mockResolvedValueOnce({ count: "7" });
+
+		const result = await cleanupAuditLogs({
+			shortRetentionDays: 180,
+			longRetentionDays: 365,
+		});
+
+		expect(result.deletedShort).toBe(12);
+		expect(result.deletedLong).toBe(7);
+		// Sanity check: no string concatenation.
+		expect(result.deletedTotal).toBe(19);
 	});
 
 	it("runs two delete statements (one short, one long) and returns row counts", async () => {

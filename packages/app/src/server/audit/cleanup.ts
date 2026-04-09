@@ -18,9 +18,9 @@ export type CleanupResult = {
  *    that contain IP addresses).
  *  - **long** retention applies to every other category (security logs).
  *
- * The function performs two targeted DELETE statements rather than a single
- * statement with a CASE expression — clearer to debug, identical performance
- * given the existing `(category, created_at)` index.
+ * Both DELETEs run inside a single transaction so the operation is atomic —
+ * if the second statement fails, the first is rolled back and the next cron
+ * run re-attempts the full purge.
  */
 export async function cleanupAuditLogs({
 	shortRetentionDays,
@@ -34,17 +34,19 @@ export async function cleanupAuditLogs({
 	const shortThreshold = subtractDays(now, shortRetentionDays);
 	const longThreshold = subtractDays(now, longRetentionDays);
 
-	const shortResult = await db
-		.delete(actionLogs)
-		.where(
-			sql`${actionLogs.category} = 'read_sensitive' AND ${actionLogs.createdAt} < ${shortThreshold}`,
-		);
-
-	const longResult = await db
-		.delete(actionLogs)
-		.where(
-			sql`${actionLogs.category} <> 'read_sensitive' AND ${actionLogs.createdAt} < ${longThreshold}`,
-		);
+	const [shortResult, longResult] = await db.transaction(async (tx) => {
+		const short = await tx
+			.delete(actionLogs)
+			.where(
+				sql`${actionLogs.category} = 'read_sensitive' AND ${actionLogs.createdAt} < ${shortThreshold}`,
+			);
+		const long = await tx
+			.delete(actionLogs)
+			.where(
+				sql`${actionLogs.category} <> 'read_sensitive' AND ${actionLogs.createdAt} < ${longThreshold}`,
+			);
+		return [short, long] as const;
+	});
 
 	const deletedShort = extractAffectedRowCount(shortResult);
 	const deletedLong = extractAffectedRowCount(longResult);
@@ -70,11 +72,19 @@ function subtractDays(ref: Date, days: number): Date {
 /**
  * postgres-js delete returns a result that exposes a `count` property; older
  * versions returned `rowCount`. Accept both shapes.
+ *
+ * `postgres-js` v3 returns `count` as a **string** (e.g. `"12"`), so we
+ * explicitly coerce via `Number()` to avoid string concatenation when the
+ * caller sums short + long counts.
  */
 function extractAffectedRowCount(result: unknown): number {
 	if (typeof result === "object" && result !== null) {
-		const r = result as { count?: number; rowCount?: number };
-		return r.count ?? r.rowCount ?? 0;
+		const r = result as { count?: unknown; rowCount?: unknown };
+		const raw = r.count ?? r.rowCount;
+		if (raw !== undefined && raw !== null) {
+			const n = Number(raw);
+			return Number.isFinite(n) ? n : 0;
+		}
 	}
 	return 0;
 }

@@ -11,13 +11,13 @@ export function extractIpAddress(headers: Headers): string | null {
 		const first = forwardedFor.split(",")[0]?.trim();
 		if (first) return first;
 	}
-	const realIp = headers.get("x-real-ip");
+	const realIp = headers.get("x-real-ip")?.trim();
 	if (realIp) return realIp;
 	return null;
 }
 
 export function extractUserAgent(headers: Headers): string | null {
-	return headers.get("user-agent") ?? null;
+	return headers.get("user-agent")?.trim() ?? null;
 }
 
 export type RequestContext = {
