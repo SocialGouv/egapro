@@ -36,9 +36,8 @@ export function ImpersonateBanner() {
 						</span>
 					</p>
 					<button
-						className="fr-btn--close fr-btn"
+						className="fr-btn fr-btn--sm fr-btn--secondary"
 						onClick={onStop}
-						title="Arrêter le mimoquage"
 						type="button"
 					>
 						Arrêter le mimoquage
