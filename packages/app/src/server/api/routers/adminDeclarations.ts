@@ -46,9 +46,13 @@ export const adminDeclarationsRouter = createTRPCRouter({
 
 			if (input.query) {
 				const term = `%${input.query}%`;
-				filters.push(
-					or(ilike(companies.name, term), ilike(declarations.siren, term))!,
+				const queryFilter = or(
+					ilike(companies.name, term),
+					ilike(declarations.siren, term),
 				);
+				if (queryFilter) {
+					filters.push(queryFilter);
+				}
 			}
 
 			if (input.email) {

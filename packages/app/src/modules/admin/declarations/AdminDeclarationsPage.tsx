@@ -72,7 +72,6 @@ function DeclarationsContent() {
 				<DeclarationTable
 					onSelectionChange={setSelectedIds}
 					page={data.page}
-					pageSize={data.pageSize}
 					rows={data.rows}
 					selectedIds={selectedIds}
 					sortBy={input.sortBy}
