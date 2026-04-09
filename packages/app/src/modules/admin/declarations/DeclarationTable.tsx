@@ -7,6 +7,7 @@ import { useCallback } from "react";
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
 import { formatDate, STATUS_LABELS } from "./shared/constants";
+import { DsfrTable } from "./shared/DsfrTable";
 import { Pagination } from "./shared/Pagination";
 import type { DeclarationSearchRow } from "./types";
 
@@ -101,89 +102,76 @@ export function DeclarationTable({
 			<p className="fr-text--sm fr-text-mention--grey fr-mb-1w">
 				{total} résultat{total > 1 ? "s" : ""}
 			</p>
-			<div className="fr-table">
-				<div className="fr-table__wrapper">
-					<div className="fr-table__container">
-						<div className="fr-table__content">
-							<table>
-								<caption className="fr-sr-only">
-									Liste des déclarations. Chaque ligne correspond à une
-									déclaration avec le SIREN, le nom de l'entreprise, l'année, le
-									statut, l'email du déclarant et la date de dépôt.
-								</caption>
-								<thead>
-									<tr>
-										<th scope="col">
-											<div className="fr-checkbox-group fr-checkbox-group--sm">
-												<input
-													checked={allSelected}
-													id="select-all"
-													onChange={toggleAll}
-													type="checkbox"
-												/>
-												<label className="fr-label" htmlFor="select-all">
-													<span className="fr-sr-only">Tout sélectionner</span>
-												</label>
-											</div>
-										</th>
-										{SORT_COLUMNS.map((col) => (
-											<th key={col} scope="col">
-												<button
-													className="fr-text--sm"
-													onClick={() => handleSort(col)}
-													type="button"
-												>
-													{COLUMN_LABELS[col]}
-													{sortIcon(col)}
-												</button>
-											</th>
-										))}
-									</tr>
-								</thead>
-								<tbody>
-									{rows.map((row) => (
-										<tr key={row.id}>
-											<td>
-												<div className="fr-checkbox-group fr-checkbox-group--sm">
-													<input
-														checked={selectedIds.has(row.id)}
-														id={`select-${row.id}`}
-														onChange={() => toggleOne(row.id)}
-														type="checkbox"
-													/>
-													<label
-														className="fr-label"
-														htmlFor={`select-${row.id}`}
-													>
-														<span className="fr-sr-only">
-															Sélectionner {row.companyName}
-														</span>
-													</label>
-												</div>
-											</td>
-											<td>{row.siren}</td>
-											<td>
-												<Link href={`/admin/declarations/${row.id}`}>
-													{row.companyName}
-												</Link>
-											</td>
-											<td>{row.year}</td>
-											<td>{STATUS_LABELS[row.status ?? ""] ?? row.status}</td>
-											<td>{row.declarantEmail}</td>
-											<td>{formatDate(row.createdAt)}</td>
-										</tr>
-									))}
-									{rows.length === 0 && (
-										<tr>
-											<td colSpan={7}>Aucune déclaration trouvée.</td>
-										</tr>
-									)}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
+			<DsfrTable
+				caption="Liste des déclarations avec SIREN, entreprise, année, statut, email déclarant et date de dépôt."
+				className=""
+			>
+				<thead>
+					<tr>
+						<th scope="col">
+							<div className="fr-checkbox-group fr-checkbox-group--sm">
+								<input
+									checked={allSelected}
+									id="select-all"
+									onChange={toggleAll}
+									type="checkbox"
+								/>
+								<label className="fr-label" htmlFor="select-all">
+									<span className="fr-sr-only">Tout sélectionner</span>
+								</label>
+							</div>
+						</th>
+						{SORT_COLUMNS.map((col) => (
+							<th key={col} scope="col">
+								<button
+									className="fr-text--sm"
+									onClick={() => handleSort(col)}
+									type="button"
+								>
+									{COLUMN_LABELS[col]}
+									{sortIcon(col)}
+								</button>
+							</th>
+						))}
+					</tr>
+				</thead>
+				<tbody>
+					{rows.map((row) => (
+						<tr key={row.id}>
+							<td>
+								<div className="fr-checkbox-group fr-checkbox-group--sm">
+									<input
+										checked={selectedIds.has(row.id)}
+										id={`select-${row.id}`}
+										onChange={() => toggleOne(row.id)}
+										type="checkbox"
+									/>
+									<label className="fr-label" htmlFor={`select-${row.id}`}>
+										<span className="fr-sr-only">
+											Sélectionner {row.companyName}
+										</span>
+									</label>
+								</div>
+							</td>
+							<td>{row.siren}</td>
+							<td>
+								<Link href={`/admin/declarations/${row.id}`}>
+									{row.companyName}
+								</Link>
+							</td>
+							<td>{row.year}</td>
+							<td>{STATUS_LABELS[row.status ?? ""] ?? row.status}</td>
+							<td>{row.declarantEmail}</td>
+							<td>{formatDate(row.createdAt)}</td>
+						</tr>
+					))}
+					{rows.length === 0 && (
+						<tr>
+							<td colSpan={7}>Aucune déclaration trouvée.</td>
+						</tr>
+					)}
+				</tbody>
+			</DsfrTable>
 			{totalPages > 1 && (
 				<Pagination
 					currentPage={page}
