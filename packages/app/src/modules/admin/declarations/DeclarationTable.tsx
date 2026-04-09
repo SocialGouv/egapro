@@ -44,17 +44,6 @@ export function DeclarationTable({
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
-	const allSelected =
-		rows.length > 0 && rows.every((r) => selectedIds.has(r.id));
-
-	const toggleAll = useCallback(() => {
-		if (allSelected) {
-			onSelectionChange(new Set());
-		} else {
-			onSelectionChange(new Set(rows.map((r) => r.id)));
-		}
-	}, [allSelected, rows, onSelectionChange]);
-
 	const toggleOne = useCallback(
 		(id: string) => {
 			const next = new Set(selectedIds);
@@ -108,18 +97,8 @@ export function DeclarationTable({
 			>
 				<thead>
 					<tr>
-						<th scope="col">
-							<div className="fr-checkbox-group fr-checkbox-group--sm">
-								<input
-									checked={allSelected}
-									id="select-all"
-									onChange={toggleAll}
-									type="checkbox"
-								/>
-								<label className="fr-label" htmlFor="select-all">
-									<span className="fr-sr-only">Tout sélectionner</span>
-								</label>
-							</div>
+						<th className="fr-cell--fixed" role="columnheader">
+							<span className="fr-sr-only">Sélectionner</span>
 						</th>
 						{SORT_COLUMNS.map((col) => (
 							<th key={col} scope="col">
@@ -138,21 +117,20 @@ export function DeclarationTable({
 				<tbody>
 					{rows.map((row) => (
 						<tr key={row.id}>
-							<td>
+							<th className="fr-cell--fixed" scope="row">
 								<div className="fr-checkbox-group fr-checkbox-group--sm">
 									<input
 										checked={selectedIds.has(row.id)}
+										data-fr-row-select="true"
 										id={`select-${row.id}`}
 										onChange={() => toggleOne(row.id)}
 										type="checkbox"
 									/>
 									<label className="fr-label" htmlFor={`select-${row.id}`}>
-										<span className="fr-sr-only">
-											Sélectionner {row.companyName}
-										</span>
+										Sélectionner {row.companyName}
 									</label>
 								</div>
-							</td>
+							</th>
 							<td>{row.siren}</td>
 							<td>
 								<Link href={`/admin/declarations/${row.id}`}>
