@@ -11,10 +11,17 @@ export default async function Page() {
 		redirect("/login");
 	}
 
+	// When an admin is impersonating a company, use the impersonated SIREN
+	// (padded to SIRET length so MonEspacePage can extract it the same way).
+	const effectiveSiret =
+		session.user.isAdmin && session.user.impersonation
+			? session.user.impersonation.siren
+			: (session.user.siret ?? null);
+
 	return (
 		<HydrateClient>
 			<MonEspacePage
-				siret={session.user.siret ?? null}
+				siret={effectiveSiret}
 				userPhone={session.user.phone ?? null}
 			/>
 		</HydrateClient>
