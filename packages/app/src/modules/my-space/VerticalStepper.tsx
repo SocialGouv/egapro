@@ -1,5 +1,5 @@
 import type { CampaignDeadlines } from "~/modules/domain";
-import { formatLongDate } from "~/modules/domain";
+import { formatLongDate, isDeadlinePassed } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 
@@ -307,6 +307,8 @@ function TransmittedRow({
 	modifyHref: string;
 	downloadHref?: string;
 }) {
+	const deadlinePassed = isDeadlinePassed(modifiableUntil);
+
 	return (
 		<div className={styles.transmittedRow}>
 			<span
@@ -316,7 +318,9 @@ function TransmittedRow({
 			<div className={styles.transmittedInfo}>
 				<p className="fr-mb-0">{label}</p>
 				<p className="fr-text-mention--grey fr-mb-0">
-					Modifiable jusqu'au {formatLongDate(modifiableUntil)}
+					{deadlinePassed
+						? `Modification close depuis le ${formatLongDate(modifiableUntil)}`
+						: `Modifiable jusqu'au ${formatLongDate(modifiableUntil)}`}
 				</p>
 			</div>
 			<div className={styles.transmittedActions}>
@@ -330,9 +334,11 @@ function TransmittedRow({
 						Télécharger
 					</a>
 				)}
-				<a className="fr-btn fr-btn--secondary" href={modifyHref}>
-					Modifier
-				</a>
+				{!deadlinePassed && (
+					<a className="fr-btn fr-btn--secondary" href={modifyHref}>
+						Modifier
+					</a>
+				)}
 			</div>
 		</div>
 	);

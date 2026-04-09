@@ -1,0 +1,39 @@
+.wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	margin-top: 1rem;
+
+	// MobileUserBlock lives outside .fr-header__menu-links so DSFR's
+	// `display: none` desktop rule doesn't reach it. Hide it explicitly on
+	// desktop — only the regular UserAccountMenu (in HeaderQuickAccess) is
+	// visible there.
+	@include respond-from(lg) {
+		display: none;
+	}
+}
+
+.userInfo {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--border-default-grey);
+}
+
+.userName {
+	margin: 0;
+	font-size: 1rem;
+	line-height: 1.5em;
+	font-weight: 700;
+	color: var(--text-default-grey);
+}
+
+.userMeta {
+	margin: 0;
+	font-size: 0.875rem;
+	line-height: 1.71em;
+	font-weight: 400;
+	color: var(--text-mention-grey);
+	word-break: break-word;
+}

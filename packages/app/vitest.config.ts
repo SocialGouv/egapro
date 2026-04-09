@@ -55,6 +55,9 @@ export default defineConfig({
 				"src/server/db/**",
 				"src/server/auth/**",
 				"src/app/api/**",
+				// Dev-only playground for visually testing the declaration process panel.
+				"src/app/test-panel/**",
+				"src/modules/my-space/PanelPlayground.tsx",
 			],
 			thresholds: {
 				statements: 75,
