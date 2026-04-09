@@ -1,9 +1,11 @@
 import { expect, test } from "@playwright/test";
 
-test("non-admin authenticated user visiting /admin is redirected to /mon-espace", async ({
+test("admin user can access /admin and sees backoffice page", async ({
 	page,
 }) => {
 	await page.goto("/admin");
-	await page.waitForURL("**/mon-espace");
-	expect(page.url()).toContain("/mon-espace");
+	await expect(
+		page.getByRole("heading", { name: "Backoffice", level: 1 }),
+	).toBeVisible();
+	await expect(page.getByText("administrateur")).toBeVisible();
 });
