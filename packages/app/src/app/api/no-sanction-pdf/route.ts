@@ -1,14 +1,31 @@
 import { renderToBuffer } from "@react-pdf/renderer";
 import { eq } from "drizzle-orm";
+import { AUDIT_ACTIONS } from "~/modules/audit";
 import { extractSiren, formatLongDate } from "~/modules/domain";
 import { NoSanctionPdfDocument } from "~/modules/noSanctionAttestation";
-import { auth } from "~/server/auth";
+import { cachedAuth } from "~/server/audit/cachedAuth";
+import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 import { companies } from "~/server/db/schema";
 import { fetchSanctionBySiren } from "~/server/services/suit";
 
-export async function GET() {
-	const session = await auth();
+export const GET = withAuditedRoute(
+	{
+		action: AUDIT_ACTIONS.PDF_NO_SANCTION_DOWNLOAD,
+		resolveContext: async (request) => {
+			const session = await cachedAuth(request);
+			return {
+				userId: session?.user?.id ?? null,
+				userEmail: session?.user?.email ?? null,
+				siren: session?.user?.siret ? extractSiren(session.user.siret) : null,
+			};
+		},
+	},
+	noSanctionPdfHandler,
+);
+
+async function noSanctionPdfHandler(request: Request): Promise<Response> {
+	const session = await cachedAuth(request);
 	if (!session?.user?.siret) {
 		return new Response("Non autorisé", { status: 401 });
 	}

@@ -1,11 +1,59 @@
 import { eq } from "drizzle-orm";
+import { headers as nextHeaders } from "next/headers";
 import type { DefaultSession, NextAuthOptions } from "next-auth";
 import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
-import { extractSiren } from "~/modules/domain";
+import { AUDIT_ACTIONS } from "~/modules/audit";
+import { extractSiren, parseSiren } from "~/modules/domain";
+import { logAction } from "~/server/audit/log";
+import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
 import { db } from "~/server/db";
 import { companies, userCompanies, users } from "~/server/db/schema";
 import { fetchCompanyBySiren } from "~/server/services/weez";
+
+/**
+ * Read the request context (IP, user-agent) from the active Next.js request.
+ *
+ * NextAuth events do not receive the request directly, so we rely on the
+ * Next.js per-request AsyncLocalStorage exposed by `next/headers`. Returns
+ * empty context if called outside a request scope (tests, edge cases).
+ */
+async function safeRequestContext() {
+	try {
+		const headerStore = await nextHeaders();
+		return buildRequestContext(toHeaders(headerStore));
+	} catch {
+		return { ipAddress: null, userAgent: null };
+	}
+}
+
+/**
+ * Whitelist-based extraction of safe metadata fields from a NextAuth error
+ * payload. NextAuth occasionally embeds OAuth tokens / state / code_verifier
+ * in error metadata — JSON.stringify-ing the whole object would leak them
+ * into `audit.action_log.error_message`.
+ */
+function buildAuthErrorMessage(code: string, metadata: unknown): string {
+	if (metadata instanceof Error) {
+		return `${code}: ${metadata.message}`.slice(0, 1000);
+	}
+	if (typeof metadata !== "object" || metadata === null) {
+		return `${code}: ${String(metadata)}`.slice(0, 1000);
+	}
+	const safe: Record<string, string> = {};
+	const m = metadata as Record<string, unknown>;
+	for (const key of ["type", "provider", "providerType", "name"] as const) {
+		const value = m[key];
+		if (typeof value === "string") safe[key] = value;
+	}
+	const innerError = m.error;
+	if (innerError instanceof Error) {
+		safe.error = innerError.message;
+	} else if (typeof innerError === "string") {
+		safe.error = innerError;
+	}
+	return `${code}: ${JSON.stringify(safe)}`.slice(0, 1000);
+}
 
 declare module "next-auth" {
 	interface Session extends DefaultSession {
@@ -203,5 +251,49 @@ export const authConfig = {
 				phone: token.phone ?? null,
 			},
 		}),
+	},
+	events: {
+		async signIn({ user }) {
+			const requestContext = await safeRequestContext();
+			const profileData = user as typeof user & { siret?: string | null };
+			void logAction({
+				action: AUDIT_ACTIONS.AUTH_LOGIN,
+				status: "success",
+				userId: user.id ?? null,
+				userEmail: user.email ?? null,
+				siren: parseSiren(profileData.siret),
+				ipAddress: requestContext.ipAddress,
+				userAgent: requestContext.userAgent,
+			});
+		},
+	},
+	logger: {
+		// NextAuth v4 expects a synchronous `(code, metadata) => void` logger.
+		// We keep the signature synchronous and dispatch the async audit write
+		// inside a detached promise so NextAuth never awaits our side-effect.
+		error(code, metadata) {
+			// Log NextAuth-level errors that match a sign-in/callback failure
+			// — issue #3174 (failed login auditing).
+			if (
+				!code.includes("SIGNIN") &&
+				!code.includes("CALLBACK") &&
+				!code.includes("OAUTH") &&
+				!code.includes("JWT_SESSION")
+			) {
+				return;
+			}
+			void (async () => {
+				const requestContext = await safeRequestContext();
+				await logAction({
+					action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+					status: "failure",
+					errorMessage: buildAuthErrorMessage(code, metadata),
+					ipAddress: requestContext.ipAddress,
+					userAgent: requestContext.userAgent,
+				});
+			})();
+		},
+		warn() {},
+		debug() {},
 	},
 } satisfies NextAuthOptions;

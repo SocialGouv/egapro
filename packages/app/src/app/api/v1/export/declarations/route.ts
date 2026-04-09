@@ -1,3 +1,4 @@
+import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	assembleDeclaration,
 	fetchCseOpinionsByDeclaration,
@@ -5,6 +6,7 @@ import {
 	fetchSubmittedDeclarations,
 } from "~/modules/export/fetchDeclarations";
 import { exportDeclarationsQuerySchema } from "~/modules/export/schemas";
+import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { verifySuitAuth } from "~/server/services/suitApiAuth";
 
 /**
@@ -18,7 +20,25 @@ import { verifySuitAuth } from "~/server/services/suitApiAuth";
  * - date_begin (required): start date (inclusive), filters on submission date (updatedAt, UTC)
  * - date_end (optional): end date (exclusive). If omitted, returns only date_begin day.
  */
-export async function GET(request: Request) {
+export const GET = withAuditedRoute(
+	{
+		action: AUDIT_ACTIONS.EXPORT_API_DECLARATIONS,
+		resolveContext: (request) => {
+			const url = new URL(request.url);
+			return {
+				metadata: {
+					date_begin: url.searchParams.get("date_begin") ?? null,
+					date_end: url.searchParams.get("date_end") ?? null,
+				},
+			};
+		},
+	},
+	apiExportDeclarationsHandler,
+);
+
+async function apiExportDeclarationsHandler(
+	request: Request,
+): Promise<Response> {
 	const authError = verifySuitAuth(request);
 	if (authError) return authError;
 

@@ -1,5 +1,7 @@
+import { AUDIT_ACTIONS } from "~/modules/audit";
 import { downloadExport } from "~/modules/export/downloadExport";
 import { exportYearQuerySchema } from "~/modules/export/schemas";
+import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 
 /**
@@ -7,7 +9,20 @@ import { db } from "~/server/db";
  *
  * Download the yearly XLSX export file for a given year.
  */
-export async function GET(request: Request) {
+export const GET = withAuditedRoute(
+	{
+		action: AUDIT_ACTIONS.EXPORT_DOWNLOAD,
+		resolveContext: (request) => {
+			const url = new URL(request.url);
+			return {
+				metadata: { year: url.searchParams.get("year") ?? null },
+			};
+		},
+	},
+	exportDownloadHandler,
+);
+
+async function exportDownloadHandler(request: Request): Promise<Response> {
 	try {
 		const url = new URL(request.url);
 		const parsed = exportYearQuerySchema.safeParse({
