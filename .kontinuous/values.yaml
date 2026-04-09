@@ -38,6 +38,9 @@ app:
     - configMapRef:
         name: "admin"
         optional: true
+    - secretRef:
+        name: "admin"
+        optional: true
   env:
     - name: POSTGRES_HOST
       valueFrom:
