@@ -6,13 +6,6 @@ import { Step2Upload } from "../Step2Upload";
 vi.mock("~/trpc/react", () => ({
 	api: {
 		cseOpinion: {
-			uploadFile: {
-				useMutation: () => ({
-					mutate: vi.fn(),
-					isPending: false,
-					error: null,
-				}),
-			},
 			deleteFile: {
 				useMutation: () => ({
 					mutate: vi.fn(),
@@ -230,8 +223,8 @@ describe("Step2Upload", () => {
 
 		const viewLinks = screen.getAllByRole("link", { name: /Visualiser/ });
 		expect(viewLinks).toHaveLength(2);
-		expect(viewLinks[0]).toHaveAttribute("href", "/api/download/file-1");
-		expect(viewLinks[1]).toHaveAttribute("href", "/api/download/file-2");
+		expect(viewLinks[0]).toHaveAttribute("href", "/api/v1/files/file-1");
+		expect(viewLinks[1]).toHaveAttribute("href", "/api/v1/files/file-2");
 		expect(viewLinks[0]).toHaveAttribute("target", "_blank");
 	});
 

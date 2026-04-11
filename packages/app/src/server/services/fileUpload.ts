@@ -21,9 +21,28 @@ type UploadOptions = {
 	allowedMimeTypes: readonly string[];
 };
 
-type UploadResult =
-	| { ok: true; key: string }
-	| { ok: false; error: string; virus?: string };
+/**
+ * Typed result of {@link handleStreamingUpload}.
+ *
+ * The `reason` discriminant on failures lets the caller map to the right HTTP
+ * status without string-matching error messages (`virus` → 422,
+ * `scan_unavailable` → 503, everything else → 400).
+ */
+export type UploadFailureReason =
+	| "too_large"
+	| "wrong_type"
+	| "empty"
+	| "virus"
+	| "scan_unavailable";
+
+export type UploadResult =
+	| { ok: true; key: string; fileId: string }
+	| {
+			ok: false;
+			reason: UploadFailureReason;
+			error: string;
+			virusName?: string;
+	  };
 
 /**
  * Streams a file to ClamAV (INSTREAM) and S3 (multipart) simultaneously.
@@ -86,10 +105,10 @@ export async function handleStreamingUpload(
 		await s3Upload.abort().catch(() => {});
 
 		if (err instanceof FileTooLargeError) {
-			return { ok: false, error: FILE_TOO_LARGE_ERROR };
+			return { ok: false, reason: "too_large", error: FILE_TOO_LARGE_ERROR };
 		}
 		if (err instanceof InvalidFileTypeError) {
-			return { ok: false, error: err.message };
+			return { ok: false, reason: "wrong_type", error: err.message };
 		}
 		throw err;
 	}
@@ -97,7 +116,7 @@ export async function handleStreamingUpload(
 	if (totalBytes === 0) {
 		clamd.destroy();
 		await s3Upload.abort().catch(() => {});
-		return { ok: false, error: "Le fichier est vide." };
+		return { ok: false, reason: "empty", error: "Le fichier est vide." };
 	}
 
 	// If the file was smaller than MIN_SIGNATURE_BYTES, validate now
@@ -106,7 +125,7 @@ export async function handleStreamingUpload(
 		if (!result.valid) {
 			clamd.destroy();
 			await s3Upload.abort().catch(() => {});
-			return { ok: false, error: result.error };
+			return { ok: false, reason: "wrong_type", error: result.error };
 		}
 	}
 
@@ -114,23 +133,33 @@ export async function handleStreamingUpload(
 	let scanResult: ScanResult;
 	try {
 		scanResult = await clamd.finish();
-	} catch {
+	} catch (err) {
+		// Log the underlying error server-side for ops, but never return it to
+		// the client — doing so would leak internal network details (clamd
+		// host/port, DNS errors, etc.) to anonymous callers.
+		console.error("[fileUpload] clamd scan failed", err);
 		clamd.destroy();
 		await s3Upload.abort().catch(() => {});
-		throw new Error("Antivirus scan failed");
+		return {
+			ok: false,
+			reason: "scan_unavailable",
+			error:
+				"Le service de scan antivirus est temporairement indisponible. Merci de réessayer dans quelques minutes.",
+		};
 	}
 
 	if (scanResult.clean) {
 		await s3Upload.complete();
-		return { ok: true, key };
+		return { ok: true, key, fileId };
 	}
 
 	// Infected → abort S3 upload
 	await s3Upload.abort();
 	return {
 		ok: false,
+		reason: "virus",
 		error: "Fichier rejeté : virus détecté",
-		virus: scanResult.virus,
+		virusName: scanResult.virus,
 	};
 }
 

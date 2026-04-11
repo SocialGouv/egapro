@@ -34,9 +34,6 @@ export const AUDIT_ACTIONS = {
 	// ── Joint evaluation mutations ─────────────────────────
 	JOINT_EVALUATION_UPLOAD_FILE: "joint_evaluation.upload_file",
 
-	// ── File upload (S3 streaming via /api/upload) ─────────
-	FILE_UPLOAD: "file.upload",
-
 	// ── Company mutations ──────────────────────────────────
 	COMPANY_UPDATE_HAS_CSE: "company.update_has_cse",
 
@@ -52,6 +49,7 @@ export const AUDIT_ACTIONS = {
 	PDF_DECLARATION_DOWNLOAD: "pdf.declaration_download",
 	PDF_TRANSMITTED_DOWNLOAD: "pdf.transmitted_download",
 	PDF_NO_SANCTION_DOWNLOAD: "pdf.no_sanction_download",
+	USER_FILE_DOWNLOAD: "user.file_download",
 
 	// ── Exports & external API consumers ──────────────────
 	EXPORT_DOWNLOAD: "export.download",
@@ -92,8 +90,6 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: "mutation",
 
-	[AUDIT_ACTIONS.FILE_UPLOAD]: "mutation",
-
 	[AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE]: "mutation",
 
 	[AUDIT_ACTIONS.PROFILE_UPDATE_PHONE]: "mutation",
@@ -105,6 +101,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_TRANSMITTED_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_NO_SANCTION_DOWNLOAD]: "read_sensitive",
+	[AUDIT_ACTIONS.USER_FILE_DOWNLOAD]: "read_sensitive",
 
 	[AUDIT_ACTIONS.EXPORT_DOWNLOAD]: "export",
 	[AUDIT_ACTIONS.EXPORT_GENERATE]: "export",

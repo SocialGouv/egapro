@@ -11,20 +11,6 @@ vi.mock("next/navigation", () => ({
 		"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
 }));
 
-vi.mock("~/trpc/react", () => ({
-	api: {
-		jointEvaluation: {
-			uploadFile: {
-				useMutation: () => ({
-					mutate: vi.fn(),
-					isPending: false,
-					error: null,
-				}),
-			},
-		},
-	},
-}));
-
 const defaultProps = {
 	declarationDate: "01/06/2026",
 	hasCse: null as boolean | null,
