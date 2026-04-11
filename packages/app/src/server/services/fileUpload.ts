@@ -97,8 +97,22 @@ export async function handleStreamingUpload(
 				}
 			}
 
-			// Send to both destinations in parallel
-			await Promise.all([clamd.sendChunk(buf), s3Upload.sendChunk(buf)]);
+			// Send to both destinations in parallel. We use allSettled + explicit
+			// priority rather than Promise.all so that a clamd failure
+			// (ECONNREFUSED, broken pipe mid-stream) is always reported as
+			// `scan_unavailable`, regardless of whether S3 also happens to be
+			// failing. ClamAV is a pre-requisite for the entire pipeline, so if
+			// it is dead the correct client-facing status is 503, not 500.
+			const [clamdResult, s3Result] = await Promise.allSettled([
+				clamd.sendChunk(buf),
+				s3Upload.sendChunk(buf),
+			]);
+			if (clamdResult.status === "rejected") {
+				throw new ClamdScanError(clamdResult.reason);
+			}
+			if (s3Result.status === "rejected") {
+				throw s3Result.reason;
+			}
 		}
 	} catch (err) {
 		clamd.destroy();
@@ -109,6 +123,15 @@ export async function handleStreamingUpload(
 		}
 		if (err instanceof InvalidFileTypeError) {
 			return { ok: false, reason: "wrong_type", error: err.message };
+		}
+		if (err instanceof ClamdScanError) {
+			console.error("[fileUpload] clamd sendChunk failed", err.cause);
+			return {
+				ok: false,
+				reason: "scan_unavailable",
+				error:
+					"Le service de scan antivirus est temporairement indisponible. Merci de réessayer dans quelques minutes.",
+			};
 		}
 		throw err;
 	}
@@ -170,3 +193,15 @@ class FileTooLargeError extends Error {
 }
 
 class InvalidFileTypeError extends Error {}
+
+/**
+ * Wraps a failure from `clamd.sendChunk()` so the outer catch can distinguish
+ * an antivirus-availability issue from a generic I/O failure and surface it
+ * as `scan_unavailable` (HTTP 503) rather than `server_error` (HTTP 500).
+ */
+class ClamdScanError extends Error {
+	constructor(cause: unknown) {
+		super("clamd sendChunk failed");
+		this.cause = cause;
+	}
+}

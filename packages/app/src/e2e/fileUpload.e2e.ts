@@ -63,6 +63,11 @@ test.describe("file upload + view access control", () => {
 		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
 
+		// `uploadJointEvalPdf` clicks the modal's Valider but returns before the
+		// async upload + router.push settles. Wait for the post-compliance
+		// destination so the S3 commit + DB insert have actually landed.
+		await page.waitForURL("**/avis-cse/**", { timeout: 15_000 });
+
 		const uploaded = await getLatestJointEvaluationFileIdForTestSiren();
 		expect(uploaded).not.toBeNull();
 		fileId = uploaded as string;

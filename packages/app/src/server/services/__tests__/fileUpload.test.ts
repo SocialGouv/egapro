@@ -221,6 +221,37 @@ describe("fileUpload service", () => {
 		consoleSpy.mockRestore();
 	});
 
+	it("returns scan_unavailable when clamd.sendChunk rejects mid-stream", async () => {
+		await setEnv();
+
+		mockClamd.sendChunk.mockRejectedValueOnce(
+			Object.assign(new Error("connect ECONNREFUSED 127.0.0.1:3310"), {
+				code: "ECONNREFUSED",
+			}),
+		);
+		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+		const { handleStreamingUpload } = await import("../fileUpload");
+		const stream = createReadableStream(PDF_HEADER);
+
+		const result = await handleStreamingUpload(stream, baseOptions);
+
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.reason).toBe("scan_unavailable");
+			// The user-facing copy must not leak the internal ECONNREFUSED detail.
+			expect(result.error).toBe(
+				"Le service de scan antivirus est temporairement indisponible. Merci de réessayer dans quelques minutes.",
+			);
+			expect(result.error).not.toContain("ECONNREFUSED");
+		}
+		expect(mockS3Upload.abort).toHaveBeenCalled();
+		expect(mockS3Upload.complete).not.toHaveBeenCalled();
+		expect(mockClamd.destroy).toHaveBeenCalled();
+
+		consoleSpy.mockRestore();
+	});
+
 	it("aborts S3 and rethrows when sendChunk fails mid-stream", async () => {
 		await setEnv();
 
