@@ -5,9 +5,13 @@ import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import type { PanelVariant } from "../DeclarationProcessPanel";
 import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
 
+// Use a far-future year so "future deadline" assertions stay valid regardless
+// of when the tests run.
+const FUTURE_YEAR = 2099;
+
 const BASE_PROPS = {
-	campaignDeadlines: getDefaultCampaignDeadlines(2027),
-	year: 2027,
+	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
+	year: FUTURE_YEAR,
 	lastActionDate: "12 mars 2026" as string | null,
 	compliancePath: null as string | null,
 	secondDeclarationStatus: null as string | null,
@@ -35,7 +39,9 @@ describe("DeclarationProcessPanel", () => {
 		it("renders the title with year", () => {
 			const { panel } = renderPanel("start");
 			expect(
-				panel.getByText("Démarche des indicateurs de rémunération 2027"),
+				panel.getByText(
+					`Démarche des indicateurs de rémunération ${FUTURE_YEAR}`,
+				),
 			).toBeInTheDocument();
 		});
 
@@ -206,5 +212,23 @@ describe("DeclarationProcessPanel", () => {
 	it("does not render last action date when null", () => {
 		const { panel } = renderPanel("start", { lastActionDate: null });
 		expect(panel.queryByText(/Dernière action/)).not.toBeInTheDocument();
+	});
+
+	describe("modify button gating by deadline", () => {
+		it("renders the Modifier link when deadline is in the future", () => {
+			const { panel } = renderPanel("compliance");
+			expect(panel.getByText("Modifier")).toBeInTheDocument();
+			expect(panel.getByText(/Modifiable jusqu'au/)).toBeInTheDocument();
+		});
+
+		it("hides the Modifier link when the deadline has passed", () => {
+			const { panel } = renderPanel("compliance", {
+				campaignDeadlines: getDefaultCampaignDeadlines(2020),
+			});
+			expect(panel.queryByText("Modifier")).not.toBeInTheDocument();
+			expect(
+				panel.getByText(/Modification close depuis le/),
+			).toBeInTheDocument();
+		});
 	});
 });

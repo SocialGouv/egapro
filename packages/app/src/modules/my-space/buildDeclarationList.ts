@@ -17,6 +17,7 @@ type DbDeclaration = {
 	complianceCompletedAt: Date | null;
 	hasCseOpinion: boolean;
 	hasJointEvaluationFile: boolean;
+	hasPrefillData: boolean;
 };
 
 /**
@@ -32,6 +33,7 @@ export function buildDeclarationList(
 	siren: string,
 	dbDeclarations: DbDeclaration[],
 	currentYear: number,
+	yearsWithPrefill: Set<number> = new Set(),
 ): DeclarationItem[] {
 	const rows: DeclarationItem[] = [];
 
@@ -53,6 +55,7 @@ export function buildDeclarationList(
 				complianceCompletedAt: existing.complianceCompletedAt,
 				hasCseOpinion: existing.hasCseOpinion,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
+				hasPrefillData: existing.hasPrefillData,
 			});
 		} else {
 			rows.push({
@@ -67,6 +70,8 @@ export function buildDeclarationList(
 				complianceCompletedAt: null,
 				hasCseOpinion: false,
 				hasJointEvaluationFile: false,
+				hasPrefillData:
+					type === "remuneration" && yearsWithPrefill.has(currentYear),
 			});
 		}
 	}
@@ -89,6 +94,7 @@ export function buildDeclarationList(
 			complianceCompletedAt: d.complianceCompletedAt,
 			hasCseOpinion: d.hasCseOpinion,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
+			hasPrefillData: d.hasPrefillData,
 		});
 	}
 

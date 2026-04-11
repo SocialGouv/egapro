@@ -59,6 +59,22 @@ export const env = createEnv({
 		EGAPRO_GIP_MDS_API_TOKEN: z.string().optional(),
 		EGAPRO_MOCK_SUIT_SANCTION: z.coerce.boolean().optional().default(false),
 		EGAPRO_SUIT_PUBLIC_KEY_PEM: z.string().optional(),
+		// Audit log (issue #3174) — bearer token for the cleanup cron + retention
+		// thresholds (CNIL: 6 months for access logs, 12 months for security logs).
+		// Required (not optional): the /api/audit/cleanup route destroys data, so
+		// a missing secret must crash startup rather than silently expose the
+		// endpoint. Must be sealed per environment (dev / preprod / prod).
+		EGAPRO_AUDIT_CLEANUP_TOKEN: z.string().min(32),
+		EGAPRO_AUDIT_RETENTION_SHORT_DAYS: z.coerce
+			.number()
+			.int()
+			.positive()
+			.default(180),
+		EGAPRO_AUDIT_RETENTION_LONG_DAYS: z.coerce
+			.number()
+			.int()
+			.positive()
+			.default(365),
 	},
 
 	/**
@@ -104,6 +120,11 @@ export const env = createEnv({
 		EGAPRO_GIP_MDS_API_TOKEN: process.env.EGAPRO_GIP_MDS_API_TOKEN,
 		EGAPRO_MOCK_SUIT_SANCTION: process.env.EGAPRO_MOCK_SUIT_SANCTION,
 		EGAPRO_SUIT_PUBLIC_KEY_PEM: process.env.EGAPRO_SUIT_PUBLIC_KEY_PEM,
+		EGAPRO_AUDIT_CLEANUP_TOKEN: process.env.EGAPRO_AUDIT_CLEANUP_TOKEN,
+		EGAPRO_AUDIT_RETENTION_SHORT_DAYS:
+			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,
+		EGAPRO_AUDIT_RETENTION_LONG_DAYS:
+			process.env.EGAPRO_AUDIT_RETENTION_LONG_DAYS,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,

@@ -142,6 +142,63 @@ export async function deleteCseOpinions() {
 	}
 }
 
+type CampaignDeadlineDates = {
+	decl1ModificationDeadline: string;
+	decl1JustificationDeadline: string;
+	decl1JointEvaluationDeadline: string;
+	decl2ModificationDeadline: string;
+	decl2JustificationDeadline: string;
+	decl2JointEvaluationDeadline: string;
+};
+
+/** Upsert campaign deadlines for a given year (YYYY-MM-DD strings). */
+export async function setCampaignDeadlines(
+	year: number,
+	dates: CampaignDeadlineDates,
+) {
+	const sql = createConnection();
+	try {
+		await sql`
+			INSERT INTO app_campaign_deadline (
+				year,
+				decl1_modification_deadline,
+				decl1_justification_deadline,
+				decl1_joint_evaluation_deadline,
+				decl2_modification_deadline,
+				decl2_justification_deadline,
+				decl2_joint_evaluation_deadline
+			) VALUES (
+				${year},
+				${dates.decl1ModificationDeadline},
+				${dates.decl1JustificationDeadline},
+				${dates.decl1JointEvaluationDeadline},
+				${dates.decl2ModificationDeadline},
+				${dates.decl2JustificationDeadline},
+				${dates.decl2JointEvaluationDeadline}
+			)
+			ON CONFLICT (year) DO UPDATE SET
+				decl1_modification_deadline = EXCLUDED.decl1_modification_deadline,
+				decl1_justification_deadline = EXCLUDED.decl1_justification_deadline,
+				decl1_joint_evaluation_deadline = EXCLUDED.decl1_joint_evaluation_deadline,
+				decl2_modification_deadline = EXCLUDED.decl2_modification_deadline,
+				decl2_justification_deadline = EXCLUDED.decl2_justification_deadline,
+				decl2_joint_evaluation_deadline = EXCLUDED.decl2_joint_evaluation_deadline
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Delete campaign deadlines for a given year (revert to defaults). */
+export async function deleteCampaignDeadlines(year: number) {
+	const sql = createConnection();
+	try {
+		await sql`DELETE FROM app_campaign_deadline WHERE year = ${year}`;
+	} finally {
+		await sql.end();
+	}
+}
+
 /** Clear or set the phone number for the test user (identified via user_company link to TEST_SIREN). */
 export async function setUserPhone(phone: string | null) {
 	const sql = createConnection();
