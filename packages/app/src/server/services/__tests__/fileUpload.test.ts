@@ -235,4 +235,57 @@ describe("fileUpload service", () => {
 		expect(mockS3Upload.abort).toHaveBeenCalled();
 		expect(mockS3Upload.complete).not.toHaveBeenCalled();
 	});
+
+	it("rejects a file larger than maxSize", async () => {
+		await setEnv();
+
+		// Stream two chunks whose combined size exceeds maxSize.
+		// First chunk is a valid PDF header so we do not trip signature
+		// validation before the size check on the second chunk.
+		const firstChunk = PDF_HEADER;
+		const secondChunk = new Uint8Array(128);
+		const stream = new ReadableStream<Uint8Array>({
+			start(controller) {
+				controller.enqueue(firstChunk);
+				controller.enqueue(secondChunk);
+				controller.close();
+			},
+		});
+
+		const { handleStreamingUpload } = await import("../fileUpload");
+		const result = await handleStreamingUpload(stream, {
+			...baseOptions,
+			maxSize: 100,
+		});
+
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.reason).toBe("too_large");
+		}
+		expect(mockS3Upload.abort).toHaveBeenCalled();
+		expect(mockS3Upload.complete).not.toHaveBeenCalled();
+		expect(mockClamd.destroy).toHaveBeenCalled();
+	});
+
+	it("rejects a sub-signature-size file with invalid magic bytes", async () => {
+		await setEnv();
+
+		// 4 bytes of arbitrary content — smaller than MIN_SIGNATURE_BYTES (8),
+		// so the in-loop signature validation is skipped and the late
+		// validation branch (after the empty-file check) runs instead.
+		const tinyChunk = new Uint8Array([0x3c, 0x68, 0x74, 0x6d]); // "<htm"
+		const stream = createReadableStream(tinyChunk);
+
+		const { handleStreamingUpload } = await import("../fileUpload");
+		const result = await handleStreamingUpload(stream, baseOptions);
+
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.reason).toBe("wrong_type");
+			expect(result.error).toContain("Format de fichier non supporté");
+		}
+		expect(mockS3Upload.abort).toHaveBeenCalled();
+		expect(mockS3Upload.complete).not.toHaveBeenCalled();
+		expect(mockClamd.destroy).toHaveBeenCalled();
+	});
 });

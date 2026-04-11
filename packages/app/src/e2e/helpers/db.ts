@@ -93,6 +93,31 @@ export async function insertJointEvaluationFile(year: number) {
 	}
 }
 
+/**
+ * Return the id of the most-recent joint_evaluation file for the test SIREN.
+ * Used by E2E tests that need the fileId of a just-uploaded real file to
+ * exercise the download endpoint.
+ */
+export async function getLatestJointEvaluationFileIdForTestSiren(): Promise<
+	string | null
+> {
+	const sql = createConnection();
+	try {
+		const rows = await sql`
+			SELECT f.id
+			FROM app_file f
+			INNER JOIN app_declaration d ON f.declaration_id = d.id
+			WHERE d.siren = ${TEST_SIREN}
+			  AND f.type = 'joint_evaluation'
+			ORDER BY f.uploaded_at DESC
+			LIMIT 1
+		`;
+		return (rows[0]?.id as string | undefined) ?? null;
+	} finally {
+		await sql.end();
+	}
+}
+
 /** Remove dummy joint evaluation files for the test declaration. */
 export async function deleteJointEvaluationFiles() {
 	const sql = createConnection();

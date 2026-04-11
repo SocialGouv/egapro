@@ -349,6 +349,75 @@ describe("runUploadPipeline", () => {
 		);
 	});
 
+	it("handles the concurrent CSE quota race by compensating the S3 commit", async () => {
+		// Pre-check passes (currentCount = 3 < MAX_CSE_FILES = 4) so we enter the
+		// streaming path and the pipeline commits the S3 multipart. Inside the
+		// tx, a concurrent upload has meanwhile pushed the count to 4, so the
+		// in-tx recount throws MaxFilesReachedError. Since the S3 object has
+		// already been committed, the compensating delete must run.
+		primeDbSelect([
+			{ kind: "declaration", id: "decl-1" },
+			{ kind: "count", value: 3 },
+		]);
+		mocks.handleStreamingUpload.mockResolvedValue({
+			ok: true,
+			key: "123456789/2027/new-file.pdf",
+			fileId: "new-file",
+		});
+
+		const insertValues = vi.fn().mockResolvedValue(undefined);
+		const insert = vi.fn().mockReturnValue({ values: insertValues });
+		let txSelectCallCount = 0;
+		const txSelect = vi.fn().mockImplementation(() => {
+			txSelectCallCount++;
+			if (txSelectCallCount === 1) {
+				// Declaration lock
+				return {
+					from: () => ({
+						where: () => ({
+							for: () => ({
+								limit: () => Promise.resolve([{ id: "decl-1" }]),
+							}),
+						}),
+					}),
+				};
+			}
+			// In-tx CSE recount — race has now pushed it to MAX_CSE_FILES.
+			return {
+				from: () => ({
+					where: () => Promise.resolve([{ value: 4 }]),
+				}),
+			};
+		});
+		mocks.dbTransaction.mockImplementation(
+			async (fn: (tx: unknown) => unknown) =>
+				fn({ select: txSelect, insert, delete: vi.fn() }),
+		);
+		mocks.deleteFile.mockResolvedValue(undefined);
+
+		vi.spyOn(console, "error").mockImplementation(() => {});
+
+		const { runUploadPipeline } = await import("../uploadPipeline");
+		const result = await runUploadPipeline({
+			...baseInput,
+			stream: createStream(),
+			flowType: "cse_opinion",
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			reason: "server_error",
+			error: "Erreur lors de l'enregistrement du fichier.",
+			s3Cleanup: "ok",
+		});
+		// No row inserted because the in-tx recount threw before the insert.
+		expect(insertValues).not.toHaveBeenCalled();
+		// Compensating delete of the just-committed S3 object.
+		expect(mocks.deleteFile).toHaveBeenCalledWith(
+			"123456789/2027/new-file.pdf",
+		);
+	});
+
 	it("reports s3Cleanup=failed when the compensating delete also fails", async () => {
 		primeDbSelect([
 			{ kind: "declaration", id: "decl-1" },

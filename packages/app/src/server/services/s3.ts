@@ -53,14 +53,6 @@ export async function ensureBucket(): Promise<void> {
 	}
 }
 
-export function buildObjectKey(
-	siren: string,
-	year: number,
-	fileId: string,
-): string {
-	return `${siren}/${year}/${fileId}.pdf`;
-}
-
 export async function uploadFile(
 	key: string,
 	buffer: Buffer,
