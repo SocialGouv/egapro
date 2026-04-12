@@ -301,3 +301,24 @@ export async function fetchFileById(
 
 	return rows[0];
 }
+
+/**
+ * Fetch a file by ID, scoped to a specific SIREN.
+ * Returns the file only if it belongs to a declaration owned by the given SIREN.
+ */
+export async function fetchFileBySiren(
+	fileId: string,
+	siren: string,
+): Promise<{ filePath: string; fileName: string } | undefined> {
+	const rows = await db
+		.select({
+			filePath: files.filePath,
+			fileName: files.fileName,
+		})
+		.from(files)
+		.innerJoin(declarations, eq(files.declarationId, declarations.id))
+		.where(and(eq(files.id, fileId), eq(declarations.siren, siren)))
+		.limit(1);
+
+	return rows[0];
+}

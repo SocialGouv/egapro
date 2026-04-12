@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { JointEvaluationForm } from "../JointEvaluationForm";
@@ -11,19 +12,13 @@ vi.mock("next/navigation", () => ({
 		"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
 }));
 
-vi.mock("~/trpc/react", () => ({
-	api: {
-		jointEvaluation: {
-			uploadFile: {
-				useMutation: () => ({
-					mutate: vi.fn(),
-					isPending: false,
-					error: null,
-				}),
-			},
-		},
-	},
+vi.mock("~/modules/shared/uploadFile", () => ({
+	uploadFile: vi.fn(),
 }));
+
+const { uploadFile: uploadFileMock } = (await import(
+	"~/modules/shared/uploadFile"
+)) as unknown as { uploadFile: ReturnType<typeof vi.fn> };
 
 const defaultProps = {
 	declarationDate: "01/06/2026",
@@ -33,10 +28,16 @@ const defaultProps = {
 
 describe("JointEvaluationForm", () => {
 	beforeEach(() => {
-		HTMLDialogElement.prototype.showModal =
-			HTMLDialogElement.prototype.showModal || vi.fn();
-		HTMLDialogElement.prototype.close =
-			HTMLDialogElement.prototype.close || vi.fn();
+		uploadFileMock.mockReset();
+		// jsdom doesn't implement <dialog>; stub showModal/close so the dialog
+		// actually toggles its `open` attribute and its contents become visible
+		// to Testing Library queries.
+		HTMLDialogElement.prototype.showModal = function showModal() {
+			this.setAttribute("open", "");
+		};
+		HTMLDialogElement.prototype.close = function close() {
+			this.removeAttribute("open");
+		};
 	});
 
 	afterEach(() => {
@@ -127,5 +128,44 @@ describe("JointEvaluationForm", () => {
 		);
 		expect(dialog).toBeInTheDocument();
 		expect(screen.getByText(/je certifie/i)).toBeInTheDocument();
+	});
+
+	it.each([
+		[true, "/avis-cse"],
+		[false, "/declaration-remuneration/parcours-conformite/confirmation"],
+		[null, "/declaration-remuneration/parcours-conformite/confirmation"],
+	])("uploads the file and redirects after confirmation when hasCse=%s", async (hasCse, expectedRedirect) => {
+		const user = userEvent.setup();
+		uploadFileMock.mockResolvedValue({
+			ok: true,
+			fileId: "file-1",
+			fileName: "rapport.pdf",
+		});
+
+		const { container } = render(
+			<JointEvaluationForm {...defaultProps} hasCse={hasCse} />,
+		);
+
+		const input = container.querySelector(
+			'input[type="file"]',
+		) as HTMLInputElement;
+		const file = new File(["pdf-content"], "rapport.pdf", {
+			type: "application/pdf",
+		});
+		fireEvent.change(input, { target: { files: [file] } });
+
+		fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
+
+		await user.click(screen.getByRole("checkbox"));
+		await user.click(screen.getByRole("button", { name: "Valider" }));
+
+		await waitFor(() => {
+			expect(uploadFileMock).toHaveBeenCalledWith(file, {
+				flowType: "joint_evaluation",
+			});
+		});
+		await waitFor(() => {
+			expect(mockPush).toHaveBeenCalledWith(expectedRedirect);
+		});
 	});
 });

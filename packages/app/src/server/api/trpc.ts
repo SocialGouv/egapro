@@ -13,8 +13,8 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 import { getCurrentYear } from "~/modules/domain";
 import { parseSiren } from "~/modules/shared/parseSiren";
-import { auth } from "~/server/auth";
 import { auditMiddleware as runAuditMiddleware } from "~/server/audit/trpcMiddleware";
+import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { declarations } from "~/server/db/schema";
 

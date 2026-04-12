@@ -3,6 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockFetchCseFiles = vi.fn().mockResolvedValue(new Map());
 const mockFetchJointFiles = vi.fn().mockResolvedValue(new Map());
 const mockFetchFileById = vi.fn().mockResolvedValue(undefined);
+const mockFetchFileBySiren = vi.fn().mockResolvedValue(undefined);
+const mockAuth = vi.fn().mockResolvedValue(null);
+const mockLogAction = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("~/modules/export/queries", () => ({
 	fetchCseFilesByDeclaration: (...args: unknown[]) =>
@@ -10,17 +13,30 @@ vi.mock("~/modules/export/queries", () => ({
 	fetchJointEvaluationFilesByDeclaration: (...args: unknown[]) =>
 		mockFetchJointFiles(...args),
 	fetchFileById: (...args: unknown[]) => mockFetchFileById(...args),
+	fetchFileBySiren: (...args: unknown[]) => mockFetchFileBySiren(...args),
 	fetchSubmittedDeclarations: vi.fn().mockResolvedValue([]),
 	fetchIndicatorGByDeclaration: vi.fn().mockResolvedValue(new Map()),
 	fetchCseOpinionsByDeclaration: vi.fn().mockResolvedValue(new Map()),
 }));
 
-vi.mock("~/server/services/s3", () => ({
-	getFile: vi.fn().mockResolvedValue({
-		body: new ReadableStream(),
-		contentType: "application/pdf",
-	}),
+vi.mock("~/server/auth", () => ({
+	auth: (...args: unknown[]) => mockAuth(...args),
 }));
+
+vi.mock("~/server/audit/log", () => ({
+	logAction: (...args: unknown[]) => mockLogAction(...args),
+}));
+
+vi.mock("~/server/services/s3", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("~/server/services/s3")>();
+	return {
+		...actual,
+		getFile: vi.fn().mockResolvedValue({
+			body: new ReadableStream(),
+			contentType: "application/pdf",
+		}),
+	};
+});
 
 const VALID_AUTH_HEADER = "Bearer test-suit-api-key-that-is-at-least-32-chars";
 
@@ -28,6 +44,27 @@ function authedRequest(url: string): Request {
 	return new Request(url, {
 		headers: { Authorization: VALID_AUTH_HEADER },
 	});
+}
+
+/**
+ * SUIT calls always sign the request — the unified `[fileId]` handler routes
+ * on the presence of `x-signature` to dispatch to the SUIT branch. The actual
+ * signature is not verified in tests because `EGAPRO_SUIT_PUBLIC_KEY_PEM` is
+ * unset (`src/test/setup.ts`).
+ */
+function suitFileRequest(url: string): Request {
+	return new Request(url, {
+		headers: {
+			Authorization: VALID_AUTH_HEADER,
+			"x-signature": "test-signature",
+		},
+	});
+}
+
+function mockSession(siret: string | null) {
+	mockAuth.mockResolvedValue(
+		siret ? { user: { id: "user-1", email: "test@example.com", siret } } : null,
+	);
 }
 
 describe("GET /api/v1/files", () => {
@@ -151,12 +188,14 @@ describe("GET /api/v1/files", () => {
 			type: "cse_opinion",
 			fileName: "avis-cse.pdf",
 			uploadedAt: "2027-03-10T08:00:00.000Z",
+			downloadUrl: "/api/v1/files/cse-1",
 		});
 		expect(body.files[1]).toEqual({
 			id: "joint-1",
 			type: "joint_evaluation",
 			fileName: "evaluation.pdf",
 			uploadedAt: "2027-03-12T09:00:00.000Z",
+			downloadUrl: "/api/v1/files/joint-1",
 		});
 	});
 
@@ -173,7 +212,7 @@ describe("GET /api/v1/files", () => {
 	});
 });
 
-describe("GET /api/v1/files/:fileId", () => {
+describe("GET /api/v1/files/:fileId — SUIT branch (signed request)", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockFetchFileById.mockResolvedValue(undefined);
@@ -181,17 +220,28 @@ describe("GET /api/v1/files/:fileId", () => {
 
 	it("should return 401 when Authorization header is missing", async () => {
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = new Request("http://localhost/api/v1/files/file-1");
+		const request = new Request("http://localhost/api/v1/files/file-1", {
+			headers: { "x-signature": "test-signature" },
+		});
 		const response = await GET(request, {
 			params: Promise.resolve({ fileId: "file-1" }),
 		});
 
 		expect(response.status).toBe(401);
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "export.api_files",
+				status: "failure",
+				errorMessage: "HTTP 401",
+			}),
+		);
 	});
 
 	it("should return 404 when file does not exist", async () => {
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = authedRequest("http://localhost/api/v1/files/nonexistent");
+		const request = suitFileRequest(
+			"http://localhost/api/v1/files/nonexistent",
+		);
 		const response = await GET(request, {
 			params: Promise.resolve({ fileId: "nonexistent" }),
 		});
@@ -199,16 +249,23 @@ describe("GET /api/v1/files/:fileId", () => {
 		expect(response.status).toBe(404);
 		const body = await response.json();
 		expect(body.error).toContain("non trouvé");
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "export.api_files",
+				status: "failure",
+				errorMessage: "HTTP 404",
+			}),
+		);
 	});
 
-	it("should stream file from S3 when file exists", async () => {
+	it("should stream file as attachment when file exists", async () => {
 		mockFetchFileById.mockResolvedValue({
 			filePath: "123456789/2027/abc.pdf",
 			fileName: "avis-cse-evaluation.pdf",
 		});
 
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = authedRequest("http://localhost/api/v1/files/file-1");
+		const request = suitFileRequest("http://localhost/api/v1/files/file-1");
 		const response = await GET(request, {
 			params: Promise.resolve({ fileId: "file-1" }),
 		});
@@ -217,6 +274,14 @@ describe("GET /api/v1/files/:fileId", () => {
 		expect(response.headers.get("Content-Type")).toBe("application/pdf");
 		expect(response.headers.get("Content-Disposition")).toBe(
 			`attachment; filename="avis-cse-evaluation.pdf"; filename*=UTF-8''avis-cse-evaluation.pdf`,
+		);
+		expect(response.headers.get("Cache-Control")).toBe("private, max-age=3600");
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "export.api_files",
+				status: "success",
+				metadata: { fileId: "file-1", fileName: "avis-cse-evaluation.pdf" },
+			}),
 		);
 	});
 
@@ -227,7 +292,7 @@ describe("GET /api/v1/files/:fileId", () => {
 		});
 
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = authedRequest("http://localhost/api/v1/files/file-1");
+		const request = suitFileRequest("http://localhost/api/v1/files/file-1");
 		const response = await GET(request, {
 			params: Promise.resolve({ fileId: "file-1" }),
 		});
@@ -247,12 +312,189 @@ describe("GET /api/v1/files/:fileId", () => {
 		const { getFile } = await import("~/server/services/s3");
 		vi.mocked(getFile).mockRejectedValueOnce(new Error("S3 error"));
 
+		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = authedRequest("http://localhost/api/v1/files/file-1");
+		const request = suitFileRequest("http://localhost/api/v1/files/file-1");
 		const response = await GET(request, {
 			params: Promise.resolve({ fileId: "file-1" }),
 		});
 
 		expect(response.status).toBe(500);
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "export.api_files",
+				status: "failure",
+				errorMessage: "S3 error",
+			}),
+		);
+
+		consoleSpy.mockRestore();
+	});
+});
+
+describe("GET /api/v1/files/:fileId — session branch (in-app user)", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockFetchFileBySiren.mockResolvedValue(undefined);
+	});
+
+	it("returns 401 when no session is present", async () => {
+		mockSession(null);
+
+		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
+		const request = new Request("http://localhost/api/v1/files/file-1");
+		const response = await GET(request, {
+			params: Promise.resolve({ fileId: "file-1" }),
+		});
+
+		expect(response.status).toBe(401);
+		const body = await response.json();
+		expect(body.error).toBe("Non authentifié");
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "user.file_download",
+				status: "failure",
+				errorMessage: "HTTP 401",
+			}),
+		);
+	});
+
+	it("returns 401 when session has no SIRET", async () => {
+		mockAuth.mockResolvedValue({
+			user: { id: "user-1", email: "test@example.com" },
+		});
+
+		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
+		const request = new Request("http://localhost/api/v1/files/file-1");
+		const response = await GET(request, {
+			params: Promise.resolve({ fileId: "file-1" }),
+		});
+
+		expect(response.status).toBe(401);
+	});
+
+	it("returns 401 when SIRET is malformed", async () => {
+		mockSession("123");
+
+		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
+		const request = new Request("http://localhost/api/v1/files/file-1");
+		const response = await GET(request, {
+			params: Promise.resolve({ fileId: "file-1" }),
+		});
+
+		expect(response.status).toBe(401);
+	});
+
+	it("returns 404 when file does not belong to user's SIREN", async () => {
+		mockSession("12345678901234");
+		mockFetchFileBySiren.mockResolvedValue(undefined);
+
+		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
+		const request = new Request("http://localhost/api/v1/files/file-1");
+		const response = await GET(request, {
+			params: Promise.resolve({ fileId: "file-1" }),
+		});
+
+		expect(response.status).toBe(404);
+		expect(mockFetchFileBySiren).toHaveBeenCalledWith("file-1", "123456789");
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "user.file_download",
+				status: "failure",
+				errorMessage: "HTTP 404",
+				siren: "123456789",
+				userId: "user-1",
+				userEmail: "test@example.com",
+			}),
+		);
+	});
+
+	it("streams file inline on success and writes a sensitive-read audit row", async () => {
+		mockSession("12345678901234");
+		mockFetchFileBySiren.mockResolvedValue({
+			filePath: "123456789/2027/abc.pdf",
+			fileName: "avis-cse.pdf",
+		});
+
+		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
+		const request = new Request("http://localhost/api/v1/files/file-1");
+		const response = await GET(request, {
+			params: Promise.resolve({ fileId: "file-1" }),
+		});
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("Content-Type")).toBe("application/pdf");
+		expect(response.headers.get("Content-Disposition")).toBe(
+			`inline; filename="avis-cse.pdf"; filename*=UTF-8''avis-cse.pdf`,
+		);
+		expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "user.file_download",
+				status: "success",
+				userId: "user-1",
+				userEmail: "test@example.com",
+				siren: "123456789",
+				metadata: { fileId: "file-1", fileName: "avis-cse.pdf" },
+			}),
+		);
+	});
+
+	it("falls back to application/octet-stream for unexpected content types", async () => {
+		mockSession("12345678901234");
+		mockFetchFileBySiren.mockResolvedValue({
+			filePath: "123456789/2027/abc.pdf",
+			fileName: "file.bin",
+		});
+
+		const { getFile } = await import("~/server/services/s3");
+		vi.mocked(getFile).mockResolvedValueOnce({
+			body: new ReadableStream(),
+			contentType: "text/html",
+		});
+
+		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
+		const request = new Request("http://localhost/api/v1/files/file-1");
+		const response = await GET(request, {
+			params: Promise.resolve({ fileId: "file-1" }),
+		});
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("Content-Type")).toBe(
+			"application/octet-stream",
+		);
+	});
+
+	it("returns 500 when S3 throws", async () => {
+		mockSession("12345678901234");
+		mockFetchFileBySiren.mockResolvedValue({
+			filePath: "123456789/2027/abc.pdf",
+			fileName: "avis-cse.pdf",
+		});
+
+		const { getFile } = await import("~/server/services/s3");
+		vi.mocked(getFile).mockRejectedValueOnce(new Error("S3 error"));
+
+		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
+		const request = new Request("http://localhost/api/v1/files/file-1");
+		const response = await GET(request, {
+			params: Promise.resolve({ fileId: "file-1" }),
+		});
+
+		expect(response.status).toBe(500);
+		const body = await response.json();
+		expect(body.error).toBe("Erreur lors de la récupération du fichier");
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "user.file_download",
+				status: "failure",
+				errorMessage: "S3 error",
+			}),
+		);
+
+		consoleSpy.mockRestore();
 	});
 });

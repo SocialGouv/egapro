@@ -34,11 +34,7 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 
 	// ── cse opinion mutations ──────────────────────────────
 	"cseOpinion.saveOpinions": AUDIT_ACTIONS.CSE_OPINION_SAVE,
-	"cseOpinion.uploadFile": AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE,
 	"cseOpinion.deleteFile": AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE,
-
-	// ── joint evaluation mutations ─────────────────────────
-	"jointEvaluation.uploadFile": AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE,
 
 	// ── company mutations ──────────────────────────────────
 	"company.updateHasCse": AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE,

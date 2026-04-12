@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockClamd = {
 	sendChunk: vi.fn(),
@@ -69,6 +69,17 @@ const baseOptions = {
 };
 
 describe("fileUpload service", () => {
+	beforeEach(() => {
+		mockClamd.sendChunk.mockClear();
+		mockClamd.finish.mockClear().mockResolvedValue({ clean: true });
+		mockClamd.destroy.mockClear();
+		mockS3Upload.init.mockClear().mockResolvedValue(undefined);
+		mockS3Upload.sendChunk.mockClear().mockResolvedValue(undefined);
+		mockS3Upload.flushPart.mockClear().mockResolvedValue(undefined);
+		mockS3Upload.complete.mockClear().mockResolvedValue(undefined);
+		mockS3Upload.abort.mockClear().mockResolvedValue(undefined);
+	});
+
 	it("uploads a clean PDF file successfully", async () => {
 		await setEnv();
 
@@ -80,6 +91,7 @@ describe("fileUpload service", () => {
 		expect(result.ok).toBe(true);
 		if (result.ok) {
 			expect(result.key).toMatch(/^123456789\/2027\/.+\.pdf$/);
+			expect(result.fileId).toMatch(/^[a-f0-9-]{36}$/);
 		}
 		expect(mockS3Upload.init).toHaveBeenCalled();
 		expect(mockS3Upload.complete).toHaveBeenCalled();
@@ -136,6 +148,7 @@ describe("fileUpload service", () => {
 
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
+			expect(result.reason).toBe("wrong_type");
 			expect(result.error).toContain("Format de fichier non supporté");
 		}
 		expect(mockS3Upload.abort).toHaveBeenCalled();
@@ -156,8 +169,9 @@ describe("fileUpload service", () => {
 
 		expect(result).toEqual({
 			ok: false,
+			reason: "virus",
 			error: "Fichier rejeté : virus détecté",
-			virus: "Eicar-Signature",
+			virusName: "Eicar-Signature",
 		});
 		expect(mockS3Upload.abort).toHaveBeenCalled();
 	});
@@ -176,7 +190,133 @@ describe("fileUpload service", () => {
 
 		expect(result).toEqual({
 			ok: false,
+			reason: "empty",
 			error: "Le fichier est vide.",
 		});
+	});
+
+	it("returns scan_unavailable when clamd.finish() rejects", async () => {
+		await setEnv();
+
+		mockClamd.finish.mockRejectedValueOnce(new Error("clamd scan timeout"));
+		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+		const { handleStreamingUpload } = await import("../fileUpload");
+		const stream = createReadableStream(PDF_HEADER);
+
+		const result = await handleStreamingUpload(stream, baseOptions);
+
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.reason).toBe("scan_unavailable");
+			// User-facing copy must not leak the internal clamd error message.
+			expect(result.error).toBe(
+				"Le service de scan antivirus est temporairement indisponible. Merci de réessayer dans quelques minutes.",
+			);
+			expect(result.error).not.toContain("clamd");
+		}
+		expect(mockS3Upload.abort).toHaveBeenCalled();
+		expect(mockS3Upload.complete).not.toHaveBeenCalled();
+
+		consoleSpy.mockRestore();
+	});
+
+	it("returns scan_unavailable when clamd.sendChunk rejects mid-stream", async () => {
+		await setEnv();
+
+		mockClamd.sendChunk.mockRejectedValueOnce(
+			Object.assign(new Error("connect ECONNREFUSED 127.0.0.1:3310"), {
+				code: "ECONNREFUSED",
+			}),
+		);
+		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+		const { handleStreamingUpload } = await import("../fileUpload");
+		const stream = createReadableStream(PDF_HEADER);
+
+		const result = await handleStreamingUpload(stream, baseOptions);
+
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.reason).toBe("scan_unavailable");
+			// The user-facing copy must not leak the internal ECONNREFUSED detail.
+			expect(result.error).toBe(
+				"Le service de scan antivirus est temporairement indisponible. Merci de réessayer dans quelques minutes.",
+			);
+			expect(result.error).not.toContain("ECONNREFUSED");
+		}
+		expect(mockS3Upload.abort).toHaveBeenCalled();
+		expect(mockS3Upload.complete).not.toHaveBeenCalled();
+		expect(mockClamd.destroy).toHaveBeenCalled();
+
+		consoleSpy.mockRestore();
+	});
+
+	it("aborts S3 and rethrows when sendChunk fails mid-stream", async () => {
+		await setEnv();
+
+		mockS3Upload.sendChunk.mockRejectedValueOnce(new Error("S3 UploadPart"));
+
+		const { handleStreamingUpload } = await import("../fileUpload");
+		const stream = createReadableStream(PDF_HEADER);
+
+		await expect(handleStreamingUpload(stream, baseOptions)).rejects.toThrow(
+			"S3 UploadPart",
+		);
+		expect(mockS3Upload.abort).toHaveBeenCalled();
+		expect(mockS3Upload.complete).not.toHaveBeenCalled();
+	});
+
+	it("rejects a file larger than maxSize", async () => {
+		await setEnv();
+
+		// Stream two chunks whose combined size exceeds maxSize.
+		// First chunk is a valid PDF header so we do not trip signature
+		// validation before the size check on the second chunk.
+		const firstChunk = PDF_HEADER;
+		const secondChunk = new Uint8Array(128);
+		const stream = new ReadableStream<Uint8Array>({
+			start(controller) {
+				controller.enqueue(firstChunk);
+				controller.enqueue(secondChunk);
+				controller.close();
+			},
+		});
+
+		const { handleStreamingUpload } = await import("../fileUpload");
+		const result = await handleStreamingUpload(stream, {
+			...baseOptions,
+			maxSize: 100,
+		});
+
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.reason).toBe("too_large");
+		}
+		expect(mockS3Upload.abort).toHaveBeenCalled();
+		expect(mockS3Upload.complete).not.toHaveBeenCalled();
+		expect(mockClamd.destroy).toHaveBeenCalled();
+	});
+
+	it("rejects a sub-signature-size file with invalid magic bytes", async () => {
+		await setEnv();
+
+		// 4 bytes of arbitrary content — smaller than MIN_SIGNATURE_BYTES (8),
+		// so the in-loop signature validation is skipped and the late
+		// validation branch (after the empty-file check) runs instead.
+		const tinyChunk = new Uint8Array([0x3c, 0x68, 0x74, 0x6d]); // "<htm"
+		const stream = createReadableStream(tinyChunk);
+
+		const { handleStreamingUpload } = await import("../fileUpload");
+		const result = await handleStreamingUpload(stream, baseOptions);
+
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.reason).toBe("wrong_type");
+			expect(result.error).toContain("Format de fichier non supporté");
+		}
+		expect(mockS3Upload.abort).toHaveBeenCalled();
+		expect(mockS3Upload.complete).not.toHaveBeenCalled();
+		expect(mockClamd.destroy).toHaveBeenCalled();
 	});
 });
