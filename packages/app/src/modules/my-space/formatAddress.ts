@@ -29,6 +29,6 @@ export function formatAddress(address: string): string {
 		.toLocaleLowerCase("fr-FR")
 		.replace(/\p{L}+/gu, (word, offset: number) => {
 			if (offset > 0 && LOWERCASE_WORDS.has(word)) return word;
-			return word[0]!.toLocaleUpperCase("fr-FR") + word.slice(1);
+			return (word[0]?.toLocaleUpperCase("fr-FR") ?? "") + word.slice(1);
 		});
 }

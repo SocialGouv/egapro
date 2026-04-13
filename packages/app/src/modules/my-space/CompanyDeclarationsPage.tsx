@@ -58,7 +58,6 @@ export function CompanyDeclarationsPage({
 				declarations={declarations}
 				hasCse={company.hasCse}
 				hasNoSanction={hasNoSanction}
-				siren={company.siren}
 				userPhone={userPhone}
 			/>
 			<ArchivesSection />

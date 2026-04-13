@@ -6,12 +6,7 @@ import { DeclarationLink } from "../DeclarationLink";
 describe("DeclarationLink", () => {
 	it("renders remuneration as a button opening the process panel when info is present", () => {
 		render(
-			<DeclarationLink
-				hasCse={true}
-				siren="532847196"
-				type="remuneration"
-				userPhone="0122334455"
-			>
+			<DeclarationLink hasCse={true} type="remuneration" userPhone="0122334455">
 				Rémunération
 			</DeclarationLink>,
 		);
@@ -25,12 +20,7 @@ describe("DeclarationLink", () => {
 
 	it("renders as a button opening missing info modal when userPhone is null", () => {
 		render(
-			<DeclarationLink
-				hasCse={true}
-				siren="532847196"
-				type="remuneration"
-				userPhone={null}
-			>
+			<DeclarationLink hasCse={true} type="remuneration" userPhone={null}>
 				Rémunération
 			</DeclarationLink>,
 		);
@@ -41,12 +31,7 @@ describe("DeclarationLink", () => {
 
 	it("renders as a button opening missing info modal when hasCse is null", () => {
 		render(
-			<DeclarationLink
-				hasCse={null}
-				siren="532847196"
-				type="remuneration"
-				userPhone="0122334455"
-			>
+			<DeclarationLink hasCse={null} type="remuneration" userPhone="0122334455">
 				Rémunération
 			</DeclarationLink>,
 		);
@@ -57,12 +42,7 @@ describe("DeclarationLink", () => {
 
 	it("stores the declaration type on buttons opening missing info modal", () => {
 		render(
-			<DeclarationLink
-				hasCse={true}
-				siren="532847196"
-				type="remuneration"
-				userPhone={null}
-			>
+			<DeclarationLink hasCse={true} type="remuneration" userPhone={null}>
 				Rémunération
 			</DeclarationLink>,
 		);
@@ -74,7 +54,6 @@ describe("DeclarationLink", () => {
 		render(
 			<DeclarationLink
 				hasCse={true}
-				siren="532847196"
 				type="representation"
 				userPhone="0122334455"
 			>

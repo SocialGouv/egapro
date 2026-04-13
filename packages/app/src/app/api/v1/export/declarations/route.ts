@@ -65,7 +65,6 @@ async function apiExportDeclarationsHandler(
 
 		const rows = await fetchSubmittedDeclarations(date_begin, dateEnd);
 
-		const sirenYearKeys = rows.map((r) => ({ siren: r.siren, year: r.year }));
 		const declarationIds = rows.map((r) => r.declarationId);
 
 		const [indicatorGMap, cseMap] = await Promise.all([
@@ -74,7 +73,6 @@ async function apiExportDeclarationsHandler(
 		]);
 
 		const data = rows.map((row) => {
-			const key = `${row.siren}-${row.year}`;
 			return assembleDeclaration(
 				row,
 				indicatorGMap.get(row.declarationId) ?? [],

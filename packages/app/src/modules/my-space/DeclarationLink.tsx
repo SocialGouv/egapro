@@ -8,7 +8,6 @@ import type { DeclarationType } from "./types";
 const MISSING_INFO_MODAL_ID = "missing-info-modal";
 
 type Props = {
-	siren: string;
 	type: DeclarationType;
 	userPhone: string | null;
 	hasCse: boolean | null;
@@ -16,13 +15,7 @@ type Props = {
 };
 
 /** Link that opens the missing info modal if phone or CSE is missing, or navigates/opens panel directly. */
-export function DeclarationLink({
-	siren,
-	type,
-	userPhone,
-	hasCse,
-	children,
-}: Props) {
+export function DeclarationLink({ type, userPhone, hasCse, children }: Props) {
 	const hasMissingInfo = !hasRequiredDeclarationInfo(userPhone, hasCse);
 
 	// When info is missing, open missing-info modal (for both types)
