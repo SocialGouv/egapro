@@ -1,6 +1,7 @@
 export { Breadcrumb } from "./Breadcrumb";
 export { Footer } from "./Footer";
 export { Header } from "./Header";
+export { ImpersonateBanner } from "./ImpersonateBanner";
 export { ResourceBanner } from "./ResourceBanner";
 export { DsfrPictogram } from "./shared/DsfrPictogram";
 export { NewTabNotice } from "./shared/NewTabNotice";

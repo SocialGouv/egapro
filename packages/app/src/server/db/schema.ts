@@ -486,6 +486,47 @@ export const campaignDeadlines = createTable("campaign_deadline", (d) => ({
 	decl2JointEvaluationDeadline: d.date().notNull(),
 }));
 
+// ── Admin impersonation audit log ───────────────────────────────────
+
+/**
+ * Audit trail of admin impersonation sessions.
+ *
+ * Each row records an admin "mimoquing" a company: `startedAt` is set at
+ * session start, `stoppedAt` when the admin explicitly stops (or stays NULL
+ * if the admin never stopped before logging out). Used both for audit/RGPD
+ * and as the source for the "recently impersonated" quick-pick list in the
+ * backoffice UI.
+ */
+export const adminImpersonationEvents = createTable(
+	"admin_impersonation_event",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		adminUserId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => users.id),
+		siren: d
+			.varchar({ length: 9 })
+			.notNull()
+			.references(() => companies.siren),
+		startedAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		stoppedAt: d.timestamp({ withTimezone: true }),
+	}),
+	(t) => [
+		index("admin_impersonation_event_admin_started_idx").on(
+			t.adminUserId,
+			t.startedAt,
+		),
+	],
+);
+
 // ── Export tables ───────────────────────────────────────────────────
 
 export const exports = createTable(

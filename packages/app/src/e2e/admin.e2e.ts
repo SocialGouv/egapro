@@ -9,3 +9,12 @@ test("admin user can access /admin and sees backoffice page", async ({
 	).toBeVisible();
 	await expect(page.getByText("administrateur")).toBeVisible();
 });
+
+test("admin user can access /admin/impersonate and sees impersonate page", async ({
+	page,
+}) => {
+	await page.goto("/admin/impersonate");
+	await expect(
+		page.getByRole("heading", { name: "Mimoquer une entreprise", level: 1 }),
+	).toBeVisible();
+});
