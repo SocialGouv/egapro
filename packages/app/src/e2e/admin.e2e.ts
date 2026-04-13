@@ -10,10 +10,11 @@ test("admin user can access /admin and sees backoffice page", async ({
 	await expect(page.getByText("administrateur")).toBeVisible();
 });
 
-test("non-admin authenticated user visiting /admin/impersonate is redirected to /mon-espace", async ({
+test("admin user can access /admin/impersonate and sees impersonate page", async ({
 	page,
 }) => {
 	await page.goto("/admin/impersonate");
-	await page.waitForURL("**/mon-espace");
-	expect(page.url()).toContain("/mon-espace");
+	await expect(
+		page.getByRole("heading", { name: "Mimoquer une entreprise", level: 1 }),
+	).toBeVisible();
 });
