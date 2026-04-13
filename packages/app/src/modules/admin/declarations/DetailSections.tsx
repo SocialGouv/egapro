@@ -188,7 +188,7 @@ export function FilesSection({ files }: { files: DeclarationDetail["files"] }) {
 									aria-label={`Télécharger ${file.fileName}`}
 									className="fr-btn fr-btn--sm fr-btn--secondary fr-btn--icon-left fr-icon-download-line"
 									download
-									href={`/api/admin/files/${file.id}`}
+									href={`/api/v1/files/${file.id}`}
 								>
 									Télécharger
 								</a>

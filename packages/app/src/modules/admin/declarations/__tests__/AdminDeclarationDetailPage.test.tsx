@@ -97,7 +97,7 @@ describe("AdminDeclarationDetailPage", () => {
 		const downloadLink = screen.getByRole("link", {
 			name: "Télécharger avis-cse.pdf",
 		});
-		expect(downloadLink).toHaveAttribute("href", "/api/admin/files/file-1");
+		expect(downloadLink).toHaveAttribute("href", "/api/v1/files/file-1");
 	});
 
 	it("displays back link", () => {

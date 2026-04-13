@@ -13,22 +13,24 @@ import { verifySuitAuth } from "~/server/services/suitApiAuth";
 /**
  * GET /api/v1/files/:fileId
  *
- * Unified file-streaming endpoint serving both:
+ * Unified file-streaming endpoint serving three caller types:
  *  - SUIT REST API consumers (signed request + Bearer key, attachment, no SIREN scope)
+ *  - Admin backoffice users (NextAuth session + isAdmin, attachment, no SIREN scope)
  *  - In-app authenticated users (NextAuth session, inline, SIREN-scoped)
  *
- * The branch is decided by the presence of an `x-signature` header — SUIT
- * always signs every request, browsers never do. Each branch logs to the
- * audit trail with its own action key (export vs. read_sensitive retention).
+ * Caller detection:
+ *  - `x-signature` header → SUIT (always signs, browsers never do)
+ *  - otherwise → session-based (admin vs. regular decided by `isAdmin` flag)
+ *
+ * Each branch logs to the audit trail with its own action key.
  */
 export async function GET(
 	request: Request,
 	{ params }: { params: Promise<{ fileId: string }> },
 ) {
 	const { fileId } = await params;
-	const isSuitCall = request.headers.has("x-signature");
 
-	return isSuitCall
+	return request.headers.has("x-signature")
 		? handleSuitDownload(request, fileId)
 		: handleSessionDownload(request, fileId);
 }
@@ -98,27 +100,115 @@ async function handleSuitDownload(
 	}
 }
 
+/**
+ * Session-based download: dispatches to admin (no SIREN scope) or regular user
+ * (SIREN-scoped) based on `isAdmin` flag.
+ */
 async function handleSessionDownload(
 	request: Request,
 	fileId: string,
 ): Promise<Response> {
-	const startedAt = Date.now();
 	const requestContext = buildRequestContext(request.headers);
 
 	const session = await auth();
-	const siren = parseSiren(session?.user?.siret);
-	if (!session?.user || !siren) {
+	if (!session?.user) {
 		writeAuditFailure({
 			action: AUDIT_ACTIONS.USER_FILE_DOWNLOAD,
 			fileId,
 			errorMessage: "HTTP 401",
 			requestContext,
-			startedAt,
-			userId: session?.user?.id ?? null,
-			userEmail: session?.user?.email ?? null,
+			startedAt: Date.now(),
 		});
 		return Response.json({ error: "Non authentifié" }, { status: 401 });
 	}
+
+	if (session.user.isAdmin) {
+		return handleAdminDownload(fileId, session, requestContext);
+	}
+
+	const siren = parseSiren(session.user.siret);
+	if (!siren) {
+		writeAuditFailure({
+			action: AUDIT_ACTIONS.USER_FILE_DOWNLOAD,
+			fileId,
+			errorMessage: "HTTP 401",
+			requestContext,
+			startedAt: Date.now(),
+			userId: session.user.id ?? null,
+			userEmail: session.user.email ?? null,
+		});
+		return Response.json({ error: "Non authentifié" }, { status: 401 });
+	}
+
+	return handleUserDownload(fileId, session, siren, requestContext);
+}
+
+async function handleAdminDownload(
+	fileId: string,
+	session: { user: { id?: string | null; email?: string | null } },
+	requestContext: RequestContext,
+): Promise<Response> {
+	const startedAt = Date.now();
+
+	try {
+		const file = await fetchFileById(fileId);
+		if (!file) {
+			writeAuditFailure({
+				action: AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD,
+				fileId,
+				errorMessage: "HTTP 404",
+				requestContext,
+				startedAt,
+				userId: session.user.id ?? null,
+				userEmail: session.user.email ?? null,
+			});
+			return Response.json({ error: "Fichier non trouvé" }, { status: 404 });
+		}
+
+		const response = await streamStoredFile({
+			filePath: file.filePath,
+			fileName: file.fileName,
+			disposition: "attachment",
+			cacheControl: "private, max-age=3600",
+		});
+
+		void logAction({
+			action: AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD,
+			status: "success",
+			userId: session.user.id ?? null,
+			userEmail: session.user.email ?? null,
+			metadata: { fileId, fileName: file.fileName },
+			ipAddress: requestContext.ipAddress,
+			userAgent: requestContext.userAgent,
+			durationMs: Date.now() - startedAt,
+		});
+
+		return response;
+	} catch (error) {
+		console.error("[api/v1/files/:fileId][admin]", error);
+		writeAuditFailure({
+			action: AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD,
+			fileId,
+			errorMessage: error instanceof Error ? error.message : "Unknown error",
+			requestContext,
+			startedAt,
+			userId: session.user.id ?? null,
+			userEmail: session.user.email ?? null,
+		});
+		return Response.json(
+			{ error: "Erreur lors du téléchargement du fichier" },
+			{ status: 500 },
+		);
+	}
+}
+
+async function handleUserDownload(
+	fileId: string,
+	session: { user: { id?: string | null; email?: string | null } },
+	siren: string,
+	requestContext: RequestContext,
+): Promise<Response> {
+	const startedAt = Date.now();
 
 	try {
 		const file = await fetchFileBySiren(fileId, siren);

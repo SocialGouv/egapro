@@ -137,6 +137,6 @@ describe("FilesSection", () => {
 		const link = screen.getByRole("link", {
 			name: "Télécharger avis-cse.pdf",
 		});
-		expect(link).toHaveAttribute("href", "/api/admin/files/file-1");
+		expect(link).toHaveAttribute("href", "/api/v1/files/file-1");
 	});
 });
