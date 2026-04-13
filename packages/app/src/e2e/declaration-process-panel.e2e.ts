@@ -15,12 +15,14 @@ import { loginWithProConnect } from "./helpers/login";
 const PANEL_ID = "declaration-process-panel";
 const CURRENT_YEAR = 2026;
 
-/** Wait for DSFR JS to finish initializing modals (it adds data-fr-js-modal). */
+/** Wait for DSFR JS to finish initializing both the modal and its trigger button. */
 async function waitForDsfrReady(page: Page) {
 	await page.waitForFunction(
 		(id) => {
-			const el = document.getElementById(id);
-			return el?.getAttribute("data-fr-js-modal") === "true";
+			const dialog = document.getElementById(id);
+			if (dialog?.getAttribute("data-fr-js-modal") !== "true") return false;
+			const btn = document.querySelector(`[aria-controls="${id}"]`);
+			return btn?.getAttribute("data-fr-js-modal") === "true";
 		},
 		PANEL_ID,
 		{ timeout: 10_000 },

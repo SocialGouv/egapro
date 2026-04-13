@@ -16,12 +16,14 @@ const PANEL_ID = "declaration-process-panel";
 // Match the year that api.declaration.getOrCreate() uses on first login.
 const testDeclarationYear = getCurrentYear();
 
-/** Wait for DSFR JS to finish initializing the modal. */
+/** Wait for DSFR JS to finish initializing both the modal and its trigger button. */
 async function waitForDsfrReady(page: Page) {
 	await page.waitForFunction(
 		(id) => {
-			const el = document.getElementById(id);
-			return el?.getAttribute("data-fr-js-modal") === "true";
+			const dialog = document.getElementById(id);
+			if (dialog?.getAttribute("data-fr-js-modal") !== "true") return false;
+			const btn = document.querySelector(`[aria-controls="${id}"]`);
+			return btn?.getAttribute("data-fr-js-modal") === "true";
 		},
 		PANEL_ID,
 		{ timeout: 10_000 },

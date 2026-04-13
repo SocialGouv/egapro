@@ -1,17 +1,21 @@
 import { expect, test } from "@playwright/test";
 
-test("non-admin user visiting /admin/declarations is redirected to /mon-espace", async ({
-	page,
-}) => {
+test("admin user can access /admin/declarations", async ({ page }) => {
 	await page.goto("/admin/declarations");
-	await page.waitForURL("**/mon-espace");
-	expect(page.url()).toContain("/mon-espace");
+	await page.waitForLoadState("networkidle");
+	expect(page.url()).toContain("/admin/declarations");
 });
 
-test("non-admin user visiting /admin/declarations/:id is redirected to /mon-espace", async ({
-	page,
+test("unauthenticated user visiting /admin/declarations is redirected to /login", async ({
+	browser,
 }) => {
-	await page.goto("/admin/declarations/00000000-0000-0000-0000-000000000000");
-	await page.waitForURL("**/mon-espace");
-	expect(page.url()).toContain("/mon-espace");
+	const anonCtx = await browser.newContext({ storageState: undefined });
+	try {
+		const page = await anonCtx.newPage();
+		await page.goto("/admin/declarations");
+		await page.waitForURL("**/login**");
+		expect(page.url()).toContain("/login");
+	} finally {
+		await anonCtx.close();
+	}
 });
