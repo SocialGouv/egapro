@@ -7,6 +7,11 @@ import { getCurrentYear } from "~/modules/domain";
 
 import { DeclarationLink } from "./DeclarationLink";
 import { getDeclarationStepLabel } from "./DeclarationStepLabel";
+import {
+	DocumentsPanel,
+	getDocumentResourceCount,
+	getDocumentsPanelId,
+} from "./DocumentsPanel";
 import { StatusBadge } from "./StatusBadge";
 import type { DeclarationItem, DeclarationType } from "./types";
 
@@ -23,15 +28,6 @@ type Props = {
 	hasNoSanction: boolean;
 };
 
-function formatDate(date: Date | null): string {
-	if (!date) return "Aucune";
-	return new Intl.DateTimeFormat("fr-FR", {
-		day: "2-digit",
-		month: "2-digit",
-		year: "numeric",
-	}).format(date);
-}
-
 const TYPE_DEADLINES: Record<DeclarationType, string> = {
 	remuneration: "01/06",
 	representation: "01/03",
@@ -43,6 +39,7 @@ function getDeadline(declaration: DeclarationItem): string {
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
+const PAGE_SIZE_SELECTOR_THRESHOLD = 20;
 
 export function DeclarationsSection({
 	siren,
@@ -142,27 +139,29 @@ export function DeclarationsSection({
 					/>
 				</>
 			)}
-			<div className="fr-table">
-				<div className="fr-table__footer--start">
-					<div className="fr-select-group">
-						<label className="fr-sr-only fr-label" htmlFor="table-page-size">
-							Nombre de lignes par page
-						</label>
-						<select
-							className="fr-select"
-							id="table-page-size"
-							onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-							value={pageSize}
-						>
-							{PAGE_SIZE_OPTIONS.map((size) => (
-								<option key={size} value={size}>
-									{size} lignes par page
-								</option>
-							))}
-						</select>
+			{totalRows > PAGE_SIZE_SELECTOR_THRESHOLD && (
+				<div className="fr-table">
+					<div className="fr-table__footer--start">
+						<div className="fr-select-group">
+							<label className="fr-sr-only fr-label" htmlFor="table-page-size">
+								Nombre de lignes par page
+							</label>
+							<select
+								className="fr-select"
+								id="table-page-size"
+								onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+								value={pageSize}
+							>
+								{PAGE_SIZE_OPTIONS.map((size) => (
+									<option key={size} value={size}>
+										{size} lignes par page
+									</option>
+								))}
+							</select>
+						</div>
 					</div>
 				</div>
-			</div>
+			)}
 			{totalPages > 1 && (
 				<Pagination
 					currentPage={safePage}
@@ -201,33 +200,54 @@ function DeclarationsTable({
 									<th scope="col">Déclaration</th>
 									<th scope="col">Année</th>
 									<th scope="col">Étape</th>
-									<th scope="col">Statut</th>
 									<th scope="col">Échéance</th>
-									<th scope="col">Mise à jour</th>
+									<th scope="col">Statut</th>
+									<th scope="col">Ressources</th>
 								</tr>
 							</thead>
 							<tbody>
-								{declarations.map((declaration) => (
-									<tr key={`${declaration.type}-${declaration.year}`}>
-										<td>
-											<DeclarationLink
-												hasCse={hasCse}
-												siren={siren}
-												type={declaration.type}
-												userPhone={userPhone}
-											>
-												{TYPE_LABELS[declaration.type]}
-											</DeclarationLink>
-										</td>
-										<td>{declaration.year}</td>
-										<td>{getDeclarationStepLabel(declaration.currentStep)}</td>
-										<td>
-											<StatusBadge status={declaration.status} />
-										</td>
-										<td>{getDeadline(declaration)}</td>
-										<td>{formatDate(declaration.updatedAt)}</td>
-									</tr>
-								))}
+								{declarations.map((declaration) => {
+									const resourceCount = getDocumentResourceCount(declaration);
+									return (
+										<tr key={`${declaration.type}-${declaration.year}`}>
+											<td>
+												<DeclarationLink
+													hasCse={hasCse}
+													siren={siren}
+													type={declaration.type}
+													userPhone={userPhone}
+												>
+													{TYPE_LABELS[declaration.type]}
+												</DeclarationLink>
+											</td>
+											<td>{declaration.year}</td>
+											<td>
+												{getDeclarationStepLabel(declaration.currentStep)}
+											</td>
+											<td>{getDeadline(declaration)}</td>
+											<td>
+												<StatusBadge status={declaration.status} />
+											</td>
+											<td>
+												{resourceCount > 0 ? (
+													<>
+														<button
+															aria-controls={getDocumentsPanelId(declaration)}
+															className="fr-link"
+															data-fr-opened="false"
+															type="button"
+														>
+															Documents ({resourceCount})
+														</button>
+														<DocumentsPanel declaration={declaration} />
+													</>
+												) : (
+													"Aucune"
+												)}
+											</td>
+										</tr>
+									);
+								})}
 							</tbody>
 						</table>
 					</div>

@@ -1,7 +1,10 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { CompliancePathChoice } from "../CompliancePathChoice";
+
+const campaignDeadlines = getDefaultCampaignDeadlines(2026);
 
 const mockMutate = vi.fn();
 const mockPush = vi.fn();
@@ -39,6 +42,7 @@ describe("CompliancePathChoice", () => {
 	it("renders the page title and success banner", () => {
 		render(
 			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
 				hasCse={null}
@@ -55,6 +59,7 @@ describe("CompliancePathChoice", () => {
 	it("renders all 3 compliance path options", () => {
 		render(
 			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
 				hasCse={true}
@@ -74,6 +79,7 @@ describe("CompliancePathChoice", () => {
 	it("disables next button when no path is selected", () => {
 		render(
 			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
 				hasCse={null}
@@ -86,6 +92,7 @@ describe("CompliancePathChoice", () => {
 	it("enables next button after selecting a path", () => {
 		render(
 			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
 				hasCse={null}
@@ -102,6 +109,7 @@ describe("CompliancePathChoice", () => {
 	it("submits the selected path and navigates to evaluation-conjointe", async () => {
 		render(
 			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
 				hasCse={null}
@@ -128,6 +136,7 @@ describe("CompliancePathChoice", () => {
 	it("navigates to second declaration when corrective_action is selected", async () => {
 		render(
 			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
 				hasCse={null}
@@ -154,6 +163,7 @@ describe("CompliancePathChoice", () => {
 	it("pre-selects the initial path when provided", () => {
 		render(
 			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
 				hasCse={null}
@@ -169,6 +179,7 @@ describe("CompliancePathChoice", () => {
 	it("renders isSecondRound options when isSecondRound is set", () => {
 		render(
 			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
 				hasCse={null}
@@ -186,6 +197,7 @@ describe("CompliancePathChoice", () => {
 	it("renders previous link pointing to step 6", () => {
 		render(
 			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
 				hasCse={null}
@@ -200,6 +212,7 @@ describe("CompliancePathChoice", () => {
 	it("renders the email in the success banner", () => {
 		render(
 			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="john@company.fr"
 				hasCse={null}

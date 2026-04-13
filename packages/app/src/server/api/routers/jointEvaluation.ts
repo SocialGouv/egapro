@@ -1,37 +1,22 @@
-import { eq } from "drizzle-orm";
-import { jointEvaluationUploadSchema } from "~/modules/declaration-remuneration/schemas";
+import { and, eq } from "drizzle-orm";
 import { createTRPCRouter, declarationProcedure } from "~/server/api/trpc";
-import { jointEvaluationFiles } from "~/server/db/schema";
+import { files } from "~/server/db/schema";
 
 export const jointEvaluationRouter = createTRPCRouter({
-	uploadFile: declarationProcedure
-		.input(jointEvaluationUploadSchema)
-		.mutation(async ({ ctx, input }) => {
-			// Upsert: one file per declaration — any declarant of the company can replace it
-			await ctx.db.transaction(async (tx) => {
-				await tx
-					.delete(jointEvaluationFiles)
-					.where(eq(jointEvaluationFiles.declarationId, ctx.declarationId));
-
-				await tx.insert(jointEvaluationFiles).values({
-					declarationId: ctx.declarationId,
-					fileName: input.fileName,
-					filePath: input.filePath,
-				});
-			});
-
-			return { success: true };
-		}),
-
 	getFile: declarationProcedure.query(async ({ ctx }) => {
 		const rows = await ctx.db
 			.select({
-				fileName: jointEvaluationFiles.fileName,
-				filePath: jointEvaluationFiles.filePath,
-				uploadedAt: jointEvaluationFiles.uploadedAt,
+				id: files.id,
+				fileName: files.fileName,
+				uploadedAt: files.uploadedAt,
 			})
-			.from(jointEvaluationFiles)
-			.where(eq(jointEvaluationFiles.declarationId, ctx.declarationId))
+			.from(files)
+			.where(
+				and(
+					eq(files.declarationId, ctx.declarationId),
+					eq(files.type, "joint_evaluation"),
+				),
+			)
 			.limit(1);
 
 		return rows[0] ?? null;

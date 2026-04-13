@@ -13,6 +13,7 @@ const NO_COMPLIANCE = {
 	complianceCompletedAt: null,
 	hasCseOpinion: false,
 	hasJointEvaluationFile: false,
+	hasPrefillData: false,
 };
 
 const declarations: DeclarationItem[] = [
@@ -67,7 +68,7 @@ describe("DeclarationsSection", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the table column headers including Échéance and Mise à jour", () => {
+	it("renders the table column headers including Échéance and Ressources", () => {
 		renderSection();
 		expect(
 			screen.getAllByRole("columnheader", { name: "Déclaration" }),
@@ -85,7 +86,7 @@ describe("DeclarationsSection", () => {
 			screen.getAllByRole("columnheader", { name: "Échéance" }),
 		).toHaveLength(2);
 		expect(
-			screen.getAllByRole("columnheader", { name: "Mise à jour" }),
+			screen.getAllByRole("columnheader", { name: "Ressources" }),
 		).toHaveLength(2);
 	});
 
@@ -98,14 +99,16 @@ describe("DeclarationsSection", () => {
 		expect(screen.getByText("Effectué")).toBeInTheDocument();
 	});
 
-	it("renders 'Aucune' for declarations with no update date", () => {
+	it("renders 'Aucune' for declarations with no resources", () => {
 		renderSection();
 		expect(screen.getAllByText("Aucune")).toHaveLength(2);
 	});
 
-	it("renders formatted date for declarations with an update date", () => {
+	it("renders a Documents link for completed declarations", () => {
 		renderSection();
-		expect(screen.getByText("15/03/2025")).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Documents (2)" }),
+		).toBeInTheDocument();
 	});
 
 	it("renders 'Années précédentes' heading when there are past declarations", () => {
@@ -127,8 +130,29 @@ describe("DeclarationsSection", () => {
 		expect(represButtons).toHaveLength(1);
 	});
 
-	it("renders the page size selector", () => {
+	it("does not render the page size selector when there are 20 rows or fewer", () => {
 		renderSection();
+		expect(
+			screen.queryByRole("combobox", { name: "Nombre de lignes par page" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders the page size selector when there are more than 20 rows", () => {
+		const manyDeclarations: DeclarationItem[] = Array.from(
+			{ length: 21 },
+			(_, i) => ({
+				type: "remuneration" as const,
+				siren: "532847196",
+				year: currentYear - i,
+				status: "done" as const,
+				currentStep: 6,
+				updatedAt: new Date("2025-01-01"),
+				...NO_COMPLIANCE,
+			}),
+		);
+
+		renderSection({ declarations: manyDeclarations });
+
 		expect(
 			screen.getByRole("combobox", { name: "Nombre de lignes par page" }),
 		).toBeInTheDocument();
@@ -241,7 +265,7 @@ describe("DeclarationsSection", () => {
 
 	it("resets to page 1 when page size changes", () => {
 		const manyDeclarations: DeclarationItem[] = Array.from(
-			{ length: 15 },
+			{ length: 25 },
 			(_, i) => ({
 				type: "remuneration" as const,
 				siren: "532847196",
@@ -258,10 +282,10 @@ describe("DeclarationsSection", () => {
 		// Go to page 2
 		fireEvent.click(screen.getByTitle("Page 2"));
 
-		// Change page size to 25
+		// Change page size to 50
 		fireEvent.change(
 			screen.getByRole("combobox", { name: "Nombre de lignes par page" }),
-			{ target: { value: "25" } },
+			{ target: { value: "50" } },
 		);
 
 		// Should be back on page 1 with all rows visible, no pagination

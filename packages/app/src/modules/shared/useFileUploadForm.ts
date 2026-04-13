@@ -1,20 +1,21 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-
 import { getDsfrModal } from "./getDsfrModal";
-import { uploadFile } from "./uploadFile";
-
-type SaveMutation = {
-	mutate: (input: { fileName: string; filePath: string }) => void;
-	isPending: boolean;
-};
+import type { FlowType } from "./uploadConfig";
+import { type UploadFailureReason, uploadFile } from "./uploadFile";
 
 type Options = {
-	saveMutation: SaveMutation;
+	flowType: FlowType;
+	onUploaded?: (file: { fileId: string; fileName: string }) => void;
+	onAllUploaded?: () => void;
 };
 
-export function useFileUploadForm({ saveMutation }: Options) {
+export function useFileUploadForm({
+	flowType,
+	onUploaded,
+	onAllUploaded,
+}: Options) {
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [uploadError, setUploadError] = useState<string | null>(null);
@@ -66,20 +67,21 @@ export function useFileUploadForm({ saveMutation }: Options) {
 		setIsUploading(true);
 		try {
 			for (const file of selectedFiles) {
-				const result = await uploadFile(file);
+				const result = await uploadFile(file, { flowType });
 				if (!result.ok) {
-					setUploadError(result.error);
+					setUploadError(
+						formatUploadError(result.reason, result.error, result.virusName),
+					);
 					setIsUploading(false);
 					return;
 				}
-				saveMutation.mutate({
-					fileName: file.name,
-					filePath: result.key,
-				});
+				onUploaded?.({ fileId: result.fileId, fileName: result.fileName });
 			}
 			setSelectedFiles([]);
 			setIsUploading(false);
+			onAllUploaded?.();
 		} catch {
+			setUploadError("Erreur lors de l'upload du fichier");
 			setIsUploading(false);
 		}
 	}
@@ -89,9 +91,44 @@ export function useFileUploadForm({ saveMutation }: Options) {
 		handleConfirm,
 		handleFilesChange,
 		handleSubmit,
-		isPending: isUploading || saveMutation.isPending,
+		isPending: isUploading,
 		modalRef,
 		selectedFiles,
 		uploadError,
 	};
+}
+
+/**
+ * Map the server's failure reason to the French copy shown to the user.
+ * Falls back to the server-provided `error` string when the reason is
+ * unknown — this keeps the UX informative even if the server adds a new
+ * reason the client hasn't been updated for.
+ */
+function formatUploadError(
+	reason: UploadFailureReason,
+	serverError: string,
+	virusName: string | undefined,
+): string {
+	switch (reason) {
+		case "virus":
+			return virusName
+				? `Fichier rejeté par l'antivirus (signature : ${virusName}).`
+				: "Fichier rejeté par l'antivirus.";
+		case "scan_unavailable":
+			return "Le service de scan antivirus est temporairement indisponible. Merci de réessayer dans quelques minutes.";
+		case "max_files":
+			return serverError;
+		case "unauthorized":
+			return "Non authentifié. Merci de vous reconnecter.";
+		case "not_found":
+			return "Déclaration introuvable pour l'année en cours.";
+		case "too_large":
+		case "wrong_type":
+		case "empty":
+		case "missing_flow":
+		case "missing_filename":
+			return serverError;
+		case "server_error":
+			return "Erreur lors de l'upload du fichier. Merci de réessayer.";
+	}
 }

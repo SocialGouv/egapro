@@ -4,8 +4,11 @@
 export {
 	getCurrentYear,
 	getDeclarationDeadline,
+	getDefaultCampaignDeadlines,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
+	isDeadlinePassed,
+	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
 // Company size
 export { classifyCompanySize, isCseRequired } from "./shared/companySize";
@@ -51,6 +54,7 @@ export {
 // SIREN utilities
 export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
 export type {
+	CampaignDeadlines,
 	CompanySize,
 	DeclarationStatus,
 	DeclarationType,

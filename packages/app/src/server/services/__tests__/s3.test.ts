@@ -50,14 +50,6 @@ describe("s3 service", () => {
 		});
 	});
 
-	describe("buildObjectKey", () => {
-		it("builds the correct S3 object key", async () => {
-			const { buildObjectKey } = await import("../s3");
-			const key = buildObjectKey("123456789", 2027, "abc-def-123");
-			expect(key).toBe("123456789/2027/abc-def-123.pdf");
-		});
-	});
-
 	describe("uploadFile", () => {
 		it("sends a PutObjectCommand", async () => {
 			const { PutObjectCommand } = await import("@aws-sdk/client-s3");

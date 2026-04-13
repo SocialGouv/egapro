@@ -1,11 +1,60 @@
 import { eq } from "drizzle-orm";
+import { headers as nextHeaders } from "next/headers";
 import type { DefaultSession, NextAuthOptions } from "next-auth";
 import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
-import { extractSiren } from "~/modules/domain";
+import { AUDIT_ACTIONS } from "~/modules/audit";
+import { extractSiren, parseSiren } from "~/modules/domain";
+import { logAction } from "~/server/audit/log";
+import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
 import { db } from "~/server/db";
 import { companies, userCompanies, users } from "~/server/db/schema";
 import { fetchCompanyBySiren } from "~/server/services/weez";
+import { parseAdminEmails } from "./parseAdminEmails";
+
+/**
+ * Read the request context (IP, user-agent) from the active Next.js request.
+ *
+ * NextAuth events do not receive the request directly, so we rely on the
+ * Next.js per-request AsyncLocalStorage exposed by `next/headers`. Returns
+ * empty context if called outside a request scope (tests, edge cases).
+ */
+async function safeRequestContext() {
+	try {
+		const headerStore = await nextHeaders();
+		return buildRequestContext(toHeaders(headerStore));
+	} catch {
+		return { ipAddress: null, userAgent: null };
+	}
+}
+
+/**
+ * Whitelist-based extraction of safe metadata fields from a NextAuth error
+ * payload. NextAuth occasionally embeds OAuth tokens / state / code_verifier
+ * in error metadata — JSON.stringify-ing the whole object would leak them
+ * into `audit.action_log.error_message`.
+ */
+function buildAuthErrorMessage(code: string, metadata: unknown): string {
+	if (metadata instanceof Error) {
+		return `${code}: ${metadata.message}`.slice(0, 1000);
+	}
+	if (typeof metadata !== "object" || metadata === null) {
+		return `${code}: ${String(metadata)}`.slice(0, 1000);
+	}
+	const safe: Record<string, string> = {};
+	const m = metadata as Record<string, unknown>;
+	for (const key of ["type", "provider", "providerType", "name"] as const) {
+		const value = m[key];
+		if (typeof value === "string") safe[key] = value;
+	}
+	const innerError = m.error;
+	if (innerError instanceof Error) {
+		safe.error = innerError.message;
+	} else if (typeof innerError === "string") {
+		safe.error = innerError;
+	}
+	return `${code}: ${JSON.stringify(safe)}`.slice(0, 1000);
+}
 
 declare module "next-auth" {
 	interface Session extends DefaultSession {
@@ -13,6 +62,7 @@ declare module "next-auth" {
 			id: string;
 			siret?: string | null;
 			phone?: string | null;
+			isAdmin: boolean;
 		} & DefaultSession["user"];
 	}
 }
@@ -23,8 +73,15 @@ declare module "next-auth/jwt" {
 		siret?: string | null;
 		phone?: string | null;
 		id_token?: string | null;
+		isAdmin: boolean;
 	}
 }
+
+/**
+ * Normalized set of admin emails parsed once from `ADMIN_EMAILS`.
+ * The env var never changes at runtime, so we memoize it at module load.
+ */
+const ADMIN_EMAILS: Set<string> = parseAdminEmails(env.ADMIN_EMAILS);
 
 function getProviders(): Provider[] {
 	const providers: Provider[] = [];
@@ -120,28 +177,43 @@ export const authConfig = {
 				};
 
 				// Find or create user by email (replaces DrizzleAdapter)
-				let dbUser = await db.query.users.findFirst({
-					where: eq(users.email, user.email!),
+				const email = user.email;
+				if (!email) {
+					throw new Error("Missing email from auth profile");
+				}
+
+				const existingUser = await db.query.users.findFirst({
+					where: eq(users.email, email),
 				});
 
-				if (!dbUser) {
+				let dbUser: NonNullable<typeof existingUser>;
+				if (!existingUser) {
 					const rows = await db
 						.insert(users)
 						.values({
-							email: user.email!,
+							email,
 							firstName: profileData.firstName ?? null,
 							lastName: profileData.lastName ?? null,
 						})
 						.returning();
-					dbUser = rows[0]!;
+					const inserted = rows[0];
+					if (!inserted) {
+						throw new Error("Failed to create user");
+					}
+					dbUser = inserted;
 				} else {
 					const updates: Record<string, string | null> = {};
 					if (profileData.firstName) updates.firstName = profileData.firstName;
 					if (profileData.lastName) updates.lastName = profileData.lastName;
 
 					if (Object.keys(updates).length > 0) {
-						await db.update(users).set(updates).where(eq(users.id, dbUser.id));
-						dbUser = { ...dbUser, ...updates } as typeof dbUser;
+						await db
+							.update(users)
+							.set(updates)
+							.where(eq(users.id, existingUser.id));
+						dbUser = { ...existingUser, ...updates } as typeof existingUser;
+					} else {
+						dbUser = existingUser;
 					}
 				}
 
@@ -191,6 +263,9 @@ export const authConfig = {
 				token.siret = profileData.siret ?? null;
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
+				// Admin role is purely env-driven: the `ADMIN_EMAILS` env var
+				// is the single source of truth, re-evaluated at each sign-in.
+				token.isAdmin = ADMIN_EMAILS.has(email.toLowerCase());
 			}
 			return token;
 		},
@@ -201,7 +276,52 @@ export const authConfig = {
 				id: token.id,
 				siret: token.siret ?? null,
 				phone: token.phone ?? null,
+				isAdmin: token.isAdmin ?? false,
 			},
 		}),
+	},
+	events: {
+		async signIn({ user }) {
+			const requestContext = await safeRequestContext();
+			const profileData = user as typeof user & { siret?: string | null };
+			void logAction({
+				action: AUDIT_ACTIONS.AUTH_LOGIN,
+				status: "success",
+				userId: user.id ?? null,
+				userEmail: user.email ?? null,
+				siren: parseSiren(profileData.siret),
+				ipAddress: requestContext.ipAddress,
+				userAgent: requestContext.userAgent,
+			});
+		},
+	},
+	logger: {
+		// NextAuth v4 expects a synchronous `(code, metadata) => void` logger.
+		// We keep the signature synchronous and dispatch the async audit write
+		// inside a detached promise so NextAuth never awaits our side-effect.
+		error(code, metadata) {
+			// Log NextAuth-level errors that match a sign-in/callback failure
+			// — issue #3174 (failed login auditing).
+			if (
+				!code.includes("SIGNIN") &&
+				!code.includes("CALLBACK") &&
+				!code.includes("OAUTH") &&
+				!code.includes("JWT_SESSION")
+			) {
+				return;
+			}
+			void (async () => {
+				const requestContext = await safeRequestContext();
+				await logAction({
+					action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+					status: "failure",
+					errorMessage: buildAuthErrorMessage(code, metadata),
+					ipAddress: requestContext.ipAddress,
+					userAgent: requestContext.userAgent,
+				});
+			})();
+		},
+		warn() {},
+		debug() {},
 	},
 } satisfies NextAuthOptions;

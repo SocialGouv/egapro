@@ -287,6 +287,40 @@ File upload forms keep the `useFileUploadForm` hook pattern. They do not need `r
 
 ---
 
+## Audit logging (issue #3174)
+
+**Any new surface that falls under the audit taxonomy must wire its audit log at the same time.** Forgetting the log is a compliance bug, not an enhancement.
+
+Covered surfaces:
+
+| Surface | How to wire |
+|---|---|
+| New tRPC **mutation** | Add `AUDIT_ACTIONS.*` + category `"mutation"` + entry in `PROCEDURE_TO_ACTION` (`~/server/audit/trpcMiddleware.ts`) |
+| New tRPC **query exposing PII / GIP data / company-scoped data** | Same as above but category `"read_sensitive"` (180-day retention) |
+| New **Next.js Route Handler** (`src/app/api/**/route.ts`) | Wrap with `withAuditedRoute({ action, resolveContext })` + use `cachedAuth(request)` for session (never `auth()` directly twice per request) |
+| New **NextAuth event / auth flow** | `logAction` directly; `logger.error` must stay synchronous (`void (async () => {...})()`) |
+| New **cron-triggered / system action** | `logAction` directly, category `"system"` |
+
+What does **not** need an audit entry:
+
+- Pure public / non-sensitive reads (`company.list`, search)
+- Health checks, static pages
+- Procedures called only by another audited procedure in the same request (duplicate rows)
+
+Every new action needs **3 wire-up points**:
+
+1. `AUDIT_ACTIONS.*` constant in [`~/modules/audit/shared/actionKeys.ts`](src/modules/audit/shared/actionKeys.ts)
+2. Category in `AUDIT_ACTION_CATEGORIES` in the same file (drives the CNIL retention bucket: `read_sensitive` → 180 days, everything else → 365 days)
+3. Surface-specific wire (tRPC map / wrapper / direct `logAction` call)
+
+The `metadata` jsonb must **never** contain secrets. The recursive sanitizer auto-strips `password`, `token`, `refresh_token`, `secret`, `client_secret`, `authorization`, `apikey`, `api_key`, `accesskey`, `access_key`, `private_key` at any depth — but when calling `logAction` directly (outside tRPC), the caller is responsible for staying clean. Never put IP addresses in `metadata` — there is a dedicated `ip_address` column.
+
+DB-layer changes in `~/server/audit/cleanup.ts` (or any file that touches `audit.action_log` via non-trivial SQL) **must** come with an integration test `*.integration.test.ts` — unit tests mock drizzle and will miss driver-level bugs. Run locally with `pnpm test:integration` (requires Docker).
+
+> Full playbook with code snippets and a PR checklist → [`.claude/rules/audit-logging.md`](../../.claude/rules/audit-logging.md)
+
+---
+
 ## File size
 
 < 200 lines ideal, 200-400 acceptable, > 400 split, > 800 **forbidden**.

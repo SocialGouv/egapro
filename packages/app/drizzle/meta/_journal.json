@@ -148,6 +148,27 @@
 			"when": 1775200000000,
 			"tag": "0020_clean-user-columns",
 			"breakpoints": true
+		},
+		{
+			"idx": 21,
+			"version": "7",
+			"when": 1775400000000,
+			"tag": "0021_add-campaign-deadlines",
+			"breakpoints": true
+		},
+		{
+			"idx": 22,
+			"version": "7",
+			"when": 1775450000000,
+			"tag": "0022_merge_file_tables",
+			"breakpoints": true
+		},
+		{
+			"idx": 23,
+			"version": "7",
+			"when": 1775500000000,
+			"tag": "0023_add_audit_action_log",
+			"breakpoints": true
 		}
 	]
 }

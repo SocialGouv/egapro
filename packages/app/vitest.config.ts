@@ -36,7 +36,13 @@ export default defineConfig({
 		globals: true,
 		setupFiles: ["./src/test/setup.ts"],
 		include: ["src/**/*.{test,spec}.{ts,tsx}"],
-		exclude: ["src/**/*.e2e.{ts,tsx}", "src/e2e/**", "node_modules", ".next"],
+		exclude: [
+			"src/**/*.integration.test.ts",
+			"src/**/*.e2e.{ts,tsx}",
+			"src/e2e/**",
+			"node_modules",
+			".next",
+		],
 		coverage: {
 			provider: "v8",
 			reporter: ["text", "lcov", "html"],
@@ -55,6 +61,9 @@ export default defineConfig({
 				"src/server/db/**",
 				"src/server/auth/**",
 				"src/app/api/**",
+				// Dev-only playground for visually testing the declaration process panel.
+				"src/app/test-panel/**",
+				"src/modules/my-space/PanelPlayground.tsx",
 			],
 			thresholds: {
 				statements: 75,

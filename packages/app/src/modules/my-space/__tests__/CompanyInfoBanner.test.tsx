@@ -36,11 +36,11 @@ describe("CompanyInfoBanner", () => {
 	it("renders the address when provided", () => {
 		render(
 			<CompanyInfoBanner
-				company={{ ...baseCompany, address: "12 rue de Paris, 75001 Paris" }}
+				company={{ ...baseCompany, address: "12 RUE DE PARIS, 75001 PARIS" }}
 			/>,
 		);
 		expect(
-			screen.getByText("12 rue de Paris, 75001 Paris"),
+			screen.getByText("12 Rue de Paris, 75001 Paris"),
 		).toBeInTheDocument();
 	});
 
@@ -86,10 +86,10 @@ describe("CompanyInfoBanner", () => {
 		expect(screen.queryByText(/Effectif annuel moyen/)).not.toBeInTheDocument();
 	});
 
-	it("renders the 'Modifier les informations' button", () => {
+	it("renders the 'Modifier' button", () => {
 		render(<CompanyInfoBanner company={baseCompany} />);
 		expect(
-			screen.getByRole("button", { name: "Modifier les informations" }),
+			screen.getByRole("button", { name: "Modifier" }),
 		).toBeInTheDocument();
 	});
 });

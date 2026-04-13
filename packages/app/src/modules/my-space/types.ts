@@ -32,4 +32,5 @@ export type DeclarationItem = {
 	complianceCompletedAt: Date | null;
 	hasCseOpinion: boolean;
 	hasJointEvaluationFile: boolean;
+	hasPrefillData: boolean;
 };

@@ -5,7 +5,9 @@ description: "Implement a GitHub issue: fetch, branch, code, validate. Usage: /i
 
 # /implement
 
-Implements a GitHub issue end-to-end: understand the issue, code it, validate it.
+Implements a GitHub issue end-to-end: code it and validate it.
+
+> **Prerequisite**: Run `/analyse` first to generate a plan. This skill executes the plan, it does not re-analyze the issue.
 
 ## Arguments
 
@@ -67,4 +69,4 @@ Run the quality gates and fix loop as defined in `.claude/rules/automation.md`.
 
 If the dev server is running, also run `pnpm test:lighthouse` (must score 100% accessibility).
 
-Done. Code is validated and ready to ship via `/ship`.
+Done. Code is validated and ready to ship — run `/ship` next.

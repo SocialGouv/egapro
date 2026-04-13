@@ -1,4 +1,5 @@
-import { getCurrentYear, hasRequiredDeclarationInfo } from "~/modules/domain";
+import type { CampaignDeadlines } from "~/modules/domain";
+import { getCurrentYear } from "~/modules/domain";
 
 import { ArchivesSection } from "./ArchivesSection";
 import { CompanyEditModal } from "./CompanyEditModal";
@@ -11,6 +12,7 @@ import type { CompanyDetail, DeclarationItem } from "./types";
 import { WelcomeBanner } from "./WelcomeBanner";
 
 type Props = {
+	campaignDeadlines: CampaignDeadlines;
 	company: CompanyDetail;
 	declarations: DeclarationItem[];
 	hasNoSanction: boolean;
@@ -34,6 +36,7 @@ function getLastActionDate(
 }
 
 export function CompanyDeclarationsPage({
+	campaignDeadlines,
 	company,
 	declarations,
 	hasNoSanction,
@@ -60,14 +63,13 @@ export function CompanyDeclarationsPage({
 			/>
 			<ArchivesSection />
 			<CompanyEditModal company={company} />
-			{!hasRequiredDeclarationInfo(userPhone, company.hasCse) && (
-				<MissingInfoModal
-					hasCse={company.hasCse}
-					siren={company.siren}
-					userPhone={userPhone}
-				/>
-			)}
+			<MissingInfoModal
+				hasCse={company.hasCse}
+				siren={company.siren}
+				userPhone={userPhone}
+			/>
 			<DeclarationProcessPanel
+				campaignDeadlines={campaignDeadlines}
 				compliancePath={currentDeclaration?.compliancePath ?? null}
 				ctaHref={ctaHref}
 				lastActionDate={lastActionDate}

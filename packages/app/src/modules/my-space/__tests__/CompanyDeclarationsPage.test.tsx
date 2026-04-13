@@ -24,7 +24,7 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, getDefaultCampaignDeadlines } from "~/modules/domain";
 import { CompanyDeclarationsPage } from "../CompanyDeclarationsPage";
 import type { CompanyDetail, DeclarationItem } from "../types";
 
@@ -38,6 +38,7 @@ const company: CompanyDetail = {
 };
 
 const currentYear = getCurrentYear();
+const campaignDeadlines = getDefaultCampaignDeadlines(currentYear);
 
 const declarations: DeclarationItem[] = [
 	{
@@ -52,6 +53,7 @@ const declarations: DeclarationItem[] = [
 		complianceCompletedAt: null,
 		hasCseOpinion: false,
 		hasJointEvaluationFile: false,
+		hasPrefillData: false,
 	},
 	{
 		type: "representation",
@@ -65,6 +67,7 @@ const declarations: DeclarationItem[] = [
 		complianceCompletedAt: null,
 		hasCseOpinion: false,
 		hasJointEvaluationFile: false,
+		hasPrefillData: false,
 	},
 ];
 
@@ -72,6 +75,7 @@ describe("CompanyDeclarationsPage", () => {
 	it("renders the main landmark with id 'content'", () => {
 		render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={company}
 				declarations={declarations}
 				hasNoSanction={false}
@@ -86,6 +90,7 @@ describe("CompanyDeclarationsPage", () => {
 	it("renders the company name", () => {
 		render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={company}
 				declarations={declarations}
 				hasNoSanction={false}
@@ -100,6 +105,7 @@ describe("CompanyDeclarationsPage", () => {
 	it("renders the 'En cours' heading", () => {
 		render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={company}
 				declarations={declarations}
 				hasNoSanction={false}
@@ -114,6 +120,7 @@ describe("CompanyDeclarationsPage", () => {
 	it("renders the 'Archives' section", () => {
 		render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={company}
 				declarations={declarations}
 				hasNoSanction={false}
@@ -123,23 +130,23 @@ describe("CompanyDeclarationsPage", () => {
 		expect(screen.getByText("Archives")).toBeInTheDocument();
 	});
 
-	it("does not show MissingInfoModal when userPhone and hasCse are provided", () => {
+	it("always renders MissingInfoModal so DSFR conceal/disclose chain works", () => {
 		const { container } = render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={{ ...company, hasCse: true }}
 				declarations={declarations}
 				hasNoSanction={false}
 				userPhone="0122334455"
 			/>,
 		);
-		expect(
-			container.querySelector("#missing-info-modal"),
-		).not.toBeInTheDocument();
+		expect(container.querySelector("#missing-info-modal")).toBeInTheDocument();
 	});
 
 	it("renders MissingInfoModal when userPhone is null", () => {
 		const { container } = render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={{ ...company, hasCse: true }}
 				declarations={declarations}
 				hasNoSanction={false}
@@ -152,6 +159,7 @@ describe("CompanyDeclarationsPage", () => {
 	it("renders MissingInfoModal when hasCse is null", () => {
 		const { container } = render(
 			<CompanyDeclarationsPage
+				campaignDeadlines={campaignDeadlines}
 				company={{ ...company, hasCse: null }}
 				declarations={declarations}
 				hasNoSanction={false}

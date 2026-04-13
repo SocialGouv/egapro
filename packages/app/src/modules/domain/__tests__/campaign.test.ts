@@ -3,8 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	getCurrentYear,
 	getDeclarationDeadline,
+	getDefaultCampaignDeadlines,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
+	isDeadlinePassed,
+	shouldRedirectSubmittedToRecap,
 } from "../shared/campaign";
 
 describe("getCurrentYear", () => {
@@ -51,5 +54,109 @@ describe("getDeclarationDeadline", () => {
 describe("getSecondDeclarationDeadline", () => {
 	it("returns 1 décembre for the given year", () => {
 		expect(getSecondDeclarationDeadline(2027)).toBe("1 décembre 2027");
+	});
+});
+
+describe("getDefaultCampaignDeadlines", () => {
+	it("returns Date objects for a given year", () => {
+		const deadlines = getDefaultCampaignDeadlines(2027);
+		expect(deadlines.decl1ModificationDeadline).toEqual(new Date(2027, 5, 1));
+		expect(deadlines.decl1JustificationDeadline).toEqual(new Date(2027, 5, 1));
+		expect(deadlines.decl1JointEvaluationDeadline).toEqual(
+			new Date(2027, 7, 1),
+		);
+		expect(deadlines.decl2ModificationDeadline).toEqual(new Date(2027, 11, 1));
+		expect(deadlines.decl2JustificationDeadline).toEqual(new Date(2027, 11, 1));
+		expect(deadlines.decl2JointEvaluationDeadline).toEqual(
+			new Date(2028, 1, 1),
+		);
+	});
+});
+
+describe("isDeadlinePassed", () => {
+	const deadline = new Date("2026-06-01T00:00:00");
+
+	it("returns false when now is before the deadline", () => {
+		expect(isDeadlinePassed(deadline, new Date("2026-05-31T23:59:59"))).toBe(
+			false,
+		);
+	});
+
+	it("returns false when now equals the deadline", () => {
+		expect(isDeadlinePassed(deadline, new Date("2026-06-01T00:00:00"))).toBe(
+			false,
+		);
+	});
+
+	it("returns true when now is after the deadline", () => {
+		expect(isDeadlinePassed(deadline, new Date("2026-06-01T00:00:01"))).toBe(
+			true,
+		);
+	});
+});
+
+describe("shouldRedirectSubmittedToRecap", () => {
+	const past = new Date("2020-06-01T00:00:00");
+	const future = new Date("2099-06-01T00:00:00");
+	const now = new Date("2026-04-07T12:00:00");
+
+	it("returns false when status is not submitted", () => {
+		expect(
+			shouldRedirectSubmittedToRecap({
+				status: "draft",
+				step: 2,
+				recapStep: 6,
+				modificationDeadline: past,
+				now,
+			}),
+		).toBe(false);
+	});
+
+	it("returns false when status is null", () => {
+		expect(
+			shouldRedirectSubmittedToRecap({
+				status: null,
+				step: 2,
+				recapStep: 6,
+				modificationDeadline: past,
+				now,
+			}),
+		).toBe(false);
+	});
+
+	it("returns false when already on the recap step", () => {
+		expect(
+			shouldRedirectSubmittedToRecap({
+				status: "submitted",
+				step: 6,
+				recapStep: 6,
+				modificationDeadline: past,
+				now,
+			}),
+		).toBe(false);
+	});
+
+	it("returns false when the deadline is in the future", () => {
+		expect(
+			shouldRedirectSubmittedToRecap({
+				status: "submitted",
+				step: 2,
+				recapStep: 6,
+				modificationDeadline: future,
+				now,
+			}),
+		).toBe(false);
+	});
+
+	it("returns true when submitted, off-recap, and deadline is past", () => {
+		expect(
+			shouldRedirectSubmittedToRecap({
+				status: "submitted",
+				step: 2,
+				recapStep: 6,
+				modificationDeadline: past,
+				now,
+			}),
+		).toBe(true);
 	});
 });

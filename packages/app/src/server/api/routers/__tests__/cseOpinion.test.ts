@@ -19,12 +19,13 @@ vi.mock("~/server/db/schema", () => ({
 		opinionDate: "opinionDate",
 		gapConsulted: "gapConsulted",
 	},
-	cseOpinionFiles: {
+	files: {
 		id: "id",
 		declarationId: "declarationId",
 		fileName: "fileName",
 		filePath: "filePath",
 		uploadedAt: "uploadedAt",
+		type: "type",
 	},
 }));
 
@@ -266,97 +267,6 @@ describe("cseOpinionRouter", () => {
 
 			await expect(caller.getFiles()).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
-			);
-		});
-	});
-
-	describe("uploadFile", () => {
-		const validInput = {
-			fileName: "avis-cse.pdf",
-			filePath: "339787277/2027/test-uuid.pdf",
-		};
-
-		it("saves file record to DB in a transaction", async () => {
-			const mockDb = createMockDb([]);
-			const caller = await createCaller(mockDb);
-
-			const result = await caller.uploadFile(validInput);
-
-			expect(result).toEqual({ success: true });
-			expect(mockTransaction).toHaveBeenCalled();
-			expect(mockInsert).toHaveBeenCalled();
-			expect(mockValues).toHaveBeenCalledWith(
-				expect.objectContaining({
-					declarationId: "decl-1",
-					fileName: "avis-cse.pdf",
-					filePath: "339787277/2027/test-uuid.pdf",
-				}),
-			);
-		});
-
-		it("throws when siret is missing", async () => {
-			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb, null as never);
-
-			await expect(caller.uploadFile(validInput)).rejects.toThrow(
-				"SIRET manquant ou invalide dans la session",
-			);
-		});
-
-		it("rejects empty fileName", async () => {
-			const mockDb = createMockDb([]);
-			const caller = await createCaller(mockDb);
-
-			await expect(
-				caller.uploadFile({
-					fileName: "",
-					filePath: "339787277/2027/test-uuid.pdf",
-				}),
-			).rejects.toThrow();
-		});
-
-		it("rejects empty filePath", async () => {
-			const mockDb = createMockDb([]);
-			const caller = await createCaller(mockDb);
-
-			await expect(
-				caller.uploadFile({ fileName: "test.pdf", filePath: "" }),
-			).rejects.toThrow();
-		});
-
-		it("rejects non-PDF fileName", async () => {
-			const mockDb = createMockDb([]);
-			const caller = await createCaller(mockDb);
-
-			await expect(
-				caller.uploadFile({
-					fileName: "malicious.exe",
-					filePath: "339787277/2027/test-uuid.pdf",
-				}),
-			).rejects.toThrow();
-		});
-
-		it("rejects invalid filePath format", async () => {
-			const mockDb = createMockDb([]);
-			const caller = await createCaller(mockDb);
-
-			await expect(
-				caller.uploadFile({
-					fileName: "test.pdf",
-					filePath: "invalid/path/with spaces.pdf",
-				}),
-			).rejects.toThrow();
-		});
-
-		it("throws when max files limit is reached", async () => {
-			const fourFiles = Array.from({ length: 4 }, (_, i) => ({
-				id: `file-${i}`,
-			}));
-			const mockDb = createMockDb(fourFiles);
-			const caller = await createCaller(mockDb);
-
-			await expect(caller.uploadFile(validInput)).rejects.toThrow(
-				/Nombre maximum de fichiers/,
 			);
 		});
 	});

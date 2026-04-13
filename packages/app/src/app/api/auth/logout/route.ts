@@ -2,6 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 import { env } from "~/env";
+import { AUDIT_ACTIONS } from "~/modules/audit";
+import { parseSiren } from "~/modules/domain";
+import { logAction } from "~/server/audit/log";
+import { buildRequestContext } from "~/server/audit/requestContext";
 import { terminateProConnectSession } from "~/server/auth/proconnect-logout";
 
 /**
@@ -15,6 +19,28 @@ export async function GET(request: NextRequest) {
 	const token = await getToken({ req: request });
 	// Use the public origin from NEXTAUTH_URL to avoid localhost redirects behind reverse proxies
 	const baseUrl = new URL(env.NEXTAUTH_URL).origin;
+
+	// Audit the logout only if there was an active session — an unauthenticated
+	// GET to /api/auth/logout should not produce a spurious `auth.logout` row.
+	// `logAction` is awaited (not fire-and-forget) so the write is guaranteed
+	// to be persisted before the redirect response is issued. `logAction` is
+	// fail-safe internally, so a DB outage will not block logout.
+	if (token) {
+		const requestContext = buildRequestContext(request.headers);
+		const tokenWithEmail = token as typeof token & {
+			email?: string | null;
+			siret?: string | null;
+		};
+		await logAction({
+			action: AUDIT_ACTIONS.AUTH_LOGOUT,
+			status: "success",
+			userId: token.id ?? null,
+			userEmail: tokenWithEmail.email ?? null,
+			siren: parseSiren(tokenWithEmail.siret),
+			ipAddress: requestContext.ipAddress,
+			userAgent: requestContext.userAgent,
+		});
+	}
 
 	if (token?.id_token) {
 		// Terminate ProConnect OIDC session server-side (fire-and-forget)
