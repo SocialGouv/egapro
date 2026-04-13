@@ -23,6 +23,7 @@ function makeDeclaration(
 		complianceCompletedAt: null,
 		hasCseOpinion: false,
 		hasJointEvaluationFile: false,
+		hasPrefillData: false,
 		...overrides,
 	};
 }

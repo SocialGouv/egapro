@@ -1,5 +1,7 @@
+import { AUDIT_ACTIONS } from "~/modules/audit";
 import { generateYearlyExport } from "~/modules/export";
 import { exportYearOptionalQuerySchema } from "~/modules/export/schemas";
+import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 
 /**
@@ -8,7 +10,20 @@ import { db } from "~/server/db";
  * Trigger yearly export XLSX generation. Called by cron job or manually.
  * Optional query param `year` (YYYY) — defaults to current year.
  */
-export async function POST(request: Request) {
+export const POST = withAuditedRoute(
+	{
+		action: AUDIT_ACTIONS.EXPORT_GENERATE,
+		resolveContext: (request) => {
+			const url = new URL(request.url);
+			return {
+				metadata: { year: url.searchParams.get("year") ?? null },
+			};
+		},
+	},
+	exportGenerateHandler,
+);
+
+async function exportGenerateHandler(request: Request): Promise<Response> {
 	try {
 		const url = new URL(request.url);
 		const parsed = exportYearOptionalQuerySchema.safeParse({

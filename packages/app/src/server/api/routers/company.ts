@@ -14,6 +14,7 @@ import {
 	cseOpinions,
 	declarations,
 	files,
+	gipMdsData,
 	userCompanies,
 } from "~/server/db/schema";
 import { fetchCseBySiren, fetchSanctionBySiren } from "~/server/services/suit";
@@ -132,7 +133,7 @@ export const companyRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const company = await findUserCompany(ctx.db, ctx.session, input.siren);
 
-			const [declarationRows, cseOpinionRows, jointEvalRows] =
+			const [declarationRows, cseOpinionRows, jointEvalRows, prefillRows] =
 				await Promise.all([
 					ctx.db
 						.select({
@@ -166,30 +167,39 @@ export const companyRouter = createTRPCRouter({
 								eq(files.type, "joint_evaluation"),
 							),
 						),
+					ctx.db
+						.select({ year: gipMdsData.year })
+						.from(gipMdsData)
+						.where(eq(gipMdsData.siren, input.siren)),
 				]);
 
 			const yearsWithCseOpinion = new Set(cseOpinionRows.map((r) => r.year));
 			const yearsWithJointEval = new Set(jointEvalRows.map((r) => r.year));
+			const yearsWithPrefill = new Set(prefillRows.map((r) => r.year));
 
 			const year = getCurrentYear();
+			const mappedDeclarations = declarationRows.map((d) => ({
+				type: "remuneration" as const,
+				year: d.year,
+				status: computeDeclarationStatus({
+					status: d.status,
+					currentStep: d.currentStep,
+				}),
+				currentStep: d.currentStep ?? 0,
+				updatedAt: d.updatedAt,
+				compliancePath: d.compliancePath,
+				secondDeclarationStatus: d.secondDeclarationStatus,
+				complianceCompletedAt: d.complianceCompletedAt,
+				hasCseOpinion: yearsWithCseOpinion.has(d.year),
+				hasJointEvaluationFile: yearsWithJointEval.has(d.year),
+				hasPrefillData: yearsWithPrefill.has(d.year),
+			}));
+
 			const declarationItems = buildDeclarationList(
 				input.siren,
-				declarationRows.map((d) => ({
-					type: "remuneration" as const,
-					year: d.year,
-					status: computeDeclarationStatus({
-						status: d.status,
-						currentStep: d.currentStep,
-					}),
-					currentStep: d.currentStep ?? 0,
-					updatedAt: d.updatedAt,
-					compliancePath: d.compliancePath,
-					secondDeclarationStatus: d.secondDeclarationStatus,
-					complianceCompletedAt: d.complianceCompletedAt,
-					hasCseOpinion: yearsWithCseOpinion.has(d.year),
-					hasJointEvaluationFile: yearsWithJointEval.has(d.year),
-				})),
+				mappedDeclarations,
 				year,
+				yearsWithPrefill,
 			);
 
 			return { company, declarations: declarationItems };

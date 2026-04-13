@@ -21,7 +21,9 @@ jobs:
       EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
       EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
       EGAPRO_SUIT_API_URL: ${{ secrets.EGAPRO_SUIT_API_URL }}
-      EGAPRO_SUIT_API_KEY: ${{ secrets.EGAPRO_SUIT_API_KEY }}
+      # Deterministic dev value matching the E2E test's hardcoded key.
+      # The real secret is only needed in deployed environments.
+      EGAPRO_SUIT_API_KEY: dev-suit-api-key-minimum-32-chars-long
       S3_ENDPOINT: http://localhost:9000
       S3_REGION: us-east-1
       S3_ACCESS_KEY_ID: minioadmin
@@ -29,6 +31,11 @@ jobs:
       S3_BUCKET_NAME: egapro-dev-app
       CLAMAV_HOST: localhost
       CLAMAV_PORT: 3310
+      ADMIN_EMAILS: test@fia1.fr
+      # Required by env.js but never exercised by E2E tests (the audit
+      # cleanup route is only called by the K8s CronJob). A dummy value
+      # that satisfies the `.min(32)` Zod check is enough.
+      EGAPRO_AUDIT_CLEANUP_TOKEN: e2e-dummy-audit-cleanup-token-not-used-1234567890
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

@@ -9,6 +9,7 @@ const NO_COMPLIANCE = {
 	complianceCompletedAt: null,
 	hasCseOpinion: false,
 	hasJointEvaluationFile: false,
+	hasPrefillData: false,
 };
 
 describe("buildDeclarationList", () => {

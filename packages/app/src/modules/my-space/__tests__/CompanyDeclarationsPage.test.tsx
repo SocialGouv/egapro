@@ -53,6 +53,7 @@ const declarations: DeclarationItem[] = [
 		complianceCompletedAt: null,
 		hasCseOpinion: false,
 		hasJointEvaluationFile: false,
+		hasPrefillData: false,
 	},
 	{
 		type: "representation",
@@ -66,6 +67,7 @@ const declarations: DeclarationItem[] = [
 		complianceCompletedAt: null,
 		hasCseOpinion: false,
 		hasJointEvaluationFile: false,
+		hasPrefillData: false,
 	},
 ];
 
@@ -128,7 +130,7 @@ describe("CompanyDeclarationsPage", () => {
 		expect(screen.getByText("Archives")).toBeInTheDocument();
 	});
 
-	it("does not show MissingInfoModal when userPhone and hasCse are provided", () => {
+	it("always renders MissingInfoModal so DSFR conceal/disclose chain works", () => {
 		const { container } = render(
 			<CompanyDeclarationsPage
 				campaignDeadlines={campaignDeadlines}
@@ -138,9 +140,7 @@ describe("CompanyDeclarationsPage", () => {
 				userPhone="0122334455"
 			/>,
 		);
-		expect(
-			container.querySelector("#missing-info-modal"),
-		).not.toBeInTheDocument();
+		expect(container.querySelector("#missing-info-modal")).toBeInTheDocument();
 	});
 
 	it("renders MissingInfoModal when userPhone is null", () => {

@@ -1,33 +1,64 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Step2Upload } from "../Step2Upload";
+
+const pushMock = vi.fn();
+const refreshMock = vi.fn();
+const invalidateMock = vi.fn();
+let deleteMutationOptions: {
+	onSuccess?: () => void;
+	onError?: () => void;
+} = {};
+const deleteMutateMock = vi.fn();
+
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: pushMock,
+		refresh: refreshMock,
+		replace: vi.fn(),
+		back: vi.fn(),
+	}),
+	usePathname: () => "/avis-cse/etape/2",
+}));
+
+vi.mock("~/modules/shared/uploadFile", () => ({
+	uploadFile: vi.fn(),
+}));
 
 vi.mock("~/trpc/react", () => ({
 	api: {
 		cseOpinion: {
-			uploadFile: {
-				useMutation: () => ({
-					mutate: vi.fn(),
-					isPending: false,
-					error: null,
-				}),
-			},
 			deleteFile: {
-				useMutation: () => ({
-					mutate: vi.fn(),
-					isPending: false,
-					error: null,
-				}),
+				useMutation: (
+					options: { onSuccess?: () => void; onError?: () => void } = {},
+				) => {
+					deleteMutationOptions = options;
+					return {
+						mutate: deleteMutateMock,
+						isPending: false,
+						error: null,
+					};
+				},
 			},
 		},
 		useUtils: () => ({
 			cseOpinion: {
-				getFiles: { invalidate: vi.fn() },
+				getFiles: { invalidate: invalidateMock },
 			},
 		}),
 	},
 }));
+
+const { uploadFile: uploadFileMock } = (await import(
+	"~/modules/shared/uploadFile"
+)) as unknown as { uploadFile: ReturnType<typeof vi.fn> };
 
 function getFileInput() {
 	return document.getElementById("cse-file-upload") as HTMLInputElement;
@@ -38,6 +69,28 @@ function makeFile(name: string, id: string) {
 }
 
 describe("Step2Upload", () => {
+	beforeEach(() => {
+		pushMock.mockReset();
+		refreshMock.mockReset();
+		invalidateMock.mockReset();
+		deleteMutateMock.mockReset();
+		uploadFileMock.mockReset();
+		deleteMutationOptions = {};
+		// jsdom doesn't implement <dialog>; stub showModal/close so the dialog
+		// actually toggles its `open` attribute and its contents become visible
+		// to Testing Library queries.
+		HTMLDialogElement.prototype.showModal = function showModal() {
+			this.setAttribute("open", "");
+		};
+		HTMLDialogElement.prototype.close = function close() {
+			this.removeAttribute("open");
+		};
+	});
+
+	afterEach(() => {
+		vi.clearAllMocks();
+	});
+
 	it("renders the page title", () => {
 		render(<Step2Upload declarationYear={2025} />);
 
@@ -217,6 +270,24 @@ describe("Step2Upload", () => {
 		expect(screen.getAllByText("Fichier transmis")).toHaveLength(2);
 	});
 
+	it("renders a view link for each existing file", () => {
+		render(
+			<Step2Upload
+				declarationYear={2025}
+				existingFiles={[
+					makeFile("avis-1.pdf", "file-1"),
+					makeFile("avis-2.pdf", "file-2"),
+				]}
+			/>,
+		);
+
+		const viewLinks = screen.getAllByRole("link", { name: /Visualiser/ });
+		expect(viewLinks).toHaveLength(2);
+		expect(viewLinks[0]).toHaveAttribute("href", "/api/v1/files/file-1");
+		expect(viewLinks[1]).toHaveAttribute("href", "/api/v1/files/file-2");
+		expect(viewLinks[0]).toHaveAttribute("target", "_blank");
+	});
+
 	it("shows submit button when files exist but under limit", () => {
 		render(
 			<Step2Upload
@@ -264,5 +335,79 @@ describe("Step2Upload", () => {
 		expect(
 			screen.getByRole("button", { name: /Soumettre/ }),
 		).toBeInTheDocument();
+	});
+
+	it("uploads the file then refreshes the list and redirects on success", async () => {
+		const user = userEvent.setup();
+		uploadFileMock.mockResolvedValue({
+			ok: true,
+			fileId: "new-file",
+			fileName: "avis.pdf",
+		});
+
+		render(<Step2Upload declarationYear={2025} />);
+
+		const file = new File(["content"], "avis.pdf", {
+			type: "application/pdf",
+		});
+		fireEvent.change(getFileInput(), { target: { files: [file] } });
+
+		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
+
+		const certifyCheckbox = screen.getByRole("checkbox");
+		await user.click(certifyCheckbox);
+		await user.click(screen.getByRole("button", { name: "Valider" }));
+
+		await waitFor(() => {
+			expect(uploadFileMock).toHaveBeenCalledWith(file, {
+				flowType: "cse_opinion",
+			});
+		});
+		await waitFor(() => {
+			expect(invalidateMock).toHaveBeenCalled();
+		});
+		expect(refreshMock).toHaveBeenCalled();
+		await waitFor(() => {
+			expect(pushMock).toHaveBeenCalledWith("/avis-cse/confirmation");
+		});
+	});
+
+	it("invalidates the file list and clears the deleting state on delete success", () => {
+		render(
+			<Step2Upload
+				declarationYear={2025}
+				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
+			/>,
+		);
+
+		const deleteButton = screen.getByTitle("Supprimer avis-1.pdf");
+		fireEvent.click(deleteButton);
+
+		expect(deleteMutateMock).toHaveBeenCalledWith({ fileId: "file-1" });
+
+		act(() => {
+			deleteMutationOptions.onSuccess?.();
+		});
+		expect(invalidateMock).toHaveBeenCalled();
+		expect(refreshMock).toHaveBeenCalled();
+	});
+
+	it("clears the deleting state when the delete mutation fails", () => {
+		render(
+			<Step2Upload
+				declarationYear={2025}
+				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
+			/>,
+		);
+
+		const deleteButton = screen.getByTitle("Supprimer avis-1.pdf");
+		fireEvent.click(deleteButton);
+
+		// Simulate the failure callback registered with the mutation.
+		expect(() => {
+			act(() => {
+				deleteMutationOptions.onError?.();
+			});
+		}).not.toThrow();
 	});
 });

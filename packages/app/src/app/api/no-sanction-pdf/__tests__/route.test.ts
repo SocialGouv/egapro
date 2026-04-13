@@ -57,7 +57,15 @@ vi.mock("~/modules/declarationPdf/pdfFonts", () => ({
 	ensurePdfFontsRegistered: vi.fn(),
 }));
 
+vi.mock("~/server/audit/log", () => ({
+	logAction: vi.fn(),
+}));
+
 import { GET } from "../route";
+
+function buildRequest() {
+	return new Request("http://localhost/api/no-sanction-pdf");
+}
 
 function mockSession(siret: string | null) {
 	mocks.auth.mockResolvedValue(
@@ -84,7 +92,7 @@ describe("GET /api/no-sanction-pdf", () => {
 	it("returns 401 when user is not authenticated", async () => {
 		mocks.auth.mockResolvedValue(null);
 
-		const response = await GET();
+		const response = await GET(buildRequest());
 
 		expect(response.status).toBe(401);
 		expect(await response.text()).toBe("Non autorisé");
@@ -93,7 +101,7 @@ describe("GET /api/no-sanction-pdf", () => {
 	it("returns 401 when user has no siret", async () => {
 		mockSession(null);
 
-		const response = await GET();
+		const response = await GET(buildRequest());
 
 		expect(response.status).toBe(401);
 	});
@@ -105,7 +113,7 @@ describe("GET /api/no-sanction-pdf", () => {
 			validityDate: null,
 		});
 
-		const response = await GET();
+		const response = await GET(buildRequest());
 
 		expect(response.status).toBe(403);
 		expect(await response.text()).toContain("sanction est en cours");
@@ -115,7 +123,7 @@ describe("GET /api/no-sanction-pdf", () => {
 		mockSession("12345678901234");
 		mocks.fetchSanctionBySiren.mockResolvedValue(null);
 
-		const response = await GET();
+		const response = await GET(buildRequest());
 
 		expect(response.status).toBe(403);
 	});
@@ -128,7 +136,7 @@ describe("GET /api/no-sanction-pdf", () => {
 		});
 		mockDbResult([]);
 
-		const response = await GET();
+		const response = await GET(buildRequest());
 
 		expect(response.status).toBe(404);
 		expect(await response.text()).toBe("Entreprise introuvable");
@@ -143,7 +151,7 @@ describe("GET /api/no-sanction-pdf", () => {
 		mockDbResult([{ name: "Acme Corp", address: "1 rue de Paris" }]);
 		mocks.renderToBuffer.mockResolvedValue(new Uint8Array([37, 80, 68, 70]));
 
-		const response = await GET();
+		const response = await GET(buildRequest());
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get("Content-Type")).toBe("application/pdf");
@@ -162,7 +170,7 @@ describe("GET /api/no-sanction-pdf", () => {
 		mocks.renderToBuffer.mockRejectedValue(new Error("render failed"));
 
 		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-		const response = await GET();
+		const response = await GET(buildRequest());
 
 		expect(response.status).toBe(500);
 		expect(await response.text()).toBe("Impossible de générer le PDF");

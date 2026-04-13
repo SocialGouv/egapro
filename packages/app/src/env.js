@@ -61,9 +61,25 @@ export const env = createEnv({
 		EGAPRO_SUIT_PUBLIC_KEY_PEM: z.string().optional(),
 		/**
 		 * Comma-separated list of emails that should be granted the admin role
-		 * on login. The flag is then persisted in the `app_user.is_admin` column.
+		 * on login. The flag is resolved in the NextAuth JWT callback.
 		 */
-		ADMIN_EMAILS: z.string().optional().default(""),
+		ADMIN_EMAILS: z.string().min(1),
+		// Audit log (issue #3174) — bearer token for the cleanup cron + retention
+		// thresholds (CNIL: 6 months for access logs, 12 months for security logs).
+		// Required (not optional): the /api/audit/cleanup route destroys data, so
+		// a missing secret must crash startup rather than silently expose the
+		// endpoint. Must be sealed per environment (dev / preprod / prod).
+		EGAPRO_AUDIT_CLEANUP_TOKEN: z.string().min(32),
+		EGAPRO_AUDIT_RETENTION_SHORT_DAYS: z.coerce
+			.number()
+			.int()
+			.positive()
+			.default(180),
+		EGAPRO_AUDIT_RETENTION_LONG_DAYS: z.coerce
+			.number()
+			.int()
+			.positive()
+			.default(365),
 	},
 
 	/**
@@ -110,6 +126,11 @@ export const env = createEnv({
 		EGAPRO_MOCK_SUIT_SANCTION: process.env.EGAPRO_MOCK_SUIT_SANCTION,
 		EGAPRO_SUIT_PUBLIC_KEY_PEM: process.env.EGAPRO_SUIT_PUBLIC_KEY_PEM,
 		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+		EGAPRO_AUDIT_CLEANUP_TOKEN: process.env.EGAPRO_AUDIT_CLEANUP_TOKEN,
+		EGAPRO_AUDIT_RETENTION_SHORT_DAYS:
+			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,
+		EGAPRO_AUDIT_RETENTION_LONG_DAYS:
+			process.env.EGAPRO_AUDIT_RETENTION_LONG_DAYS,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,

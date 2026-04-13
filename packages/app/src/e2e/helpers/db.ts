@@ -93,6 +93,31 @@ export async function insertJointEvaluationFile(year: number) {
 	}
 }
 
+/**
+ * Return the id of the most-recent joint_evaluation file for the test SIREN.
+ * Used by E2E tests that need the fileId of a just-uploaded real file to
+ * exercise the download endpoint.
+ */
+export async function getLatestJointEvaluationFileIdForTestSiren(): Promise<
+	string | null
+> {
+	const sql = createConnection();
+	try {
+		const rows = await sql`
+			SELECT f.id
+			FROM app_file f
+			INNER JOIN app_declaration d ON f.declaration_id = d.id
+			WHERE d.siren = ${TEST_SIREN}
+			  AND f.type = 'joint_evaluation'
+			ORDER BY f.uploaded_at DESC
+			LIMIT 1
+		`;
+		return (rows[0]?.id as string | undefined) ?? null;
+	} finally {
+		await sql.end();
+	}
+}
+
 /** Remove dummy joint evaluation files for the test declaration. */
 export async function deleteJointEvaluationFiles() {
 	const sql = createConnection();
@@ -137,6 +162,63 @@ export async function deleteCseOpinions() {
 				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
 			)
 		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+type CampaignDeadlineDates = {
+	decl1ModificationDeadline: string;
+	decl1JustificationDeadline: string;
+	decl1JointEvaluationDeadline: string;
+	decl2ModificationDeadline: string;
+	decl2JustificationDeadline: string;
+	decl2JointEvaluationDeadline: string;
+};
+
+/** Upsert campaign deadlines for a given year (YYYY-MM-DD strings). */
+export async function setCampaignDeadlines(
+	year: number,
+	dates: CampaignDeadlineDates,
+) {
+	const sql = createConnection();
+	try {
+		await sql`
+			INSERT INTO app_campaign_deadline (
+				year,
+				decl1_modification_deadline,
+				decl1_justification_deadline,
+				decl1_joint_evaluation_deadline,
+				decl2_modification_deadline,
+				decl2_justification_deadline,
+				decl2_joint_evaluation_deadline
+			) VALUES (
+				${year},
+				${dates.decl1ModificationDeadline},
+				${dates.decl1JustificationDeadline},
+				${dates.decl1JointEvaluationDeadline},
+				${dates.decl2ModificationDeadline},
+				${dates.decl2JustificationDeadline},
+				${dates.decl2JointEvaluationDeadline}
+			)
+			ON CONFLICT (year) DO UPDATE SET
+				decl1_modification_deadline = EXCLUDED.decl1_modification_deadline,
+				decl1_justification_deadline = EXCLUDED.decl1_justification_deadline,
+				decl1_joint_evaluation_deadline = EXCLUDED.decl1_joint_evaluation_deadline,
+				decl2_modification_deadline = EXCLUDED.decl2_modification_deadline,
+				decl2_justification_deadline = EXCLUDED.decl2_justification_deadline,
+				decl2_joint_evaluation_deadline = EXCLUDED.decl2_joint_evaluation_deadline
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Delete campaign deadlines for a given year (revert to defaults). */
+export async function deleteCampaignDeadlines(year: number) {
+	const sql = createConnection();
+	try {
+		await sql`DELETE FROM app_campaign_deadline WHERE year = ${year}`;
 	} finally {
 		await sql.end();
 	}

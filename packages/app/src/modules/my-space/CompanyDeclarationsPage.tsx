@@ -1,5 +1,5 @@
 import type { CampaignDeadlines } from "~/modules/domain";
-import { getCurrentYear, hasRequiredDeclarationInfo } from "~/modules/domain";
+import { getCurrentYear } from "~/modules/domain";
 
 import { ArchivesSection } from "./ArchivesSection";
 import { CompanyEditModal } from "./CompanyEditModal";
@@ -63,13 +63,11 @@ export function CompanyDeclarationsPage({
 			/>
 			<ArchivesSection />
 			<CompanyEditModal company={company} />
-			{!hasRequiredDeclarationInfo(userPhone, company.hasCse) && (
-				<MissingInfoModal
-					hasCse={company.hasCse}
-					siren={company.siren}
-					userPhone={userPhone}
-				/>
-			)}
+			<MissingInfoModal
+				hasCse={company.hasCse}
+				siren={company.siren}
+				userPhone={userPhone}
+			/>
 			<DeclarationProcessPanel
 				campaignDeadlines={campaignDeadlines}
 				compliancePath={currentDeclaration?.compliancePath ?? null}

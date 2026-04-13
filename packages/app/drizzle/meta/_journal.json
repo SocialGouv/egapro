@@ -166,8 +166,15 @@
 		{
 			"idx": 23,
 			"version": "7",
+			"when": 1775500000000,
+			"tag": "0023_add_audit_action_log",
+			"breakpoints": true
+		},
+		{
+			"idx": 24,
+			"version": "7",
 			"when": 1775600000000,
-			"tag": "0023_add_admin_impersonation_events",
+			"tag": "0024_add_admin_impersonation_events",
 			"breakpoints": true
 		}
 	]

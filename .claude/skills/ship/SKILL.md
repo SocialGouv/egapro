@@ -33,7 +33,7 @@ Analyze commits on the branch. Decide whether to **split** into multiple PRs bas
 - Unrelated concerns mixed together (e.g. refactor + feature + bugfix)
 - Large diff that would be hard to review as a single PR
 
-If the commits form a single cohesive change, create one PR. If not, split.
+If the commits form a single cohesive change, create one PR. If splitting seems appropriate, **always ask for user confirmation before proceeding** — never split without explicit approval.
 
 ---
 
@@ -44,16 +44,10 @@ If the commits form a single cohesive change, create one PR. If not, split.
 Push and create PR targeting `alpha` (`--base alpha`). Use this body template:
 
 ```
+fix #{N}
+
 ## Summary
 <1-3 bullet points from the issue/commits>
-
-Closes #{N}
-
-## Quality gates
-- [x] Typecheck / Tests / Lint
-- [x] Structural / RGAA / Security audit
-
-Generated with [Claude Code](https://claude.com/claude-code)
 ```
 
 ### Split PRs

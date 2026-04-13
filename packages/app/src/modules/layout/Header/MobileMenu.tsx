@@ -1,12 +1,21 @@
-import Link from "next/link";
-
 import { auth } from "~/server/auth";
+import { HeaderQuickAccessLinks } from "./HeaderQuickAccessLinks";
+import { MobileUserBlock } from "./MobileUserBlock";
 import { Navigation } from "./Navigation";
-import { UserAccountMenu } from "./UserAccountMenu";
 
 /**
  * Header menu: visible as nav bar on desktop, modal dialog on mobile.
  * DSFR JS manages role="dialog" and aria-modal dynamically on mobile open.
+ *
+ * Two DSFR-specific constraints shape this layout:
+ * 1. `HeaderLinks.init()` clones `.fr-header__tools-links` into
+ *    `.fr-header__menu-links` (via `innerHTML`) when the two contents differ —
+ *    which strips React event listeners. So we render the exact same
+ *    `HeaderQuickAccessLinks` component in both containers.
+ * 2. The desktop UserAccountMenu (a dropdown) is hidden via CSS inside the
+ *    mobile modal, and replaced by an inline `MobileUserBlock` rendered as a
+ *    sibling of `.fr-header__menu-links` so DSFR's `HeaderLinks` script does
+ *    not see it.
  */
 export async function MobileMenu() {
 	const session = await auth();
@@ -22,33 +31,15 @@ export async function MobileMenu() {
 					Fermer
 				</button>
 				<div className="fr-header__menu-links">
-					<ul className="fr-btns-group">
-						<li>
-							<Link
-								className="fr-btn fr-btn--tertiary-no-outline fr-icon-information-line fr-btn--icon-left"
-								href="/aide"
-							>
-								Aide
-							</Link>
-						</li>
-						<li>
-							{session?.user ? (
-								<UserAccountMenu
-									userEmail={session.user.email ?? ""}
-									userName={session.user.name ?? "Utilisateur"}
-									userPhone={session.user.phone ?? undefined}
-								/>
-							) : (
-								<Link
-									className="fr-btn fr-btn--secondary fr-icon-account-circle-fill"
-									href="/login"
-								>
-									Se connecter
-								</Link>
-							)}
-						</li>
-					</ul>
+					<HeaderQuickAccessLinks session={session} />
 				</div>
+				{session?.user && (
+					<MobileUserBlock
+						userEmail={session.user.email ?? ""}
+						userName={session.user.name ?? "Utilisateur"}
+						userPhone={session.user.phone ?? undefined}
+					/>
+				)}
 				{!session?.user && <Navigation />}
 			</div>
 		</div>

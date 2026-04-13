@@ -4,7 +4,6 @@ export { StepPageClient } from "./StepPageClient";
 export {
 	categoryFormEntrySchema,
 	categoryFormSchema,
-	jointEvaluationUploadSchema,
 	saveCompliancePathSchema,
 	updateEmployeeCategoriesSchema,
 	updateStep1Schema,
