@@ -153,6 +153,7 @@ export function assembleDeclaration(
 	row: DeclarationRow,
 	indicatorGEntries: IndicatorGEntry[],
 	opinions: CseRow[],
+	cseFiles: FileRow[] = [],
 ) {
 	const { initial, correction } = buildIndicatorG(indicatorGEntries);
 
@@ -190,6 +191,12 @@ export function assembleDeclaration(
 			type: o.type,
 			opinion: o.opinion,
 			date: o.opinionDate,
+		})),
+		cseFiles: cseFiles.map((f) => ({
+			id: f.id,
+			fileName: f.fileName,
+			uploadedAt: f.uploadedAt.toISOString(),
+			downloadUrl: `/api/v1/files/${f.id}`,
 		})),
 	};
 }

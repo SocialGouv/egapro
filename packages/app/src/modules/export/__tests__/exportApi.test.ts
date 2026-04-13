@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 const mockFetchSubmitted = vi.fn().mockResolvedValue([]);
 const mockFetchIndicatorG = vi.fn().mockResolvedValue(new Map());
 const mockFetchCse = vi.fn().mockResolvedValue(new Map());
+const mockFetchCseFiles = vi.fn().mockResolvedValue(new Map());
 
 vi.mock("~/modules/export/queries", () => ({
 	fetchSubmittedDeclarations: (...args: unknown[]) =>
@@ -10,7 +11,8 @@ vi.mock("~/modules/export/queries", () => ({
 	fetchIndicatorGByDeclaration: (...args: unknown[]) =>
 		mockFetchIndicatorG(...args),
 	fetchCseOpinionsByDeclaration: (...args: unknown[]) => mockFetchCse(...args),
-	fetchCseFilesByDeclaration: vi.fn().mockResolvedValue(new Map()),
+	fetchCseFilesByDeclaration: (...args: unknown[]) =>
+		mockFetchCseFiles(...args),
 	fetchJointEvaluationFilesByDeclaration: vi.fn().mockResolvedValue(new Map()),
 }));
 
@@ -74,6 +76,7 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchSubmitted.mockResolvedValue([]);
 		mockFetchIndicatorG.mockResolvedValue(new Map());
 		mockFetchCse.mockResolvedValue(new Map());
+		mockFetchCseFiles.mockResolvedValue(new Map());
 	});
 
 	it("should return 401 when Authorization header is missing", async () => {
@@ -294,5 +297,72 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.indicators.F.annual).toHaveLength(4);
 		expect(decl.secondDeclaration.correction).toBeNull();
 		expect(decl.cseOpinions).toEqual([]);
+		expect(decl.cseFiles).toEqual([]);
+	});
+
+	it("should include CSE file URLs in the declaration response", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "submitted",
+				compliancePath: null,
+				totalWomen: 100,
+				totalMen: 150,
+				secondDeclarationStatus: null,
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				companyName: "ACME Corp",
+				workforce: 250,
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: true,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+		mockFetchCseFiles.mockResolvedValue(
+			new Map([
+				[
+					"123456789-2027",
+					[
+						{
+							id: "file-abc",
+							siren: "123456789",
+							year: 2027,
+							fileName: "avis-cse-2027.pdf",
+							filePath: "/s3/path",
+							uploadedAt: new Date("2027-03-10T08:30:00Z"),
+						},
+					],
+				],
+			]),
+		);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = authedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		expect(mockFetchCseFiles).toHaveBeenCalledWith([
+			{ siren: "123456789", year: 2027 },
+		]);
+		const body = await response.json();
+		expect(body.declarations[0].cseFiles).toEqual([
+			{
+				id: "file-abc",
+				fileName: "avis-cse-2027.pdf",
+				uploadedAt: "2027-03-10T08:30:00.000Z",
+				downloadUrl: "/api/v1/files/file-abc",
+			},
+		]);
 	});
 });

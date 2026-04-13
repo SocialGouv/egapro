@@ -295,6 +295,35 @@ describe("assembleDeclaration", () => {
 		});
 	});
 
+	it("should map CSE files with download URLs", () => {
+		const files = [
+			{
+				id: "file-xyz",
+				siren: "123456789",
+				year: 2027,
+				fileName: "avis-cse.pdf",
+				filePath: "/s3/path",
+				uploadedAt: new Date("2027-02-10T08:30:00Z"),
+			},
+		];
+
+		const result = assembleDeclaration(baseRow, [], [], files);
+
+		expect(result.cseFiles).toEqual([
+			{
+				id: "file-xyz",
+				fileName: "avis-cse.pdf",
+				uploadedAt: "2027-02-10T08:30:00.000Z",
+				downloadUrl: "/api/v1/files/file-xyz",
+			},
+		]);
+	});
+
+	it("should default cseFiles to empty array when not provided", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+		expect(result.cseFiles).toEqual([]);
+	});
+
 	it("should handle null dates", () => {
 		const rowWithNullDates = { ...baseRow, createdAt: null, updatedAt: null };
 		const result = assembleDeclaration(rowWithNullDates, [], []);

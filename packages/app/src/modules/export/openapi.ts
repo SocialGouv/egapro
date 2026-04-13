@@ -213,6 +213,25 @@ const declarationSchema = {
 			description:
 				"CSE opinions (PDF uploads, up to 4/year, companies >= 100 employees)",
 		},
+		cseFiles: {
+			type: "array",
+			items: {
+				type: "object",
+				properties: {
+					id: { type: "string", description: "File unique identifier" },
+					fileName: { type: "string", example: "avis-cse-2026.pdf" },
+					uploadedAt: { type: "string", format: "date-time" },
+					downloadUrl: {
+						type: "string",
+						description:
+							"Relative URL to download the file via GET /api/v1/files/{fileId}",
+						example: "/api/v1/files/abc-123",
+					},
+				},
+			},
+			description:
+				"CSE opinion files (PDF) attached to the declaration, with a download URL pointing to /api/v1/files/{fileId}",
+		},
 	},
 } as const;
 
@@ -227,6 +246,12 @@ const fileMetadataSchema = {
 		},
 		fileName: { type: "string", example: "avis-cse-2026.pdf" },
 		uploadedAt: { type: "string", format: "date-time" },
+		downloadUrl: {
+			type: "string",
+			description:
+				"Relative URL to download the file via GET /api/v1/files/{fileId}",
+			example: "/api/v1/files/abc-123",
+		},
 	},
 } as const;
 
@@ -253,7 +278,7 @@ export const openApiSpec = {
 		title: "EGAPRO — API d'export",
 		description:
 			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une signature de requête (RSA-SHA256) et une clé API (Bearer token).",
-		version: "1.2.0",
+		version: "1.3.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},
