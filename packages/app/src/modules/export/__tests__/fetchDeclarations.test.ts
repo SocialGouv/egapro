@@ -282,14 +282,20 @@ describe("assembleDeclaration", () => {
 
 	it("should map CSE opinions", () => {
 		const opinions: CseRow[] = [
-			{ type: "initial", opinion: "favorable", opinionDate: "2027-01-15" },
+			{
+				declarationNumber: 1,
+				type: "accuracy",
+				opinion: "favorable",
+				opinionDate: "2027-01-15",
+			},
 		];
 
 		const result = assembleDeclaration(baseRow, [], opinions);
 
 		expect(result.cseOpinions).toHaveLength(1);
 		expect(result.cseOpinions[0]).toEqual({
-			type: "initial",
+			declarationNumber: 1,
+			type: "accuracy",
 			opinion: "favorable",
 			date: "2027-01-15",
 		});

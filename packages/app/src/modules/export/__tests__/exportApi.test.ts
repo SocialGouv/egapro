@@ -300,6 +300,79 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.cseFiles).toEqual([]);
 	});
 
+	it("should expose CSE opinion declarationNumber alongside type", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "submitted",
+				compliancePath: null,
+				totalWomen: 100,
+				totalMen: 150,
+				secondDeclarationStatus: null,
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				companyName: "ACME Corp",
+				workforce: 250,
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: true,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+		mockFetchCse.mockResolvedValue(
+			new Map([
+				[
+					"decl-1",
+					[
+						{
+							declarationNumber: 1,
+							type: "accuracy",
+							opinion: "favorable",
+							opinionDate: "2027-03-01",
+						},
+						{
+							declarationNumber: 2,
+							type: "gap",
+							opinion: "unfavorable",
+							opinionDate: "2027-06-01",
+						},
+					],
+				],
+			]),
+		);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = authedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.declarations[0].cseOpinions).toEqual([
+			{
+				declarationNumber: 1,
+				type: "accuracy",
+				opinion: "favorable",
+				date: "2027-03-01",
+			},
+			{
+				declarationNumber: 2,
+				type: "gap",
+				opinion: "unfavorable",
+				date: "2027-06-01",
+			},
+		]);
+	});
+
 	it("should include CSE file URLs in the declaration response", async () => {
 		mockFetchSubmitted.mockResolvedValue([
 			{

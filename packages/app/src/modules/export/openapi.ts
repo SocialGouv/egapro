@@ -34,7 +34,18 @@ const indicatorGCategorySchema = {
 const cseOpinionSchema = {
 	type: "object",
 	properties: {
-		type: { type: "string" },
+		declarationNumber: {
+			type: "integer",
+			enum: [1, 2],
+			description:
+				"Declaration number the CSE opinion refers to: 1 = initial declaration, 2 = second declaration (required when pay gap >= 5%)",
+		},
+		type: {
+			type: "string",
+			enum: ["accuracy", "gap"],
+			description:
+				"CSE opinion type: 'accuracy' = opinion on data accuracy, 'gap' = opinion on pay gap correction measures",
+		},
 		opinion: { type: ["string", "null"] },
 		date: { type: ["string", "null"], format: "date" },
 	},

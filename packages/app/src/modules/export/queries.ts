@@ -174,6 +174,7 @@ export async function fetchCseOpinionsByDeclaration(
 	const rows = await database
 		.select({
 			declarationId: cseOpinions.declarationId,
+			declarationNumber: cseOpinions.declarationNumber,
 			type: cseOpinions.type,
 			opinion: cseOpinions.opinion,
 			opinionDate: cseOpinions.opinionDate,

@@ -34,6 +34,7 @@ export type IndicatorGEntry = {
 };
 
 export type CseRow = {
+	declarationNumber: number;
 	type: string;
 	opinion: string | null;
 	opinionDate: string | null;
@@ -188,6 +189,7 @@ export function assembleDeclaration(
 			phone: row.declarantPhone,
 		},
 		cseOpinions: opinions.map((o) => ({
+			declarationNumber: o.declarationNumber,
 			type: o.type,
 			opinion: o.opinion,
 			date: o.opinionDate,
