@@ -1,0 +1,8 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: admin
+data:
+  # Test ProConnect identity used by the E2E suite and manual QA on
+  # review apps — gives admin access on dev/alpha environments only.
+  ADMIN_EMAILS: "test@fia1.fr"

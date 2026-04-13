@@ -59,6 +59,11 @@ export const env = createEnv({
 		EGAPRO_GIP_MDS_API_TOKEN: z.string().optional(),
 		EGAPRO_MOCK_SUIT_SANCTION: z.coerce.boolean().optional().default(false),
 		EGAPRO_SUIT_PUBLIC_KEY_PEM: z.string().optional(),
+		/**
+		 * Comma-separated list of emails that should be granted the admin role
+		 * on login. The flag is resolved in the NextAuth JWT callback.
+		 */
+		ADMIN_EMAILS: z.string().min(1),
 		// Audit log (issue #3174) — bearer token for the cleanup cron + retention
 		// thresholds (CNIL: 6 months for access logs, 12 months for security logs).
 		// Required (not optional): the /api/audit/cleanup route destroys data, so
@@ -120,6 +125,7 @@ export const env = createEnv({
 		EGAPRO_GIP_MDS_API_TOKEN: process.env.EGAPRO_GIP_MDS_API_TOKEN,
 		EGAPRO_MOCK_SUIT_SANCTION: process.env.EGAPRO_MOCK_SUIT_SANCTION,
 		EGAPRO_SUIT_PUBLIC_KEY_PEM: process.env.EGAPRO_SUIT_PUBLIC_KEY_PEM,
+		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
 		EGAPRO_AUDIT_CLEANUP_TOKEN: process.env.EGAPRO_AUDIT_CLEANUP_TOKEN,
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS:
 			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,

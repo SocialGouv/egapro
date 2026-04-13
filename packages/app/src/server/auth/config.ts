@@ -10,6 +10,7 @@ import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
 import { db } from "~/server/db";
 import { companies, userCompanies, users } from "~/server/db/schema";
 import { fetchCompanyBySiren } from "~/server/services/weez";
+import { parseAdminEmails } from "./parseAdminEmails";
 
 /**
  * Read the request context (IP, user-agent) from the active Next.js request.
@@ -61,6 +62,7 @@ declare module "next-auth" {
 			id: string;
 			siret?: string | null;
 			phone?: string | null;
+			isAdmin: boolean;
 		} & DefaultSession["user"];
 	}
 }
@@ -71,8 +73,15 @@ declare module "next-auth/jwt" {
 		siret?: string | null;
 		phone?: string | null;
 		id_token?: string | null;
+		isAdmin: boolean;
 	}
 }
+
+/**
+ * Normalized set of admin emails parsed once from `ADMIN_EMAILS`.
+ * The env var never changes at runtime, so we memoize it at module load.
+ */
+const ADMIN_EMAILS: Set<string> = parseAdminEmails(env.ADMIN_EMAILS);
 
 function getProviders(): Provider[] {
 	const providers: Provider[] = [];
@@ -168,28 +177,43 @@ export const authConfig = {
 				};
 
 				// Find or create user by email (replaces DrizzleAdapter)
-				let dbUser = await db.query.users.findFirst({
-					where: eq(users.email, user.email!),
+				const email = user.email;
+				if (!email) {
+					throw new Error("Missing email from auth profile");
+				}
+
+				const existingUser = await db.query.users.findFirst({
+					where: eq(users.email, email),
 				});
 
-				if (!dbUser) {
+				let dbUser: NonNullable<typeof existingUser>;
+				if (!existingUser) {
 					const rows = await db
 						.insert(users)
 						.values({
-							email: user.email!,
+							email,
 							firstName: profileData.firstName ?? null,
 							lastName: profileData.lastName ?? null,
 						})
 						.returning();
-					dbUser = rows[0]!;
+					const inserted = rows[0];
+					if (!inserted) {
+						throw new Error("Failed to create user");
+					}
+					dbUser = inserted;
 				} else {
 					const updates: Record<string, string | null> = {};
 					if (profileData.firstName) updates.firstName = profileData.firstName;
 					if (profileData.lastName) updates.lastName = profileData.lastName;
 
 					if (Object.keys(updates).length > 0) {
-						await db.update(users).set(updates).where(eq(users.id, dbUser.id));
-						dbUser = { ...dbUser, ...updates } as typeof dbUser;
+						await db
+							.update(users)
+							.set(updates)
+							.where(eq(users.id, existingUser.id));
+						dbUser = { ...existingUser, ...updates } as typeof existingUser;
+					} else {
+						dbUser = existingUser;
 					}
 				}
 
@@ -239,6 +263,9 @@ export const authConfig = {
 				token.siret = profileData.siret ?? null;
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
+				// Admin role is purely env-driven: the `ADMIN_EMAILS` env var
+				// is the single source of truth, re-evaluated at each sign-in.
+				token.isAdmin = ADMIN_EMAILS.has(email.toLowerCase());
 			}
 			return token;
 		},
@@ -249,6 +276,7 @@ export const authConfig = {
 				id: token.id,
 				siret: token.siret ?? null,
 				phone: token.phone ?? null,
+				isAdmin: token.isAdmin ?? false,
 			},
 		}),
 	},
