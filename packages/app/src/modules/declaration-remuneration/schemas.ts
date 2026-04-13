@@ -102,8 +102,3 @@ export const categoryFormSchema = z.object({
 export const saveCompliancePathSchema = z.object({
 	path: z.enum(COMPLIANCE_PATHS),
 });
-
-export const jointEvaluationUploadSchema = z.object({
-	fileName: z.string().min(1),
-	filePath: z.string().min(1),
-});

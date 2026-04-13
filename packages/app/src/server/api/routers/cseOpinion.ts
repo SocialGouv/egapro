@@ -3,9 +3,7 @@ import { and, eq } from "drizzle-orm";
 import {
 	deleteFileSchema,
 	saveOpinionsSchema,
-	uploadFileSchema,
 } from "~/modules/cseOpinion/schemas";
-import { MAX_CSE_FILES } from "~/modules/cseOpinion/types";
 import { createTRPCRouter, declarationProcedure } from "~/server/api/trpc";
 import { cseOpinions, files } from "~/server/db/schema";
 import { deleteFile as deleteS3File } from "~/server/services/s3";
@@ -95,38 +93,6 @@ export const cseOpinionRouter = createTRPCRouter({
 
 		return { files: rows };
 	}),
-
-	uploadFile: declarationProcedure
-		.input(uploadFileSchema)
-		.mutation(async ({ ctx, input }) => {
-			await ctx.db.transaction(async (tx) => {
-				const existingFiles = await tx
-					.select({ id: files.id })
-					.from(files)
-					.where(
-						and(
-							eq(files.declarationId, ctx.declarationId),
-							eq(files.type, "cse_opinion"),
-						),
-					);
-
-				if (existingFiles.length >= MAX_CSE_FILES) {
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: `Nombre maximum de fichiers atteint (${MAX_CSE_FILES}).`,
-					});
-				}
-
-				await tx.insert(files).values({
-					declarationId: ctx.declarationId,
-					fileName: input.fileName,
-					filePath: input.filePath,
-					type: "cse_opinion",
-				});
-			});
-
-			return { success: true };
-		}),
 
 	deleteFile: declarationProcedure
 		.input(deleteFileSchema)

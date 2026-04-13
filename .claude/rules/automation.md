@@ -65,6 +65,10 @@ Before reporting ANY task as done, launch **4 parallel agents**:
 
 If any fails → fix → re-run. Only report completion when all 4 pass.
 
+### Before every push — format & lint check
+
+Before pushing code (`git push`), **always** run `pnpm check:write` (or `pnpm lint:check && pnpm format:check` to verify). The auto-lint hook catches most issues after individual edits, but does not guarantee the final state is clean. A final check before push prevents CI failures.
+
 **Bonus: Next.js runtime check** — if the dev server is running, also call `nextjs_call(get_errors)` via the `next-devtools` MCP to catch runtime/compilation errors not visible in `pnpm typecheck`.
 
 > **Junior-proof policy:** Agents are always in the pipeline — a junior cannot "forget" to run them. The agent itself decides if there is work to do based on the modified files. Zero overhead when not relevant, zero chance of skipping when relevant.
@@ -101,6 +105,16 @@ Apply these rules **as you write code**, before any agent runs:
 - Multi-write → `db.transaction()`
 - Env vars → `~/env.js` (never `process.env`)
 - No secrets in client code
+
+**Audit logging** (full details → `.claude/rules/audit-logging.md`):
+
+- New tRPC mutation → add to `PROCEDURE_TO_ACTION` in `trpcMiddleware.ts` (category `mutation`)
+- New tRPC query exposing PII / GIP data / PDF / company-scoped data → add to `PROCEDURE_TO_ACTION` (category `read_sensitive`)
+- New Next.js Route Handler (`src/app/api/**/route.ts`) → wrap with `withAuditedRoute(...)` and use `cachedAuth(request)` for session
+- New auth event / cron → direct `logAction` call; `logger.error` must stay synchronous (`void (async () => {...})()`)
+- Every new action requires **3 wire-up points**: `AUDIT_ACTIONS.*` constant, `AUDIT_ACTION_CATEGORIES` mapping, and the surface-specific wire (tRPC map / wrapper / direct call)
+- `metadata` jsonb must not contain secrets (auto-stripped keys: `password`, `token`, `refresh_token`, `secret`, `client_secret`, `authorization`, `apikey`, `api_key`, `accesskey`, `access_key`, `private_key`)
+- DB-layer changes in `~/server/audit/cleanup.ts` → add an integration test (`*.integration.test.ts`, runs via `pnpm test:integration`) — unit tests mock drizzle and miss driver bugs
 
 ### E2E tests (when relevant)
 

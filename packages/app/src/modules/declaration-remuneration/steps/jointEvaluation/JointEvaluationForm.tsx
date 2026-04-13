@@ -8,7 +8,6 @@ import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedI
 import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { FileUpload, useFileUploadForm } from "~/modules/shared";
-import { api } from "~/trpc/react";
 
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
@@ -25,10 +24,6 @@ export function JointEvaluationForm({
 }: Props) {
 	const router = useRouter();
 
-	const saveMutation = api.jointEvaluation.uploadFile.useMutation({
-		onSuccess: () => router.push(getPostComplianceDestination(hasCse)),
-	});
-
 	const {
 		closeModal,
 		handleConfirm,
@@ -38,7 +33,10 @@ export function JointEvaluationForm({
 		modalRef,
 		selectedFiles,
 		uploadError,
-	} = useFileUploadForm({ saveMutation });
+	} = useFileUploadForm({
+		flowType: "joint_evaluation",
+		onAllUploaded: () => router.push(getPostComplianceDestination(hasCse)),
+	});
 
 	return (
 		<>

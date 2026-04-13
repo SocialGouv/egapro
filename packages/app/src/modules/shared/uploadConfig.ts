@@ -19,3 +19,9 @@ export const SCAN_TIMEOUT_MS = 30_000;
 
 /** Minimum S3 multipart part size in bytes (5 MB, required by S3 except for the last part). */
 export const S3_PART_MIN_SIZE = 5 * 1024 * 1024;
+
+/**
+ * Upload flow dispatched by `/api/upload` via the `X-Flow-Type` header.
+ * Mirrors the `files.type` enum on the server.
+ */
+export type FlowType = "cse_opinion" | "joint_evaluation";

@@ -130,4 +130,59 @@ describe("clamav service", () => {
 		clamd.destroy();
 		expect(socket.destroy).toHaveBeenCalled();
 	});
+
+	it("rejects with a timeout error when clamd takes longer than SCAN_TIMEOUT_MS", async () => {
+		const { createClamdStream } = await import("../clamav");
+		const clamd = createClamdStream("localhost", 3310);
+		const socket = getSocket();
+
+		// Capture the timeout handler in a ref object so TypeScript does not
+		// narrow it to `never` (aggressive control-flow analysis cannot see
+		// the closure assignment inside `mockImplementation`).
+		const timeoutRef: { handler: (() => void) | null } = { handler: null };
+		socket.setTimeout.mockImplementation((_ms: number, handler: () => void) => {
+			timeoutRef.handler = handler;
+			return socket;
+		});
+		// Swallow `data`/`end`/`error` listeners — we want the timeout path only.
+		socket.on.mockImplementation(() => socket);
+
+		const finishPromise = clamd.finish();
+		// Fire the registered setTimeout callback now.
+		timeoutRef.handler?.();
+
+		await expect(finishPromise).rejects.toThrow("clamd scan timeout");
+		expect(socket.destroy).toHaveBeenCalled();
+	});
+
+	it("surfaces a connection error thrown by the socket during sendChunk", async () => {
+		// Trigger `createConnection` once to populate the mock's results
+		// array, then grab the shared socket instance before `createClamdStream`
+		// registers its error listener.
+		net.createConnection({ host: "x", port: 0 });
+		const socket = getSocket();
+
+		// Ref-object pattern (see timeout test above) to avoid TS narrowing.
+		const errorRef: { handler: ((err: Error) => void) | null } = {
+			handler: null,
+		};
+		socket.on.mockImplementation(
+			(event: string, handler: (...args: unknown[]) => void) => {
+				if (event === "error") {
+					errorRef.handler = handler as (err: Error) => void;
+				}
+				return socket;
+			},
+		);
+
+		const { createClamdStream } = await import("../clamav");
+		const clamd = createClamdStream("localhost", 3310);
+
+		// Fire the listener registered by createClamdStream above.
+		errorRef.handler?.(new Error("ECONNREFUSED"));
+
+		await expect(clamd.sendChunk(Buffer.from("test"))).rejects.toThrow(
+			"ECONNREFUSED",
+		);
+	});
 });

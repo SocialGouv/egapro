@@ -6,6 +6,7 @@ export {
 	fetchCseFilesByDeclaration,
 	fetchCseOpinionsByDeclaration,
 	fetchFileById,
+	fetchFileBySiren,
 	fetchIndicatorGByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,

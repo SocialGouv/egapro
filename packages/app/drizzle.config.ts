@@ -26,11 +26,14 @@ function getDatabaseUrl() {
 }
 
 export default {
-	schema: "./src/server/db/schema.ts",
+	schema: ["./src/server/db/schema.ts", "./src/server/db/auditSchema.ts"],
 	dialect: "postgresql",
 	casing: "snake_case",
 	dbCredentials: {
 		url: getDatabaseUrl(),
 	},
-	tablesFilter: ["app_*"],
+	// Multi-project pattern: app tables prefixed `app_*` in `public`,
+	// audit table `action_log` lives in the dedicated `audit` schema.
+	schemaFilter: ["public", "audit"],
+	tablesFilter: ["app_*", "action_log"],
 } satisfies Config;
