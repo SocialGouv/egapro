@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
 
@@ -10,26 +10,12 @@ import {
 	setDeclarationComplianceState,
 	setUserPhone,
 } from "./helpers/db";
+import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 import { loginWithProConnect } from "./helpers/login";
 
 const PANEL_ID = "declaration-process-panel";
 // Match the year that api.declaration.getOrCreate() uses on first login.
 const testDeclarationYear = getCurrentYear();
-
-/** Wait for DSFR JS to finish initializing the modal and binding event listeners. */
-async function waitForDsfrReady(page: Page) {
-	await page.waitForFunction(
-		(id) => {
-			const el = document.getElementById(id);
-			return el?.getAttribute("data-fr-js-modal") === "true";
-		},
-		PANEL_ID,
-		{ timeout: 10_000 },
-	);
-	// DSFR JS sets data-fr-js-modal on the dialog before binding click handlers
-	// on trigger buttons. Yield to the event loop so the handler is attached.
-	await page.waitForTimeout(200);
-}
 
 const FUTURE_DEADLINES = {
 	decl1ModificationDeadline: "2099-06-01",
@@ -90,13 +76,12 @@ test.describe("Campaign deadlines gating", () => {
 			await page.goto("/declaration-remuneration");
 			await seedSubmittedCompliance();
 			await page.goto("/mon-espace");
-			await waitForDsfrReady(page);
+			await waitForDsfrModal(page, PANEL_ID);
 
 			const panel = page.locator(`#${PANEL_ID}`);
 			const remuButton = page.getByRole("button", { name: "Rémunération" });
 			await expect(remuButton.first()).toBeVisible();
-			await remuButton.first().click();
-			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
+			await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
 
 			await expect(
 				panel.getByText("Votre déclaration a été transmise"),
@@ -137,13 +122,12 @@ test.describe("Campaign deadlines gating", () => {
 			await page.goto("/declaration-remuneration");
 			await seedSubmittedCompliance();
 			await page.goto("/mon-espace");
-			await waitForDsfrReady(page);
+			await waitForDsfrModal(page, PANEL_ID);
 
 			const panel = page.locator(`#${PANEL_ID}`);
 			const remuButton = page.getByRole("button", { name: "Rémunération" });
 			await expect(remuButton.first()).toBeVisible();
-			await remuButton.first().click();
-			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
+			await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
 
 			await expect(
 				panel.getByText("Votre déclaration a été transmise"),

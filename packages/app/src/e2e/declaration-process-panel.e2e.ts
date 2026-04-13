@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import {
 	deleteCseOpinions,
@@ -10,25 +10,11 @@ import {
 	setDeclarationComplianceState,
 	setUserPhone,
 } from "./helpers/db";
+import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 import { loginWithProConnect } from "./helpers/login";
 
 const PANEL_ID = "declaration-process-panel";
 const CURRENT_YEAR = 2026;
-
-/** Wait for DSFR JS to finish initializing the modal and binding event listeners. */
-async function waitForDsfrReady(page: Page) {
-	await page.waitForFunction(
-		(id) => {
-			const el = document.getElementById(id);
-			return el?.getAttribute("data-fr-js-modal") === "true";
-		},
-		PANEL_ID,
-		{ timeout: 10_000 },
-	);
-	// DSFR JS sets data-fr-js-modal on the dialog before binding click handlers
-	// on trigger buttons. Yield to the event loop so the handler is attached.
-	await page.waitForTimeout(200);
-}
 
 test.describe("Declaration process panel", () => {
 	test.describe.configure({ mode: "serial" });
@@ -54,14 +40,13 @@ test.describe("Declaration process panel", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
-			await waitForDsfrReady(page);
+			await waitForDsfrModal(page, PANEL_ID);
 
 			const panel = page.locator(`#${PANEL_ID}`);
 			const remuButton = page.getByRole("button", { name: "Rémunération" });
 			await expect(remuButton.first()).toBeVisible();
-			await remuButton.first().click();
+			await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
 
-			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
 			await expect(
 				panel.getByText(
 					`Démarche des indicateurs de rémunération ${CURRENT_YEAR}`,
@@ -94,14 +79,13 @@ test.describe("Declaration process panel", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
-			await waitForDsfrReady(page);
+			await waitForDsfrModal(page, PANEL_ID);
 
 			const panel = page.locator(`#${PANEL_ID}`);
 			const remuButton = page.getByRole("button", { name: "Rémunération" });
 			await expect(remuButton.first()).toBeVisible();
-			await remuButton.first().click();
+			await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
 
-			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
 			await expect(
 				panel.getByText("Votre déclaration a été transmise"),
 			).toBeVisible();
@@ -124,14 +108,13 @@ test.describe("Declaration process panel", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
-			await waitForDsfrReady(page);
+			await waitForDsfrModal(page, PANEL_ID);
 
 			const panel = page.locator(`#${PANEL_ID}`);
 			const remuButton = page.getByRole("button", { name: "Rémunération" });
 			await expect(remuButton.first()).toBeVisible();
-			await remuButton.first().click();
+			await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
 
-			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
 			await expect(
 				panel.getByText("Évaluation conjointe des rémunérations"),
 			).toBeVisible();
@@ -154,14 +137,13 @@ test.describe("Declaration process panel", () => {
 		test("shows cse variant with CSE deposit step", async ({ page }) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
-			await waitForDsfrReady(page);
+			await waitForDsfrModal(page, PANEL_ID);
 
 			const panel = page.locator(`#${PANEL_ID}`);
 			const remuButton = page.getByRole("button", { name: "Rémunération" });
 			await expect(remuButton.first()).toBeVisible();
-			await remuButton.first().click();
+			await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
 
-			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
 			await expect(
 				panel.getByText("Déposer le ou les avis du CSE"),
 			).toBeVisible();
@@ -188,14 +170,13 @@ test.describe("Declaration process panel", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
-			await waitForDsfrReady(page);
+			await waitForDsfrModal(page, PANEL_ID);
 
 			const panel = page.locator(`#${PANEL_ID}`);
 			const remuButton = page.getByRole("button", { name: "Rémunération" });
 			await expect(remuButton.first()).toBeVisible();
-			await remuButton.first().click();
+			await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
 
-			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
 			await expect(panel.getByText("Démarche close")).toBeVisible();
 			await expect(
 				panel.getByText(
@@ -221,15 +202,18 @@ test.describe("Declaration process panel", () => {
 		}) => {
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
-			await waitForDsfrReady(page);
+			await waitForDsfrModal(page, PANEL_ID);
 
 			const modal = page.locator("#missing-info-modal");
 			const panel = page.locator(`#${PANEL_ID}`);
 
 			const remuButton = page.getByRole("button", { name: "Rémunération" });
 			await expect(remuButton.first()).toBeVisible();
-			await remuButton.first().click();
-			await expect(modal).toHaveAttribute("open", { timeout: 10_000 });
+			await clickAndExpectDialogOpen(
+				page,
+				remuButton.first(),
+				"missing-info-modal",
+			);
 
 			await modal.locator("label[for='missing-info-cse-yes']").click();
 			await modal.getByRole("button", { name: "Enregistrer" }).click();
