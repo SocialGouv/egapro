@@ -155,6 +155,26 @@ describe("UserAccountMenu", () => {
 		});
 	});
 
+	describe("admin link", () => {
+		it("does not display 'Administration' when isAdmin is false", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			expect(
+				screen.queryByRole("menuitem", { name: "Administration" }),
+			).not.toBeInTheDocument();
+		});
+
+		it("displays 'Administration' link when isAdmin is true", () => {
+			render(<UserAccountMenu {...defaultProps} isAdmin />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			const adminLink = screen.getByRole("menuitem", {
+				name: "Administration",
+			});
+			expect(adminLink).toBeInTheDocument();
+			expect(adminLink).toHaveAttribute("href", "/admin");
+		});
+	});
+
 	describe("optional userPhone", () => {
 		it("does not display a phone number when userPhone is not provided", () => {
 			render(<UserAccountMenu {...defaultProps} />);
