@@ -21,7 +21,6 @@ const TYPE_LABELS: Record<DeclarationType, string> = {
 };
 
 type Props = {
-	siren: string;
 	declarations: DeclarationItem[];
 	userPhone: string | null;
 	hasCse: boolean | null;
@@ -42,7 +41,6 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50];
 const PAGE_SIZE_SELECTOR_THRESHOLD = 20;
 
 export function DeclarationsSection({
-	siren,
 	declarations,
 	userPhone,
 	hasCse,
@@ -114,7 +112,6 @@ export function DeclarationsSection({
 					}
 					declarations={visibleCurrentDeclarations}
 					hasCse={hasCse}
-					siren={siren}
 					userPhone={userPhone}
 				/>
 			)}
@@ -134,7 +131,6 @@ export function DeclarationsSection({
 						}
 						declarations={visiblePreviousDeclarations}
 						hasCse={hasCse}
-						siren={siren}
 						userPhone={userPhone}
 					/>
 				</>
@@ -176,7 +172,6 @@ export function DeclarationsSection({
 type DeclarationsTableProps = {
 	declarations: DeclarationItem[];
 	caption: ReactNode;
-	siren: string;
 	userPhone: string | null;
 	hasCse: boolean | null;
 };
@@ -184,7 +179,6 @@ type DeclarationsTableProps = {
 function DeclarationsTable({
 	declarations,
 	caption,
-	siren,
 	userPhone,
 	hasCse,
 }: DeclarationsTableProps) {
@@ -213,7 +207,6 @@ function DeclarationsTable({
 											<td>
 												<DeclarationLink
 													hasCse={hasCse}
-													siren={siren}
 													type={declaration.type}
 													userPhone={userPhone}
 												>

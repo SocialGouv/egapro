@@ -66,22 +66,22 @@ async function apiExportDeclarationsHandler(
 
 		const rows = await fetchSubmittedDeclarations(date_begin, dateEnd);
 
-		const sirenYearKeys = rows.map((r) => ({ siren: r.siren, year: r.year }));
 		const declarationIds = rows.map((r) => r.declarationId);
 
 		const [indicatorGMap, cseMap, cseFilesMap] = await Promise.all([
 			fetchIndicatorGByDeclaration(declarationIds),
 			fetchCseOpinionsByDeclaration(declarationIds),
-			fetchCseFilesByDeclaration(sirenYearKeys),
+			fetchCseFilesByDeclaration(
+				rows.map((r) => ({ siren: r.siren, year: r.year })),
+			),
 		]);
 
 		const data = rows.map((row) => {
-			const key = `${row.siren}-${row.year}`;
 			return assembleDeclaration(
 				row,
 				indicatorGMap.get(row.declarationId) ?? [],
 				cseMap.get(row.declarationId) ?? [],
-				cseFilesMap.get(key) ?? [],
+				cseFilesMap.get(`${row.siren}-${row.year}`) ?? [],
 			);
 		});
 

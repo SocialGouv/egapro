@@ -73,7 +73,6 @@ export async function CompliancePathPage() {
 				campaignDeadlines={campaignDeadlines}
 				currentYear={currentYear}
 				email={email}
-				hasCse={company.hasCse}
 				initialPath={
 					(data.declaration.compliancePath as
 						| "justify"

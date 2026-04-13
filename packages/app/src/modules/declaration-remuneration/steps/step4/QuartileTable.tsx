@@ -9,8 +9,6 @@ type Props = {
 	title: string;
 	tableType: "annual" | "hourly";
 	quartiles: QuartileData[];
-	maxWomen?: number;
-	maxMen?: number;
 	validationError: string | null;
 	readingNote?: React.ReactNode;
 	sourceNote?: React.ReactNode;
@@ -38,8 +36,6 @@ export function QuartileTable({
 	title,
 	tableType,
 	quartiles,
-	maxWomen,
-	maxMen,
 	validationError,
 	readingNote,
 	sourceNote,
