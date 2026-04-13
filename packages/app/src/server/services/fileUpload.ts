@@ -67,7 +67,6 @@ export async function handleStreamingUpload(
 
 	let totalBytes = 0;
 	let headerBuf = Buffer.alloc(0);
-	let signatureValidated = false;
 	const reader = stream.getReader();
 
 	try {
@@ -82,19 +81,12 @@ export async function handleStreamingUpload(
 				throw new FileTooLargeError();
 			}
 
-			// Validate magic bytes on the first chunk(s)
-			if (!signatureValidated) {
-				headerBuf = Buffer.concat([headerBuf, buf]);
-				if (headerBuf.length >= MIN_SIGNATURE_BYTES) {
-					const result = validateFileSignature(
-						headerBuf,
-						options.allowedMimeTypes,
-					);
-					if (!result.valid) {
-						throw new InvalidFileTypeError(result.error);
-					}
-					signatureValidated = true;
-				}
+			// Collect header bytes for magic-byte validation (done after scan).
+			if (headerBuf.length < MIN_SIGNATURE_BYTES) {
+				headerBuf = Buffer.concat([
+					headerBuf,
+					buf.subarray(0, MIN_SIGNATURE_BYTES - headerBuf.length),
+				]);
 			}
 
 			// Send to both destinations in parallel. We use allSettled + explicit
@@ -121,9 +113,6 @@ export async function handleStreamingUpload(
 		if (err instanceof FileTooLargeError) {
 			return { ok: false, reason: "too_large", error: FILE_TOO_LARGE_ERROR };
 		}
-		if (err instanceof InvalidFileTypeError) {
-			return { ok: false, reason: "wrong_type", error: err.message };
-		}
 		if (err instanceof ClamdScanError) {
 			console.error("[fileUpload] clamd sendChunk failed", err.cause);
 			return {
@@ -142,24 +131,13 @@ export async function handleStreamingUpload(
 		return { ok: false, reason: "empty", error: "Le fichier est vide." };
 	}
 
-	// If the file was smaller than MIN_SIGNATURE_BYTES, validate now
-	if (!signatureValidated) {
-		const result = validateFileSignature(headerBuf, options.allowedMimeTypes);
-		if (!result.valid) {
-			clamd.destroy();
-			await s3Upload.abort().catch(() => {});
-			return { ok: false, reason: "wrong_type", error: result.error };
-		}
-	}
-
-	// Get the scan verdict
+	// Virus scan runs BEFORE magic-byte validation so that infected files
+	// always surface the virus message, even if their header is corrupted
+	// or deliberately malformed.
 	let scanResult: ScanResult;
 	try {
 		scanResult = await clamd.finish();
 	} catch (err) {
-		// Log the underlying error server-side for ops, but never return it to
-		// the client — doing so would leak internal network details (clamd
-		// host/port, DNS errors, etc.) to anonymous callers.
 		console.error("[fileUpload] clamd scan failed", err);
 		clamd.destroy();
 		await s3Upload.abort().catch(() => {});
@@ -171,19 +149,26 @@ export async function handleStreamingUpload(
 		};
 	}
 
-	if (scanResult.clean) {
-		await s3Upload.complete();
-		return { ok: true, key, fileId };
+	if (!scanResult.clean) {
+		await s3Upload.abort();
+		return {
+			ok: false,
+			reason: "virus",
+			error: "Fichier rejeté : virus détecté",
+			virusName: scanResult.virus,
+		};
 	}
 
-	// Infected → abort S3 upload
-	await s3Upload.abort();
-	return {
-		ok: false,
-		reason: "virus",
-		error: "Fichier rejeté : virus détecté",
-		virusName: scanResult.virus,
-	};
+	// ClamAV says clean — now validate magic bytes.
+	const sigResult = validateFileSignature(headerBuf, options.allowedMimeTypes);
+	if (!sigResult.valid) {
+		clamd.destroy();
+		await s3Upload.abort().catch(() => {});
+		return { ok: false, reason: "wrong_type", error: sigResult.error };
+	}
+
+	await s3Upload.complete();
+	return { ok: true, key, fileId };
 }
 
 class FileTooLargeError extends Error {
@@ -191,8 +176,6 @@ class FileTooLargeError extends Error {
 		super("File too large");
 	}
 }
-
-class InvalidFileTypeError extends Error {}
 
 /**
  * Wraps a failure from `clamd.sendChunk()` so the outer catch can distinguish

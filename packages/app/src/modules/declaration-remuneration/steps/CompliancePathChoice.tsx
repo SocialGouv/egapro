@@ -19,7 +19,6 @@ type Props = {
 	campaignDeadlines: CampaignDeadlines;
 	currentYear: number;
 	email: string;
-	hasCse: boolean | null;
 	initialPath?: CompliancePathValue;
 	isSecondRound?: boolean;
 	pdfDownloadHref?: string;
@@ -205,7 +204,6 @@ export function CompliancePathChoice({
 	campaignDeadlines,
 	currentYear,
 	email,
-	hasCse,
 	initialPath,
 	isSecondRound = false,
 	pdfDownloadHref,

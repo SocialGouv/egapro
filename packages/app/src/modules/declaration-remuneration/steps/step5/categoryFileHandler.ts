@@ -137,7 +137,7 @@ function generateCsvBlob(rows: TemplateRow[]): Blob {
 		lines.push(values.join(CSV_SEPARATOR));
 	}
 
-	return new Blob(["\uFEFF" + lines.join("\n")], {
+	return new Blob([`\uFEFF${lines.join("\n")}`], {
 		type: "text/csv;charset=utf-8",
 	});
 }

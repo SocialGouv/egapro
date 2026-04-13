@@ -31,19 +31,25 @@ const STEP3_FIELD_MAP: Array<{
 ];
 
 export function step2ToRows(data: Step2Data): PayGapRow[] {
-	return PAY_GAP_LABELS.map((label, i) => ({
-		label,
-		womenValue: data[STEP2_FIELD_MAP[i]!.women] ?? "",
-		menValue: data[STEP2_FIELD_MAP[i]!.men] ?? "",
-	}));
+	return PAY_GAP_LABELS.map((label, i) => {
+		const mapping = STEP2_FIELD_MAP[i];
+		return {
+			label,
+			womenValue: mapping ? (data[mapping.women] ?? "") : "",
+			menValue: mapping ? (data[mapping.men] ?? "") : "",
+		};
+	});
 }
 
 export function step3ToRows(data: Step3Data): PayGapRow[] {
-	return PAY_GAP_LABELS.map((label, i) => ({
-		label,
-		womenValue: data[STEP3_FIELD_MAP[i]!.women] ?? "",
-		menValue: data[STEP3_FIELD_MAP[i]!.men] ?? "",
-	}));
+	return PAY_GAP_LABELS.map((label, i) => {
+		const mapping = STEP3_FIELD_MAP[i];
+		return {
+			label,
+			womenValue: mapping ? (data[mapping.women] ?? "") : "",
+			menValue: mapping ? (data[mapping.men] ?? "") : "",
+		};
+	});
 }
 
 export function getStep2FieldName(

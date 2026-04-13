@@ -16,7 +16,7 @@ import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { gipToStep2 } from "../shared/gipToStepData";
 import { getStep2FieldName, step2ToRows } from "../shared/indicatorRowMapping";
-import { DEFAULT_PAY_GAP_ROWS, PayGapTable } from "../shared/PayGapTable";
+import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";

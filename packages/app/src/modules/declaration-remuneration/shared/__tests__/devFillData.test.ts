@@ -44,7 +44,7 @@ describe("devFillData", () => {
 	it("createDevStep5Categories returns 4 categories with sequential IDs", () => {
 		let counter = 0;
 		const nextId = () => ++counter;
-		const categories = createDevStep5Categories(nextId);
+		const categories = createDevStep5Categories(nextId, 120, 130);
 
 		expect(categories).toHaveLength(4);
 		expect(categories[0]?.id).toBe(1);
@@ -53,15 +53,39 @@ describe("devFillData", () => {
 		expect(categories[3]?.id).toBe(4);
 	});
 
-	it("createDevStep5Categories totals match Step1 workforce", () => {
-		const categories = createDevStep5Categories(() => 0);
+	it("createDevStep5Categories totals match given workforce", () => {
+		const categories = createDevStep5Categories(() => 0, 120, 130);
 		const totalWomen = categories.reduce(
 			(sum, c) => sum + Number(c.womenCount),
 			0,
 		);
 		const totalMen = categories.reduce((sum, c) => sum + Number(c.menCount), 0);
 
-		expect(totalWomen).toBe(DEV_STEP1_CATEGORIES[0]?.women);
-		expect(totalMen).toBe(DEV_STEP1_CATEGORIES[0]?.men);
+		expect(totalWomen).toBe(120);
+		expect(totalMen).toBe(130);
+	});
+
+	it("createDevStep5Categories distributes custom workforce totals correctly", () => {
+		const categories = createDevStep5Categories(() => 0, 200, 250);
+		const totalWomen = categories.reduce(
+			(sum, c) => sum + Number(c.womenCount),
+			0,
+		);
+		const totalMen = categories.reduce((sum, c) => sum + Number(c.menCount), 0);
+
+		expect(totalWomen).toBe(200);
+		expect(totalMen).toBe(250);
+	});
+
+	it("createDevStep5Categories distributes small totals", () => {
+		const categories = createDevStep5Categories(() => 0, 4, 4);
+		const totalWomen = categories.reduce(
+			(sum, c) => sum + Number(c.womenCount),
+			0,
+		);
+		const totalMen = categories.reduce((sum, c) => sum + Number(c.menCount), 0);
+
+		expect(totalWomen).toBe(4);
+		expect(totalMen).toBe(4);
 	});
 });

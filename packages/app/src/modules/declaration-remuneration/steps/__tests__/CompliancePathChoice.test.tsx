@@ -45,7 +45,6 @@ describe("CompliancePathChoice", () => {
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
-				hasCse={null}
 			/>,
 		);
 		expect(
@@ -62,7 +61,6 @@ describe("CompliancePathChoice", () => {
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
-				hasCse={true}
 			/>,
 		);
 		expect(
@@ -82,7 +80,6 @@ describe("CompliancePathChoice", () => {
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
-				hasCse={null}
 			/>,
 		);
 		const nextButton = screen.getByRole("button", { name: /suivant/i });
@@ -95,7 +92,6 @@ describe("CompliancePathChoice", () => {
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
-				hasCse={null}
 			/>,
 		);
 		const radio = screen.getByLabelText(
@@ -112,7 +108,6 @@ describe("CompliancePathChoice", () => {
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
-				hasCse={null}
 			/>,
 		);
 		const radio = screen.getByLabelText(
@@ -139,7 +134,6 @@ describe("CompliancePathChoice", () => {
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
-				hasCse={null}
 			/>,
 		);
 		const radio = screen.getByLabelText(
@@ -166,7 +160,6 @@ describe("CompliancePathChoice", () => {
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
-				hasCse={null}
 				initialPath="corrective_action"
 			/>,
 		);
@@ -182,7 +175,6 @@ describe("CompliancePathChoice", () => {
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
-				hasCse={null}
 				isSecondRound={true}
 			/>,
 		);
@@ -200,7 +192,6 @@ describe("CompliancePathChoice", () => {
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="test@example.fr"
-				hasCse={null}
 			/>,
 		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
@@ -215,7 +206,6 @@ describe("CompliancePathChoice", () => {
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
 				email="john@company.fr"
-				hasCse={null}
 			/>,
 		);
 		expect(screen.getByText("john@company.fr")).toBeInTheDocument();

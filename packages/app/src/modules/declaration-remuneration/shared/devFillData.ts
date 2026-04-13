@@ -39,19 +39,56 @@ export const DEV_STEP4_HOURLY = [
 	{ name: "4e quartile", womenCount: 27, menCount: 35, womenValue: "24.50" },
 ];
 
-// Step 5 - Employee categories (totals: 40+30+25+25=120 women, 45+35+25+25=130 men)
+// Step 5 - Employee categories
 export const DEV_STEP5_SOURCE = "convention-collective";
+
+/**
+ * Reference workforce ratios used to distribute totals across categories.
+ * Sum of each array = 1 (used for proportional splitting).
+ */
+const WOMEN_RATIOS = [40 / 120, 30 / 120, 25 / 120, 25 / 120];
+const MEN_RATIOS = [45 / 130, 35 / 130, 25 / 130, 25 / 130];
+
+/**
+ * Distributes `total` across `count` buckets using the given ratios.
+ * Uses largest-remainder method so integers always sum to `total`.
+ */
+function distribute(total: number, ratios: readonly number[]): number[] {
+	const raw = ratios.map((r) => r * total);
+	const floored = raw.map(Math.floor);
+	const remainder = total - floored.reduce((a, b) => a + b, 0);
+
+	const fractionalParts = raw.map((v, i) => ({
+		index: i,
+		frac: v - (floored[i] ?? 0),
+	}));
+	fractionalParts.sort((a, b) => b.frac - a.frac);
+
+	for (let i = 0; i < remainder; i++) {
+		const idx = fractionalParts[i]?.index;
+		if (idx !== undefined) {
+			floored[idx] = (floored[idx] ?? 0) + 1;
+		}
+	}
+
+	return floored;
+}
 
 export function createDevStep5Categories(
 	nextId: () => number,
+	totalWomen: number,
+	totalMen: number,
 ): EmployeeCategory[] {
+	const womenCounts = distribute(totalWomen, WOMEN_RATIOS);
+	const menCounts = distribute(totalMen, MEN_RATIOS);
+
 	return [
 		{
 			id: nextId(),
 			name: "Ouvriers",
 			detail: "Opérateurs, manutentionnaires",
-			womenCount: "40",
-			menCount: "45",
+			womenCount: String(womenCounts[0]),
+			menCount: String(menCounts[0]),
 			annualBaseWomen: "24000",
 			annualBaseMen: "25500",
 			annualVariableWomen: "1200",
@@ -65,8 +102,8 @@ export function createDevStep5Categories(
 			id: nextId(),
 			name: "Employés",
 			detail: "Assistants, secrétaires",
-			womenCount: "30",
-			menCount: "35",
+			womenCount: String(womenCounts[1]),
+			menCount: String(menCounts[1]),
 			annualBaseWomen: "27000",
 			annualBaseMen: "28000",
 			annualVariableWomen: "1800",
@@ -80,8 +117,8 @@ export function createDevStep5Categories(
 			id: nextId(),
 			name: "Techniciens et agents de maîtrise",
 			detail: "Contremaîtres, techniciens",
-			womenCount: "25",
-			menCount: "25",
+			womenCount: String(womenCounts[2]),
+			menCount: String(menCounts[2]),
 			annualBaseWomen: "35000",
 			annualBaseMen: "37500",
 			annualVariableWomen: "3500",
@@ -95,8 +132,8 @@ export function createDevStep5Categories(
 			id: nextId(),
 			name: "Ingénieurs et cadres",
 			detail: "Responsables, directeurs",
-			womenCount: "25",
-			menCount: "25",
+			womenCount: String(womenCounts[3]),
+			menCount: String(menCounts[3]),
 			annualBaseWomen: "48000",
 			annualBaseMen: "52000",
 			annualVariableWomen: "6000",

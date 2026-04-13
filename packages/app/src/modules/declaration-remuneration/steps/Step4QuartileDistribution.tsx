@@ -227,8 +227,6 @@ export function Step4QuartileDistribution({
 			{/* Tables */}
 			<div className={stepStyles.dataContainer}>
 				<QuartileTable
-					maxMen={maxMen}
-					maxWomen={maxWomen}
 					onQuartileChange={(index, field, value) =>
 						handleQuartileChange("annual", index, field, value)
 					}
@@ -256,8 +254,6 @@ export function Step4QuartileDistribution({
 				/>
 
 				<QuartileTable
-					maxMen={maxMen}
-					maxWomen={maxWomen}
 					onQuartileChange={(index, field, value) =>
 						handleQuartileChange("hourly", index, field, value)
 					}
