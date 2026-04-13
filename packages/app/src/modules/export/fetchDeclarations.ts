@@ -34,6 +34,7 @@ export type IndicatorGEntry = {
 };
 
 export type CseRow = {
+	declarationNumber: number;
 	type: string;
 	opinion: string | null;
 	opinionDate: string | null;
@@ -153,6 +154,7 @@ export function assembleDeclaration(
 	row: DeclarationRow,
 	indicatorGEntries: IndicatorGEntry[],
 	opinions: CseRow[],
+	cseFiles: FileRow[] = [],
 ) {
 	const { initial, correction } = buildIndicatorG(indicatorGEntries);
 
@@ -187,9 +189,16 @@ export function assembleDeclaration(
 			phone: row.declarantPhone,
 		},
 		cseOpinions: opinions.map((o) => ({
+			declarationNumber: o.declarationNumber,
 			type: o.type,
 			opinion: o.opinion,
 			date: o.opinionDate,
+		})),
+		cseFiles: cseFiles.map((f) => ({
+			id: f.id,
+			fileName: f.fileName,
+			uploadedAt: f.uploadedAt.toISOString(),
+			downloadUrl: `/api/v1/files/${f.id}`,
 		})),
 	};
 }
