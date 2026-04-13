@@ -43,6 +43,10 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"profile.updatePhone": AUDIT_ACTIONS.PROFILE_UPDATE_PHONE,
 	"profile.get": AUDIT_ACTIONS.PROFILE_READ,
 
+	// ── admin sensitive reads ─────────────────────────────
+	"adminDeclarations.search": AUDIT_ACTIONS.ADMIN_DECLARATIONS_SEARCH,
+	"adminDeclarations.getById": AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID,
+
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,
 };

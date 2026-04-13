@@ -30,9 +30,13 @@ export async function GET(
 ) {
 	const { fileId } = await params;
 
-	return request.headers.has("x-signature")
+	return isSuitCall(request)
 		? handleSuitDownload(request, fileId)
 		: handleSessionDownload(request, fileId);
+}
+
+function isSuitCall(request: Request): boolean {
+	return request.headers.has("x-signature");
 }
 
 async function handleSuitDownload(

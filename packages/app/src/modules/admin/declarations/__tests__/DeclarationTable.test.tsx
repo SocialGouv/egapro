@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", async () => {
@@ -41,8 +40,6 @@ const defaultProps = {
 	totalPages: 1,
 	sortBy: "createdAt",
 	sortOrder: "desc",
-	selectedIds: new Set<string>(),
-	onSelectionChange: vi.fn(),
 };
 
 describe("DeclarationTable", () => {
@@ -76,25 +73,6 @@ describe("DeclarationTable", () => {
 		render(<DeclarationTable {...defaultProps} total={42} />);
 
 		expect(screen.getByText("42 résultats")).toBeInTheDocument();
-	});
-
-	it("calls onSelectionChange when checkbox is clicked", async () => {
-		const onSelectionChange = vi.fn();
-		const user = userEvent.setup();
-
-		render(
-			<DeclarationTable
-				{...defaultProps}
-				onSelectionChange={onSelectionChange}
-			/>,
-		);
-
-		const checkbox = screen.getByRole("checkbox", {
-			name: `Sélectionner ${baseRow.companyName}`,
-		});
-		await user.click(checkbox);
-
-		expect(onSelectionChange).toHaveBeenCalledWith(new Set([baseRow.id]));
 	});
 
 	it("does not show pagination when totalPages is 1", () => {

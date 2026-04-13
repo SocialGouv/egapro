@@ -43,6 +43,10 @@ export const AUDIT_ACTIONS = {
 	// ── GIP MDS ────────────────────────────────────────────
 	GIP_MDS_IMPORT: "gip_mds.import",
 
+	// ── Admin reads ───────────────────────────────────────
+	ADMIN_DECLARATIONS_SEARCH: "admin_declarations.search",
+	ADMIN_DECLARATION_GET_BY_ID: "admin_declarations.get_by_id",
+
 	// ── Sensitive reads ────────────────────────────────────
 	ADMIN_FILE_DOWNLOAD: "admin.file_download",
 	PROFILE_READ: "profile.read",
@@ -97,6 +101,8 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.GIP_MDS_IMPORT]: "system",
 
+	[AUDIT_ACTIONS.ADMIN_DECLARATIONS_SEARCH]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PROFILE_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA]: "read_sensitive",

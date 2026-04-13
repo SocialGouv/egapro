@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-	deleteDeclarationsSchema,
-	getDeclarationByIdSchema,
-	searchDeclarationsSchema,
-} from "../schemas";
+import { getDeclarationByIdSchema, searchDeclarationsSchema } from "../schemas";
 
 describe("searchDeclarationsSchema", () => {
 	it("accepts minimal input with defaults", () => {
@@ -79,27 +75,6 @@ describe("getDeclarationByIdSchema", () => {
 	it("rejects a non-UUID string", () => {
 		expect(() =>
 			getDeclarationByIdSchema.parse({ id: "not-a-uuid" }),
-		).toThrow();
-	});
-});
-
-describe("deleteDeclarationsSchema", () => {
-	it("accepts an array of UUIDs", () => {
-		const ids = [
-			"a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-			"b2c3d4e5-f6a7-8901-bcde-f12345678901",
-		];
-		const result = deleteDeclarationsSchema.parse({ ids });
-		expect(result.ids).toEqual(ids);
-	});
-
-	it("rejects empty array", () => {
-		expect(() => deleteDeclarationsSchema.parse({ ids: [] })).toThrow();
-	});
-
-	it("rejects non-UUID strings", () => {
-		expect(() =>
-			deleteDeclarationsSchema.parse({ ids: ["not-a-uuid"] }),
 		).toThrow();
 	});
 });

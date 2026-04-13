@@ -6,7 +6,6 @@ import {
 	eq,
 	gte,
 	ilike,
-	inArray,
 	lt,
 	lte,
 	or,
@@ -14,7 +13,6 @@ import {
 } from "drizzle-orm";
 
 import {
-	deleteDeclarationsSchema,
 	getDeclarationByIdSchema,
 	searchDeclarationsSchema,
 } from "~/modules/admin/declarations/schemas";
@@ -23,9 +21,7 @@ import {
 	companies,
 	cseOpinions,
 	declarations,
-	employeeCategories,
 	files,
-	jobCategories,
 	users,
 } from "~/server/db/schema";
 
@@ -96,8 +92,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 
 			const where = filters.length > 0 ? and(...filters) : undefined;
 			const orderDir = input.sortOrder === "asc" ? asc : desc;
-			const orderColumn =
-				sortColumnMap[input.sortBy as keyof typeof sortColumnMap];
+			const orderColumn = sortColumnMap[input.sortBy];
 			const offset = (input.page - 1) * input.pageSize;
 
 			const [rows, totalResult] = await Promise.all([
@@ -206,42 +201,5 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				files: declarationFiles,
 				cseOpinions: opinions,
 			};
-		}),
-
-	delete: adminProcedure
-		.input(deleteDeclarationsSchema)
-		.mutation(async ({ ctx, input }) => {
-			await ctx.db.transaction(async (tx) => {
-				// Delete child rows first: files, cse opinions, employee categories, job categories
-				await tx.delete(files).where(inArray(files.declarationId, input.ids));
-
-				await tx
-					.delete(cseOpinions)
-					.where(inArray(cseOpinions.declarationId, input.ids));
-
-				// Employee categories reference job categories, not declarations directly
-				const jobCategoryRows = await tx
-					.select({ id: jobCategories.id })
-					.from(jobCategories)
-					.where(inArray(jobCategories.declarationId, input.ids));
-
-				const jobCategoryIds = jobCategoryRows.map((r) => r.id);
-				if (jobCategoryIds.length > 0) {
-					await tx
-						.delete(employeeCategories)
-						.where(inArray(employeeCategories.jobCategoryId, jobCategoryIds));
-				}
-
-				await tx
-					.delete(jobCategories)
-					.where(inArray(jobCategories.declarationId, input.ids));
-
-				// Finally delete the declarations
-				await tx
-					.delete(declarations)
-					.where(inArray(declarations.id, input.ids));
-			});
-
-			return { deleted: input.ids.length };
 		}),
 });

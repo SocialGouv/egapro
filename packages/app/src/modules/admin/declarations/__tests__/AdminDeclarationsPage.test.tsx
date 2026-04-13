@@ -45,13 +45,6 @@ vi.mock("~/trpc/react", () => ({
 						totalPages: 1,
 					},
 					isLoading: false,
-					refetch: vi.fn(),
-				}),
-			},
-			delete: {
-				useMutation: vi.fn().mockReturnValue({
-					mutate: vi.fn(),
-					isPending: false,
 				}),
 			},
 		},

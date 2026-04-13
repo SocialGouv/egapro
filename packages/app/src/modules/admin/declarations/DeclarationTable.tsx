@@ -19,8 +19,6 @@ type Props = {
 	totalPages: number;
 	sortBy: string;
 	sortOrder: string;
-	selectedIds: Set<string>;
-	onSelectionChange: (ids: Set<string>) => void;
 };
 
 const COLUMN_LABELS: Record<SortColumn, string> = {
@@ -39,24 +37,9 @@ export function DeclarationTable({
 	totalPages,
 	sortBy,
 	sortOrder,
-	selectedIds,
-	onSelectionChange,
 }: Props) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-
-	const toggleOne = useCallback(
-		(id: string) => {
-			const next = new Set(selectedIds);
-			if (next.has(id)) {
-				next.delete(id);
-			} else {
-				next.add(id);
-			}
-			onSelectionChange(next);
-		},
-		[selectedIds, onSelectionChange],
-	);
 
 	const handleSort = useCallback(
 		(column: SortColumn) => {
@@ -98,9 +81,6 @@ export function DeclarationTable({
 			>
 				<thead>
 					<tr>
-						<th className="fr-cell--fixed" scope="col">
-							<span className="fr-sr-only">Sélectionner</span>
-						</th>
 						{SORT_COLUMNS.map((col) => (
 							<th key={col} scope="col">
 								<button
@@ -118,20 +98,6 @@ export function DeclarationTable({
 				<tbody>
 					{rows.map((row) => (
 						<tr key={row.id}>
-							<th className="fr-cell--fixed" scope="row">
-								<div className="fr-checkbox-group fr-checkbox-group--sm">
-									<input
-										checked={selectedIds.has(row.id)}
-										data-fr-row-select="true"
-										id={`select-${row.id}`}
-										onChange={() => toggleOne(row.id)}
-										type="checkbox"
-									/>
-									<label className="fr-label" htmlFor={`select-${row.id}`}>
-										Sélectionner {row.companyName}
-									</label>
-								</div>
-							</th>
 							<td>{row.siren}</td>
 							<td>
 								<Link href={`/admin/declarations/${row.id}`}>
@@ -146,7 +112,7 @@ export function DeclarationTable({
 					))}
 					{rows.length === 0 && (
 						<tr>
-							<td colSpan={7}>Aucune déclaration trouvée.</td>
+							<td colSpan={6}>Aucune déclaration trouvée.</td>
 						</tr>
 					)}
 				</tbody>
