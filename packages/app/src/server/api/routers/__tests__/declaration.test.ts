@@ -18,6 +18,7 @@ vi.mock("../declarationHelpers", async (importOriginal) => {
 			employeeCategories: [],
 		}),
 		deleteJobAndEmployeeCategories: vi.fn().mockResolvedValue(undefined),
+		fetchPreviousYearJobCategories: vi.fn().mockResolvedValue(null),
 	};
 });
 
