@@ -243,7 +243,12 @@ export function CategoryForm({
 		<form className={stepStyles.form} onSubmit={handleFormSubmit}>
 			<StepTitleRow
 				onDevFill={() => {
-					const devCats = createDevStep5Categories(nextId);
+					if (maxWomen == null || maxMen == null) return;
+					const devCats = createDevStep5Categories(
+						nextId,
+						maxWomen,
+						maxMen,
+					);
 					form.setValue("categories", toFormValues(devCats));
 					form.setValue("source", DEV_STEP5_SOURCE);
 					setSaved(false);
