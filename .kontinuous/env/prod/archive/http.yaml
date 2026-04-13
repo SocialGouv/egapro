@@ -108,7 +108,7 @@ spec:
     match: Host(`egapro.travail.gouv.fr`)
     middlewares:
     - name: security-headers-nginx
-    priority: 10000
+    priority: 50
     services:
     - name: nginx
       port: 80
