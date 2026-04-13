@@ -1,6 +1,7 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	assembleDeclaration,
+	fetchCseFilesByDeclaration,
 	fetchCseOpinionsByDeclaration,
 	fetchIndicatorGByDeclaration,
 	fetchSubmittedDeclarations,
@@ -68,9 +69,10 @@ async function apiExportDeclarationsHandler(
 		const sirenYearKeys = rows.map((r) => ({ siren: r.siren, year: r.year }));
 		const declarationIds = rows.map((r) => r.declarationId);
 
-		const [indicatorGMap, cseMap] = await Promise.all([
+		const [indicatorGMap, cseMap, cseFilesMap] = await Promise.all([
 			fetchIndicatorGByDeclaration(declarationIds),
 			fetchCseOpinionsByDeclaration(declarationIds),
+			fetchCseFilesByDeclaration(sirenYearKeys),
 		]);
 
 		const data = rows.map((row) => {
@@ -79,6 +81,7 @@ async function apiExportDeclarationsHandler(
 				row,
 				indicatorGMap.get(row.declarationId) ?? [],
 				cseMap.get(row.declarationId) ?? [],
+				cseFilesMap.get(key) ?? [],
 			);
 		});
 
