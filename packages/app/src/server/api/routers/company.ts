@@ -1,4 +1,5 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
+import type { Session } from "next-auth";
 import { computeDeclarationStatus, getCurrentYear } from "~/modules/domain";
 import { buildDeclarationList } from "~/modules/my-space/buildDeclarationList";
 import {
@@ -6,6 +7,7 @@ import {
 	updateHasCseSchema,
 } from "~/modules/my-space/schemas";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { isImpersonatingSiren } from "~/server/auth/companyAccess";
 import type { DB } from "~/server/db";
 import {
 	companies,
@@ -17,8 +19,11 @@ import {
 } from "~/server/db/schema";
 import { fetchCseBySiren, fetchSanctionBySiren } from "~/server/services/suit";
 
-async function findUserCompany(db: DB, userId: string, siren: string) {
-	const rows = await db
+async function findUserCompany(db: DB, session: Session, siren: string) {
+	const userId = session.user.id;
+	const bypassOwnership = isImpersonatingSiren(session, siren);
+
+	const baseQuery = db
 		.select({
 			siren: companies.siren,
 			name: companies.name,
@@ -27,12 +32,16 @@ async function findUserCompany(db: DB, userId: string, siren: string) {
 			workforce: companies.workforce,
 			hasCse: companies.hasCse,
 		})
-		.from(userCompanies)
-		.innerJoin(companies, eq(userCompanies.siren, companies.siren))
-		.where(
-			and(eq(userCompanies.userId, userId), eq(userCompanies.siren, siren)),
-		)
-		.limit(1);
+		.from(companies);
+
+	const rows = bypassOwnership
+		? await baseQuery.where(eq(companies.siren, siren)).limit(1)
+		: await baseQuery
+				.innerJoin(userCompanies, eq(userCompanies.siren, companies.siren))
+				.where(
+					and(eq(userCompanies.userId, userId), eq(userCompanies.siren, siren)),
+				)
+				.limit(1);
 
 	const company = rows[0];
 	if (!company) {
@@ -57,20 +66,31 @@ export const companyRouter = createTRPCRouter({
 	get: protectedProcedure
 		.input(sirenInputSchema)
 		.query(({ ctx, input }) =>
-			findUserCompany(ctx.db, ctx.session.user.id, input.siren),
+			findUserCompany(ctx.db, ctx.session, input.siren),
 		),
 
 	list: protectedProcedure.query(async ({ ctx }) => {
 		const year = getCurrentYear();
 
-		const userCompanyRows = await ctx.db
-			.select({
-				siren: companies.siren,
-				name: companies.name,
-			})
-			.from(userCompanies)
-			.innerJoin(companies, eq(userCompanies.siren, companies.siren))
-			.where(eq(userCompanies.userId, ctx.session.user.id));
+		const impersonation = ctx.session.user.isAdmin
+			? ctx.session.user.impersonation
+			: null;
+
+		// When impersonating, the admin's "my space" shows only the
+		// impersonated company — not the admin's own referent companies.
+		const userCompanyRows = impersonation
+			? await ctx.db
+					.select({ siren: companies.siren, name: companies.name })
+					.from(companies)
+					.where(eq(companies.siren, impersonation.siren))
+			: await ctx.db
+					.select({
+						siren: companies.siren,
+						name: companies.name,
+					})
+					.from(userCompanies)
+					.innerJoin(companies, eq(userCompanies.siren, companies.siren))
+					.where(eq(userCompanies.userId, ctx.session.user.id));
 
 		const sirens = userCompanyRows.map((r) => r.siren);
 
@@ -111,11 +131,7 @@ export const companyRouter = createTRPCRouter({
 	getWithDeclarations: protectedProcedure
 		.input(sirenInputSchema)
 		.query(async ({ ctx, input }) => {
-			const company = await findUserCompany(
-				ctx.db,
-				ctx.session.user.id,
-				input.siren,
-			);
+			const company = await findUserCompany(ctx.db, ctx.session, input.siren);
 
 			const [declarationRows, cseOpinionRows, jointEvalRows, prefillRows] =
 				await Promise.all([
@@ -192,7 +208,7 @@ export const companyRouter = createTRPCRouter({
 	updateHasCse: protectedProcedure
 		.input(updateHasCseSchema)
 		.mutation(async ({ ctx, input }) => {
-			await findUserCompany(ctx.db, ctx.session.user.id, input.siren);
+			await findUserCompany(ctx.db, ctx.session, input.siren);
 			await ctx.db
 				.update(companies)
 				.set({ hasCse: input.hasCse })
@@ -202,7 +218,7 @@ export const companyRouter = createTRPCRouter({
 	getSanctionStatus: protectedProcedure
 		.input(sirenInputSchema)
 		.query(async ({ ctx, input }) => {
-			await findUserCompany(ctx.db, ctx.session.user.id, input.siren);
+			await findUserCompany(ctx.db, ctx.session, input.siren);
 			const result = await fetchSanctionBySiren(input.siren);
 			return result ?? { hasSanction: false, validityDate: null };
 		}),

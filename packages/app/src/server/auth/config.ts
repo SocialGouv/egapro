@@ -1,16 +1,90 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { headers as nextHeaders } from "next/headers";
 import type { DefaultSession, NextAuthOptions } from "next-auth";
 import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
+import { sirenSchema } from "~/modules/admin/schemas";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { extractSiren, parseSiren } from "~/modules/domain";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
 import { db } from "~/server/db";
-import { companies, userCompanies, users } from "~/server/db/schema";
+import {
+	adminImpersonationEvents,
+	companies,
+	userCompanies,
+	users,
+} from "~/server/db/schema";
 import { fetchCompanyBySiren } from "~/server/services/weez";
 import { parseAdminEmails } from "./parseAdminEmails";
+
+/** Cap on the `name` field of an impersonation payload — avoids oversized
+ *  tokens if an admin forges a huge string in the `session.update` call. */
+const IMPERSONATION_NAME_MAX = 255;
+
+/**
+ * Close every open impersonation row for this admin. Run on stop, and
+ * also before inserting a new row so `(adminUserId) WHERE stoppedAt IS
+ * NULL` always has at most one row.
+ */
+async function closeOpenImpersonationEvents(adminUserId: string) {
+	await db
+		.update(adminImpersonationEvents)
+		.set({ stoppedAt: new Date() })
+		.where(
+			and(
+				eq(adminImpersonationEvents.adminUserId, adminUserId),
+				isNull(adminImpersonationEvents.stoppedAt),
+			),
+		);
+}
+
+/**
+ * Persist the start of an impersonation session atomically:
+ * close any previously open session, ensure the company row exists (so
+ * the FK on the audit table holds), then insert the new event.
+ *
+ * The company upsert uses `onConflictDoNothing` — an admin impersonating
+ * a company must never silently overwrite metadata visible to its real
+ * referents.
+ */
+async function recordImpersonationStart(
+	adminUserId: string,
+	siren: string,
+	name: string,
+) {
+	await db.transaction(async (tx) => {
+		await tx
+			.insert(companies)
+			.values({ siren, name })
+			.onConflictDoNothing({ target: companies.siren });
+
+		await tx
+			.update(adminImpersonationEvents)
+			.set({ stoppedAt: new Date() })
+			.where(
+				and(
+					eq(adminImpersonationEvents.adminUserId, adminUserId),
+					isNull(adminImpersonationEvents.stoppedAt),
+				),
+			);
+
+		await tx.insert(adminImpersonationEvents).values({
+			adminUserId,
+			siren,
+		});
+	});
+}
+
+/**
+ * Active impersonation targeted by an admin. When set, the admin is browsing
+ * the app as if they were the referent of the given company. Only meaningful
+ * when `user.isAdmin === true`; the `jwt` callback guards the trigger.
+ */
+export type Impersonation = {
+	siren: string;
+	name: string;
+};
 
 /**
  * Read the request context (IP, user-agent) from the active Next.js request.
@@ -63,6 +137,7 @@ declare module "next-auth" {
 			siret?: string | null;
 			phone?: string | null;
 			isAdmin: boolean;
+			impersonation?: Impersonation | null;
 		} & DefaultSession["user"];
 	}
 }
@@ -74,6 +149,7 @@ declare module "next-auth/jwt" {
 		phone?: string | null;
 		id_token?: string | null;
 		isAdmin: boolean;
+		impersonation?: Impersonation | null;
 	}
 }
 
@@ -168,7 +244,42 @@ export const authConfig = {
 			}
 			return `${baseUrl}/mon-espace`;
 		},
-		async jwt({ token, user, account }) {
+		async jwt({ token, user, account, trigger, session: sessionUpdate }) {
+			// Admin-triggered impersonation update. Guarded server-side: only
+			// admins can set `impersonation`, and the only accepted shape is
+			// either a full `{ siren, name }` object or `null` to stop.
+			//
+			// The audit trail (`app_admin_impersonation_event`) is written
+			// atomically here so it always reflects the effective JWT state:
+			// every row in the log corresponds to an actual live session.
+			if (trigger === "update" && token.isAdmin && sessionUpdate) {
+				const raw = (sessionUpdate as { impersonation?: unknown })
+					.impersonation;
+
+				if (raw === null) {
+					await closeOpenImpersonationEvents(token.id);
+					token.impersonation = null;
+					return token;
+				}
+
+				if (raw && typeof raw === "object") {
+					const candidate = raw as { siren?: unknown; name?: unknown };
+					const sirenResult = sirenSchema.safeParse(candidate.siren);
+					const nameOk =
+						typeof candidate.name === "string" &&
+						candidate.name.length > 0 &&
+						candidate.name.length <= IMPERSONATION_NAME_MAX;
+
+					if (sirenResult.success && nameOk) {
+						const siren = sirenResult.data;
+						const name = candidate.name as string;
+						await recordImpersonationStart(token.id, siren, name);
+						token.impersonation = { siren, name };
+					}
+				}
+				return token;
+			}
+
 			if (user) {
 				const profileData = user as typeof user & {
 					siret?: string | null;
@@ -277,6 +388,7 @@ export const authConfig = {
 				siret: token.siret ?? null,
 				phone: token.phone ?? null,
 				isAdmin: token.isAdmin ?? false,
+				impersonation: token.impersonation ?? null,
 			},
 		}),
 	},
