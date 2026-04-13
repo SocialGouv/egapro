@@ -21,6 +21,7 @@ import {
 	buildEmployeeCategoryValues,
 	deleteJobAndEmployeeCategories,
 	fetchAllCategories,
+	fetchPreviousYearJobCategories,
 } from "./declarationHelpers";
 
 export const declarationRouter = createTRPCRouter({
@@ -103,9 +104,16 @@ export const declarationRouter = createTRPCRouter({
 
 		const gipPrefillData = gipRow[0] ? mapGipToFormData(gipRow[0]) : null;
 
+		// Fetch N-1 categories for automatic prefilling when step 5 is empty
+		const hasCurrentCategories = (result.jobCategories ?? []).length > 0;
+		const previousYearCategories = hasCurrentCategories
+			? null
+			: await fetchPreviousYearJobCategories(ctx.db, siren, year);
+
 		return {
 			...result,
 			gipPrefillData,
+			previousYearCategories,
 		};
 	}),
 
