@@ -90,7 +90,9 @@ test.describe("Campaign deadlines gating", () => {
 			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
-			await page.getByRole("button", { name: "Rémunération" }).first().click();
+			const remuButton = page.getByRole("button", { name: "Rémunération" });
+			await expect(remuButton.first()).toBeVisible();
+			await remuButton.first().click();
 			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
 
 			await expect(
@@ -135,7 +137,9 @@ test.describe("Campaign deadlines gating", () => {
 			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
-			await page.getByRole("button", { name: "Rémunération" }).first().click();
+			const remuButton = page.getByRole("button", { name: "Rémunération" });
+			await expect(remuButton.first()).toBeVisible();
+			await remuButton.first().click();
 			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
 
 			await expect(

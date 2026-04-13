@@ -73,15 +73,19 @@ test.describe("file upload + view access control", () => {
 		fileId = uploaded as string;
 	});
 
-	test("session user fetches their own file → 200 inline", async ({ page }) => {
+	test("session user fetches their own file → 200 attachment (admin user)", async ({
+		page,
+	}) => {
+		// The E2E test user (test@fia1.fr) is in ADMIN_EMAILS, so the unified
+		// endpoint treats them as admin: attachment disposition, cached response.
 		expect(fileId).toBeTruthy();
 
 		const response = await page.request.get(`/api/v1/files/${fileId}`);
 
 		expect(response.status()).toBe(200);
 		const disposition = response.headers()["content-disposition"] ?? "";
-		expect(disposition.toLowerCase()).toContain("inline");
-		expect(response.headers()["cache-control"]).toBe("private, no-store");
+		expect(disposition.toLowerCase()).toContain("attachment");
+		expect(response.headers()["cache-control"]).toBe("private, max-age=3600");
 		// Body is a real PDF from the dummy fixture.
 		const body = await response.body();
 		expect(body.byteLength).toBeGreaterThan(0);

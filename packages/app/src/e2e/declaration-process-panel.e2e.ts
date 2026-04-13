@@ -94,7 +94,9 @@ test.describe("Declaration process panel", () => {
 			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
-			await page.getByRole("button", { name: "Rémunération" }).first().click();
+			const remuButton = page.getByRole("button", { name: "Rémunération" });
+			await expect(remuButton.first()).toBeVisible();
+			await remuButton.first().click();
 
 			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
 			await expect(
@@ -122,7 +124,9 @@ test.describe("Declaration process panel", () => {
 			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
-			await page.getByRole("button", { name: "Rémunération" }).first().click();
+			const remuButton = page.getByRole("button", { name: "Rémunération" });
+			await expect(remuButton.first()).toBeVisible();
+			await remuButton.first().click();
 
 			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
 			await expect(
@@ -150,7 +154,9 @@ test.describe("Declaration process panel", () => {
 			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
-			await page.getByRole("button", { name: "Rémunération" }).first().click();
+			const remuButton = page.getByRole("button", { name: "Rémunération" });
+			await expect(remuButton.first()).toBeVisible();
+			await remuButton.first().click();
 
 			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
 			await expect(
@@ -182,7 +188,9 @@ test.describe("Declaration process panel", () => {
 			await waitForDsfrReady(page);
 
 			const panel = page.locator(`#${PANEL_ID}`);
-			await page.getByRole("button", { name: "Rémunération" }).first().click();
+			const remuButton = page.getByRole("button", { name: "Rémunération" });
+			await expect(remuButton.first()).toBeVisible();
+			await remuButton.first().click();
 
 			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
 			await expect(panel.getByText("Démarche close")).toBeVisible();
@@ -215,7 +223,9 @@ test.describe("Declaration process panel", () => {
 			const modal = page.locator("#missing-info-modal");
 			const panel = page.locator(`#${PANEL_ID}`);
 
-			await page.getByRole("button", { name: "Rémunération" }).first().click();
+			const remuButton = page.getByRole("button", { name: "Rémunération" });
+			await expect(remuButton.first()).toBeVisible();
+			await remuButton.first().click();
 			await expect(modal).toHaveAttribute("open", { timeout: 10_000 });
 
 			await modal.locator("label[for='missing-info-cse-yes']").click();
