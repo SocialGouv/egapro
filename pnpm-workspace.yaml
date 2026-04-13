@@ -4,5 +4,8 @@ packages:
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - '@sentry/cli'
+  - cpu-features
   - esbuild
+  - protobufjs
   - sharp
+  - ssh2
