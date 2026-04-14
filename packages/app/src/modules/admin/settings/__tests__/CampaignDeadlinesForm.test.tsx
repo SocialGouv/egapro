@@ -111,9 +111,7 @@ describe("CampaignDeadlinesForm", () => {
 		);
 		await waitFor(() => {
 			expect(
-				screen.getByLabelText(
-					/date limite de modification \(1ʳᵉ déclaration\)/i,
-				),
+				document.getElementById("settings-decl1ModificationDeadline"),
 			).toHaveValue("2026-06-01");
 		});
 		expect(
@@ -127,9 +125,7 @@ describe("CampaignDeadlinesForm", () => {
 		);
 		await waitFor(() => {
 			expect(
-				screen.getByLabelText(
-					/date limite de modification \(1ʳᵉ déclaration\)/i,
-				),
+				document.getElementById("settings-decl1ModificationDeadline"),
 			).toHaveValue("2026-06-01");
 		});
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));

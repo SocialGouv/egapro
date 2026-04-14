@@ -22,10 +22,13 @@ const OPTIONAL_FIELDS: readonly DateFieldKey[] = [
 	"campaignStartDate",
 ];
 
-const REQUIRED_FIELDS: readonly DateFieldKey[] = [
+const DECL1_FIELDS: readonly DateFieldKey[] = [
 	"decl1ModificationDeadline",
 	"decl1JustificationDeadline",
 	"decl1JointEvaluationDeadline",
+];
+
+const DECL2_FIELDS: readonly DateFieldKey[] = [
 	"decl2ModificationDeadline",
 	"decl2JustificationDeadline",
 	"decl2JointEvaluationDeadline",
@@ -34,13 +37,12 @@ const REQUIRED_FIELDS: readonly DateFieldKey[] = [
 const FIELD_LABELS: Record<DateFieldKey, string> = {
 	gipPublicationDate: "Date de publication des données GIP",
 	campaignStartDate: "Date de démarrage de la campagne",
-	decl1ModificationDeadline: "Date limite de modification (1ʳᵉ déclaration)",
-	decl1JustificationDeadline: "Date limite de justification (1ʳᵉ déclaration)",
-	decl1JointEvaluationDeadline:
-		"Date limite de l'avis du CSE (1ʳᵉ déclaration)",
-	decl2ModificationDeadline: "Date limite de modification (2ᵉ déclaration)",
-	decl2JustificationDeadline: "Date limite de justification (2ᵉ déclaration)",
-	decl2JointEvaluationDeadline: "Date limite de l'avis du CSE (2ᵉ déclaration)",
+	decl1ModificationDeadline: "Date limite de modification",
+	decl1JustificationDeadline: "Date limite de justification",
+	decl1JointEvaluationDeadline: "Date limite de l'avis du CSE",
+	decl2ModificationDeadline: "Date limite de modification",
+	decl2JustificationDeadline: "Date limite de justification",
+	decl2JointEvaluationDeadline: "Date limite de l'avis du CSE",
 };
 
 /**
@@ -143,10 +145,21 @@ export function CampaignDeadlinesForm({ initialYear, configuredYears }: Props) {
 				</fieldset>
 
 				<fieldset className="fr-fieldset">
-					<legend className="fr-fieldset__legend">
-						Échéances des déclarations
-					</legend>
-					{REQUIRED_FIELDS.map((key) => (
+					<legend className="fr-fieldset__legend">Première déclaration</legend>
+					{DECL1_FIELDS.map((key) => (
+						<DateField
+							error={form.formState.errors[key]?.message}
+							fieldKey={key}
+							key={key}
+							register={form.register(key)}
+							required={true}
+						/>
+					))}
+				</fieldset>
+
+				<fieldset className="fr-fieldset">
+					<legend className="fr-fieldset__legend">Deuxième déclaration</legend>
+					{DECL2_FIELDS.map((key) => (
 						<DateField
 							error={form.formState.errors[key]?.message}
 							fieldKey={key}
