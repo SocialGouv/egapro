@@ -133,41 +133,50 @@ export function CampaignDeadlinesForm({ initialYear, configuredYears }: Props) {
 
 				<fieldset className="fr-fieldset">
 					<legend className="fr-fieldset__legend">Campagne</legend>
-					{OPTIONAL_FIELDS.map((key) => (
-						<DateField
-							error={form.formState.errors[key]?.message}
-							fieldKey={key}
-							key={key}
-							register={form.register(key)}
-							required={false}
-						/>
-					))}
+					<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters">
+						{OPTIONAL_FIELDS.map((key) => (
+							<div className="fr-col-12 fr-col-md-6" key={key}>
+								<DateField
+									error={form.formState.errors[key]?.message}
+									fieldKey={key}
+									register={form.register(key)}
+									required={false}
+								/>
+							</div>
+						))}
+					</div>
 				</fieldset>
 
 				<fieldset className="fr-fieldset">
 					<legend className="fr-fieldset__legend">Première déclaration</legend>
-					{DECL1_FIELDS.map((key) => (
-						<DateField
-							error={form.formState.errors[key]?.message}
-							fieldKey={key}
-							key={key}
-							register={form.register(key)}
-							required={true}
-						/>
-					))}
+					<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters">
+						{DECL1_FIELDS.map((key) => (
+							<div className="fr-col-12 fr-col-md-4" key={key}>
+								<DateField
+									error={form.formState.errors[key]?.message}
+									fieldKey={key}
+									register={form.register(key)}
+									required={true}
+								/>
+							</div>
+						))}
+					</div>
 				</fieldset>
 
 				<fieldset className="fr-fieldset">
 					<legend className="fr-fieldset__legend">Deuxième déclaration</legend>
-					{DECL2_FIELDS.map((key) => (
-						<DateField
-							error={form.formState.errors[key]?.message}
-							fieldKey={key}
-							key={key}
-							register={form.register(key)}
-							required={true}
-						/>
-					))}
+					<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters">
+						{DECL2_FIELDS.map((key) => (
+							<div className="fr-col-12 fr-col-md-4" key={key}>
+								<DateField
+									error={form.formState.errors[key]?.message}
+									fieldKey={key}
+									register={form.register(key)}
+									required={true}
+								/>
+							</div>
+						))}
+					</div>
 				</fieldset>
 
 				{status === "success" && (
