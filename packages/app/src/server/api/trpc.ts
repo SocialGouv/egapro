@@ -196,6 +196,34 @@ export const companyWriteProcedure = companyProcedure.use(({ ctx, next }) => {
 });
 
 /**
+ * Resolve the current-year declaration for the given SIREN. Shared between
+ * `declarationProcedure` (reads) and `declarationWriteProcedure` (mutations)
+ * so the lookup logic stays in a single place. Throws `NOT_FOUND` when the
+ * declaration does not exist yet.
+ */
+async function fetchCurrentDeclarationId(
+	database: typeof db,
+	siren: string,
+): Promise<string> {
+	const year = getCurrentYear();
+	const rows = await database
+		.select({ id: declarations.id })
+		.from(declarations)
+		.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+		.limit(1);
+
+	const declaration = rows[0];
+	if (!declaration) {
+		throw new TRPCError({
+			code: "NOT_FOUND",
+			message: "Déclaration introuvable pour l'année en cours",
+		});
+	}
+
+	return declaration.id;
+}
+
+/**
  * Declaration procedure — company + current declaration resolved.
  *
  * Guarantees `ctx.declarationId` is the ID of the current year's declaration.
@@ -204,24 +232,8 @@ export const companyWriteProcedure = companyProcedure.use(({ ctx, next }) => {
  */
 export const declarationProcedure = companyProcedure.use(
 	async ({ ctx, next }) => {
-		const year = getCurrentYear();
-		const rows = await ctx.db
-			.select({ id: declarations.id })
-			.from(declarations)
-			.where(
-				and(eq(declarations.siren, ctx.siren), eq(declarations.year, year)),
-			)
-			.limit(1);
-
-		const declaration = rows[0];
-		if (!declaration) {
-			throw new TRPCError({
-				code: "NOT_FOUND",
-				message: "Déclaration introuvable pour l'année en cours",
-			});
-		}
-
-		return next({ ctx: { ...ctx, declarationId: declaration.id } });
+		const declarationId = await fetchCurrentDeclarationId(ctx.db, ctx.siren);
+		return next({ ctx: { ...ctx, declarationId } });
 	},
 );
 
@@ -232,28 +244,13 @@ export const declarationProcedure = companyProcedure.use(
  * etc.) so the data cannot be altered while an admin is mimoquing the
  * company (issue #3230).
  *
- * The impersonation guard runs before the declaration lookup so a blocked
- * request never hits the database.
+ * The impersonation guard runs before the declaration lookup (inherited
+ * from `companyWriteProcedure`) so a blocked request never hits the
+ * database.
  */
 export const declarationWriteProcedure = companyWriteProcedure.use(
 	async ({ ctx, next }) => {
-		const year = getCurrentYear();
-		const rows = await ctx.db
-			.select({ id: declarations.id })
-			.from(declarations)
-			.where(
-				and(eq(declarations.siren, ctx.siren), eq(declarations.year, year)),
-			)
-			.limit(1);
-
-		const declaration = rows[0];
-		if (!declaration) {
-			throw new TRPCError({
-				code: "NOT_FOUND",
-				message: "Déclaration introuvable pour l'année en cours",
-			});
-		}
-
-		return next({ ctx: { ...ctx, declarationId: declaration.id } });
+		const declarationId = await fetchCurrentDeclarationId(ctx.db, ctx.siren);
+		return next({ ctx: { ...ctx, declarationId } });
 	},
 );

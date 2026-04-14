@@ -37,7 +37,11 @@ export function isImpersonatingSiren(
  * Handlers can catch it and translate to HTTP 403.
  */
 export function assertNotImpersonating(session: Session | null): void {
-	if (session?.user?.impersonation) {
+	// Only admins can mint an impersonation in the JWT (see auth/config.ts).
+	// Gating on `isAdmin` here too keeps this helper consistent with
+	// `isImpersonatingSiren` and prevents a crafted session with a stray
+	// `impersonation` field from blocking a legitimate non-admin user.
+	if (session?.user?.isAdmin && session.user.impersonation) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
 			message:

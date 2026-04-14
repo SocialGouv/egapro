@@ -1,4 +1,3 @@
-import { TRPCError } from "@trpc/server";
 import type { Session } from "next-auth";
 import { describe, expect, it } from "vitest";
 
@@ -71,18 +70,28 @@ describe("assertNotImpersonating", () => {
 		expect(() => assertNotImpersonating(session)).not.toThrow();
 	});
 
+	it("does not throw for a non-admin with a stray impersonation field", () => {
+		// Defensive: only admins can mint an impersonation in the JWT, so a
+		// non-admin should never be blocked even if the session object
+		// happens to carry an `impersonation` value.
+		const session = makeSession({
+			isAdmin: false,
+			impersonation: { siren: "123456789", name: "Acme" },
+		});
+		expect(() => assertNotImpersonating(session)).not.toThrow();
+	});
+
 	it("throws a FORBIDDEN TRPCError when an admin is impersonating", () => {
 		const session = makeSession({
 			isAdmin: true,
 			impersonation: { siren: "123456789", name: "Acme" },
 		});
-		expect(() => assertNotImpersonating(session)).toThrow(TRPCError);
-		try {
-			assertNotImpersonating(session);
-		} catch (error) {
-			expect(error).toBeInstanceOf(TRPCError);
-			expect((error as TRPCError).code).toBe("FORBIDDEN");
-			expect((error as TRPCError).message).toContain("mimoquage");
-		}
+		expect(() => assertNotImpersonating(session)).toThrow(
+			expect.objectContaining({
+				name: "TRPCError",
+				code: "FORBIDDEN",
+				message: expect.stringContaining("mimoquage"),
+			}),
+		);
 	});
 });

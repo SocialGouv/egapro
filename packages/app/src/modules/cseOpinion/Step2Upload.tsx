@@ -29,7 +29,7 @@ export function Step2Upload({
 	const router = useRouter();
 	const utils = api.useUtils();
 	const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
-	const submitGuard = useReadOnlyGuard();
+	const readOnlyGuard = useReadOnlyGuard();
 
 	const refreshFileList = useCallback(() => {
 		void utils.cseOpinion.getFiles.invalidate();
@@ -101,7 +101,7 @@ export function Step2Upload({
 					accept=".pdf"
 					acceptLabel="pdf"
 					allowedMimeTypes={["application/pdf"]}
-					disabled={submitGuard.isReadOnly}
+					disabled={readOnlyGuard.isReadOnly}
 					error={uploadError}
 					inputId="cse-file-upload"
 					maxFiles={remainingSlots}
@@ -127,14 +127,14 @@ export function Step2Upload({
 					</Link>
 					<span>
 						<button
-							{...submitGuard.buttonProps}
+							{...readOnlyGuard.buttonProps}
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-							disabled={isPending || submitGuard.isReadOnly}
+							disabled={isPending || readOnlyGuard.isReadOnly}
 							type="submit"
 						>
 							{isPending ? "Envoi en cours\u2026" : "Soumettre"}
 						</button>
-						{submitGuard.tooltip}
+						{readOnlyGuard.tooltip}
 					</span>
 				</div>
 			</form>
@@ -160,7 +160,7 @@ function ExistingFileCard({
 	isDeleting,
 	onDelete,
 }: ExistingFileCardProps) {
-	const deleteGuard = useReadOnlyGuard();
+	const readOnlyGuard = useReadOnlyGuard();
 	return (
 		<div className="fr-card fr-card--no-border fr-p-3w fr-mb-2w">
 			<p className="fr-text--md fr-mb-0">{file.fileName}</p>
@@ -182,16 +182,16 @@ function ExistingFileCard({
 					</a>
 					<span>
 						<button
-							{...deleteGuard.buttonProps}
+							{...readOnlyGuard.buttonProps}
 							className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line fr-ml-1w"
-							disabled={isDeleting || deleteGuard.isReadOnly}
+							disabled={isDeleting || readOnlyGuard.isReadOnly}
 							onClick={() => onDelete(file.id)}
 							title={`Supprimer ${file.fileName}`}
 							type="button"
 						>
 							{isDeleting ? "Suppression\u2026" : "Supprimer"}
 						</button>
-						{deleteGuard.tooltip}
+						{readOnlyGuard.tooltip}
 					</span>
 				</div>
 			</div>
