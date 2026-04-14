@@ -25,20 +25,31 @@ const mockTransaction = vi.fn();
 type SelectQueue = unknown[];
 let selectQueue: SelectQueue = [];
 
-function makeChain(): unknown {
-	const results = selectQueue.shift() ?? [];
-	const thenable = Promise.resolve(results);
-	const chain: Record<string, unknown> = {
-		from: () => chain,
-		where: () => chain,
-		orderBy: () => chain,
-		limit: () => chain,
-		offset: () => chain,
-		then: thenable.then.bind(thenable),
-		catch: thenable.catch.bind(thenable),
-		finally: thenable.finally.bind(thenable),
-	};
+const CHAIN_METHODS = new Set(["from", "where", "orderBy", "limit", "offset"]);
+
+function wrapChain(results: unknown): unknown {
+	const promise = Promise.resolve(results);
+	const chain = new Proxy(
+		{},
+		{
+			get(_target, prop) {
+				if (prop === "then" || prop === "catch" || prop === "finally") {
+					return (promise[prop] as (...args: unknown[]) => unknown).bind(
+						promise,
+					);
+				}
+				if (typeof prop === "string" && CHAIN_METHODS.has(prop)) {
+					return () => chain;
+				}
+				return undefined;
+			},
+		},
+	);
 	return chain;
+}
+
+function makeChain(): unknown {
+	return wrapChain(selectQueue.shift() ?? []);
 }
 
 function createMockDb() {

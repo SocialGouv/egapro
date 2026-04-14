@@ -54,7 +54,9 @@ describe("/api/public/referents-egalite-professionnelle", () => {
 
 		const { GET } = await import("../route");
 		const response = await GET(
-			new Request("http://localhost/api/public/referents-egalite-professionnelle"),
+			new Request(
+				"http://localhost/api/public/referents-egalite-professionnelle",
+			),
 		);
 
 		expect(response.headers.get("Content-Type")).toMatch(/application\/json/);

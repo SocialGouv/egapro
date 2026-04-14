@@ -5,7 +5,7 @@ import type {
 	UseFormRegister,
 	UseFormWatch,
 } from "react-hook-form";
-import type { CountyCode, RegionCode } from "~/modules/domain";
+import type { RegionCode } from "~/modules/domain";
 import { COUNTIES, REGIONS, REGIONS_TO_COUNTIES } from "~/modules/domain";
 
 import type { ReferentFormValues } from "./schemas";
