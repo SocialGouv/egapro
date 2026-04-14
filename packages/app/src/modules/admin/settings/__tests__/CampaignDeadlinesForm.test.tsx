@@ -136,7 +136,8 @@ describe("CampaignDeadlinesForm", () => {
 		await waitFor(() => {
 			expect(upsertMutate).toHaveBeenCalled();
 		});
-		expect(upsertMutate.mock.calls[0][0]).toMatchObject({
+		const firstCall = upsertMutate.mock.calls[0];
+		expect(firstCall?.[0]).toMatchObject({
 			year: 2026,
 			decl1ModificationDeadline: "2026-06-01",
 		});
