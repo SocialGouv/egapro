@@ -3,6 +3,8 @@ export { downloadExport } from "./downloadExport";
 export type { FileRow } from "./fetchDeclarations";
 export {
 	assembleDeclaration,
+	buildCseFilePayload,
+	buildJointEvaluationFilePayload,
 	fetchCseFilesByDeclaration,
 	fetchCseOpinionsByDeclaration,
 	fetchFileById,

@@ -4,6 +4,7 @@ const mockFetchSubmitted = vi.fn().mockResolvedValue([]);
 const mockFetchIndicatorG = vi.fn().mockResolvedValue(new Map());
 const mockFetchCse = vi.fn().mockResolvedValue(new Map());
 const mockFetchCseFiles = vi.fn().mockResolvedValue(new Map());
+const mockFetchJointEval = vi.fn().mockResolvedValue(new Map());
 
 vi.mock("~/modules/export/queries", () => ({
 	fetchSubmittedDeclarations: (...args: unknown[]) =>
@@ -13,7 +14,8 @@ vi.mock("~/modules/export/queries", () => ({
 	fetchCseOpinionsByDeclaration: (...args: unknown[]) => mockFetchCse(...args),
 	fetchCseFilesByDeclaration: (...args: unknown[]) =>
 		mockFetchCseFiles(...args),
-	fetchJointEvaluationFilesByDeclaration: vi.fn().mockResolvedValue(new Map()),
+	fetchJointEvaluationFilesByDeclaration: (...args: unknown[]) =>
+		mockFetchJointEval(...args),
 }));
 
 const VALID_AUTH_HEADER = "Bearer test-suit-api-key-that-is-at-least-32-chars";
@@ -77,6 +79,7 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchIndicatorG.mockResolvedValue(new Map());
 		mockFetchCse.mockResolvedValue(new Map());
 		mockFetchCseFiles.mockResolvedValue(new Map());
+		mockFetchJointEval.mockResolvedValue(new Map());
 	});
 
 	it("should return 401 when Authorization header is missing", async () => {
@@ -296,8 +299,9 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.indicators.G).toBeNull();
 		expect(decl.indicators.F.annual).toHaveLength(4);
 		expect(decl.secondDeclaration.correction).toBeNull();
-		expect(decl.cseOpinions).toEqual([]);
-		expect(decl.cseFiles).toEqual([]);
+		expect(decl).not.toHaveProperty("cseOpinions");
+		expect(decl).not.toHaveProperty("cseFiles");
+		expect(decl).not.toHaveProperty("jointEvaluationFile");
 	});
 
 	it("should expose CSE opinion declarationNumber alongside type", async () => {
@@ -343,6 +347,23 @@ describe("GET /api/v1/export/declarations", () => {
 							type: "gap",
 							opinion: "unfavorable",
 							opinionDate: "2027-06-01",
+						},
+					],
+				],
+			]),
+		);
+		mockFetchCseFiles.mockResolvedValue(
+			new Map([
+				[
+					"123456789-2027",
+					[
+						{
+							id: "file-abc",
+							siren: "123456789",
+							year: 2027,
+							fileName: "avis.pdf",
+							filePath: "/s3/path",
+							uploadedAt: new Date("2027-03-10T08:30:00Z"),
 						},
 					],
 				],
@@ -432,10 +453,131 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(body.declarations[0].cseFiles).toEqual([
 			{
 				id: "file-abc",
-				fileName: "avis-cse-2027.pdf",
+				type: "cse_opinion",
+				fileName: "avis-cse-123456789-2027-1.pdf",
 				uploadedAt: "2027-03-10T08:30:00.000Z",
 				downloadUrl: "/api/v1/files/file-abc",
 			},
 		]);
+	});
+
+	it("should omit cseOpinions / cseFiles when no CSE file is attached", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "submitted",
+				compliancePath: null,
+				totalWomen: 100,
+				totalMen: 150,
+				secondDeclarationStatus: null,
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				companyName: "ACME Corp",
+				workforce: 250,
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: true,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+		mockFetchCse.mockResolvedValue(
+			new Map([
+				[
+					"decl-1",
+					[
+						{
+							declarationNumber: 1,
+							type: "accuracy",
+							opinion: "favorable",
+							opinionDate: "2027-03-01",
+						},
+					],
+				],
+			]),
+		);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = authedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.declarations[0]).not.toHaveProperty("cseOpinions");
+		expect(body.declarations[0]).not.toHaveProperty("cseFiles");
+	});
+
+	it("should include jointEvaluationFile with explicit name when uploaded", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "submitted",
+				compliancePath: null,
+				totalWomen: 100,
+				totalMen: 150,
+				secondDeclarationStatus: null,
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				companyName: "ACME Corp",
+				workforce: 250,
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: true,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+		mockFetchJointEval.mockResolvedValue(
+			new Map([
+				[
+					"123456789-2027",
+					[
+						{
+							id: "je-1",
+							siren: "123456789",
+							year: 2027,
+							fileName: "eval.pdf",
+							filePath: "/s3/je",
+							uploadedAt: new Date("2027-04-01T09:00:00Z"),
+						},
+					],
+				],
+			]),
+		);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = authedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		expect(mockFetchJointEval).toHaveBeenCalledWith([
+			{ siren: "123456789", year: 2027 },
+		]);
+		const body = await response.json();
+		expect(body.declarations[0].jointEvaluationFile).toEqual({
+			id: "je-1",
+			type: "joint_evaluation",
+			fileName: "evaluation-conjointe-123456789-2027.pdf",
+			uploadedAt: "2027-04-01T09:00:00.000Z",
+			downloadUrl: "/api/v1/files/je-1",
+		});
 	});
 });

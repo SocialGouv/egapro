@@ -186,14 +186,14 @@ describe("GET /api/v1/files", () => {
 		expect(body.files[0]).toEqual({
 			id: "cse-1",
 			type: "cse_opinion",
-			fileName: "avis-cse.pdf",
+			fileName: "avis-cse-123456789-2027-1.pdf",
 			uploadedAt: "2027-03-10T08:00:00.000Z",
 			downloadUrl: "/api/v1/files/cse-1",
 		});
 		expect(body.files[1]).toEqual({
 			id: "joint-1",
 			type: "joint_evaluation",
-			fileName: "evaluation.pdf",
+			fileName: "evaluation-conjointe-123456789-2027.pdf",
 			uploadedAt: "2027-03-12T09:00:00.000Z",
 			downloadUrl: "/api/v1/files/joint-1",
 		});
