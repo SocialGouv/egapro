@@ -93,9 +93,9 @@ async function apiExportDeclarationsHandler(
 		});
 
 		return Response.json({
-			dateBegin: date_begin,
-			dateEnd: dateEnd,
-			count: data.length,
+			date_debut: date_begin,
+			date_fin: dateEnd,
+			nombre: data.length,
 			declarations: data,
 		});
 	} catch (error) {

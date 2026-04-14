@@ -144,10 +144,10 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const body = await response.json();
-		expect(body.count).toBe(0);
+		expect(body.nombre).toBe(0);
 		expect(body.declarations).toEqual([]);
-		expect(body.dateBegin).toBe("2027-03-15");
-		expect(body.dateEnd).toBe("2027-03-16");
+		expect(body.date_debut).toBe("2027-03-15");
+		expect(body.date_fin).toBe("2027-03-16");
 		expect(mockFetchSubmitted).toHaveBeenCalledWith("2027-03-15", "2027-03-16");
 	});
 
@@ -160,7 +160,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const body = await response.json();
-		expect(body.dateEnd).toBe("2027-03-20");
+		expect(body.date_fin).toBe("2027-03-20");
 		expect(mockFetchSubmitted).toHaveBeenCalledWith("2027-03-15", "2027-03-20");
 	});
 
@@ -238,7 +238,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const body = await response.json();
-		expect(body.count).toBe(2);
+		expect(body.nombre).toBe(2);
 
 		expect(mockFetchIndicatorG).toHaveBeenCalledWith(["decl-1", "decl-2"]);
 		expect(mockFetchCse).toHaveBeenCalledWith(["decl-1", "decl-2"]);
@@ -288,20 +288,20 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const body = await response.json();
-		expect(body.count).toBe(1);
+		expect(body.nombre).toBe(1);
 
 		const decl = body.declarations[0];
-		expect(decl.siren).toBe("123456789");
-		expect(decl.declarant.email).toBe("jean@acme.fr");
-		expect(decl.indicators.A.annualWomen).toBe("35000");
-		expect(decl.indicators.A.annualMen).toBe("38000");
-		expect(decl.indicators.A.hourlyWomen).toBeNull();
-		expect(decl.indicators.G).toBeNull();
-		expect(decl.indicators.F.annual).toHaveLength(4);
-		expect(decl.secondDeclaration.correction).toBeNull();
-		expect(decl).not.toHaveProperty("cseOpinions");
-		expect(decl).not.toHaveProperty("cseFiles");
-		expect(decl).not.toHaveProperty("jointEvaluationFile");
+		expect(decl.SIREN).toBe("123456789");
+		expect(decl.Declarant.Email).toBe("jean@acme.fr");
+		expect(decl.Indicateurs.A.Rem_globale_annuelle_moyenne_F).toBe("35000");
+		expect(decl.Indicateurs.A.Rem_globale_annuelle_moyenne_H).toBe("38000");
+		expect(decl.Indicateurs.A.Taux_horaire_global_moyen_F).toBeNull();
+		expect(decl.Indicateurs.G).toBeNull();
+		expect(decl.Indicateurs.F.annuel.Seuil_Q1_Rem_globale).toBeNull();
+		expect(decl.Seconde_declaration.Correction).toBeNull();
+		expect(decl).not.toHaveProperty("Avis_CSE");
+		expect(decl).not.toHaveProperty("Fichiers_CSE");
+		expect(decl).not.toHaveProperty("Fichier_evaluation_conjointe");
 	});
 
 	it("should expose CSE opinion declarationNumber alongside type", async () => {
@@ -378,18 +378,18 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const body = await response.json();
-		expect(body.declarations[0].cseOpinions).toEqual([
+		expect(body.declarations[0].Avis_CSE).toEqual([
 			{
-				declarationNumber: 1,
-				type: "accuracy",
-				opinion: "favorable",
-				date: "2027-03-01",
+				Numero_declaration: 1,
+				Type: "accuracy",
+				Avis: "favorable",
+				Date: "2027-03-01",
 			},
 			{
-				declarationNumber: 2,
-				type: "gap",
-				opinion: "unfavorable",
-				date: "2027-06-01",
+				Numero_declaration: 2,
+				Type: "gap",
+				Avis: "unfavorable",
+				Date: "2027-06-01",
 			},
 		]);
 	});
@@ -450,13 +450,13 @@ describe("GET /api/v1/export/declarations", () => {
 			{ siren: "123456789", year: 2027 },
 		]);
 		const body = await response.json();
-		expect(body.declarations[0].cseFiles).toEqual([
+		expect(body.declarations[0].Fichiers_CSE).toEqual([
 			{
-				id: "file-abc",
-				type: "cse_opinion",
-				fileName: "avis-cse-2027.pdf",
-				uploadedAt: "2027-03-10T08:30:00.000Z",
-				downloadUrl: "/api/v1/files/file-abc",
+				Id: "file-abc",
+				Type: "cse_opinion",
+				Nom_fichier: "avis-cse-2027.pdf",
+				Date_upload: "2027-03-10T08:30:00.000Z",
+				URL_telechargement: "/api/v1/files/file-abc",
 			},
 		]);
 	});
@@ -512,8 +512,8 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const body = await response.json();
-		expect(body.declarations[0]).not.toHaveProperty("cseOpinions");
-		expect(body.declarations[0]).not.toHaveProperty("cseFiles");
+		expect(body.declarations[0]).not.toHaveProperty("Avis_CSE");
+		expect(body.declarations[0]).not.toHaveProperty("Fichiers_CSE");
 	});
 
 	it("should include jointEvaluationFile with explicit name when uploaded", async () => {
@@ -572,12 +572,12 @@ describe("GET /api/v1/export/declarations", () => {
 			{ siren: "123456789", year: 2027 },
 		]);
 		const body = await response.json();
-		expect(body.declarations[0].jointEvaluationFile).toEqual({
-			id: "je-1",
-			type: "joint_evaluation",
-			fileName: "eval.pdf",
-			uploadedAt: "2027-04-01T09:00:00.000Z",
-			downloadUrl: "/api/v1/files/je-1",
+		expect(body.declarations[0].Fichier_evaluation_conjointe).toEqual({
+			Id: "je-1",
+			Type: "joint_evaluation",
+			Nom_fichier: "eval.pdf",
+			Date_upload: "2027-04-01T09:00:00.000Z",
+			URL_telechargement: "/api/v1/files/je-1",
 		});
 	});
 });

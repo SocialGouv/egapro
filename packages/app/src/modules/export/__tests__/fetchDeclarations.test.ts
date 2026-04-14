@@ -82,89 +82,93 @@ const baseRow = {
 };
 
 describe("buildIndicators", () => {
-	it("should map indicator A columns", () => {
+	it("should map indicator A with GIP labels", () => {
 		const result = buildIndicators(baseRow);
 
-		expect(result.A.annualWomen).toBe("35000");
-		expect(result.A.annualMen).toBe("38000");
-		expect(result.A.hourlyWomen).toBe("18.50");
-		expect(result.A.hourlyMen).toBe("19.20");
+		expect(result.A.Rem_globale_annuelle_moyenne_F).toBe("35000");
+		expect(result.A.Rem_globale_annuelle_moyenne_H).toBe("38000");
+		expect(result.A.Taux_horaire_global_moyen_F).toBe("18.50");
+		expect(result.A.Taux_horaire_global_moyen_H).toBe("19.20");
 	});
 
-	it("should map indicator B columns", () => {
+	it("should map indicator B with GIP labels", () => {
 		const result = buildIndicators(baseRow);
 
-		expect(result.B.annualWomen).toBe("2500");
-		expect(result.B.annualMen).toBe("3200");
+		expect(result.B.Rem_variable_annuelle_moyenne_F).toBe("2500");
+		expect(result.B.Rem_variable_annuelle_moyenne_H).toBe("3200");
 	});
 
-	it("should map indicator C and D columns", () => {
+	it("should map indicator C and D with GIP labels", () => {
 		const result = buildIndicators(baseRow);
 
-		expect(result.C.annualWomen).toBe("33500");
-		expect(result.D.hourlyMen).toBe("1.40");
+		expect(result.C.Rem_globale_annuelle_médiane_F).toBe("33500");
+		expect(result.D.Taux_horaire_variable_médian_H).toBe("1.40");
 	});
 
-	it("should map indicator E columns", () => {
+	it("should map indicator E with GIP labels", () => {
 		const result = buildIndicators(baseRow);
 
-		expect(result.E.women).toBe("95");
-		expect(result.E.men).toBe("110");
+		expect(result.E.Effectif_F_rem_annuelle_variable).toBe("95");
+		expect(result.E.Effectif_H_rem_annuelle_variable).toBe("110");
 	});
 
-	it("should map indicator F quartiles with 4 entries per period", () => {
+	it("should expose indicator F as flat objects with thresholds + proportions", () => {
 		const result = buildIndicators(baseRow);
 
-		expect(result.F.annual).toHaveLength(4);
-		expect(result.F.annual[0]).toEqual({
-			threshold: "22000",
-			women: 35,
-			men: 28,
-		});
-		expect(result.F.annual[3]).toEqual({
-			threshold: null,
-			women: 27,
-			men: 35,
-		});
-		expect(result.F.hourly).toHaveLength(4);
-		expect(result.F.hourly[0]).toEqual({
-			threshold: "11.50",
-			women: 40,
-			men: 25,
-		});
+		// Q1 annual: women 35, men 28 → total 63; F = 35/63 = 0.5556, H = 28/63 = 0.4444
+		expect(result.F.annuel.Seuil_Q1_Rem_globale).toBe("22000");
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_F).toBe(
+			0.5556,
+		);
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_H).toBe(
+			0.4444,
+		);
+		// Q4 annual: threshold null, women 27 / men 35 → total 62
+		expect(result.F.annuel.Seuil_Q4_Rem_globale).toBeNull();
+		expect(result.F.annuel.Quartile4_Rem_globale_annuelle_proportion_F).toBe(
+			Math.round((27 / 62) * 10_000) / 10_000,
+		);
+		// Q1 hourly: women 40, men 25 → total 65
+		expect(result.F.horaire.Seuil_Q1_Taux_horaire_global).toBe("11.50");
+		expect(result.F.horaire.Quartile1_Taux_horaire_global_proportion_F).toBe(
+			Math.round((40 / 65) * 10_000) / 10_000,
+		);
 	});
 
-	it("should handle all null indicator columns gracefully", () => {
+	it("should return null proportions when counts are missing or quartile is empty", () => {
 		const nullRow = {
 			...baseRow,
 			indicatorAAnnualWomen: null,
 			indicatorAAnnualMen: null,
-			indicatorAHourlyWomen: null,
-			indicatorAHourlyMen: null,
 			indicatorEWomen: null,
 			indicatorEMen: null,
 			indicatorFAnnualThreshold1: null,
 			indicatorFAnnualWomen1: null,
 			indicatorFAnnualMen1: null,
-			indicatorFHourlyThreshold1: null,
-			indicatorFHourlyWomen1: null,
-			indicatorFHourlyMen1: null,
+			// Q2: both zero → total 0 → proportions must be null, not NaN
+			indicatorFAnnualWomen2: 0,
+			indicatorFAnnualMen2: 0,
 		};
 
 		const result = buildIndicators(nullRow);
 
-		expect(result.A.annualWomen).toBeNull();
-		expect(result.E.women).toBeNull();
-		expect(result.F.annual[0]).toEqual({
-			threshold: null,
-			women: null,
-			men: null,
-		});
+		expect(result.A.Rem_globale_annuelle_moyenne_F).toBeNull();
+		expect(result.E.Effectif_F_rem_annuelle_variable).toBeNull();
+		expect(result.F.annuel.Seuil_Q1_Rem_globale).toBeNull();
+		expect(
+			result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_F,
+		).toBeNull();
+		expect(
+			result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_H,
+		).toBeNull();
+		expect(
+			result.F.annuel.Quartile2_Rem_globale_annuelle_proportion_F,
+		).toBeNull();
 	});
 });
 
 describe("buildIndicatorG", () => {
-	it("should separate initial and correction entries", () => {
+	it("should separate initial and correction entries with French keys", () => {
 		const entries: IndicatorGEntry[] = [
 			{
 				categoryName: "Ouvriers",
@@ -202,9 +206,10 @@ describe("buildIndicatorG", () => {
 
 		expect(result.initial).toHaveLength(1);
 		expect(result.correction).toHaveLength(1);
-		expect(result.initial[0]?.categoryName).toBe("Ouvriers");
-		expect(result.initial[0]?.womenCount).toBe(40);
-		expect(result.correction[0]?.womenCount).toBe(42);
+		expect(result.initial[0]?.Nom_categorie).toBe("Ouvriers");
+		expect(result.initial[0]?.Effectif_F).toBe(40);
+		expect(result.correction[0]?.Effectif_F).toBe(42);
+		expect(result.initial[0]?.Rem_annuelle_base_F).toBe("24000");
 	});
 
 	it("should return empty arrays when no entries", () => {
@@ -216,31 +221,35 @@ describe("buildIndicatorG", () => {
 });
 
 describe("assembleDeclaration", () => {
-	it("should assemble a full declaration with all sections", () => {
+	it("should assemble a full declaration with French top-level keys", () => {
 		const result = assembleDeclaration(baseRow, [], []);
 
-		expect(result.siren).toBe("123456789");
-		expect(result.companyName).toBe("ACME Corp");
-		expect(result.declarant.email).toBe("jean@acme.fr");
-		expect(result.indicators.G).toBeNull();
-		expect(result.secondDeclaration.correction).toBeNull();
-		expect(result).not.toHaveProperty("cseOpinions");
-		expect(result).not.toHaveProperty("cseFiles");
-		expect(result).not.toHaveProperty("jointEvaluationFile");
-		expect(result.createdAt).toBe("2027-03-15T10:00:00.000Z");
+		expect(result.SIREN).toBe("123456789");
+		expect(result.Raison_sociale).toBe("ACME Corp");
+		expect(result.Effectif).toBe(250);
+		expect(result.CSE_existant).toBe(true);
+		expect(result.Annee).toBe(2027);
+		expect(result.Effectif_F_rem_annuelle_globale).toBe(100);
+		expect(result.Effectif_H_rem_annuelle_globale).toBe(150);
+		expect(result.Declarant.Email).toBe("jean@acme.fr");
+		expect(result.Indicateurs.G).toBeNull();
+		expect(result.Seconde_declaration.Correction).toBeNull();
+		expect(result).not.toHaveProperty("Avis_CSE");
+		expect(result).not.toHaveProperty("Fichiers_CSE");
+		expect(result).not.toHaveProperty("Fichier_evaluation_conjointe");
+		expect(result.Date_creation).toBe("2027-03-15T10:00:00.000Z");
 	});
 
-	it("should include indicator A–F values from declaration columns", () => {
+	it("should include indicator A–F values with GIP labels", () => {
 		const result = assembleDeclaration(baseRow, [], []);
 
-		expect(result.indicators.A.annualWomen).toBe("35000");
-		expect(result.indicators.B.hourlyMen).toBe("1.60");
-		expect(result.indicators.E.women).toBe("95");
-		expect(result.indicators.F.annual).toHaveLength(4);
-		expect(result.indicators.F.annual[0]?.threshold).toBe("22000");
+		expect(result.Indicateurs.A.Rem_globale_annuelle_moyenne_F).toBe("35000");
+		expect(result.Indicateurs.B.Taux_horaire_variable_moyen_H).toBe("1.60");
+		expect(result.Indicateurs.E.Effectif_F_rem_annuelle_variable).toBe("95");
+		expect(result.Indicateurs.F.annuel.Seuil_Q1_Rem_globale).toBe("22000");
 	});
 
-	it("should include indicator G initial in indicators and correction in secondDeclaration", () => {
+	it("should include indicator G initial in Indicateurs and correction in Seconde_declaration", () => {
 		const indicatorG: IndicatorGEntry[] = [
 			{
 				categoryName: "Cadres",
@@ -276,10 +285,10 @@ describe("assembleDeclaration", () => {
 
 		const result = assembleDeclaration(baseRow, indicatorG, []);
 
-		expect(result.indicators.G).toHaveLength(1);
-		expect(result.indicators.G?.[0]?.womenCount).toBe(50);
-		expect(result.secondDeclaration.correction).toHaveLength(1);
-		expect(result.secondDeclaration.correction?.[0]?.womenCount).toBe(52);
+		expect(result.Indicateurs.G).toHaveLength(1);
+		expect(result.Indicateurs.G?.[0]?.Effectif_F).toBe(50);
+		expect(result.Seconde_declaration.Correction).toHaveLength(1);
+		expect(result.Seconde_declaration.Correction?.[0]?.Effectif_F).toBe(52);
 	});
 
 	it("should map CSE opinions when at least one CSE file is present", () => {
@@ -304,17 +313,17 @@ describe("assembleDeclaration", () => {
 
 		const result = assembleDeclaration(baseRow, [], opinions, files);
 
-		expect(result.cseOpinions).toEqual([
+		expect(result.Avis_CSE).toEqual([
 			{
-				declarationNumber: 1,
-				type: "accuracy",
-				opinion: "favorable",
-				date: "2027-01-15",
+				Numero_declaration: 1,
+				Type: "accuracy",
+				Avis: "favorable",
+				Date: "2027-01-15",
 			},
 		]);
 	});
 
-	it("should omit cseOpinions when no CSE file is attached", () => {
+	it("should omit Avis_CSE when no CSE file is attached", () => {
 		const opinions: CseRow[] = [
 			{
 				declarationNumber: 1,
@@ -326,8 +335,8 @@ describe("assembleDeclaration", () => {
 
 		const result = assembleDeclaration(baseRow, [], opinions, []);
 
-		expect(result).not.toHaveProperty("cseOpinions");
-		expect(result).not.toHaveProperty("cseFiles");
+		expect(result).not.toHaveProperty("Avis_CSE");
+		expect(result).not.toHaveProperty("Fichiers_CSE");
 	});
 
 	it("should expose CSE files with type, stored fileName and download URLs", () => {
@@ -344,13 +353,13 @@ describe("assembleDeclaration", () => {
 
 		const result = assembleDeclaration(baseRow, [], [], files);
 
-		expect(result.cseFiles).toEqual([
+		expect(result.Fichiers_CSE).toEqual([
 			{
-				id: "file-xyz",
-				type: "cse_opinion",
-				fileName: "avis-cse-original.pdf",
-				uploadedAt: "2027-02-10T08:30:00.000Z",
-				downloadUrl: "/api/v1/files/file-xyz",
+				Id: "file-xyz",
+				Type: "cse_opinion",
+				Nom_fichier: "avis-cse-original.pdf",
+				Date_upload: "2027-02-10T08:30:00.000Z",
+				URL_telechargement: "/api/v1/files/file-xyz",
 			},
 		]);
 	});
@@ -367,12 +376,12 @@ describe("assembleDeclaration", () => {
 
 		const result = assembleDeclaration(baseRow, [], [], [], [file]);
 
-		expect(result.jointEvaluationFile).toEqual({
-			id: "je-1",
-			type: "joint_evaluation",
-			fileName: "eval-originale.pdf",
-			uploadedAt: "2027-04-01T09:00:00.000Z",
-			downloadUrl: "/api/v1/files/je-1",
+		expect(result.Fichier_evaluation_conjointe).toEqual({
+			Id: "je-1",
+			Type: "joint_evaluation",
+			Nom_fichier: "eval-originale.pdf",
+			Date_upload: "2027-04-01T09:00:00.000Z",
+			URL_telechargement: "/api/v1/files/je-1",
 		});
 	});
 
@@ -398,14 +407,14 @@ describe("assembleDeclaration", () => {
 
 		const result = assembleDeclaration(baseRow, [], [], [], files);
 
-		expect(result.jointEvaluationFile?.id).toBe("je-new");
+		expect(result.Fichier_evaluation_conjointe?.Id).toBe("je-new");
 	});
 
 	it("should handle null dates", () => {
 		const rowWithNullDates = { ...baseRow, createdAt: null, updatedAt: null };
 		const result = assembleDeclaration(rowWithNullDates, [], []);
 
-		expect(result.createdAt).toBeNull();
-		expect(result.updatedAt).toBeNull();
+		expect(result.Date_creation).toBeNull();
+		expect(result.Date_modification).toBeNull();
 	});
 });
