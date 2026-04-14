@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId } from "react";
-import { ReadOnlyTooltip, useIsImpersonating } from "~/modules/auth";
+import { useReadOnlyGuard } from "~/modules/auth";
 
 import styles from "./FormActions.module.scss";
 
@@ -23,8 +22,7 @@ export function FormActions({
 	nextDisabled = false,
 	className,
 }: FormActionsProps) {
-	const isImpersonating = useIsImpersonating();
-	const tooltipId = useId();
+	const { isReadOnly, buttonProps, tooltip } = useReadOnlyGuard();
 
 	return (
 		<div className={`fr-mt-4w ${styles.actions} ${className ?? ""}`}>
@@ -48,14 +46,14 @@ export function FormActions({
 			) : (
 				<span>
 					<button
-						aria-describedby={isImpersonating ? tooltipId : undefined}
+						{...buttonProps}
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={isImpersonating || isSubmitting || nextDisabled}
+						disabled={isReadOnly || isSubmitting || nextDisabled}
 						type="submit"
 					>
 						{isSubmitting ? "Enregistrement…" : nextLabel}
 					</button>
-					{isImpersonating ? <ReadOnlyTooltip id={tooltipId} /> : null}
+					{tooltip}
 				</span>
 			)}
 		</div>

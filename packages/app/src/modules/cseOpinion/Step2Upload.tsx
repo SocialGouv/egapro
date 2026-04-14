@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useState } from "react";
 
-import { ReadOnlyTooltip, useIsImpersonating } from "~/modules/auth";
+import { useReadOnlyGuard } from "~/modules/auth";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { FileUpload, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -29,8 +29,7 @@ export function Step2Upload({
 	const router = useRouter();
 	const utils = api.useUtils();
 	const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
-	const isImpersonating = useIsImpersonating();
-	const submitTooltipId = useId();
+	const submitGuard = useReadOnlyGuard();
 
 	const refreshFileList = useCallback(() => {
 		void utils.cseOpinion.getFiles.invalidate();
@@ -90,7 +89,6 @@ export function Step2Upload({
 					<ExistingFileCard
 						file={file}
 						isDeleting={deletingFileId === file.id}
-						isImpersonating={isImpersonating}
 						key={file.id}
 						onDelete={(fileId) => {
 							setDeletingFileId(fileId);
@@ -103,7 +101,7 @@ export function Step2Upload({
 					accept=".pdf"
 					acceptLabel="pdf"
 					allowedMimeTypes={["application/pdf"]}
-					disabled={isImpersonating}
+					disabled={submitGuard.isReadOnly}
 					error={uploadError}
 					inputId="cse-file-upload"
 					maxFiles={remainingSlots}
@@ -129,14 +127,14 @@ export function Step2Upload({
 					</Link>
 					<span>
 						<button
-							aria-describedby={isImpersonating ? submitTooltipId : undefined}
+							{...submitGuard.buttonProps}
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-							disabled={isPending || isImpersonating}
+							disabled={isPending || submitGuard.isReadOnly}
 							type="submit"
 						>
 							{isPending ? "Envoi en cours\u2026" : "Soumettre"}
 						</button>
-						{isImpersonating ? <ReadOnlyTooltip id={submitTooltipId} /> : null}
+						{submitGuard.tooltip}
 					</span>
 				</div>
 			</form>
@@ -154,17 +152,15 @@ export function Step2Upload({
 type ExistingFileCardProps = {
 	file: UploadedFile;
 	isDeleting: boolean;
-	isImpersonating: boolean;
 	onDelete: (fileId: string) => void;
 };
 
 function ExistingFileCard({
 	file,
 	isDeleting,
-	isImpersonating,
 	onDelete,
 }: ExistingFileCardProps) {
-	const tooltipId = useId();
+	const deleteGuard = useReadOnlyGuard();
 	return (
 		<div className="fr-card fr-card--no-border fr-p-3w fr-mb-2w">
 			<p className="fr-text--md fr-mb-0">{file.fileName}</p>
@@ -186,16 +182,16 @@ function ExistingFileCard({
 					</a>
 					<span>
 						<button
-							aria-describedby={isImpersonating ? tooltipId : undefined}
+							{...deleteGuard.buttonProps}
 							className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line fr-ml-1w"
-							disabled={isDeleting || isImpersonating}
+							disabled={isDeleting || deleteGuard.isReadOnly}
 							onClick={() => onDelete(file.id)}
 							title={`Supprimer ${file.fileName}`}
 							type="button"
 						>
 							{isDeleting ? "Suppression\u2026" : "Supprimer"}
 						</button>
-						{isImpersonating ? <ReadOnlyTooltip id={tooltipId} /> : null}
+						{deleteGuard.tooltip}
 					</span>
 				</div>
 			</div>
