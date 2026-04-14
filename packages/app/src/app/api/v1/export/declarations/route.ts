@@ -93,10 +93,10 @@ async function apiExportDeclarationsHandler(
 		});
 
 		return Response.json({
-			date_debut: date_begin,
-			date_fin: dateEnd,
-			nombre: data.length,
-			declarations: data,
+			Date_debut: date_begin,
+			Date_fin: dateEnd,
+			Nombre: data.length,
+			Declarations: data,
 		});
 	} catch (error) {
 		console.error("[api/v1/export/declarations]", error);

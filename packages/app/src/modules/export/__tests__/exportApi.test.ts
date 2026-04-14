@@ -144,10 +144,10 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const body = await response.json();
-		expect(body.nombre).toBe(0);
-		expect(body.declarations).toEqual([]);
-		expect(body.date_debut).toBe("2027-03-15");
-		expect(body.date_fin).toBe("2027-03-16");
+		expect(body.Nombre).toBe(0);
+		expect(body.Declarations).toEqual([]);
+		expect(body.Date_debut).toBe("2027-03-15");
+		expect(body.Date_fin).toBe("2027-03-16");
 		expect(mockFetchSubmitted).toHaveBeenCalledWith("2027-03-15", "2027-03-16");
 	});
 
@@ -160,7 +160,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const body = await response.json();
-		expect(body.date_fin).toBe("2027-03-20");
+		expect(body.Date_fin).toBe("2027-03-20");
 		expect(mockFetchSubmitted).toHaveBeenCalledWith("2027-03-15", "2027-03-20");
 	});
 
@@ -238,7 +238,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const body = await response.json();
-		expect(body.nombre).toBe(2);
+		expect(body.Nombre).toBe(2);
 
 		expect(mockFetchIndicatorG).toHaveBeenCalledWith(["decl-1", "decl-2"]);
 		expect(mockFetchCse).toHaveBeenCalledWith(["decl-1", "decl-2"]);
@@ -288,9 +288,9 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const body = await response.json();
-		expect(body.nombre).toBe(1);
+		expect(body.Nombre).toBe(1);
 
-		const decl = body.declarations[0];
+		const decl = body.Declarations[0];
 		expect(decl.SIREN).toBe("123456789");
 		expect(decl.Declarant.Email).toBe("jean@acme.fr");
 		expect(decl.Indicateurs.A.Rem_globale_annuelle_moyenne_F).toBe("35000");
@@ -378,7 +378,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const body = await response.json();
-		expect(body.declarations[0].Avis_CSE).toEqual([
+		expect(body.Declarations[0].Avis_CSE).toEqual([
 			{
 				Numero_declaration: 1,
 				Type: "accuracy",
@@ -450,7 +450,7 @@ describe("GET /api/v1/export/declarations", () => {
 			{ siren: "123456789", year: 2027 },
 		]);
 		const body = await response.json();
-		expect(body.declarations[0].Fichiers_CSE).toEqual([
+		expect(body.Declarations[0].Fichiers_CSE).toEqual([
 			{
 				Id: "file-abc",
 				Type: "cse_opinion",
@@ -512,8 +512,8 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const body = await response.json();
-		expect(body.declarations[0]).not.toHaveProperty("Avis_CSE");
-		expect(body.declarations[0]).not.toHaveProperty("Fichiers_CSE");
+		expect(body.Declarations[0]).not.toHaveProperty("Avis_CSE");
+		expect(body.Declarations[0]).not.toHaveProperty("Fichiers_CSE");
 	});
 
 	it("should include jointEvaluationFile with explicit name when uploaded", async () => {
@@ -572,7 +572,7 @@ describe("GET /api/v1/export/declarations", () => {
 			{ siren: "123456789", year: 2027 },
 		]);
 		const body = await response.json();
-		expect(body.declarations[0].Fichier_evaluation_conjointe).toEqual({
+		expect(body.Declarations[0].Fichier_evaluation_conjointe).toEqual({
 			Id: "je-1",
 			Type: "joint_evaluation",
 			Nom_fichier: "eval.pdf",

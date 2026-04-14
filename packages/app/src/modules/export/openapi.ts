@@ -428,22 +428,22 @@ export const openApiSpec = {
 								schema: {
 									type: "object",
 									properties: {
-										date_debut: {
+										Date_debut: {
 											type: "string",
 											format: "date",
 											example: "2026-03-01",
 										},
-										date_fin: {
+										Date_fin: {
 											type: "string",
 											format: "date",
 											example: "2026-03-24",
 										},
-										nombre: {
+										Nombre: {
 											type: "integer",
 											description: "Nombre de déclarations retournées",
 											example: 5,
 										},
-										declarations: { type: "array", items: declarationSchema },
+										Declarations: { type: "array", items: declarationSchema },
 									},
 								},
 							},
