@@ -74,7 +74,7 @@ function ExportButton() {
 	return (
 		<div className="fr-btns-group fr-btns-group--inline fr-btns-group--sm">
 			<button
-				className="fr-btn fr-btn--secondary fr-btn--sm fr-btn--icon-left fr-icon-download-line"
+				className="fr-btn fr-btn--secondary fr-btn--sm fr-icon-download-line fr-btn--icon-left"
 				disabled={isFetching}
 				onClick={() => handleExport("json")}
 				type="button"
@@ -82,7 +82,7 @@ function ExportButton() {
 				Export JSON
 			</button>
 			<button
-				className="fr-btn fr-btn--secondary fr-btn--sm fr-btn--icon-left fr-icon-download-line"
+				className="fr-btn fr-btn--secondary fr-btn--sm fr-icon-download-line fr-btn--icon-left"
 				disabled={isFetching}
 				onClick={() => handleExport("csv")}
 				type="button"
@@ -185,7 +185,7 @@ function ReferentsContent() {
 					<ul className="fr-btns-group fr-btns-group--inline">
 						<li>
 							<button
-								className="fr-btn fr-btn--icon-left fr-icon-add-circle-line"
+								className="fr-btn fr-icon-add-circle-line fr-btn--icon-left"
 								onClick={openCreate}
 								type="button"
 							>
@@ -194,7 +194,7 @@ function ReferentsContent() {
 						</li>
 						<li>
 							<button
-								className="fr-btn fr-btn--secondary fr-btn--icon-left fr-icon-upload-line"
+								className="fr-btn fr-btn--secondary fr-icon-upload-line fr-btn--icon-left"
 								onClick={openImport}
 								type="button"
 							>
@@ -218,7 +218,7 @@ function ReferentsContent() {
 			{selectedIds.size > 0 && (
 				<div className="fr-mb-2w">
 					<button
-						className="fr-btn fr-btn--secondary fr-btn--icon-left fr-icon-delete-line"
+						className="fr-btn fr-btn--secondary fr-icon-delete-line fr-btn--icon-left"
 						onClick={openDeleteModal}
 						type="button"
 					>

@@ -195,7 +195,7 @@ export function ReferentTable({
 							</td>
 							<td>
 								<button
-									className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-btn--icon-left fr-icon-edit-fill"
+									className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-edit-fill fr-btn--icon-left"
 									onClick={() => onEdit(row)}
 									type="button"
 								>
