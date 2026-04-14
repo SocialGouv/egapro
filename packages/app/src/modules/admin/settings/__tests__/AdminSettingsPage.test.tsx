@@ -53,7 +53,10 @@ describe("AdminSettingsPage", () => {
 			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("heading", { level: 2, name: /année de référence/i }),
+			screen.getByRole("heading", {
+				level: 2,
+				name: /année de campagne active/i,
+			}),
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("heading", { level: 2, name: /échéances de campagne/i }),

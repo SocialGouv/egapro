@@ -24,7 +24,7 @@ export async function AdminSettingsPage() {
 
 			<section aria-labelledby="active-year-heading" className="fr-mt-4w">
 				<h2 className="fr-h3" id="active-year-heading">
-					Année de référence
+					Année de campagne active
 				</h2>
 				<ActiveYearForm
 					fallbackYear={fallbackYear}

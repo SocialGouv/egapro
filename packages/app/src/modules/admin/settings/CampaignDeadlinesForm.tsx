@@ -109,7 +109,7 @@ export function CampaignDeadlinesForm({ initialYear, configuredYears }: Props) {
 		<>
 			<div className="fr-select-group fr-mb-3w">
 				<label className="fr-label" htmlFor="campaign-year-selector">
-					Année configurée
+					Année à éditer
 				</label>
 				<select
 					className="fr-select"

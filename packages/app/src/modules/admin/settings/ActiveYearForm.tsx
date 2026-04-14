@@ -53,7 +53,7 @@ export function ActiveYearForm({ initialActiveYear, fallbackYear }: Props) {
 				}
 			>
 				<label className="fr-label" htmlFor="active-campaign-year">
-					Année de référence active
+					Année de campagne active
 					<span className="fr-hint-text">
 						Année utilisée par défaut pour les déclarations et calculs.
 					</span>
@@ -82,7 +82,7 @@ export function ActiveYearForm({ initialActiveYear, fallbackYear }: Props) {
 					aria-live="polite"
 					className="fr-alert fr-alert--success fr-alert--sm fr-mt-2w"
 				>
-					<p>Année de référence enregistrée.</p>
+					<p>Année de campagne active enregistrée.</p>
 				</div>
 			)}
 			{status === "error" && serverError && (

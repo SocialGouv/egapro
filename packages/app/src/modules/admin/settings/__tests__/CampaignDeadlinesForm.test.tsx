@@ -96,7 +96,7 @@ describe("CampaignDeadlinesForm", () => {
 				initialYear={2026}
 			/>,
 		);
-		const select = screen.getByLabelText(/année configurée/i);
+		const select = screen.getByLabelText(/année à éditer/i);
 		const values = Array.from(select.querySelectorAll("option")).map(
 			(o) => o.value,
 		);

@@ -46,21 +46,21 @@ describe("ActiveYearForm", () => {
 
 	it("renders the input prefilled with the initial active year", () => {
 		render(<ActiveYearForm fallbackYear={2026} initialActiveYear={2025} />);
-		expect(screen.getByLabelText(/année de référence active/i)).toHaveValue(
+		expect(screen.getByLabelText(/année de campagne active/i)).toHaveValue(
 			2025,
 		);
 	});
 
 	it("falls back to the calendar year when no active year is configured", () => {
 		render(<ActiveYearForm fallbackYear={2028} initialActiveYear={null} />);
-		expect(screen.getByLabelText(/année de référence active/i)).toHaveValue(
+		expect(screen.getByLabelText(/année de campagne active/i)).toHaveValue(
 			2028,
 		);
 	});
 
 	it("rejects invalid years with a Zod error", async () => {
 		render(<ActiveYearForm fallbackYear={2026} initialActiveYear={2026} />);
-		const input = screen.getByLabelText(/année de référence active/i);
+		const input = screen.getByLabelText(/année de campagne active/i);
 		await userEvent.clear(input);
 		await userEvent.type(input, "1999");
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
@@ -72,7 +72,7 @@ describe("ActiveYearForm", () => {
 
 	it("submits valid input to the mutation", async () => {
 		render(<ActiveYearForm fallbackYear={2026} initialActiveYear={2026} />);
-		const input = screen.getByLabelText(/année de référence active/i);
+		const input = screen.getByLabelText(/année de campagne active/i);
 		await userEvent.clear(input);
 		await userEvent.type(input, "2027");
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
@@ -88,7 +88,7 @@ describe("ActiveYearForm", () => {
 		await mutationState.onSuccess?.();
 		await waitFor(() => {
 			expect(
-				screen.getByText(/année de référence enregistrée/i),
+				screen.getByText(/année de campagne active enregistrée/i),
 			).toBeInTheDocument();
 		});
 		expect(invalidateOverviewMock).toHaveBeenCalled();
