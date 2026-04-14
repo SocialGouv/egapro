@@ -72,7 +72,7 @@ function ExportButton() {
 	);
 
 	return (
-		<div className="fr-btns-group fr-btns-group--inline fr-btns-group--sm">
+		<div className="fr-btns-group fr-btns-group--inline fr-btns-group--sm fr-btns-group--icon-left">
 			<button
 				className="fr-btn fr-btn--secondary fr-btn--sm fr-icon-download-line fr-btn--icon-left"
 				disabled={isFetching}
@@ -182,7 +182,7 @@ function ReferentsContent() {
 			<SearchForm />
 			<div className="fr-grid-row fr-grid-row--middle fr-mb-2w">
 				<div className="fr-col">
-					<ul className="fr-btns-group fr-btns-group--inline">
+					<ul className="fr-btns-group fr-btns-group--inline fr-btns-group--icon-left">
 						<li>
 							<button
 								className="fr-btn fr-icon-add-circle-line fr-btn--icon-left"
