@@ -148,6 +148,35 @@ export function buildIndicatorG(entries: IndicatorGEntry[]): {
 	};
 }
 
+// ── File payload helpers (SUIT-facing) ───────────────────────────────
+
+export function buildCseFilePayload(file: FileRow) {
+	return {
+		id: file.id,
+		type: "cse_opinion" as const,
+		fileName: file.fileName,
+		uploadedAt: file.uploadedAt.toISOString(),
+		downloadUrl: `/api/v1/files/${file.id}`,
+	};
+}
+
+export function buildJointEvaluationFilePayload(file: FileRow) {
+	return {
+		id: file.id,
+		type: "joint_evaluation" as const,
+		fileName: file.fileName,
+		uploadedAt: file.uploadedAt.toISOString(),
+		downloadUrl: `/api/v1/files/${file.id}`,
+	};
+}
+
+function mostRecent(files: FileRow[]): FileRow | undefined {
+	if (files.length === 0) return undefined;
+	return [...files].sort(
+		(a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime(),
+	)[0];
+}
+
 // ── Assemble declaration response ────────────────────────────────────
 
 export function assembleDeclaration(
@@ -155,8 +184,12 @@ export function assembleDeclaration(
 	indicatorGEntries: IndicatorGEntry[],
 	opinions: CseRow[],
 	cseFiles: FileRow[] = [],
+	jointEvaluationFiles: FileRow[] = [],
 ) {
 	const { initial, correction } = buildIndicatorG(indicatorGEntries);
+
+	const hasCseFiles = cseFiles.length > 0;
+	const jointEvaluationFile = mostRecent(jointEvaluationFiles);
 
 	return {
 		siren: row.siren,
@@ -188,17 +221,19 @@ export function assembleDeclaration(
 			email: row.declarantEmail,
 			phone: row.declarantPhone,
 		},
-		cseOpinions: opinions.map((o) => ({
-			declarationNumber: o.declarationNumber,
-			type: o.type,
-			opinion: o.opinion,
-			date: o.opinionDate,
-		})),
-		cseFiles: cseFiles.map((f) => ({
-			id: f.id,
-			fileName: f.fileName,
-			uploadedAt: f.uploadedAt.toISOString(),
-			downloadUrl: `/api/v1/files/${f.id}`,
-		})),
+		// CSE opinions only surface alongside the files they refer to; without
+		// files, SUIT should not receive orphan opinion metadata.
+		...(hasCseFiles && {
+			cseOpinions: opinions.map((o) => ({
+				declarationNumber: o.declarationNumber,
+				type: o.type,
+				opinion: o.opinion,
+				date: o.opinionDate,
+			})),
+			cseFiles: cseFiles.map(buildCseFilePayload),
+		}),
+		...(jointEvaluationFile && {
+			jointEvaluationFile: buildJointEvaluationFilePayload(jointEvaluationFile),
+		}),
 	};
 }

@@ -222,7 +222,7 @@ const declarationSchema = {
 			type: "array",
 			items: cseOpinionSchema,
 			description:
-				"CSE opinions (PDF uploads, up to 4/year, companies >= 100 employees)",
+				"CSE opinions (PDF uploads, up to 4/year, companies >= 100 employees). Only present when at least one CSE file has been uploaded — absent otherwise.",
 		},
 		cseFiles: {
 			type: "array",
@@ -230,7 +230,16 @@ const declarationSchema = {
 				type: "object",
 				properties: {
 					id: { type: "string", description: "File unique identifier" },
-					fileName: { type: "string", example: "avis-cse-2026.pdf" },
+					type: {
+						type: "string",
+						enum: ["cse_opinion"],
+						description: "File type: CSE opinion",
+					},
+					fileName: {
+						type: "string",
+						description: "Original file name as uploaded by the company.",
+						example: "avis-cse-2026.pdf",
+					},
 					uploadedAt: { type: "string", format: "date-time" },
 					downloadUrl: {
 						type: "string",
@@ -241,7 +250,37 @@ const declarationSchema = {
 				},
 			},
 			description:
-				"CSE opinion files (PDF) attached to the declaration, with a download URL pointing to /api/v1/files/{fileId}",
+				"CSE opinion files attached to the declaration, with a download URL pointing to /api/v1/files/{fileId}. Absent when no file has been uploaded.",
+		},
+		jointEvaluationFile: {
+			oneOf: [
+				{
+					type: "object",
+					properties: {
+						id: { type: "string", description: "File unique identifier" },
+						type: {
+							type: "string",
+							enum: ["joint_evaluation"],
+							description: "File type: joint evaluation",
+						},
+						fileName: {
+							type: "string",
+							description: "Original file name as uploaded by the company.",
+							example: "evaluation-conjointe-2026.pdf",
+						},
+						uploadedAt: { type: "string", format: "date-time" },
+						downloadUrl: {
+							type: "string",
+							description:
+								"Relative URL to download the file via GET /api/v1/files/{fileId}",
+							example: "/api/v1/files/abc-123",
+						},
+					},
+				},
+				{ type: "null" },
+			],
+			description:
+				"Joint evaluation file attached to the declaration (cardinality 1). Absent when no file has been uploaded.",
 		},
 	},
 } as const;
@@ -255,7 +294,11 @@ const fileMetadataSchema = {
 			enum: ["cse_opinion", "joint_evaluation"],
 			description: "File type: CSE opinion or joint evaluation",
 		},
-		fileName: { type: "string", example: "avis-cse-2026.pdf" },
+		fileName: {
+			type: "string",
+			description: "Original file name as uploaded by the company.",
+			example: "avis-cse-2026.pdf",
+		},
 		uploadedAt: { type: "string", format: "date-time" },
 		downloadUrl: {
 			type: "string",
@@ -289,7 +332,7 @@ export const openApiSpec = {
 		title: "EGAPRO — API d'export",
 		description:
 			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une signature de requête (RSA-SHA256) et une clé API (Bearer token).",
-		version: "1.3.0",
+		version: "1.4.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},

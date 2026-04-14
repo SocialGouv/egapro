@@ -224,7 +224,9 @@ describe("assembleDeclaration", () => {
 		expect(result.declarant.email).toBe("jean@acme.fr");
 		expect(result.indicators.G).toBeNull();
 		expect(result.secondDeclaration.correction).toBeNull();
-		expect(result.cseOpinions).toEqual([]);
+		expect(result).not.toHaveProperty("cseOpinions");
+		expect(result).not.toHaveProperty("cseFiles");
+		expect(result).not.toHaveProperty("jointEvaluationFile");
 		expect(result.createdAt).toBe("2027-03-15T10:00:00.000Z");
 	});
 
@@ -280,7 +282,7 @@ describe("assembleDeclaration", () => {
 		expect(result.secondDeclaration.correction?.[0]?.womenCount).toBe(52);
 	});
 
-	it("should map CSE opinions", () => {
+	it("should map CSE opinions when at least one CSE file is present", () => {
 		const opinions: CseRow[] = [
 			{
 				declarationNumber: 1,
@@ -289,19 +291,6 @@ describe("assembleDeclaration", () => {
 				opinionDate: "2027-01-15",
 			},
 		];
-
-		const result = assembleDeclaration(baseRow, [], opinions);
-
-		expect(result.cseOpinions).toHaveLength(1);
-		expect(result.cseOpinions[0]).toEqual({
-			declarationNumber: 1,
-			type: "accuracy",
-			opinion: "favorable",
-			date: "2027-01-15",
-		});
-	});
-
-	it("should map CSE files with download URLs", () => {
 		const files = [
 			{
 				id: "file-xyz",
@@ -313,21 +302,103 @@ describe("assembleDeclaration", () => {
 			},
 		];
 
+		const result = assembleDeclaration(baseRow, [], opinions, files);
+
+		expect(result.cseOpinions).toEqual([
+			{
+				declarationNumber: 1,
+				type: "accuracy",
+				opinion: "favorable",
+				date: "2027-01-15",
+			},
+		]);
+	});
+
+	it("should omit cseOpinions when no CSE file is attached", () => {
+		const opinions: CseRow[] = [
+			{
+				declarationNumber: 1,
+				type: "accuracy",
+				opinion: "favorable",
+				opinionDate: "2027-01-15",
+			},
+		];
+
+		const result = assembleDeclaration(baseRow, [], opinions, []);
+
+		expect(result).not.toHaveProperty("cseOpinions");
+		expect(result).not.toHaveProperty("cseFiles");
+	});
+
+	it("should expose CSE files with type, stored fileName and download URLs", () => {
+		const files = [
+			{
+				id: "file-xyz",
+				siren: "123456789",
+				year: 2027,
+				fileName: "avis-cse-original.pdf",
+				filePath: "/s3/path",
+				uploadedAt: new Date("2027-02-10T08:30:00Z"),
+			},
+		];
+
 		const result = assembleDeclaration(baseRow, [], [], files);
 
 		expect(result.cseFiles).toEqual([
 			{
 				id: "file-xyz",
-				fileName: "avis-cse.pdf",
+				type: "cse_opinion",
+				fileName: "avis-cse-original.pdf",
 				uploadedAt: "2027-02-10T08:30:00.000Z",
 				downloadUrl: "/api/v1/files/file-xyz",
 			},
 		]);
 	});
 
-	it("should default cseFiles to empty array when not provided", () => {
-		const result = assembleDeclaration(baseRow, [], []);
-		expect(result.cseFiles).toEqual([]);
+	it("should expose the joint evaluation file with stored fileName", () => {
+		const file = {
+			id: "je-1",
+			siren: "123456789",
+			year: 2027,
+			fileName: "eval-originale.pdf",
+			filePath: "/s3/je",
+			uploadedAt: new Date("2027-04-01T09:00:00Z"),
+		};
+
+		const result = assembleDeclaration(baseRow, [], [], [], [file]);
+
+		expect(result.jointEvaluationFile).toEqual({
+			id: "je-1",
+			type: "joint_evaluation",
+			fileName: "eval-originale.pdf",
+			uploadedAt: "2027-04-01T09:00:00.000Z",
+			downloadUrl: "/api/v1/files/je-1",
+		});
+	});
+
+	it("should keep the most recent joint evaluation file when several exist", () => {
+		const files = [
+			{
+				id: "je-old",
+				siren: "123456789",
+				year: 2027,
+				fileName: "old.pdf",
+				filePath: "/s3/old",
+				uploadedAt: new Date("2027-03-01T09:00:00Z"),
+			},
+			{
+				id: "je-new",
+				siren: "123456789",
+				year: 2027,
+				fileName: "new.pdf",
+				filePath: "/s3/new",
+				uploadedAt: new Date("2027-06-01T09:00:00Z"),
+			},
+		];
+
+		const result = assembleDeclaration(baseRow, [], [], [], files);
+
+		expect(result.jointEvaluationFile?.id).toBe("je-new");
 	});
 
 	it("should handle null dates", () => {
