@@ -23,6 +23,8 @@ export function getSecondDeclarationDeadline(year: number): string {
 /** Returns default campaign deadlines for a given year (fallback when no DB config exists). */
 export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 	return {
+		gipPublicationDate: null,
+		campaignStartDate: null,
 		decl1ModificationDeadline: new Date(year, 5, 1),
 		decl1JustificationDeadline: new Date(year, 5, 1),
 		decl1JointEvaluationDeadline: new Date(year, 7, 1),

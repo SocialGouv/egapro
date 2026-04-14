@@ -12,6 +12,8 @@ export type CompanySize = "voluntary" | "triennial" | "annual";
 
 /** Configurable campaign deadlines. */
 export type CampaignDeadlines = {
+	gipPublicationDate: Date | null;
+	campaignStartDate: Date | null;
 	decl1ModificationDeadline: Date;
 	decl1JustificationDeadline: Date;
 	decl1JointEvaluationDeadline: Date;
