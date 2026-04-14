@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import type { Session } from "next-auth";
 
 /**
@@ -22,4 +23,25 @@ export function isImpersonatingSiren(
 ): boolean {
 	if (!session?.user?.isAdmin) return false;
 	return session.user.impersonation?.siren === siren;
+}
+
+/**
+ * Read-only guard for admin impersonation ("mimoquage").
+ *
+ * When an admin is impersonating a company, every write path (tRPC mutations,
+ * file uploads, create-on-read side effects) must be refused server-side so
+ * admins can diagnose issues without altering the user's data. The UI hides
+ * these actions too, but this assertion is the source of truth.
+ *
+ * Throws a `FORBIDDEN` `TRPCError` with a user-facing French message; Route
+ * Handlers can catch it and translate to HTTP 403.
+ */
+export function assertNotImpersonating(session: Session | null): void {
+	if (session?.user?.impersonation) {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message:
+				"Mode mimoquage actif : cette action est en lecture seule et ne peut pas être effectuée.",
+		});
+	}
 }

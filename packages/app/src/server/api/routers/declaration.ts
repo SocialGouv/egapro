@@ -10,7 +10,12 @@ import {
 } from "~/modules/declaration-remuneration/schemas";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import { getCurrentYear } from "~/modules/domain";
-import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
+import {
+	companyProcedure,
+	companyWriteProcedure,
+	createTRPCRouter,
+} from "~/server/api/trpc";
+import { assertNotImpersonating } from "~/server/auth/companyAccess";
 import {
 	declarations,
 	employeeCategories,
@@ -48,6 +53,11 @@ export const declarationRouter = createTRPCRouter({
 					...(await fetchAllCategories(tx, declaration.id)),
 				};
 			}
+
+			// Admins impersonating a company can view an existing declaration in
+			// read-only mode, but must not silently create a new draft in the
+			// user's name (issue #3230).
+			assertNotImpersonating(ctx.session);
 
 			const newDeclaration = await tx
 				.insert(declarations)
@@ -117,7 +127,7 @@ export const declarationRouter = createTRPCRouter({
 		};
 	}),
 
-	updateStep1: companyProcedure
+	updateStep1: companyWriteProcedure
 		.input(updateStep1Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -209,7 +219,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateStep2: companyProcedure
+	updateStep2: companyWriteProcedure
 		.input(updateStep2Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -234,7 +244,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateStep3: companyProcedure
+	updateStep3: companyWriteProcedure
 		.input(updateStep3Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -261,7 +271,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateStep4: companyProcedure
+	updateStep4: companyWriteProcedure
 		.input(updateStep4Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -302,7 +312,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateEmployeeCategories: companyProcedure
+	updateEmployeeCategories: companyWriteProcedure
 		.input(updateEmployeeCategoriesSchema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -395,7 +405,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	submitSecondDeclaration: companyProcedure.mutation(async ({ ctx }) => {
+	submitSecondDeclaration: companyWriteProcedure.mutation(async ({ ctx }) => {
 		const siren = ctx.siren;
 		const year = getCurrentYear();
 
@@ -411,7 +421,7 @@ export const declarationRouter = createTRPCRouter({
 		return { success: true };
 	}),
 
-	submit: companyProcedure.mutation(async ({ ctx }) => {
+	submit: companyWriteProcedure.mutation(async ({ ctx }) => {
 		const siren = ctx.siren;
 		const year = getCurrentYear();
 
@@ -427,7 +437,7 @@ export const declarationRouter = createTRPCRouter({
 		return { success: true };
 	}),
 
-	saveCompliancePath: companyProcedure
+	saveCompliancePath: companyWriteProcedure
 		.input(saveCompliancePathSchema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -444,7 +454,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	completeCompliancePath: companyProcedure.mutation(async ({ ctx }) => {
+	completeCompliancePath: companyWriteProcedure.mutation(async ({ ctx }) => {
 		const siren = ctx.siren;
 		const year = getCurrentYear();
 		const now = new Date();

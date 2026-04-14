@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
+import { ReadOnlyTooltip, useIsImpersonating } from "~/modules/auth";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
@@ -14,6 +15,8 @@ type Props = {
 export function UpdateCseModal({ siren }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const [hasCse, setHasCse] = useState<boolean | null>(null);
+	const isImpersonating = useIsImpersonating();
+	const tooltipId = useId();
 
 	const closeModal = useCallback(() => {
 		if (dialogRef.current) {
@@ -81,16 +84,28 @@ export function UpdateCseModal({ siren }: Props) {
 							<div className="fr-modal__footer">
 								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
 									<li>
-										<button
-											className="fr-btn"
-											disabled={hasCse === null || mutation.isPending}
-											onClick={handleSave}
-											type="button"
-										>
-											{mutation.isPending
-												? "Enregistrement\u2026"
-												: "Enregistrer"}
-										</button>
+										<span>
+											<button
+												aria-describedby={
+													isImpersonating ? tooltipId : undefined
+												}
+												className="fr-btn"
+												disabled={
+													hasCse === null ||
+													mutation.isPending ||
+													isImpersonating
+												}
+												onClick={handleSave}
+												type="button"
+											>
+												{mutation.isPending
+													? "Enregistrement\u2026"
+													: "Enregistrer"}
+											</button>
+											{isImpersonating ? (
+												<ReadOnlyTooltip id={tooltipId} />
+											) : null}
+										</span>
 									</li>
 									<li>
 										<button

@@ -1,8 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useId } from "react";
 import { Controller } from "react-hook-form";
 
+import { ReadOnlyTooltip, useIsImpersonating } from "~/modules/auth";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
@@ -43,6 +45,8 @@ export function Step1Opinions({
 }: Props) {
 	const isJointEvaluation = compliancePath === "joint_evaluation";
 	const router = useRouter();
+	const isImpersonating = useIsImpersonating();
+	const readOnlyTooltipId = useId();
 
 	const form = useZodForm(saveOpinionsSchema, {
 		defaultValues: {
@@ -243,13 +247,17 @@ export function Step1Opinions({
 				>
 					Précédent
 				</button>
-				<button
-					className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-					disabled={mutation.isPending}
-					type="submit"
-				>
-					{mutation.isPending ? "Enregistrement…" : "Suivant"}
-				</button>
+				<span>
+					<button
+						aria-describedby={isImpersonating ? readOnlyTooltipId : undefined}
+						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+						disabled={mutation.isPending || isImpersonating}
+						type="submit"
+					>
+						{mutation.isPending ? "Enregistrement…" : "Suivant"}
+					</button>
+					{isImpersonating ? <ReadOnlyTooltip id={readOnlyTooltipId} /> : null}
+				</span>
 			</div>
 		</form>
 	);
