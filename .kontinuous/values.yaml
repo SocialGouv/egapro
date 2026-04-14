@@ -5,6 +5,7 @@ app:
   ~chart: app
   ~needs:
     - pg
+    - valkey
   imagePackage: app
   probesPath: /api/healthz
   containerPort: 3000
@@ -44,6 +45,9 @@ app:
     - secretRef:
         name: "audit-cleanup"
         optional: true
+    - configMapRef:
+        name: "valkey"
+        optional: true
   env:
     - name: POSTGRES_HOST
       valueFrom:
@@ -81,6 +85,9 @@ app:
 
 pg:
   ~chart: pg
+
+valkey:
+  ~chart: redis
 
 clamav:
   ~chart: clamav

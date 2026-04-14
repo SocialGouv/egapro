@@ -2,6 +2,8 @@
  * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
  * for Docker builds.
  */
+import { fileURLToPath } from "node:url";
+
 import "./src/env.js";
 
 import { withSentryConfig } from "@sentry/nextjs";
@@ -9,6 +11,8 @@ import { withSentryConfig } from "@sentry/nextjs";
 /** @type {import("next").NextConfig} */
 const config = {
 	output: "standalone",
+	cacheHandler: fileURLToPath(new URL("./cache-handler.cjs", import.meta.url)),
+	cacheMaxMemorySize: 0,
 	outputFileTracingIncludes: {
 		"/api/gip-mds/mock": ["./data/mock-gip-mds.csv"],
 	},
