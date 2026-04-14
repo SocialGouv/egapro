@@ -135,6 +135,25 @@ describe("buildIndicators", () => {
 		);
 	});
 
+	it("should return null on both sides when only one gender count is null", () => {
+		// Half-missing data must not surface as 1.0/null — GIP consumers
+		// should see both as null to signal the data-quality issue.
+		const row = {
+			...baseRow,
+			indicatorFAnnualWomen1: 30,
+			indicatorFAnnualMen1: null,
+		};
+
+		const result = buildIndicators(row);
+
+		expect(
+			result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_F,
+		).toBeNull();
+		expect(
+			result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_H,
+		).toBeNull();
+	});
+
 	it("should return null proportions when counts are missing or quartile is empty", () => {
 		const nullRow = {
 			...baseRow,

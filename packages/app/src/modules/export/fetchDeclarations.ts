@@ -112,8 +112,7 @@ export function buildIndicators(row: DeclarationRow) {
 		Array.from({ length: 4 }, (_, i) => {
 			const women = annualF[i] ?? null;
 			const men = annualM[i] ?? null;
-			const total =
-				women === null && men === null ? null : (women ?? 0) + (men ?? 0);
+			const total = women !== null && men !== null ? women + men : null;
 			return [
 				[INDICATOR_F_ANNUAL_THRESHOLD_LABELS[i], annualThresholds[i] ?? null],
 				[INDICATOR_F_ANNUAL_WOMEN_LABELS[i], quartileProportion(women, total)],
@@ -126,8 +125,7 @@ export function buildIndicators(row: DeclarationRow) {
 		Array.from({ length: 4 }, (_, i) => {
 			const women = hourlyF[i] ?? null;
 			const men = hourlyM[i] ?? null;
-			const total =
-				women === null && men === null ? null : (women ?? 0) + (men ?? 0);
+			const total = women !== null && men !== null ? women + men : null;
 			return [
 				[INDICATOR_F_HOURLY_THRESHOLD_LABELS[i], hourlyThresholds[i] ?? null],
 				[INDICATOR_F_HOURLY_WOMEN_LABELS[i], quartileProportion(women, total)],
