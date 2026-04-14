@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { resendReceiptSchema, sendReceipt } from "~/modules/mail";
+import { resendReceiptSchema } from "~/modules/mail/schemas";
 import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
 
 export const mailRouter = createTRPCRouter({
@@ -15,6 +15,7 @@ export const mailRouter = createTRPCRouter({
 				});
 			}
 
+			const { sendReceipt } = await import("~/modules/mail/server");
 			await sendReceipt({
 				kind: input.kind,
 				to: email,

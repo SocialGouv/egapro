@@ -5,7 +5,6 @@ import {
 	saveOpinionsSchema,
 } from "~/modules/cseOpinion/schemas";
 import { getCurrentYear } from "~/modules/domain";
-import { sendReceipt } from "~/modules/mail";
 import { createTRPCRouter, declarationProcedure } from "~/server/api/trpc";
 import { cseOpinions, files } from "~/server/db/schema";
 import { deleteFile as deleteS3File } from "~/server/services/s3";
@@ -77,6 +76,7 @@ export const cseOpinionRouter = createTRPCRouter({
 
 			const email = ctx.session.user.email;
 			if (email) {
+				const { sendReceipt } = await import("~/modules/mail/server");
 				await sendReceipt({
 					kind: "cseOpinion",
 					to: email,

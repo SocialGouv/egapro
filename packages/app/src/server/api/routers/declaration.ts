@@ -10,7 +10,6 @@ import {
 } from "~/modules/declaration-remuneration/schemas";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import { getCurrentYear } from "~/modules/domain";
-import { sendReceipt } from "~/modules/mail";
 import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
 	declarations,
@@ -411,6 +410,7 @@ export const declarationRouter = createTRPCRouter({
 
 		const email = ctx.session.user.email;
 		if (email) {
+			const { sendReceipt } = await import("~/modules/mail/server");
 			await sendReceipt({
 				kind: "secondDeclaration",
 				to: email,
@@ -439,6 +439,7 @@ export const declarationRouter = createTRPCRouter({
 
 		const email = ctx.session.user.email;
 		if (email) {
+			const { sendReceipt } = await import("~/modules/mail/server");
 			await sendReceipt({
 				kind: "declaration",
 				to: email,
