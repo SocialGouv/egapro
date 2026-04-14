@@ -183,6 +183,13 @@
 			"when": 1775700000000,
 			"tag": "0025_add_user_is_admin",
 			"breakpoints": true
+		},
+		{
+			"idx": 26,
+			"version": "7",
+			"when": 1775800000000,
+			"tag": "0026_add_referents_table",
+			"breakpoints": true
 		}
 	]
 }
