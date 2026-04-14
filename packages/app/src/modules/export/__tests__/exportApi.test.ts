@@ -454,7 +454,7 @@ describe("GET /api/v1/export/declarations", () => {
 			{
 				id: "file-abc",
 				type: "cse_opinion",
-				fileName: "avis-cse-123456789-2027-1.pdf",
+				fileName: "avis-cse-2027.pdf",
 				uploadedAt: "2027-03-10T08:30:00.000Z",
 				downloadUrl: "/api/v1/files/file-abc",
 			},
@@ -575,7 +575,7 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(body.declarations[0].jointEvaluationFile).toEqual({
 			id: "je-1",
 			type: "joint_evaluation",
-			fileName: "evaluation-conjointe-123456789-2027.pdf",
+			fileName: "eval.pdf",
 			uploadedAt: "2027-04-01T09:00:00.000Z",
 			downloadUrl: "/api/v1/files/je-1",
 		});

@@ -68,12 +68,9 @@ async function apiFilesHandler(request: Request): Promise<Response> {
 		]);
 
 		const mapKey = `${siren}-${year}`;
-		const sortedCse = [...(cseFilesMap.get(mapKey) ?? [])].sort(
-			(a, b) => a.uploadedAt.getTime() - b.uploadedAt.getTime(),
-		);
-		const cseFiles = sortedCse.map((f, i) => buildCseFilePayload(f, i + 1));
-		const jointFiles = (jointFilesMap.get(mapKey) ?? []).map((f) =>
-			buildJointEvaluationFilePayload(f),
+		const cseFiles = (cseFilesMap.get(mapKey) ?? []).map(buildCseFilePayload);
+		const jointFiles = (jointFilesMap.get(mapKey) ?? []).map(
+			buildJointEvaluationFilePayload,
 		);
 
 		return Response.json({

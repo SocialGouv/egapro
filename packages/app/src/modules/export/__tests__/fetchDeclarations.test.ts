@@ -330,13 +330,13 @@ describe("assembleDeclaration", () => {
 		expect(result).not.toHaveProperty("cseFiles");
 	});
 
-	it("should expose CSE files with explicit names, type and download URLs", () => {
+	it("should expose CSE files with type, stored fileName and download URLs", () => {
 		const files = [
 			{
 				id: "file-xyz",
 				siren: "123456789",
 				year: 2027,
-				fileName: "original-name.pdf",
+				fileName: "avis-cse-original.pdf",
 				filePath: "/s3/path",
 				uploadedAt: new Date("2027-02-10T08:30:00Z"),
 			},
@@ -348,86 +348,19 @@ describe("assembleDeclaration", () => {
 			{
 				id: "file-xyz",
 				type: "cse_opinion",
-				fileName: "avis-cse-123456789-2027-1.pdf",
+				fileName: "avis-cse-original.pdf",
 				uploadedAt: "2027-02-10T08:30:00.000Z",
 				downloadUrl: "/api/v1/files/file-xyz",
 			},
 		]);
 	});
 
-	it("should number multiple CSE files by uploadedAt ascending", () => {
-		const files = [
-			{
-				id: "file-b",
-				siren: "123456789",
-				year: 2027,
-				fileName: "second.pdf",
-				filePath: "/s3/b",
-				uploadedAt: new Date("2027-06-10T08:30:00Z"),
-			},
-			{
-				id: "file-a",
-				siren: "123456789",
-				year: 2027,
-				fileName: "first.pdf",
-				filePath: "/s3/a",
-				uploadedAt: new Date("2027-02-10T08:30:00Z"),
-			},
-		];
-
-		const result = assembleDeclaration(baseRow, [], [], files);
-
-		expect(result.cseFiles?.map((f) => f.fileName)).toEqual([
-			"avis-cse-123456789-2027-1.pdf",
-			"avis-cse-123456789-2027-2.pdf",
-		]);
-		expect(result.cseFiles?.[0]?.id).toBe("file-a");
-	});
-
-	it("should fall back to pdf when the stored fileName has no extension", () => {
-		const files = [
-			{
-				id: "file-noext",
-				siren: "123456789",
-				year: 2027,
-				fileName: "noextension",
-				filePath: "/s3/1",
-				uploadedAt: new Date("2027-02-10T08:30:00Z"),
-			},
-		];
-
-		const result = assembleDeclaration(baseRow, [], [], files);
-
-		expect(result.cseFiles?.[0]?.fileName).toBe(
-			"avis-cse-123456789-2027-1.pdf",
-		);
-	});
-
-	it("should preserve original file extension for CSE files", () => {
-		const files = [
-			{
-				id: "file-1",
-				siren: "123456789",
-				year: 2027,
-				fileName: "scan.PDF",
-				filePath: "/s3/1",
-				uploadedAt: new Date("2027-02-10T08:30:00Z"),
-			},
-		];
-
-		const result = assembleDeclaration(baseRow, [], [], files);
-
-		expect(result.cseFiles?.[0]?.fileName).toBe(
-			"avis-cse-123456789-2027-1.pdf",
-		);
-	});
-
-	it("should expose the joint evaluation file with explicit name", () => {
+	it("should expose the joint evaluation file with stored fileName", () => {
 		const file = {
 			id: "je-1",
 			siren: "123456789",
 			year: 2027,
-			fileName: "eval.pdf",
+			fileName: "eval-originale.pdf",
 			filePath: "/s3/je",
 			uploadedAt: new Date("2027-04-01T09:00:00Z"),
 		};
@@ -437,7 +370,7 @@ describe("assembleDeclaration", () => {
 		expect(result.jointEvaluationFile).toEqual({
 			id: "je-1",
 			type: "joint_evaluation",
-			fileName: "evaluation-conjointe-123456789-2027.pdf",
+			fileName: "eval-originale.pdf",
 			uploadedAt: "2027-04-01T09:00:00.000Z",
 			downloadUrl: "/api/v1/files/je-1",
 		});

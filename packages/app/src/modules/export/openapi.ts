@@ -237,9 +237,8 @@ const declarationSchema = {
 					},
 					fileName: {
 						type: "string",
-						description:
-							"Explicit, SUIT-friendly file name: `avis-cse-{siren}-{year}-{n}.{ext}` (n starts at 1, ordered by upload date).",
-						example: "avis-cse-319159877-2026-1.pdf",
+						description: "Original file name as uploaded by the company.",
+						example: "avis-cse-2026.pdf",
 					},
 					uploadedAt: { type: "string", format: "date-time" },
 					downloadUrl: {
@@ -266,9 +265,8 @@ const declarationSchema = {
 						},
 						fileName: {
 							type: "string",
-							description:
-								"Explicit, SUIT-friendly file name: `evaluation-conjointe-{siren}-{year}.{ext}`.",
-							example: "evaluation-conjointe-319159877-2026.pdf",
+							description: "Original file name as uploaded by the company.",
+							example: "evaluation-conjointe-2026.pdf",
 						},
 						uploadedAt: { type: "string", format: "date-time" },
 						downloadUrl: {
@@ -298,9 +296,8 @@ const fileMetadataSchema = {
 		},
 		fileName: {
 			type: "string",
-			description:
-				"Explicit file name: `avis-cse-{siren}-{year}-{n}.{ext}` for CSE opinions, `evaluation-conjointe-{siren}-{year}.{ext}` for joint evaluations.",
-			example: "avis-cse-319159877-2026-1.pdf",
+			description: "Original file name as uploaded by the company.",
+			example: "avis-cse-2026.pdf",
 		},
 		uploadedAt: { type: "string", format: "date-time" },
 		downloadUrl: {
