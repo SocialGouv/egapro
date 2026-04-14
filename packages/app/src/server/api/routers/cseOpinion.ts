@@ -4,6 +4,8 @@ import {
 	deleteFileSchema,
 	saveOpinionsSchema,
 } from "~/modules/cseOpinion/schemas";
+import { getCurrentYear } from "~/modules/domain";
+import { sendReceipt } from "~/modules/mail";
 import { createTRPCRouter, declarationProcedure } from "~/server/api/trpc";
 import { cseOpinions, files } from "~/server/db/schema";
 import { deleteFile as deleteS3File } from "~/server/services/s3";
@@ -72,6 +74,18 @@ export const cseOpinionRouter = createTRPCRouter({
 
 				await tx.insert(cseOpinions).values(rows);
 			});
+
+			const email = ctx.session.user.email;
+			if (email) {
+				await sendReceipt({
+					kind: "cseOpinion",
+					to: email,
+					siren: ctx.siren,
+					year: getCurrentYear(),
+					userId: ctx.session.user.id,
+					isResend: false,
+				});
+			}
 
 			return { success: true };
 		}),

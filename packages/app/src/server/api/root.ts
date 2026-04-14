@@ -5,6 +5,7 @@ import { cseOpinionRouter } from "~/server/api/routers/cseOpinion";
 import { declarationRouter } from "~/server/api/routers/declaration";
 import { gipMdsRouter } from "~/server/api/routers/gipMds";
 import { jointEvaluationRouter } from "~/server/api/routers/jointEvaluation";
+import { mailRouter } from "~/server/api/routers/mail";
 import { profileRouter } from "~/server/api/routers/profile";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
@@ -21,6 +22,7 @@ export const appRouter = createTRPCRouter({
 	declaration: declarationRouter,
 	gipMds: gipMdsRouter,
 	jointEvaluation: jointEvaluationRouter,
+	mail: mailRouter,
 	profile: profileRouter,
 });
 

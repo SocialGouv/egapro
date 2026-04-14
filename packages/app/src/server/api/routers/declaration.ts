@@ -10,6 +10,7 @@ import {
 } from "~/modules/declaration-remuneration/schemas";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import { getCurrentYear } from "~/modules/domain";
+import { sendReceipt } from "~/modules/mail";
 import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
 	declarations,
@@ -408,6 +409,18 @@ export const declarationRouter = createTRPCRouter({
 			})
 			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
 
+		const email = ctx.session.user.email;
+		if (email) {
+			await sendReceipt({
+				kind: "secondDeclaration",
+				to: email,
+				siren,
+				year,
+				userId: ctx.session.user.id,
+				isResend: false,
+			});
+		}
+
 		return { success: true };
 	}),
 
@@ -423,6 +436,18 @@ export const declarationRouter = createTRPCRouter({
 				updatedAt: new Date(),
 			})
 			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+
+		const email = ctx.session.user.email;
+		if (email) {
+			await sendReceipt({
+				kind: "declaration",
+				to: email,
+				siren,
+				year,
+				userId: ctx.session.user.id,
+				isResend: false,
+			});
+		}
 
 		return { success: true };
 	}),

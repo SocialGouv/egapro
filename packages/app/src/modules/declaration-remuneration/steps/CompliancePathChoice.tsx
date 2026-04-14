@@ -253,6 +253,7 @@ export function CompliancePathChoice({
 						: campaignDeadlines.decl1ModificationDeadline
 				}
 				pdfDownloadHref={pdfDownloadHref}
+				year={currentYear}
 			/>
 
 			<h2 className="fr-h4 fr-mb-0">

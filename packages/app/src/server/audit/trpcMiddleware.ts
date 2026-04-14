@@ -49,6 +49,9 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,
+
+	// ── mail ──────────────────────────────────────────────
+	"mail.resendReceipt": AUDIT_ACTIONS.MAIL_RECEIPT_RESEND,
 };
 
 type SessionLike = {
