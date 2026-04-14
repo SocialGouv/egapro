@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maildev
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: maildev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: maildev
+  template:
+    metadata:
+      labels:
+        app: maildev
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: maildev
+          image: maildev/maildev:2.2.1
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: smtp
+              containerPort: 1025
+            - name: web
+              containerPort: 1080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: web
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maildev
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: maildev
+  ports:
+    - name: smtp
+      port: 1025
+      targetPort: smtp
+    - name: web
+      port: 1080
+      targetPort: web

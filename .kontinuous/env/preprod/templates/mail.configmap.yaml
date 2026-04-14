@@ -1,0 +1,9 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: mail
+data:
+  MAIL_ENABLED: "false"
+  SMTP_HOST: ""
+  SMTP_PORT: "1025"
+  MAIL_FROM: "no-reply@egapro.preprod.fabrique.social.gouv.fr"
