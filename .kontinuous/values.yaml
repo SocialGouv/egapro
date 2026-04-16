@@ -77,11 +77,17 @@ app:
         secretKeyRef:
           name: "{{ .Values.global.pgSecretName }}"
           key: PGSSLMODE
-    # SMTP (Tipimail in preprod/prod). The smtp-app sealed-secret is kept
-    # as-is from the V1 prod setup, with MAILER_* keys. We remap to the
-    # V2 SMTP_* names expected by src/env.js. `optional: true` lets dev
-    # review apps (no smtp-app secret) fall back to the values injected by
-    # the mail configmap (pointing at MailDev).
+    # SMTP (Tipimail in prod, MailDev on dev/preprod). The smtp-app
+    # sealed-secret is kept as-is from the V1 prod setup, with MAILER_*
+    # keys. We remap to the V2 SMTP_* names expected by src/env.js.
+    #
+    # Kubernetes precedence: `env` runs AFTER `envFrom`, so an `env` entry
+    # would normally override a same-named envFrom value. But with
+    # `optional: true` on a missing secret/key, the env entry is silently
+    # dropped and the envFrom value is preserved. That is exactly the
+    # fallback we rely on for dev/preprod review apps (no smtp-app
+    # secret) where SMTP_HOST, SMTP_PORT, etc. come from the `mail`
+    # configmap pointing at the in-cluster MailDev service.
     - name: SMTP_HOST
       valueFrom:
         secretKeyRef:
