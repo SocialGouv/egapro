@@ -68,9 +68,10 @@ describe("AdminNavigation", () => {
 	it("marks /admin/stats as active when on that page", () => {
 		(usePathname as Mock).mockReturnValue("/admin/stats");
 		render(<AdminNavigation />);
-		expect(
-			screen.getByRole("link", { name: "Statistiques" }),
-		).toHaveAttribute("aria-current", "page");
+		expect(screen.getByRole("link", { name: "Statistiques" })).toHaveAttribute(
+			"aria-current",
+			"page",
+		);
 		expect(screen.getByRole("link", { name: "Accueil" })).not.toHaveAttribute(
 			"aria-current",
 		);

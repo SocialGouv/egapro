@@ -45,11 +45,16 @@ export function AdminStatsPage() {
 				sizeRange={sizeRange}
 				year={year}
 			/>
-			<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
-				<div className="fr-col-12 fr-col-md-6">
-					<CampaignStatsTile sizeRange={sizeRange} year={year} />
+			<section aria-labelledby="stats-kpi-heading">
+				<h2 className="fr-h3 fr-mt-4w" id="stats-kpi-heading">
+					Indicateurs clés
+				</h2>
+				<div className="fr-grid-row fr-grid-row--gutters">
+					<div className="fr-col-12 fr-col-md-6">
+						<CampaignStatsTile sizeRange={sizeRange} year={year} />
+					</div>
 				</div>
-			</div>
+			</section>
 		</>
 	);
 }
