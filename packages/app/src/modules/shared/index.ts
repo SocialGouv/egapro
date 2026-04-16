@@ -1,3 +1,4 @@
+export { CompanySizeFilter } from "./CompanySizeFilter";
 export { FileUpload } from "./FileUpload";
 export { getDsfrModal } from "./getDsfrModal";
 export { parseSiren } from "./parseSiren";
