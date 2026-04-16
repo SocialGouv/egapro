@@ -60,3 +60,29 @@ spec:
     - name: web
       port: 1080
       targetPort: web
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: maildev
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - maildev-{{ .Values.global.host }}
+      secretName: maildev-tls
+  rules:
+    - host: maildev-{{ .Values.global.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: maildev
+                port:
+                  name: web
