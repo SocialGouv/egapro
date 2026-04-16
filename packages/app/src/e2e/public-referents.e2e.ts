@@ -2,9 +2,11 @@ import { expect, test } from "@playwright/test";
 
 import { deleteReferents, seedReferents } from "./helpers/db";
 
+// Fixed UUIDs so detail-page URLs (`/referents/[id]`) pass the
+// `z.string().uuid()` check in `publicReferents.getById`.
 const TEST_REFERENTS = [
 	{
-		id: "e2e-ref-idf-75-0000-000000000000",
+		id: "11111111-1111-4111-8111-111111111111",
 		region: "11",
 		county: "75",
 		name: "E2E Référent Paris",
@@ -15,7 +17,7 @@ const TEST_REFERENTS = [
 		substituteEmail: "e2e-paris-sub@dreets.test",
 	},
 	{
-		id: "e2e-ref-idf-92-0000-000000000000",
+		id: "22222222-2222-4222-8222-222222222222",
 		region: "11",
 		county: "92",
 		name: "E2E Référent Hauts-de-Seine",
@@ -26,7 +28,7 @@ const TEST_REFERENTS = [
 		substituteEmail: null,
 	},
 	{
-		id: "e2e-ref-bretagne-0000-000000000000",
+		id: "33333333-3333-4333-8333-333333333333",
 		region: "53",
 		county: "35",
 		name: "E2E Référent Rennes",
@@ -159,7 +161,7 @@ test.describe("public referents search", () => {
 		const anonCtx = await browser.newContext({ storageState: undefined });
 		try {
 			const page = await anonCtx.newPage();
-			await page.goto("/referents/e2e-ref-idf-92-0000-000000000000");
+			await page.goto("/referents/22222222-2222-4222-8222-222222222222");
 
 			const externalLink = page.getByRole("link", {
 				name: /dreets\.test\/contact-92/i,
