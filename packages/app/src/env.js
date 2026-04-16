@@ -88,6 +88,16 @@ export const env = createEnv({
 		SMTP_PORT: z.coerce.number().int().positive().default(1025),
 		SMTP_USER: z.string().optional(),
 		SMTP_PASS: z.string().optional(),
+		/**
+		 * `true` → connect with implicit TLS (port 465). `false` (default) keeps
+		 * the plain-socket / STARTTLS upgrade path used by MailDev (1025) and
+		 * Tipimail on 587. Accepts both "True"/"False" so the value inherited
+		 * from the V1 sealed-secret (MAILER_SMTP_SSL) flows through unchanged.
+		 */
+		SMTP_SECURE: z
+			.enum(["true", "false", "True", "False"])
+			.default("false")
+			.transform((v) => v.toLowerCase() === "true"),
 		MAIL_FROM: z.string().default("no-reply@egapro.local"),
 	},
 
@@ -145,6 +155,7 @@ export const env = createEnv({
 		SMTP_PORT: process.env.SMTP_PORT,
 		SMTP_USER: process.env.SMTP_USER,
 		SMTP_PASS: process.env.SMTP_PASS,
+		SMTP_SECURE: process.env.SMTP_SECURE,
 		MAIL_FROM: process.env.MAIL_FROM,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,

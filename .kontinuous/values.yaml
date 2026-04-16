@@ -77,6 +77,41 @@ app:
         secretKeyRef:
           name: "{{ .Values.global.pgSecretName }}"
           key: PGSSLMODE
+    # SMTP (Tipimail in preprod/prod). The smtp-app sealed-secret is kept
+    # as-is from the V1 prod setup, with MAILER_* keys. We remap to the
+    # V2 SMTP_* names expected by src/env.js. `optional: true` lets dev
+    # review apps (no smtp-app secret) fall back to the values injected by
+    # the mail configmap (pointing at MailDev).
+    - name: SMTP_HOST
+      valueFrom:
+        secretKeyRef:
+          name: smtp-app
+          key: MAILER_SMTP_HOST
+          optional: true
+    - name: SMTP_PORT
+      valueFrom:
+        secretKeyRef:
+          name: smtp-app
+          key: MAILER_SMTP_PORT
+          optional: true
+    - name: SMTP_USER
+      valueFrom:
+        secretKeyRef:
+          name: smtp-app
+          key: MAILER_SMTP_LOGIN
+          optional: true
+    - name: SMTP_PASS
+      valueFrom:
+        secretKeyRef:
+          name: smtp-app
+          key: MAILER_SMTP_PASSWORD
+          optional: true
+    - name: SMTP_SECURE
+      valueFrom:
+        secretKeyRef:
+          name: smtp-app
+          key: MAILER_SMTP_SSL
+          optional: true
   vars:
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
