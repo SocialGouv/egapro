@@ -11,6 +11,10 @@ function parseDate(dateStr: string): Date {
 	return new Date(`${dateStr}T00:00:00`);
 }
 
+function parseNullableDate(dateStr: string | null): Date | null {
+	return dateStr ? parseDate(dateStr) : null;
+}
+
 /**
  * Fetches campaign deadlines for a given year, falling back to hardcoded defaults.
  *
@@ -31,6 +35,8 @@ export const getCampaignDeadlines = cache(
 		}
 
 		return {
+			gipPublicationDate: parseNullableDate(row.gipPublicationDate),
+			campaignStartDate: parseNullableDate(row.campaignStartDate),
 			decl1ModificationDeadline: parseDate(row.decl1ModificationDeadline),
 			decl1JustificationDeadline: parseDate(row.decl1JustificationDeadline),
 			decl1JointEvaluationDeadline: parseDate(row.decl1JointEvaluationDeadline),
