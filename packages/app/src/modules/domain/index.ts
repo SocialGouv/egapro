@@ -53,6 +53,15 @@ export {
 	normalizeDecimalInput,
 	parseNumber,
 } from "./shared/number";
+export type { CountyCode, RegionCode } from "./shared/regions";
+// Regions & counties
+export {
+	COUNTIES,
+	COUNTY_CODES,
+	REGION_CODES,
+	REGIONS,
+	REGIONS_TO_COUNTIES,
+} from "./shared/regions";
 // SIREN utilities
 export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
 export type {

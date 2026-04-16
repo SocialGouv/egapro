@@ -5,7 +5,10 @@ import path from "node:path";
 
 import { env } from "~/env";
 
-import { FILE_TOO_LARGE_ERROR, MAX_FILE_SIZE } from "~/modules/shared";
+import {
+	FILE_TOO_LARGE_ERROR,
+	MAX_FILE_SIZE,
+} from "~/modules/shared/uploadConfig";
 
 import { createClamdStream, type ScanResult } from "./clamav";
 import { MIN_SIGNATURE_BYTES, validateFileSignature } from "./fileValidation";
