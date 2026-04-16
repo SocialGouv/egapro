@@ -8,8 +8,7 @@ const DISALLOWED_PATHS = [
 	"/avis-cse/",
 	"/login",
 	"/maintenance",
-	"/test-error",
-	"/test-panel",
+	"/test-",
 ];
 
 export function buildRobots(baseUrl: string): MetadataRoute.Robots {

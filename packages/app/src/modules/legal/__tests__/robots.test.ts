@@ -26,6 +26,8 @@ describe("buildRobots", () => {
 				"/declaration-remuneration/",
 				"/avis-cse/",
 				"/login",
+				"/maintenance",
+				"/test-",
 			]),
 		);
 	});
