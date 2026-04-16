@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback } from "react";
 
 import type { CountyCode, RegionCode } from "~/modules/domain";
-import { Breadcrumb } from "~/modules/layout";
+import { Breadcrumb } from "~/modules/layout/Breadcrumb";
 import { Pagination } from "~/modules/shared/Pagination";
 import { api } from "~/trpc/react";
 
