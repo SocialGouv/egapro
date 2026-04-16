@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Controller } from "react-hook-form";
 
 import { useReadOnlyGuard } from "~/modules/auth";
+import { getCurrentYear } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
@@ -126,6 +127,7 @@ export function Step1Opinions({
 				<SubmissionBanner
 					deadline={cseDeadline}
 					email={email ?? "adresse@exemple.fr"}
+					year={getCurrentYear()}
 				/>
 			)}
 

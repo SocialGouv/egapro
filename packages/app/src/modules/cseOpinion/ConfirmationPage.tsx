@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ComplianceCompletionEffect } from "~/modules/declaration-remuneration";
 import { DsfrPictogram } from "~/modules/layout";
+import { ResendReceiptButton } from "~/modules/mail";
 import styles from "./ConfirmationPage.module.scss";
 import formStyles from "./shared/formActions.module.scss";
 
@@ -64,9 +65,7 @@ export function ConfirmationPage({
 					Si ce n&apos;est pas le cas, vérifiez vos courriers indésirables ou
 					SPAM. Sinon, cliquez sur le bouton ci-dessous.
 				</p>
-				<button className="fr-btn fr-btn--tertiary fr-btn--sm" type="button">
-					Renvoyer l&apos;accusé de réception
-				</button>
+				<ResendReceiptButton kind="cseOpinion" year={declarationYear} />
 			</div>
 
 			<h2 className="fr-h5 fr-mb-3w">

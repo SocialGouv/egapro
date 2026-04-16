@@ -32,6 +32,11 @@ vi.mock("~/trpc/react", () => ({
 				},
 			},
 		},
+		mail: {
+			resendReceipt: {
+				useMutation: () => ({ mutate: vi.fn(), isPending: false }),
+			},
+		},
 	},
 }));
 

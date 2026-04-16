@@ -66,6 +66,10 @@ export const AUDIT_ACTIONS = {
 	EXPORT_API_DECLARATIONS: "export.api_declarations",
 	EXPORT_API_FILES: "export.api_files",
 
+	// ── Mail ───────────────────────────────────────────────
+	MAIL_RECEIPT_SEND: "mail.receipt_send",
+	MAIL_RECEIPT_RESEND: "mail.receipt_resend",
+
 	// ── Public searches ────────────────────────────────────
 	PUBLIC_REFERENT_SEARCH: "public_referents.search",
 	PUBLIC_REFERENT_VIEW: "public_referents.view",
@@ -125,6 +129,9 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.EXPORT_GENERATE]: "export",
 	[AUDIT_ACTIONS.EXPORT_API_DECLARATIONS]: "export",
 	[AUDIT_ACTIONS.EXPORT_API_FILES]: "export",
+
+	[AUDIT_ACTIONS.MAIL_RECEIPT_SEND]: "mutation",
+	[AUDIT_ACTIONS.MAIL_RECEIPT_RESEND]: "mutation",
 
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: "public_search",
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",

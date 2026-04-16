@@ -1,10 +1,12 @@
 import { formatLongDate } from "~/modules/domain";
+import { ResendReceiptButton } from "~/modules/mail";
 
 type Props = {
 	email: string;
 	isSecondDeclaration?: boolean;
 	modificationDeadline: Date;
 	pdfDownloadHref?: string;
+	year: number;
 };
 
 export function DeclarationSuccessBanner({
@@ -12,6 +14,7 @@ export function DeclarationSuccessBanner({
 	isSecondDeclaration = false,
 	modificationDeadline,
 	pdfDownloadHref,
+	year,
 }: Props) {
 	return (
 		<div className="fr-grid-row fr-grid-row--gutters fr-p-4w fr-background-alt--blue-france">
@@ -58,9 +61,10 @@ export function DeclarationSuccessBanner({
 						Si ce n'est pas le cas, vérifiez vos courriers indésirables ou SPAM.
 						Sinon, cliquez sur le bouton ci-dessous.
 					</p>
-					<button className="fr-btn fr-btn--tertiary fr-btn--sm" type="button">
-						Renvoyer l'accusé de réception
-					</button>
+					<ResendReceiptButton
+						kind={isSecondDeclaration ? "secondDeclaration" : "declaration"}
+						year={year}
+					/>
 				</div>
 			</div>
 		</div>

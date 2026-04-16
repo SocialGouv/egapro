@@ -232,6 +232,19 @@ export async function POST(request: Request): Promise<Response> {
 			userAgent: requestContext.userAgent,
 			durationMs: Date.now() - startedAt,
 		});
+		if (flowType === "cse_opinion" && userEmail) {
+			void (async () => {
+				const { sendReceipt } = await import("~/modules/mail/server");
+				await sendReceipt({
+					kind: "cseOpinion",
+					to: userEmail,
+					siren,
+					year,
+					userId,
+					isResend: false,
+				});
+			})();
+		}
 		return Response.json({
 			fileId: result.fileId,
 			fileName: result.fileName,
