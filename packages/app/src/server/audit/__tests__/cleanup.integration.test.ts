@@ -150,6 +150,32 @@ describe("cleanupAuditLogs (integration)", () => {
 		expect(await countRows()).toBe(2);
 	});
 
+	it("deletes public_search rows older than the short retention (bucket contains multiple categories)", async () => {
+		const now = new Date("2026-01-01T00:00:00Z");
+		// public_search, 200 d → above short threshold → deleted
+		await insertRow({
+			createdAt: new Date("2025-06-15T00:00:00Z"),
+			category: "public_search",
+			action: "public_referents.search",
+		});
+		// public_search, 100 d → below short threshold → kept
+		await insertRow({
+			createdAt: new Date("2025-09-23T00:00:00Z"),
+			category: "public_search",
+			action: "public_referents.search",
+		});
+
+		const result = await cleanupAuditLogs({
+			shortRetentionDays: 180,
+			longRetentionDays: 365,
+			now,
+		});
+
+		expect(result.deletedShort).toBe(1);
+		expect(result.deletedLong).toBe(0);
+		expect(await countRows()).toBe(1);
+	});
+
 	it("executes a real Date-based predicate without driver errors (regression guard)", async () => {
 		// Sanity check: the driver must accept a Date bind param. A previous
 		// revision used `sql\`... < ${date}\`` which crashed postgres-js with

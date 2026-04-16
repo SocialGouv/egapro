@@ -62,6 +62,10 @@ export const AUDIT_ACTIONS = {
 	EXPORT_API_DECLARATIONS: "export.api_declarations",
 	EXPORT_API_FILES: "export.api_files",
 
+	// ── Public searches ────────────────────────────────────
+	PUBLIC_REFERENT_SEARCH: "public_referents.search",
+	PUBLIC_REFERENT_VIEW: "public_referents.view",
+
 	// ── System / cron-triggered ────────────────────────────
 	SYSTEM_AUDIT_CLEANUP: "system.audit_cleanup",
 } as const;
@@ -115,6 +119,9 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.EXPORT_GENERATE]: "export",
 	[AUDIT_ACTIONS.EXPORT_API_DECLARATIONS]: "export",
 	[AUDIT_ACTIONS.EXPORT_API_FILES]: "export",
+
+	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: "public_search",
+	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",
 
 	[AUDIT_ACTIONS.SYSTEM_AUDIT_CLEANUP]: "system",
 };
