@@ -11,7 +11,13 @@ export {
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
 // Company size
-export { classifyCompanySize, isCseRequired } from "./shared/companySize";
+export {
+	COMPANY_SIZE_RANGES,
+	classifyCompanySize,
+	companySizeRangeSchema,
+	isCseRequired,
+	isObligatedForYear,
+} from "./shared/companySize";
 // Constants
 export {
 	COMPANY_SIZE_ANNUAL_MIN,
@@ -22,6 +28,8 @@ export {
 	FIRST_DECLARATION_YEAR,
 	GAP_ALERT_THRESHOLD,
 	MAX_CSE_FILES,
+	TRIENNIAL_ANCHOR_YEAR,
+	TRIENNIAL_CYCLE,
 } from "./shared/constants";
 // Declaration prerequisites
 export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";
@@ -31,10 +39,12 @@ export { computeDeclarationStatus } from "./shared/declarationStatus";
 export {
 	computePercentage,
 	computeProportion,
+	formatCount,
 	formatCurrency,
 	formatGap,
 	formatGapCompact,
 	formatLongDate,
+	formatPointsDelta,
 	formatShortDate,
 	formatShortDateTime,
 	formatTotal,
@@ -67,6 +77,7 @@ export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
 export type {
 	CampaignDeadlines,
 	CompanySize,
+	CompanySizeRange,
 	DeclarationStatus,
 	DeclarationType,
 	GapLevel,
