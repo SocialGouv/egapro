@@ -22,6 +22,7 @@ describe("AdminNavigation", () => {
 		expect(
 			screen.getByRole("link", { name: "Mimoquer un Siren" }),
 		).toBeInTheDocument();
+		expect(screen.getByRole("link", { name: "Référents" })).toBeInTheDocument();
 	});
 
 	it("marks /admin as active when on /admin", () => {
@@ -44,6 +45,18 @@ describe("AdminNavigation", () => {
 		expect(
 			screen.getByRole("link", { name: "Mimoquer un Siren" }),
 		).toHaveAttribute("aria-current", "page");
+		expect(screen.getByRole("link", { name: "Accueil" })).not.toHaveAttribute(
+			"aria-current",
+		);
+	});
+
+	it("marks /admin/liste-referents as active when on that page", () => {
+		(usePathname as Mock).mockReturnValue("/admin/liste-referents");
+		render(<AdminNavigation />);
+		expect(screen.getByRole("link", { name: "Référents" })).toHaveAttribute(
+			"aria-current",
+			"page",
+		);
 		expect(screen.getByRole("link", { name: "Accueil" })).not.toHaveAttribute(
 			"aria-current",
 		);
