@@ -8,6 +8,9 @@ export const metadata: Metadata = {
 		"Retrouvez toutes les ressources pour comprendre et réaliser votre déclaration des indicateurs d'égalité professionnelle.",
 };
 
+// Reads live campaign settings from the DB (admins can change them anytime).
+export const dynamic = "force-dynamic";
+
 export default function Page() {
 	return <AidePage />;
 }

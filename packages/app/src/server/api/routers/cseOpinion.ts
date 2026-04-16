@@ -4,7 +4,11 @@ import {
 	deleteFileSchema,
 	saveOpinionsSchema,
 } from "~/modules/cseOpinion/schemas";
-import { createTRPCRouter, declarationProcedure } from "~/server/api/trpc";
+import {
+	createTRPCRouter,
+	declarationProcedure,
+	declarationWriteProcedure,
+} from "~/server/api/trpc";
 import { cseOpinions, files } from "~/server/db/schema";
 import { deleteFile as deleteS3File } from "~/server/services/s3";
 
@@ -24,7 +28,7 @@ export const cseOpinionRouter = createTRPCRouter({
 		return { opinions: rows };
 	}),
 
-	saveOpinions: declarationProcedure
+	saveOpinions: declarationWriteProcedure
 		.input(saveOpinionsSchema)
 		.mutation(async ({ ctx, input }) => {
 			await ctx.db.transaction(async (tx) => {
@@ -94,7 +98,7 @@ export const cseOpinionRouter = createTRPCRouter({
 		return { files: rows };
 	}),
 
-	deleteFile: declarationProcedure
+	deleteFile: declarationWriteProcedure
 		.input(deleteFileSchema)
 		.mutation(async ({ ctx, input }) => {
 			const rows = await ctx.db

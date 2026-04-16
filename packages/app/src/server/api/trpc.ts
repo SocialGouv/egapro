@@ -15,6 +15,7 @@ import { getCurrentYear } from "~/modules/domain";
 import { parseSiren } from "~/modules/shared/parseSiren";
 import { auditMiddleware as runAuditMiddleware } from "~/server/audit/trpcMiddleware";
 import { auth } from "~/server/auth";
+import { assertNotImpersonating } from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
 import { declarations } from "~/server/db/schema";
 
@@ -183,6 +184,46 @@ export const companyProcedure = protectedProcedure.use(({ ctx, next }) => {
 });
 
 /**
+ * Company-scoped write procedure — same as {@link companyProcedure} plus the
+ * admin-impersonation read-only guard. Every tRPC mutation that writes
+ * company-scoped data MUST use this instead of `companyProcedure` so an
+ * admin currently mimoquing the company cannot alter the user's data
+ * (issue #3230).
+ */
+export const companyWriteProcedure = companyProcedure.use(({ ctx, next }) => {
+	assertNotImpersonating(ctx.session);
+	return next();
+});
+
+/**
+ * Resolve the current-year declaration for the given SIREN. Shared between
+ * `declarationProcedure` (reads) and `declarationWriteProcedure` (mutations)
+ * so the lookup logic stays in a single place. Throws `NOT_FOUND` when the
+ * declaration does not exist yet.
+ */
+async function fetchCurrentDeclarationId(
+	database: typeof db,
+	siren: string,
+): Promise<string> {
+	const year = getCurrentYear();
+	const rows = await database
+		.select({ id: declarations.id })
+		.from(declarations)
+		.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+		.limit(1);
+
+	const declaration = rows[0];
+	if (!declaration) {
+		throw new TRPCError({
+			code: "NOT_FOUND",
+			message: "Déclaration introuvable pour l'année en cours",
+		});
+	}
+
+	return declaration.id;
+}
+
+/**
  * Declaration procedure — company + current declaration resolved.
  *
  * Guarantees `ctx.declarationId` is the ID of the current year's declaration.
@@ -191,23 +232,25 @@ export const companyProcedure = protectedProcedure.use(({ ctx, next }) => {
  */
 export const declarationProcedure = companyProcedure.use(
 	async ({ ctx, next }) => {
-		const year = getCurrentYear();
-		const rows = await ctx.db
-			.select({ id: declarations.id })
-			.from(declarations)
-			.where(
-				and(eq(declarations.siren, ctx.siren), eq(declarations.year, year)),
-			)
-			.limit(1);
+		const declarationId = await fetchCurrentDeclarationId(ctx.db, ctx.siren);
+		return next({ ctx: { ...ctx, declarationId } });
+	},
+);
 
-		const declaration = rows[0];
-		if (!declaration) {
-			throw new TRPCError({
-				code: "NOT_FOUND",
-				message: "Déclaration introuvable pour l'année en cours",
-			});
-		}
-
-		return next({ ctx: { ...ctx, declarationId: declaration.id } });
+/**
+ * Declaration-scoped write procedure — same as {@link declarationProcedure}
+ * plus the admin-impersonation read-only guard. Use this for every mutation
+ * that writes declaration-scoped data (CSE opinions, joint evaluation files,
+ * etc.) so the data cannot be altered while an admin is mimoquing the
+ * company (issue #3230).
+ *
+ * The impersonation guard runs before the declaration lookup (inherited
+ * from `companyWriteProcedure`) so a blocked request never hits the
+ * database.
+ */
+export const declarationWriteProcedure = companyWriteProcedure.use(
+	async ({ ctx, next }) => {
+		const declarationId = await fetchCurrentDeclarationId(ctx.db, ctx.siren);
+		return next({ ctx: { ...ctx, declarationId } });
 	},
 );
