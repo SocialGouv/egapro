@@ -3,8 +3,10 @@ apiVersion: v1
 metadata:
   name: mail
 data:
-  # Kept false until a Tipimail preprod sealed-secret is generated for the
-  # egapro-preprod namespace. Flip to "true" once the smtp-app sealed-secret
-  # exists in this namespace.
-  MAIL_ENABLED: "false"
-  MAIL_FROM: "EgaPro preprod <no-reply@egapro.preprod.fabrique.social.gouv.fr>"
+  # Using MailDev as an in-cluster SMTP catcher until a Tipimail preprod
+  # sealed-secret is available. The UI is exposed at
+  # https://maildev-<global.host> via the maildev Ingress.
+  MAIL_ENABLED: "true"
+  SMTP_HOST: "maildev"
+  SMTP_PORT: "1025"
+  MAIL_FROM: "no-reply@egapro.preprod.fabrique.social.gouv.fr"
