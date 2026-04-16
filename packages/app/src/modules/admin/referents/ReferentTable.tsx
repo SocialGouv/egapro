@@ -1,10 +1,10 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import type { CountyCode, RegionCode } from "~/modules/domain";
 import { COUNTIES, REGIONS } from "~/modules/domain";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
+import { useSortableTable } from "~/modules/shared/useSortableTable";
 
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
@@ -34,8 +34,13 @@ export function ReferentTable({
 	onSelectionChange,
 	onEdit,
 }: Props) {
-	const router = useRouter();
-	const searchParams = useSearchParams();
+	const { handleSort, handlePageChange, ariaSort, sortIcon } = useSortableTable(
+		{
+			basePath: "/admin/liste-referents",
+			sortBy,
+			sortOrder,
+		},
+	);
 
 	const toggleOne = useCallback(
 		(id: string) => {
@@ -50,40 +55,9 @@ export function ReferentTable({
 		[selectedIds, onSelectionChange],
 	);
 
-	const handleSort = useCallback(
-		(column: SortColumn) => {
-			const params = new URLSearchParams(searchParams.toString());
-			if (sortBy === column) {
-				params.set("sortOrder", sortOrder === "asc" ? "desc" : "asc");
-			} else {
-				params.set("sortBy", column);
-				params.set("sortOrder", "asc");
-			}
-			params.set("page", "1");
-			router.push(`/admin/liste-referents?${params.toString()}`);
-		},
-		[searchParams, sortBy, sortOrder, router],
-	);
-
-	const handlePageChange = useCallback(
-		(newPage: number) => {
-			const params = new URLSearchParams(searchParams.toString());
-			params.set("page", String(newPage));
-			router.push(`/admin/liste-referents?${params.toString()}`);
-		},
-		[searchParams, router],
-	);
-
-	const ariaSort = (column: SortColumn) => {
-		if (sortBy !== column) return undefined;
-		return sortOrder === "asc"
-			? ("ascending" as const)
-			: ("descending" as const);
-	};
-
-	const sortIcon = (column: SortColumn) => {
-		if (sortBy !== column) return null;
-		return <span aria-hidden="true">{sortOrder === "asc" ? " ▲" : " ▼"}</span>;
+	const renderSortIcon = (column: SortColumn) => {
+		const icon = sortIcon(column);
+		return icon ? <span aria-hidden="true">{icon}</span> : null;
 	};
 
 	return (
@@ -108,7 +82,7 @@ export function ReferentTable({
 									type="button"
 								>
 									{COLUMN_LABELS[col] ?? col}
-									{sortIcon(col)}
+									{renderSortIcon(col)}
 								</button>
 							</th>
 						))}
