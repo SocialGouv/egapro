@@ -365,6 +365,59 @@ export async function deleteCampaignDeadlines(year: number) {
 	}
 }
 
+type ReferentSeed = {
+	id: string;
+	region: string;
+	county: string | null;
+	name: string;
+	type: "email" | "url";
+	value: string;
+	principal: boolean;
+	substituteName: string | null;
+	substituteEmail: string | null;
+};
+
+/** Insert or update a list of referents (used by public referents E2E tests). */
+export async function seedReferents(rows: ReferentSeed[]) {
+	const sql = createConnection();
+	try {
+		for (const r of rows) {
+			await sql`
+				INSERT INTO app_referent (
+					id, region, county, name, type, value, principal,
+					substitute_name, substitute_email, created_at, updated_at
+				) VALUES (
+					${r.id}, ${r.region}, ${r.county}, ${r.name}, ${r.type},
+					${r.value}, ${r.principal},
+					${r.substituteName}, ${r.substituteEmail}, NOW(), NOW()
+				)
+				ON CONFLICT (id) DO UPDATE SET
+					region = EXCLUDED.region,
+					county = EXCLUDED.county,
+					name = EXCLUDED.name,
+					type = EXCLUDED.type,
+					value = EXCLUDED.value,
+					principal = EXCLUDED.principal,
+					substitute_name = EXCLUDED.substitute_name,
+					substitute_email = EXCLUDED.substitute_email
+			`;
+		}
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Remove referents by id (used by public referents E2E tests). */
+export async function deleteReferents(ids: string[]) {
+	if (ids.length === 0) return;
+	const sql = createConnection();
+	try {
+		await sql`DELETE FROM app_referent WHERE id = ANY(${ids})`;
+	} finally {
+		await sql.end();
+	}
+}
+
 /** Clear or set the phone number for the test user (identified via user_company link to TEST_SIREN). */
 export async function setUserPhone(phone: string | null) {
 	const sql = createConnection();

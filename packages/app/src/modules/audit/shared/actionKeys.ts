@@ -70,6 +70,10 @@ export const AUDIT_ACTIONS = {
 	MAIL_RECEIPT_SEND: "mail.receipt_send",
 	MAIL_RECEIPT_RESEND: "mail.receipt_resend",
 
+	// ── Public searches ────────────────────────────────────
+	PUBLIC_REFERENT_SEARCH: "public_referents.search",
+	PUBLIC_REFERENT_VIEW: "public_referents.view",
+
 	// ── System / cron-triggered ────────────────────────────
 	SYSTEM_AUDIT_CLEANUP: "system.audit_cleanup",
 } as const;
@@ -128,6 +132,9 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.MAIL_RECEIPT_SEND]: "mutation",
 	[AUDIT_ACTIONS.MAIL_RECEIPT_RESEND]: "mutation",
+
+	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: "public_search",
+	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",
 
 	[AUDIT_ACTIONS.SYSTEM_AUDIT_CLEANUP]: "system",
 };

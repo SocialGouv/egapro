@@ -1,6 +1,7 @@
 import "server-only";
 
-import { and, eq, lt, ne } from "drizzle-orm";
+import { and, inArray, lt, notInArray } from "drizzle-orm";
+import { SHORT_RETENTION_CATEGORIES } from "~/modules/audit";
 import { db } from "~/server/db";
 import { actionLogs } from "~/server/db/auditSchema";
 
@@ -14,8 +15,9 @@ export type CleanupResult = {
  * Delete every `audit.action_log` row older than its retention threshold.
  *
  * Two CNIL-compliant buckets:
- *  - **short** retention applies to `read_sensitive` (high-volume access logs
- *    that contain IP addresses).
+ *  - **short** retention applies to the categories listed in
+ *    `SHORT_RETENTION_CATEGORIES` (high-volume access logs that contain IP
+ *    addresses — e.g. `read_sensitive`, `public_search`).
  *  - **long** retention applies to every other category (security logs).
  *
  * Both DELETEs run inside a single transaction so the operation is atomic —
@@ -33,13 +35,14 @@ export async function cleanupAuditLogs({
 }): Promise<CleanupResult> {
 	const shortThreshold = subtractDays(now, shortRetentionDays);
 	const longThreshold = subtractDays(now, longRetentionDays);
+	const shortCategories = [...SHORT_RETENTION_CATEGORIES];
 
 	const [shortResult, longResult] = await db.transaction(async (tx) => {
 		const short = await tx
 			.delete(actionLogs)
 			.where(
 				and(
-					eq(actionLogs.category, "read_sensitive"),
+					inArray(actionLogs.category, shortCategories),
 					lt(actionLogs.createdAt, shortThreshold),
 				),
 			);
@@ -47,7 +50,7 @@ export async function cleanupAuditLogs({
 			.delete(actionLogs)
 			.where(
 				and(
-					ne(actionLogs.category, "read_sensitive"),
+					notInArray(actionLogs.category, shortCategories),
 					lt(actionLogs.createdAt, longThreshold),
 				),
 			);
