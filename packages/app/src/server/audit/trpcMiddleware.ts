@@ -46,6 +46,7 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	// ── admin sensitive reads ─────────────────────────────
 	"adminDeclarations.search": AUDIT_ACTIONS.ADMIN_DECLARATIONS_SEARCH,
 	"adminDeclarations.getById": AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID,
+	"admin.getCampaignStats": AUDIT_ACTIONS.ADMIN_CAMPAIGN_STATS_READ,
 
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,

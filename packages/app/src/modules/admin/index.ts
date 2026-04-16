@@ -7,6 +7,8 @@ export {
 export { ImpersonatePage } from "./impersonate/ImpersonatePage";
 export { AdminReferentsPage } from "./referents";
 export {
+	type CampaignStatsInput,
+	campaignStatsSchema,
 	type ImpersonateSearchInput,
 	impersonateSearchSchema,
 	sirenSchema,
