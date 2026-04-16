@@ -75,9 +75,7 @@ test.describe("public referents search", () => {
 			await page.getByRole("button", { name: /^rechercher$/i }).click();
 
 			await expect(page.getByText("E2E Référent Paris")).toBeVisible();
-			await expect(
-				page.getByText("E2E Référent Hauts-de-Seine"),
-			).toBeVisible();
+			await expect(page.getByText("E2E Référent Hauts-de-Seine")).toBeVisible();
 			await expect(page.getByText("E2E Référent Rennes")).not.toBeVisible();
 		} finally {
 			await anonCtx.close();
@@ -121,9 +119,7 @@ test.describe("public referents search", () => {
 			const page = await anonCtx.newPage();
 			await page.goto("/referents");
 			await expect(page.getByText("E2E Référent Paris")).toBeVisible();
-			await expect(
-				page.getByText("e2e-paris@dreets.test"),
-			).not.toBeVisible();
+			await expect(page.getByText("e2e-paris@dreets.test")).not.toBeVisible();
 			await expect(
 				page.getByText("e2e-paris-sub@dreets.test"),
 			).not.toBeVisible();

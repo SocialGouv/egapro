@@ -59,7 +59,9 @@ describe("PublicReferentsSearchForm", () => {
 				expect.stringMatching(/\/referents\?.*region=11/),
 			);
 		});
-		expect(mockPush).toHaveBeenCalledWith(expect.stringMatching(/query=durand/));
+		expect(mockPush).toHaveBeenCalledWith(
+			expect.stringMatching(/query=durand/),
+		);
 		expect(mockPush).toHaveBeenCalledWith(expect.stringMatching(/page=1/));
 	});
 

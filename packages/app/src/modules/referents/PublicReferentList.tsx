@@ -44,6 +44,7 @@ export function PublicReferentList({ rows }: Props) {
 							</div>
 							<div className="fr-col-auto">
 								<Link
+									aria-label={`Voir le contact de ${row.name}`}
 									className="fr-btn fr-btn--secondary fr-btn--sm"
 									href={`/referents/${row.id}`}
 								>

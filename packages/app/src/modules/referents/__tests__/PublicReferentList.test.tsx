@@ -50,9 +50,13 @@ describe("PublicReferentList", () => {
 
 	it("renders a link to the detail page for each referent (no contact shown)", () => {
 		render(<PublicReferentList rows={sampleRows} />);
-		const links = screen.getAllByRole("link", { name: /voir le contact/i });
-		expect(links).toHaveLength(2);
-		expect(links[0]).toHaveAttribute("href", "/referents/r-1");
-		expect(links[1]).toHaveAttribute("href", "/referents/r-2");
+		const marieLink = screen.getByRole("link", {
+			name: /voir le contact de marie durand/i,
+		});
+		expect(marieLink).toHaveAttribute("href", "/referents/r-1");
+		const paulLink = screen.getByRole("link", {
+			name: /voir le contact de paul martin/i,
+		});
+		expect(paulLink).toHaveAttribute("href", "/referents/r-2");
 	});
 });
