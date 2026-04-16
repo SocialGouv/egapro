@@ -1,12 +1,13 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	assembleDeclaration,
+	exportDeclarationsQuerySchema,
 	fetchCseFilesByDeclaration,
 	fetchCseOpinionsByDeclaration,
 	fetchIndicatorGByDeclaration,
+	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,
-} from "~/modules/export/fetchDeclarations";
-import { exportDeclarationsQuerySchema } from "~/modules/export/schemas";
+} from "~/modules/export";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { verifySuitAuth } from "~/server/services/suitApiAuth";
 
@@ -67,29 +68,35 @@ async function apiExportDeclarationsHandler(
 		const rows = await fetchSubmittedDeclarations(date_begin, dateEnd);
 
 		const declarationIds = rows.map((r) => r.declarationId);
+		const sirenYearKeys = rows.map((r) => ({
+			siren: r.siren,
+			year: r.year,
+		}));
 
-		const [indicatorGMap, cseMap, cseFilesMap] = await Promise.all([
-			fetchIndicatorGByDeclaration(declarationIds),
-			fetchCseOpinionsByDeclaration(declarationIds),
-			fetchCseFilesByDeclaration(
-				rows.map((r) => ({ siren: r.siren, year: r.year })),
-			),
-		]);
+		const [indicatorGMap, cseMap, cseFilesMap, jointEvalFilesMap] =
+			await Promise.all([
+				fetchIndicatorGByDeclaration(declarationIds),
+				fetchCseOpinionsByDeclaration(declarationIds),
+				fetchCseFilesByDeclaration(sirenYearKeys),
+				fetchJointEvaluationFilesByDeclaration(sirenYearKeys),
+			]);
 
 		const data = rows.map((row) => {
+			const key = `${row.siren}-${row.year}`;
 			return assembleDeclaration(
 				row,
 				indicatorGMap.get(row.declarationId) ?? [],
 				cseMap.get(row.declarationId) ?? [],
-				cseFilesMap.get(`${row.siren}-${row.year}`) ?? [],
+				cseFilesMap.get(key) ?? [],
+				jointEvalFilesMap.get(key) ?? [],
 			);
 		});
 
 		return Response.json({
-			dateBegin: date_begin,
-			dateEnd: dateEnd,
-			count: data.length,
-			declarations: data,
+			Date_debut: date_begin,
+			Date_fin: dateEnd,
+			Nombre: data.length,
+			Declarations: data,
 		});
 	} catch (error) {
 		console.error("[api/v1/export/declarations]", error);

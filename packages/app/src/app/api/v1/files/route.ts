@@ -1,6 +1,8 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { parseSiren } from "~/modules/domain";
 import {
+	buildCseFilePayload,
+	buildJointEvaluationFilePayload,
 	exportFilesQuerySchema,
 	fetchCseFilesByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
@@ -66,20 +68,10 @@ async function apiFilesHandler(request: Request): Promise<Response> {
 		]);
 
 		const mapKey = `${siren}-${year}`;
-		const cseFiles = (cseFilesMap.get(mapKey) ?? []).map((f) => ({
-			id: f.id,
-			type: "cse_opinion" as const,
-			fileName: f.fileName,
-			uploadedAt: f.uploadedAt.toISOString(),
-			downloadUrl: `/api/v1/files/${f.id}`,
-		}));
-		const jointFiles = (jointFilesMap.get(mapKey) ?? []).map((f) => ({
-			id: f.id,
-			type: "joint_evaluation" as const,
-			fileName: f.fileName,
-			uploadedAt: f.uploadedAt.toISOString(),
-			downloadUrl: `/api/v1/files/${f.id}`,
-		}));
+		const cseFiles = (cseFilesMap.get(mapKey) ?? []).map(buildCseFilePayload);
+		const jointFiles = (jointFilesMap.get(mapKey) ?? []).map(
+			buildJointEvaluationFilePayload,
+		);
 
 		return Response.json({
 			siren,
