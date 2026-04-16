@@ -71,6 +71,12 @@ describe("getDefaultCampaignDeadlines", () => {
 			new Date(2028, 1, 1),
 		);
 	});
+
+	it("leaves optional campaign dates null by default", () => {
+		const deadlines = getDefaultCampaignDeadlines(2027);
+		expect(deadlines.gipPublicationDate).toBeNull();
+		expect(deadlines.campaignStartDate).toBeNull();
+	});
 });
 
 describe("isDeadlinePassed", () => {
