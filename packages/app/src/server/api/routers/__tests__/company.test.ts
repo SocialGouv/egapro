@@ -423,6 +423,29 @@ describe("companyRouter.updateHasCse", () => {
 
 		expect(mockSet).toHaveBeenCalledWith({ hasCse: true });
 	});
+
+	it("refuses the update when the admin is impersonating the company", async () => {
+		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: {
+				user: {
+					id: "user-1",
+					isAdmin: true,
+					impersonation: { siren: "339787277", name: "Acme" },
+				},
+				expires: "",
+			},
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.updateHasCse({ siren: "339787277", hasCse: true }),
+		).rejects.toThrow("Mode mimoquage");
+		expect(mockSet).not.toHaveBeenCalled();
+	});
 });
 
 describe("companyRouter.getSanctionStatus", () => {

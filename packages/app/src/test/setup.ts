@@ -45,9 +45,12 @@ vi.mock("next/image", () => ({
 		}),
 }));
 
-// Global mock for next-auth/react — provides a default signIn stub.
+// Global mock for next-auth/react — provides a default signIn stub and a
+// logged-out `useSession` so components that check the session (e.g. the
+// admin-impersonation guards) render without a provider.
 vi.mock("next-auth/react", () => ({
 	signIn: vi.fn(),
+	useSession: vi.fn(() => ({ data: null, status: "unauthenticated" })),
 }));
 
 // Global mock for server-only — avoids error in jsdom.

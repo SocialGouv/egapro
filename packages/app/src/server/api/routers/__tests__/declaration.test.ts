@@ -79,11 +79,23 @@ function createMockDb(selectRows: unknown[] = []) {
 	} as unknown;
 }
 
-function createCaller(mockDb: unknown, siret = "33978727700015") {
+function createCaller(
+	mockDb: unknown,
+	siret: string | null = "33978727700015",
+	impersonation: { siren: string; name: string } | null = null,
+) {
 	return import("../declaration").then(({ declarationRouter }) =>
 		declarationRouter.createCaller({
 			db: mockDb,
-			session: { user: { id: "user-1", siret }, expires: "" },
+			session: {
+				user: {
+					id: "user-1",
+					siret,
+					isAdmin: impersonation !== null,
+					impersonation,
+				},
+				expires: "",
+			},
 			headers: new Headers(),
 		} as never),
 	);
@@ -661,6 +673,105 @@ describe("declarationRouter", () => {
 			await expect(
 				caller.updateEmployeeCategories(employeeInput),
 			).rejects.toThrow("Déclaration introuvable");
+		});
+	});
+
+	describe("admin impersonation read-only guard", () => {
+		const impersonation = { siren: "339787277", name: "Acme" };
+
+		it("refuses updateStep1 when the admin is impersonating", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb, null, impersonation);
+
+			await expect(
+				caller.updateStep1({ totalWomen: 10, totalMen: 20 }),
+			).rejects.toThrow("Mode mimoquage");
+		});
+
+		it("refuses submit when the admin is impersonating", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb, null, impersonation);
+
+			await expect(caller.submit()).rejects.toThrow("Mode mimoquage");
+		});
+
+		it("refuses submitSecondDeclaration when the admin is impersonating", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb, null, impersonation);
+
+			await expect(caller.submitSecondDeclaration()).rejects.toThrow(
+				"Mode mimoquage",
+			);
+		});
+
+		it("refuses saveCompliancePath when the admin is impersonating", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb, null, impersonation);
+
+			await expect(
+				caller.saveCompliancePath({ path: "corrective_action" }),
+			).rejects.toThrow("Mode mimoquage");
+		});
+
+		it("refuses completeCompliancePath when the admin is impersonating", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb, null, impersonation);
+
+			await expect(caller.completeCompliancePath()).rejects.toThrow(
+				"Mode mimoquage",
+			);
+		});
+
+		it("refuses getOrCreate when no declaration exists (would create a draft)", async () => {
+			// Simulate the "no existing row" branch — where getOrCreate would
+			// normally insert a new draft. The impersonation guard fires right
+			// before the insert, so the admin never creates a draft in the
+			// user's name.
+			const txSelect = vi.fn().mockImplementation(() => ({
+				from: vi.fn().mockReturnValue({
+					where: vi.fn().mockReturnValue({
+						limit: vi.fn().mockResolvedValue([]),
+					}),
+				}),
+			}));
+			const tx = { select: txSelect, insert: vi.fn(), delete: vi.fn() };
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createCaller(mockDb, null, impersonation);
+
+			await expect(caller.getOrCreate()).rejects.toThrow("Mode mimoquage");
+		});
+
+		it("allows getOrCreate when an existing declaration is returned", async () => {
+			const existingTx = (() => {
+				const txSelect = vi.fn().mockImplementation(() => ({
+					from: vi.fn().mockReturnValue({
+						where: vi.fn().mockReturnValue({
+							limit: vi.fn().mockResolvedValue([mockDeclaration]),
+						}),
+					}),
+				}));
+				return { select: txSelect, insert: vi.fn(), delete: vi.fn() };
+			})();
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(existingTx),
+			);
+			const mockDb = {
+				select: vi.fn().mockReturnValue({
+					from: vi.fn().mockReturnValue({
+						where: vi.fn().mockReturnValue({
+							limit: vi.fn().mockResolvedValue([]),
+						}),
+					}),
+				}),
+				transaction: mockTransaction,
+			} as unknown;
+			const caller = await createCaller(mockDb, null, impersonation);
+
+			const result = await caller.getOrCreate();
+			expect(result.declaration).toBeDefined();
 		});
 	});
 });

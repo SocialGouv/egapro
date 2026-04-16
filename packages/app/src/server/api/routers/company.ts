@@ -7,7 +7,10 @@ import {
 	updateHasCseSchema,
 } from "~/modules/my-space/schemas";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { isImpersonatingSiren } from "~/server/auth/companyAccess";
+import {
+	assertNotImpersonating,
+	isImpersonatingSiren,
+} from "~/server/auth/companyAccess";
 import type { DB } from "~/server/db";
 import {
 	companies,
@@ -208,6 +211,7 @@ export const companyRouter = createTRPCRouter({
 	updateHasCse: protectedProcedure
 		.input(updateHasCseSchema)
 		.mutation(async ({ ctx, input }) => {
+			assertNotImpersonating(ctx.session);
 			await findUserCompany(ctx.db, ctx.session, input.siren);
 			await ctx.db
 				.update(companies)

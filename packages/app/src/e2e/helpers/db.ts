@@ -9,6 +9,42 @@ function createConnection() {
 }
 
 /**
+ * Ensure a draft declaration row exists for the test SIREN and the current
+ * year. Used by tests that can't rely on `getOrCreate` to lazily insert
+ * the row — e.g. the admin-impersonation scenario, where the insert branch
+ * is blocked server-side.
+ */
+export async function ensureCurrentYearDeclaration() {
+	const sql = createConnection();
+	try {
+		const users = await sql`
+			SELECT user_id FROM app_user_company WHERE siren = ${TEST_SIREN} LIMIT 1
+		`;
+		const userId = users[0]?.user_id as string | undefined;
+		if (!userId) return;
+		await sql`
+			INSERT INTO app_declaration (
+				id, siren, year, declarant_id, current_step, status,
+				created_at, updated_at
+			)
+			VALUES (
+				gen_random_uuid(),
+				${TEST_SIREN},
+				EXTRACT(YEAR FROM CURRENT_DATE)::int,
+				${userId},
+				1,
+				'draft',
+				NOW(),
+				NOW()
+			)
+			ON CONFLICT ON CONSTRAINT declaration_siren_year_idx DO NOTHING
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/**
  * Reset the test declaration to draft and clean all associated data
  * so a new full flow can be tested from scratch.
  */
