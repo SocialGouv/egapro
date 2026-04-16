@@ -89,6 +89,12 @@ export const env = createEnv({
 		SMTP_USER: z.string().optional(),
 		SMTP_PASS: z.string().optional(),
 		MAIL_FROM: z.string().default("no-reply@egapro.local"),
+		/**
+		 * JSON map `{ "<original>": "<replacement>" }` applied before SMTP send.
+		 * Used in non-prod envs to route test-account receipts to an inbox the
+		 * team can inspect (e.g. yopmail). Leave empty in production.
+		 */
+		MAIL_REDIRECT_MAP: z.string().optional().default("{}"),
 	},
 
 	/**
@@ -146,6 +152,7 @@ export const env = createEnv({
 		SMTP_USER: process.env.SMTP_USER,
 		SMTP_PASS: process.env.SMTP_PASS,
 		MAIL_FROM: process.env.MAIL_FROM,
+		MAIL_REDIRECT_MAP: process.env.MAIL_REDIRECT_MAP,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
