@@ -9,8 +9,6 @@ describe("mail templates", () => {
 		const t = buildDeclarationReceipt({ siren: "552100554", year: 2024 });
 		expect(t.subject).toContain("2024");
 		expect(t.html).toContain("552 100 554");
-		expect(t.text).toContain("552 100 554");
-		expect(t.text).toContain("2024");
 	});
 
 	it("builds a second declaration receipt", () => {

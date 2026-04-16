@@ -5,18 +5,6 @@ import { escapeHtml, wrapEmail } from "./shell";
 export function buildDeclarationReceipt({ siren, year }: ReceiptContext) {
 	const subject = `Accusé de réception — Déclaration des indicateurs ${year}`;
 	const prettySiren = formatSiren(siren);
-	const text = `Bonjour,
-
-Nous accusons réception de votre déclaration des indicateurs de l'égalité professionnelle pour l'année ${year}.
-
-Entreprise (SIREN) : ${prettySiren}
-Année de déclaration : ${year}
-
-Le récapitulatif de votre déclaration est joint à cet e-mail.
-
-Cordialement,
-L'équipe Egapro`;
-
 	const html = wrapEmail(
 		subject,
 		`<p>Bonjour,</p>
@@ -29,5 +17,5 @@ L'équipe Egapro`;
 <p>Cordialement,<br>L'équipe Egapro</p>`,
 	);
 
-	return { subject, text, html };
+	return { subject, html };
 }

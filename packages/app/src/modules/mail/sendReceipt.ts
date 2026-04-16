@@ -33,7 +33,6 @@ export async function sendReceipt(input: SendReceiptInput): Promise<void> {
 		const result = await sendMail({
 			to,
 			subject: template.subject,
-			text: template.text,
 			html: template.html,
 			attachments,
 		});

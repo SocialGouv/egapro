@@ -1,4 +1,5 @@
 import "server-only";
+import { convert as htmlToText } from "html-to-text";
 import { env } from "~/env.js";
 import { getTransporter } from "./transporter";
 import type { MailAttachment } from "./types";
@@ -6,7 +7,6 @@ import type { MailAttachment } from "./types";
 export type SendMailInput = {
 	to: string;
 	subject: string;
-	text: string;
 	html: string;
 	attachments?: MailAttachment[];
 };
@@ -26,7 +26,7 @@ export async function sendMail(input: SendMailInput): Promise<SendMailResult> {
 			from: env.MAIL_FROM,
 			to: input.to,
 			subject: input.subject,
-			text: input.text,
+			text: htmlToText(input.html, { wordwrap: 80 }),
 			html: input.html,
 			attachments: input.attachments?.map((a) => ({
 				filename: a.filename,

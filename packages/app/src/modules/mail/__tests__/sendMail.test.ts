@@ -34,32 +34,29 @@ describe("sendMail", () => {
 		const result = await sendMail({
 			to: "a@b.fr",
 			subject: "s",
-			text: "t",
 			html: "<p>t</p>",
 		});
 		expect(result).toEqual({ status: "disabled" });
 		expect(sendMailMock).not.toHaveBeenCalled();
 	});
 
-	it("sends the email when enabled", async () => {
+	it("sends the email with text derived from html", async () => {
 		mockEnv(true);
 		sendMailMock.mockResolvedValue({ messageId: "msg-1" });
 		const { sendMail } = await import("../sendMail");
 		const result = await sendMail({
 			to: "a@b.fr",
 			subject: "s",
-			text: "t",
-			html: "<p>t</p>",
+			html: "<p>Bonjour <strong>Egapro</strong></p>",
 		});
 		expect(result).toEqual({ status: "sent", messageId: "msg-1" });
-		expect(sendMailMock).toHaveBeenCalledWith({
-			from: "no-reply@test",
-			to: "a@b.fr",
-			subject: "s",
-			text: "t",
-			html: "<p>t</p>",
-			attachments: undefined,
-		});
+		const payload = sendMailMock.mock.calls[0]?.[0];
+		expect(payload.from).toBe("no-reply@test");
+		expect(payload.to).toBe("a@b.fr");
+		expect(payload.html).toBe("<p>Bonjour <strong>Egapro</strong></p>");
+		expect(payload.text).toContain("Bonjour");
+		expect(payload.text).toContain("Egapro");
+		expect(payload.text).not.toContain("<");
 	});
 
 	it("returns error status when transporter throws", async () => {
@@ -69,7 +66,6 @@ describe("sendMail", () => {
 		const result = await sendMail({
 			to: "a@b.fr",
 			subject: "s",
-			text: "t",
 			html: "<p>t</p>",
 		});
 		expect(result).toEqual({ status: "error", error: "smtp down" });
@@ -82,7 +78,6 @@ describe("sendMail", () => {
 		await sendMail({
 			to: "a@b.fr",
 			subject: "s",
-			text: "t",
 			html: "<p>t</p>",
 			attachments: [
 				{
