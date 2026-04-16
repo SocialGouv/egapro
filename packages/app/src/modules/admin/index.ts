@@ -6,6 +6,7 @@ export {
 } from "./declarations";
 export { ImpersonatePage } from "./impersonate/ImpersonatePage";
 export { AdminReferentsPage } from "./referents";
+export { AdminKpiTile, AdminStatsPage } from "./stats";
 export {
 	type CampaignStatsInput,
 	campaignStatsSchema,
