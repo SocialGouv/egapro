@@ -477,6 +477,9 @@ export const filesRelations = relations(files, ({ one }) => ({
 
 export const campaignDeadlines = createTable("campaign_deadline", (d) => ({
 	year: d.integer().notNull().primaryKey(),
+	// Campaign milestones
+	gipPublicationDate: d.date(),
+	campaignStartDate: d.date(),
 	// Declaration 1
 	decl1ModificationDeadline: d.date().notNull(),
 	decl1JustificationDeadline: d.date().notNull(),
@@ -485,6 +488,24 @@ export const campaignDeadlines = createTable("campaign_deadline", (d) => ({
 	decl2ModificationDeadline: d.date().notNull(),
 	decl2JustificationDeadline: d.date().notNull(),
 	decl2JointEvaluationDeadline: d.date().notNull(),
+}));
+
+// ── Global settings (singleton) ────────────────────────────────────
+
+/**
+ * Global platform settings. Single-row table (`id = 1`).
+ *
+ * Values here are free of retention constraints: they drive campaign
+ * behaviour (active year) rather than recording user actions.
+ */
+export const globalSettings = createTable("global_setting", (d) => ({
+	id: d.integer().notNull().primaryKey().default(1),
+	activeCampaignYear: d.integer(),
+	updatedAt: d
+		.timestamp({ withTimezone: true })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedBy: d.varchar({ length: 255 }).references(() => users.id),
 }));
 
 // ── Admin impersonation audit log ───────────────────────────────────
@@ -526,6 +547,32 @@ export const adminImpersonationEvents = createTable(
 			t.startedAt,
 		),
 	],
+);
+
+// ── Referent tables ───────────────────────────────────────────────
+
+export const referentTypeEnum = pgEnum("referent_type", ["email", "url"]);
+
+export const referents = createTable(
+	"referent",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		region: d.varchar({ length: 3 }).notNull(),
+		county: d.varchar({ length: 3 }),
+		name: d.varchar({ length: 255 }).notNull(),
+		type: referentTypeEnum().notNull(),
+		value: d.varchar({ length: 500 }).notNull(),
+		principal: d.boolean().notNull().default(false),
+		substituteName: d.varchar({ length: 255 }),
+		substituteEmail: d.varchar({ length: 255 }),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [index("referent_region_idx").on(t.region)],
 );
 
 // ── Export tables ───────────────────────────────────────────────────

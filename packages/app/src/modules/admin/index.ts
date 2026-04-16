@@ -5,6 +5,7 @@ export {
 	AdminDeclarationsPage,
 } from "./declarations";
 export { ImpersonatePage } from "./impersonate/ImpersonatePage";
+export { AdminReferentsPage } from "./referents";
 export {
 	type ImpersonateSearchInput,
 	impersonateSearchSchema,
