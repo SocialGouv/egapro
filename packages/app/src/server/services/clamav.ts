@@ -4,7 +4,7 @@ import net from "node:net";
 
 import { env } from "~/env";
 
-import { SCAN_TIMEOUT_MS } from "~/modules/shared";
+import { SCAN_TIMEOUT_MS } from "~/modules/shared/uploadConfig";
 
 export type ScanResult = { clean: true } | { clean: false; virus: string };
 

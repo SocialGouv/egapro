@@ -10,4 +10,6 @@ export {
 	SCAN_TIMEOUT_MS,
 } from "./uploadConfig";
 export { uploadFile } from "./uploadFile";
+export { useDsfrModal } from "./useDsfrModal";
 export { useFileUploadForm } from "./useFileUploadForm";
+export { useZodForm } from "./useZodForm";
