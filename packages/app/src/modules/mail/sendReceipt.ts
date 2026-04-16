@@ -48,9 +48,6 @@ export async function sendReceipt(input: SendReceiptInput): Promise<void> {
 				kind,
 				year,
 				mailStatus: result.status,
-				...(result.status === "sent" && result.originalTo
-					? { redirectedFrom: result.originalTo, redirectedTo: result.to }
-					: {}),
 				...(result.status === "error" ? { error: result.error } : {}),
 			},
 		});

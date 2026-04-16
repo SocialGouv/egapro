@@ -9,7 +9,7 @@ vi.mock("nodemailer", () => ({
 	createTransport: vi.fn(() => ({ sendMail: sendMailMock })),
 }));
 
-function mockEnv(enabled: boolean, redirectMap = "{}") {
+function mockEnv(enabled: boolean) {
 	vi.doMock("~/env.js", () => ({
 		env: {
 			MAIL_ENABLED: enabled,
@@ -18,7 +18,6 @@ function mockEnv(enabled: boolean, redirectMap = "{}") {
 			MAIL_FROM: "no-reply@test",
 			SMTP_USER: undefined,
 			SMTP_PASS: undefined,
-			MAIL_REDIRECT_MAP: redirectMap,
 		},
 	}));
 }
@@ -52,12 +51,7 @@ describe("sendMail", () => {
 			text: "t",
 			html: "<p>t</p>",
 		});
-		expect(result).toEqual({
-			status: "sent",
-			messageId: "msg-1",
-			to: "a@b.fr",
-			originalTo: undefined,
-		});
+		expect(result).toEqual({ status: "sent", messageId: "msg-1" });
 		expect(sendMailMock).toHaveBeenCalledWith({
 			from: "no-reply@test",
 			to: "a@b.fr",
@@ -66,38 +60,6 @@ describe("sendMail", () => {
 			html: "<p>t</p>",
 			attachments: undefined,
 		});
-	});
-
-	it("applies the redirect map and reports original recipient", async () => {
-		mockEnv(true, '{"test@fia1.fr":"fia1@yopmail.com"}');
-		sendMailMock.mockResolvedValue({ messageId: "msg-2" });
-		const { sendMail } = await import("../sendMail");
-		const result = await sendMail({
-			to: "test@fia1.fr",
-			subject: "s",
-			text: "t",
-			html: "<p>t</p>",
-		});
-		expect(result).toEqual({
-			status: "sent",
-			messageId: "msg-2",
-			to: "fia1@yopmail.com",
-			originalTo: "test@fia1.fr",
-		});
-		expect(sendMailMock.mock.calls[0]?.[0].to).toBe("fia1@yopmail.com");
-	});
-
-	it("ignores malformed MAIL_REDIRECT_MAP", async () => {
-		mockEnv(true, "not-json");
-		sendMailMock.mockResolvedValue({ messageId: "msg-3" });
-		const { sendMail } = await import("../sendMail");
-		const result = await sendMail({
-			to: "a@b.fr",
-			subject: "s",
-			text: "t",
-			html: "<p>t</p>",
-		});
-		expect(result).toMatchObject({ status: "sent", to: "a@b.fr" });
 	});
 
 	it("returns error status when transporter throws", async () => {

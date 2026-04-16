@@ -1,6 +1,5 @@
 import "server-only";
 import { env } from "~/env.js";
-import { resolveRecipient } from "./redirect";
 import { getTransporter } from "./transporter";
 import type { MailAttachment } from "./types";
 
@@ -13,7 +12,7 @@ export type SendMailInput = {
 };
 
 export type SendMailResult =
-	| { status: "sent"; messageId: string; to: string; originalTo?: string }
+	| { status: "sent"; messageId: string }
 	| { status: "disabled" }
 	| { status: "error"; error: string };
 
@@ -22,12 +21,10 @@ export async function sendMail(input: SendMailInput): Promise<SendMailResult> {
 		return { status: "disabled" };
 	}
 
-	const { to, originalTo } = resolveRecipient(input.to);
-
 	try {
 		const info = await getTransporter().sendMail({
 			from: env.MAIL_FROM,
-			to,
+			to: input.to,
 			subject: input.subject,
 			text: input.text,
 			html: input.html,
@@ -37,7 +34,7 @@ export async function sendMail(input: SendMailInput): Promise<SendMailResult> {
 				contentType: a.contentType,
 			})),
 		});
-		return { status: "sent", messageId: info.messageId, to, originalTo };
+		return { status: "sent", messageId: info.messageId };
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Unknown error";
 		return { status: "error", error: message };

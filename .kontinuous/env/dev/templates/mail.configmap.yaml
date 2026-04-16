@@ -7,6 +7,3 @@ data:
   SMTP_HOST: "maildev"
   SMTP_PORT: "1025"
   MAIL_FROM: "no-reply@egapro.dev.fabrique.social.gouv.fr"
-  # Dev-only: route the ProConnect test account to a shared yopmail inbox so
-  # the team can inspect receipts via https://yopmail.com/?fia1
-  MAIL_REDIRECT_MAP: '{"test@fia1.fr":"fia1@yopmail.com"}'
