@@ -93,7 +93,7 @@ export const env = createEnv({
 		// cache handler (cache-handler.cjs) gracefully degrades to no-op.
 		// The handler reads process.env.VALKEY_URL directly (it runs outside
 		// the app module graph), but we declare it here for validation and docs.
-		VALKEY_URL: z.string().url().optional(),
+		VALKEY_URL: z.url().optional(),
 	},
 
 	/**
