@@ -37,6 +37,8 @@ function toInputDate(d: Date): string {
 function buildPresetDeadlines(preset: "future" | "past"): CampaignDeadlines {
 	const base = preset === "future" ? 2099 : 2020;
 	return {
+		gipPublicationDate: null,
+		campaignStartDate: null,
 		decl1ModificationDeadline: new Date(base, 5, 1),
 		decl1JustificationDeadline: new Date(base, 5, 1),
 		decl1JointEvaluationDeadline: new Date(base, 7, 1),
@@ -74,6 +76,10 @@ export function PanelPlayground() {
 		if (Number.isNaN(parsed.getTime())) return;
 		setPreset("custom");
 		setDeadlines((prev) => ({ ...prev, [key]: parsed }));
+	}
+
+	function getDeadlineInputValue(value: Date | null): string {
+		return value ? toInputDate(value) : "";
 	}
 
 	return (
@@ -204,7 +210,7 @@ export function PanelPlayground() {
 								id={`deadline-${key}`}
 								onChange={(e) => updateDeadline(key, e.currentTarget.value)}
 								type="date"
-								value={toInputDate(deadlines[key])}
+								value={getDeadlineInputValue(deadlines[key])}
 							/>
 						</div>
 					</div>

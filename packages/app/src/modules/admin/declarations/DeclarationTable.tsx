@@ -1,15 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
 import { formatShortDate } from "~/modules/domain";
+import { DsfrTable } from "~/modules/shared/DsfrTable";
 import { Pagination } from "~/modules/shared/Pagination";
+import { useSortableTable } from "~/modules/shared/useSortableTable";
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
 
 import { STATUS_LABELS } from "./shared/constants";
-import { DsfrTable } from "./shared/DsfrTable";
 import type { DeclarationSearchRow } from "./types";
 
 type Props = {
@@ -38,37 +37,11 @@ export function DeclarationTable({
 	sortBy,
 	sortOrder,
 }: Props) {
-	const router = useRouter();
-	const searchParams = useSearchParams();
-
-	const handleSort = useCallback(
-		(column: SortColumn) => {
-			const params = new URLSearchParams(searchParams.toString());
-			if (sortBy === column) {
-				params.set("sortOrder", sortOrder === "asc" ? "desc" : "asc");
-			} else {
-				params.set("sortBy", column);
-				params.set("sortOrder", "asc");
-			}
-			params.set("page", "1");
-			router.push(`/admin/declarations?${params.toString()}`);
-		},
-		[searchParams, sortBy, sortOrder, router],
-	);
-
-	const handlePageChange = useCallback(
-		(newPage: number) => {
-			const params = new URLSearchParams(searchParams.toString());
-			params.set("page", String(newPage));
-			router.push(`/admin/declarations?${params.toString()}`);
-		},
-		[searchParams, router],
-	);
-
-	const sortIcon = (column: SortColumn) => {
-		if (sortBy !== column) return null;
-		return sortOrder === "asc" ? " ▲" : " ▼";
-	};
+	const { handleSort, handlePageChange, sortIcon } = useSortableTable({
+		basePath: "/admin/declarations",
+		sortBy,
+		sortOrder,
+	});
 
 	return (
 		<>

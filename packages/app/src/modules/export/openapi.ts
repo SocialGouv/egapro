@@ -2,152 +2,170 @@
 
 const declarantSchema = {
 	type: "object",
+	description: "Personne physique ayant réalisé la déclaration.",
 	properties: {
-		firstName: { type: ["string", "null"] },
-		lastName: { type: ["string", "null"] },
-		email: { type: ["string", "null"] },
-		phone: { type: ["string", "null"] },
+		Prenom: { type: ["string", "null"] },
+		Nom: { type: ["string", "null"] },
+		Email: { type: ["string", "null"] },
+		Telephone: { type: ["string", "null"] },
 	},
 } as const;
 
 const indicatorGCategorySchema = {
 	type: "object",
+	description:
+		"Catégorie socio-professionnelle déclarée par l'entreprise pour l'indicateur G.",
 	properties: {
-		categoryName: {
+		Nom_categorie: {
 			type: "string",
-			description: "CSP category (e.g. 'Ouvriers', 'Ingénieurs et cadres')",
+			description: "Libellé CSP (ex. 'Ouvriers', 'Ingénieurs et cadres')",
 		},
-		detail: { type: ["string", "null"], description: "Category description" },
-		womenCount: { type: ["integer", "null"] },
-		menCount: { type: ["integer", "null"] },
-		annualBaseWomen: { type: ["string", "null"] },
-		annualBaseMen: { type: ["string", "null"] },
-		annualVariableWomen: { type: ["string", "null"] },
-		annualVariableMen: { type: ["string", "null"] },
-		hourlyBaseWomen: { type: ["string", "null"] },
-		hourlyBaseMen: { type: ["string", "null"] },
-		hourlyVariableWomen: { type: ["string", "null"] },
-		hourlyVariableMen: { type: ["string", "null"] },
+		Detail_categorie: {
+			type: ["string", "null"],
+			description: "Précision éventuelle sur la catégorie",
+		},
+		Effectif_F: { type: ["integer", "null"] },
+		Effectif_H: { type: ["integer", "null"] },
+		Rem_annuelle_base_F: { type: ["string", "null"] },
+		Rem_annuelle_base_H: { type: ["string", "null"] },
+		Rem_annuelle_variable_F: { type: ["string", "null"] },
+		Rem_annuelle_variable_H: { type: ["string", "null"] },
+		Taux_horaire_base_F: { type: ["string", "null"] },
+		Taux_horaire_base_H: { type: ["string", "null"] },
+		Taux_horaire_variable_F: { type: ["string", "null"] },
+		Taux_horaire_variable_H: { type: ["string", "null"] },
 	},
 } as const;
 
 const cseOpinionSchema = {
 	type: "object",
 	properties: {
-		declarationNumber: {
+		Numero_declaration: {
 			type: "integer",
 			enum: [1, 2],
 			description:
-				"Declaration number the CSE opinion refers to: 1 = initial declaration, 2 = second declaration (required when pay gap >= 5%)",
+				"Numéro de déclaration concernée par l'avis : 1 = déclaration initiale, 2 = seconde déclaration (requise si l'écart de rémunération atteint 5%)",
 		},
-		type: {
+		Type: {
 			type: "string",
 			enum: ["accuracy", "gap"],
 			description:
-				"CSE opinion type: 'accuracy' = opinion on data accuracy, 'gap' = opinion on pay gap correction measures",
+				"Type d'avis CSE : 'accuracy' = avis sur l'exactitude des données, 'gap' = avis sur les mesures de correction de l'écart",
 		},
-		opinion: { type: ["string", "null"] },
-		date: { type: ["string", "null"], format: "date" },
+		Avis: { type: ["string", "null"] },
+		Date: { type: ["string", "null"], format: "date" },
 	},
 } as const;
 
-const indicatorFQuartileSchema = {
-	type: "object",
-	description: "Quartile breakdown with salary threshold and headcounts",
-	properties: {
-		threshold: {
-			type: ["string", "null"],
-			description: "Upper salary threshold for this quartile (numeric string)",
-		},
-		women: { type: ["integer", "null"], description: "Women headcount" },
-		men: { type: ["integer", "null"], description: "Men headcount" },
-	},
-} as const;
-
-const indicatorFSchema = {
+const indicatorFAnnualSchema = {
 	type: "object",
 	description:
-		"Pay quartile distribution. Each array has 4 entries (Q1–Q4). Null values indicate the indicator was not provided.",
+		"Répartition par quartile — rémunération globale annuelle. Seuils en euros (chaîne numérique) ; proportions F/H entre 0 et 1.",
 	properties: {
-		annual: {
-			type: "array",
-			items: indicatorFQuartileSchema,
-			description: "Annual salary quartile distribution (Q1 to Q4)",
-		},
-		hourly: {
-			type: "array",
-			items: indicatorFQuartileSchema,
-			description: "Hourly salary quartile distribution (Q1 to Q4)",
-		},
+		Seuil_Q1_Rem_globale: { type: ["string", "null"] },
+		Quartile1_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
+		Quartile1_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
+		Seuil_Q2_Rem_globale: { type: ["string", "null"] },
+		Quartile2_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
+		Quartile2_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
+		Seuil_Q3_Rem_globale: { type: ["string", "null"] },
+		Quartile3_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
+		Quartile3_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
+		Seuil_Q4_Rem_globale: { type: ["string", "null"] },
+		Quartile4_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
+		Quartile4_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
 	},
 } as const;
 
-const indicatorPayGapSchema = {
+const indicatorFHourlySchema = {
 	type: "object",
-	description: "Pay gap values split by pay period (annual / hourly)",
+	description:
+		"Répartition par quartile — taux horaire global. Seuils en euros (chaîne numérique) ; proportions F/H entre 0 et 1.",
 	properties: {
-		annualWomen: {
-			type: ["string", "null"],
-			description: "Annual pay — women (numeric string)",
-		},
-		annualMen: {
-			type: ["string", "null"],
-			description: "Annual pay — men (numeric string)",
-		},
-		hourlyWomen: {
-			type: ["string", "null"],
-			description: "Hourly pay — women (numeric string)",
-		},
-		hourlyMen: {
-			type: ["string", "null"],
-			description: "Hourly pay — men (numeric string)",
-		},
+		Seuil_Q1_Taux_horaire_global: { type: ["string", "null"] },
+		Quartile1_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
+		Quartile1_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
+		Seuil_Q2_Taux_horaire_global: { type: ["string", "null"] },
+		Quartile2_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
+		Quartile2_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
+		Seuil_Q3_Taux_horaire_global: { type: ["string", "null"] },
+		Quartile3_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
+		Quartile3_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
+		Seuil_Q4_Taux_horaire_global: { type: ["string", "null"] },
+		Quartile4_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
+		Quartile4_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
 	},
 } as const;
 
 const indicatorsSchema = {
 	type: "object",
 	description:
-		"Pre-calculated indicators A–F (from GIP-MDS DSN data) and company-declared indicator G",
+		"Indicateurs A–F (pré-calculés par le GIP-MDS à partir des DSN) et indicateur G déclaré par l'entreprise. Les libellés des champs reprennent ceux du fichier GIP MDS.",
 	properties: {
 		A: {
-			...indicatorPayGapSchema,
-			description: "Mean gross pay gap (annual + hourly)",
+			type: "object",
+			description: "Rémunération globale moyenne (annuel + taux horaire)",
+			properties: {
+				Rem_globale_annuelle_moyenne_F: { type: ["string", "null"] },
+				Rem_globale_annuelle_moyenne_H: { type: ["string", "null"] },
+				Taux_horaire_global_moyen_F: { type: ["string", "null"] },
+				Taux_horaire_global_moyen_H: { type: ["string", "null"] },
+			},
 		},
 		B: {
-			...indicatorPayGapSchema,
-			description: "Mean gross variable pay gap (annual + hourly)",
+			type: "object",
+			description: "Rémunération variable moyenne (annuel + taux horaire)",
+			properties: {
+				Rem_variable_annuelle_moyenne_F: { type: ["string", "null"] },
+				Rem_variable_annuelle_moyenne_H: { type: ["string", "null"] },
+				Taux_horaire_variable_moyen_F: { type: ["string", "null"] },
+				Taux_horaire_variable_moyen_H: { type: ["string", "null"] },
+			},
 		},
 		C: {
-			...indicatorPayGapSchema,
-			description: "Median gross pay gap (annual + hourly)",
+			type: "object",
+			description: "Rémunération globale médiane (annuel + taux horaire)",
+			properties: {
+				Rem_globale_annuelle_médiane_F: { type: ["string", "null"] },
+				Rem_globale_annuelle_médiane_H: { type: ["string", "null"] },
+				Taux_globale_annuelle_médiane_F: { type: ["string", "null"] },
+				Taux_globale_annuelle_médiane_H: { type: ["string", "null"] },
+			},
 		},
 		D: {
-			...indicatorPayGapSchema,
-			description: "Median gross variable pay gap (annual + hourly)",
+			type: "object",
+			description: "Rémunération variable médiane (annuel + taux horaire)",
+			properties: {
+				Rem_variable_annuelle_médiane_F: { type: ["string", "null"] },
+				Rem_variable_annuelle_médiane_H: { type: ["string", "null"] },
+				Taux_horaire_variable_médian_F: { type: ["string", "null"] },
+				Taux_horaire_variable_médian_H: { type: ["string", "null"] },
+			},
 		},
 		E: {
 			type: "object",
-			description: "Variable pay beneficiary count",
+			description: "Effectifs bénéficiaires d'une rémunération variable",
 			properties: {
-				women: {
-					type: ["string", "null"],
-					description: "Women beneficiary count (numeric string)",
-				},
-				men: {
-					type: ["string", "null"],
-					description: "Men beneficiary count (numeric string)",
-				},
+				Effectif_F_rem_annuelle_variable: { type: ["string", "null"] },
+				Effectif_H_rem_annuelle_variable: { type: ["string", "null"] },
 			},
 		},
-		F: indicatorFSchema,
+		F: {
+			type: "object",
+			description:
+				"Répartition par quartile de rémunération. Les proportions F/H reflètent la part de chaque genre dans le quartile (0 à 1).",
+			properties: {
+				annuel: indicatorFAnnualSchema,
+				horaire: indicatorFHourlySchema,
+			},
+		},
 		G: {
 			oneOf: [
 				{ type: "array", items: indicatorGCategorySchema },
 				{ type: "null" },
 			],
 			description:
-				"Company-declared pay gap by CSP (base + variable, annual + hourly). Null if not declared.",
+				"Écart de rémunération par CSP déclaré par l'entreprise. `null` si non déclaré.",
 		},
 	},
 } as const;
@@ -155,93 +173,144 @@ const indicatorsSchema = {
 const declarationSchema = {
 	type: "object",
 	properties: {
-		siren: {
+		SIREN: {
 			type: "string",
-			description: "Company SIREN (9 digits)",
+			description: "SIREN de l'entreprise (9 chiffres)",
 			example: "319159877",
 		},
-		companyName: { type: ["string", "null"], example: "THALES LAS FRANCE SAS" },
-		workforce: {
+		Raison_sociale: {
+			type: ["string", "null"],
+			example: "THALES LAS FRANCE SAS",
+		},
+		Effectif: {
 			type: ["integer", "null"],
-			description: "Total workforce",
+			description: "Effectif total",
 			example: 7403,
 		},
-		nafCode: {
+		Code_NAF: {
 			type: ["string", "null"],
-			description: "NAF/APE code",
+			description: "Code NAF/APE",
 			example: "26.51A",
 		},
-		address: {
+		Adresse: {
 			type: ["string", "null"],
 			example: "2 AVENUE GAY-LUSSAC, 78990 ELANCOURT",
 		},
-		hasCse: {
+		CSE_existant: {
 			type: ["boolean", "null"],
-			description: "Whether the company has a CSE (>= 50 employees)",
+			description: "Présence d'un CSE (>= 50 salariés)",
 		},
-		year: { type: "integer", description: "Declaration year", example: 2026 },
-		status: {
+		Annee: {
+			type: "integer",
+			description: "Année de la déclaration",
+			example: 2026,
+		},
+		Statut: {
 			type: "string",
-			description: "Declaration status",
+			description: "Statut de la déclaration",
 			example: "submitted",
 		},
-		compliancePath: {
+		Parcours_conformite: {
 			type: ["string", "null"],
-			description: "Compliance path chosen by the company",
+			description: "Parcours de conformité choisi par l'entreprise",
 		},
-		createdAt: { type: ["string", "null"], format: "date-time" },
-		updatedAt: { type: ["string", "null"], format: "date-time" },
-		totalWomen: {
+		Date_creation: { type: ["string", "null"], format: "date-time" },
+		Date_modification: { type: ["string", "null"], format: "date-time" },
+		Effectif_F_rem_annuelle_globale: {
 			type: ["integer", "null"],
-			description: "Total women in workforce",
+			description:
+				"Effectif femmes pris en compte pour la rémunération globale annuelle",
 		},
-		totalMen: {
+		Effectif_H_rem_annuelle_globale: {
 			type: ["integer", "null"],
-			description: "Total men in workforce",
+			description:
+				"Effectif hommes pris en compte pour la rémunération globale annuelle",
 		},
-		indicators: indicatorsSchema,
-		secondDeclaration: {
+		Indicateurs: indicatorsSchema,
+		Seconde_declaration: {
 			type: "object",
-			description: "Second declaration (required when pay gap >= 5%)",
+			description:
+				"Seconde déclaration (requise lorsque l'écart de rémunération atteint 5%)",
 			properties: {
-				status: { type: ["string", "null"] },
-				referencePeriodStart: { type: ["string", "null"], format: "date" },
-				referencePeriodEnd: { type: ["string", "null"], format: "date" },
-				correction: {
+				Statut: { type: ["string", "null"] },
+				Periode_reference_debut: { type: ["string", "null"], format: "date" },
+				Periode_reference_fin: { type: ["string", "null"], format: "date" },
+				Correction: {
 					oneOf: [
 						{ type: "array", items: indicatorGCategorySchema },
 						{ type: "null" },
 					],
-					description:
-						"Corrected indicator G categories. Null if no correction.",
+					description: "Indicateur G corrigé. `null` si aucune correction.",
 				},
 			},
 		},
-		declarant: declarantSchema,
-		cseOpinions: {
+		Declarant: declarantSchema,
+		Avis_CSE: {
 			type: "array",
 			items: cseOpinionSchema,
 			description:
-				"CSE opinions (PDF uploads, up to 4/year, companies >= 100 employees)",
+				"Avis du CSE (PDF, jusqu'à 4/an, entreprises >= 100 salariés). Présent uniquement si au moins un fichier d'avis CSE a été déposé.",
 		},
-		cseFiles: {
+		Fichiers_CSE: {
 			type: "array",
 			items: {
 				type: "object",
 				properties: {
-					id: { type: "string", description: "File unique identifier" },
-					fileName: { type: "string", example: "avis-cse-2026.pdf" },
-					uploadedAt: { type: "string", format: "date-time" },
-					downloadUrl: {
+					Id: { type: "string", description: "Identifiant unique du fichier" },
+					Type: {
+						type: "string",
+						enum: ["cse_opinion"],
+						description: "Type : avis CSE",
+					},
+					Nom_fichier: {
+						type: "string",
+						description: "Nom d'origine du fichier déposé.",
+						example: "avis-cse-2026.pdf",
+					},
+					Date_upload: { type: "string", format: "date-time" },
+					URL_telechargement: {
 						type: "string",
 						description:
-							"Relative URL to download the file via GET /api/v1/files/{fileId}",
+							"URL relative pour télécharger le fichier via GET /api/v1/files/{fileId}",
 						example: "/api/v1/files/abc-123",
 					},
 				},
 			},
 			description:
-				"CSE opinion files (PDF) attached to the declaration, with a download URL pointing to /api/v1/files/{fileId}",
+				"Fichiers d'avis CSE attachés à la déclaration. Absent si aucun fichier n'a été déposé.",
+		},
+		Fichier_evaluation_conjointe: {
+			oneOf: [
+				{
+					type: "object",
+					properties: {
+						Id: {
+							type: "string",
+							description: "Identifiant unique du fichier",
+						},
+						Type: {
+							type: "string",
+							enum: ["joint_evaluation"],
+							description: "Type : évaluation conjointe",
+						},
+						Nom_fichier: {
+							type: "string",
+							description: "Nom d'origine du fichier déposé.",
+							example: "evaluation-conjointe-2026.pdf",
+						},
+						Date_upload: { type: "string", format: "date-time" },
+						URL_telechargement: {
+							type: "string",
+							description:
+								"URL relative pour télécharger le fichier via GET /api/v1/files/{fileId}",
+							example: "/api/v1/files/abc-123",
+						},
+					},
+				},
+				{ type: "null" },
+			],
+			description:
+				"Fichier d'évaluation conjointe attaché à la déclaration (cardinalité 1). Absent si aucun fichier n'a été déposé.",
 		},
 	},
 } as const;
@@ -255,7 +324,11 @@ const fileMetadataSchema = {
 			enum: ["cse_opinion", "joint_evaluation"],
 			description: "File type: CSE opinion or joint evaluation",
 		},
-		fileName: { type: "string", example: "avis-cse-2026.pdf" },
+		fileName: {
+			type: "string",
+			description: "Original file name as uploaded by the company.",
+			example: "avis-cse-2026.pdf",
+		},
 		uploadedAt: { type: "string", format: "date-time" },
 		downloadUrl: {
 			type: "string",
@@ -289,7 +362,7 @@ export const openApiSpec = {
 		title: "EGAPRO — API d'export",
 		description:
 			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une signature de requête (RSA-SHA256) et une clé API (Bearer token).",
-		version: "1.3.0",
+		version: "1.4.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},
@@ -326,7 +399,7 @@ export const openApiSpec = {
 				operationId: "getDeclarations",
 				summary: "Lister les déclarations par date de soumission",
 				description:
-					"Retourne les déclarations soumises dont la date de mise à jour (`updatedAt`) est comprise dans l'intervalle [`date_begin`, `date_end`[. Inclut les indicateurs A–G, la seconde déclaration et les avis CSE.",
+					"Retourne les déclarations soumises dont la date de mise à jour (`Date_modification`) est comprise dans l'intervalle [`date_begin`, `date_end`[. Inclut les indicateurs A–G, la seconde déclaration et les avis CSE. Les libellés des champs reprennent ceux du fichier GIP MDS.",
 				parameters: [
 					{
 						name: "date_begin",
@@ -355,22 +428,22 @@ export const openApiSpec = {
 								schema: {
 									type: "object",
 									properties: {
-										dateBegin: {
+										Date_debut: {
 											type: "string",
 											format: "date",
 											example: "2026-03-01",
 										},
-										dateEnd: {
+										Date_fin: {
 											type: "string",
 											format: "date",
 											example: "2026-03-24",
 										},
-										count: {
+										Nombre: {
 											type: "integer",
-											description: "Number of declarations returned",
+											description: "Nombre de déclarations retournées",
 											example: 5,
 										},
-										declarations: { type: "array", items: declarationSchema },
+										Declarations: { type: "array", items: declarationSchema },
 									},
 								},
 							},

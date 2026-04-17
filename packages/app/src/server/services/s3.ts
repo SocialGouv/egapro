@@ -112,7 +112,7 @@ export async function deleteFile(key: string): Promise<void> {
 	);
 }
 
-import { S3_PART_MIN_SIZE } from "~/modules/shared";
+import { S3_PART_MIN_SIZE } from "~/modules/shared/uploadConfig";
 
 /**
  * Creates an incremental multipart upload to S3.

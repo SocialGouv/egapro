@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DsfrTable } from "../shared/DsfrTable";
+import { DsfrTable } from "~/modules/shared/DsfrTable";
 
 describe("DsfrTable", () => {
 	it("renders table with sr-only caption", () => {

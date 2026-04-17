@@ -80,6 +80,15 @@ export const env = createEnv({
 			.int()
 			.positive()
 			.default(365),
+		MAIL_ENABLED: z
+			.enum(["true", "false"])
+			.default("false")
+			.transform((v) => v === "true"),
+		SMTP_HOST: z.string().optional().default(""),
+		SMTP_PORT: z.coerce.number().int().positive().default(1025),
+		SMTP_USER: z.string().optional(),
+		SMTP_PASS: z.string().optional(),
+		MAIL_FROM: z.string().default("no-reply@egapro.local"),
 		// Valkey (Redis-compatible) cache URL — optional. When absent, the custom
 		// cache handler (cache-handler.cjs) gracefully degrades to no-op.
 		// The handler reads process.env.VALKEY_URL directly (it runs outside
@@ -136,6 +145,12 @@ export const env = createEnv({
 			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,
 		EGAPRO_AUDIT_RETENTION_LONG_DAYS:
 			process.env.EGAPRO_AUDIT_RETENTION_LONG_DAYS,
+		MAIL_ENABLED: process.env.MAIL_ENABLED,
+		SMTP_HOST: process.env.SMTP_HOST,
+		SMTP_PORT: process.env.SMTP_PORT,
+		SMTP_USER: process.env.SMTP_USER,
+		SMTP_PASS: process.env.SMTP_PASS,
+		MAIL_FROM: process.env.MAIL_FROM,
 		VALKEY_URL: process.env.VALKEY_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,

@@ -16,8 +16,6 @@ export { classifyCompanySize, isCseRequired } from "./shared/companySize";
 export {
 	COMPANY_SIZE_ANNUAL_MIN,
 	COMPANY_SIZE_VOLUNTARY_MAX,
-	DECLARATION_DEADLINE,
-	DECLARATION_YEAR,
 	EXPECTED_DECLARATION_TYPES,
 	FIRST_DECLARATION_YEAR,
 	GAP_ALERT_THRESHOLD,
@@ -53,6 +51,15 @@ export {
 	normalizeDecimalInput,
 	parseNumber,
 } from "./shared/number";
+export type { CountyCode, RegionCode } from "./shared/regions";
+// Regions & counties
+export {
+	COUNTIES,
+	COUNTY_CODES,
+	REGION_CODES,
+	REGIONS,
+	REGIONS_TO_COUNTIES,
+} from "./shared/regions";
 // SIREN utilities
 export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
 export type {

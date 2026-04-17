@@ -31,6 +31,8 @@ app:
     - configMapRef:
         name: "clamav"
     - configMapRef:
+        name: "mail"
+    - configMapRef:
         name: "gip-mds"
         optional: true
     - secretRef:

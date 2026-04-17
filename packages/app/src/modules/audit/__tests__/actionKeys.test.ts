@@ -33,4 +33,19 @@ describe("retention constants", () => {
 	it("read_sensitive falls into the short retention bucket", () => {
 		expect(SHORT_RETENTION_CATEGORIES).toContain("read_sensitive");
 	});
+
+	it("public_search falls into the short retention bucket", () => {
+		expect(SHORT_RETENTION_CATEGORIES).toContain("public_search");
+	});
+});
+
+describe("public_search category", () => {
+	it("maps public referent actions to public_search", () => {
+		expect(AUDIT_ACTION_CATEGORIES[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]).toBe(
+			"public_search",
+		);
+		expect(AUDIT_ACTION_CATEGORIES[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]).toBe(
+			"public_search",
+		);
+	});
 });

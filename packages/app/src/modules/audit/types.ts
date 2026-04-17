@@ -7,6 +7,7 @@ export type AuditCategory =
 	| "auth"
 	| "mutation"
 	| "read_sensitive"
+	| "public_search"
 	| "export"
 	| "system";
 
