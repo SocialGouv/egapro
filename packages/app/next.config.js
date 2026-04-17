@@ -16,7 +16,11 @@ const config = {
 	outputFileTracingIncludes: {
 		"/api/gip-mds/mock": ["./data/mock-gip-mds.csv"],
 	},
-	serverExternalPackages: ["@react-pdf/renderer"],
+	// `redis` is only required from ./cache-handler.cjs (a standalone CJS handler
+	// loaded by Next.js outside the webpack graph). Marking it external keeps the
+	// dev server from warning on dynamic require, and ensures it's never pulled
+	// into a server bundle if any server component inadvertently references it.
+	serverExternalPackages: ["@react-pdf/renderer", "redis"],
 	sassOptions: {
 		additionalData: `
 			@import "@gouvfr/dsfr/src/dsfr/core/style/selector/setting/breakpoint";

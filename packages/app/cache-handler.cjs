@@ -26,6 +26,16 @@ let client = null;
 let connectionPromise = null;
 
 /**
+ * Reset the singleton so the next `getClient()` call attempts a fresh connection.
+ * Called on error / disconnect so a transient Valkey outage does not wedge the
+ * handler with a stale disconnected client.
+ */
+function resetClient() {
+	client = null;
+	connectionPromise = null;
+}
+
+/**
  * Returns a connected Valkey client, or null if unavailable.
  * Lazy singleton — connects on first call, reuses thereafter.
  */
@@ -34,6 +44,10 @@ async function getClient() {
 	if (process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD) return null;
 
 	if (client?.isReady) return client;
+
+	// Client exists but is no longer ready (errored / disconnected).
+	// Clear the singleton so we can reconnect below.
+	if (client && !client.isReady) resetClient();
 
 	if (connectionPromise) return connectionPromise;
 
@@ -50,6 +64,13 @@ async function getClient() {
 				console.error("[cache-handler] Valkey client error:", err.message);
 			});
 
+			c.on("end", () => {
+				console.warn(
+					"[cache-handler] Valkey connection ended, will reconnect on next use",
+				);
+				resetClient();
+			});
+
 			await c.connect();
 			console.info("[cache-handler] Connected to Valkey");
 			client = /** @type {import("redis").RedisClientType} */ (c);
@@ -59,8 +80,7 @@ async function getClient() {
 				"[cache-handler] Failed to connect to Valkey:",
 				/** @type {Error} */ (err).message,
 			);
-			client = null;
-			connectionPromise = null;
+			resetClient();
 			return null;
 		}
 	})();
@@ -146,8 +166,13 @@ module.exports = class CacheHandler {
 
 			const entry = JSON.parse(raw);
 
-			// Check tag invalidation: if any tag was revalidated after the entry
-			// was stored, treat it as a cache miss.
+			// Tag invalidation check: `entry.lastModified` is the wall-clock time the
+			// entry was written (see `set` below), and each tag key stores the
+			// wall-clock time of the most recent `revalidateTag` call. An entry is
+			// stale iff any of its tags was revalidated strictly after the write.
+			// Note: we rely on `Date.now()` across processes, so clock skew between
+			// instances could keep an entry alive for up to ~1s beyond a revalidation.
+			// That matches Next.js' own filesystem handler semantics.
 			if (entry.tags?.length > 0) {
 				const tagKeys = entry.tags.map(
 					(/** @type {string} */ t) => TAG_PREFIX + t,
@@ -178,7 +203,7 @@ module.exports = class CacheHandler {
 	 * Store a cache entry.
 	 * @param {string} key
 	 * @param {Record<string, unknown> | null} data
-	 * @param {{ tags?: string[] }} ctx
+	 * @param {{ tags?: string[], revalidate?: number | false }} ctx
 	 * @returns {Promise<void>}
 	 */
 	async set(key, data, ctx) {
@@ -192,12 +217,12 @@ module.exports = class CacheHandler {
 				tags: ctx.tags ?? [],
 			};
 
-			// Use the entry's revalidate time as TTL.
-			// Falls back to 24h if not specified (e.g. force-cache without revalidate).
-			const revalidate = /** @type {number | undefined} */ (data?.revalidate);
+			// Next.js passes the page/route revalidate window via `ctx.revalidate`
+			// (seconds, or `false` for no revalidation). Fall back to 24h when unset
+			// so tag keys referencing this entry stay bounded even for `force-cache`.
 			const ttl =
-				typeof revalidate === "number" && revalidate > 0
-					? revalidate
+				typeof ctx.revalidate === "number" && ctx.revalidate > 0
+					? ctx.revalidate
 					: DEFAULT_TTL_SECONDS;
 
 			await redis.set(KEY_PREFIX + key, JSON.stringify(entry), { EX: ttl });
