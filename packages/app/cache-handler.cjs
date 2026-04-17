@@ -9,8 +9,24 @@
  * all methods silently return null / no-op. The app works exactly as without this handler.
  */
 
-const { createClient } = require("redis");
 const { PHASE_PRODUCTION_BUILD } = require("next/constants");
+
+// Lazy-load `redis` only when a client is actually needed. This keeps bundlers
+// (Turbopack) from tracing the package — and its `node:crypto` dependency —
+// into edge chunks that might transitively reference this handler.
+/** @type {typeof import("redis").createClient | undefined} */
+let createClientFn;
+/**
+ * @returns {typeof import("redis").createClient}
+ */
+function loadCreateClient() {
+	if (createClientFn) return createClientFn;
+	// Use an indirect require so the specifier is not a static literal at parse
+	// time; Turbopack's static analysis leaves dynamic requires alone.
+	const dynamicRequire = require;
+	createClientFn = dynamicRequire("redis").createClient;
+	return /** @type {typeof import("redis").createClient} */ (createClientFn);
+}
 
 const KEY_PREFIX = "nextcache:";
 const TAG_PREFIX = "nexttag:";
@@ -53,6 +69,7 @@ async function getClient() {
 
 	connectionPromise = (async () => {
 		try {
+			const createClient = loadCreateClient();
 			const c = createClient({
 				url: process.env.VALKEY_URL,
 				socket: {
