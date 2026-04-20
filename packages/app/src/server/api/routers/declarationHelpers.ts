@@ -6,6 +6,91 @@ import {
 	jobCategories,
 } from "~/server/db/schema";
 
+type DeclarationRow = typeof declarations.$inferSelect;
+
+/**
+ * Build a transient, zero-value declaration row used to satisfy the read-only
+ * UI when an admin impersonates a company that has not started a declaration
+ * yet (issue #3230). The row is never persisted — it only exists in memory
+ * to let layouts and step pages render their empty state without
+ * short-circuiting on a missing record.
+ */
+export function buildPlaceholderDeclaration({
+	siren,
+	year,
+	declarantId,
+}: {
+	siren: string;
+	year: number;
+	declarantId: string;
+}): DeclarationRow {
+	const now = new Date();
+	return {
+		id: "",
+		siren,
+		year,
+		declarantId,
+		totalWomen: null,
+		totalMen: null,
+		remunerationScore: null,
+		variableRemunerationScore: null,
+		quartileScore: null,
+		categoryScore: null,
+		compliancePath: null,
+		indicatorAAnnualWomen: null,
+		indicatorAAnnualMen: null,
+		indicatorAHourlyWomen: null,
+		indicatorAHourlyMen: null,
+		indicatorBAnnualWomen: null,
+		indicatorBAnnualMen: null,
+		indicatorBHourlyWomen: null,
+		indicatorBHourlyMen: null,
+		indicatorCAnnualWomen: null,
+		indicatorCAnnualMen: null,
+		indicatorCHourlyWomen: null,
+		indicatorCHourlyMen: null,
+		indicatorDAnnualWomen: null,
+		indicatorDAnnualMen: null,
+		indicatorDHourlyWomen: null,
+		indicatorDHourlyMen: null,
+		indicatorEWomen: null,
+		indicatorEMen: null,
+		indicatorFAnnualThreshold1: null,
+		indicatorFAnnualThreshold2: null,
+		indicatorFAnnualThreshold3: null,
+		indicatorFAnnualThreshold4: null,
+		indicatorFAnnualWomen1: null,
+		indicatorFAnnualWomen2: null,
+		indicatorFAnnualWomen3: null,
+		indicatorFAnnualWomen4: null,
+		indicatorFAnnualMen1: null,
+		indicatorFAnnualMen2: null,
+		indicatorFAnnualMen3: null,
+		indicatorFAnnualMen4: null,
+		indicatorFHourlyThreshold1: null,
+		indicatorFHourlyThreshold2: null,
+		indicatorFHourlyThreshold3: null,
+		indicatorFHourlyThreshold4: null,
+		indicatorFHourlyWomen1: null,
+		indicatorFHourlyWomen2: null,
+		indicatorFHourlyWomen3: null,
+		indicatorFHourlyWomen4: null,
+		indicatorFHourlyMen1: null,
+		indicatorFHourlyMen2: null,
+		indicatorFHourlyMen3: null,
+		indicatorFHourlyMen4: null,
+		currentStep: 0,
+		status: "draft",
+		secondDeclarationStep: null,
+		secondDeclarationStatus: null,
+		secondDeclReferencePeriodStart: null,
+		secondDeclReferencePeriodEnd: null,
+		complianceCompletedAt: null,
+		createdAt: now,
+		updatedAt: now,
+	};
+}
+
 export type Tx = Parameters<
 	Parameters<import("~/server/db").DB["transaction"]>[0]
 >[0];

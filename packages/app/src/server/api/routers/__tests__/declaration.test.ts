@@ -722,11 +722,10 @@ describe("declarationRouter", () => {
 			);
 		});
 
-		it("refuses getOrCreate when no declaration exists (would create a draft)", async () => {
-			// Simulate the "no existing row" branch — where getOrCreate would
-			// normally insert a new draft. The impersonation guard fires right
-			// before the insert, so the admin never creates a draft in the
-			// user's name.
+		it("returns a placeholder declaration in mimoquage when none exists (no insert)", async () => {
+			// When an admin mimoques a company that has not started a
+			// declaration, getOrCreate must return a transient empty row so the
+			// read-only UI can render. No INSERT is performed (issue #3230).
 			const txSelect = vi.fn().mockImplementation(() => ({
 				from: vi.fn().mockReturnValue({
 					where: vi.fn().mockReturnValue({
@@ -734,14 +733,31 @@ describe("declarationRouter", () => {
 					}),
 				}),
 			}));
-			const tx = { select: txSelect, insert: vi.fn(), delete: vi.fn() };
+			const insertSpy = vi.fn();
+			const tx = { select: txSelect, insert: insertSpy, delete: vi.fn() };
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
 				fn(tx),
 			);
-			const mockDb = { transaction: mockTransaction } as unknown;
+			const mockDb = {
+				transaction: mockTransaction,
+				select: vi.fn().mockImplementation(() => ({
+					from: vi.fn().mockReturnValue({
+						where: vi.fn().mockReturnValue({
+							limit: vi.fn().mockResolvedValue([]),
+						}),
+					}),
+				})),
+			} as unknown;
 			const caller = await createCaller(mockDb, null, impersonation);
 
-			await expect(caller.getOrCreate()).rejects.toThrow("Mode mimoquage");
+			const result = await caller.getOrCreate();
+			expect(result.declaration.id).toBe("");
+			expect(result.declaration.siren).toBe(impersonation.siren);
+			expect(result.declaration.status).toBe("draft");
+			expect(result.declaration.currentStep).toBe(0);
+			expect(result.jobCategories).toEqual([]);
+			expect(result.employeeCategories).toEqual([]);
+			expect(insertSpy).not.toHaveBeenCalled();
 		});
 
 		it("allows getOrCreate when an existing declaration is returned", async () => {
