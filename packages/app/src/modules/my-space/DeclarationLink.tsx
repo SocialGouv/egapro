@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsImpersonating } from "~/modules/auth";
 import { hasRequiredDeclarationInfo } from "~/modules/domain";
 
 import { DECLARATION_PROCESS_PANEL_ID } from "./DeclarationProcessPanel";
@@ -16,7 +17,9 @@ type Props = {
 
 /** Link that opens the missing info modal if phone or CSE is missing, or navigates/opens panel directly. */
 export function DeclarationLink({ type, userPhone, hasCse, children }: Props) {
-	const hasMissingInfo = !hasRequiredDeclarationInfo(userPhone, hasCse);
+	const isImpersonating = useIsImpersonating();
+	const hasMissingInfo =
+		!isImpersonating && !hasRequiredDeclarationInfo(userPhone, hasCse);
 
 	// When info is missing, open missing-info modal (for both types)
 	if (hasMissingInfo) {

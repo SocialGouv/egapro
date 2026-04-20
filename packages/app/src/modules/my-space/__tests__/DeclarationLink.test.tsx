@@ -1,9 +1,16 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { useSession } from "next-auth/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DeclarationLink } from "../DeclarationLink";
 
+const mockedUseSession = vi.mocked(useSession);
+
 describe("DeclarationLink", () => {
+	afterEach(() => {
+		mockedUseSession.mockReset();
+	});
+
 	it("renders remuneration as a button opening the process panel when info is present", () => {
 		render(
 			<DeclarationLink hasCse={true} type="remuneration" userPhone="0122334455">
@@ -62,5 +69,30 @@ describe("DeclarationLink", () => {
 		);
 		const button = screen.getByRole("button", { name: "Représentation" });
 		expect(button).toBeInTheDocument();
+	});
+
+	it("bypasses missing info modal during admin impersonation", () => {
+		mockedUseSession.mockReturnValue({
+			data: {
+				user: {
+					id: "admin-1",
+					impersonation: { siren: "123456789", name: "Acme" },
+				},
+				expires: "2099-01-01",
+			},
+			status: "authenticated",
+		} as unknown as ReturnType<typeof useSession>);
+
+		render(
+			<DeclarationLink hasCse={null} type="remuneration" userPhone={null}>
+				Rémunération
+			</DeclarationLink>,
+		);
+
+		const button = screen.getByRole("button", { name: "Rémunération" });
+		expect(button).toHaveAttribute(
+			"aria-controls",
+			"declaration-process-panel",
+		);
 	});
 });

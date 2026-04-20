@@ -1,5 +1,8 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { useSession } from "next-auth/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+const mockedUseSession = vi.mocked(useSession);
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -147,5 +150,29 @@ describe("MissingInfoModal", () => {
 		expect(
 			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
 		).not.toBeDisabled();
+	});
+
+	describe("admin impersonation", () => {
+		afterEach(() => {
+			mockedUseSession.mockReset();
+		});
+
+		it("does not render the modal when impersonating", () => {
+			mockedUseSession.mockReturnValue({
+				data: {
+					user: {
+						id: "admin-1",
+						impersonation: { siren: "123456789", name: "Acme" },
+					},
+					expires: "2099-01-01",
+				},
+				status: "authenticated",
+			} as unknown as ReturnType<typeof useSession>);
+
+			const { container } = render(
+				<MissingInfoModal hasCse={null} siren="532847196" userPhone={null} />,
+			);
+			expect(container.querySelector("#missing-info-modal")).toBeNull();
+		});
 	});
 });
