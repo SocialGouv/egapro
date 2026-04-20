@@ -193,12 +193,12 @@ Implémenté dans `packages/app/src/server/services/suitApiAuth.ts`.
 
 ```bash
 # Première génération
-./scripts/generate-suit-signing-keys.sh generate dev       # → ./suit-signing-keys/dev/
-./scripts/generate-suit-signing-keys.sh generate prod      # → ./suit-signing-keys/prod/
-./scripts/generate-suit-signing-keys.sh generate all       # → les deux
+./packages/app/scripts/generate-suit-signing-keys.sh generate dev       # → ./suit-signing-keys/dev/
+./packages/app/scripts/generate-suit-signing-keys.sh generate prod      # → ./suit-signing-keys/prod/
+./packages/app/scripts/generate-suit-signing-keys.sh generate all       # → les deux
 
 # Rotation (sauvegarde les anciennes clés, génère de nouvelles)
-./scripts/generate-suit-signing-keys.sh renew prod
+./packages/app/scripts/generate-suit-signing-keys.sh renew prod
 ```
 
 `generate` refuse d'écraser des clés existantes. `renew` les sauvegarde dans un dossier `backup-{date}` avant de regénérer.
@@ -237,7 +237,7 @@ Implémenté dans `packages/app/src/server/services/suitApiAuth.ts`.
 
 ### Procédure de rotation
 
-1. `./scripts/generate-suit-signing-keys.sh renew <env>` — génère une nouvelle paire, sauvegarde l'ancienne
+1. `./packages/app/scripts/generate-suit-signing-keys.sh renew <env>` — génère une nouvelle paire, sauvegarde l'ancienne
 2. Mettre à jour le sealed-secret K8s avec la nouvelle clé publique
 3. Déployer EgaPro
 4. Transmettre la nouvelle clé privée à SUIT — ils doivent basculer juste après le déploiement
