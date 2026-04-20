@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { useSession } from "next-auth/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { mockImpersonatingSession } from "~/test/impersonationMock";
+
 const mockedUseSession = vi.mocked(useSession);
 
 vi.mock("~/trpc/react", () => ({
@@ -158,16 +160,7 @@ describe("MissingInfoModal", () => {
 		});
 
 		it("does not render the modal when impersonating", () => {
-			mockedUseSession.mockReturnValue({
-				data: {
-					user: {
-						id: "admin-1",
-						impersonation: { siren: "123456789", name: "Acme" },
-					},
-					expires: "2099-01-01",
-				},
-				status: "authenticated",
-			} as unknown as ReturnType<typeof useSession>);
+			mockImpersonatingSession(mockedUseSession);
 
 			const { container } = render(
 				<MissingInfoModal hasCse={null} siren="532847196" userPhone={null} />,

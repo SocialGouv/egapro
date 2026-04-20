@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { useSession } from "next-auth/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { mockImpersonatingSession } from "~/test/impersonationMock";
 import { DeclarationLink } from "../DeclarationLink";
 
 const mockedUseSession = vi.mocked(useSession);
@@ -72,16 +73,7 @@ describe("DeclarationLink", () => {
 	});
 
 	it("bypasses missing info modal during admin impersonation", () => {
-		mockedUseSession.mockReturnValue({
-			data: {
-				user: {
-					id: "admin-1",
-					impersonation: { siren: "123456789", name: "Acme" },
-				},
-				expires: "2099-01-01",
-			},
-			status: "authenticated",
-		} as unknown as ReturnType<typeof useSession>);
+		mockImpersonatingSession(mockedUseSession);
 
 		render(
 			<DeclarationLink hasCse={null} type="remuneration" userPhone={null}>

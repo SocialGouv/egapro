@@ -1,6 +1,27 @@
 import { TRPCError } from "@trpc/server";
 import type { Session } from "next-auth";
 
+import { extractSiren } from "~/modules/domain";
+
+/**
+ * Resolve the SIREN to display/load for the current session.
+ *
+ * - Admin currently impersonating a company → the impersonated SIREN.
+ * - Regular user → the SIREN extracted from their ProConnect SIRET.
+ * - Anyone without either → `null`, and the caller decides how to bail
+ *   (redirect, `<MissingSiret/>`, etc.).
+ *
+ * Shared across every page/layout that renders company-scoped UI so every
+ * surface behaves identically during mimoquage (issue #3230).
+ */
+export function getEffectiveSiren(session: Session | null): string | null {
+	if (!session?.user) return null;
+	if (session.user.isAdmin && session.user.impersonation) {
+		return session.user.impersonation.siren;
+	}
+	return session.user.siret ? extractSiren(session.user.siret) : null;
+}
+
 /**
  * Centralized rule for "can this authenticated user read/write data scoped
  * to the given company?".
