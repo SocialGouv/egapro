@@ -1,0 +1,34 @@
+# Defaults applied to every environment for the Valkey cache.
+# Upstream keys live under `server:` because the valkey-io chart is aliased to
+# that name in Chart.yaml (avoids the valkey/valkey name collision).
+server:
+  # Lock the kubernetes service name to `valkey` so the app's VALKEY_URL
+  # (redis://valkey:6379) resolves in every namespace.
+  fullnameOverride: valkey
+
+  image:
+    tag: "9.0.2"
+
+  service:
+    type: ClusterIP
+    port: 6379
+
+  # Standalone by default. Prod overrides to enable master/replica topology.
+  replica:
+    enabled: false
+
+  # Cache is ephemeral — no persistence in standalone mode.
+  dataStorage:
+    enabled: false
+
+  # No auth for now — network policy inside the namespace is the boundary.
+  auth:
+    enabled: false
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

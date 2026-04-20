@@ -88,10 +88,11 @@ app:
 pg:
   ~chart: pg
 
-# Valkey (Redis-compatible) cache — deployed via the shared `redis` chart,
-# renamed locally to `valkey` to match the image and CLI used in the cluster.
-valkey:
-  ~chart: redis
+# Valkey (Redis-compatible) cache.
+# Deployed via the project-local `valkey` wrapper chart (.kontinuous/charts/valkey)
+# which pulls the official valkey-io/valkey-helm chart as a dependency.
+# Base defaults live in the wrapper's values.yaml; per-env overrides below.
+valkey: {}
 
 clamav:
   ~chart: clamav

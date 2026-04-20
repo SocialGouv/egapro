@@ -16,3 +16,21 @@ app:
     limits:
       cpu: 1
       memory: 2G
+
+valkey:
+  server:
+    replica:
+      enabled: true
+      replicas: 2
+      persistence:
+        size: 1Gi
+    podDisruptionBudget:
+      enabled: true
+      maxUnavailable: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 1
+        memory: 1Gi
