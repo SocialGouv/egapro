@@ -3,11 +3,21 @@ import { createPrivateKey, sign } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 
+// All SUIT-protected routes (cf. src/app/api/v1/**). Keep in sync when a route
+// adds or removes `verifySuitAuth`. Dynamic segments (e.g. [fileId]) are
+// signed only if a concrete value is passed (--file-id), since the signature
+// must match the exact pathname of the actual request.
+const SUIT_ROUTES = [
+	{ method: "GET", path: "/api/v1/export/declarations" },
+	{ method: "GET", path: "/api/v1/files" },
+];
+
 const { values } = parseArgs({
 	options: {
 		"key-file": { type: "string" },
-		method: { type: "string", default: "GET" },
-		path: { type: "string", default: "/api/v1/export/declarations" },
+		"file-id": { type: "string" },
+		method: { type: "string" },
+		path: { type: "string" },
 		url: { type: "string", default: "http://localhost:3000" },
 		help: { type: "boolean", short: "h", default: false },
 	},
@@ -18,36 +28,54 @@ if (values.help) {
 	process.exit(0);
 }
 
-const privateKeyPem = loadPrivateKey();
-const method = values.method.toUpperCase();
-const pathname = values.path;
+const privateKey = createPrivateKey(loadPrivateKey());
 const baseUrl = values.url.replace(/\/$/, "");
 const timestamp = Math.floor(Date.now() / 1000);
-const payload = `${timestamp}|${method}|${pathname}`;
 
-const signature = sign(
-	"RSA-SHA256",
-	Buffer.from(payload),
-	createPrivateKey(privateKeyPem),
-).toString("base64");
+const routes = resolveRoutes();
 
-console.log("Payload signé :");
-console.log(`  ${payload}`);
-console.log();
-console.log("Headers :");
-console.log(`  X-Timestamp: ${timestamp}`);
-console.log(`  X-Signature: ${signature}`);
-console.log();
-console.log("Exemple curl :");
-console.log(
-	[
-		`curl -X ${method} \\`,
-		`  -H 'X-Timestamp: ${timestamp}' \\`,
-		`  -H 'X-Signature: ${signature}' \\`,
-		`  -H 'Authorization: Bearer '"$EGAPRO_SUIT_API_KEY"'' \\`,
-		`  '${baseUrl}${pathname}'`,
-	].join("\n"),
-);
+for (const [index, route] of routes.entries()) {
+	if (index > 0) console.log("\n---\n");
+	printRoute(route);
+}
+
+/** @returns {Array<{method: string, path: string}>} */
+function resolveRoutes() {
+	if (values.path) {
+		return [
+			{ method: (values.method ?? "GET").toUpperCase(), path: values.path },
+		];
+	}
+	const routes = [...SUIT_ROUTES];
+	if (values["file-id"]) {
+		routes.push({ method: "GET", path: `/api/v1/files/${values["file-id"]}` });
+	}
+	return routes;
+}
+
+/** @param {{method: string, path: string}} route */
+function printRoute(route) {
+	const payload = `${timestamp}|${route.method}|${route.path}`;
+	const signature = sign(
+		"RSA-SHA256",
+		Buffer.from(payload),
+		privateKey,
+	).toString("base64");
+
+	console.log(`${route.method} ${route.path}`);
+	console.log(`  X-Timestamp: ${timestamp}`);
+	console.log(`  X-Signature: ${signature}`);
+	console.log();
+	console.log(
+		[
+			`  curl -X ${route.method} \\`,
+			`    -H 'X-Timestamp: ${timestamp}' \\`,
+			`    -H 'X-Signature: ${signature}' \\`,
+			`    -H 'Authorization: Bearer '"$EGAPRO_SUIT_API_KEY"'' \\`,
+			`    '${baseUrl}${route.path}'`,
+		].join("\n"),
+	);
+}
 
 /** @returns {string} */
 function loadPrivateKey() {
@@ -85,7 +113,10 @@ function errorMessage(err) {
 }
 
 function printHelp() {
-	console.log(`Génère une signature SUIT (X-Timestamp + X-Signature) pour tester l'API.
+	console.log(`Génère les signatures SUIT (X-Timestamp + X-Signature) pour toutes les routes protégées.
+
+Par défaut, signe l'ensemble des routes SUIT connues en une seule exécution.
+Passer --path pour signer une route unique (custom).
 
 Usage :
   node scripts/generate-suit-signature.js [options]
@@ -93,16 +124,11 @@ Usage :
 Options :
   --key-file <path>   Chemin vers la clé privée PEM
                       (ou variable d'env SUIT_PRIVATE_KEY_PEM, PEM brut ou base64)
-  --method <verb>     Méthode HTTP (défaut : GET)
-  --path <pathname>   Chemin de la route (défaut : /api/v1/export/declarations)
-  --url <base>        URL de base pour le curl d'exemple (défaut : http://localhost:3000)
+  --file-id <uuid>    Inclut aussi /api/v1/files/<uuid> dans la sortie
+  --path <pathname>   Signer uniquement cette route (désactive le mode "toutes les routes")
+  --method <verb>     Méthode HTTP pour --path (défaut : GET)
+  --url <base>        URL de base pour le curl (défaut : http://localhost:3000)
   -h, --help          Affiche cette aide
-
-Exemples :
-  node scripts/generate-suit-signature.js --key-file ./suit-signing.key
-  node scripts/generate-suit-signature.js --path '/api/v1/files' --method GET
-  SUIT_PRIVATE_KEY_PEM=$(cat ./suit-signing.key | base64) \\
-    node scripts/generate-suit-signature.js
 
 Validité de la signature :
   - dev                 : 30 jours

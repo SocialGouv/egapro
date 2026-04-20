@@ -227,70 +227,13 @@ Implémenté dans `packages/app/src/server/services/suitApiAuth.ts`.
         https://<host>/api/v1/export/declarations?date_begin=2026-01-01
    ```
 
-   **Option B (script Node fourni)** — affiche les headers prêts à copier ainsi qu'un `curl` d'exemple :
+   **Option B (script Node fourni)** — signe **toutes les routes SUIT protégées** en une seule exécution et affiche les `curl` prêts à copier :
    ```bash
    node packages/app/scripts/generate-suit-signature.js \
-     --key-file ./suit-signing-keys/dev/suit-signing.key \
-     --path /api/v1/export/declarations
+     --key-file ./suit-signing-keys/dev/suit-signing.key
    ```
 
-   Exemple de sortie :
-   ```text
-   Payload signé :
-     1776678763|GET|/api/v1/export/declarations
-
-   Headers :
-     X-Timestamp: 1776678763
-     X-Signature: F7KnzaQM+A4/oeG4DrJDWF71UbYmhNfdqCegVsqJ4qzGrIgXl9MiVTX9OZy155gJ6cYENvVMrU/Jk9kMzl+3KUes1v7Hw/Es1ON8/ZTGecOMbb2DOUyQGi12J3+3cstsEKOVJgb+abkXj4AOS6L+JDF1YSc9OYImE+9YTGvEquhCaK4Fkfw+oP2yKHuQpqCRxw64y3MPxQnQlmlMlLfQOxlBAbW29TrJ8llbBX2fOJiAhOWcrY9qmGnPE6mxDVK8A/dGbLfnBZA7ZBYW3K346r+Spr2eJalkySvUylwd1SnSNUMiy+TB2mc+BqCj+0BqV0+VCXDhS1K/fTsHcfRhCg==
-
-   Exemple curl :
-   curl -X GET \
-     -H 'X-Timestamp: 1776678763' \
-     -H 'X-Signature: F7KnzaQM+A4/oeG4DrJDWF71UbYmhNfdqCegVsqJ4qzGrIgXl9MiVTX9OZy155gJ6cYENvVMrU/Jk9kMzl+3KUes1v7Hw/Es1ON8/ZTGecOMbb2DOUyQGi12J3+3cstsEKOVJgb+abkXj4AOS6L+JDF1YSc9OYImE+9YTGvEquhCaK4Fkfw+oP2yKHuQpqCRxw64y3MPxQnQlmlMlLfQOxlBAbW29TrJ8llbBX2fOJiAhOWcrY9qmGnPE6mxDVK8A/dGbLfnBZA7ZBYW3K346r+Spr2eJalkySvUylwd1SnSNUMiy+TB2mc+BqCj+0BqV0+VCXDhS1K/fTsHcfRhCg==' \
-     -H 'Authorization: Bearer '"$EGAPRO_SUIT_API_KEY"'' \
-     'http://localhost:3000/api/v1/export/declarations'
-   ```
-
-   Il suffit alors d'exécuter la commande `curl` telle quelle après avoir exporté la clé API : `export EGAPRO_SUIT_API_KEY=<api-key>`.
-
-   **Options du script :**
-
-   | Option | Type | Défaut | Description |
-   |---|---|---|---|
-   | `--key-file <path>` | string | — | Chemin vers la clé privée PEM. Alternativement, passer la clé via la variable d'env `SUIT_PRIVATE_KEY_PEM` (PEM brut ou base64). |
-   | `--method <verb>` | string | `GET` | Méthode HTTP à signer (`GET`, `POST`, `PUT`, `DELETE`, …). Automatiquement upper-casée. |
-   | `--path <pathname>` | string | `/api/v1/export/declarations` | Chemin exact à signer (doit matcher le `pathname` de la requête ciblée). |
-   | `--url <base>` | string | `http://localhost:3000` | URL de base utilisée dans la commande `curl` d'exemple. Trailing slash retiré automatiquement. |
-   | `-h`, `--help` | flag | `false` | Affiche l'aide et sort. |
-
-   **Variables d'environnement :**
-
-   | Variable | Description |
-   |---|---|
-   | `SUIT_PRIVATE_KEY_PEM` | Clé privée RSA fournie inline (alternative à `--key-file`). Accepte le PEM brut (`-----BEGIN PRIVATE KEY-----…`) ou du base64. |
-   | `EGAPRO_SUIT_API_KEY` | Utilisée uniquement dans la commande `curl` affichée en sortie (le script lui-même ne la consomme pas). |
-
-   **Exemples :**
-
-   ```bash
-   # Clé via fichier, route par défaut
-   node packages/app/scripts/generate-suit-signature.js --key-file ./suit-signing.key
-
-   # Autre route + autre méthode
-   node packages/app/scripts/generate-suit-signature.js \
-     --key-file ./suit-signing.key \
-     --path /api/v1/files \
-     --method GET
-
-   # URL ciblée en preprod
-   node packages/app/scripts/generate-suit-signature.js \
-     --key-file ./suit-signing.key \
-     --url https://egapro-preprod.fabrique.social.gouv.fr
-
-   # Clé via variable d'env (base64)
-   SUIT_PRIVATE_KEY_PEM=$(base64 < ./suit-signing.key) \
-     node packages/app/scripts/generate-suit-signature.js
-   ```
+   Le script itère automatiquement sur les routes SUIT (actuellement `GET /api/v1/export/declarations` et `GET /api/v1/files`). Pour signer `GET /api/v1/files/<id>`, passer `--file-id <uuid>`. Pour surcharger l'URL cible, passer `--url https://egapro-preprod.fabrique.social.gouv.fr`. Voir `--help` pour toutes les options. Il suffit ensuite d'exporter `EGAPRO_SUIT_API_KEY=<api-key>` et d'exécuter un des `curl` affichés.
 
 ### Procédure de rotation
 
