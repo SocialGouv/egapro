@@ -15,6 +15,7 @@ type Props = {
 	onImport: (categories: EmployeeCategory[]) => void;
 	siren?: string;
 	year?: number;
+	disabled?: boolean;
 };
 
 export function CategoryImportExport({
@@ -22,6 +23,7 @@ export function CategoryImportExport({
 	onImport,
 	siren,
 	year,
+	disabled = false,
 }: Props) {
 	const baseId = useId();
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -98,6 +100,7 @@ export function CategoryImportExport({
 						aria-controls={importModalId}
 						className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-upload-line fr-btn--icon-left"
 						data-fr-opened="false"
+						disabled={disabled}
 						type="button"
 					>
 						Importer un fichier

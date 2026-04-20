@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -67,6 +68,7 @@ export function Step4QuartileDistribution({
 	maxMen,
 }: Step4QuartileDistributionProps) {
 	const router = useRouter();
+	const isImpersonating = useIsImpersonating();
 
 	const hasSavedData =
 		initialData.annual.some(
@@ -227,6 +229,7 @@ export function Step4QuartileDistribution({
 			{/* Tables */}
 			<div className={stepStyles.dataContainer}>
 				<QuartileTable
+					disabled={isImpersonating}
 					onQuartileChange={(index, field, value) =>
 						handleQuartileChange("annual", index, field, value)
 					}
@@ -254,6 +257,7 @@ export function Step4QuartileDistribution({
 				/>
 
 				<QuartileTable
+					disabled={isImpersonating}
 					onQuartileChange={(index, field, value) =>
 						handleQuartileChange("hourly", index, field, value)
 					}
@@ -301,6 +305,9 @@ export function Step4QuartileDistribution({
 			<FormActions
 				className="fr-mt-0"
 				isSubmitting={mutation.isPending}
+				mimoquageNextHref={
+					hasSavedData ? "/declaration-remuneration/etape/5" : undefined
+				}
 				previousHref="/declaration-remuneration/etape/3"
 			/>
 		</form>

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useIsImpersonating } from "~/modules/auth";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep1Schema } from "../schemas";
@@ -30,6 +31,7 @@ export function Step1Workforce({
 	gipPrefillData,
 }: Step1WorkforceProps) {
 	const router = useRouter();
+	const isImpersonating = useIsImpersonating();
 	const isPrefilled = !!gipPrefillData;
 
 	const hasInitialData = initialData.totalWomen > 0 || initialData.totalMen > 0;
@@ -165,6 +167,7 @@ export function Step1Workforce({
 													<input
 														aria-label="Nombre de femmes"
 														className="fr-input"
+														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={handleWomenChange}
 														pattern="[0-9]*"
@@ -176,6 +179,7 @@ export function Step1Workforce({
 													<input
 														aria-label="Nombre d'hommes"
 														className="fr-input"
+														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={handleMenChange}
 														pattern="[0-9]*"
@@ -216,6 +220,9 @@ export function Step1Workforce({
 			<FormActions
 				className="fr-mt-0"
 				isSubmitting={mutation.isPending}
+				mimoquageNextHref={
+					hasInitialData ? "/declaration-remuneration/etape/2" : undefined
+				}
 				previousHref="/"
 			/>
 		</form>
