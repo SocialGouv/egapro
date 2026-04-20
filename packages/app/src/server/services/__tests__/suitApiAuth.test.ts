@@ -319,5 +319,26 @@ describe("verifySuitSignature", () => {
 			const response = result as Response;
 			expect(response.status).toBe(403);
 		});
+
+		it("accepts a timestamp in the future within the 30-day window", async () => {
+			const verifyFn = await importWithDevEnv();
+			const request = makeSignedRequest("/api/v1/export/declarations", {
+				timestamp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // 1 day ahead
+			});
+			const result = verifyFn(request);
+			expect(result).toBe(true);
+		});
+
+		it("returns 403 when timestamp is more than 30 days in the future", async () => {
+			const verifyFn = await importWithDevEnv();
+			const request = makeSignedRequest("/api/v1/export/declarations", {
+				timestamp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 31, // 31 days ahead
+			});
+			const result = verifyFn(request);
+
+			expect(result).not.toBe(true);
+			const response = result as Response;
+			expect(response.status).toBe(403);
+		});
 	});
 });

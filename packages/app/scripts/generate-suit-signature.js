@@ -83,7 +83,7 @@ function loadPrivateKey() {
 		try {
 			return readFileSync(values["key-file"], "utf-8");
 		} catch (err) {
-			fail(
+			return fail(
 				`Impossible de lire --key-file "${values["key-file"]}" : ${errorMessage(err)}`,
 			);
 		}
@@ -95,11 +95,11 @@ function loadPrivateKey() {
 		try {
 			return Buffer.from(envKey, "base64").toString("utf-8");
 		} catch (err) {
-			fail(`SUIT_PRIVATE_KEY_PEM invalide : ${errorMessage(err)}`);
+			return fail(`SUIT_PRIVATE_KEY_PEM invalide : ${errorMessage(err)}`);
 		}
 	}
 
-	fail(
+	return fail(
 		"Clé privée manquante. Passez --key-file <chemin> ou SUIT_PRIVATE_KEY_PEM (PEM ou base64).",
 	);
 }
