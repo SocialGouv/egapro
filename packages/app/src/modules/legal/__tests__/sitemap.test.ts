@@ -6,7 +6,7 @@ const BASE_URL = "https://egapro.travail.gouv.fr";
 
 describe("buildSitemap", () => {
 	it("returns absolute URLs for every public route", () => {
-		const entries = buildSitemap(BASE_URL);
+		const entries = buildSitemap(BASE_URL, true);
 		for (const entry of entries) {
 			expect(entry.url).toMatch(/^https:\/\/egapro\.travail\.gouv\.fr(\/|$)/);
 			expect(entry.url.replace("https://", "")).not.toContain("//");
@@ -14,14 +14,14 @@ describe("buildSitemap", () => {
 	});
 
 	it("includes the home page as the root origin without trailing slash", () => {
-		const entries = buildSitemap(BASE_URL);
+		const entries = buildSitemap(BASE_URL, true);
 		const home = entries.find((entry) => entry.url === BASE_URL);
 		expect(home).toBeDefined();
 		expect(home?.priority).toBe(1);
 	});
 
 	it("lists every public route required by issue #3233", () => {
-		const entries = buildSitemap(BASE_URL);
+		const entries = buildSitemap(BASE_URL, true);
 		const paths = entries.map(
 			(entry) => entry.url.replace(BASE_URL, "") || "/",
 		);
@@ -42,7 +42,7 @@ describe("buildSitemap", () => {
 	});
 
 	it("excludes authenticated, internal and dynamic routes", () => {
-		const entries = buildSitemap(BASE_URL);
+		const entries = buildSitemap(BASE_URL, true);
 		const urls = entries.map((entry) => entry.url);
 		for (const forbidden of [
 			"/login",
@@ -60,17 +60,21 @@ describe("buildSitemap", () => {
 
 	it("stamps every entry with the provided timestamp", () => {
 		const now = new Date("2026-01-01T00:00:00.000Z");
-		const entries = buildSitemap(BASE_URL, now);
+		const entries = buildSitemap(BASE_URL, true, now);
 		for (const entry of entries) {
 			expect(entry.lastModified).toBe(now);
 		}
 	});
 
 	it("normalises a base URL with a trailing path to the origin", () => {
-		const entries = buildSitemap(`${BASE_URL}/api/auth`);
+		const entries = buildSitemap(`${BASE_URL}/api/auth`, true);
 		for (const entry of entries) {
 			expect(entry.url.startsWith(BASE_URL)).toBe(true);
 			expect(entry.url).not.toContain("/api/auth");
 		}
+	});
+
+	it("returns no entries outside of prod", () => {
+		expect(buildSitemap(BASE_URL, false)).toEqual([]);
 	});
 });

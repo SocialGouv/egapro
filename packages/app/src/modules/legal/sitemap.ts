@@ -32,8 +32,11 @@ const PUBLIC_ROUTES: readonly PublicRoute[] = [
 
 export function buildSitemap(
 	baseUrl: string,
+	isProd: boolean,
 	now: Date = new Date(),
 ): MetadataRoute.Sitemap {
+	// Non-prod environments (dev, preprod, review apps) must not be indexed.
+	if (!isProd) return [];
 	const origin = new URL(baseUrl).origin;
 	return PUBLIC_ROUTES.map(({ path, changeFrequency, priority }) => ({
 		url: `${origin}${path === "/" ? "" : path}`,

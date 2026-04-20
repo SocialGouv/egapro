@@ -8,5 +8,5 @@ import { buildSitemap } from "~/modules/legal";
 export const dynamic = "force-dynamic";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-	return buildSitemap(env.NEXTAUTH_URL);
+	return buildSitemap(env.NEXTAUTH_URL, env.NEXT_PUBLIC_EGAPRO_ENV === "prod");
 }
