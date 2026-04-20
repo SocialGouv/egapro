@@ -88,12 +88,6 @@ export const env = createEnv({
 		SMTP_PORT: z.coerce.number().int().positive().default(1025),
 		SMTP_USER: z.string().optional(),
 		SMTP_PASS: z.string().optional(),
-		/**
-		 * `true` → connect with implicit TLS (port 465). `false` (default) keeps
-		 * the plain-socket / STARTTLS upgrade path used by MailDev (1025) and
-		 * Tipimail on 587. Case-insensitive so any casing of the value inherited
-		 * from the V1 sealed-secret (MAILER_SMTP_SSL) flows through unchanged.
-		 */
 		SMTP_SECURE: z
 			.string()
 			.default("false")

@@ -17,4 +17,5 @@ export const AUDIT_RETENTION_DAYS_LONG = 365;
  */
 export const SHORT_RETENTION_CATEGORIES: ReadonlyArray<AuditCategory> = [
 	"read_sensitive",
+	"public_search",
 ];

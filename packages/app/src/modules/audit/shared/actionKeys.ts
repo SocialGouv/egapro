@@ -47,6 +47,10 @@ export const AUDIT_ACTIONS = {
 	ADMIN_DECLARATIONS_SEARCH: "admin_declarations.search",
 	ADMIN_DECLARATION_GET_BY_ID: "admin_declarations.get_by_id",
 
+	// ── Admin settings mutations ──────────────────────────
+	ADMIN_SETTINGS_UPSERT_DEADLINES: "admin_settings.upsert_deadlines",
+	ADMIN_SETTINGS_SET_ACTIVE_YEAR: "admin_settings.set_active_year",
+
 	// ── Sensitive reads ────────────────────────────────────
 	ADMIN_FILE_DOWNLOAD: "admin.file_download",
 	PROFILE_READ: "profile.read",
@@ -65,6 +69,10 @@ export const AUDIT_ACTIONS = {
 	// ── Mail ───────────────────────────────────────────────
 	MAIL_RECEIPT_SEND: "mail.receipt_send",
 	MAIL_RECEIPT_RESEND: "mail.receipt_resend",
+
+	// ── Public searches ────────────────────────────────────
+	PUBLIC_REFERENT_SEARCH: "public_referents.search",
+	PUBLIC_REFERENT_VIEW: "public_referents.view",
 
 	// ── System / cron-triggered ────────────────────────────
 	SYSTEM_AUDIT_CLEANUP: "system.audit_cleanup",
@@ -107,6 +115,8 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.ADMIN_DECLARATIONS_SEARCH]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES]: "mutation",
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_SET_ACTIVE_YEAR]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PROFILE_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA]: "read_sensitive",
@@ -122,6 +132,9 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.MAIL_RECEIPT_SEND]: "mutation",
 	[AUDIT_ACTIONS.MAIL_RECEIPT_RESEND]: "mutation",
+
+	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: "public_search",
+	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",
 
 	[AUDIT_ACTIONS.SYSTEM_AUDIT_CLEANUP]: "system",
 };

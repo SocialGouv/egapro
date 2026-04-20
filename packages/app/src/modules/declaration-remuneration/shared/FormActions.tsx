@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useReadOnlyGuard } from "~/modules/auth";
 
 import styles from "./FormActions.module.scss";
 
@@ -19,6 +22,8 @@ export function FormActions({
 	nextDisabled = false,
 	className,
 }: FormActionsProps) {
+	const { isReadOnly, buttonProps, tooltip } = useReadOnlyGuard();
+
 	return (
 		<div className={`fr-mt-4w ${styles.actions} ${className ?? ""}`}>
 			{previousHref ? (
@@ -39,13 +44,17 @@ export function FormActions({
 					{nextLabel}
 				</Link>
 			) : (
-				<button
-					className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-					disabled={isSubmitting || nextDisabled}
-					type="submit"
-				>
-					{isSubmitting ? "Enregistrement…" : nextLabel}
-				</button>
+				<span>
+					<button
+						{...buttonProps}
+						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+						disabled={isReadOnly || isSubmitting || nextDisabled}
+						type="submit"
+					>
+						{isSubmitting ? "Enregistrement…" : nextLabel}
+					</button>
+					{tooltip}
+				</span>
 			)}
 		</div>
 	);

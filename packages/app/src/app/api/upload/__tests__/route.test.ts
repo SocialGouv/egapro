@@ -108,6 +108,39 @@ describe("POST /api/upload", () => {
 		);
 	});
 
+	it("returns 403 and audits a failure row when the admin is impersonating", async () => {
+		mocks.auth.mockResolvedValue({
+			user: {
+				id: "admin-1",
+				email: "admin@example.com",
+				siret: "12345678901234",
+				isAdmin: true,
+				impersonation: { siren: "987654321", name: "Acme" },
+			},
+		});
+
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "application/pdf",
+				"X-Filename": "f.pdf",
+				"X-Flow-Type": "cse_opinion",
+			}),
+		);
+
+		expect(response.status).toBe(403);
+		const body = await response.json();
+		expect(body.error).toContain("mimoquage");
+		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "cse_opinion.upload_file",
+				status: "failure",
+				errorMessage: "HTTP 403 impersonation_read_only",
+			}),
+		);
+	});
+
 	it("returns 400 when X-Filename is missing", async () => {
 		validSession();
 		const { POST } = await import("../route");

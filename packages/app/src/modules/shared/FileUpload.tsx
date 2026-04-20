@@ -29,6 +29,12 @@ type Props = {
 	acceptLabel: string;
 	/** Maximum number of files that can be selected. */
 	maxFiles?: number;
+	/**
+	 * When true, the dropzone, file input and selection button are all
+	 * disabled. Consumers can still render the component to preserve layout,
+	 * but the user cannot add files (e.g. during admin impersonation).
+	 */
+	disabled?: boolean;
 };
 
 export function FileUpload({
@@ -40,6 +46,7 @@ export function FileUpload({
 	allowedMimeTypes,
 	acceptLabel,
 	maxFiles = 1,
+	disabled = false,
 }: Props) {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const dropzoneRef = useRef<HTMLElement>(null);
@@ -113,7 +120,7 @@ export function FileUpload({
 	}
 
 	const messagesId = `${inputId}-messages`;
-	const canAddMore = selectedFiles.length < maxFiles;
+	const canAddMore = !disabled && selectedFiles.length < maxFiles;
 
 	return (
 		<div>
@@ -178,6 +185,7 @@ export function FileUpload({
 				aria-describedby={messagesId}
 				aria-invalid={error !== null}
 				className="fr-sr-only"
+				disabled={disabled}
 				id={inputId}
 				multiple={maxFiles > 1}
 				name={inputId}
