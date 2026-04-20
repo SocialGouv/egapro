@@ -20,12 +20,17 @@ export default async function Page() {
 	// The JWT only captures `phone` at sign-in, so `session.user.phone` goes
 	// stale as soon as the user saves a phone through the missing-info modal
 	// and re-triggers it on every render. Reading from the profile table on
-	// each page load keeps the missing-info gate honest.
-	const profile = await api.profile.get();
+	// each page load keeps the missing-info gate honest. Fall back to `null`
+	// when the profile row is missing so the page still renders (the modal
+	// will prompt for a phone number just like before).
+	const profile = await api.profile.get().catch(() => null);
 
 	return (
 		<HydrateClient>
-			<MonEspacePage siret={effectiveSiret} userPhone={profile.phone ?? null} />
+			<MonEspacePage
+				siret={effectiveSiret}
+				userPhone={profile?.phone ?? null}
+			/>
 		</HydrateClient>
 	);
 }
