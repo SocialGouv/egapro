@@ -88,11 +88,30 @@ app:
 pg:
   ~chart: pg
 
-# Valkey (Redis-compatible) cache.
-# Deployed via the project-local `valkey` wrapper chart (.kontinuous/charts/valkey)
-# which pulls the official valkey-io/valkey-helm chart as a dependency.
-# Base defaults live in the wrapper's values.yaml; per-env overrides below.
-valkey: {}
+# Valkey cache. Official valkey-io/valkey-helm chart pulled as a Helm dependency
+# from .kontinuous/Chart.yaml. Values below flow straight through to that chart.
+valkey:
+  # Pin service name so VALKEY_URL (redis://valkey:6379) resolves in every namespace.
+  fullnameOverride: valkey
+  image:
+    tag: "9.0.2"
+  service:
+    type: ClusterIP
+    port: 6379
+  # Standalone by default. Prod overrides to master/replica topology.
+  replica:
+    enabled: false
+  dataStorage:
+    enabled: false
+  auth:
+    enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
 clamav:
   ~chart: clamav

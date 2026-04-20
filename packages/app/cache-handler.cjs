@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * Custom Next.js cache handler backed by Valkey (Redis-compatible).
+ * Custom Next.js cache handler backed by Valkey.
  *
  * Implements the legacy cacheHandler interface (get, set, revalidateTag, resetRequestCache).
  * Used for ISR pages, fetch cache, route handlers, and image optimization.

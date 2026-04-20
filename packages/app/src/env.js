@@ -89,7 +89,7 @@ export const env = createEnv({
 		SMTP_USER: z.string().optional(),
 		SMTP_PASS: z.string().optional(),
 		MAIL_FROM: z.string().default("no-reply@egapro.local"),
-		// Valkey (Redis-compatible) cache URL — optional. When absent, the custom
+		// Valkey cache URL — optional. When absent, the custom
 		// cache handler (cache-handler.cjs) gracefully degrades to no-op.
 		// The handler reads process.env.VALKEY_URL directly (it runs outside
 		// the app module graph), but we declare it here for validation and docs.
