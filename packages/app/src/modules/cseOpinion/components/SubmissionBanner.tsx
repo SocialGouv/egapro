@@ -1,12 +1,14 @@
 import { formatLongDate } from "~/modules/domain";
+import { ResendReceiptButton } from "~/modules/mail";
 import styles from "./SubmissionBanner.module.scss";
 
 type Props = {
 	email: string;
 	deadline: Date;
+	year: number;
 };
 
-export function SubmissionBanner({ email, deadline }: Props) {
+export function SubmissionBanner({ email, deadline, year }: Props) {
 	return (
 		<div
 			className={`fr-grid-row fr-grid-row--gutters fr-p-4w ${styles.container}`}
@@ -40,9 +42,7 @@ export function SubmissionBanner({ email, deadline }: Props) {
 						Si ce n'est pas le cas, vérifiez vos courriers indésirables ou SPAM.
 						Sinon, cliquez sur le bouton ci-dessous.
 					</p>
-					<button className="fr-btn fr-btn--tertiary fr-btn--sm" type="button">
-						Renvoyer l'accusé de réception
-					</button>
+					<ResendReceiptButton kind="cseOpinion" year={year} />
 				</div>
 			</div>
 		</div>

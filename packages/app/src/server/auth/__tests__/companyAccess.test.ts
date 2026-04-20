@@ -1,7 +1,7 @@
 import type { Session } from "next-auth";
 import { describe, expect, it } from "vitest";
 
-import { isImpersonatingSiren } from "../companyAccess";
+import { assertNotImpersonating, isImpersonatingSiren } from "../companyAccess";
 
 function makeSession(overrides: Partial<Session["user"]> = {}): Session | null {
 	return {
@@ -52,5 +52,46 @@ describe("isImpersonatingSiren", () => {
 			impersonation: { siren: "123456789", name: "Acme" },
 		});
 		expect(isImpersonatingSiren(session, "123456789")).toBe(true);
+	});
+});
+
+describe("assertNotImpersonating", () => {
+	it("does not throw when session is null", () => {
+		expect(() => assertNotImpersonating(null)).not.toThrow();
+	});
+
+	it("does not throw for a non-impersonating user", () => {
+		const session = makeSession({ isAdmin: false, impersonation: null });
+		expect(() => assertNotImpersonating(session)).not.toThrow();
+	});
+
+	it("does not throw for an admin who is not impersonating", () => {
+		const session = makeSession({ isAdmin: true, impersonation: null });
+		expect(() => assertNotImpersonating(session)).not.toThrow();
+	});
+
+	it("does not throw for a non-admin with a stray impersonation field", () => {
+		// Defensive: only admins can mint an impersonation in the JWT, so a
+		// non-admin should never be blocked even if the session object
+		// happens to carry an `impersonation` value.
+		const session = makeSession({
+			isAdmin: false,
+			impersonation: { siren: "123456789", name: "Acme" },
+		});
+		expect(() => assertNotImpersonating(session)).not.toThrow();
+	});
+
+	it("throws a FORBIDDEN TRPCError when an admin is impersonating", () => {
+		const session = makeSession({
+			isAdmin: true,
+			impersonation: { siren: "123456789", name: "Acme" },
+		});
+		expect(() => assertNotImpersonating(session)).toThrow(
+			expect.objectContaining({
+				name: "TRPCError",
+				code: "FORBIDDEN",
+				message: expect.stringContaining("mimoquage"),
+			}),
+		);
 	});
 });

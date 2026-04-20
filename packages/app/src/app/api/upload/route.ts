@@ -93,6 +93,31 @@ export async function POST(request: Request): Promise<Response> {
 	const userId = session.user.id ?? null;
 	const userEmail = session.user.email ?? null;
 
+	// Admin impersonation is a read-only support mode: file uploads are
+	// refused server-side (UI hides the button) so the admin cannot write
+	// files in the user's name (issue #3230).
+	if (session.user.impersonation) {
+		writeFailure({
+			action,
+			flowType,
+			fileName: request.headers.get("x-filename"),
+			fileId: null,
+			errorMessage: "HTTP 403 impersonation_read_only",
+			userId,
+			userEmail,
+			siren,
+			requestContext,
+			startedAt,
+		});
+		return Response.json(
+			{
+				error:
+					"Mode mimoquage actif : l'envoi de fichier est désactivé en lecture seule.",
+			},
+			{ status: 403 },
+		);
+	}
+
 	const fileName = request.headers.get("x-filename");
 	if (!fileName) {
 		writeFailure({
@@ -207,6 +232,19 @@ export async function POST(request: Request): Promise<Response> {
 			userAgent: requestContext.userAgent,
 			durationMs: Date.now() - startedAt,
 		});
+		if (flowType === "cse_opinion" && userEmail) {
+			void (async () => {
+				const { sendReceipt } = await import("~/modules/mail/server");
+				await sendReceipt({
+					kind: "cseOpinion",
+					to: userEmail,
+					siren,
+					year,
+					userId,
+					isResend: false,
+				});
+			})();
+		}
 		return Response.json({
 			fileId: result.fileId,
 			fileName: result.fileName,

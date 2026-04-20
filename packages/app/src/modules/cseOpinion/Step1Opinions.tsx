@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { Controller } from "react-hook-form";
 
+import { useReadOnlyGuard } from "~/modules/auth";
+import { getCurrentYear } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
@@ -43,6 +45,7 @@ export function Step1Opinions({
 }: Props) {
 	const isJointEvaluation = compliancePath === "joint_evaluation";
 	const router = useRouter();
+	const readOnlyGuard = useReadOnlyGuard();
 
 	const form = useZodForm(saveOpinionsSchema, {
 		defaultValues: {
@@ -124,6 +127,7 @@ export function Step1Opinions({
 				<SubmissionBanner
 					deadline={cseDeadline}
 					email={email ?? "adresse@exemple.fr"}
+					year={getCurrentYear()}
 				/>
 			)}
 
@@ -243,13 +247,17 @@ export function Step1Opinions({
 				>
 					Précédent
 				</button>
-				<button
-					className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-					disabled={mutation.isPending}
-					type="submit"
-				>
-					{mutation.isPending ? "Enregistrement…" : "Suivant"}
-				</button>
+				<span>
+					<button
+						{...readOnlyGuard.buttonProps}
+						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+						disabled={mutation.isPending || readOnlyGuard.isReadOnly}
+						type="submit"
+					>
+						{mutation.isPending ? "Enregistrement…" : "Suivant"}
+					</button>
+					{readOnlyGuard.tooltip}
+				</span>
 			</div>
 		</form>
 	);

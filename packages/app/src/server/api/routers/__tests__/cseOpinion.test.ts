@@ -91,11 +91,23 @@ function createMockDb(rows: unknown[] = []) {
 	} as unknown;
 }
 
-function createCaller(mockDb: unknown, siret = "33978727700015") {
+function createCaller(
+	mockDb: unknown,
+	siret: string | null = "33978727700015",
+	impersonation: { siren: string; name: string } | null = null,
+) {
 	return import("../cseOpinion").then(({ cseOpinionRouter }) =>
 		cseOpinionRouter.createCaller({
 			db: mockDb,
-			session: { user: { id: "user-1", siret }, expires: "" },
+			session: {
+				user: {
+					id: "user-1",
+					siret,
+					isAdmin: impersonation !== null,
+					impersonation,
+				},
+				expires: "",
+			},
 			headers: new Headers(),
 		} as never),
 	);
@@ -302,6 +314,38 @@ describe("cseOpinionRouter", () => {
 			await expect(caller.deleteFile({ fileId: "file-1" })).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
 			);
+		});
+	});
+
+	describe("admin impersonation read-only guard", () => {
+		const impersonation = { siren: "339787277", name: "Acme" };
+		const validInput = {
+			firstDeclaration: {
+				accuracyOpinion: "favorable" as const,
+				accuracyDate: "2026-01-15",
+				gapConsulted: true,
+				gapOpinion: "unfavorable" as const,
+				gapDate: "2026-01-16",
+			},
+		};
+
+		it("refuses saveOpinions when the admin is impersonating", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb, null, impersonation);
+
+			await expect(caller.saveOpinions(validInput)).rejects.toThrow(
+				"Mode mimoquage",
+			);
+		});
+
+		it("refuses deleteFile when the admin is impersonating", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb, null, impersonation);
+
+			await expect(caller.deleteFile({ fileId: "file-1" })).rejects.toThrow(
+				"Mode mimoquage",
+			);
+			expect(mockDeleteS3File).not.toHaveBeenCalled();
 		});
 	});
 });

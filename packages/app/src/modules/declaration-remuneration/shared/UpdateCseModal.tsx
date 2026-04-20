@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { useReadOnlyGuard } from "~/modules/auth";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
@@ -14,6 +15,7 @@ type Props = {
 export function UpdateCseModal({ siren }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const [hasCse, setHasCse] = useState<boolean | null>(null);
+	const readOnlyGuard = useReadOnlyGuard();
 
 	const closeModal = useCallback(() => {
 		if (dialogRef.current) {
@@ -81,16 +83,24 @@ export function UpdateCseModal({ siren }: Props) {
 							<div className="fr-modal__footer">
 								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
 									<li>
-										<button
-											className="fr-btn"
-											disabled={hasCse === null || mutation.isPending}
-											onClick={handleSave}
-											type="button"
-										>
-											{mutation.isPending
-												? "Enregistrement\u2026"
-												: "Enregistrer"}
-										</button>
+										<span>
+											<button
+												{...readOnlyGuard.buttonProps}
+												className="fr-btn"
+												disabled={
+													hasCse === null ||
+													mutation.isPending ||
+													readOnlyGuard.isReadOnly
+												}
+												onClick={handleSave}
+												type="button"
+											>
+												{mutation.isPending
+													? "Enregistrement\u2026"
+													: "Enregistrer"}
+											</button>
+											{readOnlyGuard.tooltip}
+										</span>
 									</li>
 									<li>
 										<button

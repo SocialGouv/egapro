@@ -9,6 +9,42 @@ function createConnection() {
 }
 
 /**
+ * Ensure a draft declaration row exists for the test SIREN and the current
+ * year. Used by tests that can't rely on `getOrCreate` to lazily insert
+ * the row — e.g. the admin-impersonation scenario, where the insert branch
+ * is blocked server-side.
+ */
+export async function ensureCurrentYearDeclaration() {
+	const sql = createConnection();
+	try {
+		const users = await sql`
+			SELECT user_id FROM app_user_company WHERE siren = ${TEST_SIREN} LIMIT 1
+		`;
+		const userId = users[0]?.user_id as string | undefined;
+		if (!userId) return;
+		await sql`
+			INSERT INTO app_declaration (
+				id, siren, year, declarant_id, current_step, status,
+				created_at, updated_at
+			)
+			VALUES (
+				gen_random_uuid(),
+				${TEST_SIREN},
+				EXTRACT(YEAR FROM CURRENT_DATE)::int,
+				${userId},
+				1,
+				'draft',
+				NOW(),
+				NOW()
+			)
+			ON CONFLICT ON CONSTRAINT declaration_siren_year_idx DO NOTHING
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/**
  * Reset the test declaration to draft and clean all associated data
  * so a new full flow can be tested from scratch.
  */
@@ -324,6 +360,59 @@ export async function deleteCampaignDeadlines(year: number) {
 	const sql = createConnection();
 	try {
 		await sql`DELETE FROM app_campaign_deadline WHERE year = ${year}`;
+	} finally {
+		await sql.end();
+	}
+}
+
+type ReferentSeed = {
+	id: string;
+	region: string;
+	county: string | null;
+	name: string;
+	type: "email" | "url";
+	value: string;
+	principal: boolean;
+	substituteName: string | null;
+	substituteEmail: string | null;
+};
+
+/** Insert or update a list of referents (used by public referents E2E tests). */
+export async function seedReferents(rows: ReferentSeed[]) {
+	const sql = createConnection();
+	try {
+		for (const r of rows) {
+			await sql`
+				INSERT INTO app_referent (
+					id, region, county, name, type, value, principal,
+					substitute_name, substitute_email, created_at, updated_at
+				) VALUES (
+					${r.id}, ${r.region}, ${r.county}, ${r.name}, ${r.type},
+					${r.value}, ${r.principal},
+					${r.substituteName}, ${r.substituteEmail}, NOW(), NOW()
+				)
+				ON CONFLICT (id) DO UPDATE SET
+					region = EXCLUDED.region,
+					county = EXCLUDED.county,
+					name = EXCLUDED.name,
+					type = EXCLUDED.type,
+					value = EXCLUDED.value,
+					principal = EXCLUDED.principal,
+					substitute_name = EXCLUDED.substitute_name,
+					substitute_email = EXCLUDED.substitute_email
+			`;
+		}
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Remove referents by id (used by public referents E2E tests). */
+export async function deleteReferents(ids: string[]) {
+	if (ids.length === 0) return;
+	const sql = createConnection();
+	try {
+		await sql`DELETE FROM app_referent WHERE id = ANY(${ids})`;
 	} finally {
 		await sql.end();
 	}

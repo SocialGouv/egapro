@@ -75,6 +75,14 @@ describe("ContactPage", () => {
 		);
 	});
 
+	it("renders a link to the public referents search page", () => {
+		render(<ContactPage />);
+		const searchLink = screen.getByRole("link", {
+			name: /rechercher un référent par région ou département/i,
+		});
+		expect(searchLink).toHaveAttribute("href", "/referents");
+	});
+
 	it("displays the contact email address", () => {
 		render(<ContactPage />);
 		expect(screen.getByText("index@travail.gouv.fr")).toBeInTheDocument();
