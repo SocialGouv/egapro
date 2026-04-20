@@ -12,6 +12,15 @@ type FormActionsProps = {
 	isSubmitting?: boolean;
 	nextDisabled?: boolean;
 	className?: string;
+	/**
+	 * URL used by the "Suivant" button while admin impersonation is active.
+	 * - Provided (data already saved) → button is rendered as a Link so the admin
+	 *   can navigate without triggering the submit/save mutation.
+	 * - Omitted (data never saved) → button stays disabled, since navigating
+	 *   forward without any saved data would skip a step (issue #3230).
+	 * Ignored when `nextHref` is set (the button is already a Link).
+	 */
+	mimoquageNextHref?: string;
 };
 
 export function FormActions({
@@ -21,6 +30,7 @@ export function FormActions({
 	isSubmitting = false,
 	nextDisabled = false,
 	className,
+	mimoquageNextHref,
 }: FormActionsProps) {
 	const { isReadOnly, buttonProps, tooltip } = useReadOnlyGuard();
 
@@ -43,6 +53,17 @@ export function FormActions({
 				>
 					{nextLabel}
 				</Link>
+			) : isReadOnly && mimoquageNextHref ? (
+				<span>
+					<Link
+						aria-describedby={buttonProps["aria-describedby"]}
+						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+						href={mimoquageNextHref}
+					>
+						{nextLabel}
+					</Link>
+					{tooltip}
+				</span>
 			) : (
 				<span>
 					<button

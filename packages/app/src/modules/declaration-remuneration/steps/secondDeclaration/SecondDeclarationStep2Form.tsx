@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
+import { useIsImpersonating } from "~/modules/auth";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { api } from "~/trpc/react";
 import { CategoryForm } from "../step5/CategoryForm";
@@ -28,6 +28,7 @@ export function SecondDeclarationStep2Form({
 	initialEndDate = "",
 }: Props) {
 	const router = useRouter();
+	const isImpersonating = useIsImpersonating();
 	const [startDate, setStartDate] = useState(initialStartDate);
 	const [endDate, setEndDate] = useState(initialEndDate);
 	const [periodError, setPeriodError] = useState("");
@@ -37,6 +38,8 @@ export function SecondDeclarationStep2Form({
 		initialSecondDeclarationCategories.length > 0
 			? initialSecondDeclarationCategories
 			: initialFirstDeclarationCategories;
+	const hasSavedSecondDeclaration =
+		(initialSecondDeclarationCategories?.length ?? 0) > 0;
 
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
 		onSuccess: () => router.push(`${BASE_PATH}/etape/3`),
@@ -46,10 +49,14 @@ export function SecondDeclarationStep2Form({
 		<CategoryForm
 			accordionId="accordion-second-decl"
 			descriptionText="Cette seconde déclaration reprend les catégories de salariés définies lors de la première déclaration. Elle permet de mesurer les écarts de rémunération entre les femmes et les hommes au sein de chaque catégorie, en distinguant le salaire de base des composantes variables ou complémentaires."
+			disabled={isImpersonating}
 			initialCategories={sourceData}
 			initialSource={initialSource}
 			instructionText="Modifiez les données de votre première déclaration avant de valider votre indicateur."
 			isSubmitting={mutation.isPending}
+			mimoquageNextHref={
+				hasSavedSecondDeclaration ? `${BASE_PATH}/etape/3` : undefined
+			}
 			onSubmit={(data) => {
 				if (!startDate || !endDate) {
 					setPeriodError(
@@ -70,6 +77,7 @@ export function SecondDeclarationStep2Form({
 			readOnlyNameDetail
 			referencePeriodPicker={
 				<ReferencePeriodPicker
+					disabled={isImpersonating}
 					endDate={endDate}
 					onEndDateChange={setEndDate}
 					onStartDateChange={setStartDate}

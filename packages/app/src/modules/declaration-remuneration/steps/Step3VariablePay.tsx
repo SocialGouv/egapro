@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useIsImpersonating } from "~/modules/auth";
 import { computeProportion, normalizeDecimalInput } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -43,6 +44,7 @@ export function Step3VariablePay({
 	maxMen,
 }: Step3VariablePayProps) {
 	const router = useRouter();
+	const isImpersonating = useIsImpersonating();
 
 	const hasSavedData = Object.values(initialData).some((v) => v !== "");
 	const defaultValues = hasSavedData
@@ -179,6 +181,7 @@ export function Step3VariablePay({
 								ou complémentaire
 							</>
 						}
+						disabled={isImpersonating}
 						onRowChange={handleRowChange}
 						rows={rows}
 					/>
@@ -232,6 +235,7 @@ export function Step3VariablePay({
 													<input
 														aria-label="Bénéficiaires femmes"
 														className="fr-input"
+														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={(e) =>
 															handleBenefChange(
@@ -262,6 +266,7 @@ export function Step3VariablePay({
 													<input
 														aria-label="Bénéficiaires hommes"
 														className="fr-input"
+														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={(e) =>
 															handleBenefChange(
@@ -330,6 +335,9 @@ export function Step3VariablePay({
 			<FormActions
 				className="fr-mt-0"
 				isSubmitting={mutation.isPending}
+				mimoquageNextHref={
+					hasSavedData ? "/declaration-remuneration/etape/4" : undefined
+				}
 				previousHref="/declaration-remuneration/etape/2"
 			/>
 		</form>

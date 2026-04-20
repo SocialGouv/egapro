@@ -19,12 +19,14 @@ type Props = {
 		field: keyof EmployeeCategory,
 		isInteger: boolean,
 	) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+	disabled?: boolean;
 };
 
 export function CategoryDataTable({
 	category: cat,
 	categoryIndex: catIndex,
 	onPositiveNumberChange: pos,
+	disabled = false,
 }: Props) {
 	const annualTotalWomen = computeTotal(
 		cat.annualBaseWomen,
@@ -93,6 +95,7 @@ export function CategoryDataTable({
 											<input
 												aria-label={`Effectif femmes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
+												disabled={disabled}
 												id={id("women-count")}
 												inputMode="numeric"
 												onChange={pos(catIndex, "womenCount", true)}
@@ -108,6 +111,7 @@ export function CategoryDataTable({
 											<input
 												aria-label={`Effectif hommes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
+												disabled={disabled}
 												id={id("men-count")}
 												inputMode="numeric"
 												onChange={pos(catIndex, "menCount", true)}
@@ -134,6 +138,7 @@ export function CategoryDataTable({
 											<input
 												aria-label={`Salaire de base annuel femmes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
+												disabled={disabled}
 												id={id("annual-base-women")}
 												inputMode="decimal"
 												onChange={pos(catIndex, "annualBaseWomen", false)}
@@ -148,6 +153,7 @@ export function CategoryDataTable({
 											<input
 												aria-label={`Salaire de base annuel hommes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
+												disabled={disabled}
 												id={id("annual-base-men")}
 												inputMode="decimal"
 												onChange={pos(catIndex, "annualBaseMen", false)}
@@ -174,6 +180,7 @@ export function CategoryDataTable({
 											<input
 												aria-label={`Composantes variables annuelles femmes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
+												disabled={disabled}
 												id={id("annual-variable-women")}
 												inputMode="decimal"
 												onChange={pos(catIndex, "annualVariableWomen", false)}
@@ -188,6 +195,7 @@ export function CategoryDataTable({
 											<input
 												aria-label={`Composantes variables annuelles hommes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
+												disabled={disabled}
 												id={id("annual-variable-men")}
 												inputMode="decimal"
 												onChange={pos(catIndex, "annualVariableMen", false)}
@@ -231,6 +239,7 @@ export function CategoryDataTable({
 											<input
 												aria-label={`Salaire de base horaire femmes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
+												disabled={disabled}
 												id={id("hourly-base-women")}
 												inputMode="decimal"
 												onChange={pos(catIndex, "hourlyBaseWomen", false)}
@@ -245,6 +254,7 @@ export function CategoryDataTable({
 											<input
 												aria-label={`Salaire de base horaire hommes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
+												disabled={disabled}
 												id={id("hourly-base-men")}
 												inputMode="decimal"
 												onChange={pos(catIndex, "hourlyBaseMen", false)}
@@ -271,6 +281,7 @@ export function CategoryDataTable({
 											<input
 												aria-label={`Composantes variables horaires femmes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
+												disabled={disabled}
 												id={id("hourly-variable-women")}
 												inputMode="decimal"
 												onChange={pos(catIndex, "hourlyVariableWomen", false)}
@@ -285,6 +296,7 @@ export function CategoryDataTable({
 											<input
 												aria-label={`Composantes variables horaires hommes, catégorie ${catIndex + 1}`}
 												className={`fr-input ${stepStyles.compactInput}`}
+												disabled={disabled}
 												id={id("hourly-variable-men")}
 												inputMode="decimal"
 												onChange={pos(catIndex, "hourlyVariableMen", false)}
