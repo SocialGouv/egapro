@@ -48,8 +48,21 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"adminDeclarations.getById": AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID,
 	"admin.getCampaignStats": AUDIT_ACTIONS.ADMIN_CAMPAIGN_STATS_READ,
 
+	// ── public searches ────────────────────────────────────
+	"publicReferents.search": AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH,
+	"publicReferents.getById": AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW,
+
+	// ── admin settings mutations ──────────────────────────
+	"adminSettings.upsertCampaignDeadlines":
+		AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES,
+	"adminSettings.setActiveCampaignYear":
+		AUDIT_ACTIONS.ADMIN_SETTINGS_SET_ACTIVE_YEAR,
+
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,
+
+	// ── mail ──────────────────────────────────────────────
+	"mail.resendReceipt": AUDIT_ACTIONS.MAIL_RECEIPT_RESEND,
 };
 
 type SessionLike = {

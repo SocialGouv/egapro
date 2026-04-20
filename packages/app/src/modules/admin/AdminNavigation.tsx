@@ -8,6 +8,7 @@ const adminLinks = [
 	{ href: "/admin/stats", label: "Statistiques" },
 	{ href: "/admin/impersonate", label: "Mimoquer un Siren" },
 	{ href: "/admin/liste-referents", label: "Référents" },
+	{ href: "/admin/parametres", label: "Paramètres" },
 ] as const;
 
 export function AdminNavigation() {

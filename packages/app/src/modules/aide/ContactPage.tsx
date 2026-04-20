@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Breadcrumb } from "~/modules/layout";
 
 import { AideIllustration } from "./AideIllustration";
@@ -37,6 +39,11 @@ export function ContactPage() {
 
 						<div className="fr-mb-4w">
 							<h2 className="fr-h6">Contactez votre référent régional :</h2>
+							<p className="fr-mb-2w">
+								<Link className="fr-link" href="/referents">
+									Rechercher un référent par région ou département
+								</Link>
+							</p>
 							<a
 								className="fr-link fr-link--download"
 								download

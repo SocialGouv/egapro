@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useReadOnlyGuard } from "~/modules/auth";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
@@ -23,6 +24,7 @@ export function JointEvaluationForm({
 	jointEvaluationDeadline,
 }: Props) {
 	const router = useRouter();
+	const readOnlyGuard = useReadOnlyGuard();
 
 	const {
 		closeModal,
@@ -98,6 +100,7 @@ export function JointEvaluationForm({
 					accept=".pdf"
 					acceptLabel="pdf"
 					allowedMimeTypes={["application/pdf"]}
+					disabled={readOnlyGuard.isReadOnly}
 					error={uploadError}
 					inputId="joint-evaluation-file-upload"
 					onFilesChange={handleFilesChange}
@@ -150,13 +153,17 @@ export function JointEvaluationForm({
 					>
 						Précédent
 					</Link>
-					<button
-						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={isPending}
-						type="submit"
-					>
-						Transmettre
-					</button>
+					<span>
+						<button
+							{...readOnlyGuard.buttonProps}
+							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+							disabled={isPending || readOnlyGuard.isReadOnly}
+							type="submit"
+						>
+							Transmettre
+						</button>
+						{readOnlyGuard.tooltip}
+					</span>
 				</div>
 			</form>
 

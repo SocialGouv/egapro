@@ -15,6 +15,8 @@ export type CompanySizeRange = "<50" | "50-99" | "100-149" | "150-249" | "250+";
 
 /** Configurable campaign deadlines. */
 export type CampaignDeadlines = {
+	gipPublicationDate: Date | null;
+	campaignStartDate: Date | null;
 	decl1ModificationDeadline: Date;
 	decl1JustificationDeadline: Date;
 	decl1JointEvaluationDeadline: Date;
