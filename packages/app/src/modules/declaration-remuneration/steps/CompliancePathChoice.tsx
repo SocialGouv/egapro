@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Controller } from "react-hook-form";
+import { useIsImpersonating } from "~/modules/auth";
 import { saveCompliancePathSchema } from "~/modules/declaration-remuneration/schemas";
 import type { CampaignDeadlines } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
@@ -27,10 +28,12 @@ type Props = {
 function JointEvaluationOption({
 	checked,
 	deadline,
+	disabled,
 	onChange,
 }: {
 	checked: boolean;
 	deadline: Date;
+	disabled?: boolean;
 	onChange: () => void;
 }) {
 	return (
@@ -38,6 +41,7 @@ function JointEvaluationOption({
 			<CompliancePathOption
 				checked={checked}
 				deadline={deadline}
+				disabled={disabled}
 				id="path-joint"
 				learnMoreHref="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 				learnMoreLabel="En savoir plus sur évaluation conjointe des rémunérations"
@@ -69,10 +73,12 @@ function JointEvaluationOption({
 function JustifyOption({
 	checked,
 	deadline,
+	disabled,
 	onChange,
 }: {
 	checked: boolean;
 	deadline: Date;
+	disabled?: boolean;
 	onChange: () => void;
 }) {
 	return (
@@ -80,6 +86,7 @@ function JustifyOption({
 			<CompliancePathOption
 				checked={checked}
 				deadline={deadline}
+				disabled={disabled}
 				id="path-justify"
 				name="compliance-path"
 				onChange={onChange}
@@ -100,11 +107,13 @@ function JustifyOption({
 }
 
 function SecondRoundOptions({
+	disabled,
 	justificationDeadline,
 	jointEvaluationDeadline,
 	selectedPath,
 	setSelectedPath,
 }: {
+	disabled?: boolean;
 	justificationDeadline: Date;
 	jointEvaluationDeadline: Date;
 	selectedPath: CompliancePathValue | undefined;
@@ -115,11 +124,13 @@ function SecondRoundOptions({
 			<JustifyOption
 				checked={selectedPath === "justify"}
 				deadline={justificationDeadline}
+				disabled={disabled}
 				onChange={() => setSelectedPath("justify")}
 			/>
 			<JointEvaluationOption
 				checked={selectedPath === "joint_evaluation"}
 				deadline={jointEvaluationDeadline}
+				disabled={disabled}
 				onChange={() => setSelectedPath("joint_evaluation")}
 			/>
 		</>
@@ -128,12 +139,14 @@ function SecondRoundOptions({
 
 function FirstRoundOptions({
 	correctiveActionDeadline,
+	disabled,
 	jointEvaluationDeadline,
 	justificationDeadline,
 	selectedPath,
 	setSelectedPath,
 }: {
 	correctiveActionDeadline: Date;
+	disabled?: boolean;
 	jointEvaluationDeadline: Date;
 	justificationDeadline: Date;
 	selectedPath: CompliancePathValue | undefined;
@@ -144,6 +157,7 @@ function FirstRoundOptions({
 			<JustifyOption
 				checked={selectedPath === "justify"}
 				deadline={justificationDeadline}
+				disabled={disabled}
 				onChange={() => setSelectedPath("justify")}
 			/>
 
@@ -156,6 +170,7 @@ function FirstRoundOptions({
 				<CompliancePathOption
 					checked={selectedPath === "corrective_action"}
 					deadline={correctiveActionDeadline}
+					disabled={disabled}
 					id="path-corrective"
 					learnMoreHref="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 					learnMoreLabel="En savoir plus sur actions correctives et seconde déclaration"
@@ -194,10 +209,21 @@ function FirstRoundOptions({
 			<JointEvaluationOption
 				checked={selectedPath === "joint_evaluation"}
 				deadline={jointEvaluationDeadline}
+				disabled={disabled}
 				onChange={() => setSelectedPath("joint_evaluation")}
 			/>
 		</>
 	);
+}
+
+function getCompliancePathHref(path: CompliancePathValue): string {
+	if (path === "corrective_action") {
+		return "/declaration-remuneration/parcours-conformite/etape/1";
+	}
+	if (path === "joint_evaluation") {
+		return "/declaration-remuneration/parcours-conformite/evaluation-conjointe";
+	}
+	return "/avis-cse";
 }
 
 export function CompliancePathChoice({
@@ -209,6 +235,7 @@ export function CompliancePathChoice({
 	pdfDownloadHref,
 }: Props) {
 	const router = useRouter();
+	const isImpersonating = useIsImpersonating();
 
 	const form = useZodForm(saveCompliancePathSchema, {
 		defaultValues: { path: initialPath },
@@ -300,6 +327,7 @@ export function CompliancePathChoice({
 
 						{isSecondRound ? (
 							<SecondRoundOptions
+								disabled={isImpersonating}
 								jointEvaluationDeadline={
 									campaignDeadlines.decl2JointEvaluationDeadline
 								}
@@ -314,6 +342,7 @@ export function CompliancePathChoice({
 								correctiveActionDeadline={
 									campaignDeadlines.decl2ModificationDeadline
 								}
+								disabled={isImpersonating}
 								jointEvaluationDeadline={
 									campaignDeadlines.decl1JointEvaluationDeadline
 								}
@@ -330,6 +359,9 @@ export function CompliancePathChoice({
 
 			<FormActions
 				isSubmitting={mutation.isPending}
+				mimoquageNextHref={
+					initialPath ? getCompliancePathHref(initialPath) : undefined
+				}
 				nextDisabled={!selectedPath}
 				nextLabel="Suivant"
 				previousHref="/declaration-remuneration/etape/6"

@@ -120,7 +120,7 @@ test.describe("Declaration process panel", () => {
 			).toBeVisible();
 
 			const ctaLink = panel.getByRole("link", {
-				name: "Commencer la déclaration",
+				name: "Continuer la déclaration",
 			});
 			await expect(ctaLink).toHaveAttribute("href", /evaluation-conjointe/);
 		});
@@ -149,7 +149,7 @@ test.describe("Declaration process panel", () => {
 			).toBeVisible();
 
 			const ctaLink = panel.getByRole("link", {
-				name: "Commencer la déclaration",
+				name: "Continuer la déclaration",
 			});
 			await expect(ctaLink).toHaveAttribute("href", /avis-cse/);
 		});
