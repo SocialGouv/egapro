@@ -726,27 +726,26 @@ describe("declarationRouter", () => {
 			// When an admin mimoques a company that has not started a
 			// declaration, getOrCreate must return a transient empty row so the
 			// read-only UI can render. No INSERT is performed (issue #3230).
-			const txSelect = vi.fn().mockImplementation(() => ({
-				from: vi.fn().mockReturnValue({
-					where: vi.fn().mockReturnValue({
-						limit: vi.fn().mockResolvedValue([]),
-					}),
-				}),
-			}));
-			const insertSpy = vi.fn();
-			const tx = { select: txSelect, insert: insertSpy, delete: vi.fn() };
-			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-				fn(tx),
-			);
-			const mockDb = {
-				transaction: mockTransaction,
-				select: vi.fn().mockImplementation(() => ({
+			const emptySelect = () =>
+				vi.fn().mockImplementation(() => ({
 					from: vi.fn().mockReturnValue({
 						where: vi.fn().mockReturnValue({
 							limit: vi.fn().mockResolvedValue([]),
 						}),
 					}),
-				})),
+				}));
+			const insertSpy = vi.fn();
+			const tx = {
+				select: emptySelect(),
+				insert: insertSpy,
+				delete: vi.fn(),
+			};
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = {
+				transaction: mockTransaction,
+				select: emptySelect(),
 			} as unknown;
 			const caller = await createCaller(mockDb, null, impersonation);
 
