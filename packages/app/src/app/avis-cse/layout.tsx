@@ -15,12 +15,20 @@ export default async function CseOpinionRootLayout({
 		redirect("/login");
 	}
 
-	const siret = session.user.siret;
-	if (!siret) {
+	// In mimoquage, the admin's own SIRET is typically empty — the banner must
+	// show the impersonated company (owner of the declaration being viewed),
+	// mirrors the declaration-remuneration layout.
+	const siren =
+		session.user.isAdmin && session.user.impersonation
+			? session.user.impersonation.siren
+			: session.user.siret
+				? extractSiren(session.user.siret)
+				: null;
+
+	if (!siren) {
 		redirect("/");
 	}
 
-	const siren = extractSiren(siret);
 	const [company, declarationData] = await Promise.all([
 		api.company.get({ siren }),
 		api.declaration.getOrCreate(),
