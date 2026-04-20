@@ -4,7 +4,12 @@ import { createPublicKey, timingSafeEqual, verify } from "node:crypto";
 
 import { env } from "~/env";
 
-const SIGNATURE_WINDOW_SECONDS = 30;
+// Signature validity window.
+// Dev: 30 days — allows reusing a generated signature across a working session
+// without constantly re-signing while debugging locally.
+// Preprod / prod: 30 seconds — tight anti-replay window.
+const SIGNATURE_WINDOW_SECONDS =
+	env.NEXT_PUBLIC_EGAPRO_ENV === "dev" ? 30 * 24 * 60 * 60 : 30;
 
 // Cache the public key at module level — parsed once, reused on every request.
 const suitPublicKey = (() => {
@@ -60,7 +65,8 @@ export function verifySuitApiKey(request: Request): true | Response {
  * SUIT signs `{timestamp}|{METHOD}|{pathname}` with its RSA private key.
  * The app verifies:
  * 1. The signature matches using SUIT's public key (EGAPRO_SUIT_PUBLIC_KEY_PEM)
- * 2. The timestamp is within a 30-second window (anti-replay)
+ * 2. The timestamp is within `SIGNATURE_WINDOW_SECONDS` (anti-replay — 30s
+ *    in preprod/prod, 30d in dev)
  *
  * Only active when `EGAPRO_SUIT_PUBLIC_KEY_PEM` is set. When absent, signature
  * verification is skipped (dev / environments without keys).

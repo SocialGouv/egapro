@@ -282,4 +282,42 @@ describe("verifySuitSignature", () => {
 			expect(response.status).toBe(403);
 		});
 	});
+
+	describe("when NEXT_PUBLIC_EGAPRO_ENV is 'dev'", () => {
+		async function importWithDevEnv() {
+			vi.resetModules();
+			vi.doMock("server-only", () => ({}));
+			vi.doMock("~/env", () => ({
+				env: {
+					EGAPRO_SUIT_PUBLIC_KEY_PEM: TEST_PUBLIC_KEY_PEM_B64,
+					EGAPRO_SUIT_API_KEY: "test-suit-api-key-that-is-at-least-32-chars",
+					NODE_ENV: "test",
+					NEXT_PUBLIC_EGAPRO_ENV: "dev",
+				},
+			}));
+			const mod = await import("../suitApiAuth");
+			return mod.verifySuitSignature;
+		}
+
+		it("accepts a timestamp older than 30 seconds (within the 30-day window)", async () => {
+			const verifyFn = await importWithDevEnv();
+			const request = makeSignedRequest("/api/v1/export/declarations", {
+				timestamp: Math.floor(Date.now() / 1000) - 60 * 60 * 24, // 1 day old
+			});
+			const result = verifyFn(request);
+			expect(result).toBe(true);
+		});
+
+		it("returns 403 when timestamp is older than 30 days", async () => {
+			const verifyFn = await importWithDevEnv();
+			const request = makeSignedRequest("/api/v1/export/declarations", {
+				timestamp: Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 31, // 31 days old
+			});
+			const result = verifyFn(request);
+
+			expect(result).not.toBe(true);
+			const response = result as Response;
+			expect(response.status).toBe(403);
+		});
+	});
 });
