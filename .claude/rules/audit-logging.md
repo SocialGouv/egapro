@@ -144,9 +144,17 @@ Notes:
 
 ### 5. New cron-triggered / system action
 
-Use `logAction` directly with category `system` inside the route handler or
-helper that the cron calls. See `/api/audit/cleanup/route.ts` for the canonical
-pattern (success + failure self-audit with metadata).
+Two patterns are in use, depending on whether the cron runs **inside** the app
+(a tRPC procedure or Next.js route called by a CronJob container) or **out of
+band** (a standalone `.mjs` script invoked by the CronJob with direct DB
+access — see `packages/app/scripts/audit-cleanup.mjs` for the canonical
+example, issue #3268).
+
+- **In-app trigger**: use `logAction` directly with category `system` inside
+  the route handler / helper that the cron calls.
+- **Out-of-band script**: self-audit via a raw `INSERT INTO audit.action_log`
+  statement at the end of the script (success) and in a try/catch arm
+  (failure, outside the rolled-back transaction so the row survives).
 
 ---
 
@@ -196,10 +204,10 @@ the caller is responsible for sanitisation:
 | `export` | 365 days | Data exports and third-party API consumers. |
 | `system` | 365 days | Cron-triggered / admin actions. |
 
-The cleanup cron (`/api/audit/cleanup` → `cleanupAuditLogs`) drops
-`read_sensitive` rows after 180 days and everything else after 365 days. This
-is enforced at the DB level; the category you choose **defines** the retention
-window.
+The cleanup cron (`packages/app/scripts/audit-cleanup.mjs`, wired up in
+`.kontinuous/templates/audit-cleanup-cron.yaml`) drops `read_sensitive` rows
+after 180 days and everything else after 365 days. This is enforced at the DB
+level; the category you choose **defines** the retention window.
 
 ---
 

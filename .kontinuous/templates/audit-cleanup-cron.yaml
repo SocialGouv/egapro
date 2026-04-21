@@ -10,9 +10,9 @@ spec:
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
-      # Fail fast: a failure here is either a transient 5xx (next daily run
-      # will retry naturally) or a permanent auth error (retry is pointless
-      # and noisy). Either way a single attempt is enough.
+      # Fail fast: a failure here is either a transient DB error (next daily
+      # run will retry naturally) or a permanent schema / driver error (retry
+      # is pointless and noisy). Either way a single attempt is enough.
       backoffLimit: 0
       template:
         metadata:
@@ -21,40 +21,58 @@ spec:
         spec:
           restartPolicy: OnFailure
           securityContext:
-            runAsUser: 100
+            runAsUser: 1000
             runAsNonRoot: true
           containers:
-            - name: trigger
-              image: curlimages/curl:8.12.1
+            - name: audit-cleanup
+              image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/{{ .Values.app.imagePackage }}:{{ .Values.global.imageTag }}"
               securityContext:
                 allowPrivilegeEscalation: false
               env:
-                - name: EGAPRO_AUDIT_CLEANUP_TOKEN
+                - name: POSTGRES_HOST
                   valueFrom:
                     secretKeyRef:
-                      name: audit-cleanup
-                      key: EGAPRO_AUDIT_CLEANUP_TOKEN
+                      name: "{{ .Values.global.pgSecretName }}"
+                      key: PGHOST
+                - name: POSTGRES_DB
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.global.pgSecretName }}"
+                      key: PGDATABASE
+                - name: POSTGRES_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.global.pgSecretName }}"
+                      key: PGPORT
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.global.pgSecretName }}"
+                      key: PGUSER
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.global.pgSecretName }}"
+                      key: PGPASSWORD
+                - name: POSTGRES_SSLMODE
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.global.pgSecretName }}"
+                      key: PGSSLMODE
+              # Retention windows (days) — optional. The script defaults to
+              # the CNIL thresholds (180 / 365) when these are absent, so an
+              # unset `audit-retention` configmap is a no-op.
+              envFrom:
+                - configMapRef:
+                    name: "audit-retention"
+                    optional: true
               command:
-                - /bin/sh
-                - -c
-                - |
-                  # Capture the HTTP status explicitly so the failure reason
-                  # (auth vs. server vs. network) lands in stderr for
-                  # observability instead of the opaque "curl: exit 22".
-                  HTTP_STATUS=$(curl -s -o /dev/stderr \
-                    -w "%{http_code}" \
-                    -X POST "http://app:3000/api/audit/cleanup" \
-                    -H "Authorization: Bearer ${EGAPRO_AUDIT_CLEANUP_TOKEN}" \
-                    --connect-timeout 10 \
-                    --max-time 300)
-                  if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
-                    echo "Cleanup request failed with HTTP $HTTP_STATUS" >&2
-                    exit 1
-                  fi
+                - node
+                - packages/app/scripts/audit-cleanup.mjs
               resources:
                 requests:
                   cpu: 50m
-                  memory: 32Mi
-                limits:
-                  cpu: 100m
                   memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
