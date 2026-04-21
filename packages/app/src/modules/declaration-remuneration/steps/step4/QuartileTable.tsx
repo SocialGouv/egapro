@@ -17,6 +17,7 @@ type Props = {
 		field: "threshold" | "women" | "men",
 		value: string,
 	) => void;
+	disabled?: boolean;
 };
 
 /** Format ordinal text like "1er quartile" → 1<sup>er</sup> quartile */
@@ -40,6 +41,7 @@ export function QuartileTable({
 	readingNote,
 	sourceNote,
 	onQuartileChange,
+	disabled = false,
 }: Props) {
 	const totalWomen = quartiles.reduce((sum, q) => sum + (q.women ?? 0), 0);
 	const totalMen = quartiles.reduce((sum, q) => sum + (q.men ?? 0), 0);
@@ -89,6 +91,7 @@ export function QuartileTable({
 														<input
 															aria-label={`Rémunération brute ${QUARTILE_NAMES[i]}`}
 															className="fr-input"
+															disabled={disabled}
 															inputMode="decimal"
 															onChange={(e) =>
 																onQuartileChange(i, "threshold", e.target.value)
@@ -114,6 +117,7 @@ export function QuartileTable({
 													<input
 														aria-label={`Nombre de femmes ${QUARTILE_NAMES[i]}`}
 														className="fr-input"
+														disabled={disabled}
 														inputMode="numeric"
 														onChange={(e) =>
 															onQuartileChange(i, "women", e.target.value)
@@ -163,6 +167,7 @@ export function QuartileTable({
 													<input
 														aria-label={`Nombre d'hommes ${QUARTILE_NAMES[i]}`}
 														className="fr-input"
+														disabled={disabled}
 														inputMode="numeric"
 														onChange={(e) =>
 															onQuartileChange(i, "men", e.target.value)

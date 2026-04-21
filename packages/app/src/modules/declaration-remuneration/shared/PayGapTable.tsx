@@ -38,6 +38,7 @@ type PayGapTableProps = {
 	rows: PayGapRow[];
 	onRowChange: (index: number, field: PayGapField, value: string) => void;
 	className?: string;
+	disabled?: boolean;
 };
 
 export function PayGapTable({
@@ -46,6 +47,7 @@ export function PayGapTable({
 	rows,
 	onRowChange,
 	className,
+	disabled = false,
 }: PayGapTableProps) {
 	return (
 		<div
@@ -84,6 +86,7 @@ export function PayGapTable({
 													<input
 														aria-label={`${row.label} — Femmes`}
 														className="fr-input"
+														disabled={disabled}
 														inputMode="decimal"
 														onChange={(e) =>
 															onRowChange(i, "womenValue", e.target.value)
@@ -99,6 +102,7 @@ export function PayGapTable({
 													<input
 														aria-label={`${row.label} — Hommes`}
 														className="fr-input"
+														disabled={disabled}
 														inputMode="decimal"
 														onChange={(e) =>
 															onRowChange(i, "menValue", e.target.value)

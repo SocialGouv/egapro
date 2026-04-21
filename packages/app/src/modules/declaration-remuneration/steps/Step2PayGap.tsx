@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -35,6 +36,7 @@ export function Step2PayGap({
 	gipPrefillData,
 }: Step2PayGapProps) {
 	const router = useRouter();
+	const isImpersonating = useIsImpersonating();
 
 	const hasSavedData = Object.values(initialData).some((v) => v !== "");
 	const defaultValues = hasSavedData
@@ -131,6 +133,7 @@ export function Step2PayGap({
 					<PayGapTable
 						caption="Écart de rémunération"
 						columnHeader="Rémunération"
+						disabled={isImpersonating}
 						onRowChange={handleRowChange}
 						rows={rows}
 					/>
@@ -159,6 +162,9 @@ export function Step2PayGap({
 			<FormActions
 				className="fr-mt-0"
 				isSubmitting={mutation.isPending}
+				mimoquageNextHref={
+					hasSavedData ? "/declaration-remuneration/etape/3" : undefined
+				}
 				previousHref="/declaration-remuneration/etape/1"
 			/>
 		</form>

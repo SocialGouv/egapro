@@ -111,6 +111,13 @@ describe("DeclarationProcessPanel", () => {
 				panel.queryByText(/Vous devez au préalable disposer/),
 			).not.toBeInTheDocument();
 		});
+
+		it('renders "Continuer la déclaration" CTA', () => {
+			const { dialog } = renderPanel("compliance");
+			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
+			const cta = ctaLinks[ctaLinks.length - 1];
+			expect(cta).toHaveTextContent("Continuer la déclaration");
+		});
 	});
 
 	describe("variant: evaluation", () => {

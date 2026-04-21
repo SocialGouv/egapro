@@ -5,6 +5,7 @@ type Props = {
 	endDate: string;
 	onStartDateChange: (value: string) => void;
 	onEndDateChange: (value: string) => void;
+	disabled?: boolean;
 };
 
 export function ReferencePeriodPicker({
@@ -12,6 +13,7 @@ export function ReferencePeriodPicker({
 	endDate,
 	onStartDateChange,
 	onEndDateChange,
+	disabled = false,
 }: Props) {
 	return (
 		<div>
@@ -38,6 +40,7 @@ export function ReferencePeriodPicker({
 						</label>
 						<input
 							className="fr-input"
+							disabled={disabled}
 							id="period-start-date"
 							onChange={(e) => onStartDateChange(e.target.value)}
 							type="date"
@@ -53,6 +56,7 @@ export function ReferencePeriodPicker({
 						</label>
 						<input
 							className="fr-input"
+							disabled={disabled}
 							id="period-end-date"
 							onChange={(e) => onEndDateChange(e.target.value)}
 							type="date"
