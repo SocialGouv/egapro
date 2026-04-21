@@ -128,7 +128,8 @@ export const declarationRouter = createTRPCRouter({
 
 		const gipPrefillData = gipRow[0] ? mapGipToFormData(gipRow[0]) : null;
 
-		// Fetch N-1 categories for automatic prefilling when step 5 is empty
+		// Fetch job categories from the most recent previous declaration that
+		// contains indicator 7, for automatic prefilling when step 5 is empty.
 		const hasCurrentCategories = (result.jobCategories ?? []).length > 0;
 		const previousYearCategories = hasCurrentCategories
 			? null

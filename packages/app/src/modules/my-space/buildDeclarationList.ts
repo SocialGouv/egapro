@@ -15,7 +15,7 @@ type DbDeclaration = {
 	compliancePath: string | null;
 	secondDeclarationStatus: string | null;
 	complianceCompletedAt: Date | null;
-	hasCseOpinion: boolean;
+	cseOpinionCompletedAt: Date | null;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
 };
@@ -53,7 +53,7 @@ export function buildDeclarationList(
 				compliancePath: existing.compliancePath,
 				secondDeclarationStatus: existing.secondDeclarationStatus,
 				complianceCompletedAt: existing.complianceCompletedAt,
-				hasCseOpinion: existing.hasCseOpinion,
+				cseOpinionCompletedAt: existing.cseOpinionCompletedAt,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
 				hasPrefillData: existing.hasPrefillData,
 			});
@@ -68,7 +68,7 @@ export function buildDeclarationList(
 				compliancePath: null,
 				secondDeclarationStatus: null,
 				complianceCompletedAt: null,
-				hasCseOpinion: false,
+				cseOpinionCompletedAt: null,
 				hasJointEvaluationFile: false,
 				hasPrefillData:
 					type === "remuneration" && yearsWithPrefill.has(currentYear),
@@ -92,7 +92,7 @@ export function buildDeclarationList(
 			compliancePath: d.compliancePath,
 			secondDeclarationStatus: d.secondDeclarationStatus,
 			complianceCompletedAt: d.complianceCompletedAt,
-			hasCseOpinion: d.hasCseOpinion,
+			cseOpinionCompletedAt: d.cseOpinionCompletedAt,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
 			hasPrefillData: d.hasPrefillData,
 		});

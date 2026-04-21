@@ -14,7 +14,6 @@ import {
 import type { DB } from "~/server/db";
 import {
 	companies,
-	cseOpinions,
 	declarations,
 	files,
 	gipMdsData,
@@ -136,47 +135,38 @@ export const companyRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const company = await findUserCompany(ctx.db, ctx.session, input.siren);
 
-			const [declarationRows, cseOpinionRows, jointEvalRows, prefillRows] =
-				await Promise.all([
-					ctx.db
-						.select({
-							siren: declarations.siren,
-							year: declarations.year,
-							status: declarations.status,
-							currentStep: declarations.currentStep,
-							updatedAt: declarations.updatedAt,
-							compliancePath: declarations.compliancePath,
-							secondDeclarationStatus: declarations.secondDeclarationStatus,
-							complianceCompletedAt: declarations.complianceCompletedAt,
-						})
-						.from(declarations)
-						.where(eq(declarations.siren, input.siren))
-						.orderBy(desc(declarations.year)),
-					ctx.db
-						.select({ year: declarations.year })
-						.from(cseOpinions)
-						.innerJoin(
-							declarations,
-							eq(cseOpinions.declarationId, declarations.id),
-						)
-						.where(eq(declarations.siren, input.siren)),
-					ctx.db
-						.select({ year: declarations.year })
-						.from(files)
-						.innerJoin(declarations, eq(files.declarationId, declarations.id))
-						.where(
-							and(
-								eq(declarations.siren, input.siren),
-								eq(files.type, "joint_evaluation"),
-							),
+			const [declarationRows, jointEvalRows, prefillRows] = await Promise.all([
+				ctx.db
+					.select({
+						siren: declarations.siren,
+						year: declarations.year,
+						status: declarations.status,
+						currentStep: declarations.currentStep,
+						updatedAt: declarations.updatedAt,
+						compliancePath: declarations.compliancePath,
+						secondDeclarationStatus: declarations.secondDeclarationStatus,
+						complianceCompletedAt: declarations.complianceCompletedAt,
+						cseOpinionCompletedAt: declarations.cseOpinionCompletedAt,
+					})
+					.from(declarations)
+					.where(eq(declarations.siren, input.siren))
+					.orderBy(desc(declarations.year)),
+				ctx.db
+					.select({ year: declarations.year })
+					.from(files)
+					.innerJoin(declarations, eq(files.declarationId, declarations.id))
+					.where(
+						and(
+							eq(declarations.siren, input.siren),
+							eq(files.type, "joint_evaluation"),
 						),
-					ctx.db
-						.select({ year: gipMdsData.year })
-						.from(gipMdsData)
-						.where(eq(gipMdsData.siren, input.siren)),
-				]);
+					),
+				ctx.db
+					.select({ year: gipMdsData.year })
+					.from(gipMdsData)
+					.where(eq(gipMdsData.siren, input.siren)),
+			]);
 
-			const yearsWithCseOpinion = new Set(cseOpinionRows.map((r) => r.year));
 			const yearsWithJointEval = new Set(jointEvalRows.map((r) => r.year));
 			const yearsWithPrefill = new Set(prefillRows.map((r) => r.year));
 
@@ -193,7 +183,7 @@ export const companyRouter = createTRPCRouter({
 				compliancePath: d.compliancePath,
 				secondDeclarationStatus: d.secondDeclarationStatus,
 				complianceCompletedAt: d.complianceCompletedAt,
-				hasCseOpinion: yearsWithCseOpinion.has(d.year),
+				cseOpinionCompletedAt: d.cseOpinionCompletedAt,
 				hasJointEvaluationFile: yearsWithJointEval.has(d.year),
 				hasPrefillData: yearsWithPrefill.has(d.year),
 			}));

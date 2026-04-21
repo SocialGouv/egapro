@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maildev
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: maildev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: maildev
+  template:
+    metadata:
+      labels:
+        app: maildev
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: maildev
+          image: maildev/maildev:2.2.1
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: smtp
+              containerPort: 1025
+            - name: web
+              containerPort: 1080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: web
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maildev
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: maildev
+  ports:
+    - name: smtp
+      port: 1025
+      targetPort: smtp
+    - name: web
+      port: 1080
+      targetPort: web
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: maildev
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - maildev-{{ .Values.global.host }}
+      secretName: maildev-tls
+  rules:
+    - host: maildev-{{ .Values.global.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: maildev
+                port:
+                  name: web

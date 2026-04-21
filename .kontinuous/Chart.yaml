@@ -1,0 +1,4 @@
+dependencies:
+  - name: valkey
+    repository: https://valkey.io/valkey-helm
+    version: 0.9.4

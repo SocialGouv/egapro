@@ -32,10 +32,6 @@ jobs:
       CLAMAV_HOST: localhost
       CLAMAV_PORT: 3310
       ADMIN_EMAILS: test@fia1.fr
-      # Required by env.js but never exercised by E2E tests (the audit
-      # cleanup route is only called by the K8s CronJob). A dummy value
-      # that satisfies the `.min(32)` Zod check is enough.
-      EGAPRO_AUDIT_CLEANUP_TOKEN: e2e-dummy-audit-cleanup-token-not-used-1234567890
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

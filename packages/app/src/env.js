@@ -64,12 +64,10 @@ export const env = createEnv({
 		 * on login. The flag is then persisted in the `app_user.is_admin` column.
 		 */
 		ADMIN_EMAILS: z.string().optional().default(""),
-		// Audit log (issue #3174) — bearer token for the cleanup cron + retention
-		// thresholds (CNIL: 6 months for access logs, 12 months for security logs).
-		// Required (not optional): the /api/audit/cleanup route destroys data, so
-		// a missing secret must crash startup rather than silently expose the
-		// endpoint. Must be sealed per environment (dev / preprod / prod).
-		EGAPRO_AUDIT_CLEANUP_TOKEN: z.string().min(32),
+		// Audit log (issue #3174) — retention thresholds (CNIL: 6 months for
+		// access logs, 12 months for security logs). Consumed directly by the
+		// audit-cleanup CronJob (packages/app/scripts/audit-cleanup.mjs, issue
+		// #3268) — no HTTP trigger in play anymore.
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS: z.coerce
 			.number()
 			.int()
@@ -88,7 +86,16 @@ export const env = createEnv({
 		SMTP_PORT: z.coerce.number().int().positive().default(1025),
 		SMTP_USER: z.string().optional(),
 		SMTP_PASS: z.string().optional(),
+		SMTP_SECURE: z
+			.string()
+			.default("false")
+			.transform((v) => v.toLowerCase() === "true"),
 		MAIL_FROM: z.string().default("no-reply@egapro.local"),
+		// Valkey cache URL — optional. When absent, the custom
+		// cache handler (cache-handler.cjs) gracefully degrades to no-op.
+		// The handler reads process.env.VALKEY_URL directly (it runs outside
+		// the app module graph), but we declare it here for validation and docs.
+		VALKEY_URL: z.url().optional(),
 	},
 
 	/**
@@ -135,7 +142,6 @@ export const env = createEnv({
 		EGAPRO_MOCK_SUIT_SANCTION: process.env.EGAPRO_MOCK_SUIT_SANCTION,
 		EGAPRO_SUIT_PUBLIC_KEY_PEM: process.env.EGAPRO_SUIT_PUBLIC_KEY_PEM,
 		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
-		EGAPRO_AUDIT_CLEANUP_TOKEN: process.env.EGAPRO_AUDIT_CLEANUP_TOKEN,
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS:
 			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,
 		EGAPRO_AUDIT_RETENTION_LONG_DAYS:
@@ -145,7 +151,9 @@ export const env = createEnv({
 		SMTP_PORT: process.env.SMTP_PORT,
 		SMTP_USER: process.env.SMTP_USER,
 		SMTP_PASS: process.env.SMTP_PASS,
+		SMTP_SECURE: process.env.SMTP_SECURE,
 		MAIL_FROM: process.env.MAIL_FROM,
+		VALKEY_URL: process.env.VALKEY_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,

@@ -5,6 +5,7 @@ app:
   ~chart: app
   ~needs:
     - pg
+    - valkey
   imagePackage: app
   probesPath: /api/healthz
   containerPort: 3000
@@ -43,8 +44,8 @@ app:
     - secretRef:
         name: "admin"
         optional: true
-    - secretRef:
-        name: "audit-cleanup"
+    - configMapRef:
+        name: "valkey"
         optional: true
   env:
     - name: POSTGRES_HOST
@@ -77,12 +78,80 @@ app:
         secretKeyRef:
           name: "{{ .Values.global.pgSecretName }}"
           key: PGSSLMODE
+    # SMTP (Tipimail in prod, MailDev on dev/preprod). The smtp-app
+    # sealed-secret is kept as-is from the V1 prod setup, with MAILER_*
+    # keys. We remap to the V2 SMTP_* names expected by src/env.js.
+    #
+    # Kubernetes precedence: `env` runs AFTER `envFrom`, so an `env` entry
+    # would normally override a same-named envFrom value. But with
+    # `optional: true` on a missing secret/key, the env entry is silently
+    # dropped and the envFrom value is preserved. That is exactly the
+    # fallback we rely on for dev/preprod review apps (no smtp-app
+    # secret) where SMTP_HOST, SMTP_PORT, etc. come from the `mail`
+    # configmap pointing at the in-cluster MailDev service.
+    - name: SMTP_HOST
+      valueFrom:
+        secretKeyRef:
+          name: smtp-app
+          key: MAILER_SMTP_HOST
+          optional: true
+    - name: SMTP_PORT
+      valueFrom:
+        secretKeyRef:
+          name: smtp-app
+          key: MAILER_SMTP_PORT
+          optional: true
+    - name: SMTP_USER
+      valueFrom:
+        secretKeyRef:
+          name: smtp-app
+          key: MAILER_SMTP_LOGIN
+          optional: true
+    - name: SMTP_PASS
+      valueFrom:
+        secretKeyRef:
+          name: smtp-app
+          key: MAILER_SMTP_PASSWORD
+          optional: true
+    - name: SMTP_SECURE
+      valueFrom:
+        secretKeyRef:
+          name: smtp-app
+          key: MAILER_SMTP_SSL
+          optional: true
   vars:
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"
 
 pg:
   ~chart: pg
+
+# Valkey cache. Official valkey-io/valkey-helm chart pulled as a Helm dependency
+# from .kontinuous/Chart.yaml. Values below flow straight through to that chart.
+valkey:
+  # Pin service name so VALKEY_URL (redis://valkey:6379) resolves in every namespace.
+  fullnameOverride: valkey
+  image:
+    tag: "9.0.2"
+  service:
+    type: ClusterIP
+    port: 6379
+  # Dev and preprod run a single-pod standalone deployment — cache loss on
+  # restart is acceptable, and it keeps infra cost minimal. Prod overrides
+  # this to a master/replica topology sized against app.autoscale.
+  replica:
+    enabled: false
+  dataStorage:
+    enabled: false
+  auth:
+    enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
 clamav:
   ~chart: clamav
