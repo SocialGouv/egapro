@@ -108,6 +108,9 @@ export const adminSettingsRouter = createTRPCRouter({
 				decl2JointEvaluationDeadline: input.decl2JointEvaluationDeadline,
 			};
 
+			// `gipPublicationDate` is written exclusively by the SUIT CSV import,
+			// so we never touch it here — neither on insert (defaults to NULL)
+			// nor on conflict (the `set` object below omits it by construction).
 			await ctx.db.insert(campaignDeadlines).values(values).onConflictDoUpdate({
 				target: campaignDeadlines.year,
 				set: values,

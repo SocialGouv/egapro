@@ -276,11 +276,13 @@ function GipPublicationReadOnly({ value }: { value: string | null }) {
 				</span>
 			</label>
 			<input
+				aria-readonly="true"
 				className="fr-input"
+				defaultValue={value ?? "Non disponible"}
 				id="settings-gipPublicationDate"
+				key={value ?? "empty"}
 				readOnly
 				type="text"
-				value={value ?? "Non disponible"}
 			/>
 		</div>
 	);

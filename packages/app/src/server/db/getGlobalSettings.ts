@@ -18,8 +18,12 @@ export const GLOBAL_SETTINGS_ID = 1;
  * Wrapped in React `cache()` to deduplicate calls within a single request.
  */
 export const getActiveCampaignYear = cache(async (): Promise<number> => {
-	// `.date` columns are serialised as "YYYY-MM-DD" strings, safe to compare lexicographically.
-	const today = new Date().toISOString().slice(0, 10);
+	// `.date` columns are stored as "YYYY-MM-DD" in Europe/Paris civil time, so
+	// we compare them against the local calendar date. `toISOString()` would
+	// yield a UTC date and flip the result across midnight for anyone not on
+	// UTC (e.g. Paris in summer is UTC+2 → "tomorrow" for ~2h each night).
+	// `sv-SE` locale renders dates as ISO "YYYY-MM-DD" in local time.
+	const today = new Date().toLocaleDateString("sv-SE");
 
 	const rows = await db
 		.select({ year: campaignDeadlines.year })
