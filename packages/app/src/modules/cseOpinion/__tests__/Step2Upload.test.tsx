@@ -17,6 +17,7 @@ let deleteMutationOptions: {
 	onError?: () => void;
 } = {};
 const deleteMutateMock = vi.fn();
+const finalizeMutateAsyncMock = vi.fn();
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({
@@ -47,6 +48,13 @@ vi.mock("~/trpc/react", () => ({
 					};
 				},
 			},
+			finalize: {
+				useMutation: () => ({
+					mutateAsync: finalizeMutateAsyncMock,
+					isPending: false,
+					error: null,
+				}),
+			},
 		},
 		useUtils: () => ({
 			cseOpinion: {
@@ -74,6 +82,8 @@ describe("Step2Upload", () => {
 		refreshMock.mockReset();
 		invalidateMock.mockReset();
 		deleteMutateMock.mockReset();
+		finalizeMutateAsyncMock.mockReset();
+		finalizeMutateAsyncMock.mockResolvedValue({ success: true });
 		uploadFileMock.mockReset();
 		deleteMutationOptions = {};
 		// jsdom doesn't implement <dialog>; stub showModal/close so the dialog
@@ -337,7 +347,7 @@ describe("Step2Upload", () => {
 		).toBeInTheDocument();
 	});
 
-	it("uploads the file then refreshes the list and redirects on success", async () => {
+	it("uploads the file then finalizes and redirects on success", async () => {
 		const user = userEvent.setup();
 		uploadFileMock.mockResolvedValue({
 			ok: true,
@@ -368,8 +378,60 @@ describe("Step2Upload", () => {
 		});
 		expect(refreshMock).toHaveBeenCalled();
 		await waitFor(() => {
+			expect(finalizeMutateAsyncMock).toHaveBeenCalled();
+		});
+		await waitFor(() => {
 			expect(pushMock).toHaveBeenCalledWith("/avis-cse/confirmation");
 		});
+	});
+
+	it("finalizes without uploading when only existing files are present", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step2Upload
+				declarationYear={2025}
+				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
+
+		const certifyCheckbox = screen.getByRole("checkbox");
+		await user.click(certifyCheckbox);
+		await user.click(screen.getByRole("button", { name: "Valider" }));
+
+		await waitFor(() => {
+			expect(finalizeMutateAsyncMock).toHaveBeenCalled();
+		});
+		expect(uploadFileMock).not.toHaveBeenCalled();
+		await waitFor(() => {
+			expect(pushMock).toHaveBeenCalledWith("/avis-cse/confirmation");
+		});
+	});
+
+	it("shows an error and does not redirect when finalize fails", async () => {
+		const user = userEvent.setup();
+		finalizeMutateAsyncMock.mockRejectedValueOnce(
+			new Error("Au moins un fichier d'avis CSE doit être transmis."),
+		);
+
+		render(
+			<Step2Upload
+				declarationYear={2025}
+				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
+		await user.click(screen.getByRole("checkbox"));
+		await user.click(screen.getByRole("button", { name: "Valider" }));
+
+		await waitFor(() => {
+			expect(
+				screen.getByText("Au moins un fichier d'avis CSE doit être transmis."),
+			).toBeInTheDocument();
+		});
+		expect(pushMock).not.toHaveBeenCalled();
 	});
 
 	it("invalidates the file list and clears the deleting state on delete success", () => {

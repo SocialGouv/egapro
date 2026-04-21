@@ -7,7 +7,7 @@ const NO_COMPLIANCE = {
 	compliancePath: null,
 	secondDeclarationStatus: null,
 	complianceCompletedAt: null,
-	hasCseOpinion: false,
+	cseOpinionCompletedAt: null,
 	hasJointEvaluationFile: false,
 	hasPrefillData: false,
 };
