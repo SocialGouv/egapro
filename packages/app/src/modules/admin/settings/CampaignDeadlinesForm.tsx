@@ -302,14 +302,14 @@ function buildDefaults(year: number): CampaignDeadlinesFormInput {
 }
 
 /**
- * Lists every year between FIRST_DECLARATION_YEAR and the current year + 1 so
- * the admin can pick any campaign, flagging years without a DB row as
- * "non configurée" rather than hiding them.
+ * Lists every year between FIRST_DECLARATION_YEAR and the current year + 10 so
+ * the admin can pre-configure campaigns well in advance, flagging years
+ * without a DB row as "non configurée" rather than hiding them.
  */
 function buildYearOptions(
 	configuredYears: readonly number[],
 ): Array<{ year: number; label: string }> {
-	const max = getCurrentYear() + 1;
+	const max = getCurrentYear() + 10;
 	const configured = new Set(configuredYears);
 	const years: Array<{ year: number; label: string }> = [];
 	for (let y = FIRST_DECLARATION_YEAR; y <= max; y++) {
