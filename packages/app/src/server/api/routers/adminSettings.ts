@@ -90,13 +90,15 @@ export const adminSettingsRouter = createTRPCRouter({
 
 	/**
 	 * Upsert all deadlines of a given campaign year in one call.
+	 *
+	 * `gipPublicationDate` is deliberately excluded from the payload — its value
+	 * is written by the SUIT CSV import and the admin form only displays it.
 	 */
 	upsertCampaignDeadlines: adminProcedure
 		.input(campaignDeadlinesFormSchema)
 		.mutation(async ({ ctx, input }) => {
 			const values = {
 				year: input.year,
-				gipPublicationDate: input.gipPublicationDate,
 				campaignStartDate: input.campaignStartDate,
 				decl1ModificationDeadline: input.decl1ModificationDeadline,
 				decl1JustificationDeadline: input.decl1JustificationDeadline,

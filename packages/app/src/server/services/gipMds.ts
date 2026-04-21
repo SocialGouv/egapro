@@ -4,7 +4,7 @@ import { eq, inArray } from "drizzle-orm";
 import type { GipMdsRow } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import { CSV_TO_SCHEMA_MAP } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import type { DB } from "~/server/db";
-import { companies, gipMdsData } from "~/server/db/schema";
+import { campaignDeadlines, companies, gipMdsData } from "~/server/db/schema";
 import { fetchCompanyBySiren } from "./weez";
 
 /**
@@ -13,6 +13,8 @@ import { fetchCompanyBySiren } from "./weez";
  * Line 2: values
  */
 type CsvMetadata = {
+	/** File-level timestamp emitted by SUIT (`horodatage` column). */
+	publicationDate: string;
 	periodStart: string;
 	periodEnd: string;
 	expectedRows: number;
@@ -42,6 +44,7 @@ export function parseGipCsv(csvContent: string): {
 
 	const metaValues = splitCsvLine(lines[1] ?? "");
 	const metadata: CsvMetadata = {
+		publicationDate: normaliseSuitDate(metaValues[2] ?? ""),
 		periodStart: metaValues[3] ?? "",
 		periodEnd: metaValues[4] ?? "",
 		expectedRows: Number.parseInt(metaValues[5] ?? "0", 10),
@@ -82,6 +85,17 @@ export function parseGipCsv(csvContent: string): {
 /** Split a semicolon-separated CSV line. */
 function splitCsvLine(line: string): string[] {
 	return line.split(";");
+}
+
+/**
+ * SUIT can emit the GIP `horodatage` either as a bare `YYYY-MM-DD` date or as
+ * an ISO timestamp `YYYY-MM-DDTHH:mm:ss…`. The admin UI only displays the
+ * date part so we trim it here; empty or malformed input is returned as-is
+ * and filtered out at the storage layer.
+ */
+function normaliseSuitDate(value: string): string {
+	const trimmed = value.trim();
+	return /^\d{4}-\d{2}-\d{2}/.test(trimmed) ? trimmed.slice(0, 10) : trimmed;
 }
 
 /**
@@ -218,6 +232,32 @@ export async function importGipCsvToDb(
 				siren: row.siren ?? "",
 			})),
 		);
+
+		// Record the SUIT `horodatage` as the GIP publication date on the
+		// matching campaign-deadlines row. Admins cannot edit this field — the
+		// import is the single source of truth.
+		if (/^\d{4}-\d{2}-\d{2}$/.test(metadata.publicationDate)) {
+			await tx
+				.insert(campaignDeadlines)
+				.values({
+					year,
+					gipPublicationDate: metadata.publicationDate,
+					// Non-null columns need a safe placeholder: the import-time
+					// write only touches gipPublicationDate on an existing row,
+					// so these fallbacks only matter when no campaign has been
+					// configured yet.
+					decl1ModificationDeadline: `${year}-06-01`,
+					decl1JustificationDeadline: `${year}-06-01`,
+					decl1JointEvaluationDeadline: `${year}-08-01`,
+					decl2ModificationDeadline: `${year}-12-01`,
+					decl2JustificationDeadline: `${year}-12-01`,
+					decl2JointEvaluationDeadline: `${year + 1}-02-01`,
+				})
+				.onConflictDoUpdate({
+					target: campaignDeadlines.year,
+					set: { gipPublicationDate: metadata.publicationDate },
+				});
+		}
 	});
 
 	return { year, rowCount: rows.length };

@@ -89,23 +89,43 @@ describe("CampaignDeadlinesForm", () => {
 		queryState.isLoading = false;
 	});
 
-	it("lists the configured years plus a bracket around the selected year", () => {
+	it("lists every year since FIRST_DECLARATION_YEAR up to next year", () => {
 		render(
 			<CampaignDeadlinesForm
 				configuredYears={[2024, 2025, 2026]}
 				initialYear={2026}
 			/>,
 		);
-		const select = screen.getByLabelText(/année à éditer/i);
+		const select = screen.getByLabelText(
+			/sélectionnez l'année de campagne à modifier/i,
+		);
 		const values = Array.from(select.querySelectorAll("option")).map(
 			(o) => o.value,
 		);
+		// Includes configured years and at least the current + next year.
 		expect(values).toEqual(
-			expect.arrayContaining(["2024", "2025", "2026", "2027", "2028"]),
+			expect.arrayContaining(["2019", "2024", "2025", "2026"]),
 		);
 	});
 
-	it("populates the fields from the query data", async () => {
+	it("flags non-configured years with a hint suffix", () => {
+		render(
+			<CampaignDeadlinesForm
+				configuredYears={[2024, 2025]}
+				initialYear={2025}
+			/>,
+		);
+		const select = screen.getByLabelText(
+			/sélectionnez l'année de campagne à modifier/i,
+		);
+		const options = Array.from(select.querySelectorAll("option"));
+		const labelFor = (year: string) =>
+			options.find((o) => o.value === year)?.textContent;
+		expect(labelFor("2024")).toBe("2024");
+		expect(labelFor("2026")).toMatch(/non configurée/i);
+	});
+
+	it("populates editable fields from the query and shows the GIP date read-only", async () => {
 		render(
 			<CampaignDeadlinesForm configuredYears={[2026]} initialYear={2026} />,
 		);
@@ -114,9 +134,11 @@ describe("CampaignDeadlinesForm", () => {
 				document.getElementById("settings-decl1ModificationDeadline"),
 			).toHaveValue("2026-06-01");
 		});
-		expect(
-			screen.getByLabelText(/date de publication des données gip/i),
-		).toHaveValue("2026-03-01");
+		const gipField = screen.getByLabelText(
+			/date de publication des données gip/i,
+		);
+		expect(gipField).toHaveValue("2026-03-01");
+		expect(gipField).toHaveAttribute("readonly");
 	});
 
 	it("submits the form values on save", async () => {
