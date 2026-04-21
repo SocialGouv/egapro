@@ -9,7 +9,6 @@ export {
 	publicSearchReferentsSchema,
 } from "./schemas";
 export { PUBLIC_PAGE_SIZE } from "./shared/constants";
-export { ReferentsSearchForm } from "./shared/ReferentsSearchForm";
 export type {
 	PublicReferentDetail as PublicReferentDetailData,
 	PublicReferentListRow,
