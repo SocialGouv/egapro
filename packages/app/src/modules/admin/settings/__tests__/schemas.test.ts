@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { campaignDeadlinesFormSchema, setActiveYearSchema } from "../schemas";
+import { campaignDeadlinesFormSchema } from "../schemas";
 
 const validDates = {
 	decl1ModificationDeadline: "2026-06-01",
@@ -64,30 +64,6 @@ describe("campaignDeadlinesFormSchema", () => {
 			campaignStartDate: null,
 			...validDates,
 			decl2ModificationDeadline: "2026-05-01",
-		});
-		expect(result.success).toBe(false);
-	});
-});
-
-describe("setActiveYearSchema", () => {
-	it("accepts a valid year", () => {
-		const result = setActiveYearSchema.safeParse({ activeCampaignYear: 2026 });
-		expect(result.success).toBe(true);
-	});
-
-	it("rejects years below FIRST_DECLARATION_YEAR", () => {
-		const result = setActiveYearSchema.safeParse({ activeCampaignYear: 1999 });
-		expect(result.success).toBe(false);
-	});
-
-	it("rejects years above 2100", () => {
-		const result = setActiveYearSchema.safeParse({ activeCampaignYear: 2200 });
-		expect(result.success).toBe(false);
-	});
-
-	it("rejects non-integer years", () => {
-		const result = setActiveYearSchema.safeParse({
-			activeCampaignYear: 2026.5,
 		});
 		expect(result.success).toBe(false);
 	});

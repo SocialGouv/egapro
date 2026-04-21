@@ -53,12 +53,6 @@ export type CampaignDeadlinesFormValues = z.output<
 	typeof campaignDeadlinesFormSchema
 >;
 
-export const setActiveYearSchema = z.object({
-	activeCampaignYear: campaignYearSchema,
-});
-
-export type SetActiveYearInput = z.infer<typeof setActiveYearSchema>;
-
 export const getCampaignDeadlinesByYearSchema = z.object({
 	year: campaignYearSchema,
 });

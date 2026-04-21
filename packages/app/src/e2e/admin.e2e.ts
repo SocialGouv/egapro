@@ -30,12 +30,9 @@ test("admin user can access /admin/parametres and sees settings page", async ({
 		}),
 	).toBeVisible();
 	await expect(
-		page.getByRole("heading", { name: "Année de campagne active", level: 2 }),
-	).toBeVisible();
-	await expect(
 		page.getByRole("heading", { name: "Échéances de campagne", level: 2 }),
 	).toBeVisible();
 	await expect(
-		page.getByRole("spinbutton", { name: /année de campagne active/i }),
-	).toBeVisible();
+		page.getByRole("heading", { name: "Année de campagne active", level: 2 }),
+	).not.toBeVisible();
 });
