@@ -199,7 +199,6 @@ describe("fetchAllCategories", () => {
 });
 
 describe("fetchPreviousYearJobCategories", () => {
-	type PreviousDeclarationRow = { id: string };
 	type JobCategoryRow = {
 		name: string;
 		detail: string | null;
@@ -208,65 +207,61 @@ describe("fetchPreviousYearJobCategories", () => {
 	};
 
 	/**
-	 * Builds a mocked Drizzle `tx` where:
-	 *   - the first `select()` chain (declarations query) resolves to
-	 *     `previousDeclarations` after `.orderBy()`
-	 *   - each subsequent `select()` chain (jobCategories query per declaration)
-	 *     resolves to the next entry in `jobsPerDeclaration` after `.where()`
+	 * Build a mocked `tx` with two select chains:
+	 *   1. declarations probe (innerJoin jobCategories, limit 1) → id or nothing
+	 *   2. jobCategories fetch for that id → rows
+	 *
+	 * Each chain resolves at its terminal call (`.limit()` / `.where()`), so
+	 * the mock is driven by the data the query is expected to return, not by
+	 * internal call-order counters.
 	 */
 	const makeTx = (
-		previousDeclarations: PreviousDeclarationRow[],
-		jobsPerDeclaration: JobCategoryRow[][],
+		declarationId: string | null,
+		jobs: JobCategoryRow[] = [],
 	) => {
-		let selectCallCount = 0;
-		const queuedJobs = [...jobsPerDeclaration];
+		const declarationChain = {
+			from: () => ({
+				innerJoin: () => ({
+					where: () => ({
+						orderBy: () => ({
+							limit: () =>
+								Promise.resolve(declarationId ? [{ id: declarationId }] : []),
+						}),
+					}),
+				}),
+			}),
+		};
 
-		const mockSelect = vi.fn().mockImplementation(() => {
-			selectCallCount++;
-			if (selectCallCount === 1) {
-				const mockOrderBy = vi.fn().mockResolvedValue(previousDeclarations);
-				const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
-				const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-				return { from: mockFrom };
-			}
-			const mockWhere = vi.fn().mockResolvedValue(queuedJobs.shift() ?? []);
-			const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-			return { from: mockFrom };
-		});
+		const jobCategoriesChain = {
+			from: () => ({
+				where: () => Promise.resolve(jobs),
+			}),
+		};
 
-		return { select: mockSelect } as never;
+		const queue = [declarationChain, jobCategoriesChain];
+		return { select: () => queue.shift() } as never;
 	};
 
-	it("returns null when no submitted previous declaration exists", async () => {
+	it("returns null when no previous declaration contains indicator 7", async () => {
 		const { fetchPreviousYearJobCategories } = await import(
 			"../declarationHelpers"
 		);
 
-		const tx = makeTx([], []);
-
-		const result = await fetchPreviousYearJobCategories(tx, "123456789", 2026);
+		const result = await fetchPreviousYearJobCategories(
+			makeTx(null),
+			"123456789",
+			2026,
+		);
 
 		expect(result).toBeNull();
 	});
 
-	it("returns null when no previous declaration contains job categories", async () => {
+	it("returns categories from the most recent qualifying declaration", async () => {
 		const { fetchPreviousYearJobCategories } = await import(
 			"../declarationHelpers"
 		);
 
-		const tx = makeTx([{ id: "decl-2025" }, { id: "decl-2024" }], [[], []]);
-
-		const result = await fetchPreviousYearJobCategories(tx, "123456789", 2026);
-
-		expect(result).toBeNull();
-	});
-
-	it("returns categories from the most recent previous declaration", async () => {
-		const { fetchPreviousYearJobCategories } = await import(
-			"../declarationHelpers"
-		);
-
-		const mostRecentJobs: JobCategoryRow[] = [
+		const tx = makeTx("decl-2024", [
 			{
 				name: "Employés",
 				detail: "Support",
@@ -279,9 +274,7 @@ describe("fetchPreviousYearJobCategories", () => {
 				source: "convention-collective",
 				categoryIndex: 0,
 			},
-		];
-
-		const tx = makeTx([{ id: "decl-2025" }], [mostRecentJobs]);
+		]);
 
 		const result = await fetchPreviousYearJobCategories(tx, "123456789", 2026);
 
@@ -294,48 +287,19 @@ describe("fetchPreviousYearJobCategories", () => {
 		});
 	});
 
-	it("falls back to an earlier year when N-1 has no job categories", async () => {
-		const { fetchPreviousYearJobCategories } = await import(
-			"../declarationHelpers"
-		);
-
-		const olderJobs: JobCategoryRow[] = [
-			{
-				name: "Cadres",
-				detail: "Managers",
-				source: "autre",
-				categoryIndex: 0,
-			},
-		];
-
-		const tx = makeTx(
-			[{ id: "decl-2025" }, { id: "decl-2023" }],
-			[[], olderJobs],
-		);
-
-		const result = await fetchPreviousYearJobCategories(tx, "123456789", 2026);
-
-		expect(result).toEqual({
-			source: "autre",
-			categories: [{ name: "Cadres", detail: "Managers" }],
-		});
-	});
-
 	it("uses empty string for null detail", async () => {
 		const { fetchPreviousYearJobCategories } = await import(
 			"../declarationHelpers"
 		);
 
-		const jobs: JobCategoryRow[] = [
+		const tx = makeTx("decl-2024", [
 			{
 				name: "Cadres",
 				detail: null,
 				source: "autre",
 				categoryIndex: 0,
 			},
-		];
-
-		const tx = makeTx([{ id: "decl-2025" }], [jobs]);
+		]);
 
 		const result = await fetchPreviousYearJobCategories(tx, "123456789", 2026);
 

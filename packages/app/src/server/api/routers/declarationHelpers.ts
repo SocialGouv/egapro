@@ -97,13 +97,15 @@ export async function fetchPreviousYearJobCategories(
 	siren: string,
 	currentYear: number,
 ) {
-	// Walk previous submitted declarations from most recent down and pick the
-	// first one that actually contains indicator 7 (i.e. has job categories).
-	// A company may skip year N-1 or submit without indicator 7, in which case
-	// we fall back to earlier years.
-	const previousDeclarations = await tx
+	// Find the most recent submitted declaration (strictly before currentYear)
+	// that actually contains indicator 7 — i.e. has at least one row in
+	// app_job_category. The inner join filters empty declarations out; ordering
+	// by year desc + limit 1 keeps this to a single bounded round-trip, so a
+	// company with no indicator 7 on N-1 falls back to N-2 / N-3 automatically.
+	const [previousDeclaration] = await tx
 		.select({ id: declarations.id })
 		.from(declarations)
+		.innerJoin(jobCategories, eq(jobCategories.declarationId, declarations.id))
 		.where(
 			and(
 				eq(declarations.siren, siren),
@@ -111,34 +113,31 @@ export async function fetchPreviousYearJobCategories(
 				eq(declarations.status, "submitted"),
 			),
 		)
-		.orderBy(desc(declarations.year));
+		.orderBy(desc(declarations.year))
+		.limit(1);
 
-	for (const { id } of previousDeclarations) {
-		const jobs = await tx
-			.select({
-				name: jobCategories.name,
-				detail: jobCategories.detail,
-				source: jobCategories.source,
-				categoryIndex: jobCategories.categoryIndex,
-			})
-			.from(jobCategories)
-			.where(eq(jobCategories.declarationId, id));
+	if (!previousDeclaration) return null;
 
-		if (jobs.length === 0) continue;
+	const jobs = await tx
+		.select({
+			name: jobCategories.name,
+			detail: jobCategories.detail,
+			source: jobCategories.source,
+			categoryIndex: jobCategories.categoryIndex,
+		})
+		.from(jobCategories)
+		.where(eq(jobCategories.declarationId, previousDeclaration.id));
 
-		const sorted = [...jobs].sort((a, b) => a.categoryIndex - b.categoryIndex);
-		const source = sorted[0]?.source ?? "";
+	const sorted = [...jobs].sort((a, b) => a.categoryIndex - b.categoryIndex);
+	const source = sorted[0]?.source ?? "";
 
-		return {
-			source,
-			categories: sorted.map((j) => ({
-				name: j.name,
-				detail: j.detail ?? "",
-			})),
-		};
-	}
-
-	return null;
+	return {
+		source,
+		categories: sorted.map((j) => ({
+			name: j.name,
+			detail: j.detail ?? "",
+		})),
+	};
 }
 
 type JobCategoryRow = typeof jobCategories.$inferSelect;
