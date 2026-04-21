@@ -20,7 +20,7 @@ vi.mock("next/navigation", async () => {
 import { SearchForm } from "../SearchForm";
 
 describe("SearchForm", () => {
-	it("renders all search fields", () => {
+	it("renders all search fields and omits the removed Index / Valeur pair", () => {
 		render(<SearchForm />);
 
 		expect(screen.getByLabelText("SIREN / Nom entreprise")).toBeInTheDocument();
@@ -29,10 +29,8 @@ describe("SearchForm", () => {
 		expect(screen.getByLabelText("Date de dépôt (du)")).toBeInTheDocument();
 		expect(screen.getByLabelText("Date de dépôt (au)")).toBeInTheDocument();
 		expect(screen.getByLabelText("Statut")).toBeInTheDocument();
-	});
-
-	it("does not render removed Index / Valeur filters", () => {
-		render(<SearchForm />);
+		// Regression guard for #3274 — keep these negative assertions next to
+		// their positive counterparts so a future reintroduction is caught here.
 		expect(screen.queryByLabelText("Index")).not.toBeInTheDocument();
 		expect(screen.queryByLabelText("Valeur")).not.toBeInTheDocument();
 	});
