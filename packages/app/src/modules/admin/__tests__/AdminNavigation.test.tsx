@@ -20,6 +20,9 @@ describe("AdminNavigation", () => {
 		render(<AdminNavigation />);
 		expect(screen.getByRole("link", { name: "Accueil" })).toBeInTheDocument();
 		expect(
+			screen.getByRole("link", { name: "Déclarations" }),
+		).toBeInTheDocument();
+		expect(
 			screen.getByRole("link", { name: "Mimoquer un Siren" }),
 		).toBeInTheDocument();
 		expect(screen.getByRole("link", { name: "Référents" })).toBeInTheDocument();
