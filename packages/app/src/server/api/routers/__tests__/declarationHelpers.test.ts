@@ -199,51 +199,69 @@ describe("fetchAllCategories", () => {
 });
 
 describe("fetchPreviousYearJobCategories", () => {
-	it("returns null when no submitted declaration exists for previous year", async () => {
+	type JobCategoryRow = {
+		name: string;
+		detail: string | null;
+		source: string;
+		categoryIndex: number;
+	};
+
+	/**
+	 * Build a mocked `tx` with two select chains:
+	 *   1. declarations probe (innerJoin jobCategories, limit 1) → id or nothing
+	 *   2. jobCategories fetch for that id → rows
+	 *
+	 * Each chain resolves at its terminal call (`.limit()` / `.where()`), so
+	 * the mock is driven by the data the query is expected to return, not by
+	 * internal call-order counters.
+	 */
+	const makeTx = (
+		declarationId: string | null,
+		jobs: JobCategoryRow[] = [],
+	) => {
+		const declarationChain = {
+			from: () => ({
+				innerJoin: () => ({
+					where: () => ({
+						orderBy: () => ({
+							limit: () =>
+								Promise.resolve(declarationId ? [{ id: declarationId }] : []),
+						}),
+					}),
+				}),
+			}),
+		};
+
+		const jobCategoriesChain = {
+			from: () => ({
+				where: () => Promise.resolve(jobs),
+			}),
+		};
+
+		const queue = [declarationChain, jobCategoriesChain];
+		return { select: () => queue.shift() } as never;
+	};
+
+	it("returns null when no previous declaration contains indicator 7", async () => {
 		const { fetchPreviousYearJobCategories } = await import(
 			"../declarationHelpers"
 		);
 
-		const mockLimit = vi.fn().mockResolvedValue([]);
-		const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit });
-		const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-		const mockSelect = vi.fn().mockReturnValue({ from: mockFrom });
-
-		const tx = { select: mockSelect } as never;
-
-		const result = await fetchPreviousYearJobCategories(tx, "123456789", 2026);
+		const result = await fetchPreviousYearJobCategories(
+			makeTx(null),
+			"123456789",
+			2026,
+		);
 
 		expect(result).toBeNull();
 	});
 
-	it("returns null when declaration exists but has no job categories", async () => {
+	it("returns categories from the most recent qualifying declaration", async () => {
 		const { fetchPreviousYearJobCategories } = await import(
 			"../declarationHelpers"
 		);
 
-		let selectCallCount = 0;
-		const mockLimit = vi.fn().mockResolvedValue([{ id: "decl-prev" }]);
-		const mockWhere = vi.fn().mockImplementation(() => {
-			selectCallCount++;
-			if (selectCallCount === 1) return { limit: mockLimit };
-			return Promise.resolve([]);
-		});
-		const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-		const mockSelect = vi.fn().mockReturnValue({ from: mockFrom });
-
-		const tx = { select: mockSelect } as never;
-
-		const result = await fetchPreviousYearJobCategories(tx, "123456789", 2026);
-
-		expect(result).toBeNull();
-	});
-
-	it("returns categories sorted by index with source from previous year", async () => {
-		const { fetchPreviousYearJobCategories } = await import(
-			"../declarationHelpers"
-		);
-
-		const mockJobs = [
+		const tx = makeTx("decl-2024", [
 			{
 				name: "Employés",
 				detail: "Support",
@@ -256,19 +274,7 @@ describe("fetchPreviousYearJobCategories", () => {
 				source: "convention-collective",
 				categoryIndex: 0,
 			},
-		];
-
-		let selectCallCount = 0;
-		const mockLimit = vi.fn().mockResolvedValue([{ id: "decl-prev" }]);
-		const mockWhere = vi.fn().mockImplementation(() => {
-			selectCallCount++;
-			if (selectCallCount === 1) return { limit: mockLimit };
-			return Promise.resolve(mockJobs);
-		});
-		const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-		const mockSelect = vi.fn().mockReturnValue({ from: mockFrom });
-
-		const tx = { select: mockSelect } as never;
+		]);
 
 		const result = await fetchPreviousYearJobCategories(tx, "123456789", 2026);
 
@@ -286,26 +292,14 @@ describe("fetchPreviousYearJobCategories", () => {
 			"../declarationHelpers"
 		);
 
-		const mockJobs = [
+		const tx = makeTx("decl-2024", [
 			{
 				name: "Cadres",
 				detail: null,
 				source: "autre",
 				categoryIndex: 0,
 			},
-		];
-
-		let selectCallCount = 0;
-		const mockLimit = vi.fn().mockResolvedValue([{ id: "decl-prev" }]);
-		const mockWhere = vi.fn().mockImplementation(() => {
-			selectCallCount++;
-			if (selectCallCount === 1) return { limit: mockLimit };
-			return Promise.resolve(mockJobs);
-		});
-		const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-		const mockSelect = vi.fn().mockReturnValue({ from: mockFrom });
-
-		const tx = { select: mockSelect } as never;
+		]);
 
 		const result = await fetchPreviousYearJobCategories(tx, "123456789", 2026);
 

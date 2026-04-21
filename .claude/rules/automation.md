@@ -114,7 +114,7 @@ Apply these rules **as you write code**, before any agent runs:
 - New auth event / cron → direct `logAction` call; `logger.error` must stay synchronous (`void (async () => {...})()`)
 - Every new action requires **3 wire-up points**: `AUDIT_ACTIONS.*` constant, `AUDIT_ACTION_CATEGORIES` mapping, and the surface-specific wire (tRPC map / wrapper / direct call)
 - `metadata` jsonb must not contain secrets (auto-stripped keys: `password`, `token`, `refresh_token`, `secret`, `client_secret`, `authorization`, `apikey`, `api_key`, `accesskey`, `access_key`, `private_key`)
-- DB-layer changes in `~/server/audit/cleanup.ts` → add an integration test (`*.integration.test.ts`, runs via `pnpm test:integration`) — unit tests mock drizzle and miss driver bugs
+- DB-layer changes in `packages/app/scripts/audit-cleanup.mjs` (or any file that touches `audit.action_log` via non-trivial SQL) → add an integration test (`*.integration.test.ts`, runs via `pnpm test:integration`) — unit tests mock the DB driver and miss driver bugs
 
 ### E2E tests (when relevant)
 
