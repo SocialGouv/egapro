@@ -203,48 +203,59 @@ export async function deleteCseOpinions() {
 	}
 }
 
+const PREV_YEAR_DECL_ID_PREFIX = "e2e-prev-year-decl-";
+const PREV_YEAR_DECL_ID_SUFFIX = "-000000000000";
+const PREV_YEAR_JOB_CATEGORY_IDS = [
+	"e2e-jobcat-1111-0000-000000000000",
+	"e2e-jobcat-2222-0000-000000000000",
+	"e2e-jobcat-3333-0000-000000000000",
+] as const;
+
+function previousYearDeclId(yearsBack: number) {
+	return `${PREV_YEAR_DECL_ID_PREFIX}${String(yearsBack).padStart(4, "0")}${PREV_YEAR_DECL_ID_SUFFIX}`;
+}
+
 /**
- * Insert a submitted declaration for the previous year (N-1) with job categories,
- * so the "Reprendre les catégories de l'année précédente" button appears.
+ * Insert a submitted declaration `yearsBack` years before the current year with
+ * job categories (indicator 7). Default `yearsBack = 1` matches the original
+ * N-1 seed so existing callers are unaffected.
  */
-export async function insertPreviousYearDeclaration() {
+export async function insertPreviousYearDeclaration(yearsBack = 1) {
 	const sql = createConnection();
-	const yearResult =
-		await sql`SELECT EXTRACT(YEAR FROM CURRENT_DATE)::int - 1 AS previous_year`;
-	const previousYear = yearResult[0]?.previous_year as number;
-	const declId = "e2e-prev-year-decl-0000-000000000000";
+	const yearResult = await sql`
+		SELECT EXTRACT(YEAR FROM CURRENT_DATE)::int - ${yearsBack} AS target_year
+	`;
+	const targetYear = yearResult[0]?.target_year as number;
+	const declId = previousYearDeclId(yearsBack);
 
 	try {
-		// Get test user id
 		const users = await sql`
 			SELECT user_id FROM app_user_company WHERE siren = ${TEST_SIREN} LIMIT 1
 		`;
 		const userId = users[0]?.user_id;
 		if (!userId) return;
 
-		// Insert submitted declaration for previous year
 		await sql`
 			INSERT INTO app_declaration (id, siren, year, declarant_id, total_women, total_men, current_step, status, created_at, updated_at)
-			VALUES (${declId}, ${TEST_SIREN}, ${previousYear}, ${userId}, 150, 200, 6, 'submitted', NOW(), NOW())
+			VALUES (${declId}, ${TEST_SIREN}, ${targetYear}, ${userId}, 150, 200, 6, 'submitted', NOW(), NOW())
 			ON CONFLICT DO NOTHING
 		`;
 
-		// Insert 3 job categories
 		const categories = [
 			{
-				id: "e2e-jobcat-1111-0000-000000000000",
+				id: PREV_YEAR_JOB_CATEGORY_IDS[0],
 				index: 0,
 				name: "Cadres dirigeants",
 				detail: "Directeurs et cadres supérieurs",
 			},
 			{
-				id: "e2e-jobcat-2222-0000-000000000000",
+				id: PREV_YEAR_JOB_CATEGORY_IDS[1],
 				index: 1,
 				name: "Ingénieurs et cadres",
 				detail: "Ingénieurs, chefs de projet, managers",
 			},
 			{
-				id: "e2e-jobcat-3333-0000-000000000000",
+				id: PREV_YEAR_JOB_CATEGORY_IDS[2],
 				index: 2,
 				name: "Techniciens",
 				detail: "Techniciens qualifiés",
@@ -263,18 +274,13 @@ export async function insertPreviousYearDeclaration() {
 	}
 }
 
-/** Remove the previous year test declaration and its job categories. */
-export async function deletePreviousYearDeclaration() {
+/** Remove the seeded previous-year declaration at `yearsBack` and its job categories. */
+export async function deletePreviousYearDeclaration(yearsBack = 1) {
 	const sql = createConnection();
-	const declId = "e2e-prev-year-decl-0000-000000000000";
+	const declId = previousYearDeclId(yearsBack);
 
 	try {
-		const jobIds = [
-			"e2e-jobcat-1111-0000-000000000000",
-			"e2e-jobcat-2222-0000-000000000000",
-			"e2e-jobcat-3333-0000-000000000000",
-		];
-		await sql`DELETE FROM app_employee_category WHERE job_category_id = ANY(${jobIds})`;
+		await sql`DELETE FROM app_employee_category WHERE job_category_id = ANY(${PREV_YEAR_JOB_CATEGORY_IDS})`;
 		await sql`DELETE FROM app_job_category WHERE declaration_id = ${declId}`;
 		await sql`DELETE FROM app_declaration WHERE id = ${declId}`;
 	} finally {
