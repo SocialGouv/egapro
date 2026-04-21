@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import {
 	deleteFileSchema,
 	saveOpinionsSchema,
@@ -9,7 +9,7 @@ import {
 	declarationProcedure,
 	declarationWriteProcedure,
 } from "~/server/api/trpc";
-import { cseOpinions, files } from "~/server/db/schema";
+import { cseOpinions, declarations, files } from "~/server/db/schema";
 import { deleteFile as deleteS3File } from "~/server/services/s3";
 
 export const cseOpinionRouter = createTRPCRouter({
@@ -96,6 +96,51 @@ export const cseOpinionRouter = createTRPCRouter({
 			);
 
 		return { files: rows };
+	}),
+
+	finalize: declarationWriteProcedure.mutation(async ({ ctx }) => {
+		const [opinionCount, fileCount] = await Promise.all([
+			ctx.db
+				.select({ count: sql<number>`count(*)::int` })
+				.from(cseOpinions)
+				.where(eq(cseOpinions.declarationId, ctx.declarationId)),
+			ctx.db
+				.select({ count: sql<number>`count(*)::int` })
+				.from(files)
+				.where(
+					and(
+						eq(files.declarationId, ctx.declarationId),
+						eq(files.type, "cse_opinion"),
+					),
+				),
+		]);
+
+		if ((opinionCount[0]?.count ?? 0) === 0) {
+			throw new TRPCError({
+				code: "PRECONDITION_FAILED",
+				message: "Les avis du CSE doivent être renseignés avant validation.",
+			});
+		}
+		if ((fileCount[0]?.count ?? 0) === 0) {
+			throw new TRPCError({
+				code: "PRECONDITION_FAILED",
+				message: "Au moins un fichier d'avis CSE doit être transmis.",
+			});
+		}
+
+		const now = new Date();
+		// Idempotent: only sets cseOpinionCompletedAt the first time.
+		await ctx.db
+			.update(declarations)
+			.set({ cseOpinionCompletedAt: now, updatedAt: now })
+			.where(
+				and(
+					eq(declarations.id, ctx.declarationId),
+					isNull(declarations.cseOpinionCompletedAt),
+				),
+			);
+
+		return { success: true };
 	}),
 
 	deleteFile: declarationWriteProcedure

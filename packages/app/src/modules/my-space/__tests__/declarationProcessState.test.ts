@@ -21,7 +21,7 @@ function makeDeclaration(
 		compliancePath: null,
 		secondDeclarationStatus: null,
 		complianceCompletedAt: null,
-		hasCseOpinion: false,
+		cseOpinionCompletedAt: null,
 		hasJointEvaluationFile: false,
 		hasPrefillData: false,
 		...overrides,
@@ -104,7 +104,7 @@ describe("computePanelVariant", () => {
 				makeDeclaration({
 					compliancePath: "corrective_action",
 					complianceCompletedAt: new Date(),
-					hasCseOpinion: false,
+					cseOpinionCompletedAt: null,
 				}),
 			),
 		).toBe("cse");
@@ -116,7 +116,7 @@ describe("computePanelVariant", () => {
 				makeDeclaration({
 					compliancePath: "corrective_action",
 					complianceCompletedAt: new Date(),
-					hasCseOpinion: true,
+					cseOpinionCompletedAt: new Date(),
 				}),
 			),
 		).toBe("closed");
@@ -127,7 +127,7 @@ describe("computePanelVariant", () => {
 			computePanelVariant(
 				makeDeclaration({
 					compliancePath: "justify",
-					hasCseOpinion: true,
+					cseOpinionCompletedAt: new Date(),
 				}),
 			),
 		).toBe("closed");
@@ -223,7 +223,7 @@ describe("computeCtaHref", () => {
 				makeDeclaration({
 					compliancePath: "corrective_action",
 					complianceCompletedAt: new Date(),
-					hasCseOpinion: true,
+					cseOpinionCompletedAt: new Date(),
 				}),
 				SIREN,
 			),

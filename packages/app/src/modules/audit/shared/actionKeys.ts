@@ -30,6 +30,7 @@ export const AUDIT_ACTIONS = {
 	CSE_OPINION_SAVE: "cse_opinion.save",
 	CSE_OPINION_UPLOAD_FILE: "cse_opinion.upload_file",
 	CSE_OPINION_DELETE_FILE: "cse_opinion.delete_file",
+	CSE_OPINION_FINALIZE: "cse_opinion.finalize",
 
 	// ── Joint evaluation mutations ─────────────────────────
 	JOINT_EVALUATION_UPLOAD_FILE: "joint_evaluation.upload_file",
@@ -104,6 +105,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.CSE_OPINION_SAVE]: "mutation",
 	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: "mutation",
 	[AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE]: "mutation",
+	[AUDIT_ACTIONS.CSE_OPINION_FINALIZE]: "mutation",
 
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: "mutation",
 

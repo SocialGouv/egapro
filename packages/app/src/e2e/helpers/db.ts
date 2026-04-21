@@ -94,6 +94,7 @@ export async function setDeclarationComplianceState(state: {
 	compliancePath?: string | null;
 	secondDeclarationStatus?: string | null;
 	complianceCompletedAt?: Date | null;
+	cseOpinionCompletedAt?: Date | null;
 }) {
 	const sql = createConnection();
 	try {
@@ -103,7 +104,8 @@ export async function setDeclarationComplianceState(state: {
 			    current_step = ${state.currentStep ?? 6},
 			    compliance_path = ${state.compliancePath ?? null},
 			    second_declaration_status = ${state.secondDeclarationStatus ?? null},
-			    compliance_completed_at = ${state.complianceCompletedAt ?? null}
+			    compliance_completed_at = ${state.complianceCompletedAt ?? null},
+			    cse_opinion_completed_at = ${state.cseOpinionCompletedAt ?? null}
 			WHERE siren = ${TEST_SIREN}
 		`;
 	} finally {

@@ -197,6 +197,13 @@
 			"when": 1775900000000,
 			"tag": "0027_add_global_settings",
 			"breakpoints": true
+		},
+		{
+			"idx": 28,
+			"version": "7",
+			"when": 1776000000000,
+			"tag": "0028_add_cse_opinion_completed_at",
+			"breakpoints": true
 		}
 	]
 }

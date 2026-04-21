@@ -30,7 +30,7 @@ export type DeclarationItem = {
 	compliancePath: string | null;
 	secondDeclarationStatus: string | null;
 	complianceCompletedAt: Date | null;
-	hasCseOpinion: boolean;
+	cseOpinionCompletedAt: Date | null;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
 };
