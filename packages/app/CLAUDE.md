@@ -315,7 +315,7 @@ Every new action needs **3 wire-up points**:
 
 The `metadata` jsonb must **never** contain secrets. The recursive sanitizer auto-strips `password`, `token`, `refresh_token`, `secret`, `client_secret`, `authorization`, `apikey`, `api_key`, `accesskey`, `access_key`, `private_key` at any depth — but when calling `logAction` directly (outside tRPC), the caller is responsible for staying clean. Never put IP addresses in `metadata` — there is a dedicated `ip_address` column.
 
-DB-layer changes in `~/server/audit/cleanup.ts` (or any file that touches `audit.action_log` via non-trivial SQL) **must** come with an integration test `*.integration.test.ts` — unit tests mock drizzle and will miss driver-level bugs. Run locally with `pnpm test:integration` (requires Docker).
+DB-layer changes in `packages/app/scripts/audit-cleanup.mjs` (or any file that touches `audit.action_log` via non-trivial SQL) **must** come with an integration test `*.integration.test.ts` — unit tests mock the DB driver and will miss driver-level bugs. Run locally with `pnpm test:integration` (requires Docker).
 
 > Full playbook with code snippets and a PR checklist → [`.claude/rules/audit-logging.md`](../../.claude/rules/audit-logging.md)
 

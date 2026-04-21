@@ -44,9 +44,6 @@ app:
     - secretRef:
         name: "admin"
         optional: true
-    - secretRef:
-        name: "audit-cleanup"
-        optional: true
     - configMapRef:
         name: "valkey"
         optional: true

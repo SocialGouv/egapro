@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, lt } from "drizzle-orm";
 
 import {
 	declarations,
@@ -97,18 +97,23 @@ export async function fetchPreviousYearJobCategories(
 	siren: string,
 	currentYear: number,
 ) {
-	const previousYear = currentYear - 1;
-
+	// Find the most recent submitted declaration (strictly before currentYear)
+	// that actually contains indicator 7 — i.e. has at least one row in
+	// app_job_category. The inner join filters empty declarations out; ordering
+	// by year desc + limit 1 keeps this to a single bounded round-trip, so a
+	// company with no indicator 7 on N-1 falls back to N-2 / N-3 automatically.
 	const [previousDeclaration] = await tx
 		.select({ id: declarations.id })
 		.from(declarations)
+		.innerJoin(jobCategories, eq(jobCategories.declarationId, declarations.id))
 		.where(
 			and(
 				eq(declarations.siren, siren),
-				eq(declarations.year, previousYear),
+				lt(declarations.year, currentYear),
 				eq(declarations.status, "submitted"),
 			),
 		)
+		.orderBy(desc(declarations.year))
 		.limit(1);
 
 	if (!previousDeclaration) return null;
@@ -122,8 +127,6 @@ export async function fetchPreviousYearJobCategories(
 		})
 		.from(jobCategories)
 		.where(eq(jobCategories.declarationId, previousDeclaration.id));
-
-	if (jobs.length === 0) return null;
 
 	const sorted = [...jobs].sort((a, b) => a.categoryIndex - b.categoryIndex);
 	const source = sorted[0]?.source ?? "";

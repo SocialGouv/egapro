@@ -77,6 +77,9 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/drizzle-orm
 COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/postgres ./packages/app/node_modules/postgres
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/entrypoint.sh ./packages/app/scripts/entrypoint.sh
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/migrate.mjs ./packages/app/scripts/migrate.mjs
+# Standalone script invoked by the audit-cleanup CronJob (issue #3268 — direct
+# DB access replaces the former curl → /api/audit/cleanup HTTP trigger).
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/audit-cleanup.mjs ./packages/app/scripts/audit-cleanup.mjs
 
 USER 1000
 

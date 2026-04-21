@@ -28,7 +28,8 @@
 		"incremental": true,
 		/* Path Aliases */
 		"paths": {
-			"~/*": ["./src/*"]
+			"~/*": ["./src/*"],
+			"#scripts/*": ["./scripts/*"]
 		}
 	},
 	"include": [
