@@ -64,4 +64,28 @@ describe("AdminNavigation", () => {
 			"aria-current",
 		);
 	});
+
+	it("marks /admin/declarations as active — and not Accueil", () => {
+		(usePathname as Mock).mockReturnValue("/admin/declarations");
+		render(<AdminNavigation />);
+		expect(screen.getByRole("link", { name: "Déclarations" })).toHaveAttribute(
+			"aria-current",
+			"page",
+		);
+		expect(screen.getByRole("link", { name: "Accueil" })).not.toHaveAttribute(
+			"aria-current",
+		);
+	});
+
+	it("marks /admin/declarations/<id> as active on the Déclarations link", () => {
+		(usePathname as Mock).mockReturnValue("/admin/declarations/abc123");
+		render(<AdminNavigation />);
+		expect(screen.getByRole("link", { name: "Déclarations" })).toHaveAttribute(
+			"aria-current",
+			"page",
+		);
+		expect(screen.getByRole("link", { name: "Accueil" })).not.toHaveAttribute(
+			"aria-current",
+		);
+	});
 });
