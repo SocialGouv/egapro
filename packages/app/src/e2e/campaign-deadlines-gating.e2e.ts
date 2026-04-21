@@ -45,13 +45,18 @@ test.describe("Campaign deadlines gating", () => {
 	// shared auth.setup project handles.
 	async function seedSubmittedCompliance() {
 		await resetDeclarationToDraft();
-		await setCompanyHasCse(true);
-		await setUserPhone("0122334455");
 		await setDeclarationComplianceState({
 			status: "submitted",
 			currentStep: 6,
 			compliancePath: "corrective_action",
 		});
+	}
+
+	// Phone + CSE flags must be set before login so the JWT picks them up and
+	// the missing-info-modal does not intercept clicks on /mon-espace.
+	async function seedUserProfile() {
+		await setUserPhone("0122334455");
+		await setCompanyHasCse(true);
 	}
 
 	test.afterAll(async () => {
@@ -68,6 +73,7 @@ test.describe("Campaign deadlines gating", () => {
 		test("panel shows Modifier link and 'Modifiable jusqu'au' text", async ({
 			page,
 		}) => {
+			await seedUserProfile();
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
 			// The declaration row is only created by getOrCreate() when visiting a
@@ -99,6 +105,7 @@ test.describe("Campaign deadlines gating", () => {
 		test("submitted declaration can re-enter a non-recap step", async ({
 			page,
 		}) => {
+			await seedUserProfile();
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
 			await page.goto("/declaration-remuneration");
@@ -117,6 +124,7 @@ test.describe("Campaign deadlines gating", () => {
 		test("panel hides Modifier link and shows 'Modification close depuis'", async ({
 			page,
 		}) => {
+			await seedUserProfile();
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
 			await page.goto("/declaration-remuneration");
@@ -143,6 +151,7 @@ test.describe("Campaign deadlines gating", () => {
 		test("submitted declaration non-recap step redirects to recap", async ({
 			page,
 		}) => {
+			await seedUserProfile();
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
 			await page.goto("/declaration-remuneration");
