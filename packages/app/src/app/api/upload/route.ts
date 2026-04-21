@@ -42,6 +42,7 @@ function isFlowType(value: string | null): value is FlowType {
  *  - 403 — declaration for current year not found (not owned by session SIREN)
  *  - 400 — cse_opinion max files reached
  *  - 422 — ClamAV detected a virus (body includes `virus` name)
+ *  - 499 — client closed the request before the upload finished
  *  - 503 — ClamAV unreachable / timed out (transient, user should retry)
  *  - 500 — S3 or DB failure after stream; compensating delete attempted
  *
@@ -195,6 +196,7 @@ export async function POST(request: Request): Promise<Response> {
 			contentType,
 			stream: request.body,
 			flowType,
+			signal: request.signal,
 		});
 	} catch (error) {
 		console.error("[api/upload]", error);
@@ -296,9 +298,29 @@ function mapFailureToHttp(reason: PipelineFailureReason): {
 			return { status: 422, errorMessage: "HTTP 422 virus_detected" };
 		case "scan_unavailable":
 			return { status: 503, errorMessage: "HTTP 503 antivirus_unavailable" };
+		case "aborted":
+			// 499 is the nginx-style "client closed request" status. The body is
+			// never consumed by the client (they are gone), so the status is
+			// purely for server-side observability.
+			return { status: 499, errorMessage: "HTTP 499 client_aborted" };
 		case "server_error":
 			return { status: 500, errorMessage: "HTTP 500 server_error" };
 	}
+}
+
+/**
+ * Strips control characters (including ANSI escape sequences) and clips to
+ * 255 chars before a user-supplied string is persisted to the audit log or
+ * echoed to a terminal via console.error. Defence-in-depth: a crafted header
+ * could carry escape sequences that mislead log readers.
+ */
+function sanitizeUserText(value: string): string {
+	let out = "";
+	for (const ch of value) {
+		const code = ch.codePointAt(0) ?? 0;
+		if (code >= 0x20 && code !== 0x7f) out += ch;
+	}
+	return out.slice(0, 255);
 }
 
 type AuditFailureInput = {
@@ -331,9 +353,9 @@ function writeFailure({
 	s3Cleanup = null,
 }: AuditFailureInput): void {
 	const metadata: Record<string, unknown> = { flowType };
-	if (fileName) metadata.fileName = fileName;
+	if (fileName) metadata.fileName = sanitizeUserText(fileName);
 	if (fileId) metadata.fileId = fileId;
-	if (virusName) metadata.virusName = virusName;
+	if (virusName) metadata.virusName = sanitizeUserText(virusName);
 	if (s3Cleanup) metadata.s3Cleanup = s3Cleanup;
 
 	void logAction({
