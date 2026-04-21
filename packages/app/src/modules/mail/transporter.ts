@@ -15,7 +15,7 @@ export function getTransporter(): Transporter {
 	cachedTransporter = nodemailer.createTransport({
 		host: env.SMTP_HOST,
 		port: env.SMTP_PORT,
-		secure: false,
+		secure: env.SMTP_SECURE,
 		auth,
 	});
 
