@@ -16,3 +16,24 @@ app:
     limits:
       cpu: 1
       memory: 2G
+
+valkey:
+  replica:
+    enabled: true
+    # One replica pod per always-on app pod (= app.autoscale.minReplicas below).
+    # valkey-helm deploys 1 primary + N replicas, so this gives 3 total pods,
+    # matching the app HA floor. valkey has no HPA, so we pin to minReplicas
+    # rather than maxReplicas to avoid over-provisioning cache storage.
+    replicas: 2
+    persistence:
+      size: 1Gi
+  podDisruptionBudget:
+    enabled: true
+    maxUnavailable: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1
+      memory: 1Gi

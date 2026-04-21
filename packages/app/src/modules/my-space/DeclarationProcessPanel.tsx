@@ -86,9 +86,7 @@ export function DeclarationProcessPanel({
 						<HelpSection />
 						<div className={styles.footer}>
 							<a className="fr-btn" href={ctaHref}>
-								{variant === "closed"
-									? "Voir la déclaration"
-									: "Commencer la déclaration"}
+								{getCtaLabel(variant)}
 							</a>
 						</div>
 					</div>
@@ -96,6 +94,12 @@ export function DeclarationProcessPanel({
 			</div>
 		</dialog>
 	);
+}
+
+function getCtaLabel(variant: PanelVariant): string {
+	if (variant === "closed") return "Voir la déclaration";
+	if (variant === "start") return "Commencer la déclaration";
+	return "Continuer la déclaration";
 }
 
 function PanelHeader({

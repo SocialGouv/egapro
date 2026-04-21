@@ -78,6 +78,8 @@ type Props = {
 	referencePeriodPicker?: ReactNode;
 	descriptionText?: string;
 	siren?: string;
+	disabled?: boolean;
+	mimoquageNextHref?: string;
 };
 
 export function CategoryForm({
@@ -99,6 +101,8 @@ export function CategoryForm({
 	referencePeriodPicker,
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
 	siren,
+	disabled = false,
+	mimoquageNextHref,
 }: Props) {
 	const baseId = useId();
 	const nextId = useRef(createIdGenerator()).current;
@@ -273,6 +277,7 @@ export function CategoryForm({
 						</label>
 						<select
 							className="fr-select"
+							disabled={disabled}
 							id="source-select"
 							{...form.register("source")}
 							onChange={(e) => {
@@ -326,6 +331,7 @@ export function CategoryForm({
 
 			{!readOnlyNameDetail && (
 				<CategoryImportExport
+					disabled={disabled}
 					getCategories={() =>
 						form.getValues("categories").map((cat, i) => ({
 							id: i,
@@ -369,6 +375,7 @@ export function CategoryForm({
 										<div className={stepStyles.categoryFooter}>
 											<button
 												className="fr-btn fr-btn--tertiary fr-icon-delete-line fr-btn--icon-left fr-btn--sm"
+												disabled={disabled}
 												onClick={() => askRemoveCategory(index)}
 												type="button"
 											>
@@ -401,6 +408,7 @@ export function CategoryForm({
 												</label>
 												<input
 													className="fr-input"
+													disabled={disabled}
 													id={`cat-${index}-name`}
 													{...form.register(`categories.${index}.name`)}
 													onChange={(e) => {
@@ -423,6 +431,7 @@ export function CategoryForm({
 												</label>
 												<input
 													className="fr-input"
+													disabled={disabled}
 													id={`cat-${index}-detail`}
 													{...form.register(`categories.${index}.detail`)}
 													onChange={(e) => {
@@ -443,6 +452,7 @@ export function CategoryForm({
 											cat ? { id: index, ...cat } : createEmptyCategory(index)
 										}
 										categoryIndex={index}
+										disabled={disabled}
 										onPositiveNumberChange={handlePositiveNumberChange}
 									/>
 								</div>
@@ -459,6 +469,7 @@ export function CategoryForm({
 				{!readOnlyNameDetail && (
 					<button
 						className="fr-btn fr-btn--secondary fr-icon-add-line fr-btn--icon-left"
+						disabled={disabled}
 						onClick={addCategory}
 						type="button"
 					>
@@ -477,7 +488,11 @@ export function CategoryForm({
 				validationError={workforceError}
 			/>
 
-			<FormActions isSubmitting={isSubmitting} previousHref={previousHref} />
+			<FormActions
+				isSubmitting={isSubmitting}
+				mimoquageNextHref={mimoquageNextHref}
+				previousHref={previousHref}
+			/>
 
 			<DeleteCategoryDialog
 				categoryName={

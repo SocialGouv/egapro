@@ -1,0 +1,6 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: valkey
+data:
+  VALKEY_URL: "redis://valkey:6379"

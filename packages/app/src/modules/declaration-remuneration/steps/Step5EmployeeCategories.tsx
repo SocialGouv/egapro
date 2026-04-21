@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
+import { useIsImpersonating } from "~/modules/auth";
 import { api } from "~/trpc/react";
 import { StepIndicator } from "../shared/StepIndicator";
 import type { EmployeeCategoryRow } from "../types";
@@ -25,6 +26,8 @@ export function Step5EmployeeCategories({
 	siren,
 }: Props) {
 	const router = useRouter();
+	const isImpersonating = useIsImpersonating();
+	const hasInitialData = (initialCategories?.length ?? 0) > 0;
 
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
 		onSuccess: () => router.push("/declaration-remuneration/etape/6"),
@@ -33,12 +36,16 @@ export function Step5EmployeeCategories({
 	return (
 		<CategoryForm
 			accordionId="accordion-step5"
+			disabled={isImpersonating}
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
 			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
 			isSubmitting={mutation.isPending}
 			maxMen={maxMen}
 			maxWomen={maxWomen}
+			mimoquageNextHref={
+				hasInitialData ? "/declaration-remuneration/etape/6" : undefined
+			}
 			onSubmit={(data) =>
 				mutation.mutate({
 					declarationType: "initial",

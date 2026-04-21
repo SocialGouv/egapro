@@ -52,7 +52,7 @@ describe("FormActions", () => {
 			mockedUseSession.mockReset();
 		});
 
-		it("disables the submit button and renders a tooltip when impersonating", () => {
+		function mockImpersonating() {
 			mockedUseSession.mockReturnValue({
 				data: {
 					user: {
@@ -63,6 +63,10 @@ describe("FormActions", () => {
 				},
 				status: "authenticated",
 			} as unknown as ReturnType<typeof useSession>);
+		}
+
+		it("disables the submit button and renders a tooltip when impersonating without a saved record", () => {
+			mockImpersonating();
 
 			render(<FormActions />);
 
@@ -71,6 +75,32 @@ describe("FormActions", () => {
 			const tooltip = screen.getByRole("tooltip");
 			expect(tooltip).toHaveTextContent("mimoquage");
 			expect(button).toHaveAttribute("aria-describedby", tooltip.id);
+		});
+
+		it("renders a Link instead of the submit button when impersonating with mimoquageNextHref", () => {
+			mockImpersonating();
+
+			render(
+				<FormActions mimoquageNextHref="/declaration-remuneration/etape/2" />,
+			);
+
+			expect(
+				screen.queryByRole("button", { name: /suivant/i }),
+			).not.toBeInTheDocument();
+			const link = screen.getByRole("link", { name: /suivant/i });
+			expect(link).toHaveAttribute("href", "/declaration-remuneration/etape/2");
+			const tooltip = screen.getByRole("tooltip");
+			expect(link).toHaveAttribute("aria-describedby", tooltip.id);
+		});
+
+		it("ignores mimoquageNextHref when not impersonating", () => {
+			render(
+				<FormActions mimoquageNextHref="/declaration-remuneration/etape/2" />,
+			);
+
+			const button = screen.getByRole("button", { name: /suivant/i });
+			expect(button).toHaveAttribute("type", "submit");
+			expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
 		});
 
 		it("does not render the tooltip when not impersonating", () => {

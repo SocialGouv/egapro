@@ -81,7 +81,20 @@ services:
       retries: 10
       start_period: 300s
 
+  valkey:
+    image: valkey/valkey:8-alpine
+    ports:
+      - 6379:6379
+    volumes:
+      - valkeydata:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   pgdata:
   miniodata:
   clamdata:
+  valkeydata:

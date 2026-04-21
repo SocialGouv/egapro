@@ -5,7 +5,7 @@
 # the signature with the public key (stored as EGAPRO_SUIT_PUBLIC_KEY_PEM).
 #
 # Usage:
-#   ./scripts/generate-suit-signing-keys.sh <command> <env> [output-dir]
+#   ./packages/app/scripts/generate-suit-signing-keys.sh <command> <env> [output-dir]
 #
 #   command: generate | renew
 #   env:     dev | prod | all
@@ -15,10 +15,10 @@
 #   renew     Back up the current key pair (timestamped), then generate new keys.
 #
 # Examples:
-#   ./scripts/generate-suit-signing-keys.sh generate dev
-#   ./scripts/generate-suit-signing-keys.sh generate all
-#   ./scripts/generate-suit-signing-keys.sh renew prod
-#   ./scripts/generate-suit-signing-keys.sh generate dev ./my-keys
+#   ./packages/app/scripts/generate-suit-signing-keys.sh generate dev
+#   ./packages/app/scripts/generate-suit-signing-keys.sh generate all
+#   ./packages/app/scripts/generate-suit-signing-keys.sh renew prod
+#   ./packages/app/scripts/generate-suit-signing-keys.sh generate dev ./my-keys
 #
 # Output files (per env):
 #   suit-signing.key — RSA private key (give to SUIT — they sign requests with it)

@@ -5,6 +5,7 @@ app:
   ~chart: app
   ~needs:
     - pg
+    - valkey
   imagePackage: app
   probesPath: /api/healthz
   containerPort: 3000
@@ -45,6 +46,9 @@ app:
         optional: true
     - secretRef:
         name: "audit-cleanup"
+        optional: true
+    - configMapRef:
+        name: "valkey"
         optional: true
   env:
     - name: POSTGRES_HOST
@@ -124,6 +128,33 @@ app:
 
 pg:
   ~chart: pg
+
+# Valkey cache. Official valkey-io/valkey-helm chart pulled as a Helm dependency
+# from .kontinuous/Chart.yaml. Values below flow straight through to that chart.
+valkey:
+  # Pin service name so VALKEY_URL (redis://valkey:6379) resolves in every namespace.
+  fullnameOverride: valkey
+  image:
+    tag: "9.0.2"
+  service:
+    type: ClusterIP
+    port: 6379
+  # Dev and preprod run a single-pod standalone deployment — cache loss on
+  # restart is acceptable, and it keeps infra cost minimal. Prod overrides
+  # this to a master/replica topology sized against app.autoscale.
+  replica:
+    enabled: false
+  dataStorage:
+    enabled: false
+  auth:
+    enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
 clamav:
   ~chart: clamav

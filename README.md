@@ -174,19 +174,31 @@ SUIT                                          EgaPro
                                                la clé publique de SUIT
 
                                             6. Vérifie que le timestamp
-                                               date de moins de 30s
+                                               est dans la fenêtre de validité
+                                               (30s en preprod/prod, 30j en dev)
 ```
+
+### Fenêtre de validité du timestamp
+
+La durée pendant laquelle un timestamp signé reste accepté dépend de l'environnement (`NEXT_PUBLIC_EGAPRO_ENV`) :
+
+| Environnement | Fenêtre | Raison |
+|---|---|---|
+| `dev` | **30 jours** | Permet de réutiliser une signature générée localement sans re-signer à chaque appel pendant une session de debug |
+| `preprod` / `prod` | **30 secondes** | Fenêtre anti-rejeu stricte |
+
+Implémenté dans `packages/app/src/server/services/suitApiAuth.ts`.
 
 ### Génération et rotation des clés
 
 ```bash
 # Première génération
-./scripts/generate-suit-signing-keys.sh generate dev       # → ./suit-signing-keys/dev/
-./scripts/generate-suit-signing-keys.sh generate prod      # → ./suit-signing-keys/prod/
-./scripts/generate-suit-signing-keys.sh generate all       # → les deux
+./packages/app/scripts/generate-suit-signing-keys.sh generate dev       # → ./suit-signing-keys/dev/
+./packages/app/scripts/generate-suit-signing-keys.sh generate prod      # → ./suit-signing-keys/prod/
+./packages/app/scripts/generate-suit-signing-keys.sh generate all       # → les deux
 
 # Rotation (sauvegarde les anciennes clés, génère de nouvelles)
-./scripts/generate-suit-signing-keys.sh renew prod
+./packages/app/scripts/generate-suit-signing-keys.sh renew prod
 ```
 
 `generate` refuse d'écraser des clés existantes. `renew` les sauvegarde dans un dossier `backup-{date}` avant de regénérer.
@@ -202,7 +214,9 @@ SUIT                                          EgaPro
 
 1. **Côté EgaPro** : encoder `suit-signing.pub` en base64 et le placer dans le sealed-secret K8s (`EGAPRO_SUIT_PUBLIC_KEY_PEM`).
 2. **Côté SUIT** : conserver `suit-signing.key` de manière sécurisée et signer chaque requête.
-3. **Appel API** :
+3. **Appel API** — deux options équivalentes :
+
+   **Option A (openssl)** :
    ```bash
    TIMESTAMP=$(date +%s)
    PAYLOAD="$TIMESTAMP|GET|/api/v1/export/declarations"
@@ -213,9 +227,17 @@ SUIT                                          EgaPro
         https://<host>/api/v1/export/declarations?date_begin=2026-01-01
    ```
 
+   **Option B (script Node fourni)** — signe **toutes les routes SUIT protégées** en une seule exécution et affiche les `curl` prêts à copier :
+   ```bash
+   node packages/app/scripts/generate-suit-signature.js \
+     --key-file ./suit-signing-keys/dev/suit-signing.key
+   ```
+
+   Le script itère automatiquement sur les routes SUIT (actuellement `GET /api/v1/export/declarations` et `GET /api/v1/files`). Pour signer `GET /api/v1/files/<id>`, passer `--file-id <uuid>`. Pour surcharger l'URL cible, passer `--url https://egapro-preprod.fabrique.social.gouv.fr`. Voir `--help` pour toutes les options. Il suffit ensuite d'exporter `EGAPRO_SUIT_API_KEY=<api-key>` et d'exécuter un des `curl` affichés.
+
 ### Procédure de rotation
 
-1. `./scripts/generate-suit-signing-keys.sh renew <env>` — génère une nouvelle paire, sauvegarde l'ancienne
+1. `./packages/app/scripts/generate-suit-signing-keys.sh renew <env>` — génère une nouvelle paire, sauvegarde l'ancienne
 2. Mettre à jour le sealed-secret K8s avec la nouvelle clé publique
 3. Déployer EgaPro
 4. Transmettre la nouvelle clé privée à SUIT — ils doivent basculer juste après le déploiement
