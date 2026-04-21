@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, lt } from "drizzle-orm";
 
 import {
 	declarations,
@@ -97,44 +97,48 @@ export async function fetchPreviousYearJobCategories(
 	siren: string,
 	currentYear: number,
 ) {
-	const previousYear = currentYear - 1;
-
-	const [previousDeclaration] = await tx
+	// Walk previous submitted declarations from most recent down and pick the
+	// first one that actually contains indicator 7 (i.e. has job categories).
+	// A company may skip year N-1 or submit without indicator 7, in which case
+	// we fall back to earlier years.
+	const previousDeclarations = await tx
 		.select({ id: declarations.id })
 		.from(declarations)
 		.where(
 			and(
 				eq(declarations.siren, siren),
-				eq(declarations.year, previousYear),
+				lt(declarations.year, currentYear),
 				eq(declarations.status, "submitted"),
 			),
 		)
-		.limit(1);
+		.orderBy(desc(declarations.year));
 
-	if (!previousDeclaration) return null;
+	for (const { id } of previousDeclarations) {
+		const jobs = await tx
+			.select({
+				name: jobCategories.name,
+				detail: jobCategories.detail,
+				source: jobCategories.source,
+				categoryIndex: jobCategories.categoryIndex,
+			})
+			.from(jobCategories)
+			.where(eq(jobCategories.declarationId, id));
 
-	const jobs = await tx
-		.select({
-			name: jobCategories.name,
-			detail: jobCategories.detail,
-			source: jobCategories.source,
-			categoryIndex: jobCategories.categoryIndex,
-		})
-		.from(jobCategories)
-		.where(eq(jobCategories.declarationId, previousDeclaration.id));
+		if (jobs.length === 0) continue;
 
-	if (jobs.length === 0) return null;
+		const sorted = [...jobs].sort((a, b) => a.categoryIndex - b.categoryIndex);
+		const source = sorted[0]?.source ?? "";
 
-	const sorted = [...jobs].sort((a, b) => a.categoryIndex - b.categoryIndex);
-	const source = sorted[0]?.source ?? "";
+		return {
+			source,
+			categories: sorted.map((j) => ({
+				name: j.name,
+				detail: j.detail ?? "",
+			})),
+		};
+	}
 
-	return {
-		source,
-		categories: sorted.map((j) => ({
-			name: j.name,
-			detail: j.detail ?? "",
-		})),
-	};
+	return null;
 }
 
 type JobCategoryRow = typeof jobCategories.$inferSelect;
