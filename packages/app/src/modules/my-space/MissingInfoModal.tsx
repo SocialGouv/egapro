@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { useIsImpersonating } from "~/modules/auth";
 import { getDsfrModal } from "~/modules/shared";
 import { PhoneField } from "~/modules/shared/PhoneField";
 import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
@@ -33,6 +34,7 @@ function getDescription(needsPhone: boolean, needsCse: boolean): string {
 type OpenerType = "remuneration" | "representation";
 
 export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
+	const isImpersonating = useIsImpersonating();
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const openerTypeRef = useRef<OpenerType>("remuneration");
 	const needsPhone = !userPhone;
@@ -123,6 +125,12 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 
 	const isPending =
 		updatePhoneMutation.isPending || updateHasCseMutation.isPending;
+
+	// Admin impersonation is read-only: every write would be blocked server-side
+	// (issue #3230), so prompting for missing info is pure noise.
+	if (isImpersonating) {
+		return null;
+	}
 
 	return (
 		<dialog

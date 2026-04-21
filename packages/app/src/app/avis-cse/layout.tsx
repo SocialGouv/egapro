@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { CseOpinionLayout } from "~/modules/cseOpinion";
-import { extractSiren } from "~/modules/my-space";
 import { auth } from "~/server/auth";
+import { getEffectiveSiren } from "~/server/auth/companyAccess";
 import { api } from "~/trpc/server";
 
 export default async function CseOpinionRootLayout({
@@ -15,12 +15,11 @@ export default async function CseOpinionRootLayout({
 		redirect("/login");
 	}
 
-	const siret = session.user.siret;
-	if (!siret) {
+	const siren = getEffectiveSiren(session);
+	if (!siren) {
 		redirect("/");
 	}
 
-	const siren = extractSiren(siret);
 	const [company, declarationData] = await Promise.all([
 		api.company.get({ siren }),
 		api.declaration.getOrCreate(),

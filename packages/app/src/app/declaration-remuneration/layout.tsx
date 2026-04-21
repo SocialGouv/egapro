@@ -3,8 +3,8 @@ import {
 	DeclarationLayout,
 	MissingSiret,
 } from "~/modules/declaration-remuneration";
-import { extractSiren } from "~/modules/domain";
 import { auth } from "~/server/auth";
+import { getEffectiveSiren } from "~/server/auth/companyAccess";
 import { api } from "~/trpc/server";
 
 export default async function DeclarationRootLayout({
@@ -18,12 +18,11 @@ export default async function DeclarationRootLayout({
 		redirect("/login");
 	}
 
-	const siret = session.user.siret;
-	if (!siret) {
+	const siren = getEffectiveSiren(session);
+	if (!siren) {
 		return <MissingSiret />;
 	}
 
-	const siren = extractSiren(siret);
 	const [company, declarationData] = await Promise.all([
 		api.company.get({ siren }),
 		api.declaration.getOrCreate(),
