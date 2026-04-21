@@ -12,7 +12,7 @@ export type ReferentsSearchFormSchema = Parameters<typeof useZodForm>[0];
  */
 export function useReferentsSearchForm(
 	schema: ReferentsSearchFormSchema,
-	defaultValues: { query: string; region: string; county: string },
+	defaultValues: { region: string; county: string },
 ) {
 	return useZodForm(schema, { defaultValues });
 }

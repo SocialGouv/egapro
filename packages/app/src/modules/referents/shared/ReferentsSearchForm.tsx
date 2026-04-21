@@ -17,33 +17,23 @@ type Props = {
 	basePath: string;
 	schema: ReferentsSearchFormSchema;
 	fieldPrefix: string;
-	queryLabel?: string;
-	queryPlaceholder?: string;
-	queryType?: "search" | "text";
 	emptyRegionLabel?: string;
 	emptyCountyLabel?: string;
 	wrapFieldsInFieldset?: boolean;
-	order?: "query-first" | "region-first";
 };
 
 /**
  * Shared referent search form. The admin and public pages differ in layout
- * details but share the schema (query + region + county), URL-state handling
- * and the region → county cascade. Centralising the form here removes the
- * SonarCloud duplication signal that flagged ~19 duplicated lines between
- * the two pages.
+ * details but share the schema (region + county), URL-state handling and
+ * the region → county cascade.
  */
 export function ReferentsSearchForm({
 	basePath,
 	schema,
 	fieldPrefix,
-	queryLabel = "Nom du référent",
-	queryPlaceholder,
-	queryType = "text",
 	emptyRegionLabel = "Toutes les régions",
 	emptyCountyLabel = "Tous les départements",
 	wrapFieldsInFieldset = false,
-	order = "region-first",
 }: Props) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -51,7 +41,6 @@ export function ReferentsSearchForm({
 	const { register, handleSubmit, reset, watch } = useReferentsSearchForm(
 		schema,
 		{
-			query: searchParams.get("query") ?? "",
 			region: searchParams.get("region") ?? "",
 			county: searchParams.get("county") ?? "",
 		},
@@ -77,29 +66,12 @@ export function ReferentsSearchForm({
 	);
 
 	const handleReset = useCallback(() => {
-		reset({ query: "", region: "", county: "" });
+		reset({ region: "", county: "" });
 		router.push(basePath);
 	}, [basePath, reset, router]);
 
-	const queryField = (
-		<div className="fr-col-12 fr-col-md-4">
-			<div className="fr-input-group">
-				<label className="fr-label" htmlFor={`${fieldPrefix}-query`}>
-					{queryLabel}
-				</label>
-				<input
-					className="fr-input"
-					id={`${fieldPrefix}-query`}
-					placeholder={queryPlaceholder}
-					type={queryType}
-					{...register("query")}
-				/>
-			</div>
-		</div>
-	);
-
 	const regionField = (
-		<div className="fr-col-12 fr-col-md-4">
+		<div className="fr-col-12 fr-col-md-6">
 			<div className="fr-select-group">
 				<label className="fr-label" htmlFor={`${fieldPrefix}-region`}>
 					Région
@@ -121,7 +93,7 @@ export function ReferentsSearchForm({
 	);
 
 	const countyField = (
-		<div className="fr-col-12 fr-col-md-4">
+		<div className="fr-col-12 fr-col-md-6">
 			<div className="fr-select-group">
 				<label className="fr-label" htmlFor={`${fieldPrefix}-county`}>
 					Département
@@ -147,19 +119,8 @@ export function ReferentsSearchForm({
 
 	const gridBody = (
 		<div className="fr-grid-row fr-grid-row--gutters">
-			{order === "query-first" ? (
-				<>
-					{queryField}
-					{regionField}
-					{countyField}
-				</>
-			) : (
-				<>
-					{regionField}
-					{countyField}
-					{queryField}
-				</>
-			)}
+			{regionField}
+			{countyField}
 		</div>
 	);
 

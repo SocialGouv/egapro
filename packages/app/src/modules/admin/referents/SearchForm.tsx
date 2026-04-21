@@ -1,6 +1,6 @@
 "use client";
 
-import { ReferentsSearchForm } from "~/modules/referents/shared/ReferentsSearchForm";
+import { ReferentsSearchForm } from "~/modules/referents";
 
 import { searchReferentsFormSchema } from "./schemas";
 
@@ -11,7 +11,6 @@ export function SearchForm() {
 			emptyCountyLabel="Tous"
 			emptyRegionLabel="Toutes"
 			fieldPrefix="search"
-			order="query-first"
 			schema={searchReferentsFormSchema}
 		/>
 	);

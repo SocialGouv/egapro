@@ -98,12 +98,11 @@ describe("publicReferentsRouter", () => {
 			}
 		});
 
-		it("applies filters on query, region and county", async () => {
+		it("applies filters on region and county", async () => {
 			selectQueue = [[], [{ total: 0 }]];
 			const caller = await createCaller(createMockDb());
 
 			const result = await caller.search({
-				query: "Jean",
 				region: "11",
 				county: "75",
 				page: 1,

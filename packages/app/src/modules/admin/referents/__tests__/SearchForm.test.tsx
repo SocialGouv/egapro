@@ -37,9 +37,6 @@ describe("SearchForm", () => {
 
 	it("pushes a URL with the submitted filters on search", async () => {
 		render(<SearchForm />);
-		fireEvent.input(screen.getByLabelText("Nom du référent"), {
-			target: { value: "Jean" },
-		});
 		fireEvent.change(screen.getByLabelText("Région"), {
 			target: { value: "11" },
 		});
@@ -47,11 +44,15 @@ describe("SearchForm", () => {
 
 		await waitFor(() => {
 			expect(routerPush).toHaveBeenCalledWith(
-				expect.stringMatching(/\/admin\/liste-referents\?.*query=Jean/),
+				expect.stringMatching(/\/admin\/liste-referents\?.*region=11/),
 			);
 		});
-		expect(routerPush).toHaveBeenCalledWith(expect.stringMatching(/region=11/));
 		expect(routerPush).toHaveBeenCalledWith(expect.stringMatching(/page=1/));
+	});
+
+	it("does not render a name-search input", () => {
+		render(<SearchForm />);
+		expect(screen.queryByLabelText(/nom du référent/i)).toBeNull();
 	});
 
 	it("resets and pushes the base URL on Réinitialiser", () => {
