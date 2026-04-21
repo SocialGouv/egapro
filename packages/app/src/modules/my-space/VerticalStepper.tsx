@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import type { CampaignDeadlines } from "~/modules/domain";
 import { formatLongDate, isDeadlinePassed } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
@@ -63,15 +65,36 @@ export function VerticalStepper({
 					compliancePath={compliancePath}
 					secondDeclarationSubmitted={secondDeclarationSubmitted}
 					siren={siren}
+					status={step2}
 					variant={variant}
 				/>
 			</div>
 			<div className={styles.stepLine} />
 			<div className={styles.stepRow}>
 				<StepCircle number={3} status={step3} />
-				<Step3Content campaignDeadlines={campaignDeadlines} variant={variant} />
+				<Step3Content
+					campaignDeadlines={campaignDeadlines}
+					status={step3}
+					variant={variant}
+				/>
 			</div>
 		</div>
+	);
+}
+
+function StepTitle({
+	children,
+	status,
+}: {
+	children: ReactNode;
+	status: StepStatus;
+}) {
+	return (
+		<p
+			className={`fr-text--bold fr-mb-0 ${status === "pending" ? "fr-text-mention--grey" : ""}`.trim()}
+		>
+			{children}
+		</p>
 	);
 }
 
@@ -122,14 +145,17 @@ function Step1Content({
 	year: number;
 }) {
 	const refYear = year - 1;
+	const title = (
+		<StepTitle status={status}>
+			Déclaration des indicateurs de rémunération
+		</StepTitle>
+	);
 
 	if (variant === "start") {
 		return (
 			<div className={styles.stepContent}>
 				<div>
-					<p className="fr-text--bold fr-mb-0">
-						Déclaration des indicateurs de rémunération
-					</p>
+					{title}
 					<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
 						Période de référence : 01/01/{refYear} - 31/12/{refYear}.
 					</p>
@@ -155,9 +181,7 @@ function Step1Content({
 	if (status === "complete") {
 		return (
 			<div className={styles.stepContent}>
-				<p className="fr-text--bold fr-mb-0">
-					Déclaration des indicateurs de rémunération
-				</p>
+				{title}
 				{variant !== "closed" && (
 					<TransmittedRow
 						downloadHref="/api/declaration-pdf"
@@ -170,11 +194,7 @@ function Step1Content({
 		);
 	}
 
-	return (
-		<p className="fr-text--bold fr-mb-0">
-			Déclaration des indicateurs de rémunération
-		</p>
-	);
+	return title;
 }
 
 function Step2Content({
@@ -182,19 +202,21 @@ function Step2Content({
 	compliancePath,
 	secondDeclarationSubmitted,
 	siren,
+	status,
 	variant,
 }: {
 	campaignDeadlines: CampaignDeadlines;
 	compliancePath: string | null;
 	secondDeclarationSubmitted: boolean;
 	siren: string;
+	status: StepStatus;
 	variant: PanelVariant;
 }) {
 	const title = (
-		<p className="fr-text--bold fr-mb-0">
+		<StepTitle status={status}>
 			Parcours de mise en conformité pour l'indicateur par catégorie de salariés
 			si écarts &ge; 5&nbsp;%
-		</p>
+		</StepTitle>
 	);
 
 	if (variant === "closed" || variant === "start") {
@@ -219,15 +241,32 @@ function Step2Content({
 	}
 
 	if (variant === "evaluation") {
+		const secondDeclTransmittedRow = secondDeclarationSubmitted ? (
+			<TransmittedRow
+				downloadHref="/api/declaration-pdf?type=correction"
+				label="Votre seconde déclaration a été transmise"
+				modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
+				modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
+			/>
+		) : null;
+
+		// Second-round choice pending: user did corrective_action + 2nd declaration
+		// but has not committed to joint evaluation yet. Show transmitted row +
+		// choice deadline, no "Évaluation conjointe" bullet.
+		if (compliancePath === "corrective_action") {
+			return (
+				<div className={styles.stepContent}>
+					{title}
+					{secondDeclTransmittedRow}
+					<DeadlineRow date={campaignDeadlines.decl2JustificationDeadline} />
+				</div>
+			);
+		}
+
 		return (
 			<div className={styles.stepContent}>
 				{title}
-				<TransmittedRow
-					downloadHref="/api/declaration-pdf?type=correction"
-					label="Votre seconde déclaration a été transmise"
-					modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
-					modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
-				/>
+				{secondDeclTransmittedRow}
 				<div className={styles.bulletItem}>
 					<span aria-hidden="true" className={styles.bullet} />
 					<p className="fr-mb-0">Évaluation conjointe des rémunérations</p>
@@ -268,13 +307,15 @@ function Step2Content({
 
 function Step3Content({
 	campaignDeadlines,
+	status,
 	variant,
 }: {
 	campaignDeadlines: CampaignDeadlines;
+	status: StepStatus;
 	variant: PanelVariant;
 }) {
 	const title = (
-		<p className="fr-text--bold fr-mb-0">Déposer le ou les avis du CSE</p>
+		<StepTitle status={status}>Déposer le ou les avis du CSE</StepTitle>
 	);
 
 	if (
