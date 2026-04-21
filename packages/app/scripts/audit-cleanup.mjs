@@ -1,4 +1,5 @@
-import path from "node:path";
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import postgres from "postgres";
 
 /**
@@ -11,9 +12,11 @@ import postgres from "postgres";
  *    (high-volume access logs containing IP addresses)
  *  - long retention (365 d by default): every other category (security logs)
  *
- * Both DELETEs and the self-audit INSERT run inside a single transaction — if
- * anything fails, the whole operation rolls back and the next daily run
- * re-attempts the purge.
+ * The two DELETEs are atomic (single transaction). The success self-audit is
+ * appended after the transaction commits — a failure writing the audit row
+ * must not roll back work we already accomplished. Cleanup failures go
+ * through `logFailure`, which inserts outside any transaction so the record
+ * survives the rollback.
  *
  * Env vars:
  *  - DATABASE_URL (or POSTGRES_* fallback, same convention as migrate.mjs)
@@ -112,7 +115,7 @@ export async function runAuditCleanup({
 	const shortThreshold = subtractDays(now, shortRetentionDays);
 	const longThreshold = subtractDays(now, longRetentionDays);
 
-	return await sql.begin(async (txRaw) => {
+	const summary = await sql.begin(async (txRaw) => {
 		// postgres-js `TransactionSql` is declared as `Omit<Sql, ...>`, which
 		// — quirk of TS's `Omit` — strips the call signatures on Sql. Cast
 		// back to Sql so we can use the template-tag + dynamic-array helper.
@@ -130,12 +133,22 @@ export async function runAuditCleanup({
 
 		const deletedShort = Number(shortResult.count ?? 0);
 		const deletedLong = Number(longResult.count ?? 0);
-		const deletedTotal = deletedShort + deletedLong;
+		return {
+			deletedShort,
+			deletedLong,
+			deletedTotal: deletedShort + deletedLong,
+		};
+	});
 
-		// `created_at` is NOT NULL with no SQL-level default — the drizzle
-		// schema supplies `$defaultFn(() => new Date())` at the ORM layer,
-		// which the raw SQL path has to replicate explicitly.
-		await tx`
+	// Self-audit runs OUTSIDE the transaction so a failure to record the
+	// audit row (constraint violation, disk full, etc.) cannot roll back
+	// cleanup work that has already been committed. We still log success
+	// via an INSERT so the cleanup cron is visible in `audit.action_log`.
+	// `created_at` is NOT NULL with no SQL-level default — the drizzle
+	// schema supplies `$defaultFn(() => new Date())` at the ORM layer,
+	// which the raw SQL path has to replicate explicitly.
+	try {
+		await sql`
 			INSERT INTO audit.action_log (id, created_at, action, category, status, metadata)
 			VALUES (
 				${crypto.randomUUID()},
@@ -143,18 +156,23 @@ export async function runAuditCleanup({
 				${AUDIT_CLEANUP_ACTION},
 				${AUDIT_CLEANUP_CATEGORY},
 				'success',
-				${tx.json({
-					deletedShort,
-					deletedLong,
-					deletedTotal,
+				${sql.json({
+					deletedShort: summary.deletedShort,
+					deletedLong: summary.deletedLong,
+					deletedTotal: summary.deletedTotal,
 					shortRetentionDays,
 					longRetentionDays,
 				})}
 			)
 		`;
+	} catch (auditError) {
+		console.error(
+			"[audit-cleanup] Cleanup succeeded but self-audit insert failed:",
+			auditError,
+		);
+	}
 
-		return { deletedShort, deletedLong, deletedTotal };
-	});
+	return summary;
 }
 
 /**
@@ -186,7 +204,14 @@ async function logFailure(sql, error) {
 const isMain = (() => {
 	const entry = process.argv[1];
 	if (!entry) return false;
-	return import.meta.url === `file://${path.resolve(entry)}`;
+	// `realpathSync` resolves symlinks — needed because pnpm's content-
+	// addressable store or Docker bind-mounts may hand Node a symlink path
+	// that doesn't match `import.meta.url`'s canonicalized form.
+	try {
+		return fileURLToPath(import.meta.url) === realpathSync(entry);
+	} catch {
+		return false;
+	}
 })();
 
 if (isMain) {

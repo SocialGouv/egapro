@@ -19,13 +19,19 @@ spec:
           labels:
             app: audit-cleanup-daily
         spec:
-          restartPolicy: OnFailure
+          # `Never` is consistent with `backoffLimit: 0`: the kubelet does not
+          # restart the failed container and the Job does not re-queue a new
+          # pod. A failed cleanup waits for the next daily cron run.
+          restartPolicy: Never
           securityContext:
             runAsUser: 1000
             runAsNonRoot: true
           containers:
             - name: audit-cleanup
-              image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/{{ .Values.app.imagePackage }}:{{ .Values.global.imageTag }}"
+              # `app` matches `.Values.app.imagePackage` in `values.yaml` — but
+              # that lookup lands in the `app` subchart's scope, not the
+              # project-level templates, so the literal is inlined here.
+              image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/app:{{ .Values.global.imageTag }}"
               securityContext:
                 allowPrivilegeEscalation: false
               env:

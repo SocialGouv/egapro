@@ -19,7 +19,10 @@ import { runAuditCleanup } from "#scripts/audit-cleanup.mjs";
 import { env } from "~/env.js";
 
 describe("audit-cleanup.mjs (integration)", () => {
-	let sql: ReturnType<typeof postgres>;
+	// Definite-assignment assertion — initialized synchronously in `beforeAll`.
+	// If `beforeAll` throws, vitest skips the tests and reports the original
+	// error; any afterAll failure from an undefined `sql` is suppressed below.
+	let sql!: ReturnType<typeof postgres>;
 
 	beforeAll(() => {
 		// DATABASE_URL is populated by `integration-setup.ts` before this file
@@ -28,6 +31,7 @@ describe("audit-cleanup.mjs (integration)", () => {
 	});
 
 	afterAll(async () => {
+		if (!sql) return;
 		await sql`DELETE FROM audit.action_log`;
 		await sql.end();
 	});
