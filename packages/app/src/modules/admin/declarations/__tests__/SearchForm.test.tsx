@@ -29,8 +29,12 @@ describe("SearchForm", () => {
 		expect(screen.getByLabelText("Date de dépôt (du)")).toBeInTheDocument();
 		expect(screen.getByLabelText("Date de dépôt (au)")).toBeInTheDocument();
 		expect(screen.getByLabelText("Statut")).toBeInTheDocument();
-		expect(screen.getByLabelText("Index")).toBeInTheDocument();
-		expect(screen.getByLabelText("Valeur")).toBeInTheDocument();
+	});
+
+	it("does not render removed Index / Valeur filters", () => {
+		render(<SearchForm />);
+		expect(screen.queryByLabelText("Index")).not.toBeInTheDocument();
+		expect(screen.queryByLabelText("Valeur")).not.toBeInTheDocument();
 	});
 
 	it("renders search and reset buttons", () => {
