@@ -1,17 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import { usePathname } from "next/navigation";
-import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
+import { beforeEach, describe, expect, it, type Mock } from "vitest";
 
 import { PublicChrome } from "../PublicChrome";
 
-vi.mock("../Footer", () => ({
-	Footer: () => <footer data-testid="public-footer">footer</footer>,
-}));
-vi.mock("../ResourceBanner", () => ({
-	ResourceBanner: () => (
-		<section data-testid="public-resource-banner">banner</section>
-	),
-}));
+// Renders real Footer + ResourceBanner; only their external deps
+// (next/link, next/image, next/navigation) are mocked globally in test/setup.ts,
+// so a regression inside either landmark would fail this file.
 
 describe("PublicChrome", () => {
 	beforeEach(() => {
@@ -20,8 +15,10 @@ describe("PublicChrome", () => {
 
 	it("renders ResourceBanner + Footer on public routes", () => {
 		render(<PublicChrome />);
-		expect(screen.getByTestId("public-resource-banner")).toBeInTheDocument();
-		expect(screen.getByTestId("public-footer")).toBeInTheDocument();
+		expect(
+			screen.getByRole("region", { name: /ressources et aide/i }),
+		).toBeInTheDocument();
+		expect(screen.getByRole("contentinfo")).toBeInTheDocument();
 	});
 
 	it("renders nothing on /admin", () => {
@@ -39,6 +36,18 @@ describe("PublicChrome", () => {
 	it("renders chrome on non-admin nested routes", () => {
 		(usePathname as Mock).mockReturnValue("/mon-espace/declarations");
 		render(<PublicChrome />);
-		expect(screen.getByTestId("public-footer")).toBeInTheDocument();
+		expect(
+			screen.getByRole("region", { name: /ressources et aide/i }),
+		).toBeInTheDocument();
+		expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+	});
+
+	it("renders chrome on sibling routes whose name merely starts with 'admin'", () => {
+		(usePathname as Mock).mockReturnValue("/administrator");
+		render(<PublicChrome />);
+		expect(
+			screen.getByRole("region", { name: /ressources et aide/i }),
+		).toBeInTheDocument();
+		expect(screen.getByRole("contentinfo")).toBeInTheDocument();
 	});
 });

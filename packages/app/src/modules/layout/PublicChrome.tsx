@@ -12,7 +12,9 @@ import { ResourceBanner } from "./ResourceBanner";
  */
 export function PublicChrome() {
 	const pathname = usePathname();
-	if (pathname?.startsWith("/admin")) {
+	// Match the `/admin` segment boundary so hypothetical sibling routes like
+	// `/administrator` or `/admin-tools` keep the public chrome.
+	if (pathname === "/admin" || pathname?.startsWith("/admin/")) {
 		return null;
 	}
 	return (
