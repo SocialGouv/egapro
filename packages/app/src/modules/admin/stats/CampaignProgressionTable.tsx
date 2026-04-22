@@ -20,7 +20,7 @@ export function CampaignProgressionTable({ series }: Props) {
 		new Set(
 			series.flatMap(({ points }) => points.map(({ day }) => day.slice(5))),
 		),
-	).sort();
+	).sort((a, b) => a.localeCompare(b));
 
 	const byDayByYear = new Map<number, Map<string, number>>();
 	for (const { year, points } of series) {
