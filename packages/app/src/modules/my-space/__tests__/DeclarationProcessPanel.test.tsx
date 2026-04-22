@@ -204,15 +204,24 @@ describe("DeclarationProcessPanel", () => {
 			expect(panel.getByText("Démarche close")).toBeInTheDocument();
 			expect(
 				panel.getByText(
-					"Cette démarche est terminée, aucune modification n'est possible.",
+					"Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance.",
 				),
 			).toBeInTheDocument();
 		});
 
 		it('renders "Voir la déclaration" CTA', () => {
 			const { dialog } = renderPanel("closed");
-			const cta = dialog.querySelector("a.fr-btn");
-			expect(cta).toHaveTextContent("Voir la déclaration");
+			const footerCta = dialog.querySelector(".footer a.fr-btn");
+			expect(footerCta).toHaveTextContent("Voir la déclaration");
+		});
+
+		it("exposes a Modifier link for the CSE opinion step", () => {
+			const { dialog } = renderPanel("closed");
+			const modifyLinks = dialog.querySelectorAll<HTMLAnchorElement>(
+				'a[href*="/avis-cse/etape/2"]',
+			);
+			expect(modifyLinks.length).toBeGreaterThan(0);
+			expect(modifyLinks[0]).toHaveTextContent("Modifier");
 		});
 	});
 

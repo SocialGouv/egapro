@@ -24,6 +24,7 @@ import {
 } from "~/server/db/schema";
 import {
 	buildEmployeeCategoryValues,
+	buildPlaceholderDeclaration,
 	deleteJobAndEmployeeCategories,
 	fetchAllCategories,
 	fetchPreviousYearJobCategories,
@@ -56,7 +57,20 @@ export const declarationRouter = createTRPCRouter({
 
 			// Admins impersonating a company can view an existing declaration in
 			// read-only mode, but must not silently create a new draft in the
-			// user's name (issue #3230).
+			// user's name (issue #3230). When no row exists yet, return a
+			// transient placeholder so the read-only UI can still render — it
+			// is never persisted.
+			if (ctx.session.user.isAdmin && ctx.session.user.impersonation) {
+				return {
+					declaration: buildPlaceholderDeclaration({
+						siren,
+						year,
+						declarantId: ctx.session.user.id,
+					}),
+					jobCategories: [],
+					employeeCategories: [],
+				};
+			}
 			assertNotImpersonating(ctx.session);
 
 			const newDeclaration = await tx

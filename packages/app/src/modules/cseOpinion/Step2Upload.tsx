@@ -6,7 +6,7 @@ import { useCallback, useState } from "react";
 
 import { useReadOnlyGuard } from "~/modules/auth";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import { FileUpload, useFileUploadForm } from "~/modules/shared";
+import { FileUpload, getDsfrModal, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
 import { CseStepIndicator } from "./components/CseStepIndicator";
@@ -29,6 +29,7 @@ export function Step2Upload({
 	const router = useRouter();
 	const utils = api.useUtils();
 	const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
+	const [finalizeError, setFinalizeError] = useState<string | null>(null);
 	const readOnlyGuard = useReadOnlyGuard();
 
 	const refreshFileList = useCallback(() => {
@@ -44,6 +45,21 @@ export function Step2Upload({
 		onError: () => setDeletingFileId(null),
 	});
 
+	const finalizeMutation = api.cseOpinion.finalize.useMutation();
+
+	const finalizeAndRedirect = useCallback(async () => {
+		try {
+			await finalizeMutation.mutateAsync();
+			router.push("/avis-cse/confirmation");
+		} catch (error) {
+			setFinalizeError(
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la validation du dépôt.",
+			);
+		}
+	}, [finalizeMutation, router]);
+
 	const {
 		closeModal,
 		handleConfirm,
@@ -56,14 +72,44 @@ export function Step2Upload({
 	} = useFileUploadForm({
 		flowType: "cse_opinion",
 		onUploaded: refreshFileList,
-		onAllUploaded: () => router.push("/avis-cse/confirmation"),
+		onAllUploaded: () => {
+			void finalizeAndRedirect();
+		},
 	});
 
+	const skipUploadSubmit = useCallback(
+		(event: React.FormEvent) => {
+			event.preventDefault();
+			setFinalizeError(null);
+			const dialog = modalRef.current;
+			if (!dialog) return;
+			const modal = getDsfrModal(dialog);
+			if (modal) {
+				modal.disclose();
+			} else {
+				dialog.showModal();
+			}
+		},
+		[modalRef],
+	);
+
+	const hasExistingFiles = existingFiles.length > 0;
+	const hasSelectedFiles = selectedFiles.length > 0;
+	const formSubmit =
+		!hasSelectedFiles && hasExistingFiles ? skipUploadSubmit : handleSubmit;
+	const confirmAction = hasSelectedFiles
+		? handleConfirm
+		: () => {
+				closeModal();
+				void finalizeAndRedirect();
+			};
+
 	const remainingSlots = MAX_CSE_FILES - existingFiles.length;
+	const isSubmitting = isPending || finalizeMutation.isPending;
 
 	return (
 		<>
-			<form onSubmit={handleSubmit}>
+			<form onSubmit={formSubmit}>
 				<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
 					<div className="fr-col">
 						<h1 className="fr-h4 fr-mb-0">
@@ -118,6 +164,12 @@ export function Step2Upload({
 					/>
 				</div>
 
+				{finalizeError && (
+					<p className="fr-error-text fr-mt-2w" role="alert">
+						{finalizeError}
+					</p>
+				)}
+
 				<div className={`fr-mt-4w ${formStyles.actions}`}>
 					<Link
 						className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
@@ -129,10 +181,10 @@ export function Step2Upload({
 						<button
 							{...readOnlyGuard.buttonProps}
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-							disabled={isPending || readOnlyGuard.isReadOnly}
+							disabled={isSubmitting || readOnlyGuard.isReadOnly}
 							type="submit"
 						>
-							{isPending ? "Envoi en cours\u2026" : "Soumettre"}
+							{isSubmitting ? "Envoi en cours\u2026" : "Soumettre"}
 						</button>
 						{readOnlyGuard.tooltip}
 					</span>
@@ -143,7 +195,7 @@ export function Step2Upload({
 				declarationYear={declarationYear}
 				modalRef={modalRef}
 				onClose={closeModal}
-				onSubmit={handleConfirm}
+				onSubmit={confirmAction}
 			/>
 		</>
 	);

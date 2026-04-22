@@ -319,6 +319,7 @@ describe("companyRouter.getWithDeclarations", () => {
 				compliancePath: null,
 				secondDeclarationStatus: null,
 				complianceCompletedAt: null,
+				cseOpinionCompletedAt: null,
 			},
 		];
 
@@ -347,7 +348,7 @@ describe("companyRouter.getWithDeclarations", () => {
 					}),
 				};
 			}
-			if (selectCallCount === 5) {
+			if (selectCallCount === 4) {
 				// gipMdsData query (simple .from().where(), no join)
 				return {
 					from: vi.fn().mockReturnValue({
@@ -355,7 +356,7 @@ describe("companyRouter.getWithDeclarations", () => {
 					}),
 				};
 			}
-			// cseOpinions + jointEvaluationFiles queries (join through declarations)
+			// jointEvaluationFiles query (join through declarations)
 			return {
 				from: vi.fn().mockReturnValue({
 					innerJoin: vi.fn().mockReturnValue({

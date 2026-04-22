@@ -1,10 +1,49 @@
-import { and, desc, eq, lt } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, lt } from "drizzle-orm";
 
 import {
 	declarations,
 	employeeCategories,
 	jobCategories,
 } from "~/server/db/schema";
+
+type DeclarationRow = typeof declarations.$inferSelect;
+
+/**
+ * Build a transient, zero-value declaration row used to satisfy the read-only
+ * UI when an admin impersonates a company that has not started a declaration
+ * yet (issue #3230). The row is never persisted — it only exists in memory
+ * to let layouts and step pages render their empty state without
+ * short-circuiting on a missing record.
+ *
+ * All columns default to `null`; the identifying / non-null-in-schema fields
+ * (id, siren, year, declarantId, currentStep, status, timestamps) are
+ * overridden explicitly so TypeScript enforces the shape.
+ */
+export function buildPlaceholderDeclaration({
+	siren,
+	year,
+	declarantId,
+}: {
+	siren: string;
+	year: number;
+	declarantId: string;
+}): DeclarationRow {
+	const allNull = Object.fromEntries(
+		Object.keys(getTableColumns(declarations)).map((key) => [key, null]),
+	);
+	const now = new Date();
+	return {
+		...allNull,
+		id: "",
+		siren,
+		year,
+		declarantId,
+		currentStep: 0,
+		status: "draft",
+		createdAt: now,
+		updatedAt: now,
+	} as DeclarationRow;
+}
 
 export type Tx = Parameters<
 	Parameters<import("~/server/db").DB["transaction"]>[0]

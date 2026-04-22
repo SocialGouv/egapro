@@ -25,7 +25,7 @@ export function computePanelVariant(
 		compliancePath,
 		secondDeclarationStatus,
 		complianceCompletedAt,
-		hasCseOpinion,
+		cseOpinionCompletedAt,
 		hasJointEvaluationFile,
 	} = declaration;
 
@@ -33,7 +33,7 @@ export function computePanelVariant(
 		return "compliance_choice";
 	}
 
-	if (hasCseOpinion) {
+	if (cseOpinionCompletedAt) {
 		return "closed";
 	}
 
@@ -77,7 +77,7 @@ export function computeCtaHref(
 		compliancePath,
 		secondDeclarationStatus,
 		complianceCompletedAt,
-		hasCseOpinion,
+		cseOpinionCompletedAt,
 		hasJointEvaluationFile,
 	} = declaration;
 
@@ -86,7 +86,7 @@ export function computeCtaHref(
 	}
 
 	if (complianceCompletedAt) {
-		if (hasCseOpinion) {
+		if (cseOpinionCompletedAt) {
 			return `/declaration-remuneration?siren=${siren}`;
 		}
 		return `/avis-cse?siren=${siren}`;
