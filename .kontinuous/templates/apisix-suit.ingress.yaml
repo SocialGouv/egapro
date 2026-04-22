@@ -2,8 +2,11 @@
 # Service exposes APISIX internally — users go through the Ingress or nothing).
 #
 # The host is deliberately distinct from the app Ingress: SUIT integrators
-# consume `api-suit.<host>`, end users stay on `<host>`. That split keeps the
-# gateway scope narrow — APISIX never sees browser traffic.
+# consume `api-suit-<host>`, end users stay on `<host>`. That split keeps the
+# gateway scope narrow — APISIX never sees browser traffic. The hyphen (not
+# dot) keeps the FQDN at one label below `ovh.fabrique.social.gouv.fr`, so it
+# is covered by the existing `*.ovh.fabrique.social.gouv.fr` wildcard cert
+# that kontinuous injects — same pattern as `maildev-<host>`.
 #
 # Written without controller-specific annotations beyond cert-manager, so the
 # same manifest works on ingress-nginx (alpha V2) and Traefik (prod V1). The
@@ -24,10 +27,10 @@ spec:
   ingressClassName: {{ .Values.global.apisixSuit.ingressClassName | default "nginx" }}
   tls:
     - hosts:
-        - api-suit.{{ .Values.global.host }}
+        - api-suit-{{ .Values.global.host }}
       secretName: apisix-suit-tls
   rules:
-    - host: api-suit.{{ .Values.global.host }}
+    - host: api-suit-{{ .Values.global.host }}
       http:
         paths:
           - path: /
