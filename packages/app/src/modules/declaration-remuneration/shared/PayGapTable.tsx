@@ -5,6 +5,7 @@ import {
 	formatGap,
 	gapLevel,
 	normalizeDecimalInput,
+	padDecimalToTwo,
 } from "~/modules/domain";
 import type { PayGapField, PayGapRow } from "../types";
 import common from "./common.module.scss";
@@ -88,6 +89,12 @@ export function PayGapTable({
 														className={`fr-input ${common.numericInput}`}
 														disabled={disabled}
 														inputMode="decimal"
+														onBlur={() => {
+															const padded = padDecimalToTwo(row.womenValue);
+															if (padded !== row.womenValue) {
+																onRowChange(i, "womenValue", padded);
+															}
+														}}
 														onChange={(e) =>
 															onRowChange(i, "womenValue", e.target.value)
 														}
@@ -104,6 +111,12 @@ export function PayGapTable({
 														className={`fr-input ${common.numericInput}`}
 														disabled={disabled}
 														inputMode="decimal"
+														onBlur={() => {
+															const padded = padDecimalToTwo(row.menValue);
+															if (padded !== row.menValue) {
+																onRowChange(i, "menValue", padded);
+															}
+														}}
 														onChange={(e) =>
 															onRowChange(i, "menValue", e.target.value)
 														}

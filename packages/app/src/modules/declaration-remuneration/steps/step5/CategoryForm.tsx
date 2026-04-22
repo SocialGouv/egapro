@@ -18,6 +18,7 @@ import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
+import { padDecimalToTwo } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./CategoryDataTable";
@@ -153,6 +154,18 @@ export function CategoryForm({
 			if (Number.isNaN(n) || n < 0) return;
 			form.setValue(`categories.${index}.${formField}`, raw);
 			setSaved(false);
+		};
+	}
+
+	function handleDecimalBlur(index: number, field: keyof EmployeeCategory) {
+		return () => {
+			const formField = field as Exclude<keyof EmployeeCategory, "id">;
+			const current = form.getValues(`categories.${index}.${formField}`);
+			const padded = padDecimalToTwo(current);
+			if (padded !== current) {
+				form.setValue(`categories.${index}.${formField}`, padded);
+				setSaved(false);
+			}
 		};
 	}
 
@@ -453,6 +466,7 @@ export function CategoryForm({
 										}
 										categoryIndex={index}
 										disabled={disabled}
+										onDecimalBlur={handleDecimalBlur}
 										onPositiveNumberChange={handlePositiveNumberChange}
 									/>
 								</div>

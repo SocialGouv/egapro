@@ -3,7 +3,11 @@
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
 import type { QuartileData } from "~/modules/declaration-remuneration/types";
-import { computePercentage, displayDecimal } from "~/modules/domain";
+import {
+	computePercentage,
+	displayDecimal,
+	padDecimalToTwo,
+} from "~/modules/domain";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
 
 type Props = {
@@ -94,6 +98,13 @@ export function QuartileTable({
 															className={`fr-input ${common.numericInput}`}
 															disabled={disabled}
 															inputMode="decimal"
+															onBlur={() => {
+																const current = q.threshold ?? "";
+																const padded = padDecimalToTwo(current);
+																if (padded !== current) {
+																	onQuartileChange(i, "threshold", padded);
+																}
+															}}
 															onChange={(e) =>
 																onQuartileChange(i, "threshold", e.target.value)
 															}

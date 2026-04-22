@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	displayDecimal,
 	normalizeDecimalInput,
+	padDecimalToTwo,
 	parseNumber,
 } from "../shared/number";
 
@@ -64,10 +65,36 @@ describe("displayDecimal", () => {
 	});
 
 	it("adds thousand separator", () => {
-		expect(displayDecimal("1000")).toBe("1\u202F000");
+		expect(displayDecimal("1000")).toBe("1 000");
 	});
 
 	it("formats large number with decimals", () => {
-		expect(displayDecimal("1234567.89")).toBe("1\u202F234\u202F567,89");
+		expect(displayDecimal("1234567.89")).toBe("1 234 567,89");
+	});
+});
+
+describe("padDecimalToTwo", () => {
+	it("returns empty string as-is", () => {
+		expect(padDecimalToTwo("")).toBe("");
+	});
+
+	it("pads an integer with .00", () => {
+		expect(padDecimalToTwo("100")).toBe("100.00");
+	});
+
+	it("pads a one-digit fraction with trailing zero", () => {
+		expect(padDecimalToTwo("100.5")).toBe("100.50");
+	});
+
+	it("keeps a two-digit fraction unchanged", () => {
+		expect(padDecimalToTwo("100.50")).toBe("100.50");
+	});
+
+	it("rounds fractions longer than two digits", () => {
+		expect(padDecimalToTwo("100.555")).toBe("100.56");
+	});
+
+	it("returns non-numeric input unchanged", () => {
+		expect(padDecimalToTwo("abc")).toBe("abc");
 	});
 });

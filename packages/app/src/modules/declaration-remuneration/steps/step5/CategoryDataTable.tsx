@@ -19,6 +19,7 @@ type Props = {
 		field: keyof EmployeeCategory,
 		isInteger: boolean,
 	) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	disabled?: boolean;
 };
 
@@ -26,6 +27,7 @@ export function CategoryDataTable({
 	category: cat,
 	categoryIndex: catIndex,
 	onPositiveNumberChange: pos,
+	onDecimalBlur: blur,
 	disabled = false,
 }: Props) {
 	const annualTotalWomen = computeTotal(
@@ -141,6 +143,7 @@ export function CategoryDataTable({
 												disabled={disabled}
 												id={id("annual-base-women")}
 												inputMode="decimal"
+												onBlur={blur(catIndex, "annualBaseWomen")}
 												onChange={pos(catIndex, "annualBaseWomen", false)}
 												type="text"
 												value={displayInputDecimal(cat.annualBaseWomen)}
@@ -156,6 +159,7 @@ export function CategoryDataTable({
 												disabled={disabled}
 												id={id("annual-base-men")}
 												inputMode="decimal"
+												onBlur={blur(catIndex, "annualBaseMen")}
 												onChange={pos(catIndex, "annualBaseMen", false)}
 												type="text"
 												value={displayInputDecimal(cat.annualBaseMen)}
@@ -183,6 +187,7 @@ export function CategoryDataTable({
 												disabled={disabled}
 												id={id("annual-variable-women")}
 												inputMode="decimal"
+												onBlur={blur(catIndex, "annualVariableWomen")}
 												onChange={pos(catIndex, "annualVariableWomen", false)}
 												type="text"
 												value={displayInputDecimal(cat.annualVariableWomen)}
@@ -198,6 +203,7 @@ export function CategoryDataTable({
 												disabled={disabled}
 												id={id("annual-variable-men")}
 												inputMode="decimal"
+												onBlur={blur(catIndex, "annualVariableMen")}
 												onChange={pos(catIndex, "annualVariableMen", false)}
 												type="text"
 												value={displayInputDecimal(cat.annualVariableMen)}
@@ -242,6 +248,7 @@ export function CategoryDataTable({
 												disabled={disabled}
 												id={id("hourly-base-women")}
 												inputMode="decimal"
+												onBlur={blur(catIndex, "hourlyBaseWomen")}
 												onChange={pos(catIndex, "hourlyBaseWomen", false)}
 												type="text"
 												value={displayInputDecimal(cat.hourlyBaseWomen)}
@@ -257,6 +264,7 @@ export function CategoryDataTable({
 												disabled={disabled}
 												id={id("hourly-base-men")}
 												inputMode="decimal"
+												onBlur={blur(catIndex, "hourlyBaseMen")}
 												onChange={pos(catIndex, "hourlyBaseMen", false)}
 												type="text"
 												value={displayInputDecimal(cat.hourlyBaseMen)}
@@ -284,6 +292,7 @@ export function CategoryDataTable({
 												disabled={disabled}
 												id={id("hourly-variable-women")}
 												inputMode="decimal"
+												onBlur={blur(catIndex, "hourlyVariableWomen")}
 												onChange={pos(catIndex, "hourlyVariableWomen", false)}
 												type="text"
 												value={displayInputDecimal(cat.hourlyVariableWomen)}
@@ -299,6 +308,7 @@ export function CategoryDataTable({
 												disabled={disabled}
 												id={id("hourly-variable-men")}
 												inputMode="decimal"
+												onBlur={blur(catIndex, "hourlyVariableMen")}
 												onChange={pos(catIndex, "hourlyVariableMen", false)}
 												type="text"
 												value={displayInputDecimal(cat.hourlyVariableMen)}
