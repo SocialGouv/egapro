@@ -85,7 +85,7 @@ export function PayGapTable({
 												<span className={styles.inputWithUnit}>
 													<input
 														aria-label={`${row.label} — Femmes`}
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={disabled}
 														inputMode="decimal"
 														onChange={(e) =>
@@ -101,7 +101,7 @@ export function PayGapTable({
 												<span className={styles.inputWithUnit}>
 													<input
 														aria-label={`${row.label} — Hommes`}
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={disabled}
 														inputMode="decimal"
 														onChange={(e) =>

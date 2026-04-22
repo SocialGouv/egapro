@@ -234,7 +234,7 @@ export function Step3VariablePay({
 												<td>
 													<input
 														aria-label="Bénéficiaires femmes"
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={(e) =>
@@ -265,7 +265,7 @@ export function Step3VariablePay({
 												<td>
 													<input
 														aria-label="Bénéficiaires hommes"
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={(e) =>

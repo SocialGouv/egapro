@@ -94,7 +94,7 @@ export function CategoryDataTable({
 										<div className={stepStyles.inputCell}>
 											<input
 												aria-label={`Effectif femmes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput}`}
+												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
 												disabled={disabled}
 												id={id("women-count")}
 												inputMode="numeric"
@@ -110,7 +110,7 @@ export function CategoryDataTable({
 										<div className={stepStyles.inputCell}>
 											<input
 												aria-label={`Effectif hommes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput}`}
+												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
 												disabled={disabled}
 												id={id("men-count")}
 												inputMode="numeric"
@@ -137,7 +137,7 @@ export function CategoryDataTable({
 										<div className={stepStyles.inputCell}>
 											<input
 												aria-label={`Salaire de base annuel femmes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput}`}
+												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
 												disabled={disabled}
 												id={id("annual-base-women")}
 												inputMode="decimal"
@@ -152,7 +152,7 @@ export function CategoryDataTable({
 										<div className={stepStyles.inputCell}>
 											<input
 												aria-label={`Salaire de base annuel hommes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput}`}
+												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
 												disabled={disabled}
 												id={id("annual-base-men")}
 												inputMode="decimal"
@@ -179,7 +179,7 @@ export function CategoryDataTable({
 										<div className={stepStyles.inputCell}>
 											<input
 												aria-label={`Composantes variables annuelles femmes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput}`}
+												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
 												disabled={disabled}
 												id={id("annual-variable-women")}
 												inputMode="decimal"
@@ -194,7 +194,7 @@ export function CategoryDataTable({
 										<div className={stepStyles.inputCell}>
 											<input
 												aria-label={`Composantes variables annuelles hommes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput}`}
+												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
 												disabled={disabled}
 												id={id("annual-variable-men")}
 												inputMode="decimal"
@@ -238,7 +238,7 @@ export function CategoryDataTable({
 										<div className={stepStyles.inputCell}>
 											<input
 												aria-label={`Salaire de base horaire femmes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput}`}
+												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
 												disabled={disabled}
 												id={id("hourly-base-women")}
 												inputMode="decimal"
@@ -253,7 +253,7 @@ export function CategoryDataTable({
 										<div className={stepStyles.inputCell}>
 											<input
 												aria-label={`Salaire de base horaire hommes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput}`}
+												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
 												disabled={disabled}
 												id={id("hourly-base-men")}
 												inputMode="decimal"
@@ -280,7 +280,7 @@ export function CategoryDataTable({
 										<div className={stepStyles.inputCell}>
 											<input
 												aria-label={`Composantes variables horaires femmes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput}`}
+												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
 												disabled={disabled}
 												id={id("hourly-variable-women")}
 												inputMode="decimal"
@@ -295,7 +295,7 @@ export function CategoryDataTable({
 										<div className={stepStyles.inputCell}>
 											<input
 												aria-label={`Composantes variables horaires hommes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput}`}
+												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
 												disabled={disabled}
 												id={id("hourly-variable-men")}
 												inputMode="decimal"
