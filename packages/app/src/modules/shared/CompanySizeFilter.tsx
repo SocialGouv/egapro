@@ -11,9 +11,7 @@ type Props = {
 };
 
 const ALL_SIZES_LABEL = "Toutes tailles";
-const RANGE_ENTRIES = Object.entries(COMPANY_SIZE_RANGES) as Array<
-	[CompanySizeRange, (typeof COMPANY_SIZE_RANGES)[CompanySizeRange]]
->;
+const RANGE_KEYS = Object.keys(COMPANY_SIZE_RANGES) as CompanySizeRange[];
 
 export function CompanySizeFilter({
 	value,
@@ -34,14 +32,14 @@ export function CompanySizeFilter({
 			<select
 				className="fr-select"
 				id={id}
-				name={id}
+				name="sizeRange"
 				onChange={handleChange}
 				value={value ?? ""}
 			>
 				<option value="">{ALL_SIZES_LABEL}</option>
-				{RANGE_ENTRIES.map(([range, { label: optionLabel }]) => (
+				{RANGE_KEYS.map((range) => (
 					<option key={range} value={range}>
-						{optionLabel}
+						{COMPANY_SIZE_RANGES[range].label}
 					</option>
 				))}
 			</select>
