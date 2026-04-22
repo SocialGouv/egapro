@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { FIRST_DECLARATION_YEAR, getCurrentYear } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
@@ -15,12 +16,10 @@ type Props = {
 	configuredYears: number[];
 };
 
-type DateFieldKey = Exclude<keyof CampaignDeadlinesFormInput, "year">;
-
-const OPTIONAL_FIELDS: readonly DateFieldKey[] = [
-	"gipPublicationDate",
-	"campaignStartDate",
-];
+type DateFieldKey = Exclude<
+	keyof CampaignDeadlinesFormInput,
+	"year" | "gipPublicationDate"
+>;
 
 const DECL1_FIELDS: readonly DateFieldKey[] = [
 	"decl1ModificationDeadline",
@@ -35,7 +34,6 @@ const DECL2_FIELDS: readonly DateFieldKey[] = [
 ];
 
 const FIELD_LABELS: Record<DateFieldKey, string> = {
-	gipPublicationDate: "Date de publication des données GIP",
 	campaignStartDate: "Date de démarrage de la campagne",
 	decl1ModificationDeadline: "Date limite de modification",
 	decl1JustificationDeadline: "Date limite de justification",
@@ -47,7 +45,11 @@ const FIELD_LABELS: Record<DateFieldKey, string> = {
 
 /**
  * Edits all campaign deadlines for a given year. The year selector lets the
- * admin switch between already-configured years or start a new one.
+ * admin switch between every year since the platform launched, and a visible
+ * box around the fieldsets clarifies that they depend on the selected year.
+ *
+ * `gipPublicationDate` is displayed read-only: its value is written by the
+ * GIP MDS CSV import (`horodatage` column) and cannot be changed from the UI.
  */
 export function CampaignDeadlinesForm({ initialYear, configuredYears }: Props) {
 	const [selectedYear, setSelectedYear] = useState<number>(initialYear);
@@ -68,7 +70,6 @@ export function CampaignDeadlinesForm({ initialYear, configuredYears }: Props) {
 		if (!deadlinesQuery.data) return;
 		form.reset({
 			year: selectedYear,
-			gipPublicationDate: deadlinesQuery.data.gipPublicationDate ?? "",
 			campaignStartDate: deadlinesQuery.data.campaignStartDate ?? "",
 			decl1ModificationDeadline: deadlinesQuery.data.decl1ModificationDeadline,
 			decl1JustificationDeadline:
@@ -103,13 +104,18 @@ export function CampaignDeadlinesForm({ initialYear, configuredYears }: Props) {
 		mutation.mutate(values);
 	});
 
-	const yearOptions = buildYearOptions(configuredYears, selectedYear);
+	const yearOptions = buildYearOptions(configuredYears);
+	const gipPublicationDate = deadlinesQuery.data?.gipPublicationDate ?? null;
 
 	return (
 		<>
 			<div className="fr-select-group fr-mb-3w">
 				<label className="fr-label" htmlFor="campaign-year-selector">
-					Année à éditer
+					Sélectionnez l'année de campagne à modifier
+					<span className="fr-hint-text">
+						Choisissez une année dans la liste. Les champs ci-dessous
+						correspondent à l'année sélectionnée.
+					</span>
 				</label>
 				<select
 					className="fr-select"
@@ -118,8 +124,8 @@ export function CampaignDeadlinesForm({ initialYear, configuredYears }: Props) {
 					value={selectedYear}
 				>
 					{yearOptions.map((y) => (
-						<option key={y} value={y}>
-							{y}
+						<option key={y.year} value={y.year}>
+							{y.label}
 						</option>
 					))}
 				</select>
@@ -131,53 +137,65 @@ export function CampaignDeadlinesForm({ initialYear, configuredYears }: Props) {
 					{...form.register("year", { valueAsNumber: true })}
 				/>
 
-				<fieldset className="fr-fieldset">
-					<legend className="fr-fieldset__legend">Campagne</legend>
-					<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters">
-						{OPTIONAL_FIELDS.map((key) => (
-							<div className="fr-col-12 fr-col-md-6" key={key}>
+				<div className="fr-p-3w fr-background-alt--grey">
+					<p className="fr-text--sm fr-text-mention--grey fr-mb-2w">
+						Paramètres applicables à la campagne <strong>{selectedYear}</strong>
+						.
+					</p>
+
+					<fieldset className="fr-fieldset">
+						<legend className="fr-fieldset__legend">Campagne</legend>
+						<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters">
+							<div className="fr-col-12 fr-col-md-6">
+								<GipPublicationReadOnly value={gipPublicationDate} />
+							</div>
+							<div className="fr-col-12 fr-col-md-6">
 								<DateField
-									error={form.formState.errors[key]?.message}
-									fieldKey={key}
-									register={form.register(key)}
+									error={form.formState.errors.campaignStartDate?.message}
+									fieldKey="campaignStartDate"
+									register={form.register("campaignStartDate")}
 									required={false}
 								/>
 							</div>
-						))}
-					</div>
-				</fieldset>
+						</div>
+					</fieldset>
 
-				<fieldset className="fr-fieldset">
-					<legend className="fr-fieldset__legend">Première déclaration</legend>
-					<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters">
-						{DECL1_FIELDS.map((key) => (
-							<div className="fr-col-12 fr-col-md-4" key={key}>
-								<DateField
-									error={form.formState.errors[key]?.message}
-									fieldKey={key}
-									register={form.register(key)}
-									required={true}
-								/>
-							</div>
-						))}
-					</div>
-				</fieldset>
+					<fieldset className="fr-fieldset">
+						<legend className="fr-fieldset__legend">
+							Première déclaration
+						</legend>
+						<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters">
+							{DECL1_FIELDS.map((key) => (
+								<div className="fr-col-12 fr-col-md-4" key={key}>
+									<DateField
+										error={form.formState.errors[key]?.message}
+										fieldKey={key}
+										register={form.register(key)}
+										required={true}
+									/>
+								</div>
+							))}
+						</div>
+					</fieldset>
 
-				<fieldset className="fr-fieldset">
-					<legend className="fr-fieldset__legend">Deuxième déclaration</legend>
-					<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters">
-						{DECL2_FIELDS.map((key) => (
-							<div className="fr-col-12 fr-col-md-4" key={key}>
-								<DateField
-									error={form.formState.errors[key]?.message}
-									fieldKey={key}
-									register={form.register(key)}
-									required={true}
-								/>
-							</div>
-						))}
-					</div>
-				</fieldset>
+					<fieldset className="fr-fieldset">
+						<legend className="fr-fieldset__legend">
+							Deuxième déclaration
+						</legend>
+						<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters">
+							{DECL2_FIELDS.map((key) => (
+								<div className="fr-col-12 fr-col-md-4" key={key}>
+									<DateField
+										error={form.formState.errors[key]?.message}
+										fieldKey={key}
+										register={form.register(key)}
+										required={true}
+									/>
+								</div>
+							))}
+						</div>
+					</fieldset>
+				</div>
 
 				{status === "success" && (
 					<div
@@ -248,10 +266,31 @@ function DateField({ fieldKey, register, error, required }: DateFieldProps) {
 	);
 }
 
+function GipPublicationReadOnly({ value }: { value: string | null }) {
+	return (
+		<div className="fr-input-group">
+			<label className="fr-label" htmlFor="settings-gipPublicationDate">
+				Date de publication des données GIP
+				<span className="fr-hint-text">
+					Lecture seule — valeur issue du fichier GIP récupéré depuis SUIT.
+				</span>
+			</label>
+			<input
+				aria-readonly="true"
+				className="fr-input"
+				defaultValue={value ?? "Non disponible"}
+				id="settings-gipPublicationDate"
+				key={value ?? "empty"}
+				readOnly
+				type="text"
+			/>
+		</div>
+	);
+}
+
 function buildDefaults(year: number): CampaignDeadlinesFormInput {
 	return {
 		year,
-		gipPublicationDate: "",
 		campaignStartDate: "",
 		decl1ModificationDeadline: "",
 		decl1JustificationDeadline: "",
@@ -262,14 +301,22 @@ function buildDefaults(year: number): CampaignDeadlinesFormInput {
 	};
 }
 
+/**
+ * Lists every year between FIRST_DECLARATION_YEAR and the current year + 10 so
+ * the admin can pre-configure campaigns well in advance, flagging years
+ * without a DB row as "non configurée" rather than hiding them.
+ */
 function buildYearOptions(
 	configuredYears: readonly number[],
-	selectedYear: number,
-): number[] {
-	const set = new Set<number>(configuredYears);
-	set.add(selectedYear);
-	for (let offset = -1; offset <= 2; offset++) {
-		set.add(selectedYear + offset);
+): Array<{ year: number; label: string }> {
+	const max = getCurrentYear() + 10;
+	const configured = new Set(configuredYears);
+	const years: Array<{ year: number; label: string }> = [];
+	for (let y = FIRST_DECLARATION_YEAR; y <= max; y++) {
+		years.push({
+			year: y,
+			label: configured.has(y) ? String(y) : `${y} (non configurée)`,
+		});
 	}
-	return Array.from(set).sort((a, b) => a - b);
+	return years;
 }
