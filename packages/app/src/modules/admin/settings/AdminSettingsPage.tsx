@@ -1,18 +1,16 @@
 import { getCurrentYear } from "~/modules/domain";
 import { api, HydrateClient } from "~/trpc/server";
 
-import { ActiveYearForm } from "./ActiveYearForm";
 import { CampaignDeadlinesForm } from "./CampaignDeadlinesForm";
 
 /**
- * Backoffice page to edit global platform variables: active campaign year
- * and per-year campaign deadlines (GIP publication, campaign start, CSE and
- * declaration deadlines).
+ * Backoffice page to edit per-year campaign deadlines (GIP publication,
+ * campaign start, CSE and declaration deadlines). The active campaign year is
+ * now deduced from the `campaignStartDate` field and no longer edited here.
  */
 export async function AdminSettingsPage() {
 	const overview = await api.adminSettings.getOverview();
-	const fallbackYear = getCurrentYear();
-	const initialYear = overview.activeCampaignYear ?? fallbackYear;
+	const initialYear = overview.configuredYears.at(-1) ?? getCurrentYear();
 
 	return (
 		<HydrateClient>
@@ -22,17 +20,7 @@ export async function AdminSettingsPage() {
 				les campagnes de déclaration.
 			</p>
 
-			<section aria-labelledby="active-year-heading" className="fr-mt-4w">
-				<h2 className="fr-h3" id="active-year-heading">
-					Année de campagne active
-				</h2>
-				<ActiveYearForm
-					fallbackYear={fallbackYear}
-					initialActiveYear={overview.activeCampaignYear}
-				/>
-			</section>
-
-			<section aria-labelledby="deadlines-heading" className="fr-mt-6w">
+			<section aria-labelledby="deadlines-heading" className="fr-mt-4w">
 				<h2 className="fr-h3" id="deadlines-heading">
 					Échéances de campagne
 				</h2>
