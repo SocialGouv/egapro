@@ -22,11 +22,6 @@ function DeclarationsContent() {
 		dateFrom: searchParams.get("dateFrom") ?? undefined,
 		dateTo: searchParams.get("dateTo") ?? undefined,
 		status: (searchParams.get("status") as "draft" | "submitted") || undefined,
-		index: searchParams.get("index")
-			? Number(searchParams.get("index"))
-			: undefined,
-		indexOperator:
-			(searchParams.get("indexOperator") as "gt" | "lt" | "eq") || undefined,
 		page: Number(searchParams.get("page") ?? "1"),
 		pageSize: Number(searchParams.get("pageSize") ?? String(DEFAULT_PAGE_SIZE)),
 		sortBy: (searchParams.get("sortBy") as SortColumn) ?? "createdAt",
