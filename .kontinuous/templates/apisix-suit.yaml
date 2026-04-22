@@ -62,24 +62,24 @@ spec:
         - name: seed-conf
           image: apache/apisix:3.11.0-debian
           imagePullPolicy: IfNotPresent
-          # Root in the init container is fine — it never handles traffic and
-          # exits before the main container starts. We only need it long
-          # enough to chown the emptyDir and copy the stock conf/ tree.
+          # Runs as uid 1000 (inherited from pod securityContext) — the
+          # cluster PSA rejects any container with runAsUser: 0, including
+          # initContainers. The image's /usr/local/apisix/conf/ is
+          # world-readable, so cp works as non-root; fsGroup 1000 on the pod
+          # gives write access to the emptyDir, no chown needed.
           securityContext:
-            runAsNonRoot: false
-            runAsUser: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           command:
             - sh
             - -c
             - |
               set -eu
               cp -r /usr/local/apisix/conf/. /seed-conf/
-              chown -R 1000:1000 /seed-conf /seed-logs
           volumeMounts:
             - name: apisix-conf
               mountPath: /seed-conf
-            - name: apisix-logs
-              mountPath: /seed-logs
       containers:
         - name: apisix
           image: apache/apisix:3.11.0-debian
