@@ -18,6 +18,15 @@ data:
       role: data_plane
       role_data_plane:
         config_provider: yaml
+    nginx_config:
+      # Whitelist env vars that Lua code (serverless-pre-function below) can
+      # read via `os.getenv()`. Without this, nginx hides env vars from worker
+      # processes and `os.getenv` returns nil. The APISIX secret manager
+      # (`$ENV://…`) does NOT need this — it resolves at config load time via
+      # its own channel — but it only integrates with specific plugins
+      # (key-auth.key, basic-auth.password, …), not with proxy-rewrite.
+      envs:
+        - EGAPRO_GATEWAY_SHARED_SECRET
     # Prometheus metrics scraping (see "prometheus" plugin below).
     plugin_attr:
       prometheus:
@@ -33,20 +42,26 @@ data:
           key-auth:
             key: "$ENV://EGAPRO_SUIT_API_KEY"
     # Shared plugin bundle applied to all three SUIT routes. Each request:
-    #   1. Is normalized: `Authorization: Bearer <key>` → `apikey: <key>` so
-    #      the native `key-auth` plugin (which only looks at `apikey` by
-    #      default) can validate it. We keep the Bearer contract on the wire
-    #      because the SUIT doc commits to it.
+    #   1. Is normalized in Lua (serverless-pre-function):
+    #        a. `Authorization: Bearer <key>` → `apikey: <key>` so the native
+    #           `key-auth` plugin (which only looks at `apikey` by default)
+    #           can validate it. We keep the Bearer contract on the wire
+    #           because the SUIT doc commits to it.
+    #        b. `X-Gateway-Forwarded: <shared-secret>` is injected from
+    #           `os.getenv(...)` rather than `proxy-rewrite` because the
+    #           APISIX secret manager (`$ENV://…`) does NOT resolve inside
+    #           `proxy-rewrite.headers.set.*` — the string is treated as a
+    #           literal, and the app middleware would see the raw
+    #           `"$ENV://…"` value and return 403.
     #   2. Is authenticated against the `suit` consumer (`key-auth`).
     #   3. Is rate-limited per real client IP (`limit-req`).
-    #   4. Has the anti-bypass header injected towards the app upstream
-    #      (`proxy-rewrite`).
-    #   5. Is counted in Prometheus metrics (`prometheus`).
+    #   4. Is counted in Prometheus metrics (`prometheus`).
     plugin_configs:
       - id: suit-api
         plugins:
           # Runs in the `rewrite` phase at priority 10000 (vs key-auth at
-          # 2500), so the header it sets is visible to key-auth.
+          # 2500), so the headers it sets are visible to key-auth and to the
+          # upstream (app pod).
           serverless-pre-function:
             phase: rewrite
             functions:
@@ -56,6 +71,10 @@ data:
                   local auth = core.request.header(ctx, "authorization")
                   if auth and auth:sub(1, 7):lower() == "bearer " then
                     core.request.set_header(ctx, "apikey", auth:sub(8))
+                  end
+                  local secret = os.getenv("EGAPRO_GATEWAY_SHARED_SECRET")
+                  if secret and secret ~= "" then
+                    core.request.set_header(ctx, "x-gateway-forwarded", secret)
                   end
                 end
           key-auth: {}
@@ -75,10 +94,6 @@ data:
             key_type: var
             key: http_x_real_ip
             rejected_code: 429
-          proxy-rewrite:
-            headers:
-              set:
-                X-Gateway-Forwarded: "$ENV://EGAPRO_GATEWAY_SHARED_SECRET"
           prometheus: {}
     # Three routes = the three public SUIT endpoints, all bound to the shared
     # plugin bundle above via `plugin_config_id`.
