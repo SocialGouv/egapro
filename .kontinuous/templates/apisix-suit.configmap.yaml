@@ -32,20 +32,32 @@ data:
         plugins:
           key-auth:
             key: "$ENV://EGAPRO_SUIT_API_KEY"
-    # Three routes = the three public SUIT endpoints. Each one:
-    #   1. Requires the Bearer key (key-auth plugin).
-    #   2. Applies a per-IP rate limit (limit-req plugin).
-    #   3. Injects the anti-bypass header towards the app upstream
-    #      (proxy-rewrite plugin).
-    routes:
-      - id: suit-export-declarations
-        uri: /api/v1/export/declarations
-        methods: [GET]
-        upstream:
-          type: roundrobin
-          nodes:
-            "app:3000": 1
+    # Shared plugin bundle applied to all three SUIT routes. Each request:
+    #   1. Is normalized: `Authorization: Bearer <key>` → `apikey: <key>` so
+    #      the native `key-auth` plugin (which only looks at `apikey` by
+    #      default) can validate it. We keep the Bearer contract on the wire
+    #      because the SUIT doc commits to it.
+    #   2. Is authenticated against the `suit` consumer (`key-auth`).
+    #   3. Is rate-limited per real client IP (`limit-req`).
+    #   4. Has the anti-bypass header injected towards the app upstream
+    #      (`proxy-rewrite`).
+    #   5. Is counted in Prometheus metrics (`prometheus`).
+    plugin_configs:
+      - id: suit-api
         plugins:
+          # Runs in the `rewrite` phase at priority 10000 (vs key-auth at
+          # 2500), so the header it sets is visible to key-auth.
+          serverless-pre-function:
+            phase: rewrite
+            functions:
+              - |
+                return function(conf, ctx)
+                  local core = require("apisix.core")
+                  local auth = core.request.header(ctx, "authorization")
+                  if auth and auth:sub(1, 7):lower() == "bearer " then
+                    core.request.set_header(ctx, "apikey", auth:sub(8))
+                  end
+                end
           key-auth: {}
           # Rate-limit per real client IP. APISIX sits behind the Ingress
           # controller, so `$remote_addr` is the Ingress pod IP — a single
@@ -68,44 +80,31 @@ data:
               set:
                 X-Gateway-Forwarded: "$ENV://EGAPRO_GATEWAY_SHARED_SECRET"
           prometheus: {}
+    # Three routes = the three public SUIT endpoints, all bound to the shared
+    # plugin bundle above via `plugin_config_id`.
+    routes:
+      - id: suit-export-declarations
+        uri: /api/v1/export/declarations
+        methods: [GET]
+        plugin_config_id: suit-api
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:3000": 1
       - id: suit-files-list
         uri: /api/v1/files
         methods: [GET]
+        plugin_config_id: suit-api
         upstream:
           type: roundrobin
           nodes:
             "app:3000": 1
-        plugins:
-          key-auth: {}
-          limit-req:
-            rate: 10
-            burst: 5
-            key_type: var
-            key: http_x_real_ip
-            rejected_code: 429
-          proxy-rewrite:
-            headers:
-              set:
-                X-Gateway-Forwarded: "$ENV://EGAPRO_GATEWAY_SHARED_SECRET"
-          prometheus: {}
       - id: suit-files-download
         uri: /api/v1/files/*
         methods: [GET]
+        plugin_config_id: suit-api
         upstream:
           type: roundrobin
           nodes:
             "app:3000": 1
-        plugins:
-          key-auth: {}
-          limit-req:
-            rate: 10
-            burst: 5
-            key_type: var
-            key: http_x_real_ip
-            rejected_code: 429
-          proxy-rewrite:
-            headers:
-              set:
-                X-Gateway-Forwarded: "$ENV://EGAPRO_GATEWAY_SHARED_SECRET"
-          prometheus: {}
     #END
