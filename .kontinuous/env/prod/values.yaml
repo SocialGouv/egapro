@@ -1,5 +1,8 @@
 global:
   host: egapro.travail.gouv.fr
+  apisixSuit:
+    # Two APISIX pods in prod to keep the SUIT API up during rolling restarts.
+    replicas: 2
 
 app:
   redirectFrom:
@@ -16,10 +19,6 @@ app:
     limits:
       cpu: 1
       memory: 2G
-
-apisixSuit:
-  # Two APISIX pods in prod to keep the SUIT API up during rolling restarts.
-  replicas: 2
 
 valkey:
   replica:

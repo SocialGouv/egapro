@@ -1,5 +1,13 @@
 global:
   pgSecretName: pg-app
+  # APISIX standalone gateway in front of the SUIT API.
+  # Templates: .kontinuous/templates/apisix-suit.yaml + apisix-suit.ingress.yaml.
+  # Scoped under `global:` because only `global.*` values are propagated to the
+  # `project` subchart where those templates live. Default = 1 replica
+  # (dev/preprod review apps). Prod overrides to 2 for HA.
+  apisixSuit:
+    replicas: 1
+    ingressClassName: nginx
 
 app:
   ~chart: app
@@ -155,10 +163,3 @@ valkey:
 
 clamav:
   ~chart: clamav
-
-# APISIX standalone gateway in front of the SUIT API.
-# Templates: .kontinuous/templates/apisix-suit.yaml + apisix-suit.ingress.yaml.
-# Default = 1 replica (dev/preprod review apps). Prod overrides to 2 for HA.
-apisixSuit:
-  replicas: 1
-  ingressClassName: nginx

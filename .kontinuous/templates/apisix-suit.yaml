@@ -154,7 +154,7 @@ metadata:
   labels:
     app: apisix-suit
 spec:
-  replicas: {{ .Values.apisixSuit.replicas | default 1 }}
+  replicas: {{ .Values.global.apisixSuit.replicas | default 1 }}
   selector:
     matchLabels:
       app: apisix-suit

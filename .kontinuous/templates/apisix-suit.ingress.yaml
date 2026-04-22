@@ -21,7 +21,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
-  ingressClassName: {{ .Values.apisixSuit.ingressClassName | default "nginx" }}
+  ingressClassName: {{ .Values.global.apisixSuit.ingressClassName | default "nginx" }}
   tls:
     - hosts:
         - api-suit.{{ .Values.global.host }}
