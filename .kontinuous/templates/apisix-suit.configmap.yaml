@@ -95,8 +95,34 @@ data:
             key: http_x_real_ip
             rejected_code: 429
           prometheus: {}
-    # Three routes = the three public SUIT endpoints, all bound to the shared
-    # plugin bundle above via `plugin_config_id`.
+      # Public docs bundle (Swagger UI + OpenAPI JSON + Swagger static assets).
+      # No `key-auth` — anyone can read the schema. Still injects
+      # `X-Gateway-Forwarded` so the Next.js middleware (which matches on
+      # `/api/v1/*`) lets the request through. Rate-limited per IP to prevent
+      # abuse.
+      - id: suit-docs
+        plugins:
+          serverless-pre-function:
+            phase: rewrite
+            functions:
+              - |
+                return function(conf, ctx)
+                  local core = require("apisix.core")
+                  local secret = os.getenv("EGAPRO_GATEWAY_SHARED_SECRET")
+                  if secret and secret ~= "" then
+                    core.request.set_header(ctx, "x-gateway-forwarded", secret)
+                  end
+                end
+          limit-req:
+            rate: 5
+            burst: 5
+            key_type: var
+            key: http_x_real_ip
+            rejected_code: 429
+          prometheus: {}
+    # Routes:
+    #   - 3 SUIT API endpoints (Bearer-auth via `suit-api`)
+    #   - 2 docs endpoints + 1 static asset prefix (public via `suit-docs`)
     routes:
       - id: suit-export-declarations
         uri: /api/v1/export/declarations
@@ -118,6 +144,38 @@ data:
         uri: /api/v1/files/*
         methods: [GET]
         plugin_config_id: suit-api
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:80": 1
+      # Swagger UI HTML page. The app returns 404 on this route when
+      # `NEXT_PUBLIC_EGAPRO_ENV === "prod"`, so production keeps the docs
+      # hidden automatically — no conditional wiring needed here.
+      - id: suit-docs-ui
+        uri: /api/v1/docs
+        methods: [GET]
+        plugin_config_id: suit-docs
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:80": 1
+      # Raw OpenAPI schema loaded by the Swagger UI HTML.
+      - id: suit-openapi-json
+        uri: /api/v1/openapi.json
+        methods: [GET]
+        plugin_config_id: suit-docs
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:80": 1
+      # Swagger UI static assets (CSS + JS bundles served from the app's
+      # `public/swagger-ui/` directory). Required because the HTML references
+      # them with absolute paths — when Swagger is loaded from `api-suit.*`,
+      # the browser fetches the assets from that same host.
+      - id: suit-swagger-assets
+        uri: /swagger-ui/*
+        methods: [GET]
+        plugin_config_id: suit-docs
         upstream:
           type: roundrobin
           nodes:
