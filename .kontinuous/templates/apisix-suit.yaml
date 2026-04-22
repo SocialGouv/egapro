@@ -1,0 +1,244 @@
+# APISIX standalone — transitional gateway in front of the SUIT API (/api/v1/*).
+#
+# Why a gateway here: before the infra-level API Gateway arrives at Fabrique,
+# we need somewhere to enforce the Bearer-key check and rate-limit on the
+# three SUIT routes. Doing it in the app would mean hand-rolling a signature
+# scheme again (the V1 approach we just removed). APISIX ships `key-auth` and
+# `limit-req` as native plugins — zero custom code.
+#
+# Why APISIX in YAML standalone mode (not etcd): one pod, one ConfigMap, no
+# external dependency. Trivial to rip out when the real gateway lands — see
+# the "Démantèlement futur" section in docs/SUIT-API.md.
+#
+# Portability: the upstream target is the in-cluster `app` Service (ClusterIP).
+# Nothing here depends on an ingress controller — the Ingress (separate file)
+# uses host routing and works identically on ingress-nginx (alpha V2) and
+# Traefik (prod V1), so this manifest stays untouched across environments.
+#
+# Anti-bypass: APISIX injects `X-Gateway-Forwarded: <shared-secret>` on every
+# proxied request. The Next.js middleware (packages/app/src/middleware.ts)
+# rejects /api/v1/* requests that don't carry the correct secret, so a pod
+# with network access to `app:3000` cannot bypass the gateway.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apisix-suit-config
+  namespace: {{ .Values.global.namespace }}
+data:
+  config.yaml: |
+    apisix:
+      node_listen: 9080
+      enable_admin: false
+      enable_ipv6: false
+    deployment:
+      role: traditional
+      role_traditional:
+        config_provider: yaml
+    # Prometheus metrics scraping (see "prometheus" plugin below).
+    plugin_attr:
+      prometheus:
+        export_addr:
+          ip: "0.0.0.0"
+          port: 9091
+  apisix.yaml: |
+    # APISIX reads secrets from env vars via `$ENV://<name>` — both are
+    # populated on the pod via envFrom pointing at the `suit` sealed-secret.
+    consumers:
+      - username: suit
+        plugins:
+          key-auth:
+            key: "$ENV://EGAPRO_SUIT_API_KEY"
+    # Three routes = the three public SUIT endpoints. Each one:
+    #   1. Requires the Bearer key (key-auth plugin).
+    #   2. Applies a per-IP rate limit (limit-req plugin).
+    #   3. Injects the anti-bypass header towards the app upstream
+    #      (proxy-rewrite plugin).
+    routes:
+      - id: suit-export-declarations
+        uri: /api/v1/export/declarations
+        methods: [GET]
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:3000": 1
+        plugins:
+          key-auth: {}
+          # Rate-limit per real client IP. APISIX sits behind the Ingress
+          # controller, so `$remote_addr` is the Ingress pod IP — a single
+          # bucket for the whole world, useless for per-caller quota.
+          # ingress-nginx injects `X-Real-IP: <client-ip>` (trusted, cannot be
+          # spoofed because it overrides the client-supplied header), so we
+          # key on it. For the edge case of a request arriving without XRI
+          # (direct cluster-internal call), APISIX substitutes an empty value
+          # into the key — everyone without XRI shares one bucket, which is
+          # fine since the middleware rejects those requests anyway (no
+          # `X-Gateway-Forwarded` means they never even reach here).
+          limit-req:
+            rate: 10
+            burst: 5
+            key_type: var
+            key: http_x_real_ip
+            rejected_code: 429
+          proxy-rewrite:
+            headers:
+              set:
+                X-Gateway-Forwarded: "$ENV://EGAPRO_GATEWAY_SHARED_SECRET"
+          prometheus: {}
+      - id: suit-files-list
+        uri: /api/v1/files
+        methods: [GET]
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:3000": 1
+        plugins:
+          key-auth: {}
+          # Rate-limit per real client IP. APISIX sits behind the Ingress
+          # controller, so `$remote_addr` is the Ingress pod IP — a single
+          # bucket for the whole world, useless for per-caller quota.
+          # ingress-nginx injects `X-Real-IP: <client-ip>` (trusted, cannot be
+          # spoofed because it overrides the client-supplied header), so we
+          # key on it. For the edge case of a request arriving without XRI
+          # (direct cluster-internal call), APISIX substitutes an empty value
+          # into the key — everyone without XRI shares one bucket, which is
+          # fine since the middleware rejects those requests anyway (no
+          # `X-Gateway-Forwarded` means they never even reach here).
+          limit-req:
+            rate: 10
+            burst: 5
+            key_type: var
+            key: http_x_real_ip
+            rejected_code: 429
+          proxy-rewrite:
+            headers:
+              set:
+                X-Gateway-Forwarded: "$ENV://EGAPRO_GATEWAY_SHARED_SECRET"
+          prometheus: {}
+      - id: suit-files-download
+        uri: /api/v1/files/*
+        methods: [GET]
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:3000": 1
+        plugins:
+          key-auth: {}
+          # Rate-limit per real client IP. APISIX sits behind the Ingress
+          # controller, so `$remote_addr` is the Ingress pod IP — a single
+          # bucket for the whole world, useless for per-caller quota.
+          # ingress-nginx injects `X-Real-IP: <client-ip>` (trusted, cannot be
+          # spoofed because it overrides the client-supplied header), so we
+          # key on it. For the edge case of a request arriving without XRI
+          # (direct cluster-internal call), APISIX substitutes an empty value
+          # into the key — everyone without XRI shares one bucket, which is
+          # fine since the middleware rejects those requests anyway (no
+          # `X-Gateway-Forwarded` means they never even reach here).
+          limit-req:
+            rate: 10
+            burst: 5
+            key_type: var
+            key: http_x_real_ip
+            rejected_code: 429
+          proxy-rewrite:
+            headers:
+              set:
+                X-Gateway-Forwarded: "$ENV://EGAPRO_GATEWAY_SHARED_SECRET"
+          prometheus: {}
+    #END
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apisix-suit
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: apisix-suit
+spec:
+  replicas: {{ .Values.apisixSuit.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app: apisix-suit
+  template:
+    metadata:
+      labels:
+        app: apisix-suit
+      annotations:
+        # Roll pods when the ConfigMap content changes (routes, rate limits...).
+        checksum/config: {{ include (print $.Template.BasePath "/apisix-suit.yaml") . | sha256sum }}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: apisix
+          image: apache/apisix:3.11.0-debian
+          imagePullPolicy: IfNotPresent
+          # Secrets referenced by `$ENV://…` inside apisix.yaml. Both keys
+          # come from the shared `suit` sealed-secret (see env/*/templates).
+          envFrom:
+            - secretRef:
+                name: suit
+          ports:
+            - name: http
+              containerPort: 9080
+            - name: metrics
+              containerPort: 9091
+          # Probing the gateway port with an empty-URI request returns 404 from
+          # APISIX's NGINX — a deterministic signal that the listener is up
+          # without touching the metrics subsystem. We explicitly accept 404
+          # here rather than wiring a `/healthz` route (which would widen the
+          # attack surface by adding an unauthenticated route).
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: config
+              mountPath: /usr/local/apisix/conf/config.yaml
+              subPath: config.yaml
+              readOnly: true
+            - name: config
+              mountPath: /usr/local/apisix/conf/apisix.yaml
+              subPath: apisix.yaml
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: apisix-suit-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apisix-suit
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: apisix-suit
+spec:
+  type: ClusterIP
+  selector:
+    app: apisix-suit
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+    - name: metrics
+      port: 9091
+      targetPort: metrics

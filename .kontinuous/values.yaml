@@ -155,3 +155,10 @@ valkey:
 
 clamav:
   ~chart: clamav
+
+# APISIX standalone gateway in front of the SUIT API.
+# Templates: .kontinuous/templates/apisix-suit.yaml + apisix-suit.ingress.yaml.
+# Default = 1 replica (dev/preprod review apps). Prod overrides to 2 for HA.
+apisixSuit:
+  replicas: 1
+  ingressClassName: nginx
