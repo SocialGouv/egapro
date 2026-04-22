@@ -18,7 +18,7 @@ import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
-import { padDecimalToTwo } from "~/modules/domain";
+import { padDecimalOnBlur } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./CategoryDataTable";
@@ -160,12 +160,13 @@ export function CategoryForm({
 	function handleDecimalBlur(index: number, field: keyof EmployeeCategory) {
 		return () => {
 			const formField = field as Exclude<keyof EmployeeCategory, "id">;
-			const current = form.getValues(`categories.${index}.${formField}`);
-			const padded = padDecimalToTwo(current);
-			if (padded !== current) {
-				form.setValue(`categories.${index}.${formField}`, padded);
-				setSaved(false);
-			}
+			padDecimalOnBlur(
+				form.getValues(`categories.${index}.${formField}`),
+				(padded) => {
+					form.setValue(`categories.${index}.${formField}`, padded);
+					setSaved(false);
+				},
+			);
 		};
 	}
 

@@ -49,6 +49,7 @@ export {
 	displayDecimal,
 	displayInputDecimal,
 	normalizeDecimalInput,
+	padDecimalOnBlur,
 	padDecimalToTwo,
 	parseNumber,
 } from "./shared/number";

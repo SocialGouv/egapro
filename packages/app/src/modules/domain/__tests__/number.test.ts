@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
 	displayDecimal,
 	normalizeDecimalInput,
+	padDecimalOnBlur,
 	padDecimalToTwo,
 	parseNumber,
 } from "../shared/number";
@@ -96,5 +97,37 @@ describe("padDecimalToTwo", () => {
 
 	it("returns non-numeric input unchanged", () => {
 		expect(padDecimalToTwo("abc")).toBe("abc");
+	});
+});
+
+describe("padDecimalOnBlur", () => {
+	it("calls the setter with the padded value when padding changes it", () => {
+		const setter = vi.fn();
+		padDecimalOnBlur("100", setter);
+		expect(setter).toHaveBeenCalledWith("100.00");
+	});
+
+	it("calls the setter when only a trailing zero is missing", () => {
+		const setter = vi.fn();
+		padDecimalOnBlur("100.5", setter);
+		expect(setter).toHaveBeenCalledWith("100.50");
+	});
+
+	it("does not call the setter when the value is already padded", () => {
+		const setter = vi.fn();
+		padDecimalOnBlur("100.50", setter);
+		expect(setter).not.toHaveBeenCalled();
+	});
+
+	it("does not call the setter on an empty value", () => {
+		const setter = vi.fn();
+		padDecimalOnBlur("", setter);
+		expect(setter).not.toHaveBeenCalled();
+	});
+
+	it("does not call the setter on a non-numeric value", () => {
+		const setter = vi.fn();
+		padDecimalOnBlur("abc", setter);
+		expect(setter).not.toHaveBeenCalled();
 	});
 });

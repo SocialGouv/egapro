@@ -77,3 +77,16 @@ export function padDecimalToTwo(value: string): string {
 	if (Number.isNaN(n)) return value;
 	return n.toFixed(2);
 }
+
+/**
+ * Blur handler for decimal inputs: pad the value to two fraction digits and,
+ * if the result differs from the original, hand it back to the setter.
+ * Callers keep the value change out of their reducer when nothing needs updating.
+ */
+export function padDecimalOnBlur(
+	value: string,
+	setter: (padded: string) => void,
+): void {
+	const padded = padDecimalToTwo(value);
+	if (padded !== value) setter(padded);
+}

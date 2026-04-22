@@ -6,7 +6,7 @@ import type { QuartileData } from "~/modules/declaration-remuneration/types";
 import {
 	computePercentage,
 	displayDecimal,
-	padDecimalToTwo,
+	padDecimalOnBlur,
 } from "~/modules/domain";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
 
@@ -98,13 +98,11 @@ export function QuartileTable({
 															className={`fr-input ${common.numericInput}`}
 															disabled={disabled}
 															inputMode="decimal"
-															onBlur={() => {
-																const current = q.threshold ?? "";
-																const padded = padDecimalToTwo(current);
-																if (padded !== current) {
-																	onQuartileChange(i, "threshold", padded);
-																}
-															}}
+															onBlur={() =>
+																padDecimalOnBlur(q.threshold ?? "", (v) =>
+																	onQuartileChange(i, "threshold", v),
+																)
+															}
 															onChange={(e) =>
 																onQuartileChange(i, "threshold", e.target.value)
 															}
