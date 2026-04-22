@@ -10,6 +10,23 @@ test("admin user can access /admin and sees backoffice page", async ({
 	await expect(page.getByText("administrateur")).toBeVisible();
 });
 
+test("admin routes hide the public footer and help banner", async ({
+	page,
+}) => {
+	// Runs in the authenticated `chromium` Playwright project (see
+	// playwright.config.ts): `page.goto("/admin")` reaches the real backoffice
+	// page, so the assertions below exercise the PublicChrome branch, not a
+	// login-redirect fallback that would trivially pass.
+	await page.goto("/admin");
+	await expect(
+		page.getByRole("heading", { name: "Backoffice", level: 1 }),
+	).toBeVisible();
+	await expect(page.locator("footer#footer")).toHaveCount(0);
+	await expect(
+		page.getByRole("region", { name: "Ressources et aide" }),
+	).toHaveCount(0);
+});
+
 test("admin user can access /admin/impersonate and sees impersonate page", async ({
 	page,
 }) => {
