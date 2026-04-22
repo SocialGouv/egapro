@@ -19,11 +19,13 @@ export const GLOBAL_SETTINGS_ID = 1;
  */
 export const getActiveCampaignYear = cache(async (): Promise<number> => {
 	// `.date` columns are stored as "YYYY-MM-DD" in Europe/Paris civil time, so
-	// we compare them against the local calendar date. `toISOString()` would
-	// yield a UTC date and flip the result across midnight for anyone not on
-	// UTC (e.g. Paris in summer is UTC+2 → "tomorrow" for ~2h each night).
-	// `sv-SE` locale renders dates as ISO "YYYY-MM-DD" in local time.
-	const today = new Date().toLocaleDateString("sv-SE");
+	// we compare them against the Paris calendar date. We force the timezone
+	// explicitly because production containers run in UTC — relying on the
+	// system locale would flip the result across midnight for ~2h each night
+	// (Paris in summer is UTC+2). `sv-SE` renders dates as ISO "YYYY-MM-DD".
+	const today = new Date().toLocaleDateString("sv-SE", {
+		timeZone: "Europe/Paris",
+	});
 
 	const rows = await db
 		.select({ year: campaignDeadlines.year })

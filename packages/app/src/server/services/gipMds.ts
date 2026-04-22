@@ -198,20 +198,43 @@ async function fetchCompanyInfoBatch(
 }
 
 /**
+ * Reason why the SUIT `horodatage` was not stored on `campaign_deadline`.
+ * Surfaced in the import result so callers (audit log, cron response) have a
+ * paper trail for partial imports.
+ */
+export type GipPublicationSkipReason =
+	| "invalid_horodatage"
+	| "no_campaign_deadline_row";
+
+export type GipImportResult = {
+	year: number;
+	rowCount: number;
+	gipPublicationDate: string | null;
+	gipPublicationDateUpdated: boolean;
+	gipPublicationDateSkipReason?: GipPublicationSkipReason;
+};
+
+/**
  * Import GIP MDS CSV content into the database.
  * Parses the CSV and upserts all rows for the given year.
  * Creates missing companies before inserting GIP data.
- * Returns the number of rows imported.
+ * Returns the row count and whether the `gipPublicationDate` was stored so
+ * callers can audit partial imports.
  */
 export async function importGipCsvToDb(
 	db: DB,
 	csvContent: string,
-): Promise<{ year: number; rowCount: number }> {
+): Promise<GipImportResult> {
 	const { metadata, rows } = parseGipCsv(csvContent);
 	const year = yearFromPeriodEnd(metadata.periodEnd);
 
 	if (rows.length === 0) {
-		return { year, rowCount: 0 };
+		return {
+			year,
+			rowCount: 0,
+			gipPublicationDate: null,
+			gipPublicationDateUpdated: false,
+		};
 	}
 
 	// Ensure all referenced companies exist (outside transaction to avoid long locks on Weez calls)
@@ -220,45 +243,74 @@ export async function importGipCsvToDb(
 	];
 	await ensureCompaniesExist(db, uniqueSirens);
 
-	await db.transaction(async (tx) => {
-		// Delete existing data for this year before inserting
-		await tx.delete(gipMdsData).where(eq(gipMdsData.year, year));
+	const publicationOutcome = await db.transaction(
+		async (
+			tx,
+		): Promise<
+			Pick<
+				GipImportResult,
+				| "gipPublicationDate"
+				| "gipPublicationDateUpdated"
+				| "gipPublicationDateSkipReason"
+			>
+		> => {
+			// Delete existing data for this year before inserting
+			await tx.delete(gipMdsData).where(eq(gipMdsData.year, year));
 
-		// Insert all rows with metadata
-		await tx.insert(gipMdsData).values(
-			rows.map((row) => ({
-				...row,
-				year,
-				periodStart: metadata.periodStart,
-				periodEnd: metadata.periodEnd,
-				siren: row.siren ?? "",
-			})),
-		);
-
-		// Record the SUIT `horodatage` as the GIP publication date — but only
-		// on an EXISTING `campaign_deadline` row. We never synthesise a row
-		// with placeholder deadlines here: admins must configure the campaign
-		// first (decl1/decl2 deadlines are NOT NULL and those values must be
-		// decided by a human, not made up by the import).
-		if (!ISO_DATE_RE.test(metadata.publicationDate)) {
-			console.warn(
-				`[gip-mds/import] Ignoring invalid horodatage "${metadata.publicationDate}" for year ${year}`,
+			// Insert all rows with metadata
+			await tx.insert(gipMdsData).values(
+				rows.map((row) => ({
+					...row,
+					year,
+					periodStart: metadata.periodStart,
+					periodEnd: metadata.periodEnd,
+					siren: row.siren ?? "",
+				})),
 			);
-			return;
-		}
 
-		const updated = await tx
-			.update(campaignDeadlines)
-			.set({ gipPublicationDate: metadata.publicationDate })
-			.where(eq(campaignDeadlines.year, year))
-			.returning({ year: campaignDeadlines.year });
+			// Record the SUIT `horodatage` as the GIP publication date — but only
+			// on an EXISTING `campaign_deadline` row. We never synthesise a row
+			// with placeholder deadlines here: admins must configure the campaign
+			// first (decl1/decl2 deadlines are NOT NULL and those values must be
+			// decided by a human, not made up by the import).
+			if (!ISO_DATE_RE.test(metadata.publicationDate)) {
+				console.warn(
+					`[gip-mds/import] Ignoring invalid horodatage "${metadata.publicationDate}" for year ${year}`,
+				);
+				return {
+					gipPublicationDate: null,
+					gipPublicationDateUpdated: false,
+					gipPublicationDateSkipReason: "invalid_horodatage",
+				};
+			}
 
-		if (updated.length === 0) {
-			console.warn(
-				`[gip-mds/import] No campaign_deadline row for year ${year} — gipPublicationDate not stored. Ask an admin to configure deadlines first.`,
-			);
-		}
-	});
+			const updated = await tx
+				.update(campaignDeadlines)
+				.set({ gipPublicationDate: metadata.publicationDate })
+				.where(eq(campaignDeadlines.year, year))
+				.returning({ year: campaignDeadlines.year });
 
-	return { year, rowCount: rows.length };
+			if (updated.length === 0) {
+				console.warn(
+					`[gip-mds/import] No campaign_deadline row for year ${year} — gipPublicationDate not stored. Ask an admin to configure deadlines first.`,
+				);
+				return {
+					gipPublicationDate: metadata.publicationDate,
+					gipPublicationDateUpdated: false,
+					gipPublicationDateSkipReason: "no_campaign_deadline_row",
+				};
+			}
+
+			return {
+				gipPublicationDate: metadata.publicationDate,
+				gipPublicationDateUpdated: true,
+			};
+		},
+	);
+
+	return {
+		year,
+		rowCount: rows.length,
+		...publicationOutcome,
+	};
 }
