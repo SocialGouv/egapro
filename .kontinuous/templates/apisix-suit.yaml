@@ -128,6 +128,22 @@ spec:
               mountPath: /usr/local/apisix/conf
             - name: apisix-logs
               mountPath: /usr/local/apisix/logs
+            # Nginx creates 5 temp dirs at the nginx prefix (/usr/local/apisix)
+            # at boot: client_body_temp, proxy_temp, fastcgi_temp, uwsgi_temp,
+            # scgi_temp. The image's /usr/local/apisix is root-owned and not
+            # writable by uid 1000, so we mount an emptyDir at each temp path.
+            # kubelet creates the mount points as root even though the parent
+            # is unwritable; fsGroup 1000 on the pod makes them writable.
+            - name: apisix-client-body-temp
+              mountPath: /usr/local/apisix/client_body_temp
+            - name: apisix-proxy-temp
+              mountPath: /usr/local/apisix/proxy_temp
+            - name: apisix-fastcgi-temp
+              mountPath: /usr/local/apisix/fastcgi_temp
+            - name: apisix-uwsgi-temp
+              mountPath: /usr/local/apisix/uwsgi_temp
+            - name: apisix-scgi-temp
+              mountPath: /usr/local/apisix/scgi_temp
             # ConfigMap files overlayed on top of the seeded conf dir. subPath
             # keeps the surrounding stock files (mime.types, debug.yaml…)
             # intact — a full dir mount would hide them.
@@ -143,6 +159,16 @@ spec:
         - name: apisix-conf
           emptyDir: {}
         - name: apisix-logs
+          emptyDir: {}
+        - name: apisix-client-body-temp
+          emptyDir: {}
+        - name: apisix-proxy-temp
+          emptyDir: {}
+        - name: apisix-fastcgi-temp
+          emptyDir: {}
+        - name: apisix-uwsgi-temp
+          emptyDir: {}
+        - name: apisix-scgi-temp
           emptyDir: {}
         - name: config
           configMap:
