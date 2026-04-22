@@ -64,6 +64,14 @@
 	background-color: var(--border-default-grey);
 }
 
+.stepRowComplete:not(:last-child)::before {
+	background-color: var(--background-flat-success);
+}
+
+.stepRowCurrent:not(:last-child)::before {
+	background-color: var(--background-action-high-info);
+}
+
 .stepCircle {
 	width: 28px;
 	height: 28px;

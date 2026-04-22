@@ -47,7 +47,7 @@ export function VerticalStepper({
 }) {
 	return (
 		<div className={`${styles.stepper} fr-mb-4w`}>
-			<div className={styles.stepRow}>
+			<div className={`${styles.stepRow} ${stepRowClass(step1)}`}>
 				<StepCircle number={1} status={step1} />
 				<Step1Content
 					campaignDeadlines={campaignDeadlines}
@@ -57,7 +57,7 @@ export function VerticalStepper({
 					year={year}
 				/>
 			</div>
-			<div className={styles.stepRow}>
+			<div className={`${styles.stepRow} ${stepRowClass(step2)}`}>
 				<StepCircle number={2} status={step2} />
 				<Step2Content
 					campaignDeadlines={campaignDeadlines}
@@ -68,7 +68,7 @@ export function VerticalStepper({
 					variant={variant}
 				/>
 			</div>
-			<div className={styles.stepRow}>
+			<div className={`${styles.stepRow} ${stepRowClass(step3)}`}>
 				<StepCircle number={3} status={step3} />
 				<Step3Content
 					campaignDeadlines={campaignDeadlines}
@@ -79,6 +79,12 @@ export function VerticalStepper({
 			</div>
 		</div>
 	);
+}
+
+function stepRowClass(status: StepStatus): string {
+	if (status === "complete") return styles.stepRowComplete ?? "";
+	if (status === "current") return styles.stepRowCurrent ?? "";
+	return "";
 }
 
 function StepTitle({
@@ -181,14 +187,12 @@ function Step1Content({
 		return (
 			<div className={styles.stepContent}>
 				{title}
-				{variant !== "closed" && (
-					<TransmittedRow
-						downloadHref="/api/declaration-pdf"
-						label="Votre déclaration a été transmise"
-						modifiableUntil={campaignDeadlines.decl1ModificationDeadline}
-						modifyHref={`/declaration-remuneration/etape/1?siren=${siren}`}
-					/>
-				)}
+				<TransmittedRow
+					downloadHref="/api/declaration-pdf"
+					label="Votre déclaration a été transmise"
+					modifiableUntil={campaignDeadlines.decl1ModificationDeadline}
+					modifyHref={`/declaration-remuneration/etape/1?siren=${siren}`}
+				/>
 			</div>
 		);
 	}
@@ -218,7 +222,7 @@ function Step2Content({
 		</StepTitle>
 	);
 
-	if (variant === "closed" || variant === "start") {
+	if (variant === "start") {
 		return title;
 	}
 
@@ -280,7 +284,7 @@ function Step2Content({
 		);
 	}
 
-	// cse variant: step 2 is complete — show what was actually done
+	// cse / closed variants: step 2 is complete — show what was actually done
 	return (
 		<div className={styles.stepContent}>
 			{title}
@@ -370,10 +374,7 @@ function TransmittedRow({
 
 	return (
 		<div className={styles.transmittedRow}>
-			<span
-				aria-hidden="true"
-				className="fr-icon-check-line fr-icon--sm fr-mt-1v"
-			/>
+			<span aria-hidden="true" className="fr-icon-check-line fr-icon--sm" />
 			<div className={styles.transmittedInfo}>
 				<p className="fr-mb-0">{label}</p>
 				<p className="fr-text-mention--grey fr-mb-0">
