@@ -193,12 +193,12 @@ Implémenté dans `packages/app/src/server/services/suitApiAuth.ts`.
 
 ```bash
 # Première génération
-./packages/app/scripts/generate-suit-signing-keys.sh generate dev       # → ./suit-signing-keys/dev/
-./packages/app/scripts/generate-suit-signing-keys.sh generate prod      # → ./suit-signing-keys/prod/
-./packages/app/scripts/generate-suit-signing-keys.sh generate all       # → les deux
+node packages/app/scripts/generate-suit-signing-keys.mjs generate dev    # → ./suit-signing-keys/dev/
+node packages/app/scripts/generate-suit-signing-keys.mjs generate prod   # → ./suit-signing-keys/prod/
+node packages/app/scripts/generate-suit-signing-keys.mjs generate all    # → les deux
 
 # Rotation (sauvegarde les anciennes clés, génère de nouvelles)
-./packages/app/scripts/generate-suit-signing-keys.sh renew prod
+node packages/app/scripts/generate-suit-signing-keys.mjs renew prod
 ```
 
 `generate` refuse d'écraser des clés existantes. `renew` les sauvegarde dans un dossier `backup-{date}` avant de regénérer.
@@ -229,7 +229,7 @@ Implémenté dans `packages/app/src/server/services/suitApiAuth.ts`.
 
    **Option B (script Node fourni)** — signe **toutes les routes SUIT protégées** en une seule exécution et affiche les `curl` prêts à copier :
    ```bash
-   node packages/app/scripts/generate-suit-signature.js \
+   node packages/app/scripts/generate-suit-signature.mjs \
      --key-file ./suit-signing-keys/dev/suit-signing.key
    ```
 
@@ -237,7 +237,7 @@ Implémenté dans `packages/app/src/server/services/suitApiAuth.ts`.
 
 ### Procédure de rotation
 
-1. `./packages/app/scripts/generate-suit-signing-keys.sh renew <env>` — génère une nouvelle paire, sauvegarde l'ancienne
+1. `node packages/app/scripts/generate-suit-signing-keys.mjs renew <env>` — génère une nouvelle paire, sauvegarde l'ancienne
 2. Mettre à jour le sealed-secret K8s avec la nouvelle clé publique
 3. Déployer EgaPro
 4. Transmettre la nouvelle clé privée à SUIT — ils doivent basculer juste après le déploiement

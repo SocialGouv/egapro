@@ -4,7 +4,7 @@ API REST sécurisée pour récupérer les déclarations soumises et les fichiers
 
 ## Base URL
 
-- Alpha : `https://egapro-alpha.ovh.fabrique.social.gouv.fr`
+- Alpha : `https://egapro-alpha.ovh.fabrique.social.gouv.fr/api/v1`
 
 ## Authentification
 
@@ -42,23 +42,24 @@ export EGAPRO_SUIT_API_KEY="<clé fournie par EGAPRO>"
 
 ## Générer la signature pour toutes les routes (en une commande)
 
-Équivalent shell du script `generate-suit-signature.js`. Signe toutes les routes SUIT avec le même `TS` et affiche les 3 headers + un `curl` prêt à copier pour chacune.
+Signe toutes les routes SUIT avec le même `TS` et affiche les 3 headers + un `curl` prêt à copier pour chacune.
 
 Prérequis : `suit_private_key.pem` dans le dossier courant, `EGAPRO_SUIT_API_KEY` exporté, `BASE_URL` défini.
 
 ```sh
-BASE_URL="https://egapro-alpha.ovh.fabrique.social.gouv.fr"
+BASE_URL="https://egapro-alpha.ovh.fabrique.social.gouv.fr/api/v1"
+API_PREFIX="/api/v1"
 TS=$(date +%s)
 
 # Remplacer <fileId> par l'identifiant du fichier à télécharger.
 for ROUTE in \
-  "GET /api/v1/export/declarations" \
-  "GET /api/v1/files" \
-  "GET /api/v1/files/<fileId>"
+  "GET /export/declarations" \
+  "GET /files" \
+  "GET /files/<fileId>"
 do
   METHOD="${ROUTE%% *}"
-  FULL_PATH="${ROUTE#* }"
-  PATHNAME="${FULL_PATH%%\?*}"
+  SUBPATH="${ROUTE#* }"
+  PATHNAME="$API_PREFIX$SUBPATH"
   SIG=$(printf '%s|%s|%s' "$TS" "$METHOD" "$PATHNAME" \
     | openssl dgst -sha256 -sign suit_private_key.pem \
     | openssl base64 -A)
@@ -70,12 +71,13 @@ do
   echo "  -H 'Authorization: Bearer '\"\$EGAPRO_SUIT_API_KEY\" \\"
   echo "  -H 'X-Timestamp: $TS' \\"
   echo "  -H 'X-Signature: $SIG' \\"
-  echo "  '$BASE_URL$FULL_PATH'"
+  echo "  '$BASE_URL$SUBPATH'"
   echo
 done
 ```
 
-Fenêtre de validité : **30 jours** sur alpha/dev, **30 secondes** sur preprod/prod. Au-delà → 403, il faut regénérer `TS` + `SIG`.
+> La signature porte sur le **pathname complet** reçu par le serveur (`/api/v1/...`), pas sur le sous-chemin relatif à `BASE_URL`.
+> Au-delà de la fenêtre anti-replay (cf. section Authentification), la requête renverra 403 — regénérer `TS` + `SIG`.
 
 ## Générer pour une seule route
 
@@ -95,7 +97,7 @@ echo "X-Signature: $SIG"
 ### 1. Exporter les déclarations
 
 ```sh
-curl "$BASE_URL/api/v1/export/declarations?date_begin=2026-01-01&date_end=2026-01-31" \
+curl "$BASE_URL/export/declarations?date_begin=2026-01-01&date_end=2026-01-31" \
   -H "Authorization: Bearer $EGAPRO_SUIT_API_KEY" \
   -H "X-Timestamp: $TS" \
   -H "X-Signature: $SIG"
@@ -107,7 +109,7 @@ curl "$BASE_URL/api/v1/export/declarations?date_begin=2026-01-01&date_end=2026-0
 ### 2. Lister les fichiers d'une déclaration
 
 ```sh
-curl "$BASE_URL/api/v1/files?siren=123456789&year=2026" \
+curl "$BASE_URL/files?siren=123456789&year=2026" \
   -H "Authorization: Bearer $EGAPRO_SUIT_API_KEY" \
   -H "X-Timestamp: $TS" \
   -H "X-Signature: $SIG"
@@ -118,13 +120,13 @@ curl "$BASE_URL/api/v1/files?siren=123456789&year=2026" \
 ### 3. Télécharger un fichier
 
 ```sh
-curl -OJ "$BASE_URL/api/v1/files/<fileId>" \
+curl -OJ "$BASE_URL/files/<fileId>" \
   -H "Authorization: Bearer $EGAPRO_SUIT_API_KEY" \
   -H "X-Timestamp: $TS" \
   -H "X-Signature: $SIG"
 ```
 
-Le `fileId` est renvoyé par l'endpoint `/api/v1/files`.
+Le `fileId` est renvoyé par l'endpoint `/files`.
 
 ## Réponses d'erreur
 
