@@ -16,7 +16,9 @@ type SelectChain = {
 	orderBy: ReturnType<typeof vi.fn>;
 };
 
-function buildDb(rows: Array<{ day: Date; year: number; count: number }> = []) {
+function buildDb(
+	rows: Array<{ day: string; year: number; count: number }> = [],
+) {
 	const orderBy = vi.fn().mockResolvedValue(rows);
 	const chain: SelectChain = {
 		from: vi.fn().mockReturnThis(),
@@ -74,10 +76,10 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 
 	it("groups points by year and computes a running cumulative total", async () => {
 		const db = buildDb([
-			{ day: new Date("2025-01-05T00:00:00Z"), year: 2025, count: 10 },
-			{ day: new Date("2025-01-06T00:00:00Z"), year: 2025, count: 5 },
-			{ day: new Date("2026-01-05T00:00:00Z"), year: 2026, count: 20 },
-			{ day: new Date("2026-01-08T00:00:00Z"), year: 2026, count: 3 },
+			{ day: "2025-01-05", year: 2025, count: 10 },
+			{ day: "2025-01-06", year: 2025, count: 5 },
+			{ day: "2026-01-05", year: 2026, count: 20 },
+			{ day: "2026-01-08", year: 2026, count: 3 },
 		]);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({

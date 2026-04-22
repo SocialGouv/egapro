@@ -18,17 +18,7 @@ import { COMPANY_SIZE_RANGES } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { companies, declarations } from "~/server/db/schema";
 
-type AggregatedRow = { day: Date; year: number; count: number };
-
-/**
- * Convert a PG `date` cast (returned as `Date` in UTC midnight) to an ISO
- * YYYY-MM-DD string suitable for a cross-year chart axis.
- */
-function toIsoDay(value: Date): string {
-	const iso = value.toISOString();
-	// `2026-02-15T00:00:00.000Z` → `2026-02-15`
-	return iso.slice(0, 10);
-}
+type AggregatedRow = { day: string; year: number; count: number };
 
 /**
  * Walk the per-day rows (already ordered by (year, day) ASC) and produce one
@@ -44,7 +34,7 @@ function buildSeries(rows: AggregatedRow[]): CampaignProgressionSeries[] {
 		const list = byYear.get(year) ?? [];
 		const previous = list[list.length - 1]?.cumulative ?? 0;
 		list.push({
-			day: toIsoDay(row.day),
+			day: row.day,
 			cumulative: previous + row.count,
 		});
 		byYear.set(year, list);
@@ -84,7 +74,10 @@ export const adminStatsRouter = createTRPCRouter({
 				);
 			}
 
-			const dayExpr = sql<Date>`date_trunc('day', ${declarations.submittedAt})::date`;
+			// `to_char` forces a text return so the postgres.js driver hands back
+			// a plain ISO string (YYYY-MM-DD) rather than a `Date` that would then
+			// need timezone-safe formatting.
+			const dayExpr = sql<string>`to_char(${declarations.submittedAt}, 'YYYY-MM-DD')`;
 
 			const query = ctx.db
 				.select({
