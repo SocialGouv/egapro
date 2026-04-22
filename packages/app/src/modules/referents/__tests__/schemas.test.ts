@@ -54,13 +54,6 @@ describe("publicSearchReferentsSchema", () => {
 	it("rejects an unknown region code", () => {
 		expect(() => publicSearchReferentsSchema.parse({ region: "99" })).toThrow();
 	});
-
-	it("trims query whitespace", () => {
-		const result = publicSearchReferentsSchema.parse({
-			query: "  durand  ",
-		});
-		expect(result.query).toBe("durand");
-	});
 });
 
 describe("publicSearchReferentsFormSchema", () => {
@@ -71,11 +64,10 @@ describe("publicSearchReferentsFormSchema", () => {
 
 	it("accepts free-form strings (form-level, server re-validates)", () => {
 		const result = publicSearchReferentsFormSchema.parse({
-			query: "durand",
 			region: "11",
 			county: "75",
 		});
-		expect(result).toEqual({ query: "durand", region: "11", county: "75" });
+		expect(result).toEqual({ region: "11", county: "75" });
 	});
 });
 

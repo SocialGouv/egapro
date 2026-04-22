@@ -22,7 +22,6 @@ describe("searchReferentsSchema", () => {
 
 	it("parses all fields", () => {
 		const result = searchReferentsSchema.parse({
-			query: "Dupont",
 			region: "11",
 			county: "75",
 			page: "2",
@@ -31,7 +30,6 @@ describe("searchReferentsSchema", () => {
 			sortOrder: "desc",
 		});
 		expect(result).toEqual({
-			query: "Dupont",
 			region: "11",
 			county: "75",
 			page: 2,
