@@ -95,6 +95,35 @@ test.describe("Declaration process panel", () => {
 		});
 	});
 
+	test.describe("Variant: evaluation (corrective_action, 2nd decl submitted, second-round choice pending)", () => {
+		test.beforeAll(async () => {
+			await setDeclarationComplianceState({
+				compliancePath: "corrective_action",
+				secondDeclarationStatus: "submitted",
+			});
+		});
+
+		test("shows second declaration transmitted without evaluation conjointe bullet", async ({
+			page,
+		}) => {
+			await page.context().clearCookies();
+			await loginWithProConnect(page);
+			await waitForDsfrModal(page, PANEL_ID);
+
+			const panel = page.locator(`#${PANEL_ID}`);
+			const remuButton = page.getByRole("button", { name: "Rémunération" });
+			await expect(remuButton.first()).toBeVisible();
+			await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
+
+			await expect(
+				panel.getByText("Votre seconde déclaration a été transmise"),
+			).toBeVisible();
+			await expect(
+				panel.getByText("Évaluation conjointe des rémunérations"),
+			).toHaveCount(0);
+		});
+	});
+
 	test.describe("Variant: evaluation (joint_evaluation path, file not uploaded)", () => {
 		test.beforeAll(async () => {
 			await setDeclarationComplianceState({
