@@ -130,5 +130,7 @@ function formatUploadError(
 			return serverError;
 		case "server_error":
 			return "Erreur lors de l'upload du fichier. Merci de réessayer.";
+		case "aborted":
+			return "L'upload a été interrompu. Merci de réessayer.";
 	}
 }

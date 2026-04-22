@@ -184,11 +184,46 @@ test.describe("Declaration process panel", () => {
 		});
 	});
 
+	test.describe("Variant: cse with opinions saved but not finalized", () => {
+		test.beforeAll(async () => {
+			await setDeclarationComplianceState({
+				compliancePath: "joint_evaluation",
+				complianceCompletedAt: new Date(),
+				cseOpinionCompletedAt: null,
+			});
+			await insertJointEvaluationFile(CURRENT_YEAR);
+			await insertCseOpinion(CURRENT_YEAR);
+		});
+
+		test("keeps CSE step current while finalization has not been done", async ({
+			page,
+		}) => {
+			await page.context().clearCookies();
+			await loginWithProConnect(page);
+			await waitForDsfrModal(page, PANEL_ID);
+
+			const panel = page.locator(`#${PANEL_ID}`);
+			const remuButton = page.getByRole("button", { name: "Rémunération" });
+			await expect(remuButton.first()).toBeVisible();
+			await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
+
+			await expect(panel.getByText("Démarche close")).not.toBeVisible();
+			await expect(
+				panel.getByText("Déposer le ou les avis du CSE"),
+			).toBeVisible();
+			const ctaLink = panel.getByRole("link", {
+				name: "Continuer la déclaration",
+			});
+			await expect(ctaLink).toHaveAttribute("href", /avis-cse/);
+		});
+	});
+
 	test.describe("Variant: closed (compliance completed + CSE deposited)", () => {
 		test.beforeAll(async () => {
 			await setDeclarationComplianceState({
 				compliancePath: "joint_evaluation",
 				complianceCompletedAt: new Date(),
+				cseOpinionCompletedAt: new Date(),
 			});
 			await insertJointEvaluationFile(CURRENT_YEAR);
 			await insertCseOpinion(CURRENT_YEAR);
@@ -209,7 +244,7 @@ test.describe("Declaration process panel", () => {
 			await expect(panel.getByText("Démarche close")).toBeVisible();
 			await expect(
 				panel.getByText(
-					"Cette démarche est terminée, aucune modification n'est possible.",
+					"Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance.",
 				),
 			).toBeVisible();
 		});

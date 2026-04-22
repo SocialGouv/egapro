@@ -15,6 +15,7 @@ describe("parseGipCsv", () => {
 		const result = parseGipCsv(VALID_CSV);
 
 		expect(result.metadata).toEqual({
+			publicationDate: "2026-03-01",
 			periodStart: "2026-01-01",
 			periodEnd: "2026-12-31",
 			expectedRows: 2,
@@ -289,6 +290,30 @@ describe("parseGipCsv", () => {
 		const result = parseGipCsv(csv);
 		expect(result.rows).toHaveLength(1);
 		expect(Object.keys(result.rows[0] ?? {})).toEqual(["siren"]);
+	});
+});
+
+describe("parseGipCsv — publicationDate normalisation", () => {
+	it("strips the time component from an ISO horodatage", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;2026-03-01T09:30:00Z;2026-01-01;2026-12-31;1",
+			"SIREN;Effectif_RCD",
+			"123456789;200",
+		].join("\n");
+
+		expect(parseGipCsv(csv).metadata.publicationDate).toBe("2026-03-01");
+	});
+
+	it("leaves a malformed horodatage as-is", () => {
+		const csv = [
+			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
+			"foo;bar;not-a-date;2026-01-01;2026-12-31;1",
+			"SIREN;Effectif_RCD",
+			"123456789;200",
+		].join("\n");
+
+		expect(parseGipCsv(csv).metadata.publicationDate).toBe("not-a-date");
 	});
 });
 

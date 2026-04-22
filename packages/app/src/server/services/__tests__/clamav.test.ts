@@ -155,6 +155,34 @@ describe("clamav service", () => {
 		expect(socket.destroy).toHaveBeenCalled();
 	});
 
+	it("destroys the clamd socket immediately when the abort signal fires", async () => {
+		// Fresh socket for this test.
+		net.createConnection({ host: "x", port: 0 });
+		const socket = getSocket();
+		socket.on.mockImplementation(() => socket);
+
+		const { createClamdStream } = await import("../clamav");
+		const controller = new AbortController();
+		createClamdStream("localhost", 3310, controller.signal);
+
+		socket.destroy.mockClear();
+		controller.abort();
+		expect(socket.destroy).toHaveBeenCalled();
+	});
+
+	it("rejects sendChunk if the abort signal is already aborted at construction", async () => {
+		net.createConnection({ host: "x", port: 0 });
+		const socket = getSocket();
+		socket.on.mockImplementation(() => socket);
+
+		const { createClamdStream } = await import("../clamav");
+		const controller = new AbortController();
+		controller.abort();
+		const clamd = createClamdStream("localhost", 3310, controller.signal);
+
+		await expect(clamd.sendChunk(Buffer.from("x"))).rejects.toThrow(/aborted/i);
+	});
+
 	it("surfaces a connection error thrown by the socket during sendChunk", async () => {
 		// Trigger `createConnection` once to populate the mock's results
 		// array, then grab the shared socket instance before `createClamdStream`

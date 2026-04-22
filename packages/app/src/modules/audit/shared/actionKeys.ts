@@ -30,6 +30,7 @@ export const AUDIT_ACTIONS = {
 	CSE_OPINION_SAVE: "cse_opinion.save",
 	CSE_OPINION_UPLOAD_FILE: "cse_opinion.upload_file",
 	CSE_OPINION_DELETE_FILE: "cse_opinion.delete_file",
+	CSE_OPINION_FINALIZE: "cse_opinion.finalize",
 
 	// ── Joint evaluation mutations ─────────────────────────
 	JOINT_EVALUATION_UPLOAD_FILE: "joint_evaluation.upload_file",
@@ -49,7 +50,6 @@ export const AUDIT_ACTIONS = {
 
 	// ── Admin settings mutations ──────────────────────────
 	ADMIN_SETTINGS_UPSERT_DEADLINES: "admin_settings.upsert_deadlines",
-	ADMIN_SETTINGS_SET_ACTIVE_YEAR: "admin_settings.set_active_year",
 
 	// ── Sensitive reads ────────────────────────────────────
 	ADMIN_FILE_DOWNLOAD: "admin.file_download",
@@ -104,6 +104,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.CSE_OPINION_SAVE]: "mutation",
 	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: "mutation",
 	[AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE]: "mutation",
+	[AUDIT_ACTIONS.CSE_OPINION_FINALIZE]: "mutation",
 
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: "mutation",
 
@@ -116,7 +117,6 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.ADMIN_DECLARATIONS_SEARCH]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES]: "mutation",
-	[AUDIT_ACTIONS.ADMIN_SETTINGS_SET_ACTIVE_YEAR]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PROFILE_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA]: "read_sensitive",

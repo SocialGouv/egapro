@@ -144,7 +144,8 @@ function ClosedMessage() {
 		<div className={styles.closedMessage}>
 			<p className="fr-text--bold fr-mb-0">Démarche close</p>
 			<p className="fr-mb-0">
-				Cette démarche est terminée, aucune modification n'est possible.
+				Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à
+				l'échéance.
 			</p>
 		</div>
 	);

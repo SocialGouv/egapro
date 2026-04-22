@@ -13,18 +13,6 @@ vi.mock("~/trpc/server", () => ({
 	HydrateClient: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-vi.mock("../ActiveYearForm", () => ({
-	ActiveYearForm: (props: {
-		initialActiveYear: number | null;
-		fallbackYear: number;
-	}) =>
-		React.createElement("div", {
-			"data-testid": "active-year-form",
-			"data-initial": props.initialActiveYear ?? "",
-			"data-fallback": props.fallbackYear,
-		}),
-}));
-
 vi.mock("../CampaignDeadlinesForm", () => ({
 	CampaignDeadlinesForm: (props: {
 		initialYear: number;
@@ -40,9 +28,8 @@ vi.mock("../CampaignDeadlinesForm", () => ({
 import { AdminSettingsPage } from "../AdminSettingsPage";
 
 describe("AdminSettingsPage", () => {
-	it("renders both sections and passes overview data to the forms", async () => {
+	it("renders the deadlines section and passes configured years to the form", async () => {
 		getOverviewMock.mockResolvedValue({
-			activeCampaignYear: 2027,
 			configuredYears: [2025, 2026, 2027],
 		});
 		render(await AdminSettingsPage());
@@ -53,30 +40,24 @@ describe("AdminSettingsPage", () => {
 			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("heading", {
-				level: 2,
-				name: /année de campagne active/i,
-			}),
-		).toBeInTheDocument();
-		expect(
 			screen.getByRole("heading", { level: 2, name: /échéances de campagne/i }),
 		).toBeInTheDocument();
-		const active = screen.getByTestId("active-year-form");
-		expect(active.getAttribute("data-initial")).toBe("2027");
+		expect(
+			screen.queryByRole("heading", { name: /année de campagne active/i }),
+		).not.toBeInTheDocument();
 		const deadlines = screen.getByTestId("campaign-deadlines-form");
 		expect(deadlines.getAttribute("data-initial-year")).toBe("2027");
 		expect(deadlines.getAttribute("data-years")).toBe("2025,2026,2027");
 	});
 
-	it("falls back to the current calendar year when none is configured", async () => {
+	it("falls back to the current calendar year when no year is configured", async () => {
 		getOverviewMock.mockResolvedValue({
-			activeCampaignYear: null,
 			configuredYears: [],
 		});
 		render(await AdminSettingsPage());
-		const active = screen.getByTestId("active-year-form");
-		expect(active.getAttribute("data-initial")).toBe("");
-		const fallback = Number(active.getAttribute("data-fallback"));
-		expect(fallback).toBe(new Date().getFullYear());
+		const deadlines = screen.getByTestId("campaign-deadlines-form");
+		expect(deadlines.getAttribute("data-initial-year")).toBe(
+			String(new Date().getFullYear()),
+		);
 	});
 });

@@ -72,6 +72,7 @@ export function VerticalStepper({
 				<StepCircle number={3} status={step3} />
 				<Step3Content
 					campaignDeadlines={campaignDeadlines}
+					siren={siren}
 					status={step3}
 					variant={variant}
 				/>
@@ -310,10 +311,12 @@ function Step2Content({
 
 function Step3Content({
 	campaignDeadlines,
+	siren,
 	status,
 	variant,
 }: {
 	campaignDeadlines: CampaignDeadlines;
+	siren: string;
 	status: StepStatus;
 	variant: PanelVariant;
 }) {
@@ -322,13 +325,25 @@ function Step3Content({
 	);
 
 	if (
-		variant === "closed" ||
 		variant === "start" ||
 		variant === "compliance_choice" ||
 		variant === "compliance" ||
 		variant === "evaluation"
 	) {
 		return title;
+	}
+
+	if (variant === "closed") {
+		return (
+			<div className={styles.stepContent}>
+				{title}
+				<TransmittedRow
+					label="Vos avis du CSE ont été transmis"
+					modifiableUntil={campaignDeadlines.decl2JointEvaluationDeadline}
+					modifyHref={`/avis-cse/etape/2?siren=${siren}`}
+				/>
+			</div>
+		);
 	}
 
 	// cse variant

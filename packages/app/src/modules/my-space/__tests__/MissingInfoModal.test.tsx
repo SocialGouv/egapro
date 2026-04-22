@@ -1,5 +1,10 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { useSession } from "next-auth/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { mockImpersonatingSession } from "~/test/impersonationMock";
+
+const mockedUseSession = vi.mocked(useSession);
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -147,5 +152,20 @@ describe("MissingInfoModal", () => {
 		expect(
 			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
 		).not.toBeDisabled();
+	});
+
+	describe("admin impersonation", () => {
+		afterEach(() => {
+			mockedUseSession.mockReset();
+		});
+
+		it("does not render the modal when impersonating", () => {
+			mockImpersonatingSession(mockedUseSession);
+
+			const { container } = render(
+				<MissingInfoModal hasCse={null} siren="532847196" userPhone={null} />,
+			);
+			expect(container.querySelector("#missing-info-modal")).toBeNull();
+		});
 	});
 });
