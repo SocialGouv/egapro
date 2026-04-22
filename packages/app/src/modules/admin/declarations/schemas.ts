@@ -11,10 +11,6 @@ export const SORT_COLUMNS = [
 
 export type SortColumn = (typeof SORT_COLUMNS)[number];
 
-export const INDEX_OPERATORS = ["gt", "lt", "eq"] as const;
-
-export type IndexOperator = (typeof INDEX_OPERATORS)[number];
-
 export const DEFAULT_PAGE_SIZE = 20;
 
 export const searchDeclarationsSchema = z.object({
@@ -23,8 +19,6 @@ export const searchDeclarationsSchema = z.object({
 	year: z.coerce.number().int().min(2018).max(2100).optional(),
 	dateFrom: z.string().date().optional().or(z.literal("")),
 	dateTo: z.string().date().optional().or(z.literal("")),
-	index: z.coerce.number().int().min(0).max(100).optional(),
-	indexOperator: z.enum(INDEX_OPERATORS).optional(),
 	status: z.enum(["draft", "submitted"]).optional(),
 	page: z.coerce.number().int().min(1).default(1),
 	pageSize: z.coerce.number().int().min(10).max(100).default(DEFAULT_PAGE_SIZE),
@@ -43,8 +37,6 @@ export const searchDeclarationsFormSchema = z.object({
 	year: z.string().optional(),
 	dateFrom: z.string().optional(),
 	dateTo: z.string().optional(),
-	index: z.string().optional(),
-	indexOperator: z.enum(["", ...INDEX_OPERATORS]).optional(),
 	status: z.enum(["", "draft", "submitted"]).optional(),
 });
 
