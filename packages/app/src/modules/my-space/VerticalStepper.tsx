@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { CampaignDeadlines } from "~/modules/domain";
-import { formatLongDate, isDeadlinePassed } from "~/modules/domain";
+import { isDeadlinePassed } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 
@@ -379,8 +379,9 @@ function TransmittedRow({
 				<p className="fr-mb-0">{label}</p>
 				<p className="fr-text-mention--grey fr-mb-0">
 					{deadlinePassed
-						? `Modification close depuis le ${formatLongDate(modifiableUntil)}`
-						: `Modifiable jusqu'au ${formatLongDate(modifiableUntil)}`}
+						? "Modification close depuis le "
+						: "Modifiable jusqu'au "}
+					<OrdinalLongDate date={modifiableUntil} />
 				</p>
 			</div>
 			<div className={styles.transmittedActions}>
@@ -409,8 +410,23 @@ function DeadlineRow({ date }: { date: Date }) {
 		<div className={styles.deadlineRow}>
 			<span aria-hidden="true" className="fr-icon-calendar-line fr-icon--sm" />
 			<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
-				Échéance : {formatLongDate(date)}
+				Échéance : <OrdinalLongDate date={date} />
 			</p>
 		</div>
+	);
+}
+
+function OrdinalLongDate({ date }: { date: Date }) {
+	const day = date.getDate();
+	const suffix = day === 1 ? "er" : "e";
+	const monthYear = date.toLocaleDateString("fr-FR", {
+		month: "long",
+		year: "numeric",
+	});
+	return (
+		<>
+			{day}
+			<sup>{suffix}</sup> {monthYear}
+		</>
 	);
 }
