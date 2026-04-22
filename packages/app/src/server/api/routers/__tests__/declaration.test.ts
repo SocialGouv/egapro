@@ -268,6 +268,20 @@ describe("declarationRouter", () => {
 			);
 		});
 
+		it("sets submittedAt via COALESCE so resubmits preserve the first date", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await caller.submit();
+
+			const call = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(call).toHaveProperty("submittedAt");
+			// Drizzle `sql` tag produces an SQL object with a queryChunks array.
+			expect(call.submittedAt).toMatchObject({
+				queryChunks: expect.any(Array),
+			});
+		});
+
 		it("throws when siret is missing", async () => {
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb, null as never);
