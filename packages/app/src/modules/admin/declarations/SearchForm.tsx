@@ -23,9 +23,6 @@ export function SearchForm() {
 				dateTo: searchParams.get("dateTo") ?? "",
 				status:
 					(searchParams.get("status") as "" | "draft" | "submitted") ?? "",
-				index: searchParams.get("index") ?? "",
-				indexOperator:
-					(searchParams.get("indexOperator") as "" | "gt" | "lt" | "eq") ?? "",
 			},
 		},
 	);
@@ -52,8 +49,6 @@ export function SearchForm() {
 			dateFrom: "",
 			dateTo: "",
 			status: "",
-			index: "",
-			indexOperator: "",
 		});
 		router.push("/admin/declarations");
 	}, [reset, router]);
@@ -142,42 +137,6 @@ export function SearchForm() {
 							<option value="draft">Brouillon</option>
 							<option value="submitted">Transmise</option>
 						</select>
-					</div>
-				</div>
-				<div className="fr-col-12 fr-col-md-3">
-					<div className="fr-grid-row fr-grid-row--gutters">
-						<div className="fr-col-6">
-							<div className="fr-select-group">
-								<label className="fr-label" htmlFor="search-index-op">
-									Index
-								</label>
-								<select
-									className="fr-select"
-									id="search-index-op"
-									{...register("indexOperator")}
-								>
-									<option value="">—</option>
-									<option value="eq">=</option>
-									<option value="gt">&ge;</option>
-									<option value="lt">&le;</option>
-								</select>
-							</div>
-						</div>
-						<div className="fr-col-6">
-							<div className="fr-input-group">
-								<label className="fr-label" htmlFor="search-index">
-									Valeur
-								</label>
-								<input
-									className="fr-input"
-									id="search-index"
-									max={100}
-									min={0}
-									type="number"
-									{...register("index")}
-								/>
-							</div>
-						</div>
 					</div>
 				</div>
 			</div>
