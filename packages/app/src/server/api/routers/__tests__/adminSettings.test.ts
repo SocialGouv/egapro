@@ -58,29 +58,14 @@ describe("adminSettingsRouter — access control", () => {
 		} as never);
 		await expect(caller.getOverview()).rejects.toThrow(/administrateurs/i);
 	});
-
-	it("rejects unauthenticated callers on setActiveCampaignYear", async () => {
-		const { adminSettingsRouter } = await import("../adminSettings");
-		const caller = adminSettingsRouter.createCaller({
-			db: buildDb(),
-			session: null,
-			headers: new Headers(),
-		} as never);
-		await expect(
-			caller.setActiveCampaignYear({ activeCampaignYear: 2026 }),
-		).rejects.toThrow();
-	});
 });
 
 describe("adminSettingsRouter — getOverview", () => {
 	beforeEach(() => vi.resetAllMocks());
 
-	it("returns the active year and configured years", async () => {
+	it("returns the list of configured years", async () => {
 		const db = buildDb();
-		db.__chainQuery.limit
-			.mockResolvedValueOnce([{ activeCampaignYear: 2027 }])
-			.mockResolvedValueOnce([{ year: 2025 }, { year: 2026 }, { year: 2027 }]);
-		db.select.mockReturnValueOnce(db.__chainQuery).mockReturnValueOnce({
+		db.select.mockReturnValueOnce({
 			from: vi.fn().mockReturnValue({
 				orderBy: vi
 					.fn()
@@ -94,15 +79,11 @@ describe("adminSettingsRouter — getOverview", () => {
 			headers: new Headers(),
 		} as never);
 		const result = await caller.getOverview();
-		expect(result.activeCampaignYear).toBe(2027);
 		expect(result.configuredYears).toEqual([2025, 2026, 2027]);
 	});
 
-	it("returns null active year when no row exists", async () => {
+	it("returns an empty list when no deadlines are configured", async () => {
 		const db = buildDb();
-		db.select.mockReturnValueOnce({
-			from: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }),
-		});
 		db.select.mockReturnValueOnce({
 			from: vi.fn().mockReturnValue({ orderBy: vi.fn().mockResolvedValue([]) }),
 		});
@@ -113,7 +94,6 @@ describe("adminSettingsRouter — getOverview", () => {
 			headers: new Headers(),
 		} as never);
 		const result = await caller.getOverview();
-		expect(result.activeCampaignYear).toBeNull();
 		expect(result.configuredYears).toEqual([]);
 	});
 });
@@ -213,44 +193,6 @@ describe("adminSettingsRouter — upsertCampaignDeadlines", () => {
 				...validInput,
 				decl2ModificationDeadline: "2026-05-01",
 			}),
-		).rejects.toThrow();
-	});
-});
-
-describe("adminSettingsRouter — setActiveCampaignYear", () => {
-	beforeEach(() => vi.resetAllMocks());
-
-	it("upserts the singleton with the admin user id", async () => {
-		const db = buildDb();
-		const { adminSettingsRouter } = await import("../adminSettings");
-		const caller = adminSettingsRouter.createCaller({
-			db,
-			session: adminSession,
-			headers: new Headers(),
-		} as never);
-		const result = await caller.setActiveCampaignYear({
-			activeCampaignYear: 2027,
-		});
-		expect(result).toEqual({ success: true });
-		expect(db.__insert.values).toHaveBeenCalledWith(
-			expect.objectContaining({
-				id: 1,
-				activeCampaignYear: 2027,
-				updatedBy: "admin-1",
-			}),
-		);
-	});
-
-	it("rejects years below the lower bound", async () => {
-		const db = buildDb();
-		const { adminSettingsRouter } = await import("../adminSettings");
-		const caller = adminSettingsRouter.createCaller({
-			db,
-			session: adminSession,
-			headers: new Headers(),
-		} as never);
-		await expect(
-			caller.setActiveCampaignYear({ activeCampaignYear: 1999 }),
 		).rejects.toThrow();
 	});
 });

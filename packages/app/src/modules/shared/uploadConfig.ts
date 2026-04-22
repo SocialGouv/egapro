@@ -17,6 +17,13 @@ export const ALLOWED_UPLOAD_MIME_TYPES = [
 /** ClamAV scan timeout in milliseconds (30s). */
 export const SCAN_TIMEOUT_MS = 30_000;
 
+/**
+ * Overall upload pipeline timeout (2min). Combined via AbortSignal.any with
+ * the incoming request signal so a hung clamd or S3 socket aborts the whole
+ * pipeline instead of tying up the request indefinitely.
+ */
+export const UPLOAD_REQUEST_TIMEOUT_MS = 120_000;
+
 /** Minimum S3 multipart part size in bytes (5 MB, required by S3 except for the last part). */
 export const S3_PART_MIN_SIZE = 5 * 1024 * 1024;
 

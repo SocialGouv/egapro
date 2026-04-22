@@ -4,10 +4,9 @@ import Script from "next/script";
 import { MatomoAnalytics } from "~/modules/analytics";
 import { SessionProviderWrapper } from "~/modules/auth";
 import {
-	Footer,
 	Header,
 	ImpersonateBanner,
-	ResourceBanner,
+	PublicChrome,
 	SkipLinks,
 } from "~/modules/layout";
 import { ProfileModal } from "~/modules/profile";
@@ -59,8 +58,7 @@ export default function RootLayout({
 						<ImpersonateBanner />
 						<Header />
 						{children}
-						<ResourceBanner />
-						<Footer />
+						<PublicChrome />
 						<ProfileModal />
 					</TRPCReactProvider>
 				</SessionProviderWrapper>
