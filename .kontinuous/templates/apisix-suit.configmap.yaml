@@ -90,7 +90,7 @@ data:
         upstream:
           type: roundrobin
           nodes:
-            "app:3000": 1
+            "app:80": 1
       - id: suit-files-list
         uri: /api/v1/files
         methods: [GET]
@@ -98,7 +98,7 @@ data:
         upstream:
           type: roundrobin
           nodes:
-            "app:3000": 1
+            "app:80": 1
       - id: suit-files-download
         uri: /api/v1/files/*
         methods: [GET]
@@ -106,5 +106,5 @@ data:
         upstream:
           type: roundrobin
           nodes:
-            "app:3000": 1
+            "app:80": 1
     #END
