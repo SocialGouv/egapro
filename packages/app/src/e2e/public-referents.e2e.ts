@@ -68,6 +68,35 @@ test.describe("public referents search", () => {
 		}
 	});
 
+	test("landing on /referents without a filter shows the empty-filter hint and no results", async ({
+		browser,
+	}) => {
+		const anonCtx = await browser.newContext({ storageState: undefined });
+		try {
+			const page = await anonCtx.newPage();
+			await page.goto("/referents");
+			await expect(
+				page.getByText(/remplissez au moins un filtre/i),
+			).toBeVisible();
+			await expect(page.getByText("E2E Référent Paris")).not.toBeVisible();
+		} finally {
+			await anonCtx.close();
+		}
+	});
+
+	test("/referents shows the public help banner", async ({ browser }) => {
+		const anonCtx = await browser.newContext({ storageState: undefined });
+		try {
+			const page = await anonCtx.newPage();
+			await page.goto("/referents");
+			await expect(
+				page.getByRole("region", { name: /ressources et aide/i }),
+			).toBeVisible();
+		} finally {
+			await anonCtx.close();
+		}
+	});
+
 	test("search by region filters the results", async ({ browser }) => {
 		const anonCtx = await browser.newContext({ storageState: undefined });
 		try {
@@ -120,6 +149,8 @@ test.describe("public referents search", () => {
 		try {
 			const page = await anonCtx.newPage();
 			await page.goto("/referents");
+			await page.getByLabel("Région").selectOption("11");
+			await page.getByRole("button", { name: /^rechercher$/i }).click();
 			await expect(page.getByText("E2E Référent Paris")).toBeVisible();
 			await expect(page.getByText("e2e-paris@dreets.test")).not.toBeVisible();
 			await expect(
@@ -137,6 +168,8 @@ test.describe("public referents search", () => {
 		try {
 			const page = await anonCtx.newPage();
 			await page.goto("/referents");
+			await page.getByLabel("Région").selectOption("11");
+			await page.getByRole("button", { name: /^rechercher$/i }).click();
 
 			const row = page.locator("li", { hasText: "E2E Référent Paris" });
 			await row.getByRole("link", { name: /voir le contact/i }).click();
