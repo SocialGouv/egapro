@@ -44,9 +44,24 @@
 }
 
 .stepRow {
+	position: relative;
 	display: flex;
 	gap: 1rem;
 	align-items: flex-start;
+}
+
+.stepRow:not(:last-child) {
+	padding-bottom: 1rem;
+}
+
+.stepRow:not(:last-child)::before {
+	content: "";
+	position: absolute;
+	left: 13.5px;
+	top: 28px;
+	bottom: 0;
+	width: 1px;
+	background-color: var(--border-default-grey);
 }
 
 .stepCircle {
@@ -75,13 +90,6 @@
 	background-color: var(--background-flat-success);
 }
 
-.stepLine {
-	width: 1px;
-	min-height: 1rem;
-	margin-left: 14px;
-	background-color: var(--border-default-grey);
-}
-
 .stepContent {
 	display: flex;
 	flex-direction: column;
@@ -94,7 +102,7 @@
 .transmittedRow {
 	display: flex;
 	gap: 0.5rem;
-	align-items: center;
+	align-items: flex-start;
 	width: 100%;
 }
 

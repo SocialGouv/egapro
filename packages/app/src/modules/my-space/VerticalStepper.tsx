@@ -57,7 +57,6 @@ export function VerticalStepper({
 					year={year}
 				/>
 			</div>
-			<div className={styles.stepLine} />
 			<div className={styles.stepRow}>
 				<StepCircle number={2} status={step2} />
 				<Step2Content
@@ -69,7 +68,6 @@ export function VerticalStepper({
 					variant={variant}
 				/>
 			</div>
-			<div className={styles.stepLine} />
 			<div className={styles.stepRow}>
 				<StepCircle number={3} status={step3} />
 				<Step3Content
@@ -224,7 +222,12 @@ function Step2Content({
 	}
 
 	if (variant === "compliance_choice") {
-		return <div className={styles.stepContent}>{title}</div>;
+		return (
+			<div className={styles.stepContent}>
+				{title}
+				<DeadlineRow date={campaignDeadlines.decl2ModificationDeadline} />
+			</div>
+		);
 	}
 
 	if (variant === "compliance") {
