@@ -13,6 +13,16 @@ PROJECT_ID       = PVT_kwDOAh0HH84BFsK7
 STATUS_FIELD_ID  = PVTSSF_lADOAh0HH84BFsK7zg29EI8
 ```
 
+### Issue types (GitHub native)
+
+| Type | ID | Qui applique | Quand |
+|---|---|---|---|
+| Feature | `IT_kwDOAh0HH84Aa_K4` | `product-owner` | création de l'epic (phase `/ticket`) |
+| Task | `IT_kwDOAh0HH84Aa_Kz` | `architect` | création des sub-issues de l'epic |
+| Bug | `IT_kwDOAh0HH84Aa_K1` | selon contexte | création d'une issue de bug |
+
+L'epic porte le type **Feature** ; chaque sub-issue porte le type **Task**. À appliquer **juste après** `gh issue create` via la mutation GraphQL `updateIssueIssueType` (snippet 7 ci-dessous).
+
 ### Status options
 
 | Statut | Option ID | Qui bouge | Quand |
@@ -137,6 +147,25 @@ mutation($parent:ID!, $child:ID!) {
   }
 }' -f parent="$EPIC_NODE_ID" -f child="$TICKET_NODE_ID"
 ```
+
+### 7. Appliquer un issue type (Feature / Task / Bug)
+
+`gh issue edit` ne supporte **pas** le flag `--type`. Utiliser la mutation GraphQL :
+
+```bash
+# $ISSUE_NODE_ID récupéré via snippet 1
+# $TYPE_ID = IT_kwDOAh0HH84Aa_K4 (Feature) | IT_kwDOAh0HH84Aa_Kz (Task) | IT_kwDOAh0HH84Aa_K1 (Bug)
+gh api graphql -f query='
+mutation($issueId: ID!, $typeId: ID!) {
+  updateIssueIssueType(input: { issueId: $issueId, issueTypeId: $typeId }) {
+    issue { number issueType { name } }
+  }
+}' -f issueId="$ISSUE_NODE_ID" -f typeId="$TYPE_ID"
+```
+
+**Usage standard dans la pipeline `/ticket`** :
+- `product-owner` applique **Feature** à l'epic juste après sa création.
+- `architect` applique **Task** à chaque sub-issue juste après sa création (boucle for).
 
 ---
 

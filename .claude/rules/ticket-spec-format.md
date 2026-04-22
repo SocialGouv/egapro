@@ -39,9 +39,21 @@ Ajouter les scénarios spécifiques au ticket si besoin, au format Gherkin simpl
 
 ## Références visuelles
 
-<Si le ticket touche de l'UI, référencer les screenshots produits par le `designer` (dans `/tmp/egapro-mocks/epic-<NNN>/screenshots/`, chemins exacts listés dans le commentaire `## Designer: proposition d'écrans` de l'epic parent). Exemples :
-- `/tmp/egapro-mocks/epic-42/screenshots/declaration-form-desktop.png`
-- `/tmp/egapro-mocks/epic-42/screenshots/declaration-form-mobile.png`
+<Si le ticket touche de l'UI, **impérativement** afficher les screenshots inline (desktop + mobile) via les URLs `raw.githubusercontent.com` de la branche `design-assets/epic-<NNN>` publiée par le `designer`. Cette branche est orpheline et héberge les PNG — voir `.claude/agents/designer/AGENT.md` pour la procédure de publication. Les chemins `/tmp/...` sont ajoutés en annexe pour que `code-dev` et `design-validator` puissent lire les fichiers localement lors de la validation visuelle Phase 4.
+
+Format :
+
+```markdown
+**Desktop**
+![<alt>](https://raw.githubusercontent.com/<owner>/<repo>/design-assets/epic-<NNN>/epic-<NNN>/screenshots/<screen>-desktop.png)
+
+**Mobile**
+![<alt>](https://raw.githubusercontent.com/<owner>/<repo>/design-assets/epic-<NNN>/epic-<NNN>/screenshots/<screen>-mobile.png)
+
+_Annexe pipeline (lecture locale par code-dev / design-validator) :_
+- `/tmp/egapro-mocks/epic-<NNN>/screenshots/<screen>-desktop.png`
+- `/tmp/egapro-mocks/epic-<NNN>/screenshots/<screen>-mobile.png`
+```
 
 Si pas d'UI, écrire "N/A".>
 
