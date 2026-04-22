@@ -37,6 +37,7 @@ export {
 	formatGap,
 	formatGapCompact,
 	formatLongDate,
+	formatMonthDay,
 	formatShortDate,
 	formatShortDateTime,
 	formatTotal,

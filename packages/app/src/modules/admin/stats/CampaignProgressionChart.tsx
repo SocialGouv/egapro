@@ -11,8 +11,9 @@ import {
 	YAxis,
 } from "recharts";
 
+import { formatMonthDay } from "~/modules/domain";
+
 import styles from "./CampaignProgressionChart.module.scss";
-import { formatMonthDay } from "./format";
 import type { CampaignProgressionSeries } from "./types";
 
 type TooltipEntry = {
