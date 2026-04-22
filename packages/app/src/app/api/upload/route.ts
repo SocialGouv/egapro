@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { AUDIT_ACTIONS, type AuditActionKey } from "~/modules/audit";
 import { getCurrentYear } from "~/modules/domain";
 import { parseSiren } from "~/modules/shared/parseSiren";
@@ -225,11 +226,11 @@ export async function POST(request: Request): Promise<Response> {
 			userId,
 			userEmail,
 			siren,
-			metadata: {
+			metadata: uploadAuditMetadataSchema.parse({
 				flowType,
 				fileId: result.fileId,
 				fileName: result.fileName,
-			},
+			}),
 			ipAddress: requestContext.ipAddress,
 			userAgent: requestContext.userAgent,
 			durationMs: Date.now() - startedAt,
@@ -323,6 +324,23 @@ function sanitizeUserText(value: string): string {
 	return out.slice(0, 255);
 }
 
+/**
+ * Audit metadata schema for /api/upload. Fields sourced from user input
+ * (fileName, virusName) use `sanitizedUserString` so future additions to the
+ * schema are sanitised by construction — a new untrusted string just has to
+ * reuse the same transform. Internal literals (flowType, fileId, s3Cleanup)
+ * are already constrained and do not need sanitisation.
+ */
+const sanitizedUserString = z.string().transform(sanitizeUserText);
+
+const uploadAuditMetadataSchema = z.object({
+	flowType: z.enum(["cse_opinion", "joint_evaluation"]),
+	fileId: z.string().optional(),
+	fileName: sanitizedUserString.optional(),
+	virusName: sanitizedUserString.optional(),
+	s3Cleanup: z.enum(["ok", "failed"]).optional(),
+});
+
 type AuditFailureInput = {
 	action: AuditActionKey;
 	flowType: FlowType;
@@ -352,11 +370,13 @@ function writeFailure({
 	virusName = null,
 	s3Cleanup = null,
 }: AuditFailureInput): void {
-	const metadata: Record<string, unknown> = { flowType };
-	if (fileName) metadata.fileName = sanitizeUserText(fileName);
-	if (fileId) metadata.fileId = fileId;
-	if (virusName) metadata.virusName = sanitizeUserText(virusName);
-	if (s3Cleanup) metadata.s3Cleanup = s3Cleanup;
+	const metadata = uploadAuditMetadataSchema.parse({
+		flowType,
+		fileName: fileName ?? undefined,
+		fileId: fileId ?? undefined,
+		virusName: virusName ?? undefined,
+		s3Cleanup: s3Cleanup ?? undefined,
+	});
 
 	void logAction({
 		action,
