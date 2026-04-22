@@ -113,7 +113,6 @@ function ReferentsContent() {
 	} = useImportModal();
 
 	const input = {
-		query: searchParams.get("query") ?? undefined,
 		region: (searchParams.get("region") as RegionCode) || undefined,
 		county: (searchParams.get("county") as CountyCode) || undefined,
 		page: Number(searchParams.get("page") ?? "1"),

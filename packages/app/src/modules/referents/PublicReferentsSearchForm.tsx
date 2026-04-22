@@ -8,8 +8,6 @@ export function PublicReferentsSearchForm() {
 		<ReferentsSearchForm
 			basePath="/referents"
 			fieldPrefix="referents"
-			queryPlaceholder="Ex : Durand"
-			queryType="search"
 			schema={publicSearchReferentsFormSchema}
 			wrapFieldsInFieldset
 		/>

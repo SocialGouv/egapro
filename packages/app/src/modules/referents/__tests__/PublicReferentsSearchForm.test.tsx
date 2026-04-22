@@ -17,11 +17,11 @@ describe("PublicReferentsSearchForm", () => {
 		mockPush.mockClear();
 	});
 
-	it("renders region, county and name inputs", () => {
+	it("renders region and county selects only", () => {
 		render(<PublicReferentsSearchForm />);
 		expect(screen.getByLabelText(/région/i)).toBeInTheDocument();
 		expect(screen.getByLabelText(/département/i)).toBeInTheDocument();
-		expect(screen.getByLabelText(/nom du référent/i)).toBeInTheDocument();
+		expect(screen.queryByLabelText(/nom du référent/i)).toBeNull();
 	});
 
 	it("disables the county select until a region is chosen", () => {
@@ -49,9 +49,6 @@ describe("PublicReferentsSearchForm", () => {
 		fireEvent.change(screen.getByLabelText(/région/i), {
 			target: { value: "11" },
 		});
-		fireEvent.input(screen.getByLabelText(/nom du référent/i), {
-			target: { value: "durand" },
-		});
 		fireEvent.click(screen.getByRole("button", { name: /^rechercher$/i }));
 
 		await waitFor(() => {
@@ -59,9 +56,6 @@ describe("PublicReferentsSearchForm", () => {
 				expect.stringMatching(/\/referents\?.*region=11/),
 			);
 		});
-		expect(mockPush).toHaveBeenCalledWith(
-			expect.stringMatching(/query=durand/),
-		);
 		expect(mockPush).toHaveBeenCalledWith(expect.stringMatching(/page=1/));
 	});
 

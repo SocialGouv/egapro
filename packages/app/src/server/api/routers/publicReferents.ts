@@ -1,4 +1,4 @@
-import { and, asc, count, eq, ilike, type SQL } from "drizzle-orm";
+import { and, asc, count, eq, type SQL } from "drizzle-orm";
 
 import {
 	publicReferentIdSchema,
@@ -21,9 +21,6 @@ export const publicReferentsRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const filters: SQL[] = [];
 
-			if (input.query) {
-				filters.push(ilike(referents.name, `%${input.query}%`));
-			}
 			if (input.region) {
 				filters.push(eq(referents.region, input.region));
 			}
