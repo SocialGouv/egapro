@@ -53,6 +53,7 @@
 		"react": "^19.2.5",
 		"react-dom": "^19.2.5",
 		"react-hook-form": "^7.72.1",
+		"recharts": "^3.8.1",
 		"redis": "^5.11.0",
 		"server-only": "^0.0.1",
 		"superjson": "^2.2.6",
