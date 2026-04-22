@@ -1,0 +1,108 @@
+import {
+	and,
+	between,
+	eq,
+	gte,
+	inArray,
+	isNotNull,
+	type SQL,
+	sql,
+} from "drizzle-orm";
+
+import { getCampaignProgressionSchema } from "~/modules/admin/stats/schemas";
+import type {
+	CampaignProgressionPoint,
+	CampaignProgressionSeries,
+} from "~/modules/admin/stats/types";
+import { COMPANY_SIZE_RANGES } from "~/modules/domain";
+import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
+import { companies, declarations } from "~/server/db/schema";
+
+type AggregatedRow = { day: Date; year: number; count: number };
+
+/**
+ * Convert a PG `date` cast (returned as `Date` in UTC midnight) to an ISO
+ * YYYY-MM-DD string suitable for a cross-year chart axis.
+ */
+function toIsoDay(value: Date): string {
+	const iso = value.toISOString();
+	// `2026-02-15T00:00:00.000Z` → `2026-02-15`
+	return iso.slice(0, 10);
+}
+
+/**
+ * Walk the per-day rows (already ordered by (year, day) ASC) and produce one
+ * series per year with running cumulative totals. Days without any submission
+ * are NOT padded — the chart connects consecutive points as a line, which
+ * visually represents a flat segment on zero-submission days.
+ */
+function buildSeries(rows: AggregatedRow[]): CampaignProgressionSeries[] {
+	const byYear = new Map<number, CampaignProgressionPoint[]>();
+
+	for (const row of rows) {
+		const year = row.year;
+		const list = byYear.get(year) ?? [];
+		const previous = list[list.length - 1]?.cumulative ?? 0;
+		list.push({
+			day: toIsoDay(row.day),
+			cumulative: previous + row.count,
+		});
+		byYear.set(year, list);
+	}
+
+	return Array.from(byYear.entries())
+		.sort(([a], [b]) => a - b)
+		.map(([year, points]) => ({ year, points }));
+}
+
+/**
+ * Admin statistics router — read-only aggregations for the DGT dashboard.
+ *
+ * All procedures expose sensitive submission data (PII-adjacent when filtered
+ * narrowly enough) and are therefore audited with category `read_sensitive`.
+ */
+export const adminStatsRouter = createTRPCRouter({
+	/**
+	 * Returns the cumulative submission curve per campaign year, optionally
+	 * scoped to a workforce bucket. Feeds the K2 progression chart.
+	 */
+	getCampaignProgression: adminProcedure
+		.input(getCampaignProgressionSchema)
+		.query(async ({ ctx, input }): Promise<CampaignProgressionSeries[]> => {
+			const filters: SQL[] = [
+				eq(declarations.status, "submitted"),
+				isNotNull(declarations.submittedAt),
+				inArray(declarations.year, input.years),
+			];
+
+			if (input.sizeRange) {
+				const { min, max } = COMPANY_SIZE_RANGES[input.sizeRange];
+				filters.push(
+					max === null
+						? gte(companies.workforce, min)
+						: between(companies.workforce, min, max),
+				);
+			}
+
+			const dayExpr = sql<Date>`date_trunc('day', ${declarations.submittedAt})::date`;
+
+			const query = ctx.db
+				.select({
+					day: dayExpr,
+					year: declarations.year,
+					count: sql<number>`count(*)::int`,
+				})
+				.from(declarations);
+
+			const scoped = input.sizeRange
+				? query.innerJoin(companies, eq(declarations.siren, companies.siren))
+				: query;
+
+			const rows = await scoped
+				.where(and(...filters))
+				.groupBy(dayExpr, declarations.year)
+				.orderBy(declarations.year, dayExpr);
+
+			return buildSeries(rows as AggregatedRow[]);
+		}),
+});

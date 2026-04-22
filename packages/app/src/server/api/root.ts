@@ -2,6 +2,7 @@ import { adminRouter } from "~/server/api/routers/admin";
 import { adminDeclarationsRouter } from "~/server/api/routers/adminDeclarations";
 import { adminReferentsRouter } from "~/server/api/routers/adminReferents";
 import { adminSettingsRouter } from "~/server/api/routers/adminSettings";
+import { adminStatsRouter } from "~/server/api/routers/adminStats";
 import { companyRouter } from "~/server/api/routers/company";
 import { cseOpinionRouter } from "~/server/api/routers/cseOpinion";
 import { declarationRouter } from "~/server/api/routers/declaration";
@@ -22,6 +23,7 @@ export const appRouter = createTRPCRouter({
 	adminDeclarations: adminDeclarationsRouter,
 	adminReferents: adminReferentsRouter,
 	adminSettings: adminSettingsRouter,
+	adminStats: adminStatsRouter,
 	company: companyRouter,
 	cseOpinion: cseOpinionRouter,
 	declaration: declarationRouter,
