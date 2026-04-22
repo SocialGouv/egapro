@@ -13,8 +13,10 @@ data:
       enable_admin: false
       enable_ipv6: false
     deployment:
-      role: traditional
-      role_traditional:
+      # Standalone YAML mode = role `data_plane` (no etcd). `traditional`
+      # requires an etcd config center and rejects `config_provider: yaml`.
+      role: data_plane
+      role_data_plane:
         config_provider: yaml
     # Prometheus metrics scraping (see "prometheus" plugin below).
     plugin_attr:
