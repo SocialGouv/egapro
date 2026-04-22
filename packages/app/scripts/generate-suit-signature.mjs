@@ -119,7 +119,7 @@ Par défaut, signe l'ensemble des routes SUIT connues en une seule exécution.
 Passer --path pour signer une route unique (custom).
 
 Usage :
-  node scripts/generate-suit-signature.js [options]
+  node scripts/generate-suit-signature.mjs [options]
 
 Options :
   --key-file <path>   Chemin vers la clé privée PEM

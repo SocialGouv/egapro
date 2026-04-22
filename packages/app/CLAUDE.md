@@ -201,7 +201,7 @@ Cascade: 1) DSFR classes → 2) DSFR utilities + CSS custom properties → 3) Sc
 
 ### DSFR runtime
 
-- **Assets**: copied to `public/dsfr/` by `scripts/copy-dsfr.js` (git-ignored, regenerated on `dev`/`build`). Never import DSFR CSS via webpack.
+- **Assets**: copied to `public/dsfr/` by `scripts/copy-dsfr.mjs` (git-ignored, regenerated on `dev`/`build`). Never import DSFR CSS via webpack.
 - **JS**: loaded via `<Script type="module" strategy="beforeInteractive">`. Handles modals, dropdowns, theme toggle, keyboard navigation. Never duplicate this logic in React — use `data-fr-*` attributes.
 - **Dark mode**: `data-fr-scheme="system"` on `<html>`, cookie `fr-theme` read by inline script to avoid flash, `ThemeModal` for user toggle.
 - **Icons**: `fr-icon-{name}-{fill|line}` classes. Always `aria-hidden="true"` on decorative icons.
