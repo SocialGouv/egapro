@@ -68,7 +68,7 @@ describe("PublicReferentsPage", () => {
 			expect.objectContaining({ enabled: false }),
 		);
 		expect(
-			screen.getByText(/remplissez au moins un filtre/i),
+			screen.getByText(/sélectionnez au moins un filtre/i),
 		).toBeInTheDocument();
 	});
 

@@ -76,7 +76,7 @@ test.describe("public referents search", () => {
 			const page = await anonCtx.newPage();
 			await page.goto("/referents");
 			await expect(
-				page.getByText(/remplissez au moins un filtre/i),
+				page.getByText(/sélectionnez au moins un filtre/i),
 			).toBeVisible();
 			await expect(page.getByText("E2E Référent Paris")).not.toBeVisible();
 		} finally {

@@ -26,7 +26,7 @@ function ReferentsContent() {
 	// Require at least one filter before hitting the search endpoint — the full
 	// referent list must never be returned (anti-harvest + UX: forcing a filter
 	// gives results users actually need instead of a paginated dump).
-	const hasFilter = Boolean(input.query || input.region || input.county);
+	const hasFilter = Boolean(input.region || input.county);
 
 	const { data, isLoading, isError } = api.publicReferents.search.useQuery(
 		input,
@@ -47,8 +47,8 @@ function ReferentsContent() {
 			<PublicReferentsSearchForm />
 			{!hasFilter && (
 				<p className="fr-text--lg fr-text-mention--grey fr-my-4w">
-					Remplissez au moins un filtre (nom, région ou département) pour lancer
-					la recherche.
+					Sélectionnez au moins un filtre (région ou département) pour lancer la
+					recherche.
 				</p>
 			)}
 			{hasFilter && isLoading && !data && (
