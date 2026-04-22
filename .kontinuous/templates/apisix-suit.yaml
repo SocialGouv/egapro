@@ -42,9 +42,44 @@ spec:
         # Roll pods when the ConfigMap content changes (routes, rate limits...).
         checksum/config: {{ include (print $.Template.BasePath "/apisix-suit.configmap.yaml") . | sha256sum }}
     spec:
+      # APISIX upstream image ships /usr/local/apisix owned by root and writes
+      # nginx.conf + logs under that tree at boot. Running as non-root (our
+      # org-wide rule) therefore requires two things:
+      #   1. A writable overlay on /usr/local/apisix/{conf,logs} — we use
+      #      emptyDir volumes owned by fsGroup 1000.
+      #   2. Seeding /conf with the image's stock files (mime.types, debug.yaml,
+      #      etc.) before APISIX starts, then overlaying our ConfigMap values.
+      # An initContainer running as root copies /usr/local/apisix/conf/* from
+      # the image into the emptyDir; the main container then mounts the same
+      # emptyDir as non-root and overwrites config.yaml + apisix.yaml via
+      # subPath mounts from the ConfigMap.
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: seed-conf
+          image: apache/apisix:3.11.0-debian
+          imagePullPolicy: IfNotPresent
+          # Root in the init container is fine — it never handles traffic and
+          # exits before the main container starts. We only need it long
+          # enough to chown the emptyDir and copy the stock conf/ tree.
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              cp -r /usr/local/apisix/conf/. /seed-conf/
+              chown -R 1000:1000 /seed-conf /seed-logs
+          volumeMounts:
+            - name: apisix-conf
+              mountPath: /seed-conf
+            - name: apisix-logs
+              mountPath: /seed-logs
       containers:
         - name: apisix
           image: apache/apisix:3.11.0-debian
@@ -87,6 +122,15 @@ spec:
               cpu: 500m
               memory: 512Mi
           volumeMounts:
+            # Writable overlay seeded by the init container. APISIX needs to
+            # generate nginx.conf here at boot.
+            - name: apisix-conf
+              mountPath: /usr/local/apisix/conf
+            - name: apisix-logs
+              mountPath: /usr/local/apisix/logs
+            # ConfigMap files overlayed on top of the seeded conf dir. subPath
+            # keeps the surrounding stock files (mime.types, debug.yaml…)
+            # intact — a full dir mount would hide them.
             - name: config
               mountPath: /usr/local/apisix/conf/config.yaml
               subPath: config.yaml
@@ -96,6 +140,10 @@ spec:
               subPath: apisix.yaml
               readOnly: true
       volumes:
+        - name: apisix-conf
+          emptyDir: {}
+        - name: apisix-logs
+          emptyDir: {}
         - name: config
           configMap:
             name: apisix-suit-config
