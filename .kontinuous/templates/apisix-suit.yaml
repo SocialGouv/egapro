@@ -19,133 +19,9 @@
 # proxied request. The Next.js middleware (packages/app/src/middleware.ts)
 # rejects /api/v1/* requests that don't carry the correct secret, so a pod
 # with network access to `app:3000` cannot bypass the gateway.
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: apisix-suit-config
-  namespace: {{ .Values.global.namespace }}
-data:
-  config.yaml: |
-    apisix:
-      node_listen: 9080
-      enable_admin: false
-      enable_ipv6: false
-    deployment:
-      role: traditional
-      role_traditional:
-        config_provider: yaml
-    # Prometheus metrics scraping (see "prometheus" plugin below).
-    plugin_attr:
-      prometheus:
-        export_addr:
-          ip: "0.0.0.0"
-          port: 9091
-  apisix.yaml: |
-    # APISIX reads secrets from env vars via `$ENV://<name>` — both are
-    # populated on the pod via envFrom pointing at the `suit` sealed-secret.
-    consumers:
-      - username: suit
-        plugins:
-          key-auth:
-            key: "$ENV://EGAPRO_SUIT_API_KEY"
-    # Three routes = the three public SUIT endpoints. Each one:
-    #   1. Requires the Bearer key (key-auth plugin).
-    #   2. Applies a per-IP rate limit (limit-req plugin).
-    #   3. Injects the anti-bypass header towards the app upstream
-    #      (proxy-rewrite plugin).
-    routes:
-      - id: suit-export-declarations
-        uri: /api/v1/export/declarations
-        methods: [GET]
-        upstream:
-          type: roundrobin
-          nodes:
-            "app:3000": 1
-        plugins:
-          key-auth: {}
-          # Rate-limit per real client IP. APISIX sits behind the Ingress
-          # controller, so `$remote_addr` is the Ingress pod IP — a single
-          # bucket for the whole world, useless for per-caller quota.
-          # ingress-nginx injects `X-Real-IP: <client-ip>` (trusted, cannot be
-          # spoofed because it overrides the client-supplied header), so we
-          # key on it. For the edge case of a request arriving without XRI
-          # (direct cluster-internal call), APISIX substitutes an empty value
-          # into the key — everyone without XRI shares one bucket, which is
-          # fine since the middleware rejects those requests anyway (no
-          # `X-Gateway-Forwarded` means they never even reach here).
-          limit-req:
-            rate: 10
-            burst: 5
-            key_type: var
-            key: http_x_real_ip
-            rejected_code: 429
-          proxy-rewrite:
-            headers:
-              set:
-                X-Gateway-Forwarded: "$ENV://EGAPRO_GATEWAY_SHARED_SECRET"
-          prometheus: {}
-      - id: suit-files-list
-        uri: /api/v1/files
-        methods: [GET]
-        upstream:
-          type: roundrobin
-          nodes:
-            "app:3000": 1
-        plugins:
-          key-auth: {}
-          # Rate-limit per real client IP. APISIX sits behind the Ingress
-          # controller, so `$remote_addr` is the Ingress pod IP — a single
-          # bucket for the whole world, useless for per-caller quota.
-          # ingress-nginx injects `X-Real-IP: <client-ip>` (trusted, cannot be
-          # spoofed because it overrides the client-supplied header), so we
-          # key on it. For the edge case of a request arriving without XRI
-          # (direct cluster-internal call), APISIX substitutes an empty value
-          # into the key — everyone without XRI shares one bucket, which is
-          # fine since the middleware rejects those requests anyway (no
-          # `X-Gateway-Forwarded` means they never even reach here).
-          limit-req:
-            rate: 10
-            burst: 5
-            key_type: var
-            key: http_x_real_ip
-            rejected_code: 429
-          proxy-rewrite:
-            headers:
-              set:
-                X-Gateway-Forwarded: "$ENV://EGAPRO_GATEWAY_SHARED_SECRET"
-          prometheus: {}
-      - id: suit-files-download
-        uri: /api/v1/files/*
-        methods: [GET]
-        upstream:
-          type: roundrobin
-          nodes:
-            "app:3000": 1
-        plugins:
-          key-auth: {}
-          # Rate-limit per real client IP. APISIX sits behind the Ingress
-          # controller, so `$remote_addr` is the Ingress pod IP — a single
-          # bucket for the whole world, useless for per-caller quota.
-          # ingress-nginx injects `X-Real-IP: <client-ip>` (trusted, cannot be
-          # spoofed because it overrides the client-supplied header), so we
-          # key on it. For the edge case of a request arriving without XRI
-          # (direct cluster-internal call), APISIX substitutes an empty value
-          # into the key — everyone without XRI shares one bucket, which is
-          # fine since the middleware rejects those requests anyway (no
-          # `X-Gateway-Forwarded` means they never even reach here).
-          limit-req:
-            rate: 10
-            burst: 5
-            key_type: var
-            key: http_x_real_ip
-            rejected_code: 429
-          proxy-rewrite:
-            headers:
-              set:
-                X-Gateway-Forwarded: "$ENV://EGAPRO_GATEWAY_SHARED_SECRET"
-          prometheus: {}
-    #END
----
+#
+# The ConfigMap lives in apisix-suit.configmap.yaml (separate file so the
+# Deployment can hash it via `checksum/config` without self-include recursion).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -164,7 +40,7 @@ spec:
         app: apisix-suit
       annotations:
         # Roll pods when the ConfigMap content changes (routes, rate limits...).
-        checksum/config: {{ include (print $.Template.BasePath "/apisix-suit.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/apisix-suit.configmap.yaml") . | sha256sum }}
     spec:
       securityContext:
         runAsNonRoot: true
