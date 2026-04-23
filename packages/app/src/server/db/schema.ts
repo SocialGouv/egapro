@@ -116,6 +116,12 @@ export const declarations = createTable(
 		complianceCompletedAt: d.timestamp({ withTimezone: true }),
 		cseOpinionCompletedAt: d.timestamp({ withTimezone: true }),
 		submittedAt: d.timestamp({ withTimezone: true }),
+		// Denormalized flag recomputed at `submit` time via
+		// `hasGapsAboveThreshold`. The source of truth is still the per-category
+		// salary pairs on `employeeCategories`; this column only exists to speed
+		// up the admin-stats KPIs (K8 in particular) that aggregate across all
+		// declarations of a campaign year without joining employee_category.
+		hasAlertGap: d.boolean().notNull().default(false),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 	}),
@@ -123,6 +129,7 @@ export const declarations = createTable(
 		unique("declaration_siren_year_idx").on(t.siren, t.year),
 		index("declaration_declarant_idx").on(t.declarantId),
 		index("declaration_submitted_at_idx").on(t.submittedAt),
+		index("declaration_has_alert_gap_idx").on(t.hasAlertGap),
 	],
 );
 

@@ -9,7 +9,7 @@ import {
 	updateStep4Schema,
 } from "~/modules/declaration-remuneration/schemas";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, hasGapsAboveThreshold } from "~/modules/domain";
 import {
 	companyProcedure,
 	companyWriteProcedure,
@@ -457,10 +457,26 @@ export const declarationRouter = createTRPCRouter({
 		// Preserve the very first submission date — resubmissions after
 		// corrections must not move the campaign progression curve.
 		const [existing] = await ctx.db
-			.select({ submittedAt: declarations.submittedAt })
+			.select({
+				id: declarations.id,
+				submittedAt: declarations.submittedAt,
+			})
 			.from(declarations)
 			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
 			.limit(1);
+
+		// Recompute the denormalized hasAlertGap flag from the employee
+		// categories. Source of truth stays on employee_category; this flag
+		// only exists to accelerate admin-stats KPIs (K8) that aggregate
+		// across a whole campaign year without a four-way join on salary pairs.
+		let hasAlertGap = false;
+		if (existing) {
+			const { employeeCategories: empCats } = await fetchAllCategories(
+				ctx.db,
+				existing.id,
+			);
+			hasAlertGap = hasGapsAboveThreshold(empCats);
+		}
 
 		await ctx.db
 			.update(declarations)
@@ -468,6 +484,7 @@ export const declarationRouter = createTRPCRouter({
 				status: "submitted",
 				currentStep: 6,
 				submittedAt: existing?.submittedAt ?? now,
+				hasAlertGap,
 				updatedAt: now,
 			})
 			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));

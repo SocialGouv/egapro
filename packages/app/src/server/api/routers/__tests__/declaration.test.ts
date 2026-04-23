@@ -113,8 +113,21 @@ const mockDeclaration = {
 };
 
 describe("declarationRouter", () => {
-	beforeEach(() => {
+	beforeEach(async () => {
 		vi.resetAllMocks();
+		// `vi.resetAllMocks()` clears implementations set at mock-factory time,
+		// so we have to re-apply the default behaviour of declarationHelpers
+		// here (otherwise `fetchAllCategories` returns undefined and the submit
+		// path — which now destructures its result — throws).
+		const helpers = await import("../declarationHelpers");
+		vi.mocked(helpers.fetchAllCategories).mockResolvedValue({
+			jobCategories: [],
+			employeeCategories: [],
+		});
+		vi.mocked(helpers.deleteJobAndEmployeeCategories).mockResolvedValue(
+			undefined,
+		);
+		vi.mocked(helpers.fetchPreviousYearJobCategories).mockResolvedValue(null);
 	});
 
 	afterEach(() => {
@@ -287,6 +300,43 @@ describe("declarationRouter", () => {
 
 			const call = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(call.submittedAt).toBeInstanceOf(Date);
+		});
+
+		it("stamps hasAlertGap=false when no employee category reaches the threshold", async () => {
+			const mockDb = createMockDb([{ id: "decl-1", submittedAt: null }]);
+			const caller = await createCaller(mockDb);
+
+			await caller.submit();
+
+			const call = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(call.hasAlertGap).toBe(false);
+		});
+
+		it("stamps hasAlertGap=true when at least one employee category has a gap >= 5%", async () => {
+			const { fetchAllCategories } = await import("../declarationHelpers");
+			vi.mocked(fetchAllCategories).mockResolvedValueOnce({
+				jobCategories: [],
+				employeeCategories: [
+					{
+						annualBaseWomen: "90",
+						annualBaseMen: "100",
+						annualVariableWomen: null,
+						annualVariableMen: null,
+						hourlyBaseWomen: null,
+						hourlyBaseMen: null,
+						hourlyVariableWomen: null,
+						hourlyVariableMen: null,
+					},
+				] as never,
+			});
+
+			const mockDb = createMockDb([{ id: "decl-1", submittedAt: null }]);
+			const caller = await createCaller(mockDb);
+
+			await caller.submit();
+
+			const call = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(call.hasAlertGap).toBe(true);
 		});
 
 		it("throws when siret is missing", async () => {
