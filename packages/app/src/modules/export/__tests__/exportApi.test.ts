@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockFetchSubmitted = vi.fn().mockResolvedValue([]);
 const mockFetchIndicatorG = vi.fn().mockResolvedValue(new Map());
@@ -18,11 +18,16 @@ vi.mock("~/modules/export/queries", () => ({
 		mockFetchJointEval(...args),
 }));
 
-const VALID_AUTH_HEADER = "Bearer test-suit-api-key-that-is-at-least-32-chars";
-
-function authedRequest(url: string): Request {
+/**
+ * APISIX-forwarded requests carry `X-Gateway-Forwarded` (injected by the
+ * gateway's `proxy-rewrite` plugin). Bearer + rate-limit are enforced by
+ * APISIX upstream, so tests only need to simulate the header presence that
+ * the middleware has already validated. See `filesApi.test.ts` for the same
+ * pattern.
+ */
+function gatewayForwardedRequest(url: string): Request {
 	return new Request(url, {
-		headers: { Authorization: VALID_AUTH_HEADER },
+		headers: { "x-gateway-forwarded": "test-gateway-secret" },
 	});
 }
 
@@ -82,28 +87,20 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchJointEval.mockResolvedValue(new Map());
 	});
 
-	it("should return 401 when Authorization header is missing", async () => {
+	it("should return 403 when X-Gateway-Forwarded header is missing", async () => {
+		// Bearer validation now lives in APISIX; the route only enforces the
+		// anti-bypass header (see gatewaySource.ts). A direct cluster-internal
+		// call that skips APISIX arrives with no header and is rejected here.
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
 		const request = new Request("http://localhost/api/v1/export/declarations");
 		const response = await GET(request);
 
-		expect(response.status).toBe(401);
-	});
-
-	it("should return 401 when API key is invalid", async () => {
-		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = new Request(
-			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
-			{ headers: { Authorization: "Bearer wrong-key" } },
-		);
-		const response = await GET(request);
-
-		expect(response.status).toBe(401);
+		expect(response.status).toBe(403);
 	});
 
 	it("should return 400 when date_begin param is missing", async () => {
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/export/declarations",
 		);
 		const response = await GET(request);
@@ -115,7 +112,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 	it("should return 400 when date_begin format is invalid", async () => {
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-3-5",
 		);
 		const response = await GET(request);
@@ -125,7 +122,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 	it("should return 400 when date_end format is invalid", async () => {
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15&date_end=bad",
 		);
 		const response = await GET(request);
@@ -137,7 +134,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 	it("should return empty declarations when no match", async () => {
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
 		);
 		const response = await GET(request);
@@ -153,7 +150,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 	it("should use date_end when provided", async () => {
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15&date_end=2027-03-20",
 		);
 		const response = await GET(request);
@@ -168,7 +165,7 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchSubmitted.mockRejectedValue(new Error("DB connection failed"));
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
 		);
 		const response = await GET(request);
@@ -231,7 +228,7 @@ describe("GET /api/v1/export/declarations", () => {
 		]);
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-01-01&date_end=2027-01-03",
 		);
 		const response = await GET(request);
@@ -281,7 +278,7 @@ describe("GET /api/v1/export/declarations", () => {
 		]);
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
 		);
 		const response = await GET(request);
@@ -371,7 +368,7 @@ describe("GET /api/v1/export/declarations", () => {
 		);
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
 		);
 		const response = await GET(request);
@@ -440,7 +437,7 @@ describe("GET /api/v1/export/declarations", () => {
 		);
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
 		);
 		const response = await GET(request);
@@ -505,7 +502,7 @@ describe("GET /api/v1/export/declarations", () => {
 		);
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
 		);
 		const response = await GET(request);
@@ -562,7 +559,7 @@ describe("GET /api/v1/export/declarations", () => {
 		);
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
 		);
 		const response = await GET(request);
