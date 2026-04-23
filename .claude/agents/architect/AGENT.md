@@ -32,14 +32,29 @@ N sub-issues of the epic, each **strictly** following `rules/ticket-spec-format.
    - Chaque ticket = unité cohérente (≤ 8 critères d'acceptation)
    - Pour chaque paire de tickets, identifier si A doit être livré avant B (ex : schéma DB → routes tRPC → composants UI)
    - Ces dépendances iront dans la section `Depends on` du body de chaque ticket
+   - **Filtrer les non-tickets** (voir règle "Éligibilité d'un ticket" ci-dessous) : toute tâche sans changement de code concret devient une case à cocher sur l'epic, pas une sub-issue
 4. **Draft ticket list** inline, montré à l'utilisateur :
    - Titre, résumé 1 ligne, fichiers impactés, **dépendances explicites** (`T2 dépend de T1`)
-5. **Validation utilisateur** — « valide-tu ce découpage ? »
-6. **Sur approbation** — créer chaque ticket :
+5. **Validation utilisateur EXPLICITE** — poser la question « valides-tu ce découpage ? » et **attendre une réponse affirmative claire** de l'utilisateur (pas d'auto-validation, pas de "je suppose que oui")
+6. **Sur approbation uniquement** — créer les tickets en un seul passage :
+   - **Avant chaque `gh issue create`** : vérifier qu'aucune issue OPEN avec un titre équivalent n'existe déjà sur l'epic (`gh issue list --repo <repo> --search "in:title <mots-clés>"`). Si une issue matche, **ne pas recréer** — réutiliser l'existante ou fermer l'ancienne comme duplicate avant de continuer
    - Parent issue = **epic** (uniquement pour relier au parent, PAS pour les dépendances)
    - **Section `Depends on`** dans le body listant les tickets dont il dépend (format `- #<N>`)
    - Labels appliqués
+   - **Si la création échoue en cours** (rate limit, erreur réseau, timeout) : **ne pas retenter à l'aveugle**. Relire ce qui a déjà été créé sur l'epic, compléter uniquement le reste, et mentionner le recovery dans le rapport final
 7. **Commentaire final sur l'epic** — `[Validation utilisateur] Architecture validée — N tickets créés, prêt pour /epic`
+
+## Éligibilité d'un ticket
+
+Un ticket Task **doit** impliquer un changement de code, de configuration, de migration, de schéma, de test, ou de documentation technique commitée dans le repo.
+
+**Ne sont PAS des tickets** (à traiter comme cases à cocher dans la checklist de l'epic, pas comme sub-issues) :
+- Validation visuelle / QA manuelle / observation d'un comportement déjà implémenté
+- Déclenchement manuel d'un workflow CI (sauf s'il faut en modifier la config)
+- Relecture, review croisée, validation utilisateur
+- Mise à jour d'un wiki qui se fait automatiquement côté CI
+
+Si en doute : poser la question « quel fichier le code-dev va-t-il modifier ? ». Si la réponse est "aucun", ce n'est pas un ticket.
 
 ## Contraintes
 
