@@ -23,7 +23,15 @@ import {
 	getMultiYearGapTrendSchema,
 } from "~/modules/admin/stats";
 import { COMPANY_SIZE_RANGES } from "~/modules/domain";
-import { DOMINANT_NAF_SECTIONS, OTHER_NAF_SEGMENT } from "~/modules/shared";
+// Server-only router: import the constants directly from the internal file
+// instead of the `~/modules/shared` barrel, which also re-exports the
+// `useZodForm` client hook. The barrel pulls `react-hook-form`, and its
+// server build (`react-server.esm.mjs`) does not export `useForm`, so
+// indirect imports from server code break `next build`.
+import {
+	DOMINANT_NAF_SECTIONS,
+	OTHER_NAF_SEGMENT,
+} from "~/modules/shared/nafSections";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import type { DB } from "~/server/db";
 import { companies, declarations } from "~/server/db/schema";
