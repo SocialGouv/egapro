@@ -1,8 +1,8 @@
 # Visual Quality Validation
 
-Protocole de comparaison du rendu de l'app avec les mockups HTML DSFR produits par l'agent `designer`.
+> **Used by**: `design-validator` (exclusif). Invoqué par `code-dev` step 9a après PR draft.
 
-Utilisé par `design-validator` après qu'un `code-dev` a passé un ticket en **In review**.
+Protocole de comparaison du rendu de l'app avec les mockups HTML DSFR produits par l'agent `designer`.
 
 La validation visuelle est faite **par Claude** (capacité vision native), pas par un outil externe.
 

@@ -1,5 +1,7 @@
 # Figma Workflow
 
+> **Used by**: `designer` (produit mockups HTML depuis Figma), `code-dev` (quand ticket UI avec ref visuelle). Hors pipeline : tout agent implémentant depuis un design Figma.
+
 When implementing from a Figma design, follow this phased approach strictly.
 
 ---

@@ -1,5 +1,7 @@
 # GitHub Board Reference
 
+> **Used by**: `product-owner`, `architect`, `code-dev` (déplacent les tickets), skills `/ticket`, `/epic`, `/code`. `functional-validator` + `design-validator` commentent seulement.
+
 IDs et snippets GraphQL prêts à l'emploi pour que les agents (`architect`, `code-dev`) et skills (`/epic`, `/code`) pilotent le project board **EGAPRO V2**.
 
 Les IDs sont **stables** tant que le board n'est pas recréé. Si un snippet échoue avec "node not found", re-extraire les IDs via la requête de diagnostic en bas de ce fichier.

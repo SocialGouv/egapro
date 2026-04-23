@@ -1,5 +1,7 @@
 # Ticket Spec Format
 
+> **Used by**: `architect` (écrit les tickets au format), `code-dev` (valide le format avant exécution, retourne en To Do si manquant), skill `/code` (préconditions).
+
 Format standardisé des tickets **code** produits par l'agent `architect` et consommés par `code-dev` (Sonnet par défaut, Opus si label `complexe`).
 
 Un ticket bien formaté permet à un dev Sonnet d'exécuter la tâche sans ambiguïté ni questions supplémentaires. Si un ticket ne respecte pas ce format, `code-dev` doit retourner le ticket en `To Do` avec un commentaire listant les manques, plutôt qu'improviser.

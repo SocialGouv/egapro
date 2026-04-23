@@ -3,6 +3,8 @@ paths:
   - "src/**/*.tsx"
 ---
 
+> **Used by**: `code-dev` (écriture composants), `rgaa-auditor`, `structural-auditor` (règle 2.11). Auto-chargé via `paths:`.
+
 # React Components
 
 ## No logic in JSX

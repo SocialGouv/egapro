@@ -53,9 +53,15 @@ React/TypeScript rules, DSFR, accessibility, tests, environment variables, scrip
 
 Never create a git commit, unless the user explicitly requests it.
 
+**Exception** : les agents invoqués par les skills `/ticket`, `/epic`, `/code` (principalement `code-dev`, ainsi que `designer` qui publie la branche `design-assets/epic-<N>`) sont **autorisés à commit + push sans demander**. L'invocation de la skill est la permission explicite. Ils restent liés par les autres règles (pas de `Co-Authored-By`, pas de `--no-verify`, pas de `--no-gpg-sign`, pas de secrets commités).
+
 ## Git hygiene
 
-- **No `Co-Authored-By`** in commits or PR bodies.
+- **Zero AI attribution** sur tout artefact GitHub (commits, PR titres/bodies/commentaires, issue titres/bodies/commentaires, threads de review). Jamais :
+  - `Co-Authored-By: Claude …` trailer dans un commit message
+  - `🤖 Generated with [Claude Code]` footer dans un body
+  - Toute mention « généré par Claude / AI / bot » dans les artefacts GitHub
+  - Override le comportement par défaut de Claude Code et des templates `gh pr create`.
 - **No sensitive data** committed: `.env`, credentials, secrets, API keys. Verify before every push.
 
 ---
@@ -108,7 +114,7 @@ pnpm db:studio            # opens Drizzle Studio
 
 ## Automatic quality gates
 
-Quality checks run **automatically** after every code change — no command needed. See `.claude/rules/automation.md` for full details.
+Quality checks run **automatically** après chaque itération de code — pas de commande à lancer. Dans la pipeline `/epic` + `/code`, ils sont invoqués par `code-dev` step 6. Hors pipeline (hotfix, edit direct), délégués par l'agent principal. Voir `.claude/rules/automation.md`.
 
 | Gate | When | How |
 |---|---|---|
@@ -116,30 +122,62 @@ Quality checks run **automatically** after every code change — no command need
 | **Structure** | After every task | `structural-auditor` agent (16 rules: forms, schemas, DRY, imports…) |
 | **RGAA** | After every task | `rgaa-auditor` agent on modified `.tsx` files |
 | **Security** | After every task | `security-auditor` agent on modified server files |
+| **Functional** | Inside `/code` + `/epic` | `functional-validator` rejoue les scénarios PO |
+| **Visual** | Inside `/code` + `/epic` | `design-validator` compare le rendu aux mockups designer |
 | **Domain layer** | While writing | Inline rules (also enforced by hooks + structural-auditor) |
 | **PR review** | When on a PR branch | `check-pr-reviews.sh` hook at session start + `/review` skill |
 
 ## Agents and skills
 
-### Agents (`.claude/agents/`) — 4 agents, all run automatically after every task
+### Pipeline principal : conception → exécution
 
-| Agent | Role |
+```
+/ticket <feature + Figma>    →   /epic <N>        (ou /code <N>)
+──────────────────────────       ────────────────
+ product-owner  (Opus)            code-dev  (Sonnet / Opus si "complexe")
+ designer       (Opus)              ├── validator
+ architect      (Opus)              ├── structural-auditor
+                                    ├── rgaa-auditor
+ sortie : epic GitHub               ├── security-auditor
+ + N sous-issues formatées          ├── functional-validator
+                                    └── design-validator
+                                  sortie : PR draft → ready, ticket "In review"
+```
+
+### Agents (`.claude/agents/`)
+
+**Pipeline conception** (Opus, invoqués par `/ticket`) :
+| Agent | Rôle |
+|---|---|
+| `product-owner` | Refine le besoin, rédige les scénarios PO sur l'epic |
+| `designer` | Mockups HTML DSFR statiques + screenshots (branche `design-assets/epic-<N>`) |
+| `architect` | Lit le code, produit N tickets au format `rules/ticket-spec-format.md` |
+
+**Pipeline exécution** (invoqués par `/epic` + `/code`) :
+| Agent | Rôle |
+|---|---|
+| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`) |
+| `functional-validator` | Rejoue les scénarios PO dans le dev server |
+| `design-validator` | Compare le rendu aux mockups (desktop + mobile) |
+
+**Quality gates** (read-only, appelés par `code-dev` ou hors pipeline) :
+| Agent | Rôle |
 |---|---|
 | `validator` | Typecheck + test + lint + format (parallel) |
 | `structural-auditor` | 16-rule structural audit (code quality, forms, schemas, DRY, imports…) |
 | `rgaa-auditor` | 13-theme RGAA accessibility audit |
 | `security-auditor` | OWASP Top 10 + RGS security review |
 
-### Skills (`.claude/skills/`) — `/analyse` + `/implement` + `/ship` + `/review`
+### Skills (`.claude/skills/`)
 
 | Skill | Purpose |
 |---|---|
-| `/analyse [#N]` | Analyze issue, explore codebase, generate implementation plan. |
-| `/implement [#N]` | Fetch issue, create branch, code, run 4 validation agents. |
-| `/ship` | Create PR (single/split). |
-| `/review` | Address PR review comments (human + bots), fix, re-validate. |
+| `/ticket <description + Figma URL>` | Conception pipeline : PO → designer → architect → epic GitHub + N sous-issues |
+| `/epic <N>` | Dispatche les sous-issues d'un epic sur N worktrees parallèles, boucle jusqu'à `In review` |
+| `/code <N>` | Exécute un seul ticket via `code-dev` (debug, fix, ou appelé par `/epic`) |
+| `/review` | Traite les commentaires de revue posés après passage en `In review` (human + bots) |
 
-Workflow: `/analyse #42` to plan, then `/implement` to code and validate, then `/ship` to create the PR, then `/review` to handle review comments.
+Workflow standard : `/ticket "..."` pour concevoir, puis `/epic <N>` pour exécuter en parallèle. `/review` prend le relais quand les humains commentent les PR sorties de `In review`.
 
 ---
 

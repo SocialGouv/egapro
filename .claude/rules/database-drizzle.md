@@ -3,6 +3,8 @@ paths:
   - "src/server/**/*.ts"
 ---
 
+> **Used by**: `code-dev` (écriture queries/migrations), `security-auditor` (A03/A08), `structural-auditor` (règle 2.10). Auto-chargé via `paths:`.
+
 # Database & Drizzle
 
 ## Transactions (mandatory)

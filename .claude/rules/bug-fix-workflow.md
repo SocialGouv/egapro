@@ -1,5 +1,7 @@
 # Bug Fix Workflow
 
+> **Used by**: `code-dev` (sur les tickets avec label `bug`). Hors pipeline : l'agent principal quand il traite un fix.
+
 Quand un ticket est un **bug** (label `bug`, ou description explicite d'un comportement incorrect), `code-dev` suit un protocole strict **reproduire → fixer → valider**.
 
 Cette discipline évite deux pièges fréquents :

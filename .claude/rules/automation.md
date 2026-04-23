@@ -4,6 +4,8 @@ description: Automated guardrails, quality gates, and agent delegation — alway
 
 # Automated Guardrails
 
+> **Used by**: tous les agents et toute session. Décrit les hooks (`block-bad-patterns.sh`, `auto-lint.sh`, `check-pr-reviews.sh`), les 4 auditors obligatoires, et la liste des skills.
+
 Everything below is **automatic**. No commands needed — the rules trigger themselves.
 
 ---
@@ -54,9 +56,11 @@ Runs `pnpm biome check --write` automatically:
 These gates trigger **automatically** without user input. Do NOT wait to be asked.
 **All gates are mandatory on every task** (junior-proof policy).
 
-### After every task — agent delegation
+### Quality gates — agent delegation
 
-Before reporting ANY task as done, launch **4 parallel agents**:
+Within the `/epic` + `/code` pipeline, quality gates are delegated by the `code-dev` agent (step 6) — it invokes the 4 auditors in parallel after implementation, before opening the draft PR.
+
+**Outside the pipeline** (direct edits, manual fixes, hotfixes), the same rule applies : before reporting ANY task as done, launch the **4 parallel agents** :
 
 1. **Validator** — delegate to `.claude/agents/validator/AGENT.md` (typecheck + test + lint + format)
 2. **Structural auditor** — delegate to `.claude/agents/structural-auditor/AGENT.md` on all modified files
@@ -143,7 +147,7 @@ Four skills split the lifecycle:
 
 | Command | When to use |
 |---|---|
-| `/analyse [#N]` | Analyze issue, explore codebase, generate implementation plan. Run before `/implement`. |
-| `/implement [#N]` | Fetch issue, create branch, code, validate (4 agents). |
-| `/ship` | Create PR (single/split). Run after `/implement`. |
-| `/review` | Address PR review comments (human + bots). Run after `/ship`. |
+| `/ticket <description + Figma URL>` | Conception pipeline : PO → designer → architect. Produit un epic GitHub avec N sous-issues prêtes à dispatcher. |
+| `/epic <N>` | Exécute un epic : worktrees parallèles, `code-dev` + validators, boucle jusqu'à `In review`. |
+| `/code <N>` | Exécute un seul ticket via `code-dev`. Utilisé seul (debug, fix manuel) ou appelé par `/epic`. |
+| `/review` | Traite les commentaires de revue posés après passage en `In review` (human + bots). |

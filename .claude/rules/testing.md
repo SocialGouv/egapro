@@ -5,6 +5,8 @@ paths:
 
 # Testing
 
+> **Used by**: `code-dev` (écrit TU + E2E), `validator` (exécute `pnpm test`), `structural-auditor` (règle 2.13). Auto-chargé via `paths:`.
+
 ## 75% minimum code coverage (enforced)
 
 Global code coverage must stay **at or above 75%** for statements, branches, functions, and lines. This is enforced by Vitest coverage thresholds — `pnpm test --coverage` will fail if any metric drops below 75%.
