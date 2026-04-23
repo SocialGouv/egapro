@@ -239,11 +239,15 @@ function buildSegmentExpression(
 		end`;
 	}
 	// NAF: collapse non-dominant sections into a single "Autres" segment.
-	const dominantList = DOMINANT_NAF_SECTIONS.map((code) => `'${code}'`).join(
-		", ",
+	// Each dominant letter goes through parameter binding via `sql.join` —
+	// prevents the helper from becoming an injection sink if the constant
+	// is ever sourced from outside the module.
+	const dominantParams = sql.join(
+		DOMINANT_NAF_SECTIONS.map((code) => sql`${code}`),
+		sql`, `,
 	);
 	return sql<string>`case
-		when upper(left(${companies.nafCode}, 1)) in (${sql.raw(dominantList)})
+		when upper(left(${companies.nafCode}, 1)) in (${dominantParams})
 		then upper(left(${companies.nafCode}, 1))
 		else ${OTHER_NAF_SEGMENT}
 	end`;

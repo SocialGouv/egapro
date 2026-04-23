@@ -78,22 +78,3 @@ export const DOMINANT_NAF_SECTIONS: readonly NafSectionCode[] = [
 
 /** Label used for the aggregated series bucketing all non-dominant sections. */
 export const OTHER_NAF_SEGMENT = "Autres";
-
-export type NafSegment = NafSectionCode | typeof OTHER_NAF_SEGMENT;
-
-/**
- * Map a full NAF code (e.g. `"62.01Z"`) to its chart segment. Dominant
- * sections keep their letter; everything else collapses into `"Autres"`.
- * Returns `null` when the code is null / empty / unknown.
- */
-export function classifyNafSegment(nafCode: string | null): NafSegment | null {
-	if (!nafCode) return null;
-	const prefix = nafCode.charAt(0).toUpperCase();
-	if (DOMINANT_NAF_SECTIONS.includes(prefix as NafSectionCode)) {
-		return prefix as NafSectionCode;
-	}
-	// Reject obviously invalid prefixes so upstream doesn't silently fold
-	// corrupt data into "Autres".
-	if (!NAF_SECTION_CODES.includes(prefix as NafSectionCode)) return null;
-	return OTHER_NAF_SEGMENT;
-}
