@@ -3,6 +3,9 @@ export { CampaignProgressionChart } from "./CampaignProgressionChart";
 export { CampaignProgressionTable } from "./CampaignProgressionTable";
 export { CampaignStatsPage } from "./CampaignStatsPage";
 export { ConformiteStatsPage } from "./ConformiteStatsPage";
+export { GapChartSeriesToggle } from "./GapChartSeriesToggle";
+export { MultiYearGapChart } from "./MultiYearGapChart";
+export { MultiYearGapTable } from "./MultiYearGapTable";
 export type {
 	GetCampaignProgressionInput,
 	GetGapAlertRateInput,
