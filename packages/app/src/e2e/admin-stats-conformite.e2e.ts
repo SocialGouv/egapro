@@ -21,70 +21,74 @@ const SIRENS = {
 const CURRENT_YEAR = getCurrentYear();
 const PREVIOUS_YEAR = CURRENT_YEAR - 1;
 
+// Seed shared by every test in this file — K8 (gap alert rate) and K10
+// (multi-year trend) both consult the same /admin/stats/conformite page,
+// so file-level beforeAll/afterAll avoids re-seeding between describes
+// and prevents the K10 tests from running against an empty DB.
+test.beforeAll(async () => {
+	await seedSubmittedDeclarationsForStats([
+		{
+			siren: SIRENS.currentAlert,
+			year: CURRENT_YEAR,
+			submittedAt: `${CURRENT_YEAR}-01-15T10:00:00Z`,
+			workforce: 30,
+			hasAlertGap: true,
+			nafCode: "A01.11Z",
+			averageGap: 6.5,
+		},
+		{
+			siren: SIRENS.currentSafe,
+			year: CURRENT_YEAR,
+			submittedAt: `${CURRENT_YEAR}-01-16T10:00:00Z`,
+			workforce: 30,
+			hasAlertGap: false,
+			nafCode: "A01.11Z",
+			averageGap: 2.1,
+		},
+		{
+			siren: SIRENS.currentLargeAlert,
+			year: CURRENT_YEAR,
+			submittedAt: `${CURRENT_YEAR}-01-17T10:00:00Z`,
+			workforce: 300,
+			hasAlertGap: true,
+			nafCode: "C10.11Z",
+			averageGap: 7.2,
+		},
+		{
+			siren: SIRENS.currentFinance,
+			year: CURRENT_YEAR,
+			submittedAt: `${CURRENT_YEAR}-01-18T10:00:00Z`,
+			workforce: 50,
+			hasAlertGap: true,
+			nafCode: "K64.19Z",
+			averageGap: 8.4,
+		},
+		{
+			siren: SIRENS.previousAlert,
+			year: PREVIOUS_YEAR,
+			submittedAt: `${PREVIOUS_YEAR}-02-15T10:00:00Z`,
+			workforce: 30,
+			hasAlertGap: true,
+			nafCode: "A01.11Z",
+			averageGap: 6.8,
+		},
+		{
+			siren: SIRENS.previousSafe,
+			year: PREVIOUS_YEAR,
+			submittedAt: `${PREVIOUS_YEAR}-02-16T10:00:00Z`,
+			workforce: 30,
+			hasAlertGap: false,
+			nafCode: "A01.11Z",
+			averageGap: 2.3,
+		},
+	]);
+});
+
+test.afterAll(async () => {
+	await deleteSeededCampaignDeclarations(Object.values(SIRENS));
+});
+
 test.describe("admin conformity stats (K8 — gap alert rate)", () => {
-	test.beforeAll(async () => {
-		await seedSubmittedDeclarationsForStats([
-			{
-				siren: SIRENS.currentAlert,
-				year: CURRENT_YEAR,
-				submittedAt: `${CURRENT_YEAR}-01-15T10:00:00Z`,
-				workforce: 30,
-				hasAlertGap: true,
-				nafCode: "A01.11Z",
-				averageGap: 6.5,
-			},
-			{
-				siren: SIRENS.currentSafe,
-				year: CURRENT_YEAR,
-				submittedAt: `${CURRENT_YEAR}-01-16T10:00:00Z`,
-				workforce: 30,
-				hasAlertGap: false,
-				nafCode: "A01.11Z",
-				averageGap: 2.1,
-			},
-			{
-				siren: SIRENS.currentLargeAlert,
-				year: CURRENT_YEAR,
-				submittedAt: `${CURRENT_YEAR}-01-17T10:00:00Z`,
-				workforce: 300,
-				hasAlertGap: true,
-				nafCode: "C10.11Z",
-				averageGap: 7.2,
-			},
-			{
-				siren: SIRENS.currentFinance,
-				year: CURRENT_YEAR,
-				submittedAt: `${CURRENT_YEAR}-01-18T10:00:00Z`,
-				workforce: 50,
-				hasAlertGap: true,
-				nafCode: "K64.19Z",
-				averageGap: 8.4,
-			},
-			{
-				siren: SIRENS.previousAlert,
-				year: PREVIOUS_YEAR,
-				submittedAt: `${PREVIOUS_YEAR}-02-15T10:00:00Z`,
-				workforce: 30,
-				hasAlertGap: true,
-				nafCode: "A01.11Z",
-				averageGap: 6.8,
-			},
-			{
-				siren: SIRENS.previousSafe,
-				year: PREVIOUS_YEAR,
-				submittedAt: `${PREVIOUS_YEAR}-02-16T10:00:00Z`,
-				workforce: 30,
-				hasAlertGap: false,
-				nafCode: "A01.11Z",
-				averageGap: 2.3,
-			},
-		]);
-	});
-
-	test.afterAll(async () => {
-		await deleteSeededCampaignDeclarations(Object.values(SIRENS));
-	});
-
 	test("admin can open the conformity stats page and sees the KPI tile", async ({
 		page,
 	}) => {
