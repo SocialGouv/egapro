@@ -33,11 +33,13 @@ export { computeDeclarationStatus } from "./shared/declarationStatus";
 export {
 	computePercentage,
 	computeProportion,
+	formatCount,
 	formatCurrency,
 	formatGap,
 	formatGapCompact,
 	formatLongDate,
 	formatMonthDay,
+	formatPointsDelta,
 	formatShortDate,
 	formatShortDateTime,
 	formatTotal,

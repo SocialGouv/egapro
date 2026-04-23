@@ -1,0 +1,18 @@
+.tile {
+	// Lay out the tile body vertically with consistent DSFR spacing.
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.value {
+	font-size: 2.5rem;
+	font-weight: 700;
+	line-height: 1.2;
+	margin: 0;
+}
+
+.subtitle {
+	color: var(--text-mention-grey);
+	margin: 0;
+}

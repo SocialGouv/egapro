@@ -48,6 +48,25 @@ export function formatTotal(value: number | null, unit: string): string {
 	return `${value.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${unit}`;
 }
 
+/** Format an integer with French thousand separators: `4213` → `"4 213"`. */
+export function formatCount(value: number): string {
+	return value.toLocaleString("fr-FR");
+}
+
+/**
+ * Format a percentage-point delta with sign and unit for KPI badges:
+ * `2.1` → `"+2,1 pts"`, `-2.1` → `"-2,1 pts"`, `0` → `"= 0 pt"`.
+ *
+ * The value is rounded to one decimal before display.
+ */
+export function formatPointsDelta(value: number): string {
+	const rounded = Math.round(value * 10) / 10;
+	if (rounded === 0) return "= 0 pt";
+	const sign = rounded > 0 ? "+" : "-";
+	const abs = Math.abs(rounded).toFixed(1).replace(".", ",");
+	return `${sign}${abs} pts`;
+}
+
 /** Format a date in short French format: `new Date("2026-03-10")` → `"10/03/2026"`. Returns `"—"` for nullish values. */
 export function formatShortDate(date: Date | null | undefined): string {
 	if (!date) return "—";

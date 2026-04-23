@@ -1,3 +1,4 @@
+export { AdminKpiTile } from "./AdminKpiTile";
 export { CampaignProgressionChart } from "./CampaignProgressionChart";
 export { CampaignProgressionTable } from "./CampaignProgressionTable";
 export { CampaignStatsPage } from "./CampaignStatsPage";

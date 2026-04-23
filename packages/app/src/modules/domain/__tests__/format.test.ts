@@ -3,10 +3,12 @@ import { describe, expect, it } from "vitest";
 import {
 	computePercentage,
 	computeProportion,
+	formatCount,
 	formatCurrency,
 	formatGap,
 	formatGapCompact,
 	formatMonthDay,
+	formatPointsDelta,
 	formatShortDate,
 	formatShortDateTime,
 	formatTotal,
@@ -104,5 +106,35 @@ describe("formatMonthDay", () => {
 	it("swaps a MM-DD fragment to the French DD/MM form", () => {
 		expect(formatMonthDay("02-15")).toBe("15/02");
 		expect(formatMonthDay("12-01")).toBe("01/12");
+	});
+});
+
+describe("formatCount", () => {
+	it("formats an integer with French thousand separators", () => {
+		expect(formatCount(4213)).toMatch(/4[\s ]213/);
+	});
+
+	it("leaves values below 1000 unchanged", () => {
+		expect(formatCount(42)).toBe("42");
+	});
+});
+
+describe("formatPointsDelta", () => {
+	it("prefixes a positive value with + and appends pts", () => {
+		expect(formatPointsDelta(2.1)).toBe("+2,1 pts");
+	});
+
+	it("prefixes a negative value with - and appends pts", () => {
+		expect(formatPointsDelta(-2.1)).toBe("-2,1 pts");
+	});
+
+	it("formats zero as '= 0 pt' (singular, no sign)", () => {
+		expect(formatPointsDelta(0)).toBe("= 0 pt");
+		expect(formatPointsDelta(0.04)).toBe("= 0 pt");
+	});
+
+	it("rounds to one decimal", () => {
+		expect(formatPointsDelta(2.16)).toBe("+2,2 pts");
+		expect(formatPointsDelta(-0.18)).toBe("-0,2 pts");
 	});
 });
