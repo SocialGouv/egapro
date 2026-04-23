@@ -25,17 +25,23 @@ const SEED_DECLARANT_ID = "seed-conformite-declarant-0000-0000000";
 
 /** 777XXXXXX SIRENs are reserved for this fixture. */
 const SIREN_PREFIX = "777";
-/** Generates one company per (bucket × sector) combination, 5 × 8 = 40. */
+/** Generates one company per (bucket × sector) combination, 5 × 9 = 45. */
 const WORKFORCE_BUCKETS = [20, 60, 120, 180, 300];
+/**
+ * Nine NAF sample codes cover the five K10 dominant sections (C, G, M, N, Q)
+ * so every expected curve shows up in "Segmenter par NAF" mode, plus four
+ * non-dominant sections (A, F, J, K) that collapse into the "Autres" series.
+ */
 const NAF_SAMPLE_CODES = [
-	"A01.11Z", // A — Agriculture
-	"C10.11Z", // C — Industrie manufacturière
-	"F41.10A", // F — Construction
-	"G47.11B", // G — Commerce
-	"J62.01Z", // J — Information & communication
-	"K64.19Z", // K — Activités financières et d'assurance
-	"M70.10Z", // M — Activités spécialisées
-	"Q86.10Z", // Q — Santé humaine
+	"A01.11Z", // A — Agriculture → "Autres"
+	"C10.11Z", // C — Industrie manufacturière (dominant)
+	"F41.10A", // F — Construction → "Autres"
+	"G47.11B", // G — Commerce (dominant)
+	"J62.01Z", // J — Information & communication → "Autres"
+	"K64.19Z", // K — Activités financières et d'assurance → "Autres"
+	"M70.10Z", // M — Activités spécialisées (dominant)
+	"N78.10Z", // N — Services administratifs (dominant)
+	"Q86.10Z", // Q — Santé humaine (dominant)
 ];
 /** Number of most-recent campaign years to seed (current year + N-1 … N-3). */
 const CAMPAIGN_YEARS_BACK = 4;
@@ -119,20 +125,46 @@ function shouldHaveAlertGap(companyIndex, yearsBeforeCurrent, nafCode) {
 
 /**
  * Build a plausible average gap (0..12%) for a seed row so K10 has something
- * to plot. Same shape as `shouldHaveAlertGap`: slightly improving over time,
- * with a sector bias (K finance skewed up, M services skewed down). Clamped
- * to [0.5, 12] so the chart's Y-axis stays readable.
+ * to plot. Combines three effects so every K10 segmentation produces visibly
+ * distinct curves:
+ *  - **year drift**: ~+0.6pt per year going back, so the trend slopes down
+ *    toward the current year.
+ *  - **NAF sector bias**: K (finance) runs hotter, M (services spécialisés)
+ *    cooler — the "Segmenter par NAF" mode shows spread between Autres and
+ *    the dominant series.
+ *  - **workforce bias**: smaller companies (< 50) trend ~+1.5pt vs. 250+,
+ *    so the "Segmenter par effectif" mode separates the buckets vertically
+ *    instead of drawing five overlapping lines.
+ * Clamped to [0.5, 12] so the Y-axis stays readable.
  */
-function pseudoAverageGap(companyIndex, yearsBeforeCurrent, nafCode) {
+function pseudoAverageGap(
+	companyIndex,
+	yearsBeforeCurrent,
+	nafCode,
+	workforce,
+) {
 	const baseGap = 4 + 0.6 * yearsBeforeCurrent;
 	const sectorShift = nafCode.startsWith("K")
 		? 2.5
 		: nafCode.startsWith("M")
 			? -1.5
 			: 0;
+	// Linear gradient across the five buckets: <50 → +1.5, 50-99 → +0.75,
+	// 100-149 → 0, 150-249 → -0.5, 250+ → -1. Enough spread for the chart
+	// to render five distinct curves without overlapping.
+	const workforceShift =
+		workforce < 50
+			? 1.5
+			: workforce < 100
+				? 0.75
+				: workforce < 150
+					? 0
+					: workforce < 250
+						? -0.5
+						: -1;
 	const jitter =
-		(pseudoRandom(companyIndex * 211 + yearsBeforeCurrent) - 0.5) * 3;
-	const value = baseGap + sectorShift + jitter;
+		(pseudoRandom(companyIndex * 211 + yearsBeforeCurrent) - 0.5) * 1.5;
+	const value = baseGap + sectorShift + workforceShift + jitter;
 	return Math.max(0.5, Math.min(12, Math.round(value * 10) / 10));
 }
 
@@ -194,10 +226,15 @@ async function seed(sql) {
 	for (let yearsBack = 0; yearsBack < CAMPAIGN_YEARS_BACK; yearsBack++) {
 		const year = currentYear - yearsBack;
 		let companyIndex = 0;
-		for (const { siren, nafCode } of catalog) {
+		for (const { siren, nafCode, workforce } of catalog) {
 			companyIndex++;
 			const hasAlertGap = shouldHaveAlertGap(companyIndex, yearsBack, nafCode);
-			const averageGap = pseudoAverageGap(companyIndex, yearsBack, nafCode);
+			const averageGap = pseudoAverageGap(
+				companyIndex,
+				yearsBack,
+				nafCode,
+				workforce,
+			);
 			// Spread submissions over January-February so the rows look realistic
 			// (even though the campaign progression chart is not what we exercise
 			// here, keeping a plausible date avoids surprises elsewhere).
