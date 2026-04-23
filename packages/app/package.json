@@ -29,7 +29,8 @@
 		"test:lighthouse": "lhci collect --url=${LIGHTHOUSE_URL:-http://localhost:3000} && lhci upload && lhci assert",
 		"typecheck": "tsc --noEmit",
 		"generate:fetch-companies": "tsx scripts/fetch-large-companies.ts",
-		"generate:mock-gip": "tsx scripts/generate-mock-gip-data.ts"
+		"generate:mock-gip": "tsx scripts/generate-mock-gip-data.ts",
+		"post-process-schema-wiki": "tsx scripts/post-process-schema-wiki.mjs"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.1029.0",
@@ -79,6 +80,7 @@
 		"jsdom": "^29.0.2",
 		"sass": "^1.99.0",
 		"swagger-ui-dist": "^5.32.2",
+		"tsx": "^4.21.0",
 		"typescript": "^6.0.2",
 		"vite-tsconfig-paths": "^6.1.1",
 		"vitest": "^4.1.4"
