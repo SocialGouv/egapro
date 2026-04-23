@@ -80,6 +80,9 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/migrate.mjs ./pa
 # Standalone script invoked by the audit-cleanup CronJob (issue #3268 — direct
 # DB access replaces the former curl → /api/audit/cleanup HTTP trigger).
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/audit-cleanup.mjs ./packages/app/scripts/audit-cleanup.mjs
+# Optional conformity-stats fixture seed (dev / alpha review apps only;
+# gated by EGAPRO_AUTO_SEED_CONFORMITE in entrypoint.sh).
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/seed-conformite-stats.mjs ./packages/app/scripts/seed-conformite-stats.mjs
 
 USER 1000
 

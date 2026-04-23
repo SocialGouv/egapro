@@ -37,12 +37,8 @@ const NAF_SAMPLE_CODES = [
 	"M70.10Z", // M — Activités spécialisées
 	"Q86.10Z", // Q — Santé humaine
 ];
-/**
- * Kept in sync with `FIRST_DECLARATION_YEAR` from `~/modules/domain` — the
- * year filter on `/admin/stats/conformite` goes from there to the current
- * year, so we seed every slot to avoid empty tiles on older selections.
- */
-const FIRST_SEED_YEAR = 2019;
+/** Number of most-recent campaign years to seed (current year + N-1 … N-3). */
+const CAMPAIGN_YEARS_BACK = 4;
 
 function getDatabaseUrl() {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;

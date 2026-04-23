@@ -16,7 +16,7 @@
 		"db:migrate": "drizzle-kit migrate",
 		"db:push": "drizzle-kit push",
 		"db:studio": "drizzle-kit studio",
-		"dev": "node scripts/copy-dsfr.mjs && node scripts/copy-swagger-ui.mjs && next dev --turbo",
+		"dev": "node scripts/copy-dsfr.mjs && node scripts/copy-swagger-ui.mjs && (pnpm seed:conformite || true) && next dev --turbo",
 		"preview": "next build && next start",
 		"start": "next start",
 		"test": "vitest run",

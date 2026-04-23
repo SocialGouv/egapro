@@ -1,3 +1,8 @@
 app:
   annotations:
     oblik.socialgouv.io/min-limit-cpu: 2
+  vars:
+    # Seed the admin conformity-stats fixture at container startup so every
+    # review app (including alpha) has realistic numbers to browse. Gated
+    # here so preprod / prod never auto-seed — they ship with real data.
+    EGAPRO_AUTO_SEED_CONFORMITE: "true"
