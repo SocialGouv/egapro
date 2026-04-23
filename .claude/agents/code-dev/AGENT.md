@@ -80,7 +80,19 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
      - Désaccord → répondre avec argumentation, laisser le reviewer trancher (ne pas imposer)
    - Tant que des threads de review sont **non résolus** (unresolved), ne pas `gh pr ready`. Marquer les threads résolus via l'API GitHub quand applicable.
 
-   **Toutes rouges persistantes (> 3 tentatives sur un même axe)** → remettre le ticket en **To Do** avec diagnostic complet (logs CI, liens Sonar, commentaires validators + bot).
+   **Toutes rouges persistantes (> 3 tentatives sur un même axe)** → auto-escalade ou REFACTO selon le modèle courant (logique **interne à `code-dev`**, transparente pour l'appelant `/epic` ou `/code`) :
+
+   - **Modèle courant = Sonnet** (ticket sans label `complexe`) :
+     - Ajouter le label `complexe` au ticket : `gh issue edit <N> --add-label complexe`
+     - Poster un commentaire `code-dev: ESCALATE Sonnet→Opus` avec le diagnostic complet : axe en échec, 3 dernières tentatives, logs/liens/commentaires
+     - Commit + `git push` l'état courant (ne pas reset — l'instance Opus reprendra ce travail)
+     - **Déléguer à soi-même en Opus** via le tool `Agent` : `subagent_type` pointant sur `code-dev`, `model: "opus"`, prompt = « Ticket escaladé depuis Sonnet. Branche `<name>` au commit `<sha>`. Reprendre l'axe en échec (<axe>). Diagnostic : `<détails>`. Mêmes inputs : ticket #<N>, worktree `<path>`, port `<port>`, base branch `<base>`. »
+     - Attendre le retour de l'instance Opus. Son verdict (PASS ou REFACTO) devient le verdict de la présente instance Sonnet, propagé à l'appelant.
+   - **Modèle courant = Opus** (ticket déjà `complexe` à l'entrée OU escaladé depuis Sonnet) :
+     - Remettre le ticket en **To Do** avec diagnostic complet → intervention `architect` probablement nécessaire (re-découpage du ticket)
+     - Retourner le verdict **REFACTO** à l'appelant
+
+   **Une seule escalade possible par ticket** : Sonnet → Opus → REFACTO. Pas de ré-escalade après Opus. Le label `complexe` une fois posé ne se retire pas.
 
 10. **Fin** — quand 9a + 9b + 9c + 9d sont **tous verts / résolus** :
    - `gh pr ready <PR>` (sort la PR du draft)
@@ -96,6 +108,7 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 - **Coverage TU = 100%** sur le code du ticket (fichiers modifiés ou créés), pas seulement les 75% globaux
 - **CI + Sonar verts obligatoires** avant `gh pr ready` — aucune exception
 - **Zéro commentaire de review non-adressé** — bot ou humain, corriger ou répondre avec justification. Jamais d'ignorance silencieuse.
+- **Escalade Sonnet → Opus interne** — sur 3-retry exhaustion en Sonnet, auto-déléguer à une instance Opus du même agent. Invisible pour `/epic` et `/code`. Une seule escalade par ticket.
 
 ## Output Format
 
