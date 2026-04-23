@@ -44,7 +44,9 @@ describe("NafSectorFilter", () => {
 		render(<NafSectorFilter onChange={vi.fn()} value={undefined} />);
 
 		expect(
-			screen.getByRole("option", { name: /^J — Information et communication$/ }),
+			screen.getByRole("option", {
+				name: /^J — Information et communication$/,
+			}),
 		).toBeInTheDocument();
 	});
 

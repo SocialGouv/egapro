@@ -10,15 +10,15 @@ import {
 	sql,
 } from "drizzle-orm";
 
-import {
-	getCampaignProgressionSchema,
-	getGapAlertRateSchema,
-} from "~/modules/admin/stats/schemas";
 import type {
 	CampaignProgressionPoint,
 	CampaignProgressionSeries,
 	GapAlertRateResult,
-} from "~/modules/admin/stats/types";
+} from "~/modules/admin/stats";
+import {
+	getCampaignProgressionSchema,
+	getGapAlertRateSchema,
+} from "~/modules/admin/stats";
 import { COMPANY_SIZE_RANGES } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import type { DB } from "~/server/db";

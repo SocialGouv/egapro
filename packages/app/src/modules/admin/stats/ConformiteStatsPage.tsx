@@ -1,13 +1,12 @@
 "use client";
 
 import { type ChangeEvent, useState } from "react";
-
-import { formatCount, formatGap } from "~/modules/domain";
 import type { CompanySizeRange } from "~/modules/domain";
+import { formatCount, formatGap } from "~/modules/domain";
 import {
 	CompanySizeFilter,
-	NafSectorFilter,
 	type NafSectionCode,
+	NafSectorFilter,
 } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
@@ -76,10 +75,7 @@ export function ConformiteStatsPage({ currentYear, availableYears }: Props) {
 					/>
 				</div>
 				<div className="fr-col-12 fr-col-md-4">
-					<NafSectorFilter
-						onChange={setNafCodePrefix}
-						value={nafCodePrefix}
-					/>
+					<NafSectorFilter onChange={setNafCodePrefix} value={nafCodePrefix} />
 				</div>
 			</div>
 
