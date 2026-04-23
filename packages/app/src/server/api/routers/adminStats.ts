@@ -10,24 +10,27 @@ import {
 	sql,
 } from "drizzle-orm";
 
+// Server-only router: every import below bypasses the `~/modules/admin/stats`
+// and `~/modules/shared` barrels and targets internal files instead. Those
+// barrels re-export React-only code (`ConformiteStatsPage`, `useZodForm`,
+// `useDsfrModal`) whose dependency chain ends in `react-hook-form`'s
+// `react-server.esm.mjs` build — which does not expose `useForm`. Indirect
+// imports from server code therefore fail at `next build` and the dev
+// server error overlay. Hitting files directly is ugly but correct until
+// the barrels get split into client/server halves.
+import {
+	getCampaignProgressionSchema,
+	getGapAlertRateSchema,
+	getMultiYearGapTrendSchema,
+} from "~/modules/admin/stats/schemas";
 import type {
 	CampaignProgressionPoint,
 	CampaignProgressionSeries,
 	GapAlertRateResult,
 	MultiYearGapPoint,
 	MultiYearGapTrendSeries,
-} from "~/modules/admin/stats";
-import {
-	getCampaignProgressionSchema,
-	getGapAlertRateSchema,
-	getMultiYearGapTrendSchema,
-} from "~/modules/admin/stats";
+} from "~/modules/admin/stats/types";
 import { COMPANY_SIZE_RANGES } from "~/modules/domain";
-// Server-only router: import the constants directly from the internal file
-// instead of the `~/modules/shared` barrel, which also re-exports the
-// `useZodForm` client hook. The barrel pulls `react-hook-form`, and its
-// server build (`react-server.esm.mjs`) does not export `useForm`, so
-// indirect imports from server code break `next build`.
 import {
 	DOMINANT_NAF_SECTIONS,
 	OTHER_NAF_SEGMENT,
