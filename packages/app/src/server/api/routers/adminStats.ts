@@ -237,22 +237,35 @@ export const adminStatsRouter = createTRPCRouter({
 				];
 			}
 
-			// Workforce / NAF modes: the segment column is a CASE expression
-			// (a real expression, not a constant), so Postgres is happy to see
-			// it in both SELECT and GROUP BY.
+			// Workforce / NAF modes: the segment column is a CASE expression.
+			// We *must* compute it once in an inner subquery and reference the
+			// alias from the outer aggregation. Inlining the CASE in SELECT +
+			// GROUP BY + ORDER BY directly makes Drizzle re-bind fresh `$N`
+			// parameters at each call site — Postgres then sees three textually
+			// different CASE expressions and rejects the GROUP BY with
+			// "column must appear in the GROUP BY clause".
 			const segmentExpr = buildSegmentExpression(input.segmentBy);
-			const rows = await ctx.db
+			const innerSub = ctx.db
 				.select({
 					year: declarations.year,
-					segment: segmentExpr,
-					avgGap: sql<string | null>`avg(${declarations.averageGap})`,
-					sampleSize: sql<number>`count(*)::int`,
+					segment: segmentExpr.as("segment"),
+					averageGap: declarations.averageGap,
 				})
 				.from(declarations)
 				.innerJoin(companies, eq(declarations.siren, companies.siren))
 				.where(and(...filters))
-				.groupBy(declarations.year, segmentExpr)
-				.orderBy(declarations.year, segmentExpr);
+				.as("gap_trend_src");
+
+			const rows = await ctx.db
+				.select({
+					year: innerSub.year,
+					segment: innerSub.segment,
+					avgGap: sql<string | null>`avg(${innerSub.averageGap})`,
+					sampleSize: sql<number>`count(*)::int`,
+				})
+				.from(innerSub)
+				.groupBy(innerSub.year, innerSub.segment)
+				.orderBy(innerSub.year, innerSub.segment);
 
 			return buildTrendSeries(rows);
 		}),

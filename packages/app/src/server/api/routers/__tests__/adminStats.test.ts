@@ -306,8 +306,14 @@ type TrendRow = {
 };
 
 /**
- * Build a DB mock matching the getMultiYearGapTrend chain:
- * select → from → optional innerJoin → where → groupBy → orderBy (resolves).
+ * Build a DB mock matching the getMultiYearGapTrend chain. The workforce /
+ * NAF branch runs two queries: an inner `select → from → innerJoin → where
+ * → as()` that materialises the CASE-derived segment column, then an outer
+ * `select → from → groupBy → orderBy (resolves)` that aggregates on the
+ * subquery alias. The global branch only runs the final aggregating chain
+ * (no innerJoin when there are no filters). A single chained mock covers
+ * both shapes — every method returns `this` so the graph can be walked in
+ * any order before `orderBy` resolves with the seeded rows.
  */
 function buildTrendDb(rows: TrendRow[]) {
 	const orderBy = vi.fn().mockResolvedValue(rows);
@@ -317,6 +323,7 @@ function buildTrendDb(rows: TrendRow[]) {
 		where: vi.fn().mockReturnThis() as ReturnType<typeof vi.fn>,
 		groupBy: vi.fn().mockReturnThis() as ReturnType<typeof vi.fn>,
 		orderBy,
+		as: vi.fn().mockReturnThis() as ReturnType<typeof vi.fn>,
 	};
 	return {
 		select: vi.fn().mockReturnValue(chain),
