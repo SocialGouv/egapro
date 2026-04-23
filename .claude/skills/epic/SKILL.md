@@ -27,12 +27,12 @@ Si aucun ticket dispatchable → exit avec `Nothing to dispatch on epic #<N>`.
 
 ---
 
-# Step 1 — Worktree + port + base branch
+# Step 1 — Worktree + port + base branch + stack docker
 
 Pour chaque ticket à dispatcher, déterminer :
 
-- **Worktree** : `../egapro-epic<N>-t<ticket-id>`
-- **Dev server port** : `3000 + <index>` (3001, 3002, 3003, …)
+- **Index du worktree** (0, 1, 2, …) — drive tous les ports et le namespace docker
+- **Worktree path** : `../egapro-epic<N>-t<ticket-id>`
 - **Base branch** selon l'état de ses dépendances (stacked PR pattern) :
 
   | État des dépendances | Base branch |
@@ -43,14 +43,32 @@ Pour chaque ticket à dispatcher, déterminer :
   | 2+ en `In review` | **ne pas dispatcher** — attendre qu'au moins une soit mergée (partial blocking v1) |
   | 1+ en `In progress` ou `To Do` | **ne pas dispatcher** — attendre que la dépendance arrive en `In review` au minimum |
 
-Création du worktree à partir de la base branch choisie :
+- **Services docker extras** : parser la section `## Requires services` du body du ticket. Typiquement `clamavd` pour les tickets qui touchent à l'upload (lourd, ~1 GB RAM, donc opt-in uniquement).
+
+**Création** :
 
 ```bash
+# 1. Worktree
 git fetch origin <base-branch>
 git worktree add ../egapro-epic42-t123 -b ticket/123-<slug> <base-branch>
+
+# 2. Stack docker-compose isolée (DB + MinIO + Maildev + Valkey + éventuellement ClamAV)
+#    Le script écrit packages/app/.env.local avec les ports calculés depuis l'index
+#    et lance docker compose avec un COMPOSE_PROJECT_NAME unique.
+cd ../egapro-epic42-t123
+scripts/setup-worktree.sh <index> [<extras>]
 ```
 
-Si un worktree avec ce path existe déjà (re-run d'`/epic`), le réutiliser plutôt que d'en créer un nouveau.
+Si un worktree avec ce path existe déjà (re-run d'`/epic`), le réutiliser et **ne pas re-lancer setup-worktree.sh** (`packages/app/.env.local` déjà présent).
+
+## Parallélisme — hard cap
+
+**Maximum 3 tickets en parallèle** par défaut, configurable via `EPIC_MAX_PARALLEL` (minimum 1, maximum 5).
+
+Justification du cap :
+- Chaque worktree = ~1.2 GB de containers docker (Postgres + MinIO + Maildev + Valkey ; +1 GB si ClamAV) + ~1.5–2 GB de dev server Next.js
+- Au-delà de 3, les rate limits API (Claude tokens/min, GitHub 5000 req/h) commencent à être un souci
+- Une machine 16 GB RAM supporte confortablement 3 worktrees complets
 
 ---
 
@@ -58,11 +76,11 @@ Si un worktree avec ce path existe déjà (re-run d'`/epic`), le réutiliser plu
 
 Tant qu'il reste des tickets en **To Do** dispatchables (toutes dépendances résolues selon le tableau de Step 1) :
 
-1. **Sélectionner les N prochains tickets dispatchables** — parallélisme par défaut **N = 3**. Ajuster selon la RAM de la machine (~1–2 GB par dev server).
+1. **Sélectionner les N prochains tickets dispatchables** — `N = min(EPIC_MAX_PARALLEL, tickets_restants)`, plafonné à **3** par défaut.
 
 2. **Invoquer `code-dev` en parallèle** (un Agent tool call par ticket, dans un seul message) :
    - Model : **opus** si label `complexe`, sinon **sonnet**
-   - Arguments : ticket number, worktree path, dev server port, **base branch** (cf. tableau Step 1)
+   - Arguments : ticket number, worktree path, **worktree index** (pour que code-dev passe au setup-worktree.sh), dev server port, base branch
    - `run_in_background: true` pour que `/epic` continue à orchestrer pendant l'exécution
 
 3. **Attendre la complétion** de tous les `code-dev` lancés. Chaque retour est PASS ou REFACTO.
@@ -88,14 +106,16 @@ PASS (In review):
   - #N4 (PR #104, base: ticket/N3-slug ← stacked)
 REFACTO (retour To Do): #N2 — <diagnostic>
 Bloqués (en attente merge humain) : #N5 (dépend de #N3 merged)
-Worktrees actifs: ../egapro-epic<N>-t*
+Worktrees actifs: ../egapro-epic<N>-t* (stacks docker toujours up)
 
 Next:
 1. Revoir et merger les PR dans l'ordre du stack (#101 → #103 → #104)
 2. Les PR dépendantes seront auto-retargettées par GitHub vers `alpha` après chaque merge
 3. Passer manuellement les tickets In review → Done
 4. Si REFACTO : re-lancer /ticket sur l'epic (phase architect) puis /epic
-5. `git worktree remove ../egapro-epic<N>-t*` après merge de toutes les PR
+5. Après merge de chaque PR, dans le worktree associé :
+   - `scripts/teardown-worktree.sh` (arrête containers + drop volumes)
+   - `git worktree remove ../egapro-epic<N>-tXXX`
 ```
 
 ---

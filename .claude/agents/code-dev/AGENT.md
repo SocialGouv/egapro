@@ -11,7 +11,8 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
 - Ticket issue number
 - Worktree path (assigned by `/epic`, e.g. `../egapro-epic42-t1`)
-- Dev server port (assigned by `/epic`, e.g. 3001)
+- **Worktree index** (0, 1, 2…) — utilisé par `scripts/setup-worktree.sh` pour allouer les ports docker
+- Dev server port (dérivé de l'index : `3001 + index`, lu depuis `packages/app/.env.local` écrit par le setup script)
 - **Base branch** (assigned by `/epic` ou `/code`) :
   - `origin/alpha` si aucune dépendance ou toutes mergées
   - `ticket/<parent-slug>` si le ticket dépend d'un autre encore en `In review` (stacked PR)
@@ -28,6 +29,8 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - `git fetch origin <base-branch>` pour rafraîchir
    - `git checkout -b ticket/<N>-<slug> <base-branch>`
    - Si `<base-branch>` ≠ `origin/alpha`, on est en mode **stacked PR** — la PR sera ouverte avec `--base <base-branch>`, GitHub retargettera vers `alpha` quand la PR parent sera mergée
+
+4.5. **Sanity check stack docker** — vérifier que `packages/app/.env.local` existe et contient `COMPOSE_PROJECT_NAME=egapro-wt-*`. Si absent → `scripts/setup-worktree.sh <index> [<extras>]` (où `<extras>` vient du parsing de la section `## Requires services` du ticket). Si `/epic` ou `/code` a déjà lancé le setup, l'étape est un no-op.
 
 5. **Implémenter** :
    - Modifier les fichiers listés dans le ticket

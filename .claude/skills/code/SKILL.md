@@ -25,9 +25,9 @@ Exécute **un seul ticket** end-to-end via l'agent `code-dev`. Utilisé seul (de
 
 ---
 
-# Step 1 — Worktree + port + base branch
+# Step 1 — Worktree + port + base branch + stack docker
 
-Si déjà dans un worktree assigné par `/epic` → le réutiliser (variable d'env ou chemin courant), `/epic` a déjà calculé la base branch.
+Si déjà dans un worktree assigné par `/epic` → le réutiliser (`packages/app/.env.local` et stack docker déjà en place par `setup-worktree.sh`). `/epic` a déjà calculé la base branch.
 
 Sinon (standalone), déterminer la base branch selon la section `Depends on` du body :
 - Aucune dépendance → `origin/alpha`
@@ -36,10 +36,22 @@ Sinon (standalone), déterminer la base branch selon la section `Depends on` du 
 - 2+ dépendances en `In review` → **exit** avec message : « attendre le merge d'au moins une dépendance avant `/code` »
 - 1+ dépendance en `In progress` ou `To Do` → **exit** avec message : « dépendance pas prête, attendre `/epic` »
 
+Parser la section `## Requires services` pour détecter les services docker extras (typiquement `clamavd`).
+
 Création :
-- `git fetch origin <base-branch>`
-- `git worktree add ../egapro-ticket<N> -b ticket/<N>-<slug> <base-branch>`
-- Assigner le prochain port libre (check via `lsof -i :3001`, incrémenter)
+
+```bash
+# 1. Worktree
+git fetch origin <base-branch>
+git worktree add ../egapro-ticket<N> -b ticket/<N>-<slug> <base-branch>
+
+# 2. Calculer un index unique (standalone = premier index libre, check via lsof sur les ports déjà utilisés)
+#    Puis lancer la stack docker isolée pour ce worktree.
+cd ../egapro-ticket<N>
+scripts/setup-worktree.sh <index> [<extras>]
+```
+
+Le script écrit `packages/app/.env.local` avec les ports et URLs, lance docker-compose avec un `COMPOSE_PROJECT_NAME` unique, attend la DB, applique les migrations.
 
 ---
 
@@ -48,7 +60,8 @@ Création :
 Invoquer l'agent `code-dev` (`.claude/agents/code-dev/AGENT.md`) avec :
 - Ticket number
 - Worktree path
-- Dev server port
+- Worktree index (pour setup-worktree.sh si standalone ; sinon assigné par `/epic`)
+- Dev server port (`PORT` variable du `.env.local` écrit par setup-worktree.sh = `3001 + index`)
 - Base branch (cf. Step 1)
 
 Model :

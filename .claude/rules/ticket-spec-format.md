@@ -75,6 +75,14 @@ Si pas d'UI, écrire "N/A".>
 - #<N2>
 
 Si aucune dépendance, écrire "N/A" ou omettre la section entièrement.>
+
+## Requires services
+
+<Services docker-compose optionnels dont le ticket a besoin en plus du core (db, minio, maildev, valkey qui sont lancés par défaut). Un service par ligne :
+
+- clamavd  (antivirus, nécessaire si le ticket touche à l'upload de fichiers)
+
+Si le ticket n'a besoin que du core, omettre la section entièrement.>
 ```
 
 ## Règles de rédaction
