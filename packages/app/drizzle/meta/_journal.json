@@ -204,6 +204,13 @@
 			"when": 1776000000000,
 			"tag": "0028_add_cse_opinion_completed_at",
 			"breakpoints": true
+		},
+		{
+			"idx": 29,
+			"version": "7",
+			"when": 1776100000000,
+			"tag": "0029_add_declaration_submitted_at",
+			"breakpoints": true
 		}
 	]
 }

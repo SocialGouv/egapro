@@ -26,6 +26,20 @@ describe("AdminNavigation", () => {
 			screen.getByRole("link", { name: "Mimoquer un Siren" }),
 		).toBeInTheDocument();
 		expect(screen.getByRole("link", { name: "Référents" })).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: "Statistiques campagne" }),
+		).toBeInTheDocument();
+	});
+
+	it("marks /admin/stats/campagne as active on that page", () => {
+		(usePathname as Mock).mockReturnValue("/admin/stats/campagne");
+		render(<AdminNavigation />);
+		expect(
+			screen.getByRole("link", { name: "Statistiques campagne" }),
+		).toHaveAttribute("aria-current", "page");
+		expect(screen.getByRole("link", { name: "Accueil" })).not.toHaveAttribute(
+			"aria-current",
+		);
 	});
 
 	it("marks /admin as active when on /admin", () => {
