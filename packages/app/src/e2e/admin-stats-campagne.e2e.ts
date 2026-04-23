@@ -65,17 +65,17 @@ test.describe("admin campaign progression stats", () => {
 	test("accessible alternative table lists the same data", async ({ page }) => {
 		await page.goto("/admin/stats/campagne");
 
-		await page
-			.getByRole("group", { name: /^années à comparer/i })
-			.getByRole("checkbox", { name: "2024" })
-			.check()
-			.catch(() => {
-				/* already checked by default selection */
-			});
+		// Wait for the chart to be rendered — the table renders next to it only
+		// once the tRPC query resolves.
+		await expect(
+			page.getByRole("figure", { name: /courbe de progression cumulative/i }),
+		).toBeVisible();
 
+		// The table lives inside a <details> disclosure — use the summary text
+		// directly rather than a role match (varies across browsers).
 		await page
-			.getByRole("button", {
-				name: /consulter les données du graphique sous forme de tableau/i,
+			.locator("summary", {
+				hasText: /consulter les données du graphique sous forme de tableau/i,
 			})
 			.click();
 

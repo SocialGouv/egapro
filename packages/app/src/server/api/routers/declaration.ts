@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import {
 	saveCompliancePathSchema,
 	updateEmployeeCategoriesSchema,
@@ -454,14 +454,20 @@ export const declarationRouter = createTRPCRouter({
 		const year = getCurrentYear();
 		const now = new Date();
 
+		// Preserve the very first submission date — resubmissions after
+		// corrections must not move the campaign progression curve.
+		const [existing] = await ctx.db
+			.select({ submittedAt: declarations.submittedAt })
+			.from(declarations)
+			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+			.limit(1);
+
 		await ctx.db
 			.update(declarations)
 			.set({
 				status: "submitted",
 				currentStep: 6,
-				// Preserve the very first submission date — resubmissions after
-				// corrections must not move the campaign progression curve.
-				submittedAt: sql`COALESCE(${declarations.submittedAt}, ${now})`,
+				submittedAt: existing?.submittedAt ?? now,
 				updatedAt: now,
 			})
 			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
