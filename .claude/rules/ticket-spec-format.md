@@ -66,12 +66,22 @@ Si pas d'UI, écrire "N/A".>
 - [ ] Lint vert (`pnpm lint:check`)
 - [ ] Scénario(s) rejoué(s) sans erreur par `functional-validator`
 - [ ] (si UI) Comparaison visuelle PASS par `design-validator`
+
+## Depends on
+
+<Liste des tickets dont celui-ci dépend (le code/schéma de ces tickets doit exister avant que celui-ci puisse être implémenté). Un ticket par ligne avec le numéro GitHub :
+
+- #<N1>
+- #<N2>
+
+Si aucune dépendance, écrire "N/A" ou omettre la section entièrement.>
 ```
 
 ## Règles de rédaction
 
-- **Un ticket = une unité cohérente** : si les critères d'acceptation dépassent 8 éléments, découper en deux tickets avec dépendance parent-enfant GitHub.
+- **Un ticket = une unité cohérente** : si les critères d'acceptation dépassent 8 éléments, découper en deux tickets et exprimer la dépendance via la section `Depends on`.
 - **Pas de décision architecturale** dans le ticket : l'architect a déjà tranché. Le dev exécute.
 - **Pas de "voir le code pour comprendre"** : les fichiers à lire doivent être listés explicitement.
 - **Le label `complexe`** est ajouté uniquement si la tâche demande un raisonnement multi-étapes non trivial (refacto multi-fichiers, perf critique, algo complexe). Par défaut, Sonnet suffit.
-- **Dépendances** : utiliser le champ `Parent issue` / sub-issues GitHub. `/epic` respecte l'ordre : les tickets sans dépendance partent en premier, les suivants dès que leurs parents sont **Done**.
+- **Dépendances inter-tickets** : listées dans la section `Depends on` du body. `/epic` parse cette section et applique la stratégie **stacked PRs** : si un ticket `T2` dépend de `T1` encore `In review` (PR non mergée), `T2` est créé avec `--base` sur la branche de `T1`. Ainsi l'exécution n'attend jamais une validation humaine.
+- **Parent issue GitHub** : utilisé uniquement pour pointer vers l'epic (relation epic → ticket). **Pas** pour exprimer des dépendances inter-tickets — utiliser `Depends on` à la place.

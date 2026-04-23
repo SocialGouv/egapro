@@ -25,12 +25,20 @@ Exécute **un seul ticket** end-to-end via l'agent `code-dev`. Utilisé seul (de
 
 ---
 
-# Step 1 — Worktree + port
+# Step 1 — Worktree + port + base branch
 
-Si déjà dans un worktree assigné par `/epic` → le réutiliser (variable d'env ou chemin courant).
+Si déjà dans un worktree assigné par `/epic` → le réutiliser (variable d'env ou chemin courant), `/epic` a déjà calculé la base branch.
 
-Sinon (standalone) :
-- Créer `../egapro-ticket<N>` depuis `origin/alpha` : `git worktree add ../egapro-ticket<N> -b ticket/<N>-<slug> origin/alpha`
+Sinon (standalone), déterminer la base branch selon la section `Depends on` du body :
+- Aucune dépendance → `origin/alpha`
+- Toutes les dépendances en `Done` → `origin/alpha` (après `git fetch`)
+- 1 dépendance en `In review` → `ticket/<parent-slug>` (stacked PR)
+- 2+ dépendances en `In review` → **exit** avec message : « attendre le merge d'au moins une dépendance avant `/code` »
+- 1+ dépendance en `In progress` ou `To Do` → **exit** avec message : « dépendance pas prête, attendre `/epic` »
+
+Création :
+- `git fetch origin <base-branch>`
+- `git worktree add ../egapro-ticket<N> -b ticket/<N>-<slug> <base-branch>`
 - Assigner le prochain port libre (check via `lsof -i :3001`, incrémenter)
 
 ---
@@ -41,6 +49,7 @@ Invoquer l'agent `code-dev` (`.claude/agents/code-dev/AGENT.md`) avec :
 - Ticket number
 - Worktree path
 - Dev server port
+- Base branch (cf. Step 1)
 
 Model :
 - **opus** si ticket a label `complexe`

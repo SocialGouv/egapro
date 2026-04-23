@@ -12,6 +12,9 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 - Ticket issue number
 - Worktree path (assigned by `/epic`, e.g. `../egapro-epic42-t1`)
 - Dev server port (assigned by `/epic`, e.g. 3001)
+- **Base branch** (assigned by `/epic` ou `/code`) :
+  - `origin/alpha` si aucune dépendance ou toutes mergées
+  - `ticket/<parent-slug>` si le ticket dépend d'un autre encore en `In review` (stacked PR)
 
 ## Workflow
 
@@ -21,7 +24,10 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
 3. **Status ticket** → **In progress** (op. 3+4 de `rules/github-board.md`, option ID `47fc9ee4`).
 
-4. **Branche** dans le worktree : `git checkout -b <ticket-slug>`.
+4. **Branche** dans le worktree, à partir de la **base branch** reçue en input :
+   - `git fetch origin <base-branch>` pour rafraîchir
+   - `git checkout -b ticket/<N>-<slug> <base-branch>`
+   - Si `<base-branch>` ≠ `origin/alpha`, on est en mode **stacked PR** — la PR sera ouverte avec `--base <base-branch>`, GitHub retargettera vers `alpha` quand la PR parent sera mergée
 
 5. **Implémenter** :
    - Modifier les fichiers listés dans le ticket
@@ -42,10 +48,11 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - Démarrer dev server sur le port assigné
    - Playwright → screenshots desktop (1280×800) + mobile (375×667)
 
-8. **PR draft** via `gh pr create --draft` :
-   - Base = branche epic (ou master)
+8. **PR draft** via `gh pr create --draft --base <base-branch>` :
+   - Base = la `<base-branch>` reçue en input (`origin/alpha` ou `ticket/<parent-slug>`)
    - Body : lien ticket (`Closes #NNN`), résumé, test plan, screenshots
    - **Ticket reste en In progress** pendant les validators
+   - Si stacked : noter dans le body « Stacked on #<parent-PR> — GitHub retargettera automatiquement sur `alpha` une fois le parent mergé »
 
 9. **Validations en parallèle** — 3 axes simultanés, tous doivent être verts avant de passer à l'étape 10.
 
