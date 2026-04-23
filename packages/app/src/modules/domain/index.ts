@@ -46,6 +46,7 @@ export {
 } from "./shared/format";
 // Gap business rules (calculations & threshold classification)
 export {
+	computeAverageGap,
 	computeGap,
 	computeTotal,
 	gapLevel,

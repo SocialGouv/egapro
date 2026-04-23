@@ -339,6 +339,40 @@ describe("declarationRouter", () => {
 			expect(call.hasAlertGap).toBe(true);
 		});
 
+		it("stamps averageGap with the mean of exploitable salary-pair gaps", async () => {
+			const { fetchAllCategories } = await import("../declarationHelpers");
+			vi.mocked(fetchAllCategories).mockResolvedValueOnce({
+				jobCategories: [],
+				employeeCategories: [
+					{
+						annualBaseWomen: "90",
+						annualBaseMen: "100", // 10%
+						hourlyBaseWomen: "80",
+						hourlyBaseMen: "100", // 20%
+					},
+				] as never,
+			});
+
+			const mockDb = createMockDb([{ id: "decl-1", submittedAt: null }]);
+			const caller = await createCaller(mockDb);
+
+			await caller.submit();
+
+			const call = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			// drizzle `numeric` columns take a string at runtime
+			expect(call.averageGap).toBe("15");
+		});
+
+		it("stamps averageGap=null when no salary pair is exploitable", async () => {
+			const mockDb = createMockDb([{ id: "decl-1", submittedAt: null }]);
+			const caller = await createCaller(mockDb);
+
+			await caller.submit();
+
+			const call = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(call.averageGap).toBeNull();
+		});
+
 		it("throws when siret is missing", async () => {
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb, null as never);

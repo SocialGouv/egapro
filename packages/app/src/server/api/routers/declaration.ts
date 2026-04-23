@@ -9,7 +9,11 @@ import {
 	updateStep4Schema,
 } from "~/modules/declaration-remuneration/schemas";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
-import { getCurrentYear, hasGapsAboveThreshold } from "~/modules/domain";
+import {
+	computeAverageGap,
+	getCurrentYear,
+	hasGapsAboveThreshold,
+} from "~/modules/domain";
 import {
 	companyProcedure,
 	companyWriteProcedure,
@@ -465,17 +469,20 @@ export const declarationRouter = createTRPCRouter({
 			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
 			.limit(1);
 
-		// Recompute the denormalized hasAlertGap flag from the employee
-		// categories. Source of truth stays on employee_category; this flag
-		// only exists to accelerate admin-stats KPIs (K8) that aggregate
-		// across a whole campaign year without a four-way join on salary pairs.
+		// Recompute the denormalized hasAlertGap flag + averageGap number from
+		// the employee categories. Source of truth stays on employee_category;
+		// these fields only exist to accelerate admin-stats KPIs (K8 alert
+		// rate, K10 multi-year trend) that aggregate across a whole campaign
+		// year without a four-way join on salary pairs.
 		let hasAlertGap = false;
+		let averageGap: number | null = null;
 		if (existing) {
 			const { employeeCategories: empCats } = await fetchAllCategories(
 				ctx.db,
 				existing.id,
 			);
 			hasAlertGap = hasGapsAboveThreshold(empCats);
+			averageGap = computeAverageGap(empCats);
 		}
 
 		await ctx.db
@@ -485,6 +492,9 @@ export const declarationRouter = createTRPCRouter({
 				currentStep: 6,
 				submittedAt: existing?.submittedAt ?? now,
 				hasAlertGap,
+				// drizzle-orm stores `numeric` as a string at runtime to avoid
+				// silent float truncation — serialize with `.toString()`.
+				averageGap: averageGap === null ? null : averageGap.toString(),
 				updatedAt: now,
 			})
 			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));

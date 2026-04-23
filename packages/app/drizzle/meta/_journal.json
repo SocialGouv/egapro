@@ -218,6 +218,13 @@
 			"when": 1776200000000,
 			"tag": "0030_add_declaration_has_alert_gap",
 			"breakpoints": true
+		},
+		{
+			"idx": 31,
+			"version": "7",
+			"when": 1776300000000,
+			"tag": "0031_add_declaration_average_gap",
+			"breakpoints": true
 		}
 	]
 }

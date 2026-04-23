@@ -81,3 +81,41 @@ export function hasGapsAboveThreshold(
 		});
 	});
 }
+
+/**
+ * Arithmetic mean of every computable salary gap across every employee
+ * category (four pairs per row: annual/hourly × base/variable). Pairs where
+ * one side is missing or `men = 0` are skipped — they produce no gap.
+ *
+ * Returns `null` when no pair yields a valid gap (empty categories, all
+ * fields null, etc.). Powers the K10 multi-year gap trend chart.
+ */
+export function computeAverageGap(
+	categories: EmployeeCategoryLike[],
+): number | null {
+	let sum = 0;
+	let count = 0;
+	for (const cat of categories) {
+		const pairs: SalaryPair[] = [
+			{ women: cat.annualBaseWomen ?? null, men: cat.annualBaseMen ?? null },
+			{
+				women: cat.annualVariableWomen ?? null,
+				men: cat.annualVariableMen ?? null,
+			},
+			{ women: cat.hourlyBaseWomen ?? null, men: cat.hourlyBaseMen ?? null },
+			{
+				women: cat.hourlyVariableWomen ?? null,
+				men: cat.hourlyVariableMen ?? null,
+			},
+		];
+		for (const { women, men } of pairs) {
+			if (!women || !men) continue;
+			const gap = computeGap(women, men);
+			if (gap === null) continue;
+			sum += gap;
+			count += 1;
+		}
+	}
+	if (count === 0) return null;
+	return sum / count;
+}

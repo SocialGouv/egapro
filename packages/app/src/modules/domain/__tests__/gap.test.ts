@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	computeAverageGap,
 	computeGap,
 	computeTotal,
 	gapLevel,
@@ -95,5 +96,48 @@ describe("hasGapsAboveThreshold", () => {
 				2,
 			),
 		).toBe(true);
+	});
+});
+
+describe("computeAverageGap", () => {
+	it("returns null for an empty input", () => {
+		expect(computeAverageGap([])).toBeNull();
+	});
+
+	it("returns null when no pair is exploitable", () => {
+		expect(
+			computeAverageGap([
+				{ annualBaseWomen: null, annualBaseMen: null },
+				{ hourlyBaseWomen: undefined, hourlyBaseMen: undefined },
+			]),
+		).toBeNull();
+	});
+
+	it("returns the single gap when only one pair is valid", () => {
+		expect(
+			computeAverageGap([{ annualBaseWomen: "90", annualBaseMen: "100" }]),
+		).toBeCloseTo(10);
+	});
+
+	it("averages gaps across multiple pairs within one category", () => {
+		const result = computeAverageGap([
+			{
+				annualBaseWomen: "90",
+				annualBaseMen: "100", // 10%
+				hourlyBaseWomen: "80",
+				hourlyBaseMen: "100", // 20%
+			},
+		]);
+		expect(result).toBeCloseTo(15);
+	});
+
+	it("averages across multiple categories, skipping unexploitable pairs", () => {
+		const result = computeAverageGap([
+			{ annualBaseWomen: "90", annualBaseMen: "100" }, // 10%
+			{ annualBaseWomen: "80", annualBaseMen: "100" }, // 20%
+			{ annualBaseWomen: null, annualBaseMen: "100" }, // skipped
+			{ annualBaseWomen: "100", annualBaseMen: "0" }, // skipped (men = 0)
+		]);
+		expect(result).toBeCloseTo(15);
 	});
 });

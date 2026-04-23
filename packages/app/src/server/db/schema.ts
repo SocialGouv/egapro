@@ -122,6 +122,12 @@ export const declarations = createTable(
 		// up the admin-stats KPIs (K8 in particular) that aggregate across all
 		// declarations of a campaign year without joining employee_category.
 		hasAlertGap: d.boolean().notNull().default(false),
+		// Arithmetic mean of every computable salary gap on the four pairs of
+		// the declaration's employee categories. Recomputed at submit via
+		// `computeAverageGap`; nullable when no pair is exploitable. Feeds the
+		// K10 multi-year trend chart so the aggregation stays a single scan
+		// over declarations without re-joining employee_category.
+		averageGap: d.numeric(),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 	}),
@@ -130,6 +136,7 @@ export const declarations = createTable(
 		index("declaration_declarant_idx").on(t.declarantId),
 		index("declaration_submitted_at_idx").on(t.submittedAt),
 		index("declaration_has_alert_gap_idx").on(t.hasAlertGap),
+		index("declaration_average_gap_idx").on(t.averageGap),
 	],
 );
 
