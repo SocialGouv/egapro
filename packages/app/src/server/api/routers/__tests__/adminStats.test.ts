@@ -148,3 +148,148 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 		).rejects.toThrow();
 	});
 });
+
+// ------------------------------------------------------------------
+// K8 — getGapAlertRate
+// ------------------------------------------------------------------
+
+type GapRateRow = { total: number; alerts: number };
+type GapRateDb = ReturnType<typeof buildGapRateDb>;
+
+/**
+ * Build a DB mock for `getGapAlertRate` — the procedure calls computeYearRate
+ * twice (current year + N-1), so we queue two row sets and track which chain
+ * gets returned on each `select()` call.
+ */
+function buildGapRateDb(rowsPerCall: GapRateRow[]) {
+	const calls: Array<{
+		innerJoin: ReturnType<typeof vi.fn>;
+		where: ReturnType<typeof vi.fn>;
+	}> = [];
+
+	const select = vi.fn().mockImplementation(() => {
+		const row = rowsPerCall[calls.length];
+		const where = vi.fn().mockResolvedValue(row ? [row] : []);
+		const innerJoin = vi.fn().mockImplementation(() => ({ where }));
+		const from = vi.fn().mockImplementation(() => ({ innerJoin, where }));
+		calls.push({ innerJoin, where });
+		return { from };
+	});
+
+	return { select, calls };
+}
+
+function buildCaller(db: GapRateDb | ReturnType<typeof buildDb>) {
+	return import("../adminStats").then(({ adminStatsRouter }) =>
+		adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never),
+	);
+}
+
+describe("adminStatsRouter.getGapAlertRate", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("returns nulls for rate / delta and sampleSize=0 when no declaration matches", async () => {
+		const db = buildGapRateDb([
+			{ total: 0, alerts: 0 },
+			{ total: 0, alerts: 0 },
+		]);
+		const caller = await buildCaller(db);
+
+		const result = await caller.getGapAlertRate({ year: 2026 });
+
+		expect(result).toEqual({
+			rate: null,
+			previousRate: null,
+			delta: null,
+			sampleSize: 0,
+		});
+	});
+
+	it("returns delta=null when the previous year has no sample", async () => {
+		const db = buildGapRateDb([
+			{ total: 1000, alerts: 420 },
+			{ total: 0, alerts: 0 },
+		]);
+		const caller = await buildCaller(db);
+
+		const result = await caller.getGapAlertRate({ year: 2026 });
+
+		expect(result.rate).toBe(42);
+		expect(result.previousRate).toBeNull();
+		expect(result.delta).toBeNull();
+		expect(result.sampleSize).toBe(1000);
+	});
+
+	it("computes a positive delta when the rate rises (degradation)", async () => {
+		const db = buildGapRateDb([
+			{ total: 1000, alerts: 423 }, // 42.3% in 2026
+			{ total: 1000, alerts: 411 }, // 41.1% in 2025
+		]);
+		const caller = await buildCaller(db);
+
+		const result = await caller.getGapAlertRate({ year: 2026 });
+
+		expect(result.rate).toBe(42.3);
+		expect(result.previousRate).toBe(41.1);
+		expect(result.delta).toBeCloseTo(1.2, 5);
+		expect(result.sampleSize).toBe(1000);
+	});
+
+	it("computes a negative delta when the rate improves", async () => {
+		const db = buildGapRateDb([
+			{ total: 1000, alerts: 388 }, // 38.8%
+			{ total: 1000, alerts: 411 }, // 41.1%
+		]);
+		const caller = await buildCaller(db);
+
+		const result = await caller.getGapAlertRate({ year: 2026 });
+
+		expect(result.delta).toBeCloseTo(-2.3, 5);
+	});
+
+	it("joins on companies only when a sizeRange or nafCodePrefix filter is given", async () => {
+		const db = buildGapRateDb([
+			{ total: 10, alerts: 1 },
+			{ total: 10, alerts: 1 },
+			{ total: 10, alerts: 1 },
+			{ total: 10, alerts: 1 },
+			{ total: 10, alerts: 1 },
+			{ total: 10, alerts: 1 },
+		]);
+		const caller = await buildCaller(db);
+
+		// No filter → no companies join
+		await caller.getGapAlertRate({ year: 2026 });
+		expect(db.calls[0]?.innerJoin).not.toHaveBeenCalled();
+		expect(db.calls[1]?.innerJoin).not.toHaveBeenCalled();
+
+		// sizeRange only → join
+		await caller.getGapAlertRate({ year: 2026, sizeRange: "50-99" });
+		expect(db.calls[2]?.innerJoin).toHaveBeenCalledTimes(1);
+		expect(db.calls[3]?.innerJoin).toHaveBeenCalledTimes(1);
+
+		// nafCodePrefix only → join
+		await caller.getGapAlertRate({ year: 2026, nafCodePrefix: "J" });
+		expect(db.calls[4]?.innerJoin).toHaveBeenCalledTimes(1);
+		expect(db.calls[5]?.innerJoin).toHaveBeenCalledTimes(1);
+	});
+
+	it("rejects invalid NAF code prefixes (must be a single letter A–U)", async () => {
+		const db = buildGapRateDb([]);
+		const caller = await buildCaller(db);
+
+		await expect(
+			caller.getGapAlertRate({ year: 2026, nafCodePrefix: "Z" }),
+		).rejects.toThrow();
+		await expect(
+			caller.getGapAlertRate({ year: 2026, nafCodePrefix: "AB" }),
+		).rejects.toThrow();
+		await expect(
+			caller.getGapAlertRate({ year: 2026, nafCodePrefix: "a" }),
+		).rejects.toThrow();
+	});
+});

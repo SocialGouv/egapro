@@ -59,6 +59,7 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	// ── admin stats sensitive reads ──────────────────────
 	"adminStats.getCampaignProgression":
 		AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION,
+	"adminStats.getGapAlertRate": AUDIT_ACTIONS.ADMIN_STATS_GAP_ALERT_RATE,
 
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,

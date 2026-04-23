@@ -105,7 +105,7 @@ export async function deleteJobAndEmployeeCategories(
 	}
 }
 
-export async function fetchAllCategories(tx: Tx, declarationId: string) {
+export async function fetchAllCategories(tx: DbOrTx, declarationId: string) {
 	const jobs = await tx
 		.select()
 		.from(jobCategories)
