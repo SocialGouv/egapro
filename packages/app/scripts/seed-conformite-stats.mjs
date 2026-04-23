@@ -191,8 +191,7 @@ async function seed(sql) {
 		insertedCompanies++;
 	}
 
-	const totalYears = currentYear - FIRST_SEED_YEAR + 1;
-	for (let yearsBack = 0; yearsBack < totalYears; yearsBack++) {
+	for (let yearsBack = 0; yearsBack < CAMPAIGN_YEARS_BACK; yearsBack++) {
 		const year = currentYear - yearsBack;
 		let companyIndex = 0;
 		for (const { siren, nafCode } of catalog) {
@@ -278,7 +277,7 @@ async function main() {
 		}
 		const result = await seed(sql);
 		console.log(
-			`[seed-conformite] upserted ${result.insertedCompanies} companies and ${result.insertedDeclarations} submitted declarations from ${FIRST_SEED_YEAR} to the current year.`,
+			`[seed-conformite] upserted ${result.insertedCompanies} companies and ${result.insertedDeclarations} submitted declarations across ${CAMPAIGN_YEARS_BACK} campaign years.`,
 		);
 		console.log(
 			`[seed-conformite] open http://localhost:3000/admin/stats/conformite to browse the tile.`,
