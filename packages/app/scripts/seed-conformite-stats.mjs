@@ -40,6 +40,39 @@ const NAF_SAMPLE_CODES = [
 /** Number of most-recent campaign years to seed (current year + N-1 … N-3). */
 const CAMPAIGN_YEARS_BACK = 4;
 
+/**
+ * Hard-fail when the script is about to talk to a production database.
+ *
+ * Defence in depth on top of the `EGAPRO_AUTO_SEED_CONFORMITE` opt-in
+ * flag and the `.kontinuous/env/dev` scoping: even a configuration
+ * mistake that leaks the flag into preprod or prod cannot end up
+ * overwriting real declarations with synthetic ones.
+ *
+ * Signals that prevent execution, in priority order:
+ *  - `NEXT_PUBLIC_EGAPRO_ENV` equals `"prod"` / `"production"` / `"preprod"`
+ *    (set by kontinuous `app.vars`, matches the values in
+ *    `.kontinuous/env/{prod,preprod}/`).
+ *  - `EGAPRO_ENV` same values (some scripts read this non-public form).
+ *
+ * Explicit bypass for CI / emergency: `EGAPRO_ALLOW_SEED_IN_PROD=true`.
+ * Leaves the seed usable from a break-glass terminal if someone ever
+ * needs it — but that is a deliberate, logged decision.
+ */
+function assertNotProduction() {
+	if (process.env.EGAPRO_ALLOW_SEED_IN_PROD === "true") return;
+	const signals = [process.env.NEXT_PUBLIC_EGAPRO_ENV, process.env.EGAPRO_ENV]
+		.filter((v) => typeof v === "string" && v.length > 0)
+		.map((v) => v.toLowerCase());
+	const forbidden = ["prod", "production", "preprod", "preproduction"];
+	const hit = signals.find((v) => forbidden.includes(v));
+	if (hit) {
+		console.error(
+			`[seed-conformite] refusing to run against a ${hit} environment. Set EGAPRO_ALLOW_SEED_IN_PROD=true to override.`,
+		);
+		process.exit(1);
+	}
+}
+
 function getDatabaseUrl() {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
 	const user = encodeURIComponent(process.env.POSTGRES_USER ?? "postgres");
@@ -205,6 +238,7 @@ async function clean(sql) {
 }
 
 async function main() {
+	assertNotProduction();
 	const mode = process.argv[2] ?? "seed";
 	const sql = postgres(getDatabaseUrl(), { max: 1 });
 	try {
