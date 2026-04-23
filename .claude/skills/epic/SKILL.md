@@ -63,7 +63,7 @@ Si un worktree avec ce path existe déjà (re-run d'`/epic`), le réutiliser et 
 
 ## Parallélisme — hard cap
 
-**Maximum 3 tickets en parallèle** par défaut, configurable via `EPIC_MAX_PARALLEL` (minimum 1, maximum 5).
+**Maximum 5 tickets en parallèle** par défaut, configurable via `EPIC_MAX_PARALLEL` (minimum 1, maximum 5).
 
 Justification du cap :
 - Chaque worktree = ~1.2 GB de containers docker (Postgres + MinIO + Maildev + Valkey ; +1 GB si ClamAV) + ~1.5–2 GB de dev server Next.js
@@ -76,7 +76,7 @@ Justification du cap :
 
 Tant qu'il reste des tickets en **To Do** dispatchables (toutes dépendances résolues selon le tableau de Step 1) :
 
-1. **Sélectionner les N prochains tickets dispatchables** — `N = min(EPIC_MAX_PARALLEL, tickets_restants)`, plafonné à **3** par défaut.
+1. **Sélectionner les N prochains tickets dispatchables** — `N = min(EPIC_MAX_PARALLEL, tickets_restants)`, plafonné à **5** par défaut.
 
 2. **Invoquer `code-dev` en parallèle** (un Agent tool call par ticket, dans un seul message) :
    - Model : **opus** si label `complexe`, sinon **sonnet**

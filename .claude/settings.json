@@ -1,6 +1,6 @@
 {
   "env": {
-    "EPIC_MAX_PARALLEL": "3"
+    "EPIC_MAX_PARALLEL": "5"
   },
   "hooks": {
     "UserPromptSubmit": [
