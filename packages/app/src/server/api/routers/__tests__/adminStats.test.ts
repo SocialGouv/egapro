@@ -293,3 +293,170 @@ describe("adminStatsRouter.getGapAlertRate", () => {
 		).rejects.toThrow();
 	});
 });
+
+// ------------------------------------------------------------------
+// K10 — getMultiYearGapTrend
+// ------------------------------------------------------------------
+
+type TrendRow = {
+	year: number;
+	segment: string;
+	avgGap: string | null;
+	sampleSize: number;
+};
+
+/**
+ * Build a DB mock matching the getMultiYearGapTrend chain:
+ * select → from → optional innerJoin → where → groupBy → orderBy (resolves).
+ */
+function buildTrendDb(rows: TrendRow[]) {
+	const orderBy = vi.fn().mockResolvedValue(rows);
+	const chain = {
+		from: vi.fn().mockReturnThis() as ReturnType<typeof vi.fn>,
+		innerJoin: vi.fn().mockReturnThis() as ReturnType<typeof vi.fn>,
+		where: vi.fn().mockReturnThis() as ReturnType<typeof vi.fn>,
+		groupBy: vi.fn().mockReturnThis() as ReturnType<typeof vi.fn>,
+		orderBy,
+	};
+	return {
+		select: vi.fn().mockReturnValue(chain),
+		__chain: chain,
+	};
+}
+
+describe("adminStatsRouter.getMultiYearGapTrend", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("returns one 'Global' series spanning every requested year", async () => {
+		const db = buildTrendDb([
+			{ year: 2024, segment: "Global", avgGap: "5.12", sampleSize: 800 },
+			{ year: 2025, segment: "Global", avgGap: "4.71", sampleSize: 900 },
+			{ year: 2026, segment: "Global", avgGap: "4.25", sampleSize: 1000 },
+		]);
+		const caller = await buildCaller(db);
+
+		const result = await caller.getMultiYearGapTrend({
+			yearFrom: 2024,
+			yearTo: 2026,
+			segmentBy: "global",
+		});
+
+		expect(result).toEqual([
+			{
+				segment: "Global",
+				points: [
+					{ year: 2024, avgGap: 5.1, sampleSize: 800 },
+					{ year: 2025, avgGap: 4.7, sampleSize: 900 },
+					{ year: 2026, avgGap: 4.3, sampleSize: 1000 },
+				],
+			},
+		]);
+	});
+
+	it("splits rows into one series per workforce bucket", async () => {
+		const db = buildTrendDb([
+			{ year: 2025, segment: "<50", avgGap: "6.0", sampleSize: 100 },
+			{ year: 2025, segment: "50-99", avgGap: "5.5", sampleSize: 80 },
+			{ year: 2026, segment: "<50", avgGap: "5.8", sampleSize: 110 },
+			{ year: 2026, segment: "50-99", avgGap: "5.2", sampleSize: 85 },
+		]);
+		const caller = await buildCaller(db);
+
+		const result = await caller.getMultiYearGapTrend({
+			yearFrom: 2025,
+			yearTo: 2026,
+			segmentBy: "workforce",
+		});
+
+		expect(result).toHaveLength(2);
+		expect(result.map((s) => s.segment).sort()).toEqual(["50-99", "<50"]);
+		expect(
+			result.find((s) => s.segment === "<50")?.points.map((p) => p.avgGap),
+		).toEqual([6, 5.8]);
+	});
+
+	it("collapses non-dominant NAF sections into 'Autres'", async () => {
+		const db = buildTrendDb([
+			{ year: 2026, segment: "C", avgGap: "4.2", sampleSize: 500 },
+			{ year: 2026, segment: "G", avgGap: "3.9", sampleSize: 600 },
+			{ year: 2026, segment: "Autres", avgGap: "5.1", sampleSize: 1200 },
+		]);
+		const caller = await buildCaller(db);
+
+		const result = await caller.getMultiYearGapTrend({
+			yearFrom: 2026,
+			yearTo: 2026,
+			segmentBy: "naf",
+		});
+
+		expect(result.map((s) => s.segment).sort()).toEqual(["Autres", "C", "G"]);
+	});
+
+	it("returns null points when avgGap comes back null for a year", async () => {
+		const db = buildTrendDb([
+			{ year: 2024, segment: "Global", avgGap: null, sampleSize: 0 },
+			{ year: 2025, segment: "Global", avgGap: "4.5", sampleSize: 10 },
+		]);
+		const caller = await buildCaller(db);
+
+		const result = await caller.getMultiYearGapTrend({
+			yearFrom: 2024,
+			yearTo: 2025,
+			segmentBy: "global",
+		});
+
+		expect(result[0]?.points[0]?.avgGap).toBeNull();
+		expect(result[0]?.points[1]?.avgGap).toBe(4.5);
+	});
+
+	it("ignores sizeRange filter when segmenting by workforce", async () => {
+		const db = buildTrendDb([]);
+		const caller = await buildCaller(db);
+
+		await caller.getMultiYearGapTrend({
+			yearFrom: 2025,
+			yearTo: 2026,
+			segmentBy: "workforce",
+			sizeRange: "50-99",
+		});
+
+		// The procedure should still issue exactly one query; we just verify
+		// the where predicate was called (filter count is hidden inside `and`).
+		expect(db.__chain.where).toHaveBeenCalledTimes(1);
+		expect(db.__chain.innerJoin).toHaveBeenCalledTimes(1);
+	});
+
+	it("joins on companies only when needed (global + no filter = no join)", async () => {
+		const db = buildTrendDb([]);
+		const caller = await buildCaller(db);
+
+		await caller.getMultiYearGapTrend({
+			yearFrom: 2025,
+			yearTo: 2026,
+			segmentBy: "global",
+		});
+
+		expect(db.__chain.innerJoin).not.toHaveBeenCalled();
+	});
+
+	it("validates the year range (yearTo >= yearFrom, span <= 10 years)", async () => {
+		const db = buildTrendDb([]);
+		const caller = await buildCaller(db);
+
+		await expect(
+			caller.getMultiYearGapTrend({
+				yearFrom: 2026,
+				yearTo: 2020,
+				segmentBy: "global",
+			}),
+		).rejects.toThrow();
+
+		await expect(
+			caller.getMultiYearGapTrend({
+				yearFrom: 2010,
+				yearTo: 2026,
+				segmentBy: "global",
+			}),
+		).rejects.toThrow();
+	});
+});

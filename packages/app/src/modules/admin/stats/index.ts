@@ -6,14 +6,18 @@ export { ConformiteStatsPage } from "./ConformiteStatsPage";
 export type {
 	GetCampaignProgressionInput,
 	GetGapAlertRateInput,
+	GetMultiYearGapTrendInput,
 } from "./schemas";
 export {
 	getCampaignProgressionSchema,
 	getGapAlertRateSchema,
+	getMultiYearGapTrendSchema,
 } from "./schemas";
 export type {
 	CampaignProgressionPoint,
 	CampaignProgressionSeries,
 	GapAlertRateResult,
+	MultiYearGapPoint,
+	MultiYearGapTrendSeries,
 } from "./types";
 export { YearsFilter } from "./YearsFilter";

@@ -2,8 +2,14 @@ export { CompanySizeFilter } from "./CompanySizeFilter";
 export { FileUpload } from "./FileUpload";
 export { getDsfrModal } from "./getDsfrModal";
 export { NafSectorFilter } from "./NafSectorFilter";
-export type { NafSectionCode } from "./nafSections";
-export { NAF_SECTION_CODES, NAF_SECTIONS } from "./nafSections";
+export type { NafSectionCode, NafSegment } from "./nafSections";
+export {
+	classifyNafSegment,
+	DOMINANT_NAF_SECTIONS,
+	NAF_SECTION_CODES,
+	NAF_SECTIONS,
+	OTHER_NAF_SEGMENT,
+} from "./nafSections";
 export { parseSiren } from "./parseSiren";
 export { SubmitModal } from "./SubmitModal";
 export {

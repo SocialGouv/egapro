@@ -55,3 +55,45 @@ export const NAF_SECTIONS: Record<NafSectionCode, string> = {
 };
 
 export const NAF_SECTION_CODES = Object.keys(NAF_SECTIONS) as NafSectionCode[];
+
+/**
+ * Sections kept as their own series in the K10 multi-year gap trend chart.
+ * The remaining 16 sections are aggregated into a single "Autres" series so
+ * the chart stays readable (max 6 series). Selection: the five sections with
+ * the most declarations on Egapro (companies >= 50 employees).
+ *
+ * C — Industrie manufacturière
+ * G — Commerce, réparation d'automobiles et de motocycles
+ * M — Activités spécialisées, scientifiques et techniques
+ * N — Activités de services administratifs et de soutien
+ * Q — Santé humaine et action sociale
+ */
+export const DOMINANT_NAF_SECTIONS: readonly NafSectionCode[] = [
+	"C",
+	"G",
+	"M",
+	"N",
+	"Q",
+] as const;
+
+/** Label used for the aggregated series bucketing all non-dominant sections. */
+export const OTHER_NAF_SEGMENT = "Autres";
+
+export type NafSegment = NafSectionCode | typeof OTHER_NAF_SEGMENT;
+
+/**
+ * Map a full NAF code (e.g. `"62.01Z"`) to its chart segment. Dominant
+ * sections keep their letter; everything else collapses into `"Autres"`.
+ * Returns `null` when the code is null / empty / unknown.
+ */
+export function classifyNafSegment(nafCode: string | null): NafSegment | null {
+	if (!nafCode) return null;
+	const prefix = nafCode.charAt(0).toUpperCase();
+	if (DOMINANT_NAF_SECTIONS.includes(prefix as NafSectionCode)) {
+		return prefix as NafSectionCode;
+	}
+	// Reject obviously invalid prefixes so upstream doesn't silently fold
+	// corrupt data into "Autres".
+	if (!NAF_SECTION_CODES.includes(prefix as NafSectionCode)) return null;
+	return OTHER_NAF_SEGMENT;
+}

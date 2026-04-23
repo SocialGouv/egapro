@@ -46,3 +46,45 @@ export const getGapAlertRateSchema = z.object({
 });
 
 export type GetGapAlertRateInput = z.infer<typeof getGapAlertRateSchema>;
+
+/**
+ * Input for `adminStats.getMultiYearGapTrend` (K10 — Évolution annuelle
+ * des écarts).
+ *
+ * `yearFrom` / `yearTo`: inclusive range on `declarations.year`. `yearTo`
+ * must be ≥ `yearFrom`; the span is capped at 10 years to keep the chart
+ * readable.
+ *
+ * `segmentBy`: which dimension drives the series split:
+ *   - `"global"` → one "National" curve
+ *   - `"workforce"` → one curve per `COMPANY_SIZE_RANGES` bucket
+ *   - `"naf"` → one curve per dominant NAF section (5) + `"Autres"`
+ *
+ * `sizeRange` / `nafCodePrefix`: extra filters. Silently ignored by the
+ * procedure when they would contradict the segmentation (e.g. filtering
+ * by `sizeRange` while `segmentBy === "workforce"`).
+ */
+export const getMultiYearGapTrendSchema = z
+	.object({
+		yearFrom: z.number().int().min(2000).max(2100),
+		yearTo: z.number().int().min(2000).max(2100),
+		segmentBy: z.enum(["global", "workforce", "naf"]),
+		sizeRange: z.enum(COMPANY_SIZE_RANGE_KEYS).optional(),
+		nafCodePrefix: z
+			.string()
+			.length(1)
+			.regex(/^[A-U]$/, "Le code NAF doit être une lettre majuscule entre A et U")
+			.optional(),
+	})
+	.refine((input) => input.yearTo >= input.yearFrom, {
+		message: "yearTo doit être supérieur ou égal à yearFrom",
+		path: ["yearTo"],
+	})
+	.refine((input) => input.yearTo - input.yearFrom <= 9, {
+		message: "La plage d'années ne peut pas dépasser 10 ans",
+		path: ["yearTo"],
+	});
+
+export type GetMultiYearGapTrendInput = z.infer<
+	typeof getMultiYearGapTrendSchema
+>;

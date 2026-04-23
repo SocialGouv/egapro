@@ -34,3 +34,24 @@ export type GapAlertRateResult = {
 	delta: number | null;
 	sampleSize: number;
 };
+
+/**
+ * One (year, avgGap, sampleSize) tuple on a K10 series. `avgGap` is null for
+ * a year when no declaration in the filtered scope exposes an exploitable
+ * salary pair.
+ */
+export type MultiYearGapPoint = {
+	year: number;
+	avgGap: number | null;
+	sampleSize: number;
+};
+
+/**
+ * One series on the K10 multi-year gap trend chart. `segment` is the label
+ * shown in the legend / accessible table — `"Global"`, a workforce bucket
+ * key (`"<50"`, …), a dominant NAF letter (`"C"`, …) or `"Autres"`.
+ */
+export type MultiYearGapTrendSeries = {
+	segment: string;
+	points: MultiYearGapPoint[];
+};
