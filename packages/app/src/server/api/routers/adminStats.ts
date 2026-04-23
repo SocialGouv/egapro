@@ -198,27 +198,55 @@ export const adminStatsRouter = createTRPCRouter({
 				filters.push(isNotNull(companies.nafCode));
 			}
 
+			// Global mode collapses every row into a single series, so we group
+			// by year only. A literal segment expression can't live in `GROUP BY`
+			// — Postgres rejects string constants there ("non-integer constant
+			// in GROUP BY"). The `'Global'` label is attached back in TS.
+			if (input.segmentBy === "global") {
+				const baseQuery = ctx.db.select({
+					year: declarations.year,
+					avgGap: sql<string | null>`avg(${declarations.averageGap})`,
+					sampleSize: sql<number>`count(*)::int`,
+				});
+				const scoped =
+					shouldApplySizeRange || shouldApplyNafFilter
+						? baseQuery
+								.from(declarations)
+								.innerJoin(companies, eq(declarations.siren, companies.siren))
+						: baseQuery.from(declarations);
+				const rows = await scoped
+					.where(and(...filters))
+					.groupBy(declarations.year)
+					.orderBy(declarations.year);
+				if (rows.length === 0) return [];
+				return [
+					{
+						segment: "Global",
+						points: rows.map((row) => ({
+							year: row.year,
+							avgGap:
+								row.avgGap === null
+									? null
+									: Math.round(Number.parseFloat(row.avgGap) * 10) / 10,
+							sampleSize: row.sampleSize,
+						})),
+					},
+				];
+			}
+
+			// Workforce / NAF modes: the segment column is a CASE expression
+			// (a real expression, not a constant), so Postgres is happy to see
+			// it in both SELECT and GROUP BY.
 			const segmentExpr = buildSegmentExpression(input.segmentBy);
-
-			const needsCompaniesJoin =
-				input.segmentBy !== "global" ||
-				shouldApplySizeRange ||
-				shouldApplyNafFilter;
-
-			const baseQuery = ctx.db.select({
-				year: declarations.year,
-				segment: segmentExpr,
-				avgGap: sql<string | null>`avg(${declarations.averageGap})`,
-				sampleSize: sql<number>`count(*)::int`,
-			});
-
-			const scoped = needsCompaniesJoin
-				? baseQuery
-						.from(declarations)
-						.innerJoin(companies, eq(declarations.siren, companies.siren))
-				: baseQuery.from(declarations);
-
-			const rows = await scoped
+			const rows = await ctx.db
+				.select({
+					year: declarations.year,
+					segment: segmentExpr,
+					avgGap: sql<string | null>`avg(${declarations.averageGap})`,
+					sampleSize: sql<number>`count(*)::int`,
+				})
+				.from(declarations)
+				.innerJoin(companies, eq(declarations.siren, companies.siren))
 				.where(and(...filters))
 				.groupBy(declarations.year, segmentExpr)
 				.orderBy(declarations.year, segmentExpr);
@@ -227,12 +255,7 @@ export const adminStatsRouter = createTRPCRouter({
 		}),
 });
 
-function buildSegmentExpression(
-	segmentBy: "global" | "workforce" | "naf",
-): SQL<string> {
-	if (segmentBy === "global") {
-		return sql<string>`'Global'`;
-	}
+function buildSegmentExpression(segmentBy: "workforce" | "naf"): SQL<string> {
 	if (segmentBy === "workforce") {
 		// Mirrors the boundaries of `COMPANY_SIZE_RANGES`. Hard-coding the
 		// buckets as literals keeps the generated SQL self-documenting; if a
