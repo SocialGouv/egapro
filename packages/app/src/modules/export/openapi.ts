@@ -361,8 +361,8 @@ export const openApiSpec = {
 	info: {
 		title: "EGAPRO — API d'export",
 		description:
-			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une signature de requête (RSA-SHA256) et une clé API (Bearer token).",
-		version: "1.4.0",
+			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une clé API transmise en Bearer token. L'authentification ainsi qu'un quota (rate limit) sont appliqués en amont par la passerelle EGAPRO.",
+		version: "2.0.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},
@@ -374,25 +374,11 @@ export const openApiSpec = {
 				type: "http",
 				scheme: "bearer",
 				description:
-					"Clé API SUIT. Utiliser le header : Authorization: Bearer <clé>",
-			},
-			requestSignature: {
-				type: "apiKey",
-				in: "header",
-				name: "X-Signature",
-				description:
-					"Signature RSA-SHA256 du payload `{timestamp}|{METHOD}|{pathname}`, encodée en base64.",
-			},
-			requestTimestamp: {
-				type: "apiKey",
-				in: "header",
-				name: "X-Timestamp",
-				description:
-					"Horodatage Unix (secondes) utilisé pour construire le payload signé. Doit être à moins de 30 secondes de l'heure serveur.",
+					"Clé API SUIT. Utiliser le header : Authorization: Bearer <clé>. La clé est validée par la passerelle (APISIX) en amont de l'application.",
 			},
 		},
 	},
-	security: [{ requestSignature: [], requestTimestamp: [], bearerAuth: [] }],
+	security: [{ bearerAuth: [] }],
 	paths: {
 		"/api/v1/export/declarations": {
 			get: {
@@ -449,24 +435,9 @@ export const openApiSpec = {
 							},
 						},
 					},
-					"403": {
-						description: "Signature manquante ou invalide",
-						content: {
-							"application/json": {
-								schema: {
-									type: "object",
-									properties: {
-										error: {
-											type: "string",
-											example: "Signature manquante ou invalide",
-										},
-									},
-								},
-							},
-						},
-					},
 					"401": {
-						description: "Clé API manquante ou invalide",
+						description:
+							"Clé API manquante ou invalide (renvoyé par la passerelle)",
 						content: {
 							"application/json": {
 								schema: {
@@ -480,6 +451,11 @@ export const openApiSpec = {
 								},
 							},
 						},
+					},
+					"429": {
+						description:
+							"Quota dépassé (rate limit appliqué par la passerelle)",
+						content: { "application/json": { schema: errorSchema } },
 					},
 					"400": {
 						description: "Paramètres invalides",
@@ -569,12 +545,14 @@ export const openApiSpec = {
 							},
 						},
 					},
-					"403": {
-						description: "Signature manquante ou invalide",
+					"401": {
+						description:
+							"Clé API manquante ou invalide (renvoyé par la passerelle)",
 						content: { "application/json": { schema: errorSchema } },
 					},
-					"401": {
-						description: "Clé API manquante ou invalide",
+					"429": {
+						description:
+							"Quota dépassé (rate limit appliqué par la passerelle)",
 						content: { "application/json": { schema: errorSchema } },
 					},
 					"400": {
@@ -612,12 +590,14 @@ export const openApiSpec = {
 							},
 						},
 					},
-					"403": {
-						description: "Signature manquante ou invalide",
+					"401": {
+						description:
+							"Clé API manquante ou invalide (renvoyé par la passerelle)",
 						content: { "application/json": { schema: errorSchema } },
 					},
-					"401": {
-						description: "Clé API manquante ou invalide",
+					"429": {
+						description:
+							"Quota dépassé (rate limit appliqué par la passerelle)",
 						content: { "application/json": { schema: errorSchema } },
 					},
 					"404": {

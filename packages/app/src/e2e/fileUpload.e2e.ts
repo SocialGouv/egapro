@@ -21,9 +21,10 @@ import { completeDeclaration } from "./helpers/declaration-flows";
  *    anonymous callers, 404 for unknown fileIds (which also exercises the
  *    SIREN filter in `fetchFileBySiren`).
  *  - Scenario B (SUIT API): verify the SUIT branch is triggered by the
- *    `x-signature` header, returns 200 with `attachment` disposition on a
- *    valid Bearer key, rejects a wrong key with 401, and — critically —
- *    verifies that the SUIT credentials are **not** accepted by the upload
+ *    `X-Gateway-Forwarded` header (injected by APISIX in prod, simulated
+ *    here with the dev shared secret), returns 200 with `attachment`
+ *    disposition, rejects a wrong secret with 403, and — critically —
+ *    verifies that no gateway-based path lets a caller reach the upload
  *    endpoint (read-only invariant).
  *
  * The strict cross-SIREN isolation case is already covered exhaustively by
@@ -36,11 +37,12 @@ import { completeDeclaration } from "./helpers/declaration-flows";
 // checks run fast against the same S3 object.
 test.describe.configure({ mode: "serial" });
 
-// Dev SUIT API key — the deterministic local value from `.env.example`. Not
-// a secret. The E2E server runs with the same `.env`, so this Bearer token
-// passes the constant-time check. Signature verification is auto-disabled in
-// the local dev env because `EGAPRO_SUIT_PUBLIC_KEY_PEM` is unset.
-const DEV_SUIT_API_KEY = "dev-suit-api-key-minimum-32-chars-long";
+// Dev gateway shared secret — the deterministic local value from
+// `.env.example`. Not a secret. In prod the value is injected into the
+// `X-Gateway-Forwarded` header by the APISIX `proxy-rewrite` plugin; the
+// E2E server runs with the same `.env`, so this value passes the
+// middleware's constant-time check.
+const DEV_GATEWAY_SHARED_SECRET = "dev-gateway-shared-secret-minimum-32-chars";
 
 test.describe("file upload + view access control", () => {
 	let fileId: string;
@@ -112,18 +114,14 @@ test.describe("file upload + view access control", () => {
 		expect(response.status()).toBe(404);
 	});
 
-	test("SUIT API with valid bearer + x-signature → 200 attachment", async ({
-		browser,
-	}) => {
+	test("gateway-forwarded request → 200 attachment", async ({ browser }) => {
 		expect(fileId).toBeTruthy();
 
 		const anonCtx = await browser.newContext({ storageState: undefined });
 		try {
 			const response = await anonCtx.request.get(`/api/v1/files/${fileId}`, {
 				headers: {
-					Authorization: `Bearer ${DEV_SUIT_API_KEY}`,
-					"x-signature": "e2e-signature",
-					"x-timestamp": `${Math.floor(Date.now() / 1000)}`,
+					"X-Gateway-Forwarded": DEV_GATEWAY_SHARED_SECRET,
 				},
 			});
 			expect(response.status()).toBe(200);
@@ -134,36 +132,34 @@ test.describe("file upload + view access control", () => {
 		}
 	});
 
-	test("SUIT API with wrong bearer key → 401", async ({ browser }) => {
+	test("invalid gateway shared secret → 403", async ({ browser }) => {
 		expect(fileId).toBeTruthy();
 
 		const anonCtx = await browser.newContext({ storageState: undefined });
 		try {
 			const response = await anonCtx.request.get(`/api/v1/files/${fileId}`, {
 				headers: {
-					Authorization: "Bearer invalid-key-invalid-key-invalid-key-inv",
-					"x-signature": "e2e-signature",
+					"X-Gateway-Forwarded": "definitely-not-the-right-gateway-secret",
 				},
 			});
-			expect(response.status()).toBe(401);
+			expect(response.status()).toBe(403);
 		} finally {
 			await anonCtx.close();
 		}
 	});
 
-	test("SUIT credentials cannot upload via POST /api/upload (read-only invariant)", async ({
+	test("gateway header cannot upload via POST /api/upload (read-only invariant)", async ({
 		browser,
 	}) => {
-		// The upload endpoint only trusts NextAuth sessions — SUIT credentials
-		// must never be accepted as a write channel. This test guards that
-		// invariant so a future refactor of the download router cannot
-		// accidentally leak into the upload router.
+		// The upload endpoint only trusts NextAuth sessions. This test guards
+		// that a caller who somehow reached the app via the gateway cannot
+		// use that route to upload — the gateway is configured to only
+		// proxy GET /api/v1/* anyway, but the app-side invariant matters.
 		const anonCtx = await browser.newContext({ storageState: undefined });
 		try {
 			const response = await anonCtx.request.post("/api/upload", {
 				headers: {
-					Authorization: `Bearer ${DEV_SUIT_API_KEY}`,
-					"x-signature": "e2e-signature",
+					"X-Gateway-Forwarded": DEV_GATEWAY_SHARED_SECRET,
 					"Content-Type": "application/pdf",
 					"X-Filename": "should-be-rejected.pdf",
 					"X-Flow-Type": "cse_opinion",
