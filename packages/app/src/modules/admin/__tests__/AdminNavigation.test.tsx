@@ -29,6 +29,9 @@ describe("AdminNavigation", () => {
 		expect(
 			screen.getByRole("link", { name: "Statistiques campagne" }),
 		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: "Statistiques conformité" }),
+		).toBeInTheDocument();
 	});
 
 	it("marks /admin/stats/campagne as active on that page", () => {
@@ -101,5 +104,16 @@ describe("AdminNavigation", () => {
 		expect(screen.getByRole("link", { name: "Accueil" })).not.toHaveAttribute(
 			"aria-current",
 		);
+	});
+
+	it("marks /admin/stats/conformite as active on that page", () => {
+		(usePathname as Mock).mockReturnValue("/admin/stats/conformite");
+		render(<AdminNavigation />);
+		expect(
+			screen.getByRole("link", { name: "Statistiques conformité" }),
+		).toHaveAttribute("aria-current", "page");
+		expect(
+			screen.getByRole("link", { name: "Statistiques campagne" }),
+		).not.toHaveAttribute("aria-current");
 	});
 });

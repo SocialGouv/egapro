@@ -9,6 +9,7 @@ const adminLinks = [
 	{ href: "/admin/impersonate", label: "Mimoquer un Siren" },
 	{ href: "/admin/liste-referents", label: "Référents" },
 	{ href: "/admin/stats/campagne", label: "Statistiques campagne" },
+	{ href: "/admin/stats/conformite", label: "Statistiques conformité" },
 	{ href: "/admin/parametres", label: "Paramètres" },
 ] as const;
 
