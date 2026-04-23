@@ -213,16 +213,18 @@ test.describe("admin conformity stats (K10 — multi-year gap trend)", () => {
 	}) => {
 		await page.goto("/admin/stats/conformite");
 		await page.getByLabel("Segmenter par").selectOption("workforce");
-		await expect(
-			page.getByRole("group", { name: /séries affichées/i }),
-		).toBeVisible();
+		const legend = page.getByRole("group", { name: /séries affichées/i });
+		await expect(legend).toBeVisible();
 
-		const firstCheckbox = page
-			.getByRole("group", { name: /séries affichées/i })
-			.getByRole("checkbox")
-			.first();
+		// DSFR checkbox groups hide the underlying <input> (opacity 0, positioned
+		// off-screen) and route clicks through the <label>. Targeting the input
+		// directly with .uncheck() times out because Playwright can't "see" it.
+		// Click the label text — that dispatches the change event the React
+		// controlled checkbox needs, and the input state flips as expected.
+		const firstCheckbox = legend.getByRole("checkbox").first();
+		const firstLabel = legend.locator("label").first();
 		await expect(firstCheckbox).toBeChecked();
-		await firstCheckbox.uncheck();
+		await firstLabel.click();
 		await expect(firstCheckbox).not.toBeChecked();
 	});
 
