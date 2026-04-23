@@ -444,6 +444,12 @@ type SeededCampaignDeclaration = {
 	 * K8 tests set it to exercise the sector filter, K2 tests leave it null.
 	 */
 	nafCode?: string | null;
+	/**
+	 * Denormalized average gap (%) used by the K10 multi-year trend chart.
+	 * Optional — null means "no exploitable salary pair", which the chart
+	 * filters out.
+	 */
+	averageGap?: number | null;
 };
 
 /**
@@ -470,6 +476,10 @@ export async function seedSubmittedDeclarationsForStats(
 		for (const row of rows) {
 			const nafCode = row.nafCode ?? null;
 			const hasAlertGap = row.hasAlertGap ?? false;
+			const averageGap =
+				row.averageGap === undefined || row.averageGap === null
+					? null
+					: row.averageGap.toString();
 			await sql`
 				INSERT INTO app_company (siren, name, workforce, naf_code, created_at, updated_at)
 				VALUES (${row.siren}, ${`E2E Stats Co. ${row.siren}`}, ${row.workforce}, ${nafCode}, NOW(), NOW())
@@ -480,16 +490,18 @@ export async function seedSubmittedDeclarationsForStats(
 			await sql`
 				INSERT INTO app_declaration (
 					id, siren, year, declarant_id, current_step, status,
-					submitted_at, has_alert_gap, created_at, updated_at
+					submitted_at, has_alert_gap, average_gap, created_at, updated_at
 				)
 				VALUES (
 					gen_random_uuid(), ${row.siren}, ${row.year}, ${declarantId}, 6,
-					'submitted', ${row.submittedAt}, ${hasAlertGap}, NOW(), NOW()
+					'submitted', ${row.submittedAt}, ${hasAlertGap}, ${averageGap},
+					NOW(), NOW()
 				)
 				ON CONFLICT ON CONSTRAINT declaration_siren_year_idx DO UPDATE SET
 					status = 'submitted',
 					submitted_at = EXCLUDED.submitted_at,
-					has_alert_gap = EXCLUDED.has_alert_gap
+					has_alert_gap = EXCLUDED.has_alert_gap,
+					average_gap = EXCLUDED.average_gap
 			`;
 		}
 	} finally {

@@ -73,7 +73,10 @@ export const getMultiYearGapTrendSchema = z
 		nafCodePrefix: z
 			.string()
 			.length(1)
-			.regex(/^[A-U]$/, "Le code NAF doit être une lettre majuscule entre A et U")
+			.regex(
+				/^[A-U]$/,
+				"Le code NAF doit être une lettre majuscule entre A et U",
+			)
 			.optional(),
 	})
 	.refine((input) => input.yearTo >= input.yearFrom, {

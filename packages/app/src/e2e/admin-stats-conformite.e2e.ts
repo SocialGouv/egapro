@@ -7,7 +7,8 @@ import {
 	seedSubmittedDeclarationsForStats,
 } from "./helpers/db";
 
-// Reserved SIRENs — outside any real range, scoped to the K8 conformity test.
+// Reserved SIRENs — outside any real range, scoped to the K8/K10 conformity
+// test. averageGap values double as K10 fixture data.
 const SIRENS = {
 	currentAlert: "999400001", // year N, alert, small
 	currentSafe: "999400002", // year N, no alert, small
@@ -30,6 +31,7 @@ test.describe("admin conformity stats (K8 — gap alert rate)", () => {
 				workforce: 30,
 				hasAlertGap: true,
 				nafCode: "A01.11Z",
+				averageGap: 6.5,
 			},
 			{
 				siren: SIRENS.currentSafe,
@@ -38,6 +40,7 @@ test.describe("admin conformity stats (K8 — gap alert rate)", () => {
 				workforce: 30,
 				hasAlertGap: false,
 				nafCode: "A01.11Z",
+				averageGap: 2.1,
 			},
 			{
 				siren: SIRENS.currentLargeAlert,
@@ -46,6 +49,7 @@ test.describe("admin conformity stats (K8 — gap alert rate)", () => {
 				workforce: 300,
 				hasAlertGap: true,
 				nafCode: "C10.11Z",
+				averageGap: 7.2,
 			},
 			{
 				siren: SIRENS.currentFinance,
@@ -54,6 +58,7 @@ test.describe("admin conformity stats (K8 — gap alert rate)", () => {
 				workforce: 50,
 				hasAlertGap: true,
 				nafCode: "K64.19Z",
+				averageGap: 8.4,
 			},
 			{
 				siren: SIRENS.previousAlert,
@@ -62,6 +67,7 @@ test.describe("admin conformity stats (K8 — gap alert rate)", () => {
 				workforce: 30,
 				hasAlertGap: true,
 				nafCode: "A01.11Z",
+				averageGap: 6.8,
 			},
 			{
 				siren: SIRENS.previousSafe,
@@ -70,6 +76,7 @@ test.describe("admin conformity stats (K8 — gap alert rate)", () => {
 				workforce: 30,
 				hasAlertGap: false,
 				nafCode: "A01.11Z",
+				averageGap: 2.3,
 			},
 		]);
 	});
@@ -154,6 +161,90 @@ test.describe("admin conformity stats (K8 — gap alert rate)", () => {
 				name: new RegExp(`Taux d'écart ≥ 5 % en ${PREVIOUS_YEAR}`),
 				level: 3,
 			}),
+		).toBeVisible();
+	});
+});
+
+test.describe("admin conformity stats (K10 — multi-year gap trend)", () => {
+	test("admin sees the trend section, chart figure and toggle legend", async ({
+		page,
+	}) => {
+		await page.goto("/admin/stats/conformite");
+
+		await expect(
+			page.getByRole("heading", {
+				name: "Évolution annuelle des écarts",
+				level: 2,
+			}),
+		).toBeVisible();
+		await expect(
+			page.getByRole("figure", {
+				name: /courbe d'évolution annuelle de l'écart moyen/i,
+			}),
+		).toBeVisible();
+	});
+
+	test("switching to workforce segmentation swaps the legend series", async ({
+		page,
+	}) => {
+		await page.goto("/admin/stats/conformite");
+
+		await expect(
+			page.getByRole("heading", {
+				name: "Évolution annuelle des écarts",
+				level: 2,
+			}),
+		).toBeVisible();
+
+		await page.getByLabel("Segmenter par").selectOption("workforce");
+
+		// Checkbox group appears when there is more than one series.
+		await expect(
+			page.getByRole("group", { name: /séries affichées/i }),
+		).toBeVisible();
+	});
+
+	test("a checkbox in the toggle legend hides its series from the chart", async ({
+		page,
+	}) => {
+		await page.goto("/admin/stats/conformite");
+		await page.getByLabel("Segmenter par").selectOption("workforce");
+		await expect(
+			page.getByRole("group", { name: /séries affichées/i }),
+		).toBeVisible();
+
+		const firstCheckbox = page
+			.getByRole("group", { name: /séries affichées/i })
+			.getByRole("checkbox")
+			.first();
+		await expect(firstCheckbox).toBeChecked();
+		await firstCheckbox.uncheck();
+		await expect(firstCheckbox).not.toBeChecked();
+	});
+
+	test("accessible alternative table lists segments and years", async ({
+		page,
+	}) => {
+		await page.goto("/admin/stats/conformite");
+
+		await expect(
+			page.getByRole("figure", {
+				name: /courbe d'évolution annuelle de l'écart moyen/i,
+			}),
+		).toBeVisible();
+
+		// The trend section uses the same <details> pattern as K2 — open the
+		// second disclosure on the page (the first belongs to the K8 tile if
+		// any ever lands; here K8 has no table, so the first details is K10).
+		await page
+			.locator("summary", {
+				hasText: /consulter les données du graphique sous forme de tableau/i,
+			})
+			.first()
+			.click();
+
+		await expect(
+			page.getByRole("columnheader", { name: String(CURRENT_YEAR) }),
 		).toBeVisible();
 	});
 });

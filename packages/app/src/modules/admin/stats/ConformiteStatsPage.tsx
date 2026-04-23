@@ -11,6 +11,9 @@ import {
 import { api } from "~/trpc/react";
 
 import { AdminKpiTile } from "./AdminKpiTile";
+import { GapChartSeriesToggle } from "./GapChartSeriesToggle";
+import { MultiYearGapChart } from "./MultiYearGapChart";
+import { MultiYearGapTable } from "./MultiYearGapTable";
 
 type Props = {
 	/** Reference year — also the default selection of the year filter. */
@@ -18,6 +21,11 @@ type Props = {
 	/** Years available in the year dropdown, newest first. */
 	availableYears: number[];
 };
+
+type SegmentBy = "global" | "workforce" | "naf";
+
+/** Default trend window: last five campaign years. */
+const DEFAULT_TREND_SPAN = 4;
 
 export function ConformiteStatsPage({ currentYear, availableYears }: Props) {
 	const [year, setYear] = useState(currentYear);
@@ -28,14 +36,57 @@ export function ConformiteStatsPage({ currentYear, availableYears }: Props) {
 		NafSectionCode | undefined
 	>(undefined);
 
-	const query = api.adminStats.getGapAlertRate.useQuery(
+	const trendDefaultFrom = Math.max(
+		availableYears[availableYears.length - 1] ?? currentYear,
+		currentYear - DEFAULT_TREND_SPAN,
+	);
+	const [trendYearFrom, setTrendYearFrom] = useState(trendDefaultFrom);
+	const [trendYearTo, setTrendYearTo] = useState(currentYear);
+	const [segmentBy, setSegmentBy] = useState<SegmentBy>("global");
+	const [hiddenSegments, setHiddenSegments] = useState<ReadonlySet<string>>(
+		new Set(),
+	);
+
+	const gapAlertRate = api.adminStats.getGapAlertRate.useQuery(
 		{ year, sizeRange, nafCodePrefix },
+		{ placeholderData: (prev) => prev },
+	);
+
+	const trend = api.adminStats.getMultiYearGapTrend.useQuery(
+		{
+			yearFrom: trendYearFrom,
+			yearTo: trendYearTo,
+			segmentBy,
+			sizeRange,
+			nafCodePrefix,
+		},
 		{ placeholderData: (prev) => prev },
 	);
 
 	const handleYearChange = (event: ChangeEvent<HTMLSelectElement>) => {
 		setYear(Number.parseInt(event.target.value, 10));
 	};
+
+	const handleTrendYearFromChange = (event: ChangeEvent<HTMLSelectElement>) => {
+		const next = Number.parseInt(event.target.value, 10);
+		setTrendYearFrom(next);
+		if (next > trendYearTo) setTrendYearTo(next);
+	};
+
+	const handleTrendYearToChange = (event: ChangeEvent<HTMLSelectElement>) => {
+		const next = Number.parseInt(event.target.value, 10);
+		setTrendYearTo(next);
+		if (next < trendYearFrom) setTrendYearFrom(next);
+	};
+
+	const handleSegmentByChange = (event: ChangeEvent<HTMLSelectElement>) => {
+		setSegmentBy(event.target.value as SegmentBy);
+		// Reset the hidden set on mode change — the series names change, so the
+		// old hidden entries no longer match.
+		setHiddenSegments(new Set());
+	};
+
+	const segments = trend.data?.map(({ segment }) => segment) ?? [];
 
 	return (
 		<>
@@ -83,27 +134,122 @@ export function ConformiteStatsPage({ currentYear, availableYears }: Props) {
 				<h2 className="fr-h3" id="gap-alert-rate-heading">
 					Taux d'écart ≥ 5 %
 				</h2>
-				{query.isLoading && !query.data && (
+				{gapAlertRate.isLoading && !gapAlertRate.data && (
 					<p aria-live="polite">Chargement de l'indicateur…</p>
 				)}
-				{query.isError && (
+				{gapAlertRate.isError && (
 					<div aria-live="polite" className="fr-alert fr-alert--error">
 						<p>Une erreur est survenue lors du chargement du taux d'écart.</p>
 					</div>
 				)}
-				{query.data && (
+				{gapAlertRate.data && (
 					<div className="fr-grid-row fr-grid-row--gutters">
 						<div className="fr-col-12 fr-col-md-6 fr-col-lg-4">
 							<AdminKpiTile
 								deltaLabel={`vs ${year - 1}`}
-								deltaPoints={query.data.delta}
+								deltaPoints={gapAlertRate.data.delta}
 								inverted
-								subtitle={`Sur ${formatCount(query.data.sampleSize)} déclarations`}
+								subtitle={`Sur ${formatCount(gapAlertRate.data.sampleSize)} déclarations`}
 								title={`Taux d'écart ≥ 5 % en ${year}`}
-								value={formatGap(query.data.rate)}
+								value={formatGap(gapAlertRate.data.rate)}
 							/>
 						</div>
 					</div>
+				)}
+			</section>
+
+			<section
+				aria-labelledby="multi-year-gap-trend-heading"
+				className="fr-mt-6w"
+			>
+				<h2 className="fr-h3" id="multi-year-gap-trend-heading">
+					Évolution annuelle des écarts
+				</h2>
+
+				<div className="fr-grid-row fr-grid-row--gutters fr-mt-2w">
+					<div className="fr-col-12 fr-col-md-4">
+						<div className="fr-select-group">
+							<label className="fr-label" htmlFor="trend-year-from-filter">
+								De
+							</label>
+							<select
+								className="fr-select"
+								id="trend-year-from-filter"
+								name="yearFrom"
+								onChange={handleTrendYearFromChange}
+								value={trendYearFrom}
+							>
+								{availableYears.map((y) => (
+									<option key={y} value={y}>
+										{y}
+									</option>
+								))}
+							</select>
+						</div>
+					</div>
+					<div className="fr-col-12 fr-col-md-4">
+						<div className="fr-select-group">
+							<label className="fr-label" htmlFor="trend-year-to-filter">
+								À
+							</label>
+							<select
+								className="fr-select"
+								id="trend-year-to-filter"
+								name="yearTo"
+								onChange={handleTrendYearToChange}
+								value={trendYearTo}
+							>
+								{availableYears.map((y) => (
+									<option key={y} value={y}>
+										{y}
+									</option>
+								))}
+							</select>
+						</div>
+					</div>
+					<div className="fr-col-12 fr-col-md-4">
+						<div className="fr-select-group">
+							<label className="fr-label" htmlFor="trend-segment-filter">
+								Segmenter par
+							</label>
+							<select
+								className="fr-select"
+								id="trend-segment-filter"
+								name="segmentBy"
+								onChange={handleSegmentByChange}
+								value={segmentBy}
+							>
+								<option value="global">Global</option>
+								<option value="workforce">Tranche d'effectif</option>
+								<option value="naf">Secteur NAF</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				{trend.isLoading && !trend.data && (
+					<p aria-live="polite">Chargement du graphique…</p>
+				)}
+				{trend.isError && (
+					<div aria-live="polite" className="fr-alert fr-alert--error">
+						<p>Une erreur est survenue lors du chargement de l'évolution.</p>
+					</div>
+				)}
+				{trend.data && (
+					<>
+						<MultiYearGapChart
+							hiddenSegments={hiddenSegments}
+							series={trend.data}
+						/>
+						{segments.length > 1 && (
+							<GapChartSeriesToggle
+								hiddenSegments={hiddenSegments}
+								onChange={setHiddenSegments}
+								segments={segments}
+							/>
+						)}
+						<MultiYearGapTable series={trend.data} />
+					</>
 				)}
 			</section>
 		</>

@@ -104,9 +104,9 @@ function pseudoRandom(n) {
  * @param {string} nafCode
  */
 function shouldHaveAlertGap(companyIndex, yearsBeforeCurrent, nafCode) {
-	// Gentle downward drift: the oldest seeded year (2019) sits around 54%,
-	// the current year at ~40% — the points-delta badge between any two
-	// adjacent years should show a visible ~2pt swing.
+	// Gentle downward drift: older years sit around 50%, the current year at
+	// ~40% — the K8 points-delta badge between any two adjacent years should
+	// show a visible ~2pt swing.
 	const baseRate = 0.4 + 0.02 * yearsBeforeCurrent;
 	const sectorBias = nafCode.startsWith("K")
 		? 0.12
@@ -115,6 +115,25 @@ function shouldHaveAlertGap(companyIndex, yearsBeforeCurrent, nafCode) {
 			: 0;
 	const threshold = Math.min(0.9, Math.max(0.05, baseRate + sectorBias));
 	return pseudoRandom(companyIndex * 101 + yearsBeforeCurrent * 17) < threshold;
+}
+
+/**
+ * Build a plausible average gap (0..12%) for a seed row so K10 has something
+ * to plot. Same shape as `shouldHaveAlertGap`: slightly improving over time,
+ * with a sector bias (K finance skewed up, M services skewed down). Clamped
+ * to [0.5, 12] so the chart's Y-axis stays readable.
+ */
+function pseudoAverageGap(companyIndex, yearsBeforeCurrent, nafCode) {
+	const baseGap = 4 + 0.6 * yearsBeforeCurrent;
+	const sectorShift = nafCode.startsWith("K")
+		? 2.5
+		: nafCode.startsWith("M")
+			? -1.5
+			: 0;
+	const jitter =
+		(pseudoRandom(companyIndex * 211 + yearsBeforeCurrent) - 0.5) * 3;
+	const value = baseGap + sectorShift + jitter;
+	return Math.max(0.5, Math.min(12, Math.round(value * 10) / 10));
 }
 
 function sirenFor(index) {
@@ -172,12 +191,14 @@ async function seed(sql) {
 		insertedCompanies++;
 	}
 
-	for (let yearsBack = 0; yearsBack < CAMPAIGN_YEARS_BACK; yearsBack++) {
+	const totalYears = currentYear - FIRST_SEED_YEAR + 1;
+	for (let yearsBack = 0; yearsBack < totalYears; yearsBack++) {
 		const year = currentYear - yearsBack;
 		let companyIndex = 0;
 		for (const { siren, nafCode } of catalog) {
 			companyIndex++;
 			const hasAlertGap = shouldHaveAlertGap(companyIndex, yearsBack, nafCode);
+			const averageGap = pseudoAverageGap(companyIndex, yearsBack, nafCode);
 			// Spread submissions over January-February so the rows look realistic
 			// (even though the campaign progression chart is not what we exercise
 			// here, keeping a plausible date avoids surprises elsewhere).
@@ -187,7 +208,7 @@ async function seed(sql) {
 			await sql`
 				INSERT INTO app_declaration (
 					id, siren, year, declarant_id, current_step, status,
-					submitted_at, has_alert_gap, created_at, updated_at
+					submitted_at, has_alert_gap, average_gap, created_at, updated_at
 				)
 				VALUES (
 					gen_random_uuid(),
@@ -198,6 +219,7 @@ async function seed(sql) {
 					'submitted',
 					${submittedAt},
 					${hasAlertGap},
+					${averageGap},
 					NOW(),
 					NOW()
 				)
@@ -205,6 +227,7 @@ async function seed(sql) {
 					status = 'submitted',
 					submitted_at = EXCLUDED.submitted_at,
 					has_alert_gap = EXCLUDED.has_alert_gap,
+					average_gap = EXCLUDED.average_gap,
 					updated_at = NOW()
 			`;
 			insertedDeclarations++;
@@ -255,7 +278,7 @@ async function main() {
 		}
 		const result = await seed(sql);
 		console.log(
-			`[seed-conformite] upserted ${result.insertedCompanies} companies and ${result.insertedDeclarations} submitted declarations across ${CAMPAIGN_YEARS_BACK} campaign years.`,
+			`[seed-conformite] upserted ${result.insertedCompanies} companies and ${result.insertedDeclarations} submitted declarations from ${FIRST_SEED_YEAR} to the current year.`,
 		);
 		console.log(
 			`[seed-conformite] open http://localhost:3000/admin/stats/conformite to browse the tile.`,
