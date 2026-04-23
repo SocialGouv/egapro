@@ -434,6 +434,16 @@ type SeededCampaignDeclaration = {
 	submittedAt: string;
 	/** Workforce stored on the synthetic company. */
 	workforce: number;
+	/**
+	 * Denormalized alert-gap flag used by the K8 conformity KPI. Optional so
+	 * the K2 campaign-progression seeds keep working without caring about it.
+	 */
+	hasAlertGap?: boolean;
+	/**
+	 * NAF code (full form, e.g. `"62.01Z"`). Optional for the same reason —
+	 * K8 tests set it to exercise the sector filter, K2 tests leave it null.
+	 */
+	nafCode?: string | null;
 };
 
 /**
@@ -458,23 +468,28 @@ export async function seedSubmittedDeclarationsForStats(
 			);
 		}
 		for (const row of rows) {
+			const nafCode = row.nafCode ?? null;
+			const hasAlertGap = row.hasAlertGap ?? false;
 			await sql`
-				INSERT INTO app_company (siren, name, workforce, created_at, updated_at)
-				VALUES (${row.siren}, ${`E2E Stats Co. ${row.siren}`}, ${row.workforce}, NOW(), NOW())
-				ON CONFLICT (siren) DO UPDATE SET workforce = EXCLUDED.workforce
+				INSERT INTO app_company (siren, name, workforce, naf_code, created_at, updated_at)
+				VALUES (${row.siren}, ${`E2E Stats Co. ${row.siren}`}, ${row.workforce}, ${nafCode}, NOW(), NOW())
+				ON CONFLICT (siren) DO UPDATE SET
+					workforce = EXCLUDED.workforce,
+					naf_code = EXCLUDED.naf_code
 			`;
 			await sql`
 				INSERT INTO app_declaration (
 					id, siren, year, declarant_id, current_step, status,
-					submitted_at, created_at, updated_at
+					submitted_at, has_alert_gap, created_at, updated_at
 				)
 				VALUES (
 					gen_random_uuid(), ${row.siren}, ${row.year}, ${declarantId}, 6,
-					'submitted', ${row.submittedAt}, NOW(), NOW()
+					'submitted', ${row.submittedAt}, ${hasAlertGap}, NOW(), NOW()
 				)
 				ON CONFLICT ON CONSTRAINT declaration_siren_year_idx DO UPDATE SET
 					status = 'submitted',
-					submitted_at = EXCLUDED.submitted_at
+					submitted_at = EXCLUDED.submitted_at,
+					has_alert_gap = EXCLUDED.has_alert_gap
 			`;
 		}
 	} finally {
