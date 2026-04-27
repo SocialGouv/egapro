@@ -107,6 +107,14 @@ for _ in $(seq 1 60); do
   sleep 1
 done
 
+# Install workspace dependencies if missing. pnpm hardlinks from the shared
+# global store (~/.local/share/pnpm/store), so cold-cache cost is the only
+# slow run; subsequent worktrees are ~10-15s.
+if [ ! -d node_modules ] || [ ! -d packages/app/node_modules ]; then
+  echo "[setup-worktree] Installing dependencies (pnpm install --frozen-lockfile)..."
+  pnpm install --frozen-lockfile
+fi
+
 # Run Drizzle migrations against this worktree's DB.
 echo "[setup-worktree] Applying migrations..."
 (cd packages/app && pnpm db:migrate)

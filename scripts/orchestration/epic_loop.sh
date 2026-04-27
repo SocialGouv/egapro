@@ -58,6 +58,10 @@ AGENT_TIMEOUT="${EPIC_LOOP_AGENT_TIMEOUT:-5400}"
 
 mkdir -p "$TICK_DIR"
 
+# Invalidate any stale gh cache from a prior run — the very first tick must
+# read fresh board state.
+rm -rf /tmp/egapro_gh_cache/ 2>/dev/null || true
+
 bash "$SCRIPT_DIR/log_event.sh" "$AID" START "epics=$EPICS budget_sonnet=$BUDGET_SONNET budget_opus=$BUDGET_OPUS max_ticks=$MAX_TICKS"
 
 # ---- Pre-flight: validate args + move epics to 'In progress' ----
@@ -89,7 +93,10 @@ ensure_worktree() {
     fi
 
     if [ ! -f "$WT_PATH/packages/app/.env.local" ]; then
-        (cd "$WT_PATH" && bash scripts/setup-worktree.sh "$INDEX" 2>&1) \
+        # Use the main-repo's setup-worktree.sh (resolved via $REPO_ROOT) so
+        # the bootstrap works even if the worktree's checked-out branch does
+        # not yet contain the orchestration infrastructure scripts.
+        (cd "$WT_PATH" && bash "$REPO_ROOT/scripts/setup-worktree.sh" "$INDEX" 2>&1) \
             || { echo "ERROR: setup-worktree.sh failed for #$TICKET (index $INDEX)" >&2; return 1; }
     fi
 

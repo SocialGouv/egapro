@@ -129,6 +129,7 @@ Pour reprendre où on en était : juste relancer `/epic <N>` — le script repar
 | `EPIC_LOOP_BUDGET_SONNET` | 10 | Budget USD max par sub-agent Sonnet (`claude --max-budget-usd`). |
 | `EPIC_LOOP_BUDGET_OPUS` | 40 | Budget USD max par sub-agent Opus. |
 | `EPIC_LOOP_AGENT_TIMEOUT` | 5400 | Timeout dur par sub-agent en sec (90 min). |
+| `EPIC_DEFAULT_BASE` | `origin/alpha` | Base branch pour les tickets sans dépendance. **À override tant que l'infra orchestration n'est pas mergée dans `alpha`** (sinon le worktree fraîchement checkouté ne contient pas `scripts/setup-worktree.sh`). Usage typique pendant la phase de test : `EPIC_DEFAULT_BASE=origin/chore/ai-pipeline`. |
 
 Pour un run avec budget plus généreux, override en ligne :
 

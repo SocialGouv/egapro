@@ -146,8 +146,11 @@ for EPIC_N in "$@"; do
             capture { print }
         ' | grep -oE '#[0-9]+' | tr -d '#' | sort -u || true)
 
-        # Resolve dep statuses → decide base branch or skip
-        BASE_BRANCH="origin/alpha"
+        # Resolve dep statuses → decide base branch or skip.
+        # Default base is origin/alpha; override via EPIC_DEFAULT_BASE env var
+        # (useful while the orchestration scripts themselves are not yet on alpha
+        # — point at origin/chore/ai-pipeline or any branch that has them).
+        BASE_BRANCH="${EPIC_DEFAULT_BASE:-origin/alpha}"
         IN_REVIEW_PARENTS=()
         BLOCKED=0
         for DEP in $DEPS; do
