@@ -180,14 +180,17 @@ for EPIC_N in "$@"; do
             continue
         fi
 
-        # Exactly one parent in In review → stacked PR base
+        # Exactly one parent in In review → stacked PR base. We emit the
+        # remote-tracking ref (origin/ticket/<parent>-...) so the consumer
+        # (epic_loop.sh + code-dev) can checkout it uniformly, the same way
+        # it handles origin/alpha or origin/chore/ai-pipeline.
         if [ "${#IN_REVIEW_PARENTS[@]}" -eq 1 ]; then
             PARENT_N="${IN_REVIEW_PARENTS[0]}"
             PARENT_BRANCH=$("$SCRIPT_DIR/cache_gh.sh" "ticket_branch_${PARENT_N}" 60 -- \
                 git ls-remote --heads origin "ticket/${PARENT_N}-*" 2>/dev/null \
                 | awk '{print $2}' | sed 's|refs/heads/||' | head -1)
             if [ -n "$PARENT_BRANCH" ]; then
-                BASE_BRANCH="$PARENT_BRANCH"
+                BASE_BRANCH="origin/$PARENT_BRANCH"
             fi
             # If no remote branch found yet, fall back to origin/alpha — the
             # parent will retarget once its PR is merged.

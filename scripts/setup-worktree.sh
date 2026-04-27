@@ -40,7 +40,13 @@ if [ ! -f docker-compose.yml ]; then
 fi
 
 # Branch-based project name → unique containers/volumes/networks per worktree.
+# In detached-HEAD mode (how /epic provisions worktrees), `git branch
+# --show-current` returns empty; fall back to the worktree directory name,
+# which encodes the ticket (e.g. egapro-epic42-t123).
 BRANCH=$(git branch --show-current)
+if [ -z "$BRANCH" ]; then
+  BRANCH=$(basename "$(pwd)")
+fi
 SLUG=$(echo "$BRANCH" | tr '/' '-' | tr -cd 'a-zA-Z0-9-' | head -c 40)
 COMPOSE_PROJECT_NAME="egapro-wt-${SLUG}"
 

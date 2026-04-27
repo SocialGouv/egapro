@@ -128,18 +128,19 @@ spawn_agent() {
     local PROMPT="Ticket #${TICKET} à traiter (epic parent #${EPIC}).
 Worktree: ${WT_PATH}
 Worktree index: ${INDEX} (dev server port = ${PORT})
-Base branch: ${BASE}
+Base branch: ${BASE}  (remote-tracking ref, déjà fetchée par l'orchestrateur)
 
 Suivre STRICTEMENT le workflow de .claude/agents/code-dev/AGENT.md.
 
 L'orchestrateur a déjà :
-- créé le worktree (git worktree add --detach ${WT_PATH} ${BASE})
-- lancé setup-worktree.sh ${INDEX} (stack docker + .env.local + migrations OK)
-- passé l'epic en \"In progress\" sur le board
+- créé le worktree en mode --detach sur ${BASE}
+- lancé setup-worktree.sh ${INDEX} (pnpm install + stack docker + .env.local + migrations OK)
+- passé le ticket #${TICKET} en \"In progress\" sur le board
 
-Toi : passer le ticket en In progress, implémenter, créer la PR draft,
-faire les 4 + 2 validators internes, itérer sur les RETRY, retourner le
-verdict final JSON.
+Toi : depuis le worktree, créer la branche ticket/${TICKET}-<slug> à partir de
+${BASE} (remote-tracking ref, donc \`git checkout -b ticket/${TICKET}-<slug> ${BASE}\`,
+**pas besoin de re-fetch**), implémenter, créer la PR draft, faire les 4 + 2
+validators internes, itérer sur les RETRY, retourner le verdict final JSON.
 
 Format de retour OBLIGATOIRE — un seul de :
   {\"status\":\"validated\",\"ticket\":${TICKET},\"pr\":<P>}
