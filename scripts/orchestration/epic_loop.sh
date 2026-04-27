@@ -176,12 +176,18 @@ Ton dernier message DOIT être uniquement ce JSON (rien d'autre, pas de prose)."
     # -b ticket/3313-...` from the cwd of its claude CLI, which used to be
     # REPO_ROOT — main repo silently switched branch.
     cd "$WT_PATH"
+    # NOTE: --dangerously-skip-permissions, NOT --allow-dangerously-skip-permissions.
+    # The latter only makes the flag *available* for an interactive session; in
+    # --print mode it has no effect, so the sub-agent hits unresolved permission
+    # prompts on every gh / bash / pnpm call and aborts. This was the cause of
+    # the 'I cannot complete the code-dev workflow ... permission hasn't been
+    # granted' failures observed on the second epic #3308 run.
     timeout "$AGENT_TIMEOUT" claude \
         --agent "$AGENT" \
         --model "$MODEL" \
         --print \
         --output-format json \
-        --allow-dangerously-skip-permissions \
+        --dangerously-skip-permissions \
         --max-budget-usd "$BUDGET" \
         "$PROMPT" \
         > "$AGENT_LOG" 2>&1 || true
