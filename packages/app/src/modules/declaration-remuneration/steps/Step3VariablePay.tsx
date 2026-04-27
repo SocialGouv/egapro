@@ -20,7 +20,10 @@ import {
 } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
-import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
+import {
+	GapInterpretationCallout,
+	hasHighPayGap,
+} from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { gipToStep3 } from "../shared/gipToStepData";
 import { getStep3FieldName, step3ToRows } from "../shared/indicatorRowMapping";
@@ -323,32 +326,36 @@ export function Step3VariablePay({
 					id="accordion-step3"
 					title="Définitions et méthode de calcul"
 				>
-					<ul>
-						<li>
-							Quelles composantes de la rémunération sont incluses dans le
-							calcul (ex. véhicule de fonction, repas, prime de participation,
-							etc.)&nbsp;?
-						</li>
-						<li>
-							Les bons codes rubrique DSN sont-ils bien utilisés pour chacune de
-							ces composantes&nbsp;?
-						</li>
-						<li>
-							Comment vérifier ou identifier les codes DSN associés aux éléments
-							de rémunération pris en compte&nbsp;?
-						</li>
-					</ul>
+					{hasHighPayGap(rows) ? (
+						<GapInterpretationCallout
+							beneficiaryMen={beneficiaryMen}
+							beneficiaryWomen={beneficiaryWomen}
+							maxMen={maxMen}
+							maxWomen={maxWomen}
+							rows={rows}
+							variant="variablePay"
+						/>
+					) : (
+						<div className="fr-callout">
+							<ul>
+								<li>
+									Quelles composantes de la rémunération sont incluses dans le
+									calcul (ex. véhicule de fonction, repas, prime de
+									participation, etc.)&nbsp;?
+								</li>
+								<li>
+									Les bons codes rubrique DSN sont-ils bien utilisés pour
+									chacune de ces composantes&nbsp;?
+								</li>
+								<li>
+									Comment vérifier ou identifier les codes DSN associés aux
+									éléments de rémunération pris en compte&nbsp;?
+								</li>
+							</ul>
+						</div>
+					)}
 				</DefinitionAccordion>
 			</div>
-
-			<GapInterpretationCallout
-				beneficiaryMen={beneficiaryMen}
-				beneficiaryWomen={beneficiaryWomen}
-				maxMen={maxMen}
-				maxWomen={maxWomen}
-				rows={rows}
-				variant="variablePay"
-			/>
 
 			<FormErrors
 				mutationError={mutation.error?.message}

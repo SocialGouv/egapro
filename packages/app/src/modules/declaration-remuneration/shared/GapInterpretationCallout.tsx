@@ -8,6 +8,14 @@ import {
 import type { PayGapRow } from "../types";
 import styles from "./InterpretationCallout.module.scss";
 
+/** Returns true when at least one row crosses the regulatory gap threshold. */
+export function hasHighPayGap(rows: PayGapRow[]): boolean {
+	return rows.some((r) => {
+		const gap = computeGap(r.womenValue, r.menValue);
+		return gap !== null && gap >= GAP_ALERT_THRESHOLD;
+	});
+}
+
 type GapDirection = "women" | "men" | "balanced";
 
 type GapAnalysis = {

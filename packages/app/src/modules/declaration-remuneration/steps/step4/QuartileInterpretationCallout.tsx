@@ -7,6 +7,25 @@ type Props = {
 	hourlyCategories: QuartileData[];
 };
 
+/** Returns true when the highest quartile is significantly skewed toward one sex. */
+export function hasHighQuartileImbalance(
+	annualCategories: QuartileData[],
+	hourlyCategories: QuartileData[],
+): boolean {
+	const annualQ4 = annualCategories[3];
+	const hourlyQ4 = hourlyCategories[3];
+	if (!annualQ4 || !hourlyQ4) return false;
+	const annualTotal = (annualQ4.women ?? 0) + (annualQ4.men ?? 0);
+	const hourlyTotal = (hourlyQ4.women ?? 0) + (hourlyQ4.men ?? 0);
+	if (annualTotal === 0 && hourlyTotal === 0) return false;
+	const annualRatio =
+		annualTotal > 0 ? (annualQ4.women ?? 0) / annualTotal : 0.5;
+	const hourlyRatio =
+		hourlyTotal > 0 ? (hourlyQ4.women ?? 0) / hourlyTotal : 0.5;
+	const avg = (annualRatio + hourlyRatio) / 2;
+	return avg < 0.4 || avg > 0.6;
+}
+
 /**
  * Interpretation callout for Step 4 quartile distribution.
  * Analyzes the proportion of women in the highest quartile (4th)
