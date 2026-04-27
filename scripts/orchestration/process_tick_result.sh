@@ -101,6 +101,7 @@ set_attempt_label() {
 jq -c '.results[]' "$RESULT_FILE" | while read -r result; do
     STATUS=$(echo "$result" | jq -r '.status // "unknown"')
     TICKET=$(echo "$result" | jq -r '.ticket // 0')
+    PR=$(echo "$result" | jq -r '.pr // ""')
 
     case "$STATUS" in
         validated)
