@@ -77,15 +77,27 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - Si le bot n'a pas encore commenté, attendre avant de `gh pr ready`
    - Seuils critiques bloquants : bugs, vulnérabilités, security hotspots non reviewed
 
-   **9d. Review bot auto + commentaires humains** — `gh pr view <PR> --comments` régulièrement pendant le watch :
-   - **Bot de review auto** (commentaires posés par un bot de review GitHub Actions) : lire chaque suggestion. Juger de la pertinence :
-     - Pertinent → corriger le code, push, répondre au commentaire avec `gh pr comment` (ou `gh api` pour répondre en thread) en expliquant le fix
-     - Non pertinent (faux positif, hors scope, opinion contraire justifiée) → répondre poliment en expliquant pourquoi on ne suit pas la suggestion. Ne jamais ignorer silencieusement.
-   - **Commentaires humains** : même logique. Lire, juger, agir.
-     - Correction demandée claire → appliquer + répondre « Fixed in <sha> »
-     - Question → répondre avec la justification technique
-     - Désaccord → répondre avec argumentation, laisser le reviewer trancher (ne pas imposer)
-   - Tant que des threads de review sont **non résolus** (unresolved), ne pas `gh pr ready`. Marquer les threads résolus via l'API GitHub quand applicable.
+   **9d. Cycle review unique** — déclenché **une seule fois**, après que 9a + 9b + 9c sont tous verts :
+
+   Lire **tous** les comments + reviews bot/humain de la PR :
+   ```bash
+   gh pr view <PR> --comments
+   gh api "repos/SocialGouv/egapro/pulls/<PR>/reviews"
+   gh api "repos/SocialGouv/egapro/pulls/<PR>/comments"
+   ```
+
+   Pour **chaque** comment / review thread :
+   - **Pertinent** (correction réelle, sécurité, accessibilité, bug) → corriger le code, push (qui re-déclenchera la CI), répondre au thread via `gh pr comment` ou `gh api` en expliquant le fix
+   - **Non pertinent** (faux positif, hors scope, opinion contraire justifiée) → répondre poliment avec justification (ne jamais ignorer silencieusement)
+   - **Question** (humain demande clarification) → répondre avec la justification technique
+   - **Désaccord** (humain) → répondre avec argumentation, laisser le reviewer trancher (ne pas imposer)
+
+   **Sortie de la phase 9d** :
+
+   - **Si aucun fix appliqué** (aucun push) → passer immédiatement à l'étape 10 (retour `validated`)
+   - **Si au moins un push** → poll `gh pr checks <PR> --watch` jusqu'à ce que la nouvelle CI/Sonar repassent **toutes vertes** (timeout poll : 10 min). Ensuite passer à l'étape 10.
+
+   **Règle stricte : 1 itération maximum.** Les nouveaux comments postés par les bots **après** ton push (le re-spam typique) sont **ignorés** par toi — ils relèvent de la skill `/review` (post-In-review). Ne JAMAIS re-lire les comments après le push de 9d, sinon tu boucles indéfiniment sur le re-spam des bots.
 
    À chaque début d'itération de fix : `bash scripts/orchestration/log_event.sh code-dev-<N> RETRY "axis=<axe> attempt=<K>"`.
 
