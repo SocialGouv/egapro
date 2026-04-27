@@ -150,7 +150,35 @@ export function Step2PayGap({
 				<DefinitionAccordion
 					id="accordion-step2"
 					title="Définitions et méthode de calcul"
-				/>
+				>
+					<ul>
+						<li>
+							Quelles composantes variables ou complémentaires sont incluses
+							dans le calcul (ex. prime de cooptation, prime d&apos;astreinte,
+							prime d&apos;avancement) et avec quel niveau de détail&nbsp;?
+						</li>
+						<li>
+							Comment les rémunérations sont-elles reconstituées à partir des
+							données disponibles&nbsp;?
+						</li>
+						<li>
+							Comment expliquer l&apos;écart entre les pourcentages annuels et
+							horaires (ex. ×12 = annuel)&nbsp;?
+						</li>
+						<li>
+							Les données seraient-elles plus pertinentes en mensuel brut&nbsp;?
+						</li>
+						<li>
+							Comment sont traitées les spécificités des UES, notamment
+							lorsque&nbsp;:
+						</li>
+						<li>
+							les salariés n&apos;ont pas tous le même nombre d&apos;heures pour
+							un équivalent temps plein, certains salariés sont au forfait
+							jours&nbsp;?
+						</li>
+					</ul>
+				</DefinitionAccordion>
 			</div>
 
 			{gipPrefillData && <GapInterpretationCallout rows={rows} />}
