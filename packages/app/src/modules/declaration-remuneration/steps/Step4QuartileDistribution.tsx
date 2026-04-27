@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
-import { normalizeDecimalInput } from "~/modules/domain";
+import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep4Schema } from "../schemas";
@@ -29,7 +29,7 @@ function toQuartileData(c: {
 	menCount: number;
 }): QuartileData {
 	return {
-		threshold: c.womenValue ?? "",
+		threshold: padDecimalToTwo(c.womenValue ?? ""),
 		women: c.womenCount,
 		men: c.menCount,
 	};
@@ -78,17 +78,26 @@ export function Step4QuartileDistribution({
 			(q) => q.threshold || q.women !== undefined || q.men !== undefined,
 		);
 
-	const defaultAnnual = hasSavedData
-		? initialData.annual
-		: gipPrefillData
-			? gipToQuartiles(gipPrefillData.step4.annual)
-			: emptyQuartiles();
+	const padThresholds = (quartiles: QuartileData[]): QuartileData[] =>
+		quartiles.map((q) =>
+			q.threshold ? { ...q, threshold: padDecimalToTwo(q.threshold) } : q,
+		);
 
-	const defaultHourly = hasSavedData
-		? initialData.hourly
-		: gipPrefillData
-			? gipToQuartiles(gipPrefillData.step4.hourly)
-			: emptyQuartiles();
+	const defaultAnnual = padThresholds(
+		hasSavedData
+			? initialData.annual
+			: gipPrefillData
+				? gipToQuartiles(gipPrefillData.step4.annual)
+				: emptyQuartiles(),
+	);
+
+	const defaultHourly = padThresholds(
+		hasSavedData
+			? initialData.hourly
+			: gipPrefillData
+				? gipToQuartiles(gipPrefillData.step4.hourly)
+				: emptyQuartiles(),
+	);
 
 	const form = useZodForm(updateStep4Schema, {
 		defaultValues: {

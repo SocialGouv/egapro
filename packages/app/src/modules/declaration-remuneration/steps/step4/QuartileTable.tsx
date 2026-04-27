@@ -1,8 +1,13 @@
 "use client";
 
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
 import type { QuartileData } from "~/modules/declaration-remuneration/types";
-import { computePercentage, displayDecimal } from "~/modules/domain";
+import {
+	computePercentage,
+	displayDecimal,
+	padDecimalOnBlur,
+} from "~/modules/domain";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
 
 type Props = {
@@ -90,9 +95,14 @@ export function QuartileTable({
 													<span className={stepStyles.inputWithUnit}>
 														<input
 															aria-label={`Rémunération brute ${QUARTILE_NAMES[i]}`}
-															className="fr-input"
+															className={`fr-input ${common.numericInput}`}
 															disabled={disabled}
 															inputMode="decimal"
+															onBlur={() =>
+																padDecimalOnBlur(q.threshold ?? "", (v) =>
+																	onQuartileChange(i, "threshold", v),
+																)
+															}
 															onChange={(e) =>
 																onQuartileChange(i, "threshold", e.target.value)
 															}
@@ -116,7 +126,7 @@ export function QuartileTable({
 												<td key={QUARTILE_NAMES[i]}>
 													<input
 														aria-label={`Nombre de femmes ${QUARTILE_NAMES[i]}`}
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={disabled}
 														inputMode="numeric"
 														onChange={(e) =>
@@ -166,7 +176,7 @@ export function QuartileTable({
 												<td key={QUARTILE_NAMES[i]}>
 													<input
 														aria-label={`Nombre d'hommes ${QUARTILE_NAMES[i]}`}
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={disabled}
 														inputMode="numeric"
 														onChange={(e) =>

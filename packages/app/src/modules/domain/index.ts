@@ -54,6 +54,8 @@ export {
 	displayDecimal,
 	displayInputDecimal,
 	normalizeDecimalInput,
+	padDecimalOnBlur,
+	padDecimalToTwo,
 	parseNumber,
 } from "./shared/number";
 export type { CountyCode, RegionCode } from "./shared/regions";
