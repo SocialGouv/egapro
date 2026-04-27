@@ -295,7 +295,32 @@ export function Step4QuartileDistribution({
 				<DefinitionAccordion
 					id="accordion-step4"
 					title="Définitions et méthode de calcul"
-				/>
+				>
+					<ul>
+						<li>
+							Quelles données sont prises en compte dans les calculs&nbsp;?
+						</li>
+						<li>
+							Les calculs incluent-ils uniquement le salaire de base ou
+							également les primes&nbsp;?
+						</li>
+						<li>
+							Sont-ils réalisés en équivalent temps plein, en salaire brut
+							horaire ou selon une autre modalité&nbsp;?
+						</li>
+						<li>
+							Que signifie la notion de «&nbsp;quartile&nbsp;» dans ce
+							contexte&nbsp;? Définir simplement un quartile pour permettre à
+							l&apos;utilisateur de s&apos;assurer qu&apos;il comprend bien
+							cette notion.
+						</li>
+						<li>
+							À quoi servent les quartiles présentés&nbsp;? Quelle est la
+							finalité des quartiles lorsqu&apos;ils sont affichés sans échelle
+							ou référence comparative&nbsp;?
+						</li>
+					</ul>
+				</DefinitionAccordion>
 			</div>
 
 			{gipPrefillData && (
