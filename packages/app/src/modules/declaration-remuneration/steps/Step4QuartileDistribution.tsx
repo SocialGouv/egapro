@@ -7,6 +7,7 @@ import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep4Schema } from "../schemas";
+import common from "../shared/common.module.scss";
 import { QUARTILE_NAMES } from "../shared/constants";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY } from "../shared/devFillData";
@@ -220,12 +221,10 @@ export function Step4QuartileDistribution({
 					salariés les mieux rémunérés.
 				</p>
 
-				<p className="fr-mb-0">
-					<strong>
-						{gipPrefillData
-							? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
-							: "Renseignez les informations avant de valider vos indicateurs."}
-					</strong>
+				<p className={`fr-mb-0 ${common.fontMedium}`}>
+					{gipPrefillData
+						? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+						: "Renseignez les informations avant de valider vos indicateurs."}
 					<TooltipButton
 						id="tooltip-step4-info"
 						label="Information sur les indicateurs"

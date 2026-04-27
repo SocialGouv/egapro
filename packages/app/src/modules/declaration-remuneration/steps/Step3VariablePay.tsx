@@ -163,12 +163,10 @@ export function Step3VariablePay({
 					rémunérations.
 				</p>
 
-				<p className="fr-mb-0">
-					<strong>
-						{gipPrefillData
-							? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
-							: "Renseignez les informations avant de valider vos indicateurs."}
-					</strong>
+				<p className={`fr-mb-0 ${common.fontMedium}`}>
+					{gipPrefillData
+						? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+						: "Renseignez les informations avant de valider vos indicateurs."}
 					<TooltipButton
 						id="tooltip-step3-info"
 						label="Information sur les indicateurs"
