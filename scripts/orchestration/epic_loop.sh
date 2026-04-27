@@ -147,6 +147,18 @@ ${BASE} (remote-tracking ref, donc \`git checkout -b ticket/${TICKET}-<slug> ${B
 **pas besoin de re-fetch**), implémenter, créer la PR draft, faire les 4 + 2
 validators internes, itérer sur les RETRY, retourner le verdict final JSON.
 
+REGLES STRICTES (appliquer sans exception) :
+- **N'invoque AUCUN skill built-in** (fewer-permission-prompts, update-config,
+  claude-api, schedule, loop, etc.). Si une de ces skills semble utile, ignore-la
+  et reste concentré sur le ticket.
+- **Ne modifie JAMAIS .claude/settings.json ni .claude/settings.local.json**.
+  Ces fichiers sont user-managed. Si tu rencontres un permission-denied, retourne
+  \`failed\` avec la raison, ne tente pas de patcher la config.
+- **Pas d'auto-mémoire** : ne crée pas et ne modifie pas les fichiers sous
+  ~/.claude/projects/.../memory/ ni MEMORY.md.
+- **Reste dans le scope du ticket** : seuls les fichiers listés dans la section
+  \"Fichiers impactés\" du ticket peuvent être modifiés.
+
 Format de retour OBLIGATOIRE — un seul de :
   {\"status\":\"validated\",\"ticket\":${TICKET},\"pr\":<P>}
   {\"status\":\"refacto\",\"ticket\":${TICKET},\"reason\":\"...\"}
