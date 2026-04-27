@@ -323,12 +323,10 @@ export function Step4QuartileDistribution({
 				</DefinitionAccordion>
 			</div>
 
-			{gipPrefillData && (
-				<QuartileInterpretationCallout
-					annualCategories={annual}
-					hourlyCategories={hourly}
-				/>
-			)}
+			<QuartileInterpretationCallout
+				annualCategories={annual}
+				hourlyCategories={hourly}
+			/>
 
 			<FormErrors
 				mutationError={mutation.error?.message}

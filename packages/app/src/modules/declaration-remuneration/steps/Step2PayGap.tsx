@@ -181,7 +181,7 @@ export function Step2PayGap({
 				</DefinitionAccordion>
 			</div>
 
-			{gipPrefillData && <GapInterpretationCallout rows={rows} />}
+			<GapInterpretationCallout rows={rows} />
 
 			<FormErrors
 				mutationError={mutation.error?.message}

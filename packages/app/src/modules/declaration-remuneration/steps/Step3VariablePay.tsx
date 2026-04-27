@@ -341,16 +341,14 @@ export function Step3VariablePay({
 				</DefinitionAccordion>
 			</div>
 
-			{gipPrefillData && (
-				<GapInterpretationCallout
-					beneficiaryMen={beneficiaryMen}
-					beneficiaryWomen={beneficiaryWomen}
-					maxMen={maxMen}
-					maxWomen={maxWomen}
-					rows={rows}
-					variant="variablePay"
-				/>
-			)}
+			<GapInterpretationCallout
+				beneficiaryMen={beneficiaryMen}
+				beneficiaryWomen={beneficiaryWomen}
+				maxMen={maxMen}
+				maxWomen={maxWomen}
+				rows={rows}
+				variant="variablePay"
+			/>
 
 			<FormErrors
 				mutationError={mutation.error?.message}
