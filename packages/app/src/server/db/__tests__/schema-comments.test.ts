@@ -135,9 +135,10 @@ describe("SCHEMA_COLUMN_COMMENTS — indicators A–F", () => {
 	});
 
 	it("has every SUIT label appearing exactly once across all A–F entries (S4)", () => {
-		const allLabels = Object.values(declarationComments).map((comment) =>
-			comment.replace("GIP-MDS | SUIT: ", ""),
-		);
+		const PREFIX = "GIP-MDS | SUIT: ";
+		const allLabels = Object.values(declarationComments)
+			.filter((comment) => comment.startsWith(PREFIX))
+			.map((comment) => comment.slice(PREFIX.length));
 		const suitLabels = [
 			...Object.values(INDICATOR_A_LABELS),
 			...Object.values(INDICATOR_B_LABELS),
@@ -151,6 +152,7 @@ describe("SCHEMA_COLUMN_COMMENTS — indicators A–F", () => {
 			...INDICATOR_F_HOURLY_WOMEN_LABELS,
 			...INDICATOR_F_HOURLY_MEN_LABELS,
 		];
+		expect(allLabels).toHaveLength(suitLabels.length);
 		for (const label of suitLabels) {
 			expect(allLabels.filter((l) => l === label)).toHaveLength(1);
 		}
