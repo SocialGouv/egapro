@@ -118,6 +118,15 @@ export function injectComments(
 }
 
 async function main(): Promise<void> {
+	// Path is intentionally relative: the script must run from the repo root
+	// (where db-schema-toolkit writes schema-doc.md). Fail fast if not.
+	if (!existsSync("package.json")) {
+		console.error(
+			"Error: must be run from the repository root (no package.json found in CWD).",
+		);
+		process.exit(1);
+	}
+
 	const inputPath = "schema-doc.md";
 	if (!existsSync(inputPath)) {
 		console.error(

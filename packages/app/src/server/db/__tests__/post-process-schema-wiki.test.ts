@@ -29,7 +29,7 @@ describe("injectComments", () => {
 		expect(result).toContain(
 			"GIP-MDS \\| SUIT: Rem_globale_annuelle_moyenne_F",
 		);
-		expect(stats["declaration"]).toBe(1);
+		expect(stats.declaration).toBe(1);
 	});
 
 	it("leaves empty cell for columns not in the map", () => {
@@ -90,8 +90,8 @@ describe("injectComments", () => {
 		const { result, stats } = injectComments(multiTable, comments);
 		expect(result).toContain("Primary key");
 		expect(result).toContain("SIREN identifier");
-		expect(stats["declaration"]).toBe(1);
-		expect(stats["company"]).toBe(1);
+		expect(stats.declaration).toBe(1);
+		expect(stats.company).toBe(1);
 	});
 
 	it("returns empty stats when no comments match", () => {
