@@ -178,23 +178,23 @@ function buildVariablePayBody(
 			body: (
 				<>
 					les écarts sont très importants sur les rémunérations variables
-					horaires ({fmtGap(hourlyMeanGap)} en moyenne et{" "}
-					{fmtGap(hourlyMedianGap)} en médiane), tandis que les écarts annuels
-					restent faibles, dans un contexte où seules <strong>{menPct}</strong>{" "}
-					des hommes en bénéficient contre <strong>{womenPct}</strong> des
-					femmes.
+					horaires en défaveur des hommes ({fmtGap(hourlyMeanGap)} en moyenne et{" "}
+					{fmtGap(hourlyMedianGap)} en médiane en faveur des femmes), tandis que
+					les écarts annuels restent faibles, dans un contexte où{" "}
+					<strong>{womenPct}</strong> des femmes en bénéficient contre{" "}
+					<strong>{menPct}</strong> des hommes.
 				</>
 			),
 			interpretation:
-				"les hommes accèdent moins souvent aux rémunérations variables et perçoivent des montants horaires inférieurs.",
+				"Les hommes accèdent moins souvent aux rémunérations variables et perçoivent des montants horaires inférieurs à ceux des femmes.",
 		};
 	}
 
 	return {
 		title: "Écart entre hommes et femmes",
-		body: "Les rémunérations variables sont très proches entre femmes et hommes, avec des écarts inférieurs à 5 %.",
+		body: "Les écarts de rémunération variable observés, en moyenne et en médiane, ne révèlent pas de différence significative entre les femmes et les hommes.",
 		interpretation:
-			"Les écarts sont faibles et ne révèlent pas d'inégalité significative.",
+			"Les niveaux de rémunération sont globalement équivalents et ne traduisent pas de déséquilibre notable.",
 	};
 }
 

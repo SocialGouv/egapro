@@ -73,19 +73,24 @@ export function QuartileInterpretationCallout({
 
 	if (isWomenUnderrepresented) {
 		title = "Écart en défaveur des femmes";
-		body = `Les femmes sont nettement moins présentes dans le quartile des plus hauts salaires (${annualWomenPct} en annuel et ${hourlyWomenPct} en horaire), alors qu'elles sont proches de la parité dans les autres quartiles.`;
+		body = `les femmes sont nettement moins présentes dans le quartile des plus hauts salaires (${annualWomenPct} en annuel et ${hourlyWomenPct} en horaire), alors qu'elles sont proches de la parité dans les autres quartiles.`;
 		interpretation =
 			"les femmes accèdent moins aux postes les mieux rémunérés, ce qui indique une inégalité d'accès aux niveaux de salaire les plus élevés.";
 	} else if (isMenUnderrepresented) {
+		const annualMenPct =
+			annualQ4Total > 0 ? computePercentage(annualQ4Men, annualQ4Total) : "-";
+		const hourlyMenPct =
+			hourlyQ4Total > 0 ? computePercentage(hourlyQ4Men, hourlyQ4Total) : "-";
 		title = "Écart en défaveur des hommes";
-		body = `Les hommes sont nettement moins présents dans le quartile des plus hauts salaires (${annualQ4Total > 0 ? computePercentage(annualQ4Men, annualQ4Total) : "-"} en annuel et ${hourlyQ4Total > 0 ? computePercentage(hourlyQ4Men, hourlyQ4Total) : "-"} en horaire).`;
+		body = `les hommes sont nettement moins présents dans le quartile des plus hauts salaires (${annualMenPct} en annuel et ${hourlyMenPct} en horaire), alors qu'ils sont proches de la parité dans les autres quartiles.`;
 		interpretation =
-			"les hommes accèdent moins aux postes les mieux rémunérés, ce qui indique une inégalité d'accès aux niveaux de salaire les plus élevés.";
+			"les hommes accèdent moins aux postes les mieux rémunérés, ce qui met en évidence une inégalité d'accès aux niveaux de salaire les plus élevés.";
 	} else {
-		title = "Équilibre entre hommes et femmes";
-		body = `La répartition entre femmes et hommes est relativement équilibrée dans le quartile des plus hauts salaires (${annualWomenPct} de femmes en annuel et ${hourlyWomenPct} en horaire).`;
+		title = "Écart entre hommes et femmes";
+		body =
+			"la répartition des femmes et des hommes au sein des différents quartiles de rémunération est globalement équilibrée.";
 		interpretation =
-			"Les écarts de répartition sont faibles et ne révèlent pas d'inégalité significative dans l'accès aux niveaux de salaire les plus élevés.";
+			"ces résultats traduisent une répartition relativement homogène des niveaux de rémunération et ne révèlent pas d'inégalité significative d'accès aux niveaux de salaire les plus élevés.";
 	}
 
 	return (

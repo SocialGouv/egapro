@@ -74,9 +74,9 @@ describe("QuartileInterpretationCallout", () => {
 		);
 
 		expect(
-			screen.getByText(/Équilibre entre hommes et femmes/),
+			screen.getByText(/Écart entre hommes et femmes/),
 		).toBeInTheDocument();
-		expect(screen.getByText(/relativement équilibrée/)).toBeInTheDocument();
+		expect(screen.getByText(/globalement équilibrée/)).toBeInTheDocument();
 	});
 
 	it("shows men underrepresented when women ratio > 0.6 in Q4", () => {
