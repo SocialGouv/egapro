@@ -85,12 +85,17 @@ ensure_worktree() {
     local WT_PATH="${REPO_ROOT}/../egapro-epic${EPIC}-t${TICKET}"
     local TID_AID="code-dev-${TICKET}"
 
+    # CAREFUL: the function's stdout is captured by the caller via $(...).
+    # Sub-commands here must NOT write to stdout — redirect their output to
+    # stderr (>&2 2>&1) so the only thing reaching the caller is the final
+    # `echo "$WT_PATH"`. The redirected output still lands in the loop log
+    # file (since epic_loop.sh is launched with `nohup ... > LOG 2>&1`).
     if [ ! -d "$WT_PATH" ]; then
         bash "$SCRIPT_DIR/log_event.sh" "$TID_AID" WORKTREE_CREATE "path=$WT_PATH base=$BASE"
         # Refresh remote so the base branch is up-to-date
-        (cd "$REPO_ROOT" && git fetch origin "${BASE#origin/}" 2>/dev/null || true)
+        (cd "$REPO_ROOT" && git fetch origin "${BASE#origin/}") >&2 2>&1 || true
         # Detached worktree — code-dev will create the ticket branch itself (step 4 of AGENT.md)
-        (cd "$REPO_ROOT" && git worktree add --detach "$WT_PATH" "$BASE" 2>&1) \
+        (cd "$REPO_ROOT" && git worktree add --detach "$WT_PATH" "$BASE") >&2 2>&1 \
             || { bash "$SCRIPT_DIR/log_event.sh" "$TID_AID" WORKTREE_FAIL "git worktree add failed"; return 1; }
     fi
 
@@ -99,7 +104,7 @@ ensure_worktree() {
         # Use the main-repo's setup-worktree.sh (resolved via $REPO_ROOT) so
         # the bootstrap works even if the worktree's checked-out branch does
         # not yet contain the orchestration infrastructure scripts.
-        (cd "$WT_PATH" && bash "$REPO_ROOT/scripts/setup-worktree.sh" "$INDEX" 2>&1) \
+        (cd "$WT_PATH" && bash "$REPO_ROOT/scripts/setup-worktree.sh" "$INDEX") >&2 2>&1 \
             || { bash "$SCRIPT_DIR/log_event.sh" "$TID_AID" STACK_FAIL "setup-worktree.sh failed (index=$INDEX)"; return 1; }
         bash "$SCRIPT_DIR/log_event.sh" "$TID_AID" STACK_READY "wt=$WT_PATH index=$INDEX"
     fi
