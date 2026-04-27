@@ -1,13 +1,20 @@
 import styles from "~/modules/declaration-remuneration/shared/InterpretationCallout.module.scss";
 import type { QuartileData } from "~/modules/declaration-remuneration/types";
-import { computePercentage } from "~/modules/domain";
+import { computePercentage, GAP_ALERT_THRESHOLD } from "~/modules/domain";
 
 type Props = {
 	annualCategories: QuartileData[];
 	hourlyCategories: QuartileData[];
 };
 
-/** Returns true when the highest quartile is significantly skewed toward one sex. */
+/**
+ * Threshold ratios delimiting balanced vs skewed Q4: parity (50%) ± 5pp.
+ * Same alert threshold as the pay-gap indicators.
+ */
+const BALANCED_LOWER = 0.5 - GAP_ALERT_THRESHOLD / 100;
+const BALANCED_UPPER = 0.5 + GAP_ALERT_THRESHOLD / 100;
+
+/** Returns true when the highest quartile is more than 5pp away from parity. */
 export function hasHighQuartileImbalance(
 	annualCategories: QuartileData[],
 	hourlyCategories: QuartileData[],
@@ -23,7 +30,7 @@ export function hasHighQuartileImbalance(
 	const hourlyRatio =
 		hourlyTotal > 0 ? (hourlyQ4.women ?? 0) / hourlyTotal : 0.5;
 	const avg = (annualRatio + hourlyRatio) / 2;
-	return avg < 0.4 || avg > 0.6;
+	return avg < BALANCED_LOWER || avg > BALANCED_UPPER;
 }
 
 /**
@@ -52,15 +59,15 @@ export function QuartileInterpretationCallout({
 	const annualWomenPct = computePercentage(annualQ4Women, annualQ4Total);
 	const hourlyWomenPct = computePercentage(hourlyQ4Women, hourlyQ4Total);
 
-	// Determine if women are underrepresented in the highest quartile (< 40%)
+	// Compare Q4 women ratio to parity (50%) using the regulatory ±5pp band.
 	const annualWomenRatio =
 		annualQ4Total > 0 ? annualQ4Women / annualQ4Total : 0.5;
 	const hourlyWomenRatio =
 		hourlyQ4Total > 0 ? hourlyQ4Women / hourlyQ4Total : 0.5;
 	const avgRatio = (annualWomenRatio + hourlyWomenRatio) / 2;
 
-	const isWomenUnderrepresented = avgRatio < 0.4;
-	const isMenUnderrepresented = avgRatio > 0.6;
+	const isWomenUnderrepresented = avgRatio < BALANCED_LOWER;
+	const isMenUnderrepresented = avgRatio > BALANCED_UPPER;
 	const isBalanced = !isWomenUnderrepresented && !isMenUnderrepresented;
 
 	const accentClass = isBalanced
