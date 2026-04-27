@@ -107,7 +107,13 @@ jq -c '.results[]' "$RESULT_FILE" | while read -r result; do
             # code-dev has set 'In review' and pr ready. Just reset attempt counter.
             clear_attempt_labels "$TICKET"
             invalidate_caches "$TICKET"
-            bash "$SCRIPT_DIR/log_event.sh" "$AID" VALIDATED "ticket=$TICKET pr=$(echo "$result" | jq -r '.pr // ""')"
+            # Cross-reference the PR on the ticket (GitHub's native auto-link
+            # via Closes #N doesn't fire when the PR base isn't the default
+            # branch — typical of our stacked PR / transition-base runs).
+            if [ -n "$PR" ] && [ "$PR" != "null" ]; then
+                bash "$SCRIPT_DIR/link_pr_to_ticket.sh" "$TICKET" "$PR" || true
+            fi
+            bash "$SCRIPT_DIR/log_event.sh" "$AID" VALIDATED "ticket=$TICKET pr=$PR"
             echo "  ✓ ticket #$TICKET validated (In review, PR ready)"
             N_VALIDATED=$((N_VALIDATED + 1))
             ;;
