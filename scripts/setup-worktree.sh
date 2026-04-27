@@ -116,8 +116,10 @@ if [ ! -d node_modules ] || [ ! -d packages/app/node_modules ]; then
 fi
 
 # Run Drizzle migrations against this worktree's DB.
+# drizzle-kit reads process.env directly and does not load .env.local
+# (unlike Next.js), so source the file into the subshell before running.
 echo "[setup-worktree] Applying migrations..."
-(cd packages/app && pnpm db:migrate)
+(cd packages/app && set -a && . ./.env.local && set +a && pnpm db:migrate)
 
 echo ""
 echo "[setup-worktree] Done. Worktree $N ready."
