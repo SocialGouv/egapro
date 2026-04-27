@@ -73,26 +73,36 @@ L'agent :
 2. Passe les 4 agents existants (`validator`, `structural-auditor`, `rgaa-auditor`, `security-auditor`) en parallèle
 3. Ouvre une PR draft
 4. Lance `functional-validator` + `design-validator` en parallèle
-5. Sur tous PASS → `gh pr ready` + ticket **In review**
-6. Sur REFACTO (après 3 RETRY) → ticket **To Do** avec diagnostic
+5. Sur tous PASS → `gh pr ready` + ticket **In review** + retour `{"status":"validated", ...}`
+6. Sur 3-retry Sonnet → retour `{"status":"needs_opus_escalation", ...}` (en standalone `/code`, **re-invoquer immédiatement** le même agent en `model: "opus"` avec les mêmes inputs)
+7. Sur 3-retry Opus ou spec invalide → retour `{"status":"refacto", ...}` (ticket reste en **To Do** avec diagnostic)
 
 ---
 
 # Step 3 — Report
 
+L'agent `code-dev` retourne un JSON strict en dernier message. Le parser et formatter pour l'utilisateur :
+
+| `.status` retourné | Action skill | Markdown affiché |
+|---|---|---|
+| `validated` | aucune (déjà In review) | `## Code: PASS` + ticket/branche/PR/status In review + next-step revue humaine |
+| `needs_opus_escalation` | en standalone, re-invoquer `code-dev` en Opus avec les mêmes inputs ; afficher le verdict final | `## Code: PASS` ou `## Code: REFACTO` selon le retour Opus |
+| `refacto` | aucune (le ticket est en To Do) | `## Code: REFACTO` + ticket/diagnostic/next-step `/ticket` (architect) |
+| `rate_limited` | proposer de retenter dans `retry_in` secondes ou abandonner | `## Code: RATE_LIMITED` + délai suggéré |
+| `failed` | propager l'erreur sans modifier le ticket | `## Code: FAILED` + raison technique |
+
+Format affiché à l'utilisateur :
+
 ```
-## Code: <PASS | REFACTO>
+## Code: <PASS | REFACTO | RATE_LIMITED | FAILED>
 
 Ticket: #<N>
 Branch: <name>
 PR: #<PPP>
-Status: In review | To Do
+Status: <In review | To Do | unchanged>
 
-<Si PASS>
-Next: utilisateur revoit la PR, merge, passe le ticket In review → Done manuellement.
-
-<Si REFACTO>
-Next: /ticket sur l'epic parent (phase architect) pour re-découper.
+<Si PASS> Next: utilisateur revoit la PR, merge, passe le ticket In review → Done manuellement.
+<Si REFACTO> Next: /ticket sur l'epic parent (phase architect) pour re-découper.
 ```
 
 ---
@@ -101,4 +111,5 @@ Next: /ticket sur l'epic parent (phase architect) pour re-découper.
 
 - **Standalone vs /epic** : même skill, le contexte (worktree, port) peut venir de `/epic` ou être créé ici.
 - **Jamais auto-Done** : terminus IA = **In review**.
-- **RETRY/REFACTO** sont gérés à l'intérieur de `code-dev`, pas ici — cette skill est un fin wrapper.
+- **Contrat JSON strict** : le dernier message de `code-dev` est un JSON parsable. Voir `.claude/agents/code-dev/AGENT.md` section « Format de retour ».
+- **Escalade Opus en standalone** : `/code` re-invoque `code-dev` en Opus si le retour est `needs_opus_escalation`. Dans `/epic`, c'est le pipeline (`process_tick_result.sh`) qui orchestre la ré-attribution au prochain tick — `/code` n'a pas ce mécanisme et doit gérer l'escalade lui-même.

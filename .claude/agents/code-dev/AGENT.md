@@ -19,11 +19,13 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
 ## Workflow
 
-1. **Vérifier le format du ticket** — lire le body. S'il ne respecte pas `rules/ticket-spec-format.md` (fichiers manquants, pas de scénarios, pas de critères), remettre le ticket en **To Do** avec commentaire listant les manques. **Ne pas improviser.**
+0. **Logger START** — `bash scripts/orchestration/log_event.sh code-dev-<N> START "worktree=<path> base=<base-branch>"`. Voir la section « Logging events » plus bas pour la liste complète.
+
+1. **Vérifier le format du ticket** — lire le body. S'il ne respecte pas `rules/ticket-spec-format.md` (fichiers manquants, pas de scénarios, pas de critères), remettre le ticket en **To Do** avec commentaire listant les manques, retourner `{"status":"refacto","ticket":<N>,"reason":"ticket spec format invalid"}`. **Ne pas improviser.**
 
 2. **Si bug** (label `bug`) — appliquer `rules/bug-fix-workflow.md` : test qui échoue **avant** le fix.
 
-3. **Status ticket** → **In progress** (op. 3+4 de `rules/github-board.md`, option ID `47fc9ee4`).
+3. **Status ticket** → **In progress** via `bash scripts/orchestration/set_ticket_status.sh <N> "In progress"`.
 
 4. **Branche** dans le worktree, à partir de la **base branch** reçue en input :
    - `git fetch origin <base-branch>` pour rafraîchir
@@ -38,6 +40,7 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - `pnpm typecheck` après chaque modif de types/schemas
    - `nextjs_call(get_errors)` si dev server tourne
    - **Tests unitaires : 100% de couverture sur le code produit** (statements, branches, functions, lines). Vérifier via `pnpm test --coverage` + lecture du rapport — chaque fichier modifié ou créé doit être à 100%. Pas de « ça couvre assez » : 100% strict.
+   - Logger `IMPLEMENT_OK` quand typecheck + tests passent localement.
 
 6. **Quality gates (ticket reste en In progress)** — déléguer en parallèle aux 4 agents existants :
    - `validator` (typecheck + test + lint + format)
@@ -45,7 +48,7 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - `rgaa-auditor` (si `.tsx` modifié)
    - `security-auditor` (si server files modifiés)
 
-   Corriger toutes les findings. Re-run jusqu'au vert.
+   Corriger toutes les findings. Re-run jusqu'au vert. Logger `QUALITY_OK` quand les 4 agents PASS.
 
 7. **Screenshots** (si UI touchée) :
    - Démarrer dev server sur le port assigné
@@ -56,6 +59,7 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - Body : lien ticket (`Closes #NNN`), résumé, test plan, screenshots
    - **Ticket reste en In progress** pendant les validators
    - Si stacked : noter dans le body « Stacked on #<parent-PR> — GitHub retargettera automatiquement sur `alpha` une fois le parent mergé »
+   - Logger `PR_DRAFT` avec le numéro de PR.
 
 9. **Validations en parallèle** — 3 axes simultanés, tous doivent être verts avant de passer à l'étape 10.
 
@@ -83,47 +87,62 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
      - Désaccord → répondre avec argumentation, laisser le reviewer trancher (ne pas imposer)
    - Tant que des threads de review sont **non résolus** (unresolved), ne pas `gh pr ready`. Marquer les threads résolus via l'API GitHub quand applicable.
 
-   **Toutes rouges persistantes (> 3 tentatives sur un même axe)** → auto-escalade ou REFACTO selon le modèle courant (logique **interne à `code-dev`**, transparente pour l'appelant `/epic` ou `/code`) :
+   À chaque début d'itération de fix : `bash scripts/orchestration/log_event.sh code-dev-<N> RETRY "axis=<axe> attempt=<K>"`.
+
+   **Toutes rouges persistantes (> 3 tentatives sur un même axe)** — escalade gérée par le pipeline (process_tick_result.sh), pas par `code-dev` lui-même :
 
    - **Modèle courant = Sonnet** (ticket sans label `complexe`) :
-     - Ajouter le label `complexe` au ticket : `gh issue edit <N> --add-label complexe`
-     - Poster un commentaire `code-dev: ESCALATE Sonnet→Opus` avec le diagnostic complet : axe en échec, 3 dernières tentatives, logs/liens/commentaires
-     - Commit + `git push` l'état courant (ne pas reset — l'instance Opus reprendra ce travail)
-     - **Déléguer à soi-même en Opus** via le tool `Agent` : `subagent_type` pointant sur `code-dev`, `model: "opus"`, prompt = « Ticket escaladé depuis Sonnet. Branche `<name>` au commit `<sha>`. Reprendre l'axe en échec (<axe>). Diagnostic : `<détails>`. Mêmes inputs : ticket #<N>, worktree `<path>`, port `<port>`, base branch `<base>`. »
-     - Attendre le retour de l'instance Opus. Son verdict (PASS ou REFACTO) devient le verdict de la présente instance Sonnet, propagé à l'appelant.
-   - **Modèle courant = Opus** (ticket déjà `complexe` à l'entrée OU escaladé depuis Sonnet) :
-     - Remettre le ticket en **To Do** avec diagnostic complet → intervention `architect` probablement nécessaire (re-découpage du ticket)
-     - Retourner le verdict **REFACTO** à l'appelant
-
-   **Une seule escalade possible par ticket** : Sonnet → Opus → REFACTO. Pas de ré-escalade après Opus. Le label `complexe` une fois posé ne se retire pas.
+     - Commit + `git push` l'état courant (l'instance Opus reprendra ce travail)
+     - Poster un commentaire `code-dev: needs Opus escalation` avec le diagnostic complet : axe en échec, 3 dernières tentatives, logs/liens/commentaires
+     - Logger `ESCALATED` puis retourner le JSON `{"status":"needs_opus_escalation","ticket":<N>}` (le pipeline pose le label `complexe` et re-dispatchera en Opus au prochain tick)
+   - **Modèle courant = Opus** (ticket déjà `complexe` à l'entrée OU re-dispatché en Opus) :
+     - Poster un commentaire `code-dev: REFACTO` avec diagnostic complet → intervention `architect` probablement nécessaire (re-découpage du ticket)
+     - Logger `STUCK` puis retourner le JSON `{"status":"refacto","ticket":<N>,"reason":"<résumé>"}` (le pipeline incrémente le compteur d'échecs Opus du ticket : au 3ᵉ refacto consécutif il pose `dispatch=escalate` pour intervention humaine)
 
 10. **Fin** — quand 9a + 9b + 9c + 9d sont **tous verts / résolus** :
    - `gh pr ready <PR>` (sort la PR du draft)
-   - Status ticket → **In review** (op. 4, option ID `df73e18b`)
+   - Logger `PR_READY` avec le numéro de PR
+   - Status ticket → **In review** via `bash scripts/orchestration/set_ticket_status.sh <N> "In review"`
+   - Logger `COMPLETE`
    - `In review` = terminus pour l'IA. L'utilisateur passe manuellement en **Done** après revue humaine. Les nouveaux commentaires posés **après** le passage en In review relèvent de la skill `/review` (existante), plus du `code-dev`.
 
 ## Contraintes
 
-- **Jamais `Done` automatique** — utilisateur uniquement
+- **Jamais `Done` automatique** — utilisateur uniquement (le script `set_ticket_status.sh` refuse explicitement cette transition pour un agent)
 - **Jamais bypass** — pas de `@ts-ignore`, `--no-verify`, `--no-gpg-sign`, pas de skip CI
 - **Screenshots PR obligatoires** pour toute modif UI
 - **Un ticket = une branche = une PR** — pas de bundle
 - **Coverage TU = 100%** sur le code du ticket (fichiers modifiés ou créés), pas seulement les 75% globaux
 - **CI + Sonar verts obligatoires** avant `gh pr ready` — aucune exception
 - **Zéro commentaire de review non-adressé** — bot ou humain, corriger ou répondre avec justification. Jamais d'ignorance silencieuse.
-- **Escalade Sonnet → Opus interne** — sur 3-retry exhaustion en Sonnet, auto-déléguer à une instance Opus du même agent. Invisible pour `/epic` et `/code`. Une seule escalade par ticket.
+- **Pas d'auto-délégation Opus** — sur 3-retry Sonnet, retourner `needs_opus_escalation`, le pipeline re-dispatche au prochain tick. C'est plus simple, plus testable, et offre un budget API isolé à l'instance Opus.
 
-## Output Format
+## Logging events
 
-```
-## Code Dev: DONE
+Calls `bash scripts/orchestration/log_event.sh code-dev-<N> <EVENT> [msg]`. Logger aux **transitions d'état** seulement (pas chaque Read/Edit/grep). Les events alimentent `/report`.
 
-Ticket: #NNN
-Branch: <name>
-PR: #PPP
-Ticket status: In review
-Coverage: 100% (X files)
-CI: green (Y checks)
-Sonar: Quality Gate passed
-Validators IA: functional-validator PASS, design-validator PASS
-```
+| Event | Quand |
+|---|---|
+| `START` | Début, après réception du prompt (étape 0) |
+| `IMPLEMENT_OK` | Code écrit, typecheck + tests locaux verts (étape 5) |
+| `QUALITY_OK` | Les 4 auditors PASS (étape 6) |
+| `PR_DRAFT` | PR draft ouverte (étape 8), `msg=pr=<NNN>` |
+| `RETRY` | Début d'une itération de fix sur un verdict RETRY (étape 9), `msg=axis=<axe> attempt=<K>` |
+| `ESCALATED` | Avant retour `needs_opus_escalation` (étape 9, mode Sonnet épuisé) |
+| `STUCK` | Avant retour `refacto` (étape 9, mode Opus épuisé) |
+| `PR_READY` | `gh pr ready` réussi (étape 10), `msg=pr=<NNN>` |
+| `COMPLETE` | Avant retour `validated` (étape 10) |
+
+## Format de retour OBLIGATOIRE (dernier message)
+
+Le **dernier message** de l'agent doit être **exactement un de ces 5 JSON** — rien d'autre, pas de prose, pas de markdown autour. Le pipeline parse ce JSON via `jq -e '.status'`.
+
+| Cas | JSON |
+|---|---|
+| PR ready, ticket en `In review` | `{"status":"validated","ticket":<N>,"pr":<P>}` |
+| 3-retry exhaustion en Sonnet (le pipeline ré-essaiera en Opus) | `{"status":"needs_opus_escalation","ticket":<N>}` |
+| 3-retry exhaustion en Opus, OU spec invalide non corrigeable | `{"status":"refacto","ticket":<N>,"reason":"<résumé court>"}` |
+| Rate limit API Claude/GitHub persistant | `{"status":"rate_limited","ticket":<N>,"retry_in":<sec>}` |
+| Erreur technique (worktree corrompu, dev server crash, etc.) | `{"status":"failed","ticket":<N>,"reason":"<erreur>"}` |
+
+Le diagnostic détaillé (commentaires, screenshots, axes en échec) est posté **sur le ticket GitHub** via `gh issue comment`, pas dans le retour JSON. Le retour JSON est un canal de signalisation machine, pas un rapport.
