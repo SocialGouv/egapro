@@ -452,13 +452,23 @@ export const declarationRouter = createTRPCRouter({
 	submit: companyWriteProcedure.mutation(async ({ ctx }) => {
 		const siren = ctx.siren;
 		const year = getCurrentYear();
+		const now = new Date();
+
+		// Preserve the very first submission date — resubmissions after
+		// corrections must not move the campaign progression curve.
+		const [existing] = await ctx.db
+			.select({ submittedAt: declarations.submittedAt })
+			.from(declarations)
+			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+			.limit(1);
 
 		await ctx.db
 			.update(declarations)
 			.set({
 				status: "submitted",
 				currentStep: 6,
-				updatedAt: new Date(),
+				submittedAt: existing?.submittedAt ?? now,
+				updatedAt: now,
 			})
 			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
 

@@ -38,26 +38,16 @@ vi.mock("~/server/services/s3", async (importOriginal) => {
 	};
 });
 
-const VALID_AUTH_HEADER = "Bearer test-suit-api-key-that-is-at-least-32-chars";
-
-function authedRequest(url: string): Request {
-	return new Request(url, {
-		headers: { Authorization: VALID_AUTH_HEADER },
-	});
-}
-
 /**
- * SUIT calls always sign the request — the unified `[fileId]` handler routes
- * on the presence of `x-signature` to dispatch to the SUIT branch. The actual
- * signature is not verified in tests because `EGAPRO_SUIT_PUBLIC_KEY_PEM` is
- * unset (`src/test/setup.ts`).
+ * APISIX-forwarded requests carry `X-Gateway-Forwarded` (injected by the
+ * gateway's `proxy-rewrite` plugin). Bearer + rate-limit are enforced by
+ * APISIX upstream, so tests only need to simulate the header presence
+ * that the middleware has already validated. The unified `[fileId]`
+ * handler routes on this header to dispatch to the SUIT branch.
  */
-function suitFileRequest(url: string): Request {
+function gatewayForwardedRequest(url: string): Request {
 	return new Request(url, {
-		headers: {
-			Authorization: VALID_AUTH_HEADER,
-			"x-signature": "test-signature",
-		},
+		headers: { "x-gateway-forwarded": "test-gateway-secret" },
 	});
 }
 
@@ -74,19 +64,21 @@ describe("GET /api/v1/files", () => {
 		mockFetchJointFiles.mockResolvedValue(new Map());
 	});
 
-	it("should return 401 when Authorization header is missing", async () => {
+	it("should return 403 when X-Gateway-Forwarded header is missing", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
 		const request = new Request(
 			"http://localhost/api/v1/files?siren=123456789&year=2027",
 		);
 		const response = await GET(request);
 
-		expect(response.status).toBe(401);
+		expect(response.status).toBe(403);
 	});
 
 	it("should return 400 when siren is missing", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = authedRequest("http://localhost/api/v1/files?year=2027");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/files?year=2027",
+		);
 		const response = await GET(request);
 
 		expect(response.status).toBe(400);
@@ -96,7 +88,7 @@ describe("GET /api/v1/files", () => {
 
 	it("should return 400 when siren format is invalid", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/files?siren=123&year=2027",
 		);
 		const response = await GET(request);
@@ -106,7 +98,7 @@ describe("GET /api/v1/files", () => {
 
 	it("should return 400 when year is missing", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/files?siren=123456789",
 		);
 		const response = await GET(request);
@@ -116,7 +108,7 @@ describe("GET /api/v1/files", () => {
 
 	it("should return 400 when year is outside the allowed range", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/files?siren=123456789&year=0000",
 		);
 		const response = await GET(request);
@@ -126,7 +118,7 @@ describe("GET /api/v1/files", () => {
 
 	it("should return empty files array when no files exist", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/files?siren=123456789&year=2027",
 		);
 		const response = await GET(request);
@@ -175,7 +167,7 @@ describe("GET /api/v1/files", () => {
 		);
 
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/files?siren=123456789&year=2027",
 		);
 		const response = await GET(request);
@@ -201,7 +193,7 @@ describe("GET /api/v1/files", () => {
 
 	it("should call queries with correct siren and year", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
-		const request = authedRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/files?siren=987654321&year=2026",
 		);
 		await GET(request);
@@ -212,34 +204,15 @@ describe("GET /api/v1/files", () => {
 	});
 });
 
-describe("GET /api/v1/files/:fileId — SUIT branch (signed request)", () => {
+describe("GET /api/v1/files/:fileId — SUIT branch (gateway-forwarded)", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockFetchFileById.mockResolvedValue(undefined);
 	});
 
-	it("should return 401 when Authorization header is missing", async () => {
-		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = new Request("http://localhost/api/v1/files/file-1", {
-			headers: { "x-signature": "test-signature" },
-		});
-		const response = await GET(request, {
-			params: Promise.resolve({ fileId: "file-1" }),
-		});
-
-		expect(response.status).toBe(401);
-		expect(mockLogAction).toHaveBeenCalledWith(
-			expect.objectContaining({
-				action: "export.api_files",
-				status: "failure",
-				errorMessage: "HTTP 401",
-			}),
-		);
-	});
-
 	it("should return 404 when file does not exist", async () => {
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = suitFileRequest(
+		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/files/nonexistent",
 		);
 		const response = await GET(request, {
@@ -265,7 +238,9 @@ describe("GET /api/v1/files/:fileId — SUIT branch (signed request)", () => {
 		});
 
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = suitFileRequest("http://localhost/api/v1/files/file-1");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/files/file-1",
+		);
 		const response = await GET(request, {
 			params: Promise.resolve({ fileId: "file-1" }),
 		});
@@ -292,7 +267,9 @@ describe("GET /api/v1/files/:fileId — SUIT branch (signed request)", () => {
 		});
 
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = suitFileRequest("http://localhost/api/v1/files/file-1");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/files/file-1",
+		);
 		const response = await GET(request, {
 			params: Promise.resolve({ fileId: "file-1" }),
 		});
@@ -315,7 +292,9 @@ describe("GET /api/v1/files/:fileId — SUIT branch (signed request)", () => {
 		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
 		const { GET } = await import("~/app/api/v1/files/[fileId]/route");
-		const request = suitFileRequest("http://localhost/api/v1/files/file-1");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/files/file-1",
+		);
 		const response = await GET(request, {
 			params: Promise.resolve({ fileId: "file-1" }),
 		});

@@ -11,7 +11,11 @@ export {
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
 // Company size
-export { classifyCompanySize, isCseRequired } from "./shared/companySize";
+export {
+	COMPANY_SIZE_RANGES,
+	classifyCompanySize,
+	isCseRequired,
+} from "./shared/companySize";
 // Constants
 export {
 	COMPANY_SIZE_ANNUAL_MIN,
@@ -33,6 +37,7 @@ export {
 	formatGap,
 	formatGapCompact,
 	formatLongDate,
+	formatMonthDay,
 	formatShortDate,
 	formatShortDateTime,
 	formatTotal,
@@ -67,6 +72,7 @@ export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
 export type {
 	CampaignDeadlines,
 	CompanySize,
+	CompanySizeRange,
 	DeclarationStatus,
 	DeclarationType,
 	GapLevel,

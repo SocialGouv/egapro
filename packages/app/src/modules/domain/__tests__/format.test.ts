@@ -6,6 +6,7 @@ import {
 	formatCurrency,
 	formatGap,
 	formatGapCompact,
+	formatMonthDay,
 	formatShortDate,
 	formatShortDateTime,
 	formatTotal,
@@ -96,5 +97,12 @@ describe("formatShortDateTime", () => {
 
 	it("returns dash for null", () => {
 		expect(formatShortDateTime(null)).toBe("—");
+	});
+});
+
+describe("formatMonthDay", () => {
+	it("swaps a MM-DD fragment to the French DD/MM form", () => {
+		expect(formatMonthDay("02-15")).toBe("15/02");
+		expect(formatMonthDay("12-01")).toBe("01/12");
 	});
 });

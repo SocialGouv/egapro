@@ -78,3 +78,9 @@ export function formatLongDate(date: Date): string {
 		year: "numeric",
 	});
 }
+
+/** Format a `MM-DD` fragment (year-agnostic) to French short form: `"02-15"` → `"15/02"`. */
+export function formatMonthDay(monthDay: string): string {
+	const [month, day] = monthDay.split("-");
+	return `${day}/${month}`;
+}

@@ -56,6 +56,10 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"adminSettings.upsertCampaignDeadlines":
 		AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES,
 
+	// ── admin stats sensitive reads ──────────────────────
+	"adminStats.getCampaignProgression":
+		AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION,
+
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,
 
