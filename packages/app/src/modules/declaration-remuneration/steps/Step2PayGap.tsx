@@ -13,10 +13,7 @@ import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP2_ROWS } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
-import {
-	GapInterpretationCallout,
-	hasHighPayGap,
-} from "../shared/GapInterpretationCallout";
+import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { gipToStep2 } from "../shared/gipToStepData";
 import { getStep2FieldName, step2ToRows } from "../shared/indicatorRowMapping";
@@ -154,43 +151,40 @@ export function Step2PayGap({
 					id="accordion-step2"
 					title="Définitions et méthode de calcul"
 				>
-					{hasHighPayGap(rows) ? (
-						<GapInterpretationCallout rows={rows} />
-					) : (
-						<div className="fr-callout">
-							<ul>
-								<li>
-									Quelles composantes variables ou complémentaires sont incluses
-									dans le calcul (ex. prime de cooptation, prime
-									d&apos;astreinte, prime d&apos;avancement) et avec quel niveau
-									de détail&nbsp;?
-								</li>
-								<li>
-									Comment les rémunérations sont-elles reconstituées à partir
-									des données disponibles&nbsp;?
-								</li>
-								<li>
-									Comment expliquer l&apos;écart entre les pourcentages annuels
-									et horaires (ex. ×12 = annuel)&nbsp;?
-								</li>
-								<li>
-									Les données seraient-elles plus pertinentes en mensuel
-									brut&nbsp;?
-								</li>
-								<li>
-									Comment sont traitées les spécificités des UES, notamment
-									lorsque&nbsp;:
-								</li>
-								<li>
-									les salariés n&apos;ont pas tous le même nombre d&apos;heures
-									pour un équivalent temps plein, certains salariés sont au
-									forfait jours&nbsp;?
-								</li>
-							</ul>
-						</div>
-					)}
+					<div className="fr-callout">
+						<ul>
+							<li>
+								Quelles composantes variables ou complémentaires sont incluses
+								dans le calcul (ex. prime de cooptation, prime d&apos;astreinte,
+								prime d&apos;avancement) et avec quel niveau de détail&nbsp;?
+							</li>
+							<li>
+								Comment les rémunérations sont-elles reconstituées à partir des
+								données disponibles&nbsp;?
+							</li>
+							<li>
+								Comment expliquer l&apos;écart entre les pourcentages annuels et
+								horaires (ex. ×12 = annuel)&nbsp;?
+							</li>
+							<li>
+								Les données seraient-elles plus pertinentes en mensuel
+								brut&nbsp;?
+							</li>
+							<li>
+								Comment sont traitées les spécificités des UES, notamment
+								lorsque&nbsp;:
+							</li>
+							<li>
+								les salariés n&apos;ont pas tous le même nombre d&apos;heures
+								pour un équivalent temps plein, certains salariés sont au
+								forfait jours&nbsp;?
+							</li>
+						</ul>
+					</div>
 				</DefinitionAccordion>
 			</div>
+
+			<GapInterpretationCallout rows={rows} />
 
 			<FormErrors
 				mutationError={mutation.error?.message}

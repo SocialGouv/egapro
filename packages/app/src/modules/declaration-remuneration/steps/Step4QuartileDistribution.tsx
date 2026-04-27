@@ -20,10 +20,7 @@ import { StepTitleRow } from "../shared/StepTitleRow";
 import { TooltipButton } from "../shared/TooltipButton";
 import type { QuartileData, QuartileTuple, Step4Data } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
-import {
-	hasHighQuartileImbalance,
-	QuartileInterpretationCallout,
-} from "./step4/QuartileInterpretationCallout";
+import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCallout";
 import { QuartileReadingNote } from "./step4/QuartileReadingNote";
 import { QuartileTable } from "./step4/QuartileTable";
 
@@ -299,41 +296,39 @@ export function Step4QuartileDistribution({
 					id="accordion-step4"
 					title="Définitions et méthode de calcul"
 				>
-					{hasHighQuartileImbalance(annual, hourly) ? (
-						<QuartileInterpretationCallout
-							annualCategories={annual}
-							hourlyCategories={hourly}
-						/>
-					) : (
-						<div className="fr-callout">
-							<ul>
-								<li>
-									Quelles données sont prises en compte dans les calculs&nbsp;?
-								</li>
-								<li>
-									Les calculs incluent-ils uniquement le salaire de base ou
-									également les primes&nbsp;?
-								</li>
-								<li>
-									Sont-ils réalisés en équivalent temps plein, en salaire brut
-									horaire ou selon une autre modalité&nbsp;?
-								</li>
-								<li>
-									Que signifie la notion de «&nbsp;quartile&nbsp;» dans ce
-									contexte&nbsp;? Définir simplement un quartile pour permettre
-									à l&apos;utilisateur de s&apos;assurer qu&apos;il comprend
-									bien cette notion.
-								</li>
-								<li>
-									À quoi servent les quartiles présentés&nbsp;? Quelle est la
-									finalité des quartiles lorsqu&apos;ils sont affichés sans
-									échelle ou référence comparative&nbsp;?
-								</li>
-							</ul>
-						</div>
-					)}
+					<div className="fr-callout">
+						<ul>
+							<li>
+								Quelles données sont prises en compte dans les calculs&nbsp;?
+							</li>
+							<li>
+								Les calculs incluent-ils uniquement le salaire de base ou
+								également les primes&nbsp;?
+							</li>
+							<li>
+								Sont-ils réalisés en équivalent temps plein, en salaire brut
+								horaire ou selon une autre modalité&nbsp;?
+							</li>
+							<li>
+								Que signifie la notion de «&nbsp;quartile&nbsp;» dans ce
+								contexte&nbsp;? Définir simplement un quartile pour permettre à
+								l&apos;utilisateur de s&apos;assurer qu&apos;il comprend bien
+								cette notion.
+							</li>
+							<li>
+								À quoi servent les quartiles présentés&nbsp;? Quelle est la
+								finalité des quartiles lorsqu&apos;ils sont affichés sans
+								échelle ou référence comparative&nbsp;?
+							</li>
+						</ul>
+					</div>
 				</DefinitionAccordion>
 			</div>
+
+			<QuartileInterpretationCallout
+				annualCategories={annual}
+				hourlyCategories={hourly}
+			/>
 
 			<FormErrors
 				mutationError={mutation.error?.message}
