@@ -227,9 +227,21 @@ while [ $TICK -lt $MAX_TICKS ]; do
     bash "$SCRIPT_DIR/log_event.sh" "$AID" TICK_DISPATCH "tick=$TICK plan_len=$PLAN_LEN"
 
     # 4. For each plan entry, ensure worktree + spawn the agent in parallel
+    #
+    # IMPORTANT: pre-load all plan entries into an array BEFORE forking any
+    # sub-shell. Mixing `< <(jq ...)` (process substitution) with `&` inside
+    # the loop body breaks subtly: the backgrounded sub-shell inherits the
+    # process substitution's pipe FD, and the main shell's subsequent
+    # `read entry` for the next line starves out — only the first plan
+    # entry gets dispatched per tick (observed on epic #3308).
     declare -A AGENT_FILES=()
     PIDS=()
+    PLAN_ENTRIES=()
     while IFS= read -r entry; do
+        PLAN_ENTRIES+=("$entry")
+    done < <(jq -c '.[]' "$PLAN_FILE")
+
+    for entry in "${PLAN_ENTRIES[@]}"; do
         TICKET=$(echo "$entry" | jq -r '.ticket')
         AGENT=$(echo "$entry" | jq -r '.agent')
         MODEL=$(echo "$entry" | jq -r '.model')
@@ -254,7 +266,7 @@ while [ $TICK -lt $MAX_TICKS ]; do
 
         spawn_agent "$TICKET" "$AGENT" "$MODEL" "$INDEX" "$EPIC" "$BASE" "$WT_PATH" "$AGENT_LOG" &
         PIDS+=($!)
-    done < <(jq -c '.[]' "$PLAN_FILE")
+    done
 
     # 5. Wait for all spawned agents
     for pid in "${PIDS[@]}"; do
