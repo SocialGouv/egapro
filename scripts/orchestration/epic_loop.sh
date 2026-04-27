@@ -168,7 +168,14 @@ Format de retour OBLIGATOIRE — un seul de :
 
 Ton dernier message DOIT être uniquement ce JSON (rien d'autre, pas de prose)."
 
-    cd "$REPO_ROOT"
+    # Start the claude CLI from inside the worktree, NOT the main repo.
+    # If the sub-agent forgets to `cd` and runs git/gh commands directly, those
+    # land in the worktree where they belong (creating ticket/<N> branch in
+    # the worktree's HEAD) instead of polluting the main repo. Observed in
+    # the first live run on epic #3308: sub-agent for #3313 ran `git checkout
+    # -b ticket/3313-...` from the cwd of its claude CLI, which used to be
+    # REPO_ROOT — main repo silently switched branch.
+    cd "$WT_PATH"
     timeout "$AGENT_TIMEOUT" claude \
         --agent "$AGENT" \
         --model "$MODEL" \

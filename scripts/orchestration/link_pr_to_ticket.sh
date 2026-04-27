@@ -30,15 +30,19 @@ fi
 TICKET="$1"
 PR="$2"
 
-# Idempotence: skip if a comment already mentions this exact PR
+# Idempotence: skip if a comment already starts with our exact signature.
+# Use jq's startswith (not contains/test) — punctuation differences can
+# break substring matching (e.g. "PR: #N" vs "PR #N"), and a script-owned
+# signature avoids false positives from human comments mentioning the PR.
+SIGNATURE="Linked PR: #${PR}"
 EXISTING=$(gh issue view "$TICKET" --json comments \
-    --jq "[.comments[] | select(.body | test(\"PR #${PR}([^0-9]|$)\"))] | length" 2>/dev/null || echo "0")
+    --jq "[.comments[] | select(.body | startswith(\"${SIGNATURE}\"))] | length" 2>/dev/null || echo "0")
 if [ "$EXISTING" -gt 0 ]; then
     echo "[link_pr_to_ticket] cross-ref already present for PR #${PR} on issue #${TICKET} ($EXISTING match) — skipping" >&2
     exit 0
 fi
 
-gh issue comment "$TICKET" --body "Linked PR: #${PR}
+gh issue comment "$TICKET" --body "${SIGNATURE}
 
 (Cross-reference posted by orchestrator. GitHub's native auto-link via \`Closes #N\` only fires when the PR targets the default branch; this comment makes the relation visible in the issue timeline regardless of the PR's base.)" >/dev/null
 
