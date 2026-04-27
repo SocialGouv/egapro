@@ -214,9 +214,14 @@ while [ $TICK -lt $MAX_TICKS ]; do
     PLAN_LEN=$(jq 'length' "$PLAN_FILE")
     if [ "$PLAN_LEN" -eq 0 ]; then
         # Are there any non-terminal tickets left?
-        NON_DONE=$(bash "$SCRIPT_DIR/epic_state.sh" $EPICS 2>/dev/null | grep -cE '\| (Todo|To Do|In progress|In review) ' || true)
+        # 'In review' is the AI's terminus (cf. code-dev/AGENT.md): the human
+        # then merges the PR and moves the ticket to 'Done'. The loop driver
+        # must NOT wait for that human action — it would burn MAX_TICKS in
+        # WAITs for nothing (observed on epic #3308: 30 ticks of WAIT after
+        # all sub-agents validated).
+        NON_DONE=$(bash "$SCRIPT_DIR/epic_state.sh" $EPICS 2>/dev/null | grep -cE '\| (Todo|To Do|In progress) ' || true)
         if [ "${NON_DONE:-0}" -eq 0 ]; then
-            break  # all terminal, exit loop
+            break  # all terminal (In review or Done), exit loop with success
         fi
         bash "$SCRIPT_DIR/log_event.sh" "$AID" WAIT "non_done=$NON_DONE plan_empty"
         sleep "$SLEEP_WAIT"
