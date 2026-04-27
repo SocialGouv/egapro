@@ -28,7 +28,9 @@ export function DefinitionAccordion({
 				</button>
 			</h3>
 			<div className="fr-collapse" id={id}>
-				<div className="fr-callout">{children}</div>
+				<div className="fr-callout fr-callout--orange-terre-battue">
+					{children}
+				</div>
 			</div>
 		</section>
 	);
