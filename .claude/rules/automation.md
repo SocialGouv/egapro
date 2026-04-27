@@ -143,11 +143,12 @@ These agents are **read-only** — they report findings but never modify files. 
 
 ## Skills (manual)
 
-Four skills split the lifecycle:
+Five skills split the lifecycle:
 
 | Command | When to use |
 |---|---|
 | `/ticket <description + Figma URL>` | Conception pipeline : PO → designer → architect. Produit un epic GitHub avec N sous-issues prêtes à dispatcher. |
-| `/epic <N>` | Exécute un epic : worktrees parallèles, `code-dev` + validators, boucle jusqu'à `In review`. |
-| `/code <N>` | Exécute un seul ticket via `code-dev`. Utilisé seul (debug, fix manuel) ou appelé par `/epic`. |
+| `/epic <N1> [<N2> ...]` | Lance `scripts/orchestration/epic_loop.sh` en background. Thin wrapper — toute la logique est en bash. Main context libre. |
+| `/code <N>` | Exécute un seul ticket via `code-dev`. Parse le retour JSON strict ; ré-invoque en Opus si `needs_opus_escalation`. |
+| `/report [<N> ...]` | Dashboard live des agents en cours + état des sous-tickets d'un epic. Pure bash, zéro LLM. |
 | `/review` | Traite les commentaires de revue posés après passage en `In review` (human + bots). |

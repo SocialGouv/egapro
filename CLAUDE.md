@@ -173,11 +173,29 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | Skill | Purpose |
 |---|---|
 | `/ticket <description + Figma URL>` | Conception pipeline : PO → designer → architect → epic GitHub + N sous-issues |
-| `/epic <N>` | Dispatche les sous-issues d'un epic sur N worktrees parallèles, boucle jusqu'à `In review` |
-| `/code <N>` | Exécute un seul ticket via `code-dev` (debug, fix, ou appelé par `/epic`) |
+| `/epic <N1> [<N2> ...]` | Lance le bash loop driver `scripts/orchestration/epic_loop.sh` en background sur les epics donnés. Main context libre. |
+| `/code <N>` | Exécute un seul ticket via `code-dev` (debug, fix). Parse le retour JSON strict, ré-invoque en Opus si `needs_opus_escalation`. |
+| `/report [<N> ...]` | Dashboard live des agents actifs + état des sous-tickets de l'epic. Pure bash, zéro LLM. |
 | `/review` | Traite les commentaires de revue posés après passage en `In review` (human + bots) |
 
-Workflow standard : `/ticket "..."` pour concevoir, puis `/epic <N>` pour exécuter en parallèle. `/review` prend le relais quand les humains commentent les PR sorties de `In review`.
+Workflow standard : `/ticket "..."` pour concevoir, puis `/epic <N>` pour exécuter en parallèle (suivi via `/report`). `/review` prend le relais quand les humains commentent les PR sorties de `In review`.
+
+### Orchestration (`scripts/orchestration/`)
+
+Tous les scripts shell portent leur propre header `--help`-friendly. La pipeline `/epic` est entièrement bash :
+
+| Script | Rôle |
+|---|---|
+| `epic_loop.sh` | Loop driver background. Tick = plan → spawn N `claude` CLIs en parallèle (budget USD isolé) → aggregate JSON returns → process. Plafond `EPIC_LOOP_MAX_TICKS=30`. |
+| `dispatch_plan.sh` | Calcule la JSON list des tickets dispatchables : parse `## Depends on`, applique le stacked PR pattern, alloue les indices libres dans `[0, EPIC_MAX_PARALLEL[`. |
+| `process_tick_result.sh` | Applique les mutations board selon le statut JSON retourné par `code-dev`. Compteur `attempt=N` pour anti-boucle 3 refacto consécutifs → `dispatch=escalate`. |
+| `set_ticket_status.sh` | Encapsule les 3 GraphQL calls de `rules/github-board.md`. **Refuse explicitement la transition `Done`** (user-only). |
+| `cache_gh.sh` | TTL wrapper sur `gh` pour amortir les rate limits (clé `epic_<N>_full` partagée entre `dispatch_plan` et `epic_state`, TTL 300s). |
+| `log_event.sh` | Logging append-only par agent, rolling 50 lignes, sous `.claude/state/epic_run/agents/`. |
+| `epic_state.sh` | Tableau compact des sous-tickets d'un epic (status board + last log event + retries + PR liée). |
+| `render_dashboard.sh` | Dashboard `/report` agents actifs, triés par inactivité, avec alertes >10min. |
+
+Les sub-agents `code-dev` retournent un **JSON strict** en dernier message (`validated` / `needs_opus_escalation` / `refacto` / `rate_limited` / `failed`) — voir `.claude/agents/code-dev/AGENT.md`. Le bash loop parse ce JSON via `jq`, aucun LLM n'intervient dans la chaîne de décision post-verdict.
 
 ---
 
