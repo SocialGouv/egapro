@@ -33,6 +33,27 @@ NOW_TS=$(date '+%s')
 ACTIVE=()
 ALERTS=()
 
+# Helper: is the agent's underlying OS process still alive?
+# Sub-agents (code-dev, validators, ...) are claude CLIs whose cmdline
+# contains "Ticket #<N>". The orchestrator is an epic_loop.sh whose cmdline
+# contains the epics key. Returns 0 if alive, 1 if not.
+process_alive() {
+    local AID="$1"
+    case "$AID" in
+        epic-orchestrator-*)
+            local KEY="${AID#epic-orchestrator-}"
+            pgrep -af "epic_loop.sh.*${KEY}" >/dev/null 2>&1
+            ;;
+        *-[0-9]*)
+            local TICKET="${AID##*-}"
+            ps -ef | grep -E "Ticket #${TICKET}([^0-9]|\$)" | grep -v grep >/dev/null 2>&1
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
 for log in "$LOG_DIR"/*.log; do
     [ -f "$log" ] || continue
     AGENT_ID=$(basename "$log" .log)
@@ -50,9 +71,12 @@ for log in "$LOG_DIR"/*.log; do
 
     ACTIVE+=("${AGENT_ID}|${INACTIVITY}|${log}")
 
-    if [ "$INACTIVITY" -gt "$THRESHOLD" ]; then
+    # Only alert if both: log is stale AND no live process backs the agent.
+    # A silent-but-running agent (Sonnet ignores log_event calls, common) is
+    # NOT a real stuck — its cmdline is still in `ps`.
+    if [ "$INACTIVITY" -gt "$THRESHOLD" ] && ! process_alive "$AGENT_ID"; then
         MIN=$((INACTIVITY / 60))
-        ALERTS+=("⚠ ${AGENT_ID} : inactif ${MIN} min (seuil $((THRESHOLD / 60)) min)")
+        ALERTS+=("⚠ ${AGENT_ID} : inactif ${MIN} min, process gone (seuil $((THRESHOLD / 60)) min)")
     fi
 done
 
@@ -79,7 +103,11 @@ else
         fi
 
         if [ "$INACTIVITY" -gt "$THRESHOLD" ]; then
-            FLAG="⚠ INACTIF"
+            if process_alive "$AGENT_ID"; then
+                FLAG="○ live (log silent)"
+            else
+                FLAG="⚠ INACTIF"
+            fi
         else
             FLAG="✓"
         fi
