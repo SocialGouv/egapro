@@ -14,7 +14,6 @@ type Props = {
 	initialSource?: string;
 	maxWomen?: number;
 	maxMen?: number;
-	siren?: string;
 };
 
 export function Step5EmployeeCategories({
@@ -23,7 +22,6 @@ export function Step5EmployeeCategories({
 	initialSource,
 	maxWomen,
 	maxMen,
-	siren,
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
@@ -55,7 +53,6 @@ export function Step5EmployeeCategories({
 			}
 			previousHref="/declaration-remuneration/etape/4"
 			referenceYear={declarationYear - 1}
-			siren={siren}
 			stepper={<StepIndicator currentStep={5} />}
 			submitError={mutation.error?.message}
 			title={

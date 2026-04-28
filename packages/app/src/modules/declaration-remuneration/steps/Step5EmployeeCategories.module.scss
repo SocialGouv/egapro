@@ -1,5 +1,22 @@
 .sectionHeader {
-	background-color: var(--background-default-grey-hover);
+	background-color: var(--background-contrast-grey);
+}
+
+.sourceSelectGroup {
+	max-width: 18rem;
+}
+
+.obligatoiresRow {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.deleteRow {
+	display: flex;
+	justify-content: flex-end;
 }
 
 .inputCell {

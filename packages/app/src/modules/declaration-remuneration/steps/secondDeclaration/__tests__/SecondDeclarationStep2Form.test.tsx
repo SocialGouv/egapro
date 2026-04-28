@@ -90,13 +90,13 @@ describe("SecondDeclarationStep2Form", () => {
 			<SecondDeclarationStep2Form
 				declarationYear={2025}
 				initialFirstDeclarationCategories={mockCategories}
-				initialSource="convention-collective"
+				initialSource="accord-entreprise"
 			/>,
 		);
 		expect(
 			screen.getByText(/Source utilisée pour déterminer/),
 		).toBeInTheDocument();
-		expect(screen.getByText("Convention collective")).toBeInTheDocument();
+		expect(screen.getByText("Accord d'entreprise")).toBeInTheDocument();
 		expect(
 			screen.queryByLabelText(/Quelle est la source/),
 		).not.toBeInTheDocument();

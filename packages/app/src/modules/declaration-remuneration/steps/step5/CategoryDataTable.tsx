@@ -81,12 +81,12 @@ export function CategoryDataTable({
 								</tr>
 							</thead>
 							<tbody>
-								{/* Section: Nombre de salariés */}
+								{/* Section: Total salariés */}
 								<tr>
 									<td className={stepStyles.sectionHeader} colSpan={4}>
 										<strong>
-											Nombre de salariés{" "}
-											{totalEmployees !== null ? `[${totalEmployees}]` : ""}
+											Total salariés
+											{totalEmployees !== null ? ` : ${totalEmployees}` : ""}
 										</strong>
 									</td>
 								</tr>
@@ -130,7 +130,7 @@ export function CategoryDataTable({
 								{/* Section: Rémunération annuelle brute */}
 								<tr>
 									<td className={stepStyles.sectionHeader} colSpan={4}>
-										<strong>Rémunération annuelle brute</strong>
+										<strong>Rémunération annuelle brute moyenne</strong>
 									</td>
 								</tr>
 								<tr>
@@ -235,7 +235,7 @@ export function CategoryDataTable({
 								{/* Section: Rémunération horaire brute */}
 								<tr>
 									<td className={stepStyles.sectionHeader} colSpan={4}>
-										<strong>Rémunération horaire brute</strong>
+										<strong>Rémunération horaire brute moyenne</strong>
 									</td>
 								</tr>
 								<tr>
