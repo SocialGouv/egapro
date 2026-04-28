@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import styles from "./ResourceBanner.module.scss";
 import { DsfrPictogram } from "./shared/DsfrPictogram";
 
 type ResourceTileProps = {
@@ -19,7 +20,7 @@ function ResourceTile({
 	return (
 		<div className="fr-tile fr-tile--horizontal fr-tile--sm fr-enlarge-link">
 			<div className="fr-tile__body">
-				<div className="fr-tile__content">
+				<div className={`fr-tile__content ${styles.tileContent}`}>
 					<h3 className="fr-tile__title">
 						<Link href={href}>{title}</Link>
 					</h3>
