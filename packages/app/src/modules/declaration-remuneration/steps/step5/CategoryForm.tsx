@@ -14,6 +14,10 @@ import { FormActions } from "~/modules/declaration-remuneration/shared/FormActio
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { StepTitleRow } from "~/modules/declaration-remuneration/shared/StepTitleRow";
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
+import {
+	CATEGORY_SOURCES,
+	SOURCE_LABELS,
+} from "~/modules/declaration-remuneration/steps/step5/sources";
 import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
@@ -30,13 +34,6 @@ import {
 	toSubmitData,
 } from "./categorySerializer";
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
-
-const SOURCE_LABELS: Record<string, string> = {
-	"accord-entreprise": "Accord d'entreprise",
-	"accord-groupe": "Accord de groupe",
-	"accord-branche": "Accord de branche",
-	"decision-unilaterale": "Décision unilatérale",
-};
 
 function createIdGenerator() {
 	let id = 0;
@@ -316,12 +313,11 @@ export function CategoryForm({
 							<option disabled value="">
 								Sélectionner une option
 							</option>
-							<option value="accord-entreprise">
-								Accord d&apos;entreprise
-							</option>
-							<option value="accord-groupe">Accord de groupe</option>
-							<option value="accord-branche">Accord de branche</option>
-							<option value="decision-unilaterale">Décision unilatérale</option>
+							{CATEGORY_SOURCES.map((s) => (
+								<option key={s.value} value={s.value}>
+									{s.label}
+								</option>
+							))}
 						</select>
 					</div>
 				)}
@@ -365,6 +361,7 @@ export function CategoryForm({
 				{fields.map((field, index) => {
 					const cat = categories[index];
 					const collapseId = `${baseId}-accordion-${index}`;
+					const headingId = `${collapseId}-heading`;
 					const categoryNumber = `Catégorie d'emplois n°${index + 1}`;
 					const catName = cat?.name?.trim() ?? "";
 					const categoryLabel = catName
@@ -372,12 +369,17 @@ export function CategoryForm({
 						: categoryNumber;
 
 					return (
-						<section className="fr-accordion" key={field.id}>
+						<section
+							aria-labelledby={headingId}
+							className="fr-accordion"
+							key={field.id}
+						>
 							<h3 className="fr-accordion__title">
 								<button
 									aria-controls={collapseId}
 									aria-expanded="true"
 									className="fr-accordion__btn"
+									id={headingId}
 									onClick={handleAccordionToggle}
 									type="button"
 								>

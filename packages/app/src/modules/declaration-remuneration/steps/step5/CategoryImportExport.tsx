@@ -63,6 +63,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 			{createPortal(
 				<dialog
 					aria-labelledby={importTitleId}
+					aria-modal="true"
 					className="fr-modal"
 					id={importModalId}
 				>
