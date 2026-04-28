@@ -1,4 +1,8 @@
 {
+  "env": {
+    "EPIC_MAX_PARALLEL": "5",
+    "EPIC_DEFAULT_BASE": "origin/chore/ai-pipeline"
+  },
   "hooks": {
     "UserPromptSubmit": [
       {
