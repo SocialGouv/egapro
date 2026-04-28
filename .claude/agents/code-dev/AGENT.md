@@ -85,7 +85,38 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - Si le bot n'a pas encore commenté, attendre avant de `gh pr ready`
    - Seuils critiques bloquants : bugs, vulnérabilités, security hotspots non reviewed
 
-   **9d. Cycle review unique** — déclenché **une seule fois**, après que 9a + 9b + 9c sont tous verts :
+   **9d. Cycle review unique** — déclenché **une seule fois**, **uniquement** après que 9a + 9b + 9c sont **tous verts** (vérifie explicitement le critère jq de 9b : toutes conclusions SUCCESS / SKIPPED / NEUTRAL, sans exception).
+
+   ### 9d.1 — Wait borné pour les reviews bot
+
+   Les bots de review (notamment `revu-bot`) postent leurs commentaires avec un délai de **plusieurs minutes après que la CI soit verte** (~9 min observés sur PR #3335). Si tu fais 9d immédiatement après 9c, tu as 0 review et tu sors en `validated` — puis le bot poste, et ses commentaires ne sont jamais traités.
+
+   Avant de lire les comments, attends **au moins une fois** qu'au moins un review/comment soit posté **après le dernier push**. Avec un timeout de **10 min** (au-delà, on suppose qu'aucun bot ne va commenter et on sort) :
+
+   ```bash
+   PR=<PR_NUMBER>
+   LAST_PUSH=$(gh pr view "$PR" --json commits --jq '.commits[-1].committedDate')
+   WAIT_MAX=600  # 10 min
+   ELAPSED=0
+   while [ "$ELAPSED" -lt "$WAIT_MAX" ]; do
+       N_REVIEWS=$(gh api "repos/SocialGouv/egapro/pulls/$PR/reviews" \
+           --jq "[.[] | select(.submitted_at > \"$LAST_PUSH\")] | length")
+       N_COMMENTS=$(gh api "repos/SocialGouv/egapro/pulls/$PR/comments" \
+           --jq "[.[] | select(.created_at > \"$LAST_PUSH\")] | length")
+       N_ISSUE_COMMENTS=$(gh api "repos/SocialGouv/egapro/issues/$PR/comments" \
+           --jq "[.[] | select(.created_at > \"$LAST_PUSH\" and (.user.login | test(\"bot|revu\") | not == false))] | length")
+       if [ "$N_REVIEWS" -gt 0 ] || [ "$N_COMMENTS" -gt 0 ] || [ "$N_ISSUE_COMMENTS" -gt 0 ]; then
+           break
+       fi
+       sleep 30
+       ELAPSED=$((ELAPSED + 30))
+   done
+   ```
+
+   - **Si timeout (10 min sans nouveau review/comment)** → passer directement à l'étape 10 (retour `validated`).
+   - **Sinon** (au moins 1 review/comment reçu) → continuer en 9d.2.
+
+   ### 9d.2 — Traitement des reviews/comments (1 itération max)
 
    Lire **tous** les comments + reviews bot/humain de la PR :
    ```bash
@@ -100,10 +131,10 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - **Question** (humain demande clarification) → répondre avec la justification technique
    - **Désaccord** (humain) → répondre avec argumentation, laisser le reviewer trancher (ne pas imposer)
 
-   **Sortie de la phase 9d** :
+   ### 9d.3 — Sortie de la phase 9d
 
    - **Si aucun fix appliqué** (aucun push) → passer immédiatement à l'étape 10 (retour `validated`)
-   - **Si au moins un push** → poll `gh pr checks <PR> --watch` jusqu'à ce que la nouvelle CI/Sonar repassent **toutes vertes** (timeout poll : 10 min). Ensuite passer à l'étape 10.
+   - **Si au moins un push** → poll `gh pr checks <PR> --watch` jusqu'à ce que la nouvelle CI/Sonar repassent **toutes vertes** (même critère jq qu'en 9b, timeout poll : 10 min). Ensuite passer à l'étape 10.
 
    **Règle stricte : 1 itération maximum.** Les nouveaux comments postés par les bots **après** ton push (le re-spam typique) sont **ignorés** par toi — ils relèvent de la skill `/review` (post-In-review). Ne JAMAIS re-lire les comments après le push de 9d, sinon tu boucles indéfiniment sur le re-spam des bots.
 
