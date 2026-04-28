@@ -168,10 +168,26 @@
 	gap: 1.5rem;
 }
 
+.helpSection :global(.fr-hr),
+.helpSection hr {
+	margin: 0;
+	padding: 0;
+}
+
 .helpLinks {
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
+}
+
+.helpLinks :global(.fr-link),
+.helpLinks a,
+.helpLinks button {
+	text-decoration: underline;
+}
+
+.historyLink {
+	text-decoration: underline;
 }
 
 // Documents panel — custom card list
