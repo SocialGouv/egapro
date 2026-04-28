@@ -21,7 +21,6 @@ import { TooltipButton } from "../shared/TooltipButton";
 import type { QuartileData, QuartileTuple, Step4Data } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
 import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCallout";
-import { QuartileReadingNote } from "./step4/QuartileReadingNote";
 import { QuartileTable } from "./step4/QuartileTable";
 
 function toQuartileData(c: {
@@ -210,25 +209,23 @@ export function Step4QuartileDistribution({
 			{/* Description + instructions */}
 			<div className={stepStyles.instructions}>
 				<p className="fr-mb-0">
-					Cet indicateur compare la proportion de femmes et d&apos;hommes selon
-					les niveaux de rémunération. Les rémunérations sont classées de la
-					plus faible à la plus élevée puis divisées en quatre groupes de même
-					taille appelés quartiles&nbsp;: le 1<sup>er</sup> quartile correspond
-					aux 25 % des salariés les moins rémunérés, le 2<sup>e</sup> quartile
-					(médiane) aux 50 % des salariés situés au milieu de la distribution,
-					le 3<sup>e</sup> quartile aux salariés situés entre 50 % et 75 % des
-					rémunérations, et le 4<sup>e</sup> quartile correspond aux 25 % des
-					salariés les mieux rémunérés.
+					Cet indicateur répartit l&apos;ensemble des salariés en quatre groupes
+					de rémunération appelés quartiles&nbsp;: du quartile inférieur qui
+					regroupe les salariés les moins rémunérés, au quartile supérieur qui
+					rassemble les salariés les mieux rémunérés.
 				</p>
 
 				<p className={`fr-mb-0 ${common.fontMedium}`}>
 					{gipPrefillData
 						? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."
 						: "Renseignez les informations avant de valider vos indicateurs."}
-					<TooltipButton
-						id="tooltip-step4-info"
-						label="Information sur les indicateurs"
-					/>
+					{!gipPrefillData && (
+						<TooltipButton
+							id="tooltip-step4-info"
+							label="Information sur la confidentialité des données"
+							text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
+						/>
+					)}
 				</p>
 
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
@@ -242,15 +239,6 @@ export function Step4QuartileDistribution({
 						handleQuartileChange("annual", index, field, value)
 					}
 					quartiles={annual}
-					readingNote={
-						gipPrefillData ? (
-							<QuartileReadingNote
-								categories={annual}
-								tableType="annual"
-								year={declarationYear}
-							/>
-						) : undefined
-					}
 					sourceNote={
 						gipPrefillData ? (
 							<PrefillSource
@@ -270,15 +258,6 @@ export function Step4QuartileDistribution({
 						handleQuartileChange("hourly", index, field, value)
 					}
 					quartiles={hourly}
-					readingNote={
-						gipPrefillData ? (
-							<QuartileReadingNote
-								categories={hourly}
-								tableType="hourly"
-								year={declarationYear}
-							/>
-						) : undefined
-					}
 					sourceNote={
 						gipPrefillData ? (
 							<PrefillSource
