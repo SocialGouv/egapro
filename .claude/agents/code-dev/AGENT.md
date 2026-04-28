@@ -71,6 +71,14 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - Polling : `gh pr checks <PR> --watch` (ou `gh run list --branch <branch>`)
    - Si un check est rouge : `gh run view <run-id> --log-failed`, identifier la cause, corriger, push, reboucler
    - Ne jamais marquer la PR `ready` tant qu'un check CI est rouge
+   - **Attendre que TOUTES les checks aient une conclusion**, pas juste la majorité. Certains checks lents (notamment `Deploy on Kubernetes 🐳 / 🐳 Deploy Review on Kubernetes`) se lancent ou se terminent **après** Build / Lint / Tests. Sortir de 9b dès que les checks "core" sont verts laisse une fenêtre où un check Deploy peut basculer en FAILURE alors que tu as déjà retourné `validated` — observé sur PR #3334.
+
+   Critère de sortie de 9b (à valider explicitement avant de passer à 9c) :
+   ```bash
+   gh pr view <PR> --json statusCheckRollup --jq \
+     '[.statusCheckRollup[]? | select(.name) | .conclusion] | (length > 0) and (all(. == "SUCCESS" or . == "SKIPPED" or . == "NEUTRAL"))'
+   ```
+   Doit retourner `true`. Toute conclusion `FAILURE`, `CANCELLED`, `TIMED_OUT`, `ACTION_REQUIRED`, ou conclusion vide (check encore en cours) → on attend / on corrige.
 
    **9c. SonarCloud** — le bot `sonarcloud[bot]` commente sur la PR avec un lien dashboard :
    - Si `Quality Gate: Failed` → ouvrir le dashboard via `mcp__playwright__browser_navigate`, lire les issues (bugs, code smells, duplications, coverage), corriger, push
@@ -113,6 +121,7 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
 10. **Fin** — quand 9a + 9b + 9c + 9d sont **tous verts / résolus** :
    - `gh pr ready <PR>` (sort la PR du draft)
+   - **Re-poll les checks après `gh pr ready`** : marquer la PR `ready` peut re-déclencher certains workflows (Deploy review notamment, qui n'a pas de `pull_request: types: [opened, synchronize]` strict). Attendre encore une fois que **toutes** les conclusions soient SUCCESS / SKIPPED / NEUTRAL — même critère qu'en 9b. Si un check repasse en FAILURE après `pr ready`, retourner en 9b (corriger, push, watch). Ne **jamais** retourner `validated` avec un check rouge — observé sur PR #3334 où Deploy a basculé FAILURE après pr ready.
    - Logger `PR_READY` avec le numéro de PR
    - Status ticket → **In review** via `bash scripts/orchestration/set_ticket_status.sh <N> "In review"`
    - Logger `COMPLETE`
