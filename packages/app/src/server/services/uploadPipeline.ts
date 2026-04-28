@@ -6,6 +6,7 @@ import { MAX_CSE_FILES } from "~/modules/cseOpinion/types";
 import {
 	ALLOWED_UPLOAD_MIME_TYPES,
 	type FlowType,
+	UPLOAD_REQUEST_TIMEOUT_MS,
 } from "~/modules/shared/uploadConfig";
 import { db } from "~/server/db";
 import { declarations, files } from "~/server/db/schema";
@@ -50,6 +51,12 @@ export type UploadPipelineInput = {
 	contentType: string;
 	stream: ReadableStream<Uint8Array>;
 	flowType: FlowType;
+	/**
+	 * Abort signal from the HTTP request. Combined with a pipeline-level
+	 * timeout and forwarded to clamd + S3 so a client disconnect or hung
+	 * socket aborts the whole stream instead of tying up the request.
+	 */
+	signal?: AbortSignal;
 };
 
 /**
@@ -101,12 +108,15 @@ export async function runUploadPipeline(
 		}
 	}
 
+	const pipelineSignal = combineSignals(input.signal);
+
 	const streamResult = await handleStreamingUpload(input.stream, {
 		siren: input.siren,
 		year: input.year,
 		fileName: input.fileName,
 		contentType: input.contentType,
 		allowedMimeTypes: ALLOWED_UPLOAD_MIME_TYPES,
+		signal: pipelineSignal,
 	});
 
 	if (!streamResult.ok) {
@@ -283,4 +293,15 @@ export class MaxFilesReachedError extends Error {
 	constructor() {
 		super("Max files reached (race condition)");
 	}
+}
+
+/**
+ * Combine the incoming request signal with a pipeline-level timeout. Either
+ * one firing aborts the clamd + S3 streams. Requires Node 20+ (native
+ * AbortSignal.any + AbortSignal.timeout).
+ */
+function combineSignals(requestSignal: AbortSignal | undefined): AbortSignal {
+	const timeoutSignal = AbortSignal.timeout(UPLOAD_REQUEST_TIMEOUT_MS);
+	if (!requestSignal) return timeoutSignal;
+	return AbortSignal.any([requestSignal, timeoutSignal]);
 }

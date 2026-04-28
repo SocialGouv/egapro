@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { useSearchParams } from "next/navigation";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", async () => {
@@ -28,7 +29,7 @@ import { PublicReferentsPage } from "../PublicReferentsPage";
 describe("PublicReferentsPage", () => {
 	it("renders title and intro paragraph", () => {
 		useQueryMock.mockReturnValue({
-			data: { rows: [], total: 0, page: 1, pageSize: 20, totalPages: 1 },
+			data: undefined,
 			isLoading: false,
 			isError: false,
 		});
@@ -44,7 +45,7 @@ describe("PublicReferentsPage", () => {
 
 	it("renders the search form", () => {
 		useQueryMock.mockReturnValue({
-			data: { rows: [], total: 0, page: 1, pageSize: 20, totalPages: 1 },
+			data: undefined,
 			isLoading: false,
 			isError: false,
 		});
@@ -54,7 +55,48 @@ describe("PublicReferentsPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("shows empty state when no results", () => {
+	it("does not call the search API when no filter is set", () => {
+		useQueryMock.mockClear();
+		useQueryMock.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isError: false,
+		});
+		render(<PublicReferentsPage />);
+		expect(useQueryMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ enabled: false }),
+		);
+		expect(
+			screen.getByText(/sélectionnez au moins un filtre/i),
+		).toBeInTheDocument();
+	});
+
+	it("enables the search API when at least one filter is set", async () => {
+		vi.mocked(useSearchParams).mockReturnValueOnce(
+			new URLSearchParams({ region: "93" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
+		useQueryMock.mockClear();
+		useQueryMock.mockReturnValue({
+			data: { rows: [], total: 0, page: 1, pageSize: 20, totalPages: 1 },
+			isLoading: false,
+			isError: false,
+		});
+		render(<PublicReferentsPage />);
+		expect(useQueryMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ enabled: true }),
+		);
+	});
+
+	it("shows empty state when filter yields no results", () => {
+		vi.mocked(useSearchParams).mockReturnValueOnce(
+			new URLSearchParams({ region: "93" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
 		useQueryMock.mockReturnValue({
 			data: { rows: [], total: 0, page: 1, pageSize: 20, totalPages: 1 },
 			isLoading: false,
@@ -65,6 +107,11 @@ describe("PublicReferentsPage", () => {
 	});
 
 	it("renders a list of referents when data is returned", () => {
+		vi.mocked(useSearchParams).mockReturnValueOnce(
+			new URLSearchParams({ region: "11" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
 		useQueryMock.mockReturnValue({
 			data: {
 				rows: [
@@ -90,6 +137,11 @@ describe("PublicReferentsPage", () => {
 	});
 
 	it("renders the error alert when the query fails", () => {
+		vi.mocked(useSearchParams).mockReturnValueOnce(
+			new URLSearchParams({ region: "11" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
 		useQueryMock.mockReturnValue({
 			data: undefined,
 			isLoading: false,
@@ -100,6 +152,11 @@ describe("PublicReferentsPage", () => {
 	});
 
 	it("shows a loading state when data is not yet available", () => {
+		vi.mocked(useSearchParams).mockReturnValueOnce(
+			new URLSearchParams({ region: "11" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
 		useQueryMock.mockReturnValue({
 			data: undefined,
 			isLoading: true,
@@ -110,6 +167,11 @@ describe("PublicReferentsPage", () => {
 	});
 
 	it("renders pagination when there is more than one page", () => {
+		vi.mocked(useSearchParams).mockReturnValueOnce(
+			new URLSearchParams({ region: "11" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
 		useQueryMock.mockReturnValue({
 			data: { rows: [], total: 50, page: 1, pageSize: 20, totalPages: 3 },
 			isLoading: false,
@@ -122,6 +184,11 @@ describe("PublicReferentsPage", () => {
 	});
 
 	it("does not render pagination when there is only one page", () => {
+		vi.mocked(useSearchParams).mockReturnValueOnce(
+			new URLSearchParams({ region: "11" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
 		useQueryMock.mockReturnValue({
 			data: { rows: [], total: 5, page: 1, pageSize: 20, totalPages: 1 },
 			isLoading: false,

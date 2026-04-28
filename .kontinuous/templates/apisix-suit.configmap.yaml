@@ -1,0 +1,183 @@
+# ConfigMap for the APISIX standalone gateway (see apisix-suit.yaml for the
+# Deployment and Service). Split into its own file so the Deployment can hash
+# it via `checksum/config` without introducing a self-include recursion.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apisix-suit-config
+  namespace: {{ .Values.global.namespace }}
+data:
+  config.yaml: |
+    apisix:
+      node_listen: 9080
+      enable_admin: false
+      enable_ipv6: false
+    deployment:
+      # Standalone YAML mode = role `data_plane` (no etcd). `traditional`
+      # requires an etcd config center and rejects `config_provider: yaml`.
+      role: data_plane
+      role_data_plane:
+        config_provider: yaml
+    nginx_config:
+      # Whitelist env vars that Lua code (serverless-pre-function below) can
+      # read via `os.getenv()`. Without this, nginx hides env vars from worker
+      # processes and `os.getenv` returns nil. The APISIX secret manager
+      # (`$ENV://…`) does NOT need this — it resolves at config load time via
+      # its own channel — but it only integrates with specific plugins
+      # (key-auth.key, basic-auth.password, …), not with proxy-rewrite.
+      envs:
+        - EGAPRO_GATEWAY_SHARED_SECRET
+    # Prometheus metrics scraping (see "prometheus" plugin below).
+    plugin_attr:
+      prometheus:
+        export_addr:
+          ip: "0.0.0.0"
+          port: 9091
+  apisix.yaml: |
+    # APISIX reads secrets from env vars via `$ENV://<name>` — both are
+    # populated on the pod via envFrom pointing at the `suit` sealed-secret.
+    consumers:
+      - username: suit
+        plugins:
+          key-auth:
+            key: "$ENV://EGAPRO_SUIT_API_KEY"
+    # Shared plugin bundle applied to all three SUIT routes. Each request:
+    #   1. Is normalized in Lua (serverless-pre-function):
+    #        a. `Authorization: Bearer <key>` → `apikey: <key>` so the native
+    #           `key-auth` plugin (which only looks at `apikey` by default)
+    #           can validate it. We keep the Bearer contract on the wire
+    #           because the SUIT doc commits to it.
+    #        b. `X-Gateway-Forwarded: <shared-secret>` is injected from
+    #           `os.getenv(...)` rather than `proxy-rewrite` because the
+    #           APISIX secret manager (`$ENV://…`) does NOT resolve inside
+    #           `proxy-rewrite.headers.set.*` — the string is treated as a
+    #           literal, and the app middleware would see the raw
+    #           `"$ENV://…"` value and return 403.
+    #   2. Is authenticated against the `suit` consumer (`key-auth`).
+    #   3. Is rate-limited per real client IP (`limit-req`).
+    #   4. Is counted in Prometheus metrics (`prometheus`).
+    plugin_configs:
+      - id: suit-api
+        plugins:
+          # Runs in the `rewrite` phase at priority 10000 (vs key-auth at
+          # 2500), so the headers it sets are visible to key-auth and to the
+          # upstream (app pod).
+          serverless-pre-function:
+            phase: rewrite
+            functions:
+              - |
+                return function(conf, ctx)
+                  local core = require("apisix.core")
+                  local auth = core.request.header(ctx, "authorization")
+                  if auth and auth:sub(1, 7):lower() == "bearer " then
+                    core.request.set_header(ctx, "apikey", auth:sub(8))
+                  end
+                  local secret = os.getenv("EGAPRO_GATEWAY_SHARED_SECRET")
+                  if secret and secret ~= "" then
+                    core.request.set_header(ctx, "x-gateway-forwarded", secret)
+                  end
+                end
+          key-auth: {}
+          # Rate-limit per real client IP. APISIX sits behind the Ingress
+          # controller, so `$remote_addr` is the Ingress pod IP — a single
+          # bucket for the whole world, useless for per-caller quota.
+          # ingress-nginx injects `X-Real-IP: <client-ip>` (trusted, cannot be
+          # spoofed because it overrides the client-supplied header), so we
+          # key on it. For the edge case of a request arriving without XRI
+          # (direct cluster-internal call), APISIX substitutes an empty value
+          # into the key — everyone without XRI shares one bucket, which is
+          # fine since the middleware rejects those requests anyway (no
+          # `X-Gateway-Forwarded` means they never even reach here).
+          limit-req:
+            rate: 10
+            burst: 5
+            key_type: var
+            key: http_x_real_ip
+            rejected_code: 429
+          prometheus: {}
+      # Public docs bundle (Swagger UI + OpenAPI JSON + Swagger static assets).
+      # No `key-auth` — anyone can read the schema. Still injects
+      # `X-Gateway-Forwarded` so the Next.js middleware (which matches on
+      # `/api/v1/*`) lets the request through. Rate-limited per IP to prevent
+      # abuse.
+      - id: suit-docs
+        plugins:
+          serverless-pre-function:
+            phase: rewrite
+            functions:
+              - |
+                return function(conf, ctx)
+                  local core = require("apisix.core")
+                  local secret = os.getenv("EGAPRO_GATEWAY_SHARED_SECRET")
+                  if secret and secret ~= "" then
+                    core.request.set_header(ctx, "x-gateway-forwarded", secret)
+                  end
+                end
+          limit-req:
+            rate: 5
+            burst: 5
+            key_type: var
+            key: http_x_real_ip
+            rejected_code: 429
+          prometheus: {}
+    # Routes:
+    #   - 3 SUIT API endpoints (Bearer-auth via `suit-api`)
+    #   - 2 docs endpoints + 1 static asset prefix (public via `suit-docs`)
+    routes:
+      - id: suit-export-declarations
+        uri: /api/v1/export/declarations
+        methods: [GET]
+        plugin_config_id: suit-api
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:80": 1
+      - id: suit-files-list
+        uri: /api/v1/files
+        methods: [GET]
+        plugin_config_id: suit-api
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:80": 1
+      - id: suit-files-download
+        uri: /api/v1/files/*
+        methods: [GET]
+        plugin_config_id: suit-api
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:80": 1
+      # Swagger UI HTML page. The app returns 404 on this route when
+      # `NEXT_PUBLIC_EGAPRO_ENV === "prod"`, so production keeps the docs
+      # hidden automatically — no conditional wiring needed here.
+      - id: suit-docs-ui
+        uri: /api/v1/docs
+        methods: [GET]
+        plugin_config_id: suit-docs
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:80": 1
+      # Raw OpenAPI schema loaded by the Swagger UI HTML.
+      - id: suit-openapi-json
+        uri: /api/v1/openapi.json
+        methods: [GET]
+        plugin_config_id: suit-docs
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:80": 1
+      # Swagger UI static assets (CSS + JS bundles served from the app's
+      # `public/swagger-ui/` directory). Required because the HTML references
+      # them with absolute paths — when Swagger is loaded from `api-suit.*`,
+      # the browser fetches the assets from that same host.
+      - id: suit-swagger-assets
+        uri: /swagger-ui/*
+        methods: [GET]
+        plugin_config_id: suit-docs
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:80": 1
+    #END

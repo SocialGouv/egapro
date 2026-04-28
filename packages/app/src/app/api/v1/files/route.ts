@@ -8,15 +8,15 @@ import {
 	fetchJointEvaluationFilesByDeclaration,
 } from "~/modules/export";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
-import { verifySuitAuth } from "~/server/services/suitApiAuth";
+import { assertGatewaySource } from "~/server/services/gatewaySource";
 
 /**
  * GET /api/v1/files?siren=123456789&year=2027
  *
- * Secured REST API returning file metadata for CSE opinions and joint evaluations.
- * Requires:
- * 1. A valid request signature (RSA-SHA256, verified via X-Signature + X-Timestamp headers)
- * 2. A valid SUIT API key in the Authorization: Bearer header
+ * Secured REST API returning file metadata for CSE opinions and joint
+ * evaluations. Authentication is handled at the edge by the APISIX
+ * gateway; the handler only enforces that the request transited through
+ * APISIX via the `X-Gateway-Forwarded` header.
  */
 export const GET = withAuditedRoute(
 	{
@@ -39,8 +39,8 @@ export const GET = withAuditedRoute(
 );
 
 async function apiFilesHandler(request: Request): Promise<Response> {
-	const authError = verifySuitAuth(request);
-	if (authError) return authError;
+	const gatewayError = assertGatewaySource(request);
+	if (gatewayError) return gatewayError;
 
 	try {
 		const url = new URL(request.url);
@@ -79,7 +79,10 @@ async function apiFilesHandler(request: Request): Promise<Response> {
 			files: [...cseFiles, ...jointFiles],
 		});
 	} catch (error) {
-		console.error("[api/v1/files]", error);
+		console.error(
+			"[api/v1/files]",
+			error instanceof Error ? error.message : "unknown error",
+		);
 		return Response.json(
 			{ error: "Erreur lors de la récupération des fichiers" },
 			{ status: 500 },

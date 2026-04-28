@@ -18,6 +18,7 @@ import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
+import { padDecimalOnBlur, padDecimalToTwo } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./CategoryDataTable";
@@ -48,14 +49,14 @@ function toFormValues(cats: EmployeeCategory[]) {
 		detail: c.detail,
 		womenCount: c.womenCount,
 		menCount: c.menCount,
-		annualBaseWomen: c.annualBaseWomen,
-		annualBaseMen: c.annualBaseMen,
-		annualVariableWomen: c.annualVariableWomen,
-		annualVariableMen: c.annualVariableMen,
-		hourlyBaseWomen: c.hourlyBaseWomen,
-		hourlyBaseMen: c.hourlyBaseMen,
-		hourlyVariableWomen: c.hourlyVariableWomen,
-		hourlyVariableMen: c.hourlyVariableMen,
+		annualBaseWomen: padDecimalToTwo(c.annualBaseWomen),
+		annualBaseMen: padDecimalToTwo(c.annualBaseMen),
+		annualVariableWomen: padDecimalToTwo(c.annualVariableWomen),
+		annualVariableMen: padDecimalToTwo(c.annualVariableMen),
+		hourlyBaseWomen: padDecimalToTwo(c.hourlyBaseWomen),
+		hourlyBaseMen: padDecimalToTwo(c.hourlyBaseMen),
+		hourlyVariableWomen: padDecimalToTwo(c.hourlyVariableWomen),
+		hourlyVariableMen: padDecimalToTwo(c.hourlyVariableMen),
 	}));
 }
 
@@ -153,6 +154,19 @@ export function CategoryForm({
 			if (Number.isNaN(n) || n < 0) return;
 			form.setValue(`categories.${index}.${formField}`, raw);
 			setSaved(false);
+		};
+	}
+
+	function handleDecimalBlur(index: number, field: keyof EmployeeCategory) {
+		return () => {
+			const formField = field as Exclude<keyof EmployeeCategory, "id">;
+			padDecimalOnBlur(
+				form.getValues(`categories.${index}.${formField}`),
+				(padded) => {
+					form.setValue(`categories.${index}.${formField}`, padded);
+					setSaved(false);
+				},
+			);
 		};
 	}
 
@@ -453,6 +467,7 @@ export function CategoryForm({
 										}
 										categoryIndex={index}
 										disabled={disabled}
+										onDecimalBlur={handleDecimalBlur}
 										onPositiveNumberChange={handlePositiveNumberChange}
 									/>
 								</div>

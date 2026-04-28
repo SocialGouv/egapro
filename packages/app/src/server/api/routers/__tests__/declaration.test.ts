@@ -268,6 +268,27 @@ describe("declarationRouter", () => {
 			);
 		});
 
+		it("keeps the existing submittedAt when one is already present", async () => {
+			const firstSubmission = new Date("2024-01-15T09:00:00Z");
+			const mockDb = createMockDb([{ submittedAt: firstSubmission }]);
+			const caller = await createCaller(mockDb);
+
+			await caller.submit();
+
+			const call = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(call.submittedAt).toBe(firstSubmission);
+		});
+
+		it("stamps submittedAt with now when the row has never been submitted", async () => {
+			const mockDb = createMockDb([{ submittedAt: null }]);
+			const caller = await createCaller(mockDb);
+
+			await caller.submit();
+
+			const call = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(call.submittedAt).toBeInstanceOf(Date);
+		});
+
 		it("throws when siret is missing", async () => {
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb, null as never);
