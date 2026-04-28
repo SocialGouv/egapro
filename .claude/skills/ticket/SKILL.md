@@ -5,7 +5,7 @@ description: "Conception pipeline: PO → designer → architect. Usage: /ticket
 
 # /ticket
 
-Orchestre la phase conception. Trois agents Opus se succèdent et posent chacun un checkpoint `[Validation utilisateur]` sur l'epic avant de passer au suivant :
+Orchestre la phase conception. Trois agents Opus se succèdent. **Chaque agent gère lui-même un gate de validation utilisateur explicite avant de poster sur GitHub** — l'orchestrateur (toi qui exécutes ce skill) chaîne simplement les agents et ne ré-interroge pas l'utilisateur entre eux.
 
 1. **`product-owner`** — refine le besoin, rédige les scénarios PO
 2. **`designer`** — propose un flow d'écrans + mockups HTML DSFR statiques
@@ -23,7 +23,7 @@ Orchestre la phase conception. Trois agents Opus se succèdent et posent chacun 
 
 Déléguer à l'agent `product-owner` (`.claude/agents/product-owner/AGENT.md`).
 
-L'agent gère lui-même le Q&A fonctionnel et la validation utilisateur. Il retourne le numéro d'epic + la liste des scénarios.
+L'agent gère son Q&A fonctionnel, rédige le draft (body + 2 commentaires `## Besoin métier` et `## Analyse PO`), **obtient explicitement la validation utilisateur**, puis poste sur GitHub. Il retourne le numéro d'epic + la liste des scénarios.
 
 **Attendre** le commentaire `[Validation utilisateur] Epic validé` sur l'epic avant de passer à la suite.
 
@@ -33,7 +33,7 @@ L'agent gère lui-même le Q&A fonctionnel et la validation utilisateur. Il reto
 
 Déléguer à l'agent `designer` (`.claude/agents/designer/AGENT.md`). Passer : epic issue number + URL Figma.
 
-L'agent produit HTML + screenshots dans `/tmp/egapro-mocks/epic-<NNN>/` (jamais commités) et valide avec l'utilisateur.
+L'agent produit HTML + screenshots dans `/tmp/egapro-mocks/epic-<NNN>/` (jamais commités), **obtient explicitement la validation utilisateur sur le flow et les mockups**, uploade les PNG sur `design-assets/epic-<NNN>` et poste un commentaire avec images inline.
 
 **Attendre** le commentaire `[Validation utilisateur] Design validé` avant de passer à la suite.
 
@@ -43,7 +43,7 @@ L'agent produit HTML + screenshots dans `/tmp/egapro-mocks/epic-<NNN>/` (jamais 
 
 Déléguer à l'agent `architect` (`.claude/agents/architect/AGENT.md`). Passer : epic issue number.
 
-L'agent lit le code, produit N sous-issues respectant `rules/ticket-spec-format.md`, applique le label `complexe` quand nécessaire, ordonne les dépendances via Parent issue / Sub-issues.
+L'agent lit le code, **obtient explicitement la validation utilisateur sur le découpage proposé**, produit N sous-issues respectant `rules/ticket-spec-format.md`, applique le label `complexe` quand nécessaire, ordonne les dépendances via Parent issue / Sub-issues.
 
 **Attendre** le commentaire `[Validation utilisateur] Architecture validée`.
 

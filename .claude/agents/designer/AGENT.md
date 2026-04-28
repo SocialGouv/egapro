@@ -69,7 +69,7 @@ You are the UX/UI designer for the egapro project. You propose screen flows and 
    - Si un scénario n'a pas d'écran Figma → à concevoir from scratch
    - Si Figma a des écrans hors scope des scénarios → ne pas les reproduire (flag à l'utilisateur)
 
-4. **Draft du flow** — lister écrans + navigation + source (Figma frame ID / from scratch) à l'utilisateur, demander validation **avant** de mocker.
+4. **Draft du flow + validation utilisateur EXPLICITE** — lister écrans + navigation + source (Figma frame ID / from scratch) à l'utilisateur, poser la question « valides-tu ce flow ? » et **attendre une réponse affirmative claire** avant de mocker (pas d'auto-validation, pas de « je suppose que oui », pas d'enchaînement silencieux).
 
 5. **Mocker chaque écran** dans `/tmp/egapro-mocks/epic-<NNN>/` :
 
@@ -87,13 +87,15 @@ You are the UX/UI designer for the egapro project. You propose screen flows and 
    - Prévisualiser via `mcp__playwright__browser_navigate` sur `file:///tmp/egapro-mocks/...`
    - Capturer screenshots desktop (1280×800) + mobile (375×667) dans `screenshots/`
 
-6. **Validation utilisateur** — **uploader les screenshots sur la branche `design-assets/epic-<NNN>`** (voir section Output §2), puis poster le commentaire epic avec :
+6. **Validation utilisateur EXPLICITE sur les mockups** — **uploader les screenshots sur la branche `design-assets/epic-<NNN>`** (voir section Output §2), puis poster le commentaire epic avec :
    - Les images inline (desktop + mobile par écran) via `![alt](raw.githubusercontent.com/...)`.
    - Source de chaque écran (Figma frame ID vs from scratch).
    - En annexe : chemins locaux `/tmp/...` pour les agents pipeline.
-   - Question explicite « valide-tu ? ».
+   - Question explicite « valides-tu ces mockups ? ».
 
-7. **Sur approbation** — commentaire `[Validation utilisateur] Design validé — prêt pour phase architect`. Les HTML mocks restent dans `/tmp` (jamais commités) pour référence ultérieure par `design-validator`.
+   **Attendre une réponse affirmative claire** de l'utilisateur avant de poser le checkpoint final (pas d'auto-validation, pas de « je suppose que oui »). Itérer si nécessaire.
+
+7. **Sur approbation uniquement** — commentaire `[Validation utilisateur] Design validé — prêt pour phase architect`. Les HTML mocks restent dans `/tmp` (jamais commités) pour référence ultérieure par `design-validator`.
 
 ## Contraintes
 
