@@ -169,19 +169,14 @@ Format de retour OBLIGATOIRE — un seul de :
 Ton dernier message DOIT être uniquement ce JSON (rien d'autre, pas de prose)."
 
     # Start the claude CLI from inside the worktree, NOT the main repo.
-    # If the sub-agent forgets to `cd` and runs git/gh commands directly, those
-    # land in the worktree where they belong (creating ticket/<N> branch in
-    # the worktree's HEAD) instead of polluting the main repo. Observed in
-    # the first live run on epic #3308: sub-agent for #3313 ran `git checkout
-    # -b ticket/3313-...` from the cwd of its claude CLI, which used to be
-    # REPO_ROOT — main repo silently switched branch.
+    # If the sub-agent forgets to `cd` and runs git/gh commands directly,
+    # those land in the worktree where they belong (creating ticket/<N>
+    # branch in the worktree's HEAD) instead of polluting the main repo.
     cd "$WT_PATH"
     # NOTE: --dangerously-skip-permissions, NOT --allow-dangerously-skip-permissions.
-    # The latter only makes the flag *available* for an interactive session; in
-    # --print mode it has no effect, so the sub-agent hits unresolved permission
-    # prompts on every gh / bash / pnpm call and aborts. This was the cause of
-    # the 'I cannot complete the code-dev workflow ... permission hasn't been
-    # granted' failures observed on the second epic #3308 run.
+    # The latter only makes the flag *available* for an interactive session;
+    # in --print mode it has no effect, so the sub-agent hits unresolved
+    # permission prompts on every gh / bash / pnpm call and aborts.
     timeout "$AGENT_TIMEOUT" claude \
         --agent "$AGENT" \
         --model "$MODEL" \
@@ -216,9 +211,8 @@ while [ $TICK -lt $MAX_TICKS ]; do
         # Are there any non-terminal tickets left?
         # 'In review' is the AI's terminus (cf. code-dev/AGENT.md): the human
         # then merges the PR and moves the ticket to 'Done'. The loop driver
-        # must NOT wait for that human action — it would burn MAX_TICKS in
-        # WAITs for nothing (observed on epic #3308: 30 ticks of WAIT after
-        # all sub-agents validated).
+        # must NOT wait for that human action — otherwise it would burn
+        # MAX_TICKS in WAITs for nothing once all sub-agents have validated.
         NON_DONE=$(bash "$SCRIPT_DIR/epic_state.sh" $EPICS 2>/dev/null | grep -cE '\| (Todo|To Do|In progress) ' || true)
         if [ "${NON_DONE:-0}" -eq 0 ]; then
             break  # all terminal (In review or Done), exit loop with success
@@ -238,7 +232,7 @@ while [ $TICK -lt $MAX_TICKS ]; do
     # the loop body breaks subtly: the backgrounded sub-shell inherits the
     # process substitution's pipe FD, and the main shell's subsequent
     # `read entry` for the next line starves out — only the first plan
-    # entry gets dispatched per tick (observed on epic #3308).
+    # entry would be dispatched per tick.
     declare -A AGENT_FILES=()
     PIDS=()
     PLAN_ENTRIES=()

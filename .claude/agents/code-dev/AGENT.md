@@ -71,7 +71,7 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - Polling : `gh pr checks <PR> --watch` (ou `gh run list --branch <branch>`)
    - Si un check est rouge : `gh run view <run-id> --log-failed`, identifier la cause, corriger, push, reboucler
    - Ne jamais marquer la PR `ready` tant qu'un check CI est rouge
-   - **Attendre que TOUTES les checks aient une conclusion**, pas juste la majorité. Certains checks lents (notamment `Deploy on Kubernetes 🐳 / 🐳 Deploy Review on Kubernetes`) se lancent ou se terminent **après** Build / Lint / Tests. Sortir de 9b dès que les checks "core" sont verts laisse une fenêtre où un check Deploy peut basculer en FAILURE alors que tu as déjà retourné `validated` — observé sur PR #3334.
+   - **Attendre que TOUTES les checks aient une conclusion**, pas juste la majorité. Certains checks lents (notamment `Deploy on Kubernetes 🐳 / 🐳 Deploy Review on Kubernetes`) se lancent ou se terminent **après** Build / Lint / Tests. Sortir de 9b dès que les checks "core" sont verts laisse une fenêtre où un check Deploy peut basculer en FAILURE alors que tu as déjà retourné `validated`.
 
    Critère de sortie de 9b (à valider explicitement avant de passer à 9c) :
    ```bash
@@ -89,9 +89,9 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
    ### 9d.1 — Wait borné pour les reviews bot
 
-   Les bots de review (notamment `revu-bot`) postent leurs commentaires avec un délai de **plusieurs minutes après que la CI soit verte** (~9 min observés sur PR #3335 ; peut-être plus selon la charge GH Actions et la taille du diff). Si tu fais 9d immédiatement après 9c, tu as 0 review et tu sors en `validated` — puis le bot poste, et ses commentaires ne sont jamais traités.
+   Les bots de review (notamment `revu-bot`) postent leurs commentaires avec un délai de **plusieurs minutes après que la CI soit verte** — typiquement 5 à 10 min, parfois plus selon la charge GitHub Actions et la taille du diff. Si tu fais 9d immédiatement après 9c, tu as 0 review et tu sors en `validated` — puis le bot poste, et ses commentaires ne sont jamais traités.
 
-   Avant de lire les comments, attends **au moins une fois** qu'au moins un review/comment soit posté **après le dernier push**. Avec un timeout de **15 min** (laisse ~6 min de marge au-delà du pire cas observé, sans rogner trop sur le timeout global de 90 min du sub-agent) :
+   Avant de lire les comments, attends **au moins une fois** qu'au moins un review/comment soit posté **après le dernier push**. Timeout : **15 min** (couvre le pire cas avec marge, sans rogner trop sur le timeout global de 90 min du sub-agent) :
 
    ```bash
    PR=<PR_NUMBER>
@@ -152,7 +152,7 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
 10. **Fin** — quand 9a + 9b + 9c + 9d sont **tous verts / résolus** :
    - `gh pr ready <PR>` (sort la PR du draft)
-   - **Re-poll les checks après `gh pr ready`** : marquer la PR `ready` peut re-déclencher certains workflows (Deploy review notamment, qui n'a pas de `pull_request: types: [opened, synchronize]` strict). Attendre encore une fois que **toutes** les conclusions soient SUCCESS / SKIPPED / NEUTRAL — même critère qu'en 9b. Si un check repasse en FAILURE après `pr ready`, retourner en 9b (corriger, push, watch). Ne **jamais** retourner `validated` avec un check rouge — observé sur PR #3334 où Deploy a basculé FAILURE après pr ready.
+   - **Re-poll les checks après `gh pr ready`** : marquer la PR `ready` peut re-déclencher certains workflows (Deploy review notamment, qui n'a pas de `pull_request: types: [opened, synchronize]` strict). Attendre encore une fois que **toutes** les conclusions soient SUCCESS / SKIPPED / NEUTRAL — même critère qu'en 9b. Si un check repasse en FAILURE après `pr ready`, retourner en 9b (corriger, push, watch). Ne **jamais** retourner `validated` avec un check rouge.
    - Logger `PR_READY` avec le numéro de PR
    - Status ticket → **In review** via `bash scripts/orchestration/set_ticket_status.sh <N> "In review"`
    - Logger `COMPLETE`
