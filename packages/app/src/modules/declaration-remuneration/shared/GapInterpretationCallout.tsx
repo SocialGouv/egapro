@@ -237,7 +237,7 @@ export function GapInterpretationCallout({
 		: "fr-callout--blue-ecume";
 
 	return (
-		<div className={`fr-callout fr-mt-4w ${accentClass} ${styles.callout}`}>
+		<div className={`fr-callout ${accentClass} ${styles.callout}`}>
 			<p className="fr-callout__text fr-mb-2w">
 				<strong>{title}&nbsp;:</strong> {body}
 			</p>

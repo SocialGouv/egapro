@@ -218,6 +218,12 @@ export function Step3VariablePay({
 										<caption>
 											Bénéficiaires de composantes variables ou complémentaires
 										</caption>
+										<colgroup>
+											<col className={stepStyles.colSex} />
+											<col className={stepStyles.colCount} />
+											<col className={stepStyles.colCount} />
+											<col />
+										</colgroup>
 										<thead>
 											<tr>
 												<th scope="col">Sexe</th>
@@ -240,7 +246,7 @@ export function Step3VariablePay({
 												<td>
 													<strong>Femmes</strong>
 												</td>
-												<td>
+												<td className="fr-cell--right">
 													<strong>{maxWomen ?? "-"}</strong>
 												</td>
 												<td>
@@ -261,7 +267,7 @@ export function Step3VariablePay({
 														value={beneficiaryWomen}
 													/>
 												</td>
-												<td>
+												<td className="fr-cell--right">
 													<strong>
 														{computeProportion(beneficiaryWomen, maxWomen)}
 													</strong>
@@ -271,7 +277,7 @@ export function Step3VariablePay({
 												<td>
 													<strong>Hommes</strong>
 												</td>
-												<td>
+												<td className="fr-cell--right">
 													<strong>{maxMen ?? "-"}</strong>
 												</td>
 												<td>
@@ -292,7 +298,7 @@ export function Step3VariablePay({
 														value={beneficiaryMen}
 													/>
 												</td>
-												<td>
+												<td className="fr-cell--right">
 													<strong>
 														{computeProportion(beneficiaryMen, maxMen)}
 													</strong>
