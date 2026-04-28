@@ -18,12 +18,12 @@ export function HomeSearch() {
 						</p>
 						<ul>
 							<li>
-								les <strong>indicateurs de rémunération</strong> femmes-hommes
-								pour l&apos;ensemble des salariés
+								les <strong>indicateurs de rémunération</strong>
+								{" femmes-hommes pour l'ensemble des salariés"}
 							</li>
 							<li>
-								les <strong>indicateurs de représentation</strong> femmes-hommes
-								au sein des postes de direction
+								les <strong>indicateurs de représentation</strong>
+								{" femmes-hommes au sein des postes de direction"}
 							</li>
 						</ul>
 					</div>
