@@ -36,6 +36,9 @@ jobs:
       - name: Generate schema documentation
         run: npx db-schema-toolkit export packages/app/src/server/db/schema.ts -f markdown -o schema-doc.md
 
+      - name: Post-process schema doc with SUIT/GIP-MDS comments
+        run: packages/app/node_modules/.bin/tsx packages/app/scripts/post-process-schema-wiki.ts
+
       - name: Publish to GitHub Wiki
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
