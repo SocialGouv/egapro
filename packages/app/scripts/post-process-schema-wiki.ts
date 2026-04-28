@@ -23,7 +23,10 @@ if (!existsSync(SCHEMA_DOC_PATH)) {
 
 /** Convert camelCase to snake_case for comment map lookup. */
 function toSnakeCase(str: string): string {
-	return str.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
+	return str
+		.replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
+		.replace(/([a-z])([A-Z])/g, "$1_$2")
+		.toLowerCase();
 }
 
 const lines = readFileSync(SCHEMA_DOC_PATH, "utf8").split("\n");
@@ -33,13 +36,25 @@ let currentTable: string | null = null;
 let inTable = false;
 let headerProcessed = false;
 let totalInjected = 0;
-const warnedTables = new Set<string>();
+const seenTables = new Set<string>();
 
 for (const line of lines) {
-	// db-schema-toolkit produces headers like: ## Table: declaration
-	const headerMatch = /^#{2,3}\s+(?:Table:\s+)?(\w+)/.exec(line);
+	// db-schema-toolkit produces table headers like: ## Table: declaration
+	// (followed by sub-sections like `### Indexes` and `### Foreign Keys` that
+	// must NOT be matched here, otherwise currentTable gets corrupted).
+	const headerMatch = /^##\s+Table:\s+(\w+)/.exec(line);
 	if (headerMatch) {
 		currentTable = headerMatch[1] ?? null;
+		if (currentTable) seenTables.add(currentTable);
+		inTable = false;
+		headerProcessed = false;
+		output.push(line);
+		continue;
+	}
+
+	// Reset table context when entering a sub-section (Indexes, Foreign Keys, …)
+	if (/^###\s+/.test(line)) {
+		currentTable = null;
 		inTable = false;
 		headerProcessed = false;
 		output.push(line);
@@ -84,7 +99,10 @@ for (const line of lines) {
 			totalInjected++;
 		}
 
-		const safeComment = comment.replace(/\|/g, "\\|");
+		// Pipes break the column boundary; newlines break the row.
+		const safeComment = comment.replace(/[|\r\n]/g, (ch) =>
+			ch === "|" ? "\\|" : " ",
+		);
 
 		if (headerProcessed) {
 			output.push(line.replace(/\|$/, `| ${safeComment} |`));
@@ -104,10 +122,8 @@ for (const line of lines) {
 }
 
 // Warn about map entries with no matching table in the Markdown
-const fullDoc = readFileSync(SCHEMA_DOC_PATH, "utf8");
 for (const tableName of Object.keys(SCHEMA_COLUMN_COMMENTS)) {
-	if (!fullDoc.includes(tableName) && !warnedTables.has(tableName)) {
-		warnedTables.add(tableName);
+	if (!seenTables.has(tableName)) {
 		console.warn(
 			`WARN: table "${tableName}" found in schema-comments.ts but not in schema-doc.md`,
 		);
