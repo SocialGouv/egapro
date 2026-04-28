@@ -48,7 +48,7 @@ describe("Step2PayGap dev fill", () => {
 		const menInput = screen.getByLabelText(
 			"Annuelle brute moyenne — Hommes",
 		) as HTMLInputElement;
-		expect(womenInput.value.replace(/\s/g, " ")).toBe("35 000");
-		expect(menInput.value.replace(/\s/g, " ")).toBe("38 000");
+		expect(womenInput.value.replace(/\s/g, " ")).toBe("35 000,00");
+		expect(menInput.value.replace(/\s/g, " ")).toBe("38 000,00");
 	});
 });

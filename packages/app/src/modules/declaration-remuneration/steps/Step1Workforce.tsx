@@ -166,7 +166,7 @@ export function Step1Workforce({
 												<td>
 													<input
 														aria-label="Nombre de femmes"
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={handleWomenChange}
@@ -178,7 +178,7 @@ export function Step1Workforce({
 												<td>
 													<input
 														aria-label="Nombre d'hommes"
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={handleMenChange}

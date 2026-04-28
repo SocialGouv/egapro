@@ -129,7 +129,7 @@ describe("Step4QuartileDistribution", () => {
 
 		// Check annual remuneration inputs have values
 		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
-		expect(remuInputs[0]).toHaveValue("980");
+		expect(remuInputs[0]).toHaveValue("980,00");
 
 		// Check annual women count inputs
 		const womenCountInputs = screen.getAllByLabelText(/Nombre de femmes/);
@@ -313,7 +313,7 @@ describe("Step4QuartileDistribution", () => {
 		);
 		// Check annual remuneration inputs have prefilled values
 		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
-		expect(remuInputs[0]).toHaveValue("25\u202f000");
+		expect(remuInputs[0]).toHaveValue("25\u202f000,00");
 		// Check women count inputs
 		const womenCountInputs = screen.getAllByLabelText(/Nombre de femmes/);
 		expect(womenCountInputs[0]).toHaveValue("30");
@@ -370,8 +370,8 @@ describe("Step4QuartileDistribution", () => {
 		);
 		// First 3 quartiles should be prefilled
 		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
-		expect(remuInputs[0]).toHaveValue("25\u202f000");
-		expect(remuInputs[2]).toHaveValue("40\u202f000");
+		expect(remuInputs[0]).toHaveValue("25\u202f000,00");
+		expect(remuInputs[2]).toHaveValue("40\u202f000,00");
 		// Q4 should be empty (null threshold)
 		expect(remuInputs[3]).toHaveValue("");
 	});

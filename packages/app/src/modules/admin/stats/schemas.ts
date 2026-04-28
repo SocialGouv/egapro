@@ -1,0 +1,25 @@
+import { z } from "zod";
+
+import { COMPANY_SIZE_RANGES } from "~/modules/domain";
+
+const COMPANY_SIZE_RANGE_KEYS = Object.keys(COMPANY_SIZE_RANGES) as Array<
+	keyof typeof COMPANY_SIZE_RANGES
+>;
+
+/**
+ * Input for `adminStats.getCampaignProgression`.
+ *
+ * `years`: campaign years whose cumulative submission curves must be returned.
+ * Min 1 / max 5 to keep the chart readable.
+ *
+ * `sizeRange`: optional workforce bucket to scope both the chart and the
+ * underlying aggregation (undefined = all sizes).
+ */
+export const getCampaignProgressionSchema = z.object({
+	years: z.array(z.number().int().min(2000).max(2100)).min(1).max(5),
+	sizeRange: z.enum(COMPANY_SIZE_RANGE_KEYS).optional(),
+});
+
+export type GetCampaignProgressionInput = z.infer<
+	typeof getCampaignProgressionSchema
+>;

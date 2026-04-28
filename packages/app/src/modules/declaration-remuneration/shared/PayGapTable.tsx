@@ -5,6 +5,7 @@ import {
 	formatGap,
 	gapLevel,
 	normalizeDecimalInput,
+	padDecimalOnBlur,
 } from "~/modules/domain";
 import type { PayGapField, PayGapRow } from "../types";
 import common from "./common.module.scss";
@@ -85,9 +86,14 @@ export function PayGapTable({
 												<span className={styles.inputWithUnit}>
 													<input
 														aria-label={`${row.label} — Femmes`}
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={disabled}
 														inputMode="decimal"
+														onBlur={() =>
+															padDecimalOnBlur(row.womenValue, (v) =>
+																onRowChange(i, "womenValue", v),
+															)
+														}
 														onChange={(e) =>
 															onRowChange(i, "womenValue", e.target.value)
 														}
@@ -101,9 +107,14 @@ export function PayGapTable({
 												<span className={styles.inputWithUnit}>
 													<input
 														aria-label={`${row.label} — Hommes`}
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={disabled}
 														inputMode="decimal"
+														onBlur={() =>
+															padDecimalOnBlur(row.menValue, (v) =>
+																onRowChange(i, "menValue", v),
+															)
+														}
 														onChange={(e) =>
 															onRowChange(i, "menValue", e.target.value)
 														}

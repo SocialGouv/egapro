@@ -55,8 +55,10 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	// ── admin settings mutations ──────────────────────────
 	"adminSettings.upsertCampaignDeadlines":
 		AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES,
-	"adminSettings.setActiveCampaignYear":
-		AUDIT_ACTIONS.ADMIN_SETTINGS_SET_ACTIVE_YEAR,
+
+	// ── admin stats sensitive reads ──────────────────────
+	"adminStats.getCampaignProgression":
+		AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION,
 
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,

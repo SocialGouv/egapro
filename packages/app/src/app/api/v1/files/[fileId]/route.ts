@@ -8,18 +8,19 @@ import {
 } from "~/server/audit/requestContext";
 import { auth } from "~/server/auth";
 import { streamStoredFile } from "~/server/services/fileStreaming";
-import { verifySuitAuth } from "~/server/services/suitApiAuth";
+import { isGatewayForwarded } from "~/server/services/gatewaySource";
 
 /**
  * GET /api/v1/files/:fileId
  *
  * Unified file-streaming endpoint serving three caller types:
- *  - SUIT REST API consumers (signed request + Bearer key, attachment, no SIREN scope)
+ *  - SUIT REST API consumers (via APISIX gateway, attachment, no SIREN scope)
  *  - Admin backoffice users (NextAuth session + isAdmin, attachment, no SIREN scope)
  *  - In-app authenticated users (NextAuth session, inline, SIREN-scoped)
  *
  * Caller detection:
- *  - `x-signature` header → SUIT (always signs, browsers never do)
+ *  - `X-Gateway-Forwarded` header present → SUIT (injected by APISIX's
+ *    `proxy-rewrite` plugin; validated by the Edge middleware)
  *  - otherwise → session-based (admin vs. regular decided by `isAdmin` flag)
  *
  * Each branch logs to the audit trail with its own action key.
@@ -30,13 +31,9 @@ export async function GET(
 ) {
 	const { fileId } = await params;
 
-	return isSuitCall(request)
+	return isGatewayForwarded(request)
 		? handleSuitDownload(request, fileId)
 		: handleSessionDownload(request, fileId);
-}
-
-function isSuitCall(request: Request): boolean {
-	return request.headers.has("x-signature");
 }
 
 async function handleSuitDownload(
@@ -45,18 +42,6 @@ async function handleSuitDownload(
 ): Promise<Response> {
 	const startedAt = Date.now();
 	const requestContext = buildRequestContext(request.headers);
-
-	const authError = verifySuitAuth(request);
-	if (authError) {
-		writeAuditFailure({
-			action: AUDIT_ACTIONS.EXPORT_API_FILES,
-			fileId,
-			errorMessage: `HTTP ${authError.status}`,
-			requestContext,
-			startedAt,
-		});
-		return authError;
-	}
 
 	try {
 		const file = await fetchFileById(fileId);
@@ -89,7 +74,10 @@ async function handleSuitDownload(
 
 		return response;
 	} catch (error) {
-		console.error("[api/v1/files/:fileId][suit]", error);
+		console.error(
+			"[api/v1/files/:fileId][suit]",
+			error instanceof Error ? error.message : "unknown error",
+		);
 		writeAuditFailure({
 			action: AUDIT_ACTIONS.EXPORT_API_FILES,
 			fileId,
@@ -189,7 +177,10 @@ async function handleAdminDownload(
 
 		return response;
 	} catch (error) {
-		console.error("[api/v1/files/:fileId][admin]", error);
+		console.error(
+			"[api/v1/files/:fileId][admin]",
+			error instanceof Error ? error.message : "unknown error",
+		);
 		writeAuditFailure({
 			action: AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD,
 			fileId,
@@ -251,7 +242,10 @@ async function handleUserDownload(
 
 		return response;
 	} catch (error) {
-		console.error("[api/v1/files/:fileId][session]", error);
+		console.error(
+			"[api/v1/files/:fileId][session]",
+			error instanceof Error ? error.message : "unknown error",
+		);
 		writeAuditFailure({
 			action: AUDIT_ACTIONS.USER_FILE_DOWNLOAD,
 			fileId,

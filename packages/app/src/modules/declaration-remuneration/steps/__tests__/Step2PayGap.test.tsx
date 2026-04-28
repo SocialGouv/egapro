@@ -214,7 +214,7 @@ describe("Step2PayGap", () => {
 		);
 		// GIP rows should be used — check prefilled values
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
-		expect(womenInput).toHaveValue("35\u202f000");
+		expect(womenInput).toHaveValue("35\u202f000,00");
 	});
 
 	it("shows validation error on submit when fields are incomplete", async () => {

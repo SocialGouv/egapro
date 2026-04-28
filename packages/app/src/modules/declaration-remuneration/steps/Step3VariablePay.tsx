@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
-import { computeProportion, normalizeDecimalInput } from "~/modules/domain";
+import {
+	computeProportion,
+	normalizeDecimalInput,
+	padDecimalToTwo,
+} from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep3Schema } from "../schemas";
@@ -47,11 +51,18 @@ export function Step3VariablePay({
 	const isImpersonating = useIsImpersonating();
 
 	const hasSavedData = Object.values(initialData).some((v) => v !== "");
-	const defaultValues = hasSavedData
+	const rawDefaults = hasSavedData
 		? initialData
 		: gipPrefillData
 			? gipToStep3(gipPrefillData.step3)
 			: initialData;
+	const defaultValues = Object.fromEntries(
+		Object.entries(rawDefaults).map(([k, v]) =>
+			k === "indicatorEWomen" || k === "indicatorEMen"
+				? [k, v]
+				: [k, padDecimalToTwo(v)],
+		),
+	) as Step3Data;
 
 	const hasInitialData = hasSavedData;
 
@@ -125,8 +136,8 @@ export function Step3VariablePay({
 					DEV_STEP3_ROWS.forEach((row, i) => {
 						const womenField = getStep3FieldName(i, "womenValue");
 						const menField = getStep3FieldName(i, "menValue");
-						form.setValue(womenField, row.womenValue);
-						form.setValue(menField, row.menValue);
+						form.setValue(womenField, padDecimalToTwo(row.womenValue));
+						form.setValue(menField, padDecimalToTwo(row.menValue));
 					});
 					form.setValue("indicatorEWomen", DEV_STEP3_BENEFICIARY_WOMEN);
 					form.setValue("indicatorEMen", DEV_STEP3_BENEFICIARY_MEN);
@@ -234,7 +245,7 @@ export function Step3VariablePay({
 												<td>
 													<input
 														aria-label="Bénéficiaires femmes"
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={(e) =>
@@ -265,7 +276,7 @@ export function Step3VariablePay({
 												<td>
 													<input
 														aria-label="Bénéficiaires hommes"
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={(e) =>

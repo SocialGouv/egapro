@@ -11,7 +11,6 @@ import { PUBLIC_PAGE_SIZE } from "./shared/constants";
  * for the "Toutes" / "Tous" options; we normalize to `undefined` at the border.
  */
 export const publicSearchReferentsSchema = z.object({
-	query: z.string().trim().optional(),
 	region: z.enum(REGION_CODES).optional().or(z.literal("")),
 	county: z.enum(COUNTY_CODES).optional().or(z.literal("")),
 	page: z.coerce.number().int().min(1).default(1),
@@ -30,7 +29,6 @@ export type PublicSearchReferentsOutput = z.output<
  * the URL and are managed by the page container.
  */
 export const publicSearchReferentsFormSchema = z.object({
-	query: z.string().optional(),
 	region: z.string().optional(),
 	county: z.string().optional(),
 });

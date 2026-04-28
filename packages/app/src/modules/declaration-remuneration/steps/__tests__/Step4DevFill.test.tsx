@@ -51,7 +51,7 @@ describe("Step4QuartileDistribution dev fill", () => {
 		// Intl.NumberFormat("fr-FR") uses U+202F as thousands separator
 		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
 		const firstRemuInput = remuInputs[0] as HTMLInputElement;
-		expect(firstRemuInput.value.replace(/\s/g, " ")).toBe("22 000");
+		expect(firstRemuInput.value.replace(/\s/g, " ")).toBe("22 000,00");
 
 		const womenInputs = screen.getAllByLabelText(/Nombre de femmes/);
 		expect(womenInputs[0]).toHaveValue("35");
