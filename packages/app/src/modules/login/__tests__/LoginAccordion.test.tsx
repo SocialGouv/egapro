@@ -36,4 +36,25 @@ describe("LoginAccordion", () => {
 		expect(container.querySelector(".fr-accordion__title")).toBeInTheDocument();
 		expect(container.querySelector(".fr-collapse")).toBeInTheDocument();
 	});
+
+	it("lists the six account creation steps in order, ending with the success step", () => {
+		const { container } = render(<LoginAccordion />);
+		const items = container.querySelectorAll("ol > li");
+		expect(items).toHaveLength(6);
+		expect(items[0]?.textContent).toMatch(
+			/cliquez d'abord sur le bouton.*s'identifier avec proconnect/i,
+		);
+		expect(items[3]?.textContent).toMatch(
+			/entrez le siret du siège social de votre entreprise/i,
+		);
+		expect(items[5]?.textContent).toMatch(/votre compte est créé/i);
+	});
+
+	it("emphasizes the ProConnect button label in the first step", () => {
+		const { container } = render(<LoginAccordion />);
+		const firstItem = container.querySelector("ol > li:first-child");
+		expect(firstItem?.querySelector("strong")?.textContent).toBe(
+			'"S\'identifier avec ProConnect"',
+		);
+	});
 });
