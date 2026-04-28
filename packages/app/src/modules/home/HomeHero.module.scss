@@ -1,15 +1,24 @@
 .hero {
 	background: linear-gradient(-33deg, var(--background-alt-blue-france) 39%, var(--background-alt-purple-glycine) 113%);
+	padding-block: 3.5rem;
 }
 
 .heroContent {
 	display: flex;
 	flex-direction: column;
-	gap: 2rem;
+	gap: 1.5rem;
 }
 
 .heroDescription {
 	text-wrap: pretty;
+}
+
+.heroDescriptionBreak {
+	display: none;
+
+	@include respond-from(md) {
+		display: inline;
+	}
 }
 
 .cta.cta {

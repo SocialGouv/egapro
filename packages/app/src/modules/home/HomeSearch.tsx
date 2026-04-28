@@ -9,7 +9,7 @@ export function HomeSearch() {
 			<div className="fr-container">
 				<div className="fr-grid-row fr-grid-row--gutters">
 					<div className="fr-col-12">
-						<h2 id="search-heading">
+						<h2 className="fr-mb-2w" id="search-heading">
 							Rechercher une entreprise et consulter ses résultats
 						</h2>
 						<p>
