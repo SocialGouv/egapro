@@ -81,6 +81,7 @@
 		"swagger-ui-dist": "^5.32.2",
 		"typescript": "^6.0.2",
 		"vite-tsconfig-paths": "^6.1.1",
+		"tsx": "^4.21.0",
 		"vitest": "^4.1.4"
 	},
 	"packageManager": "pnpm@10.8.1"

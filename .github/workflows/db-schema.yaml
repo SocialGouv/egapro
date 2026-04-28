@@ -5,6 +5,8 @@ on:
     branches: [master, alpha]
     paths:
       - "packages/app/src/server/db/schema.ts"
+      - "packages/app/src/server/db/schema-comments.ts"
+      - "packages/app/scripts/post-process-schema-wiki.mjs"
   workflow_dispatch:
 
 concurrency:
@@ -35,6 +37,9 @@ jobs:
 
       - name: Generate schema documentation
         run: npx db-schema-toolkit export packages/app/src/server/db/schema.ts -f markdown -o schema-doc.md
+
+      - name: Post-process schema doc with SUIT/GIP-MDS comments
+        run: node --import ./packages/app/node_modules/tsx/dist/esm/index.mjs packages/app/scripts/post-process-schema-wiki.mjs
 
       - name: Publish to GitHub Wiki
         env:
