@@ -13,6 +13,15 @@ test.describe("Login page", () => {
 			page.getByRole("button", { name: /s.identifier avec\s*proconnect/i }),
 		).toBeVisible();
 	});
+
+	test("hides the public help banner", async ({ page }) => {
+		await page.goto("/login");
+		await dismissCookieBanner(page);
+
+		await expect(
+			page.getByRole("region", { name: /ressources et aide/i }),
+		).toHaveCount(0);
+	});
 });
 
 test.describe("ProConnect authentication flow", () => {
