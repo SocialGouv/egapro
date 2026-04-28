@@ -89,34 +89,70 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
    **9d. Cycle review unique** — déclenché **une seule fois**, **uniquement** après que 9a + 9b + 9c sont **tous verts** (vérifie explicitement le critère jq de 9b : toutes conclusions SUCCESS / SKIPPED / NEUTRAL, sans exception).
 
-   ### 9d.1 — Wait borné pour les reviews bot
+   ### 9d.1 — Wait borné pour les reviews bot (avec debounce)
 
-   Les bots de review (notamment `revu-bot`) postent leurs commentaires avec un délai de **plusieurs minutes après que la CI soit verte** — typiquement 5 à 10 min, parfois plus selon la charge GitHub Actions et la taille du diff. Si tu fais 9d immédiatement après 9c, tu as 0 review et tu sors en `validated` — puis le bot poste, et ses commentaires ne sont jamais traités.
+   Les bots de review (notamment `revu-bot`) postent leurs commentaires avec un délai de **plusieurs minutes après que la CI soit verte** — typiquement 5 à 10 min, parfois plus selon la charge GitHub Actions et la taille du diff. **Et** ils postent leurs commentaires **un par un** sur quelques secondes/dizaines de secondes (un par fichier ou section). Si tu sors dès le premier comment détecté, tu lis un résumé incomplet et tu rates les retours détaillés.
 
-   Avant de lire les comments, attends **au moins une fois** qu'au moins un review/comment soit posté **après le dernier push**. Timeout : **15 min** (couvre le pire cas avec marge, sans rogner trop sur le timeout global de 90 min du sub-agent) :
+   La phase 9d.1 fait donc deux choses :
+
+   **9d.1a — Wait initial pour le premier comment** (timeout 15 min) :
 
    ```bash
    PR=<PR_NUMBER>
    LAST_PUSH=$(gh pr view "$PR" --json commits --jq '.commits[-1].committedDate')
+
+   count_after_last_push() {
+       local pr="$1" since="$2"
+       local n_reviews n_comments n_issue
+       n_reviews=$(gh api "repos/SocialGouv/egapro/pulls/$pr/reviews" \
+           --jq "[.[] | select(.submitted_at > \"$since\")] | length")
+       n_comments=$(gh api "repos/SocialGouv/egapro/pulls/$pr/comments" \
+           --jq "[.[] | select(.created_at > \"$since\")] | length")
+       n_issue=$(gh api "repos/SocialGouv/egapro/issues/$pr/comments" \
+           --jq "[.[] | select(.created_at > \"$since\")] | length")
+       echo $((n_reviews + n_comments + n_issue))
+   }
+
    WAIT_MAX=900  # 15 min
    ELAPSED=0
+   FIRST_COUNT=0
    while [ "$ELAPSED" -lt "$WAIT_MAX" ]; do
-       N_REVIEWS=$(gh api "repos/SocialGouv/egapro/pulls/$PR/reviews" \
-           --jq "[.[] | select(.submitted_at > \"$LAST_PUSH\")] | length")
-       N_COMMENTS=$(gh api "repos/SocialGouv/egapro/pulls/$PR/comments" \
-           --jq "[.[] | select(.created_at > \"$LAST_PUSH\")] | length")
-       N_ISSUE_COMMENTS=$(gh api "repos/SocialGouv/egapro/issues/$PR/comments" \
-           --jq "[.[] | select(.created_at > \"$LAST_PUSH\" and (.user.login | test(\"bot|revu\") | not == false))] | length")
-       if [ "$N_REVIEWS" -gt 0 ] || [ "$N_COMMENTS" -gt 0 ] || [ "$N_ISSUE_COMMENTS" -gt 0 ]; then
-           break
-       fi
+       FIRST_COUNT=$(count_after_last_push "$PR" "$LAST_PUSH")
+       [ "$FIRST_COUNT" -gt 0 ] && break
        sleep 30
        ELAPSED=$((ELAPSED + 30))
    done
+
+   if [ "$FIRST_COUNT" -eq 0 ]; then
+       # 15 min sans rien → on suppose qu'aucun bot ne va commenter
+       # → passer directement à l'étape 10 (retour validated)
+       :
+   fi
    ```
 
-   - **Si timeout (15 min sans nouveau review/comment)** → passer directement à l'étape 10 (retour `validated`).
-   - **Sinon** (au moins 1 review/comment reçu) → continuer en 9d.2.
+   **9d.1b — Debounce : attendre que la rafale du bot soit terminée** (uniquement si 9d.1a n'a PAS timeout) :
+
+   Le bot poste ses comments en séquence. On attend que le compte total soit **stable pendant 2 min consécutives** (probe toutes les 30s) avant de passer à 9d.2.
+
+   ```bash
+   STABLE_FOR=0
+   PREV_COUNT=$FIRST_COUNT
+   while [ "$STABLE_FOR" -lt 120 ]; do
+       sleep 30
+       NEW_COUNT=$(count_after_last_push "$PR" "$LAST_PUSH")
+       if [ "$NEW_COUNT" -eq "$PREV_COUNT" ]; then
+           STABLE_FOR=$((STABLE_FOR + 30))
+       else
+           # Le bot poste encore, reset le timer
+           PREV_COUNT=$NEW_COUNT
+           STABLE_FOR=0
+       fi
+   done
+   # À ce point le bot a fini sa rafale, on a tous les comments → 9d.2
+   ```
+
+   - **Si 9d.1a timeout (15 min sans le moindre comment)** → passer directement à l'étape 10 (retour `validated`).
+   - **Sinon** (debounce 9d.1b satisfait) → continuer en 9d.2 avec **TOUS** les comments captés.
 
    ### 9d.2 — Traitement des reviews/comments (1 itération max)
 
