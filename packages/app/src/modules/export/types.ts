@@ -116,7 +116,6 @@ export type IndicatorGRow = {
 	declarationType: "initial" | "correction";
 	categoryIndex: number;
 	categoryName: string;
-	categoryDetail: string | null;
 	categorySource: string;
 	womenCount: number | null;
 	menCount: number | null;

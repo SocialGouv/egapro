@@ -42,7 +42,6 @@ function makeCategory(
 ): EmployeeCategoryRow {
 	return {
 		name: "",
-		detail: "",
 		womenCount: null,
 		menCount: null,
 		annualBaseWomen: null,
@@ -353,7 +352,6 @@ describe("Step6Review", () => {
 				step5Categories={[
 					makeCategory({
 						name: "Ingénieurs",
-						detail: "Dev",
 						womenCount: 10,
 						menCount: 15,
 						annualBaseWomen: "3000",

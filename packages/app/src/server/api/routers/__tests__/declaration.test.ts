@@ -624,7 +624,6 @@ describe("declarationRouter", () => {
 			categories: [
 				{
 					name: "Cadres",
-					detail: "Senior",
 					data: { womenCount: 10, menCount: 15 },
 				},
 			],
@@ -663,7 +662,6 @@ describe("declarationRouter", () => {
 				categories: [
 					{
 						name: "Cadres",
-						detail: "Senior",
 						data: { womenCount: 12, menCount: 18 },
 					},
 				],

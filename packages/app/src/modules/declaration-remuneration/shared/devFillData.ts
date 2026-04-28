@@ -40,7 +40,7 @@ export const DEV_STEP4_HOURLY = [
 ];
 
 // Step 5 - Employee categories
-export const DEV_STEP5_SOURCE = "convention-collective";
+export const DEV_STEP5_SOURCE = "accord-entreprise";
 
 /**
  * Reference workforce ratios used to distribute totals across categories.
@@ -86,7 +86,6 @@ export function createDevStep5Categories(
 		{
 			id: nextId(),
 			name: "Ouvriers",
-			detail: "Opérateurs, manutentionnaires",
 			womenCount: String(womenCounts[0]),
 			menCount: String(menCounts[0]),
 			annualBaseWomen: "24000",
@@ -101,7 +100,6 @@ export function createDevStep5Categories(
 		{
 			id: nextId(),
 			name: "Employés",
-			detail: "Assistants, secrétaires",
 			womenCount: String(womenCounts[1]),
 			menCount: String(menCounts[1]),
 			annualBaseWomen: "27000",
@@ -116,7 +114,6 @@ export function createDevStep5Categories(
 		{
 			id: nextId(),
 			name: "Techniciens et agents de maîtrise",
-			detail: "Contremaîtres, techniciens",
 			womenCount: String(womenCounts[2]),
 			menCount: String(menCounts[2]),
 			annualBaseWomen: "35000",
@@ -131,7 +128,6 @@ export function createDevStep5Categories(
 		{
 			id: nextId(),
 			name: "Ingénieurs et cadres",
-			detail: "Responsables, directeurs",
 			womenCount: String(womenCounts[3]),
 			menCount: String(menCounts[3]),
 			annualBaseWomen: "48000",
