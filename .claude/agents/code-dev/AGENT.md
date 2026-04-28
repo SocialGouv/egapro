@@ -16,6 +16,7 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 - **Base branch** (assigned by `/epic` ou `/code`) — toujours au format **remote-tracking ref** (`origin/<branch>`), déjà fetchée par l'orchestrateur :
   - `origin/alpha` (ou `origin/chore/ai-pipeline` pendant la phase de transition) si aucune dépendance ou toutes mergées
   - `origin/ticket/<parent-slug>` si le ticket dépend d'un autre encore en `In review` (stacked PR)
+- **Working branch** (assigned by `/epic`) — déjà créée sur GitHub par l'orchestrateur via `createLinkedBranch` GraphQL et **officiellement linkée à l'issue** (sidebar Development). La PR ouverte depuis cette branche y apparaîtra automatiquement — pas besoin de cross-reference comment.
 
 ## Workflow
 
@@ -27,10 +28,11 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
 3. **Status ticket** → **In progress** via `bash scripts/orchestration/set_ticket_status.sh <N> "In progress"`.
 
-4. **Branche** dans le worktree, à partir de la **base branch** reçue en input (déjà au format `origin/<x>` et déjà fetchée par l'orchestrateur — **ne pas re-fetcher**) :
+4. **Checkout la branche linkée pré-créée** (la `Working branch` reçue en input). **Ne pas créer une nouvelle branche** — la branche existe déjà sur GitHub, est linkée à l'issue, et c'est sur elle que tu dois pousser :
    - `cd <worktree>` (le worktree est en mode `--detach` sur la base)
-   - `git checkout -b ticket/<N>-<slug> <base-branch>` (ex: `git checkout -b ticket/123-foo origin/alpha`)
-   - Si `<base-branch>` n'est pas `origin/alpha` (ou `origin/chore/ai-pipeline` en phase de transition), on est en mode **stacked PR** — la PR sera ouverte avec `--base <base-branch-sans-prefix-origin>` (ex: `--base ticket/<parent-slug>`), GitHub retargettera vers `alpha` quand la PR parent sera mergée
+   - `git fetch origin <working-branch>`
+   - `git checkout <working-branch>` (PAS `checkout -b`)
+   - Si la **base branch** n'est pas `origin/alpha` (ou `origin/chore/ai-pipeline` en phase de transition), on est en mode **stacked PR** — la PR sera ouverte avec `--base <base-branch-sans-prefix-origin>` (ex: `--base ticket/<parent-slug>`), GitHub retargettera vers `alpha` quand la PR parent sera mergée
 
 4.5. **Sanity check stack docker** — vérifier que `packages/app/.env.local` existe et contient `COMPOSE_PROJECT_NAME=egapro-wt-*`. Si absent → `scripts/setup-worktree.sh <index> [<extras>]` (où `<extras>` vient du parsing de la section `## Requires services` du ticket). Si `/epic` ou `/code` a déjà lancé le setup, l'étape est un no-op.
 

@@ -105,15 +105,12 @@ jq -c '.results[]' "$RESULT_FILE" | while read -r result; do
 
     case "$STATUS" in
         validated)
-            # code-dev has set 'In review' and pr ready. Just reset attempt counter.
+            # code-dev has set 'In review' and pr ready. The PR is already
+            # linked to the issue via the linked-branch flow (createLinkedBranch
+            # called by epic_loop.sh before spawning the agent), so no manual
+            # cross-ref is needed. Just reset the attempt counter.
             clear_attempt_labels "$TICKET"
             invalidate_caches "$TICKET"
-            # Cross-reference the PR on the ticket (GitHub's native auto-link
-            # via Closes #N doesn't fire when the PR base isn't the default
-            # branch — typical of our stacked PR / transition-base runs).
-            if [ -n "$PR" ] && [ "$PR" != "null" ]; then
-                bash "$SCRIPT_DIR/link_pr_to_ticket.sh" "$TICKET" "$PR" || true
-            fi
             bash "$SCRIPT_DIR/log_event.sh" "$AID" VALIDATED "ticket=$TICKET pr=$PR"
             echo "  ✓ ticket #$TICKET validated (In review, PR ready)"
             N_VALIDATED=$((N_VALIDATED + 1))

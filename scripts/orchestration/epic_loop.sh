@@ -124,6 +124,7 @@ spawn_agent() {
     local BASE="$6"
     local WT_PATH="$7"
     local AGENT_LOG="$8"
+    local BRANCH="$9"
 
     local BUDGET="$BUDGET_SONNET"
     [ "$MODEL" = "opus" ] && BUDGET="$BUDGET_OPUS"
@@ -134,6 +135,7 @@ spawn_agent() {
 Worktree: ${WT_PATH}
 Worktree index: ${INDEX} (dev server port = ${PORT})
 Base branch: ${BASE}  (remote-tracking ref, déjà fetchée par l'orchestrateur)
+Working branch: ${BRANCH}  (déjà créée et linkée à l'issue via createLinkedBranch — pousse tes commits dessus)
 
 Suivre STRICTEMENT le workflow de .claude/agents/code-dev/AGENT.md.
 
@@ -141,11 +143,17 @@ L'orchestrateur a déjà :
 - créé le worktree en mode --detach sur ${BASE}
 - lancé setup-worktree.sh ${INDEX} (pnpm install + stack docker + .env.local + migrations OK)
 - passé le ticket #${TICKET} en \"In progress\" sur le board
+- **créé la branche ${BRANCH}** sur GitHub, officiellement linkée à l'issue #${TICKET} (la PR que tu ouvriras y apparaîtra automatiquement dans la sidebar Development — pas besoin de comment cross-ref)
 
-Toi : depuis le worktree, créer la branche ticket/${TICKET}-<slug> à partir de
-${BASE} (remote-tracking ref, donc \`git checkout -b ticket/${TICKET}-<slug> ${BASE}\`,
-**pas besoin de re-fetch**), implémenter, créer la PR draft, faire les 4 + 2
-validators internes, itérer sur les RETRY, retourner le verdict final JSON.
+Toi : depuis le worktree, fetch et checkout la branche existante :
+\`\`\`bash
+cd ${WT_PATH}
+git fetch origin ${BRANCH}
+git checkout ${BRANCH}
+\`\`\`
+Puis implémenter, push tes commits sur ${BRANCH}, créer la PR draft (\`gh pr create --base ${BASE#origin/} --head ${BRANCH}\`), faire les 4 + 2 validators internes, itérer sur les RETRY, retourner le verdict final JSON.
+
+**Ne crée PAS une autre branche** (pas de \`checkout -b\`). La branche ${BRANCH} est déjà créée et linkée — utilise-la telle quelle.
 
 REGLES STRICTES (appliquer sans exception) :
 - **N'invoque AUCUN skill built-in** (fewer-permission-prompts, update-config,
@@ -258,12 +266,21 @@ while [ $TICK -lt $MAX_TICKS ]; do
             continue
         fi
 
+        # Create (or reuse) a branch linked to the issue. The PR opened from
+        # this branch will then be auto-attached in the issue's "Development"
+        # sidebar — no manual cross-ref comment needed.
+        BRANCH=$(bash "$SCRIPT_DIR/create_linked_branch.sh" "$TICKET" "$BASE" 2>/dev/null)
+        if [ -z "$BRANCH" ]; then
+            bash "$SCRIPT_DIR/log_event.sh" "$AID" LINKED_BRANCH_FAIL "ticket=$TICKET base=$BASE"
+            continue
+        fi
+
         AGENT_LOG="$TICK_DIR/tick_${TICK}_agent_${TICKET}.json"
         AGENT_FILES[$TICKET]="$AGENT_LOG"
 
-        bash "$SCRIPT_DIR/log_event.sh" "$AID" AGENT_SPAWN "ticket=$TICKET agent=$AGENT model=$MODEL index=$INDEX budget=$([ "$MODEL" = "opus" ] && echo "$BUDGET_OPUS" || echo "$BUDGET_SONNET")"
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" AGENT_SPAWN "ticket=$TICKET agent=$AGENT model=$MODEL index=$INDEX branch=$BRANCH budget=$([ "$MODEL" = "opus" ] && echo "$BUDGET_OPUS" || echo "$BUDGET_SONNET")"
 
-        spawn_agent "$TICKET" "$AGENT" "$MODEL" "$INDEX" "$EPIC" "$BASE" "$WT_PATH" "$AGENT_LOG" &
+        spawn_agent "$TICKET" "$AGENT" "$MODEL" "$INDEX" "$EPIC" "$BASE" "$WT_PATH" "$AGENT_LOG" "$BRANCH" &
         PIDS+=($!)
     done
 
