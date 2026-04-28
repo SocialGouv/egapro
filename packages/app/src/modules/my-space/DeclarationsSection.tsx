@@ -9,6 +9,7 @@ import { Pagination } from "~/modules/shared/Pagination";
 
 import { DeclarationLink } from "./DeclarationLink";
 import { getDeclarationStepLabel } from "./DeclarationStepLabel";
+import styles from "./DeclarationsSection.module.scss";
 import {
 	DocumentsPanel,
 	getDocumentResourceCount,
@@ -86,7 +87,7 @@ export function DeclarationsSection({
 		<div className="fr-container fr-my-6w">
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters fr-mb-3w">
 				<div className="fr-col">
-					<h2 className="fr-mb-0">En cours</h2>
+					<h2 className="fr-mb-0">Démarche en cours</h2>
 				</div>
 				{hasNoSanction && (
 					<div className="fr-col-auto">
@@ -189,7 +190,7 @@ function DeclarationsTable({
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">
-						<table>
+						<table className={styles.tableSm}>
 							<caption className="fr-sr-only">{caption}</caption>
 							<thead>
 								<tr>
@@ -197,7 +198,7 @@ function DeclarationsTable({
 									<th scope="col">Année</th>
 									<th scope="col">Étape</th>
 									<th scope="col">Échéance</th>
-									<th scope="col">Statut</th>
+									<th scope="col">État</th>
 									<th scope="col">Ressources</th>
 								</tr>
 							</thead>
@@ -228,7 +229,7 @@ function DeclarationsTable({
 													<>
 														<button
 															aria-controls={getDocumentsPanelId(declaration)}
-															className="fr-link"
+															className={`fr-link ${styles.linkUnderlined}`}
 															data-fr-opened="false"
 															type="button"
 														>

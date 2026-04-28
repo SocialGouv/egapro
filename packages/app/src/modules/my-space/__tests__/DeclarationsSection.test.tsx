@@ -60,10 +60,10 @@ function renderSection(
 }
 
 describe("DeclarationsSection", () => {
-	it("renders the 'En cours' heading", () => {
+	it("renders the 'Démarche en cours' heading", () => {
 		renderSection();
 		expect(
-			screen.getByRole("heading", { level: 2, name: "En cours" }),
+			screen.getByRole("heading", { level: 2, name: "Démarche en cours" }),
 		).toBeInTheDocument();
 	});
 
@@ -78,9 +78,9 @@ describe("DeclarationsSection", () => {
 		expect(screen.getAllByRole("columnheader", { name: "Étape" })).toHaveLength(
 			2,
 		);
-		expect(
-			screen.getAllByRole("columnheader", { name: "Statut" }),
-		).toHaveLength(2);
+		expect(screen.getAllByRole("columnheader", { name: "État" })).toHaveLength(
+			2,
+		);
 		expect(
 			screen.getAllByRole("columnheader", { name: "Échéance" }),
 		).toHaveLength(2);

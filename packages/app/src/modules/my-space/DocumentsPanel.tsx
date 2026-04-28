@@ -97,27 +97,29 @@ export function DocumentsPanel({ declaration }: Props) {
 						<ul className={styles.documentList}>
 							{resources.map((resource) => (
 								<li className={styles.documentItem} key={resource.href}>
-									<div className={styles.documentCard}>
-										<a
-											className={styles.documentCardTitle}
-											download
-											href={resource.href}
-										>
-											{resource.title}
-										</a>
-										<p className="fr-text--sm fr-mb-0 fr-text-default--grey">
-											{resource.subtitle}
-										</p>
+									<a
+										className={styles.documentCard}
+										download
+										href={resource.href}
+									>
+										<div className={styles.documentCardBody}>
+											<p className={styles.documentCardTitle}>
+												{resource.title}
+											</p>
+											<p className="fr-text--sm fr-mb-0 fr-text-default--grey">
+												{resource.subtitle}
+											</p>
+										</div>
 										<div className={styles.documentCardFooter}>
 											<p className="fr-text--xs fr-text-mention--grey fr-mb-0">
 												PDF
 											</p>
 											<span
 												aria-hidden="true"
-												className="fr-icon-download-line fr-icon--sm"
+												className={`fr-icon-download-line fr-icon--sm ${styles.documentCardArrow}`}
 											/>
 										</div>
-									</div>
+									</a>
 								</li>
 							))}
 						</ul>
