@@ -202,6 +202,12 @@ while [ $TICK -lt $MAX_TICKS ]; do
     PLAN_FILE="$TICK_DIR/tick_${TICK}_plan.json"
     RESULT_FILE="$TICK_DIR/tick_${TICK}_result.json"
 
+    # 0. Free up worktree slots whose ticket has reached a terminal pipeline
+    # state (In review or Done). Critical for epics with > EPIC_MAX_PARALLEL
+    # tickets — without this, slots stay busy until manual cleanup and the
+    # remaining tickets can never be dispatched.
+    bash "$SCRIPT_DIR/cleanup_terminal_worktrees.sh" $EPICS >/dev/null 2>&1 || true
+
     # 1. Compute the plan
     bash "$SCRIPT_DIR/dispatch_plan.sh" $EPICS > "$PLAN_FILE"
 

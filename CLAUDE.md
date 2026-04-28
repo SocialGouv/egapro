@@ -176,6 +176,7 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | `/epic <N1> [<N2> ...]` | Lance le bash loop driver `scripts/orchestration/epic_loop.sh` en background sur les epics donnés. Main context libre. |
 | `/code <N>` | Exécute un seul ticket via `code-dev` (debug, fix). Parse le retour JSON strict, ré-invoque en Opus si `needs_opus_escalation`. |
 | `/report [<N> ...]` | Dashboard live des agents actifs + état des sous-tickets de l'epic. Pure bash, zéro LLM. |
+| `/open <PR>` | Recrée un worktree local pour une PR (typique après auto-cleanup de `/epic`) — utile pour tester la PR avant merge. |
 | `/review` | Traite les commentaires de revue posés après passage en `In review` (human + bots) |
 
 Workflow standard : `/ticket "..."` pour concevoir, puis `/epic <N>` pour exécuter en parallèle (suivi via `/report`). `/review` prend le relais quand les humains commentent les PR sorties de `In review`.
@@ -186,10 +187,14 @@ Tous les scripts shell portent leur propre header `--help`-friendly. La pipeline
 
 | Script | Rôle |
 |---|---|
-| `epic_loop.sh` | Loop driver background. Tick = plan → spawn N `claude` CLIs en parallèle (budget USD isolé) → aggregate JSON returns → process. Plafond `EPIC_LOOP_MAX_TICKS=30`. |
+| `epic_loop.sh` | Loop driver background. Tick = cleanup terminal worktrees → plan → spawn N `claude` CLIs en parallèle (budget USD isolé) → aggregate JSON returns → process. Plafond `EPIC_LOOP_MAX_TICKS=30`. |
+| `cleanup_terminal_worktrees.sh` | Scan les worktrees `egapro-epic<E>-t<N>` ; teardown + remove ceux dont le ticket est en `In review` ou `Done`. Appelé à chaque tick par `epic_loop.sh` pour libérer les slots dynamiquement. |
 | `dispatch_plan.sh` | Calcule la JSON list des tickets dispatchables : parse `## Depends on`, applique le stacked PR pattern, alloue les indices libres dans `[0, EPIC_MAX_PARALLEL[`. |
 | `process_tick_result.sh` | Applique les mutations board selon le statut JSON retourné par `code-dev`. Compteur `attempt=N` pour anti-boucle 3 refacto consécutifs → `dispatch=escalate`. |
 | `set_ticket_status.sh` | Encapsule les 3 GraphQL calls de `rules/github-board.md`. **Refuse explicitement la transition `Done`** (user-only). |
+| `create_linked_branch.sh` | Crée une branche linkée à l'issue via `createLinkedBranch` GraphQL — la PR sera auto-attachée à la sidebar Development de l'issue. |
+| `open_worktree.sh` | Recrée un worktree pour une PR donnée (skill `/open <PR>`). Utile pour tester localement après auto-cleanup. |
+| `refresh_pr_link.sh` | Force GitHub à re-parser le `Closes #N` d'une PR (workaround pour le retarget post-merge stacked). |
 | `cache_gh.sh` | TTL wrapper sur `gh` pour amortir les rate limits (clé `epic_<N>_full` partagée entre `dispatch_plan` et `epic_state`, TTL 300s). |
 | `log_event.sh` | Logging append-only par agent, rolling 50 lignes, sous `.claude/state/epic_run/agents/`. |
 | `epic_state.sh` | Tableau compact des sous-tickets d'un epic (status board + last log event + retries + PR liée). |
