@@ -74,7 +74,6 @@ describe("mapToEmployeeCategoryRows", () => {
 		declarationId: "decl-1",
 		categoryIndex: 0,
 		name: "Cadres",
-		detail: "Senior",
 		source: "dads",
 		createdAt: new Date(),
 	};
@@ -142,14 +141,6 @@ describe("mapToEmployeeCategoryRows", () => {
 
 		expect(result[0]?.womenCount).toBeNull();
 	});
-
-	it("uses empty string for null detail", () => {
-		const jobs = [{ ...baseJob, detail: null }];
-
-		const result = mapToEmployeeCategoryRows(jobs, [], "initial");
-
-		expect(result[0]?.detail).toBe("");
-	});
 });
 
 describe("fetchAllCategories", () => {
@@ -201,7 +192,6 @@ describe("fetchAllCategories", () => {
 describe("fetchPreviousYearJobCategories", () => {
 	type JobCategoryRow = {
 		name: string;
-		detail: string | null;
 		source: string;
 		categoryIndex: number;
 	};
@@ -264,14 +254,12 @@ describe("fetchPreviousYearJobCategories", () => {
 		const tx = makeTx("decl-2024", [
 			{
 				name: "Employés",
-				detail: "Support",
-				source: "convention-collective",
+				source: "accord-entreprise",
 				categoryIndex: 1,
 			},
 			{
 				name: "Cadres",
-				detail: "Managers",
-				source: "convention-collective",
+				source: "accord-entreprise",
 				categoryIndex: 0,
 			},
 		]);
@@ -279,31 +267,9 @@ describe("fetchPreviousYearJobCategories", () => {
 		const result = await fetchPreviousYearJobCategories(tx, "123456789", 2026);
 
 		expect(result).toEqual({
-			source: "convention-collective",
-			categories: [
-				{ name: "Cadres", detail: "Managers" },
-				{ name: "Employés", detail: "Support" },
-			],
+			source: "accord-entreprise",
+			categories: [{ name: "Cadres" }, { name: "Employés" }],
 		});
-	});
-
-	it("uses empty string for null detail", async () => {
-		const { fetchPreviousYearJobCategories } = await import(
-			"../declarationHelpers"
-		);
-
-		const tx = makeTx("decl-2024", [
-			{
-				name: "Cadres",
-				detail: null,
-				source: "autre",
-				categoryIndex: 0,
-			},
-		]);
-
-		const result = await fetchPreviousYearJobCategories(tx, "123456789", 2026);
-
-		expect(result?.categories[0]?.detail).toBe("");
 	});
 });
 

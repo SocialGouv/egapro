@@ -33,7 +33,6 @@ import {
 
 export type IndicatorGEntry = {
 	categoryName: string;
-	detail: string | null;
 	declarationType: string;
 	womenCount: number | null;
 	menCount: number | null;
@@ -175,7 +174,6 @@ export function buildIndicators(row: DeclarationRow) {
 function toIndicatorGCategory(entry: IndicatorGEntry) {
 	return {
 		Nom_categorie: entry.categoryName,
-		Detail_categorie: entry.detail,
 		Effectif_F: entry.womenCount,
 		Effectif_H: entry.menCount,
 		Rem_annuelle_base_F: entry.annualBaseWomen,

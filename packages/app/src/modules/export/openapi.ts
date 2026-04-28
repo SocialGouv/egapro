@@ -20,10 +20,6 @@ const indicatorGCategorySchema = {
 			type: "string",
 			description: "Libellé CSP (ex. 'Ouvriers', 'Ingénieurs et cadres')",
 		},
-		Detail_categorie: {
-			type: ["string", "null"],
-			description: "Précision éventuelle sur la catégorie",
-		},
 		Effectif_F: { type: ["integer", "null"] },
 		Effectif_H: { type: ["integer", "null"] },
 		Rem_annuelle_base_F: { type: ["string", "null"] },

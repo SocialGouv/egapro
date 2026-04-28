@@ -160,7 +160,6 @@ export async function fetchPreviousYearJobCategories(
 	const jobs = await tx
 		.select({
 			name: jobCategories.name,
-			detail: jobCategories.detail,
 			source: jobCategories.source,
 			categoryIndex: jobCategories.categoryIndex,
 		})
@@ -174,7 +173,6 @@ export async function fetchPreviousYearJobCategories(
 		source,
 		categories: sorted.map((j) => ({
 			name: j.name,
-			detail: j.detail ?? "",
 		})),
 	};
 }
@@ -196,7 +194,6 @@ export function mapToEmployeeCategoryRows(
 			);
 			return {
 				name: job.name,
-				detail: job.detail ?? "",
 				womenCount: emp?.womenCount ?? null,
 				menCount: emp?.menCount ?? null,
 				annualBaseWomen: emp?.annualBaseWomen ?? null,

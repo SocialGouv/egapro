@@ -12,7 +12,6 @@ function makeCategory(
 	return {
 		id,
 		name,
-		detail: "",
 		womenCount: "",
 		menCount: "",
 		annualBaseWomen: "",
@@ -50,7 +49,6 @@ describe("generateTemplate", () => {
 	it("generates a CSV with current categories data", async () => {
 		const categories = [
 			makeCategory(0, "Cadres", {
-				detail: "Direction",
 				womenCount: "10",
 				menCount: "15",
 				annualBaseWomen: "45000.50",
@@ -63,7 +61,6 @@ describe("generateTemplate", () => {
 
 		expect(lines.length).toBe(2);
 		expect(lines[1]).toContain("Cadres");
-		expect(lines[1]).toContain("Direction");
 		expect(lines[1]).toContain("10");
 		expect(lines[1]).toContain("45000.50");
 	});
@@ -73,7 +70,6 @@ describe("parseImportFile — XLSX", () => {
 	it("round-trips: generate then parse XLSX", async () => {
 		const original = [
 			makeCategory(0, "Ouvriers", {
-				detail: "Production",
 				womenCount: "50",
 				menCount: "60",
 				annualBaseWomen: "30000",
@@ -94,7 +90,6 @@ describe("parseImportFile — XLSX", () => {
 
 		expect(result.categories).toHaveLength(2);
 		expect(result.categories[0]?.name).toBe("Ouvriers");
-		expect(result.categories[0]?.detail).toBe("Production");
 		expect(result.categories[0]?.womenCount).toBe("50");
 		expect(result.categories[0]?.annualBaseWomen).toBe("30000");
 		expect(result.categories[1]?.name).toBe("Cadres");
@@ -108,10 +103,10 @@ describe("parseImportFile — CSV", () => {
 	}
 
 	const headers =
-		"Nom de la catégorie;Détail des emplois;Effectif femmes;Effectif hommes;Annuel base femmes (€);Annuel base hommes (€);Annuel variable femmes (€);Annuel variable hommes (€);Horaire base femmes (€);Horaire base hommes (€);Horaire variable femmes (€);Horaire variable hommes (€)";
+		"Nom de la catégorie;Effectif femmes;Effectif hommes;Annuel base femmes (€);Annuel base hommes (€);Annuel variable femmes (€);Annuel variable hommes (€);Horaire base femmes (€);Horaire base hommes (€);Horaire variable femmes (€);Horaire variable hommes (€)";
 
 	it("parses a valid CSV file", async () => {
-		const csv = `${headers}\nOuvriers;Production;50;60;30000;31000;;;;;\nCadres;;20;25;;;;;;;;;`;
+		const csv = `${headers}\nOuvriers;50;60;30000;31000;;;;;\nCadres;20;25;;;;;;;;;`;
 		const result = await parseImportFile(csvFile(csv));
 
 		expect(result.ok).toBe(true);
@@ -124,7 +119,7 @@ describe("parseImportFile — CSV", () => {
 	});
 
 	it("normalizes comma decimals to dots", async () => {
-		const csv = `${headers}\nOuvriers;;10;12;30 000,50;31000;;;;;`;
+		const csv = `${headers}\nOuvriers;10;12;30 000,50;31000;;;;;`;
 		const result = await parseImportFile(csvFile(csv));
 
 		expect(result.ok).toBe(true);
@@ -134,7 +129,7 @@ describe("parseImportFile — CSV", () => {
 	});
 
 	it("skips rows with empty name", async () => {
-		const csv = `${headers}\nOuvriers;;10;12;;;;;;\n;;5;8;;;;;;`;
+		const csv = `${headers}\nOuvriers;10;12;;;;;;\n;5;8;;;;;;`;
 		const result = await parseImportFile(csvFile(csv));
 
 		expect(result.ok).toBe(true);
@@ -176,7 +171,6 @@ describe("parseImportFile — CSV", () => {
 	it("round-trips: generate then parse CSV", async () => {
 		const original = [
 			makeCategory(0, "Techniciens", {
-				detail: "Maintenance",
 				womenCount: "30",
 				menCount: "40",
 				hourlyBaseWomen: "18.50",
@@ -194,7 +188,6 @@ describe("parseImportFile — CSV", () => {
 
 		expect(result.categories).toHaveLength(1);
 		expect(result.categories[0]?.name).toBe("Techniciens");
-		expect(result.categories[0]?.detail).toBe("Maintenance");
 		expect(result.categories[0]?.hourlyBaseWomen).toBe("18.50");
 	});
 });

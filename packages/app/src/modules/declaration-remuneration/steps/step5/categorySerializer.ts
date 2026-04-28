@@ -6,7 +6,6 @@ import type {
 export type EmployeeCategory = {
 	id: number;
 	name: string;
-	detail: string;
 	womenCount: string;
 	menCount: string;
 	annualBaseWomen: string;
@@ -21,7 +20,6 @@ export type EmployeeCategory = {
 
 const EMPTY_FIELDS = {
 	name: "",
-	detail: "",
 	womenCount: "",
 	menCount: "",
 	annualBaseWomen: "",
@@ -45,7 +43,6 @@ export function fromDatabaseRows(
 	return rows.map((row) => ({
 		id: nextId(),
 		name: row.name,
-		detail: row.detail,
 		womenCount: row.womenCount?.toString() ?? "",
 		menCount: row.menCount?.toString() ?? "",
 		annualBaseWomen: row.annualBaseWomen ?? "",
@@ -77,7 +74,6 @@ export function toSubmitData(
 		source,
 		categories: categories.map((cat) => ({
 			name: cat.name,
-			detail: cat.detail,
 			data: {
 				womenCount: toInt(cat.womenCount),
 				menCount: toInt(cat.menCount),

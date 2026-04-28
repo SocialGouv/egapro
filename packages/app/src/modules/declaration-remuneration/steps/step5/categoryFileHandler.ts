@@ -6,7 +6,6 @@ import type { EmployeeCategory } from "./categorySerializer";
 /** Column definitions for the import/export template. */
 const TEMPLATE_COLUMNS = [
 	{ key: "name", header: "Nom de la catégorie" },
-	{ key: "detail", header: "Détail des emplois" },
 	{ key: "womenCount", header: "Effectif femmes" },
 	{ key: "menCount", header: "Effectif hommes" },
 	{ key: "annualBaseWomen", header: "Annuel base femmes (€)" },
@@ -52,7 +51,7 @@ export async function generateTemplate(
 
 type TemplateRow = Record<TemplateKey, string | number>;
 
-type MinimalCategory = { name: string; detail: string };
+type MinimalCategory = { name: string };
 
 function isFullCategory(
 	cat: EmployeeCategory | MinimalCategory,
@@ -64,12 +63,11 @@ function buildTemplateRows(categories: EmployeeCategory[]): TemplateRow[] {
 	const cats: Array<EmployeeCategory | MinimalCategory> =
 		categories.length > 0 && categories.some((c) => c.name.trim())
 			? categories
-			: DEFAULT_CATEGORIES.map((name) => ({ name, detail: "" }));
+			: DEFAULT_CATEGORIES.map((name) => ({ name }));
 
 	return cats.map((cat) => {
 		const row: TemplateRow = {
 			name: cat.name,
-			detail: cat.detail,
 			womenCount: "",
 			menCount: "",
 			annualBaseWomen: "",
@@ -398,7 +396,6 @@ function buildCategoryFromRow(
 	return {
 		id,
 		name: get("name").trim(),
-		detail: get("detail").trim(),
 		womenCount: normalizeDecimal(get("womenCount")),
 		menCount: normalizeDecimal(get("menCount")),
 		annualBaseWomen: normalizeDecimal(get("annualBaseWomen")),

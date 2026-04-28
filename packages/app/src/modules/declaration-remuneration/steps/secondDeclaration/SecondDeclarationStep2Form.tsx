@@ -74,7 +74,7 @@ export function SecondDeclarationStep2Form({
 				});
 			}}
 			previousHref={`${BASE_PATH}/etape/1`}
-			readOnlyNameDetail
+			readOnlyLabel
 			referencePeriodPicker={
 				<ReferencePeriodPicker
 					disabled={isImpersonating}
