@@ -125,9 +125,9 @@ function PanelHeader({
 						{" — "}
 					</>
 				)}
-				<a className={`fr-link ${styles.historyLink}`} href="#">
+				<button className={`fr-link ${styles.historyLink}`} type="button">
 					Voir l'historique
-				</a>
+				</button>
 			</p>
 		</div>
 	);

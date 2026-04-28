@@ -6,7 +6,7 @@ const PHONE_ERROR = "Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55";
 
 /** Strip whitespace, dots, and dashes. Keeps + and digits. */
 export function normalizePhone(value: string): string {
-	return value.replace(/[\s.\-]/g, "");
+	return value.replace(/[\s.-]/g, "");
 }
 
 /**

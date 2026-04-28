@@ -98,6 +98,7 @@ export function DocumentsPanel({ declaration }: Props) {
 							{resources.map((resource) => (
 								<li className={styles.documentItem} key={resource.href}>
 									<a
+										aria-label={`${resource.title} (PDF) — ${resource.subtitle}`}
 										className={styles.documentCard}
 										download
 										href={resource.href}
