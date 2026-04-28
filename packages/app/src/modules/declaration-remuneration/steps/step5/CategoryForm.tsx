@@ -32,10 +32,10 @@ import {
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
 
 const SOURCE_LABELS: Record<string, string> = {
-	"convention-collective": "Convention collective",
 	"accord-entreprise": "Accord d'entreprise",
-	"classification-interne": "Classification interne",
-	autre: "Autre",
+	"accord-groupe": "Accord de groupe",
+	"accord-branche": "Accord de branche",
+	"decision-unilaterale": "Décision unilatérale",
 };
 
 function createIdGenerator() {
@@ -77,7 +77,6 @@ type Props = {
 	readOnlyLabel?: boolean;
 	referencePeriodPicker?: ReactNode;
 	descriptionText?: string;
-	siren?: string;
 	disabled?: boolean;
 	mimoquageNextHref?: string;
 };
@@ -100,7 +99,6 @@ export function CategoryForm({
 	readOnlyLabel = false,
 	referencePeriodPicker,
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
-	siren,
 	disabled = false,
 	mimoquageNextHref,
 }: Props) {
@@ -184,6 +182,23 @@ export function CategoryForm({
 	function askRemoveCategory(index: number) {
 		setDeleteIndex(index);
 		deleteDialogRef.current?.showModal();
+	}
+
+	// DSFR's accordion JS focuses the toggle button after a collapse, which
+	// scrolls the page to keep the (now much shorter) page in view — users
+	// land at the top instead of staying near the category they just folded.
+	// Snapshot the button's viewport offset before the toggle and restore it
+	// after the next layout pass so the click feels in-place.
+	function handleAccordionToggle(e: React.MouseEvent<HTMLButtonElement>) {
+		const button = e.currentTarget;
+		const offsetBefore = button.getBoundingClientRect().top;
+		requestAnimationFrame(() => {
+			const offsetAfter = button.getBoundingClientRect().top;
+			const drift = offsetAfter - offsetBefore;
+			if (Math.abs(drift) > 1) {
+				window.scrollBy({ top: drift, behavior: "instant" });
+			}
+		});
 	}
 
 	function confirmRemoveCategory() {
@@ -283,7 +298,7 @@ export function CategoryForm({
 						</span>
 					</p>
 				) : (
-					<div className="fr-select-group">
+					<div className={`fr-select-group ${stepStyles.sourceSelectGroup}`}>
 						<label className="fr-label" htmlFor="source-select">
 							Quelle est la source utilisée pour déterminer les catégories
 							d&apos;emplois ?
@@ -301,16 +316,12 @@ export function CategoryForm({
 							<option disabled value="">
 								Sélectionner une option
 							</option>
-							<option value="convention-collective">
-								Convention collective
-							</option>
 							<option value="accord-entreprise">
 								Accord d&apos;entreprise
 							</option>
-							<option value="classification-interne">
-								Classification interne
-							</option>
-							<option value="autre">Autre</option>
+							<option value="accord-groupe">Accord de groupe</option>
+							<option value="accord-branche">Accord de branche</option>
+							<option value="decision-unilaterale">Décision unilatérale</option>
 						</select>
 					</div>
 				)}
@@ -339,23 +350,16 @@ export function CategoryForm({
 						label="Information sur la saisie"
 					/>
 				</div>
-				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
+				<div className={stepStyles.obligatoiresRow}>
+					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
+					{!readOnlyLabel && (
+						<CategoryImportExport
+							disabled={disabled}
+							onImport={handleImportCategories}
+						/>
+					)}
+				</div>
 			</div>
-
-			{!readOnlyLabel && (
-				<CategoryImportExport
-					disabled={disabled}
-					getCategories={() =>
-						form.getValues("categories").map((cat, i) => ({
-							id: i,
-							...cat,
-						}))
-					}
-					onImport={handleImportCategories}
-					siren={siren}
-					year={referenceYear + 1}
-				/>
-			)}
 
 			<div className="fr-accordions-group" data-fr-group="false">
 				{fields.map((field, index) => {
@@ -374,6 +378,7 @@ export function CategoryForm({
 									aria-controls={collapseId}
 									aria-expanded="true"
 									className="fr-accordion__btn"
+									onClick={handleAccordionToggle}
 									type="button"
 								>
 									{categoryLabel}

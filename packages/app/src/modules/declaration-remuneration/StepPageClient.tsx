@@ -88,7 +88,6 @@ export function StepPageClient({
 					initialSource={initialSource}
 					maxMen={declaration.totalMen ?? undefined}
 					maxWomen={declaration.totalWomen ?? undefined}
-					siren={declaration.siren}
 				/>
 			);
 		case 6:
