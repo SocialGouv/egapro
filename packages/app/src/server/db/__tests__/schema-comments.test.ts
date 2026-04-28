@@ -1,7 +1,38 @@
 import { describe, expect, it } from "vitest";
+import {
+	INDICATOR_A_LABELS,
+	INDICATOR_B_LABELS,
+	INDICATOR_C_LABELS,
+	INDICATOR_D_LABELS,
+	INDICATOR_E_LABELS,
+	INDICATOR_F_ANNUAL_MEN_LABELS,
+	INDICATOR_F_ANNUAL_THRESHOLD_LABELS,
+	INDICATOR_F_ANNUAL_WOMEN_LABELS,
+	INDICATOR_F_HOURLY_MEN_LABELS,
+	INDICATOR_F_HOURLY_THRESHOLD_LABELS,
+	INDICATOR_F_HOURLY_WOMEN_LABELS,
+} from "~/modules/export/shared/apiLabels";
 import { SCHEMA_COLUMN_COMMENTS } from "../schema-comments";
 
+const ALL_SUIT_LABELS: readonly string[] = [
+	...Object.values(INDICATOR_A_LABELS),
+	...Object.values(INDICATOR_B_LABELS),
+	...Object.values(INDICATOR_C_LABELS),
+	...Object.values(INDICATOR_D_LABELS),
+	...Object.values(INDICATOR_E_LABELS),
+	...INDICATOR_F_ANNUAL_THRESHOLD_LABELS,
+	...INDICATOR_F_ANNUAL_WOMEN_LABELS,
+	...INDICATOR_F_ANNUAL_MEN_LABELS,
+	...INDICATOR_F_HOURLY_THRESHOLD_LABELS,
+	...INDICATOR_F_HOURLY_WOMEN_LABELS,
+	...INDICATOR_F_HOURLY_MEN_LABELS,
+];
+
 describe("SCHEMA_COLUMN_COMMENTS", () => {
+	const declarationComments = SCHEMA_COLUMN_COMMENTS.declaration;
+
+	// ── T2 tests (PR #3312 — SUIT meta columns) ──────────────────────────────
+
 	it("annotates declaration.siren as SUIT: SIREN (S1)", () => {
 		expect(SCHEMA_COLUMN_COMMENTS.declaration?.siren).toBe("SUIT: SIREN");
 	});
@@ -127,6 +158,50 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		for (const comment of allComments) {
 			expect(comment).toMatch(/^SUIT: /);
 			expect(comment).not.toContain("GIP-MDS");
+		}
+	});
+
+	// ── T1 tests (PR #3313 — Indicators A–F GIP-MDS | SUIT) ──────────────────
+
+	it("defines a declaration entry", () => {
+		expect(declarationComments).toBeDefined();
+		expect(typeof declarationComments).toBe("object");
+	});
+
+	it("annotates all indicator A–E columns (18 columns)", () => {
+		const aToEColumns = Object.keys(declarationComments ?? {}).filter((k) =>
+			/^indicator_[a-e]_/.test(k),
+		);
+		expect(aToEColumns).toHaveLength(18);
+	});
+
+	it("annotates all indicator F columns (24 columns)", () => {
+		const fColumns = Object.keys(declarationComments ?? {}).filter((k) =>
+			k.startsWith("indicator_f_"),
+		);
+		expect(fColumns).toHaveLength(24);
+	});
+
+	it("uses the strict format 'GIP-MDS | SUIT: <label>' for every indicator A–F comment", () => {
+		// Scoped to T1 columns only (`indicator_*`). T2 columns within `declaration`
+		// (siren, year, total_women, etc.) use the `SUIT: ...` format and are
+		// validated by the T2 tests above.
+		const t1Entries = Object.entries(declarationComments ?? {}).filter(
+			([col]) => col.startsWith("indicator_"),
+		);
+		for (const [column, comment] of t1Entries) {
+			expect(comment, `column ${column}`).toMatch(/^GIP-MDS \| SUIT: .+$/);
+		}
+	});
+
+	it("uses each SUIT label verbatim, exactly once (S4)", () => {
+		const commentValues = Object.values(declarationComments ?? {}).map((c) =>
+			c.replace("GIP-MDS | SUIT: ", ""),
+		);
+
+		for (const label of ALL_SUIT_LABELS) {
+			const occurrences = commentValues.filter((v) => v === label).length;
+			expect(occurrences, `label "${label}"`).toBe(1);
 		}
 	});
 });

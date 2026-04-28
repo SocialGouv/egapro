@@ -28,7 +28,80 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 			"SUIT: Seconde_declaration.Periode_reference_debut",
 		second_decl_reference_period_end:
 			"SUIT: Seconde_declaration.Periode_reference_fin",
-		// ── Indicators A–F populated by T1 ──
+		// ── Indicators A–F (T1 — GIP-MDS → SUIT) ──
+		// Indicator A — mean global remuneration (GIP-MDS → SUIT)
+		indicator_a_annual_women: "GIP-MDS | SUIT: Rem_globale_annuelle_moyenne_F",
+		indicator_a_annual_men: "GIP-MDS | SUIT: Rem_globale_annuelle_moyenne_H",
+		indicator_a_hourly_women: "GIP-MDS | SUIT: Taux_horaire_global_moyen_F",
+		indicator_a_hourly_men: "GIP-MDS | SUIT: Taux_horaire_global_moyen_H",
+		// Indicator B — mean variable remuneration (GIP-MDS → SUIT)
+		indicator_b_annual_women: "GIP-MDS | SUIT: Rem_variable_annuelle_moyenne_F",
+		indicator_b_annual_men: "GIP-MDS | SUIT: Rem_variable_annuelle_moyenne_H",
+		indicator_b_hourly_women: "GIP-MDS | SUIT: Taux_horaire_variable_moyen_F",
+		indicator_b_hourly_men: "GIP-MDS | SUIT: Taux_horaire_variable_moyen_H",
+		// Indicator C — median global remuneration (GIP-MDS → SUIT)
+		indicator_c_annual_women: "GIP-MDS | SUIT: Rem_globale_annuelle_médiane_F",
+		indicator_c_annual_men: "GIP-MDS | SUIT: Rem_globale_annuelle_médiane_H",
+		indicator_c_hourly_women: "GIP-MDS | SUIT: Taux_globale_annuelle_médiane_F",
+		indicator_c_hourly_men: "GIP-MDS | SUIT: Taux_globale_annuelle_médiane_H",
+		// Indicator D — median variable remuneration (GIP-MDS → SUIT)
+		indicator_d_annual_women: "GIP-MDS | SUIT: Rem_variable_annuelle_médiane_F",
+		indicator_d_annual_men: "GIP-MDS | SUIT: Rem_variable_annuelle_médiane_H",
+		indicator_d_hourly_women: "GIP-MDS | SUIT: Taux_horaire_variable_médian_F",
+		indicator_d_hourly_men: "GIP-MDS | SUIT: Taux_horaire_variable_médian_H",
+		// Indicator E — variable pay beneficiary counts (GIP-MDS → SUIT)
+		indicator_e_women: "GIP-MDS | SUIT: Effectif_F_rem_annuelle_variable",
+		indicator_e_men: "GIP-MDS | SUIT: Effectif_H_rem_annuelle_variable",
+		// Indicator F — quartile thresholds, annual (GIP-MDS → SUIT)
+		indicator_f_annual_threshold1: "GIP-MDS | SUIT: Seuil_Q1_Rem_globale",
+		indicator_f_annual_threshold2: "GIP-MDS | SUIT: Seuil_Q2_Rem_globale",
+		indicator_f_annual_threshold3: "GIP-MDS | SUIT: Seuil_Q3_Rem_globale",
+		indicator_f_annual_threshold4: "GIP-MDS | SUIT: Seuil_Q4_Rem_globale",
+		// Indicator F — quartile women proportions, annual (GIP-MDS → SUIT)
+		indicator_f_annual_women1:
+			"GIP-MDS | SUIT: Quartile1_Rem_globale_annuelle_proportion_F",
+		indicator_f_annual_women2:
+			"GIP-MDS | SUIT: Quartile2_Rem_globale_annuelle_proportion_F",
+		indicator_f_annual_women3:
+			"GIP-MDS | SUIT: Quartile3_Rem_globale_annuelle_proportion_F",
+		indicator_f_annual_women4:
+			"GIP-MDS | SUIT: Quartile4_Rem_globale_annuelle_proportion_F",
+		// Indicator F — quartile men proportions, annual (GIP-MDS → SUIT)
+		indicator_f_annual_men1:
+			"GIP-MDS | SUIT: Quartile1_Rem_globale_annuelle_proportion_H",
+		indicator_f_annual_men2:
+			"GIP-MDS | SUIT: Quartile2_Rem_globale_annuelle_proportion_H",
+		indicator_f_annual_men3:
+			"GIP-MDS | SUIT: Quartile3_Rem_globale_annuelle_proportion_H",
+		indicator_f_annual_men4:
+			"GIP-MDS | SUIT: Quartile4_Rem_globale_annuelle_proportion_H",
+		// Indicator F — quartile thresholds, hourly (GIP-MDS → SUIT)
+		indicator_f_hourly_threshold1:
+			"GIP-MDS | SUIT: Seuil_Q1_Taux_horaire_global",
+		indicator_f_hourly_threshold2:
+			"GIP-MDS | SUIT: Seuil_Q2_Taux_horaire_global",
+		indicator_f_hourly_threshold3:
+			"GIP-MDS | SUIT: Seuil_Q3_Taux_horaire_global",
+		indicator_f_hourly_threshold4:
+			"GIP-MDS | SUIT: Seuil_Q4_Taux_horaire_global",
+		// Indicator F — quartile women proportions, hourly (GIP-MDS → SUIT)
+		indicator_f_hourly_women1:
+			"GIP-MDS | SUIT: Quartile1_Taux_horaire_global_proportion_F",
+		indicator_f_hourly_women2:
+			"GIP-MDS | SUIT: Quartile2_Taux_horaire_global_proportion_F",
+		indicator_f_hourly_women3:
+			"GIP-MDS | SUIT: Quartile3_Taux_horaire_global_proportion_F",
+		indicator_f_hourly_women4:
+			"GIP-MDS | SUIT: Quartile4_Taux_horaire_global_proportion_F",
+		// Indicator F — quartile men proportions, hourly (GIP-MDS → SUIT)
+		indicator_f_hourly_men1:
+			"GIP-MDS | SUIT: Quartile1_Taux_horaire_global_proportion_H",
+		indicator_f_hourly_men2:
+			"GIP-MDS | SUIT: Quartile2_Taux_horaire_global_proportion_H",
+		indicator_f_hourly_men3:
+			"GIP-MDS | SUIT: Quartile3_Taux_horaire_global_proportion_H",
+		indicator_f_hourly_men4:
+			"GIP-MDS | SUIT: Quartile4_Taux_horaire_global_proportion_H",
 	},
 	company: {
 		name: "SUIT: Raison_sociale",
