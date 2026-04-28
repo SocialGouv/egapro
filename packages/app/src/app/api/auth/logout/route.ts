@@ -6,25 +6,26 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import { parseSiren } from "~/modules/domain";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext } from "~/server/audit/requestContext";
-import { terminateProConnectSession } from "~/server/auth/proconnect-logout";
+import { fetchEndSessionEndpoint } from "~/server/auth/proconnect-logout";
 
 /**
- * Custom logout route that terminates both the local NextAuth session
- * and the ProConnect OIDC session (server-side fire-and-forget).
+ * Custom logout route. Performs a browser-side OIDC RP-initiated logout:
  *
- * The browser is always redirected to / (home page) — the ProConnect end_session
- * is called server-side to avoid post_logout_redirect_uri registration issues.
+ *   1. Audit the intent.
+ *   2. Clear the local NextAuth session cookie on the redirect response.
+ *   3. Redirect the browser to ProConnect's `end_session_endpoint` with
+ *      `id_token_hint` (so the IdP knows which session to terminate) and
+ *      `post_logout_redirect_uri` pointing back to /api/auth/logout/callback.
+ *
+ * The redirect MUST happen in the browser — a server-side fetch cannot
+ * kill the IdP SSO cookie that lives in the user's browser. If the
+ * end_session_endpoint cannot be discovered (issuer unreachable, etc.) we
+ * fall back to a local-only logout and redirect home directly.
  */
 export async function GET(request: NextRequest) {
 	const token = await getToken({ req: request });
-	// Use the public origin from NEXTAUTH_URL to avoid localhost redirects behind reverse proxies
 	const baseUrl = new URL(env.NEXTAUTH_URL).origin;
 
-	// Audit the logout only if there was an active session — an unauthenticated
-	// GET to /api/auth/logout should not produce a spurious `auth.logout` row.
-	// `logAction` is awaited (not fire-and-forget) so the write is guaranteed
-	// to be persisted before the redirect response is issued. `logAction` is
-	// fail-safe internally, so a DB outage will not block logout.
 	if (token) {
 		const requestContext = buildRequestContext(request.headers);
 		const tokenWithEmail = token as typeof token & {
@@ -42,22 +43,18 @@ export async function GET(request: NextRequest) {
 		});
 	}
 
-	if (token?.id_token) {
-		// Terminate ProConnect OIDC session server-side (fire-and-forget)
-		await terminateProConnectSession(token.id_token);
-	}
+	const redirectTarget = await buildLogoutRedirectUrl(token?.id_token, baseUrl);
+	const response = NextResponse.redirect(redirectTarget);
 
-	const response = NextResponse.redirect(new URL("/", baseUrl));
-
-	// Delete the NextAuth session cookie directly on the redirect response
-	// to ensure the Set-Cookie header is included in the 307 response.
-	// Using cookies() from next/headers does not propagate to NextResponse.redirect().
+	// Clear the local NextAuth session cookie eagerly so the user is logged
+	// out of egapro even if the IdP round-trip never completes (network blip,
+	// user closes the tab, ProConnect outage). Set is used over delete because
+	// cookies.delete() omits the Secure flag, which browsers silently ignore
+	// on `__Secure-` prefixed cookies.
 	const isSecure = baseUrl.startsWith("https://");
 	const sessionCookieName = isSecure
 		? "__Secure-next-auth.session-token"
 		: "next-auth.session-token";
-	// Explicit set with matching attributes — cookies.delete() omits the Secure
-	// flag, so browsers silently ignore the deletion for __Secure- prefixed cookies.
 	response.cookies.set(sessionCookieName, "", {
 		expires: new Date(0),
 		path: "/",
@@ -67,4 +64,24 @@ export async function GET(request: NextRequest) {
 	});
 
 	return response;
+}
+
+async function buildLogoutRedirectUrl(
+	idToken: string | null | undefined,
+	baseUrl: string,
+): Promise<URL> {
+	if (!idToken) {
+		return new URL("/", baseUrl);
+	}
+	const endSessionEndpoint = await fetchEndSessionEndpoint();
+	if (!endSessionEndpoint) {
+		return new URL("/", baseUrl);
+	}
+	const url = new URL(endSessionEndpoint);
+	url.searchParams.set("id_token_hint", idToken);
+	url.searchParams.set(
+		"post_logout_redirect_uri",
+		`${baseUrl}/api/auth/logout/callback`,
+	);
+	return url;
 }

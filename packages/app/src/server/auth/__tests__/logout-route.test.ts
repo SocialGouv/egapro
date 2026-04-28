@@ -9,16 +9,16 @@ vi.mock("next-auth/jwt", () => ({
 }));
 
 vi.mock("~/server/auth/proconnect-logout", () => ({
-	terminateProConnectSession: vi.fn(),
+	fetchEndSessionEndpoint: vi.fn(),
 }));
 
 vi.mock("~/server/audit/log", () => ({
 	logAction: (...args: unknown[]) => mockLogAction(...args),
 }));
 
-import { terminateProConnectSession } from "~/server/auth/proconnect-logout";
+import { fetchEndSessionEndpoint } from "~/server/auth/proconnect-logout";
 
-const mockTerminate = vi.mocked(terminateProConnectSession);
+const mockFetchEndSession = vi.mocked(fetchEndSessionEndpoint);
 
 // Dynamic import to ensure mocks are registered before the module loads
 const { GET } = await import("~/app/api/auth/logout/route");
@@ -32,15 +32,60 @@ function buildRequest() {
 describe("GET /api/auth/logout", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockFetchEndSession.mockResolvedValue(null);
 	});
 
-	it("redirects to the home page", async () => {
+	it("redirects to the home page when no session is active", async () => {
 		mockGetToken.mockResolvedValue(null);
 
 		const response = await GET(buildRequest());
 
 		expect(response.status).toBe(307);
 		expect(response.headers.get("Location")).toBe("http://localhost:3000/");
+	});
+
+	it("redirects to the home page when the session has no id_token", async () => {
+		mockGetToken.mockResolvedValue({ id: "user-123" });
+
+		const response = await GET(buildRequest());
+
+		expect(response.status).toBe(307);
+		expect(response.headers.get("Location")).toBe("http://localhost:3000/");
+		expect(mockFetchEndSession).not.toHaveBeenCalled();
+	});
+
+	it("redirects to the home page when end_session_endpoint cannot be discovered", async () => {
+		mockGetToken.mockResolvedValue({
+			id: "user-123",
+			id_token: "oidc-id-token",
+		});
+		mockFetchEndSession.mockResolvedValue(null);
+
+		const response = await GET(buildRequest());
+
+		expect(response.status).toBe(307);
+		expect(response.headers.get("Location")).toBe("http://localhost:3000/");
+	});
+
+	it("redirects to end_session_endpoint with id_token_hint and post_logout_redirect_uri when an id_token is present", async () => {
+		mockGetToken.mockResolvedValue({
+			id: "user-123",
+			id_token: "oidc-id-token",
+		});
+		mockFetchEndSession.mockResolvedValue(
+			"https://proconnect.example.com/api/v2/session/end",
+		);
+
+		const response = await GET(buildRequest());
+
+		expect(response.status).toBe(307);
+		const location = new URL(response.headers.get("Location") ?? "");
+		expect(location.origin).toBe("https://proconnect.example.com");
+		expect(location.pathname).toBe("/api/v2/session/end");
+		expect(location.searchParams.get("id_token_hint")).toBe("oidc-id-token");
+		expect(location.searchParams.get("post_logout_redirect_uri")).toBe(
+			"http://localhost:3000/api/auth/logout/callback",
+		);
 	});
 
 	it("deletes the session cookie on the response with correct attributes", async () => {
@@ -54,43 +99,6 @@ describe("GET /api/auth/logout", () => {
 		expect(setCookie).toContain("Path=/");
 		expect(setCookie).toContain("HttpOnly");
 		expect(setCookie).toContain("SameSite=lax");
-	});
-
-	it("calls terminateProConnectSession with id_token when present", async () => {
-		mockGetToken.mockResolvedValue({
-			id: "user-123",
-			id_token: "oidc-id-token",
-		});
-
-		await GET(buildRequest());
-
-		expect(mockTerminate).toHaveBeenCalledWith("oidc-id-token");
-	});
-
-	it("does not call terminateProConnectSession when no token", async () => {
-		mockGetToken.mockResolvedValue(null);
-
-		await GET(buildRequest());
-
-		expect(mockTerminate).not.toHaveBeenCalled();
-	});
-
-	it("does not call terminateProConnectSession when token has no id_token", async () => {
-		mockGetToken.mockResolvedValue({ id: "user-123" });
-
-		await GET(buildRequest());
-
-		expect(mockTerminate).not.toHaveBeenCalled();
-	});
-
-	it("propagates error when terminateProConnectSession fails", async () => {
-		mockGetToken.mockResolvedValue({
-			id: "user-123",
-			id_token: "oidc-id-token",
-		});
-		mockTerminate.mockRejectedValue(new Error("Network error"));
-
-		await expect(GET(buildRequest())).rejects.toThrow("Network error");
 	});
 
 	it("does not write an audit log when the request is unauthenticated", async () => {
