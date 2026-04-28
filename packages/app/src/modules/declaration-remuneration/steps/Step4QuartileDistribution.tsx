@@ -223,7 +223,7 @@ export function Step4QuartileDistribution({
 
 				<p className={`fr-mb-0 ${common.fontMedium}`}>
 					{gipPrefillData
-						? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+						? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."
 						: "Renseignez les informations avant de valider vos indicateurs."}
 					<TooltipButton
 						id="tooltip-step4-info"

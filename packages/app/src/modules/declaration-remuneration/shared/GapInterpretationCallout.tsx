@@ -50,20 +50,22 @@ function analyzeGaps(rows: PayGapRow[]): GapAnalysis {
 	const gaps = [annualMeanGap, annualMedianGap, hourlyMeanGap, hourlyMedianGap];
 	const hasHighGap = gaps.some((g) => g !== null && g >= GAP_ALERT_THRESHOLD);
 
-	// Determine direction based on raw values (women < men = disfavor of women)
-	let womenLowerCount = 0;
-	let menLowerCount = 0;
-	for (const row of rows) {
-		const w = Number.parseFloat(row.womenValue);
-		const m = Number.parseFloat(row.menValue);
-		if (Number.isNaN(w) || Number.isNaN(m)) continue;
-		if (w < m) womenLowerCount++;
-		if (m < w) menLowerCount++;
-	}
-
+	// When no gap reaches the regulatory threshold, treat the situation as
+	// balanced — sub-threshold deltas are not interpreted as disfavor.
 	let direction: GapDirection = "balanced";
-	if (womenLowerCount > menLowerCount) direction = "women";
-	else if (menLowerCount > womenLowerCount) direction = "men";
+	if (hasHighGap) {
+		let womenLowerCount = 0;
+		let menLowerCount = 0;
+		for (const row of rows) {
+			const w = Number.parseFloat(row.womenValue);
+			const m = Number.parseFloat(row.menValue);
+			if (Number.isNaN(w) || Number.isNaN(m)) continue;
+			if (w < m) womenLowerCount++;
+			if (m < w) menLowerCount++;
+		}
+		if (womenLowerCount > menLowerCount) direction = "women";
+		else if (menLowerCount > womenLowerCount) direction = "men";
+	}
 
 	return {
 		direction,
