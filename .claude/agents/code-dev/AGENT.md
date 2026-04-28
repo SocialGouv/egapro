@@ -131,6 +131,28 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - **Question** (humain demande clarification) → répondre avec la justification technique
    - **Désaccord** (humain) → répondre avec argumentation, laisser le reviewer trancher (ne pas imposer)
 
+   ### 9d.2bis — Post-condition obligatoire avant sortie
+
+   Avant de passer à 9d.3, vérifier que **chaque review thread / inline comment** posté **après ton dernier push** a reçu **au moins une réponse de toi** (l'auteur de la PR). Si tu ne réponds pas, le pipeline considère ça comme un drift et fera échouer le ticket.
+
+   ```bash
+   PR=<PR_NUMBER>
+   # Author login = the GitHub user whose token is gh-authenticated (i.e. you)
+   AUTHOR=$(gh api user --jq '.login')
+   LAST_PUSH=$(gh pr view "$PR" --json commits --jq '.commits[-1].committedDate')
+
+   # Reviews + inline comments posted by anyone after the last push
+   UNREPLIED_INLINE=$(gh api "repos/SocialGouv/egapro/pulls/$PR/comments" \
+       --jq "[.[] | select(.created_at > \"$LAST_PUSH\" and .user.login != \"$AUTHOR\")] | length")
+   AUTHOR_INLINE=$(gh api "repos/SocialGouv/egapro/pulls/$PR/comments" \
+       --jq "[.[] | select(.created_at > \"$LAST_PUSH\" and .user.login == \"$AUTHOR\")] | length")
+   ```
+
+   - Si `UNREPLIED_INLINE > AUTHOR_INLINE` → il reste des threads non couverts. Pour chacun, poster un commentaire texte (acknowledgement minimum, ou justification de non-pertinence). Utiliser `gh api -X POST repos/.../pulls/$PR/comments` avec `in_reply_to` pour répondre dans le thread.
+   - Recommencer le check jusqu'à ce que `UNREPLIED_INLINE <= AUTHOR_INLINE`. Une fois OK, passer à 9d.3.
+
+   **Pourquoi cette post-condition** : Sonnet a tendance à conclure "non pertinent" silencieusement et à sortir sans poster de réponse. Le bot reviewer revient sur le sujet à chaque nouvelle PR, et l'humain qui review la PR ne sait pas ce que l'agent a pensé des suggestions. Une réponse explicite (même brève) est obligatoire pour la traçabilité.
+
    ### 9d.3 — Sortie de la phase 9d
 
    - **Si aucun fix appliqué** (aucun push) → passer immédiatement à l'étape 10 (retour `validated`)
