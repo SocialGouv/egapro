@@ -167,10 +167,13 @@ export function Step3VariablePay({
 					{gipPrefillData
 						? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."
 						: "Renseignez les informations avant de valider vos indicateurs."}
-					<TooltipButton
-						id="tooltip-step3-info"
-						label="Information sur les indicateurs"
-					/>
+					{!gipPrefillData && (
+						<TooltipButton
+							id="tooltip-step3-info"
+							label="Information sur la confidentialité des données"
+							text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
+						/>
+					)}
 				</p>
 
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
