@@ -11,7 +11,8 @@ export type UploadFailureReason =
 	| "not_found"
 	| "scan_unavailable"
 	| "unauthorized"
-	| "server_error";
+	| "server_error"
+	| "aborted";
 
 type UploadSuccess = { ok: true; fileId: string; fileName: string };
 type UploadError = {
@@ -80,6 +81,7 @@ const VALID_REASONS = new Set<UploadFailureReason>([
 	"scan_unavailable",
 	"unauthorized",
 	"server_error",
+	"aborted",
 ]);
 
 function parseReason(status: number, raw: unknown): UploadFailureReason {
@@ -92,6 +94,7 @@ function parseReason(status: number, raw: unknown): UploadFailureReason {
 	// Fall back to a reason inferred from the HTTP status for early-exit paths
 	// where the server returns 400/401 without a structured `reason` field.
 	if (status === 401) return "unauthorized";
+	if (status === 499) return "aborted";
 	if (status === 400) return "wrong_type";
 	return "server_error";
 }

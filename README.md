@@ -153,95 +153,50 @@ En développement local, l'authentification utilise le fournisseur d'identité d
 | `pnpm db:migrate` | Migrations Drizzle |
 | `pnpm db:studio` | Drizzle Studio |
 
-## Vérification par signature de requête pour l'API SUIT
+## Sécurisation de l'API SUIT (via passerelle APISIX)
 
-L'API privée SUIT est protégée par **signature de requête RSA-SHA256**. SUIT signe chaque requête avec sa clé privée, et EgaPro vérifie la signature avec la clé publique correspondante.
+L'API privée consommée par SUIT (`GET /api/v1/*`) est sécurisée par une **passerelle APISIX standalone**, déployée en amont de l'application dans le même cluster Kubernetes (manifests Kubernetes générés via Kontinuous, dans `.kontinuous/templates/apisix-suit.*.yaml`).
 
 ### Fonctionnement
 
 ```
-SUIT                                          EgaPro
-─────                                         ──────
-1. Construit le payload :
-   "{timestamp}|{METHOD}|{pathname}"
-
-2. Signe avec sa clé privée (RSA-SHA256)
-
-3. Envoie la requête avec :
-   X-Timestamp: {timestamp}                 4. Reconstruit le même payload
-   X-Signature: {base64 signature}
-   Authorization: Bearer {api-key}          5. Vérifie la signature avec
-                                               la clé publique de SUIT
-
-                                            6. Vérifie que le timestamp
-                                               est dans la fenêtre de validité
-                                               (30s en preprod/prod, 30j en dev)
+SUIT ──HTTPS──▶ Ingress Kubernetes (api-suit.<host>)
+                │
+                ▼
+             Service apisix-suit-gateway
+                │  plugins actifs :
+                │   - key-auth        → valide le Bearer
+                │   - limit-req       → rate-limit par IP (~10 req/s, burst 5)
+                │   - proxy-rewrite   → injecte X-Gateway-Forwarded
+                ▼
+             Service app (ClusterIP)
+                │
+                ▼  Edge middleware (src/middleware.ts)
+                │   vérifie X-Gateway-Forwarded en constant-time
+                │   (défense en profondeur : un pod compromis du cluster
+                │    ne peut pas appeler /api/v1/* sans passer par APISIX)
+                ▼
+             Route handler → withAuditedRoute → business logic
 ```
 
-### Fenêtre de validité du timestamp
+- **Authentification** : clé `EGAPRO_SUIT_API_KEY` connue de la passerelle uniquement (plus dans l'app).
+- **Shared secret** : `EGAPRO_GATEWAY_SHARED_SECRET` monté à la fois dans le pod APISIX (pour injecter le header) et dans le pod app (pour le vérifier).
+- **Côté client SUIT** : un seul en-tête `Authorization: Bearer <clé>`. Plus de signature RSA ni de timestamp à gérer (cf. [docs/SUIT-API.md](docs/SUIT-API.md)).
 
-La durée pendant laquelle un timestamp signé reste accepté dépend de l'environnement (`NEXT_PUBLIC_EGAPRO_ENV`) :
+### Rotation des secrets
 
-| Environnement | Fenêtre | Raison |
-|---|---|---|
-| `dev` | **30 jours** | Permet de réutiliser une signature générée localement sans re-signer à chaque appel pendant une session de debug |
-| `preprod` / `prod` | **30 secondes** | Fenêtre anti-rejeu stricte |
+1. Rotation de la clé API SUIT :
+   - Générer une nouvelle valeur (≥ 32 caractères).
+   - Mettre à jour le sealed-secret `suit` (clé `EGAPRO_SUIT_API_KEY`) — la valeur est consommée par le consumer APISIX dans `.kontinuous/templates/apisix-suit.configmap.yaml`.
+   - Déployer, transmettre la nouvelle valeur à SUIT.
+2. Rotation du shared secret (APISIX↔app) : idem sur la clé `EGAPRO_GATEWAY_SHARED_SECRET`. Pas d'impact SUIT (interne au cluster).
 
-Implémenté dans `packages/app/src/server/services/suitApiAuth.ts`.
+### Démantèlement
 
-### Génération et rotation des clés
-
-```bash
-# Première génération
-./packages/app/scripts/generate-suit-signing-keys.sh generate dev       # → ./suit-signing-keys/dev/
-./packages/app/scripts/generate-suit-signing-keys.sh generate prod      # → ./suit-signing-keys/prod/
-./packages/app/scripts/generate-suit-signing-keys.sh generate all       # → les deux
-
-# Rotation (sauvegarde les anciennes clés, génère de nouvelles)
-./packages/app/scripts/generate-suit-signing-keys.sh renew prod
-```
-
-`generate` refuse d'écraser des clés existantes. `renew` les sauvegarde dans un dossier `backup-{date}` avant de regénérer.
-
-### Fichiers générés (par environnement)
-
-| Fichier | Description | Destinataire |
-|---|---|---|
-| `suit-signing.key` | Clé privée RSA | SUIT (signe les requêtes) |
-| `suit-signing.pub` | Clé publique RSA | EgaPro (secret K8s `EGAPRO_SUIT_PUBLIC_KEY_PEM` en base64) |
-
-### Mise en place
-
-1. **Côté EgaPro** : encoder `suit-signing.pub` en base64 et le placer dans le sealed-secret K8s (`EGAPRO_SUIT_PUBLIC_KEY_PEM`).
-2. **Côté SUIT** : conserver `suit-signing.key` de manière sécurisée et signer chaque requête.
-3. **Appel API** — deux options équivalentes :
-
-   **Option A (openssl)** :
-   ```bash
-   TIMESTAMP=$(date +%s)
-   PAYLOAD="$TIMESTAMP|GET|/api/v1/export/declarations"
-   SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -sign suit-signing.key | base64 | tr -d '\n')
-   curl -H "X-Timestamp: $TIMESTAMP" \
-        -H "X-Signature: $SIGNATURE" \
-        -H 'Authorization: Bearer <api-key>' \
-        https://<host>/api/v1/export/declarations?date_begin=2026-01-01
-   ```
-
-   **Option B (script Node fourni)** — signe **toutes les routes SUIT protégées** en une seule exécution et affiche les `curl` prêts à copier :
-   ```bash
-   node packages/app/scripts/generate-suit-signature.js \
-     --key-file ./suit-signing-keys/dev/suit-signing.key
-   ```
-
-   Le script itère automatiquement sur les routes SUIT (actuellement `GET /api/v1/export/declarations` et `GET /api/v1/files`). Pour signer `GET /api/v1/files/<id>`, passer `--file-id <uuid>`. Pour surcharger l'URL cible, passer `--url https://egapro-preprod.fabrique.social.gouv.fr`. Voir `--help` pour toutes les options. Il suffit ensuite d'exporter `EGAPRO_SUIT_API_KEY=<api-key>` et d'exécuter un des `curl` affichés.
-
-### Procédure de rotation
-
-1. `./packages/app/scripts/generate-suit-signing-keys.sh renew <env>` — génère une nouvelle paire, sauvegarde l'ancienne
-2. Mettre à jour le sealed-secret K8s avec la nouvelle clé publique
-3. Déployer EgaPro
-4. Transmettre la nouvelle clé privée à SUIT — ils doivent basculer juste après le déploiement
-5. Les anciennes clés sont dans `backup-{date}/` en cas de rollback
+Quand l'infra fournira une API Gateway native :
+- retirer la dépendance `apisix-suit` dans `.kontinuous/Chart.yaml`
+- supprimer les fichiers `.kontinuous/templates/apisix-suit.*.yaml`
+- selon la nouvelle gateway, adapter ou supprimer `src/middleware.ts` + la var `EGAPRO_GATEWAY_SHARED_SECRET`
 
 ## Configuration AI (Claude Code)
 

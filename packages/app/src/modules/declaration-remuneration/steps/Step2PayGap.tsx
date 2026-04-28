@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
-import { normalizeDecimalInput } from "~/modules/domain";
+import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep2Schema } from "../schemas";
@@ -39,11 +39,14 @@ export function Step2PayGap({
 	const isImpersonating = useIsImpersonating();
 
 	const hasSavedData = Object.values(initialData).some((v) => v !== "");
-	const defaultValues = hasSavedData
+	const rawDefaults = hasSavedData
 		? initialData
 		: gipPrefillData
 			? gipToStep2(gipPrefillData.step2)
 			: initialData;
+	const defaultValues = Object.fromEntries(
+		Object.entries(rawDefaults).map(([k, v]) => [k, padDecimalToTwo(v)]),
+	) as Step2Data;
 
 	const hasInitialData = hasSavedData;
 
@@ -87,8 +90,8 @@ export function Step2PayGap({
 					DEV_STEP2_ROWS.forEach((row, i) => {
 						const womenField = getStep2FieldName(i, "womenValue");
 						const menField = getStep2FieldName(i, "menValue");
-						form.setValue(womenField, row.womenValue);
-						form.setValue(menField, row.menValue);
+						form.setValue(womenField, padDecimalToTwo(row.womenValue));
+						form.setValue(menField, padDecimalToTwo(row.menValue));
 					});
 					setSaved(false);
 				}}

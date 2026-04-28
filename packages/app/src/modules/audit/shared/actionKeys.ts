@@ -50,7 +50,9 @@ export const AUDIT_ACTIONS = {
 
 	// ── Admin settings mutations ──────────────────────────
 	ADMIN_SETTINGS_UPSERT_DEADLINES: "admin_settings.upsert_deadlines",
-	ADMIN_SETTINGS_SET_ACTIVE_YEAR: "admin_settings.set_active_year",
+
+	// ── Admin stats reads ─────────────────────────────────
+	ADMIN_STATS_CAMPAIGN_PROGRESSION: "admin_stats.campaign_progression",
 
 	// ── Sensitive reads ────────────────────────────────────
 	ADMIN_FILE_DOWNLOAD: "admin.file_download",
@@ -118,7 +120,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.ADMIN_DECLARATIONS_SEARCH]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES]: "mutation",
-	[AUDIT_ACTIONS.ADMIN_SETTINGS_SET_ACTIVE_YEAR]: "mutation",
+	[AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PROFILE_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA]: "read_sensitive",

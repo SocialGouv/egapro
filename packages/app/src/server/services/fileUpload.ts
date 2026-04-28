@@ -22,6 +22,11 @@ type UploadOptions = {
 	maxSize?: number;
 	/** MIME types to allow, validated via magic bytes on the first chunk. */
 	allowedMimeTypes: readonly string[];
+	/**
+	 * Request / timeout signal. On abort, the clamd socket is destroyed and
+	 * the S3 multipart is aborted, so no orphan parts are left behind.
+	 */
+	signal?: AbortSignal;
 };
 
 /**
@@ -36,7 +41,8 @@ export type UploadFailureReason =
 	| "wrong_type"
 	| "empty"
 	| "virus"
-	| "scan_unavailable";
+	| "scan_unavailable"
+	| "aborted";
 
 export type UploadResult =
 	| { ok: true; key: string; fileId: string }
@@ -60,12 +66,16 @@ export async function handleStreamingUpload(
 	options: UploadOptions,
 ): Promise<UploadResult> {
 	const maxSize = options.maxSize ?? MAX_FILE_SIZE;
-	const ext = path.extname(options.fileName) || ".bin";
+	const signal = options.signal;
+	// Normalise ext to alnum only — `path.extname` rules out `/` traversal
+	// (basename suffix) but exotic bytes would survive and land in the S3 key.
+	const rawExt = path.extname(options.fileName);
+	const ext = /^\.[A-Za-z0-9]{1,10}$/.test(rawExt) ? rawExt : ".bin";
 	const fileId = crypto.randomUUID();
 	const key = `${options.siren}/${options.year}/${fileId}${ext}`;
 
-	const clamd = createClamdStream(env.CLAMAV_HOST, env.CLAMAV_PORT);
-	const s3Upload = createMultipartUpload(key, options.contentType);
+	const clamd = createClamdStream(env.CLAMAV_HOST, env.CLAMAV_PORT, signal);
+	const s3Upload = createMultipartUpload(key, options.contentType, signal);
 	await s3Upload.init();
 
 	let totalBytes = 0;
@@ -74,6 +84,7 @@ export async function handleStreamingUpload(
 
 	try {
 		while (true) {
+			if (signal?.aborted) throw new UploadAbortedError();
 			const { done, value } = await reader.read();
 			if (done) break;
 
@@ -103,18 +114,28 @@ export async function handleStreamingUpload(
 				s3Upload.sendChunk(buf),
 			]);
 			if (clamdResult.status === "rejected") {
+				if (signal?.aborted) throw new UploadAbortedError();
 				throw new ClamdScanError(clamdResult.reason);
 			}
 			if (s3Result.status === "rejected") {
+				if (signal?.aborted) throw new UploadAbortedError();
 				throw s3Result.reason;
 			}
 		}
 	} catch (err) {
 		clamd.destroy();
 		await s3Upload.abort().catch(() => {});
+		await reader.cancel().catch(() => {});
 
 		if (err instanceof FileTooLargeError) {
 			return { ok: false, reason: "too_large", error: FILE_TOO_LARGE_ERROR };
+		}
+		if (err instanceof UploadAbortedError || signal?.aborted) {
+			return {
+				ok: false,
+				reason: "aborted",
+				error: "L'upload a été interrompu.",
+			};
 		}
 		if (err instanceof ClamdScanError) {
 			console.error("[fileUpload] clamd sendChunk failed", err.cause);
@@ -144,6 +165,13 @@ export async function handleStreamingUpload(
 		console.error("[fileUpload] clamd scan failed", err);
 		clamd.destroy();
 		await s3Upload.abort().catch(() => {});
+		if (signal?.aborted) {
+			return {
+				ok: false,
+				reason: "aborted",
+				error: "L'upload a été interrompu.",
+			};
+		}
 		return {
 			ok: false,
 			reason: "scan_unavailable",
@@ -177,6 +205,17 @@ export async function handleStreamingUpload(
 class FileTooLargeError extends Error {
 	constructor() {
 		super("File too large");
+	}
+}
+
+/**
+ * Sentinel thrown when the request-scoped AbortSignal fires (client
+ * disconnect or request-level timeout). Lets the outer catch distinguish an
+ * interruption from a genuine scan/S3 failure.
+ */
+class UploadAbortedError extends Error {
+	constructor() {
+		super("Upload aborted by request signal");
 	}
 }
 

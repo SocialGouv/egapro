@@ -7,7 +7,6 @@ import {
 	gte,
 	ilike,
 	lt,
-	lte,
 	or,
 	type SQL,
 } from "drizzle-orm";
@@ -73,21 +72,6 @@ export const adminDeclarationsRouter = createTRPCRouter({
 
 			if (input.status) {
 				filters.push(eq(declarations.status, input.status));
-			}
-
-			if (input.index !== undefined && input.indexOperator) {
-				const indexScore = declarations.remunerationScore;
-				switch (input.indexOperator) {
-					case "gt":
-						filters.push(gte(indexScore, input.index));
-						break;
-					case "lt":
-						filters.push(lte(indexScore, input.index));
-						break;
-					case "eq":
-						filters.push(eq(indexScore, input.index));
-						break;
-				}
 			}
 
 			const where = filters.length > 0 ? and(...filters) : undefined;
