@@ -108,8 +108,21 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 	});
 
 	it("uses SUIT prefix (not GIP-MDS) for all T2 entries", () => {
-		const allComments = Object.values(SCHEMA_COLUMN_COMMENTS).flatMap((table) =>
-			Object.values(table),
+		// Scoped to T2 tables only. The `declaration` table is excluded because T1
+		// (PR #3312) populates it with `GIP-MDS | SUIT: ...` indicator A–F entries;
+		// the T2 keys inside `declaration` are already validated verbatim by the
+		// per-key tests above ("annotates all declaration meta columns…",
+		// "annotates second declaration columns").
+		const t2Tables = [
+			"company",
+			"user",
+			"cse_opinion",
+			"file",
+			"job_category",
+			"employee_category",
+		] as const;
+		const allComments = t2Tables.flatMap((table) =>
+			Object.values(SCHEMA_COLUMN_COMMENTS[table] ?? {}),
 		);
 		for (const comment of allComments) {
 			expect(comment).toMatch(/^SUIT: /);
