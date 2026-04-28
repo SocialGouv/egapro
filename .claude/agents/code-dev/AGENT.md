@@ -89,14 +89,14 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
    ### 9d.1 — Wait borné pour les reviews bot
 
-   Les bots de review (notamment `revu-bot`) postent leurs commentaires avec un délai de **plusieurs minutes après que la CI soit verte** (~9 min observés sur PR #3335). Si tu fais 9d immédiatement après 9c, tu as 0 review et tu sors en `validated` — puis le bot poste, et ses commentaires ne sont jamais traités.
+   Les bots de review (notamment `revu-bot`) postent leurs commentaires avec un délai de **plusieurs minutes après que la CI soit verte** (~9 min observés sur PR #3335 ; peut-être plus selon la charge GH Actions et la taille du diff). Si tu fais 9d immédiatement après 9c, tu as 0 review et tu sors en `validated` — puis le bot poste, et ses commentaires ne sont jamais traités.
 
-   Avant de lire les comments, attends **au moins une fois** qu'au moins un review/comment soit posté **après le dernier push**. Avec un timeout de **10 min** (au-delà, on suppose qu'aucun bot ne va commenter et on sort) :
+   Avant de lire les comments, attends **au moins une fois** qu'au moins un review/comment soit posté **après le dernier push**. Avec un timeout de **15 min** (laisse ~6 min de marge au-delà du pire cas observé, sans rogner trop sur le timeout global de 90 min du sub-agent) :
 
    ```bash
    PR=<PR_NUMBER>
    LAST_PUSH=$(gh pr view "$PR" --json commits --jq '.commits[-1].committedDate')
-   WAIT_MAX=600  # 10 min
+   WAIT_MAX=900  # 15 min
    ELAPSED=0
    while [ "$ELAPSED" -lt "$WAIT_MAX" ]; do
        N_REVIEWS=$(gh api "repos/SocialGouv/egapro/pulls/$PR/reviews" \
@@ -113,7 +113,7 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    done
    ```
 
-   - **Si timeout (10 min sans nouveau review/comment)** → passer directement à l'étape 10 (retour `validated`).
+   - **Si timeout (15 min sans nouveau review/comment)** → passer directement à l'étape 10 (retour `validated`).
    - **Sinon** (au moins 1 review/comment reçu) → continuer en 9d.2.
 
    ### 9d.2 — Traitement des reviews/comments (1 itération max)
