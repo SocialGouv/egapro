@@ -8,6 +8,10 @@
 	gap: 2rem;
 }
 
+.heroDescription {
+	text-wrap: pretty;
+}
+
 .cta.cta {
 	@include respond-to(sm) {
 		justify-content: center;
