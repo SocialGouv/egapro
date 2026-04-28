@@ -199,9 +199,21 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 			c.replace("GIP-MDS | SUIT: ", ""),
 		);
 
+		const labelSet = new Set(ALL_SUIT_LABELS);
+
 		for (const label of ALL_SUIT_LABELS) {
 			const occurrences = commentValues.filter((v) => v === label).length;
 			expect(occurrences, `label "${label}"`).toBe(1);
+		}
+
+		// Reverse check: every value in the map must be a known canonical label.
+		// Catches typos that pass the format regex but aren't in apiLabels.ts.
+		for (const [column, value] of Object.entries(declarationComments ?? {})) {
+			const label = value.replace("GIP-MDS | SUIT: ", "");
+			expect(
+				labelSet.has(label),
+				`column "${column}" has unknown label "${label}"`,
+			).toBe(true);
 		}
 	});
 });
