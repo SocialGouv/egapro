@@ -49,7 +49,7 @@ describe("MissingInfoModal", () => {
 		);
 		expect(
 			screen.getByText(
-				"Pour continuer, vous devez renseigner un numéro de téléphone et indiquer si un CSE a été mis en place dans votre entreprise.",
+				"Pour continuer, vous devez ajouter un numéro de téléphone à votre profil et nous indiquer si un CSE a été mis en place.",
 			),
 		).toBeInTheDocument();
 	});

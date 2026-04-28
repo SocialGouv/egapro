@@ -23,7 +23,9 @@ export function PhoneField({
 		>
 			<label className="fr-label" htmlFor={inputId}>
 				Numéro de téléphone (obligatoire)
-				<span className="fr-hint-text">Format attendu : 01 22 33 44 55</span>
+				<span className="fr-hint-text">
+					Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55
+				</span>
 			</label>
 			<input
 				aria-describedby={messagesId}
