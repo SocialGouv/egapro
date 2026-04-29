@@ -37,7 +37,7 @@ const quartileItemSchema = z.object({
 	men: z.number().int().min(0).optional(),
 });
 
-const isValidNumericThreshold = (v: string | undefined): boolean =>
+const isValidNumericThreshold = (v: string | undefined): v is string =>
 	v !== undefined && v !== "" && !Number.isNaN(Number(v));
 
 const tableSchema = z
@@ -69,9 +69,7 @@ const tableSchema = z
 			) {
 				return true;
 			}
-			return (
-				parseFloat(t1!) < parseFloat(t2!) && parseFloat(t2!) < parseFloat(t3!)
-			);
+			return parseFloat(t1) < parseFloat(t2) && parseFloat(t2) < parseFloat(t3);
 		},
 		{ message: "Les seuils doivent être strictement croissants" },
 	);
