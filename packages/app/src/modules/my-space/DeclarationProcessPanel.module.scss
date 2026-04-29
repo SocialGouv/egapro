@@ -202,7 +202,20 @@
 	background-size: 100% 1px;
 }
 
+.lastAction {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.875rem;
+	line-height: 1.5rem;
+	color: var(--text-mention-grey);
+}
+
 .historyLink {
+	display: inline;
+	font-size: 0.875rem;
+	line-height: 1.5rem;
 	text-decoration: none;
 	background-image: linear-gradient(0deg, currentColor, currentColor);
 	background-position: 0 100%;
