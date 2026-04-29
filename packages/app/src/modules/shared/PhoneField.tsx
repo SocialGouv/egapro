@@ -1,6 +1,9 @@
 "use client";
 
+import type { ChangeEvent } from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
+
+import { formatPhoneInput } from "~/modules/profile/phone";
 
 type PhoneFieldProps = {
 	className?: string;
@@ -16,6 +19,11 @@ export function PhoneField({
 	registration,
 }: PhoneFieldProps) {
 	const messagesId = `${inputId}-messages`;
+
+	function handleChange(event: ChangeEvent<HTMLInputElement>) {
+		event.target.value = formatPhoneInput(event.target.value);
+		void registration.onChange(event);
+	}
 
 	return (
 		<div
@@ -33,6 +41,7 @@ export function PhoneField({
 				id={inputId}
 				type="tel"
 				{...registration}
+				onChange={handleChange}
 			/>
 			<div aria-live="polite" className="fr-messages-group" id={messagesId}>
 				{error && <p className="fr-message fr-message--error">{error}</p>}

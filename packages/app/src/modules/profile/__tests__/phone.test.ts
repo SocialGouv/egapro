@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	formatPhone,
+	formatPhoneInput,
 	normalizePhone,
 	phoneSchema,
 	toCanonicalPhone,
@@ -58,6 +59,40 @@ describe("formatPhone", () => {
 
 	it("returns the input unchanged for a non-canonical value", () => {
 		expect(formatPhone("0122334455")).toBe("0122334455");
+	});
+});
+
+describe("formatPhoneInput", () => {
+	it("groups French local digits as pairs", () => {
+		expect(formatPhoneInput("0122334455")).toBe("01 22 33 44 55");
+	});
+
+	it("formats partial French local input", () => {
+		expect(formatPhoneInput("0122")).toBe("01 22");
+		expect(formatPhoneInput("01223")).toBe("01 22 3");
+	});
+
+	it("preserves a leading + while typing", () => {
+		expect(formatPhoneInput("+")).toBe("+");
+		expect(formatPhoneInput("+3")).toBe("+3");
+		expect(formatPhoneInput("+33")).toBe("+33");
+	});
+
+	it("formats a French international number as +33 X XX XX XX XX", () => {
+		expect(formatPhoneInput("+33122334455")).toBe("+33 1 22 33 44 55");
+	});
+
+	it("formats a non-French international number with pair groups", () => {
+		expect(formatPhoneInput("+15551234567")).toBe("+15 55 12 34 56 7");
+	});
+
+	it("strips disallowed characters from input", () => {
+		expect(formatPhoneInput("01-22.33 44.55")).toBe("01 22 33 44 55");
+		expect(formatPhoneInput("01abc22")).toBe("01 22");
+	});
+
+	it("returns empty string for empty input", () => {
+		expect(formatPhoneInput("")).toBe("");
 	});
 });
 

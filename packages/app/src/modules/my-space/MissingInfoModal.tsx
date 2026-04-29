@@ -226,6 +226,20 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 						)}
 					</div>
 					<div>
+						<div className={styles.helpSection}>
+							<hr className="fr-hr" />
+							<p className="fr-text--lg fr-text--bold fr-mb-0">
+								Pour vous aider
+							</p>
+							<div className={styles.helpLinks}>
+								<button className="fr-link" type="button">
+									Détail des étapes
+								</button>
+								<button className="fr-link" type="button">
+									Aides
+								</button>
+							</div>
+						</div>
 						<div className={styles.footer}>
 							<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
 								<li>

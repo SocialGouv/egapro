@@ -85,7 +85,7 @@ export function DeclarationsSection({
 
 	return (
 		<div className="fr-container fr-my-6w">
-			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters fr-mb-3w">
+			<div className="fr-grid-row fr-grid-row--middle fr-mb-4w">
 				<div className="fr-col">
 					<h2 className="fr-mb-0">Démarche en cours</h2>
 				</div>
@@ -186,7 +186,7 @@ function DeclarationsTable({
 	hasCse,
 }: DeclarationsTableProps) {
 	return (
-		<div className="fr-table">
+		<div className={`fr-table ${styles.tableNoCaptionOffset}`}>
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">

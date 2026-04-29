@@ -42,6 +42,36 @@ export function formatPhone(canonical: string): string {
 }
 
 /**
+ * Format a user-typed phone number with pair-spacing for live input display.
+ * Without a leading "+": treats the digits as a French local number and groups
+ * them as pairs ("01 22 33 44 55"). With a leading "+": uses international
+ * format with the French "+33 X XX XX XX XX" layout when CC=33, otherwise
+ * "+CC NN NN…". Tolerates partial input as the user types.
+ */
+export function formatPhoneInput(raw: string): string {
+	const hasPlus = raw.trimStart().startsWith("+");
+	const digits = raw.replace(/\D/g, "");
+	if (!hasPlus) {
+		return digits.match(/.{1,2}/g)?.join(" ") ?? "";
+	}
+	if (digits.length === 0) return "+";
+	if (digits.length <= 2) return `+${digits}`;
+	const cc = digits.slice(0, 2);
+	const rest = digits.slice(2);
+	if (cc === "33") {
+		const groups: string[] = ["+33"];
+		if (rest.length >= 1) groups.push(rest.slice(0, 1));
+		if (rest.length >= 2) groups.push(rest.slice(1, 3));
+		if (rest.length >= 4) groups.push(rest.slice(3, 5));
+		if (rest.length >= 6) groups.push(rest.slice(5, 7));
+		if (rest.length >= 8) groups.push(rest.slice(7, 9));
+		return groups.join(" ");
+	}
+	const grouped = rest.match(/.{1,2}/g)?.join(" ") ?? rest;
+	return `+${cc} ${grouped}`;
+}
+
+/**
  * Zod schema validating French local or international phone numbers and
  * normalizing them to the canonical "+CC…" form for storage.
  */
