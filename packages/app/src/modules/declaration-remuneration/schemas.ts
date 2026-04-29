@@ -37,6 +37,9 @@ const quartileItemSchema = z.object({
 	men: z.number().int().min(0).optional(),
 });
 
+const isValidNumericThreshold = (v: string | undefined): boolean =>
+	v !== undefined && v !== "" && !Number.isNaN(Number(v));
+
 const tableSchema = z
 	.tuple([
 		quartileItemSchema,
@@ -46,9 +49,9 @@ const tableSchema = z
 	])
 	.refine(
 		(q) =>
-			Boolean(q[0].threshold) &&
-			Boolean(q[1].threshold) &&
-			Boolean(q[2].threshold),
+			isValidNumericThreshold(q[0].threshold) &&
+			isValidNumericThreshold(q[1].threshold) &&
+			isValidNumericThreshold(q[2].threshold),
 		{ message: "Le seuil est obligatoire" },
 	)
 	.refine((q) => !q[3].threshold, {
@@ -59,8 +62,16 @@ const tableSchema = z
 			const t1 = q[0].threshold;
 			const t2 = q[1].threshold;
 			const t3 = q[2].threshold;
-			if (!t1 || !t2 || !t3) return true;
-			return parseFloat(t1) < parseFloat(t2) && parseFloat(t2) < parseFloat(t3);
+			if (
+				!isValidNumericThreshold(t1) ||
+				!isValidNumericThreshold(t2) ||
+				!isValidNumericThreshold(t3)
+			) {
+				return true;
+			}
+			return (
+				parseFloat(t1!) < parseFloat(t2!) && parseFloat(t2!) < parseFloat(t3!)
+			);
 		},
 		{ message: "Les seuils doivent être strictement croissants" },
 	);

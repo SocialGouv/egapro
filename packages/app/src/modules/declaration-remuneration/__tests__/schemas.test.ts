@@ -96,6 +96,10 @@ describe("updateStep4Schema", () => {
 			hourly: table,
 		});
 		expect(result.success).toBe(false);
+		if (!result.success) {
+			const messages = result.error.issues.map((i) => i.message);
+			expect(messages).toContain("Le 4ème quartile ne doit pas avoir de seuil");
+		}
 	});
 
 	it("rejects when women count is negative", () => {
