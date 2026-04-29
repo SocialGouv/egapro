@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="fr" data-fr-scheme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Étape 4 — Quartiles (état vide) — Mock epic-3349</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.13.2/dist/dsfr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.13.2/dist/utility/utility.min.css">
+  <link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+  <header role="banner" class="fr-header">
+    <div class="fr-header__body">
+      <div class="fr-container">
+        <div class="fr-header__body-row">
+          <div class="fr-header__brand fr-enlarge-link">
+            <div class="fr-header__brand-top">
+              <div class="fr-header__logo">
+                <p class="fr-logo">
+                  Ministère<br>du travail<br>et de l'emploi
+                </p>
+              </div>
+            </div>
+            <div class="fr-header__service">
+              <a href="#" title="Accueil — Egapro">
+                <p class="fr-header__service-title">Egapro</p>
+              </a>
+              <p class="fr-header__service-tagline">Indicateurs d'égalité professionnelle femmes-hommes</p>
+            </div>
+          </div>
+          <div class="fr-header__tools">
+            <div class="fr-header__tools-links">
+              <ul class="fr-btns-group">
+                <li>
+                  <a class="fr-btn fr-icon-question-line" href="#">Aide</a>
+                </li>
+                <li>
+                  <a class="fr-btn fr-icon-account-line" href="#">Mon espace</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="alpha-banner">
+    <div class="fr-container">
+      <div class="alpha-banner__inner">
+        <span><strong>Alpha Solutions</strong></span>
+        <span>SIREN : <strong>532 847 196</strong></span>
+        <span>Effectif annuel moyen en 2026 : <strong>moins de 50</strong></span>
+        <span>Existence d'un CSE : <strong>Non</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <main role="main" id="main-content">
+    <div class="fr-container page-content">
+      <nav role="navigation" class="fr-breadcrumb" aria-label="vous êtes ici :">
+        <button class="fr-breadcrumb__button" aria-expanded="false" aria-controls="breadcrumb-1">Voir le fil d'Ariane</button>
+        <div class="fr-collapse" id="breadcrumb-1">
+          <ol class="fr-breadcrumb__list">
+            <li><a class="fr-breadcrumb__link" href="#">Accueil</a></li>
+            <li><a class="fr-breadcrumb__link" href="#">Alpha Solutions</a></li>
+            <li><a class="fr-breadcrumb__link" aria-current="page">Déclaration des indicateurs de rémunération 2027</a></li>
+          </ol>
+        </div>
+      </nav>
+
+      <div class="declaration-title fr-mt-3w">
+        <h1 class="fr-h4">Déclaration des indicateurs de rémunération 2027</h1>
+        <p class="declaration-title__status">Enregistré</p>
+      </div>
+
+      <div class="fr-stepper fr-mt-3w">
+        <h2 class="fr-stepper__title">
+          Proportion de femmes et d'hommes dans chaque quartile de rémunération
+          <span class="fr-stepper__state">Étape 4 sur 6</span>
+        </h2>
+        <div class="fr-stepper__steps" data-fr-current-step="4" data-fr-steps="6"></div>
+        <p class="fr-stepper__details">
+          <span class="fr-text--bold">Étape suivante :</span> Écart de rémunération par catégories de salariés
+        </p>
+      </div>
+
+      <div class="declaration-intro fr-mt-3w">
+        <p>Cet indicateur répartit l'ensemble des salariés en quatre groupes de rémunération appelés quartiles : du quartile inférieur qui regroupe les salariés les moins rémunérés, au quartile supérieur qui rassemble les salariés les mieux rémunérés.</p>
+        <p class="declaration-intro__emphasis">Renseignez les informations avant de valider vos indicateurs.</p>
+        <p>Tous les champs sont obligatoires.</p>
+      </div>
+
+      <!-- Table 1 : Rémunération annuelle brute moyenne -->
+      <section class="table-section fr-mt-5w">
+        <h3 class="fr-h5 table-section__title">Rémunération annuelle brute moyenne</h3>
+
+        <div class="fr-table fr-table--bordered" id="table-annual">
+          <div class="fr-table__wrapper">
+            <div class="fr-table__container">
+              <div class="fr-table__content">
+                <table class="quartile-table">
+                  <caption class="fr-sr-only">Rémunération annuelle brute moyenne par quartile et répartition femmes / hommes</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col" style="width: 14%;">&nbsp;</th>
+                      <th scope="col" colspan="2" class="quartile-table__col-numeric" style="width: 36%;">Tranche de rémunération<br>annuelle brute</th>
+                      <th scope="col" class="quartile-table__col-numeric" style="width: 12%;">Nombre<br>de femmes</th>
+                      <th scope="col" class="quartile-table__col-numeric" style="width: 12%;">Nombre<br>d'hommes</th>
+                      <th scope="col" class="quartile-table__col-numeric" style="width: 13%;">Pourcentage<br>de femmes</th>
+                      <th scope="col" class="quartile-table__col-numeric" style="width: 13%;">Pourcentage<br>d'hommes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row" class="quartile-table__row-label">
+                        <span class="row-label__text">1<sup>er</sup> quartile <button type="button" class="info-tooltip" aria-label="Plus d'informations sur le 1er quartile">?</button></span>
+                      </th>
+                      <td class="quartile-table__min" data-mobile-label="Minimum">- €</td>
+                      <td data-mobile-label="Maximum">
+                        <div class="cell-input">
+                          <label class="fr-sr-only" for="annual-q1-max">Seuil maximum 1er quartile annuel</label>
+                          <input class="fr-input" id="annual-q1-max" name="annual-q1-max" type="text" inputmode="decimal">
+                          <span class="cell-input__suffix">€</span>
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre de femmes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="annual-q1-f">Nombre de femmes 1er quartile annuel</label>
+                          <input class="fr-input" id="annual-q1-f" name="annual-q1-f" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre d'hommes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="annual-q1-h">Nombre d'hommes 1er quartile annuel</label>
+                          <input class="fr-input" id="annual-q1-h" name="annual-q1-h" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage de femmes">- %</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage d'hommes">- %</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" class="quartile-table__row-label">
+                        <span class="row-label__text">2<sup>e</sup> quartile <button type="button" class="info-tooltip" aria-label="Plus d'informations sur le 2e quartile">?</button></span>
+                      </th>
+                      <td class="quartile-table__min" data-mobile-label="Minimum">- €</td>
+                      <td data-mobile-label="Maximum">
+                        <div class="cell-input">
+                          <label class="fr-sr-only" for="annual-q2-max">Seuil maximum 2e quartile annuel</label>
+                          <input class="fr-input" id="annual-q2-max" name="annual-q2-max" type="text" inputmode="decimal">
+                          <span class="cell-input__suffix">€</span>
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre de femmes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="annual-q2-f">Nombre de femmes 2e quartile annuel</label>
+                          <input class="fr-input" id="annual-q2-f" name="annual-q2-f" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre d'hommes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="annual-q2-h">Nombre d'hommes 2e quartile annuel</label>
+                          <input class="fr-input" id="annual-q2-h" name="annual-q2-h" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage de femmes">- %</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage d'hommes">- %</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" class="quartile-table__row-label">
+                        <span class="row-label__text">3<sup>e</sup> quartile <button type="button" class="info-tooltip" aria-label="Plus d'informations sur le 3e quartile">?</button></span>
+                      </th>
+                      <td class="quartile-table__min" data-mobile-label="Minimum">- €</td>
+                      <td data-mobile-label="Maximum">
+                        <div class="cell-input">
+                          <label class="fr-sr-only" for="annual-q3-max">Seuil maximum 3e quartile annuel</label>
+                          <input class="fr-input" id="annual-q3-max" name="annual-q3-max" type="text" inputmode="decimal">
+                          <span class="cell-input__suffix">€</span>
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre de femmes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="annual-q3-f">Nombre de femmes 3e quartile annuel</label>
+                          <input class="fr-input" id="annual-q3-f" name="annual-q3-f" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre d'hommes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="annual-q3-h">Nombre d'hommes 3e quartile annuel</label>
+                          <input class="fr-input" id="annual-q3-h" name="annual-q3-h" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage de femmes">- %</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage d'hommes">- %</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" class="quartile-table__row-label">
+                        <span class="row-label__text">4<sup>e</sup> quartile <button type="button" class="info-tooltip" aria-label="Plus d'informations sur le 4e quartile">?</button></span>
+                      </th>
+                      <td class="quartile-table__min" data-mobile-label="Minimum">- €</td>
+                      <td class="quartile-table__max-readonly" data-mobile-label="Maximum">- €</td>
+                      <td data-mobile-label="Nombre de femmes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="annual-q4-f">Nombre de femmes 4e quartile annuel</label>
+                          <input class="fr-input" id="annual-q4-f" name="annual-q4-f" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre d'hommes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="annual-q4-h">Nombre d'hommes 4e quartile annuel</label>
+                          <input class="fr-input" id="annual-q4-h" name="annual-q4-h" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage de femmes">- %</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage d'hommes">- %</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" class="quartile-table__total-label">Tous les salariés</th>
+                      <td class="quartile-table__min"></td>
+                      <td></td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Nombre de femmes">-</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Nombre d'hommes">-</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage de femmes">- %</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage d'hommes">- %</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="table-source table-section__source">Source : DSN (Déclarations Sociales Nominatives), période de référence : 01/01/2026 - 31/12/2026.</p>
+      </section>
+
+      <!-- Table 2 : Rémunération horaire brute moyenne -->
+      <section class="table-section">
+        <h3 class="fr-h5 table-section__title">Rémunération horaire brute moyenne</h3>
+
+        <div class="fr-table fr-table--bordered" id="table-hourly">
+          <div class="fr-table__wrapper">
+            <div class="fr-table__container">
+              <div class="fr-table__content">
+                <table class="quartile-table">
+                  <caption class="fr-sr-only">Rémunération horaire brute moyenne par quartile et répartition femmes / hommes</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col" style="width: 14%;">&nbsp;</th>
+                      <th scope="col" colspan="2" class="quartile-table__col-numeric" style="width: 36%;">Tranche de rémunération<br>horaire brute</th>
+                      <th scope="col" class="quartile-table__col-numeric" style="width: 12%;">Nombre<br>de femmes</th>
+                      <th scope="col" class="quartile-table__col-numeric" style="width: 12%;">Nombre<br>d'hommes</th>
+                      <th scope="col" class="quartile-table__col-numeric" style="width: 13%;">Pourcentage<br>de femmes</th>
+                      <th scope="col" class="quartile-table__col-numeric" style="width: 13%;">Pourcentage<br>d'hommes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row" class="quartile-table__row-label">
+                        <span class="row-label__text">1<sup>er</sup> quartile <button type="button" class="info-tooltip" aria-label="Plus d'informations sur le 1er quartile">?</button></span>
+                      </th>
+                      <td class="quartile-table__min" data-mobile-label="Minimum">- €</td>
+                      <td data-mobile-label="Maximum">
+                        <div class="cell-input">
+                          <label class="fr-sr-only" for="hourly-q1-max">Seuil maximum 1er quartile horaire</label>
+                          <input class="fr-input" id="hourly-q1-max" name="hourly-q1-max" type="text" inputmode="decimal">
+                          <span class="cell-input__suffix">€</span>
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre de femmes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="hourly-q1-f">Nombre de femmes 1er quartile horaire</label>
+                          <input class="fr-input" id="hourly-q1-f" name="hourly-q1-f" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre d'hommes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="hourly-q1-h">Nombre d'hommes 1er quartile horaire</label>
+                          <input class="fr-input" id="hourly-q1-h" name="hourly-q1-h" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage de femmes">- %</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage d'hommes">- %</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" class="quartile-table__row-label">
+                        <span class="row-label__text">2<sup>e</sup> quartile <button type="button" class="info-tooltip" aria-label="Plus d'informations sur le 2e quartile">?</button></span>
+                      </th>
+                      <td class="quartile-table__min" data-mobile-label="Minimum">- €</td>
+                      <td data-mobile-label="Maximum">
+                        <div class="cell-input">
+                          <label class="fr-sr-only" for="hourly-q2-max">Seuil maximum 2e quartile horaire</label>
+                          <input class="fr-input" id="hourly-q2-max" name="hourly-q2-max" type="text" inputmode="decimal">
+                          <span class="cell-input__suffix">€</span>
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre de femmes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="hourly-q2-f">Nombre de femmes 2e quartile horaire</label>
+                          <input class="fr-input" id="hourly-q2-f" name="hourly-q2-f" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre d'hommes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="hourly-q2-h">Nombre d'hommes 2e quartile horaire</label>
+                          <input class="fr-input" id="hourly-q2-h" name="hourly-q2-h" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage de femmes">- %</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage d'hommes">- %</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" class="quartile-table__row-label">
+                        <span class="row-label__text">3<sup>e</sup> quartile <button type="button" class="info-tooltip" aria-label="Plus d'informations sur le 3e quartile">?</button></span>
+                      </th>
+                      <td class="quartile-table__min" data-mobile-label="Minimum">- €</td>
+                      <td data-mobile-label="Maximum">
+                        <div class="cell-input">
+                          <label class="fr-sr-only" for="hourly-q3-max">Seuil maximum 3e quartile horaire</label>
+                          <input class="fr-input" id="hourly-q3-max" name="hourly-q3-max" type="text" inputmode="decimal">
+                          <span class="cell-input__suffix">€</span>
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre de femmes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="hourly-q3-f">Nombre de femmes 3e quartile horaire</label>
+                          <input class="fr-input" id="hourly-q3-f" name="hourly-q3-f" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre d'hommes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="hourly-q3-h">Nombre d'hommes 3e quartile horaire</label>
+                          <input class="fr-input" id="hourly-q3-h" name="hourly-q3-h" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage de femmes">- %</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage d'hommes">- %</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" class="quartile-table__row-label">
+                        <span class="row-label__text">4<sup>e</sup> quartile <button type="button" class="info-tooltip" aria-label="Plus d'informations sur le 4e quartile">?</button></span>
+                      </th>
+                      <td class="quartile-table__min" data-mobile-label="Minimum">- €</td>
+                      <td class="quartile-table__max-readonly" data-mobile-label="Maximum">- €</td>
+                      <td data-mobile-label="Nombre de femmes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="hourly-q4-f">Nombre de femmes 4e quartile horaire</label>
+                          <input class="fr-input" id="hourly-q4-f" name="hourly-q4-f" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td data-mobile-label="Nombre d'hommes">
+                        <div class="cell-input cell-input--narrow">
+                          <label class="fr-sr-only" for="hourly-q4-h">Nombre d'hommes 4e quartile horaire</label>
+                          <input class="fr-input" id="hourly-q4-h" name="hourly-q4-h" type="text" inputmode="numeric">
+                        </div>
+                      </td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage de femmes">- %</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage d'hommes">- %</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" class="quartile-table__total-label">Tous les salariés</th>
+                      <td class="quartile-table__min"></td>
+                      <td></td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Nombre de femmes">-</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Nombre d'hommes">-</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage de femmes">- %</td>
+                      <td class="quartile-table__numeric quartile-table__numeric--bold" data-mobile-label="Pourcentage d'hommes">- %</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="table-source table-section__source">Source : Déclarations Sociales Nominatives, période de référence : 01/01/2026 - 31/12/2026.</p>
+      </section>
+
+      <section class="fr-mt-3w">
+        <div class="fr-accordions-group">
+          <section class="fr-accordion">
+            <h3 class="fr-accordion__title">
+              <button type="button" class="fr-accordion__btn" aria-expanded="false" aria-controls="accordion-definitions">Définitions et méthode de calcul</button>
+            </h3>
+            <div id="accordion-definitions" class="fr-collapse">
+              <ul>
+                <li>Quelles données sont prises en compte dans les calculs ?</li>
+                <li>Les calculs incluent-ils uniquement le salaire de base ou également les primes ?</li>
+                <li>Sont-ils réalisés en équivalent temps plein, en salaire brut horaire ou selon une autre modalité ?</li>
+                <li>Que signifie la notion de « quartile » dans ce contexte ?</li>
+                <li>À quoi servent les quartiles présentés ? Quelle est la finalité des quartiles lorsqu'ils sont affichés sans échelle ou référence comparative ?</li>
+              </ul>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button class="fr-btn fr-btn--secondary fr-icon-arrow-left-line fr-btn--icon-left" type="button">Précédent</button>
+        <button class="fr-btn fr-icon-arrow-right-line fr-btn--icon-right" type="button">Suivant</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="fr-footer" role="contentinfo" id="footer">
+    <div class="fr-container">
+      <div class="fr-footer__body">
+        <div class="fr-footer__brand fr-enlarge-link">
+          <p class="fr-logo">
+            Ministère<br>du travail<br>et de l'emploi
+          </p>
+        </div>
+        <div class="fr-footer__content">
+          <p class="fr-footer__content-desc">Egapro permet aux entreprises de déclarer leurs indicateurs de rémunération et de représentation entre les femmes et les hommes.</p>
+          <ul class="fr-footer__content-list">
+            <li class="fr-footer__content-item"><a class="fr-footer__content-link" href="#">info.gouv.fr</a></li>
+            <li class="fr-footer__content-item"><a class="fr-footer__content-link" href="#">service-public.fr</a></li>
+            <li class="fr-footer__content-item"><a class="fr-footer__content-link" href="#">legifrance.gouv.fr</a></li>
+            <li class="fr-footer__content-item"><a class="fr-footer__content-link" href="#">data.gouv.fr</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="fr-footer__bottom">
+        <ul class="fr-footer__bottom-list">
+          <li class="fr-footer__bottom-item"><a class="fr-footer__bottom-link" href="#">Accessibilité : non conforme</a></li>
+          <li class="fr-footer__bottom-item"><a class="fr-footer__bottom-link" href="#">Mentions légales</a></li>
+          <li class="fr-footer__bottom-item"><a class="fr-footer__bottom-link" href="#">Données personnelles</a></li>
+          <li class="fr-footer__bottom-item"><a class="fr-footer__bottom-link" href="#">Gestion des cookies</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.13.2/dist/dsfr.module.min.js"></script>
+  <script type="text/javascript" nomodule src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.13.2/dist/dsfr.nomodule.min.js"></script>
+</body>
+</html>

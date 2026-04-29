@@ -1,0 +1,310 @@
+/* Shared styles for the 4 epic-3349 mockup screens.
+   Built strictly on top of DSFR; only declares overrides
+   needed to fit narrow input fields inside table cells. */
+
+/* Page wrapper to mirror the white declaration page background */
+.page-content {
+  padding: 56px 0;
+}
+
+@media (max-width: 767px) {
+  .page-content {
+    padding: 32px 0;
+  }
+}
+
+/* Header brand line: site name + slogan stacked, inline with logo */
+.alpha-banner {
+  background-color: var(--background-alt-blue-france);
+  padding: 1rem 0;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.alpha-banner__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.alpha-banner__inner > span {
+  white-space: nowrap;
+}
+
+/* Title row: H1 + saved indicator, baseline aligned */
+.declaration-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.declaration-title h1 {
+  margin: 0;
+}
+
+.declaration-title__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-mention-grey);
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  margin: 0;
+}
+
+.declaration-title__status::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: var(--background-action-high-success);
+  -webkit-mask: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%27currentColor%27%20d%3D%27M12%2022C6.477%2022%202%2017.523%202%2012S6.477%202%2012%202s10%204.477%2010%2010-4.477%2010-10%2010m-1-6%207.07-7.07-1.414-1.42L11%2013.17%207.879%2010.05%206.464%2011.46Z%27/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%27currentColor%27%20d%3D%27M12%2022C6.477%2022%202%2017.523%202%2012S6.477%202%2012%202s10%204.477%2010%2010-4.477%2010-10%2010m-1-6%207.07-7.07-1.414-1.42L11%2013.17%207.879%2010.05%206.464%2011.46Z%27/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Two introductory paragraphs (regular + medium) */
+.declaration-intro p {
+  margin: 0 0 1rem 0;
+}
+
+.declaration-intro p:last-child {
+  margin-bottom: 0;
+}
+
+.declaration-intro__emphasis {
+  font-weight: 500;
+}
+
+/* Quartile data table — overrides for inline inputs */
+.quartile-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.quartile-table thead th {
+  font-weight: 700;
+  color: var(--text-title-grey);
+  background-color: var(--background-alt-grey);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: top;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  border-bottom: 1px solid var(--border-plain-grey);
+}
+
+.quartile-table thead th.quartile-table__col-numeric {
+  text-align: right;
+}
+
+.quartile-table tbody td,
+.quartile-table tbody th {
+  padding: 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border-default-grey);
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: var(--text-default-grey);
+}
+
+.quartile-table tbody tr:last-child td,
+.quartile-table tbody tr:last-child th {
+  border-bottom: none;
+}
+
+.quartile-table__row-label {
+  font-weight: 700;
+  color: var(--text-title-grey);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.quartile-table__row-label .row-label__text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quartile-table__min,
+.quartile-table__max-readonly,
+.quartile-table__numeric {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.quartile-table__numeric--bold {
+  font-weight: 700;
+  color: var(--text-title-grey);
+}
+
+.quartile-table__total-label {
+  font-weight: 700;
+  color: var(--text-title-grey);
+  text-align: left;
+}
+
+/* Inline input cell: input + euro suffix on the same line */
+.cell-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.cell-input .fr-input {
+  width: 8rem;
+  text-align: right;
+  background-color: var(--background-contrast-grey);
+}
+
+.cell-input--narrow .fr-input {
+  width: 4.5rem;
+}
+
+.cell-input__suffix {
+  color: var(--text-default-grey);
+  font-size: 1rem;
+  line-height: 1.5rem;
+  white-space: nowrap;
+}
+
+/* Error variant inside a table cell: keep margins compact */
+.cell-input-group {
+  margin: 0;
+}
+
+.cell-input-group .fr-message {
+  text-align: right;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+}
+
+@media (max-width: 767px) {
+  .cell-input-group .fr-message {
+    text-align: left;
+  }
+}
+
+/* Tooltip-like info icon trigger next to a quartile label */
+.info-tooltip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--border-action-high-blue-france);
+  border-radius: 50%;
+  color: var(--text-action-high-blue-france);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  background: transparent;
+  padding: 0;
+  cursor: help;
+}
+
+.info-tooltip:focus-visible {
+  outline: 2px solid var(--text-action-high-blue-france);
+  outline-offset: 2px;
+}
+
+/* Source line under each table */
+.table-source {
+  margin: 0;
+  color: var(--text-mention-grey);
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+
+/* Section heading for each table block */
+.table-section {
+  margin-bottom: 2.5rem;
+}
+
+.table-section__title {
+  margin-bottom: 1rem;
+}
+
+.table-section__source {
+  margin-top: 0.5rem;
+}
+
+/* Form actions row: previous on the left, next on the right */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Mobile responsive: stack table cells, drop sticky widths */
+@media (max-width: 767px) {
+  .quartile-table thead {
+    display: none;
+  }
+
+  .quartile-table,
+  .quartile-table tbody,
+  .quartile-table tr,
+  .quartile-table td,
+  .quartile-table th {
+    display: block;
+    width: 100%;
+  }
+
+  .quartile-table tbody tr {
+    border-bottom: 1px solid var(--border-default-grey);
+    padding: 0.75rem 0;
+  }
+
+  .quartile-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .quartile-table tbody td,
+  .quartile-table tbody th {
+    border-bottom: none;
+    padding: 0.5rem 0;
+    text-align: left;
+  }
+
+  .quartile-table__row-label {
+    font-size: 1.125rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .quartile-table tbody td[data-mobile-label]::before {
+    content: attr(data-mobile-label);
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-mention-grey);
+    margin-bottom: 0.25rem;
+    font-weight: 400;
+  }
+
+  .quartile-table__min,
+  .quartile-table__max-readonly,
+  .quartile-table__numeric,
+  .cell-input {
+    text-align: left;
+    justify-content: flex-start;
+  }
+
+  .cell-input .fr-input {
+    width: 100%;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .form-actions .fr-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
