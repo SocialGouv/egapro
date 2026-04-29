@@ -34,7 +34,7 @@ export type Step3Data = {
 };
 
 export type QuartileData = {
-	threshold?: string;
+	threshold?: string; // undefined for Q4 (no upper bound)
 	women?: number;
 	men?: number;
 };

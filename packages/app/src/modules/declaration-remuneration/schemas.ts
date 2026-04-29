@@ -31,25 +31,43 @@ export const updateStep3Schema = z.object({
 	indicatorEMen: z.string().optional(),
 });
 
-const quartileSchema = z.object({
+const quartileItemSchema = z.object({
 	threshold: z.string().optional(),
 	women: z.number().int().min(0).optional(),
 	men: z.number().int().min(0).optional(),
 });
 
+const tableSchema = z
+	.tuple([
+		quartileItemSchema,
+		quartileItemSchema,
+		quartileItemSchema,
+		quartileItemSchema,
+	])
+	.refine(
+		(q) =>
+			Boolean(q[0].threshold) &&
+			Boolean(q[1].threshold) &&
+			Boolean(q[2].threshold),
+		{ message: "Le seuil est obligatoire" },
+	)
+	.refine((q) => !q[3].threshold, {
+		message: "Le 4ème quartile ne doit pas avoir de seuil",
+	})
+	.refine(
+		(q) => {
+			const t1 = q[0].threshold;
+			const t2 = q[1].threshold;
+			const t3 = q[2].threshold;
+			if (!t1 || !t2 || !t3) return true;
+			return parseFloat(t1) < parseFloat(t2) && parseFloat(t2) < parseFloat(t3);
+		},
+		{ message: "Les seuils doivent être strictement croissants" },
+	);
+
 export const updateStep4Schema = z.object({
-	annual: z.tuple([
-		quartileSchema,
-		quartileSchema,
-		quartileSchema,
-		quartileSchema,
-	]),
-	hourly: z.tuple([
-		quartileSchema,
-		quartileSchema,
-		quartileSchema,
-		quartileSchema,
-	]),
+	annual: tableSchema,
+	hourly: tableSchema,
 });
 
 const employeeCategoryDataSchema = z.object({
