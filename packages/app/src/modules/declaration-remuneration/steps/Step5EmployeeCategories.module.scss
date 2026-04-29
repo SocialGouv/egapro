@@ -1,4 +1,7 @@
 .sectionHeader {
+	// DSFR's `.fr-table__content table tbody td` rule wins on specificity, so
+	// override the variable it reads instead of fighting the selector.
+	--background-default-grey: var(--background-contrast-grey);
 	background-color: var(--background-contrast-grey);
 }
 
