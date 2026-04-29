@@ -31,45 +31,42 @@ export const updateStep3Schema = z.object({
 	indicatorEMen: z.string().optional(),
 });
 
-const quartileItemSchema = z.object({
-	threshold: z.string().optional(),
-	women: z.number().int().min(0).optional(),
-	men: z.number().int().min(0).optional(),
-});
-
 const isValidNumericThreshold = (v: string | undefined): v is string =>
 	v !== undefined && v !== "" && !Number.isNaN(Number(v));
 
+const quartileWithThresholdSchema = z
+	.object({
+		threshold: z.string().optional(),
+		women: z.number().int().min(0).optional(),
+		men: z.number().int().min(0).optional(),
+	})
+	.refine((q) => isValidNumericThreshold(q.threshold), {
+		message: "Le seuil est obligatoire",
+	});
+
+const quartileLastSchema = z
+	.object({
+		threshold: z.string().optional(),
+		women: z.number().int().min(0).optional(),
+		men: z.number().int().min(0).optional(),
+	})
+	.refine((q) => !q.threshold, {
+		message: "Le 4ème quartile ne doit pas avoir de seuil",
+	});
+
 const tableSchema = z
 	.tuple([
-		quartileItemSchema,
-		quartileItemSchema,
-		quartileItemSchema,
-		quartileItemSchema,
+		quartileWithThresholdSchema,
+		quartileWithThresholdSchema,
+		quartileWithThresholdSchema,
+		quartileLastSchema,
 	])
 	.refine(
-		(q) =>
-			isValidNumericThreshold(q[0].threshold) &&
-			isValidNumericThreshold(q[1].threshold) &&
-			isValidNumericThreshold(q[2].threshold),
-		{ message: "Le seuil est obligatoire" },
-	)
-	.refine((q) => !q[3].threshold, {
-		message: "Le 4ème quartile ne doit pas avoir de seuil",
-	})
-	.refine(
 		(q) => {
-			const t1 = q[0].threshold;
-			const t2 = q[1].threshold;
-			const t3 = q[2].threshold;
-			if (
-				!isValidNumericThreshold(t1) ||
-				!isValidNumericThreshold(t2) ||
-				!isValidNumericThreshold(t3)
-			) {
-				return true;
-			}
-			return parseFloat(t1) < parseFloat(t2) && parseFloat(t2) < parseFloat(t3);
+			const t1 = parseFloat(q[0].threshold as string);
+			const t2 = parseFloat(q[1].threshold as string);
+			const t3 = parseFloat(q[2].threshold as string);
+			return t1 < t2 && t2 < t3;
 		},
 		{ message: "Les seuils doivent être strictement croissants" },
 	);

@@ -44,6 +44,24 @@ describe("updateStep4Schema", () => {
 		}
 	});
 
+	it("rejects when a Q1-Q3 threshold is absent (undefined)", () => {
+		const table = makeTable(
+			{ women: 1, men: 1 },
+			{ threshold: "20000", women: 1, men: 1 },
+			{ threshold: "30000", women: 1, men: 1 },
+			{ women: 1, men: 1 },
+		);
+		const result = updateStep4Schema.safeParse({
+			annual: table,
+			hourly: table,
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			const messages = result.error.issues.map((i) => i.message);
+			expect(messages).toContain("Le seuil est obligatoire");
+		}
+	});
+
 	it("rejects when thresholds are not strictly increasing", () => {
 		const table = makeTable(
 			{ threshold: "30000", women: 1, men: 1 },
@@ -127,5 +145,43 @@ describe("updateStep4Schema", () => {
 			hourly: shortTable,
 		});
 		expect(result.success).toBe(false);
+	});
+
+	it("rejects when a Q1-Q3 threshold is non-numeric", () => {
+		const table = makeTable(
+			{ threshold: "abc", women: 1, men: 1 },
+			{ threshold: "20000", women: 1, men: 1 },
+			{ threshold: "30000", women: 1, men: 1 },
+			{ women: 1, men: 1 },
+		);
+		const result = updateStep4Schema.safeParse({
+			annual: table,
+			hourly: table,
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			const messages = result.error.issues.map((i) => i.message);
+			expect(messages).toContain("Le seuil est obligatoire");
+		}
+	});
+
+	it("rejects when first two thresholds increase but third is lower", () => {
+		const table = makeTable(
+			{ threshold: "10000", women: 1, men: 1 },
+			{ threshold: "30000", women: 1, men: 1 },
+			{ threshold: "20000", women: 1, men: 1 },
+			{ women: 1, men: 1 },
+		);
+		const result = updateStep4Schema.safeParse({
+			annual: table,
+			hourly: table,
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			const messages = result.error.issues.map((i) => i.message);
+			expect(messages).toContain(
+				"Les seuils doivent être strictement croissants",
+			);
+		}
 	});
 });
