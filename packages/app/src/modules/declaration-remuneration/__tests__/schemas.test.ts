@@ -7,12 +7,7 @@ function makeTable(
 	q3: { threshold?: string; women?: number; men?: number },
 	q4: { threshold?: string; women?: number; men?: number },
 ) {
-	return [q1, q2, q3, q4] as [
-		typeof q1,
-		typeof q2,
-		typeof q3,
-		typeof q4,
-	];
+	return [q1, q2, q3, q4] as [typeof q1, typeof q2, typeof q3, typeof q4];
 }
 
 const validTable = makeTable(
@@ -38,7 +33,10 @@ describe("updateStep4Schema", () => {
 			{ threshold: "30000", women: 1, men: 1 },
 			{ women: 1, men: 1 },
 		);
-		const result = updateStep4Schema.safeParse({ annual: table, hourly: table });
+		const result = updateStep4Schema.safeParse({
+			annual: table,
+			hourly: table,
+		});
 		expect(result.success).toBe(false);
 		if (!result.success) {
 			const messages = result.error.issues.map((i) => i.message);
@@ -53,7 +51,10 @@ describe("updateStep4Schema", () => {
 			{ threshold: "40000", women: 1, men: 1 },
 			{ women: 1, men: 1 },
 		);
-		const result = updateStep4Schema.safeParse({ annual: table, hourly: table });
+		const result = updateStep4Schema.safeParse({
+			annual: table,
+			hourly: table,
+		});
 		expect(result.success).toBe(false);
 		if (!result.success) {
 			const messages = result.error.issues.map((i) => i.message);
@@ -70,7 +71,10 @@ describe("updateStep4Schema", () => {
 			{ threshold: "30000", women: 1, men: 1 },
 			{ women: 1, men: 1 },
 		);
-		const result = updateStep4Schema.safeParse({ annual: table, hourly: table });
+		const result = updateStep4Schema.safeParse({
+			annual: table,
+			hourly: table,
+		});
 		expect(result.success).toBe(false);
 		if (!result.success) {
 			const messages = result.error.issues.map((i) => i.message);
@@ -87,7 +91,10 @@ describe("updateStep4Schema", () => {
 			{ threshold: "30000", women: 1, men: 1 },
 			{ threshold: "50000", women: 1, men: 1 },
 		);
-		const result = updateStep4Schema.safeParse({ annual: table, hourly: table });
+		const result = updateStep4Schema.safeParse({
+			annual: table,
+			hourly: table,
+		});
 		expect(result.success).toBe(false);
 	});
 
@@ -98,7 +105,10 @@ describe("updateStep4Schema", () => {
 			{ threshold: "30000", women: 1, men: 1 },
 			{ women: 1, men: 1 },
 		);
-		const result = updateStep4Schema.safeParse({ annual: table, hourly: table });
+		const result = updateStep4Schema.safeParse({
+			annual: table,
+			hourly: table,
+		});
 		expect(result.success).toBe(false);
 	});
 
