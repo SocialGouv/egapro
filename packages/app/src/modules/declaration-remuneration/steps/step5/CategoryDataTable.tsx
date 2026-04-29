@@ -222,7 +222,7 @@ export function CategoryDataTable({
 								</tr>
 								{/* Total annuel */}
 								<tr>
-									<td className={stepStyles.sectionHeader}>
+									<td>
 										<strong>Total</strong>
 									</td>
 									<td>{formatTotal(annualTotalWomen, "€")}</td>
@@ -327,7 +327,7 @@ export function CategoryDataTable({
 								</tr>
 								{/* Total horaire */}
 								<tr>
-									<td className={stepStyles.sectionHeader}>
+									<td>
 										<strong>Total</strong>
 									</td>
 									<td>{formatTotal(hourlyTotalWomen, "€")}</td>
