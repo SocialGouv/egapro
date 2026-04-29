@@ -20,6 +20,9 @@ export {
 	FIRST_DECLARATION_YEAR,
 	GAP_ALERT_THRESHOLD,
 	MAX_CSE_FILES,
+	QUARTILE_COUNT,
+	QUARTILE_MIN_INCREMENT,
+	QUARTILE_THRESHOLD_COUNT,
 } from "./shared/constants";
 // Declaration prerequisites
 export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";
@@ -51,6 +54,8 @@ export {
 	normalizeDecimalInput,
 	parseNumber,
 } from "./shared/number";
+// Quartile helpers
+export { computeQuartileMin, migrateLegacyThresholds } from "./shared/quartile";
 export type { CountyCode, RegionCode } from "./shared/regions";
 // Regions & counties
 export {
