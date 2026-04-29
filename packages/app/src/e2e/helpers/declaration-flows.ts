@@ -18,12 +18,37 @@ async function fillPayGapTable(page: Page) {
 async function fillStep4Quartiles(page: Page) {
 	// Total must equal step 1 workforce: 10 women, 15 men
 	// Split across 4 quartiles: 3+3+2+2=10 women, 4+4+4+3=15 men
-	const quartiles = [
-		{ name: "1er quartile", women: "3", men: "4" },
-		{ name: "2e quartile", women: "3", men: "4" },
-		{ name: "3e quartile", women: "2", men: "4" },
+	// Q4 has no upper threshold (schema enforces this)
+	const quartiles: Array<{
+		name: string;
+		annualThreshold?: string;
+		hourlyThreshold?: string;
+		women: string;
+		men: string;
+	}> = [
+		{
+			name: "1er quartile",
+			annualThreshold: "10000",
+			hourlyThreshold: "10",
+			women: "3",
+			men: "4",
+		},
+		{
+			name: "2e quartile",
+			annualThreshold: "20000",
+			hourlyThreshold: "20",
+			women: "3",
+			men: "4",
+		},
+		{
+			name: "3e quartile",
+			annualThreshold: "30000",
+			hourlyThreshold: "30",
+			women: "2",
+			men: "4",
+		},
 		{ name: "4e quartile", women: "2", men: "3" },
-	] as const;
+	];
 
 	for (const q of quartiles) {
 		// Each quartile appears twice (annual table + hourly table) — fill both
@@ -35,10 +60,12 @@ async function fillStep4Quartiles(page: Page) {
 			.getByRole("textbox", { name: `Nombre d'hommes ${q.name}` })
 			.nth(0)
 			.fill(q.men);
-		await page
-			.getByRole("textbox", { name: `Rémunération brute ${q.name}` })
-			.nth(0)
-			.fill("1000");
+		if (q.annualThreshold !== undefined) {
+			await page
+				.getByRole("textbox", { name: `Rémunération brute ${q.name}` })
+				.nth(0)
+				.fill(q.annualThreshold);
+		}
 	}
 
 	// Hourly table (same quartile names, second occurrence)
@@ -51,10 +78,12 @@ async function fillStep4Quartiles(page: Page) {
 			.getByRole("textbox", { name: `Nombre d'hommes ${q.name}` })
 			.nth(1)
 			.fill(q.men);
-		await page
-			.getByRole("textbox", { name: `Rémunération brute ${q.name}` })
-			.nth(1)
-			.fill("10");
+		if (q.hourlyThreshold !== undefined) {
+			await page
+				.getByRole("textbox", { name: `Rémunération brute ${q.name}` })
+				.nth(1)
+				.fill(q.hourlyThreshold);
+		}
 	}
 }
 

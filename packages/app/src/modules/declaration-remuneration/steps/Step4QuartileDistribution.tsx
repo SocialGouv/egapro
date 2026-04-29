@@ -160,8 +160,12 @@ export function Step4QuartileDistribution({
 
 	const onSubmit = form.handleSubmit(() => {
 		const allQuartiles = [...annual, ...hourly];
+		// Q4 (every 4th element, index % 4 === 3) has no upper threshold by design
 		const incomplete = allQuartiles.some(
-			(q) => q.women === undefined || q.men === undefined || !q.threshold,
+			(q, i) =>
+				q.women === undefined ||
+				q.men === undefined ||
+				(i % 4 !== 3 && !q.threshold),
 		);
 		if (incomplete) {
 			setFormValidationError(
