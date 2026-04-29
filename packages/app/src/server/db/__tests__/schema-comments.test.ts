@@ -195,20 +195,26 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 	});
 
 	it("uses each SUIT label verbatim, exactly once (S4)", () => {
-		const commentValues = Object.values(declarationComments ?? {}).map((c) =>
-			c.replace("GIP-MDS | SUIT: ", ""),
+		// Scoped to T1 columns only (`indicator_*`). T2 columns inside `declaration`
+		// (siren, year, total_women, …) use the bare `SUIT: …` format and are
+		// validated by the T2 per-key tests above.
+		const t1Entries = Object.entries(declarationComments ?? {}).filter(
+			([col]) => col.startsWith("indicator_"),
+		);
+		const t1CommentValues = t1Entries.map(([, v]) =>
+			v.replace("GIP-MDS | SUIT: ", ""),
 		);
 
 		const labelSet = new Set(ALL_SUIT_LABELS);
 
 		for (const label of ALL_SUIT_LABELS) {
-			const occurrences = commentValues.filter((v) => v === label).length;
+			const occurrences = t1CommentValues.filter((v) => v === label).length;
 			expect(occurrences, `label "${label}"`).toBe(1);
 		}
 
-		// Reverse check: every value in the map must be a known canonical label.
+		// Reverse check: every T1 value in the map must be a known canonical label.
 		// Catches typos that pass the format regex but aren't in apiLabels.ts.
-		for (const [column, value] of Object.entries(declarationComments ?? {})) {
+		for (const [column, value] of t1Entries) {
 			const label = value.replace("GIP-MDS | SUIT: ", "");
 			expect(
 				labelSet.has(label),
