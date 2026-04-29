@@ -109,7 +109,7 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 					row.annualQuartileThreshold1,
 					row.annualQuartileThreshold2,
 					row.annualQuartileThreshold3,
-					row.annualQuartileThreshold4,
+					null,
 				],
 				[
 					row.annualQuartile1ProportionWomen,
@@ -131,7 +131,7 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 					row.hourlyQuartileThreshold1,
 					row.hourlyQuartileThreshold2,
 					row.hourlyQuartileThreshold3,
-					row.hourlyQuartileThreshold4,
+					null,
 				],
 				[
 					row.hourlyQuartile1ProportionWomen,
@@ -194,7 +194,6 @@ export const CSV_TO_SCHEMA_MAP: Record<string, keyof GipMdsRow> = {
 	Seuil_Q1_Rem_globale: "annualQuartileThreshold1",
 	Seuil_Q2_Rem_globale: "annualQuartileThreshold2",
 	Seuil_Q3_Rem_globale: "annualQuartileThreshold3",
-	Seuil_Q4_Rem_globale: "annualQuartileThreshold4",
 	Quartile1_Rem_globale_annuelle_proportion_F: "annualQuartile1ProportionWomen",
 	Quartile2_Rem_globale_annuelle_proportion_F: "annualQuartile2ProportionWomen",
 	Quartile3_Rem_globale_annuelle_proportion_F: "annualQuartile3ProportionWomen",
@@ -206,7 +205,6 @@ export const CSV_TO_SCHEMA_MAP: Record<string, keyof GipMdsRow> = {
 	Seuil_Q1_Taux_horaire_global: "hourlyQuartileThreshold1",
 	Seuil_Q2_Taux_horaire_global: "hourlyQuartileThreshold2",
 	Seuil_Q3_Taux_horaire_global: "hourlyQuartileThreshold3",
-	Seuil_Q4_Taux_horaire_global: "hourlyQuartileThreshold4",
 	Quartile1_Taux_horaire_global_proportion_F: "hourlyQuartile1ProportionWomen",
 	Quartile2_Taux_horaire_global_proportion_F: "hourlyQuartile2ProportionWomen",
 	Quartile3_Taux_horaire_global_proportion_F: "hourlyQuartile3ProportionWomen",

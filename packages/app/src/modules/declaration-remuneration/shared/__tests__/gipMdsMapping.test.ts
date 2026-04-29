@@ -46,7 +46,6 @@ function makeRow(overrides: Partial<GipMdsRow> = {}): GipMdsRow {
 		annualQuartileThreshold1: null,
 		annualQuartileThreshold2: null,
 		annualQuartileThreshold3: null,
-		annualQuartileThreshold4: null,
 		annualQuartile1ProportionWomen: null,
 		annualQuartile2ProportionWomen: null,
 		annualQuartile3ProportionWomen: null,
@@ -58,7 +57,6 @@ function makeRow(overrides: Partial<GipMdsRow> = {}): GipMdsRow {
 		hourlyQuartileThreshold1: null,
 		hourlyQuartileThreshold2: null,
 		hourlyQuartileThreshold3: null,
-		hourlyQuartileThreshold4: null,
 		hourlyQuartile1ProportionWomen: null,
 		hourlyQuartile2ProportionWomen: null,
 		hourlyQuartile3ProportionWomen: null,
@@ -171,7 +169,6 @@ describe("mapGipToFormData", () => {
 			annualQuartileThreshold1: "25000",
 			annualQuartileThreshold2: "30000",
 			annualQuartileThreshold3: "35000",
-			annualQuartileThreshold4: "40000",
 			annualQuartile1ProportionWomen: "0.6",
 			annualQuartile2ProportionWomen: "0.5",
 			annualQuartile3ProportionWomen: "0.4",
@@ -187,7 +184,7 @@ describe("mapGipToFormData", () => {
 			"25000",
 			"30000",
 			"35000",
-			"40000",
+			null,
 		]);
 		expect(result?.step4.annual.womenCounts).toEqual([30, 25, 20, 15]);
 		expect(result?.step4.annual.menCounts).toEqual([20, 25, 30, 35]);
@@ -273,7 +270,6 @@ describe("mapGipToFormData", () => {
 			hourlyQuartileThreshold1: "13.74",
 			hourlyQuartileThreshold2: "17.58",
 			hourlyQuartileThreshold3: "21.98",
-			hourlyQuartileThreshold4: "30.22",
 			hourlyQuartile1ProportionWomen: "0.6",
 			hourlyQuartile2ProportionWomen: "0.4",
 			hourlyQuartile3ProportionWomen: "0.3",
@@ -289,7 +285,7 @@ describe("mapGipToFormData", () => {
 			"13.74",
 			"17.58",
 			"21.98",
-			"30.22",
+			null,
 		]);
 		expect(result?.step4.hourly.womenCounts).toEqual([30, 20, 15, 10]);
 		expect(result?.step4.hourly.menCounts).toEqual([20, 30, 35, 40]);
