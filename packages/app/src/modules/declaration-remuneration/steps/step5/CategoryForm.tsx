@@ -496,7 +496,33 @@ export function CategoryForm({
 			<DefinitionAccordion
 				id={accordionId}
 				title="Définitions et méthode de calcul"
-			/>
+			>
+				<div className="fr-callout">
+					<ul>
+						<li>
+							Comment importer directement ses données depuis un fichier
+							Excel&nbsp;?
+						</li>
+						<li>
+							Où trouver le modèle de fichier pour l&apos;importation&nbsp;?
+						</li>
+						<li>Que signifie «&nbsp;Salaire de base&nbsp;»&nbsp;?</li>
+						<li>
+							Que signifie «&nbsp;Rémunération annuelle brute&nbsp;»&nbsp;?
+							Est-ce la moyenne ou le total annuel&nbsp;?
+						</li>
+						<li>Que signifie «&nbsp;Rémunération horaire&nbsp;»&nbsp;?</li>
+						<li>
+							Comment saisir le nombre d&apos;heures pour un calcul automatique
+							du taux horaire&nbsp;?
+						</li>
+						<li>
+							Comment savoir quels accords s&apos;appliquent à mon
+							entreprise&nbsp;?
+						</li>
+					</ul>
+				</div>
+			</DefinitionAccordion>
 
 			<FormErrors
 				mutationError={submitError}

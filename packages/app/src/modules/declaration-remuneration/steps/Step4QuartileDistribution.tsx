@@ -7,6 +7,7 @@ import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep4Schema } from "../schemas";
+import common from "../shared/common.module.scss";
 import { QUARTILE_NAMES } from "../shared/constants";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY } from "../shared/devFillData";
@@ -20,7 +21,6 @@ import { TooltipButton } from "../shared/TooltipButton";
 import type { QuartileData, QuartileTuple, Step4Data } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
 import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCallout";
-import { QuartileReadingNote } from "./step4/QuartileReadingNote";
 import { QuartileTable } from "./step4/QuartileTable";
 
 function toQuartileData(c: {
@@ -209,27 +209,23 @@ export function Step4QuartileDistribution({
 			{/* Description + instructions */}
 			<div className={stepStyles.instructions}>
 				<p className="fr-mb-0">
-					Cet indicateur compare la proportion de femmes et d&apos;hommes selon
-					les niveaux de rémunération. Les rémunérations sont classées de la
-					plus faible à la plus élevée puis divisées en quatre groupes de même
-					taille appelés quartiles&nbsp;: le 1<sup>er</sup> quartile correspond
-					aux 25 % des salariés les moins rémunérés, le 2<sup>e</sup> quartile
-					(médiane) aux 50 % des salariés situés au milieu de la distribution,
-					le 3<sup>e</sup> quartile aux salariés situés entre 50 % et 75 % des
-					rémunérations, et le 4<sup>e</sup> quartile correspond aux 25 % des
-					salariés les mieux rémunérés.
+					Cet indicateur répartit l&apos;ensemble des salariés en quatre groupes
+					de rémunération appelés quartiles&nbsp;: du quartile inférieur qui
+					regroupe les salariés les moins rémunérés, au quartile supérieur qui
+					rassemble les salariés les mieux rémunérés.
 				</p>
 
-				<p className="fr-mb-0">
-					<strong>
-						{gipPrefillData
-							? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
-							: "Renseignez les informations avant de valider vos indicateurs."}
-					</strong>
-					<TooltipButton
-						id="tooltip-step4-info"
-						label="Information sur les indicateurs"
-					/>
+				<p className={`fr-mb-0 ${common.fontMedium}`}>
+					{gipPrefillData
+						? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."
+						: "Renseignez les informations avant de valider vos indicateurs."}
+					{!gipPrefillData && (
+						<TooltipButton
+							id="tooltip-step4-info"
+							label="Information sur la confidentialité des données"
+							text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
+						/>
+					)}
 				</p>
 
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
@@ -243,15 +239,6 @@ export function Step4QuartileDistribution({
 						handleQuartileChange("annual", index, field, value)
 					}
 					quartiles={annual}
-					readingNote={
-						gipPrefillData ? (
-							<QuartileReadingNote
-								categories={annual}
-								tableType="annual"
-								year={declarationYear}
-							/>
-						) : undefined
-					}
 					sourceNote={
 						gipPrefillData ? (
 							<PrefillSource
@@ -271,15 +258,6 @@ export function Step4QuartileDistribution({
 						handleQuartileChange("hourly", index, field, value)
 					}
 					quartiles={hourly}
-					readingNote={
-						gipPrefillData ? (
-							<QuartileReadingNote
-								categories={hourly}
-								tableType="hourly"
-								year={declarationYear}
-							/>
-						) : undefined
-					}
 					sourceNote={
 						gipPrefillData ? (
 							<PrefillSource
@@ -296,15 +274,40 @@ export function Step4QuartileDistribution({
 				<DefinitionAccordion
 					id="accordion-step4"
 					title="Définitions et méthode de calcul"
-				/>
+				>
+					<div className="fr-callout">
+						<ul>
+							<li>
+								Quelles données sont prises en compte dans les calculs&nbsp;?
+							</li>
+							<li>
+								Les calculs incluent-ils uniquement le salaire de base ou
+								également les primes&nbsp;?
+							</li>
+							<li>
+								Sont-ils réalisés en équivalent temps plein, en salaire brut
+								horaire ou selon une autre modalité&nbsp;?
+							</li>
+							<li>
+								Que signifie la notion de «&nbsp;quartile&nbsp;» dans ce
+								contexte&nbsp;? Définir simplement un quartile pour permettre à
+								l&apos;utilisateur de s&apos;assurer qu&apos;il comprend bien
+								cette notion.
+							</li>
+							<li>
+								À quoi servent les quartiles présentés&nbsp;? Quelle est la
+								finalité des quartiles lorsqu&apos;ils sont affichés sans
+								échelle ou référence comparative&nbsp;?
+							</li>
+						</ul>
+					</div>
+				</DefinitionAccordion>
 			</div>
 
-			{gipPrefillData && (
-				<QuartileInterpretationCallout
-					annualCategories={annual}
-					hourlyCategories={hourly}
-				/>
-			)}
+			<QuartileInterpretationCallout
+				annualCategories={annual}
+				hourlyCategories={hourly}
+			/>
 
 			<FormErrors
 				mutationError={mutation.error?.message}

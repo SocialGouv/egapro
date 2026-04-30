@@ -81,8 +81,10 @@ test.describe("Declaration workflow", () => {
 			.getByRole("textbox", { name: "Annuelle brute moyenne — Hommes" })
 			.fill("32000");
 
-		// Verify gap is computed and displayed
-		await expect(page.getByText("6,3 %", { exact: true })).toBeVisible();
+		// Verify gap is computed and displayed in the table cell
+		await expect(
+			page.getByRole("table").getByText("6,3 %", { exact: true }),
+		).toBeVisible();
 	});
 
 	test("step 3 - Rémunération variable inline editing", async ({ page }) => {
