@@ -37,9 +37,11 @@ fi
 TICKET="$1"
 BASE="$2"
 
-# 1. Reuse existing branch if any (idempotent across re-runs)
+# 1. Reuse existing branch if any (idempotent across re-runs).
+# `head -1` SIGPIPEs upstream `sed`/`awk`, which under `set -o pipefail`
+# poisons `set -e`. `|| true` is the cheap fix.
 EXISTING=$(git ls-remote --heads origin "ticket/${TICKET}-*" 2>/dev/null \
-    | awk '{print $2}' | sed 's|refs/heads/||' | head -1)
+    | awk '{print $2}' | sed 's|refs/heads/||' | head -1 || true)
 if [ -n "$EXISTING" ]; then
     echo "[create_linked_branch] reusing existing branch: $EXISTING" >&2
     echo "$EXISTING"
@@ -52,12 +54,19 @@ TITLE=$(gh issue view "$TICKET" --json title --jq '.title')
 TITLE_TRIMMED=$(echo "$TITLE" | sed -E 's/^(T[0-9]+ *[—–-] *|\[[^]]+\] *)//')
 # Slugify: lowercase, ASCII-fold removes accents, non-alphanumeric → '-',
 # collapse runs of '-', trim leading/trailing '-', cap at 40 chars.
+# Truncation uses bash parameter expansion (not `head -c`) so a SIGPIPE
+# from a downstream pipe stage doesn't tank the pipeline under
+# `set -o pipefail` for long titles.
+# `|| true` swallows failures from any pipe stage (esp. macOS iconv,
+# which exits non-zero on some characters even with TRANSLIT) so a single
+# slugification quirk doesn't tank `set -o pipefail` and crash silently.
 SLUG=$(echo "$TITLE_TRIMMED" \
-    | iconv -f UTF-8 -t ASCII//TRANSLIT 2>/dev/null \
+    | { iconv -f UTF-8 -t ASCII//TRANSLIT 2>/dev/null || cat; } \
     | tr '[:upper:]' '[:lower:]' \
     | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' \
-    | head -c 40 \
-    | sed -E 's/-+$//')
+    || true)
+SLUG="${SLUG:0:40}"
+SLUG="${SLUG%-}"
 
 if [ -z "$SLUG" ]; then
     SLUG="ticket"
