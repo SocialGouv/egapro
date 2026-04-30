@@ -29,6 +29,12 @@
 }
 
 .quartileTable {
+	:global(.fr-table__container),
+	:global(.fr-table__content),
+	:global(.fr-table__wrapper) {
+		overflow: visible;
+	}
+
 	table {
 		width: 100%;
 		min-width: 0;
@@ -192,6 +198,7 @@
 		padding: 0;
 		margin-left: 0.25rem;
 		vertical-align: middle;
+		overflow: visible;
 
 		&::before {
 			margin: 0;
