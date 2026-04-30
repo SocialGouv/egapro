@@ -48,18 +48,16 @@ export function emptyQuartiles(): QuartileTuple {
 	];
 }
 
-/** Computes the lower bound display string for each of the 4 quartiles. */
 export function computeMinsForTable(
 	quartiles: QuartileTuple,
 ): [string, string, string, string] {
 	const dash = "- €";
-	const q1Min = "0,00 €";
 	const min = (prevThreshold: string | undefined): string => {
 		const computed = computeQuartileMin(prevThreshold);
 		return computed ? `${displayDecimal(computed)} €` : dash;
 	};
 	return [
-		q1Min,
+		dash,
 		min(quartiles[0]?.threshold),
 		min(quartiles[1]?.threshold),
 		min(quartiles[2]?.threshold),

@@ -107,20 +107,17 @@ describe("Step4QuartileDistribution", () => {
 		).toBeInTheDocument();
 	});
 
-	it("displays empty state with Q1 min = 0,00 € and Q2..Q4 min = - €", () => {
+	it("displays empty state with all min = - € and Q4 max = - €", () => {
 		render(
 			<Step4QuartileDistribution
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
 		);
-		// Q1 min = "0,00 €" (twice: annual + hourly)
-		expect(screen.getAllByText("0,00 €").length).toBe(2);
-		// Q2/Q3/Q4 min and Q4 max readonly = "- €" → 4 per table × 2 = 8
 		const dashCells = screen
 			.getAllByRole("cell")
 			.filter((c) => c.textContent === "- €");
-		expect(dashCells.length).toBeGreaterThanOrEqual(8);
+		expect(dashCells.length).toBeGreaterThanOrEqual(10);
 	});
 
 	it("renders 3 threshold inputs per table (Q1/Q2/Q3 only) and Q4 readonly", () => {
