@@ -137,7 +137,7 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 
 		// Verify category 1 form fields
-		await expect(page.getByRole("textbox", { name: "Nom" })).toBeVisible();
+		await expect(page.getByRole("textbox", { name: "Libellé" })).toBeVisible();
 		await expect(
 			page.getByRole("textbox", { name: "Effectif femmes, catégorie 1" }),
 		).toBeVisible();

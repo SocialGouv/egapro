@@ -129,7 +129,6 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 	},
 	job_category: {
 		name: "SUIT: Indicateurs.G.Nom_categorie",
-		detail: "SUIT: Indicateurs.G.Detail_categorie",
 	},
 	employee_category: {
 		women_count: "SUIT: Indicateurs.G.Effectif_F",
