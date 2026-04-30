@@ -45,16 +45,15 @@ function pct(q: QuartileData, gender: "women" | "men") {
 	return computePercentage(q[gender] ?? 0, total);
 }
 
-/** Format ordinal text like "1er quartile" → 1<sup>er</sup> quartile */
 function OrdinalLabel({ text }: { text: string }) {
 	const match = text.match(/^(\d+)(er|e)\s(.+)$/);
-	if (!match) return <>{text}</>;
+	if (!match) return <span>{text}</span>;
 	const [, num, suffix, rest] = match;
 	return (
-		<>
+		<span>
 			{num}
 			<sup>{suffix}</sup> {rest}
-		</>
+		</span>
 	);
 }
 

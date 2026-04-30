@@ -121,19 +121,27 @@
 }
 
 .rowLabelText {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.25rem;
+	display: inline;
 	white-space: nowrap;
 
+	sup {
+		font-size: 0.75em;
+		line-height: 0;
+		vertical-align: super;
+	}
+
 	.fr-btn {
-		min-height: 1.5rem;
-		max-width: 1.5rem;
-		max-height: 1.5rem;
+		min-height: 1rem;
+		min-width: 1rem;
+		width: 1rem;
+		height: 1rem;
 		padding: 0;
+		margin-left: 0.25rem;
+		vertical-align: middle;
 
 		&::before {
-			margin-right: 0;
+			margin: 0;
+			--icon-size: 0.875rem;
 		}
 	}
 }
