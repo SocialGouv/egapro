@@ -63,6 +63,13 @@
 
 	tbody td input.fr-input {
 		text-align: right;
+		width: 4.5rem;
+		margin-left: auto;
+	}
+
+	tbody td .inputWithUnit input.fr-input {
+		width: 8rem;
+		margin-left: 0;
 	}
 
 	tbody tr:last-child {
@@ -117,6 +124,13 @@
 
 		tbody td input.fr-input {
 			text-align: left;
+			width: 100%;
+			margin-left: 0;
+		}
+
+		tbody td .inputWithUnit input.fr-input {
+			width: auto;
+			flex: 1;
 		}
 
 		tbody td[data-mobile-label]::before {
@@ -179,17 +193,7 @@
 	gap: 0.5rem;
 	justify-content: flex-end;
 
-	input {
-		min-width: 5rem;
-		text-align: right;
-	}
-
 	@include respond-to(sm) {
 		justify-content: flex-start;
-
-		input {
-			flex: 1;
-			min-width: 0;
-		}
 	}
 }
