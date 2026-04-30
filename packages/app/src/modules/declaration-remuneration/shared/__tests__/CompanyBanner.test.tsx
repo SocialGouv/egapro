@@ -6,7 +6,6 @@ import { CompanyBanner } from "../CompanyBanner";
 const defaultCompany = {
 	name: "Alpha Solutions",
 	siren: "123456789",
-	workforce: 256,
 	hasCse: true,
 };
 
@@ -38,21 +37,17 @@ describe("CompanyBanner", () => {
 		expect(screen.getByText(/Alpha Solutions/)).toBeInTheDocument();
 	});
 
-	it("renders workforce and CSE values", () => {
+	it("renders CSE value", () => {
 		render(
 			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
 		);
 
-		expect(screen.getByText("256")).toBeInTheDocument();
 		expect(screen.getByText("Oui")).toBeInTheDocument();
 	});
 
-	it("hides workforce when null", () => {
+	it("does not render the workforce line", () => {
 		render(
-			<CompanyBanner
-				company={{ ...defaultCompany, workforce: null }}
-				currentPageLabel="Déclaration"
-			/>,
+			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
 		);
 
 		expect(screen.queryByText(/Effectif annuel/)).not.toBeInTheDocument();

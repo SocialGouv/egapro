@@ -1,4 +1,3 @@
-import { getWorkforceYear } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
 
@@ -8,7 +7,6 @@ type CompanyBannerProps = {
 	company: {
 		name: string;
 		siren: string;
-		workforce: number | null;
 		hasCse: boolean | null;
 	};
 	currentPageLabel: string;
@@ -29,7 +27,7 @@ export function CompanyBanner({
 				/>
 
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
-					<div className="fr-col-auto">
+					<div className="fr-col">
 						<p
 							className={`fr-text--bold fr-mb-0 fr-flex fr-flex--align-center ${styles.companyInfo}`}
 						>
@@ -37,14 +35,6 @@ export function CompanyBanner({
 							{company.name} - {formatSiren(company.siren)}
 						</p>
 					</div>
-					{company.workforce !== null && (
-						<div className="fr-col-auto">
-							<p className="fr-mb-0 fr-text--sm">
-								Effectif annuel moyen en {getWorkforceYear()} :{" "}
-								<strong>{company.workforce}</strong>
-							</p>
-						</div>
-					)}
 					<div className="fr-col-auto">
 						<p className="fr-mb-0 fr-text--sm">
 							Existence d'un CSE :{" "}

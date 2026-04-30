@@ -3,7 +3,6 @@ import { CompanyBanner } from "./shared/CompanyBanner";
 type CompanyData = {
 	name: string;
 	siren: string;
-	workforce: number | null;
 	hasCse: boolean | null;
 };
 

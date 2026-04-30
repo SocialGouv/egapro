@@ -23,7 +23,9 @@ const emptyStep1Data = () => ({ totalWomen: 0, totalMen: 0 });
 
 describe("Step1Workforce", () => {
 	it("renders default state with zero totals", () => {
-		render(<Step1Workforce initialData={emptyStep1Data()} />);
+		render(
+			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+		);
 		expect(screen.getByText("Nombre de salariés")).toBeInTheDocument();
 		const table = screen.getByRole("table");
 		expect(within(table).getByText("Femmes")).toBeInTheDocument();
@@ -35,7 +37,9 @@ describe("Step1Workforce", () => {
 	});
 
 	it("renders reference period and mandatory fields notice", () => {
-		render(<Step1Workforce initialData={emptyStep1Data()} />);
+		render(
+			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+		);
 		expect(
 			screen.getByText(/Période de référence pour le calcul des indicateurs/),
 		).toBeInTheDocument();
@@ -45,7 +49,12 @@ describe("Step1Workforce", () => {
 	});
 
 	it("renders initial data with correct values", () => {
-		render(<Step1Workforce initialData={{ totalWomen: 10, totalMen: 20 }} />);
+		render(
+			<Step1Workforce
+				declarationYear={2026}
+				initialData={{ totalWomen: 10, totalMen: 20 }}
+			/>,
+		);
 		expect(screen.getByLabelText("Nombre de femmes")).toHaveValue("10");
 		expect(screen.getByLabelText("Nombre d'hommes")).toHaveValue("20");
 		const row = screen
@@ -56,18 +65,27 @@ describe("Step1Workforce", () => {
 	});
 
 	it("shows SavedIndicator when initial data has values", () => {
-		render(<Step1Workforce initialData={{ totalWomen: 5, totalMen: 3 }} />);
+		render(
+			<Step1Workforce
+				declarationYear={2026}
+				initialData={{ totalWomen: 5, totalMen: 3 }}
+			/>,
+		);
 		expect(screen.getByText("Enregistré")).toBeInTheDocument();
 	});
 
 	it("does not show SavedIndicator when no initial data", () => {
-		render(<Step1Workforce initialData={emptyStep1Data()} />);
+		render(
+			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+		);
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
 	});
 
 	it("updates women/men values via inline inputs", async () => {
 		const user = userEvent.setup();
-		render(<Step1Workforce initialData={emptyStep1Data()} />);
+		render(
+			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+		);
 
 		const womenInput = screen.getByLabelText("Nombre de femmes");
 		const menInput = screen.getByLabelText("Nombre d'hommes");
@@ -90,7 +108,9 @@ describe("Step1Workforce", () => {
 
 	it("validates total > 0 on submit", async () => {
 		const user = userEvent.setup();
-		render(<Step1Workforce initialData={emptyStep1Data()} />);
+		render(
+			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+		);
 
 		const submitButton = screen.getByRole("button", { name: /suivant/i });
 		await user.click(submitButton);
@@ -100,7 +120,12 @@ describe("Step1Workforce", () => {
 
 	it("calls mutation with updated data on valid submit", async () => {
 		const user = userEvent.setup();
-		render(<Step1Workforce initialData={{ totalWomen: 10, totalMen: 20 }} />);
+		render(
+			<Step1Workforce
+				declarationYear={2026}
+				initialData={{ totalWomen: 10, totalMen: 20 }}
+			/>,
+		);
 
 		const submitButton = screen.getByRole("button", { name: /suivant/i });
 		await user.click(submitButton);
@@ -113,7 +138,9 @@ describe("Step1Workforce", () => {
 
 	it("shows validation error message when submitting with zero total", async () => {
 		const user = userEvent.setup();
-		render(<Step1Workforce initialData={emptyStep1Data()} />);
+		render(
+			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+		);
 
 		const submitButton = screen.getByRole("button", { name: /suivant/i });
 		await user.click(submitButton);
@@ -126,10 +153,53 @@ describe("Step1Workforce", () => {
 	});
 
 	it("renders previous link pointing to home", () => {
-		render(<Step1Workforce initialData={emptyStep1Data()} />);
+		render(
+			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
 			"/",
 		);
+	});
+
+	it("hides the reset warning by default", () => {
+		render(
+			<Step1Workforce
+				declarationYear={2026}
+				initialData={{ totalWomen: 50, totalMen: 100 }}
+			/>,
+		);
+		expect(
+			screen.queryByText(/réinitialise les indicateurs préremplis/),
+		).not.toBeInTheDocument();
+	});
+
+	it("shows the reset warning when an input with a value receives focus", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step1Workforce
+				declarationYear={2026}
+				initialData={{ totalWomen: 50, totalMen: 100 }}
+			/>,
+		);
+
+		await user.click(screen.getByLabelText("Nombre de femmes"));
+
+		expect(
+			screen.getByText(/réinitialise les indicateurs préremplis/),
+		).toBeInTheDocument();
+	});
+
+	it("does not show the reset warning when focusing an empty input", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+		);
+
+		await user.click(screen.getByLabelText("Nombre de femmes"));
+
+		expect(
+			screen.queryByText(/réinitialise les indicateurs préremplis/),
+		).not.toBeInTheDocument();
 	});
 });
