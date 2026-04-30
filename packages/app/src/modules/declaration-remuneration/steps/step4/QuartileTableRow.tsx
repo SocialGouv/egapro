@@ -89,8 +89,10 @@ export function QuartileTableRow({
 			<th scope="row">
 				<OrdinalLabel text={QUARTILE_NAMES[index] ?? ""} />
 			</th>
-			<td className={stepStyles.minCell}>{min}</td>
-			<td>
+			<td className={stepStyles.minCell} data-mobile-label="Minimum">
+				{min}
+			</td>
+			<td data-mobile-label="Maximum">
 				{isLast ? (
 					<span className={stepStyles.readonlyCell}>- €</span>
 				) : (
@@ -132,7 +134,7 @@ export function QuartileTableRow({
 					</div>
 				)}
 			</td>
-			<td>
+			<td data-mobile-label="Nombre de femmes">
 				<div
 					className={
 						womenErr
@@ -166,7 +168,7 @@ export function QuartileTableRow({
 					)}
 				</div>
 			</td>
-			<td>
+			<td data-mobile-label="Nombre d'hommes">
 				<div
 					className={
 						menErr
@@ -200,10 +202,10 @@ export function QuartileTableRow({
 					)}
 				</div>
 			</td>
-			<td>
+			<td data-mobile-label="Pourcentage de femmes">
 				<strong>{pct(quartile, "women")}</strong>
 			</td>
-			<td>
+			<td data-mobile-label="Pourcentage d'hommes">
 				<strong>{pct(quartile, "men")}</strong>
 			</td>
 		</tr>

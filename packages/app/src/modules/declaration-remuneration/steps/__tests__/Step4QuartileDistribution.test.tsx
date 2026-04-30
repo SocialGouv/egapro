@@ -198,6 +198,42 @@ describe("Step4QuartileDistribution", () => {
 		expect(screen.getByText(/ne peut pas dépasser/i)).toBeInTheDocument();
 	});
 
+	it("renders mobile-label attributes on data cells for responsive reflow", () => {
+		const { container } = render(
+			<Step4QuartileDistribution
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
+		// Each quartile row carries data-mobile-label on its data cells
+		// (Minimum, Maximum, Nombre de femmes, Nombre d'hommes, % de femmes, % d'hommes)
+		const labels = container.querySelectorAll("[data-mobile-label]");
+		// 4 rows × 6 cells × 2 tables = 48; total row adds 4 cells × 2 = 8 → 56
+		expect(labels.length).toBeGreaterThanOrEqual(48);
+		expect(
+			container.querySelector('[data-mobile-label="Minimum"]'),
+		).toBeInTheDocument();
+		expect(
+			container.querySelector('[data-mobile-label="Maximum"]'),
+		).toBeInTheDocument();
+		expect(
+			container.querySelector('[data-mobile-label="Pourcentage de femmes"]'),
+		).toBeInTheDocument();
+	});
+
+	it("renders DSN source line on both tables even without GIP prefill", () => {
+		render(
+			<Step4QuartileDistribution
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
+		expect(
+			screen.getAllByText(/Source\s*:\s*DSN \(Déclarations Sociales Nominatives\)/)
+				.length,
+		).toBe(2);
+	});
+
 	it("renders accordion", () => {
 		render(
 			<Step4QuartileDistribution

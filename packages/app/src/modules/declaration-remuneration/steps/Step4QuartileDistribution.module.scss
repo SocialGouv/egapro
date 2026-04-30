@@ -38,10 +38,59 @@
 	tbody tr:last-child {
 		font-weight: bold;
 	}
+
+	@include respond-to(sm) {
+		table {
+			display: block;
+		}
+
+		thead {
+			display: none;
+		}
+
+		tbody,
+		tbody tr,
+		tbody td,
+		tbody th {
+			display: block;
+			width: 100%;
+		}
+
+		tbody tr {
+			border-bottom: 1px solid var(--border-default-grey);
+			padding: 0.75rem 0;
+		}
+
+		tbody tr:last-child {
+			border-bottom: none;
+		}
+
+		tbody td,
+		tbody th {
+			border-bottom: none;
+			padding: 0.5rem 0;
+			text-align: left;
+		}
+
+		tbody td[data-mobile-label]::before {
+			content: attr(data-mobile-label);
+			display: block;
+			font-size: 0.75rem;
+			color: var(--text-mention-grey);
+			margin-bottom: 0.25rem;
+			font-weight: 400;
+		}
+
+		tbody td[data-mobile-label]:empty {
+			display: none;
+		}
+	}
 }
 
 .minCell {
 	font-variant-numeric: tabular-nums;
+	text-align: right;
+	white-space: nowrap;
 }
 
 .readonlyCell {
@@ -64,5 +113,14 @@
 
 	input {
 		min-width: 5rem;
+	}
+
+	@include respond-to(sm) {
+		justify-content: flex-start;
+
+		input {
+			flex: 1;
+			min-width: 0;
+		}
 	}
 }

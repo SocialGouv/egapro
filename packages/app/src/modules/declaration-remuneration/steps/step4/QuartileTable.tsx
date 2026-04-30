@@ -108,18 +108,18 @@ export function QuartileTable({
 											<th scope="row">Tous les salariés</th>
 											<td className={stepStyles.minCell} />
 											<td />
-											<td>
+											<td data-mobile-label="Nombre de femmes">
 												<strong>{totalAll > 0 ? totalWomen : "-"}</strong>
 											</td>
-											<td>
+											<td data-mobile-label="Nombre d'hommes">
 												<strong>{totalAll > 0 ? totalMen : "-"}</strong>
 											</td>
-											<td>
+											<td data-mobile-label="Pourcentage de femmes">
 												<strong>
 													{computePercentage(totalWomen, totalAll)}
 												</strong>
 											</td>
-											<td>
+											<td data-mobile-label="Pourcentage d'hommes">
 												<strong>{computePercentage(totalMen, totalAll)}</strong>
 											</td>
 										</tr>

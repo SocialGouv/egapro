@@ -287,12 +287,10 @@ export function Step4QuartileDistribution({
 						) : undefined
 					}
 					sourceNote={
-						gipPrefillData ? (
-							<PrefillSource
-								periodEnd={gipPrefillData.periodEnd}
-								tooltipId="tooltip-source-step4-annual"
-							/>
-						) : undefined
+						<PrefillSource
+							periodEnd={gipPrefillData?.periodEnd ?? null}
+							tooltipId="tooltip-source-step4-annual"
+						/>
 					}
 					tableType="annual"
 					title="Rémunération annuelle brute moyenne"
@@ -316,12 +314,10 @@ export function Step4QuartileDistribution({
 						) : undefined
 					}
 					sourceNote={
-						gipPrefillData ? (
-							<PrefillSource
-								periodEnd={gipPrefillData.periodEnd}
-								tooltipId="tooltip-source-step4-hourly"
-							/>
-						) : undefined
+						<PrefillSource
+							periodEnd={gipPrefillData?.periodEnd ?? null}
+							tooltipId="tooltip-source-step4-hourly"
+						/>
 					}
 					tableType="hourly"
 					title="Rémunération horaire brute moyenne"
