@@ -415,6 +415,9 @@ describe("declarationRouter", () => {
 			expect(mockSet).toHaveBeenCalledWith(
 				expect.objectContaining({ remunerationScore: null }),
 			);
+			const setArg = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setArg).not.toHaveProperty("indicatorFAnnualThreshold4");
+			expect(setArg).not.toHaveProperty("indicatorFHourlyThreshold4");
 		});
 
 		it("throws when siret is missing", async () => {
@@ -544,6 +547,25 @@ describe("declarationRouter", () => {
 			);
 		});
 
+		it("maps 3 thresholds + 4 counts per table with no *Threshold4 column", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await caller.updateStep4(step4Input);
+
+			const setArg = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setArg).toHaveProperty("indicatorFAnnualThreshold1", "25000");
+			expect(setArg).toHaveProperty("indicatorFAnnualThreshold2", "35000");
+			expect(setArg).toHaveProperty("indicatorFAnnualThreshold3", "50000");
+			expect(setArg).not.toHaveProperty("indicatorFAnnualThreshold4");
+			expect(setArg).toHaveProperty("indicatorFHourlyThreshold1", "15");
+			expect(setArg).toHaveProperty("indicatorFHourlyThreshold2", "20");
+			expect(setArg).toHaveProperty("indicatorFHourlyThreshold3", "30");
+			expect(setArg).not.toHaveProperty("indicatorFHourlyThreshold4");
+			expect(setArg).toHaveProperty("indicatorFAnnualWomen4", null);
+			expect(setArg).toHaveProperty("indicatorFHourlyWomen4", null);
+		});
+
 		it("stores null for Q4 threshold when it is an empty string", async () => {
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb);
@@ -569,6 +591,9 @@ describe("declarationRouter", () => {
 					indicatorFHourlyThreshold3: "30",
 				}),
 			);
+			const setArg = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setArg).not.toHaveProperty("indicatorFAnnualThreshold4");
+			expect(setArg).not.toHaveProperty("indicatorFHourlyThreshold4");
 		});
 
 		it("throws when siret is missing", async () => {
@@ -815,5 +840,32 @@ describe("declarationRouter", () => {
 			const result = await caller.getOrCreate();
 			expect(result.declaration).toBeDefined();
 		});
+	});
+});
+
+import { migrateLegacyThresholds } from "~/modules/domain";
+
+describe("step4Data loader migration", () => {
+	it("builds tuple with [3].threshold === undefined from 3 DB thresholds", () => {
+		const annualThresholds = migrateLegacyThresholds([
+			"25000",
+			"35000",
+			"50000",
+		]);
+		const step4Annual = [
+			{ threshold: annualThresholds[0], women: 10, men: 12 },
+			{ threshold: annualThresholds[1], women: 8, men: 9 },
+			{ threshold: annualThresholds[2], women: 5, men: 6 },
+			{ threshold: undefined, women: 3, men: 4 },
+		];
+		expect(step4Annual[3]?.threshold).toBeUndefined();
+		expect(step4Annual[0]?.threshold).toBe("25000");
+		expect(step4Annual[1]?.threshold).toBe("35000");
+		expect(step4Annual[2]?.threshold).toBe("50000");
+	});
+
+	it("normalizes null DB thresholds to empty string for Q1-Q3", () => {
+		const thresholds = migrateLegacyThresholds([null, null, null]);
+		expect(thresholds).toEqual(["", "", ""]);
 	});
 });
