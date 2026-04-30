@@ -110,7 +110,7 @@ describe("Step4QuartileDistribution", () => {
 		).toBeInTheDocument();
 	});
 
-	it("displays empty state with all min = - € and Q4 max = - €", () => {
+	it("displays empty state with all min = - € and Q4 max = - €", () => {
 		render(
 			<Step4QuartileDistribution
 				declarationYear={2025}
@@ -119,7 +119,7 @@ describe("Step4QuartileDistribution", () => {
 		);
 		const dashCells = screen
 			.getAllByRole("cell")
-			.filter((c) => c.textContent === "- €");
+			.filter((c) => c.textContent === "- €");
 		expect(dashCells.length).toBeGreaterThanOrEqual(10);
 	});
 

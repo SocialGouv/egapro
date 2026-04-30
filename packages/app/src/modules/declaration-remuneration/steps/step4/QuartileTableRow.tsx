@@ -103,7 +103,7 @@ export function QuartileTableRow({
 			</td>
 			<td className={stepStyles.maxCell} data-mobile-label="Maximum">
 				{isLast ? (
-					<span className={stepStyles.readonlyCell}>- €</span>
+					<span className={stepStyles.readonlyCell}>- €</span>
 				) : (
 					<div
 						className={

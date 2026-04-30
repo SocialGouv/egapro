@@ -51,10 +51,10 @@ export function emptyQuartiles(): QuartileTuple {
 export function computeMinsForTable(
 	quartiles: QuartileTuple,
 ): [string, string, string, string] {
-	const dash = "- €";
+	const dash = "- €";
 	const min = (prevThreshold: string | undefined): string => {
 		const computed = computeQuartileMin(prevThreshold);
-		return computed ? `${displayDecimal(computed)} €` : dash;
+		return computed ? `${displayDecimal(computed)} €` : dash;
 	};
 	return [
 		dash,
