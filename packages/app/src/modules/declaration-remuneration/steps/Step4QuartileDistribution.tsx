@@ -221,21 +221,16 @@ export function Step4QuartileDistribution({
 
 			<div className={stepStyles.instructions}>
 				<p className="fr-mb-0">
-					Cet indicateur compare la proportion de femmes et d&apos;hommes selon
-					les niveaux de rémunération. Les rémunérations sont classées de la
-					plus faible à la plus élevée puis divisées en quatre groupes de même
-					taille appelés quartiles&nbsp;: le 1<sup>er</sup> quartile correspond
-					aux 25 % des salariés les moins rémunérés, le 2<sup>e</sup> quartile
-					(médiane) aux 50 % des salariés situés au milieu de la distribution,
-					le 3<sup>e</sup> quartile aux salariés situés entre 50 % et 75 % des
-					rémunérations, et le 4<sup>e</sup> quartile correspond aux 25 % des
-					salariés les mieux rémunérés.
+					Cet indicateur répartit l&apos;ensemble des salariés en quatre groupes
+					de rémunération appelés quartiles&nbsp;: du quartile inférieur qui
+					regroupe les salariés les moins rémunérés, au quartile supérieur qui
+					rassemble les salariés les mieux rémunérés.
 				</p>
 
 				<p className="fr-mb-0">
 					<strong>
 						{gipPrefillData
-							? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+							? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."
 							: "Renseignez les informations avant de valider vos indicateurs."}
 					</strong>
 					<TooltipButton

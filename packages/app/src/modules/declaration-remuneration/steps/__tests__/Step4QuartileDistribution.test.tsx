@@ -89,7 +89,7 @@ describe("Step4QuartileDistribution", () => {
 			/>,
 		);
 		expect(
-			screen.getByText(/compare la proportion de femmes et d'hommes/),
+			screen.getByText(/répartit l'ensemble des salariés en quatre groupes/),
 		).toBeInTheDocument();
 	});
 
