@@ -2,3 +2,7 @@
 	display: inline-flex;
 	vertical-align: middle;
 }
+
+.button + :global(.fr-tooltip) {
+	padding-left: 0;
+}
