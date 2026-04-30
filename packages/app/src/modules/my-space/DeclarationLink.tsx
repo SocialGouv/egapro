@@ -2,11 +2,12 @@
 
 import { useIsImpersonating } from "~/modules/auth";
 import { hasRequiredDeclarationInfo } from "~/modules/domain";
-
 import { DECLARATION_PROCESS_PANEL_ID } from "./DeclarationProcessPanel";
+import styles from "./DeclarationsSection.module.scss";
 import type { DeclarationType } from "./types";
 
 const MISSING_INFO_MODAL_ID = "missing-info-modal";
+const linkClass = `fr-link ${styles.linkUnderlined}`;
 
 type Props = {
 	type: DeclarationType;
@@ -26,7 +27,7 @@ export function DeclarationLink({ type, userPhone, hasCse, children }: Props) {
 		return (
 			<button
 				aria-controls={MISSING_INFO_MODAL_ID}
-				className="fr-link"
+				className={linkClass}
 				data-declaration-type={type}
 				data-fr-opened="false"
 				type="button"
@@ -41,7 +42,7 @@ export function DeclarationLink({ type, userPhone, hasCse, children }: Props) {
 		return (
 			<button
 				aria-controls={DECLARATION_PROCESS_PANEL_ID}
-				className="fr-link"
+				className={linkClass}
 				data-fr-opened="false"
 				type="button"
 			>
@@ -52,7 +53,7 @@ export function DeclarationLink({ type, userPhone, hasCse, children }: Props) {
 
 	// Representation: placeholder (no route yet)
 	return (
-		<button className="fr-link" type="button">
+		<button className={linkClass} type="button">
 			{children}
 		</button>
 	);

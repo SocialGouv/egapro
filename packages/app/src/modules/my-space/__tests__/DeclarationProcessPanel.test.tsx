@@ -48,8 +48,13 @@ describe("DeclarationProcessPanel", () => {
 		it("renders the last action date", () => {
 			const { panel } = renderPanel("start");
 			expect(
-				panel.getByText("Dernière action le 12 mars 2026"),
+				panel.getByText(/Dernière action le 12 mars 2026/),
 			).toBeInTheDocument();
+		});
+
+		it("renders the history link", () => {
+			const { panel } = renderPanel("start");
+			expect(panel.getByText("Voir l'historique")).toBeInTheDocument();
 		});
 
 		it("renders the info alert", () => {

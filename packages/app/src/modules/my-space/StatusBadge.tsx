@@ -18,7 +18,7 @@ const BADGE_CONFIG: Record<
 	},
 	done: {
 		label: "Effectué",
-		className: "fr-badge fr-badge--sm fr-badge--success",
+		className: "fr-badge fr-badge--sm fr-badge--success fr-badge--no-icon",
 	},
 };
 
