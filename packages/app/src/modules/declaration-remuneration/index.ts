@@ -1,5 +1,6 @@
 export { DeclarationLayout } from "./DeclarationLayout";
 export { MissingSiret } from "./MissingSiret";
+export { RecapitulatifPage } from "./recapitulatif";
 export { StepPageClient } from "./StepPageClient";
 export {
 	categoryFormEntrySchema,
