@@ -3,186 +3,40 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
-import {
-	computeQuartileMin,
-	displayDecimal,
-	normalizeDecimalInput,
-} from "~/modules/domain";
-import { useZodForm } from "~/modules/shared/useZodForm";
+import { normalizeDecimalInput } from "~/modules/domain";
+import { useZodForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { updateStep4Schema } from "../schemas";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
-import type { GipPrefillData, GipQuartileData } from "../shared/gipMdsMapping";
+import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
 import { TooltipButton } from "../shared/TooltipButton";
-import type { QuartileData, QuartileTuple, Step4Data } from "../types";
+import type { QuartileTuple, Step4Data } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
 import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCallout";
 import { QuartileReadingNote } from "./step4/QuartileReadingNote";
-import { type QuartileFieldErrors, QuartileTable } from "./step4/QuartileTable";
-
-type TableType = "annual" | "hourly";
-type CountField = "women" | "men";
-
-const TABLE_LABEL: Record<TableType, string> = {
-	annual: "rémunération annuelle",
-	hourly: "rémunération horaire",
-};
-
-function toQuartileData(c: {
-	womenValue?: string | null;
-	womenCount: number;
-	menCount: number;
-}): QuartileData {
-	return {
-		threshold: c.womenValue ?? undefined,
-		women: c.womenCount,
-		men: c.menCount,
-	};
-}
-
-/** Q4 carries no upper threshold by spec — strip whatever the form holds. */
-function normalizeForMutation(values: {
-	annual: QuartileTuple;
-	hourly: QuartileTuple;
-}): { annual: QuartileTuple; hourly: QuartileTuple } {
-	const stripQ4 = (table: QuartileTuple): QuartileTuple => [
-		table[0],
-		table[1],
-		table[2],
-		{ ...table[3], threshold: undefined },
-	];
-	return { annual: stripQ4(values.annual), hourly: stripQ4(values.hourly) };
-}
-
-function gipToQuartiles(gip: GipQuartileData): QuartileData[] {
-	return [0, 1, 2, 3].map((i) => ({
-		threshold: gip.thresholds[i] ?? "",
-		women: gip.womenCounts[i] ?? undefined,
-		men: gip.menCounts[i] ?? undefined,
-	}));
-}
-
-function emptyQuartiles(): QuartileTuple {
-	return [
-		{ threshold: "" },
-		{ threshold: "" },
-		{ threshold: "" },
-		{ threshold: "" },
-	];
-}
-
-/** Formats a stored decimal value as `"… €"` for read-only display cells. */
-function formatEuro(value: string): string {
-	return `${displayDecimal(value)} €`;
-}
-
-/** Computes the lower bound display string for each of the 4 quartiles. */
-function computeMinsForTable(
-	quartiles: QuartileTuple,
-): [string, string, string, string] {
-	const dash = "- €";
-	const q1Min = "0,00 €";
-	const min = (prevThreshold: string | undefined): string => {
-		const computed = computeQuartileMin(prevThreshold);
-		return computed ? formatEuro(computed) : dash;
-	};
-	return [
-		q1Min,
-		min(quartiles[0]?.threshold),
-		min(quartiles[1]?.threshold),
-		min(quartiles[2]?.threshold),
-	];
-}
-
-/** Returns the index of the first threshold that breaks strict ascending order, or null. */
-function findCroissanceOffender(
-	thresholds: Array<string | undefined>,
-): number | null {
-	const [t1, t2, t3] = thresholds
-		.slice(0, 3)
-		.map((t) => Number.parseFloat(t ?? "")) as [number, number, number];
-	if ([t1, t2, t3].some((n) => Number.isNaN(n))) return null;
-	if (!(t1 < t2)) return 1;
-	if (!(t2 < t3)) return 2;
-	return null;
-}
-
-type RecapEntry = {
-	id: string;
-	label: string;
-};
-
-type FieldErrorMap = Record<
-	TableType,
-	[
-		QuartileFieldErrors,
-		QuartileFieldErrors,
-		QuartileFieldErrors,
-		QuartileFieldErrors,
-	]
->;
-
-const EMPTY_ERRORS: QuartileFieldErrors = {};
-
-function emptyErrorMap(): FieldErrorMap {
-	return {
-		annual: [EMPTY_ERRORS, EMPTY_ERRORS, EMPTY_ERRORS, EMPTY_ERRORS],
-		hourly: [EMPTY_ERRORS, EMPTY_ERRORS, EMPTY_ERRORS, EMPTY_ERRORS],
-	};
-}
-
-function fieldId(
-	tableType: TableType,
-	index: number,
-	suffix: "max" | "f" | "h",
-) {
-	return `step4-${tableType}-q${index + 1}-${suffix}`;
-}
-
-const SUFFIX_FOR_FIELD: Record<"threshold" | CountField, "max" | "f" | "h"> = {
-	threshold: "max",
-	women: "f",
-	men: "h",
-};
-
-function buildRecap(errors: FieldErrorMap): RecapEntry[] {
-	const out: RecapEntry[] = [];
-	const tables: TableType[] = ["annual", "hourly"];
-	for (const table of tables) {
-		for (let i = 0; i < 4; i++) {
-			const cell = errors[table][i] ?? EMPTY_ERRORS;
-			const orderedFields: Array<"threshold" | CountField> = [
-				"threshold",
-				"women",
-				"men",
-			];
-			for (const field of orderedFields) {
-				const message = cell[field];
-				if (!message) continue;
-				const id = fieldId(table, i, SUFFIX_FOR_FIELD[field]);
-				const fieldLabel =
-					field === "threshold"
-						? "Seuil"
-						: field === "women"
-							? "Effectif femmes"
-							: "Effectif hommes";
-				const ordinal = `${i + 1}${i === 0 ? "er" : "e"}`;
-				out.push({
-					id,
-					label: `${fieldLabel} ${ordinal} quartile (${TABLE_LABEL[table]}) — ${message}`,
-				});
-				if (out.length === 4) return out;
-			}
-		}
-	}
-	return out;
-}
+import { QuartileTable } from "./step4/QuartileTable";
+import {
+	buildRecap,
+	type CountField,
+	deriveErrors,
+	emptyErrorMap,
+	type FieldErrorMap,
+	hasAnyError,
+	type TableType,
+} from "./step4/quartileErrors";
+import {
+	computeMinsForTable,
+	emptyQuartiles,
+	gipToQuartiles,
+	normalizeForMutation,
+	toQuartileData,
+} from "./step4/quartileFormHelpers";
 
 type Step4QuartileDistributionProps = {
 	declarationYear: number;
@@ -266,7 +120,7 @@ export function Step4QuartileDistribution({
 				annual: [...prev.annual] as FieldErrorMap["annual"],
 				hourly: [...prev.hourly] as FieldErrorMap["hourly"],
 			};
-			const cell = { ...(next[tableType][index] ?? EMPTY_ERRORS) };
+			const cell = { ...(next[tableType][index] ?? {}) };
 			delete cell[field];
 			next[tableType][index] = cell;
 			return next;
@@ -312,74 +166,6 @@ export function Step4QuartileDistribution({
 		}
 		setSaved(false);
 		clearFieldError(tableType, index, field);
-	}
-
-	function isValidThreshold(v: string | undefined): boolean {
-		return v !== undefined && v !== "" && !Number.isNaN(Number(v));
-	}
-
-	function deriveErrors(values: {
-		annual: QuartileTuple;
-		hourly: QuartileTuple;
-	}): FieldErrorMap {
-		const result = emptyErrorMap();
-		for (const table of ["annual", "hourly"] as const) {
-			const tableValues = values[table];
-			// Required check on Q1/Q2/Q3 thresholds
-			for (let i = 0; i < 3; i++) {
-				const cell = tableValues[i];
-				if (!isValidThreshold(cell?.threshold)) {
-					result[table][i] = {
-						...result[table][i],
-						threshold: "Le seuil est obligatoire",
-					};
-				}
-			}
-			// Strictly increasing check (only when all 3 are valid)
-			const t1 = tableValues[0]?.threshold;
-			const t2 = tableValues[1]?.threshold;
-			const t3 = tableValues[2]?.threshold;
-			if (
-				isValidThreshold(t1) &&
-				isValidThreshold(t2) &&
-				isValidThreshold(t3)
-			) {
-				const offender = findCroissanceOffender([t1, t2, t3]);
-				if (offender !== null) {
-					result[table][offender] = {
-						...result[table][offender],
-						threshold: "Les seuils doivent être strictement croissants",
-					};
-				}
-			}
-			// Counts required (8 cells per table)
-			for (let i = 0; i < 4; i++) {
-				const cell = tableValues[i];
-				if (cell?.women === undefined) {
-					result[table][i] = {
-						...result[table][i],
-						women: "Effectif obligatoire",
-					};
-				}
-				if (cell?.men === undefined) {
-					result[table][i] = {
-						...result[table][i],
-						men: "Effectif obligatoire",
-					};
-				}
-			}
-		}
-		return result;
-	}
-
-	function hasAnyError(map: FieldErrorMap) {
-		for (const table of ["annual", "hourly"] as const) {
-			for (let i = 0; i < 4; i++) {
-				const cell = map[table][i] ?? EMPTY_ERRORS;
-				if (cell.threshold || cell.women || cell.men) return true;
-			}
-		}
-		return false;
 	}
 
 	function focusAlert() {
