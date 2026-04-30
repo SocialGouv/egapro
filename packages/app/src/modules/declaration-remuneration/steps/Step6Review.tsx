@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
-import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
 import { computeGap, GAP_ALERT_THRESHOLD } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -326,8 +324,6 @@ export function Step6Review({
 				)}
 			</div>
 
-			{isSubmitted && <DownloadDeclarationPdfButton year={declarationYear} />}
-
 			{/* Next steps callout when high gap detected */}
 			{highGap && declaration.siren && (
 				<NextStepsBox
@@ -348,10 +344,6 @@ export function Step6Review({
 					previousHref="/declaration-remuneration/etape/5"
 				/>
 			)}
-
-			<Link className={`fr-link ${stepStyles.centeredLink}`} href="/avis-cse">
-				Modèles d&apos;avis CSE
-			</Link>
 
 			{!isSubmitted && (
 				<SubmitDeclarationModal
