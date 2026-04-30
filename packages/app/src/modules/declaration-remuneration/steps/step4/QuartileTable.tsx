@@ -45,10 +45,8 @@ export function QuartileTable({
 	const totalWomen = quartiles.reduce((sum, q) => sum + (q.women ?? 0), 0);
 	const totalMen = quartiles.reduce((sum, q) => sum + (q.men ?? 0), 0);
 	const totalAll = totalWomen + totalMen;
-	const trancheTitle =
-		tableType === "annual"
-			? "Tranche de rémunération annuelle brute"
-			: "Tranche de rémunération horaire brute";
+	const trancheSuffix =
+		tableType === "annual" ? "annuelle brute" : "horaire brute";
 
 	return (
 		<div className={stepStyles.tableWrapper}>
@@ -65,7 +63,9 @@ export function QuartileTable({
 										<tr>
 											<th scope="col">{/* row label */}</th>
 											<th colSpan={2} scope="col">
-												{trancheTitle}
+												Tranche de rémunération
+												<br />
+												{trancheSuffix}
 											</th>
 											<th scope="col">
 												Nombre

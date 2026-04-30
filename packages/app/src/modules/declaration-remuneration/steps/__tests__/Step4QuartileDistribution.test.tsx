@@ -69,12 +69,15 @@ describe("Step4QuartileDistribution", () => {
 				initialData={emptyStep4Data()}
 			/>,
 		);
-		expect(
-			screen.getByText("Tranche de rémunération annuelle brute"),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText("Tranche de rémunération horaire brute"),
-		).toBeInTheDocument();
+		const headers = screen.getAllByRole("columnheader");
+		const annualHeader = headers.find((h) =>
+			/Tranche de rémunération[\s\S]*annuelle brute/.test(h.textContent ?? ""),
+		);
+		expect(annualHeader).toBeDefined();
+		const hourlyHeader = headers.find((h) =>
+			/Tranche de rémunération[\s\S]*horaire brute/.test(h.textContent ?? ""),
+		);
+		expect(hourlyHeader).toBeDefined();
 		expect(screen.getAllByText(/Pourcentage/).length).toBeGreaterThanOrEqual(4);
 	});
 
