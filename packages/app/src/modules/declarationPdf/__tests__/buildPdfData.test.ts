@@ -293,7 +293,11 @@ describe("buildPdfData", () => {
 		queryResults.push([{ jobCategoryId: "job-1" }]);
 
 		const { buildPdfData } = await import("../buildPdfData");
-		const result = await buildPdfData("111222333", 2026, new Date("2026-03-09"));
+		const result = await buildPdfData(
+			"111222333",
+			2026,
+			new Date("2026-03-09"),
+		);
 
 		// step5Categories still empty because mapToEmployeeCategoryRows is mocked to return []
 		expect(result.step5Categories).toEqual([]);
