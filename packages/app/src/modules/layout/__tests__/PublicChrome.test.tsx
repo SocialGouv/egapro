@@ -50,4 +50,13 @@ describe("PublicChrome", () => {
 		).toBeInTheDocument();
 		expect(screen.getByRole("contentinfo")).toBeInTheDocument();
 	});
+
+	it("hides ResourceBanner on /login but keeps the Footer", () => {
+		(usePathname as Mock).mockReturnValue("/login");
+		render(<PublicChrome />);
+		expect(
+			screen.queryByRole("region", { name: /ressources et aide/i }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+	});
 });

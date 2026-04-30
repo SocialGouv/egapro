@@ -28,13 +28,17 @@ export function LoginAccordion() {
 				<p>Créez un compte en quelques étapes simples :</p>
 				<ol>
 					<li>
+						Cliquez d'abord sur le bouton{" "}
+						<strong>"S'identifier avec ProConnect"</strong>
+					</li>
+					<li>
 						Confirmez votre adresse email à l'aide du code de validation reçu
 					</li>
 					<li>Choisissez un mot de passe</li>
-					<li>Entrez le SIRET de votre organisation</li>
+					<li>Entrez le SIRET du siège social de votre entreprise</li>
 					<li>Complétez vos informations personnelles</li>
+					<li>Votre compte est créé !</li>
 				</ol>
-				<p>Votre compte est créé !</p>
 			</div>
 		</section>
 	);
