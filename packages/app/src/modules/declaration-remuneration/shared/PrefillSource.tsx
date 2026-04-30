@@ -1,31 +1,29 @@
-/**
- * Source attribution line shown under tables when GIP DSN data is available.
- * Displays the DSN data source and (optionally) the reference period range.
- */
 type Props = {
 	periodStart?: string | null;
 	periodEnd: string | null;
 };
 
 export function PrefillSource({ periodStart, periodEnd }: Props) {
-	const showPeriod = periodStart && periodEnd;
+	const suffix = buildSuffix(periodStart, periodEnd);
 	return (
-		<div className="fr-text--sm fr-text-mention--grey fr-mb-0">
-			<p className="fr-mb-0">
-				Source&nbsp;: DSN (Déclarations Sociales Nominatives)
-				{periodEnd &&
-					!showPeriod &&
-					`, mise à jour le ${formatFrenchDate(periodEnd)}`}
-				.
-			</p>
-			{showPeriod && (
-				<p className="fr-mb-0">
-					Période de référence&nbsp;: {formatFrenchDate(periodStart)} -{" "}
-					{formatFrenchDate(periodEnd)}.
-				</p>
-			)}
-		</div>
+		<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
+			Source&nbsp;: DSN (Déclarations Sociales Nominatives)
+			{suffix}.
+		</p>
 	);
+}
+
+function buildSuffix(
+	periodStart: string | null | undefined,
+	periodEnd: string | null,
+): string {
+	if (periodStart && periodEnd) {
+		return `, période de référence : ${formatFrenchDate(periodStart)} - ${formatFrenchDate(periodEnd)}`;
+	}
+	if (periodEnd) {
+		return `, mise à jour le ${formatFrenchDate(periodEnd)}`;
+	}
+	return "";
 }
 
 /** Format "2026-12-31" → "31/12/2026" */

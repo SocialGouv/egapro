@@ -18,20 +18,20 @@ describe("PrefillSource", () => {
 
 		expect(screen.getByText(/Source/)).toBeInTheDocument();
 		expect(screen.queryByText(/mise à jour le/)).not.toBeInTheDocument();
-		expect(screen.queryByText(/Période de référence/)).not.toBeInTheDocument();
+		expect(screen.queryByText(/période de référence/)).not.toBeInTheDocument();
 	});
 
 	it("shows update date when only periodEnd is provided", () => {
 		render(<PrefillSource periodEnd="2025-03-15" />);
 
 		expect(screen.getByText(/mise à jour le 15\/03\/2025/)).toBeInTheDocument();
-		expect(screen.queryByText(/Période de référence/)).not.toBeInTheDocument();
+		expect(screen.queryByText(/période de référence/)).not.toBeInTheDocument();
 	});
 
 	it("renders the reference period range when both periodStart and periodEnd are provided", () => {
 		render(<PrefillSource periodEnd="2026-12-31" periodStart="2026-01-01" />);
 
-		expect(screen.getByText(/Période de référence/)).toBeInTheDocument();
+		expect(screen.getByText(/période de référence/)).toBeInTheDocument();
 		expect(screen.getByText(/01\/01\/2026/)).toBeInTheDocument();
 		expect(screen.getByText(/31\/12\/2026/)).toBeInTheDocument();
 		expect(screen.queryByText(/mise à jour le/)).not.toBeInTheDocument();
