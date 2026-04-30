@@ -184,7 +184,6 @@ describe("mapGipToFormData", () => {
 			"25000",
 			"30000",
 			"35000",
-			null,
 		]);
 		expect(result?.step4.annual.womenCounts).toEqual([30, 25, 20, 15]);
 		expect(result?.step4.annual.menCounts).toEqual([20, 25, 30, 35]);
@@ -285,20 +284,18 @@ describe("mapGipToFormData", () => {
 			"13.74",
 			"17.58",
 			"21.98",
-			null,
 		]);
 		expect(result?.step4.hourly.womenCounts).toEqual([30, 20, 15, 10]);
 		expect(result?.step4.hourly.menCounts).toEqual([20, 30, 35, 40]);
 	});
 
-	it("handles null Q4 threshold (only Q1-Q3 present)", () => {
+	it("returns 3-element thresholds tuple (Q1-Q3 only, no Q4)", () => {
 		const row = makeRow({
 			womenCountAnnualGlobal: "100",
 			menCountAnnualGlobal: "100",
 			annualQuartileThreshold1: "25000",
 			annualQuartileThreshold2: "32000",
 			annualQuartileThreshold3: "40000",
-			// annualQuartileThreshold4 remains null
 			annualQuartile1ProportionWomen: "0.5",
 			annualQuartile1ProportionMen: "0.5",
 		});
@@ -307,7 +304,6 @@ describe("mapGipToFormData", () => {
 			"25000",
 			"32000",
 			"40000",
-			null,
 		]);
 	});
 
@@ -380,6 +376,22 @@ describe("mapGipToFormData", () => {
 		const row = makeRow({ confidenceIndex: "1" });
 		const result = mapGipToFormData(row);
 		expect(result?.confidenceIndex).toBe("1");
+	});
+
+	it("returns null for non-numeric workforce string (toInt NaN branch)", () => {
+		const row = makeRow({ womenCountAnnualGlobal: "N/A" });
+		const result = mapGipToFormData(row);
+		expect(result?.step1.totalWomen).toBeNull();
+	});
+
+	it("returns null for non-numeric quartile proportion string (proportionToCount NaN branch)", () => {
+		const row = makeRow({
+			womenCountAnnualGlobal: "100",
+			menCountAnnualGlobal: "100",
+			annualQuartile1ProportionWomen: "N/A",
+		});
+		const result = mapGipToFormData(row);
+		expect(result?.step4.annual.womenCounts[0]).toBeNull();
 	});
 });
 

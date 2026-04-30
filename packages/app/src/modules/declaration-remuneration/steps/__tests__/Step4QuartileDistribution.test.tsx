@@ -295,12 +295,12 @@ describe("Step4QuartileDistribution", () => {
 					},
 					step4: {
 						annual: {
-							thresholds: ["25000", "32000", "40000", "55000"],
+							thresholds: ["25000", "32000", "40000"],
 							womenCounts: [30, 25, 20, 15],
 							menCounts: [20, 25, 30, 35],
 						},
 						hourly: {
-							thresholds: ["13.74", "17.58", "21.98", "30.22"],
+							thresholds: ["13.74", "17.58", "21.98"],
 							womenCounts: [28, 22, 18, 12],
 							menCounts: [22, 28, 32, 38],
 						},
@@ -322,7 +322,7 @@ describe("Step4QuartileDistribution", () => {
 		expect(menCountInputs[0]).toHaveValue("20");
 	});
 
-	it("uses gipPrefillData with null Q4 threshold", () => {
+	it("uses gipPrefillData with partial null thresholds (Q4 has none)", () => {
 		render(
 			<Step4QuartileDistribution
 				declarationYear={2025}
@@ -352,12 +352,12 @@ describe("Step4QuartileDistribution", () => {
 					},
 					step4: {
 						annual: {
-							thresholds: ["25000", "32000", "40000", null],
+							thresholds: ["25000", "32000", "40000"],
 							womenCounts: [30, 25, 20, null],
 							menCounts: [20, 25, 30, null],
 						},
 						hourly: {
-							thresholds: ["13.74", "17.58", "21.98", null],
+							thresholds: ["13.74", "17.58", "21.98"],
 							womenCounts: [28, 22, 18, null],
 							menCounts: [22, 28, 32, null],
 						},
@@ -406,12 +406,12 @@ describe("Step4QuartileDistribution", () => {
 					},
 					step4: {
 						annual: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
 						hourly: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
@@ -459,12 +459,12 @@ describe("Step4QuartileDistribution", () => {
 					},
 					step4: {
 						annual: {
-							thresholds: ["25000", "32000", "40000", "55000"],
+							thresholds: ["25000", "32000", "40000"],
 							womenCounts: [50, 50, 50, 50],
 							menCounts: [0, 0, 0, 0],
 						},
 						hourly: {
-							thresholds: ["13.74", "17.58", "21.98", "30.22"],
+							thresholds: ["13.74", "17.58", "21.98"],
 							womenCounts: [50, 50, 50, 50],
 							menCounts: [0, 0, 0, 0],
 						},
