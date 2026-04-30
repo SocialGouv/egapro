@@ -104,7 +104,6 @@ describe("buildPdfData", () => {
 				indicatorFAnnualThreshold1: "40000",
 				indicatorFAnnualThreshold2: "50000",
 				indicatorFAnnualThreshold3: "60000",
-				indicatorFAnnualThreshold4: "70000",
 				indicatorFAnnualWomen1: 10,
 				indicatorFAnnualWomen2: 12,
 				indicatorFAnnualWomen3: 14,
@@ -117,7 +116,6 @@ describe("buildPdfData", () => {
 				indicatorFHourlyThreshold1: null,
 				indicatorFHourlyThreshold2: null,
 				indicatorFHourlyThreshold3: null,
-				indicatorFHourlyThreshold4: null,
 				indicatorFHourlyWomen1: null,
 				indicatorFHourlyWomen2: null,
 				indicatorFHourlyWomen3: null,
@@ -272,5 +270,33 @@ describe("buildPdfData", () => {
 		]);
 		expect(result.step3Data.beneficiaryWomen).toBe("");
 		expect(result.step3Data.beneficiaryMen).toBe("");
+	});
+
+	it("fetches employee categories when job categories exist", async () => {
+		resetMocks();
+		// Query 1: declarations
+		queryResults.push([
+			{
+				id: "decl-uuid-3",
+				siren: "111222333",
+				year: 2026,
+				status: "submitted",
+				totalWomen: 10,
+				totalMen: 10,
+			},
+		]);
+		// Query 2: companies
+		queryResults.push([{ siren: "111222333", name: "Test Corp" }]);
+		// Query 3: jobCategories — returns one job
+		queryResults.push([{ id: "job-1" }]);
+		// Query 4: employeeCategories for job-1
+		queryResults.push([{ jobCategoryId: "job-1" }]);
+
+		const { buildPdfData } = await import("../buildPdfData");
+		const result = await buildPdfData("111222333", 2026, new Date("2026-03-09"));
+
+		// step5Categories still empty because mapToEmployeeCategoryRows is mocked to return []
+		expect(result.step5Categories).toEqual([]);
+		expect(result.companyName).toBe("Test Corp");
 	});
 });

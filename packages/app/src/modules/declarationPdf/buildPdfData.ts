@@ -82,7 +82,6 @@ function buildQuartileCategories(d: Declaration): QuartileCategory[] {
 		d.indicatorFAnnualThreshold1,
 		d.indicatorFAnnualThreshold2,
 		d.indicatorFAnnualThreshold3,
-		null,
 	];
 	const annualWomen = [
 		d.indicatorFAnnualWomen1,
@@ -101,7 +100,6 @@ function buildQuartileCategories(d: Declaration): QuartileCategory[] {
 		d.indicatorFHourlyThreshold1,
 		d.indicatorFHourlyThreshold2,
 		d.indicatorFHourlyThreshold3,
-		null,
 	];
 	const hourlyWomen = [
 		d.indicatorFHourlyWomen1,

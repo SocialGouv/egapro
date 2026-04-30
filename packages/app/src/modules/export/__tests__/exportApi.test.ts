@@ -55,7 +55,6 @@ const nullIndicators = {
 	indicatorFAnnualThreshold3: null,
 	indicatorFAnnualWomen3: null,
 	indicatorFAnnualMen3: null,
-	indicatorFAnnualThreshold4: null,
 	indicatorFAnnualWomen4: null,
 	indicatorFAnnualMen4: null,
 	indicatorFHourlyThreshold1: null,
@@ -67,7 +66,6 @@ const nullIndicators = {
 	indicatorFHourlyThreshold3: null,
 	indicatorFHourlyWomen3: null,
 	indicatorFHourlyMen3: null,
-	indicatorFHourlyThreshold4: null,
 	indicatorFHourlyWomen4: null,
 	indicatorFHourlyMen4: null,
 };

@@ -73,7 +73,6 @@ export const DECLARATION_COLUMNS: Array<{
 	{ key: "indFAnnualQ3Threshold", header: "Ind_F_Annuel_Q3_seuil" },
 	{ key: "indFAnnualQ4Women", header: "Ind_F_Annuel_Q4_F" },
 	{ key: "indFAnnualQ4Men", header: "Ind_F_Annuel_Q4_H" },
-	{ key: "indFAnnualQ4Threshold", header: "Ind_F_Annuel_Q4_seuil" },
 
 	// Indicator F — Quartile distribution (hourly)
 	{ key: "indFHourlyQ1Women", header: "Ind_F_Horaire_Q1_F" },
@@ -87,7 +86,6 @@ export const DECLARATION_COLUMNS: Array<{
 	{ key: "indFHourlyQ3Threshold", header: "Ind_F_Horaire_Q3_seuil" },
 	{ key: "indFHourlyQ4Women", header: "Ind_F_Horaire_Q4_F" },
 	{ key: "indFHourlyQ4Men", header: "Ind_F_Horaire_Q4_H" },
-	{ key: "indFHourlyQ4Threshold", header: "Ind_F_Horaire_Q4_seuil" },
 
 	// Second declaration
 	{ key: "secondDeclarationStatus", header: "Seconde_declaration_statut" },
