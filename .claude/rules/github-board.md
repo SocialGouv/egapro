@@ -1,6 +1,6 @@
 # GitHub Board Reference
 
-> **Used by**: `product-owner`, `architect`, `code-dev` (déplacent les tickets), skills `/ticket`, `/epic`, `/code`. `functional-validator` + `design-validator` commentent seulement.
+> **Used by**: `product-owner`, `architect`, `code-dev` (déplacent les tickets), skills `/ticket`, `/epic`, `/code`. `functional-validator` commente seulement.
 
 IDs et snippets GraphQL prêts à l'emploi pour que les agents (`architect`, `code-dev`) et skills (`/epic`, `/code`) pilotent le project board **EGAPRO V2**.
 
@@ -201,9 +201,8 @@ Si le board a été recréé, mettre à jour les constantes en haut de ce fichie
 | Agent / Skill | Opérations utilisées |
 |---|---|
 | `product-owner` | 1, 2 (créer epic, ajouter au project en Backlog puis → To Do en fin de phase) |
-| `designer` | aucune (ne touche pas au board, commente seulement) |
 | `architect` | 1, 2, 4, 6 (créer sub-issues, ajouter au project, → To Do, lier au parent) |
 | `code-dev` | 3, 4 (passer To Do → In progress → In review) |
-| `functional-validator`, `design-validator` | aucune (commentent seulement, ne touchent pas au board) |
+| `functional-validator` | aucune (commente seulement, ne touche pas au board) |
 | `/epic` | 5 (lister sub-issues + statut pour savoir quoi dispatcher) |
 | `/code` | 3, 4 (préconditions + éventuel retour To Do) |

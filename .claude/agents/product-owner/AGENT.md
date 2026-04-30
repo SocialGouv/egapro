@@ -62,7 +62,7 @@ La séparation **body / besoin / analyse** permet à l'utilisateur (et aux relec
    - Appliquer le type **Feature** (op. 7 de `github-board.md`)
    - **Premier commentaire** : `gh issue comment <N> --body-file <tmpfile>` avec le bloc `## Besoin métier`
    - **Deuxième commentaire** : `gh issue comment <N> --body-file <tmpfile>` avec le bloc `## Analyse PO` (user stories + scénarios + hors scope + critères d'acceptation)
-   - Poster commentaire `[Validation utilisateur] Epic validé — prêt pour phase designer`
+   - Poster commentaire `[Validation utilisateur] Epic validé — prêt pour phase architect`
    - Retourner le numéro d'issue à l'appelant (`/ticket`)
 
 ### Mode `enrich`
@@ -109,12 +109,12 @@ La séparation **body / besoin / analyse** permet à l'utilisateur (et aux relec
    - Idem pour `## Analyse PO (révisée YYYY-MM-DD)` : recopier les scénarios conservés sous leur identifiant existant (`S1`, `S2`…), ajouter les nouveaux à la suite (`S5`, `S6`…), pour que les références dans les sub-issues restent stables
    - Si promotion en epic nécessaire : appliquer type Feature, ajouter au project en Backlog, label `Epic`. Si l'issue est en `Open` mais en dehors du board, l'ajouter (op. 1+2+4 de `rules/github-board.md`).
    - Le **body** n'est édité que si `EXTRA_CONTEXT` change la demande utilisateur originale ; sinon il reste tel quel.
-   - Poster commentaire `[Validation utilisateur] Epic enrichi — prêt pour phase designer`
-   - Retourner le numéro d'issue à l'appelant (`/ticket`) avec la liste des scénarios **finale** (anciens conservés + nouveaux), pour que les phases suivantes (designer, architect) sachent ce qui a changé.
+   - Poster commentaire `[Validation utilisateur] Epic enrichi — prêt pour phase architect`
+   - Retourner le numéro d'issue à l'appelant (`/ticket`) avec la liste des scénarios **finale** (anciens conservés + nouveaux), pour que la phase architect sache ce qui a changé.
 
 ## Contraintes
 
-- **Pas de décision UI** (layout, composants) — c'est le rôle du `designer`
+- **Pas de décision UI** (layout, composants, fidélité Figma) — l'architect cite Figma dans les tickets, `code-dev` implémente avec le MCP `figma-dev`
 - **Pas de décision technique** (fichiers, patterns) — c'est le rôle de l'`architect`
 - **Scénarios observables** en black-box (pas de référence à l'état interne)
 - **Texte en français** (contenu utilisateur). Titre d'issue impératif, < 70 chars.
@@ -127,5 +127,5 @@ La séparation **body / besoin / analyse** permet à l'utilisateur (et aux relec
 Epic: #NNN
 Scenarios: S1, S2, S3
 Promotion: <appliquée|déjà en epic|N/A>     # mode enrich uniquement
-Ready for: designer phase
+Ready for: architect phase
 ```

@@ -80,10 +80,10 @@ Model :
 - **sonnet** sinon
 
 L'agent :
-1. Implémente le ticket
+1. Implémente le ticket — pour les tickets UI, vérifie lui-même la fidélité visuelle vs. l'URL Figma citée dans la section `## Référence Figma` (MCP `figma-dev`, voir `rules/figma-workflow.md`)
 2. Passe les 4 agents existants (`validator`, `structural-auditor`, `rgaa-auditor`, `security-auditor`) en parallèle
 3. Ouvre une PR draft
-4. Lance `functional-validator` + `design-validator` en parallèle
+4. Lance `functional-validator` (rejoue les scénarios PO dans le dev server)
 5. Sur tous PASS → `gh pr ready` + ticket **In review** + retour `{"status":"validated", ...}`
 6. Sur 3-retry Sonnet → retour `{"status":"needs_opus_escalation", ...}` (en standalone `/code`, **re-invoquer immédiatement** le même agent en `model: "opus"` avec les mêmes inputs)
 7. Sur 3-retry Opus ou spec invalide → retour `{"status":"refacto", ...}` (ticket reste en **To Do** avec diagnostic)

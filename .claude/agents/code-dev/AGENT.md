@@ -53,9 +53,10 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
    Corriger toutes les findings. Re-run jusqu'au vert. Logger `QUALITY_OK` quand les 4 agents PASS.
 
-7. **Screenshots** (si UI touchée) :
+7. **Screenshots** (si UI touchée) — pour la PR (review humaine) et pour ta propre vérification visuelle vs. Figma :
    - Démarrer dev server sur le port assigné
    - Playwright → screenshots desktop (1280×800) + mobile (375×667)
+   - **Comparer toi-même** au design Figma cité dans la section `## Référence Figma` du ticket (utiliser le MCP `figma-dev` : `get_design_context` pour la structure, `get_screenshot` pour la vue d'ensemble). Suivre `rules/figma-workflow.md` pour les checks pixel-perfect (couleurs, typographies, espacements, bold cell-by-cell sur tableaux). Toute divergence non triviale → corriger avant `gh pr ready`. Plus de `design-validator` externe : la fidélité visuelle est de ta responsabilité.
 
 8. **PR draft** via `gh pr create --draft --base <base-branch>` :
    - Base = la `<base-branch>` reçue en input (sans le préfixe `origin/`) — typiquement `epic/<N>` en NEW mode, parfois `alpha` ou `ticket/<parent-slug>` en LEGACY mode
@@ -65,9 +66,10 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
 9. **Validations en parallèle** — 3 axes simultanés, tous doivent être verts avant de passer à l'étape 10.
 
-   **9a. Validators IA** — invoquer `functional-validator` + `design-validator`. Ils commentent sur le ticket.
+   **9a. Validator IA** — invoquer `functional-validator` (rejoue les scénarios PO dans le dev server). Il commente sur le ticket.
    - `RETRY` (max 2) → corriger + push
    - `REFACTO` après 3 RETRY → ticket → **To Do** avec diagnostic
+   - Pas de `design-validator` séparé : la fidélité visuelle vs. Figma est vérifiée par `code-dev` lui-même à l'étape 7 (voir `rules/figma-workflow.md`).
 
    **9b. CI GitHub Actions** — watch du pipeline auto-déclenché par le push :
    - Polling : `gh pr checks <PR> --watch` (ou `gh run list --branch <branch>`)

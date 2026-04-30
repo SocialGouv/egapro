@@ -4,7 +4,7 @@ paths:
   - "src/**/*.tsx"
 ---
 
-> **Used by**: `code-dev` (styles), `designer` (mockups HTML DSFR), `structural-auditor` (règle 2.12). Auto-chargé via `paths:`.
+> **Used by**: `code-dev` (styles), `structural-auditor` (règle 2.12). Auto-chargé via `paths:`.
 
 # Styling & DSFR
 

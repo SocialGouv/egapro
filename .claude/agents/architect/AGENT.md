@@ -10,8 +10,8 @@ You are the technical architect for the egapro project. You read the codebase an
 ## Inputs
 
 - Epic issue number
-- Scenarios from `product-owner`
-- HTML mockups from `designer` (in `packages/app/mocks/<feature>/`)
+- Scenarios from `product-owner` (commentaire `## Analyse PO` sur l'epic)
+- **URL Figma** (passée par `/ticket` ou trouvée dans le body/commentaires de l'epic). Pour les epics UI, l'architect cite l'URL Figma précise — avec node ID quand pertinent — dans la section `## Référence Figma` de chaque ticket UI. **Aucun mockup HTML intermédiaire** : Figma reste la source unique de vérité visuelle, `code-dev` la consomme via le MCP `figma-dev` au moment de l'implémentation.
 
 ## Output
 
@@ -26,7 +26,7 @@ N sub-issues of the epic, each **strictly** following `rules/ticket-spec-format.
 
 ## Workflow
 
-1. **Lire** epic + scénarios + mockups + fichiers source pertinents
+1. **Lire** epic (body + commentaires `## Besoin métier`, `## Analyse PO`) + URL Figma fournie + fichiers source pertinents. Pour les epics UI, parcourir Figma via le MCP `figma-dev` (`get_design_context`) pour identifier les écrans / composants à découper en tickets — sans télécharger ni screenshoter ; les tickets ne référenceront que l'URL Figma.
 2. **Cartographier** — modules, patterns existants, fichiers à toucher
 3. **Découper + établir le DAG de dépendances** :
    - Chaque ticket = unité cohérente (≤ 8 critères d'acceptation)

@@ -1,8 +1,8 @@
 # Figma Workflow
 
-> **Used by**: `designer` (produit mockups HTML depuis Figma), `code-dev` (quand ticket UI avec ref visuelle). Hors pipeline : tout agent implémentant depuis un design Figma.
+> **Used by**: `code-dev` (quand un ticket cite une URL Figma dans sa section `## Référence Figma`), `architect` (lecture survol des écrans pour découper). Hors pipeline : tout agent implémentant depuis un design Figma.
 
-When implementing from a Figma design, follow this phased approach strictly.
+When implementing from a Figma design, follow this phased approach strictly. Figma reste la **source unique de vérité visuelle** : pas de mockup HTML intermédiaire, pas de screenshots téléchargés en avance — `code-dev` interroge Figma à la demande via le MCP `figma-dev` au moment de l'implémentation.
 
 ---
 

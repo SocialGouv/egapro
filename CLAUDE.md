@@ -53,7 +53,7 @@ React/TypeScript rules, DSFR, accessibility, tests, environment variables, scrip
 
 Never create a git commit, unless the user explicitly requests it.
 
-**Exception** : les agents invoqués par les skills `/ticket`, `/epic`, `/code` (principalement `code-dev`, ainsi que `designer` qui publie la branche `design-assets/epic-<N>`) sont **autorisés à commit + push sans demander**. L'invocation de la skill est la permission explicite. Ils restent liés par les autres règles (pas de `Co-Authored-By`, pas de `--no-verify`, pas de `--no-gpg-sign`, pas de secrets commités).
+**Exception** : les agents invoqués par les skills `/ticket`, `/epic`, `/code` (principalement `code-dev`) sont **autorisés à commit + push sans demander**. L'invocation de la skill est la permission explicite. Ils restent liés par les autres règles (pas de `Co-Authored-By`, pas de `--no-verify`, pas de `--no-gpg-sign`, pas de secrets commités).
 
 ## Git hygiene
 
@@ -123,7 +123,7 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | **RGAA** | After every task | `rgaa-auditor` agent on modified `.tsx` files |
 | **Security** | After every task | `security-auditor` agent on modified server files |
 | **Functional** | Inside `/code` + `/epic` | `functional-validator` rejoue les scénarios PO |
-| **Visual** | Inside `/code` + `/epic` | `design-validator` compare le rendu aux mockups designer |
+| **Visual** | Inside `/code` (UI tickets) | `code-dev` compare lui-même le rendu à Figma via le MCP `figma-dev` (voir `rules/figma-workflow.md`) |
 | **Domain layer** | While writing | Inline rules (also enforced by hooks + structural-auditor) |
 | **PR review** | When on a PR branch | `check-pr-reviews.sh` hook at session start + `/review` skill |
 
@@ -135,13 +135,14 @@ Quality checks run **automatically** après chaque itération de code — pas de
 /ticket <feature + Figma>    →   /epic <N>        (ou /code <N>)
 ──────────────────────────       ────────────────
  product-owner  (Opus)            code-dev  (Sonnet / Opus si "complexe")
- designer       (Opus)              ├── validator
- architect      (Opus)              ├── structural-auditor
-                                    ├── rgaa-auditor
- sortie : epic GitHub               ├── security-auditor
- + N sous-issues formatées          ├── functional-validator
-                                    └── design-validator
-                                  sortie : PR draft → ready, ticket "In review"
+ architect      (Opus)              ├── validator
+                                    ├── structural-auditor
+ sortie : epic GitHub               ├── rgaa-auditor
+ + N sous-issues formatées          ├── security-auditor
+ (URL Figma citée dans              └── functional-validator
+  chaque ticket UI)                sortie : PR draft → ready, ticket "In review"
+                                   (fidélité Figma vérifiée par code-dev lui-même
+                                    via le MCP figma-dev)
 ```
 
 ### Agents (`.claude/agents/`)
@@ -150,15 +151,13 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | Agent | Rôle |
 |---|---|
 | `product-owner` | Refine le besoin, rédige les scénarios PO sur l'epic |
-| `designer` | Mockups HTML DSFR statiques + screenshots (branche `design-assets/epic-<N>`) |
-| `architect` | Lit le code, produit N tickets au format `rules/ticket-spec-format.md` |
+| `architect` | Lit le code, produit N tickets au format `rules/ticket-spec-format.md` (URL Figma citée par node dans chaque ticket UI) |
 
 **Pipeline exécution** (invoqués par `/epic` + `/code`) :
 | Agent | Rôle |
 |---|---|
-| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`) |
+| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Pour les tickets UI, vérifie lui-même la fidélité Figma via le MCP `figma-dev`. |
 | `functional-validator` | Rejoue les scénarios PO dans le dev server |
-| `design-validator` | Compare le rendu aux mockups (desktop + mobile) |
 
 **Quality gates** (read-only, appelés par `code-dev` ou hors pipeline) :
 | Agent | Rôle |
@@ -172,7 +171,7 @@ Quality checks run **automatically** après chaque itération de code — pas de
 
 | Skill | Purpose |
 |---|---|
-| `/ticket <description + Figma URL>` | Conception pipeline : PO → designer → architect → epic GitHub + N sous-issues |
+| `/ticket <description + Figma URL>` ou `/ticket <issue#>` | Conception pipeline : PO → architect → epic GitHub + N sous-issues. Accepte aussi une issue existante à enrichir. |
 | `/epic <N1> [<N2> ...]` | Lance le bash loop driver `scripts/orchestration/epic_loop.sh` en background sur les epics donnés. Main context libre. |
 | `/code <N>` | Exécute un seul ticket via `code-dev` (debug, fix). Parse le retour JSON strict, ré-invoque en Opus si `needs_opus_escalation`. |
 | `/report [<N> ...]` | Dashboard live des agents actifs + état des sous-tickets de l'epic. Pure bash, zéro LLM. |

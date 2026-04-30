@@ -1,15 +1,14 @@
 ---
 name: ticket
-description: "Conception pipeline: PO → designer → architect. Usage: /ticket <feature description + Figma URL> | /ticket <issue_number_or_url> [<extra context>]"
+description: "Conception pipeline: PO → architect. Usage: /ticket <feature description + Figma URL> | /ticket <issue_number_or_url> [<extra context>]"
 ---
 
 # /ticket
 
-Orchestre la phase conception. Trois agents Opus se succèdent. **Chaque agent gère lui-même un gate de validation utilisateur explicite avant de poster sur GitHub** — l'orchestrateur (toi qui exécutes ce skill) chaîne simplement les agents et ne ré-interroge pas l'utilisateur entre eux.
+Orchestre la phase conception. Deux agents Opus se succèdent. **Chaque agent gère lui-même un gate de validation utilisateur explicite avant de poster sur GitHub** — l'orchestrateur (toi qui exécutes ce skill) chaîne simplement les agents et ne ré-interroge pas l'utilisateur entre eux.
 
 1. **`product-owner`** — refine le besoin, rédige les scénarios PO
-2. **`designer`** — propose un flow d'écrans + mockups HTML DSFR statiques
-3. **`architect`** — lit le code et produit N tickets exécutables au format `rules/ticket-spec-format.md`
+2. **`architect`** — lit le code et produit N tickets exécutables au format `rules/ticket-spec-format.md` (référence visuelle = URL Figma directe dans chaque ticket UI)
 
 À la sortie : un epic GitHub avec N sous-issues prêtes à dispatcher via `/epic`.
 
@@ -19,7 +18,7 @@ Orchestre la phase conception. Trois agents Opus se succèdent. **Chaque agent g
 
 ### Mode A — création (description libre)
 
-`$ARGUMENTS` = description de la feature (en français) + URL Figma avec node ID. Si l'URL Figma manque, demander à l'utilisateur avant de commencer. **Comportement par défaut.**
+`$ARGUMENTS` = description de la feature (en français) + URL Figma avec node ID. Si l'URL Figma manque pour un epic UI, demander à l'utilisateur avant de commencer (l'architect en aura besoin pour citer les nodes Figma dans chaque ticket UI ; `code-dev` consommera ces URLs via le MCP `figma-dev` au moment de l'implémentation). **Comportement par défaut.**
 
 ### Mode B — enrichissement d'un ticket existant
 
@@ -57,7 +56,7 @@ gh issue view "$EPIC_NUMBER" --json number,title,body,labels,state,comments \
 **Exigences sur l'issue existante** :
 - Doit être **OPEN** (sinon : prévenir l'utilisateur, demander confirmation pour rouvrir / créer une nouvelle).
 - Si l'issue n'a **pas le type `Feature`** ni le label `Epic` → la pipeline va la promouvoir en epic (le PO appliquera le type Feature et le statut `Backlog` du board s'ils sont absents). Avertir l'utilisateur que l'issue va être convertie en epic et lui demander confirmation explicite avant de continuer.
-- Si l'issue a déjà des sub-issues : la pipeline part du principe que les phases déjà présentes (PO / designer / architect) sont à **compléter ou ré-itérer**, pas à recréer. Voir comportement par phase ci-dessous.
+- Si l'issue a déjà des sub-issues : la pipeline part du principe que les phases déjà présentes (PO / architect) sont à **compléter ou ré-itérer**, pas à recréer. Voir comportement par phase ci-dessous.
 
 ---
 
@@ -79,32 +78,15 @@ Déléguer à l'agent `product-owner` (`.claude/agents/product-owner/AGENT.md`).
 
 ---
 
-# Step 2 — Designer (Opus)
+# Step 2 — Architect (Opus)
 
-Déléguer à l'agent `designer` (`.claude/agents/designer/AGENT.md`). Passer : epic issue number + URL Figma + mode (`create` / `enrich`).
+Déléguer à l'agent `architect` (`.claude/agents/architect/AGENT.md`). Passer : epic issue number + URL Figma (si fournie) + mode.
 
-**Mode A** — l'agent produit HTML + screenshots dans `/tmp/egapro-mocks/epic-<NNN>/` (jamais commités), **obtient explicitement la validation utilisateur sur le flow et les mockups**, uploade les PNG sur `design-assets/epic-<NNN>` et poste un commentaire avec images inline.
-
-**Mode B** — si la branche `design-assets/epic-<NNN>` existe déjà et qu'un commentaire `## Designer: proposition d'écrans` est présent :
-- Lire le commentaire existant + screenshots déjà publiés
-- Évaluer ce qui doit changer à la lumière du PO révisé / `EXTRA_CONTEXT`
-- Mettre à jour seulement les écrans impactés (push commit incrémental sur la branche orpheline)
-- Poster un nouveau commentaire `## Designer: proposition d'écrans (révisée YYYY-MM-DD)` listant le delta
-- Si rien à changer : poster un commentaire « Designer: pas de changement nécessaire » et passer en validation
-
-**Attendre** le commentaire `[Validation utilisateur] Design validé` (ou `Design inchangé`) avant de passer à la suite.
-
----
-
-# Step 3 — Architect (Opus)
-
-Déléguer à l'agent `architect` (`.claude/agents/architect/AGENT.md`). Passer : epic issue number + mode.
-
-**Mode A** — l'agent lit le code, **obtient explicitement la validation utilisateur sur le découpage proposé**, produit N sous-issues respectant `rules/ticket-spec-format.md`, applique le label `complexe` quand nécessaire, ordonne les dépendances via Parent issue / Sub-issues.
+**Mode A** — l'agent lit le code, **obtient explicitement la validation utilisateur sur le découpage proposé**, produit N sous-issues respectant `rules/ticket-spec-format.md`, applique le label `complexe` quand nécessaire, ordonne les dépendances via Parent issue / Sub-issues. Pour chaque ticket UI, il **cite l'URL Figma précise** (avec node ID quand pertinent) dans la section "Référence Figma" du body — `code-dev` la consommera via le MCP `figma-dev` au moment de l'implémentation. Pas de mockup HTML intermédiaire, pas de screenshots Figma téléchargés en avance : Figma reste la source unique de vérité visuelle.
 
 **Mode B** — l'epic peut déjà avoir des sub-issues :
 - Lister les sub-issues existantes (snippet 5 de `rules/github-board.md`) + leur statut + leur PR liée
-- Calculer le delta vs. le PO/designer révisés :
+- Calculer le delta vs. le PO révisé / `EXTRA_CONTEXT` :
   - **Sub-issue déjà `Done` / `In review`** : ne pas la modifier (intouchable). Si le scope a changé, créer une **nouvelle** sub-issue qui amende.
   - **Sub-issue `In progress`** : commenter `architect: scope ajusté — voir epic` puis la replacer en `To Do` si le diff impacte le ticket — décision soumise à validation utilisateur explicite (un agent IA ne peut pas annuler le travail d'un autre sans aval).
   - **Sub-issue `To Do`** : mise à jour du body autorisée (édition `gh issue edit`).
@@ -115,7 +97,7 @@ Déléguer à l'agent `architect` (`.claude/agents/architect/AGENT.md`). Passer 
 
 ---
 
-# Step 4 — Report
+# Step 3 — Report
 
 ```
 ## Ticket pipeline: DONE  (mode=<create|enrich>)
@@ -125,7 +107,6 @@ Tickets créés: #N1, #N2
 Tickets amendés: #N3
 Tickets intouchés (déjà In review/Done): #N4
 Complexe: #N2 (Opus required)
-Mockups: /tmp/egapro-mocks/epic-NNN/
 
 Next: /epic NNN
 ```
@@ -133,5 +114,5 @@ Next: /epic NNN
 ## Notes
 
 - Si l'un des agents revient sans validation utilisateur (ex : utilisateur a refusé après le Q&A du PO), **ne pas continuer**. Arrêter la pipeline, laisser l'utilisateur reformuler sa demande.
-- Un agent peut être relancé isolément en invoquant directement son agent (`.claude/agents/<name>/AGENT.md`) — utile pour re-travailler un design après un RETRY de `design-validator` en aval.
-- En mode B, **ne jamais effacer** les commentaires précédents `## Besoin métier`, `## Analyse PO`, `## Designer: proposition d'écrans`. La traçabilité historique est précieuse — préférer ajouter un commentaire `(révisé YYYY-MM-DD)` qui pointe vers le précédent.
+- Un agent peut être relancé isolément en invoquant directement son agent (`.claude/agents/<name>/AGENT.md`).
+- En mode B, **ne jamais effacer** les commentaires précédents `## Besoin métier`, `## Analyse PO`. La traçabilité historique est précieuse — préférer ajouter un commentaire `(révisé YYYY-MM-DD)` qui pointe vers le précédent.

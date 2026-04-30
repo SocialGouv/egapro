@@ -39,23 +39,19 @@ Ajouter les scénarios spécifiques au ticket si besoin, au format Gherkin simpl
 - **Quand** ... (action utilisateur)
 - **Alors** ... (résultat observable)>
 
-## Références visuelles
+## Référence Figma
 
-<Si le ticket touche de l'UI, **impérativement** afficher les screenshots inline (desktop + mobile) via les URLs `raw.githubusercontent.com` de la branche `design-assets/epic-<NNN>` publiée par le `designer`. Cette branche est orpheline et héberge les PNG — voir `.claude/agents/designer/AGENT.md` pour la procédure de publication. Les chemins `/tmp/...` sont ajoutés en annexe pour que `code-dev` et `design-validator` puissent lire les fichiers localement lors de la validation visuelle Phase 4.
+<Si le ticket touche de l'UI, **impérativement** citer l'URL Figma précise du / des écran(s) ou composant(s) concerné(s), avec le node ID quand pertinent (`?node-id=...`). `code-dev` consommera cette URL via le MCP `figma-dev` (`get_design_context` pour la structure, `get_screenshot` pour la vue d'ensemble) au moment de l'implémentation, en suivant `rules/figma-workflow.md` (Phase 3 pixel-perfect + Phase 4 validation visuelle qu'il fait lui-même).
 
 Format :
 
 ```markdown
-**Desktop**
-![<alt>](https://raw.githubusercontent.com/<owner>/<repo>/design-assets/epic-<NNN>/epic-<NNN>/screenshots/<screen>-desktop.png)
-
-**Mobile**
-![<alt>](https://raw.githubusercontent.com/<owner>/<repo>/design-assets/epic-<NNN>/epic-<NNN>/screenshots/<screen>-mobile.png)
-
-_Annexe pipeline (lecture locale par code-dev / design-validator) :_
-- `/tmp/egapro-mocks/epic-<NNN>/screenshots/<screen>-desktop.png`
-- `/tmp/egapro-mocks/epic-<NNN>/screenshots/<screen>-mobile.png`
+- Écran principal : <Figma URL avec node-id>
+- Composant X : <Figma URL avec node-id>     # si plusieurs nodes pertinents
+- État Y (hover / error / mobile) : <Figma URL avec node-id>
 ```
+
+**Une URL = un node Figma précis.** Pas d'URL générique de fichier Figma sans node-id : `code-dev` doit pouvoir aller direct au bon écran, sans deviner.
 
 Si pas d'UI, écrire "N/A".>
 
@@ -67,7 +63,7 @@ Si pas d'UI, écrire "N/A".>
 - [ ] Typecheck vert (`pnpm typecheck`)
 - [ ] Lint vert (`pnpm lint:check`)
 - [ ] Scénario(s) rejoué(s) sans erreur par `functional-validator`
-- [ ] (si UI) Comparaison visuelle PASS par `design-validator`
+- [ ] (si UI) Vérification visuelle vs. Figma faite par `code-dev` (screenshots dev server vs. `get_screenshot` Figma, voir `rules/figma-workflow.md` Phase 4)
 
 ## Depends on
 
