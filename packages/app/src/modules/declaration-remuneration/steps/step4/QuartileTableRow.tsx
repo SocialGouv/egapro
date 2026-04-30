@@ -143,7 +143,10 @@ export function QuartileTableRow({
 					</div>
 				)}
 			</td>
-			<td data-mobile-label="Nombre de femmes">
+			<td
+				className={stepStyles.numericCell}
+				data-mobile-label="Nombre de femmes"
+			>
 				<div
 					className={
 						womenErr
@@ -177,7 +180,10 @@ export function QuartileTableRow({
 					)}
 				</div>
 			</td>
-			<td data-mobile-label="Nombre d'hommes">
+			<td
+				className={stepStyles.numericCell}
+				data-mobile-label="Nombre d'hommes"
+			>
 				<div
 					className={
 						menErr
@@ -211,10 +217,16 @@ export function QuartileTableRow({
 					)}
 				</div>
 			</td>
-			<td data-mobile-label="Pourcentage de femmes">
+			<td
+				className={stepStyles.numericCell}
+				data-mobile-label="Pourcentage de femmes"
+			>
 				<strong>{pct(quartile, "women")}</strong>
 			</td>
-			<td data-mobile-label="Pourcentage d'hommes">
+			<td
+				className={stepStyles.numericCell}
+				data-mobile-label="Pourcentage d'hommes"
+			>
 				<strong>{pct(quartile, "men")}</strong>
 			</td>
 		</tr>

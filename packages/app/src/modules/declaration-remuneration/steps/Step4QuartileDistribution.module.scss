@@ -56,6 +56,15 @@
 		white-space: nowrap;
 	}
 
+	.numericCell {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+	}
+
+	tbody td input.fr-input {
+		text-align: right;
+	}
+
 	tbody tr:last-child {
 		font-weight: bold;
 	}
@@ -101,7 +110,12 @@
 		}
 
 		.minCell,
-		.maxCell {
+		.maxCell,
+		.numericCell {
+			text-align: left;
+		}
+
+		tbody td input.fr-input {
 			text-align: left;
 		}
 
