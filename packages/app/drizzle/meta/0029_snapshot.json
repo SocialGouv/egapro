@@ -1057,12 +1057,6 @@
 					"primaryKey": false,
 					"notNull": false
 				},
-				"annual_quartile_threshold4": {
-					"name": "annual_quartile_threshold4",
-					"type": "numeric(9, 2)",
-					"primaryKey": false,
-					"notNull": false
-				},
 				"annual_quartile1_proportion_women": {
 					"name": "annual_quartile1_proportion_women",
 					"type": "numeric(9, 4)",
@@ -1125,12 +1119,6 @@
 				},
 				"hourly_quartile_threshold3": {
 					"name": "hourly_quartile_threshold3",
-					"type": "numeric(9, 2)",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"hourly_quartile_threshold4": {
-					"name": "hourly_quartile_threshold4",
 					"type": "numeric(9, 2)",
 					"primaryKey": false,
 					"notNull": false
