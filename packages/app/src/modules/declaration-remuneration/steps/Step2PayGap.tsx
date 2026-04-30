@@ -21,7 +21,6 @@ import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
-import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapField, Step2Data } from "../types";
 
 type Step2PayGapProps = {
@@ -116,12 +115,8 @@ export function Step2PayGap({
 					<strong>
 						{gipPrefillData
 							? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
-							: "Renseignez les informations avant de valider vos indicateurs."}
+							: "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."}
 					</strong>
-					<TooltipButton
-						id="tooltip-step2-info"
-						label="Information sur les indicateurs"
-					/>
 				</p>
 
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>

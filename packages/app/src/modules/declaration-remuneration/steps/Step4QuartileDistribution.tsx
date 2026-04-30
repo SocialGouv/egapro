@@ -15,7 +15,6 @@ import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
-import { TooltipButton } from "../shared/TooltipButton";
 import type { QuartileTuple, Step4Data } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
 import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCallout";
@@ -229,14 +228,9 @@ export function Step4QuartileDistribution({
 
 				<p className="fr-mb-0">
 					<strong>
-						{gipPrefillData
-							? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."
-							: "Renseignez les informations avant de valider vos indicateurs."}
+						Vérifiez les informations préremplies et modifiez-les si nécessaire
+						avant de valider vos indicateurs.
 					</strong>
-					<TooltipButton
-						id="tooltip-step4-info"
-						label="Information sur les indicateurs"
-					/>
 				</p>
 
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>

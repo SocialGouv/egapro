@@ -102,7 +102,7 @@ describe("Step4QuartileDistribution", () => {
 		);
 		expect(
 			screen.getByText(
-				"Renseignez les informations avant de valider vos indicateurs.",
+				"Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs.",
 			),
 		).toBeInTheDocument();
 		expect(
