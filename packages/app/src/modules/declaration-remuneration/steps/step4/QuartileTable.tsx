@@ -59,6 +59,15 @@ export function QuartileTable({
 							<div className="fr-table__content">
 								<table>
 									<caption className="fr-sr-only">{title}</caption>
+									<colgroup>
+										<col className={stepStyles.colRowLabel} />
+										<col className={stepStyles.colMin} />
+										<col className={stepStyles.colMax} />
+										<col className={stepStyles.colCount} />
+										<col className={stepStyles.colCount} />
+										<col className={stepStyles.colPercent} />
+										<col className={stepStyles.colPercent} />
+									</colgroup>
 									<thead>
 										<tr>
 											<th scope="col">{/* row label */}</th>

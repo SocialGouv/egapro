@@ -36,6 +36,26 @@
 		border-collapse: collapse;
 	}
 
+	.colRowLabel {
+		width: 9rem;
+	}
+
+	.colMin {
+		width: 7rem;
+	}
+
+	.colMax {
+		width: 13rem;
+	}
+
+	.colCount {
+		width: 7rem;
+	}
+
+	.colPercent {
+		width: 7rem;
+	}
+
 	th,
 	td {
 		white-space: normal;
@@ -44,7 +64,6 @@
 
 	tbody th[scope="row"] {
 		background: transparent;
-		width: 1%;
 		white-space: nowrap;
 		padding-right: 0.5rem;
 	}
@@ -68,7 +87,7 @@
 	}
 
 	tbody td .inputWithUnit input.fr-input {
-		width: 8rem;
+		width: 11rem;
 		margin-left: 0;
 	}
 
