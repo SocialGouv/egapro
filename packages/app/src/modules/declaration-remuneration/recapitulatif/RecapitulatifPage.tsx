@@ -5,17 +5,25 @@ import { ResourceBanner } from "~/modules/layout";
 import common from "../shared/common.module.scss";
 import { QUARTILE_NAMES } from "../shared/constants";
 import stepStyles from "../steps/Step6Review.module.scss";
-import { CardTitle } from "../steps/step6/CardTitle";
-import { GapColumn } from "../steps/step6/GapColumn";
-import { GapSideBySide } from "../steps/step6/GapSideBySide";
-import { parseEmployeeCategories } from "../steps/step6/parseStep5Categories";
-import { QuartileColumn } from "../steps/step6/QuartileColumn";
+import {
+	CardTitle,
+	GapColumn,
+	GapSideBySide,
+	parseEmployeeCategories,
+	QuartileColumn,
+} from "../steps/step6";
 import type {
 	EmployeeCategoryRow,
 	Step2Data,
 	Step3Data,
 	Step4Data,
 } from "../types";
+
+function EmptyDataNotice() {
+	return (
+		<p className={`fr-mb-0 ${common.mentionGrey}`}>Aucune donnée renseignée.</p>
+	);
+}
 
 type CompanyInfo = {
 	name: string;
@@ -123,7 +131,7 @@ export function RecapitulatifPage({
 							<caption>Informations déclarant</caption>
 							<tbody>
 								<tr>
-									<td>Mail déclarant</td>
+									<th scope="row">Mail déclarant</th>
 									<td>{declarantEmail}</td>
 								</tr>
 							</tbody>
@@ -139,22 +147,22 @@ export function RecapitulatifPage({
 							<caption>Informations entreprise</caption>
 							<tbody>
 								<tr>
-									<td>Raison sociale</td>
+									<th scope="row">Raison sociale</th>
 									<td>{company.name}</td>
 								</tr>
 								<tr>
-									<td>SIREN</td>
+									<th scope="row">SIREN</th>
 									<td>{company.siren}</td>
 								</tr>
 								{company.nafCode && (
 									<tr>
-										<td>Code NAF</td>
+										<th scope="row">Code NAF</th>
 										<td>{company.nafCode}</td>
 									</tr>
 								)}
 								{company.address && (
 									<tr>
-										<td>Adresse</td>
+										<th scope="row">Adresse</th>
 										<td>{company.address}</td>
 									</tr>
 								)}
@@ -171,11 +179,11 @@ export function RecapitulatifPage({
 							<caption>Informations période de référence</caption>
 							<tbody>
 								<tr>
-									<td>Date de début</td>
+									<th scope="row">Date de début</th>
 									<td>{periodStart}</td>
 								</tr>
 								<tr>
-									<td>Date de fin</td>
+									<th scope="row">Date de fin</th>
 									<td>{periodEnd}</td>
 								</tr>
 							</tbody>
@@ -358,9 +366,7 @@ export function RecapitulatifPage({
 							</div>
 						))
 					) : (
-						<p className={`fr-mb-0 ${common.mentionGrey}`}>
-							Aucune donnée renseignée.
-						</p>
+						<EmptyDataNotice />
 					)}
 				</div>
 

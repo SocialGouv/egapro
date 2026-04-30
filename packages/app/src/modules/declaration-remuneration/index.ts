@@ -38,7 +38,7 @@ export {
 	SecondDeclarationStep3Review,
 	SecondDeclarationStepPage,
 } from "./steps/secondDeclaration";
-export { parseEmployeeCategories } from "./steps/step6/parseStep5Categories";
+export { parseEmployeeCategories } from "./steps/step6";
 export type {
 	EmployeeCategoryRow,
 	PayGapRow,

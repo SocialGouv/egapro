@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { RecapitulatifPage } from "~/modules/declaration-remuneration/recapitulatif";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { auth } from "~/server/auth";
 import { getEffectiveSiren } from "~/server/auth/companyAccess";
 import { api } from "~/trpc/server";
+
+export const metadata: Metadata = {
+	title: "Récapitulatif de la déclaration",
+};
 
 type Props = {
 	searchParams: Promise<{ type?: string; siren?: string }>;
