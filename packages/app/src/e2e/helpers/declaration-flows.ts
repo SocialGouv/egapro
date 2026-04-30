@@ -105,7 +105,7 @@ export async function completeDeclaration(
 		name: /source utilisée pour déterminer les catégories/i,
 	});
 	if (await sourceSelect.isVisible({ timeout: 1_000 }).catch(() => false)) {
-		await sourceSelect.selectOption("convention-collective");
+		await sourceSelect.selectOption("accord-entreprise");
 		await page.getByRole("textbox", { name: "Libellé" }).fill("Catégorie test");
 		await page
 			.getByRole("textbox", { name: "Effectif femmes, catégorie 1" })

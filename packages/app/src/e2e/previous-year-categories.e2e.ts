@@ -18,7 +18,7 @@ async function assertStep5PrefilledWithSeedData(page: Page) {
 	// Source pre-filled from the previous declaration
 	await expect(
 		page.getByRole("combobox", { name: /source utilisée/i }),
-	).toHaveValue("convention-collective");
+	).toHaveValue("accord-entreprise");
 
 	// 3 categories pre-filled
 	await expect(page.getByText("Nombre de catégories : 3")).toBeVisible();

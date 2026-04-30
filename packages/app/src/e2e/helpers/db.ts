@@ -264,7 +264,7 @@ export async function insertPreviousYearDeclaration(yearsBack = 1) {
 		for (const cat of categories) {
 			await sql`
 				INSERT INTO app_job_category (id, declaration_id, category_index, name, source)
-				VALUES (${cat.id}, ${declId}, ${cat.index}, ${cat.name}, 'convention-collective')
+				VALUES (${cat.id}, ${declId}, ${cat.index}, ${cat.name}, 'accord-entreprise')
 				ON CONFLICT DO NOTHING
 			`;
 		}
