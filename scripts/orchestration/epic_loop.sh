@@ -192,7 +192,19 @@ Ton dernier message DOIT être uniquement ce JSON (rien d'autre, pas de prose)."
     # The latter only makes the flag *available* for an interactive session;
     # in --print mode it has no effect, so the sub-agent hits unresolved
     # permission prompts on every gh / bash / pnpm call and aborts.
-    timeout "$AGENT_TIMEOUT" claude \
+    #
+    # Portability: macOS ships no `timeout`. Prefer GNU `gtimeout` from
+    # coreutils (`brew install coreutils`); fall back to `timeout` when
+    # coreutils is the system default (Linux). If neither is on PATH, run
+    # claude without a hard timeout — the loop's per-tick aggregation will
+    # still catch pathological cases.
+    local TIMEOUT_BIN=""
+    if command -v gtimeout >/dev/null 2>&1; then
+        TIMEOUT_BIN="gtimeout $AGENT_TIMEOUT"
+    elif command -v timeout >/dev/null 2>&1; then
+        TIMEOUT_BIN="timeout $AGENT_TIMEOUT"
+    fi
+    $TIMEOUT_BIN claude \
         --agent "$AGENT" \
         --model "$MODEL" \
         --print \
@@ -208,6 +220,12 @@ TICK=0
 while [ $TICK -lt $MAX_TICKS ]; do
     PLAN_FILE="$TICK_DIR/tick_${TICK}_plan.json"
     RESULT_FILE="$TICK_DIR/tick_${TICK}_result.json"
+
+    # 0. Free up worktree slots whose ticket has reached a terminal pipeline
+    # state (In review or Done). Critical for epics with > EPIC_MAX_PARALLEL
+    # tickets — without this, slots stay busy until manual cleanup and the
+    # remaining tickets can never be dispatched.
+    bash "$SCRIPT_DIR/cleanup_terminal_worktrees.sh" $EPICS >/dev/null 2>&1 || true
 
     # 1. Compute the plan
     bash "$SCRIPT_DIR/dispatch_plan.sh" $EPICS > "$PLAN_FILE"
