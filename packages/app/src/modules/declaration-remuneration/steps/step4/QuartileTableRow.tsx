@@ -27,7 +27,7 @@ function fieldId(
 }
 
 function thresholdAriaLabel(tableType: TableType, index: number) {
-	return `Seuil maximum ${index + 1}${ordinalSuffix(index)} quartile ${TYPE_LABEL[tableType]} en euros`;
+	return `Seuil maximum ${index + 1}${ordinalSuffix(index)} quartile ${TYPE_LABEL[tableType]}`;
 }
 
 function womenAriaLabel(tableType: TableType, index: number) {
