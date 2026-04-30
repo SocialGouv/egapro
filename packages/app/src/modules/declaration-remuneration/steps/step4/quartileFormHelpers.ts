@@ -33,7 +33,7 @@ export function normalizeForMutation(values: {
 
 export function gipToQuartiles(gip: GipQuartileData): QuartileData[] {
 	return [0, 1, 2, 3].map((i) => ({
-		threshold: gip.thresholds[i] ?? "",
+		threshold: gip.thresholds[i] ?? undefined,
 		women: gip.womenCounts[i] ?? undefined,
 		men: gip.menCounts[i] ?? undefined,
 	}));
