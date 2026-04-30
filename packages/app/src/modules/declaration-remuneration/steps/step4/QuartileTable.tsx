@@ -55,9 +55,7 @@ export function QuartileTable({
 			<h3 className="fr-h5 fr-mb-0">{title}</h3>
 			<div className={stepStyles.tableSection}>
 				{readingNote}
-				<div
-					className={`fr-table fr-table--bordered fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
-				>
+				<div className={`fr-table fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}>
 					<div className="fr-table__wrapper">
 						<div className="fr-table__container">
 							<div className="fr-table__content">

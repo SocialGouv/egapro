@@ -40,16 +40,20 @@
 	td {
 		white-space: normal;
 		vertical-align: middle;
-		border-right: 1px solid var(--border-default-grey);
-	}
-
-	th:last-child,
-	td:last-child {
-		border-right: none;
 	}
 
 	tbody th[scope="row"] {
 		background: transparent;
+		width: 1%;
+		white-space: nowrap;
+		padding-right: 0.5rem;
+	}
+
+	.minCell,
+	.maxCell {
+		font-variant-numeric: tabular-nums;
+		text-align: right;
+		white-space: nowrap;
 	}
 
 	tbody tr:last-child {
@@ -72,7 +76,6 @@
 		tbody th {
 			display: block;
 			width: 100%;
-			border-right: none;
 		}
 
 		tbody tr {
@@ -88,6 +91,17 @@
 		tbody th {
 			border-bottom: none;
 			padding: 0.5rem 0;
+			text-align: left;
+		}
+
+		tbody th[scope="row"] {
+			width: 100%;
+			white-space: normal;
+			padding-right: 0;
+		}
+
+		.minCell,
+		.maxCell {
 			text-align: left;
 		}
 
@@ -109,14 +123,19 @@
 .rowLabelText {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.5rem;
-}
-
-.minCell,
-.maxCell {
-	font-variant-numeric: tabular-nums;
-	text-align: right;
+	gap: 0.25rem;
 	white-space: nowrap;
+
+	.fr-btn {
+		min-height: 1.5rem;
+		max-width: 1.5rem;
+		max-height: 1.5rem;
+		padding: 0;
+
+		&::before {
+			margin-right: 0;
+		}
+	}
 }
 
 .readonlyCell {
