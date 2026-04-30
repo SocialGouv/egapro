@@ -5,9 +5,13 @@ import styles from "./TooltipButton.module.scss";
 type TooltipButtonProps = {
 	id: string;
 	label: string;
+	text?: string;
 };
 
-export function TooltipButton({ id, label }: TooltipButtonProps) {
+const PLACEHOLDER_TEXT =
+	"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
+export function TooltipButton({ id, label, text }: TooltipButtonProps) {
 	return (
 		<>
 			<button
@@ -22,8 +26,7 @@ export function TooltipButton({ id, label }: TooltipButtonProps) {
 				id={id}
 				role="tooltip"
 			>
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
-				tempor incididunt ut labore et dolore magna aliqua.
+				{text ?? PLACEHOLDER_TEXT}
 			</span>
 		</>
 	);

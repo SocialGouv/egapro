@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: egapro
     ports:
-      - 5438:5432
+      - "${POSTGRES_HOST_PORT:-5438}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -33,8 +33,8 @@ services:
   minio:
     image: minio/minio
     ports:
-      - 9000:9000
-      - 9001:9001
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -71,7 +71,7 @@ services:
   clamavd:
     image: clamav/clamav-debian:1.5.2
     ports:
-      - 3310:3310
+      - "${CLAMAV_HOST_PORT:-3310}:3310"
     volumes:
       - clamdata:/var/lib/clamav
     healthcheck:
@@ -84,7 +84,7 @@ services:
   valkey:
     image: valkey/valkey:8-alpine
     ports:
-      - 6379:6379
+      - "${VALKEY_HOST_PORT:-6379}:6379"
     volumes:
       - valkeydata:/data
     healthcheck:

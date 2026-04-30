@@ -5,6 +5,8 @@ paths:
 
 # tRPC API
 
+> **Used by**: `code-dev` (écriture routers), `security-auditor` (A01/A03/A04), `structural-auditor` (règle 2.14). Auto-chargé via `paths:`.
+
 ## Zod schemas in module folders (shared frontend/backend)
 
 Zod schemas live in `src/modules/{domain}/schemas.ts` — **never** in `src/server/api/routers/`.

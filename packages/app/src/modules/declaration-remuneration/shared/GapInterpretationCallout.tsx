@@ -8,6 +8,14 @@ import {
 import type { PayGapRow } from "../types";
 import styles from "./InterpretationCallout.module.scss";
 
+/** Returns true when at least one row crosses the regulatory gap threshold. */
+export function hasHighPayGap(rows: PayGapRow[]): boolean {
+	return rows.some((r) => {
+		const gap = computeGap(r.womenValue, r.menValue);
+		return gap !== null && gap >= GAP_ALERT_THRESHOLD;
+	});
+}
+
 type GapDirection = "women" | "men" | "balanced";
 
 type GapAnalysis = {
@@ -42,20 +50,22 @@ function analyzeGaps(rows: PayGapRow[]): GapAnalysis {
 	const gaps = [annualMeanGap, annualMedianGap, hourlyMeanGap, hourlyMedianGap];
 	const hasHighGap = gaps.some((g) => g !== null && g >= GAP_ALERT_THRESHOLD);
 
-	// Determine direction based on raw values (women < men = disfavor of women)
-	let womenLowerCount = 0;
-	let menLowerCount = 0;
-	for (const row of rows) {
-		const w = Number.parseFloat(row.womenValue);
-		const m = Number.parseFloat(row.menValue);
-		if (Number.isNaN(w) || Number.isNaN(m)) continue;
-		if (w < m) womenLowerCount++;
-		if (m < w) menLowerCount++;
-	}
-
+	// When no gap reaches the regulatory threshold, treat the situation as
+	// balanced — sub-threshold deltas are not interpreted as disfavor.
 	let direction: GapDirection = "balanced";
-	if (womenLowerCount > menLowerCount) direction = "women";
-	else if (menLowerCount > womenLowerCount) direction = "men";
+	if (hasHighGap) {
+		let womenLowerCount = 0;
+		let menLowerCount = 0;
+		for (const row of rows) {
+			const w = Number.parseFloat(row.womenValue);
+			const m = Number.parseFloat(row.menValue);
+			if (Number.isNaN(w) || Number.isNaN(m)) continue;
+			if (w < m) womenLowerCount++;
+			if (m < w) menLowerCount++;
+		}
+		if (womenLowerCount > menLowerCount) direction = "women";
+		else if (menLowerCount > womenLowerCount) direction = "men";
+	}
 
 	return {
 		direction,
@@ -170,23 +180,23 @@ function buildVariablePayBody(
 			body: (
 				<>
 					les écarts sont très importants sur les rémunérations variables
-					horaires ({fmtGap(hourlyMeanGap)} en moyenne et{" "}
-					{fmtGap(hourlyMedianGap)} en médiane), tandis que les écarts annuels
-					restent faibles, dans un contexte où seules <strong>{menPct}</strong>{" "}
-					des hommes en bénéficient contre <strong>{womenPct}</strong> des
-					femmes.
+					horaires en défaveur des hommes ({fmtGap(hourlyMeanGap)} en moyenne et{" "}
+					{fmtGap(hourlyMedianGap)} en médiane en faveur des femmes), tandis que
+					les écarts annuels restent faibles, dans un contexte où{" "}
+					<strong>{womenPct}</strong> des femmes en bénéficient contre{" "}
+					<strong>{menPct}</strong> des hommes.
 				</>
 			),
 			interpretation:
-				"les hommes accèdent moins souvent aux rémunérations variables et perçoivent des montants horaires inférieurs.",
+				"Les hommes accèdent moins souvent aux rémunérations variables et perçoivent des montants horaires inférieurs à ceux des femmes.",
 		};
 	}
 
 	return {
 		title: "Écart entre hommes et femmes",
-		body: "Les rémunérations variables sont très proches entre femmes et hommes, avec des écarts inférieurs à 5 %.",
+		body: "Les écarts de rémunération variable observés, en moyenne et en médiane, ne révèlent pas de différence significative entre les femmes et les hommes.",
 		interpretation:
-			"Les écarts sont faibles et ne révèlent pas d'inégalité significative.",
+			"Les niveaux de rémunération sont globalement équivalents et ne traduisent pas de déséquilibre notable.",
 	};
 }
 
@@ -227,7 +237,7 @@ export function GapInterpretationCallout({
 		: "fr-callout--blue-ecume";
 
 	return (
-		<div className={`fr-callout fr-mt-4w ${accentClass} ${styles.callout}`}>
+		<div className={`fr-callout ${accentClass} ${styles.callout}`}>
 			<p className="fr-callout__text fr-mb-2w">
 				<strong>{title}&nbsp;:</strong> {body}
 			</p>

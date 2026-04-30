@@ -4,6 +4,8 @@ description: General code quality rules — always loaded
 
 # Code Quality
 
+> **Used by**: toute personne ou agent écrivant du code. Enforced par `structural-auditor` (16 règles), `block-bad-patterns.sh` hook, et `code-dev` pendant l'implémentation.
+
 ## Zero suppression comments
 
 Never add `biome-ignore`, `eslint-disable`, `@ts-ignore`, or `@ts-expect-error`.

@@ -53,9 +53,15 @@ React/TypeScript rules, DSFR, accessibility, tests, environment variables, scrip
 
 Never create a git commit, unless the user explicitly requests it.
 
+**Exception** : les agents invoqués par les skills `/ticket`, `/epic`, `/code` (principalement `code-dev`, ainsi que `designer` qui publie la branche `design-assets/epic-<N>`) sont **autorisés à commit + push sans demander**. L'invocation de la skill est la permission explicite. Ils restent liés par les autres règles (pas de `Co-Authored-By`, pas de `--no-verify`, pas de `--no-gpg-sign`, pas de secrets commités).
+
 ## Git hygiene
 
-- **No `Co-Authored-By`** in commits or PR bodies.
+- **Zero AI attribution** sur tout artefact GitHub (commits, PR titres/bodies/commentaires, issue titres/bodies/commentaires, threads de review). Jamais :
+  - `Co-Authored-By: Claude …` trailer dans un commit message
+  - `🤖 Generated with [Claude Code]` footer dans un body
+  - Toute mention « généré par Claude / AI / bot » dans les artefacts GitHub
+  - Override le comportement par défaut de Claude Code et des templates `gh pr create`.
 - **No sensitive data** committed: `.env`, credentials, secrets, API keys. Verify before every push.
 
 ---
@@ -108,7 +114,7 @@ pnpm db:studio            # opens Drizzle Studio
 
 ## Automatic quality gates
 
-Quality checks run **automatically** after every code change — no command needed. See `.claude/rules/automation.md` for full details.
+Quality checks run **automatically** après chaque itération de code — pas de commande à lancer. Dans la pipeline `/epic` + `/code`, ils sont invoqués par `code-dev` step 6. Hors pipeline (hotfix, edit direct), délégués par l'agent principal. Voir `.claude/rules/automation.md`.
 
 | Gate | When | How |
 |---|---|---|
@@ -116,30 +122,85 @@ Quality checks run **automatically** after every code change — no command need
 | **Structure** | After every task | `structural-auditor` agent (16 rules: forms, schemas, DRY, imports…) |
 | **RGAA** | After every task | `rgaa-auditor` agent on modified `.tsx` files |
 | **Security** | After every task | `security-auditor` agent on modified server files |
+| **Functional** | Inside `/code` + `/epic` | `functional-validator` rejoue les scénarios PO |
+| **Visual** | Inside `/code` + `/epic` | `design-validator` compare le rendu aux mockups designer |
 | **Domain layer** | While writing | Inline rules (also enforced by hooks + structural-auditor) |
 | **PR review** | When on a PR branch | `check-pr-reviews.sh` hook at session start + `/review` skill |
 
 ## Agents and skills
 
-### Agents (`.claude/agents/`) — 4 agents, all run automatically after every task
+### Pipeline principal : conception → exécution
 
-| Agent | Role |
+```
+/ticket <feature + Figma>    →   /epic <N>        (ou /code <N>)
+──────────────────────────       ────────────────
+ product-owner  (Opus)            code-dev  (Sonnet / Opus si "complexe")
+ designer       (Opus)              ├── validator
+ architect      (Opus)              ├── structural-auditor
+                                    ├── rgaa-auditor
+ sortie : epic GitHub               ├── security-auditor
+ + N sous-issues formatées          ├── functional-validator
+                                    └── design-validator
+                                  sortie : PR draft → ready, ticket "In review"
+```
+
+### Agents (`.claude/agents/`)
+
+**Pipeline conception** (Opus, invoqués par `/ticket`) :
+| Agent | Rôle |
+|---|---|
+| `product-owner` | Refine le besoin, rédige les scénarios PO sur l'epic |
+| `designer` | Mockups HTML DSFR statiques + screenshots (branche `design-assets/epic-<N>`) |
+| `architect` | Lit le code, produit N tickets au format `rules/ticket-spec-format.md` |
+
+**Pipeline exécution** (invoqués par `/epic` + `/code`) :
+| Agent | Rôle |
+|---|---|
+| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`) |
+| `functional-validator` | Rejoue les scénarios PO dans le dev server |
+| `design-validator` | Compare le rendu aux mockups (desktop + mobile) |
+
+**Quality gates** (read-only, appelés par `code-dev` ou hors pipeline) :
+| Agent | Rôle |
 |---|---|
 | `validator` | Typecheck + test + lint + format (parallel) |
 | `structural-auditor` | 16-rule structural audit (code quality, forms, schemas, DRY, imports…) |
 | `rgaa-auditor` | 13-theme RGAA accessibility audit |
 | `security-auditor` | OWASP Top 10 + RGS security review |
 
-### Skills (`.claude/skills/`) — `/analyse` + `/implement` + `/ship` + `/review`
+### Skills (`.claude/skills/`)
 
 | Skill | Purpose |
 |---|---|
-| `/analyse [#N]` | Analyze issue, explore codebase, generate implementation plan. |
-| `/implement [#N]` | Fetch issue, create branch, code, run 4 validation agents. |
-| `/ship` | Create PR (single/split). |
-| `/review` | Address PR review comments (human + bots), fix, re-validate. |
+| `/ticket <description + Figma URL>` | Conception pipeline : PO → designer → architect → epic GitHub + N sous-issues |
+| `/epic <N1> [<N2> ...]` | Lance le bash loop driver `scripts/orchestration/epic_loop.sh` en background sur les epics donnés. Main context libre. |
+| `/code <N>` | Exécute un seul ticket via `code-dev` (debug, fix). Parse le retour JSON strict, ré-invoque en Opus si `needs_opus_escalation`. |
+| `/report [<N> ...]` | Dashboard live des agents actifs + état des sous-tickets de l'epic. Pure bash, zéro LLM. |
+| `/open <PR>` | Recrée un worktree local pour une PR (typique après auto-cleanup de `/epic`) — utile pour tester la PR avant merge. |
+| `/review` | Traite les commentaires de revue posés après passage en `In review` (human + bots) |
 
-Workflow: `/analyse #42` to plan, then `/implement` to code and validate, then `/ship` to create the PR, then `/review` to handle review comments.
+Workflow standard : `/ticket "..."` pour concevoir, puis `/epic <N>` pour exécuter en parallèle (suivi via `/report`). `/review` prend le relais quand les humains commentent les PR sorties de `In review`.
+
+### Orchestration (`scripts/orchestration/`)
+
+Tous les scripts shell portent leur propre header `--help`-friendly. La pipeline `/epic` est entièrement bash :
+
+| Script | Rôle |
+|---|---|
+| `epic_loop.sh` | Loop driver background. Tick = cleanup terminal worktrees → plan → spawn N `claude` CLIs en parallèle (budget USD isolé) → aggregate JSON returns → process. Plafond `EPIC_LOOP_MAX_TICKS=30`. |
+| `cleanup_terminal_worktrees.sh` | Scan les worktrees `egapro-epic<E>-t<N>` ; teardown + remove ceux dont le ticket est en `In review` ou `Done`. Appelé à chaque tick par `epic_loop.sh` pour libérer les slots dynamiquement. |
+| `dispatch_plan.sh` | Calcule la JSON list des tickets dispatchables : parse `## Depends on`, applique le stacked PR pattern, alloue les indices libres dans `[0, EPIC_MAX_PARALLEL[`. |
+| `process_tick_result.sh` | Applique les mutations board selon le statut JSON retourné par `code-dev`. Compteur `attempt=N` pour anti-boucle 3 refacto consécutifs → `dispatch=escalate`. |
+| `set_ticket_status.sh` | Encapsule les 3 GraphQL calls de `rules/github-board.md`. **Refuse explicitement la transition `Done`** (user-only). |
+| `create_linked_branch.sh` | Crée une branche linkée à l'issue via `createLinkedBranch` GraphQL — la PR sera auto-attachée à la sidebar Development de l'issue. |
+| `open_worktree.sh` | Recrée un worktree pour une PR donnée (skill `/open <PR>`). Utile pour tester localement après auto-cleanup. |
+| `refresh_pr_link.sh` | Force GitHub à re-parser le `Closes #N` d'une PR (workaround pour le retarget post-merge stacked). |
+| `cache_gh.sh` | TTL wrapper sur `gh` pour amortir les rate limits (clé `epic_<N>_full` partagée entre `dispatch_plan` et `epic_state`, TTL 300s). |
+| `log_event.sh` | Logging append-only par agent, rolling 50 lignes, sous `.claude/state/epic_run/agents/`. |
+| `epic_state.sh` | Tableau compact des sous-tickets d'un epic (status board + last log event + retries + PR liée). |
+| `render_dashboard.sh` | Dashboard `/report` agents actifs, triés par inactivité, avec alertes >10min. |
+
+Les sub-agents `code-dev` retournent un **JSON strict** en dernier message (`validated` / `needs_opus_escalation` / `refacto` / `rate_limited` / `failed`) — voir `.claude/agents/code-dev/AGENT.md`. Le bash loop parse ce JSON via `jq`, aucun LLM n'intervient dans la chaîne de décision post-verdict.
 
 ---
 

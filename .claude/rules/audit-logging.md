@@ -9,6 +9,8 @@ paths:
 
 # Audit logging
 
+> **Used by**: `code-dev` (quand il touche à tRPC, route handlers, auth), `security-auditor` (A09), `structural-auditor`. Auto-chargé via `paths:` frontmatter.
+
 Every user-facing action that falls into one of the audit categories **must**
 produce a row in `audit.action_log`. Adding a new action without wiring the
 audit log is a bug, not a missing enhancement.

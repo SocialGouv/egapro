@@ -1,15 +1,19 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 type DefinitionAccordionProps = {
 	id: string;
 	title: string;
 	className?: string;
+	children: ReactNode;
 };
 
 export function DefinitionAccordion({
 	id,
 	title,
 	className,
+	children,
 }: DefinitionAccordionProps) {
 	return (
 		<section className={`fr-accordion ${className ?? ""}`}>
@@ -24,18 +28,7 @@ export function DefinitionAccordion({
 				</button>
 			</h3>
 			<div className="fr-collapse" id={id}>
-				<p>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-					eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-					minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-					aliquip ex ea commodo consequat.
-				</p>
-				<p>
-					Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-					dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-					proident, sunt in culpa qui officia deserunt mollit anim id est
-					laborum.
-				</p>
+				{children}
 			</div>
 		</section>
 	);

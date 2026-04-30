@@ -4,6 +4,8 @@ paths:
   - "src/**/*.tsx"
 ---
 
+> **Used by**: `code-dev` (styles), `designer` (mockups HTML DSFR), `structural-auditor` (règle 2.12). Auto-chargé via `paths:`.
+
 # Styling & DSFR
 
 ## One component = one SCSS module
