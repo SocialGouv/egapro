@@ -57,7 +57,9 @@
 	}
 
 	th,
-	td {
+	td,
+	:global(.fr-table__content) th,
+	:global(.fr-table__content) td {
 		white-space: normal;
 		vertical-align: middle;
 		padding-left: 10px;
