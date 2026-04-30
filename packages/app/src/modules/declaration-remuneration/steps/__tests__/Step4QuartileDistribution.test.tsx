@@ -229,8 +229,9 @@ describe("Step4QuartileDistribution", () => {
 			/>,
 		);
 		expect(
-			screen.getAllByText(/Source\s*:\s*DSN \(Déclarations Sociales Nominatives\)/)
-				.length,
+			screen.getAllByText(
+				/Source\s*:\s*DSN \(Déclarations Sociales Nominatives\)/,
+			).length,
 		).toBe(2);
 	});
 
