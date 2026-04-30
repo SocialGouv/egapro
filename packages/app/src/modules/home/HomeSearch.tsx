@@ -9,7 +9,7 @@ export function HomeSearch() {
 			<div className="fr-container">
 				<div className="fr-grid-row fr-grid-row--gutters">
 					<div className="fr-col-12">
-						<h2 id="search-heading">
+						<h2 className="fr-mb-2w" id="search-heading">
 							Rechercher une entreprise et consulter ses résultats
 						</h2>
 						<p>
@@ -18,12 +18,12 @@ export function HomeSearch() {
 						</p>
 						<ul>
 							<li>
-								les <strong>indicateurs de rémunération</strong> femmes-hommes
-								pour l&apos;ensemble des salariés
+								les <strong>indicateurs de rémunération</strong>
+								{" femmes-hommes pour l'ensemble des salariés"}
 							</li>
 							<li>
-								les <strong>indicateurs de représentation</strong> femmes-hommes
-								au sein des postes de direction
+								les <strong>indicateurs de représentation</strong>
+								{" femmes-hommes au sein des postes de direction"}
 							</li>
 						</ul>
 					</div>
