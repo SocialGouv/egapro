@@ -1,27 +1,30 @@
-import { TooltipButton } from "./TooltipButton";
-
 /**
  * Source attribution line shown under tables when GIP DSN data is available.
- * Displays the DSN data source and last update date with a tooltip.
+ * Displays the DSN data source and (optionally) the reference period range.
  */
 type Props = {
+	periodStart?: string | null;
 	periodEnd: string | null;
-	tooltipId?: string;
 };
 
-export function PrefillSource({
-	periodEnd,
-	tooltipId = "tooltip-source",
-}: Props) {
+export function PrefillSource({ periodStart, periodEnd }: Props) {
+	const showPeriod = periodStart && periodEnd;
 	return (
-		<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
-			Source&nbsp;: DSN (Déclarations Sociales Nominatives)
-			{periodEnd && `, mise à jour le ${formatFrenchDate(periodEnd)}`}.
-			<TooltipButton
-				id={tooltipId}
-				label="Information sur la source des données"
-			/>
-		</p>
+		<div className="fr-text--sm fr-text-mention--grey fr-mb-0">
+			<p className="fr-mb-0">
+				Source&nbsp;: DSN (Déclarations Sociales Nominatives)
+				{periodEnd &&
+					!showPeriod &&
+					`, mise à jour le ${formatFrenchDate(periodEnd)}`}
+				.
+			</p>
+			{showPeriod && (
+				<p className="fr-mb-0">
+					Période de référence&nbsp;: {formatFrenchDate(periodStart)} -{" "}
+					{formatFrenchDate(periodEnd)}.
+				</p>
+			)}
+		</div>
 	);
 }
 

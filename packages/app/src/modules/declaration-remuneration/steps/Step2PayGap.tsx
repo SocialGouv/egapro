@@ -139,10 +139,7 @@ export function Step2PayGap({
 					/>
 
 					{gipPrefillData && (
-						<PrefillSource
-							periodEnd={gipPrefillData.periodEnd}
-							tooltipId="tooltip-source-step2"
-						/>
+						<PrefillSource periodEnd={gipPrefillData.periodEnd} />
 					)}
 				</div>
 

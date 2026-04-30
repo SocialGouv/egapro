@@ -53,7 +53,11 @@ describe("Step4QuartileDistribution", () => {
 			}),
 		).toBeInTheDocument();
 		// Q1..Q4 row labels per table → 8 rows (excluding total row "Tous les salariés")
-		expect(screen.getAllByText(/quartile/, { selector: "th" }).length).toBe(8);
+		expect(
+			screen
+				.getAllByRole("rowheader")
+				.filter((cell) => /quartile/.test(cell.textContent ?? "")),
+		).toHaveLength(8);
 		// Total row "Tous les salariés" shows in both tables
 		expect(screen.getAllByText(/Tous les salariés/).length).toBe(2);
 	});
@@ -301,6 +305,7 @@ describe("Step4QuartileDistribution", () => {
 						},
 					},
 					confidenceIndex: "0.85",
+					periodStart: "2026-01-01",
 					periodEnd: "2026-12-31",
 				}}
 				initialData={emptyStep4Data()}
@@ -355,6 +360,7 @@ describe("Step4QuartileDistribution", () => {
 						},
 					},
 					confidenceIndex: null,
+					periodStart: null,
 					periodEnd: null,
 				}}
 				initialData={emptyStep4Data()}

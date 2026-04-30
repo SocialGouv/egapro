@@ -107,7 +107,7 @@ export function QuartileTable({
 										<tr>
 											<th scope="row">Tous les salariés</th>
 											<td className={stepStyles.minCell} />
-											<td />
+											<td className={stepStyles.maxCell} />
 											<td data-mobile-label="Nombre de femmes">
 												<strong>{totalAll > 0 ? totalWomen : "-"}</strong>
 											</td>

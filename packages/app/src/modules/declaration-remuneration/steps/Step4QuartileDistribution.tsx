@@ -289,7 +289,7 @@ export function Step4QuartileDistribution({
 					sourceNote={
 						<PrefillSource
 							periodEnd={gipPrefillData?.periodEnd ?? null}
-							tooltipId="tooltip-source-step4-annual"
+							periodStart={gipPrefillData?.periodStart ?? null}
 						/>
 					}
 					tableType="annual"
@@ -316,7 +316,7 @@ export function Step4QuartileDistribution({
 					sourceNote={
 						<PrefillSource
 							periodEnd={gipPrefillData?.periodEnd ?? null}
-							tooltipId="tooltip-source-step4-hourly"
+							periodStart={gipPrefillData?.periodStart ?? null}
 						/>
 					}
 					tableType="hourly"

@@ -187,10 +187,7 @@ export function Step3VariablePay({
 					/>
 
 					{gipPrefillData && (
-						<PrefillSource
-							periodEnd={gipPrefillData.periodEnd}
-							tooltipId="tooltip-source-step3-paygap"
-						/>
+						<PrefillSource periodEnd={gipPrefillData.periodEnd} />
 					)}
 				</div>
 
@@ -303,10 +300,7 @@ export function Step3VariablePay({
 					)}
 
 					{gipPrefillData && (
-						<PrefillSource
-							periodEnd={gipPrefillData.periodEnd}
-							tooltipId="tooltip-source-step3"
-						/>
+						<PrefillSource periodEnd={gipPrefillData.periodEnd} />
 					)}
 				</div>
 

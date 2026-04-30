@@ -60,6 +60,8 @@ export type GipPrefillData = {
 	};
 	/** Confidence index (0-1, for internal DGT use) */
 	confidenceIndex: string | null;
+	/** Start of the data collection period (e.g. "2026-01-01"), used for "Période de référence" display. */
+	periodStart?: string | null;
 	/** End of the data collection period (e.g. "2026-12-31"), used for "Source : DSN" display. */
 	periodEnd: string | null;
 };
@@ -148,6 +150,7 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 			),
 		},
 		confidenceIndex: row.confidenceIndex,
+		periodStart: row.periodStart,
 		periodEnd: row.periodEnd,
 	};
 }

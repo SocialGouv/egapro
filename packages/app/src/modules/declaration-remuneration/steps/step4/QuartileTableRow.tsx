@@ -1,6 +1,7 @@
 "use client";
 
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
+import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import type { QuartileData } from "~/modules/declaration-remuneration/types";
 import { computePercentage, displayDecimal } from "~/modules/domain";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
@@ -84,15 +85,24 @@ export function QuartileTableRow({
 	const womenErr = errors.women;
 	const menErr = errors.men;
 
+	const quartileName = QUARTILE_NAMES[index] ?? "";
+	const tooltipId = `tooltip-${tableType}-q${index + 1}`;
+
 	return (
 		<tr>
 			<th scope="row">
-				<OrdinalLabel text={QUARTILE_NAMES[index] ?? ""} />
+				<span className={stepStyles.rowLabelText}>
+					<OrdinalLabel text={quartileName} />
+					<TooltipButton
+						id={tooltipId}
+						label={`Plus d'informations sur le ${quartileName}`}
+					/>
+				</span>
 			</th>
 			<td className={stepStyles.minCell} data-mobile-label="Minimum">
 				{min}
 			</td>
-			<td data-mobile-label="Maximum">
+			<td className={stepStyles.maxCell} data-mobile-label="Maximum">
 				{isLast ? (
 					<span className={stepStyles.readonlyCell}>- €</span>
 				) : (

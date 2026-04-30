@@ -29,10 +29,27 @@
 }
 
 .quartileTable {
+	table {
+		width: 100%;
+		min-width: 0;
+		table-layout: fixed;
+		border-collapse: collapse;
+	}
+
 	th,
 	td {
 		white-space: normal;
 		vertical-align: middle;
+		border-right: 1px solid var(--border-default-grey);
+	}
+
+	th:last-child,
+	td:last-child {
+		border-right: none;
+	}
+
+	tbody th[scope="row"] {
+		background: transparent;
 	}
 
 	tbody tr:last-child {
@@ -42,6 +59,7 @@
 	@include respond-to(sm) {
 		table {
 			display: block;
+			table-layout: auto;
 		}
 
 		thead {
@@ -54,6 +72,7 @@
 		tbody th {
 			display: block;
 			width: 100%;
+			border-right: none;
 		}
 
 		tbody tr {
@@ -87,7 +106,14 @@
 	}
 }
 
-.minCell {
+.rowLabelText {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.minCell,
+.maxCell {
 	font-variant-numeric: tabular-nums;
 	text-align: right;
 	white-space: nowrap;
@@ -110,9 +136,11 @@
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
+	justify-content: flex-end;
 
 	input {
 		min-width: 5rem;
+		text-align: right;
 	}
 
 	@include respond-to(sm) {
