@@ -27,7 +27,7 @@ test.describe("Declaration workflow", () => {
 	test("displays step 1 after login", async ({ page }) => {
 		await expect(
 			page.getByRole("heading", {
-				name: /Déclarer les indicateurs pour l'ensemble/i,
+				name: /Déclaration des indicateurs de rémunération/i,
 			}),
 		).toBeVisible();
 
