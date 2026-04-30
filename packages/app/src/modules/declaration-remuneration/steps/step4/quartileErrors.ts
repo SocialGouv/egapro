@@ -24,12 +24,24 @@ export type RecapEntry = {
 	label: string;
 };
 
-const EMPTY_ERRORS: QuartileFieldErrors = {};
+function createEmptyError(): QuartileFieldErrors {
+	return {};
+}
 
 export function emptyErrorMap(): FieldErrorMap {
 	return {
-		annual: [EMPTY_ERRORS, EMPTY_ERRORS, EMPTY_ERRORS, EMPTY_ERRORS],
-		hourly: [EMPTY_ERRORS, EMPTY_ERRORS, EMPTY_ERRORS, EMPTY_ERRORS],
+		annual: [
+			createEmptyError(),
+			createEmptyError(),
+			createEmptyError(),
+			createEmptyError(),
+		],
+		hourly: [
+			createEmptyError(),
+			createEmptyError(),
+			createEmptyError(),
+			createEmptyError(),
+		],
 	};
 }
 
@@ -117,7 +129,7 @@ export function deriveErrors(values: {
 export function hasAnyError(map: FieldErrorMap): boolean {
 	for (const table of ["annual", "hourly"] as const) {
 		for (let i = 0; i < 4; i++) {
-			const cell = map[table][i] ?? EMPTY_ERRORS;
+			const cell = map[table][i] ?? createEmptyError();
 			if (cell.threshold || cell.women || cell.men) return true;
 		}
 	}
@@ -134,7 +146,7 @@ export function buildRecap(errors: FieldErrorMap): RecapEntry[] {
 	];
 	for (const table of ["annual", "hourly"] as const) {
 		for (let i = 0; i < 4; i++) {
-			const cell = errors[table][i] ?? EMPTY_ERRORS;
+			const cell = errors[table][i] ?? createEmptyError();
 			for (const field of orderedFields) {
 				const message = cell[field];
 				if (!message) continue;
