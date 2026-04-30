@@ -343,9 +343,30 @@ while [ $TICK -lt $MAX_TICKS ]; do
                 CLI_ERROR="true"
             fi
 
+            # Tolerant verdict extraction:
+            # 1) Pure JSON (the strict contract).
+            # 2) JSON inside a ```json ... ``` markdown fence — common when the
+            #    sub-agent ignores "no prose" and adds a summary section.
+            # 3) The first {...} object in the text containing a `"status"` key.
+            # Otherwise fall through to a `failed` result with the raw output.
+            RESULT_JSON=""
             if echo "$RESULT_TEXT" | jq -e '.status' >/dev/null 2>&1; then
                 RESULT_JSON="$RESULT_TEXT"
             else
+                FENCED=$(echo "$RESULT_TEXT" | awk '
+                    /^```(json)?[[:space:]]*$/ { if (in_block) exit; in_block=1; next }
+                    in_block { print }
+                ')
+                if [ -n "$FENCED" ] && echo "$FENCED" | jq -e '.status' >/dev/null 2>&1; then
+                    RESULT_JSON="$FENCED"
+                else
+                    EXTRACTED=$(echo "$RESULT_TEXT" | grep -oE '\{[^{}]*"status"[^{}]*\}' | head -1 || true)
+                    if [ -n "$EXTRACTED" ] && echo "$EXTRACTED" | jq -e '.status' >/dev/null 2>&1; then
+                        RESULT_JSON="$EXTRACTED"
+                    fi
+                fi
+            fi
+            if [ -z "$RESULT_JSON" ]; then
                 ESCAPED=$(echo "$RESULT_TEXT" | jq -Rs '.' | head -c 500)
                 RESULT_JSON=$(jq -nc \
                     --argjson ticket "$ticket" \
