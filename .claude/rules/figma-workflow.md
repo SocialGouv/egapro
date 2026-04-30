@@ -131,39 +131,31 @@ This prevents missing structural elements (alert blocks, source lines, descripti
 
 ---
 
-## Phase 4 — Visual validation (mandatory)
+## Phase 4 — Final verification
 
-After implementing each screen, **visually verify** the result against the Figma design.
+L'implémentation pixel-perfect (Phases 1–3) repose sur la **lecture structurelle** de l'arbre Figma via `mcp__figma-dev__get_figma_data` — chaque propriété (color, fontSize, fontWeight, itemSpacing) est mappée à sa classe / token DSFR. Quand cette lecture a été faite proprement, la Phase 4 sert juste à **fermer la boucle** : confirmer que le rendu réel correspond au plan, et produire les artefacts pour la review humaine.
 
-### Method A — Browser tool (preferred)
+### 1. Sanity check structurel
 
-If a browser MCP is available (Playwright, next-devtools `browser_eval`, etc.):
+Reparcourir mentalement la checklist Phase 3 sur l'écran fini : couleurs, fontSize, fontWeight (cell-by-cell sur les tableaux), texte verbatim, ordre des éléments, espacements. Si un doute persiste sur un point d'ambiguïté de l'API (typiquement les overrides char-level de bold dans un tableau), faire un appel ciblé à `mcp__figma-dev__download_figma_images` sur le node concerné pour confirmer visuellement.
 
-1. **Navigate** to the page in the dev server
-2. **Take a screenshot** of the rendered page
-3. **Download the Figma screenshot** via `get_screenshot`
-4. **Compare side-by-side** against the checklist below
-5. **Fix discrepancies** before moving to the next screen
+### 2. Screenshots dev server pour la review humaine
 
-### Method B — Manual review (fallback)
+Avec un browser MCP (Playwright ou next-devtools `browser_eval`) :
 
-If no browser tool is available:
+1. **Navigate** vers la page dans le dev server
+2. **Take a screenshot** du rendu (desktop 1280×800 + mobile 375×667)
+3. **Joindre les images au body de la PR** — c'est le signal visuel principal pour le reviewer humain
 
-1. **Ask the user to take a screenshot** of the rendered page
-2. **Download the Figma screenshot** via `get_screenshot`
-3. **Compare both images** against the checklist below
-4. **Fix discrepancies** before moving to the next screen
+Si aucun browser MCP n'est dispo, demander à l'utilisateur de fournir le screenshot.
 
-### Validation checklist
+### Points qui échappent souvent à la lecture structurelle seule
 
-- Text colors match (grey text is actually grey, not default black)
-- Bold text renders as bold (especially numbers, percentages, computed values)
-- Element order matches (titles before content, notes in correct position)
-- Spacing between sections matches the design
-- No extra or missing elements (phantom tooltips, missing labels)
-- Design system component margins are correctly overridden when needed
+- Wrong DSFR class name **qui n'existe pas** (ex : `fr-text--mention-grey` au lieu de `fr-text-mention--grey`) → la classe est silencieusement ignorée, le token attendu n'est pas appliqué. Vérifier dans `public/dsfr/dsfr.css` que la classe existe bien.
+- DSFR utility class correcte mais **CSS file pas chargé** dans `layout.tsx` (ex : `utility/colors/colors.min.css`). Confirmer dans le DOM que la prop CSS est bien appliquée.
+- Marges par défaut d'un composant DSFR qui s'additionnent à tes utilities (`fr-mb-3w` qui s'ajoute à la marge interne du composant).
 
-This step catches issues that code review alone misses: wrong CSS class names (that silently fail), incorrect element nesting, and spacing problems.
+Ces 3 cas typiques sont les seuls où un screenshot du rendu apporte une info que la lecture structurelle ne donne pas.
 
 ---
 

@@ -53,10 +53,11 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
    Corriger toutes les findings. Re-run jusqu'au vert. Logger `QUALITY_OK` quand les 4 agents PASS.
 
-7. **Screenshots** (si UI touchée) — pour la PR (review humaine) et pour ta propre vérification visuelle vs. Figma :
-   - Démarrer dev server sur le port assigné
-   - Playwright → screenshots desktop (1280×800) + mobile (375×667)
-   - **Comparer toi-même** au design Figma cité dans la section `## Référence Figma` du ticket (utiliser le MCP `figma-dev` : `get_design_context` pour la structure, `get_screenshot` pour la vue d'ensemble). Suivre `rules/figma-workflow.md` pour les checks pixel-perfect (couleurs, typographies, espacements, bold cell-by-cell sur tableaux). Toute divergence non triviale → corriger avant `gh pr ready`. Plus de `design-validator` externe : la fidélité visuelle est de ta responsabilité.
+7. **Vérification visuelle Figma** (si UI touchée) — la fidélité au design est **ta** responsabilité, plus de `design-validator` externe :
+   - **Lecture structurelle (le cœur du travail)** : pour chaque URL citée dans la section `## Référence Figma` du ticket, appeler `mcp__figma-dev__get_figma_data` (équivalent `get_design_context`) sur le node-id pour récupérer l'arbre des nodes — couleurs (`fill`), typographies (`fontSize`, `fontWeight`, `textStyle`), espacements (`itemSpacing`, `gap`), hiérarchie, contenu verbatim. Vérifier que ton implémentation **mappe précisément chaque propriété** : couleur Figma → DSFR token / classe, `fontSize` → `fr-text--xs/sm/lg/xl`, `fontWeight ≥ 600` → `<strong>`, `itemSpacing` → `fr-m{b,t,r,l}-Xw`. Suivre `rules/figma-workflow.md` (Phases 1–3) pour la checklist exhaustive.
+   - **Spot-check visuel via `mcp__figma-dev__download_figma_images`** uniquement quand l'API structurelle est ambiguë — typiquement le **bold cell-by-cell** dans les tableaux (l'API ne révèle que le style dominant d'un node, jamais les overrides char-level), ou pour vérifier qu'un node `Group` se rend comme attendu. Pas systématique, ciblé.
+   - **Screenshots dev server** (Playwright, desktop 1280×800 + mobile 375×667) : à inclure dans le body de la PR pour la review humaine. Pas la comparaison principale — c'est juste l'artefact pour le reviewer.
+   - Toute divergence non triviale détectée à la lecture structurelle → corriger avant `gh pr ready`.
 
 8. **PR draft** via `gh pr create --draft --base <base-branch>` :
    - Base = la `<base-branch>` reçue en input (sans le préfixe `origin/`) — typiquement `epic/<N>` en NEW mode, parfois `alpha` ou `ticket/<parent-slug>` en LEGACY mode
