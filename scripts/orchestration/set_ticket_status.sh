@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # set_ticket_status.sh <ticket_number> <status_label>
 #
 # Moves an issue to the given status on the EGAPRO V2 GitHub project board.

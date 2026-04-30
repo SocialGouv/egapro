@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # refresh_pr_link.sh <pr_number> [<pr_number> ...]
 #
 # Re-emits a PR's body unchanged to force GitHub to re-parse the
