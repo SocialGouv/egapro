@@ -129,7 +129,7 @@ Pour reprendre où on en était : juste relancer `/epic <N>` — le script repar
 | `EPIC_LOOP_BUDGET_SONNET` | 10 | Budget USD max par sub-agent Sonnet (`claude --max-budget-usd`). |
 | `EPIC_LOOP_BUDGET_OPUS` | 40 | Budget USD max par sub-agent Opus. |
 | `EPIC_LOOP_AGENT_TIMEOUT` | 5400 | Timeout dur par sub-agent en sec (90 min). |
-| `EPIC_DEFAULT_BASE` | `origin/alpha` | Base branch pour les tickets sans dépendance. **À override tant que l'infra orchestration n'est pas mergée dans `alpha`** (sinon le worktree fraîchement checkouté ne contient pas `scripts/setup-worktree.sh`). Usage typique pendant la phase de test : `EPIC_DEFAULT_BASE=origin/chore/ai-pipeline`. |
+| `EPIC_DEFAULT_BASE` | `origin/alpha` | **LEGACY mode uniquement** (epics avec label `pipeline=legacy`). Base par défaut pour les tickets sans dépendance dans le pattern stacked-PR historique. En NEW mode (par défaut), la base est toujours `origin/epic/<N>` et cette variable est ignorée. |
 
 Pour un run avec budget plus généreux, override en ligne :
 
@@ -164,8 +164,9 @@ L'utilisateur retire `dispatch=escalate` (et éventuellement `attempt=3`) après
 ## Référence
 
 - Loop driver : `scripts/orchestration/epic_loop.sh`
-- Computation du plan : `scripts/orchestration/dispatch_plan.sh` (DAG `Depends on`, stacked PR, index libre)
-- Mutations board : `scripts/orchestration/process_tick_result.sh` (anti-boucle 3 attempts, refus du `Done`, no auto-merge)
+- Branche d'intégration (NEW mode) : `scripts/orchestration/{ensure_epic_branch,merge_validated_ticket,rebase_epic_branch,open_epic_final_pr}.sh`
+- Computation du plan : `scripts/orchestration/dispatch_plan.sh` (DAG `Depends on`, base = `epic/<N>` en NEW mode, stacked PR en LEGACY mode si l'epic carry `pipeline=legacy`)
+- Mutations board : `scripts/orchestration/process_tick_result.sh` (anti-boucle 3 attempts, refus du `Done`, squash-merge dans `epic/<N>` sur `validated`)
 - Helpers : `scripts/orchestration/{cache_gh,log_event,set_ticket_status,epic_state,render_dashboard}.sh`
 - Dashboard : skill `/report`
 - Legacy (ancienne version LLM-driven du skill) : `.claude/skills/epic/SKILL-legacy.md.bak`

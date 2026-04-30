@@ -4,12 +4,29 @@ description: General code quality rules — always loaded
 
 # Code Quality
 
-> **Used by**: toute personne ou agent écrivant du code. Enforced par `structural-auditor` (16 règles), `block-bad-patterns.sh` hook, et `code-dev` pendant l'implémentation.
+> **Used by**: toute personne ou agent écrivant du code. Enforced par `structural-auditor` (17 règles), `block-bad-patterns.sh` hook, et `code-dev` pendant l'implémentation.
 
 ## Zero suppression comments
 
 Never add `biome-ignore`, `eslint-disable`, `@ts-ignore`, or `@ts-expect-error`.
 Fix the underlying issue instead. If a rule is genuinely wrong for the entire project, update the Biome config.
+
+## No comments by default
+
+Les agents dev (`code-dev`, et plus largement tout agent qui écrit du code via la pipeline `/ticket` → `/epic` → `/code`) **ne doivent pas ajouter de commentaires** dans le code produit. Aucun :
+
+- Commentaire descriptif (`// fetch user`, `// loop over items`) — le nom de fonction/variable doit suffire
+- JSDoc ou docstring multi-lignes
+- Commentaire référençant le ticket, la feature, le fix (`// for ticket #42`, `// fixes the X bug`) — le contexte vit dans le commit message et la PR
+- Commentaire « TODO » / « FIXME » — ouvrir une issue à la place
+- Section header en commentaire (`// --- helpers ---`) — découper en fichiers/modules à la place
+- Commentaire qui paraphrase le code juste en dessous
+
+**Seule exception autorisée** : un commentaire `// ` court (une ligne) qui explique un **WHY non-évident** — contrainte cachée, invariant subtil, workaround pour un bug spécifique référencé, comportement contre-intuitif qui surprendrait un lecteur. Si retirer le commentaire ne gênerait pas un futur lecteur, il ne faut pas l'écrire.
+
+Les commentaires legacy déjà présents dans le code et qui n'enfreignent pas cette règle ne sont **pas** à supprimer dans le cadre du ticket courant — pas de scope creep. La règle s'applique au **code nouvellement écrit ou modifié** par l'agent.
+
+Enforced par `structural-auditor` (rule 2.17) sur les fichiers modifiés.
 
 ## DRY: 3+ repetitions = extract
 

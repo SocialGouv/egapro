@@ -176,6 +176,26 @@ For changed `.tsx` files:
 - Heading hierarchy skipping levels → **[ERROR]**
 - Form groups without `<fieldset>` + `<legend>` → **[WARN]**
 
+#### 2.17 No comments in newly written code
+
+Voir `rules/code-quality.md` section "No comments by default". Sur les **lignes ajoutées ou modifiées** par le ticket courant (pas le legacy), reporter en `[WARN]` :
+
+- Commentaires `//` ou `/* */` qui paraphrasent le code (`// fetch user` au-dessus de `const user = await fetchUser()`)
+- JSDoc / docstring multi-ligne (`/** ... */`)
+- Section headers (`// --- helpers ---`, `// region X`)
+- Commentaires référençant le ticket / la PR / le bug (`// for ticket #N`, `// fix the X bug`)
+- TODO / FIXME — l'agent doit ouvrir une issue plutôt qu'écrire un TODO
+
+```bash
+git diff origin/master...HEAD --unified=0 -- '*.ts' '*.tsx' \
+  | grep -E '^\+\s*(//|/\*|\*)' \
+  | grep -vE '^\+\s*//\s*$'   # ignore les // vides
+```
+
+**Tolérance** : un `// ` court (≤ 1 ligne) qui justifie un **WHY non-évident** (workaround documenté avec lien d'issue, invariant subtil) reste acceptable. Si le commentaire paraphrase le code, c'est un `[WARN]`.
+
+Les commentaires legacy non touchés par le ticket ne sont **pas** à reporter — la règle ne porte que sur le diff.
+
 ## Output Format
 
 For each violation:

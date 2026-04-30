@@ -14,8 +14,8 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 - **Worktree index** (0, 1, 2…) — utilisé par `scripts/setup-worktree.sh` pour allouer les ports docker
 - Dev server port (dérivé de l'index : `3001 + index`, lu depuis `packages/app/.env.local` écrit par le setup script)
 - **Base branch** (assigned by `/epic` ou `/code`) — toujours au format **remote-tracking ref** (`origin/<branch>`), déjà fetchée par l'orchestrateur :
-  - `origin/alpha` (ou `origin/chore/ai-pipeline` pendant la phase de transition) si aucune dépendance ou toutes mergées
-  - `origin/ticket/<parent-slug>` si le ticket dépend d'un autre encore en `In review` (stacked PR)
+  - **NEW mode (par défaut)** : `origin/epic/<N>` — la branche d'intégration de l'epic. Toutes les PRs des sous-tickets de l'epic ciblent cette branche. Une fois validée par la pipeline, ta PR sera squash-mergée dans `epic/<N>` par `process_tick_result.sh` ; les tickets enfants pourront alors démarrer.
+  - **LEGACY mode** (epic carry le label `pipeline=legacy`) : `origin/alpha` ou `origin/ticket/<parent-slug>` (stacked PR si le parent est encore `In review`). Conservé uniquement pour les epics en cours créés avant le modèle d'intégration.
 - **Working branch** (assigned by `/epic`) — déjà créée sur GitHub par l'orchestrateur via `createLinkedBranch` GraphQL et **officiellement linkée à l'issue** (sidebar Development). La PR ouverte depuis cette branche y apparaîtra automatiquement — pas besoin de cross-reference comment.
 
 ## Workflow
@@ -32,13 +32,14 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - `cd <worktree>` (le worktree est en mode `--detach` sur la base)
    - `git fetch origin <working-branch>`
    - `git checkout <working-branch>` (PAS `checkout -b`)
-   - Si la **base branch** n'est pas `origin/alpha` (ou `origin/chore/ai-pipeline` en phase de transition), on est en mode **stacked PR** — la PR sera ouverte avec `--base <base-branch-sans-prefix-origin>` (ex: `--base ticket/<parent-slug>`), GitHub retargettera vers `alpha` quand la PR parent sera mergée
+   - La PR sera ouverte avec `--base <base-branch-sans-prefix-origin>` — par défaut `--base epic/<N>` (la branche d'intégration de l'epic en NEW mode), ou `--base alpha` / `--base ticket/<parent-slug>` en LEGACY mode
 
 4.5. **Sanity check stack docker** — vérifier que `packages/app/.env.local` existe et contient `COMPOSE_PROJECT_NAME=egapro-wt-*`. Si absent → `scripts/setup-worktree.sh <index> [<extras>]` (où `<extras>` vient du parsing de la section `## Requires services` du ticket). Si `/epic` ou `/code` a déjà lancé le setup, l'étape est un no-op.
 
 5. **Implémenter** :
    - Modifier les fichiers listés dans le ticket
    - Respecter `packages/app/CLAUDE.md` et les rules projet
+   - **Aucun commentaire dans le code écrit ou modifié** — voir `rules/code-quality.md` section "No comments by default". Pas de JSDoc, pas de `// fetch user`, pas de `// for ticket #N`, pas de TODO/FIXME, pas de header de section. Seule exception : un `// ` court qui explique un WHY non-évident (workaround documenté, invariant subtil). Si le commentaire paraphrase le code juste en dessous, supprimer.
    - `pnpm typecheck` après chaque modif de types/schemas
    - `nextjs_call(get_errors)` si dev server tourne
    - **Tests unitaires : 100% de couverture sur le code produit** (statements, branches, functions, lines). Vérifier via `pnpm test --coverage` + lecture du rapport — chaque fichier modifié ou créé doit être à 100%. Pas de « ça couvre assez » : 100% strict.
@@ -57,10 +58,9 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - Playwright → screenshots desktop (1280×800) + mobile (375×667)
 
 8. **PR draft** via `gh pr create --draft --base <base-branch>` :
-   - Base = la `<base-branch>` reçue en input (`origin/alpha` ou `ticket/<parent-slug>`)
-   - Body : lien ticket (`Closes #NNN`), résumé, test plan, screenshots
+   - Base = la `<base-branch>` reçue en input (sans le préfixe `origin/`) — typiquement `epic/<N>` en NEW mode, parfois `alpha` ou `ticket/<parent-slug>` en LEGACY mode
+   - Body : lien ticket (`Closes #NNN`), résumé, test plan, screenshots. **Important** : `Closes #N` ne déclenche l'auto-close que sur le merge dans la branche par défaut (`master`) ; sur le merge dans `epic/<N>` il ne fait rien — c'est attendu, le ticket reste `In review` jusqu'à la release.
    - **Ticket reste en In progress** pendant les validators
-   - Si stacked : noter dans le body « Stacked on #<parent-PR> — GitHub retargettera automatiquement sur `alpha` une fois le parent mergé »
    - Logger `PR_DRAFT` avec le numéro de PR.
 
 9. **Validations en parallèle** — 3 axes simultanés, tous doivent être verts avant de passer à l'étape 10.
@@ -216,11 +216,14 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - Logger `PR_READY` avec le numéro de PR
    - Status ticket → **In review** via `bash scripts/orchestration/set_ticket_status.sh <N> "In review"`
    - Logger `COMPLETE`
-   - `In review` = terminus pour l'IA. L'utilisateur passe manuellement en **Done** après revue humaine. Les nouveaux commentaires posés **après** le passage en In review relèvent de la skill `/review` (existante), plus du `code-dev`.
+   - **Pas de merge depuis `code-dev`** — le squash-merge dans `epic/<N>` est fait par `process_tick_result.sh` après ton retour `validated`. Si le merge échoue (conflit avec la branche d'intégration parce qu'une autre PR a été mergée entre-temps), le pipeline te redispatchera avec le ticket en `In progress` ; tu n'as qu'à rebaser sur `origin/epic/<N>` et re-pousser.
+   - `In review` = terminus pour l'IA. L'utilisateur passe manuellement en **Done** après revue humaine de la PR finale `epic/<N> → alpha`. Les nouveaux commentaires posés **après** le passage en In review relèvent de la skill `/review` (existante), plus du `code-dev`.
 
 ## Contraintes
 
 - **Jamais `Done` automatique** — utilisateur uniquement (le script `set_ticket_status.sh` refuse explicitement cette transition pour un agent)
+- **Aucun commentaire dans le code produit** — voir `rules/code-quality.md` section "No comments by default". Seul un `// ` court justifiant un WHY non-évident est toléré.
+- **Jamais de merge depuis `code-dev`** — pas de `gh pr merge`, pas de `git push origin epic/<N>`, jamais. Le squash-merge dans la branche d'intégration est centralisé dans `process_tick_result.sh` après le retour `validated`.
 - **Jamais bypass** — pas de `@ts-ignore`, `--no-verify`, `--no-gpg-sign`, pas de skip CI
 - **Screenshots PR obligatoires** pour toute modif UI
 - **Un ticket = une branche = une PR** — pas de bundle

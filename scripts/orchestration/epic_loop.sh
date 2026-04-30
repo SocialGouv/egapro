@@ -64,13 +64,36 @@ rm -rf /tmp/egapro_gh_cache/ 2>/dev/null || true
 
 bash "$SCRIPT_DIR/log_event.sh" "$AID" START "epics=$EPICS budget_sonnet=$BUDGET_SONNET budget_opus=$BUDGET_OPUS max_ticks=$MAX_TICKS"
 
-# ---- Pre-flight: validate args + move epics to 'In progress' ----
+# ---- Pre-flight: validate args + classify mode + bootstrap epic branches ----
+# An epic is "legacy" if it carries the label `pipeline=legacy` — used for
+# in-flight epics created before the integration-branch model. Legacy epics
+# keep the old stacked-PR + base=alpha behavior. New epics get a dedicated
+# `epic/<N>` integration branch, ticket PRs target it, process_tick_result
+# squash-merges validated tickets into it, and a final PR `epic/<N> → alpha`
+# is opened at the end for human review.
+declare -A EPIC_MODE   # value: "new" | "legacy"
 for N in $EPICS; do
-    if ! gh issue view "$N" --json labels --jq '[.labels[].name]' 2>/dev/null | grep -qiE '"epic"'; then
+    EPIC_LBL=$(gh issue view "$N" --json labels --jq '[.labels[].name] | join(",")' 2>/dev/null || echo "")
+    if ! echo "$EPIC_LBL" | grep -qiE '(^|,)epic(,|$)'; then
         bash "$SCRIPT_DIR/log_event.sh" "$AID" ERROR "not_an_epic:$N"
         echo "ERROR: #$N is not an epic" >&2
         exit 1
     fi
+
+    if echo "$EPIC_LBL" | grep -qE '(^|,)pipeline=legacy(,|$)'; then
+        EPIC_MODE[$N]="legacy"
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" EPIC_MODE "epic=$N mode=legacy"
+    else
+        EPIC_MODE[$N]="new"
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" EPIC_MODE "epic=$N mode=new"
+        # Ensure the integration branch exists on origin (idempotent)
+        if ! bash "$SCRIPT_DIR/ensure_epic_branch.sh" "$N" >/dev/null; then
+            bash "$SCRIPT_DIR/log_event.sh" "$AID" ERROR "ensure_epic_branch_failed:$N"
+            echo "ERROR: cannot ensure epic/$N integration branch" >&2
+            exit 1
+        fi
+    fi
+
     bash "$SCRIPT_DIR/set_ticket_status.sh" "$N" "In progress" >/dev/null 2>&1 || true
 done
 
@@ -208,6 +231,29 @@ while [ $TICK -lt $MAX_TICKS ]; do
     # remaining tickets can never be dispatched.
     bash "$SCRIPT_DIR/cleanup_terminal_worktrees.sh" $EPICS >/dev/null 2>&1 || true
 
+    # 0bis. For each NEW-mode epic, rebase epic/<N> on origin/alpha so the
+    # integration branch stays current. Skipped for legacy epics (no epic
+    # branch) and on the very first tick (epic branch was just created from
+    # a fresh origin/alpha by ensure_epic_branch.sh, no rebase needed).
+    if [ "$TICK" -gt 0 ]; then
+        for N in $EPICS; do
+            [ "${EPIC_MODE[$N]:-new}" = "legacy" ] && continue
+            set +e
+            bash "$SCRIPT_DIR/rebase_epic_branch.sh" "$N" >/dev/null
+            REBASE_RC=$?
+            set -e
+            if [ "$REBASE_RC" = "2" ]; then
+                bash "$SCRIPT_DIR/log_event.sh" "$AID" REBASE_CONFLICT "epic=$N"
+                echo "REBASE CONFLICT on epic/$N — escalating, halting orchestration" >&2
+                exit 2
+            elif [ "$REBASE_RC" != "0" ]; then
+                bash "$SCRIPT_DIR/log_event.sh" "$AID" REBASE_ERROR "epic=$N rc=$REBASE_RC"
+                echo "REBASE ERROR on epic/$N (rc=$REBASE_RC) — halting orchestration" >&2
+                exit 1
+            fi
+        done
+    fi
+
     # 1. Compute the plan
     bash "$SCRIPT_DIR/dispatch_plan.sh" $EPICS > "$PLAN_FILE"
 
@@ -248,6 +294,7 @@ while [ $TICK -lt $MAX_TICKS ]; do
     # `read entry` for the next line starves out — only the first plan
     # entry would be dispatched per tick.
     declare -A AGENT_FILES=()
+    declare -A AGENT_EPIC=()
     PIDS=()
     PLAN_ENTRIES=()
     while IFS= read -r entry; do
@@ -283,6 +330,7 @@ while [ $TICK -lt $MAX_TICKS ]; do
 
         AGENT_LOG="$TICK_DIR/tick_${TICK}_agent_${TICKET}.json"
         AGENT_FILES[$TICKET]="$AGENT_LOG"
+        AGENT_EPIC[$TICKET]="$EPIC"
 
         bash "$SCRIPT_DIR/log_event.sh" "$AID" AGENT_SPAWN "ticket=$TICKET agent=$AGENT model=$MODEL index=$INDEX branch=$BRANCH budget=$([ "$MODEL" = "opus" ] && echo "$BUDGET_OPUS" || echo "$BUDGET_SONNET")"
 
@@ -324,14 +372,16 @@ while [ $TICK -lt $MAX_TICKS ]; do
                 CLI_ERROR="true"
             fi
 
+            TICKET_EPIC="${AGENT_EPIC[$ticket]:-}"
             if echo "$RESULT_TEXT" | jq -e '.status' >/dev/null 2>&1; then
-                RESULT_JSON="$RESULT_TEXT"
+                RESULT_JSON=$(echo "$RESULT_TEXT" | jq -c --argjson epic "${TICKET_EPIC:-0}" '. + {epic: $epic}')
             else
                 ESCAPED=$(echo "$RESULT_TEXT" | jq -Rs '.' | head -c 500)
                 RESULT_JSON=$(jq -nc \
                     --argjson ticket "$ticket" \
+                    --argjson epic "${TICKET_EPIC:-0}" \
                     --arg reason "non-JSON return from agent (cli_error=$CLI_ERROR): $ESCAPED" \
-                    '{status:"failed", ticket:$ticket, reason:$reason}')
+                    '{status:"failed", ticket:$ticket, epic:$epic, reason:$reason}')
             fi
 
             [ "$FIRST" = "0" ] && echo ","
@@ -358,8 +408,24 @@ if [ $TICK -ge $MAX_TICKS ]; then
 fi
 
 # ---- Done: every sub-ticket is terminal (validated/In review or escalated) ----
-# Unlike leviathan, we do NOT auto-archive epics. The user owns the
-# Done transition after PR merges.
+# For each NEW-mode epic, open the final integration PR `epic/<N> → alpha`
+# (idempotent — reuses an existing open PR if any). Legacy epics keep the
+# old behavior (no final PR, the human merges each ticket PR into alpha).
+for N in $EPICS; do
+    [ "${EPIC_MODE[$N]:-new}" = "legacy" ] && continue
+    set +e
+    FINAL_PR=$(bash "$SCRIPT_DIR/open_epic_final_pr.sh" "$N" 2>/dev/null)
+    OPEN_RC=$?
+    set -e
+    if [ "$OPEN_RC" = "0" ] && [ -n "$FINAL_PR" ]; then
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" FINAL_PR_OPEN "epic=$N pr=$FINAL_PR"
+        echo "DONE epic=$N: integration PR #$FINAL_PR opened (epic/$N → alpha) — review + merge manually"
+    else
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" FINAL_PR_FAIL "epic=$N rc=$OPEN_RC"
+        echo "WARN epic=$N: open_epic_final_pr.sh exited $OPEN_RC — open the PR manually" >&2
+    fi
+done
+
 bash "$SCRIPT_DIR/log_event.sh" "$AID" COMPLETE "all_terminal ticks=$TICK"
-echo "DONE: epics=$EPICS terminated in $TICK ticks (review PRs and merge manually)"
+echo "DONE: epics=$EPICS terminated in $TICK ticks"
 exit 0

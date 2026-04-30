@@ -119,7 +119,7 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | Gate | When | How |
 |---|---|---|
 | **Validation** | After every task | `validator` agent (typecheck + test + lint + format) |
-| **Structure** | After every task | `structural-auditor` agent (16 rules: forms, schemas, DRY, imports…) |
+| **Structure** | After every task | `structural-auditor` agent (17 rules: forms, schemas, DRY, imports, no-comments…) |
 | **RGAA** | After every task | `rgaa-auditor` agent on modified `.tsx` files |
 | **Security** | After every task | `security-auditor` agent on modified server files |
 | **Functional** | Inside `/code` + `/epic` | `functional-validator` rejoue les scénarios PO |
@@ -164,7 +164,7 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | Agent | Rôle |
 |---|---|
 | `validator` | Typecheck + test + lint + format (parallel) |
-| `structural-auditor` | 16-rule structural audit (code quality, forms, schemas, DRY, imports…) |
+| `structural-auditor` | 17-rule structural audit (code quality, forms, schemas, DRY, imports, no-comments…) |
 | `rgaa-auditor` | 13-theme RGAA accessibility audit |
 | `security-auditor` | OWASP Top 10 + RGS security review |
 
@@ -187,18 +187,26 @@ Tous les scripts shell portent leur propre header `--help`-friendly. La pipeline
 
 | Script | Rôle |
 |---|---|
-| `epic_loop.sh` | Loop driver background. Tick = cleanup terminal worktrees → plan → spawn N `claude` CLIs en parallèle (budget USD isolé) → aggregate JSON returns → process. Plafond `EPIC_LOOP_MAX_TICKS=30`. |
+| `epic_loop.sh` | Loop driver background. Tick = cleanup terminal worktrees → rebase epic branches → plan → spawn N `claude` CLIs en parallèle (budget USD isolé) → aggregate JSON returns → process. Plafond `EPIC_LOOP_MAX_TICKS=30`. À la fin, ouvre la PR finale `epic/<N> → alpha`. |
+| `ensure_epic_branch.sh` | Idempotent. Crée la branche d'intégration `epic/<N>` depuis `origin/alpha` si absente. Appelé au startup d'`epic_loop.sh` pour chaque epic NEW-mode. |
+| `merge_validated_ticket.sh` | Squash-merge la PR d'un ticket validé dans `epic/<N>` via `gh pr merge --squash`. Branche auto-supprimée par les settings repo. Sur conflit : commente la PR + remet le ticket en `In progress` (le pipeline redispatchera pour rebaser). |
+| `rebase_epic_branch.sh` | Entre ticks, rebase `epic/<N>` sur `origin/alpha` dans un worktree dédié (`/tmp/egapro-rebase-epic<N>`). Force-with-lease push. Sur conflit : commente l'epic + label `dispatch=escalate` + exit 2 (halt orchestration). |
+| `open_epic_final_pr.sh` | Ouvre (ou réutilise) la PR finale `epic/<N> → alpha` avec body listant chaque sub-ticket via `Closes #N`. Appelé en fin de loop pour la review humaine. |
 | `cleanup_terminal_worktrees.sh` | Scan les worktrees `egapro-epic<E>-t<N>` ; teardown + remove ceux dont le ticket est en `In review` ou `Done`. Appelé à chaque tick par `epic_loop.sh` pour libérer les slots dynamiquement. |
-| `dispatch_plan.sh` | Calcule la JSON list des tickets dispatchables : parse `## Depends on`, applique le stacked PR pattern, alloue les indices libres dans `[0, EPIC_MAX_PARALLEL[`. |
-| `process_tick_result.sh` | Applique les mutations board selon le statut JSON retourné par `code-dev`. Compteur `attempt=N` pour anti-boucle 3 refacto consécutifs → `dispatch=escalate`. |
+| `dispatch_plan.sh` | Calcule la JSON list des tickets dispatchables : parse `## Depends on`, gate les enfants dont le parent n'est pas encore squash-mergé dans `epic/<N>` (= sa branche n'existe plus sur origin), alloue les indices libres dans `[0, EPIC_MAX_PARALLEL[`. Bascule en mode legacy stacked-PR si l'epic carry le label `pipeline=legacy`. |
+| `process_tick_result.sh` | Applique les mutations board selon le statut JSON retourné par `code-dev`. Sur `validated` (NEW mode) → invoke `merge_validated_ticket.sh`. Compteur `attempt=N` pour anti-boucle 3 refacto consécutifs → `dispatch=escalate`. |
 | `set_ticket_status.sh` | Encapsule les 3 GraphQL calls de `rules/github-board.md`. **Refuse explicitement la transition `Done`** (user-only). |
-| `create_linked_branch.sh` | Crée une branche linkée à l'issue via `createLinkedBranch` GraphQL — la PR sera auto-attachée à la sidebar Development de l'issue. |
+| `create_linked_branch.sh` | Crée une branche linkée à l'issue via `createLinkedBranch` GraphQL — la PR sera auto-attachée à la sidebar Development de l'issue. Base = `epic/<N>` en NEW mode. |
 | `open_worktree.sh` | Recrée un worktree pour une PR donnée (skill `/open <PR>`). Utile pour tester localement après auto-cleanup. |
-| `refresh_pr_link.sh` | Force GitHub à re-parser le `Closes #N` d'une PR (workaround pour le retarget post-merge stacked). |
+| `refresh_pr_link.sh` | Force GitHub à re-parser le `Closes #N` d'une PR (workaround legacy post-merge stacked). |
 | `cache_gh.sh` | TTL wrapper sur `gh` pour amortir les rate limits (clé `epic_<N>_full` partagée entre `dispatch_plan` et `epic_state`, TTL 300s). |
 | `log_event.sh` | Logging append-only par agent, rolling 50 lignes, sous `.claude/state/epic_run/agents/`. |
 | `epic_state.sh` | Tableau compact des sous-tickets d'un epic (status board + last log event + retries + PR liée). |
 | `render_dashboard.sh` | Dashboard `/report` agents actifs, triés par inactivité, avec alertes >10min. |
+
+**Modèle de branche d'intégration (NEW mode, par défaut)** : chaque epic a sa branche `epic/<N>` créée depuis `alpha` au startup d'`epic_loop.sh`. Toutes les PRs des sous-tickets ciblent `epic/<N>`. Une fois validée par toute la pipeline (CI + Sonar + validators IA + bots), `process_tick_result.sh` squash-merge la PR dans `epic/<N>`. Les tickets enfants (qui dépendent d'un parent) ne démarrent qu'une fois leur parent squash-mergé. Entre ticks, `epic/<N>` est rebasée sur `origin/alpha` pour rester fraîche. À la fin, une PR unique `epic/<N> → alpha` est ouverte pour la **review humaine** — c'est le seul point d'intervention humain pour valider l'epic complet.
+
+**Mode LEGACY** : un epic carry le label `pipeline=legacy` pour conserver le comportement précédent (stacked PRs, base `alpha`, pas d'auto-merge). Réservé aux epics en cours créés avant l'introduction du modèle d'intégration.
 
 Les sub-agents `code-dev` retournent un **JSON strict** en dernier message (`validated` / `needs_opus_escalation` / `refacto` / `rate_limited` / `failed`) — voir `.claude/agents/code-dev/AGENT.md`. Le bash loop parse ce JSON via `jq`, aucun LLM n'intervient dans la chaîne de décision post-verdict.
 

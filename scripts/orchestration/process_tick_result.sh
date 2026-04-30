@@ -20,18 +20,21 @@
 #
 # Per-status actions:
 #
-# | Status                  | Board change           | Labels                                    | Counter         |
-# |-------------------------|------------------------|-------------------------------------------|-----------------|
-# | validated               | none (already In rev.) | clear attempt=N                           | reset           |
-# | needs_opus_escalation   | → To Do                | + complexe                                | reset           |
+# | Status                  | Board change           | Labels                                    | Counter / merge       |
+# |-------------------------|------------------------|-------------------------------------------|-----------------------|
+# | validated (NEW mode)    | stays In review        | clear attempt=N                           | squash-merge into epic/<N> |
+# | validated (LEGACY mode) | stays In review        | clear attempt=N                           | none (human merges)   |
+# | needs_opus_escalation   | → To Do                | + complexe                                | reset                 |
 # | refacto                 | → To Do                | bump attempt=N (1→2→3); +dispatch=escalate at 3 | +1              |
-# | rate_limited            | none                   | none (handled by loop driver)             | unchanged       |
-# | failed                  | → To Do                | none (technical, not semantic)            | unchanged       |
+# | rate_limited            | none                   | none (handled by loop driver)             | unchanged             |
+# | failed                  | → To Do                | none (technical, not semantic)            | unchanged             |
 #
-# === HARD RULE ===
-# This script NEVER merges PRs and NEVER sets a ticket to 'Done'.
-# `validated` means code-dev has already moved the ticket to 'In review' and
-# the PR is ready — human review takes over from there.
+# === HARD RULES ===
+# - Never sets a ticket to 'Done' — that's user-only.
+# - Never merges into alpha/master. The only merge done by this script is the
+#   squash-merge of a validated ticket PR into its `epic/<N>` integration
+#   branch — gated by the per-ticket validators (CI green, Sonar green,
+#   IA validators OK, bot reviews addressed).
 
 set -euo pipefail
 
@@ -98,22 +101,72 @@ set_attempt_label() {
     gh issue edit "$TICKET" --add-label "attempt=$N" >/dev/null 2>&1 || true
 }
 
+N_MERGED=0
+N_MERGE_CONFLICT=0
+N_MERGE_PENDING=0
+
 jq -c '.results[]' "$RESULT_FILE" | while read -r result; do
     STATUS=$(echo "$result" | jq -r '.status // "unknown"')
     TICKET=$(echo "$result" | jq -r '.ticket // 0')
     PR=$(echo "$result" | jq -r '.pr // ""')
+    EPIC=$(echo "$result" | jq -r '.epic // ""')
 
     case "$STATUS" in
         validated)
             # code-dev has set 'In review' and pr ready. The PR is already
             # linked to the issue via the linked-branch flow (createLinkedBranch
-            # called by epic_loop.sh before spawning the agent), so no manual
-            # cross-ref is needed. Just reset the attempt counter.
+            # called by epic_loop.sh before spawning the agent).
+            #
+            # In NEW mode: squash-merge the ticket PR into epic/<N> right now.
+            # The next dispatch_plan tick can then unlock children that
+            # depend on this ticket (parent's branch will be gone after merge).
+            #
+            # In LEGACY mode (epic carries `pipeline=legacy`): no auto-merge,
+            # the human merges into alpha as before.
             clear_attempt_labels "$TICKET"
             invalidate_caches "$TICKET"
-            bash "$SCRIPT_DIR/log_event.sh" "$AID" VALIDATED "ticket=$TICKET pr=$PR"
-            echo "  ✓ ticket #$TICKET validated (In review, PR ready)"
-            N_VALIDATED=$((N_VALIDATED + 1))
+
+            EPIC_LEGACY=0
+            if [ -n "$EPIC" ]; then
+                EPIC_LBL=$(gh issue view "$EPIC" --json labels --jq '[.labels[].name] | join(",")' 2>/dev/null || echo "")
+                if echo "$EPIC_LBL" | grep -qE '(^|,)pipeline=legacy(,|$)'; then
+                    EPIC_LEGACY=1
+                fi
+            fi
+
+            if [ -z "$EPIC" ] || [ "$EPIC_LEGACY" = "1" ] || [ -z "$PR" ]; then
+                bash "$SCRIPT_DIR/log_event.sh" "$AID" VALIDATED "ticket=$TICKET pr=$PR mode=$([ "$EPIC_LEGACY" = "1" ] && echo legacy || echo no-merge)"
+                echo "  ✓ ticket #$TICKET validated (In review, PR ready) — no auto-merge"
+                N_VALIDATED=$((N_VALIDATED + 1))
+            else
+                set +e
+                bash "$SCRIPT_DIR/merge_validated_ticket.sh" "$PR" "$EPIC" "$TICKET" >&2
+                MERGE_RC=$?
+                set -e
+                case "$MERGE_RC" in
+                    0)
+                        bash "$SCRIPT_DIR/log_event.sh" "$AID" MERGED "ticket=$TICKET pr=$PR epic=$EPIC"
+                        echo "  ✓ ticket #$TICKET validated + squash-merged into epic/$EPIC (PR #$PR)"
+                        N_VALIDATED=$((N_VALIDATED + 1))
+                        N_MERGED=$((N_MERGED + 1))
+                        ;;
+                    2)
+                        bash "$SCRIPT_DIR/log_event.sh" "$AID" MERGE_CONFLICT "ticket=$TICKET pr=$PR epic=$EPIC"
+                        echo "  ⚠ ticket #$TICKET validated but conflicts with epic/$EPIC (PR #$PR) — set In progress, will retry"
+                        N_MERGE_CONFLICT=$((N_MERGE_CONFLICT + 1))
+                        ;;
+                    3)
+                        bash "$SCRIPT_DIR/log_event.sh" "$AID" MERGE_PENDING "ticket=$TICKET pr=$PR epic=$EPIC"
+                        echo "  ⏸ ticket #$TICKET validated but mergeability=UNKNOWN — retry next tick"
+                        N_MERGE_PENDING=$((N_MERGE_PENDING + 1))
+                        ;;
+                    *)
+                        bash "$SCRIPT_DIR/log_event.sh" "$AID" MERGE_FAILED "ticket=$TICKET pr=$PR epic=$EPIC rc=$MERGE_RC"
+                        echo "  ✗ ticket #$TICKET validated but merge_validated_ticket.sh exited $MERGE_RC — manual investigation"
+                        N_VALIDATED=$((N_VALIDATED + 1))
+                        ;;
+                esac
+            fi
             ;;
 
         needs_opus_escalation)
@@ -177,6 +230,9 @@ done
 echo ""
 echo "=== Tick #$TICK process resume ==="
 echo "  Validated:           $N_VALIDATED"
+echo "    └─ merged:         $N_MERGED"
+echo "    └─ merge conflict: $N_MERGE_CONFLICT"
+echo "    └─ merge pending:  $N_MERGE_PENDING"
 echo "  Opus escalation:     $N_OPUS"
 echo "  Refacto (retried):   $N_REFACTO"
 echo "  Escalate to user:    $N_ESCALATE"

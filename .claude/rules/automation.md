@@ -133,7 +133,7 @@ Agents in `.claude/agents/` are delegated to automatically by skills and quality
 | Agent | Role | Model |
 |---|---|---|
 | `validator` | Typecheck + test + lint + format (parallel) | sonnet |
-| `structural-auditor` | 16-rule structural audit (code quality, forms, schemas, DRY, imports…) | sonnet |
+| `structural-auditor` | 17-rule structural audit (code quality, forms, schemas, DRY, imports, no-comments…) | sonnet |
 | `rgaa-auditor` | Full 13-theme RGAA accessibility audit | sonnet |
 | `security-auditor` | OWASP Top 10 + RGS security review | sonnet |
 

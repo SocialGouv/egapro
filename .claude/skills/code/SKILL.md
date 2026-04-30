@@ -29,12 +29,23 @@ Exécute **un seul ticket** end-to-end via l'agent `code-dev`. Utilisé seul (de
 
 Si déjà dans un worktree assigné par `/epic` → le réutiliser (`packages/app/.env.local` et stack docker déjà en place par `setup-worktree.sh`). `/epic` a déjà calculé la base branch.
 
-Sinon (standalone), déterminer la base branch selon la section `Depends on` du body :
-- Aucune dépendance → `origin/alpha`
-- Toutes les dépendances en `Done` → `origin/alpha` (après `git fetch`)
-- 1 dépendance en `In review` → `ticket/<parent-slug>` (stacked PR)
-- 2+ dépendances en `In review` → **exit** avec message : « attendre le merge d'au moins une dépendance avant `/code` »
-- 1+ dépendance en `In progress` ou `To Do` → **exit** avec message : « dépendance pas prête, attendre `/epic` »
+Sinon (standalone), déterminer la base branch :
+
+1. Identifier l'epic parent du ticket (`gh issue view <N> --json parent` ou la sub-issue API).
+2. Vérifier le mode de l'epic (label `pipeline=legacy` posé ou pas).
+
+**Epic NEW mode (par défaut)** :
+- Base = `origin/epic/<EPIC_N>`. Si la branche n'existe pas encore sur origin → la créer via `bash scripts/orchestration/ensure_epic_branch.sh <EPIC_N>`.
+- Pour chaque dépendance dans `## Depends on` : vérifier qu'elle a été squash-mergée (sa branche `ticket/<dep>-*` n'existe plus sur origin, repo settings auto-deletes).
+  - Toutes mergées → OK, lancer.
+  - 1+ pas encore mergée → **exit** avec message : « dépendance non mergée dans `epic/<EPIC_N>` — attendre `/epic` ».
+
+**Epic LEGACY mode** (`pipeline=legacy` sur l'epic) :
+- Aucune dépendance → `origin/alpha`.
+- Toutes mergées (status `Done`) → `origin/alpha`.
+- 1 dépendance en `In review` → `origin/ticket/<parent-slug>` (stacked PR legacy).
+- 2+ dépendances en `In review` → **exit** : « attendre le merge d'au moins une dépendance ».
+- 1+ dépendance en `In progress` / `To Do` → **exit** : « dépendance pas prête, attendre `/epic` ».
 
 Parser la section `## Requires services` pour détecter les services docker extras (typiquement `clamavd`).
 
