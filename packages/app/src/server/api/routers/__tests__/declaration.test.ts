@@ -1,4 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	createCaller,
+	mockDeclaration,
+} from "./helpers/declarationTestHelpers";
 
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
@@ -78,39 +82,6 @@ function createMockDb(selectRows: unknown[] = []) {
 		transaction: mockTransaction,
 	} as unknown;
 }
-
-function createCaller(
-	mockDb: unknown,
-	siret: string | null = "33978727700015",
-	impersonation: { siren: string; name: string } | null = null,
-) {
-	return import("../declaration").then(({ declarationRouter }) =>
-		declarationRouter.createCaller({
-			db: mockDb,
-			session: {
-				user: {
-					id: "user-1",
-					siret,
-					isAdmin: impersonation !== null,
-					impersonation,
-				},
-				expires: "",
-			},
-			headers: new Headers(),
-		} as never),
-	);
-}
-
-const mockDeclaration = {
-	id: "decl-1",
-	siren: "339787277",
-	year: 2026,
-	currentStep: 0,
-	status: "draft",
-	declarantId: "user-1",
-	totalWomen: null,
-	totalMen: null,
-};
 
 describe("declarationRouter", () => {
 	beforeEach(() => {
