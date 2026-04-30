@@ -83,13 +83,15 @@
 		font-variant-numeric: tabular-nums;
 	}
 
-	tbody td input.fr-input {
+	tbody td input:global(.fr-input) {
 		text-align: right;
 		width: 4.5rem;
 		margin-left: auto;
+		padding-left: 8px;
+		padding-right: 8px;
 	}
 
-	tbody td .inputWithUnit input.fr-input {
+	tbody td .inputWithUnit input:global(.fr-input) {
 		width: 5.5rem;
 		min-width: 5.5rem;
 		max-width: 5.5rem;
@@ -146,13 +148,13 @@
 			text-align: left;
 		}
 
-		tbody td input.fr-input {
+		tbody td input:global(.fr-input) {
 			text-align: left;
 			width: 100%;
 			margin-left: 0;
 		}
 
-		tbody td .inputWithUnit input.fr-input {
+		tbody td .inputWithUnit input:global(.fr-input) {
 			width: auto;
 			flex: 1;
 		}
@@ -182,7 +184,7 @@
 		vertical-align: super;
 	}
 
-	.fr-btn {
+	:global(.fr-btn) {
 		min-height: 1rem;
 		min-width: 1rem;
 		width: 1rem;
