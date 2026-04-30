@@ -60,12 +60,13 @@
 	td {
 		white-space: normal;
 		vertical-align: middle;
+		padding-left: 10px;
+		padding-right: 10px;
 	}
 
 	tbody th[scope="row"] {
 		background: transparent;
 		white-space: nowrap;
-		padding-right: 0.5rem;
 	}
 
 	.minCell,
