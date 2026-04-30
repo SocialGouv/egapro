@@ -24,19 +24,20 @@ export const DEV_STEP3_ROWS: PayGapRow[] = [
 export const DEV_STEP3_BENEFICIARY_WOMEN = "95";
 export const DEV_STEP3_BENEFICIARY_MEN = "110";
 
-// Step 4 - Quartile distribution (annual + hourly)
+// Step 4 - Quartile distribution (annual + hourly).
+// Only Q1, Q2, Q3 carry an upper threshold; Q4 has no `womenValue`.
 export const DEV_STEP4_ANNUAL = [
 	{ name: "1er quartile", womenCount: 35, menCount: 28, womenValue: "22000" },
 	{ name: "2e quartile", womenCount: 30, menCount: 32, womenValue: "28500" },
 	{ name: "3e quartile", womenCount: 28, menCount: 35, womenValue: "35000" },
-	{ name: "4e quartile", womenCount: 27, menCount: 35, womenValue: "48000" },
+	{ name: "4e quartile", womenCount: 27, menCount: 35 },
 ];
 
 export const DEV_STEP4_HOURLY = [
 	{ name: "1er quartile", womenCount: 35, menCount: 28, womenValue: "11.50" },
 	{ name: "2e quartile", womenCount: 30, menCount: 32, womenValue: "14.80" },
 	{ name: "3e quartile", womenCount: 28, menCount: 35, womenValue: "18.20" },
-	{ name: "4e quartile", womenCount: 27, menCount: 35, womenValue: "24.50" },
+	{ name: "4e quartile", womenCount: 27, menCount: 35 },
 ];
 
 // Step 5 - Employee categories

@@ -32,8 +32,29 @@
 	th,
 	td {
 		white-space: normal;
+		vertical-align: middle;
 	}
 
+	tbody tr:last-child {
+		font-weight: bold;
+	}
+}
+
+.minCell {
+	font-variant-numeric: tabular-nums;
+}
+
+.readonlyCell {
+	display: inline-block;
+	font-variant-numeric: tabular-nums;
+}
+
+.cellInputGroup {
+	margin: 0;
+}
+
+.cellLabel {
+	position: absolute;
 }
 
 .inputWithUnit {

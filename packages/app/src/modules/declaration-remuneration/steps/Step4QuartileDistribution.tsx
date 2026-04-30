@@ -1,13 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
-import { normalizeDecimalInput } from "~/modules/domain";
+import {
+	computeQuartileMin,
+	displayDecimal,
+	normalizeDecimalInput,
+} from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep4Schema } from "../schemas";
-import { QUARTILE_NAMES } from "../shared/constants";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY } from "../shared/devFillData";
 import { FormActions } from "../shared/FormActions";
@@ -21,7 +24,15 @@ import type { QuartileData, QuartileTuple, Step4Data } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
 import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCallout";
 import { QuartileReadingNote } from "./step4/QuartileReadingNote";
-import { QuartileTable } from "./step4/QuartileTable";
+import { type QuartileFieldErrors, QuartileTable } from "./step4/QuartileTable";
+
+type TableType = "annual" | "hourly";
+type CountField = "women" | "men";
+
+const TABLE_LABEL: Record<TableType, string> = {
+	annual: "rémunération annuelle",
+	hourly: "rémunération horaire",
+};
 
 function toQuartileData(c: {
 	womenValue?: string | null;
@@ -29,14 +40,28 @@ function toQuartileData(c: {
 	menCount: number;
 }): QuartileData {
 	return {
-		threshold: c.womenValue ?? "",
+		threshold: c.womenValue ?? undefined,
 		women: c.womenCount,
 		men: c.menCount,
 	};
 }
 
+/** Q4 carries no upper threshold by spec — strip whatever the form holds. */
+function normalizeForMutation(values: {
+	annual: QuartileTuple;
+	hourly: QuartileTuple;
+}): { annual: QuartileTuple; hourly: QuartileTuple } {
+	const stripQ4 = (table: QuartileTuple): QuartileTuple => [
+		table[0],
+		table[1],
+		table[2],
+		{ ...table[3], threshold: undefined },
+	];
+	return { annual: stripQ4(values.annual), hourly: stripQ4(values.hourly) };
+}
+
 function gipToQuartiles(gip: GipQuartileData): QuartileData[] {
-	return QUARTILE_NAMES.map((_, i) => ({
+	return [0, 1, 2, 3].map((i) => ({
 		threshold: gip.thresholds[i] ?? "",
 		women: gip.womenCounts[i] ?? undefined,
 		men: gip.menCounts[i] ?? undefined,
@@ -50,6 +75,113 @@ function emptyQuartiles(): QuartileTuple {
 		{ threshold: "" },
 		{ threshold: "" },
 	];
+}
+
+/** Formats a stored decimal value as `"… €"` for read-only display cells. */
+function formatEuro(value: string): string {
+	return `${displayDecimal(value)} €`;
+}
+
+/** Computes the lower bound display string for each of the 4 quartiles. */
+function computeMinsForTable(
+	quartiles: QuartileTuple,
+): [string, string, string, string] {
+	const dash = "- €";
+	const q1Min = "0,00 €";
+	const min = (prevThreshold: string | undefined): string => {
+		const computed = computeQuartileMin(prevThreshold);
+		return computed ? formatEuro(computed) : dash;
+	};
+	return [
+		q1Min,
+		min(quartiles[0]?.threshold),
+		min(quartiles[1]?.threshold),
+		min(quartiles[2]?.threshold),
+	];
+}
+
+/** Returns the index of the first threshold that breaks strict ascending order, or null. */
+function findCroissanceOffender(
+	thresholds: Array<string | undefined>,
+): number | null {
+	const [t1, t2, t3] = thresholds
+		.slice(0, 3)
+		.map((t) => Number.parseFloat(t ?? "")) as [number, number, number];
+	if ([t1, t2, t3].some((n) => Number.isNaN(n))) return null;
+	if (!(t1 < t2)) return 1;
+	if (!(t2 < t3)) return 2;
+	return null;
+}
+
+type RecapEntry = {
+	id: string;
+	label: string;
+};
+
+type FieldErrorMap = Record<
+	TableType,
+	[
+		QuartileFieldErrors,
+		QuartileFieldErrors,
+		QuartileFieldErrors,
+		QuartileFieldErrors,
+	]
+>;
+
+const EMPTY_ERRORS: QuartileFieldErrors = {};
+
+function emptyErrorMap(): FieldErrorMap {
+	return {
+		annual: [EMPTY_ERRORS, EMPTY_ERRORS, EMPTY_ERRORS, EMPTY_ERRORS],
+		hourly: [EMPTY_ERRORS, EMPTY_ERRORS, EMPTY_ERRORS, EMPTY_ERRORS],
+	};
+}
+
+function fieldId(
+	tableType: TableType,
+	index: number,
+	suffix: "max" | "f" | "h",
+) {
+	return `step4-${tableType}-q${index + 1}-${suffix}`;
+}
+
+const SUFFIX_FOR_FIELD: Record<"threshold" | CountField, "max" | "f" | "h"> = {
+	threshold: "max",
+	women: "f",
+	men: "h",
+};
+
+function buildRecap(errors: FieldErrorMap): RecapEntry[] {
+	const out: RecapEntry[] = [];
+	const tables: TableType[] = ["annual", "hourly"];
+	for (const table of tables) {
+		for (let i = 0; i < 4; i++) {
+			const cell = errors[table][i] ?? EMPTY_ERRORS;
+			const orderedFields: Array<"threshold" | CountField> = [
+				"threshold",
+				"women",
+				"men",
+			];
+			for (const field of orderedFields) {
+				const message = cell[field];
+				if (!message) continue;
+				const id = fieldId(table, i, SUFFIX_FOR_FIELD[field]);
+				const fieldLabel =
+					field === "threshold"
+						? "Seuil"
+						: field === "women"
+							? "Effectif femmes"
+							: "Effectif hommes";
+				const ordinal = `${i + 1}${i === 0 ? "er" : "e"}`;
+				out.push({
+					id,
+					label: `${fieldLabel} ${ordinal} quartile (${TABLE_LABEL[table]}) — ${message}`,
+				});
+				if (out.length === 4) return out;
+			}
+		}
+	}
+	return out;
 }
 
 type Step4QuartileDistributionProps = {
@@ -69,6 +201,7 @@ export function Step4QuartileDistribution({
 }: Step4QuartileDistributionProps) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
+	const alertRef = useRef<HTMLDivElement | null>(null);
 
 	const hasSavedData =
 		initialData.annual.some(
@@ -100,20 +233,19 @@ export function Step4QuartileDistribution({
 	const annual = form.watch("annual");
 	const hourly = form.watch("hourly");
 
-	const [validationError, setValidationError] = useState<string | null>(null);
+	const [maxError, setMaxError] = useState<string | null>(null);
 	const [saved, setSaved] = useState(hasSavedData);
-	const [formValidationError, setFormValidationError] = useState<string | null>(
-		null,
-	);
+	const [fieldErrors, setFieldErrors] = useState<FieldErrorMap>(emptyErrorMap);
+	const [showRecap, setShowRecap] = useState(false);
 
 	const mutation = api.declaration.updateStep4.useMutation({
 		onSuccess: () => router.push("/declaration-remuneration/etape/5"),
 	});
 
 	function setQuartileField(
-		tableType: "annual" | "hourly",
+		tableType: TableType,
 		index: number,
-		field: "threshold" | "women" | "men",
+		field: "threshold" | CountField,
 		value: string | number | undefined,
 	) {
 		const arr = tableType === "annual" ? [...annual] : [...hourly];
@@ -124,22 +256,45 @@ export function Step4QuartileDistribution({
 		form.setValue(tableType, arr as QuartileTuple);
 	}
 
-	function handleQuartileChange(
-		tableType: "annual" | "hourly",
+	function clearFieldError(
+		tableType: TableType,
 		index: number,
-		field: "threshold" | "women" | "men",
+		field: "threshold" | CountField,
+	) {
+		setFieldErrors((prev) => {
+			const next: FieldErrorMap = {
+				annual: [...prev.annual] as FieldErrorMap["annual"],
+				hourly: [...prev.hourly] as FieldErrorMap["hourly"],
+			};
+			const cell = { ...(next[tableType][index] ?? EMPTY_ERRORS) };
+			delete cell[field];
+			next[tableType][index] = cell;
+			return next;
+		});
+	}
+
+	function handleQuartileChange(
+		tableType: TableType,
+		index: number,
+		field: "threshold" | CountField,
 		value: string,
 	) {
 		if (field === "threshold") {
 			const normalized = normalizeDecimalInput(value);
 			if (normalized === null) return;
 			if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
-			setQuartileField(tableType, index, field, normalized || undefined);
+			setQuartileField(
+				tableType,
+				index,
+				field,
+				normalized === "" ? undefined : normalized,
+			);
 		} else {
 			if (value === "") {
 				setQuartileField(tableType, index, field, undefined);
-				setValidationError(null);
+				setMaxError(null);
 				setSaved(false);
+				clearFieldError(tableType, index, field);
 				return;
 			}
 			if (/\D/.test(value)) return;
@@ -147,38 +302,113 @@ export function Step4QuartileDistribution({
 			if (Number.isNaN(n) || n < 0) return;
 			const max = field === "women" ? maxWomen : maxMen;
 			if (max !== undefined && n > max) {
-				setValidationError(
+				setMaxError(
 					`Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
 				);
 				return;
 			}
-			setValidationError(null);
+			setMaxError(null);
 			setQuartileField(tableType, index, field, n);
 		}
 		setSaved(false);
+		clearFieldError(tableType, index, field);
 	}
 
-	const onSubmit = form.handleSubmit(() => {
-		const allQuartiles = [...annual, ...hourly];
-		// Q4 (every 4th element, index % 4 === 3) has no upper threshold by design
-		const incomplete = allQuartiles.some(
-			(q, i) =>
-				q.women === undefined ||
-				q.men === undefined ||
-				(i % 4 !== 3 && !q.threshold),
-		);
-		if (incomplete) {
-			setFormValidationError(
-				"Veuillez renseigner toutes les données avant de passer à l'étape suivante.",
-			);
+	function isValidThreshold(v: string | undefined): boolean {
+		return v !== undefined && v !== "" && !Number.isNaN(Number(v));
+	}
+
+	function deriveErrors(values: {
+		annual: QuartileTuple;
+		hourly: QuartileTuple;
+	}): FieldErrorMap {
+		const result = emptyErrorMap();
+		for (const table of ["annual", "hourly"] as const) {
+			const tableValues = values[table];
+			// Required check on Q1/Q2/Q3 thresholds
+			for (let i = 0; i < 3; i++) {
+				const cell = tableValues[i];
+				if (!isValidThreshold(cell?.threshold)) {
+					result[table][i] = {
+						...result[table][i],
+						threshold: "Le seuil est obligatoire",
+					};
+				}
+			}
+			// Strictly increasing check (only when all 3 are valid)
+			const t1 = tableValues[0]?.threshold;
+			const t2 = tableValues[1]?.threshold;
+			const t3 = tableValues[2]?.threshold;
+			if (
+				isValidThreshold(t1) &&
+				isValidThreshold(t2) &&
+				isValidThreshold(t3)
+			) {
+				const offender = findCroissanceOffender([t1, t2, t3]);
+				if (offender !== null) {
+					result[table][offender] = {
+						...result[table][offender],
+						threshold: "Les seuils doivent être strictement croissants",
+					};
+				}
+			}
+			// Counts required (8 cells per table)
+			for (let i = 0; i < 4; i++) {
+				const cell = tableValues[i];
+				if (cell?.women === undefined) {
+					result[table][i] = {
+						...result[table][i],
+						women: "Effectif obligatoire",
+					};
+				}
+				if (cell?.men === undefined) {
+					result[table][i] = {
+						...result[table][i],
+						men: "Effectif obligatoire",
+					};
+				}
+			}
+		}
+		return result;
+	}
+
+	function hasAnyError(map: FieldErrorMap) {
+		for (const table of ["annual", "hourly"] as const) {
+			for (let i = 0; i < 4; i++) {
+				const cell = map[table][i] ?? EMPTY_ERRORS;
+				if (cell.threshold || cell.women || cell.men) return true;
+			}
+		}
+		return false;
+	}
+
+	function focusAlert() {
+		requestAnimationFrame(() => alertRef.current?.focus());
+	}
+
+	function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		const values = form.getValues();
+		const errors = deriveErrors(values);
+		if (hasAnyError(errors)) {
+			setFieldErrors(errors);
+			setShowRecap(true);
+			focusAlert();
 			return;
 		}
-		setFormValidationError(null);
-		mutation.mutate(form.getValues());
-	});
+		setFieldErrors(emptyErrorMap());
+		setShowRecap(false);
+		mutation.mutate(normalizeForMutation(values));
+	}
+
+	const annualMins = computeMinsForTable(annual);
+	const hourlyMins = computeMinsForTable(hourly);
+
+	const recap = buildRecap(fieldErrors);
+	const showAlert = showRecap && recap.length > 0;
 
 	return (
-		<form className={stepStyles.formColumn} onSubmit={onSubmit}>
+		<form className={stepStyles.formColumn} noValidate onSubmit={onSubmit}>
 			<StepTitleRow
 				onDevFill={() => {
 					form.setValue(
@@ -190,6 +420,8 @@ export function Step4QuartileDistribution({
 						DEV_STEP4_HOURLY.map(toQuartileData) as QuartileTuple,
 					);
 					setSaved(false);
+					setFieldErrors(emptyErrorMap());
+					setShowRecap(false);
 				}}
 				saved={saved}
 				title={
@@ -201,7 +433,6 @@ export function Step4QuartileDistribution({
 
 			<StepIndicator currentStep={4} />
 
-			{/* Description + instructions */}
 			<div className={stepStyles.instructions}>
 				<p className="fr-mb-0">
 					Cet indicateur compare la proportion de femmes et d&apos;hommes selon
@@ -230,10 +461,32 @@ export function Step4QuartileDistribution({
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 			</div>
 
-			{/* Tables */}
+			{showAlert && (
+				<div
+					aria-labelledby="step4-error-summary-title"
+					className="fr-alert fr-alert--error"
+					ref={alertRef}
+					role="alert"
+					tabIndex={-1}
+				>
+					<h3 className="fr-alert__title" id="step4-error-summary-title">
+						Le formulaire contient des erreurs
+					</h3>
+					<ul>
+						{recap.map((entry) => (
+							<li key={entry.id}>
+								<a href={`#${entry.id}`}>{entry.label}</a>
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+
 			<div className={stepStyles.dataContainer}>
 				<QuartileTable
 					disabled={isImpersonating}
+					errors={fieldErrors.annual}
+					mins={annualMins}
 					onQuartileChange={(index, field, value) =>
 						handleQuartileChange("annual", index, field, value)
 					}
@@ -257,11 +510,12 @@ export function Step4QuartileDistribution({
 					}
 					tableType="annual"
 					title="Rémunération annuelle brute moyenne"
-					validationError={null}
 				/>
 
 				<QuartileTable
 					disabled={isImpersonating}
+					errors={fieldErrors.hourly}
+					mins={hourlyMins}
 					onQuartileChange={(index, field, value) =>
 						handleQuartileChange("hourly", index, field, value)
 					}
@@ -285,7 +539,6 @@ export function Step4QuartileDistribution({
 					}
 					tableType="hourly"
 					title="Rémunération horaire brute moyenne"
-					validationError={validationError}
 				/>
 
 				<DefinitionAccordion
@@ -303,7 +556,7 @@ export function Step4QuartileDistribution({
 
 			<FormErrors
 				mutationError={mutation.error?.message}
-				validationError={formValidationError}
+				validationError={maxError}
 			/>
 
 			<FormActions
