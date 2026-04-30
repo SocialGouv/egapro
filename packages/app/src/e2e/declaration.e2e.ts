@@ -143,13 +143,20 @@ test.describe("Declaration workflow", () => {
 	}) => {
 		await goToStep(page, 4);
 
+		// Scope assertions to the annual table — the hourly table may be
+		// pre-populated with GIP-MDS data for the test SIREN, so a global
+		// page-level lookup would resolve to multiple cells.
+		const annualTable = page.getByRole("table", {
+			name: "Rémunération annuelle brute moyenne",
+		});
+
 		// S2 — fill annual Q1 max (the only threshold input on the Q1 row)
-		const seuil1Annual = page.getByRole("textbox", {
+		const seuil1Annual = annualTable.getByRole("textbox", {
 			name: "Seuil maximum 1er quartile annuel",
 		});
 		await seuil1Annual.fill("20000");
 		// Q2 min cell is computed from Q1 threshold + 0,01 → "20 000,01 €"
-		await expect(page.getByText(/20.000,01 €/)).toBeVisible();
+		await expect(annualTable.getByText(/20.000,01 €/)).toBeVisible();
 	});
 
 	test("step 4 - non-crescent thresholds trigger recap alert with anchors (S3)", async ({
