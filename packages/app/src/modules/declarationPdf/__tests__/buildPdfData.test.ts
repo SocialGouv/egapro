@@ -302,5 +302,12 @@ describe("buildPdfData", () => {
 		// step5Categories still empty because mapToEmployeeCategoryRows is mocked to return []
 		expect(result.step5Categories).toEqual([]);
 		expect(result.companyName).toBe("Test Corp");
+		expect(result.step4Categories).toHaveLength(8);
+		expect(result.step4Categories[0]).toMatchObject({
+			name: "annual:1er quartile",
+			womenCount: undefined,
+			menCount: undefined,
+			womenValue: undefined,
+		});
 	});
 });

@@ -82,6 +82,7 @@ function buildQuartileCategories(d: Declaration): QuartileCategory[] {
 		d.indicatorFAnnualThreshold1,
 		d.indicatorFAnnualThreshold2,
 		d.indicatorFAnnualThreshold3,
+		null, // Q4 has no threshold (column removed in migration #3352)
 	];
 	const annualWomen = [
 		d.indicatorFAnnualWomen1,
@@ -100,6 +101,7 @@ function buildQuartileCategories(d: Declaration): QuartileCategory[] {
 		d.indicatorFHourlyThreshold1,
 		d.indicatorFHourlyThreshold2,
 		d.indicatorFHourlyThreshold3,
+		null, // Q4 has no threshold (column removed in migration #3352)
 	];
 	const hourlyWomen = [
 		d.indicatorFHourlyWomen1,
