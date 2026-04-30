@@ -232,6 +232,22 @@ test.describe("Declaration workflow", () => {
 		page,
 	}) => {
 		await goToStep(page, 4);
+
+		// The test SIREN has GIP-MDS prefilled thresholds — clear them so the
+		// "all empty → required errors" path is exercised.
+		for (const ordinal of ["1er", "2e", "3e"] as const) {
+			await page
+				.getByRole("textbox", {
+					name: `Seuil maximum ${ordinal} quartile annuel`,
+				})
+				.fill("");
+			await page
+				.getByRole("textbox", {
+					name: `Seuil maximum ${ordinal} quartile horaire`,
+				})
+				.fill("");
+		}
+
 		await page.getByRole("button", { name: "Suivant" }).click();
 
 		// At least one error message per missing threshold
