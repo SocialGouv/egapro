@@ -22,6 +22,11 @@
 
 set -euo pipefail
 
+# Mac compat: GNU stat uses `-c '%Y'`; BSD/macOS stat uses `-f '%m'`.
+file_mtime() {
+    stat -c '%Y' "$1" 2>/dev/null || stat -f '%m' "$1" 2>/dev/null || echo 0
+}
+
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <epic_N1> [<epic_N2> ...]" >&2
     exit 1
@@ -92,7 +97,7 @@ for EPIC_N in "$@"; do
         if [ -d "$LOG_DIR" ]; then
             for log in "$LOG_DIR"/*-${N}.log; do
                 [ -f "$log" ] || continue
-                MTIME=$(stat -c '%Y' "$log")
+                MTIME=$(file_mtime "$log")
                 if [ "$MTIME" -gt "$LATEST_MTIME" ]; then
                     LATEST_MTIME=$MTIME
                     LATEST_LOG=$log

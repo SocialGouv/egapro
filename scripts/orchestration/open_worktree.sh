@@ -18,6 +18,12 @@
 
 set -euo pipefail
 
+# Mac compat: `declare -A` needs bash 4+ (macOS ships bash 3.2 by default).
+if [ "${BASH_VERSINFO[0]:-0}" -lt 4 ]; then
+    echo "ERROR: this script requires bash 4+ (you have ${BASH_VERSION:-unknown}). On macOS: brew install bash" >&2
+    exit 1
+fi
+
 if [ $# -lt 1 ]; then
     echo "Usage: $0 <pr_number>" >&2
     exit 2
@@ -78,8 +84,10 @@ if [ -z "$EPIC" ]; then
 fi
 
 # 3. Compute path
-WT_PATH="${REPO_ROOT}/../egapro-epic${EPIC}-t${TICKET}"
-WT_PATH=$(realpath -m "$WT_PATH")
+# Mac compat: GNU `realpath -m` (canonicalize a path that may not exist yet)
+# is not available on macOS without coreutils. Resolve REPO_ROOT/.. (which
+# always exists because REPO_ROOT does) then append the worktree dir name.
+WT_PATH="$(cd "${REPO_ROOT}/.." && pwd)/egapro-epic${EPIC}-t${TICKET}"
 
 # 4. Pick free worktree index
 declare -A INDEX_BUSY

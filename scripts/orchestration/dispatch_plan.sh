@@ -45,6 +45,12 @@
 
 set -euo pipefail
 
+# Mac compat: `declare -A` needs bash 4+ (macOS ships bash 3.2 by default).
+if [ "${BASH_VERSINFO[0]:-0}" -lt 4 ]; then
+    echo "ERROR: this script requires bash 4+ (you have ${BASH_VERSION:-unknown}). On macOS: brew install bash" >&2
+    exit 1
+fi
+
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <epic_N1> [<epic_N2> ...]" >&2
     exit 1

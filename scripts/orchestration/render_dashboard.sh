@@ -16,6 +16,11 @@
 
 set -euo pipefail
 
+# Mac compat: GNU stat uses `-c '%Y'`; BSD/macOS stat uses `-f '%m'`.
+file_mtime() {
+    stat -c '%Y' "$1" 2>/dev/null || stat -f '%m' "$1" 2>/dev/null || echo 0
+}
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
@@ -66,7 +71,7 @@ for log in "$LOG_DIR"/*.log; do
         COMPLETE|STUCK|ESCALATED) continue ;;
     esac
 
-    MTIME=$(stat -c '%Y' "$log")
+    MTIME=$(file_mtime "$log")
     INACTIVITY=$((NOW_TS - MTIME))
 
     ACTIVE+=("${AGENT_ID}|${INACTIVITY}|${log}")

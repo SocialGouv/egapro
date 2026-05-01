@@ -37,6 +37,23 @@
 
 set -euo pipefail
 
+# ---- Mac compat ----
+# `declare -A` (associative arrays) needs bash 4+. macOS ships bash 3.2 by
+# default; users must install a modern bash via Homebrew (`brew install bash`).
+if [ "${BASH_VERSINFO[0]:-0}" -lt 4 ]; then
+    echo "ERROR: this script requires bash 4+ (you have ${BASH_VERSION:-unknown})." >&2
+    echo "  On macOS: brew install bash    (then restart the shell so /opt/homebrew/bin/bash is first in PATH)" >&2
+    exit 1
+fi
+
+# `timeout` is GNU coreutils on Linux; on macOS install `coreutils` via
+# Homebrew which exposes it as `gtimeout`. Resolve once, fail loud if neither.
+TIMEOUT_BIN="$(command -v timeout 2>/dev/null || command -v gtimeout 2>/dev/null || true)"
+if [ -z "$TIMEOUT_BIN" ]; then
+    echo "ERROR: 'timeout' not found. On macOS: brew install coreutils    (provides gtimeout)" >&2
+    exit 1
+fi
+
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <epic_N1> [<epic_N2> ...]" >&2
     exit 1
@@ -208,7 +225,7 @@ Ton dernier message DOIT être uniquement ce JSON (rien d'autre, pas de prose)."
     # The latter only makes the flag *available* for an interactive session;
     # in --print mode it has no effect, so the sub-agent hits unresolved
     # permission prompts on every gh / bash / pnpm call and aborts.
-    timeout "$AGENT_TIMEOUT" claude \
+    "$TIMEOUT_BIN" "$AGENT_TIMEOUT" claude \
         --agent "$AGENT" \
         --model "$MODEL" \
         --print \

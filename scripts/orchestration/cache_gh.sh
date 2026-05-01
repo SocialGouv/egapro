@@ -43,9 +43,15 @@ mkdir -p "$CACHE_DIR"
 
 CACHE_FILE="${CACHE_DIR}/${KEY}.json"
 
+# Mac compat: GNU stat uses `-c '%Y'`; BSD/macOS stat uses `-f '%m'`.
+# Try both so the script works on Linux and macOS without coreutils.
+file_mtime() {
+    stat -c '%Y' "$1" 2>/dev/null || stat -f '%m' "$1" 2>/dev/null || echo 0
+}
+
 # Cache hit?
 if [ -f "$CACHE_FILE" ]; then
-    MTIME=$(stat -c '%Y' "$CACHE_FILE" 2>/dev/null || echo 0)
+    MTIME=$(file_mtime "$CACHE_FILE")
     NOW=$(date +%s)
     AGE=$((NOW - MTIME))
     if [ "$AGE" -lt "$TTL" ]; then
