@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # open_worktree.sh <pr_number>
 #
-# Recreate the egapro worktree for a given PR — used after the pipeline
-# has auto-cleaned the worktree (when the ticket transitioned to In review
-# or Done) but the user wants to test the PR locally.
+# Recreate the egapro worktree for a given PR — used after /implement (mode
+# epic) has auto-cleaned the worktree (when the ticket transitioned to In
+# review or Done) but the user wants to test the PR locally.
 #
 # Workflow:
 # 1. Resolve PR head branch + linked issue from GitHub
 # 2. Resolve the issue's parent epic
-# 3. Path = ../egapro-epic<EPIC>-t<TICKET>  (same convention as /epic)
+# 3. Path = ../egapro-epic<EPIC>-t<TICKET>  (same convention as /implement mode epic)
 # 4. Pick first free worktree index in [0, EPIC_MAX_PARALLEL[
 # 5. git worktree add (or reuse if already present)
 # 6. setup-worktree.sh <index>  (pnpm install + docker stack + migrations)

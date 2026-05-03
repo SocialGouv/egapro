@@ -22,9 +22,14 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
 0. **Logger START** — `bash scripts/orchestration/log_event.sh code-dev-<N> START "worktree=<path> base=<base-branch>"`. Voir la section « Logging events » plus bas pour la liste complète.
 
-1. **Vérifier le format du ticket** — lire le body. S'il ne respecte pas `rules/ticket-spec-format.md` (fichiers manquants, pas de scénarios, pas de critères), remettre le ticket en **To Do** avec commentaire listant les manques, retourner `{"status":"refacto","ticket":<N>,"reason":"ticket spec format invalid"}`. **Ne pas improviser.**
+1. **Vérifier le format du ticket** — lire le body **et** les commentaires. La source du spec dépend du type d'issue :
+   - **Type Feature (sub-issue d'epic)** → spec dans le **body** au format `rules/ticket-spec-format.md`
+   - **Type Task** → body = description originale de l'utilisateur (intacte) ; spec dans le **commentaire `## Analyse architecte`** (le plus récent si plusieurs)
+   - **Type Bug** → body = rapport de bug de l'utilisateur ; spec dans le **commentaire `## Analyse du bug`** (posté par `bug-analyst`)
 
-2. **Si bug** (label `bug`) — appliquer `rules/bug-fix-workflow.md` : test qui échoue **avant** le fix.
+   Si le spec attendu est manquant (pas de body conforme pour Feature, pas de commentaire `## Analyse architecte` pour Task, pas de `## Analyse du bug` pour Bug) → remettre le ticket en **To Do** avec un commentaire listant les manques, et retourner `{"status":"refacto","ticket":<N>,"reason":"spec missing — run /analyse first"}`. **Ne pas improviser.**
+
+2. **Si bug** (issue type Bug ou label `bug`) — appliquer `rules/bug-fix-workflow.md` : test qui échoue **avant** le fix. Pour les bugs de type "visual mismatch Figma ↔ app", le test n'est pas un test automatisé classique (cf. section visual mismatch de `bug-fix-workflow.md`) — la validation est la relecture structurelle Figma.
 
 3. **Status ticket** → **In progress** via `bash scripts/orchestration/set_ticket_status.sh <N> "In progress"`.
 

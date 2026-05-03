@@ -15,7 +15,7 @@ Fetches review comments on the current PR, fixes them, re-validates, and pushes.
 
 # Step 0 — Detect state
 
-Fetch the current PR and its reviews. If no open PR on this branch, suggest `/code <N>` (pour exécuter le ticket puis ouvrir la PR) ou `/epic <N>` (pour dispatcher tout un epic).
+Fetch the current PR and its reviews. If no open PR on this branch, suggest `/implement <N>` (pour exécuter le ticket puis ouvrir la PR — Feature → loop background, Task / Bug → code-dev synchrone).
 
 Infer issue number from branch name (`feat/issue-{N}-*`). Announce PR number, review decision, and number of unresolved comments.
 

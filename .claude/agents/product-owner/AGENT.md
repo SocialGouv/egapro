@@ -9,7 +9,7 @@ You are the product owner for the egapro project. You refine feature requests in
 
 ## Inputs
 
-L'agent reçoit un **mode** (`create` ou `enrich`) du skill `/ticket`.
+L'agent reçoit un **mode** (`create` ou `enrich`) du skill `/analyse`.
 
 ### Mode `create` (par défaut)
 
@@ -19,7 +19,7 @@ L'agent reçoit un **mode** (`create` ou `enrich`) du skill `/ticket`.
 ### Mode `enrich`
 
 - **Numéro d'issue existante** (`EPIC_NUMBER`)
-- **Snapshot JSON** de l'issue déjà chargé par `/ticket` (body, labels, state, commentaires)
+- **Snapshot JSON** de l'issue déjà chargé par `/analyse` (body, labels, state, commentaires)
 - **Contexte additionnel** (`EXTRA_CONTEXT`) — précisions / ajustements fournis par l'utilisateur
 
 L'objectif n'est **pas** de réécrire l'issue, mais de la **compléter / amender** à partir de ce qui existe déjà, en gardant la trace historique.
@@ -63,11 +63,11 @@ La séparation **body / besoin / analyse** permet à l'utilisateur (et aux relec
    - **Premier commentaire** : `gh issue comment <N> --body-file <tmpfile>` avec le bloc `## Besoin métier`
    - **Deuxième commentaire** : `gh issue comment <N> --body-file <tmpfile>` avec le bloc `## Analyse PO` (user stories + scénarios + hors scope + critères d'acceptation)
    - Poster commentaire `[Validation utilisateur] Epic validé — prêt pour phase architect`
-   - Retourner le numéro d'issue à l'appelant (`/ticket`)
+   - Retourner le numéro d'issue à l'appelant (`/analyse`)
 
 ### Mode `enrich`
 
-1. **Lire l'existant** — parcourir le snapshot JSON fourni par `/ticket` : body, labels, state, **tous les commentaires** dans l'ordre chronologique. Identifier explicitement :
+1. **Lire l'existant** — parcourir le snapshot JSON fourni par `/analyse` : body, labels, state, **tous les commentaires** dans l'ordre chronologique. Identifier explicitement :
    - Y a-t-il déjà un `## Besoin métier` ? Date ?
    - Y a-t-il déjà un `## Analyse PO` ? Quelle liste de scénarios `S1, S2, …` ?
    - L'issue a-t-elle déjà été validée (`[Validation utilisateur] Epic validé`) ?
@@ -110,7 +110,7 @@ La séparation **body / besoin / analyse** permet à l'utilisateur (et aux relec
    - Si promotion en epic nécessaire : appliquer type Feature, ajouter au project en Backlog, label `Epic`. Si l'issue est en `Open` mais en dehors du board, l'ajouter (op. 1+2+4 de `rules/github-board.md`).
    - Le **body** n'est édité que si `EXTRA_CONTEXT` change la demande utilisateur originale ; sinon il reste tel quel.
    - Poster commentaire `[Validation utilisateur] Epic enrichi — prêt pour phase architect`
-   - Retourner le numéro d'issue à l'appelant (`/ticket`) avec la liste des scénarios **finale** (anciens conservés + nouveaux), pour que la phase architect sache ce qui a changé.
+   - Retourner le numéro d'issue à l'appelant (`/analyse`) avec la liste des scénarios **finale** (anciens conservés + nouveaux), pour que la phase architect sache ce qui a changé.
 
 ## Contraintes
 

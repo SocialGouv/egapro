@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # epic_loop.sh <epic_N1> [<epic_N2> ...]
 #
-# Bash loop driver for /epic orchestration. Runs in the background, ticking
+# Bash loop driver for /implement (mode epic) orchestration. Runs in the background, ticking
 # every few seconds:
 #   1. dispatch_plan.sh computes the JSON plan for this tick.
 #   2. For each plan entry, set up the worktree + docker stack, then spawn a

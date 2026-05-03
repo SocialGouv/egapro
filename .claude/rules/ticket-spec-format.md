@@ -1,10 +1,16 @@
 # Ticket Spec Format
 
-> **Used by**: `architect` (écrit les tickets au format), `code-dev` (valide le format avant exécution, retourne en To Do si manquant), skill `/code` (préconditions).
+> **Used by**: `architect` (écrit le spec — body en mode epic-*, commentaire `## Analyse architecte` en mode task), `bug-analyst` (commentaire `## Analyse du bug` qui sert de spec implicite pour les bugs), `code-dev` (valide le format avant exécution, retourne en To Do si manquant), skill `/implement` (préconditions).
 
-Format standardisé des tickets **code** produits par l'agent `architect` et consommés par `code-dev` (Sonnet par défaut, Opus si label `complexe`).
+Format standardisé des tickets **code** consommés par `code-dev` (Sonnet par défaut, Opus si label `complexe`). Selon le type d'issue, l'emplacement du spec change :
 
-Un ticket bien formaté permet à un dev Sonnet d'exécuter la tâche sans ambiguïté ni questions supplémentaires. Si un ticket ne respecte pas ce format, `code-dev` doit retourner le ticket en `To Do` avec un commentaire listant les manques, plutôt qu'improviser.
+| Type d'issue | Source du spec |
+|---|---|
+| **Feature** (sub-issue d'epic) | **Body** de la sub-issue, écrit par l'architect en mode epic-* |
+| **Task** | Body = description originale (intacte) + commentaire **`## Analyse architecte`** posté par l'architect en mode task |
+| **Bug** | Body = rapport bug (intact) + commentaire **`## Analyse du bug`** posté par `bug-analyst` (root cause + fix proposé, pas un spec complet — le protocole `bug-fix-workflow.md` prend le relais) |
+
+Un spec bien formaté permet à un dev Sonnet d'exécuter la tâche sans ambiguïté ni questions supplémentaires. Si le spec attendu (selon le type) est manquant, `code-dev` doit retourner le ticket en `To Do` avec un commentaire listant les manques, plutôt qu'improviser.
 
 ---
 

@@ -1,11 +1,11 @@
 ---
 name: open
-description: "Recreate a worktree for a given PR to test it locally — useful after /epic auto-cleaned the worktree. Usage: /open <PR>"
+description: "Recreate a worktree for a given PR to test it locally — useful after /implement auto-cleaned the worktree. Usage: /open <PR>"
 ---
 
 # /open <PR>
 
-Recreate the egapro worktree associated with a PR — typically one that was auto-cleaned by `/epic` after the sub-agent returned `validated`. Use this to **test the PR's code locally** : run the dev server, exercise the feature, debug issues before merging.
+Recreate the egapro worktree associated with a PR — typically one that was auto-cleaned by `/implement` after the sub-agent returned `validated`. Use this to **test the PR's code locally** : run the dev server, exercise the feature, debug issues before merging.
 
 ## Arguments
 
@@ -53,7 +53,7 @@ Le script :
 ## Limitations
 
 - Si tous les slots `[0, EPIC_MAX_PARALLEL[` sont occupés (par d'autres worktrees actifs), le script retourne une erreur. Libérer un slot via `git worktree remove ../egapro-epic*-tXXX` ou augmenter `EPIC_MAX_PARALLEL`.
-- Si la PR a été créée hors de la pipeline `/epic` (pas de ticket lié, pas d'epic parent), le script échoue. Cas limite — créer le worktree à la main dans ce cas.
+- Si la PR a été créée hors de la pipeline `/implement` (pas de ticket lié, pas d'epic parent), le script échoue. Cas limite — créer le worktree à la main dans ce cas.
 
 ---
 

@@ -53,7 +53,7 @@ React/TypeScript rules, DSFR, accessibility, tests, environment variables, scrip
 
 Never create a git commit, unless the user explicitly requests it.
 
-**Exception** : les agents invoqués par les skills `/ticket`, `/epic`, `/code` (principalement `code-dev`) sont **autorisés à commit + push sans demander**. L'invocation de la skill est la permission explicite. Ils restent liés par les autres règles (pas de `Co-Authored-By`, pas de `--no-verify`, pas de `--no-gpg-sign`, pas de secrets commités).
+**Exception** : les agents invoqués par les skills `/analyse` et `/implement` (principalement `code-dev`) sont **autorisés à commit + push sans demander**. L'invocation de la skill est la permission explicite. Ils restent liés par les autres règles (pas de `Co-Authored-By`, pas de `--no-verify`, pas de `--no-gpg-sign`, pas de secrets commités).
 
 ## Git hygiene
 
@@ -114,7 +114,7 @@ pnpm db:studio            # opens Drizzle Studio
 
 ## Automatic quality gates
 
-Quality checks run **automatically** après chaque itération de code — pas de commande à lancer. Dans la pipeline `/epic` + `/code`, ils sont invoqués par `code-dev` step 6. Hors pipeline (hotfix, edit direct), délégués par l'agent principal. Voir `.claude/rules/automation.md`.
+Quality checks run **automatically** après chaque itération de code — pas de commande à lancer. Dans la pipeline `/implement`, ils sont invoqués par `code-dev` step 6. Hors pipeline (hotfix, edit direct), délégués par l'agent principal. Voir `.claude/rules/automation.md`.
 
 | Gate | When | How |
 |---|---|---|
@@ -122,8 +122,8 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | **Structure** | After every task | `structural-auditor` agent (17 rules: forms, schemas, DRY, imports, no-comments…) |
 | **RGAA** | After every task | `rgaa-auditor` agent on modified `.tsx` files |
 | **Security** | After every task | `security-auditor` agent on modified server files |
-| **Functional** | Inside `/code` + `/epic` | `functional-validator` rejoue les scénarios PO |
-| **Visual** | Inside `/code` (UI tickets) | `code-dev` compare lui-même le rendu à Figma via le MCP `figma-dev` (voir `rules/figma-workflow.md`) |
+| **Functional** | Inside `/implement` | `functional-validator` rejoue les scénarios PO |
+| **Visual** | Inside `/implement` (UI tickets) | `code-dev` compare lui-même le rendu à Figma via le MCP `figma-dev` (voir `rules/figma-workflow.md`) |
 | **Domain layer** | While writing | Inline rules (also enforced by hooks + structural-auditor) |
 | **PR review** | When on a PR branch | `check-pr-reviews.sh` hook at session start + `/review` skill |
 
@@ -132,31 +132,35 @@ Quality checks run **automatically** après chaque itération de code — pas de
 ### Pipeline principal : conception → exécution
 
 ```
-/ticket <feature + Figma>    →   /epic <N>        (ou /code <N>)
-──────────────────────────       ────────────────
- product-owner  (Opus)            code-dev  (Sonnet / Opus si "complexe")
- architect      (Opus)              ├── validator
-                                    ├── structural-auditor
- sortie : epic GitHub               ├── rgaa-auditor
- + N sous-issues formatées          ├── security-auditor
- (URL Figma citée dans              └── functional-validator
-  chaque ticket UI)                sortie : PR draft → ready, ticket "In review"
-                                   (fidélité Figma vérifiée par code-dev lui-même
-                                    via le MCP figma-dev)
+/analyse [<issue#>|<description>]    →    /implement <issue#>
+──────────────────────────────────         ───────────────────
+ Détection mode selon issue type            Détection mode selon issue type
+ ou prompt :                                 :
+   Feature → product-owner + architect       Feature → epic_loop.sh background
+                                            (parallèle, plusieurs sub-tickets)
+   Task    → architect mode task            Task → code-dev synchrone foreground
+   Bug     → bug-analyst                    Bug  → code-dev synchrone foreground
+                                                   (avec bug-fix-workflow)
+ Sortie :                                   Sortie :
+   epic = epic GitHub + N sub-issues          epic = N PRs squash-mergées dans
+   task = ## Analyse architecte sur l'issue          epic/<N>, PR finale → alpha
+   bug  = ## Analyse du bug sur l'issue       task = PR sur alpha, ticket "In review"
+                                              bug  = PR sur alpha, ticket "In review"
 ```
 
 ### Agents (`.claude/agents/`)
 
-**Pipeline conception** (Opus, invoqués par `/ticket`) :
+**Pipeline conception** (Opus, invoqués par `/analyse`) :
 | Agent | Rôle |
 |---|---|
-| `product-owner` | Refine le besoin, rédige les scénarios PO sur l'epic |
-| `architect` | Lit le code, produit N tickets au format `rules/ticket-spec-format.md` (URL Figma citée par node dans chaque ticket UI) |
+| `product-owner` | Refine le besoin, rédige les scénarios PO sur l'epic (mode epic uniquement) |
+| `architect` | 3 modes : `epic-create` / `epic-enrich` (sub-issues d'un epic), `task` (commentaire `## Analyse architecte` sur une task isolée) |
+| `bug-analyst` | Reproduit + diagnostique un bug (3 sous-stratégies : local / env / Figma diff). Poste `## Analyse du bug`. |
 
-**Pipeline exécution** (invoqués par `/epic` + `/code`) :
+**Pipeline exécution** (invoqués par `/implement`) :
 | Agent | Rôle |
 |---|---|
-| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Pour les tickets UI, vérifie lui-même la fidélité Figma via le MCP `figma-dev`. |
+| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature) ou le commentaire d'analyse (Task / Bug). Pour les tickets UI, vérifie lui-même la fidélité Figma via le MCP `figma-dev`. |
 | `functional-validator` | Rejoue les scénarios PO dans le dev server |
 
 **Quality gates** (read-only, appelés par `code-dev` ou hors pipeline) :
@@ -171,18 +175,17 @@ Quality checks run **automatically** après chaque itération de code — pas de
 
 | Skill | Purpose |
 |---|---|
-| `/ticket <description + Figma URL>` ou `/ticket <issue#>` | Conception pipeline : PO → architect → epic GitHub + N sous-issues. Accepte aussi une issue existante à enrichir. |
-| `/epic <N1> [<N2> ...]` | Lance le bash loop driver `scripts/orchestration/epic_loop.sh` en background sur les epics donnés. Main context libre. |
-| `/code <N>` | Exécute un seul ticket via `code-dev` (debug, fix). Parse le retour JSON strict, ré-invoque en Opus si `needs_opus_escalation`. |
+| `/analyse [<issue#>] [<description>]` | **Phase conception**. Détecte le mode (epic / task / bug) selon le type d'issue ou le prompt et invoque les agents appropriés (PO + architect, architect-task, ou bug-analyst). Si ambigu → demande à l'utilisateur. |
+| `/implement <issue#>` | **Phase exécution**. Détecte le mode selon le type d'issue : Feature → loop driver background ; Task / Bug → `code-dev` synchrone foreground. Vérifie qu'une analyse a été faite avant de dispatcher (sinon propose `/analyse`). |
 | `/report [<N> ...]` | Dashboard live des agents actifs + état des sous-tickets de l'epic. Pure bash, zéro LLM. |
-| `/open <PR>` | Recrée un worktree local pour une PR (typique après auto-cleanup de `/epic`) — utile pour tester la PR avant merge. |
+| `/open <PR>` | Recrée un worktree local pour une PR (typique après auto-cleanup de `/implement`) — utile pour tester la PR avant merge. |
 | `/review` | Traite les commentaires de revue posés après passage en `In review` (human + bots) |
 
-Workflow standard : `/ticket "..."` pour concevoir, puis `/epic <N>` pour exécuter en parallèle (suivi via `/report`). `/review` prend le relais quand les humains commentent les PR sorties de `In review`.
+Workflow standard : `/analyse <issue>` pour la conception (modes auto-détectés), puis `/implement <issue>` pour l'exécution. `/review` prend le relais quand les humains commentent les PR sorties de `In review`.
 
 ### Orchestration (`scripts/orchestration/`)
 
-Tous les scripts shell portent leur propre header `--help`-friendly. La pipeline `/epic` est entièrement bash :
+Tous les scripts shell portent leur propre header `--help`-friendly. Le mode epic de `/implement` est entièrement bash :
 
 | Script | Rôle |
 |---|---|

@@ -13,7 +13,7 @@ Fix the underlying issue instead. If a rule is genuinely wrong for the entire pr
 
 ## No comments by default
 
-Les agents dev (`code-dev`, et plus largement tout agent qui écrit du code via la pipeline `/ticket` → `/epic` → `/code`) **ne doivent pas ajouter de commentaires** dans le code produit. Aucun :
+Les agents dev (`code-dev`, et plus largement tout agent qui écrit du code via la pipeline `/analyse` → `/implement`) **ne doivent pas ajouter de commentaires** dans le code produit. Aucun :
 
 - Commentaire descriptif (`// fetch user`, `// loop over items`) — le nom de fonction/variable doit suffire
 - JSDoc ou docstring multi-lignes

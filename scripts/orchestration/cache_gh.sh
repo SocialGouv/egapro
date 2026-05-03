@@ -5,7 +5,7 @@
 # Returns cached output if cache file is younger than TTL, otherwise runs the
 # command, stores the output, and returns it.
 #
-# Used to dampen GitHub API rate limits during /epic orchestration: the same
+# Used to dampen GitHub API rate limits during /implement (mode epic) orchestration: the same
 # `gh issue view <epic> ...` is called by both dispatch_plan.sh and the loop
 # driver, sometimes several times per tick. With TTL=300s on the bulk
 # sub-issues query, the API cost drops by ~20×.
