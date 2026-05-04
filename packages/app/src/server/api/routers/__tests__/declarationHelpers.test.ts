@@ -317,7 +317,11 @@ describe("deleteJobAndEmployeeCategories", () => {
 describe("mapToStepData", () => {
 	// All raw declaration fields default to null. The helper must coerce them
 	// to "" for step2/step3 string values and undefined for step4 numerics.
-	const emptyDeclaration = {
+	// `Record<string, unknown>` keeps the type spreadable while `as never` at
+	// call sites lets us focus the test on the mapping rather than building a
+	// full DeclarationRow.
+	type IndicatorRecord = Record<string, unknown>;
+	const emptyDeclaration: IndicatorRecord = {
 		// only the indicator fields touched by mapToStepData need to be present;
 		// `as never` lets us focus the test on the mapping rather than building a
 		// full DeclarationRow shape.
@@ -363,10 +367,10 @@ describe("mapToStepData", () => {
 		indicatorFHourlyThreshold4: null,
 		indicatorFHourlyWomen4: null,
 		indicatorFHourlyMen4: null,
-	} as never;
+	};
 
 	it("coerces null indicator values to empty strings for step2 / step3", () => {
-		const { step2Data, step3Data } = mapToStepData(emptyDeclaration);
+		const { step2Data, step3Data } = mapToStepData(emptyDeclaration as never);
 
 		expect(step2Data).toEqual({
 			indicatorAAnnualWomen: "",
@@ -393,7 +397,7 @@ describe("mapToStepData", () => {
 	});
 
 	it("coerces null F-indicator quartiles to empty threshold + undefined women/men", () => {
-		const { step4Data } = mapToStepData(emptyDeclaration);
+		const { step4Data } = mapToStepData(emptyDeclaration as never);
 
 		expect(step4Data.annual).toHaveLength(4);
 		expect(step4Data.hourly).toHaveLength(4);
@@ -407,7 +411,7 @@ describe("mapToStepData", () => {
 	});
 
 	it("preserves provided indicator values verbatim", () => {
-		const populated = {
+		const populated: IndicatorRecord = {
 			...emptyDeclaration,
 			indicatorAAnnualWomen: "12.5",
 			indicatorAAnnualMen: "10.0",
@@ -419,9 +423,11 @@ describe("mapToStepData", () => {
 			indicatorFHourlyThreshold4: "80000",
 			indicatorFHourlyWomen4: 1,
 			indicatorFHourlyMen4: 2,
-		} as never;
+		};
 
-		const { step2Data, step3Data, step4Data } = mapToStepData(populated);
+		const { step2Data, step3Data, step4Data } = mapToStepData(
+			populated as never,
+		);
 
 		expect(step2Data.indicatorAAnnualWomen).toBe("12.5");
 		expect(step2Data.indicatorAAnnualMen).toBe("10.0");
