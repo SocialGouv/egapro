@@ -3,8 +3,22 @@
 	flex-direction: column;
 }
 
+/* "Informations déclarant / entreprise / calcul" — Marianne Bold 16/24
+   per Figma. We bypass `fr-h6` here because DSFR sets it to
+   font-size: 1.125rem !important. */
 .infoTitle {
 	margin: 0 0 1rem;
+	font-family: Marianne, arial, sans-serif;
+	font-size: 1rem;
+	line-height: 1.5rem;
+	font-weight: 700;
+	color: var(--text-title-grey);
+}
+
+/* "Indicateurs pour l'ensemble" / "Indicateurs par catégorie" h2 —
+   Marianne Bold 18/28 per Figma. fr-h6 already covers this size. */
+.sectionHeading {
+	line-height: 1.75rem;
 }
 
 .infoList {

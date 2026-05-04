@@ -49,7 +49,7 @@ function InfoSection({ title, items }: { title: string; items: InfoItem[] }) {
 	if (items.length === 0) return null;
 	return (
 		<section className={styles.infoSection}>
-			<h2 className={`fr-h6 ${styles.infoTitle}`}>{title}</h2>
+			<h2 className={styles.infoTitle}>{title}</h2>
 			<dl className={styles.infoList}>
 				{items.map((item) => (
 					<div className={styles.infoRow} key={item.label}>
@@ -122,10 +122,10 @@ export function RecapitulatifPage({
 
 	return (
 		<div className={common.flexColumnGap2}>
-			{/* Title row */}
+			{/* Title row — Marianne Bold 24/32 per Figma (DSFR fr-h4) */}
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 				<div className="fr-col">
-					<h1 className="fr-h2 fr-mb-0">
+					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {declarationYear}
 					</h1>
 				</div>
@@ -150,23 +150,25 @@ export function RecapitulatifPage({
 			/>
 
 			{/* Indicators for all employees */}
-			<section className={styles.indicatorsSection}>
-				<h2 className="fr-h5 fr-mb-2w">
+			<section>
+				<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
 					Indicateurs pour l&apos;ensemble de vos salariés
 				</h2>
-				<IndicatorTables
-					declarationYear={declarationYear}
-					step2Data={step2Data}
-					step3Data={step3Data}
-					step4Data={step4Data}
-					totalMen={totalMen}
-					totalWomen={totalWomen}
-				/>
+				<div className={styles.indicatorsSection}>
+					<IndicatorTables
+						declarationYear={declarationYear}
+						step2Data={step2Data}
+						step3Data={step3Data}
+						step4Data={step4Data}
+						totalMen={totalMen}
+						totalWomen={totalWomen}
+					/>
+				</div>
 			</section>
 
 			{/* Indicators by employee category */}
-			<section className={styles.indicatorsSection}>
-				<h2 className="fr-h5 fr-mb-2w">
+			<section>
+				<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
 					Indicateurs par catégorie de salariés
 				</h2>
 				{sourceLabel && (
@@ -177,18 +179,20 @@ export function RecapitulatifPage({
 						<strong>{sourceLabel}</strong>
 					</p>
 				)}
-				{indexedCategories.length > 0 ? (
-					indexedCategories.map((cat) => (
-						<CategoryRecapTable
-							category={cat}
-							declarationYear={declarationYear}
-							index={cat.position}
-							key={cat.position}
-						/>
-					))
-				) : (
-					<p className={styles.emptyNotice}>Aucune donnée renseignée.</p>
-				)}
+				<div className={styles.indicatorsSection}>
+					{indexedCategories.length > 0 ? (
+						indexedCategories.map((cat) => (
+							<CategoryRecapTable
+								category={cat}
+								declarationYear={declarationYear}
+								index={cat.position}
+								key={cat.position}
+							/>
+						))
+					) : (
+						<p className={styles.emptyNotice}>Aucune donnée renseignée.</p>
+					)}
+				</div>
 			</section>
 
 			{/* Primary action — return to Mon Espace */}

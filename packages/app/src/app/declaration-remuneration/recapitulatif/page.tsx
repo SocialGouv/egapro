@@ -84,7 +84,7 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 				</Link>
 			</div>
 
-			<main className="fr-container fr-pb-7w fr-pt-3w" id="content">
+			<main className="fr-container fr-pb-7w fr-pt-7w" id="content">
 				<div className="fr-grid-row fr-grid-row--center">
 					<div className="fr-col-12 fr-col-lg-8">
 						<RecapitulatifPage
