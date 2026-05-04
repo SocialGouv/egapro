@@ -1,10 +1,10 @@
-# GitHub Artefact Hygiene
+# Git Artefact Hygiene
 
-> **Used by**: `product-owner`, `architect`, `bug-analyst`, `code-dev` — tout agent qui poste sur GitHub (issue body/title, PR body/title, commentaires, commit messages, noms de branches).
+> **Used by**: `product-owner`, `architect`, `bug-analyst`, `code-dev` — tout agent qui poste sur l'hébergeur git du projet (issue body/title, PR/MR body/title, commentaires, threads de review, commit messages, noms de branches). S'applique à GitHub aujourd'hui ; les principes restent valides si le projet migre vers GitLab ou un autre hébergeur.
 
-Le repo **`SocialGouv/egapro` est public** (open-source). Tout artefact GitHub est **immédiatement lisible par n'importe qui**, indexé par les moteurs de recherche, et mirroré sur les forks/clones. Une fois posté, c'est très difficile à enlever proprement (l'historique Git et l'indexation persistent même après edit/delete).
+Le repo **`SocialGouv/egapro` est public** (open-source). Tout artefact posté sur l'hébergeur git est **immédiatement lisible par n'importe qui**, indexé par les moteurs de recherche, et mirroré sur les forks/clones. Une fois posté, c'est très difficile à enlever proprement (l'historique Git et l'indexation persistent même après edit/delete).
 
-**Avant de poster un artefact GitHub**, scrubber pour toute information sensible.
+**Avant de poster un artefact**, scrubber pour toute information sensible.
 
 ---
 

@@ -70,7 +70,7 @@ Never create a git commit, unless the user explicitly requests it.
 
 **Hard rule — secrets/tokens** : zéro paste, jamais. GitHub tokens (`ghp_`, `github_pat_`), clés LLM (`sk-ant-`, `sk-proj-`, `sk-`), AWS/GCP keys, JWTs (`eyJ...`), connection strings (`postgres://user:pwd@...`), valeurs de `.env`, output de `kubectl get secret`, headers `Authorization: Bearer ...` — tout ça doit être référencé par rôle (« le token stocké dans le secret K8s `gh-app-token` ») et **jamais** par valeur, même tronquée. Un secret leaké est compromis dans les minutes — la rotation est obligatoire, l'édit du commentaire ne suffit pas.
 
-Avant de poster, scrubber aussi : test logins (ex: `test@fia1.fr` → « le compte ProConnect de test »), PII (emails, noms, SIRENs réels), infra interne (namespace K8s avec hash), output `kubectl logs` brut, stack traces révélant Sentry/Datadog. Voir `.claude/rules/github-artefact-hygiene.md` pour la liste exhaustive, les patterns d'auto-detection regex, et la procédure si une fuite a quand même eu lieu. Si tu hésites — demande à l'utilisateur avant de poster.
+Avant de poster, scrubber aussi : test logins (ex: `test@fia1.fr` → « le compte ProConnect de test »), PII (emails, noms, SIRENs réels), infra interne (namespace K8s avec hash), output `kubectl logs` brut, stack traces révélant Sentry/Datadog. Voir `.claude/rules/git-artefact-hygiene.md` pour la liste exhaustive, les patterns d'auto-detection regex, et la procédure si une fuite a quand même eu lieu. Si tu hésites — demande à l'utilisateur avant de poster.
 
 ---
 

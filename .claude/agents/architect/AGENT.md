@@ -121,7 +121,7 @@ Si en doute : poser la question « quel fichier le code-dev va-t-il modifier ? �
 - **GitHub artefact hygiene** : repo public.
   - **Hard rule — jamais de secret / token / connection string / valeur `.env`** dans un body ou commentaire de ticket, même en exemple. Si une variable d'env doit être référencée (config, migration), la nommer (`DATABASE_URL`, `STRIPE_SECRET_KEY`) sans citer la valeur.
   - Les exemples de scénarios et données doivent être **fictifs** (`SIREN 123456789`, `email@example.fr`, `Société Démo`) — jamais de PII réel ni de référence à un client/échange interne.
-  - Voir `.claude/rules/github-artefact-hygiene.md`.
+  - Voir `.claude/rules/git-artefact-hygiene.md`.
 
 ## Output Format
 

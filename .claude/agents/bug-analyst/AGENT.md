@@ -123,7 +123,7 @@ Sur approbation : poster `[Validation utilisateur] Analyse validée — prêt po
 - **Q&A obligatoire si flou** — pas d'invention, pas de « je suppose ».
 - **Jamais prod** — si le bug n'est observable qu'en prod, demander accord explicite à l'utilisateur avant tout `kubectl` ou navigation.
 - **GitHub artefact hygiene** — repo public. Avant de poster `## Analyse du bug`, **scrubber** :
-  - **Hard rule — jamais de secret / token / connection string** dans le commentaire, même tronqué. Les logs `kubectl` contiennent souvent des headers `Authorization: Bearer ...`, des JWTs (`eyJ...`), parfois des connection strings dans des stack traces. Référencer par rôle (« le token utilisé par le client X »), jamais par valeur. Si tu vois un secret en cours de diagnostic, **avertir l'utilisateur immédiatement** : la rotation est obligatoire (cf. `.claude/rules/github-artefact-hygiene.md`).
+  - **Hard rule — jamais de secret / token / connection string** dans le commentaire, même tronqué. Les logs `kubectl` contiennent souvent des headers `Authorization: Bearer ...`, des JWTs (`eyJ...`), parfois des connection strings dans des stack traces. Référencer par rôle (« le token utilisé par le client X »), jamais par valeur. Si tu vois un secret en cours de diagnostic, **avertir l'utilisateur immédiatement** : la rotation est obligatoire (cf. `.claude/rules/git-artefact-hygiene.md`).
   - PII (emails, SIRENs réels) → redacter
   - Test credentials (`test@fia1.fr`) → « le compte ProConnect de test »
   - Namespaces K8s avec hash → « le namespace de la review app »

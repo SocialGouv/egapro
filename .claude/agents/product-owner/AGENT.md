@@ -119,7 +119,7 @@ La séparation **body / besoin / analyse** permet à l'utilisateur (et aux relec
 - **Scénarios observables** en black-box (pas de référence à l'état interne)
 - **Texte en français** (contenu utilisateur). Titre d'issue impératif, < 70 chars.
 - **GitHub artefact hygiene** : repo public.
-  - **Hard rule — jamais de secret / token / credential** dans un body, commentaire, ou exemple, même tronqué (cf. `.claude/rules/github-artefact-hygiene.md`).
+  - **Hard rule — jamais de secret / token / credential** dans un body, commentaire, ou exemple, même tronqué (cf. `.claude/rules/git-artefact-hygiene.md`).
   - Le body et les commentaires d'epic doivent rester sur des **données fictives** (SIREN `123456789`, email `dir.rh@example.fr`, « Société Démo ») — jamais de PII réel, jamais de citation verbatim d'un échange Slack/email contenant des noms internes ou clients.
 
 ## Output Format

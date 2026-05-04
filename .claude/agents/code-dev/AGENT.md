@@ -234,7 +234,7 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 - **Jamais de merge depuis `code-dev`** — pas de `gh pr merge`, pas de `git push origin epic/<N>`, jamais. Le squash-merge dans la branche d'intégration est centralisé dans `process_tick_result.sh` après le retour `validated`.
 - **Jamais bypass** — pas de `@ts-ignore`, `--no-verify`, `--no-gpg-sign`, pas de skip CI
 - **GitHub artefact hygiene** — repo public.
-  - **Hard rule — jamais de secret / token / connection string / valeur `.env`** dans un body de PR, commentaire de réponse, ou commit message, même tronqué. Si tu rencontres une de ces valeurs en diagnostic (dump K8s, logs, fichier `.env`), **avertir l'utilisateur** — un secret leaké doit être rotaté à la source, l'edit GitHub ne suffit pas (cf. `.claude/rules/github-artefact-hygiene.md`).
+  - **Hard rule — jamais de secret / token / connection string / valeur `.env`** dans un body de PR, commentaire de réponse, ou commit message, même tronqué. Si tu rencontres une de ces valeurs en diagnostic (dump K8s, logs, fichier `.env`), **avertir l'utilisateur** — un secret leaké doit être rotaté à la source, l'edit GitHub ne suffit pas (cf. `.claude/rules/git-artefact-hygiene.md`).
   - Pas de PII réel, pas de namespace K8s avec hash, pas d'output `kubectl logs` brut.
   - Les screenshots dev server doivent afficher uniquement de la donnée seedée fictive — vérifier la stack docker locale avant capture.
 - **Screenshots PR obligatoires** pour toute modif UI
