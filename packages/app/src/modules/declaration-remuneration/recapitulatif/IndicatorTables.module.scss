@@ -8,6 +8,11 @@
 	font-variant-numeric: tabular-nums;
 }
 
+.gapNumeric {
+	text-align: left;
+	font-variant-numeric: tabular-nums;
+}
+
 .gapHeaderHint {
 	display: block;
 	font-weight: 400;
@@ -19,8 +24,7 @@
 	display: inline-flex;
 	gap: 0.5rem;
 	align-items: center;
-	justify-content: flex-end;
-	width: 100%;
+	justify-content: flex-start;
 }
 
 .highBadge {

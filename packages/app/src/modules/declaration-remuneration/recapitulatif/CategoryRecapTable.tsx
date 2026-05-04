@@ -85,7 +85,7 @@ export function CategoryRecapTable({
 	return (
 		<section className={styles.section}>
 			<p className={`fr-text--bold fr-mb-2w ${styles.heading}`}>{heading}</p>
-			<div className="fr-table fr-table--no-caption">
+			<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">
 						<div className="fr-table__content">
@@ -134,7 +134,7 @@ export function CategoryRecapTable({
 										<td className={indicatorStyles.numeric}>
 											{formatCurrency(category.annualBaseMen)}
 										</td>
-										<td className={indicatorStyles.numeric}>
+										<td className={indicatorStyles.gapNumeric}>
 											<GapCell gap={annualBaseGap} />
 										</td>
 									</tr>
@@ -148,7 +148,7 @@ export function CategoryRecapTable({
 										<td className={indicatorStyles.numeric}>
 											{formatCurrency(category.annualVariableMen)}
 										</td>
-										<td className={indicatorStyles.numeric}>
+										<td className={indicatorStyles.gapNumeric}>
 											<GapCell gap={annualVarGap} />
 										</td>
 									</tr>
@@ -160,7 +160,7 @@ export function CategoryRecapTable({
 										<td className={indicatorStyles.numeric}>
 											<strong>{formatTotal(annualMenSum, "€")}</strong>
 										</td>
-										<td className={indicatorStyles.numeric}>
+										<td className={indicatorStyles.gapNumeric}>
 											<GapCell gap={annualTotalGap} />
 										</td>
 									</tr>
@@ -178,7 +178,7 @@ export function CategoryRecapTable({
 										<td className={indicatorStyles.numeric}>
 											{formatCurrency(category.hourlyBaseMen)}
 										</td>
-										<td className={indicatorStyles.numeric}>
+										<td className={indicatorStyles.gapNumeric}>
 											<GapCell gap={hourlyBaseGap} />
 										</td>
 									</tr>
@@ -192,7 +192,7 @@ export function CategoryRecapTable({
 										<td className={indicatorStyles.numeric}>
 											{formatCurrency(category.hourlyVariableMen)}
 										</td>
-										<td className={indicatorStyles.numeric}>
+										<td className={indicatorStyles.gapNumeric}>
 											<GapCell gap={hourlyVarGap} />
 										</td>
 									</tr>
@@ -204,7 +204,7 @@ export function CategoryRecapTable({
 										<td className={indicatorStyles.numeric}>
 											<strong>{formatTotal(hourlyMenSum, "€")}</strong>
 										</td>
-										<td className={indicatorStyles.numeric}>
+										<td className={indicatorStyles.gapNumeric}>
 											<GapCell gap={hourlyTotalGap} />
 										</td>
 									</tr>

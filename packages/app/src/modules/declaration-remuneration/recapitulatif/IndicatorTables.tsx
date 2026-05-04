@@ -56,7 +56,7 @@ function GapTable({
 		return <p className={styles.emptyNotice}>Aucune donnée renseignée.</p>;
 	}
 	return (
-		<div className="fr-table fr-table--no-caption">
+		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">
@@ -87,7 +87,7 @@ function GapTable({
 											<td className={styles.numeric}>
 												{formatCurrency(row.men)}
 											</td>
-											<td className={styles.numeric}>
+											<td className={styles.gapNumeric}>
 												<GapCell gap={gap} />
 											</td>
 										</tr>
@@ -112,7 +112,7 @@ function WorkforceTable({
 }) {
 	const total = (totalWomen ?? 0) + (totalMen ?? 0);
 	return (
-		<div className="fr-table fr-table--no-caption">
+		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">
@@ -163,7 +163,7 @@ function ProportionTable({
 	const tMen = totalMen ?? 0;
 	const grandTotal = tWomen + tMen;
 	return (
-		<div className="fr-table fr-table--no-caption">
+		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">
@@ -259,7 +259,7 @@ function QuartileDistributionTable({
 	return (
 		<div className={styles.subTable}>
 			<p className={`fr-text--bold fr-mb-1w ${styles.subTitle}`}>{title}</p>
-			<div className="fr-table fr-table--no-caption">
+			<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">
 						<div className="fr-table__content">
