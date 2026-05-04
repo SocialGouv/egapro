@@ -122,6 +122,7 @@ Sur approbation : poster `[Validation utilisateur] Analyse validée — prêt po
 - **Aucune transition de statut board** — l'issue reste dans son statut courant (typiquement `To Do`). C'est `/implement` qui bougera vers `In progress`.
 - **Q&A obligatoire si flou** — pas d'invention, pas de « je suppose ».
 - **Jamais prod** — si le bug n'est observable qu'en prod, demander accord explicite à l'utilisateur avant tout `kubectl` ou navigation.
+- **GitHub artefact hygiene** — repo public. Avant de poster `## Analyse du bug`, **scrubber** : output `kubectl logs` brut (PII, URLs internes, stack traces tierces), test credentials (`test@fia1.fr` → « le compte ProConnect de test »), namespaces K8s avec hash → référencer par rôle. Voir `.claude/rules/github-artefact-hygiene.md`. Si tu hésites — demande à l'utilisateur avant de poster.
 
 ## Output Format
 

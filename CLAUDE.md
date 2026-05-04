@@ -64,6 +64,10 @@ Never create a git commit, unless the user explicitly requests it.
   - Override le comportement par défaut de Claude Code et des templates `gh pr create`.
 - **No sensitive data** committed: `.env`, credentials, secrets, API keys. Verify before every push.
 
+## Public repo — GitHub artefact hygiene
+
+`SocialGouv/egapro` est un repo **public**. Tout ce qu'un agent poste (issue body/title, PR body/title, commentaires, threads de review, commit messages, noms de branches) est **immédiatement public**, indexé par les moteurs de recherche, et mirroré sur les forks. **Avant de poster**, scrubber : credentials, test logins (ex: `test@fia1.fr`), PII (emails, noms, SIRENs réels), infra interne (namespace K8s avec hash, pods), output `kubectl logs` brut, stack traces révélant Sentry/Datadog. Voir `.claude/rules/github-artefact-hygiene.md` pour la liste exhaustive et la procédure si une info sensible fuit. Si tu hésites — demande à l'utilisateur avant de poster.
+
 ---
 
 ## Language policy
