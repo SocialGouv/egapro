@@ -106,7 +106,11 @@ N_MERGED=0
 N_MERGE_CONFLICT=0
 N_MERGE_PENDING=0
 
-jq -c '.results[]' "$RESULT_FILE" | while read -r result; do
+# Use process substitution (not a pipe) so the loop runs in the current
+# shell — counter increments inside the loop must propagate to the
+# summary at the end. A `jq ... | while read` would run the body in a
+# subshell and zero out every counter at the summary.
+while read -r result; do
     STATUS=$(echo "$result" | jq -r '.status // "unknown"')
     TICKET=$(echo "$result" | jq -r '.ticket // 0')
     PR=$(echo "$result" | jq -r '.pr // ""')
@@ -216,7 +220,7 @@ jq -c '.results[]' "$RESULT_FILE" | while read -r result; do
             bash "$SCRIPT_DIR/log_event.sh" "$AID" UNKNOWN_STATUS "ticket=$TICKET status=$STATUS"
             ;;
     esac
-done
+done < <(jq -c '.results[]' "$RESULT_FILE")
 
 # Summary
 echo ""

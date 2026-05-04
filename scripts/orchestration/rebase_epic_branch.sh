@@ -30,13 +30,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 WT="/tmp/egapro-rebase-epic${EPIC}"
 
-(cd "$REPO_ROOT" && git fetch --quiet origin alpha "$BRANCH") >&2 2>&1 || {
+(cd "$REPO_ROOT" && git fetch --quiet origin alpha "$BRANCH") >&2 || {
     echo "[rebase_epic_branch] ERROR: git fetch origin alpha $BRANCH failed" >&2
     exit 1
 }
 
 if [ ! -d "$WT" ]; then
-    git -C "$REPO_ROOT" worktree add --force "$WT" "origin/${BRANCH}" >&2 2>&1 || {
+    git -C "$REPO_ROOT" worktree add --force "$WT" "origin/${BRANCH}" >&2 || {
         echo "[rebase_epic_branch] ERROR: cannot add worktree at $WT" >&2
         exit 1
     }
@@ -44,13 +44,13 @@ fi
 
 cd "$WT"
 
-git fetch --quiet origin "$BRANCH" >&2 2>&1 || true
+git fetch --quiet origin "$BRANCH" >&2 || true
 if git show-ref --verify --quiet "refs/heads/${BRANCH}"; then
-    git checkout "$BRANCH" >&2 2>&1
+    git checkout "$BRANCH" >&2
 else
-    git checkout -b "$BRANCH" "origin/${BRANCH}" >&2 2>&1
+    git checkout -b "$BRANCH" "origin/${BRANCH}" >&2
 fi
-git reset --hard "origin/${BRANCH}" >&2 2>&1
+git reset --hard "origin/${BRANCH}" >&2
 
 ALPHA_OID=$(git rev-parse "origin/alpha")
 BASE_OID=$(git merge-base "origin/alpha" HEAD)
@@ -61,8 +61,8 @@ fi
 
 echo "[rebase_epic_branch] rebasing $BRANCH onto origin/alpha (current base ${BASE_OID:0:8} → ${ALPHA_OID:0:8})" >&2
 
-if git rebase "origin/alpha" >&2 2>&1; then
-    if ! git push --force-with-lease origin "$BRANCH" >&2 2>&1; then
+if git rebase "origin/alpha" >&2; then
+    if ! git push --force-with-lease origin "$BRANCH" >&2; then
         echo "[rebase_epic_branch] ERROR: push --force-with-lease rejected — remote $BRANCH moved during rebase" >&2
         exit 1
     fi
@@ -71,7 +71,7 @@ if git rebase "origin/alpha" >&2 2>&1; then
 fi
 
 echo "[rebase_epic_branch] CONFLICT during rebase of $BRANCH on origin/alpha" >&2
-git rebase --abort >&2 2>&1 || true
+git rebase --abort >&2 || true
 
 gh issue comment "$EPIC" --body "**rebase_epic_branch : conflit \`${BRANCH}\` ↔ \`origin/alpha\`**
 

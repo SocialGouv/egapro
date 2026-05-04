@@ -62,11 +62,35 @@ Une fois la PR à nouveau verte, le pipeline retentera le squash-merge automatiq
         exit 2
         ;;
     UNKNOWN|"")
-        # GitHub may still be computing — retry once after a short wait
-        sleep 5
-        MERGEABLE=$(gh pr view "$PR" --json mergeable --jq '.mergeable' 2>/dev/null || echo "")
+        # GitHub computes mergeability asynchronously — for large diffs it can
+        # take 10-30s to settle. Poll up to 6 times with a 5s pause (~30s total)
+        # before giving up and asking the caller to retry next tick.
+        ATTEMPTS=0
+        while [ "$ATTEMPTS" -lt 6 ]; do
+            sleep 5
+            ATTEMPTS=$((ATTEMPTS + 1))
+            MERGEABLE=$(gh pr view "$PR" --json mergeable --jq '.mergeable' 2>/dev/null || echo "")
+            case "$MERGEABLE" in
+                MERGEABLE) break ;;
+                CONFLICTING)
+                    echo "[merge_validated_ticket] PR #$PR conflicts with $BRANCH (detected after $ATTEMPTS poll(s)) — comment + reset ticket" >&2
+                    gh pr comment "$PR" --body "**process_tick_result : conflit avec \`${BRANCH}\`**
+
+Le ticket a été validé techniquement mais la squash-merge dans \`${BRANCH}\` est impossible à cause d'un conflit. Le ticket repasse en \`In progress\` pour un nouveau dispatch \`code-dev\` qui doit rebaser sur \`${BRANCH}\` :
+
+\`\`\`bash
+git fetch origin ${BRANCH}
+git rebase origin/${BRANCH}
+# résoudre les conflits
+git push --force-with-lease
+\`\`\`" >/dev/null 2>&1 || true
+                    bash "$SCRIPT_DIR/set_ticket_status.sh" "$TICKET" "In progress" >/dev/null 2>&1 || true
+                    exit 2
+                    ;;
+            esac
+        done
         if [ "$MERGEABLE" != "MERGEABLE" ]; then
-            echo "[merge_validated_ticket] PR #$PR mergeability=$MERGEABLE — postponing to next tick" >&2
+            echo "[merge_validated_ticket] PR #$PR mergeability=$MERGEABLE after $ATTEMPTS retries (~30s) — postponing to next tick" >&2
             exit 3
         fi
         ;;
