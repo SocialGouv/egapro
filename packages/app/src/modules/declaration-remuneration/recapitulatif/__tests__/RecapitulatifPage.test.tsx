@@ -112,10 +112,16 @@ describe("RecapitulatifPage", () => {
 		);
 	});
 
-	it("renders top back link to /mon-espace", () => {
+	it("does not render its own breadcrumb or back link (handled by the page route at fr-container width)", () => {
 		render(<RecapitulatifPage {...defaultProps()} />);
-		const back = screen.getByRole("link", { name: "Retour" });
-		expect(back).toHaveAttribute("href", "/mon-espace");
+		expect(
+			screen.queryByRole("navigation", { name: /vous êtes ici/i }),
+		).not.toBeInTheDocument();
+		// The only "Retour" link in the component is the bottom primary
+		// "Retour à Mon Espace" button — there is no top "Retour" link.
+		expect(
+			screen.queryByRole("link", { name: "Retour" }),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders declarant info with Nom Prénom and Adresse email", () => {

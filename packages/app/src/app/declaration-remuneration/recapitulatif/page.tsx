@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RecapitulatifPage } from "~/modules/declaration-remuneration/recapitulatif";
+import { Breadcrumb } from "~/modules/layout";
 import {
 	mapToEmployeeCategoryRows,
 	mapToStepData,
@@ -62,31 +64,52 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 	const step5Source = data.jobCategories[0]?.source ?? null;
 
 	return (
-		<main className="fr-container fr-py-7w" id="content">
-			<div className="fr-grid-row fr-grid-row--center">
-				<div className="fr-col-12 fr-col-lg-8">
-					<RecapitulatifPage
-						company={{
-							name: company.name,
-							siren: company.siren,
-							nafCode: company.nafCode,
-							address: company.address,
-							workforce: company.workforce,
-						}}
-						declarantEmail={session.user.email ?? ""}
-						declarantName={session.user.name ?? ""}
-						declarationYear={d.year}
-						isCorrection={isCorrection}
-						step2Data={step2Data}
-						step3Data={step3Data}
-						step4Data={step4Data}
-						step5Categories={step5Categories}
-						step5Source={step5Source}
-						totalMen={d.totalMen}
-						totalWomen={d.totalWomen}
-					/>
-				</div>
+		<>
+			{/* Breadcrumb + back link sit at the page-container edge (under
+			    the Marianne logo), not inside the constrained content
+			    column — matches Figma 9394:247502. */}
+			<div className="fr-container fr-pt-3w">
+				<Breadcrumb
+					items={[
+						{ label: "Accueil", href: "/" },
+						{ label: "Mon espace", href: "/mon-espace" },
+						{ label: `Récapitulatif de la déclaration ${d.year}` },
+					]}
+				/>
+				<Link
+					className="fr-link fr-icon-arrow-left-line fr-link--icon-left fr-mt-2w"
+					href="/mon-espace"
+				>
+					Retour
+				</Link>
 			</div>
-		</main>
+
+			<main className="fr-container fr-pb-7w fr-pt-3w" id="content">
+				<div className="fr-grid-row fr-grid-row--center">
+					<div className="fr-col-12 fr-col-lg-8">
+						<RecapitulatifPage
+							company={{
+								name: company.name,
+								siren: company.siren,
+								nafCode: company.nafCode,
+								address: company.address,
+								workforce: company.workforce,
+							}}
+							declarantEmail={session.user.email ?? ""}
+							declarantName={session.user.name ?? ""}
+							declarationYear={d.year}
+							isCorrection={isCorrection}
+							step2Data={step2Data}
+							step3Data={step3Data}
+							step4Data={step4Data}
+							step5Categories={step5Categories}
+							step5Source={step5Source}
+							totalMen={d.totalMen}
+							totalWomen={d.totalWomen}
+						/>
+					</div>
+				</div>
+			</main>
+		</>
 	);
 }
