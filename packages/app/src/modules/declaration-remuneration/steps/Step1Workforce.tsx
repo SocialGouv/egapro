@@ -22,11 +22,13 @@ import type { Step1Data } from "../types";
 import styles from "./Step1Workforce.module.scss";
 
 type Step1WorkforceProps = {
+	declarationYear: number;
 	initialData: Step1Data;
 	gipPrefillData?: GipPrefillData;
 };
 
 export function Step1Workforce({
+	declarationYear,
 	initialData,
 	gipPrefillData,
 }: Step1WorkforceProps) {
@@ -49,6 +51,11 @@ export function Step1Workforce({
 
 	const [saved, setSaved] = useState(hasInitialData);
 	const [validationError, setValidationError] = useState<string | null>(null);
+	const [showResetWarning, setShowResetWarning] = useState(false);
+
+	function handleInputFocus(currentValue: number) {
+		if (currentValue > 0) setShowResetWarning(true);
+	}
 
 	const mutation = api.declaration.updateStep1.useMutation({
 		onSuccess: () => router.push("/declaration-remuneration/etape/2"),
@@ -96,8 +103,7 @@ export function Step1Workforce({
 				saved={saved}
 				title={
 					<h1 className="fr-h4 fr-mb-0">
-						Déclarer les indicateurs pour l'ensemble des salariés et par
-						catégorie salariés
+						Déclaration des indicateurs de rémunération {declarationYear}
 					</h1>
 				}
 			/>
@@ -111,23 +117,23 @@ export function Step1Workforce({
 					<TooltipButton
 						id="tooltip-period"
 						label="Information sur la période de référence"
+						text="Pour les entreprises créées en cours d'année, cette période correspond à la durée d'activité effective depuis la date de création jusqu'au 31/12/2026."
 					/>
 				</p>
 
 				<p className={`fr-mb-0 ${common.fontMedium}`}>
 					{isPrefilled
-						? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."
+						? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
 						: "Renseignez l'effectif physique de votre entreprise."}
 					<TooltipButton
 						id="tooltip-workforce"
 						label="Information sur les effectifs"
+						text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
 					/>
 				</p>
 
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 			</div>
-
-			{isPrefilled && <PrefillResetWarning />}
 
 			<div className={common.dataSection}>
 				<div className={common.flexColumnGapHalf}>
@@ -168,6 +174,7 @@ export function Step1Workforce({
 														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={handleWomenChange}
+														onFocus={() => handleInputFocus(totalWomen)}
 														pattern="[0-9]*"
 														type="text"
 														value={totalWomen > 0 ? String(totalWomen) : ""}
@@ -180,6 +187,7 @@ export function Step1Workforce({
 														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={handleMenChange}
+														onFocus={() => handleInputFocus(totalMen)}
 														pattern="[0-9]*"
 														type="text"
 														value={totalMen > 0 ? String(totalMen) : ""}
@@ -202,6 +210,8 @@ export function Step1Workforce({
 							tooltipId="tooltip-source-step1"
 						/>
 					)}
+
+					{showResetWarning && <PrefillResetWarning />}
 				</div>
 
 				<DefinitionAccordion

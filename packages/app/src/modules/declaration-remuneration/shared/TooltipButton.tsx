@@ -17,15 +17,10 @@ export function TooltipButton({ id, label, text }: TooltipButtonProps) {
 			<button
 				aria-describedby={id}
 				aria-label={label}
-				className={`fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-question-line ${styles.button}`}
+				className={`fr-btn--tooltip fr-btn ${styles.button}`}
 				type="button"
 			/>
-			<span
-				aria-hidden="true"
-				className="fr-tooltip fr-placement"
-				id={id}
-				role="tooltip"
-			>
+			<span className="fr-tooltip fr-placement" id={id} role="tooltip">
 				{text ?? PLACEHOLDER_TEXT}
 			</span>
 		</>

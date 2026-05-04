@@ -48,6 +48,7 @@ export function StepPageClient({
 		case 1:
 			return (
 				<Step1Workforce
+					declarationYear={declaration.year}
 					gipPrefillData={gipPrefillData}
 					initialData={step1Data}
 				/>

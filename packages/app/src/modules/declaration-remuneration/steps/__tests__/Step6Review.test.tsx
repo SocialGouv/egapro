@@ -220,7 +220,7 @@ describe("Step6Review", () => {
 				step4Data={emptyStep4Data()}
 			/>,
 		);
-		const tooltipButtons = container.querySelectorAll(".fr-icon-question-line");
+		const tooltipButtons = container.querySelectorAll(".fr-btn--tooltip");
 		expect(tooltipButtons).toHaveLength(2);
 	});
 
