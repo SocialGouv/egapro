@@ -14,7 +14,10 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-	searchParams: Promise<{ type?: string; siren?: string }>;
+	// `?siren=` may appear in the URL as a UX hint (mirroring the modify
+	// links in Mon Espace), but the route never reads it — security relies
+	// on the session SIREN bound by `companyProcedure`. Not in the type.
+	searchParams: Promise<{ type?: string }>;
 };
 
 export default async function RecapitulatifRoute({ searchParams }: Props) {
@@ -27,6 +30,11 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 	const siren = getEffectiveSiren(session);
 	if (!siren) notFound();
 
+	// FIXME(#3373-followup): `getOrCreate` may insert an empty `draft` row
+	// for a session that has never started a declaration, then we 404 right
+	// after. Harmless (the draft is later either submitted or pruned) but
+	// not ideal on a read-only page. A future PR can introduce a `get` query
+	// that returns null without writing.
 	const [data, company] = await Promise.all([
 		api.declaration.getOrCreate(),
 		api.company.get({ siren }),

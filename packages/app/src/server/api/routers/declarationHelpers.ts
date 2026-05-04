@@ -17,6 +17,11 @@ type DeclarationRow = typeof declarations.$inferSelect;
  * Map a declaration row to the indicator-form step shapes (steps 2, 3, 4).
  * Same mapping regardless of caller — used by the in-flow declaration pages
  * (`etape/[step]/page.tsx`) and the post-submission recap.
+ *
+ * The `?? ""` (steps 2/3) and `?? undefined` (step 4) are intentional: DB
+ * columns are nullable but the form types are `string` and `number?`
+ * respectively. The coalescing is the explicit `null → form-shape`
+ * conversion — without it TS rejects the assignment.
  */
 export function mapToStepData(d: DeclarationRow): {
 	step2Data: Step2Data;

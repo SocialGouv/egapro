@@ -43,6 +43,14 @@ export function RecapitulatifPage({
 	step4Data,
 	step5Categories,
 }: Props) {
+	// Reference period is implicit in this app: every declaration spans the
+	// full calendar year of `declarationYear` (the in-flow forms hardcode
+	// the same boundaries — see `Step1Workforce.tsx` etc.). The
+	// `gipMdsData.periodStart/periodEnd` columns from the GIP-MDS source
+	// are not surfaced through `declaration.getOrCreate`, and the
+	// `declarations` table itself does not store explicit period
+	// boundaries. If custom 12-month windows are ever introduced, both
+	// this recap and the in-flow steps need to be updated together.
 	const periodStart = `01/01/${declarationYear}`;
 	const periodEnd = `31/12/${declarationYear}`;
 
