@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	buildEmployeeCategoryValues,
 	mapToEmployeeCategoryRows,
+	mapToStepData,
 } from "../declarationHelpers";
 
 describe("buildEmployeeCategoryValues", () => {
@@ -310,5 +311,131 @@ describe("deleteJobAndEmployeeCategories", () => {
 		await deleteJobAndEmployeeCategories(tx, "decl-1");
 
 		expect(mockDelete).not.toHaveBeenCalled();
+	});
+});
+
+describe("mapToStepData", () => {
+	// All raw declaration fields default to null. The helper must coerce them
+	// to "" for step2/step3 string values and undefined for step4 numerics.
+	const emptyDeclaration = {
+		// only the indicator fields touched by mapToStepData need to be present;
+		// `as never` lets us focus the test on the mapping rather than building a
+		// full DeclarationRow shape.
+		indicatorAAnnualWomen: null,
+		indicatorAAnnualMen: null,
+		indicatorAHourlyWomen: null,
+		indicatorAHourlyMen: null,
+		indicatorCAnnualWomen: null,
+		indicatorCAnnualMen: null,
+		indicatorCHourlyWomen: null,
+		indicatorCHourlyMen: null,
+		indicatorBAnnualWomen: null,
+		indicatorBAnnualMen: null,
+		indicatorBHourlyWomen: null,
+		indicatorBHourlyMen: null,
+		indicatorDAnnualWomen: null,
+		indicatorDAnnualMen: null,
+		indicatorDHourlyWomen: null,
+		indicatorDHourlyMen: null,
+		indicatorEWomen: null,
+		indicatorEMen: null,
+		indicatorFAnnualThreshold1: null,
+		indicatorFAnnualWomen1: null,
+		indicatorFAnnualMen1: null,
+		indicatorFAnnualThreshold2: null,
+		indicatorFAnnualWomen2: null,
+		indicatorFAnnualMen2: null,
+		indicatorFAnnualThreshold3: null,
+		indicatorFAnnualWomen3: null,
+		indicatorFAnnualMen3: null,
+		indicatorFAnnualThreshold4: null,
+		indicatorFAnnualWomen4: null,
+		indicatorFAnnualMen4: null,
+		indicatorFHourlyThreshold1: null,
+		indicatorFHourlyWomen1: null,
+		indicatorFHourlyMen1: null,
+		indicatorFHourlyThreshold2: null,
+		indicatorFHourlyWomen2: null,
+		indicatorFHourlyMen2: null,
+		indicatorFHourlyThreshold3: null,
+		indicatorFHourlyWomen3: null,
+		indicatorFHourlyMen3: null,
+		indicatorFHourlyThreshold4: null,
+		indicatorFHourlyWomen4: null,
+		indicatorFHourlyMen4: null,
+	} as never;
+
+	it("coerces null indicator values to empty strings for step2 / step3", () => {
+		const { step2Data, step3Data } = mapToStepData(emptyDeclaration);
+
+		expect(step2Data).toEqual({
+			indicatorAAnnualWomen: "",
+			indicatorAAnnualMen: "",
+			indicatorAHourlyWomen: "",
+			indicatorAHourlyMen: "",
+			indicatorCAnnualWomen: "",
+			indicatorCAnnualMen: "",
+			indicatorCHourlyWomen: "",
+			indicatorCHourlyMen: "",
+		});
+		expect(step3Data).toEqual({
+			indicatorBAnnualWomen: "",
+			indicatorBAnnualMen: "",
+			indicatorBHourlyWomen: "",
+			indicatorBHourlyMen: "",
+			indicatorDAnnualWomen: "",
+			indicatorDAnnualMen: "",
+			indicatorDHourlyWomen: "",
+			indicatorDHourlyMen: "",
+			indicatorEWomen: "",
+			indicatorEMen: "",
+		});
+	});
+
+	it("coerces null F-indicator quartiles to empty threshold + undefined women/men", () => {
+		const { step4Data } = mapToStepData(emptyDeclaration);
+
+		expect(step4Data.annual).toHaveLength(4);
+		expect(step4Data.hourly).toHaveLength(4);
+		for (const row of [...step4Data.annual, ...step4Data.hourly]) {
+			expect(row).toEqual({
+				threshold: "",
+				women: undefined,
+				men: undefined,
+			});
+		}
+	});
+
+	it("preserves provided indicator values verbatim", () => {
+		const populated = {
+			...emptyDeclaration,
+			indicatorAAnnualWomen: "12.5",
+			indicatorAAnnualMen: "10.0",
+			indicatorEWomen: "60",
+			indicatorEMen: "40",
+			indicatorFAnnualThreshold1: "30000",
+			indicatorFAnnualWomen1: 5,
+			indicatorFAnnualMen1: 6,
+			indicatorFHourlyThreshold4: "80000",
+			indicatorFHourlyWomen4: 1,
+			indicatorFHourlyMen4: 2,
+		} as never;
+
+		const { step2Data, step3Data, step4Data } = mapToStepData(populated);
+
+		expect(step2Data.indicatorAAnnualWomen).toBe("12.5");
+		expect(step2Data.indicatorAAnnualMen).toBe("10.0");
+		expect(step3Data.indicatorEWomen).toBe("60");
+		expect(step3Data.indicatorEMen).toBe("40");
+		expect(step4Data.annual[0]).toEqual({
+			threshold: "30000",
+			women: 5,
+			men: 6,
+		});
+		expect(step4Data.hourly[3]).toEqual({
+			threshold: "80000",
+			women: 1,
+			men: 2,
+		});
 	});
 });
