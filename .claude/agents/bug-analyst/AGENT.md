@@ -122,7 +122,13 @@ Sur approbation : poster `[Validation utilisateur] Analyse validée — prêt po
 - **Aucune transition de statut board** — l'issue reste dans son statut courant (typiquement `To Do`). C'est `/implement` qui bougera vers `In progress`.
 - **Q&A obligatoire si flou** — pas d'invention, pas de « je suppose ».
 - **Jamais prod** — si le bug n'est observable qu'en prod, demander accord explicite à l'utilisateur avant tout `kubectl` ou navigation.
-- **GitHub artefact hygiene** — repo public. Avant de poster `## Analyse du bug`, **scrubber** : output `kubectl logs` brut (PII, URLs internes, stack traces tierces), test credentials (`test@fia1.fr` → « le compte ProConnect de test »), namespaces K8s avec hash → référencer par rôle. Voir `.claude/rules/github-artefact-hygiene.md`. Si tu hésites — demande à l'utilisateur avant de poster.
+- **GitHub artefact hygiene** — repo public. Avant de poster `## Analyse du bug`, **scrubber** :
+  - **Hard rule — jamais de secret / token / connection string** dans le commentaire, même tronqué. Les logs `kubectl` contiennent souvent des headers `Authorization: Bearer ...`, des JWTs (`eyJ...`), parfois des connection strings dans des stack traces. Référencer par rôle (« le token utilisé par le client X »), jamais par valeur. Si tu vois un secret en cours de diagnostic, **avertir l'utilisateur immédiatement** : la rotation est obligatoire (cf. `.claude/rules/github-artefact-hygiene.md`).
+  - PII (emails, SIRENs réels) → redacter
+  - Test credentials (`test@fia1.fr`) → « le compte ProConnect de test »
+  - Namespaces K8s avec hash → « le namespace de la review app »
+  - Output `kubectl logs` brut → quoter seulement la ligne pertinente, pas le block complet
+  - Si tu hésites — demande à l'utilisateur avant de poster.
 
 ## Output Format
 
