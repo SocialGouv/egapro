@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
-import { ResourceBanner } from "~/modules/layout";
 import common from "../shared/common.module.scss";
 import stepStyles from "../steps/Step6Review.module.scss";
 import { CardTitle, IndicatorSections } from "../steps/step6";
@@ -10,6 +9,7 @@ import type {
 	Step3Data,
 	Step4Data,
 } from "../types";
+import styles from "./RecapitulatifPage.module.scss";
 
 type CompanyInfo = {
 	name: string;
@@ -31,6 +31,24 @@ type Props = {
 	step5Categories: EmployeeCategoryRow[];
 };
 
+type InfoItem = { label: string; value: string };
+
+function InfoSection({ title, items }: { title: string; items: InfoItem[] }) {
+	return (
+		<section>
+			<h2 className="fr-h6 fr-mb-2w">{title}</h2>
+			<dl className={styles.infoList}>
+				{items.map((item) => (
+					<div className={styles.infoRow} key={item.label}>
+						<dt className={styles.infoLabel}>{item.label}</dt>
+						<dd className={styles.infoValue}>{item.value}</dd>
+					</div>
+				))}
+			</dl>
+		</section>
+	);
+}
+
 export function RecapitulatifPage({
 	company,
 	declarationYear,
@@ -44,148 +62,107 @@ export function RecapitulatifPage({
 	step5Categories,
 }: Props) {
 	// Reference period is implicit in this app: every declaration spans the
-	// full calendar year of `declarationYear` (the in-flow forms hardcode
-	// the same boundaries — see `Step1Workforce.tsx` etc.). The
-	// `gipMdsData.periodStart/periodEnd` columns from the GIP-MDS source
-	// are not surfaced through `declaration.getOrCreate`, and the
-	// `declarations` table itself does not store explicit period
-	// boundaries. If custom 12-month windows are ever introduced, both
-	// this recap and the in-flow steps need to be updated together.
+	// full calendar year of `declarationYear` — the in-flow forms hardcode
+	// the same boundaries and `declarations` does not store custom windows.
 	const periodStart = `01/01/${declarationYear}`;
 	const periodEnd = `31/12/${declarationYear}`;
 
 	const totalWorkforce = (totalWomen ?? 0) + (totalMen ?? 0);
 
+	const companyItems: InfoItem[] = [
+		{ label: "Raison sociale", value: company.name },
+		{ label: "SIREN", value: company.siren },
+	];
+	if (company.nafCode) {
+		companyItems.push({ label: "Code NAF", value: company.nafCode });
+	}
+	if (company.address) {
+		companyItems.push({ label: "Adresse", value: company.address });
+	}
+
 	return (
-		<>
-			<div className={common.flexColumnGap2}>
-				{/* Title row */}
-				<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
-					<div className="fr-col">
-						<h1 className="fr-h2 fr-mb-0">
-							Déclaration des indicateurs de rémunération {declarationYear}
-						</h1>
-					</div>
-					<div className="fr-col-auto">
-						<DownloadDeclarationPdfButton
-							correction={isCorrection}
-							variant="tertiary"
-							year={declarationYear}
-						/>
-					</div>
+		<div className={common.flexColumnGap2}>
+			{/* Back link (between breadcrumb and title) */}
+			<Link
+				className={`fr-link fr-icon-arrow-left-line fr-link--icon-left ${styles.backLink}`}
+				href="/mon-espace"
+			>
+				Retour
+			</Link>
+
+			{/* Title row */}
+			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
+				<div className="fr-col">
+					<h1 className="fr-h2 fr-mb-0">
+						Déclaration des indicateurs de rémunération {declarationYear}
+					</h1>
 				</div>
-
-				{/* Section: Declarant info */}
-				<section>
-					<h2 className="fr-h6 fr-mb-2w">Informations déclarant</h2>
-					<div className="fr-table fr-table--no-caption">
-						<table>
-							<caption>Informations déclarant</caption>
-							<tbody>
-								<tr>
-									<th scope="row">Mail déclarant</th>
-									<td>{declarantEmail}</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</section>
-
-				{/* Section: Company info */}
-				<section>
-					<h2 className="fr-h6 fr-mb-2w">Informations entreprise</h2>
-					<div className="fr-table fr-table--no-caption">
-						<table>
-							<caption>Informations entreprise</caption>
-							<tbody>
-								<tr>
-									<th scope="row">Raison sociale</th>
-									<td>{company.name}</td>
-								</tr>
-								<tr>
-									<th scope="row">SIREN</th>
-									<td>{company.siren}</td>
-								</tr>
-								{company.nafCode && (
-									<tr>
-										<th scope="row">Code NAF</th>
-										<td>{company.nafCode}</td>
-									</tr>
-								)}
-								{company.address && (
-									<tr>
-										<th scope="row">Adresse</th>
-										<td>{company.address}</td>
-									</tr>
-								)}
-							</tbody>
-						</table>
-					</div>
-				</section>
-
-				{/* Section: Reference period */}
-				<section>
-					<h2 className="fr-h6 fr-mb-2w">Informations période de référence</h2>
-					<div className="fr-table fr-table--no-caption">
-						<table>
-							<caption>Informations période de référence</caption>
-							<tbody>
-								<tr>
-									<th scope="row">Date de début</th>
-									<td>{periodStart}</td>
-								</tr>
-								<tr>
-									<th scope="row">Date de fin</th>
-									<td>{periodEnd}</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</section>
-
-				{/* Workforce card (recap-only — Step6Review doesn't render this) */}
-				<div className={stepStyles.section}>
-					<div className={stepStyles.card}>
-						<CardTitle>Effectif</CardTitle>
-						<div className="fr-table fr-table--no-caption">
-							<table>
-								<caption>Effectif</caption>
-								<thead>
-									<tr>
-										<th scope="col">Femmes</th>
-										<th scope="col">Hommes</th>
-										<th scope="col">Total</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td>{totalWomen ?? 0}</td>
-										<td>{totalMen ?? 0}</td>
-										<td>
-											<strong>{totalWorkforce}</strong>
-										</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
+				<div className="fr-col-auto">
+					<DownloadDeclarationPdfButton
+						correction={isCorrection}
+						variant="tertiary"
+						year={declarationYear}
+					/>
 				</div>
-
-				<IndicatorSections
-					step2Data={step2Data}
-					step3Data={step3Data}
-					step4Data={step4Data}
-					step5Categories={step5Categories}
-				/>
-
-				{/* Return button */}
-				<Link className="fr-btn fr-btn--primary" href="/mon-espace">
-					Retour à Mon Espace
-				</Link>
 			</div>
 
-			{/* ResourceBanner outside the narrow column (rendered after the container content) */}
-			<ResourceBanner />
-		</>
+			<InfoSection
+				items={[{ label: "Mail déclarant", value: declarantEmail }]}
+				title="Informations déclarant"
+			/>
+
+			<InfoSection items={companyItems} title="Informations entreprise" />
+
+			<InfoSection
+				items={[
+					{ label: "Date de début", value: periodStart },
+					{ label: "Date de fin", value: periodEnd },
+				]}
+				title="Informations période de référence"
+			/>
+
+			{/* Workforce card (recap-only — Step6Review doesn't render this) */}
+			<div className={stepStyles.section}>
+				<div className={stepStyles.card}>
+					<CardTitle>Effectif</CardTitle>
+					<div className="fr-table fr-table--no-caption">
+						<table>
+							<caption>Effectif</caption>
+							<thead>
+								<tr>
+									<th scope="col">Femmes</th>
+									<th scope="col">Hommes</th>
+									<th scope="col">Total</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>{totalWomen ?? 0}</td>
+									<td>{totalMen ?? 0}</td>
+									<td>
+										<strong>{totalWorkforce}</strong>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<IndicatorSections
+				step2Data={step2Data}
+				step3Data={step3Data}
+				step4Data={step4Data}
+				step5Categories={step5Categories}
+			/>
+
+			{/* Primary action — return to Mon Espace */}
+			<Link
+				className={`fr-btn fr-btn--primary ${styles.primaryAction}`}
+				href="/mon-espace"
+			>
+				Retour à Mon Espace
+			</Link>
+		</div>
 	);
 }

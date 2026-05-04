@@ -304,9 +304,26 @@ describe("RecapitulatifPage", () => {
 		expect(returnLink).toHaveAttribute("href", "/mon-espace");
 	});
 
-	it("renders ResourceBanner", () => {
+	it("renders top back link", () => {
 		render(<RecapitulatifPage {...defaultProps()} />);
-		expect(screen.getByTestId("resource-banner")).toBeInTheDocument();
+		const backLink = screen.getByRole("link", { name: "Retour" });
+		expect(backLink).toHaveAttribute("href", "/mon-espace");
+	});
+
+	it("does not render its own ResourceBanner (PublicChrome handles it)", () => {
+		render(<RecapitulatifPage {...defaultProps()} />);
+		expect(screen.queryByTestId("resource-banner")).not.toBeInTheDocument();
+	});
+
+	it("renders informations sections without table markup", () => {
+		render(<RecapitulatifPage {...defaultProps()} />);
+		// Only the workforce + indicator tables are real <table>s.
+		// The 3 "Informations …" sections must use <dl>, not <table>.
+		const tables = screen.getAllByRole("table");
+		for (const t of tables) {
+			const caption = t.querySelector("caption")?.textContent ?? "";
+			expect(caption).not.toMatch(/^Informations /);
+		}
 	});
 
 	it("hides NAF code when not available", () => {

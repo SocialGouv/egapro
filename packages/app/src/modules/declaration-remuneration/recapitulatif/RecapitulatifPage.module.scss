@@ -1,0 +1,38 @@
+.backLink {
+	align-self: flex-start;
+}
+
+.infoList {
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.infoRow {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+
+	@include respond-from(md) {
+		flex-direction: row;
+		gap: 1rem;
+	}
+}
+
+.infoLabel {
+	margin: 0;
+	font-weight: 500;
+
+	@include respond-from(md) {
+		flex: 0 0 15rem;
+	}
+}
+
+.infoValue {
+	margin: 0;
+}
+
+.primaryAction {
+	align-self: flex-end;
+}
