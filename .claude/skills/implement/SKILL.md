@@ -202,5 +202,5 @@ L'utilisateur retire `dispatch=escalate` (et `attempt=3`) après orientation pou
 - Branche d'intégration (NEW mode) : `scripts/orchestration/{ensure_epic_branch,merge_validated_ticket,rebase_epic_branch,open_epic_final_pr}.sh`
 - Computation du plan : `scripts/orchestration/dispatch_plan.sh`
 - Mutations board : `scripts/orchestration/process_tick_result.sh`
-- Helpers : `scripts/orchestration/{cache_gh,log_event,set_ticket_status,epic_state,render_dashboard,create_linked_branch}.sh`
+- Helpers : `scripts/orchestration/{cache_gh,log_event,set_ticket_status,epic_state,render_dashboard,create_linked_branch,force_pr_issue_link}.sh`
 - Dashboard : skill `/report`

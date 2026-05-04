@@ -211,7 +211,8 @@ Tous les scripts shell portent leur propre header `--help`-friendly. Le mode epi
 | `dispatch_plan.sh` | Calcule la JSON list des tickets dispatchables : parse `## Depends on`, gate les enfants dont le parent n'est pas encore squash-mergé dans `epic/<N>` (= sa branche n'existe plus sur origin), alloue les indices libres dans `[0, EPIC_MAX_PARALLEL[`. Bascule en mode legacy stacked-PR si l'epic carry le label `pipeline=legacy`. |
 | `process_tick_result.sh` | Applique les mutations board selon le statut JSON retourné par `code-dev`. Sur `validated` (NEW mode) → invoke `merge_validated_ticket.sh`. Compteur `attempt=N` pour anti-boucle 3 refacto consécutifs → `dispatch=escalate`. |
 | `set_ticket_status.sh` | Encapsule les 3 GraphQL calls de `rules/github-board.md`. **Refuse explicitement la transition `Done`** (user-only). |
-| `create_linked_branch.sh` | Crée une branche linkée à l'issue via `createLinkedBranch` GraphQL — la PR sera auto-attachée à la sidebar Development de l'issue. Base = `epic/<N>` en NEW mode. |
+| `create_linked_branch.sh` | Crée une branche linkée à l'issue via `createLinkedBranch` GraphQL — la branche apparaît dans la sidebar Development de l'issue. Base = `epic/<N>` en NEW mode. |
+| `force_pr_issue_link.sh` | Appelé par `code-dev` juste après `gh pr create` pour forcer le `closingIssuesReferences` à se peupler (sinon, l'auto-linker GitHub ne fire que quand la PR cible `master`). Workaround : flip la base sur `master`, sleep 3, revenir sur la base d'origine. Idempotent. ~2 CI runs supplémentaires par appel. |
 | `open_worktree.sh` | Recrée un worktree pour une PR donnée (skill `/open <PR>`). Utile pour tester localement après auto-cleanup. |
 | `refresh_pr_link.sh` | Force GitHub à re-parser le `Closes #N` d'une PR (workaround legacy post-merge stacked). |
 | `cache_gh.sh` | TTL wrapper sur `gh` pour amortir les rate limits (clé `epic_<N>_full` partagée entre `dispatch_plan` et `epic_state`, TTL 300s). |
