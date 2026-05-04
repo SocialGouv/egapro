@@ -93,9 +93,8 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 
 1. **Worktree + stack docker** :
    - Identifier la base branch :
-     - **Sub-issue d'un epic NEW mode** → `origin/epic/<EPIC_N>`. Si la branche n'existe pas encore : `bash scripts/orchestration/ensure_epic_branch.sh <EPIC_N>`.
+     - **Sub-issue d'un epic** → `origin/epic/<EPIC_N>`. Si la branche n'existe pas encore : `bash scripts/orchestration/ensure_epic_branch.sh <EPIC_N>`.
      - **Task ou Bug standalone** (pas de parent epic) → `origin/alpha` direct.
-     - **Sub-issue d'un epic LEGACY mode** (`pipeline=legacy`) → résoudre la base via `dispatch_plan.sh` (peut être `origin/alpha` ou stacked sur un parent en `In review`).
    - Picker un index libre dans `[0, EPIC_MAX_PARALLEL[` (`lsof` sur les ports 3001–3005).
    - `git worktree add` + `scripts/setup-worktree.sh <index> [<extras>]` (parser `## Requires services` du ticket pour les extras).
 
@@ -109,19 +108,19 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 4. **Invoquer `code-dev`** en foreground via le subagent :
    - Inputs : ticket number, worktree path, worktree index, base branch (sans préfixe `origin/`), working branch.
    - Si label `complexe` → model `opus`, sinon `sonnet`.
-   - L'agent suit `code-dev/AGENT.md` : implémente, push, ouvre PR draft, fait passer les 4 quality gates + `functional-validator`, `gh pr ready`, `set_ticket_status "In review"`, retourne JSON.
+   - L'agent suit `code-dev/AGENT.md` : implémente, push, ouvre PR draft, force PR↔issue link, fait passer les 4 quality gates + `functional-validator`, `gh pr ready`, retourne JSON. **Le ticket reste en `In progress`** — les transitions `In review` et `Done` sont user-only.
 
 5. **Parser le JSON retourné** :
 
    | `.status` | Action skill | Markdown affiché |
    |---|---|---|
-   | `validated` | aucune (déjà In review) | `## Code: PASS` + ticket/branche/PR + next-step revue humaine |
+   | `validated` | aucune (ticket reste In progress, l'utilisateur le bouge à In review à son rythme) | `## Code: PASS` + ticket/branche/PR + next-step revue humaine |
    | `needs_opus_escalation` | re-invoquer immédiatement `code-dev` en `model: "opus"` avec les mêmes inputs ; afficher le verdict final | `## Code: PASS` ou `## Code: REFACTO` selon le retour Opus |
    | `refacto` | aucune (le ticket est en To Do) | `## Code: REFACTO` + diagnostic + next-step `/analyse <N>` (re-spec) |
    | `rate_limited` | proposer de retenter dans `retry_in` secondes ou abandonner | `## Code: RATE_LIMITED` + délai suggéré |
    | `failed` | propager l'erreur sans modifier le ticket | `## Code: FAILED` + raison technique |
 
-6. **Pour les sub-issues d'epic NEW mode validées** : `process_tick_result.sh` n'est pas appelé en mode synchrone (c'est un mécanisme du loop driver). Mais le squash-merge de la PR validée dans `epic/<N>` peut être déclenché manuellement :
+6. **Pour les sub-issues d'epic validées en mode synchrone** : `process_tick_result.sh` n'est pas appelé (c'est un mécanisme du loop driver). Le squash-merge de la PR validée dans `epic/<N>` peut être déclenché manuellement :
    ```bash
    bash scripts/orchestration/merge_validated_ticket.sh "$PR_N" "$EPIC_N" "$ISSUE_N"
    ```
@@ -140,7 +139,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 
 | Exit | Signification | Action user |
 |---|---|---|
-| 0 | Tous les tickets en état terminal (`In review` ou `dispatch=escalate`), final epic PR ouverte | Review + merge la PR finale |
+| 0 | Tous les sub-tickets squash-mergés dans `epic/<N>` (= leurs branches `ticket/*` supprimées sur origin), final epic PR ouverte | Review + merge la PR finale `epic/<N> → alpha` |
 | 1 | Erreur technique (claude CLI, plan malformé, fetch raté) | Voir log + `tick_<N>_agent_*.json` |
 | 2 | `dispatch=escalate` posé (3 refacto consécutifs ou conflit rebase epic branch) | Lire les commentaires → orienter / re-spec, retirer le label, relancer |
 | 3 | `EPIC_LOOP_MAX_TICKS` (30 par défaut) atteint sans converger | Inspecter pourquoi des tickets ne progressent pas |
@@ -151,7 +150,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 pkill -f "epic_loop.sh.*<EPICS_KEY>"
 ```
 
-Pour reprendre : relancer `/implement <N>` — le script est idempotent (worktrees existants réutilisés, tickets `In review` skippés).
+Pour reprendre : relancer `/implement <N>` — le script est idempotent (worktrees existants réutilisés, tickets dont la branche est gone sont skippés par `dispatch_plan`).
 
 ---
 
@@ -166,7 +165,6 @@ Pour reprendre : relancer `/implement <N>` — le script est idempotent (worktre
 | `EPIC_LOOP_BUDGET_SONNET` | 10 | Budget USD max par sub-agent Sonnet (`claude --max-budget-usd`). |
 | `EPIC_LOOP_BUDGET_OPUS` | 40 | Budget USD max par sub-agent Opus. |
 | `EPIC_LOOP_AGENT_TIMEOUT` | 5400 | Timeout dur par sub-agent en sec (90 min). |
-| `EPIC_DEFAULT_BASE` | `origin/alpha` | **LEGACY mode uniquement** (epics avec label `pipeline=legacy`). En NEW mode (défaut), la base est `origin/epic/<N>`. |
 
 ```bash
 EPIC_LOOP_BUDGET_OPUS=80 /implement 42

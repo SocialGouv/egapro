@@ -81,14 +81,11 @@ rm -rf /tmp/egapro_gh_cache/ 2>/dev/null || true
 
 bash "$SCRIPT_DIR/log_event.sh" "$AID" START "epics=$EPICS budget_sonnet=$BUDGET_SONNET budget_opus=$BUDGET_OPUS max_ticks=$MAX_TICKS"
 
-# ---- Pre-flight: validate args + classify mode + bootstrap epic branches ----
-# An epic is "legacy" if it carries the label `pipeline=legacy` — used for
-# in-flight epics created before the integration-branch model. Legacy epics
-# keep the old stacked-PR + base=alpha behavior. New epics get a dedicated
-# `epic/<N>` integration branch, ticket PRs target it, process_tick_result
-# squash-merges validated tickets into it, and a final PR `epic/<N> → alpha`
+# ---- Pre-flight: validate args + bootstrap epic integration branches ----
+# Each epic gets a dedicated `epic/<N>` integration branch (created from
+# origin/alpha). Ticket PRs target this branch ; process_tick_result.sh
+# squash-merges validated tickets into it ; a final PR `epic/<N> → alpha`
 # is opened at the end for human review.
-declare -A EPIC_MODE   # value: "new" | "legacy"
 for N in $EPICS; do
     EPIC_LBL=$(gh issue view "$N" --json labels --jq '[.labels[].name] | join(",")' 2>/dev/null || echo "")
     if ! echo "$EPIC_LBL" | grep -qiE '(^|,)epic(,|$)'; then
@@ -97,18 +94,11 @@ for N in $EPICS; do
         exit 1
     fi
 
-    if echo "$EPIC_LBL" | grep -qE '(^|,)pipeline=legacy(,|$)'; then
-        EPIC_MODE[$N]="legacy"
-        bash "$SCRIPT_DIR/log_event.sh" "$AID" EPIC_MODE "epic=$N mode=legacy"
-    else
-        EPIC_MODE[$N]="new"
-        bash "$SCRIPT_DIR/log_event.sh" "$AID" EPIC_MODE "epic=$N mode=new"
-        # Ensure the integration branch exists on origin (idempotent)
-        if ! bash "$SCRIPT_DIR/ensure_epic_branch.sh" "$N" >/dev/null; then
-            bash "$SCRIPT_DIR/log_event.sh" "$AID" ERROR "ensure_epic_branch_failed:$N"
-            echo "ERROR: cannot ensure epic/$N integration branch" >&2
-            exit 1
-        fi
+    # Ensure the integration branch exists on origin (idempotent)
+    if ! bash "$SCRIPT_DIR/ensure_epic_branch.sh" "$N" >/dev/null; then
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" ERROR "ensure_epic_branch_failed:$N"
+        echo "ERROR: cannot ensure epic/$N integration branch" >&2
+        exit 1
     fi
 
     bash "$SCRIPT_DIR/set_ticket_status.sh" "$N" "In progress" >/dev/null 2>&1 || true
@@ -248,13 +238,12 @@ while [ $TICK -lt $MAX_TICKS ]; do
     # remaining tickets can never be dispatched.
     bash "$SCRIPT_DIR/cleanup_terminal_worktrees.sh" $EPICS >/dev/null 2>&1 || true
 
-    # 0bis. For each NEW-mode epic, rebase epic/<N> on origin/alpha so the
-    # integration branch stays current. Skipped for legacy epics (no epic
-    # branch) and on the very first tick (epic branch was just created from
-    # a fresh origin/alpha by ensure_epic_branch.sh, no rebase needed).
+    # 0bis. Rebase each epic/<N> on origin/alpha so the integration branch
+    # stays current. Skipped on the very first tick (epic branch was just
+    # created from a fresh origin/alpha by ensure_epic_branch.sh, no rebase
+    # needed).
     if [ "$TICK" -gt 0 ]; then
         for N in $EPICS; do
-            [ "${EPIC_MODE[$N]:-new}" = "legacy" ] && continue
             set +e
             bash "$SCRIPT_DIR/rebase_epic_branch.sh" "$N" >/dev/null
             REBASE_RC=$?
@@ -282,19 +271,37 @@ while [ $TICK -lt $MAX_TICKS ]; do
         exit 2
     fi
 
-    # 3. Empty plan: either everything is done, or in flight (waiting for a parent merge)
+    # 3. Empty plan: either everything is done, or in flight / blocked
+    # waiting for a parent squash-merge.
+    #
+    # Authoritative signal: a sub-ticket is "done from the AI side" when
+    # its `ticket/<N>-*` branch is gone from origin (squash-merged into
+    # epic/<N> by process_tick_result.sh ; GitHub auto-deletes the branch).
+    # The board status is decorative (humans own In review/Done transitions).
     PLAN_LEN=$(jq 'length' "$PLAN_FILE")
     if [ "$PLAN_LEN" -eq 0 ]; then
-        # Are there any non-terminal tickets left?
-        # 'In review' is the AI's terminus (cf. code-dev/AGENT.md): the human
-        # then merges the PR and moves the ticket to 'Done'. The loop driver
-        # must NOT wait for that human action — otherwise it would burn
-        # MAX_TICKS in WAITs for nothing once all sub-agents have validated.
-        NON_DONE=$(bash "$SCRIPT_DIR/epic_state.sh" $EPICS 2>/dev/null | grep -cE '\| (Todo|To Do|In progress) ' || true)
-        if [ "${NON_DONE:-0}" -eq 0 ]; then
-            break  # all terminal (In review or Done), exit loop with success
+        # Refresh remote refs so `git ls-remote` reflects recent merges
+        (cd "$REPO_ROOT" && git fetch --prune origin >/dev/null 2>&1) || true
+
+        REMAINING=0
+        for N in $EPICS; do
+            SUB_NUMBERS=$(gh api graphql -f query="{
+                repository(owner:\"SocialGouv\", name:\"egapro\") {
+                    issue(number:${N}) { subIssues(first:50) { nodes { number } } }
+                }
+            }" --jq '[.data.repository.issue.subIssues.nodes[].number] | @csv' 2>/dev/null | tr -d '"' | tr ',' ' ' || echo "")
+            for SUB in $SUB_NUMBERS; do
+                [ -z "$SUB" ] && continue
+                if git ls-remote --exit-code --heads origin "ticket/${SUB}-*" >/dev/null 2>&1; then
+                    REMAINING=$((REMAINING + 1))
+                fi
+            done
+        done
+
+        if [ "$REMAINING" -eq 0 ]; then
+            break  # every sub-task squash-merged, exit loop with success
         fi
-        bash "$SCRIPT_DIR/log_event.sh" "$AID" WAIT "non_done=$NON_DONE plan_empty"
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" WAIT "remaining_branches=$REMAINING plan_empty"
         sleep "$SLEEP_WAIT"
         TICK=$((TICK + 1))
         continue
@@ -424,12 +431,10 @@ if [ $TICK -ge $MAX_TICKS ]; then
     exit 3
 fi
 
-# ---- Done: every sub-ticket is terminal (validated/In review or escalated) ----
-# For each NEW-mode epic, open the final integration PR `epic/<N> → alpha`
-# (idempotent — reuses an existing open PR if any). Legacy epics keep the
-# old behavior (no final PR, the human merges each ticket PR into alpha).
+# ---- Done: every sub-ticket squash-merged into epic/<N> ----
+# Open the final integration PR `epic/<N> → alpha` for each epic in scope
+# (idempotent — reuses an existing open PR if any).
 for N in $EPICS; do
-    [ "${EPIC_MODE[$N]:-new}" = "legacy" ] && continue
     set +e
     FINAL_PR=$(bash "$SCRIPT_DIR/open_epic_final_pr.sh" "$N" 2>/dev/null)
     OPEN_RC=$?

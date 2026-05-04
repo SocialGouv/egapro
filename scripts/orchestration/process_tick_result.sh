@@ -22,15 +22,16 @@
 #
 # | Status                  | Board change           | Labels                                    | Counter / merge       |
 # |-------------------------|------------------------|-------------------------------------------|-----------------------|
-# | validated (NEW mode)    | stays In review        | clear attempt=N                           | squash-merge into epic/<N> |
-# | validated (LEGACY mode) | stays In review        | clear attempt=N                           | none (human merges)   |
+# | validated               | stays In progress      | clear attempt=N                           | squash-merge into epic/<N> |
 # | needs_opus_escalation   | → To Do                | + complexe                                | reset                 |
 # | refacto                 | → To Do                | bump attempt=N (1→2→3); +dispatch=escalate at 3 | +1              |
 # | rate_limited            | none                   | none (handled by loop driver)             | unchanged             |
 # | failed                  | → To Do                | none (technical, not semantic)            | unchanged             |
 #
 # === HARD RULES ===
-# - Never sets a ticket to 'Done' — that's user-only.
+# - Never sets a ticket to 'In review' or 'Done' — both transitions are
+#   user-only. The agent's terminus is the squash-merge of the validated PR
+#   into epic/<N>; the ticket stays at 'In progress' until the human moves it.
 # - Never merges into alpha/master. The only merge done by this script is the
 #   squash-merge of a validated ticket PR into its `epic/<N>` integration
 #   branch — gated by the per-ticket validators (CI green, Sonar green,
@@ -113,30 +114,21 @@ jq -c '.results[]' "$RESULT_FILE" | while read -r result; do
 
     case "$STATUS" in
         validated)
-            # code-dev has set 'In review' and pr ready. The PR is already
-            # linked to the issue via the linked-branch flow (createLinkedBranch
-            # called by epic_loop.sh before spawning the agent).
+            # code-dev has gh-pr-ready'd the PR and returned validated. The
+            # ticket stays at 'In progress' (board transitions to In review
+            # and Done are user-only). Squash-merge the validated PR into
+            # epic/<N> right now — the next dispatch_plan tick can then
+            # unlock children that depend on this ticket (parent's branch
+            # will be gone after merge).
             #
-            # In NEW mode: squash-merge the ticket PR into epic/<N> right now.
-            # The next dispatch_plan tick can then unlock children that
-            # depend on this ticket (parent's branch will be gone after merge).
-            #
-            # In LEGACY mode (epic carries `pipeline=legacy`): no auto-merge,
-            # the human merges into alpha as before.
+            # Standalone Task / Bug (no parent epic) : no auto-merge, the
+            # PR stays open for human review and merge into alpha.
             clear_attempt_labels "$TICKET"
             invalidate_caches "$TICKET"
 
-            EPIC_LEGACY=0
-            if [ -n "$EPIC" ]; then
-                EPIC_LBL=$(gh issue view "$EPIC" --json labels --jq '[.labels[].name] | join(",")' 2>/dev/null || echo "")
-                if echo "$EPIC_LBL" | grep -qE '(^|,)pipeline=legacy(,|$)'; then
-                    EPIC_LEGACY=1
-                fi
-            fi
-
-            if [ -z "$EPIC" ] || [ "$EPIC_LEGACY" = "1" ] || [ -z "$PR" ]; then
-                bash "$SCRIPT_DIR/log_event.sh" "$AID" VALIDATED "ticket=$TICKET pr=$PR mode=$([ "$EPIC_LEGACY" = "1" ] && echo legacy || echo no-merge)"
-                echo "  ✓ ticket #$TICKET validated (In review, PR ready) — no auto-merge"
+            if [ -z "$EPIC" ] || [ -z "$PR" ]; then
+                bash "$SCRIPT_DIR/log_event.sh" "$AID" VALIDATED "ticket=$TICKET pr=$PR no-epic-or-pr-no-auto-merge"
+                echo "  ✓ ticket #$TICKET validated (PR ready) — no auto-merge (standalone or missing PR)"
                 N_VALIDATED=$((N_VALIDATED + 1))
             else
                 set +e

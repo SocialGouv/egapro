@@ -31,11 +31,11 @@ L'epic porte le type **Feature** ; chaque sub-issue porte le type **Task**. À a
 |---|---|---|---|
 | Backlog | `f75ad846` | `product-owner` | création epic (phase `/analyse`) |
 | To Do | `61e4505c` | `architect` | tickets créés, prêts à dispatcher |
-| In progress | `47fc9ee4` | `code-dev` | début ticket (jusqu'à tous validators PASS) |
-| In review | `df73e18b` | `code-dev` | tous validators PASS + PR marked ready |
-| Done | `98236657` | **utilisateur uniquement** | revue humaine de la PR |
+| In progress | `47fc9ee4` | `code-dev` | début ticket — et y reste après `gh pr ready` (validation IA terminée). `code-dev` ne bouge plus le ticket au-delà. |
+| In review | `df73e18b` | **utilisateur uniquement** | quand l'humain décide qu'une PR est prête pour sa propre revue |
+| Done | `98236657` | **utilisateur uniquement** | après validation humaine de la PR mergée |
 
-**Règle absolue** : aucun agent IA ne passe un ticket à `Done` (`98236657`). L'ID est listé ici pour référence mais ne doit apparaître dans **aucun `gh api` mutation** d'un agent.
+**Règle absolue** : aucun agent IA ne passe un ticket à `In review` (`df73e18b`) ni `Done` (`98236657`). Les IDs sont listés pour référence mais ne doivent apparaître dans **aucun `gh api` mutation** d'un agent. Le script `set_ticket_status.sh` refuse explicitement les deux transitions (exit 3).
 
 ---
 
@@ -202,7 +202,7 @@ Si le board a été recréé, mettre à jour les constantes en haut de ce fichie
 |---|---|
 | `product-owner` | 1, 2 (créer epic, ajouter au project en Backlog puis → To Do en fin de phase) |
 | `architect` | 1, 2, 4, 6 (créer sub-issues, ajouter au project, → To Do, lier au parent) |
-| `code-dev` | 3, 4 (passer To Do → In progress → In review) |
+| `code-dev` | 3, 4 (passer To Do → In progress ; ne bouge **jamais** à In review ni Done) |
 | `functional-validator` | aucune (commente seulement, ne touche pas au board) |
 | `/analyse` | aucune transition de board (les agents conception sont read-only) ; via PO peut ajouter au project en Backlog (op. 1+2+4) |
-| `/implement` | 3, 4, 5 (préconditions + In progress + In review ; mode epic = via le loop driver) |
+| `/implement` | 3, 4, 5 (préconditions + In progress ; mode epic = via le loop driver). Pas de transition à In review. |

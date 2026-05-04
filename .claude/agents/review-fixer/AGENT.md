@@ -105,7 +105,7 @@ You address review feedback on one or more PRs : read the unresolved comments, a
 ## Contraintes
 
 - **Aucune transition de statut board** — si le ticket est en `In review`, il y reste. Pas de `set_ticket_status` depuis cet agent.
-- **Aucun auto-merge** — le merge final reste manuel humain (mode epic) ou par `process_tick_result.sh` (legacy mode task/bug).
+- **Aucun auto-merge** — le merge final reste manuel humain. Pour une sub-task d'epic dont la PR est encore ouverte, c'est `process_tick_result.sh` qui re-tentera le squash-merge dans `epic/<N>` après ton push (la pipeline détectera la nouvelle CI verte).
 - **Pas de force-push** sans validation utilisateur explicite. Une exception : un `git rebase` clean sur `epic/<N>` en mode epic peut être nécessaire si la branche d'intégration a bougé pendant que tu travaillais — demander avant.
 - **Aucun commentaire dans le code produit** (cf. `rules/code-quality.md`).
 - **Git artefact hygiene** — repo public.

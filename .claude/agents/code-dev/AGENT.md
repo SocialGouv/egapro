@@ -13,10 +13,10 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 - Worktree path (assigned by `/epic`, e.g. `../egapro-epic42-t1`)
 - **Worktree index** (0, 1, 2…) — utilisé par `scripts/setup-worktree.sh` pour allouer les ports docker
 - Dev server port (dérivé de l'index : `3001 + index`, lu depuis `packages/app/.env.local` écrit par le setup script)
-- **Base branch** (assigned by `/epic` ou `/code`) — toujours au format **remote-tracking ref** (`origin/<branch>`), déjà fetchée par l'orchestrateur :
-  - **NEW mode (par défaut)** : `origin/epic/<N>` — la branche d'intégration de l'epic. Toutes les PRs des sous-tickets de l'epic ciblent cette branche. Une fois validée par la pipeline, ta PR sera squash-mergée dans `epic/<N>` par `process_tick_result.sh` ; les tickets enfants pourront alors démarrer.
-  - **LEGACY mode** (epic carry le label `pipeline=legacy`) : `origin/alpha` ou `origin/ticket/<parent-slug>` (stacked PR si le parent est encore `In review`). Conservé uniquement pour les epics en cours créés avant le modèle d'intégration.
-- **Working branch** (assigned by `/epic`) — déjà créée sur GitHub par l'orchestrateur via `createLinkedBranch` GraphQL et **officiellement linkée à l'issue** (sidebar Development). La PR ouverte depuis cette branche y apparaîtra automatiquement — pas besoin de cross-reference comment.
+- **Base branch** (assigned by `/implement`) — toujours au format **remote-tracking ref** (`origin/<branch>`), déjà fetchée par l'orchestrateur :
+  - **Sub-issue d'un epic** : `origin/epic/<EPIC_N>` (la branche d'intégration de l'epic). Toutes les PRs des sous-tickets de l'epic ciblent cette branche. Une fois validée par la pipeline, ta PR sera squash-mergée dans `epic/<N>` par `process_tick_result.sh` ; les tickets enfants pourront alors démarrer.
+  - **Task ou Bug standalone** (sans parent epic) : `origin/alpha` direct. La PR sera mergée à la main par l'humain après revue.
+- **Working branch** (assigned by `/implement`) — déjà créée sur GitHub par l'orchestrateur via `createLinkedBranch` GraphQL et **officiellement linkée à l'issue** (sidebar Development). Le force-link PR↔issue (étape 8.5) ajoute également la PR à la sidebar dès qu'elle est créée.
 
 ## Workflow
 
@@ -37,7 +37,7 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - `cd <worktree>` (le worktree est en mode `--detach` sur la base)
    - `git fetch origin <working-branch>`
    - `git checkout <working-branch>` (PAS `checkout -b`)
-   - La PR sera ouverte avec `--base <base-branch-sans-prefix-origin>` — par défaut `--base epic/<N>` (la branche d'intégration de l'epic en NEW mode), ou `--base alpha` / `--base ticket/<parent-slug>` en LEGACY mode
+   - La PR sera ouverte avec `--base <base-branch-sans-prefix-origin>` — `--base epic/<EPIC_N>` (sub-issue d'epic) ou `--base alpha` (Task / Bug standalone)
 
 4.5. **Sanity check stack docker** — vérifier que `packages/app/.env.local` existe et contient `COMPOSE_PROJECT_NAME=egapro-wt-*`. Si absent → `scripts/setup-worktree.sh <index> [<extras>]` (où `<extras>` vient du parsing de la section `## Requires services` du ticket). Si `/epic` ou `/code` a déjà lancé le setup, l'étape est un no-op.
 
@@ -65,9 +65,9 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - Toute divergence non triviale détectée à la lecture structurelle → corriger avant `gh pr ready`.
 
 8. **PR draft** via `gh pr create --draft --base <base-branch>` :
-   - Base = la `<base-branch>` reçue en input (sans le préfixe `origin/`) — typiquement `epic/<N>` en NEW mode, parfois `alpha` ou `ticket/<parent-slug>` en LEGACY mode
+   - Base = la `<base-branch>` reçue en input (sans le préfixe `origin/`) — `epic/<EPIC_N>` (sub-issue d'epic) ou `alpha` (Task / Bug standalone)
    - Body : `Closes #NNN` **sur la première ligne** (obligatoire pour que le force-link de l'étape 8.5 fonctionne), suivi du résumé, test plan, screenshots
-   - **Note auto-close** : `Closes #N` ne déclenche l'auto-close du ticket que sur merge dans la branche par défaut (`master`) ; sur le merge dans `epic/<N>` ou `alpha`, le ticket reste `In review` jusqu'à la release `alpha → master`. Le force-link ci-dessous ne corrige pas ça — il sert uniquement à faire apparaître la PR dans la sidebar Development de l'issue.
+   - **Note auto-close** : `Closes #N` ne déclenche l'auto-close du ticket que sur merge dans la branche par défaut (`master`) ; sur le merge dans `epic/<N>` ou `alpha`, le ticket reste ouvert jusqu'à la release `alpha → master`. Le force-link ci-dessous ne corrige pas ça — il sert uniquement à faire apparaître la PR dans la sidebar Development de l'issue.
    - **Ticket reste en In progress** pendant les validators
    - Logger `PR_DRAFT` avec le numéro de PR.
 
@@ -237,14 +237,14 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - `gh pr ready <PR>` (sort la PR du draft)
    - **Re-poll les checks après `gh pr ready`** : marquer la PR `ready` peut re-déclencher certains workflows (Deploy review notamment, qui n'a pas de `pull_request: types: [opened, synchronize]` strict). Attendre encore une fois que **toutes** les conclusions soient SUCCESS / SKIPPED / NEUTRAL — même critère qu'en 9b. Si un check repasse en FAILURE après `pr ready`, retourner en 9b (corriger, push, watch). Ne **jamais** retourner `validated` avec un check rouge.
    - Logger `PR_READY` avec le numéro de PR
-   - Status ticket → **In review** via `bash scripts/orchestration/set_ticket_status.sh <N> "In review"`
+   - **Le ticket reste en `In progress`** — c'est l'utilisateur qui passe à `In review` puis `Done` selon son rythme de revue humaine. AI's terminus = `gh pr ready` + retour `validated`. `set_ticket_status.sh` refusera explicitement la transition `In review`.
    - Logger `COMPLETE`
    - **Pas de merge depuis `code-dev`** — le squash-merge dans `epic/<N>` est fait par `process_tick_result.sh` après ton retour `validated`. Si le merge échoue (conflit avec la branche d'intégration parce qu'une autre PR a été mergée entre-temps), le pipeline te redispatchera avec le ticket en `In progress` ; tu n'as qu'à rebaser sur `origin/epic/<N>` et re-pousser.
-   - `In review` = terminus pour l'IA. L'utilisateur passe manuellement en **Done** après revue humaine de la PR finale `epic/<N> → alpha`. Les nouveaux commentaires posés **après** le passage en In review relèvent de la skill `/review` (existante), plus du `code-dev`.
+   - Les nouveaux commentaires posés **après** le retour `validated` relèvent de la skill `/review` (existante), plus du `code-dev`.
 
 ## Contraintes
 
-- **Jamais `Done` automatique** — utilisateur uniquement (le script `set_ticket_status.sh` refuse explicitement cette transition pour un agent)
+- **Jamais `In review` ni `Done` automatique** — les deux transitions sont user-only (le script `set_ticket_status.sh` refuse explicitement). AI's terminus board-side = laisser le ticket à `In progress` ; l'humain bouge ensuite à `In review` puis `Done` à son rythme.
 - **Aucun commentaire dans le code produit** — voir `rules/code-quality.md` section "No comments by default". Seul un `// ` court justifiant un WHY non-évident est toléré.
 - **Jamais de merge depuis `code-dev`** — pas de `gh pr merge`, pas de `git push origin epic/<N>`, jamais. Le squash-merge dans la branche d'intégration est centralisé dans `process_tick_result.sh` après le retour `validated`.
 - **Jamais bypass** — pas de `@ts-ignore`, `--no-verify`, `--no-gpg-sign`, pas de skip CI
@@ -281,7 +281,7 @@ Le **dernier message** de l'agent doit être **exactement un de ces 5 JSON** —
 
 | Cas | JSON |
 |---|---|
-| PR ready, ticket en `In review` | `{"status":"validated","ticket":<N>,"pr":<P>}` |
+| PR ready, ticket reste en `In progress` (l'utilisateur le bouge à `In review` lui-même) | `{"status":"validated","ticket":<N>,"pr":<P>}` |
 | 3-retry exhaustion en Sonnet (le pipeline ré-essaiera en Opus) | `{"status":"needs_opus_escalation","ticket":<N>}` |
 | 3-retry exhaustion en Opus, OU spec invalide non corrigeable | `{"status":"refacto","ticket":<N>,"reason":"<résumé court>"}` |
 | Rate limit API Claude/GitHub persistant | `{"status":"rate_limited","ticket":<N>,"retry_in":<sec>}` |

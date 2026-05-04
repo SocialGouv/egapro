@@ -37,7 +37,7 @@ if [ -z "$PR_BASE" ]; then
     exit 1
 fi
 if [ "$PR_BASE" != "$BRANCH" ]; then
-    echo "[merge_validated_ticket] ERROR: PR #$PR base is '$PR_BASE', expected '$BRANCH' — refusing merge (legacy stacked PR? wrong epic?)" >&2
+    echo "[merge_validated_ticket] ERROR: PR #$PR base is '$PR_BASE', expected '$BRANCH' — refusing merge (wrong epic? stale PR base?)" >&2
     exit 1
 fi
 

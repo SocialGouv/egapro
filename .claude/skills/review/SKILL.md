@@ -12,7 +12,7 @@ Délègue à l'agent **`review-fixer`** dans un worktree dédié pour : lire les
 | **epic** | Issue type `Feature` | Toutes les sub-task PRs liées à la feature + la PR finale `epic/<N> → alpha`. Les fixes sont appliqués sur la **branche d'intégration `epic/<N>`** (les sub-tasks sont déjà squash-mergées dedans). |
 | **task** | Issue type `Task` | La PR du ticket en review. Fixes sur la branche head du PR. |
 | **bug** | Issue type `Bug` | La PR du bug en review. Fixes sur la branche head du PR. |
-| (legacy) | Aucun argument, sur une branche de PR | La PR de la branche courante (équivalent task/bug single-PR). |
+| (no-arg) | Aucun argument, sur une branche de PR | La PR de la branche courante (équivalent task/bug single-PR). |
 
 Globalement le fonctionnement reste identique au précédent `/review` : fetch, fix, re-validate, reply. La nouveauté c'est que le travail réel se passe dans un agent qui tourne en worktree (comme `code-dev` pour `/implement`), pas dans le main context.
 
@@ -179,7 +179,7 @@ Working branch: <branch>
 ## Règles
 
 - **Pas de force-push** sans validation utilisateur explicite (cf. agent `review-fixer`).
-- **Pas de transition de statut board** — un ticket en `In review` reste en `In review`. Le merge final + transition `Done` reste manuel humain.
+- **Pas de transition de statut board** — `/review` ne touche jamais au board. `In review` et `Done` sont user-only.
 - **Mode epic** : les fixes vont sur `epic/<N>`, **pas** sur les sub-task branches (qui sont supprimées après squash-merge). Si un sub-task PR est encore OPEN (rare en pratique — la pipeline aurait dû le squash-merger), le pipeline `/implement` reprend la main, pas `/review`.
 - **Reply gate** : `review-fixer` **prépare** les replies, l'utilisateur les valide avant de les poster. Cette discipline est conservée du `/review` historique.
 - **Git artefact hygiene** — voir `.claude/rules/git-artefact-hygiene.md`. Les replies sont publiques : pas de secret/PII/infra interne.
