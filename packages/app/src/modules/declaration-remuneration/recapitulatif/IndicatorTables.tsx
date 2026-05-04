@@ -258,7 +258,7 @@ function QuartileDistributionTable({
 
 	return (
 		<div className={styles.subTable}>
-			<p className={`fr-text--bold fr-mb-1w ${styles.subTitle}`}>{title}</p>
+			<p className={`fr-text--bold ${styles.subTitle}`}>{title}</p>
 			<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">
@@ -394,14 +394,14 @@ export function IndicatorTables({
 	return (
 		<>
 			<section className={styles.section}>
-				<h3 className="fr-h6 fr-mb-2w">
+				<h3 className="fr-h6 fr-mb-0">
 					Effectifs physiques pris en compte pour le calcul des indicateurs
 				</h3>
 				<WorkforceTable totalMen={totalMen} totalWomen={totalWomen} />
 			</section>
 
 			<section className={styles.section}>
-				<h3 className="fr-h6 fr-mb-2w">Écart de rémunération</h3>
+				<h3 className="fr-h6 fr-mb-0">Écart de rémunération</h3>
 				<GapTable
 					caption={`Écart de rémunération – ${declarationYear}`}
 					rowLabel="Rémunération"
@@ -410,7 +410,7 @@ export function IndicatorTables({
 			</section>
 
 			<section className={styles.section}>
-				<h3 className="fr-h6 fr-mb-2w">
+				<h3 className="fr-h6 fr-mb-0">
 					Écart de rémunération variable ou complémentaire
 				</h3>
 				<GapTable
@@ -427,7 +427,7 @@ export function IndicatorTables({
 			</section>
 
 			<section className={styles.section}>
-				<h3 className="fr-h6 fr-mb-2w">
+				<h3 className="fr-h6 fr-mb-0">
 					Proportion de femmes et d&apos;hommes dans chaque quartile salarial
 				</h3>
 				<QuartileDistributionTable

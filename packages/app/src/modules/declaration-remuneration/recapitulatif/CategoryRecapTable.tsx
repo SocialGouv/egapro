@@ -84,7 +84,7 @@ export function CategoryRecapTable({
 
 	return (
 		<section className={styles.section}>
-			<p className={`fr-text--bold fr-mb-2w ${styles.heading}`}>{heading}</p>
+			<p className={`fr-text--bold ${styles.heading}`}>{heading}</p>
 			<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">
