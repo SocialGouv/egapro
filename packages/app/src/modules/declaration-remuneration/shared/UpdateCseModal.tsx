@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
+import styles from "./UpdateCseModal.module.scss";
 
 const MODAL_ID = "update-cse-modal";
 
@@ -56,31 +57,42 @@ export function UpdateCseModal({ siren }: Props) {
 									Fermer
 								</button>
 							</div>
-							<div className="fr-modal__content">
-								<h2 className="fr-modal__title" id="update-cse-modal-title">
+							<div className={`fr-modal__content ${styles.content}`}>
+								<h2
+									className={`fr-modal__title ${styles.title}`}
+									id="update-cse-modal-title"
+								>
 									Mettre à jour la présence d&apos;un CSE
 								</h2>
-								<p className="fr-text--bold">
-									Un CSE a-t-il été mis en place ?
-								</p>
-								<div className="fr-btns-group">
-									<button
-										className={`fr-btn fr-btn--tertiary${hasCse === true ? "" : "-no-outline"}`}
-										onClick={() => setHasCse(true)}
-										type="button"
+								<fieldset className={styles.toggleFieldset}>
+									<legend
+										className={`fr-text--regular fr-text--lg ${styles.legend}`}
 									>
-										Oui
-									</button>
-									<button
-										className={`fr-btn fr-btn--tertiary${hasCse === false ? "" : "-no-outline"}`}
-										onClick={() => setHasCse(false)}
-										type="button"
+										Un CSE a-t-il été mis en place&nbsp;?
+									</legend>
+									<div
+										className={`fr-btns-group fr-btns-group--inline ${styles.toggleGroup}`}
 									>
-										Non
-									</button>
-								</div>
+										<button
+											aria-pressed={hasCse === true}
+											className={`fr-btn ${hasCse === true ? "" : "fr-btn--tertiary"} ${styles.toggleBtn}`}
+											onClick={() => setHasCse(true)}
+											type="button"
+										>
+											Oui
+										</button>
+										<button
+											aria-pressed={hasCse === false}
+											className={`fr-btn ${hasCse === false ? "" : "fr-btn--tertiary"} ${styles.toggleBtn}`}
+											onClick={() => setHasCse(false)}
+											type="button"
+										>
+											Non
+										</button>
+									</div>
+								</fieldset>
 							</div>
-							<div className="fr-modal__footer">
+							<div className={`fr-modal__footer ${styles.footer}`}>
 								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
 									<li>
 										<span>
@@ -95,9 +107,7 @@ export function UpdateCseModal({ siren }: Props) {
 												onClick={handleSave}
 												type="button"
 											>
-												{mutation.isPending
-													? "Enregistrement\u2026"
-													: "Enregistrer"}
+												{mutation.isPending ? "Enregistrement…" : "Enregistrer"}
 											</button>
 											{readOnlyGuard.tooltip}
 										</span>

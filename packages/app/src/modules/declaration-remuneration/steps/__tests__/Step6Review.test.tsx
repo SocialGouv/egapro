@@ -3,16 +3,6 @@ import { describe, expect, it, vi } from "vitest";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { Step6Review } from "../Step6Review";
 
-vi.mock("~/modules/declarationPdf", () => ({
-	DownloadDeclarationPdfButton: ({ year }: { year?: number }) => (
-		<a
-			href={year ? `/api/declaration-pdf?year=${year}` : "/api/declaration-pdf"}
-		>
-			Télécharger le récapitulatif (PDF)
-		</a>
-	),
-}));
-
 const mockSubmitMutate = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
@@ -447,27 +437,12 @@ describe("Step6Review", () => {
 		);
 	});
 
-	it("renders PDF download button when submitted", () => {
+	it("does not render PDF download button when submitted", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				isSubmitted
-				step2Data={emptyStep2Data()}
-				step3Data={emptyStep3Data()}
-				step4Data={emptyStep4Data()}
-			/>,
-		);
-		expect(
-			screen.getByRole("link", { name: /télécharger le récapitulatif/i }),
-		).toHaveAttribute("href", "/api/declaration-pdf?year=2025");
-	});
-
-	it("does not render PDF download button when not submitted", () => {
-		render(
-			<Step6Review
-				declaration={emptyDeclaration()}
-				declarationYear={2025}
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -503,7 +478,8 @@ describe("Step6Review", () => {
 			/>,
 		);
 		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
-		expect(screen.getByText("Des écarts ont été détectés")).toBeInTheDocument();
+		expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
+		expect(screen.getByText("Actions à engager")).toBeInTheDocument();
 		expect(
 			screen.getByText(/des écarts ≥ 5 % ont été identifiés/),
 		).toBeInTheDocument();
@@ -517,21 +493,6 @@ describe("Step6Review", () => {
 		expect(
 			screen.getByRole("link", { name: /évaluation conjointe/ }),
 		).toBeInTheDocument();
-	});
-
-	it("renders 'Modèles d'avis CSE' link", () => {
-		render(
-			<Step6Review
-				declaration={emptyDeclaration()}
-				declarationYear={2025}
-				step2Data={emptyStep2Data()}
-				step3Data={emptyStep3Data()}
-				step4Data={emptyStep4Data()}
-			/>,
-		);
-		expect(
-			screen.getByRole("link", { name: /Modèles d.*avis CSE/ }),
-		).toHaveAttribute("href", "/avis-cse");
 	});
 
 	it("does not show 'Prochaines étapes' callout when all gaps < 5%", () => {

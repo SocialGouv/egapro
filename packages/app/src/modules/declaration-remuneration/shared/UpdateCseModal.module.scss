@@ -1,0 +1,41 @@
+// Title needs 32px gap below (Figma). DSFR's .fr-modal__title default
+// margin-bottom is 1rem (16px), so override here.
+.title {
+	margin-bottom: 2rem;
+}
+
+.toggleFieldset {
+	border: 0;
+	margin: 0;
+	padding: 0;
+}
+
+// Question text: 18px regular, default grey color, 32px gap to buttons.
+.legend {
+	color: var(--text-default-grey);
+	margin-bottom: 2rem;
+	padding: 0;
+}
+
+.toggleGroup {
+	gap: 2rem;
+}
+
+.toggleBtn {
+	flex: 1;
+	justify-content: center;
+}
+
+// DSFR's desktop modal stacks content margin-bottom: 64px + footer
+// margin-top: -48px + footer padding-top: 32px (= 48px effective gap).
+// Per the Figma we want 32px above and 32px below the footer instead.
+// Use compound selectors to win specificity vs DSFR's media-query rules.
+.content.content {
+	margin-bottom: 0;
+}
+
+.footer.footer {
+	margin-top: 0;
+	padding: 2rem;
+}
+

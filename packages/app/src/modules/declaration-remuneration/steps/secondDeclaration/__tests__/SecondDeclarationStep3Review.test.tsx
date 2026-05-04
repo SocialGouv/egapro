@@ -208,7 +208,9 @@ describe("SecondDeclarationStep3Review", () => {
 				siren="532847196"
 			/>,
 		);
-		expect(screen.getByText("Des écarts ont été détectés")).toBeInTheDocument();
+		expect(
+			screen.getByText("Des écarts ont été de nouveau détectés"),
+		).toBeInTheDocument();
 	});
 
 	it("does not show gap warning when all gaps < 5%", () => {
@@ -237,7 +239,7 @@ describe("SecondDeclarationStep3Review", () => {
 			/>,
 		);
 		expect(
-			screen.queryByText("Des écarts ont été détectés"),
+			screen.queryByText("Des écarts ont été de nouveau détectés"),
 		).not.toBeInTheDocument();
 	});
 
