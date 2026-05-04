@@ -15,7 +15,6 @@ type Props = {
 	tableType: "annual" | "hourly";
 	quartiles: QuartileData[];
 	validationError: string | null;
-	readingNote?: React.ReactNode;
 	sourceNote?: React.ReactNode;
 	onQuartileChange: (
 		index: number,
@@ -43,7 +42,6 @@ export function QuartileTable({
 	tableType,
 	quartiles,
 	validationError,
-	readingNote,
 	sourceNote,
 	onQuartileChange,
 	disabled = false,
@@ -56,7 +54,6 @@ export function QuartileTable({
 		<div className={stepStyles.tableWrapper}>
 			<h3 className="fr-h5 fr-mb-0">{title}</h3>
 			<div className={stepStyles.tableSection}>
-				{readingNote}
 				<div
 					className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
 				>

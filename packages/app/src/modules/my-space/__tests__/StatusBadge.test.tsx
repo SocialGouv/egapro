@@ -22,12 +22,12 @@ describe("StatusBadge", () => {
 		expect(badge).toHaveClass("fr-badge--sm");
 	});
 
-	it("renders a success badge with icon for done status", () => {
+	it("renders a success badge without icon for done status", () => {
 		render(<StatusBadge status="done" />);
 		const badge = screen.getByText("Effectué");
 		expect(badge).toBeInTheDocument();
 		expect(badge).toHaveClass("fr-badge--success");
 		expect(badge).toHaveClass("fr-badge--sm");
-		expect(badge).not.toHaveClass("fr-badge--no-icon");
+		expect(badge).toHaveClass("fr-badge--no-icon");
 	});
 });

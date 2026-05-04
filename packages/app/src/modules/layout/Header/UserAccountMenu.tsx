@@ -106,7 +106,7 @@ export function UserAccountMenu({
 			<button
 				aria-expanded={isOpen}
 				aria-haspopup="menu"
-				className="fr-btn fr-btn--tertiary-no-outline fr-icon-account-circle-line fr-btn--icon-left"
+				className="fr-btn fr-btn--tertiary fr-icon-account-circle-line fr-btn--icon-left"
 				onClick={() => setIsOpen((prev) => !prev)}
 				ref={buttonRef}
 				type="button"

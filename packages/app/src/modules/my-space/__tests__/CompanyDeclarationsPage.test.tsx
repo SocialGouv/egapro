@@ -102,7 +102,7 @@ describe("CompanyDeclarationsPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the 'En cours' heading", () => {
+	it("renders the 'Démarche en cours' heading", () => {
 		render(
 			<CompanyDeclarationsPage
 				campaignDeadlines={campaignDeadlines}
@@ -113,7 +113,7 @@ describe("CompanyDeclarationsPage", () => {
 			/>,
 		);
 		expect(
-			screen.getByRole("heading", { level: 2, name: "En cours" }),
+			screen.getByRole("heading", { level: 2, name: "Démarche en cours" }),
 		).toBeInTheDocument();
 	});
 

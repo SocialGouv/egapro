@@ -1,0 +1,26 @@
+.tableSm {
+	font-size: 0.875rem;
+	line-height: 1.5rem;
+
+	th,
+	td {
+		font-size: 0.875rem;
+		line-height: 1.5rem;
+	}
+}
+
+// DSFR JS sets --table-offset: calc(1px + 1rem) on .fr-table__wrapper to
+// reserve space above the table for the caption. Our captions are fr-sr-only,
+// so the reserved space appears as 17px of empty padding above the thead.
+// Override the variable on the wrapper so both the container padding-top and
+// the border overlay (.fr-table__wrapper::after) collapse together.
+.tableNoCaptionOffset :global(.fr-table__wrapper) {
+	// 0px (not 0): `calc(100% - 0)` is invalid in CSS — the calc on the
+	// pseudo-overlay's height needs a unit-bearing length, otherwise the
+	// border overlay collapses to height 0 and the table loses its borders.
+	--table-offset: 0px !important;
+}
+
+.linkUnderlined {
+	text-decoration: underline;
+}
