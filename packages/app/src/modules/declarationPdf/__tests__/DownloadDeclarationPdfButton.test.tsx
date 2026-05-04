@@ -40,7 +40,10 @@ describe("DownloadDeclarationPdfButton", () => {
 		const link = screen.getByRole("link", {
 			name: /Télécharger le récapitulatif/,
 		});
-		expect(link).toHaveAttribute("href", "/api/declaration-pdf?type=correction");
+		expect(link).toHaveAttribute(
+			"href",
+			"/api/declaration-pdf?type=correction",
+		);
 	});
 
 	it("uses tertiary DSFR variant when variant=tertiary", () => {

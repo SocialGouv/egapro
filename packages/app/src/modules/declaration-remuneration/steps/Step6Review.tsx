@@ -87,8 +87,6 @@ export function Step6Review({
 		step2Data.indicatorCHourlyMen,
 	);
 
-	const hasStep2Data = Object.values(step2Data).some((v) => v !== "");
-
 	// Step 3 gaps
 	const step3AnnualMeanGap = computeGap(
 		step3Data.indicatorBAnnualWomen,
@@ -107,14 +105,8 @@ export function Step6Review({
 		step3Data.indicatorDHourlyMen,
 	);
 
-	const hasStep3Data = Object.values(step3Data).some((v) => v !== "");
-
-	// Step 4 quartile data
-	const hasStep4Data =
-		step4Data.annual.some((q) => q.threshold || q.women !== undefined) ||
-		step4Data.hourly.some((q) => q.threshold || q.women !== undefined);
-
-	// Step 5 categories
+	// Step 5 categories — parsed here to feed `allGaps` below; the cards
+	// re-parse internally inside IndicatorSections (negligible cost).
 	const step5Parsed = parseEmployeeCategories(step5Categories);
 
 	// Check if any gap exceeds the regulatory threshold

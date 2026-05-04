@@ -1,13 +1,13 @@
-import { computeGap } from "~/modules/domain";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
+import stepStyles from "~/modules/declaration-remuneration/steps/Step6Review.module.scss";
 import type {
 	EmployeeCategoryRow,
 	Step2Data,
 	Step3Data,
 	Step4Data,
 } from "~/modules/declaration-remuneration/types";
-import stepStyles from "~/modules/declaration-remuneration/steps/Step6Review.module.scss";
+import { computeGap } from "~/modules/domain";
 import { CardTitle } from "./CardTitle";
 import { GapColumn } from "./GapColumn";
 import { GapSideBySide } from "./GapSideBySide";
