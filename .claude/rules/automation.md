@@ -150,4 +150,4 @@ Five skills split the lifecycle:
 | `/analyse [<issue#>] [<description>]` | Phase conception. Détecte le mode (epic / task / bug) selon le type d'issue ou le prompt et invoque les agents appropriés (PO + architect, architect-task, ou bug-analyst). |
 | `/implement <issue#>` | Phase exécution. Détecte le mode selon le type d'issue : Feature → loop driver background (`epic_loop.sh`) ; Task / Bug → `code-dev` synchrone foreground. Vérifie qu'une analyse a été faite avant de dispatcher. |
 | `/report [<N> ...]` | Dashboard live des agents en cours + état des sous-tickets d'un epic. Pure bash, zéro LLM. |
-| `/review` | Traite les commentaires de revue posés après passage en `In review` (human + bots). |
+| `/review [<issue#>\|<PR#>]` | Adresse les commentaires de revue (humain + bots). 3 modes auto-détectés : Feature → toutes les sub-task PRs + PR finale, fixes sur `epic/<N>` ; Task / Bug → la seule PR du ticket. Délègue à `review-fixer` en worktree. |

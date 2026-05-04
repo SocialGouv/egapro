@@ -171,6 +171,11 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature) ou le commentaire d'analyse (Task / Bug). Pour les tickets UI, vérifie lui-même la fidélité Figma via le MCP `figma-dev`. |
 | `functional-validator` | Rejoue les scénarios PO dans le dev server |
 
+**Pipeline review** (invoqué par `/review`) :
+| Agent | Rôle |
+|---|---|
+| `review-fixer` | Adresse les commentaires de revue (humain + bots) sur une ou plusieurs PRs. Lit les unresolved comments, applique les fixes, push, prépare les replies (gate utilisateur explicite avant de poster). Tourne en worktree dédié, comme `code-dev`. |
+
 **Quality gates** (read-only, appelés par `code-dev` ou hors pipeline) :
 | Agent | Rôle |
 |---|---|
@@ -187,7 +192,7 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | `/implement <issue#>` | **Phase exécution**. Détecte le mode selon le type d'issue : Feature → loop driver background ; Task / Bug → `code-dev` synchrone foreground. Vérifie qu'une analyse a été faite avant de dispatcher (sinon propose `/analyse`). |
 | `/report [<N> ...]` | Dashboard live des agents actifs + état des sous-tickets de l'epic. Pure bash, zéro LLM. |
 | `/open <PR>` | Recrée un worktree local pour une PR (typique après auto-cleanup de `/implement`) — utile pour tester la PR avant merge. |
-| `/review` | Traite les commentaires de revue posés après passage en `In review` (human + bots) |
+| `/review [<issue#>\|<PR#>]` | Adresse les commentaires de revue (humain + bots). Détecte le mode (epic / task / bug) selon le type d'issue ; en mode epic, traite toutes les sub-task PRs liées à la feature et applique les fixes sur `epic/<N>`. Délègue à l'agent `review-fixer` qui tourne en worktree. |
 
 Workflow standard : `/analyse <issue>` pour la conception (modes auto-détectés), puis `/implement <issue>` pour l'exécution. `/review` prend le relais quand les humains commentent les PR sorties de `In review`.
 
