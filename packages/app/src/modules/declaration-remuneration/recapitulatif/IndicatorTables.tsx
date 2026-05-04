@@ -256,6 +256,8 @@ function QuartileDistributionTable({
 		return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${unit}`;
 	}
 
+	const trancheKind = unit === "€" ? "annuelle brute" : "horaire brute";
+
 	return (
 		<div className={styles.subTable}>
 			<p className={`fr-text--bold ${styles.subTitle}`}>{title}</p>
@@ -267,13 +269,32 @@ function QuartileDistributionTable({
 								<caption>{caption}</caption>
 								<thead>
 									<tr>
-										<th scope="col">Tranche de rémunération</th>
-										<th scope="col">Min</th>
-										<th scope="col">Max</th>
-										<th scope="col">Nombre de femmes</th>
-										<th scope="col">Nombre d&apos;hommes</th>
-										<th scope="col">Pourcentage de femmes</th>
-										<th scope="col">Pourcentage d&apos;hommes</th>
+										<th scope="col" />
+										<th colSpan={2} scope="col">
+											Tranche de rémunération
+											<br />
+											{trancheKind}
+										</th>
+										<th scope="col">
+											Nombre
+											<br />
+											de femmes
+										</th>
+										<th scope="col">
+											Nombre
+											<br />
+											d&apos;hommes
+										</th>
+										<th scope="col">
+											Pourcentage
+											<br />
+											de femmes
+										</th>
+										<th scope="col">
+											Pourcentage
+											<br />
+											d&apos;hommes
+										</th>
 									</tr>
 								</thead>
 								<tbody>
