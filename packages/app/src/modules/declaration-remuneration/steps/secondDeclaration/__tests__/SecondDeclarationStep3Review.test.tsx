@@ -42,7 +42,6 @@ function makeCategory(
 ): EmployeeCategoryRow {
 	return {
 		name: "",
-		detail: "",
 		womenCount: null,
 		menCount: null,
 		annualBaseWomen: null,
@@ -60,7 +59,6 @@ function makeCategory(
 const mockCategories: EmployeeCategoryRow[] = [
 	makeCategory({
 		name: "Ingénieurs",
-		detail: "Dev",
 		womenCount: 10,
 		menCount: 15,
 		annualBaseWomen: "3000",

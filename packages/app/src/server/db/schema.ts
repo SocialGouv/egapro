@@ -164,7 +164,6 @@ export const jobCategories = createTable(
 			.references(() => declarations.id),
 		categoryIndex: d.integer().notNull(),
 		name: d.varchar({ length: 255 }).notNull(),
-		detail: d.varchar({ length: 500 }),
 		source: d.varchar({ length: 50 }).notNull(),
 	}),
 	(t) => [

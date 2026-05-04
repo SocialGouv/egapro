@@ -100,7 +100,6 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 	it("annotates indicator G job_category columns without GIP-MDS prefix", () => {
 		const jobCat = SCHEMA_COLUMN_COMMENTS.job_category;
 		expect(jobCat?.name).toBe("SUIT: Indicateurs.G.Nom_categorie");
-		expect(jobCat?.detail).toBe("SUIT: Indicateurs.G.Detail_categorie");
 	});
 
 	it("does not annotate job_category internal columns (not in SUIT JSON)", () => {

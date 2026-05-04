@@ -248,26 +248,23 @@ export async function insertPreviousYearDeclaration(yearsBack = 1) {
 				id: PREV_YEAR_JOB_CATEGORY_IDS[0],
 				index: 0,
 				name: "Cadres dirigeants",
-				detail: "Directeurs et cadres supérieurs",
 			},
 			{
 				id: PREV_YEAR_JOB_CATEGORY_IDS[1],
 				index: 1,
 				name: "Ingénieurs et cadres",
-				detail: "Ingénieurs, chefs de projet, managers",
 			},
 			{
 				id: PREV_YEAR_JOB_CATEGORY_IDS[2],
 				index: 2,
 				name: "Techniciens",
-				detail: "Techniciens qualifiés",
 			},
 		];
 
 		for (const cat of categories) {
 			await sql`
-				INSERT INTO app_job_category (id, declaration_id, category_index, name, detail, source)
-				VALUES (${cat.id}, ${declId}, ${cat.index}, ${cat.name}, ${cat.detail}, 'convention-collective')
+				INSERT INTO app_job_category (id, declaration_id, category_index, name, source)
+				VALUES (${cat.id}, ${declId}, ${cat.index}, ${cat.name}, 'convention-collective')
 				ON CONFLICT DO NOTHING
 			`;
 		}

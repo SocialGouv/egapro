@@ -46,7 +46,6 @@ function createIdGenerator() {
 function toFormValues(cats: EmployeeCategory[]) {
 	return cats.map((c) => ({
 		name: c.name,
-		detail: c.detail,
 		womenCount: c.womenCount,
 		menCount: c.menCount,
 		annualBaseWomen: padDecimalToTwo(c.annualBaseWomen),
@@ -75,7 +74,7 @@ type Props = {
 	onSubmit: (data: EmployeeCategorySubmitData) => void;
 	isSubmitting: boolean;
 	submitError?: string | null;
-	readOnlyNameDetail?: boolean;
+	readOnlyLabel?: boolean;
 	referencePeriodPicker?: ReactNode;
 	descriptionText?: string;
 	siren?: string;
@@ -98,7 +97,7 @@ export function CategoryForm({
 	onSubmit,
 	isSubmitting,
 	submitError,
-	readOnlyNameDetail = false,
+	readOnlyLabel = false,
 	referencePeriodPicker,
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
 	siren,
@@ -276,7 +275,7 @@ export function CategoryForm({
 			<div className={stepStyles.categoryBlock}>
 				<p className="fr-mb-0">{descriptionText}</p>
 
-				{readOnlyNameDetail ? (
+				{readOnlyLabel ? (
 					<p className="fr-mb-0">
 						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
 						<span className="fr-text--bold">
@@ -343,7 +342,7 @@ export function CategoryForm({
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 			</div>
 
-			{!readOnlyNameDetail && (
+			{!readOnlyLabel && (
 				<CategoryImportExport
 					disabled={disabled}
 					getCategories={() =>
@@ -385,80 +384,31 @@ export function CategoryForm({
 								id={collapseId}
 							>
 								<div className={stepStyles.categoryBlock}>
-									{!readOnlyNameDetail && fields.length > 1 && (
-										<div className={stepStyles.categoryFooter}>
-											<button
-												className="fr-btn fr-btn--tertiary fr-icon-delete-line fr-btn--icon-left fr-btn--sm"
-												disabled={disabled}
-												onClick={() => askRemoveCategory(index)}
-												type="button"
-											>
-												Supprimer
-											</button>
-										</div>
-									)}
-
-									{readOnlyNameDetail ? (
-										<>
-											<p className="fr-mb-0">
-												<span className="fr-text--bold">Nom : </span>
-												{cat?.name}
-											</p>
-											<p className="fr-mb-0">
-												<span className="fr-text--bold">
-													Détail des emplois :{" "}
-												</span>
-												{cat?.detail}
-											</p>
-										</>
+									{readOnlyLabel ? (
+										<p className="fr-mb-0">
+											<span className="fr-text--bold">Libellé : </span>
+											{cat?.name}
+										</p>
 									) : (
-										<>
-											<div className="fr-input-group fr-mb-0">
-												<label
-													className="fr-label"
-													htmlFor={`cat-${index}-name`}
-												>
-													Nom
-												</label>
-												<input
-													className="fr-input"
-													disabled={disabled}
-													id={`cat-${index}-name`}
-													{...form.register(`categories.${index}.name`)}
-													onChange={(e) => {
-														form.setValue(
-															`categories.${index}.name`,
-															e.target.value,
-														);
-														setSaved(false);
-													}}
-													type="text"
-												/>
-											</div>
-
-											<div className="fr-input-group fr-mb-0">
-												<label
-													className="fr-label"
-													htmlFor={`cat-${index}-detail`}
-												>
-													Détail des emplois
-												</label>
-												<input
-													className="fr-input"
-													disabled={disabled}
-													id={`cat-${index}-detail`}
-													{...form.register(`categories.${index}.detail`)}
-													onChange={(e) => {
-														form.setValue(
-															`categories.${index}.detail`,
-															e.target.value,
-														);
-														setSaved(false);
-													}}
-													type="text"
-												/>
-											</div>
-										</>
+										<div className="fr-input-group fr-mb-0">
+											<label className="fr-label" htmlFor={`cat-${index}-name`}>
+												Libellé
+											</label>
+											<input
+												className="fr-input"
+												disabled={disabled}
+												id={`cat-${index}-name`}
+												{...form.register(`categories.${index}.name`)}
+												onChange={(e) => {
+													form.setValue(
+														`categories.${index}.name`,
+														e.target.value,
+													);
+													setSaved(false);
+												}}
+												type="text"
+											/>
+										</div>
 									)}
 
 									<CategoryDataTable
@@ -470,6 +420,19 @@ export function CategoryForm({
 										onDecimalBlur={handleDecimalBlur}
 										onPositiveNumberChange={handlePositiveNumberChange}
 									/>
+
+									{!readOnlyLabel && fields.length > 1 && (
+										<div className={stepStyles.deleteRow}>
+											<button
+												className="fr-btn fr-btn--tertiary fr-icon-delete-line fr-btn--icon-left fr-btn--sm"
+												disabled={disabled}
+												onClick={() => askRemoveCategory(index)}
+												type="button"
+											>
+												Supprimer
+											</button>
+										</div>
+									)}
 								</div>
 							</div>
 						</section>
@@ -481,7 +444,7 @@ export function CategoryForm({
 				<p className="fr-text--bold fr-mb-0">
 					Nombre de catégories : {fields.length}
 				</p>
-				{!readOnlyNameDetail && (
+				{!readOnlyLabel && (
 					<button
 						className="fr-btn fr-btn--secondary fr-icon-add-line fr-btn--icon-left"
 						disabled={disabled}

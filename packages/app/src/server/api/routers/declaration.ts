@@ -367,7 +367,6 @@ export const declarationRouter = createTRPCRouter({
 								declarationId: declaration.id,
 								categoryIndex: i,
 								name: cat.name,
-								detail: cat.detail || null,
 								source: input.source,
 							})
 							.returning();
