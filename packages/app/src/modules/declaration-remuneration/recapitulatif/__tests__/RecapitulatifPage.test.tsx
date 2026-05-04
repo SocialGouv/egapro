@@ -264,11 +264,17 @@ describe("RecapitulatifPage", () => {
 			/>,
 		);
 		expect(screen.getByText(/Total de salariés : 250/)).toBeInTheDocument();
-		expect(
-			screen.getByText(
-				"Bénéficiaires de composantes variables ou complémentaires",
-			),
-		).toBeInTheDocument();
+		// The "Bénéficiaires de composantes / variables ou complémentaires"
+		// header wraps via `<br />` so its textContent spans multiple nodes.
+		// Match it via the column header role.
+		const beneficiairesHeader = screen
+			.getAllByRole("columnheader")
+			.find((cell) =>
+				cell.textContent?.includes(
+					"Bénéficiaires de composantesvariables ou complémentaires",
+				),
+			);
+		expect(beneficiairesHeader).toBeDefined();
 	});
 
 	it("renders quartile tables when step4 data is provided", () => {

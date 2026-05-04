@@ -48,7 +48,7 @@ function GapTable({
 	rows,
 }: {
 	caption: string;
-	rowLabel: string;
+	rowLabel: React.ReactNode;
 	rows: GapRow[];
 }) {
 	const allEmpty = rows.every((r) => r.women === "" && r.men === "");
@@ -177,7 +177,9 @@ function ProportionTable({
 									<th scope="col">Sexe</th>
 									<th scope="col">Total de salariés : {grandTotal}</th>
 									<th scope="col">
-										Bénéficiaires de composantes variables ou complémentaires
+										Bénéficiaires de composantes
+										<br />
+										variables ou complémentaires
 									</th>
 									<th scope="col">Proportion</th>
 								</tr>
@@ -436,7 +438,13 @@ export function IndicatorTables({
 				</h3>
 				<GapTable
 					caption={`Écart de rémunération variable ou complémentaire – ${declarationYear}`}
-					rowLabel="Rémunération variable ou complémentaire"
+					rowLabel={
+						<>
+							Rémunération variable
+							<br />
+							ou complémentaire
+						</>
+					}
 					rows={step3Rows}
 				/>
 				<ProportionTable
