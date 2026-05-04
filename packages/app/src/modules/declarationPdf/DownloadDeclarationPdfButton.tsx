@@ -2,12 +2,14 @@ type Props = {
 	year?: number;
 	correction?: boolean;
 	variant?: "secondary" | "tertiary";
+	label?: string;
 };
 
 export function DownloadDeclarationPdfButton({
 	year,
 	correction,
 	variant = "secondary",
+	label = "Télécharger le récapitulatif (PDF)",
 }: Props) {
 	const params = new URLSearchParams();
 	if (year) params.set("year", String(year));
@@ -21,7 +23,7 @@ export function DownloadDeclarationPdfButton({
 			download
 			href={href}
 		>
-			Télécharger le récapitulatif (PDF)
+			{label}
 		</a>
 	);
 }

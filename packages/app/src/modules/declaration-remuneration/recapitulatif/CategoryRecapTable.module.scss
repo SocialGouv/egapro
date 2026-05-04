@@ -1,0 +1,25 @@
+.section {
+	display: flex;
+	flex-direction: column;
+}
+
+.heading {
+	margin: 0;
+}
+
+.subheaderRow th {
+	background-color: var(--background-alt-grey);
+	font-weight: 700;
+	text-align: left;
+}
+
+.sectionRow th {
+	background-color: var(--background-alt-grey);
+	font-weight: 700;
+	text-align: left;
+}
+
+.totalRow th,
+.totalRow td {
+	background-color: var(--background-alt-grey);
+}

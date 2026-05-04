@@ -59,16 +59,26 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 				)
 			: [];
 
+	const step5Source = data.jobCategories[0]?.source ?? null;
+
 	return (
 		<RecapitulatifPage
-			company={company}
+			company={{
+				name: company.name,
+				siren: company.siren,
+				nafCode: company.nafCode,
+				address: company.address,
+				workforce: company.workforce,
+			}}
 			declarantEmail={session.user.email ?? ""}
+			declarantName={session.user.name ?? ""}
 			declarationYear={d.year}
 			isCorrection={isCorrection}
 			step2Data={step2Data}
 			step3Data={step3Data}
 			step4Data={step4Data}
 			step5Categories={step5Categories}
+			step5Source={step5Source}
 			totalMen={d.totalMen}
 			totalWomen={d.totalWomen}
 		/>

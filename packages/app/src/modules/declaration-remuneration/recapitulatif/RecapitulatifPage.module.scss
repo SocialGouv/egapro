@@ -2,8 +2,18 @@
 	align-self: flex-start;
 }
 
+.infoSection {
+	display: flex;
+	flex-direction: column;
+}
+
+.infoTitle {
+	margin: 0 0 1rem;
+}
+
 .infoList {
 	margin: 0;
+	padding: 0;
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
@@ -17,12 +27,15 @@
 	@include respond-from(md) {
 		flex-direction: row;
 		gap: 1rem;
+		align-items: baseline;
 	}
 }
 
 .infoLabel {
 	margin: 0;
-	font-weight: 500;
+	padding: 0;
+	font-weight: 400;
+	color: var(--text-mention-grey);
 
 	@include respond-from(md) {
 		flex: 0 0 15rem;
@@ -31,6 +44,27 @@
 
 .infoValue {
 	margin: 0;
+	margin-inline-start: 0;
+	padding: 0;
+}
+
+.indicatorsSection {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.sourceLine {
+	margin: 0;
+}
+
+.sourceLabel {
+	color: var(--text-mention-grey);
+}
+
+.emptyNotice {
+	margin: 0;
+	color: var(--text-mention-grey);
 }
 
 .primaryAction {
