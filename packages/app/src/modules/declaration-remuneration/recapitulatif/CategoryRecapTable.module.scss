@@ -24,3 +24,12 @@
 .totalRow td {
 	background-color: var(--background-alt-grey);
 }
+
+/* "Effectif physique", "Salaire de base", "Composantes variables …"
+   are <th scope="row"> for a11y, but the Figma cell looks like a
+   regular data row: white background, regular weight. Override DSFR's
+   default tbody-th styling. */
+.regularRow th {
+	background: transparent;
+	font-weight: 400;
+}

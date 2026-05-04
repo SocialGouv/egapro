@@ -110,14 +110,10 @@ export function CategoryRecapTable({
 											Total salariés : {totalSalaries}
 										</th>
 									</tr>
-									<tr>
+									<tr className={styles.regularRow}>
 										<th scope="row">Effectif physique</th>
-										<td className={indicatorStyles.numeric}>
-											<strong>{womenCount}</strong>
-										</td>
-										<td className={indicatorStyles.numeric}>
-											<strong>{menCount}</strong>
-										</td>
+										<td className={indicatorStyles.numeric}>{womenCount}</td>
+										<td className={indicatorStyles.numeric}>{menCount}</td>
 										<td />
 									</tr>
 
@@ -126,7 +122,7 @@ export function CategoryRecapTable({
 											Rémunération annuelle brute
 										</th>
 									</tr>
-									<tr>
+									<tr className={styles.regularRow}>
 										<th scope="row">Salaire de base</th>
 										<td className={indicatorStyles.numeric}>
 											{formatCurrency(category.annualBaseWomen)}
@@ -138,9 +134,11 @@ export function CategoryRecapTable({
 											<GapCell gap={annualBaseGap} />
 										</td>
 									</tr>
-									<tr>
+									<tr className={styles.regularRow}>
 										<th scope="row">
-											Composantes variables ou complémentaires
+											Composantes variables
+											<br />
+											ou complémentaires
 										</th>
 										<td className={indicatorStyles.numeric}>
 											{formatCurrency(category.annualVariableWomen)}
@@ -170,7 +168,7 @@ export function CategoryRecapTable({
 											Rémunération horaire brute
 										</th>
 									</tr>
-									<tr>
+									<tr className={styles.regularRow}>
 										<th scope="row">Salaire de base</th>
 										<td className={indicatorStyles.numeric}>
 											{formatCurrency(category.hourlyBaseWomen)}
@@ -182,9 +180,11 @@ export function CategoryRecapTable({
 											<GapCell gap={hourlyBaseGap} />
 										</td>
 									</tr>
-									<tr>
+									<tr className={styles.regularRow}>
 										<th scope="row">
-											Composantes variables ou complémentaires
+											Composantes variables
+											<br />
+											ou complémentaires
 										</th>
 										<td className={indicatorStyles.numeric}>
 											{formatCurrency(category.hourlyVariableWomen)}
