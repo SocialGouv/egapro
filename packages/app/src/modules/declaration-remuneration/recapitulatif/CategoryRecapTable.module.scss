@@ -34,6 +34,11 @@
    win the cascade. */
 :global(.fr-table__content) tbody tr.regularRow th {
 	background-color: var(--background-default-grey);
-	background-image: linear-gradient(0deg, var(--border-default-grey), var(--border-default-grey));
+	/* Match the <td> border setup so the row separator stays the same
+	   colour across the whole row (DSFR uses border-plain-grey on <th>
+	   right-borders, which gave a darker stripe at the column boundary). */
+	background-image:
+		linear-gradient(0deg, var(--border-contrast-grey), var(--border-contrast-grey)),
+		linear-gradient(0deg, var(--border-contrast-grey), var(--border-contrast-grey));
 	font-weight: 400;
 }
