@@ -28,8 +28,12 @@
 /* "Effectif physique", "Salaire de base", "Composantes variables …"
    are <th scope="row"> for a11y, but the Figma cell looks like a
    regular data row: white background, regular weight. Override DSFR's
-   default tbody-th styling. */
-.regularRow th {
-	background: transparent;
+   default tbody-th styling — DSFR pins the grey background via
+   `.fr-table__content table tbody th { background-color … background-image … }`,
+   so we have to bump specificity (and override the gradient image) to
+   win the cascade. */
+:global(.fr-table__content) tbody tr.regularRow th {
+	background-color: var(--background-default-grey);
+	background-image: linear-gradient(0deg, var(--border-default-grey), var(--border-default-grey));
 	font-weight: 400;
 }
