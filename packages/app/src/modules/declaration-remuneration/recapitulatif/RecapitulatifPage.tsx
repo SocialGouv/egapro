@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Breadcrumb } from "~/modules/layout";
 import common from "../shared/common.module.scss";
 import type {
 	EmployeeCategoryRow,
@@ -122,6 +123,16 @@ export function RecapitulatifPage({
 
 	return (
 		<div className={common.flexColumnGap2}>
+			<Breadcrumb
+				items={[
+					{ label: "Accueil", href: "/" },
+					{ label: "Mon espace", href: "/mon-espace" },
+					{
+						label: `Récapitulatif de la déclaration ${declarationYear}`,
+					},
+				]}
+			/>
+
 			{/* Back link (between breadcrumb and title) */}
 			<Link
 				className={`fr-link fr-icon-arrow-left-line fr-link--icon-left ${styles.backLink}`}
