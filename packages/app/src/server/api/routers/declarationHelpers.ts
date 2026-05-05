@@ -69,7 +69,7 @@ export function mapToStepData(d: DeclarationRow): {
 					men: d.indicatorFAnnualMen3 ?? undefined,
 				},
 				{
-					threshold: d.indicatorFAnnualThreshold4 ?? "",
+					threshold: undefined,
 					women: d.indicatorFAnnualWomen4 ?? undefined,
 					men: d.indicatorFAnnualMen4 ?? undefined,
 				},
@@ -91,7 +91,7 @@ export function mapToStepData(d: DeclarationRow): {
 					men: d.indicatorFHourlyMen3 ?? undefined,
 				},
 				{
-					threshold: d.indicatorFHourlyThreshold4 ?? "",
+					threshold: undefined,
 					women: d.indicatorFHourlyWomen4 ?? undefined,
 					men: d.indicatorFHourlyMen4 ?? undefined,
 				},

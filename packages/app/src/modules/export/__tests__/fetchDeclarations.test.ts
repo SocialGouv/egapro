@@ -63,7 +63,6 @@ const baseRow = {
 	indicatorFAnnualThreshold3: "36000",
 	indicatorFAnnualWomen3: 28,
 	indicatorFAnnualMen3: 33,
-	indicatorFAnnualThreshold4: null,
 	indicatorFAnnualWomen4: 27,
 	indicatorFAnnualMen4: 35,
 	// Indicator F — hourly
@@ -76,7 +75,6 @@ const baseRow = {
 	indicatorFHourlyThreshold3: "18.00",
 	indicatorFHourlyWomen3: 28,
 	indicatorFHourlyMen3: 33,
-	indicatorFHourlyThreshold4: null,
 	indicatorFHourlyWomen4: 20,
 	indicatorFHourlyMen4: 37,
 };

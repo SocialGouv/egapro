@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("server-only", () => ({}));
-
 describe("buildExportRows", () => {
 	// Mock DB chain: select().from().innerJoin().innerJoin().where()
 	const mockWhere = vi.fn();
@@ -110,7 +108,6 @@ describe("buildExportRows", () => {
 			indicatorFAnnualThreshold3: null,
 			indicatorFAnnualWomen3: null,
 			indicatorFAnnualMen3: null,
-			indicatorFAnnualThreshold4: null,
 			indicatorFAnnualWomen4: null,
 			indicatorFAnnualMen4: null,
 			// Indicator F — hourly
@@ -123,7 +120,6 @@ describe("buildExportRows", () => {
 			indicatorFHourlyThreshold3: null,
 			indicatorFHourlyWomen3: null,
 			indicatorFHourlyMen3: null,
-			indicatorFHourlyThreshold4: null,
 			indicatorFHourlyWomen4: null,
 			indicatorFHourlyMen4: null,
 		};
@@ -203,7 +199,6 @@ describe("buildExportRows", () => {
 			indicatorFAnnualThreshold3: null,
 			indicatorFAnnualWomen3: null,
 			indicatorFAnnualMen3: null,
-			indicatorFAnnualThreshold4: null,
 			indicatorFAnnualWomen4: null,
 			indicatorFAnnualMen4: null,
 			indicatorFHourlyThreshold1: null,
@@ -215,7 +210,6 @@ describe("buildExportRows", () => {
 			indicatorFHourlyThreshold3: null,
 			indicatorFHourlyWomen3: null,
 			indicatorFHourlyMen3: null,
-			indicatorFHourlyThreshold4: null,
 			indicatorFHourlyWomen4: null,
 			indicatorFHourlyMen4: null,
 		};
@@ -284,7 +278,6 @@ describe("buildExportRows", () => {
 			indicatorFAnnualThreshold3: null,
 			indicatorFAnnualWomen3: null,
 			indicatorFAnnualMen3: null,
-			indicatorFAnnualThreshold4: null,
 			indicatorFAnnualWomen4: null,
 			indicatorFAnnualMen4: null,
 			indicatorFHourlyThreshold1: null,
@@ -296,7 +289,6 @@ describe("buildExportRows", () => {
 			indicatorFHourlyThreshold3: null,
 			indicatorFHourlyWomen3: null,
 			indicatorFHourlyMen3: null,
-			indicatorFHourlyThreshold4: null,
 			indicatorFHourlyWomen4: null,
 			indicatorFHourlyMen4: null,
 		};
@@ -387,7 +379,6 @@ describe("buildExportRows", () => {
 			indicatorFAnnualThreshold3: null,
 			indicatorFAnnualWomen3: null,
 			indicatorFAnnualMen3: null,
-			indicatorFAnnualThreshold4: null,
 			indicatorFAnnualWomen4: null,
 			indicatorFAnnualMen4: null,
 			indicatorFHourlyThreshold1: null,
@@ -399,7 +390,6 @@ describe("buildExportRows", () => {
 			indicatorFHourlyThreshold3: null,
 			indicatorFHourlyWomen3: null,
 			indicatorFHourlyMen3: null,
-			indicatorFHourlyThreshold4: null,
 			indicatorFHourlyWomen4: null,
 			indicatorFHourlyMen4: null,
 		};

@@ -98,13 +98,11 @@ export function buildIndicators(row: DeclarationRow) {
 		row.indicatorFAnnualThreshold1,
 		row.indicatorFAnnualThreshold2,
 		row.indicatorFAnnualThreshold3,
-		row.indicatorFAnnualThreshold4,
 	];
 	const hourlyThresholds = [
 		row.indicatorFHourlyThreshold1,
 		row.indicatorFHourlyThreshold2,
 		row.indicatorFHourlyThreshold3,
-		row.indicatorFHourlyThreshold4,
 	];
 
 	const annualQuartile = Object.fromEntries(

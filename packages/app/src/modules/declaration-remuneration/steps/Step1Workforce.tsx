@@ -205,10 +205,7 @@ export function Step1Workforce({
 					</div>
 
 					{isPrefilled && (
-						<PrefillSource
-							periodEnd={gipPrefillData.periodEnd}
-							tooltipId="tooltip-source-step1"
-						/>
+						<PrefillSource periodEnd={gipPrefillData.periodEnd} />
 					)}
 
 					{showResetWarning && <PrefillResetWarning />}

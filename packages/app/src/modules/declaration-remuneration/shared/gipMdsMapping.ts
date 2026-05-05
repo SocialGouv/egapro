@@ -8,8 +8,8 @@ export type GipMdsRow = typeof gipMdsData.$inferSelect;
 
 /** Quartile data computed from GIP proportions + workforce totals. */
 export type GipQuartileData = {
-	/** 4 thresholds, one per quartile (lower bound of each quartile group). */
-	thresholds: [string | null, string | null, string | null, string | null];
+	/** 3 thresholds for Q1-Q3 (lower bound); Q4 has no threshold in the GIP model. */
+	thresholds: [string | null, string | null, string | null];
 	/** Integer women count per quartile, derived from proportion × total/4. */
 	womenCounts: [number | null, number | null, number | null, number | null];
 	/** Integer men count per quartile, derived from proportion × total/4. */
@@ -60,6 +60,8 @@ export type GipPrefillData = {
 	};
 	/** Confidence index (0-1, for internal DGT use) */
 	confidenceIndex: string | null;
+	/** Start of the data collection period (e.g. "2026-01-01"), used for "Période de référence" display. */
+	periodStart?: string | null;
 	/** End of the data collection period (e.g. "2026-12-31"), used for "Source : DSN" display. */
 	periodEnd: string | null;
 };
@@ -109,7 +111,6 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 					row.annualQuartileThreshold1,
 					row.annualQuartileThreshold2,
 					row.annualQuartileThreshold3,
-					row.annualQuartileThreshold4,
 				],
 				[
 					row.annualQuartile1ProportionWomen,
@@ -131,7 +132,6 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 					row.hourlyQuartileThreshold1,
 					row.hourlyQuartileThreshold2,
 					row.hourlyQuartileThreshold3,
-					row.hourlyQuartileThreshold4,
 				],
 				[
 					row.hourlyQuartile1ProportionWomen,
@@ -148,6 +148,7 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 			),
 		},
 		confidenceIndex: row.confidenceIndex,
+		periodStart: row.periodStart,
 		periodEnd: row.periodEnd,
 	};
 }
@@ -194,7 +195,6 @@ export const CSV_TO_SCHEMA_MAP: Record<string, keyof GipMdsRow> = {
 	Seuil_Q1_Rem_globale: "annualQuartileThreshold1",
 	Seuil_Q2_Rem_globale: "annualQuartileThreshold2",
 	Seuil_Q3_Rem_globale: "annualQuartileThreshold3",
-	Seuil_Q4_Rem_globale: "annualQuartileThreshold4",
 	Quartile1_Rem_globale_annuelle_proportion_F: "annualQuartile1ProportionWomen",
 	Quartile2_Rem_globale_annuelle_proportion_F: "annualQuartile2ProportionWomen",
 	Quartile3_Rem_globale_annuelle_proportion_F: "annualQuartile3ProportionWomen",
@@ -206,7 +206,6 @@ export const CSV_TO_SCHEMA_MAP: Record<string, keyof GipMdsRow> = {
 	Seuil_Q1_Taux_horaire_global: "hourlyQuartileThreshold1",
 	Seuil_Q2_Taux_horaire_global: "hourlyQuartileThreshold2",
 	Seuil_Q3_Taux_horaire_global: "hourlyQuartileThreshold3",
-	Seuil_Q4_Taux_horaire_global: "hourlyQuartileThreshold4",
 	Quartile1_Taux_horaire_global_proportion_F: "hourlyQuartile1ProportionWomen",
 	Quartile2_Taux_horaire_global_proportion_F: "hourlyQuartile2ProportionWomen",
 	Quartile3_Taux_horaire_global_proportion_F: "hourlyQuartile3ProportionWomen",
@@ -261,7 +260,7 @@ function proportionToCount(
 function buildQuartileData(
 	totalWomen: number | null,
 	totalMen: number | null,
-	thresholds: [string | null, string | null, string | null, string | null],
+	thresholds: [string | null, string | null, string | null],
 	womenProportions: [
 		string | null,
 		string | null,
