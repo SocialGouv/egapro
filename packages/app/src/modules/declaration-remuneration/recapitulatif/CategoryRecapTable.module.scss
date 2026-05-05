@@ -42,6 +42,6 @@
 	   right-borders, which gave a darker stripe at the column boundary). */
 	background-image:
 		linear-gradient(0deg, var(--border-contrast-grey), var(--border-contrast-grey)),
-		linear-gradient(0deg, var(--border-contrast-grey), var(--border-contrast-grey));
+		linear-gradient(0deg, transparent, transparent);
 	font-weight: 400;
 }
