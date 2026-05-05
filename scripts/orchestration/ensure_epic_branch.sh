@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # ensure_epic_branch.sh <epic_N>
 #
 # Idempotent: ensures the integration branch `epic/<N>` exists on origin.
@@ -27,7 +34,7 @@ if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
     exit 0
 fi
 
-ALPHA_OID=$(git ls-remote --heads origin alpha 2>/dev/null | awk '{print $1}' | head -1)
+ALPHA_OID=$(git ls-remote --heads origin alpha 2>/dev/null | awk '{print $1}' | head -1 || true)
 if [ -z "$ALPHA_OID" ]; then
     echo "[ensure_epic_branch] ERROR: cannot resolve origin/alpha" >&2
     exit 1

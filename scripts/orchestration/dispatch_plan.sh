@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # dispatch_plan.sh <epic_N1> [<epic_N2> ...]
 #
 # Computes the next-tick dispatch plan for one or more active epics.
@@ -39,12 +46,6 @@
 
 set -euo pipefail
 
-# Mac compat: `declare -A` needs bash 4+ (macOS ships bash 3.2 by default).
-if [ "${BASH_VERSINFO[0]:-0}" -lt 4 ]; then
-    echo "ERROR: this script requires bash 4+ (you have ${BASH_VERSION:-unknown}). On macOS: brew install bash" >&2
-    exit 1
-fi
-
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <epic_N1> [<epic_N2> ...]" >&2
     exit 1
@@ -74,7 +75,7 @@ while IFS= read -r path; do
     esac
     ENV_FILE="$path/packages/app/.env.local"
     [ -f "$ENV_FILE" ] || continue
-    PORT_LINE=$(grep '^PORT=' "$ENV_FILE" | head -1 | cut -d= -f2)
+    PORT_LINE=$(grep '^PORT=' "$ENV_FILE" | head -1 | cut -d= -f2 || true)
     [[ "$PORT_LINE" =~ ^[0-9]+$ ]] || continue
     IDX=$((PORT_LINE - 3001))
     if [ "$IDX" -ge 0 ] && [ "$IDX" -lt "$MAX_PARALLEL" ]; then
@@ -126,7 +127,7 @@ for EPIC_N in "$@"; do
     declare -A SUB_LABELS
     while IFS= read -r issue; do
         N=$(echo "$issue" | jq -r '.number')
-        S=$(echo "$issue" | jq -r '.projectItems.nodes[0].fieldValues.nodes[]? | select(.field.name == "Status") | .name' | head -1)
+        S=$(echo "$issue" | jq -r '.projectItems.nodes[0].fieldValues.nodes[]? | select(.field.name == "Status") | .name' | head -1 || true)
         L=$(echo "$issue" | jq -r '[.labels.nodes[].name] | join(",")')
         SUB_STATUS[$N]="$S"
         SUB_LABELS[$N]="$L"
@@ -167,7 +168,7 @@ for EPIC_N in "$@"; do
         BASE_BRANCH="origin/epic/${EPIC_N}"
         BLOCKED=0
         for DEP in $DEPS; do
-            DEP_BRANCH=$(git ls-remote --heads origin "ticket/${DEP}-*" 2>/dev/null | awk '{print $2}' | head -1)
+            DEP_BRANCH=$(git ls-remote --heads origin "ticket/${DEP}-*" 2>/dev/null | awk '{print $2}' | head -1 || true)
             if [ -n "$DEP_BRANCH" ]; then
                 # Branch still on origin → not yet squash-merged → child blocked
                 BLOCKED=1

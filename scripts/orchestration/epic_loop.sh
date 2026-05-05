@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # epic_loop.sh <epic_N1> [<epic_N2> ...]
 #
 # Bash loop driver for /implement (mode epic) orchestration. Runs in the background, ticking
@@ -39,19 +46,19 @@ set -euo pipefail
 
 # ---- Mac compat ----
 # `declare -A` (associative arrays) needs bash 4+. macOS ships bash 3.2 by
-# default; users must install a modern bash via Homebrew (`brew install bash`).
-if [ "${BASH_VERSINFO[0]:-0}" -lt 4 ]; then
-    echo "ERROR: this script requires bash 4+ (you have ${BASH_VERSION:-unknown})." >&2
-    echo "  On macOS: brew install bash    (then restart the shell so /opt/homebrew/bin/bash is first in PATH)" >&2
-    exit 1
-fi
+# default; auto re-exec via Homebrew bash if available, otherwise instruct.
+# (Note: this guard fires before `set -e` only if placed at the top, so the
+# script's main logic is the bash 4+ block that follows.)
 
-# `timeout` is GNU coreutils on Linux; on macOS install `coreutils` via
-# Homebrew which exposes it as `gtimeout`. Resolve once, fail loud if neither.
-TIMEOUT_BIN="$(command -v timeout 2>/dev/null || command -v gtimeout 2>/dev/null || true)"
-if [ -z "$TIMEOUT_BIN" ]; then
-    echo "ERROR: 'timeout' not found. On macOS: brew install coreutils    (provides gtimeout)" >&2
-    exit 1
+# `timeout` is GNU coreutils. Linux distros ship it as `timeout`; macOS users
+# get it via `brew install coreutils` which installs it as `gtimeout`. If
+# neither is present, run claude without a hard timeout — the loop's per-tick
+# aggregation will still catch pathological cases.
+TIMEOUT_BIN=""
+if command -v timeout >/dev/null 2>&1; then
+    TIMEOUT_BIN="timeout"
+elif command -v gtimeout >/dev/null 2>&1; then
+    TIMEOUT_BIN="gtimeout"
 fi
 
 if [ $# -eq 0 ]; then
@@ -215,7 +222,11 @@ Ton dernier message DOIT être uniquement ce JSON (rien d'autre, pas de prose)."
     # The latter only makes the flag *available* for an interactive session;
     # in --print mode it has no effect, so the sub-agent hits unresolved
     # permission prompts on every gh / bash / pnpm call and aborts.
-    "$TIMEOUT_BIN" "$AGENT_TIMEOUT" claude \
+    # TIMEOUT_BIN may be empty on hosts without timeout/gtimeout — unquoted
+    # word-split lets it disappear cleanly.
+    local TIMEOUT_PREFIX=""
+    [ -n "$TIMEOUT_BIN" ] && TIMEOUT_PREFIX="$TIMEOUT_BIN $AGENT_TIMEOUT"
+    $TIMEOUT_PREFIX claude \
         --agent "$AGENT" \
         --model "$MODEL" \
         --print \
@@ -397,10 +408,33 @@ while [ $TICK -lt $MAX_TICKS ]; do
             fi
 
             TICKET_EPIC="${AGENT_EPIC[$ticket]:-}"
+            # Tolerant verdict extraction:
+            # 1) Pure JSON (the strict contract).
+            # 2) JSON inside a ```json ... ``` markdown fence — common when the
+            #    sub-agent ignores "no prose" and adds a summary section.
+            # 3) The first {...} object in the text containing a `"status"` key.
+            # Otherwise fall through to a `failed` result with the raw output.
+            RAW_VERDICT=""
             if echo "$RESULT_TEXT" | jq -e '.status' >/dev/null 2>&1; then
-                RESULT_JSON=$(echo "$RESULT_TEXT" | jq -c --argjson epic "${TICKET_EPIC:-0}" '. + {epic: $epic}')
+                RAW_VERDICT="$RESULT_TEXT"
             else
-                ESCAPED=$(echo "$RESULT_TEXT" | jq -Rs '.' | head -c 500)
+                FENCED=$(echo "$RESULT_TEXT" | awk '
+                    /^```(json)?[[:space:]]*$/ { if (in_block) exit; in_block=1; next }
+                    in_block { print }
+                ')
+                if [ -n "$FENCED" ] && echo "$FENCED" | jq -e '.status' >/dev/null 2>&1; then
+                    RAW_VERDICT="$FENCED"
+                else
+                    EXTRACTED=$(echo "$RESULT_TEXT" | grep -oE '\{[^{}]*"status"[^{}]*\}' | head -1 || true)
+                    if [ -n "$EXTRACTED" ] && echo "$EXTRACTED" | jq -e '.status' >/dev/null 2>&1; then
+                        RAW_VERDICT="$EXTRACTED"
+                    fi
+                fi
+            fi
+            if [ -n "$RAW_VERDICT" ]; then
+                RESULT_JSON=$(echo "$RAW_VERDICT" | jq -c --argjson epic "${TICKET_EPIC:-0}" '. + {epic: $epic}')
+            else
+                ESCAPED=$(echo "$RESULT_TEXT" | jq -Rs '.' | head -c 500 || true)
                 RESULT_JSON=$(jq -nc \
                     --argjson ticket "$ticket" \
                     --argjson epic "${TICKET_EPIC:-0}" \

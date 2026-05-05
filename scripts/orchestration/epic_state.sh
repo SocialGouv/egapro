@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # epic_state.sh <epic_N1> [<epic_N2> ...]
 #
 # Compact status dump for one or more epics. Replaces N individual
@@ -84,7 +91,7 @@ for EPIC_N in "$@"; do
         N=$(echo "$issue" | jq -r '.number')
         LABELS=$(echo "$issue" | jq -r '[.labels.nodes[].name] | join(",")')
 
-        STATUS=$(echo "$issue" | jq -r '.projectItems.nodes[0].fieldValues.nodes[]? | select(.field.name == "Status") | .name' 2>/dev/null | head -1)
+        STATUS=$(echo "$issue" | jq -r '.projectItems.nodes[0].fieldValues.nodes[]? | select(.field.name == "Status") | .name' 2>/dev/null | head -1 || true)
         [ -z "$STATUS" ] || [ "$STATUS" = "null" ] && STATUS="-"
 
         # Latest log event across all agents on this ticket
@@ -109,7 +116,7 @@ for EPIC_N in "$@"; do
 
         if [ -n "$LATEST_LOG" ]; then
             LAST_LINE=$(tail -n 1 "$LATEST_LOG")
-            LAST_EVENT=$(echo "$LAST_LINE" | grep -oE '\[[A-Z_0-9]+\]' | head -1 | tr -d '[]')
+            LAST_EVENT=$(echo "$LAST_LINE" | grep -oE '\[[A-Z_0-9]+\]' | head -1 | tr -d '[]' || true)
             [ -z "$LAST_EVENT" ] && LAST_EVENT="-"
             AGE_SEC=$((NOW_TS - LATEST_MTIME))
             if [ "$AGE_SEC" -lt 60 ]; then

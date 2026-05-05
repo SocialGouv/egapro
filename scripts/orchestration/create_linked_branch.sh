@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # create_linked_branch.sh <ticket_number> <base_branch>
 #
 # Creates a branch officially "linked" to the GitHub issue (i.e. it shows up
@@ -30,9 +37,11 @@ fi
 TICKET="$1"
 BASE="$2"
 
-# 1. Reuse existing branch if any (idempotent across re-runs)
+# 1. Reuse existing branch if any (idempotent across re-runs).
+# `head -1` SIGPIPEs upstream `awk`/`sed`; under `set -o pipefail` (bash 5+)
+# that poisons `set -e` and silently aborts the script. `|| true` prevents it.
 EXISTING=$(git ls-remote --heads origin "ticket/${TICKET}-*" 2>/dev/null \
-    | awk '{print $2}' | sed 's|refs/heads/||' | head -1)
+    | awk '{print $2}' | sed 's|refs/heads/||' | head -1 || true)
 if [ -n "$EXISTING" ]; then
     echo "[create_linked_branch] reusing existing branch: $EXISTING" >&2
     echo "$EXISTING"
@@ -45,12 +54,18 @@ TITLE=$(gh issue view "$TICKET" --json title --jq '.title')
 TITLE_TRIMMED=$(echo "$TITLE" | sed -E 's/^(T[0-9]+ *[—–-] *|\[[^]]+\] *)//')
 # Slugify: lowercase, ASCII-fold removes accents, non-alphanumeric → '-',
 # collapse runs of '-', trim leading/trailing '-', cap at 40 chars.
+# Truncation uses bash parameter expansion (not `head -c`) so a SIGPIPE from
+# a downstream pipe stage doesn't tank the pipeline under `set -o pipefail`
+# for long titles. macOS `iconv -t ASCII//TRANSLIT` exits non-zero on some
+# characters even with TRANSLIT — `|| cat` falls through unchanged so a
+# single quirky character doesn't crash the whole slugifier.
 SLUG=$(echo "$TITLE_TRIMMED" \
-    | iconv -f UTF-8 -t ASCII//TRANSLIT 2>/dev/null \
+    | { iconv -f UTF-8 -t ASCII//TRANSLIT 2>/dev/null || cat; } \
     | tr '[:upper:]' '[:lower:]' \
     | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' \
-    | head -c 40 \
-    | sed -E 's/-+$//')
+    || true)
+SLUG="${SLUG:0:40}"
+SLUG="${SLUG%-}"
 
 if [ -z "$SLUG" ]; then
     SLUG="ticket"
@@ -61,7 +76,7 @@ NAME="ticket/${TICKET}-${SLUG}"
 # 3. Resolve the base branch SHA. Accept either a remote-tracking ref
 # (origin/<x>) or a bare branch name (<x>).
 BASE_REF="${BASE#origin/}"
-OID=$(git ls-remote --heads origin "$BASE_REF" 2>/dev/null | awk '{print $1}' | head -1)
+OID=$(git ls-remote --heads origin "$BASE_REF" 2>/dev/null | awk '{print $1}' | head -1 || true)
 if [ -z "$OID" ]; then
     echo "[create_linked_branch] ERROR: cannot resolve SHA for base $BASE" >&2
     exit 1

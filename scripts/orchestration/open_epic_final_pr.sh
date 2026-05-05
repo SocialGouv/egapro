@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # open_epic_final_pr.sh <epic_N>
 #
 # Opens (or reuses, if already open) the integration PR `epic/<N> → alpha`
@@ -72,7 +79,7 @@ PR_URL=$(gh pr create \
     exit 1
 }
 
-PR_NUM=$(echo "$PR_URL" | grep -oE 'pull/[0-9]+' | sed 's|pull/||' | head -1)
+PR_NUM=$(echo "$PR_URL" | grep -oE 'pull/[0-9]+' | sed 's|pull/||' | head -1 || true)
 if [ -z "$PR_NUM" ]; then
     PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$' | tail -1)
 fi

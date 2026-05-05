@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # render_dashboard.sh
 #
 # Formats the /report dashboard from .claude/state/epic_run/.
@@ -65,7 +72,7 @@ for log in "$LOG_DIR"/*.log; do
 
     # Skip if terminal state in last event
     LAST_LINE=$(tail -n 1 "$log" 2>/dev/null || echo "")
-    LAST_EVENT=$(echo "$LAST_LINE" | grep -oE '\[[A-Z_0-9]+\]' | head -1 | tr -d '[]')
+    LAST_EVENT=$(echo "$LAST_LINE" | grep -oE '\[[A-Z_0-9]+\]' | head -1 | tr -d '[]' || true)
 
     case "$LAST_EVENT" in
         COMPLETE|STUCK|ESCALATED) continue ;;

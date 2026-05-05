@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # open_worktree.sh <pr_number>
 #
 # Recreate the egapro worktree for a given PR — used after /implement (mode
@@ -17,12 +24,6 @@
 # Idempotent: if the worktree already exists at the expected path, reuse it.
 
 set -euo pipefail
-
-# Mac compat: `declare -A` needs bash 4+ (macOS ships bash 3.2 by default).
-if [ "${BASH_VERSINFO[0]:-0}" -lt 4 ]; then
-    echo "ERROR: this script requires bash 4+ (you have ${BASH_VERSION:-unknown}). On macOS: brew install bash" >&2
-    exit 1
-fi
 
 if [ $# -lt 1 ]; then
     echo "Usage: $0 <pr_number>" >&2
@@ -59,7 +60,7 @@ fi
 # (e.g. PR targets a non-default branch and the link wasn't established).
 if [ -z "$TICKET" ]; then
     BODY=$(gh pr view "$PR" --json body --jq '.body')
-    TICKET=$(echo "$BODY" | grep -ioE '(closes|resolves|fixes) #[0-9]+' | head -1 | grep -oE '[0-9]+' | head -1)
+    TICKET=$(echo "$BODY" | grep -ioE '(closes|resolves|fixes) #[0-9]+' | head -1 | grep -oE '[0-9]+' | head -1 || true)
 fi
 
 if [ -z "$TICKET" ]; then
@@ -100,7 +101,7 @@ while IFS= read -r path; do
     case "$(basename "$path")" in egapro-epic*-t*) ;; *) continue ;; esac
     ENV_FILE="$path/packages/app/.env.local"
     [ -f "$ENV_FILE" ] || continue
-    PORT_LINE=$(grep '^PORT=' "$ENV_FILE" | head -1 | cut -d= -f2)
+    PORT_LINE=$(grep '^PORT=' "$ENV_FILE" | head -1 | cut -d= -f2 || true)
     [[ "$PORT_LINE" =~ ^[0-9]+$ ]] || continue
     IDX=$((PORT_LINE - 3001))
     if [ "$IDX" -ge 0 ] && [ "$IDX" -lt "$MAX_PARALLEL" ]; then
