@@ -85,7 +85,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 			/>,
 		);
 		const seuilInputs = screen.getAllByLabelText(/Seuil maximum/);
-		expect(seuilInputs[0]).toHaveValue("25 000");
+		expect(seuilInputs[0]).toHaveValue("25 000,00");
 		const womenCountInputs = screen.getAllByLabelText(/Nombre de femmes/);
 		expect(womenCountInputs[0]).toHaveValue("30");
 		const menCountInputs = screen.getAllByLabelText(/Nombre d'hommes/);
@@ -119,8 +119,8 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 			/>,
 		);
 		const seuilInputs = screen.getAllByLabelText(/Seuil maximum/);
-		expect(seuilInputs[0]).toHaveValue("25 000");
-		expect(seuilInputs[2]).toHaveValue("40 000");
+		expect(seuilInputs[0]).toHaveValue("25 000,00");
+		expect(seuilInputs[2]).toHaveValue("40 000,00");
 	});
 
 	it("uses gipPrefillData with all null quartile data", () => {

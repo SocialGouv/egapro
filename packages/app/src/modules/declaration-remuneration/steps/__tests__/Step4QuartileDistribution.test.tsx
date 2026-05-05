@@ -312,7 +312,7 @@ describe("Step4QuartileDistribution", () => {
 			/>,
 		);
 		const seuilInputs = screen.getAllByLabelText(/Seuil maximum/);
-		expect(seuilInputs[0]).toHaveValue("25 000");
+		expect(seuilInputs[0]).toHaveValue("25 000,00");
 		const womenCountInputs = screen.getAllByLabelText(/Nombre de femmes/);
 		expect(womenCountInputs[0]).toHaveValue("30");
 		const menCountInputs = screen.getAllByLabelText(/Nombre d'hommes/);
