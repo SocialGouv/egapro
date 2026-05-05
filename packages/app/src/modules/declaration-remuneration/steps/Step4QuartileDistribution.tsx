@@ -207,11 +207,15 @@ export function Step4QuartileDistribution({
 				onDevFill={() => {
 					form.setValue(
 						"annual",
-						DEV_STEP4_ANNUAL.map(toQuartileData) as QuartileTuple,
+						padThresholds(
+							DEV_STEP4_ANNUAL.map(toQuartileData) as QuartileTuple,
+						),
 					);
 					form.setValue(
 						"hourly",
-						DEV_STEP4_HOURLY.map(toQuartileData) as QuartileTuple,
+						padThresholds(
+							DEV_STEP4_HOURLY.map(toQuartileData) as QuartileTuple,
+						),
 					);
 					setSaved(false);
 					setFieldErrors(emptyErrorMap());

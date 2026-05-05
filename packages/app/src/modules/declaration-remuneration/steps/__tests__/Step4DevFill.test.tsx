@@ -52,7 +52,7 @@ describe("Step4QuartileDistribution dev fill", () => {
 		const seuilInputs = screen.getAllByLabelText(/Seuil maximum/);
 		expect(seuilInputs.length).toBe(6);
 		const firstSeuil = seuilInputs[0] as HTMLInputElement;
-		expect(firstSeuil.value.replace(/\s/g, " ")).toBe("22 000");
+		expect(firstSeuil.value.replace(/\s/g, " ")).toBe("22 000,00");
 
 		// 4 women count inputs per table → 8 total, all filled
 		const womenInputs = screen.getAllByLabelText(/Nombre de femmes/);
