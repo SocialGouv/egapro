@@ -29,19 +29,204 @@
 }
 
 .quartileTable {
-	th,
-	td {
-		white-space: normal;
+	:global(.fr-table__container),
+	:global(.fr-table__content),
+	:global(.fr-table__wrapper) {
+		overflow: visible;
 	}
 
+	table {
+		width: 100%;
+		min-width: 0;
+		table-layout: fixed;
+		border-collapse: collapse;
+	}
+
+	.colRowLabel {
+		width: 9rem;
+	}
+
+	.colMin {
+		width: 7rem;
+	}
+
+	.colMax {
+		width: 7.5rem;
+	}
+
+	.colCount {
+		width: 7rem;
+	}
+
+	.colPercent {
+		width: 7rem;
+	}
+
+	th,
+	td,
+	:global(.fr-table__content) th,
+	:global(.fr-table__content) td {
+		white-space: normal;
+		vertical-align: middle;
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+
+	tbody th[scope="row"] {
+		background: transparent;
+		white-space: nowrap;
+	}
+
+	.minCell,
+	.maxCell {
+		font-variant-numeric: tabular-nums;
+		text-align: right;
+		white-space: nowrap;
+	}
+
+	.numericCell {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+	}
+
+	tbody td input:global(.fr-input) {
+		text-align: right;
+		width: 4.5rem;
+		margin-left: auto;
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+
+	tbody td .inputWithUnit input:global(.fr-input) {
+		width: 5.5rem;
+		min-width: 5.5rem;
+		max-width: 5.5rem;
+		margin-left: 0;
+	}
+
+	tbody tr:last-child {
+		font-weight: bold;
+	}
+
+	@include respond-to(sm) {
+		table {
+			display: block;
+			table-layout: auto;
+		}
+
+		thead {
+			display: none;
+		}
+
+		tbody,
+		tbody tr,
+		tbody td,
+		tbody th {
+			display: block;
+			width: 100%;
+		}
+
+		tbody tr {
+			border-bottom: 1px solid var(--border-default-grey);
+			padding: 0.75rem 0;
+		}
+
+		tbody tr:last-child {
+			border-bottom: none;
+		}
+
+		tbody td,
+		tbody th {
+			border-bottom: none;
+			padding: 0.5rem 0;
+			text-align: left;
+		}
+
+		tbody th[scope="row"] {
+			width: 100%;
+			white-space: normal;
+			padding-right: 0;
+		}
+
+		.minCell,
+		.maxCell,
+		.numericCell {
+			text-align: left;
+		}
+
+		tbody td input:global(.fr-input) {
+			text-align: left;
+			width: 100%;
+			margin-left: 0;
+		}
+
+		tbody td .inputWithUnit input:global(.fr-input) {
+			width: auto;
+			flex: 1;
+		}
+
+		tbody td[data-mobile-label]::before {
+			content: attr(data-mobile-label);
+			display: block;
+			font-size: 0.75rem;
+			color: var(--text-mention-grey);
+			margin-bottom: 0.25rem;
+			font-weight: 400;
+		}
+
+		tbody td[data-mobile-label]:empty {
+			display: none;
+		}
+	}
+}
+
+.rowLabelText {
+	display: inline;
+	white-space: nowrap;
+
+	sup {
+		font-size: 0.75em;
+		line-height: 0;
+		vertical-align: super;
+	}
+
+	:global(.fr-btn) {
+		min-height: 1rem;
+		min-width: 1rem;
+		width: 1rem;
+		height: 1rem;
+		padding: 0 !important;
+		margin-left: 0.25rem;
+		vertical-align: middle;
+		overflow: visible !important;
+
+		&::before {
+			margin: 0;
+			--icon-size: 0.875rem;
+		}
+	}
+}
+
+.readonlyCell {
+	display: inline-block;
+	font-variant-numeric: tabular-nums;
+}
+
+.cellInputGroup {
+	margin: 0;
+}
+
+.cellLabel {
+	position: absolute;
 }
 
 .inputWithUnit {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
+	justify-content: flex-end;
 
-	input {
-		min-width: 5rem;
+	@include respond-to(sm) {
+		justify-content: flex-start;
 	}
 }

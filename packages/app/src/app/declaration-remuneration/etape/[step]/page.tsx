@@ -3,7 +3,10 @@ import {
 	StepPageClient,
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
-import { shouldRedirectSubmittedToRecap } from "~/modules/domain";
+import {
+	migrateLegacyThresholds,
+	shouldRedirectSubmittedToRecap,
+} from "~/modules/domain";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
@@ -68,47 +71,58 @@ export default async function StepPage({ params }: StepPageProps) {
 		indicatorEMen: d.indicatorEMen ?? "",
 	};
 
+	const annualThresholds = migrateLegacyThresholds([
+		d.indicatorFAnnualThreshold1,
+		d.indicatorFAnnualThreshold2,
+		d.indicatorFAnnualThreshold3,
+	]);
+	const hourlyThresholds = migrateLegacyThresholds([
+		d.indicatorFHourlyThreshold1,
+		d.indicatorFHourlyThreshold2,
+		d.indicatorFHourlyThreshold3,
+	]);
+
 	const step4Data = {
 		annual: [
 			{
-				threshold: d.indicatorFAnnualThreshold1 ?? "",
+				threshold: annualThresholds[0],
 				women: d.indicatorFAnnualWomen1 ?? undefined,
 				men: d.indicatorFAnnualMen1 ?? undefined,
 			},
 			{
-				threshold: d.indicatorFAnnualThreshold2 ?? "",
+				threshold: annualThresholds[1],
 				women: d.indicatorFAnnualWomen2 ?? undefined,
 				men: d.indicatorFAnnualMen2 ?? undefined,
 			},
 			{
-				threshold: d.indicatorFAnnualThreshold3 ?? "",
+				threshold: annualThresholds[2],
 				women: d.indicatorFAnnualWomen3 ?? undefined,
 				men: d.indicatorFAnnualMen3 ?? undefined,
 			},
 			{
-				threshold: "",
+				threshold: undefined,
 				women: d.indicatorFAnnualWomen4 ?? undefined,
 				men: d.indicatorFAnnualMen4 ?? undefined,
 			},
 		],
 		hourly: [
 			{
-				threshold: d.indicatorFHourlyThreshold1 ?? "",
+				threshold: hourlyThresholds[0],
 				women: d.indicatorFHourlyWomen1 ?? undefined,
 				men: d.indicatorFHourlyMen1 ?? undefined,
 			},
 			{
-				threshold: d.indicatorFHourlyThreshold2 ?? "",
+				threshold: hourlyThresholds[1],
 				women: d.indicatorFHourlyWomen2 ?? undefined,
 				men: d.indicatorFHourlyMen2 ?? undefined,
 			},
 			{
-				threshold: d.indicatorFHourlyThreshold3 ?? "",
+				threshold: hourlyThresholds[2],
 				women: d.indicatorFHourlyWomen3 ?? undefined,
 				men: d.indicatorFHourlyMen3 ?? undefined,
 			},
 			{
-				threshold: "",
+				threshold: undefined,
 				women: d.indicatorFHourlyWomen4 ?? undefined,
 				men: d.indicatorFHourlyMen4 ?? undefined,
 			},

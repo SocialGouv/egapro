@@ -1,43 +1,42 @@
 "use client";
 
-import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
-import type { QuartileData } from "~/modules/declaration-remuneration/types";
-import { computePercentage, displayDecimal } from "~/modules/domain";
+import type { QuartileTuple } from "~/modules/declaration-remuneration/types";
+import { computePercentage } from "~/modules/domain";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
+import { QuartileTableRow } from "./QuartileTableRow";
+
+type Field = "threshold" | "women" | "men";
+
+export type QuartileFieldErrors = {
+	threshold?: string;
+	women?: string;
+	men?: string;
+};
 
 type Props = {
 	title: string;
 	tableType: "annual" | "hourly";
-	quartiles: QuartileData[];
-	validationError: string | null;
+	quartiles: QuartileTuple;
+	/** Display string for each quartile lower bound (Q1..Q4). */
+	mins: [string, string, string, string];
+	errors: [
+		QuartileFieldErrors,
+		QuartileFieldErrors,
+		QuartileFieldErrors,
+		QuartileFieldErrors,
+	];
 	readingNote?: React.ReactNode;
 	sourceNote?: React.ReactNode;
-	onQuartileChange: (
-		index: number,
-		field: "threshold" | "women" | "men",
-		value: string,
-	) => void;
+	onQuartileChange: (index: number, field: Field, value: string) => void;
 	disabled?: boolean;
 };
-
-/** Format ordinal text like "1er quartile" → 1<sup>er</sup> quartile */
-function OrdinalLabel({ text }: { text: string }) {
-	const match = text.match(/^(\d+)(er|e)\s(.+)$/);
-	if (!match) return <>{text}</>;
-	const [, num, suffix, rest] = match;
-	return (
-		<>
-			{num}
-			<sup>{suffix}</sup> {rest}
-		</>
-	);
-}
 
 export function QuartileTable({
 	title,
 	tableType,
 	quartiles,
-	validationError,
+	mins,
+	errors,
 	readingNote,
 	sourceNote,
 	onQuartileChange,
@@ -46,6 +45,8 @@ export function QuartileTable({
 	const totalWomen = quartiles.reduce((sum, q) => sum + (q.women ?? 0), 0);
 	const totalMen = quartiles.reduce((sum, q) => sum + (q.men ?? 0), 0);
 	const totalAll = totalWomen + totalMen;
+	const trancheSuffix =
+		tableType === "annual" ? "annuelle brute" : "horaire brute";
 
 	return (
 		<div className={stepStyles.tableWrapper}>
@@ -53,153 +54,93 @@ export function QuartileTable({
 			<div className={stepStyles.tableSection}>
 				{readingNote}
 				<div
-					className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
+					className={`fr-table fr-table--no-scroll fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
 				>
 					<div className="fr-table__wrapper">
 						<div className="fr-table__container">
 							<div className="fr-table__content">
 								<table>
-									<caption>{title}</caption>
+									<caption className="fr-sr-only">{title}</caption>
+									<colgroup>
+										<col className={stepStyles.colRowLabel} />
+										<col className={stepStyles.colMin} />
+										<col className={stepStyles.colMax} />
+										<col className={stepStyles.colCount} />
+										<col className={stepStyles.colCount} />
+										<col className={stepStyles.colPercent} />
+										<col className={stepStyles.colPercent} />
+									</colgroup>
 									<thead>
 										<tr>
 											<th scope="col">{/* row label */}</th>
-											{QUARTILE_NAMES.map((name) => (
-												<th key={name} scope="col">
-													<OrdinalLabel text={name} />
-												</th>
-											))}
-											<th scope="col">
-												Tous
+											<th colSpan={2} scope="col">
+												Tranche de rémunération
 												<br />
-												les salariés
+												{trancheSuffix}
+											</th>
+											<th scope="col">
+												Nombre
+												<br />
+												de femmes
+											</th>
+											<th scope="col">
+												Nombre
+												<br />
+												d&apos;hommes
+											</th>
+											<th scope="col">
+												Pourcentage
+												<br />
+												de femmes
+											</th>
+											<th scope="col">
+												Pourcentage
+												<br />
+												d&apos;hommes
 											</th>
 										</tr>
 									</thead>
 									<tbody>
-										{/* Row 1: Remuneration */}
+										{[0, 1, 2, 3].map((i) => (
+											<QuartileTableRow
+												disabled={disabled}
+												errors={errors[i] ?? {}}
+												index={i}
+												key={`${tableType}-q${i + 1}`}
+												min={mins[i] ?? ""}
+												onQuartileChange={onQuartileChange}
+												quartile={quartiles[i] ?? { threshold: undefined }}
+												tableType={tableType}
+											/>
+										))}
 										<tr>
-											<td>
-												Rémunération
-												<br />
-												{tableType === "annual"
-													? "annuelle brute"
-													: "horaire brute"}
+											<th scope="row">Tous les salariés</th>
+											<td className={stepStyles.minCell} />
+											<td className={stepStyles.maxCell} />
+											<td
+												className={stepStyles.numericCell}
+												data-mobile-label="Nombre de femmes"
+											>
+												<strong>{totalAll > 0 ? totalWomen : "-"}</strong>
 											</td>
-											{quartiles.map((q, i) => (
-												<td key={QUARTILE_NAMES[i]}>
-													<span className={stepStyles.inputWithUnit}>
-														<input
-															aria-label={`Rémunération brute ${QUARTILE_NAMES[i]}`}
-															className="fr-input"
-															disabled={disabled}
-															inputMode="decimal"
-															onChange={(e) =>
-																onQuartileChange(i, "threshold", e.target.value)
-															}
-															type="text"
-															value={displayDecimal(q.threshold ?? "")}
-														/>
-														<span aria-hidden="true">€</span>
-													</span>
-												</td>
-											))}
-											<td>-</td>
-										</tr>
-										{/* Row 2: Women count */}
-										<tr>
-											<td>
-												Nombre
-												<br />
-												de femmes
+											<td
+												className={stepStyles.numericCell}
+												data-mobile-label="Nombre d'hommes"
+											>
+												<strong>{totalAll > 0 ? totalMen : "-"}</strong>
 											</td>
-											{quartiles.map((q, i) => (
-												<td key={QUARTILE_NAMES[i]}>
-													<input
-														aria-label={`Nombre de femmes ${QUARTILE_NAMES[i]}`}
-														className="fr-input"
-														disabled={disabled}
-														inputMode="numeric"
-														onChange={(e) =>
-															onQuartileChange(i, "women", e.target.value)
-														}
-														pattern="[0-9]*"
-														type="text"
-														value={q.women ?? ""}
-													/>
-												</td>
-											))}
-											<td>{totalAll > 0 ? totalWomen : "-"}</td>
-										</tr>
-										{/* Row 3: Women percentage */}
-										<tr>
-											<td>
-												<strong>
-													Pourcentage
-													<br />
-													de femmes
-												</strong>
-											</td>
-											{quartiles.map((q, i) => {
-												const total = (q.women ?? 0) + (q.men ?? 0);
-												return (
-													<td key={QUARTILE_NAMES[i]}>
-														<strong>
-															{computePercentage(q.women ?? 0, total)}
-														</strong>
-													</td>
-												);
-											})}
-											<td>
+											<td
+												className={stepStyles.numericCell}
+												data-mobile-label="Pourcentage de femmes"
+											>
 												<strong>
 													{computePercentage(totalWomen, totalAll)}
 												</strong>
 											</td>
-										</tr>
-										{/* Row 4: Men count */}
-										<tr>
-											<td>
-												Nombre
-												<br />
-												d&apos;hommes
-											</td>
-											{quartiles.map((q, i) => (
-												<td key={QUARTILE_NAMES[i]}>
-													<input
-														aria-label={`Nombre d'hommes ${QUARTILE_NAMES[i]}`}
-														className="fr-input"
-														disabled={disabled}
-														inputMode="numeric"
-														onChange={(e) =>
-															onQuartileChange(i, "men", e.target.value)
-														}
-														pattern="[0-9]*"
-														type="text"
-														value={q.men ?? ""}
-													/>
-												</td>
-											))}
-											<td>{totalAll > 0 ? totalMen : "-"}</td>
-										</tr>
-										{/* Row 5: Men percentage */}
-										<tr>
-											<td>
-												<strong>
-													Pourcentage
-													<br />
-													d&apos;hommes
-												</strong>
-											</td>
-											{quartiles.map((q, i) => {
-												const total = (q.women ?? 0) + (q.men ?? 0);
-												return (
-													<td key={QUARTILE_NAMES[i]}>
-														<strong>
-															{computePercentage(q.men ?? 0, total)}
-														</strong>
-													</td>
-												);
-											})}
-											<td>
+											<td
+												className={stepStyles.numericCell}
+												data-mobile-label="Pourcentage d'hommes"
+											>
 												<strong>{computePercentage(totalMen, totalAll)}</strong>
 											</td>
 										</tr>
@@ -210,14 +151,6 @@ export function QuartileTable({
 					</div>
 				</div>
 
-				{validationError && (
-					<div
-						aria-live="polite"
-						className="fr-alert fr-alert--error fr-alert--sm"
-					>
-						<p>{validationError}</p>
-					</div>
-				)}
 				{sourceNote}
 			</div>
 		</div>

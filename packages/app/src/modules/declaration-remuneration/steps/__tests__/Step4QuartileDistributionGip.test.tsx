@@ -84,8 +84,8 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				initialData={emptyStep4Data()}
 			/>,
 		);
-		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
-		expect(remuInputs[0]).toHaveValue("25 000");
+		const seuilInputs = screen.getAllByLabelText(/Seuil maximum/);
+		expect(seuilInputs[0]).toHaveValue("25 000");
 		const womenCountInputs = screen.getAllByLabelText(/Nombre de femmes/);
 		expect(womenCountInputs[0]).toHaveValue("30");
 		const menCountInputs = screen.getAllByLabelText(/Nombre d'hommes/);
@@ -118,10 +118,9 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				initialData={emptyStep4Data()}
 			/>,
 		);
-		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
-		expect(remuInputs[0]).toHaveValue("25 000");
-		expect(remuInputs[2]).toHaveValue("40 000");
-		expect(remuInputs[3]).toHaveValue("");
+		const seuilInputs = screen.getAllByLabelText(/Seuil maximum/);
+		expect(seuilInputs[0]).toHaveValue("25 000");
+		expect(seuilInputs[2]).toHaveValue("40 000");
 	});
 
 	it("uses gipPrefillData with all null quartile data", () => {
@@ -150,8 +149,8 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				initialData={emptyStep4Data()}
 			/>,
 		);
-		const remuInputs = screen.getAllByLabelText(/Rémunération brute/);
-		for (const input of remuInputs) {
+		const seuilInputs = screen.getAllByLabelText(/Seuil maximum/);
+		for (const input of seuilInputs) {
 			expect(input).toHaveValue("");
 		}
 	});
