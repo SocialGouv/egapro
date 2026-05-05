@@ -261,11 +261,10 @@ function generateRow(company: CompanyData): string[] {
 		totalWomen > 0 ? variableWomen / totalWomen : 0;
 	const proportionVariableMen = totalMen > 0 ? variableMen / totalMen : 0;
 
-	// Quartile distribution (annual)
+	// Quartile distribution (annual) — Q1-Q3 thresholds only; Q4 has none in GIP model
 	const q1Threshold = baseSalaryMen * randBetween(0.5, 0.7);
 	const q2Threshold = baseSalaryMen * randBetween(0.7, 0.9);
 	const q3Threshold = baseSalaryMen * randBetween(0.9, 1.1);
-	const q4Threshold = baseSalaryMen * randBetween(1.1, 1.5);
 
 	// Women proportion tends to decrease in higher quartiles for disfavored profiles
 	const q1WomenProp = Math.min(
@@ -292,11 +291,10 @@ function generateRow(company: CompanyData): string[] {
 		),
 	);
 
-	// Hourly quartile thresholds
+	// Hourly quartile thresholds — Q1-Q3 only
 	const hq1 = q1Threshold / 1820;
 	const hq2 = q2Threshold / 1820;
 	const hq3 = q3Threshold / 1820;
-	const hq4 = q4Threshold / 1820;
 
 	// Hourly quartile proportions (slight variation from annual)
 	const hq1WomenProp = Math.min(
@@ -374,11 +372,10 @@ function generateRow(company: CompanyData): string[] {
 		// Indicator E — Variable pay proportions
 		fmt4(proportionVariableWomen),
 		fmt4(proportionVariableMen),
-		// Indicator F — Annual quartile thresholds
+		// Indicator F — Annual quartile thresholds (Q1-Q3 only)
 		fmt2(q1Threshold),
 		fmt2(q2Threshold),
 		fmt2(q3Threshold),
-		fmt2(q4Threshold),
 		// Annual quartile proportions (women)
 		fmt4(q1WomenProp),
 		fmt4(q2WomenProp),
@@ -389,11 +386,10 @@ function generateRow(company: CompanyData): string[] {
 		fmt4(1 - q2WomenProp),
 		fmt4(1 - q3WomenProp),
 		fmt4(1 - q4WomenProp),
-		// Hourly quartile thresholds
+		// Hourly quartile thresholds (Q1-Q3 only)
 		fmt2(hq1),
 		fmt2(hq2),
 		fmt2(hq3),
-		fmt2(hq4),
 		// Hourly quartile proportions (women)
 		fmt4(hq1WomenProp),
 		fmt4(hq2WomenProp),
@@ -463,7 +459,6 @@ const HEADERS = [
 	"Seuil_Q1_Rem_globale",
 	"Seuil_Q2_Rem_globale",
 	"Seuil_Q3_Rem_globale",
-	"Seuil_Q4_Rem_globale",
 	"Quartile1_Rem_globale_annuelle_proportion_F",
 	"Quartile2_Rem_globale_annuelle_proportion_F",
 	"Quartile3_Rem_globale_annuelle_proportion_F",
@@ -475,7 +470,6 @@ const HEADERS = [
 	"Seuil_Q1_Taux_horaire_global",
 	"Seuil_Q2_Taux_horaire_global",
 	"Seuil_Q3_Taux_horaire_global",
-	"Seuil_Q4_Taux_horaire_global",
 	"Quartile1_Taux_horaire_global_proportion_F",
 	"Quartile2_Taux_horaire_global_proportion_F",
 	"Quartile3_Taux_horaire_global_proportion_F",

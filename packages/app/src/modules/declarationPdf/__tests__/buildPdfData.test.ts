@@ -197,7 +197,7 @@ describe("buildPdfData", () => {
 				name: "annual:4e quartile",
 				womenCount: 14,
 				menCount: 10,
-				womenValue: "70000",
+				womenValue: undefined,
 			},
 			{
 				name: "hourly:1er quartile",

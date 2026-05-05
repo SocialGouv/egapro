@@ -565,8 +565,8 @@ describe("declarationRouter", () => {
 
 			expect(mockSet).toHaveBeenCalledWith(
 				expect.objectContaining({
-					indicatorFAnnualThreshold4: null,
-					indicatorFHourlyThreshold4: null,
+					indicatorFAnnualThreshold3: "30000",
+					indicatorFHourlyThreshold3: "30",
 				}),
 			);
 		});
