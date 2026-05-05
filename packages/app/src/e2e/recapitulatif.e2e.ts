@@ -19,9 +19,7 @@ test.describe("Recapitulatif page", () => {
 			}),
 		).toBeVisible();
 
-		await expect(
-			page.getByRole("link", { name: /Télécharger le récapitulatif/ }),
-		).toBeVisible();
+		await expect(page.getByRole("link", { name: "Télécharger" })).toBeVisible();
 	});
 
 	test("displays info sections", async ({ page }) => {
@@ -44,7 +42,7 @@ test.describe("Recapitulatif page", () => {
 		await expect(
 			page.getByRole("heading", {
 				level: 2,
-				name: "Informations période de référence",
+				name: "Informations calcul",
 			}),
 		).toBeVisible();
 	});
