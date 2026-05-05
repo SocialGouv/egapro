@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 	title: "Récapitulatif de la déclaration",
 };
 
+
 type Props = {
 	// `?siren=` may appear in the URL as a UX hint (mirroring the modify
 	// links in Mon Espace), but the route never reads it — security relies
@@ -51,6 +52,10 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 	}
 
 	const { step2Data, step3Data, step4Data } = mapToStepData(d);
+
+	// declarations does not store custom period windows — every declaration
+	// covers the full calendar year. The period is derived from d.year.
+	const referencePeriod = `01/01/${d.year} - 31/12/${d.year}`;
 
 	const step5Categories =
 		data.jobCategories.length > 0
@@ -99,6 +104,7 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 							declarantName={session.user.name ?? ""}
 							declarationYear={d.year}
 							isCorrection={isCorrection}
+							referencePeriod={referencePeriod}
 							step2Data={step2Data}
 							step3Data={step3Data}
 							step4Data={step4Data}

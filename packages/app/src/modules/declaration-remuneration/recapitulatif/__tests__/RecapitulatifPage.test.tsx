@@ -72,6 +72,7 @@ const emptyStep4Data = () => ({
 const defaultProps = () => ({
 	company: defaultCompany(),
 	declarationYear: 2025,
+	referencePeriod: "01/01/2025 - 31/12/2025",
 	declarantName: "Marie Dupont",
 	declarantEmail: "marie@acme.fr",
 	isCorrection: false,

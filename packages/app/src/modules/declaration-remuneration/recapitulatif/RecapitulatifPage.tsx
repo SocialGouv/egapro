@@ -7,7 +7,7 @@ import type {
 	Step4Data,
 } from "../types";
 import { CategoryRecapTable } from "./CategoryRecapTable";
-import { IndicatorTables } from "./IndicatorTables";
+import { EmptyNotice, IndicatorTables } from "./IndicatorTables";
 import styles from "./RecapitulatifPage.module.scss";
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -31,6 +31,7 @@ type CompanyInfo = {
 type Props = {
 	company: CompanyInfo;
 	declarationYear: number;
+	referencePeriod: string;
 	declarantName: string;
 	declarantEmail: string;
 	isCorrection: boolean;
@@ -72,6 +73,7 @@ function buildPdfHref(year: number, isCorrection: boolean) {
 export function RecapitulatifPage({
 	company,
 	declarationYear,
+	referencePeriod,
 	declarantName,
 	declarantEmail,
 	isCorrection,
@@ -83,11 +85,6 @@ export function RecapitulatifPage({
 	step5Categories,
 	step5Source,
 }: Props) {
-	// Reference period is implicit in this app: every declaration spans the
-	// full calendar year of `declarationYear` — the in-flow forms hardcode
-	// the same boundaries and `declarations` does not store custom windows.
-	const referencePeriod = `01/01/${declarationYear} - 31/12/${declarationYear}`;
-
 	const declarantItems: InfoItem[] = [];
 	if (declarantName) {
 		declarantItems.push({ label: "Nom Prénom", value: declarantName });
@@ -190,7 +187,7 @@ export function RecapitulatifPage({
 							/>
 						))
 					) : (
-						<p className={styles.emptyNotice}>Aucune donnée renseignée.</p>
+						<EmptyNotice />
 					)}
 				</div>
 			</section>

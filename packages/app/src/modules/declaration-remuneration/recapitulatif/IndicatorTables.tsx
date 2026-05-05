@@ -41,6 +41,10 @@ function GapCell({ gap }: { gap: number | null }) {
 	);
 }
 
+export function EmptyNotice() {
+	return <p className={styles.emptyNotice}>Aucune donnée renseignée.</p>;
+}
+
 /** 4-row pay-gap table (annuelle/horaire × moyenne/médiane). */
 function GapTable({
 	caption,
@@ -53,7 +57,7 @@ function GapTable({
 }) {
 	const allEmpty = rows.every((r) => r.women === "" && r.men === "");
 	if (allEmpty) {
-		return <p className={styles.emptyNotice}>Aucune donnée renseignée.</p>;
+		return <EmptyNotice />;
 	}
 	return (
 		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
