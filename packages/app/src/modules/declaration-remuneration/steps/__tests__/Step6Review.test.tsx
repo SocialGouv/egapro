@@ -416,7 +416,7 @@ describe("Step6Review", () => {
 		);
 	});
 
-	it("renders previous link to home and next link to compliance path when already submitted", () => {
+	it("renders previous link to step 5 and next link to compliance path when already submitted", () => {
 		render(
 			<Step6Review
 				declaration={emptyDeclaration()}
@@ -429,7 +429,7 @@ describe("Step6Review", () => {
 		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
-			"/",
+			"/declaration-remuneration/etape/5",
 		);
 		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
 			"href",

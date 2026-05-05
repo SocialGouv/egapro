@@ -172,18 +172,15 @@ export function Step6Review({
 				/>
 			)}
 
-			{isSubmitted ? (
-				<FormActions
-					nextHref="/declaration-remuneration/parcours-conformite"
-					nextLabel="Suivant"
-					previousHref="/"
-				/>
-			) : (
-				<FormActions
-					nextLabel="Suivant"
-					previousHref="/declaration-remuneration/etape/5"
-				/>
-			)}
+			<FormActions
+				nextHref={
+					isSubmitted
+						? "/declaration-remuneration/parcours-conformite"
+						: undefined
+				}
+				nextLabel="Suivant"
+				previousHref="/declaration-remuneration/etape/5"
+			/>
 
 			{!isSubmitted && (
 				<SubmitDeclarationModal
