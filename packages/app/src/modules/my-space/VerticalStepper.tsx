@@ -1,5 +1,5 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
-
 import type { CampaignDeadlines } from "~/modules/domain";
 import { isDeadlinePassed } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
@@ -388,7 +388,7 @@ function TransmittedRow({
 			</div>
 			<div className={styles.transmittedActions}>
 				{viewHref && (
-					<a
+					<Link
 						className="fr-btn fr-btn--secondary fr-icon-eye-line"
 						href={viewHref}
 						title="Voir le récapitulatif de la déclaration"
@@ -396,7 +396,7 @@ function TransmittedRow({
 						<span className="fr-sr-only">
 							Voir le récapitulatif de la déclaration
 						</span>
-					</a>
+					</Link>
 				)}
 				{!deadlinePassed && (
 					<a className="fr-btn fr-btn--secondary" href={modifyHref}>
