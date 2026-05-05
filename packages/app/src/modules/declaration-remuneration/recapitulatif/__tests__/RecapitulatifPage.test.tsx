@@ -8,7 +8,6 @@ function makeCategory(
 ): EmployeeCategoryRow {
 	return {
 		name: "",
-		detail: "",
 		womenCount: null,
 		menCount: null,
 		annualBaseWomen: null,
