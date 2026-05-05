@@ -389,7 +389,7 @@ function TransmittedRow({
 			<div className={styles.transmittedActions}>
 				{viewHref && (
 					<a
-						className="fr-btn fr-btn--secondary fr-btn--icon-left fr-icon-eye-line"
+						className="fr-btn fr-btn--secondary fr-icon-eye-line"
 						href={viewHref}
 						title="Voir le récapitulatif de la déclaration"
 					>
