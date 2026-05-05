@@ -18,7 +18,7 @@ async function assertStep5PrefilledWithSeedData(page: Page) {
 	// Source pre-filled from the previous declaration
 	await expect(
 		page.getByRole("combobox", { name: /source utilisée/i }),
-	).toHaveValue("convention-collective");
+	).toHaveValue("accord-entreprise");
 
 	// 3 categories pre-filled
 	await expect(page.getByText("Nombre de catégories : 3")).toBeVisible();
@@ -30,11 +30,9 @@ async function assertStep5PrefilledWithSeedData(page: Page) {
 	).toBeVisible();
 	await expect(page.getByRole("button", { name: /Techniciens/ })).toBeVisible();
 
-	// Detail pre-filled, numeric fields empty
+	// Libellé pre-filled, numeric fields empty
 	await page.getByRole("button", { name: /Cadres dirigeants/ }).click();
-	await expect(page.locator("#cat-0-detail")).toHaveValue(
-		"Directeurs et cadres supérieurs",
-	);
+	await expect(page.locator("#cat-0-name")).toHaveValue("Cadres dirigeants");
 	await expect(
 		page.getByRole("textbox", { name: "Effectif femmes, catégorie 1" }),
 	).toHaveValue("");
@@ -57,7 +55,7 @@ test.describe("Previous year categories prefill", () => {
 			await deletePreviousYearDeclaration(1);
 		});
 
-		test("pre-fills category names, details and source with empty numeric fields", async ({
+		test("pre-fills category names and source with empty numeric fields", async ({
 			page,
 		}) => {
 			await goToStep5(page);

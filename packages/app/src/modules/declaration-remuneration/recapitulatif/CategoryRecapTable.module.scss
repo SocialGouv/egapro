@@ -1,0 +1,47 @@
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.heading {
+	margin: 0;
+}
+
+/* Specificity (0,2,3) beats the page-level white reset (0,2,2) so these
+   section-header rows keep their grey background. */
+:global(.fr-table__content) tbody tr.subheaderRow th {
+	background-color: var(--background-alt-grey);
+	font-weight: 700;
+	text-align: left;
+}
+
+:global(.fr-table__content) tbody tr.sectionRow th {
+	background-color: var(--background-alt-grey);
+	font-weight: 700;
+	text-align: left;
+}
+
+/* Total rows: th goes white via page-level reset; td needs explicit override
+   since the old rule set it grey. */
+.totalRow td {
+	background-color: var(--background-default-grey);
+}
+
+/* "Effectif physique", "Salaire de base", "Composantes variables …"
+   are <th scope="row"> for a11y, but the Figma cell looks like a
+   regular data row: white background, regular weight. Override DSFR's
+   default tbody-th styling — DSFR pins the grey background via
+   `.fr-table__content table tbody th { background-color … background-image … }`,
+   so we have to bump specificity (and override the gradient image) to
+   win the cascade. */
+:global(.fr-table__content) tbody tr.regularRow th {
+	background-color: var(--background-default-grey);
+	/* Match the <td> border setup so the row separator stays the same
+	   colour across the whole row (DSFR uses border-plain-grey on <th>
+	   right-borders, which gave a darker stripe at the column boundary). */
+	background-image:
+		linear-gradient(0deg, var(--border-contrast-grey), var(--border-contrast-grey)),
+		linear-gradient(0deg, transparent, transparent);
+	font-weight: 400;
+}

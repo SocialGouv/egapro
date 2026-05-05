@@ -139,7 +139,6 @@ export default async function StepPage({ params }: StepPageProps) {
 			)
 		: (data.previousYearCategories?.categories.map((cat) => ({
 				name: cat.name,
-				detail: cat.detail,
 				womenCount: null,
 				menCount: null,
 				annualBaseWomen: null,

@@ -1,13 +1,30 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # dispatch_plan.sh <epic_N1> [<epic_N2> ...]
 #
 # Computes the next-tick dispatch plan for one or more active epics.
 # Output: a JSON array (possibly empty) with one entry per dispatchable ticket:
 #
 #   [
-#     {"ticket":123,"index":0,"agent":"code-dev","model":"sonnet","epic":42,"base_branch":"origin/alpha"},
-#     {"ticket":124,"index":1,"agent":"code-dev","model":"opus",   "epic":42,"base_branch":"ticket/123-foo"}
+#     {"ticket":123,"index":0,"agent":"code-dev","model":"sonnet","epic":42,"base_branch":"origin/epic/42"},
+#     {"ticket":124,"index":1,"agent":"code-dev","model":"opus",  "epic":42,"base_branch":"origin/epic/42"}
 #   ]
+#
+# Every ticket targets `origin/epic/<N>`. A ticket whose `Depends on`
+# references a parent ticket is dispatchable as soon as the parent's PR has
+# been squash-merged into epic/<N> — detected by the absence of the parent's
+# `ticket/<parent>-*` branch on origin (GitHub auto-deletes the head branch
+# on squash-merge). Until then the child stays blocked.
+#
+# The board status of the parent is purely decorative (the user owns the
+# In review / Done transitions); the canonical signal is **branch presence
+# on origin**.
 #
 # Logic:
 #   1. Detect busy worktree indices from existing worktrees `egapro-epic*-t*`
@@ -16,13 +33,10 @@
 #      a. Bulk-query sub-issues with labels + board status (cache key
 #         `epic_<N>_full`, TTL 300s, shared with epic_state.sh).
 #      b. For each sub-issue still in 'Todo':
-#         - Skip if label `dispatch=escalate` (manual hold, removed by user)
+#         - Skip if label `dispatch=escalate` (manual hold)
 #         - Parse `## Depends on` from the body for inter-ticket deps
-#         - Resolve each dep's status from the bulk query:
-#             * Done                 → OK, base = origin/alpha
-#             * In review            → OK, stacked, base = ticket/<parent-slug>
-#             * In progress / To Do  → BLOCKED, skip this tick
-#         - 2+ deps in 'In review' → BLOCKED (partial-blocking v1)
+#         - Resolve each dep: dispatchable iff its `ticket/<N>-*` branch is
+#           gone from origin (= squash-merged into epic/<N>).
 #   3. Assign candidates greedily to the first free index in
 #      [0, EPIC_MAX_PARALLEL[ (default 5).
 #
@@ -61,7 +75,7 @@ while IFS= read -r path; do
     esac
     ENV_FILE="$path/packages/app/.env.local"
     [ -f "$ENV_FILE" ] || continue
-    PORT_LINE=$(grep '^PORT=' "$ENV_FILE" | head -1 | cut -d= -f2)
+    PORT_LINE=$(grep '^PORT=' "$ENV_FILE" | head -1 | cut -d= -f2 || true)
     [[ "$PORT_LINE" =~ ^[0-9]+$ ]] || continue
     IDX=$((PORT_LINE - 3001))
     if [ "$IDX" -ge 0 ] && [ "$IDX" -lt "$MAX_PARALLEL" ]; then
@@ -113,7 +127,7 @@ for EPIC_N in "$@"; do
     declare -A SUB_LABELS
     while IFS= read -r issue; do
         N=$(echo "$issue" | jq -r '.number')
-        S=$(echo "$issue" | jq -r '.projectItems.nodes[0].fieldValues.nodes[]? | select(.field.name == "Status") | .name' | head -1)
+        S=$(echo "$issue" | jq -r '.projectItems.nodes[0].fieldValues.nodes[]? | select(.field.name == "Status") | .name' | head -1 || true)
         L=$(echo "$issue" | jq -r '[.labels.nodes[].name] | join(",")')
         SUB_STATUS[$N]="$S"
         SUB_LABELS[$N]="$L"
@@ -146,55 +160,23 @@ for EPIC_N in "$@"; do
             capture { print }
         ' | grep -oE '#[0-9]+' | tr -d '#' | sort -u || true)
 
-        # Resolve dep statuses → decide base branch or skip.
-        # Default base is origin/alpha; override via EPIC_DEFAULT_BASE env var
-        # (useful while the orchestration scripts themselves are not yet on alpha
-        # — point at origin/chore/ai-pipeline or any branch that has them).
-        BASE_BRANCH="${EPIC_DEFAULT_BASE:-origin/alpha}"
-        IN_REVIEW_PARENTS=()
+        # Resolve deps: each parent must be squash-merged into epic/<N>.
+        # Repo settings auto-delete the head branch on merge, so parent
+        # ticket branch absence on origin == merged. The board status is
+        # decorative (humans own In review / Done) — branch presence is
+        # the canonical signal.
+        BASE_BRANCH="origin/epic/${EPIC_N}"
         BLOCKED=0
         for DEP in $DEPS; do
-            DEP_STATUS="${SUB_STATUS[$DEP]:-}"
-            # Dep might not be in this epic (cross-epic dep) — fall back to a
-            # direct query; rare enough not to cache aggressively.
-            if [ -z "$DEP_STATUS" ]; then
-                DEP_STATUS=$(gh issue view "$DEP" --json projectItems --jq '.projectItems[0].status.name // ""' 2>/dev/null || echo "")
+            DEP_BRANCH=$(git ls-remote --heads origin "ticket/${DEP}-*" 2>/dev/null | awk '{print $2}' | head -1 || true)
+            if [ -n "$DEP_BRANCH" ]; then
+                # Branch still on origin → not yet squash-merged → child blocked
+                BLOCKED=1
+                break
             fi
-            case "$DEP_STATUS" in
-                Done) ;;
-                "In review"|"In Review")
-                    IN_REVIEW_PARENTS+=("$DEP")
-                    ;;
-                *)
-                    BLOCKED=1
-                    break
-                    ;;
-            esac
         done
 
         [ "$BLOCKED" = "1" ] && continue
-
-        # 2+ deps in 'In review' → partial-blocking v1: skip until at least one
-        # gets merged to alpha (status = Done).
-        if [ "${#IN_REVIEW_PARENTS[@]}" -gt 1 ]; then
-            continue
-        fi
-
-        # Exactly one parent in In review → stacked PR base. We emit the
-        # remote-tracking ref (origin/ticket/<parent>-...) so the consumer
-        # (epic_loop.sh + code-dev) can checkout it uniformly, the same way
-        # it handles origin/alpha or origin/chore/ai-pipeline.
-        if [ "${#IN_REVIEW_PARENTS[@]}" -eq 1 ]; then
-            PARENT_N="${IN_REVIEW_PARENTS[0]}"
-            PARENT_BRANCH=$("$SCRIPT_DIR/cache_gh.sh" "ticket_branch_${PARENT_N}" 60 -- \
-                git ls-remote --heads origin "ticket/${PARENT_N}-*" 2>/dev/null \
-                | awk '{print $2}' | sed 's|refs/heads/||' | head -1)
-            if [ -n "$PARENT_BRANCH" ]; then
-                BASE_BRANCH="origin/$PARENT_BRANCH"
-            fi
-            # If no remote branch found yet, fall back to origin/alpha — the
-            # parent will retarget once its PR is merged.
-        fi
 
         # Model: opus if `complexe` label is set, sonnet otherwise
         MODEL="sonnet"

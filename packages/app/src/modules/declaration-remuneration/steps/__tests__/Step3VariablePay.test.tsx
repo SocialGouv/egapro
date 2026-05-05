@@ -70,7 +70,7 @@ describe("Step3VariablePay", () => {
 		);
 		expect(
 			screen.getByText(
-				"Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs.",
+				"Renseignez les informations avant de valider vos indicateurs.",
 			),
 		).toBeInTheDocument();
 		expect(
@@ -272,7 +272,7 @@ describe("Step3VariablePay", () => {
 			/>,
 		);
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
-		expect(womenInput).toHaveValue("5\u202f000");
+		expect(womenInput).toHaveValue("5\u202f000,00");
 		const benefWomenInput = screen.getByLabelText("Bénéficiaires femmes");
 		expect(benefWomenInput).toHaveValue("45");
 		const benefMenInput = screen.getByLabelText("Bénéficiaires hommes");
@@ -326,7 +326,7 @@ describe("Step3VariablePay", () => {
 			/>,
 		);
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
-		expect(womenInput).toHaveValue("900");
+		expect(womenInput).toHaveValue("900,00");
 		// Beneficiary inputs should be empty (null converted to "")
 		const benefWomenInput = screen.getByLabelText("Bénéficiaires femmes");
 		expect(benefWomenInput).toHaveValue("");

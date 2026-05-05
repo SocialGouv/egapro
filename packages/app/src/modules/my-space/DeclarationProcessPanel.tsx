@@ -114,15 +114,20 @@ function PanelHeader({
 			<h2 className="fr-h5 fr-mb-1w" id={PANEL_TITLE_ID}>
 				Démarche des indicateurs de rémunération {year}
 			</h2>
-			{lastActionDate && (
-				<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
-					<span
-						aria-hidden="true"
-						className="fr-icon-time-line fr-icon--sm fr-mr-1v"
-					/>
-					Dernière action le {lastActionDate}
-				</p>
-			)}
+			<div className={styles.lastAction}>
+				{lastActionDate && (
+					<>
+						<span
+							aria-hidden="true"
+							className="fr-icon-time-line fr-icon--sm"
+						/>
+						<span>Dernière action le {lastActionDate}</span>
+					</>
+				)}
+				<button className={`fr-link ${styles.historyLink}`} type="button">
+					Voir l'historique
+				</button>
+			</div>
 		</div>
 	);
 }

@@ -9,15 +9,18 @@ import {
 	fetchSubmittedDeclarations,
 } from "~/modules/export";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
-import { verifySuitAuth } from "~/server/services/suitApiAuth";
+import { assertGatewaySource } from "~/server/services/gatewaySource";
 
 /**
  * GET /api/v1/export/declarations?date_begin=YYYY-MM-DD&date_end=YYYY-MM-DD
  *
  * Secured REST API returning submitted declarations as JSON.
- * Requires:
- * 1. A valid request signature (RSA-SHA256, verified via X-Signature + X-Timestamp headers)
- * 2. A valid SUIT API key in the Authorization: Bearer header
+ *
+ * Authentication is handled at the edge by the APISIX gateway
+ * (`key-auth` + `limit-req` plugins, see
+ * `.kontinuous/templates/apisix-suit.configmap.yaml`). The handler only
+ * enforces that the request actually transited through APISIX via the
+ * `X-Gateway-Forwarded` header (see `assertGatewaySource`).
  *
  * - date_begin (required): start date (inclusive), filters on submission date (updatedAt, UTC)
  * - date_end (optional): end date (exclusive). If omitted, returns only date_begin day.
@@ -41,8 +44,8 @@ export const GET = withAuditedRoute(
 async function apiExportDeclarationsHandler(
 	request: Request,
 ): Promise<Response> {
-	const authError = verifySuitAuth(request);
-	if (authError) return authError;
+	const gatewayError = assertGatewaySource(request);
+	if (gatewayError) return gatewayError;
 
 	try {
 		const url = new URL(request.url);
@@ -99,7 +102,13 @@ async function apiExportDeclarationsHandler(
 			Declarations: data,
 		});
 	} catch (error) {
-		console.error("[api/v1/export/declarations]", error);
+		// Only log the message: AWS SDK / pg errors sometimes attach the request
+		// payload (presigned URLs, DB credentials) in `.cause`, which would leak
+		// to the log shipper if we printed the raw object.
+		console.error(
+			"[api/v1/export/declarations]",
+			error instanceof Error ? error.message : "unknown error",
+		);
 		return Response.json(
 			{ error: "Erreur lors de la récupération des déclarations" },
 			{ status: 500 },

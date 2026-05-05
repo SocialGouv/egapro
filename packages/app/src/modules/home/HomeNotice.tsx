@@ -13,11 +13,11 @@ export function HomeNotice() {
 			<div className="fr-container">
 				<div className="fr-notice__body">
 					<p>
-						<span className="fr-notice__title">Egapro évolue&nbsp;:</span>
+						<span className="fr-notice__title">Egapro évolue&nbsp;:</span>{" "}
 						<span className="fr-notice__desc">
 							Le portail intègre désormais les nouvelles directives européennes
 							sur l&apos;égalité salariale.
-						</span>
+						</span>{" "}
 						<a className="fr-notice__link" href="/actualites">
 							En savoir plus
 						</a>

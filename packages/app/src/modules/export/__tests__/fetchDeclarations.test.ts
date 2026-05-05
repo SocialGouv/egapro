@@ -189,7 +189,6 @@ describe("buildIndicatorG", () => {
 		const entries: IndicatorGEntry[] = [
 			{
 				categoryName: "Ouvriers",
-				detail: "Opérateurs",
 				declarationType: "initial",
 				womenCount: 40,
 				menCount: 45,
@@ -204,7 +203,6 @@ describe("buildIndicatorG", () => {
 			},
 			{
 				categoryName: "Ouvriers",
-				detail: "Opérateurs",
 				declarationType: "correction",
 				womenCount: 42,
 				menCount: 44,
@@ -270,7 +268,6 @@ describe("assembleDeclaration", () => {
 		const indicatorG: IndicatorGEntry[] = [
 			{
 				categoryName: "Cadres",
-				detail: null,
 				declarationType: "initial",
 				womenCount: 50,
 				menCount: 60,
@@ -285,7 +282,6 @@ describe("assembleDeclaration", () => {
 			},
 			{
 				categoryName: "Cadres",
-				detail: null,
 				declarationType: "correction",
 				womenCount: 52,
 				menCount: 58,

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
-import { normalizeDecimalInput } from "~/modules/domain";
+import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep2Schema } from "../schemas";
@@ -21,6 +21,7 @@ import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
+import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapField, Step2Data } from "../types";
 
 type Step2PayGapProps = {
@@ -38,11 +39,14 @@ export function Step2PayGap({
 	const isImpersonating = useIsImpersonating();
 
 	const hasSavedData = Object.values(initialData).some((v) => v !== "");
-	const defaultValues = hasSavedData
+	const rawDefaults = hasSavedData
 		? initialData
 		: gipPrefillData
 			? gipToStep2(gipPrefillData.step2)
 			: initialData;
+	const defaultValues = Object.fromEntries(
+		Object.entries(rawDefaults).map(([k, v]) => [k, padDecimalToTwo(v)]),
+	) as Step2Data;
 
 	const hasInitialData = hasSavedData;
 
@@ -86,8 +90,8 @@ export function Step2PayGap({
 					DEV_STEP2_ROWS.forEach((row, i) => {
 						const womenField = getStep2FieldName(i, "womenValue");
 						const menField = getStep2FieldName(i, "menValue");
-						form.setValue(womenField, row.womenValue);
-						form.setValue(menField, row.menValue);
+						form.setValue(womenField, padDecimalToTwo(row.womenValue));
+						form.setValue(menField, padDecimalToTwo(row.menValue));
 					});
 					setSaved(false);
 				}}
@@ -111,12 +115,17 @@ export function Step2PayGap({
 					complémentaires.
 				</p>
 
-				<p className="fr-mb-0">
-					<strong>
-						{gipPrefillData
-							? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
-							: "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."}
-					</strong>
+				<p className={`fr-mb-0 ${common.fontMedium}`}>
+					{gipPrefillData
+						? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+						: "Renseignez les informations avant de valider vos indicateurs."}
+					{!gipPrefillData && (
+						<TooltipButton
+							id="tooltip-step2-info"
+							label="Information sur la confidentialité des données"
+							text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
+						/>
+					)}
 				</p>
 
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
@@ -134,17 +143,51 @@ export function Step2PayGap({
 					/>
 
 					{gipPrefillData && (
-						<PrefillSource periodEnd={gipPrefillData.periodEnd} />
+						<PrefillSource
+							periodEnd={gipPrefillData.periodEnd}
+							tooltipId="tooltip-source-step2"
+						/>
 					)}
 				</div>
 
 				<DefinitionAccordion
 					id="accordion-step2"
 					title="Définitions et méthode de calcul"
-				/>
+				>
+					<div className="fr-callout">
+						<ul>
+							<li>
+								Quelles composantes variables ou complémentaires sont incluses
+								dans le calcul (ex. prime de cooptation, prime d&apos;astreinte,
+								prime d&apos;avancement) et avec quel niveau de détail&nbsp;?
+							</li>
+							<li>
+								Comment les rémunérations sont-elles reconstituées à partir des
+								données disponibles&nbsp;?
+							</li>
+							<li>
+								Comment expliquer l&apos;écart entre les pourcentages annuels et
+								horaires (ex. ×12 = annuel)&nbsp;?
+							</li>
+							<li>
+								Les données seraient-elles plus pertinentes en mensuel
+								brut&nbsp;?
+							</li>
+							<li>
+								Comment sont traitées les spécificités des UES, notamment
+								lorsque&nbsp;:
+							</li>
+							<li>
+								les salariés n&apos;ont pas tous le même nombre d&apos;heures
+								pour un équivalent temps plein, certains salariés sont au
+								forfait jours&nbsp;?
+							</li>
+						</ul>
+					</div>
+				</DefinitionAccordion>
 			</div>
 
-			{gipPrefillData && <GapInterpretationCallout rows={rows} />}
+			<GapInterpretationCallout rows={rows} />
 
 			<FormErrors
 				mutationError={mutation.error?.message}

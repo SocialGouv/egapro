@@ -5,25 +5,23 @@ import styles from "./TooltipButton.module.scss";
 type TooltipButtonProps = {
 	id: string;
 	label: string;
+	text?: string;
 };
 
-export function TooltipButton({ id, label }: TooltipButtonProps) {
+const PLACEHOLDER_TEXT =
+	"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
+export function TooltipButton({ id, label, text }: TooltipButtonProps) {
 	return (
 		<>
 			<button
 				aria-describedby={id}
 				aria-label={label}
-				className={`fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-question-line ${styles.button}`}
+				className={`fr-btn--tooltip fr-btn ${styles.button}`}
 				type="button"
 			/>
-			<span
-				aria-hidden="true"
-				className="fr-tooltip fr-placement"
-				id={id}
-				role="tooltip"
-			>
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
-				tempor incididunt ut labore et dolore magna aliqua.
+			<span className="fr-tooltip fr-placement" id={id} role="tooltip">
+				{text ?? PLACEHOLDER_TEXT}
 			</span>
 		</>
 	);

@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "node scripts/copy-dsfr.js && node scripts/copy-swagger-ui.mjs && next build",
+		"build": "node scripts/copy-dsfr.mjs && node scripts/copy-swagger-ui.mjs && next build",
 		"check": "biome check .",
 		"check:unsafe": "biome check --write --unsafe .",
 		"check:write": "biome check --write .",
@@ -16,7 +16,7 @@
 		"db:migrate": "drizzle-kit migrate",
 		"db:push": "drizzle-kit push",
 		"db:studio": "drizzle-kit studio",
-		"dev": "node scripts/copy-dsfr.js && node scripts/copy-swagger-ui.mjs && next dev --turbo",
+		"dev": "node scripts/copy-dsfr.mjs && node scripts/copy-swagger-ui.mjs && next dev --turbo",
 		"preview": "next build && next start",
 		"start": "next start",
 		"test": "vitest run",
@@ -53,6 +53,7 @@
 		"react": "^19.2.5",
 		"react-dom": "^19.2.5",
 		"react-hook-form": "^7.72.1",
+		"recharts": "^3.8.1",
 		"redis": "^5.11.0",
 		"server-only": "^0.0.1",
 		"superjson": "^2.2.6",
@@ -79,6 +80,7 @@
 		"jsdom": "^29.0.2",
 		"sass": "^1.99.0",
 		"swagger-ui-dist": "^5.32.2",
+		"tsx": "^4.21.0",
 		"typescript": "^6.0.2",
 		"vite-tsconfig-paths": "^6.1.1",
 		"vitest": "^4.1.4"

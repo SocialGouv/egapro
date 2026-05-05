@@ -1,21 +1,84 @@
 .nextSteps {
 	display: flex;
 	flex-direction: column;
+	gap: 2rem;
+	padding: 2rem;
+	background: var(--background-alt-blue-france);
+	border-radius: 4px;
+}
+
+.nextStepsCompact {
+	display: flex;
+	flex-direction: column;
 	gap: 1rem;
 	padding: 1.875rem;
 	background: var(--background-alt-blue-france);
 	border-radius: 4px;
 }
 
-.separator {
-	border: none;
-	border-top: 1px solid var(--border-default-grey);
-	margin: 0;
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+
+	// Strip default browser <ul>/<ol> top/bottom margins so the section's
+	// flex gap is the only spacing between elements; otherwise the gap from
+	// the last bullet text to the next separator becomes 40px instead of 32px.
+	ul,
+	ol {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+
+	// DSFR adds `padding-bottom: 0.25rem` (4px) on every <li> which leaks
+	// below the visible text and breaks the symmetric 32px gap to a sibling
+	// separator. Remove it on the last item only so the gap stays exact.
+	ul > li:last-child,
+	ol > li:last-child {
+		padding-bottom: 0;
+	}
 }
 
-.buttonLink {
-	background-image: linear-gradient(0deg, currentColor, currentColor);
-	background-size: 100% 1px;
-	background-position: 0 100%;
-	background-repeat: no-repeat;
+.separator {
+	// DSFR styles <hr> via a 1px background-image gradient and adds
+	// `padding: var(--text-spacing)` which can leak from inherited body-text
+	// rules. Force a single clean 1px line by zeroing padding and dropping the
+	// border (the gradient stays for the visual line).
+	border: 0;
+	margin: 0;
+	padding: 0;
+	height: 1px;
+}
+
+.linksRow {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+// DSFR's `fr-link` applies the underline via the `[href]` selector,
+// which a <button> does not match. Replicate the same gradient-based
+// underline so the modal trigger button renders identically to an
+// adjacent <a class="fr-link">.
+.linkButton {
+	background:
+		linear-gradient(0deg, currentColor, currentColor) no-repeat 0
+			calc(100% - var(--underline-thickness, 0.0625em)) /
+			var(--underline-idle-width, 100%) var(--underline-thickness, 0.0625em);
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+	font: inherit;
+}
+
+.alertHeader {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	align-items: flex-start;
+}
+
+.alertBadge {
+	text-transform: uppercase;
 }

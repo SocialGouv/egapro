@@ -61,7 +61,6 @@ export type PayGapRow = {
 
 export type EmployeeCategoryRow = {
 	name: string;
-	detail: string;
 	womenCount: number | null;
 	menCount: number | null;
 	annualBaseWomen: string | null;
@@ -78,7 +77,6 @@ export type EmployeeCategorySubmitData = {
 	source: string;
 	categories: Array<{
 		name: string;
-		detail: string;
 		data: {
 			womenCount?: number;
 			menCount?: number;

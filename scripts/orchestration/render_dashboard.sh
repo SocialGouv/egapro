@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # render_dashboard.sh
 #
 # Formats the /report dashboard from .claude/state/epic_run/.
@@ -15,6 +22,11 @@
 #   INACTIVITY_THRESHOLD_SEC  — alert threshold in seconds (default: 600 = 10 min)
 
 set -euo pipefail
+
+# Mac compat: GNU stat uses `-c '%Y'`; BSD/macOS stat uses `-f '%m'`.
+file_mtime() {
+    stat -c '%Y' "$1" 2>/dev/null || stat -f '%m' "$1" 2>/dev/null || echo 0
+}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -60,13 +72,13 @@ for log in "$LOG_DIR"/*.log; do
 
     # Skip if terminal state in last event
     LAST_LINE=$(tail -n 1 "$log" 2>/dev/null || echo "")
-    LAST_EVENT=$(echo "$LAST_LINE" | grep -oE '\[[A-Z_0-9]+\]' | head -1 | tr -d '[]')
+    LAST_EVENT=$(echo "$LAST_LINE" | grep -oE '\[[A-Z_0-9]+\]' | head -1 | tr -d '[]' || true)
 
     case "$LAST_EVENT" in
         COMPLETE|STUCK|ESCALATED) continue ;;
     esac
 
-    MTIME=$(stat -c '%Y' "$log")
+    MTIME=$(file_mtime "$log")
     INACTIVITY=$((NOW_TS - MTIME))
 
     ACTIVE+=("${AGENT_ID}|${INACTIVITY}|${log}")

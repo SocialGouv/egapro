@@ -95,7 +95,6 @@ export const updateEmployeeCategoriesSchema = z.object({
 	categories: z.array(
 		z.object({
 			name: z.string().min(1),
-			detail: z.string(),
 			data: employeeCategoryDataSchema,
 		}),
 	),
@@ -105,7 +104,6 @@ export const updateEmployeeCategoriesSchema = z.object({
 
 export const categoryFormEntrySchema = z.object({
 	name: z.string(),
-	detail: z.string(),
 	womenCount: z.string(),
 	menCount: z.string(),
 	annualBaseWomen: z.string(),

@@ -42,7 +42,6 @@ function makeCategory(
 ): EmployeeCategoryRow {
 	return {
 		name: "",
-		detail: "",
 		womenCount: null,
 		menCount: null,
 		annualBaseWomen: null,
@@ -60,7 +59,6 @@ function makeCategory(
 const mockCategories: EmployeeCategoryRow[] = [
 	makeCategory({
 		name: "Ingénieurs",
-		detail: "Dev",
 		womenCount: 10,
 		menCount: 15,
 		annualBaseWomen: "3000",
@@ -210,7 +208,9 @@ describe("SecondDeclarationStep3Review", () => {
 				siren="532847196"
 			/>,
 		);
-		expect(screen.getByText("Des écarts ont été détectés")).toBeInTheDocument();
+		expect(
+			screen.getByText("Des écarts ont été de nouveau détectés"),
+		).toBeInTheDocument();
 	});
 
 	it("does not show gap warning when all gaps < 5%", () => {
@@ -239,7 +239,7 @@ describe("SecondDeclarationStep3Review", () => {
 			/>,
 		);
 		expect(
-			screen.queryByText("Des écarts ont été détectés"),
+			screen.queryByText("Des écarts ont été de nouveau détectés"),
 		).not.toBeInTheDocument();
 	});
 

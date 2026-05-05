@@ -22,7 +22,6 @@ function makeCategory(
 ): EmployeeCategoryRow {
 	return {
 		name: "",
-		detail: "",
 		womenCount: null,
 		menCount: null,
 		annualBaseWomen: null,
@@ -40,7 +39,6 @@ function makeCategory(
 const mockCategories: EmployeeCategoryRow[] = [
 	makeCategory({
 		name: "Ouvriers",
-		detail: "Opérateurs de production",
 		womenCount: 50,
 		menCount: 60,
 		annualBaseWomen: "19114",
@@ -70,34 +68,21 @@ describe("SecondDeclarationStep2Form", () => {
 		expect(screen.getByText("Étape 2 sur 3")).toBeInTheDocument();
 	});
 
-	it("displays category name as read-only text", () => {
+	it("displays category label as read-only text", () => {
 		render(
 			<SecondDeclarationStep2Form
 				declarationYear={2025}
 				initialFirstDeclarationCategories={mockCategories}
 			/>,
 		);
-		expect(screen.getByText("Nom :")).toBeInTheDocument();
+		expect(screen.getByText("Libellé :")).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", {
 				name: "Catégorie d'emplois n°1 : Ouvriers",
 			}),
 		).toBeInTheDocument();
 		expect(screen.getByText("Ouvriers")).toBeInTheDocument();
-		expect(screen.queryByLabelText("Nom")).not.toBeInTheDocument();
-	});
-
-	it("displays detail as read-only text", () => {
-		render(
-			<SecondDeclarationStep2Form
-				declarationYear={2025}
-				initialFirstDeclarationCategories={mockCategories}
-			/>,
-		);
-		expect(screen.getByText("Opérateurs de production")).toBeInTheDocument();
-		expect(
-			screen.queryByLabelText("Détail des emplois"),
-		).not.toBeInTheDocument();
+		expect(screen.queryByLabelText("Libellé")).not.toBeInTheDocument();
 	});
 
 	it("displays source as read-only text", () => {
@@ -105,13 +90,13 @@ describe("SecondDeclarationStep2Form", () => {
 			<SecondDeclarationStep2Form
 				declarationYear={2025}
 				initialFirstDeclarationCategories={mockCategories}
-				initialSource="convention-collective"
+				initialSource="accord-entreprise"
 			/>,
 		);
 		expect(
 			screen.getByText(/Source utilisée pour déterminer/),
 		).toBeInTheDocument();
-		expect(screen.getByText("Convention collective")).toBeInTheDocument();
+		expect(screen.getByText("Accord d'entreprise")).toBeInTheDocument();
 		expect(
 			screen.queryByLabelText(/Quelle est la source/),
 		).not.toBeInTheDocument();
@@ -160,7 +145,6 @@ describe("SecondDeclarationStep2Form", () => {
 		const secondDeclData: EmployeeCategoryRow[] = [
 			makeCategory({
 				name: "Techniciens",
-				detail: "Senior",
 				womenCount: 30,
 				menCount: 40,
 				annualBaseWomen: "25000",

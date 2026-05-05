@@ -63,3 +63,30 @@ export function displayDecimal(value: string): string {
 		: thousandFormatter.format(n);
 	return decPart !== undefined ? `${formatted},${decPart}` : formatted;
 }
+
+/**
+ * Pad a stored decimal value to exactly two fraction digits.
+ * Used on blur for euro inputs so every amount displays a consistent ",XX" suffix.
+ *
+ * Empty or non-numeric values pass through unchanged.
+ * Example: `"100"` → `"100.00"`, `"100.5"` → `"100.50"`, `"100.555"` → `"100.56"`.
+ */
+export function padDecimalToTwo(value: string): string {
+	if (!value) return value;
+	const n = Number.parseFloat(value);
+	if (Number.isNaN(n)) return value;
+	return n.toFixed(2);
+}
+
+/**
+ * Blur handler for decimal inputs: pad the value to two fraction digits and,
+ * if the result differs from the original, hand it back to the setter.
+ * Callers keep the value change out of their reducer when nothing needs updating.
+ */
+export function padDecimalOnBlur(
+	value: string,
+	setter: (padded: string) => void,
+): void {
+	const padded = padDecimalToTwo(value);
+	if (padded !== value) setter(padded);
+}

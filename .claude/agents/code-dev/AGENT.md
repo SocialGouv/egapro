@@ -13,18 +13,23 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 - Worktree path (assigned by `/epic`, e.g. `../egapro-epic42-t1`)
 - **Worktree index** (0, 1, 2…) — utilisé par `scripts/setup-worktree.sh` pour allouer les ports docker
 - Dev server port (dérivé de l'index : `3001 + index`, lu depuis `packages/app/.env.local` écrit par le setup script)
-- **Base branch** (assigned by `/epic` ou `/code`) — toujours au format **remote-tracking ref** (`origin/<branch>`), déjà fetchée par l'orchestrateur :
-  - `origin/alpha` (ou `origin/chore/ai-pipeline` pendant la phase de transition) si aucune dépendance ou toutes mergées
-  - `origin/ticket/<parent-slug>` si le ticket dépend d'un autre encore en `In review` (stacked PR)
-- **Working branch** (assigned by `/epic`) — déjà créée sur GitHub par l'orchestrateur via `createLinkedBranch` GraphQL et **officiellement linkée à l'issue** (sidebar Development). La PR ouverte depuis cette branche y apparaîtra automatiquement — pas besoin de cross-reference comment.
+- **Base branch** (assigned by `/implement`) — toujours au format **remote-tracking ref** (`origin/<branch>`), déjà fetchée par l'orchestrateur :
+  - **Sub-issue d'un epic** : `origin/epic/<EPIC_N>` (la branche d'intégration de l'epic). Toutes les PRs des sous-tickets de l'epic ciblent cette branche. Une fois validée par la pipeline, ta PR sera squash-mergée dans `epic/<N>` par `process_tick_result.sh` ; les tickets enfants pourront alors démarrer.
+  - **Task ou Bug standalone** (sans parent epic) : `origin/alpha` direct. La PR sera mergée à la main par l'humain après revue.
+- **Working branch** (assigned by `/implement`) — déjà créée sur GitHub par l'orchestrateur via `createLinkedBranch` GraphQL et **officiellement linkée à l'issue** (sidebar Development). Le force-link PR↔issue (étape 8.5) ajoute également la PR à la sidebar dès qu'elle est créée.
 
 ## Workflow
 
 0. **Logger START** — `bash scripts/orchestration/log_event.sh code-dev-<N> START "worktree=<path> base=<base-branch>"`. Voir la section « Logging events » plus bas pour la liste complète.
 
-1. **Vérifier le format du ticket** — lire le body. S'il ne respecte pas `rules/ticket-spec-format.md` (fichiers manquants, pas de scénarios, pas de critères), remettre le ticket en **To Do** avec commentaire listant les manques, retourner `{"status":"refacto","ticket":<N>,"reason":"ticket spec format invalid"}`. **Ne pas improviser.**
+1. **Vérifier le format du ticket** — lire le body **et** les commentaires. La source du spec dépend du type d'issue :
+   - **Type Feature (sub-issue d'epic)** → spec dans le **body** au format `rules/ticket-spec-format.md`
+   - **Type Task** → body = description originale de l'utilisateur (intacte) ; spec dans le **commentaire `## Analyse architecte`** (le plus récent si plusieurs)
+   - **Type Bug** → body = rapport de bug de l'utilisateur ; spec dans le **commentaire `## Analyse du bug`** (posté par `bug-analyst`)
 
-2. **Si bug** (label `bug`) — appliquer `rules/bug-fix-workflow.md` : test qui échoue **avant** le fix.
+   Si le spec attendu est manquant (pas de body conforme pour Feature, pas de commentaire `## Analyse architecte` pour Task, pas de `## Analyse du bug` pour Bug) → remettre le ticket en **To Do** avec un commentaire listant les manques, et retourner `{"status":"refacto","ticket":<N>,"reason":"spec missing — run /analyse first"}`. **Ne pas improviser.**
+
+2. **Si bug** (issue type Bug ou label `bug`) — appliquer `rules/bug-fix-workflow.md` : test qui échoue **avant** le fix. Pour les bugs de type "visual mismatch Figma ↔ app", le test n'est pas un test automatisé classique (cf. section visual mismatch de `bug-fix-workflow.md`) — la validation est la relecture structurelle Figma.
 
 3. **Status ticket** → **In progress** via `bash scripts/orchestration/set_ticket_status.sh <N> "In progress"`.
 
@@ -32,13 +37,14 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - `cd <worktree>` (le worktree est en mode `--detach` sur la base)
    - `git fetch origin <working-branch>`
    - `git checkout <working-branch>` (PAS `checkout -b`)
-   - Si la **base branch** n'est pas `origin/alpha` (ou `origin/chore/ai-pipeline` en phase de transition), on est en mode **stacked PR** — la PR sera ouverte avec `--base <base-branch-sans-prefix-origin>` (ex: `--base ticket/<parent-slug>`), GitHub retargettera vers `alpha` quand la PR parent sera mergée
+   - La PR sera ouverte avec `--base <base-branch-sans-prefix-origin>` — `--base epic/<EPIC_N>` (sub-issue d'epic) ou `--base alpha` (Task / Bug standalone)
 
 4.5. **Sanity check stack docker** — vérifier que `packages/app/.env.local` existe et contient `COMPOSE_PROJECT_NAME=egapro-wt-*`. Si absent → `scripts/setup-worktree.sh <index> [<extras>]` (où `<extras>` vient du parsing de la section `## Requires services` du ticket). Si `/epic` ou `/code` a déjà lancé le setup, l'étape est un no-op.
 
 5. **Implémenter** :
    - Modifier les fichiers listés dans le ticket
    - Respecter `packages/app/CLAUDE.md` et les rules projet
+   - **Aucun commentaire dans le code écrit ou modifié** — voir `rules/code-quality.md` section "No comments by default". Pas de JSDoc, pas de `// fetch user`, pas de `// for ticket #N`, pas de TODO/FIXME, pas de header de section. Seule exception : un `// ` court qui explique un WHY non-évident (workaround documenté, invariant subtil). Si le commentaire paraphrase le code juste en dessous, supprimer.
    - `pnpm typecheck` après chaque modif de types/schemas
    - `nextjs_call(get_errors)` si dev server tourne
    - **Tests unitaires : 100% de couverture sur le code produit** (statements, branches, functions, lines). Vérifier via `pnpm test --coverage` + lecture du rapport — chaque fichier modifié ou créé doit être à 100%. Pas de « ça couvre assez » : 100% strict.
@@ -52,22 +58,39 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
    Corriger toutes les findings. Re-run jusqu'au vert. Logger `QUALITY_OK` quand les 4 agents PASS.
 
-7. **Screenshots** (si UI touchée) :
-   - Démarrer dev server sur le port assigné
-   - Playwright → screenshots desktop (1280×800) + mobile (375×667)
+7. **Vérification visuelle Figma** (si UI touchée) — la fidélité au design est **ta** responsabilité, plus de `design-validator` externe :
+   - **Lecture structurelle (le cœur du travail)** : pour chaque URL citée dans la section `## Référence Figma` du ticket, appeler `mcp__figma-dev__get_figma_data` (équivalent `get_design_context`) sur le node-id pour récupérer l'arbre des nodes — couleurs (`fill`), typographies (`fontSize`, `fontWeight`, `textStyle`), espacements (`itemSpacing`, `gap`), hiérarchie, contenu verbatim. Vérifier que ton implémentation **mappe précisément chaque propriété** : couleur Figma → DSFR token / classe, `fontSize` → `fr-text--xs/sm/lg/xl`, `fontWeight ≥ 600` → `<strong>`, `itemSpacing` → `fr-m{b,t,r,l}-Xw`. Suivre `rules/figma-workflow.md` (Phases 1–3) pour la checklist exhaustive.
+   - **Spot-check visuel via `mcp__figma-dev__download_figma_images`** uniquement quand l'API structurelle est ambiguë — typiquement le **bold cell-by-cell** dans les tableaux (l'API ne révèle que le style dominant d'un node, jamais les overrides char-level), ou pour vérifier qu'un node `Group` se rend comme attendu. Pas systématique, ciblé.
+   - **Screenshots dev server** (Playwright, desktop 1280×800 + mobile 375×667) : à inclure dans le body de la PR pour la review humaine. Pas la comparaison principale — c'est juste l'artefact pour le reviewer.
+   - Toute divergence non triviale détectée à la lecture structurelle → corriger avant `gh pr ready`.
 
 8. **PR draft** via `gh pr create --draft --base <base-branch>` :
-   - Base = la `<base-branch>` reçue en input (`origin/alpha` ou `ticket/<parent-slug>`)
-   - Body : lien ticket (`Closes #NNN`), résumé, test plan, screenshots
+   - Base = la `<base-branch>` reçue en input (sans le préfixe `origin/`) — `epic/<EPIC_N>` (sub-issue d'epic) ou `alpha` (Task / Bug standalone)
+   - Body : `Closes #NNN` **sur la première ligne** (obligatoire pour que le force-link de l'étape 8.5 fonctionne), suivi du résumé, test plan, screenshots
+   - **Note auto-close** : `Closes #N` ne déclenche l'auto-close du ticket que sur merge dans la branche par défaut (`master`) ; sur le merge dans `epic/<N>` ou `alpha`, le ticket reste ouvert jusqu'à la release `alpha → master`. Le force-link ci-dessous ne corrige pas ça — il sert uniquement à faire apparaître la PR dans la sidebar Development de l'issue.
    - **Ticket reste en In progress** pendant les validators
-   - Si stacked : noter dans le body « Stacked on #<parent-PR> — GitHub retargettera automatiquement sur `alpha` une fois le parent mergé »
    - Logger `PR_DRAFT` avec le numéro de PR.
+
+8.5. **Force le lien formel PR ↔ issue** :
+
+   GitHub n'enregistre `closingIssuesReferences` (la liste qui peuple la sidebar « Development » de l'issue) **que** si la PR a été créée avec `--base master` (la branche par défaut). Comme on cible `epic/<N>` ou `alpha`, le `Closes #N` reste dans le body sans créer le lien formel. Workaround : flip la base sur `master` puis revenir.
+
+   ```bash
+   bash scripts/orchestration/force_pr_issue_link.sh <PR_N>
+   ```
+
+   Le script est idempotent (skip si lien déjà en place ou si la PR cible déjà master) et vérifie via GraphQL après le flip que `closingIssuesReferences` est non-vide. **Coût** : ~2 runs CI supplémentaires par flip (workflows `pull_request: types: [edited|synchronize]` se redéclenchent à chaque changement de base) — donc on l'appelle une seule fois, juste après `gh pr create`.
+
+   Si le script échoue (`exit 1`) avec « Closes keyword missing » → ton body n'a pas `Closes #N` sur la première ligne, le corriger via `gh pr edit --body` puis re-run le script.
+
+   Note : ce force-link est **complémentaire** de la `linked branch` créée par `create_linked_branch.sh` (op. 6 de `rules/github-board.md`). Les deux artefacts apparaissent dans la sidebar Development de l'issue : la branche linkée (en haut) et la PR linkée (en bas, avec son statut). Sans le flip, seule la branche apparaît.
 
 9. **Validations en parallèle** — 3 axes simultanés, tous doivent être verts avant de passer à l'étape 10.
 
-   **9a. Validators IA** — invoquer `functional-validator` + `design-validator`. Ils commentent sur le ticket.
+   **9a. Validator IA** — invoquer `functional-validator` (rejoue les scénarios PO dans le dev server). Il commente sur le ticket.
    - `RETRY` (max 2) → corriger + push
    - `REFACTO` après 3 RETRY → ticket → **To Do** avec diagnostic
+   - Pas de `design-validator` séparé : la fidélité visuelle vs. Figma est vérifiée par `code-dev` lui-même à l'étape 7 (voir `rules/figma-workflow.md`).
 
    **9b. CI GitHub Actions** — watch du pipeline auto-déclenché par le push :
    - Polling : `gh pr checks <PR> --watch` (ou `gh run list --branch <branch>`)
@@ -214,14 +237,21 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    - `gh pr ready <PR>` (sort la PR du draft)
    - **Re-poll les checks après `gh pr ready`** : marquer la PR `ready` peut re-déclencher certains workflows (Deploy review notamment, qui n'a pas de `pull_request: types: [opened, synchronize]` strict). Attendre encore une fois que **toutes** les conclusions soient SUCCESS / SKIPPED / NEUTRAL — même critère qu'en 9b. Si un check repasse en FAILURE après `pr ready`, retourner en 9b (corriger, push, watch). Ne **jamais** retourner `validated` avec un check rouge.
    - Logger `PR_READY` avec le numéro de PR
-   - Status ticket → **In review** via `bash scripts/orchestration/set_ticket_status.sh <N> "In review"`
+   - **Le ticket reste en `In progress`** — c'est l'utilisateur qui passe à `In review` puis `Done` selon son rythme de revue humaine. AI's terminus = `gh pr ready` + retour `validated`. `set_ticket_status.sh` refusera explicitement la transition `In review`.
    - Logger `COMPLETE`
-   - `In review` = terminus pour l'IA. L'utilisateur passe manuellement en **Done** après revue humaine. Les nouveaux commentaires posés **après** le passage en In review relèvent de la skill `/review` (existante), plus du `code-dev`.
+   - **Pas de merge depuis `code-dev`** — le squash-merge dans `epic/<N>` est fait par `process_tick_result.sh` après ton retour `validated`. Si le merge échoue (conflit avec la branche d'intégration parce qu'une autre PR a été mergée entre-temps), le pipeline te redispatchera avec le ticket en `In progress` ; tu n'as qu'à rebaser sur `origin/epic/<N>` et re-pousser.
+   - Les nouveaux commentaires posés **après** le retour `validated` relèvent de la skill `/review` (existante), plus du `code-dev`.
 
 ## Contraintes
 
-- **Jamais `Done` automatique** — utilisateur uniquement (le script `set_ticket_status.sh` refuse explicitement cette transition pour un agent)
+- **Jamais `In review` ni `Done` automatique** — les deux transitions sont user-only (le script `set_ticket_status.sh` refuse explicitement). AI's terminus board-side = laisser le ticket à `In progress` ; l'humain bouge ensuite à `In review` puis `Done` à son rythme.
+- **Aucun commentaire dans le code produit** — voir `rules/code-quality.md` section "No comments by default". Seul un `// ` court justifiant un WHY non-évident est toléré.
+- **Jamais de merge depuis `code-dev`** — pas de `gh pr merge`, pas de `git push origin epic/<N>`, jamais. Le squash-merge dans la branche d'intégration est centralisé dans `process_tick_result.sh` après le retour `validated`.
 - **Jamais bypass** — pas de `@ts-ignore`, `--no-verify`, `--no-gpg-sign`, pas de skip CI
+- **GitHub artefact hygiene** — repo public.
+  - **Hard rule — jamais de secret / token / connection string / valeur `.env`** dans un body de PR, commentaire de réponse, ou commit message, même tronqué. Si tu rencontres une de ces valeurs en diagnostic (dump K8s, logs, fichier `.env`), **avertir l'utilisateur** — un secret leaké doit être rotaté à la source, l'edit GitHub ne suffit pas (cf. `.claude/rules/git-artefact-hygiene.md`).
+  - Pas de PII réel, pas de namespace K8s avec hash, pas d'output `kubectl logs` brut.
+  - Les screenshots dev server doivent afficher uniquement de la donnée seedée fictive — vérifier la stack docker locale avant capture.
 - **Screenshots PR obligatoires** pour toute modif UI
 - **Un ticket = une branche = une PR** — pas de bundle
 - **Coverage TU = 100%** sur le code du ticket (fichiers modifiés ou créés), pas seulement les 75% globaux
@@ -251,7 +281,7 @@ Le **dernier message** de l'agent doit être **exactement un de ces 5 JSON** —
 
 | Cas | JSON |
 |---|---|
-| PR ready, ticket en `In review` | `{"status":"validated","ticket":<N>,"pr":<P>}` |
+| PR ready, ticket reste en `In progress` (l'utilisateur le bouge à `In review` lui-même) | `{"status":"validated","ticket":<N>,"pr":<P>}` |
 | 3-retry exhaustion en Sonnet (le pipeline ré-essaiera en Opus) | `{"status":"needs_opus_escalation","ticket":<N>}` |
 | 3-retry exhaustion en Opus, OU spec invalide non corrigeable | `{"status":"refacto","ticket":<N>,"reason":"<résumé court>"}` |
 | Rate limit API Claude/GitHub persistant | `{"status":"rate_limited","ticket":<N>,"retry_in":<sec>}` |

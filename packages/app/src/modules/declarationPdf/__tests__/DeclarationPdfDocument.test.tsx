@@ -163,7 +163,6 @@ const declarationPdfData: DeclarationPdfData = {
 	step5Categories: [
 		{
 			name: "Ingénieurs",
-			detail: "",
 			womenCount: 5,
 			menCount: 8,
 			annualBaseWomen: "55000",

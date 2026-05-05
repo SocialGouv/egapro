@@ -46,7 +46,14 @@ export const env = createEnv({
 		EGAPRO_PROCONNECT_ISSUER: z.string().url(),
 		EGAPRO_WEEZ_API_URL: z.string().url(),
 		EGAPRO_SUIT_API_URL: z.string().url(),
-		EGAPRO_SUIT_API_KEY: z.string().min(32),
+		// Shared secret injected by the APISIX gateway (plugin `proxy-rewrite`)
+		// into `X-Gateway-Forwarded` on every SUIT request it proxies. The
+		// middleware (`src/middleware.ts`) verifies this header on
+		// `/api/v1/:path*` as a belt-and-suspenders protection against any
+		// in-cluster pod hitting the app pod directly and bypassing APISIX's
+		// Bearer auth + rate-limit. Stored in the `suit` sealed-secret and
+		// mounted on both the APISIX pod (to inject) and the app pod (to verify).
+		EGAPRO_GATEWAY_SHARED_SECRET: z.string().min(32),
 		S3_ENDPOINT: z.string().url(),
 		S3_REGION: z.string(),
 		S3_ACCESS_KEY_ID: z.string(),
@@ -58,7 +65,6 @@ export const env = createEnv({
 		EGAPRO_GIP_MDS_API_URL: z.string().url().optional(),
 		EGAPRO_GIP_MDS_API_TOKEN: z.string().optional(),
 		EGAPRO_MOCK_SUIT_SANCTION: z.coerce.boolean().optional().default(false),
-		EGAPRO_SUIT_PUBLIC_KEY_PEM: z.string().optional(),
 		/**
 		 * Comma-separated list of emails that should be granted the admin role
 		 * on login. The flag is then persisted in the `app_user.is_admin` column.
@@ -128,7 +134,7 @@ export const env = createEnv({
 		EGAPRO_PROCONNECT_ISSUER: process.env.EGAPRO_PROCONNECT_ISSUER,
 		EGAPRO_WEEZ_API_URL: process.env.EGAPRO_WEEZ_API_URL,
 		EGAPRO_SUIT_API_URL: process.env.EGAPRO_SUIT_API_URL,
-		EGAPRO_SUIT_API_KEY: process.env.EGAPRO_SUIT_API_KEY,
+		EGAPRO_GATEWAY_SHARED_SECRET: process.env.EGAPRO_GATEWAY_SHARED_SECRET,
 		S3_ENDPOINT: process.env.S3_ENDPOINT,
 		S3_REGION: process.env.S3_REGION,
 		S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID,
@@ -140,7 +146,6 @@ export const env = createEnv({
 		EGAPRO_GIP_MDS_API_URL: process.env.EGAPRO_GIP_MDS_API_URL,
 		EGAPRO_GIP_MDS_API_TOKEN: process.env.EGAPRO_GIP_MDS_API_TOKEN,
 		EGAPRO_MOCK_SUIT_SANCTION: process.env.EGAPRO_MOCK_SUIT_SANCTION,
-		EGAPRO_SUIT_PUBLIC_KEY_PEM: process.env.EGAPRO_SUIT_PUBLIC_KEY_PEM,
 		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS:
 			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,

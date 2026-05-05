@@ -6,6 +6,7 @@
  */
 
 import type { GapLevel } from "~/modules/domain";
+import styles from "./gapBadge.module.scss";
 
 /** French labels for gap severity levels. */
 export const GAP_LEVEL_LABELS: Record<GapLevel, string> = {
@@ -15,7 +16,8 @@ export const GAP_LEVEL_LABELS: Record<GapLevel, string> = {
 
 /** Returns the DSFR badge class for a gap severity level. */
 export function gapBadgeClass(level: GapLevel): string {
+	const base = "fr-badge fr-badge--sm fr-badge--no-icon";
 	return level === "low"
-		? "fr-badge fr-badge--sm fr-badge--no-icon fr-badge--info"
-		: "fr-badge fr-badge--sm fr-badge--no-icon fr-badge--warning";
+		? `${base} fr-badge--info`
+		: `${base} fr-badge--warning ${styles.high}`;
 }

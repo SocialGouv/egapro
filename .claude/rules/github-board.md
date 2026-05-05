@@ -1,8 +1,8 @@
 # GitHub Board Reference
 
-> **Used by**: `product-owner`, `architect`, `code-dev` (déplacent les tickets), skills `/ticket`, `/epic`, `/code`. `functional-validator` + `design-validator` commentent seulement.
+> **Used by**: `product-owner`, `architect`, `bug-analyst`, `code-dev` (déplacent les tickets — uniquement code-dev en pratique, les autres ne touchent pas au board), skills `/analyse`, `/implement`. `functional-validator` commente seulement.
 
-IDs et snippets GraphQL prêts à l'emploi pour que les agents (`architect`, `code-dev`) et skills (`/epic`, `/code`) pilotent le project board **EGAPRO V2**.
+IDs et snippets GraphQL prêts à l'emploi pour que les agents (`architect`, `code-dev`) et skills (`/analyse`, `/implement`) pilotent le project board **EGAPRO V2**.
 
 Les IDs sont **stables** tant que le board n'est pas recréé. Si un snippet échoue avec "node not found", re-extraire les IDs via la requête de diagnostic en bas de ce fichier.
 
@@ -19,7 +19,7 @@ STATUS_FIELD_ID  = PVTSSF_lADOAh0HH84BFsK7zg29EI8
 
 | Type | ID | Qui applique | Quand |
 |---|---|---|---|
-| Feature | `IT_kwDOAh0HH84Aa_K4` | `product-owner` | création de l'epic (phase `/ticket`) |
+| Feature | `IT_kwDOAh0HH84Aa_K4` | `product-owner` | création de l'epic (phase `/analyse`) |
 | Task | `IT_kwDOAh0HH84Aa_Kz` | `architect` | création des sub-issues de l'epic |
 | Bug | `IT_kwDOAh0HH84Aa_K1` | selon contexte | création d'une issue de bug |
 
@@ -29,13 +29,13 @@ L'epic porte le type **Feature** ; chaque sub-issue porte le type **Task**. À a
 
 | Statut | Option ID | Qui bouge | Quand |
 |---|---|---|---|
-| Backlog | `f75ad846` | `product-owner` | création epic (phase `/ticket`) |
+| Backlog | `f75ad846` | `product-owner` | création epic (phase `/analyse`) |
 | To Do | `61e4505c` | `architect` | tickets créés, prêts à dispatcher |
-| In progress | `47fc9ee4` | `code-dev` | début ticket (jusqu'à tous validators PASS) |
-| In review | `df73e18b` | `code-dev` | tous validators PASS + PR marked ready |
-| Done | `98236657` | **utilisateur uniquement** | revue humaine de la PR |
+| In progress | `47fc9ee4` | `code-dev` | début ticket — et y reste après `gh pr ready` (validation IA terminée). `code-dev` ne bouge plus le ticket au-delà. |
+| In review | `df73e18b` | **utilisateur uniquement** | quand l'humain décide qu'une PR est prête pour sa propre revue |
+| Done | `98236657` | **utilisateur uniquement** | après validation humaine de la PR mergée |
 
-**Règle absolue** : aucun agent IA ne passe un ticket à `Done` (`98236657`). L'ID est listé ici pour référence mais ne doit apparaître dans **aucun `gh api` mutation** d'un agent.
+**Règle absolue** : aucun agent IA ne passe un ticket à `In review` (`df73e18b`) ni `Done` (`98236657`). Les IDs sont listés pour référence mais ne doivent apparaître dans **aucun `gh api` mutation** d'un agent. Le script `set_ticket_status.sh` refuse explicitement les deux transitions (exit 3).
 
 ---
 
@@ -102,7 +102,7 @@ mutation($project:ID!, $item:ID!, $field:ID!, $option:String!) {
   -f option="47fc9ee4"   # In progress
 ```
 
-### 5. Lister les sub-issues d'un epic avec leur statut (pour `/epic`)
+### 5. Lister les sub-issues d'un epic avec leur statut (pour `/implement` mode epic)
 
 ```bash
 EPIC_NUMBER=42
@@ -165,7 +165,7 @@ mutation($issueId: ID!, $typeId: ID!) {
 }' -f issueId="$ISSUE_NODE_ID" -f typeId="$TYPE_ID"
 ```
 
-**Usage standard dans la pipeline `/ticket`** :
+**Usage standard dans la pipeline `/analyse`** :
 - `product-owner` applique **Feature** à l'epic juste après sa création.
 - `architect` applique **Task** à chaque sub-issue juste après sa création (boucle for).
 
@@ -201,9 +201,8 @@ Si le board a été recréé, mettre à jour les constantes en haut de ce fichie
 | Agent / Skill | Opérations utilisées |
 |---|---|
 | `product-owner` | 1, 2 (créer epic, ajouter au project en Backlog puis → To Do en fin de phase) |
-| `designer` | aucune (ne touche pas au board, commente seulement) |
 | `architect` | 1, 2, 4, 6 (créer sub-issues, ajouter au project, → To Do, lier au parent) |
-| `code-dev` | 3, 4 (passer To Do → In progress → In review) |
-| `functional-validator`, `design-validator` | aucune (commentent seulement, ne touchent pas au board) |
-| `/epic` | 5 (lister sub-issues + statut pour savoir quoi dispatcher) |
-| `/code` | 3, 4 (préconditions + éventuel retour To Do) |
+| `code-dev` | 3, 4 (passer To Do → In progress ; ne bouge **jamais** à In review ni Done) |
+| `functional-validator` | aucune (commente seulement, ne touche pas au board) |
+| `/analyse` | aucune transition de board (les agents conception sont read-only) ; via PO peut ajouter au project en Backlog (op. 1+2+4) |
+| `/implement` | 3, 4, 5 (préconditions + In progress ; mode epic = via le loop driver). Pas de transition à In review. |

@@ -16,7 +16,6 @@ export type SortColumn = (typeof SORT_COLUMNS)[number];
 export const DEFAULT_PAGE_SIZE = 20;
 
 export const searchReferentsSchema = z.object({
-	query: z.string().optional(),
 	region: z.enum(REGION_CODES).optional().or(z.literal("")),
 	county: z.enum(COUNTY_CODES).optional().or(z.literal("")),
 	page: z.coerce.number().int().min(1).default(1),
@@ -29,7 +28,6 @@ export type SearchReferentsInput = z.input<typeof searchReferentsSchema>;
 export type SearchReferentsOutput = z.output<typeof searchReferentsSchema>;
 
 export const searchReferentsFormSchema = z.object({
-	query: z.string().optional(),
 	region: z.string().optional(),
 	county: z.string().optional(),
 });

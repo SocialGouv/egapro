@@ -208,8 +208,22 @@
 		{
 			"idx": 29,
 			"version": "7",
+			"when": 1776100000000,
+			"tag": "0029_add_declaration_submitted_at",
+			"breakpoints": true
+		},
+		{
+			"idx": 30,
+			"version": "7",
+			"when": 1777379362370,
+			"tag": "0030_drop_job_category_detail",
+			"breakpoints": true
+		},
+		{
+			"idx": 31,
+			"version": "7",
 			"when": 1777494411210,
-			"tag": "0029_drop_quartile_threshold4",
+			"tag": "0031_drop_quartile_threshold4",
 			"breakpoints": true
 		}
 	]

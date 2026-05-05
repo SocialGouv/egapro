@@ -135,7 +135,7 @@ describe("ProfileModal", () => {
 			screen.getByText("Numéro de téléphone (obligatoire)"),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Format attendu : 01 22 33 44 55"),
+			screen.getByText("Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55"),
 		).toBeInTheDocument();
 		const input = getPhoneInput();
 		expect(input).toHaveAttribute("type", "tel");
@@ -179,7 +179,9 @@ describe("ProfileModal", () => {
 				"#profile-phone-messages .fr-message--error",
 			);
 			expect(errorMessage).toBeInTheDocument();
-			expect(errorMessage).toHaveTextContent("Format attendu : 01 22 33 44 55");
+			expect(errorMessage).toHaveTextContent(
+				"Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55",
+			);
 		});
 	});
 
@@ -190,7 +192,7 @@ describe("ProfileModal", () => {
 		});
 		fireEvent.submit(getForm());
 		await waitFor(() => {
-			expect(mockMutate).toHaveBeenCalledWith({ phone: "0122334455" });
+			expect(mockMutate).toHaveBeenCalledWith({ phone: "+33122334455" });
 		});
 	});
 

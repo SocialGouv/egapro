@@ -130,7 +130,6 @@ export const INDICATOR_G_COLUMNS: Array<{
 	{ key: "declarationType", header: "Type_declaration" },
 	{ key: "categoryIndex", header: "Index_categorie" },
 	{ key: "categoryName", header: "Nom_categorie" },
-	{ key: "categoryDetail", header: "Detail_categorie" },
 	{ key: "categorySource", header: "Source" },
 	{ key: "womenCount", header: "Effectif_F" },
 	{ key: "menCount", header: "Effectif_H" },

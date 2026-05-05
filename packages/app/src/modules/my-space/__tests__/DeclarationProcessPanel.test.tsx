@@ -48,8 +48,13 @@ describe("DeclarationProcessPanel", () => {
 		it("renders the last action date", () => {
 			const { panel } = renderPanel("start");
 			expect(
-				panel.getByText("Dernière action le 12 mars 2026"),
+				panel.getByText(/Dernière action le 12 mars 2026/),
 			).toBeInTheDocument();
+		});
+
+		it("renders the history link", () => {
+			const { panel } = renderPanel("start");
+			expect(panel.getByText("Voir l'historique")).toBeInTheDocument();
 		});
 
 		it("renders the info alert", () => {
@@ -121,18 +126,49 @@ describe("DeclarationProcessPanel", () => {
 	});
 
 	describe("variant: evaluation", () => {
-		it("renders second declaration transmitted message", () => {
-			const { panel } = renderPanel("evaluation");
+		it("renders second declaration transmitted message when submitted", () => {
+			const { panel } = renderPanel("evaluation", {
+				compliancePath: "joint_evaluation",
+				secondDeclarationStatus: "submitted",
+			});
 			expect(
 				panel.getByText("Votre seconde déclaration a été transmise"),
 			).toBeInTheDocument();
 		});
 
-		it("renders evaluation conjointe bullet", () => {
-			const { panel } = renderPanel("evaluation");
+		it("does not render second declaration row when joint_evaluation chosen directly", () => {
+			const { panel } = renderPanel("evaluation", {
+				compliancePath: "joint_evaluation",
+				secondDeclarationStatus: null,
+			});
+			expect(
+				panel.queryByText("Votre seconde déclaration a été transmise"),
+			).not.toBeInTheDocument();
 			expect(
 				panel.getByText("Évaluation conjointe des rémunérations"),
 			).toBeInTheDocument();
+		});
+
+		it("renders evaluation conjointe bullet on joint_evaluation path", () => {
+			const { panel } = renderPanel("evaluation", {
+				compliancePath: "joint_evaluation",
+			});
+			expect(
+				panel.getByText("Évaluation conjointe des rémunérations"),
+			).toBeInTheDocument();
+		});
+
+		it("hides evaluation conjointe bullet in second-round choice (corrective_action + 2nd decl submitted)", () => {
+			const { panel } = renderPanel("evaluation", {
+				compliancePath: "corrective_action",
+				secondDeclarationStatus: "submitted",
+			});
+			expect(
+				panel.getByText("Votre seconde déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(
+				panel.queryByText("Évaluation conjointe des rémunérations"),
+			).not.toBeInTheDocument();
 		});
 	});
 

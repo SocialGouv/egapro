@@ -1,0 +1,101 @@
+.infoSection {
+	display: flex;
+	flex-direction: column;
+}
+
+/* "Informations déclarant / entreprise / calcul" — Marianne Bold 16/24
+   per Figma. We bypass `fr-h6` here because DSFR sets it to
+   font-size: 1.125rem !important. */
+.infoTitle {
+	margin: 0 0 1rem;
+	font-family: Marianne, arial, sans-serif;
+	font-size: 1rem;
+	line-height: 1.5rem;
+	font-weight: 700;
+	color: var(--text-title-grey);
+}
+
+/* "Indicateurs pour l'ensemble" / "Indicateurs par catégorie" h2 —
+   Marianne Bold 18/28 per Figma. fr-h6 already covers this size. */
+.sectionHeading {
+	line-height: 1.75rem;
+}
+
+.infoList {
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.infoRow {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+
+	@include respond-from(md) {
+		flex-direction: row;
+		gap: 1rem;
+		align-items: baseline;
+	}
+}
+
+.infoLabel {
+	margin: 0;
+	padding: 0;
+	font-weight: 400;
+	color: var(--text-mention-grey);
+
+	@include respond-from(md) {
+		flex: 0 0 15rem;
+	}
+}
+
+.infoValue {
+	margin: 0;
+	margin-inline-start: 0;
+	padding: 0;
+}
+
+.indicatorsSection {
+	display: flex;
+	flex-direction: column;
+	gap: 2.5rem;
+
+	/* Recap tables show no vertical column separators per Figma —
+	   only the row separator + the outer border survive. DSFR draws
+	   the right-edge of each <th>/<td> via a 2nd linear-gradient
+	   layer; we keep the layer (so background-size still maps two
+	   slots) but paint it transparent. */
+	:global(.fr-table__content) tbody td,
+	:global(.fr-table__content) tbody th,
+	:global(.fr-table__content) thead th {
+		background-image:
+			linear-gradient(0deg, var(--border-contrast-grey), var(--border-contrast-grey)),
+			linear-gradient(0deg, transparent, transparent);
+	}
+
+	/* All data-row <th scope="row"> default to white; section-header
+	   rows re-apply grey via higher-specificity rules in their own module. */
+	:global(.fr-table__content) tbody th {
+		background-color: var(--background-default-grey);
+	}
+}
+
+.sourceLine {
+	margin: 0;
+}
+
+.sourceLabel {
+	color: var(--text-mention-grey);
+}
+
+.emptyNotice {
+	margin: 0;
+	color: var(--text-mention-grey);
+}
+
+.primaryAction {
+	align-self: flex-end;
+}

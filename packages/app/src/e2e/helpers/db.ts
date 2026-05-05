@@ -248,26 +248,23 @@ export async function insertPreviousYearDeclaration(yearsBack = 1) {
 				id: PREV_YEAR_JOB_CATEGORY_IDS[0],
 				index: 0,
 				name: "Cadres dirigeants",
-				detail: "Directeurs et cadres supérieurs",
 			},
 			{
 				id: PREV_YEAR_JOB_CATEGORY_IDS[1],
 				index: 1,
 				name: "Ingénieurs et cadres",
-				detail: "Ingénieurs, chefs de projet, managers",
 			},
 			{
 				id: PREV_YEAR_JOB_CATEGORY_IDS[2],
 				index: 2,
 				name: "Techniciens",
-				detail: "Techniciens qualifiés",
 			},
 		];
 
 		for (const cat of categories) {
 			await sql`
-				INSERT INTO app_job_category (id, declaration_id, category_index, name, detail, source)
-				VALUES (${cat.id}, ${declId}, ${cat.index}, ${cat.name}, ${cat.detail}, 'convention-collective')
+				INSERT INTO app_job_category (id, declaration_id, category_index, name, source)
+				VALUES (${cat.id}, ${declId}, ${cat.index}, ${cat.name}, 'accord-entreprise')
 				ON CONFLICT DO NOTHING
 			`;
 		}
@@ -421,6 +418,74 @@ export async function deleteReferents(ids: string[]) {
 	const sql = createConnection();
 	try {
 		await sql`DELETE FROM app_referent WHERE id = ANY(${ids})`;
+	} finally {
+		await sql.end();
+	}
+}
+
+type SeededCampaignDeclaration = {
+	/** Unique 9-digit SIREN. Must not collide with existing data. */
+	siren: string;
+	year: number;
+	/** Campaign-day the declaration was submitted (ISO string). */
+	submittedAt: string;
+	/** Workforce stored on the synthetic company. */
+	workforce: number;
+};
+
+/**
+ * Insert synthetic submitted declarations for the campaign progression E2E
+ * tests (K2). Each entry creates a company row if needed and a matching
+ * declaration with the specified `submitted_at`. Uses the real E2E declarant
+ * attached to TEST_SIREN to satisfy the FK on `declarant_id`.
+ */
+export async function seedSubmittedDeclarationsForStats(
+	rows: SeededCampaignDeclaration[],
+) {
+	if (rows.length === 0) return;
+	const sql = createConnection();
+	try {
+		const users = await sql`
+			SELECT user_id FROM app_user_company WHERE siren = ${TEST_SIREN} LIMIT 1
+		`;
+		const declarantId = users[0]?.user_id as string | undefined;
+		if (!declarantId) {
+			throw new Error(
+				"seedSubmittedDeclarationsForStats: no declarant found for TEST_SIREN",
+			);
+		}
+		for (const row of rows) {
+			await sql`
+				INSERT INTO app_company (siren, name, workforce, created_at, updated_at)
+				VALUES (${row.siren}, ${`E2E Stats Co. ${row.siren}`}, ${row.workforce}, NOW(), NOW())
+				ON CONFLICT (siren) DO UPDATE SET workforce = EXCLUDED.workforce
+			`;
+			await sql`
+				INSERT INTO app_declaration (
+					id, siren, year, declarant_id, current_step, status,
+					submitted_at, created_at, updated_at
+				)
+				VALUES (
+					gen_random_uuid(), ${row.siren}, ${row.year}, ${declarantId}, 6,
+					'submitted', ${row.submittedAt}, NOW(), NOW()
+				)
+				ON CONFLICT ON CONSTRAINT declaration_siren_year_idx DO UPDATE SET
+					status = 'submitted',
+					submitted_at = EXCLUDED.submitted_at
+			`;
+		}
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Remove the synthetic company+declaration rows seeded for the stats E2E. */
+export async function deleteSeededCampaignDeclarations(sirens: string[]) {
+	if (sirens.length === 0) return;
+	const sql = createConnection();
+	try {
+		await sql`DELETE FROM app_declaration WHERE siren = ANY(${sirens})`;
+		await sql`DELETE FROM app_company WHERE siren = ANY(${sirens})`;
 	} finally {
 		await sql.end();
 	}

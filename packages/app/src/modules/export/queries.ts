@@ -138,7 +138,6 @@ export async function fetchIndicatorGByDeclaration(
 		.select({
 			declarationId: jobCategories.declarationId,
 			categoryName: jobCategories.name,
-			detail: jobCategories.detail,
 			declarationType: employeeCategories.declarationType,
 			womenCount: employeeCategories.womenCount,
 			menCount: employeeCategories.menCount,
@@ -197,7 +196,6 @@ export async function buildIndicatorGRows(
 			declarationType: employeeCategories.declarationType,
 			categoryIndex: jobCategories.categoryIndex,
 			categoryName: jobCategories.name,
-			categoryDetail: jobCategories.detail,
 			categorySource: jobCategories.source,
 			womenCount: employeeCategories.womenCount,
 			menCount: employeeCategories.menCount,

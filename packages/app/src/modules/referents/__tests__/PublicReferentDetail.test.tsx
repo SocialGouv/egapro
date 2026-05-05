@@ -114,4 +114,27 @@ describe("PublicReferentDetail", () => {
 		);
 		expect(screen.getByText(/^99/)).toBeInTheDocument();
 	});
+
+	it("renders gracefully when the referent name is a region label (e.g. PACA)", () => {
+		render(
+			<PublicReferentDetail
+				referent={{
+					...baseReferent,
+					name: "PACA",
+					county: null,
+					type: "url",
+					value: "https://dreets.paca.gouv.fr/contact",
+					substituteName: null,
+					substituteEmail: null,
+				}}
+			/>,
+		);
+		expect(
+			screen.getByRole("heading", { level: 1, name: "PACA" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: /dreets\.paca\.gouv\.fr/i }),
+		).toHaveAttribute("href", "https://dreets.paca.gouv.fr/contact");
+		expect(screen.queryByText(/suppléant/i)).not.toBeInTheDocument();
+	});
 });

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { classifyCompanySize, isCseRequired } from "../shared/companySize";
+import {
+	COMPANY_SIZE_RANGES,
+	classifyCompanySize,
+	isCseRequired,
+} from "../shared/companySize";
 
 describe("classifyCompanySize", () => {
 	it("returns voluntary for workforce below 50", () => {
@@ -29,5 +33,48 @@ describe("isCseRequired", () => {
 	it("returns true for workforce at or above 100", () => {
 		expect(isCseRequired(100)).toBe(true);
 		expect(isCseRequired(500)).toBe(true);
+	});
+});
+
+describe("COMPANY_SIZE_RANGES", () => {
+	it("exposes the five buckets in UI order", () => {
+		expect(Object.keys(COMPANY_SIZE_RANGES)).toEqual([
+			"<50",
+			"50-99",
+			"100-149",
+			"150-249",
+			"250+",
+		]);
+	});
+
+	it("uses contiguous, non-overlapping bounds", () => {
+		expect(COMPANY_SIZE_RANGES["<50"]).toEqual({
+			min: 0,
+			max: 49,
+			label: "Moins de 50 salariés",
+		});
+		expect(COMPANY_SIZE_RANGES["50-99"]).toEqual({
+			min: 50,
+			max: 99,
+			label: "50 à 99 salariés",
+		});
+		expect(COMPANY_SIZE_RANGES["100-149"]).toEqual({
+			min: 100,
+			max: 149,
+			label: "100 à 149 salariés",
+		});
+		expect(COMPANY_SIZE_RANGES["150-249"]).toEqual({
+			min: 150,
+			max: 249,
+			label: "150 à 249 salariés",
+		});
+	});
+
+	it("leaves the top bucket open-ended", () => {
+		expect(COMPANY_SIZE_RANGES["250+"]).toEqual({
+			min: 250,
+			max: null,
+			label: "250 salariés et plus",
+		});
 	});
 });

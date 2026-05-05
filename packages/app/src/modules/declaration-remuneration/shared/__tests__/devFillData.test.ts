@@ -37,8 +37,8 @@ describe("devFillData", () => {
 		expect(DEV_STEP4_HOURLY).toHaveLength(4);
 	});
 
-	it("Step5 source is convention-collective", () => {
-		expect(DEV_STEP5_SOURCE).toBe("convention-collective");
+	it("Step5 source is accord-entreprise", () => {
+		expect(DEV_STEP5_SOURCE).toBe("accord-entreprise");
 	});
 
 	it("createDevStep5Categories returns 4 categories with sequential IDs", () => {

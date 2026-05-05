@@ -97,7 +97,6 @@ function makeIndicatorGRow(
 		declarationType: "initial",
 		categoryIndex: 0,
 		categoryName: "Ouvriers",
-		categoryDetail: "Production",
 		categorySource: "predefined",
 		womenCount: 40,
 		menCount: 45,

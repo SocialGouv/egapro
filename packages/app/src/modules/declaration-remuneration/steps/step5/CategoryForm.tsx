@@ -14,10 +14,15 @@ import { FormActions } from "~/modules/declaration-remuneration/shared/FormActio
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { StepTitleRow } from "~/modules/declaration-remuneration/shared/StepTitleRow";
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
+import {
+	CATEGORY_SOURCES,
+	SOURCE_LABELS,
+} from "~/modules/declaration-remuneration/steps/step5/sources";
 import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
+import { padDecimalOnBlur, padDecimalToTwo } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./CategoryDataTable";
@@ -30,13 +35,6 @@ import {
 } from "./categorySerializer";
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
 
-const SOURCE_LABELS: Record<string, string> = {
-	"convention-collective": "Convention collective",
-	"accord-entreprise": "Accord d'entreprise",
-	"classification-interne": "Classification interne",
-	autre: "Autre",
-};
-
 function createIdGenerator() {
 	let id = 0;
 	return () => id++;
@@ -45,17 +43,16 @@ function createIdGenerator() {
 function toFormValues(cats: EmployeeCategory[]) {
 	return cats.map((c) => ({
 		name: c.name,
-		detail: c.detail,
 		womenCount: c.womenCount,
 		menCount: c.menCount,
-		annualBaseWomen: c.annualBaseWomen,
-		annualBaseMen: c.annualBaseMen,
-		annualVariableWomen: c.annualVariableWomen,
-		annualVariableMen: c.annualVariableMen,
-		hourlyBaseWomen: c.hourlyBaseWomen,
-		hourlyBaseMen: c.hourlyBaseMen,
-		hourlyVariableWomen: c.hourlyVariableWomen,
-		hourlyVariableMen: c.hourlyVariableMen,
+		annualBaseWomen: padDecimalToTwo(c.annualBaseWomen),
+		annualBaseMen: padDecimalToTwo(c.annualBaseMen),
+		annualVariableWomen: padDecimalToTwo(c.annualVariableWomen),
+		annualVariableMen: padDecimalToTwo(c.annualVariableMen),
+		hourlyBaseWomen: padDecimalToTwo(c.hourlyBaseWomen),
+		hourlyBaseMen: padDecimalToTwo(c.hourlyBaseMen),
+		hourlyVariableWomen: padDecimalToTwo(c.hourlyVariableWomen),
+		hourlyVariableMen: padDecimalToTwo(c.hourlyVariableMen),
 	}));
 }
 
@@ -74,10 +71,9 @@ type Props = {
 	onSubmit: (data: EmployeeCategorySubmitData) => void;
 	isSubmitting: boolean;
 	submitError?: string | null;
-	readOnlyNameDetail?: boolean;
+	readOnlyLabel?: boolean;
 	referencePeriodPicker?: ReactNode;
 	descriptionText?: string;
-	siren?: string;
 	disabled?: boolean;
 	mimoquageNextHref?: string;
 };
@@ -97,10 +93,9 @@ export function CategoryForm({
 	onSubmit,
 	isSubmitting,
 	submitError,
-	readOnlyNameDetail = false,
+	readOnlyLabel = false,
 	referencePeriodPicker,
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
-	siren,
 	disabled = false,
 	mimoquageNextHref,
 }: Props) {
@@ -156,6 +151,19 @@ export function CategoryForm({
 		};
 	}
 
+	function handleDecimalBlur(index: number, field: keyof EmployeeCategory) {
+		return () => {
+			const formField = field as Exclude<keyof EmployeeCategory, "id">;
+			padDecimalOnBlur(
+				form.getValues(`categories.${index}.${formField}`),
+				(padded) => {
+					form.setValue(`categories.${index}.${formField}`, padded);
+					setSaved(false);
+				},
+			);
+		};
+	}
+
 	function addCategory() {
 		const empty = createEmptyCategory(nextId());
 		const formEntry = toFormValues([empty])[0];
@@ -171,6 +179,23 @@ export function CategoryForm({
 	function askRemoveCategory(index: number) {
 		setDeleteIndex(index);
 		deleteDialogRef.current?.showModal();
+	}
+
+	// DSFR's accordion JS focuses the toggle button after a collapse, which
+	// scrolls the page to keep the (now much shorter) page in view — users
+	// land at the top instead of staying near the category they just folded.
+	// Snapshot the button's viewport offset before the toggle and restore it
+	// after the next layout pass so the click feels in-place.
+	function handleAccordionToggle(e: React.MouseEvent<HTMLButtonElement>) {
+		const button = e.currentTarget;
+		const offsetBefore = button.getBoundingClientRect().top;
+		requestAnimationFrame(() => {
+			const offsetAfter = button.getBoundingClientRect().top;
+			const drift = offsetAfter - offsetBefore;
+			if (Math.abs(drift) > 1) {
+				window.scrollBy({ top: drift, behavior: "instant" });
+			}
+		});
 	}
 
 	function confirmRemoveCategory() {
@@ -262,7 +287,7 @@ export function CategoryForm({
 			<div className={stepStyles.categoryBlock}>
 				<p className="fr-mb-0">{descriptionText}</p>
 
-				{readOnlyNameDetail ? (
+				{readOnlyLabel ? (
 					<p className="fr-mb-0">
 						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
 						<span className="fr-text--bold">
@@ -270,7 +295,7 @@ export function CategoryForm({
 						</span>
 					</p>
 				) : (
-					<div className="fr-select-group">
+					<div className={`fr-select-group ${stepStyles.sourceSelectGroup}`}>
 						<label className="fr-label" htmlFor="source-select">
 							Quelle est la source utilisée pour déterminer les catégories
 							d&apos;emplois ?
@@ -288,16 +313,11 @@ export function CategoryForm({
 							<option disabled value="">
 								Sélectionner une option
 							</option>
-							<option value="convention-collective">
-								Convention collective
-							</option>
-							<option value="accord-entreprise">
-								Accord d&apos;entreprise
-							</option>
-							<option value="classification-interne">
-								Classification interne
-							</option>
-							<option value="autre">Autre</option>
+							{CATEGORY_SOURCES.map((s) => (
+								<option key={s.value} value={s.value}>
+									{s.label}
+								</option>
+							))}
 						</select>
 					</div>
 				)}
@@ -326,28 +346,22 @@ export function CategoryForm({
 						label="Information sur la saisie"
 					/>
 				</div>
-				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
+				<div className={stepStyles.obligatoiresRow}>
+					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
+					{!readOnlyLabel && (
+						<CategoryImportExport
+							disabled={disabled}
+							onImport={handleImportCategories}
+						/>
+					)}
+				</div>
 			</div>
-
-			{!readOnlyNameDetail && (
-				<CategoryImportExport
-					disabled={disabled}
-					getCategories={() =>
-						form.getValues("categories").map((cat, i) => ({
-							id: i,
-							...cat,
-						}))
-					}
-					onImport={handleImportCategories}
-					siren={siren}
-					year={referenceYear + 1}
-				/>
-			)}
 
 			<div className="fr-accordions-group" data-fr-group="false">
 				{fields.map((field, index) => {
 					const cat = categories[index];
 					const collapseId = `${baseId}-accordion-${index}`;
+					const headingId = `${collapseId}-heading`;
 					const categoryNumber = `Catégorie d'emplois n°${index + 1}`;
 					const catName = cat?.name?.trim() ?? "";
 					const categoryLabel = catName
@@ -355,12 +369,18 @@ export function CategoryForm({
 						: categoryNumber;
 
 					return (
-						<section className="fr-accordion" key={field.id}>
+						<section
+							aria-labelledby={headingId}
+							className="fr-accordion"
+							key={field.id}
+						>
 							<h3 className="fr-accordion__title">
 								<button
 									aria-controls={collapseId}
 									aria-expanded="true"
 									className="fr-accordion__btn"
+									id={headingId}
+									onClick={handleAccordionToggle}
 									type="button"
 								>
 									{categoryLabel}
@@ -371,8 +391,45 @@ export function CategoryForm({
 								id={collapseId}
 							>
 								<div className={stepStyles.categoryBlock}>
-									{!readOnlyNameDetail && fields.length > 1 && (
-										<div className={stepStyles.categoryFooter}>
+									{readOnlyLabel ? (
+										<p className="fr-mb-0">
+											<span className="fr-text--bold">Libellé : </span>
+											{cat?.name}
+										</p>
+									) : (
+										<div className="fr-input-group fr-mb-0">
+											<label className="fr-label" htmlFor={`cat-${index}-name`}>
+												Libellé
+											</label>
+											<input
+												className="fr-input"
+												disabled={disabled}
+												id={`cat-${index}-name`}
+												{...form.register(`categories.${index}.name`)}
+												onChange={(e) => {
+													form.setValue(
+														`categories.${index}.name`,
+														e.target.value,
+													);
+													setSaved(false);
+												}}
+												type="text"
+											/>
+										</div>
+									)}
+
+									<CategoryDataTable
+										category={
+											cat ? { id: index, ...cat } : createEmptyCategory(index)
+										}
+										categoryIndex={index}
+										disabled={disabled}
+										onDecimalBlur={handleDecimalBlur}
+										onPositiveNumberChange={handlePositiveNumberChange}
+									/>
+
+									{!readOnlyLabel && fields.length > 1 && (
+										<div className={stepStyles.deleteRow}>
 											<button
 												className="fr-btn fr-btn--tertiary fr-icon-delete-line fr-btn--icon-left fr-btn--sm"
 												disabled={disabled}
@@ -383,78 +440,6 @@ export function CategoryForm({
 											</button>
 										</div>
 									)}
-
-									{readOnlyNameDetail ? (
-										<>
-											<p className="fr-mb-0">
-												<span className="fr-text--bold">Nom : </span>
-												{cat?.name}
-											</p>
-											<p className="fr-mb-0">
-												<span className="fr-text--bold">
-													Détail des emplois :{" "}
-												</span>
-												{cat?.detail}
-											</p>
-										</>
-									) : (
-										<>
-											<div className="fr-input-group fr-mb-0">
-												<label
-													className="fr-label"
-													htmlFor={`cat-${index}-name`}
-												>
-													Nom
-												</label>
-												<input
-													className="fr-input"
-													disabled={disabled}
-													id={`cat-${index}-name`}
-													{...form.register(`categories.${index}.name`)}
-													onChange={(e) => {
-														form.setValue(
-															`categories.${index}.name`,
-															e.target.value,
-														);
-														setSaved(false);
-													}}
-													type="text"
-												/>
-											</div>
-
-											<div className="fr-input-group fr-mb-0">
-												<label
-													className="fr-label"
-													htmlFor={`cat-${index}-detail`}
-												>
-													Détail des emplois
-												</label>
-												<input
-													className="fr-input"
-													disabled={disabled}
-													id={`cat-${index}-detail`}
-													{...form.register(`categories.${index}.detail`)}
-													onChange={(e) => {
-														form.setValue(
-															`categories.${index}.detail`,
-															e.target.value,
-														);
-														setSaved(false);
-													}}
-													type="text"
-												/>
-											</div>
-										</>
-									)}
-
-									<CategoryDataTable
-										category={
-											cat ? { id: index, ...cat } : createEmptyCategory(index)
-										}
-										categoryIndex={index}
-										disabled={disabled}
-										onPositiveNumberChange={handlePositiveNumberChange}
-									/>
 								</div>
 							</div>
 						</section>
@@ -466,7 +451,7 @@ export function CategoryForm({
 				<p className="fr-text--bold fr-mb-0">
 					Nombre de catégories : {fields.length}
 				</p>
-				{!readOnlyNameDetail && (
+				{!readOnlyLabel && (
 					<button
 						className="fr-btn fr-btn--secondary fr-icon-add-line fr-btn--icon-left"
 						disabled={disabled}
@@ -481,7 +466,33 @@ export function CategoryForm({
 			<DefinitionAccordion
 				id={accordionId}
 				title="Définitions et méthode de calcul"
-			/>
+			>
+				<div className="fr-callout">
+					<ul>
+						<li>
+							Comment importer directement ses données depuis un fichier
+							Excel&nbsp;?
+						</li>
+						<li>
+							Où trouver le modèle de fichier pour l&apos;importation&nbsp;?
+						</li>
+						<li>Que signifie «&nbsp;Salaire de base&nbsp;»&nbsp;?</li>
+						<li>
+							Que signifie «&nbsp;Rémunération annuelle brute&nbsp;»&nbsp;?
+							Est-ce la moyenne ou le total annuel&nbsp;?
+						</li>
+						<li>Que signifie «&nbsp;Rémunération horaire&nbsp;»&nbsp;?</li>
+						<li>
+							Comment saisir le nombre d&apos;heures pour un calcul automatique
+							du taux horaire&nbsp;?
+						</li>
+						<li>
+							Comment savoir quels accords s&apos;appliquent à mon
+							entreprise&nbsp;?
+						</li>
+					</ul>
+				</div>
+			</DefinitionAccordion>
 
 			<FormErrors
 				mutationError={submitError}

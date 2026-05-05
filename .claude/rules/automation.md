@@ -58,7 +58,7 @@ These gates trigger **automatically** without user input. Do NOT wait to be aske
 
 ### Quality gates — agent delegation
 
-Within the `/epic` + `/code` pipeline, quality gates are delegated by the `code-dev` agent (step 6) — it invokes the 4 auditors in parallel after implementation, before opening the draft PR.
+Within the `/implement` pipeline, quality gates are delegated by the `code-dev` agent (step 6) — it invokes the 4 auditors in parallel after implementation, before opening the draft PR.
 
 **Outside the pipeline** (direct edits, manual fixes, hotfixes), the same rule applies : before reporting ANY task as done, launch the **4 parallel agents** :
 
@@ -133,7 +133,7 @@ Agents in `.claude/agents/` are delegated to automatically by skills and quality
 | Agent | Role | Model |
 |---|---|---|
 | `validator` | Typecheck + test + lint + format (parallel) | sonnet |
-| `structural-auditor` | 16-rule structural audit (code quality, forms, schemas, DRY, imports…) | sonnet |
+| `structural-auditor` | 17-rule structural audit (code quality, forms, schemas, DRY, imports, no-comments…) | sonnet |
 | `rgaa-auditor` | Full 13-theme RGAA accessibility audit | sonnet |
 | `security-auditor` | OWASP Top 10 + RGS security review | sonnet |
 
@@ -147,8 +147,7 @@ Five skills split the lifecycle:
 
 | Command | When to use |
 |---|---|
-| `/ticket <description + Figma URL>` | Conception pipeline : PO → designer → architect. Produit un epic GitHub avec N sous-issues prêtes à dispatcher. |
-| `/epic <N1> [<N2> ...]` | Lance `scripts/orchestration/epic_loop.sh` en background. Thin wrapper — toute la logique est en bash. Main context libre. |
-| `/code <N>` | Exécute un seul ticket via `code-dev`. Parse le retour JSON strict ; ré-invoque en Opus si `needs_opus_escalation`. |
+| `/analyse [<issue#>] [<description>]` | Phase conception. Détecte le mode (epic / task / bug) selon le type d'issue ou le prompt et invoque les agents appropriés (PO + architect, architect-task, ou bug-analyst). |
+| `/implement <issue#>` | Phase exécution. Détecte le mode selon le type d'issue : Feature → loop driver background (`epic_loop.sh`) ; Task / Bug → `code-dev` synchrone foreground. Vérifie qu'une analyse a été faite avant de dispatcher. |
 | `/report [<N> ...]` | Dashboard live des agents en cours + état des sous-tickets d'un epic. Pure bash, zéro LLM. |
-| `/review` | Traite les commentaires de revue posés après passage en `In review` (human + bots). |
+| `/review [<issue#>\|<PR#>]` | Adresse les commentaires de revue (humain + bots). 3 modes auto-détectés : Feature → toutes les sub-task PRs + PR finale, fixes sur `epic/<N>` ; Task / Bug → la seule PR du ticket. Délègue à `review-fixer` en worktree. |

@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
-import { computeProportion, normalizeDecimalInput } from "~/modules/domain";
+import {
+	computeProportion,
+	normalizeDecimalInput,
+	padDecimalToTwo,
+} from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep3Schema } from "../schemas";
@@ -24,6 +28,7 @@ import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
+import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapField, Step3Data } from "../types";
 import stepStyles from "./Step3VariablePay.module.scss";
 
@@ -46,11 +51,18 @@ export function Step3VariablePay({
 	const isImpersonating = useIsImpersonating();
 
 	const hasSavedData = Object.values(initialData).some((v) => v !== "");
-	const defaultValues = hasSavedData
+	const rawDefaults = hasSavedData
 		? initialData
 		: gipPrefillData
 			? gipToStep3(gipPrefillData.step3)
 			: initialData;
+	const defaultValues = Object.fromEntries(
+		Object.entries(rawDefaults).map(([k, v]) =>
+			k === "indicatorEWomen" || k === "indicatorEMen"
+				? [k, v]
+				: [k, padDecimalToTwo(v)],
+		),
+	) as Step3Data;
 
 	const hasInitialData = hasSavedData;
 
@@ -124,8 +136,8 @@ export function Step3VariablePay({
 					DEV_STEP3_ROWS.forEach((row, i) => {
 						const womenField = getStep3FieldName(i, "womenValue");
 						const menField = getStep3FieldName(i, "menValue");
-						form.setValue(womenField, row.womenValue);
-						form.setValue(menField, row.menValue);
+						form.setValue(womenField, padDecimalToTwo(row.womenValue));
+						form.setValue(menField, padDecimalToTwo(row.menValue));
 					});
 					form.setValue("indicatorEWomen", DEV_STEP3_BENEFICIARY_WOMEN);
 					form.setValue("indicatorEMen", DEV_STEP3_BENEFICIARY_MEN);
@@ -151,12 +163,17 @@ export function Step3VariablePay({
 					rémunérations.
 				</p>
 
-				<p className="fr-mb-0">
-					<strong>
-						{gipPrefillData
-							? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
-							: "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."}
-					</strong>
+				<p className={`fr-mb-0 ${common.fontMedium}`}>
+					{gipPrefillData
+						? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."
+						: "Renseignez les informations avant de valider vos indicateurs."}
+					{!gipPrefillData && (
+						<TooltipButton
+							id="tooltip-step3-info"
+							label="Information sur la confidentialité des données"
+							text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
+						/>
+					)}
 				</p>
 
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
@@ -182,7 +199,10 @@ export function Step3VariablePay({
 					/>
 
 					{gipPrefillData && (
-						<PrefillSource periodEnd={gipPrefillData.periodEnd} />
+						<PrefillSource
+							periodEnd={gipPrefillData.periodEnd}
+							tooltipId="tooltip-source-step3-paygap"
+						/>
 					)}
 				</div>
 
@@ -198,6 +218,12 @@ export function Step3VariablePay({
 										<caption>
 											Bénéficiaires de composantes variables ou complémentaires
 										</caption>
+										<colgroup>
+											<col className={stepStyles.colSex} />
+											<col className={stepStyles.colCount} />
+											<col className={stepStyles.colCount} />
+											<col />
+										</colgroup>
 										<thead>
 											<tr>
 												<th scope="col">Sexe</th>
@@ -220,13 +246,13 @@ export function Step3VariablePay({
 												<td>
 													<strong>Femmes</strong>
 												</td>
-												<td>
+												<td className="fr-cell--right">
 													<strong>{maxWomen ?? "-"}</strong>
 												</td>
 												<td>
 													<input
 														aria-label="Bénéficiaires femmes"
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={(e) =>
@@ -241,7 +267,7 @@ export function Step3VariablePay({
 														value={beneficiaryWomen}
 													/>
 												</td>
-												<td>
+												<td className="fr-cell--right">
 													<strong>
 														{computeProportion(beneficiaryWomen, maxWomen)}
 													</strong>
@@ -251,13 +277,13 @@ export function Step3VariablePay({
 												<td>
 													<strong>Hommes</strong>
 												</td>
-												<td>
+												<td className="fr-cell--right">
 													<strong>{maxMen ?? "-"}</strong>
 												</td>
 												<td>
 													<input
 														aria-label="Bénéficiaires hommes"
-														className="fr-input"
+														className={`fr-input ${common.numericInput}`}
 														disabled={isImpersonating}
 														inputMode="numeric"
 														onChange={(e) =>
@@ -272,7 +298,7 @@ export function Step3VariablePay({
 														value={beneficiaryMen}
 													/>
 												</td>
-												<td>
+												<td className="fr-cell--right">
 													<strong>
 														{computeProportion(beneficiaryMen, maxMen)}
 													</strong>
@@ -295,26 +321,45 @@ export function Step3VariablePay({
 					)}
 
 					{gipPrefillData && (
-						<PrefillSource periodEnd={gipPrefillData.periodEnd} />
+						<PrefillSource
+							periodEnd={gipPrefillData.periodEnd}
+							tooltipId="tooltip-source-step3"
+						/>
 					)}
 				</div>
 
 				<DefinitionAccordion
 					id="accordion-step3"
 					title="Définitions et méthode de calcul"
-				/>
+				>
+					<div className="fr-callout">
+						<ul>
+							<li>
+								Quelles composantes de la rémunération sont incluses dans le
+								calcul (ex. véhicule de fonction, repas, prime de participation,
+								etc.)&nbsp;?
+							</li>
+							<li>
+								Les bons codes rubrique DSN sont-ils bien utilisés pour chacune
+								de ces composantes&nbsp;?
+							</li>
+							<li>
+								Comment vérifier ou identifier les codes DSN associés aux
+								éléments de rémunération pris en compte&nbsp;?
+							</li>
+						</ul>
+					</div>
+				</DefinitionAccordion>
 			</div>
 
-			{gipPrefillData && (
-				<GapInterpretationCallout
-					beneficiaryMen={beneficiaryMen}
-					beneficiaryWomen={beneficiaryWomen}
-					maxMen={maxMen}
-					maxWomen={maxWomen}
-					rows={rows}
-					variant="variablePay"
-				/>
-			)}
+			<GapInterpretationCallout
+				beneficiaryMen={beneficiaryMen}
+				beneficiaryWomen={beneficiaryWomen}
+				maxMen={maxMen}
+				maxWomen={maxWomen}
+				rows={rows}
+				variant="variablePay"
+			/>
 
 			<FormErrors
 				mutationError={mutation.error?.message}

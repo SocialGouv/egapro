@@ -16,14 +16,36 @@ export type ScanResult = { clean: true } | { clean: false; virus: string };
  *   → [4 bytes big-endian = chunk size][chunk data]  (repeated)
  *   → [4 bytes zero]                                 (end of stream)
  *   ← "stream: OK\0"  or  "stream: <virus> FOUND\0"
+ *
+ * When an `AbortSignal` is provided, an abort (client disconnect, request
+ * timeout) immediately destroys the socket. Any pending `sendChunk` or
+ * `finish` call rejects with the abort reason so the pipeline surfaces a
+ * clean failure instead of hanging on the clamd read.
  */
-export function createClamdStream(host: string, port: number) {
+export function createClamdStream(
+	host: string,
+	port: number,
+	signal?: AbortSignal,
+) {
 	const socket = net.createConnection({ host, port });
 
 	let socketError: Error | null = null;
 	socket.on("error", (err) => {
 		socketError = err;
 	});
+
+	const onAbort = () => {
+		socketError =
+			socketError ?? new Error("clamd connection aborted by request signal");
+		socket.destroy();
+	};
+	if (signal) {
+		if (signal.aborted) {
+			onAbort();
+		} else {
+			signal.addEventListener("abort", onAbort, { once: true });
+		}
+	}
 
 	// Send the INSTREAM command (null-terminated)
 	socket.write("zINSTREAM\0");
@@ -97,8 +119,11 @@ export function createClamdStream(host: string, port: number) {
 /**
  * Convenience wrapper: scan a complete buffer using the INSTREAM protocol.
  */
-export async function scanBuffer(buffer: Buffer): Promise<ScanResult> {
-	const clamd = createClamdStream(env.CLAMAV_HOST, env.CLAMAV_PORT);
+export async function scanBuffer(
+	buffer: Buffer,
+	signal?: AbortSignal,
+): Promise<ScanResult> {
+	const clamd = createClamdStream(env.CLAMAV_HOST, env.CLAMAV_PORT, signal);
 
 	try {
 		await clamd.sendChunk(buffer);

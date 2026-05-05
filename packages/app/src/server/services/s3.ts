@@ -117,8 +117,17 @@ import { S3_PART_MIN_SIZE } from "~/modules/shared/uploadConfig";
 /**
  * Creates an incremental multipart upload to S3.
  * Chunks are buffered until they reach S3_PART_MIN_SIZE, then flushed as a part.
+ *
+ * The optional `signal` is forwarded to every `s3Client.send()` call so an
+ * aborted request (client disconnect, request-level timeout) cancels the
+ * in-flight HTTP request at the AWS SDK layer. Calling `abort()` is still
+ * required on the caller side to release the multipart upload on S3.
  */
-export function createMultipartUpload(key: string, contentType: string) {
+export function createMultipartUpload(
+	key: string,
+	contentType: string,
+	signal?: AbortSignal,
+) {
 	let uploadId: string;
 	let partNumber = 1;
 	const parts: { ETag: string; PartNumber: number }[] = [];
@@ -132,6 +141,7 @@ export function createMultipartUpload(key: string, contentType: string) {
 					Key: key,
 					ContentType: contentType,
 				}),
+				{ abortSignal: signal },
 			);
 			if (!res.UploadId) {
 				throw new Error("S3 CreateMultipartUpload returned no UploadId");
@@ -157,6 +167,7 @@ export function createMultipartUpload(key: string, contentType: string) {
 					PartNumber: partNumber,
 					Body: buffer,
 				}),
+				{ abortSignal: signal },
 			);
 			if (!res.ETag) {
 				throw new Error("S3 UploadPart returned no ETag");
@@ -175,10 +186,15 @@ export function createMultipartUpload(key: string, contentType: string) {
 					UploadId: uploadId,
 					MultipartUpload: { Parts: parts },
 				}),
+				{ abortSignal: signal },
 			);
 		},
 
 		async abort() {
+			// Intentionally not forwarding `signal` here: abort() runs in the
+			// catch/cleanup path where the outer signal is usually already
+			// aborted, which would itself short-circuit the AbortMultipartUpload
+			// call and leave the upload alive on S3.
 			return s3Client.send(
 				new AbortMultipartUploadCommand({
 					Bucket: env.S3_BUCKET_NAME,

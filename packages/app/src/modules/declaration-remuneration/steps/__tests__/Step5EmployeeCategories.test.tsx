@@ -31,7 +31,6 @@ function makeCategory(
 ): EmployeeCategoryRow {
 	return {
 		name: "",
-		detail: "",
 		womenCount: null,
 		menCount: null,
 		annualBaseWomen: null,
@@ -100,15 +99,19 @@ describe("Step5EmployeeCategories", () => {
 
 	it("renders table section headers", () => {
 		render(<Step5EmployeeCategories declarationYear={2025} />);
-		expect(screen.getAllByText(/Nombre de salariés/).length).toBe(1);
-		expect(screen.getAllByText("Rémunération annuelle brute").length).toBe(1);
-		expect(screen.getAllByText("Rémunération horaire brute").length).toBe(1);
+		expect(screen.getAllByText(/Total salariés/).length).toBe(1);
+		expect(
+			screen.getAllByText("Rémunération annuelle brute moyenne").length,
+		).toBe(1);
+		expect(
+			screen.getAllByText("Rémunération horaire brute moyenne").length,
+		).toBe(1);
 	});
 
-	it("renders name and detail input fields for category", () => {
+	it("renders the libellé input field for category", () => {
 		render(<Step5EmployeeCategories declarationYear={2025} />);
 		expect(document.getElementById("cat-0-name")).toBeInTheDocument();
-		expect(document.getElementById("cat-0-detail")).toBeInTheDocument();
+		expect(document.getElementById("cat-0-detail")).not.toBeInTheDocument();
 	});
 
 	it("can add a new category", async () => {
@@ -228,14 +231,13 @@ describe("Step5EmployeeCategories", () => {
 				initialCategories={[
 					makeCategory({
 						name: "Ingénieurs",
-						detail: "Dev",
 						womenCount: 10,
 						menCount: 15,
 						annualBaseWomen: "3000",
 						annualBaseMen: "3200",
 					}),
 				]}
-				initialSource="autre"
+				initialSource="accord-entreprise"
 			/>,
 		);
 		expect(screen.getByText("Enregistré")).toBeInTheDocument();
@@ -253,31 +255,25 @@ describe("Step5EmployeeCategories", () => {
 				initialCategories={[
 					makeCategory({
 						name: "Cadres",
-						detail: "Managers",
 						womenCount: 5,
 						menCount: 8,
 					}),
 				]}
-				initialSource="convention-collective"
+				initialSource="accord-entreprise"
 			/>,
 		);
 
-		const nameInput = screen.getByLabelText("Nom", {
+		const nameInput = screen.getByLabelText("Libellé", {
 			selector: "#cat-0-name",
 		});
 		expect(nameInput).toHaveValue("Cadres");
-
-		const detailInput = screen.getByLabelText("Détail des emplois", {
-			selector: "#cat-0-detail",
-		});
-		expect(detailInput).toHaveValue("Managers");
 	});
 
 	it("submits data on form submit", async () => {
 		const user = userEvent.setup();
 		render(<Step5EmployeeCategories declarationYear={2025} />);
 
-		const nameInput = screen.getByLabelText("Nom", {
+		const nameInput = screen.getByLabelText("Libellé", {
 			selector: "#cat-0-name",
 		});
 		await user.type(nameInput, "Techniciens");

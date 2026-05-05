@@ -1,12 +1,15 @@
 import { redirect } from "next/navigation";
-import {
-	DeclarationLayout,
-	MissingSiret,
-} from "~/modules/declaration-remuneration";
+import { MissingSiret } from "~/modules/declaration-remuneration";
 import { auth } from "~/server/auth";
 import { getEffectiveSiren } from "~/server/auth/companyAccess";
-import { api } from "~/trpc/server";
 
+/**
+ * Shell layout for every page under `/declaration-remuneration/*`.
+ * Only enforces authentication and the SIREN context — the company info
+ * banner lives in the `(with-banner)` route group, so consultation
+ * surfaces (e.g. `/recapitulatif`) can opt out and only render the
+ * breadcrumb that fits the Figma frame.
+ */
 export default async function DeclarationRootLayout({
 	children,
 }: {
@@ -23,17 +26,5 @@ export default async function DeclarationRootLayout({
 		return <MissingSiret />;
 	}
 
-	const [company, declarationData] = await Promise.all([
-		api.company.get({ siren }),
-		api.declaration.getOrCreate(),
-	]);
-
-	return (
-		<DeclarationLayout
-			company={company}
-			declarationYear={declarationData.declaration.year}
-		>
-			{children}
-		</DeclarationLayout>
-	);
+	return <>{children}</>;
 }

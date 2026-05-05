@@ -27,7 +27,7 @@ test.describe("Declaration workflow", () => {
 	test("displays step 1 after login", async ({ page }) => {
 		await expect(
 			page.getByRole("heading", {
-				name: /Déclarer les indicateurs pour l'ensemble/i,
+				name: /Déclaration des indicateurs de rémunération/i,
 			}),
 		).toBeVisible();
 
@@ -81,8 +81,10 @@ test.describe("Declaration workflow", () => {
 			.getByRole("textbox", { name: "Annuelle brute moyenne — Hommes" })
 			.fill("32000");
 
-		// Verify gap is computed and displayed
-		await expect(page.getByText("6,3 %", { exact: true })).toBeVisible();
+		// Verify gap is computed and displayed in the table cell
+		await expect(
+			page.getByRole("table").getByText("6,3 %", { exact: true }),
+		).toBeVisible();
 	});
 
 	test("step 3 - Rémunération variable inline editing", async ({ page }) => {
@@ -269,7 +271,7 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 
 		// Verify category 1 form fields
-		await expect(page.getByRole("textbox", { name: "Nom" })).toBeVisible();
+		await expect(page.getByRole("textbox", { name: "Libellé" })).toBeVisible();
 		await expect(
 			page.getByRole("textbox", { name: "Effectif femmes, catégorie 1" }),
 		).toBeVisible();

@@ -2,7 +2,10 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import type { PayGapRow } from "~/modules/declaration-remuneration/types";
-import { GapInterpretationCallout } from "../GapInterpretationCallout";
+import {
+	GapInterpretationCallout,
+	hasHighPayGap,
+} from "../GapInterpretationCallout";
 
 /** Helper to build the 4 standard rows used by analyzeGaps. */
 function makeRows(overrides: {
@@ -187,5 +190,109 @@ describe("GapInterpretationCallout", () => {
 
 		const callout = container.querySelector(".fr-callout");
 		expect(callout).toHaveClass("fr-callout--blue-ecume");
+	});
+
+	it("uses the Figma men-disfavor wording on variablePay variant", () => {
+		const rows = makeRows({
+			annualMeanW: "3000",
+			annualMeanM: "2000",
+			annualMedianW: "2800",
+			annualMedianM: "1800",
+			hourlyMeanW: "8",
+			hourlyMeanM: "5",
+			hourlyMedianW: "7",
+			hourlyMedianM: "4",
+		});
+
+		render(
+			<GapInterpretationCallout
+				beneficiaryMen="20"
+				beneficiaryWomen="40"
+				maxMen={100}
+				maxWomen={100}
+				rows={rows}
+				variant="variablePay"
+			/>,
+		);
+
+		expect(
+			screen.getAllByText(/en défaveur des hommes/).length,
+		).toBeGreaterThan(0);
+		expect(screen.getByText(/en faveur des femmes/)).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				/perçoivent des montants horaires inférieurs à ceux des femmes/,
+			),
+		).toBeInTheDocument();
+	});
+
+	it("uses the Figma balanced wording on variablePay variant", () => {
+		// All gaps below 5% threshold → balanced direction
+		const rows = makeRows({
+			annualMeanW: "3000",
+			annualMeanM: "3050",
+			annualMedianW: "3050",
+			annualMedianM: "3000",
+			hourlyMeanW: "5",
+			hourlyMeanM: "5.05",
+			hourlyMedianW: "5.05",
+			hourlyMedianM: "5",
+		});
+
+		render(
+			<GapInterpretationCallout
+				beneficiaryMen="50"
+				beneficiaryWomen="50"
+				maxMen={100}
+				maxWomen={100}
+				rows={rows}
+				variant="variablePay"
+			/>,
+		);
+
+		expect(
+			screen.getByText(/Écart entre hommes et femmes/),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				/ne révèlent pas de différence significative entre les femmes et les hommes/,
+			),
+		).toBeInTheDocument();
+		expect(screen.getByText(/globalement équivalents/)).toBeInTheDocument();
+	});
+});
+
+describe("hasHighPayGap", () => {
+	it("returns false on empty rows", () => {
+		expect(hasHighPayGap([])).toBe(false);
+	});
+
+	it("returns false when no row has data", () => {
+		const rows: PayGapRow[] = [
+			{ label: "Annuelle brute moyenne", womenValue: "", menValue: "" },
+		];
+		expect(hasHighPayGap(rows)).toBe(false);
+	});
+
+	it("returns false when all gaps are below 5%", () => {
+		const rows = makeRows({
+			annualMeanW: "30000",
+			annualMeanM: "31000",
+			annualMedianW: "30000",
+			annualMedianM: "30500",
+			hourlyMeanW: "15",
+			hourlyMeanM: "15.5",
+			hourlyMedianW: "15",
+			hourlyMedianM: "15.2",
+		});
+		expect(hasHighPayGap(rows)).toBe(false);
+	});
+
+	it("returns true as soon as one row crosses the 5% threshold", () => {
+		const rows = makeRows({
+			annualMeanW: "25000",
+			annualMeanM: "30000",
+		});
+		expect(hasHighPayGap(rows)).toBe(true);
 	});
 });
