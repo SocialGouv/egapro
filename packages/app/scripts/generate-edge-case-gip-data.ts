@@ -64,7 +64,6 @@ const HEADERS = [
 	"Seuil_Q1_Rem_globale",
 	"Seuil_Q2_Rem_globale",
 	"Seuil_Q3_Rem_globale",
-	"Seuil_Q4_Rem_globale",
 	"Quartile1_Rem_globale_annuelle_proportion_F",
 	"Quartile2_Rem_globale_annuelle_proportion_F",
 	"Quartile3_Rem_globale_annuelle_proportion_F",
@@ -76,7 +75,6 @@ const HEADERS = [
 	"Seuil_Q1_Taux_horaire_global",
 	"Seuil_Q2_Taux_horaire_global",
 	"Seuil_Q3_Taux_horaire_global",
-	"Seuil_Q4_Taux_horaire_global",
 	"Quartile1_Taux_horaire_global_proportion_F",
 	"Quartile2_Taux_horaire_global_proportion_F",
 	"Quartile3_Taux_horaire_global_proportion_F",
@@ -146,11 +144,10 @@ function baseRow(siren: string, ema: string): Record<string, string> {
 		// Indicator E
 		Proportion_variable_F: fmt4(0.5625),
 		Proportion_variable_H: fmt4(0.6),
-		// Indicator F — Annual
+		// Indicator F — Annual (Q1-Q3 thresholds only)
 		Seuil_Q1_Rem_globale: fmt2(25000),
 		Seuil_Q2_Rem_globale: fmt2(32000),
 		Seuil_Q3_Rem_globale: fmt2(40000),
-		Seuil_Q4_Rem_globale: fmt2(55000),
 		Quartile1_Rem_globale_annuelle_proportion_F: fmt4(0.55),
 		Quartile2_Rem_globale_annuelle_proportion_F: fmt4(0.48),
 		Quartile3_Rem_globale_annuelle_proportion_F: fmt4(0.4),
@@ -159,11 +156,10 @@ function baseRow(siren: string, ema: string): Record<string, string> {
 		Quartile2_Rem_globale_annuelle_proportion_H: fmt4(0.52),
 		Quartile3_Rem_globale_annuelle_proportion_H: fmt4(0.6),
 		Quartile4_Rem_globale_annuelle_proportion_H: fmt4(0.65),
-		// Indicator F — Hourly
+		// Indicator F — Hourly (Q1-Q3 thresholds only)
 		Seuil_Q1_Taux_horaire_global: fmt2(13.74),
 		Seuil_Q2_Taux_horaire_global: fmt2(17.58),
 		Seuil_Q3_Taux_horaire_global: fmt2(21.98),
-		Seuil_Q4_Taux_horaire_global: fmt2(30.22),
 		Quartile1_Taux_horaire_global_proportion_F: fmt4(0.54),
 		Quartile2_Taux_horaire_global_proportion_F: fmt4(0.47),
 		Quartile3_Taux_horaire_global_proportion_F: fmt4(0.39),
@@ -255,7 +251,6 @@ const edgeCases: EdgeCase[] = [
 			Seuil_Q1_Rem_globale: NULL,
 			Seuil_Q2_Rem_globale: NULL,
 			Seuil_Q3_Rem_globale: NULL,
-			Seuil_Q4_Rem_globale: NULL,
 			Quartile1_Rem_globale_annuelle_proportion_F: NULL,
 			Quartile2_Rem_globale_annuelle_proportion_F: NULL,
 			Quartile3_Rem_globale_annuelle_proportion_F: NULL,
@@ -267,7 +262,6 @@ const edgeCases: EdgeCase[] = [
 			Seuil_Q1_Taux_horaire_global: NULL,
 			Seuil_Q2_Taux_horaire_global: NULL,
 			Seuil_Q3_Taux_horaire_global: NULL,
-			Seuil_Q4_Taux_horaire_global: NULL,
 			Quartile1_Taux_horaire_global_proportion_F: NULL,
 			Quartile2_Taux_horaire_global_proportion_F: NULL,
 			Quartile3_Taux_horaire_global_proportion_F: NULL,
@@ -304,7 +298,6 @@ const edgeCases: EdgeCase[] = [
 			Seuil_Q1_Rem_globale: NULL,
 			Seuil_Q2_Rem_globale: NULL,
 			Seuil_Q3_Rem_globale: NULL,
-			Seuil_Q4_Rem_globale: NULL,
 			Quartile1_Rem_globale_annuelle_proportion_F: NULL,
 			Quartile2_Rem_globale_annuelle_proportion_F: NULL,
 			Quartile3_Rem_globale_annuelle_proportion_F: NULL,
@@ -316,7 +309,6 @@ const edgeCases: EdgeCase[] = [
 			Seuil_Q1_Taux_horaire_global: NULL,
 			Seuil_Q2_Taux_horaire_global: NULL,
 			Seuil_Q3_Taux_horaire_global: NULL,
-			Seuil_Q4_Taux_horaire_global: NULL,
 			Quartile1_Taux_horaire_global_proportion_F: NULL,
 			Quartile2_Taux_horaire_global_proportion_F: NULL,
 			Quartile3_Taux_horaire_global_proportion_F: NULL,
@@ -582,18 +574,7 @@ const edgeCases: EdgeCase[] = [
 		},
 	},
 
-	// #15 — Q4 threshold absent (only Q1-Q3, as per Excel spec)
-	{
-		description: "Q4 threshold absent — only Q1-Q3 as in Excel spec",
-		siren: "080456789",
-		ema: fmt2(210),
-		overrides: {
-			Seuil_Q4_Rem_globale: NULL,
-			Seuil_Q4_Taux_horaire_global: NULL,
-		},
-	},
-
-	// #16 — Confidence index = 0 (zero confidence)
+	// #15 — Confidence index = 0 (zero confidence)
 	{
 		description: "Confidence index = 0 — zero confidence",
 		siren: "090567890",
@@ -617,7 +598,7 @@ const edgeCases: EdgeCase[] = [
 		},
 	},
 
-	// #17 — Mono-gender: only men (women count = 0 everywhere)
+	// #16 — Mono-gender: only men (women count = 0 everywhere)
 	{
 		description: "Mono-gender company — only men (F=0)",
 		siren: "001567890",
@@ -667,7 +648,7 @@ const edgeCases: EdgeCase[] = [
 		},
 	},
 
-	// #18 — EMA near max (399999.99)
+	// #17 — EMA near max (399999.99)
 	{
 		description: "EMA near maximum — 399999.99",
 		siren: "002678901",
@@ -682,7 +663,7 @@ const edgeCases: EdgeCase[] = [
 		},
 	},
 
-	// #19 — Quartile thresholds very close (minimal pay dispersion)
+	// #18 — Quartile thresholds very close (minimal pay dispersion)
 	{
 		description: "Quartile thresholds very close — minimal dispersion",
 		siren: "003789012",
@@ -691,15 +672,13 @@ const edgeCases: EdgeCase[] = [
 			Seuil_Q1_Rem_globale: fmt2(30000),
 			Seuil_Q2_Rem_globale: fmt2(30100),
 			Seuil_Q3_Rem_globale: fmt2(30200),
-			Seuil_Q4_Rem_globale: fmt2(30300),
 			Seuil_Q1_Taux_horaire_global: fmt2(16.48),
 			Seuil_Q2_Taux_horaire_global: fmt2(16.54),
 			Seuil_Q3_Taux_horaire_global: fmt2(16.59),
-			Seuil_Q4_Taux_horaire_global: fmt2(16.65),
 		},
 	},
 
-	// #20 — Quartile thresholds extremely spread
+	// #19 — Quartile thresholds extremely spread
 	{
 		description: "Quartile thresholds extremely spread",
 		siren: "004890123",
@@ -708,15 +687,13 @@ const edgeCases: EdgeCase[] = [
 			Seuil_Q1_Rem_globale: fmt2(1000),
 			Seuil_Q2_Rem_globale: fmt2(25000),
 			Seuil_Q3_Rem_globale: fmt2(100000),
-			Seuil_Q4_Rem_globale: fmt2(500000),
 			Seuil_Q1_Taux_horaire_global: fmt2(0.55),
 			Seuil_Q2_Taux_horaire_global: fmt2(13.74),
 			Seuil_Q3_Taux_horaire_global: fmt2(54.95),
-			Seuil_Q4_Taux_horaire_global: fmt2(274.73),
 		},
 	},
 
-	// #21 — EMA with decimals (50.01)
+	// #20 — EMA with decimals (50.01)
 	{
 		description: "EMA with decimals — 50.01",
 		siren: "005901234",
@@ -731,7 +708,7 @@ const edgeCases: EdgeCase[] = [
 		},
 	},
 
-	// #22 — Partial effectifs null (some workforce columns empty)
+	// #21 — Partial effectifs null (some workforce columns empty)
 	{
 		description: "Partial effectifs null — hourly and variable empty",
 		siren: "006012345",

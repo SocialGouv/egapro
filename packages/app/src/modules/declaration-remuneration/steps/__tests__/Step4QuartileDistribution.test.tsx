@@ -294,12 +294,12 @@ describe("Step4QuartileDistribution", () => {
 					},
 					step4: {
 						annual: {
-							thresholds: ["25000", "32000", "40000", null],
+							thresholds: ["25000", "32000", "40000"],
 							womenCounts: [30, 25, 20, 15],
 							menCounts: [20, 25, 30, 35],
 						},
 						hourly: {
-							thresholds: ["13.74", "17.58", "21.98", null],
+							thresholds: ["13.74", "17.58", "21.98"],
 							womenCounts: [28, 22, 18, 12],
 							menCounts: [22, 28, 32, 38],
 						},
@@ -349,12 +349,12 @@ describe("Step4QuartileDistribution", () => {
 					},
 					step4: {
 						annual: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
 						hourly: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
