@@ -1,0 +1,57 @@
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.numeric {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.gapNumeric {
+	text-align: left;
+	font-variant-numeric: tabular-nums;
+}
+
+.gapHeaderHint {
+	display: block;
+	font-weight: 400;
+	font-size: 0.875rem;
+	color: var(--text-mention-grey);
+}
+
+.gapCell {
+	display: inline-flex;
+	gap: 0.5rem;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+.highBadge {
+	display: inline-block;
+	padding: 0 0.375rem;
+	border-radius: 0.25rem;
+	background-color: var(--background-contrast-warning);
+	color: var(--text-default-warning);
+	font-size: 0.75rem;
+	font-weight: 700;
+	line-height: 1.25rem;
+	text-transform: uppercase;
+	letter-spacing: 0.01em;
+}
+
+.subTable {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.subTitle {
+	margin: 0;
+}
+
+.emptyNotice {
+	margin: 0;
+	color: var(--text-mention-grey);
+}

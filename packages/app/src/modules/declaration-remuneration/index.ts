@@ -1,5 +1,6 @@
 export { DeclarationLayout } from "./DeclarationLayout";
 export { MissingSiret } from "./MissingSiret";
+export { RecapitulatifPage } from "./recapitulatif";
 export { StepPageClient } from "./StepPageClient";
 export {
 	categoryFormEntrySchema,
@@ -37,7 +38,7 @@ export {
 	SecondDeclarationStep3Review,
 	SecondDeclarationStepPage,
 } from "./steps/secondDeclaration";
-export { parseEmployeeCategories } from "./steps/step6/parseStep5Categories";
+export { parseEmployeeCategories } from "./steps/step6";
 export type {
 	EmployeeCategoryRow,
 	PayGapRow,

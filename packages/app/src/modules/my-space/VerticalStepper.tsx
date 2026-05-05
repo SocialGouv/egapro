@@ -1,5 +1,5 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
-
 import type { CampaignDeadlines } from "~/modules/domain";
 import { isDeadlinePassed } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
@@ -187,12 +187,14 @@ function Step1Content({
 		return (
 			<div className={styles.stepContent}>
 				{title}
-				<TransmittedRow
-					downloadHref="/api/declaration-pdf"
-					label="Votre déclaration a été transmise"
-					modifiableUntil={campaignDeadlines.decl1ModificationDeadline}
-					modifyHref={`/declaration-remuneration/etape/1?siren=${siren}`}
-				/>
+				{variant !== "closed" && (
+					<TransmittedRow
+						label="Votre déclaration a été transmise"
+						modifiableUntil={campaignDeadlines.decl1ModificationDeadline}
+						modifyHref={`/declaration-remuneration/etape/1?siren=${siren}`}
+						viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}`}
+					/>
+				)}
 			</div>
 		);
 	}
@@ -251,10 +253,10 @@ function Step2Content({
 	if (variant === "evaluation") {
 		const secondDeclTransmittedRow = secondDeclarationSubmitted ? (
 			<TransmittedRow
-				downloadHref="/api/declaration-pdf?type=correction"
 				label="Votre seconde déclaration a été transmise"
 				modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
 				modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
+				viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}&type=correction`}
 			/>
 		) : null;
 
@@ -290,10 +292,10 @@ function Step2Content({
 			{title}
 			{secondDeclarationSubmitted && (
 				<TransmittedRow
-					downloadHref="/api/declaration-pdf?type=correction"
 					label="Votre seconde déclaration a été transmise"
 					modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
 					modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
+					viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}&type=correction`}
 				/>
 			)}
 			{compliancePath === "joint_evaluation" && (
@@ -363,12 +365,12 @@ function TransmittedRow({
 	label,
 	modifiableUntil,
 	modifyHref,
-	downloadHref,
+	viewHref,
 }: {
 	label: string;
 	modifiableUntil: Date;
 	modifyHref: string;
-	downloadHref?: string;
+	viewHref?: string;
 }) {
 	const deadlinePassed = isDeadlinePassed(modifiableUntil);
 
@@ -385,15 +387,16 @@ function TransmittedRow({
 				</p>
 			</div>
 			<div className={styles.transmittedActions}>
-				{downloadHref && (
-					<a
-						className="fr-btn fr-btn--secondary fr-icon-download-line"
-						download
-						href={downloadHref}
-						title="Télécharger"
+				{viewHref && (
+					<Link
+						className="fr-btn fr-btn--secondary fr-icon-eye-line"
+						href={viewHref}
+						title="Voir le récapitulatif de la déclaration"
 					>
-						Télécharger
-					</a>
+						<span className="fr-sr-only">
+							Voir le récapitulatif de la déclaration
+						</span>
+					</Link>
 				)}
 				{!deadlinePassed && (
 					<a className="fr-btn fr-btn--secondary" href={modifyHref}>
