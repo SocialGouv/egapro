@@ -117,7 +117,7 @@ export async function buildExportRows(
 			indFAnnualQ3Threshold: row.indicatorFAnnualThreshold3,
 			indFAnnualQ3Women: row.indicatorFAnnualWomen3,
 			indFAnnualQ3Men: row.indicatorFAnnualMen3,
-			indFAnnualQ4Threshold: row.indicatorFAnnualThreshold4,
+			indFAnnualQ4Threshold: null,
 			indFAnnualQ4Women: row.indicatorFAnnualWomen4,
 			indFAnnualQ4Men: row.indicatorFAnnualMen4,
 			// Indicator F — hourly
@@ -130,7 +130,7 @@ export async function buildExportRows(
 			indFHourlyQ3Threshold: row.indicatorFHourlyThreshold3,
 			indFHourlyQ3Women: row.indicatorFHourlyWomen3,
 			indFHourlyQ3Men: row.indicatorFHourlyMen3,
-			indFHourlyQ4Threshold: row.indicatorFHourlyThreshold4,
+			indFHourlyQ4Threshold: null,
 			indFHourlyQ4Women: row.indicatorFHourlyWomen4,
 			indFHourlyQ4Men: row.indicatorFHourlyMen4,
 			secondDeclarationStatus: row.secondDeclarationStatus,

@@ -31,25 +31,49 @@ export const updateStep3Schema = z.object({
 	indicatorEMen: z.string().optional(),
 });
 
-const quartileSchema = z.object({
-	threshold: z.string().optional(),
-	women: z.number().int().min(0).optional(),
-	men: z.number().int().min(0).optional(),
-});
+const isValidNumericThreshold = (v: string | undefined): v is string =>
+	v !== undefined && v !== "" && !Number.isNaN(Number(v));
+
+const quartileWithThresholdSchema = z
+	.object({
+		threshold: z.string().optional(),
+		women: z.number().int().min(0).optional(),
+		men: z.number().int().min(0).optional(),
+	})
+	.refine((q) => isValidNumericThreshold(q.threshold), {
+		message: "Le seuil est obligatoire",
+	});
+
+const quartileLastSchema = z
+	.object({
+		threshold: z.string().optional(),
+		women: z.number().int().min(0).optional(),
+		men: z.number().int().min(0).optional(),
+	})
+	.refine((q) => !q.threshold, {
+		message: "Le 4ème quartile ne doit pas avoir de seuil",
+	});
+
+const tableSchema = z
+	.tuple([
+		quartileWithThresholdSchema,
+		quartileWithThresholdSchema,
+		quartileWithThresholdSchema,
+		quartileLastSchema,
+	])
+	.refine(
+		(q) => {
+			const t1 = parseFloat(q[0].threshold as string);
+			const t2 = parseFloat(q[1].threshold as string);
+			const t3 = parseFloat(q[2].threshold as string);
+			return t1 < t2 && t2 < t3;
+		},
+		{ message: "Les seuils doivent être strictement croissants" },
+	);
 
 export const updateStep4Schema = z.object({
-	annual: z.tuple([
-		quartileSchema,
-		quartileSchema,
-		quartileSchema,
-		quartileSchema,
-	]),
-	hourly: z.tuple([
-		quartileSchema,
-		quartileSchema,
-		quartileSchema,
-		quartileSchema,
-	]),
+	annual: tableSchema,
+	hourly: tableSchema,
 });
 
 const employeeCategoryDataSchema = z.object({

@@ -544,6 +544,33 @@ describe("declarationRouter", () => {
 			);
 		});
 
+		it("stores null for Q4 threshold when it is an empty string", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await caller.updateStep4({
+				annual: [
+					{ threshold: "10000", women: 3, men: 4 },
+					{ threshold: "20000", women: 3, men: 4 },
+					{ threshold: "30000", women: 2, men: 4 },
+					{ threshold: "", women: 2, men: 3 },
+				],
+				hourly: [
+					{ threshold: "10", women: 3, men: 4 },
+					{ threshold: "20", women: 3, men: 4 },
+					{ threshold: "30", women: 2, men: 4 },
+					{ threshold: "", women: 2, men: 3 },
+				],
+			});
+
+			expect(mockSet).toHaveBeenCalledWith(
+				expect.objectContaining({
+					indicatorFAnnualThreshold3: "30000",
+					indicatorFHourlyThreshold3: "30",
+				}),
+			);
+		});
+
 		it("throws when siret is missing", async () => {
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb, null as never);
