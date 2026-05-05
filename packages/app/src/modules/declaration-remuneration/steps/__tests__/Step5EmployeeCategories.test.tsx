@@ -278,12 +278,17 @@ describe("Step5EmployeeCategories", () => {
 		});
 		await user.type(nameInput, "Techniciens");
 
+		await user.selectOptions(
+			screen.getByLabelText(/Quelle est la source utilisée/),
+			"accord-entreprise",
+		);
+
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
 		expect(mockMutate).toHaveBeenCalledWith(
 			expect.objectContaining({
 				declarationType: "initial",
-				source: expect.any(String),
+				source: "accord-entreprise",
 				categories: expect.arrayContaining([
 					expect.objectContaining({
 						name: "Techniciens",
@@ -291,6 +296,23 @@ describe("Step5EmployeeCategories", () => {
 				]),
 			}),
 		);
+	});
+
+	it("shows a friendly error when source is not selected", async () => {
+		const user = userEvent.setup();
+		render(<Step5EmployeeCategories declarationYear={2025} />);
+
+		const nameInput = screen.getByLabelText("Libellé", {
+			selector: "#cat-0-name",
+		});
+		await user.type(nameInput, "Techniciens");
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(
+			screen.getByText(/veuillez sélectionner la source/i),
+		).toBeInTheDocument();
+		expect(mockMutate).not.toHaveBeenCalled();
 	});
 
 	it("shows error when workforce totals do not match step 1", async () => {
@@ -306,6 +328,11 @@ describe("Step5EmployeeCategories", () => {
 		// Fill required name first
 		const nameInput = document.getElementById("cat-0-name") as HTMLElement;
 		await user.type(nameInput, "Cadres");
+
+		await user.selectOptions(
+			screen.getByLabelText(/Quelle est la source utilisée/),
+			"accord-entreprise",
+		);
 
 		const womenInput = screen.getByLabelText("Effectif femmes, catégorie 1");
 		const menInput = screen.getByLabelText("Effectif hommes, catégorie 1");
@@ -325,6 +352,11 @@ describe("Step5EmployeeCategories", () => {
 		const user = userEvent.setup();
 		render(<Step5EmployeeCategories declarationYear={2025} />);
 
+		await user.selectOptions(
+			screen.getByLabelText(/Quelle est la source utilisée/),
+			"accord-entreprise",
+		);
+
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
 		expect(
@@ -340,6 +372,11 @@ describe("Step5EmployeeCategories", () => {
 		// Fill first category name
 		const nameInput = document.getElementById("cat-0-name") as HTMLElement;
 		await user.type(nameInput, "Cadres");
+
+		await user.selectOptions(
+			screen.getByLabelText(/Quelle est la source utilisée/),
+			"accord-entreprise",
+		);
 
 		// Add second category and give same name
 		await user.click(

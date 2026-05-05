@@ -207,6 +207,7 @@ export function CategoryForm({
 	}
 
 	const categories = form.watch("categories");
+	const sourceError = form.formState.errors.source?.message;
 
 	const handleFormSubmit = form.handleSubmit((data) => {
 		setWorkforceError("");
@@ -295,18 +296,26 @@ export function CategoryForm({
 						</span>
 					</p>
 				) : (
-					<div className={`fr-select-group ${stepStyles.sourceSelectGroup}`}>
+					<div
+						className={`fr-select-group ${
+							sourceError ? "fr-select-group--error" : ""
+						} ${stepStyles.sourceSelectGroup}`}
+					>
 						<label className="fr-label" htmlFor="source-select">
 							Quelle est la source utilisée pour déterminer les catégories
 							d&apos;emplois ?
 						</label>
 						<select
+							aria-describedby={sourceError ? "source-error" : undefined}
+							aria-invalid={Boolean(sourceError)}
 							className="fr-select"
 							disabled={disabled}
 							id="source-select"
 							{...form.register("source")}
 							onChange={(e) => {
-								form.setValue("source", e.target.value);
+								form.setValue("source", e.target.value, {
+									shouldValidate: true,
+								});
 								setSaved(false);
 							}}
 						>
@@ -319,6 +328,11 @@ export function CategoryForm({
 								</option>
 							))}
 						</select>
+						{sourceError && (
+							<p className="fr-error-text" id="source-error">
+								{sourceError}
+							</p>
+						)}
 					</div>
 				)}
 

@@ -93,7 +93,12 @@ export const categoryFormEntrySchema = z.object({
 });
 
 export const categoryFormSchema = z.object({
-	source: z.string(),
+	source: z
+		.string()
+		.min(
+			1,
+			"Veuillez sélectionner la source utilisée pour déterminer les catégories d'emplois.",
+		),
 	categories: z.array(categoryFormEntrySchema),
 });
 
