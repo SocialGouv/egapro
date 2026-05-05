@@ -189,7 +189,6 @@ function Step1Content({
 				{title}
 				{variant !== "closed" && (
 					<TransmittedRow
-						downloadHref="/api/declaration-pdf"
 						label="Votre déclaration a été transmise"
 						modifiableUntil={campaignDeadlines.decl1ModificationDeadline}
 						modifyHref={`/declaration-remuneration/etape/1?siren=${siren}`}
@@ -254,7 +253,6 @@ function Step2Content({
 	if (variant === "evaluation") {
 		const secondDeclTransmittedRow = secondDeclarationSubmitted ? (
 			<TransmittedRow
-				downloadHref="/api/declaration-pdf?type=correction"
 				label="Votre seconde déclaration a été transmise"
 				modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
 				modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
@@ -294,7 +292,6 @@ function Step2Content({
 			{title}
 			{secondDeclarationSubmitted && (
 				<TransmittedRow
-					downloadHref="/api/declaration-pdf?type=correction"
 					label="Votre seconde déclaration a été transmise"
 					modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
 					modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
@@ -368,13 +365,11 @@ function TransmittedRow({
 	label,
 	modifiableUntil,
 	modifyHref,
-	downloadHref,
 	viewHref,
 }: {
 	label: string;
 	modifiableUntil: Date;
 	modifyHref: string;
-	downloadHref?: string;
 	viewHref?: string;
 }) {
 	const deadlinePassed = isDeadlinePassed(modifiableUntil);
@@ -392,19 +387,9 @@ function TransmittedRow({
 				</p>
 			</div>
 			<div className={styles.transmittedActions}>
-				{downloadHref && (
-					<a
-						className="fr-btn fr-btn--secondary fr-icon-download-line"
-						download
-						href={downloadHref}
-						title="Télécharger"
-					>
-						Télécharger
-					</a>
-				)}
 				{viewHref && (
 					<a
-						className="fr-btn fr-btn--secondary fr-icon-eye-line"
+						className="fr-btn fr-btn--secondary fr-btn--icon-left fr-icon-eye-line"
 						href={viewHref}
 						title="Voir le récapitulatif de la déclaration"
 					>
