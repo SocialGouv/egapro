@@ -15,7 +15,6 @@ export const metadata: Metadata = {
 	title: "Récapitulatif de la déclaration",
 };
 
-
 type Props = {
 	// `?siren=` may appear in the URL as a UX hint (mirroring the modify
 	// links in Mon Espace), but the route never reads it — security relies
