@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # set_ticket_status.sh <ticket_number> <status_label>
 #
 # Moves an issue to the given status on the EGAPRO V2 GitHub project board.
@@ -12,9 +19,14 @@
 # Status labels are case-insensitive and accept the human-readable names from
 # the board: "Backlog", "To Do", "In progress", "In review", "Done".
 #
-# === HARD RULE ===
-# AI agents are FORBIDDEN to set a ticket to "Done" — only the user does that
-# after human review of the PR. This script REJECTS "Done" with exit code 3.
+# === HARD RULES ===
+# Two transitions are USER-ONLY — agents must never trigger them :
+# 1. "Done" — set by the user once they validate the merged work.
+# 2. "In review" — set by the user once they decide a PR is ready for their
+#    own review. AI's terminus is the JSON `validated` return + the PR being
+#    out of draft (`gh pr ready`) ; the ticket stays at `In progress` until
+#    the human moves it.
+# This script REJECTS both transitions with exit code 3.
 #
 # Usage:
 #   set_ticket_status.sh 123 "In progress"
@@ -44,7 +56,11 @@ case "$STATUS_RAW" in
     Backlog|backlog)               OPTION_ID="f75ad846" ;;
     "To Do"|"To do"|"to do"|Todo|todo) OPTION_ID="61e4505c" ;;
     "In progress"|"In Progress"|"in progress"|"In-progress") OPTION_ID="47fc9ee4" ;;
-    "In review"|"In Review"|"in review"|"In-review")         OPTION_ID="df73e18b" ;;
+    "In review"|"In Review"|"in review"|"In-review")
+        echo "REFUSED: AI agents must never set a ticket to 'In review' — that's user-only." >&2
+        echo "  AI's terminus is `validated` JSON + `gh pr ready`; ticket #$TICKET stays at 'In progress'." >&2
+        exit 3
+        ;;
     Done|done)
         echo "REFUSED: AI agents must never set a ticket to 'Done' — that's user-only." >&2
         echo "  Ticket #$TICKET stays at its current status." >&2
@@ -52,7 +68,8 @@ case "$STATUS_RAW" in
         ;;
     *)
         echo "ERROR: unknown status label '$STATUS_RAW'" >&2
-        echo "  Accepted: Backlog | To Do | In progress | In review" >&2
+        echo "  Accepted (agents): Backlog | To Do | In progress" >&2
+        echo "  Accepted (user): + In review | Done" >&2
         exit 2
         ;;
 esac
@@ -82,7 +99,7 @@ query($owner:String!, $repo:String!, $n:Int!) {
   }
 }' -f owner=SocialGouv -f repo=egapro -F n="$TICKET" \
   --jq ".data.repository.issue.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id" \
-  | head -1)
+  | head -1 || true)
 
 if [ -z "$ITEM_ID" ]; then
     # Not on the project yet — add it

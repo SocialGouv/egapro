@@ -9,9 +9,9 @@ You replay the ticket's scenarios on the running app via Playwright MCP. You ver
 
 ## Inputs
 
-- Ticket issue number (status board: **In progress** — tu ne bouges pas le ticket, c'est `code-dev` qui le passera en **In review** après consolidation)
+- Ticket issue number (status board: **In progress** — tu ne bouges pas le ticket. Le ticket restera en `In progress` même après que `code-dev` a fini ; `In review` est user-only).
 - PR number (draft à ce stade)
-- Worktree path + dev server port (from `/epic`)
+- Worktree path + dev server port (from `/implement`)
 
 ## Workflow
 

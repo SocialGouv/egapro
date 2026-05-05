@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # epic_state.sh <epic_N1> [<epic_N2> ...]
 #
 # Compact status dump for one or more epics. Replaces N individual
@@ -21,6 +28,11 @@
 #   EGAPRO_STATE_ROOT — state dir (default: derived from script path)
 
 set -euo pipefail
+
+# Mac compat: GNU stat uses `-c '%Y'`; BSD/macOS stat uses `-f '%m'`.
+file_mtime() {
+    stat -c '%Y' "$1" 2>/dev/null || stat -f '%m' "$1" 2>/dev/null || echo 0
+}
 
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <epic_N1> [<epic_N2> ...]" >&2
@@ -79,7 +91,7 @@ for EPIC_N in "$@"; do
         N=$(echo "$issue" | jq -r '.number')
         LABELS=$(echo "$issue" | jq -r '[.labels.nodes[].name] | join(",")')
 
-        STATUS=$(echo "$issue" | jq -r '.projectItems.nodes[0].fieldValues.nodes[]? | select(.field.name == "Status") | .name' 2>/dev/null | head -1)
+        STATUS=$(echo "$issue" | jq -r '.projectItems.nodes[0].fieldValues.nodes[]? | select(.field.name == "Status") | .name' 2>/dev/null | head -1 || true)
         [ -z "$STATUS" ] || [ "$STATUS" = "null" ] && STATUS="-"
 
         # Latest log event across all agents on this ticket
@@ -92,7 +104,7 @@ for EPIC_N in "$@"; do
         if [ -d "$LOG_DIR" ]; then
             for log in "$LOG_DIR"/*-${N}.log; do
                 [ -f "$log" ] || continue
-                MTIME=$(stat -c '%Y' "$log")
+                MTIME=$(file_mtime "$log")
                 if [ "$MTIME" -gt "$LATEST_MTIME" ]; then
                     LATEST_MTIME=$MTIME
                     LATEST_LOG=$log
@@ -104,7 +116,7 @@ for EPIC_N in "$@"; do
 
         if [ -n "$LATEST_LOG" ]; then
             LAST_LINE=$(tail -n 1 "$LATEST_LOG")
-            LAST_EVENT=$(echo "$LAST_LINE" | grep -oE '\[[A-Z_0-9]+\]' | head -1 | tr -d '[]')
+            LAST_EVENT=$(echo "$LAST_LINE" | grep -oE '\[[A-Z_0-9]+\]' | head -1 | tr -d '[]' || true)
             [ -z "$LAST_EVENT" ] && LAST_EVENT="-"
             AGE_SEC=$((NOW_TS - LATEST_MTIME))
             if [ "$AGE_SEC" -lt 60 ]; then

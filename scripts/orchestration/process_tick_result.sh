@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # process_tick_result.sh <result_file>
 #
 # Reads a tick result file produced by epic_loop.sh and applies the side
@@ -20,18 +27,22 @@
 #
 # Per-status actions:
 #
-# | Status                  | Board change           | Labels                                    | Counter         |
-# |-------------------------|------------------------|-------------------------------------------|-----------------|
-# | validated               | none (already In rev.) | clear attempt=N                           | reset           |
-# | needs_opus_escalation   | → To Do                | + complexe                                | reset           |
+# | Status                  | Board change           | Labels                                    | Counter / merge       |
+# |-------------------------|------------------------|-------------------------------------------|-----------------------|
+# | validated               | stays In progress      | clear attempt=N                           | squash-merge into epic/<N> |
+# | needs_opus_escalation   | → To Do                | + complexe                                | reset                 |
 # | refacto                 | → To Do                | bump attempt=N (1→2→3); +dispatch=escalate at 3 | +1              |
-# | rate_limited            | none                   | none (handled by loop driver)             | unchanged       |
-# | failed                  | → To Do                | none (technical, not semantic)            | unchanged       |
+# | rate_limited            | none                   | none (handled by loop driver)             | unchanged             |
+# | failed                  | → To Do                | none (technical, not semantic)            | unchanged             |
 #
-# === HARD RULE ===
-# This script NEVER merges PRs and NEVER sets a ticket to 'Done'.
-# `validated` means code-dev has already moved the ticket to 'In review' and
-# the PR is ready — human review takes over from there.
+# === HARD RULES ===
+# - Never sets a ticket to 'In review' or 'Done' — both transitions are
+#   user-only. The agent's terminus is the squash-merge of the validated PR
+#   into epic/<N>; the ticket stays at 'In progress' until the human moves it.
+# - Never merges into alpha/master. The only merge done by this script is the
+#   squash-merge of a validated ticket PR into its `epic/<N>` integration
+#   branch — gated by the per-ticket validators (CI green, Sonar green,
+#   IA validators OK, bot reviews addressed).
 
 set -euo pipefail
 
@@ -98,22 +109,67 @@ set_attempt_label() {
     gh issue edit "$TICKET" --add-label "attempt=$N" >/dev/null 2>&1 || true
 }
 
-jq -c '.results[]' "$RESULT_FILE" | while read -r result; do
+N_MERGED=0
+N_MERGE_CONFLICT=0
+N_MERGE_PENDING=0
+
+# Use process substitution (not a pipe) so the loop runs in the current
+# shell — counter increments inside the loop must propagate to the
+# summary at the end. A `jq ... | while read` would run the body in a
+# subshell and zero out every counter at the summary.
+while read -r result; do
     STATUS=$(echo "$result" | jq -r '.status // "unknown"')
     TICKET=$(echo "$result" | jq -r '.ticket // 0')
     PR=$(echo "$result" | jq -r '.pr // ""')
+    EPIC=$(echo "$result" | jq -r '.epic // ""')
 
     case "$STATUS" in
         validated)
-            # code-dev has set 'In review' and pr ready. The PR is already
-            # linked to the issue via the linked-branch flow (createLinkedBranch
-            # called by epic_loop.sh before spawning the agent), so no manual
-            # cross-ref is needed. Just reset the attempt counter.
+            # code-dev has gh-pr-ready'd the PR and returned validated. The
+            # ticket stays at 'In progress' (board transitions to In review
+            # and Done are user-only). Squash-merge the validated PR into
+            # epic/<N> right now — the next dispatch_plan tick can then
+            # unlock children that depend on this ticket (parent's branch
+            # will be gone after merge).
+            #
+            # Standalone Task / Bug (no parent epic) : no auto-merge, the
+            # PR stays open for human review and merge into alpha.
             clear_attempt_labels "$TICKET"
             invalidate_caches "$TICKET"
-            bash "$SCRIPT_DIR/log_event.sh" "$AID" VALIDATED "ticket=$TICKET pr=$PR"
-            echo "  ✓ ticket #$TICKET validated (In review, PR ready)"
-            N_VALIDATED=$((N_VALIDATED + 1))
+
+            if [ -z "$EPIC" ] || [ -z "$PR" ]; then
+                bash "$SCRIPT_DIR/log_event.sh" "$AID" VALIDATED "ticket=$TICKET pr=$PR no-epic-or-pr-no-auto-merge"
+                echo "  ✓ ticket #$TICKET validated (PR ready) — no auto-merge (standalone or missing PR)"
+                N_VALIDATED=$((N_VALIDATED + 1))
+            else
+                set +e
+                bash "$SCRIPT_DIR/merge_validated_ticket.sh" "$PR" "$EPIC" "$TICKET" >&2
+                MERGE_RC=$?
+                set -e
+                case "$MERGE_RC" in
+                    0)
+                        bash "$SCRIPT_DIR/log_event.sh" "$AID" MERGED "ticket=$TICKET pr=$PR epic=$EPIC"
+                        echo "  ✓ ticket #$TICKET validated + squash-merged into epic/$EPIC (PR #$PR)"
+                        N_VALIDATED=$((N_VALIDATED + 1))
+                        N_MERGED=$((N_MERGED + 1))
+                        ;;
+                    2)
+                        bash "$SCRIPT_DIR/log_event.sh" "$AID" MERGE_CONFLICT "ticket=$TICKET pr=$PR epic=$EPIC"
+                        echo "  ⚠ ticket #$TICKET validated but conflicts with epic/$EPIC (PR #$PR) — set In progress, will retry"
+                        N_MERGE_CONFLICT=$((N_MERGE_CONFLICT + 1))
+                        ;;
+                    3)
+                        bash "$SCRIPT_DIR/log_event.sh" "$AID" MERGE_PENDING "ticket=$TICKET pr=$PR epic=$EPIC"
+                        echo "  ⏸ ticket #$TICKET validated but mergeability=UNKNOWN — retry next tick"
+                        N_MERGE_PENDING=$((N_MERGE_PENDING + 1))
+                        ;;
+                    *)
+                        bash "$SCRIPT_DIR/log_event.sh" "$AID" MERGE_FAILED "ticket=$TICKET pr=$PR epic=$EPIC rc=$MERGE_RC"
+                        echo "  ✗ ticket #$TICKET validated but merge_validated_ticket.sh exited $MERGE_RC — manual investigation"
+                        N_VALIDATED=$((N_VALIDATED + 1))
+                        ;;
+                esac
+            fi
             ;;
 
         needs_opus_escalation)
@@ -171,12 +227,15 @@ jq -c '.results[]' "$RESULT_FILE" | while read -r result; do
             bash "$SCRIPT_DIR/log_event.sh" "$AID" UNKNOWN_STATUS "ticket=$TICKET status=$STATUS"
             ;;
     esac
-done
+done < <(jq -c '.results[]' "$RESULT_FILE")
 
 # Summary
 echo ""
 echo "=== Tick #$TICK process resume ==="
 echo "  Validated:           $N_VALIDATED"
+echo "    └─ merged:         $N_MERGED"
+echo "    └─ merge conflict: $N_MERGE_CONFLICT"
+echo "    └─ merge pending:  $N_MERGE_PENDING"
 echo "  Opus escalation:     $N_OPUS"
 echo "  Refacto (retried):   $N_REFACTO"
 echo "  Escalate to user:    $N_ESCALATE"

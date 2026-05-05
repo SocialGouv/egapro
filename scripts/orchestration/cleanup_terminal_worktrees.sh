@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # cleanup_terminal_worktrees.sh <epic_N1> [<epic_N2> ...]
 #
-# Scans worktrees matching egapro-epic<E>-t<N> for the given epics, queries
-# each ticket's board status, and tears down + removes the worktree if the
-# ticket is in a terminal pipeline state (In review or Done).
+# Scans worktrees matching egapro-epic<E>-t<N> for the given epics, and
+# tears down + removes the worktree if the ticket has been squash-merged
+# into the epic integration branch — detected by the absence of the
+# ticket's `ticket/<N>-*` branch on origin (GitHub auto-deletes the
+# head branch on squash-merge).
 #
 # Called by epic_loop.sh at the BEGINNING of each tick — before
 # dispatch_plan — so that slots get freed dynamically. Important when an
@@ -11,12 +20,12 @@
 # the 6th ticket can never enter the loop because all slots stay busy
 # until the user manually cleans them up.
 #
-# 'Cleanable' definition: PR is green and bot reviews have been addressed.
-# This is exactly what code-dev returning `validated` guarantees, which is
-# also what triggers the board transition to 'In review'. So checking the
-# board status is enough.
+# Why branch presence (not board status): the board transitions
+# `In review` and `Done` are user-only by design (cf. code-dev/AGENT.md
+# step 10 + set_ticket_status.sh hard rule). The agent's terminus is the
+# squash-merge of the validated PR ; that's what frees the worktree.
 #
-# Idempotent. No-op if no worktree matches or none is in terminal state.
+# Idempotent. No-op if no worktree matches or none has been merged yet.
 
 set -euo pipefail
 
@@ -35,7 +44,11 @@ for epic in "$@"; do
     EPICS_REGEX="${EPICS_REGEX}${epic}"
 done
 
-# For each worktree matching the given epics, check the ticket status
+# Refresh remote refs so `git ls-remote` reflects recent merges
+(cd "$REPO_ROOT" && git fetch --prune origin >/dev/null 2>&1) || true
+
+# For each worktree matching the given epics, check whether the ticket
+# branch is still on origin (= still in flight) or gone (= squash-merged).
 while IFS= read -r path; do
     [ -n "$path" ] || continue
 
@@ -52,40 +65,12 @@ while IFS= read -r path; do
         continue
     fi
 
-    # Query the ticket's board status. Use the bulk GraphQL pattern from
-    # rules/github-board.md (snippet 3) to find the project item, then
-    # extract the Status single-select value.
-    STATUS=$(gh api graphql -f query='
-        query($owner:String!, $repo:String!, $n:Int!) {
-          repository(owner:$owner, name:$repo) {
-            issue(number:$n) {
-              projectItems(first: 5) {
-                nodes {
-                  project { id }
-                  fieldValues(first: 10) {
-                    nodes {
-                      ... on ProjectV2ItemFieldSingleSelectValue {
-                        field { ... on ProjectV2SingleSelectField { name } }
-                        name
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }' -f owner=SocialGouv -f repo=egapro -F n="$ticket" \
-        --jq '.data.repository.issue.projectItems.nodes[] | select(.project.id == "PVT_kwDOAh0HH84BFsK7") | .fieldValues.nodes[]? | select(.field.name == "Status") | .name' 2>/dev/null | head -1)
-
-    case "$STATUS" in
-        "In review"|"Done")
-            echo "[cleanup_terminal_worktrees] $name (ticket #$ticket = $STATUS) → teardown + remove" >&2
-            (cd "$path" && bash "$REPO_ROOT/scripts/teardown-worktree.sh" >&2 2>&1) || true
-            git worktree remove --force "$path" >&2 2>&1 || true
-            ;;
-        *)
-            # In progress / To Do / Backlog → keep the worktree
-            :
-            ;;
-    esac
+    if git ls-remote --exit-code --heads origin "ticket/${ticket}-*" >/dev/null 2>&1; then
+        # Branch still on origin → ticket still in flight → keep worktree
+        :
+    else
+        echo "[cleanup_terminal_worktrees] $name (ticket #$ticket: branch deleted on origin = squash-merged) → teardown + remove" >&2
+        (cd "$path" && bash "$REPO_ROOT/scripts/teardown-worktree.sh" >&2 2>&1) || true
+        git worktree remove --force "$path" >&2 2>&1 || true
+    fi
 done < <(git worktree list --porcelain 2>/dev/null | awk '/^worktree /{print $2}')

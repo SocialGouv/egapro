@@ -1,14 +1,21 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # open_worktree.sh <pr_number>
 #
-# Recreate the egapro worktree for a given PR — used after the pipeline
-# has auto-cleaned the worktree (when the ticket transitioned to In review
-# or Done) but the user wants to test the PR locally.
+# Recreate the egapro worktree for a given PR — used after /implement (mode
+# epic) has auto-cleaned the worktree (when the ticket transitioned to In
+# review or Done) but the user wants to test the PR locally.
 #
 # Workflow:
 # 1. Resolve PR head branch + linked issue from GitHub
 # 2. Resolve the issue's parent epic
-# 3. Path = ../egapro-epic<EPIC>-t<TICKET>  (same convention as /epic)
+# 3. Path = ../egapro-epic<EPIC>-t<TICKET>  (same convention as /implement mode epic)
 # 4. Pick first free worktree index in [0, EPIC_MAX_PARALLEL[
 # 5. git worktree add (or reuse if already present)
 # 6. setup-worktree.sh <index>  (pnpm install + docker stack + migrations)
@@ -53,7 +60,7 @@ fi
 # (e.g. PR targets a non-default branch and the link wasn't established).
 if [ -z "$TICKET" ]; then
     BODY=$(gh pr view "$PR" --json body --jq '.body')
-    TICKET=$(echo "$BODY" | grep -ioE '(closes|resolves|fixes) #[0-9]+' | head -1 | grep -oE '[0-9]+' | head -1)
+    TICKET=$(echo "$BODY" | grep -ioE '(closes|resolves|fixes) #[0-9]+' | head -1 | grep -oE '[0-9]+' | head -1 || true)
 fi
 
 if [ -z "$TICKET" ]; then
@@ -78,8 +85,10 @@ if [ -z "$EPIC" ]; then
 fi
 
 # 3. Compute path
-WT_PATH="${REPO_ROOT}/../egapro-epic${EPIC}-t${TICKET}"
-WT_PATH=$(realpath -m "$WT_PATH")
+# Mac compat: GNU `realpath -m` (canonicalize a path that may not exist yet)
+# is not available on macOS without coreutils. Resolve REPO_ROOT/.. (which
+# always exists because REPO_ROOT does) then append the worktree dir name.
+WT_PATH="$(cd "${REPO_ROOT}/.." && pwd)/egapro-epic${EPIC}-t${TICKET}"
 
 # 4. Pick free worktree index
 declare -A INDEX_BUSY
@@ -92,7 +101,7 @@ while IFS= read -r path; do
     case "$(basename "$path")" in egapro-epic*-t*) ;; *) continue ;; esac
     ENV_FILE="$path/packages/app/.env.local"
     [ -f "$ENV_FILE" ] || continue
-    PORT_LINE=$(grep '^PORT=' "$ENV_FILE" | head -1 | cut -d= -f2)
+    PORT_LINE=$(grep '^PORT=' "$ENV_FILE" | head -1 | cut -d= -f2 || true)
     [[ "$PORT_LINE" =~ ^[0-9]+$ ]] || continue
     IDX=$((PORT_LINE - 3001))
     if [ "$IDX" -ge 0 ] && [ "$IDX" -lt "$MAX_PARALLEL" ]; then

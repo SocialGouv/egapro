@@ -54,7 +54,7 @@ INACTIVITY_THRESHOLD_SEC=300 bash scripts/orchestration/render_dashboard.sh   # 
 Si `.claude/state/epic_run/agents/` n'existe pas ou ne contient aucun `.log` :
 
 - Aucun agent n'a été dispatché récemment, OU
-- `/epic` tourne mais ses agents n'ont pas encore loggé
+- `/implement` (mode epic) tourne mais ses agents n'ont pas encore loggé
 
 Dans ce cas le script affiche `(Aucun epic en cours)`. Si `<N>` est fourni en argument, `epic_state.sh` donne quand même l'état GitHub des sous-tickets (la query GraphQL ne dépend pas des logs locaux).
 

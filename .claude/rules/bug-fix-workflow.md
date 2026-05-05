@@ -1,8 +1,8 @@
 # Bug Fix Workflow
 
-> **Used by**: `code-dev` (sur les tickets avec label `bug`). Hors pipeline : l'agent principal quand il traite un fix.
+> **Used by**: `code-dev` (issue type Bug, ou label `bug`), `bug-analyst` (phase analyse). Hors pipeline : l'agent principal quand il traite un fix.
 
-Quand un ticket est un **bug** (label `bug`, ou description explicite d'un comportement incorrect), `code-dev` suit un protocole strict **reproduire → fixer → valider**.
+Quand un ticket est un **bug** (issue type Bug, label `bug`, ou description explicite d'un comportement incorrect), `code-dev` suit un protocole strict **reproduire → fixer → valider**, en s'appuyant sur l'analyse postée par `bug-analyst` dans le commentaire `## Analyse du bug` (root cause, fichiers à modifier, fix proposé).
 
 Cette discipline évite deux pièges fréquents :
 1. "Je crois que j'ai fixé" sans preuve → régression un mois plus tard
@@ -60,3 +60,22 @@ Les bugs touchant CI/CD, Docker, Kubernetes n'ont pas forcément de test automat
 2. Tester le fix dans un environnement de review (voir mémoire utilisateur : namespace K8s, URL, mail test)
 3. Joindre les logs **avant** et **après** fix en commentaire du ticket
 4. Si possible, ajouter un monitoring/assertion pour détecter la régression (health check, alerte)
+
+---
+
+## Cas particulier : visual mismatch (Figma ↔ app)
+
+Quand le bug est un **écart visuel** entre le rendu de l'app et le design Figma de référence (couleur fausse, espacement décalé, typo wrong weight, élément manquant), le protocole « test qui échoue avant fix » ne s'applique pas tel quel : il n'y a pas de test unitaire / E2E qui asserte du pixel-perfect.
+
+`bug-analyst` aura déjà identifié le delta dans son commentaire `## Analyse du bug` (sous-stratégie `visual mismatch`) — pour chaque divergence, il liste la propriété Figma concernée (`fontWeight`, `fill`, `itemSpacing`, …) et le fichier/composant à corriger.
+
+Protocole côté `code-dev` :
+
+1. **Lire l'analyse** posté par `bug-analyst` → savoir exactement quelles propriétés sont en écart
+2. **Implémenter le fix** en suivant `rules/figma-workflow.md` Phase 3 (mapping Figma → DSFR : couleur → token, fontSize → `fr-text--*`, fontWeight ≥ 600 → `<strong>`, itemSpacing → `fr-m{b,t,r,l}-Xw`)
+3. **Vérifier le rendu** :
+   - Démarrer le dev server, naviguer via Playwright sur la page concernée
+   - Re-lire le node Figma via `mcp__figma-dev__get_figma_data` et confirmer que chaque propriété est maintenant alignée
+   - `mcp__figma-dev__download_figma_images` uniquement pour les cas ambigus (typiquement bold cell-by-cell sur tableaux où l'API ne révèle que le style dominant)
+4. **Inclure des screenshots dev server** (desktop + mobile) dans le body de la PR — c'est le signal visuel pour la review humaine
+5. **Pas de test E2E de record** sur le pixel-perfect : Lighthouse couvre l'a11y, la fidélité visuelle reste en revue humaine + check structurel agent

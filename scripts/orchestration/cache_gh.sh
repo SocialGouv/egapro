@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
+if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+  for B in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$B" ] && exec "$B" "$0" "$@"
+  done
+  echo "Bash 4+ required. Install via 'brew install bash'." >&2
+  exit 1
+fi
 # cache_gh.sh <key> <ttl_sec> -- <command>
 #
 # TTL-based cache wrapper for any command (typically `gh`).
 # Returns cached output if cache file is younger than TTL, otherwise runs the
 # command, stores the output, and returns it.
 #
-# Used to dampen GitHub API rate limits during /epic orchestration: the same
+# Used to dampen GitHub API rate limits during /implement (mode epic) orchestration: the same
 # `gh issue view <epic> ...` is called by both dispatch_plan.sh and the loop
 # driver, sometimes several times per tick. With TTL=300s on the bulk
 # sub-issues query, the API cost drops by ~20×.
@@ -43,9 +50,15 @@ mkdir -p "$CACHE_DIR"
 
 CACHE_FILE="${CACHE_DIR}/${KEY}.json"
 
+# Mac compat: GNU stat uses `-c '%Y'`; BSD/macOS stat uses `-f '%m'`.
+# Try both so the script works on Linux and macOS without coreutils.
+file_mtime() {
+    stat -c '%Y' "$1" 2>/dev/null || stat -f '%m' "$1" 2>/dev/null || echo 0
+}
+
 # Cache hit?
 if [ -f "$CACHE_FILE" ]; then
-    MTIME=$(stat -c '%Y' "$CACHE_FILE" 2>/dev/null || echo 0)
+    MTIME=$(file_mtime "$CACHE_FILE")
     NOW=$(date +%s)
     AGE=$((NOW - MTIME))
     if [ "$AGE" -lt "$TTL" ]; then
