@@ -113,7 +113,7 @@ Si en doute : poser la question « quel fichier le code-dev va-t-il modifier ? �
 
 - **Respecter `rules/ticket-spec-format.md`** — toutes les sections requises, chemins de fichiers explicites, pas de « voir le code »
 - **Max 8 critères d'acceptation par ticket** — découper sinon (mode epic-*) et lier via `Depends on`
-- **Dépendances inter-tickets via section `Depends on`** (mode epic-*), jamais via `Parent issue` (qui sert uniquement à lier l'epic) — `/implement` parse cette section pour gater le dispatch (un enfant ne démarre que quand son parent a été squash-mergé dans `epic/<N>`)
+- **Dépendances inter-tickets via section `Depends on`** (mode epic-*), jamais via `Parent issue` (qui sert uniquement à lier l'epic) — `/implement` parse cette section pour conditionner le dispatch (un enfant ne démarre que quand son parent a été squash-mergé dans `epic/<N>`)
 - **Pas de cycles** dans le DAG de dépendances
 - **Aucune décision résiduelle** pour `code-dev` — Sonnet exécute, ne conçoit pas
 - **Read-only** : aucun fichier code modifié, aucune branche créée

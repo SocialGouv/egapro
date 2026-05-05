@@ -36,7 +36,7 @@ Avant tout effort de repro, lire le body. Si la description manque d'éléments 
 - « Qu'attendais-tu, qu'as-tu obtenu ? »
 - (visuel) « As-tu une URL Figma de référence ? »
 
-**Attendre les réponses** avant de passer à l'étape 1. Pas d'auto-validation, pas d'invention. Si la repro reste impossible après Q&A, retourner `failed` au skill avec le diagnostic.
+**Attendre les réponses** avant de passer à l'étape 1. Pas d'auto-validation, pas d'invention. Si la repro reste impossible après une première passe Q&A, **continuer à challenger l'utilisateur** plutôt que de retourner `failed` : exposer précisément ce qui manque (étape ambiguë, env non identifié, log absent, scénario non isolable), proposer des hypothèses à confirmer, demander un screenshot, un dump de logs, ou une capture réseau. `failed` est réservé au cas où l'utilisateur lui-même bloque la collaboration (« je n'ai pas plus d'infos », « pas reproductible chez moi non plus »). Tant qu'il y a un chemin pour avancer, continuer la boucle Q&A.
 
 ### 1. Choisir la sous-stratégie de reproduction
 
