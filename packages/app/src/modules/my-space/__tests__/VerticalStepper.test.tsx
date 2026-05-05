@@ -29,7 +29,11 @@ function renderPanel(
 			variant={variant}
 		/>,
 	);
-	const dialog = container.querySelector("dialog") as HTMLElement;
+	const dialog = container.querySelector("dialog");
+	if (!dialog)
+		throw new Error(
+			"DeclarationProcessPanel did not render a <dialog> element",
+		);
 	return { panel: within(dialog), dialog, container };
 }
 
@@ -118,9 +122,12 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 
 	describe("TransmittedRow sans viewHref — pas de bouton œil sur ces lignes", () => {
 		it("does not render view link on CSE avis row (closed variant, no decl1 row shown)", () => {
-			// In closed variant Step1Content does not render TransmittedRow for decl1,
-			// and Step3Content renders CSE avis without viewHref → no eye links at all.
+			// Step3Content in closed variant renders the CSE avis row (Modifier link
+			// points to /avis-cse/etape/2) but without viewHref → no eye links at all.
 			const { dialog } = renderPanel("closed");
+			// Prove Step3Content actually rendered (the CSE modify link is present)
+			expect(dialog.querySelector('a[href*="avis-cse"]')).toBeInTheDocument();
+			// Confirm no eye link was added to this row
 			const links = dialog.querySelectorAll(
 				'a[title="Voir le récapitulatif de la déclaration"]',
 			);
