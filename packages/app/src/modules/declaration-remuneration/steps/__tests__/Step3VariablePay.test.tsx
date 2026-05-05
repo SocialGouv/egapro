@@ -70,7 +70,7 @@ describe("Step3VariablePay", () => {
 		);
 		expect(
 			screen.getByText(
-				"Renseignez les informations avant de valider vos indicateurs.",
+				"Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs.",
 			),
 		).toBeInTheDocument();
 		expect(
@@ -255,12 +255,12 @@ describe("Step3VariablePay", () => {
 					},
 					step4: {
 						annual: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
 						hourly: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
@@ -309,12 +309,12 @@ describe("Step3VariablePay", () => {
 					},
 					step4: {
 						annual: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
 						hourly: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
@@ -362,12 +362,12 @@ describe("Step3VariablePay", () => {
 					},
 					step4: {
 						annual: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
 						hourly: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},

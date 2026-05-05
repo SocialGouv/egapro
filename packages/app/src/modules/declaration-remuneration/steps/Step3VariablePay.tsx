@@ -24,7 +24,6 @@ import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
-import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapField, Step3Data } from "../types";
 import stepStyles from "./Step3VariablePay.module.scss";
 
@@ -156,12 +155,8 @@ export function Step3VariablePay({
 					<strong>
 						{gipPrefillData
 							? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
-							: "Renseignez les informations avant de valider vos indicateurs."}
+							: "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."}
 					</strong>
-					<TooltipButton
-						id="tooltip-step3-info"
-						label="Information sur les indicateurs"
-					/>
 				</p>
 
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
@@ -187,10 +182,7 @@ export function Step3VariablePay({
 					/>
 
 					{gipPrefillData && (
-						<PrefillSource
-							periodEnd={gipPrefillData.periodEnd}
-							tooltipId="tooltip-source-step3-paygap"
-						/>
+						<PrefillSource periodEnd={gipPrefillData.periodEnd} />
 					)}
 				</div>
 
@@ -303,10 +295,7 @@ export function Step3VariablePay({
 					)}
 
 					{gipPrefillData && (
-						<PrefillSource
-							periodEnd={gipPrefillData.periodEnd}
-							tooltipId="tooltip-source-step3"
-						/>
+						<PrefillSource periodEnd={gipPrefillData.periodEnd} />
 					)}
 				</div>
 

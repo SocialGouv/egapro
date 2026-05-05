@@ -8,8 +8,8 @@ export type GipMdsRow = typeof gipMdsData.$inferSelect;
 
 /** Quartile data computed from GIP proportions + workforce totals. */
 export type GipQuartileData = {
-	/** 4 thresholds, one per quartile (lower bound of each quartile group). */
-	thresholds: [string | null, string | null, string | null, string | null];
+	/** 3 thresholds for Q1-Q3 (lower bound); Q4 has no threshold in the GIP model. */
+	thresholds: [string | null, string | null, string | null];
 	/** Integer women count per quartile, derived from proportion × total/4. */
 	womenCounts: [number | null, number | null, number | null, number | null];
 	/** Integer men count per quartile, derived from proportion × total/4. */
@@ -60,6 +60,8 @@ export type GipPrefillData = {
 	};
 	/** Confidence index (0-1, for internal DGT use) */
 	confidenceIndex: string | null;
+	/** Start of the data collection period (e.g. "2026-01-01"), used for "Période de référence" display. */
+	periodStart?: string | null;
 	/** End of the data collection period (e.g. "2026-12-31"), used for "Source : DSN" display. */
 	periodEnd: string | null;
 };
@@ -109,7 +111,6 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 					row.annualQuartileThreshold1,
 					row.annualQuartileThreshold2,
 					row.annualQuartileThreshold3,
-					null,
 				],
 				[
 					row.annualQuartile1ProportionWomen,
@@ -131,7 +132,6 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 					row.hourlyQuartileThreshold1,
 					row.hourlyQuartileThreshold2,
 					row.hourlyQuartileThreshold3,
-					null,
 				],
 				[
 					row.hourlyQuartile1ProportionWomen,
@@ -148,6 +148,7 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 			),
 		},
 		confidenceIndex: row.confidenceIndex,
+		periodStart: row.periodStart,
 		periodEnd: row.periodEnd,
 	};
 }
@@ -259,7 +260,7 @@ function proportionToCount(
 function buildQuartileData(
 	totalWomen: number | null,
 	totalMen: number | null,
-	thresholds: [string | null, string | null, string | null, string | null],
+	thresholds: [string | null, string | null, string | null],
 	womenProportions: [
 		string | null,
 		string | null,

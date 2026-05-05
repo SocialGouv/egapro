@@ -1,4 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	createCaller,
+	mockDeclaration,
+} from "./helpers/declarationTestHelpers";
 
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
@@ -78,39 +82,6 @@ function createMockDb(selectRows: unknown[] = []) {
 		transaction: mockTransaction,
 	} as unknown;
 }
-
-function createCaller(
-	mockDb: unknown,
-	siret: string | null = "33978727700015",
-	impersonation: { siren: string; name: string } | null = null,
-) {
-	return import("../declaration").then(({ declarationRouter }) =>
-		declarationRouter.createCaller({
-			db: mockDb,
-			session: {
-				user: {
-					id: "user-1",
-					siret,
-					isAdmin: impersonation !== null,
-					impersonation,
-				},
-				expires: "",
-			},
-			headers: new Headers(),
-		} as never),
-	);
-}
-
-const mockDeclaration = {
-	id: "decl-1",
-	siren: "339787277",
-	year: 2026,
-	currentStep: 0,
-	status: "draft",
-	declarantId: "user-1",
-	totalWomen: null,
-	totalMen: null,
-};
 
 describe("declarationRouter", () => {
 	beforeEach(() => {
@@ -415,6 +386,9 @@ describe("declarationRouter", () => {
 			expect(mockSet).toHaveBeenCalledWith(
 				expect.objectContaining({ remunerationScore: null }),
 			);
+			const setArg = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setArg).not.toHaveProperty("indicatorFAnnualThreshold4");
+			expect(setArg).not.toHaveProperty("indicatorFHourlyThreshold4");
 		});
 
 		it("throws when siret is missing", async () => {
@@ -544,6 +518,25 @@ describe("declarationRouter", () => {
 			);
 		});
 
+		it("maps 3 thresholds + 4 counts per table with no *Threshold4 column", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await caller.updateStep4(step4Input);
+
+			const setArg = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setArg).toHaveProperty("indicatorFAnnualThreshold1", "25000");
+			expect(setArg).toHaveProperty("indicatorFAnnualThreshold2", "35000");
+			expect(setArg).toHaveProperty("indicatorFAnnualThreshold3", "50000");
+			expect(setArg).not.toHaveProperty("indicatorFAnnualThreshold4");
+			expect(setArg).toHaveProperty("indicatorFHourlyThreshold1", "15");
+			expect(setArg).toHaveProperty("indicatorFHourlyThreshold2", "20");
+			expect(setArg).toHaveProperty("indicatorFHourlyThreshold3", "30");
+			expect(setArg).not.toHaveProperty("indicatorFHourlyThreshold4");
+			expect(setArg).toHaveProperty("indicatorFAnnualWomen4", null);
+			expect(setArg).toHaveProperty("indicatorFHourlyWomen4", null);
+		});
+
 		it("stores null for Q4 threshold when it is an empty string", async () => {
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb);
@@ -569,6 +562,9 @@ describe("declarationRouter", () => {
 					indicatorFHourlyThreshold3: "30",
 				}),
 			);
+			const setArg = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setArg).not.toHaveProperty("indicatorFAnnualThreshold4");
+			expect(setArg).not.toHaveProperty("indicatorFHourlyThreshold4");
 		});
 
 		it("throws when siret is missing", async () => {
@@ -578,242 +574,6 @@ describe("declarationRouter", () => {
 			await expect(caller.updateStep4(step4Input)).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
 			);
-		});
-	});
-
-	describe("updateEmployeeCategories", () => {
-		function createEmployeeTx(
-			declaration: unknown,
-			existingJobs: unknown[] = [],
-		) {
-			let selectCallCount = 0;
-			const txSelectWhere = vi.fn().mockImplementation(() => {
-				selectCallCount++;
-				const result = Promise.resolve(
-					selectCallCount === 1 ? [] : existingJobs,
-				);
-				(result as unknown as Record<string, unknown>).limit = vi
-					.fn()
-					.mockResolvedValue(declaration ? [declaration] : []);
-				return result;
-			});
-			const txSelectFrom = vi.fn().mockReturnValue({ where: txSelectWhere });
-			const txSelect = vi.fn().mockReturnValue({ from: txSelectFrom });
-
-			mockUpdateWhere.mockResolvedValue(undefined);
-			mockSet.mockReturnValue({ where: mockUpdateWhere });
-			mockUpdate.mockReturnValue({ set: mockSet });
-
-			mockDeleteWhere.mockResolvedValue(undefined);
-			mockDelete.mockReturnValue({ where: mockDeleteWhere });
-
-			const mockReturningFn = vi.fn().mockResolvedValue([{ id: "new-job-1" }]);
-			mockValues.mockReturnValue({
-				returning: mockReturningFn,
-				onConflictDoNothing: vi
-					.fn()
-					.mockReturnValue({ returning: mockReturningFn }),
-			});
-			mockInsert.mockReturnValue({ values: mockValues });
-
-			return {
-				select: txSelect,
-				update: mockUpdate,
-				delete: mockDelete,
-				insert: mockInsert,
-			};
-		}
-
-		const employeeInput = {
-			declarationType: "initial" as const,
-			source: "dads",
-			categories: [
-				{
-					name: "Cadres",
-					detail: "Senior",
-					data: { womenCount: 10, menCount: 15 },
-				},
-			],
-		};
-
-		it("creates job and employee categories for initial declaration", async () => {
-			const tx = createEmployeeTx(mockDeclaration);
-			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-				fn(tx),
-			);
-			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
-
-			const result = await caller.updateEmployeeCategories(employeeInput);
-
-			expect(result).toEqual({ success: true });
-			expect(mockTransaction).toHaveBeenCalled();
-			expect(mockInsert).toHaveBeenCalled();
-			expect(mockSet).toHaveBeenCalledWith(
-				expect.objectContaining({ currentStep: 5 }),
-			);
-		});
-
-		it("updates employee categories for correction declaration", async () => {
-			const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
-			const tx = createEmployeeTx(mockDeclaration, existingJobs);
-			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-				fn(tx),
-			);
-			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
-
-			const correctionInput = {
-				declarationType: "correction" as const,
-				source: "dads",
-				categories: [
-					{
-						name: "Cadres",
-						detail: "Senior",
-						data: { womenCount: 12, menCount: 18 },
-					},
-				],
-				referencePeriodStart: "2025-01-01",
-				referencePeriodEnd: "2025-12-31",
-			};
-
-			const result = await caller.updateEmployeeCategories(correctionInput);
-
-			expect(result).toEqual({ success: true });
-			expect(mockSet).toHaveBeenCalledWith(
-				expect.objectContaining({
-					secondDeclarationStep: 2,
-					secondDeclReferencePeriodStart: "2025-01-01",
-					secondDeclReferencePeriodEnd: "2025-12-31",
-				}),
-			);
-		});
-
-		it("throws when declaration not found", async () => {
-			const tx = createEmployeeTx(null);
-			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-				fn(tx),
-			);
-			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
-
-			await expect(
-				caller.updateEmployeeCategories(employeeInput),
-			).rejects.toThrow("Déclaration introuvable");
-		});
-	});
-
-	describe("admin impersonation read-only guard", () => {
-		const impersonation = { siren: "339787277", name: "Acme" };
-
-		it("refuses updateStep1 when the admin is impersonating", async () => {
-			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb, null, impersonation);
-
-			await expect(
-				caller.updateStep1({ totalWomen: 10, totalMen: 20 }),
-			).rejects.toThrow("Mode mimoquage");
-		});
-
-		it("refuses submit when the admin is impersonating", async () => {
-			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb, null, impersonation);
-
-			await expect(caller.submit()).rejects.toThrow("Mode mimoquage");
-		});
-
-		it("refuses submitSecondDeclaration when the admin is impersonating", async () => {
-			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb, null, impersonation);
-
-			await expect(caller.submitSecondDeclaration()).rejects.toThrow(
-				"Mode mimoquage",
-			);
-		});
-
-		it("refuses saveCompliancePath when the admin is impersonating", async () => {
-			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb, null, impersonation);
-
-			await expect(
-				caller.saveCompliancePath({ path: "corrective_action" }),
-			).rejects.toThrow("Mode mimoquage");
-		});
-
-		it("refuses completeCompliancePath when the admin is impersonating", async () => {
-			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb, null, impersonation);
-
-			await expect(caller.completeCompliancePath()).rejects.toThrow(
-				"Mode mimoquage",
-			);
-		});
-
-		it("returns a placeholder declaration in mimoquage when none exists (no insert)", async () => {
-			// When an admin mimoques a company that has not started a
-			// declaration, getOrCreate must return a transient empty row so the
-			// read-only UI can render. No INSERT is performed (issue #3230).
-			const emptySelect = () =>
-				vi.fn().mockImplementation(() => ({
-					from: vi.fn().mockReturnValue({
-						where: vi.fn().mockReturnValue({
-							limit: vi.fn().mockResolvedValue([]),
-						}),
-					}),
-				}));
-			const insertSpy = vi.fn();
-			const tx = {
-				select: emptySelect(),
-				insert: insertSpy,
-				delete: vi.fn(),
-			};
-			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-				fn(tx),
-			);
-			const mockDb = {
-				transaction: mockTransaction,
-				select: emptySelect(),
-			} as unknown;
-			const caller = await createCaller(mockDb, null, impersonation);
-
-			const result = await caller.getOrCreate();
-			expect(result.declaration.id).toBe("");
-			expect(result.declaration.siren).toBe(impersonation.siren);
-			expect(result.declaration.status).toBe("draft");
-			expect(result.declaration.currentStep).toBe(0);
-			expect(result.jobCategories).toEqual([]);
-			expect(result.employeeCategories).toEqual([]);
-			expect(insertSpy).not.toHaveBeenCalled();
-		});
-
-		it("allows getOrCreate when an existing declaration is returned", async () => {
-			const existingTx = (() => {
-				const txSelect = vi.fn().mockImplementation(() => ({
-					from: vi.fn().mockReturnValue({
-						where: vi.fn().mockReturnValue({
-							limit: vi.fn().mockResolvedValue([mockDeclaration]),
-						}),
-					}),
-				}));
-				return { select: txSelect, insert: vi.fn(), delete: vi.fn() };
-			})();
-			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-				fn(existingTx),
-			);
-			const mockDb = {
-				select: vi.fn().mockReturnValue({
-					from: vi.fn().mockReturnValue({
-						where: vi.fn().mockReturnValue({
-							limit: vi.fn().mockResolvedValue([]),
-						}),
-					}),
-				}),
-				transaction: mockTransaction,
-			} as unknown;
-			const caller = await createCaller(mockDb, null, impersonation);
-
-			const result = await caller.getOrCreate();
-			expect(result.declaration).toBeDefined();
 		});
 	});
 });
