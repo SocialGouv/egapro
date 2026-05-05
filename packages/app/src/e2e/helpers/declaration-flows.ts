@@ -14,18 +14,20 @@ async function fillPayGapTable(page: Page) {
 	}
 }
 
+type QuartileFillRow = {
+	name: string;
+	annualThreshold?: string;
+	hourlyThreshold?: string;
+	women: string;
+	men: string;
+};
+
 /** Fill step 4 quartile data with consistent values (total = step 1 workforce). */
 async function fillStep4Quartiles(page: Page) {
 	// Total must equal step 1 workforce: 10 women, 15 men
 	// Split across 4 quartiles: 3+3+2+2=10 women, 4+4+4+3=15 men
 	// Q4 has no upper threshold (schema enforces this)
-	const quartiles: Array<{
-		name: string;
-		annualThreshold?: string;
-		hourlyThreshold?: string;
-		women: string;
-		men: string;
-	}> = [
+	const quartiles: QuartileFillRow[] = [
 		{
 			name: "1er quartile",
 			annualThreshold: "10000",
