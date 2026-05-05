@@ -112,6 +112,21 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
    **9d. Cycle review unique** — déclenché **une seule fois**, **uniquement** après que 9a + 9b + 9c sont **tous verts** (vérifie explicitement le critère jq de 9b : toutes conclusions SUCCESS / SKIPPED / NEUTRAL, sans exception).
 
+   ### 9d.0 — Sortir la PR du draft (prérequis du wait bots)
+
+   `revu-bot` (et certains autres reviewers configurés sur ce repo) ne se déclenchent **pas** sur les PR draft. Si tu entres en 9d.1 avec une PR encore en draft, le wait initial timeout 15 min dans le vide. Avant le wait, fais donc :
+
+   ```bash
+   PR=<PR_NUMBER>
+   IS_DRAFT=$(gh pr view "$PR" --json isDraft --jq '.isDraft')
+   if [ "$IS_DRAFT" = "true" ]; then
+       gh pr ready "$PR"
+       bash scripts/orchestration/log_event.sh code-dev-<N> PR_READY "pr=$PR"
+   fi
+   ```
+
+   `gh pr ready` peut re-déclencher certains workflows (Deploy review notamment). Re-poll les checks après ce `pr ready` avec le **même critère jq qu'en 9b** (toutes conclusions SUCCESS / SKIPPED / NEUTRAL, sans exception). Si un check repasse en FAILURE, retourner en 9b (corriger, push, watch) avant de continuer.
+
    ### 9d.1 — Wait borné pour les reviews bot (avec debounce)
 
    Les bots de review (notamment `revu-bot`) postent leurs commentaires avec un délai de **plusieurs minutes après que la CI soit verte** — typiquement 5 à 10 min, parfois plus selon la charge GitHub Actions et la taille du diff. **Et** ils postent leurs commentaires **un par un** sur quelques secondes/dizaines de secondes (un par fichier ou section). Si tu sors dès le premier comment détecté, tu lis un résumé incomplet et tu rates les retours détaillés.
@@ -234,9 +249,7 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
      - Logger `STUCK` puis retourner le JSON `{"status":"refacto","ticket":<N>,"reason":"<résumé>"}` (le pipeline incrémente le compteur d'échecs Opus du ticket : au 3ᵉ refacto consécutif il pose `dispatch=escalate` pour intervention humaine)
 
 10. **Fin** — quand 9a + 9b + 9c + 9d sont **tous verts / résolus** :
-   - `gh pr ready <PR>` (sort la PR du draft)
-   - **Re-poll les checks après `gh pr ready`** : marquer la PR `ready` peut re-déclencher certains workflows (Deploy review notamment, qui n'a pas de `pull_request: types: [opened, synchronize]` strict). Attendre encore une fois que **toutes** les conclusions soient SUCCESS / SKIPPED / NEUTRAL — même critère qu'en 9b. Si un check repasse en FAILURE après `pr ready`, retourner en 9b (corriger, push, watch). Ne **jamais** retourner `validated` avec un check rouge.
-   - Logger `PR_READY` avec le numéro de PR
+   - La PR est déjà sortie du draft en 9d.0 (prérequis du wait bots). Vérifier qu'elle est toujours `ready` et que tous les checks (y compris ceux re-déclenchés après le `pr ready` ou par les pushes correctifs de 9d.2) sont SUCCESS / SKIPPED / NEUTRAL — même critère jq qu'en 9b. Si un check est FAILURE → retourner en 9b (corriger, push, watch). Ne **jamais** retourner `validated` avec un check rouge.
    - **Le ticket reste en `In progress`** — c'est l'utilisateur qui passe à `In review` puis `Done` selon son rythme de revue humaine. AI's terminus = `gh pr ready` + retour `validated`. `set_ticket_status.sh` refusera explicitement la transition `In review`.
    - Logger `COMPLETE`
    - **Pas de merge depuis `code-dev`** — le squash-merge dans `epic/<N>` est fait par `process_tick_result.sh` après ton retour `validated`. Si le merge échoue (conflit avec la branche d'intégration parce qu'une autre PR a été mergée entre-temps), le pipeline te redispatchera avec le ticket en `In progress` ; tu n'as qu'à rebaser sur `origin/epic/<N>` et re-pousser.
@@ -272,7 +285,7 @@ Calls `bash scripts/orchestration/log_event.sh code-dev-<N> <EVENT> [msg]`. Logg
 | `RETRY` | Début d'une itération de fix sur un verdict RETRY (étape 9), `msg=axis=<axe> attempt=<K>` |
 | `ESCALATED` | Avant retour `needs_opus_escalation` (étape 9, mode Sonnet épuisé) |
 | `STUCK` | Avant retour `refacto` (étape 9, mode Opus épuisé) |
-| `PR_READY` | `gh pr ready` réussi (étape 10), `msg=pr=<NNN>` |
+| `PR_READY` | `gh pr ready` réussi (étape 9d.0), `msg=pr=<NNN>` |
 | `COMPLETE` | Avant retour `validated` (étape 10) |
 
 ## Format de retour OBLIGATOIRE (dernier message)
