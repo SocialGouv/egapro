@@ -75,6 +75,12 @@
 			linear-gradient(0deg, var(--border-contrast-grey), var(--border-contrast-grey)),
 			linear-gradient(0deg, transparent, transparent);
 	}
+
+	/* All data-row <th scope="row"> default to white; section-header
+	   rows re-apply grey via higher-specificity rules in their own module. */
+	:global(.fr-table__content) tbody th {
+		background-color: var(--background-default-grey);
+	}
 }
 
 .sourceLine {

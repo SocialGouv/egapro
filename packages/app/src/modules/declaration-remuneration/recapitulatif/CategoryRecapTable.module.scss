@@ -8,21 +8,24 @@
 	margin: 0;
 }
 
-.subheaderRow th {
+/* Specificity (0,2,3) beats the page-level white reset (0,2,2) so these
+   section-header rows keep their grey background. */
+:global(.fr-table__content) tbody tr.subheaderRow th {
 	background-color: var(--background-alt-grey);
 	font-weight: 700;
 	text-align: left;
 }
 
-.sectionRow th {
+:global(.fr-table__content) tbody tr.sectionRow th {
 	background-color: var(--background-alt-grey);
 	font-weight: 700;
 	text-align: left;
 }
 
-.totalRow th,
+/* Total rows: th goes white via page-level reset; td needs explicit override
+   since the old rule set it grey. */
 .totalRow td {
-	background-color: var(--background-alt-grey);
+	background-color: var(--background-default-grey);
 }
 
 /* "Effectif physique", "Salaire de base", "Composantes variables …"
