@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { useZodForm } from "~/modules/shared/useZodForm";
@@ -10,6 +10,7 @@ import { updateStep1Schema } from "../schemas";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP1_CATEGORIES } from "../shared/devFillData";
+import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
@@ -22,12 +23,14 @@ import type { Step1Data } from "../types";
 import styles from "./Step1Workforce.module.scss";
 
 type Step1WorkforceProps = {
+	declarationSiren: string;
 	declarationYear: number;
 	initialData: Step1Data;
 	gipPrefillData?: GipPrefillData;
 };
 
 export function Step1Workforce({
+	declarationSiren,
 	declarationYear,
 	initialData,
 	gipPrefillData,
@@ -38,18 +41,40 @@ export function Step1Workforce({
 
 	const hasInitialData = initialData.totalWomen > 0 || initialData.totalMen > 0;
 
-	const form = useZodForm(updateStep1Schema, {
-		defaultValues: {
+	const dbValues = useMemo(
+		() => ({
 			totalWomen: initialData.totalWomen,
 			totalMen: initialData.totalMen,
-		},
+		}),
+		[initialData.totalWomen, initialData.totalMen],
+	);
+
+	const { draft, setField, clearDraft, hasDraft } = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: 1,
+		kind: "main",
+		dbValues,
+	});
+
+	const form = useZodForm(updateStep1Schema, {
+		defaultValues: dbValues,
 	});
 
 	const totalWomen = form.watch("totalWomen");
 	const totalMen = form.watch("totalMen");
 	const total = totalWomen + totalMen;
 
-	const [saved, setSaved] = useState(hasInitialData);
+	useEffect(() => {
+		if (typeof draft.totalWomen === "number") {
+			form.setValue("totalWomen", draft.totalWomen);
+		}
+		if (typeof draft.totalMen === "number") {
+			form.setValue("totalMen", draft.totalMen);
+		}
+	}, [draft.totalWomen, draft.totalMen, form]);
+
+	const saved = !hasDraft && hasInitialData;
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const [showResetWarning, setShowResetWarning] = useState(false);
 
@@ -58,7 +83,10 @@ export function Step1Workforce({
 	}
 
 	const mutation = api.declaration.updateStep1.useMutation({
-		onSuccess: () => router.push("/declaration-remuneration/etape/2"),
+		onSuccess: () => {
+			clearDraft();
+			router.push("/declaration-remuneration/etape/2");
+		},
 	});
 
 	function parseIntegerInput(raw: string): number | null {
@@ -71,14 +99,14 @@ export function Step1Workforce({
 		const value = parseIntegerInput(e.target.value);
 		if (value === null) return;
 		form.setValue("totalWomen", value);
-		setSaved(false);
+		setField({ totalWomen: value, totalMen });
 	}
 
 	function handleMenChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const value = parseIntegerInput(e.target.value);
 		if (value === null) return;
 		form.setValue("totalMen", value);
-		setSaved(false);
+		setField({ totalWomen, totalMen: value });
 	}
 
 	const onSubmit = form.handleSubmit((data) => {
@@ -96,9 +124,11 @@ export function Step1Workforce({
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
 				onDevFill={() => {
-					form.setValue("totalWomen", DEV_STEP1_CATEGORIES[0]?.women ?? 50);
-					form.setValue("totalMen", DEV_STEP1_CATEGORIES[0]?.men ?? 50);
-					setSaved(false);
+					const womenValue = DEV_STEP1_CATEGORIES[0]?.women ?? 50;
+					const menValue = DEV_STEP1_CATEGORIES[0]?.men ?? 50;
+					form.setValue("totalWomen", womenValue);
+					form.setValue("totalMen", menValue);
+					setField({ totalWomen: womenValue, totalMen: menValue });
 				}}
 				saved={saved}
 				title={
