@@ -50,7 +50,7 @@ export function QuartileTable({
 
 	return (
 		<div className={stepStyles.tableWrapper}>
-			<h2 className="fr-h5 fr-mb-0">{title}</h2>
+			<h3 className="fr-h5 fr-mb-0">{title}</h3>
 			<div className={stepStyles.tableSection}>
 				{readingNote}
 				<div

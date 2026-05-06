@@ -220,10 +220,9 @@ export function Step4QuartileDistribution({
 		requestAnimationFrame(() => alertRef.current?.focus());
 	}
 
-	function onSubmitValid(values: {
-		annual: QuartileTuple;
-		hourly: QuartileTuple;
-	}) {
+	function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		const values = form.getValues();
 		const errors = deriveErrors(values);
 		if (hasAnyError(errors)) {
 			setFieldErrors(errors);
@@ -243,11 +242,7 @@ export function Step4QuartileDistribution({
 	const showAlert = showRecap && recap.length > 0;
 
 	return (
-		<form
-			className={stepStyles.formColumn}
-			noValidate
-			onSubmit={form.handleSubmit(onSubmitValid)}
-		>
+		<form className={stepStyles.formColumn} noValidate onSubmit={onSubmit}>
 			<StepTitleRow
 				onDevFill={() => {
 					form.setValue(
@@ -301,9 +296,9 @@ export function Step4QuartileDistribution({
 					role="alert"
 					tabIndex={-1}
 				>
-					<p className="fr-alert__title" id="step4-error-summary-title">
+					<h3 className="fr-alert__title" id="step4-error-summary-title">
 						Le formulaire contient des erreurs
-					</p>
+					</h3>
 					<ul>
 						{recap.map((entry) => (
 							<li key={entry.id}>
