@@ -67,19 +67,19 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 8. **PR draft** via `gh pr create --draft --base <base-branch>` :
    - Base = la `<base-branch>` reçue en input (sans le préfixe `origin/`) — `epic/<EPIC_N>` (sub-issue d'epic) ou `alpha` (Task / Bug standalone)
    - Body : `Closes #NNN` **sur la première ligne** (obligatoire pour que le force-link de l'étape 8.5 fonctionne), suivi du résumé, test plan, screenshots
-   - **Note auto-close** : `Closes #N` ne déclenche l'auto-close du ticket que sur merge dans la branche par défaut (`master`) ; sur le merge dans `epic/<N>` ou `alpha`, le ticket reste ouvert jusqu'à la release `alpha → master`. Le force-link ci-dessous ne corrige pas ça — il sert uniquement à faire apparaître la PR dans la sidebar Development de l'issue.
+   - **Note auto-close** : `Closes #N` ne déclenche l'auto-close du ticket que sur merge dans la branche par défaut (`alpha`). Pour une PR de sub-issue ciblant `epic/<N>`, le ticket reste ouvert jusqu'à ce que la PR finale `epic/<N> → alpha` merge — son body recopie `Closes #N` pour chaque sub-issue, ce qui déclenche l'auto-close de toutes en un coup. Le force-link ci-dessous ne corrige pas ça — il sert uniquement à faire apparaître la PR dans la sidebar Development de l'issue dès sa création.
    - **Ticket reste en In progress** pendant les validators
    - Logger `PR_DRAFT` avec le numéro de PR.
 
 8.5. **Force le lien formel PR ↔ issue** :
 
-   GitHub n'enregistre `closingIssuesReferences` (la liste qui peuple la sidebar « Development » de l'issue) **que** si la PR a été créée avec `--base master` (la branche par défaut). Comme on cible `epic/<N>` ou `alpha`, le `Closes #N` reste dans le body sans créer le lien formel. Workaround : flip la base sur `master` puis revenir.
+   GitHub n'enregistre `closingIssuesReferences` (la liste qui peuple la sidebar « Development » de l'issue) **que** si la PR a été créée avec `--base <default-branch>` (`alpha` actuellement). Comme on cible `epic/<N>`, le `Closes #N` reste dans le body sans créer le lien formel. Workaround : flip la base sur la default branch puis revenir. Le script lit la default branch dynamiquement (pas de hardcoding `master` ou `alpha`).
 
    ```bash
    bash scripts/orchestration/force_pr_issue_link.sh <PR_N>
    ```
 
-   Le script est idempotent (skip si lien déjà en place ou si la PR cible déjà master) et vérifie via GraphQL après le flip que `closingIssuesReferences` est non-vide. **Coût** : ~2 runs CI supplémentaires par flip (workflows `pull_request: types: [edited|synchronize]` se redéclenchent à chaque changement de base) — donc on l'appelle une seule fois, juste après `gh pr create`.
+   Le script est idempotent (skip si lien déjà en place ou si la PR cible déjà la default branch) et vérifie via GraphQL après le flip que `closingIssuesReferences` est non-vide. **Coût** : ~2 runs CI supplémentaires par flip (workflows `pull_request: types: [edited|synchronize]` se redéclenchent à chaque changement de base) — donc on l'appelle une seule fois, juste après `gh pr create`.
 
    Si le script échoue (`exit 1`) avec « Closes keyword missing » → ton body n'a pas `Closes #N` sur la première ligne, le corriger via `gh pr edit --body` puis re-run le script.
 
