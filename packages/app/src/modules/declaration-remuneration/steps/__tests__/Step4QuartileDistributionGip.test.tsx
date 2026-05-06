@@ -61,6 +61,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 	it("uses gipPrefillData when no initialCategories", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 100, totalMen: 100 },
@@ -95,6 +96,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 	it("uses gipPrefillData with partial null thresholds (Q4 has none)", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 100, totalMen: 100 },
@@ -126,6 +128,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 	it("uses gipPrefillData with all null quartile data", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: null, totalMen: null },
@@ -158,6 +161,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 	it("uses gipPrefillData with mono-gender quartiles (100% women)", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 200, totalMen: 0 },

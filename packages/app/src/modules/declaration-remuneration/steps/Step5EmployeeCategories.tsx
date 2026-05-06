@@ -1,14 +1,35 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
+import { padDecimalToTwo } from "~/modules/domain";
 import { api } from "~/trpc/react";
+import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
 import { StepIndicator } from "../shared/StepIndicator";
 import type { EmployeeCategoryRow } from "../types";
 import { CategoryForm } from "./step5/CategoryForm";
 
+type Step5FormValues = {
+	source: string;
+	categories: {
+		name: string;
+		womenCount: string;
+		menCount: string;
+		annualBaseWomen: string;
+		annualBaseMen: string;
+		annualVariableWomen: string;
+		annualVariableMen: string;
+		hourlyBaseWomen: string;
+		hourlyBaseMen: string;
+		hourlyVariableWomen: string;
+		hourlyVariableMen: string;
+	}[];
+};
+
 type Props = {
+	declarationSiren: string;
 	declarationYear: number;
 	initialCategories?: EmployeeCategoryRow[];
 	initialSource?: string;
@@ -17,6 +38,7 @@ type Props = {
 };
 
 export function Step5EmployeeCategories({
+	declarationSiren,
 	declarationYear,
 	initialCategories,
 	initialSource,
@@ -27,18 +49,66 @@ export function Step5EmployeeCategories({
 	const isImpersonating = useIsImpersonating();
 	const hasInitialData = (initialCategories?.length ?? 0) > 0;
 
+	const dbValues = useMemo<Step5FormValues>(
+		() => ({
+			source: initialSource ?? "",
+			categories: (initialCategories ?? []).map((row) => ({
+				name: row.name,
+				womenCount: row.womenCount?.toString() ?? "",
+				menCount: row.menCount?.toString() ?? "",
+				annualBaseWomen: padDecimalToTwo(row.annualBaseWomen ?? ""),
+				annualBaseMen: padDecimalToTwo(row.annualBaseMen ?? ""),
+				annualVariableWomen: padDecimalToTwo(row.annualVariableWomen ?? ""),
+				annualVariableMen: padDecimalToTwo(row.annualVariableMen ?? ""),
+				hourlyBaseWomen: padDecimalToTwo(row.hourlyBaseWomen ?? ""),
+				hourlyBaseMen: padDecimalToTwo(row.hourlyBaseMen ?? ""),
+				hourlyVariableWomen: padDecimalToTwo(row.hourlyVariableWomen ?? ""),
+				hourlyVariableMen: padDecimalToTwo(row.hourlyVariableMen ?? ""),
+			})),
+		}),
+		[initialCategories, initialSource],
+	);
+
+	const { draft, setField, clearDraft, hasDraft } =
+		useDeclarationDraft<Step5FormValues>({
+			siren: declarationSiren,
+			year: declarationYear,
+			step: 5,
+			kind: "main",
+			dbValues,
+		});
+
+	const [draftLoaded, setDraftLoaded] = useState(false);
+
+	useEffect(() => {
+		if (hasDraft && !draftLoaded) setDraftLoaded(true);
+	}, [hasDraft, draftLoaded]);
+
+	const categoryFormKey = draftLoaded ? 1 : 0;
+	const categoryFormDefaultOverride = draftLoaded
+		? {
+				source: draft.source ?? initialSource ?? "",
+				categories: draft.categories ?? dbValues.categories,
+			}
+		: undefined;
+
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
-		onSuccess: () => router.push("/declaration-remuneration/etape/6"),
+		onSuccess: () => {
+			clearDraft();
+			router.push("/declaration-remuneration/etape/6");
+		},
 	});
 
 	return (
 		<CategoryForm
 			accordionId="accordion-step5"
+			defaultValuesOverride={categoryFormDefaultOverride}
 			disabled={isImpersonating}
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
 			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
 			isSubmitting={mutation.isPending}
+			key={categoryFormKey}
 			maxMen={maxMen}
 			maxWomen={maxWomen}
 			mimoquageNextHref={
@@ -51,8 +121,10 @@ export function Step5EmployeeCategories({
 					categories: data.categories,
 				})
 			}
+			onValuesChange={(values) => setField(values)}
 			previousHref="/declaration-remuneration/etape/4"
 			referenceYear={declarationYear - 1}
+			savedOverride={!hasDraft && hasInitialData}
 			stepper={<StepIndicator currentStep={5} />}
 			submitError={mutation.error?.message}
 			title={

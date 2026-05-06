@@ -38,6 +38,7 @@ describe("Step4QuartileDistribution", () => {
 	it("renders two tables with quartile rows and inverted columns", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
@@ -65,6 +66,7 @@ describe("Step4QuartileDistribution", () => {
 	it("renders renumeration tranche header and Pourcentage columns", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
@@ -84,6 +86,7 @@ describe("Step4QuartileDistribution", () => {
 	it("renders description text about quartiles", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
@@ -96,6 +99,7 @@ describe("Step4QuartileDistribution", () => {
 	it("renders instruction text and mandatory fields notice", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
@@ -113,6 +117,7 @@ describe("Step4QuartileDistribution", () => {
 	it("displays empty state with all min = - € and Q4 max = - €", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
@@ -126,6 +131,7 @@ describe("Step4QuartileDistribution", () => {
 	it("renders 3 threshold inputs per table (Q1/Q2/Q3 only) and Q4 readonly", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
@@ -141,6 +147,7 @@ describe("Step4QuartileDistribution", () => {
 	it("renders 4 women and 4 men count inputs per table", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
@@ -153,6 +160,7 @@ describe("Step4QuartileDistribution", () => {
 		const user = userEvent.setup();
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
@@ -172,6 +180,7 @@ describe("Step4QuartileDistribution", () => {
 		const user = userEvent.setup();
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
@@ -188,6 +197,7 @@ describe("Step4QuartileDistribution", () => {
 		const user = userEvent.setup();
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 				maxMen={25}
@@ -205,6 +215,7 @@ describe("Step4QuartileDistribution", () => {
 	it("renders mobile-label attributes on data cells for responsive reflow", () => {
 		const { container } = render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
@@ -228,6 +239,7 @@ describe("Step4QuartileDistribution", () => {
 	it("renders DSN source line on both tables even without GIP prefill", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
@@ -242,6 +254,7 @@ describe("Step4QuartileDistribution", () => {
 	it("renders accordion", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
@@ -254,6 +267,7 @@ describe("Step4QuartileDistribution", () => {
 	it("renders previous link pointing to step 3", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
@@ -267,6 +281,7 @@ describe("Step4QuartileDistribution", () => {
 	it("uses gipPrefillData to pre-populate 3 thresholds and counts", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 100, totalMen: 100 },
@@ -322,6 +337,7 @@ describe("Step4QuartileDistribution", () => {
 	it("uses gipPrefillData with all null quartile data", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: null, totalMen: null },
@@ -375,6 +391,7 @@ describe("Step4QuartileDistribution", () => {
 	it("displays computed percentages for prefilled data", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={{
 					annual: [
@@ -399,6 +416,7 @@ describe("Step4QuartileDistribution", () => {
 	it("shows SavedIndicator when initialData has data", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={{
 					annual: [
@@ -422,6 +440,7 @@ describe("Step4QuartileDistribution", () => {
 	it("does not show SavedIndicator when no initial data", () => {
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
