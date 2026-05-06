@@ -10,8 +10,8 @@ function getStorage(): Storage | null {
 	return window.localStorage;
 }
 
-function getStorageKey(userId: string): string {
-	return `${STORAGE_KEY_PREFIX}${userId}`;
+function getStorageKey(userId: string, siren: string, year: number): string {
+	return `${STORAGE_KEY_PREFIX}${userId}:${siren}:${year}`;
 }
 
 function isExpired(payload: DraftPayload, now: number): boolean {
@@ -22,10 +22,14 @@ function isExpired(payload: DraftPayload, now: number): boolean {
 	return now > deadline.getTime();
 }
 
-export function readDraft(userId: string): DraftPayload | null {
+export function readDraft(
+	userId: string,
+	siren: string,
+	year: number,
+): DraftPayload | null {
 	const storage = getStorage();
 	if (!storage) return null;
-	const key = getStorageKey(userId);
+	const key = getStorageKey(userId, siren, year);
 	const raw = storage.getItem(key);
 	if (raw === null) return null;
 	let parsed: unknown;
@@ -47,14 +51,19 @@ export function readDraft(userId: string): DraftPayload | null {
 	return result.data;
 }
 
-export function writeDraft(userId: string, payload: DraftPayload): void {
+export function writeDraft(
+	userId: string,
+	siren: string,
+	year: number,
+	payload: DraftPayload,
+): void {
 	const storage = getStorage();
 	if (!storage) return;
-	storage.setItem(getStorageKey(userId), JSON.stringify(payload));
+	storage.setItem(getStorageKey(userId, siren, year), JSON.stringify(payload));
 }
 
-export function clearDraft(userId: string): void {
+export function clearDraft(userId: string, siren: string, year: number): void {
 	const storage = getStorage();
 	if (!storage) return;
-	storage.removeItem(getStorageKey(userId));
+	storage.removeItem(getStorageKey(userId, siren, year));
 }

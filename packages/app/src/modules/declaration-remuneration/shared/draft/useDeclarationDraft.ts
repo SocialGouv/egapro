@@ -36,13 +36,9 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 
 	useEffect(() => {
 		if (!isEnabled || userId === null) return;
-		const payload = readDraft(userId);
+		const payload = readDraft(userId, siren, year);
 		if (payload === null) return;
-		if (
-			payload.siren !== siren ||
-			payload.year !== year ||
-			payload.step !== step
-		) {
+		if (payload.step !== step) {
 			return;
 		}
 		const fields = payload.fields as Partial<T>;
@@ -55,11 +51,11 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			if (!isEnabled || userId === null) return;
 			const diff = computeDraftDiff(currentValues, dbValues);
 			if (Object.keys(diff).length === 0) {
-				clearDraft(userId);
+				clearDraft(userId, siren, year);
 				setHasDraft(false);
 				return;
 			}
-			writeDraft(userId, {
+			writeDraft(userId, siren, year, {
 				siren,
 				year,
 				step,
@@ -74,9 +70,9 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 
 	const clearDraftCallback = useCallback(() => {
 		if (!isEnabled || userId === null) return;
-		clearDraft(userId);
+		clearDraft(userId, siren, year);
 		setHasDraft(false);
-	}, [isEnabled, userId]);
+	}, [isEnabled, userId, siren, year]);
 
 	return useMemo(
 		() => ({

@@ -10,7 +10,7 @@ const useSessionMock = vi.mocked(useSession);
 const SIREN = "123456789";
 const YEAR = 2026;
 const USER_ID = "user-1";
-const STORAGE_KEY = `egapro:declaration-draft:${USER_ID}`;
+const STORAGE_KEY = `egapro:declaration-draft:${USER_ID}:${SIREN}:${YEAR}`;
 
 const FIXED_NOW = new Date("2026-03-15T12:00:00Z").getTime();
 
@@ -112,7 +112,7 @@ describe("useDeclarationDraft", () => {
 		expect(window.localStorage.getItem(STORAGE_KEY)).not.toBeNull();
 	});
 
-	it("hydrates draft when payload matches (siren, year, step)", () => {
+	it("hydrates draft when payload step matches the current step", () => {
 		setSession();
 		window.localStorage.setItem(
 			STORAGE_KEY,
@@ -131,9 +131,9 @@ describe("useDeclarationDraft", () => {
 		expect(result.current.hasDraft).toBe(true);
 	});
 
-	it("does not hydrate when payload (siren, year, step) does not match — and does not purge", () => {
+	it("does not hydrate when payload step does not match — and does not purge", () => {
 		setSession();
-		const payload = buildPayload({ siren: "987654321" });
+		const payload = buildPayload({ step: 2 });
 		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 		const { result } = renderHook(() =>
 			useDeclarationDraft<StepValues>({
@@ -149,11 +149,13 @@ describe("useDeclarationDraft", () => {
 		expect(window.localStorage.getItem(STORAGE_KEY)).not.toBeNull();
 	});
 
-	it("does not hydrate when payload year does not match", () => {
+	it("does not hydrate from a different SIREN's draft (key isolation)", () => {
 		setSession();
+		const otherSiren = "987654321";
+		const otherKey = `egapro:declaration-draft:${USER_ID}:${otherSiren}:${YEAR}`;
 		window.localStorage.setItem(
-			STORAGE_KEY,
-			JSON.stringify(buildPayload({ year: 2025 })),
+			otherKey,
+			JSON.stringify(buildPayload({ siren: otherSiren })),
 		);
 		const { result } = renderHook(() =>
 			useDeclarationDraft<StepValues>({
@@ -166,13 +168,16 @@ describe("useDeclarationDraft", () => {
 		);
 		expect(result.current.draft).toEqual({});
 		expect(result.current.hasDraft).toBe(false);
+		expect(window.localStorage.getItem(otherKey)).not.toBeNull();
 	});
 
-	it("does not hydrate when payload step does not match", () => {
+	it("does not hydrate from a different year's draft (key isolation)", () => {
 		setSession();
+		const otherYear = 2025;
+		const otherKey = `egapro:declaration-draft:${USER_ID}:${SIREN}:${otherYear}`;
 		window.localStorage.setItem(
-			STORAGE_KEY,
-			JSON.stringify(buildPayload({ step: 2 })),
+			otherKey,
+			JSON.stringify(buildPayload({ year: otherYear })),
 		);
 		const { result } = renderHook(() =>
 			useDeclarationDraft<StepValues>({
@@ -212,7 +217,7 @@ describe("useDeclarationDraft", () => {
 		expect(result.current.hasDraft).toBe(false);
 	});
 
-	it("writes the diff (only differing keys) when setField is called", () => {
+	it("writes the diff under the (user, siren, year)-scoped key", () => {
 		setSession();
 		const { result } = renderHook(() =>
 			useDeclarationDraft<StepValues>({
