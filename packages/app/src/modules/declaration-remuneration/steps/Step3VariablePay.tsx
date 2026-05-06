@@ -58,14 +58,23 @@ export function Step3VariablePay({
 	function padStep3(data: Step3Data): Step3Data {
 		return Object.fromEntries(
 			Object.entries(data).map(([k, v]) =>
-				k === "indicatorEWomen" || k === "indicatorEMen" ? [k, v] : [k, padDecimalToTwo(v)],
+				k === "indicatorEWomen" || k === "indicatorEMen"
+					? [k, v]
+					: [k, padDecimalToTwo(v)],
 			),
 		) as Step3Data;
 	}
 
-	const rawDefaults = hasSavedData ? initialData : gipPrefillData ? gipToStep3(gipPrefillData.step3) : initialData;
+	const rawDefaults = hasSavedData
+		? initialData
+		: gipPrefillData
+			? gipToStep3(gipPrefillData.step3)
+			: initialData;
 	const defaultValues = padStep3(rawDefaults);
-	const dbValues = useMemo(() => padStep3(initialData), [initialData]);
+	const dbValues = useMemo(
+		() => padStep3(initialData),
+		[initialData, padStep3],
+	);
 
 	const { draft, setField, clearDraft, hasDraft } = useDeclarationDraft({
 		siren: declarationSiren,
