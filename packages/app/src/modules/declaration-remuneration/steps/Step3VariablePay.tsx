@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import {
 	computeProportion,
@@ -18,6 +18,7 @@ import {
 	DEV_STEP3_BENEFICIARY_WOMEN,
 	DEV_STEP3_ROWS,
 } from "../shared/devFillData";
+import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
@@ -33,6 +34,7 @@ import type { PayGapField, Step3Data } from "../types";
 import stepStyles from "./Step3VariablePay.module.scss";
 
 type Step3VariablePayProps = {
+	declarationSiren: string;
 	declarationYear: number;
 	initialData: Step3Data;
 	gipPrefillData?: GipPrefillData;
@@ -41,6 +43,7 @@ type Step3VariablePayProps = {
 };
 
 export function Step3VariablePay({
+	declarationSiren,
 	declarationYear,
 	initialData,
 	gipPrefillData,
@@ -66,7 +69,39 @@ export function Step3VariablePay({
 
 	const hasInitialData = hasSavedData;
 
+	const dbValues = useMemo(
+		() =>
+			Object.fromEntries(
+				Object.entries(initialData).map(([k, v]) =>
+					k === "indicatorEWomen" || k === "indicatorEMen"
+						? [k, v]
+						: [k, padDecimalToTwo(v)],
+				),
+			) as Step3Data,
+		[initialData],
+	);
+
+	const { draft, setField, clearDraft, hasDraft } = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: 3,
+		kind: "main",
+		dbValues,
+	});
+
 	const form = useZodForm(updateStep3Schema, { defaultValues });
+
+	useEffect(() => {
+		(Object.keys(draft) as Array<keyof Step3Data>).forEach((key) => {
+			const value = draft[key];
+			if (value !== undefined) form.setValue(key, value as string);
+		});
+	}, [draft, form]);
+
+	useEffect(() => {
+		const sub = form.watch((values) => setField(values as Step3Data));
+		return () => sub.unsubscribe();
+	}, [form, setField]);
 
 	const formData = form.watch();
 	const rows = step3ToRows(formData as Step3Data);
@@ -76,11 +111,14 @@ export function Step3VariablePay({
 	const [benefValidationError, setBenefValidationError] = useState<
 		string | null
 	>(null);
-	const [saved, setSaved] = useState(hasInitialData);
+	const saved = !hasDraft && hasInitialData;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const mutation = api.declaration.updateStep3.useMutation({
-		onSuccess: () => router.push("/declaration-remuneration/etape/4"),
+		onSuccess: () => {
+			clearDraft();
+			router.push("/declaration-remuneration/etape/4");
+		},
 	});
 
 	function handleRowChange(index: number, field: PayGapField, value: string) {
@@ -89,7 +127,6 @@ export function Step3VariablePay({
 		if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
 		const fieldName = getStep3FieldName(index, field);
 		form.setValue(fieldName, normalized);
-		setSaved(false);
 	}
 
 	function handleBenefChange(
@@ -113,7 +150,6 @@ export function Step3VariablePay({
 		}
 		setBenefValidationError(null);
 		form.setValue(field, value);
-		setSaved(false);
 	}
 
 	const onSubmit = form.handleSubmit(() => {
@@ -141,7 +177,6 @@ export function Step3VariablePay({
 					});
 					form.setValue("indicatorEWomen", DEV_STEP3_BENEFICIARY_WOMEN);
 					form.setValue("indicatorEMen", DEV_STEP3_BENEFICIARY_MEN);
-					setSaved(false);
 				}}
 				saved={saved}
 				title={

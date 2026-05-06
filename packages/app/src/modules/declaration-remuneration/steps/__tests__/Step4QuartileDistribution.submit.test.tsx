@@ -58,6 +58,7 @@ describe("Step4QuartileDistribution submit behaviour", () => {
 		const user = userEvent.setup();
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={validStep4Data()}
 			/>,
@@ -79,6 +80,7 @@ describe("Step4QuartileDistribution submit behaviour", () => {
 		const user = userEvent.setup();
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={{
 					annual: [
@@ -113,6 +115,7 @@ describe("Step4QuartileDistribution submit behaviour", () => {
 		const user = userEvent.setup();
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={{
 					annual: [
@@ -147,6 +150,7 @@ describe("Step4QuartileDistribution submit behaviour", () => {
 		const user = userEvent.setup();
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,

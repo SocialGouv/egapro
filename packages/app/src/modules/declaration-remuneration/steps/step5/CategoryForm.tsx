@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useCallback, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useFieldArray } from "react-hook-form";
 
 import { categoryFormSchema } from "~/modules/declaration-remuneration/schemas";
@@ -76,6 +76,39 @@ type Props = {
 	descriptionText?: string;
 	disabled?: boolean;
 	mimoquageNextHref?: string;
+	savedOverride?: boolean;
+	onValuesChange?: (values: {
+		source: string;
+		categories: {
+			name: string;
+			womenCount: string;
+			menCount: string;
+			annualBaseWomen: string;
+			annualBaseMen: string;
+			annualVariableWomen: string;
+			annualVariableMen: string;
+			hourlyBaseWomen: string;
+			hourlyBaseMen: string;
+			hourlyVariableWomen: string;
+			hourlyVariableMen: string;
+		}[];
+	}) => void;
+	defaultValuesOverride?: {
+		source: string;
+		categories: {
+			name: string;
+			womenCount: string;
+			menCount: string;
+			annualBaseWomen: string;
+			annualBaseMen: string;
+			annualVariableWomen: string;
+			annualVariableMen: string;
+			hourlyBaseWomen: string;
+			hourlyBaseMen: string;
+			hourlyVariableWomen: string;
+			hourlyVariableMen: string;
+		}[];
+	};
 };
 
 export function CategoryForm({
@@ -98,6 +131,9 @@ export function CategoryForm({
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
 	disabled = false,
 	mimoquageNextHref,
+	savedOverride,
+	onValuesChange,
+	defaultValuesOverride,
 }: Props) {
 	const baseId = useId();
 	const nextId = useRef(createIdGenerator()).current;
@@ -108,11 +144,20 @@ export function CategoryForm({
 			: [createEmptyCategory(nextId())];
 
 	const form = useZodForm(categoryFormSchema, {
-		defaultValues: {
+		defaultValues: defaultValuesOverride ?? {
 			source: initialSource,
 			categories: toFormValues(initialCats),
 		},
 	});
+
+	useEffect(() => {
+		if (!onValuesChange) return;
+		const sub = form.watch(() => {
+			const values = form.getValues();
+			onValuesChange({ source: values.source, categories: values.categories });
+		});
+		return () => sub.unsubscribe();
+	}, [form, onValuesChange]);
 
 	const { fields, append, remove } = useFieldArray({
 		control: form.control,
@@ -120,7 +165,8 @@ export function CategoryForm({
 	});
 
 	const hasInitialData = initialCategories.length > 0;
-	const [saved, setSaved] = useState(hasInitialData);
+	const [savedInternal, setSaved] = useState(hasInitialData);
+	const saved = savedOverride !== undefined ? savedOverride : savedInternal;
 	const [workforceError, setWorkforceError] = useState("");
 	const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 	const deleteDialogRef = useRef<HTMLDialogElement>(null);

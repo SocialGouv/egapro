@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
@@ -11,6 +11,7 @@ import { updateStep2Schema } from "../schemas";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP2_ROWS } from "../shared/devFillData";
+import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
@@ -25,12 +26,14 @@ import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapField, Step2Data } from "../types";
 
 type Step2PayGapProps = {
+	declarationSiren: string;
 	declarationYear: number;
 	initialData: Step2Data;
 	gipPrefillData?: GipPrefillData;
 };
 
 export function Step2PayGap({
+	declarationSiren,
 	declarationYear,
 	initialData,
 	gipPrefillData,
@@ -50,16 +53,47 @@ export function Step2PayGap({
 
 	const hasInitialData = hasSavedData;
 
+	const dbValues = useMemo(
+		() =>
+			Object.fromEntries(
+				Object.entries(initialData).map(([k, v]) => [k, padDecimalToTwo(v)]),
+			) as Step2Data,
+		[initialData],
+	);
+
+	const { draft, setField, clearDraft, hasDraft } = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: 2,
+		kind: "main",
+		dbValues,
+	});
+
 	const form = useZodForm(updateStep2Schema, { defaultValues });
+
+	useEffect(() => {
+		(Object.keys(draft) as Array<keyof Step2Data>).forEach((key) => {
+			const value = draft[key];
+			if (value !== undefined) form.setValue(key, value as string);
+		});
+	}, [draft, form]);
+
+	useEffect(() => {
+		const sub = form.watch((values) => setField(values as Step2Data));
+		return () => sub.unsubscribe();
+	}, [form, setField]);
 
 	const formData = form.watch();
 	const rows = step2ToRows(formData as Step2Data);
 
-	const [saved, setSaved] = useState(hasInitialData);
+	const saved = !hasDraft && hasInitialData;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const mutation = api.declaration.updateStep2.useMutation({
-		onSuccess: () => router.push("/declaration-remuneration/etape/3"),
+		onSuccess: () => {
+			clearDraft();
+			router.push("/declaration-remuneration/etape/3");
+		},
 	});
 
 	function handleRowChange(index: number, field: PayGapField, value: string) {
@@ -68,7 +102,6 @@ export function Step2PayGap({
 		if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
 		const fieldName = getStep2FieldName(index, field);
 		form.setValue(fieldName, normalized);
-		setSaved(false);
 	}
 
 	const onSubmit = form.handleSubmit(() => {
@@ -93,7 +126,6 @@ export function Step2PayGap({
 						form.setValue(womenField, padDecimalToTwo(row.womenValue));
 						form.setValue(menField, padDecimalToTwo(row.menValue));
 					});
-					setSaved(false);
 				}}
 				saved={saved}
 				title={
