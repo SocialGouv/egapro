@@ -42,6 +42,16 @@ type Step3VariablePayProps = {
 	maxMen?: number;
 };
 
+function padStep3(data: Step3Data): Step3Data {
+	return Object.fromEntries(
+		Object.entries(data).map(([k, v]) =>
+			k === "indicatorEWomen" || k === "indicatorEMen"
+				? [k, v]
+				: [k, padDecimalToTwo(v)],
+		),
+	) as Step3Data;
+}
+
 export function Step3VariablePay({
 	declarationSiren,
 	declarationYear,
@@ -55,15 +65,11 @@ export function Step3VariablePay({
 
 	const hasSavedData = Object.values(initialData).some((v) => v !== "");
 
-	function padStep3(data: Step3Data): Step3Data {
-		return Object.fromEntries(
-			Object.entries(data).map(([k, v]) =>
-				k === "indicatorEWomen" || k === "indicatorEMen" ? [k, v] : [k, padDecimalToTwo(v)],
-			),
-		) as Step3Data;
-	}
-
-	const rawDefaults = hasSavedData ? initialData : gipPrefillData ? gipToStep3(gipPrefillData.step3) : initialData;
+	const rawDefaults = hasSavedData
+		? initialData
+		: gipPrefillData
+			? gipToStep3(gipPrefillData.step3)
+			: initialData;
 	const defaultValues = padStep3(rawDefaults);
 	const dbValues = useMemo(() => padStep3(initialData), [initialData]);
 

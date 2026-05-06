@@ -2,29 +2,49 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
-import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
+import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { FileUpload, useFileUploadForm } from "~/modules/shared";
 
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
+const EMPTY_DB_VALUES = {} as Record<string, never>;
+
 type Props = {
 	declarationDate: string;
+	declarationSiren: string;
+	declarationYear: number;
 	hasCse: boolean | null;
 	jointEvaluationDeadline: Date;
 };
 
 export function JointEvaluationForm({
 	declarationDate,
+	declarationSiren,
+	declarationYear,
 	hasCse,
 	jointEvaluationDeadline,
 }: Props) {
 	const router = useRouter();
 	const readOnlyGuard = useReadOnlyGuard();
+
+	const { clearDraft } = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: "joint",
+		kind: "joint",
+		dbValues: EMPTY_DB_VALUES,
+	});
+
+	const onAllUploaded = useCallback(() => {
+		clearDraft();
+		router.push(getPostComplianceDestination(hasCse));
+	}, [clearDraft, hasCse, router]);
 
 	const {
 		closeModal,
@@ -37,7 +57,7 @@ export function JointEvaluationForm({
 		uploadError,
 	} = useFileUploadForm({
 		flowType: "joint_evaluation",
-		onAllUploaded: () => router.push(getPostComplianceDestination(hasCse)),
+		onAllUploaded,
 	});
 
 	return (
@@ -48,7 +68,6 @@ export function JointEvaluationForm({
 						Parcours de mise en conformité pour l&apos;indicateur par catégorie
 						de salariés
 					</h1>
-					<SavedIndicator />
 				</div>
 
 				<div className={common.flexColumnGap1}>

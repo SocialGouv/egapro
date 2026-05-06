@@ -72,6 +72,8 @@ export async function CompliancePathPage() {
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
 				currentYear={currentYear}
+				declarationSiren={data.declaration.siren}
+				declarationYear={currentYear}
 				email={email}
 				initialPath={
 					(data.declaration.compliancePath as
