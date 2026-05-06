@@ -54,32 +54,18 @@ export function Step3VariablePay({
 	const isImpersonating = useIsImpersonating();
 
 	const hasSavedData = Object.values(initialData).some((v) => v !== "");
-	const rawDefaults = hasSavedData
-		? initialData
-		: gipPrefillData
-			? gipToStep3(gipPrefillData.step3)
-			: initialData;
-	const defaultValues = Object.fromEntries(
-		Object.entries(rawDefaults).map(([k, v]) =>
-			k === "indicatorEWomen" || k === "indicatorEMen"
-				? [k, v]
-				: [k, padDecimalToTwo(v)],
-		),
-	) as Step3Data;
 
-	const hasInitialData = hasSavedData;
+	function padStep3(data: Step3Data): Step3Data {
+		return Object.fromEntries(
+			Object.entries(data).map(([k, v]) =>
+				k === "indicatorEWomen" || k === "indicatorEMen" ? [k, v] : [k, padDecimalToTwo(v)],
+			),
+		) as Step3Data;
+	}
 
-	const dbValues = useMemo(
-		() =>
-			Object.fromEntries(
-				Object.entries(initialData).map(([k, v]) =>
-					k === "indicatorEWomen" || k === "indicatorEMen"
-						? [k, v]
-						: [k, padDecimalToTwo(v)],
-				),
-			) as Step3Data,
-		[initialData],
-	);
+	const rawDefaults = hasSavedData ? initialData : gipPrefillData ? gipToStep3(gipPrefillData.step3) : initialData;
+	const defaultValues = padStep3(rawDefaults);
+	const dbValues = useMemo(() => padStep3(initialData), [initialData]);
 
 	const { draft, setField, clearDraft, hasDraft } = useDeclarationDraft({
 		siren: declarationSiren,
@@ -111,7 +97,7 @@ export function Step3VariablePay({
 	const [benefValidationError, setBenefValidationError] = useState<
 		string | null
 	>(null);
-	const saved = !hasDraft && hasInitialData;
+	const saved = !hasDraft && hasSavedData;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const mutation = api.declaration.updateStep3.useMutation({
@@ -188,7 +174,6 @@ export function Step3VariablePay({
 
 			<StepIndicator currentStep={3} />
 
-			{/* Introduction */}
 			<div className={common.flexColumnGap1}>
 				<p className="fr-mb-0">
 					Ces indicateurs évaluent et comparent les rémunérations variables
@@ -214,9 +199,7 @@ export function Step3VariablePay({
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 			</div>
 
-			{/* Data section */}
 			<div className={common.dataSection}>
-				{/* Table 1 - Variable pay gap + source */}
 				<div className={common.flexColumnGapHalf}>
 					<PayGapTable
 						caption="Écart de rémunération variable ou complémentaire"
@@ -241,7 +224,6 @@ export function Step3VariablePay({
 					)}
 				</div>
 
-				{/* Table 2 - Beneficiaries + source */}
 				<div className={common.flexColumnGapHalf}>
 					<div
 						className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.payGapTable}`}

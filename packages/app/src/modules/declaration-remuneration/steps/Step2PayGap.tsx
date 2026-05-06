@@ -137,7 +137,6 @@ export function Step2PayGap({
 
 			<StepIndicator currentStep={2} />
 
-			{/* Introduction */}
 			<div className={common.flexColumnGap1}>
 				<p className="fr-mb-0">
 					Ces indicateurs mesurent la différence de rémunération, moyenne et
@@ -163,7 +162,6 @@ export function Step2PayGap({
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 			</div>
 
-			{/* Data section */}
 			<div className={common.dataSection}>
 				<div className={common.flexColumnGapHalf}>
 					<PayGapTable

@@ -420,7 +420,7 @@ export function CategoryForm({
 							className="fr-accordion"
 							key={field.id}
 						>
-							<h3 className="fr-accordion__title">
+							<h2 className="fr-accordion__title">
 								<button
 									aria-controls={collapseId}
 									aria-expanded="true"
@@ -431,7 +431,7 @@ export function CategoryForm({
 								>
 									{categoryLabel}
 								</button>
-							</h3>
+							</h2>
 							<div
 								className="fr-collapse fr-collapse--expanded"
 								id={collapseId}
