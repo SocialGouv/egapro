@@ -36,7 +36,11 @@ describe("Step2PayGap dev fill", () => {
 	it("fills pay gap rows when dev fill button is clicked", async () => {
 		const user = userEvent.setup();
 		render(
-			<Step2PayGap declarationSiren="123456789" declarationYear={2025} initialData={emptyStep2Data()} />,
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep2Data()}
+			/>,
 		);
 
 		await user.click(screen.getByRole("button", { name: "[DEV] Remplir" }));

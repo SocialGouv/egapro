@@ -33,7 +33,11 @@ const emptyStep2Data = () => ({
 describe("Step2PayGap", () => {
 	it("renders the table with 4 remuneration rows", () => {
 		render(
-			<Step2PayGap declarationSiren="123456789" declarationYear={2025} initialData={emptyStep2Data()} />,
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep2Data()}
+			/>,
 		);
 		expect(screen.getByText("Annuelle brute moyenne")).toBeInTheDocument();
 		expect(screen.getByText("Horaire brute moyenne")).toBeInTheDocument();
@@ -43,7 +47,11 @@ describe("Step2PayGap", () => {
 
 	it("renders instruction text and mandatory fields notice", () => {
 		render(
-			<Step2PayGap declarationSiren="123456789" declarationYear={2025} initialData={emptyStep2Data()} />,
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep2Data()}
+			/>,
 		);
 		expect(
 			screen.getByText(
@@ -57,7 +65,11 @@ describe("Step2PayGap", () => {
 
 	it("renders table headers", () => {
 		render(
-			<Step2PayGap declarationSiren="123456789" declarationYear={2025} initialData={emptyStep2Data()} />,
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep2Data()}
+			/>,
 		);
 		expect(screen.getByText("Rémunération")).toBeInTheDocument();
 		expect(screen.getByText("Femmes")).toBeInTheDocument();
@@ -90,7 +102,11 @@ describe("Step2PayGap", () => {
 
 	it("does not show SavedIndicator when initialData is empty", () => {
 		render(
-			<Step2PayGap declarationSiren="123456789" declarationYear={2025} initialData={emptyStep2Data()} />,
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep2Data()}
+			/>,
 		);
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
 	});
@@ -98,7 +114,11 @@ describe("Step2PayGap", () => {
 	it("updates values via inline inputs and rejects negative values", async () => {
 		const user = userEvent.setup();
 		render(
-			<Step2PayGap declarationSiren="123456789" declarationYear={2025} initialData={emptyStep2Data()} />,
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep2Data()}
+			/>,
 		);
 
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
@@ -121,7 +141,11 @@ describe("Step2PayGap", () => {
 	it("computes gap and shows badge after entering values", async () => {
 		const user = userEvent.setup();
 		render(
-			<Step2PayGap declarationSiren="123456789" declarationYear={2025} initialData={emptyStep2Data()} />,
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep2Data()}
+			/>,
 		);
 
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
@@ -140,7 +164,11 @@ describe("Step2PayGap", () => {
 	it("shows no badge when gap is less than 5%", async () => {
 		const user = userEvent.setup();
 		render(
-			<Step2PayGap declarationSiren="123456789" declarationYear={2025} initialData={emptyStep2Data()} />,
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep2Data()}
+			/>,
 		);
 
 		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
@@ -159,7 +187,11 @@ describe("Step2PayGap", () => {
 
 	it("renders previous link pointing to step 1", () => {
 		render(
-			<Step2PayGap declarationSiren="123456789" declarationYear={2025} initialData={emptyStep2Data()} />,
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep2Data()}
+			/>,
 		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
@@ -222,7 +254,11 @@ describe("Step2PayGap", () => {
 	it("shows validation error on submit when fields are incomplete", async () => {
 		const user = userEvent.setup();
 		render(
-			<Step2PayGap declarationSiren="123456789" declarationYear={2025} initialData={emptyStep2Data()} />,
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep2Data()}
+			/>,
 		);
 
 		const submitButton = screen.getByRole("button", { name: /suivant/i });
