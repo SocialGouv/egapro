@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
 import { Controller } from "react-hook-form";
 import { useIsImpersonating } from "~/modules/auth";
 import { saveCompliancePathSchema } from "~/modules/declaration-remuneration/schemas";
+import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import type { CampaignDeadlines } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { useZodForm } from "~/modules/shared/useZodForm";
@@ -19,6 +21,8 @@ import { DeclarationSuccessBanner } from "./compliancePath/DeclarationSuccessBan
 type Props = {
 	campaignDeadlines: CampaignDeadlines;
 	currentYear: number;
+	declarationSiren: string;
+	declarationYear: number;
 	email: string;
 	initialPath?: CompliancePathValue;
 	isSecondRound?: boolean;
@@ -229,6 +233,8 @@ function getCompliancePathHref(path: CompliancePathValue): string {
 export function CompliancePathChoice({
 	campaignDeadlines,
 	currentYear,
+	declarationSiren,
+	declarationYear,
 	email,
 	initialPath,
 	isSecondRound = false,
@@ -237,14 +243,40 @@ export function CompliancePathChoice({
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
 
+	const dbValues = useMemo(() => ({ path: initialPath }), [initialPath]);
+
+	const { draft, setField, clearDraft, hasDraft } = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: "compliance",
+		kind: "compliance",
+		dbValues,
+	});
+
 	const form = useZodForm(saveCompliancePathSchema, {
 		defaultValues: { path: initialPath },
 	});
 
+	useEffect(() => {
+		if (draft.path !== undefined) {
+			form.setValue("path", draft.path as CompliancePathValue);
+		}
+	}, [draft.path, form]);
+
+	useEffect(() => {
+		const sub = form.watch((values) =>
+			setField(values as { path: CompliancePathValue | undefined }),
+		);
+		return () => sub.unsubscribe();
+	}, [form, setField]);
+
 	const selectedPath = form.watch("path");
+	const hasInitialData = !!initialPath;
+	const saved = !hasDraft && hasInitialData;
 
 	const mutation = api.declaration.saveCompliancePath.useMutation({
 		onSuccess: (_, { path }) => {
+			clearDraft();
 			if (path === "corrective_action") {
 				router.push("/declaration-remuneration/parcours-conformite/etape/1");
 			} else if (path === "joint_evaluation") {
@@ -268,7 +300,7 @@ export function CompliancePathChoice({
 				<h1 className="fr-h4 fr-mb-0">
 					Déclaration des indicateurs de rémunération {currentYear}
 				</h1>
-				<SavedIndicator />
+				{saved && <SavedIndicator />}
 			</div>
 
 			<DeclarationSuccessBanner

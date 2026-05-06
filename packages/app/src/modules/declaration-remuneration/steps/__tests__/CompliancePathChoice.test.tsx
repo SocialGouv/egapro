@@ -6,6 +6,9 @@ import { CompliancePathChoice } from "../CompliancePathChoice";
 
 const campaignDeadlines = getDefaultCampaignDeadlines(2026);
 
+const DECLARATION_SIREN = "123456789";
+const DECLARATION_YEAR = 2026;
+
 const mockMutate = vi.fn();
 const mockPush = vi.fn();
 
@@ -49,6 +52,8 @@ describe("CompliancePathChoice", () => {
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
 			/>,
 		);
@@ -65,6 +70,8 @@ describe("CompliancePathChoice", () => {
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
 			/>,
 		);
@@ -84,6 +91,8 @@ describe("CompliancePathChoice", () => {
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
 			/>,
 		);
@@ -96,6 +105,8 @@ describe("CompliancePathChoice", () => {
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
 			/>,
 		);
@@ -112,6 +123,8 @@ describe("CompliancePathChoice", () => {
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
 			/>,
 		);
@@ -138,6 +151,8 @@ describe("CompliancePathChoice", () => {
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
 			/>,
 		);
@@ -164,6 +179,8 @@ describe("CompliancePathChoice", () => {
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
 				initialPath="corrective_action"
 			/>,
@@ -179,6 +196,8 @@ describe("CompliancePathChoice", () => {
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
 				isSecondRound={true}
 			/>,
@@ -196,6 +215,8 @@ describe("CompliancePathChoice", () => {
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
 			/>,
 		);
@@ -210,6 +231,8 @@ describe("CompliancePathChoice", () => {
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
 				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
 				email="john@company.fr"
 			/>,
 		);

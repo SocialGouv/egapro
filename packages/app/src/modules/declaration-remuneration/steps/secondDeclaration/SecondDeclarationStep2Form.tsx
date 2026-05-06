@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
+import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { api } from "~/trpc/react";
 import { CategoryForm } from "../step5/CategoryForm";
@@ -11,6 +12,7 @@ import { ReferencePeriodPicker } from "./ReferencePeriodPicker";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
+	declarationSiren: string;
 	declarationYear: number;
 	initialFirstDeclarationCategories: EmployeeCategoryRow[];
 	initialSecondDeclarationCategories?: EmployeeCategoryRow[];
@@ -20,6 +22,7 @@ type Props = {
 };
 
 export function SecondDeclarationStep2Form({
+	declarationSiren,
 	declarationYear,
 	initialFirstDeclarationCategories,
 	initialSecondDeclarationCategories,
@@ -41,8 +44,36 @@ export function SecondDeclarationStep2Form({
 	const hasSavedSecondDeclaration =
 		(initialSecondDeclarationCategories?.length ?? 0) > 0;
 
+	const dbValues = useMemo(
+		() => ({
+			startDate: initialStartDate ?? "",
+			endDate: initialEndDate ?? "",
+		}),
+		[initialStartDate, initialEndDate],
+	);
+
+	const { draft, setField, clearDraft } = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: "second-2",
+		kind: "second",
+		dbValues,
+	});
+
+	useEffect(() => {
+		if (typeof draft.startDate === "string") setStartDate(draft.startDate);
+		if (typeof draft.endDate === "string") setEndDate(draft.endDate);
+	}, [draft.startDate, draft.endDate]);
+
+	useEffect(() => {
+		setField({ startDate, endDate });
+	}, [startDate, endDate, setField]);
+
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
-		onSuccess: () => router.push(`${BASE_PATH}/etape/3`),
+		onSuccess: () => {
+			clearDraft();
+			router.push(`${BASE_PATH}/etape/3`);
+		},
 	});
 
 	return (

@@ -63,6 +63,8 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 		return (
 			<SecondDeclarationStep1Info
 				declarationDate={declarationDate}
+				declarationSiren={data.declaration.siren}
+				declarationYear={currentYear}
 				modificationDeadline={campaignDeadlines.decl2ModificationDeadline}
 			/>
 		);
@@ -72,6 +74,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 		return (
 			<HydrateClient>
 				<SecondDeclarationStep2Form
+					declarationSiren={data.declaration.siren}
 					declarationYear={currentYear}
 					initialEndDate={
 						data.declaration.secondDeclReferencePeriodEnd ?? undefined
