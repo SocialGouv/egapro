@@ -41,6 +41,7 @@ describe("Step4QuartileDistribution dev fill", () => {
 		const user = userEvent.setup();
 		render(
 			<Step4QuartileDistribution
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep4Data()}
 			/>,
