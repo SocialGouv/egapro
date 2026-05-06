@@ -2,10 +2,41 @@ import { describe, expect, it } from "vitest";
 
 import {
 	computeGap,
+	computeGapRatio,
 	computeTotal,
 	gapLevel,
 	hasGapsAboveThreshold,
 } from "../shared/gap";
+
+describe("computeGapRatio", () => {
+	it("returns positive ratio when men earn more", () => {
+		expect(computeGapRatio("100", "110")).toBeCloseTo((110 - 100) / 110);
+	});
+
+	it("returns negative ratio when women earn more", () => {
+		expect(computeGapRatio("110", "100")).toBeCloseTo(-0.1);
+	});
+
+	it("returns 0 for equal values", () => {
+		expect(computeGapRatio("100", "100")).toBe(0);
+	});
+
+	it("returns null when women value is empty", () => {
+		expect(computeGapRatio("", "100")).toBeNull();
+	});
+
+	it("returns null when men value is zero (division by zero)", () => {
+		expect(computeGapRatio("100", "0")).toBeNull();
+	});
+
+	it("returns null when men value is empty", () => {
+		expect(computeGapRatio("100", "")).toBeNull();
+	});
+
+	it("returns null for non-numeric women value", () => {
+		expect(computeGapRatio("abc", "100")).toBeNull();
+	});
+});
 
 describe("computeGap", () => {
 	it("computes gap as absolute percentage", () => {

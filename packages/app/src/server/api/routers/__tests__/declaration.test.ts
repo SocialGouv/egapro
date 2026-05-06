@@ -224,8 +224,46 @@ describe("declarationRouter", () => {
 	});
 
 	describe("submit", () => {
+		const mockDeclarationWithIndicators = {
+			submittedAt: null,
+			indicatorAAnnualWomen: "100",
+			indicatorAAnnualMen: "110",
+			indicatorAHourlyWomen: "20",
+			indicatorAHourlyMen: "22",
+			indicatorBAnnualWomen: "50",
+			indicatorBAnnualMen: "55",
+			indicatorBHourlyWomen: "10",
+			indicatorBHourlyMen: "11",
+			indicatorCAnnualWomen: "95",
+			indicatorCAnnualMen: "105",
+			indicatorCHourlyWomen: "18",
+			indicatorCHourlyMen: "20",
+			indicatorDAnnualWomen: "45",
+			indicatorDAnnualMen: "50",
+			indicatorDHourlyWomen: "9",
+			indicatorDHourlyMen: "10",
+			indicatorEWomen: "30",
+			indicatorEMen: "70",
+			indicatorFAnnualWomen1: 10,
+			indicatorFAnnualWomen2: 20,
+			indicatorFAnnualWomen3: 30,
+			indicatorFAnnualWomen4: 40,
+			indicatorFAnnualMen1: 90,
+			indicatorFAnnualMen2: 80,
+			indicatorFAnnualMen3: 70,
+			indicatorFAnnualMen4: 60,
+			indicatorFHourlyWomen1: 5,
+			indicatorFHourlyWomen2: 15,
+			indicatorFHourlyWomen3: 25,
+			indicatorFHourlyWomen4: 35,
+			indicatorFHourlyMen1: 95,
+			indicatorFHourlyMen2: 85,
+			indicatorFHourlyMen3: 75,
+			indicatorFHourlyMen4: 65,
+		};
+
 		it("sets status to submitted and step to 6", async () => {
-			const mockDb = createMockDb();
+			const mockDb = createMockDb([mockDeclarationWithIndicators]);
 			const caller = await createCaller(mockDb);
 
 			const result = await caller.submit();
@@ -237,6 +275,48 @@ describe("declarationRouter", () => {
 					currentStep: 6,
 				}),
 			);
+		});
+
+		it("persists computed percentage columns on submit", async () => {
+			const mockDb = createMockDb([mockDeclarationWithIndicators]);
+			const caller = await createCaller(mockDb);
+
+			await caller.submit();
+
+			const setCall = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setCall).toBeDefined();
+
+			const expectedGlobalAnnualMeanGap = (110 - 100) / 110;
+			expect(Number(setCall.globalAnnualMeanGap)).toBeCloseTo(
+				expectedGlobalAnnualMeanGap,
+			);
+
+			const expectedVariableProportionWomen = 30 / 100;
+			expect(Number(setCall.variableProportionWomen)).toBeCloseTo(
+				expectedVariableProportionWomen,
+			);
+
+			const expectedAnnualQ1ProportionWomen = 10 / 100;
+			expect(Number(setCall.annualQuartile1ProportionWomen)).toBeCloseTo(
+				expectedAnnualQ1ProportionWomen,
+			);
+		});
+
+		it("persists null percentage columns as null when inputs are null", async () => {
+			const mockDb = createMockDb([
+				{
+					...mockDeclarationWithIndicators,
+					indicatorAAnnualWomen: null,
+					indicatorAAnnualMen: null,
+				},
+			]);
+			const caller = await createCaller(mockDb);
+
+			await caller.submit();
+
+			const setCall = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setCall).toBeDefined();
+			expect(setCall.globalAnnualMeanGap).toBeNull();
 		});
 
 		it("throws when siret is missing", async () => {
