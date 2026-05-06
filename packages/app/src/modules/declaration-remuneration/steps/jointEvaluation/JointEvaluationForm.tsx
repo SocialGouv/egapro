@@ -7,7 +7,6 @@ import { useReadOnlyGuard } from "~/modules/auth";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
-import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { FileUpload, useFileUploadForm } from "~/modules/shared";
@@ -34,16 +33,13 @@ export function JointEvaluationForm({
 	const router = useRouter();
 	const readOnlyGuard = useReadOnlyGuard();
 
-	const { clearDraft, hasDraft } = useDeclarationDraft({
+	const { clearDraft } = useDeclarationDraft({
 		siren: declarationSiren,
 		year: declarationYear,
 		step: "joint",
 		kind: "joint",
 		dbValues: EMPTY_DB_VALUES,
 	});
-
-	const hasInitialData = false;
-	const saved = !hasDraft && hasInitialData;
 
 	const onAllUploaded = useCallback(() => {
 		clearDraft();
@@ -72,7 +68,6 @@ export function JointEvaluationForm({
 						Parcours de mise en conformité pour l&apos;indicateur par catégorie
 						de salariés
 					</h1>
-					{saved && <SavedIndicator />}
 				</div>
 
 				<div className={common.flexColumnGap1}>
