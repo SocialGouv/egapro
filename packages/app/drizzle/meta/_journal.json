@@ -225,6 +225,13 @@
 			"when": 1777500000000,
 			"tag": "0031_drop_quartile_threshold4",
 			"breakpoints": true
+		},
+		{
+			"idx": 32,
+			"version": "7",
+			"when": 1778071563871,
+			"tag": "0032_sparkling_monster_badoon",
+			"breakpoints": true
 		}
 	]
 }
