@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
@@ -60,9 +60,17 @@ export function SecondDeclarationStep2Form({
 		dbValues,
 	});
 
+	const didHydrate = useRef(false);
 	useEffect(() => {
+		if (didHydrate.current) return;
+		if (
+			typeof draft.startDate !== "string" &&
+			typeof draft.endDate !== "string"
+		)
+			return;
 		if (typeof draft.startDate === "string") setStartDate(draft.startDate);
 		if (typeof draft.endDate === "string") setEndDate(draft.endDate);
+		didHydrate.current = true;
 	}, [draft.startDate, draft.endDate]);
 
 	useEffect(() => {

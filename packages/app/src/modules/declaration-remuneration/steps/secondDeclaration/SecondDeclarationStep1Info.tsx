@@ -31,8 +31,7 @@ export function SecondDeclarationStep1Info({
 		dbValues: EMPTY_DB_VALUES,
 	});
 
-	const hasInitialData = !!declarationDate;
-	const saved = !hasDraft && hasInitialData;
+	const saved = !hasDraft;
 
 	return (
 		<div className={common.flexColumnGap2}>
