@@ -24,7 +24,11 @@ const emptyStep1Data = () => ({ totalWomen: 0, totalMen: 0 });
 describe("Step1Workforce", () => {
 	it("renders default state with zero totals", () => {
 		render(
-			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={emptyStep1Data()}
+			/>,
 		);
 		expect(screen.getByText("Nombre de salariés")).toBeInTheDocument();
 		const table = screen.getByRole("table");
@@ -38,7 +42,11 @@ describe("Step1Workforce", () => {
 
 	it("renders reference period and mandatory fields notice", () => {
 		render(
-			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={emptyStep1Data()}
+			/>,
 		);
 		expect(
 			screen.getByText(/Période de référence pour le calcul des indicateurs/),
@@ -51,6 +59,7 @@ describe("Step1Workforce", () => {
 	it("renders initial data with correct values", () => {
 		render(
 			<Step1Workforce
+				declarationSiren="123456789"
 				declarationYear={2026}
 				initialData={{ totalWomen: 10, totalMen: 20 }}
 			/>,
@@ -67,6 +76,7 @@ describe("Step1Workforce", () => {
 	it("shows SavedIndicator when initial data has values", () => {
 		render(
 			<Step1Workforce
+				declarationSiren="123456789"
 				declarationYear={2026}
 				initialData={{ totalWomen: 5, totalMen: 3 }}
 			/>,
@@ -76,7 +86,11 @@ describe("Step1Workforce", () => {
 
 	it("does not show SavedIndicator when no initial data", () => {
 		render(
-			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={emptyStep1Data()}
+			/>,
 		);
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
 	});
@@ -84,7 +98,11 @@ describe("Step1Workforce", () => {
 	it("updates women/men values via inline inputs", async () => {
 		const user = userEvent.setup();
 		render(
-			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={emptyStep1Data()}
+			/>,
 		);
 
 		const womenInput = screen.getByLabelText("Nombre de femmes");
@@ -109,7 +127,11 @@ describe("Step1Workforce", () => {
 	it("validates total > 0 on submit", async () => {
 		const user = userEvent.setup();
 		render(
-			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={emptyStep1Data()}
+			/>,
 		);
 
 		const submitButton = screen.getByRole("button", { name: /suivant/i });
@@ -122,6 +144,7 @@ describe("Step1Workforce", () => {
 		const user = userEvent.setup();
 		render(
 			<Step1Workforce
+				declarationSiren="123456789"
 				declarationYear={2026}
 				initialData={{ totalWomen: 10, totalMen: 20 }}
 			/>,
@@ -139,7 +162,11 @@ describe("Step1Workforce", () => {
 	it("shows validation error message when submitting with zero total", async () => {
 		const user = userEvent.setup();
 		render(
-			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={emptyStep1Data()}
+			/>,
 		);
 
 		const submitButton = screen.getByRole("button", { name: /suivant/i });
@@ -154,7 +181,11 @@ describe("Step1Workforce", () => {
 
 	it("renders previous link pointing to home", () => {
 		render(
-			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={emptyStep1Data()}
+			/>,
 		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
@@ -165,6 +196,7 @@ describe("Step1Workforce", () => {
 	it("hides the reset warning by default", () => {
 		render(
 			<Step1Workforce
+				declarationSiren="123456789"
 				declarationYear={2026}
 				initialData={{ totalWomen: 50, totalMen: 100 }}
 			/>,
@@ -178,6 +210,7 @@ describe("Step1Workforce", () => {
 		const user = userEvent.setup();
 		render(
 			<Step1Workforce
+				declarationSiren="123456789"
 				declarationYear={2026}
 				initialData={{ totalWomen: 50, totalMen: 100 }}
 			/>,
@@ -193,7 +226,11 @@ describe("Step1Workforce", () => {
 	it("does not show the reset warning when focusing an empty input", async () => {
 		const user = userEvent.setup();
 		render(
-			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={emptyStep1Data()}
+			/>,
 		);
 
 		await user.click(screen.getByLabelText("Nombre de femmes"));

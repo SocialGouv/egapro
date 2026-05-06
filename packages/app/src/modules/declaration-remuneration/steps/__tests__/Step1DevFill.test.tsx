@@ -27,7 +27,11 @@ describe("Step1Workforce dev fill", () => {
 	it("fills workforce when dev fill button is clicked", async () => {
 		const user = userEvent.setup();
 		render(
-			<Step1Workforce declarationYear={2026} initialData={emptyStep1Data()} />,
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={emptyStep1Data()}
+			/>,
 		);
 
 		await user.click(screen.getByRole("button", { name: "[DEV] Remplir" }));
