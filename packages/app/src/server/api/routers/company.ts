@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
 import { computeDeclarationStatus, getCurrentYear } from "~/modules/domain";
 import { buildDeclarationList } from "~/modules/my-space/buildDeclarationList";
@@ -110,7 +110,11 @@ export const companyRouter = createTRPCRouter({
 				})
 				.from(declarations)
 				.where(
-					and(eq(declarations.year, year), inArray(declarations.siren, sirens)),
+					and(
+						eq(declarations.year, year),
+						inArray(declarations.siren, sirens),
+						isNull(declarations.cancelledAt),
+					),
 				);
 
 			for (const d of decls) {
@@ -149,7 +153,12 @@ export const companyRouter = createTRPCRouter({
 						cseOpinionCompletedAt: declarations.cseOpinionCompletedAt,
 					})
 					.from(declarations)
-					.where(eq(declarations.siren, input.siren))
+					.where(
+						and(
+							eq(declarations.siren, input.siren),
+							isNull(declarations.cancelledAt),
+						),
+					)
 					.orderBy(desc(declarations.year)),
 				ctx.db
 					.select({ year: declarations.year })
