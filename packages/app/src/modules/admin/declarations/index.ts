@@ -6,6 +6,7 @@ export type {
 	SearchDeclarationsOutput,
 } from "./schemas";
 export {
+	cancelDeclarationSchema,
 	getDeclarationByIdSchema,
 	searchDeclarationsFormSchema,
 	searchDeclarationsSchema,
