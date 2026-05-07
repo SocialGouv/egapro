@@ -193,6 +193,17 @@ Puis implémenter, push tes commits sur ${BRANCH}, créer la PR draft (\`gh pr c
 **Ne crée PAS une autre branche** (pas de \`checkout -b\`). La branche ${BRANCH} est déjà créée et linkée — utilise-la telle quelle.
 
 REGLES STRICTES (appliquer sans exception) :
+- **DISCIPLINE DE LOGGING (BLOCKING)** — à chaque transition de phase tu DOIS
+  exécuter \`bash scripts/orchestration/log_event.sh code-dev-${TICKET} <EVENT> [msg]\`
+  AVANT de commencer la phase suivante. Sans ces events, le dashboard /report
+  ne peut pas suivre ta progression et l'utilisateur croit que tu es stuck.
+  Events obligatoires dans l'ordre : START → ANALYSIS_START → ANALYSIS_OK
+  → DEV_START → DEV_OK → VALIDATION_START → VALIDATION_OK → PR_DRAFT
+  → FUNCTIONAL_START → FUNCTIONAL_OK → CI_WAIT → CI_OK → SONAR_WAIT → SONAR_OK
+  → BOT_WAIT → BOT_REPLIED → PR_READY → COMPLETE. (RETRY/CI_FAIL/SONAR_FAIL
+  à intercaler en cas d'itération, voir AGENT.md « Logging events ».)
+  Logger AVANT de poursuivre n'est pas optionnel — c'est une étape de la phase,
+  au même titre que git push ou gh pr create.
 - **N'invoque AUCUN skill built-in** (fewer-permission-prompts, update-config,
   claude-api, schedule, loop, etc.). Si une de ces skills semble utile, ignore-la
   et reste concentré sur le ticket.
