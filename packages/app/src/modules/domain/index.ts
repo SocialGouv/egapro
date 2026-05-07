@@ -31,7 +31,10 @@ export {
 // Declaration prerequisites
 export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";
 // Declaration status
-export { computeDeclarationStatus } from "./shared/declarationStatus";
+export {
+	computeDeclarationStatus,
+	isCancelled,
+} from "./shared/declarationStatus";
 // Display formatting (%, €, units)
 export {
 	computePercentage,

@@ -114,11 +114,14 @@ export const declarations = createTable(
 		complianceCompletedAt: d.timestamp({ withTimezone: true }),
 		cseOpinionCompletedAt: d.timestamp({ withTimezone: true }),
 		submittedAt: d.timestamp({ withTimezone: true }),
+		cancelledAt: d.timestamp({ withTimezone: false, mode: "date" }),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 	}),
 	(t) => [
-		unique("declaration_siren_year_idx").on(t.siren, t.year),
+		uniqueIndex("declarations_siren_year_active_unique")
+			.on(t.siren, t.year)
+			.where(sql`cancelled_at IS NULL`),
 		index("declaration_declarant_idx").on(t.declarantId),
 		index("declaration_submitted_at_idx").on(t.submittedAt),
 	],
