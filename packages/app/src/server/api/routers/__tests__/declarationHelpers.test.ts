@@ -1,10 +1,33 @@
 import { describe, expect, it, vi } from "vitest";
-
+import { declarations } from "~/server/db/schema";
 import {
+	activeDeclarationFilter,
 	buildEmployeeCategoryValues,
 	mapToEmployeeCategoryRows,
 	mapToStepData,
 } from "../declarationHelpers";
+
+describe("activeDeclarationFilter", () => {
+	it("filters siren, year, and cancelled_at IS NULL", async () => {
+		const { PgDialect } = await import("drizzle-orm/pg-core");
+		const dialect = new PgDialect({ casing: "snake_case" });
+
+		const filter = activeDeclarationFilter("123456789", 2025);
+		expect(filter).toBeDefined();
+		const compiled = dialect.sqlToQuery(filter as never);
+
+		expect(compiled.sql).toMatch(/"siren"\s*=\s*\$1/);
+		expect(compiled.sql).toMatch(/"year"\s*=\s*\$2/);
+		expect(compiled.sql).toMatch(/"cancelled_at"\s+is\s+null/i);
+		expect(compiled.params).toEqual(["123456789", 2025]);
+	});
+
+	it("targets the declarations.cancelledAt column", () => {
+		const filter = activeDeclarationFilter("987654321", 2030);
+		expect(filter).toBeDefined();
+		expect(declarations.cancelledAt).toBeDefined();
+	});
+});
 
 describe("buildEmployeeCategoryValues", () => {
 	it("maps all fields from data to values object", () => {
