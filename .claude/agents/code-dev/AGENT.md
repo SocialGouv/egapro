@@ -22,12 +22,14 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
 0. **Logger START** — `bash scripts/orchestration/log_event.sh code-dev-<N> START "worktree=<path> base=<base-branch>"`. Voir la section « Logging events » plus bas pour la liste complète.
 
-1. **Vérifier le format du ticket** — lire le body **et** les commentaires. La source du spec dépend du type d'issue :
+1. **Vérifier le format du ticket** — `bash scripts/orchestration/log_event.sh code-dev-<N> ANALYSIS_START`. Lire le body **et** les commentaires. La source du spec dépend du type d'issue :
    - **Type Feature (sub-issue d'epic)** → spec dans le **body** au format `rules/ticket-spec-format.md`
    - **Type Task** → body = description originale de l'utilisateur (intacte) ; spec dans le **commentaire `## Analyse architecte`** (le plus récent si plusieurs)
    - **Type Bug** → body = rapport de bug de l'utilisateur ; spec dans le **commentaire `## Analyse du bug`** (posté par `bug-analyst`)
 
-   Si le spec attendu est manquant (pas de body conforme pour Feature, pas de commentaire `## Analyse architecte` pour Task, pas de `## Analyse du bug` pour Bug) → remettre le ticket en **To Do** avec un commentaire listant les manques, et retourner `{"status":"refacto","ticket":<N>,"reason":"spec missing — run /analyse first"}`. **Ne pas improviser.**
+   Si le spec attendu est manquant (pas de body conforme pour Feature, pas de commentaire `## Analyse architecte` pour Task, pas de `## Analyse du bug` pour Bug) → logger `ANALYSIS_FAIL "reason=spec missing"`, remettre le ticket en **To Do** avec un commentaire listant les manques, et retourner `{"status":"refacto","ticket":<N>,"reason":"spec missing — run /analyse first"}`. **Ne pas improviser.**
+
+   Sinon → logger `ANALYSIS_OK "format=<feature|task|bug>"` avant de continuer.
 
 2. **Si bug** (issue type Bug ou label `bug`) — appliquer `rules/bug-fix-workflow.md` : test qui échoue **avant** le fix. Pour les bugs de type "visual mismatch Figma ↔ app", le test n'est pas un test automatisé classique (cf. section visual mismatch de `bug-fix-workflow.md`) — la validation est la relecture structurelle Figma.
 
@@ -41,22 +43,22 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
 4.5. **Sanity check stack docker** — vérifier que `packages/app/.env.local` existe et contient `COMPOSE_PROJECT_NAME=egapro-wt-*`. Si absent → `scripts/setup-worktree.sh <index> [<extras>]` (où `<extras>` vient du parsing de la section `## Requires services` du ticket). Si `/epic` ou `/code` a déjà lancé le setup, l'étape est un no-op.
 
-5. **Implémenter** :
+5. **Implémenter** — `bash scripts/orchestration/log_event.sh code-dev-<N> DEV_START "attempt=1"` au début. Sur reprise après un RETRY de 9a/9b/9c/9d, incrémenter `attempt`.
    - Modifier les fichiers listés dans le ticket
    - Respecter `packages/app/CLAUDE.md` et les rules projet
    - **Aucun commentaire dans le code écrit ou modifié** — voir `rules/code-quality.md` section "No comments by default". Pas de JSDoc, pas de `// fetch user`, pas de `// for ticket #N`, pas de TODO/FIXME, pas de header de section. Seule exception : un `// ` court qui explique un WHY non-évident (workaround documenté, invariant subtil). Si le commentaire paraphrase le code juste en dessous, supprimer.
    - `pnpm typecheck` après chaque modif de types/schemas
    - `nextjs_call(get_errors)` si dev server tourne
    - **Tests unitaires : 100% de couverture sur le code produit** (statements, branches, functions, lines). Vérifier via `pnpm test --coverage` + lecture du rapport — chaque fichier modifié ou créé doit être à 100%. Pas de « ça couvre assez » : 100% strict.
-   - Logger `IMPLEMENT_OK` quand typecheck + tests passent localement.
+   - Logger `DEV_OK "attempt=<K>"` quand typecheck + tests passent localement.
 
-6. **Quality gates (ticket reste en In progress)** — déléguer en parallèle aux 4 agents existants :
+6. **Quality gates (ticket reste en In progress)** — `bash scripts/orchestration/log_event.sh code-dev-<N> VALIDATION_START "attempt=1"`. Déléguer en parallèle aux 4 agents existants :
    - `validator` (typecheck + test + lint + format)
    - `structural-auditor`
    - `rgaa-auditor` (si `.tsx` modifié)
    - `security-auditor` (si server files modifiés)
 
-   Corriger toutes les findings. Re-run jusqu'au vert. Logger `QUALITY_OK` quand les 4 agents PASS.
+   Corriger toutes les findings. Re-run jusqu'au vert. À chaque nouvelle itération sur un finding : logger `VALIDATION_START "attempt=<K+1>"` avant la re-run. Logger `VALIDATION_OK "attempt=<K>"` quand les 4 agents PASS.
 
 7. **Vérification visuelle Figma** (si UI touchée) — la fidélité au design est **ta** responsabilité, plus de `design-validator` externe :
    - **Lecture structurelle (le cœur du travail)** : pour chaque URL citée dans la section `## Référence Figma` du ticket, appeler `mcp__figma-dev__get_figma_data` (équivalent `get_design_context`) sur le node-id pour récupérer l'arbre des nodes — couleurs (`fill`), typographies (`fontSize`, `fontWeight`, `textStyle`), espacements (`itemSpacing`, `gap`), hiérarchie, contenu verbatim. Vérifier que ton implémentation **mappe précisément chaque propriété** : couleur Figma → DSFR token / classe, `fontSize` → `fr-text--xs/sm/lg/xl`, `fontWeight ≥ 600` → `<strong>`, `itemSpacing` → `fr-m{b,t,r,l}-Xw`. Suivre `rules/figma-workflow.md` (Phases 1–3) pour la checklist exhaustive.
@@ -87,15 +89,17 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
 9. **Validations en parallèle** — 3 axes simultanés, tous doivent être verts avant de passer à l'étape 10.
 
-   **9a. Validator IA** — invoquer `functional-validator` (rejoue les scénarios PO dans le dev server). Il commente sur le ticket.
-   - `RETRY` (max 2) → corriger + push
+   **9a. Validator IA** — `bash scripts/orchestration/log_event.sh code-dev-<N> FUNCTIONAL_START "attempt=1"`. Invoquer `functional-validator` (rejoue les scénarios PO dans le dev server). Il commente sur le ticket.
+   - `RETRY` (max 2) → logger `FUNCTIONAL_START "attempt=<K+1>"`, corriger + push
    - `REFACTO` après 3 RETRY → ticket → **To Do** avec diagnostic
+   - PASS → logger `FUNCTIONAL_OK "attempt=<K>"`
    - Pas de `design-validator` séparé : la fidélité visuelle vs. Figma est vérifiée par `code-dev` lui-même à l'étape 7 (voir `rules/figma-workflow.md`).
 
-   **9b. CI GitHub Actions** — watch du pipeline auto-déclenché par le push :
+   **9b. CI GitHub Actions** — `bash scripts/orchestration/log_event.sh code-dev-<N> CI_WAIT "pr=<PR>"`. Watch du pipeline auto-déclenché par le push :
    - Polling : `gh pr checks <PR> --watch` (ou `gh run list --branch <branch>`)
-   - Si un check est rouge : `gh run view <run-id> --log-failed`, identifier la cause, corriger, push, reboucler
+   - Si un check est rouge : logger `CI_FAIL "pr=<PR> failed=<check-name>"`, `gh run view <run-id> --log-failed`, identifier la cause, corriger, push, **logger `CI_WAIT "pr=<PR>"` à nouveau** pour la new attempt
    - Ne jamais marquer la PR `ready` tant qu'un check CI est rouge
+   - Quand toutes les checks sont vertes : logger `CI_OK "pr=<PR>"`
    - **Attendre que TOUTES les checks aient une conclusion**, pas juste la majorité. Certains checks lents (notamment `Deploy on Kubernetes 🐳 / 🐳 Deploy Review on Kubernetes`) se lancent ou se terminent **après** Build / Lint / Tests. Sortir de 9b dès que les checks "core" sont verts laisse une fenêtre où un check Deploy peut basculer en FAILURE alors que tu as déjà retourné `validated`.
 
    Critère de sortie de 9b (à valider explicitement avant de passer à 9c) :
@@ -105,12 +109,13 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
    ```
    Doit retourner `true`. Toute conclusion `FAILURE`, `CANCELLED`, `TIMED_OUT`, `ACTION_REQUIRED`, ou conclusion vide (check encore en cours) → on attend / on corrige.
 
-   **9c. SonarCloud** — le bot `sonarcloud[bot]` commente sur la PR avec un lien dashboard :
-   - Si `Quality Gate: Failed` → ouvrir le dashboard via `mcp__playwright__browser_navigate`, lire les issues (bugs, code smells, duplications, coverage), corriger, push
+   **9c. SonarCloud** — `bash scripts/orchestration/log_event.sh code-dev-<N> SONAR_WAIT "pr=<PR>"`. Le bot `sonarcloud[bot]` commente sur la PR avec un lien dashboard :
+   - Si `Quality Gate: Failed` → logger `SONAR_FAIL "pr=<PR>"`, ouvrir le dashboard via `mcp__playwright__browser_navigate`, lire les issues (bugs, code smells, duplications, coverage), corriger, push, re-logger `SONAR_WAIT "pr=<PR>"`
    - Si le bot n'a pas encore commenté, attendre avant de `gh pr ready`
    - Seuils critiques bloquants : bugs, vulnérabilités, security hotspots non reviewed
+   - Quand Quality Gate Passed → logger `SONAR_OK "pr=<PR>"`
 
-   **9d. Cycle review unique** — déclenché **une seule fois**, **uniquement** après que 9a + 9b + 9c sont **tous verts** (vérifie explicitement le critère jq de 9b : toutes conclusions SUCCESS / SKIPPED / NEUTRAL, sans exception).
+   **9d. Cycle review unique** — `bash scripts/orchestration/log_event.sh code-dev-<N> BOT_WAIT "pr=<PR>"`. Déclenché **une seule fois**, **uniquement** après que 9a + 9b + 9c sont **tous verts** (vérifie explicitement le critère jq de 9b : toutes conclusions SUCCESS / SKIPPED / NEUTRAL, sans exception).
 
    ### 9d.1 — Wait borné pour les reviews bot (avec debounce)
 
@@ -216,6 +221,8 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
    ### 9d.3 — Sortie de la phase 9d
 
+   Logger `BOT_REPLIED "pr=<PR> comments=<K>"` (où K = nombre de threads adressés).
+
    - **Si aucun fix appliqué** (aucun push) → passer immédiatement à l'étape 10 (retour `validated`)
    - **Si au moins un push** → poll `gh pr checks <PR> --watch` jusqu'à ce que la nouvelle CI/Sonar repassent **toutes vertes** (même critère jq qu'en 9b, timeout poll : 10 min). Ensuite passer à l'étape 10.
 
@@ -261,19 +268,34 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 
 ## Logging events
 
-Calls `bash scripts/orchestration/log_event.sh code-dev-<N> <EVENT> [msg]`. Logger aux **transitions d'état** seulement (pas chaque Read/Edit/grep). Les events alimentent `/report`.
+Calls `bash scripts/orchestration/log_event.sh code-dev-<N> <EVENT> [msg]`. Logger aux **transitions de phase** seulement (pas chaque Read/Edit/grep). Les events alimentent `/report` (table d'agents actifs + drill-down stuck).
 
-| Event | Quand |
-|---|---|
-| `START` | Début, après réception du prompt (étape 0) |
-| `IMPLEMENT_OK` | Code écrit, typecheck + tests locaux verts (étape 5) |
-| `QUALITY_OK` | Les 4 auditors PASS (étape 6) |
-| `PR_DRAFT` | PR draft ouverte (étape 8), `msg=pr=<NNN>` |
-| `RETRY` | Début d'une itération de fix sur un verdict RETRY (étape 9), `msg=axis=<axe> attempt=<K>` |
-| `ESCALATED` | Avant retour `needs_opus_escalation` (étape 9, mode Sonnet épuisé) |
-| `STUCK` | Avant retour `refacto` (étape 9, mode Opus épuisé) |
-| `PR_READY` | `gh pr ready` réussi (étape 10), `msg=pr=<NNN>` |
-| `COMPLETE` | Avant retour `validated` (étape 10) |
+| Event | Quand | msg |
+|---|---|---|
+| `START` | Début, après réception du prompt (étape 0) | `worktree=<path> base=<branch>` |
+| `ANALYSIS_START` | Étape 1 — début lecture body+commentaires | — |
+| `ANALYSIS_OK` | Étape 1 — spec valide trouvée | `format=<feature\|task\|bug>` |
+| `ANALYSIS_FAIL` | Étape 1 — spec manquant, retour refacto | `reason=<résumé>` |
+| `DEV_START` | Étape 5 — début implémentation, à chaque retry | `attempt=<K>` |
+| `DEV_OK` | Étape 5 — typecheck + tests locaux verts | `attempt=<K>` |
+| `VALIDATION_START` | Étape 6 — début quality gates, à chaque retry | `attempt=<K>` |
+| `VALIDATION_OK` | Étape 6 — les 4 auditors PASS | `attempt=<K>` |
+| `PR_DRAFT` | Étape 8 — PR draft ouverte | `pr=<P>` |
+| `FUNCTIONAL_START` | Étape 9a — début functional-validator | `attempt=<K>` |
+| `FUNCTIONAL_OK` | Étape 9a — PASS | `attempt=<K>` |
+| `CI_WAIT` | Étape 9b — début (ou re-début après push) du watch CI | `pr=<P>` |
+| `CI_FAIL` | Étape 9b — un check rouge identifié | `pr=<P> failed=<check-name>` |
+| `CI_OK` | Étape 9b — toutes les checks vertes | `pr=<P>` |
+| `SONAR_WAIT` | Étape 9c — attente du commentaire sonarcloud | `pr=<P>` |
+| `SONAR_FAIL` | Étape 9c — Quality Gate Failed | `pr=<P>` |
+| `SONAR_OK` | Étape 9c — Quality Gate Passed | `pr=<P>` |
+| `BOT_WAIT` | Étape 9d — début du wait borné pour reviews bots | `pr=<P>` |
+| `BOT_REPLIED` | Étape 9d.3 — tous les threads post-push adressés | `pr=<P> comments=<K>` |
+| `RETRY` | Début d'une itération de fix sur un verdict RETRY (étape 9) | `axis=<axe> attempt=<K>` |
+| `ESCALATED` | Avant retour `needs_opus_escalation` (étape 9, Sonnet épuisé) | — |
+| `STUCK` | Avant retour `refacto` (étape 9, Opus épuisé) | — |
+| `PR_READY` | Étape 10 — `gh pr ready` réussi | `pr=<P>` |
+| `COMPLETE` | Étape 10 — avant retour `validated` | — |
 
 ## Format de retour OBLIGATOIRE (dernier message)
 

@@ -231,11 +231,16 @@ Ton dernier message DOIT être uniquement ce JSON (rien d'autre, pas de prose)."
     # CLAUDECODE=1 would otherwise abort the nested CLI to prevent runtime
     # collisions). The sub-agent runs in its own process tree with its own
     # budget, so the anti-nesting guard does not apply here.
+    # stream-json emits a JSONL trace (one event per turn) instead of a single
+    # wrapper at the end. compute_cost.sh tails the file to derive the live
+    # cost; the final `{"type":"result", ...}` line carries total_cost_usd
+    # for the authoritative number.
     $TIMEOUT_PREFIX env -u CLAUDECODE claude \
         --agent "$AGENT" \
         --model "$MODEL" \
         --print \
-        --output-format json \
+        --output-format stream-json \
+        --verbose \
         --dangerously-skip-permissions \
         --max-budget-usd "$BUDGET" \
         "$PROMPT" \
@@ -395,16 +400,25 @@ while [ $TICK -lt $MAX_TICKS ]; do
         for ticket in "${!AGENT_FILES[@]}"; do
             file="${AGENT_FILES[$ticket]}"
 
-            # The claude CLI emits a wrapper {result, is_error, ...}. Extract .result
-            # and try to parse it as the strict JSON contract.
+            # The claude CLI emits a JSONL trace (--output-format stream-json).
+            # The final `result` event carries the assistant's last message
+            # text (`.result`) and an error flag (`.is_error`).
+            # If the stream was cut short (timeout, killed, budget exhaustion)
+            # there may be no result line — fall back to the last assistant
+            # message text so we can at least diagnose what happened.
             RESULT_TEXT=""
             CLI_ERROR="false"
             if [ -s "$file" ]; then
-                if jq -e '.result' "$file" >/dev/null 2>&1; then
-                    RESULT_TEXT=$(jq -r '.result // ""' "$file")
-                    CLI_ERROR=$(jq -r '.is_error // false' "$file")
+                RESULT_LINE=$(grep '"type":"result"' "$file" | tail -1 || true)
+                if [ -n "$RESULT_LINE" ] && echo "$RESULT_LINE" | jq -e '.result' >/dev/null 2>&1; then
+                    RESULT_TEXT=$(echo "$RESULT_LINE" | jq -r '.result // ""')
+                    CLI_ERROR=$(echo "$RESULT_LINE" | jq -r '.is_error // false')
                 else
-                    RESULT_TEXT=$(head -c 500 "$file")
+                    LAST_ASSISTANT=$(grep '"type":"assistant"' "$file" | tail -1 || true)
+                    if [ -n "$LAST_ASSISTANT" ]; then
+                        RESULT_TEXT=$(echo "$LAST_ASSISTANT" | jq -r '[.message.content[]? | .text? // empty] | join(" ")' 2>/dev/null | head -c 500)
+                    fi
+                    [ -z "$RESULT_TEXT" ] && RESULT_TEXT="(stream cut short — no result event in $file)"
                     CLI_ERROR="true"
                 fi
             else
