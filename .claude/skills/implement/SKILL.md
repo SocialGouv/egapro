@@ -76,7 +76,28 @@ Workflow identique à l'ex-`/epic` :
    ```
    Si oui : avertir, proposer (a) attendre via `/report`, (b) `pkill -f "epic_loop.sh.*${EPICS_KEY}"` puis relancer, (c) annuler.
 
-2. Lancer le bash loop driver en background :
+2. **Aligner le main worktree sur `epic/<N>`** — la pipeline orchestrate doit tourner sur la branche d'intégration de l'epic, pas depuis `alpha` ni un worktree dédié. Sinon : `rebase_epic_branch.sh` entre ticks plante (`epic/<N> is already used by worktree at ...`), et l'état dans `.claude/state/epic_run/` finit sur le mauvais worktree (cassant `/report`).
+   ```bash
+   # Sécurité : refuser si working tree dirty (commit/stash d'abord)
+   if [ -n "$(git status --porcelain)" ]; then
+       echo "ERROR: working tree dirty — commit ou stash avant /implement <N>"
+       exit 1
+   fi
+
+   # S'assurer que la branche d'intégration existe sur origin (idempotent)
+   bash scripts/orchestration/ensure_epic_branch.sh "$ISSUE_N"
+
+   # Checkout epic/<N> sur le main worktree
+   git fetch origin "epic/${ISSUE_N}" --quiet
+   if git rev-parse --verify --quiet "epic/${ISSUE_N}" >/dev/null; then
+       git checkout "epic/${ISSUE_N}"
+       git pull --ff-only origin "epic/${ISSUE_N}"
+   else
+       git checkout -B "epic/${ISSUE_N}" "origin/epic/${ISSUE_N}"
+   fi
+   ```
+
+3. Lancer le bash loop driver en background **depuis le main worktree** (qui est désormais sur `epic/<N>`) :
    ```bash
    LOG_FILE="/tmp/epic_loop_${EPICS_KEY}.log"
    nohup bash scripts/orchestration/epic_loop.sh $EPICS > "$LOG_FILE" 2>&1 &
@@ -85,7 +106,9 @@ Workflow identique à l'ex-`/epic` :
    echo "epic_loop lancé en background (PID $PID, log: $LOG_FILE). Suivi via /report."
    ```
 
-3. Rendre la main immédiatement (pas de polling — utiliser `/report`).
+4. Rendre la main immédiatement (pas de polling — utiliser `/report`).
+
+> **Note** : le main worktree reste sur `epic/<N>` pendant toute la durée du loop (ticks + final PR). Pour faire du travail sur `alpha` en parallèle (hotfix, autre branche), monter un worktree dédié (`git worktree add /tmp/egapro-alpha alpha`). À la fin de l'epic — quand la PR finale est mergée sur alpha — basculer manuellement le main worktree avec `git checkout alpha && git pull`.
 
 ### Mode task ou bug — code-dev synchrone foreground
 

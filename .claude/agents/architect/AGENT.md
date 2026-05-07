@@ -80,9 +80,25 @@ L'objectif : transformer une task vague en un spec exécutable, **sans découpag
    - Depends on (rare en task — la plupart des tasks sont autonomes)
    - Requires services (rare — typiquement core stack suffit)
 
-5. **Validation utilisateur EXPLICITE** : « valides-tu cette analyse ? ». Itérer si besoin.
+5. **Évaluation du scope** — avant de demander la validation utilisateur, comparer le draft à ces seuils. Une task standard est une **unité cohérente exécutable par un seul `code-dev`**. Si **au moins un** seuil est franchement dépassé, le ticket doit basculer en Feature (epic) plutôt qu'en task :
 
-6. **Sur approbation** : poster un seul commentaire sur la task (pas de modification du body) :
+   - \> 8 critères d'acceptation
+   - \> 5 fichiers à modifier
+   - Refacto multi-modules (touche plusieurs `~/modules/*` distincts, ou couches multiples comme domain + UI + tRPC + tests + scripts)
+   - Création d'un nouveau sous-module (nouveau dossier sous `~/modules/<feature>/<sous-module>/`)
+   - Plus d'un flow utilisateur indépendant impacté (ex : Step1 du parcours principal + JointEvaluationForm + CompliancePathChoice)
+   - Présence de dépendances internes naturelles (foundation → câblage répétitif sur N forms) qui se découperaient en T1 + T2 + T3 parallélisables
+
+   **Cas limite** : un spec avec exactement 8 critères et 5 fichiers reste une task. Le dépassement doit être franc, pas marginal.
+
+   **Si dépassement** :
+   - Présenter le constat au user en 2-3 lignes : « Le scope dépasse une task standard ([raison concrète : X fichiers, Y modules touchés, Z critères]). Je recommande de convertir cette issue en Feature et de relancer `/analyse` en mode epic-create pour découper en sub-tasks parallélisables. »
+   - **Si user accepte** : convertir l'issue type Task → Feature via la mutation GraphQL `updateIssueIssueType` (cf. `rules/github-board.md` snippet 7, ID Feature = `IT_kwDOAh0HH84Aa_K4`), poster un commentaire `[Architect] Converti en Feature — relancer /analyse #N pour le découpage`, puis **exiter le mode task** (ne pas poster d'analyse architecte). L'utilisateur relancera `/analyse #N` qui passera automatiquement en mode `epic-create`.
+   - **Si user refuse** : poursuivre en mode task malgré le scope. Mentionner dans le draft que le ticket est volumineux et appliquer le label `complexe` (Opus) systématiquement.
+
+6. **Validation utilisateur EXPLICITE** : « valides-tu cette analyse ? ». Itérer si besoin.
+
+7. **Sur approbation** : poster un seul commentaire sur la task (pas de modification du body) :
    ```bash
    gh issue comment "$TASK_N" --body-file <(cat <<'EOF'
    ## Analyse architecte
@@ -93,7 +109,7 @@ L'objectif : transformer une task vague en un spec exécutable, **sans découpag
    ```
    Appliquer le label `complexe` si > 5 fichiers ou refacto multi-modules attendu (op. via `gh issue edit --add-label`).
 
-7. **Commentaire final** : `[Validation utilisateur] Analyse validée — prêt pour /implement`.
+8. **Commentaire final** : `[Validation utilisateur] Analyse validée — prêt pour /implement`.
 
 ---
 
