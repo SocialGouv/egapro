@@ -66,6 +66,7 @@ describe("buildExportRows", () => {
 			secondDeclReferencePeriodEnd: null,
 			createdAt: new Date("2027-03-15T10:00:00Z"),
 			updatedAt: new Date("2027-03-15T12:00:00Z"),
+			cancelledAt: null,
 			companyName: "ACME Corp",
 			workforce: 250,
 			nafCode: "62.02",
@@ -163,6 +164,7 @@ describe("buildExportRows", () => {
 			secondDeclReferencePeriodEnd: null,
 			createdAt: new Date("2027-03-15T10:00:00Z"),
 			updatedAt: new Date("2027-03-15T12:00:00Z"),
+			cancelledAt: null,
 			companyName: "BigCo",
 			workforce: 500,
 			nafCode: "70.10",
@@ -242,6 +244,7 @@ describe("buildExportRows", () => {
 			secondDeclReferencePeriodEnd: null,
 			createdAt: new Date("2027-03-15T10:00:00Z"),
 			updatedAt: new Date("2027-03-15T12:00:00Z"),
+			cancelledAt: null,
 			companyName: "ACME Corp",
 			workforce: 250,
 			nafCode: "62.02",
@@ -343,6 +346,7 @@ describe("buildExportRows", () => {
 			secondDeclReferencePeriodEnd: null,
 			createdAt: null,
 			updatedAt: null,
+			cancelledAt: null,
 			companyName: "NullCo",
 			workforce: null,
 			nafCode: null,
@@ -407,4 +411,106 @@ describe("buildExportRows", () => {
 			workforce: null,
 		});
 	});
+
+	it("should serialize cancelledAt as ISO string for cancelled declarations", async () => {
+		const dbRow = makeMinimalDbRow({
+			declarationId: "decl-cancelled",
+			siren: "555555555",
+			cancelledAt: new Date("2027-04-20T08:30:00Z"),
+			companyName: "CancelCo",
+			declarantFirstName: "Anne",
+			declarantLastName: "Lopez",
+			declarantEmail: "anne@cancelco.fr",
+			indicatorAAnnualWomen: "30000",
+			indicatorAAnnualMen: "32000",
+		});
+
+		mockWhere.mockResolvedValue([dbRow]);
+		mockJobWhere.mockResolvedValue([]);
+		mockCseWhere.mockResolvedValue([]);
+
+		const { buildExportRows } = await import("../buildExportRows");
+		const rows = await buildExportRows(mockDb as never, 2027);
+
+		expect(rows[0]).toMatchObject({
+			siren: "555555555",
+			cancelledAt: "2027-04-20T08:30:00.000Z",
+			indAAnnualWomen: "30000",
+			indAAnnualMen: "32000",
+		});
+	});
 });
+
+type DbRow = Record<string, unknown>;
+
+function makeMinimalDbRow(overrides: DbRow): DbRow {
+	return {
+		declarationId: "decl-1",
+		siren: "123456789",
+		year: 2027,
+		status: "submitted",
+		compliancePath: null,
+		totalWomen: null,
+		totalMen: null,
+		remunerationScore: null,
+		variableRemunerationScore: null,
+		quartileScore: null,
+		categoryScore: null,
+		secondDeclarationStatus: null,
+		secondDeclReferencePeriodStart: null,
+		secondDeclReferencePeriodEnd: null,
+		createdAt: new Date("2027-03-15T10:00:00Z"),
+		updatedAt: new Date("2027-03-15T12:00:00Z"),
+		cancelledAt: null,
+		companyName: "ACME",
+		workforce: null,
+		nafCode: null,
+		address: null,
+		hasCse: null,
+		declarantFirstName: null,
+		declarantLastName: null,
+		declarantEmail: "a@b.fr",
+		declarantPhone: null,
+		indicatorAAnnualWomen: null,
+		indicatorAAnnualMen: null,
+		indicatorAHourlyWomen: null,
+		indicatorAHourlyMen: null,
+		indicatorBAnnualWomen: null,
+		indicatorBAnnualMen: null,
+		indicatorBHourlyWomen: null,
+		indicatorBHourlyMen: null,
+		indicatorCAnnualWomen: null,
+		indicatorCAnnualMen: null,
+		indicatorCHourlyWomen: null,
+		indicatorCHourlyMen: null,
+		indicatorDAnnualWomen: null,
+		indicatorDAnnualMen: null,
+		indicatorDHourlyWomen: null,
+		indicatorDHourlyMen: null,
+		indicatorEWomen: null,
+		indicatorEMen: null,
+		indicatorFAnnualThreshold1: null,
+		indicatorFAnnualWomen1: null,
+		indicatorFAnnualMen1: null,
+		indicatorFAnnualThreshold2: null,
+		indicatorFAnnualWomen2: null,
+		indicatorFAnnualMen2: null,
+		indicatorFAnnualThreshold3: null,
+		indicatorFAnnualWomen3: null,
+		indicatorFAnnualMen3: null,
+		indicatorFAnnualWomen4: null,
+		indicatorFAnnualMen4: null,
+		indicatorFHourlyThreshold1: null,
+		indicatorFHourlyWomen1: null,
+		indicatorFHourlyMen1: null,
+		indicatorFHourlyThreshold2: null,
+		indicatorFHourlyWomen2: null,
+		indicatorFHourlyMen2: null,
+		indicatorFHourlyThreshold3: null,
+		indicatorFHourlyWomen3: null,
+		indicatorFHourlyMen3: null,
+		indicatorFHourlyWomen4: null,
+		indicatorFHourlyMen4: null,
+		...overrides,
+	};
+}

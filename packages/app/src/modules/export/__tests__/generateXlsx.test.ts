@@ -18,6 +18,7 @@ function makeRow(overrides: Partial<ExportRow> = {}): ExportRow {
 		compliancePath: null,
 		createdAt: "2027-03-15T10:00:00.000Z",
 		updatedAt: "2027-03-15T10:00:00.000Z",
+		cancelledAt: null,
 		totalWomen: 120,
 		totalMen: 130,
 		remunerationScore: 5,

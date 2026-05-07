@@ -212,6 +212,13 @@ const declarationSchema = {
 		},
 		Date_creation: { type: ["string", "null"], format: "date-time" },
 		Date_modification: { type: ["string", "null"], format: "date-time" },
+		Date_annulation: {
+			type: ["string", "null"],
+			format: "date-time",
+			description:
+				"Date d'annulation administrative de la déclaration. `null` si la déclaration est active. Une déclaration annulée conserve l'intégralité de ses données pour audit.",
+			example: "2025-04-01T10:30:00.000Z",
+		},
 		Effectif_F_rem_annuelle_globale: {
 			type: ["integer", "null"],
 			description:
@@ -379,9 +386,10 @@ export const openApiSpec = {
 		"/api/v1/export/declarations": {
 			get: {
 				operationId: "getDeclarations",
-				summary: "Lister les déclarations par date de soumission",
+				summary:
+					"Lister les déclarations par date de soumission ou d'annulation",
 				description:
-					"Retourne les déclarations soumises dont la date de mise à jour (`Date_modification`) est comprise dans l'intervalle [`date_begin`, `date_end`[. Inclut les indicateurs A–G, la seconde déclaration et les avis CSE. Les libellés des champs reprennent ceux du fichier GIP MDS.",
+					"Retourne les déclarations dont la date de mise à jour (`Date_modification`, pour les déclarations actives soumises) ou la date d'annulation (`Date_annulation`, pour les déclarations annulées) est comprise dans l'intervalle [`date_begin`, `date_end`[. Inclut les indicateurs A–G, la seconde déclaration, les avis CSE et le champ `Date_annulation` (renseigné si la déclaration est annulée). Les libellés des champs reprennent ceux du fichier GIP MDS.",
 				parameters: [
 					{
 						name: "date_begin",

@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNotNull, or } from "drizzle-orm";
 
 import type { DB } from "~/server/db";
 import { companies, declarations, users } from "~/server/db/schema";
@@ -36,6 +36,7 @@ export async function buildExportRows(
 			secondDeclReferencePeriodEnd: declarations.secondDeclReferencePeriodEnd,
 			createdAt: declarations.createdAt,
 			updatedAt: declarations.updatedAt,
+			cancelledAt: declarations.cancelledAt,
 			declarationId: declarations.id,
 			companyName: companies.name,
 			workforce: companies.workforce,
@@ -52,7 +53,13 @@ export async function buildExportRows(
 		.innerJoin(companies, eq(declarations.siren, companies.siren))
 		.innerJoin(users, eq(declarations.declarantId, users.id))
 		.where(
-			and(eq(declarations.status, "submitted"), eq(declarations.year, year)),
+			and(
+				eq(declarations.year, year),
+				or(
+					eq(declarations.status, "submitted"),
+					isNotNull(declarations.cancelledAt),
+				),
+			),
 		);
 
 	const declarationIds = rows.map((r) => r.declarationId);
@@ -78,6 +85,7 @@ export async function buildExportRows(
 			compliancePath: row.compliancePath,
 			createdAt: row.createdAt?.toISOString() ?? null,
 			updatedAt: row.updatedAt?.toISOString() ?? null,
+			cancelledAt: row.cancelledAt?.toISOString() ?? null,
 			totalWomen: row.totalWomen,
 			totalMen: row.totalMen,
 			remunerationScore: row.remunerationScore,

@@ -15,6 +15,7 @@ export type ExportRow = {
 	compliancePath: string | null;
 	createdAt: string | null;
 	updatedAt: string | null;
+	cancelledAt: string | null;
 
 	// Employees
 	totalWomen: number | null;
