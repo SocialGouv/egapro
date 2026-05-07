@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import {
 	and,
 	asc,
@@ -12,9 +13,11 @@ import {
 } from "drizzle-orm";
 
 import {
+	cancelDeclarationSchema,
 	getDeclarationByIdSchema,
 	searchDeclarationsSchema,
 } from "~/modules/admin/declarations/schemas";
+import { getCurrentYear } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
 	companies,
@@ -185,5 +188,46 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				files: declarationFiles,
 				cseOpinions: opinions,
 			};
+		}),
+
+	cancel: adminProcedure
+		.input(cancelDeclarationSchema)
+		.mutation(async ({ input, ctx }) => {
+			const rows = await ctx.db
+				.select({
+					id: declarations.id,
+					year: declarations.year,
+					cancelledAt: declarations.cancelledAt,
+				})
+				.from(declarations)
+				.where(eq(declarations.id, input.id))
+				.limit(1);
+
+			const declaration = rows[0];
+			if (!declaration) {
+				throw new TRPCError({ code: "NOT_FOUND" });
+			}
+
+			if (declaration.cancelledAt !== null) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "déclaration déjà annulée",
+				});
+			}
+
+			if (declaration.year !== getCurrentYear()) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "annulation impossible : campagne passée",
+				});
+			}
+
+			const cancelledAt = new Date();
+			await ctx.db
+				.update(declarations)
+				.set({ cancelledAt })
+				.where(eq(declarations.id, input.id));
+
+			return { id: input.id, cancelledAt };
 		}),
 });

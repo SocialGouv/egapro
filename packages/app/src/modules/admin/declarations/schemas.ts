@@ -47,3 +47,7 @@ export type SearchDeclarationsFormValues = z.infer<
 export const getDeclarationByIdSchema = z.object({
 	id: z.string().uuid(),
 });
+
+export const cancelDeclarationSchema = z.object({
+	id: z.string().uuid(),
+});
