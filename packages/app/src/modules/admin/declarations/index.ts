@@ -1,5 +1,6 @@
 export { AdminDeclarationDetailPage } from "./AdminDeclarationDetailPage";
 export { AdminDeclarationsPage } from "./AdminDeclarationsPage";
+export { CancelDeclarationButton } from "./CancelDeclarationButton";
 export type {
 	SearchDeclarationsFormValues,
 	SearchDeclarationsInput,

@@ -4,6 +4,18 @@ import { DsfrTable } from "~/modules/shared/DsfrTable";
 import { STATUS_LABELS } from "./shared/constants";
 import type { DeclarationDetail } from "./types";
 
+export function CancelledBadge({ cancelledAt }: { cancelledAt: Date }) {
+	return (
+		<div
+			aria-live="polite"
+			className="fr-alert fr-alert--warning fr-mb-3w"
+			role="alert"
+		>
+			<p>Annulée le {formatShortDate(cancelledAt)}</p>
+		</div>
+	);
+}
+
 export function DeclarationSummary({
 	declaration,
 }: {

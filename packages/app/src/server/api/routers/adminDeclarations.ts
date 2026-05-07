@@ -141,6 +141,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					secondDeclarationStatus: declarations.secondDeclarationStatus,
 					createdAt: declarations.createdAt,
 					updatedAt: declarations.updatedAt,
+					cancelledAt: declarations.cancelledAt,
 					companyName: companies.name,
 					companyAddress: companies.address,
 					companyNafCode: companies.nafCode,
