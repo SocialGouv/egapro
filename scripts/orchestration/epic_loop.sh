@@ -471,9 +471,23 @@ if [ $TICK -ge $MAX_TICKS ]; then
 fi
 
 # ---- Done: every sub-ticket squash-merged into epic/<N> ----
-# Open the final integration PR `epic/<N> → alpha` for each epic in scope
-# (idempotent — reuses an existing open PR if any).
+# For each epic in scope:
+#   1. Regenerate docs/*.md from the current state of epic/<N> (best-effort,
+#      non-blocking — a doc-writer failure just logs and continues).
+#   2. Open the final integration PR `epic/<N> → alpha` (idempotent —
+#      reuses an existing open PR if any).
 for N in $EPICS; do
+    # ---- Doc regeneration (best-effort, non-blocking) ----
+    set +e
+    bash "$SCRIPT_DIR/run_doc_writer.sh" "$N"
+    DOC_RC=$?
+    set -e
+    if [ "$DOC_RC" != "0" ]; then
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" DOC_WRITER_FAIL "epic=$N rc=$DOC_RC"
+        echo "WARN epic=$N: doc-writer exited $DOC_RC — final PR will be opened without doc updates" >&2
+    fi
+
+    # ---- Final integration PR ----
     set +e
     FINAL_PR=$(bash "$SCRIPT_DIR/open_epic_final_pr.sh" "$N" 2>/dev/null)
     OPEN_RC=$?
