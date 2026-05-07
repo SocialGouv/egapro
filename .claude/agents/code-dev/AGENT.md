@@ -18,6 +18,24 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
   - **Task ou Bug standalone** (sans parent epic) : `origin/alpha` direct. La PR sera mergée à la main par l'humain après revue.
 - **Working branch** (assigned by `/implement`) — déjà créée sur GitHub par l'orchestrateur via `createLinkedBranch` GraphQL et **officiellement linkée à l'issue** (sidebar Development). Le force-link PR↔issue (étape 8.5) ajoute également la PR à la sidebar dès qu'elle est créée.
 
+## Discipline non-interactive (BLOCKING)
+
+Les commandes susceptibles de prompter (drizzle-kit, gh sans `--yes`, prompts TUI custom) peuvent **hang indéfiniment** si stdin reçoit un TTY au lieu d'EOF. Symptôme observé : `pnpm db:generate` qui hang 1h+ parce que drizzle-kit détecte un schema diff ambigu et attend une réponse interactive.
+
+**Hard rules** :
+
+1. **Toute commande potentiellement interactive doit avoir stdin redirigé depuis `/dev/null`** :
+   ```bash
+   pnpm db:generate < /dev/null      # ✅
+   pnpm db:generate                   # ❌ peut hang si TTY visible
+   ```
+
+2. **Ne JAMAIS wrapper une commande dans `script -q -c '...'`** pour capturer son output. `script` crée un pseudo-TTY → la commande croit être en mode interactif et peut prompter. Préférer `2>&1 | tee /tmp/log` ou `2>&1 | head -50` directement.
+
+3. **Pour les commandes qui prennent > 30s** (db:migrate, pnpm install, build), wrapper avec `timeout` : `timeout 180 pnpm db:migrate < /dev/null`. Si timeout atteint → escalader (commenter le ticket, retourner verdict approprié).
+
+4. La règle **stdin redirect** s'applique aussi aux scripts pipeline qu'on appelle (ex: `bash scripts/orchestration/foo.sh < /dev/null` quand on n'est pas certain qu'ils ne prompteront pas).
+
 ## Discipline de logging (BLOCKING)
 
 À chaque transition de phase tu DOIS exécuter `bash scripts/orchestration/log_event.sh code-dev-<N> <EVENT> [msg]` **avant** de poursuivre la phase suivante. Sans ces events, le dashboard `/report` ne peut pas suivre ta progression et l'utilisateur croit que tu es stuck (il a déjà signalé le problème — c'est exactement pour éviter ça).
