@@ -46,6 +46,7 @@ vi.mock("~/trpc/react", () => ({
 								opinionDate: "2024-03-15",
 							},
 						],
+						siblings: [],
 					},
 					isLoading: false,
 				}),

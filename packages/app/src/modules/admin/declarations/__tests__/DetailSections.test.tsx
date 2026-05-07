@@ -54,6 +54,7 @@ const declaration: DeclarationDetail = {
 			opinionDate: "2024-03-15",
 		},
 	],
+	siblings: [],
 };
 
 describe("DeclarationSummary", () => {

@@ -7,7 +7,10 @@ import {
 	eq,
 	gte,
 	ilike,
+	isNotNull,
+	isNull,
 	lt,
+	ne,
 	or,
 	type SQL,
 } from "drizzle-orm";
@@ -73,8 +76,13 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				);
 			}
 
-			if (input.status) {
+			if (input.status === "cancelled") {
+				filters.push(isNotNull(declarations.cancelledAt));
+			} else if (input.status) {
 				filters.push(eq(declarations.status, input.status));
+				filters.push(isNull(declarations.cancelledAt));
+			} else {
+				filters.push(isNull(declarations.cancelledAt));
 			}
 
 			const where = filters.length > 0 ? and(...filters) : undefined;
@@ -89,6 +97,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 						siren: declarations.siren,
 						year: declarations.year,
 						status: declarations.status,
+						cancelledAt: declarations.cancelledAt,
 						remunerationScore: declarations.remunerationScore,
 						createdAt: declarations.createdAt,
 						updatedAt: declarations.updatedAt,
@@ -163,7 +172,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				return null;
 			}
 
-			const [declarationFiles, opinions] = await Promise.all([
+			const [declarationFiles, opinions, siblingRows] = await Promise.all([
 				ctx.db
 					.select({
 						id: files.id,
@@ -182,12 +191,36 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					})
 					.from(cseOpinions)
 					.where(eq(cseOpinions.declarationId, input.id)),
+				ctx.db
+					.select({
+						id: declarations.id,
+						status: declarations.status,
+						cancelledAt: declarations.cancelledAt,
+						updatedAt: declarations.updatedAt,
+					})
+					.from(declarations)
+					.where(
+						and(
+							eq(declarations.siren, declaration.siren),
+							eq(declarations.year, declaration.year),
+							ne(declarations.id, input.id),
+						),
+					)
+					.orderBy(desc(declarations.updatedAt)),
 			]);
+
+			const siblings = siblingRows.map((s) => ({
+				id: s.id,
+				cancelledAt: s.cancelledAt,
+				updatedAt: s.updatedAt,
+				status: s.cancelledAt !== null ? "cancelled" : (s.status ?? "draft"),
+			}));
 
 			return {
 				...declaration,
 				files: declarationFiles,
 				cseOpinions: opinions,
+				siblings,
 			};
 		}),
 

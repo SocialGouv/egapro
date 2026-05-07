@@ -19,7 +19,7 @@ export const searchDeclarationsSchema = z.object({
 	year: z.coerce.number().int().min(2018).max(2100).optional(),
 	dateFrom: z.string().date().optional().or(z.literal("")),
 	dateTo: z.string().date().optional().or(z.literal("")),
-	status: z.enum(["draft", "submitted"]).optional(),
+	status: z.enum(["draft", "submitted", "cancelled"]).optional(),
 	page: z.coerce.number().int().min(1).default(1),
 	pageSize: z.coerce.number().int().min(10).max(100).default(DEFAULT_PAGE_SIZE),
 	sortBy: z.enum(SORT_COLUMNS).default("createdAt"),
@@ -37,7 +37,7 @@ export const searchDeclarationsFormSchema = z.object({
 	year: z.string().optional(),
 	dateFrom: z.string().optional(),
 	dateTo: z.string().optional(),
-	status: z.enum(["", "draft", "submitted"]).optional(),
+	status: z.enum(["", "draft", "submitted", "cancelled"]).optional(),
 });
 
 export type SearchDeclarationsFormValues = z.infer<
