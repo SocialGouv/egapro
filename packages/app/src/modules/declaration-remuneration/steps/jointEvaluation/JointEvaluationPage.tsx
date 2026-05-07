@@ -22,6 +22,8 @@ export async function JointEvaluationPage() {
 	return (
 		<JointEvaluationForm
 			declarationDate={declarationDate}
+			declarationSiren={data.declaration.siren}
+			declarationYear={currentYear}
 			hasCse={company.hasCse}
 			jointEvaluationDeadline={campaignDeadlines.decl1JointEvaluationDeadline}
 		/>

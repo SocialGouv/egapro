@@ -9,6 +9,8 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
+				declarationSiren="123456789"
+				declarationYear={2027}
 				modificationDeadline={modificationDeadline}
 			/>,
 		);
@@ -23,6 +25,8 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
+				declarationSiren="123456789"
+				declarationYear={2027}
 				modificationDeadline={modificationDeadline}
 			/>,
 		);
@@ -36,6 +40,8 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
+				declarationSiren="123456789"
+				declarationYear={2027}
 				modificationDeadline={modificationDeadline}
 			/>,
 		);
@@ -46,6 +52,8 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
+				declarationSiren="123456789"
+				declarationYear={2027}
 				modificationDeadline={modificationDeadline}
 			/>,
 		);
@@ -58,6 +66,8 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
+				declarationSiren="123456789"
+				declarationYear={2027}
 				modificationDeadline={modificationDeadline}
 			/>,
 		);
@@ -73,6 +83,8 @@ describe("SecondDeclarationStep1Info", () => {
 		render(
 			<SecondDeclarationStep1Info
 				declarationDate="01/06/2027"
+				declarationSiren="123456789"
+				declarationYear={2027}
 				modificationDeadline={modificationDeadline}
 			/>,
 		);

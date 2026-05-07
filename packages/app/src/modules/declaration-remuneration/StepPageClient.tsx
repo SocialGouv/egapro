@@ -48,6 +48,7 @@ export function StepPageClient({
 		case 1:
 			return (
 				<Step1Workforce
+					declarationSiren={declaration.siren}
 					declarationYear={declaration.year}
 					gipPrefillData={gipPrefillData}
 					initialData={step1Data}
@@ -56,6 +57,7 @@ export function StepPageClient({
 		case 2:
 			return (
 				<Step2PayGap
+					declarationSiren={declaration.siren}
 					declarationYear={declaration.year}
 					gipPrefillData={gipPrefillData}
 					initialData={step2Data}
@@ -64,6 +66,7 @@ export function StepPageClient({
 		case 3:
 			return (
 				<Step3VariablePay
+					declarationSiren={declaration.siren}
 					declarationYear={declaration.year}
 					gipPrefillData={gipPrefillData}
 					initialData={step3Data}
@@ -74,6 +77,7 @@ export function StepPageClient({
 		case 4:
 			return (
 				<Step4QuartileDistribution
+					declarationSiren={declaration.siren}
 					declarationYear={declaration.year}
 					gipPrefillData={gipPrefillData}
 					initialData={step4Data}
@@ -84,6 +88,7 @@ export function StepPageClient({
 		case 5:
 			return (
 				<Step5EmployeeCategories
+					declarationSiren={declaration.siren}
 					declarationYear={declaration.year}
 					initialCategories={step5Categories}
 					initialSource={initialSource}

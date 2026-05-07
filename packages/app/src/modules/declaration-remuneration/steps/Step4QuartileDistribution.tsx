@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared";
@@ -9,6 +9,7 @@ import { api } from "~/trpc/react";
 import { updateStep4Schema } from "../schemas";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY } from "../shared/devFillData";
+import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
@@ -36,7 +37,15 @@ import {
 	toQuartileData,
 } from "./step4/quartileFormHelpers";
 
+function padThresholds(qs: QuartileTuple): QuartileTuple {
+	return qs.map((q, i) => ({
+		...q,
+		threshold: i === 3 ? undefined : padDecimalToTwo(q.threshold ?? ""),
+	})) as QuartileTuple;
+}
+
 type Step4QuartileDistributionProps = {
+	declarationSiren: string;
 	declarationYear: number;
 	initialData: Step4Data;
 	gipPrefillData?: GipPrefillData;
@@ -45,6 +54,7 @@ type Step4QuartileDistributionProps = {
 };
 
 export function Step4QuartileDistribution({
+	declarationSiren,
 	declarationYear,
 	initialData,
 	gipPrefillData,
@@ -63,12 +73,6 @@ export function Step4QuartileDistribution({
 			(q) => q.threshold || q.women !== undefined || q.men !== undefined,
 		);
 
-	const padThresholds = (qs: QuartileTuple): QuartileTuple =>
-		qs.map((q, i) => ({
-			...q,
-			threshold: i === 3 ? undefined : padDecimalToTwo(q.threshold ?? ""),
-		})) as QuartileTuple;
-
 	const defaultAnnual = padThresholds(
 		(hasSavedData
 			? initialData.annual
@@ -85,6 +89,26 @@ export function Step4QuartileDistribution({
 				: emptyQuartiles()) as QuartileTuple,
 	);
 
+	const dbValues = useMemo(
+		() => ({
+			annual: padThresholds(
+				hasSavedData ? (initialData.annual as QuartileTuple) : emptyQuartiles(),
+			),
+			hourly: padThresholds(
+				hasSavedData ? (initialData.hourly as QuartileTuple) : emptyQuartiles(),
+			),
+		}),
+		[hasSavedData, initialData],
+	);
+
+	const { draft, setField, clearDraft, hasDraft } = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: 4,
+		kind: "main",
+		dbValues,
+	});
+
 	const form = useZodForm(updateStep4Schema, {
 		defaultValues: {
 			annual: defaultAnnual as QuartileTuple,
@@ -92,16 +116,34 @@ export function Step4QuartileDistribution({
 		},
 	});
 
+	useEffect(() => {
+		if (draft.annual) form.setValue("annual", draft.annual);
+		if (draft.hourly) form.setValue("hourly", draft.hourly);
+	}, [draft.annual, draft.hourly, form]);
+
+	useEffect(() => {
+		const sub = form.watch((values) =>
+			setField({
+				annual: values.annual as QuartileTuple,
+				hourly: values.hourly as QuartileTuple,
+			}),
+		);
+		return () => sub.unsubscribe();
+	}, [form, setField]);
+
 	const annual = form.watch("annual");
 	const hourly = form.watch("hourly");
 
 	const [maxError, setMaxError] = useState<string | null>(null);
-	const [saved, setSaved] = useState(hasSavedData);
+	const saved = !hasDraft && hasSavedData;
 	const [fieldErrors, setFieldErrors] = useState<FieldErrorMap>(emptyErrorMap);
 	const [showRecap, setShowRecap] = useState(false);
 
 	const mutation = api.declaration.updateStep4.useMutation({
-		onSuccess: () => router.push("/declaration-remuneration/etape/5"),
+		onSuccess: () => {
+			clearDraft();
+			router.push("/declaration-remuneration/etape/5");
+		},
 	});
 
 	function setQuartileField(
@@ -155,7 +197,6 @@ export function Step4QuartileDistribution({
 			if (value === "") {
 				setQuartileField(tableType, index, field, undefined);
 				setMaxError(null);
-				setSaved(false);
 				clearFieldError(tableType, index, field);
 				return;
 			}
@@ -172,7 +213,6 @@ export function Step4QuartileDistribution({
 			setMaxError(null);
 			setQuartileField(tableType, index, field, n);
 		}
-		setSaved(false);
 		clearFieldError(tableType, index, field);
 	}
 
@@ -217,7 +257,6 @@ export function Step4QuartileDistribution({
 							DEV_STEP4_HOURLY.map(toQuartileData) as QuartileTuple,
 						),
 					);
-					setSaved(false);
 					setFieldErrors(emptyErrorMap());
 					setShowRecap(false);
 				}}
