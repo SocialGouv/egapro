@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, lt } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, isNull, lt } from "drizzle-orm";
 
 import type {
 	Step2Data,
@@ -12,6 +12,14 @@ import {
 } from "~/server/db/schema";
 
 type DeclarationRow = typeof declarations.$inferSelect;
+
+export function activeDeclarationFilter(siren: string, year: number) {
+	return and(
+		eq(declarations.siren, siren),
+		eq(declarations.year, year),
+		isNull(declarations.cancelledAt),
+	);
+}
 
 /**
  * Map a declaration row to the indicator-form step shapes (steps 2, 3, 4).

@@ -1,8 +1,11 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { formatLongDate } from "~/modules/domain";
-import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
+import {
+	activeDeclarationFilter,
+	mapToEmployeeCategoryRows,
+} from "~/server/api/routers/declarationHelpers";
 import { db } from "~/server/db";
 import {
 	companies,
@@ -146,7 +149,7 @@ export async function buildPdfData(
 	const [declaration] = await db
 		.select()
 		.from(declarations)
-		.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+		.where(activeDeclarationFilter(siren, year))
 		.limit(1);
 
 	if (!declaration) {

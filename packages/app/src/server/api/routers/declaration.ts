@@ -23,6 +23,7 @@ import {
 	jobCategories,
 } from "~/server/db/schema";
 import {
+	activeDeclarationFilter,
 	buildEmployeeCategoryValues,
 	buildPlaceholderDeclaration,
 	deleteJobAndEmployeeCategories,
@@ -39,7 +40,7 @@ export const declarationRouter = createTRPCRouter({
 			const existing = await tx
 				.select()
 				.from(declarations)
-				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+				.where(activeDeclarationFilter(siren, year))
 				.limit(1);
 
 			if (existing.length > 0) {
@@ -90,9 +91,7 @@ export const declarationRouter = createTRPCRouter({
 				const retried = await tx
 					.select()
 					.from(declarations)
-					.where(
-						and(eq(declarations.siren, siren), eq(declarations.year, year)),
-					)
+					.where(activeDeclarationFilter(siren, year))
 					.limit(1);
 				const declaration = retried[0];
 				if (!declaration)
@@ -152,9 +151,7 @@ export const declarationRouter = createTRPCRouter({
 				const existing = await tx
 					.select()
 					.from(declarations)
-					.where(
-						and(eq(declarations.siren, siren), eq(declarations.year, year)),
-					)
+					.where(activeDeclarationFilter(siren, year))
 					.limit(1);
 
 				const hasChanged =
@@ -224,9 +221,7 @@ export const declarationRouter = createTRPCRouter({
 								}
 							: {}),
 					})
-					.where(
-						and(eq(declarations.siren, siren), eq(declarations.year, year)),
-					);
+					.where(activeDeclarationFilter(siren, year));
 			});
 
 			return { success: true };
@@ -252,7 +247,7 @@ export const declarationRouter = createTRPCRouter({
 					currentStep: 2,
 					updatedAt: new Date(),
 				})
-				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+				.where(activeDeclarationFilter(siren, year));
 
 			return { success: true };
 		}),
@@ -279,7 +274,7 @@ export const declarationRouter = createTRPCRouter({
 					currentStep: 3,
 					updatedAt: new Date(),
 				})
-				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+				.where(activeDeclarationFilter(siren, year));
 
 			return { success: true };
 		}),
@@ -318,7 +313,7 @@ export const declarationRouter = createTRPCRouter({
 					currentStep: 4,
 					updatedAt: new Date(),
 				})
-				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+				.where(activeDeclarationFilter(siren, year));
 
 			return { success: true };
 		}),
@@ -333,9 +328,7 @@ export const declarationRouter = createTRPCRouter({
 				const [declaration] = await tx
 					.select()
 					.from(declarations)
-					.where(
-						and(eq(declarations.siren, siren), eq(declarations.year, year)),
-					)
+					.where(activeDeclarationFilter(siren, year))
 					.limit(1);
 
 				if (!declaration)
@@ -426,7 +419,7 @@ export const declarationRouter = createTRPCRouter({
 				secondDeclarationStep: 3,
 				updatedAt: new Date(),
 			})
-			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+			.where(activeDeclarationFilter(siren, year));
 
 		const email = ctx.session.user.email;
 		if (email) {
@@ -454,7 +447,7 @@ export const declarationRouter = createTRPCRouter({
 		const [existing] = await ctx.db
 			.select({ submittedAt: declarations.submittedAt })
 			.from(declarations)
-			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+			.where(activeDeclarationFilter(siren, year))
 			.limit(1);
 
 		await ctx.db
@@ -465,7 +458,7 @@ export const declarationRouter = createTRPCRouter({
 				submittedAt: existing?.submittedAt ?? now,
 				updatedAt: now,
 			})
-			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+			.where(activeDeclarationFilter(siren, year));
 
 		const email = ctx.session.user.email;
 		if (email) {
@@ -495,7 +488,7 @@ export const declarationRouter = createTRPCRouter({
 					compliancePath: input.path,
 					updatedAt: new Date(),
 				})
-				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+				.where(activeDeclarationFilter(siren, year));
 
 			return { success: true };
 		}),
@@ -513,8 +506,7 @@ export const declarationRouter = createTRPCRouter({
 			.set({ complianceCompletedAt: now, updatedAt: now })
 			.where(
 				and(
-					eq(declarations.siren, siren),
-					eq(declarations.year, year),
+					activeDeclarationFilter(siren, year),
 					eq(declarations.status, "submitted"),
 					isNull(declarations.complianceCompletedAt),
 				),

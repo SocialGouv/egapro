@@ -33,11 +33,17 @@ vi.mock("~/server/api/routers/declarationHelpers", () => ({
 		_empCats: unknown[],
 		_type: string,
 	) => [],
+	activeDeclarationFilter: (siren: string, year: number) => ({
+		siren,
+		year,
+		cancelledAt: "IS NULL",
+	}),
 }));
 
 vi.mock("drizzle-orm", () => ({
 	and: (...args: unknown[]) => args,
 	eq: (col: unknown, val: unknown) => ({ col, val }),
+	isNull: (col: unknown) => ({ col, op: "isNull" }),
 }));
 
 function resetMocks() {
@@ -47,6 +53,16 @@ function resetMocks() {
 
 describe("buildPdfData", () => {
 	it("throws when declaration not found", async () => {
+		resetMocks();
+		queryResults.push([]);
+
+		const { buildPdfData } = await import("../buildPdfData");
+		await expect(
+			buildPdfData("123456789", 2026, new Date("2026-03-09")),
+		).rejects.toThrow("Déclaration introuvable");
+	});
+
+	it("throws when only cancelled declarations exist for (siren, year)", async () => {
 		resetMocks();
 		queryResults.push([]);
 
