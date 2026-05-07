@@ -18,6 +18,12 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
   - **Task ou Bug standalone** (sans parent epic) : `origin/alpha` direct. La PR sera mergée à la main par l'humain après revue.
 - **Working branch** (assigned by `/implement`) — déjà créée sur GitHub par l'orchestrateur via `createLinkedBranch` GraphQL et **officiellement linkée à l'issue** (sidebar Development). Le force-link PR↔issue (étape 8.5) ajoute également la PR à la sidebar dès qu'elle est créée.
 
+## Discipline de logging (BLOCKING)
+
+À chaque transition de phase tu DOIS exécuter `bash scripts/orchestration/log_event.sh code-dev-<N> <EVENT> [msg]` **avant** de poursuivre la phase suivante. Sans ces events, le dashboard `/report` ne peut pas suivre ta progression et l'utilisateur croit que tu es stuck (il a déjà signalé le problème — c'est exactement pour éviter ça).
+
+Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la phase, au même titre qu'un `git push` ou un `gh pr create`. Si une phase a démarré et son event n'a pas été loggé, **arrête tout, logge, puis reprends**. Liste exhaustive en bas du document (« Logging events »).
+
 ## Workflow
 
 0. **Logger START** — `bash scripts/orchestration/log_event.sh code-dev-<N> START "worktree=<path> base=<base-branch>"`. Voir la section « Logging events » plus bas pour la liste complète.
