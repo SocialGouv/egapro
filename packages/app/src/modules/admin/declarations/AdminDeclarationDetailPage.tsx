@@ -13,6 +13,7 @@ import {
 	DeclarationSummary,
 	FilesSection,
 } from "./DetailSections";
+import { SiblingDeclarationsSection } from "./SiblingDeclarationsSection";
 
 type Props = {
 	declarationId: string;
@@ -68,6 +69,7 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 				<CseOpinionsSection opinions={data.cseOpinions} />
 			)}
 			{data.files.length > 0 && <FilesSection files={data.files} />}
+			<SiblingDeclarationsSection siblings={data.siblings} />
 		</div>
 	);
 }

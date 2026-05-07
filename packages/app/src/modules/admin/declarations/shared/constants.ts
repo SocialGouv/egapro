@@ -1,6 +1,7 @@
 export const STATUS_LABELS: Record<string, string> = {
 	draft: "Brouillon",
 	submitted: "Transmise",
+	cancelled: "Annulée",
 };
 
 export const CANCEL_DECLARATION_BUTTON_LABEL = "Annuler la déclaration";

@@ -22,7 +22,11 @@ export function SearchForm() {
 				dateFrom: searchParams.get("dateFrom") ?? "",
 				dateTo: searchParams.get("dateTo") ?? "",
 				status:
-					(searchParams.get("status") as "" | "draft" | "submitted") ?? "",
+					(searchParams.get("status") as
+						| ""
+						| "draft"
+						| "submitted"
+						| "cancelled") ?? "",
 			},
 		},
 	);
@@ -136,6 +140,7 @@ export function SearchForm() {
 							<option value="">Tous</option>
 							<option value="draft">Brouillon</option>
 							<option value="submitted">Transmise</option>
+							<option value="cancelled">Annulée</option>
 						</select>
 					</div>
 				</div>
