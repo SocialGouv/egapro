@@ -9,7 +9,7 @@ on:
 
 concurrency:
   cancel-in-progress: true
-  group: "${{ github.workflow }}"
+  group: "${{ github.workflow }}-${{ github.ref }}"
 
 permissions:
   contents: write
@@ -26,7 +26,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git clone "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git" /tmp/wiki
+          # Keep the token out of the process argument list (visible in `ps aux`)
+          # by writing it to ~/.netrc instead of inlining it in the clone URL.
+          echo "machine github.com login x-access-token password ${GITHUB_TOKEN}" > ~/.netrc
+          chmod 600 ~/.netrc
+          git clone "https://github.com/${{ github.repository }}.wiki.git" /tmp/wiki
 
       - name: Mirror markdown files
         shell: bash
@@ -34,7 +38,8 @@ jobs:
           shopt -s nullglob
           for f in docs/*.md; do
             base=$(basename "$f" .md)
-            page="${base^}.md"
+            # Portable first-letter uppercase (avoids ${var^} which needs Bash 4+)
+            page="$(echo "${base:0:1}" | tr '[:lower:]' '[:upper:]')${base:1}.md"
             cp "$f" "/tmp/wiki/${page}"
             echo "  $f -> ${page}"
           done
@@ -53,6 +58,19 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           cd /tmp/wiki
           git add -A
-          git diff --cached --quiet \
-            || git commit -m "Sync docs from ${{ github.ref_name }} ($(echo ${{ github.sha }} | cut -c1-7))"
-          git push
+          if git diff --cached --quiet; then
+            echo "No changes to sync."
+            exit 0
+          fi
+          git commit -m "Sync docs from ${{ github.ref_name }} ($(echo ${{ github.sha }} | cut -c1-7))"
+          # Retry with rebase to survive a concurrent push from another wiki-syncing
+          # workflow (e.g. db-schema.yaml committing at the same time).
+          for i in 1 2 3; do
+            if git pull --rebase origin HEAD && git push origin HEAD; then
+              exit 0
+            fi
+            echo "Push attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
+          echo "All push attempts failed." >&2
+          exit 1
