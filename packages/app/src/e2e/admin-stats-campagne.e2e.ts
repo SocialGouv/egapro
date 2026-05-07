@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import {
 	deleteSeededCampaignDeclarations,
 	seedSubmittedDeclarationsForStats,
-} from "./helpers/db";
+} from "./helpers/db-campaign";
 
 // 9-digit SIRENs reserved for this test only — chosen outside any legitimate
 // range so we don't collide with real data.

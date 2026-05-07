@@ -1,8 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
 import {
-	deleteCurrentYearCategories,
 	deletePreviousYearDeclaration,
 	insertPreviousYearDeclaration,
+} from "./helpers/db-campaign";
+import {
+	deleteCurrentYearCategories,
 	resetDeclarationToDraft,
 } from "./helpers/db";
 
