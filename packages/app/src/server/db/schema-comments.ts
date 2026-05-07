@@ -13,6 +13,8 @@ export type SchemaColumnComments = Record<string, Record<string, string>>;
 
 export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 	declaration: {
+		cancelled_at:
+			"Timestamp d'annulation administrative (soft-cancel). null = déclaration active. La déclaration est conservée intacte pour audit et transmission API SUIT.",
 		// ── Identity & meta (T2 — SUIT, not GIP-MDS) ──
 		siren: "SUIT: SIREN",
 		year: "SUIT: Annee",

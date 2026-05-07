@@ -1,6 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { computeDeclarationStatus } from "../shared/declarationStatus";
+import {
+	computeDeclarationStatus,
+	isCancelled,
+} from "../shared/declarationStatus";
+
+describe("isCancelled", () => {
+	it("returns false when cancelledAt is null", () => {
+		expect(isCancelled({ cancelledAt: null })).toBe(false);
+	});
+
+	it("returns true when cancelledAt is a Date", () => {
+		expect(isCancelled({ cancelledAt: new Date("2025-04-01") })).toBe(true);
+	});
+});
 
 describe("computeDeclarationStatus", () => {
 	it("returns to_complete when declaration is undefined", () => {

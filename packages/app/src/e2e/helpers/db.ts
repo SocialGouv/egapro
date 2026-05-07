@@ -37,7 +37,7 @@ export async function ensureCurrentYearDeclaration() {
 				NOW(),
 				NOW()
 			)
-			ON CONFLICT ON CONSTRAINT declaration_siren_year_idx DO NOTHING
+			ON CONFLICT DO NOTHING
 		`;
 	} finally {
 		await sql.end();
@@ -469,7 +469,7 @@ export async function seedSubmittedDeclarationsForStats(
 					gen_random_uuid(), ${row.siren}, ${row.year}, ${declarantId}, 6,
 					'submitted', ${row.submittedAt}, NOW(), NOW()
 				)
-				ON CONFLICT ON CONSTRAINT declaration_siren_year_idx DO UPDATE SET
+				ON CONFLICT (siren, year) WHERE cancelled_at IS NULL DO UPDATE SET
 					status = 'submitted',
 					submitted_at = EXCLUDED.submitted_at
 			`;

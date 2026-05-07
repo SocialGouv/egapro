@@ -1,6 +1,11 @@
 import type { DeclarationStatus } from "../types";
 
-/** Compute the user-facing declaration status from DB fields. */
+export function isCancelled(declaration: {
+	cancelledAt: Date | null;
+}): boolean {
+	return declaration.cancelledAt !== null;
+}
+
 export function computeDeclarationStatus(
 	declaration:
 		| { status: string | null; currentStep: number | null }
