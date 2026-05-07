@@ -226,7 +226,12 @@ Ton dernier message DOIT être uniquement ce JSON (rien d'autre, pas de prose)."
     # word-split lets it disappear cleanly.
     local TIMEOUT_PREFIX=""
     [ -n "$TIMEOUT_BIN" ] && TIMEOUT_PREFIX="$TIMEOUT_BIN $AGENT_TIMEOUT"
-    $TIMEOUT_PREFIX claude \
+    # `env -u CLAUDECODE` lets the spawned claude CLI start even when the
+    # orchestrator was launched from inside a Claude Code session (where
+    # CLAUDECODE=1 would otherwise abort the nested CLI to prevent runtime
+    # collisions). The sub-agent runs in its own process tree with its own
+    # budget, so the anti-nesting guard does not apply here.
+    $TIMEOUT_PREFIX env -u CLAUDECODE claude \
         --agent "$AGENT" \
         --model "$MODEL" \
         --print \
