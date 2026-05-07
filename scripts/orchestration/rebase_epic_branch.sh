@@ -56,8 +56,12 @@ EXISTING_WT=$(git -C "$REPO_ROOT" worktree list --porcelain 2>/dev/null \
     ')
 
 if [ -n "$EXISTING_WT" ]; then
-    if [ -n "$(git -C "$EXISTING_WT" status --porcelain)" ]; then
-        echo "[rebase_epic_branch] ERROR: worktree at $EXISTING_WT is on $BRANCH but dirty — refuse to rebase (would lose uncommitted edits)" >&2
+    # `-uno` (or --untracked-files=no) : we tolerate untracked files in the
+    # main worktree (e.g. `scripts/package.json` artifacts created by tooling
+    # outside of git's tracking) — they don't risk being lost by the rebase.
+    # Only reject if there are real tracked-but-uncommitted edits.
+    if [ -n "$(git -C "$EXISTING_WT" status --porcelain -uno)" ]; then
+        echo "[rebase_epic_branch] ERROR: worktree at $EXISTING_WT is on $BRANCH but has tracked-uncommitted edits — refuse to rebase (would lose them)" >&2
         exit 1
     fi
     WT="$EXISTING_WT"
