@@ -1,0 +1,58 @@
+name: Sync docs to wiki
+
+on:
+  push:
+    branches: [master, alpha]
+    paths:
+      - "docs/**"
+  workflow_dispatch:
+
+concurrency:
+  cancel-in-progress: true
+  group: "${{ github.workflow }}"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Mirror docs/ to GitHub Wiki
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Clone wiki
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git" /tmp/wiki
+
+      - name: Mirror markdown files
+        shell: bash
+        run: |
+          shopt -s nullglob
+          for f in docs/*.md; do
+            base=$(basename "$f" .md)
+            page="${base^}.md"
+            cp "$f" "/tmp/wiki/${page}"
+            echo "  $f -> ${page}"
+          done
+
+      - name: Mirror images directory if present
+        run: |
+          if [ -d "docs/images" ]; then
+            mkdir -p /tmp/wiki/images
+            rsync -a --delete docs/images/ /tmp/wiki/images/
+            echo "Mirrored docs/images/ -> /tmp/wiki/images/"
+          fi
+
+      - name: Commit and push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          cd /tmp/wiki
+          git add -A
+          git diff --cached --quiet \
+            || git commit -m "Sync docs from ${{ github.ref_name }} ($(echo ${{ github.sha }} | cut -c1-7))"
+          git push
