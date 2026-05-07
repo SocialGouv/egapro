@@ -288,6 +288,85 @@ describe("companyRouter.list", () => {
 		// Only 1 select call (companies), no second call for declarations
 		expect(localMockSelect).toHaveBeenCalledTimes(1);
 	});
+
+	it("returns to_complete when all declarations for the siren are cancelled", async () => {
+		const companyRows = [{ siren: "123456789", name: "Acme" }];
+
+		let selectCallCount = 0;
+		const localMockSelect = vi.fn().mockImplementation(() => {
+			selectCallCount++;
+			if (selectCallCount === 1) {
+				return {
+					from: vi.fn().mockReturnValue({
+						innerJoin: vi.fn().mockReturnValue({
+							where: vi.fn().mockResolvedValue(companyRows),
+						}),
+					}),
+				};
+			}
+			// declarations query returns empty (all cancelled, filtered by isNull)
+			return {
+				from: vi.fn().mockReturnValue({
+					where: vi.fn().mockResolvedValue([]),
+				}),
+			};
+		});
+
+		const mockDb = { select: localMockSelect } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.list();
+
+		expect(result).toHaveLength(1);
+		expect(result[0]?.declarationStatus).toBe("to_complete");
+	});
+
+	it("returns status based on the active declaration when cancelled and active coexist", async () => {
+		const companyRows = [{ siren: "123456789", name: "Acme" }];
+		// Only the active (non-cancelled) declaration is returned by the filtered query
+		const activeDeclRows = [
+			{ siren: "123456789", status: "submitted", currentStep: 6 },
+		];
+
+		let selectCallCount = 0;
+		const localMockSelect = vi.fn().mockImplementation(() => {
+			selectCallCount++;
+			if (selectCallCount === 1) {
+				return {
+					from: vi.fn().mockReturnValue({
+						innerJoin: vi.fn().mockReturnValue({
+							where: vi.fn().mockResolvedValue(companyRows),
+						}),
+					}),
+				};
+			}
+			return {
+				from: vi.fn().mockReturnValue({
+					where: vi.fn().mockResolvedValue(activeDeclRows),
+				}),
+			};
+		});
+
+		const mockDb = { select: localMockSelect } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.list();
+
+		expect(result).toHaveLength(1);
+		expect(result[0]?.declarationStatus).toBe("done");
+	});
 });
 
 describe("companyRouter.getWithDeclarations", () => {
@@ -339,7 +418,7 @@ describe("companyRouter.getWithDeclarations", () => {
 				};
 			}
 			if (selectCallCount === 2) {
-				// declarations query
+				// declarations query (filtered by isNull(cancelledAt))
 				return {
 					from: vi.fn().mockReturnValue({
 						where: vi.fn().mockReturnValue({
@@ -379,6 +458,88 @@ describe("companyRouter.getWithDeclarations", () => {
 
 		expect(result.company.siren).toBe("339787277");
 		expect(result.declarations).toBeDefined();
+	});
+
+	it("excludes cancelled declarations from the timeline", async () => {
+		const companyRow = {
+			siren: "339787277",
+			name: "Test Company",
+			address: "1 rue de Paris",
+			nafCode: "6202A",
+			workforce: 100,
+			hasCse: true,
+		};
+
+		// Only the active declaration is returned by the isNull-filtered query
+		const activeDeclRows = [
+			{
+				siren: "339787277",
+				year: 2026,
+				status: "submitted",
+				currentStep: 6,
+				updatedAt: new Date(),
+				compliancePath: null,
+				secondDeclarationStatus: null,
+				complianceCompletedAt: null,
+				cseOpinionCompletedAt: null,
+			},
+		];
+
+		let selectCallCount = 0;
+		const localMockSelect = vi.fn().mockImplementation(() => {
+			selectCallCount++;
+			if (selectCallCount === 1) {
+				return {
+					from: vi.fn().mockReturnValue({
+						innerJoin: vi.fn().mockReturnValue({
+							where: vi.fn().mockReturnValue({
+								limit: vi.fn().mockResolvedValue([companyRow]),
+							}),
+						}),
+					}),
+				};
+			}
+			if (selectCallCount === 2) {
+				return {
+					from: vi.fn().mockReturnValue({
+						where: vi.fn().mockReturnValue({
+							orderBy: vi.fn().mockResolvedValue(activeDeclRows),
+						}),
+					}),
+				};
+			}
+			if (selectCallCount === 4) {
+				return {
+					from: vi.fn().mockReturnValue({
+						where: vi.fn().mockResolvedValue([]),
+					}),
+				};
+			}
+			return {
+				from: vi.fn().mockReturnValue({
+					innerJoin: vi.fn().mockReturnValue({
+						where: vi.fn().mockResolvedValue([]),
+					}),
+				}),
+			};
+		});
+
+		const mockDb = { select: localMockSelect } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getWithDeclarations({ siren: "339787277" });
+
+		// The DB query already excludes cancelled rows; only 1 active row is in the result
+		const remunerationDecls = result.declarations.filter(
+			(d) => d.type === "remuneration",
+		);
+		expect(remunerationDecls).toHaveLength(1);
 	});
 });
 

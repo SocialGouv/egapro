@@ -49,4 +49,44 @@ describe("computeDeclarationStatus", () => {
 			"in_progress",
 		);
 	});
+
+	it("returns to_complete when cancelledAt is set, regardless of status", () => {
+		expect(
+			computeDeclarationStatus({
+				status: "submitted",
+				currentStep: 6,
+				cancelledAt: new Date("2025-04-01"),
+			}),
+		).toBe("to_complete");
+	});
+
+	it("returns to_complete when cancelledAt is set for in-progress declaration", () => {
+		expect(
+			computeDeclarationStatus({
+				status: "draft",
+				currentStep: 3,
+				cancelledAt: new Date("2025-04-01"),
+			}),
+		).toBe("to_complete");
+	});
+
+	it("uses existing logic when cancelledAt is null", () => {
+		expect(
+			computeDeclarationStatus({
+				status: "submitted",
+				currentStep: 6,
+				cancelledAt: null,
+			}),
+		).toBe("done");
+	});
+
+	it("uses existing logic when cancelledAt is undefined", () => {
+		expect(
+			computeDeclarationStatus({
+				status: "submitted",
+				currentStep: 6,
+				cancelledAt: undefined,
+			}),
+		).toBe("done");
+	});
 });
