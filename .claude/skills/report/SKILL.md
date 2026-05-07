@@ -42,10 +42,27 @@ bash scripts/orchestration/epic_state.sh <N1> [<N2> ...]
 Le dashboard est déjà formaté par les scripts. Tu n'as qu'à :
 
 1. Exécuter les commandes bash ci-dessus
-2. **Copier-coller la sortie telle quelle** à l'utilisateur
-3. Ajouter **au maximum 2 lignes de commentaire** en tête si tu remarques quelque chose d'important (ex: « Attention, 2 agents inactifs > 20 min — probablement stuck »)
+2. **Re-rendre les tableaux en markdown propre** (colonnes alignées, headers `|` syntax). L'UI utilisateur rend mal les tableaux bash bruts (── boxes, alignement à espaces multiples).
+3. **Joindre une analyse** : interprétation de l'état actuel, qui bouge, qui est bloqué, prochaine étape attendue.
 
-**Ne PAS reformater** la sortie du script. Le format texte-table est voulu pour la lisibilité terminal.
+> Note : la version « copier-coller la sortie telle quelle » a été remplacée par cette mouture markdown + analyse. Les scripts bash restent la source de vérité — la donnée vient toujours d'eux, ne pas inventer.
+
+## Mode auto-report (lancé depuis /loop, e.g. par /implement)
+
+Quand `/report` est invoqué via `/loop` (mode dynamic-pacing), il devient l'élément central d'un suivi automatique pendant la durée d'un `/implement` epic. À chaque iteration :
+
+1. Run `/report <N>` (rendu markdown + analyse comme ci-dessus)
+2. **Vérifier la condition d'arrêt** : la PR finale `epic/<N> → alpha` est-elle ouverte ?
+   ```bash
+   gh pr list --repo SocialGouv/egapro --base alpha --head "epic/<N>" --state open --json number --jq 'length'
+   ```
+   - Retourne `> 0` → l'epic est terminé (loop driver a appelé `open_epic_final_pr.sh`). **Omettre `ScheduleWakeup`** → loop s'arrête. Annoncer à l'utilisateur.
+   - Retourne `0` → re-schedule un wakeup avec délai adaptatif (cf. ci-dessous).
+3. **Picking du délai adaptatif** :
+   - **Activité récente** (logs avec event dans les 5 min, agent qui spawn/transition de phase) → 60-270s (cache prompt warm)
+   - **État stable** (agent log-silent, rien d'actionable) → 1200-1800s (un seul cache miss couvre une longue fenêtre)
+   - **300s = NEVER** : worst-of-both case (cache miss sans amortissement)
+4. La cadence DOIT s'adapter à ce que tu OBSERVES, pas à un timer fixe. Lis le delta de coût (`*` indicateur live), l'âge du dernier event, l'état de la PR — décide en fonction.
 
 ## Ajustement des seuils
 
@@ -74,7 +91,7 @@ Dans ce cas le script affiche `(Aucun epic en cours)`. Si `<N>` est fourni en ar
 
 ## Règles
 
-- **Zéro LLM processing** quand les scripts suffisent. Si l'utilisateur demande un rapport standard, c'est juste `bash` + affichage.
-- **Interventions LLM autorisées** : commentaire analytique (max 2 lignes) en tête du rapport pour signaler un pattern important (plusieurs agents stuck, epic bientôt finie, etc.).
-- **Ne pas interroger GitHub** pour des données que les logs per-agent ont déjà (last_event, retries). GitHub n'est sollicité que via `epic_state.sh` pour le status board.
-- **Ne pas dispatcher ni prendre de décision d'orchestration** pendant un `/report` — l'utilisateur décide ensuite.
+- **Données d'entrée = scripts bash** (`render_dashboard.sh`, `epic_state.sh`). Toujours les exécuter, ne pas inventer la donnée.
+- **Rendu = markdown propre + analyse** (cf. « Format du rapport »). Ne pas dump la sortie bash brute.
+- **Ne pas interroger GitHub** pour des données que les logs per-agent ont déjà (last_event, retries). GitHub n'est sollicité que via `epic_state.sh` pour le board ET via le check d'arrêt de loop (mode auto-report).
+- **Ne pas dispatcher ni prendre de décision d'orchestration** pendant un `/report` — l'utilisateur décide ensuite. Exception : en mode auto-report, décider du délai du prochain wakeup ET de l'arrêt du loop.
