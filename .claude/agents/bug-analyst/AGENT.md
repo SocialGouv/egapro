@@ -27,6 +27,10 @@ Le **body de l'issue est intact** — l'analyse vit dans un commentaire séparé
 
 ## Workflow
 
+**Agent-id pour le logging** : `bug-analyst-<BUG_N>`.
+
+`bash scripts/orchestration/log_event.sh bug-analyst-<BUG_N> START` au tout début, avant la lecture du body.
+
 ### 0. Q&A si l'issue est trop floue
 
 Avant tout effort de repro, lire le body. Si la description manque d'éléments essentiels — pas de scénario reproductible, pas d'indication d'env, pas de URL ou comportement attendu —, **poser 1 à 3 questions ciblées à l'utilisateur** :
@@ -40,13 +44,13 @@ Avant tout effort de repro, lire le body. Si la description manque d'éléments 
 
 ### 1. Choisir la sous-stratégie de reproduction
 
-Trois cas, à décider d'après le body et les réponses Q&A :
+Trois cas, à décider d'après le body et les réponses Q&A. Logger l'event correspondant à la sous-stratégie retenue : `REPRO_LOCAL` / `REPRO_ENV` / `REPRO_VISUAL`.
 
-| Sous-stratégie | Quand | Outils |
-|---|---|---|
-| **Fonctionnel local** | Bug observable sur la branche `alpha` en local | Worktree `alpha` + `pnpm dev:app` + Playwright |
-| **Env-specific** | Bug uniquement sur un env de review / preprod (ex : intégration ProConnect, déploiement, secret manquant) | `kubectl logs` + Playwright sur l'URL de l'env |
-| **Visual mismatch (Figma ↔ app)** | L'utilisateur signale un écart entre une page de l'app et son design Figma | Worktree `alpha` + `pnpm dev:app` + Playwright + `figma-dev` MCP |
+| Sous-stratégie | Event | Quand | Outils |
+|---|---|---|---|
+| **Fonctionnel local** | `REPRO_LOCAL` | Bug observable sur la branche `alpha` en local | Worktree `alpha` + `pnpm dev:app` + Playwright |
+| **Env-specific** | `REPRO_ENV` | Bug uniquement sur un env de review / preprod (ex : intégration ProConnect, déploiement, secret manquant) | `kubectl logs` + Playwright sur l'URL de l'env |
+| **Visual mismatch (Figma ↔ app)** | `REPRO_VISUAL` | L'utilisateur signale un écart entre une page de l'app et son design Figma | Worktree `alpha` + `pnpm dev:app` + Playwright + `figma-dev` MCP |
 
 ### 2a. Fonctionnel local
 
@@ -87,7 +91,11 @@ kubectl -n <namespace> describe pod <pod>
 
 Ne pas se contenter du symptôme — voir `rules/bug-fix-workflow.md`. Lire le code en amont (stack trace, appelants, schémas Zod, migrations). Pour les régressions, `git log -p <file>` sur la zone incriminée pour voir si un commit récent introduit le bug.
 
+Une fois identifiée : logger `ROOT_CAUSE_FOUND "file=<path:line>"`.
+
 ### 4. Poster l'analyse
+
+Logger `ANALYSIS_POSTED` juste après le `gh issue comment`.
 
 ```bash
 gh issue comment "$BUG_N" --body-file <(cat <<'EOF'
@@ -112,9 +120,9 @@ EOF
 
 ### 5. Validation utilisateur EXPLICITE
 
-Demander en chat : « Tu valides cette analyse pour passer à `/implement` ? » Itérer si l'utilisateur conteste.
+Logger `AWAITING_VALIDATION`. Demander en chat : « Tu valides cette analyse pour passer à `/implement` ? » Itérer si l'utilisateur conteste.
 
-Sur approbation : poster `[Validation utilisateur] Analyse validée — prêt pour /implement` en commentaire et retourner.
+Sur approbation : poster `[Validation utilisateur] Analyse validée — prêt pour /implement` en commentaire, logger `COMPLETE`, et retourner.
 
 ## Contraintes
 

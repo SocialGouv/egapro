@@ -19,7 +19,13 @@ description: "Dashboard d'avancement des epics en cours. Thin wrapper sur les sc
 bash scripts/orchestration/render_dashboard.sh
 ```
 
-Ce script pur bash lit `.claude/state/epic_run/agents/*.log`, trie les agents par inactivité (stuck en tête), affiche les derniers events de chacun, et signale les agents inactifs depuis plus de 10 minutes.
+Ce script pur bash lit `.claude/state/epic_run/agents/*.log`, calcule pour chaque agent son statut (`healthy` / `slow` / `stuck`) via `agent_status.sh`, son coût LLM (live ou estimate) via `compute_cost.sh`, et rend une table compacte :
+
+```
+AGENT  TICKET  PHASE  ATTEMPT  AGE  MODEL  EST. $  REASON
+```
+
+Les agents flagués 🔴 stuck déclenchent automatiquement un drill-down (last 20 events, shell command actif, git status du worktree, dernier check CI failed, dernier comment PR) — fourni par `agent_drilldown.sh`. Les ⚠ slow sont juste mentionnés dans la table sans drill-down.
 
 **Cas avec epic(s) en argument — ajouter l'état des sous-tickets** :
 
@@ -41,13 +47,21 @@ Le dashboard est déjà formaté par les scripts. Tu n'as qu'à :
 
 **Ne PAS reformater** la sortie du script. Le format texte-table est voulu pour la lisibilité terminal.
 
-## Ajustement du seuil d'inactivité
+## Ajustement des seuils
 
-Par défaut, un agent est flaggé inactif après 10 minutes sans nouvel event. Pour ajuster :
+Les seuils stuck/slow sont définis dans `agent_status.sh` (variables d'env) :
 
 ```bash
-INACTIVITY_THRESHOLD_SEC=300 bash scripts/orchestration/render_dashboard.sh   # seuil 5 min
+SLOW_THRESHOLD_SEC=300 \
+STUCK_PHASE_SEC=1200 \
+STUCK_BOT_SEC=900 \
+bash scripts/orchestration/render_dashboard.sh
 ```
+
+Règles de décision (voir `agent_status.sh`) :
+- 🔴 **stuck** : ≥ 3 RETRY sur le même axis · CI_FAIL ≥ 3 fois consécutifs sur le même check · BOT_WAIT > 15min sans BOT_REPLIED · phase stalled > 20min · process gone (fallback)
+- ⚠ **slow** : log silent > 5min, process alive, pas de pattern stuck identifié
+- ✓ **healthy** : activité log récente OU process actif
 
 ## Cas où les logs sont vides
 
