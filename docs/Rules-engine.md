@@ -4,6 +4,27 @@
 >
 > Statut : **draft** — pas encore implémenté. Le fichier `rules-engine-v2027.1-draft.json` à côté est la spec complète prête à être déplacée vers `src/server/rules/v2027.1.json` lors de l'implémentation.
 
+## Vue FSM (générée depuis le JSON)
+
+![FSM v2027.1](./rules-engine-v2027.1-fsm.svg)
+
+Le diagramme ci-dessus est **généré automatiquement** depuis `rules-engine-v2027.1-draft.json` via `scripts/docs/render-rules-fsm.mjs`. C'est un outil de validation : si une transition existe dans le JSON, elle apparaît dans le diagramme.
+
+```bash
+# Régénérer le SVG après modification du JSON :
+node scripts/docs/render-rules-fsm.mjs docs/rules-engine-v2027.1-draft.json \
+  | npx -y --package=@mermaid-js/mermaid-cli mmdc -i - -o docs/rules-engine-v2027.1-fsm.svg -w 3200
+```
+
+Couleurs :
+- **Jaune** = état initial (`draft`)
+- **Bleu** = état neutre (post-`submitted`)
+- **Jaune clair** = parcours choisi (`*_chosen`)
+- **Vert d'eau** = exécution soumise (`*_submitted`)
+- **Vert** = démarche complétée (`demarche_completed`)
+
+Les subgraphs regroupent les états par **stage business** (cf. flowchart wiki [Déclarations & Parcours CSE](https://github.com/SocialGouv/egapro/wiki/Déclarations-&-Parcours-CSE)). Les edges portent `action + matchPayload + guard`.
+
 ## Pourquoi un rules engine versionné
 
 Le statut d'une déclaration EGAPRO suit une **state machine** (`draft` → `submitted` → ... → `demarche_completed`) avec des règles métier dérivées de la régulation (seuils d'effectif, taux d'écart, parcours Phase 2). Ces règles **évoluent dans le temps** (V2 entre en vigueur en 2027, 7e indicateur G obligatoire pour toutes les tranches dès 2030, etc.).
