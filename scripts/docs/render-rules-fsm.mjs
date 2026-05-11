@@ -28,7 +28,8 @@ function formatPredicate(p) {
 	if (p.op === "isNull") return p.fact + " is null";
 	if (p.op === "isNotNull") return p.fact + " is not null";
 	if (p.op === "in") return p.fact + " ∈ [...]";
-	return p.fact + " " + p.op + " " + JSON.stringify(p.value);
+	const rhs = "threshold" in p ? `@${p.threshold}` : JSON.stringify(p.value);
+	return p.fact + " " + p.op + " " + rhs;
 }
 
 function transitionLabel(t) {

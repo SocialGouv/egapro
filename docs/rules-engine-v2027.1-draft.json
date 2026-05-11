@@ -41,24 +41,24 @@
   "computations": {
     "phase2Required": {
       "all": [
-        { "fact": "workforce", "op": ">=", "value": 100 },
+        { "fact": "workforce", "op": ">=", "threshold": "phase2SizeMin" },
         { "fact": "indicatorGCalculated", "op": "==", "value": true },
-        { "fact": "gap", "op": ">=", "value": 5 }
+        { "fact": "gap", "op": ">=", "threshold": "gapAlertPercent" }
       ]
     },
     "cseRequired": {
       "all": [
-        { "fact": "workforce", "op": ">=", "value": 100 },
-        { "fact": "company.hasCse", "op": "==", "value": true }
+        { "fact": "workforce", "op": ">=", "threshold": "phase2SizeMin" },
+        { "fact": "hasCse", "op": "==", "value": true }
       ]
     },
     "indicatorGRequired": {
       "any": [
-        { "fact": "workforce", "op": ">=", "value": 250 },
+        { "fact": "workforce", "op": ">=", "threshold": "indicatorGAnnualSizeMin" },
         {
           "all": [
-            { "fact": "workforce", "op": ">=", "value": 150 },
-            { "fact": "workforce", "op": "<", "value": 250 },
+            { "fact": "workforce", "op": ">=", "threshold": "indicatorGTriennialSizeMin" },
+            { "fact": "workforce", "op": "<", "threshold": "indicatorGAnnualSizeMin" },
             { "fact": "isTriennialYear", "op": "==", "value": true }
           ]
         }

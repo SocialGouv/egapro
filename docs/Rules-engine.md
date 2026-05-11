@@ -56,9 +56,13 @@ Plutôt qu'une state machine codée en TS qui change avec la régulation et perd
 Un prédicat est l'unité de base : il s'évalue contre les facts d'une déclaration et retourne `true` / `false`.
 
 ```ts
+type CompareValue =
+  | { value: string | number | boolean | null }   // valeur littérale
+  | { threshold: string };                         // référence à rules.thresholds[<key>]
+
 type Predicate =
   // Comparaison d'un fact (path nested supporté via "company.hasCse")
-  | { fact: string; op: "==" | "!=" | ">" | ">=" | "<" | "<="; value: string | number | boolean | null }
+  | ({ fact: string; op: "==" | "!=" | ">" | ">=" | "<" | "<=" } & CompareValue)
   | { fact: string; op: "isNull" }
   | { fact: string; op: "isNotNull" }
   | { fact: string; op: "in"; value: unknown[] }
@@ -70,17 +74,21 @@ type Predicate =
   | { compute: string };
 ```
 
-Exemple : `phase2Required` est défini comme la conjonction de 3 facts :
+**Pourquoi `threshold` plutôt que `value` littérale** : les seuils régulatoires (5% gap, 100/150/250 employés) vivent dans `rules.thresholds`. Les computations les **référencent** plutôt que d'inliner les valeurs — si la régulation change un seuil, on modifie **un seul endroit** (la section `thresholds`) au lieu de tous les sites d'usage. L'interpréteur résout `{ "threshold": "phase2SizeMin" }` en lisant `rules.thresholds.phase2SizeMin`.
+
+Exemple : `phase2Required` référence les thresholds plutôt que d'inliner :
 
 ```json
 {
   "all": [
-    { "fact": "workforce", "op": ">=", "value": 100 },
+    { "fact": "workforce", "op": ">=", "threshold": "phase2SizeMin" },
     { "fact": "indicatorGCalculated", "op": "==", "value": true },
-    { "fact": "gap", "op": ">=", "value": 5 }
+    { "fact": "gap", "op": ">=", "threshold": "gapAlertPercent" }
   ]
 }
 ```
+
+Les `value` littérales restent autorisées pour les valeurs qui ne sont **pas** des seuils régulatoires (booléens type `true`/`false`, strings de path comme `"justify"`).
 
 ### Write source
 
@@ -187,7 +195,7 @@ L'interpréteur reçoit un objet `facts` qui doit contenir, au minimum, ces prop
 | `phase2Required` | `boolean` | flag figé à submit | Désambiguïse les transitions |
 | `phase2RevisionRequired` | `boolean` | flag figé au submit de la 2nde décl | Active les transitions revised |
 | `cseRequired` | `boolean` | flag figé à submit | Active les transitions CSE |
-| `company.hasCse` | `boolean` | jointure avec `companies` | Path nested |
+| `hasCse` | `boolean` | colonne `companies.hasCse` (jointure DB faite par le facts builder) | Le facts builder denormalize : pas de path nested |
 | Timestamps (`submittedAt`, etc.) | `Date \| null` | colonnes DB | Pour idempotence et display |
 | `action.<key>` | `unknown` | payload de l'action courante | Ex `action.path`, `action.stillHasGap` |
 
