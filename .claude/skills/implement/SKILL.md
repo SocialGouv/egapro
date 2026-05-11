@@ -103,10 +103,25 @@ Workflow identique à l'ex-`/epic` :
    nohup bash scripts/orchestration/epic_loop.sh $EPICS > "$LOG_FILE" 2>&1 &
    PID=$!
    disown
-   echo "epic_loop lancé en background (PID $PID, log: $LOG_FILE). Suivi via /report."
+   echo "epic_loop lancé en background (PID $PID, log: $LOG_FILE)."
    ```
 
-4. Rendre la main immédiatement (pas de polling — utiliser `/report`).
+4. **Lancer l'auto-report dynamique** — invoquer le skill `/loop` avec args `/report <N>` (mode dynamic-pacing, pas d'intervalle fixe).
+   ```
+   Skill("loop", args="/report <N>")
+   ```
+   Le `/loop` va run `/report <N>` immédiatement, puis re-schedule un wakeup avec délai adaptatif (60-3600s) basé sur ce que `/report` observe. À chaque wakeup, après le rendu du dashboard, **vérifier la condition d'arrêt** : la PR finale `epic/<N> → alpha` est-elle ouverte ?
+   ```bash
+   gh pr list --repo SocialGouv/egapro --base alpha --head "epic/<N>" --state open --json number --jq 'length'
+   ```
+   Si > 0 → omettre `ScheduleWakeup` → loop s'arrête. Sinon → re-schedule.
+
+   Cadence recommandée :
+   - **Activité récente côté logs** (phase qui bouge, agent qui spawn) → 60-270s (cache prompt warm)
+   - **État stable** (agent silent, rien à observer) → 1200-1800s (un seul cache miss)
+   - **Sortie 5 min** → toujours mauvais choix (300s = cache miss sans amortissement)
+
+5. Rendre la main immédiatement (le /loop continue en arrière-plan, t'auto-rapporte jusqu'à fin de l'epic).
 
 > **Note** : le main worktree reste sur `epic/<N>` pendant toute la durée du loop (ticks + final PR). Pour faire du travail sur `alpha` en parallèle (hotfix, autre branche), monter un worktree dédié (`git worktree add /tmp/egapro-alpha alpha`). À la fin de l'epic — quand la PR finale est mergée sur alpha — basculer manuellement le main worktree avec `git checkout alpha && git pull`.
 
@@ -153,8 +168,8 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 
 ## Suivi de la progression (mode epic)
 
-- `/report` — dashboard live agents actifs + état du board
-- `/report <N>` — état détaillé des sous-tickets de l'epic
+- **Auto-report `/loop /report <N>`** lancé automatiquement à l'étape 4 — délivre des dashboards adaptatifs jusqu'à la fin de l'epic, puis s'auto-arrête (cf. condition d'arrêt en step 4)
+- `/report <N>` — déclencher manuellement à tout moment pour un check on-demand (n'interfère pas avec le loop dynamique)
 - `tail -f /tmp/epic_loop_<EPICS_KEY>.log`
 - `ls .claude/state/epic_run/ticks/<EPICS_KEY>/` — JSON des ticks (plan + result + agent returns)
 
