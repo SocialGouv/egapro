@@ -93,8 +93,8 @@ describe("adminDeclarationsRouter — search", () => {
 		expect(result.rows[0]?.id).toBe(DECL_ID_2);
 	});
 
-	it("excludes cancelled rows by default (no status filter)", async () => {
-		const db = buildDb([activeRow]);
+	it("includes both active and cancelled rows by default (no status filter)", async () => {
+		const db = buildDb([activeRow, cancelledRow]);
 		const { adminDeclarationsRouter } = await import("../adminDeclarations");
 		const caller = adminDeclarationsRouter.createCaller({
 			db,
@@ -104,8 +104,7 @@ describe("adminDeclarationsRouter — search", () => {
 
 		const result = await caller.search({});
 
-		expect(result.rows).toHaveLength(1);
-		expect(result.rows[0]?.id).toBe(DECL_ID_1);
+		expect(result.rows).toHaveLength(2);
 	});
 
 	it("excludes cancelled rows when filtering by submitted status", async () => {

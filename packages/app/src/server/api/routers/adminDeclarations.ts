@@ -81,8 +81,6 @@ export const adminDeclarationsRouter = createTRPCRouter({
 			} else if (input.status) {
 				filters.push(eq(declarations.status, input.status));
 				filters.push(isNull(declarations.cancelledAt));
-			} else {
-				filters.push(isNull(declarations.cancelledAt));
 			}
 
 			const where = filters.length > 0 ? and(...filters) : undefined;
