@@ -199,11 +199,39 @@
     },
 
     {
-      "id": "submit_cse_opinion",
+      "id": "submit_cse_opinion_no_phase2",
+      "from": ["submitted"],
+      "action": "submit_cse_opinion",
+      "guard": {
+        "all": [
+          { "fact": "cseRequired", "op": "==", "value": true },
+          { "fact": "phase2Required", "op": "==", "value": false }
+        ]
+      },
+      "to": "cse_opinion_submitted",
+      "writes": [
+        { "field": "cseOpinionCompletedAt", "source": "$now" }
+      ]
+    },
+    {
+      "id": "submit_cse_opinion_after_corrective_actions",
+      "from": ["second_declaration_submitted"],
+      "action": "submit_cse_opinion",
+      "guard": {
+        "all": [
+          { "fact": "cseRequired", "op": "==", "value": true },
+          { "fact": "phase2RevisionRequired", "op": "==", "value": false }
+        ]
+      },
+      "to": "cse_opinion_submitted",
+      "writes": [
+        { "field": "cseOpinionCompletedAt", "source": "$now" }
+      ]
+    },
+    {
+      "id": "submit_cse_opinion_after_other_path",
       "from": [
-        "submitted",
         "gap_justification_chosen",
-        "second_declaration_submitted",
         "joint_evaluation_submitted",
         "revised_gap_justification_chosen",
         "revised_joint_evaluation_submitted"
@@ -217,19 +245,53 @@
     },
 
     {
-      "id": "complete_demarche",
+      "id": "complete_demarche_no_phase2_no_cse",
+      "from": ["submitted"],
+      "action": "complete_demarche",
+      "guard": {
+        "all": [
+          { "fact": "phase2Required", "op": "==", "value": false },
+          { "fact": "cseRequired", "op": "==", "value": false }
+        ]
+      },
+      "to": "demarche_completed",
+      "writes": [
+        { "field": "demarcheCompletedAt", "source": "$now" }
+      ]
+    },
+    {
+      "id": "complete_demarche_after_corrective_actions_no_cse",
+      "from": ["second_declaration_submitted"],
+      "action": "complete_demarche",
+      "guard": {
+        "all": [
+          { "fact": "phase2RevisionRequired", "op": "==", "value": false },
+          { "fact": "cseRequired", "op": "==", "value": false }
+        ]
+      },
+      "to": "demarche_completed",
+      "writes": [
+        { "field": "demarcheCompletedAt", "source": "$now" }
+      ]
+    },
+    {
+      "id": "complete_demarche_after_other_path_no_cse",
       "from": [
-        "submitted",
         "gap_justification_chosen",
-        "corrective_actions_chosen",
-        "joint_evaluation_chosen",
-        "second_declaration_submitted",
         "joint_evaluation_submitted",
         "revised_gap_justification_chosen",
-        "revised_joint_evaluation_chosen",
-        "revised_joint_evaluation_submitted",
-        "cse_opinion_submitted"
+        "revised_joint_evaluation_submitted"
       ],
+      "action": "complete_demarche",
+      "guard": { "fact": "cseRequired", "op": "==", "value": false },
+      "to": "demarche_completed",
+      "writes": [
+        { "field": "demarcheCompletedAt", "source": "$now" }
+      ]
+    },
+    {
+      "id": "complete_demarche_after_cse",
+      "from": ["cse_opinion_submitted"],
       "action": "complete_demarche",
       "to": "demarche_completed",
       "writes": [
