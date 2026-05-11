@@ -171,6 +171,7 @@ Quality checks run **automatically** après chaque itération de code — pas de
 |---|---|
 | `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature) ou le commentaire d'analyse (Task / Bug). Pour les tickets UI, vérifie lui-même la fidélité Figma via le MCP `figma-dev`. |
 | `functional-validator` | Rejoue les scénarios PO dans le dev server |
+| `doc-writer` | Régénère `docs/*.md` from scratch à partir de l'état courant du code. Invoqué par `epic_loop.sh` en fin d'epic (juste avant `open_epic_final_pr.sh`) ou par le skill `/doc` (humain). Sonnet, sans worktree dédié — opère sur la branche courante. |
 
 **Pipeline review** (invoqué par `/review`) :
 | Agent | Rôle |
@@ -194,8 +195,9 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | `/report [<N> ...]` | Dashboard live des agents actifs + état des sous-tickets de l'epic. Pure bash, zéro LLM. |
 | `/open <PR>` | Recrée un worktree local pour une PR (typique après auto-cleanup de `/implement`) — utile pour tester la PR avant merge. |
 | `/review [<issue#>\|<PR#>]` | Adresse les commentaires de revue (humain + bots). Détecte le mode (epic / task / bug) selon le type d'issue ; en mode epic, traite toutes les sub-task PRs liées à la feature et applique les fixes sur `epic/<N>`. Délègue à l'agent `review-fixer` qui tourne en worktree. |
+| `/doc [<issue#>]` | Régénère `docs/features.md` / `architecture.md` / `parcours-utilisateurs.md` à partir de l'état courant du code. Sans arg : commit local sur la branche courante (l'humain push). Avec `<issue#>` (epic ou task) : se positionne sur la branche cible, commit + push. Délègue à l'agent `doc-writer`. Hors pipeline / en complément de l'invocation auto par `epic_loop.sh`. |
 
-Workflow standard : `/analyse <issue>` pour la conception (modes auto-détectés), puis `/implement <issue>` pour l'exécution. Le ticket reste en `In progress` même quand l'IA a fini — c'est l'utilisateur qui le bouge à `In review` puis `Done` à son rythme. `/review` prend le relais quand les humains commentent les PR.
+Workflow standard : `/analyse <issue>` pour la conception (modes auto-détectés), puis `/implement <issue>` pour l'exécution. Le ticket reste en `In progress` même quand l'IA a fini — c'est l'utilisateur qui le bouge à `In review` puis `Done` à son rythme. `/review` prend le relais quand les humains commentent les PR. `/doc` régénère la doc utilisateur depuis le code (auto en fin d'epic, manuel hors pipeline).
 
 ### Orchestration (`scripts/orchestration/`)
 
@@ -203,11 +205,12 @@ Tous les scripts shell portent leur propre header `--help`-friendly. Le mode epi
 
 | Script | Rôle |
 |---|---|
-| `epic_loop.sh` | Loop driver background. Tick = cleanup terminal worktrees → rebase epic branches → plan → spawn N `claude` CLIs en parallèle (budget USD isolé) → aggregate JSON returns → process. Plafond `EPIC_LOOP_MAX_TICKS=30`. À la fin, ouvre la PR finale `epic/<N> → alpha`. |
+| `epic_loop.sh` | Loop driver background. Tick = cleanup terminal worktrees → rebase epic branches → plan → spawn N `claude` CLIs en parallèle (budget USD isolé) → aggregate JSON returns → process. Plafond `EPIC_LOOP_MAX_TICKS=30`. À la fin, pour chaque epic : invoke `run_doc_writer.sh` (best-effort, non-blocking) puis `open_epic_final_pr.sh`. |
 | `ensure_epic_branch.sh` | Idempotent. Crée la branche d'intégration `epic/<N>` depuis `origin/alpha` si absente. Appelé au startup d'`epic_loop.sh` pour chaque epic NEW-mode. |
 | `merge_validated_ticket.sh` | Squash-merge la PR d'un ticket validé dans `epic/<N>` via `gh pr merge --squash`. Branche auto-supprimée par les settings repo. Sur conflit : commente la PR + remet le ticket en `In progress` (le pipeline redispatchera pour rebaser). |
 | `rebase_epic_branch.sh` | Entre ticks, rebase `epic/<N>` sur `origin/alpha` dans un worktree dédié (`/tmp/egapro-rebase-epic<N>`). Force-with-lease push. Sur conflit : commente l'epic + label `dispatch=escalate` + exit 2 (halt orchestration). |
 | `open_epic_final_pr.sh` | Ouvre (ou réutilise) la PR finale `epic/<N> → alpha` avec body listant chaque sub-ticket via `Closes #N`. Appelé en fin de loop pour la review humaine. |
+| `run_doc_writer.sh` | Invoque l'agent `doc-writer` sur `epic/<N>` (depuis le main worktree, pas de worktree dédié). Régénère `docs/*.md` from scratch et commit + push. Best-effort : un échec/rate-limit ne bloque pas l'ouverture de la PR finale. Budget Sonnet par défaut $5 (`EPIC_LOOP_BUDGET_DOC`). |
 | `cleanup_terminal_worktrees.sh` | Scan les worktrees `egapro-epic<E>-t<N>` ; teardown + remove ceux dont le ticket a été squash-mergé dans `epic/<N>` (signal canonique : la branche `ticket/<N>-*` est gone d'origin). Appelé à chaque tick par `epic_loop.sh` pour libérer les slots dynamiquement. |
 | `dispatch_plan.sh` | Calcule la JSON list des tickets dispatchables : parse `## Depends on`, gate les enfants dont le parent n'est pas encore squash-mergé dans `epic/<N>` (= sa branche n'existe plus sur origin), alloue les indices libres dans `[0, EPIC_MAX_PARALLEL[`. Base = `origin/epic/<N>` toujours. |
 | `process_tick_result.sh` | Applique les mutations board selon le statut JSON retourné par `code-dev`. Sur `validated` (NEW mode) → invoke `merge_validated_ticket.sh`. Compteur `attempt=N` pour anti-boucle 3 refacto consécutifs → `dispatch=escalate`. |
