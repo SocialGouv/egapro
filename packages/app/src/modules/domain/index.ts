@@ -51,6 +51,7 @@ export {
 // Gap business rules (calculations & threshold classification)
 export {
 	computeGap,
+	computeGapRatio,
 	computeTotal,
 	gapLevel,
 	hasGapsAboveThreshold,

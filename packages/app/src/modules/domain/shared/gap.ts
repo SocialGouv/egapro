@@ -18,6 +18,18 @@ import type { GapLevel } from "../types";
 import { GAP_ALERT_THRESHOLD } from "./constants";
 import { parseNumber } from "./number";
 
+/** Compute signed gap ratio: (men - women) / men. Returns null if invalid or men is 0. Range: typically -1..1.
+ *  Sign convention: positive when men earn more (typical case), negative when women earn more. */
+export function computeGapRatio(
+	womenVal: string,
+	menVal: string,
+): number | null {
+	const w = parseNumber(womenVal);
+	const m = parseNumber(menVal);
+	if (Number.isNaN(w) || Number.isNaN(m) || m === 0) return null;
+	return (m - w) / m;
+}
+
 /** Compute gap as absolute percentage: |((men - women) / men) * 100|. Returns null if inputs are invalid or men is zero. */
 export function computeGap(womenVal: string, menVal: string): number | null {
 	const w = parseNumber(womenVal);

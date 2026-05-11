@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+	INDICATOR_A_GAP_LABELS,
 	INDICATOR_A_LABELS,
+	INDICATOR_B_GAP_LABELS,
 	INDICATOR_B_LABELS,
+	INDICATOR_C_GAP_LABELS,
 	INDICATOR_C_LABELS,
+	INDICATOR_D_GAP_LABELS,
 	INDICATOR_D_LABELS,
 	INDICATOR_E_LABELS,
+	INDICATOR_E_PROPORTION_LABELS,
 	INDICATOR_F_ANNUAL_MEN_LABELS,
 	INDICATOR_F_ANNUAL_THRESHOLD_LABELS,
 	INDICATOR_F_ANNUAL_WOMEN_LABELS,
@@ -26,6 +31,19 @@ const ALL_SUIT_LABELS: readonly string[] = [
 	...INDICATOR_F_HOURLY_THRESHOLD_LABELS,
 	...INDICATOR_F_HOURLY_WOMEN_LABELS,
 	...INDICATOR_F_HOURLY_MEN_LABELS,
+];
+
+const T3_GAP_PROPORTION_COLUMNS: ReadonlyArray<[string, string]> = [
+	["global_annual_mean_gap", INDICATOR_A_GAP_LABELS.annual],
+	["global_hourly_mean_gap", INDICATOR_A_GAP_LABELS.hourly],
+	["variable_annual_mean_gap", INDICATOR_B_GAP_LABELS.annual],
+	["variable_hourly_mean_gap", INDICATOR_B_GAP_LABELS.hourly],
+	["global_annual_median_gap", INDICATOR_C_GAP_LABELS.annual],
+	["global_hourly_median_gap", INDICATOR_C_GAP_LABELS.hourly],
+	["variable_annual_median_gap", INDICATOR_D_GAP_LABELS.annual],
+	["variable_hourly_median_gap", INDICATOR_D_GAP_LABELS.hourly],
+	["variable_proportion_women", INDICATOR_E_PROPORTION_LABELS.women],
+	["variable_proportion_men", INDICATOR_E_PROPORTION_LABELS.men],
 ];
 
 describe("SCHEMA_COLUMN_COMMENTS", () => {
@@ -219,6 +237,23 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 				labelSet.has(label),
 				`column "${column}" has unknown label "${label}"`,
 			).toBe(true);
+		}
+	});
+
+	// ── T3 tests (T3 — gap + proportion E columns) ────────────────────────────
+
+	it("annotates all 10 T3 gap and proportion E columns with their SUIT labels", () => {
+		const decl = SCHEMA_COLUMN_COMMENTS.declaration;
+		for (const [column, expectedLabel] of T3_GAP_PROPORTION_COLUMNS) {
+			expect(decl?.[column], `column "${column}"`).toBe(
+				`GIP-MDS | SUIT: ${expectedLabel}`,
+			);
+		}
+	});
+
+	it("uses verbatim CSV labels for all T3 gap and proportion E columns (naming check)", () => {
+		for (const [, label] of T3_GAP_PROPORTION_COLUMNS) {
+			expect(label).toMatch(/^(Rem_|Taux_|Proportion_)/);
 		}
 	});
 });

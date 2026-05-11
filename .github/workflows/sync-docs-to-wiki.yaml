@@ -1,0 +1,76 @@
+name: Sync docs to wiki
+
+on:
+  push:
+    branches: [master, alpha]
+    paths:
+      - "docs/**"
+  workflow_dispatch:
+
+concurrency:
+  cancel-in-progress: true
+  group: "${{ github.workflow }}-${{ github.ref }}"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Mirror docs/ to GitHub Wiki
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Clone wiki
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Keep the token out of the process argument list (visible in `ps aux`)
+          # by writing it to ~/.netrc instead of inlining it in the clone URL.
+          echo "machine github.com login x-access-token password ${GITHUB_TOKEN}" > ~/.netrc
+          chmod 600 ~/.netrc
+          git clone "https://github.com/${{ github.repository }}.wiki.git" /tmp/wiki
+
+      - name: Mirror markdown files
+        shell: bash
+        run: |
+          shopt -s nullglob
+          for f in docs/*.md; do
+            base=$(basename "$f" .md)
+            # Portable first-letter uppercase (avoids ${var^} which needs Bash 4+)
+            page="$(echo "${base:0:1}" | tr '[:lower:]' '[:upper:]')${base:1}.md"
+            cp "$f" "/tmp/wiki/${page}"
+            echo "  $f -> ${page}"
+          done
+
+      - name: Mirror images directory if present
+        run: |
+          if [ -d "docs/images" ]; then
+            mkdir -p /tmp/wiki/images
+            rsync -a --delete docs/images/ /tmp/wiki/images/
+            echo "Mirrored docs/images/ -> /tmp/wiki/images/"
+          fi
+
+      - name: Commit and push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          cd /tmp/wiki
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to sync."
+            exit 0
+          fi
+          git commit -m "Sync docs from ${{ github.ref_name }} ($(echo ${{ github.sha }} | cut -c1-7))"
+          # Retry with rebase to survive a concurrent push from another wiki-syncing
+          # workflow (e.g. db-schema.yaml committing at the same time).
+          for i in 1 2 3; do
+            if git pull --rebase origin HEAD && git push origin HEAD; then
+              exit 0
+            fi
+            echo "Push attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
+          echo "All push attempts failed." >&2
+          exit 1

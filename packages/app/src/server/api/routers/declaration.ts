@@ -8,6 +8,7 @@ import {
 	updateStep3Schema,
 	updateStep4Schema,
 } from "~/modules/declaration-remuneration/schemas";
+import { computeIndicatorPercentages } from "~/modules/declaration-remuneration/shared/computeIndicatorPercentages";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import { getCurrentYear } from "~/modules/domain";
 import {
@@ -445,18 +446,65 @@ export const declarationRouter = createTRPCRouter({
 		// Preserve the very first submission date — resubmissions after
 		// corrections must not move the campaign progression curve.
 		const [existing] = await ctx.db
-			.select({ submittedAt: declarations.submittedAt })
+			.select({
+				submittedAt: declarations.submittedAt,
+				indicatorAAnnualWomen: declarations.indicatorAAnnualWomen,
+				indicatorAAnnualMen: declarations.indicatorAAnnualMen,
+				indicatorAHourlyWomen: declarations.indicatorAHourlyWomen,
+				indicatorAHourlyMen: declarations.indicatorAHourlyMen,
+				indicatorBAnnualWomen: declarations.indicatorBAnnualWomen,
+				indicatorBAnnualMen: declarations.indicatorBAnnualMen,
+				indicatorBHourlyWomen: declarations.indicatorBHourlyWomen,
+				indicatorBHourlyMen: declarations.indicatorBHourlyMen,
+				indicatorCAnnualWomen: declarations.indicatorCAnnualWomen,
+				indicatorCAnnualMen: declarations.indicatorCAnnualMen,
+				indicatorCHourlyWomen: declarations.indicatorCHourlyWomen,
+				indicatorCHourlyMen: declarations.indicatorCHourlyMen,
+				indicatorDAnnualWomen: declarations.indicatorDAnnualWomen,
+				indicatorDAnnualMen: declarations.indicatorDAnnualMen,
+				indicatorDHourlyWomen: declarations.indicatorDHourlyWomen,
+				indicatorDHourlyMen: declarations.indicatorDHourlyMen,
+				indicatorEWomen: declarations.indicatorEWomen,
+				indicatorEMen: declarations.indicatorEMen,
+				indicatorFAnnualWomen1: declarations.indicatorFAnnualWomen1,
+				indicatorFAnnualWomen2: declarations.indicatorFAnnualWomen2,
+				indicatorFAnnualWomen3: declarations.indicatorFAnnualWomen3,
+				indicatorFAnnualWomen4: declarations.indicatorFAnnualWomen4,
+				indicatorFAnnualMen1: declarations.indicatorFAnnualMen1,
+				indicatorFAnnualMen2: declarations.indicatorFAnnualMen2,
+				indicatorFAnnualMen3: declarations.indicatorFAnnualMen3,
+				indicatorFAnnualMen4: declarations.indicatorFAnnualMen4,
+				indicatorFHourlyWomen1: declarations.indicatorFHourlyWomen1,
+				indicatorFHourlyWomen2: declarations.indicatorFHourlyWomen2,
+				indicatorFHourlyWomen3: declarations.indicatorFHourlyWomen3,
+				indicatorFHourlyWomen4: declarations.indicatorFHourlyWomen4,
+				indicatorFHourlyMen1: declarations.indicatorFHourlyMen1,
+				indicatorFHourlyMen2: declarations.indicatorFHourlyMen2,
+				indicatorFHourlyMen3: declarations.indicatorFHourlyMen3,
+				indicatorFHourlyMen4: declarations.indicatorFHourlyMen4,
+			})
 			.from(declarations)
 			.where(activeDeclarationFilter(siren, year))
 			.limit(1);
+
+		if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
+
+		const percentages = computeIndicatorPercentages(existing);
+		const percentagesForDb = Object.fromEntries(
+			Object.entries(percentages).map(([k, v]) => [
+				k,
+				v === null ? null : v.toString(),
+			]),
+		);
 
 		await ctx.db
 			.update(declarations)
 			.set({
 				status: "submitted",
 				currentStep: 6,
-				submittedAt: existing?.submittedAt ?? now,
+				submittedAt: existing.submittedAt ?? now,
 				updatedAt: now,
+				...percentagesForDb,
 			})
 			.where(activeDeclarationFilter(siren, year));
 

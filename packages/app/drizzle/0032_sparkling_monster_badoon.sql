@@ -1,0 +1,26 @@
+ALTER TABLE "app_declaration" ADD COLUMN "global_annual_mean_gap" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "global_hourly_mean_gap" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "variable_annual_mean_gap" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "variable_hourly_mean_gap" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "global_annual_median_gap" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "global_hourly_median_gap" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "variable_annual_median_gap" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "variable_hourly_median_gap" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "variable_proportion_women" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "variable_proportion_men" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "annual_quartile1_proportion_women" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "annual_quartile2_proportion_women" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "annual_quartile3_proportion_women" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "annual_quartile4_proportion_women" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "annual_quartile1_proportion_men" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "annual_quartile2_proportion_men" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "annual_quartile3_proportion_men" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "annual_quartile4_proportion_men" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "hourly_quartile1_proportion_women" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "hourly_quartile2_proportion_women" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "hourly_quartile3_proportion_women" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "hourly_quartile4_proportion_women" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "hourly_quartile1_proportion_men" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "hourly_quartile2_proportion_men" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "hourly_quartile3_proportion_men" numeric(9, 4);--> statement-breakpoint
+ALTER TABLE "app_declaration" ADD COLUMN "hourly_quartile4_proportion_men" numeric(9, 4);

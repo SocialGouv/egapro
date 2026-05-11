@@ -1,9 +1,160 @@
 {
-	"id": "0032_add_cancelled_at",
-	"prevId": "0032_add_cancelled_at",
+	"id": "4b044fe1-1829-4e38-b451-449fb058e162",
+	"prevId": "d0362ab4-b90f-4ede-8f1d-53ee0f4e955b",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
+		"public.app_admin_impersonation_event": {
+			"name": "app_admin_impersonation_event",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"admin_user_id": {
+					"name": "admin_user_id",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"siren": {
+					"name": "siren",
+					"type": "varchar(9)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"started_at": {
+					"name": "started_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"stopped_at": {
+					"name": "stopped_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {
+				"admin_impersonation_event_admin_started_idx": {
+					"name": "admin_impersonation_event_admin_started_idx",
+					"columns": [
+						{
+							"expression": "admin_user_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						},
+						{
+							"expression": "started_at",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"app_admin_impersonation_event_admin_user_id_app_user_id_fk": {
+					"name": "app_admin_impersonation_event_admin_user_id_app_user_id_fk",
+					"tableFrom": "app_admin_impersonation_event",
+					"tableTo": "app_user",
+					"columnsFrom": ["admin_user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"app_admin_impersonation_event_siren_app_company_siren_fk": {
+					"name": "app_admin_impersonation_event_siren_app_company_siren_fk",
+					"tableFrom": "app_admin_impersonation_event",
+					"tableTo": "app_company",
+					"columnsFrom": ["siren"],
+					"columnsTo": ["siren"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.app_campaign_deadline": {
+			"name": "app_campaign_deadline",
+			"schema": "",
+			"columns": {
+				"year": {
+					"name": "year",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"gip_publication_date": {
+					"name": "gip_publication_date",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"campaign_start_date": {
+					"name": "campaign_start_date",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"decl1_modification_deadline": {
+					"name": "decl1_modification_deadline",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"decl1_justification_deadline": {
+					"name": "decl1_justification_deadline",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"decl1_joint_evaluation_deadline": {
+					"name": "decl1_joint_evaluation_deadline",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"decl2_modification_deadline": {
+					"name": "decl2_modification_deadline",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"decl2_justification_deadline": {
+					"name": "decl2_justification_deadline",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"decl2_joint_evaluation_deadline": {
+					"name": "decl2_joint_evaluation_deadline",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
 		"public.app_company": {
 			"name": "app_company",
 			"schema": "",
@@ -65,157 +216,6 @@
 			"checkConstraints": {},
 			"isRLSEnabled": false
 		},
-		"public.app_cse_opinion_file_link": {
-			"name": "app_cse_opinion_file_link",
-			"schema": "",
-			"columns": {
-				"file_id": {
-					"name": "file_id",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"opinion_id": {
-					"name": "opinion_id",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				}
-			},
-			"indexes": {},
-			"foreignKeys": {
-				"app_cse_opinion_file_link_file_id_app_cse_opinion_file_id_fk": {
-					"name": "app_cse_opinion_file_link_file_id_app_cse_opinion_file_id_fk",
-					"tableFrom": "app_cse_opinion_file_link",
-					"columnsFrom": ["file_id"],
-					"tableTo": "app_cse_opinion_file",
-					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
-				},
-				"app_cse_opinion_file_link_opinion_id_app_cse_opinion_id_fk": {
-					"name": "app_cse_opinion_file_link_opinion_id_app_cse_opinion_id_fk",
-					"tableFrom": "app_cse_opinion_file_link",
-					"columnsFrom": ["opinion_id"],
-					"tableTo": "app_cse_opinion",
-					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
-				}
-			},
-			"compositePrimaryKeys": {
-				"app_cse_opinion_file_link_file_id_opinion_id_pk": {
-					"name": "app_cse_opinion_file_link_file_id_opinion_id_pk",
-					"columns": ["file_id", "opinion_id"]
-				}
-			},
-			"uniqueConstraints": {},
-			"policies": {},
-			"checkConstraints": {},
-			"isRLSEnabled": false
-		},
-		"public.app_cse_opinion_file": {
-			"name": "app_cse_opinion_file",
-			"schema": "",
-			"columns": {
-				"id": {
-					"name": "id",
-					"type": "varchar(255)",
-					"primaryKey": true,
-					"notNull": true
-				},
-				"siren": {
-					"name": "siren",
-					"type": "varchar(9)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"year": {
-					"name": "year",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"file_name": {
-					"name": "file_name",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"file_path": {
-					"name": "file_path",
-					"type": "varchar(500)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"declarant_id": {
-					"name": "declarant_id",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"uploaded_at": {
-					"name": "uploaded_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"created_at": {
-					"name": "created_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
-				}
-			},
-			"indexes": {
-				"cse_opinion_file_siren_year_idx": {
-					"name": "cse_opinion_file_siren_year_idx",
-					"columns": [
-						{
-							"expression": "siren",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						},
-						{
-							"expression": "year",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"with": {},
-					"method": "btree",
-					"concurrently": false
-				}
-			},
-			"foreignKeys": {
-				"app_cse_opinion_file_siren_app_company_siren_fk": {
-					"name": "app_cse_opinion_file_siren_app_company_siren_fk",
-					"tableFrom": "app_cse_opinion_file",
-					"columnsFrom": ["siren"],
-					"tableTo": "app_company",
-					"columnsTo": ["siren"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
-				},
-				"app_cse_opinion_file_declarant_id_app_user_id_fk": {
-					"name": "app_cse_opinion_file_declarant_id_app_user_id_fk",
-					"tableFrom": "app_cse_opinion_file",
-					"columnsFrom": ["declarant_id"],
-					"tableTo": "app_user",
-					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
-				}
-			},
-			"compositePrimaryKeys": {},
-			"uniqueConstraints": {},
-			"policies": {},
-			"checkConstraints": {},
-			"isRLSEnabled": false
-		},
 		"public.app_cse_opinion": {
 			"name": "app_cse_opinion",
 			"schema": "",
@@ -226,15 +226,9 @@
 					"primaryKey": true,
 					"notNull": true
 				},
-				"siren": {
-					"name": "siren",
-					"type": "varchar(9)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"year": {
-					"name": "year",
-					"type": "integer",
+				"declaration_id": {
+					"name": "declaration_id",
+					"type": "varchar(255)",
 					"primaryKey": false,
 					"notNull": true
 				},
@@ -268,12 +262,6 @@
 					"primaryKey": false,
 					"notNull": false
 				},
-				"declarant_id": {
-					"name": "declarant_id",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
 				"created_at": {
 					"name": "created_at",
 					"type": "timestamp with time zone",
@@ -288,163 +276,41 @@
 				}
 			},
 			"indexes": {
-				"cse_opinion_siren_year_idx": {
-					"name": "cse_opinion_siren_year_idx",
+				"cse_opinion_declaration_idx": {
+					"name": "cse_opinion_declaration_idx",
 					"columns": [
 						{
-							"expression": "siren",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						},
-						{
-							"expression": "year",
+							"expression": "declaration_id",
 							"isExpression": false,
 							"asc": true,
 							"nulls": "last"
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {
-				"app_cse_opinion_siren_app_company_siren_fk": {
-					"name": "app_cse_opinion_siren_app_company_siren_fk",
+				"app_cse_opinion_declaration_id_app_declaration_id_fk": {
+					"name": "app_cse_opinion_declaration_id_app_declaration_id_fk",
 					"tableFrom": "app_cse_opinion",
-					"columnsFrom": ["siren"],
-					"tableTo": "app_company",
-					"columnsTo": ["siren"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
-				},
-				"app_cse_opinion_declarant_id_app_user_id_fk": {
-					"name": "app_cse_opinion_declarant_id_app_user_id_fk",
-					"tableFrom": "app_cse_opinion",
-					"columnsFrom": ["declarant_id"],
-					"tableTo": "app_user",
+					"tableTo": "app_declaration",
+					"columnsFrom": ["declaration_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {
-				"cse_opinion_siren_year_decl_type_idx": {
-					"name": "cse_opinion_siren_year_decl_type_idx",
-					"columns": ["siren", "year", "declaration_number", "type"],
-					"nullsNotDistinct": false
+				"cse_opinion_decl_number_type_idx": {
+					"name": "cse_opinion_decl_number_type_idx",
+					"nullsNotDistinct": false,
+					"columns": ["declaration_id", "declaration_number", "type"]
 				}
 			},
-			"policies": {},
-			"checkConstraints": {},
-			"isRLSEnabled": false
-		},
-		"public.app_declaration_category": {
-			"name": "app_declaration_category",
-			"schema": "",
-			"columns": {
-				"id": {
-					"name": "id",
-					"type": "varchar(255)",
-					"primaryKey": true,
-					"notNull": true
-				},
-				"siren": {
-					"name": "siren",
-					"type": "varchar(9)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"year": {
-					"name": "year",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"step": {
-					"name": "step",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"category_name": {
-					"name": "category_name",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"women_count": {
-					"name": "women_count",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"men_count": {
-					"name": "men_count",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"women_value": {
-					"name": "women_value",
-					"type": "numeric",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"men_value": {
-					"name": "men_value",
-					"type": "numeric",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"women_median_value": {
-					"name": "women_median_value",
-					"type": "numeric",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"men_median_value": {
-					"name": "men_median_value",
-					"type": "numeric",
-					"primaryKey": false,
-					"notNull": false
-				}
-			},
-			"indexes": {
-				"declaration_cat_siren_year_step_idx": {
-					"name": "declaration_cat_siren_year_step_idx",
-					"columns": [
-						{
-							"expression": "siren",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						},
-						{
-							"expression": "year",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						},
-						{
-							"expression": "step",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"with": {},
-					"method": "btree",
-					"concurrently": false
-				}
-			},
-			"foreignKeys": {},
-			"compositePrimaryKeys": {},
-			"uniqueConstraints": {},
 			"policies": {},
 			"checkConstraints": {},
 			"isRLSEnabled": false
@@ -519,6 +385,402 @@
 					"primaryKey": false,
 					"notNull": false
 				},
+				"indicator_a_annual_women": {
+					"name": "indicator_a_annual_women",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_a_annual_men": {
+					"name": "indicator_a_annual_men",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_a_hourly_women": {
+					"name": "indicator_a_hourly_women",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_a_hourly_men": {
+					"name": "indicator_a_hourly_men",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_b_annual_women": {
+					"name": "indicator_b_annual_women",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_b_annual_men": {
+					"name": "indicator_b_annual_men",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_b_hourly_women": {
+					"name": "indicator_b_hourly_women",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_b_hourly_men": {
+					"name": "indicator_b_hourly_men",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_c_annual_women": {
+					"name": "indicator_c_annual_women",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_c_annual_men": {
+					"name": "indicator_c_annual_men",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_c_hourly_women": {
+					"name": "indicator_c_hourly_women",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_c_hourly_men": {
+					"name": "indicator_c_hourly_men",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_d_annual_women": {
+					"name": "indicator_d_annual_women",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_d_annual_men": {
+					"name": "indicator_d_annual_men",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_d_hourly_women": {
+					"name": "indicator_d_hourly_women",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_d_hourly_men": {
+					"name": "indicator_d_hourly_men",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_e_women": {
+					"name": "indicator_e_women",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_e_men": {
+					"name": "indicator_e_men",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_annual_threshold1": {
+					"name": "indicator_f_annual_threshold1",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_annual_threshold2": {
+					"name": "indicator_f_annual_threshold2",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_annual_threshold3": {
+					"name": "indicator_f_annual_threshold3",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_annual_women1": {
+					"name": "indicator_f_annual_women1",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_annual_women2": {
+					"name": "indicator_f_annual_women2",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_annual_women3": {
+					"name": "indicator_f_annual_women3",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_annual_women4": {
+					"name": "indicator_f_annual_women4",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_annual_men1": {
+					"name": "indicator_f_annual_men1",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_annual_men2": {
+					"name": "indicator_f_annual_men2",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_annual_men3": {
+					"name": "indicator_f_annual_men3",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_annual_men4": {
+					"name": "indicator_f_annual_men4",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_hourly_threshold1": {
+					"name": "indicator_f_hourly_threshold1",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_hourly_threshold2": {
+					"name": "indicator_f_hourly_threshold2",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_hourly_threshold3": {
+					"name": "indicator_f_hourly_threshold3",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_hourly_women1": {
+					"name": "indicator_f_hourly_women1",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_hourly_women2": {
+					"name": "indicator_f_hourly_women2",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_hourly_women3": {
+					"name": "indicator_f_hourly_women3",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_hourly_women4": {
+					"name": "indicator_f_hourly_women4",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_hourly_men1": {
+					"name": "indicator_f_hourly_men1",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_hourly_men2": {
+					"name": "indicator_f_hourly_men2",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_hourly_men3": {
+					"name": "indicator_f_hourly_men3",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"indicator_f_hourly_men4": {
+					"name": "indicator_f_hourly_men4",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_annual_mean_gap": {
+					"name": "global_annual_mean_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_hourly_mean_gap": {
+					"name": "global_hourly_mean_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_annual_mean_gap": {
+					"name": "variable_annual_mean_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_hourly_mean_gap": {
+					"name": "variable_hourly_mean_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_annual_median_gap": {
+					"name": "global_annual_median_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"global_hourly_median_gap": {
+					"name": "global_hourly_median_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_annual_median_gap": {
+					"name": "variable_annual_median_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_hourly_median_gap": {
+					"name": "variable_hourly_median_gap",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_proportion_women": {
+					"name": "variable_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"variable_proportion_men": {
+					"name": "variable_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile1_proportion_women": {
+					"name": "annual_quartile1_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile2_proportion_women": {
+					"name": "annual_quartile2_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile3_proportion_women": {
+					"name": "annual_quartile3_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile4_proportion_women": {
+					"name": "annual_quartile4_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile1_proportion_men": {
+					"name": "annual_quartile1_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile2_proportion_men": {
+					"name": "annual_quartile2_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile3_proportion_men": {
+					"name": "annual_quartile3_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"annual_quartile4_proportion_men": {
+					"name": "annual_quartile4_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile1_proportion_women": {
+					"name": "hourly_quartile1_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile2_proportion_women": {
+					"name": "hourly_quartile2_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile3_proportion_women": {
+					"name": "hourly_quartile3_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile4_proportion_women": {
+					"name": "hourly_quartile4_proportion_women",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile1_proportion_men": {
+					"name": "hourly_quartile1_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile2_proportion_men": {
+					"name": "hourly_quartile2_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile3_proportion_men": {
+					"name": "hourly_quartile3_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hourly_quartile4_proportion_men": {
+					"name": "hourly_quartile4_proportion_men",
+					"type": "numeric(9, 4)",
+					"primaryKey": false,
+					"notNull": false
+				},
 				"current_step": {
 					"name": "current_step",
 					"type": "integer",
@@ -563,6 +825,18 @@
 					"primaryKey": false,
 					"notNull": false
 				},
+				"cse_opinion_completed_at": {
+					"name": "cse_opinion_completed_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"submitted_at": {
+					"name": "submitted_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
 				"created_at": {
 					"name": "created_at",
 					"type": "timestamp with time zone",
@@ -572,12 +846,6 @@
 				"updated_at": {
 					"name": "updated_at",
 					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"cancelled_at": {
-					"name": "cancelled_at",
-					"type": "timestamp",
 					"primaryKey": false,
 					"notNull": false
 				}
@@ -594,55 +862,54 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				},
-				"declarations_siren_year_active_unique": {
-					"name": "declarations_siren_year_active_unique",
+				"declaration_submitted_at_idx": {
+					"name": "declaration_submitted_at_idx",
 					"columns": [
 						{
-							"expression": "siren",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						},
-						{
-							"expression": "year",
+							"expression": "submitted_at",
 							"isExpression": false,
 							"asc": true,
 							"nulls": "last"
 						}
 					],
-					"isUnique": true,
+					"isUnique": false,
 					"concurrently": false,
 					"method": "btree",
-					"with": {},
-					"where": "cancelled_at IS NULL"
+					"with": {}
 				}
 			},
 			"foreignKeys": {
-				"app_declaration_declarant_id_app_user_id_fk": {
-					"name": "app_declaration_declarant_id_app_user_id_fk",
-					"tableFrom": "app_declaration",
-					"columnsFrom": ["declarant_id"],
-					"tableTo": "app_user",
-					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
-				},
 				"app_declaration_siren_app_company_siren_fk": {
 					"name": "app_declaration_siren_app_company_siren_fk",
 					"tableFrom": "app_declaration",
-					"columnsFrom": ["siren"],
 					"tableTo": "app_company",
+					"columnsFrom": ["siren"],
 					"columnsTo": ["siren"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"app_declaration_declarant_id_app_user_id_fk": {
+					"name": "app_declaration_declarant_id_app_user_id_fk",
+					"tableFrom": "app_declaration",
+					"tableTo": "app_user",
+					"columnsFrom": ["declarant_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
-			"uniqueConstraints": {},
+			"uniqueConstraints": {
+				"declaration_siren_year_idx": {
+					"name": "declaration_siren_year_idx",
+					"nullsNotDistinct": false,
+					"columns": ["siren", "year"]
+				}
+			},
 			"policies": {},
 			"checkConstraints": {},
 			"isRLSEnabled": false
@@ -748,19 +1015,19 @@
 				"app_employee_category_job_category_id_app_job_category_id_fk": {
 					"name": "app_employee_category_job_category_id_app_job_category_id_fk",
 					"tableFrom": "app_employee_category",
-					"columnsFrom": ["job_category_id"],
 					"tableTo": "app_job_category",
+					"columnsFrom": ["job_category_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {
 				"employee_category_job_type_idx": {
 					"name": "employee_category_job_type_idx",
-					"columns": ["job_category_id", "declaration_type"],
-					"nullsNotDistinct": false
+					"nullsNotDistinct": false,
+					"columns": ["job_category_id", "declaration_type"]
 				}
 			},
 			"policies": {},
@@ -821,10 +1088,108 @@
 			"uniqueConstraints": {
 				"export_year_version_idx": {
 					"name": "export_year_version_idx",
-					"columns": ["year", "version"],
-					"nullsNotDistinct": false
+					"nullsNotDistinct": false,
+					"columns": ["year", "version"]
 				}
 			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.app_file": {
+			"name": "app_file",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"declaration_id": {
+					"name": "declaration_id",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"file_name": {
+					"name": "file_name",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"file_path": {
+					"name": "file_path",
+					"type": "varchar(500)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"uploaded_at": {
+					"name": "uploaded_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"type": {
+					"name": "type",
+					"type": "file_type",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {
+				"file_declaration_idx": {
+					"name": "file_declaration_idx",
+					"columns": [
+						{
+							"expression": "declaration_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"file_joint_eval_unique": {
+					"name": "file_joint_eval_unique",
+					"columns": [
+						{
+							"expression": "declaration_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": true,
+					"where": "\"type\" = 'joint_evaluation'",
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"app_file_declaration_id_app_declaration_id_fk": {
+					"name": "app_file_declaration_id_app_declaration_id_fk",
+					"tableFrom": "app_file",
+					"tableTo": "app_declaration",
+					"columnsFrom": ["declaration_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
 			"policies": {},
 			"checkConstraints": {},
 			"isRLSEnabled": false
@@ -1296,20 +1661,20 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {
 				"app_gip_mds_data_siren_app_company_siren_fk": {
 					"name": "app_gip_mds_data_siren_app_company_siren_fk",
 					"tableFrom": "app_gip_mds_data",
-					"columnsFrom": ["siren"],
 					"tableTo": "app_company",
+					"columnsFrom": ["siren"],
 					"columnsTo": ["siren"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {
@@ -1318,6 +1683,54 @@
 					"columns": ["siren", "year"]
 				}
 			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.app_global_setting": {
+			"name": "app_global_setting",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true,
+					"default": 1
+				},
+				"active_campaign_year": {
+					"name": "active_campaign_year",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updated_by": {
+					"name": "updated_by",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"app_global_setting_updated_by_app_user_id_fk": {
+					"name": "app_global_setting_updated_by_app_user_id_fk",
+					"tableFrom": "app_global_setting",
+					"tableTo": "app_user",
+					"columnsFrom": ["updated_by"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},
 			"policies": {},
 			"checkConstraints": {},
@@ -1351,12 +1764,6 @@
 					"primaryKey": false,
 					"notNull": true
 				},
-				"detail": {
-					"name": "detail",
-					"type": "varchar(500)",
-					"primaryKey": false,
-					"notNull": false
-				},
 				"source": {
 					"name": "source",
 					"type": "varchar(50)",
@@ -1369,27 +1776,27 @@
 				"app_job_category_declaration_id_app_declaration_id_fk": {
 					"name": "app_job_category_declaration_id_app_declaration_id_fk",
 					"tableFrom": "app_job_category",
-					"columnsFrom": ["declaration_id"],
 					"tableTo": "app_declaration",
+					"columnsFrom": ["declaration_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {
 				"job_category_declaration_index_idx": {
 					"name": "job_category_declaration_index_idx",
-					"columns": ["declaration_id", "category_index"],
-					"nullsNotDistinct": false
+					"nullsNotDistinct": false,
+					"columns": ["declaration_id", "category_index"]
 				}
 			},
 			"policies": {},
 			"checkConstraints": {},
 			"isRLSEnabled": false
 		},
-		"public.app_joint_evaluation_file": {
-			"name": "app_joint_evaluation_file",
+		"public.app_referent": {
+			"name": "app_referent",
 			"schema": "",
 			"columns": {
 				"id": {
@@ -1398,92 +1805,87 @@
 					"primaryKey": true,
 					"notNull": true
 				},
-				"siren": {
-					"name": "siren",
-					"type": "varchar(9)",
+				"region": {
+					"name": "region",
+					"type": "varchar(3)",
 					"primaryKey": false,
 					"notNull": true
 				},
-				"year": {
-					"name": "year",
-					"type": "integer",
+				"county": {
+					"name": "county",
+					"type": "varchar(3)",
 					"primaryKey": false,
-					"notNull": true
+					"notNull": false
 				},
-				"file_name": {
-					"name": "file_name",
+				"name": {
+					"name": "name",
 					"type": "varchar(255)",
 					"primaryKey": false,
 					"notNull": true
 				},
-				"file_path": {
-					"name": "file_path",
+				"type": {
+					"name": "type",
+					"type": "referent_type",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"value": {
+					"name": "value",
 					"type": "varchar(500)",
 					"primaryKey": false,
 					"notNull": true
 				},
-				"declarant_id": {
-					"name": "declarant_id",
+				"principal": {
+					"name": "principal",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"substitute_name": {
+					"name": "substitute_name",
 					"type": "varchar(255)",
 					"primaryKey": false,
-					"notNull": true
+					"notNull": false
 				},
-				"uploaded_at": {
-					"name": "uploaded_at",
-					"type": "timestamp with time zone",
+				"substitute_email": {
+					"name": "substitute_email",
+					"type": "varchar(255)",
 					"primaryKey": false,
-					"notNull": true
+					"notNull": false
 				},
 				"created_at": {
 					"name": "created_at",
 					"type": "timestamp with time zone",
 					"primaryKey": false,
 					"notNull": false
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
 				}
 			},
 			"indexes": {
-				"joint_eval_file_siren_year_idx": {
-					"name": "joint_eval_file_siren_year_idx",
+				"referent_region_idx": {
+					"name": "referent_region_idx",
 					"columns": [
 						{
-							"expression": "siren",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						},
-						{
-							"expression": "year",
+							"expression": "region",
 							"isExpression": false,
 							"asc": true,
 							"nulls": "last"
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
-			"foreignKeys": {
-				"app_joint_evaluation_file_siren_app_company_siren_fk": {
-					"name": "app_joint_evaluation_file_siren_app_company_siren_fk",
-					"tableFrom": "app_joint_evaluation_file",
-					"columnsFrom": ["siren"],
-					"tableTo": "app_company",
-					"columnsTo": ["siren"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
-				},
-				"app_joint_evaluation_file_declarant_id_app_user_id_fk": {
-					"name": "app_joint_evaluation_file_declarant_id_app_user_id_fk",
-					"tableFrom": "app_joint_evaluation_file",
-					"columnsFrom": ["declarant_id"],
-					"tableTo": "app_user",
-					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
-				}
-			},
+			"foreignKeys": {},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},
 			"policies": {},
@@ -1525,29 +1927,29 @@
 						}
 					],
 					"isUnique": false,
-					"with": {},
+					"concurrently": false,
 					"method": "btree",
-					"concurrently": false
+					"with": {}
 				}
 			},
 			"foreignKeys": {
 				"app_user_company_user_id_app_user_id_fk": {
 					"name": "app_user_company_user_id_app_user_id_fk",
 					"tableFrom": "app_user_company",
-					"columnsFrom": ["user_id"],
 					"tableTo": "app_user",
+					"columnsFrom": ["user_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				},
 				"app_user_company_siren_app_company_siren_fk": {
 					"name": "app_user_company_siren_app_company_siren_fk",
 					"tableFrom": "app_user_company",
-					"columnsFrom": ["siren"],
 					"tableTo": "app_company",
+					"columnsFrom": ["siren"],
 					"columnsTo": ["siren"],
-					"onUpdate": "no action",
-					"onDelete": "no action"
+					"onDelete": "no action",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {
@@ -1570,12 +1972,6 @@
 					"type": "varchar(255)",
 					"primaryKey": true,
 					"notNull": true
-				},
-				"name": {
-					"name": "name",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": false
 				},
 				"first_name": {
 					"name": "first_name",
@@ -1601,26 +1997,224 @@
 					"primaryKey": false,
 					"notNull": false
 				},
-				"image": {
-					"name": "image",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": false
-				},
 				"phone": {
 					"name": "phone",
 					"type": "varchar(20)",
 					"primaryKey": false,
 					"notNull": false
 				},
-				"siret": {
-					"name": "siret",
-					"type": "varchar(14)",
+				"is_admin": {
+					"name": "is_admin",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"audit.action_log": {
+			"name": "action_log",
+			"schema": "audit",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"user_email": {
+					"name": "user_email",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"siren": {
+					"name": "siren",
+					"type": "varchar(9)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"action": {
+					"name": "action",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"category": {
+					"name": "category",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"resource_type": {
+					"name": "resource_type",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"resource_id": {
+					"name": "resource_id",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"status": {
+					"name": "status",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"error_message": {
+					"name": "error_message",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"metadata": {
+					"name": "metadata",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"ip_address": {
+					"name": "ip_address",
+					"type": "varchar(45)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"user_agent": {
+					"name": "user_agent",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"duration_ms": {
+					"name": "duration_ms",
+					"type": "integer",
 					"primaryKey": false,
 					"notNull": false
 				}
 			},
-			"indexes": {},
+			"indexes": {
+				"action_log_created_at_idx": {
+					"name": "action_log_created_at_idx",
+					"columns": [
+						{
+							"expression": "created_at",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"action_log_user_idx": {
+					"name": "action_log_user_idx",
+					"columns": [
+						{
+							"expression": "user_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						},
+						{
+							"expression": "created_at",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"action_log_siren_idx": {
+					"name": "action_log_siren_idx",
+					"columns": [
+						{
+							"expression": "siren",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						},
+						{
+							"expression": "created_at",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"action_log_action_idx": {
+					"name": "action_log_action_idx",
+					"columns": [
+						{
+							"expression": "action",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						},
+						{
+							"expression": "created_at",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"action_log_category_created_at_idx": {
+					"name": "action_log_category_created_at_idx",
+					"columns": [
+						{
+							"expression": "category",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						},
+						{
+							"expression": "created_at",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
 			"foreignKeys": {},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},
@@ -1634,13 +2228,25 @@
 			"name": "declaration_type",
 			"schema": "public",
 			"values": ["initial", "correction"]
+		},
+		"public.file_type": {
+			"name": "file_type",
+			"schema": "public",
+			"values": ["cse_opinion", "joint_evaluation"]
+		},
+		"public.referent_type": {
+			"name": "referent_type",
+			"schema": "public",
+			"values": ["email", "url"]
 		}
 	},
-	"schemas": {},
-	"views": {},
+	"schemas": {
+		"audit": "audit"
+	},
 	"sequences": {},
 	"roles": {},
 	"policies": {},
+	"views": {},
 	"_meta": {
 		"columns": {},
 		"schemas": {},
