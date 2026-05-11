@@ -58,7 +58,6 @@ test.describe("Declaration cancellation — full cycle", () => {
 		const firstLink = await findFirstDeclarationLink();
 		await firstLink.click();
 		await page.waitForLoadState("networkidle");
-		const cancelledUrl1 = page.url();
 		await cancelCurrentDeclaration();
 
 		// S5 — declarant espace shows "À compléter" after cancellation
@@ -91,8 +90,15 @@ test.describe("Declaration cancellation — full cycle", () => {
 		await expect(rows.first()).toBeVisible();
 		expect(await rows.count()).toBe(3);
 
-		// S8 — admin opens a cancelled declaration and sees "Annulée" badge
-		await page.goto(cancelledUrl1);
+		// S8 — admin opens a cancelled declaration from the list and sees the badge.
+		// We click directly the first row whose status badge is "Annulée" so the
+		// navigation target is unambiguous (no dependency on a URL captured
+		// earlier in the test cycle).
+		const cancelledRow = page
+			.locator("table tbody tr")
+			.filter({ hasText: "Annulée" })
+			.first();
+		await cancelledRow.getByRole("link").first().click();
 		await page.waitForLoadState("networkidle");
 		await expect(page.getByText(/Annulée le/)).toBeVisible({
 			timeout: 10_000,
