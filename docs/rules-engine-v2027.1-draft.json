@@ -1,0 +1,240 @@
+{
+  "version": "2027.1",
+  "effectiveFrom": "2027-03-01",
+  "effectiveUntil": "2028-02-28",
+  "description": "Entrée en vigueur V2 — 6 ind A-F obligatoires 50+, 7e ind G obligatoire 150+ (triennal an 1 pour 150-249, annuel 250+). Pas de mail d'ouverture (première année).",
+
+  "thresholds": {
+    "gapAlertPercent": 5,
+    "phase2SizeMin": 100,
+    "indicatorGAnnualSizeMin": 250,
+    "indicatorGTriennialSizeMin": 150,
+    "voluntarySizeMax": 50,
+    "mandatorySizeMin": 50
+  },
+
+  "stages": [
+    { "id": 1, "name": "Déclaration des indicateurs de rémunération" },
+    { "id": 2, "name": "(1ère déclaration) Choix du parcours de mise en conformité" },
+    { "id": 3, "name": "Actions correctives et seconde déclaration" },
+    { "id": 4, "name": "(2e déclaration) Choix du parcours de mise en conformité" },
+    { "id": 5, "name": "Évaluation conjointe des rémunérations" },
+    { "id": 6, "name": "Déposer le ou les avis CSE" },
+    { "id": 7, "name": "Finalisation - Démarche des indicateurs de rémunération" }
+  ],
+
+  "states": [
+    { "id": "draft", "stage": null },
+    { "id": "submitted", "stage": 1 },
+    { "id": "gap_justification_chosen", "stage": 2 },
+    { "id": "corrective_actions_chosen", "stage": 2 },
+    { "id": "joint_evaluation_chosen", "stage": 2 },
+    { "id": "second_declaration_submitted", "stage": 3 },
+    { "id": "joint_evaluation_submitted", "stage": 5 },
+    { "id": "revised_gap_justification_chosen", "stage": 4 },
+    { "id": "revised_joint_evaluation_chosen", "stage": 4 },
+    { "id": "revised_joint_evaluation_submitted", "stage": 5 },
+    { "id": "cse_opinion_submitted", "stage": 6 },
+    { "id": "demarche_completed", "stage": 7 }
+  ],
+
+  "computations": {
+    "phase2Required": {
+      "all": [
+        { "fact": "workforce", "op": ">=", "value": 100 },
+        { "fact": "indicatorGCalculated", "op": "==", "value": true },
+        { "fact": "gap", "op": ">=", "value": 5 }
+      ]
+    },
+    "cseRequired": {
+      "all": [
+        { "fact": "workforce", "op": ">=", "value": 100 },
+        { "fact": "company.hasCse", "op": "==", "value": true }
+      ]
+    },
+    "indicatorGRequired": {
+      "any": [
+        { "fact": "workforce", "op": ">=", "value": 250 },
+        {
+          "all": [
+            { "fact": "workforce", "op": ">=", "value": 150 },
+            { "fact": "workforce", "op": "<", "value": 250 },
+            { "fact": "isTriennialYear", "op": "==", "value": true }
+          ]
+        }
+      ]
+    }
+  },
+
+  "transitions": [
+    {
+      "id": "submit",
+      "from": ["draft"],
+      "action": "submit",
+      "to": "submitted",
+      "writes": [
+        { "field": "submittedAt",        "source": "$now" },
+        { "field": "phase2Required",     "source": { "compute": "phase2Required" } },
+        { "field": "cseRequired",        "source": { "compute": "cseRequired" } },
+        { "field": "indicatorGRequired", "source": { "compute": "indicatorGRequired" } },
+        { "field": "rulesVersion",       "source": { "value": "2027.1" } }
+      ]
+    },
+
+    {
+      "id": "choose_path_initial_justify",
+      "from": ["submitted"],
+      "action": "choose_compliance_path",
+      "matchPayload": { "path": "justify" },
+      "guard": {
+        "all": [
+          { "fact": "phase2Required", "op": "==", "value": true },
+          { "fact": "firstDeclarationPathChoice", "op": "isNull" }
+        ]
+      },
+      "to": "gap_justification_chosen",
+      "writes": [
+        { "field": "firstDeclarationPathChoice",   "source": { "value": "justify" } },
+        { "field": "firstDeclarationPathChoiceAt", "source": "$now" }
+      ]
+    },
+    {
+      "id": "choose_path_initial_corrective_action",
+      "from": ["submitted"],
+      "action": "choose_compliance_path",
+      "matchPayload": { "path": "corrective_action" },
+      "guard": {
+        "all": [
+          { "fact": "phase2Required", "op": "==", "value": true },
+          { "fact": "firstDeclarationPathChoice", "op": "isNull" }
+        ]
+      },
+      "to": "corrective_actions_chosen",
+      "writes": [
+        { "field": "firstDeclarationPathChoice",   "source": { "value": "corrective_action" } },
+        { "field": "firstDeclarationPathChoiceAt", "source": "$now" }
+      ]
+    },
+    {
+      "id": "choose_path_initial_joint_evaluation",
+      "from": ["submitted"],
+      "action": "choose_compliance_path",
+      "matchPayload": { "path": "joint_evaluation" },
+      "guard": {
+        "all": [
+          { "fact": "phase2Required", "op": "==", "value": true },
+          { "fact": "firstDeclarationPathChoice", "op": "isNull" }
+        ]
+      },
+      "to": "joint_evaluation_chosen",
+      "writes": [
+        { "field": "firstDeclarationPathChoice",   "source": { "value": "joint_evaluation" } },
+        { "field": "firstDeclarationPathChoiceAt", "source": "$now" }
+      ]
+    },
+
+    {
+      "id": "submit_second_declaration",
+      "from": ["corrective_actions_chosen"],
+      "action": "submit_second_declaration",
+      "to": "second_declaration_submitted",
+      "writes": [
+        { "field": "secondDeclarationSubmittedAt", "source": "$now" },
+        { "field": "phase2RevisionRequired",       "source": { "ref": "action.stillHasGap" } }
+      ]
+    },
+
+    {
+      "id": "choose_path_revised_justify",
+      "from": ["second_declaration_submitted"],
+      "action": "choose_compliance_path",
+      "matchPayload": { "path": "justify" },
+      "guard": {
+        "all": [
+          { "fact": "phase2RevisionRequired", "op": "==", "value": true },
+          { "fact": "secondDeclarationPathChoice", "op": "isNull" }
+        ]
+      },
+      "to": "revised_gap_justification_chosen",
+      "writes": [
+        { "field": "secondDeclarationPathChoice",   "source": { "value": "justify" } },
+        { "field": "secondDeclarationPathChoiceAt", "source": "$now" }
+      ]
+    },
+    {
+      "id": "choose_path_revised_joint_evaluation",
+      "from": ["second_declaration_submitted"],
+      "action": "choose_compliance_path",
+      "matchPayload": { "path": "joint_evaluation" },
+      "guard": {
+        "all": [
+          { "fact": "phase2RevisionRequired", "op": "==", "value": true },
+          { "fact": "secondDeclarationPathChoice", "op": "isNull" }
+        ]
+      },
+      "to": "revised_joint_evaluation_chosen",
+      "writes": [
+        { "field": "secondDeclarationPathChoice",   "source": { "value": "joint_evaluation" } },
+        { "field": "secondDeclarationPathChoiceAt", "source": "$now" }
+      ]
+    },
+
+    {
+      "id": "submit_joint_evaluation_initial",
+      "from": ["joint_evaluation_chosen"],
+      "action": "submit_joint_evaluation",
+      "to": "joint_evaluation_submitted",
+      "writes": [
+        { "field": "jointEvaluationSubmittedAt", "source": "$now" }
+      ]
+    },
+    {
+      "id": "submit_joint_evaluation_revised",
+      "from": ["revised_joint_evaluation_chosen"],
+      "action": "submit_joint_evaluation",
+      "to": "revised_joint_evaluation_submitted",
+      "writes": [
+        { "field": "jointEvaluationSubmittedAt", "source": "$now" }
+      ]
+    },
+
+    {
+      "id": "submit_cse_opinion",
+      "from": [
+        "submitted",
+        "gap_justification_chosen",
+        "second_declaration_submitted",
+        "joint_evaluation_submitted",
+        "revised_gap_justification_chosen",
+        "revised_joint_evaluation_submitted"
+      ],
+      "action": "submit_cse_opinion",
+      "guard": { "fact": "cseRequired", "op": "==", "value": true },
+      "to": "cse_opinion_submitted",
+      "writes": [
+        { "field": "cseOpinionCompletedAt", "source": "$now" }
+      ]
+    },
+
+    {
+      "id": "complete_demarche",
+      "from": [
+        "submitted",
+        "gap_justification_chosen",
+        "corrective_actions_chosen",
+        "joint_evaluation_chosen",
+        "second_declaration_submitted",
+        "joint_evaluation_submitted",
+        "revised_gap_justification_chosen",
+        "revised_joint_evaluation_chosen",
+        "revised_joint_evaluation_submitted",
+        "cse_opinion_submitted"
+      ],
+      "action": "complete_demarche",
+      "to": "demarche_completed",
+      "writes": [
+        { "field": "demarcheCompletedAt", "source": "$now" }
+      ]
+    }
+  ]
+}
