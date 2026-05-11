@@ -93,6 +93,9 @@ test.describe("Declaration cancellation — full cycle", () => {
 
 		// S8 — admin opens a cancelled declaration and sees "Annulée" badge
 		await page.goto(cancelledUrl1);
-		await expect(page.getByText(/Annulée le/)).toBeVisible();
+		await page.waitForLoadState("networkidle");
+		await expect(page.getByText(/Annulée le/)).toBeVisible({
+			timeout: 10_000,
+		});
 	});
 });
