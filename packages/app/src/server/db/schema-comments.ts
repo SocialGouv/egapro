@@ -102,6 +102,23 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 			"GIP-MDS | SUIT: Quartile3_Taux_horaire_global_proportion_H",
 		indicator_f_hourly_men4:
 			"GIP-MDS | SUIT: Quartile4_Taux_horaire_global_proportion_H",
+		global_annual_mean_gap:
+			"GIP-MDS | SUIT: Rem_globale_annuelle_moyenne_ecart",
+		global_hourly_mean_gap: "GIP-MDS | SUIT: Taux_horaire_global_moyen_ecart",
+		variable_annual_mean_gap:
+			"GIP-MDS | SUIT: Rem_variable_annuelle_moyenne_ecart",
+		variable_hourly_mean_gap:
+			"GIP-MDS | SUIT: Taux_horaire_variable_moyen_ecart",
+		global_annual_median_gap:
+			"GIP-MDS | SUIT: Rem_globale_annuelle_médiane_ecart",
+		global_hourly_median_gap:
+			"GIP-MDS | SUIT: Taux_horaire_global_médian_ecart",
+		variable_annual_median_gap:
+			"GIP-MDS | SUIT: Rem_variable_annuelle_médiane_ecart",
+		variable_hourly_median_gap:
+			"GIP-MDS | SUIT: Taux_horaire_variable_médian_ecart",
+		variable_proportion_women: "GIP-MDS | SUIT: Proportion_variable_F",
+		variable_proportion_men: "GIP-MDS | SUIT: Proportion_variable_H",
 	},
 	company: {
 		name: "SUIT: Raison_sociale",

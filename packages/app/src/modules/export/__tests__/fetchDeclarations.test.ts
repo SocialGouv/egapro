@@ -77,6 +77,36 @@ const baseRow = {
 	indicatorFHourlyMen3: 33,
 	indicatorFHourlyWomen4: 20,
 	indicatorFHourlyMen4: 37,
+	// Gaps A/B/C/D (ratio -1..1)
+	globalAnnualMeanGap: "0.0455",
+	globalHourlyMeanGap: "0.0360",
+	variableAnnualMeanGap: "0.1500",
+	variableHourlyMeanGap: "0.0750",
+	globalAnnualMedianGap: "0.0390",
+	globalHourlyMedianGap: "0.0310",
+	variableAnnualMedianGap: "0.1200",
+	variableHourlyMedianGap: "0.0600",
+	// Proportions E
+	variableProportionWomen: "0.4523",
+	variableProportionMen: "0.5477",
+	// Proportions F annual (persisted)
+	annualQuartile1ProportionWomen: "0.5556",
+	annualQuartile1ProportionMen: "0.4444",
+	annualQuartile2ProportionWomen: "0.4839",
+	annualQuartile2ProportionMen: "0.5161",
+	annualQuartile3ProportionWomen: "0.4590",
+	annualQuartile3ProportionMen: "0.5410",
+	annualQuartile4ProportionWomen: "0.4355",
+	annualQuartile4ProportionMen: "0.5645",
+	// Proportions F hourly (persisted)
+	hourlyQuartile1ProportionWomen: "0.6154",
+	hourlyQuartile1ProportionMen: "0.3846",
+	hourlyQuartile2ProportionWomen: "0.5161",
+	hourlyQuartile2ProportionMen: "0.4839",
+	hourlyQuartile3ProportionWomen: "0.4590",
+	hourlyQuartile3ProportionMen: "0.5410",
+	hourlyQuartile4ProportionWomen: "0.3509",
+	hourlyQuartile4ProportionMen: "0.6491",
 };
 
 describe("buildIndicators", () => {
@@ -110,49 +140,47 @@ describe("buildIndicators", () => {
 		expect(result.E.Effectif_H_rem_annuelle_variable).toBe("110");
 	});
 
-	it("should expose indicator F as flat objects with thresholds + proportions", () => {
+	it("should expose indicator F proportions read from persisted DB columns", () => {
 		const result = buildIndicators(baseRow);
 
-		// Q1 annual: women 35, men 28 → total 63; F = 35/63 = 0.5556, H = 28/63 = 0.4444
 		expect(result.F.annuel.Seuil_Q1_Rem_globale).toBe("22000");
 		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_F).toBe(
-			0.5556,
+			"0.5556",
 		);
 		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_H).toBe(
-			0.4444,
+			"0.4444",
 		);
-		// Q4 annual: threshold null, women 27 / men 35 → total 62
 		expect(result.F.annuel.Seuil_Q4_Rem_globale).toBeNull();
 		expect(result.F.annuel.Quartile4_Rem_globale_annuelle_proportion_F).toBe(
-			Math.round((27 / 62) * 10_000) / 10_000,
+			"0.4355",
 		);
-		// Q1 hourly: women 40, men 25 → total 65
 		expect(result.F.horaire.Seuil_Q1_Taux_horaire_global).toBe("11.50");
 		expect(result.F.horaire.Quartile1_Taux_horaire_global_proportion_F).toBe(
-			Math.round((40 / 65) * 10_000) / 10_000,
+			"0.6154",
 		);
 	});
 
-	it("should return null on both sides when only one gender count is null", () => {
-		// Half-missing data must not surface as 1.0/null — GIP consumers
-		// should see both as null to signal the data-quality issue.
-		const row = {
-			...baseRow,
-			indicatorFAnnualWomen1: 30,
-			indicatorFAnnualMen1: null,
-		};
+	it("should expose gap labels for indicators A/B/C/D", () => {
+		const result = buildIndicators(baseRow);
 
-		const result = buildIndicators(row);
-
-		expect(
-			result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_F,
-		).toBeNull();
-		expect(
-			result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_H,
-		).toBeNull();
+		expect(result.A.Rem_globale_annuelle_moyenne_ecart).toBe("0.0455");
+		expect(result.A.Taux_horaire_global_moyen_ecart).toBe("0.0360");
+		expect(result.B.Rem_variable_annuelle_moyenne_ecart).toBe("0.1500");
+		expect(result.B.Taux_horaire_variable_moyen_ecart).toBe("0.0750");
+		expect(result.C.Rem_globale_annuelle_médiane_ecart).toBe("0.0390");
+		expect(result.C.Taux_horaire_global_médian_ecart).toBe("0.0310");
+		expect(result.D.Rem_variable_annuelle_médiane_ecart).toBe("0.1200");
+		expect(result.D.Taux_horaire_variable_médian_ecart).toBe("0.0600");
 	});
 
-	it("should return null proportions when counts are missing or quartile is empty", () => {
+	it("should expose proportion labels for indicator E", () => {
+		const result = buildIndicators(baseRow);
+
+		expect(result.E.Proportion_variable_F).toBe("0.4523");
+		expect(result.E.Proportion_variable_H).toBe("0.5477");
+	});
+
+	it("should return null for F proportions and gap labels when DB columns are null", () => {
 		const nullRow = {
 			...baseRow,
 			indicatorAAnnualWomen: null,
@@ -162,15 +190,19 @@ describe("buildIndicators", () => {
 			indicatorFAnnualThreshold1: null,
 			indicatorFAnnualWomen1: null,
 			indicatorFAnnualMen1: null,
-			// Q2: both zero → total 0 → proportions must be null, not NaN
-			indicatorFAnnualWomen2: 0,
-			indicatorFAnnualMen2: 0,
+			globalAnnualMeanGap: null,
+			variableProportionWomen: null,
+			annualQuartile1ProportionWomen: null,
+			annualQuartile1ProportionMen: null,
+			annualQuartile2ProportionWomen: null,
 		};
 
 		const result = buildIndicators(nullRow);
 
 		expect(result.A.Rem_globale_annuelle_moyenne_F).toBeNull();
+		expect(result.A.Rem_globale_annuelle_moyenne_ecart).toBeNull();
 		expect(result.E.Effectif_F_rem_annuelle_variable).toBeNull();
+		expect(result.E.Proportion_variable_F).toBeNull();
 		expect(result.F.annuel.Seuil_Q1_Rem_globale).toBeNull();
 		expect(
 			result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_F,
