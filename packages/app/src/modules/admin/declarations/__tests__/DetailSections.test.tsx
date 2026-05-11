@@ -28,6 +28,7 @@ const declaration: DeclarationDetail = {
 	secondDeclarationStatus: null,
 	createdAt: new Date("2024-03-01T10:00:00Z"),
 	updatedAt: new Date("2024-06-15T10:00:00Z"),
+	cancelledAt: null,
 	companyName: "ACME Corp",
 	companyAddress: "123 Rue de Paris",
 	companyNafCode: "6201Z",
@@ -53,6 +54,7 @@ const declaration: DeclarationDetail = {
 			opinionDate: "2024-03-15",
 		},
 	],
+	siblings: [],
 };
 
 describe("DeclarationSummary", () => {

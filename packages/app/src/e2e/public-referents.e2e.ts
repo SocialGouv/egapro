@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { deleteReferents, seedReferents } from "./helpers/db";
+import { deleteReferents, seedReferents } from "./helpers/db-campaign";
 
 // Fixed UUIDs so detail-page URLs (`/referents/[id]`) pass the
 // `z.string().uuid()` check in `publicReferents.getById`.

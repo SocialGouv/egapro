@@ -24,6 +24,7 @@ const baseRow: DeclarationSearchRow = {
 	siren: "123456789",
 	year: 2024,
 	status: "submitted",
+	cancelledAt: null,
 	remunerationScore: 85,
 	createdAt: new Date("2024-06-15T10:00:00Z"),
 	updatedAt: new Date("2024-06-15T10:00:00Z"),
@@ -89,5 +90,20 @@ describe("DeclarationTable", () => {
 		expect(
 			screen.getByRole("navigation", { name: "Pagination" }),
 		).toBeInTheDocument();
+	});
+
+	it("shows cancelled badge when cancelledAt is set", () => {
+		const cancelledRow = { ...baseRow, cancelledAt: new Date("2024-07-01") };
+		render(<DeclarationTable {...defaultProps} rows={[cancelledRow]} />);
+
+		expect(screen.getByText("Annulée")).toBeInTheDocument();
+		expect(screen.queryByText("Transmise")).not.toBeInTheDocument();
+	});
+
+	it("shows status label when cancelledAt is null", () => {
+		render(<DeclarationTable {...defaultProps} />);
+
+		expect(screen.getByText("Transmise")).toBeInTheDocument();
+		expect(screen.queryByText("Annulée")).not.toBeInTheDocument();
 	});
 });

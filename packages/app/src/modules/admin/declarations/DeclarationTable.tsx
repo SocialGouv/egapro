@@ -78,7 +78,13 @@ export function DeclarationTable({
 								</Link>
 							</td>
 							<td>{row.year}</td>
-							<td>{STATUS_LABELS[row.status ?? ""] ?? row.status}</td>
+							<td>
+								{row.cancelledAt !== null ? (
+									<span className="fr-badge fr-badge--warning">Annulée</span>
+								) : (
+									(STATUS_LABELS[row.status ?? ""] ?? row.status)
+								)}
+							</td>
 							<td>{row.declarantEmail}</td>
 							<td>{formatShortDate(row.createdAt)}</td>
 						</tr>

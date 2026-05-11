@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, gte, inArray, lt, or } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lt, or } from "drizzle-orm";
 import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
@@ -133,6 +133,7 @@ export async function fetchSubmittedDeclarations(
 			secondDeclReferencePeriodEnd: declarations.secondDeclReferencePeriodEnd,
 			createdAt: declarations.createdAt,
 			updatedAt: declarations.updatedAt,
+			cancelledAt: declarations.cancelledAt,
 			declarationId: declarations.id,
 			companyName: companies.name,
 			workforce: companies.workforce,
@@ -145,10 +146,17 @@ export async function fetchSubmittedDeclarations(
 		.innerJoin(companies, eq(declarations.siren, companies.siren))
 		.innerJoin(users, eq(declarations.declarantId, users.id))
 		.where(
-			and(
-				eq(declarations.status, "submitted"),
-				gte(declarations.updatedAt, new Date(`${dateBegin}T00:00:00Z`)),
-				lt(declarations.updatedAt, new Date(`${dateEnd}T00:00:00Z`)),
+			or(
+				and(
+					gte(declarations.cancelledAt, new Date(`${dateBegin}T00:00:00Z`)),
+					lt(declarations.cancelledAt, new Date(`${dateEnd}T00:00:00Z`)),
+				),
+				and(
+					eq(declarations.status, "submitted"),
+					gte(declarations.updatedAt, new Date(`${dateBegin}T00:00:00Z`)),
+					lt(declarations.updatedAt, new Date(`${dateEnd}T00:00:00Z`)),
+					isNull(declarations.cancelledAt),
+				),
 			),
 		);
 }

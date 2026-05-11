@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import {
 	and,
 	asc,
@@ -6,15 +7,20 @@ import {
 	eq,
 	gte,
 	ilike,
+	isNotNull,
+	isNull,
 	lt,
+	ne,
 	or,
 	type SQL,
 } from "drizzle-orm";
 
 import {
+	cancelDeclarationSchema,
 	getDeclarationByIdSchema,
 	searchDeclarationsSchema,
 } from "~/modules/admin/declarations/schemas";
+import { getCurrentYear } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
 	companies,
@@ -70,8 +76,11 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				);
 			}
 
-			if (input.status) {
+			if (input.status === "cancelled") {
+				filters.push(isNotNull(declarations.cancelledAt));
+			} else if (input.status) {
 				filters.push(eq(declarations.status, input.status));
+				filters.push(isNull(declarations.cancelledAt));
 			}
 
 			const where = filters.length > 0 ? and(...filters) : undefined;
@@ -86,6 +95,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 						siren: declarations.siren,
 						year: declarations.year,
 						status: declarations.status,
+						cancelledAt: declarations.cancelledAt,
 						remunerationScore: declarations.remunerationScore,
 						createdAt: declarations.createdAt,
 						updatedAt: declarations.updatedAt,
@@ -138,6 +148,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					secondDeclarationStatus: declarations.secondDeclarationStatus,
 					createdAt: declarations.createdAt,
 					updatedAt: declarations.updatedAt,
+					cancelledAt: declarations.cancelledAt,
 					companyName: companies.name,
 					companyAddress: companies.address,
 					companyNafCode: companies.nafCode,
@@ -159,7 +170,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				return null;
 			}
 
-			const [declarationFiles, opinions] = await Promise.all([
+			const [declarationFiles, opinions, siblingRows] = await Promise.all([
 				ctx.db
 					.select({
 						id: files.id,
@@ -178,12 +189,77 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					})
 					.from(cseOpinions)
 					.where(eq(cseOpinions.declarationId, input.id)),
+				ctx.db
+					.select({
+						id: declarations.id,
+						status: declarations.status,
+						cancelledAt: declarations.cancelledAt,
+						updatedAt: declarations.updatedAt,
+					})
+					.from(declarations)
+					.where(
+						and(
+							eq(declarations.siren, declaration.siren),
+							eq(declarations.year, declaration.year),
+							ne(declarations.id, input.id),
+						),
+					)
+					.orderBy(desc(declarations.updatedAt)),
 			]);
+
+			const siblings = siblingRows.map((s) => ({
+				id: s.id,
+				cancelledAt: s.cancelledAt,
+				updatedAt: s.updatedAt,
+				status: s.cancelledAt !== null ? "cancelled" : (s.status ?? "draft"),
+			}));
 
 			return {
 				...declaration,
 				files: declarationFiles,
 				cseOpinions: opinions,
+				siblings,
 			};
+		}),
+
+	cancel: adminProcedure
+		.input(cancelDeclarationSchema)
+		.mutation(async ({ input, ctx }) => {
+			const rows = await ctx.db
+				.select({
+					id: declarations.id,
+					year: declarations.year,
+					cancelledAt: declarations.cancelledAt,
+				})
+				.from(declarations)
+				.where(eq(declarations.id, input.id))
+				.limit(1);
+
+			const declaration = rows[0];
+			if (!declaration) {
+				throw new TRPCError({ code: "NOT_FOUND" });
+			}
+
+			if (declaration.cancelledAt !== null) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "déclaration déjà annulée",
+				});
+			}
+
+			if (declaration.year !== getCurrentYear()) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "annulation impossible : campagne passée",
+				});
+			}
+
+			const cancelledAt = new Date();
+			await ctx.db
+				.update(declarations)
+				.set({ cancelledAt })
+				.where(eq(declarations.id, input.id));
+
+			return { id: input.id, cancelledAt };
 		}),
 });

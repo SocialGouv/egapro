@@ -22,6 +22,7 @@ export const DECLARATION_COLUMNS: Array<{
 	{ key: "compliancePath", header: "Parcours_conformite" },
 	{ key: "createdAt", header: "Date_creation" },
 	{ key: "updatedAt", header: "Date_modification" },
+	{ key: "cancelledAt", header: "Date_annulation" },
 
 	// Employees
 	{ key: "totalWomen", header: "Total_femmes" },

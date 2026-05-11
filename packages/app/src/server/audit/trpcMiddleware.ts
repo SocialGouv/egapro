@@ -48,6 +48,9 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"adminDeclarations.search": AUDIT_ACTIONS.ADMIN_DECLARATIONS_SEARCH,
 	"adminDeclarations.getById": AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID,
 
+	// ── admin declaration mutations ───────────────────────
+	"adminDeclarations.cancel": AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL,
+
 	// ── public searches ────────────────────────────────────
 	"publicReferents.search": AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH,
 	"publicReferents.getById": AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW,

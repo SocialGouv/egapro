@@ -21,6 +21,7 @@ const baseRow = {
 	secondDeclReferencePeriodEnd: null,
 	createdAt: new Date("2027-03-15T10:00:00Z"),
 	updatedAt: new Date("2027-03-15T12:00:00Z"),
+	cancelledAt: null as Date | null,
 	companyName: "ACME Corp",
 	workforce: 250,
 	nafCode: "62.02",
@@ -461,5 +462,53 @@ describe("assembleDeclaration", () => {
 
 		expect(result.Date_creation).toBeNull();
 		expect(result.Date_modification).toBeNull();
+	});
+
+	it("should expose Date_annulation as null for an active declaration", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		expect(result.Date_annulation).toBeNull();
+	});
+
+	it("should expose Date_annulation as ISO string for a cancelled declaration", () => {
+		const cancelledRow = {
+			...baseRow,
+			cancelledAt: new Date("2027-04-15T08:00:00Z"),
+		};
+		const result = assembleDeclaration(cancelledRow, [], []);
+
+		expect(result.Date_annulation).toBe("2027-04-15T08:00:00.000Z");
+	});
+
+	it("should preserve indicator data on a cancelled declaration", () => {
+		const cancelledRow = {
+			...baseRow,
+			cancelledAt: new Date("2027-04-15T08:00:00Z"),
+		};
+		const indicatorG: IndicatorGEntry[] = [
+			{
+				categoryName: "Cadres",
+				declarationType: "initial",
+				womenCount: 12,
+				menCount: 18,
+				annualBaseWomen: "52000",
+				annualBaseMen: "56000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+		];
+
+		const result = assembleDeclaration(cancelledRow, indicatorG, []);
+
+		expect(result.Date_annulation).toBe("2027-04-15T08:00:00.000Z");
+		expect(result.Indicateurs.A.Rem_globale_annuelle_moyenne_F).toBe("35000");
+		expect(result.Indicateurs.G).toHaveLength(1);
+		expect(result.Indicateurs.G?.[0]?.Effectif_F).toBe(12);
+		expect(result.SIREN).toBe("123456789");
+		expect(result.Effectif).toBe(250);
 	});
 });

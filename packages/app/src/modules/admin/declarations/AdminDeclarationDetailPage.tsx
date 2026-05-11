@@ -4,13 +4,16 @@ import Link from "next/link";
 
 import { api } from "~/trpc/react";
 
+import { CancelDeclarationButton } from "./CancelDeclarationButton";
 import {
+	CancelledBadge,
 	CompanySection,
 	CseOpinionsSection,
 	DeclarantSection,
 	DeclarationSummary,
 	FilesSection,
 } from "./DetailSections";
+import { SiblingDeclarationsSection } from "./SiblingDeclarationsSection";
 
 type Props = {
 	declarationId: string;
@@ -53,6 +56,12 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 			<h1 className="fr-h3 fr-mt-2w">
 				{data.companyName} — {data.year}
 			</h1>
+			{data.cancelledAt && <CancelledBadge cancelledAt={data.cancelledAt} />}
+			<CancelDeclarationButton
+				cancelledAt={data.cancelledAt}
+				declarationId={data.id}
+				year={data.year}
+			/>
 			<DeclarationSummary declaration={data} />
 			<CompanySection declaration={data} />
 			<DeclarantSection declaration={data} />
@@ -60,6 +69,7 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 				<CseOpinionsSection opinions={data.cseOpinions} />
 			)}
 			{data.files.length > 0 && <FilesSection files={data.files} />}
+			<SiblingDeclarationsSection siblings={data.siblings} />
 		</div>
 	);
 }

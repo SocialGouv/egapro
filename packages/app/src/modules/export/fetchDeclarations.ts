@@ -266,6 +266,7 @@ export function assembleDeclaration(
 		Parcours_conformite: row.compliancePath,
 		Date_creation: row.createdAt?.toISOString() ?? null,
 		Date_modification: row.updatedAt?.toISOString() ?? null,
+		Date_annulation: row.cancelledAt?.toISOString() ?? null,
 		Effectif_F_rem_annuelle_globale: row.totalWomen,
 		Effectif_H_rem_annuelle_globale: row.totalMen,
 		Indicateurs: {

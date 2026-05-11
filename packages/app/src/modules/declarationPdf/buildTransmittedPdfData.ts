@@ -2,6 +2,7 @@ import "server-only";
 
 import { and, eq } from "drizzle-orm";
 import { formatLongDate } from "~/modules/domain";
+import { activeDeclarationFilter } from "~/server/api/routers/declarationHelpers";
 import { db } from "~/server/db";
 import {
 	companies,
@@ -44,7 +45,7 @@ export async function buildTransmittedPdfData(
 		db
 			.select({ id: declarations.id, year: declarations.year })
 			.from(declarations)
-			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+			.where(activeDeclarationFilter(siren, year))
 			.limit(1),
 	]);
 

@@ -4,8 +4,10 @@ import { getCurrentYear } from "~/modules/domain";
 
 import {
 	deleteCampaignDeadlines,
-	resetDeclarationToDraft,
 	setCampaignDeadlines,
+} from "./helpers/db-campaign";
+import {
+	resetDeclarationToDraft,
 	setCompanyHasCse,
 	setDeclarationComplianceState,
 	setUserPhone,
