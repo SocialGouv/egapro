@@ -92,10 +92,32 @@ for (const t of rules.transitions) {
 }
 
 out.push("");
+
+// ── Legend: thresholds + computations definitions ──
+out.push(`    subgraph legend ["📖 Légende"]`);
+out.push("        direction TB");
+
+const thresholdLines = Object.entries(rules.thresholds ?? {}).map(
+	([k, v]) => `${k} = ${typeof v === "string" ? `"${v}"` : v}`,
+);
+if (thresholdLines.length > 0) {
+	out.push(`        thresholds_def["<b>Thresholds</b><br/>${thresholdLines.join("<br/>")}"]:::legendBox`);
+}
+
+const computationLines = Object.entries(rules.computations ?? {}).map(
+	([name, predicate]) => `<b>${name}</b> = ${formatPredicate(predicate)}`,
+);
+if (computationLines.length > 0) {
+	out.push(`        computations_def["<b>Computations</b><br/>${computationLines.join("<br/><br/>")}"]:::legendBox`);
+}
+
+out.push("    end");
+out.push("");
 out.push("    classDef initial fill:#fff2a8,stroke:#b59e00,color:#000,font-weight:bold");
 out.push("    classDef neutral fill:#cfe3ff,stroke:#2d5fa8,color:#000");
 out.push("    classDef chosen fill:#fff6c9,stroke:#a88a2d,color:#000");
 out.push("    classDef submitted fill:#c5e8e0,stroke:#0a7a6a,color:#000,font-weight:bold");
 out.push("    classDef final fill:#c9f0a1,stroke:#3b7a1d,color:#000,font-weight:bold");
+out.push("    classDef legendBox fill:#f5f5f5,stroke:#666,color:#000,text-align:left");
 
 console.log(out.join("\n"));
