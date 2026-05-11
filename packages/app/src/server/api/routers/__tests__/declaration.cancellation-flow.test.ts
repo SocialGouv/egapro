@@ -120,21 +120,58 @@ function buildTx() {
 	};
 }
 
+const INDICATOR_FIELDS = [
+	"indicatorAAnnualWomen",
+	"indicatorAAnnualMen",
+	"indicatorAHourlyWomen",
+	"indicatorAHourlyMen",
+	"indicatorBAnnualWomen",
+	"indicatorBAnnualMen",
+	"indicatorBHourlyWomen",
+	"indicatorBHourlyMen",
+	"indicatorCAnnualWomen",
+	"indicatorCAnnualMen",
+	"indicatorCHourlyWomen",
+	"indicatorCHourlyMen",
+	"indicatorDAnnualWomen",
+	"indicatorDAnnualMen",
+	"indicatorDHourlyWomen",
+	"indicatorDHourlyMen",
+	"indicatorEWomen",
+	"indicatorEMen",
+	"indicatorFAnnualWomen1",
+	"indicatorFAnnualWomen2",
+	"indicatorFAnnualWomen3",
+	"indicatorFAnnualWomen4",
+	"indicatorFAnnualMen1",
+	"indicatorFAnnualMen2",
+	"indicatorFAnnualMen3",
+	"indicatorFAnnualMen4",
+	"indicatorFHourlyWomen1",
+	"indicatorFHourlyWomen2",
+	"indicatorFHourlyWomen3",
+	"indicatorFHourlyWomen4",
+	"indicatorFHourlyMen1",
+	"indicatorFHourlyMen2",
+	"indicatorFHourlyMen3",
+	"indicatorFHourlyMen4",
+] as const;
+
+function nullIndicators() {
+	return Object.fromEntries(INDICATOR_FIELDS.map((k) => [k, null]));
+}
+
 function buildDb() {
 	const tx = buildTx();
 	return {
 		transaction: vi.fn(async (fn: (tx: unknown) => unknown) => fn(tx)),
 		select: () => ({
-			from: (table: unknown) => ({
+			from: () => ({
 				where: () => ({
 					limit: async () => {
-						const t = table as { _?: { name?: string } };
-						if (t?._?.name === "app_declaration") {
-							const row = activeRows()[0];
-							if (!row) return [];
-							return [{ submittedAt: row.submittedAt }];
-						}
-						return [];
+						const row = activeRows()[0];
+						if (!row) return [];
+						return [{ submittedAt: row.submittedAt, ...nullIndicators() }];
 					},
 				}),
 			}),
