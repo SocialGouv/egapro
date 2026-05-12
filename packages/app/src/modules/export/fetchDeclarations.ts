@@ -263,9 +263,26 @@ export function assembleDeclaration(
 		CSE_existant: row.hasCse,
 		Annee: row.year,
 		Statut: row.status,
-		Parcours_conformite: row.firstDeclarationPathChoice,
+		Parcours_apres_declaration_1: row.firstDeclarationPathChoice,
+		Parcours_apres_declaration_2: row.secondDeclarationPathChoice,
+		Phase_2_requise: row.phase2Required,
+		Phase_2_revision_requise: row.phase2RevisionRequired,
+		Avis_CSE_requis: row.cseRequired,
+		Indicateur_G_requis: row.indicatorGRequired,
+		Version_regles: row.rulesVersion,
 		Date_creation: row.createdAt?.toISOString() ?? null,
 		Date_modification: row.updatedAt?.toISOString() ?? null,
+		Date_soumission: row.submittedAt?.toISOString() ?? null,
+		Date_parcours_apres_declaration_1:
+			row.firstDeclarationPathChoiceAt?.toISOString() ?? null,
+		Date_parcours_apres_declaration_2:
+			row.secondDeclarationPathChoiceAt?.toISOString() ?? null,
+		Date_seconde_declaration:
+			row.secondDeclarationSubmittedAt?.toISOString() ?? null,
+		Date_evaluation_conjointe:
+			row.jointEvaluationSubmittedAt?.toISOString() ?? null,
+		Date_avis_CSE: row.cseOpinionCompletedAt?.toISOString() ?? null,
+		Date_fin_demarche: row.demarcheCompletedAt?.toISOString() ?? null,
 		Date_annulation: row.cancelledAt?.toISOString() ?? null,
 		Effectif_F_rem_annuelle_globale: row.totalWomen,
 		Effectif_H_rem_annuelle_globale: row.totalMen,
@@ -274,7 +291,7 @@ export function assembleDeclaration(
 			G: initial.length > 0 ? initial : null,
 		},
 		Seconde_declaration: {
-			Statut: row.secondDeclarationSubmittedAt !== null ? "submitted" : null,
+			Statut: row.secondDeclarationSubmittedAt !== null,
 			Periode_reference_debut: row.secondDeclReferencePeriodStart,
 			Periode_reference_fin: row.secondDeclReferencePeriodEnd,
 			Correction: correction.length > 0 ? correction : null,

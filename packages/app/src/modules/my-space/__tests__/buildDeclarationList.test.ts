@@ -5,6 +5,7 @@ import { buildDeclarationList } from "../buildDeclarationList";
 const SIREN = "532847196";
 const NO_COMPLIANCE = {
 	firstDeclarationPathChoice: null,
+	secondDeclarationPathChoice: null,
 	secondDeclarationSubmittedAt: null,
 	demarcheCompletedAt: null,
 	cseOpinionCompletedAt: null,

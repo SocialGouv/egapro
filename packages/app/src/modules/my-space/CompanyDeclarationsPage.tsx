@@ -74,6 +74,9 @@ export function CompanyDeclarationsPage({
 					currentDeclaration?.firstDeclarationPathChoice ?? null
 				}
 				lastActionDate={lastActionDate}
+				secondDeclarationPathChoice={
+					currentDeclaration?.secondDeclarationPathChoice ?? null
+				}
 				secondDeclarationSubmittedAt={
 					currentDeclaration?.secondDeclarationSubmittedAt ?? null
 				}

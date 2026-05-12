@@ -6,13 +6,16 @@ import type {
 	DeclarationType,
 } from "./types";
 
+type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
+
 type DbDeclaration = {
 	type: DeclarationType;
 	year: number;
 	status: DeclarationStatus;
 	currentStep: number;
 	updatedAt: Date | null;
-	firstDeclarationPathChoice: string | null;
+	firstDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationPathChoice: CompliancePath | null;
 	secondDeclarationSubmittedAt: Date | null;
 	demarcheCompletedAt: Date | null;
 	cseOpinionCompletedAt: Date | null;
@@ -51,6 +54,7 @@ export function buildDeclarationList(
 				currentStep: existing.currentStep,
 				updatedAt: existing.updatedAt,
 				firstDeclarationPathChoice: existing.firstDeclarationPathChoice,
+				secondDeclarationPathChoice: existing.secondDeclarationPathChoice,
 				secondDeclarationSubmittedAt: existing.secondDeclarationSubmittedAt,
 				demarcheCompletedAt: existing.demarcheCompletedAt,
 				cseOpinionCompletedAt: existing.cseOpinionCompletedAt,
@@ -66,6 +70,7 @@ export function buildDeclarationList(
 				currentStep: 0,
 				updatedAt: null,
 				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				secondDeclarationSubmittedAt: null,
 				demarcheCompletedAt: null,
 				cseOpinionCompletedAt: null,
@@ -90,6 +95,7 @@ export function buildDeclarationList(
 			currentStep: d.currentStep,
 			updatedAt: d.updatedAt,
 			firstDeclarationPathChoice: d.firstDeclarationPathChoice,
+			secondDeclarationPathChoice: d.secondDeclarationPathChoice,
 			secondDeclarationSubmittedAt: d.secondDeclarationSubmittedAt,
 			demarcheCompletedAt: d.demarcheCompletedAt,
 			cseOpinionCompletedAt: d.cseOpinionCompletedAt,

@@ -9,6 +9,7 @@ const currentYear = getCurrentYear();
 
 const NO_COMPLIANCE = {
 	firstDeclarationPathChoice: null,
+	secondDeclarationPathChoice: null,
 	secondDeclarationSubmittedAt: null,
 	demarcheCompletedAt: null,
 	cseOpinionCompletedAt: null,

@@ -273,7 +273,7 @@ test.describe("Path 11: second round + joint evaluation + no hasCse → /confirm
 	});
 });
 
-// === GROUP F: Redirect guard (complianceCompletedAt) ===
+// === GROUP F: Redirect guard (demarcheCompletedAt) ===
 
 test.describe("Path 12: compliance already completed → redirect", () => {
 	test.beforeAll(async () => {
@@ -292,7 +292,7 @@ test.describe("Path 12: compliance already completed → redirect", () => {
 		await fillCseStep1(page, false);
 		await submitCseStep2(page);
 
-		// complianceCompletedAt is now set — navigating back should redirect
+		// demarcheCompletedAt is now set — navigating back should redirect
 		await page.goto(COMPLIANCE_PATH);
 		await page.waitForURL(
 			(url) => !url.pathname.endsWith("/parcours-conformite"),

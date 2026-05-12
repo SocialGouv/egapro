@@ -35,9 +35,11 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		);
 		return (
 			<Step1Opinions
-				compliancePath={declarationData.declaration.firstDeclarationPathChoice}
 				cseDeadline={campaignDeadlines.decl2JointEvaluationDeadline}
 				email={session?.user?.email ?? undefined}
+				firstDeclarationPathChoice={
+					declarationData.declaration.firstDeclarationPathChoice
+				}
 				hasSecondDeclaration={hasSecondDeclaration}
 				initialData={initialData}
 			/>

@@ -20,6 +20,8 @@ export type CompanyDetail = {
 	hasCse: boolean | null;
 };
 
+type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
+
 export type DeclarationItem = {
 	type: DeclarationType;
 	siren: string;
@@ -27,7 +29,8 @@ export type DeclarationItem = {
 	status: DeclarationStatus;
 	currentStep: number;
 	updatedAt: Date | null;
-	firstDeclarationPathChoice: string | null;
+	firstDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationPathChoice: CompliancePath | null;
 	secondDeclarationSubmittedAt: Date | null;
 	demarcheCompletedAt: Date | null;
 	cseOpinionCompletedAt: Date | null;

@@ -3,6 +3,7 @@
 import { useRef } from "react";
 
 import type { CampaignDeadlines } from "~/modules/domain";
+import { getCurrentCompliancePath } from "~/modules/domain";
 import styles from "./DeclarationProcessPanel.module.scss";
 import { getStepStatuses, VerticalStepper } from "./VerticalStepper";
 
@@ -17,12 +18,15 @@ export type PanelVariant =
 	| "cse"
 	| "closed";
 
+type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
+
 type Props = {
 	campaignDeadlines: CampaignDeadlines;
 	year: number;
 	lastActionDate: string | null;
 	variant: PanelVariant;
-	firstDeclarationPathChoice: string | null;
+	firstDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationPathChoice: CompliancePath | null;
 	secondDeclarationSubmittedAt: Date | null;
 	siren: string;
 	ctaHref: string;
@@ -34,6 +38,7 @@ export function DeclarationProcessPanel({
 	lastActionDate,
 	variant,
 	firstDeclarationPathChoice,
+	secondDeclarationPathChoice,
 	secondDeclarationSubmittedAt,
 	siren,
 	ctaHref,
@@ -41,6 +46,10 @@ export function DeclarationProcessPanel({
 	const dialogRef = useRef<HTMLDialogElement>(null);
 
 	const [step1, step2, step3] = getStepStatuses(variant);
+	const currentCompliancePath = getCurrentCompliancePath({
+		firstDeclarationPathChoice,
+		secondDeclarationPathChoice,
+	});
 
 	return (
 		<dialog
@@ -69,7 +78,7 @@ export function DeclarationProcessPanel({
 						)}
 						<VerticalStepper
 							campaignDeadlines={campaignDeadlines}
-							compliancePath={firstDeclarationPathChoice}
+							compliancePath={currentCompliancePath}
 							secondDeclarationSubmitted={secondDeclarationSubmittedAt !== null}
 							siren={siren}
 							step1={step1}

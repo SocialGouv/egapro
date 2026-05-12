@@ -233,6 +233,7 @@ export function PanelPlayground() {
 				ctaHref="/declaration-remuneration?siren=000000000"
 				firstDeclarationPathChoice={compliancePath}
 				lastActionDate="12 mars 2026"
+				secondDeclarationPathChoice={null}
 				secondDeclarationSubmittedAt={
 					secondDeclarationSubmitted ? new Date() : null
 				}
