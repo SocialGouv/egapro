@@ -8,23 +8,22 @@ async def main(db, logger):
         r["siren"]
         for r in await db.declaration.fetch(
             "SELECT DISTINCT siren FROM declaration "
-            "WHERE COALESCE(data->'entreprise'->>'raison_sociale', '') = ''"
+            "WHERE jsonb_typeof(data->'entreprise') = 'object' "
+            "AND COALESCE(data->'entreprise'->>'raison_sociale', '') = ''"
         )
     ]
     repeq_sirens = [
         r["siren"]
         for r in await db.representation_equilibree.fetch(
             "SELECT DISTINCT siren FROM representation_equilibree "
-            "WHERE COALESCE(data->'entreprise'->>'raison_sociale', '') = ''"
+            "WHERE jsonb_typeof(data->'entreprise') = 'object' "
+            "AND COALESCE(data->'entreprise'->>'raison_sociale', '') = ''"
         )
     ]
     ues_records = await db.declaration.fetch(
-        "SELECT siren, year, owner, modified_at, data FROM declaration "
-        "WHERE jsonb_array_length(COALESCE(data->'entreprise'->'ues'->'entreprises', '[]'::jsonb)) > 0 "
-        "AND EXISTS ("
-        "  SELECT 1 FROM jsonb_array_elements(data->'entreprise'->'ues'->'entreprises') ue "
-        "  WHERE COALESCE(ue->>'raison_sociale', '') = ''"
-        ")"
+        "SELECT siren, year, declarant, modified_at, data FROM declaration "
+        "WHERE jsonb_typeof(data->'entreprise'->'ues'->'entreprises') = 'array' "
+        "AND jsonb_array_length(data->'entreprise'->'ues'->'entreprises') > 0"
     )
 
     ues_sirens = set()
@@ -63,7 +62,9 @@ async def main(db, logger):
         res = await db.declaration.execute(
             "UPDATE declaration "
             "SET data = jsonb_set(data, '{entreprise,raison_sociale}', to_jsonb($2::text)) "
-            "WHERE siren=$1 AND COALESCE(data->'entreprise'->>'raison_sociale', '') = ''",
+            "WHERE siren=$1 "
+            "AND jsonb_typeof(data->'entreprise') = 'object' "
+            "AND COALESCE(data->'entreprise'->>'raison_sociale', '') = ''",
             siren,
             name,
         )
@@ -78,7 +79,9 @@ async def main(db, logger):
         res = await db.representation_equilibree.execute(
             "UPDATE representation_equilibree "
             "SET data = jsonb_set(data, '{entreprise,raison_sociale}', to_jsonb($2::text)) "
-            "WHERE siren=$1 AND COALESCE(data->'entreprise'->>'raison_sociale', '') = ''",
+            "WHERE siren=$1 "
+            "AND jsonb_typeof(data->'entreprise') = 'object' "
+            "AND COALESCE(data->'entreprise'->>'raison_sociale', '') = ''",
             siren,
             name,
         )
@@ -101,7 +104,7 @@ async def main(db, logger):
             await db.declaration.put(
                 record.data.siren,
                 record.data.year,
-                declarant=record["owner"],
+                declarant=record["declarant"],
                 data=data,
                 modified_at=record["modified_at"],
             )
