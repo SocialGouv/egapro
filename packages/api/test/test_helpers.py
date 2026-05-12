@@ -525,3 +525,76 @@ async def test_recherche_entreprise_with_date_radiation_current_year(monkeypatch
 )
 def test_code_insee_to_departement(code, expected):
     assert helpers.code_insee_to_departement(code) == expected
+
+
+@pytest.mark.asyncio
+async def test_fetch_raison_sociale_uses_nom_raison_sociale_when_present(monkeypatch):
+    async def mock_get(*args, **kwargs):
+        return {
+            "results": [
+                {"nom_raison_sociale": "RAISON SOCIALE SARL", "nom_complet": "Raison Sociale"}
+            ]
+        }
+
+    monkeypatch.setattr("egapro.helpers.get", mock_get)
+    assert (
+        await helpers.fetch_raison_sociale_from_public_api("384964508")
+        == "RAISON SOCIALE SARL"
+    )
+
+
+@pytest.mark.asyncio
+async def test_fetch_raison_sociale_falls_back_to_nom_complet(monkeypatch):
+    async def mock_get(*args, **kwargs):
+        return {"results": [{"nom_complet": "Nom Complet Only"}]}
+
+    monkeypatch.setattr("egapro.helpers.get", mock_get)
+    assert (
+        await helpers.fetch_raison_sociale_from_public_api("384964508")
+        == "Nom Complet Only"
+    )
+
+
+@pytest.mark.asyncio
+async def test_fetch_raison_sociale_falls_back_when_nom_raison_sociale_is_empty(
+    monkeypatch,
+):
+    async def mock_get(*args, **kwargs):
+        return {
+            "results": [
+                {"nom_raison_sociale": "", "nom_complet": "Nom Complet Fallback"}
+            ]
+        }
+
+    monkeypatch.setattr("egapro.helpers.get", mock_get)
+    assert (
+        await helpers.fetch_raison_sociale_from_public_api("384964508")
+        == "Nom Complet Fallback"
+    )
+
+
+@pytest.mark.asyncio
+async def test_fetch_raison_sociale_returns_none_when_both_missing(monkeypatch):
+    async def mock_get(*args, **kwargs):
+        return {"results": [{"siren": "384964508"}]}
+
+    monkeypatch.setattr("egapro.helpers.get", mock_get)
+    assert await helpers.fetch_raison_sociale_from_public_api("384964508") is None
+
+
+@pytest.mark.asyncio
+async def test_fetch_raison_sociale_returns_none_on_empty_results(monkeypatch):
+    async def mock_get(*args, **kwargs):
+        return {"results": []}
+
+    monkeypatch.setattr("egapro.helpers.get", mock_get)
+    assert await helpers.fetch_raison_sociale_from_public_api("384964508") is None
+
+
+@pytest.mark.asyncio
+async def test_fetch_raison_sociale_returns_none_on_api_failure(monkeypatch):
+    async def mock_get(*args, **kwargs):
+        return None
+
+    monkeypatch.setattr("egapro.helpers.get", mock_get)
+    assert await helpers.fetch_raison_sociale_from_public_api("384964508") is None

@@ -340,6 +340,19 @@ async def patch_from_recherche_entreprises(data):
                 entreprise.setdefault(key, value)
 
 
+async def fetch_raison_sociale_from_public_api(siren):
+    if not siren:
+        return None
+    url = "https://recherche-entreprises.api.gouv.fr/search"
+    params = {"q": siren, "per_page": 1}
+    headers = {"Referer": "egapro"}
+    data = await get(url, params=params, headers=headers)
+    if not data or not data.get("results"):
+        return None
+    item = data["results"][0] or {}
+    return item.get("nom_raison_sociale") or item.get("nom_complet") or None
+
+
 def compare_str(wanted: str, candidate: str):
     candidate = candidate.lower()
     if wanted == candidate:
