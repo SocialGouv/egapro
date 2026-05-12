@@ -22,8 +22,8 @@ type Props = {
 	year: number;
 	lastActionDate: string | null;
 	variant: PanelVariant;
-	compliancePath: string | null;
-	secondDeclarationStatus: string | null;
+	firstDeclarationPathChoice: string | null;
+	secondDeclarationSubmittedAt: Date | null;
 	siren: string;
 	ctaHref: string;
 };
@@ -33,8 +33,8 @@ export function DeclarationProcessPanel({
 	year,
 	lastActionDate,
 	variant,
-	compliancePath,
-	secondDeclarationStatus,
+	firstDeclarationPathChoice,
+	secondDeclarationSubmittedAt,
 	siren,
 	ctaHref,
 }: Props) {
@@ -69,10 +69,8 @@ export function DeclarationProcessPanel({
 						)}
 						<VerticalStepper
 							campaignDeadlines={campaignDeadlines}
-							compliancePath={compliancePath}
-							secondDeclarationSubmitted={
-								secondDeclarationStatus === "submitted"
-							}
+							compliancePath={firstDeclarationPathChoice}
+							secondDeclarationSubmitted={secondDeclarationSubmittedAt !== null}
 							siren={siren}
 							step1={step1}
 							step2={step2}

@@ -58,7 +58,7 @@ const activeRow: Row = {
 	id: DECL_ID_1,
 	siren: "123456789",
 	year: 2026,
-	status: "submitted",
+	status: "awaiting_compliance_path_choice",
 	cancelledAt: null,
 	remunerationScore: 85,
 	createdAt: new Date("2026-03-01"),
@@ -116,7 +116,9 @@ describe("adminDeclarationsRouter — search", () => {
 			headers: new Headers(),
 		} as never);
 
-		const result = await caller.search({ status: "submitted" });
+		const result = await caller.search({
+			status: "awaiting_compliance_path_choice",
+		});
 
 		expect(result.rows).toHaveLength(1);
 		expect(result.rows[0]?.id).toBe(DECL_ID_1);

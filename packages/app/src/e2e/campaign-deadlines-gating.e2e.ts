@@ -1,17 +1,16 @@
 import { expect, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
-
-import {
-	deleteCampaignDeadlines,
-	setCampaignDeadlines,
-} from "./helpers/db-campaign";
 import {
 	resetDeclarationToDraft,
 	setCompanyHasCse,
 	setDeclarationComplianceState,
 	setUserPhone,
 } from "./helpers/db";
+import {
+	deleteCampaignDeadlines,
+	setCampaignDeadlines,
+} from "./helpers/db-campaign";
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 import { loginWithProConnect } from "./helpers/login";
 

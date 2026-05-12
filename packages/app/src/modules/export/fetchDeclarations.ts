@@ -263,7 +263,7 @@ export function assembleDeclaration(
 		CSE_existant: row.hasCse,
 		Annee: row.year,
 		Statut: row.status,
-		Parcours_conformite: row.compliancePath,
+		Parcours_conformite: row.firstDeclarationPathChoice,
 		Date_creation: row.createdAt?.toISOString() ?? null,
 		Date_modification: row.updatedAt?.toISOString() ?? null,
 		Date_annulation: row.cancelledAt?.toISOString() ?? null,
@@ -274,7 +274,7 @@ export function assembleDeclaration(
 			G: initial.length > 0 ? initial : null,
 		},
 		Seconde_declaration: {
-			Statut: row.secondDeclarationStatus,
+			Statut: row.secondDeclarationSubmittedAt !== null ? "submitted" : null,
 			Periode_reference_debut: row.secondDeclReferencePeriodStart,
 			Periode_reference_fin: row.secondDeclReferencePeriodEnd,
 			Correction: correction.length > 0 ? correction : null,

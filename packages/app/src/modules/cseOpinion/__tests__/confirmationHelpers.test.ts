@@ -7,15 +7,15 @@ import {
 
 describe("hasSubmittedSecondDeclaration", () => {
 	it("returns true when status is 'submitted'", () => {
-		expect(hasSubmittedSecondDeclaration("submitted")).toBe(true);
+		expect(hasSubmittedSecondDeclaration(new Date())).toBe(true);
 	});
 
 	it("returns false when status is null", () => {
 		expect(hasSubmittedSecondDeclaration(null)).toBe(false);
 	});
 
-	it("returns false when status is 'draft'", () => {
-		expect(hasSubmittedSecondDeclaration("draft")).toBe(false);
+	it("returns false when no date provided", () => {
+		expect(hasSubmittedSecondDeclaration(null)).toBe(false);
 	});
 });
 

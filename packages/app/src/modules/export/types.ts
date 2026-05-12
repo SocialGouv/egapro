@@ -12,7 +12,7 @@ export type ExportRow = {
 	year: number;
 	status: string | null;
 	declarationType: "6_indicateurs" | "7_indicateurs";
-	compliancePath: string | null;
+	firstDeclarationPathChoice: string | null;
 	createdAt: string | null;
 	updatedAt: string | null;
 	cancelledAt: string | null;
@@ -82,7 +82,7 @@ export type ExportRow = {
 	indFHourlyQ4Men: number | null;
 
 	// Second declaration
-	secondDeclarationStatus: string | null;
+	secondDeclarationSubmittedAt: Date | null;
 	secondDeclReferencePeriodStart: string | null;
 	secondDeclReferencePeriodEnd: string | null;
 

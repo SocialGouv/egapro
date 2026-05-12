@@ -8,7 +8,7 @@ import { JointEvaluationForm } from "./JointEvaluationForm";
 export async function JointEvaluationPage() {
 	const data = await api.declaration.getOrCreate();
 
-	if (data.declaration.compliancePath !== "joint_evaluation") {
+	if (data.declaration.firstDeclarationPathChoice !== "joint_evaluation") {
 		redirect("/declaration-remuneration/parcours-conformite");
 	}
 

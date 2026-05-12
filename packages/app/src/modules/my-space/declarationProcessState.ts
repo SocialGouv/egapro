@@ -22,14 +22,14 @@ export function computePanelVariant(
 	}
 
 	const {
-		compliancePath,
-		secondDeclarationStatus,
-		complianceCompletedAt,
+		firstDeclarationPathChoice,
+		secondDeclarationSubmittedAt,
+		demarcheCompletedAt,
 		cseOpinionCompletedAt,
 		hasJointEvaluationFile,
 	} = declaration;
 
-	if (!compliancePath) {
+	if (!firstDeclarationPathChoice) {
 		return "compliance_choice";
 	}
 
@@ -37,25 +37,25 @@ export function computePanelVariant(
 		return "closed";
 	}
 
-	if (complianceCompletedAt) {
+	if (demarcheCompletedAt) {
 		return "cse";
 	}
 
-	if (compliancePath === "corrective_action") {
-		if (secondDeclarationStatus === "submitted") {
+	if (firstDeclarationPathChoice === "corrective_action") {
+		if (secondDeclarationSubmittedAt !== null) {
 			return "evaluation";
 		}
 		return "compliance";
 	}
 
-	if (compliancePath === "joint_evaluation") {
+	if (firstDeclarationPathChoice === "joint_evaluation") {
 		if (hasJointEvaluationFile) {
 			return "cse";
 		}
 		return "evaluation";
 	}
 
-	if (compliancePath === "justify") {
+	if (firstDeclarationPathChoice === "justify") {
 		return "cse";
 	}
 
@@ -74,39 +74,39 @@ export function computeCtaHref(
 	}
 
 	const {
-		compliancePath,
-		secondDeclarationStatus,
-		complianceCompletedAt,
+		firstDeclarationPathChoice,
+		secondDeclarationSubmittedAt,
+		demarcheCompletedAt,
 		cseOpinionCompletedAt,
 		hasJointEvaluationFile,
 	} = declaration;
 
-	if (!compliancePath) {
+	if (!firstDeclarationPathChoice) {
 		return `/declaration-remuneration/parcours-conformite?siren=${siren}`;
 	}
 
-	if (complianceCompletedAt) {
+	if (demarcheCompletedAt) {
 		if (cseOpinionCompletedAt) {
 			return `/declaration-remuneration?siren=${siren}`;
 		}
 		return `/avis-cse?siren=${siren}`;
 	}
 
-	if (compliancePath === "corrective_action") {
-		if (secondDeclarationStatus === "submitted") {
+	if (firstDeclarationPathChoice === "corrective_action") {
+		if (secondDeclarationSubmittedAt !== null) {
 			return `/declaration-remuneration/parcours-conformite?siren=${siren}`;
 		}
 		return `/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`;
 	}
 
-	if (compliancePath === "joint_evaluation") {
+	if (firstDeclarationPathChoice === "joint_evaluation") {
 		if (hasJointEvaluationFile) {
 			return `/avis-cse?siren=${siren}`;
 		}
 		return `/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=${siren}`;
 	}
 
-	if (compliancePath === "justify") {
+	if (firstDeclarationPathChoice === "justify") {
 		return `/avis-cse?siren=${siren}`;
 	}
 

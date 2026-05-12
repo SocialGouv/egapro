@@ -262,7 +262,7 @@ describe("declarationRouter", () => {
 			indicatorFHourlyMen4: 65,
 		};
 
-		it("sets status to submitted and step to 6", async () => {
+		it("sets status to awaiting_compliance_path_choice and step to 6", async () => {
 			const mockDb = createMockDb([mockDeclarationWithIndicators]);
 			const caller = await createCaller(mockDb);
 
@@ -271,7 +271,7 @@ describe("declarationRouter", () => {
 			expect(result).toEqual({ success: true });
 			expect(mockSet).toHaveBeenCalledWith(
 				expect.objectContaining({
-					status: "submitted",
+					status: "awaiting_compliance_path_choice",
 					currentStep: 6,
 				}),
 			);
@@ -330,7 +330,7 @@ describe("declarationRouter", () => {
 	});
 
 	describe("submitSecondDeclaration", () => {
-		it("sets secondDeclarationStatus to submitted and step to 3", async () => {
+		it("sets secondDeclarationSubmittedAt and step to 3", async () => {
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb);
 
@@ -339,7 +339,7 @@ describe("declarationRouter", () => {
 			expect(result).toEqual({ success: true });
 			expect(mockSet).toHaveBeenCalledWith(
 				expect.objectContaining({
-					secondDeclarationStatus: "submitted",
+					secondDeclarationSubmittedAt: expect.any(Date),
 					secondDeclarationStep: 3,
 				}),
 			);
@@ -358,7 +358,7 @@ describe("declarationRouter", () => {
 			expect(result).toEqual({ success: true });
 			expect(mockSet).toHaveBeenCalledWith(
 				expect.objectContaining({
-					compliancePath: "corrective_action",
+					firstDeclarationPathChoice: "corrective_action",
 				}),
 			);
 		});
@@ -374,7 +374,7 @@ describe("declarationRouter", () => {
 			expect(result).toEqual({ success: true });
 			expect(mockSet).toHaveBeenCalledWith(
 				expect.objectContaining({
-					compliancePath: "joint_evaluation",
+					firstDeclarationPathChoice: "joint_evaluation",
 				}),
 			);
 		});
@@ -390,7 +390,7 @@ describe("declarationRouter", () => {
 	});
 
 	describe("completeCompliancePath", () => {
-		it("sets complianceCompletedAt timestamp", async () => {
+		it("sets demarcheCompletedAt timestamp", async () => {
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb);
 
@@ -399,7 +399,7 @@ describe("declarationRouter", () => {
 			expect(result).toEqual({ success: true });
 			expect(mockSet).toHaveBeenCalledWith(
 				expect.objectContaining({
-					complianceCompletedAt: expect.any(Date),
+					demarcheCompletedAt: expect.any(Date),
 					updatedAt: expect.any(Date),
 				}),
 			);

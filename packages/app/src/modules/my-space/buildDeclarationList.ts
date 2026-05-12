@@ -12,9 +12,9 @@ type DbDeclaration = {
 	status: DeclarationStatus;
 	currentStep: number;
 	updatedAt: Date | null;
-	compliancePath: string | null;
-	secondDeclarationStatus: string | null;
-	complianceCompletedAt: Date | null;
+	firstDeclarationPathChoice: string | null;
+	secondDeclarationSubmittedAt: Date | null;
+	demarcheCompletedAt: Date | null;
 	cseOpinionCompletedAt: Date | null;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
@@ -50,9 +50,9 @@ export function buildDeclarationList(
 				status: existing.status,
 				currentStep: existing.currentStep,
 				updatedAt: existing.updatedAt,
-				compliancePath: existing.compliancePath,
-				secondDeclarationStatus: existing.secondDeclarationStatus,
-				complianceCompletedAt: existing.complianceCompletedAt,
+				firstDeclarationPathChoice: existing.firstDeclarationPathChoice,
+				secondDeclarationSubmittedAt: existing.secondDeclarationSubmittedAt,
+				demarcheCompletedAt: existing.demarcheCompletedAt,
 				cseOpinionCompletedAt: existing.cseOpinionCompletedAt,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
 				hasPrefillData: existing.hasPrefillData,
@@ -65,9 +65,9 @@ export function buildDeclarationList(
 				status: "to_complete",
 				currentStep: 0,
 				updatedAt: null,
-				compliancePath: null,
-				secondDeclarationStatus: null,
-				complianceCompletedAt: null,
+				firstDeclarationPathChoice: null,
+				secondDeclarationSubmittedAt: null,
+				demarcheCompletedAt: null,
 				cseOpinionCompletedAt: null,
 				hasJointEvaluationFile: false,
 				hasPrefillData:
@@ -89,9 +89,9 @@ export function buildDeclarationList(
 			status: d.status,
 			currentStep: d.currentStep,
 			updatedAt: d.updatedAt,
-			compliancePath: d.compliancePath,
-			secondDeclarationStatus: d.secondDeclarationStatus,
-			complianceCompletedAt: d.complianceCompletedAt,
+			firstDeclarationPathChoice: d.firstDeclarationPathChoice,
+			secondDeclarationSubmittedAt: d.secondDeclarationSubmittedAt,
+			demarcheCompletedAt: d.demarcheCompletedAt,
 			cseOpinionCompletedAt: d.cseOpinionCompletedAt,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
 			hasPrefillData: d.hasPrefillData,

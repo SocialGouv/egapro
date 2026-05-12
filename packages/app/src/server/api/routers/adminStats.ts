@@ -5,6 +5,7 @@ import {
 	gte,
 	inArray,
 	isNotNull,
+	ne,
 	type SQL,
 	sql,
 } from "drizzle-orm";
@@ -60,7 +61,7 @@ export const adminStatsRouter = createTRPCRouter({
 		.input(getCampaignProgressionSchema)
 		.query(async ({ ctx, input }): Promise<CampaignProgressionSeries[]> => {
 			const filters: SQL[] = [
-				eq(declarations.status, "submitted"),
+				ne(declarations.status, "draft"),
 				isNotNull(declarations.submittedAt),
 				inArray(declarations.year, input.years),
 			];

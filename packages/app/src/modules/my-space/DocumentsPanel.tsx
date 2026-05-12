@@ -43,7 +43,7 @@ function getResources(declaration: DeclarationItem): DocumentResource[] {
 	}
 
 	// Available once the second (corrective) declaration has been submitted.
-	if (declaration.secondDeclarationStatus === "submitted") {
+	if (declaration.secondDeclarationSubmittedAt !== null) {
 		resources.push({
 			title: "Télécharger le récapitulatif de la seconde déclaration",
 			subtitle,

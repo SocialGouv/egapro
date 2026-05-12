@@ -25,7 +25,13 @@ export function SearchForm() {
 					(searchParams.get("status") as
 						| ""
 						| "draft"
-						| "submitted"
+						| "awaiting_compliance_path_choice"
+						| "corrective_actions_chosen"
+						| "joint_evaluation_chosen"
+						| "awaiting_revision_choice"
+						| "revised_joint_evaluation_chosen"
+						| "awaiting_cse_opinion"
+						| "demarche_completed"
 						| "cancelled") ?? "",
 			},
 		},
@@ -139,7 +145,6 @@ export function SearchForm() {
 						>
 							<option value="">Tous</option>
 							<option value="draft">Brouillon</option>
-							<option value="submitted">Transmise</option>
 							<option value="cancelled">Annulée</option>
 						</select>
 					</div>

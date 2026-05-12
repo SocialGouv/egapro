@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, ne } from "drizzle-orm";
 import {
 	saveCompliancePathSchema,
 	updateEmployeeCategoriesSchema,
@@ -416,7 +416,7 @@ export const declarationRouter = createTRPCRouter({
 		await ctx.db
 			.update(declarations)
 			.set({
-				secondDeclarationStatus: "submitted",
+				secondDeclarationSubmittedAt: new Date(),
 				secondDeclarationStep: 3,
 				updatedAt: new Date(),
 			})
@@ -500,7 +500,7 @@ export const declarationRouter = createTRPCRouter({
 		await ctx.db
 			.update(declarations)
 			.set({
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				currentStep: 6,
 				submittedAt: existing.submittedAt ?? now,
 				updatedAt: now,
@@ -533,7 +533,7 @@ export const declarationRouter = createTRPCRouter({
 			await ctx.db
 				.update(declarations)
 				.set({
-					compliancePath: input.path,
+					firstDeclarationPathChoice: input.path,
 					updatedAt: new Date(),
 				})
 				.where(activeDeclarationFilter(siren, year));
@@ -551,12 +551,12 @@ export const declarationRouter = createTRPCRouter({
 		// mutations from overwriting a reset declaration.
 		await ctx.db
 			.update(declarations)
-			.set({ complianceCompletedAt: now, updatedAt: now })
+			.set({ demarcheCompletedAt: now, updatedAt: now })
 			.where(
 				and(
 					activeDeclarationFilter(siren, year),
-					eq(declarations.status, "submitted"),
-					isNull(declarations.complianceCompletedAt),
+					ne(declarations.status, "draft"),
+					isNull(declarations.demarcheCompletedAt),
 				),
 			);
 

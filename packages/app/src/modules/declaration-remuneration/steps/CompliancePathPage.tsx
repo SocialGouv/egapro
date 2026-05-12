@@ -12,8 +12,8 @@ type ComplianceState =
 	| { type: "second_round" };
 
 export function getComplianceState(
-	compliancePath: string | null,
-	secondDeclarationStatus: string | null,
+	firstDeclarationPathChoice: string | null,
+	secondDeclarationSubmittedAt: Date | null,
 	initialCategories: Parameters<typeof hasGapsAboveThreshold>[0],
 	correctionCategories: Parameters<typeof hasGapsAboveThreshold>[0],
 ): ComplianceState {
@@ -22,8 +22,8 @@ export function getComplianceState(
 	}
 
 	const hasSubmittedSecondDeclaration =
-		compliancePath === "corrective_action" &&
-		secondDeclarationStatus === "submitted";
+		firstDeclarationPathChoice === "corrective_action" &&
+		secondDeclarationSubmittedAt !== null;
 
 	if (
 		hasSubmittedSecondDeclaration &&
@@ -39,7 +39,7 @@ export async function CompliancePathPage() {
 	const session = await auth();
 	const data = await api.declaration.getOrCreate();
 
-	if (data.declaration.status !== "submitted") {
+	if (data.declaration.status === "draft") {
 		redirect("/declaration-remuneration/etape/6");
 	}
 
@@ -53,13 +53,13 @@ export async function CompliancePathPage() {
 	);
 
 	const state = getComplianceState(
-		data.declaration.compliancePath,
-		data.declaration.secondDeclarationStatus,
+		data.declaration.firstDeclarationPathChoice,
+		data.declaration.secondDeclarationSubmittedAt,
 		initialCategories,
 		correctionCategories,
 	);
 
-	if (state.type === "no_gap" || data.declaration.complianceCompletedAt) {
+	if (state.type === "no_gap" || data.declaration.demarcheCompletedAt) {
 		redirect(getPostComplianceDestination(company.hasCse));
 	}
 
@@ -75,13 +75,7 @@ export async function CompliancePathPage() {
 				declarationSiren={data.declaration.siren}
 				declarationYear={currentYear}
 				email={email}
-				initialPath={
-					(data.declaration.compliancePath as
-						| "justify"
-						| "corrective_action"
-						| "joint_evaluation"
-						| null) ?? undefined
-				}
+				initialPath={data.declaration.firstDeclarationPathChoice ?? undefined}
 				isSecondRound={state.type === "second_round"}
 				pdfDownloadHref={
 					state.type === "second_round"

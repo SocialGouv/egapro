@@ -230,11 +230,11 @@ export function PanelPlayground() {
 
 			<DeclarationProcessPanel
 				campaignDeadlines={deadlines}
-				compliancePath={compliancePath}
 				ctaHref="/declaration-remuneration?siren=000000000"
+				firstDeclarationPathChoice={compliancePath}
 				lastActionDate="12 mars 2026"
-				secondDeclarationStatus={
-					secondDeclarationSubmitted ? "submitted" : null
+				secondDeclarationSubmittedAt={
+					secondDeclarationSubmitted ? new Date() : null
 				}
 				siren="000000000"
 				variant={variant}

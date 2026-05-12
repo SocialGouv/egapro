@@ -1,6 +1,12 @@
 export const STATUS_LABELS: Record<string, string> = {
 	draft: "Brouillon",
-	submitted: "Transmise",
+	awaiting_compliance_path_choice: "Transmise",
+	corrective_actions_chosen: "Actions correctives choisies",
+	joint_evaluation_chosen: "Évaluation conjointe choisie",
+	awaiting_revision_choice: "Révision en attente",
+	revised_joint_evaluation_chosen: "Révision évaluation conjointe",
+	awaiting_cse_opinion: "Avis CSE en attente",
+	demarche_completed: "Démarche terminée",
 	cancelled: "Annulée",
 };
 
