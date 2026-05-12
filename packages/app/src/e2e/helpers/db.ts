@@ -76,6 +76,17 @@ export async function setCompanyHasCse(hasCse: boolean | null) {
 	}
 }
 
+export async function setCompanyWorkforce(workforce: number | null) {
+	const sql = createConnection();
+	try {
+		await sql`
+			UPDATE app_company SET workforce = ${workforce} WHERE siren = ${TEST_SIREN}
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
 export async function setDeclarationComplianceState(state: {
 	status?: string;
 	currentStep?: number;
