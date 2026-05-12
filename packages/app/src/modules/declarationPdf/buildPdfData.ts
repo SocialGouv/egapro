@@ -156,7 +156,7 @@ export async function buildPdfData(
 		throw new Error("Déclaration introuvable");
 	}
 
-	if (declaration.status !== "submitted") {
+	if (declaration.status === "draft") {
 		throw new Error("La déclaration n'est pas encore soumise");
 	}
 

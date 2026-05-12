@@ -41,7 +41,7 @@ describe("getComplianceState", () => {
 	it("returns first_round when path is corrective_action, submitted, but correction gaps resolved", () => {
 		const result = getComplianceState(
 			"corrective_action",
-			"submitted",
+			new Date(),
 			[highGapCategory],
 			[noGapCategory],
 		);
@@ -51,7 +51,7 @@ describe("getComplianceState", () => {
 	it("returns second_round when corrective_action submitted and correction gaps persist", () => {
 		const result = getComplianceState(
 			"corrective_action",
-			"submitted",
+			new Date(),
 			[highGapCategory],
 			[highGapCategory],
 		);
@@ -61,7 +61,7 @@ describe("getComplianceState", () => {
 	it("returns first_round when path is joint_evaluation regardless of second declaration", () => {
 		const result = getComplianceState(
 			"joint_evaluation",
-			"submitted",
+			new Date(),
 			[highGapCategory],
 			[highGapCategory],
 		);

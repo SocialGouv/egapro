@@ -8,9 +8,9 @@ import type { DeclarationItem } from "../types";
 const currentYear = getCurrentYear();
 
 const NO_COMPLIANCE = {
-	compliancePath: null,
-	secondDeclarationStatus: null,
-	complianceCompletedAt: null,
+	firstDeclarationPathChoice: null,
+	secondDeclarationSubmittedAt: null,
+	demarcheCompletedAt: null,
 	cseOpinionCompletedAt: null,
 	hasJointEvaluationFile: false,
 	hasPrefillData: false,

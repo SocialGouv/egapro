@@ -143,9 +143,10 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					totalWomen: declarations.totalWomen,
 					totalMen: declarations.totalMen,
 					remunerationScore: declarations.remunerationScore,
-					compliancePath: declarations.compliancePath,
-					complianceCompletedAt: declarations.complianceCompletedAt,
-					secondDeclarationStatus: declarations.secondDeclarationStatus,
+					firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
+					demarcheCompletedAt: declarations.demarcheCompletedAt,
+					secondDeclarationSubmittedAt:
+						declarations.secondDeclarationSubmittedAt,
 					createdAt: declarations.createdAt,
 					updatedAt: declarations.updatedAt,
 					cancelledAt: declarations.cancelledAt,

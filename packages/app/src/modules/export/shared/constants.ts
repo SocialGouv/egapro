@@ -19,7 +19,7 @@ export const DECLARATION_COLUMNS: Array<{
 	{ key: "year", header: "Annee" },
 	{ key: "status", header: "Statut" },
 	{ key: "declarationType", header: "Type_declaration" },
-	{ key: "compliancePath", header: "Parcours_conformite" },
+	{ key: "firstDeclarationPathChoice", header: "Parcours_conformite" },
 	{ key: "createdAt", header: "Date_creation" },
 	{ key: "updatedAt", header: "Date_modification" },
 	{ key: "cancelledAt", header: "Date_annulation" },
@@ -89,7 +89,7 @@ export const DECLARATION_COLUMNS: Array<{
 	{ key: "indFHourlyQ4Men", header: "Ind_F_Horaire_Q4_H" },
 
 	// Second declaration
-	{ key: "secondDeclarationStatus", header: "Seconde_declaration_statut" },
+	{ key: "secondDeclarationSubmittedAt", header: "Seconde_declaration_statut" },
 	{
 		key: "secondDeclReferencePeriodStart",
 		header: "Seconde_declaration_periode_debut",

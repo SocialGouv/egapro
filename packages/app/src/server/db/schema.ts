@@ -15,6 +15,23 @@ import {
  */
 export const createTable = pgTableCreator((name) => `app_${name}`);
 
+export const declarationStatusEnum = pgEnum("declaration_status", [
+	"draft",
+	"awaiting_compliance_path_choice",
+	"corrective_actions_chosen",
+	"joint_evaluation_chosen",
+	"awaiting_revision_choice",
+	"revised_joint_evaluation_chosen",
+	"awaiting_cse_opinion",
+	"demarche_completed",
+]);
+
+export const compliancePathEnum = pgEnum("compliance_path", [
+	"justify",
+	"corrective_action",
+	"joint_evaluation",
+]);
+
 export const users = createTable("user", (d) => ({
 	id: d
 		.varchar({ length: 255 })
@@ -57,7 +74,12 @@ export const declarations = createTable(
 		variableRemunerationScore: d.integer(),
 		quartileScore: d.integer(),
 		categoryScore: d.integer(),
-		compliancePath: d.varchar({ length: 30 }),
+		firstDeclarationPathChoice: compliancePathEnum(
+			"first_declaration_path_choice",
+		),
+		secondDeclarationPathChoice: compliancePathEnum(
+			"second_declaration_path_choice",
+		),
 		// ── Indicator A — Global remuneration gap (mean) ──
 		indicatorAAnnualWomen: d.numeric(),
 		indicatorAAnnualMen: d.numeric(),
@@ -136,13 +158,21 @@ export const declarations = createTable(
 		hourlyQuartile3ProportionMen: d.numeric({ precision: 9, scale: 4 }),
 		hourlyQuartile4ProportionMen: d.numeric({ precision: 9, scale: 4 }),
 		currentStep: d.integer().default(0),
-		status: d.varchar({ length: 20 }).default("draft"),
+		status: declarationStatusEnum("status").notNull().default("draft"),
 		secondDeclarationStep: d.integer(),
-		secondDeclarationStatus: d.varchar({ length: 20 }),
 		secondDeclReferencePeriodStart: d.varchar({ length: 10 }),
 		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
-		complianceCompletedAt: d.timestamp({ withTimezone: true }),
+		firstDeclarationPathChoiceAt: d.timestamp({ withTimezone: true }),
+		secondDeclarationPathChoiceAt: d.timestamp({ withTimezone: true }),
+		secondDeclarationSubmittedAt: d.timestamp({ withTimezone: true }),
+		jointEvaluationSubmittedAt: d.timestamp({ withTimezone: true }),
+		demarcheCompletedAt: d.timestamp({ withTimezone: true }),
 		cseOpinionCompletedAt: d.timestamp({ withTimezone: true }),
+		phase2Required: d.boolean().notNull().default(false),
+		phase2RevisionRequired: d.boolean().notNull().default(false),
+		cseRequired: d.boolean().notNull().default(false),
+		indicatorGRequired: d.boolean().notNull().default(false),
+		rulesVersion: d.varchar("rules_version").notNull().default("2027.1"),
 		submittedAt: d.timestamp({ withTimezone: true }),
 		cancelledAt: d.timestamp({ withTimezone: false, mode: "date" }),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),

@@ -147,9 +147,10 @@ export const companyRouter = createTRPCRouter({
 						status: declarations.status,
 						currentStep: declarations.currentStep,
 						updatedAt: declarations.updatedAt,
-						compliancePath: declarations.compliancePath,
-						secondDeclarationStatus: declarations.secondDeclarationStatus,
-						complianceCompletedAt: declarations.complianceCompletedAt,
+						firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
+						secondDeclarationSubmittedAt:
+							declarations.secondDeclarationSubmittedAt,
+						demarcheCompletedAt: declarations.demarcheCompletedAt,
 						cseOpinionCompletedAt: declarations.cseOpinionCompletedAt,
 					})
 					.from(declarations)
@@ -189,9 +190,9 @@ export const companyRouter = createTRPCRouter({
 				}),
 				currentStep: d.currentStep ?? 0,
 				updatedAt: d.updatedAt,
-				compliancePath: d.compliancePath,
-				secondDeclarationStatus: d.secondDeclarationStatus,
-				complianceCompletedAt: d.complianceCompletedAt,
+				firstDeclarationPathChoice: d.firstDeclarationPathChoice,
+				secondDeclarationSubmittedAt: d.secondDeclarationSubmittedAt,
+				demarcheCompletedAt: d.demarcheCompletedAt,
 				cseOpinionCompletedAt: d.cseOpinionCompletedAt,
 				hasJointEvaluationFile: yearsWithJointEval.has(d.year),
 				hasPrefillData: yearsWithPrefill.has(d.year),

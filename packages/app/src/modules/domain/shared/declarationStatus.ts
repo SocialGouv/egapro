@@ -24,7 +24,7 @@ export function computeDeclarationStatus(
 	if (declaration.cancelledAt != null) {
 		return "to_complete";
 	}
-	if (declaration.status === "submitted") {
+	if (declaration.status !== null && declaration.status !== "draft") {
 		return "done";
 	}
 	return "in_progress";

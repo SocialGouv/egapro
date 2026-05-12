@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, gte, inArray, isNull, lt, or } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lt, ne, or } from "drizzle-orm";
 import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
@@ -124,10 +124,10 @@ export async function fetchSubmittedDeclarations(
 			siren: declarations.siren,
 			year: declarations.year,
 			status: declarations.status,
-			compliancePath: declarations.compliancePath,
+			firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
 			totalWomen: declarations.totalWomen,
 			totalMen: declarations.totalMen,
-			secondDeclarationStatus: declarations.secondDeclarationStatus,
+			secondDeclarationSubmittedAt: declarations.secondDeclarationSubmittedAt,
 			secondDeclReferencePeriodStart:
 				declarations.secondDeclReferencePeriodStart,
 			secondDeclReferencePeriodEnd: declarations.secondDeclReferencePeriodEnd,
@@ -152,7 +152,7 @@ export async function fetchSubmittedDeclarations(
 					lt(declarations.cancelledAt, new Date(`${dateEnd}T00:00:00Z`)),
 				),
 				and(
-					eq(declarations.status, "submitted"),
+					ne(declarations.status, "draft"),
 					gte(declarations.updatedAt, new Date(`${dateBegin}T00:00:00Z`)),
 					lt(declarations.updatedAt, new Date(`${dateEnd}T00:00:00Z`)),
 					isNull(declarations.cancelledAt),
@@ -249,9 +249,7 @@ export async function buildIndicatorGRows(
 			employeeCategories,
 			eq(employeeCategories.jobCategoryId, jobCategories.id),
 		)
-		.where(
-			and(eq(declarations.status, "submitted"), eq(declarations.year, year)),
-		);
+		.where(and(ne(declarations.status, "draft"), eq(declarations.year, year)));
 }
 
 // ── Indicator G presence check ──────────────────────────────────────

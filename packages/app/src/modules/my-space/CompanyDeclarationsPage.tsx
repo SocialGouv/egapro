@@ -69,11 +69,13 @@ export function CompanyDeclarationsPage({
 			/>
 			<DeclarationProcessPanel
 				campaignDeadlines={campaignDeadlines}
-				compliancePath={currentDeclaration?.compliancePath ?? null}
 				ctaHref={ctaHref}
+				firstDeclarationPathChoice={
+					currentDeclaration?.firstDeclarationPathChoice ?? null
+				}
 				lastActionDate={lastActionDate}
-				secondDeclarationStatus={
-					currentDeclaration?.secondDeclarationStatus ?? null
+				secondDeclarationSubmittedAt={
+					currentDeclaration?.secondDeclarationSubmittedAt ?? null
 				}
 				siren={company.siren}
 				variant={panelVariant}

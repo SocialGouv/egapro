@@ -18,9 +18,9 @@ function makeDeclaration(
 		status: "done",
 		currentStep: 6,
 		updatedAt: new Date(),
-		compliancePath: null,
-		secondDeclarationStatus: null,
-		complianceCompletedAt: null,
+		firstDeclarationPathChoice: null,
+		secondDeclarationSubmittedAt: null,
+		demarcheCompletedAt: null,
 		cseOpinionCompletedAt: null,
 		hasJointEvaluationFile: false,
 		hasPrefillData: false,
@@ -46,15 +46,17 @@ describe("computePanelVariant", () => {
 	});
 
 	it('returns "compliance_choice" when done but no compliance path', () => {
-		expect(computePanelVariant(makeDeclaration({ compliancePath: null }))).toBe(
-			"compliance_choice",
-		);
+		expect(
+			computePanelVariant(
+				makeDeclaration({ firstDeclarationPathChoice: null }),
+			),
+		).toBe("compliance_choice");
 	});
 
 	it('returns "compliance" for corrective_action without second declaration', () => {
 		expect(
 			computePanelVariant(
-				makeDeclaration({ compliancePath: "corrective_action" }),
+				makeDeclaration({ firstDeclarationPathChoice: "corrective_action" }),
 			),
 		).toBe("compliance");
 	});
@@ -63,8 +65,8 @@ describe("computePanelVariant", () => {
 		expect(
 			computePanelVariant(
 				makeDeclaration({
-					compliancePath: "corrective_action",
-					secondDeclarationStatus: "submitted",
+					firstDeclarationPathChoice: "corrective_action",
+					secondDeclarationSubmittedAt: new Date(),
 				}),
 			),
 		).toBe("evaluation");
@@ -74,7 +76,7 @@ describe("computePanelVariant", () => {
 		expect(
 			computePanelVariant(
 				makeDeclaration({
-					compliancePath: "joint_evaluation",
+					firstDeclarationPathChoice: "joint_evaluation",
 					hasJointEvaluationFile: false,
 				}),
 			),
@@ -85,7 +87,7 @@ describe("computePanelVariant", () => {
 		expect(
 			computePanelVariant(
 				makeDeclaration({
-					compliancePath: "joint_evaluation",
+					firstDeclarationPathChoice: "joint_evaluation",
 					hasJointEvaluationFile: true,
 				}),
 			),
@@ -94,7 +96,9 @@ describe("computePanelVariant", () => {
 
 	it('returns "cse" for justify path', () => {
 		expect(
-			computePanelVariant(makeDeclaration({ compliancePath: "justify" })),
+			computePanelVariant(
+				makeDeclaration({ firstDeclarationPathChoice: "justify" }),
+			),
 		).toBe("cse");
 	});
 
@@ -102,8 +106,8 @@ describe("computePanelVariant", () => {
 		expect(
 			computePanelVariant(
 				makeDeclaration({
-					compliancePath: "corrective_action",
-					complianceCompletedAt: new Date(),
+					firstDeclarationPathChoice: "corrective_action",
+					demarcheCompletedAt: new Date(),
 					cseOpinionCompletedAt: null,
 				}),
 			),
@@ -114,8 +118,8 @@ describe("computePanelVariant", () => {
 		expect(
 			computePanelVariant(
 				makeDeclaration({
-					compliancePath: "corrective_action",
-					complianceCompletedAt: new Date(),
+					firstDeclarationPathChoice: "corrective_action",
+					demarcheCompletedAt: new Date(),
 					cseOpinionCompletedAt: new Date(),
 				}),
 			),
@@ -126,7 +130,7 @@ describe("computePanelVariant", () => {
 		expect(
 			computePanelVariant(
 				makeDeclaration({
-					compliancePath: "justify",
+					firstDeclarationPathChoice: "justify",
 					cseOpinionCompletedAt: new Date(),
 				}),
 			),
@@ -156,7 +160,7 @@ describe("computeCtaHref", () => {
 	it("returns second declaration step 1 URL for corrective_action", () => {
 		expect(
 			computeCtaHref(
-				makeDeclaration({ compliancePath: "corrective_action" }),
+				makeDeclaration({ firstDeclarationPathChoice: "corrective_action" }),
 				SIREN,
 			),
 		).toBe(
@@ -168,8 +172,8 @@ describe("computeCtaHref", () => {
 		expect(
 			computeCtaHref(
 				makeDeclaration({
-					compliancePath: "corrective_action",
-					secondDeclarationStatus: "submitted",
+					firstDeclarationPathChoice: "corrective_action",
+					secondDeclarationSubmittedAt: new Date(),
 				}),
 				SIREN,
 			),
@@ -179,7 +183,7 @@ describe("computeCtaHref", () => {
 	it("returns evaluation conjointe URL for joint_evaluation without file", () => {
 		expect(
 			computeCtaHref(
-				makeDeclaration({ compliancePath: "joint_evaluation" }),
+				makeDeclaration({ firstDeclarationPathChoice: "joint_evaluation" }),
 				SIREN,
 			),
 		).toBe(
@@ -191,7 +195,7 @@ describe("computeCtaHref", () => {
 		expect(
 			computeCtaHref(
 				makeDeclaration({
-					compliancePath: "joint_evaluation",
+					firstDeclarationPathChoice: "joint_evaluation",
 					hasJointEvaluationFile: true,
 				}),
 				SIREN,
@@ -201,7 +205,10 @@ describe("computeCtaHref", () => {
 
 	it("returns CSE URL for justify path", () => {
 		expect(
-			computeCtaHref(makeDeclaration({ compliancePath: "justify" }), SIREN),
+			computeCtaHref(
+				makeDeclaration({ firstDeclarationPathChoice: "justify" }),
+				SIREN,
+			),
 		).toBe(`/avis-cse?siren=${SIREN}`);
 	});
 
@@ -209,8 +216,8 @@ describe("computeCtaHref", () => {
 		expect(
 			computeCtaHref(
 				makeDeclaration({
-					compliancePath: "corrective_action",
-					complianceCompletedAt: new Date(),
+					firstDeclarationPathChoice: "corrective_action",
+					demarcheCompletedAt: new Date(),
 				}),
 				SIREN,
 			),
@@ -221,8 +228,8 @@ describe("computeCtaHref", () => {
 		expect(
 			computeCtaHref(
 				makeDeclaration({
-					compliancePath: "corrective_action",
-					complianceCompletedAt: new Date(),
+					firstDeclarationPathChoice: "corrective_action",
+					demarcheCompletedAt: new Date(),
 					cseOpinionCompletedAt: new Date(),
 				}),
 				SIREN,

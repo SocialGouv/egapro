@@ -23,7 +23,7 @@ export default async function CseOpinionConfirmationPage() {
 			declarationYear={declarationData.declaration.year}
 			email={session?.user?.email ?? undefined}
 			hasSecondDeclaration={hasSubmittedSecondDeclaration(
-				declarationData.declaration.secondDeclarationStatus,
+				declarationData.declaration.secondDeclarationSubmittedAt,
 			)}
 		/>
 	);

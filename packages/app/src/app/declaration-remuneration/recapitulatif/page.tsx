@@ -45,9 +45,9 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 	const d = data.declaration;
 
 	if (isCorrection) {
-		if (d.secondDeclarationStatus !== "submitted") notFound();
+		if (d.secondDeclarationSubmittedAt === null) notFound();
 	} else {
-		if (d.status !== "submitted") notFound();
+		if (d.status === "draft") notFound();
 	}
 
 	const { step2Data, step3Data, step4Data } = mapToStepData(d);

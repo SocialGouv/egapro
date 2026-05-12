@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, or } from "drizzle-orm";
+import { and, eq, isNotNull, ne, or } from "drizzle-orm";
 
 import type { DB } from "~/server/db";
 import { companies, declarations, users } from "~/server/db/schema";
@@ -10,10 +10,6 @@ import {
 } from "./queries";
 import type { ExportRow } from "./types";
 
-/**
- * Query all submitted declarations for a given year
- * and flatten them into ExportRow objects ready for XLSX generation.
- */
 export async function buildExportRows(
 	db: DB,
 	year: number,
@@ -23,14 +19,14 @@ export async function buildExportRows(
 			siren: declarations.siren,
 			year: declarations.year,
 			status: declarations.status,
-			compliancePath: declarations.compliancePath,
+			firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
 			totalWomen: declarations.totalWomen,
 			totalMen: declarations.totalMen,
 			remunerationScore: declarations.remunerationScore,
 			variableRemunerationScore: declarations.variableRemunerationScore,
 			quartileScore: declarations.quartileScore,
 			categoryScore: declarations.categoryScore,
-			secondDeclarationStatus: declarations.secondDeclarationStatus,
+			secondDeclarationSubmittedAt: declarations.secondDeclarationSubmittedAt,
 			secondDeclReferencePeriodStart:
 				declarations.secondDeclReferencePeriodStart,
 			secondDeclReferencePeriodEnd: declarations.secondDeclReferencePeriodEnd,
@@ -56,7 +52,7 @@ export async function buildExportRows(
 			and(
 				eq(declarations.year, year),
 				or(
-					eq(declarations.status, "submitted"),
+					ne(declarations.status, "draft"),
 					isNotNull(declarations.cancelledAt),
 				),
 			),
@@ -82,7 +78,7 @@ export async function buildExportRows(
 			declarationType: hasIndicatorG.has(row.declarationId)
 				? ("7_indicateurs" as const)
 				: ("6_indicateurs" as const),
-			compliancePath: row.compliancePath,
+			firstDeclarationPathChoice: row.firstDeclarationPathChoice,
 			createdAt: row.createdAt?.toISOString() ?? null,
 			updatedAt: row.updatedAt?.toISOString() ?? null,
 			cancelledAt: row.cancelledAt?.toISOString() ?? null,
@@ -139,7 +135,7 @@ export async function buildExportRows(
 			indFHourlyQ3Men: row.indicatorFHourlyMen3,
 			indFHourlyQ4Women: row.indicatorFHourlyWomen4,
 			indFHourlyQ4Men: row.indicatorFHourlyMen4,
-			secondDeclarationStatus: row.secondDeclarationStatus,
+			secondDeclarationSubmittedAt: row.secondDeclarationSubmittedAt,
 			secondDeclReferencePeriodStart: row.secondDeclReferencePeriodStart,
 			secondDeclReferencePeriodEnd: row.secondDeclReferencePeriodEnd,
 			declarantFirstName: row.declarantFirstName,

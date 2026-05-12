@@ -1,12 +1,12 @@
 import { expect, type Page, test } from "@playwright/test";
 import {
-	deletePreviousYearDeclaration,
-	insertPreviousYearDeclaration,
-} from "./helpers/db-campaign";
-import {
 	deleteCurrentYearCategories,
 	resetDeclarationToDraft,
 } from "./helpers/db";
+import {
+	deletePreviousYearDeclaration,
+	insertPreviousYearDeclaration,
+} from "./helpers/db-campaign";
 
 async function goToStep5(page: Page) {
 	await page.goto("/declaration-remuneration");

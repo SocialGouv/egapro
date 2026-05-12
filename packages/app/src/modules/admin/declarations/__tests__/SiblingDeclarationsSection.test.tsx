@@ -18,7 +18,7 @@ describe("SiblingDeclarationsSection", () => {
 				siblings={[
 					{
 						id: SIBLING_ID_1,
-						status: "submitted",
+						status: "awaiting_compliance_path_choice",
 						cancelledAt: null,
 						updatedAt: new Date("2026-03-10T12:00:00Z"),
 					},
@@ -40,7 +40,7 @@ describe("SiblingDeclarationsSection", () => {
 				siblings={[
 					{
 						id: SIBLING_ID_1,
-						status: "submitted",
+						status: "awaiting_compliance_path_choice",
 						cancelledAt: null,
 						updatedAt: new Date("2026-03-10T12:00:00Z"),
 					},
@@ -75,7 +75,7 @@ describe("SiblingDeclarationsSection", () => {
 				siblings={[
 					{
 						id: SIBLING_ID_1,
-						status: "submitted",
+						status: "awaiting_compliance_path_choice",
 						cancelledAt: null,
 						updatedAt: new Date("2026-03-10T12:00:00Z"),
 					},
@@ -93,7 +93,7 @@ describe("SiblingDeclarationsSection", () => {
 				siblings={[
 					{
 						id: SIBLING_ID_1,
-						status: "submitted",
+						status: "awaiting_compliance_path_choice",
 						cancelledAt: null,
 						updatedAt: new Date("2026-03-10T12:00:00Z"),
 					},

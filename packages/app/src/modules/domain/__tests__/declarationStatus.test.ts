@@ -32,9 +32,30 @@ describe("computeDeclarationStatus", () => {
 		).toBe("to_complete");
 	});
 
-	it("returns done for submitted declaration", () => {
+	it("returns done for awaiting_compliance_path_choice", () => {
 		expect(
-			computeDeclarationStatus({ status: "submitted", currentStep: 6 }),
+			computeDeclarationStatus({
+				status: "awaiting_compliance_path_choice",
+				currentStep: 6,
+			}),
+		).toBe("done");
+	});
+
+	it("returns done for corrective_actions_chosen", () => {
+		expect(
+			computeDeclarationStatus({
+				status: "corrective_actions_chosen",
+				currentStep: 6,
+			}),
+		).toBe("done");
+	});
+
+	it("returns done for demarche_completed", () => {
+		expect(
+			computeDeclarationStatus({
+				status: "demarche_completed",
+				currentStep: 6,
+			}),
 		).toBe("done");
 	});
 
@@ -44,16 +65,10 @@ describe("computeDeclarationStatus", () => {
 		);
 	});
 
-	it("returns in_progress for unknown status with currentStep > 0", () => {
-		expect(computeDeclarationStatus({ status: "other", currentStep: 1 })).toBe(
-			"in_progress",
-		);
-	});
-
 	it("returns to_complete when cancelledAt is set, regardless of status", () => {
 		expect(
 			computeDeclarationStatus({
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				currentStep: 6,
 				cancelledAt: new Date("2025-04-01"),
 			}),
@@ -73,7 +88,7 @@ describe("computeDeclarationStatus", () => {
 	it("uses existing logic when cancelledAt is null", () => {
 		expect(
 			computeDeclarationStatus({
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				currentStep: 6,
 				cancelledAt: null,
 			}),
@@ -83,7 +98,7 @@ describe("computeDeclarationStatus", () => {
 	it("uses existing logic when cancelledAt is undefined", () => {
 		expect(
 			computeDeclarationStatus({
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				currentStep: 6,
 				cancelledAt: undefined,
 			}),
