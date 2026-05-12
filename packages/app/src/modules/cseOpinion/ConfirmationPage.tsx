@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ComplianceCompletionEffect } from "~/modules/declaration-remuneration";
 import { DsfrPictogram } from "~/modules/layout";
 import { ResendReceiptButton } from "~/modules/mail";
 import styles from "./ConfirmationPage.module.scss";
@@ -43,7 +42,6 @@ export function ConfirmationPage({
 	const displayEmail = email ?? "adresse@exemple.fr";
 	return (
 		<div>
-			<ComplianceCompletionEffect />
 			<h1 className="fr-h4 fr-mb-4w">
 				Démarche des indicateurs de rémunération {declarationYear}
 			</h1>

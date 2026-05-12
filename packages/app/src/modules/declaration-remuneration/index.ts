@@ -12,7 +12,6 @@ export {
 	updateStep3Schema,
 	updateStep4Schema,
 } from "./schemas";
-export { ComplianceCompletionEffect } from "./shared/ComplianceCompletionEffect";
 export { computeIndicatorPercentages } from "./shared/computeIndicatorPercentages";
 export { DevFillButton } from "./shared/DevFillButton";
 export { GAP_LEVEL_LABELS, gapBadgeClass } from "./shared/gapBadge";
