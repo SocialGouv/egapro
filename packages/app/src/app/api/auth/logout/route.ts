@@ -8,20 +8,6 @@ import { logAction } from "~/server/audit/log";
 import { buildRequestContext } from "~/server/audit/requestContext";
 import { fetchEndSessionEndpoint } from "~/server/auth/proconnect-logout";
 
-/**
- * Custom logout route. Performs a browser-side OIDC RP-initiated logout:
- *
- *   1. Audit the intent.
- *   2. Clear the local NextAuth session cookie on the redirect response.
- *   3. Redirect the browser to ProConnect's `end_session_endpoint` with
- *      `id_token_hint` (so the IdP knows which session to terminate) and
- *      `post_logout_redirect_uri` pointing back to /api/auth/logout/callback.
- *
- * The redirect MUST happen in the browser — a server-side fetch cannot
- * kill the IdP SSO cookie that lives in the user's browser. If the
- * end_session_endpoint cannot be discovered (issuer unreachable, etc.) we
- * fall back to a local-only logout and redirect home directly.
- */
 export async function GET(request: NextRequest) {
 	const token = await getToken({ req: request });
 	const baseUrl = new URL(env.NEXTAUTH_URL).origin;
@@ -46,11 +32,6 @@ export async function GET(request: NextRequest) {
 	const redirectTarget = await buildLogoutRedirectUrl(token?.id_token, baseUrl);
 	const response = NextResponse.redirect(redirectTarget);
 
-	// Clear the local NextAuth session cookie eagerly so the user is logged
-	// out of egapro even if the IdP round-trip never completes (network blip,
-	// user closes the tab, ProConnect outage). Set is used over delete because
-	// cookies.delete() omits the Secure flag, which browsers silently ignore
-	// on `__Secure-` prefixed cookies.
 	const isSecure = baseUrl.startsWith("https://");
 	const sessionCookieName = isSecure
 		? "__Secure-next-auth.session-token"
