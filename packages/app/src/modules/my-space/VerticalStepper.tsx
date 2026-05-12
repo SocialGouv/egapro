@@ -1,6 +1,9 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import type { CampaignDeadlines } from "~/modules/domain";
+import type {
+	CampaignDeadlines,
+	DeclarationDisplayContext,
+} from "~/modules/domain";
 import { isDeadlinePassed } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
@@ -26,7 +29,7 @@ export function getStepStatuses(
 
 export function VerticalStepper({
 	campaignDeadlines,
-	compliancePath,
+	displayContext,
 	secondDeclarationSubmitted,
 	siren,
 	step1,
@@ -36,7 +39,7 @@ export function VerticalStepper({
 	year,
 }: {
 	campaignDeadlines: CampaignDeadlines;
-	compliancePath: string | null;
+	displayContext: DeclarationDisplayContext;
 	secondDeclarationSubmitted: boolean;
 	siren: string;
 	step1: StepStatus;
@@ -61,7 +64,7 @@ export function VerticalStepper({
 				<StepCircle number={2} status={step2} />
 				<Step2Content
 					campaignDeadlines={campaignDeadlines}
-					compliancePath={compliancePath}
+					displayContext={displayContext}
 					secondDeclarationSubmitted={secondDeclarationSubmitted}
 					siren={siren}
 					status={step2}
@@ -204,14 +207,14 @@ function Step1Content({
 
 function Step2Content({
 	campaignDeadlines,
-	compliancePath,
+	displayContext,
 	secondDeclarationSubmitted,
 	siren,
 	status,
 	variant,
 }: {
 	campaignDeadlines: CampaignDeadlines;
-	compliancePath: string | null;
+	displayContext: DeclarationDisplayContext;
 	secondDeclarationSubmitted: boolean;
 	siren: string;
 	status: StepStatus;
@@ -250,6 +253,10 @@ function Step2Content({
 		);
 	}
 
+	const activeCompliancePath =
+		displayContext.secondDeclarationPathChoice ??
+		displayContext.firstDeclarationPathChoice;
+
 	if (variant === "evaluation") {
 		const secondDeclTransmittedRow = secondDeclarationSubmitted ? (
 			<TransmittedRow
@@ -260,10 +267,7 @@ function Step2Content({
 			/>
 		) : null;
 
-		// Second-round choice pending: user did corrective_action + 2nd declaration
-		// but has not committed to joint evaluation yet. Show transmitted row +
-		// choice deadline, no "Évaluation conjointe" bullet.
-		if (compliancePath === "corrective_action") {
+		if (activeCompliancePath === "corrective_action") {
 			return (
 				<div className={styles.stepContent}>
 					{title}
@@ -286,7 +290,6 @@ function Step2Content({
 		);
 	}
 
-	// cse / closed variants: step 2 is complete — show what was actually done
 	return (
 		<div className={styles.stepContent}>
 			{title}
@@ -298,14 +301,14 @@ function Step2Content({
 					viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}&type=correction`}
 				/>
 			)}
-			{compliancePath === "joint_evaluation" && (
+			{displayContext.shouldShowJointEvaluation && (
 				<TransmittedRow
 					label="Votre rapport de l'évaluation conjointe a été transmis"
 					modifiableUntil={campaignDeadlines.decl2JointEvaluationDeadline}
 					modifyHref={`/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=${siren}`}
 				/>
 			)}
-			{compliancePath === "justify" && (
+			{displayContext.shouldShowGapJustification && (
 				<div className={styles.bulletItem}>
 					<span aria-hidden="true" className={styles.bullet} />
 					<p className="fr-mb-0">Justification des écarts de rémunération</p>

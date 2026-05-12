@@ -1,5 +1,5 @@
 import type { CampaignDeadlines } from "~/modules/domain";
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, getDeclarationDisplayContext } from "~/modules/domain";
 
 import { ArchivesSection } from "./ArchivesSection";
 import { CompanyEditModal } from "./CompanyEditModal";
@@ -49,6 +49,13 @@ export function CompanyDeclarationsPage({
 	);
 	const panelVariant = computePanelVariant(currentDeclaration);
 	const ctaHref = computeCtaHref(currentDeclaration, company.siren);
+	const displayContext = getDeclarationDisplayContext({
+		firstDeclarationPathChoice:
+			currentDeclaration?.firstDeclarationPathChoice ?? null,
+		secondDeclarationPathChoice:
+			currentDeclaration?.secondDeclarationPathChoice ?? null,
+		cseRequired: currentDeclaration?.cseRequired ?? false,
+	});
 
 	return (
 		<main id="content">
@@ -70,13 +77,8 @@ export function CompanyDeclarationsPage({
 			<DeclarationProcessPanel
 				campaignDeadlines={campaignDeadlines}
 				ctaHref={ctaHref}
-				firstDeclarationPathChoice={
-					currentDeclaration?.firstDeclarationPathChoice ?? null
-				}
+				displayContext={displayContext}
 				lastActionDate={lastActionDate}
-				secondDeclarationPathChoice={
-					currentDeclaration?.secondDeclarationPathChoice ?? null
-				}
 				secondDeclarationSubmittedAt={
 					currentDeclaration?.secondDeclarationSubmittedAt ?? null
 				}
