@@ -161,7 +161,7 @@ test.describe("Declaration process panel", () => {
 	test.describe("Variant: cse (joint evaluation file uploaded)", () => {
 		test.beforeAll(async () => {
 			await setDeclarationComplianceState({
-				status: "joint_evaluation_chosen",
+				status: "awaiting_cse_opinion",
 				firstDeclarationPathChoice: "joint_evaluation",
 			});
 			await insertJointEvaluationFile(CURRENT_YEAR);
