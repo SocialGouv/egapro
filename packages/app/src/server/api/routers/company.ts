@@ -154,6 +154,7 @@ export const companyRouter = createTRPCRouter({
 							declarations.secondDeclarationSubmittedAt,
 						demarcheCompletedAt: declarations.demarcheCompletedAt,
 						cseOpinionCompletedAt: declarations.cseOpinionCompletedAt,
+						cseRequired: declarations.cseRequired,
 					})
 					.from(declarations)
 					.where(
@@ -190,6 +191,7 @@ export const companyRouter = createTRPCRouter({
 					status: d.status,
 					currentStep: d.currentStep,
 				}),
+				fsmStatus: d.status,
 				currentStep: d.currentStep ?? 0,
 				updatedAt: d.updatedAt,
 				firstDeclarationPathChoice: d.firstDeclarationPathChoice,
@@ -197,6 +199,7 @@ export const companyRouter = createTRPCRouter({
 				secondDeclarationSubmittedAt: d.secondDeclarationSubmittedAt,
 				demarcheCompletedAt: d.demarcheCompletedAt,
 				cseOpinionCompletedAt: d.cseOpinionCompletedAt,
+				cseRequired: d.cseRequired,
 				hasJointEvaluationFile: yearsWithJointEval.has(d.year),
 				hasPrefillData: yearsWithPrefill.has(d.year),
 			}));

@@ -96,7 +96,7 @@ test.describe("Declaration process panel", () => {
 		});
 	});
 
-	test.describe("Variant: evaluation (corrective_action, 2nd decl submitted, second-round choice pending)", () => {
+	test.describe("Variant: compliance_choice (awaiting_revision_choice after corrective_action + 2nd decl)", () => {
 		test.beforeAll(async () => {
 			await setDeclarationComplianceState({
 				status: "awaiting_revision_choice",
@@ -105,7 +105,7 @@ test.describe("Declaration process panel", () => {
 			});
 		});
 
-		test("shows second declaration transmitted without evaluation conjointe bullet", async ({
+		test("shows compliance_choice variant prompting a revised path choice", async ({
 			page,
 		}) => {
 			await page.context().clearCookies();
@@ -118,7 +118,10 @@ test.describe("Declaration process panel", () => {
 			await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
 
 			await expect(
-				panel.getByText("Votre seconde déclaration a été transmise"),
+				panel.getByText("Vous devez au préalable disposer"),
+			).toBeVisible();
+			await expect(
+				panel.getByRole("link", { name: "Continuer la déclaration" }),
 			).toBeVisible();
 			await expect(
 				panel.getByText("Évaluation conjointe des rémunérations"),
@@ -161,7 +164,7 @@ test.describe("Declaration process panel", () => {
 	test.describe("Variant: cse (joint evaluation file uploaded)", () => {
 		test.beforeAll(async () => {
 			await setDeclarationComplianceState({
-				status: "joint_evaluation_chosen",
+				status: "awaiting_cse_opinion",
 				firstDeclarationPathChoice: "joint_evaluation",
 			});
 			await insertJointEvaluationFile(CURRENT_YEAR);

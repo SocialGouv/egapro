@@ -8,14 +8,16 @@ import type { DeclarationItem } from "../types";
 const currentYear = getCurrentYear();
 
 const NO_COMPLIANCE = {
+	fsmStatus: null,
 	firstDeclarationPathChoice: null,
 	secondDeclarationPathChoice: null,
 	secondDeclarationSubmittedAt: null,
 	demarcheCompletedAt: null,
 	cseOpinionCompletedAt: null,
+	cseRequired: false,
 	hasJointEvaluationFile: false,
 	hasPrefillData: false,
-};
+} as const;
 
 const declarations: DeclarationItem[] = [
 	{

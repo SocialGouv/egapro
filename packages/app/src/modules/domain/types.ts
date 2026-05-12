@@ -4,6 +4,17 @@ export type GapLevel = "low" | "high";
 /** Lifecycle state of a declaration from the user's perspective. */
 export type DeclarationStatus = "to_complete" | "in_progress" | "done";
 
+/** FSM status persisted in `declarations.status`; mirrors `declarationStatusEnum` (kept in sync by `declarationFsmStatus.test.ts` — domain layer stays isomorphic, no Drizzle import). */
+export type DeclarationFsmStatus =
+	| "draft"
+	| "awaiting_compliance_path_choice"
+	| "corrective_actions_chosen"
+	| "joint_evaluation_chosen"
+	| "awaiting_revision_choice"
+	| "revised_joint_evaluation_chosen"
+	| "awaiting_cse_opinion"
+	| "demarche_completed";
+
 /** The two types of declarations a company must file each year. */
 export type DeclarationType = "remuneration" | "representation";
 

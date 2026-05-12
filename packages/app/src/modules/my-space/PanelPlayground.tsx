@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import type { CampaignDeadlines } from "~/modules/domain";
+import { getDeclarationDisplayContext } from "~/modules/domain";
 import {
 	DECLARATION_PROCESS_PANEL_ID,
 	DeclarationProcessPanel,
@@ -231,9 +232,12 @@ export function PanelPlayground() {
 			<DeclarationProcessPanel
 				campaignDeadlines={deadlines}
 				ctaHref="/declaration-remuneration?siren=000000000"
-				firstDeclarationPathChoice={compliancePath}
+				displayContext={getDeclarationDisplayContext({
+					firstDeclarationPathChoice: compliancePath,
+					secondDeclarationPathChoice: null,
+					cseRequired: false,
+				})}
 				lastActionDate="12 mars 2026"
-				secondDeclarationPathChoice={null}
 				secondDeclarationSubmittedAt={
 					secondDeclarationSubmitted ? new Date() : null
 				}

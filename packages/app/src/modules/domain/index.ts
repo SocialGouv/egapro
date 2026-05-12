@@ -96,6 +96,7 @@ export type {
 	CampaignDeadlines,
 	CompanySize,
 	CompanySizeRange,
+	DeclarationFsmStatus,
 	DeclarationStatus,
 	DeclarationType,
 	GapLevel,

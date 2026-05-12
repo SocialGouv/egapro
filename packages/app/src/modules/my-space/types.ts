@@ -1,7 +1,15 @@
 // Domain re-exports (canonical source: ~/modules/domain)
-export type { DeclarationStatus, DeclarationType } from "~/modules/domain";
+export type {
+	DeclarationFsmStatus,
+	DeclarationStatus,
+	DeclarationType,
+} from "~/modules/domain";
 
-import type { DeclarationStatus, DeclarationType } from "~/modules/domain";
+import type {
+	DeclarationFsmStatus,
+	DeclarationStatus,
+	DeclarationType,
+} from "~/modules/domain";
 
 export type CompanyItem = {
 	siren: string;
@@ -27,6 +35,7 @@ export type DeclarationItem = {
 	siren: string;
 	year: number;
 	status: DeclarationStatus;
+	fsmStatus: DeclarationFsmStatus | null;
 	currentStep: number;
 	updatedAt: Date | null;
 	firstDeclarationPathChoice: CompliancePath | null;
@@ -34,6 +43,7 @@ export type DeclarationItem = {
 	secondDeclarationSubmittedAt: Date | null;
 	demarcheCompletedAt: Date | null;
 	cseOpinionCompletedAt: Date | null;
+	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
 };
