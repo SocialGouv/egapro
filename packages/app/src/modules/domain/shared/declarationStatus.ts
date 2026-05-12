@@ -1,5 +1,17 @@
 import type { DeclarationStatus } from "../types";
 
+type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
+
+export function getCurrentCompliancePath(declaration: {
+	firstDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationPathChoice: CompliancePath | null;
+}): CompliancePath | null {
+	return (
+		declaration.secondDeclarationPathChoice ??
+		declaration.firstDeclarationPathChoice
+	);
+}
+
 export function isCancelled(declaration: {
 	cancelledAt: Date | null;
 }): boolean {
