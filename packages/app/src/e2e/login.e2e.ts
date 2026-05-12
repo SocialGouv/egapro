@@ -45,7 +45,9 @@ test.describe("ProConnect authentication flow", () => {
 		await page.getByRole("button", { name: "Mon espace" }).click();
 		await page.getByRole("menuitem", { name: "Se déconnecter" }).click();
 
-		await page.waitForURL(/\/$/, { timeout: 10_000 });
+		await page.waitForURL(/session\/end|oauth\/logout/, { timeout: 10_000 });
+		await page.goto("/");
+
 		await expect(
 			page.getByRole("link", { name: "Se connecter" }),
 		).toBeVisible();
