@@ -10,6 +10,20 @@
 
 Le diagramme ci-dessus est **généré automatiquement** depuis `rules-engine-v2027.1-draft.json` via `scripts/docs/render-rules-fsm.mjs`. C'est un outil de validation : si une transition existe dans le JSON, elle apparaît dans le diagramme.
 
+### Principe : convergence + états `awaiting_*` explicites
+
+8 états couvrent l'intégralité du parcours, dont 3 états `awaiting_*` qui désambiguïsent ce que l'utilisateur doit faire ensuite :
+
+- `awaiting_compliance_path_choice` — Phase 2 requise après submit, choisir A/B/C
+- `awaiting_revision_choice` — 2nde déclaration filée avec écart résiduel, choisir A/C revised
+- `awaiting_cse_opinion` — convergence universelle : tout est exécuté, reste l'upload CSE
+
+Plus aucun état n'oblige le consommateur à inspecter `phase2Required`, `phase2RevisionRequired` ou `cseRequired` pour deviner « qu'est-ce qui vient après ». Le statut le dit explicitement.
+
+L'action `complete_demarche` est **éliminée** : la complétion (`demarche_completed` + write `demarcheCompletedAt`) est intégrée à la dernière action métier requise (`submit`, `submit_cse_opinion`, etc.). Pas de jalon fire-and-forget côté UI.
+
+Détails A path : le parcours A (justify) ne possède pas d'état `*_chosen` dédié — son exécution est l'upload CSE (ou l'absence d'action si !cseRequired). Le choix « justify » écrit `firstDeclarationPathChoice = "justify"` puis transitionne directement vers `awaiting_cse_opinion` ou `demarche_completed` selon `cseRequired`.
+
 ```bash
 # Régénérer le SVG après modification du JSON :
 node scripts/docs/render-rules-fsm.mjs docs/rules-engine-v2027.1-draft.json \
