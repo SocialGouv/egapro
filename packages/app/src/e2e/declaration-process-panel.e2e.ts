@@ -70,7 +70,8 @@ test.describe("Declaration process panel", () => {
 	test.describe("Variant: compliance (corrective action, second decl not done)", () => {
 		test.beforeAll(async () => {
 			await setDeclarationComplianceState({
-				compliancePath: "corrective_action",
+				status: "corrective_actions_chosen",
+				firstDeclarationPathChoice: "corrective_action",
 			});
 		});
 
@@ -98,8 +99,9 @@ test.describe("Declaration process panel", () => {
 	test.describe("Variant: evaluation (corrective_action, 2nd decl submitted, second-round choice pending)", () => {
 		test.beforeAll(async () => {
 			await setDeclarationComplianceState({
-				compliancePath: "corrective_action",
-				secondDeclarationStatus: "submitted",
+				status: "awaiting_revision_choice",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationSubmittedAt: new Date(),
 			});
 		});
 
@@ -127,7 +129,8 @@ test.describe("Declaration process panel", () => {
 	test.describe("Variant: evaluation (joint_evaluation path, file not uploaded)", () => {
 		test.beforeAll(async () => {
 			await setDeclarationComplianceState({
-				compliancePath: "joint_evaluation",
+				status: "joint_evaluation_chosen",
+				firstDeclarationPathChoice: "joint_evaluation",
 			});
 			await deleteJointEvaluationFiles();
 		});
@@ -158,7 +161,8 @@ test.describe("Declaration process panel", () => {
 	test.describe("Variant: cse (joint evaluation file uploaded)", () => {
 		test.beforeAll(async () => {
 			await setDeclarationComplianceState({
-				compliancePath: "joint_evaluation",
+				status: "joint_evaluation_chosen",
+				firstDeclarationPathChoice: "joint_evaluation",
 			});
 			await insertJointEvaluationFile(CURRENT_YEAR);
 		});
@@ -187,8 +191,9 @@ test.describe("Declaration process panel", () => {
 	test.describe("Variant: cse with opinions saved but not finalized", () => {
 		test.beforeAll(async () => {
 			await setDeclarationComplianceState({
-				compliancePath: "joint_evaluation",
-				complianceCompletedAt: new Date(),
+				status: "awaiting_cse_opinion",
+				firstDeclarationPathChoice: "joint_evaluation",
+				demarcheCompletedAt: new Date(),
 				cseOpinionCompletedAt: null,
 			});
 			await insertJointEvaluationFile(CURRENT_YEAR);
@@ -221,8 +226,9 @@ test.describe("Declaration process panel", () => {
 	test.describe("Variant: closed (compliance completed + CSE deposited)", () => {
 		test.beforeAll(async () => {
 			await setDeclarationComplianceState({
-				compliancePath: "joint_evaluation",
-				complianceCompletedAt: new Date(),
+				status: "demarche_completed",
+				firstDeclarationPathChoice: "joint_evaluation",
+				demarcheCompletedAt: new Date(),
 				cseOpinionCompletedAt: new Date(),
 			});
 			await insertJointEvaluationFile(CURRENT_YEAR);

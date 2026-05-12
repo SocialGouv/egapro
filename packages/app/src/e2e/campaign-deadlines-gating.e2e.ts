@@ -47,9 +47,9 @@ test.describe("Campaign deadlines gating", () => {
 	async function seedSubmittedCompliance() {
 		await resetDeclarationToDraft();
 		await setDeclarationComplianceState({
-			status: "submitted",
+			status: "corrective_actions_chosen",
 			currentStep: 6,
-			compliancePath: "corrective_action",
+			firstDeclarationPathChoice: "corrective_action",
 		});
 	}
 

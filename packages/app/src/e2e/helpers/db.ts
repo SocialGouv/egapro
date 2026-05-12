@@ -44,8 +44,10 @@ export async function resetDeclarationToDraft() {
 		await sql`
 			UPDATE app_declaration
 			SET status = 'draft', current_step = 1,
-			    compliance_path = NULL, second_declaration_status = NULL,
-			    compliance_completed_at = NULL
+			    first_declaration_path_choice = NULL, second_declaration_path_choice = NULL,
+			    first_declaration_path_choice_at = NULL, second_declaration_path_choice_at = NULL,
+			    second_declaration_submitted_at = NULL, joint_evaluation_submitted_at = NULL,
+			    demarche_completed_at = NULL
 			WHERE siren = ${TEST_SIREN}
 		`;
 
@@ -77,20 +79,22 @@ export async function setCompanyHasCse(hasCse: boolean | null) {
 export async function setDeclarationComplianceState(state: {
 	status?: string;
 	currentStep?: number;
-	compliancePath?: string | null;
-	secondDeclarationStatus?: string | null;
-	complianceCompletedAt?: Date | null;
+	firstDeclarationPathChoice?: string | null;
+	secondDeclarationPathChoice?: string | null;
+	secondDeclarationSubmittedAt?: Date | null;
+	demarcheCompletedAt?: Date | null;
 	cseOpinionCompletedAt?: Date | null;
 }) {
 	const sql = createConnection();
 	try {
 		await sql`
 			UPDATE app_declaration
-			SET status = ${state.status ?? "submitted"},
+			SET status = ${state.status ?? "awaiting_compliance_path_choice"},
 			    current_step = ${state.currentStep ?? 6},
-			    compliance_path = ${state.compliancePath ?? null},
-			    second_declaration_status = ${state.secondDeclarationStatus ?? null},
-			    compliance_completed_at = ${state.complianceCompletedAt ?? null},
+			    first_declaration_path_choice = ${state.firstDeclarationPathChoice ?? null},
+			    second_declaration_path_choice = ${state.secondDeclarationPathChoice ?? null},
+			    second_declaration_submitted_at = ${state.secondDeclarationSubmittedAt ?? null},
+			    demarche_completed_at = ${state.demarcheCompletedAt ?? null},
 			    cse_opinion_completed_at = ${state.cseOpinionCompletedAt ?? null}
 			WHERE siren = ${TEST_SIREN}
 		`;

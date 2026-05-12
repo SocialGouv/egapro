@@ -27,16 +27,22 @@ describe("computeDeclarationStatus", () => {
 		);
 	});
 
-	it("returns done for submitted status", () => {
+	it("returns done for any non-draft status", () => {
 		expect(
-			computeDeclarationStatus({ status: "submitted", currentStep: 6 }),
+			computeDeclarationStatus({
+				status: "awaiting_compliance_path_choice",
+				currentStep: 6,
+			}),
 		).toBe("done");
 	});
 
-	it("returns in_progress for any other status", () => {
-		expect(computeDeclarationStatus({ status: "review", currentStep: 2 })).toBe(
-			"in_progress",
-		);
+	it("returns done for corrective_actions_chosen", () => {
+		expect(
+			computeDeclarationStatus({
+				status: "corrective_actions_chosen",
+				currentStep: 6,
+			}),
+		).toBe("done");
 	});
 });
 
