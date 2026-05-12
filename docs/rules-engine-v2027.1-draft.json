@@ -24,7 +24,8 @@
   ],
 
   "states": [
-    { "id": "draft", "stage": null },
+    { "id": "not_started", "stage": null },
+    { "id": "draft", "stage": 1 },
     { "id": "awaiting_compliance_path_choice", "stage": 2 },
     { "id": "corrective_actions_chosen", "stage": 3 },
     { "id": "joint_evaluation_chosen", "stage": 5 },
@@ -63,6 +64,14 @@
   },
 
   "transitions": [
+    {
+      "id": "start_filling_declaration",
+      "from": ["not_started"],
+      "action": "start_filling",
+      "to": "draft",
+      "writes": []
+    },
+
     {
       "id": "submit_to_compliance_path_choice",
       "from": ["draft"],
