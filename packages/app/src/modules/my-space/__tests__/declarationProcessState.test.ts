@@ -53,7 +53,7 @@ describe("computePanelVariant", () => {
 		{ fsm: "draft", variant: "start" },
 		{ fsm: "awaiting_compliance_path_choice", variant: "compliance_choice" },
 		{ fsm: "corrective_actions_chosen", variant: "compliance" },
-		{ fsm: "awaiting_revision_choice", variant: "evaluation" },
+		{ fsm: "awaiting_revision_choice", variant: "compliance_choice" },
 		{ fsm: "joint_evaluation_chosen", variant: "evaluation" },
 		{ fsm: "revised_joint_evaluation_chosen", variant: "evaluation" },
 		{ fsm: "awaiting_cse_opinion", variant: "cse" },

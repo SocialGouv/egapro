@@ -13,10 +13,10 @@ export function computePanelVariant(
 		case "draft":
 			return "start";
 		case "awaiting_compliance_path_choice":
+		case "awaiting_revision_choice":
 			return "compliance_choice";
 		case "corrective_actions_chosen":
 			return "compliance";
-		case "awaiting_revision_choice":
 		case "joint_evaluation_chosen":
 		case "revised_joint_evaluation_chosen":
 			return "evaluation";
