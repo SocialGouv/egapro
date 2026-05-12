@@ -255,7 +255,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
       etablissements: item.nombre_etablissements || 0,
       etatAdministratifUniteLegale: (item.etat_administratif || "A") as EtatAdministratif,
       label: item.nom_complet || "",
-      simpleLabel: item.nom_raison_sociale || "",
+      simpleLabel: item.nom_raison_sociale || item.nom_complet || "",
       highlightLabel: item.nom_complet || "",
       matching: item.matching_etablissements?.length || 0,
       siren: item.siren || "",
