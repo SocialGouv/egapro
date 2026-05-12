@@ -19,13 +19,26 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		siren: "SUIT: SIREN",
 		year: "SUIT: Annee",
 		status: "SUIT: Statut",
-		compliance_path: "SUIT: Parcours_conformite",
+		first_declaration_path_choice: "SUIT: Parcours_apres_declaration_1",
+		second_declaration_path_choice: "SUIT: Parcours_apres_declaration_2",
+		phase2_required: "SUIT: Phase_2_requise",
+		phase2_revision_required: "SUIT: Phase_2_revision_requise",
+		cse_required: "SUIT: Avis_CSE_requis",
+		indicator_g_required: "SUIT: Indicateur_G_requis",
+		rules_version: "SUIT: Version_regles",
+		first_declaration_path_choice_at: "SUIT: Date_parcours_apres_declaration_1",
+		second_declaration_path_choice_at:
+			"SUIT: Date_parcours_apres_declaration_2",
+		submitted_at: "SUIT: Date_soumission",
+		joint_evaluation_submitted_at: "SUIT: Date_evaluation_conjointe",
+		cse_opinion_completed_at: "SUIT: Date_avis_CSE",
+		demarche_completed_at: "SUIT: Date_fin_demarche",
 		total_women: "SUIT: Effectif_F_rem_annuelle_globale",
 		total_men: "SUIT: Effectif_H_rem_annuelle_globale",
 		created_at: "SUIT: Date_creation",
 		updated_at: "SUIT: Date_modification",
 		// ── Second declaration ──
-		second_declaration_status: "SUIT: Seconde_declaration.Statut",
+		second_declaration_submitted_at: "SUIT: Seconde_declaration.Statut",
 		second_decl_reference_period_start:
 			"SUIT: Seconde_declaration.Periode_reference_debut",
 		second_decl_reference_period_end:

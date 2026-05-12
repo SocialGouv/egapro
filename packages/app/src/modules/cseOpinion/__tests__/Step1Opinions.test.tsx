@@ -49,8 +49,8 @@ describe("Step1Opinions", () => {
 	it("renders compliance path title when compliancePath is joint_evaluation", () => {
 		render(
 			<Step1Opinions
-				compliancePath="joint_evaluation"
 				cseDeadline={cseDeadline}
+				firstDeclarationPathChoice="joint_evaluation"
 			/>,
 		);
 
@@ -63,7 +63,10 @@ describe("Step1Opinions", () => {
 
 	it("does not render compliance path title for other paths", () => {
 		render(
-			<Step1Opinions compliancePath="justify" cseDeadline={cseDeadline} />,
+			<Step1Opinions
+				cseDeadline={cseDeadline}
+				firstDeclarationPathChoice="justify"
+			/>,
 		);
 
 		expect(
@@ -107,8 +110,8 @@ describe("Step1Opinions", () => {
 	it("renders the submission banner for joint_evaluation path", () => {
 		render(
 			<Step1Opinions
-				compliancePath="joint_evaluation"
 				cseDeadline={cseDeadline}
+				firstDeclarationPathChoice="joint_evaluation"
 			/>,
 		);
 
@@ -259,9 +262,9 @@ describe("Step1Opinions", () => {
 	it("displays email in submission banner for joint_evaluation path", () => {
 		render(
 			<Step1Opinions
-				compliancePath="joint_evaluation"
 				cseDeadline={cseDeadline}
 				email="test@example.fr"
+				firstDeclarationPathChoice="joint_evaluation"
 			/>,
 		);
 
@@ -271,8 +274,8 @@ describe("Step1Opinions", () => {
 	it("uses default email when none provided for joint_evaluation path", () => {
 		render(
 			<Step1Opinions
-				compliancePath="joint_evaluation"
 				cseDeadline={cseDeadline}
+				firstDeclarationPathChoice="joint_evaluation"
 			/>,
 		);
 

@@ -8,11 +8,14 @@ import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
 const FUTURE_YEAR = 2099;
 const PAST_YEAR = 2020;
 
+type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
+
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
 	year: FUTURE_YEAR,
 	lastActionDate: null as string | null,
-	firstDeclarationPathChoice: null as string | null,
+	firstDeclarationPathChoice: null as CompliancePath | null,
+	secondDeclarationPathChoice: null as CompliancePath | null,
 	secondDeclarationSubmittedAt: null as Date | null,
 	siren: "532847196",
 	ctaHref: "/declaration-remuneration?siren=532847196",

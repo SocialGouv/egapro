@@ -59,7 +59,31 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		const decl = SCHEMA_COLUMN_COMMENTS.declaration;
 		expect(decl?.year).toBe("SUIT: Annee");
 		expect(decl?.status).toBe("SUIT: Statut");
-		expect(decl?.compliance_path).toBe("SUIT: Parcours_conformite");
+		expect(decl?.first_declaration_path_choice).toBe(
+			"SUIT: Parcours_apres_declaration_1",
+		);
+		expect(decl?.second_declaration_path_choice).toBe(
+			"SUIT: Parcours_apres_declaration_2",
+		);
+		expect(decl?.phase2_required).toBe("SUIT: Phase_2_requise");
+		expect(decl?.phase2_revision_required).toBe(
+			"SUIT: Phase_2_revision_requise",
+		);
+		expect(decl?.cse_required).toBe("SUIT: Avis_CSE_requis");
+		expect(decl?.indicator_g_required).toBe("SUIT: Indicateur_G_requis");
+		expect(decl?.rules_version).toBe("SUIT: Version_regles");
+		expect(decl?.submitted_at).toBe("SUIT: Date_soumission");
+		expect(decl?.first_declaration_path_choice_at).toBe(
+			"SUIT: Date_parcours_apres_declaration_1",
+		);
+		expect(decl?.second_declaration_path_choice_at).toBe(
+			"SUIT: Date_parcours_apres_declaration_2",
+		);
+		expect(decl?.joint_evaluation_submitted_at).toBe(
+			"SUIT: Date_evaluation_conjointe",
+		);
+		expect(decl?.cse_opinion_completed_at).toBe("SUIT: Date_avis_CSE");
+		expect(decl?.demarche_completed_at).toBe("SUIT: Date_fin_demarche");
 		expect(decl?.total_women).toBe("SUIT: Effectif_F_rem_annuelle_globale");
 		expect(decl?.total_men).toBe("SUIT: Effectif_H_rem_annuelle_globale");
 		expect(decl?.created_at).toBe("SUIT: Date_creation");
@@ -68,7 +92,7 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 
 	it("annotates second declaration columns", () => {
 		const decl = SCHEMA_COLUMN_COMMENTS.declaration;
-		expect(decl?.second_declaration_status).toBe(
+		expect(decl?.second_declaration_submitted_at).toBe(
 			"SUIT: Seconde_declaration.Statut",
 		);
 		expect(decl?.second_decl_reference_period_start).toBe(
@@ -204,7 +228,7 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		// (siren, year, total_women, etc.) use the `SUIT: ...` format and are
 		// validated by the T2 tests above.
 		const t1Entries = Object.entries(declarationComments ?? {}).filter(
-			([col]) => col.startsWith("indicator_"),
+			([col]) => /^indicator_[a-f]_/.test(col),
 		);
 		for (const [column, comment] of t1Entries) {
 			expect(comment, `column ${column}`).toMatch(/^GIP-MDS \| SUIT: .+$/);
@@ -216,7 +240,7 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		// (siren, year, total_women, …) use the bare `SUIT: …` format and are
 		// validated by the T2 per-key tests above.
 		const t1Entries = Object.entries(declarationComments ?? {}).filter(
-			([col]) => col.startsWith("indicator_"),
+			([col]) => /^indicator_[a-f]_/.test(col),
 		);
 		const t1CommentValues = t1Entries.map(([, v]) =>
 			v.replace("GIP-MDS | SUIT: ", ""),

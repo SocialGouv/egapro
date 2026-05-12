@@ -19,6 +19,7 @@ function makeDeclaration(
 		currentStep: 6,
 		updatedAt: new Date(),
 		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: null,
 		secondDeclarationSubmittedAt: null,
 		demarcheCompletedAt: null,
 		cseOpinionCompletedAt: null,

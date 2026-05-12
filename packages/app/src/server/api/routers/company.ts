@@ -148,6 +148,8 @@ export const companyRouter = createTRPCRouter({
 						currentStep: declarations.currentStep,
 						updatedAt: declarations.updatedAt,
 						firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
+						secondDeclarationPathChoice:
+							declarations.secondDeclarationPathChoice,
 						secondDeclarationSubmittedAt:
 							declarations.secondDeclarationSubmittedAt,
 						demarcheCompletedAt: declarations.demarcheCompletedAt,
@@ -191,6 +193,7 @@ export const companyRouter = createTRPCRouter({
 				currentStep: d.currentStep ?? 0,
 				updatedAt: d.updatedAt,
 				firstDeclarationPathChoice: d.firstDeclarationPathChoice,
+				secondDeclarationPathChoice: d.secondDeclarationPathChoice,
 				secondDeclarationSubmittedAt: d.secondDeclarationSubmittedAt,
 				demarcheCompletedAt: d.demarcheCompletedAt,
 				cseOpinionCompletedAt: d.cseOpinionCompletedAt,
