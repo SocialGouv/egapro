@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import {
 	deleteFileSchema,
 	saveOpinionsSchema,
@@ -10,7 +10,10 @@ import {
 	declarationWriteProcedure,
 } from "~/server/api/trpc";
 import { cseOpinions, declarations, files } from "~/server/db/schema";
+import { applyAction, loadRules } from "~/server/rules/engine";
 import { deleteFile as deleteS3File } from "~/server/services/s3";
+
+type DeclarationRow = typeof declarations.$inferSelect;
 
 export const cseOpinionRouter = createTRPCRouter({
 	get: declarationProcedure.query(async ({ ctx }) => {
@@ -99,7 +102,7 @@ export const cseOpinionRouter = createTRPCRouter({
 	}),
 
 	finalize: declarationWriteProcedure.mutation(async ({ ctx }) => {
-		const [opinionCount, fileCount] = await Promise.all([
+		const [opinionCount, fileCount, declarationRow] = await Promise.all([
 			ctx.db
 				.select({ count: sql<number>`count(*)::int` })
 				.from(cseOpinions)
@@ -113,6 +116,11 @@ export const cseOpinionRouter = createTRPCRouter({
 						eq(files.type, "cse_opinion"),
 					),
 				),
+			ctx.db
+				.select()
+				.from(declarations)
+				.where(eq(declarations.id, ctx.declarationId))
+				.limit(1),
 		]);
 
 		if ((opinionCount[0]?.count ?? 0) === 0) {
@@ -128,17 +136,30 @@ export const cseOpinionRouter = createTRPCRouter({
 			});
 		}
 
-		const now = new Date();
-		// Idempotent: only sets cseOpinionCompletedAt the first time.
+		const declaration = declarationRow[0];
+		if (!declaration) {
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: "Déclaration introuvable",
+			});
+		}
+
+		const rules = loadRules(declaration.rulesVersion);
+		const facts = { currentState: declaration.status };
+		const { nextState, setFlags } = applyAction(
+			facts,
+			"submit_cse_opinion",
+			rules,
+		);
+
 		await ctx.db
 			.update(declarations)
-			.set({ cseOpinionCompletedAt: now, updatedAt: now })
-			.where(
-				and(
-					eq(declarations.id, ctx.declarationId),
-					isNull(declarations.cseOpinionCompletedAt),
-				),
-			);
+			.set({
+				status: nextState as DeclarationRow["status"],
+				updatedAt: new Date(),
+				...setFlags,
+			})
+			.where(eq(declarations.id, ctx.declarationId));
 
 		return { success: true };
 	}),

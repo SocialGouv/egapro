@@ -37,7 +37,7 @@ export async function insertPreviousYearDeclaration(yearsBack = 1) {
 
 		await sql`
 			INSERT INTO app_declaration (id, siren, year, declarant_id, total_women, total_men, current_step, status, created_at, updated_at)
-			VALUES (${declId}, ${TEST_SIREN}, ${targetYear}, ${userId}, 150, 200, 6, 'submitted', NOW(), NOW())
+			VALUES (${declId}, ${TEST_SIREN}, ${targetYear}, ${userId}, 150, 200, 6, 'demarche_completed', NOW(), NOW())
 			ON CONFLICT DO NOTHING
 		`;
 
@@ -225,10 +225,10 @@ export async function seedSubmittedDeclarationsForStats(
 				)
 				VALUES (
 					gen_random_uuid(), ${row.siren}, ${row.year}, ${declarantId}, 6,
-					'submitted', ${row.submittedAt}, NOW(), NOW()
+					'demarche_completed', ${row.submittedAt}, NOW(), NOW()
 				)
 				ON CONFLICT (siren, year) WHERE cancelled_at IS NULL DO UPDATE SET
-					status = 'submitted',
+					status = 'demarche_completed',
 					submitted_at = EXCLUDED.submitted_at
 			`;
 		}
