@@ -56,6 +56,16 @@ export {
 	gapLevel,
 	hasGapsAboveThreshold,
 } from "./shared/gap";
+// Indicator G — applicability rules (workforce thresholds, triennial cycle, universal year)
+export {
+	getApplicableIndicators,
+	INDICATOR_G_ANNUAL_MIN,
+	INDICATOR_G_TRIENNIAL_BASE_YEAR,
+	INDICATOR_G_TRIENNIAL_MIN,
+	INDICATOR_G_UNIVERSAL_YEAR,
+	isIndicatorGRequired,
+	isTriennialYear,
+} from "./shared/indicatorG";
 // Number parsing & normalization (French locale)
 export {
 	displayDecimal,
