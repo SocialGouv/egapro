@@ -28,11 +28,15 @@ export {
 	QUARTILE_MIN_INCREMENT,
 	QUARTILE_THRESHOLD_COUNT,
 } from "./shared/constants";
+// Declaration display context
+export type { DeclarationDisplayContext } from "./shared/declarationDisplay";
+export { getDeclarationDisplayContext } from "./shared/declarationDisplay";
 // Declaration prerequisites
 export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";
 // Declaration status
 export {
 	computeDeclarationStatus,
+	getCurrentCompliancePath,
 	isCancelled,
 } from "./shared/declarationStatus";
 // Display formatting (%, €, units)

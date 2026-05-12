@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	computeDeclarationStatus,
+	getCurrentCompliancePath,
 	isCancelled,
 } from "../shared/declarationStatus";
 
@@ -103,5 +104,34 @@ describe("computeDeclarationStatus", () => {
 				cancelledAt: undefined,
 			}),
 		).toBe("done");
+	});
+});
+
+describe("getCurrentCompliancePath", () => {
+	it("returns firstDeclarationPathChoice when secondDeclarationPathChoice is null", () => {
+		expect(
+			getCurrentCompliancePath({
+				firstDeclarationPathChoice: "justify",
+				secondDeclarationPathChoice: null,
+			}),
+		).toBe("justify");
+	});
+
+	it("returns secondDeclarationPathChoice when it is set, ignoring first", () => {
+		expect(
+			getCurrentCompliancePath({
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "joint_evaluation",
+			}),
+		).toBe("joint_evaluation");
+	});
+
+	it("returns null when both pathChoices are null", () => {
+		expect(
+			getCurrentCompliancePath({
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+			}),
+		).toBeNull();
 	});
 });
