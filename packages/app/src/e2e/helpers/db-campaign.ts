@@ -218,18 +218,30 @@ export async function seedSubmittedDeclarationsForStats(
 				VALUES (${row.siren}, ${`E2E Stats Co. ${row.siren}`}, ${row.workforce}, NOW(), NOW())
 				ON CONFLICT (siren) DO UPDATE SET workforce = EXCLUDED.workforce
 			`;
-			await sql`
+			const inserted = await sql<[{ id: string }]>`
 				INSERT INTO app_declaration (
 					id, siren, year, declarant_id, current_step, status,
-					submitted_at, created_at, updated_at
+					created_at, updated_at
 				)
 				VALUES (
 					gen_random_uuid(), ${row.siren}, ${row.year}, ${declarantId}, 6,
-					'demarche_completed', ${row.submittedAt}, NOW(), NOW()
+					'demarche_completed', NOW(), NOW()
 				)
 				ON CONFLICT (siren, year) WHERE cancelled_at IS NULL DO UPDATE SET
-					status = 'demarche_completed',
-					submitted_at = EXCLUDED.submitted_at
+					status = 'demarche_completed'
+				RETURNING id
+			`;
+			const declarationId = inserted[0]?.id;
+			if (!declarationId) continue;
+			await sql`
+				DELETE FROM app_declaration_status_history
+				WHERE declaration_id = ${declarationId}
+				  AND event_type = 'submit'
+			`;
+			await sql`
+				INSERT INTO app_declaration_status_history
+				(id, declaration_id, event_type, created_at)
+				VALUES (gen_random_uuid(), ${declarationId}, 'submit', ${row.submittedAt})
 			`;
 		}
 	} finally {
