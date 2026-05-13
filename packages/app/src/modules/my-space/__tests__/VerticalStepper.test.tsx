@@ -121,6 +121,32 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 	});
 
+	describe("2nde déclaration — variant compliance_choice (révision)", () => {
+		it("renders the Modifier link for second declaration when awaiting_revision_choice", () => {
+			const { panel, dialog } = renderPanel("compliance_choice", {
+				displayContext: makeDisplayContext("corrective_action"),
+				secondDeclarationSubmittedAt: new Date(),
+			});
+			expect(
+				panel.getByText("Votre seconde déclaration a été transmise"),
+			).toBeInTheDocument();
+			const modifyLink = dialog.querySelector<HTMLAnchorElement>(
+				'a[href*="/declaration-remuneration/parcours-conformite/etape/1"]',
+			);
+			expect(modifyLink).toBeInTheDocument();
+			expect(modifyLink?.textContent).toContain("Modifier");
+		});
+
+		it("does not render second-declaration row when not yet submitted (initial path choice)", () => {
+			const { panel } = renderPanel("compliance_choice", {
+				secondDeclarationSubmittedAt: null,
+			});
+			expect(
+				panel.queryByText("Votre seconde déclaration a été transmise"),
+			).not.toBeInTheDocument();
+		});
+	});
+
 	describe("2nde déclaration — variant cse avec secondDeclarationSubmitted", () => {
 		it("renders view link on the second declaration row (with type=correction)", () => {
 			const { dialog } = renderPanel("cse", {

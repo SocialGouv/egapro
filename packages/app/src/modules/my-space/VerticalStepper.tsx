@@ -235,6 +235,14 @@ function Step2Content({
 		return (
 			<div className={styles.stepContent}>
 				{title}
+				{secondDeclarationSubmitted && (
+					<TransmittedRow
+						label="Votre seconde déclaration a été transmise"
+						modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
+						modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
+						viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}&type=correction`}
+					/>
+				)}
 				<DeadlineRow date={campaignDeadlines.decl2ModificationDeadline} />
 			</div>
 		);
