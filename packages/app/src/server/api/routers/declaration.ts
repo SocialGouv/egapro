@@ -41,8 +41,8 @@ import {
 	fetchPreviousYearJobCategories,
 } from "./declarationHelpers";
 
-const IMMUTABLE_FIELD_ERROR =
-	"Le choix du parcours est définitif et ne peut pas être modifié.";
+const PATH_CHANGE_LOCKED_ERROR =
+	"Changement de parcours impossible : une action en aval a déjà été réalisée (rapport d'évaluation conjointe ou avis CSE déposé).";
 
 type DeclarationRow = typeof declarations.$inferSelect;
 type CompanyRow = typeof companies.$inferSelect;
@@ -592,10 +592,35 @@ export const declarationRouter = createTRPCRouter({
 
 			if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
 
-			if (
-				declaration.status === "awaiting_revision_choice" &&
-				input.path === "corrective_action"
-			) {
+			// A path change is allowed as long as no downstream concrete action
+			// has occurred. The audit log (`audit.action_log`) keeps a trace of
+			// every save, so changing one's mind here is not historical erasure.
+			// Loose `!= null` to defend against fixtures hydrating these fields
+			// as `undefined` instead of `null`.
+			const hasDownstreamArtifact =
+				declaration.cseOpinionCompletedAt != null ||
+				declaration.jointEvaluationSubmittedAt != null;
+			if (hasDownstreamArtifact) {
+				throw new TRPCError({
+					code: "CONFLICT",
+					message: PATH_CHANGE_LOCKED_ERROR,
+				});
+			}
+
+			// Determine which phase of the démarche we are choosing for.
+			// The second declaration submission is the marker that promotes the
+			// declaration into the "revision" phase. The two `*revision_choice` /
+			// `*revised_*` FSM states are kept as fallback markers — useful when
+			// the row was hydrated without `secondDeclarationSubmittedAt`.
+			const isRevisionPhase =
+				declaration.secondDeclarationSubmittedAt != null ||
+				declaration.status === "awaiting_revision_choice" ||
+				declaration.status === "revised_joint_evaluation_chosen";
+			const virtualChoiceState: DeclarationRow["status"] = isRevisionPhase
+				? "awaiting_revision_choice"
+				: "awaiting_compliance_path_choice";
+
+			if (isRevisionPhase && input.path === "corrective_action") {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
 					message:
@@ -603,31 +628,25 @@ export const declarationRouter = createTRPCRouter({
 				});
 			}
 
-			const isInitialChoice =
-				declaration.status === "awaiting_compliance_path_choice";
-			if (isInitialChoice && declaration.firstDeclarationPathChoice !== null) {
-				throw new TRPCError({
-					code: "CONFLICT",
-					message: IMMUTABLE_FIELD_ERROR,
-				});
-			}
-			if (
-				!isInitialChoice &&
-				declaration.secondDeclarationPathChoice !== null
-			) {
-				throw new TRPCError({
-					code: "CONFLICT",
-					message: IMMUTABLE_FIELD_ERROR,
-				});
-			}
-
 			const rules = loadRules(declaration.rulesVersion);
-			const facts = buildPathChoiceFacts(declaration, input.path);
+			const facts = buildPathChoiceFacts(
+				{ ...declaration, status: virtualChoiceState },
+				input.path,
+			);
 			const { nextState, setFlags } = applyAction(
 				facts,
 				"choose_compliance_path",
 				rules,
 			);
+
+			// If the previous path landed on `demarche_completed` purely from a
+			// no-action choice (justify+nocse), reverting to a different path
+			// requires clearing the stale completion timestamp.
+			const cleanupCompletedAt =
+				declaration.status === "demarche_completed" &&
+				nextState !== "demarche_completed"
+					? { demarcheCompletedAt: null }
+					: {};
 
 			await ctx.db
 				.update(declarations)
@@ -635,6 +654,7 @@ export const declarationRouter = createTRPCRouter({
 					status: nextState as DeclarationRow["status"],
 					updatedAt: new Date(),
 					...setFlags,
+					...cleanupCompletedAt,
 				})
 				.where(activeDeclarationFilter(siren, year));
 

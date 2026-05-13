@@ -97,12 +97,18 @@ type DeclarationStateRow = {
 		| "corrective_action"
 		| "joint_evaluation"
 		| null;
+	firstDeclarationPathChoiceAt?: Date | null;
 	secondDeclarationPathChoice:
 		| "justify"
 		| "corrective_action"
 		| "joint_evaluation"
 		| null;
+	secondDeclarationPathChoiceAt?: Date | null;
 	submittedAt: Date | null;
+	secondDeclarationSubmittedAt?: Date | null;
+	jointEvaluationSubmittedAt?: Date | null;
+	cseOpinionCompletedAt?: Date | null;
+	demarcheCompletedAt?: Date | null;
 	indicatorAAnnualWomen?: string | null;
 	indicatorAAnnualMen?: string | null;
 };
@@ -689,33 +695,91 @@ describe("declarationRouter", () => {
 			).rejects.toThrow(/action corrective/i);
 		});
 
-		it("rejects re-write of firstDeclarationPathChoice (immutable)", async () => {
+		it("allows changing firstDeclarationPathChoice while still in initial phase (no downstream action)", async () => {
 			const declaration = buildDeclaration({
-				status: "awaiting_compliance_path_choice",
+				status: "corrective_actions_chosen",
 				cseRequired: true,
+				firstDeclarationPathChoice: "corrective_action",
+				firstDeclarationPathChoiceAt: new Date("2027-04-01"),
+			});
+			const ctx = createSimpleSelectDb(declaration);
+			const caller = await createCaller(ctx.db);
+
+			await caller.saveCompliancePath({ path: "joint_evaluation" });
+
+			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setCall.status).toBe("joint_evaluation_chosen");
+			expect(setCall.firstDeclarationPathChoice).toBe("joint_evaluation");
+			expect(setCall.firstDeclarationPathChoiceAt).toBeInstanceOf(Date);
+		});
+
+		it("allows changing firstDeclarationPathChoice from demarche_completed when reached by justify+nocse (clears demarcheCompletedAt)", async () => {
+			const declaration = buildDeclaration({
+				status: "demarche_completed",
+				cseRequired: false,
 				firstDeclarationPathChoice: "justify",
+				firstDeclarationPathChoiceAt: new Date("2027-04-01"),
+				demarcheCompletedAt: new Date("2027-04-01"),
+			});
+			const ctx = createSimpleSelectDb(declaration);
+			const caller = await createCaller(ctx.db);
+
+			await caller.saveCompliancePath({ path: "corrective_action" });
+
+			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setCall.status).toBe("corrective_actions_chosen");
+			expect(setCall.firstDeclarationPathChoice).toBe("corrective_action");
+			expect(setCall.demarcheCompletedAt).toBeNull();
+		});
+
+		it("allows changing secondDeclarationPathChoice while still in revision phase (no joint eval, no CSE opinion)", async () => {
+			const declaration = buildDeclaration({
+				status: "revised_joint_evaluation_chosen",
+				cseRequired: true,
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "joint_evaluation",
+				secondDeclarationPathChoiceAt: new Date("2027-08-01"),
+				secondDeclarationSubmittedAt: new Date("2027-07-01"),
+			});
+			const ctx = createSimpleSelectDb(declaration);
+			const caller = await createCaller(ctx.db);
+
+			await caller.saveCompliancePath({ path: "justify" });
+
+			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setCall.status).toBe("awaiting_cse_opinion");
+			expect(setCall.secondDeclarationPathChoice).toBe("justify");
+		});
+
+		it("rejects path change when joint evaluation report has already been submitted", async () => {
+			const declaration = buildDeclaration({
+				status: "awaiting_cse_opinion",
+				cseRequired: true,
+				firstDeclarationPathChoice: "joint_evaluation",
+				jointEvaluationSubmittedAt: new Date("2027-08-15"),
 			});
 			const ctx = createSimpleSelectDb(declaration);
 			const caller = await createCaller(ctx.db);
 
 			await expect(
 				caller.saveCompliancePath({ path: "corrective_action" }),
-			).rejects.toThrow(/définitif/i);
+			).rejects.toThrow(/aval/i);
 		});
 
-		it("rejects re-write of secondDeclarationPathChoice (immutable)", async () => {
+		it("rejects path change when CSE opinion has already been deposited", async () => {
 			const declaration = buildDeclaration({
-				status: "awaiting_revision_choice",
+				status: "demarche_completed",
 				cseRequired: true,
-				firstDeclarationPathChoice: "corrective_action",
-				secondDeclarationPathChoice: "justify",
+				firstDeclarationPathChoice: "justify",
+				cseOpinionCompletedAt: new Date("2027-09-15"),
+				demarcheCompletedAt: new Date("2027-09-15"),
 			});
 			const ctx = createSimpleSelectDb(declaration);
 			const caller = await createCaller(ctx.db);
 
 			await expect(
 				caller.saveCompliancePath({ path: "joint_evaluation" }),
-			).rejects.toThrow(/définitif/i);
+			).rejects.toThrow(/aval/i);
 		});
 
 		it("rejects invalid compliance path", async () => {
