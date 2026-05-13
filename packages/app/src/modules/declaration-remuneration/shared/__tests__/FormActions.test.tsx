@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -107,6 +108,83 @@ describe("FormActions", () => {
 			render(<FormActions />);
 
 			expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+		});
+	});
+
+	describe("onPrevious prop", () => {
+		it("renders a button for Précédent when onPrevious is provided", async () => {
+			const user = userEvent.setup();
+			const handlePrevious = vi.fn();
+			render(
+				<FormActions onPrevious={handlePrevious} previousHref="/step/1" />,
+			);
+
+			const btn = screen.getByRole("button", { name: /précédent/i });
+			expect(btn).toHaveAttribute("type", "button");
+			await user.click(btn);
+			expect(handlePrevious).toHaveBeenCalledTimes(1);
+		});
+
+		it("shows Enregistrement… on Précédent when isPreviousPending is true", () => {
+			render(
+				<FormActions
+					isPreviousPending
+					onPrevious={vi.fn()}
+					previousHref="/step/1"
+				/>,
+			);
+
+			expect(screen.getByText("Enregistrement…")).toBeInTheDocument();
+		});
+
+		it("disables Précédent and Suivant when isPreviousPending is true", () => {
+			render(
+				<FormActions
+					isPreviousPending
+					onPrevious={vi.fn()}
+					previousHref="/step/1"
+				/>,
+			);
+
+			expect(
+				screen.getByRole("button", { name: "Enregistrement…" }),
+			).toBeDisabled();
+			expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
+		});
+
+		it("disables Précédent and Suivant when isSubmitting is true", () => {
+			render(
+				<FormActions
+					isSubmitting
+					onPrevious={vi.fn()}
+					previousHref="/step/1"
+				/>,
+			);
+
+			expect(screen.getByRole("button", { name: /précédent/i })).toBeDisabled();
+		});
+
+		it("renders a Link for Précédent when admin is impersonating even if onPrevious is provided", () => {
+			mockedUseSession.mockReturnValue({
+				data: {
+					user: {
+						id: "admin-1",
+						impersonation: { siren: "123456789", name: "Acme" },
+					},
+					expires: "2099-01-01",
+				},
+				status: "authenticated",
+			} as unknown as ReturnType<typeof useSession>);
+
+			render(<FormActions onPrevious={vi.fn()} previousHref="/step/1" />);
+
+			const link = screen.getByRole("link", { name: /précédent/i });
+			expect(link).toHaveAttribute("href", "/step/1");
+			expect(
+				screen.queryByRole("button", { name: /précédent/i }),
+			).not.toBeInTheDocument();
+
+			mockedUseSession.mockReset();
 		});
 	});
 });

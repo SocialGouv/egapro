@@ -7,24 +7,20 @@ import styles from "./FormActions.module.scss";
 
 type FormActionsProps = {
 	previousHref?: string;
+	onPrevious?: () => void;
+	isPreviousPending?: boolean;
 	nextHref?: string;
 	nextLabel?: string;
 	isSubmitting?: boolean;
 	nextDisabled?: boolean;
 	className?: string;
-	/**
-	 * URL used by the "Suivant" button while admin impersonation is active.
-	 * - Provided (data already saved) → button is rendered as a Link so the admin
-	 *   can navigate without triggering the submit/save mutation.
-	 * - Omitted (data never saved) → button stays disabled, since navigating
-	 *   forward without any saved data would skip a step (issue #3230).
-	 * Ignored when `nextHref` is set (the button is already a Link).
-	 */
 	mimoquageNextHref?: string;
 };
 
 export function FormActions({
 	previousHref,
+	onPrevious,
+	isPreviousPending = false,
 	nextHref,
 	nextLabel = "Suivant",
 	isSubmitting = false,
@@ -34,9 +30,20 @@ export function FormActions({
 }: FormActionsProps) {
 	const { isReadOnly, buttonProps, tooltip } = useReadOnlyGuard();
 
+	const showPreviousAsButton = onPrevious !== undefined && !isReadOnly;
+
 	return (
 		<div className={`fr-mt-4w ${styles.actions} ${className ?? ""}`}>
-			{previousHref ? (
+			{showPreviousAsButton ? (
+				<button
+					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
+					disabled={isPreviousPending || isSubmitting}
+					onClick={onPrevious}
+					type="button"
+				>
+					{isPreviousPending ? "Enregistrement…" : "Précédent"}
+				</button>
+			) : previousHref ? (
 				<Link
 					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
 					href={previousHref}
@@ -69,7 +76,9 @@ export function FormActions({
 					<button
 						{...buttonProps}
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={isReadOnly || isSubmitting || nextDisabled}
+						disabled={
+							isReadOnly || isSubmitting || isPreviousPending || nextDisabled
+						}
 						type="submit"
 					>
 						{isSubmitting ? "Enregistrement…" : nextLabel}

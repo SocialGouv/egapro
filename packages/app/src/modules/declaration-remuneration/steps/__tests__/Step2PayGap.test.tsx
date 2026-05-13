@@ -1,9 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Step2PayGap } from "../Step2PayGap";
 
 const mockMutate = vi.fn();
+let mockIsPending = false;
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -11,13 +12,20 @@ vi.mock("~/trpc/react", () => ({
 			updateStep2: {
 				useMutation: () => ({
 					mutate: mockMutate,
-					isPending: false,
+					get isPending() {
+						return mockIsPending;
+					},
 					error: null,
 				}),
 			},
 		},
 	},
 }));
+
+beforeEach(() => {
+	mockMutate.mockClear();
+	mockIsPending = false;
+});
 
 const emptyStep2Data = () => ({
 	indicatorAAnnualWomen: "",
@@ -185,7 +193,7 @@ describe("Step2PayGap", () => {
 		expect(screen.queryByText("élevé")).not.toBeInTheDocument();
 	});
 
-	it("renders previous link pointing to step 1", () => {
+	it("renders previous button (not a link) that triggers save", () => {
 		render(
 			<Step2PayGap
 				declarationSiren="123456789"
@@ -193,10 +201,9 @@ describe("Step2PayGap", () => {
 				initialData={emptyStep2Data()}
 			/>,
 		);
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/etape/1",
-		);
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		expect(prevButton).toBeInTheDocument();
+		expect(prevButton).toHaveAttribute("type", "button");
 	});
 
 	it("uses gipPrefillData when no initialData", () => {
@@ -270,5 +277,98 @@ describe("Step2PayGap", () => {
 			),
 		).toBeInTheDocument();
 		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("clicking Précédent with valid data triggers the mutation", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={{
+					indicatorAAnnualWomen: "100",
+					indicatorAAnnualMen: "200",
+					indicatorAHourlyWomen: "10",
+					indicatorAHourlyMen: "20",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "200",
+					indicatorCHourlyWomen: "10",
+					indicatorCHourlyMen: "20",
+				}}
+			/>,
+		);
+
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		await user.click(prevButton);
+
+		expect(mockMutate).toHaveBeenCalled();
+	});
+
+	it("clicking Précédent with incomplete data shows validation error without mutation", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep2Data()}
+			/>,
+		);
+
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		await user.click(prevButton);
+
+		expect(
+			screen.getByText(
+				/Veuillez renseigner toutes les données de rémunération/,
+			),
+		).toBeInTheDocument();
+		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("both Précédent and Suivant are disabled when mutation is pending", async () => {
+		mockMutate.mockImplementation(() => {
+			mockIsPending = true;
+		});
+		const user = userEvent.setup();
+		const { rerender } = render(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={{
+					indicatorAAnnualWomen: "100",
+					indicatorAAnnualMen: "200",
+					indicatorAHourlyWomen: "10",
+					indicatorAHourlyMen: "20",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "200",
+					indicatorCHourlyWomen: "10",
+					indicatorCHourlyMen: "20",
+				}}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: /précédent/i }));
+
+		rerender(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={{
+					indicatorAAnnualWomen: "100",
+					indicatorAAnnualMen: "200",
+					indicatorAHourlyWomen: "10",
+					indicatorAHourlyMen: "20",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "200",
+					indicatorCHourlyWomen: "10",
+					indicatorCHourlyMen: "20",
+				}}
+			/>,
+		);
+
+		expect(screen.getByText("Enregistrement…")).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Enregistrement…" }),
+		).toBeDisabled();
 	});
 });

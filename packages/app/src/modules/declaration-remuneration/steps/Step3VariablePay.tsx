@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import {
 	computeProportion,
@@ -106,10 +106,14 @@ export function Step3VariablePay({
 	const saved = !hasDraft && hasSavedData;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
+	const NEXT_URL = "/declaration-remuneration/etape/4";
+	const PREV_URL = "/declaration-remuneration/etape/2";
+	const navTargetRef = useRef(NEXT_URL);
+
 	const mutation = api.declaration.updateStep3.useMutation({
 		onSuccess: () => {
 			clearDraft();
-			router.push("/declaration-remuneration/etape/4");
+			router.push(navTargetRef.current);
 		},
 	});
 
@@ -144,18 +148,30 @@ export function Step3VariablePay({
 		form.setValue(field, value);
 	}
 
-	const onSubmit = form.handleSubmit(() => {
-		const incompleteRows = rows.some((r) => !r.womenValue || !r.menValue);
-		const incompleteBeneficiaries = !beneficiaryWomen || !beneficiaryMen;
-		if (incompleteRows || incompleteBeneficiaries) {
-			setValidationError(
-				"Veuillez renseigner toutes les données avant de passer à l'étape suivante.",
-			);
-			return;
-		}
-		setValidationError(null);
-		mutation.mutate(form.getValues() as Step3Data);
-	});
+	function triggerSave(targetHref: string) {
+		form.handleSubmit(() => {
+			const incompleteRows = rows.some((r) => !r.womenValue || !r.menValue);
+			const incompleteBeneficiaries = !beneficiaryWomen || !beneficiaryMen;
+			if (incompleteRows || incompleteBeneficiaries) {
+				setValidationError(
+					"Veuillez renseigner toutes les données avant de passer à l'étape suivante.",
+				);
+				return;
+			}
+			setValidationError(null);
+			navTargetRef.current = targetHref;
+			mutation.mutate(form.getValues() as Step3Data);
+		})();
+	}
+
+	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		triggerSave(NEXT_URL);
+	};
+
+	function onPrevious() {
+		triggerSave(PREV_URL);
+	}
 
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
@@ -391,11 +407,13 @@ export function Step3VariablePay({
 
 			<FormActions
 				className="fr-mt-0"
-				isSubmitting={mutation.isPending}
-				mimoquageNextHref={
-					hasSavedData ? "/declaration-remuneration/etape/4" : undefined
+				isPreviousPending={
+					mutation.isPending && navTargetRef.current === PREV_URL
 				}
-				previousHref="/declaration-remuneration/etape/2"
+				isSubmitting={mutation.isPending && navTargetRef.current === NEXT_URL}
+				mimoquageNextHref={hasSavedData ? NEXT_URL : undefined}
+				onPrevious={onPrevious}
+				previousHref={PREV_URL}
 			/>
 		</form>
 	);

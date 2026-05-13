@@ -5,6 +5,7 @@ import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/typ
 import { Step5EmployeeCategories } from "../Step5EmployeeCategories";
 
 const mockMutate = vi.fn();
+let mockIsPending = false;
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -12,7 +13,9 @@ vi.mock("~/trpc/react", () => ({
 			updateEmployeeCategories: {
 				useMutation: () => ({
 					mutate: mockMutate,
-					isPending: false,
+					get isPending() {
+						return mockIsPending;
+					},
 					error: null,
 				}),
 			},
@@ -22,6 +25,7 @@ vi.mock("~/trpc/react", () => ({
 
 beforeEach(() => {
 	mockMutate.mockClear();
+	mockIsPending = false;
 	HTMLDialogElement.prototype.showModal = vi.fn();
 	HTMLDialogElement.prototype.close = vi.fn();
 });
@@ -382,7 +386,7 @@ describe("Step5EmployeeCategories", () => {
 
 	it("shows a friendly error when source is not selected", async () => {
 		const user = userEvent.setup();
-		render(<Step5EmployeeCategories declarationYear={2025} />);
+		render(<Step5EmployeeCategories declarationSiren="123456789" declarationYear={2025} />);
 
 		const nameInput = screen.getByLabelText("Libellé", {
 			selector: "#cat-0-name",
@@ -486,17 +490,16 @@ describe("Step5EmployeeCategories", () => {
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
 
-	it("renders previous link pointing to step 4", () => {
+	it("renders previous button (not a link) that triggers save", () => {
 		render(
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
 			/>,
 		);
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/etape/4",
-		);
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		expect(prevButton).toBeInTheDocument();
+		expect(prevButton).toHaveAttribute("type", "button");
 	});
 
 	it("renders accordion for definitions", () => {
@@ -509,5 +512,80 @@ describe("Step5EmployeeCategories", () => {
 		expect(
 			screen.getByText("Définitions et méthode de calcul"),
 		).toBeInTheDocument();
+	});
+
+	it("clicking Précédent with valid data triggers the mutation", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+			/>,
+		);
+
+		const nameInput = document.getElementById("cat-0-name") as HTMLElement;
+		await user.type(nameInput, "Cadres");
+
+		await user.selectOptions(
+			screen.getByLabelText(/Quelle est la source utilisée/),
+			"accord-entreprise",
+		);
+
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		await user.click(prevButton);
+
+		expect(mockMutate).toHaveBeenCalledWith(
+			expect.objectContaining({ declarationType: "initial" }),
+		);
+	});
+
+	it("clicking Précédent with incomplete data blocks mutation", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+			/>,
+		);
+
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		await user.click(prevButton);
+
+		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("both Précédent and Suivant are disabled when mutation is pending after Précédent click", async () => {
+		mockMutate.mockImplementation(() => {
+			mockIsPending = true;
+		});
+		const user = userEvent.setup();
+		const { rerender } = render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+			/>,
+		);
+
+		const nameInput = document.getElementById("cat-0-name") as HTMLElement;
+		await user.type(nameInput, "Cadres");
+
+		await user.selectOptions(
+			screen.getByLabelText(/Quelle est la source utilisée/),
+			"accord-entreprise",
+		);
+
+		await user.click(screen.getByRole("button", { name: /précédent/i }));
+
+		rerender(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+			/>,
+		);
+
+		expect(screen.getByText("Enregistrement…")).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Enregistrement…" }),
+		).toBeDisabled();
 	});
 });

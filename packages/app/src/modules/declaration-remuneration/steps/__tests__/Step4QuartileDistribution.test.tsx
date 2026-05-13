@@ -1,9 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Step4QuartileDistribution } from "../Step4QuartileDistribution";
 
 const mockMutate = vi.fn();
+let mockIsPending = false;
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -11,13 +12,20 @@ vi.mock("~/trpc/react", () => ({
 			updateStep4: {
 				useMutation: () => ({
 					mutate: mockMutate,
-					isPending: false,
+					get isPending() {
+						return mockIsPending;
+					},
 					error: null,
 				}),
 			},
 		},
 	},
 }));
+
+beforeEach(() => {
+	mockMutate.mockClear();
+	mockIsPending = false;
+});
 
 const emptyStep4Data = () => ({
 	annual: [
@@ -264,7 +272,7 @@ describe("Step4QuartileDistribution", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders previous link pointing to step 3", () => {
+	it("renders previous button (not a link) that triggers save", () => {
 		render(
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
@@ -272,10 +280,9 @@ describe("Step4QuartileDistribution", () => {
 				initialData={emptyStep4Data()}
 			/>,
 		);
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/etape/3",
-		);
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		expect(prevButton).toBeInTheDocument();
+		expect(prevButton).toHaveAttribute("type", "button");
 	});
 
 	it("uses gipPrefillData to pre-populate 3 thresholds and counts", () => {
@@ -446,5 +453,113 @@ describe("Step4QuartileDistribution", () => {
 			/>,
 		);
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
+	});
+
+	it("clicking Précédent with valid data triggers the mutation", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={{
+					annual: [
+						{ threshold: "20000", women: 60, men: 30 },
+						{ threshold: "25000", women: 40, men: 30 },
+						{ threshold: "35000", women: 24, men: 31 },
+						{ threshold: undefined, women: 15, men: 26 },
+					],
+					hourly: [
+						{ threshold: "10", women: 20, men: 23 },
+						{ threshold: "12", women: 16, men: 18 },
+						{ threshold: "15", women: 15, men: 18 },
+						{ threshold: undefined, women: 4, men: 9 },
+					],
+				}}
+			/>,
+		);
+
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		await user.click(prevButton);
+
+		expect(mockMutate).toHaveBeenCalled();
+	});
+
+	it("clicking Précédent with validation errors shows recap without calling mutation", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
+
+		const seuil1 = screen.getAllByLabelText(
+			/Seuil maximum 1er quartile/i,
+		)[0] as HTMLInputElement;
+		await user.type(seuil1, "50000");
+
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		await user.click(prevButton);
+
+		expect(
+			screen.getByText(/Le formulaire contient des erreurs/),
+		).toBeInTheDocument();
+		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("both Précédent and Suivant are disabled when mutation is pending after Précédent click", async () => {
+		mockMutate.mockImplementation(() => {
+			mockIsPending = true;
+		});
+		const user = userEvent.setup();
+		const { rerender } = render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={{
+					annual: [
+						{ threshold: "20000", women: 60, men: 30 },
+						{ threshold: "25000", women: 40, men: 30 },
+						{ threshold: "35000", women: 24, men: 31 },
+						{ threshold: undefined, women: 15, men: 26 },
+					],
+					hourly: [
+						{ threshold: "10", women: 20, men: 23 },
+						{ threshold: "12", women: 16, men: 18 },
+						{ threshold: "15", women: 15, men: 18 },
+						{ threshold: undefined, women: 4, men: 9 },
+					],
+				}}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: /précédent/i }));
+
+		rerender(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={{
+					annual: [
+						{ threshold: "20000", women: 60, men: 30 },
+						{ threshold: "25000", women: 40, men: 30 },
+						{ threshold: "35000", women: 24, men: 31 },
+						{ threshold: undefined, women: 15, men: 26 },
+					],
+					hourly: [
+						{ threshold: "10", women: 20, men: 23 },
+						{ threshold: "12", women: 16, men: 18 },
+						{ threshold: "15", women: 15, men: 18 },
+						{ threshold: undefined, women: 4, men: 9 },
+					],
+				}}
+			/>,
+		);
+
+		expect(screen.getByText("Enregistrement…")).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Enregistrement…" }),
+		).toBeDisabled();
 	});
 });

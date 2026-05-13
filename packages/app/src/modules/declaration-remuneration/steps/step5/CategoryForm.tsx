@@ -63,7 +63,10 @@ type Props = {
 	instructionText: string;
 	tooltipPrefix: string;
 	accordionId: string;
-	previousHref: string;
+	previousHref?: string;
+	onPrevious?: () => void;
+	isPreviousPending?: boolean;
+	onPreviousSubmit?: (data: EmployeeCategorySubmitData) => void;
 	initialCategories: EmployeeCategoryRow[];
 	initialSource?: string;
 	maxWomen?: number;
@@ -119,6 +122,9 @@ export function CategoryForm({
 	tooltipPrefix,
 	accordionId,
 	previousHref,
+	onPrevious,
+	isPreviousPending = false,
+	onPreviousSubmit,
 	initialCategories,
 	initialSource = "",
 	maxWomen,
@@ -255,65 +261,75 @@ export function CategoryForm({
 	const categories = form.watch("categories");
 	const sourceError = form.formState.errors.source?.message;
 
-	const handleFormSubmit = form.handleSubmit((data) => {
-		setWorkforceError("");
+	function runValidatedSubmit(
+		callback: (data: EmployeeCategorySubmitData) => void,
+	) {
+		return form.handleSubmit((data) => {
+			setWorkforceError("");
 
-		const emptyNames = data.categories.some((cat) => !cat.name.trim());
-		if (emptyNames) {
-			setWorkforceError(
-				"Le nom de chaque catégorie d'emplois est obligatoire.",
-			);
-			return;
-		}
-
-		const names = data.categories.map((cat) => cat.name.trim().toLowerCase());
-		const hasDuplicates = names.length !== new Set(names).size;
-		if (hasDuplicates) {
-			setWorkforceError(
-				"Les noms des catégories d'emplois doivent être uniques.",
-			);
-			return;
-		}
-
-		if (maxWomen !== undefined || maxMen !== undefined) {
-			const totalWomen = data.categories.reduce(
-				(sum, cat) =>
-					sum + (cat.womenCount ? Number.parseInt(cat.womenCount, 10) : 0),
-				0,
-			);
-			const totalMen = data.categories.reduce(
-				(sum, cat) =>
-					sum + (cat.menCount ? Number.parseInt(cat.menCount, 10) : 0),
-				0,
-			);
-
-			const errors: string[] = [];
-			if (maxWomen !== undefined && totalWomen !== maxWomen) {
-				errors.push(
-					`Le total des effectifs femmes (${totalWomen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxWomen}).`,
+			const emptyNames = data.categories.some((cat) => !cat.name.trim());
+			if (emptyNames) {
+				setWorkforceError(
+					"Le nom de chaque catégorie d'emplois est obligatoire.",
 				);
-			}
-			if (maxMen !== undefined && totalMen !== maxMen) {
-				errors.push(
-					`Le total des effectifs hommes (${totalMen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxMen}).`,
-				);
-			}
-			if (errors.length > 0) {
-				setWorkforceError(errors.join(" "));
 				return;
 			}
-		}
 
-		onSubmit(
-			toSubmitData(
-				data.categories.map((cat, i) => ({
-					id: i,
-					...cat,
-				})),
-				data.source,
-			),
-		);
-	});
+			const names = data.categories.map((cat) => cat.name.trim().toLowerCase());
+			const hasDuplicates = names.length !== new Set(names).size;
+			if (hasDuplicates) {
+				setWorkforceError(
+					"Les noms des catégories d'emplois doivent être uniques.",
+				);
+				return;
+			}
+
+			if (maxWomen !== undefined || maxMen !== undefined) {
+				const totalWomen = data.categories.reduce(
+					(sum, cat) =>
+						sum + (cat.womenCount ? Number.parseInt(cat.womenCount, 10) : 0),
+					0,
+				);
+				const totalMen = data.categories.reduce(
+					(sum, cat) =>
+						sum + (cat.menCount ? Number.parseInt(cat.menCount, 10) : 0),
+					0,
+				);
+
+				const errors: string[] = [];
+				if (maxWomen !== undefined && totalWomen !== maxWomen) {
+					errors.push(
+						`Le total des effectifs femmes (${totalWomen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxWomen}).`,
+					);
+				}
+				if (maxMen !== undefined && totalMen !== maxMen) {
+					errors.push(
+						`Le total des effectifs hommes (${totalMen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxMen}).`,
+					);
+				}
+				if (errors.length > 0) {
+					setWorkforceError(errors.join(" "));
+					return;
+				}
+			}
+
+			callback(
+				toSubmitData(
+					data.categories.map((cat, i) => ({
+						id: i,
+						...cat,
+					})),
+					data.source,
+				),
+			);
+		});
+	}
+
+	const handleFormSubmit = runValidatedSubmit(onSubmit);
+
+	const handlePreviousClick = onPreviousSubmit
+		? () => runValidatedSubmit(onPreviousSubmit)()
+		: onPrevious;
 
 	return (
 		<form className={stepStyles.form} onSubmit={handleFormSubmit}>
@@ -560,8 +576,10 @@ export function CategoryForm({
 			/>
 
 			<FormActions
+				isPreviousPending={isPreviousPending}
 				isSubmitting={isSubmitting}
 				mimoquageNextHref={mimoquageNextHref}
+				onPrevious={handlePreviousClick}
 				previousHref={previousHref}
 			/>
 

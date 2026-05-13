@@ -1,9 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Step3VariablePay } from "../Step3VariablePay";
 
 const mockMutate = vi.fn();
+let mockIsPending = false;
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -11,13 +12,20 @@ vi.mock("~/trpc/react", () => ({
 			updateStep3: {
 				useMutation: () => ({
 					mutate: mockMutate,
-					isPending: false,
+					get isPending() {
+						return mockIsPending;
+					},
 					error: null,
 				}),
 			},
 		},
 	},
 }));
+
+beforeEach(() => {
+	mockMutate.mockClear();
+	mockIsPending = false;
+});
 
 const emptyStep3Data = () => ({
 	indicatorBAnnualWomen: "",
@@ -222,7 +230,7 @@ describe("Step3VariablePay", () => {
 		expect(screen.getByText(/ne peut pas dépasser/i)).toBeInTheDocument();
 	});
 
-	it("renders previous link pointing to step 2", () => {
+	it("renders previous button (not a link) that triggers save", () => {
 		render(
 			<Step3VariablePay
 				declarationSiren="123456789"
@@ -230,10 +238,9 @@ describe("Step3VariablePay", () => {
 				initialData={emptyStep3Data()}
 			/>,
 		);
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/etape/2",
-		);
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		expect(prevButton).toBeInTheDocument();
+		expect(prevButton).toHaveAttribute("type", "button");
 	});
 
 	it("uses gipPrefillData when no initialData", () => {
@@ -396,5 +403,102 @@ describe("Step3VariablePay", () => {
 		expect(benefWomenInput).toHaveValue("0");
 		const benefMenInput = screen.getByLabelText("Bénéficiaires hommes");
 		expect(benefMenInput).toHaveValue("0");
+	});
+
+	it("clicking Précédent with valid data triggers the mutation", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={{
+					indicatorBAnnualWomen: "100",
+					indicatorBAnnualMen: "200",
+					indicatorBHourlyWomen: "10",
+					indicatorBHourlyMen: "20",
+					indicatorDAnnualWomen: "100",
+					indicatorDAnnualMen: "200",
+					indicatorDHourlyWomen: "10",
+					indicatorDHourlyMen: "20",
+					indicatorEWomen: "5",
+					indicatorEMen: "10",
+				}}
+			/>,
+		);
+
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		await user.click(prevButton);
+
+		expect(mockMutate).toHaveBeenCalled();
+	});
+
+	it("clicking Précédent with incomplete data shows validation error without mutation", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep3Data()}
+			/>,
+		);
+
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		await user.click(prevButton);
+
+		expect(
+			screen.getByText(/Veuillez renseigner toutes les données/),
+		).toBeInTheDocument();
+		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("both Précédent and Suivant are disabled when mutation is pending", async () => {
+		mockMutate.mockImplementation(() => {
+			mockIsPending = true;
+		});
+		const user = userEvent.setup();
+		const { rerender } = render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={{
+					indicatorBAnnualWomen: "100",
+					indicatorBAnnualMen: "200",
+					indicatorBHourlyWomen: "10",
+					indicatorBHourlyMen: "20",
+					indicatorDAnnualWomen: "100",
+					indicatorDAnnualMen: "200",
+					indicatorDHourlyWomen: "10",
+					indicatorDHourlyMen: "20",
+					indicatorEWomen: "5",
+					indicatorEMen: "10",
+				}}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: /précédent/i }));
+
+		rerender(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={{
+					indicatorBAnnualWomen: "100",
+					indicatorBAnnualMen: "200",
+					indicatorBHourlyWomen: "10",
+					indicatorBHourlyMen: "20",
+					indicatorDAnnualWomen: "100",
+					indicatorDAnnualMen: "200",
+					indicatorDHourlyWomen: "10",
+					indicatorDHourlyMen: "20",
+					indicatorEWomen: "5",
+					indicatorEMen: "10",
+				}}
+			/>,
+		);
+
+		expect(screen.getByText("Enregistrement…")).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Enregistrement…" }),
+		).toBeDisabled();
 	});
 });

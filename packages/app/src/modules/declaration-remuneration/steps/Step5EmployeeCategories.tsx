@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { padDecimalToTwo } from "~/modules/domain";
@@ -92,10 +92,14 @@ export function Step5EmployeeCategories({
 			}
 		: undefined;
 
+	const NEXT_URL = "/declaration-remuneration/etape/6";
+	const PREV_URL = "/declaration-remuneration/etape/4";
+	const navTargetRef = useRef(NEXT_URL);
+
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
 		onSuccess: () => {
 			clearDraft();
-			router.push("/declaration-remuneration/etape/6");
+			router.push(navTargetRef.current);
 		},
 	});
 
@@ -107,22 +111,32 @@ export function Step5EmployeeCategories({
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
 			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
-			isSubmitting={mutation.isPending}
+			isPreviousPending={
+				mutation.isPending && navTargetRef.current === PREV_URL
+			}
+			isSubmitting={mutation.isPending && navTargetRef.current === NEXT_URL}
 			key={categoryFormKey}
 			maxMen={maxMen}
 			maxWomen={maxWomen}
-			mimoquageNextHref={
-				hasInitialData ? "/declaration-remuneration/etape/6" : undefined
-			}
-			onSubmit={(data) =>
+			mimoquageNextHref={hasInitialData ? NEXT_URL : undefined}
+			onPreviousSubmit={(data) => {
+				navTargetRef.current = PREV_URL;
 				mutation.mutate({
 					declarationType: "initial",
 					source: data.source,
 					categories: data.categories,
-				})
-			}
+				});
+			}}
+			onSubmit={(data) => {
+				navTargetRef.current = NEXT_URL;
+				mutation.mutate({
+					declarationType: "initial",
+					source: data.source,
+					categories: data.categories,
+				});
+			}}
 			onValuesChange={(values) => setField(values)}
-			previousHref="/declaration-remuneration/etape/4"
+			previousHref={PREV_URL}
 			referenceYear={declarationYear - 1}
 			savedOverride={!hasDraft && hasInitialData}
 			stepper={<StepIndicator currentStep={5} />}

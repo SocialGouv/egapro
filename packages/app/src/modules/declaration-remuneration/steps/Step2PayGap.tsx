@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
@@ -89,10 +89,14 @@ export function Step2PayGap({
 	const saved = !hasDraft && hasInitialData;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
+	const NEXT_URL = "/declaration-remuneration/etape/3";
+	const PREV_URL = "/declaration-remuneration/etape/1";
+	const navTargetRef = useRef(NEXT_URL);
+
 	const mutation = api.declaration.updateStep2.useMutation({
 		onSuccess: () => {
 			clearDraft();
-			router.push("/declaration-remuneration/etape/3");
+			router.push(navTargetRef.current);
 		},
 	});
 
@@ -104,17 +108,29 @@ export function Step2PayGap({
 		form.setValue(fieldName, normalized);
 	}
 
-	const onSubmit = form.handleSubmit(() => {
-		const incomplete = rows.some((r) => !r.womenValue || !r.menValue);
-		if (incomplete) {
-			setValidationError(
-				"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",
-			);
-			return;
-		}
-		setValidationError(null);
-		mutation.mutate(form.getValues() as Step2Data);
-	});
+	function triggerSave(targetHref: string) {
+		form.handleSubmit(() => {
+			const incomplete = rows.some((r) => !r.womenValue || !r.menValue);
+			if (incomplete) {
+				setValidationError(
+					"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",
+				);
+				return;
+			}
+			setValidationError(null);
+			navTargetRef.current = targetHref;
+			mutation.mutate(form.getValues() as Step2Data);
+		})();
+	}
+
+	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		triggerSave(NEXT_URL);
+	};
+
+	function onPrevious() {
+		triggerSave(PREV_URL);
+	}
 
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
@@ -226,11 +242,13 @@ export function Step2PayGap({
 
 			<FormActions
 				className="fr-mt-0"
-				isSubmitting={mutation.isPending}
-				mimoquageNextHref={
-					hasSavedData ? "/declaration-remuneration/etape/3" : undefined
+				isPreviousPending={
+					mutation.isPending && navTargetRef.current === PREV_URL
 				}
-				previousHref="/declaration-remuneration/etape/1"
+				isSubmitting={mutation.isPending && navTargetRef.current === NEXT_URL}
+				mimoquageNextHref={hasSavedData ? NEXT_URL : undefined}
+				onPrevious={onPrevious}
+				previousHref={PREV_URL}
 			/>
 		</form>
 	);

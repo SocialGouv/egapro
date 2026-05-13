@@ -139,10 +139,14 @@ export function Step4QuartileDistribution({
 	const [fieldErrors, setFieldErrors] = useState<FieldErrorMap>(emptyErrorMap);
 	const [showRecap, setShowRecap] = useState(false);
 
+	const NEXT_URL = "/declaration-remuneration/etape/5";
+	const PREV_URL = "/declaration-remuneration/etape/3";
+	const navTargetRef = useRef(NEXT_URL);
+
 	const mutation = api.declaration.updateStep4.useMutation({
 		onSuccess: () => {
 			clearDraft();
-			router.push("/declaration-remuneration/etape/5");
+			router.push(navTargetRef.current);
 		},
 	});
 
@@ -220,8 +224,7 @@ export function Step4QuartileDistribution({
 		requestAnimationFrame(() => alertRef.current?.focus());
 	}
 
-	function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-		event.preventDefault();
+	function triggerSave(targetHref: string) {
 		const values = form.getValues();
 		const errors = deriveErrors(values);
 		if (hasAnyError(errors)) {
@@ -232,7 +235,17 @@ export function Step4QuartileDistribution({
 		}
 		setFieldErrors(emptyErrorMap());
 		setShowRecap(false);
+		navTargetRef.current = targetHref;
 		mutation.mutate(normalizeForMutation(values));
+	}
+
+	function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		triggerSave(NEXT_URL);
+	}
+
+	function onPrevious() {
+		triggerSave(PREV_URL);
 	}
 
 	const annualMins = computeMinsForTable(annual);
@@ -387,11 +400,13 @@ export function Step4QuartileDistribution({
 
 			<FormActions
 				className="fr-mt-0"
-				isSubmitting={mutation.isPending}
-				mimoquageNextHref={
-					hasSavedData ? "/declaration-remuneration/etape/5" : undefined
+				isPreviousPending={
+					mutation.isPending && navTargetRef.current === PREV_URL
 				}
-				previousHref="/declaration-remuneration/etape/3"
+				isSubmitting={mutation.isPending && navTargetRef.current === NEXT_URL}
+				mimoquageNextHref={hasSavedData ? NEXT_URL : undefined}
+				onPrevious={onPrevious}
+				previousHref={PREV_URL}
 			/>
 		</form>
 	);
