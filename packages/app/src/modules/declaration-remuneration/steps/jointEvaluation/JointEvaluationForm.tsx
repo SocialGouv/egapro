@@ -10,6 +10,7 @@ import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/d
 import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { FileUpload, useFileUploadForm } from "~/modules/shared";
+import { api } from "~/trpc/react";
 
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
@@ -41,10 +42,22 @@ export function JointEvaluationForm({
 		dbValues: EMPTY_DB_VALUES,
 	});
 
+	const submitJointEvaluationMutation =
+		api.declaration.submitJointEvaluation.useMutation();
+
 	const onAllUploaded = useCallback(() => {
 		clearDraft();
-		router.push(getPostComplianceDestination(hasCse));
-	}, [clearDraft, hasCse, router]);
+		// The upload writes the joint evaluation files to S3; the FSM transition
+		// (`joint_evaluation_chosen` / `revised_joint_evaluation_chosen` →
+		// `awaiting_cse_opinion` or `demarche_completed`) is decoupled and must
+		// be triggered explicitly so `jointEvaluationSubmittedAt` is set and the
+		// "Mon espace" panel + table reflect the new step.
+		submitJointEvaluationMutation.mutate(undefined, {
+			onSettled: () => {
+				router.push(getPostComplianceDestination(hasCse));
+			},
+		});
+	}, [clearDraft, hasCse, router, submitJointEvaluationMutation]);
 
 	const {
 		closeModal,
