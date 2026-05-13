@@ -303,10 +303,10 @@ test.describe("Declaration workflow", () => {
 	});
 
 	test("previous button navigates back", async ({ page }) => {
-		await page.goto("/declaration-remuneration/etape/2");
+		await goToStep(page, 6);
 
 		await page.getByRole("link", { name: "Précédent" }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/1");
+		await page.waitForURL("**/declaration-remuneration/etape/5");
 	});
 
 	test("previous button is present on step pages", async ({ page }) => {
