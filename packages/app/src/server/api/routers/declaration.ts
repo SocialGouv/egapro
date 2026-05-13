@@ -14,6 +14,7 @@ import {
 import { computeIndicatorPercentages } from "~/modules/declaration-remuneration/shared/computeIndicatorPercentages";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import {
+	COMPANY_SIZE_ANNUAL_MIN,
 	getCurrentYear,
 	hasGapsAboveThreshold,
 	isTriennialYear,
@@ -571,6 +572,14 @@ export const declarationRouter = createTRPCRouter({
 			ctx.session.user.id,
 		);
 
+		// Snapshot `cseRequired` à la soumission (figé pour le reste du cycle FSM
+		// même si l'admin modifie ensuite `companies.hasCse`). C'est cette valeur
+		// que les transitions FSM aval (saveCompliancePath, submitJointEvaluation,
+		// cseOpinion.finalize) liront comme guard.
+		const cseRequiredSnapshot =
+			(company.workforce ?? 0) >= COMPANY_SIZE_ANNUAL_MIN &&
+			company.hasCse === true;
+
 		await ctx.db.transaction(async (tx) => {
 			if (declaration.status === "draft" && historyInserts.length > 0) {
 				await tx.insert(declarationStatusHistory).values(historyInserts);
@@ -579,6 +588,7 @@ export const declarationRouter = createTRPCRouter({
 				.update(declarations)
 				.set({
 					...projection,
+					cseRequired: cseRequiredSnapshot,
 					currentStep: 6,
 					updatedAt: new Date(),
 					...percentagesForDb,
