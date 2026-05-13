@@ -1,5 +1,4 @@
-import { buildCseOpinionSubmittedMail } from "./cseOpinionSubmitted.js";
-import { buildJointEvaluationSubmittedMail } from "./jointEvaluationSubmitted.js";
+import { buildJointEvaluationSubmittedMail } from "./templates/jointEvaluationSubmitted.js";
 import {
 	type MailBuilderRegistry,
 	NOTIFICATION_TYPES,
@@ -9,7 +8,6 @@ import {
 } from "./types.js";
 
 export const MAIL_BUILDERS: MailBuilderRegistry = {
-	cse_opinion_submitted: buildCseOpinionSubmittedMail,
 	joint_evaluation_submitted: buildJointEvaluationSubmittedMail,
 };
 

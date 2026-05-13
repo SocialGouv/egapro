@@ -3,6 +3,10 @@ import nodemailer, { type Transporter } from "nodemailer";
 import { PgBoss, type JobWithMetadata } from "pg-boss";
 import postgres, { type Sql } from "postgres";
 
+import { resolvePgUrl } from "./db.js";
+import { buildMail, MAIL_BUILDERS } from "./mails/index.js";
+import { QUEUE_NAME, validateJobData } from "./queue.js";
+
 type SerializableJson =
 	| null
 	| string
@@ -11,12 +15,6 @@ type SerializableJson =
 	| Date
 	| { [key: string]: SerializableJson }
 	| SerializableJson[];
-
-import { buildMail, isNotificationType, MAIL_BUILDERS } from "./mails/index.js";
-import type {
-	NotificationPayloadMap,
-	NotificationType,
-} from "./mails/types.js";
 
 /**
  * Notifications worker — long-running pg-boss consumer.
@@ -27,9 +25,13 @@ import type {
  * (`packages/notifications/`) so the Next.js bundle never imports a single
  * line of worker code.
  *
- * Retry policy is applied per-job at publish time (`retryLimit`,
- * `retryBackoff`). Throwing from the handler tells pg-boss to retry; a clean
- * return marks the job complete.
+ * Job lifecycle:
+ * - `validateJobData` runs first. Schema errors are *poison pills* — they can
+ *   never succeed, so the handler logs the failure and returns clean (marking
+ *   the job complete) rather than throwing. Throwing would trigger up to 5
+ *   retries for nothing.
+ * - SMTP / transient errors throw, so pg-boss retries them according to the
+ *   per-job retry policy (`retryLimit`, `retryBackoff`) set at publish time.
  *
  * Audit rows go to the main DB (`DATABASE_URL`) when available — failure to
  * log audit never aborts the send. When `DATABASE_URL` is absent the worker
@@ -41,18 +43,11 @@ import type {
  */
 
 export { MAIL_BUILDERS, buildMail };
+export { QUEUE_NAME, validateJobData };
+export type { EmailJobData } from "./queue.js";
 
-const QUEUE_NAME = "email-notification";
 const SEND_AUDIT_ACTION = "notification.send";
 const SEND_AUDIT_CATEGORY = "system";
-
-type EmailJobData = {
-	type: NotificationType;
-	payload: NotificationPayloadMap[NotificationType];
-	recipientEmail: string;
-	recipientUserId: string | null;
-	siren: string | null;
-};
 
 type AuditRow = {
 	action: string;
@@ -66,56 +61,6 @@ type AuditRow = {
 	errorMessage?: string | null;
 	metadata?: SerializableJson;
 };
-
-function getNotificationsDatabaseUrl(): string {
-	if (process.env.NOTIFICATIONS_DATABASE_URL) {
-		return process.env.NOTIFICATIONS_DATABASE_URL;
-	}
-	const {
-		NOTIFICATIONS_POSTGRES_USER,
-		NOTIFICATIONS_POSTGRES_PASSWORD,
-		NOTIFICATIONS_POSTGRES_HOST,
-		NOTIFICATIONS_POSTGRES_PORT,
-		NOTIFICATIONS_POSTGRES_DB,
-		NOTIFICATIONS_POSTGRES_SSLMODE,
-	} = process.env;
-	if (NOTIFICATIONS_POSTGRES_HOST && NOTIFICATIONS_POSTGRES_DB) {
-		const user = encodeURIComponent(NOTIFICATIONS_POSTGRES_USER ?? "postgres");
-		const password = NOTIFICATIONS_POSTGRES_PASSWORD
-			? `:${encodeURIComponent(NOTIFICATIONS_POSTGRES_PASSWORD)}`
-			: "";
-		const port = NOTIFICATIONS_POSTGRES_PORT ?? "5432";
-		const sslmode = NOTIFICATIONS_POSTGRES_SSLMODE
-			? `?sslmode=${NOTIFICATIONS_POSTGRES_SSLMODE}`
-			: "";
-		return `postgresql://${user}${password}@${NOTIFICATIONS_POSTGRES_HOST}:${port}/${NOTIFICATIONS_POSTGRES_DB}${sslmode}`;
-	}
-	throw new Error(
-		"NOTIFICATIONS_DATABASE_URL or NOTIFICATIONS_POSTGRES_HOST+NOTIFICATIONS_POSTGRES_DB must be set",
-	);
-}
-
-function getMainDatabaseUrl(): string | null {
-	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
-	const {
-		POSTGRES_USER,
-		POSTGRES_PASSWORD,
-		POSTGRES_HOST,
-		POSTGRES_PORT,
-		POSTGRES_DB,
-		POSTGRES_SSLMODE,
-	} = process.env;
-	if (POSTGRES_HOST && POSTGRES_DB) {
-		const user = encodeURIComponent(POSTGRES_USER ?? "postgres");
-		const password = POSTGRES_PASSWORD
-			? `:${encodeURIComponent(POSTGRES_PASSWORD)}`
-			: "";
-		const port = POSTGRES_PORT ?? "5432";
-		const sslmode = POSTGRES_SSLMODE ? `?sslmode=${POSTGRES_SSLMODE}` : "";
-		return `postgresql://${user}${password}@${POSTGRES_HOST}:${port}/${POSTGRES_DB}${sslmode}`;
-	}
-	return null;
-}
 
 function getMailEnabled(): boolean {
 	return (process.env.MAIL_ENABLED ?? "false").toLowerCase() === "true";
@@ -173,29 +118,32 @@ export type JobHandlerDeps = {
 
 export function makeJobHandler(
 	deps: JobHandlerDeps,
-): (job: JobWithMetadata<EmailJobData>) => Promise<void> {
+): (job: JobWithMetadata<unknown>) => Promise<void> {
 	const { transporter, mailFrom, mailEnabled, mainSql } = deps;
 	return async (job) => {
-		const data = job.data;
-		const { type, payload, recipientEmail, recipientUserId, siren } = data;
 		const attempt = (job.retryCount ?? 0) + 1;
+		const result = validateJobData(job.data);
 
-		if (!isNotificationType(type)) {
-			const message = `Unknown notification type: ${String(type)}`;
+		if (!result.ok) {
+			// Poison pill: malformed payload can never succeed. Log + return clean
+			// so pg-boss marks the job complete and stops retrying.
+			console.error(
+				`[notifications] dropping malformed job ${job.id}: ${result.reason}`,
+			);
 			void logAuditMain(mainSql, {
 				action: SEND_AUDIT_ACTION,
 				category: SEND_AUDIT_CATEGORY,
 				status: "failure",
-				userId: recipientUserId,
-				userEmail: recipientEmail,
-				siren,
 				resourceType: "notification",
 				resourceId: job.id,
-				errorMessage: message,
-				metadata: { type, attempt },
+				errorMessage: result.reason,
+				metadata: { attempt, poisonPill: true },
 			});
-			throw new Error(message);
+			return;
 		}
+
+		const { type, payload, recipientEmail, recipientUserId, siren } =
+			result.data;
 
 		try {
 			const { subject, html } = buildMail(type, payload);
@@ -245,8 +193,16 @@ export function makeJobHandler(
 }
 
 async function main(): Promise<void> {
-	const notifUrl = getNotificationsDatabaseUrl();
-	const mainUrl = getMainDatabaseUrl();
+	const notifUrl = resolvePgUrl(
+		process.env.NOTIFICATIONS_DATABASE_URL,
+		"NOTIFICATIONS_",
+	);
+	if (!notifUrl) {
+		throw new Error(
+			"NOTIFICATIONS_DATABASE_URL or NOTIFICATIONS_POSTGRES_HOST+NOTIFICATIONS_POSTGRES_DB must be set",
+		);
+	}
+	const mainUrl = resolvePgUrl(process.env.DATABASE_URL, "");
 	const mailEnabled = getMailEnabled();
 	const transporter = mailEnabled ? buildTransporter() : null;
 	const mailFrom = process.env.MAIL_FROM ?? "no-reply@egapro.local";
@@ -273,10 +229,10 @@ async function main(): Promise<void> {
 		mailEnabled,
 		mainSql,
 	});
-	await boss.work<EmailJobData>(
+	await boss.work<unknown>(
 		QUEUE_NAME,
 		{ batchSize: 1, includeMetadata: true },
-		async (jobs: JobWithMetadata<EmailJobData>[]) => {
+		async (jobs: JobWithMetadata<unknown>[]) => {
 			const job = jobs?.[0];
 			if (!job) return;
 			try {

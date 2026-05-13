@@ -13,6 +13,10 @@ const config = {
 	output: "standalone",
 	cacheHandler: fileURLToPath(new URL("./cache-handler.cjs", import.meta.url)),
 	cacheMaxMemorySize: 0,
+	// Transpile the workspace `notifications` package: its `./queue` and `./mails`
+	// subpath exports point at .ts sources so the app has a single source of truth
+	// for notification types and the email registry.
+	transpilePackages: ["notifications"],
 	outputFileTracingIncludes: {
 		"/api/gip-mds/mock": ["./data/mock-gip-mds.csv"],
 	},

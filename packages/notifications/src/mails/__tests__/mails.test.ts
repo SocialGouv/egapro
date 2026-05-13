@@ -9,10 +9,9 @@ import {
 	type NotificationType,
 } from "../index.js";
 import { escapeHtml, formatSiren, getPublicUrl } from "../helpers.js";
-import { ctaButton, infoList, paragraph, wrapEmail } from "../shell.js";
+import { ctaButton, infoList, paragraph, wrapEmail } from "../view/shell.js";
 
 const SAMPLE_PAYLOADS: NotificationPayloadMap = {
-	cse_opinion_submitted: { siren: "552100554", year: 2025 },
 	joint_evaluation_submitted: { siren: "552100554", year: 2025 },
 };
 
@@ -124,23 +123,15 @@ describe("helpers", () => {
 });
 
 describe("per-type rendering details", () => {
-	it("cse_opinion_submitted shows SIREN, year and CTA", () => {
-		const tpl = buildMail("cse_opinion_submitted", {
-			siren: "552100554",
-			year: 2025,
-		});
-		expect(tpl.subject).toContain("2025");
-		expect(tpl.html).toContain("552 100 554");
-		expect(tpl.html).toContain("Voir ma déclaration");
-	});
-
 	it("joint_evaluation_submitted confirms the upload", () => {
 		const tpl = buildMail("joint_evaluation_submitted", {
 			siren: "552100554",
 			year: 2025,
 		});
 		expect(tpl.subject).toContain("2025");
+		expect(tpl.subject).toContain("rapport d'évaluation conjointe");
 		expect(tpl.html).toContain("552 100 554");
-		expect(tpl.html).toContain("Évaluation conjointe");
+		expect(tpl.html).toContain("évaluation conjointe");
+		expect(tpl.html).toContain("Prochaine étape");
 	});
 });

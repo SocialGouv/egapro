@@ -38,7 +38,6 @@ const mockLimit = vi.fn();
 const mockUpdate = vi.fn();
 const mockUpdateSet = vi.fn();
 const mockUpdateWhere = vi.fn();
-const mockUpdateReturning = vi.fn();
 
 let selectCallCount = 0;
 
@@ -69,8 +68,7 @@ function createMockDbForFinalize(opinionCount: number, fileCount: number) {
 		return { from: mockFrom };
 	});
 
-	mockUpdateReturning.mockResolvedValue([{ siren: "339787277", year: 2025 }]);
-	mockUpdateWhere.mockReturnValue({ returning: mockUpdateReturning });
+	mockUpdateWhere.mockResolvedValue(undefined);
 	mockUpdateSet.mockReturnValue({ where: mockUpdateWhere });
 	mockUpdate.mockReturnValue({ set: mockUpdateSet });
 

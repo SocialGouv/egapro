@@ -1,5 +1,5 @@
-import { COLORS, FONT_SIZE, FONT_STACK, SPACING } from "./dsfr-tokens.js";
-import { escapeHtml, getPublicUrl } from "./helpers.js";
+import { escapeHtml, getPublicUrl } from "../helpers.js";
+import { COLORS, FONT_SIZE, FONT_STACK, SPACING } from "./tokens.js";
 
 export type WrapEmailInput = {
 	title: string;

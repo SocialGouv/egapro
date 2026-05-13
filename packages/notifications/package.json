@@ -4,6 +4,11 @@
 	"private": true,
 	"type": "module",
 	"main": "dist/index.js",
+	"exports": {
+		"./publisher": "./src/publisher.ts",
+		"./queue": "./src/queue.ts",
+		"./mails": "./src/mails/index.ts"
+	},
 	"scripts": {
 		"build": "tsc",
 		"start": "node dist/index.js",

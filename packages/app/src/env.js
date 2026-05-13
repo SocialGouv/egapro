@@ -30,34 +30,6 @@ function buildDatabaseUrl() {
 	return undefined;
 }
 
-function buildNotificationsDatabaseUrl() {
-	if (process.env.NOTIFICATIONS_DATABASE_URL)
-		return process.env.NOTIFICATIONS_DATABASE_URL;
-
-	const {
-		NOTIFICATIONS_POSTGRES_USER,
-		NOTIFICATIONS_POSTGRES_PASSWORD,
-		NOTIFICATIONS_POSTGRES_HOST,
-		NOTIFICATIONS_POSTGRES_PORT,
-		NOTIFICATIONS_POSTGRES_DB,
-		NOTIFICATIONS_POSTGRES_SSLMODE,
-	} = process.env;
-
-	if (NOTIFICATIONS_POSTGRES_HOST && NOTIFICATIONS_POSTGRES_DB) {
-		const user = encodeURIComponent(NOTIFICATIONS_POSTGRES_USER ?? "postgres");
-		const password = NOTIFICATIONS_POSTGRES_PASSWORD
-			? `:${encodeURIComponent(NOTIFICATIONS_POSTGRES_PASSWORD)}`
-			: "";
-		const port = NOTIFICATIONS_POSTGRES_PORT ?? "5432";
-		const sslmode = NOTIFICATIONS_POSTGRES_SSLMODE
-			? `?sslmode=${NOTIFICATIONS_POSTGRES_SSLMODE}`
-			: "";
-		return `postgresql://${user}${password}@${NOTIFICATIONS_POSTGRES_HOST}:${port}/${NOTIFICATIONS_POSTGRES_DB}${sslmode}`;
-	}
-
-	return undefined;
-}
-
 export const env = createEnv({
 	/**
 	 * Specify your server-side environment variables schema here. This way you can ensure the app
@@ -66,11 +38,6 @@ export const env = createEnv({
 	server: {
 		AUTH_SECRET: z.string(),
 		DATABASE_URL: z.string().url(),
-		// Dedicated PG for the notifications queue (pg-boss). Optional by
-		// design: if the URL is missing or the DB is unreachable, the app
-		// keeps working — enqueue calls degrade gracefully (audit "failure",
-		// no email sent) instead of blocking the business mutation.
-		NOTIFICATIONS_DATABASE_URL: z.string().url().optional(),
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
@@ -130,20 +97,6 @@ export const env = createEnv({
 			.default("false")
 			.transform((v) => v.toLowerCase() === "true"),
 		MAIL_FROM: z.string().default("no-reply@egapro.local"),
-		// pg-boss tunables — retryLimit + retryBackoff control the per-job
-		// retry policy. retryDelay is the base backoff in seconds; pg-boss
-		// applies an exponential factor when retryBackoff=true.
-		NOTIFICATIONS_RETRY_LIMIT: z.coerce.number().int().positive().default(5),
-		NOTIFICATIONS_RETRY_DELAY_SECONDS: z.coerce
-			.number()
-			.int()
-			.positive()
-			.default(60),
-		NOTIFICATIONS_WORKER_BATCH_SIZE: z.coerce
-			.number()
-			.int()
-			.positive()
-			.default(10),
 		// Valkey cache URL — optional. When absent, the custom
 		// cache handler (cache-handler.cjs) gracefully degrades to no-op.
 		// The handler reads process.env.VALKEY_URL directly (it runs outside
@@ -174,7 +127,6 @@ export const env = createEnv({
 	runtimeEnv: {
 		AUTH_SECRET: process.env.AUTH_SECRET,
 		DATABASE_URL: buildDatabaseUrl(),
-		NOTIFICATIONS_DATABASE_URL: buildNotificationsDatabaseUrl(),
 		NODE_ENV: process.env.NODE_ENV,
 		EGAPRO_PROCONNECT_CLIENT_ID: process.env.EGAPRO_PROCONNECT_CLIENT_ID,
 		EGAPRO_PROCONNECT_CLIENT_SECRET:
@@ -206,11 +158,6 @@ export const env = createEnv({
 		SMTP_PASS: process.env.SMTP_PASS,
 		SMTP_SECURE: process.env.SMTP_SECURE,
 		MAIL_FROM: process.env.MAIL_FROM,
-		NOTIFICATIONS_RETRY_LIMIT: process.env.NOTIFICATIONS_RETRY_LIMIT,
-		NOTIFICATIONS_RETRY_DELAY_SECONDS:
-			process.env.NOTIFICATIONS_RETRY_DELAY_SECONDS,
-		NOTIFICATIONS_WORKER_BATCH_SIZE:
-			process.env.NOTIFICATIONS_WORKER_BATCH_SIZE,
 		VALKEY_URL: process.env.VALKEY_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,

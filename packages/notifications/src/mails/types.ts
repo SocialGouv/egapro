@@ -1,7 +1,4 @@
-export const NOTIFICATION_TYPES = [
-	"cse_opinion_submitted",
-	"joint_evaluation_submitted",
-] as const;
+export const NOTIFICATION_TYPES = ["joint_evaluation_submitted"] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 
@@ -11,7 +8,6 @@ export type CompanyScopedPayload = {
 };
 
 export type NotificationPayloadMap = {
-	cse_opinion_submitted: CompanyScopedPayload;
 	joint_evaluation_submitted: CompanyScopedPayload;
 };
 

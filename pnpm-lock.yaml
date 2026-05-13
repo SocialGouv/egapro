@@ -71,6 +71,9 @@ importers:
       nodemailer:
         specifier: ^7.0.13
         version: 7.0.13
+      notifications:
+        specifier: workspace:*
+        version: link:../notifications
       pg-boss:
         specifier: ^12.18.2
         version: 12.18.2
