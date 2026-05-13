@@ -11,15 +11,18 @@ a row to the main DB's `audit.action_log` when reachable.
 
 ```
 src/
-  index.mjs              entry — pg-boss runtime, SMTP transport, audit hooks
-  templates/
-    index.mjs            registry { type → builder } + buildTemplate dispatcher
-    shell.mjs            DSFR layout (header, footer, infoList, ctaButton, …)
-    dsfr-tokens.mjs      colors, font stack, spacing — inlined for email clients
-    helpers.mjs          escapeHtml, formatSiren, formatFrenchDate, getPublicUrl
-    <oneFilePerType>.mjs one template per notification type
-    __tests__/           snapshot + per-type assertions
+  index.ts              entry — pg-boss runtime, SMTP transport, audit hooks
+  mails/
+    index.ts            registry { type → builder } + buildMail dispatcher
+    shell.ts            DSFR layout (header, footer, infoList, ctaButton, …)
+    dsfr-tokens.ts      colors, font stack, spacing — inlined for email clients
+    helpers.ts          escapeHtml, formatSiren, getPublicUrl
+    <oneFilePerType>.ts one template per notification type
+    __tests__/          snapshot + per-type assertions
 ```
+
+Compiled with `tsc` to `dist/` (git-ignored) — the Dockerfile runs the build
+in its builder stage and ships only the compiled output to the runtime image.
 
 ## Run
 
@@ -28,8 +31,19 @@ NOTIFICATIONS_DATABASE_URL=... \
 DATABASE_URL=... \
 MAIL_ENABLED=true \
 SMTP_HOST=... SMTP_PORT=... SMTP_SECURE=... MAIL_FROM=... \
-pnpm --filter notifications start
+pnpm --filter notifications dev    # tsx watch on src/index.ts
+# or, after pnpm --filter notifications build:
+pnpm --filter notifications start  # node dist/index.js
 ```
+
+The pod uses `node packages/notifications/dist/index.js` directly — the dist
+tree is produced during the Docker build (`pnpm --filter notifications build`).
+
+In addition to `NOTIFICATIONS_DATABASE_URL` / `DATABASE_URL`, the runtime
+accepts the `NOTIFICATIONS_POSTGRES_*` / `POSTGRES_*` Kubernetes-style
+variables (host/port/user/password/db/sslmode) and assembles the URL
+itself — matches the secret layout used by the in-cluster Postgres
+operator.
 
 Graceful shutdown: SIGTERM / SIGINT triggers `boss.stop({ graceful: true,
 timeout: 15s })` so in-flight jobs ACK before exit.
@@ -40,7 +54,7 @@ timeout: 15s })` so in-flight jobs ACK before exit.
 pnpm --filter notifications test
 ```
 
-23 tests cover the templates registry, DSFR shell rendering, helpers, and
+Tests cover the templates registry, DSFR shell rendering, helpers, and
 per-type details. The Vitest config uses `environment: node` — no JSDOM is
 loaded, the suite runs in ~100 ms.
 

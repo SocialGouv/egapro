@@ -239,13 +239,6 @@
 			"when": 1778489783883,
 			"tag": "0033_add_cancelled_at",
 			"breakpoints": true
-		},
-		{
-			"idx": 34,
-			"version": "7",
-			"when": 1778619667748,
-			"tag": "0034_fuzzy_sue_storm",
-			"breakpoints": true
 		}
 	]
 }

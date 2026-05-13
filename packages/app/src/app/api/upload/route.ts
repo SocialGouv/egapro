@@ -248,6 +248,20 @@ export async function POST(request: Request): Promise<Response> {
 				});
 			})();
 		}
+		if (flowType === "joint_evaluation" && userEmail) {
+			void (async () => {
+				const { enqueueNotification } = await import(
+					"~/modules/notifications/server"
+				);
+				await enqueueNotification({
+					type: "joint_evaluation_submitted",
+					recipientEmail: userEmail,
+					recipientUserId: userId,
+					siren,
+					payload: { siren, year },
+				});
+			})();
+		}
 		return Response.json({
 			fileId: result.fileId,
 			fileName: result.fileName,

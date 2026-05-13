@@ -106,7 +106,3 @@ export function ctaButton({ label, href }: CtaInput): string {
 export function paragraph(text: string): string {
 	return `<p style="margin:0 0 ${SPACING.w2}; font-family:${FONT_STACK}; font-size:${FONT_SIZE.md}; color:${COLORS.textDefault}; line-height:1.5;">${text}</p>`;
 }
-
-export function calloutWarning(html: string): string {
-	return `<div style="margin:${SPACING.w2} 0 ${SPACING.w3}; padding:${SPACING.w2}; background:${COLORS.warningBackground}; border-left:4px solid ${COLORS.warningText}; color:${COLORS.warningText}; font-family:${FONT_STACK}; font-size:${FONT_SIZE.sm}; line-height:1.5;">${html}</div>`;
-}

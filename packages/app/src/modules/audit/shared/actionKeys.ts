@@ -76,10 +76,9 @@ export const AUDIT_ACTIONS = {
 	MAIL_RECEIPT_SEND: "mail.receipt_send",
 	MAIL_RECEIPT_RESEND: "mail.receipt_resend",
 
-	// ── Notifications (queue + worker + preferences) ──────
+	// ── Notifications (queue + worker) ───────────────────
 	NOTIFICATION_ENQUEUE: "notification.enqueue",
 	NOTIFICATION_SEND: "notification.send",
-	NOTIFICATION_PREFERENCES_UPDATE: "notification.preferences_update",
 
 	// ── Public searches ────────────────────────────────────
 	PUBLIC_REFERENT_SEARCH: "public_referents.search",
@@ -148,7 +147,6 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.NOTIFICATION_ENQUEUE]: "mutation",
 	[AUDIT_ACTIONS.NOTIFICATION_SEND]: "system",
-	[AUDIT_ACTIONS.NOTIFICATION_PREFERENCES_UPDATE]: "mutation",
 
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: "public_search",
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",

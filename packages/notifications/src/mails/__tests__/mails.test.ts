@@ -8,36 +8,12 @@ import {
 	type NotificationPayloadMap,
 	type NotificationType,
 } from "../index.js";
-import {
-	escapeHtml,
-	formatFrenchDate,
-	formatSiren,
-	getPublicUrl,
-} from "../helpers.js";
-import {
-	calloutWarning,
-	ctaButton,
-	infoList,
-	paragraph,
-	wrapEmail,
-} from "../shell.js";
+import { escapeHtml, formatSiren, getPublicUrl } from "../helpers.js";
+import { ctaButton, infoList, paragraph, wrapEmail } from "../shell.js";
 
 const SAMPLE_PAYLOADS: NotificationPayloadMap = {
-	declaration_submitted: { siren: "552100554", year: 2025 },
-	second_declaration_submitted: { siren: "552100554", year: 2025 },
 	cse_opinion_submitted: { siren: "552100554", year: 2025 },
 	joint_evaluation_submitted: { siren: "552100554", year: 2025 },
-	campaign_opening: { year: 2025, deadlineIso: "2026-03-01T00:00:00.000Z" },
-	second_declaration_reminder: {
-		siren: "552100554",
-		year: 2025,
-		deadlineIso: "2026-03-01T00:00:00.000Z",
-	},
-	annual_deadline_reminder: {
-		siren: "552100554",
-		year: 2025,
-		deadlineIso: "2026-03-01T00:00:00.000Z",
-	},
 };
 
 describe("mail registry", () => {
@@ -122,9 +98,8 @@ describe("DSFR shell rendering", () => {
 		expect(html).toContain("#000091");
 	});
 
-	it("paragraph and calloutWarning return non-empty HTML", () => {
+	it("paragraph returns non-empty HTML", () => {
 		expect(paragraph("Hello")).toContain("Hello");
-		expect(calloutWarning("Watch out")).toContain("Watch out");
 	});
 });
 
@@ -135,14 +110,6 @@ describe("helpers", () => {
 
 	it("formatSiren applies the 3-3-3 grouping", () => {
 		expect(formatSiren("552100554")).toBe("552 100 554");
-	});
-
-	it("formatFrenchDate uses French locale", () => {
-		const formatted = formatFrenchDate("2026-03-01T00:00:00.000Z");
-		expect(formatted).toContain("2026");
-		expect(formatted).toMatch(
-			/(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)/,
-		);
 	});
 
 	it("getPublicUrl falls back to the default Egapro URL", () => {
@@ -157,41 +124,23 @@ describe("helpers", () => {
 });
 
 describe("per-type rendering details", () => {
-	it("declaration_submitted includes the formatted SIREN and a CTA", () => {
-		const tpl = buildMail("declaration_submitted", {
+	it("cse_opinion_submitted shows SIREN, year and CTA", () => {
+		const tpl = buildMail("cse_opinion_submitted", {
 			siren: "552100554",
 			year: 2025,
 		});
 		expect(tpl.subject).toContain("2025");
 		expect(tpl.html).toContain("552 100 554");
-		expect(tpl.html).toContain("Accéder à mon espace");
+		expect(tpl.html).toContain("Voir ma déclaration");
 	});
 
-	it("second_declaration_submitted shows the compliance callout", () => {
-		const tpl = buildMail("second_declaration_submitted", {
+	it("joint_evaluation_submitted confirms the upload", () => {
+		const tpl = buildMail("joint_evaluation_submitted", {
 			siren: "552100554",
 			year: 2025,
 		});
-		expect(tpl.html).toContain("obligations complémentaires");
-	});
-
-	it("reminder mails render the deadline in French", () => {
-		const tpl = buildMail("annual_deadline_reminder", {
-			siren: "552100554",
-			year: 2025,
-			deadlineIso: "2026-03-01T00:00:00.000Z",
-		});
-		expect(tpl.html).toContain("2026");
-		expect(tpl.html).toMatch(/mars/);
-	});
-
-	it("campaign_opening references the campaign year in subject and body", () => {
-		const tpl = buildMail("campaign_opening", {
-			year: 2026,
-			deadlineIso: "2027-03-01T00:00:00.000Z",
-		});
-		expect(tpl.subject).toContain("2026");
-		expect(tpl.html).toContain("2026");
-		expect(tpl.html).toContain("Commencer ma déclaration");
+		expect(tpl.subject).toContain("2025");
+		expect(tpl.html).toContain("552 100 554");
+		expect(tpl.html).toContain("Évaluation conjointe");
 	});
 });

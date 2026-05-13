@@ -12,14 +12,6 @@ export function formatSiren(siren: string | null | undefined): string {
 	return digits.replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3");
 }
 
-export function formatFrenchDate(iso: string): string {
-	return new Date(iso).toLocaleDateString("fr-FR", {
-		day: "2-digit",
-		month: "long",
-		year: "numeric",
-	});
-}
-
 export function getPublicUrl(): string {
 	const url = process.env.EGAPRO_PUBLIC_URL ?? "https://egapro.travail.gouv.fr";
 	return url.replace(/\/$/, "");

@@ -1,5 +1,10 @@
 global:
   pgSecretName: pg-app
+  # Notifications worker (packages/notifications). Opt-in: the deployment is
+  # only rendered when this flag is true. Review apps and dev keep it off by
+  # default since they don't provision the dedicated pg-notifications secret.
+  # Enable in env/preprod and env/prod overrides once the secret is ready.
+  notificationsEnabled: false
   # APISIX standalone gateway in front of the SUIT API.
   # Templates: .kontinuous/templates/apisix-suit.yaml + apisix-suit.ingress.yaml.
   # Scoped under `global:` because only `global.*` values are propagated to the
@@ -86,6 +91,47 @@ app:
         secretKeyRef:
           name: "{{ .Values.global.pgSecretName }}"
           key: PGSSLMODE
+    # Notifications queue DB (pg-boss). Optional everywhere: when the secret
+    # is absent (review apps), env.js leaves NOTIFICATIONS_DATABASE_URL
+    # unset and enqueueNotification returns `queue_unavailable` without
+    # blocking the calling mutation. Wired explicitly here (same shape as
+    # POSTGRES_*) because each key lives in a separate field of the secret.
+    - name: NOTIFICATIONS_POSTGRES_HOST
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
+          key: PGHOST
+          optional: true
+    - name: NOTIFICATIONS_POSTGRES_DB
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
+          key: PGDATABASE
+          optional: true
+    - name: NOTIFICATIONS_POSTGRES_PORT
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
+          key: PGPORT
+          optional: true
+    - name: NOTIFICATIONS_POSTGRES_USER
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
+          key: PGUSER
+          optional: true
+    - name: NOTIFICATIONS_POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
+          key: PGPASSWORD
+          optional: true
+    - name: NOTIFICATIONS_POSTGRES_SSLMODE
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
+          key: PGSSLMODE
+          optional: true
     # SMTP (Tipimail in prod, MailDev on dev/preprod). The smtp-app
     # sealed-secret is kept as-is from the V1 prod setup, with MAILER_*
     # keys. We remap to the V2 SMTP_* names expected by src/env.js.

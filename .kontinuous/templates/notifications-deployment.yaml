@@ -1,3 +1,4 @@
+{{- if .Values.global.notificationsEnabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -50,37 +51,46 @@ spec:
                 optional: true
           env:
             # pg-boss queue DB — dedicated infra, isolated from the main app
-            # so a crash here does not block business mutations.
+            # so a crash here does not block business mutations. The secret
+            # name is overridable; `optional: true` keeps the pod alive when
+            # the secret is absent (the worker exits cleanly at startup —
+            # see src/index.ts).
             - name: NOTIFICATIONS_POSTGRES_HOST
               valueFrom:
                 secretKeyRef:
                   name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
                   key: PGHOST
+                  optional: true
             - name: NOTIFICATIONS_POSTGRES_DB
               valueFrom:
                 secretKeyRef:
                   name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
                   key: PGDATABASE
+                  optional: true
             - name: NOTIFICATIONS_POSTGRES_PORT
               valueFrom:
                 secretKeyRef:
                   name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
                   key: PGPORT
+                  optional: true
             - name: NOTIFICATIONS_POSTGRES_USER
               valueFrom:
                 secretKeyRef:
                   name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
                   key: PGUSER
+                  optional: true
             - name: NOTIFICATIONS_POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
                   key: PGPASSWORD
+                  optional: true
             - name: NOTIFICATIONS_POSTGRES_SSLMODE
               valueFrom:
                 secretKeyRef:
                   name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
                   key: PGSSLMODE
+                  optional: true
             # Main app DB — used only to append rows to `audit.action_log`.
             # The worker tolerates a missing DATABASE_URL (it just stops
             # emitting audit rows), so an outage here will not stop emails.
@@ -154,3 +164,4 @@ spec:
             limits:
               cpu: 300m
               memory: 256Mi
+{{- end }}

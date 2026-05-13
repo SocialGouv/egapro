@@ -1,13 +1,9 @@
 import "server-only";
 
-import { AUDIT_ACTIONS } from "~/modules/audit";
 import { env } from "~/env";
+import { AUDIT_ACTIONS } from "~/modules/audit";
 import { logAction } from "~/server/audit/log";
-import { NOTIFICATION_QUEUE_NAME, getBoss } from "./boss";
-import {
-	getUserNotificationPreferences,
-	shouldDeliverByPreferences,
-} from "./preferences";
+import { getBoss, NOTIFICATION_QUEUE_NAME } from "./boss";
 import type { NotificationPayloadMap, NotificationType } from "./types";
 
 export type EnqueueNotificationInput<T extends NotificationType> = {
@@ -21,40 +17,12 @@ export type EnqueueNotificationInput<T extends NotificationType> = {
 
 export type EnqueueResult =
 	| { status: "enqueued"; id: string }
-	| { status: "skipped_by_preferences" }
 	| { status: "queue_unavailable" }
 	| { status: "error"; error: string };
 
 export async function enqueueNotification<T extends NotificationType>(
 	input: EnqueueNotificationInput<T>,
 ): Promise<EnqueueResult> {
-	if (input.recipientUserId) {
-		try {
-			const prefs = await getUserNotificationPreferences(input.recipientUserId);
-			if (!shouldDeliverByPreferences(input.type, prefs)) {
-				void logAction({
-					action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
-					status: "success",
-					userId: input.recipientUserId,
-					userEmail: input.recipientEmail,
-					siren: input.siren ?? null,
-					metadata: {
-						type: input.type,
-						outcome: "skipped_by_preferences",
-					},
-				});
-				return { status: "skipped_by_preferences" };
-			}
-		} catch (error) {
-			// Preferences live in the main DB — if reading them fails we still
-			// try to enqueue the notification rather than silently dropping it.
-			console.error(
-				"[notifications] preferences read failed, proceeding with enqueue:",
-				error,
-			);
-		}
-	}
-
 	const boss = await getBoss();
 	if (!boss) {
 		void logAction({
