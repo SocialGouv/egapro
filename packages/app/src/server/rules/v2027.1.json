@@ -2,7 +2,7 @@
 	"version": "2027.1",
 	"effectiveFrom": "2027-03-01",
 	"effectiveUntil": "2028-02-28",
-	"description": "Entrée en vigueur V2 — 6 ind A-F obligatoires 50+, 7e ind G obligatoire 150+ (triennal an 1 pour 150-249, annuel 250+). Pas de mail d'ouverture (première année). FSM avec convergence : 8 états, chacun explicitement nommé pour signaler l'action utilisateur attendue (awaiting_*) ou la terminaison (demarche_completed). L'action `complete_demarche` est éliminée — la complétion est implicite à la dernière action métier requise.",
+	"description": "Entrée en vigueur V2 — 6 ind A-F obligatoires 50+, 7e ind G obligatoire 150+ (triennal an 1 pour 150-249, annuel 250+). FSM avec convergence : 8 états. Modèle event-sourced (T8) : applyAction émet des events typés persistés dans declaration_status_history. La projection declarations.status / first|second_declaration_path_choice est dérivée du dernier event de chaque type.",
 
 	"thresholds": {
 		"gapAlertPercent": 5,
@@ -90,19 +90,7 @@
 			"action": "submit",
 			"guard": { "compute": "phase2Required" },
 			"to": "awaiting_compliance_path_choice",
-			"writes": [
-				{ "field": "submittedAt", "source": "$now" },
-				{
-					"field": "phase2Required",
-					"source": { "compute": "phase2Required" }
-				},
-				{ "field": "cseRequired", "source": { "compute": "cseRequired" } },
-				{
-					"field": "indicatorGRequired",
-					"source": { "compute": "indicatorGRequired" }
-				},
-				{ "field": "rulesVersion", "source": { "value": "2027.1" } }
-			]
+			"events": [{ "type": "submit" }]
 		},
 		{
 			"id": "submit_to_cse_opinion_directly",
@@ -115,19 +103,7 @@
 				]
 			},
 			"to": "awaiting_cse_opinion",
-			"writes": [
-				{ "field": "submittedAt", "source": "$now" },
-				{
-					"field": "phase2Required",
-					"source": { "compute": "phase2Required" }
-				},
-				{ "field": "cseRequired", "source": { "compute": "cseRequired" } },
-				{
-					"field": "indicatorGRequired",
-					"source": { "compute": "indicatorGRequired" }
-				},
-				{ "field": "rulesVersion", "source": { "value": "2027.1" } }
-			]
+			"events": [{ "type": "submit" }]
 		},
 		{
 			"id": "submit_to_demarche_completed_directly",
@@ -140,20 +116,7 @@
 				]
 			},
 			"to": "demarche_completed",
-			"writes": [
-				{ "field": "submittedAt", "source": "$now" },
-				{ "field": "demarcheCompletedAt", "source": "$now" },
-				{
-					"field": "phase2Required",
-					"source": { "compute": "phase2Required" }
-				},
-				{ "field": "cseRequired", "source": { "compute": "cseRequired" } },
-				{
-					"field": "indicatorGRequired",
-					"source": { "compute": "indicatorGRequired" }
-				},
-				{ "field": "rulesVersion", "source": { "value": "2027.1" } }
-			]
+			"events": [{ "type": "submit" }, { "type": "demarche_complete" }]
 		},
 
 		{
@@ -163,13 +126,7 @@
 			"matchPayload": { "path": "justify" },
 			"guard": { "fact": "cseRequired", "op": "==", "value": true },
 			"to": "awaiting_cse_opinion",
-			"writes": [
-				{
-					"field": "firstDeclarationPathChoice",
-					"source": { "value": "justify" }
-				},
-				{ "field": "firstDeclarationPathChoiceAt", "source": "$now" }
-			]
+			"events": [{ "type": "path_choice", "value": "justify", "round": 1 }]
 		},
 		{
 			"id": "choose_path_initial_justify_without_cse",
@@ -178,13 +135,9 @@
 			"matchPayload": { "path": "justify" },
 			"guard": { "fact": "cseRequired", "op": "==", "value": false },
 			"to": "demarche_completed",
-			"writes": [
-				{
-					"field": "firstDeclarationPathChoice",
-					"source": { "value": "justify" }
-				},
-				{ "field": "firstDeclarationPathChoiceAt", "source": "$now" },
-				{ "field": "demarcheCompletedAt", "source": "$now" }
+			"events": [
+				{ "type": "path_choice", "value": "justify", "round": 1 },
+				{ "type": "demarche_complete" }
 			]
 		},
 		{
@@ -193,12 +146,8 @@
 			"action": "choose_compliance_path",
 			"matchPayload": { "path": "corrective_action" },
 			"to": "corrective_actions_chosen",
-			"writes": [
-				{
-					"field": "firstDeclarationPathChoice",
-					"source": { "value": "corrective_action" }
-				},
-				{ "field": "firstDeclarationPathChoiceAt", "source": "$now" }
+			"events": [
+				{ "type": "path_choice", "value": "corrective_action", "round": 1 }
 			]
 		},
 		{
@@ -207,12 +156,8 @@
 			"action": "choose_compliance_path",
 			"matchPayload": { "path": "joint_evaluation" },
 			"to": "joint_evaluation_chosen",
-			"writes": [
-				{
-					"field": "firstDeclarationPathChoice",
-					"source": { "value": "joint_evaluation" }
-				},
-				{ "field": "firstDeclarationPathChoiceAt", "source": "$now" }
+			"events": [
+				{ "type": "path_choice", "value": "joint_evaluation", "round": 1 }
 			]
 		},
 
@@ -222,10 +167,7 @@
 			"action": "submit_second_declaration",
 			"guard": { "fact": "action.stillHasGap", "op": "==", "value": true },
 			"to": "awaiting_revision_choice",
-			"writes": [
-				{ "field": "secondDeclarationSubmittedAt", "source": "$now" },
-				{ "field": "phase2RevisionRequired", "source": { "value": true } }
-			]
+			"events": [{ "type": "second_declaration_submit", "round": 2 }]
 		},
 		{
 			"id": "submit_second_declaration_resolved_with_cse",
@@ -238,10 +180,7 @@
 				]
 			},
 			"to": "awaiting_cse_opinion",
-			"writes": [
-				{ "field": "secondDeclarationSubmittedAt", "source": "$now" },
-				{ "field": "phase2RevisionRequired", "source": { "value": false } }
-			]
+			"events": [{ "type": "second_declaration_submit", "round": 2 }]
 		},
 		{
 			"id": "submit_second_declaration_resolved_without_cse",
@@ -254,10 +193,9 @@
 				]
 			},
 			"to": "demarche_completed",
-			"writes": [
-				{ "field": "secondDeclarationSubmittedAt", "source": "$now" },
-				{ "field": "phase2RevisionRequired", "source": { "value": false } },
-				{ "field": "demarcheCompletedAt", "source": "$now" }
+			"events": [
+				{ "type": "second_declaration_submit", "round": 2 },
+				{ "type": "demarche_complete" }
 			]
 		},
 
@@ -267,7 +205,7 @@
 			"action": "submit_joint_evaluation",
 			"guard": { "fact": "cseRequired", "op": "==", "value": true },
 			"to": "awaiting_cse_opinion",
-			"writes": [{ "field": "jointEvaluationSubmittedAt", "source": "$now" }]
+			"events": [{ "type": "joint_evaluation_submit", "round": 1 }]
 		},
 		{
 			"id": "submit_joint_evaluation_initial_without_cse",
@@ -275,9 +213,9 @@
 			"action": "submit_joint_evaluation",
 			"guard": { "fact": "cseRequired", "op": "==", "value": false },
 			"to": "demarche_completed",
-			"writes": [
-				{ "field": "jointEvaluationSubmittedAt", "source": "$now" },
-				{ "field": "demarcheCompletedAt", "source": "$now" }
+			"events": [
+				{ "type": "joint_evaluation_submit", "round": 1 },
+				{ "type": "demarche_complete" }
 			]
 		},
 
@@ -288,13 +226,7 @@
 			"matchPayload": { "path": "justify" },
 			"guard": { "fact": "cseRequired", "op": "==", "value": true },
 			"to": "awaiting_cse_opinion",
-			"writes": [
-				{
-					"field": "secondDeclarationPathChoice",
-					"source": { "value": "justify" }
-				},
-				{ "field": "secondDeclarationPathChoiceAt", "source": "$now" }
-			]
+			"events": [{ "type": "path_choice", "value": "justify", "round": 2 }]
 		},
 		{
 			"id": "choose_path_revised_justify_without_cse",
@@ -303,13 +235,9 @@
 			"matchPayload": { "path": "justify" },
 			"guard": { "fact": "cseRequired", "op": "==", "value": false },
 			"to": "demarche_completed",
-			"writes": [
-				{
-					"field": "secondDeclarationPathChoice",
-					"source": { "value": "justify" }
-				},
-				{ "field": "secondDeclarationPathChoiceAt", "source": "$now" },
-				{ "field": "demarcheCompletedAt", "source": "$now" }
+			"events": [
+				{ "type": "path_choice", "value": "justify", "round": 2 },
+				{ "type": "demarche_complete" }
 			]
 		},
 		{
@@ -318,12 +246,8 @@
 			"action": "choose_compliance_path",
 			"matchPayload": { "path": "joint_evaluation" },
 			"to": "revised_joint_evaluation_chosen",
-			"writes": [
-				{
-					"field": "secondDeclarationPathChoice",
-					"source": { "value": "joint_evaluation" }
-				},
-				{ "field": "secondDeclarationPathChoiceAt", "source": "$now" }
+			"events": [
+				{ "type": "path_choice", "value": "joint_evaluation", "round": 2 }
 			]
 		},
 
@@ -333,7 +257,7 @@
 			"action": "submit_joint_evaluation",
 			"guard": { "fact": "cseRequired", "op": "==", "value": true },
 			"to": "awaiting_cse_opinion",
-			"writes": [{ "field": "jointEvaluationSubmittedAt", "source": "$now" }]
+			"events": [{ "type": "joint_evaluation_submit", "round": 2 }]
 		},
 		{
 			"id": "submit_joint_evaluation_revised_without_cse",
@@ -341,9 +265,9 @@
 			"action": "submit_joint_evaluation",
 			"guard": { "fact": "cseRequired", "op": "==", "value": false },
 			"to": "demarche_completed",
-			"writes": [
-				{ "field": "jointEvaluationSubmittedAt", "source": "$now" },
-				{ "field": "demarcheCompletedAt", "source": "$now" }
+			"events": [
+				{ "type": "joint_evaluation_submit", "round": 2 },
+				{ "type": "demarche_complete" }
 			]
 		},
 
@@ -352,9 +276,9 @@
 			"from": ["awaiting_cse_opinion"],
 			"action": "submit_cse_opinion",
 			"to": "demarche_completed",
-			"writes": [
-				{ "field": "cseOpinionCompletedAt", "source": "$now" },
-				{ "field": "demarcheCompletedAt", "source": "$now" }
+			"events": [
+				{ "type": "cse_opinion_submit" },
+				{ "type": "demarche_complete" }
 			]
 		}
 	]

@@ -63,13 +63,26 @@ function createMockDbForFinalize(
 	const updateSet = vi.fn().mockReturnValue({ where: updateWhere });
 	const update = vi.fn().mockReturnValue({ set: updateSet });
 
+	const insertReturning = vi.fn().mockResolvedValue([]);
+	const insertValues = vi.fn().mockReturnValue({ returning: insertReturning });
+	const insert = vi.fn().mockReturnValue({ values: insertValues });
+
+	const transaction = vi
+		.fn()
+		.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+			fn({ select, insert, update, delete: vi.fn() }),
+		);
+
 	return {
 		db: {
 			select,
 			update,
+			insert,
+			transaction,
 		} as unknown,
 		updateSet,
 		update,
+		insertValues,
 	};
 }
 
@@ -104,7 +117,7 @@ describe("cseOpinionRouter.finalize", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("transitions awaiting_cse_opinion → demarche_completed and sets both timestamps", async () => {
+	it("transitions awaiting_cse_opinion → demarche_completed and inserts cse_opinion_submit + demarche_complete events", async () => {
 		const ctx = createMockDbForFinalize(2, 1);
 		const caller = await createCaller(ctx.db);
 
@@ -115,11 +128,16 @@ describe("cseOpinionRouter.finalize", () => {
 		expect(ctx.updateSet).toHaveBeenCalledWith(
 			expect.objectContaining({
 				status: "demarche_completed",
-				cseOpinionCompletedAt: expect.any(Date),
-				demarcheCompletedAt: expect.any(Date),
 				updatedAt: expect.any(Date),
 			}),
 		);
+		const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+			eventType: string;
+		}>;
+		expect(insertedEvents.map((e) => e.eventType)).toEqual([
+			"cse_opinion_submit",
+			"demarche_complete",
+		]);
 	});
 
 	it("throws PRECONDITION_FAILED when no opinions exist", async () => {

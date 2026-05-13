@@ -493,6 +493,9 @@ describe("buildExportRows", () => {
 			declarationId: "decl-completed",
 			siren: "100100100",
 			status: "demarche_completed",
+			workforce: 300,
+			globalAnnualMeanGap: "0.10",
+			variableAnnualMeanGap: "0.08",
 			firstDeclarationPathChoice: "corrective_action",
 			secondDeclarationPathChoice: "joint_evaluation",
 			submittedAt: new Date("2027-03-01T09:00:00Z"),
@@ -502,15 +505,12 @@ describe("buildExportRows", () => {
 			jointEvaluationSubmittedAt: new Date("2027-09-01T12:00:00Z"),
 			cseOpinionCompletedAt: new Date("2027-10-01T13:00:00Z"),
 			demarcheCompletedAt: new Date("2027-10-15T14:00:00Z"),
-			phase2Required: true,
-			phase2RevisionRequired: true,
 			cseRequired: true,
-			indicatorGRequired: true,
 			rulesVersion: "2027.1",
 		});
 
 		mockWhere.mockResolvedValue([dbRow]);
-		mockJobWhere.mockResolvedValue([]);
+		mockJobWhere.mockResolvedValue([{ declarationId: "decl-completed" }]);
 		mockCseWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");

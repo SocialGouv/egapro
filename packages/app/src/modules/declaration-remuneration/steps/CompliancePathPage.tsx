@@ -13,7 +13,7 @@ type ComplianceState =
 
 export function getComplianceState(
 	firstDeclarationPathChoice: string | null,
-	secondDeclarationSubmittedAt: Date | null,
+	hasSubmittedSecondDeclaration: boolean,
 	initialCategories: Parameters<typeof hasGapsAboveThreshold>[0],
 	correctionCategories: Parameters<typeof hasGapsAboveThreshold>[0],
 ): ComplianceState {
@@ -21,14 +21,11 @@ export function getComplianceState(
 		return { type: "no_gap" };
 	}
 
-	const hasSubmittedSecondDeclaration =
+	const hasFinalisedFirstRound =
 		firstDeclarationPathChoice === "corrective_action" &&
-		secondDeclarationSubmittedAt !== null;
+		hasSubmittedSecondDeclaration;
 
-	if (
-		hasSubmittedSecondDeclaration &&
-		hasGapsAboveThreshold(correctionCategories)
-	) {
+	if (hasFinalisedFirstRound && hasGapsAboveThreshold(correctionCategories)) {
 		return { type: "second_round" };
 	}
 
@@ -54,12 +51,15 @@ export async function CompliancePathPage() {
 
 	const state = getComplianceState(
 		data.declaration.firstDeclarationPathChoice,
-		data.declaration.secondDeclarationSubmittedAt,
+		data.hasSubmittedSecondDeclaration,
 		initialCategories,
 		correctionCategories,
 	);
 
-	if (state.type === "no_gap" || data.declaration.demarcheCompletedAt) {
+	if (
+		state.type === "no_gap" ||
+		data.declaration.status === "demarche_completed"
+	) {
 		redirect(getPostComplianceDestination(company.hasCse));
 	}
 

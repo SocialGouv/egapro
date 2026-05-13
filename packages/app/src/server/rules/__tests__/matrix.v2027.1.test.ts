@@ -8,16 +8,20 @@ beforeEach(() => {
 
 const rules = loadRules("2027.1");
 
+type EventExpectation = {
+	type: string;
+	value?: string;
+	round?: 1 | 2;
+};
+
 type Case = {
 	label: string;
 	from: string;
 	action: string;
 	facts: Facts;
 	expectedTo: string;
-	expectedWriteKeys: string[];
+	expectedEvents: EventExpectation[];
 };
-
-const FIXED_NOW = new Date("2027-04-01T00:00:00.000Z");
 
 function base(currentState: string, overrides: Partial<Facts> = {}): Facts {
 	return {
@@ -32,8 +36,6 @@ function base(currentState: string, overrides: Partial<Facts> = {}): Facts {
 }
 
 const MATRIX: Case[] = [
-	// ── submit from draft ──────────────────────────────────────────────────────
-
 	{
 		label:
 			"submit_to_compliance_path_choice: phase2Required (gap>=5, ind G, workforce>=100)",
@@ -46,13 +48,7 @@ const MATRIX: Case[] = [
 			hasCse: true,
 		}),
 		expectedTo: "awaiting_compliance_path_choice",
-		expectedWriteKeys: [
-			"submittedAt",
-			"phase2Required",
-			"cseRequired",
-			"indicatorGRequired",
-			"rulesVersion",
-		],
+		expectedEvents: [{ type: "submit" }],
 	},
 	{
 		label: "submit_to_cse_opinion_directly: no phase2, but cseRequired",
@@ -65,13 +61,7 @@ const MATRIX: Case[] = [
 			hasCse: true,
 		}),
 		expectedTo: "awaiting_cse_opinion",
-		expectedWriteKeys: [
-			"submittedAt",
-			"phase2Required",
-			"cseRequired",
-			"indicatorGRequired",
-			"rulesVersion",
-		],
+		expectedEvents: [{ type: "submit" }],
 	},
 	{
 		label: "submit_to_demarche_completed_directly: no phase2, no cse",
@@ -84,20 +74,11 @@ const MATRIX: Case[] = [
 			hasCse: false,
 		}),
 		expectedTo: "demarche_completed",
-		expectedWriteKeys: [
-			"submittedAt",
-			"demarcheCompletedAt",
-			"phase2Required",
-			"cseRequired",
-			"indicatorGRequired",
-			"rulesVersion",
-		],
+		expectedEvents: [{ type: "submit" }, { type: "demarche_complete" }],
 	},
 
-	// ── choose_compliance_path from awaiting_compliance_path_choice ────────────
-
 	{
-		label: "choose_path_initial_justify_with_cse: justify + cseRequired=true",
+		label: "choose_path_initial_justify_with_cse",
 		from: "awaiting_compliance_path_choice",
 		action: "choose_compliance_path",
 		facts: base("awaiting_compliance_path_choice", {
@@ -105,14 +86,10 @@ const MATRIX: Case[] = [
 			action: { path: "justify" },
 		}),
 		expectedTo: "awaiting_cse_opinion",
-		expectedWriteKeys: [
-			"firstDeclarationPathChoice",
-			"firstDeclarationPathChoiceAt",
-		],
+		expectedEvents: [{ type: "path_choice", value: "justify", round: 1 }],
 	},
 	{
-		label:
-			"choose_path_initial_justify_without_cse: justify + cseRequired=false",
+		label: "choose_path_initial_justify_without_cse",
 		from: "awaiting_compliance_path_choice",
 		action: "choose_compliance_path",
 		facts: base("awaiting_compliance_path_choice", {
@@ -120,10 +97,9 @@ const MATRIX: Case[] = [
 			action: { path: "justify" },
 		}),
 		expectedTo: "demarche_completed",
-		expectedWriteKeys: [
-			"firstDeclarationPathChoice",
-			"firstDeclarationPathChoiceAt",
-			"demarcheCompletedAt",
+		expectedEvents: [
+			{ type: "path_choice", value: "justify", round: 1 },
+			{ type: "demarche_complete" },
 		],
 	},
 	{
@@ -134,9 +110,8 @@ const MATRIX: Case[] = [
 			action: { path: "corrective_action" },
 		}),
 		expectedTo: "corrective_actions_chosen",
-		expectedWriteKeys: [
-			"firstDeclarationPathChoice",
-			"firstDeclarationPathChoiceAt",
+		expectedEvents: [
+			{ type: "path_choice", value: "corrective_action", round: 1 },
 		],
 	},
 	{
@@ -147,16 +122,13 @@ const MATRIX: Case[] = [
 			action: { path: "joint_evaluation" },
 		}),
 		expectedTo: "joint_evaluation_chosen",
-		expectedWriteKeys: [
-			"firstDeclarationPathChoice",
-			"firstDeclarationPathChoiceAt",
+		expectedEvents: [
+			{ type: "path_choice", value: "joint_evaluation", round: 1 },
 		],
 	},
 
-	// ── submit_second_declaration from corrective_actions_chosen ──────────────
-
 	{
-		label: "submit_second_declaration_persistent_gap: stillHasGap=true",
+		label: "submit_second_declaration_persistent_gap",
 		from: "corrective_actions_chosen",
 		action: "submit_second_declaration",
 		facts: base("corrective_actions_chosen", {
@@ -164,14 +136,10 @@ const MATRIX: Case[] = [
 			action: { stillHasGap: true },
 		}),
 		expectedTo: "awaiting_revision_choice",
-		expectedWriteKeys: [
-			"secondDeclarationSubmittedAt",
-			"phase2RevisionRequired",
-		],
+		expectedEvents: [{ type: "second_declaration_submit", round: 2 }],
 	},
 	{
-		label:
-			"submit_second_declaration_resolved_with_cse: gap resolved, cse required",
+		label: "submit_second_declaration_resolved_with_cse",
 		from: "corrective_actions_chosen",
 		action: "submit_second_declaration",
 		facts: base("corrective_actions_chosen", {
@@ -179,14 +147,10 @@ const MATRIX: Case[] = [
 			action: { stillHasGap: false },
 		}),
 		expectedTo: "awaiting_cse_opinion",
-		expectedWriteKeys: [
-			"secondDeclarationSubmittedAt",
-			"phase2RevisionRequired",
-		],
+		expectedEvents: [{ type: "second_declaration_submit", round: 2 }],
 	},
 	{
-		label:
-			"submit_second_declaration_resolved_without_cse: gap resolved, no cse",
+		label: "submit_second_declaration_resolved_without_cse",
 		from: "corrective_actions_chosen",
 		action: "submit_second_declaration",
 		facts: base("corrective_actions_chosen", {
@@ -194,14 +158,11 @@ const MATRIX: Case[] = [
 			action: { stillHasGap: false },
 		}),
 		expectedTo: "demarche_completed",
-		expectedWriteKeys: [
-			"secondDeclarationSubmittedAt",
-			"phase2RevisionRequired",
-			"demarcheCompletedAt",
+		expectedEvents: [
+			{ type: "second_declaration_submit", round: 2 },
+			{ type: "demarche_complete" },
 		],
 	},
-
-	// ── submit_joint_evaluation from joint_evaluation_chosen ──────────────────
 
 	{
 		label: "submit_joint_evaluation_initial_with_cse",
@@ -209,7 +170,7 @@ const MATRIX: Case[] = [
 		action: "submit_joint_evaluation",
 		facts: base("joint_evaluation_chosen", { cseRequired: true }),
 		expectedTo: "awaiting_cse_opinion",
-		expectedWriteKeys: ["jointEvaluationSubmittedAt"],
+		expectedEvents: [{ type: "joint_evaluation_submit", round: 1 }],
 	},
 	{
 		label: "submit_joint_evaluation_initial_without_cse",
@@ -217,10 +178,11 @@ const MATRIX: Case[] = [
 		action: "submit_joint_evaluation",
 		facts: base("joint_evaluation_chosen", { cseRequired: false }),
 		expectedTo: "demarche_completed",
-		expectedWriteKeys: ["jointEvaluationSubmittedAt", "demarcheCompletedAt"],
+		expectedEvents: [
+			{ type: "joint_evaluation_submit", round: 1 },
+			{ type: "demarche_complete" },
+		],
 	},
-
-	// ── choose_compliance_path from awaiting_revision_choice ─────────────────
 
 	{
 		label: "choose_path_revised_justify_with_cse",
@@ -231,10 +193,7 @@ const MATRIX: Case[] = [
 			action: { path: "justify" },
 		}),
 		expectedTo: "awaiting_cse_opinion",
-		expectedWriteKeys: [
-			"secondDeclarationPathChoice",
-			"secondDeclarationPathChoiceAt",
-		],
+		expectedEvents: [{ type: "path_choice", value: "justify", round: 2 }],
 	},
 	{
 		label: "choose_path_revised_justify_without_cse",
@@ -245,10 +204,9 @@ const MATRIX: Case[] = [
 			action: { path: "justify" },
 		}),
 		expectedTo: "demarche_completed",
-		expectedWriteKeys: [
-			"secondDeclarationPathChoice",
-			"secondDeclarationPathChoiceAt",
-			"demarcheCompletedAt",
+		expectedEvents: [
+			{ type: "path_choice", value: "justify", round: 2 },
+			{ type: "demarche_complete" },
 		],
 	},
 	{
@@ -259,13 +217,10 @@ const MATRIX: Case[] = [
 			action: { path: "joint_evaluation" },
 		}),
 		expectedTo: "revised_joint_evaluation_chosen",
-		expectedWriteKeys: [
-			"secondDeclarationPathChoice",
-			"secondDeclarationPathChoiceAt",
+		expectedEvents: [
+			{ type: "path_choice", value: "joint_evaluation", round: 2 },
 		],
 	},
-
-	// ── submit_joint_evaluation from revised_joint_evaluation_chosen ──────────
 
 	{
 		label: "submit_joint_evaluation_revised_with_cse",
@@ -273,7 +228,7 @@ const MATRIX: Case[] = [
 		action: "submit_joint_evaluation",
 		facts: base("revised_joint_evaluation_chosen", { cseRequired: true }),
 		expectedTo: "awaiting_cse_opinion",
-		expectedWriteKeys: ["jointEvaluationSubmittedAt"],
+		expectedEvents: [{ type: "joint_evaluation_submit", round: 2 }],
 	},
 	{
 		label: "submit_joint_evaluation_revised_without_cse",
@@ -281,10 +236,11 @@ const MATRIX: Case[] = [
 		action: "submit_joint_evaluation",
 		facts: base("revised_joint_evaluation_chosen", { cseRequired: false }),
 		expectedTo: "demarche_completed",
-		expectedWriteKeys: ["jointEvaluationSubmittedAt", "demarcheCompletedAt"],
+		expectedEvents: [
+			{ type: "joint_evaluation_submit", round: 2 },
+			{ type: "demarche_complete" },
+		],
 	},
-
-	// ── submit_cse_opinion from awaiting_cse_opinion ──────────────────────────
 
 	{
 		label: "submit_cse_opinion → demarche_completed",
@@ -292,27 +248,18 @@ const MATRIX: Case[] = [
 		action: "submit_cse_opinion",
 		facts: base("awaiting_cse_opinion"),
 		expectedTo: "demarche_completed",
-		expectedWriteKeys: ["cseOpinionCompletedAt", "demarcheCompletedAt"],
+		expectedEvents: [
+			{ type: "cse_opinion_submit" },
+			{ type: "demarche_complete" },
+		],
 	},
 ];
 
 describe("matrix v2027.1 — all 18 transitions", () => {
-	it.each(MATRIX)("$label", ({
-		facts,
-		action,
-		expectedTo,
-		expectedWriteKeys,
-	}) => {
-		const result = applyAction(facts, action, rules, FIXED_NOW);
-
-		expect(result.nextState).toBe(expectedTo);
-
-		for (const key of expectedWriteKeys) {
-			expect(
-				result.setFlags,
-				`expected write key "${key}" to be present`,
-			).toHaveProperty(key);
-		}
+	it.each(MATRIX)("$label", ({ facts, action, expectedTo, expectedEvents }) => {
+		const result = applyAction(facts, action, rules);
+		expect(result.nextStatus).toBe(expectedTo);
+		expect(result.events).toEqual(expectedEvents);
 	});
 });
 
@@ -324,7 +271,7 @@ describe("applyAction — no matching transition throws", () => {
 		);
 	});
 
-	it("throws when the guard is not satisfied for any transition", () => {
+	it("does not throw when at least one guard matches a draft submit", () => {
 		const facts = base("draft", {
 			workforce: 300,
 			gap: 10,
@@ -347,40 +294,34 @@ describe("loadRules — caching", () => {
 	});
 });
 
-describe("write source resolution", () => {
-	it("$now writes resolve to the provided Date", () => {
+describe("events shape", () => {
+	it("submit transitions always emit a `submit` event", () => {
 		const facts = base("draft", {
 			workforce: 60,
 			gap: 2,
 			indicatorGCalculated: false,
 			hasCse: false,
 		});
-		const result = applyAction(facts, "submit", rules, FIXED_NOW);
-		expect(result.setFlags.submittedAt).toBe(FIXED_NOW);
-		expect(result.setFlags.demarcheCompletedAt).toBe(FIXED_NOW);
+		const result = applyAction(facts, "submit", rules);
+		expect(result.events[0]).toEqual({ type: "submit" });
 	});
 
-	it("{ value: ... } writes resolve to the literal value", () => {
-		const facts = base("draft", {
-			workforce: 60,
-			gap: 2,
-			indicatorGCalculated: false,
-			hasCse: false,
+	it("path_choice events carry the chosen value and round", () => {
+		const facts = base("awaiting_compliance_path_choice", {
+			action: { path: "corrective_action" },
 		});
-		const result = applyAction(facts, "submit", rules, FIXED_NOW);
-		expect(result.setFlags.rulesVersion).toBe("2027.1");
+		const result = applyAction(facts, "choose_compliance_path", rules);
+		expect(result.events).toEqual([
+			{ type: "path_choice", value: "corrective_action", round: 1 },
+		]);
 	});
 
-	it("{ compute: ... } writes resolve to a boolean computation result", () => {
-		const facts = base("draft", {
-			workforce: 300,
-			gap: 10,
-			indicatorGCalculated: true,
-			hasCse: true,
+	it("revised path_choice events carry round=2", () => {
+		const facts = base("awaiting_revision_choice", {
+			cseRequired: true,
+			action: { path: "justify" },
 		});
-		const result = applyAction(facts, "submit", rules, FIXED_NOW);
-		expect(result.setFlags.phase2Required).toBe(true);
-		expect(result.setFlags.cseRequired).toBe(true);
-		expect(result.setFlags.indicatorGRequired).toBe(true);
+		const result = applyAction(facts, "choose_compliance_path", rules);
+		expect(result.events[0]).toMatchObject({ round: 2 });
 	});
 });

@@ -50,8 +50,8 @@ export function JointEvaluationForm({
 		// The upload writes the joint evaluation files to S3; the FSM transition
 		// (`joint_evaluation_chosen` / `revised_joint_evaluation_chosen` →
 		// `awaiting_cse_opinion` or `demarche_completed`) is decoupled and must
-		// be triggered explicitly so `jointEvaluationSubmittedAt` is set and the
-		// "Mon espace" panel + table reflect the new step.
+		// be triggered explicitly so the `joint_evaluation_submit` event is
+		// recorded and the "Mon espace" panel + table reflect the new step.
 		submitJointEvaluationMutation.mutate(undefined, {
 			onSettled: () => {
 				router.push(getPostComplianceDestination(hasCse));

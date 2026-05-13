@@ -90,8 +90,6 @@ type DeclarationStateRow = {
 	status: string;
 	rulesVersion: string;
 	cseRequired: boolean;
-	phase2Required?: boolean;
-	indicatorGRequired?: boolean;
 	firstDeclarationPathChoice:
 		| "justify"
 		| "corrective_action"
@@ -102,7 +100,6 @@ type DeclarationStateRow = {
 		| "corrective_action"
 		| "joint_evaluation"
 		| null;
-	submittedAt: Date | null;
 	indicatorAAnnualWomen?: string | null;
 	indicatorAAnnualMen?: string | null;
 };
@@ -162,7 +159,6 @@ function buildDeclaration(
 		cseRequired: false,
 		firstDeclarationPathChoice: null,
 		secondDeclarationPathChoice: null,
-		submittedAt: null,
 		...INDICATOR_FIELDS_WITHOUT_GAP,
 		...overrides,
 	};
@@ -209,6 +205,37 @@ function createSelectQueue(rows: unknown[][]) {
 	return { select, dropFirst, getIndex: () => index };
 }
 
+function createMutationTxMock() {
+	const update = vi.fn();
+	const set = vi.fn();
+	const updateWhere = vi.fn().mockResolvedValue(undefined);
+	set.mockReturnValue({ where: updateWhere });
+	update.mockReturnValue({ set });
+
+	const insertReturning = vi.fn().mockResolvedValue([]);
+	const insertValues = vi.fn().mockReturnValue({ returning: insertReturning });
+	const insert = vi.fn().mockReturnValue({ values: insertValues });
+
+	const transaction = vi
+		.fn()
+		.mockImplementation(async (fn: (tx: unknown) => unknown) => {
+			const txSelect = vi.fn().mockReturnValue({
+				from: vi.fn().mockReturnValue({
+					where: vi.fn().mockResolvedValue([]),
+				}),
+			});
+			const txInsert = vi.fn().mockReturnValue({ values: insertValues });
+			return fn({
+				select: txSelect,
+				insert: txInsert,
+				update,
+				delete: vi.fn(),
+			});
+		});
+
+	return { update, set, insert, insertValues, transaction };
+}
+
 function createSubmitMockDb(
 	declaration: DeclarationStateRow,
 	company: CompanyRow,
@@ -217,19 +244,19 @@ function createSubmitMockDb(
 	const joinRows = employeeCategories.map((ec) => ({ employee_category: ec }));
 	const selectQueue = createSelectQueue([[declaration], [company], joinRows]);
 
-	const update = vi.fn();
-	const set = vi.fn();
-	const updateWhere = vi.fn().mockResolvedValue(undefined);
-	set.mockReturnValue({ where: updateWhere });
-	update.mockReturnValue({ set });
+	const m = createMutationTxMock();
 
 	return {
 		db: {
 			select: selectQueue.select,
-			update,
+			update: m.update,
+			insert: m.insert,
+			transaction: m.transaction,
 		} as unknown,
-		set,
-		update,
+		set: m.set,
+		update: m.update,
+		insert: m.insert,
+		insertValues: m.insertValues,
 	};
 }
 
@@ -242,37 +269,45 @@ function createOneRowSelectDb(
 	}));
 	const selectQueue = createSelectQueue([[declaration], joinRows]);
 
-	const update = vi.fn();
-	const set = vi.fn();
-	const updateWhere = vi.fn().mockResolvedValue(undefined);
-	set.mockReturnValue({ where: updateWhere });
-	update.mockReturnValue({ set });
+	const m = createMutationTxMock();
 
 	return {
 		db: {
 			select: selectQueue.select,
-			update,
+			update: m.update,
+			insert: m.insert,
+			transaction: m.transaction,
 		} as unknown,
-		set,
-		update,
+		set: m.set,
+		update: m.update,
+		insert: m.insert,
+		insertValues: m.insertValues,
 	};
 }
 
-function createSimpleSelectDb(declaration: DeclarationStateRow) {
-	const selectQueue = createSelectQueue([[declaration]]);
-	const update = vi.fn();
-	const set = vi.fn();
-	const updateWhere = vi.fn().mockResolvedValue(undefined);
-	set.mockReturnValue({ where: updateWhere });
-	update.mockReturnValue({ set });
+function createSimpleSelectDb(
+	declaration: DeclarationStateRow,
+	historyForRound: unknown[] = [],
+	historyForLock: unknown[] = [],
+) {
+	const queue = createSelectQueue([
+		[declaration],
+		historyForRound,
+		historyForLock,
+	]);
+	const m = createMutationTxMock();
 
 	return {
 		db: {
-			select: selectQueue.select,
-			update,
+			select: queue.select,
+			update: m.update,
+			insert: m.insert,
+			transaction: m.transaction,
 		} as unknown,
-		set,
-		update,
+		set: m.set,
+		update: m.update,
+		insert: m.insert,
+		insertValues: m.insertValues,
 	};
 }
 
@@ -428,14 +463,15 @@ describe("declarationRouter", () => {
 				expect.objectContaining({
 					status: "demarche_completed",
 					currentStep: 6,
-					phase2Required: false,
-					cseRequired: false,
-					indicatorGRequired: false,
 				}),
 			);
-			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
-			expect(setCall.submittedAt).toBeInstanceOf(Date);
-			expect(setCall.demarcheCompletedAt).toBeInstanceOf(Date);
+			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+			}>;
+			expect(insertedEvents.map((e) => e.eventType)).toEqual([
+				"submit",
+				"demarche_complete",
+			]);
 		});
 
 		it("transitions draft → awaiting_cse_opinion for 120-employee with CSE without gap (S3)", async () => {
@@ -451,8 +487,10 @@ describe("declarationRouter", () => {
 
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("awaiting_cse_opinion");
-			expect(setCall.cseRequired).toBe(true);
-			expect(setCall.phase2Required).toBe(false);
+			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+			}>;
+			expect(insertedEvents.map((e) => e.eventType)).toEqual(["submit"]);
 		});
 
 		it("transitions draft → awaiting_compliance_path_choice when gap detected and workforce >= 100 (S8)", async () => {
@@ -468,24 +506,18 @@ describe("declarationRouter", () => {
 
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("awaiting_compliance_path_choice");
-			expect(setCall.phase2Required).toBe(true);
-			expect(setCall.cseRequired).toBe(true);
+			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+			}>;
+			expect(insertedEvents.map((e) => e.eventType)).toEqual(["submit"]);
 		});
 
-		it("preserves the original submittedAt on resubmission", async () => {
-			const originalDate = new Date("2027-04-01T00:00:00Z");
-			const declaration = buildDeclaration({
-				status: "draft",
-				submittedAt: originalDate,
-			});
+		it("does not duplicate submit events when called from a non-draft state", async () => {
+			const declaration = buildDeclaration({ status: "awaiting_cse_opinion" });
 			const company = buildCompany();
 			const ctx = createSubmitMockDb(declaration, company, []);
 			const caller = await createCaller(ctx.db);
-
-			await caller.submit();
-
-			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
-			expect(setCall.submittedAt).toEqual(originalDate);
+			await expect(caller.submit()).rejects.toThrow(/No matching transition/);
 		});
 
 		it("persists computed percentage columns on submit", async () => {
@@ -555,8 +587,16 @@ describe("declarationRouter", () => {
 			expect(result).toEqual({ success: true });
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("awaiting_revision_choice");
-			expect(setCall.phase2RevisionRequired).toBe(true);
-			expect(setCall.secondDeclarationSubmittedAt).toBeInstanceOf(Date);
+			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+				round: number | null;
+			}>;
+			expect(insertedEvents).toEqual([
+				expect.objectContaining({
+					eventType: "second_declaration_submit",
+					round: 2,
+				}),
+			]);
 		});
 
 		it("transitions corrective_actions_chosen → demarche_completed when gap resolved without CSE (S13)", async () => {
@@ -574,8 +614,13 @@ describe("declarationRouter", () => {
 
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("demarche_completed");
-			expect(setCall.phase2RevisionRequired).toBe(false);
-			expect(setCall.demarcheCompletedAt).toBeInstanceOf(Date);
+			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+			}>;
+			expect(insertedEvents.map((e) => e.eventType)).toEqual([
+				"second_declaration_submit",
+				"demarche_complete",
+			]);
 		});
 
 		it("transitions corrective_actions_chosen → awaiting_cse_opinion when gap resolved with CSE (S14)", async () => {
@@ -593,7 +638,6 @@ describe("declarationRouter", () => {
 
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("awaiting_cse_opinion");
-			expect(setCall.phase2RevisionRequired).toBe(false);
 		});
 
 		it("throws NOT_FOUND when declaration is missing", async () => {
@@ -625,7 +669,18 @@ describe("declarationRouter", () => {
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("corrective_actions_chosen");
 			expect(setCall.firstDeclarationPathChoice).toBe("corrective_action");
-			expect(setCall.firstDeclarationPathChoiceAt).toBeInstanceOf(Date);
+			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+				value: string | null;
+				round: number | null;
+			}>;
+			expect(insertedEvents).toEqual([
+				expect.objectContaining({
+					eventType: "path_choice",
+					value: "corrective_action",
+					round: 1,
+				}),
+			]);
 		});
 
 		it("transitions awaiting_compliance_path_choice → awaiting_cse_opinion for justify with CSE (S9)", async () => {
@@ -655,7 +710,13 @@ describe("declarationRouter", () => {
 
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("demarche_completed");
-			expect(setCall.demarcheCompletedAt).toBeInstanceOf(Date);
+			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+			}>;
+			expect(insertedEvents.map((e) => e.eventType)).toEqual([
+				"path_choice",
+				"demarche_complete",
+			]);
 		});
 
 		it("writes secondDeclarationPathChoice when state is awaiting_revision_choice (S16)", async () => {
@@ -664,7 +725,11 @@ describe("declarationRouter", () => {
 				cseRequired: true,
 				firstDeclarationPathChoice: "corrective_action",
 			});
-			const ctx = createSimpleSelectDb(declaration);
+			const ctx = createSimpleSelectDb(
+				declaration,
+				[{ eventType: "second_declaration_submit" }],
+				[],
+			);
 			const caller = await createCaller(ctx.db);
 
 			await caller.saveCompliancePath({ path: "justify" });
@@ -672,7 +737,16 @@ describe("declarationRouter", () => {
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("awaiting_cse_opinion");
 			expect(setCall.secondDeclarationPathChoice).toBe("justify");
-			expect(setCall.secondDeclarationPathChoiceAt).toBeInstanceOf(Date);
+			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+				round: number | null;
+			}>;
+			expect(insertedEvents).toEqual([
+				expect.objectContaining({
+					eventType: "path_choice",
+					round: 2,
+				}),
+			]);
 		});
 
 		it("rejects corrective_action when state is awaiting_revision_choice", async () => {
@@ -681,7 +755,11 @@ describe("declarationRouter", () => {
 				cseRequired: true,
 				firstDeclarationPathChoice: "corrective_action",
 			});
-			const ctx = createSimpleSelectDb(declaration);
+			const ctx = createSimpleSelectDb(
+				declaration,
+				[{ eventType: "second_declaration_submit" }],
+				[],
+			);
 			const caller = await createCaller(ctx.db);
 
 			await expect(
@@ -689,33 +767,41 @@ describe("declarationRouter", () => {
 			).rejects.toThrow(/action corrective/i);
 		});
 
-		it("rejects re-write of firstDeclarationPathChoice (immutable)", async () => {
+		it("rejects path change after a joint_evaluation_submit event is recorded for the round (path locked)", async () => {
 			const declaration = buildDeclaration({
 				status: "awaiting_compliance_path_choice",
 				cseRequired: true,
 				firstDeclarationPathChoice: "justify",
 			});
-			const ctx = createSimpleSelectDb(declaration);
+			const ctx = createSimpleSelectDb(
+				declaration,
+				[],
+				[{ eventType: "joint_evaluation_submit", round: 1 }],
+			);
 			const caller = await createCaller(ctx.db);
 
 			await expect(
 				caller.saveCompliancePath({ path: "corrective_action" }),
-			).rejects.toThrow(/définitif/i);
+			).rejects.toThrow(/parcours ne peut plus/i);
 		});
 
-		it("rejects re-write of secondDeclarationPathChoice (immutable)", async () => {
+		it("rejects path change in round 2 after cse_opinion_submit event (path locked)", async () => {
 			const declaration = buildDeclaration({
 				status: "awaiting_revision_choice",
 				cseRequired: true,
 				firstDeclarationPathChoice: "corrective_action",
 				secondDeclarationPathChoice: "justify",
 			});
-			const ctx = createSimpleSelectDb(declaration);
+			const ctx = createSimpleSelectDb(
+				declaration,
+				[{ eventType: "second_declaration_submit" }],
+				[{ eventType: "cse_opinion_submit", round: null }],
+			);
 			const caller = await createCaller(ctx.db);
 
 			await expect(
 				caller.saveCompliancePath({ path: "joint_evaluation" }),
-			).rejects.toThrow(/définitif/i);
+			).rejects.toThrow(/parcours ne peut plus/i);
 		});
 
 		it("rejects invalid compliance path", async () => {
@@ -747,7 +833,16 @@ describe("declarationRouter", () => {
 			expect(result).toEqual({ success: true });
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("awaiting_cse_opinion");
-			expect(setCall.jointEvaluationSubmittedAt).toBeInstanceOf(Date);
+			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+				round: number | null;
+			}>;
+			expect(insertedEvents).toEqual([
+				expect.objectContaining({
+					eventType: "joint_evaluation_submit",
+					round: 1,
+				}),
+			]);
 		});
 
 		it("transitions revised_joint_evaluation_chosen → demarche_completed without CSE (S17)", async () => {
@@ -764,8 +859,13 @@ describe("declarationRouter", () => {
 
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("demarche_completed");
-			expect(setCall.jointEvaluationSubmittedAt).toBeInstanceOf(Date);
-			expect(setCall.demarcheCompletedAt).toBeInstanceOf(Date);
+			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+			}>;
+			expect(insertedEvents.map((e) => e.eventType)).toEqual([
+				"joint_evaluation_submit",
+				"demarche_complete",
+			]);
 		});
 
 		it("throws NOT_FOUND when declaration is missing", async () => {

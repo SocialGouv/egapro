@@ -44,7 +44,7 @@ const BASE_PROPS = {
 	year: FUTURE_YEAR,
 	lastActionDate: "12 mars 2026" as string | null,
 	displayContext: makeDisplayContext(),
-	secondDeclarationSubmittedAt: null as Date | null,
+	hasSubmittedSecondDeclaration: false,
 	siren: "532847196",
 	ctaHref: "/declaration-remuneration?siren=532847196",
 };
@@ -159,7 +159,7 @@ describe("DeclarationProcessPanel", () => {
 		it("renders second declaration transmitted message when submitted", () => {
 			const { panel } = renderPanel("evaluation", {
 				displayContext: makeDisplayContextFromPaths("joint_evaluation"),
-				secondDeclarationSubmittedAt: new Date(),
+				hasSubmittedSecondDeclaration: true,
 			});
 			expect(
 				panel.getByText("Votre seconde déclaration a été transmise"),
@@ -169,7 +169,7 @@ describe("DeclarationProcessPanel", () => {
 		it("does not render second declaration row when joint_evaluation chosen directly", () => {
 			const { panel } = renderPanel("evaluation", {
 				displayContext: makeDisplayContextFromPaths("joint_evaluation"),
-				secondDeclarationSubmittedAt: null,
+				hasSubmittedSecondDeclaration: false,
 			});
 			expect(
 				panel.queryByText("Votre seconde déclaration a été transmise"),
@@ -191,7 +191,7 @@ describe("DeclarationProcessPanel", () => {
 		it("hides evaluation conjointe bullet in second-round choice (corrective_action + 2nd decl submitted)", () => {
 			const { panel } = renderPanel("evaluation", {
 				displayContext: makeDisplayContextFromPaths("corrective_action"),
-				secondDeclarationSubmittedAt: new Date(),
+				hasSubmittedSecondDeclaration: true,
 			});
 			expect(
 				panel.getByText("Votre seconde déclaration a été transmise"),
@@ -224,7 +224,7 @@ describe("DeclarationProcessPanel", () => {
 		it("renders second declaration when submitted, even with justify path", () => {
 			const { panel } = renderPanel("cse", {
 				displayContext: makeDisplayContextFromPaths("justify"),
-				secondDeclarationSubmittedAt: new Date(),
+				hasSubmittedSecondDeclaration: true,
 			});
 			expect(
 				panel.getByText("Votre seconde déclaration a été transmise"),
@@ -248,7 +248,7 @@ describe("DeclarationProcessPanel", () => {
 		it("renders second declaration and evaluation conjointe for corrective_action path", () => {
 			const { panel } = renderPanel("cse", {
 				displayContext: makeDisplayContextFromPaths("corrective_action"),
-				secondDeclarationSubmittedAt: new Date(),
+				hasSubmittedSecondDeclaration: true,
 			});
 			expect(
 				panel.getByText("Votre seconde déclaration a été transmise"),
@@ -258,7 +258,7 @@ describe("DeclarationProcessPanel", () => {
 		it("does not render second declaration when not submitted", () => {
 			const { panel } = renderPanel("cse", {
 				displayContext: makeDisplayContextFromPaths("corrective_action"),
-				secondDeclarationSubmittedAt: null,
+				hasSubmittedSecondDeclaration: false,
 			});
 			expect(
 				panel.queryByText("Votre seconde déclaration a été transmise"),

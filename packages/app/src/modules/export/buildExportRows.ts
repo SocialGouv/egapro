@@ -1,5 +1,6 @@
 import { and, eq, isNotNull, ne, or } from "drizzle-orm";
 
+import { GAP_ALERT_THRESHOLD, isIndicatorGRequired } from "~/modules/domain";
 import type { DB } from "~/server/db";
 import { companies, declarations, users } from "~/server/db/schema";
 import { mapCseOpinions } from "./mapIndicators";
@@ -7,8 +8,24 @@ import {
 	fetchCseOpinionsByDeclaration,
 	getDeclarationsWithIndicatorG,
 	indicatorColumns,
+	statusHistoryProjection,
 } from "./queries";
 import type { ExportRow } from "./types";
+
+const PHASE2_SIZE_MIN = 100;
+
+function computePhase2Required(
+	workforce: number | null,
+	hasIndicatorG: boolean,
+	globalAnnualMeanGap: number | null,
+): boolean {
+	if (workforce === null || globalAnnualMeanGap === null) return false;
+	return (
+		workforce >= PHASE2_SIZE_MIN &&
+		hasIndicatorG &&
+		Math.abs(globalAnnualMeanGap) >= GAP_ALERT_THRESHOLD
+	);
+}
 
 export async function buildExportRows(
 	db: DB,
@@ -27,17 +44,7 @@ export async function buildExportRows(
 			variableRemunerationScore: declarations.variableRemunerationScore,
 			quartileScore: declarations.quartileScore,
 			categoryScore: declarations.categoryScore,
-			submittedAt: declarations.submittedAt,
-			firstDeclarationPathChoiceAt: declarations.firstDeclarationPathChoiceAt,
-			secondDeclarationPathChoiceAt: declarations.secondDeclarationPathChoiceAt,
-			secondDeclarationSubmittedAt: declarations.secondDeclarationSubmittedAt,
-			jointEvaluationSubmittedAt: declarations.jointEvaluationSubmittedAt,
-			cseOpinionCompletedAt: declarations.cseOpinionCompletedAt,
-			demarcheCompletedAt: declarations.demarcheCompletedAt,
-			phase2Required: declarations.phase2Required,
-			phase2RevisionRequired: declarations.phase2RevisionRequired,
 			cseRequired: declarations.cseRequired,
-			indicatorGRequired: declarations.indicatorGRequired,
 			rulesVersion: declarations.rulesVersion,
 			secondDeclReferencePeriodStart:
 				declarations.secondDeclReferencePeriodStart,
@@ -55,6 +62,7 @@ export async function buildExportRows(
 			declarantLastName: users.lastName,
 			declarantEmail: users.email,
 			declarantPhone: users.phone,
+			...statusHistoryProjection,
 			...indicatorColumns,
 		})
 		.from(declarations)
@@ -78,6 +86,27 @@ export async function buildExportRows(
 	]);
 
 	return rows.map((row) => {
+		const hasIndicatorGForThisDecl = hasIndicatorG.has(row.declarationId);
+		const globalAnnualMeanGap = row.globalAnnualMeanGap
+			? Number(row.globalAnnualMeanGap) * 100
+			: null;
+		const variableAnnualMeanGap = row.variableAnnualMeanGap
+			? Number(row.variableAnnualMeanGap) * 100
+			: null;
+		const phase2Required = computePhase2Required(
+			row.workforce,
+			hasIndicatorGForThisDecl,
+			globalAnnualMeanGap,
+		);
+		const phase2RevisionRequired =
+			phase2Required &&
+			row.secondDeclarationSubmittedAt !== null &&
+			variableAnnualMeanGap !== null &&
+			Math.abs(variableAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
+		const indicatorGRequired = isIndicatorGRequired(
+			row.workforce ?? 0,
+			row.year,
+		);
 		return {
 			siren: row.siren,
 			companyName: row.companyName,
@@ -87,7 +116,7 @@ export async function buildExportRows(
 			hasCse: row.hasCse,
 			year: row.year,
 			status: row.status,
-			declarationType: hasIndicatorG.has(row.declarationId)
+			declarationType: hasIndicatorGForThisDecl
 				? ("7_indicateurs" as const)
 				: ("6_indicateurs" as const),
 			firstDeclarationPathChoice: row.firstDeclarationPathChoice,
@@ -103,10 +132,10 @@ export async function buildExportRows(
 				row.jointEvaluationSubmittedAt?.toISOString() ?? null,
 			cseOpinionCompletedAt: row.cseOpinionCompletedAt?.toISOString() ?? null,
 			demarcheCompletedAt: row.demarcheCompletedAt?.toISOString() ?? null,
-			phase2Required: row.phase2Required,
-			phase2RevisionRequired: row.phase2RevisionRequired,
+			phase2Required,
+			phase2RevisionRequired,
 			cseRequired: row.cseRequired,
-			indicatorGRequired: row.indicatorGRequired,
+			indicatorGRequired,
 			rulesVersion: row.rulesVersion,
 			cancelledAt: row.cancelledAt?.toISOString() ?? null,
 			totalWomen: row.totalWomen,

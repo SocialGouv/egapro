@@ -9,11 +9,18 @@ import {
 	declarationProcedure,
 	declarationWriteProcedure,
 } from "~/server/api/trpc";
-import { cseOpinions, declarations, files } from "~/server/db/schema";
+import {
+	cseOpinions,
+	declarationStatusHistory,
+	declarations,
+	files,
+} from "~/server/db/schema";
 import { applyAction, loadRules } from "~/server/rules/engine";
 import { deleteFile as deleteS3File } from "~/server/services/s3";
-
-type DeclarationRow = typeof declarations.$inferSelect;
+import {
+	buildHistoryInserts,
+	computeProjectionUpdates,
+} from "./statusHistoryHelpers";
 
 export const cseOpinionRouter = createTRPCRouter({
 	get: declarationProcedure.query(async ({ ctx }) => {
@@ -146,20 +153,26 @@ export const cseOpinionRouter = createTRPCRouter({
 
 		const rules = loadRules(declaration.rulesVersion);
 		const facts = { currentState: declaration.status };
-		const { nextState, setFlags } = applyAction(
+		const { nextStatus, events } = applyAction(
 			facts,
 			"submit_cse_opinion",
 			rules,
 		);
 
-		await ctx.db
-			.update(declarations)
-			.set({
-				status: nextState as DeclarationRow["status"],
-				updatedAt: new Date(),
-				...setFlags,
-			})
-			.where(eq(declarations.id, ctx.declarationId));
+		const projection = computeProjectionUpdates(events, nextStatus);
+		const historyInserts = buildHistoryInserts(
+			ctx.declarationId,
+			events,
+			ctx.session.user.id,
+		);
+
+		await ctx.db.transaction(async (tx) => {
+			await tx.insert(declarationStatusHistory).values(historyInserts);
+			await tx
+				.update(declarations)
+				.set({ ...projection, updatedAt: new Date() })
+				.where(eq(declarations.id, ctx.declarationId));
+		});
 
 		return { success: true };
 	}),

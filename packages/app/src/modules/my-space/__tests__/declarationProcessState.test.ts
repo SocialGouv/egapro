@@ -23,9 +23,9 @@ function makeDeclaration(
 		updatedAt: new Date(),
 		firstDeclarationPathChoice: null,
 		secondDeclarationPathChoice: null,
-		secondDeclarationSubmittedAt: null,
-		demarcheCompletedAt: null,
-		cseOpinionCompletedAt: null,
+		hasSubmittedSecondDeclaration: false,
+
+		hasSubmittedCseOpinion: false,
 		cseRequired: false,
 		hasJointEvaluationFile: false,
 		hasPrefillData: false,
@@ -65,7 +65,7 @@ describe("computePanelVariant", () => {
 		{
 			fsm: "demarche_completed",
 			variant: "closed",
-			overrides: { cseOpinionCompletedAt: new Date() },
+			overrides: { hasSubmittedCseOpinion: true },
 			label: "demarche_completed with CSE opinion deposited",
 		},
 	];
@@ -134,7 +134,7 @@ describe("computeCtaHref", () => {
 		{
 			fsm: "demarche_completed",
 			href: `/declaration-remuneration?siren=${SIREN}`,
-			overrides: { cseOpinionCompletedAt: new Date() },
+			overrides: { hasSubmittedCseOpinion: true },
 			label: "demarche_completed with CSE opinion deposited",
 		},
 	];

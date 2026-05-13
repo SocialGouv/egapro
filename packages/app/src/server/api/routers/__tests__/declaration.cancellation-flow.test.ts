@@ -311,7 +311,6 @@ describe("declaration cancellation redeposit flow", () => {
 		expect(result).toEqual({ success: true });
 		expect(activeRow.status).toBe("demarche_completed");
 		expect(activeRow.currentStep).toBe(6);
-		expect(activeRow.submittedAt).not.toBeNull();
 		expect(cancelledRow.status).toBe("submitted");
 		expect(cancelledRow.cancelledAt).toBeInstanceOf(Date);
 	});
@@ -388,8 +387,6 @@ describe("declaration cancellation redeposit flow", () => {
 
 		expect(lastUpdateSet).not.toBeNull();
 		expect(lastUpdateSet?.status).toBe("demarche_completed");
-		const submittedAt = lastUpdateSet?.submittedAt as Date;
-		expect(submittedAt).toBeInstanceOf(Date);
 		expect(cancelledRow.submittedAt?.toISOString()).toContain(`${YEAR}-03-01`);
 	});
 });

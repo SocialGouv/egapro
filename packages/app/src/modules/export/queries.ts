@@ -1,11 +1,12 @@
 import "server-only";
 
-import { and, eq, gte, inArray, isNull, lt, ne, or } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
 import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
 	companies,
 	cseOpinions,
+	declarationStatusHistory,
 	declarations,
 	employeeCategories,
 	files,
@@ -14,6 +15,35 @@ import {
 } from "~/server/db/schema";
 import type { CseRow, FileRow, IndicatorGEntry } from "./fetchDeclarations";
 import type { IndicatorGRow } from "./types";
+
+function latestEventAt(eventType: string) {
+	return sql<Date | null>`(
+		SELECT MAX(${declarationStatusHistory.createdAt})
+		FROM ${declarationStatusHistory}
+		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
+		AND ${declarationStatusHistory.eventType} = ${eventType}
+	)`;
+}
+
+function latestPathChoiceAt(round: 1 | 2) {
+	return sql<Date | null>`(
+		SELECT MAX(${declarationStatusHistory.createdAt})
+		FROM ${declarationStatusHistory}
+		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
+		AND ${declarationStatusHistory.eventType} = 'path_choice'
+		AND ${declarationStatusHistory.round} = ${round}
+	)`;
+}
+
+export const statusHistoryProjection = {
+	submittedAt: latestEventAt("submit"),
+	firstDeclarationPathChoiceAt: latestPathChoiceAt(1),
+	secondDeclarationPathChoiceAt: latestPathChoiceAt(2),
+	secondDeclarationSubmittedAt: latestEventAt("second_declaration_submit"),
+	jointEvaluationSubmittedAt: latestEventAt("joint_evaluation_submit"),
+	cseOpinionCompletedAt: latestEventAt("cse_opinion_submit"),
+	demarcheCompletedAt: latestEventAt("demarche_complete"),
+};
 
 // ── Shared select columns for indicators A–F ───────────────────────
 
@@ -128,17 +158,7 @@ export async function fetchSubmittedDeclarations(
 			secondDeclarationPathChoice: declarations.secondDeclarationPathChoice,
 			totalWomen: declarations.totalWomen,
 			totalMen: declarations.totalMen,
-			submittedAt: declarations.submittedAt,
-			firstDeclarationPathChoiceAt: declarations.firstDeclarationPathChoiceAt,
-			secondDeclarationPathChoiceAt: declarations.secondDeclarationPathChoiceAt,
-			secondDeclarationSubmittedAt: declarations.secondDeclarationSubmittedAt,
-			jointEvaluationSubmittedAt: declarations.jointEvaluationSubmittedAt,
-			cseOpinionCompletedAt: declarations.cseOpinionCompletedAt,
-			demarcheCompletedAt: declarations.demarcheCompletedAt,
-			phase2Required: declarations.phase2Required,
-			phase2RevisionRequired: declarations.phase2RevisionRequired,
 			cseRequired: declarations.cseRequired,
-			indicatorGRequired: declarations.indicatorGRequired,
 			rulesVersion: declarations.rulesVersion,
 			secondDeclReferencePeriodStart:
 				declarations.secondDeclReferencePeriodStart,
@@ -152,6 +172,7 @@ export async function fetchSubmittedDeclarations(
 			nafCode: companies.nafCode,
 			address: companies.address,
 			hasCse: companies.hasCse,
+			...statusHistoryProjection,
 			...sharedExportColumns,
 		})
 		.from(declarations)

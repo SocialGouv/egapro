@@ -18,9 +18,8 @@ type DbDeclaration = {
 	updatedAt: Date | null;
 	firstDeclarationPathChoice: CompliancePath | null;
 	secondDeclarationPathChoice: CompliancePath | null;
-	secondDeclarationSubmittedAt: Date | null;
-	demarcheCompletedAt: Date | null;
-	cseOpinionCompletedAt: Date | null;
+	hasSubmittedSecondDeclaration: boolean;
+	hasSubmittedCseOpinion: boolean;
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
@@ -49,9 +48,8 @@ export function buildDeclarationList(
 				updatedAt: existing.updatedAt,
 				firstDeclarationPathChoice: existing.firstDeclarationPathChoice,
 				secondDeclarationPathChoice: existing.secondDeclarationPathChoice,
-				secondDeclarationSubmittedAt: existing.secondDeclarationSubmittedAt,
-				demarcheCompletedAt: existing.demarcheCompletedAt,
-				cseOpinionCompletedAt: existing.cseOpinionCompletedAt,
+				hasSubmittedSecondDeclaration: existing.hasSubmittedSecondDeclaration,
+				hasSubmittedCseOpinion: existing.hasSubmittedCseOpinion,
 				cseRequired: existing.cseRequired,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
 				hasPrefillData: existing.hasPrefillData,
@@ -67,9 +65,8 @@ export function buildDeclarationList(
 				updatedAt: null,
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
-				secondDeclarationSubmittedAt: null,
-				demarcheCompletedAt: null,
-				cseOpinionCompletedAt: null,
+				hasSubmittedSecondDeclaration: false,
+				hasSubmittedCseOpinion: false,
 				cseRequired: false,
 				hasJointEvaluationFile: false,
 				hasPrefillData:
@@ -93,9 +90,8 @@ export function buildDeclarationList(
 			updatedAt: d.updatedAt,
 			firstDeclarationPathChoice: d.firstDeclarationPathChoice,
 			secondDeclarationPathChoice: d.secondDeclarationPathChoice,
-			secondDeclarationSubmittedAt: d.secondDeclarationSubmittedAt,
-			demarcheCompletedAt: d.demarcheCompletedAt,
-			cseOpinionCompletedAt: d.cseOpinionCompletedAt,
+			hasSubmittedSecondDeclaration: d.hasSubmittedSecondDeclaration,
+			hasSubmittedCseOpinion: d.hasSubmittedCseOpinion,
 			cseRequired: d.cseRequired,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
 			hasPrefillData: d.hasPrefillData,

@@ -40,9 +40,8 @@ export type DeclarationItem = {
 	updatedAt: Date | null;
 	firstDeclarationPathChoice: CompliancePath | null;
 	secondDeclarationPathChoice: CompliancePath | null;
-	secondDeclarationSubmittedAt: Date | null;
-	demarcheCompletedAt: Date | null;
-	cseOpinionCompletedAt: Date | null;
+	hasSubmittedSecondDeclaration: boolean;
+	hasSubmittedCseOpinion: boolean;
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;

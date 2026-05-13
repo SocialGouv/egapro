@@ -12,9 +12,9 @@ const NO_COMPLIANCE = {
 	fsmStatus: null,
 	firstDeclarationPathChoice: null,
 	secondDeclarationPathChoice: null,
-	secondDeclarationSubmittedAt: null,
-	demarcheCompletedAt: null,
-	cseOpinionCompletedAt: null,
+	hasSubmittedSecondDeclaration: false,
+
+	hasSubmittedCseOpinion: false,
 	cseRequired: false,
 	hasJointEvaluationFile: false,
 	hasPrefillData: false,

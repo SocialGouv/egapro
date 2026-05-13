@@ -43,18 +43,32 @@ function buildDb(
 		set: vi.fn().mockReturnThis(),
 		where: vi.fn().mockResolvedValue(undefined),
 	};
-	return {
-		select: vi.fn().mockReturnValue({
-			from: vi.fn().mockReturnValue({
-				where: vi.fn().mockReturnValue({
-					limit: vi
-						.fn()
-						.mockResolvedValue(declarationRow ? [declarationRow] : []),
-				}),
+	const insertChain = {
+		values: vi.fn().mockResolvedValue(undefined),
+	};
+	const select = vi.fn().mockReturnValue({
+		from: vi.fn().mockReturnValue({
+			where: vi.fn().mockReturnValue({
+				limit: vi
+					.fn()
+					.mockResolvedValue(declarationRow ? [declarationRow] : []),
 			}),
 		}),
-		update: vi.fn().mockReturnValue(updateChain),
+	});
+	const update = vi.fn().mockReturnValue(updateChain);
+	const insert = vi.fn().mockReturnValue(insertChain);
+	const transaction = vi
+		.fn()
+		.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+			fn({ update, insert, select, delete: vi.fn() }),
+		);
+	return {
+		select,
+		update,
+		insert,
+		transaction,
 		__updateChain: updateChain,
+		__insertChain: insertChain,
 	};
 }
 

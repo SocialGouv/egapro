@@ -983,10 +983,7 @@ describe("GET /api/v1/export/declarations", () => {
 				jointEvaluationSubmittedAt: new Date("2027-09-01T12:00:00Z"),
 				cseOpinionCompletedAt: new Date("2027-10-01T13:00:00Z"),
 				demarcheCompletedAt: new Date("2027-10-15T14:00:00Z"),
-				phase2Required: true,
-				phase2RevisionRequired: true,
 				cseRequired: true,
-				indicatorGRequired: true,
 				rulesVersion: "2027.1",
 				secondDeclReferencePeriodStart: null,
 				secondDeclReferencePeriodEnd: null,
@@ -1002,8 +999,33 @@ describe("GET /api/v1/export/declarations", () => {
 				declarantEmail: "jean@acme.fr",
 				declarantPhone: "0612345678",
 				...nullIndicators,
+				globalAnnualMeanGap: "0.10",
+				variableAnnualMeanGap: "0.08",
 			},
 		]);
+		mockFetchIndicatorG.mockResolvedValueOnce(
+			new Map([
+				[
+					"decl-1",
+					[
+						{
+							categoryName: "cadres",
+							declarationType: "initial",
+							womenCount: 10,
+							menCount: 10,
+							annualBaseWomen: "100",
+							annualBaseMen: "100",
+							annualVariableWomen: null,
+							annualVariableMen: null,
+							hourlyBaseWomen: null,
+							hourlyBaseMen: null,
+							hourlyVariableWomen: null,
+							hourlyVariableMen: null,
+						},
+					],
+				],
+			]),
+		);
 
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
 		const request = gatewayForwardedRequest(

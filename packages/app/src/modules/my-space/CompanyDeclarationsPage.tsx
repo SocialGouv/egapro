@@ -79,10 +79,10 @@ export function CompanyDeclarationsPage({
 				campaignDeadlines={campaignDeadlines}
 				ctaHref={ctaHref}
 				displayContext={displayContext}
-				lastActionDate={lastActionDate}
-				secondDeclarationSubmittedAt={
-					currentDeclaration?.secondDeclarationSubmittedAt ?? null
+				hasSubmittedSecondDeclaration={
+					currentDeclaration?.hasSubmittedSecondDeclaration ?? false
 				}
+				lastActionDate={lastActionDate}
 				siren={company.siren}
 				variant={panelVariant}
 				year={currentYear}
