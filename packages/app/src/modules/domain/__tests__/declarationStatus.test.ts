@@ -33,25 +33,43 @@ describe("computeDeclarationStatus", () => {
 		).toBe("to_complete");
 	});
 
-	it("returns done for awaiting_compliance_path_choice", () => {
+	it("returns in_progress for awaiting_compliance_path_choice (action still expected)", () => {
 		expect(
 			computeDeclarationStatus({
 				status: "awaiting_compliance_path_choice",
 				currentStep: 6,
 			}),
-		).toBe("done");
+		).toBe("in_progress");
 	});
 
-	it("returns done for corrective_actions_chosen", () => {
+	it("returns in_progress for corrective_actions_chosen (waiting on 2nd decl)", () => {
 		expect(
 			computeDeclarationStatus({
 				status: "corrective_actions_chosen",
 				currentStep: 6,
 			}),
-		).toBe("done");
+		).toBe("in_progress");
 	});
 
-	it("returns done for demarche_completed", () => {
+	it("returns in_progress for awaiting_revision_choice (revised path pending)", () => {
+		expect(
+			computeDeclarationStatus({
+				status: "awaiting_revision_choice",
+				currentStep: 6,
+			}),
+		).toBe("in_progress");
+	});
+
+	it("returns in_progress for awaiting_cse_opinion (CSE deposit pending)", () => {
+		expect(
+			computeDeclarationStatus({
+				status: "awaiting_cse_opinion",
+				currentStep: 6,
+			}),
+		).toBe("in_progress");
+	});
+
+	it("returns done only for demarche_completed (terminal FSM state)", () => {
 		expect(
 			computeDeclarationStatus({
 				status: "demarche_completed",
@@ -93,7 +111,7 @@ describe("computeDeclarationStatus", () => {
 				currentStep: 6,
 				cancelledAt: null,
 			}),
-		).toBe("done");
+		).toBe("in_progress");
 	});
 
 	it("uses existing logic when cancelledAt is undefined", () => {
@@ -103,7 +121,7 @@ describe("computeDeclarationStatus", () => {
 				currentStep: 6,
 				cancelledAt: undefined,
 			}),
-		).toBe("done");
+		).toBe("in_progress");
 	});
 });
 

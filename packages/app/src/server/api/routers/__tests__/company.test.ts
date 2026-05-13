@@ -27,19 +27,46 @@ describe("computeDeclarationStatus", () => {
 		);
 	});
 
-	it("returns done for any non-draft status", () => {
+	it("returns in_progress for awaiting_compliance_path_choice (action still expected)", () => {
 		expect(
 			computeDeclarationStatus({
 				status: "awaiting_compliance_path_choice",
 				currentStep: 6,
 			}),
-		).toBe("done");
+		).toBe("in_progress");
 	});
 
-	it("returns done for corrective_actions_chosen", () => {
+	it("returns in_progress for corrective_actions_chosen (waiting on 2nd decl)", () => {
 		expect(
 			computeDeclarationStatus({
 				status: "corrective_actions_chosen",
+				currentStep: 6,
+			}),
+		).toBe("in_progress");
+	});
+
+	it("returns in_progress for awaiting_revision_choice (user must pick a revised path)", () => {
+		expect(
+			computeDeclarationStatus({
+				status: "awaiting_revision_choice",
+				currentStep: 6,
+			}),
+		).toBe("in_progress");
+	});
+
+	it("returns in_progress for awaiting_cse_opinion (still expecting CSE deposit)", () => {
+		expect(
+			computeDeclarationStatus({
+				status: "awaiting_cse_opinion",
+				currentStep: 6,
+			}),
+		).toBe("in_progress");
+	});
+
+	it("returns done only for demarche_completed (terminal FSM state)", () => {
+		expect(
+			computeDeclarationStatus({
+				status: "demarche_completed",
 				currentStep: 6,
 			}),
 		).toBe("done");

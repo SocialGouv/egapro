@@ -36,7 +36,10 @@ export function computeDeclarationStatus(
 	if (declaration.cancelledAt != null) {
 		return "to_complete";
 	}
-	if (declaration.status !== null && declaration.status !== "draft") {
+	// Only the terminal FSM state means the démarche is fully done. Every other
+	// non-draft state (awaiting_*_choice, *_chosen, awaiting_cse_opinion) is an
+	// in-progress step the user still has to act on.
+	if (declaration.status === "demarche_completed") {
 		return "done";
 	}
 	return "in_progress";
