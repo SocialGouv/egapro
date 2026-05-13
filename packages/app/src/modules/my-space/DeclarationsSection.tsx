@@ -3,7 +3,12 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 
-import { getCurrentYear } from "~/modules/domain";
+import type { CampaignDeadlines } from "~/modules/domain";
+import {
+	formatShortDate,
+	getCurrentYear,
+	getDeclarationProcessStepDeadline,
+} from "~/modules/domain";
 
 import { Pagination } from "~/modules/shared/Pagination";
 
@@ -24,26 +29,35 @@ const TYPE_LABELS: Record<DeclarationType, string> = {
 };
 
 type Props = {
+	campaignDeadlines: CampaignDeadlines;
 	declarations: DeclarationItem[];
 	userPhone: string | null;
 	hasCse: boolean | null;
 	hasNoSanction: boolean;
 };
 
-const TYPE_DEADLINES: Record<DeclarationType, string> = {
-	remuneration: "01/06",
-	representation: "01/03",
-};
+const REPRESENTATION_DEADLINE_PREFIX = "01/03";
 
-function getDeadline(declaration: DeclarationItem): string {
-	if (declaration.status === "done") return "Clôturée";
-	return `${TYPE_DEADLINES[declaration.type]}/${declaration.year}`;
+function getDeadlineCell(
+	declaration: DeclarationItem,
+	campaignDeadlines: CampaignDeadlines,
+): string {
+	if (declaration.type === "representation") {
+		return `${REPRESENTATION_DEADLINE_PREFIX}/${declaration.year}`;
+	}
+	const deadline = getDeclarationProcessStepDeadline(
+		declaration.fsmStatus,
+		campaignDeadlines,
+	);
+	if (deadline === null) return "Clôturée";
+	return formatShortDate(deadline);
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 const PAGE_SIZE_SELECTOR_THRESHOLD = 20;
 
 export function DeclarationsSection({
+	campaignDeadlines,
 	declarations,
 	userPhone,
 	hasCse,
@@ -103,6 +117,7 @@ export function DeclarationsSection({
 			</div>
 			{visibleCurrentDeclarations.length > 0 && (
 				<DeclarationsTable
+					campaignDeadlines={campaignDeadlines}
 					caption={
 						<>
 							Ce tableau présente la liste des démarches en cours.
@@ -122,6 +137,7 @@ export function DeclarationsSection({
 				<>
 					<h2 className="fr-mt-6w fr-mb-3w">Années précédentes</h2>
 					<DeclarationsTable
+						campaignDeadlines={campaignDeadlines}
 						caption={
 							<>
 								Ce tableau présente l'historique des démarches.
@@ -173,6 +189,7 @@ export function DeclarationsSection({
 }
 
 type DeclarationsTableProps = {
+	campaignDeadlines: CampaignDeadlines;
 	declarations: DeclarationItem[];
 	caption: ReactNode;
 	userPhone: string | null;
@@ -180,6 +197,7 @@ type DeclarationsTableProps = {
 };
 
 function DeclarationsTable({
+	campaignDeadlines,
 	declarations,
 	caption,
 	userPhone,
@@ -220,7 +238,7 @@ function DeclarationsTable({
 											<td>
 												{getDeclarationProcessStepLabel(declaration.fsmStatus)}
 											</td>
-											<td>{getDeadline(declaration)}</td>
+											<td>{getDeadlineCell(declaration, campaignDeadlines)}</td>
 											<td>
 												<StatusBadge status={declaration.status} />
 											</td>

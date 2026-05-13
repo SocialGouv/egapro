@@ -1,11 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, getDefaultCampaignDeadlines } from "~/modules/domain";
 import { DeclarationsSection } from "../DeclarationsSection";
 import type { DeclarationItem } from "../types";
 
 const currentYear = getCurrentYear();
+const campaignDeadlines = getDefaultCampaignDeadlines(currentYear);
 
 const NO_COMPLIANCE = {
 	fsmStatus: null,
@@ -55,6 +56,7 @@ function renderSection(
 ) {
 	return render(
 		<DeclarationsSection
+			campaignDeadlines={campaignDeadlines}
 			declarations={overrides?.declarations ?? declarations}
 			hasCse={true}
 			hasNoSanction={false}

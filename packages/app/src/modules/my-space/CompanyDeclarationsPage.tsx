@@ -62,6 +62,7 @@ export function CompanyDeclarationsPage({
 			<WelcomeBanner />
 			<CompanyInfoBanner company={company} />
 			<DeclarationsSection
+				campaignDeadlines={campaignDeadlines}
 				declarations={declarations}
 				hasCse={company.hasCse}
 				hasNoSanction={hasNoSanction}

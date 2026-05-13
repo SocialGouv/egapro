@@ -33,6 +33,8 @@ export type { DeclarationDisplayContext } from "./shared/declarationDisplay";
 export { getDeclarationDisplayContext } from "./shared/declarationDisplay";
 // Declaration prerequisites
 export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";
+// Declaration process step deadline
+export { getDeclarationProcessStepDeadline } from "./shared/declarationProcessStep";
 // Declaration status
 export {
 	computeDeclarationStatus,
