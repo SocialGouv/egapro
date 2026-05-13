@@ -1,3 +1,8 @@
+.container {
+	margin-inline: auto;
+	max-width: 78rem;
+}
+
 .columns {
 	display: flex;
 	flex-direction: column;
@@ -42,7 +47,7 @@
 }
 
 .illustrationInner {
-	align-items: center;
+	align-items: flex-start;
 	box-sizing: border-box;
 	display: flex;
 	justify-content: center;
