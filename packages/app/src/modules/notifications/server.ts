@@ -10,5 +10,3 @@ export {
 	shouldDeliverByPreferences,
 	updateUserNotificationPreferences,
 } from "./preferences";
-export type { BuiltTemplate } from "./templates";
-export { buildNotificationTemplate } from "./templates";

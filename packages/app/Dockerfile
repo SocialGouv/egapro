@@ -17,13 +17,17 @@ RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 # Copy minimal files first for better layer caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/app/package.json ./packages/app/
+COPY packages/notifications/package.json ./packages/notifications/
 
-# Install only the workspace subtree needed to build the app
+# Install both the app (Next.js build) and the notifications worker
+# subtree. Both packages are leaves of the workspace graph; listing them
+# explicitly is enough.
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm install --filter app --frozen-lockfile --store-dir=/pnpm/store
+    pnpm install --filter app --filter notifications --frozen-lockfile --store-dir=/pnpm/store
 
 # Copy source code (after install to maximize cache hits)
 COPY packages/app/ ./packages/app/
+COPY packages/notifications/ ./packages/notifications/
 
 # Build-time env handling
 ENV HUSKY=0
@@ -51,6 +55,10 @@ RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null) \
     NEXT_PUBLIC_SENTRY_RELEASE=$(cat /run/secrets/sentry_release 2>/dev/null | tr '/' '-') \
     pnpm --filter app build
+
+# Compile the notifications worker TypeScript sources to dist/. Runs after the
+# Next.js build so any TS error fails the whole image.
+RUN pnpm --filter notifications build
 
 
 # Runner stage: minimal Node runtime, no pnpm/corepack
@@ -80,6 +88,14 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/migrate.mjs ./pa
 # Standalone script invoked by the audit-cleanup CronJob (issue #3268 — direct
 # DB access replaces the former curl → /api/audit/cleanup HTTP trigger).
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/audit-cleanup.mjs ./packages/app/scripts/audit-cleanup.mjs
+
+# Notifications worker — independent workspace, runs as its own K8s
+# Deployment (notifications-deployment.yaml). Ship the compiled `dist/` tree
+# plus its full node_modules so the pod resolves pg-boss / nodemailer /
+# postgres / html-to-text without sharing the app's node_modules graph.
+COPY --from=builder --chown=1000:1000 /app/packages/notifications/dist ./packages/notifications/dist
+COPY --from=builder --chown=1000:1000 /app/packages/notifications/package.json ./packages/notifications/package.json
+COPY --from=builder --chown=1000:1000 /app/packages/notifications/node_modules ./packages/notifications/node_modules
 
 USER 1000
 

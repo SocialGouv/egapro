@@ -87,7 +87,6 @@ export const AUDIT_ACTIONS = {
 
 	// ── System / cron-triggered ────────────────────────────
 	SYSTEM_AUDIT_CLEANUP: "system.audit_cleanup",
-	SYSTEM_NOTIFICATIONS_WORKER: "system.notifications_worker",
 } as const;
 
 export type AuditActionKey = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
@@ -155,5 +154,4 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",
 
 	[AUDIT_ACTIONS.SYSTEM_AUDIT_CLEANUP]: "system",
-	[AUDIT_ACTIONS.SYSTEM_NOTIFICATIONS_WORKER]: "system",
 };

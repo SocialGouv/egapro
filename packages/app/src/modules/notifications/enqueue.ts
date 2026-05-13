@@ -1,9 +1,9 @@
 import "server-only";
 
 import { AUDIT_ACTIONS } from "~/modules/audit";
+import { env } from "~/env";
 import { logAction } from "~/server/audit/log";
-import { notifDb } from "~/server/notifications/db";
-import { notifications } from "~/server/notifications/db/schema";
+import { NOTIFICATION_QUEUE_NAME, getBoss } from "./boss";
 import {
 	getUserNotificationPreferences,
 	shouldDeliverByPreferences,
@@ -22,53 +22,77 @@ export type EnqueueNotificationInput<T extends NotificationType> = {
 export type EnqueueResult =
 	| { status: "enqueued"; id: string }
 	| { status: "skipped_by_preferences" }
+	| { status: "queue_unavailable" }
 	| { status: "error"; error: string };
 
 export async function enqueueNotification<T extends NotificationType>(
 	input: EnqueueNotificationInput<T>,
 ): Promise<EnqueueResult> {
 	if (input.recipientUserId) {
-		const prefs = await getUserNotificationPreferences(input.recipientUserId);
-		if (!shouldDeliverByPreferences(input.type, prefs)) {
-			void logAction({
-				action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
-				status: "success",
-				userId: input.recipientUserId,
-				userEmail: input.recipientEmail,
-				siren: input.siren ?? null,
-				metadata: {
-					type: input.type,
-					outcome: "skipped_by_preferences",
-				},
-			});
-			return { status: "skipped_by_preferences" };
+		try {
+			const prefs = await getUserNotificationPreferences(input.recipientUserId);
+			if (!shouldDeliverByPreferences(input.type, prefs)) {
+				void logAction({
+					action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
+					status: "success",
+					userId: input.recipientUserId,
+					userEmail: input.recipientEmail,
+					siren: input.siren ?? null,
+					metadata: {
+						type: input.type,
+						outcome: "skipped_by_preferences",
+					},
+				});
+				return { status: "skipped_by_preferences" };
+			}
+		} catch (error) {
+			// Preferences live in the main DB — if reading them fails we still
+			// try to enqueue the notification rather than silently dropping it.
+			console.error(
+				"[notifications] preferences read failed, proceeding with enqueue:",
+				error,
+			);
 		}
 	}
 
-	const scheduledFor = input.scheduledFor ?? new Date();
-	const now = new Date();
+	const boss = await getBoss();
+	if (!boss) {
+		void logAction({
+			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
+			status: "failure",
+			userId: input.recipientUserId,
+			userEmail: input.recipientEmail,
+			siren: input.siren ?? null,
+			errorMessage: "queue_unavailable",
+			metadata: { type: input.type, reason: "queue_unavailable" },
+		});
+		return { status: "queue_unavailable" };
+	}
+
+	const jobData = {
+		type: input.type,
+		payload: input.payload,
+		recipientEmail: input.recipientEmail,
+		recipientUserId: input.recipientUserId,
+		siren: input.siren ?? null,
+	};
 
 	try {
-		const [row] = await notifDb
-			.insert(notifications)
-			.values({
-				type: input.type,
-				channel: "email",
-				recipientEmail: input.recipientEmail,
-				recipientUserId: input.recipientUserId,
-				siren: input.siren ?? null,
-				payload: input.payload as Record<string, unknown>,
-				status: "pending",
-				attemptCount: 0,
-				scheduledFor,
-				nextRetryAt: scheduledFor,
-				createdAt: now,
-				updatedAt: now,
-			})
-			.returning({ id: notifications.id });
+		const startAfterSeconds = input.scheduledFor
+			? Math.max(
+					0,
+					Math.floor((input.scheduledFor.getTime() - Date.now()) / 1000),
+				)
+			: 0;
 
-		const id = row?.id ?? "";
+		const jobId = await boss.send(NOTIFICATION_QUEUE_NAME, jobData, {
+			retryLimit: env.NOTIFICATIONS_RETRY_LIMIT,
+			retryBackoff: true,
+			retryDelay: env.NOTIFICATIONS_RETRY_DELAY_SECONDS,
+			startAfter: startAfterSeconds,
+		});
 
+		const id = jobId ?? "";
 		void logAction({
 			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
 			status: "success",
@@ -79,7 +103,7 @@ export async function enqueueNotification<T extends NotificationType>(
 			resourceId: id,
 			metadata: {
 				type: input.type,
-				scheduledFor: scheduledFor.toISOString(),
+				startAfterSeconds,
 			},
 		});
 

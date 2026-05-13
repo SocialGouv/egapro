@@ -48,7 +48,7 @@ services:
       db-notifications:
         condition: service_healthy
     command: >
-      sh -c "corepack enable && pnpm --filter app db:push && pnpm --filter app db:push:notifications"
+      sh -c "corepack enable && pnpm --filter app db:push"
 
   minio:
     image: minio/minio

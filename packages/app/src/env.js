@@ -66,7 +66,11 @@ export const env = createEnv({
 	server: {
 		AUTH_SECRET: z.string(),
 		DATABASE_URL: z.string().url(),
-		NOTIFICATIONS_DATABASE_URL: z.string().url(),
+		// Dedicated PG for the notifications queue (pg-boss). Optional by
+		// design: if the URL is missing or the DB is unreachable, the app
+		// keeps working — enqueue calls degrade gracefully (audit "failure",
+		// no email sent) instead of blocking the business mutation.
+		NOTIFICATIONS_DATABASE_URL: z.string().url().optional(),
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
@@ -126,11 +130,20 @@ export const env = createEnv({
 			.default("false")
 			.transform((v) => v.toLowerCase() === "true"),
 		MAIL_FROM: z.string().default("no-reply@egapro.local"),
-		// Notifications queue worker — polling interval in seconds (cron driver),
-		// max attempts per job, and base backoff in seconds. Defaults reflect the
-		// design doc: 5 essais, backoff 1m / 5m / 30m / 2h / 12h.
-		NOTIFICATIONS_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
-		NOTIFICATIONS_BATCH_SIZE: z.coerce.number().int().positive().default(50),
+		// pg-boss tunables — retryLimit + retryBackoff control the per-job
+		// retry policy. retryDelay is the base backoff in seconds; pg-boss
+		// applies an exponential factor when retryBackoff=true.
+		NOTIFICATIONS_RETRY_LIMIT: z.coerce.number().int().positive().default(5),
+		NOTIFICATIONS_RETRY_DELAY_SECONDS: z.coerce
+			.number()
+			.int()
+			.positive()
+			.default(60),
+		NOTIFICATIONS_WORKER_BATCH_SIZE: z.coerce
+			.number()
+			.int()
+			.positive()
+			.default(10),
 		// Valkey cache URL — optional. When absent, the custom
 		// cache handler (cache-handler.cjs) gracefully degrades to no-op.
 		// The handler reads process.env.VALKEY_URL directly (it runs outside
@@ -193,8 +206,11 @@ export const env = createEnv({
 		SMTP_PASS: process.env.SMTP_PASS,
 		SMTP_SECURE: process.env.SMTP_SECURE,
 		MAIL_FROM: process.env.MAIL_FROM,
-		NOTIFICATIONS_MAX_ATTEMPTS: process.env.NOTIFICATIONS_MAX_ATTEMPTS,
-		NOTIFICATIONS_BATCH_SIZE: process.env.NOTIFICATIONS_BATCH_SIZE,
+		NOTIFICATIONS_RETRY_LIMIT: process.env.NOTIFICATIONS_RETRY_LIMIT,
+		NOTIFICATIONS_RETRY_DELAY_SECONDS:
+			process.env.NOTIFICATIONS_RETRY_DELAY_SECONDS,
+		NOTIFICATIONS_WORKER_BATCH_SIZE:
+			process.env.NOTIFICATIONS_WORKER_BATCH_SIZE,
 		VALKEY_URL: process.env.VALKEY_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
