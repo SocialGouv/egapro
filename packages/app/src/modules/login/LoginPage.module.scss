@@ -42,7 +42,6 @@
 
 	@include respond-from(md) {
 		flex: 0 0 50%;
-		justify-content: flex-start;
 	}
 }
 
@@ -55,10 +54,8 @@
 	width: 100%;
 
 	@include respond-from(md) {
-		justify-content: flex-end;
-		max-width: 39rem;
 		padding-block: 4.5rem;
-		padding-inline: 0 1.5rem;
+		padding-inline: 1.5rem;
 	}
 }
 
