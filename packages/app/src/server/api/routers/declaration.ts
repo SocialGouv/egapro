@@ -433,6 +433,16 @@ export const declarationRouter = createTRPCRouter({
 				userId: ctx.session.user.id,
 				isResend: false,
 			});
+			const { enqueueNotification } = await import(
+				"~/modules/notifications/server"
+			);
+			void enqueueNotification({
+				type: "second_declaration_submitted",
+				recipientEmail: email,
+				recipientUserId: ctx.session.user.id,
+				siren,
+				payload: { siren, year },
+			});
 		}
 
 		return { success: true };
@@ -518,6 +528,16 @@ export const declarationRouter = createTRPCRouter({
 				year,
 				userId: ctx.session.user.id,
 				isResend: false,
+			});
+			const { enqueueNotification } = await import(
+				"~/modules/notifications/server"
+			);
+			void enqueueNotification({
+				type: "declaration_submitted",
+				recipientEmail: email,
+				recipientUserId: ctx.session.user.id,
+				siren,
+				payload: { siren, year },
 			});
 		}
 

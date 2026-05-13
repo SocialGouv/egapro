@@ -34,6 +34,24 @@ export const users = createTable("user", (d) => ({
 	isAdmin: d.boolean().notNull().default(false),
 }));
 
+export const userNotificationSettings = createTable(
+	"user_notification_settings",
+	(d) => ({
+		userId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.references(() => users.id, { onDelete: "cascade" }),
+		emailEnabled: d.boolean().notNull().default(true),
+		reminders: d.boolean().notNull().default(true),
+		confirmations: d.boolean().notNull().default(true),
+		updatedAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+	}),
+);
+
 export const declarations = createTable(
 	"declaration",
 	(d) => ({

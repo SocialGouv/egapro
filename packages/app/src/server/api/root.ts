@@ -9,6 +9,7 @@ import { declarationRouter } from "~/server/api/routers/declaration";
 import { gipMdsRouter } from "~/server/api/routers/gipMds";
 import { jointEvaluationRouter } from "~/server/api/routers/jointEvaluation";
 import { mailRouter } from "~/server/api/routers/mail";
+import { notificationPreferencesRouter } from "~/server/api/routers/notificationPreferences";
 import { profileRouter } from "~/server/api/routers/profile";
 import { publicReferentsRouter } from "~/server/api/routers/publicReferents";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
@@ -30,6 +31,7 @@ export const appRouter = createTRPCRouter({
 	gipMds: gipMdsRouter,
 	jointEvaluation: jointEvaluationRouter,
 	mail: mailRouter,
+	notificationPreferences: notificationPreferencesRouter,
 	profile: profileRouter,
 	publicReferents: publicReferentsRouter,
 });

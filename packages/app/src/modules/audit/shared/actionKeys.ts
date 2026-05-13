@@ -76,12 +76,18 @@ export const AUDIT_ACTIONS = {
 	MAIL_RECEIPT_SEND: "mail.receipt_send",
 	MAIL_RECEIPT_RESEND: "mail.receipt_resend",
 
+	// ── Notifications (queue + worker + preferences) ──────
+	NOTIFICATION_ENQUEUE: "notification.enqueue",
+	NOTIFICATION_SEND: "notification.send",
+	NOTIFICATION_PREFERENCES_UPDATE: "notification.preferences_update",
+
 	// ── Public searches ────────────────────────────────────
 	PUBLIC_REFERENT_SEARCH: "public_referents.search",
 	PUBLIC_REFERENT_VIEW: "public_referents.view",
 
 	// ── System / cron-triggered ────────────────────────────
 	SYSTEM_AUDIT_CLEANUP: "system.audit_cleanup",
+	SYSTEM_NOTIFICATIONS_WORKER: "system.notifications_worker",
 } as const;
 
 export type AuditActionKey = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
@@ -141,8 +147,13 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.MAIL_RECEIPT_SEND]: "mutation",
 	[AUDIT_ACTIONS.MAIL_RECEIPT_RESEND]: "mutation",
 
+	[AUDIT_ACTIONS.NOTIFICATION_ENQUEUE]: "mutation",
+	[AUDIT_ACTIONS.NOTIFICATION_SEND]: "system",
+	[AUDIT_ACTIONS.NOTIFICATION_PREFERENCES_UPDATE]: "mutation",
+
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: "public_search",
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",
 
 	[AUDIT_ACTIONS.SYSTEM_AUDIT_CLEANUP]: "system",
+	[AUDIT_ACTIONS.SYSTEM_NOTIFICATIONS_WORKER]: "system",
 };

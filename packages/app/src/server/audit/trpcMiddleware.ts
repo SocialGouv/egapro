@@ -68,6 +68,10 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 
 	// ── mail ──────────────────────────────────────────────
 	"mail.resendReceipt": AUDIT_ACTIONS.MAIL_RECEIPT_RESEND,
+
+	// ── notifications ────────────────────────────────────
+	"notificationPreferences.update":
+		AUDIT_ACTIONS.NOTIFICATION_PREFERENCES_UPDATE,
 };
 
 type SessionLike = {

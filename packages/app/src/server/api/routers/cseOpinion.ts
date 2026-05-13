@@ -130,7 +130,7 @@ export const cseOpinionRouter = createTRPCRouter({
 
 		const now = new Date();
 		// Idempotent: only sets cseOpinionCompletedAt the first time.
-		await ctx.db
+		const updated = await ctx.db
 			.update(declarations)
 			.set({ cseOpinionCompletedAt: now, updatedAt: now })
 			.where(
@@ -138,7 +138,26 @@ export const cseOpinionRouter = createTRPCRouter({
 					eq(declarations.id, ctx.declarationId),
 					isNull(declarations.cseOpinionCompletedAt),
 				),
+			)
+			.returning({
+				siren: declarations.siren,
+				year: declarations.year,
+			});
+
+		const finalized = updated[0];
+		const email = ctx.session.user.email;
+		if (finalized && email) {
+			const { enqueueNotification } = await import(
+				"~/modules/notifications/server"
 			);
+			void enqueueNotification({
+				type: "cse_opinion_submitted",
+				recipientEmail: email,
+				recipientUserId: ctx.session.user.id,
+				siren: finalized.siren,
+				payload: { siren: finalized.siren, year: finalized.year },
+			});
+		}
 
 		return { success: true };
 	}),
