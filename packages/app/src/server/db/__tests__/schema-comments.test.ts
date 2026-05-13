@@ -65,25 +65,8 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		expect(decl?.second_declaration_path_choice).toBe(
 			"SUIT: Parcours_apres_declaration_2",
 		);
-		expect(decl?.phase2_required).toBe("SUIT: Phase_2_requise");
-		expect(decl?.phase2_revision_required).toBe(
-			"SUIT: Phase_2_revision_requise",
-		);
 		expect(decl?.cse_required).toBe("SUIT: Avis_CSE_requis");
-		expect(decl?.indicator_g_required).toBe("SUIT: Indicateur_G_requis");
 		expect(decl?.rules_version).toBe("SUIT: Version_regles");
-		expect(decl?.submitted_at).toBe("SUIT: Date_soumission");
-		expect(decl?.first_declaration_path_choice_at).toBe(
-			"SUIT: Date_parcours_apres_declaration_1",
-		);
-		expect(decl?.second_declaration_path_choice_at).toBe(
-			"SUIT: Date_parcours_apres_declaration_2",
-		);
-		expect(decl?.joint_evaluation_submitted_at).toBe(
-			"SUIT: Date_evaluation_conjointe",
-		);
-		expect(decl?.cse_opinion_completed_at).toBe("SUIT: Date_avis_CSE");
-		expect(decl?.demarche_completed_at).toBe("SUIT: Date_fin_demarche");
 		expect(decl?.total_women).toBe("SUIT: Effectif_F_rem_annuelle_globale");
 		expect(decl?.total_men).toBe("SUIT: Effectif_H_rem_annuelle_globale");
 		expect(decl?.created_at).toBe("SUIT: Date_creation");
@@ -92,15 +75,36 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 
 	it("annotates second declaration columns", () => {
 		const decl = SCHEMA_COLUMN_COMMENTS.declaration;
-		expect(decl?.second_declaration_submitted_at).toBe(
-			"SUIT: Seconde_declaration.Statut",
-		);
 		expect(decl?.second_decl_reference_period_start).toBe(
 			"SUIT: Seconde_declaration.Periode_reference_debut",
 		);
 		expect(decl?.second_decl_reference_period_end).toBe(
 			"SUIT: Seconde_declaration.Periode_reference_fin",
 		);
+	});
+
+	it("annotates declaration_status_history columns (T8 — event-sourced history)", () => {
+		const hist = SCHEMA_COLUMN_COMMENTS.declaration_status_history;
+		expect(hist?.declaration_id).toMatch(/Référence vers la déclaration/);
+		expect(hist?.event_type).toMatch(/Type d'event métier/);
+		expect(hist?.value).toMatch(/Charge utile/);
+		expect(hist?.round).toMatch(/première déclaration/);
+		expect(hist?.actor_user_id).toMatch(/Auteur de l'event/);
+		expect(hist?.created_at).toMatch(/Timestamp d'émission/);
+	});
+
+	it("does not annotate dropped legacy columns (T8 — event sourcing)", () => {
+		const decl = SCHEMA_COLUMN_COMMENTS.declaration;
+		expect(decl?.submitted_at).toBeUndefined();
+		expect(decl?.first_declaration_path_choice_at).toBeUndefined();
+		expect(decl?.second_declaration_path_choice_at).toBeUndefined();
+		expect(decl?.second_declaration_submitted_at).toBeUndefined();
+		expect(decl?.joint_evaluation_submitted_at).toBeUndefined();
+		expect(decl?.cse_opinion_completed_at).toBeUndefined();
+		expect(decl?.demarche_completed_at).toBeUndefined();
+		expect(decl?.phase2_required).toBeUndefined();
+		expect(decl?.phase2_revision_required).toBeUndefined();
+		expect(decl?.indicator_g_required).toBeUndefined();
 	});
 
 	it("annotates company identity columns exposed by SUIT", () => {

@@ -14,6 +14,7 @@ import {
 import type { DB } from "~/server/db";
 import {
 	companies,
+	declarationStatusHistory,
 	declarations,
 	files,
 	gipMdsData,
@@ -139,49 +140,74 @@ export const companyRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const company = await findUserCompany(ctx.db, ctx.session, input.siren);
 
-			const [declarationRows, jointEvalRows, prefillRows] = await Promise.all([
-				ctx.db
-					.select({
-						siren: declarations.siren,
-						year: declarations.year,
-						status: declarations.status,
-						currentStep: declarations.currentStep,
-						updatedAt: declarations.updatedAt,
-						firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
-						secondDeclarationPathChoice:
-							declarations.secondDeclarationPathChoice,
-						secondDeclarationSubmittedAt:
-							declarations.secondDeclarationSubmittedAt,
-						demarcheCompletedAt: declarations.demarcheCompletedAt,
-						cseOpinionCompletedAt: declarations.cseOpinionCompletedAt,
-						cseRequired: declarations.cseRequired,
-					})
-					.from(declarations)
-					.where(
-						and(
-							eq(declarations.siren, input.siren),
-							isNull(declarations.cancelledAt),
+			const [declarationRows, jointEvalRows, prefillRows, eventRows] =
+				await Promise.all([
+					ctx.db
+						.select({
+							id: declarations.id,
+							siren: declarations.siren,
+							year: declarations.year,
+							status: declarations.status,
+							currentStep: declarations.currentStep,
+							updatedAt: declarations.updatedAt,
+							firstDeclarationPathChoice:
+								declarations.firstDeclarationPathChoice,
+							secondDeclarationPathChoice:
+								declarations.secondDeclarationPathChoice,
+							cseRequired: declarations.cseRequired,
+						})
+						.from(declarations)
+						.where(
+							and(
+								eq(declarations.siren, input.siren),
+								isNull(declarations.cancelledAt),
+							),
+						)
+						.orderBy(desc(declarations.year)),
+					ctx.db
+						.select({ year: declarations.year })
+						.from(files)
+						.innerJoin(declarations, eq(files.declarationId, declarations.id))
+						.where(
+							and(
+								eq(declarations.siren, input.siren),
+								eq(files.type, "joint_evaluation"),
+							),
 						),
-					)
-					.orderBy(desc(declarations.year)),
-				ctx.db
-					.select({ year: declarations.year })
-					.from(files)
-					.innerJoin(declarations, eq(files.declarationId, declarations.id))
-					.where(
-						and(
-							eq(declarations.siren, input.siren),
-							eq(files.type, "joint_evaluation"),
+					ctx.db
+						.select({ year: gipMdsData.year })
+						.from(gipMdsData)
+						.where(eq(gipMdsData.siren, input.siren)),
+					ctx.db
+						.select({
+							declarationId: declarationStatusHistory.declarationId,
+							eventType: declarationStatusHistory.eventType,
+						})
+						.from(declarationStatusHistory)
+						.innerJoin(
+							declarations,
+							eq(declarationStatusHistory.declarationId, declarations.id),
+						)
+						.where(
+							and(
+								eq(declarations.siren, input.siren),
+								isNull(declarations.cancelledAt),
+							),
 						),
-					),
-				ctx.db
-					.select({ year: gipMdsData.year })
-					.from(gipMdsData)
-					.where(eq(gipMdsData.siren, input.siren)),
-			]);
+				]);
 
 			const yearsWithJointEval = new Set(jointEvalRows.map((r) => r.year));
 			const yearsWithPrefill = new Set(prefillRows.map((r) => r.year));
+			const declarationIdsWithSecondDecl = new Set(
+				eventRows
+					.filter((r) => r.eventType === "second_declaration_submit")
+					.map((r) => r.declarationId),
+			);
+			const declarationIdsWithCseOpinion = new Set(
+				eventRows
+					.filter((r) => r.eventType === "cse_opinion_submit")
+					.map((r) => r.declarationId),
+			);
 
 			const year = getCurrentYear();
 			const mappedDeclarations = declarationRows.map((d) => ({
@@ -196,9 +222,8 @@ export const companyRouter = createTRPCRouter({
 				updatedAt: d.updatedAt,
 				firstDeclarationPathChoice: d.firstDeclarationPathChoice,
 				secondDeclarationPathChoice: d.secondDeclarationPathChoice,
-				secondDeclarationSubmittedAt: d.secondDeclarationSubmittedAt,
-				demarcheCompletedAt: d.demarcheCompletedAt,
-				cseOpinionCompletedAt: d.cseOpinionCompletedAt,
+				hasSubmittedSecondDeclaration: declarationIdsWithSecondDecl.has(d.id),
+				hasSubmittedCseOpinion: declarationIdsWithCseOpinion.has(d.id),
 				cseRequired: d.cseRequired,
 				hasJointEvaluationFile: yearsWithJointEval.has(d.year),
 				hasPrefillData: yearsWithPrefill.has(d.year),

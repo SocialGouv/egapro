@@ -43,19 +43,25 @@ export const PredicateSchema: z.ZodType<Predicate> = z.lazy(() =>
 	]),
 );
 
-export const WriteSourceSchema = z.union([
-	z.literal("$now"),
-	z.object({ value: JsonScalarSchema }),
-	z.object({ ref: z.string() }),
-	z.object({ compute: z.string() }),
-]);
+export const EVENT_TYPES = [
+	"submit",
+	"path_choice",
+	"second_declaration_submit",
+	"joint_evaluation_submit",
+	"cse_opinion_submit",
+	"cancel",
+	"demarche_complete",
+] as const;
 
-export type WriteSource = z.infer<typeof WriteSourceSchema>;
+export type EventType = (typeof EVENT_TYPES)[number];
 
-export const WriteSchema = z.object({
-	field: z.string(),
-	source: WriteSourceSchema,
+export const EventSchema = z.object({
+	type: z.enum(EVENT_TYPES),
+	value: z.string().optional(),
+	round: z.union([z.literal(1), z.literal(2)]).optional(),
 });
+
+export type RuleEvent = z.infer<typeof EventSchema>;
 
 export const TransitionSchema = z.object({
 	id: z.string(),
@@ -64,7 +70,7 @@ export const TransitionSchema = z.object({
 	matchPayload: z.record(z.string(), z.unknown()).optional(),
 	guard: PredicateSchema.optional(),
 	to: z.string(),
-	writes: z.array(WriteSchema),
+	events: z.array(EventSchema),
 });
 
 export type Transition = z.infer<typeof TransitionSchema>;

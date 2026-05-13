@@ -21,24 +21,13 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		status: "SUIT: Statut",
 		first_declaration_path_choice: "SUIT: Parcours_apres_declaration_1",
 		second_declaration_path_choice: "SUIT: Parcours_apres_declaration_2",
-		phase2_required: "SUIT: Phase_2_requise",
-		phase2_revision_required: "SUIT: Phase_2_revision_requise",
 		cse_required: "SUIT: Avis_CSE_requis",
-		indicator_g_required: "SUIT: Indicateur_G_requis",
 		rules_version: "SUIT: Version_regles",
-		first_declaration_path_choice_at: "SUIT: Date_parcours_apres_declaration_1",
-		second_declaration_path_choice_at:
-			"SUIT: Date_parcours_apres_declaration_2",
-		submitted_at: "SUIT: Date_soumission",
-		joint_evaluation_submitted_at: "SUIT: Date_evaluation_conjointe",
-		cse_opinion_completed_at: "SUIT: Date_avis_CSE",
-		demarche_completed_at: "SUIT: Date_fin_demarche",
 		total_women: "SUIT: Effectif_F_rem_annuelle_globale",
 		total_men: "SUIT: Effectif_H_rem_annuelle_globale",
 		created_at: "SUIT: Date_creation",
 		updated_at: "SUIT: Date_modification",
 		// ── Second declaration ──
-		second_declaration_submitted_at: "SUIT: Seconde_declaration.Statut",
 		second_decl_reference_period_start:
 			"SUIT: Seconde_declaration.Periode_reference_debut",
 		second_decl_reference_period_end:
@@ -161,6 +150,20 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 	},
 	job_category: {
 		name: "SUIT: Indicateurs.G.Nom_categorie",
+	},
+	declaration_status_history: {
+		declaration_id:
+			"Référence vers la déclaration concernée. Append-only — chaque event capture une transition métier (submit / path_choice / *_submit / cse_opinion_submit / cancel / demarche_complete).",
+		event_type:
+			"Type d'event métier. Source de vérité de la trajectoire FSM (la colonne app_declaration.status est une projection dérivée du dernier event).",
+		value:
+			"Charge utile facultative selon le type d'event. Pour path_choice: 'justify' | 'corrective_action' | 'joint_evaluation'.",
+		round:
+			"1 = première déclaration, 2 = seconde déclaration. Renseigné pour path_choice, second_declaration_submit, joint_evaluation_submit.",
+		actor_user_id:
+			"Auteur de l'event. NULL = event système (cron, demarche_complete, etc.).",
+		created_at:
+			"Timestamp d'émission de l'event (rétention permanente, hors purge CNIL applicable à audit.action_log).",
 	},
 	employee_category: {
 		women_count: "SUIT: Indicateurs.G.Effectif_F",

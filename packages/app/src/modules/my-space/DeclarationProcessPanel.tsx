@@ -26,7 +26,7 @@ type Props = {
 	lastActionDate: string | null;
 	variant: PanelVariant;
 	displayContext: DeclarationDisplayContext;
-	secondDeclarationSubmittedAt: Date | null;
+	hasSubmittedSecondDeclaration: boolean;
 	siren: string;
 	ctaHref: string;
 };
@@ -37,7 +37,7 @@ export function DeclarationProcessPanel({
 	lastActionDate,
 	variant,
 	displayContext,
-	secondDeclarationSubmittedAt,
+	hasSubmittedSecondDeclaration,
 	siren,
 	ctaHref,
 }: Props) {
@@ -73,7 +73,7 @@ export function DeclarationProcessPanel({
 						<VerticalStepper
 							campaignDeadlines={campaignDeadlines}
 							displayContext={displayContext}
-							secondDeclarationSubmitted={secondDeclarationSubmittedAt !== null}
+							secondDeclarationSubmitted={hasSubmittedSecondDeclaration}
 							siren={siren}
 							step1={step1}
 							step2={step2}

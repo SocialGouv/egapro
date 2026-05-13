@@ -1,7 +1,7 @@
-import { type Rules, RulesSchema } from "./schema";
+import { type RuleEvent, type Rules, RulesSchema } from "./schema";
 import rawV20271 from "./v2027.1.json";
 
-export type { Rules };
+export type { RuleEvent, Rules };
 
 export type Facts = Record<string, unknown>;
 
@@ -107,30 +107,6 @@ function matchesPayload(
 	return true;
 }
 
-function resolveWriteSource(
-	source: unknown,
-	facts: Facts,
-	computations: Record<string, ComputationNode>,
-	thresholds: Record<string, number>,
-	now: Date,
-): unknown {
-	if (source === "$now") return now;
-	const s = source as Record<string, unknown>;
-	if ("value" in s) return s.value;
-	if ("ref" in s && typeof s.ref === "string") {
-		return getNestedValue(facts, s.ref);
-	}
-	if ("compute" in s && typeof s.compute === "string") {
-		return evaluatePredicate(
-			computations[s.compute],
-			facts,
-			computations,
-			thresholds,
-		);
-	}
-	throw new Error(`Unrecognized write source: ${JSON.stringify(source)}`);
-}
-
 function runSanityChecks(rules: Rules): void {
 	const stateIds = new Set(rules.states.map((s) => s.id));
 	const stageIds = new Set(rules.stages.map((s) => s.id));
@@ -231,8 +207,7 @@ export function applyAction(
 	facts: Facts,
 	action: string,
 	rules: Rules,
-	now: Date = new Date(),
-): { nextState: string; setFlags: Record<string, unknown> } {
+): { nextStatus: string; events: RuleEvent[] } {
 	const currentState = facts.currentState as string | undefined;
 	const computations = (rules.computations ?? {}) as Record<
 		string,
@@ -253,18 +228,7 @@ export function applyAction(
 			continue;
 		}
 
-		const setFlags: Record<string, unknown> = {};
-		for (const write of transition.writes) {
-			setFlags[write.field] = resolveWriteSource(
-				write.source,
-				facts,
-				computations,
-				thresholds,
-				now,
-			);
-		}
-
-		return { nextState: transition.to, setFlags };
+		return { nextStatus: transition.to, events: transition.events };
 	}
 
 	throw new Error(

@@ -237,10 +237,8 @@ export function PanelPlayground() {
 					secondDeclarationPathChoice: null,
 					cseRequired: false,
 				})}
+				hasSubmittedSecondDeclaration={secondDeclarationSubmitted}
 				lastActionDate="12 mars 2026"
-				secondDeclarationSubmittedAt={
-					secondDeclarationSubmitted ? new Date() : null
-				}
 				siren="000000000"
 				variant={variant}
 				year={2027}

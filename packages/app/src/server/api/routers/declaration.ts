@@ -26,6 +26,7 @@ import {
 import { assertNotImpersonating } from "~/server/auth/companyAccess";
 import {
 	companies,
+	declarationStatusHistory,
 	declarations,
 	employeeCategories,
 	gipMdsData,
@@ -40,9 +41,15 @@ import {
 	fetchAllCategories,
 	fetchPreviousYearJobCategories,
 } from "./declarationHelpers";
+import {
+	buildHistoryInserts,
+	computeProjectionUpdates,
+	getCurrentRound,
+	hasLockingEventForRound,
+} from "./statusHistoryHelpers";
 
-const IMMUTABLE_FIELD_ERROR =
-	"Le choix du parcours est définitif et ne peut pas être modifié.";
+const PATH_LOCKED_ERROR =
+	"Le choix du parcours ne peut plus être modifié : une action aval a déjà été enregistrée.";
 
 type DeclarationRow = typeof declarations.$inferSelect;
 type CompanyRow = typeof companies.$inferSelect;
@@ -98,17 +105,6 @@ function buildSubmitFacts(
 		indicatorGCalculated: hasIndicatorGData,
 		gap: hasGap ? 100 : 0,
 		isTriennialYear: isTriennialYear(declaration.year),
-	};
-}
-
-function buildPathChoiceFacts(
-	declaration: DeclarationRow,
-	path: "justify" | "corrective_action" | "joint_evaluation",
-): Record<string, unknown> {
-	return {
-		currentState: declaration.status,
-		cseRequired: declaration.cseRequired,
-		action: { path },
 	};
 }
 
@@ -226,10 +222,31 @@ export const declarationRouter = createTRPCRouter({
 			? null
 			: await fetchPreviousYearJobCategories(ctx.db, siren, year);
 
+		const declarationId = result.declaration.id;
+		let hasSubmittedSecondDeclaration = false;
+		let hasSubmittedCseOpinion = false;
+		if (declarationId !== "") {
+			const eventRows = await ctx.db
+				.select({ eventType: declarationStatusHistory.eventType })
+				.from(declarationStatusHistory)
+				.where(eq(declarationStatusHistory.declarationId, declarationId));
+			if (Array.isArray(eventRows)) {
+				for (const row of eventRows) {
+					if (row.eventType === "second_declaration_submit") {
+						hasSubmittedSecondDeclaration = true;
+					} else if (row.eventType === "cse_opinion_submit") {
+						hasSubmittedCseOpinion = true;
+					}
+				}
+			}
+		}
+
 		return {
 			...result,
 			gipPrefillData,
 			previousYearCategories,
+			hasSubmittedSecondDeclaration,
+			hasSubmittedCseOpinion,
 		};
 	}),
 
@@ -537,7 +554,7 @@ export const declarationRouter = createTRPCRouter({
 			hasIndicatorGData,
 			hasGap,
 		);
-		const { nextState, setFlags } = applyAction(facts, "submit", rules);
+		const { nextStatus, events } = applyAction(facts, "submit", rules);
 
 		const percentages = computeIndicatorPercentages(declaration);
 		const percentagesForDb = Object.fromEntries(
@@ -547,20 +564,27 @@ export const declarationRouter = createTRPCRouter({
 			]),
 		);
 
-		const submittedAt =
-			declaration.submittedAt ?? (setFlags.submittedAt as Date);
+		const projection = computeProjectionUpdates(events, nextStatus);
+		const historyInserts = buildHistoryInserts(
+			declaration.id,
+			events,
+			ctx.session.user.id,
+		);
 
-		await ctx.db
-			.update(declarations)
-			.set({
-				status: nextState as DeclarationRow["status"],
-				currentStep: 6,
-				updatedAt: new Date(),
-				...setFlags,
-				submittedAt,
-				...percentagesForDb,
-			})
-			.where(activeDeclarationFilter(siren, year));
+		await ctx.db.transaction(async (tx) => {
+			if (declaration.status === "draft" && historyInserts.length > 0) {
+				await tx.insert(declarationStatusHistory).values(historyInserts);
+			}
+			await tx
+				.update(declarations)
+				.set({
+					...projection,
+					currentStep: 6,
+					updatedAt: new Date(),
+					...percentagesForDb,
+				})
+				.where(activeDeclarationFilter(siren, year));
+		});
 
 		const email = ctx.session.user.email;
 		if (email) {
@@ -592,10 +616,10 @@ export const declarationRouter = createTRPCRouter({
 
 			if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
 
-			if (
-				declaration.status === "awaiting_revision_choice" &&
-				input.path === "corrective_action"
-			) {
+			const round = await getCurrentRound(ctx.db, declaration.id);
+			const isRound2 = round === 2;
+
+			if (isRound2 && input.path === "corrective_action") {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
 					message:
@@ -603,40 +627,54 @@ export const declarationRouter = createTRPCRouter({
 				});
 			}
 
-			const isInitialChoice =
-				declaration.status === "awaiting_compliance_path_choice";
-			if (isInitialChoice && declaration.firstDeclarationPathChoice !== null) {
+			const locked = await hasLockingEventForRound(
+				ctx.db,
+				declaration.id,
+				round,
+			);
+			if (locked) {
 				throw new TRPCError({
 					code: "CONFLICT",
-					message: IMMUTABLE_FIELD_ERROR,
-				});
-			}
-			if (
-				!isInitialChoice &&
-				declaration.secondDeclarationPathChoice !== null
-			) {
-				throw new TRPCError({
-					code: "CONFLICT",
-					message: IMMUTABLE_FIELD_ERROR,
+					message: PATH_LOCKED_ERROR,
 				});
 			}
 
+			let fsmCurrentState = declaration.status;
+			if (isRound2 && fsmCurrentState !== "awaiting_revision_choice") {
+				fsmCurrentState = "awaiting_revision_choice";
+			} else if (
+				!isRound2 &&
+				fsmCurrentState !== "awaiting_compliance_path_choice"
+			) {
+				fsmCurrentState = "awaiting_compliance_path_choice";
+			}
+
 			const rules = loadRules(declaration.rulesVersion);
-			const facts = buildPathChoiceFacts(declaration, input.path);
-			const { nextState, setFlags } = applyAction(
+			const facts = {
+				currentState: fsmCurrentState,
+				cseRequired: declaration.cseRequired,
+				action: { path: input.path },
+			};
+			const { nextStatus, events } = applyAction(
 				facts,
 				"choose_compliance_path",
 				rules,
 			);
 
-			await ctx.db
-				.update(declarations)
-				.set({
-					status: nextState as DeclarationRow["status"],
-					updatedAt: new Date(),
-					...setFlags,
-				})
-				.where(activeDeclarationFilter(siren, year));
+			const projection = computeProjectionUpdates(events, nextStatus);
+			const historyInserts = buildHistoryInserts(
+				declaration.id,
+				events,
+				ctx.session.user.id,
+			);
+
+			await ctx.db.transaction(async (tx) => {
+				await tx.insert(declarationStatusHistory).values(historyInserts);
+				await tx
+					.update(declarations)
+					.set({ ...projection, updatedAt: new Date() })
+					.where(activeDeclarationFilter(siren, year));
+			});
 
 			return { success: true };
 		}),
@@ -662,21 +700,30 @@ export const declarationRouter = createTRPCRouter({
 
 		const rules = loadRules(declaration.rulesVersion);
 		const facts = buildSecondDeclarationFacts(declaration, stillHasGap);
-		const { nextState, setFlags } = applyAction(
+		const { nextStatus, events } = applyAction(
 			facts,
 			"submit_second_declaration",
 			rules,
 		);
 
-		await ctx.db
-			.update(declarations)
-			.set({
-				status: nextState as DeclarationRow["status"],
-				secondDeclarationStep: 3,
-				updatedAt: new Date(),
-				...setFlags,
-			})
-			.where(activeDeclarationFilter(siren, year));
+		const projection = computeProjectionUpdates(events, nextStatus);
+		const historyInserts = buildHistoryInserts(
+			declaration.id,
+			events,
+			ctx.session.user.id,
+		);
+
+		await ctx.db.transaction(async (tx) => {
+			await tx.insert(declarationStatusHistory).values(historyInserts);
+			await tx
+				.update(declarations)
+				.set({
+					...projection,
+					secondDeclarationStep: 3,
+					updatedAt: new Date(),
+				})
+				.where(activeDeclarationFilter(siren, year));
+		});
 
 		const email = ctx.session.user.email;
 		if (email) {
@@ -710,20 +757,26 @@ export const declarationRouter = createTRPCRouter({
 
 			const rules = loadRules(declaration.rulesVersion);
 			const facts = buildJointEvaluationFacts(declaration);
-			const { nextState, setFlags } = applyAction(
+			const { nextStatus, events } = applyAction(
 				facts,
 				"submit_joint_evaluation",
 				rules,
 			);
 
-			await ctx.db
-				.update(declarations)
-				.set({
-					status: nextState as DeclarationRow["status"],
-					updatedAt: new Date(),
-					...setFlags,
-				})
-				.where(activeDeclarationFilter(siren, year));
+			const projection = computeProjectionUpdates(events, nextStatus);
+			const historyInserts = buildHistoryInserts(
+				declaration.id,
+				events,
+				ctx.session.user.id,
+			);
+
+			await ctx.db.transaction(async (tx) => {
+				await tx.insert(declarationStatusHistory).values(historyInserts);
+				await tx
+					.update(declarations)
+					.set({ ...projection, updatedAt: new Date() })
+					.where(activeDeclarationFilter(siren, year));
+			});
 
 			return { success: true };
 		}),

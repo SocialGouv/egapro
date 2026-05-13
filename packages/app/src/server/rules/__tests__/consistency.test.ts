@@ -75,17 +75,22 @@ describe("v2027.1.json — structural consistency", () => {
 		}
 	});
 
-	it("every compute ref inside write sources is a known computation key", () => {
+	it("every event type emitted by a transition is one of the allowed types", () => {
+		const allowedTypes = new Set([
+			"submit",
+			"path_choice",
+			"second_declaration_submit",
+			"joint_evaluation_submit",
+			"cse_opinion_submit",
+			"cancel",
+			"demarche_complete",
+		]);
 		for (const t of rules.transitions) {
-			for (const write of t.writes) {
-				if (typeof write.source !== "object" || write.source === null) continue;
-				const source = write.source as Record<string, unknown>;
-				if ("compute" in source && typeof source.compute === "string") {
-					expect(
-						computationKeys.has(source.compute),
-						`transition "${t.id}" write field "${write.field}" references unknown computation "${source.compute}"`,
-					).toBe(true);
-				}
+			for (const event of t.events) {
+				expect(
+					allowedTypes.has(event.type),
+					`transition "${t.id}" emits unknown event type "${event.type}"`,
+				).toBe(true);
 			}
 		}
 	});

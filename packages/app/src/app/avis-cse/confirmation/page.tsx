@@ -1,9 +1,6 @@
 import { redirect } from "next/navigation";
 import { ConfirmationPage } from "~/modules/cseOpinion";
-import {
-	hasSubmittedSecondDeclaration,
-	isDeclarationSubmitted,
-} from "~/modules/cseOpinion/confirmationHelpers";
+import { isDeclarationSubmitted } from "~/modules/cseOpinion/confirmationHelpers";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -22,9 +19,7 @@ export default async function CseOpinionConfirmationPage() {
 			dataYear={declarationData.declaration.year - 1}
 			declarationYear={declarationData.declaration.year}
 			email={session?.user?.email ?? undefined}
-			hasSecondDeclaration={hasSubmittedSecondDeclaration(
-				declarationData.declaration.secondDeclarationSubmittedAt,
-			)}
+			hasSecondDeclaration={declarationData.hasSubmittedSecondDeclaration}
 		/>
 	);
 }

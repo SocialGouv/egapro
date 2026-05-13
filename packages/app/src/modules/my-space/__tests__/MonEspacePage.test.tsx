@@ -71,9 +71,9 @@ vi.mock("~/trpc/server", () => ({
 						updatedAt: null,
 						firstDeclarationPathChoice: null,
 						secondDeclarationPathChoice: null,
-						secondDeclarationSubmittedAt: null,
-						demarcheCompletedAt: null,
-						cseOpinionCompletedAt: null,
+						hasSubmittedSecondDeclaration: false,
+
+						hasSubmittedCseOpinion: false,
 						cseRequired: false,
 						hasJointEvaluationFile: false,
 						hasPrefillData: false,

@@ -6,9 +6,8 @@ const SIREN = "532847196";
 const EMPTY_DECLARATION = {
 	firstDeclarationPathChoice: null,
 	secondDeclarationPathChoice: null,
-	secondDeclarationSubmittedAt: null,
-	demarcheCompletedAt: null,
-	cseOpinionCompletedAt: null,
+	hasSubmittedSecondDeclaration: false,
+	hasSubmittedCseOpinion: false,
 	cseRequired: false,
 	hasJointEvaluationFile: false,
 	hasPrefillData: false,
