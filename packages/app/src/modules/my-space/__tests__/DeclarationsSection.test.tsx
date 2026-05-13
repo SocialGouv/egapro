@@ -46,6 +46,7 @@ const declarations: DeclarationItem[] = [
 		currentStep: 6,
 		updatedAt: new Date("2025-03-15"),
 		...NO_COMPLIANCE,
+		fsmStatus: "demarche_completed",
 	},
 ];
 
@@ -92,11 +93,15 @@ describe("DeclarationsSection", () => {
 		).toHaveLength(2);
 	});
 
-	it("renders declaration rows with year, status badge, and step label", () => {
+	it("renders declaration rows with year, status badge, and process step label", () => {
 		renderSection();
 		expect(screen.getAllByText(String(currentYear))).toHaveLength(2);
 		expect(screen.getByText(String(currentYear - 1))).toBeInTheDocument();
-		expect(screen.getByText("Complétée")).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Finalisation - Démarche des indicateurs de rémunération",
+			),
+		).toBeInTheDocument();
 		expect(screen.getAllByText("À compléter")).toHaveLength(2);
 		expect(screen.getByText("Effectué")).toBeInTheDocument();
 	});

@@ -8,7 +8,7 @@ import { getCurrentYear } from "~/modules/domain";
 import { Pagination } from "~/modules/shared/Pagination";
 
 import { DeclarationLink } from "./DeclarationLink";
-import { getDeclarationStepLabel } from "./DeclarationStepLabel";
+import { getDeclarationProcessStepLabel } from "./DeclarationStepLabel";
 import styles from "./DeclarationsSection.module.scss";
 import {
 	DocumentsPanel,
@@ -218,7 +218,7 @@ function DeclarationsTable({
 											</td>
 											<td>{declaration.year}</td>
 											<td>
-												{getDeclarationStepLabel(declaration.currentStep)}
+												{getDeclarationProcessStepLabel(declaration.fsmStatus)}
 											</td>
 											<td>{getDeadline(declaration)}</td>
 											<td>
