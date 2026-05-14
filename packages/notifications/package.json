@@ -4,10 +4,23 @@
 	"private": true,
 	"type": "module",
 	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"exports": {
-		"./publisher": "./src/publisher.ts",
-		"./queue": "./src/queue.ts",
-		"./mails": "./src/mails/index.ts"
+		"./publisher": {
+			"types": "./dist/publisher.d.ts",
+			"import": "./dist/publisher.js",
+			"default": "./dist/publisher.js"
+		},
+		"./queue": {
+			"types": "./dist/queue.d.ts",
+			"import": "./dist/queue.js",
+			"default": "./dist/queue.js"
+		},
+		"./mails": {
+			"types": "./dist/mails/index.d.ts",
+			"import": "./dist/mails/index.js",
+			"default": "./dist/mails/index.js"
+		}
 	},
 	"scripts": {
 		"build": "tsc",

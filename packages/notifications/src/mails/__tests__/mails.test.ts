@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { escapeHtml, formatSiren, getPublicUrl } from "../helpers.js";
 import {
 	buildMail,
 	isNotificationType,
@@ -8,10 +9,12 @@ import {
 	type NotificationPayloadMap,
 	type NotificationType,
 } from "../index.js";
-import { escapeHtml, formatSiren, getPublicUrl } from "../helpers.js";
 import { ctaButton, infoList, paragraph, wrapEmail } from "../view/shell.js";
 
-const SAMPLE_PAYLOADS: NotificationPayloadMap = {
+const SAMPLE: NotificationPayloadMap = {
+	declaration_confirmation: { siren: "552100554", year: 2025 },
+	second_declaration_confirmation: { siren: "552100554", year: 2025 },
+	cse_opinion_receipt: { siren: "552100554", year: 2025 },
 	joint_evaluation_submitted: { siren: "552100554", year: 2025 },
 };
 
@@ -25,7 +28,7 @@ describe("mail registry", () => {
 	it.each(NOTIFICATION_TYPES)("renders a valid mail for %s", (type) => {
 		const result = buildMail(
 			type,
-			SAMPLE_PAYLOADS[type] as NotificationPayloadMap[typeof type],
+			SAMPLE[type] as NotificationPayloadMap[typeof type],
 		);
 		expect(result.subject).toBeTypeOf("string");
 		expect(result.subject.length).toBeGreaterThan(0);
@@ -123,6 +126,35 @@ describe("helpers", () => {
 });
 
 describe("per-type rendering details", () => {
+	it("declaration_confirmation references the year and SIREN", () => {
+		const tpl = buildMail("declaration_confirmation", {
+			siren: "552100554",
+			year: 2025,
+		});
+		expect(tpl.subject).toContain("2025");
+		expect(tpl.subject.toLowerCase()).toContain("déclaration");
+		expect(tpl.html).toContain("552 100 554");
+		expect(tpl.html).toContain("récapitulatif");
+	});
+
+	it("second_declaration_confirmation mentions 'seconde'", () => {
+		const tpl = buildMail("second_declaration_confirmation", {
+			siren: "552100554",
+			year: 2025,
+		});
+		expect(tpl.subject.toLowerCase()).toContain("seconde");
+		expect(tpl.html).toContain("552 100 554");
+	});
+
+	it("cse_opinion_receipt mentions the CSE", () => {
+		const tpl = buildMail("cse_opinion_receipt", {
+			siren: "552100554",
+			year: 2025,
+		});
+		expect(tpl.subject).toContain("CSE");
+		expect(tpl.html).toContain("552 100 554");
+	});
+
 	it("joint_evaluation_submitted confirms the upload", () => {
 		const tpl = buildMail("joint_evaluation_submitted", {
 			siren: "552100554",

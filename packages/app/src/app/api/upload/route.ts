@@ -235,48 +235,51 @@ export async function POST(request: Request): Promise<Response> {
 			userAgent: requestContext.userAgent,
 			durationMs: Date.now() - startedAt,
 		});
-		if (flowType === "cse_opinion" && userEmail) {
+		if (userEmail) {
 			void (async () => {
-				const { sendReceipt } = await import("~/modules/mail/server");
-				await sendReceipt({
-					kind: "cseOpinion",
-					to: userEmail,
-					siren,
-					year,
-					userId,
-					isResend: false,
-				});
-			})();
-		}
-		if (flowType === "joint_evaluation" && userEmail) {
-			void (async () => {
-				const { enqueueNotification } = await import("notifications/publisher");
-				const enqueueResult = await enqueueNotification({
-					type: "joint_evaluation_submitted",
-					recipientEmail: userEmail,
-					recipientUserId: userId,
-					siren,
-					payload: { siren, year },
-				});
-				void logAction({
-					action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
-					status: enqueueResult.status === "enqueued" ? "success" : "failure",
-					userId,
-					userEmail,
-					siren,
-					...(enqueueResult.status === "enqueued"
-						? {
-								resourceType: "notification",
-								resourceId: enqueueResult.id,
-							}
-						: {
-								errorMessage:
-									enqueueResult.status === "error"
-										? enqueueResult.error
-										: "queue_unavailable",
-							}),
-					metadata: { type: "joint_evaluation_submitted" },
-				});
+				if (flowType === "cse_opinion") {
+					const { enqueueReceipt } = await import("~/modules/mail/server");
+					await enqueueReceipt({
+						kind: "cseOpinion",
+						to: userEmail,
+						siren,
+						year,
+						userId,
+						isResend: false,
+					});
+					return;
+				}
+				if (flowType === "joint_evaluation") {
+					const { enqueueNotification } = await import(
+						"notifications/publisher"
+					);
+					const enqueueResult = await enqueueNotification({
+						type: "joint_evaluation_submitted",
+						recipientEmail: userEmail,
+						recipientUserId: userId,
+						siren,
+						payload: { siren, year },
+					});
+					void logAction({
+						action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
+						status: enqueueResult.status === "enqueued" ? "success" : "failure",
+						userId,
+						userEmail,
+						siren,
+						...(enqueueResult.status === "enqueued"
+							? {
+									resourceType: "notification",
+									resourceId: enqueueResult.id,
+								}
+							: {
+									errorMessage:
+										enqueueResult.status === "error"
+											? enqueueResult.error
+											: "queue_unavailable",
+								}),
+						metadata: { type: "joint_evaluation_submitted" },
+					});
+				}
 			})();
 		}
 		return Response.json({

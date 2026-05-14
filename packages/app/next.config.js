@@ -13,18 +13,17 @@ const config = {
 	output: "standalone",
 	cacheHandler: fileURLToPath(new URL("./cache-handler.cjs", import.meta.url)),
 	cacheMaxMemorySize: 0,
-	// Transpile the workspace `notifications` package: its `./queue` and `./mails`
-	// subpath exports point at .ts sources so the app has a single source of truth
-	// for notification types and the email registry.
-	transpilePackages: ["notifications"],
 	outputFileTracingIncludes: {
 		"/api/gip-mds/mock": ["./data/mock-gip-mds.csv"],
 	},
-	// `redis` is only required from ./cache-handler.cjs (a standalone CJS handler
-	// loaded by Next.js outside the webpack graph). Marking it external keeps the
-	// dev server from warning on dynamic require, and ensures it's never pulled
-	// into a server bundle if any server component inadvertently references it.
-	serverExternalPackages: ["@react-pdf/renderer", "redis"],
+	// `notifications` ships pre-compiled JS in dist/ — keep it external so Next
+	// never tries to bundle its `pg-boss` / `nodemailer` deps into the app
+	// server bundle. The dist tree is produced by `pnpm --filter notifications
+	// build` (wired as `predev` and `prebuild` on the app, and run explicitly
+	// in the Dockerfile before the Next.js build).
+	// `redis` is only required from ./cache-handler.cjs (a standalone CJS
+	// handler loaded by Next.js outside the webpack graph).
+	serverExternalPackages: ["notifications", "@react-pdf/renderer", "redis"],
 	sassOptions: {
 		additionalData: `
 			@import "@gouvfr/dsfr/src/dsfr/core/style/selector/setting/breakpoint";

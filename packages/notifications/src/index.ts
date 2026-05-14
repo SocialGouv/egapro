@@ -142,8 +142,14 @@ export function makeJobHandler(
 			return;
 		}
 
-		const { type, payload, recipientEmail, recipientUserId, siren } =
-			result.data;
+		const {
+			type,
+			payload,
+			recipientEmail,
+			recipientUserId,
+			siren,
+			attachments,
+		} = result.data;
 
 		try {
 			const { subject, html } = buildMail(type, payload);
@@ -153,12 +159,18 @@ export function makeJobHandler(
 					`[notifications] MAIL_ENABLED=false — would send ${type} to ${recipientEmail}`,
 				);
 			} else {
+				const decodedAttachments = attachments?.map((att) => ({
+					filename: att.filename,
+					content: Buffer.from(att.contentBase64, "base64"),
+					contentType: att.contentType,
+				}));
 				const info = await transporter.sendMail({
 					from: mailFrom,
 					to: recipientEmail,
 					subject,
 					text: htmlToText(html, { wordwrap: 80 }),
 					html,
+					...(decodedAttachments ? { attachments: decodedAttachments } : {}),
 				});
 				messageId = info.messageId ?? null;
 			}

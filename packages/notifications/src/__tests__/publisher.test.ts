@@ -121,4 +121,53 @@ describe("enqueueNotification — graceful degradation", () => {
 		expect(callArgs.startAfter).toBeGreaterThanOrEqual(55);
 		expect(callArgs.startAfter).toBeLessThanOrEqual(60);
 	});
+
+	it("serialises attachments to base64 in the job payload", async () => {
+		process.env.NOTIFICATIONS_DATABASE_URL =
+			"postgres://user:pwd@localhost:5432/db";
+		mockStart.mockResolvedValue(undefined);
+		mockCreateQueue.mockResolvedValue(undefined);
+		mockSend.mockResolvedValue("job-1");
+
+		await enqueueNotification({
+			...BASE_INPUT,
+			attachments: [
+				{
+					filename: "receipt.pdf",
+					content: Buffer.from("Hello PDF"),
+					contentType: "application/pdf",
+				},
+			],
+		});
+
+		const jobData = mockSend.mock.calls[0]?.[1] as {
+			attachments?: Array<{
+				filename: string;
+				contentBase64: string;
+				contentType: string;
+			}>;
+		};
+		expect(jobData.attachments).toHaveLength(1);
+		expect(jobData.attachments?.[0]?.filename).toBe("receipt.pdf");
+		expect(
+			Buffer.from(
+				jobData.attachments?.[0]?.contentBase64 ?? "",
+				"base64",
+			).toString(),
+		).toBe("Hello PDF");
+		expect(jobData.attachments?.[0]?.contentType).toBe("application/pdf");
+	});
+
+	it("omits attachments key when none provided", async () => {
+		process.env.NOTIFICATIONS_DATABASE_URL =
+			"postgres://user:pwd@localhost:5432/db";
+		mockStart.mockResolvedValue(undefined);
+		mockCreateQueue.mockResolvedValue(undefined);
+		mockSend.mockResolvedValue("job-1");
+
+		await enqueueNotification(BASE_INPUT);
+
+		const jobData = mockSend.mock.calls[0]?.[1] as Record<string, unknown>;
+		expect(Object.hasOwn(jobData, "attachments")).toBe(false);
+	});
 });

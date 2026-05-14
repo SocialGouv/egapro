@@ -1,6 +1,6 @@
-import { formatSiren, getPublicUrl } from "../helpers.js";
-import type { MailBuilder } from "../types.js";
-import { ctaButton, infoList, paragraph, wrapEmail } from "../view/shell.js";
+import { formatSiren, getPublicUrl } from "./helpers.js";
+import type { MailBuilder } from "./types.js";
+import { ctaButton, infoList, paragraph, wrapEmail } from "./view/shell.js";
 
 export const buildJointEvaluationSubmittedMail: MailBuilder<
 	"joint_evaluation_submitted"

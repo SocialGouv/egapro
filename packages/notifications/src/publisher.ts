@@ -5,7 +5,13 @@ import type {
 	NotificationPayloadMap,
 	NotificationType,
 } from "./mails/types.js";
-import { QUEUE_NAME } from "./queue.js";
+import { QUEUE_NAME, type SerializedAttachment } from "./queue.js";
+
+export type PublisherAttachment = {
+	filename: string;
+	content: Buffer | Uint8Array;
+	contentType: string;
+};
 
 export type EnqueueInput<T extends NotificationType = NotificationType> = {
 	type: T;
@@ -14,6 +20,7 @@ export type EnqueueInput<T extends NotificationType = NotificationType> = {
 	siren?: string | null;
 	payload: NotificationPayloadMap[T];
 	scheduledFor?: Date;
+	attachments?: PublisherAttachment[];
 };
 
 export type PublishResult =
@@ -104,12 +111,22 @@ export async function enqueueNotification<T extends NotificationType>(
 	const boss = await getPublisher();
 	if (!boss) return { status: "queue_unavailable" };
 
+	const attachments: SerializedAttachment[] | undefined = input.attachments
+		?.length
+		? input.attachments.map((att) => ({
+				filename: att.filename,
+				contentBase64: Buffer.from(att.content).toString("base64"),
+				contentType: att.contentType,
+			}))
+		: undefined;
+
 	const jobData = {
 		type: input.type,
 		payload: input.payload,
 		recipientEmail: input.recipientEmail,
 		recipientUserId: input.recipientUserId,
 		siren: input.siren ?? null,
+		...(attachments ? { attachments } : {}),
 	};
 	const startAfterSeconds = input.scheduledFor
 		? Math.max(

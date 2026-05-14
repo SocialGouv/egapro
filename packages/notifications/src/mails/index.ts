@@ -1,4 +1,7 @@
-import { buildJointEvaluationSubmittedMail } from "./templates/jointEvaluationSubmitted.js";
+import { buildCseOpinionReceiptMail } from "./cseOpinionReceipt.js";
+import { buildDeclarationConfirmationMail } from "./declarationConfirmation.js";
+import { buildJointEvaluationSubmittedMail } from "./jointEvaluationSubmitted.js";
+import { buildSecondDeclarationConfirmationMail } from "./secondDeclarationConfirmation.js";
 import {
 	type MailBuilderRegistry,
 	NOTIFICATION_TYPES,
@@ -8,6 +11,9 @@ import {
 } from "./types.js";
 
 export const MAIL_BUILDERS: MailBuilderRegistry = {
+	declaration_confirmation: buildDeclarationConfirmationMail,
+	second_declaration_confirmation: buildSecondDeclarationConfirmationMail,
+	cse_opinion_receipt: buildCseOpinionReceiptMail,
 	joint_evaluation_submitted: buildJointEvaluationSubmittedMail,
 };
 

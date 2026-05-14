@@ -46,6 +46,12 @@ ENV NEXT_PUBLIC_MATOMO_URL=$NEXT_PUBLIC_MATOMO_URL
 ARG NEXT_PUBLIC_MATOMO_SITE_ID
 ENV NEXT_PUBLIC_MATOMO_SITE_ID=$NEXT_PUBLIC_MATOMO_SITE_ID
 
+# Compile the notifications worker / publisher TypeScript sources to dist/
+# BEFORE the Next.js build. The app's runtime dynamic import
+# `await import("notifications/publisher")` resolves to ./dist/publisher.js
+# via package.json exports, so the dist must exist when Next.js starts.
+RUN pnpm --filter notifications build
+
 # Build with Next.js cache persisted across builds
 # Sentry auth token and release are mounted as BuildKit secrets to avoid leaking in image layers
 # and to preserve build cache (ARG would invalidate cache on every new release)
@@ -55,10 +61,6 @@ RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null) \
     NEXT_PUBLIC_SENTRY_RELEASE=$(cat /run/secrets/sentry_release 2>/dev/null | tr '/' '-') \
     pnpm --filter app build
-
-# Compile the notifications worker TypeScript sources to dist/. Runs after the
-# Next.js build so any TS error fails the whole image.
-RUN pnpm --filter notifications build
 
 
 # Runner stage: minimal Node runtime, no pnpm/corepack

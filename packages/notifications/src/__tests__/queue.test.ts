@@ -54,4 +54,59 @@ describe("validateJobData", () => {
 		if (!result.ok)
 			expect(result.reason).toContain("payload is missing required fields");
 	});
+
+	it("accepts a well-formed attachments array", () => {
+		const result = validateJobData({
+			...VALID,
+			attachments: [
+				{
+					filename: "receipt.pdf",
+					contentBase64: "JVBERi0xLjQK",
+					contentType: "application/pdf",
+				},
+			],
+		});
+		expect(result.ok).toBe(true);
+	});
+
+	it("rejects attachments that is not an array", () => {
+		const result = validateJobData({ ...VALID, attachments: "nope" });
+		expect(result.ok).toBe(false);
+		if (!result.ok)
+			expect(result.reason).toContain("attachments must be an array");
+	});
+
+	it("rejects an attachment missing filename", () => {
+		const result = validateJobData({
+			...VALID,
+			attachments: [
+				{ filename: "", contentBase64: "AA", contentType: "application/pdf" },
+			],
+		});
+		expect(result.ok).toBe(false);
+	});
+
+	it("rejects an attachment missing contentBase64", () => {
+		const result = validateJobData({
+			...VALID,
+			attachments: [
+				{
+					filename: "a.pdf",
+					contentBase64: "",
+					contentType: "application/pdf",
+				},
+			],
+		});
+		expect(result.ok).toBe(false);
+	});
+
+	it("rejects an attachment missing contentType", () => {
+		const result = validateJobData({
+			...VALID,
+			attachments: [
+				{ filename: "a.pdf", contentBase64: "AA", contentType: "" },
+			],
+		});
+		expect(result.ok).toBe(false);
+	});
 });

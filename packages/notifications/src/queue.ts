@@ -8,12 +8,19 @@ export type { NotificationPayloadMap, NotificationType };
 
 export const QUEUE_NAME = "email-notification";
 
+export type SerializedAttachment = {
+	filename: string;
+	contentBase64: string;
+	contentType: string;
+};
+
 export type EmailJobData = {
 	type: NotificationType;
 	payload: NotificationPayloadMap[NotificationType];
 	recipientEmail: string;
 	recipientUserId: string | null;
 	siren: string | null;
+	attachments?: SerializedAttachment[];
 };
 
 export type JobValidationFailure = { ok: false; reason: string };
@@ -26,6 +33,19 @@ function isCompanyScopedPayload(value: unknown): boolean {
 	if (typeof value !== "object" || value === null) return false;
 	const v = value as Record<string, unknown>;
 	return typeof v.siren === "string" && typeof v.year === "number";
+}
+
+function isSerializedAttachment(value: unknown): value is SerializedAttachment {
+	if (typeof value !== "object" || value === null) return false;
+	const v = value as Record<string, unknown>;
+	return (
+		typeof v.filename === "string" &&
+		v.filename.length > 0 &&
+		typeof v.contentBase64 === "string" &&
+		v.contentBase64.length > 0 &&
+		typeof v.contentType === "string" &&
+		v.contentType.length > 0
+	);
 }
 
 export function validateJobData(raw: unknown): JobValidationResult {
@@ -54,6 +74,20 @@ export function validateJobData(raw: unknown): JobValidationResult {
 	}
 	if (!isCompanyScopedPayload(d.payload)) {
 		return { ok: false, reason: "payload is missing required fields" };
+	}
+	if (d.attachments !== undefined) {
+		if (!Array.isArray(d.attachments)) {
+			return { ok: false, reason: "attachments must be an array" };
+		}
+		for (const att of d.attachments) {
+			if (!isSerializedAttachment(att)) {
+				return {
+					ok: false,
+					reason:
+						"each attachment must have filename, contentBase64, contentType",
+				};
+			}
+		}
 	}
 	return { ok: true, data: d as unknown as EmailJobData };
 }
