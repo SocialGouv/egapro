@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useRef } from "react";
 import { Controller } from "react-hook-form";
 
 import { useReadOnlyGuard } from "~/modules/auth";
@@ -69,36 +70,55 @@ export function Step1Opinions({
 		},
 	});
 
+	const NEXT_URL = "/avis-cse/etape/2";
+	const navTargetRef = useRef<"next" | "back">("next");
+
 	const mutation = api.cseOpinion.saveOpinions.useMutation({
-		onSuccess: () => router.push("/avis-cse/etape/2"),
+		onSuccess: () => {
+			if (navTargetRef.current === "back") {
+				router.back();
+			} else {
+				router.push(NEXT_URL);
+			}
+		},
 	});
 
-	const onSubmit = form.handleSubmit((data) => {
-		// Additional validation for conditional gap fields
-		const firstGapIncomplete =
-			data.firstDeclaration.gapConsulted === true &&
-			(!data.firstDeclaration.gapOpinion || !data.firstDeclaration.gapDate);
-		const secondGapIncomplete =
-			hasSecondDeclaration &&
-			data.secondDeclaration?.gapConsulted === true &&
-			(!data.secondDeclaration?.gapOpinion || !data.secondDeclaration?.gapDate);
+	function triggerSave(direction: "next" | "back") {
+		form.handleSubmit((data) => {
+			const firstGapIncomplete =
+				data.firstDeclaration.gapConsulted === true &&
+				(!data.firstDeclaration.gapOpinion || !data.firstDeclaration.gapDate);
+			const secondGapIncomplete =
+				hasSecondDeclaration &&
+				data.secondDeclaration?.gapConsulted === true &&
+				(!data.secondDeclaration?.gapOpinion ||
+					!data.secondDeclaration?.gapDate);
 
-		if (firstGapIncomplete) {
-			form.setError("firstDeclaration.gapOpinion", {
-				message: "Veuillez remplir tous les champs de consultation.",
-			});
-			return;
-		}
+			if (firstGapIncomplete) {
+				form.setError("firstDeclaration.gapOpinion", {
+					message: "Veuillez remplir tous les champs de consultation.",
+				});
+				return;
+			}
+			if (secondGapIncomplete) {
+				form.setError("secondDeclaration.gapOpinion", {
+					message: "Veuillez remplir tous les champs de consultation.",
+				});
+				return;
+			}
+			navTargetRef.current = direction;
+			mutation.mutate(data);
+		})();
+	}
 
-		if (secondGapIncomplete) {
-			form.setError("secondDeclaration.gapOpinion", {
-				message: "Veuillez remplir tous les champs de consultation.",
-			});
-			return;
-		}
+	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		triggerSave("next");
+	};
 
-		mutation.mutate(data);
-	});
+	function onPrevious() {
+		triggerSave("back");
+	}
 
 	// Watch fields for controlled sub-components
 	const firstDeclOpinion = form.watch("firstDeclaration.accuracyOpinion");
@@ -242,10 +262,13 @@ export function Step1Opinions({
 			<div className={`fr-mt-4w ${formStyles.actions}`}>
 				<button
 					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
-					onClick={() => router.back()}
+					disabled={mutation.isPending}
+					onClick={onPrevious}
 					type="button"
 				>
-					Précédent
+					{mutation.isPending && navTargetRef.current === "back"
+						? "Enregistrement…"
+						: "Précédent"}
 				</button>
 				<span>
 					<button
@@ -254,7 +277,9 @@ export function Step1Opinions({
 						disabled={mutation.isPending || readOnlyGuard.isReadOnly}
 						type="submit"
 					>
-						{mutation.isPending ? "Enregistrement…" : "Suivant"}
+						{mutation.isPending && navTargetRef.current === "next"
+							? "Enregistrement…"
+							: "Suivant"}
 					</button>
 					{readOnlyGuard.tooltip}
 				</span>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Controller } from "react-hook-form";
 import { useIsImpersonating } from "~/modules/auth";
 import { saveCompliancePathSchema } from "~/modules/declaration-remuneration/schemas";
@@ -77,10 +77,16 @@ export function CompliancePathChoice({
 	const hasInitialData = !!initialPath;
 	const saved = !hasDraft && hasInitialData;
 
+	const PREV_URL = "/declaration-remuneration/etape/6";
+	const navTargetRef = useRef<string | null>(null);
+
 	const mutation = api.declaration.saveCompliancePath.useMutation({
 		onSuccess: (_, { path }) => {
 			clearDraft();
-			if (path === "corrective_action") {
+			if (navTargetRef.current === PREV_URL) {
+				navTargetRef.current = null;
+				router.push(PREV_URL);
+			} else if (path === "corrective_action") {
 				router.push("/declaration-remuneration/parcours-conformite/etape/1");
 			} else if (path === "joint_evaluation") {
 				router.push(
@@ -94,8 +100,18 @@ export function CompliancePathChoice({
 
 	const onSubmit = form.handleSubmit((data) => {
 		if (!data.path) return;
+		navTargetRef.current = null;
 		mutation.mutate({ path: data.path });
 	});
+
+	function onPrevious() {
+		if (selectedPath) {
+			navTargetRef.current = PREV_URL;
+			mutation.mutate({ path: selectedPath });
+		} else {
+			router.push(PREV_URL);
+		}
+	}
 
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
@@ -193,13 +209,17 @@ export function CompliancePathChoice({
 			/>
 
 			<FormActions
-				isSubmitting={mutation.isPending}
+				isPreviousPending={
+					mutation.isPending && navTargetRef.current === PREV_URL
+				}
+				isSubmitting={mutation.isPending && navTargetRef.current !== PREV_URL}
 				mimoquageNextHref={
 					initialPath ? getCompliancePathHref(initialPath) : undefined
 				}
 				nextDisabled={!selectedPath}
 				nextLabel="Suivant"
-				previousHref="/declaration-remuneration/etape/6"
+				onPrevious={onPrevious}
+				previousHref={PREV_URL}
 			/>
 		</form>
 	);

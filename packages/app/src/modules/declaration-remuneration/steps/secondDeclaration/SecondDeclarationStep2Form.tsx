@@ -4,7 +4,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
-import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
+import type {
+	EmployeeCategoryRow,
+	EmployeeCategorySubmitData,
+} from "~/modules/declaration-remuneration/types";
 import { api } from "~/trpc/react";
 import { CategoryForm } from "../step5/CategoryForm";
 import { BASE_PATH } from "./constants";
@@ -77,12 +80,34 @@ export function SecondDeclarationStep2Form({
 		setField({ startDate, endDate });
 	}, [startDate, endDate, setField]);
 
+	const NEXT_URL = `${BASE_PATH}/etape/3`;
+	const PREV_URL = `${BASE_PATH}/etape/1`;
+	const navTargetRef = useRef(NEXT_URL);
+
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
 		onSuccess: () => {
 			clearDraft();
-			router.push(`${BASE_PATH}/etape/3`);
+			router.push(navTargetRef.current);
 		},
 	});
+
+	function triggerMutate(data: EmployeeCategorySubmitData, targetUrl: string) {
+		if (!startDate || !endDate) {
+			setPeriodError(
+				"La période de référence est obligatoire. Veuillez renseigner les dates de début et de fin.",
+			);
+			return;
+		}
+		setPeriodError("");
+		navTargetRef.current = targetUrl;
+		mutation.mutate({
+			declarationType: "correction",
+			source: data.source,
+			categories: data.categories,
+			referencePeriodStart: startDate,
+			referencePeriodEnd: endDate,
+		});
+	}
 
 	return (
 		<CategoryForm
@@ -92,27 +117,14 @@ export function SecondDeclarationStep2Form({
 			initialCategories={sourceData}
 			initialSource={initialSource}
 			instructionText="Modifiez les données de votre première déclaration avant de valider votre indicateur."
-			isSubmitting={mutation.isPending}
-			mimoquageNextHref={
-				hasSavedSecondDeclaration ? `${BASE_PATH}/etape/3` : undefined
+			isPreviousPending={
+				mutation.isPending && navTargetRef.current === PREV_URL
 			}
-			onSubmit={(data) => {
-				if (!startDate || !endDate) {
-					setPeriodError(
-						"La période de référence est obligatoire. Veuillez renseigner les dates de début et de fin.",
-					);
-					return;
-				}
-				setPeriodError("");
-				mutation.mutate({
-					declarationType: "correction",
-					source: data.source,
-					categories: data.categories,
-					referencePeriodStart: startDate,
-					referencePeriodEnd: endDate,
-				});
-			}}
-			previousHref={`${BASE_PATH}/etape/1`}
+			isSubmitting={mutation.isPending && navTargetRef.current === NEXT_URL}
+			mimoquageNextHref={hasSavedSecondDeclaration ? NEXT_URL : undefined}
+			onPreviousSubmit={(data) => triggerMutate(data, PREV_URL)}
+			onSubmit={(data) => triggerMutate(data, NEXT_URL)}
+			previousHref={PREV_URL}
 			readOnlyLabel
 			referencePeriodPicker={
 				<ReferencePeriodPicker
