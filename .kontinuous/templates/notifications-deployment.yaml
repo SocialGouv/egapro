@@ -58,37 +58,37 @@ spec:
             - name: NOTIFICATIONS_POSTGRES_HOST
               valueFrom:
                 secretKeyRef:
-                  name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
                   key: PGHOST
                   optional: true
             - name: NOTIFICATIONS_POSTGRES_DB
               valueFrom:
                 secretKeyRef:
-                  name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
                   key: PGDATABASE
                   optional: true
             - name: NOTIFICATIONS_POSTGRES_PORT
               valueFrom:
                 secretKeyRef:
-                  name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
                   key: PGPORT
                   optional: true
             - name: NOTIFICATIONS_POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
                   key: PGUSER
                   optional: true
             - name: NOTIFICATIONS_POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
                   key: PGPASSWORD
                   optional: true
             - name: NOTIFICATIONS_POSTGRES_SSLMODE
               valueFrom:
                 secretKeyRef:
-                  name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
                   key: PGSSLMODE
                   optional: true
             # Main app DB — used only to append rows to `audit.action_log`.
