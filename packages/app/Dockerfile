@@ -52,6 +52,13 @@ ENV NEXT_PUBLIC_MATOMO_SITE_ID=$NEXT_PUBLIC_MATOMO_SITE_ID
 # via package.json exports, so the dist must exist when Next.js starts.
 RUN pnpm --filter notifications build
 
+# Produce a self-contained runtime tree for the notifications worker. The
+# output bundles its own `node_modules/.pnpm` store, so the symlinks
+# resolve at runtime without depending on the workspace `.pnpm` store we
+# do NOT ship to the runner. `--legacy` is required since pnpm v10 (we
+# don't use injected workspace packages).
+RUN pnpm --filter notifications deploy --prod --legacy /deploy/notifications
+
 # Build with Next.js cache persisted across builds
 # Sentry auth token and release are mounted as BuildKit secrets to avoid leaking in image layers
 # and to preserve build cache (ARG would invalidate cache on every new release)
@@ -92,12 +99,13 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/migrate.mjs ./pa
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/audit-cleanup.mjs ./packages/app/scripts/audit-cleanup.mjs
 
 # Notifications worker — independent workspace, runs as its own K8s
-# Deployment (notifications-deployment.yaml). Ship the compiled `dist/` tree
-# plus its full node_modules so the pod resolves pg-boss / nodemailer /
-# postgres / html-to-text without sharing the app's node_modules graph.
-COPY --from=builder --chown=1000:1000 /app/packages/notifications/dist ./packages/notifications/dist
-COPY --from=builder --chown=1000:1000 /app/packages/notifications/package.json ./packages/notifications/package.json
-COPY --from=builder --chown=1000:1000 /app/packages/notifications/node_modules ./packages/notifications/node_modules
+# Deployment (notifications-deployment.yaml). Source = `pnpm deploy` output
+# from the builder stage: a flat tree with the compiled `dist/`, the
+# package.json, and a real (non-symlinked) node_modules with pg-boss,
+# nodemailer, postgres, html-to-text resolved inline.
+COPY --from=builder --chown=1000:1000 /deploy/notifications/dist ./packages/notifications/dist
+COPY --from=builder --chown=1000:1000 /deploy/notifications/package.json ./packages/notifications/package.json
+COPY --from=builder --chown=1000:1000 /deploy/notifications/node_modules ./packages/notifications/node_modules
 
 USER 1000
 
