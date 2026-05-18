@@ -38,13 +38,13 @@ spec:
             - node
             - packages/notifications/dist/index.js
           # Load defaults from the same configmaps as the app pod. The
-          # `egapro` configmap exposes MAIL_ENABLED / SMTP_HOST / SMTP_PORT /
+          # `mail` configmap exposes MAIL_ENABLED / SMTP_HOST / SMTP_PORT /
           # SMTP_SECURE / MAIL_FROM pointing at the in-cluster MailDev for
           # dev / preprod review apps. The `notifications` configmap is
           # optional and lets ops tune retry / batch knobs without rebuilding.
           envFrom:
             - configMapRef:
-                name: egapro
+                name: mail
                 optional: true
             - configMapRef:
                 name: notifications
