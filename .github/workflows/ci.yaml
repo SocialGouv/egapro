@@ -11,6 +11,31 @@ env:
   NODE_ENV: test
 
 jobs:
+  notifications:
+    name: Notifications package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck notifications
+        run: pnpm --filter notifications typecheck
+      - name: Build notifications
+        run: pnpm --filter notifications build
+      - name: Test notifications
+        run: pnpm --filter notifications test
+      - name: Lint notifications
+        run: pnpm --filter notifications lint:check
+      - name: Format check notifications
+        run: pnpm --filter notifications format:check
+
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -27,6 +52,8 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Build notifications package
+        run: pnpm --filter notifications build
       - name: Typecheck
         run: pnpm typecheck
       - name: Build
