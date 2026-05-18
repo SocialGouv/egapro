@@ -218,9 +218,18 @@ async function main(): Promise<void> {
 
 	const mainSql: Sql | null = mainUrl ? postgres(mainUrl, { max: 1 }) : null;
 
+	// pg-boss uses node-postgres internally. When the URL declares any TLS
+	// mode (typical inside k8s where pg uses a self-signed cert), pg
+	// otherwise enforces full chain verification and rejects the cluster
+	// cert. Mirror the postgres-js permissive default by disabling chain
+	// verification — the connection stays encrypted, only the issuer
+	// check is relaxed.
+	const useSsl = /sslmode=(require|prefer|verify-ca|verify-full)/.test(notifUrl);
+
 	const boss = new PgBoss({
 		connectionString: notifUrl,
 		application_name: "egapro-notifications",
+		...(useSsl ? { ssl: { rejectUnauthorized: false } } : {}),
 	});
 	boss.on("error", (error) => {
 		console.error("[notifications] pg-boss error:", error);
