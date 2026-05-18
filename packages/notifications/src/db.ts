@@ -38,9 +38,21 @@ export function resolvePgUrl(
 // preprod / prod. When that secret is absent (typical on review apps),
 // fall back to the main app DB so the worker still boots: pg-boss creates
 // its own `pgboss` schema, with no collision risk against the app tables.
+//
+// pg-boss uses node-postgres, which rejects self-signed certs when
+// `sslmode=require` (in-cluster pg-rw uses a self-signed cert). Rewrite
+// `require` → `no-verify` so pg-connection-string sets
+// `ssl: { rejectUnauthorized: false }` itself — the connection stays
+// encrypted, only chain verification is relaxed. URL rewriting is the
+// only reliable path because the parsed `connectionString` overrides any
+// explicit `ssl` Pool option in pg-pool.
 export function resolveNotificationsDbUrl(): string | null {
-	return (
+	const url =
 		resolvePgUrl(process.env.NOTIFICATIONS_DATABASE_URL, "NOTIFICATIONS_") ??
-		resolvePgUrl(process.env.DATABASE_URL, "")
+		resolvePgUrl(process.env.DATABASE_URL, "");
+	if (!url) return null;
+	return url.replace(
+		/([?&])sslmode=(require|prefer|verify-ca|verify-full)/,
+		"$1sslmode=no-verify",
 	);
 }
