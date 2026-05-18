@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { getPostComplianceDestination } from "../complianceNavigation";
+import {
+	getCseOpinionPreviousHref,
+	getPostComplianceDestination,
+} from "../complianceNavigation";
 
 describe("getPostComplianceDestination", () => {
 	it("returns /avis-cse when hasCse is true", () => {
@@ -16,5 +19,43 @@ describe("getPostComplianceDestination", () => {
 		expect(getPostComplianceDestination(null)).toBe(
 			"/declaration-remuneration/parcours-conformite/confirmation",
 		);
+	});
+});
+
+describe("getCseOpinionPreviousHref", () => {
+	it("returns the second-decl recap when second declaration is submitted", () => {
+		expect(
+			getCseOpinionPreviousHref({
+				firstDeclarationPathChoice: "corrective_action",
+				hasSubmittedSecondDeclaration: true,
+			}),
+		).toBe("/declaration-remuneration/recapitulatif?type=correction");
+	});
+
+	it("returns the joint evaluation page when path = joint_evaluation", () => {
+		expect(
+			getCseOpinionPreviousHref({
+				firstDeclarationPathChoice: "joint_evaluation",
+				hasSubmittedSecondDeclaration: false,
+			}),
+		).toBe("/declaration-remuneration/parcours-conformite/evaluation-conjointe");
+	});
+
+	it("returns the compliance path choice when path = justify", () => {
+		expect(
+			getCseOpinionPreviousHref({
+				firstDeclarationPathChoice: "justify",
+				hasSubmittedSecondDeclaration: false,
+			}),
+		).toBe("/declaration-remuneration/parcours-conformite");
+	});
+
+	it("returns the first-decl recap when no compliance path was chosen", () => {
+		expect(
+			getCseOpinionPreviousHref({
+				firstDeclarationPathChoice: null,
+				hasSubmittedSecondDeclaration: false,
+			}),
+		).toBe("/declaration-remuneration/recapitulatif");
 	});
 });

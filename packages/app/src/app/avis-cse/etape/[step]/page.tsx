@@ -5,6 +5,7 @@ import {
 	Step2Upload,
 	TOTAL_STEPS,
 } from "~/modules/cseOpinion";
+import { getCseOpinionPreviousHref } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
@@ -32,6 +33,11 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		const campaignDeadlines = await getCampaignDeadlines(
 			declarationData.declaration.year,
 		);
+		const previousHref = getCseOpinionPreviousHref({
+			firstDeclarationPathChoice:
+				declarationData.declaration.firstDeclarationPathChoice,
+			hasSubmittedSecondDeclaration: hasSecondDeclaration,
+		});
 		return (
 			<Step1Opinions
 				cseDeadline={campaignDeadlines.decl2JointEvaluationDeadline}
@@ -41,6 +47,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 				}
 				hasSecondDeclaration={hasSecondDeclaration}
 				initialData={initialData}
+				previousHref={previousHref}
 			/>
 		);
 	}
