@@ -1,5 +1,6 @@
 import { and, desc, eq, getTableColumns, isNull, lt, ne } from "drizzle-orm";
 
+import { computeIndicatorPercentages } from "~/modules/declaration-remuneration/shared/computeIndicatorPercentages";
 import type {
 	Step2Data,
 	Step3Data,
@@ -19,6 +20,45 @@ export function activeDeclarationFilter(siren: string, year: number) {
 		eq(declarations.year, year),
 		isNull(declarations.cancelledAt),
 	);
+}
+
+type PercentagesTx = {
+	select: () => {
+		from: (table: typeof declarations) => {
+			where: (predicate: ReturnType<typeof and>) => {
+				limit: (n: number) => Promise<DeclarationRow[]>;
+			};
+		};
+	};
+	update: (table: typeof declarations) => {
+		set: (values: Record<string, unknown>) => {
+			where: (predicate: ReturnType<typeof and>) => Promise<unknown>;
+		};
+	};
+};
+
+export async function applyPercentagesAfterUpdate(
+	tx: PercentagesTx,
+	siren: string,
+	year: number,
+): Promise<void> {
+	const [fresh] = await tx
+		.select()
+		.from(declarations)
+		.where(activeDeclarationFilter(siren, year))
+		.limit(1);
+	if (!fresh) return;
+	const percentages = computeIndicatorPercentages(fresh);
+	const percentagesForDb = Object.fromEntries(
+		Object.entries(percentages).map(([k, v]) => [
+			k,
+			v === null ? null : v.toString(),
+		]),
+	);
+	await tx
+		.update(declarations)
+		.set(percentagesForDb)
+		.where(activeDeclarationFilter(siren, year));
 }
 
 /**

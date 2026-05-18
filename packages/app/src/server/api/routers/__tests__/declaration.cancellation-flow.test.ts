@@ -56,12 +56,18 @@ const YEAR = 2026;
 let store: StoredRow[];
 
 let lastInsertedRow: StoredRow | null;
-let lastUpdateSet: Record<string, unknown> | null;
+let updateSetCalls: Array<Record<string, unknown>>;
 
 function buildActiveStore(rows: StoredRow[]) {
 	store = rows;
 	lastInsertedRow = null;
-	lastUpdateSet = null;
+	updateSetCalls = [];
+}
+
+function findUpdateSet(
+	predicate: (values: Record<string, unknown>) => boolean,
+): Record<string, unknown> | undefined {
+	return updateSetCalls.find(predicate);
 }
 
 function activeRows() {
@@ -73,7 +79,10 @@ function buildTx() {
 		select: () => ({
 			from: () => ({
 				where: () => ({
-					limit: async () => activeRows().slice(0, 1),
+					limit: async () =>
+						activeRows()
+							.slice(0, 1)
+							.map((row) => ({ ...row, ...nullIndicators() })),
 				}),
 			}),
 		}),
@@ -108,7 +117,7 @@ function buildTx() {
 		update: () => ({
 			set: (values: Record<string, unknown>) => ({
 				where: async () => {
-					lastUpdateSet = values;
+					updateSetCalls.push(values);
 					const target = activeRows()[0];
 					if (target) {
 						Object.assign(target, values);
@@ -385,8 +394,9 @@ describe("declaration cancellation redeposit flow", () => {
 
 		await caller.submit();
 
-		expect(lastUpdateSet).not.toBeNull();
-		expect(lastUpdateSet?.status).toBe("demarche_completed");
+		const statusSet = findUpdateSet((v) => "status" in v);
+		expect(statusSet).toBeDefined();
+		expect(statusSet?.status).toBe("demarche_completed");
 		expect(cancelledRow.submittedAt?.toISOString()).toContain(`${YEAR}-03-01`);
 	});
 });

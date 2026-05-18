@@ -102,6 +102,38 @@ type DeclarationStateRow = {
 		| null;
 	indicatorAAnnualWomen?: string | null;
 	indicatorAAnnualMen?: string | null;
+	indicatorAHourlyWomen?: string | null;
+	indicatorAHourlyMen?: string | null;
+	indicatorBAnnualWomen?: string | null;
+	indicatorBAnnualMen?: string | null;
+	indicatorBHourlyWomen?: string | null;
+	indicatorBHourlyMen?: string | null;
+	indicatorCAnnualWomen?: string | null;
+	indicatorCAnnualMen?: string | null;
+	indicatorCHourlyWomen?: string | null;
+	indicatorCHourlyMen?: string | null;
+	indicatorDAnnualWomen?: string | null;
+	indicatorDAnnualMen?: string | null;
+	indicatorDHourlyWomen?: string | null;
+	indicatorDHourlyMen?: string | null;
+	indicatorEWomen?: string | null;
+	indicatorEMen?: string | null;
+	indicatorFAnnualWomen1?: number | null;
+	indicatorFAnnualWomen2?: number | null;
+	indicatorFAnnualWomen3?: number | null;
+	indicatorFAnnualWomen4?: number | null;
+	indicatorFAnnualMen1?: number | null;
+	indicatorFAnnualMen2?: number | null;
+	indicatorFAnnualMen3?: number | null;
+	indicatorFAnnualMen4?: number | null;
+	indicatorFHourlyWomen1?: number | null;
+	indicatorFHourlyWomen2?: number | null;
+	indicatorFHourlyWomen3?: number | null;
+	indicatorFHourlyWomen4?: number | null;
+	indicatorFHourlyMen1?: number | null;
+	indicatorFHourlyMen2?: number | null;
+	indicatorFHourlyMen3?: number | null;
+	indicatorFHourlyMen4?: number | null;
 };
 
 type CompanyRow = {
@@ -205,7 +237,7 @@ function createSelectQueue(rows: unknown[][]) {
 	return { select, dropFirst, getIndex: () => index };
 }
 
-function createMutationTxMock() {
+function createMutationTxMock(txSelectRows: unknown[] = []) {
 	const update = vi.fn();
 	const set = vi.fn();
 	const updateWhere = vi.fn().mockResolvedValue(undefined);
@@ -221,7 +253,12 @@ function createMutationTxMock() {
 		.mockImplementation(async (fn: (tx: unknown) => unknown) => {
 			const txSelect = vi.fn().mockReturnValue({
 				from: vi.fn().mockReturnValue({
-					where: vi.fn().mockResolvedValue([]),
+					where: vi.fn().mockImplementation(() => {
+						const promise = Promise.resolve(txSelectRows);
+						return Object.assign(promise, {
+							limit: vi.fn().mockResolvedValue(txSelectRows),
+						});
+					}),
 				}),
 			});
 			const txInsert = vi.fn().mockReturnValue({ values: insertValues });
@@ -244,7 +281,7 @@ function createSubmitMockDb(
 	const joinRows = employeeCategories.map((ec) => ({ employee_category: ec }));
 	const selectQueue = createSelectQueue([[declaration], [company], joinRows]);
 
-	const m = createMutationTxMock();
+	const m = createMutationTxMock([declaration]);
 
 	return {
 		db: {
@@ -528,9 +565,13 @@ describe("declarationRouter", () => {
 
 			await caller.submit();
 
-			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+			const setCalls = ctx.set.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const percentageSet = setCalls.find((c) => "globalAnnualMeanGap" in c);
+			expect(percentageSet).toBeDefined();
 			const expectedGlobalAnnualMeanGap = (110 - 100) / 110;
-			expect(Number(setCall.globalAnnualMeanGap)).toBeCloseTo(
+			expect(Number(percentageSet?.globalAnnualMeanGap)).toBeCloseTo(
 				expectedGlobalAnnualMeanGap,
 			);
 		});
@@ -952,6 +993,62 @@ describe("declarationRouter", () => {
 				caller.updateStep1({ totalWomen: 10, totalMen: 20 }),
 			).rejects.toThrow("SIRET manquant ou invalide dans la session");
 		});
+
+		it("resets percentage columns when indicators are reset (totals changed)", async () => {
+			const rowAfterReset = buildDeclaration({
+				indicatorAAnnualWomen: null,
+				indicatorAAnnualMen: null,
+				indicatorAHourlyWomen: null,
+				indicatorAHourlyMen: null,
+				indicatorBAnnualWomen: null,
+				indicatorBAnnualMen: null,
+				indicatorBHourlyWomen: null,
+				indicatorBHourlyMen: null,
+				indicatorCAnnualWomen: null,
+				indicatorCAnnualMen: null,
+				indicatorCHourlyWomen: null,
+				indicatorCHourlyMen: null,
+				indicatorDAnnualWomen: null,
+				indicatorDAnnualMen: null,
+				indicatorDHourlyWomen: null,
+				indicatorDHourlyMen: null,
+				indicatorEWomen: null,
+				indicatorEMen: null,
+				indicatorFAnnualWomen1: null,
+				indicatorFAnnualWomen2: null,
+				indicatorFAnnualWomen3: null,
+				indicatorFAnnualWomen4: null,
+				indicatorFAnnualMen1: null,
+				indicatorFAnnualMen2: null,
+				indicatorFAnnualMen3: null,
+				indicatorFAnnualMen4: null,
+				indicatorFHourlyWomen1: null,
+				indicatorFHourlyWomen2: null,
+				indicatorFHourlyWomen3: null,
+				indicatorFHourlyWomen4: null,
+				indicatorFHourlyMen1: null,
+				indicatorFHourlyMen2: null,
+				indicatorFHourlyMen3: null,
+				indicatorFHourlyMen4: null,
+			});
+			const tx = createMockTx([rowAfterReset]);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createCaller(mockDb);
+
+			await caller.updateStep1({ totalWomen: 50, totalMen: 60 });
+
+			const setCalls = mockSet.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const percentageSet = setCalls.find((c) => "globalAnnualMeanGap" in c);
+			expect(percentageSet).toBeDefined();
+			expect(percentageSet?.globalAnnualMeanGap).toBeNull();
+			expect(percentageSet?.variableProportionWomen).toBeNull();
+			expect(percentageSet?.annualQuartile1ProportionWomen).toBeNull();
+		});
 	});
 
 	describe("updateStep2", () => {
@@ -991,6 +1088,42 @@ describe("declarationRouter", () => {
 
 			await expect(caller.updateStep2({})).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
+			);
+		});
+
+		it("recomputes percentage columns after updateStep2", async () => {
+			const freshRowAfterUpdate = buildDeclaration({
+				indicatorAAnnualWomen: "200",
+				indicatorAAnnualMen: "100",
+			});
+			const tx = createMockTx([freshRowAfterUpdate]);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = {
+				update: mockUpdate,
+				transaction: mockTransaction,
+			} as unknown;
+			const caller = await createCaller(mockDb);
+
+			await caller.updateStep2({
+				indicatorAAnnualWomen: "200",
+				indicatorAAnnualMen: "100",
+				indicatorAHourlyWomen: "20",
+				indicatorAHourlyMen: "22",
+				indicatorCAnnualWomen: "95",
+				indicatorCAnnualMen: "105",
+				indicatorCHourlyWomen: "18",
+				indicatorCHourlyMen: "20",
+			});
+
+			const setCalls = mockSet.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const percentageSet = setCalls.find((c) => "globalAnnualMeanGap" in c);
+			expect(percentageSet).toBeDefined();
+			expect(Number(percentageSet?.globalAnnualMeanGap)).toBeCloseTo(
+				(100 - 200) / 100,
 			);
 		});
 	});
@@ -1034,6 +1167,44 @@ describe("declarationRouter", () => {
 
 			await expect(caller.updateStep3({})).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
+			);
+		});
+
+		it("recomputes percentage columns after updateStep3", async () => {
+			const freshRowAfterUpdate = buildDeclaration({
+				indicatorBAnnualWomen: "100",
+				indicatorBAnnualMen: "200",
+			});
+			const tx = createMockTx([freshRowAfterUpdate]);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = {
+				update: mockUpdate,
+				transaction: mockTransaction,
+			} as unknown;
+			const caller = await createCaller(mockDb);
+
+			await caller.updateStep3({
+				indicatorBAnnualWomen: "100",
+				indicatorBAnnualMen: "200",
+				indicatorBHourlyWomen: "10",
+				indicatorBHourlyMen: "11",
+				indicatorDAnnualWomen: "45",
+				indicatorDAnnualMen: "50",
+				indicatorDHourlyWomen: "9",
+				indicatorDHourlyMen: "10",
+				indicatorEWomen: "30",
+				indicatorEMen: "70",
+			});
+
+			const setCalls = mockSet.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const percentageSet = setCalls.find((c) => "globalAnnualMeanGap" in c);
+			expect(percentageSet).toBeDefined();
+			expect(Number(percentageSet?.variableAnnualMeanGap)).toBeCloseTo(
+				(200 - 100) / 200,
 			);
 		});
 	});
@@ -1126,6 +1297,36 @@ describe("declarationRouter", () => {
 
 			await expect(caller.updateStep4(step4Input)).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
+			);
+		});
+
+		it("recomputes percentage columns after updateStep4", async () => {
+			const freshRowAfterUpdate = buildDeclaration({
+				indicatorFAnnualWomen1: 30,
+				indicatorFAnnualMen1: 70,
+			});
+			const tx = createMockTx([freshRowAfterUpdate]);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = {
+				update: mockUpdate,
+				transaction: mockTransaction,
+			} as unknown;
+			const caller = await createCaller(mockDb);
+
+			await caller.updateStep4(step4Input);
+
+			const setCalls = mockSet.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const percentageSet = setCalls.find((c) => "globalAnnualMeanGap" in c);
+			expect(percentageSet).toBeDefined();
+			expect(Number(percentageSet?.annualQuartile1ProportionWomen)).toBeCloseTo(
+				0.3,
+			);
+			expect(Number(percentageSet?.annualQuartile1ProportionMen)).toBeCloseTo(
+				0.7,
 			);
 		});
 	});
