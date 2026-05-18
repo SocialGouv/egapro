@@ -1,10 +1,12 @@
 global:
   pgSecretName: pg-app
-  # Notifications worker (packages/notifications). Opt-in: the deployment is
-  # only rendered when this flag is true. Review apps and dev keep it off by
-  # default since they don't provision the dedicated pg-notifications secret.
-  # Enable in env/preprod and env/prod overrides once the secret is ready.
-  notificationsEnabled: false
+  # Notifications worker (packages/notifications). Enabled by default so the
+  # mail flow can be exercised on every environment (dev / preprod review apps,
+  # preprod, prod). The deployment tolerates a missing pg-notifications secret:
+  # every NOTIFICATIONS_POSTGRES_* env var is `optional: true`, and on startup
+  # `packages/notifications/src/index.ts` exits cleanly when the queue DB URL
+  # is absent — so a namespace without pg-notifications just runs an idle pod.
+  notificationsEnabled: true
   # APISIX standalone gateway in front of the SUIT API.
   # Templates: .kontinuous/templates/apisix-suit.yaml + apisix-suit.ingress.yaml.
   # Scoped under `global:` because only `global.*` values are propagated to the

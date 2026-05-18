@@ -3,7 +3,7 @@ import nodemailer, { type Transporter } from "nodemailer";
 import { PgBoss, type JobWithMetadata } from "pg-boss";
 import postgres, { type Sql } from "postgres";
 
-import { resolvePgUrl } from "./db.js";
+import { resolveNotificationsDbUrl, resolvePgUrl } from "./db.js";
 import { buildMail, MAIL_BUILDERS } from "./mails/index.js";
 import { QUEUE_NAME, validateJobData } from "./queue.js";
 
@@ -205,13 +205,10 @@ export function makeJobHandler(
 }
 
 async function main(): Promise<void> {
-	const notifUrl = resolvePgUrl(
-		process.env.NOTIFICATIONS_DATABASE_URL,
-		"NOTIFICATIONS_",
-	);
+	const notifUrl = resolveNotificationsDbUrl();
 	if (!notifUrl) {
 		throw new Error(
-			"NOTIFICATIONS_DATABASE_URL or NOTIFICATIONS_POSTGRES_HOST+NOTIFICATIONS_POSTGRES_DB must be set",
+			"No connection string: set NOTIFICATIONS_DATABASE_URL / NOTIFICATIONS_POSTGRES_* (dedicated queue DB) or DATABASE_URL / POSTGRES_* (fallback to main DB)",
 		);
 	}
 	const mainUrl = resolvePgUrl(process.env.DATABASE_URL, "");

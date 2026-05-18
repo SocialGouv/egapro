@@ -1,6 +1,6 @@
 import { PgBoss } from "pg-boss";
 
-import { resolvePgUrl } from "./db.js";
+import { resolveNotificationsDbUrl } from "./db.js";
 import type {
 	NotificationPayloadMap,
 	NotificationType,
@@ -51,10 +51,7 @@ async function buildAndStart(connectionString: string): Promise<PgBoss> {
 }
 
 async function getPublisher(): Promise<PgBoss | null> {
-	const url = resolvePgUrl(
-		process.env.NOTIFICATIONS_DATABASE_URL,
-		"NOTIFICATIONS_",
-	);
+	const url = resolveNotificationsDbUrl();
 	if (!url) return null;
 	if (cachedBoss) return cachedBoss;
 	if (

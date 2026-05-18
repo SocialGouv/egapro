@@ -1,6 +1,10 @@
 import type { ChildProcess } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import {
+	completeSecondDeclaration,
+	selectCompliancePath,
+} from "./helpers/compliance-flows";
+import {
 	resetDeclarationToDraft,
 	setCompanyHasCse,
 	setCompanyWorkforce,
@@ -64,5 +68,33 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 		expect(email.subject).toMatch(/Déclaration des indicateurs/i);
 		expect(email.to.some((r) => r.address === TEST_USER_EMAIL)).toBe(true);
 		expect(email.html).toMatch(/SIREN/i);
+	});
+
+	test("second declaration submission (corrective action) delivers a second-declaration receipt", async ({
+		page,
+	}) => {
+		test.slow();
+		// Corrective action requires a CSE-eligible company (>= 100 employees)
+		// and a first declaration with a gap >= 5% so the compliance choice
+		// page appears. Switching state here keeps the default beforeEach
+		// (workforce=60, no CSE) intact for the other test.
+		await setCompanyWorkforce(200);
+		await setCompanyHasCse(true);
+		await clearMaildev();
+
+		const startedAt = new Date();
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-corrective");
+		await completeSecondDeclaration(page, { hasGap: false });
+
+		const email = await waitForEmail(
+			TEST_USER_EMAIL,
+			(m) => /Seconde déclaration/i.test(m.subject),
+			{ since: startedAt },
+		);
+
+		expect(email.subject).toMatch(/Accusé de réception.*Seconde déclaration/i);
+		expect(email.to.some((r) => r.address === TEST_USER_EMAIL)).toBe(true);
+		expect(email.html).toMatch(/seconde déclaration/i);
 	});
 });

@@ -38,6 +38,11 @@ describe("enqueueNotification — graceful degradation", () => {
 		delete process.env.NOTIFICATIONS_POSTGRES_DB;
 		delete process.env.NOTIFICATIONS_RETRY_LIMIT;
 		delete process.env.NOTIFICATIONS_RETRY_DELAY_SECONDS;
+		// Also clear the main-DB fallback vars so "queue_unavailable" stays
+		// the deterministic outcome when no NOTIFICATIONS_* config is set.
+		delete process.env.DATABASE_URL;
+		delete process.env.POSTGRES_HOST;
+		delete process.env.POSTGRES_DB;
 	});
 
 	afterEach(() => {

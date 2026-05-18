@@ -32,3 +32,15 @@ export function resolvePgUrl(
 		sslmode: process.env[`${prefix}POSTGRES_SSLMODE`],
 	});
 }
+
+// Resolve the connection string used by pg-boss. The dedicated queue DB
+// (`NOTIFICATIONS_*`) is preferred — kept isolated from business data on
+// preprod / prod. When that secret is absent (typical on review apps),
+// fall back to the main app DB so the worker still boots: pg-boss creates
+// its own `pgboss` schema, with no collision risk against the app tables.
+export function resolveNotificationsDbUrl(): string | null {
+	return (
+		resolvePgUrl(process.env.NOTIFICATIONS_DATABASE_URL, "NOTIFICATIONS_") ??
+		resolvePgUrl(process.env.DATABASE_URL, "")
+	);
+}
