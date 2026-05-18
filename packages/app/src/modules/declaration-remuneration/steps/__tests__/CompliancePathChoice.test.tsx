@@ -210,7 +210,7 @@ describe("CompliancePathChoice", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("renders previous link pointing to step 6", () => {
+	it("renders previous button (not a link) that triggers save", () => {
 		render(
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
@@ -220,10 +220,9 @@ describe("CompliancePathChoice", () => {
 				email="test@example.fr"
 			/>,
 		);
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/etape/6",
-		);
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		expect(prevButton).toBeInTheDocument();
+		expect(prevButton).toHaveAttribute("type", "button");
 	});
 
 	it("renders the email in the success banner", () => {

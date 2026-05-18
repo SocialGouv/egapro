@@ -133,7 +133,7 @@ describe("SecondDeclarationStep2Form", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("renders previous link to step 1", () => {
+	it("renders previous button (not a link) that triggers save", () => {
 		render(
 			<SecondDeclarationStep2Form
 				declarationSiren="123456789"
@@ -141,10 +141,9 @@ describe("SecondDeclarationStep2Form", () => {
 				initialFirstDeclarationCategories={mockCategories}
 			/>,
 		);
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/parcours-conformite/etape/1",
-		);
+		const prevButton = screen.getByRole("button", { name: /précédent/i });
+		expect(prevButton).toBeInTheDocument();
+		expect(prevButton).toHaveAttribute("type", "button");
 	});
 
 	it("uses second declaration data when available", () => {
