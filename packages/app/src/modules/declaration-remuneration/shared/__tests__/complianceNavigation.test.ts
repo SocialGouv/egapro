@@ -38,7 +38,9 @@ describe("getCseOpinionPreviousHref", () => {
 				firstDeclarationPathChoice: "joint_evaluation",
 				hasSubmittedSecondDeclaration: false,
 			}),
-		).toBe("/declaration-remuneration/parcours-conformite/evaluation-conjointe");
+		).toBe(
+			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
+		);
 	});
 
 	it("returns the compliance path choice when path = justify", () => {
