@@ -173,7 +173,6 @@ export function CategoryForm({
 	const hasInitialData = initialCategories.length > 0;
 	const [savedInternal, setSaved] = useState(hasInitialData);
 	const saved = savedOverride !== undefined ? savedOverride : savedInternal;
-	const [workforceError, setWorkforceError] = useState("");
 	const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 	const deleteDialogRef = useRef<HTMLDialogElement>(null);
 
@@ -265,22 +264,22 @@ export function CategoryForm({
 		callback: (data: EmployeeCategorySubmitData) => void,
 	) {
 		return form.handleSubmit((data) => {
-			setWorkforceError("");
+			form.clearErrors("root");
 
 			const emptyNames = data.categories.some((cat) => !cat.name.trim());
 			if (emptyNames) {
-				setWorkforceError(
-					"Le nom de chaque catégorie d'emplois est obligatoire.",
-				);
+				form.setError("root", {
+					message: "Le nom de chaque catégorie d'emplois est obligatoire.",
+				});
 				return;
 			}
 
 			const names = data.categories.map((cat) => cat.name.trim().toLowerCase());
 			const hasDuplicates = names.length !== new Set(names).size;
 			if (hasDuplicates) {
-				setWorkforceError(
-					"Les noms des catégories d'emplois doivent être uniques.",
-				);
+				form.setError("root", {
+					message: "Les noms des catégories d'emplois doivent être uniques.",
+				});
 				return;
 			}
 
@@ -296,19 +295,19 @@ export function CategoryForm({
 					0,
 				);
 
-				const errors: string[] = [];
+				const messages: string[] = [];
 				if (maxWomen !== undefined && totalWomen !== maxWomen) {
-					errors.push(
+					messages.push(
 						`Le total des effectifs femmes (${totalWomen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxWomen}).`,
 					);
 				}
 				if (maxMen !== undefined && totalMen !== maxMen) {
-					errors.push(
+					messages.push(
 						`Le total des effectifs hommes (${totalMen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxMen}).`,
 					);
 				}
-				if (errors.length > 0) {
-					setWorkforceError(errors.join(" "));
+				if (messages.length > 0) {
+					form.setError("root", { message: messages.join(" ") });
 					return;
 				}
 			}
@@ -572,7 +571,7 @@ export function CategoryForm({
 
 			<FormErrors
 				mutationError={submitError}
-				validationError={workforceError}
+				validationError={form.formState.errors.root?.message}
 			/>
 
 			<FormActions
