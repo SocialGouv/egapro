@@ -12,10 +12,22 @@ export type ExportRow = {
 	year: number;
 	status: string | null;
 	declarationType: "6_indicateurs" | "7_indicateurs";
-	compliancePath: string | null;
+	firstDeclarationPathChoice: string | null;
+	secondDeclarationPathChoice: string | null;
 	createdAt: string | null;
 	updatedAt: string | null;
 	cancelledAt: string | null;
+	submittedAt: string | null;
+	firstDeclarationPathChoiceAt: string | null;
+	secondDeclarationPathChoiceAt: string | null;
+	jointEvaluationSubmittedAt: string | null;
+	cseOpinionCompletedAt: string | null;
+	demarcheCompletedAt: string | null;
+	phase2Required: boolean;
+	phase2RevisionRequired: boolean;
+	cseRequired: boolean;
+	indicatorGRequired: boolean;
+	rulesVersion: string | null;
 
 	// Employees
 	totalWomen: number | null;
@@ -82,7 +94,8 @@ export type ExportRow = {
 	indFHourlyQ4Men: number | null;
 
 	// Second declaration
-	secondDeclarationStatus: string | null;
+	secondDeclarationSubmittedAt: string | null;
+	secondDeclarationSubmitted: boolean;
 	secondDeclReferencePeriodStart: string | null;
 	secondDeclReferencePeriodEnd: string | null;
 

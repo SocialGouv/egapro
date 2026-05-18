@@ -27,7 +27,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 	// passed, lock editing by redirecting non-recap steps to the recap.
 	if (
 		shouldRedirectSubmittedToRecap({
-			status: data.declaration.secondDeclarationStatus,
+			status: data.hasSubmittedSecondDeclaration ? "submitted" : null,
 			step,
 			recapStep: 3,
 			modificationDeadline: campaignDeadlines.decl2ModificationDeadline,

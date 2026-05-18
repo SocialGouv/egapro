@@ -8,74 +8,82 @@ vi.mock("~/server/db", () => ({
 	db: {},
 }));
 
-vi.mock("~/server/db/schema", () => ({
-	declarations: {
-		id: "id",
-		siren: "siren",
-		year: "year",
-		cseOpinionCompletedAt: "cseOpinionCompletedAt",
-		updatedAt: "updatedAt",
-	},
-	cseOpinions: {
-		id: "id",
-		declarationId: "declarationId",
-	},
-	files: {
-		id: "id",
-		declarationId: "declarationId",
-		type: "type",
-	},
-}));
-
 vi.mock("~/server/services/s3", () => ({
 	deleteFile: vi.fn(),
 }));
 
-const mockWhere = vi.fn();
-const mockFrom = vi.fn();
-const mockSelect = vi.fn();
-const mockLimit = vi.fn();
-const mockUpdate = vi.fn();
-const mockUpdateSet = vi.fn();
-const mockUpdateWhere = vi.fn();
+function createMockDbForFinalize(
+	opinionCount: number,
+	fileCount: number,
+	declaration: Record<string, unknown> | null = {
+		id: "decl-1",
+		status: "awaiting_cse_opinion",
+		rulesVersion: "2027.1",
+	},
+) {
+	const declarationLookupRow = { id: "decl-1" };
 
-let selectCallCount = 0;
+	let selectCallCount = 0;
+	const limit = vi.fn();
+	const where = vi.fn();
+	const from = vi.fn();
+	const select = vi.fn();
 
-function createMockDbForFinalize(opinionCount: number, fileCount: number) {
-	selectCallCount = 0;
+	limit.mockImplementation(() => {
+		const call = selectCallCount;
+		if (call === 1) return Promise.resolve([declarationLookupRow]);
+		if (call === 4) {
+			return Promise.resolve(declaration ? [declaration] : []);
+		}
+		return Promise.resolve([]);
+	});
 
-	const declarationResult = [{ id: "decl-1" }];
-	const queue: unknown[][] = [
-		[{ count: opinionCount }],
-		[{ count: fileCount }],
-	];
-
-	mockLimit.mockImplementation(() =>
-		Promise.resolve(selectCallCount <= 1 ? declarationResult : []),
-	);
-	mockWhere.mockImplementation(() => {
-		if (selectCallCount <= 1) {
-			return Object.assign(Promise.resolve(declarationResult), {
-				limit: mockLimit,
+	where.mockImplementation(() => {
+		const call = selectCallCount;
+		if (call === 2) {
+			return Object.assign(Promise.resolve([{ count: opinionCount }]), {
+				limit,
 			});
 		}
-		const result = queue.shift() ?? [];
-		return Object.assign(Promise.resolve(result), { limit: mockLimit });
-	});
-	mockFrom.mockReturnValue({ where: mockWhere });
-	mockSelect.mockImplementation(() => {
-		selectCallCount++;
-		return { from: mockFrom };
+		if (call === 3) {
+			return Object.assign(Promise.resolve([{ count: fileCount }]), {
+				limit,
+			});
+		}
+		return Object.assign(Promise.resolve([declarationLookupRow]), { limit });
 	});
 
-	mockUpdateWhere.mockResolvedValue(undefined);
-	mockUpdateSet.mockReturnValue({ where: mockUpdateWhere });
-	mockUpdate.mockReturnValue({ set: mockUpdateSet });
+	from.mockReturnValue({ where });
+	select.mockImplementation(() => {
+		selectCallCount++;
+		return { from };
+	});
+
+	const updateWhere = vi.fn().mockResolvedValue(undefined);
+	const updateSet = vi.fn().mockReturnValue({ where: updateWhere });
+	const update = vi.fn().mockReturnValue({ set: updateSet });
+
+	const insertReturning = vi.fn().mockResolvedValue([]);
+	const insertValues = vi.fn().mockReturnValue({ returning: insertReturning });
+	const insert = vi.fn().mockReturnValue({ values: insertValues });
+
+	const transaction = vi
+		.fn()
+		.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+			fn({ select, insert, update, delete: vi.fn() }),
+		);
 
 	return {
-		select: mockSelect,
-		update: mockUpdate,
-	} as unknown;
+		db: {
+			select,
+			update,
+			insert,
+			transaction,
+		} as unknown,
+		updateSet,
+		update,
+		insertValues,
+	};
 }
 
 function createCaller(
@@ -109,50 +117,64 @@ describe("cseOpinionRouter.finalize", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("sets cseOpinionCompletedAt when opinions and at least one file exist", async () => {
-		const mockDb = createMockDbForFinalize(2, 1);
-		const caller = await createCaller(mockDb);
+	it("transitions awaiting_cse_opinion → demarche_completed and inserts cse_opinion_submit + demarche_complete events", async () => {
+		const ctx = createMockDbForFinalize(2, 1);
+		const caller = await createCaller(ctx.db);
 
 		const result = await caller.finalize();
 
 		expect(result).toEqual({ success: true });
-		expect(mockUpdate).toHaveBeenCalled();
-		expect(mockUpdateSet).toHaveBeenCalledWith(
+		expect(ctx.update).toHaveBeenCalled();
+		expect(ctx.updateSet).toHaveBeenCalledWith(
 			expect.objectContaining({
-				cseOpinionCompletedAt: expect.any(Date),
+				status: "demarche_completed",
 				updatedAt: expect.any(Date),
 			}),
 		);
+		const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+			eventType: string;
+		}>;
+		expect(insertedEvents.map((e) => e.eventType)).toEqual([
+			"cse_opinion_submit",
+			"demarche_complete",
+		]);
 	});
 
 	it("throws PRECONDITION_FAILED when no opinions exist", async () => {
-		const mockDb = createMockDbForFinalize(0, 1);
-		const caller = await createCaller(mockDb);
+		const ctx = createMockDbForFinalize(0, 1);
+		const caller = await createCaller(ctx.db);
 
 		await expect(caller.finalize()).rejects.toThrow(
 			"Les avis du CSE doivent être renseignés avant validation.",
 		);
-		expect(mockUpdate).not.toHaveBeenCalled();
+		expect(ctx.update).not.toHaveBeenCalled();
 	});
 
 	it("throws PRECONDITION_FAILED when no file has been uploaded", async () => {
-		const mockDb = createMockDbForFinalize(2, 0);
-		const caller = await createCaller(mockDb);
+		const ctx = createMockDbForFinalize(2, 0);
+		const caller = await createCaller(ctx.db);
 
 		await expect(caller.finalize()).rejects.toThrow(
 			"Au moins un fichier d'avis CSE doit être transmis.",
 		);
-		expect(mockUpdate).not.toHaveBeenCalled();
+		expect(ctx.update).not.toHaveBeenCalled();
+	});
+
+	it("throws NOT_FOUND when declaration row vanished between lookup and finalize", async () => {
+		const ctx = createMockDbForFinalize(2, 1, null);
+		const caller = await createCaller(ctx.db);
+
+		await expect(caller.finalize()).rejects.toThrow("Déclaration introuvable");
 	});
 
 	it("refuses to finalize when the admin is impersonating", async () => {
-		const mockDb = createMockDbForFinalize(2, 1);
-		const caller = await createCaller(mockDb, null, {
+		const ctx = createMockDbForFinalize(2, 1);
+		const caller = await createCaller(ctx.db, null, {
 			siren: "339787277",
 			name: "Acme",
 		});
 
 		await expect(caller.finalize()).rejects.toThrow("Mode mimoquage");
-		expect(mockUpdate).not.toHaveBeenCalled();
+		expect(ctx.update).not.toHaveBeenCalled();
 	});
 });

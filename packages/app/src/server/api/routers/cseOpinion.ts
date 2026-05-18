@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import {
 	deleteFileSchema,
 	saveOpinionsSchema,
@@ -9,8 +9,18 @@ import {
 	declarationProcedure,
 	declarationWriteProcedure,
 } from "~/server/api/trpc";
-import { cseOpinions, declarations, files } from "~/server/db/schema";
+import {
+	cseOpinions,
+	declarationStatusHistory,
+	declarations,
+	files,
+} from "~/server/db/schema";
+import { applyAction, loadRules } from "~/server/rules/engine";
 import { deleteFile as deleteS3File } from "~/server/services/s3";
+import {
+	buildHistoryInserts,
+	computeProjectionUpdates,
+} from "./statusHistoryHelpers";
 
 export const cseOpinionRouter = createTRPCRouter({
 	get: declarationProcedure.query(async ({ ctx }) => {
@@ -99,7 +109,7 @@ export const cseOpinionRouter = createTRPCRouter({
 	}),
 
 	finalize: declarationWriteProcedure.mutation(async ({ ctx }) => {
-		const [opinionCount, fileCount] = await Promise.all([
+		const [opinionCount, fileCount, declarationRow] = await Promise.all([
 			ctx.db
 				.select({ count: sql<number>`count(*)::int` })
 				.from(cseOpinions)
@@ -113,6 +123,11 @@ export const cseOpinionRouter = createTRPCRouter({
 						eq(files.type, "cse_opinion"),
 					),
 				),
+			ctx.db
+				.select()
+				.from(declarations)
+				.where(eq(declarations.id, ctx.declarationId))
+				.limit(1),
 		]);
 
 		if ((opinionCount[0]?.count ?? 0) === 0) {
@@ -128,17 +143,36 @@ export const cseOpinionRouter = createTRPCRouter({
 			});
 		}
 
-		const now = new Date();
-		// Idempotent: only sets cseOpinionCompletedAt the first time.
-		await ctx.db
-			.update(declarations)
-			.set({ cseOpinionCompletedAt: now, updatedAt: now })
-			.where(
-				and(
-					eq(declarations.id, ctx.declarationId),
-					isNull(declarations.cseOpinionCompletedAt),
-				),
-			);
+		const declaration = declarationRow[0];
+		if (!declaration) {
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: "Déclaration introuvable",
+			});
+		}
+
+		const rules = loadRules(declaration.rulesVersion);
+		const facts = { currentState: declaration.status };
+		const { nextStatus, events } = applyAction(
+			facts,
+			"submit_cse_opinion",
+			rules,
+		);
+
+		const projection = computeProjectionUpdates(events, nextStatus);
+		const historyInserts = buildHistoryInserts(
+			ctx.declarationId,
+			events,
+			ctx.session.user.id,
+		);
+
+		await ctx.db.transaction(async (tx) => {
+			await tx.insert(declarationStatusHistory).values(historyInserts);
+			await tx
+				.update(declarations)
+				.set({ ...projection, updatedAt: new Date() })
+				.where(eq(declarations.id, ctx.declarationId));
+		});
 
 		return { success: true };
 	}),

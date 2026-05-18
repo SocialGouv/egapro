@@ -206,12 +206,77 @@ const declarationSchema = {
 			description: "Statut de la déclaration",
 			example: "submitted",
 		},
-		Parcours_conformite: {
+		Parcours_apres_declaration_1: {
 			type: ["string", "null"],
-			description: "Parcours de conformité choisi par l'entreprise",
+			description:
+				"Parcours après la première déclaration (justify, corrective_action, joint_evaluation)",
+		},
+		Parcours_apres_declaration_2: {
+			type: ["string", "null"],
+			description:
+				"Parcours après la seconde déclaration (justify, corrective_action, joint_evaluation)",
+		},
+		Phase_2_requise: {
+			type: "boolean",
+			description:
+				"Indique si la phase 2 (parcours après déclaration 1) est requise.",
+		},
+		Phase_2_revision_requise: {
+			type: "boolean",
+			description:
+				"Indique si une révision du parcours phase 2 est requise après la seconde déclaration.",
+		},
+		Avis_CSE_requis: {
+			type: "boolean",
+			description: "Indique si un avis CSE est requis pour cette déclaration.",
+		},
+		Indicateur_G_requis: {
+			type: "boolean",
+			description:
+				"Indique si l'indicateur G est requis (déclaration à 7 indicateurs).",
+		},
+		Version_regles: {
+			type: ["string", "null"],
+			description:
+				"Version du moteur de règles métier utilisée à la soumission.",
 		},
 		Date_creation: { type: ["string", "null"], format: "date-time" },
 		Date_modification: { type: ["string", "null"], format: "date-time" },
+		Date_soumission: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date de soumission initiale de la déclaration.",
+		},
+		Date_parcours_apres_declaration_1: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date du choix du parcours après la première déclaration.",
+		},
+		Date_parcours_apres_declaration_2: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date du choix du parcours après la seconde déclaration.",
+		},
+		Date_seconde_declaration: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date de soumission de la seconde déclaration.",
+		},
+		Date_evaluation_conjointe: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date de soumission du rapport d'évaluation conjointe.",
+		},
+		Date_avis_CSE: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date de finalisation des avis CSE.",
+		},
+		Date_fin_demarche: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date de finalisation complète de la démarche.",
+		},
 		Date_annulation: {
 			type: ["string", "null"],
 			format: "date-time",
@@ -235,7 +300,11 @@ const declarationSchema = {
 			description:
 				"Seconde déclaration (requise lorsque l'écart de rémunération atteint 5%)",
 			properties: {
-				Statut: { type: ["string", "null"] },
+				Statut: {
+					type: "boolean",
+					description:
+						"`true` si la seconde déclaration a été soumise, `false` sinon.",
+				},
 				Periode_reference_debut: { type: ["string", "null"], format: "date" },
 				Periode_reference_fin: { type: ["string", "null"], format: "date" },
 				Correction: {

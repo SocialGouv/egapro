@@ -1,5 +1,5 @@
 import type { CampaignDeadlines } from "~/modules/domain";
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, getDeclarationDisplayContext } from "~/modules/domain";
 
 import { ArchivesSection } from "./ArchivesSection";
 import { CompanyEditModal } from "./CompanyEditModal";
@@ -49,12 +49,20 @@ export function CompanyDeclarationsPage({
 	);
 	const panelVariant = computePanelVariant(currentDeclaration);
 	const ctaHref = computeCtaHref(currentDeclaration, company.siren);
+	const displayContext = getDeclarationDisplayContext({
+		firstDeclarationPathChoice:
+			currentDeclaration?.firstDeclarationPathChoice ?? null,
+		secondDeclarationPathChoice:
+			currentDeclaration?.secondDeclarationPathChoice ?? null,
+		cseRequired: currentDeclaration?.cseRequired ?? false,
+	});
 
 	return (
 		<main id="content">
 			<WelcomeBanner />
 			<CompanyInfoBanner company={company} />
 			<DeclarationsSection
+				campaignDeadlines={campaignDeadlines}
 				declarations={declarations}
 				hasCse={company.hasCse}
 				hasNoSanction={hasNoSanction}
@@ -69,12 +77,12 @@ export function CompanyDeclarationsPage({
 			/>
 			<DeclarationProcessPanel
 				campaignDeadlines={campaignDeadlines}
-				compliancePath={currentDeclaration?.compliancePath ?? null}
 				ctaHref={ctaHref}
-				lastActionDate={lastActionDate}
-				secondDeclarationStatus={
-					currentDeclaration?.secondDeclarationStatus ?? null
+				displayContext={displayContext}
+				hasSubmittedSecondDeclaration={
+					currentDeclaration?.hasSubmittedSecondDeclaration ?? false
 				}
+				lastActionDate={lastActionDate}
 				siren={company.siren}
 				variant={panelVariant}
 				year={currentYear}

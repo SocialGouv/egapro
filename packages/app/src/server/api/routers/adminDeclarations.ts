@@ -25,6 +25,7 @@ import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
 	companies,
 	cseOpinions,
+	declarationStatusHistory,
 	declarations,
 	files,
 	users,
@@ -143,9 +144,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					totalWomen: declarations.totalWomen,
 					totalMen: declarations.totalMen,
 					remunerationScore: declarations.remunerationScore,
-					compliancePath: declarations.compliancePath,
-					complianceCompletedAt: declarations.complianceCompletedAt,
-					secondDeclarationStatus: declarations.secondDeclarationStatus,
+					firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
 					createdAt: declarations.createdAt,
 					updatedAt: declarations.updatedAt,
 					cancelledAt: declarations.cancelledAt,
@@ -170,42 +169,51 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				return null;
 			}
 
-			const [declarationFiles, opinions, siblingRows] = await Promise.all([
-				ctx.db
-					.select({
-						id: files.id,
-						fileName: files.fileName,
-						type: files.type,
-						uploadedAt: files.uploadedAt,
-					})
-					.from(files)
-					.where(eq(files.declarationId, input.id)),
-				ctx.db
-					.select({
-						id: cseOpinions.id,
-						type: cseOpinions.type,
-						opinion: cseOpinions.opinion,
-						opinionDate: cseOpinions.opinionDate,
-					})
-					.from(cseOpinions)
-					.where(eq(cseOpinions.declarationId, input.id)),
-				ctx.db
-					.select({
-						id: declarations.id,
-						status: declarations.status,
-						cancelledAt: declarations.cancelledAt,
-						updatedAt: declarations.updatedAt,
-					})
-					.from(declarations)
-					.where(
-						and(
-							eq(declarations.siren, declaration.siren),
-							eq(declarations.year, declaration.year),
-							ne(declarations.id, input.id),
-						),
-					)
-					.orderBy(desc(declarations.updatedAt)),
-			]);
+			const [declarationFiles, opinions, siblingRows, historyRows] =
+				await Promise.all([
+					ctx.db
+						.select({
+							id: files.id,
+							fileName: files.fileName,
+							type: files.type,
+							uploadedAt: files.uploadedAt,
+						})
+						.from(files)
+						.where(eq(files.declarationId, input.id)),
+					ctx.db
+						.select({
+							id: cseOpinions.id,
+							type: cseOpinions.type,
+							opinion: cseOpinions.opinion,
+							opinionDate: cseOpinions.opinionDate,
+						})
+						.from(cseOpinions)
+						.where(eq(cseOpinions.declarationId, input.id)),
+					ctx.db
+						.select({
+							id: declarations.id,
+							status: declarations.status,
+							cancelledAt: declarations.cancelledAt,
+							updatedAt: declarations.updatedAt,
+						})
+						.from(declarations)
+						.where(
+							and(
+								eq(declarations.siren, declaration.siren),
+								eq(declarations.year, declaration.year),
+								ne(declarations.id, input.id),
+							),
+						)
+						.orderBy(desc(declarations.updatedAt)),
+					ctx.db
+						.select({
+							eventType: declarationStatusHistory.eventType,
+							createdAt: declarationStatusHistory.createdAt,
+						})
+						.from(declarationStatusHistory)
+						.where(eq(declarationStatusHistory.declarationId, input.id))
+						.orderBy(desc(declarationStatusHistory.createdAt)),
+				]);
 
 			const siblings = siblingRows.map((s) => ({
 				id: s.id,
@@ -214,11 +222,18 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				status: s.cancelledAt !== null ? "cancelled" : (s.status ?? "draft"),
 			}));
 
+			const findLatest = (eventType: string): Date | null => {
+				const found = historyRows.find((r) => r.eventType === eventType);
+				return found ? found.createdAt : null;
+			};
+
 			return {
 				...declaration,
 				files: declarationFiles,
 				cseOpinions: opinions,
 				siblings,
+				demarcheCompletedAt: findLatest("demarche_complete"),
+				secondDeclarationSubmittedAt: findLatest("second_declaration_submit"),
 			};
 		}),
 
@@ -255,10 +270,17 @@ export const adminDeclarationsRouter = createTRPCRouter({
 			}
 
 			const cancelledAt = new Date();
-			await ctx.db
-				.update(declarations)
-				.set({ cancelledAt })
-				.where(eq(declarations.id, input.id));
+			await ctx.db.transaction(async (tx) => {
+				await tx
+					.update(declarations)
+					.set({ cancelledAt })
+					.where(eq(declarations.id, input.id));
+				await tx.insert(declarationStatusHistory).values({
+					declarationId: input.id,
+					eventType: "cancel",
+					actorUserId: ctx.session.user.id,
+				});
+			});
 
 			return { id: input.id, cancelledAt };
 		}),

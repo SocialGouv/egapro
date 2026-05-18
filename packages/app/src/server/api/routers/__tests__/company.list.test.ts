@@ -16,7 +16,7 @@ describe("companyRouter.list", () => {
 	it("returns companies with declaration status", async () => {
 		const companyRows = [{ siren: "339787277", name: "Test Company" }];
 		const declRows = [
-			{ siren: "339787277", status: "submitted", currentStep: 6 },
+			{ siren: "339787277", status: "demarche_completed", currentStep: 6 },
 		];
 
 		let selectCallCount = 0;
@@ -140,7 +140,7 @@ describe("companyRouter.list", () => {
 	it("returns status based on the active declaration when cancelled and active coexist", async () => {
 		const companyRows = [{ siren: "123456789", name: "Acme" }];
 		const activeDeclRows = [
-			{ siren: "123456789", status: "submitted", currentStep: 6 },
+			{ siren: "123456789", status: "demarche_completed", currentStep: 6 },
 		];
 
 		let selectCallCount = 0;

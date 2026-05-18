@@ -58,7 +58,7 @@ export function shouldRedirectSubmittedToRecap(params: {
 	now?: Date;
 }): boolean {
 	const { status, step, recapStep, modificationDeadline, now } = params;
-	if (status !== "submitted") return false;
+	if (status === null || status === "draft") return false;
 	if (step === recapStep) return false;
 	return isDeadlinePassed(modificationDeadline, now);
 }

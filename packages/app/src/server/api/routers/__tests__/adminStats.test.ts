@@ -110,7 +110,7 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 		]);
 	});
 
-	it("joins on companies only when a sizeRange filter is provided", async () => {
+	it("joins history → declarations always, and additionally on companies when a sizeRange filter is provided", async () => {
 		const db = buildDb([]);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
@@ -120,13 +120,14 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 		} as never);
 
 		await caller.getCampaignProgression({ years: [2026] });
-		expect(db.__chain.innerJoin).not.toHaveBeenCalled();
+		expect(db.__chain.innerJoin).toHaveBeenCalledTimes(1);
 
+		db.__chain.innerJoin.mockClear();
 		await caller.getCampaignProgression({
 			years: [2026],
 			sizeRange: "50-99",
 		});
-		expect(db.__chain.innerJoin).toHaveBeenCalledTimes(1);
+		expect(db.__chain.innerJoin).toHaveBeenCalledTimes(2);
 	});
 
 	it("validates the years array (min 1, max 5)", async () => {

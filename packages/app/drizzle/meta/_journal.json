@@ -239,6 +239,20 @@
 			"when": 1778489783883,
 			"tag": "0033_add_cancelled_at",
 			"breakpoints": true
+		},
+		{
+			"idx": 34,
+			"version": "7",
+			"when": 1778584824979,
+			"tag": "0034_tranquil_catseye",
+			"breakpoints": true
+		},
+		{
+			"idx": 35,
+			"version": "7",
+			"when": 1778682813792,
+			"tag": "0035_status_history",
+			"breakpoints": true
 		}
 	]
 }

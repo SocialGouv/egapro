@@ -5,6 +5,8 @@ import {
 	ensureCurrentYearDeclaration,
 	getCurrentDbYear,
 	resetDeclarationToDraft,
+	setCompanyHasCse,
+	setCompanyWorkforce,
 } from "./helpers/db";
 import { completeDeclaration } from "./helpers/declaration-flows";
 
@@ -16,6 +18,13 @@ test.describe("Declaration cancellation — full cycle", () => {
 	test.beforeAll(async () => {
 		currentYear = await getCurrentDbYear();
 		await cleanCurrentYearDeclarations();
+		// Force a "clean finish" submit path : workforce < 100 + no CSE → the
+		// no-gap submit transitions directly to `demarche_completed` and shows
+		// the "Effectué" badge. Without this, leftover state from previous
+		// suites (workforce=200, hasCse=true) drives the FSM through
+		// `awaiting_cse_opinion`, where the badge is correctly "En cours".
+		await setCompanyHasCse(false);
+		await setCompanyWorkforce(80);
 	});
 
 	test.afterAll(async () => {

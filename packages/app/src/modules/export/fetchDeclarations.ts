@@ -13,6 +13,7 @@ export {
 	fetchSubmittedDeclarations,
 } from "./queries";
 
+import { GAP_ALERT_THRESHOLD, isIndicatorGRequired } from "~/modules/domain";
 import type { DeclarationRow } from "./queries";
 import {
 	INDICATOR_A_GAP_LABELS,
@@ -32,6 +33,43 @@ import {
 	INDICATOR_F_HOURLY_THRESHOLD_LABELS,
 	INDICATOR_F_HOURLY_WOMEN_LABELS,
 } from "./shared/apiLabels";
+
+const PHASE2_SIZE_MIN = 100;
+
+function deriveExportFlags(
+	row: DeclarationRow,
+	indicatorGEntries: IndicatorGEntry[],
+): {
+	phase2Required: boolean;
+	phase2RevisionRequired: boolean;
+	indicatorGRequired: boolean;
+} {
+	const hasIndicatorG = indicatorGEntries.length > 0;
+	const globalAnnualMeanGap = row.globalAnnualMeanGap
+		? Number(row.globalAnnualMeanGap) * 100
+		: null;
+	const variableAnnualMeanGap = row.variableAnnualMeanGap
+		? Number(row.variableAnnualMeanGap) * 100
+		: null;
+	const workforce = row.workforce;
+	const phase2Required =
+		workforce !== null &&
+		workforce >= PHASE2_SIZE_MIN &&
+		hasIndicatorG &&
+		globalAnnualMeanGap !== null &&
+		Math.abs(globalAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
+	const phase2RevisionRequired =
+		phase2Required &&
+		row.secondDeclarationSubmittedAt !== null &&
+		variableAnnualMeanGap !== null &&
+		Math.abs(variableAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
+	const indicatorGRequiredFlag = isIndicatorGRequired(workforce ?? 0, row.year);
+	return {
+		phase2Required,
+		phase2RevisionRequired,
+		indicatorGRequired: indicatorGRequiredFlag,
+	};
+}
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -254,6 +292,8 @@ export function assembleDeclaration(
 	const hasCseFiles = cseFiles.length > 0;
 	const jointEvaluationFile = mostRecent(jointEvaluationFiles);
 
+	const flags = deriveExportFlags(row, indicatorGEntries);
+
 	return {
 		SIREN: row.siren,
 		Raison_sociale: row.companyName,
@@ -263,9 +303,26 @@ export function assembleDeclaration(
 		CSE_existant: row.hasCse,
 		Annee: row.year,
 		Statut: row.status,
-		Parcours_conformite: row.compliancePath,
+		Parcours_apres_declaration_1: row.firstDeclarationPathChoice,
+		Parcours_apres_declaration_2: row.secondDeclarationPathChoice,
+		Phase_2_requise: flags.phase2Required,
+		Phase_2_revision_requise: flags.phase2RevisionRequired,
+		Avis_CSE_requis: row.cseRequired,
+		Indicateur_G_requis: flags.indicatorGRequired,
+		Version_regles: row.rulesVersion,
 		Date_creation: row.createdAt?.toISOString() ?? null,
 		Date_modification: row.updatedAt?.toISOString() ?? null,
+		Date_soumission: row.submittedAt?.toISOString() ?? null,
+		Date_parcours_apres_declaration_1:
+			row.firstDeclarationPathChoiceAt?.toISOString() ?? null,
+		Date_parcours_apres_declaration_2:
+			row.secondDeclarationPathChoiceAt?.toISOString() ?? null,
+		Date_seconde_declaration:
+			row.secondDeclarationSubmittedAt?.toISOString() ?? null,
+		Date_evaluation_conjointe:
+			row.jointEvaluationSubmittedAt?.toISOString() ?? null,
+		Date_avis_CSE: row.cseOpinionCompletedAt?.toISOString() ?? null,
+		Date_fin_demarche: row.demarcheCompletedAt?.toISOString() ?? null,
 		Date_annulation: row.cancelledAt?.toISOString() ?? null,
 		Effectif_F_rem_annuelle_globale: row.totalWomen,
 		Effectif_H_rem_annuelle_globale: row.totalMen,
@@ -274,7 +331,7 @@ export function assembleDeclaration(
 			G: initial.length > 0 ? initial : null,
 		},
 		Seconde_declaration: {
-			Statut: row.secondDeclarationStatus,
+			Statut: row.secondDeclarationSubmittedAt !== null,
 			Periode_reference_debut: row.secondDeclReferencePeriodStart,
 			Periode_reference_fin: row.secondDeclReferencePeriodEnd,
 			Correction: correction.length > 0 ? correction : null,

@@ -1,11 +1,12 @@
 import "server-only";
 
-import { and, eq, gte, inArray, isNull, lt, or } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
 import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
 	companies,
 	cseOpinions,
+	declarationStatusHistory,
 	declarations,
 	employeeCategories,
 	files,
@@ -14,6 +15,35 @@ import {
 } from "~/server/db/schema";
 import type { CseRow, FileRow, IndicatorGEntry } from "./fetchDeclarations";
 import type { IndicatorGRow } from "./types";
+
+function latestEventAt(eventType: string) {
+	return sql<Date | null>`(
+		SELECT MAX(${declarationStatusHistory.createdAt})
+		FROM ${declarationStatusHistory}
+		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
+		AND ${declarationStatusHistory.eventType} = ${eventType}
+	)`;
+}
+
+function latestPathChoiceAt(round: 1 | 2) {
+	return sql<Date | null>`(
+		SELECT MAX(${declarationStatusHistory.createdAt})
+		FROM ${declarationStatusHistory}
+		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
+		AND ${declarationStatusHistory.eventType} = 'path_choice'
+		AND ${declarationStatusHistory.round} = ${round}
+	)`;
+}
+
+export const statusHistoryProjection = {
+	submittedAt: latestEventAt("submit"),
+	firstDeclarationPathChoiceAt: latestPathChoiceAt(1),
+	secondDeclarationPathChoiceAt: latestPathChoiceAt(2),
+	secondDeclarationSubmittedAt: latestEventAt("second_declaration_submit"),
+	jointEvaluationSubmittedAt: latestEventAt("joint_evaluation_submit"),
+	cseOpinionCompletedAt: latestEventAt("cse_opinion_submit"),
+	demarcheCompletedAt: latestEventAt("demarche_complete"),
+};
 
 // ── Shared select columns for indicators A–F ───────────────────────
 
@@ -124,10 +154,12 @@ export async function fetchSubmittedDeclarations(
 			siren: declarations.siren,
 			year: declarations.year,
 			status: declarations.status,
-			compliancePath: declarations.compliancePath,
+			firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
+			secondDeclarationPathChoice: declarations.secondDeclarationPathChoice,
 			totalWomen: declarations.totalWomen,
 			totalMen: declarations.totalMen,
-			secondDeclarationStatus: declarations.secondDeclarationStatus,
+			cseRequired: declarations.cseRequired,
+			rulesVersion: declarations.rulesVersion,
 			secondDeclReferencePeriodStart:
 				declarations.secondDeclReferencePeriodStart,
 			secondDeclReferencePeriodEnd: declarations.secondDeclReferencePeriodEnd,
@@ -140,6 +172,7 @@ export async function fetchSubmittedDeclarations(
 			nafCode: companies.nafCode,
 			address: companies.address,
 			hasCse: companies.hasCse,
+			...statusHistoryProjection,
 			...sharedExportColumns,
 		})
 		.from(declarations)
@@ -152,7 +185,7 @@ export async function fetchSubmittedDeclarations(
 					lt(declarations.cancelledAt, new Date(`${dateEnd}T00:00:00Z`)),
 				),
 				and(
-					eq(declarations.status, "submitted"),
+					ne(declarations.status, "draft"),
 					gte(declarations.updatedAt, new Date(`${dateBegin}T00:00:00Z`)),
 					lt(declarations.updatedAt, new Date(`${dateEnd}T00:00:00Z`)),
 					isNull(declarations.cancelledAt),
@@ -249,9 +282,7 @@ export async function buildIndicatorGRows(
 			employeeCategories,
 			eq(employeeCategories.jobCategoryId, jobCategories.id),
 		)
-		.where(
-			and(eq(declarations.status, "submitted"), eq(declarations.year, year)),
-		);
+		.where(and(ne(declarations.status, "draft"), eq(declarations.year, year)));
 }
 
 // ── Indicator G presence check ──────────────────────────────────────

@@ -1,13 +1,4 @@
-import {
-	and,
-	between,
-	eq,
-	gte,
-	inArray,
-	isNotNull,
-	type SQL,
-	sql,
-} from "drizzle-orm";
+import { and, between, eq, gte, inArray, type SQL, sql } from "drizzle-orm";
 
 import { getCampaignProgressionSchema } from "~/modules/admin/stats/schemas";
 import type {
@@ -16,7 +7,11 @@ import type {
 } from "~/modules/admin/stats/types";
 import { COMPANY_SIZE_RANGES } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
-import { companies, declarations } from "~/server/db/schema";
+import {
+	companies,
+	declarationStatusHistory,
+	declarations,
+} from "~/server/db/schema";
 
 type AggregatedRow = { day: string; year: number; count: number };
 
@@ -60,8 +55,7 @@ export const adminStatsRouter = createTRPCRouter({
 		.input(getCampaignProgressionSchema)
 		.query(async ({ ctx, input }): Promise<CampaignProgressionSeries[]> => {
 			const filters: SQL[] = [
-				eq(declarations.status, "submitted"),
-				isNotNull(declarations.submittedAt),
+				eq(declarationStatusHistory.eventType, "submit"),
 				inArray(declarations.year, input.years),
 			];
 
@@ -74,10 +68,7 @@ export const adminStatsRouter = createTRPCRouter({
 				);
 			}
 
-			// `to_char` forces a text return so the postgres.js driver hands back
-			// a plain ISO string (YYYY-MM-DD) rather than a `Date` that would then
-			// need timezone-safe formatting.
-			const dayExpr = sql<string>`to_char(${declarations.submittedAt}, 'YYYY-MM-DD')`;
+			const dayExpr = sql<string>`to_char(${declarationStatusHistory.createdAt}, 'YYYY-MM-DD')`;
 
 			const query = ctx.db
 				.select({
@@ -85,7 +76,11 @@ export const adminStatsRouter = createTRPCRouter({
 					year: declarations.year,
 					count: sql<number>`count(*)::int`,
 				})
-				.from(declarations);
+				.from(declarationStatusHistory)
+				.innerJoin(
+					declarations,
+					eq(declarationStatusHistory.declarationId, declarations.id),
+				);
 
 			const scoped = input.sizeRange
 				? query.innerJoin(companies, eq(declarations.siren, companies.siren))
