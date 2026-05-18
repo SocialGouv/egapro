@@ -1,37 +1,45 @@
 import { describe, expect, it } from "vitest";
+import type { DeclarationFsmStatus } from "~/modules/domain";
 
-import { getDeclarationStepLabel } from "../DeclarationStepLabel";
+import { getDeclarationProcessStepLabel } from "../DeclarationStepLabel";
 
-describe("getDeclarationStepLabel", () => {
-	it("returns '-' for step 0 (not started)", () => {
-		expect(getDeclarationStepLabel(0)).toBe("-");
+describe("getDeclarationProcessStepLabel", () => {
+	it("returns 'Non commencée' when fsmStatus is null", () => {
+		expect(getDeclarationProcessStepLabel(null)).toBe("Non commencée");
 	});
 
-	it("returns 'Effectifs par catégorie' for step 1", () => {
-		expect(getDeclarationStepLabel(1)).toBe("Effectifs par catégorie");
-	});
+	const cases: Array<{ fsm: DeclarationFsmStatus; label: string }> = [
+		{ fsm: "draft", label: "Déclaration des indicateurs de rémunération" },
+		{
+			fsm: "awaiting_compliance_path_choice",
+			label: "(Première déclaration) Choix du parcours de mise en conformité",
+		},
+		{
+			fsm: "corrective_actions_chosen",
+			label: "Actions correctives et seconde déclaration",
+		},
+		{
+			fsm: "awaiting_revision_choice",
+			label: "(Deuxième déclaration) Choix du parcours de mise en conformité",
+		},
+		{
+			fsm: "joint_evaluation_chosen",
+			label: "Évaluation conjointe des rémunérations",
+		},
+		{
+			fsm: "revised_joint_evaluation_chosen",
+			label: "Évaluation conjointe des rémunérations",
+		},
+		{ fsm: "awaiting_cse_opinion", label: "Déposer le ou les avis CSE" },
+		{
+			fsm: "demarche_completed",
+			label: "Finalisation - Démarche des indicateurs de rémunération",
+		},
+	];
 
-	it("returns 'Rémunération de base' for step 2", () => {
-		expect(getDeclarationStepLabel(2)).toBe("Rémunération de base");
-	});
-
-	it("returns 'Écart de rémunération' for step 3", () => {
-		expect(getDeclarationStepLabel(3)).toBe("Écart de rémunération");
-	});
-
-	it("returns 'Répartition par quartile' for step 4", () => {
-		expect(getDeclarationStepLabel(4)).toBe("Répartition par quartile");
-	});
-
-	it("returns 'Catégories personnalisées' for step 5", () => {
-		expect(getDeclarationStepLabel(5)).toBe("Catégories personnalisées");
-	});
-
-	it("returns 'Complétée' for step 6", () => {
-		expect(getDeclarationStepLabel(6)).toBe("Complétée");
-	});
-
-	it("returns '-' for an unknown step", () => {
-		expect(getDeclarationStepLabel(99)).toBe("-");
-	});
+	for (const { fsm, label } of cases) {
+		it(`returns "${label}" for fsmStatus="${fsm}"`, () => {
+			expect(getDeclarationProcessStepLabel(fsm)).toBe(label);
+		});
+	}
 });

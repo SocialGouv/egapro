@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, isNull, lt } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, isNull, lt, ne } from "drizzle-orm";
 
 import type {
 	Step2Data,
@@ -249,7 +249,7 @@ export async function fetchPreviousYearJobCategories(
 			and(
 				eq(declarations.siren, siren),
 				lt(declarations.year, currentYear),
-				eq(declarations.status, "submitted"),
+				ne(declarations.status, "draft"),
 			),
 		)
 		.orderBy(desc(declarations.year))

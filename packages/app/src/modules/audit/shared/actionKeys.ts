@@ -24,7 +24,7 @@ export const AUDIT_ACTIONS = {
 	DECLARATION_SUBMIT: "declaration.submit",
 	DECLARATION_SUBMIT_SECOND: "declaration.submit_second",
 	DECLARATION_SAVE_COMPLIANCE_PATH: "declaration.save_compliance_path",
-	DECLARATION_COMPLETE_COMPLIANCE_PATH: "declaration.complete_compliance_path",
+	DECLARATION_SUBMIT_JOINT_EVALUATION: "declaration.submit_joint_evaluation",
 
 	// ── CSE opinion mutations ──────────────────────────────
 	CSE_OPINION_SAVE: "cse_opinion.save",
@@ -109,7 +109,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.DECLARATION_SUBMIT]: "mutation",
 	[AUDIT_ACTIONS.DECLARATION_SUBMIT_SECOND]: "mutation",
 	[AUDIT_ACTIONS.DECLARATION_SAVE_COMPLIANCE_PATH]: "mutation",
-	[AUDIT_ACTIONS.DECLARATION_COMPLETE_COMPLIANCE_PATH]: "mutation",
+	[AUDIT_ACTIONS.DECLARATION_SUBMIT_JOINT_EVALUATION]: "mutation",
 
 	[AUDIT_ACTIONS.CSE_OPINION_SAVE]: "mutation",
 	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: "mutation",

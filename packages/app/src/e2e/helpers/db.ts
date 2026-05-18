@@ -42,10 +42,17 @@ export async function resetDeclarationToDraft() {
 	const sql = createConnection();
 	try {
 		await sql`
+			DELETE FROM app_declaration_status_history
+			WHERE declaration_id IN (
+				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
+			)
+		`;
+
+		await sql`
 			UPDATE app_declaration
 			SET status = 'draft', current_step = 1,
-			    compliance_path = NULL, second_declaration_status = NULL,
-			    compliance_completed_at = NULL
+			    first_declaration_path_choice = NULL,
+			    second_declaration_path_choice = NULL
 			WHERE siren = ${TEST_SIREN}
 		`;
 
@@ -74,26 +81,69 @@ export async function setCompanyHasCse(hasCse: boolean | null) {
 	}
 }
 
+export async function setCompanyWorkforce(workforce: number | null) {
+	const sql = createConnection();
+	try {
+		await sql`
+			UPDATE app_company SET workforce = ${workforce} WHERE siren = ${TEST_SIREN}
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
 export async function setDeclarationComplianceState(state: {
 	status?: string;
 	currentStep?: number;
-	compliancePath?: string | null;
-	secondDeclarationStatus?: string | null;
-	complianceCompletedAt?: Date | null;
+	firstDeclarationPathChoice?: string | null;
+	secondDeclarationPathChoice?: string | null;
+	secondDeclarationSubmittedAt?: Date | null;
+	demarcheCompletedAt?: Date | null;
 	cseOpinionCompletedAt?: Date | null;
 }) {
 	const sql = createConnection();
 	try {
 		await sql`
 			UPDATE app_declaration
-			SET status = ${state.status ?? "submitted"},
+			SET status = ${state.status ?? "awaiting_compliance_path_choice"},
 			    current_step = ${state.currentStep ?? 6},
-			    compliance_path = ${state.compliancePath ?? null},
-			    second_declaration_status = ${state.secondDeclarationStatus ?? null},
-			    compliance_completed_at = ${state.complianceCompletedAt ?? null},
-			    cse_opinion_completed_at = ${state.cseOpinionCompletedAt ?? null}
+			    first_declaration_path_choice = ${state.firstDeclarationPathChoice ?? null},
+			    second_declaration_path_choice = ${state.secondDeclarationPathChoice ?? null}
 			WHERE siren = ${TEST_SIREN}
 		`;
+
+		const decl = await sql`
+			SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} LIMIT 1
+		`;
+		const declarationId = decl[0]?.id;
+		if (!declarationId) return;
+
+		await sql`
+			DELETE FROM app_declaration_status_history
+			WHERE declaration_id = ${declarationId}
+		`;
+
+		if (state.secondDeclarationSubmittedAt) {
+			await sql`
+				INSERT INTO app_declaration_status_history
+				(id, declaration_id, event_type, round, created_at)
+				VALUES (gen_random_uuid(), ${declarationId}, 'second_declaration_submit', 2, ${state.secondDeclarationSubmittedAt})
+			`;
+		}
+		if (state.cseOpinionCompletedAt) {
+			await sql`
+				INSERT INTO app_declaration_status_history
+				(id, declaration_id, event_type, created_at)
+				VALUES (gen_random_uuid(), ${declarationId}, 'cse_opinion_submit', ${state.cseOpinionCompletedAt})
+			`;
+		}
+		if (state.demarcheCompletedAt) {
+			await sql`
+				INSERT INTO app_declaration_status_history
+				(id, declaration_id, event_type, created_at)
+				VALUES (gen_random_uuid(), ${declarationId}, 'demarche_complete', ${state.demarcheCompletedAt})
+			`;
+		}
 	} finally {
 		await sql.end();
 	}
@@ -254,6 +304,42 @@ export async function cleanCurrentYearDeclarations() {
 			)
 		`;
 		await sql`DELETE FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year}`;
+	} finally {
+		await sql.end();
+	}
+}
+
+export async function countPathChoiceEventsRound1(): Promise<number> {
+	const sql = createConnection();
+	try {
+		const rows = await sql<[{ n: number }]>`
+			SELECT COUNT(*)::int AS n
+			FROM app_declaration_status_history h
+			INNER JOIN app_declaration d ON d.id = h.declaration_id
+			WHERE d.siren = ${TEST_SIREN}
+			  AND h.event_type = 'path_choice'
+			  AND h.round = 1
+		`;
+		return rows[0]?.n ?? 0;
+	} finally {
+		await sql.end();
+	}
+}
+
+export async function lastPathChoiceValueRound1(): Promise<string | null> {
+	const sql = createConnection();
+	try {
+		const rows = await sql<[{ value: string | null }]>`
+			SELECT h.value
+			FROM app_declaration_status_history h
+			INNER JOIN app_declaration d ON d.id = h.declaration_id
+			WHERE d.siren = ${TEST_SIREN}
+			  AND h.event_type = 'path_choice'
+			  AND h.round = 1
+			ORDER BY h.created_at DESC
+			LIMIT 1
+		`;
+		return rows[0]?.value ?? null;
 	} finally {
 		await sql.end();
 	}

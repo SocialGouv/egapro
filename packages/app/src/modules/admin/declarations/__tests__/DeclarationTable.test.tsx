@@ -23,7 +23,7 @@ const baseRow: DeclarationSearchRow = {
 	id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
 	siren: "123456789",
 	year: 2024,
-	status: "submitted",
+	status: "awaiting_compliance_path_choice",
 	cancelledAt: null,
 	remunerationScore: 85,
 	createdAt: new Date("2024-06-15T10:00:00Z"),

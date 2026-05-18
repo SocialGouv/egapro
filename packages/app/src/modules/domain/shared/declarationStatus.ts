@@ -1,5 +1,17 @@
 import type { DeclarationStatus } from "../types";
 
+type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
+
+export function getCurrentCompliancePath(declaration: {
+	firstDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationPathChoice: CompliancePath | null;
+}): CompliancePath | null {
+	return (
+		declaration.secondDeclarationPathChoice ??
+		declaration.firstDeclarationPathChoice
+	);
+}
+
 export function isCancelled(declaration: {
 	cancelledAt: Date | null;
 }): boolean {
@@ -24,7 +36,10 @@ export function computeDeclarationStatus(
 	if (declaration.cancelledAt != null) {
 		return "to_complete";
 	}
-	if (declaration.status === "submitted") {
+	// Only the terminal FSM state means the démarche is fully done. Every other
+	// non-draft state (awaiting_*_choice, *_chosen, awaiting_cse_opinion) is an
+	// in-progress step the user still has to act on.
+	if (declaration.status === "demarche_completed") {
 		return "done";
 	}
 	return "in_progress";

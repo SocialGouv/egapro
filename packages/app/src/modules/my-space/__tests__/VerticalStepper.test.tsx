@@ -1,6 +1,7 @@
 import { render, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import type { DeclarationDisplayContext } from "~/modules/domain";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import type { PanelVariant } from "../DeclarationProcessPanel";
 import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
@@ -8,12 +9,29 @@ import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
 const FUTURE_YEAR = 2099;
 const PAST_YEAR = 2020;
 
+type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
+
+function makeDisplayContext(
+	first: CompliancePath | null = null,
+	second: CompliancePath | null = null,
+): DeclarationDisplayContext {
+	const paths: Array<CompliancePath | null> = [first, second];
+	return {
+		firstDeclarationPathChoice: first,
+		secondDeclarationPathChoice: second,
+		shouldShowGapJustification: paths.includes("justify"),
+		shouldShowCorrectiveActions: paths.includes("corrective_action"),
+		shouldShowJointEvaluation: paths.includes("joint_evaluation"),
+		shouldShowCseOpinion: false,
+	};
+}
+
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
 	year: FUTURE_YEAR,
 	lastActionDate: null as string | null,
-	compliancePath: null as string | null,
-	secondDeclarationStatus: null as string | null,
+	displayContext: makeDisplayContext(),
+	hasSubmittedSecondDeclaration: false,
 	siren: "532847196",
 	ctaHref: "/declaration-remuneration?siren=532847196",
 };
@@ -90,9 +108,8 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 	describe("2nde déclaration — variant evaluation", () => {
 		it("renders view link on the second declaration row (with type=correction)", () => {
 			const { dialog } = renderPanel("evaluation", {
-				secondDeclarationStatus: "submitted",
+				hasSubmittedSecondDeclaration: true,
 			});
-			// Use partial href match to avoid CSS selector issues with & character
 			const correctionLink = dialog.querySelector<HTMLAnchorElement>(
 				'a[href*="type=correction"][title="Voir le récapitulatif de la déclaration"]',
 			);
@@ -104,10 +121,36 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 	});
 
+	describe("2nde déclaration — variant compliance_choice (révision)", () => {
+		it("renders the Modifier link for second declaration when awaiting_revision_choice", () => {
+			const { panel, dialog } = renderPanel("compliance_choice", {
+				displayContext: makeDisplayContext("corrective_action"),
+				hasSubmittedSecondDeclaration: true,
+			});
+			expect(
+				panel.getByText("Votre seconde déclaration a été transmise"),
+			).toBeInTheDocument();
+			const modifyLink = dialog.querySelector<HTMLAnchorElement>(
+				'a[href*="/declaration-remuneration/parcours-conformite/etape/1"]',
+			);
+			expect(modifyLink).toBeInTheDocument();
+			expect(modifyLink?.textContent).toContain("Modifier");
+		});
+
+		it("does not render second-declaration row when not yet submitted (initial path choice)", () => {
+			const { panel } = renderPanel("compliance_choice", {
+				hasSubmittedSecondDeclaration: false,
+			});
+			expect(
+				panel.queryByText("Votre seconde déclaration a été transmise"),
+			).not.toBeInTheDocument();
+		});
+	});
+
 	describe("2nde déclaration — variant cse avec secondDeclarationSubmitted", () => {
 		it("renders view link on the second declaration row (with type=correction)", () => {
 			const { dialog } = renderPanel("cse", {
-				secondDeclarationStatus: "submitted",
+				hasSubmittedSecondDeclaration: true,
 			});
 			const correctionLink = dialog.querySelector<HTMLAnchorElement>(
 				'a[href*="type=correction"][title="Voir le récapitulatif de la déclaration"]',
@@ -122,12 +165,8 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 
 	describe("TransmittedRow sans viewHref — pas de bouton œil sur ces lignes", () => {
 		it("does not render view link on CSE avis row (closed variant, no decl1 row shown)", () => {
-			// Step3Content in closed variant renders the CSE avis row (Modifier link
-			// points to /avis-cse/etape/2) but without viewHref → no eye links at all.
 			const { dialog } = renderPanel("closed");
-			// Prove Step3Content actually rendered (the CSE modify link is present)
 			expect(dialog.querySelector('a[href*="avis-cse"]')).toBeInTheDocument();
-			// Confirm no eye link was added to this row
 			const links = dialog.querySelectorAll(
 				'a[title="Voir le récapitulatif de la déclaration"]',
 			);
@@ -135,21 +174,18 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 
 		it("does not render view link for joint evaluation row (no type=correction link)", () => {
-			// cse + joint_evaluation + secondDeclarationSubmitted=false:
-			// Only decl1 view link is present (no type=correction), joint eval row has no viewHref.
 			const { dialog } = renderPanel("cse", {
-				compliancePath: "joint_evaluation",
-				secondDeclarationStatus: null,
+				displayContext: makeDisplayContext("joint_evaluation"),
+				hasSubmittedSecondDeclaration: false,
 			});
 			const correctionLink = dialog.querySelector('a[href*="type=correction"]');
 			expect(correctionLink).not.toBeInTheDocument();
 		});
 
 		it("does not render view link for 2nd decl when secondDeclarationSubmitted is false", () => {
-			// cse + no second submission: no type=correction link appears
 			const { dialog } = renderPanel("cse", {
-				compliancePath: "corrective_action",
-				secondDeclarationStatus: null,
+				displayContext: makeDisplayContext("corrective_action"),
+				hasSubmittedSecondDeclaration: false,
 			});
 			const correctionLink = dialog.querySelector('a[href*="type=correction"]');
 			expect(correctionLink).not.toBeInTheDocument();

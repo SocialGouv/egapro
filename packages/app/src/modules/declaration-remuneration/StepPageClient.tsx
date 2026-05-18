@@ -101,7 +101,9 @@ export function StepPageClient({
 				<Step6Review
 					declaration={declaration}
 					declarationYear={declaration.year}
-					isSubmitted={declaration.status === "submitted"}
+					isSubmitted={
+						declaration.status !== null && declaration.status !== "draft"
+					}
 					step2Data={step2Data}
 					step3Data={step3Data}
 					step4Data={step4Data}

@@ -163,19 +163,44 @@ function nullIndicators() {
 
 function buildDb() {
 	const tx = buildTx();
-	return {
-		transaction: vi.fn(async (fn: (tx: unknown) => unknown) => fn(tx)),
-		select: () => ({
+	let selectCallCount = 0;
+	const select = () => {
+		selectCallCount++;
+		const call = selectCallCount;
+		return {
 			from: () => ({
-				where: () => ({
-					limit: async () => {
-						const row = activeRows()[0];
-						if (!row) return [];
-						return [{ submittedAt: row.submittedAt, ...nullIndicators() }];
-					},
+				where: () => {
+					if (call === 1) {
+						return {
+							limit: async () => {
+								const row = activeRows()[0];
+								if (!row) return [];
+								return [
+									{
+										...row,
+										...nullIndicators(),
+										rulesVersion: "2027.1",
+										cseRequired: false,
+										firstDeclarationPathChoice: null,
+										secondDeclarationPathChoice: null,
+									},
+								];
+							},
+						};
+					}
+					return {
+						limit: async () => [{ siren: SIREN, workforce: 80, hasCse: false }],
+					};
+				},
+				innerJoin: () => ({
+					where: async () => [],
 				}),
 			}),
-		}),
+		};
+	};
+	return {
+		transaction: vi.fn(async (fn: (tx: unknown) => unknown) => fn(tx)),
+		select,
 		update: tx.update,
 	};
 }
@@ -284,9 +309,8 @@ describe("declaration cancellation redeposit flow", () => {
 		const result = await caller.submit();
 
 		expect(result).toEqual({ success: true });
-		expect(activeRow.status).toBe("submitted");
+		expect(activeRow.status).toBe("demarche_completed");
 		expect(activeRow.currentStep).toBe(6);
-		expect(activeRow.submittedAt).not.toBeNull();
 		expect(cancelledRow.status).toBe("submitted");
 		expect(cancelledRow.cancelledAt).toBeInstanceOf(Date);
 	});
@@ -362,9 +386,7 @@ describe("declaration cancellation redeposit flow", () => {
 		await caller.submit();
 
 		expect(lastUpdateSet).not.toBeNull();
-		expect(lastUpdateSet?.status).toBe("submitted");
-		const submittedAt = lastUpdateSet?.submittedAt as Date;
-		expect(submittedAt).toBeInstanceOf(Date);
+		expect(lastUpdateSet?.status).toBe("demarche_completed");
 		expect(cancelledRow.submittedAt?.toISOString()).toContain(`${YEAR}-03-01`);
 	});
 });

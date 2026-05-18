@@ -15,6 +15,33 @@ import {
  */
 export const createTable = pgTableCreator((name) => `app_${name}`);
 
+export const declarationStatusEnum = pgEnum("declaration_status", [
+	"draft",
+	"awaiting_compliance_path_choice",
+	"corrective_actions_chosen",
+	"joint_evaluation_chosen",
+	"awaiting_revision_choice",
+	"revised_joint_evaluation_chosen",
+	"awaiting_cse_opinion",
+	"demarche_completed",
+]);
+
+export const compliancePathEnum = pgEnum("compliance_path", [
+	"justify",
+	"corrective_action",
+	"joint_evaluation",
+]);
+
+export const declarationEventTypeEnum = pgEnum("declaration_event_type", [
+	"submit",
+	"path_choice",
+	"second_declaration_submit",
+	"joint_evaluation_submit",
+	"cse_opinion_submit",
+	"cancel",
+	"demarche_complete",
+]);
+
 export const users = createTable("user", (d) => ({
 	id: d
 		.varchar({ length: 255 })
@@ -57,7 +84,12 @@ export const declarations = createTable(
 		variableRemunerationScore: d.integer(),
 		quartileScore: d.integer(),
 		categoryScore: d.integer(),
-		compliancePath: d.varchar({ length: 30 }),
+		firstDeclarationPathChoice: compliancePathEnum(
+			"first_declaration_path_choice",
+		),
+		secondDeclarationPathChoice: compliancePathEnum(
+			"second_declaration_path_choice",
+		),
 		// ── Indicator A — Global remuneration gap (mean) ──
 		indicatorAAnnualWomen: d.numeric(),
 		indicatorAAnnualMen: d.numeric(),
@@ -136,14 +168,12 @@ export const declarations = createTable(
 		hourlyQuartile3ProportionMen: d.numeric({ precision: 9, scale: 4 }),
 		hourlyQuartile4ProportionMen: d.numeric({ precision: 9, scale: 4 }),
 		currentStep: d.integer().default(0),
-		status: d.varchar({ length: 20 }).default("draft"),
+		status: declarationStatusEnum("status").notNull().default("draft"),
 		secondDeclarationStep: d.integer(),
-		secondDeclarationStatus: d.varchar({ length: 20 }),
 		secondDeclReferencePeriodStart: d.varchar({ length: 10 }),
 		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
-		complianceCompletedAt: d.timestamp({ withTimezone: true }),
-		cseOpinionCompletedAt: d.timestamp({ withTimezone: true }),
-		submittedAt: d.timestamp({ withTimezone: true }),
+		cseRequired: d.boolean().notNull().default(false),
+		rulesVersion: d.varchar("rules_version").notNull().default("2027.1"),
 		cancelledAt: d.timestamp({ withTimezone: false, mode: "date" }),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
@@ -153,8 +183,50 @@ export const declarations = createTable(
 			.on(t.siren, t.year)
 			.where(sql`cancelled_at IS NULL`),
 		index("declaration_declarant_idx").on(t.declarantId),
-		index("declaration_submitted_at_idx").on(t.submittedAt),
 	],
+);
+
+export const declarationStatusHistory = createTable(
+	"declaration_status_history",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		declarationId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => declarations.id, { onDelete: "cascade" }),
+		eventType: declarationEventTypeEnum("event_type").notNull(),
+		value: d.varchar({ length: 50 }),
+		round: d.integer(),
+		actorUserId: d.varchar({ length: 255 }).references(() => users.id),
+		createdAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+	}),
+	(t) => [
+		index("decl_status_history_declaration_idx").on(
+			t.declarationId,
+			t.createdAt.desc(),
+		),
+	],
+);
+
+export const declarationStatusHistoryRelations = relations(
+	declarationStatusHistory,
+	({ one }) => ({
+		declaration: one(declarations, {
+			fields: [declarationStatusHistory.declarationId],
+			references: [declarations.id],
+		}),
+		actor: one(users, {
+			fields: [declarationStatusHistory.actorUserId],
+			references: [users.id],
+		}),
+	}),
 );
 
 export const declarationsRelations = relations(
@@ -171,6 +243,7 @@ export const declarationsRelations = relations(
 		jobCategories: many(jobCategories),
 		cseOpinions: many(cseOpinions),
 		files: many(files),
+		statusHistory: many(declarationStatusHistory),
 	}),
 );
 

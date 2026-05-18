@@ -16,6 +16,29 @@ vi.mock("~/modules/shared/uploadFile", () => ({
 	uploadFile: vi.fn(),
 }));
 
+const submitJointEvaluationMock = vi.fn();
+
+vi.mock("~/trpc/react", () => ({
+	api: {
+		declaration: {
+			submitJointEvaluation: {
+				useMutation: () => ({
+					mutate: (
+						_input: undefined,
+						opts?: { onSettled?: () => void; onSuccess?: () => void },
+					) => {
+						submitJointEvaluationMock();
+						opts?.onSuccess?.();
+						opts?.onSettled?.();
+					},
+					isPending: false,
+					error: null,
+				}),
+			},
+		},
+	},
+}));
+
 const { uploadFile: uploadFileMock } = (await import(
 	"~/modules/shared/uploadFile"
 )) as unknown as { uploadFile: ReturnType<typeof vi.fn> };
@@ -165,6 +188,9 @@ describe("JointEvaluationForm", () => {
 			expect(uploadFileMock).toHaveBeenCalledWith(file, {
 				flowType: "joint_evaluation",
 			});
+		});
+		await waitFor(() => {
+			expect(submitJointEvaluationMock).toHaveBeenCalledTimes(1);
 		});
 		await waitFor(() => {
 			expect(mockPush).toHaveBeenCalledWith(expectedRedirect);

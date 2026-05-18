@@ -26,8 +26,8 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 		AUDIT_ACTIONS.DECLARATION_SUBMIT_SECOND,
 	"declaration.saveCompliancePath":
 		AUDIT_ACTIONS.DECLARATION_SAVE_COMPLIANCE_PATH,
-	"declaration.completeCompliancePath":
-		AUDIT_ACTIONS.DECLARATION_COMPLETE_COMPLIANCE_PATH,
+	"declaration.submitJointEvaluation":
+		AUDIT_ACTIONS.DECLARATION_SUBMIT_JOINT_EVALUATION,
 
 	// ── declaration sensitive query (returns GIP MDS data) ─
 	"declaration.getOrCreate": AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA,

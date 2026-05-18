@@ -1,34 +1,30 @@
 import { EXPECTED_DECLARATION_TYPES } from "~/modules/domain";
 
 import type {
+	DeclarationFsmStatus,
 	DeclarationItem,
 	DeclarationStatus,
 	DeclarationType,
 } from "./types";
 
+type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
+
 type DbDeclaration = {
 	type: DeclarationType;
 	year: number;
 	status: DeclarationStatus;
+	fsmStatus: DeclarationFsmStatus | null;
 	currentStep: number;
 	updatedAt: Date | null;
-	compliancePath: string | null;
-	secondDeclarationStatus: string | null;
-	complianceCompletedAt: Date | null;
-	cseOpinionCompletedAt: Date | null;
+	firstDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationPathChoice: CompliancePath | null;
+	hasSubmittedSecondDeclaration: boolean;
+	hasSubmittedCseOpinion: boolean;
+	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
 };
 
-/**
- * Builds the full list of declaration rows by merging expected rows
- * (one per type for the current year) with actual DB records.
- *
- * - Current year: one row per expected type, using DB data when available
- *   or a "to_complete" placeholder otherwise.
- * - Previous years: only rows that exist in DB.
- * - Sorted: current year first, then previous years descending.
- */
 export function buildDeclarationList(
 	siren: string,
 	dbDeclarations: DbDeclaration[],
@@ -37,7 +33,6 @@ export function buildDeclarationList(
 ): DeclarationItem[] {
 	const rows: DeclarationItem[] = [];
 
-	// Current year: ensure one row per expected type
 	for (const type of EXPECTED_DECLARATION_TYPES) {
 		const existing = dbDeclarations.find(
 			(d) => d.year === currentYear && d.type === type,
@@ -48,12 +43,14 @@ export function buildDeclarationList(
 				siren,
 				year: currentYear,
 				status: existing.status,
+				fsmStatus: existing.fsmStatus,
 				currentStep: existing.currentStep,
 				updatedAt: existing.updatedAt,
-				compliancePath: existing.compliancePath,
-				secondDeclarationStatus: existing.secondDeclarationStatus,
-				complianceCompletedAt: existing.complianceCompletedAt,
-				cseOpinionCompletedAt: existing.cseOpinionCompletedAt,
+				firstDeclarationPathChoice: existing.firstDeclarationPathChoice,
+				secondDeclarationPathChoice: existing.secondDeclarationPathChoice,
+				hasSubmittedSecondDeclaration: existing.hasSubmittedSecondDeclaration,
+				hasSubmittedCseOpinion: existing.hasSubmittedCseOpinion,
+				cseRequired: existing.cseRequired,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
 				hasPrefillData: existing.hasPrefillData,
 			});
@@ -63,12 +60,14 @@ export function buildDeclarationList(
 				siren,
 				year: currentYear,
 				status: "to_complete",
+				fsmStatus: null,
 				currentStep: 0,
 				updatedAt: null,
-				compliancePath: null,
-				secondDeclarationStatus: null,
-				complianceCompletedAt: null,
-				cseOpinionCompletedAt: null,
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+				hasSubmittedSecondDeclaration: false,
+				hasSubmittedCseOpinion: false,
+				cseRequired: false,
 				hasJointEvaluationFile: false,
 				hasPrefillData:
 					type === "remuneration" && yearsWithPrefill.has(currentYear),
@@ -76,7 +75,6 @@ export function buildDeclarationList(
 		}
 	}
 
-	// Previous years: only show DB records, sorted by year desc
 	const previousYears = dbDeclarations
 		.filter((d) => d.year < currentYear)
 		.sort((a, b) => b.year - a.year);
@@ -87,12 +85,14 @@ export function buildDeclarationList(
 			siren,
 			year: d.year,
 			status: d.status,
+			fsmStatus: d.fsmStatus,
 			currentStep: d.currentStep,
 			updatedAt: d.updatedAt,
-			compliancePath: d.compliancePath,
-			secondDeclarationStatus: d.secondDeclarationStatus,
-			complianceCompletedAt: d.complianceCompletedAt,
-			cseOpinionCompletedAt: d.cseOpinionCompletedAt,
+			firstDeclarationPathChoice: d.firstDeclarationPathChoice,
+			secondDeclarationPathChoice: d.secondDeclarationPathChoice,
+			hasSubmittedSecondDeclaration: d.hasSubmittedSecondDeclaration,
+			hasSubmittedCseOpinion: d.hasSubmittedCseOpinion,
+			cseRequired: d.cseRequired,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
 			hasPrefillData: d.hasPrefillData,
 		});

@@ -26,7 +26,7 @@ export default async function StepPage({ params }: StepPageProps) {
 	const data = await api.declaration.getOrCreate();
 	const d = data.declaration;
 
-	if (d.status === "submitted" && step !== 6) {
+	if (d.status !== "draft" && step !== 6) {
 		const { decl1ModificationDeadline } = await getCampaignDeadlines(d.year);
 		if (
 			shouldRedirectSubmittedToRecap({

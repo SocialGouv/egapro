@@ -50,7 +50,7 @@ export function DeclarationSummary({
 				</tr>
 				<tr>
 					<th scope="row">Parcours conformité</th>
-					<td>{declaration.compliancePath ?? "—"}</td>
+					<td>{declaration.firstDeclarationPathChoice ?? "—"}</td>
 				</tr>
 				<tr>
 					<th scope="row">Date de création</th>

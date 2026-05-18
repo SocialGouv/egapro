@@ -4,11 +4,6 @@ import { ConfirmationPage } from "../ConfirmationPage";
 
 vi.mock("~/trpc/react", () => ({
 	api: {
-		declaration: {
-			completeCompliancePath: {
-				useMutation: () => ({ mutate: vi.fn() }),
-			},
-		},
 		mail: {
 			resendReceipt: {
 				useMutation: () => ({ mutate: vi.fn(), isPending: false }),

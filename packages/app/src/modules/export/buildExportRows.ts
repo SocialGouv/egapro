@@ -1,5 +1,6 @@
-import { and, eq, isNotNull, or } from "drizzle-orm";
+import { and, eq, isNotNull, ne, or } from "drizzle-orm";
 
+import { GAP_ALERT_THRESHOLD, isIndicatorGRequired } from "~/modules/domain";
 import type { DB } from "~/server/db";
 import { companies, declarations, users } from "~/server/db/schema";
 import { mapCseOpinions } from "./mapIndicators";
@@ -7,13 +8,25 @@ import {
 	fetchCseOpinionsByDeclaration,
 	getDeclarationsWithIndicatorG,
 	indicatorColumns,
+	statusHistoryProjection,
 } from "./queries";
 import type { ExportRow } from "./types";
 
-/**
- * Query all submitted declarations for a given year
- * and flatten them into ExportRow objects ready for XLSX generation.
- */
+const PHASE2_SIZE_MIN = 100;
+
+function computePhase2Required(
+	workforce: number | null,
+	hasIndicatorG: boolean,
+	globalAnnualMeanGap: number | null,
+): boolean {
+	if (workforce === null || globalAnnualMeanGap === null) return false;
+	return (
+		workforce >= PHASE2_SIZE_MIN &&
+		hasIndicatorG &&
+		Math.abs(globalAnnualMeanGap) >= GAP_ALERT_THRESHOLD
+	);
+}
+
 export async function buildExportRows(
 	db: DB,
 	year: number,
@@ -23,14 +36,16 @@ export async function buildExportRows(
 			siren: declarations.siren,
 			year: declarations.year,
 			status: declarations.status,
-			compliancePath: declarations.compliancePath,
+			firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
+			secondDeclarationPathChoice: declarations.secondDeclarationPathChoice,
 			totalWomen: declarations.totalWomen,
 			totalMen: declarations.totalMen,
 			remunerationScore: declarations.remunerationScore,
 			variableRemunerationScore: declarations.variableRemunerationScore,
 			quartileScore: declarations.quartileScore,
 			categoryScore: declarations.categoryScore,
-			secondDeclarationStatus: declarations.secondDeclarationStatus,
+			cseRequired: declarations.cseRequired,
+			rulesVersion: declarations.rulesVersion,
 			secondDeclReferencePeriodStart:
 				declarations.secondDeclReferencePeriodStart,
 			secondDeclReferencePeriodEnd: declarations.secondDeclReferencePeriodEnd,
@@ -47,6 +62,7 @@ export async function buildExportRows(
 			declarantLastName: users.lastName,
 			declarantEmail: users.email,
 			declarantPhone: users.phone,
+			...statusHistoryProjection,
 			...indicatorColumns,
 		})
 		.from(declarations)
@@ -56,7 +72,7 @@ export async function buildExportRows(
 			and(
 				eq(declarations.year, year),
 				or(
-					eq(declarations.status, "submitted"),
+					ne(declarations.status, "draft"),
 					isNotNull(declarations.cancelledAt),
 				),
 			),
@@ -70,6 +86,27 @@ export async function buildExportRows(
 	]);
 
 	return rows.map((row) => {
+		const hasIndicatorGForThisDecl = hasIndicatorG.has(row.declarationId);
+		const globalAnnualMeanGap = row.globalAnnualMeanGap
+			? Number(row.globalAnnualMeanGap) * 100
+			: null;
+		const variableAnnualMeanGap = row.variableAnnualMeanGap
+			? Number(row.variableAnnualMeanGap) * 100
+			: null;
+		const phase2Required = computePhase2Required(
+			row.workforce,
+			hasIndicatorGForThisDecl,
+			globalAnnualMeanGap,
+		);
+		const phase2RevisionRequired =
+			phase2Required &&
+			row.secondDeclarationSubmittedAt !== null &&
+			variableAnnualMeanGap !== null &&
+			Math.abs(variableAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
+		const indicatorGRequired = isIndicatorGRequired(
+			row.workforce ?? 0,
+			row.year,
+		);
 		return {
 			siren: row.siren,
 			companyName: row.companyName,
@@ -79,12 +116,27 @@ export async function buildExportRows(
 			hasCse: row.hasCse,
 			year: row.year,
 			status: row.status,
-			declarationType: hasIndicatorG.has(row.declarationId)
+			declarationType: hasIndicatorGForThisDecl
 				? ("7_indicateurs" as const)
 				: ("6_indicateurs" as const),
-			compliancePath: row.compliancePath,
+			firstDeclarationPathChoice: row.firstDeclarationPathChoice,
+			secondDeclarationPathChoice: row.secondDeclarationPathChoice,
 			createdAt: row.createdAt?.toISOString() ?? null,
 			updatedAt: row.updatedAt?.toISOString() ?? null,
+			submittedAt: row.submittedAt?.toISOString() ?? null,
+			firstDeclarationPathChoiceAt:
+				row.firstDeclarationPathChoiceAt?.toISOString() ?? null,
+			secondDeclarationPathChoiceAt:
+				row.secondDeclarationPathChoiceAt?.toISOString() ?? null,
+			jointEvaluationSubmittedAt:
+				row.jointEvaluationSubmittedAt?.toISOString() ?? null,
+			cseOpinionCompletedAt: row.cseOpinionCompletedAt?.toISOString() ?? null,
+			demarcheCompletedAt: row.demarcheCompletedAt?.toISOString() ?? null,
+			phase2Required,
+			phase2RevisionRequired,
+			cseRequired: row.cseRequired,
+			indicatorGRequired,
+			rulesVersion: row.rulesVersion,
 			cancelledAt: row.cancelledAt?.toISOString() ?? null,
 			totalWomen: row.totalWomen,
 			totalMen: row.totalMen,
@@ -139,7 +191,9 @@ export async function buildExportRows(
 			indFHourlyQ3Men: row.indicatorFHourlyMen3,
 			indFHourlyQ4Women: row.indicatorFHourlyWomen4,
 			indFHourlyQ4Men: row.indicatorFHourlyMen4,
-			secondDeclarationStatus: row.secondDeclarationStatus,
+			secondDeclarationSubmittedAt:
+				row.secondDeclarationSubmittedAt?.toISOString() ?? null,
+			secondDeclarationSubmitted: row.secondDeclarationSubmittedAt !== null,
 			secondDeclReferencePeriodStart: row.secondDeclReferencePeriodStart,
 			secondDeclReferencePeriodEnd: row.secondDeclReferencePeriodEnd,
 			declarantFirstName: row.declarantFirstName,

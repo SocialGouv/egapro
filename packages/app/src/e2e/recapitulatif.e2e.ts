@@ -4,7 +4,7 @@ import { setDeclarationComplianceState } from "./helpers/db";
 test.describe("Recapitulatif page", () => {
 	test.beforeAll(async () => {
 		await setDeclarationComplianceState({
-			status: "submitted",
+			status: "awaiting_compliance_path_choice",
 			currentStep: 6,
 		});
 	});

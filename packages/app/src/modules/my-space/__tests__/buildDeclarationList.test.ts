@@ -3,14 +3,16 @@ import { describe, expect, it } from "vitest";
 import { buildDeclarationList } from "../buildDeclarationList";
 
 const SIREN = "532847196";
-const NO_COMPLIANCE = {
-	compliancePath: null,
-	secondDeclarationStatus: null,
-	complianceCompletedAt: null,
-	cseOpinionCompletedAt: null,
+const EMPTY_DECLARATION = {
+	firstDeclarationPathChoice: null,
+	secondDeclarationPathChoice: null,
+	hasSubmittedSecondDeclaration: false,
+	hasSubmittedCseOpinion: false,
+	cseRequired: false,
 	hasJointEvaluationFile: false,
 	hasPrefillData: false,
 };
+const PLACEHOLDER_ROW = { ...EMPTY_DECLARATION, fsmStatus: null };
 
 describe("buildDeclarationList", () => {
 	it("returns two rows (remuneration + representation) for the current year when no DB records exist", () => {
@@ -24,7 +26,7 @@ describe("buildDeclarationList", () => {
 				status: "to_complete",
 				currentStep: 0,
 				updatedAt: null,
-				...NO_COMPLIANCE,
+				...PLACEHOLDER_ROW,
 			},
 			{
 				type: "representation",
@@ -33,7 +35,7 @@ describe("buildDeclarationList", () => {
 				status: "to_complete",
 				currentStep: 0,
 				updatedAt: null,
-				...NO_COMPLIANCE,
+				...PLACEHOLDER_ROW,
 			},
 		]);
 	});
@@ -47,9 +49,10 @@ describe("buildDeclarationList", () => {
 					type: "remuneration",
 					year: 2026,
 					status: "in_progress",
+					fsmStatus: "draft",
 					currentStep: 3,
 					updatedAt,
-					...NO_COMPLIANCE,
+					...EMPTY_DECLARATION,
 				},
 			],
 			2026,
@@ -61,14 +64,16 @@ describe("buildDeclarationList", () => {
 			siren: SIREN,
 			year: 2026,
 			status: "in_progress",
+			fsmStatus: "draft",
 			currentStep: 3,
 			updatedAt,
-			...NO_COMPLIANCE,
+			...EMPTY_DECLARATION,
 		});
 		expect(result[1]).toMatchObject({
 			type: "representation",
 			year: 2026,
 			status: "to_complete",
+			fsmStatus: null,
 		});
 	});
 
@@ -81,9 +86,10 @@ describe("buildDeclarationList", () => {
 					type: "remuneration",
 					year: 2025,
 					status: "done",
+					fsmStatus: "demarche_completed",
 					currentStep: 6,
 					updatedAt: updatedAt2025,
-					...NO_COMPLIANCE,
+					...EMPTY_DECLARATION,
 				},
 			],
 			2026,
@@ -94,15 +100,18 @@ describe("buildDeclarationList", () => {
 			type: "remuneration",
 			year: 2026,
 			status: "to_complete",
+			fsmStatus: null,
 		});
 		expect(result[1]).toMatchObject({
 			type: "representation",
 			year: 2026,
 			status: "to_complete",
+			fsmStatus: null,
 		});
 		expect(result[2]).toMatchObject({
 			year: 2025,
 			status: "done",
+			fsmStatus: "demarche_completed",
 			updatedAt: updatedAt2025,
 		});
 	});
@@ -115,25 +124,28 @@ describe("buildDeclarationList", () => {
 					type: "remuneration",
 					year: 2023,
 					status: "done",
+					fsmStatus: "demarche_completed",
 					currentStep: 6,
 					updatedAt: null,
-					...NO_COMPLIANCE,
+					...EMPTY_DECLARATION,
 				},
 				{
 					type: "remuneration",
 					year: 2025,
 					status: "done",
+					fsmStatus: "demarche_completed",
 					currentStep: 6,
 					updatedAt: null,
-					...NO_COMPLIANCE,
+					...EMPTY_DECLARATION,
 				},
 				{
 					type: "remuneration",
 					year: 2024,
 					status: "done",
+					fsmStatus: "demarche_completed",
 					currentStep: 6,
 					updatedAt: null,
-					...NO_COMPLIANCE,
+					...EMPTY_DECLARATION,
 				},
 			],
 			2026,
@@ -156,17 +168,19 @@ describe("buildDeclarationList", () => {
 					type: "remuneration",
 					year: 2026,
 					status: "done",
+					fsmStatus: "awaiting_compliance_path_choice",
 					currentStep: 6,
 					updatedAt,
-					...NO_COMPLIANCE,
+					...EMPTY_DECLARATION,
 				},
 				{
 					type: "remuneration",
 					year: 2025,
 					status: "done",
+					fsmStatus: "demarche_completed",
 					currentStep: 6,
 					updatedAt: null,
-					...NO_COMPLIANCE,
+					...EMPTY_DECLARATION,
 				},
 			],
 			2026,
@@ -177,16 +191,45 @@ describe("buildDeclarationList", () => {
 			type: "remuneration",
 			year: 2026,
 			status: "done",
+			fsmStatus: "awaiting_compliance_path_choice",
 		});
 		expect(result[1]).toMatchObject({
 			type: "representation",
 			year: 2026,
 			status: "to_complete",
+			fsmStatus: null,
 		});
 		expect(result[2]).toMatchObject({
 			type: "remuneration",
 			year: 2025,
 			status: "done",
+			fsmStatus: "demarche_completed",
+		});
+	});
+
+	it("propagates cseRequired from DB records", () => {
+		const result = buildDeclarationList(
+			SIREN,
+			[
+				{
+					type: "remuneration",
+					year: 2026,
+					status: "done",
+					fsmStatus: "awaiting_cse_opinion",
+					currentStep: 6,
+					updatedAt: null,
+					...EMPTY_DECLARATION,
+					cseRequired: true,
+				},
+			],
+			2026,
+		);
+
+		expect(result[0]).toMatchObject({
+			type: "remuneration",
+			year: 2026,
+			fsmStatus: "awaiting_cse_opinion",
+			cseRequired: true,
 		});
 	});
 });

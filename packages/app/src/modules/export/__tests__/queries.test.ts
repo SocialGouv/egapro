@@ -39,7 +39,7 @@ describe("fetchSubmittedDeclarations — composite temporal filter", () => {
 		expect(fields).toHaveProperty("cancelledAt");
 	});
 
-	it("should compose an OR with two AND branches: cancelled_at-window OR (submitted + updated_at-window + cancelled_at IS NULL)", async () => {
+	it("should compose an OR with two AND branches: cancelled_at-window OR (non-draft + updated_at-window + cancelled_at IS NULL)", async () => {
 		const { fetchSubmittedDeclarations } = await import("../queries");
 		await fetchSubmittedDeclarations("2025-04-01", "2025-05-01");
 
@@ -48,11 +48,11 @@ describe("fetchSubmittedDeclarations — composite temporal filter", () => {
 		expect(sql).toMatch(/\bor\b/i);
 		expect(sql).toContain('"cancelled_at" >=');
 		expect(sql).toContain('"cancelled_at" <');
-		expect(sql).toContain('"status" =');
+		expect(sql).toContain('"status" <>');
 		expect(sql).toContain('"updated_at" >=');
 		expect(sql).toContain('"updated_at" <');
 		expect(sql).toContain('"cancelled_at" is null');
-		expect(params).toContain("submitted");
+		expect(params).toContain("draft");
 		const dateBegin = new Date("2025-04-01T00:00:00Z").toISOString();
 		const dateEnd = new Date("2025-05-01T00:00:00Z").toISOString();
 		const dateLikeParams = params.filter(
@@ -68,16 +68,16 @@ describe("fetchSubmittedDeclarations — composite temporal filter", () => {
 		expect(endCount).toBe(2);
 	});
 
-	it("should not gate the cancelled-window arm on status='submitted'", async () => {
+	it("should not gate the cancelled-window arm on status check", async () => {
 		// Annulation tardive d'une déclaration soumise hors fenêtre :
-		// le filtre composite doit la capter sans exiger status='submitted'
+		// le filtre composite doit la capter sans exiger status<>'draft'
 		// dans la même conjonction. Le statut n'apparaît que dans l'arm 2.
 		const { fetchSubmittedDeclarations } = await import("../queries");
 		await fetchSubmittedDeclarations("2025-04-01", "2025-05-01");
 
 		const { sql, params } = compileWhere();
 
-		expect(params.filter((p) => p === "submitted")).toHaveLength(1);
+		expect(params.filter((p) => p === "draft")).toHaveLength(1);
 		const orIndex = sql.toLowerCase().indexOf(" or ");
 		expect(orIndex).toBeGreaterThan(0);
 		const beforeOr = sql.slice(0, orIndex).toLowerCase();

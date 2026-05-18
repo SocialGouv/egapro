@@ -32,7 +32,7 @@ type Props = {
 		secondDeclGapDate: string | null;
 	};
 	email?: string;
-	compliancePath?: string | null;
+	firstDeclarationPathChoice?: string | null;
 	hasSecondDeclaration?: boolean;
 };
 
@@ -40,10 +40,10 @@ export function Step1Opinions({
 	cseDeadline,
 	initialData,
 	email,
-	compliancePath,
+	firstDeclarationPathChoice,
 	hasSecondDeclaration = true,
 }: Props) {
-	const isJointEvaluation = compliancePath === "joint_evaluation";
+	const isJointEvaluation = firstDeclarationPathChoice === "joint_evaluation";
 	const router = useRouter();
 	const readOnlyGuard = useReadOnlyGuard();
 

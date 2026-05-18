@@ -1,20 +1,24 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, getDefaultCampaignDeadlines } from "~/modules/domain";
 import { DeclarationsSection } from "../DeclarationsSection";
 import type { DeclarationItem } from "../types";
 
 const currentYear = getCurrentYear();
+const campaignDeadlines = getDefaultCampaignDeadlines(currentYear);
 
 const NO_COMPLIANCE = {
-	compliancePath: null,
-	secondDeclarationStatus: null,
-	complianceCompletedAt: null,
-	cseOpinionCompletedAt: null,
+	fsmStatus: null,
+	firstDeclarationPathChoice: null,
+	secondDeclarationPathChoice: null,
+	hasSubmittedSecondDeclaration: false,
+
+	hasSubmittedCseOpinion: false,
+	cseRequired: false,
 	hasJointEvaluationFile: false,
 	hasPrefillData: false,
-};
+} as const;
 
 const declarations: DeclarationItem[] = [
 	{
@@ -43,6 +47,7 @@ const declarations: DeclarationItem[] = [
 		currentStep: 6,
 		updatedAt: new Date("2025-03-15"),
 		...NO_COMPLIANCE,
+		fsmStatus: "demarche_completed",
 	},
 ];
 
@@ -51,6 +56,7 @@ function renderSection(
 ) {
 	return render(
 		<DeclarationsSection
+			campaignDeadlines={campaignDeadlines}
 			declarations={overrides?.declarations ?? declarations}
 			hasCse={true}
 			hasNoSanction={false}
@@ -89,11 +95,15 @@ describe("DeclarationsSection", () => {
 		).toHaveLength(2);
 	});
 
-	it("renders declaration rows with year, status badge, and step label", () => {
+	it("renders declaration rows with year, status badge, and process step label", () => {
 		renderSection();
 		expect(screen.getAllByText(String(currentYear))).toHaveLength(2);
 		expect(screen.getByText(String(currentYear - 1))).toBeInTheDocument();
-		expect(screen.getByText("Complétée")).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Finalisation - Démarche des indicateurs de rémunération",
+			),
+		).toBeInTheDocument();
 		expect(screen.getAllByText("À compléter")).toHaveLength(2);
 		expect(screen.getByText("Effectué")).toBeInTheDocument();
 	});

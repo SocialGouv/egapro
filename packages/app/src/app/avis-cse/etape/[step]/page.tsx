@@ -28,16 +28,17 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 			api.declaration.getOrCreate(),
 		]);
 		const initialData = mapOpinionsFromDb(opinions);
-		const hasSecondDeclaration =
-			declarationData.declaration.secondDeclarationStatus === "submitted";
+		const hasSecondDeclaration = declarationData.hasSubmittedSecondDeclaration;
 		const campaignDeadlines = await getCampaignDeadlines(
 			declarationData.declaration.year,
 		);
 		return (
 			<Step1Opinions
-				compliancePath={declarationData.declaration.compliancePath}
 				cseDeadline={campaignDeadlines.decl2JointEvaluationDeadline}
 				email={session?.user?.email ?? undefined}
+				firstDeclarationPathChoice={
+					declarationData.declaration.firstDeclarationPathChoice
+				}
 				hasSecondDeclaration={hasSecondDeclaration}
 				initialData={initialData}
 			/>
@@ -49,8 +50,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 			api.declaration.getOrCreate(),
 			api.cseOpinion.getFiles(),
 		]);
-		const hasSecondDeclaration =
-			declarationData.declaration.secondDeclarationStatus === "submitted";
+		const hasSecondDeclaration = declarationData.hasSubmittedSecondDeclaration;
 		return (
 			<Step2Upload
 				declarationYear={declarationData.declaration.year}

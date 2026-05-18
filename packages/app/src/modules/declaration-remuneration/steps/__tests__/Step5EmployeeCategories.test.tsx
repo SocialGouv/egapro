@@ -382,7 +382,12 @@ describe("Step5EmployeeCategories", () => {
 
 	it("shows a friendly error when source is not selected", async () => {
 		const user = userEvent.setup();
-		render(<Step5EmployeeCategories declarationYear={2025} />);
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+			/>,
+		);
 
 		const nameInput = screen.getByLabelText("Libellé", {
 			selector: "#cat-0-name",
