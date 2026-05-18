@@ -224,7 +224,9 @@ async function main(): Promise<void> {
 	// cert. Mirror the postgres-js permissive default by disabling chain
 	// verification — the connection stays encrypted, only the issuer
 	// check is relaxed.
-	const useSsl = /sslmode=(require|prefer|verify-ca|verify-full)/.test(notifUrl);
+	const useSsl = /sslmode=(require|prefer|verify-ca|verify-full)/.test(
+		notifUrl,
+	);
 
 	const boss = new PgBoss({
 		connectionString: notifUrl,

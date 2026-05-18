@@ -44,8 +44,9 @@ async function buildAndStart(connectionString: string): Promise<PgBoss> {
 	// cert. Mirror the postgres-js permissive default by disabling chain
 	// verification — the connection stays encrypted, only the issuer
 	// check is relaxed.
-	const useSsl =
-		/sslmode=(require|prefer|verify-ca|verify-full)/.test(connectionString);
+	const useSsl = /sslmode=(require|prefer|verify-ca|verify-full)/.test(
+		connectionString,
+	);
 	const boss = new PgBoss({
 		connectionString,
 		application_name: "egapro-app-publisher",
