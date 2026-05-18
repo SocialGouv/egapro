@@ -52,10 +52,13 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 		page,
 	}) => {
 		test.slow();
+		const startedAt = new Date();
 		await completeDeclaration(page, { hasGap: false });
 
-		const email = await waitForEmail(TEST_USER_EMAIL, (m) =>
-			/Déclaration des indicateurs/i.test(m.subject),
+		const email = await waitForEmail(
+			TEST_USER_EMAIL,
+			(m) => /Déclaration des indicateurs/i.test(m.subject),
+			{ since: startedAt },
 		);
 
 		expect(email.subject).toMatch(/Déclaration des indicateurs/i);

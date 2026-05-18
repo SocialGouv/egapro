@@ -8,6 +8,7 @@ export type MailDevEmail = {
 	subject: string;
 	html: string;
 	text?: string;
+	date?: string;
 };
 
 export async function maildevReachable(): Promise<boolean> {
@@ -35,13 +36,21 @@ export async function listEmailsTo(recipient: string): Promise<MailDevEmail[]> {
 export async function waitForEmail(
 	recipient: string,
 	predicate: (m: MailDevEmail) => boolean,
-	timeoutMs = 30_000,
+	options: { since?: Date; timeoutMs?: number } = {},
 ): Promise<MailDevEmail> {
+	const { since, timeoutMs = 30_000 } = options;
+	const sinceMs = since?.getTime();
 	const deadline = Date.now() + timeoutMs;
 	let last: MailDevEmail[] = [];
 	while (Date.now() < deadline) {
 		last = await listEmailsTo(recipient);
-		const match = last.find(predicate);
+		const fresh =
+			sinceMs === undefined
+				? last
+				: last.filter((m) =>
+						m.date ? new Date(m.date).getTime() >= sinceMs : true,
+					);
+		const match = fresh.find(predicate);
 		if (match) return match;
 		await new Promise((r) => setTimeout(r, 500));
 	}
