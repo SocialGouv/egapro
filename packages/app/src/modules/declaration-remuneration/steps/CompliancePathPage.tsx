@@ -74,12 +74,6 @@ export async function CompliancePathPage() {
 	const email = session?.user?.email ?? "";
 	const currentYear = data.declaration.year;
 	const campaignDeadlines = await getCampaignDeadlines(currentYear);
-	// The FSM only accepts choose_compliance_path from awaiting_compliance_
-	// path_choice / awaiting_revision_choice. Any other state means the user
-	// has moved past their choice — render the page as read-only.
-	const isReadOnly =
-		data.declaration.status !== "awaiting_compliance_path_choice" &&
-		data.declaration.status !== "awaiting_revision_choice";
 
 	return (
 		<HydrateClient>
@@ -90,7 +84,6 @@ export async function CompliancePathPage() {
 				declarationYear={currentYear}
 				email={email}
 				initialPath={data.declaration.firstDeclarationPathChoice ?? undefined}
-				isReadOnly={isReadOnly}
 				isSecondRound={state.type === "second_round"}
 				pdfDownloadHref={
 					state.type === "second_round"

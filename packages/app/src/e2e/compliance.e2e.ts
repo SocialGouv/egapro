@@ -334,38 +334,6 @@ test.describe("Path 13.c: corrective second decl resolved → /avis-cse Précéd
 	});
 });
 
-test.describe("Path 13.d: /parcours-conformite renders read-only after path chosen + demarche_completed", () => {
-	test.beforeAll(async () => {
-		await resetDeclarationToDraft();
-		await setCompanyHasCse(true);
-		await setCompanyWorkforce(200);
-	});
-
-	test("after justify + CSE upload, revisiting /parcours-conformite shows read-only banner", async ({
-		page,
-	}) => {
-		test.slow();
-		await completeDeclaration(page, { hasGap: true });
-		await selectCompliancePath(page, "path-justify");
-		await fillCseStep1(page, false);
-		await submitCseStep2(page);
-
-		// demarche_completed: revisiting the compliance page must NOT redirect
-		// (firstDeclarationPathChoice is set) and must render the read-only banner.
-		await page.goto(COMPLIANCE_PATH);
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
-		await expect(
-			page.getByText(
-				/Vous avez déjà choisi votre parcours.*lecture seule/i,
-			),
-		).toBeVisible();
-		// Radios are disabled
-		await expect(page.locator("#path-corrective")).toBeDisabled();
-		await expect(page.locator("#path-joint")).toBeDisabled();
-		await expect(page.locator("#path-justify")).toBeDisabled();
-	});
-});
-
 // === GROUP F: Redirect guard (demarcheCompletedAt) ===
 
 test.describe("Path 12: compliance already completed → redirect", () => {
