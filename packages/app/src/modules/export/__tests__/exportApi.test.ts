@@ -1065,7 +1065,7 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.Seconde_declaration.Statut).toBe(true);
 	});
 
-	it("should include Historique_statuts with FR labels and Round on path_choice entries", async () => {
+	it("should include Historique_statuts with FR labels and Numero_declaration on path_choice entries", async () => {
 		mockFetchSubmitted.mockResolvedValue([
 			{
 				declarationId: "decl-1",
@@ -1138,7 +1138,7 @@ describe("GET /api/v1/export/declarations", () => {
 				Statut: "path_choice",
 				Libelle_statut: "Choix du parcours — Actions correctives",
 				Date: "2027-04-01T10:00:00.000Z",
-				Round: 1,
+				Numero_declaration: 1,
 			},
 		]);
 	});

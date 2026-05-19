@@ -323,11 +323,11 @@ const declarationSchema = {
 						description:
 							"Date de l'événement au format ISO-8601 UTC (`YYYY-MM-DDTHH:MM:SS.sssZ`).",
 					},
-					Round: {
+					Numero_declaration: {
 						type: "integer",
 						enum: [1, 2],
 						description:
-							'Numéro de round (1 ou 2). Présent uniquement pour `Statut === "path_choice"`. Absent pour les autres événements.',
+							'Numéro de la déclaration concernée par le choix de parcours : 1 = déclaration initiale, 2 = seconde déclaration. Présent uniquement pour `Statut === "path_choice"`. Absent pour les autres événements.',
 					},
 				},
 			},

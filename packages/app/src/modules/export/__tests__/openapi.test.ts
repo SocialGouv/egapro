@@ -101,11 +101,13 @@ describe("openApiSpec", () => {
 			expect(historiqueSchema.items.properties.Date.format).toBe("date-time");
 		});
 
-		it("declares Round as optional integer enum [1, 2]", () => {
-			const round = historiqueSchema.items.properties.Round;
-			expect(round.type).toBe("integer");
-			expect(round.enum).toEqual([1, 2]);
-			expect(historiqueSchema.items.required).not.toContain("Round");
+		it("declares Numero_declaration as optional integer enum [1, 2]", () => {
+			const numero = historiqueSchema.items.properties.Numero_declaration;
+			expect(numero.type).toBe("integer");
+			expect(numero.enum).toEqual([1, 2]);
+			expect(historiqueSchema.items.required).not.toContain(
+				"Numero_declaration",
+			);
 		});
 	});
 });

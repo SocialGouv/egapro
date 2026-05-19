@@ -573,7 +573,7 @@ describe("assembleDeclaration", () => {
 		]);
 	});
 
-	it("should expose Round and Libelle for path_choice corrective_action (S2)", () => {
+	it("should expose Numero_declaration and Libelle for path_choice corrective_action (S2)", () => {
 		const row = {
 			...baseRow,
 			statusHistoryArray: [
@@ -593,7 +593,7 @@ describe("assembleDeclaration", () => {
 				Statut: "path_choice",
 				Libelle_statut: "Choix du parcours — Actions correctives",
 				Date: "2027-04-01T10:00:00.000Z",
-				Round: 1,
+				Numero_declaration: 1,
 			},
 		]);
 	});
@@ -644,7 +644,10 @@ describe("assembleDeclaration", () => {
 		expect(result.Historique_statuts[1]?.Libelle_statut).toBe(
 			"Choix du parcours — Évaluation conjointe",
 		);
-		expect(result.Historique_statuts[1]).toHaveProperty("Round", 1);
+		expect(result.Historique_statuts[1]).toHaveProperty(
+			"Numero_declaration",
+			1,
+		);
 		expect(result.Historique_statuts[2]?.Libelle_statut).toBe(
 			"Dépôt du rapport d'évaluation conjointe",
 		);
@@ -656,7 +659,7 @@ describe("assembleDeclaration", () => {
 		);
 	});
 
-	it("should expose two path_choice entries with their own Round (S4)", () => {
+	it("should expose two path_choice entries with their own Numero_declaration (S4)", () => {
 		const row = {
 			...baseRow,
 			statusHistoryArray: [
@@ -681,12 +684,12 @@ describe("assembleDeclaration", () => {
 		expect(result.Historique_statuts[0]).toMatchObject({
 			Statut: "path_choice",
 			Libelle_statut: "Choix du parcours — Justification de l'écart",
-			Round: 1,
+			Numero_declaration: 1,
 		});
 		expect(result.Historique_statuts[1]).toMatchObject({
 			Statut: "path_choice",
 			Libelle_statut: "Choix du parcours — Actions correctives",
-			Round: 2,
+			Numero_declaration: 2,
 		});
 	});
 
@@ -748,7 +751,7 @@ describe("assembleDeclaration", () => {
 		]);
 	});
 
-	it("should not add Round key when path_choice round is null", () => {
+	it("should not add Numero_declaration key when path_choice round is null", () => {
 		const row = {
 			...baseRow,
 			statusHistoryArray: [
@@ -763,7 +766,9 @@ describe("assembleDeclaration", () => {
 
 		const result = assembleDeclaration(row, [], []);
 
-		expect(result.Historique_statuts[0]).not.toHaveProperty("Round");
+		expect(result.Historique_statuts[0]).not.toHaveProperty(
+			"Numero_declaration",
+		);
 		expect(result.Historique_statuts[0]?.Libelle_statut).toBe(
 			"Choix du parcours",
 		);

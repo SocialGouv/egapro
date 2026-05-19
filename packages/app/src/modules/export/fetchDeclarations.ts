@@ -339,7 +339,7 @@ export function assembleDeclaration(
 				Date: entry.createdAt,
 			};
 			return entry.eventType === "path_choice" && entry.round !== null
-				? { ...base, Round: entry.round }
+				? { ...base, Numero_declaration: entry.round }
 				: base;
 		}),
 		Effectif_F_rem_annuelle_globale: row.totalWomen,
