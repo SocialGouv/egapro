@@ -238,4 +238,61 @@ describe("CompliancePathChoice", () => {
 		);
 		expect(screen.getByText("john@company.fr")).toBeInTheDocument();
 	});
+
+	describe("read-only mode", () => {
+		it("renders the read-only info banner when isReadOnly is true", () => {
+			render(
+				<CompliancePathChoice
+					campaignDeadlines={campaignDeadlines}
+					currentYear={2026}
+					declarationSiren={DECLARATION_SIREN}
+					declarationYear={DECLARATION_YEAR}
+					email="test@example.fr"
+					initialPath="justify"
+					isReadOnly
+				/>,
+			);
+			expect(
+				screen.getByText(
+					/Vous avez déjà choisi votre parcours.*lecture seule/i,
+				),
+			).toBeInTheDocument();
+		});
+
+		it("disables the radio inputs when isReadOnly is true", () => {
+			render(
+				<CompliancePathChoice
+					campaignDeadlines={campaignDeadlines}
+					currentYear={2026}
+					declarationSiren={DECLARATION_SIREN}
+					declarationYear={DECLARATION_YEAR}
+					email="test@example.fr"
+					initialPath="justify"
+					isReadOnly
+				/>,
+			);
+			expect(screen.getByRole("radio", { name: /Justifier/i })).toBeDisabled();
+			expect(
+				screen.getByRole("radio", { name: /Actions correctives/i }),
+			).toBeDisabled();
+			expect(
+				screen.getByRole("radio", { name: /Évaluation conjointe/i }),
+			).toBeDisabled();
+		});
+
+		it("disables the next button when isReadOnly is true", () => {
+			render(
+				<CompliancePathChoice
+					campaignDeadlines={campaignDeadlines}
+					currentYear={2026}
+					declarationSiren={DECLARATION_SIREN}
+					declarationYear={DECLARATION_YEAR}
+					email="test@example.fr"
+					initialPath="justify"
+					isReadOnly
+				/>,
+			);
+			expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
+		});
+	});
 });

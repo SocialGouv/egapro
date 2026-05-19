@@ -31,6 +31,13 @@ type Props = {
 	initialPath?: CompliancePathValue;
 	isSecondRound?: boolean;
 	pdfDownloadHref?: string;
+	/**
+	 * True when the FSM no longer accepts a `choose_compliance_path` action
+	 * from the current state (any state other than awaiting_compliance_path_
+	 * choice / awaiting_revision_choice). Renders the page as a read-only
+	 * recap of the path the user previously picked, with an info banner.
+	 */
+	isReadOnly?: boolean;
 };
 
 export function CompliancePathChoice({
@@ -42,6 +49,7 @@ export function CompliancePathChoice({
 	initialPath,
 	isSecondRound = false,
 	pdfDownloadHref,
+	isReadOnly = false,
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
@@ -93,7 +101,7 @@ export function CompliancePathChoice({
 	});
 
 	const onSubmit = form.handleSubmit((data) => {
-		if (!data.path) return;
+		if (isReadOnly || !data.path) return;
 		mutation.mutate({ path: data.path });
 	});
 
@@ -123,12 +131,21 @@ export function CompliancePathChoice({
 				salariés
 			</h2>
 
-			<p className="fr-mb-0">
-				Des écarts ≥ 5 % ont été constatés,{" "}
-				<span className="fr-text--medium">
-					vous devez engager l&apos;un des parcours suivants.
-				</span>
-			</p>
+			{isReadOnly ? (
+				<div className="fr-alert fr-alert--info">
+					<p>
+						Vous avez déjà choisi votre parcours de mise en conformité. Cette
+						page est consultée en lecture seule.
+					</p>
+				</div>
+			) : (
+				<p className="fr-mb-0">
+					Des écarts ≥ 5 % ont été constatés,{" "}
+					<span className="fr-text--medium">
+						vous devez engager l&apos;un des parcours suivants.
+					</span>
+				</p>
+			)}
 
 			<div className={common.flexColumnGap1}>
 				<h3 className="fr-h6 fr-mb-0">
@@ -162,7 +179,7 @@ export function CompliancePathChoice({
 
 						{isSecondRound ? (
 							<SecondRoundOptions
-								disabled={isImpersonating}
+								disabled={isImpersonating || isReadOnly}
 								jointEvaluationDeadline={
 									campaignDeadlines.decl2JointEvaluationDeadline
 								}
@@ -177,7 +194,7 @@ export function CompliancePathChoice({
 								correctiveActionDeadline={
 									campaignDeadlines.decl2ModificationDeadline
 								}
-								disabled={isImpersonating}
+								disabled={isImpersonating || isReadOnly}
 								jointEvaluationDeadline={
 									campaignDeadlines.decl1JointEvaluationDeadline
 								}
@@ -197,7 +214,7 @@ export function CompliancePathChoice({
 				mimoquageNextHref={
 					initialPath ? getCompliancePathHref(initialPath) : undefined
 				}
-				nextDisabled={!selectedPath}
+				nextDisabled={!selectedPath || isReadOnly}
 				nextLabel="Suivant"
 				previousHref="/declaration-remuneration/etape/6"
 			/>

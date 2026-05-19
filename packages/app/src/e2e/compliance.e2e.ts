@@ -273,6 +273,99 @@ test.describe("Path 11: second round + joint evaluation + no hasCse → /confirm
 	});
 });
 
+// === GROUP F.0: /avis-cse Précédent button routes via rule-engine state ===
+
+test.describe("Path 13.a: no gap → /avis-cse Précédent → /etape/6 (recap)", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
+	});
+
+	test("after no-gap submission, Précédent on /avis-cse goes to step 6", async ({
+		page,
+	}) => {
+		test.slow();
+		await completeDeclaration(page, { hasGap: false });
+		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.getByRole("link", { name: /Précédent/ }).click();
+		await page.waitForURL("**/declaration-remuneration/etape/6", {
+			timeout: 10_000,
+		});
+	});
+});
+
+test.describe("Path 13.b: justify round 1 → /avis-cse Précédent → /parcours-conformite", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
+	});
+
+	test("after justify choice, Précédent on /avis-cse goes back to compliance choice", async ({
+		page,
+	}) => {
+		test.slow();
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-justify");
+		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.getByRole("link", { name: /Précédent/ }).click();
+		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+	});
+});
+
+test.describe("Path 13.c: corrective second decl resolved → /avis-cse Précédent → /etape/3", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
+	});
+
+	test("after second-decl resolved, Précédent on /avis-cse goes to second-decl recap", async ({
+		page,
+	}) => {
+		test.slow();
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-corrective");
+		await completeSecondDeclaration(page, { hasGap: false });
+		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.getByRole("link", { name: /Précédent/ }).click();
+		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/3`, { timeout: 10_000 });
+	});
+});
+
+test.describe("Path 13.d: /parcours-conformite renders read-only after path chosen + demarche_completed", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
+	});
+
+	test("after justify + CSE upload, revisiting /parcours-conformite shows read-only banner", async ({
+		page,
+	}) => {
+		test.slow();
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-justify");
+		await fillCseStep1(page, false);
+		await submitCseStep2(page);
+
+		// demarche_completed: revisiting the compliance page must NOT redirect
+		// (firstDeclarationPathChoice is set) and must render the read-only banner.
+		await page.goto(COMPLIANCE_PATH);
+		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		await expect(
+			page.getByText(
+				/Vous avez déjà choisi votre parcours.*lecture seule/i,
+			),
+		).toBeVisible();
+		// Radios are disabled
+		await expect(page.locator("#path-corrective")).toBeDisabled();
+		await expect(page.locator("#path-joint")).toBeDisabled();
+		await expect(page.locator("#path-justify")).toBeDisabled();
+	});
+});
+
 // === GROUP F: Redirect guard (demarcheCompletedAt) ===
 
 test.describe("Path 12: compliance already completed → redirect", () => {
