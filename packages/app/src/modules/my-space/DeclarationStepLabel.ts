@@ -2,8 +2,7 @@ import type { DeclarationFsmStatus } from "~/modules/domain";
 
 const PROCESS_STEP_LABELS: Record<DeclarationFsmStatus, string> = {
 	draft: "Déclaration des indicateurs de rémunération",
-	awaiting_compliance_path_choice:
-		"Choix du parcours de mise en conformité",
+	awaiting_compliance_path_choice: "Choix du parcours de mise en conformité",
 	corrective_actions_chosen: "Actions correctives et seconde déclaration",
 	awaiting_revision_choice:
 		"Choix du parcours de mise en conformité (Deuxième déclaration)",
