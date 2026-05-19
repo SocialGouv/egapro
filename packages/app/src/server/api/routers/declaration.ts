@@ -11,7 +11,6 @@ import {
 	updateStep3Schema,
 	updateStep4Schema,
 } from "~/modules/declaration-remuneration/schemas";
-import { computeIndicatorPercentages } from "~/modules/declaration-remuneration/shared/computeIndicatorPercentages";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import {
 	COMPANY_SIZE_ANNUAL_MIN,
@@ -36,6 +35,7 @@ import {
 import { applyAction, loadRules } from "~/server/rules/engine";
 import {
 	activeDeclarationFilter,
+	applyPercentagesAfterUpdate,
 	buildEmployeeCategoryValues,
 	buildPlaceholderDeclaration,
 	deleteJobAndEmployeeCategories,
@@ -332,6 +332,8 @@ export const declarationRouter = createTRPCRouter({
 							: {}),
 					})
 					.where(activeDeclarationFilter(siren, year));
+
+				await applyPercentagesAfterUpdate(tx, siren, year);
 			});
 
 			return { success: true };
@@ -343,21 +345,25 @@ export const declarationRouter = createTRPCRouter({
 			const siren = ctx.siren;
 			const year = getCurrentYear();
 
-			await ctx.db
-				.update(declarations)
-				.set({
-					indicatorAAnnualWomen: input.indicatorAAnnualWomen ?? null,
-					indicatorAAnnualMen: input.indicatorAAnnualMen ?? null,
-					indicatorAHourlyWomen: input.indicatorAHourlyWomen ?? null,
-					indicatorAHourlyMen: input.indicatorAHourlyMen ?? null,
-					indicatorCAnnualWomen: input.indicatorCAnnualWomen ?? null,
-					indicatorCAnnualMen: input.indicatorCAnnualMen ?? null,
-					indicatorCHourlyWomen: input.indicatorCHourlyWomen ?? null,
-					indicatorCHourlyMen: input.indicatorCHourlyMen ?? null,
-					currentStep: 2,
-					updatedAt: new Date(),
-				})
-				.where(activeDeclarationFilter(siren, year));
+			await ctx.db.transaction(async (tx) => {
+				await tx
+					.update(declarations)
+					.set({
+						indicatorAAnnualWomen: input.indicatorAAnnualWomen ?? null,
+						indicatorAAnnualMen: input.indicatorAAnnualMen ?? null,
+						indicatorAHourlyWomen: input.indicatorAHourlyWomen ?? null,
+						indicatorAHourlyMen: input.indicatorAHourlyMen ?? null,
+						indicatorCAnnualWomen: input.indicatorCAnnualWomen ?? null,
+						indicatorCAnnualMen: input.indicatorCAnnualMen ?? null,
+						indicatorCHourlyWomen: input.indicatorCHourlyWomen ?? null,
+						indicatorCHourlyMen: input.indicatorCHourlyMen ?? null,
+						currentStep: 2,
+						updatedAt: new Date(),
+					})
+					.where(activeDeclarationFilter(siren, year));
+
+				await applyPercentagesAfterUpdate(tx, siren, year);
+			});
 
 			return { success: true };
 		}),
@@ -368,23 +374,27 @@ export const declarationRouter = createTRPCRouter({
 			const siren = ctx.siren;
 			const year = getCurrentYear();
 
-			await ctx.db
-				.update(declarations)
-				.set({
-					indicatorBAnnualWomen: input.indicatorBAnnualWomen ?? null,
-					indicatorBAnnualMen: input.indicatorBAnnualMen ?? null,
-					indicatorBHourlyWomen: input.indicatorBHourlyWomen ?? null,
-					indicatorBHourlyMen: input.indicatorBHourlyMen ?? null,
-					indicatorDAnnualWomen: input.indicatorDAnnualWomen ?? null,
-					indicatorDAnnualMen: input.indicatorDAnnualMen ?? null,
-					indicatorDHourlyWomen: input.indicatorDHourlyWomen ?? null,
-					indicatorDHourlyMen: input.indicatorDHourlyMen ?? null,
-					indicatorEWomen: input.indicatorEWomen ?? null,
-					indicatorEMen: input.indicatorEMen ?? null,
-					currentStep: 3,
-					updatedAt: new Date(),
-				})
-				.where(activeDeclarationFilter(siren, year));
+			await ctx.db.transaction(async (tx) => {
+				await tx
+					.update(declarations)
+					.set({
+						indicatorBAnnualWomen: input.indicatorBAnnualWomen ?? null,
+						indicatorBAnnualMen: input.indicatorBAnnualMen ?? null,
+						indicatorBHourlyWomen: input.indicatorBHourlyWomen ?? null,
+						indicatorBHourlyMen: input.indicatorBHourlyMen ?? null,
+						indicatorDAnnualWomen: input.indicatorDAnnualWomen ?? null,
+						indicatorDAnnualMen: input.indicatorDAnnualMen ?? null,
+						indicatorDHourlyWomen: input.indicatorDHourlyWomen ?? null,
+						indicatorDHourlyMen: input.indicatorDHourlyMen ?? null,
+						indicatorEWomen: input.indicatorEWomen ?? null,
+						indicatorEMen: input.indicatorEMen ?? null,
+						currentStep: 3,
+						updatedAt: new Date(),
+					})
+					.where(activeDeclarationFilter(siren, year));
+
+				await applyPercentagesAfterUpdate(tx, siren, year);
+			});
 
 			return { success: true };
 		}),
@@ -395,35 +405,39 @@ export const declarationRouter = createTRPCRouter({
 			const siren = ctx.siren;
 			const year = getCurrentYear();
 
-			await ctx.db
-				.update(declarations)
-				.set({
-					indicatorFAnnualThreshold1: input.annual[0].threshold || null,
-					indicatorFAnnualThreshold2: input.annual[1].threshold || null,
-					indicatorFAnnualThreshold3: input.annual[2].threshold || null,
-					indicatorFAnnualWomen1: input.annual[0].women ?? null,
-					indicatorFAnnualWomen2: input.annual[1].women ?? null,
-					indicatorFAnnualWomen3: input.annual[2].women ?? null,
-					indicatorFAnnualWomen4: input.annual[3].women ?? null,
-					indicatorFAnnualMen1: input.annual[0].men ?? null,
-					indicatorFAnnualMen2: input.annual[1].men ?? null,
-					indicatorFAnnualMen3: input.annual[2].men ?? null,
-					indicatorFAnnualMen4: input.annual[3].men ?? null,
-					indicatorFHourlyThreshold1: input.hourly[0].threshold || null,
-					indicatorFHourlyThreshold2: input.hourly[1].threshold || null,
-					indicatorFHourlyThreshold3: input.hourly[2].threshold || null,
-					indicatorFHourlyWomen1: input.hourly[0].women ?? null,
-					indicatorFHourlyWomen2: input.hourly[1].women ?? null,
-					indicatorFHourlyWomen3: input.hourly[2].women ?? null,
-					indicatorFHourlyWomen4: input.hourly[3].women ?? null,
-					indicatorFHourlyMen1: input.hourly[0].men ?? null,
-					indicatorFHourlyMen2: input.hourly[1].men ?? null,
-					indicatorFHourlyMen3: input.hourly[2].men ?? null,
-					indicatorFHourlyMen4: input.hourly[3].men ?? null,
-					currentStep: 4,
-					updatedAt: new Date(),
-				})
-				.where(activeDeclarationFilter(siren, year));
+			await ctx.db.transaction(async (tx) => {
+				await tx
+					.update(declarations)
+					.set({
+						indicatorFAnnualThreshold1: input.annual[0].threshold || null,
+						indicatorFAnnualThreshold2: input.annual[1].threshold || null,
+						indicatorFAnnualThreshold3: input.annual[2].threshold || null,
+						indicatorFAnnualWomen1: input.annual[0].women ?? null,
+						indicatorFAnnualWomen2: input.annual[1].women ?? null,
+						indicatorFAnnualWomen3: input.annual[2].women ?? null,
+						indicatorFAnnualWomen4: input.annual[3].women ?? null,
+						indicatorFAnnualMen1: input.annual[0].men ?? null,
+						indicatorFAnnualMen2: input.annual[1].men ?? null,
+						indicatorFAnnualMen3: input.annual[2].men ?? null,
+						indicatorFAnnualMen4: input.annual[3].men ?? null,
+						indicatorFHourlyThreshold1: input.hourly[0].threshold || null,
+						indicatorFHourlyThreshold2: input.hourly[1].threshold || null,
+						indicatorFHourlyThreshold3: input.hourly[2].threshold || null,
+						indicatorFHourlyWomen1: input.hourly[0].women ?? null,
+						indicatorFHourlyWomen2: input.hourly[1].women ?? null,
+						indicatorFHourlyWomen3: input.hourly[2].women ?? null,
+						indicatorFHourlyWomen4: input.hourly[3].women ?? null,
+						indicatorFHourlyMen1: input.hourly[0].men ?? null,
+						indicatorFHourlyMen2: input.hourly[1].men ?? null,
+						indicatorFHourlyMen3: input.hourly[2].men ?? null,
+						indicatorFHourlyMen4: input.hourly[3].men ?? null,
+						currentStep: 4,
+						updatedAt: new Date(),
+					})
+					.where(activeDeclarationFilter(siren, year));
+
+				await applyPercentagesAfterUpdate(tx, siren, year);
+			});
 
 			return { success: true };
 		}),
@@ -557,14 +571,6 @@ export const declarationRouter = createTRPCRouter({
 		);
 		const { nextStatus, events } = applyAction(facts, "submit", rules);
 
-		const percentages = computeIndicatorPercentages(declaration);
-		const percentagesForDb = Object.fromEntries(
-			Object.entries(percentages).map(([k, v]) => [
-				k,
-				v === null ? null : v.toString(),
-			]),
-		);
-
 		const projection = computeProjectionUpdates(events, nextStatus);
 		const historyInserts = buildHistoryInserts(
 			declaration.id,
@@ -591,9 +597,10 @@ export const declarationRouter = createTRPCRouter({
 					cseRequired: cseRequiredSnapshot,
 					currentStep: 6,
 					updatedAt: new Date(),
-					...percentagesForDb,
 				})
 				.where(activeDeclarationFilter(siren, year));
+
+			await applyPercentagesAfterUpdate(tx, siren, year);
 		});
 
 		const email = ctx.session.user.email;

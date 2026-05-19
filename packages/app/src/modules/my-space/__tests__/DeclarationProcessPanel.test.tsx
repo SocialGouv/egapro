@@ -147,11 +147,11 @@ describe("DeclarationProcessPanel", () => {
 			).not.toBeInTheDocument();
 		});
 
-		it('renders "Continuer la déclaration" CTA', () => {
+		it('renders "Continuer" CTA', () => {
 			const { dialog } = renderPanel("compliance");
 			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
 			const cta = ctaLinks[ctaLinks.length - 1];
-			expect(cta).toHaveTextContent("Continuer la déclaration");
+			expect(cta).toHaveTextContent("Continuer");
 		});
 	});
 
