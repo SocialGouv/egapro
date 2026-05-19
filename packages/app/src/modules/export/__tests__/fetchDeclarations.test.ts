@@ -284,6 +284,8 @@ describe("assembleDeclaration", () => {
 	it("should assemble a full declaration with French top-level keys", () => {
 		const result = assembleDeclaration(baseRow, [], []);
 
+		expect(result.id).toBe("decl-1");
+		expect(Object.keys(result)[0]).toBe("id");
 		expect(result.SIREN).toBe("123456789");
 		expect(result.Raison_sociale).toBe("ACME Corp");
 		expect(result.Effectif).toBe(250);
