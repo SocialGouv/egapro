@@ -1,0 +1,167 @@
+{{- if .Values.global.notificationsEnabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifications
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: notifications
+spec:
+  # Single replica is enough: pg-boss already handles fan-out via batchSize
+  # inside the process. Scaling horizontally is safe (pg-boss uses Postgres
+  # row locks under the hood) but unnecessary at this volume.
+  replicas: 1
+  strategy:
+    # Re-create on rollout so we don't have two workers polling the queue
+    # during a rolling deploy.
+    type: Recreate
+  selector:
+    matchLabels:
+      app: notifications
+  template:
+    metadata:
+      labels:
+        app: notifications
+    spec:
+      # Long enough for `boss.stop({ graceful: true, timeout: 15_000 })` to
+      # flush in-flight jobs before SIGKILL.
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsUser: 1000
+        runAsNonRoot: true
+      containers:
+        - name: notifications
+          image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/app:{{ .Values.global.imageTag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+          command:
+            - node
+            - packages/notifications/dist/index.js
+          # Load defaults from the same configmaps as the app pod. The
+          # `mail` configmap exposes MAIL_ENABLED / SMTP_HOST / SMTP_PORT /
+          # SMTP_SECURE / MAIL_FROM pointing at the in-cluster MailDev for
+          # dev / preprod review apps. The `notifications` configmap is
+          # optional and lets ops tune retry / batch knobs without rebuilding.
+          envFrom:
+            - configMapRef:
+                name: mail
+                optional: true
+            - configMapRef:
+                name: notifications
+                optional: true
+          env:
+            # pg-boss queue DB — dedicated infra, isolated from the main app
+            # so a crash here does not block business mutations. The secret
+            # name is overridable; `optional: true` keeps the pod alive when
+            # the secret is absent (the worker exits cleanly at startup —
+            # see src/index.ts).
+            - name: NOTIFICATIONS_POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGHOST
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGDATABASE
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGPORT
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGUSER
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGPASSWORD
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_SSLMODE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGSSLMODE
+                  optional: true
+            # Main app DB — used only to append rows to `audit.action_log`.
+            # The worker tolerates a missing DATABASE_URL (it just stops
+            # emitting audit rows), so an outage here will not stop emails.
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGHOST
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGDATABASE
+            - name: POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGPORT
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGUSER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGPASSWORD
+            - name: POSTGRES_SSLMODE
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGSSLMODE
+            # SMTP — same source as the app pod (`smtp-app` sealed-secret with
+            # MAILER_* keys = Tipimail in prod). `optional: true` keeps the
+            # configmap fallback (MailDev) usable in dev / preprod.
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_HOST
+                  optional: true
+            - name: SMTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_PORT
+                  optional: true
+            - name: SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_LOGIN
+                  optional: true
+            - name: SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_PASSWORD
+                  optional: true
+            - name: SMTP_SECURE
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_SSL
+                  optional: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 96Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+{{- end }}

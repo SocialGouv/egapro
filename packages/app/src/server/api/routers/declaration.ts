@@ -605,8 +605,8 @@ export const declarationRouter = createTRPCRouter({
 
 		const email = ctx.session.user.email;
 		if (email) {
-			const { sendReceipt } = await import("~/modules/mail/server");
-			await sendReceipt({
+			const { enqueueReceipt } = await import("~/modules/mail/server");
+			await enqueueReceipt({
 				kind: "declaration",
 				to: email,
 				siren,
@@ -744,8 +744,8 @@ export const declarationRouter = createTRPCRouter({
 
 		const email = ctx.session.user.email;
 		if (email) {
-			const { sendReceipt } = await import("~/modules/mail/server");
-			await sendReceipt({
+			const { enqueueReceipt } = await import("~/modules/mail/server");
+			await enqueueReceipt({
 				kind: "secondDeclaration",
 				to: email,
 				siren,
