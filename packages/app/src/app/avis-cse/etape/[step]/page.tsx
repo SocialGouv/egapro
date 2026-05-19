@@ -36,6 +36,8 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		const previousHref = getCseOpinionPreviousHref({
 			firstDeclarationPathChoice:
 				declarationData.declaration.firstDeclarationPathChoice,
+			secondDeclarationPathChoice:
+				declarationData.declaration.secondDeclarationPathChoice,
 			hasSubmittedSecondDeclaration: hasSecondDeclaration,
 		});
 		return (
