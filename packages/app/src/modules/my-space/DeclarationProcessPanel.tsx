@@ -100,7 +100,7 @@ export function DeclarationProcessPanel({
 function getCtaLabel(variant: PanelVariant): string {
 	if (variant === "closed") return "Voir la déclaration";
 	if (variant === "start") return "Commencer la déclaration";
-	return "Continuer la déclaration";
+	return "Continuer";
 }
 
 function PanelHeader({
