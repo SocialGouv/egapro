@@ -290,6 +290,48 @@ const declarationSchema = {
 				"Date d'annulation administrative de la déclaration. `null` si la déclaration est active. Une déclaration annulée conserve l'intégralité de ses données pour audit.",
 			example: "2025-04-01T10:30:00.000Z",
 		},
+		Historique_statuts: {
+			type: "array",
+			description:
+				"Historique exhaustif et ordonné chronologiquement (ASC, du plus ancien au plus récent) des transitions de statut de la déclaration. Toutes les occurrences sont listées (pas de dédoublonnage). Vaut `[]` si aucune transition n'est enregistrée — jamais `null`, jamais absent.",
+			items: {
+				type: "object",
+				required: ["Statut", "Libelle_statut", "Date"],
+				properties: {
+					Statut: {
+						type: "string",
+						enum: [
+							"submit",
+							"path_choice",
+							"second_declaration_submit",
+							"joint_evaluation_submit",
+							"cse_opinion_submit",
+							"cancel",
+							"demarche_complete",
+						],
+						description:
+							"Type d'événement brut issu de l'enum `declaration_event_type`.",
+					},
+					Libelle_statut: {
+						type: "string",
+						description:
+							"Libellé FR lisible de l'événement (ex : « Soumission de la déclaration », « Choix du parcours — Actions correctives »).",
+					},
+					Date: {
+						type: "string",
+						format: "date-time",
+						description:
+							"Date de l'événement au format ISO-8601 UTC (`YYYY-MM-DDTHH:MM:SS.sssZ`).",
+					},
+					Round: {
+						type: "integer",
+						enum: [1, 2],
+						description:
+							'Numéro de round (1 ou 2). Présent uniquement pour `Statut === "path_choice"`. Absent pour les autres événements.',
+					},
+				},
+			},
+		},
 		Effectif_F_rem_annuelle_globale: {
 			type: ["integer", "null"],
 			description:
@@ -440,7 +482,7 @@ export const openApiSpec = {
 		title: "EGAPRO — API d'export",
 		description:
 			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une clé API transmise en Bearer token. L'authentification ainsi qu'un quota (rate limit) sont appliqués en amont par la passerelle EGAPRO.",
-		version: "2.0.0",
+		version: "2.1.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},
