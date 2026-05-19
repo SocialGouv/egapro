@@ -6,6 +6,8 @@ const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
 const JOINT_EVALUATION_PATH = `${COMPLIANCE_PATH}/evaluation-conjointe`;
 const FIRST_DECLARATION_RECAP_PATH = "/declaration-remuneration/etape/6";
 const SECOND_DECLARATION_RECAP_PATH = `${COMPLIANCE_PATH}/etape/3`;
+const CSE_OPINION_PATH = "/avis-cse";
+const CORRECTIVE_ACTIONS_FIRST_STEP_PATH = `${COMPLIANCE_PATH}/etape/1`;
 
 /**
  * Returns the destination URL after completing a compliance path step,
@@ -39,6 +41,38 @@ type CseOpinionPreviousContext = {
  * - justify chosen → compliance path choice page
  * - direct submit (no gap, has CSE) → first-declaration recap step
  */
+/**
+ * Returns the URL of the page that represents the user's current stage in
+ * the FSM (`server/rules/v2027.1.json`). Used by recap-step "Suivant"
+ * buttons to send the user **directly** to where they should be, instead
+ * of routing through /parcours-conformite which would re-render the
+ * compliance path choice page when the user has already moved past it.
+ *
+ * The status here is the projected `declarations.status` from the
+ * event-sourced history (FSM final state).
+ */
+export function getCurrentStageHref(
+	status: string | null,
+	hasCse: boolean | null,
+): string {
+	switch (status) {
+		case "awaiting_compliance_path_choice":
+		case "awaiting_revision_choice":
+			return COMPLIANCE_PATH;
+		case "corrective_actions_chosen":
+			return CORRECTIVE_ACTIONS_FIRST_STEP_PATH;
+		case "joint_evaluation_chosen":
+		case "revised_joint_evaluation_chosen":
+			return JOINT_EVALUATION_PATH;
+		case "awaiting_cse_opinion":
+			return CSE_OPINION_PATH;
+		case "demarche_completed":
+			return hasCse === true ? CSE_OPINION_PATH : COMPLIANCE_CONFIRMATION_PATH;
+		default:
+			return COMPLIANCE_PATH;
+	}
+}
+
 export function getCseOpinionPreviousHref({
 	firstDeclarationPathChoice,
 	secondDeclarationPathChoice,

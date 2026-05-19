@@ -5,6 +5,7 @@ import { useCallback, useRef } from "react";
 import { computeGap, GAP_ALERT_THRESHOLD } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
+import { getCurrentStageHref } from "../shared/complianceNavigation";
 import { FormActions } from "../shared/FormActions";
 import { NextStepsBox } from "../shared/NextStepsBox";
 import { SavedIndicator } from "../shared/SavedIndicator";
@@ -38,6 +39,7 @@ type Props = {
 	step4Data: Step4Data;
 	step5Categories?: EmployeeCategoryRow[];
 	isSubmitted?: boolean;
+	hasCse?: boolean | null;
 };
 
 export function Step6Review({
@@ -48,6 +50,7 @@ export function Step6Review({
 	step4Data,
 	step5Categories = [],
 	isSubmitted = false,
+	hasCse = null,
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
@@ -175,7 +178,7 @@ export function Step6Review({
 			<FormActions
 				nextHref={
 					isSubmitted
-						? "/declaration-remuneration/parcours-conformite"
+						? getCurrentStageHref(declaration.status, hasCse)
 						: undefined
 				}
 				nextLabel="Suivant"
