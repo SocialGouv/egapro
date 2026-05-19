@@ -35,7 +35,7 @@ type Props = {
 	email?: string;
 	firstDeclarationPathChoice?: string | null;
 	hasSecondDeclaration?: boolean;
-	previousHref?: string | null;
+	previousHref?: string;
 };
 
 export function Step1Opinions({
@@ -44,7 +44,7 @@ export function Step1Opinions({
 	email,
 	firstDeclarationPathChoice,
 	hasSecondDeclaration = true,
-	previousHref = null,
+	previousHref = "/declaration-remuneration/etape/6",
 }: Props) {
 	const isJointEvaluation = firstDeclarationPathChoice === "joint_evaluation";
 	const router = useRouter();
@@ -243,16 +243,12 @@ export function Step1Opinions({
 			</div>
 
 			<div className={`fr-mt-4w ${formStyles.actions}`}>
-				{previousHref ? (
-					<Link
-						className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
-						href={previousHref}
-					>
-						Précédent
-					</Link>
-				) : (
-					<span />
-				)}
+				<Link
+					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
+					href={previousHref}
+				>
+					Précédent
+				</Link>
 				<span>
 					<button
 						{...readOnlyGuard.buttonProps}

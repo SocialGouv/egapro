@@ -132,16 +132,17 @@ describe("Step1Opinions", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("hides the previous link when previousHref is null (no logical previous step)", () => {
+	it("renders previous link to the declaration recap step by default", () => {
 		render(<Step1Opinions cseDeadline={cseDeadline} />);
 
-		expect(
-			screen.queryByRole("link", { name: /Précédent/ }),
-		).not.toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /Précédent/ })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/etape/6",
+		);
 		expect(screen.getByRole("button", { name: /Suivant/ })).toBeInTheDocument();
 	});
 
-	it("renders the previous link when previousHref is provided", () => {
+	it("uses the previousHref prop when provided", () => {
 		render(
 			<Step1Opinions
 				cseDeadline={cseDeadline}

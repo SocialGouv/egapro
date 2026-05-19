@@ -23,14 +23,14 @@ describe("getPostComplianceDestination", () => {
 });
 
 describe("getCseOpinionPreviousHref", () => {
-	it("returns null when arriving from direct submit (no gap, round 1)", () => {
+	it("returns first-decl recap step when arriving from direct submit (no gap, round 1)", () => {
 		expect(
 			getCseOpinionPreviousHref({
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				hasSubmittedSecondDeclaration: false,
 			}),
-		).toBeNull();
+		).toBe("/declaration-remuneration/etape/6");
 	});
 
 	it("returns the compliance path choice when path = justify (round 1)", () => {
@@ -55,14 +55,14 @@ describe("getCseOpinionPreviousHref", () => {
 		);
 	});
 
-	it("returns null when second decl submitted with no revision (resolved)", () => {
+	it("returns second-decl recap step when second decl submitted with no revision (resolved)", () => {
 		expect(
 			getCseOpinionPreviousHref({
 				firstDeclarationPathChoice: "corrective_action",
 				secondDeclarationPathChoice: null,
 				hasSubmittedSecondDeclaration: true,
 			}),
-		).toBeNull();
+		).toBe("/declaration-remuneration/parcours-conformite/etape/3");
 	});
 
 	it("returns the compliance path choice when second-decl path = justify (round 2)", () => {
