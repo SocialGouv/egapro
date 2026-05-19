@@ -1,3 +1,13 @@
+## [3.17.3](https://github.com/SocialGouv/egapro/compare/v3.17.2...v3.17.3) (2026-05-19)
+
+
+### Bug Fixes
+
+* lower nginx catch-all ingressroute priority to restore /api routing ([#3202](https://github.com/SocialGouv/egapro/issues/3202)) ([e0a7cad](https://github.com/SocialGouv/egapro/commit/e0a7cadc5929c5df4f7047f669679732b3b2f638))
+* **recherche-entreprise:** fallback sur nom_complet si nom_raison_sociale est vide ([#3465](https://github.com/SocialGouv/egapro/issues/3465)) ([3ec902e](https://github.com/SocialGouv/egapro/commit/3ec902e5d692caaf0b008d8f5b46dca05991eb19))
+* remove http yaml ([#3097](https://github.com/SocialGouv/egapro/issues/3097)) ([7c4eec9](https://github.com/SocialGouv/egapro/commit/7c4eec9f90c2b60431d4b2ad83e162a5f8f9426d))
+* test compatibility issues ([#3081](https://github.com/SocialGouv/egapro/issues/3081)) ([fbabf4c](https://github.com/SocialGouv/egapro/commit/fbabf4ccd898898ad409bef5f7f19b86b2ab272d))
+
 ## [3.17.2](https://github.com/SocialGouv/egapro/compare/v3.17.1...v3.17.2) (2026-03-25)
 
 
