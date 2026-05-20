@@ -1,6 +1,7 @@
 "use client";
 
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import { DraftLoadingState } from "~/modules/declaration-remuneration/shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
@@ -23,13 +24,17 @@ export function SecondDeclarationStep1Info({
 	declarationYear,
 	modificationDeadline,
 }: Props) {
-	const { hasDraft } = useDeclarationDraft({
+	const { hasDraft, isLoadingDraft } = useDeclarationDraft({
 		siren: declarationSiren,
 		year: declarationYear,
 		step: "second-1",
 		kind: "second",
 		dbValues: EMPTY_DB_VALUES,
 	});
+
+	if (isLoadingDraft) {
+		return <DraftLoadingState />;
+	}
 
 	const saved = !hasDraft;
 

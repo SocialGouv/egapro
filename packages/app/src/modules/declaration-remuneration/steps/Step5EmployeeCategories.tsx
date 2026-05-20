@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { padDecimalToTwo } from "~/modules/domain";
 import { api } from "~/trpc/react";
+import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
 import { StepIndicator } from "../shared/StepIndicator";
 import type { EmployeeCategoryRow } from "../types";
@@ -69,7 +70,7 @@ export function Step5EmployeeCategories({
 		[initialCategories, initialSource],
 	);
 
-	const { draft, setField, clearDraft, hasDraft } =
+	const { draft, setField, clearDraft, hasDraft, isLoadingDraft } =
 		useDeclarationDraft<Step5FormValues>({
 			siren: declarationSiren,
 			year: declarationYear,
@@ -78,26 +79,23 @@ export function Step5EmployeeCategories({
 			dbValues,
 		});
 
-	const [draftLoaded, setDraftLoaded] = useState(false);
-
-	useEffect(() => {
-		if (hasDraft && !draftLoaded) setDraftLoaded(true);
-	}, [hasDraft, draftLoaded]);
-
-	const categoryFormKey = draftLoaded ? 1 : 0;
-	const categoryFormDefaultOverride = draftLoaded
-		? {
-				source: draft.source ?? initialSource ?? "",
-				categories: draft.categories ?? dbValues.categories,
-			}
-		: undefined;
-
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
 		onSuccess: () => {
 			clearDraft();
 			router.push("/declaration-remuneration/etape/6");
 		},
 	});
+
+	if (isLoadingDraft) {
+		return <DraftLoadingState />;
+	}
+
+	const categoryFormDefaultOverride = hasDraft
+		? {
+				source: draft.source ?? initialSource ?? "",
+				categories: draft.categories ?? dbValues.categories,
+			}
+		: undefined;
 
 	return (
 		<CategoryForm
@@ -108,7 +106,6 @@ export function Step5EmployeeCategories({
 			initialSource={initialSource}
 			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
 			isSubmitting={mutation.isPending}
-			key={categoryFormKey}
 			maxMen={maxMen}
 			maxWomen={maxWomen}
 			mimoquageNextHref={
