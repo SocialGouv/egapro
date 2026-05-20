@@ -71,9 +71,8 @@ test.describe("admin campaign progression stats", () => {
 			page.getByRole("figure", { name: /courbe de progression cumulative/i }),
 		).toBeVisible();
 
-		// The table lives inside a <details> disclosure — use the summary text
-		// directly rather than a role match (varies across browsers).
 		await page
+			.getByLabel("Progression dans le temps")
 			.locator("summary", {
 				hasText: /consulter les données du graphique sous forme de tableau/i,
 			})
