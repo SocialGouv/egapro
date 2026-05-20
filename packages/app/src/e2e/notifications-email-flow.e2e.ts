@@ -67,7 +67,7 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 
 		expect(email.subject).toMatch(/Déclaration des indicateurs/i);
 		expect(email.to.some((r) => r.address === TEST_USER_EMAIL)).toBe(true);
-		expect(email.html).toMatch(/SIREN/i);
+		expect(email.html).toMatch(/récapitulatif/i);
 	});
 
 	test("second declaration submission (corrective action) delivers a second-declaration receipt", async ({

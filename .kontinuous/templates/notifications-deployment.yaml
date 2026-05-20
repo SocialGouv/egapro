@@ -37,11 +37,13 @@ spec:
           command:
             - node
             - packages/notifications/dist/index.js
-          # Load defaults from the same configmaps as the app pod. The
-          # `mail` configmap exposes MAIL_ENABLED / SMTP_HOST / SMTP_PORT /
-          # SMTP_SECURE / MAIL_FROM pointing at the in-cluster MailDev for
-          # dev / preprod review apps. The `notifications` configmap is
-          # optional and lets ops tune retry / batch knobs without rebuilding.
+          # The worker is the single consumer of MAIL_*/SMTP_* — the app pod
+          # no longer mounts these vars (removed from `global.env` once the
+          # publisher pattern landed). The `mail` configmap exposes
+          # MAIL_ENABLED / SMTP_HOST / SMTP_PORT / SMTP_SECURE / MAIL_FROM
+          # pointing at the in-cluster MailDev for dev / preprod review
+          # apps. The `notifications` configmap is optional and lets ops
+          # tune retry / batch knobs without rebuilding.
           envFrom:
             - configMapRef:
                 name: mail
@@ -124,9 +126,10 @@ spec:
                 secretKeyRef:
                   name: "{{ .Values.global.pgSecretName }}"
                   key: PGSSLMODE
-            # SMTP — same source as the app pod (`smtp-app` sealed-secret with
-            # MAILER_* keys = Tipimail in prod). `optional: true` keeps the
-            # configmap fallback (MailDev) usable in dev / preprod.
+            # SMTP — `smtp-app` sealed-secret with MAILER_* keys = Tipimail
+            # in prod, directly bound to this pod (the app pod has been
+            # disconnected from this secret). `optional: true` keeps the
+            # `mail` configmap fallback (MailDev) usable in dev / preprod.
             - name: SMTP_HOST
               valueFrom:
                 secretKeyRef:

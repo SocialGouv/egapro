@@ -141,30 +141,33 @@ pnpm --filter notifications test
 The full source-of-truth flow lives in `docs/parcours-utilisateurs.md`. Mapping
 to current implementation:
 
-| Code | BRD label | Trigger | Status |
+| Code | BRD label | Trigger | Implemented as |
 |---|---|---|---|
-| MD | Confirmation 1ère déclaration | event (`declaration.submit`) | ✅ async via `declaration_confirmation` (PDF attachments rendered by the app, passed as base64 in the queue payload) |
-| MSDc | Confirmation 2e déclaration | event (`declaration.submitSecondDeclaration`) | ✅ async via `second_declaration_confirmation` (same pattern) |
-| MH_* | Confirmation avis CSE | event (file upload `cse_opinion`) | ✅ async via `cse_opinion_receipt` (no attachment) |
-| M_PE2 | Confirmation rapport éval. conjointe | event (file upload `joint_evaluation`) | ✅ async via `joint_evaluation_submitted` (no attachment) |
-| MR30 | Rappel déclaration J-30 (1er mai) | cron annuel | ⏳ infra prête (`scheduledFor`), template + scheduler à implémenter |
-| MR10 | Rappel déclaration J-10 (22 mai) | cron annuel | ⏳ idem |
-| ME | Rappel choix parcours J-15 (avant 1er juillet) | cron, si G≥5% | ⏳ idem |
-| MSD3 | Rappel 2e déclaration J-90 | cron | ⏳ idem |
-| MSD30 | Rappel 2e déclaration J-30 (1er déc) | cron | ⏳ idem |
-| MG_E1 | Rappel dépôt éval. conjointe (1er août) | cron | ⏳ idem |
-| MG_J1 | Rappel avis CSE — Justifier (avant 1er oct) | cron | ⏳ idem |
-| MG_J2 | Rappel avis CSE 1er déc (Justifier) | cron | ⏳ idem |
-| MG_E2 | Rappel avis CSE 1er déc (Éval. conjointe) | cron | ⏳ idem |
-| MG_A | Rappel avis CSE (Actions correctives) | cron | ⏳ idem |
-| MG_B/C | Rappel avis CSE (exactitude) | cron | ⏳ idem |
-| MA | Info ouverture cycle (1er mars, dès 2028) | cron annuel | ⏳ idem |
-| MI_* | Bascule cycle suivant | cron annuel | ⏳ idem |
+| MD | Confirmation 1ère déclaration | event (`declaration.submit`) | `declaration_confirmation` (PDF attachment via base64 in the queue payload) |
+| MSDc | Confirmation 2e déclaration | event (`declaration.submitSecondDeclaration`) | `second_declaration_confirmation` |
+| MH_* | Confirmation avis CSE | event (file upload `cse_opinion`) | `cse_opinion_receipt` |
+| M_PE2 | Confirmation rapport éval. conjointe | event (file upload `joint_evaluation`) | `joint_evaluation_submitted` |
+| MA | Info ouverture cycle (1er mars, dès 2028) | cron `0 8 1 3 *` | `cycle_opening_info` |
+| MR30 | Rappel déclaration J-30 (1er mai) | cron `0 8 2 5 *` | `declaration_deadline_reminder` (variant `d30`) |
+| MR10 | Rappel déclaration J-10 (22 mai) | cron `0 8 22 5 *` | `declaration_deadline_reminder` (variant `d10`) |
+| ME | Rappel choix parcours J-15 (avant 1er juillet) | cron `0 8 16 6 *` | `compliance_path_choice_reminder` (covers round 1 + round 2 revisions) |
+| MSD3 | Rappel 2e déclaration J-90 | cron `0 8 3 10 *` | `second_declaration_reminder` (variant `d90`) |
+| MSD30 | Rappel 2e déclaration J-30 (1er déc) | cron `0 8 1 12 *` | `second_declaration_reminder` (variant `d30`) |
+| MG_E1 | Rappel dépôt éval. conjointe (1er août) | cron `0 8 1 8 *` | `joint_evaluation_reminder` (covers round 1 + round 2 = `corrective → joint_eval`) |
+| MG_J1 | Rappel avis CSE — Justifier (avant 1er oct) | cron `0 8 1 9 *` | `cse_opinion_reminder` variant `justify_oct` |
+| MG_J2 | Rappel avis CSE 1er déc (Justifier) | cron `0 8 1 12 *` | `cse_opinion_reminder` variant `justify_dec` |
+| MG_E2 | Rappel avis CSE 1er déc (Éval. conjointe) | cron `0 8 1 12 *` | `cse_opinion_reminder` variant `joint_eval` |
+| MG_A | Rappel avis CSE (Actions correctives) | cron `0 8 1 2 *` | `cse_opinion_reminder` variant `corrective` |
+| MG_B/C | Rappel avis CSE (exactitude) | cron `0 8 1 2 *` | `cse_opinion_reminder` variant `compliance` |
+| MI_* | Bascule cycle suivant | cron `0 8 2 3 *` | `next_cycle_handover` |
 
 **Couverture événementielle : 4/4** (les 4 confirmations event-driven du
-schéma BRD). **Couverture rappels/cron : 0/13** — l'infra pg-boss +
-`enqueueNotification({ scheduledFor })` supportent `startAfter`, ce qui sera
-exploité par les futurs CronJobs.
+schéma BRD). **Couverture rappels/cron : 13/13** — implémentés via 7 builders
+schedule-driven et 13 schedules pg-boss (tous en `tz=Europe/Paris`), avec
+déduplication par `notifications.reminder_sent_log` (UNIQUE
+`type/siren/year/variant`) qui garantit l'idempotence des ticks. Voir
+[`docs/mails.md`](../../docs/mails.md) pour le détail des éligibilités SQL,
+des variants, et de l'architecture.
 
 ## Adding a new notification type
 
