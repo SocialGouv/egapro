@@ -131,3 +131,16 @@ vi.mock("~/trpc/server", () => ({
 	HydrateClient: ({ children }: { children: React.ReactNode }) =>
 		React.createElement(React.Fragment, null, children),
 }));
+
+vi.mock(
+	"~/modules/declaration-remuneration/shared/draft/useDeclarationDraft",
+	() => ({
+		useDeclarationDraft: () => ({
+			draft: {},
+			setField: () => undefined,
+			clearDraft: () => undefined,
+			hasDraft: false,
+			isLoadingDraft: false,
+		}),
+	}),
+);
