@@ -3,6 +3,26 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Step1Opinions } from "../Step1Opinions";
 
+const { mockSetField, mockClearDraft, mockUseDeclarationDraft } = vi.hoisted(
+	() => {
+		const mockSetField = vi.fn();
+		const mockClearDraft = vi.fn();
+		const mockUseDeclarationDraft = vi.fn(() => ({
+			draft: {} as Record<string, unknown>,
+			setField: mockSetField,
+			clearDraft: mockClearDraft,
+			hasDraft: false,
+			isLoadingDraft: false,
+		}));
+		return { mockSetField, mockClearDraft, mockUseDeclarationDraft };
+	},
+);
+
+vi.mock(
+	"~/modules/declaration-remuneration/shared/draft/useDeclarationDraft",
+	() => ({ useDeclarationDraft: mockUseDeclarationDraft }),
+);
+
 const mockPush = vi.fn();
 const cseDeadline = new Date("2028-02-01T00:00:00");
 
@@ -43,6 +63,15 @@ vi.mock("~/trpc/react", () => ({
 beforeEach(() => {
 	mockPush.mockClear();
 	mockMutate.mockClear();
+	mockSetField.mockClear();
+	mockClearDraft.mockClear();
+	mockUseDeclarationDraft.mockReturnValue({
+		draft: {},
+		setField: mockSetField,
+		clearDraft: mockClearDraft,
+		hasDraft: false,
+		isLoadingDraft: false,
+	});
 });
 
 describe("Step1Opinions", () => {
@@ -51,6 +80,8 @@ describe("Step1Opinions", () => {
 			<Step1Opinions
 				cseDeadline={cseDeadline}
 				firstDeclarationPathChoice="joint_evaluation"
+				siren="123456789"
+				year={2026}
 			/>,
 		);
 
@@ -66,6 +97,8 @@ describe("Step1Opinions", () => {
 			<Step1Opinions
 				cseDeadline={cseDeadline}
 				firstDeclarationPathChoice="justify"
+				siren="123456789"
+				year={2026}
 			/>,
 		);
 
@@ -77,21 +110,30 @@ describe("Step1Opinions", () => {
 	});
 
 	it("renders h1 as CSE opinion title when no compliance path banner", () => {
-		render(<Step1Opinions cseDeadline={cseDeadline} />);
+		render(
+			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,
+		);
 
 		const heading = screen.getByRole("heading", { level: 1 });
 		expect(heading).toHaveTextContent("Transmettre l'avis ou les avis du CSE");
 	});
 
 	it("renders the stepper at step 1", () => {
-		render(<Step1Opinions cseDeadline={cseDeadline} />);
+		render(
+			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,
+		);
 
 		expect(screen.getByText(/Étape 1 sur 2/)).toBeInTheDocument();
 	});
 
 	it("renders both declaration sections when hasSecondDeclaration is true", () => {
 		render(
-			<Step1Opinions cseDeadline={cseDeadline} hasSecondDeclaration={true} />,
+			<Step1Opinions
+				cseDeadline={cseDeadline}
+				hasSecondDeclaration={true}
+				siren="123456789"
+				year={2026}
+			/>,
 		);
 
 		expect(screen.getByText("Première déclaration")).toBeInTheDocument();
@@ -100,7 +142,12 @@ describe("Step1Opinions", () => {
 
 	it("hides second declaration section when hasSecondDeclaration is false", () => {
 		render(
-			<Step1Opinions cseDeadline={cseDeadline} hasSecondDeclaration={false} />,
+			<Step1Opinions
+				cseDeadline={cseDeadline}
+				hasSecondDeclaration={false}
+				siren="123456789"
+				year={2026}
+			/>,
 		);
 
 		expect(screen.getByText("Première déclaration")).toBeInTheDocument();
@@ -112,6 +159,8 @@ describe("Step1Opinions", () => {
 			<Step1Opinions
 				cseDeadline={cseDeadline}
 				firstDeclarationPathChoice="joint_evaluation"
+				siren="123456789"
+				year={2026}
 			/>,
 		);
 
@@ -123,7 +172,9 @@ describe("Step1Opinions", () => {
 	});
 
 	it("does not render the submission banner for other paths", () => {
-		render(<Step1Opinions cseDeadline={cseDeadline} />);
+		render(
+			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,
+		);
 
 		expect(
 			screen.queryByText(
@@ -133,7 +184,9 @@ describe("Step1Opinions", () => {
 	});
 
 	it("renders previous and next buttons", () => {
-		render(<Step1Opinions cseDeadline={cseDeadline} />);
+		render(
+			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,
+		);
 
 		expect(
 			screen.getByRole("button", { name: /Précédent/ }),
@@ -143,7 +196,9 @@ describe("Step1Opinions", () => {
 
 	it("shows validation error when submitting empty form", async () => {
 		const user = userEvent.setup();
-		render(<Step1Opinions cseDeadline={cseDeadline} />);
+		render(
+			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,
+		);
 
 		await user.click(screen.getByRole("button", { name: /Suivant/ }));
 
@@ -171,6 +226,8 @@ describe("Step1Opinions", () => {
 					secondDeclGapOpinion: null,
 					secondDeclGapDate: null,
 				}}
+				siren="123456789"
+				year={2026}
 			/>,
 		);
 
@@ -213,6 +270,8 @@ describe("Step1Opinions", () => {
 					secondDeclGapOpinion: null,
 					secondDeclGapDate: null,
 				}}
+				siren="123456789"
+				year={2026}
 			/>,
 		);
 
@@ -247,16 +306,18 @@ describe("Step1Opinions", () => {
 					secondDeclGapOpinion: null,
 					secondDeclGapDate: null,
 				}}
+				siren="123456789"
+				year={2026}
 			/>,
 		);
 
 		// First declaration accuracy radios
 		const favorableRadios = screen.getAllByLabelText("Favorable");
-		expect(favorableRadios[0]).toBeChecked();
+		expect(favorableRadios[0]!).toBeChecked();
 
 		// Second declaration accuracy radios
 		const unfavorableRadios = screen.getAllByLabelText("Défavorable");
-		expect(unfavorableRadios[1]).toBeChecked();
+		expect(unfavorableRadios[1]!).toBeChecked();
 	});
 
 	it("displays email in submission banner for joint_evaluation path", () => {
@@ -265,6 +326,8 @@ describe("Step1Opinions", () => {
 				cseDeadline={cseDeadline}
 				email="test@example.fr"
 				firstDeclarationPathChoice="joint_evaluation"
+				siren="123456789"
+				year={2026}
 			/>,
 		);
 
@@ -276,9 +339,84 @@ describe("Step1Opinions", () => {
 			<Step1Opinions
 				cseDeadline={cseDeadline}
 				firstDeclarationPathChoice="joint_evaluation"
+				siren="123456789"
+				year={2026}
 			/>,
 		);
 
 		expect(screen.getByText("adresse@exemple.fr")).toBeInTheDocument();
+	});
+
+	describe("draft integration", () => {
+		it("hydrates form from draft when available", () => {
+			mockUseDeclarationDraft.mockReturnValue({
+				draft: {
+					firstDeclaration: {
+						accuracyOpinion: "favorable",
+						accuracyDate: "",
+						gapConsulted: undefined,
+						gapOpinion: null,
+						gapDate: null,
+					},
+				},
+				setField: mockSetField,
+				clearDraft: mockClearDraft,
+				hasDraft: true,
+				isLoadingDraft: false,
+			});
+
+			render(
+				<Step1Opinions
+					cseDeadline={cseDeadline}
+					siren="123456789"
+					year={2026}
+				/>,
+			);
+
+			const favorableRadios = screen.getAllByLabelText("Favorable");
+			expect(favorableRadios[0]!).toBeChecked();
+		});
+
+		it("shows loading state while draft is loading", () => {
+			mockUseDeclarationDraft.mockReturnValue({
+				draft: {},
+				setField: mockSetField,
+				clearDraft: mockClearDraft,
+				hasDraft: false,
+				isLoadingDraft: true,
+			});
+
+			render(
+				<Step1Opinions
+					cseDeadline={cseDeadline}
+					siren="123456789"
+					year={2026}
+				/>,
+			);
+
+			expect(screen.getByText("Chargement...")).toBeInTheDocument();
+			expect(
+				screen.queryByText("Première déclaration"),
+			).not.toBeInTheDocument();
+		});
+
+		it("calls setField when a radio is changed", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Opinions
+					cseDeadline={cseDeadline}
+					siren="123456789"
+					year={2026}
+				/>,
+			);
+
+			await user.click(screen.getAllByLabelText("Favorable")[0]!);
+
+			expect(mockSetField).toHaveBeenCalled();
+			const callArg = mockSetField.mock.calls[
+				mockSetField.mock.calls.length - 1
+			]?.[0] as { firstDeclaration?: { accuracyOpinion?: string } } | undefined;
+			expect(callArg?.firstDeclaration?.accuracyOpinion).toBe("favorable");
+		});
 	});
 });

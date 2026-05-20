@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo } from "react";
 import { Controller } from "react-hook-form";
 
 import { useReadOnlyGuard } from "~/modules/auth";
+import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { getCurrentYear } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -19,6 +21,8 @@ import type { OpinionType } from "./types";
 
 type Props = {
 	cseDeadline: Date;
+	siren: string;
+	year: number;
 	initialData?: {
 		firstDeclAccuracyOpinion: OpinionType | null;
 		firstDeclAccuracyDate: string | null;
@@ -38,6 +42,8 @@ type Props = {
 
 export function Step1Opinions({
 	cseDeadline,
+	siren,
+	year,
 	initialData,
 	email,
 	firstDeclarationPathChoice,
@@ -46,6 +52,37 @@ export function Step1Opinions({
 	const isJointEvaluation = firstDeclarationPathChoice === "joint_evaluation";
 	const router = useRouter();
 	const readOnlyGuard = useReadOnlyGuard();
+
+	const dbValues = useMemo(
+		() => ({
+			firstDeclaration: {
+				accuracyOpinion: initialData?.firstDeclAccuracyOpinion ?? undefined,
+				accuracyDate: initialData?.firstDeclAccuracyDate ?? "",
+				gapConsulted: initialData?.firstDeclGapConsulted ?? undefined,
+				gapOpinion: initialData?.firstDeclGapOpinion ?? null,
+				gapDate: initialData?.firstDeclGapDate ?? null,
+			},
+			secondDeclaration: hasSecondDeclaration
+				? {
+						accuracyOpinion:
+							initialData?.secondDeclAccuracyOpinion ?? undefined,
+						accuracyDate: initialData?.secondDeclAccuracyDate ?? "",
+						gapConsulted: initialData?.secondDeclGapConsulted ?? undefined,
+						gapOpinion: initialData?.secondDeclGapOpinion ?? null,
+						gapDate: initialData?.secondDeclGapDate ?? null,
+					}
+				: undefined,
+		}),
+		[initialData, hasSecondDeclaration],
+	);
+
+	const { draft, setField, isLoadingDraft } = useDeclarationDraft({
+		siren,
+		year,
+		step: "opinions",
+		kind: "cse",
+		dbValues,
+	});
 
 	const form = useZodForm(saveOpinionsSchema, {
 		defaultValues: {
@@ -69,12 +106,54 @@ export function Step1Opinions({
 		},
 	});
 
+	useEffect(() => {
+		if (isLoadingDraft) return;
+		const fd = draft.firstDeclaration;
+		if (fd) {
+			if (fd.accuracyOpinion !== undefined)
+				form.setValue("firstDeclaration.accuracyOpinion", fd.accuracyOpinion);
+			if (fd.accuracyDate !== undefined)
+				form.setValue("firstDeclaration.accuracyDate", fd.accuracyDate);
+			if (fd.gapConsulted !== undefined)
+				form.setValue("firstDeclaration.gapConsulted", fd.gapConsulted);
+			if (fd.gapOpinion !== undefined)
+				form.setValue("firstDeclaration.gapOpinion", fd.gapOpinion);
+			if (fd.gapDate !== undefined)
+				form.setValue("firstDeclaration.gapDate", fd.gapDate);
+		}
+		if (hasSecondDeclaration) {
+			const sd = draft.secondDeclaration;
+			if (sd) {
+				if (sd.accuracyOpinion !== undefined)
+					form.setValue(
+						"secondDeclaration.accuracyOpinion",
+						sd.accuracyOpinion,
+					);
+				if (sd.accuracyDate !== undefined)
+					form.setValue("secondDeclaration.accuracyDate", sd.accuracyDate);
+				if (sd.gapConsulted !== undefined)
+					form.setValue("secondDeclaration.gapConsulted", sd.gapConsulted);
+				if (sd.gapOpinion !== undefined)
+					form.setValue("secondDeclaration.gapOpinion", sd.gapOpinion);
+				if (sd.gapDate !== undefined)
+					form.setValue("secondDeclaration.gapDate", sd.gapDate);
+			}
+		}
+	}, [isLoadingDraft, draft, form, hasSecondDeclaration]);
+
+	const triggerDraftSave = useCallback(() => {
+		const values = form.getValues();
+		setField({
+			firstDeclaration: values.firstDeclaration,
+			secondDeclaration: values.secondDeclaration,
+		});
+	}, [form, setField]);
+
 	const mutation = api.cseOpinion.saveOpinions.useMutation({
 		onSuccess: () => router.push("/avis-cse/etape/2"),
 	});
 
 	const onSubmit = form.handleSubmit((data) => {
-		// Additional validation for conditional gap fields
 		const firstGapIncomplete =
 			data.firstDeclaration.gapConsulted === true &&
 			(!data.firstDeclaration.gapOpinion || !data.firstDeclaration.gapDate);
@@ -100,7 +179,6 @@ export function Step1Opinions({
 		mutation.mutate(data);
 	});
 
-	// Watch fields for controlled sub-components
 	const firstDeclOpinion = form.watch("firstDeclaration.accuracyOpinion");
 	const firstDeclDate = form.watch("firstDeclaration.accuracyDate");
 	const firstDeclGapOpinion = form.watch("firstDeclaration.gapOpinion");
@@ -109,6 +187,10 @@ export function Step1Opinions({
 	const secondDeclDate = form.watch("secondDeclaration.accuracyDate");
 	const secondDeclGapOpinion = form.watch("secondDeclaration.gapOpinion");
 	const secondDeclGapDate = form.watch("secondDeclaration.gapDate");
+
+	if (isLoadingDraft) {
+		return <p>Chargement...</p>;
+	}
 
 	return (
 		<form onSubmit={onSubmit}>
@@ -155,12 +237,14 @@ export function Step1Opinions({
 				<AccuracyOpinionCard
 					date={firstDeclDate ?? ""}
 					id="first-decl-accuracy"
-					onDateChange={(v) =>
-						form.setValue("firstDeclaration.accuracyDate", v)
-					}
-					onOpinionChange={(v) =>
-						form.setValue("firstDeclaration.accuracyOpinion", v)
-					}
+					onDateChange={(v) => {
+						form.setValue("firstDeclaration.accuracyDate", v);
+						triggerDraftSave();
+					}}
+					onOpinionChange={(v) => {
+						form.setValue("firstDeclaration.accuracyOpinion", v);
+						triggerDraftSave();
+					}}
 					opinion={firstDeclOpinion ?? null}
 					title="Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs"
 				/>
@@ -173,11 +257,18 @@ export function Step1Opinions({
 							consulted={field.value ?? null}
 							date={firstDeclGapDate ?? ""}
 							id="first-decl-gap"
-							onConsultedChange={field.onChange}
-							onDateChange={(v) => form.setValue("firstDeclaration.gapDate", v)}
-							onOpinionChange={(v) =>
-								form.setValue("firstDeclaration.gapOpinion", v)
-							}
+							onConsultedChange={(v) => {
+								field.onChange(v);
+								triggerDraftSave();
+							}}
+							onDateChange={(v) => {
+								form.setValue("firstDeclaration.gapDate", v);
+								triggerDraftSave();
+							}}
+							onOpinionChange={(v) => {
+								form.setValue("firstDeclaration.gapOpinion", v);
+								triggerDraftSave();
+							}}
 							opinion={firstDeclGapOpinion ?? null}
 						/>
 					)}
@@ -192,12 +283,14 @@ export function Step1Opinions({
 						<AccuracyOpinionCard
 							date={secondDeclDate ?? ""}
 							id="second-decl-accuracy"
-							onDateChange={(v) =>
-								form.setValue("secondDeclaration.accuracyDate", v)
-							}
-							onOpinionChange={(v) =>
-								form.setValue("secondDeclaration.accuracyOpinion", v)
-							}
+							onDateChange={(v) => {
+								form.setValue("secondDeclaration.accuracyDate", v);
+								triggerDraftSave();
+							}}
+							onOpinionChange={(v) => {
+								form.setValue("secondDeclaration.accuracyOpinion", v);
+								triggerDraftSave();
+							}}
 							opinion={secondDeclOpinion ?? null}
 							title="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
 						/>
@@ -210,13 +303,18 @@ export function Step1Opinions({
 									consulted={field.value ?? null}
 									date={secondDeclGapDate ?? ""}
 									id="second-decl-gap"
-									onConsultedChange={field.onChange}
-									onDateChange={(v) =>
-										form.setValue("secondDeclaration.gapDate", v)
-									}
-									onOpinionChange={(v) =>
-										form.setValue("secondDeclaration.gapOpinion", v)
-									}
+									onConsultedChange={(v) => {
+										field.onChange(v);
+										triggerDraftSave();
+									}}
+									onDateChange={(v) => {
+										form.setValue("secondDeclaration.gapDate", v);
+										triggerDraftSave();
+									}}
+									onOpinionChange={(v) => {
+										form.setValue("secondDeclaration.gapOpinion", v);
+										triggerDraftSave();
+									}}
 									opinion={secondDeclGapOpinion ?? null}
 								/>
 							)}
