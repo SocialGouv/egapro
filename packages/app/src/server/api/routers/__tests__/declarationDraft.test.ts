@@ -331,10 +331,8 @@ describe("declarationDraftRouter", () => {
 				string,
 				unknown
 			>;
-			const metadata = callArg?.["metadata"] as
-				| Record<string, unknown>
-				| undefined;
-			const slice = metadata?.["slice"] as Record<string, unknown> | undefined;
+			const metadata = callArg?.metadata as Record<string, unknown> | undefined;
+			const slice = metadata?.slice as Record<string, unknown> | undefined;
 			expect(slice).not.toHaveProperty("data");
 		});
 	});
