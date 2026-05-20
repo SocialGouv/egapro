@@ -1,11 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import { useIsImpersonating } from "~/modules/auth";
 import { saveCompliancePathSchema } from "~/modules/declaration-remuneration/schemas";
+import { DraftLoadingState } from "~/modules/declaration-remuneration/shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
+import { useDraftAutoSave } from "~/modules/declaration-remuneration/shared/draft/useDraftAutoSave";
+import { useDraftHydration } from "~/modules/declaration-remuneration/shared/draft/useDraftHydration";
 import type { CampaignDeadlines } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { useZodForm } from "~/modules/shared/useZodForm";
@@ -48,30 +51,28 @@ export function CompliancePathChoice({
 
 	const dbValues = useMemo(() => ({ path: initialPath }), [initialPath]);
 
-	const { draft, setField, clearDraft, hasDraft } = useDeclarationDraft({
-		siren: declarationSiren,
-		year: declarationYear,
-		step: "compliance",
-		kind: "compliance",
-		dbValues,
-	});
+	const { draft, setField, clearDraft, hasDraft, isLoadingDraft } =
+		useDeclarationDraft({
+			siren: declarationSiren,
+			year: declarationYear,
+			step: "compliance",
+			kind: "compliance",
+			dbValues,
+		});
 
 	const form = useZodForm(saveCompliancePathSchema, {
 		defaultValues: { path: initialPath },
 	});
 
-	useEffect(() => {
-		if (draft.path !== undefined) {
-			form.setValue("path", draft.path as CompliancePathValue);
+	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
+		if (d.path !== undefined) {
+			form.setValue("path", d.path as CompliancePathValue);
 		}
-	}, [draft.path, form]);
+	});
 
-	useEffect(() => {
-		const sub = form.watch((values) =>
-			setField(values as { path: CompliancePathValue | undefined }),
-		);
-		return () => sub.unsubscribe();
-	}, [form, setField]);
+	useDraftAutoSave(form, draftHydrated, (values) =>
+		setField(values as { path: CompliancePathValue | undefined }),
+	);
 
 	const selectedPath = form.watch("path");
 	const hasInitialData = !!initialPath;
@@ -91,6 +92,8 @@ export function CompliancePathChoice({
 			}
 		},
 	});
+
+	if (!draftHydrated) return <DraftLoadingState />;
 
 	const onSubmit = form.handleSubmit((data) => {
 		if (!data.path) return;

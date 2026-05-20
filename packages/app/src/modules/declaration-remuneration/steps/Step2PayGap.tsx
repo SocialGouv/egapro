@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
@@ -11,7 +11,10 @@ import { updateStep2Schema } from "../schemas";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP2_ROWS } from "../shared/devFillData";
+import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
+import { useDraftAutoSave } from "../shared/draft/useDraftAutoSave";
+import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
@@ -61,27 +64,27 @@ export function Step2PayGap({
 		[initialData],
 	);
 
-	const { draft, setField, clearDraft, hasDraft } = useDeclarationDraft({
-		siren: declarationSiren,
-		year: declarationYear,
-		step: 2,
-		kind: "main",
-		dbValues,
-	});
+	const { draft, setField, clearDraft, hasDraft, isLoadingDraft } =
+		useDeclarationDraft({
+			siren: declarationSiren,
+			year: declarationYear,
+			step: 2,
+			kind: "main",
+			dbValues,
+		});
 
 	const form = useZodForm(updateStep2Schema, { defaultValues });
 
-	useEffect(() => {
-		(Object.keys(draft) as Array<keyof Step2Data>).forEach((key) => {
-			const value = draft[key];
+	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
+		(Object.keys(d) as Array<keyof Step2Data>).forEach((key) => {
+			const value = d[key];
 			if (value !== undefined) form.setValue(key, value as string);
 		});
-	}, [draft, form]);
+	});
 
-	useEffect(() => {
-		const sub = form.watch((values) => setField(values as Step2Data));
-		return () => sub.unsubscribe();
-	}, [form, setField]);
+	useDraftAutoSave(form, draftHydrated, (values) =>
+		setField(values as Step2Data),
+	);
 
 	const formData = form.watch();
 	const rows = step2ToRows(formData as Step2Data);
@@ -95,6 +98,8 @@ export function Step2PayGap({
 			router.push("/declaration-remuneration/etape/3");
 		},
 	});
+
+	if (!draftHydrated) return <DraftLoadingState />;
 
 	function handleRowChange(index: number, field: PayGapField, value: string) {
 		const normalized = normalizeDecimalInput(value);
