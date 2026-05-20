@@ -25,11 +25,7 @@ function buildProgressionDb(rows: ProgressionRow[] = []) {
 	};
 }
 
-/**
- * Builds a db mock specialised for `getCampaignStats`. The procedure issues
- * four `select(...).from(...)[.innerJoin(...)].where(...)` calls in parallel —
- * we capture each call's terminal value via a FIFO queue of results.
- */
+// FIFO queue: 4 parallel COUNT queries each consume one result in call order.
 function buildStatsDb(results: Array<Array<{ value: number }>>) {
 	const queue = [...results];
 	const select = vi.fn(() => {
