@@ -7,6 +7,8 @@ import { api } from "~/trpc/react";
 
 import { CampaignProgressionChart } from "./CampaignProgressionChart";
 import { CampaignProgressionTable } from "./CampaignProgressionTable";
+import { StepDurationsChart } from "./StepDurationsChart";
+import { StepDurationsTable } from "./StepDurationsTable";
 import { YearsFilter } from "./YearsFilter";
 
 type Props = {
@@ -32,6 +34,12 @@ export function CampaignStatsPage({ currentYear, availableYears }: Props) {
 			enabled: selectedYears.length > 0,
 			placeholderData: (prev) => prev,
 		},
+	);
+
+	const stepDurationsYear = selectedYears[0] ?? currentYear;
+	const stepDurationsQuery = api.adminStats.getStepDurations.useQuery(
+		{ year: stepDurationsYear, sizeRange },
+		{ placeholderData: (prev) => prev },
 	);
 
 	return (
@@ -87,6 +95,33 @@ export function CampaignStatsPage({ currentYear, availableYears }: Props) {
 							series={query.data}
 						/>
 						<CampaignProgressionTable series={query.data} />
+					</>
+				)}
+			</section>
+
+			<section aria-labelledby="step-durations-heading" className="fr-mt-6w">
+				<h2 className="fr-h3" id="step-durations-heading">
+					Délai moyen par étape — campagne {stepDurationsYear}
+				</h2>
+				<p className="fr-text--sm fr-text-mention--grey">
+					Temps passé par les déclarations sur chaque étape du parcours
+					indicateurs (médiane et 90e percentile). Aide à repérer les étapes qui
+					ralentissent la campagne.
+				</p>
+				{stepDurationsQuery.isLoading && !stepDurationsQuery.data && (
+					<p aria-live="polite">Chargement du graphique…</p>
+				)}
+				{stepDurationsQuery.isError && (
+					<div aria-live="polite" className="fr-alert fr-alert--error">
+						<p>
+							Une erreur est survenue lors du chargement des délais par étape.
+						</p>
+					</div>
+				)}
+				{stepDurationsQuery.data && (
+					<>
+						<StepDurationsChart rows={stepDurationsQuery.data} />
+						<StepDurationsTable rows={stepDurationsQuery.data} />
 					</>
 				)}
 			</section>
