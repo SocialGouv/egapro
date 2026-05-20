@@ -298,6 +298,21 @@ describe("useDeclarationDraft", () => {
 		expect(clearMutateMock).not.toHaveBeenCalled();
 	});
 
+	it("keeps a stable draft reference when setField is called with the same values", () => {
+		queryState = { data: null, isLoading: false };
+		const { result } = renderDraftHook();
+
+		act(() => {
+			result.current.setField({ totalWomen: 5, totalMen: 0 });
+		});
+		const draftAfterFirst = result.current.draft;
+
+		act(() => {
+			result.current.setField({ totalWomen: 5, totalMen: 0 });
+		});
+		expect(result.current.draft).toBe(draftAfterFirst);
+	});
+
 	it("honors a custom step in the save payload", () => {
 		queryState = { data: null, isLoading: false };
 		const { result } = renderDraftHook({ step: "second-1" });

@@ -27,6 +27,20 @@ type UseDeclarationDraftResult<T extends Record<string, unknown>> = {
 };
 
 const DEBOUNCE_MS = 600;
+const EMPTY_DRAFT: Readonly<Record<string, never>> = Object.freeze({});
+
+function shallowEqualRecord(
+	a: Record<string, unknown>,
+	b: Record<string, unknown>,
+): boolean {
+	const keysA = Object.keys(a);
+	const keysB = Object.keys(b);
+	if (keysA.length !== keysB.length) return false;
+	for (const key of keysA) {
+		if (!Object.is(a[key], b[key])) return false;
+	}
+	return true;
+}
 
 export function useDeclarationDraft<T extends Record<string, unknown>>(
 	options: UseDeclarationDraftOptions<T>,
@@ -45,7 +59,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 
 	const stepKey = String(step);
 
-	const { mutate: saveMutate } = api.declarationDraft.save.useMutation({
+	const saveMutation = api.declarationDraft.save.useMutation({
 		onSuccess: (_data, variables) => {
 			utils.declarationDraft.get.setData(
 				{ year: variables.year, siren: variables.siren },
@@ -67,7 +81,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 		},
 	});
 
-	const { mutate: clearMutate } = api.declarationDraft.clear.useMutation({
+	const clearMutation = api.declarationDraft.clear.useMutation({
 		onSuccess: (_data, variables) => {
 			utils.declarationDraft.get.setData(
 				{ year: variables.year, siren: variables.siren },
@@ -82,6 +96,11 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 		},
 	});
 
+	const saveMutateRef = useRef(saveMutation.mutate);
+	const clearMutateRef = useRef(clearMutation.mutate);
+	saveMutateRef.current = saveMutation.mutate;
+	clearMutateRef.current = clearMutation.mutate;
+
 	const [localDraft, setLocalDraft] = useState<Partial<T> | null>(null);
 
 	const queryDraft = useMemo<Partial<T> | null>(() => {
@@ -94,7 +113,8 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 		return stepData as Partial<T>;
 	}, [query.data, kind, stepKey]);
 
-	const draft: Partial<T> = localDraft ?? queryDraft ?? {};
+	const draft: Partial<T> =
+		localDraft ?? queryDraft ?? (EMPTY_DRAFT as Partial<T>);
 	const hasDraft = Object.keys(draft).length > 0;
 
 	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -112,9 +132,9 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			pendingRef.current = null;
 			if (pending === null || !isEnabled) return;
 			if (pending.diff === null) {
-				clearMutate({ year, siren, kind });
+				clearMutateRef.current({ year, siren, kind });
 			} else {
-				saveMutate({
+				saveMutateRef.current({
 					year,
 					siren,
 					slice: { kind, step: stepKey, data: pending.diff },
@@ -128,24 +148,38 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			if (!isEnabled) return;
 			const diff = computeDraftDiff(currentValues, dbValues);
 			const hasDiff = Object.keys(diff).length > 0;
-			setLocalDraft(hasDiff ? (diff as Partial<T>) : ({} as Partial<T>));
+			setLocalDraft((prev) => {
+				const next = hasDiff
+					? (diff as Partial<T>)
+					: (EMPTY_DRAFT as Partial<T>);
+				if (
+					prev !== null &&
+					shallowEqualRecord(
+						prev as Record<string, unknown>,
+						next as Record<string, unknown>,
+					)
+				) {
+					return prev;
+				}
+				return next;
+			});
 			if (timerRef.current !== null) clearTimeout(timerRef.current);
 			pendingRef.current = { diff: hasDiff ? diff : null };
 			timerRef.current = setTimeout(() => {
 				timerRef.current = null;
 				pendingRef.current = null;
 				if (hasDiff) {
-					saveMutate({
+					saveMutateRef.current({
 						year,
 						siren,
 						slice: { kind, step: stepKey, data: diff },
 					});
 				} else {
-					clearMutate({ year, siren, kind });
+					clearMutateRef.current({ year, siren, kind });
 				}
 			}, DEBOUNCE_MS);
 		},
-		[isEnabled, siren, year, kind, stepKey, dbValues, saveMutate, clearMutate],
+		[isEnabled, siren, year, kind, stepKey, dbValues],
 	);
 
 	const clearDraftCallback = useCallback(() => {
@@ -155,9 +189,12 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			timerRef.current = null;
 			pendingRef.current = null;
 		}
-		setLocalDraft({} as Partial<T>);
-		clearMutate({ year, siren, kind });
-	}, [isEnabled, siren, year, kind, clearMutate]);
+		setLocalDraft((prev) => {
+			if (prev !== null && Object.keys(prev).length === 0) return prev;
+			return EMPTY_DRAFT as Partial<T>;
+		});
+		clearMutateRef.current({ year, siren, kind });
+	}, [isEnabled, siren, year, kind]);
 
 	useEffect(() => {
 		return () => {
