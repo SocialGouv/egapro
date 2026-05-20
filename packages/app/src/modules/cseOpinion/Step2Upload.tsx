@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useReadOnlyGuard } from "~/modules/auth";
+import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { FileUpload, getDsfrModal, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -17,12 +18,14 @@ import { MAX_CSE_FILES, type UploadedFile } from "./types";
 
 type Props = {
 	declarationYear: number;
+	siren: string;
 	hasSecondDeclaration?: boolean;
 	existingFiles?: UploadedFile[];
 };
 
 export function Step2Upload({
 	declarationYear,
+	siren,
 	hasSecondDeclaration = true,
 	existingFiles = [],
 }: Props) {
@@ -31,6 +34,15 @@ export function Step2Upload({
 	const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
 	const [finalizeError, setFinalizeError] = useState<string | null>(null);
 	const readOnlyGuard = useReadOnlyGuard();
+
+	const emptyDbValues = useMemo(() => ({}), []);
+	useDeclarationDraft({
+		siren,
+		year: declarationYear,
+		step: "upload",
+		kind: "cse",
+		dbValues: emptyDbValues,
+	});
 
 	const refreshFileList = useCallback(() => {
 		void utils.cseOpinion.getFiles.invalidate();
