@@ -134,6 +134,8 @@ type DeclarationStateRow = {
 	indicatorFHourlyMen2?: number | null;
 	indicatorFHourlyMen3?: number | null;
 	indicatorFHourlyMen4?: number | null;
+	draft?: Record<string, unknown> | null;
+	draftUpdatedAt?: Date | null;
 };
 
 type CompanyRow = {
@@ -300,13 +302,14 @@ function createSubmitMockDb(
 function createOneRowSelectDb(
 	declaration: DeclarationStateRow,
 	correctionCategories: Array<Record<string, unknown>> = [],
+	txRows: unknown[] = [],
 ) {
 	const joinRows = correctionCategories.map((ec) => ({
 		employee_category: ec,
 	}));
 	const selectQueue = createSelectQueue([[declaration], joinRows]);
 
-	const m = createMutationTxMock();
+	const m = createMutationTxMock(txRows);
 
 	return {
 		db: {
@@ -326,13 +329,14 @@ function createSimpleSelectDb(
 	declaration: DeclarationStateRow,
 	historyForRound: unknown[] = [],
 	historyForLock: unknown[] = [],
+	txRows: unknown[] = [],
 ) {
 	const queue = createSelectQueue([
 		[declaration],
 		historyForRound,
 		historyForLock,
 	]);
-	const m = createMutationTxMock();
+	const m = createMutationTxMock(txRows);
 
 	return {
 		db: {
@@ -609,6 +613,61 @@ describe("declarationRouter", () => {
 				"SIRET manquant ou invalide dans la session",
 			);
 		});
+
+		it("purges the main draft slice and keeps other slices after submit", async () => {
+			const declaration = buildDeclaration({
+				status: "draft",
+				draft: { main: { step1: { foo: "bar" } }, cse: { step1: {} } },
+			});
+			const company = buildCompany();
+			const ctx = createSubmitMockDb(declaration, company, []);
+			const caller = await createCaller(ctx.db);
+
+			await caller.submit();
+
+			const setCalls = ctx.set.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const purgeCall = setCalls.find((c) => "draft" in c);
+			expect(purgeCall).toBeDefined();
+			expect(purgeCall?.draft).toEqual({ cse: { step1: {} } });
+			expect(purgeCall?.draftUpdatedAt).toBeInstanceOf(Date);
+		});
+
+		it("sets draft to null when main was the only slice after submit", async () => {
+			const declaration = buildDeclaration({
+				status: "draft",
+				draft: { main: { step1: { foo: "bar" } } },
+			});
+			const company = buildCompany();
+			const ctx = createSubmitMockDb(declaration, company, []);
+			const caller = await createCaller(ctx.db);
+
+			await caller.submit();
+
+			const setCalls = ctx.set.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const purgeCall = setCalls.find((c) => "draft" in c);
+			expect(purgeCall).toBeDefined();
+			expect(purgeCall?.draft).toBeNull();
+			expect(purgeCall?.draftUpdatedAt).toBeNull();
+		});
+
+		it("does not call draft update when draft is null after submit", async () => {
+			const declaration = buildDeclaration({ status: "draft", draft: null });
+			const company = buildCompany();
+			const ctx = createSubmitMockDb(declaration, company, []);
+			const caller = await createCaller(ctx.db);
+
+			await caller.submit();
+
+			const setCalls = ctx.set.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const purgeCall = setCalls.find((c) => "draft" in c);
+			expect(purgeCall).toBeUndefined();
+		});
 	});
 
 	describe("submitSecondDeclaration (rules engine)", () => {
@@ -690,6 +749,46 @@ describe("declarationRouter", () => {
 			const caller = await createCaller(mockDb);
 
 			await expect(caller.submitSecondDeclaration()).rejects.toThrow();
+		});
+
+		it("purges the second draft slice and keeps other slices after submitSecondDeclaration", async () => {
+			const declaration = buildDeclaration({
+				status: "corrective_actions_chosen",
+				cseRequired: false,
+				draft: { second: { step1: { foo: "bar" } }, main: { step1: {} } },
+			});
+			const ctx = createOneRowSelectDb(declaration, [], [declaration]);
+			const caller = await createCaller(ctx.db);
+
+			await caller.submitSecondDeclaration();
+
+			const setCalls = ctx.set.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const purgeCall = setCalls.find((c) => "draft" in c);
+			expect(purgeCall).toBeDefined();
+			expect(purgeCall?.draft).toEqual({ main: { step1: {} } });
+			expect(purgeCall?.draftUpdatedAt).toBeInstanceOf(Date);
+		});
+
+		it("sets draft to null when second was the only slice after submitSecondDeclaration", async () => {
+			const declaration = buildDeclaration({
+				status: "corrective_actions_chosen",
+				cseRequired: false,
+				draft: { second: { step1: { foo: "bar" } } },
+			});
+			const ctx = createOneRowSelectDb(declaration, [], [declaration]);
+			const caller = await createCaller(ctx.db);
+
+			await caller.submitSecondDeclaration();
+
+			const setCalls = ctx.set.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const purgeCall = setCalls.find((c) => "draft" in c);
+			expect(purgeCall).toBeDefined();
+			expect(purgeCall?.draft).toBeNull();
+			expect(purgeCall?.draftUpdatedAt).toBeNull();
 		});
 	});
 
@@ -857,6 +956,49 @@ describe("declarationRouter", () => {
 				caller.saveCompliancePath({ path: "invalid_path" as never }),
 			).rejects.toThrow();
 		});
+
+		it("purges the compliance draft slice and keeps other slices after saveCompliancePath", async () => {
+			const declaration = buildDeclaration({
+				status: "awaiting_compliance_path_choice",
+				cseRequired: true,
+				draft: {
+					compliance: { step1: { path: "justify" } },
+					main: { step1: {} },
+				},
+			});
+			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
+			const caller = await createCaller(ctx.db);
+
+			await caller.saveCompliancePath({ path: "justify" });
+
+			const setCalls = ctx.set.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const purgeCall = setCalls.find((c) => "draft" in c);
+			expect(purgeCall).toBeDefined();
+			expect(purgeCall?.draft).toEqual({ main: { step1: {} } });
+			expect(purgeCall?.draftUpdatedAt).toBeInstanceOf(Date);
+		});
+
+		it("sets draft to null when compliance was the only slice after saveCompliancePath", async () => {
+			const declaration = buildDeclaration({
+				status: "awaiting_compliance_path_choice",
+				cseRequired: true,
+				draft: { compliance: { step1: { path: "justify" } } },
+			});
+			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
+			const caller = await createCaller(ctx.db);
+
+			await caller.saveCompliancePath({ path: "justify" });
+
+			const setCalls = ctx.set.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const purgeCall = setCalls.find((c) => "draft" in c);
+			expect(purgeCall).toBeDefined();
+			expect(purgeCall?.draft).toBeNull();
+			expect(purgeCall?.draftUpdatedAt).toBeNull();
+		});
 	});
 
 	describe("submitJointEvaluation (rules engine)", () => {
@@ -918,6 +1060,51 @@ describe("declarationRouter", () => {
 			const caller = await createCaller(mockDb);
 
 			await expect(caller.submitJointEvaluation()).rejects.toThrow();
+		});
+
+		it("purges the joint draft slice and keeps other slices after submitJointEvaluation", async () => {
+			const declaration = buildDeclaration({
+				status: "joint_evaluation_chosen",
+				cseRequired: true,
+				firstDeclarationPathChoice: "joint_evaluation",
+				draft: {
+					joint: { step1: { foo: "bar" } },
+					cse: { step1: {} },
+				},
+			});
+			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
+			const caller = await createCaller(ctx.db);
+
+			await caller.submitJointEvaluation();
+
+			const setCalls = ctx.set.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const purgeCall = setCalls.find((c) => "draft" in c);
+			expect(purgeCall).toBeDefined();
+			expect(purgeCall?.draft).toEqual({ cse: { step1: {} } });
+			expect(purgeCall?.draftUpdatedAt).toBeInstanceOf(Date);
+		});
+
+		it("sets draft to null when joint was the only slice after submitJointEvaluation", async () => {
+			const declaration = buildDeclaration({
+				status: "joint_evaluation_chosen",
+				cseRequired: true,
+				firstDeclarationPathChoice: "joint_evaluation",
+				draft: { joint: { step1: { foo: "bar" } } },
+			});
+			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
+			const caller = await createCaller(ctx.db);
+
+			await caller.submitJointEvaluation();
+
+			const setCalls = ctx.set.mock.calls.map(
+				(c) => c[0] as Record<string, unknown>,
+			);
+			const purgeCall = setCalls.find((c) => "draft" in c);
+			expect(purgeCall).toBeDefined();
+			expect(purgeCall?.draft).toBeNull();
+			expect(purgeCall?.draftUpdatedAt).toBeNull();
 		});
 	});
 
