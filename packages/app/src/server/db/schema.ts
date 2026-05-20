@@ -177,6 +177,8 @@ export const declarations = createTable(
 		cancelledAt: d.timestamp({ withTimezone: false, mode: "date" }),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		draft: d.jsonb(),
+		draftUpdatedAt: d.timestamp({ withTimezone: true }),
 	}),
 	(t) => [
 		uniqueIndex("declarations_siren_year_active_unique")
