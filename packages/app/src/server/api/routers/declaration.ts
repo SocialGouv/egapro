@@ -41,6 +41,7 @@ import {
 	deleteJobAndEmployeeCategories,
 	fetchAllCategories,
 	fetchPreviousYearJobCategories,
+	purgeDraftSlice,
 } from "./declarationHelpers";
 import {
 	buildHistoryInserts,
@@ -601,6 +602,7 @@ export const declarationRouter = createTRPCRouter({
 				.where(activeDeclarationFilter(siren, year));
 
 			await applyPercentagesAfterUpdate(tx, siren, year);
+			await purgeDraftSlice(tx, siren, year, "main");
 		});
 
 		const email = ctx.session.user.email;
@@ -691,6 +693,7 @@ export const declarationRouter = createTRPCRouter({
 					.update(declarations)
 					.set({ ...projection, updatedAt: new Date() })
 					.where(activeDeclarationFilter(siren, year));
+				await purgeDraftSlice(tx, siren, year, "compliance");
 			});
 
 			return { success: true };
@@ -740,6 +743,7 @@ export const declarationRouter = createTRPCRouter({
 					updatedAt: new Date(),
 				})
 				.where(activeDeclarationFilter(siren, year));
+			await purgeDraftSlice(tx, siren, year, "second");
 		});
 
 		const email = ctx.session.user.email;
@@ -793,6 +797,7 @@ export const declarationRouter = createTRPCRouter({
 					.update(declarations)
 					.set({ ...projection, updatedAt: new Date() })
 					.where(activeDeclarationFilter(siren, year));
+				await purgeDraftSlice(tx, siren, year, "joint");
 			});
 
 			return { success: true };

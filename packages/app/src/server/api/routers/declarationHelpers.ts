@@ -37,6 +37,8 @@ type PercentagesTx = {
 	};
 };
 
+type DraftPurgeTx = PercentagesTx;
+
 export async function applyPercentagesAfterUpdate(
 	tx: PercentagesTx,
 	siren: string,
@@ -346,4 +348,31 @@ export function mapToEmployeeCategoryRows(
 				hourlyVariableMen: emp?.hourlyVariableMen ?? null,
 			};
 		});
+}
+
+export async function purgeDraftSlice(
+	tx: DraftPurgeTx,
+	siren: string,
+	year: number,
+	kind: string,
+): Promise<void> {
+	const [row] = await tx
+		.select()
+		.from(declarations)
+		.where(activeDeclarationFilter(siren, year))
+		.limit(1);
+
+	if (!row?.draft) return;
+
+	const current = row.draft as Record<string, unknown>;
+	const { [kind]: _removed, ...remaining } = current;
+	const isEmpty = Object.keys(remaining).length === 0;
+
+	await tx
+		.update(declarations)
+		.set({
+			draft: isEmpty ? null : remaining,
+			draftUpdatedAt: isEmpty ? null : new Date(),
+		})
+		.where(activeDeclarationFilter(siren, year));
 }
