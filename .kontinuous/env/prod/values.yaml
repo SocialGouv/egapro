@@ -84,6 +84,11 @@ nginx:
       cpu: 1
       memory: 2G
 
+pg:
+  cnpg-cluster:
+    storage:
+      size: 20Gi
+
 redis:
   sentinel:
     enabled: true
