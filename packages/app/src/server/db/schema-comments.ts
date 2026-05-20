@@ -155,11 +155,11 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		declaration_id:
 			"Référence vers la déclaration concernée. Append-only — chaque event capture une transition métier (submit / path_choice / *_submit / cse_opinion_submit / cancel / demarche_complete).",
 		event_type:
-			"Type d'event métier. Source de vérité de la trajectoire FSM (la colonne app_declaration.status est une projection dérivée du dernier event).",
+			"Type d'event métier. Source de vérité de la trajectoire FSM (la colonne app_declaration.status est une projection dérivée du dernier event). Inclut step_change pour les transitions du stepper Indicateurs A–F (alimente le KPI K4).",
 		value:
-			"Charge utile facultative selon le type d'event. Pour path_choice: 'justify' | 'corrective_action' | 'joint_evaluation'.",
+			"Charge utile facultative selon le type d'event. Pour path_choice: 'justify' | 'corrective_action' | 'joint_evaluation'. Pour step_change: 'from:N|to:M' (N peut être 'null' à la création).",
 		round:
-			"1 = première déclaration, 2 = seconde déclaration. Renseigné pour path_choice, second_declaration_submit, joint_evaluation_submit.",
+			"1 = première déclaration, 2 = seconde déclaration. Renseigné pour path_choice, second_declaration_submit, joint_evaluation_submit. Pour step_change : numéro de l'étape atteinte (toStep) — facilite l'agrégation côté SQL.",
 		actor_user_id:
 			"Auteur de l'event. NULL = event système (cron, demarche_complete, etc.).",
 		created_at:
