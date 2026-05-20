@@ -17,7 +17,14 @@ test.describe("Declaration draft round-trip", () => {
 				name: "Nombre de femmes",
 			});
 			await womenInput1.fill("75");
-			await page1.waitForTimeout(1200);
+
+			await page1.waitForResponse(
+				(r) =>
+					r.url().includes("declarationDraft.save") &&
+					r.request().method() === "POST" &&
+					r.status() === 200,
+				{ timeout: 10_000 },
+			);
 		} finally {
 			await ctx1.close();
 		}
@@ -31,7 +38,7 @@ test.describe("Declaration draft round-trip", () => {
 			const womenInput2 = page2.getByRole("textbox", {
 				name: "Nombre de femmes",
 			});
-			await expect(womenInput2).toHaveValue("75");
+			await expect(womenInput2).toHaveValue("75", { timeout: 10_000 });
 		} finally {
 			await ctx2.close();
 		}

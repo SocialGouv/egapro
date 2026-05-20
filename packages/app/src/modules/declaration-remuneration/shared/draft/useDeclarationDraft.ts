@@ -59,6 +59,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 ): UseDeclarationDraftResult<T> {
 	const { siren, year, step, kind, dbValues } = options;
 	const session = useSession();
+	const isSessionLoading = session.status === "loading";
 	const userId = session.data?.user?.id ?? null;
 	const isImpersonating = Boolean(session.data?.user?.impersonation);
 	const isEnabled = userId !== null && !isImpersonating;
@@ -214,8 +215,16 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			setField,
 			clearDraft: clearDraftCallback,
 			hasDraft,
-			isLoadingDraft: isEnabled ? query.isLoading : false,
+			isLoadingDraft: isSessionLoading || (isEnabled && query.isLoading),
 		}),
-		[draft, setField, clearDraftCallback, hasDraft, query.isLoading, isEnabled],
+		[
+			draft,
+			setField,
+			clearDraftCallback,
+			hasDraft,
+			query.isLoading,
+			isEnabled,
+			isSessionLoading,
+		],
 	);
 }
