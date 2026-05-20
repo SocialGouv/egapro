@@ -15,3 +15,10 @@ export type CampaignProgressionSeries = {
 	year: number;
 	points: CampaignProgressionPoint[];
 };
+
+export type CampaignStats = {
+	totalObligated: number;
+	totalSubmitted: number;
+	submissionRate: number;
+	previousYearRate: number | null;
+};

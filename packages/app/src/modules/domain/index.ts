@@ -10,6 +10,8 @@ export {
 	isDeadlinePassed,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
+// Company obligation
+export { isObligatedForYear } from "./shared/companyObligation";
 // Company size
 export {
 	COMPANY_SIZE_RANGES,

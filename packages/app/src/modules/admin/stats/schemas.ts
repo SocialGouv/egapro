@@ -23,3 +23,10 @@ export const getCampaignProgressionSchema = z.object({
 export type GetCampaignProgressionInput = z.infer<
 	typeof getCampaignProgressionSchema
 >;
+
+export const getCampaignStatsSchema = z.object({
+	year: z.number().int().min(2000).max(2100),
+	sizeRange: z.enum(COMPANY_SIZE_RANGE_KEYS).optional(),
+});
+
+export type GetCampaignStatsInput = z.infer<typeof getCampaignStatsSchema>;
