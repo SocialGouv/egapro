@@ -70,6 +70,11 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,
 
+	// ── declaration draft ─────────────────────────────────
+	"declarationDraft.get": AUDIT_ACTIONS.DRAFT_READ,
+	"declarationDraft.save": AUDIT_ACTIONS.DRAFT_SAVE,
+	"declarationDraft.clear": AUDIT_ACTIONS.DRAFT_CLEAR,
+
 	// ── mail ──────────────────────────────────────────────
 	"mail.resendReceipt": AUDIT_ACTIONS.MAIL_RECEIPT_RESEND,
 };
@@ -234,4 +239,5 @@ const SENSITIVE_KEYS = new Set([
 	"accesskey",
 	"access_key",
 	"private_key",
+	"data",
 ]);
