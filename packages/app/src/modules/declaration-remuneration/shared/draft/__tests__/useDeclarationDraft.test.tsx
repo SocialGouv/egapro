@@ -278,6 +278,17 @@ describe("useDeclarationDraft", () => {
 		expect(clearMutateMock).not.toHaveBeenCalled();
 	});
 
+	it("reports isLoadingDraft=true while the session is loading", () => {
+		useSessionMock.mockReturnValue({
+			data: null,
+			status: "loading",
+			update: vi.fn(),
+		} as never);
+		queryState = { data: undefined, isLoading: false };
+		const { result } = renderDraftHook();
+		expect(result.current.isLoadingDraft).toBe(true);
+	});
+
 	it("is a no-op when the user is logged out", () => {
 		setSession({ userId: null });
 		queryState = { data: undefined, isLoading: true };

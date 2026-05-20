@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import {
 	computeProportion,
@@ -18,7 +18,10 @@ import {
 	DEV_STEP3_BENEFICIARY_WOMEN,
 	DEV_STEP3_ROWS,
 } from "../shared/devFillData";
+import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
+import { useDraftAutoSave } from "../shared/draft/useDraftAutoSave";
+import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
@@ -73,27 +76,27 @@ export function Step3VariablePay({
 	const defaultValues = padStep3(rawDefaults);
 	const dbValues = useMemo(() => padStep3(initialData), [initialData]);
 
-	const { draft, setField, clearDraft, hasDraft } = useDeclarationDraft({
-		siren: declarationSiren,
-		year: declarationYear,
-		step: 3,
-		kind: "main",
-		dbValues,
-	});
+	const { draft, setField, clearDraft, hasDraft, isLoadingDraft } =
+		useDeclarationDraft({
+			siren: declarationSiren,
+			year: declarationYear,
+			step: 3,
+			kind: "main",
+			dbValues,
+		});
 
 	const form = useZodForm(updateStep3Schema, { defaultValues });
 
-	useEffect(() => {
-		(Object.keys(draft) as Array<keyof Step3Data>).forEach((key) => {
-			const value = draft[key];
+	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
+		(Object.keys(d) as Array<keyof Step3Data>).forEach((key) => {
+			const value = d[key];
 			if (value !== undefined) form.setValue(key, value as string);
 		});
-	}, [draft, form]);
+	});
 
-	useEffect(() => {
-		const sub = form.watch((values) => setField(values as Step3Data));
-		return () => sub.unsubscribe();
-	}, [form, setField]);
+	useDraftAutoSave(form, draftHydrated, (values) =>
+		setField(values as Step3Data),
+	);
 
 	const formData = form.watch();
 	const rows = step3ToRows(formData as Step3Data);
@@ -112,6 +115,8 @@ export function Step3VariablePay({
 			router.push("/declaration-remuneration/etape/4");
 		},
 	});
+
+	if (!draftHydrated) return <DraftLoadingState />;
 
 	function handleRowChange(index: number, field: PayGapField, value: string) {
 		const normalized = normalizeDecimalInput(value);
