@@ -313,6 +313,30 @@ describe("useDeclarationDraft", () => {
 		expect(result.current.draft).toBe(draftAfterFirst);
 	});
 
+	it("keeps a stable draft reference for nested values with identical contents", () => {
+		queryState = { data: null, isLoading: false };
+		const tupleDb = { rows: [{ a: 0, b: 0 }] };
+		const { result } = renderHook(() =>
+			useDeclarationDraft<typeof tupleDb>({
+				siren: SIREN,
+				year: YEAR,
+				step: 4,
+				kind: "main",
+				dbValues: tupleDb,
+			}),
+		);
+
+		act(() => {
+			result.current.setField({ rows: [{ a: 1, b: 2 }] });
+		});
+		const draftAfterFirst = result.current.draft;
+
+		act(() => {
+			result.current.setField({ rows: [{ a: 1, b: 2 }] });
+		});
+		expect(result.current.draft).toBe(draftAfterFirst);
+	});
+
 	it("honors a custom step in the save payload", () => {
 		queryState = { data: null, isLoading: false };
 		const { result } = renderDraftHook({ step: "second-1" });

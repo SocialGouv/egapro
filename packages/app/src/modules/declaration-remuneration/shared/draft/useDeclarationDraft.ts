@@ -29,15 +29,27 @@ type UseDeclarationDraftResult<T extends Record<string, unknown>> = {
 const DEBOUNCE_MS = 600;
 const EMPTY_DRAFT: Readonly<Record<string, never>> = Object.freeze({});
 
-function shallowEqualRecord(
-	a: Record<string, unknown>,
-	b: Record<string, unknown>,
-): boolean {
-	const keysA = Object.keys(a);
-	const keysB = Object.keys(b);
+function deepEqual(a: unknown, b: unknown): boolean {
+	if (Object.is(a, b)) return true;
+	if (a === null || b === null) return false;
+	if (typeof a !== "object" || typeof b !== "object") return false;
+	const aIsArray = Array.isArray(a);
+	const bIsArray = Array.isArray(b);
+	if (aIsArray !== bIsArray) return false;
+	if (aIsArray && bIsArray) {
+		if (a.length !== b.length) return false;
+		for (let i = 0; i < a.length; i++) {
+			if (!deepEqual(a[i], b[i])) return false;
+		}
+		return true;
+	}
+	const aObj = a as Record<string, unknown>;
+	const bObj = b as Record<string, unknown>;
+	const keysA = Object.keys(aObj);
+	const keysB = Object.keys(bObj);
 	if (keysA.length !== keysB.length) return false;
 	for (const key of keysA) {
-		if (!Object.is(a[key], b[key])) return false;
+		if (!deepEqual(aObj[key], bObj[key])) return false;
 	}
 	return true;
 }
@@ -152,13 +164,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 				const next = hasDiff
 					? (diff as Partial<T>)
 					: (EMPTY_DRAFT as Partial<T>);
-				if (
-					prev !== null &&
-					shallowEqualRecord(
-						prev as Record<string, unknown>,
-						next as Record<string, unknown>,
-					)
-				) {
+				if (prev !== null && deepEqual(prev, next)) {
 					return prev;
 				}
 				return next;
