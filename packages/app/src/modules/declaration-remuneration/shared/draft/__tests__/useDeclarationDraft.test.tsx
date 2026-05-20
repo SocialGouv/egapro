@@ -1,34 +1,53 @@
 import { act, renderHook } from "@testing-library/react";
 import { useSession } from "next-auth/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type Mock,
+	vi,
+} from "vitest";
 
-import type { DraftPayload } from "../draftSchema";
+vi.unmock(
+	"~/modules/declaration-remuneration/shared/draft/useDeclarationDraft",
+);
+
 import { useDeclarationDraft } from "../useDeclarationDraft";
+
+type DraftBlob = Record<string, Record<string, unknown>>;
+type DraftKindLiteral = "main" | "second" | "joint" | "compliance" | "cse";
+type StepValues = { totalWomen: number; totalMen: number };
 
 const useSessionMock = vi.mocked(useSession);
 
 const SIREN = "123456789";
 const YEAR = 2026;
 const USER_ID = "user-1";
-const STORAGE_KEY = `egapro:declaration-draft:${USER_ID}:${SIREN}:${YEAR}`;
-
-const FIXED_NOW = new Date("2026-03-15T12:00:00Z").getTime();
-
-function buildPayload(overrides: Partial<DraftPayload> = {}): DraftPayload {
-	return {
-		siren: SIREN,
-		year: YEAR,
-		step: 1,
-		kind: "main",
-		timestamp: FIXED_NOW - 1000,
-		fields: { totalWomen: 10 },
-		...overrides,
-	};
-}
-
-type StepValues = { totalWomen: number; totalMen: number };
-
 const DB_VALUES: StepValues = { totalWomen: 0, totalMen: 0 };
+
+let queryState: { data: DraftBlob | null | undefined; isLoading: boolean };
+let saveMutateMock: Mock;
+let clearMutateMock: Mock;
+let setDataMock: Mock;
+
+vi.mock("~/trpc/react", () => ({
+	api: {
+		useUtils: () => ({
+			declarationDraft: {
+				get: {
+					setData: (_input: unknown, updater: unknown) => setDataMock(updater),
+				},
+			},
+		}),
+		declarationDraft: {
+			get: { useQuery: () => queryState },
+			save: { useMutation: () => ({ mutate: saveMutateMock }) },
+			clear: { useMutation: () => ({ mutate: clearMutateMock }) },
+		},
+	},
+}));
 
 function setSession(
 	options: { userId?: string | null; impersonating?: boolean } = {},
@@ -52,11 +71,32 @@ function setSession(
 	} as never);
 }
 
+function renderDraftHook(
+	overrides: Partial<{
+		kind: DraftKindLiteral;
+		step: number | "second-1";
+		dbValues: StepValues;
+	}> = {},
+) {
+	return renderHook(() =>
+		useDeclarationDraft<StepValues>({
+			siren: SIREN,
+			year: YEAR,
+			step: overrides.step ?? 1,
+			kind: overrides.kind ?? "main",
+			dbValues: overrides.dbValues ?? DB_VALUES,
+		}),
+	);
+}
+
 describe("useDeclarationDraft", () => {
 	beforeEach(() => {
-		window.localStorage.clear();
 		vi.useFakeTimers();
-		vi.setSystemTime(new Date(FIXED_NOW));
+		queryState = { data: undefined, isLoading: true };
+		saveMutateMock = vi.fn();
+		clearMutateMock = vi.fn();
+		setDataMock = vi.fn();
+		setSession();
 	});
 
 	afterEach(() => {
@@ -64,204 +104,215 @@ describe("useDeclarationDraft", () => {
 		useSessionMock.mockReset();
 	});
 
-	it("is a no-op when userId is null (logged out)", () => {
-		setSession({ userId: null });
-		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPayload()));
-		const { result } = renderHook(() =>
-			useDeclarationDraft<StepValues>({
-				siren: SIREN,
-				year: YEAR,
-				step: 1,
-				kind: "main",
-				dbValues: DB_VALUES,
-			}),
-		);
+	it("returns an empty draft and loading=true while the query is pending", () => {
+		const { result } = renderDraftHook();
 		expect(result.current.draft).toEqual({});
 		expect(result.current.hasDraft).toBe(false);
-
-		act(() => {
-			result.current.setField({ totalWomen: 99, totalMen: 0 });
-		});
-		expect(window.localStorage.length).toBe(1);
-
-		act(() => {
-			result.current.clearDraft();
-		});
-		expect(window.localStorage.getItem(STORAGE_KEY)).not.toBeNull();
+		expect(result.current.isLoadingDraft).toBe(true);
 	});
 
-	it("is a no-op when impersonating", () => {
-		setSession({ impersonating: true });
-		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPayload()));
-		const { result } = renderHook(() =>
-			useDeclarationDraft<StepValues>({
-				siren: SIREN,
-				year: YEAR,
-				step: 1,
-				kind: "main",
-				dbValues: DB_VALUES,
-			}),
-		);
-		expect(result.current.draft).toEqual({});
-		expect(result.current.hasDraft).toBe(false);
-
-		act(() => {
-			result.current.setField({ totalWomen: 99, totalMen: 0 });
-			result.current.clearDraft();
-		});
-		expect(window.localStorage.getItem(STORAGE_KEY)).not.toBeNull();
-	});
-
-	it("hydrates draft when payload step matches the current step", () => {
-		setSession();
-		window.localStorage.setItem(
-			STORAGE_KEY,
-			JSON.stringify(buildPayload({ fields: { totalWomen: 10, totalMen: 5 } })),
-		);
-		const { result } = renderHook(() =>
-			useDeclarationDraft<StepValues>({
-				siren: SIREN,
-				year: YEAR,
-				step: 1,
-				kind: "main",
-				dbValues: DB_VALUES,
-			}),
-		);
+	it("hydrates draft from the query slice when data resolves", () => {
+		queryState = {
+			data: { main: { "1": { totalWomen: 10, totalMen: 5 } } } as DraftBlob,
+			isLoading: false,
+		};
+		const { result } = renderDraftHook();
 		expect(result.current.draft).toEqual({ totalWomen: 10, totalMen: 5 });
 		expect(result.current.hasDraft).toBe(true);
+		expect(result.current.isLoadingDraft).toBe(false);
 	});
 
-	it("does not hydrate when payload step does not match — and does not purge", () => {
-		setSession();
-		const payload = buildPayload({ step: 2 });
-		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-		const { result } = renderHook(() =>
-			useDeclarationDraft<StepValues>({
-				siren: SIREN,
-				year: YEAR,
-				step: 1,
-				kind: "main",
-				dbValues: DB_VALUES,
-			}),
-		);
-		expect(result.current.draft).toEqual({});
-		expect(result.current.hasDraft).toBe(false);
-		expect(window.localStorage.getItem(STORAGE_KEY)).not.toBeNull();
-	});
-
-	it("does not hydrate from a different SIREN's draft (key isolation)", () => {
-		setSession();
-		const otherSiren = "987654321";
-		const otherKey = `egapro:declaration-draft:${USER_ID}:${otherSiren}:${YEAR}`;
-		window.localStorage.setItem(
-			otherKey,
-			JSON.stringify(buildPayload({ siren: otherSiren })),
-		);
-		const { result } = renderHook(() =>
-			useDeclarationDraft<StepValues>({
-				siren: SIREN,
-				year: YEAR,
-				step: 1,
-				kind: "main",
-				dbValues: DB_VALUES,
-			}),
-		);
-		expect(result.current.draft).toEqual({});
-		expect(result.current.hasDraft).toBe(false);
-		expect(window.localStorage.getItem(otherKey)).not.toBeNull();
-	});
-
-	it("does not hydrate from a different year's draft (key isolation)", () => {
-		setSession();
-		const otherYear = 2025;
-		const otherKey = `egapro:declaration-draft:${USER_ID}:${SIREN}:${otherYear}`;
-		window.localStorage.setItem(
-			otherKey,
-			JSON.stringify(buildPayload({ year: otherYear })),
-		);
-		const { result } = renderHook(() =>
-			useDeclarationDraft<StepValues>({
-				siren: SIREN,
-				year: YEAR,
-				step: 1,
-				kind: "main",
-				dbValues: DB_VALUES,
-			}),
-		);
+	it("returns an empty draft when the query data has no slice for this kind", () => {
+		queryState = {
+			data: { compliance: { "1": { foo: 1 } } } as DraftBlob,
+			isLoading: false,
+		};
+		const { result } = renderDraftHook();
 		expect(result.current.draft).toEqual({});
 		expect(result.current.hasDraft).toBe(false);
 	});
 
-	it("clears the draft when setField makes values match dbValues", () => {
-		setSession();
-		const { result } = renderHook(() =>
-			useDeclarationDraft<StepValues>({
-				siren: SIREN,
-				year: YEAR,
-				step: 1,
-				kind: "main",
-				dbValues: DB_VALUES,
-			}),
-		);
+	it("returns an empty draft when the kind slice exists but the step is missing", () => {
+		queryState = {
+			data: { main: { "2": { totalWomen: 3 } } } as DraftBlob,
+			isLoading: false,
+		};
+		const { result } = renderDraftHook({ step: 1 });
+		expect(result.current.draft).toEqual({});
+		expect(result.current.hasDraft).toBe(false);
+	});
+
+	it("debounces save calls (multiple setField in <600ms → 1 mutation)", () => {
+		queryState = { data: null, isLoading: false };
+		const { result } = renderDraftHook();
+
+		act(() => {
+			result.current.setField({ totalWomen: 1, totalMen: 0 });
+			result.current.setField({ totalWomen: 2, totalMen: 0 });
+			result.current.setField({ totalWomen: 3, totalMen: 0 });
+		});
+		expect(saveMutateMock).not.toHaveBeenCalled();
+
+		act(() => {
+			vi.advanceTimersByTime(600);
+		});
+
+		expect(saveMutateMock).toHaveBeenCalledTimes(1);
+		expect(saveMutateMock).toHaveBeenCalledWith({
+			year: YEAR,
+			siren: SIREN,
+			slice: { kind: "main", step: "1", data: { totalWomen: 3 } },
+		});
+	});
+
+	it("updates the local draft immediately on setField (optimistic)", () => {
+		queryState = { data: null, isLoading: false };
+		const { result } = renderDraftHook();
+
+		act(() => {
+			result.current.setField({ totalWomen: 7, totalMen: 0 });
+		});
+
+		expect(result.current.draft).toEqual({ totalWomen: 7 });
+		expect(result.current.hasDraft).toBe(true);
+		expect(saveMutateMock).not.toHaveBeenCalled();
+	});
+
+	it("clearDraft triggers the clear mutation immediately (not debounced)", () => {
+		queryState = {
+			data: { main: { "1": { totalWomen: 10 } } } as DraftBlob,
+			isLoading: false,
+		};
+		const { result } = renderDraftHook();
+		expect(result.current.hasDraft).toBe(true);
+
+		act(() => {
+			result.current.clearDraft();
+		});
+
+		expect(clearMutateMock).toHaveBeenCalledTimes(1);
+		expect(clearMutateMock).toHaveBeenCalledWith({
+			year: YEAR,
+			siren: SIREN,
+			kind: "main",
+		});
+		expect(result.current.draft).toEqual({});
+		expect(result.current.hasDraft).toBe(false);
+	});
+
+	it("clearDraft cancels any pending debounced save", () => {
+		queryState = { data: null, isLoading: false };
+		const { result } = renderDraftHook();
 
 		act(() => {
 			result.current.setField({ totalWomen: 5, totalMen: 0 });
 		});
-		expect(window.localStorage.getItem(STORAGE_KEY)).not.toBeNull();
-		expect(result.current.hasDraft).toBe(true);
+		act(() => {
+			result.current.clearDraft();
+		});
+		act(() => {
+			vi.advanceTimersByTime(1000);
+		});
+
+		expect(saveMutateMock).not.toHaveBeenCalled();
+		expect(clearMutateMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("setField with values equal to dbValues triggers a clear (no save)", () => {
+		queryState = {
+			data: { main: { "1": { totalWomen: 5 } } } as DraftBlob,
+			isLoading: false,
+		};
+		const { result } = renderDraftHook();
 
 		act(() => {
 			result.current.setField({ totalWomen: 0, totalMen: 0 });
 		});
-		expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
+		expect(result.current.draft).toEqual({});
 		expect(result.current.hasDraft).toBe(false);
-	});
 
-	it("writes the diff under the (user, siren, year)-scoped key", () => {
-		setSession();
-		const { result } = renderHook(() =>
-			useDeclarationDraft<StepValues>({
-				siren: SIREN,
-				year: YEAR,
-				step: 1,
-				kind: "main",
-				dbValues: DB_VALUES,
-			}),
-		);
 		act(() => {
-			result.current.setField({ totalWomen: 5, totalMen: 0 });
+			vi.advanceTimersByTime(600);
 		});
-		const stored = JSON.parse(
-			window.localStorage.getItem(STORAGE_KEY) ?? "{}",
-		) as DraftPayload;
-		expect(stored.fields).toEqual({ totalWomen: 5 });
-		expect(stored.siren).toBe(SIREN);
-		expect(stored.year).toBe(YEAR);
-		expect(stored.step).toBe(1);
-		expect(stored.kind).toBe("main");
-		expect(stored.timestamp).toBe(FIXED_NOW);
+		expect(saveMutateMock).not.toHaveBeenCalled();
+		expect(clearMutateMock).toHaveBeenCalledTimes(1);
+		expect(clearMutateMock).toHaveBeenCalledWith({
+			year: YEAR,
+			siren: SIREN,
+			kind: "main",
+		});
 	});
 
-	it("clearDraft removes the key and resets hasDraft", () => {
-		setSession();
-		window.localStorage.setItem(
-			STORAGE_KEY,
-			JSON.stringify(buildPayload({ fields: { totalWomen: 10 } })),
-		);
-		const { result } = renderHook(() =>
-			useDeclarationDraft<StepValues>({
-				siren: SIREN,
-				year: YEAR,
-				step: 1,
-				kind: "main",
-				dbValues: DB_VALUES,
-			}),
-		);
+	it("hasDraft becomes true once the query resolves with a non-empty slice", () => {
+		queryState = { data: undefined, isLoading: true };
+		const { rerender, result } = renderDraftHook();
+		expect(result.current.hasDraft).toBe(false);
+
+		queryState = {
+			data: { main: { "1": { totalWomen: 10 } } } as DraftBlob,
+			isLoading: false,
+		};
+		rerender();
 		expect(result.current.hasDraft).toBe(true);
+		expect(result.current.draft).toEqual({ totalWomen: 10 });
+	});
+
+	it("disables the query and is a no-op when impersonating", () => {
+		setSession({ impersonating: true });
+		queryState = { data: undefined, isLoading: true };
+		const { result } = renderDraftHook();
+
+		expect(result.current.isLoadingDraft).toBe(false);
+		expect(result.current.draft).toEqual({});
+		expect(result.current.hasDraft).toBe(false);
+
 		act(() => {
+			result.current.setField({ totalWomen: 99, totalMen: 0 });
 			result.current.clearDraft();
 		});
-		expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
-		expect(result.current.hasDraft).toBe(false);
+		act(() => {
+			vi.advanceTimersByTime(1000);
+		});
+
+		expect(saveMutateMock).not.toHaveBeenCalled();
+		expect(clearMutateMock).not.toHaveBeenCalled();
+	});
+
+	it("is a no-op when the user is logged out", () => {
+		setSession({ userId: null });
+		queryState = { data: undefined, isLoading: true };
+		const { result } = renderDraftHook();
+
+		expect(result.current.isLoadingDraft).toBe(false);
+		expect(result.current.draft).toEqual({});
+
+		act(() => {
+			result.current.setField({ totalWomen: 1, totalMen: 0 });
+			result.current.clearDraft();
+		});
+		act(() => {
+			vi.advanceTimersByTime(1000);
+		});
+
+		expect(saveMutateMock).not.toHaveBeenCalled();
+		expect(clearMutateMock).not.toHaveBeenCalled();
+	});
+
+	it("honors a custom step in the save payload", () => {
+		queryState = { data: null, isLoading: false };
+		const { result } = renderDraftHook({ step: "second-1" });
+
+		act(() => {
+			result.current.setField({ totalWomen: 1, totalMen: 0 });
+		});
+		act(() => {
+			vi.advanceTimersByTime(600);
+		});
+
+		expect(saveMutateMock).toHaveBeenCalledWith({
+			year: YEAR,
+			siren: SIREN,
+			slice: { kind: "main", step: "second-1", data: { totalWomen: 1 } },
+		});
 	});
 });

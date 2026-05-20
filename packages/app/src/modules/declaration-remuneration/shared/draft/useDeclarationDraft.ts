@@ -1,11 +1,14 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { api } from "~/trpc/react";
 
 import { computeDraftDiff } from "./computeDraftDiff";
 import type { DraftKind, DraftStep } from "./draftSchema";
-import { clearDraft, readDraft, writeDraft } from "./draftStorage";
+
+type DraftBlob = Record<string, Record<string, unknown>>;
 
 type UseDeclarationDraftOptions<T extends Record<string, unknown>> = {
 	siren: string;
@@ -20,7 +23,10 @@ type UseDeclarationDraftResult<T extends Record<string, unknown>> = {
 	setField: (currentValues: T) => void;
 	clearDraft: () => void;
 	hasDraft: boolean;
+	isLoadingDraft: boolean;
 };
+
+const DEBOUNCE_MS = 600;
 
 export function useDeclarationDraft<T extends Record<string, unknown>>(
 	options: UseDeclarationDraftOptions<T>,
@@ -31,48 +37,133 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 	const isImpersonating = Boolean(session.data?.user?.impersonation);
 	const isEnabled = userId !== null && !isImpersonating;
 
-	const [draft, setDraft] = useState<Partial<T>>({});
-	const [hasDraft, setHasDraft] = useState(false);
+	const utils = api.useUtils();
+	const query = api.declarationDraft.get.useQuery(
+		{ year, siren },
+		{ staleTime: Infinity, enabled: isEnabled },
+	);
+
+	const stepKey = String(step);
+
+	const { mutate: saveMutate } = api.declarationDraft.save.useMutation({
+		onSuccess: (_data, variables) => {
+			utils.declarationDraft.get.setData(
+				{ year: variables.year, siren: variables.siren },
+				(old) => {
+					const base = (old ?? {}) as DraftBlob;
+					const slice = (base[variables.slice.kind] ?? {}) as Record<
+						string,
+						unknown
+					>;
+					return {
+						...base,
+						[variables.slice.kind]: {
+							...slice,
+							[variables.slice.step]: variables.slice.data,
+						},
+					};
+				},
+			);
+		},
+	});
+
+	const { mutate: clearMutate } = api.declarationDraft.clear.useMutation({
+		onSuccess: (_data, variables) => {
+			utils.declarationDraft.get.setData(
+				{ year: variables.year, siren: variables.siren },
+				(old) => {
+					if (!old) return old;
+					const base = old as DraftBlob;
+					if (variables.kind === undefined) return null;
+					const { [variables.kind]: _removed, ...rest } = base;
+					return Object.keys(rest).length === 0 ? null : (rest as DraftBlob);
+				},
+			);
+		},
+	});
+
+	const [localDraft, setLocalDraft] = useState<Partial<T> | null>(null);
+
+	const queryDraft = useMemo<Partial<T> | null>(() => {
+		const data = query.data as DraftBlob | null | undefined;
+		if (!data) return null;
+		const slice = data[kind];
+		if (!slice) return null;
+		const stepData = slice[stepKey];
+		if (!stepData) return null;
+		return stepData as Partial<T>;
+	}, [query.data, kind, stepKey]);
+
+	const draft: Partial<T> = localDraft ?? queryDraft ?? {};
+	const hasDraft = Object.keys(draft).length > 0;
+
+	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const pendingRef = useRef<{ diff: Record<string, unknown> | null } | null>(
+		null,
+	);
+	const flushRef = useRef<(() => void) | null>(null);
 
 	useEffect(() => {
-		if (!isEnabled || userId === null) return;
-		const payload = readDraft(userId, siren, year);
-		if (payload === null) return;
-		if (payload.step !== step) {
-			return;
-		}
-		const fields = payload.fields as Partial<T>;
-		setDraft(fields);
-		setHasDraft(Object.keys(fields).length > 0);
-	}, [isEnabled, userId, siren, year, step]);
+		flushRef.current = () => {
+			if (timerRef.current === null) return;
+			clearTimeout(timerRef.current);
+			timerRef.current = null;
+			const pending = pendingRef.current;
+			pendingRef.current = null;
+			if (pending === null || !isEnabled) return;
+			if (pending.diff === null) {
+				clearMutate({ year, siren, kind });
+			} else {
+				saveMutate({
+					year,
+					siren,
+					slice: { kind, step: stepKey, data: pending.diff },
+				});
+			}
+		};
+	});
 
 	const setField = useCallback(
 		(currentValues: T) => {
-			if (!isEnabled || userId === null) return;
+			if (!isEnabled) return;
 			const diff = computeDraftDiff(currentValues, dbValues);
-			if (Object.keys(diff).length === 0) {
-				clearDraft(userId, siren, year);
-				setHasDraft(false);
-				return;
-			}
-			writeDraft(userId, siren, year, {
-				siren,
-				year,
-				step,
-				kind,
-				timestamp: Date.now(),
-				fields: diff,
-			});
-			setHasDraft(true);
+			const hasDiff = Object.keys(diff).length > 0;
+			setLocalDraft(hasDiff ? (diff as Partial<T>) : ({} as Partial<T>));
+			if (timerRef.current !== null) clearTimeout(timerRef.current);
+			pendingRef.current = { diff: hasDiff ? diff : null };
+			timerRef.current = setTimeout(() => {
+				timerRef.current = null;
+				pendingRef.current = null;
+				if (hasDiff) {
+					saveMutate({
+						year,
+						siren,
+						slice: { kind, step: stepKey, data: diff },
+					});
+				} else {
+					clearMutate({ year, siren, kind });
+				}
+			}, DEBOUNCE_MS);
 		},
-		[isEnabled, userId, siren, year, step, kind, dbValues],
+		[isEnabled, siren, year, kind, stepKey, dbValues, saveMutate, clearMutate],
 	);
 
 	const clearDraftCallback = useCallback(() => {
-		if (!isEnabled || userId === null) return;
-		clearDraft(userId, siren, year);
-		setHasDraft(false);
-	}, [isEnabled, userId, siren, year]);
+		if (!isEnabled) return;
+		if (timerRef.current !== null) {
+			clearTimeout(timerRef.current);
+			timerRef.current = null;
+			pendingRef.current = null;
+		}
+		setLocalDraft({} as Partial<T>);
+		clearMutate({ year, siren, kind });
+	}, [isEnabled, siren, year, kind, clearMutate]);
+
+	useEffect(() => {
+		return () => {
+			flushRef.current?.();
+		};
+	}, []);
 
 	return useMemo(
 		() => ({
@@ -80,7 +171,8 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			setField,
 			clearDraft: clearDraftCallback,
 			hasDraft,
+			isLoadingDraft: isEnabled ? query.isLoading : false,
 		}),
-		[draft, setField, clearDraftCallback, hasDraft],
+		[draft, setField, clearDraftCallback, hasDraft, query.isLoading, isEnabled],
 	);
 }
