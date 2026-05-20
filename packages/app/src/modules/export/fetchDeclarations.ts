@@ -293,6 +293,7 @@ export function assembleDeclaration(
 	const flags = deriveExportFlags(row, indicatorGEntries);
 
 	return {
+		id: row.declarationId,
 		SIREN: row.siren,
 		Raison_sociale: row.companyName,
 		Effectif: row.workforce,

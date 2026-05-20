@@ -121,7 +121,7 @@ test.describe("Declaration process panel", () => {
 				panel.getByText("Vous devez au préalable disposer"),
 			).toBeVisible();
 			await expect(
-				panel.getByRole("link", { name: "Continuer la déclaration" }),
+				panel.getByRole("link", { name: "Continuer" }),
 			).toBeVisible();
 			await expect(
 				panel.getByText("Évaluation conjointe des rémunérations"),
@@ -155,7 +155,7 @@ test.describe("Declaration process panel", () => {
 			).toBeVisible();
 
 			const ctaLink = panel.getByRole("link", {
-				name: "Continuer la déclaration",
+				name: "Continuer",
 			});
 			await expect(ctaLink).toHaveAttribute("href", /evaluation-conjointe/);
 		});
@@ -185,7 +185,7 @@ test.describe("Declaration process panel", () => {
 			).toBeVisible();
 
 			const ctaLink = panel.getByRole("link", {
-				name: "Continuer la déclaration",
+				name: "Continuer",
 			});
 			await expect(ctaLink).toHaveAttribute("href", /avis-cse/);
 		});
@@ -220,7 +220,7 @@ test.describe("Declaration process panel", () => {
 				panel.getByText("Déposer le ou les avis du CSE"),
 			).toBeVisible();
 			const ctaLink = panel.getByRole("link", {
-				name: "Continuer la déclaration",
+				name: "Continuer",
 			});
 			await expect(ctaLink).toHaveAttribute("href", /avis-cse/);
 		});

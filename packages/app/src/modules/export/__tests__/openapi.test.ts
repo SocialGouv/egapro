@@ -33,6 +33,17 @@ describe("openApiSpec", () => {
 		expect(dateEnd?.required).toBe(false);
 	});
 
+	it("should declare id as first property of declarationSchema with uuid format", () => {
+		const responseSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema;
+		const declarationSchema = responseSchema.properties.Declarations.items;
+		expect(declarationSchema.properties.id).toBeDefined();
+		expect(declarationSchema.properties.id.type).toBe("string");
+		expect(declarationSchema.properties.id.format).toBe("uuid");
+		expect(Object.keys(declarationSchema.properties)[0]).toBe("id");
+	});
+
 	it("should define 200, 400, and 500 responses", () => {
 		const responses =
 			openApiSpec.paths["/api/v1/export/declarations"].get.responses;
