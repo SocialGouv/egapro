@@ -1,0 +1,50 @@
+{
+	"name": "notifications",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		"./publisher": {
+			"types": "./dist/publisher.d.ts",
+			"import": "./dist/publisher.js",
+			"default": "./dist/publisher.js"
+		},
+		"./queue": {
+			"types": "./dist/queue.d.ts",
+			"import": "./dist/queue.js",
+			"default": "./dist/queue.js"
+		},
+		"./mails": {
+			"types": "./dist/mails/index.d.ts",
+			"import": "./dist/mails/index.js",
+			"default": "./dist/mails/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc",
+		"start": "node dist/index.js",
+		"dev": "tsx watch src/index.ts",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"typecheck": "tsc --noEmit",
+		"lint:check": "biome lint src",
+		"format:check": "biome format src"
+	},
+	"dependencies": {
+		"html-to-text": "^9.0.5",
+		"nodemailer": "^7.0.13",
+		"pg-boss": "^12.18.2",
+		"postgres": "^3.4.9"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.11",
+		"@types/html-to-text": "^9.0.4",
+		"@types/node": "^25.6.0",
+		"@types/nodemailer": "^8.0.0",
+		"tsx": "^4.21.0",
+		"typescript": "^6.0.2",
+		"vitest": "^4.1.4"
+	}
+}
