@@ -60,7 +60,6 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		indicator_f_annual_threshold1: "GIP-MDS | SUIT: Seuil_Q1_Rem_globale",
 		indicator_f_annual_threshold2: "GIP-MDS | SUIT: Seuil_Q2_Rem_globale",
 		indicator_f_annual_threshold3: "GIP-MDS | SUIT: Seuil_Q3_Rem_globale",
-		indicator_f_annual_threshold4: "GIP-MDS | SUIT: Seuil_Q4_Rem_globale",
 		// Indicator F — quartile women proportions, annual (GIP-MDS → SUIT)
 		indicator_f_annual_women1:
 			"GIP-MDS | SUIT: Quartile1_Rem_globale_annuelle_proportion_F",
@@ -86,8 +85,6 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 			"GIP-MDS | SUIT: Seuil_Q2_Taux_horaire_global",
 		indicator_f_hourly_threshold3:
 			"GIP-MDS | SUIT: Seuil_Q3_Taux_horaire_global",
-		indicator_f_hourly_threshold4:
-			"GIP-MDS | SUIT: Seuil_Q4_Taux_horaire_global",
 		// Indicator F — quartile women proportions, hourly (GIP-MDS → SUIT)
 		indicator_f_hourly_women1:
 			"GIP-MDS | SUIT: Quartile1_Taux_horaire_global_proportion_F",
