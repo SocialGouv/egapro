@@ -313,11 +313,11 @@ describe("Step1Opinions", () => {
 
 		// First declaration accuracy radios
 		const favorableRadios = screen.getAllByLabelText("Favorable");
-		expect(favorableRadios[0]!).toBeChecked();
+		expect(favorableRadios[0]).toBeChecked();
 
 		// Second declaration accuracy radios
 		const unfavorableRadios = screen.getAllByLabelText("Défavorable");
-		expect(unfavorableRadios[1]!).toBeChecked();
+		expect(unfavorableRadios[1]).toBeChecked();
 	});
 
 	it("displays email in submission banner for joint_evaluation path", () => {
@@ -374,7 +374,7 @@ describe("Step1Opinions", () => {
 			);
 
 			const favorableRadios = screen.getAllByLabelText("Favorable");
-			expect(favorableRadios[0]!).toBeChecked();
+			expect(favorableRadios[0]).toBeChecked();
 		});
 
 		it("shows loading state while draft is loading", () => {
@@ -410,7 +410,7 @@ describe("Step1Opinions", () => {
 				/>,
 			);
 
-			await user.click(screen.getAllByLabelText("Favorable")[0]!);
+			await user.click(screen.getAllByLabelText("Favorable")[0] as HTMLElement);
 
 			expect(mockSetField).toHaveBeenCalled();
 			const callArg = mockSetField.mock.calls[
