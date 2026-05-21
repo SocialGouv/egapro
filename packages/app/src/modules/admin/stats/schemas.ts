@@ -38,3 +38,21 @@ export const getStepDurationsSchema = z.object({
 });
 
 export type GetStepDurationsInput = z.infer<typeof getStepDurationsSchema>;
+
+/**
+ * Input for `adminStats.getCompletionFunnel`.
+ *
+ * `year`: campaign year scoped for the K19 funnels — one year at a time, the
+ * funnels compare step counts not inter-year curves.
+ *
+ * `sizeRange`: optional workforce bucket scoping the aggregation (undefined =
+ * all sizes).
+ */
+export const getCompletionFunnelSchema = z.object({
+	year: z.number().int().min(2000).max(2100),
+	sizeRange: z.enum(COMPANY_SIZE_RANGE_KEYS).optional(),
+});
+
+export type GetCompletionFunnelInput = z.infer<
+	typeof getCompletionFunnelSchema
+>;

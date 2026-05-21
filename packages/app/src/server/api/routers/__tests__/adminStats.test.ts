@@ -652,3 +652,299 @@ describe("adminStatsRouter.getStepDurations", () => {
 		expect(result.find((row) => row.label === "Récapitulatif")).toBeUndefined();
 	});
 });
+
+type FunnelAggregateRow = {
+	main?: {
+		draft_started: number;
+		indicators_filled: number;
+		submitted: number;
+		demarche_completed: number;
+	};
+	compliance?: {
+		submitted_with_alert: number;
+		path_chosen: number;
+		corrective_action_submitted: number;
+		demarche_completed: number;
+	};
+	revision?: {
+		revision_required: number;
+		revision_path_chosen: number;
+		revision_action_submitted: number;
+		demarche_completed: number;
+	};
+};
+
+const ZERO_MAIN_ROW = {
+	draft_started: 0,
+	indicators_filled: 0,
+	submitted: 0,
+	demarche_completed: 0,
+};
+
+const ZERO_COMPLIANCE_ROW = {
+	submitted_with_alert: 0,
+	path_chosen: 0,
+	corrective_action_submitted: 0,
+	demarche_completed: 0,
+};
+
+const ZERO_REVISION_ROW = {
+	revision_required: 0,
+	revision_path_chosen: 0,
+	revision_action_submitted: 0,
+	demarche_completed: 0,
+};
+
+function buildFunnelDb(rows: FunnelAggregateRow = {}) {
+	const execute = vi.fn();
+	execute.mockResolvedValueOnce([rows.main ?? ZERO_MAIN_ROW]);
+	execute.mockResolvedValueOnce([rows.compliance ?? ZERO_COMPLIANCE_ROW]);
+	execute.mockResolvedValueOnce([rows.revision ?? ZERO_REVISION_ROW]);
+	return {
+		select: vi.fn(),
+		execute,
+	};
+}
+
+describe("adminStatsRouter.getCompletionFunnel", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers (S-K19-7 access control)", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: {
+				user: { id: "u", email: "u@x", isAdmin: false },
+				expires: "",
+			},
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getCompletionFunnel({ year: 2026 })).rejects.toThrow(
+			/administrateurs/i,
+		);
+	});
+
+	it("returns three funnels each with 4 zero-count rows when SQL returns no data", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.mainFunnel).toHaveLength(4);
+		expect(result.complianceFunnel).toHaveLength(4);
+		expect(result.revisionFunnel).toHaveLength(4);
+		for (const row of [
+			...result.mainFunnel,
+			...result.complianceFunnel,
+			...result.revisionFunnel,
+		]) {
+			expect(row.count).toBe(0);
+			expect(row.pctOfStart).toBe(0);
+		}
+		expect(result.mainFunnel[0]?.pctDropFromPrev).toBeNull();
+		expect(result.mainFunnel[1]?.pctDropFromPrev).toBe(0);
+	});
+
+	it("S-K19-1: maps the main funnel with correct counts, pctOfStart and pctDropFromPrev", async () => {
+		const db = buildFunnelDb({
+			main: {
+				draft_started: 100,
+				indicators_filled: 80,
+				submitted: 60,
+				demarche_completed: 50,
+			},
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.mainFunnel).toEqual([
+			{
+				key: "draft_started",
+				label: "Brouillon créé",
+				count: 100,
+				pctOfStart: 100,
+				pctDropFromPrev: null,
+			},
+			{
+				key: "indicators_filled",
+				label: "Indicateurs saisis",
+				count: 80,
+				pctOfStart: 80,
+				pctDropFromPrev: 20,
+			},
+			{
+				key: "submitted",
+				label: "Déclaration soumise",
+				count: 60,
+				pctOfStart: 60,
+				pctDropFromPrev: 25,
+			},
+			{
+				key: "demarche_completed",
+				label: "Démarche complète",
+				count: 50,
+				pctOfStart: 50,
+				pctDropFromPrev: 17,
+			},
+		]);
+	});
+
+	it("S-K19-2: returns the compliance funnel with correct labels and drops", async () => {
+		const db = buildFunnelDb({
+			compliance: {
+				submitted_with_alert: 40,
+				path_chosen: 30,
+				corrective_action_submitted: 20,
+				demarche_completed: 10,
+			},
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.complianceFunnel.map((r) => r.key)).toEqual([
+			"submitted_with_alert",
+			"path_chosen",
+			"corrective_action_submitted",
+			"demarche_completed",
+		]);
+		expect(result.complianceFunnel[1]?.pctDropFromPrev).toBe(25);
+		expect(result.complianceFunnel[3]?.pctOfStart).toBe(25);
+	});
+
+	it("S-K19-3: passes year and size range filters to all three queries", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCompletionFunnel({ year: 2025, sizeRange: "100-149" });
+
+		expect(db.execute).toHaveBeenCalledTimes(3);
+	});
+
+	it("S-K19-4: pctDropFromPrev is null for the first jalon and 0 when the previous jalon is empty", async () => {
+		const db = buildFunnelDb({
+			main: {
+				draft_started: 0,
+				indicators_filled: 5,
+				submitted: 5,
+				demarche_completed: 5,
+			},
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.mainFunnel[0]?.pctDropFromPrev).toBeNull();
+		expect(result.mainFunnel[1]?.pctDropFromPrev).toBe(0);
+		expect(result.mainFunnel[1]?.pctOfStart).toBe(0);
+	});
+
+	it("S-K19-5: builds the revision funnel from the dedicated SQL row", async () => {
+		const db = buildFunnelDb({
+			revision: {
+				revision_required: 10,
+				revision_path_chosen: 8,
+				revision_action_submitted: 6,
+				demarche_completed: 4,
+			},
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.revisionFunnel.map((r) => r.count)).toEqual([10, 8, 6, 4]);
+		expect(result.revisionFunnel[0]?.label).toBe("Révision requise");
+		expect(result.revisionFunnel[3]?.pctOfStart).toBe(40);
+		expect(result.revisionFunnel[3]?.pctDropFromPrev).toBe(33);
+	});
+
+	it("S-K19-6: the revision funnel is empty when no declaration is in revision (count[0] === 0)", async () => {
+		const db = buildFunnelDb({
+			main: {
+				draft_started: 100,
+				indicators_filled: 80,
+				submitted: 60,
+				demarche_completed: 60,
+			},
+			revision: ZERO_REVISION_ROW,
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.revisionFunnel[0]?.count).toBe(0);
+		expect(result.revisionFunnel.every((r) => r.count === 0)).toBe(true);
+	});
+
+	it("S-K19-8: validates the year bounds", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getCompletionFunnel({ year: 1999 })).rejects.toThrow();
+		await expect(caller.getCompletionFunnel({ year: 2101 })).rejects.toThrow();
+	});
+
+	it("coerces SQL numeric strings to numbers (pg sometimes returns COUNT(...) as a string)", async () => {
+		const db = buildFunnelDb({
+			main: {
+				draft_started: "50" as unknown as number,
+				indicators_filled: "40" as unknown as number,
+				submitted: "30" as unknown as number,
+				demarche_completed: "20" as unknown as number,
+			},
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.mainFunnel.map((r) => r.count)).toEqual([50, 40, 30, 20]);
+	});
+});

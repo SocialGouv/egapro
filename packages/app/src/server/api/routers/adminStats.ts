@@ -2,16 +2,22 @@ import { and, between, eq, gte, inArray, type SQL, sql } from "drizzle-orm";
 
 import {
 	getCampaignProgressionSchema,
+	getCompletionFunnelSchema,
 	getStepDurationsSchema,
 } from "~/modules/admin/stats/schemas";
 import type {
 	CampaignProgressionPoint,
 	CampaignProgressionSeries,
+	CompletionFunnelOutput,
+	FunnelRow,
 	StepDurationRow,
 } from "~/modules/admin/stats/types";
 import {
 	COMPANY_SIZE_RANGES,
 	DECLARATION_STEPS,
+	FUNNEL_COMPLIANCE_KEY_STEPS,
+	FUNNEL_MAIN_KEY_STEPS,
+	FUNNEL_REVISION_KEY_STEPS,
 	getStepLabel,
 	POST_SUBMIT_MILESTONES,
 	type PostSubmitMilestoneKey,
@@ -441,4 +447,238 @@ export const adminStatsRouter = createTRPCRouter({
 
 			return [...wizardRows, ...postSubmitRows];
 		}),
+
+	/**
+	 * Returns the three completion funnels (main / compliance / revision)
+	 * scoped to one campaign year and optionally to a workforce bucket. Feeds
+	 * the K19 funnels on `/admin/stats/plateforme`.
+	 *
+	 * Each funnel is built from a single SQL aggregation pattern:
+	 * `COUNT(DISTINCT declaration_id) FILTER (WHERE …)` per jalon, scoped to a
+	 * base sub-population (the WHERE clause that defines what "100 %" means
+	 * for that funnel). `pctOfStart` and `pctDropFromPrev` are computed in JS
+	 * after the query to keep the SQL test-friendly.
+	 */
+	getCompletionFunnel: adminProcedure
+		.input(getCompletionFunnelSchema)
+		.query(async ({ ctx, input }): Promise<CompletionFunnelOutput> => {
+			const sizeFilterSql = (() => {
+				if (!input.sizeRange) return sql`TRUE`;
+				const { min, max } = COMPANY_SIZE_RANGES[input.sizeRange];
+				return max === null
+					? sql`${companies.workforce} >= ${min}`
+					: sql`${companies.workforce} BETWEEN ${min} AND ${max}`;
+			})();
+
+			const mainFunnelRows = await ctx.db.execute<{
+				draft_started: number | string;
+				indicators_filled: number | string;
+				submitted: number | string;
+				demarche_completed: number | string;
+			}>(sql`
+				WITH base AS (
+					SELECT ${declarations.id} AS declaration_id
+					FROM ${declarations}
+					INNER JOIN ${companies}
+						ON ${companies.siren} = ${declarations.siren}
+					WHERE ${declarations.year} = ${input.year}
+						AND ${declarations.cancelledAt} IS NULL
+						AND ${sizeFilterSql}
+				)
+				SELECT
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type = 'step_change'
+								AND h.round = 0
+						)
+					)::int AS draft_started,
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type = 'step_change'
+								AND h.round = 5
+						)
+					)::int AS indicators_filled,
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type = 'step_change'
+								AND h.round = 6
+						)
+					)::int AS submitted,
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type = 'demarche_complete'
+						)
+					)::int AS demarche_completed
+				FROM base
+			`);
+
+			const complianceFunnelRows = await ctx.db.execute<{
+				submitted_with_alert: number | string;
+				path_chosen: number | string;
+				corrective_action_submitted: number | string;
+				demarche_completed: number | string;
+			}>(sql`
+				WITH base AS (
+					SELECT ${declarations.id} AS declaration_id
+					FROM ${declarations}
+					INNER JOIN ${companies}
+						ON ${companies.siren} = ${declarations.siren}
+					WHERE ${declarations.year} = ${input.year}
+						AND ${declarations.cancelledAt} IS NULL
+						AND ${sizeFilterSql}
+						AND (
+							${declarations.firstDeclarationPathChoice} IS NOT NULL
+							OR ${declarations.status} = 'awaiting_compliance_path_choice'
+						)
+				)
+				SELECT
+					COUNT(DISTINCT base.declaration_id)::int AS submitted_with_alert,
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type = 'path_choice'
+						)
+					)::int AS path_chosen,
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type IN (
+									'second_declaration_submit',
+									'joint_evaluation_submit'
+								)
+						)
+					)::int AS corrective_action_submitted,
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type = 'demarche_complete'
+						)
+					)::int AS demarche_completed
+				FROM base
+			`);
+
+			const revisionFunnelRows = await ctx.db.execute<{
+				revision_required: number | string;
+				revision_path_chosen: number | string;
+				revision_action_submitted: number | string;
+				demarche_completed: number | string;
+			}>(sql`
+				WITH base AS (
+					SELECT ${declarations.id} AS declaration_id
+					FROM ${declarations}
+					INNER JOIN ${companies}
+						ON ${companies.siren} = ${declarations.siren}
+					WHERE ${declarations.year} = ${input.year}
+						AND ${declarations.cancelledAt} IS NULL
+						AND ${sizeFilterSql}
+						AND (
+							${declarations.status} = 'awaiting_revision_choice'
+							OR EXISTS (
+								SELECT 1 FROM ${declarationStatusHistory} h
+								WHERE h.declaration_id = ${declarations.id}
+									AND h.event_type = 'path_choice'
+									AND h.round = 2
+							)
+						)
+				)
+				SELECT
+					COUNT(DISTINCT base.declaration_id)::int AS revision_required,
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type = 'path_choice'
+								AND h.round = 2
+						)
+					)::int AS revision_path_chosen,
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type IN (
+									'second_declaration_submit',
+									'joint_evaluation_submit'
+								)
+								AND h.round = 2
+						)
+					)::int AS revision_action_submitted,
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type = 'demarche_complete'
+						)
+					)::int AS demarche_completed
+				FROM base
+			`);
+
+			const mainCounts = mainFunnelRows[0] as
+				| Record<string, number | string>
+				| undefined;
+			const complianceCounts = complianceFunnelRows[0] as
+				| Record<string, number | string>
+				| undefined;
+			const revisionCounts = revisionFunnelRows[0] as
+				| Record<string, number | string>
+				| undefined;
+
+			return {
+				mainFunnel: buildFunnelRows(FUNNEL_MAIN_KEY_STEPS, mainCounts),
+				complianceFunnel: buildFunnelRows(
+					FUNNEL_COMPLIANCE_KEY_STEPS,
+					complianceCounts,
+				),
+				revisionFunnel: buildFunnelRows(
+					FUNNEL_REVISION_KEY_STEPS,
+					revisionCounts,
+				),
+			};
+		}),
 });
+
+type FunnelStepDef = Readonly<{ key: string; label: string }>;
+
+/**
+ * Turn the SQL aggregate row into the typed `FunnelRow[]` array, computing
+ * the two derived percentages.
+ *
+ * `pctOfStart` is anchored to the first jalon and rounded to a whole number
+ * (DGT analysts want a clean readout, not statistical precision).
+ * `pctDropFromPrev` is `null` for the first jalon; when the previous jalon
+ * is empty we return `0` because there is no meaningful drop to surface.
+ */
+function buildFunnelRows(
+	steps: ReadonlyArray<FunnelStepDef>,
+	counts: Record<string, number | string> | undefined,
+): FunnelRow[] {
+	const numbers = steps.map(({ key }) => Number(counts?.[key] ?? 0));
+	const start = numbers[0] ?? 0;
+	return steps.map((step, idx) => {
+		const count = numbers[idx] ?? 0;
+		const pctOfStart = start === 0 ? 0 : Math.round((count / start) * 100);
+		let pctDropFromPrev: number | null = null;
+		if (idx > 0) {
+			const prev = numbers[idx - 1] ?? 0;
+			pctDropFromPrev =
+				prev === 0 ? 0 : Math.round(((prev - count) / prev) * 100);
+		}
+		return {
+			key: step.key,
+			label: step.label,
+			count,
+			pctOfStart,
+			pctDropFromPrev,
+		};
+	});
+}
