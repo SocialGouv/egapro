@@ -8,11 +8,9 @@ import {
 type Props = {
 	value: number;
 	onChange: (value: number) => void;
-	/** DOM id of the input — exposed so external `<label>`s can target it. */
-	id?: string;
 };
 
-const DEFAULT_ID = "stagnation-days-input";
+const INPUT_ID = "stagnation-days-input";
 
 /**
  * Controlled DSFR numeric input for the K5 « stagnation window » filter.
@@ -21,14 +19,10 @@ const DEFAULT_ID = "stagnation-days-input";
  * to debounce the value before forwarding it to the underlying tRPC query.
  * That separation keeps the filter testable in isolation and reusable.
  */
-export function StagnationDaysFilter({
-	value,
-	onChange,
-	id = DEFAULT_ID,
-}: Props) {
+export function StagnationDaysFilter({ value, onChange }: Props) {
 	return (
 		<div className="fr-input-group">
-			<label className="fr-label" htmlFor={id}>
+			<label className="fr-label" htmlFor={INPUT_ID}>
 				Considérer une déclaration abandonnée après
 				<span className="fr-hint-text">
 					Entre {DROPOFF_STAGNATION_DAYS_MIN} et {DROPOFF_STAGNATION_DAYS_MAX}{" "}
@@ -38,7 +32,7 @@ export function StagnationDaysFilter({
 			<div className="fr-input-wrap">
 				<input
 					className="fr-input"
-					id={id}
+					id={INPUT_ID}
 					inputMode="numeric"
 					max={DROPOFF_STAGNATION_DAYS_MAX}
 					min={DROPOFF_STAGNATION_DAYS_MIN}

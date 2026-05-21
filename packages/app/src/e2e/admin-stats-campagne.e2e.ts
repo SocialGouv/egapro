@@ -156,7 +156,6 @@ test.describe("admin campaign progression stats", () => {
 
 		const k5Section = page.getByLabel(/Taux d'abandon par étape/i);
 
-		// The stagnation filter — input wired to the K5 query.
 		await expect(
 			k5Section.getByLabel(/Considérer une déclaration abandonnée après/i),
 		).toBeVisible();
