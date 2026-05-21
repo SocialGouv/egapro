@@ -97,7 +97,6 @@ export function Step1Workforce({
 
 	const hasData = hasInitialData || hasDraft;
 	const [validationError, setValidationError] = useState<string | null>(null);
-	const [showResetWarning, setShowResetWarning] = useState(false);
 
 	const mutation = api.declaration.updateStep1.useMutation({
 		onSuccess: () => {
@@ -112,21 +111,21 @@ export function Step1Workforce({
 		return Number.parseInt(raw, 10);
 	}
 
+	const showResetWarning =
+		gipPrefillData !== undefined &&
+		((gipPrefillData.step1.totalWomen !== null &&
+			parseIntegerInput(womenRaw) !== gipPrefillData.step1.totalWomen) ||
+			(gipPrefillData.step1.totalMen !== null &&
+				parseIntegerInput(menRaw) !== gipPrefillData.step1.totalMen));
+
 	function handleWomenChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const raw = e.target.value;
 		setWomenRaw(raw);
 		setWomenError(null);
 		const value = parseIntegerInput(raw);
-		if (value === null) {
-			if (isPrefilled && raw === "") setShowResetWarning(true);
-			return;
-		}
+		if (value === null) return;
 		form.setValue("totalWomen", value);
 		setField({ totalWomen: value, totalMen });
-
-		if (isPrefilled && gipPrefillData.step1.totalWomen !== null) {
-			setShowResetWarning(value !== gipPrefillData.step1.totalWomen);
-		}
 	}
 
 	function handleMenChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -134,16 +133,9 @@ export function Step1Workforce({
 		setMenRaw(raw);
 		setMenError(null);
 		const value = parseIntegerInput(raw);
-		if (value === null) {
-			if (isPrefilled && raw === "") setShowResetWarning(true);
-			return;
-		}
+		if (value === null) return;
 		form.setValue("totalMen", value);
 		setField({ totalWomen, totalMen: value });
-
-		if (isPrefilled && gipPrefillData.step1.totalMen !== null) {
-			setShowResetWarning(value !== gipPrefillData.step1.totalMen);
-		}
 	}
 
 	if (!draftHydrated) return <DraftLoadingState />;
