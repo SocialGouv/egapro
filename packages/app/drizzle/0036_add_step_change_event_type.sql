@@ -1,0 +1,1 @@
+ALTER TYPE "public"."declaration_event_type" ADD VALUE 'step_change';

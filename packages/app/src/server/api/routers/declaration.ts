@@ -44,6 +44,7 @@ import {
 } from "./declarationHelpers";
 import {
 	buildHistoryInserts,
+	buildStepChangeInsert,
 	computeProjectionUpdates,
 	getCurrentRound,
 	hasLockingEventForRound,
@@ -203,6 +204,16 @@ export const declarationRouter = createTRPCRouter({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Erreur lors de la création",
 				});
+
+			await tx.insert(declarationStatusHistory).values(
+				buildStepChangeInsert({
+					declarationId: declaration.id,
+					fromStep: null,
+					toStep: 0,
+					actorUserId: ctx.session.user.id,
+				}),
+			);
+
 			return {
 				declaration,
 				jobCategories: [],
@@ -275,6 +286,9 @@ export const declarationRouter = createTRPCRouter({
 					}
 				}
 
+				const previousStep = existing[0]?.currentStep ?? null;
+				const declarationId = existing[0]?.id ?? null;
+
 				await tx
 					.update(declarations)
 					.set({
@@ -333,6 +347,17 @@ export const declarationRouter = createTRPCRouter({
 					})
 					.where(activeDeclarationFilter(siren, year));
 
+				if (declarationId && previousStep !== 1) {
+					await tx.insert(declarationStatusHistory).values(
+						buildStepChangeInsert({
+							declarationId,
+							fromStep: previousStep,
+							toStep: 1,
+							actorUserId: ctx.session.user.id,
+						}),
+					);
+				}
+
 				await applyPercentagesAfterUpdate(tx, siren, year);
 			});
 
@@ -346,6 +371,15 @@ export const declarationRouter = createTRPCRouter({
 			const year = getCurrentYear();
 
 			await ctx.db.transaction(async (tx) => {
+				const [existing] = await tx
+					.select({
+						id: declarations.id,
+						currentStep: declarations.currentStep,
+					})
+					.from(declarations)
+					.where(activeDeclarationFilter(siren, year))
+					.limit(1);
+
 				await tx
 					.update(declarations)
 					.set({
@@ -362,6 +396,17 @@ export const declarationRouter = createTRPCRouter({
 					})
 					.where(activeDeclarationFilter(siren, year));
 
+				if (existing && existing.currentStep !== 2) {
+					await tx.insert(declarationStatusHistory).values(
+						buildStepChangeInsert({
+							declarationId: existing.id,
+							fromStep: existing.currentStep,
+							toStep: 2,
+							actorUserId: ctx.session.user.id,
+						}),
+					);
+				}
+
 				await applyPercentagesAfterUpdate(tx, siren, year);
 			});
 
@@ -375,6 +420,15 @@ export const declarationRouter = createTRPCRouter({
 			const year = getCurrentYear();
 
 			await ctx.db.transaction(async (tx) => {
+				const [existing] = await tx
+					.select({
+						id: declarations.id,
+						currentStep: declarations.currentStep,
+					})
+					.from(declarations)
+					.where(activeDeclarationFilter(siren, year))
+					.limit(1);
+
 				await tx
 					.update(declarations)
 					.set({
@@ -393,6 +447,17 @@ export const declarationRouter = createTRPCRouter({
 					})
 					.where(activeDeclarationFilter(siren, year));
 
+				if (existing && existing.currentStep !== 3) {
+					await tx.insert(declarationStatusHistory).values(
+						buildStepChangeInsert({
+							declarationId: existing.id,
+							fromStep: existing.currentStep,
+							toStep: 3,
+							actorUserId: ctx.session.user.id,
+						}),
+					);
+				}
+
 				await applyPercentagesAfterUpdate(tx, siren, year);
 			});
 
@@ -406,6 +471,15 @@ export const declarationRouter = createTRPCRouter({
 			const year = getCurrentYear();
 
 			await ctx.db.transaction(async (tx) => {
+				const [existing] = await tx
+					.select({
+						id: declarations.id,
+						currentStep: declarations.currentStep,
+					})
+					.from(declarations)
+					.where(activeDeclarationFilter(siren, year))
+					.limit(1);
+
 				await tx
 					.update(declarations)
 					.set({
@@ -435,6 +509,17 @@ export const declarationRouter = createTRPCRouter({
 						updatedAt: new Date(),
 					})
 					.where(activeDeclarationFilter(siren, year));
+
+				if (existing && existing.currentStep !== 4) {
+					await tx.insert(declarationStatusHistory).values(
+						buildStepChangeInsert({
+							declarationId: existing.id,
+							fromStep: existing.currentStep,
+							toStep: 4,
+							actorUserId: ctx.session.user.id,
+						}),
+					);
+				}
 
 				await applyPercentagesAfterUpdate(tx, siren, year);
 			});
@@ -492,6 +577,17 @@ export const declarationRouter = createTRPCRouter({
 						.update(declarations)
 						.set({ currentStep: 5, updatedAt: new Date() })
 						.where(eq(declarations.id, declaration.id));
+
+					if (declaration.currentStep !== 5) {
+						await tx.insert(declarationStatusHistory).values(
+							buildStepChangeInsert({
+								declarationId: declaration.id,
+								fromStep: declaration.currentStep,
+								toStep: 5,
+								actorUserId: ctx.session.user.id,
+							}),
+						);
+					}
 				} else {
 					for (const job of existingJobs) {
 						const cat = input.categories[job.categoryIndex];
@@ -599,6 +695,17 @@ export const declarationRouter = createTRPCRouter({
 					updatedAt: new Date(),
 				})
 				.where(activeDeclarationFilter(siren, year));
+
+			if (declaration.currentStep !== 6) {
+				await tx.insert(declarationStatusHistory).values(
+					buildStepChangeInsert({
+						declarationId: declaration.id,
+						fromStep: declaration.currentStep,
+						toStep: 6,
+						actorUserId: ctx.session.user.id,
+					}),
+				);
+			}
 
 			await applyPercentagesAfterUpdate(tx, siren, year);
 		});
