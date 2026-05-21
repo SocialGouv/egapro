@@ -31,14 +31,10 @@ export function PrefillResetConfirmDialog({
 				Confirmation de modification
 			</h2>
 			<p>
-				Vous avez modifié les effectifs préremplis à partir de vos données DSN.{" "}
-				<strong>
-					Cette modification réinitialisera les indicateurs préremplis des
-					étapes suivantes.
-				</strong>{" "}
-				Ceux-ci devront alors être ressaisis manuellement.
+				Vous avez modifié l&apos;effectif. En continuant, les données devront
+				être renseignées pour l&apos;ensemble de la suite des indicateurs.
 			</p>
-			<p>Voulez-vous continuer ?</p>
+			<p>Êtes-vous sûr de vouloir continuer&nbsp;?</p>
 
 			<ul className="fr-btns-group fr-btns-group--inline fr-btns-group--right fr-mt-4w">
 				<li>
