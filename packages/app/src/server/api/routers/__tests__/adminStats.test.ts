@@ -24,9 +24,30 @@ type StepRow = {
 	p90_days: number | null;
 };
 
+type MilestoneRow = {
+	sample_size: number;
+	completed_sample_size: number;
+	median_days: number | null;
+	p90_days: number | null;
+};
+
+/**
+ * Builds a mock Drizzle db where each call to `execute()` returns the next
+ * planned rowset. For `getStepDurations` the order is fixed: wizard, then
+ * milestones 1..5 (`submit_to_path_choice`, `path_choice_to_action`,
+ * `revision_choice_to_action`, `action_to_cse_opinion`,
+ * `last_action_to_complete`).
+ */
 function buildDb(
 	rows: Array<{ day: string; year: number; count: number }> = [],
 	stepRows: StepRow[] = [],
+	milestoneRows: Array<MilestoneRow | undefined> = [
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+	],
 ) {
 	const orderBy = vi.fn().mockResolvedValue(rows);
 	const chain: SelectChain = {
@@ -36,9 +57,14 @@ function buildDb(
 		groupBy: vi.fn().mockReturnThis(),
 		orderBy,
 	};
+	const execute = vi.fn();
+	execute.mockResolvedValueOnce(stepRows);
+	for (const milestone of milestoneRows) {
+		execute.mockResolvedValueOnce(milestone ? [milestone] : []);
+	}
 	return {
 		select: vi.fn().mockReturnValue(chain),
-		execute: vi.fn().mockResolvedValue(stepRows),
+		execute,
 		__chain: chain,
 	};
 }
@@ -180,7 +206,7 @@ describe("adminStatsRouter.getStepDurations", () => {
 		);
 	});
 
-	it("returns a complete set of 7 steps (0..6) even when SQL returns nothing", async () => {
+	it("returns the 7 wizard steps + 5 post-submit milestones (12 rows) even when SQL returns nothing", async () => {
 		const db = buildDb([], []);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
@@ -191,8 +217,19 @@ describe("adminStatsRouter.getStepDurations", () => {
 
 		const result = await caller.getStepDurations({ year: 2026 });
 
-		expect(result).toHaveLength(7);
-		expect(result.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5, 6]);
+		expect(result).toHaveLength(12);
+		const wizard = result.filter((row) => row.phase === "wizard");
+		const postSubmit = result.filter((row) => row.phase === "post_submit");
+		expect(wizard).toHaveLength(7);
+		expect(postSubmit).toHaveLength(5);
+		expect(wizard.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5, 6]);
+		expect(postSubmit.map((row) => row.key)).toEqual([
+			"submit_to_path_choice",
+			"path_choice_to_action",
+			"revision_choice_to_action",
+			"action_to_cse_opinion",
+			"last_action_to_complete",
+		]);
 		expect(result.every((row) => row.medianDays === null)).toBe(true);
 		expect(result.every((row) => row.sampleSize === 0)).toBe(true);
 	});
@@ -229,6 +266,8 @@ describe("adminStatsRouter.getStepDurations", () => {
 		const step2 = result.find((row) => row.step === 2);
 
 		expect(step1).toEqual({
+			key: "step_1",
+			phase: "wizard",
 			step: 1,
 			label: "Effectifs",
 			sampleSize: 10,
@@ -306,7 +345,8 @@ describe("adminStatsRouter.getStepDurations", () => {
 		} as never);
 
 		await caller.getStepDurations({ year: 2025, sizeRange: "250+" });
-		expect(db.execute).toHaveBeenCalledTimes(1);
+		// 1 wizard query + 5 milestone queries = 6 execute calls
+		expect(db.execute).toHaveBeenCalledTimes(6);
 	});
 
 	it("validates the year input bounds", async () => {
@@ -320,5 +360,224 @@ describe("adminStatsRouter.getStepDurations", () => {
 
 		await expect(caller.getStepDurations({ year: 1999 })).rejects.toThrow();
 		await expect(caller.getStepDurations({ year: 2101 })).rejects.toThrow();
+	});
+
+	// S-K4-9 — nominal post-submit: each milestone row maps correctly to
+	// its typed output (label, phase, percentiles, sample size).
+	it("maps post-submit milestone rows to the typed output with FR labels (S-K4-9)", async () => {
+		const db = buildDb(
+			[],
+			[],
+			[
+				{
+					sample_size: 20,
+					completed_sample_size: 20,
+					median_days: 4.5,
+					p90_days: 10.0,
+				},
+				{
+					sample_size: 15,
+					completed_sample_size: 15,
+					median_days: 7.0,
+					p90_days: 14.0,
+				},
+				{
+					sample_size: 6,
+					completed_sample_size: 6,
+					median_days: 2.5,
+					p90_days: 5.0,
+				},
+				{
+					sample_size: 8,
+					completed_sample_size: 8,
+					median_days: 9.5,
+					p90_days: 18.0,
+				},
+				{
+					sample_size: 12,
+					completed_sample_size: 12,
+					median_days: 30.0,
+					p90_days: 90.0,
+				},
+			],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDurations({ year: 2025 });
+		const postSubmit = result.filter((row) => row.phase === "post_submit");
+
+		expect(postSubmit).toHaveLength(5);
+		expect(postSubmit[0]).toMatchObject({
+			key: "submit_to_path_choice",
+			phase: "post_submit",
+			step: null,
+			label: "Soumission → choix conformité",
+			sampleSize: 20,
+			medianDays: 4.5,
+			p90Days: 10.0,
+		});
+		expect(postSubmit[1]?.key).toBe("path_choice_to_action");
+		expect(postSubmit[1]?.label).toBe("Choix conformité → action soumise");
+		expect(postSubmit[2]?.key).toBe("revision_choice_to_action");
+		expect(postSubmit[3]?.key).toBe("action_to_cse_opinion");
+		expect(postSubmit[3]?.medianDays).toBe(9.5);
+		expect(postSubmit[4]?.key).toBe("last_action_to_complete");
+		expect(postSubmit[4]?.sampleSize).toBe(12);
+	});
+
+	// S-K4-10 — sub-set coherence: when a milestone has no rows (e.g. no
+	// declaration with a path_choice), the row keeps a 0 sample and null
+	// percentiles, but unrelated milestones still surface their data.
+	it("keeps milestones independent: empty sub-set does not blank out the others (S-K4-10)", async () => {
+		const db = buildDb(
+			[],
+			[],
+			[
+				undefined, // submit_to_path_choice — no path_choice round=1
+				undefined, // path_choice_to_action — no action
+				undefined, // revision_choice_to_action — no path_choice round=2
+				undefined, // action_to_cse_opinion — no CSE
+				{
+					sample_size: 7,
+					completed_sample_size: 7,
+					median_days: 45.0,
+					p90_days: 120.0,
+				},
+			],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDurations({ year: 2025 });
+		const postSubmit = result.filter((row) => row.phase === "post_submit");
+
+		expect(postSubmit[0]?.sampleSize).toBe(0);
+		expect(postSubmit[0]?.medianDays).toBeNull();
+		expect(postSubmit[3]?.sampleSize).toBe(0);
+		expect(postSubmit[4]?.sampleSize).toBe(7);
+		expect(postSubmit[4]?.medianDays).toBe(45.0);
+	});
+
+	// S-K4-11 — revision cycle: jalon 3 captures path_choice round=2 →
+	// joint_evaluation_submit round=2, independently from the round=1 jalons.
+	it("captures the revision cycle independently of the first wave (S-K4-11)", async () => {
+		const db = buildDb(
+			[],
+			[],
+			[
+				{
+					sample_size: 10,
+					completed_sample_size: 10,
+					median_days: 5.0,
+					p90_days: 10.0,
+				},
+				{
+					sample_size: 10,
+					completed_sample_size: 10,
+					median_days: 6.0,
+					p90_days: 11.0,
+				},
+				{
+					sample_size: 5,
+					completed_sample_size: 5,
+					median_days: 20.0,
+					p90_days: 40.0,
+				},
+				undefined,
+				undefined,
+			],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDurations({ year: 2025 });
+		const revisionRow = result.find(
+			(row) => row.key === "revision_choice_to_action",
+		);
+
+		expect(revisionRow).toMatchObject({
+			phase: "post_submit",
+			sampleSize: 5,
+			completedSampleSize: 5,
+			medianDays: 20.0,
+			p90Days: 40.0,
+		});
+	});
+
+	// S-K4-12 — fallback n < 5: sample below threshold → null percentiles,
+	// but sample size stays visible so consumers know data exists.
+	it("returns null percentiles for milestones with completedSampleSize < 5 (S-K4-12)", async () => {
+		const db = buildDb(
+			[],
+			[],
+			[
+				{
+					sample_size: 4,
+					completed_sample_size: 4,
+					median_days: 3.0,
+					p90_days: 5.5,
+				},
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+			],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDurations({ year: 2025 });
+		const firstMilestone = result.find(
+			(row) => row.key === "submit_to_path_choice",
+		);
+
+		expect(firstMilestone?.sampleSize).toBe(4);
+		expect(firstMilestone?.medianDays).toBeNull();
+		expect(firstMilestone?.p90Days).toBeNull();
+	});
+
+	// S-K4-13 — sample size 0: a milestone with no qualifying declarations
+	// keeps a 0 sample size and null percentiles. Drives the "no data yet"
+	// state in the table.
+	it("renders milestones with no data as zero-sample / null-percentile rows (S-K4-13)", async () => {
+		const db = buildDb(
+			[],
+			[],
+			[undefined, undefined, undefined, undefined, undefined],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDurations({ year: 2025 });
+		const postSubmit = result.filter((row) => row.phase === "post_submit");
+
+		expect(postSubmit).toHaveLength(5);
+		for (const row of postSubmit) {
+			expect(row.sampleSize).toBe(0);
+			expect(row.completedSampleSize).toBe(0);
+			expect(row.medianDays).toBeNull();
+			expect(row.p90Days).toBeNull();
+		}
 	});
 });

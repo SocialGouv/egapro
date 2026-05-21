@@ -4,14 +4,34 @@ import { describe, expect, it } from "vitest";
 import { StepDurationsTable } from "../StepDurationsTable";
 import type { StepDurationRow } from "../types";
 
-function buildRow(overrides: Partial<StepDurationRow> = {}): StepDurationRow {
+function buildWizardRow(
+	overrides: Partial<StepDurationRow> = {},
+): StepDurationRow {
 	return {
+		key: `step_${overrides.step ?? 1}`,
+		phase: "wizard",
 		step: 1,
 		label: "Effectifs",
 		sampleSize: 10,
 		completedSampleSize: 10,
 		medianDays: 5,
 		p90Days: 9,
+		...overrides,
+	};
+}
+
+function buildPostSubmitRow(
+	overrides: Partial<StepDurationRow> = {},
+): StepDurationRow {
+	return {
+		key: "submit_to_path_choice",
+		phase: "post_submit",
+		step: null,
+		label: "Soumission → choix conformité",
+		sampleSize: 8,
+		completedSampleSize: 8,
+		medianDays: 3,
+		p90Days: 7,
 		...overrides,
 	};
 }
@@ -26,8 +46,13 @@ describe("StepDurationsTable", () => {
 		render(
 			<StepDurationsTable
 				rows={[
-					buildRow({ step: 0, label: "Introduction", sampleSize: 12 }),
-					buildRow({ step: 1, label: "Effectifs", sampleSize: 10 }),
+					buildWizardRow({
+						step: 0,
+						label: "Introduction",
+						sampleSize: 12,
+						key: "step_0",
+					}),
+					buildWizardRow({ step: 1, label: "Effectifs", sampleSize: 10 }),
 				]}
 			/>,
 		);
@@ -35,12 +60,18 @@ describe("StepDurationsTable", () => {
 		const headers = screen
 			.getAllByRole("columnheader")
 			.map((el) => el.textContent);
-		expect(headers).toEqual(["Étape", "Médiane (j)", "p90 (j)", "Échantillon"]);
+		expect(headers).toEqual([
+			"Étape ou jalon",
+			"Médiane (j)",
+			"p90 (j)",
+			"Échantillon",
+		]);
 
+		// 1 column-header row + 1 group-header row + 2 data rows = 4 rows
 		const rows = screen.getAllByRole("row");
-		expect(rows).toHaveLength(3);
+		expect(rows.length).toBeGreaterThanOrEqual(4);
 
-		const firstDataRow = rows[1];
+		const firstDataRow = rows[2];
 		if (!firstDataRow) throw new Error("missing row");
 		expect(within(firstDataRow).getByRole("rowheader").textContent).toBe(
 			"Introduction",
@@ -50,7 +81,7 @@ describe("StepDurationsTable", () => {
 	it("formats numeric values with French decimal separator (1 decimal)", () => {
 		render(
 			<StepDurationsTable
-				rows={[buildRow({ medianDays: 5.5, p90Days: 9.12 })]}
+				rows={[buildWizardRow({ medianDays: 5.5, p90Days: 9.12 })]}
 			/>,
 		);
 
@@ -63,7 +94,7 @@ describe("StepDurationsTable", () => {
 		render(
 			<StepDurationsTable
 				rows={[
-					buildRow({
+					buildWizardRow({
 						sampleSize: 2,
 						medianDays: null,
 						p90Days: null,
@@ -74,5 +105,39 @@ describe("StepDurationsTable", () => {
 
 		const cells = screen.getAllByRole("cell").map((el) => el.textContent);
 		expect(cells.filter((value) => value === "—")).toHaveLength(2);
+	});
+
+	it("groups wizard and post-submit rows under distinct section headers", () => {
+		render(
+			<StepDurationsTable
+				rows={[
+					buildWizardRow({
+						step: 0,
+						label: "Introduction",
+						key: "step_0",
+					}),
+					buildPostSubmitRow(),
+				]}
+			/>,
+		);
+
+		expect(
+			screen.getByRole("rowheader", {
+				name: /Parcours initial \(wizard A–F\)/i,
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("rowheader", {
+				name: "Démarche post-soumission",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("rowheader", { name: "Introduction" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("rowheader", {
+				name: /Soumission → choix conformité/i,
+			}),
+		).toBeInTheDocument();
 	});
 });

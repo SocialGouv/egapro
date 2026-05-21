@@ -95,6 +95,52 @@ test.describe("admin campaign progression stats", () => {
 			page.getByRole("figure", { name: /courbe de progression cumulative/i }),
 		).toBeVisible();
 	});
+
+	test("K4 step durations table lists wizard steps and post-submit milestones", async ({
+		page,
+	}) => {
+		await page.goto("/admin/stats/campagne");
+
+		// Section K4 — délai moyen par étape
+		await expect(
+			page.getByRole("heading", { name: /Délai moyen par étape/i, level: 2 }),
+		).toBeVisible();
+
+		const k4Section = page.getByLabel(/Délai moyen par étape/i);
+
+		// Open the accessible alternative table. Scope to K4 to avoid colliding
+		// with the K2 progression table summary above.
+		await k4Section
+			.locator("summary", {
+				hasText: /consulter les données du graphique sous forme de tableau/i,
+			})
+			.click();
+
+		// Wizard group header + post-submit group header.
+		await expect(
+			k4Section.getByRole("rowheader", {
+				name: /Parcours initial \(wizard A–F\)/i,
+			}),
+		).toBeVisible();
+		await expect(
+			k4Section.getByRole("rowheader", { name: "Démarche post-soumission" }),
+		).toBeVisible();
+
+		// At least one wizard row and one post-submit row.
+		await expect(
+			k4Section.getByRole("rowheader", { name: "Introduction" }),
+		).toBeVisible();
+		await expect(
+			k4Section.getByRole("rowheader", {
+				name: /Soumission → choix conformité/i,
+			}),
+		).toBeVisible();
+		await expect(
+			k4Section.getByRole("rowheader", {
+				name: /Dernière action → démarche complète/i,
+			}),
+		).toBeVisible();
+	});
 });
 
 test("non-admin users are redirected away from the stats page", async ({
