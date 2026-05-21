@@ -130,7 +130,6 @@ export function buildIndicators(row: DeclarationRow) {
 			row.annualQuartile3ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[2]]:
 			row.annualQuartile3ProportionMen ?? null,
-		[INDICATOR_F_ANNUAL_THRESHOLD_LABELS[3]]: null,
 		[INDICATOR_F_ANNUAL_WOMEN_LABELS[3]]:
 			row.annualQuartile4ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[3]]:
@@ -156,7 +155,6 @@ export function buildIndicators(row: DeclarationRow) {
 			row.hourlyQuartile3ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[2]]:
 			row.hourlyQuartile3ProportionMen ?? null,
-		[INDICATOR_F_HOURLY_THRESHOLD_LABELS[3]]: null,
 		[INDICATOR_F_HOURLY_WOMEN_LABELS[3]]:
 			row.hourlyQuartile4ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[3]]:

@@ -13,6 +13,9 @@ out/
 # cra
 build/
 
+# notifications worker — compiled by tsc in the Docker builder stage
+packages/notifications/dist/
+
 # misc
 .DS_Store
 *.pem

@@ -23,3 +23,18 @@ export const getCampaignProgressionSchema = z.object({
 export type GetCampaignProgressionInput = z.infer<
 	typeof getCampaignProgressionSchema
 >;
+
+/**
+ * Input for `adminStats.getStepDurations`.
+ *
+ * `year`: campaign year scoped for the K4 chart (single year, the comparison
+ * is intra-step rather than inter-year).
+ *
+ * `sizeRange`: optional workforce bucket scoping the aggregation.
+ */
+export const getStepDurationsSchema = z.object({
+	year: z.number().int().min(2000).max(2100),
+	sizeRange: z.enum(COMPANY_SIZE_RANGE_KEYS).optional(),
+});
+
+export type GetStepDurationsInput = z.infer<typeof getStepDurationsSchema>;

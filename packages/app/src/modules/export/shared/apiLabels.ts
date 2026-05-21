@@ -80,14 +80,12 @@ export const INDICATOR_F_ANNUAL_THRESHOLD_LABELS = [
 	"Seuil_Q1_Rem_globale",
 	"Seuil_Q2_Rem_globale",
 	"Seuil_Q3_Rem_globale",
-	"Seuil_Q4_Rem_globale",
 ] as const;
 
 export const INDICATOR_F_HOURLY_THRESHOLD_LABELS = [
 	"Seuil_Q1_Taux_horaire_global",
 	"Seuil_Q2_Taux_horaire_global",
 	"Seuil_Q3_Taux_horaire_global",
-	"Seuil_Q4_Taux_horaire_global",
 ] as const;
 
 export const INDICATOR_F_ANNUAL_WOMEN_LABELS = [
