@@ -33,6 +33,10 @@ import {
 	INDICATOR_F_HOURLY_THRESHOLD_LABELS,
 	INDICATOR_F_HOURLY_WOMEN_LABELS,
 } from "./shared/apiLabels";
+import {
+	type DeclarationEventType,
+	getStatusHistoryLabel,
+} from "./shared/statusHistoryLabels";
 
 const COMPLIANCE_PROCESS_SIZE_MIN = 100;
 
@@ -324,6 +328,19 @@ export function assembleDeclaration(
 		Date_avis_CSE: row.cseOpinionCompletedAt?.toISOString() ?? null,
 		Date_fin_demarche: row.demarcheCompletedAt?.toISOString() ?? null,
 		Date_annulation: row.cancelledAt?.toISOString() ?? null,
+		Historique_statuts: row.statusHistoryArray.map((entry) => {
+			const base = {
+				Statut: entry.eventType,
+				Libelle_statut: getStatusHistoryLabel(
+					entry.eventType as DeclarationEventType,
+					entry.value,
+				),
+				Date: entry.createdAt,
+			};
+			return entry.eventType === "path_choice" && entry.round !== null
+				? { ...base, Numero_declaration: entry.round }
+				: base;
+		}),
 		Effectif_F_rem_annuelle_globale: row.totalWomen,
 		Effectif_H_rem_annuelle_globale: row.totalMen,
 		Indicateurs: {

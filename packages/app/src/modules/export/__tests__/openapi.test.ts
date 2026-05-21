@@ -61,4 +61,53 @@ describe("openApiSpec", () => {
 		expect(details.items).toBeDefined();
 		expect(details.items.type).toBe("object");
 	});
+
+	describe("Historique_statuts schema", () => {
+		const declarationSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items;
+		const historiqueSchema = declarationSchema.properties.Historique_statuts;
+
+		it("declares Historique_statuts as an array", () => {
+			expect(historiqueSchema).toBeDefined();
+			expect(historiqueSchema.type).toBe("array");
+			expect(historiqueSchema.items).toBeDefined();
+			expect(historiqueSchema.items.type).toBe("object");
+		});
+
+		it("requires Statut, Libelle_statut and Date on each item", () => {
+			expect(historiqueSchema.items.required).toEqual([
+				"Statut",
+				"Libelle_statut",
+				"Date",
+			]);
+		});
+
+		it("lists the 7 declaration_event_type values in Statut.enum", () => {
+			expect(historiqueSchema.items.properties.Statut.type).toBe("string");
+			expect(historiqueSchema.items.properties.Statut.enum).toEqual([
+				"submit",
+				"path_choice",
+				"second_declaration_submit",
+				"joint_evaluation_submit",
+				"cse_opinion_submit",
+				"cancel",
+				"demarche_complete",
+			]);
+		});
+
+		it("declares Date as date-time formatted string", () => {
+			expect(historiqueSchema.items.properties.Date.type).toBe("string");
+			expect(historiqueSchema.items.properties.Date.format).toBe("date-time");
+		});
+
+		it("declares Numero_declaration as optional integer enum [1, 2]", () => {
+			const numero = historiqueSchema.items.properties.Numero_declaration;
+			expect(numero.type).toBe("integer");
+			expect(numero.enum).toEqual([1, 2]);
+			expect(historiqueSchema.items.required).not.toContain(
+				"Numero_declaration",
+			);
+		});
+	});
 });
