@@ -1,15 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import type { CompanySizeRange } from "~/modules/domain";
+import {
+	type CompanySizeRange,
+	DROPOFF_STAGNATION_DAYS_DEFAULT,
+} from "~/modules/domain";
 import { CompanySizeFilter } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
 import { CampaignProgressionChart } from "./CampaignProgressionChart";
 import { CampaignProgressionTable } from "./CampaignProgressionTable";
+import { StagnationDaysFilter } from "./StagnationDaysFilter";
+import { StepDropoffChart } from "./StepDropoffChart";
+import { StepDropoffTable } from "./StepDropoffTable";
 import { StepDurationsChart } from "./StepDurationsChart";
 import { StepDurationsTable } from "./StepDurationsTable";
+import { useDebouncedValue } from "./useDebouncedValue";
 import { YearsFilter } from "./YearsFilter";
+
+const STAGNATION_DEBOUNCE_MS = 500;
 
 type Props = {
 	/** Reference year used for the emphasis color and the default selection. */
@@ -39,6 +48,22 @@ export function CampaignStatsPage({ currentYear, availableYears }: Props) {
 	const stepDurationsYear = selectedYears[0] ?? currentYear;
 	const stepDurationsQuery = api.adminStats.getStepDurations.useQuery(
 		{ year: stepDurationsYear, sizeRange },
+		{ placeholderData: (prev) => prev },
+	);
+
+	const [stagnationDays, setStagnationDays] = useState(
+		DROPOFF_STAGNATION_DAYS_DEFAULT,
+	);
+	const debouncedStagnationDays = useDebouncedValue(
+		stagnationDays,
+		STAGNATION_DEBOUNCE_MS,
+	);
+	const stepDropoffQuery = api.adminStats.getStepDropoffRate.useQuery(
+		{
+			year: stepDurationsYear,
+			sizeRange,
+			stagnationDays: debouncedStagnationDays,
+		},
 		{ placeholderData: (prev) => prev },
 	);
 
@@ -122,6 +147,41 @@ export function CampaignStatsPage({ currentYear, availableYears }: Props) {
 					<>
 						<StepDurationsChart rows={stepDurationsQuery.data} />
 						<StepDurationsTable rows={stepDurationsQuery.data} />
+					</>
+				)}
+			</section>
+
+			<section aria-labelledby="step-dropoff-heading" className="fr-mt-6w">
+				<h2 className="fr-h3" id="step-dropoff-heading">
+					Taux d'abandon par étape — campagne {stepDurationsYear}
+				</h2>
+				<p className="fr-text--sm fr-text-mention--grey">
+					Pourcentage de déclarations entrées sur chaque étape du parcours
+					indicateurs et qui n'ont pas progressé depuis le délai sélectionné.
+					Aide à repérer les étapes où les déclarants décrochent.
+				</p>
+				<div className="fr-grid-row fr-grid-row--gutters fr-mb-2w">
+					<div className="fr-col-12 fr-col-md-6">
+						<StagnationDaysFilter
+							onChange={setStagnationDays}
+							value={stagnationDays}
+						/>
+					</div>
+				</div>
+				{stepDropoffQuery.isLoading && !stepDropoffQuery.data && (
+					<p aria-live="polite">Chargement du graphique…</p>
+				)}
+				{stepDropoffQuery.isError && (
+					<div aria-live="polite" className="fr-alert fr-alert--error">
+						<p>
+							Une erreur est survenue lors du chargement des taux d'abandon.
+						</p>
+					</div>
+				)}
+				{stepDropoffQuery.data && (
+					<>
+						<StepDropoffChart rows={stepDropoffQuery.data} />
+						<StepDropoffTable rows={stepDropoffQuery.data} />
 					</>
 				)}
 			</section>
