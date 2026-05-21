@@ -19,17 +19,22 @@ export type CampaignProgressionSeries = {
 /**
  * One row of the K4 « délai moyen par étape » dataset.
  *
- * `step` is the integer index (0..6) of the A–F stepper. `medianDays` and
- * `p90Days` are the 50th and 90th percentiles of the duration (in days)
- * declarations spent on that step before transitioning to a later one.
+ * Covers both phases of the journey:
+ * - **wizard phase** (`phase: "wizard"`, `step` set to 0..6) — durations spent
+ *   on each step of the A–F stepper, computed from `step_change` events.
+ * - **post-submit phase** (`phase: "post_submit"`, `step: null`) — durations
+ *   between business milestones (path choice, action, CSE opinion, complete),
+ *   computed from business events in `declaration_status_history`.
  *
- * `sampleSize` counts how many declarations reached that step (whether or not
- * they exited). When too few declarations have exited the step
- * (`completedSampleSize < 5`), `medianDays` and `p90Days` are `null` to avoid
- * surfacing statistically meaningless numbers.
+ * `key` is a stable identifier (e.g. `step_0`, `submit_to_path_choice`) used as
+ * the React key in the chart and as the row identity in tests. `medianDays` /
+ * `p90Days` are null when the completed sample is too small (< 5) to surface
+ * statistically meaningful percentiles.
  */
 export type StepDurationRow = {
-	step: number;
+	key: string;
+	phase: "wizard" | "post_submit";
+	step: number | null;
 	label: string;
 	sampleSize: number;
 	completedSampleSize: number;
