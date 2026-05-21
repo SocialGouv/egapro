@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
 	DECLARATION_STEPS,
+	FUNNEL_COMPLIANCE_KEY_STEPS,
+	FUNNEL_DROP_ALERT_THRESHOLD,
+	FUNNEL_MAIN_KEY_STEPS,
+	FUNNEL_REVISION_KEY_STEPS,
 	getStepLabel,
 	POST_SUBMIT_MILESTONES,
 } from "../shared/declarationSteps";
@@ -75,5 +79,70 @@ describe("POST_SUBMIT_MILESTONES", () => {
 	it("uses unique keys", () => {
 		const keys = POST_SUBMIT_MILESTONES.map((m) => m.key);
 		expect(new Set(keys).size).toBe(keys.length);
+	});
+});
+
+describe("FUNNEL_MAIN_KEY_STEPS (S-K19-D1)", () => {
+	it("exposes the 4 main funnel jalons in chronological order", () => {
+		expect(FUNNEL_MAIN_KEY_STEPS.map((s) => s.key)).toEqual([
+			"draft_started",
+			"indicators_filled",
+			"submitted",
+			"demarche_completed",
+		]);
+	});
+
+	it("uses non-empty French labels and unique keys within the funnel", () => {
+		for (const entry of FUNNEL_MAIN_KEY_STEPS) {
+			expect(entry.label.length).toBeGreaterThan(0);
+		}
+		const keys = FUNNEL_MAIN_KEY_STEPS.map((s) => s.key);
+		expect(new Set(keys).size).toBe(keys.length);
+	});
+});
+
+describe("FUNNEL_COMPLIANCE_KEY_STEPS (S-K19-D2)", () => {
+	it("exposes the 4 compliance funnel jalons in chronological order", () => {
+		expect(FUNNEL_COMPLIANCE_KEY_STEPS.map((s) => s.key)).toEqual([
+			"submitted_with_alert",
+			"path_chosen",
+			"corrective_action_submitted",
+			"demarche_completed",
+		]);
+	});
+
+	it("uses non-empty French labels and unique keys within the funnel", () => {
+		for (const entry of FUNNEL_COMPLIANCE_KEY_STEPS) {
+			expect(entry.label.length).toBeGreaterThan(0);
+		}
+		const keys = FUNNEL_COMPLIANCE_KEY_STEPS.map((s) => s.key);
+		expect(new Set(keys).size).toBe(keys.length);
+	});
+});
+
+describe("FUNNEL_REVISION_KEY_STEPS (S-K19-D4)", () => {
+	it("exposes the 4 revision funnel jalons in chronological order", () => {
+		expect(FUNNEL_REVISION_KEY_STEPS.map((s) => s.key)).toEqual([
+			"revision_required",
+			"revision_path_chosen",
+			"revision_action_submitted",
+			"demarche_completed",
+		]);
+	});
+
+	it("uses non-empty French labels and unique keys within the funnel", () => {
+		for (const entry of FUNNEL_REVISION_KEY_STEPS) {
+			expect(entry.label.length).toBeGreaterThan(0);
+		}
+		const keys = FUNNEL_REVISION_KEY_STEPS.map((s) => s.key);
+		expect(new Set(keys).size).toBe(keys.length);
+	});
+});
+
+describe("FUNNEL_DROP_ALERT_THRESHOLD (S-K19-D3)", () => {
+	it("is a positive number strictly between 0 and 100", () => {
+		expect(typeof FUNNEL_DROP_ALERT_THRESHOLD).toBe("number");
+		expect(FUNNEL_DROP_ALERT_THRESHOLD).toBeGreaterThan(0);
+		expect(FUNNEL_DROP_ALERT_THRESHOLD).toBeLessThan(100);
 	});
 });
