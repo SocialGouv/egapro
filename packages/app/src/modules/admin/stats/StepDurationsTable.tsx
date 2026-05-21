@@ -12,6 +12,11 @@ function formatDays(value: number | null): string {
 	});
 }
 
+const PHASE_HEADERS: Record<StepDurationRow["phase"], string> = {
+	wizard: "Parcours initial (wizard A–F)",
+	post_submit: "Démarche post-soumission",
+};
+
 /**
  * Accessible alternative to `<StepDurationsChart>` — same K4 dataset rendered
  * as a DSFR table inside a `<details>` toggle. Required for RGAA because the
@@ -21,6 +26,12 @@ export function StepDurationsTable({ rows }: Props) {
 	if (rows.length === 0) {
 		return null;
 	}
+
+	// Split rows by phase to surface the two groups in the table without
+	// mixing them. The chart keeps a single continuous series but the table
+	// benefits from explicit section headers for assistive tech and quick scan.
+	const wizardRows = rows.filter((row) => row.phase === "wizard");
+	const postSubmitRows = rows.filter((row) => row.phase === "post_submit");
 
 	return (
 		<details className="fr-mt-3w">
@@ -34,27 +45,59 @@ export function StepDurationsTable({ rows }: Props) {
 							<table>
 								<caption className="fr-sr-only">
 									Délai médian et 90e percentile en jours par étape du parcours
-									indicateurs, et nombre de déclarations passées par chaque
-									étape.
+									indicateurs et par jalon de la démarche post-soumission, et
+									nombre de déclarations concernées.
 								</caption>
 								<thead>
 									<tr>
-										<th scope="col">Étape</th>
+										<th scope="col">Étape ou jalon</th>
 										<th scope="col">Médiane (j)</th>
 										<th scope="col">p90 (j)</th>
 										<th scope="col">Échantillon</th>
 									</tr>
 								</thead>
-								<tbody>
-									{rows.map((row) => (
-										<tr key={row.step}>
-											<th scope="row">{row.label}</th>
-											<td>{formatDays(row.medianDays)}</td>
-											<td>{formatDays(row.p90Days)}</td>
-											<td>{row.sampleSize.toLocaleString("fr-FR")}</td>
+								{wizardRows.length > 0 && (
+									<tbody>
+										<tr>
+											<th
+												className="fr-text--bold fr-background-alt--blue-france"
+												colSpan={4}
+												scope="rowgroup"
+											>
+												{PHASE_HEADERS.wizard}
+											</th>
 										</tr>
-									))}
-								</tbody>
+										{wizardRows.map((row) => (
+											<tr key={row.key}>
+												<th scope="row">{row.label}</th>
+												<td>{formatDays(row.medianDays)}</td>
+												<td>{formatDays(row.p90Days)}</td>
+												<td>{row.sampleSize.toLocaleString("fr-FR")}</td>
+											</tr>
+										))}
+									</tbody>
+								)}
+								{postSubmitRows.length > 0 && (
+									<tbody>
+										<tr>
+											<th
+												className="fr-text--bold fr-background-alt--red-marianne"
+												colSpan={4}
+												scope="rowgroup"
+											>
+												{PHASE_HEADERS.post_submit}
+											</th>
+										</tr>
+										{postSubmitRows.map((row) => (
+											<tr key={row.key}>
+												<th scope="row">{row.label}</th>
+												<td>{formatDays(row.medianDays)}</td>
+												<td>{formatDays(row.p90Days)}</td>
+												<td>{row.sampleSize.toLocaleString("fr-FR")}</td>
+											</tr>
+										))}
+									</tbody>
+								)}
 							</table>
 						</div>
 					</div>
