@@ -132,12 +132,12 @@ test.describe("admin campaign progression stats", () => {
 		).toBeVisible();
 		await expect(
 			k4Section.getByRole("rowheader", {
-				name: /Soumission → choix conformité/i,
+				name: /Délai avant choix du parcours/i,
 			}),
 		).toBeVisible();
 		await expect(
 			k4Section.getByRole("rowheader", {
-				name: /Dernière action → démarche complète/i,
+				name: /Temps passé sur l'avis CSE/i,
 			}),
 		).toBeVisible();
 	});

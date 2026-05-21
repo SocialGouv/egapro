@@ -161,10 +161,10 @@ export const adminStatsRouter = createTRPCRouter({
 	 *   excluded. Rows where there is no next event (declaration still on that
 	 *   step) are excluded from the percentile aggregation but still count in
 	 *   `sampleSize`.
-	 * - **post_submit** (6 milestones) — durations between business events
+	 * - **post_submit** (4 milestones) — durations between business events
 	 *   (`submit`, `path_choice`, `second_declaration_submit`,
-	 *   `joint_evaluation_submit`, `cse_opinion_submit`, `demarche_complete`),
-	 *   computed per milestone via a dedicated CTE.
+	 *   `joint_evaluation_submit`, `cse_opinion_submit`), computed per
+	 *   milestone via a dedicated CTE.
 	 *
 	 * Percentiles are null when fewer than `STEP_DURATION_MIN_SAMPLE`
 	 * declarations have actually exited the step / milestone, to avoid
@@ -277,9 +277,7 @@ export const adminStatsRouter = createTRPCRouter({
 				submit_to_path_choice: undefined,
 				path_choice_to_second_declaration: undefined,
 				path_choice_to_joint_evaluation: undefined,
-				revision_choice_to_action: undefined,
 				action_to_cse_opinion: undefined,
-				last_action_to_complete: undefined,
 			};
 
 			// `step_change round=6` (recap) is preferred over the legacy `submit`
@@ -351,16 +349,20 @@ export const adminStatsRouter = createTRPCRouter({
 				pathChoiceToSecondDeclarationRows as unknown as AggregatedMilestone[]
 			)[0];
 
-			// `joint_evaluation_submit round=1` = joint evaluation as the
-			// first-wave corrective path (round=2 covers the revision wave and
-			// is captured by `revision_choice_to_action`).
+			// Pair `path_choice` and `joint_evaluation_submit` on the same round
+			// (per declaration) so each cycle contributes its own duration: the
+			// initial wave (round=1) and the revision wave (round=2). A
+			// declaration that completes both rounds contributes twice — the
+			// aggregate reflects the number of observed durations, not the
+			// number of distinct declarations.
 			const pathChoiceToJointEvaluationRows =
 				await ctx.db.execute<AggregatedMilestone>(sql`
 				WITH paired AS (
 					SELECT
 						s.declaration_id,
-						MAX(s.created_at) FILTER (WHERE s.event_type = 'path_choice' AND s.round = 1) AS start_at,
-						MIN(s.created_at) FILTER (WHERE s.event_type = 'joint_evaluation_submit' AND s.round = 1) AS end_at
+						s.round,
+						MAX(s.created_at) FILTER (WHERE s.event_type = 'path_choice') AS start_at,
+						MIN(s.created_at) FILTER (WHERE s.event_type = 'joint_evaluation_submit') AS end_at
 					FROM ${declarationStatusHistory} s
 					INNER JOIN ${declarations}
 						ON ${declarations.id} = s.declaration_id
@@ -369,8 +371,9 @@ export const adminStatsRouter = createTRPCRouter({
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
-					GROUP BY s.declaration_id
-					HAVING MAX(s.created_at) FILTER (WHERE s.event_type = 'path_choice' AND s.round = 1) IS NOT NULL
+						AND s.event_type IN ('path_choice', 'joint_evaluation_submit')
+					GROUP BY s.declaration_id, s.round
+					HAVING MAX(s.created_at) FILTER (WHERE s.event_type = 'path_choice') IS NOT NULL
 				)
 				SELECT
 					COUNT(*) FILTER (WHERE end_at IS NOT NULL)::int AS sample_size,
@@ -385,39 +388,6 @@ export const adminStatsRouter = createTRPCRouter({
 			`);
 			postSubmitAggregates.path_choice_to_joint_evaluation = (
 				pathChoiceToJointEvaluationRows as unknown as AggregatedMilestone[]
-			)[0];
-
-			const revisionChoiceToActionRows =
-				await ctx.db.execute<AggregatedMilestone>(sql`
-				WITH paired AS (
-					SELECT
-						s.declaration_id,
-						MAX(s.created_at) FILTER (WHERE s.event_type = 'path_choice' AND s.round = 2) AS start_at,
-						MAX(s.created_at) FILTER (WHERE s.event_type = 'joint_evaluation_submit' AND s.round = 2) AS end_at
-					FROM ${declarationStatusHistory} s
-					INNER JOIN ${declarations}
-						ON ${declarations.id} = s.declaration_id
-					INNER JOIN ${companies}
-						ON ${companies.siren} = ${declarations.siren}
-					WHERE ${declarations.year} = ${input.year}
-						AND ${declarations.cancelledAt} IS NULL
-						AND ${sizeFilterSql}
-					GROUP BY s.declaration_id
-					HAVING MAX(s.created_at) FILTER (WHERE s.event_type = 'path_choice' AND s.round = 2) IS NOT NULL
-				)
-				SELECT
-					COUNT(*)::int AS sample_size,
-					COUNT(*) FILTER (WHERE end_at IS NOT NULL AND end_at > start_at)::int AS completed_sample_size,
-					percentile_cont(0.5) WITHIN GROUP (
-						ORDER BY EXTRACT(EPOCH FROM (end_at - start_at)) / 86400.0
-					) FILTER (WHERE end_at IS NOT NULL AND end_at > start_at) AS median_days,
-					percentile_cont(0.9) WITHIN GROUP (
-						ORDER BY EXTRACT(EPOCH FROM (end_at - start_at)) / 86400.0
-					) FILTER (WHERE end_at IS NOT NULL AND end_at > start_at) AS p90_days
-				FROM paired
-			`);
-			postSubmitAggregates.revision_choice_to_action = (
-				revisionChoiceToActionRows as unknown as AggregatedMilestone[]
 			)[0];
 
 			// CSE opinion only applies to >= 100 employees. The preceding action
@@ -463,58 +433,6 @@ export const adminStatsRouter = createTRPCRouter({
 			`);
 			postSubmitAggregates.action_to_cse_opinion = (
 				actionToCseOpinionRows as unknown as AggregatedMilestone[]
-			)[0];
-
-			// `created_at < complete_at` filter is load-bearing: a CSE opinion
-			// can fire AFTER the completion (correction edge case) and would
-			// otherwise yield a negative duration.
-			const lastActionToCompleteRows =
-				await ctx.db.execute<AggregatedMilestone>(sql`
-				WITH complete_ts AS (
-					SELECT
-						s.declaration_id,
-						MAX(s.created_at) AS complete_at
-					FROM ${declarationStatusHistory} s
-					INNER JOIN ${declarations}
-						ON ${declarations.id} = s.declaration_id
-					INNER JOIN ${companies}
-						ON ${companies.siren} = ${declarations.siren}
-					WHERE s.event_type = 'demarche_complete'
-						AND ${declarations.year} = ${input.year}
-						AND ${declarations.cancelledAt} IS NULL
-						AND ${sizeFilterSql}
-					GROUP BY s.declaration_id
-				),
-				paired AS (
-					SELECT
-						ct.declaration_id,
-						MAX(s.created_at) FILTER (
-							WHERE s.event_type IN (
-								'cse_opinion_submit',
-								'second_declaration_submit',
-								'joint_evaluation_submit'
-							)
-							AND s.created_at < ct.complete_at
-						) AS start_at,
-						ct.complete_at AS end_at
-					FROM complete_ts ct
-					LEFT JOIN ${declarationStatusHistory} s
-						ON s.declaration_id = ct.declaration_id
-					GROUP BY ct.declaration_id, ct.complete_at
-				)
-				SELECT
-					COUNT(*)::int AS sample_size,
-					COUNT(*) FILTER (WHERE start_at IS NOT NULL AND end_at > start_at)::int AS completed_sample_size,
-					percentile_cont(0.5) WITHIN GROUP (
-						ORDER BY EXTRACT(EPOCH FROM (end_at - start_at)) / 86400.0
-					) FILTER (WHERE start_at IS NOT NULL AND end_at > start_at) AS median_days,
-					percentile_cont(0.9) WITHIN GROUP (
-						ORDER BY EXTRACT(EPOCH FROM (end_at - start_at)) / 86400.0
-					) FILTER (WHERE start_at IS NOT NULL AND end_at > start_at) AS p90_days
-				FROM paired
-			`);
-			postSubmitAggregates.last_action_to_complete = (
-				lastActionToCompleteRows as unknown as AggregatedMilestone[]
 			)[0];
 
 			const postSubmitRows = POST_SUBMIT_MILESTONES.map(({ key, label }) =>

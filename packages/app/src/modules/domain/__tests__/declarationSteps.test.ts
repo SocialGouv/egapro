@@ -39,15 +39,31 @@ describe("getStepLabel", () => {
 });
 
 describe("POST_SUBMIT_MILESTONES", () => {
-	it("exposes the 6 post-submission jalons in chronological order", () => {
+	it("exposes the 4 post-submission jalons in chronological order", () => {
 		expect(POST_SUBMIT_MILESTONES.map((m) => m.key)).toEqual([
 			"submit_to_path_choice",
 			"path_choice_to_second_declaration",
 			"path_choice_to_joint_evaluation",
-			"revision_choice_to_action",
 			"action_to_cse_opinion",
-			"last_action_to_complete",
 		]);
+	});
+
+	it("uses the « Temps passé sur » labels for post-path-choice durations", () => {
+		const labelByKey = new Map(
+			POST_SUBMIT_MILESTONES.map((m) => [m.key, m.label]),
+		);
+		expect(labelByKey.get("submit_to_path_choice")).toBe(
+			"Délai avant choix du parcours",
+		);
+		expect(labelByKey.get("path_choice_to_second_declaration")).toBe(
+			"Temps passé sur la seconde déclaration",
+		);
+		expect(labelByKey.get("path_choice_to_joint_evaluation")).toBe(
+			"Temps passé sur l'évaluation conjointe",
+		);
+		expect(labelByKey.get("action_to_cse_opinion")).toBe(
+			"Temps passé sur l'avis CSE",
+		);
 	});
 
 	it("uses French labels with no empty strings", () => {

@@ -27,7 +27,7 @@ function buildPostSubmitRow(
 		key: "submit_to_path_choice",
 		phase: "post_submit",
 		step: null,
-		label: "Soumission → choix conformité",
+		label: "Délai avant choix du parcours",
 		sampleSize: 8,
 		completedSampleSize: 8,
 		medianDays: 3,
@@ -136,7 +136,7 @@ describe("StepDurationsTable", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("rowheader", {
-				name: /Soumission → choix conformité/i,
+				name: /Délai avant choix du parcours/i,
 			}),
 		).toBeInTheDocument();
 	});

@@ -42,7 +42,7 @@ const POPULATED_ROWS: StepDurationRow[] = [
 		key: "submit_to_path_choice",
 		phase: "post_submit",
 		step: null,
-		label: "Soumission → choix conformité",
+		label: "Délai avant choix du parcours",
 		sampleSize: 6,
 		completedSampleSize: 6,
 		medianDays: 3.2,

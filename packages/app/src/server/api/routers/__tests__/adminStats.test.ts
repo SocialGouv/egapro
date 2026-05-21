@@ -34,17 +34,14 @@ type MilestoneRow = {
 /**
  * Builds a mock Drizzle db where each call to `execute()` returns the next
  * planned rowset. For `getStepDurations` the order is fixed: wizard, then
- * milestones 1..6 (`submit_to_path_choice`,
+ * milestones 1..4 (`submit_to_path_choice`,
  * `path_choice_to_second_declaration`, `path_choice_to_joint_evaluation`,
- * `revision_choice_to_action`, `action_to_cse_opinion`,
- * `last_action_to_complete`).
+ * `action_to_cse_opinion`).
  */
 function buildDb(
 	rows: Array<{ day: string; year: number; count: number }> = [],
 	stepRows: StepRow[] = [],
 	milestoneRows: Array<MilestoneRow | undefined> = [
-		undefined,
-		undefined,
 		undefined,
 		undefined,
 		undefined,
@@ -208,7 +205,7 @@ describe("adminStatsRouter.getStepDurations", () => {
 		);
 	});
 
-	it("returns the 6 wizard steps + 6 post-submit milestones (12 rows) even when SQL returns nothing", async () => {
+	it("returns the 6 wizard steps + 4 post-submit milestones (10 rows) even when SQL returns nothing", async () => {
 		const db = buildDb([], []);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
@@ -219,19 +216,17 @@ describe("adminStatsRouter.getStepDurations", () => {
 
 		const result = await caller.getStepDurations({ year: 2026 });
 
-		expect(result).toHaveLength(12);
+		expect(result).toHaveLength(10);
 		const wizard = result.filter((row) => row.phase === "wizard");
 		const postSubmit = result.filter((row) => row.phase === "post_submit");
 		expect(wizard).toHaveLength(6);
-		expect(postSubmit).toHaveLength(6);
+		expect(postSubmit).toHaveLength(4);
 		expect(wizard.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5]);
 		expect(postSubmit.map((row) => row.key)).toEqual([
 			"submit_to_path_choice",
 			"path_choice_to_second_declaration",
 			"path_choice_to_joint_evaluation",
-			"revision_choice_to_action",
 			"action_to_cse_opinion",
-			"last_action_to_complete",
 		]);
 		expect(result.every((row) => row.medianDays === null)).toBe(true);
 		expect(result.every((row) => row.sampleSize === 0)).toBe(true);
@@ -348,7 +343,7 @@ describe("adminStatsRouter.getStepDurations", () => {
 		} as never);
 
 		await caller.getStepDurations({ year: 2025, sizeRange: "250+" });
-		expect(db.execute).toHaveBeenCalledTimes(7);
+		expect(db.execute).toHaveBeenCalledTimes(5);
 	});
 
 	it("validates the year input bounds", async () => {
@@ -388,22 +383,10 @@ describe("adminStatsRouter.getStepDurations", () => {
 					p90_days: 11.0,
 				},
 				{
-					sample_size: 6,
-					completed_sample_size: 6,
-					median_days: 2.5,
-					p90_days: 5.0,
-				},
-				{
 					sample_size: 8,
 					completed_sample_size: 8,
 					median_days: 9.5,
 					p90_days: 18.0,
-				},
-				{
-					sample_size: 12,
-					completed_sample_size: 12,
-					median_days: 30.0,
-					p90_days: 90.0,
 				},
 			],
 		);
@@ -417,29 +400,25 @@ describe("adminStatsRouter.getStepDurations", () => {
 		const result = await caller.getStepDurations({ year: 2025 });
 		const postSubmit = result.filter((row) => row.phase === "post_submit");
 
-		expect(postSubmit).toHaveLength(6);
+		expect(postSubmit).toHaveLength(4);
 		expect(postSubmit[0]).toMatchObject({
 			key: "submit_to_path_choice",
 			phase: "post_submit",
 			step: null,
-			label: "Soumission → choix conformité",
+			label: "Délai avant choix du parcours",
 			sampleSize: 20,
 			medianDays: 4.5,
 			p90Days: 10.0,
 		});
 		expect(postSubmit[1]?.key).toBe("path_choice_to_second_declaration");
-		expect(postSubmit[1]?.label).toBe("Choix conformité → seconde déclaration");
+		expect(postSubmit[1]?.label).toBe("Temps passé sur la seconde déclaration");
 		expect(postSubmit[1]?.medianDays).toBe(7.0);
 		expect(postSubmit[2]?.key).toBe("path_choice_to_joint_evaluation");
-		expect(postSubmit[2]?.label).toBe(
-			"Choix conformité → évaluation conjointe",
-		);
+		expect(postSubmit[2]?.label).toBe("Temps passé sur l'évaluation conjointe");
 		expect(postSubmit[2]?.medianDays).toBe(5.5);
-		expect(postSubmit[3]?.key).toBe("revision_choice_to_action");
-		expect(postSubmit[4]?.key).toBe("action_to_cse_opinion");
-		expect(postSubmit[4]?.medianDays).toBe(9.5);
-		expect(postSubmit[5]?.key).toBe("last_action_to_complete");
-		expect(postSubmit[5]?.sampleSize).toBe(12);
+		expect(postSubmit[3]?.key).toBe("action_to_cse_opinion");
+		expect(postSubmit[3]?.label).toBe("Temps passé sur l'avis CSE");
+		expect(postSubmit[3]?.medianDays).toBe(9.5);
 	});
 
 	it("keeps milestones independent: empty sub-set does not blank out the others (S-K4-10)", async () => {
@@ -450,8 +429,6 @@ describe("adminStatsRouter.getStepDurations", () => {
 				undefined, // submit_to_path_choice — no path_choice round=1
 				undefined, // path_choice_to_second_declaration — no second decl
 				undefined, // path_choice_to_joint_evaluation — no joint eval
-				undefined, // revision_choice_to_action — no path_choice round=2
-				undefined, // action_to_cse_opinion — no CSE
 				{
 					sample_size: 7,
 					completed_sample_size: 7,
@@ -472,41 +449,24 @@ describe("adminStatsRouter.getStepDurations", () => {
 
 		expect(postSubmit[0]?.sampleSize).toBe(0);
 		expect(postSubmit[0]?.medianDays).toBeNull();
-		expect(postSubmit[4]?.sampleSize).toBe(0);
-		expect(postSubmit[5]?.sampleSize).toBe(7);
-		expect(postSubmit[5]?.medianDays).toBe(45.0);
+		expect(postSubmit[2]?.sampleSize).toBe(0);
+		expect(postSubmit[3]?.sampleSize).toBe(7);
+		expect(postSubmit[3]?.medianDays).toBe(45.0);
 	});
 
-	it("captures the revision cycle independently of the first wave (S-K4-11)", async () => {
+	it("aggregates initial and revision joint-evaluation cycles under a single milestone (S-K4-16)", async () => {
 		const db = buildDb(
 			[],
 			[],
 			[
-				{
-					sample_size: 10,
-					completed_sample_size: 10,
-					median_days: 5.0,
-					p90_days: 10.0,
-				},
-				{
-					sample_size: 7,
-					completed_sample_size: 7,
-					median_days: 6.0,
-					p90_days: 11.0,
-				},
-				{
-					sample_size: 3,
-					completed_sample_size: 3,
-					median_days: 4.0,
-					p90_days: 7.0,
-				},
-				{
-					sample_size: 5,
-					completed_sample_size: 5,
-					median_days: 20.0,
-					p90_days: 40.0,
-				},
 				undefined,
+				undefined,
+				{
+					sample_size: 8,
+					completed_sample_size: 8,
+					median_days: 12.5,
+					p90_days: 30.0,
+				},
 				undefined,
 			],
 		);
@@ -518,17 +478,26 @@ describe("adminStatsRouter.getStepDurations", () => {
 		} as never);
 
 		const result = await caller.getStepDurations({ year: 2025 });
-		const revisionRow = result.find(
-			(row) => row.key === "revision_choice_to_action",
+		const jointEvaluationRow = result.find(
+			(row) => row.key === "path_choice_to_joint_evaluation",
 		);
 
-		expect(revisionRow).toMatchObject({
+		expect(jointEvaluationRow).toMatchObject({
 			phase: "post_submit",
-			sampleSize: 5,
-			completedSampleSize: 5,
-			medianDays: 20.0,
-			p90Days: 40.0,
+			step: null,
+			label: "Temps passé sur l'évaluation conjointe",
+			sampleSize: 8,
+			completedSampleSize: 8,
+			medianDays: 12.5,
+			p90Days: 30.0,
 		});
+
+		expect(
+			result.find((row) => row.key === "revision_choice_to_action"),
+		).toBeUndefined();
+		expect(
+			result.find((row) => row.key === "last_action_to_complete"),
+		).toBeUndefined();
 	});
 
 	it("returns null percentiles for milestones with completedSampleSize < 5 (S-K4-12)", async () => {
@@ -542,8 +511,6 @@ describe("adminStatsRouter.getStepDurations", () => {
 					median_days: 3.0,
 					p90_days: 5.5,
 				},
-				undefined,
-				undefined,
 				undefined,
 				undefined,
 				undefined,
@@ -567,11 +534,7 @@ describe("adminStatsRouter.getStepDurations", () => {
 	});
 
 	it("renders milestones with no data as zero-sample / null-percentile rows (S-K4-13)", async () => {
-		const db = buildDb(
-			[],
-			[],
-			[undefined, undefined, undefined, undefined, undefined, undefined],
-		);
+		const db = buildDb([], [], [undefined, undefined, undefined, undefined]);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
 			db,
@@ -582,7 +545,7 @@ describe("adminStatsRouter.getStepDurations", () => {
 		const result = await caller.getStepDurations({ year: 2025 });
 		const postSubmit = result.filter((row) => row.phase === "post_submit");
 
-		expect(postSubmit).toHaveLength(6);
+		expect(postSubmit).toHaveLength(4);
 		for (const row of postSubmit) {
 			expect(row.sampleSize).toBe(0);
 			expect(row.completedSampleSize).toBe(0);
@@ -610,8 +573,6 @@ describe("adminStatsRouter.getStepDurations", () => {
 					p90_days: 22.0,
 				},
 				undefined,
-				undefined,
-				undefined,
 			],
 		);
 		const { adminStatsRouter } = await import("../adminStats");
@@ -632,7 +593,7 @@ describe("adminStatsRouter.getStepDurations", () => {
 		expect(secondDeclarationRow).toMatchObject({
 			phase: "post_submit",
 			step: null,
-			label: "Choix conformité → seconde déclaration",
+			label: "Temps passé sur la seconde déclaration",
 			sampleSize: 11,
 			completedSampleSize: 11,
 			medianDays: 8.0,
@@ -641,7 +602,7 @@ describe("adminStatsRouter.getStepDurations", () => {
 		expect(jointEvaluationRow).toMatchObject({
 			phase: "post_submit",
 			step: null,
-			label: "Choix conformité → évaluation conjointe",
+			label: "Temps passé sur l'évaluation conjointe",
 			sampleSize: 7,
 			completedSampleSize: 7,
 			medianDays: 12.0,

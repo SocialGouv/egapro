@@ -42,27 +42,19 @@ export function getStepLabel(step: number): string {
 export const POST_SUBMIT_MILESTONES = [
 	{
 		key: "submit_to_path_choice",
-		label: "Soumission → choix conformité",
+		label: "Délai avant choix du parcours",
 	},
 	{
 		key: "path_choice_to_second_declaration",
-		label: "Choix conformité → seconde déclaration",
+		label: "Temps passé sur la seconde déclaration",
 	},
 	{
 		key: "path_choice_to_joint_evaluation",
-		label: "Choix conformité → évaluation conjointe",
-	},
-	{
-		key: "revision_choice_to_action",
-		label: "Choix révision → action de révision",
+		label: "Temps passé sur l'évaluation conjointe",
 	},
 	{
 		key: "action_to_cse_opinion",
-		label: "Action → avis CSE",
-	},
-	{
-		key: "last_action_to_complete",
-		label: "Dernière action → démarche complète",
+		label: "Temps passé sur l'avis CSE",
 	},
 ] as const;
 
