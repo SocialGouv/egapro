@@ -58,6 +58,10 @@ export type {
 } from "./shared/declarationSteps";
 export {
 	DECLARATION_STEPS,
+	DROPOFF_RATE_ALERT_THRESHOLD,
+	DROPOFF_STAGNATION_DAYS_DEFAULT,
+	DROPOFF_STAGNATION_DAYS_MAX,
+	DROPOFF_STAGNATION_DAYS_MIN,
 	getStepLabel,
 	POST_SUBMIT_MILESTONES,
 } from "./shared/declarationSteps";

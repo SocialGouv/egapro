@@ -60,3 +60,8 @@ export const POST_SUBMIT_MILESTONES = [
 
 export type PostSubmitMilestoneKey =
 	(typeof POST_SUBMIT_MILESTONES)[number]["key"];
+
+export const DROPOFF_RATE_ALERT_THRESHOLD = 15;
+export const DROPOFF_STAGNATION_DAYS_DEFAULT = 30;
+export const DROPOFF_STAGNATION_DAYS_MIN = 1;
+export const DROPOFF_STAGNATION_DAYS_MAX = 180;

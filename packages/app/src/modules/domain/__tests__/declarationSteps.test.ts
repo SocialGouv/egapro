@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
 	DECLARATION_STEPS,
+	DROPOFF_RATE_ALERT_THRESHOLD,
+	DROPOFF_STAGNATION_DAYS_DEFAULT,
+	DROPOFF_STAGNATION_DAYS_MAX,
+	DROPOFF_STAGNATION_DAYS_MIN,
 	getStepLabel,
 	POST_SUBMIT_MILESTONES,
 } from "../shared/declarationSteps";
@@ -75,5 +79,26 @@ describe("POST_SUBMIT_MILESTONES", () => {
 	it("uses unique keys", () => {
 		const keys = POST_SUBMIT_MILESTONES.map((m) => m.key);
 		expect(new Set(keys).size).toBe(keys.length);
+	});
+});
+
+describe("K5 dropoff constants", () => {
+	it("uses 15 % as the alert threshold for the dropoff chart", () => {
+		expect(DROPOFF_RATE_ALERT_THRESHOLD).toBe(15);
+	});
+
+	it("defaults the stagnation window to 30 days", () => {
+		expect(DROPOFF_STAGNATION_DAYS_DEFAULT).toBe(30);
+	});
+
+	it("bounds the stagnation window between 1 and 180 days", () => {
+		expect(DROPOFF_STAGNATION_DAYS_MIN).toBe(1);
+		expect(DROPOFF_STAGNATION_DAYS_MAX).toBe(180);
+		expect(DROPOFF_STAGNATION_DAYS_DEFAULT).toBeGreaterThanOrEqual(
+			DROPOFF_STAGNATION_DAYS_MIN,
+		);
+		expect(DROPOFF_STAGNATION_DAYS_DEFAULT).toBeLessThanOrEqual(
+			DROPOFF_STAGNATION_DAYS_MAX,
+		);
 	});
 });
