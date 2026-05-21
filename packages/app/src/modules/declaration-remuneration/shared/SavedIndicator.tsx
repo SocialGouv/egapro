@@ -14,6 +14,7 @@ export function SavedIndicator({
 	hasData,
 }: Props) {
 	const isBusy = isSaving || isPendingSave;
+	if (!isBusy && !hasData) return null;
 	return (
 		<p
 			aria-busy={isBusy}
@@ -27,9 +28,9 @@ export function SavedIndicator({
 						aria-hidden="true"
 						className={`fr-icon-refresh-line ${styles.iconSlot} ${styles.spinning}`}
 					/>
-					Enregistrement...
+					Enregistre
 				</>
-			) : hasData ? (
+			) : (
 				<>
 					<span className={styles.iconSlot}>
 						<Image
@@ -41,14 +42,6 @@ export function SavedIndicator({
 						/>
 					</span>
 					Enregistré
-				</>
-			) : (
-				<>
-					<span
-						aria-hidden="true"
-						className={`fr-icon-pencil-line ${styles.iconSlot}`}
-					/>
-					Non enregistré
 				</>
 			)}
 		</p>

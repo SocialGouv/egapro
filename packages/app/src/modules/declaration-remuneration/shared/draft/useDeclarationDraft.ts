@@ -130,9 +130,25 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 		return stepData as Partial<T>;
 	}, [query.data, kind, stepKey]);
 
+	// Prevents hasDraft from flickering to false when a clearMutation from a
+	// previous mount resolves after the new mount has already hydrated the form.
+	// Set via effect so it only fires when queryDraft actually changes, preventing
+	// render-time re-override of the false set by setField/clearDraft callbacks.
+	const hadQueryDraftRef = useRef(false);
+	useEffect(() => {
+		if (queryDraft !== null && Object.keys(queryDraft).length > 0) {
+			hadQueryDraftRef.current = true;
+		}
+	}, [queryDraft]);
+
 	const draft: Partial<T> =
 		localDraft ?? queryDraft ?? (EMPTY_DRAFT as Partial<T>);
-	const hasDraft = Object.keys(draft).length > 0;
+	const localIsExplicitlyEmpty =
+		localDraft !== null && Object.keys(localDraft).length === 0;
+	const hasDraft =
+		!localIsExplicitlyEmpty &&
+		((queryDraft !== null && Object.keys(queryDraft).length > 0) ||
+			hadQueryDraftRef.current);
 
 	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const visualTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -155,8 +171,26 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			pendingRef.current = null;
 			if (pending === null || !isEnabled) return;
 			if (pending.diff === null) {
+				// Immediately reflect the clear in the cache so the next mount sees null,
+				// not stale data that the in-flight mutation will remove later.
+				utils.declarationDraft.get.setData({ year, siren }, (old) => {
+					if (!old) return old;
+					const base = old as DraftBlob;
+					const { [kind]: _removed, ...rest } = base;
+					return Object.keys(rest).length === 0 ? null : (rest as DraftBlob);
+				});
 				clearMutateRef.current({ year, siren, kind });
 			} else {
+				// Immediately reflect the save in the cache so the next mount hydrates
+				// with the correct data before the in-flight mutation resolves.
+				utils.declarationDraft.get.setData({ year, siren }, (old) => {
+					const base = (old ?? {}) as DraftBlob;
+					const slice = (base[kind] ?? {}) as Record<string, unknown>;
+					return {
+						...base,
+						[kind]: { ...slice, [stepKey]: pending.diff },
+					};
+				});
 				saveMutateRef.current({
 					year,
 					siren,
@@ -171,6 +205,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			if (!isEnabled) return;
 			const diff = computeDraftDiff(currentValues, dbValues);
 			const hasDiff = Object.keys(diff).length > 0;
+			if (!hasDiff) hadQueryDraftRef.current = false;
 			setLocalDraft((prev) => {
 				const next = hasDiff
 					? (diff as Partial<T>)
@@ -207,6 +242,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 
 	const clearDraftCallback = useCallback(() => {
 		if (!isEnabled) return;
+		hadQueryDraftRef.current = false;
 		if (visualTimerRef.current !== null) {
 			clearTimeout(visualTimerRef.current);
 			visualTimerRef.current = null;
@@ -246,7 +282,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			setField,
 			clearDraftCallback,
 			hasDraft,
-			query.isLoading,
+			query.data,
 			isEnabled,
 			isSessionLoading,
 			saveMutation.isPending,
