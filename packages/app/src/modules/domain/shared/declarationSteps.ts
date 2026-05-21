@@ -28,3 +28,39 @@ const STEP_LABEL_BY_NUMBER: ReadonlyMap<number, string> = new Map(
 export function getStepLabel(step: number): string {
 	return STEP_LABEL_BY_NUMBER.get(step) ?? `Étape ${step}`;
 }
+
+/**
+ * Jalons post-soumission de la déclaration — étendent le KPI K4 au-delà des
+ * 7 étapes du wizard A–F. Ces jalons couvrent la « démarche complète » : choix
+ * du parcours de conformité, actions correctives (seconde déclaration ou
+ * évaluation conjointe), avis du CSE, et clôture.
+ *
+ * Chaque jalon mesure la durée entre deux événements de
+ * `declaration_status_history`. L'ordre du tableau reflète la chronologie
+ * typique et est conservé tel quel par les consommateurs (chart + table).
+ */
+export const POST_SUBMIT_MILESTONES = [
+	{
+		key: "submit_to_path_choice",
+		label: "Soumission → choix conformité",
+	},
+	{
+		key: "path_choice_to_action",
+		label: "Choix conformité → action soumise",
+	},
+	{
+		key: "revision_choice_to_action",
+		label: "Choix révision → action de révision",
+	},
+	{
+		key: "action_to_cse_opinion",
+		label: "Action → avis CSE",
+	},
+	{
+		key: "last_action_to_complete",
+		label: "Dernière action → démarche complète",
+	},
+] as const;
+
+export type PostSubmitMilestoneKey =
+	(typeof POST_SUBMIT_MILESTONES)[number]["key"];

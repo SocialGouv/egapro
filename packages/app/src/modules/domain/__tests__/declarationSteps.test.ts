@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { DECLARATION_STEPS, getStepLabel } from "../shared/declarationSteps";
+import {
+	DECLARATION_STEPS,
+	getStepLabel,
+	POST_SUBMIT_MILESTONES,
+} from "../shared/declarationSteps";
 
 describe("DECLARATION_STEPS", () => {
 	it("covers all 7 steps (0..6)", () => {
@@ -31,5 +35,28 @@ describe("getStepLabel", () => {
 	it("returns a sensible fallback for unknown step numbers", () => {
 		expect(getStepLabel(42)).toBe("Étape 42");
 		expect(getStepLabel(-1)).toBe("Étape -1");
+	});
+});
+
+describe("POST_SUBMIT_MILESTONES", () => {
+	it("exposes the 5 post-submission jalons in chronological order", () => {
+		expect(POST_SUBMIT_MILESTONES.map((m) => m.key)).toEqual([
+			"submit_to_path_choice",
+			"path_choice_to_action",
+			"revision_choice_to_action",
+			"action_to_cse_opinion",
+			"last_action_to_complete",
+		]);
+	});
+
+	it("uses French labels with no empty strings", () => {
+		for (const entry of POST_SUBMIT_MILESTONES) {
+			expect(entry.label.length).toBeGreaterThan(0);
+		}
+	});
+
+	it("uses unique keys", () => {
+		const keys = POST_SUBMIT_MILESTONES.map((m) => m.key);
+		expect(new Set(keys).size).toBe(keys.length);
 	});
 });

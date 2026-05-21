@@ -51,9 +51,16 @@ export {
 	getCurrentCompliancePath,
 	isCancelled,
 } from "./shared/declarationStatus";
-// Declaration steps labels (A–F stepper)
-export type { DeclarationStepNumber } from "./shared/declarationSteps";
-export { DECLARATION_STEPS, getStepLabel } from "./shared/declarationSteps";
+// Declaration steps labels (A–F stepper) and post-submit milestones
+export type {
+	DeclarationStepNumber,
+	PostSubmitMilestoneKey,
+} from "./shared/declarationSteps";
+export {
+	DECLARATION_STEPS,
+	getStepLabel,
+	POST_SUBMIT_MILESTONES,
+} from "./shared/declarationSteps";
 // Declaration status history (event-sourced trajectory)
 export type {
 	DeclarationEventType,
