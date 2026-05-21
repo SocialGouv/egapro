@@ -2,11 +2,13 @@ import { and, between, eq, gte, inArray, type SQL, sql } from "drizzle-orm";
 
 import {
 	getCampaignProgressionSchema,
+	getStepDropoffRateSchema,
 	getStepDurationsSchema,
 } from "~/modules/admin/stats/schemas";
 import type {
 	CampaignProgressionPoint,
 	CampaignProgressionSeries,
+	StepDropoffRow,
 	StepDurationRow,
 } from "~/modules/admin/stats/types";
 import {
@@ -440,5 +442,104 @@ export const adminStatsRouter = createTRPCRouter({
 			);
 
 			return [...wizardRows, ...postSubmitRows];
+		}),
+
+	/**
+	 * Returns the dropoff rate per wizard step, scoped to a single campaign
+	 * year and optionally to a workforce bucket. Feeds the K5 « taux d'abandon
+	 * par étape » chart + table.
+	 *
+	 * A declaration is counted as **abandoned** on step E when:
+	 * - it currently sits on step E (`declarations.current_step = E`),
+	 * - its latest `step_change` row landing on E is older than the requested
+	 *   `stagnationDays`,
+	 * - it has not been completed (`status != 'demarche_completed'`),
+	 * - it has not been cancelled (`cancelled_at IS NULL`).
+	 *
+	 * The denominator (`total`) counts distinct declarations that entered step
+	 * E at least once. A round-trip (e.g. step 3 → 1 → 3) counts the
+	 * declaration only once per step; the numerator uses the **latest**
+	 * entry on E to assess stagnation, so a recent re-entry resets the timer.
+	 *
+	 * Step 6 (« Récapitulatif ») is excluded — it represents a submitted
+	 * declaration, not a wizard step where the user can stagnate.
+	 */
+	getStepDropoffRate: adminProcedure
+		.input(getStepDropoffRateSchema)
+		.query(async ({ ctx, input }): Promise<StepDropoffRow[]> => {
+			const sizeFilterSql = (() => {
+				if (!input.sizeRange) return sql`TRUE`;
+				const { min, max } = COMPANY_SIZE_RANGES[input.sizeRange];
+				return max === null
+					? sql`${companies.workforce} >= ${min}`
+					: sql`${companies.workforce} BETWEEN ${min} AND ${max}`;
+			})();
+
+			const rawRows = await ctx.db.execute<{
+				step: number | string;
+				total: number | string;
+				abandoned: number | string;
+			}>(sql`
+				WITH latest_step_change AS (
+					SELECT DISTINCT ON (${declarationStatusHistory.declarationId}, ${declarationStatusHistory.round})
+						${declarationStatusHistory.declarationId} AS declaration_id,
+						${declarationStatusHistory.round} AS step,
+						${declarationStatusHistory.createdAt} AS changed_at
+					FROM ${declarationStatusHistory}
+					WHERE ${declarationStatusHistory.eventType} = 'step_change'
+					ORDER BY
+						${declarationStatusHistory.declarationId},
+						${declarationStatusHistory.round},
+						${declarationStatusHistory.createdAt} DESC
+				)
+				SELECT
+					lsc.step AS step,
+					COUNT(DISTINCT lsc.declaration_id)::int AS total,
+					COUNT(DISTINCT lsc.declaration_id) FILTER (
+						WHERE ${declarations.currentStep} = lsc.step
+							AND ${declarations.status} != 'demarche_completed'
+							AND lsc.changed_at < NOW() - (${input.stagnationDays} || ' days')::interval
+					)::int AS abandoned
+				FROM latest_step_change lsc
+				INNER JOIN ${declarations}
+					ON ${declarations.id} = lsc.declaration_id
+				INNER JOIN ${companies}
+					ON ${companies.siren} = ${declarations.siren}
+				WHERE ${declarations.year} = ${input.year}
+					AND ${declarations.cancelledAt} IS NULL
+					AND lsc.step < ${WIZARD_TERMINAL_STEP}
+					AND ${sizeFilterSql}
+				GROUP BY lsc.step
+				ORDER BY lsc.step
+			`);
+
+			const byStep = new Map<number, { total: number; abandoned: number }>();
+			for (const raw of rawRows as unknown as Array<{
+				step: number | string;
+				total: number | string;
+				abandoned: number | string;
+			}>) {
+				byStep.set(Number(raw.step), {
+					total: Number(raw.total),
+					abandoned: Number(raw.abandoned),
+				});
+			}
+
+			return DECLARATION_STEPS.filter(
+				({ step }) => step < WIZARD_TERMINAL_STEP,
+			).map(({ step }) => {
+				const aggregate = byStep.get(step);
+				const total = aggregate?.total ?? 0;
+				const abandoned = aggregate?.abandoned ?? 0;
+				const dropoffRate =
+					total === 0 ? 0 : Math.round((abandoned / total) * 1000) / 10;
+				return {
+					step,
+					label: getStepLabel(step),
+					total,
+					abandoned,
+					dropoffRate,
+				};
+			});
 		}),
 });

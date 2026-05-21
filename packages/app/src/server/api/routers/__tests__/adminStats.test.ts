@@ -31,6 +31,12 @@ type MilestoneRow = {
 	p90_days: number | null;
 };
 
+type DropoffRow = {
+	step: number;
+	total: number;
+	abandoned: number;
+};
+
 /**
  * Builds a mock Drizzle db where each call to `execute()` returns the next
  * planned rowset. For `getStepDurations` the order is fixed: wizard, then
@@ -66,6 +72,47 @@ function buildDb(
 		execute,
 		__chain: chain,
 	};
+}
+
+/**
+ * Builds a mock Drizzle db scoped to `getStepDropoffRate` — its single
+ * `execute()` call returns the dropoff rows. Kept separate from `buildDb`
+ * because the K5 query does only one execute (no milestones chain).
+ */
+function buildDropoffDb(dropoffRows: DropoffRow[] = []) {
+	const execute = vi.fn();
+	execute.mockResolvedValueOnce(dropoffRows);
+	return {
+		select: vi.fn(),
+		execute,
+	};
+}
+
+/**
+ * Flatten a Drizzle SQL value (the argument passed to `db.execute(sql\`…\`)`)
+ * to a plain string for assertion. Recursively walks nested SQL chunks
+ * (e.g. `sql\`${sizeFilterSql}\``) and surfaces literal text, scalar
+ * parameters, and column names.
+ */
+function flattenSql(value: unknown): string {
+	if (value === null || value === undefined) return "";
+	if (typeof value === "string") return value;
+	if (typeof value === "number" || typeof value === "boolean") {
+		return String(value);
+	}
+	if (value instanceof Number || value instanceof String) {
+		return String(value);
+	}
+	if (typeof value !== "object") return "";
+	const obj = value as Record<string, unknown>;
+	const chunks = obj.queryChunks;
+	if (Array.isArray(chunks)) {
+		return chunks.map(flattenSql).join(" ");
+	}
+	const literal = obj.value;
+	if (Array.isArray(literal)) return literal.join("");
+	if (typeof obj.name === "string") return obj.name;
+	return "";
 }
 
 const adminSession = {
@@ -650,5 +697,229 @@ describe("adminStatsRouter.getStepDurations", () => {
 		expect(wizard.some((row) => row.step === 6)).toBe(false);
 		expect(wizard.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5]);
 		expect(result.find((row) => row.label === "Récapitulatif")).toBeUndefined();
+	});
+});
+
+describe("adminStatsRouter.getStepDropoffRate", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("S-K5-9 — rejects non-admin callers", async () => {
+		const db = buildDropoffDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: {
+				user: { id: "u", email: "u@x", isAdmin: false },
+				expires: "",
+			},
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getStepDropoffRate({ year: 2026, stagnationDays: 30 }),
+		).rejects.toThrow(/administrateurs/i);
+	});
+
+	it("S-K5-1 — maps SQL rows to typed output with FR step labels and 1-decimal rates", async () => {
+		const db = buildDropoffDb([
+			{ step: 1, total: 10, abandoned: 2 },
+			{ step: 2, total: 8, abandoned: 4 },
+			{ step: 3, total: 6, abandoned: 1 },
+		]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+		});
+
+		expect(result).toHaveLength(6);
+		expect(result.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5]);
+
+		const step1 = result.find((row) => row.step === 1);
+		expect(step1).toEqual({
+			step: 1,
+			label: "Effectifs",
+			total: 10,
+			abandoned: 2,
+			dropoffRate: 20,
+		});
+
+		const step2 = result.find((row) => row.step === 2);
+		expect(step2?.label).toBe("Écart de rémunération");
+		expect(step2?.dropoffRate).toBe(50);
+
+		const step3 = result.find((row) => row.step === 3);
+		expect(step3?.dropoffRate).toBeCloseTo(16.7, 1);
+	});
+
+	it("S-K5-2 — returns total=0 abandoned=0 rate=0 for steps the SQL omits (no division by zero, no missing row)", async () => {
+		const db = buildDropoffDb([{ step: 1, total: 4, abandoned: 0 }]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+		});
+
+		expect(result).toHaveLength(6);
+		const step5 = result.find((row) => row.step === 5);
+		expect(step5).toEqual({
+			step: 5,
+			label: "Écart par catégorie de salariés",
+			total: 0,
+			abandoned: 0,
+			dropoffRate: 0,
+		});
+
+		const step1 = result.find((row) => row.step === 1);
+		expect(step1?.dropoffRate).toBe(0);
+	});
+
+	it("S-K5-3 — forwards stagnationDays as an SQL parameter (router passes input through)", async () => {
+		const db = buildDropoffDb([]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 10 });
+		expect(db.execute).toHaveBeenCalledTimes(1);
+
+		const firstCall = db.execute.mock.calls[0]?.[0];
+		const serialized = flattenSql(firstCall);
+		expect(serialized).toContain("10");
+	});
+
+	it("S-K5-4 — `status != 'demarche_completed'` is part of the abandoned FILTER", async () => {
+		const db = buildDropoffDb([]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 30 });
+
+		const firstCall = db.execute.mock.calls[0]?.[0];
+		const serialized = flattenSql(firstCall);
+		expect(serialized).toContain("demarche_completed");
+	});
+
+	it("S-K5-5 — `cancelled_at IS NULL` is applied to the declaration join", async () => {
+		const db = buildDropoffDb([]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 30 });
+
+		const firstCall = db.execute.mock.calls[0]?.[0];
+		const serialized = flattenSql(firstCall);
+		expect(serialized).toMatch(/cancelled\s*At\s+IS NULL/i);
+	});
+
+	it("S-K5-6 — uses DISTINCT ON in the latest_step_change CTE so back-and-forth entries are deduplicated", async () => {
+		const db = buildDropoffDb([]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 30 });
+
+		const firstCall = db.execute.mock.calls[0]?.[0];
+		const serialized = flattenSql(firstCall);
+		expect(serialized).toContain("DISTINCT ON");
+	});
+
+	it("S-K5-7 — never returns a row for step 6 (excluded by `lsc.step < 6`)", async () => {
+		const db = buildDropoffDb([
+			{ step: 0, total: 5, abandoned: 0 },
+			{ step: 6, total: 9, abandoned: 0 },
+		]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+		});
+
+		expect(result).toHaveLength(6);
+		expect(result.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5]);
+		expect(result.some((row) => row.step === 6)).toBe(false);
+	});
+
+	it("S-K5-8 — propagates the sizeRange filter into the SQL (between predicate)", async () => {
+		const db = buildDropoffDb([]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+			sizeRange: "250+",
+		});
+
+		const firstCall = db.execute.mock.calls[0]?.[0];
+		const serialized = flattenSql(firstCall);
+		expect(serialized).toContain("250");
+	});
+
+	it("rejects invalid stagnationDays (below 1 / above 180)", async () => {
+		const db = buildDropoffDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getStepDropoffRate({ year: 2025, stagnationDays: 0 }),
+		).rejects.toThrow();
+		await expect(
+			caller.getStepDropoffRate({ year: 2025, stagnationDays: 181 }),
+		).rejects.toThrow();
+	});
+
+	it("defaults stagnationDays to 30 when omitted", async () => {
+		const db = buildDropoffDb([]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({ year: 2025 });
+		expect(db.execute).toHaveBeenCalledTimes(1);
 	});
 });
