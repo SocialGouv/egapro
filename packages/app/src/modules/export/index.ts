@@ -32,4 +32,10 @@ export {
 	EXPORT_VERSION,
 	INDICATOR_G_COLUMNS,
 } from "./shared/constants";
+export {
+	DECLARATION_EVENT_TYPE_LABELS,
+	type DeclarationEventType,
+	getStatusHistoryLabel,
+	PATH_CHOICE_VALUE_LABELS,
+} from "./shared/statusHistoryLabels";
 export type { ExportRow, IndicatorGRow } from "./types";
