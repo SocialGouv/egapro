@@ -75,19 +75,29 @@ export function Step1Workforce({
 	const totalMen = form.watch("totalMen");
 	const total = totalWomen + totalMen;
 
+	const [womenRaw, setWomenRaw] = useState(() =>
+		initialData.totalWomen > 0 ? String(initialData.totalWomen) : "",
+	);
+	const [menRaw, setMenRaw] = useState(() =>
+		initialData.totalMen > 0 ? String(initialData.totalMen) : "",
+	);
+	const [womenError, setWomenError] = useState<string | null>(null);
+	const [menError, setMenError] = useState<string | null>(null);
+
 	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
-		if (typeof d.totalWomen === "number")
+		if (typeof d.totalWomen === "number") {
 			form.setValue("totalWomen", d.totalWomen);
-		if (typeof d.totalMen === "number") form.setValue("totalMen", d.totalMen);
+			setWomenRaw(d.totalWomen > 0 ? String(d.totalWomen) : "");
+		}
+		if (typeof d.totalMen === "number") {
+			form.setValue("totalMen", d.totalMen);
+			setMenRaw(d.totalMen > 0 ? String(d.totalMen) : "");
+		}
 	});
 
 	const hasData = hasInitialData || hasDraft;
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const [showResetWarning, setShowResetWarning] = useState(false);
-
-	function handleInputFocus(currentValue: number) {
-		if (currentValue > 0) setShowResetWarning(true);
-	}
 
 	const mutation = api.declaration.updateStep1.useMutation({
 		onSuccess: () => {
@@ -97,34 +107,53 @@ export function Step1Workforce({
 	});
 
 	function parseIntegerInput(raw: string): number | null {
-		if (raw === "") return 0;
+		if (raw === "") return null;
 		if (/\D/.test(raw)) return null;
 		return Number.parseInt(raw, 10);
 	}
 
 	function handleWomenChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const value = parseIntegerInput(e.target.value);
+		const raw = e.target.value;
+		setWomenRaw(raw);
+		setWomenError(null);
+		const value = parseIntegerInput(raw);
 		if (value === null) return;
 		form.setValue("totalWomen", value);
 		setField({ totalWomen: value, totalMen });
+
+		if (isPrefilled && gipPrefillData.step1.totalWomen !== null) {
+			setShowResetWarning(value !== gipPrefillData.step1.totalWomen);
+		}
 	}
 
 	function handleMenChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const value = parseIntegerInput(e.target.value);
+		const raw = e.target.value;
+		setMenRaw(raw);
+		setMenError(null);
+		const value = parseIntegerInput(raw);
 		if (value === null) return;
 		form.setValue("totalMen", value);
 		setField({ totalWomen, totalMen: value });
+
+		if (isPrefilled && gipPrefillData.step1.totalMen !== null) {
+			setShowResetWarning(value !== gipPrefillData.step1.totalMen);
+		}
 	}
 
 	if (!draftHydrated) return <DraftLoadingState />;
 
 	const onSubmit = form.handleSubmit((data) => {
-		if (data.totalWomen + data.totalMen === 0) {
-			setValidationError(
-				"Veuillez renseigner les effectifs avant de passer à l'étape suivante.",
-			);
-			return;
+		const womenEmpty = womenRaw === "";
+		const menEmpty = menRaw === "";
+
+		if (womenEmpty) {
+			setWomenError("Veuillez renseigner le nombre de femmes.");
 		}
+		if (menEmpty) {
+			setMenError("Veuillez renseigner le nombre d'hommes.");
+		}
+		if (womenEmpty || menEmpty) return;
+
 		setValidationError(null);
 		mutation.mutate(data);
 	});
@@ -144,6 +173,8 @@ export function Step1Workforce({
 					const menValue = DEV_STEP1_CATEGORIES[0]?.men ?? 50;
 					form.setValue("totalWomen", womenValue);
 					form.setValue("totalMen", menValue);
+					setWomenRaw(String(womenValue));
+					setMenRaw(String(menValue));
 					setField({ totalWomen: womenValue, totalMen: menValue });
 				}}
 				title={
@@ -213,30 +244,62 @@ export function Step1Workforce({
 													<strong>Nombre de salariés</strong>
 												</td>
 												<td>
-													<input
-														aria-label="Nombre de femmes"
-														className={`fr-input ${common.numericInput}`}
-														disabled={isImpersonating}
-														inputMode="numeric"
-														onChange={handleWomenChange}
-														onFocus={() => handleInputFocus(totalWomen)}
-														pattern="[0-9]*"
-														type="text"
-														value={totalWomen > 0 ? String(totalWomen) : ""}
-													/>
+													<div
+														className={
+															womenError
+																? "fr-input-group fr-input-group--error"
+																: "fr-input-group"
+														}
+													>
+														<input
+															aria-describedby={
+																womenError ? "women-error" : undefined
+															}
+															aria-invalid={womenError ? true : undefined}
+															aria-label="Nombre de femmes"
+															className={`fr-input ${common.numericInput}${womenError ? "fr-input--error" : ""}`}
+															disabled={isImpersonating}
+															inputMode="numeric"
+															onChange={handleWomenChange}
+															pattern="[0-9]*"
+															type="text"
+															value={womenRaw}
+														/>
+														{womenError && (
+															<p className="fr-error-text" id="women-error">
+																{womenError}
+															</p>
+														)}
+													</div>
 												</td>
 												<td>
-													<input
-														aria-label="Nombre d'hommes"
-														className={`fr-input ${common.numericInput}`}
-														disabled={isImpersonating}
-														inputMode="numeric"
-														onChange={handleMenChange}
-														onFocus={() => handleInputFocus(totalMen)}
-														pattern="[0-9]*"
-														type="text"
-														value={totalMen > 0 ? String(totalMen) : ""}
-													/>
+													<div
+														className={
+															menError
+																? "fr-input-group fr-input-group--error"
+																: "fr-input-group"
+														}
+													>
+														<input
+															aria-describedby={
+																menError ? "men-error" : undefined
+															}
+															aria-invalid={menError ? true : undefined}
+															aria-label="Nombre d'hommes"
+															className={`fr-input ${common.numericInput}${menError ? "fr-input--error" : ""}`}
+															disabled={isImpersonating}
+															inputMode="numeric"
+															onChange={handleMenChange}
+															pattern="[0-9]*"
+															type="text"
+															value={menRaw}
+														/>
+														{menError && (
+															<p className="fr-error-text" id="men-error">
+																{menError}
+															</p>
+														)}
+													</div>
 												</td>
 												<td>
 													<strong>{total}</strong>
