@@ -26,6 +26,11 @@ import {
 /** Minimum number of completed transitions before showing a median / p90. */
 const STEP_DURATION_MIN_SAMPLE = 5;
 
+// Step 6 (« Récapitulatif ») is the terminal submission state — no subsequent
+// `step_change` event exists, so its duration is always undefined. Excluded
+// from the K4 wizard chart to avoid empty bars.
+const WIZARD_TERMINAL_STEP = 6;
+
 type AggregatedRow = { day: string; year: number; count: number };
 
 /**
@@ -149,10 +154,12 @@ export const adminStatsRouter = createTRPCRouter({
 	 * table.
 	 *
 	 * Two phases:
-	 * - **wizard** (steps 0..6) — durations are `LEAD(changed_at) - changed_at`
-	 *   over the `step_change` events ordered by time per declaration. Rows
-	 *   where there is no next event (declaration still on that step) are
-	 *   excluded from the percentile aggregation but still count in
+	 * - **wizard** (steps 0..5) — durations are `LEAD(changed_at) - changed_at`
+	 *   over the `step_change` events ordered by time per declaration. Step 6
+	 *   (« Récapitulatif ») is the terminal submission state with no following
+	 *   `step_change` event, so its duration is undefined and the row is
+	 *   excluded. Rows where there is no next event (declaration still on that
+	 *   step) are excluded from the percentile aggregation but still count in
 	 *   `sampleSize`.
 	 * - **post_submit** (6 milestones) — durations between business events
 	 *   (`submit`, `path_choice`, `second_declaration_submit`,
@@ -212,6 +219,7 @@ export const adminStatsRouter = createTRPCRouter({
 					) FILTER (WHERE next_changed_at IS NOT NULL) AS p90_days
 				FROM events
 				WHERE step IS NOT NULL
+					AND step < ${WIZARD_TERMINAL_STEP}
 				GROUP BY step
 				ORDER BY step
 			`);
@@ -246,7 +254,9 @@ export const adminStatsRouter = createTRPCRouter({
 				});
 			}
 
-			const wizardRows = DECLARATION_STEPS.map(
+			const wizardRows = DECLARATION_STEPS.filter(
+				({ step }) => step < WIZARD_TERMINAL_STEP,
+			).map(
 				({ step }) =>
 					wizardByStep.get(step) ?? {
 						key: `step_${step}`,

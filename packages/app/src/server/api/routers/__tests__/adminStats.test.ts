@@ -208,7 +208,7 @@ describe("adminStatsRouter.getStepDurations", () => {
 		);
 	});
 
-	it("returns the 7 wizard steps + 6 post-submit milestones (13 rows) even when SQL returns nothing", async () => {
+	it("returns the 6 wizard steps + 6 post-submit milestones (12 rows) even when SQL returns nothing", async () => {
 		const db = buildDb([], []);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
@@ -219,12 +219,12 @@ describe("adminStatsRouter.getStepDurations", () => {
 
 		const result = await caller.getStepDurations({ year: 2026 });
 
-		expect(result).toHaveLength(13);
+		expect(result).toHaveLength(12);
 		const wizard = result.filter((row) => row.phase === "wizard");
 		const postSubmit = result.filter((row) => row.phase === "post_submit");
-		expect(wizard).toHaveLength(7);
+		expect(wizard).toHaveLength(6);
 		expect(postSubmit).toHaveLength(6);
-		expect(wizard.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5, 6]);
+		expect(wizard.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5]);
 		expect(postSubmit.map((row) => row.key)).toEqual([
 			"submit_to_path_choice",
 			"path_choice_to_second_declaration",
@@ -647,5 +647,47 @@ describe("adminStatsRouter.getStepDurations", () => {
 			medianDays: 12.0,
 			p90Days: 22.0,
 		});
+	});
+
+	it("never returns a wizard row with step === 6 (S-K4-15)", async () => {
+		const db = buildDb(
+			[],
+			[
+				{
+					step: 0,
+					sample_size: 12,
+					completed_sample_size: 12,
+					median_days: 1,
+					p90_days: 2,
+				},
+				{
+					step: 5,
+					sample_size: 8,
+					completed_sample_size: 8,
+					median_days: 4,
+					p90_days: 9,
+				},
+				{
+					step: 6,
+					sample_size: 5,
+					completed_sample_size: 0,
+					median_days: null,
+					p90_days: null,
+				},
+			],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDurations({ year: 2025 });
+		const wizard = result.filter((row) => row.phase === "wizard");
+
+		expect(wizard.some((row) => row.step === 6)).toBe(false);
+		expect(wizard.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5]);
+		expect(result.find((row) => row.label === "Récapitulatif")).toBeUndefined();
 	});
 });
