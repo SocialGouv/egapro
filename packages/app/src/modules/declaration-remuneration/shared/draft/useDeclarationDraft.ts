@@ -29,6 +29,7 @@ type UseDeclarationDraftResult<T extends Record<string, unknown>> = {
 };
 
 const DEBOUNCE_MS = 600;
+const VISUAL_DELAY_MS = 400;
 const EMPTY_DRAFT: Readonly<Record<string, never>> = Object.freeze({});
 
 function deepEqual(a: unknown, b: unknown): boolean {
@@ -134,6 +135,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 	const hasDraft = Object.keys(draft).length > 0;
 
 	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const visualTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const pendingRef = useRef<{ diff: Record<string, unknown> | null } | null>(
 		null,
 	);
@@ -141,9 +143,14 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 
 	useEffect(() => {
 		flushRef.current = () => {
+			if (visualTimerRef.current !== null) {
+				clearTimeout(visualTimerRef.current);
+				visualTimerRef.current = null;
+			}
 			if (timerRef.current === null) return;
 			clearTimeout(timerRef.current);
 			timerRef.current = null;
+			setIsPendingSave(false);
 			const pending = pendingRef.current;
 			pendingRef.current = null;
 			if (pending === null || !isEnabled) return;
@@ -174,8 +181,12 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 				return next;
 			});
 			if (timerRef.current !== null) clearTimeout(timerRef.current);
+			if (visualTimerRef.current !== null) clearTimeout(visualTimerRef.current);
 			pendingRef.current = { diff: hasDiff ? diff : null };
-			setIsPendingSave(true);
+			visualTimerRef.current = setTimeout(() => {
+				visualTimerRef.current = null;
+				setIsPendingSave(true);
+			}, VISUAL_DELAY_MS);
 			timerRef.current = setTimeout(() => {
 				timerRef.current = null;
 				pendingRef.current = null;
@@ -196,6 +207,10 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 
 	const clearDraftCallback = useCallback(() => {
 		if (!isEnabled) return;
+		if (visualTimerRef.current !== null) {
+			clearTimeout(visualTimerRef.current);
+			visualTimerRef.current = null;
+		}
 		if (timerRef.current !== null) {
 			clearTimeout(timerRef.current);
 			timerRef.current = null;
@@ -221,7 +236,8 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			setField,
 			clearDraft: clearDraftCallback,
 			hasDraft,
-			isLoadingDraft: isSessionLoading || (isEnabled && query.isLoading),
+			isLoadingDraft:
+				isSessionLoading || (isEnabled && query.data === undefined),
 			isSaving: saveMutation.isPending,
 			isPendingSave,
 		}),
