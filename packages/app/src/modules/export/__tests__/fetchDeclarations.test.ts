@@ -163,7 +163,7 @@ describe("buildIndicators", () => {
 		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_H).toBe(
 			"0.4444",
 		);
-		expect(result.F.annuel.Seuil_Q4_Rem_globale).toBeNull();
+		expect(result.F.annuel).not.toHaveProperty("Seuil_Q4_Rem_globale");
 		expect(result.F.annuel.Quartile4_Rem_globale_annuelle_proportion_F).toBe(
 			"0.4355",
 		);
@@ -171,6 +171,7 @@ describe("buildIndicators", () => {
 		expect(result.F.horaire.Quartile1_Taux_horaire_global_proportion_F).toBe(
 			"0.6154",
 		);
+		expect(result.F.horaire).not.toHaveProperty("Seuil_Q4_Taux_horaire_global");
 	});
 
 	it("should expose gap labels for indicators A/B/C/D", () => {

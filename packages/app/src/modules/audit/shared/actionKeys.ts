@@ -56,6 +56,7 @@ export const AUDIT_ACTIONS = {
 
 	// ── Admin stats reads ─────────────────────────────────
 	ADMIN_STATS_CAMPAIGN_PROGRESSION: "admin_stats.campaign_progression",
+	ADMIN_STATS_GET_STEP_DURATIONS: "admin_stats.get_step_durations",
 
 	// ── Sensitive reads ────────────────────────────────────
 	ADMIN_FILE_DOWNLOAD: "admin.file_download",
@@ -75,6 +76,10 @@ export const AUDIT_ACTIONS = {
 	// ── Mail ───────────────────────────────────────────────
 	MAIL_RECEIPT_SEND: "mail.receipt_send",
 	MAIL_RECEIPT_RESEND: "mail.receipt_resend",
+
+	// ── Notifications (queue + worker) ───────────────────
+	NOTIFICATION_ENQUEUE: "notification.enqueue",
+	NOTIFICATION_SEND: "notification.send",
 
 	// ── Public searches ────────────────────────────────────
 	PUBLIC_REFERENT_SEARCH: "public_referents.search",
@@ -125,6 +130,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DURATIONS]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PROFILE_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA]: "read_sensitive",
@@ -140,6 +146,9 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.MAIL_RECEIPT_SEND]: "mutation",
 	[AUDIT_ACTIONS.MAIL_RECEIPT_RESEND]: "mutation",
+
+	[AUDIT_ACTIONS.NOTIFICATION_ENQUEUE]: "mutation",
+	[AUDIT_ACTIONS.NOTIFICATION_SEND]: "system",
 
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: "public_search",
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",

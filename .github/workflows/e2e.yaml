@@ -33,6 +33,17 @@ jobs:
       CLAMAV_HOST: localhost
       CLAMAV_PORT: 3310
       ADMIN_EMAILS: test@fia1.fr
+      # Notifications worker + publisher wiring (separate Postgres + MailDev
+      # SMTP). The dev server reads NOTIFICATIONS_DATABASE_URL when calling
+      # `enqueueNotification`; the worker is spawned by the E2E test itself
+      # and inherits these from process.env.
+      NOTIFICATIONS_DATABASE_URL: postgresql://postgres:postgres@localhost:5439/egapro_notifications
+      MAIL_ENABLED: "true"
+      SMTP_HOST: localhost
+      SMTP_PORT: "1025"
+      SMTP_SECURE: "false"
+      MAIL_FROM: no-reply@egapro.local
+      MAILDEV_URL: http://localhost:1080
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

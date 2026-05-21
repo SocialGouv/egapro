@@ -56,9 +56,17 @@ export async function CompliancePathPage() {
 		correctionCategories,
 	);
 
+	const hasChosenPath = data.declaration.firstDeclarationPathChoice !== null;
+
+	// Skip the choice page only when the user has nothing to (re-)choose:
+	// no current gap and they never picked a path, or they finalised the
+	// procedure without one. When firstDeclarationPathChoice is set, render
+	// the choice page so the user can review what they picked — the FSM
+	// rejects mutations from demarche_completed, so toggling is harmless.
 	if (
-		state.type === "no_gap" ||
-		data.declaration.status === "demarche_completed"
+		!hasChosenPath &&
+		(state.type === "no_gap" ||
+			data.declaration.status === "demarche_completed")
 	) {
 		redirect(getPostComplianceDestination(company.hasCse));
 	}

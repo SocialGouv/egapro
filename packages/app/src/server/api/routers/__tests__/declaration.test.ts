@@ -1330,4 +1330,58 @@ describe("declarationRouter", () => {
 			);
 		});
 	});
+
+	describe("step_change instrumentation (K4 — délai par étape)", () => {
+		it("inserts a step_change row when updateStep1 advances from step 0 (S1)", async () => {
+			const tx = createMockTx([mockDeclaration]);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createCaller(mockDb);
+
+			await caller.updateStep1({ totalWomen: 30, totalMen: 40 });
+
+			const insertedRows = mockValues.mock.calls
+				.map((c) => c[0])
+				.filter(
+					(v): v is { eventType?: string } =>
+						typeof v === "object" && v !== null && "eventType" in v,
+				);
+			const stepChange = insertedRows.find(
+				(row) => row.eventType === "step_change",
+			);
+			expect(stepChange).toMatchObject({
+				eventType: "step_change",
+				value: "from:0|to:1",
+				round: 1,
+			});
+		});
+
+		it("does not insert a step_change row when the new step equals the existing one (idempotent re-save)", async () => {
+			const declarationAtStep2 = { ...mockDeclaration, currentStep: 2 };
+			const tx = createMockTx([declarationAtStep2]);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createCaller(mockDb);
+
+			await caller.updateStep2({
+				indicatorAAnnualWomen: "30000",
+				indicatorAAnnualMen: "32000",
+			});
+
+			const insertedRows = mockValues.mock.calls
+				.map((c) => c[0])
+				.filter(
+					(v): v is { eventType?: string } =>
+						typeof v === "object" && v !== null && "eventType" in v,
+				);
+			const stepChange = insertedRows.find(
+				(row) => row.eventType === "step_change",
+			);
+			expect(stepChange).toBeUndefined();
+		});
+	});
 });
