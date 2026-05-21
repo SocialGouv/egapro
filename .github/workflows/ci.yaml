@@ -11,15 +11,14 @@ env:
   NODE_ENV: test
 
 jobs:
-  build:
-    name: Build
+  notifications-typecheck:
+    name: Notifications · Typecheck
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Shallow clones should be disabled for better SonarCloud analysis
-      - uses: pnpm/action-setup@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -27,60 +26,143 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Typecheck
-        run: pnpm typecheck
-      - name: Build
-        run: pnpm build
+      - name: Typecheck notifications
+        run: pnpm --filter notifications typecheck
+
+  notifications-build:
+    name: Notifications · Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build notifications
+        run: pnpm --filter notifications build
+
+  notifications-test:
+    name: Notifications · Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Test notifications
+        run: pnpm --filter notifications test
+
+  notifications-lint:
+    name: Notifications · Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint notifications
+        run: pnpm --filter notifications lint:check
+      - name: Format check notifications
+        run: pnpm --filter notifications format:check
+
+  app-typecheck:
+    name: App · Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck app
+        run: pnpm --filter app typecheck
+
+  app-build:
+    name: App · Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build app
+        run: pnpm --filter app build
         env:
           SKIP_ENV_VALIDATION: "1"
-      - name: Cache build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: "${{ github.sha }}"
 
-  lint:
-    name: Lint & Format
+  app-test:
+    name: App · Test
     runs-on: ubuntu-latest
-    needs:
-      - build
     steps:
-      - name: Restore build
-        uses: actions/cache@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          path: ./*
-          key: "${{ github.sha }}"
-      - uses: pnpm/action-setup@v4
+          fetch-depth: 0 # Shallow clones should be disabled for better SonarCloud analysis
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
-      - name: Lint
-        run: pnpm lint:check
-      - name: Format check
-        run: pnpm format:check
-
-  unit-tests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    needs:
-      - build
-    steps:
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: "${{ github.sha }}"
-      - uses: pnpm/action-setup@v4
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-          cache: pnpm
-      - name: Run unit tests with coverage
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Test app with coverage
         run: pnpm test:app:coverage
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  app-lint:
+    name: App · Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint app
+        run: pnpm --filter app lint:check
+      - name: Format check app
+        run: pnpm --filter app format:check

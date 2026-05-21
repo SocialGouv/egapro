@@ -16,13 +16,19 @@ import {
 import type { CseRow, FileRow, IndicatorGEntry } from "./fetchDeclarations";
 import type { IndicatorGRow } from "./types";
 
+// postgres.js returns ISO strings (not Date) for raw `sql<>` aggregations like
+// MAX(timestamptz) — the column-type metadata is lost. mapWith bridges that
+// gap so callers can rely on a real Date | null.
+const toDate = (value: unknown): Date | null =>
+	value == null ? null : new Date(value as string | number | Date);
+
 function latestEventAt(eventType: string) {
 	return sql<Date | null>`(
 		SELECT MAX(${declarationStatusHistory.createdAt})
 		FROM ${declarationStatusHistory}
 		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
 		AND ${declarationStatusHistory.eventType} = ${eventType}
-	)`;
+	)`.mapWith(toDate);
 }
 
 function latestPathChoiceAt(round: 1 | 2) {
@@ -32,7 +38,7 @@ function latestPathChoiceAt(round: 1 | 2) {
 		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
 		AND ${declarationStatusHistory.eventType} = 'path_choice'
 		AND ${declarationStatusHistory.round} = ${round}
-	)`;
+	)`.mapWith(toDate);
 }
 
 export const statusHistoryProjection = {

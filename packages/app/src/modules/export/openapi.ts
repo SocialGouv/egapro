@@ -67,7 +67,6 @@ const indicatorFAnnualSchema = {
 		Seuil_Q3_Rem_globale: { type: ["string", "null"] },
 		Quartile3_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
 		Quartile3_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
-		Seuil_Q4_Rem_globale: { type: ["string", "null"] },
 		Quartile4_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
 		Quartile4_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
 	},
@@ -87,7 +86,6 @@ const indicatorFHourlySchema = {
 		Seuil_Q3_Taux_horaire_global: { type: ["string", "null"] },
 		Quartile3_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
 		Quartile3_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
-		Seuil_Q4_Taux_horaire_global: { type: ["string", "null"] },
 		Quartile4_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
 		Quartile4_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
 	},
@@ -169,6 +167,12 @@ const indicatorsSchema = {
 const declarationSchema = {
 	type: "object",
 	properties: {
+		id: {
+			type: "string",
+			format: "uuid",
+			description: "Identifiant interne de la déclaration (UUID)",
+			example: "11111111-2222-4333-8444-555555555555",
+		},
 		SIREN: {
 			type: "string",
 			description: "SIREN de l'entreprise (9 chiffres)",
@@ -434,7 +438,7 @@ export const openApiSpec = {
 		title: "EGAPRO — API d'export",
 		description:
 			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une clé API transmise en Bearer token. L'authentification ainsi qu'un quota (rate limit) sont appliqués en amont par la passerelle EGAPRO.",
-		version: "2.0.0",
+		version: "2.1.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},

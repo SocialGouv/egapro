@@ -6,7 +6,7 @@ describe("openApiSpec", () => {
 	it("should be a valid OpenAPI 3.1 structure", () => {
 		expect(openApiSpec.openapi).toBe("3.1.0");
 		expect(openApiSpec.info.title).toBeDefined();
-		expect(openApiSpec.info.version).toBe("2.0.0");
+		expect(openApiSpec.info.version).toBe("2.1.0");
 		expect(openApiSpec.paths).toBeDefined();
 	});
 
@@ -31,6 +31,17 @@ describe("openApiSpec", () => {
 		const dateEnd = params.find((p) => p.name === "date_end");
 		expect(dateEnd).toBeDefined();
 		expect(dateEnd?.required).toBe(false);
+	});
+
+	it("should declare id as first property of declarationSchema with uuid format", () => {
+		const responseSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema;
+		const declarationSchema = responseSchema.properties.Declarations.items;
+		expect(declarationSchema.properties.id).toBeDefined();
+		expect(declarationSchema.properties.id.type).toBe("string");
+		expect(declarationSchema.properties.id.format).toBe("uuid");
+		expect(Object.keys(declarationSchema.properties)[0]).toBe("id");
 	});
 
 	it("should define 200, 400, and 500 responses", () => {
