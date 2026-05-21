@@ -1,56 +1,84 @@
 import { describe, expect, it } from "vitest";
 
 import {
-	isPhase2Required,
-	isPhase2RevisionRequired,
+	isComplianceProcessRequired,
+	isComplianceProcessRevisionRequired,
 } from "../shared/declarationFlags";
 import type { DeclarationStatusEvent } from "../shared/declarationTrajectory";
 
-describe("isPhase2Required", () => {
+describe("isComplianceProcessRequired", () => {
 	it("returns true when workforce ≥ 100, indicator G computed, and gap ≥ 5%", () => {
 		expect(
-			isPhase2Required({ workforce: 300, hasIndicatorG: true, gap: 10 }),
+			isComplianceProcessRequired({
+				workforce: 300,
+				hasIndicatorG: true,
+				gap: 10,
+			}),
 		).toBe(true);
 	});
 
 	it("returns false when workforce < 100 even if gap is high", () => {
 		expect(
-			isPhase2Required({ workforce: 80, hasIndicatorG: true, gap: 10 }),
+			isComplianceProcessRequired({
+				workforce: 80,
+				hasIndicatorG: true,
+				gap: 10,
+			}),
 		).toBe(false);
 	});
 
 	it("returns false when no indicator G data", () => {
 		expect(
-			isPhase2Required({ workforce: 300, hasIndicatorG: false, gap: 10 }),
+			isComplianceProcessRequired({
+				workforce: 300,
+				hasIndicatorG: false,
+				gap: 10,
+			}),
 		).toBe(false);
 	});
 
 	it("returns false when gap < 5%", () => {
 		expect(
-			isPhase2Required({ workforce: 300, hasIndicatorG: true, gap: 3 }),
+			isComplianceProcessRequired({
+				workforce: 300,
+				hasIndicatorG: true,
+				gap: 3,
+			}),
 		).toBe(false);
 	});
 
 	it("returns false when workforce is null", () => {
 		expect(
-			isPhase2Required({ workforce: null, hasIndicatorG: true, gap: 10 }),
+			isComplianceProcessRequired({
+				workforce: null,
+				hasIndicatorG: true,
+				gap: 10,
+			}),
 		).toBe(false);
 	});
 
 	it("returns false when gap is null", () => {
 		expect(
-			isPhase2Required({ workforce: 300, hasIndicatorG: true, gap: null }),
+			isComplianceProcessRequired({
+				workforce: 300,
+				hasIndicatorG: true,
+				gap: null,
+			}),
 		).toBe(false);
 	});
 
 	it("returns true at the exact 100 / 5 thresholds", () => {
 		expect(
-			isPhase2Required({ workforce: 100, hasIndicatorG: true, gap: 5 }),
+			isComplianceProcessRequired({
+				workforce: 100,
+				hasIndicatorG: true,
+				gap: 5,
+			}),
 		).toBe(true);
 	});
 });
 
-describe("isPhase2RevisionRequired", () => {
+describe("isComplianceProcessRevisionRequired", () => {
 	const withSecondDecl: DeclarationStatusEvent[] = [
 		{
 			eventType: "second_declaration_submit",
@@ -61,9 +89,9 @@ describe("isPhase2RevisionRequired", () => {
 		},
 	];
 
-	it("returns false when phase 2 was not required to start with", () => {
+	it("returns false when compliance process was not required to start with", () => {
 		expect(
-			isPhase2RevisionRequired({
+			isComplianceProcessRevisionRequired({
 				workforce: 80,
 				hasIndicatorG: true,
 				gap: 10,
@@ -75,7 +103,7 @@ describe("isPhase2RevisionRequired", () => {
 
 	it("returns false when no second_declaration_submit event exists", () => {
 		expect(
-			isPhase2RevisionRequired({
+			isComplianceProcessRevisionRequired({
 				workforce: 300,
 				hasIndicatorG: true,
 				gap: 10,
@@ -87,7 +115,7 @@ describe("isPhase2RevisionRequired", () => {
 
 	it("returns false when correctionGap is null", () => {
 		expect(
-			isPhase2RevisionRequired({
+			isComplianceProcessRevisionRequired({
 				workforce: 300,
 				hasIndicatorG: true,
 				gap: 10,
@@ -99,7 +127,7 @@ describe("isPhase2RevisionRequired", () => {
 
 	it("returns false when correctionGap is below 5%", () => {
 		expect(
-			isPhase2RevisionRequired({
+			isComplianceProcessRevisionRequired({
 				workforce: 300,
 				hasIndicatorG: true,
 				gap: 10,
@@ -109,9 +137,9 @@ describe("isPhase2RevisionRequired", () => {
 		).toBe(false);
 	});
 
-	it("returns true when phase 2 + second decl + gap persists", () => {
+	it("returns true when compliance process + second decl + gap persists", () => {
 		expect(
-			isPhase2RevisionRequired({
+			isComplianceProcessRevisionRequired({
 				workforce: 300,
 				hasIndicatorG: true,
 				gap: 10,

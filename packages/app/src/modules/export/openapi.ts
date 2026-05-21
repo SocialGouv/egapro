@@ -220,15 +220,15 @@ const declarationSchema = {
 			description:
 				"Parcours après la seconde déclaration (justify, corrective_action, joint_evaluation)",
 		},
-		Phase_2_requise: {
+		Parcours_de_conformite_requis: {
 			type: "boolean",
 			description:
-				"Indique si la phase 2 (parcours après déclaration 1) est requise.",
+				"Indique si le parcours de conformité (mesures correctives après déclaration 1) est requis.",
 		},
-		Phase_2_revision_requise: {
+		Parcours_de_conformite_revision_requis: {
 			type: "boolean",
 			description:
-				"Indique si une révision du parcours phase 2 est requise après la seconde déclaration.",
+				"Indique si une révision du parcours de conformité est requise après la seconde déclaration.",
 		},
 		Avis_CSE_requis: {
 			type: "boolean",

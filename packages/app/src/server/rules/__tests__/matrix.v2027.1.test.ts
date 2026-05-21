@@ -38,7 +38,7 @@ function base(currentState: string, overrides: Partial<Facts> = {}): Facts {
 const MATRIX: Case[] = [
 	{
 		label:
-			"submit_to_compliance_path_choice: phase2Required (gap>=5, ind G, workforce>=100)",
+			"submit_to_compliance_path_choice: complianceProcessRequired (gap>=5, ind G, workforce>=100)",
 		from: "draft",
 		action: "submit",
 		facts: base("draft", {
@@ -51,7 +51,8 @@ const MATRIX: Case[] = [
 		expectedEvents: [{ type: "submit" }],
 	},
 	{
-		label: "submit_to_cse_opinion_directly: no phase2, but cseRequired",
+		label:
+			"submit_to_cse_opinion_directly: no compliance process, but cseRequired",
 		from: "draft",
 		action: "submit",
 		facts: base("draft", {
@@ -64,7 +65,8 @@ const MATRIX: Case[] = [
 		expectedEvents: [{ type: "submit" }],
 	},
 	{
-		label: "submit_to_demarche_completed_directly: no phase2, no cse",
+		label:
+			"submit_to_demarche_completed_directly: no compliance process, no cse",
 		from: "draft",
 		action: "submit",
 		facts: base("draft", {

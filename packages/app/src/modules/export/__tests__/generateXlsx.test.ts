@@ -26,8 +26,8 @@ function makeRow(overrides: Partial<ExportRow> = {}): ExportRow {
 		jointEvaluationSubmittedAt: null,
 		cseOpinionCompletedAt: null,
 		demarcheCompletedAt: null,
-		phase2Required: false,
-		phase2RevisionRequired: false,
+		complianceProcessRequired: false,
+		complianceProcessRevisionRequired: false,
 		cseRequired: false,
 		indicatorGRequired: false,
 		rulesVersion: "2027.1",
@@ -154,6 +154,22 @@ describe("generateXlsx", () => {
 		for (const col of DECLARATION_COLUMNS) {
 			expect(headers).toContain(col.header);
 		}
+	});
+
+	it("should expose Parcours_de_conformite_* headers and not legacy Phase_2_* headers", async () => {
+		const buffer = await generateXlsx([makeRow()], []);
+
+		const workbook = new ExcelJS.Workbook();
+		await workbook.xlsx.load(buffer as never);
+
+		const sheet = workbook.getWorksheet("Déclarations");
+		const headerRow = sheet?.getRow(1);
+		const headers = headerRow?.values as string[];
+
+		expect(headers).toContain("Parcours_de_conformite_requis");
+		expect(headers).toContain("Parcours_de_conformite_revision_requis");
+		expect(headers).not.toContain("Phase_2_requise");
+		expect(headers).not.toContain("Phase_2_revision_requise");
 	});
 
 	it("should have correct headers in Indicateur G sheet", async () => {
