@@ -15,8 +15,8 @@ export const mailRouter = createTRPCRouter({
 				});
 			}
 
-			const { sendReceipt } = await import("~/modules/mail/server");
-			await sendReceipt({
+			const { enqueueReceipt } = await import("~/modules/mail/server");
+			await enqueueReceipt({
 				kind: input.kind,
 				to: email,
 				siren: ctx.siren,
