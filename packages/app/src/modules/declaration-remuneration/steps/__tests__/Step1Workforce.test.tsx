@@ -358,6 +358,97 @@ describe("Step1Workforce", () => {
 		).toBeInTheDocument();
 	});
 
+	describe("confirmation modal", () => {
+		beforeEach(() => {
+			HTMLDialogElement.prototype.showModal = vi
+				.fn()
+				.mockImplementation(function (this: HTMLDialogElement) {
+					this.setAttribute("open", "");
+				});
+			HTMLDialogElement.prototype.close = vi.fn().mockImplementation(function (
+				this: HTMLDialogElement,
+			) {
+				this.removeAttribute("open");
+			});
+		});
+
+		it("shows modal on submit when saved values are changed", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Workforce
+					declarationSiren="123456789"
+					declarationYear={2026}
+					initialData={{ totalWomen: 50, totalMen: 100 }}
+				/>,
+			);
+
+			await user.clear(screen.getByLabelText("Nombre de femmes"));
+			await user.type(screen.getByLabelText("Nombre de femmes"), "49");
+			await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+			expect(mockMutate).not.toHaveBeenCalled();
+			expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
+		});
+
+		it("calls mutation after confirming", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Workforce
+					declarationSiren="123456789"
+					declarationYear={2026}
+					initialData={{ totalWomen: 50, totalMen: 100 }}
+				/>,
+			);
+
+			await user.clear(screen.getByLabelText("Nombre de femmes"));
+			await user.type(screen.getByLabelText("Nombre de femmes"), "49");
+			await user.click(screen.getByRole("button", { name: /suivant/i }));
+			await user.click(screen.getByRole("button", { name: /continuer/i }));
+
+			expect(mockMutate).toHaveBeenCalledWith({
+				totalWomen: 49,
+				totalMen: 100,
+			});
+		});
+
+		it("does not call mutation when cancelling", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Workforce
+					declarationSiren="123456789"
+					declarationYear={2026}
+					initialData={{ totalWomen: 50, totalMen: 100 }}
+				/>,
+			);
+
+			await user.clear(screen.getByLabelText("Nombre de femmes"));
+			await user.type(screen.getByLabelText("Nombre de femmes"), "49");
+			await user.click(screen.getByRole("button", { name: /suivant/i }));
+			await user.click(screen.getByRole("button", { name: /annuler/i }));
+
+			expect(mockMutate).not.toHaveBeenCalled();
+		});
+
+		it("does not show modal when values match initial data", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Workforce
+					declarationSiren="123456789"
+					declarationYear={2026}
+					initialData={{ totalWomen: 50, totalMen: 100 }}
+				/>,
+			);
+
+			await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+			expect(HTMLDialogElement.prototype.showModal).not.toHaveBeenCalled();
+			expect(mockMutate).toHaveBeenCalledWith({
+				totalWomen: 50,
+				totalMen: 100,
+			});
+		});
+	});
+
 	it("does not show the reset warning when no GIP data is provided", async () => {
 		const user = userEvent.setup();
 		render(
