@@ -220,11 +220,11 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		expect(aToEColumns).toHaveLength(18);
 	});
 
-	it("annotates all indicator F columns (24 columns)", () => {
+	it("annotates all indicator F columns (22 columns)", () => {
 		const fColumns = Object.keys(declarationComments ?? {}).filter((k) =>
 			k.startsWith("indicator_f_"),
 		);
-		expect(fColumns).toHaveLength(24);
+		expect(fColumns).toHaveLength(22);
 	});
 
 	it("uses the strict format 'GIP-MDS | SUIT: <label>' for every indicator A–F comment", () => {

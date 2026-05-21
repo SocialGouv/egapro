@@ -25,6 +25,7 @@ export default async function StepPage({ params }: StepPageProps) {
 
 	const data = await api.declaration.getOrCreate();
 	const d = data.declaration;
+	const company = await api.company.get({ siren: d.siren });
 
 	if (d.status !== "draft" && step !== 6) {
 		const { decl1ModificationDeadline } = await getCampaignDeadlines(d.year);
@@ -80,6 +81,7 @@ export default async function StepPage({ params }: StepPageProps) {
 			<StepPageClient
 				declaration={d}
 				gipPrefillData={data.gipPrefillData ?? undefined}
+				hasCse={company.hasCse}
 				initialSource={initialSource}
 				step={step}
 				step1Data={step1Data}

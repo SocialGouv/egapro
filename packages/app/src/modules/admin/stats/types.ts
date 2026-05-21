@@ -16,6 +16,13 @@ export type CampaignProgressionSeries = {
 	points: CampaignProgressionPoint[];
 };
 
+export type CampaignStats = {
+	totalObligated: number;
+	totalSubmitted: number;
+	submissionRate: number;
+	previousYearRate: number | null;
+};
+
 /**
  * One row of the K4 « délai moyen par étape » dataset.
  *

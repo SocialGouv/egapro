@@ -10,6 +10,8 @@ export {
 	isDeadlinePassed,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
+// Company obligation
+export { isObligatedForYear } from "./shared/companyObligation";
 // Company size
 export {
 	COMPANY_SIZE_RANGES,
@@ -31,15 +33,15 @@ export {
 // Declaration display context
 export type { DeclarationDisplayContext } from "./shared/declarationDisplay";
 export { getDeclarationDisplayContext } from "./shared/declarationDisplay";
-// Declaration derived flags (phase 2, revision, indicator G)
+// Declaration derived flags (compliance process, revision, indicator G)
 export type {
+	ComplianceProcessRequiredInput,
+	ComplianceProcessRevisionRequiredInput,
 	DeclarationForFlags,
-	Phase2RequiredInput,
-	Phase2RevisionRequiredInput,
 } from "./shared/declarationFlags";
 export {
-	isPhase2Required,
-	isPhase2RevisionRequired,
+	isComplianceProcessRequired,
+	isComplianceProcessRevisionRequired,
 } from "./shared/declarationFlags";
 // Declaration prerequisites
 export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";

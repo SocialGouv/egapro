@@ -2,23 +2,29 @@ import { and, between, eq, gte, inArray, type SQL, sql } from "drizzle-orm";
 
 import {
 	getCampaignProgressionSchema,
+	getCampaignStatsSchema,
 	getCompletionFunnelSchema,
 	getStepDurationsSchema,
 } from "~/modules/admin/stats/schemas";
 import type {
 	CampaignProgressionPoint,
 	CampaignProgressionSeries,
+	CampaignStats,
 	CompletionFunnelOutput,
 	FunnelRow,
 	StepDurationRow,
 } from "~/modules/admin/stats/types";
 import {
+	COMPANY_SIZE_ANNUAL_MIN,
 	COMPANY_SIZE_RANGES,
+	COMPANY_SIZE_VOLUNTARY_MAX,
+	type CompanySizeRange,
 	DECLARATION_STEPS,
 	FUNNEL_COMPLIANCE_KEY_STEPS,
 	FUNNEL_MAIN_KEY_STEPS,
 	FUNNEL_REVISION_KEY_STEPS,
 	getStepLabel,
+	isTriennialYear,
 	POST_SUBMIT_MILESTONES,
 	type PostSubmitMilestoneKey,
 } from "~/modules/domain";
@@ -27,6 +33,7 @@ import {
 	companies,
 	declarationStatusHistory,
 	declarations,
+	gipMdsData,
 } from "~/server/db/schema";
 
 /** Minimum number of completed transitions before showing a median / p90. */
@@ -62,6 +69,39 @@ function buildSeries(rows: AggregatedRow[]): CampaignProgressionSeries[] {
 	return Array.from(byYear.entries())
 		.sort(([a], [b]) => a - b)
 		.map(([year, points]) => ({ year, points }));
+}
+
+// Mirrors `isObligatedForYear` (domain) as a SQL predicate so the workforce
+// bracket is enforced server-side and stays symmetric between numerator and denominator.
+function obligationWorkforceFilter(
+	year: number,
+	sizeRange: CompanySizeRange | undefined,
+): SQL {
+	const ema = sql<number>`floor(${gipMdsData.workforceEma})`;
+	const triennialActive = isTriennialYear(year);
+	const triennialClause = triennialActive
+		? sql`${ema} >= ${COMPANY_SIZE_VOLUNTARY_MAX} AND ${ema} < ${COMPANY_SIZE_ANNUAL_MIN}`
+		: sql`false`;
+	const annualClause = sql`${ema} >= ${COMPANY_SIZE_ANNUAL_MIN}`;
+	const baseObligation = sql`((${triennialClause}) OR (${annualClause}))`;
+
+	if (!sizeRange) return baseObligation;
+
+	const { min, max } = COMPANY_SIZE_RANGES[sizeRange];
+	const bucket =
+		max === null
+			? sql`${ema} >= ${min}`
+			: sql`${ema} BETWEEN ${min} AND ${max}`;
+	return sql`(${bucket}) AND ${baseObligation}`;
+}
+
+function roundOneDecimal(value: number): number {
+	return Math.round(value * 10) / 10;
+}
+
+function computeRate(submitted: number, obligated: number): number {
+	if (obligated === 0) return 0;
+	return roundOneDecimal((submitted / obligated) * 100);
 }
 
 type AggregatedMilestone = {
@@ -151,6 +191,72 @@ export const adminStatsRouter = createTRPCRouter({
 				.orderBy(declarations.year, dayExpr);
 
 			return buildSeries(rows as AggregatedRow[]);
+		}),
+
+	getCampaignStats: adminProcedure
+		.input(getCampaignStatsSchema)
+		.query(async ({ ctx, input }): Promise<CampaignStats> => {
+			const previousYear = input.year - 1;
+
+			const obligatedQuery = (year: number) =>
+				ctx.db
+					.select({ value: sql<number>`count(*)::int` })
+					.from(gipMdsData)
+					.where(
+						and(
+							eq(gipMdsData.year, year),
+							obligationWorkforceFilter(year, input.sizeRange),
+						),
+					);
+
+			const submittedQuery = (year: number) =>
+				ctx.db
+					.select({ value: sql<number>`count(*)::int` })
+					.from(declarations)
+					.innerJoin(
+						gipMdsData,
+						and(
+							eq(declarations.siren, gipMdsData.siren),
+							eq(declarations.year, gipMdsData.year),
+						) as SQL,
+					)
+					.where(
+						and(
+							eq(declarations.year, year),
+							eq(declarations.status, "demarche_completed"),
+							obligationWorkforceFilter(year, input.sizeRange),
+						),
+					);
+
+			const [
+				obligatedRows,
+				submittedRows,
+				previousObligatedRows,
+				previousSubmittedRows,
+			] = await Promise.all([
+				obligatedQuery(input.year),
+				submittedQuery(input.year),
+				obligatedQuery(previousYear),
+				submittedQuery(previousYear),
+			]);
+
+			const totalObligated = obligatedRows[0]?.value ?? 0;
+			const totalSubmitted = submittedRows[0]?.value ?? 0;
+			const previousObligated = previousObligatedRows[0]?.value ?? 0;
+			const previousSubmitted = previousSubmittedRows[0]?.value ?? 0;
+
+			const submissionRate = computeRate(totalSubmitted, totalObligated);
+			const previousYearRate =
+				previousObligated === 0
+					? null
+					: computeRate(previousSubmitted, previousObligated);
+
+			return {
+				totalObligated,
+				totalSubmitted,
+				submissionRate,
+				previousYearRate,
+			};
 		}),
 
 	/**

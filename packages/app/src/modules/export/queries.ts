@@ -22,6 +22,13 @@ import type { IndicatorGRow } from "./types";
 const toDate = (value: unknown): Date | null =>
 	value == null ? null : new Date(value as string | number | Date);
 
+export type RawHistoryEntry = {
+	eventType: string;
+	value: string | null;
+	round: number | null;
+	createdAt: string;
+};
+
 function latestEventAt(eventType: string) {
 	return sql<Date | null>`(
 		SELECT MAX(${declarationStatusHistory.createdAt})
@@ -41,6 +48,30 @@ function latestPathChoiceAt(round: 1 | 2) {
 	)`.mapWith(toDate);
 }
 
+function statusHistoryArray() {
+	return sql<RawHistoryEntry[]>`(
+		SELECT COALESCE(
+			json_agg(
+				json_build_object(
+					'eventType', ${declarationStatusHistory.eventType},
+					'value', ${declarationStatusHistory.value},
+					'round', ${declarationStatusHistory.round},
+					'createdAt', to_char(
+						${declarationStatusHistory.createdAt} AT TIME ZONE 'UTC',
+						'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'
+					)
+				)
+				ORDER BY ${declarationStatusHistory.createdAt} ASC
+			),
+			'[]'::json
+		)
+		FROM ${declarationStatusHistory}
+		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
+	)`.mapWith((value: unknown) =>
+		Array.isArray(value) ? (value as RawHistoryEntry[]) : [],
+	);
+}
+
 export const statusHistoryProjection = {
 	submittedAt: latestEventAt("submit"),
 	firstDeclarationPathChoiceAt: latestPathChoiceAt(1),
@@ -49,6 +80,7 @@ export const statusHistoryProjection = {
 	jointEvaluationSubmittedAt: latestEventAt("joint_evaluation_submit"),
 	cseOpinionCompletedAt: latestEventAt("cse_opinion_submit"),
 	demarcheCompletedAt: latestEventAt("demarche_complete"),
+	statusHistoryArray: statusHistoryArray(),
 };
 
 // ── Shared select columns for indicators A–F ───────────────────────
