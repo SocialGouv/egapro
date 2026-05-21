@@ -99,6 +99,12 @@ const nullIndicators = {
 	hourlyQuartile2ProportionMen: null,
 	hourlyQuartile3ProportionMen: null,
 	hourlyQuartile4ProportionMen: null,
+	statusHistoryArray: [] as Array<{
+		eventType: string;
+		value: string | null;
+		round: number | null;
+		createdAt: string;
+	}>,
 };
 
 describe("GET /api/v1/export/declarations", () => {
@@ -217,8 +223,8 @@ describe("GET /api/v1/export/declarations", () => {
 				jointEvaluationSubmittedAt: null,
 				cseOpinionCompletedAt: null,
 				demarcheCompletedAt: null,
-				phase2Required: false,
-				phase2RevisionRequired: false,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
 				cseRequired: false,
 				indicatorGRequired: false,
 				rulesVersion: "2027.1",
@@ -253,8 +259,8 @@ describe("GET /api/v1/export/declarations", () => {
 				jointEvaluationSubmittedAt: null,
 				cseOpinionCompletedAt: null,
 				demarcheCompletedAt: null,
-				phase2Required: false,
-				phase2RevisionRequired: false,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
 				cseRequired: false,
 				indicatorGRequired: false,
 				rulesVersion: "2027.1",
@@ -307,8 +313,8 @@ describe("GET /api/v1/export/declarations", () => {
 				jointEvaluationSubmittedAt: null,
 				cseOpinionCompletedAt: null,
 				demarcheCompletedAt: null,
-				phase2Required: false,
-				phase2RevisionRequired: false,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
 				cseRequired: false,
 				indicatorGRequired: false,
 				rulesVersion: "2027.1",
@@ -379,8 +385,8 @@ describe("GET /api/v1/export/declarations", () => {
 				jointEvaluationSubmittedAt: null,
 				cseOpinionCompletedAt: null,
 				demarcheCompletedAt: null,
-				phase2Required: false,
-				phase2RevisionRequired: false,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
 				cseRequired: false,
 				indicatorGRequired: false,
 				rulesVersion: "2027.1",
@@ -481,8 +487,8 @@ describe("GET /api/v1/export/declarations", () => {
 				jointEvaluationSubmittedAt: null,
 				cseOpinionCompletedAt: null,
 				demarcheCompletedAt: null,
-				phase2Required: false,
-				phase2RevisionRequired: false,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
 				cseRequired: false,
 				indicatorGRequired: false,
 				rulesVersion: "2027.1",
@@ -560,8 +566,8 @@ describe("GET /api/v1/export/declarations", () => {
 				jointEvaluationSubmittedAt: null,
 				cseOpinionCompletedAt: null,
 				demarcheCompletedAt: null,
-				phase2Required: false,
-				phase2RevisionRequired: false,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
 				cseRequired: false,
 				indicatorGRequired: false,
 				rulesVersion: "2027.1",
@@ -627,8 +633,8 @@ describe("GET /api/v1/export/declarations", () => {
 				jointEvaluationSubmittedAt: null,
 				cseOpinionCompletedAt: null,
 				demarcheCompletedAt: null,
-				phase2Required: false,
-				phase2RevisionRequired: false,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
 				cseRequired: false,
 				indicatorGRequired: false,
 				rulesVersion: "2027.1",
@@ -704,8 +710,8 @@ describe("GET /api/v1/export/declarations", () => {
 				jointEvaluationSubmittedAt: null,
 				cseOpinionCompletedAt: null,
 				demarcheCompletedAt: null,
-				phase2Required: false,
-				phase2RevisionRequired: false,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
 				cseRequired: false,
 				indicatorGRequired: false,
 				rulesVersion: "2027.1",
@@ -765,8 +771,8 @@ describe("GET /api/v1/export/declarations", () => {
 				jointEvaluationSubmittedAt: null,
 				cseOpinionCompletedAt: null,
 				demarcheCompletedAt: null,
-				phase2Required: false,
-				phase2RevisionRequired: false,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
 				cseRequired: false,
 				indicatorGRequired: false,
 				rulesVersion: "2027.1",
@@ -833,8 +839,8 @@ describe("GET /api/v1/export/declarations", () => {
 				jointEvaluationSubmittedAt: null,
 				cseOpinionCompletedAt: null,
 				demarcheCompletedAt: null,
-				phase2Required: false,
-				phase2RevisionRequired: false,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
 				cseRequired: false,
 				indicatorGRequired: false,
 				rulesVersion: "2027.1",
@@ -890,8 +896,8 @@ describe("GET /api/v1/export/declarations", () => {
 				jointEvaluationSubmittedAt: null,
 				cseOpinionCompletedAt: null,
 				demarcheCompletedAt: null,
-				phase2Required: false,
-				phase2RevisionRequired: false,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
 				cseRequired: false,
 				indicatorGRequired: false,
 				rulesVersion: "2027.1",
@@ -1040,8 +1046,10 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl).not.toHaveProperty("Parcours_conformite");
 		expect(decl.Parcours_apres_declaration_1).toBe("corrective_action");
 		expect(decl.Parcours_apres_declaration_2).toBe("joint_evaluation");
-		expect(decl.Phase_2_requise).toBe(true);
-		expect(decl.Phase_2_revision_requise).toBe(true);
+		expect(decl.Parcours_de_conformite_requis).toBe(true);
+		expect(decl.Parcours_de_conformite_revision_requis).toBe(true);
+		expect(decl).not.toHaveProperty("Phase_2_requise");
+		expect(decl).not.toHaveProperty("Phase_2_revision_requise");
 		expect(decl.Avis_CSE_requis).toBe(true);
 		expect(decl.Indicateur_G_requis).toBe(true);
 		expect(decl.Version_regles).toBe("2027.1");
@@ -1057,6 +1065,84 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.Date_avis_CSE).toBe("2027-10-01T13:00:00.000Z");
 		expect(decl.Date_fin_demarche).toBe("2027-10-15T14:00:00.000Z");
 		expect(decl.Seconde_declaration.Statut).toBe(true);
+	});
+
+	it("should include Historique_statuts with FR labels and Numero_declaration on path_choice entries", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "submitted",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: null,
+				totalWomen: 100,
+				totalMen: 150,
+				submittedAt: new Date("2027-03-15T10:00:00Z"),
+				firstDeclarationPathChoiceAt: new Date("2027-04-01T10:00:00Z"),
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				phase2Required: false,
+				phase2RevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-04-01T10:00:00Z"),
+				companyName: "ACME Corp",
+				workforce: 250,
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: false,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+				statusHistoryArray: [
+					{
+						eventType: "submit",
+						value: null,
+						round: null,
+						createdAt: "2027-03-15T10:00:00.000Z",
+					},
+					{
+						eventType: "path_choice",
+						value: "corrective_action",
+						round: 1,
+						createdAt: "2027-04-01T10:00:00.000Z",
+					},
+				],
+			},
+		]);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		const decl = body.Declarations[0];
+		expect(decl.Historique_statuts).toEqual([
+			{
+				Statut: "submit",
+				Libelle_statut: "Soumission de la déclaration",
+				Date: "2027-03-15T10:00:00.000Z",
+			},
+			{
+				Statut: "path_choice",
+				Libelle_statut: "Choix du parcours — Actions correctives",
+				Date: "2027-04-01T10:00:00.000Z",
+				Numero_declaration: 1,
+			},
+		]);
 	});
 
 	it("should expose Seconde_declaration.Statut=false when secondDeclarationSubmittedAt is null", async () => {
@@ -1077,8 +1163,8 @@ describe("GET /api/v1/export/declarations", () => {
 				jointEvaluationSubmittedAt: null,
 				cseOpinionCompletedAt: null,
 				demarcheCompletedAt: null,
-				phase2Required: false,
-				phase2RevisionRequired: false,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
 				cseRequired: false,
 				indicatorGRequired: false,
 				rulesVersion: "2027.1",

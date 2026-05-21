@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const progressionUseQueryMock = vi.fn();
 const statsUseQueryMock = vi.fn();
+const stepDurationsUseQueryMock = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -13,6 +14,9 @@ vi.mock("~/trpc/react", () => ({
 			},
 			getCampaignStats: {
 				useQuery: (...args: unknown[]) => statsUseQueryMock(...args),
+			},
+			getStepDurations: {
+				useQuery: (...args: unknown[]) => stepDurationsUseQueryMock(...args),
 			},
 		},
 	},
@@ -26,12 +30,21 @@ vi.mock("../CampaignProgressionTable", () => ({
 	CampaignProgressionTable: () => <div data-testid="progression-table" />,
 }));
 
+vi.mock("../StepDurationsChart", () => ({
+	StepDurationsChart: () => <div data-testid="step-durations-chart" />,
+}));
+
+vi.mock("../StepDurationsTable", () => ({
+	StepDurationsTable: () => <div data-testid="step-durations-table" />,
+}));
+
 import { CampaignStatsPage } from "../CampaignStatsPage";
 
 describe("CampaignStatsPage — K1 integration", () => {
 	beforeEach(() => {
 		progressionUseQueryMock.mockReset();
 		statsUseQueryMock.mockReset();
+		stepDurationsUseQueryMock.mockReset();
 		progressionUseQueryMock.mockReturnValue({
 			data: [],
 			isLoading: false,
@@ -44,6 +57,11 @@ describe("CampaignStatsPage — K1 integration", () => {
 				submissionRate: 50,
 				previousYearRate: 45,
 			},
+			isLoading: false,
+			isError: false,
+		});
+		stepDurationsUseQueryMock.mockReturnValue({
+			data: [],
 			isLoading: false,
 			isError: false,
 		});

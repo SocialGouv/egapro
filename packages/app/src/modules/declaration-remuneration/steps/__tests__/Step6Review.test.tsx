@@ -416,6 +416,27 @@ describe("Step6Review", () => {
 		);
 	});
 
+	it("routes next link to /avis-cse when status is awaiting_cse_opinion", () => {
+		render(
+			<Step6Review
+				declaration={{
+					...emptyDeclaration(),
+					status: "awaiting_cse_opinion",
+				}}
+				declarationYear={2025}
+				hasCse={true}
+				isSubmitted
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			"/avis-cse",
+		);
+	});
+
 	it("renders previous link to step 5 and next link to compliance path when already submitted", () => {
 		render(
 			<Step6Review
