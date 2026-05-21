@@ -109,6 +109,7 @@ export function Step5EmployeeCategories({
 			accordionId="accordion-step5"
 			defaultValuesOverride={categoryFormDefaultOverride}
 			disabled={isImpersonating}
+			hasDataOverride={hasInitialData || hasDraft}
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
 			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
@@ -130,9 +131,6 @@ export function Step5EmployeeCategories({
 			onValuesChange={(values) => setField(values)}
 			previousHref="/declaration-remuneration/etape/4"
 			referenceYear={declarationYear - 1}
-			savedOverride={
-				(hasInitialData || hasDraft) && !isPendingSave && !isSaving
-			}
 			stepper={<StepIndicator currentStep={5} />}
 			submitError={mutation.error?.message}
 			title={

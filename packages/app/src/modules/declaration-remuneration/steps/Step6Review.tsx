@@ -145,7 +145,7 @@ export function Step6Review({
 					</h1>
 				</div>
 				<div className="fr-col-auto">
-					<SavedIndicator />
+					<SavedIndicator hasData={true} />
 				</div>
 			</div>
 

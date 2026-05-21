@@ -51,14 +51,21 @@ export function CompliancePathChoice({
 
 	const dbValues = useMemo(() => ({ path: initialPath }), [initialPath]);
 
-	const { draft, setField, clearDraft, hasDraft, isLoadingDraft } =
-		useDeclarationDraft({
-			siren: declarationSiren,
-			year: declarationYear,
-			step: "compliance",
-			kind: "compliance",
-			dbValues,
-		});
+	const {
+		draft,
+		setField,
+		clearDraft,
+		hasDraft,
+		isLoadingDraft,
+		isSaving,
+		isPendingSave,
+	} = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: "compliance",
+		kind: "compliance",
+		dbValues,
+	});
 
 	const form = useZodForm(saveCompliancePathSchema, {
 		defaultValues: { path: initialPath },
@@ -76,7 +83,7 @@ export function CompliancePathChoice({
 
 	const selectedPath = form.watch("path");
 	const hasInitialData = !!initialPath;
-	const saved = !hasDraft && hasInitialData;
+	const hasData = hasInitialData || hasDraft;
 
 	const mutation = api.declaration.saveCompliancePath.useMutation({
 		onSuccess: (_, { path }) => {
@@ -106,7 +113,11 @@ export function CompliancePathChoice({
 				<h1 className="fr-h4 fr-mb-0">
 					Déclaration des indicateurs de rémunération {currentYear}
 				</h1>
-				{saved && <SavedIndicator />}
+				<SavedIndicator
+					hasData={hasData}
+					isPendingSave={isPendingSave}
+					isSaving={isSaving}
+				/>
 			</div>
 
 			<DeclarationSuccessBanner

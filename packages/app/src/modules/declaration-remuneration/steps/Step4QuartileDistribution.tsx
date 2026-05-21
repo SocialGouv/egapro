@@ -143,7 +143,7 @@ export function Step4QuartileDistribution({
 	const hourly = form.watch("hourly");
 
 	const [maxError, setMaxError] = useState<string | null>(null);
-	const saved = (hasSavedData || hasDraft) && !isPendingSave && !isSaving;
+	const hasData = hasSavedData || hasDraft;
 	const [fieldErrors, setFieldErrors] = useState<FieldErrorMap>(emptyErrorMap);
 	const [showRecap, setShowRecap] = useState(false);
 
@@ -254,6 +254,7 @@ export function Step4QuartileDistribution({
 	return (
 		<form className={stepStyles.formColumn} noValidate onSubmit={onSubmit}>
 			<StepTitleRow
+				hasData={hasData}
 				isPendingSave={isPendingSave}
 				isSaving={isSaving}
 				onDevFill={() => {
@@ -272,7 +273,6 @@ export function Step4QuartileDistribution({
 					setFieldErrors(emptyErrorMap());
 					setShowRecap(false);
 				}}
-				saved={saved}
 				title={
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {declarationYear}

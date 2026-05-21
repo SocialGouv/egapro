@@ -5,28 +5,23 @@ import styles from "./SavedIndicator.module.scss";
 type Props = {
 	isSaving?: boolean;
 	isPendingSave?: boolean;
+	hasData: boolean;
 };
 
 export function SavedIndicator({
 	isSaving = false,
 	isPendingSave = false,
+	hasData,
 }: Props) {
+	const isBusy = isSaving || isPendingSave;
 	return (
 		<p
-			aria-busy={isSaving || isPendingSave}
+			aria-busy={isBusy}
 			aria-live="polite"
 			className={`fr-mb-0 fr-text--lg ${styles.indicator}`}
 			role="status"
 		>
-			{isPendingSave ? (
-				<>
-					<span
-						aria-hidden="true"
-						className={`fr-icon-pencil-line ${styles.iconSlot}`}
-					/>
-					Non enregistré
-				</>
-			) : isSaving ? (
+			{isBusy ? (
 				<>
 					<span
 						aria-hidden="true"
@@ -34,7 +29,7 @@ export function SavedIndicator({
 					/>
 					Enregistrement...
 				</>
-			) : (
+			) : hasData ? (
 				<>
 					<span className={styles.iconSlot}>
 						<Image
@@ -46,6 +41,14 @@ export function SavedIndicator({
 						/>
 					</span>
 					Enregistré
+				</>
+			) : (
+				<>
+					<span
+						aria-hidden="true"
+						className={`fr-icon-pencil-line ${styles.iconSlot}`}
+					/>
+					Non enregistré
 				</>
 			)}
 		</p>

@@ -81,7 +81,7 @@ export function Step1Workforce({
 		if (typeof d.totalMen === "number") form.setValue("totalMen", d.totalMen);
 	});
 
-	const saved = (hasInitialData || hasDraft) && !isPendingSave && !isSaving;
+	const hasData = hasInitialData || hasDraft;
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const [showResetWarning, setShowResetWarning] = useState(false);
 
@@ -132,6 +132,7 @@ export function Step1Workforce({
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
+				hasData={hasData}
 				isPendingSave={isPendingSave}
 				isSaving={isSaving}
 				onDevFill={() => {
@@ -141,7 +142,6 @@ export function Step1Workforce({
 					form.setValue("totalMen", menValue);
 					setField({ totalWomen: womenValue, totalMen: menValue });
 				}}
-				saved={saved}
 				title={
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {declarationYear}

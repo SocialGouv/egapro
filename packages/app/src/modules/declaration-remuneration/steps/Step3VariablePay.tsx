@@ -113,7 +113,7 @@ export function Step3VariablePay({
 	const [benefValidationError, setBenefValidationError] = useState<
 		string | null
 	>(null);
-	const saved = (hasSavedData || hasDraft) && !isPendingSave && !isSaving;
+	const hasData = hasSavedData || hasDraft;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const mutation = api.declaration.updateStep3.useMutation({
@@ -172,6 +172,7 @@ export function Step3VariablePay({
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
+				hasData={hasData}
 				isPendingSave={isPendingSave}
 				isSaving={isSaving}
 				onDevFill={() => {
@@ -184,7 +185,6 @@ export function Step3VariablePay({
 					form.setValue("indicatorEWomen", DEV_STEP3_BENEFICIARY_WOMEN);
 					form.setValue("indicatorEMen", DEV_STEP3_BENEFICIARY_MEN);
 				}}
-				saved={saved}
 				title={
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {declarationYear}

@@ -96,7 +96,7 @@ export function Step2PayGap({
 	const formData = form.watch();
 	const rows = step2ToRows(formData as Step2Data);
 
-	const saved = (hasInitialData || hasDraft) && !isPendingSave && !isSaving;
+	const hasData = hasInitialData || hasDraft;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const mutation = api.declaration.updateStep2.useMutation({
@@ -131,6 +131,7 @@ export function Step2PayGap({
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
+				hasData={hasData}
 				isPendingSave={isPendingSave}
 				isSaving={isSaving}
 				onDevFill={() => {
@@ -141,7 +142,6 @@ export function Step2PayGap({
 						form.setValue(menField, padDecimalToTwo(row.menValue));
 					});
 				}}
-				saved={saved}
 				title={
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {declarationYear}
