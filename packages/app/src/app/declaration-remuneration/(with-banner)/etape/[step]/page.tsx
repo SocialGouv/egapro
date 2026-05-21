@@ -48,6 +48,15 @@ export default async function StepPage({ params }: StepPageProps) {
 		totalMen: d.totalMen ?? gip?.step1.totalMen ?? 0,
 	};
 
+	// When step1 has been saved with values different from GIP, the GIP indicators
+	// for steps 2–4 are no longer valid (updateStep1 already reset them in the DB).
+	const gipMatchesSavedStep1 =
+		gip === null ||
+		d.totalWomen === null ||
+		(d.totalWomen === (gip.step1.totalWomen ?? 0) &&
+			d.totalMen === (gip.step1.totalMen ?? 0));
+	const effectiveGipPrefillData = gipMatchesSavedStep1 ? gip : null;
+
 	const { step2Data, step3Data, step4Data } = mapToStepData(d);
 
 	const hasCurrentYearCategories = data.jobCategories.length > 0;
@@ -80,7 +89,7 @@ export default async function StepPage({ params }: StepPageProps) {
 		<HydrateClient>
 			<StepPageClient
 				declaration={d}
-				gipPrefillData={data.gipPrefillData ?? undefined}
+				gipPrefillData={effectiveGipPrefillData ?? undefined}
 				hasCse={company.hasCse}
 				initialSource={initialSource}
 				step={step}

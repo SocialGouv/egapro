@@ -117,7 +117,10 @@ export function Step1Workforce({
 		setWomenRaw(raw);
 		setWomenError(null);
 		const value = parseIntegerInput(raw);
-		if (value === null) return;
+		if (value === null) {
+			if (isPrefilled && raw === "") setShowResetWarning(true);
+			return;
+		}
 		form.setValue("totalWomen", value);
 		setField({ totalWomen: value, totalMen });
 
@@ -131,7 +134,10 @@ export function Step1Workforce({
 		setMenRaw(raw);
 		setMenError(null);
 		const value = parseIntegerInput(raw);
-		if (value === null) return;
+		if (value === null) {
+			if (isPrefilled && raw === "") setShowResetWarning(true);
+			return;
+		}
 		form.setValue("totalMen", value);
 		setField({ totalWomen, totalMen: value });
 

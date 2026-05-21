@@ -302,6 +302,62 @@ describe("Step1Workforce", () => {
 		).toBeInTheDocument();
 	});
 
+	it("shows reset warning when GIP prefilled field is cleared to empty", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				gipPrefillData={{
+					step1: { totalWomen: 50, totalMen: 100 },
+					step2: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+					},
+					step3: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+						beneficiaryCountWomen: null,
+						beneficiaryCountMen: null,
+					},
+					step4: {
+						annual: {
+							thresholds: [null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+						hourly: {
+							thresholds: [null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+					},
+					confidenceIndex: null,
+					periodEnd: null,
+				}}
+				initialData={{ totalWomen: 50, totalMen: 100 }}
+			/>,
+		);
+
+		await user.clear(screen.getByLabelText("Nombre de femmes"));
+
+		expect(
+			screen.getByText(/réinitialise les indicateurs préremplis/),
+		).toBeInTheDocument();
+	});
+
 	it("does not show the reset warning when no GIP data is provided", async () => {
 		const user = userEvent.setup();
 		render(
