@@ -24,6 +24,7 @@ type UseDeclarationDraftResult<T extends Record<string, unknown>> = {
 	clearDraft: () => void;
 	hasDraft: boolean;
 	isLoadingDraft: boolean;
+	isSaving: boolean;
 };
 
 const DEBOUNCE_MS = 600;
@@ -216,6 +217,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			clearDraft: clearDraftCallback,
 			hasDraft,
 			isLoadingDraft: isSessionLoading || (isEnabled && query.isLoading),
+			isSaving: saveMutation.isPending,
 		}),
 		[
 			draft,
@@ -225,6 +227,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			query.isLoading,
 			isEnabled,
 			isSessionLoading,
+			saveMutation.isPending,
 		],
 	);
 }

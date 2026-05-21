@@ -76,7 +76,7 @@ export function Step3VariablePay({
 	const defaultValues = padStep3(rawDefaults);
 	const dbValues = useMemo(() => padStep3(initialData), [initialData]);
 
-	const { draft, setField, clearDraft, hasDraft, isLoadingDraft } =
+	const { draft, setField, clearDraft, hasDraft, isLoadingDraft, isSaving } =
 		useDeclarationDraft({
 			siren: declarationSiren,
 			year: declarationYear,
@@ -165,6 +165,7 @@ export function Step3VariablePay({
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
+				isSaving={isSaving}
 				onDevFill={() => {
 					DEV_STEP3_ROWS.forEach((row, i) => {
 						const womenField = getStep3FieldName(i, "womenValue");

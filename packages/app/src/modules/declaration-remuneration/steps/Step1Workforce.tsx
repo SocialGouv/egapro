@@ -51,7 +51,7 @@ export function Step1Workforce({
 		[initialData.totalWomen, initialData.totalMen],
 	);
 
-	const { draft, setField, clearDraft, hasDraft, isLoadingDraft } =
+	const { draft, setField, clearDraft, hasDraft, isLoadingDraft, isSaving } =
 		useDeclarationDraft({
 			siren: declarationSiren,
 			year: declarationYear,
@@ -125,6 +125,7 @@ export function Step1Workforce({
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
+				isSaving={isSaving}
 				onDevFill={() => {
 					const womenValue = DEV_STEP1_CATEGORIES[0]?.women ?? 50;
 					const menValue = DEV_STEP1_CATEGORIES[0]?.men ?? 50;

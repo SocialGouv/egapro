@@ -70,7 +70,7 @@ export function Step5EmployeeCategories({
 		[initialCategories, initialSource],
 	);
 
-	const { draft, setField, clearDraft, hasDraft, isLoadingDraft } =
+	const { draft, setField, clearDraft, hasDraft, isLoadingDraft, isSaving } =
 		useDeclarationDraft<Step5FormValues>({
 			siren: declarationSiren,
 			year: declarationYear,
@@ -105,6 +105,7 @@ export function Step5EmployeeCategories({
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
 			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
+			isSavingOverride={isSaving}
 			isSubmitting={mutation.isPending}
 			maxMen={maxMen}
 			maxWomen={maxWomen}

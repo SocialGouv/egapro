@@ -64,7 +64,7 @@ export function Step2PayGap({
 		[initialData],
 	);
 
-	const { draft, setField, clearDraft, hasDraft, isLoadingDraft } =
+	const { draft, setField, clearDraft, hasDraft, isLoadingDraft, isSaving } =
 		useDeclarationDraft({
 			siren: declarationSiren,
 			year: declarationYear,
@@ -124,6 +124,7 @@ export function Step2PayGap({
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
+				isSaving={isSaving}
 				onDevFill={() => {
 					DEV_STEP2_ROWS.forEach((row, i) => {
 						const womenField = getStep2FieldName(i, "womenValue");

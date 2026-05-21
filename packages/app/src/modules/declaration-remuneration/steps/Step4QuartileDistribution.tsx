@@ -104,7 +104,7 @@ export function Step4QuartileDistribution({
 		[hasSavedData, initialData],
 	);
 
-	const { draft, setField, clearDraft, hasDraft, isLoadingDraft } =
+	const { draft, setField, clearDraft, hasDraft, isLoadingDraft, isSaving } =
 		useDeclarationDraft({
 			siren: declarationSiren,
 			year: declarationYear,
@@ -247,6 +247,7 @@ export function Step4QuartileDistribution({
 	return (
 		<form className={stepStyles.formColumn} noValidate onSubmit={onSubmit}>
 			<StepTitleRow
+				isSaving={isSaving}
 				onDevFill={() => {
 					form.setValue(
 						"annual",

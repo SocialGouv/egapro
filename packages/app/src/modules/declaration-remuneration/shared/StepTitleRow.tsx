@@ -7,18 +7,24 @@ type StepTitleRowProps = {
 	title: ReactNode;
 	onDevFill: () => void;
 	saved: boolean;
+	isSaving?: boolean;
 };
 
-export function StepTitleRow({ title, onDevFill, saved }: StepTitleRowProps) {
+export function StepTitleRow({
+	title,
+	onDevFill,
+	saved,
+	isSaving = false,
+}: StepTitleRowProps) {
 	return (
 		<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 			<div className="fr-col">{title}</div>
 			<div className="fr-col-auto">
 				<DevFillButton onFill={onDevFill} />
 			</div>
-			{saved && (
+			{(saved || isSaving) && (
 				<div className="fr-col-auto">
-					<SavedIndicator />
+					<SavedIndicator isSaving={isSaving} />
 				</div>
 			)}
 		</div>

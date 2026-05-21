@@ -77,6 +77,7 @@ type Props = {
 	disabled?: boolean;
 	mimoquageNextHref?: string;
 	savedOverride?: boolean;
+	isSavingOverride?: boolean;
 	onValuesChange?: (values: {
 		source: string;
 		categories: {
@@ -132,6 +133,7 @@ export function CategoryForm({
 	disabled = false,
 	mimoquageNextHref,
 	savedOverride,
+	isSavingOverride = false,
 	onValuesChange,
 	defaultValuesOverride,
 }: Props) {
@@ -318,6 +320,7 @@ export function CategoryForm({
 	return (
 		<form className={stepStyles.form} onSubmit={handleFormSubmit}>
 			<StepTitleRow
+				isSaving={isSavingOverride}
 				onDevFill={() => {
 					if (maxWomen == null || maxMen == null) return;
 					const devCats = createDevStep5Categories(nextId, maxWomen, maxMen);

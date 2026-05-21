@@ -12,6 +12,7 @@ vi.mock(
 			clearDraft: () => undefined,
 			hasDraft: false,
 			isLoadingDraft: true,
+			isSaving: false,
 		})),
 	}),
 );
@@ -59,6 +60,7 @@ const loadingDraftResult = {
 	clearDraft: () => undefined,
 	hasDraft: false,
 	isLoadingDraft: true,
+	isSaving: false,
 };
 
 function mockLoadingDraft() {
