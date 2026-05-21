@@ -13,6 +13,7 @@ vi.mock(
 			hasDraft: false,
 			isLoadingDraft: true,
 			isSaving: false,
+			isPendingSave: false,
 		})),
 	}),
 );
@@ -61,6 +62,7 @@ const loadingDraftResult = {
 	hasDraft: false,
 	isLoadingDraft: true,
 	isSaving: false,
+	isPendingSave: false,
 };
 
 function mockLoadingDraft() {

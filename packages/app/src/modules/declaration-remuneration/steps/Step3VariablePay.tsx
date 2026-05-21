@@ -76,14 +76,21 @@ export function Step3VariablePay({
 	const defaultValues = padStep3(rawDefaults);
 	const dbValues = useMemo(() => padStep3(initialData), [initialData]);
 
-	const { draft, setField, clearDraft, hasDraft, isLoadingDraft, isSaving } =
-		useDeclarationDraft({
-			siren: declarationSiren,
-			year: declarationYear,
-			step: 3,
-			kind: "main",
-			dbValues,
-		});
+	const {
+		draft,
+		setField,
+		clearDraft,
+		hasDraft,
+		isLoadingDraft,
+		isSaving,
+		isPendingSave,
+	} = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: 3,
+		kind: "main",
+		dbValues,
+	});
 
 	const form = useZodForm(updateStep3Schema, { defaultValues });
 
@@ -106,7 +113,7 @@ export function Step3VariablePay({
 	const [benefValidationError, setBenefValidationError] = useState<
 		string | null
 	>(null);
-	const saved = !hasDraft && hasSavedData;
+	const saved = (hasSavedData || hasDraft) && !isPendingSave && !isSaving;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const mutation = api.declaration.updateStep3.useMutation({
@@ -165,6 +172,7 @@ export function Step3VariablePay({
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
+				isPendingSave={isPendingSave}
 				isSaving={isSaving}
 				onDevFill={() => {
 					DEV_STEP3_ROWS.forEach((row, i) => {

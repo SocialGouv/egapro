@@ -25,6 +25,7 @@ type UseDeclarationDraftResult<T extends Record<string, unknown>> = {
 	hasDraft: boolean;
 	isLoadingDraft: boolean;
 	isSaving: boolean;
+	isPendingSave: boolean;
 };
 
 const DEBOUNCE_MS = 600;
@@ -116,6 +117,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 	clearMutateRef.current = clearMutation.mutate;
 
 	const [localDraft, setLocalDraft] = useState<Partial<T> | null>(null);
+	const [isPendingSave, setIsPendingSave] = useState(false);
 
 	const queryDraft = useMemo<Partial<T> | null>(() => {
 		const data = query.data as DraftBlob | null | undefined;
@@ -173,9 +175,11 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			});
 			if (timerRef.current !== null) clearTimeout(timerRef.current);
 			pendingRef.current = { diff: hasDiff ? diff : null };
+			setIsPendingSave(true);
 			timerRef.current = setTimeout(() => {
 				timerRef.current = null;
 				pendingRef.current = null;
+				setIsPendingSave(false);
 				if (hasDiff) {
 					saveMutateRef.current({
 						year,
@@ -196,6 +200,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			clearTimeout(timerRef.current);
 			timerRef.current = null;
 			pendingRef.current = null;
+			setIsPendingSave(false);
 		}
 		setLocalDraft((prev) => {
 			if (prev !== null && Object.keys(prev).length === 0) return prev;
@@ -218,6 +223,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			hasDraft,
 			isLoadingDraft: isSessionLoading || (isEnabled && query.isLoading),
 			isSaving: saveMutation.isPending,
+			isPendingSave,
 		}),
 		[
 			draft,
@@ -228,6 +234,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			isEnabled,
 			isSessionLoading,
 			saveMutation.isPending,
+			isPendingSave,
 		],
 	);
 }

@@ -51,14 +51,21 @@ export function Step1Workforce({
 		[initialData.totalWomen, initialData.totalMen],
 	);
 
-	const { draft, setField, clearDraft, hasDraft, isLoadingDraft, isSaving } =
-		useDeclarationDraft({
-			siren: declarationSiren,
-			year: declarationYear,
-			step: 1,
-			kind: "main",
-			dbValues,
-		});
+	const {
+		draft,
+		setField,
+		clearDraft,
+		hasDraft,
+		isLoadingDraft,
+		isSaving,
+		isPendingSave,
+	} = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: 1,
+		kind: "main",
+		dbValues,
+	});
 
 	const form = useZodForm(updateStep1Schema, {
 		defaultValues: dbValues,
@@ -74,7 +81,7 @@ export function Step1Workforce({
 		if (typeof d.totalMen === "number") form.setValue("totalMen", d.totalMen);
 	});
 
-	const saved = !hasDraft && hasInitialData;
+	const saved = (hasInitialData || hasDraft) && !isPendingSave && !isSaving;
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const [showResetWarning, setShowResetWarning] = useState(false);
 
@@ -125,6 +132,7 @@ export function Step1Workforce({
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
+				isPendingSave={isPendingSave}
 				isSaving={isSaving}
 				onDevFill={() => {
 					const womenValue = DEV_STEP1_CATEGORIES[0]?.women ?? 50;

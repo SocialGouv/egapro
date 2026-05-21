@@ -64,14 +64,21 @@ export function Step2PayGap({
 		[initialData],
 	);
 
-	const { draft, setField, clearDraft, hasDraft, isLoadingDraft, isSaving } =
-		useDeclarationDraft({
-			siren: declarationSiren,
-			year: declarationYear,
-			step: 2,
-			kind: "main",
-			dbValues,
-		});
+	const {
+		draft,
+		setField,
+		clearDraft,
+		hasDraft,
+		isLoadingDraft,
+		isSaving,
+		isPendingSave,
+	} = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: 2,
+		kind: "main",
+		dbValues,
+	});
 
 	const form = useZodForm(updateStep2Schema, { defaultValues });
 
@@ -89,7 +96,7 @@ export function Step2PayGap({
 	const formData = form.watch();
 	const rows = step2ToRows(formData as Step2Data);
 
-	const saved = !hasDraft && hasInitialData;
+	const saved = (hasInitialData || hasDraft) && !isPendingSave && !isSaving;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const mutation = api.declaration.updateStep2.useMutation({
@@ -124,6 +131,7 @@ export function Step2PayGap({
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
+				isPendingSave={isPendingSave}
 				isSaving={isSaving}
 				onDevFill={() => {
 					DEV_STEP2_ROWS.forEach((row, i) => {

@@ -8,6 +8,7 @@ type StepTitleRowProps = {
 	onDevFill: () => void;
 	saved: boolean;
 	isSaving?: boolean;
+	isPendingSave?: boolean;
 };
 
 export function StepTitleRow({
@@ -15,6 +16,7 @@ export function StepTitleRow({
 	onDevFill,
 	saved,
 	isSaving = false,
+	isPendingSave = false,
 }: StepTitleRowProps) {
 	return (
 		<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
@@ -22,9 +24,9 @@ export function StepTitleRow({
 			<div className="fr-col-auto">
 				<DevFillButton onFill={onDevFill} />
 			</div>
-			{(saved || isSaving) && (
+			{(saved || isSaving || isPendingSave) && (
 				<div className="fr-col-auto">
-					<SavedIndicator isSaving={isSaving} />
+					<SavedIndicator isPendingSave={isPendingSave} isSaving={isSaving} />
 				</div>
 			)}
 		</div>
