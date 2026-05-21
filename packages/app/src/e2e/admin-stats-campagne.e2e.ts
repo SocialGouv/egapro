@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+import { getCurrentYear } from "~/modules/domain";
 import {
 	deleteSeededCampaignDeclarations,
+	seedGipMdsObligatedPopulation,
 	seedSubmittedDeclarationsForStats,
 } from "./helpers/db-campaign";
 
@@ -11,6 +13,13 @@ const SIRENS = {
 	smallA: "999300001",
 	smallB: "999300002",
 	largeA: "999300003",
+} as const;
+
+const K1_SIRENS = {
+	obligatedSubmitted: "999300101",
+	obligatedNotSubmitted: "999300102",
+	obligatedPrevYearSubmitted: "999300103",
+	obligatedPrevYearNotSubmitted: "999300104",
 } as const;
 
 test.describe("admin campaign progression stats", () => {
@@ -155,4 +164,89 @@ test("non-admin users are redirected away from the stats page", async ({
 	} finally {
 		await anonCtx.close();
 	}
+});
+
+test.describe("admin campaign K1 declaration rate tile", () => {
+	const currentYear = getCurrentYear();
+
+	test.beforeAll(async () => {
+		await seedGipMdsObligatedPopulation([
+			{
+				siren: K1_SIRENS.obligatedSubmitted,
+				year: currentYear,
+				workforceEma: 250,
+			},
+			{
+				siren: K1_SIRENS.obligatedNotSubmitted,
+				year: currentYear,
+				workforceEma: 250,
+			},
+			{
+				siren: K1_SIRENS.obligatedPrevYearSubmitted,
+				year: currentYear - 1,
+				workforceEma: 250,
+			},
+			{
+				siren: K1_SIRENS.obligatedPrevYearNotSubmitted,
+				year: currentYear - 1,
+				workforceEma: 250,
+			},
+		]);
+		await seedSubmittedDeclarationsForStats([
+			{
+				siren: K1_SIRENS.obligatedSubmitted,
+				year: currentYear,
+				submittedAt: `${currentYear}-02-10T10:00:00Z`,
+				workforce: 250,
+			},
+			{
+				siren: K1_SIRENS.obligatedPrevYearSubmitted,
+				year: currentYear - 1,
+				submittedAt: `${currentYear - 1}-02-10T10:00:00Z`,
+				workforce: 250,
+			},
+		]);
+	});
+
+	test.afterAll(async () => {
+		await deleteSeededCampaignDeclarations(Object.values(K1_SIRENS));
+	});
+
+	test("K1 tile is rendered with the current-year title and a percent value", async ({
+		page,
+	}) => {
+		await page.goto("/admin/stats/campagne");
+
+		await expect(
+			page.getByRole("heading", {
+				name: new RegExp(`^Taux de déclaration ${currentYear}$`),
+			}),
+		).toBeVisible();
+		await expect(page.getByText(/\d{1,3},\d\s*%/)).toBeVisible();
+	});
+
+	test("the K1 year selector exposes 4 options (currentYear + 3 previous)", async ({
+		page,
+	}) => {
+		await page.goto("/admin/stats/campagne");
+
+		const select = page.getByLabel(/année \(taux de déclaration\)/i);
+		await expect(select).toBeVisible();
+		const optionsCount = await select.locator("option").count();
+		expect(optionsCount).toBe(4);
+	});
+
+	test("changing the size range filter keeps the K1 tile rendered", async ({
+		page,
+	}) => {
+		await page.goto("/admin/stats/campagne");
+
+		await expect(
+			page.getByRole("heading", { name: /^Taux de déclaration/ }),
+		).toBeVisible();
+		await page.getByLabel("Tranche d'effectif").selectOption("250+");
+		await expect(
+			page.getByRole("heading", { name: /^Taux de déclaration/ }),
+		).toBeVisible();
+	});
 });

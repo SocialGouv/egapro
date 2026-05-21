@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import type { CompanySizeRange } from "~/modules/domain";
 import { CompanySizeFilter } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
 import { CampaignProgressionChart } from "./CampaignProgressionChart";
 import { CampaignProgressionTable } from "./CampaignProgressionTable";
+import { CampaignRateTile } from "./CampaignRateTile";
 import { StepDurationsChart } from "./StepDurationsChart";
 import { StepDurationsTable } from "./StepDurationsTable";
 import { YearsFilter } from "./YearsFilter";
@@ -19,6 +20,7 @@ type Props = {
 };
 
 const DEFAULT_SELECTION_COUNT = 3;
+const K1_YEAR_OPTIONS_COUNT = 4;
 
 export function CampaignStatsPage({ currentYear, availableYears }: Props) {
 	const [selectedYears, setSelectedYears] = useState(() =>
@@ -27,6 +29,7 @@ export function CampaignStatsPage({ currentYear, availableYears }: Props) {
 	const [sizeRange, setSizeRange] = useState<CompanySizeRange | undefined>(
 		undefined,
 	);
+	const [k1Year, setK1Year] = useState(currentYear);
 
 	const query = api.adminStats.getCampaignProgression.useQuery(
 		{ years: selectedYears, sizeRange },
@@ -35,6 +38,15 @@ export function CampaignStatsPage({ currentYear, availableYears }: Props) {
 			placeholderData: (prev) => prev,
 		},
 	);
+
+	const k1YearOptions: number[] = [];
+	for (let offset = 0; offset < K1_YEAR_OPTIONS_COUNT; offset++) {
+		k1YearOptions.push(currentYear - offset);
+	}
+
+	const handleK1YearChange = (event: ChangeEvent<HTMLSelectElement>) => {
+		setK1Year(Number.parseInt(event.target.value, 10));
+	};
 
 	const stepDurationsYear = selectedYears[0] ?? currentYear;
 	const stepDurationsQuery = api.adminStats.getStepDurations.useQuery(
@@ -52,14 +64,34 @@ export function CampaignStatsPage({ currentYear, availableYears }: Props) {
 			</p>
 
 			<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
-				<div className="fr-col-12 fr-col-md-6">
+				<div className="fr-col-12 fr-col-md-4">
 					<CompanySizeFilter
 						label="Tranche d'effectif"
 						onChange={setSizeRange}
 						value={sizeRange}
 					/>
 				</div>
-				<div className="fr-col-12 fr-col-md-6">
+				<div className="fr-col-12 fr-col-md-4">
+					<div className="fr-select-group">
+						<label className="fr-label" htmlFor="campaign-rate-year">
+							Année (taux de déclaration)
+						</label>
+						<select
+							className="fr-select"
+							id="campaign-rate-year"
+							name="campaignRateYear"
+							onChange={handleK1YearChange}
+							value={k1Year}
+						>
+							{k1YearOptions.map((year) => (
+								<option key={year} value={year}>
+									{year}
+								</option>
+							))}
+						</select>
+					</div>
+				</div>
+				<div className="fr-col-12 fr-col-md-4">
 					<YearsFilter
 						availableYears={availableYears}
 						onChange={setSelectedYears}
@@ -67,6 +99,13 @@ export function CampaignStatsPage({ currentYear, availableYears }: Props) {
 					/>
 				</div>
 			</div>
+
+			<section aria-labelledby="campaign-rate-heading" className="fr-mt-4w">
+				<h2 className="fr-h3" id="campaign-rate-heading">
+					Taux de déclaration
+				</h2>
+				<CampaignRateTile sizeRange={sizeRange} year={k1Year} />
+			</section>
 
 			<section
 				aria-labelledby="campaign-progression-heading"
