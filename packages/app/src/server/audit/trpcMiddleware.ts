@@ -63,6 +63,8 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"adminStats.getCampaignProgression":
 		AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION,
 	"adminStats.getStepDurations": AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DURATIONS,
+	"adminStats.getStepDropoffRate":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DROPOFF_RATE,
 
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,

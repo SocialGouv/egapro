@@ -41,3 +41,23 @@ export type StepDurationRow = {
 	medianDays: number | null;
 	p90Days: number | null;
 };
+
+/**
+ * One row of the K5 « taux d'abandon par étape » dataset.
+ *
+ * Covers the wizard steps 0..5 (step 6 — submission — is excluded since a
+ * declaration on the recap step is submitted, not abandoned). For each step:
+ * - `total` counts declarations that entered the step at least once.
+ * - `abandoned` counts the subset whose latest entry on the step is older
+ *   than the requested `stagnationDays`, that is still on the step today,
+ *   and that has not been completed nor cancelled.
+ * - `dropoffRate` is `(abandoned / total) * 100`, rounded to 1 decimal, and
+ *   defaults to 0 when `total` is 0 (no declaration ever entered the step).
+ */
+export type StepDropoffRow = {
+	step: number;
+	label: string;
+	total: number;
+	abandoned: number;
+	dropoffRate: number;
+};
