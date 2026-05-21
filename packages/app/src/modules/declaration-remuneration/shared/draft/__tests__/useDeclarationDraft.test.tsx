@@ -174,7 +174,9 @@ describe("useDeclarationDraft", () => {
 		});
 
 		expect(result.current.draft).toEqual({ totalWomen: 7 });
-		expect(result.current.hasDraft).toBe(true);
+		// hasDraft stays false until the save is confirmed — localDraft is optimistic
+		// for the form fields but does not trigger the "Enregistré" indicator yet.
+		expect(result.current.hasDraft).toBe(false);
 		expect(saveMutateMock).not.toHaveBeenCalled();
 	});
 
