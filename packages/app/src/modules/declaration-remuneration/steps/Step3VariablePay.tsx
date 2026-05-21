@@ -76,14 +76,21 @@ export function Step3VariablePay({
 	const defaultValues = padStep3(rawDefaults);
 	const dbValues = useMemo(() => padStep3(initialData), [initialData]);
 
-	const { draft, setField, clearDraft, hasDraft, isLoadingDraft } =
-		useDeclarationDraft({
-			siren: declarationSiren,
-			year: declarationYear,
-			step: 3,
-			kind: "main",
-			dbValues,
-		});
+	const {
+		draft,
+		setField,
+		clearDraft,
+		hasDraft,
+		isLoadingDraft,
+		isSaving,
+		isPendingSave,
+	} = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: 3,
+		kind: "main",
+		dbValues,
+	});
 
 	const form = useZodForm(updateStep3Schema, { defaultValues });
 
@@ -106,7 +113,7 @@ export function Step3VariablePay({
 	const [benefValidationError, setBenefValidationError] = useState<
 		string | null
 	>(null);
-	const saved = !hasDraft && hasSavedData;
+	const hasData = hasSavedData || hasDraft;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const mutation = api.declaration.updateStep3.useMutation({
@@ -165,6 +172,9 @@ export function Step3VariablePay({
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
+				hasData={hasData}
+				isPendingSave={isPendingSave}
+				isSaving={isSaving}
 				onDevFill={() => {
 					DEV_STEP3_ROWS.forEach((row, i) => {
 						const womenField = getStep3FieldName(i, "womenValue");
@@ -175,7 +185,6 @@ export function Step3VariablePay({
 					form.setValue("indicatorEWomen", DEV_STEP3_BENEFICIARY_WOMEN);
 					form.setValue("indicatorEMen", DEV_STEP3_BENEFICIARY_MEN);
 				}}
-				saved={saved}
 				title={
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {declarationYear}

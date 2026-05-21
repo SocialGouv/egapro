@@ -82,7 +82,7 @@ export function SecondDeclarationStep3Review({
 					Parcours de mise en conformité pour l&apos;indicateur par catégorie de
 					salariés
 				</h1>
-				<SavedIndicator />
+				<SavedIndicator hasData={true} />
 			</div>
 
 			<SecondDeclarationStepIndicator currentStep={3} />

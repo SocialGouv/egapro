@@ -70,14 +70,21 @@ export function Step5EmployeeCategories({
 		[initialCategories, initialSource],
 	);
 
-	const { draft, setField, clearDraft, hasDraft, isLoadingDraft } =
-		useDeclarationDraft<Step5FormValues>({
-			siren: declarationSiren,
-			year: declarationYear,
-			step: 5,
-			kind: "main",
-			dbValues,
-		});
+	const {
+		draft,
+		setField,
+		clearDraft,
+		hasDraft,
+		isLoadingDraft,
+		isSaving,
+		isPendingSave,
+	} = useDeclarationDraft<Step5FormValues>({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: 5,
+		kind: "main",
+		dbValues,
+	});
 
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
 		onSuccess: () => {
@@ -102,9 +109,12 @@ export function Step5EmployeeCategories({
 			accordionId="accordion-step5"
 			defaultValuesOverride={categoryFormDefaultOverride}
 			disabled={isImpersonating}
+			hasDataOverride={hasInitialData || hasDraft}
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
 			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
+			isPendingSaveOverride={isPendingSave}
+			isSavingOverride={isSaving}
 			isSubmitting={mutation.isPending}
 			maxMen={maxMen}
 			maxWomen={maxWomen}
@@ -121,7 +131,6 @@ export function Step5EmployeeCategories({
 			onValuesChange={(values) => setField(values)}
 			previousHref="/declaration-remuneration/etape/4"
 			referenceYear={declarationYear - 1}
-			savedOverride={!hasDraft && hasInitialData}
 			stepper={<StepIndicator currentStep={5} />}
 			submitError={mutation.error?.message}
 			title={

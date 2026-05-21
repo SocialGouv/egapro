@@ -24,7 +24,7 @@ export function SecondDeclarationStep1Info({
 	declarationYear,
 	modificationDeadline,
 }: Props) {
-	const { hasDraft, isLoadingDraft } = useDeclarationDraft({
+	const { isLoadingDraft } = useDeclarationDraft({
 		siren: declarationSiren,
 		year: declarationYear,
 		step: "second-1",
@@ -36,8 +36,6 @@ export function SecondDeclarationStep1Info({
 		return <DraftLoadingState />;
 	}
 
-	const saved = !hasDraft;
-
 	return (
 		<div className={common.flexColumnGap2}>
 			<div className={common.flexBetween}>
@@ -45,7 +43,7 @@ export function SecondDeclarationStep1Info({
 					Parcours de mise en conformité pour l&apos;indicateur par catégorie de
 					salariés
 				</h1>
-				{saved && <SavedIndicator />}
+				<SavedIndicator hasData={true} />
 			</div>
 
 			<SecondDeclarationStepIndicator currentStep={1} />
