@@ -45,8 +45,12 @@ export const POST_SUBMIT_MILESTONES = [
 		label: "Soumission → choix conformité",
 	},
 	{
-		key: "path_choice_to_action",
-		label: "Choix conformité → action soumise",
+		key: "path_choice_to_second_declaration",
+		label: "Choix conformité → seconde déclaration",
+	},
+	{
+		key: "path_choice_to_joint_evaluation",
+		label: "Choix conformité → évaluation conjointe",
 	},
 	{
 		key: "revision_choice_to_action",

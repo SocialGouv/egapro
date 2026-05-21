@@ -39,10 +39,11 @@ describe("getStepLabel", () => {
 });
 
 describe("POST_SUBMIT_MILESTONES", () => {
-	it("exposes the 5 post-submission jalons in chronological order", () => {
+	it("exposes the 6 post-submission jalons in chronological order", () => {
 		expect(POST_SUBMIT_MILESTONES.map((m) => m.key)).toEqual([
 			"submit_to_path_choice",
-			"path_choice_to_action",
+			"path_choice_to_second_declaration",
+			"path_choice_to_joint_evaluation",
 			"revision_choice_to_action",
 			"action_to_cse_opinion",
 			"last_action_to_complete",

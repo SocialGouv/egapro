@@ -154,7 +154,7 @@ export const adminStatsRouter = createTRPCRouter({
 	 *   where there is no next event (declaration still on that step) are
 	 *   excluded from the percentile aggregation but still count in
 	 *   `sampleSize`.
-	 * - **post_submit** (5 milestones) — durations between business events
+	 * - **post_submit** (6 milestones) — durations between business events
 	 *   (`submit`, `path_choice`, `second_declaration_submit`,
 	 *   `joint_evaluation_submit`, `cse_opinion_submit`, `demarche_complete`),
 	 *   computed per milestone via a dedicated CTE.
@@ -265,7 +265,8 @@ export const adminStatsRouter = createTRPCRouter({
 				AggregatedMilestone | undefined
 			> = {
 				submit_to_path_choice: undefined,
-				path_choice_to_action: undefined,
+				path_choice_to_second_declaration: undefined,
+				path_choice_to_joint_evaluation: undefined,
 				revision_choice_to_action: undefined,
 				action_to_cse_opinion: undefined,
 				last_action_to_complete: undefined,
@@ -307,19 +308,13 @@ export const adminStatsRouter = createTRPCRouter({
 				submitToPathChoiceRows as unknown as AggregatedMilestone[]
 			)[0];
 
-			// FSM allows only one of `second_declaration round=2` or
-			// `joint_evaluation round=1` per declaration in wave 1, so taking
-			// the LEAST of the two is safe and resolves whichever exists.
-			const pathChoiceToActionRows =
+			const pathChoiceToSecondDeclarationRows =
 				await ctx.db.execute<AggregatedMilestone>(sql`
 				WITH paired AS (
 					SELECT
 						s.declaration_id,
 						MAX(s.created_at) FILTER (WHERE s.event_type = 'path_choice' AND s.round = 1) AS start_at,
-						LEAST(
-							MIN(s.created_at) FILTER (WHERE s.event_type = 'second_declaration_submit' AND s.round = 2),
-							MIN(s.created_at) FILTER (WHERE s.event_type = 'joint_evaluation_submit' AND s.round = 1)
-						) AS end_at
+						MIN(s.created_at) FILTER (WHERE s.event_type = 'second_declaration_submit') AS end_at
 					FROM ${declarationStatusHistory} s
 					INNER JOIN ${declarations}
 						ON ${declarations.id} = s.declaration_id
@@ -342,8 +337,44 @@ export const adminStatsRouter = createTRPCRouter({
 					) FILTER (WHERE end_at IS NOT NULL AND end_at > start_at) AS p90_days
 				FROM paired
 			`);
-			postSubmitAggregates.path_choice_to_action = (
-				pathChoiceToActionRows as unknown as AggregatedMilestone[]
+			postSubmitAggregates.path_choice_to_second_declaration = (
+				pathChoiceToSecondDeclarationRows as unknown as AggregatedMilestone[]
+			)[0];
+
+			// `joint_evaluation_submit round=1` = joint evaluation as the
+			// first-wave corrective path (round=2 covers the revision wave and
+			// is captured by `revision_choice_to_action`).
+			const pathChoiceToJointEvaluationRows =
+				await ctx.db.execute<AggregatedMilestone>(sql`
+				WITH paired AS (
+					SELECT
+						s.declaration_id,
+						MAX(s.created_at) FILTER (WHERE s.event_type = 'path_choice' AND s.round = 1) AS start_at,
+						MIN(s.created_at) FILTER (WHERE s.event_type = 'joint_evaluation_submit' AND s.round = 1) AS end_at
+					FROM ${declarationStatusHistory} s
+					INNER JOIN ${declarations}
+						ON ${declarations.id} = s.declaration_id
+					INNER JOIN ${companies}
+						ON ${companies.siren} = ${declarations.siren}
+					WHERE ${declarations.year} = ${input.year}
+						AND ${declarations.cancelledAt} IS NULL
+						AND ${sizeFilterSql}
+					GROUP BY s.declaration_id
+					HAVING MAX(s.created_at) FILTER (WHERE s.event_type = 'path_choice' AND s.round = 1) IS NOT NULL
+				)
+				SELECT
+					COUNT(*) FILTER (WHERE end_at IS NOT NULL)::int AS sample_size,
+					COUNT(*) FILTER (WHERE end_at IS NOT NULL AND end_at > start_at)::int AS completed_sample_size,
+					percentile_cont(0.5) WITHIN GROUP (
+						ORDER BY EXTRACT(EPOCH FROM (end_at - start_at)) / 86400.0
+					) FILTER (WHERE end_at IS NOT NULL AND end_at > start_at) AS median_days,
+					percentile_cont(0.9) WITHIN GROUP (
+						ORDER BY EXTRACT(EPOCH FROM (end_at - start_at)) / 86400.0
+					) FILTER (WHERE end_at IS NOT NULL AND end_at > start_at) AS p90_days
+				FROM paired
+			`);
+			postSubmitAggregates.path_choice_to_joint_evaluation = (
+				pathChoiceToJointEvaluationRows as unknown as AggregatedMilestone[]
 			)[0];
 
 			const revisionChoiceToActionRows =
