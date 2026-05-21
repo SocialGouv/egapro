@@ -27,9 +27,6 @@ export function StepDurationsTable({ rows }: Props) {
 		return null;
 	}
 
-	// Split rows by phase to surface the two groups in the table without
-	// mixing them. The chart keeps a single continuous series but the table
-	// benefits from explicit section headers for assistive tech and quick scan.
 	const wizardRows = rows.filter((row) => row.phase === "wizard");
 	const postSubmitRows = rows.filter((row) => row.phase === "post_submit");
 

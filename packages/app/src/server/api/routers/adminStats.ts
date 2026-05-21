@@ -60,11 +60,6 @@ type AggregatedMilestone = {
 	p90_days: number | string | null;
 };
 
-/**
- * Convert a raw SQL aggregation row into the typed `StepDurationRow` for a
- * given post-submit milestone, applying the `STEP_DURATION_MIN_SAMPLE` floor
- * for percentile visibility.
- */
 function buildPostSubmitRow(
 	key: PostSubmitMilestoneKey,
 	label: string,
@@ -276,12 +271,9 @@ export const adminStatsRouter = createTRPCRouter({
 				last_action_to_complete: undefined,
 			};
 
-			// Jalon 1 — `submit` (step_change round=6) → `path_choice round=1`
-			//
-			// `step_change round=6` is the canonical signal that the declarant
-			// reached the recap (= submission). We use it instead of the legacy
-			// `submit` event to be consistent with the wizard CTE above and avoid
-			// duplicates when both events exist on the same declaration.
+			// `step_change round=6` (recap) is preferred over the legacy `submit`
+			// event so we stay consistent with the wizard CTE and avoid double-
+			// counting declarations where both rows coexist.
 			const submitToPathChoiceRows =
 				await ctx.db.execute<AggregatedMilestone>(sql`
 				WITH paired AS (
@@ -315,11 +307,9 @@ export const adminStatsRouter = createTRPCRouter({
 				submitToPathChoiceRows as unknown as AggregatedMilestone[]
 			)[0];
 
-			// Jalon 2 — `path_choice round=1` → MIN(`second_declaration_submit round=2`,
-			// `joint_evaluation_submit round=1`)
-			//
-			// FSM allows only one of the two actions per declaration in wave 1, so
-			// we just take the earliest of the two events that exists.
+			// FSM allows only one of `second_declaration round=2` or
+			// `joint_evaluation round=1` per declaration in wave 1, so taking
+			// the LEAST of the two is safe and resolves whichever exists.
 			const pathChoiceToActionRows =
 				await ctx.db.execute<AggregatedMilestone>(sql`
 				WITH paired AS (
@@ -356,10 +346,6 @@ export const adminStatsRouter = createTRPCRouter({
 				pathChoiceToActionRows as unknown as AggregatedMilestone[]
 			)[0];
 
-			// Jalon 3 — `path_choice round=2` → `joint_evaluation_submit round=2`
-			//
-			// The revision cycle, triggered when the company chooses to revise
-			// its plan or the joint evaluation after a first action.
 			const revisionChoiceToActionRows =
 				await ctx.db.execute<AggregatedMilestone>(sql`
 				WITH paired AS (
@@ -393,12 +379,9 @@ export const adminStatsRouter = createTRPCRouter({
 				revisionChoiceToActionRows as unknown as AggregatedMilestone[]
 			)[0];
 
-			// Jalon 4 — MAX(action_before_cse) → `cse_opinion_submit`
-			//
-			// CSE opinion only applies to companies >= 100 employees that have
-			// submitted one. The preceding action is typically the second
-			// declaration or joint evaluation; we use the latest such event that
-			// happened before the CSE opinion.
+			// CSE opinion only applies to >= 100 employees. The preceding action
+			// is either the second declaration or joint evaluation, both grouped
+			// under a single `last_action_at` aggregate.
 			const actionToCseOpinionRows =
 				await ctx.db.execute<AggregatedMilestone>(sql`
 				WITH ranked AS (
@@ -441,12 +424,9 @@ export const adminStatsRouter = createTRPCRouter({
 				actionToCseOpinionRows as unknown as AggregatedMilestone[]
 			)[0];
 
-			// Jalon 5 — MAX(business_event_before_complete) → `demarche_complete`
-			//
-			// Anchors against the latest business event preceding the completion:
-			// CSE opinion (>= 100 employees), second declaration, or joint
-			// evaluation. The filter `created_at < complete.created_at` makes sure
-			// we don't pick an event that fired after the closure.
+			// `created_at < complete_at` filter is load-bearing: a CSE opinion
+			// can fire AFTER the completion (correction edge case) and would
+			// otherwise yield a negative duration.
 			const lastActionToCompleteRows =
 				await ctx.db.execute<AggregatedMilestone>(sql`
 				WITH complete_ts AS (

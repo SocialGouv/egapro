@@ -345,7 +345,6 @@ describe("adminStatsRouter.getStepDurations", () => {
 		} as never);
 
 		await caller.getStepDurations({ year: 2025, sizeRange: "250+" });
-		// 1 wizard query + 5 milestone queries = 6 execute calls
 		expect(db.execute).toHaveBeenCalledTimes(6);
 	});
 
@@ -362,8 +361,6 @@ describe("adminStatsRouter.getStepDurations", () => {
 		await expect(caller.getStepDurations({ year: 2101 })).rejects.toThrow();
 	});
 
-	// S-K4-9 — nominal post-submit: each milestone row maps correctly to
-	// its typed output (label, phase, percentiles, sample size).
 	it("maps post-submit milestone rows to the typed output with FR labels (S-K4-9)", async () => {
 		const db = buildDb(
 			[],
@@ -430,9 +427,6 @@ describe("adminStatsRouter.getStepDurations", () => {
 		expect(postSubmit[4]?.sampleSize).toBe(12);
 	});
 
-	// S-K4-10 — sub-set coherence: when a milestone has no rows (e.g. no
-	// declaration with a path_choice), the row keeps a 0 sample and null
-	// percentiles, but unrelated milestones still surface their data.
 	it("keeps milestones independent: empty sub-set does not blank out the others (S-K4-10)", async () => {
 		const db = buildDb(
 			[],
@@ -467,8 +461,6 @@ describe("adminStatsRouter.getStepDurations", () => {
 		expect(postSubmit[4]?.medianDays).toBe(45.0);
 	});
 
-	// S-K4-11 — revision cycle: jalon 3 captures path_choice round=2 →
-	// joint_evaluation_submit round=2, independently from the round=1 jalons.
 	it("captures the revision cycle independently of the first wave (S-K4-11)", async () => {
 		const db = buildDb(
 			[],
@@ -517,8 +509,6 @@ describe("adminStatsRouter.getStepDurations", () => {
 		});
 	});
 
-	// S-K4-12 — fallback n < 5: sample below threshold → null percentiles,
-	// but sample size stays visible so consumers know data exists.
 	it("returns null percentiles for milestones with completedSampleSize < 5 (S-K4-12)", async () => {
 		const db = buildDb(
 			[],
@@ -553,9 +543,6 @@ describe("adminStatsRouter.getStepDurations", () => {
 		expect(firstMilestone?.p90Days).toBeNull();
 	});
 
-	// S-K4-13 — sample size 0: a milestone with no qualifying declarations
-	// keeps a 0 sample size and null percentiles. Drives the "no data yet"
-	// state in the table.
 	it("renders milestones with no data as zero-sample / null-percentile rows (S-K4-13)", async () => {
 		const db = buildDb(
 			[],

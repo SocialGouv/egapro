@@ -31,10 +31,8 @@ type DurationsTooltipProps = {
 	payload?: TooltipEntry[];
 };
 
-// DSFR palette — wizard phase uses the primary blue, post-submit phase uses
-// the secondary red so the visual handoff between the two groups is obvious
-// even without reading the labels. Tokens validated against the DSFR design
-// system (background-action-high-blue-france / background-action-high-red-marianne).
+// Distinct DSFR palettes per phase — the colour break makes the wizard /
+// post-submit handoff readable without referencing the labels.
 const WIZARD_MEDIAN_COLOR = "var(--background-action-high-blue-france)";
 const WIZARD_P90_COLOR = "var(--background-action-low-blue-france)";
 const POST_SUBMIT_MEDIAN_COLOR = "var(--background-action-high-red-marianne)";
