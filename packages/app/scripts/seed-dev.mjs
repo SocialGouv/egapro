@@ -19,7 +19,8 @@ const sql = postgres(
 
 async function main() {
 	// 1. Upsert user (creates it if ProConnect login hasn't happened yet)
-	let userRows = await sql`SELECT id FROM app_user WHERE email = ${TEST_EMAIL} LIMIT 1`;
+	let userRows =
+		await sql`SELECT id FROM app_user WHERE email = ${TEST_EMAIL} LIMIT 1`;
 	if (userRows.length === 0) {
 		userRows = await sql`
 			INSERT INTO app_user (id, email) VALUES (gen_random_uuid(), ${TEST_EMAIL}) RETURNING id
@@ -89,7 +90,9 @@ async function main() {
 	`;
 	console.log(`Declaration ${TEST_SIREN}/${CURRENT_YEAR} (draft, step 1)`);
 
-	console.log("\nDone. Log in at http://localhost:3000/login with test@fia1.fr");
+	console.log(
+		"\nDone. Log in at http://localhost:3000/login with test@fia1.fr",
+	);
 }
 
 main()

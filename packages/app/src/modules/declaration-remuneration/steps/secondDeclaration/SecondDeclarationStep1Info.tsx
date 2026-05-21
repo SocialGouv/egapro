@@ -24,7 +24,7 @@ export function SecondDeclarationStep1Info({
 	declarationYear,
 	modificationDeadline,
 }: Props) {
-	const { hasDraft, isLoadingDraft } = useDeclarationDraft({
+	const { isLoadingDraft } = useDeclarationDraft({
 		siren: declarationSiren,
 		year: declarationYear,
 		step: "second-1",
