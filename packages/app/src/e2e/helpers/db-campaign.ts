@@ -249,11 +249,50 @@ export async function seedSubmittedDeclarationsForStats(
 	}
 }
 
+type SeededGipMdsRow = {
+	siren: string;
+	year: number;
+	workforceEma: number;
+};
+
+export async function seedGipMdsObligatedPopulation(rows: SeededGipMdsRow[]) {
+	if (rows.length === 0) return;
+	const sql = createConnection();
+	try {
+		for (const row of rows) {
+			await sql`
+				INSERT INTO app_company (siren, name, workforce, created_at, updated_at)
+				VALUES (${row.siren}, ${`E2E GIP Co. ${row.siren}`}, ${Math.floor(row.workforceEma)}, NOW(), NOW())
+				ON CONFLICT (siren) DO UPDATE SET workforce = EXCLUDED.workforce
+			`;
+			await sql`
+				INSERT INTO app_gip_mds_data (siren, year, workforce_ema, imported_at)
+				VALUES (${row.siren}, ${row.year}, ${row.workforceEma}, NOW())
+				ON CONFLICT (siren, year) DO UPDATE SET
+					workforce_ema = EXCLUDED.workforce_ema
+			`;
+		}
+	} finally {
+		await sql.end();
+	}
+}
+
+export async function deleteSeededGipMdsRows(sirens: string[]) {
+	if (sirens.length === 0) return;
+	const sql = createConnection();
+	try {
+		await sql`DELETE FROM app_gip_mds_data WHERE siren = ANY(${sirens})`;
+	} finally {
+		await sql.end();
+	}
+}
+
 export async function deleteSeededCampaignDeclarations(sirens: string[]) {
 	if (sirens.length === 0) return;
 	const sql = createConnection();
 	try {
 		await sql`DELETE FROM app_declaration WHERE siren = ANY(${sirens})`;
+		await sql`DELETE FROM app_gip_mds_data WHERE siren = ANY(${sirens})`;
 		await sql`DELETE FROM app_company WHERE siren = ANY(${sirens})`;
 	} finally {
 		await sql.end();

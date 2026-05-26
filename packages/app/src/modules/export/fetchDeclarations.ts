@@ -33,15 +33,19 @@ import {
 	INDICATOR_F_HOURLY_THRESHOLD_LABELS,
 	INDICATOR_F_HOURLY_WOMEN_LABELS,
 } from "./shared/apiLabels";
+import {
+	type DeclarationEventType,
+	getStatusHistoryLabel,
+} from "./shared/statusHistoryLabels";
 
-const PHASE2_SIZE_MIN = 100;
+const COMPLIANCE_PROCESS_SIZE_MIN = 100;
 
 function deriveExportFlags(
 	row: DeclarationRow,
 	indicatorGEntries: IndicatorGEntry[],
 ): {
-	phase2Required: boolean;
-	phase2RevisionRequired: boolean;
+	complianceProcessRequired: boolean;
+	complianceProcessRevisionRequired: boolean;
 	indicatorGRequired: boolean;
 } {
 	const hasIndicatorG = indicatorGEntries.length > 0;
@@ -52,21 +56,21 @@ function deriveExportFlags(
 		? Number(row.variableAnnualMeanGap) * 100
 		: null;
 	const workforce = row.workforce;
-	const phase2Required =
+	const complianceProcessRequired =
 		workforce !== null &&
-		workforce >= PHASE2_SIZE_MIN &&
+		workforce >= COMPLIANCE_PROCESS_SIZE_MIN &&
 		hasIndicatorG &&
 		globalAnnualMeanGap !== null &&
 		Math.abs(globalAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
-	const phase2RevisionRequired =
-		phase2Required &&
+	const complianceProcessRevisionRequired =
+		complianceProcessRequired &&
 		row.secondDeclarationSubmittedAt !== null &&
 		variableAnnualMeanGap !== null &&
 		Math.abs(variableAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
 	const indicatorGRequiredFlag = isIndicatorGRequired(workforce ?? 0, row.year);
 	return {
-		phase2Required,
-		phase2RevisionRequired,
+		complianceProcessRequired,
+		complianceProcessRevisionRequired,
 		indicatorGRequired: indicatorGRequiredFlag,
 	};
 }
@@ -126,7 +130,6 @@ export function buildIndicators(row: DeclarationRow) {
 			row.annualQuartile3ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[2]]:
 			row.annualQuartile3ProportionMen ?? null,
-		[INDICATOR_F_ANNUAL_THRESHOLD_LABELS[3]]: null,
 		[INDICATOR_F_ANNUAL_WOMEN_LABELS[3]]:
 			row.annualQuartile4ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[3]]:
@@ -152,7 +155,6 @@ export function buildIndicators(row: DeclarationRow) {
 			row.hourlyQuartile3ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[2]]:
 			row.hourlyQuartile3ProportionMen ?? null,
-		[INDICATOR_F_HOURLY_THRESHOLD_LABELS[3]]: null,
 		[INDICATOR_F_HOURLY_WOMEN_LABELS[3]]:
 			row.hourlyQuartile4ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[3]]:
@@ -306,8 +308,9 @@ export function assembleDeclaration(
 		Statut: row.status,
 		Parcours_apres_declaration_1: row.firstDeclarationPathChoice,
 		Parcours_apres_declaration_2: row.secondDeclarationPathChoice,
-		Phase_2_requise: flags.phase2Required,
-		Phase_2_revision_requise: flags.phase2RevisionRequired,
+		Parcours_de_conformite_requis: flags.complianceProcessRequired,
+		Parcours_de_conformite_revision_requis:
+			flags.complianceProcessRevisionRequired,
 		Avis_CSE_requis: row.cseRequired,
 		Indicateur_G_requis: flags.indicatorGRequired,
 		Version_regles: row.rulesVersion,
@@ -325,6 +328,19 @@ export function assembleDeclaration(
 		Date_avis_CSE: row.cseOpinionCompletedAt?.toISOString() ?? null,
 		Date_fin_demarche: row.demarcheCompletedAt?.toISOString() ?? null,
 		Date_annulation: row.cancelledAt?.toISOString() ?? null,
+		Historique_statuts: row.statusHistoryArray.map((entry) => {
+			const base = {
+				Statut: entry.eventType,
+				Libelle_statut: getStatusHistoryLabel(
+					entry.eventType as DeclarationEventType,
+					entry.value,
+				),
+				Date: entry.createdAt,
+			};
+			return entry.eventType === "path_choice" && entry.round !== null
+				? { ...base, Numero_declaration: entry.round }
+				: base;
+		}),
 		Effectif_F_rem_annuelle_globale: row.totalWomen,
 		Effectif_H_rem_annuelle_globale: row.totalMen,
 		Indicateurs: {

@@ -12,16 +12,16 @@ import {
 } from "./queries";
 import type { ExportRow } from "./types";
 
-const PHASE2_SIZE_MIN = 100;
+const COMPLIANCE_PROCESS_SIZE_MIN = 100;
 
-function computePhase2Required(
+function computeComplianceProcessRequired(
 	workforce: number | null,
 	hasIndicatorG: boolean,
 	globalAnnualMeanGap: number | null,
 ): boolean {
 	if (workforce === null || globalAnnualMeanGap === null) return false;
 	return (
-		workforce >= PHASE2_SIZE_MIN &&
+		workforce >= COMPLIANCE_PROCESS_SIZE_MIN &&
 		hasIndicatorG &&
 		Math.abs(globalAnnualMeanGap) >= GAP_ALERT_THRESHOLD
 	);
@@ -93,13 +93,13 @@ export async function buildExportRows(
 		const variableAnnualMeanGap = row.variableAnnualMeanGap
 			? Number(row.variableAnnualMeanGap) * 100
 			: null;
-		const phase2Required = computePhase2Required(
+		const complianceProcessRequired = computeComplianceProcessRequired(
 			row.workforce,
 			hasIndicatorGForThisDecl,
 			globalAnnualMeanGap,
 		);
-		const phase2RevisionRequired =
-			phase2Required &&
+		const complianceProcessRevisionRequired =
+			complianceProcessRequired &&
 			row.secondDeclarationSubmittedAt !== null &&
 			variableAnnualMeanGap !== null &&
 			Math.abs(variableAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
@@ -132,8 +132,8 @@ export async function buildExportRows(
 				row.jointEvaluationSubmittedAt?.toISOString() ?? null,
 			cseOpinionCompletedAt: row.cseOpinionCompletedAt?.toISOString() ?? null,
 			demarcheCompletedAt: row.demarcheCompletedAt?.toISOString() ?? null,
-			phase2Required,
-			phase2RevisionRequired,
+			complianceProcessRequired,
+			complianceProcessRevisionRequired,
 			cseRequired: row.cseRequired,
 			indicatorGRequired,
 			rulesVersion: row.rulesVersion,

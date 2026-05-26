@@ -1,5 +1,8 @@
+export type { AdminKpiTileDelta } from "./AdminKpiTile";
+export { AdminKpiTile } from "./AdminKpiTile";
 export { CampaignProgressionChart } from "./CampaignProgressionChart";
 export { CampaignProgressionTable } from "./CampaignProgressionTable";
+export { CampaignRateTile } from "./CampaignRateTile";
 export { CampaignStatsPage } from "./CampaignStatsPage";
 export { StagnationDaysFilter } from "./StagnationDaysFilter";
 export { StepDropoffChart } from "./StepDropoffChart";
@@ -8,17 +11,20 @@ export { StepDurationsChart } from "./StepDurationsChart";
 export { StepDurationsTable } from "./StepDurationsTable";
 export type {
 	GetCampaignProgressionInput,
+	GetCampaignStatsInput,
 	GetStepDropoffRateInput,
 	GetStepDurationsInput,
 } from "./schemas";
 export {
 	getCampaignProgressionSchema,
+	getCampaignStatsSchema,
 	getStepDropoffRateSchema,
 	getStepDurationsSchema,
 } from "./schemas";
 export type {
 	CampaignProgressionPoint,
 	CampaignProgressionSeries,
+	CampaignStats,
 	StepDropoffRow,
 	StepDurationRow,
 } from "./types";

@@ -23,8 +23,8 @@ export type ExportRow = {
 	jointEvaluationSubmittedAt: string | null;
 	cseOpinionCompletedAt: string | null;
 	demarcheCompletedAt: string | null;
-	phase2Required: boolean;
-	phase2RevisionRequired: boolean;
+	complianceProcessRequired: boolean;
+	complianceProcessRevisionRequired: boolean;
 	cseRequired: boolean;
 	indicatorGRequired: boolean;
 	rulesVersion: string | null;
