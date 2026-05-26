@@ -304,6 +304,17 @@ describe("pickFunnelColor", () => {
 			PALETTE_COLORS[last],
 		);
 	});
+
+	it("uses the dsfrPalette argument when provided (dark-theme override)", () => {
+		const darkPalette = {
+			palette: ["#ffffff", "#cccccc", "#999999"] as const,
+			alert: "#ff5151",
+			legendText: "#dddddd",
+		};
+		expect(pickFunnelColor(0, null, 30, darkPalette)).toBe("#ffffff");
+		expect(pickFunnelColor(2, null, 30, darkPalette)).toBe("#999999");
+		expect(pickFunnelColor(1, 99, 30, darkPalette)).toBe("#ff5151");
+	});
 });
 
 describe("buildTooltipFormatter", () => {

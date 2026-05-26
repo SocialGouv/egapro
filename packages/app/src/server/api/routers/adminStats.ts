@@ -565,6 +565,10 @@ export const adminStatsRouter = createTRPCRouter({
 	 * base sub-population (the WHERE clause that defines what "100 %" means
 	 * for that funnel). `pctOfStart` and `pctDropFromPrev` are computed in JS
 	 * after the query to keep the SQL test-friendly.
+	 *
+	 * The four queries share the same `COUNT(DISTINCT id) FILTER (WHERE EXISTS
+	 * <history match>)` skeleton — `countDeclarationsWithEvent` factorises it
+	 * so each jalon is one readable line per funnel.
 	 */
 	getCompletionFunnel: adminProcedure
 		.input(getCompletionFunnelSchema)
@@ -593,37 +597,10 @@ export const adminStatsRouter = createTRPCRouter({
 						AND ${sizeFilterSql}
 				)
 				SELECT
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type = 'step_change'
-								AND h.round = 0
-						)
-					)::int AS draft_started,
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type = 'step_change'
-								AND h.round = 5
-						)
-					)::int AS indicators_filled,
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type = 'step_change'
-								AND h.round = 6
-						)
-					)::int AS submitted,
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type = 'demarche_complete'
-						)
-					)::int AS demarche_completed
+					${countDeclarationsWithEvent({ eventType: "step_change", round: 0, alias: "draft_started" })},
+					${countDeclarationsWithEvent({ eventType: "step_change", round: 5, alias: "indicators_filled" })},
+					${countDeclarationsWithEvent({ eventType: "step_change", round: 6, alias: "submitted" })},
+					${countDeclarationsWithEvent({ eventType: "demarche_complete", alias: "demarche_completed" })}
 				FROM base
 			`);
 
@@ -648,30 +625,9 @@ export const adminStatsRouter = createTRPCRouter({
 				)
 				SELECT
 					COUNT(DISTINCT base.declaration_id)::int AS submitted_with_alert,
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type = 'path_choice'
-						)
-					)::int AS path_chosen,
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type IN (
-									'second_declaration_submit',
-									'joint_evaluation_submit'
-								)
-						)
-					)::int AS corrective_action_submitted,
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type = 'demarche_complete'
-						)
-					)::int AS demarche_completed
+					${countDeclarationsWithEvent({ eventType: "path_choice", alias: "path_chosen" })},
+					${countDeclarationsWithEvent({ eventType: ["second_declaration_submit", "joint_evaluation_submit"], alias: "corrective_action_submitted" })},
+					${countDeclarationsWithEvent({ eventType: "demarche_complete", alias: "demarche_completed" })}
 				FROM base
 			`);
 
@@ -701,32 +657,9 @@ export const adminStatsRouter = createTRPCRouter({
 				)
 				SELECT
 					COUNT(DISTINCT base.declaration_id)::int AS revision_required,
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type = 'path_choice'
-								AND h.round = 2
-						)
-					)::int AS revision_path_chosen,
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type IN (
-									'second_declaration_submit',
-									'joint_evaluation_submit'
-								)
-								AND h.round = 2
-						)
-					)::int AS revision_action_submitted,
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type = 'demarche_complete'
-						)
-					)::int AS demarche_completed
+					${countDeclarationsWithEvent({ eventType: "path_choice", round: 2, alias: "revision_path_chosen" })},
+					${countDeclarationsWithEvent({ eventType: ["second_declaration_submit", "joint_evaluation_submit"], round: 2, alias: "revision_action_submitted" })},
+					${countDeclarationsWithEvent({ eventType: "demarche_complete", alias: "demarche_completed" })}
 				FROM base
 			`);
 
@@ -748,44 +681,11 @@ export const adminStatsRouter = createTRPCRouter({
 						AND ${sizeFilterSql}
 				)
 				SELECT
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type = 'step_change'
-								AND h.round = 0
-						)
-					)::int AS draft_started,
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type = 'step_change'
-								AND h.round = 5
-						)
-					)::int AS indicators_filled,
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type = 'step_change'
-								AND h.round = 6
-						)
-					)::int AS submitted,
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type = 'cse_opinion_submit'
-						)
-					)::int AS cse_opinion_submitted,
-					COUNT(DISTINCT base.declaration_id) FILTER (
-						WHERE EXISTS (
-							SELECT 1 FROM ${declarationStatusHistory} h
-							WHERE h.declaration_id = base.declaration_id
-								AND h.event_type = 'demarche_complete'
-						)
-					)::int AS demarche_completed
+					${countDeclarationsWithEvent({ eventType: "step_change", round: 0, alias: "draft_started" })},
+					${countDeclarationsWithEvent({ eventType: "step_change", round: 5, alias: "indicators_filled" })},
+					${countDeclarationsWithEvent({ eventType: "step_change", round: 6, alias: "submitted" })},
+					${countDeclarationsWithEvent({ eventType: "cse_opinion_submit", alias: "cse_opinion_submitted" })},
+					${countDeclarationsWithEvent({ eventType: "demarche_complete", alias: "demarche_completed" })}
 				FROM base
 			`);
 
@@ -828,6 +728,34 @@ export const adminStatsRouter = createTRPCRouter({
 			};
 		}),
 });
+
+// Each funnel jalon is the same SQL skeleton — a `COUNT(DISTINCT id)`
+// restricted to declarations whose history contains a matching event.
+// Centralising the template keeps the four queries readable and prevents
+// drift between mainFunnel / complianceFunnel / revisionFunnel / cseFunnel
+// (one place to fix if e.g. the history table is renamed).
+function countDeclarationsWithEvent(opts: {
+	eventType: string | readonly string[];
+	round?: number;
+	alias: string;
+}): SQL {
+	const eventClause =
+		typeof opts.eventType === "string"
+			? sql`h.event_type = ${opts.eventType}`
+			: sql`h.event_type IN (${sql.join(
+					opts.eventType.map((t) => sql`${t}`),
+					sql`, `,
+				)})`;
+	const roundClause =
+		opts.round === undefined ? sql`` : sql` AND h.round = ${opts.round}`;
+	return sql`COUNT(DISTINCT base.declaration_id) FILTER (
+		WHERE EXISTS (
+			SELECT 1 FROM ${declarationStatusHistory} h
+			WHERE h.declaration_id = base.declaration_id
+				AND ${eventClause}${roundClause}
+		)
+	)::int AS ${sql.raw(opts.alias)}`;
+}
 
 type FunnelStepDef = Readonly<{ key: string; label: string }>;
 
