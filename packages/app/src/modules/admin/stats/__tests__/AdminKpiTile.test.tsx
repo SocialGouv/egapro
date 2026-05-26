@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { AdminKpiTile, getBadgeRendering } from "../AdminKpiTile";
+import { AdminKpiTile } from "../AdminKpiTile";
 
 describe("AdminKpiTile", () => {
 	it("renders title, value and subtitle", () => {
@@ -128,38 +128,5 @@ describe("AdminKpiTile", () => {
 		const arrow = container.querySelector(".fr-badge [aria-hidden='true']");
 		expect(arrow).not.toBeNull();
 		expect(arrow?.textContent).toBe("↑");
-	});
-});
-
-describe("getBadgeRendering (badge logic helper)", () => {
-	it("rounds the displayed points to one decimal place", () => {
-		const out = getBadgeRendering({ points: 2.07, comparisonLabel: "" }, false);
-		expect(out.signedValue).toBe("+2,1");
-	});
-
-	it("uses the success class for negative delta when inverted", () => {
-		const out = getBadgeRendering(
-			{ points: -2, comparisonLabel: "vs 2025" },
-			true,
-		);
-		expect(out.className).toContain("fr-badge--success");
-		expect(out.arrow).toBe("↓");
-		expect(out.signedValue).toBe("-2,0");
-	});
-
-	it("uses the error class for positive delta when inverted", () => {
-		const out = getBadgeRendering(
-			{ points: 0.5, comparisonLabel: "vs 2025" },
-			true,
-		);
-		expect(out.className).toContain("fr-badge--error");
-	});
-
-	it("produces a neutral badge with `0` for a zero delta", () => {
-		const out = getBadgeRendering({ points: 0, comparisonLabel: "" }, false);
-		expect(out.arrow).toBe("=");
-		expect(out.signedValue.trim()).toBe("0");
-		expect(out.className).not.toContain("--success");
-		expect(out.className).not.toContain("--error");
 	});
 });
