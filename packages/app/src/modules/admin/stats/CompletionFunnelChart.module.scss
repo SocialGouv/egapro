@@ -8,19 +8,7 @@
 	height: 360px;
 }
 
-.tooltipList {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-
-.tooltipItem {
-	font-size: 0.8125rem;
-	color: var(--text-default-grey);
-}
-
-.tooltipItemAlert {
-	font-size: 0.8125rem;
-	font-weight: 600;
-	color: var(--text-default-error);
+.chart {
+	width: 100%;
+	height: 100%;
 }

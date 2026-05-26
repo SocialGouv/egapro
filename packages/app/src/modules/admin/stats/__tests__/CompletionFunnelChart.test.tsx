@@ -1,12 +1,21 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import React from "react";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("echarts-for-react/lib/core", () => ({
+	default: ({ option, className }: { option: unknown; className?: string }) =>
+		React.createElement("div", {
+			className,
+			"data-option": JSON.stringify(option),
+			"data-testid": "echarts-mock",
+		}),
+}));
 
 import {
-	buildColorAccessor,
-	buildTooltipRenderer,
+	buildEchartsOption,
+	buildTooltipFormatter,
 	CompletionFunnelChart,
-	FunnelTooltip,
-	formatFunnelValue,
+	isAboveThreshold,
 } from "../CompletionFunnelChart";
 import type { FunnelRow } from "../types";
 
@@ -53,19 +62,27 @@ const THIRD_ROW: FunnelRow = {
 
 const POPULATED_ROWS: FunnelRow[] = [FIRST_ROW, SECOND_ROW, THIRD_ROW];
 
-function buildTooltipPart(
-	row: FunnelRow,
-): Parameters<typeof FunnelTooltip>[0]["part"] {
-	return {
-		data: {
-			id: row.key,
-			value: row.count,
-			label: row.label,
-			rowCount: row.count,
-			rowPctOfStart: row.pctOfStart,
-			rowPctDropFromPrev: row.pctDropFromPrev ?? -1,
-		},
-	} as unknown as Parameters<typeof FunnelTooltip>[0]["part"];
+type ParsedSeries = {
+	type: string;
+	orient: string;
+	sort: string;
+	data: Array<{
+		name: string;
+		value: number;
+		row: FunnelRow;
+		itemStyle: { color: string };
+	}>;
+};
+
+function readSeries(container: HTMLElement): ParsedSeries {
+	const node = container.querySelector('[data-testid="echarts-mock"]');
+	if (!node) throw new Error("echarts mock not rendered");
+	const raw = node.getAttribute("data-option");
+	if (!raw) throw new Error("data-option missing");
+	const parsed = JSON.parse(raw) as { series: ParsedSeries[] };
+	const series = parsed.series[0];
+	if (!series) throw new Error("series missing in option");
+	return series;
 }
 
 describe("CompletionFunnelChart (S-K19-C1..C5)", () => {
@@ -117,7 +134,10 @@ describe("CompletionFunnelChart (S-K19-C1..C5)", () => {
 				rows={noAlertRows}
 			/>,
 		);
-		expect(container.querySelector("figure")).not.toBeNull();
+		const series = readSeries(container);
+		for (const datum of series.data) {
+			expect(datum.itemStyle.color).toBe("#000091");
+		}
 	});
 
 	it("S-K19-C5: tolerates a single-row funnel (no drop computation needed)", () => {
@@ -137,7 +157,9 @@ describe("CompletionFunnelChart (S-K19-C1..C5)", () => {
 				rows={singleRow}
 			/>,
 		);
-		expect(container.querySelector("figure")).not.toBeNull();
+		const series = readSeries(container);
+		expect(series.data).toHaveLength(1);
+		expect(series.data[0]?.itemStyle.color).toBe("#000091");
 	});
 
 	it("exposes the caption via aria-label on the chart container for assistive tech", () => {
@@ -154,92 +176,113 @@ describe("CompletionFunnelChart (S-K19-C1..C5)", () => {
 	});
 });
 
-describe("FunnelTooltip", () => {
-	it("renders label, count and percentage of funnel", () => {
-		const row = FIRST_ROW;
-		render(<FunnelTooltip dropThreshold={30} part={buildTooltipPart(row)} />);
-		expect(screen.getByText(row.label)).toBeInTheDocument();
-		expect(
-			screen.getByText(/100 déclarations \(100 % du funnel\)/),
-		).toBeInTheDocument();
-	});
-
-	it("omits the drop line when pctDropFromPrev is null (first jalon)", () => {
-		const row = FIRST_ROW;
-		render(<FunnelTooltip dropThreshold={30} part={buildTooltipPart(row)} />);
-		expect(screen.queryByText(/Chute de/)).not.toBeInTheDocument();
-	});
-
-	it("shows the drop line with the alert styling when above threshold", () => {
-		const row = THIRD_ROW;
+describe("buildEchartsOption", () => {
+	it("uses a horizontal funnel with sort=none to preserve row order", () => {
 		const { container } = render(
-			<FunnelTooltip dropThreshold={30} part={buildTooltipPart(row)} />,
+			<CompletionFunnelChart
+				caption="Funnel"
+				dropThreshold={30}
+				rows={POPULATED_ROWS}
+			/>,
 		);
-		expect(
-			screen.getByText(/Chute de 62 % vs étape précédente/),
-		).toBeInTheDocument();
-		expect(
-			container.querySelector('[class*="tooltipItemAlert"]'),
-		).not.toBeNull();
+		const series = readSeries(container);
+		expect(series.type).toBe("funnel");
+		expect(series.orient).toBe("horizontal");
+		expect(series.sort).toBe("none");
 	});
 
-	it("shows the drop line with the default styling when below threshold", () => {
-		const row = SECOND_ROW;
+	it("colours each datum: default blue below threshold, alert red above", () => {
 		const { container } = render(
-			<FunnelTooltip dropThreshold={30} part={buildTooltipPart(row)} />,
+			<CompletionFunnelChart
+				caption="Funnel"
+				dropThreshold={30}
+				rows={POPULATED_ROWS}
+			/>,
 		);
-		expect(
-			screen.getByText(/Chute de 20 % vs étape précédente/),
-		).toBeInTheDocument();
-		expect(container.querySelector('[class*="tooltipItemAlert"]')).toBeNull();
+		const series = readSeries(container);
+		expect(series.data[0]?.itemStyle.color).toBe("#000091");
+		expect(series.data[1]?.itemStyle.color).toBe("#000091");
+		expect(series.data[2]?.itemStyle.color).toBe("#c9191e");
+	});
+
+	it("preserves the row payload alongside name/value so formatters can use it", () => {
+		const option = buildEchartsOption(POPULATED_ROWS, 30);
+		const series = (
+			option as { series: Array<{ data: Array<{ row: FunnelRow }> }> }
+		).series[0];
+		expect(series?.data[0]?.row).toEqual(FIRST_ROW);
+		expect(series?.data[2]?.row).toEqual(THIRD_ROW);
 	});
 });
 
-describe("nivo render-prop helpers", () => {
-	function nivoDatum(row: FunnelRow) {
-		return {
-			id: row.key,
-			value: row.count,
-			label: row.label,
-			rowCount: row.count,
-			rowPctOfStart: row.pctOfStart,
-			rowPctDropFromPrev: row.pctDropFromPrev ?? -1,
-		};
-	}
-
-	it("buildColorAccessor returns the alert colour when the drop exceeds the threshold", () => {
-		const accessor = buildColorAccessor(30);
-		expect(accessor(nivoDatum(THIRD_ROW))).toBe("#c9191e");
+describe("buildTooltipFormatter", () => {
+	it("renders label, count and percentage of funnel", () => {
+		const formatter = buildTooltipFormatter(30);
+		const html = formatter({
+			data: {
+				name: FIRST_ROW.label,
+				value: FIRST_ROW.count,
+				row: FIRST_ROW,
+				itemStyle: { color: "#000091" },
+			},
+		});
+		expect(html).toContain("<strong>Brouillon créé</strong>");
+		expect(html).toContain("100 déclarations (100 % du funnel)");
 	});
 
-	it("buildColorAccessor returns the default colour for the first jalon (no drop)", () => {
-		const accessor = buildColorAccessor(30);
-		expect(accessor(nivoDatum(FIRST_ROW))).toBe("#000091");
+	it("omits the drop line when pctDropFromPrev is null (first jalon)", () => {
+		const formatter = buildTooltipFormatter(30);
+		const html = formatter({
+			data: {
+				name: FIRST_ROW.label,
+				value: FIRST_ROW.count,
+				row: FIRST_ROW,
+				itemStyle: { color: "#000091" },
+			},
+		});
+		expect(html).not.toContain("Chute de");
 	});
 
-	it("buildColorAccessor returns the default colour when the drop is below the threshold", () => {
-		const accessor = buildColorAccessor(30);
-		expect(accessor(nivoDatum(SECOND_ROW))).toBe("#000091");
+	it("shows the drop line with alert styling when above threshold", () => {
+		const formatter = buildTooltipFormatter(30);
+		const html = formatter({
+			data: {
+				name: THIRD_ROW.label,
+				value: THIRD_ROW.count,
+				row: THIRD_ROW,
+				itemStyle: { color: "#c9191e" },
+			},
+		});
+		expect(html).toContain("Chute de 62 % vs étape précédente");
+		expect(html).toContain("color:#c9191e");
+		expect(html).toContain("font-weight:600");
 	});
 
-	it("formatFunnelValue formats integers with French locale", () => {
-		expect(formatFunnelValue(12400)).toBe((12400).toLocaleString("fr-FR"));
+	it("shows the drop line without alert styling when below threshold", () => {
+		const formatter = buildTooltipFormatter(30);
+		const html = formatter({
+			data: {
+				name: SECOND_ROW.label,
+				value: SECOND_ROW.count,
+				row: SECOND_ROW,
+				itemStyle: { color: "#000091" },
+			},
+		});
+		expect(html).toContain("Chute de 20 % vs étape précédente");
+		expect(html).not.toContain("color:#c9191e");
+	});
+});
+
+describe("isAboveThreshold", () => {
+	it("returns false when pctDropFromPrev is null", () => {
+		expect(isAboveThreshold(null, 30)).toBe(false);
 	});
 
-	it("buildTooltipRenderer returns a component that renders FunnelTooltip", () => {
-		const Renderer = buildTooltipRenderer(30);
-		const row = THIRD_ROW;
-		render(
-			<Renderer
-				part={
-					{
-						data: nivoDatum(row),
-					} as unknown as Parameters<typeof FunnelTooltip>[0]["part"]
-				}
-			/>,
-		);
-		expect(
-			screen.getByText(/Chute de 62 % vs étape précédente/),
-		).toBeInTheDocument();
+	it("returns false when pctDropFromPrev equals the threshold", () => {
+		expect(isAboveThreshold(30, 30)).toBe(false);
+	});
+
+	it("returns true when pctDropFromPrev exceeds the threshold", () => {
+		expect(isAboveThreshold(31, 30)).toBe(true);
 	});
 });

@@ -1,10 +1,25 @@
 "use client";
 
-import type { FunnelPartWithHandlers } from "@nivo/funnel";
-import { ResponsiveFunnel } from "@nivo/funnel";
+import { FunnelChart } from "echarts/charts";
+import {
+	LegendComponent,
+	TitleComponent,
+	TooltipComponent,
+} from "echarts/components";
+import * as echarts from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import ReactECharts from "echarts-for-react/lib/core";
 
 import styles from "./CompletionFunnelChart.module.scss";
 import type { FunnelRow } from "./types";
+
+echarts.use([
+	FunnelChart,
+	TooltipComponent,
+	TitleComponent,
+	LegendComponent,
+	CanvasRenderer,
+]);
 
 type Props = {
 	caption: string;
@@ -12,96 +27,111 @@ type Props = {
 	dropThreshold: number;
 };
 
-// Hardcoded DSFR light-theme hex values for @nivo/funnel — its colors prop
-// does not evaluate `var(--…)` CSS variables (it routes data through its own
-// d3 colour scale). Sources :
-//  - --background-action-high-blue-france  → --blue-france-sun-113-625 → #000091
-//  - --background-action-high-red-marianne → --red-marianne-425-625    → #c9191e
 const DEFAULT_BAR_COLOR = "#000091";
 const ALERT_BAR_COLOR = "#c9191e";
-
-// nivo's FunnelDatum requires extra fields to be string | number — we serialize
-// `pctDropFromPrev` (which can be null on the first jalon) via -1 sentinel.
-const NO_DROP_SENTINEL = -1;
-
-type NivoDatum = {
-	id: string;
-	value: number;
-	label: string;
-	rowCount: number;
-	rowPctOfStart: number;
-	rowPctDropFromPrev: number;
-};
 
 function formatCount(value: number): string {
 	return value.toLocaleString("fr-FR");
 }
 
-function isAboveThreshold(pctDropFromPrev: number, threshold: number): boolean {
-	return pctDropFromPrev !== NO_DROP_SENTINEL && pctDropFromPrev > threshold;
+export function isAboveThreshold(
+	pctDropFromPrev: number | null,
+	threshold: number,
+): boolean {
+	return pctDropFromPrev !== null && pctDropFromPrev > threshold;
 }
 
-type FunnelTooltipProps = {
-	part: FunnelPartWithHandlers<NivoDatum>;
-	dropThreshold: number;
+type FunnelDatum = {
+	name: string;
+	value: number;
+	row: FunnelRow;
+	itemStyle: { color: string };
 };
 
-export function FunnelTooltip({ part, dropThreshold }: FunnelTooltipProps) {
-	const datum = part.data;
-	const hasDrop = datum.rowPctDropFromPrev !== NO_DROP_SENTINEL;
-	const triggersAlert = isAboveThreshold(
-		datum.rowPctDropFromPrev,
-		dropThreshold,
-	);
-	return (
-		<div className="fr-p-2w fr-background-alt--grey">
-			<p className="fr-text--sm fr-text--bold fr-mb-1w">{datum.label}</p>
-			<ul className={styles.tooltipList}>
-				<li className={styles.tooltipItem}>
-					{formatCount(datum.rowCount)} déclarations ({datum.rowPctOfStart} % du
-					funnel)
-				</li>
-				{hasDrop && (
-					<li
-						className={
-							triggersAlert ? styles.tooltipItemAlert : styles.tooltipItem
-						}
-					>
-						Chute de {datum.rowPctDropFromPrev} % vs étape précédente
-					</li>
-				)}
-			</ul>
-		</div>
-	);
-}
+type TooltipFormatterParams = {
+	data: FunnelDatum;
+};
 
-export function buildColorAccessor(dropThreshold: number) {
-	return (datum: NivoDatum): string =>
-		isAboveThreshold(datum.rowPctDropFromPrev, dropThreshold)
-			? ALERT_BAR_COLOR
-			: DEFAULT_BAR_COLOR;
-}
+type LabelFormatterParams = {
+	data: FunnelDatum;
+};
 
-export function formatFunnelValue(value: number): string {
-	return formatCount(value);
-}
-
-export function buildTooltipRenderer(dropThreshold: number) {
-	return function TooltipRenderer(props: {
-		part: FunnelPartWithHandlers<NivoDatum>;
-	}) {
-		return <FunnelTooltip dropThreshold={dropThreshold} part={props.part} />;
+export function buildTooltipFormatter(
+	dropThreshold: number,
+): (params: TooltipFormatterParams) => string {
+	return (params) => {
+		const { row } = params.data;
+		const head =
+			`<strong>${row.label}</strong><br/>` +
+			`${formatCount(row.count)} déclarations (${row.pctOfStart} % du funnel)`;
+		if (row.pctDropFromPrev === null) {
+			return head;
+		}
+		const dropStyle = isAboveThreshold(row.pctDropFromPrev, dropThreshold)
+			? "color:#c9191e;font-weight:600;"
+			: "";
+		return `${head}<br/><span style="${dropStyle}">Chute de ${row.pctDropFromPrev} % vs étape précédente</span>`;
 	};
 }
 
-function toNivoDatum(row: FunnelRow): NivoDatum {
+function labelFormatter(params: LabelFormatterParams): string {
+	const { row } = params.data;
+	return `{name|${row.label}}\n{value|${formatCount(row.count)}}\n{pct|${row.pctOfStart} %}`;
+}
+
+export function buildEchartsOption(
+	rows: FunnelRow[],
+	dropThreshold: number,
+): echarts.EChartsCoreOption {
 	return {
-		id: row.key,
-		value: row.count,
-		label: row.label,
-		rowCount: row.count,
-		rowPctOfStart: row.pctOfStart,
-		rowPctDropFromPrev: row.pctDropFromPrev ?? NO_DROP_SENTINEL,
+		tooltip: {
+			trigger: "item",
+			formatter: buildTooltipFormatter(dropThreshold),
+		},
+		series: [
+			{
+				type: "funnel",
+				orient: "horizontal",
+				sort: "none",
+				gap: 4,
+				width: "92%",
+				height: "76%",
+				left: "4%",
+				top: "8%",
+				funnelAlign: "center",
+				label: {
+					show: true,
+					position: "inside",
+					color: "#fff",
+					formatter: labelFormatter,
+					rich: {
+						name: {
+							fontSize: 13,
+							fontWeight: 600,
+							padding: [0, 0, 4, 0],
+							color: "#fff",
+						},
+						value: { fontSize: 16, fontWeight: 700, color: "#fff" },
+						pct: { fontSize: 12, color: "rgba(255,255,255,0.9)" },
+					},
+				},
+				labelLine: { show: false },
+				itemStyle: {
+					borderColor: "rgba(255,255,255,0.8)",
+					borderWidth: 1,
+				},
+				data: rows.map<FunnelDatum>((row) => ({
+					name: row.label,
+					value: row.count,
+					row,
+					itemStyle: {
+						color: isAboveThreshold(row.pctDropFromPrev, dropThreshold)
+							? ALERT_BAR_COLOR
+							: DEFAULT_BAR_COLOR,
+					},
+				})),
+			},
+		],
 	};
 }
 
@@ -118,7 +148,7 @@ export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 		);
 	}
 
-	const data = rows.map(toNivoDatum);
+	const option = buildEchartsOption(rows, dropThreshold);
 
 	return (
 		<figure className={styles.chartWrapper}>
@@ -128,17 +158,11 @@ export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 				données équivalentes sont disponibles dans le tableau ci-dessous.
 			</figcaption>
 			<div aria-label={caption} className={styles.chartContainer} role="img">
-				<ResponsiveFunnel<NivoDatum>
-					borderColor={{ from: "color", modifiers: [["darker", 0.5]] }}
-					borderWidth={20}
-					colors={buildColorAccessor(dropThreshold)}
-					data={data}
-					direction="horizontal"
-					labelColor={{ from: "color", modifiers: [["darker", 3]] }}
-					margin={{ top: 30, right: 30, bottom: 60, left: 30 }}
-					motionConfig="gentle"
-					tooltip={buildTooltipRenderer(dropThreshold)}
-					valueFormat={formatFunnelValue}
+				<ReactECharts
+					className={styles.chart}
+					echarts={echarts}
+					option={option}
+					opts={{ renderer: "canvas" }}
 				/>
 			</div>
 		</figure>
