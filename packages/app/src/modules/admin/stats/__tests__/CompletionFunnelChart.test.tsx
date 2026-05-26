@@ -16,8 +16,20 @@ import {
 	buildTooltipFormatter,
 	CompletionFunnelChart,
 	isAboveThreshold,
+	labelFormatter,
+	pickFunnelColor,
 } from "../CompletionFunnelChart";
 import type { FunnelRow } from "../types";
+
+const PALETTE_COLORS = [
+	"#000091",
+	"#465f9d",
+	"#417dc4",
+	"#009099",
+	"#00a95f",
+	"#b7a73f",
+] as const;
+const ALERT_COLOR = "#c9191e";
 
 const EMPTY_ROWS: FunnelRow[] = [
 	{
@@ -122,7 +134,7 @@ describe("CompletionFunnelChart (S-K19-C1..C5)", () => {
 		expect(container.querySelector("figcaption")).not.toBeNull();
 	});
 
-	it("S-K19-C4: passes the row count without crashing when a drop is below the threshold", () => {
+	it("S-K19-C4: assigns palette colors to each jalon when no drop is above the threshold", () => {
 		const noAlertRows: FunnelRow[] = POPULATED_ROWS.map((row, idx) => ({
 			...row,
 			pctDropFromPrev: idx === 0 ? null : 5,
@@ -135,9 +147,9 @@ describe("CompletionFunnelChart (S-K19-C1..C5)", () => {
 			/>,
 		);
 		const series = readSeries(container);
-		for (const datum of series.data) {
-			expect(datum.itemStyle.color).toBe("#000091");
-		}
+		series.data.forEach((datum, idx) => {
+			expect(datum.itemStyle.color).toBe(PALETTE_COLORS[idx]);
+		});
 	});
 
 	it("S-K19-C5: tolerates a single-row funnel (no drop computation needed)", () => {
@@ -159,7 +171,7 @@ describe("CompletionFunnelChart (S-K19-C1..C5)", () => {
 		);
 		const series = readSeries(container);
 		expect(series.data).toHaveLength(1);
-		expect(series.data[0]?.itemStyle.color).toBe("#000091");
+		expect(series.data[0]?.itemStyle.color).toBe(PALETTE_COLORS[0]);
 	});
 
 	it("exposes the caption via aria-label on the chart container for assistive tech", () => {
@@ -191,7 +203,7 @@ describe("buildEchartsOption", () => {
 		expect(series.sort).toBe("none");
 	});
 
-	it("colours each datum: default blue below threshold, alert red above", () => {
+	it("colours each datum: palette per index below threshold, alert red above", () => {
 		const { container } = render(
 			<CompletionFunnelChart
 				caption="Funnel"
@@ -200,9 +212,31 @@ describe("buildEchartsOption", () => {
 			/>,
 		);
 		const series = readSeries(container);
-		expect(series.data[0]?.itemStyle.color).toBe("#000091");
-		expect(series.data[1]?.itemStyle.color).toBe("#000091");
-		expect(series.data[2]?.itemStyle.color).toBe("#c9191e");
+		expect(series.data[0]?.itemStyle.color).toBe(PALETTE_COLORS[0]);
+		expect(series.data[1]?.itemStyle.color).toBe(PALETTE_COLORS[1]);
+		expect(series.data[2]?.itemStyle.color).toBe(ALERT_COLOR);
+	});
+
+	it("cycles the palette modulo its length when there are more jalons than colors", () => {
+		const sevenRows: FunnelRow[] = Array.from(
+			{ length: PALETTE_COLORS.length + 1 },
+			(_, idx) => ({
+				key: `step_${idx}`,
+				label: `Étape ${idx + 1}`,
+				count: 100 - idx,
+				pctOfStart: 100 - idx,
+				pctDropFromPrev: idx === 0 ? null : 1,
+			}),
+		);
+		const option = buildEchartsOption(sevenRows, 30);
+		const series = (
+			option as {
+				series: Array<{ data: Array<{ itemStyle: { color: string } }> }>;
+			}
+		).series[0];
+		expect(series?.data[PALETTE_COLORS.length]?.itemStyle.color).toBe(
+			PALETTE_COLORS[0],
+		);
 	});
 
 	it("preserves the row payload alongside name/value so formatters can use it", () => {
@@ -212,6 +246,63 @@ describe("buildEchartsOption", () => {
 		).series[0];
 		expect(series?.data[0]?.row).toEqual(FIRST_ROW);
 		expect(series?.data[2]?.row).toEqual(THIRD_ROW);
+	});
+
+	it("exposes a clickable legend with one entry per jalon", () => {
+		const option = buildEchartsOption(POPULATED_ROWS, 30);
+		const legend = (
+			option as {
+				legend: { show: boolean; data: string[] };
+			}
+		).legend;
+		expect(legend.show).toBe(true);
+		expect(legend.data).toEqual(POPULATED_ROWS.map((row) => row.label));
+	});
+});
+
+describe("labelFormatter", () => {
+	it("formats name, count and percentage with localized thousands", () => {
+		const row: FunnelRow = {
+			key: "draft_started",
+			label: "Brouillon créé",
+			count: 12345,
+			pctOfStart: 87,
+			pctDropFromPrev: null,
+		};
+		const out = labelFormatter({
+			data: {
+				name: row.label,
+				value: row.count,
+				row,
+				itemStyle: { color: "" },
+			},
+		});
+		expect(out).toContain("{name|Brouillon créé}");
+		expect(out).toContain("{value|12 345}");
+		expect(out).toContain("{pct|87 %}");
+	});
+});
+
+describe("pickFunnelColor", () => {
+	it("returns the palette color matching the index when the drop is below threshold", () => {
+		expect(pickFunnelColor(0, null, 30)).toBe(PALETTE_COLORS[0]);
+		expect(pickFunnelColor(1, 10, 30)).toBe(PALETTE_COLORS[1]);
+		expect(pickFunnelColor(2, 30, 30)).toBe(PALETTE_COLORS[2]);
+	});
+
+	it("returns the alert color when pctDropFromPrev exceeds the threshold", () => {
+		expect(pickFunnelColor(1, 31, 30)).toBe(ALERT_COLOR);
+		expect(pickFunnelColor(4, 99, 30)).toBe(ALERT_COLOR);
+	});
+
+	it("wraps the palette index modulo its length", () => {
+		const last = PALETTE_COLORS.length - 1;
+		expect(pickFunnelColor(PALETTE_COLORS.length, null, 30)).toBe(
+			PALETTE_COLORS[0],
+		);
+		expect(pickFunnelColor(PALETTE_COLORS.length + last, null, 30)).toBe(
+			PALETTE_COLORS[last],
+		);
 	});
 });
 

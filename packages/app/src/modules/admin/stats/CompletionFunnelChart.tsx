@@ -27,8 +27,30 @@ type Props = {
 	dropThreshold: number;
 };
 
-const DEFAULT_BAR_COLOR = "#000091";
-const ALERT_BAR_COLOR = "#c9191e";
+// DSFR illustration palette — light-theme hex values verified against
+// packages/app/node_modules/@gouvfr/dsfr/dist/dsfr.css custom properties.
+const DSFR_FUNNEL_PALETTE = [
+	"#000091", // --blue-france-sun-113-625
+	"#465f9d", // --blue-ecume-main-400
+	"#417dc4", // --blue-cumulus-main-526
+	"#009099", // --green-archipel-main-557
+	"#00a95f", // --green-emeraude-main-632
+	"#b7a73f", // --green-tilleul-verveine-main-707
+] as const;
+
+const ALERT_BAR_COLOR = "#c9191e"; // --red-marianne-425-625 (light)
+const LEGEND_TEXT_COLOR = "#3a3a3a";
+
+export function pickFunnelColor(
+	index: number,
+	pctDropFromPrev: number | null,
+	threshold: number,
+): string {
+	if (isAboveThreshold(pctDropFromPrev, threshold)) {
+		return ALERT_BAR_COLOR;
+	}
+	return DSFR_FUNNEL_PALETTE[index % DSFR_FUNNEL_PALETTE.length] as string;
+}
 
 function formatCount(value: number): string {
 	return value.toLocaleString("fr-FR");
@@ -74,7 +96,7 @@ export function buildTooltipFormatter(
 	};
 }
 
-function labelFormatter(params: LabelFormatterParams): string {
+export function labelFormatter(params: LabelFormatterParams): string {
 	const { row } = params.data;
 	return `{name|${row.label}}\n{value|${formatCount(row.count)}}\n{pct|${row.pctOfStart} %}`;
 }
@@ -88,6 +110,19 @@ export function buildEchartsOption(
 			trigger: "item",
 			formatter: buildTooltipFormatter(dropThreshold),
 		},
+		legend: {
+			show: true,
+			orient: "horizontal",
+			bottom: 0,
+			data: rows.map((row) => row.label),
+			textStyle: {
+				fontSize: 12,
+				color: LEGEND_TEXT_COLOR,
+			},
+			icon: "rect",
+			itemWidth: 18,
+			itemHeight: 12,
+		},
 		series: [
 			{
 				type: "funnel",
@@ -95,9 +130,10 @@ export function buildEchartsOption(
 				sort: "none",
 				gap: 4,
 				width: "92%",
-				height: "76%",
+				height: "66%",
 				left: "4%",
 				top: "8%",
+				bottom: "20%",
 				funnelAlign: "center",
 				label: {
 					show: true,
@@ -120,14 +156,12 @@ export function buildEchartsOption(
 					borderColor: "rgba(255,255,255,0.8)",
 					borderWidth: 1,
 				},
-				data: rows.map<FunnelDatum>((row) => ({
+				data: rows.map<FunnelDatum>((row, index) => ({
 					name: row.label,
 					value: row.count,
 					row,
 					itemStyle: {
-						color: isAboveThreshold(row.pctDropFromPrev, dropThreshold)
-							? ALERT_BAR_COLOR
-							: DEFAULT_BAR_COLOR,
+						color: pickFunnelColor(index, row.pctDropFromPrev, dropThreshold),
 					},
 				})),
 			},
