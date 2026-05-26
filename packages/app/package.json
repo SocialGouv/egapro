@@ -43,6 +43,8 @@
 		"@aws-sdk/client-s3": "^3.1029.0",
 		"@gouvfr/dsfr": "^1.14.4",
 		"@hookform/resolvers": "^5.2.2",
+		"@nivo/core": "^0.99.0",
+		"@nivo/funnel": "^0.99.0",
 		"@react-pdf/renderer": "^4.4.1",
 		"@sentry/nextjs": "^10.48.0",
 		"@socialgouv/matomo-next": "^1.13.1",

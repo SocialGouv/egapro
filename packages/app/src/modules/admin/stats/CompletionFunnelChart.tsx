@@ -1,5 +1,8 @@
 "use client";
 
+import type { FunnelPartWithHandlers } from "@nivo/funnel";
+import { ResponsiveFunnel } from "@nivo/funnel";
+
 import styles from "./CompletionFunnelChart.module.scss";
 import type { FunnelRow } from "./types";
 
@@ -9,31 +12,97 @@ type Props = {
 	dropThreshold: number;
 };
 
-const DEFAULT_BAR_COLOR = "var(--background-action-high-blue-france)";
-const ALERT_BAR_COLOR = "var(--background-action-high-red-marianne)";
+// Hardcoded DSFR light-theme hex values for @nivo/funnel — its colors prop
+// does not evaluate `var(--…)` CSS variables (it routes data through its own
+// d3 colour scale). Sources :
+//  - --background-action-high-blue-france  → --blue-france-sun-113-625 → #000091
+//  - --background-action-high-red-marianne → --red-marianne-425-625    → #c9191e
+const DEFAULT_BAR_COLOR = "#000091";
+const ALERT_BAR_COLOR = "#c9191e";
 
-const VIEW_WIDTH = 1000;
-const VIEW_HEIGHT = 360;
-const TOP_LABEL_AREA = 50;
-const BOTTOM_LABEL_AREA = 100;
-const DRAW_HEIGHT = VIEW_HEIGHT - TOP_LABEL_AREA - BOTTOM_LABEL_AREA;
-const MID_Y = TOP_LABEL_AREA + DRAW_HEIGHT / 2;
+// nivo's FunnelDatum requires extra fields to be string | number — we serialize
+// `pctDropFromPrev` (which can be null on the first jalon) via -1 sentinel.
+const NO_DROP_SENTINEL = -1;
+
+type NivoDatum = {
+	id: string;
+	value: number;
+	label: string;
+	rowCount: number;
+	rowPctOfStart: number;
+	rowPctDropFromPrev: number;
+};
 
 function formatCount(value: number): string {
 	return value.toLocaleString("fr-FR");
 }
 
-function isAboveThreshold(
-	pctDropFromPrev: number | null,
-	threshold: number,
-): boolean {
-	return pctDropFromPrev !== null && pctDropFromPrev > threshold;
+function isAboveThreshold(pctDropFromPrev: number, threshold: number): boolean {
+	return pctDropFromPrev !== NO_DROP_SENTINEL && pctDropFromPrev > threshold;
 }
 
-function buildTitle(row: FunnelRow): string {
-	const head = `${row.label} : ${formatCount(row.count)} (${row.pctOfStart} % du funnel)`;
-	if (row.pctDropFromPrev === null) return head;
-	return `${head} — chute de ${row.pctDropFromPrev} % vs étape précédente`;
+type FunnelTooltipProps = {
+	part: FunnelPartWithHandlers<NivoDatum>;
+	dropThreshold: number;
+};
+
+export function FunnelTooltip({ part, dropThreshold }: FunnelTooltipProps) {
+	const datum = part.data;
+	const hasDrop = datum.rowPctDropFromPrev !== NO_DROP_SENTINEL;
+	const triggersAlert = isAboveThreshold(
+		datum.rowPctDropFromPrev,
+		dropThreshold,
+	);
+	return (
+		<div className="fr-p-2w fr-background-alt--grey">
+			<p className="fr-text--sm fr-text--bold fr-mb-1w">{datum.label}</p>
+			<ul className={styles.tooltipList}>
+				<li className={styles.tooltipItem}>
+					{formatCount(datum.rowCount)} déclarations ({datum.rowPctOfStart} % du
+					funnel)
+				</li>
+				{hasDrop && (
+					<li
+						className={
+							triggersAlert ? styles.tooltipItemAlert : styles.tooltipItem
+						}
+					>
+						Chute de {datum.rowPctDropFromPrev} % vs étape précédente
+					</li>
+				)}
+			</ul>
+		</div>
+	);
+}
+
+export function buildColorAccessor(dropThreshold: number) {
+	return (datum: NivoDatum): string =>
+		isAboveThreshold(datum.rowPctDropFromPrev, dropThreshold)
+			? ALERT_BAR_COLOR
+			: DEFAULT_BAR_COLOR;
+}
+
+export function formatFunnelValue(value: number): string {
+	return formatCount(value);
+}
+
+export function buildTooltipRenderer(dropThreshold: number) {
+	return function TooltipRenderer(props: {
+		part: FunnelPartWithHandlers<NivoDatum>;
+	}) {
+		return <FunnelTooltip dropThreshold={dropThreshold} part={props.part} />;
+	};
+}
+
+function toNivoDatum(row: FunnelRow): NivoDatum {
+	return {
+		id: row.key,
+		value: row.count,
+		label: row.label,
+		rowCount: row.count,
+		rowPctOfStart: row.pctOfStart,
+		rowPctDropFromPrev: row.pctDropFromPrev ?? NO_DROP_SENTINEL,
+	};
 }
 
 export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
@@ -49,9 +118,7 @@ export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 		);
 	}
 
-	const maxValue = Math.max(...rows.map((r) => r.count), 1);
-	const segmentWidth = VIEW_WIDTH / rows.length;
-	const heights = rows.map((r) => (r.count / maxValue) * DRAW_HEIGHT);
+	const data = rows.map(toNivoDatum);
 
 	return (
 		<figure className={styles.chartWrapper}>
@@ -60,73 +127,20 @@ export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 				pourcentage du funnel et la chute par rapport à l'étape précédente. Les
 				données équivalentes sont disponibles dans le tableau ci-dessous.
 			</figcaption>
-			<svg
-				aria-label={caption}
-				className={styles.chartSvg}
-				role="img"
-				viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
-			>
-				{rows.map((row, i) => {
-					const xStart = i * segmentWidth;
-					const xEnd = xStart + segmentWidth;
-					const hLeft = heights[i] ?? 0;
-					const hRight =
-						i < rows.length - 1 ? (heights[i + 1] ?? 0) : (heights[i] ?? 0);
-					const path = `M ${xStart} ${MID_Y - hLeft / 2} L ${xEnd} ${
-						MID_Y - hRight / 2
-					} L ${xEnd} ${MID_Y + hRight / 2} L ${xStart} ${MID_Y + hLeft / 2} Z`;
-					const xMid = xStart + segmentWidth / 2;
-					const triggersAlert = isAboveThreshold(
-						row.pctDropFromPrev,
-						dropThreshold,
-					);
-					const fill = triggersAlert ? ALERT_BAR_COLOR : DEFAULT_BAR_COLOR;
-
-					return (
-						<g key={row.key}>
-							<text
-								className={styles.topLabel}
-								textAnchor="middle"
-								x={xMid}
-								y={TOP_LABEL_AREA - 16}
-							>
-								{row.label}
-							</text>
-							<path d={path} fill={fill}>
-								<title>{buildTitle(row)}</title>
-							</path>
-							<text
-								className={styles.countLabel}
-								textAnchor="middle"
-								x={xMid}
-								y={VIEW_HEIGHT - BOTTOM_LABEL_AREA + 28}
-							>
-								{formatCount(row.count)}
-							</text>
-							<text
-								className={styles.pctLabel}
-								textAnchor="middle"
-								x={xMid}
-								y={VIEW_HEIGHT - BOTTOM_LABEL_AREA + 52}
-							>
-								{row.pctOfStart} % du funnel
-							</text>
-							{row.pctDropFromPrev !== null && (
-								<text
-									className={
-										triggersAlert ? styles.dropLabelAlert : styles.dropLabel
-									}
-									textAnchor="middle"
-									x={xMid}
-									y={VIEW_HEIGHT - BOTTOM_LABEL_AREA + 76}
-								>
-									↓ {row.pctDropFromPrev} % vs précédent
-								</text>
-							)}
-						</g>
-					);
-				})}
-			</svg>
+			<div aria-label={caption} className={styles.chartContainer} role="img">
+				<ResponsiveFunnel<NivoDatum>
+					borderColor={{ from: "color", modifiers: [["darker", 0.5]] }}
+					borderWidth={20}
+					colors={buildColorAccessor(dropThreshold)}
+					data={data}
+					direction="horizontal"
+					labelColor={{ from: "color", modifiers: [["darker", 3]] }}
+					margin={{ top: 30, right: 30, bottom: 60, left: 30 }}
+					motionConfig="gentle"
+					tooltip={buildTooltipRenderer(dropThreshold)}
+					valueFormat={formatFunnelValue}
+				/>
+			</div>
 		</figure>
 	);
 }
