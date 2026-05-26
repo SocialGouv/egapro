@@ -14,6 +14,17 @@ export {
 } from "./schemas";
 export { computeIndicatorPercentages } from "./shared/computeIndicatorPercentages";
 export { DevFillButton } from "./shared/DevFillButton";
+export type {
+	ClearDraftInput,
+	DraftBlob,
+	GetDraftInput,
+	SaveDraftInput,
+} from "./shared/draft/schemas";
+export {
+	clearDraftInput,
+	getDraftInput,
+	saveDraftInput,
+} from "./shared/draft/schemas";
 export { GAP_LEVEL_LABELS, gapBadgeClass } from "./shared/gapBadge";
 export type {
 	GipMdsRow,

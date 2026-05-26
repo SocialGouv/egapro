@@ -1,12 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
-
+import type { DraftBlob } from "~/modules/declaration-remuneration";
 import {
 	clearDraftInput,
 	getDraftInput,
 	saveDraftInput,
-} from "~/modules/declaration-remuneration/shared/draft/schemas";
+} from "~/modules/declaration-remuneration";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { isImpersonatingSiren } from "~/server/auth/companyAccess";
@@ -14,8 +14,6 @@ import type { DB } from "~/server/db";
 import { declarations, userCompanies } from "~/server/db/schema";
 
 const DRAFT_TTL_MS = 30 * 24 * 3600 * 1000;
-
-type DraftBlob = Record<string, Record<string, unknown>>;
 
 async function assertOwnership(
 	db: DB,

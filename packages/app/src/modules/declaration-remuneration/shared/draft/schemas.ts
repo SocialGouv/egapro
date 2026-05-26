@@ -30,3 +30,4 @@ export const clearDraftInput = z.object({
 export type GetDraftInput = z.infer<typeof getDraftInput>;
 export type SaveDraftInput = z.infer<typeof saveDraftInput>;
 export type ClearDraftInput = z.infer<typeof clearDraftInput>;
+export type DraftBlob = Record<string, Record<string, unknown>>;

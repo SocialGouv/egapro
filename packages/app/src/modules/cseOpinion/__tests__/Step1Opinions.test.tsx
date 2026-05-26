@@ -200,6 +200,8 @@ describe("Step1Opinions", () => {
 			<Step1Opinions
 				cseDeadline={cseDeadline}
 				previousHref="/declaration-remuneration/parcours-conformite"
+				siren="123456789"
+				year={2026}
 			/>,
 		);
 

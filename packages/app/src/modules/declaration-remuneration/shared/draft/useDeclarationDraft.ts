@@ -7,8 +7,7 @@ import { api } from "~/trpc/react";
 
 import { computeDraftDiff, deepEqual } from "./computeDraftDiff";
 import type { DraftKind, DraftStep } from "./draftSchema";
-
-type DraftBlob = Record<string, Record<string, unknown>>;
+import type { DraftBlob } from "./schemas";
 
 type UseDeclarationDraftOptions<T extends Record<string, unknown>> = {
 	siren: string;
