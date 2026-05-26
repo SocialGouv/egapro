@@ -4,7 +4,7 @@ import { resetDeclarationToDraft } from "./helpers/db";
 test.describe("Step 1 workforce — Bug #3527", () => {
 	test.describe.configure({ mode: "serial" });
 
-	test.beforeAll(async () => {
+	test.beforeEach(async () => {
 		await resetDeclarationToDraft();
 	});
 
