@@ -61,6 +61,47 @@ export const POST_SUBMIT_MILESTONES = [
 export type PostSubmitMilestoneKey =
 	(typeof POST_SUBMIT_MILESTONES)[number]["key"];
 
+export const DROPOFF_RATE_ALERT_THRESHOLD = 15;
+export const DROPOFF_STAGNATION_DAYS_DEFAULT = 30;
+export const DROPOFF_STAGNATION_DAYS_MIN = 1;
+export const DROPOFF_STAGNATION_DAYS_MAX = 180;
+
+export const POST_SUBMIT_DROPOFF_PHASES = [
+	{
+		key: "awaiting_compliance_path_choice",
+		label: "Choix parcours conformité",
+		status: "awaiting_compliance_path_choice",
+	},
+	{
+		key: "corrective_actions_chosen",
+		label: "Seconde déclaration (corrective)",
+		status: "corrective_actions_chosen",
+	},
+	{
+		key: "joint_evaluation_chosen",
+		label: "Évaluation conjointe",
+		status: "joint_evaluation_chosen",
+	},
+	{
+		key: "awaiting_revision_choice",
+		label: "Choix de révision",
+		status: "awaiting_revision_choice",
+	},
+	{
+		key: "revised_joint_evaluation_chosen",
+		label: "Évaluation conjointe (révision)",
+		status: "revised_joint_evaluation_chosen",
+	},
+	{
+		key: "awaiting_cse_opinion",
+		label: "Avis CSE",
+		status: "awaiting_cse_opinion",
+	},
+] as const;
+
+export type PostSubmitDropoffPhaseKey =
+	(typeof POST_SUBMIT_DROPOFF_PHASES)[number]["key"];
+
 /**
  * Funnel jalons for KPI K19 « funnel de complétion ».
  *

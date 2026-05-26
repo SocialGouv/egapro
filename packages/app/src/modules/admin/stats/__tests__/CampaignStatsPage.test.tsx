@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const progressionUseQueryMock = vi.fn();
 const statsUseQueryMock = vi.fn();
 const stepDurationsUseQueryMock = vi.fn();
+const stepDropoffUseQueryMock = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -17,6 +18,9 @@ vi.mock("~/trpc/react", () => ({
 			},
 			getStepDurations: {
 				useQuery: (...args: unknown[]) => stepDurationsUseQueryMock(...args),
+			},
+			getStepDropoffRate: {
+				useQuery: (...args: unknown[]) => stepDropoffUseQueryMock(...args),
 			},
 		},
 	},
@@ -38,6 +42,14 @@ vi.mock("../StepDurationsTable", () => ({
 	StepDurationsTable: () => <div data-testid="step-durations-table" />,
 }));
 
+vi.mock("../StepDropoffChart", () => ({
+	StepDropoffChart: () => <div data-testid="step-dropoff-chart" />,
+}));
+
+vi.mock("../StepDropoffTable", () => ({
+	StepDropoffTable: () => <div data-testid="step-dropoff-table" />,
+}));
+
 import { CampaignStatsPage } from "../CampaignStatsPage";
 
 describe("CampaignStatsPage — K1 integration", () => {
@@ -45,6 +57,7 @@ describe("CampaignStatsPage — K1 integration", () => {
 		progressionUseQueryMock.mockReset();
 		statsUseQueryMock.mockReset();
 		stepDurationsUseQueryMock.mockReset();
+		stepDropoffUseQueryMock.mockReset();
 		progressionUseQueryMock.mockReturnValue({
 			data: [],
 			isLoading: false,
@@ -61,6 +74,11 @@ describe("CampaignStatsPage — K1 integration", () => {
 			isError: false,
 		});
 		stepDurationsUseQueryMock.mockReturnValue({
+			data: [],
+			isLoading: false,
+			isError: false,
+		});
+		stepDropoffUseQueryMock.mockReturnValue({
 			data: [],
 			isLoading: false,
 			isError: false,

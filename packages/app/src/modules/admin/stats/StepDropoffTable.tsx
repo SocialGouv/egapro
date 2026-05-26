@@ -1,21 +1,21 @@
-import { formatCount, formatDays } from "./formatters";
-import type { StepDurationRow } from "./types";
+import { formatCount, formatPercent } from "./formatters";
+import type { StepDropoffRow } from "./types";
 
 type Props = {
-	rows: StepDurationRow[];
+	rows: StepDropoffRow[];
 };
 
-const PHASE_HEADERS: Record<StepDurationRow["phase"], string> = {
+const PHASE_HEADERS: Record<StepDropoffRow["phase"], string> = {
 	wizard: "Parcours initial (wizard A–F)",
 	post_submit: "Démarche post-soumission",
 };
 
 /**
- * Accessible alternative to `<StepDurationsChart>` — same K4 dataset rendered
- * as a DSFR table inside a `<details>` toggle. Required for RGAA because the
- * Recharts SVG is not navigable by assistive tech.
+ * Accessible alternative to `<StepDropoffChart>` — same K5 dataset rendered
+ * as a DSFR table inside a `<details>` toggle. Required for RGAA because
+ * the Recharts SVG is not navigable by assistive tech.
  */
-export function StepDurationsTable({ rows }: Props) {
+export function StepDropoffTable({ rows }: Props) {
 	if (rows.length === 0) {
 		return null;
 	}
@@ -34,16 +34,18 @@ export function StepDurationsTable({ rows }: Props) {
 						<div className="fr-table__content">
 							<table>
 								<caption className="fr-sr-only">
-									Délai médian et 90e percentile en jours par étape du parcours
-									indicateurs et par jalon de la démarche post-soumission, et
-									nombre de déclarations concernées.
+									Taux d'abandon, nombre de déclarations abandonnées et nombre
+									total de déclarations entrées par phase du parcours déclaratif
+									: étapes du wizard A–F puis phases post-soumission.
 								</caption>
 								<thead>
 									<tr>
-										<th scope="col">Étape ou jalon</th>
-										<th scope="col">Médiane (j)</th>
-										<th scope="col">p90 (j)</th>
-										<th scope="col">Échantillon</th>
+										<th scope="col">Phase</th>
+										<th scope="col">Taux d'abandon (%)</th>
+										<th scope="col">Abandonnées</th>
+										<th scope="col">
+											Total déclarations entrées dans la phase
+										</th>
 									</tr>
 								</thead>
 								{wizardRows.length > 0 && (
@@ -60,9 +62,9 @@ export function StepDurationsTable({ rows }: Props) {
 										{wizardRows.map((row) => (
 											<tr key={row.key}>
 												<th scope="row">{row.label}</th>
-												<td>{formatDays(row.medianDays)}</td>
-												<td>{formatDays(row.p90Days)}</td>
-												<td>{formatCount(row.sampleSize)}</td>
+												<td>{formatPercent(row.dropoffRate)}</td>
+												<td>{formatCount(row.abandoned)}</td>
+												<td>{formatCount(row.total)}</td>
 											</tr>
 										))}
 									</tbody>
@@ -81,9 +83,9 @@ export function StepDurationsTable({ rows }: Props) {
 										{postSubmitRows.map((row) => (
 											<tr key={row.key}>
 												<th scope="row">{row.label}</th>
-												<td>{formatDays(row.medianDays)}</td>
-												<td>{formatDays(row.p90Days)}</td>
-												<td>{formatCount(row.sampleSize)}</td>
+												<td>{formatPercent(row.dropoffRate)}</td>
+												<td>{formatCount(row.abandoned)}</td>
+												<td>{formatCount(row.total)}</td>
 											</tr>
 										))}
 									</tbody>

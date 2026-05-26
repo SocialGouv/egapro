@@ -60,16 +60,22 @@ export type {
 	FunnelCseStepKey,
 	FunnelMainStepKey,
 	FunnelRevisionStepKey,
+	PostSubmitDropoffPhaseKey,
 	PostSubmitMilestoneKey,
 } from "./shared/declarationSteps";
 export {
 	DECLARATION_STEPS,
+	DROPOFF_RATE_ALERT_THRESHOLD,
+	DROPOFF_STAGNATION_DAYS_DEFAULT,
+	DROPOFF_STAGNATION_DAYS_MAX,
+	DROPOFF_STAGNATION_DAYS_MIN,
 	FUNNEL_COMPLIANCE_KEY_STEPS,
 	FUNNEL_CSE_KEY_STEPS,
 	FUNNEL_DROP_ALERT_THRESHOLD,
 	FUNNEL_MAIN_KEY_STEPS,
 	FUNNEL_REVISION_KEY_STEPS,
 	getStepLabel,
+	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
 } from "./shared/declarationSteps";
 // Declaration status history (event-sourced trajectory)
