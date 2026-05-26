@@ -143,7 +143,7 @@ export const declarationDraftRouter = createTRPCRouter({
 	clear: protectedProcedure
 		.input(clearDraftInput)
 		.mutation(async ({ ctx, input }) => {
-			const { siren, year, kind } = input;
+			const { siren, year, kind, step } = input;
 
 			if (ctx.session.user.isAdmin && ctx.session.user.impersonation) {
 				return { ok: true as const };
@@ -173,14 +173,33 @@ export const declarationDraftRouter = createTRPCRouter({
 				if (!row || row.draft === null) return { ok: true as const };
 
 				const current = row.draft as DraftBlob;
-				const { [kind]: _removed, ...remaining } = current;
+				let newDraft: DraftBlob | null;
 
-				const isEmpty = Object.keys(remaining).length === 0;
+				if (step !== undefined) {
+					const kindData = (current[kind] ?? {}) as Record<string, unknown>;
+					const { [step]: _removedStep, ...remainingSteps } = kindData;
+					if (Object.keys(remainingSteps).length === 0) {
+						const { [kind]: _removedKind, ...remainingKinds } = current;
+						newDraft =
+							Object.keys(remainingKinds).length === 0
+								? null
+								: (remainingKinds as DraftBlob);
+					} else {
+						newDraft = { ...current, [kind]: remainingSteps };
+					}
+				} else {
+					const { [kind]: _removed, ...remaining } = current;
+					newDraft =
+						Object.keys(remaining).length === 0
+							? null
+							: (remaining as DraftBlob);
+				}
+
 				await ctx.db
 					.update(declarations)
 					.set({
-						draft: isEmpty ? null : remaining,
-						draftUpdatedAt: isEmpty ? null : new Date(),
+						draft: newDraft,
+						draftUpdatedAt: newDraft !== null ? new Date() : null,
 					})
 					.where(where);
 			}

@@ -197,6 +197,7 @@ describe("useDeclarationDraft", () => {
 			year: YEAR,
 			siren: SIREN,
 			kind: "main",
+			step: "1",
 		});
 		expect(result.current.draft).toEqual({});
 		expect(result.current.hasDraft).toBe(false);
@@ -242,6 +243,7 @@ describe("useDeclarationDraft", () => {
 			year: YEAR,
 			siren: SIREN,
 			kind: "main",
+			step: "1",
 		});
 	});
 
@@ -278,6 +280,16 @@ describe("useDeclarationDraft", () => {
 
 		expect(saveMutateMock).not.toHaveBeenCalled();
 		expect(clearMutateMock).not.toHaveBeenCalled();
+	});
+
+	it("reports isLoadingDraft=true when data is undefined even if isLoading is false (enabled/disabled race)", () => {
+		// Reproduces the logout+login bug: when enabled transitions false→true,
+		// TanStack Query briefly has fetchStatus='idle' making isLoading=false,
+		// but data is still undefined. We must NOT fire hydration early.
+		queryState = { data: undefined, isLoading: false };
+		const { result } = renderDraftHook();
+		expect(result.current.isLoadingDraft).toBe(true);
+		expect(result.current.draft).toEqual({});
 	});
 
 	it("reports isLoadingDraft=true while the session is loading", () => {

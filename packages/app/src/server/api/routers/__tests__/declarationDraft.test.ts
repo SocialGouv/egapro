@@ -423,5 +423,75 @@ describe("declarationDraftRouter", () => {
 			expect(result).toEqual({ ok: true });
 			expect(mocks.update).not.toHaveBeenCalled();
 		});
+
+		it("drops only the specified step while preserving other steps in the same kind", async () => {
+			const existingDraft = {
+				main: { "1": { totalWomen: 50 }, "2": { payGap: 3.5 } },
+			};
+			const { db, mocks } = createMockDb([
+				[{ siren: SIREN }],
+				[{ draft: existingDraft }],
+			]);
+			const caller = await createCaller(db);
+
+			const result = await caller.clear({
+				siren: SIREN,
+				year: YEAR,
+				kind: "main",
+				step: "1",
+			});
+
+			expect(result).toEqual({ ok: true });
+			expect(mocks.set).toHaveBeenCalledWith(
+				expect.objectContaining({
+					draft: { main: { "2": { payGap: 3.5 } } },
+				}),
+			);
+		});
+
+		it("removes the kind bucket when clearing its last step", async () => {
+			const existingDraft = {
+				main: { "1": { totalWomen: 50 } },
+				cse: { opinions: { opinion: "favorable" } },
+			};
+			const { db, mocks } = createMockDb([
+				[{ siren: SIREN }],
+				[{ draft: existingDraft }],
+			]);
+			const caller = await createCaller(db);
+
+			await caller.clear({
+				siren: SIREN,
+				year: YEAR,
+				kind: "main",
+				step: "1",
+			});
+
+			expect(mocks.set).toHaveBeenCalledWith(
+				expect.objectContaining({
+					draft: { cse: { opinions: { opinion: "favorable" } } },
+				}),
+			);
+		});
+
+		it("sets draft to null when clearing the last step of the last kind", async () => {
+			const existingDraft = { main: { "1": { totalWomen: 50 } } };
+			const { db, mocks } = createMockDb([
+				[{ siren: SIREN }],
+				[{ draft: existingDraft }],
+			]);
+			const caller = await createCaller(db);
+
+			await caller.clear({
+				siren: SIREN,
+				year: YEAR,
+				kind: "main",
+				step: "1",
+			});
+
+			expect(mocks.set).toHaveBeenCalledWith(
+				expect.objectContaining({ draft: null, draftUpdatedAt: null }),
+			);
+		});
 	});
 });

@@ -24,6 +24,7 @@ export const clearDraftInput = z.object({
 	year: yearSchema,
 	siren: sirenSchema,
 	kind: kindSchema.optional(),
+	step: z.string().min(1).optional(),
 });
 
 export type GetDraftInput = z.infer<typeof getDraftInput>;

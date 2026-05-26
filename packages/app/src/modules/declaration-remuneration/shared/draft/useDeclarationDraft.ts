@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { api } from "~/trpc/react";
 
-import { computeDraftDiff } from "./computeDraftDiff";
+import { computeDraftDiff, deepEqual } from "./computeDraftDiff";
 import type { DraftKind, DraftStep } from "./draftSchema";
 
 type DraftBlob = Record<string, Record<string, unknown>>;
@@ -31,31 +31,6 @@ type UseDeclarationDraftResult<T extends Record<string, unknown>> = {
 const DEBOUNCE_MS = 600;
 const VISUAL_DELAY_MS = 400;
 const EMPTY_DRAFT: Readonly<Record<string, never>> = Object.freeze({});
-
-function deepEqual(a: unknown, b: unknown): boolean {
-	if (Object.is(a, b)) return true;
-	if (a === null || b === null) return false;
-	if (typeof a !== "object" || typeof b !== "object") return false;
-	const aIsArray = Array.isArray(a);
-	const bIsArray = Array.isArray(b);
-	if (aIsArray !== bIsArray) return false;
-	if (aIsArray && bIsArray) {
-		if (a.length !== b.length) return false;
-		for (let i = 0; i < a.length; i++) {
-			if (!deepEqual(a[i], b[i])) return false;
-		}
-		return true;
-	}
-	const aObj = a as Record<string, unknown>;
-	const bObj = b as Record<string, unknown>;
-	const keysA = Object.keys(aObj);
-	const keysB = Object.keys(bObj);
-	if (keysA.length !== keysB.length) return false;
-	for (const key of keysA) {
-		if (!deepEqual(aObj[key], bObj[key])) return false;
-	}
-	return true;
-}
 
 export function useDeclarationDraft<T extends Record<string, unknown>>(
 	options: UseDeclarationDraftOptions<T>,
@@ -105,6 +80,22 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 					if (!old) return old;
 					const base = old as DraftBlob;
 					if (variables.kind === undefined) return null;
+					if (variables.step !== undefined) {
+						const kindData = (base[variables.kind] ?? {}) as Record<
+							string,
+							unknown
+						>;
+						const { [variables.step]: _removedStep, ...remainingSteps } =
+							kindData;
+						if (Object.keys(remainingSteps).length === 0) {
+							const { [variables.kind]: _removedKind, ...remainingKinds } =
+								base;
+							return Object.keys(remainingKinds).length === 0
+								? null
+								: (remainingKinds as DraftBlob);
+						}
+						return { ...base, [variables.kind]: remainingSteps };
+					}
 					const { [variables.kind]: _removed, ...rest } = base;
 					return Object.keys(rest).length === 0 ? null : (rest as DraftBlob);
 				},
@@ -176,10 +167,17 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 				utils.declarationDraft.get.setData({ year, siren }, (old) => {
 					if (!old) return old;
 					const base = old as DraftBlob;
-					const { [kind]: _removed, ...rest } = base;
-					return Object.keys(rest).length === 0 ? null : (rest as DraftBlob);
+					const kindData = (base[kind] ?? {}) as Record<string, unknown>;
+					const { [stepKey]: _removedStep, ...remainingSteps } = kindData;
+					if (Object.keys(remainingSteps).length === 0) {
+						const { [kind]: _removedKind, ...remainingKinds } = base;
+						return Object.keys(remainingKinds).length === 0
+							? null
+							: (remainingKinds as DraftBlob);
+					}
+					return { ...base, [kind]: remainingSteps };
 				});
-				clearMutateRef.current({ year, siren, kind });
+				clearMutateRef.current({ year, siren, kind, step: stepKey });
 			} else {
 				// Immediately reflect the save in the cache so the next mount hydrates
 				// with the correct data before the in-flight mutation resolves.
@@ -233,7 +231,7 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 						slice: { kind, step: stepKey, data: diff },
 					});
 				} else {
-					clearMutateRef.current({ year, siren, kind });
+					clearMutateRef.current({ year, siren, kind, step: stepKey });
 				}
 			}, DEBOUNCE_MS);
 		},
@@ -257,8 +255,8 @@ export function useDeclarationDraft<T extends Record<string, unknown>>(
 			if (prev !== null && Object.keys(prev).length === 0) return prev;
 			return EMPTY_DRAFT as Partial<T>;
 		});
-		clearMutateRef.current({ year, siren, kind });
-	}, [isEnabled, siren, year, kind]);
+		clearMutateRef.current({ year, siren, kind, step: stepKey });
+	}, [isEnabled, siren, year, kind, stepKey]);
 
 	useEffect(() => {
 		return () => {
