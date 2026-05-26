@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { getBadgeRendering, PublicKpiTile } from "../PublicKpiTile";
+import { PublicKpiTile } from "../PublicKpiTile";
 
 describe("PublicKpiTile", () => {
 	it("renders title, value and subtitle", () => {
@@ -98,32 +98,5 @@ describe("PublicKpiTile", () => {
 		const arrow = container.querySelector(".fr-badge [aria-hidden='true']");
 		expect(arrow).not.toBeNull();
 		expect(arrow?.textContent).toBe("↑");
-	});
-});
-
-describe("getBadgeRendering", () => {
-	it("rounds the displayed points to one decimal place", () => {
-		const out = getBadgeRendering({ points: 2.07, comparisonLabel: "" });
-		expect(out.signedValue).toBe("+2,1");
-	});
-
-	it("uses the error class for negative delta", () => {
-		const out = getBadgeRendering({ points: -2, comparisonLabel: "vs 2025" });
-		expect(out.className).toContain("fr-badge--error");
-		expect(out.arrow).toBe("↓");
-		expect(out.signedValue).toBe("-2,0");
-	});
-
-	it("uses the success class for positive delta", () => {
-		const out = getBadgeRendering({ points: 0.5, comparisonLabel: "vs 2025" });
-		expect(out.className).toContain("fr-badge--success");
-	});
-
-	it("produces a neutral badge with `0` for a zero delta", () => {
-		const out = getBadgeRendering({ points: 0, comparisonLabel: "" });
-		expect(out.arrow).toBe("=");
-		expect(out.signedValue.trim()).toBe("0");
-		expect(out.className).not.toContain("--success");
-		expect(out.className).not.toContain("--error");
 	});
 });

@@ -1,6 +1,12 @@
+export {
+	CampaignRateTileError,
+	CampaignRateTileLoading,
+} from "./CampaignRateTileStates";
 export { CompanySizeFilter } from "./CompanySizeFilter";
 export { FileUpload } from "./FileUpload";
 export { getDsfrModal } from "./getDsfrModal";
+export type { KpiBadgeDelta } from "./KpiBadge";
+export { getKpiBadgeRendering, KpiBadge } from "./KpiBadge";
 export { parseSiren } from "./parseSiren";
 export { SubmitModal } from "./SubmitModal";
 export {

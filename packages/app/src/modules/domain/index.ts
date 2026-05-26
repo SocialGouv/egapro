@@ -136,9 +136,14 @@ export {
 // SIREN utilities
 export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
 // Submission rate helpers (shared by admin/public stats routers and KPI tiles)
+export type { CampaignRateTileProps } from "./shared/submissionRate";
 export {
+	buildCampaignRateTileProps,
 	computeRate,
+	formatCount,
 	formatPointsAbs,
+	formatRate,
+	NARROW_NBSP,
 	roundOneDecimal,
 } from "./shared/submissionRate";
 export type {
