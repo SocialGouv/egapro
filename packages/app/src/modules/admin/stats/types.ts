@@ -71,13 +71,15 @@ export type FunnelRow = {
 /**
  * Output of `adminStats.getCompletionFunnel`.
  *
- * Three sibling funnels rendered on `/admin/stats/plateforme`:
+ * Four sibling funnels rendered on `/admin/stats/plateforme`:
  * - `mainFunnel`: all declarations of the year.
  * - `complianceFunnel`: sub-population that crossed the alert threshold.
  * - `revisionFunnel`: sub-population that re-entered a revision cycle.
+ * - `cseFunnel`: declarations whose company has a CSE (`companies.has_cse = true`).
  */
 export type CompletionFunnelOutput = {
 	mainFunnel: FunnelRow[];
 	complianceFunnel: FunnelRow[];
 	revisionFunnel: FunnelRow[];
+	cseFunnel: FunnelRow[];
 };

@@ -36,8 +36,12 @@ type FunnelDeclarationSeed = {
 	}>;
 	/** Whether to emit a `demarche_complete` event. */
 	demarcheComplete?: boolean;
+	/** Whether to emit a `cse_opinion_submit` event. */
+	cseOpinionSubmit?: boolean;
 	/** Whether the gap is above the alert threshold (affects firstDeclarationPathChoice). */
 	firstDeclarationPathChoice?: "corrective_action" | "joint_evaluation" | null;
+	/** Whether the company has a CSE (`companies.has_cse`). */
+	hasCse?: boolean;
 };
 
 /**
@@ -64,9 +68,14 @@ export async function seedFunnelDeclarations(rows: FunnelDeclarationSeed[]) {
 
 		for (const row of rows) {
 			await sql`
-				INSERT INTO app_company (siren, name, workforce, created_at, updated_at)
-				VALUES (${row.siren}, ${`E2E K19 Co. ${row.siren}`}, ${row.workforce}, NOW(), NOW())
-				ON CONFLICT (siren) DO UPDATE SET workforce = EXCLUDED.workforce
+				INSERT INTO app_company (siren, name, workforce, has_cse, created_at, updated_at)
+				VALUES (
+					${row.siren}, ${`E2E K19 Co. ${row.siren}`}, ${row.workforce},
+					${row.hasCse ?? false}, NOW(), NOW()
+				)
+				ON CONFLICT (siren) DO UPDATE SET
+					workforce = EXCLUDED.workforce,
+					has_cse = EXCLUDED.has_cse
 			`;
 			const inserted = await sql<[{ id: string }]>`
 				INSERT INTO app_declaration (
@@ -129,6 +138,16 @@ export async function seedFunnelDeclarations(rows: FunnelDeclarationSeed[]) {
 						)
 					`;
 				}
+			}
+
+			if (row.cseOpinionSubmit) {
+				await sql`
+					INSERT INTO app_declaration_status_history
+					(id, declaration_id, event_type, created_at)
+					VALUES (
+						gen_random_uuid(), ${declarationId}, 'cse_opinion_submit', NOW()
+					)
+				`;
 			}
 
 			if (row.demarcheComplete) {

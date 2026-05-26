@@ -33,6 +33,7 @@ export function PlatformStatsPage({ currentYear, availableYears }: Props) {
 	};
 
 	const hasRevisionData = (query.data?.revisionFunnel[0]?.count ?? 0) > 0;
+	const hasCseData = (query.data?.cseFunnel[0]?.count ?? 0) > 0;
 
 	return (
 		<>
@@ -145,6 +146,32 @@ export function PlatformStatsPage({ currentYear, availableYears }: Props) {
 						) : (
 							<p className="fr-text--sm fr-mb-0">
 								Aucune révision pour ces filtres.
+							</p>
+						)}
+					</section>
+
+					<section
+						aria-labelledby="completion-funnel-cse-heading"
+						className="fr-mt-6w"
+					>
+						<h2 className="fr-h3" id="completion-funnel-cse-heading">
+							Funnel cycle CSE — déclarations d'entreprises ayant un CSE
+						</h2>
+						{hasCseData ? (
+							<>
+								<CompletionFunnelChart
+									caption="Funnel cycle CSE — déclarations d'entreprises ayant un CSE"
+									dropThreshold={FUNNEL_DROP_ALERT_THRESHOLD}
+									rows={query.data.cseFunnel}
+								/>
+								<CompletionFunnelTable
+									caption="Funnel cycle CSE — déclarations d'entreprises ayant un CSE"
+									rows={query.data.cseFunnel}
+								/>
+							</>
+						) : (
+							<p className="fr-text--sm fr-mb-0">
+								Aucune déclaration avec CSE pour ces filtres.
 							</p>
 						)}
 					</section>

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	DECLARATION_STEPS,
 	FUNNEL_COMPLIANCE_KEY_STEPS,
+	FUNNEL_CSE_KEY_STEPS,
 	FUNNEL_DROP_ALERT_THRESHOLD,
 	FUNNEL_MAIN_KEY_STEPS,
 	FUNNEL_REVISION_KEY_STEPS,
@@ -135,6 +136,27 @@ describe("FUNNEL_REVISION_KEY_STEPS (S-K19-D4)", () => {
 			expect(entry.label.length).toBeGreaterThan(0);
 		}
 		const keys = FUNNEL_REVISION_KEY_STEPS.map((s) => s.key);
+		expect(new Set(keys).size).toBe(keys.length);
+	});
+});
+
+describe("FUNNEL_CSE_KEY_STEPS (S-K19-D5)", () => {
+	it("exposes the 5 CSE funnel jalons in chronological order", () => {
+		expect(FUNNEL_CSE_KEY_STEPS).toHaveLength(5);
+		expect(FUNNEL_CSE_KEY_STEPS.map((s) => s.key)).toEqual([
+			"draft_started",
+			"indicators_filled",
+			"submitted",
+			"cse_opinion_submitted",
+			"demarche_completed",
+		]);
+	});
+
+	it("uses non-empty French labels and unique keys within the funnel", () => {
+		for (const entry of FUNNEL_CSE_KEY_STEPS) {
+			expect(entry.label.length).toBeGreaterThan(0);
+		}
+		const keys = FUNNEL_CSE_KEY_STEPS.map((s) => s.key);
 		expect(new Set(keys).size).toBe(keys.length);
 	});
 });

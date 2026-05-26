@@ -104,11 +104,20 @@ export const FUNNEL_REVISION_KEY_STEPS = [
 	{ key: "demarche_completed", label: "Démarche complète" },
 ] as const;
 
+export const FUNNEL_CSE_KEY_STEPS = [
+	{ key: "draft_started", label: "Brouillon créé" },
+	{ key: "indicators_filled", label: "Indicateurs saisis" },
+	{ key: "submitted", label: "Déclaration soumise" },
+	{ key: "cse_opinion_submitted", label: "Avis CSE soumis" },
+	{ key: "demarche_completed", label: "Démarche complète" },
+] as const;
+
 export type FunnelMainStepKey = (typeof FUNNEL_MAIN_KEY_STEPS)[number]["key"];
 export type FunnelComplianceStepKey =
 	(typeof FUNNEL_COMPLIANCE_KEY_STEPS)[number]["key"];
 export type FunnelRevisionStepKey =
 	(typeof FUNNEL_REVISION_KEY_STEPS)[number]["key"];
+export type FunnelCseStepKey = (typeof FUNNEL_CSE_KEY_STEPS)[number]["key"];
 
 /** % drop between two consecutive jalons above which the bar is colored red. */
 export const FUNNEL_DROP_ALERT_THRESHOLD = 30;

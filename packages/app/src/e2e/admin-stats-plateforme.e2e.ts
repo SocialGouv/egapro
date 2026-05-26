@@ -11,6 +11,7 @@ const SIRENS = {
 	main: "999500001",
 	compliance: "999500002",
 	revision: "999500003",
+	cse: "999500004",
 } as const;
 
 const K19_YEAR = 2024;
@@ -60,6 +61,18 @@ test.describe("admin platform funnel stats (K19)", () => {
 				],
 				demarcheComplete: true,
 			},
+			// CSE funnel: company with has_cse=true that submitted a CSE opinion
+			// and went through the full demarche.
+			{
+				siren: SIRENS.cse,
+				year: K19_YEAR,
+				workforce: 250,
+				maxStepRound: 6,
+				status: "demarche_completed",
+				hasCse: true,
+				cseOpinionSubmit: true,
+				demarcheComplete: true,
+			},
 		]);
 	});
 
@@ -67,7 +80,7 @@ test.describe("admin platform funnel stats (K19)", () => {
 		await deleteFunnelDeclarations(Object.values(SIRENS));
 	});
 
-	test("S-K19-E1: admin can open the platform stats page and sees the three funnel sections", async ({
+	test("S-K19-E1: admin can open the platform stats page and sees the four funnel sections", async ({
 		page,
 	}) => {
 		await page.goto("/admin/stats/plateforme");
@@ -90,6 +103,12 @@ test.describe("admin platform funnel stats (K19)", () => {
 		await expect(
 			page.getByRole("heading", {
 				name: /Funnel cycle de révision/i,
+				level: 2,
+			}),
+		).toBeVisible();
+		await expect(
+			page.getByRole("heading", {
+				name: /Funnel cycle CSE/i,
 				level: 2,
 			}),
 		).toBeVisible();
@@ -151,6 +170,31 @@ test.describe("admin platform funnel stats (K19)", () => {
 
 		await expect(
 			page.getByRole("heading", { name: /Funnel principal/i, level: 2 }),
+		).toBeVisible();
+	});
+
+	test("S-K19-E5: the CSE funnel exposes the cse_opinion_submitted jalon in its accessible table", async ({
+		page,
+	}) => {
+		await page.goto("/admin/stats/plateforme");
+		await page.getByLabel("Année de campagne").selectOption(String(K19_YEAR));
+
+		await expect(
+			page.getByRole("heading", { name: /Funnel cycle CSE/i, level: 2 }),
+		).toBeVisible();
+
+		const cseSection = page.getByLabel(
+			/Funnel cycle CSE — déclarations d'entreprises ayant un CSE/i,
+		);
+
+		await cseSection
+			.locator("summary", {
+				hasText: /Consulter les données du graphique sous forme de tableau/i,
+			})
+			.click();
+
+		await expect(
+			cseSection.getByRole("rowheader", { name: "Avis CSE soumis" }),
 		).toBeVisible();
 	});
 

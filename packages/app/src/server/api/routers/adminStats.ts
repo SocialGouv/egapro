@@ -21,6 +21,7 @@ import {
 	type CompanySizeRange,
 	DECLARATION_STEPS,
 	FUNNEL_COMPLIANCE_KEY_STEPS,
+	FUNNEL_CSE_KEY_STEPS,
 	FUNNEL_MAIN_KEY_STEPS,
 	FUNNEL_REVISION_KEY_STEPS,
 	getStepLabel,
@@ -555,7 +556,7 @@ export const adminStatsRouter = createTRPCRouter({
 		}),
 
 	/**
-	 * Returns the three completion funnels (main / compliance / revision)
+	 * Returns the four completion funnels (main / compliance / revision / CSE)
 	 * scoped to one campaign year and optionally to a workforce bucket. Feeds
 	 * the K19 funnels on `/admin/stats/plateforme`.
 	 *
@@ -576,7 +577,7 @@ export const adminStatsRouter = createTRPCRouter({
 					: sql`${companies.workforce} BETWEEN ${min} AND ${max}`;
 			})();
 
-			const mainFunnelRows = await ctx.db.execute<{
+			const mainFunnelPromise = ctx.db.execute<{
 				draft_started: number | string;
 				indicators_filled: number | string;
 				submitted: number | string;
@@ -626,7 +627,7 @@ export const adminStatsRouter = createTRPCRouter({
 				FROM base
 			`);
 
-			const complianceFunnelRows = await ctx.db.execute<{
+			const complianceFunnelPromise = ctx.db.execute<{
 				submitted_with_alert: number | string;
 				path_chosen: number | string;
 				corrective_action_submitted: number | string;
@@ -674,7 +675,7 @@ export const adminStatsRouter = createTRPCRouter({
 				FROM base
 			`);
 
-			const revisionFunnelRows = await ctx.db.execute<{
+			const revisionFunnelPromise = ctx.db.execute<{
 				revision_required: number | string;
 				revision_path_chosen: number | string;
 				revision_action_submitted: number | string;
@@ -729,6 +730,77 @@ export const adminStatsRouter = createTRPCRouter({
 				FROM base
 			`);
 
+			const cseFunnelPromise = ctx.db.execute<{
+				draft_started: number | string;
+				indicators_filled: number | string;
+				submitted: number | string;
+				cse_opinion_submitted: number | string;
+				demarche_completed: number | string;
+			}>(sql`
+				WITH base AS (
+					SELECT ${declarations.id} AS declaration_id
+					FROM ${declarations}
+					INNER JOIN ${companies}
+						ON ${companies.siren} = ${declarations.siren}
+					WHERE ${declarations.year} = ${input.year}
+						AND ${declarations.cancelledAt} IS NULL
+						AND ${companies.hasCse} = true
+						AND ${sizeFilterSql}
+				)
+				SELECT
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type = 'step_change'
+								AND h.round = 0
+						)
+					)::int AS draft_started,
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type = 'step_change'
+								AND h.round = 5
+						)
+					)::int AS indicators_filled,
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type = 'step_change'
+								AND h.round = 6
+						)
+					)::int AS submitted,
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type = 'cse_opinion_submit'
+						)
+					)::int AS cse_opinion_submitted,
+					COUNT(DISTINCT base.declaration_id) FILTER (
+						WHERE EXISTS (
+							SELECT 1 FROM ${declarationStatusHistory} h
+							WHERE h.declaration_id = base.declaration_id
+								AND h.event_type = 'demarche_complete'
+						)
+					)::int AS demarche_completed
+				FROM base
+			`);
+
+			const [
+				mainFunnelRows,
+				complianceFunnelRows,
+				revisionFunnelRows,
+				cseFunnelRows,
+			] = await Promise.all([
+				mainFunnelPromise,
+				complianceFunnelPromise,
+				revisionFunnelPromise,
+				cseFunnelPromise,
+			]);
+
 			const mainCounts = mainFunnelRows[0] as
 				| Record<string, number | string>
 				| undefined;
@@ -736,6 +808,9 @@ export const adminStatsRouter = createTRPCRouter({
 				| Record<string, number | string>
 				| undefined;
 			const revisionCounts = revisionFunnelRows[0] as
+				| Record<string, number | string>
+				| undefined;
+			const cseCounts = cseFunnelRows[0] as
 				| Record<string, number | string>
 				| undefined;
 
@@ -749,6 +824,7 @@ export const adminStatsRouter = createTRPCRouter({
 					FUNNEL_REVISION_KEY_STEPS,
 					revisionCounts,
 				),
+				cseFunnel: buildFunnelRows(FUNNEL_CSE_KEY_STEPS, cseCounts),
 			};
 		}),
 });

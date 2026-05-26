@@ -57,6 +57,7 @@ export {
 export type {
 	DeclarationStepNumber,
 	FunnelComplianceStepKey,
+	FunnelCseStepKey,
 	FunnelMainStepKey,
 	FunnelRevisionStepKey,
 	PostSubmitMilestoneKey,
@@ -64,6 +65,7 @@ export type {
 export {
 	DECLARATION_STEPS,
 	FUNNEL_COMPLIANCE_KEY_STEPS,
+	FUNNEL_CSE_KEY_STEPS,
 	FUNNEL_DROP_ALERT_THRESHOLD,
 	FUNNEL_MAIN_KEY_STEPS,
 	FUNNEL_REVISION_KEY_STEPS,
