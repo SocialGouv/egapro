@@ -1,15 +1,12 @@
 "use client";
 
 import {
-	Bar,
-	BarChart,
-	CartesianGrid,
 	Cell,
+	Funnel,
+	FunnelChart,
 	LabelList,
 	ResponsiveContainer,
 	Tooltip,
-	XAxis,
-	YAxis,
 } from "recharts";
 
 import styles from "./CompletionFunnelChart.module.scss";
@@ -44,7 +41,7 @@ function isAboveThreshold(
 	return pctDropFromPrev !== null && pctDropFromPrev > threshold;
 }
 
-function FunnelTooltip({ active, payload }: FunnelTooltipProps) {
+export function FunnelTooltip({ active, payload }: FunnelTooltipProps) {
 	if (!active || !payload || payload.length === 0) return null;
 	const row = payload[0]?.payload;
 	if (!row) return null;
@@ -94,24 +91,14 @@ export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 				données équivalentes sont disponibles dans le tableau ci-dessous.
 			</figcaption>
 			<ResponsiveContainer>
-				<BarChart
-					data={chartRows}
-					layout="vertical"
-					margin={{ top: 16, right: 96, bottom: 16, left: 16 }}
-				>
-					<CartesianGrid strokeDasharray="3 3" />
-					<XAxis
-						label={{
-							value: "Déclarations",
-							position: "insideBottom",
-							offset: -4,
-						}}
-						tickFormatter={(value: number) => value.toLocaleString("fr-FR")}
-						type="number"
-					/>
-					<YAxis dataKey="label" interval={0} type="category" width={220} />
+				<FunnelChart margin={{ top: 16, right: 160, bottom: 16, left: 160 }}>
 					<Tooltip content={<FunnelTooltip />} />
-					<Bar dataKey="count" fill={DEFAULT_BAR_COLOR} name="Déclarations">
+					<Funnel
+						data={chartRows}
+						dataKey="count"
+						isAnimationActive={false}
+						nameKey="label"
+					>
 						{chartRows.map((row) => (
 							<Cell
 								fill={
@@ -122,9 +109,20 @@ export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 								key={row.key}
 							/>
 						))}
-						<LabelList dataKey="displayLabel" position="right" />
-					</Bar>
-				</BarChart>
+						<LabelList
+							dataKey="label"
+							fill="var(--text-default-grey)"
+							position="right"
+							stroke="none"
+						/>
+						<LabelList
+							dataKey="displayLabel"
+							fill="var(--text-default-grey)"
+							position="left"
+							stroke="none"
+						/>
+					</Funnel>
+				</FunnelChart>
 			</ResponsiveContainer>
 		</figure>
 	);

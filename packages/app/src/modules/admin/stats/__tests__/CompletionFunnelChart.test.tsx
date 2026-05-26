@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { CompletionFunnelChart } from "../CompletionFunnelChart";
+import { CompletionFunnelChart, FunnelTooltip } from "../CompletionFunnelChart";
 import type { FunnelRow } from "../types";
 
 const EMPTY_ROWS: FunnelRow[] = [
@@ -115,5 +115,77 @@ describe("CompletionFunnelChart (S-K19-C1..C5)", () => {
 			/>,
 		);
 		expect(container.querySelector("figure")).not.toBeNull();
+	});
+});
+
+describe("FunnelTooltip", () => {
+	it("renders nothing when inactive", () => {
+		const { container } = render(<FunnelTooltip active={false} payload={[]} />);
+		expect(container.firstChild).toBeNull();
+	});
+
+	it("renders nothing when payload is empty", () => {
+		const { container } = render(<FunnelTooltip active={true} payload={[]} />);
+		expect(container.firstChild).toBeNull();
+	});
+
+	it("renders nothing when payload is undefined", () => {
+		const { container } = render(<FunnelTooltip active={true} />);
+		expect(container.firstChild).toBeNull();
+	});
+
+	it("renders nothing when the first payload entry has no row", () => {
+		const { container } = render(
+			<FunnelTooltip active={true} payload={[{}]} />,
+		);
+		expect(container.firstChild).toBeNull();
+	});
+
+	it("renders the row label, count and percentage when active with data", () => {
+		render(
+			<FunnelTooltip
+				active={true}
+				payload={[
+					{
+						payload: {
+							key: "submitted",
+							label: "Déclaration soumise",
+							count: 1234,
+							pctOfStart: 42,
+							pctDropFromPrev: 18,
+						},
+					},
+				]}
+			/>,
+		);
+		expect(screen.getByText(/Déclaration soumise/)).toBeInTheDocument();
+		const items = screen.getAllByRole("listitem");
+		expect(items[0]?.textContent ?? "").toMatch(
+			/1\s234\s+déclarations\s+\(42\s+%\s+du funnel\)/,
+		);
+		expect(items[1]?.textContent ?? "").toMatch(
+			/Chute de\s+18\s+%\s+vs étape précédente/,
+		);
+	});
+
+	it("omits the drop line when pctDropFromPrev is null", () => {
+		render(
+			<FunnelTooltip
+				active={true}
+				payload={[
+					{
+						payload: {
+							key: "draft_started",
+							label: "Brouillon créé",
+							count: 100,
+							pctOfStart: 100,
+							pctDropFromPrev: null,
+						},
+					},
+				]}
+			/>,
+		);
+		expect(screen.getByText(/Brouillon créé/)).toBeInTheDocument();
+		expect(screen.queryByText(/Chute de/)).not.toBeInTheDocument();
 	});
 });
