@@ -91,13 +91,14 @@ export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 				données équivalentes sont disponibles dans le tableau ci-dessous.
 			</figcaption>
 			<ResponsiveContainer>
-				<FunnelChart margin={{ top: 16, right: 160, bottom: 16, left: 160 }}>
+				<FunnelChart margin={{ top: 56, right: 16, bottom: 56, left: 16 }}>
 					<Tooltip content={<FunnelTooltip />} />
 					<Funnel
 						data={chartRows}
 						dataKey="count"
 						isAnimationActive={false}
 						nameKey="label"
+						orientation="horizontal"
 					>
 						{chartRows.map((row) => (
 							<Cell
@@ -112,13 +113,13 @@ export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 						<LabelList
 							dataKey="label"
 							fill="var(--text-default-grey)"
-							position="right"
+							position="top"
 							stroke="none"
 						/>
 						<LabelList
 							dataKey="displayLabel"
 							fill="var(--text-default-grey)"
-							position="left"
+							position="bottom"
 							stroke="none"
 						/>
 					</Funnel>
