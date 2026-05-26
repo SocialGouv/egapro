@@ -1,4 +1,4 @@
-import { KpiBadge, type KpiBadgeDelta } from "~/modules/shared";
+import { KpiBadge, type KpiBadgeDelta } from "~/modules/shared/KpiBadge";
 
 export type PublicKpiTileDelta = KpiBadgeDelta;
 
