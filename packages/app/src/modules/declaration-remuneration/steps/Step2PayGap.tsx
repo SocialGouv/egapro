@@ -117,7 +117,11 @@ export function Step2PayGap({
 	});
 
 	return (
-		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
+		<form
+			autoComplete="off"
+			className={common.flexColumnGap2}
+			onSubmit={onSubmit}
+		>
 			<StepTitleRow
 				onDevFill={() => {
 					DEV_STEP2_ROWS.forEach((row, i) => {

@@ -48,6 +48,7 @@ export function HomeSearch() {
 						<form
 							action="/index-egapro/recherche"
 							aria-label="Rechercher une entreprise"
+							autoComplete="off"
 							method="GET"
 						>
 							<div className="fr-input-group">

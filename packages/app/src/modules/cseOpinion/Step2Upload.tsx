@@ -109,7 +109,7 @@ export function Step2Upload({
 
 	return (
 		<>
-			<form onSubmit={formSubmit}>
+			<form autoComplete="off" onSubmit={formSubmit}>
 				<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
 					<div className="fr-col">
 						<h1 className="fr-h4 fr-mb-0">

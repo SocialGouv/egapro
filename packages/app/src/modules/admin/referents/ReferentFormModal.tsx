@@ -129,7 +129,11 @@ export function ReferentFormModal({
 										? "Ajouter un référent"
 										: "Modifier le référent"}
 								</h2>
-								<form id={`${modalId}-form`} onSubmit={handleSubmit(doSubmit)}>
+								<form
+									autoComplete="off"
+									id={`${modalId}-form`}
+									onSubmit={handleSubmit(doSubmit)}
+								>
 									<ReferentFormFields
 										errors={errors}
 										modalId={modalId}

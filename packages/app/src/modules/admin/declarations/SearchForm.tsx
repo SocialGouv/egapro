@@ -64,7 +64,11 @@ export function SearchForm() {
 	}, [reset, router]);
 
 	return (
-		<form className="fr-mb-4w" onSubmit={handleSubmit(onSubmit)}>
+		<form
+			autoComplete="off"
+			className="fr-mb-4w"
+			onSubmit={handleSubmit(onSubmit)}
+		>
 			<div className="fr-grid-row fr-grid-row--gutters">
 				<div className="fr-col-12 fr-col-md-4">
 					<div className="fr-input-group">

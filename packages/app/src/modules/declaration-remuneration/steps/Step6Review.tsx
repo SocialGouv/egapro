@@ -139,7 +139,11 @@ export function Step6Review({
 	}
 
 	return (
-		<form className={stepStyles.formColumn} onSubmit={handleSubmit}>
+		<form
+			autoComplete="off"
+			className={stepStyles.formColumn}
+			onSubmit={handleSubmit}
+		>
 			{/* Title + save status */}
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 				<div className="fr-col">

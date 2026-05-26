@@ -316,7 +316,11 @@ export function CategoryForm({
 	});
 
 	return (
-		<form className={stepStyles.form} onSubmit={handleFormSubmit}>
+		<form
+			autoComplete="off"
+			className={stepStyles.form}
+			onSubmit={handleFormSubmit}
+		>
 			<StepTitleRow
 				onDevFill={() => {
 					if (maxWomen == null || maxMen == null) return;

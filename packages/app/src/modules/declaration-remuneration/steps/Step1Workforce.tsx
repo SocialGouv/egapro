@@ -121,7 +121,11 @@ export function Step1Workforce({
 	});
 
 	return (
-		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
+		<form
+			autoComplete="off"
+			className={common.flexColumnGap2}
+			onSubmit={onSubmit}
+		>
 			<StepTitleRow
 				onDevFill={() => {
 					const womenValue = DEV_STEP1_CATEGORIES[0]?.women ?? 50;

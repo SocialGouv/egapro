@@ -37,6 +37,15 @@ beforeEach(() => {
 // The <dialog> is closed (not open) in jsdom, so its content is hidden.
 // We use { hidden: true } for role queries to access hidden elements.
 describe("CompanyEditModal", () => {
+	it("disables browser autofill on the form", () => {
+		const { container } = render(<CompanyEditModal company={company} />);
+
+		expect(container.querySelector("form")).toHaveAttribute(
+			"autocomplete",
+			"off",
+		);
+	});
+
 	it("renders the modal with company info", () => {
 		const { container } = render(<CompanyEditModal company={company} />);
 

@@ -158,7 +158,11 @@ export function Step3VariablePay({
 	});
 
 	return (
-		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
+		<form
+			autoComplete="off"
+			className={common.flexColumnGap2}
+			onSubmit={onSubmit}
+		>
 			<StepTitleRow
 				onDevFill={() => {
 					DEV_STEP3_ROWS.forEach((row, i) => {

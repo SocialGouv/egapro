@@ -125,7 +125,11 @@ export function ReferentsSearchForm({
 	);
 
 	return (
-		<form className="fr-mb-4w" onSubmit={handleSubmit(onSubmit)}>
+		<form
+			autoComplete="off"
+			className="fr-mb-4w"
+			onSubmit={handleSubmit(onSubmit)}
+		>
 			{wrapFieldsInFieldset ? (
 				<fieldset className="fr-fieldset">
 					<legend className="fr-fieldset__legend fr-sr-only">
