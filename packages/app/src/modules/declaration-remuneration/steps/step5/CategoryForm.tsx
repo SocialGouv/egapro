@@ -321,7 +321,11 @@ export function CategoryForm({
 	});
 
 	return (
-		<form className={stepStyles.form} onSubmit={handleFormSubmit}>
+		<form
+			autoComplete="off"
+			className={stepStyles.form}
+			onSubmit={handleFormSubmit}
+		>
 			<StepTitleRow
 				hasData={hasData}
 				isPendingSave={isPendingSaveOverride}

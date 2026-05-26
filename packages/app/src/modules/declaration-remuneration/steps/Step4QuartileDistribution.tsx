@@ -252,7 +252,12 @@ export function Step4QuartileDistribution({
 	const showAlert = showRecap && recap.length > 0;
 
 	return (
-		<form className={stepStyles.formColumn} noValidate onSubmit={onSubmit}>
+		<form
+			autoComplete="off"
+			className={stepStyles.formColumn}
+			noValidate
+			onSubmit={onSubmit}
+		>
 			<StepTitleRow
 				hasData={hasData}
 				isPendingSave={isPendingSave}

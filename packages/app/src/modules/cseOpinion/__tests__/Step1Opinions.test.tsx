@@ -75,6 +75,15 @@ beforeEach(() => {
 });
 
 describe("Step1Opinions", () => {
+	it("disables browser autofill on the form", () => {
+		const { container } = render(<Step1Opinions cseDeadline={cseDeadline} />);
+
+		expect(container.querySelector("form")).toHaveAttribute(
+			"autocomplete",
+			"off",
+		);
+	});
+
 	it("renders compliance path title when compliancePath is joint_evaluation", () => {
 		render(
 			<Step1Opinions

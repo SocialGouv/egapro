@@ -196,7 +196,7 @@ export function Step1Opinions({
 	}
 
 	return (
-		<form onSubmit={onSubmit}>
+		<form autoComplete="off" onSubmit={onSubmit}>
 			{isJointEvaluation && (
 				<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
 					<div className="fr-col">

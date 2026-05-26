@@ -22,6 +22,20 @@ vi.mock("~/trpc/react", () => ({
 const emptyStep1Data = () => ({ totalWomen: 0, totalMen: 0 });
 
 describe("Step1Workforce", () => {
+	it("disables browser autofill on the form", () => {
+		const { container } = render(
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={emptyStep1Data()}
+			/>,
+		);
+		expect(container.querySelector("form")).toHaveAttribute(
+			"autocomplete",
+			"off",
+		);
+	});
+
 	it("renders default state with zero totals", () => {
 		render(
 			<Step1Workforce

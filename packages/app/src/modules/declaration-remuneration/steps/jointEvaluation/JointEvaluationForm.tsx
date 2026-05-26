@@ -75,7 +75,11 @@ export function JointEvaluationForm({
 
 	return (
 		<>
-			<form className={common.flexColumnGap2} onSubmit={handleSubmit}>
+			<form
+				autoComplete="off"
+				className={common.flexColumnGap2}
+				onSubmit={handleSubmit}
+			>
 				<div className={common.flexBetween}>
 					<h1 className="fr-h4 fr-mb-0">
 						Parcours de mise en conformité pour l&apos;indicateur par catégorie

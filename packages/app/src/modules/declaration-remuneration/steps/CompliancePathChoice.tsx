@@ -108,7 +108,11 @@ export function CompliancePathChoice({
 	});
 
 	return (
-		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
+		<form
+			autoComplete="off"
+			className={common.flexColumnGap2}
+			onSubmit={onSubmit}
+		>
 			<div className={common.flexBetween}>
 				<h1 className="fr-h4 fr-mb-0">
 					Déclaration des indicateurs de rémunération {currentYear}
