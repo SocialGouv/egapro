@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 
-const NARROW_NBSP = " ";
+import { formatPointsAbs } from "~/modules/domain";
+
+const NARROW_NBSP = " ";
 
 export type PublicKpiTileDelta = {
 	points: number;
@@ -19,11 +21,6 @@ type BadgeRendering = {
 	arrow: string;
 	signedValue: string;
 };
-
-function formatPointsAbs(points: number): string {
-	const rounded = Math.round(Math.abs(points) * 10) / 10;
-	return rounded.toFixed(1).replace(".", ",");
-}
 
 export function getBadgeRendering(delta: PublicKpiTileDelta): BadgeRendering {
 	if (delta.points > 0) {

@@ -3,6 +3,7 @@ import { and, eq, type SQL, sql } from "drizzle-orm";
 import {
 	COMPANY_SIZE_ANNUAL_MIN,
 	COMPANY_SIZE_VOLUNTARY_MAX,
+	computeRate,
 	getCurrentYear,
 	isTriennialYear,
 } from "~/modules/domain";
@@ -24,15 +25,6 @@ function buildObligationFilter(year: number): SQL {
 		: sql`false`;
 	const annualClause = sql`${ema} >= ${COMPANY_SIZE_ANNUAL_MIN}`;
 	return sql`((${triennialClause}) OR (${annualClause}))`;
-}
-
-function roundOneDecimal(value: number): number {
-	return Math.round(value * 10) / 10;
-}
-
-function computeRate(submitted: number, obligated: number): number {
-	if (obligated === 0) return 0;
-	return roundOneDecimal((submitted / obligated) * 100);
 }
 
 export const publicStatsRouter = createTRPCRouter({

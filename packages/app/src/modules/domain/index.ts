@@ -150,6 +150,12 @@ export {
 } from "./shared/regions";
 // SIREN utilities
 export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
+// Submission rate helpers (shared by admin/public stats routers and KPI tiles)
+export {
+	computeRate,
+	formatPointsAbs,
+	roundOneDecimal,
+} from "./shared/submissionRate";
 export type {
 	CampaignDeadlines,
 	CompanySize,
