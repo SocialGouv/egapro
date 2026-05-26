@@ -78,3 +78,38 @@ export type StepDropoffRow = {
 	abandoned: number;
 	dropoffRate: number;
 };
+
+/**
+ * One row of a K19 completion funnel.
+ *
+ * Each row represents a single jalon (step) of the funnel:
+ * - `count`: distinct declarations that reached this jalon.
+ * - `pctOfStart`: percentage of `count` relative to the first jalon of the
+ *   funnel (= 100 for the first row, 0 if the first jalon is empty).
+ * - `pctDropFromPrev`: percentage drop from the previous jalon (null for the
+ *   first row, 0 when the previous jalon is empty so we cannot compute a
+ *   meaningful drop).
+ */
+export type FunnelRow = {
+	key: string;
+	label: string;
+	count: number;
+	pctOfStart: number;
+	pctDropFromPrev: number | null;
+};
+
+/**
+ * Output of `adminStats.getCompletionFunnel`.
+ *
+ * Four sibling funnels rendered on `/admin/stats/plateforme`:
+ * - `mainFunnel`: all declarations of the year.
+ * - `complianceFunnel`: sub-population that crossed the alert threshold.
+ * - `revisionFunnel`: sub-population that re-entered a revision cycle.
+ * - `cseFunnel`: declarations whose company has a CSE (`companies.has_cse = true`).
+ */
+export type CompletionFunnelOutput = {
+	mainFunnel: FunnelRow[];
+	complianceFunnel: FunnelRow[];
+	revisionFunnel: FunnelRow[];
+	cseFunnel: FunnelRow[];
+};

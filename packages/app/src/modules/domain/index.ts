@@ -53,9 +53,13 @@ export {
 	getCurrentCompliancePath,
 	isCancelled,
 } from "./shared/declarationStatus";
-// Declaration steps labels (A–F stepper) and post-submit milestones
+// Declaration steps labels (A–F stepper), post-submit milestones, K19 funnels
 export type {
 	DeclarationStepNumber,
+	FunnelComplianceStepKey,
+	FunnelCseStepKey,
+	FunnelMainStepKey,
+	FunnelRevisionStepKey,
 	PostSubmitDropoffPhaseKey,
 	PostSubmitMilestoneKey,
 } from "./shared/declarationSteps";
@@ -65,6 +69,11 @@ export {
 	DROPOFF_STAGNATION_DAYS_DEFAULT,
 	DROPOFF_STAGNATION_DAYS_MAX,
 	DROPOFF_STAGNATION_DAYS_MIN,
+	FUNNEL_COMPLIANCE_KEY_STEPS,
+	FUNNEL_CSE_KEY_STEPS,
+	FUNNEL_DROP_ALERT_THRESHOLD,
+	FUNNEL_MAIN_KEY_STEPS,
+	FUNNEL_REVISION_KEY_STEPS,
 	getStepLabel,
 	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
