@@ -1,14 +1,39 @@
 .chartWrapper {
-	width: 100%;
-	height: 360px;
-}
-
-.tooltipList {
 	margin: 0;
-	padding: 0;
-	list-style: none;
+	width: 100%;
 }
 
-.tooltipItem {
+.chartSvg {
+	width: 100%;
+	height: auto;
+	max-width: 100%;
+	display: block;
+}
+
+.topLabel {
 	font-size: 0.875rem;
+	font-weight: 600;
+	fill: var(--text-default-grey);
+}
+
+.countLabel {
+	font-size: 1.125rem;
+	font-weight: 700;
+	fill: var(--text-default-grey);
+}
+
+.pctLabel {
+	font-size: 0.8125rem;
+	fill: var(--text-mention-grey);
+}
+
+.dropLabel {
+	font-size: 0.75rem;
+	fill: var(--text-mention-grey);
+}
+
+.dropLabelAlert {
+	font-size: 0.75rem;
+	font-weight: 600;
+	fill: var(--text-default-error);
 }

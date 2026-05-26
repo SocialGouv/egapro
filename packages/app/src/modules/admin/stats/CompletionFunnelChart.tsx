@@ -1,14 +1,5 @@
 "use client";
 
-import {
-	Cell,
-	Funnel,
-	FunnelChart,
-	LabelList,
-	ResponsiveContainer,
-	Tooltip,
-} from "recharts";
-
 import styles from "./CompletionFunnelChart.module.scss";
 import type { FunnelRow } from "./types";
 
@@ -18,17 +9,15 @@ type Props = {
 	dropThreshold: number;
 };
 
-type TooltipEntry = {
-	payload?: FunnelRow;
-};
-
-type FunnelTooltipProps = {
-	active?: boolean;
-	payload?: TooltipEntry[];
-};
-
 const DEFAULT_BAR_COLOR = "var(--background-action-high-blue-france)";
 const ALERT_BAR_COLOR = "var(--background-action-high-red-marianne)";
+
+const VIEW_WIDTH = 1000;
+const VIEW_HEIGHT = 360;
+const TOP_LABEL_AREA = 50;
+const BOTTOM_LABEL_AREA = 100;
+const DRAW_HEIGHT = VIEW_HEIGHT - TOP_LABEL_AREA - BOTTOM_LABEL_AREA;
+const MID_Y = TOP_LABEL_AREA + DRAW_HEIGHT / 2;
 
 function formatCount(value: number): string {
 	return value.toLocaleString("fr-FR");
@@ -41,32 +30,14 @@ function isAboveThreshold(
 	return pctDropFromPrev !== null && pctDropFromPrev > threshold;
 }
 
-export function FunnelTooltip({ active, payload }: FunnelTooltipProps) {
-	if (!active || !payload || payload.length === 0) return null;
-	const row = payload[0]?.payload;
-	if (!row) return null;
-	return (
-		<div className="fr-p-2w fr-background-alt--grey">
-			<p className="fr-text--sm fr-text--bold fr-mb-1w">« {row.label} »</p>
-			<ul className={styles.tooltipList}>
-				<li className={styles.tooltipItem}>
-					{formatCount(row.count)} déclarations ({row.pctOfStart} % du funnel)
-				</li>
-				{row.pctDropFromPrev !== null && (
-					<li className={styles.tooltipItem}>
-						Chute de {row.pctDropFromPrev} % vs étape précédente
-					</li>
-				)}
-			</ul>
-		</div>
-	);
+function buildTitle(row: FunnelRow): string {
+	const head = `${row.label} : ${formatCount(row.count)} (${row.pctOfStart} % du funnel)`;
+	if (row.pctDropFromPrev === null) return head;
+	return `${head} — chute de ${row.pctDropFromPrev} % vs étape précédente`;
 }
-
-type ChartRow = FunnelRow & { displayLabel: string };
 
 export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 	const hasData = rows.some((row) => row.count > 0);
-
 	if (!hasData) {
 		return (
 			<p
@@ -78,10 +49,9 @@ export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 		);
 	}
 
-	const chartRows: ChartRow[] = rows.map((row) => ({
-		...row,
-		displayLabel: `${formatCount(row.count)} (${row.pctOfStart} %)`,
-	}));
+	const maxValue = Math.max(...rows.map((r) => r.count), 1);
+	const segmentWidth = VIEW_WIDTH / rows.length;
+	const heights = rows.map((r) => (r.count / maxValue) * DRAW_HEIGHT);
 
 	return (
 		<figure className={styles.chartWrapper}>
@@ -90,41 +60,73 @@ export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 				pourcentage du funnel et la chute par rapport à l'étape précédente. Les
 				données équivalentes sont disponibles dans le tableau ci-dessous.
 			</figcaption>
-			<ResponsiveContainer>
-				<FunnelChart margin={{ top: 56, right: 16, bottom: 56, left: 16 }}>
-					<Tooltip content={<FunnelTooltip />} />
-					<Funnel
-						data={chartRows}
-						dataKey="count"
-						isAnimationActive={false}
-						nameKey="label"
-						orientation="horizontal"
-					>
-						{chartRows.map((row) => (
-							<Cell
-								fill={
-									isAboveThreshold(row.pctDropFromPrev, dropThreshold)
-										? ALERT_BAR_COLOR
-										: DEFAULT_BAR_COLOR
-								}
-								key={row.key}
-							/>
-						))}
-						<LabelList
-							dataKey="label"
-							fill="var(--text-default-grey)"
-							position="top"
-							stroke="none"
-						/>
-						<LabelList
-							dataKey="displayLabel"
-							fill="var(--text-default-grey)"
-							position="bottom"
-							stroke="none"
-						/>
-					</Funnel>
-				</FunnelChart>
-			</ResponsiveContainer>
+			<svg
+				aria-label={caption}
+				className={styles.chartSvg}
+				role="img"
+				viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+			>
+				{rows.map((row, i) => {
+					const xStart = i * segmentWidth;
+					const xEnd = xStart + segmentWidth;
+					const hLeft = heights[i] ?? 0;
+					const hRight =
+						i < rows.length - 1 ? (heights[i + 1] ?? 0) : (heights[i] ?? 0);
+					const path = `M ${xStart} ${MID_Y - hLeft / 2} L ${xEnd} ${
+						MID_Y - hRight / 2
+					} L ${xEnd} ${MID_Y + hRight / 2} L ${xStart} ${MID_Y + hLeft / 2} Z`;
+					const xMid = xStart + segmentWidth / 2;
+					const triggersAlert = isAboveThreshold(
+						row.pctDropFromPrev,
+						dropThreshold,
+					);
+					const fill = triggersAlert ? ALERT_BAR_COLOR : DEFAULT_BAR_COLOR;
+
+					return (
+						<g key={row.key}>
+							<text
+								className={styles.topLabel}
+								textAnchor="middle"
+								x={xMid}
+								y={TOP_LABEL_AREA - 16}
+							>
+								{row.label}
+							</text>
+							<path d={path} fill={fill}>
+								<title>{buildTitle(row)}</title>
+							</path>
+							<text
+								className={styles.countLabel}
+								textAnchor="middle"
+								x={xMid}
+								y={VIEW_HEIGHT - BOTTOM_LABEL_AREA + 28}
+							>
+								{formatCount(row.count)}
+							</text>
+							<text
+								className={styles.pctLabel}
+								textAnchor="middle"
+								x={xMid}
+								y={VIEW_HEIGHT - BOTTOM_LABEL_AREA + 52}
+							>
+								{row.pctOfStart} % du funnel
+							</text>
+							{row.pctDropFromPrev !== null && (
+								<text
+									className={
+										triggersAlert ? styles.dropLabelAlert : styles.dropLabel
+									}
+									textAnchor="middle"
+									x={xMid}
+									y={VIEW_HEIGHT - BOTTOM_LABEL_AREA + 76}
+								>
+									↓ {row.pctDropFromPrev} % vs précédent
+								</text>
+							)}
+						</g>
+					);
+				})}
+			</svg>
 		</figure>
 	);
 }

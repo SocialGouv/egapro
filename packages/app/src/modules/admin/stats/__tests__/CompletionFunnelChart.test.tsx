@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { CompletionFunnelChart, FunnelTooltip } from "../CompletionFunnelChart";
+import { CompletionFunnelChart } from "../CompletionFunnelChart";
 import type { FunnelRow } from "../types";
 
 const EMPTY_ROWS: FunnelRow[] = [
@@ -116,76 +116,35 @@ describe("CompletionFunnelChart (S-K19-C1..C5)", () => {
 		);
 		expect(container.querySelector("figure")).not.toBeNull();
 	});
-});
 
-describe("FunnelTooltip", () => {
-	it("renders nothing when inactive", () => {
-		const { container } = render(<FunnelTooltip active={false} payload={[]} />);
-		expect(container.firstChild).toBeNull();
-	});
-
-	it("renders nothing when payload is empty", () => {
-		const { container } = render(<FunnelTooltip active={true} payload={[]} />);
-		expect(container.firstChild).toBeNull();
-	});
-
-	it("renders nothing when payload is undefined", () => {
-		const { container } = render(<FunnelTooltip active={true} />);
-		expect(container.firstChild).toBeNull();
-	});
-
-	it("renders nothing when the first payload entry has no row", () => {
+	it("renders one trapezoid path per row with the SVG title for native tooltip", () => {
 		const { container } = render(
-			<FunnelTooltip active={true} payload={[{}]} />,
-		);
-		expect(container.firstChild).toBeNull();
-	});
-
-	it("renders the row label, count and percentage when active with data", () => {
-		render(
-			<FunnelTooltip
-				active={true}
-				payload={[
-					{
-						payload: {
-							key: "submitted",
-							label: "Déclaration soumise",
-							count: 1234,
-							pctOfStart: 42,
-							pctDropFromPrev: 18,
-						},
-					},
-				]}
+			<CompletionFunnelChart
+				caption="Funnel principal"
+				dropThreshold={30}
+				rows={POPULATED_ROWS}
 			/>,
 		);
-		expect(screen.getByText(/Déclaration soumise/)).toBeInTheDocument();
-		const items = screen.getAllByRole("listitem");
-		expect(items[0]?.textContent ?? "").toMatch(
-			/1\s234\s+déclarations\s+\(42\s+%\s+du funnel\)/,
-		);
-		expect(items[1]?.textContent ?? "").toMatch(
-			/Chute de\s+18\s+%\s+vs étape précédente/,
-		);
+		const paths = container.querySelectorAll("svg path");
+		expect(paths.length).toBe(POPULATED_ROWS.length);
+		const titles = container.querySelectorAll("svg path title");
+		expect(titles.length).toBe(POPULATED_ROWS.length);
+		expect(titles[0]?.textContent).toMatch(/Brouillon créé/);
+		expect(titles[0]?.textContent).not.toMatch(/chute/);
+		expect(titles[1]?.textContent).toMatch(/chute de 20 %/);
 	});
 
-	it("omits the drop line when pctDropFromPrev is null", () => {
+	it("renders the count and percentage labels for each row in SVG text", () => {
 		render(
-			<FunnelTooltip
-				active={true}
-				payload={[
-					{
-						payload: {
-							key: "draft_started",
-							label: "Brouillon créé",
-							count: 100,
-							pctOfStart: 100,
-							pctDropFromPrev: null,
-						},
-					},
-				]}
+			<CompletionFunnelChart
+				caption="Funnel principal"
+				dropThreshold={30}
+				rows={POPULATED_ROWS}
 			/>,
 		);
-		expect(screen.getByText(/Brouillon créé/)).toBeInTheDocument();
-		expect(screen.queryByText(/Chute de/)).not.toBeInTheDocument();
+		expect(screen.getByText("100")).toBeInTheDocument();
+		expect(screen.getByText("80")).toBeInTheDocument();
+		expect(screen.getByText("30")).toBeInTheDocument();
+		expect(screen.getByText(/↓\s*62\s*%/)).toBeInTheDocument();
 	});
 });
