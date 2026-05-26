@@ -7,6 +7,7 @@ import {
 	DROPOFF_STAGNATION_DAYS_MAX,
 	DROPOFF_STAGNATION_DAYS_MIN,
 	getStepLabel,
+	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
 } from "../shared/declarationSteps";
 
@@ -79,6 +80,38 @@ describe("POST_SUBMIT_MILESTONES", () => {
 	it("uses unique keys", () => {
 		const keys = POST_SUBMIT_MILESTONES.map((m) => m.key);
 		expect(new Set(keys).size).toBe(keys.length);
+	});
+});
+
+describe("POST_SUBMIT_DROPOFF_PHASES", () => {
+	it("S-K5-D2 — exposes the 6 post-submission FSM phases in chronological order", () => {
+		expect(POST_SUBMIT_DROPOFF_PHASES.map((p) => p.key)).toEqual([
+			"awaiting_compliance_path_choice",
+			"corrective_actions_chosen",
+			"joint_evaluation_chosen",
+			"awaiting_revision_choice",
+			"revised_joint_evaluation_chosen",
+			"awaiting_cse_opinion",
+		]);
+	});
+
+	it("uses French user-facing labels with no empty strings", () => {
+		for (const phase of POST_SUBMIT_DROPOFF_PHASES) {
+			expect(phase.label.length).toBeGreaterThan(0);
+		}
+	});
+
+	it("uses unique keys and unique FSM statuses", () => {
+		const keys = POST_SUBMIT_DROPOFF_PHASES.map((p) => p.key);
+		const statuses = POST_SUBMIT_DROPOFF_PHASES.map((p) => p.status);
+		expect(new Set(keys).size).toBe(keys.length);
+		expect(new Set(statuses).size).toBe(statuses.length);
+	});
+
+	it("maps each phase to the matching blocking FSM status (`status` mirrors `key`)", () => {
+		for (const phase of POST_SUBMIT_DROPOFF_PHASES) {
+			expect(phase.status).toBe(phase.key);
+		}
 	});
 });
 

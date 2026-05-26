@@ -50,19 +50,29 @@ export type StepDurationRow = {
 };
 
 /**
- * One row of the K5 « taux d'abandon par étape » dataset.
+ * One row of the K5 « taux d'abandon par phase » dataset.
  *
- * Covers the wizard steps 0..5 (step 6 — submission — is excluded since a
- * declaration on the recap step is submitted, not abandoned). For each step:
- * - `total` counts declarations that entered the step at least once.
- * - `abandoned` counts the subset whose latest entry on the step is older
- *   than the requested `stagnationDays`, that is still on the step today,
- *   and that has not been completed nor cancelled.
- * - `dropoffRate` is `(abandoned / total) * 100`, rounded to 1 decimal, and
- *   defaults to 0 when `total` is 0 (no declaration ever entered the step).
+ * Covers both halves of the journey:
+ * - **wizard phase** (`phase: "wizard"`, `step` set to 0..5) — declarations
+ *   that entered a step at least once and stagnate on it past
+ *   `stagnationDays`. Step 6 (« Récapitulatif ») is excluded since a
+ *   declaration on the recap step is submitted, not abandoned.
+ * - **post-submit phase** (`phase: "post_submit"`, `step: null`) — the 6
+ *   blocking FSM statuses (path choice, second declaration, joint
+ *   evaluation, revision choice, revised joint evaluation, CSE opinion).
+ *   `total` counts declarations that ever entered the phase; `abandoned`
+ *   counts the subset still stuck on the FSM status with no activity in the
+ *   last `stagnationDays`.
+ *
+ * `key` is a stable identifier (`"0"`..`"5"` for wizard steps, FSM status
+ * for post-submit phases) used as the React key in the chart and as the row
+ * identity in tests. `dropoffRate` is `(abandoned / total) * 100`, rounded
+ * to 1 decimal, and defaults to 0 when `total` is 0.
  */
 export type StepDropoffRow = {
-	step: number;
+	key: string;
+	phase: "wizard" | "post_submit";
+	step: number | null;
 	label: string;
 	total: number;
 	abandoned: number;

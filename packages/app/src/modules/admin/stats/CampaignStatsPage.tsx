@@ -192,12 +192,13 @@ export function CampaignStatsPage({ currentYear, availableYears }: Props) {
 
 			<section aria-labelledby="step-dropoff-heading" className="fr-mt-6w">
 				<h2 className="fr-h3" id="step-dropoff-heading">
-					Taux d'abandon par étape — campagne {stepDurationsYear}
+					Taux d'abandon par phase — campagne {stepDurationsYear}
 				</h2>
 				<p className="fr-text--sm fr-text-mention--grey">
-					Pourcentage de déclarations entrées sur chaque étape du parcours
-					indicateurs et qui n'ont pas progressé depuis le délai sélectionné.
-					Aide à repérer les étapes où les déclarants décrochent.
+					Pourcentage de déclarations entrées sur chaque phase du parcours
+					déclaratif (étapes du wizard A–F puis phases post-soumission) et qui
+					n'ont pas progressé depuis le délai sélectionné. Aide à repérer les
+					phases où les déclarants décrochent.
 				</p>
 				<div className="fr-grid-row fr-grid-row--gutters fr-mb-2w">
 					<div className="fr-col-12 fr-col-md-6">

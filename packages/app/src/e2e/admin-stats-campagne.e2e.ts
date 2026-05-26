@@ -151,19 +151,19 @@ test.describe("admin campaign progression stats", () => {
 		).toBeVisible();
 	});
 
-	test("K5 step dropoff section is visible with chart, table and stagnation filter", async ({
+	test("K5 step dropoff section is visible with chart, table, stagnation filter and both phase rowgroups", async ({
 		page,
 	}) => {
 		await page.goto("/admin/stats/campagne");
 
 		await expect(
 			page.getByRole("heading", {
-				name: /Taux d'abandon par étape/i,
+				name: /Taux d'abandon par phase/i,
 				level: 2,
 			}),
 		).toBeVisible();
 
-		const k5Section = page.getByLabel(/Taux d'abandon par étape/i);
+		const k5Section = page.getByLabel(/Taux d'abandon par phase/i);
 
 		await expect(
 			k5Section.getByLabel(/Considérer une déclaration abandonnée après/i),
@@ -183,6 +183,20 @@ test.describe("admin campaign progression stats", () => {
 		await expect(
 			k5Section.getByRole("rowheader", { name: "Introduction" }),
 		).toBeVisible();
+		await expect(
+			k5Section.getByRole("rowheader", {
+				name: /Parcours initial \(wizard A–F\)/i,
+			}),
+		).toBeVisible();
+		await expect(
+			k5Section.getByRole("rowheader", { name: "Démarche post-soumission" }),
+		).toBeVisible();
+		await expect(
+			k5Section.getByRole("rowheader", { name: "Choix parcours conformité" }),
+		).toBeVisible();
+		await expect(
+			k5Section.getByRole("rowheader", { name: "Avis CSE" }),
+		).toBeVisible();
 	});
 
 	test("K5 stagnation filter is editable and stays in sync with the input", async ({
@@ -190,7 +204,7 @@ test.describe("admin campaign progression stats", () => {
 	}) => {
 		await page.goto("/admin/stats/campagne");
 
-		const k5Section = page.getByLabel(/Taux d'abandon par étape/i);
+		const k5Section = page.getByLabel(/Taux d'abandon par phase/i);
 		const filter = k5Section.getByLabel(
 			/Considérer une déclaration abandonnée après/i,
 		);

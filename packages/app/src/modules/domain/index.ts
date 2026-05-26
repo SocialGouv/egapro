@@ -56,6 +56,7 @@ export {
 // Declaration steps labels (A–F stepper) and post-submit milestones
 export type {
 	DeclarationStepNumber,
+	PostSubmitDropoffPhaseKey,
 	PostSubmitMilestoneKey,
 } from "./shared/declarationSteps";
 export {
@@ -65,6 +66,7 @@ export {
 	DROPOFF_STAGNATION_DAYS_MAX,
 	DROPOFF_STAGNATION_DAYS_MIN,
 	getStepLabel,
+	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
 } from "./shared/declarationSteps";
 // Declaration status history (event-sourced trajectory)

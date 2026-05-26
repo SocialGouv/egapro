@@ -37,6 +37,16 @@ type DropoffRow = {
 	abandoned: number;
 };
 
+type PostSubmitTotalRow = {
+	phase: string;
+	total: number;
+};
+
+type PostSubmitAbandonedRow = {
+	phase: string;
+	abandoned: number;
+};
+
 /**
  * Builds a mock Drizzle db where each call to `execute()` returns the next
  * planned rowset. For `getStepDurations` the order is fixed: wizard, then
@@ -75,13 +85,24 @@ function buildDb(
 }
 
 /**
- * Builds a mock Drizzle db scoped to `getStepDropoffRate` — its single
- * `execute()` call returns the dropoff rows. Kept separate from `buildDb`
- * because the K5 query does only one execute (no milestones chain).
+ * Builds a mock Drizzle db scoped to `getStepDropoffRate` — the K5 query runs
+ * 3 `execute()` calls in this fixed order:
+ *   1. wizard CTE (steps 0..5)
+ *   2. post-submit phase totals (UNION ALL of 6 entry-event counts)
+ *   3. post-submit phase abandoned (declarations stuck on FSM status)
+ * Tests that only need to assert on the wizard CTE pass empty arrays for the
+ * post-submit slots; tests that exercise the post-submit phases populate
+ * them.
  */
-function buildDropoffDb(dropoffRows: DropoffRow[] = []) {
+function buildDropoffDb(
+	dropoffRows: DropoffRow[] = [],
+	postSubmitTotals: PostSubmitTotalRow[] = [],
+	postSubmitAbandoned: PostSubmitAbandonedRow[] = [],
+) {
 	const execute = vi.fn();
 	execute.mockResolvedValueOnce(dropoffRows);
+	execute.mockResolvedValueOnce(postSubmitTotals);
+	execute.mockResolvedValueOnce(postSubmitAbandoned);
 	return {
 		select: vi.fn(),
 		execute,
@@ -767,12 +788,16 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 		).rejects.toThrow(/administrateurs/i);
 	});
 
-	it("S-K5-1 — maps SQL rows to typed output with FR step labels and 1-decimal rates", async () => {
-		const db = buildDropoffDb([
-			{ step: 1, total: 10, abandoned: 2 },
-			{ step: 2, total: 8, abandoned: 4 },
-			{ step: 3, total: 6, abandoned: 1 },
-		]);
+	it("S-K5-1 — maps SQL rows to 12 typed output rows (6 wizard + 6 post-submit) with FR labels and 1-decimal rates", async () => {
+		const db = buildDropoffDb(
+			[
+				{ step: 1, total: 10, abandoned: 2 },
+				{ step: 2, total: 8, abandoned: 4 },
+				{ step: 3, total: 6, abandoned: 1 },
+			],
+			[],
+			[],
+		);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
 			db,
@@ -785,11 +810,14 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 			stagnationDays: 30,
 		});
 
-		expect(result).toHaveLength(6);
-		expect(result.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5]);
+		expect(result).toHaveLength(12);
+		const wizard = result.filter((row) => row.phase === "wizard");
+		expect(wizard.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5]);
 
-		const step1 = result.find((row) => row.step === 1);
+		const step1 = wizard.find((row) => row.step === 1);
 		expect(step1).toEqual({
+			key: "1",
+			phase: "wizard",
 			step: 1,
 			label: "Effectifs",
 			total: 10,
@@ -797,16 +825,16 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 			dropoffRate: 20,
 		});
 
-		const step2 = result.find((row) => row.step === 2);
+		const step2 = wizard.find((row) => row.step === 2);
 		expect(step2?.label).toBe("Écart de rémunération");
 		expect(step2?.dropoffRate).toBe(50);
 
-		const step3 = result.find((row) => row.step === 3);
+		const step3 = wizard.find((row) => row.step === 3);
 		expect(step3?.dropoffRate).toBeCloseTo(16.7, 1);
 	});
 
-	it("S-K5-2 — returns total=0 abandoned=0 rate=0 for steps the SQL omits (no division by zero, no missing row)", async () => {
-		const db = buildDropoffDb([{ step: 1, total: 4, abandoned: 0 }]);
+	it("S-K5-2 — returns total=0 abandoned=0 rate=0 for phases the SQL omits (no division by zero, no missing row)", async () => {
+		const db = buildDropoffDb([{ step: 1, total: 4, abandoned: 0 }], [], []);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
 			db,
@@ -819,9 +847,13 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 			stagnationDays: 30,
 		});
 
-		expect(result).toHaveLength(6);
-		const step5 = result.find((row) => row.step === 5);
+		expect(result).toHaveLength(12);
+		const step5 = result.find(
+			(row) => row.phase === "wizard" && row.step === 5,
+		);
 		expect(step5).toEqual({
+			key: "5",
+			phase: "wizard",
 			step: 5,
 			label: "Écart par catégorie de salariés",
 			total: 0,
@@ -829,12 +861,25 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 			dropoffRate: 0,
 		});
 
-		const step1 = result.find((row) => row.step === 1);
+		const step1 = result.find(
+			(row) => row.phase === "wizard" && row.step === 1,
+		);
 		expect(step1?.dropoffRate).toBe(0);
+
+		const postSubmit = result.filter((row) => row.phase === "post_submit");
+		expect(postSubmit).toHaveLength(6);
+		for (const row of postSubmit) {
+			expect(row).toMatchObject({
+				step: null,
+				total: 0,
+				abandoned: 0,
+				dropoffRate: 0,
+			});
+		}
 	});
 
-	it("S-K5-3 — forwards stagnationDays as an SQL parameter (router passes input through)", async () => {
-		const db = buildDropoffDb([]);
+	it("S-K5-3 — forwards stagnationDays as an SQL parameter in both wizard and post-submit-abandoned queries", async () => {
+		const db = buildDropoffDb([], [], []);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
 			db,
@@ -843,15 +888,16 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 		} as never);
 
 		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 10 });
-		expect(db.execute).toHaveBeenCalledTimes(1);
+		expect(db.execute).toHaveBeenCalledTimes(3);
 
-		const firstCall = db.execute.mock.calls[0]?.[0];
-		const serialized = flattenSql(firstCall);
-		expect(serialized).toContain("10");
+		const wizardCall = db.execute.mock.calls[0]?.[0];
+		expect(flattenSql(wizardCall)).toContain("10");
+		const abandonedCall = db.execute.mock.calls[2]?.[0];
+		expect(flattenSql(abandonedCall)).toContain("10");
 	});
 
-	it("S-K5-4 — `status != 'demarche_completed'` is part of the abandoned FILTER", async () => {
-		const db = buildDropoffDb([]);
+	it("S-K5-4 — `status != 'demarche_completed'` is part of the wizard abandoned FILTER", async () => {
+		const db = buildDropoffDb([], [], []);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
 			db,
@@ -861,13 +907,12 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 
 		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 30 });
 
-		const firstCall = db.execute.mock.calls[0]?.[0];
-		const serialized = flattenSql(firstCall);
-		expect(serialized).toContain("demarche_completed");
+		const wizardCall = db.execute.mock.calls[0]?.[0];
+		expect(flattenSql(wizardCall)).toContain("demarche_completed");
 	});
 
-	it("S-K5-5 — `cancelled_at IS NULL` is applied to the declaration join", async () => {
-		const db = buildDropoffDb([]);
+	it("S-K5-5 — `cancelled_at IS NULL` is applied to the declaration join in every query", async () => {
+		const db = buildDropoffDb([], [], []);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
 			db,
@@ -877,13 +922,13 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 
 		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 30 });
 
-		const firstCall = db.execute.mock.calls[0]?.[0];
-		const serialized = flattenSql(firstCall);
-		expect(serialized).toMatch(/cancelled\s*At\s+IS NULL/i);
+		for (const call of db.execute.mock.calls) {
+			expect(flattenSql(call?.[0])).toMatch(/cancelled\s*At\s+IS NULL/i);
+		}
 	});
 
 	it("S-K5-6 — uses DISTINCT ON in the latest_step_change CTE so back-and-forth entries are deduplicated", async () => {
-		const db = buildDropoffDb([]);
+		const db = buildDropoffDb([], [], []);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
 			db,
@@ -893,16 +938,19 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 
 		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 30 });
 
-		const firstCall = db.execute.mock.calls[0]?.[0];
-		const serialized = flattenSql(firstCall);
-		expect(serialized).toContain("DISTINCT ON");
+		const wizardCall = db.execute.mock.calls[0]?.[0];
+		expect(flattenSql(wizardCall)).toContain("DISTINCT ON");
 	});
 
 	it("S-K5-7 — never returns a row for step 6 (excluded by `lsc.step < 6`)", async () => {
-		const db = buildDropoffDb([
-			{ step: 0, total: 5, abandoned: 0 },
-			{ step: 6, total: 9, abandoned: 0 },
-		]);
+		const db = buildDropoffDb(
+			[
+				{ step: 0, total: 5, abandoned: 0 },
+				{ step: 6, total: 9, abandoned: 0 },
+			],
+			[],
+			[],
+		);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
 			db,
@@ -915,13 +963,14 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 			stagnationDays: 30,
 		});
 
-		expect(result).toHaveLength(6);
-		expect(result.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5]);
-		expect(result.some((row) => row.step === 6)).toBe(false);
+		expect(result).toHaveLength(12);
+		const wizard = result.filter((row) => row.phase === "wizard");
+		expect(wizard.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5]);
+		expect(wizard.some((row) => row.step === 6)).toBe(false);
 	});
 
-	it("S-K5-8 — propagates the sizeRange filter into the SQL (between predicate)", async () => {
-		const db = buildDropoffDb([]);
+	it("S-K5-8 — propagates the sizeRange filter into every SQL query (between predicate)", async () => {
+		const db = buildDropoffDb([], [], []);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
 			db,
@@ -935,9 +984,167 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 			sizeRange: "250+",
 		});
 
-		const firstCall = db.execute.mock.calls[0]?.[0];
-		const serialized = flattenSql(firstCall);
-		expect(serialized).toContain("250");
+		expect(db.execute).toHaveBeenCalledTimes(3);
+		for (const call of db.execute.mock.calls) {
+			expect(flattenSql(call?.[0])).toContain("250");
+		}
+	});
+
+	it("S-K5-10 — maps post-submit totals + abandoned to typed rows with phase='post_submit', step=null, FR labels", async () => {
+		const db = buildDropoffDb(
+			[],
+			[
+				{ phase: "awaiting_compliance_path_choice", total: 100 },
+				{ phase: "corrective_actions_chosen", total: 40 },
+				{ phase: "joint_evaluation_chosen", total: 20 },
+				{ phase: "awaiting_revision_choice", total: 8 },
+				{ phase: "revised_joint_evaluation_chosen", total: 4 },
+				{ phase: "awaiting_cse_opinion", total: 60 },
+			],
+			[
+				{ phase: "awaiting_compliance_path_choice", abandoned: 5 },
+				{ phase: "corrective_actions_chosen", abandoned: 8 },
+				{ phase: "joint_evaluation_chosen", abandoned: 4 },
+				{ phase: "awaiting_revision_choice", abandoned: 2 },
+				{ phase: "revised_joint_evaluation_chosen", abandoned: 1 },
+				{ phase: "awaiting_cse_opinion", abandoned: 12 },
+			],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+		});
+
+		const postSubmit = result.filter((row) => row.phase === "post_submit");
+		expect(postSubmit.map((row) => row.key)).toEqual([
+			"awaiting_compliance_path_choice",
+			"corrective_actions_chosen",
+			"joint_evaluation_chosen",
+			"awaiting_revision_choice",
+			"revised_joint_evaluation_chosen",
+			"awaiting_cse_opinion",
+		]);
+
+		const cse = postSubmit.find((row) => row.key === "awaiting_cse_opinion");
+		expect(cse).toEqual({
+			key: "awaiting_cse_opinion",
+			phase: "post_submit",
+			step: null,
+			label: "Avis CSE",
+			total: 60,
+			abandoned: 12,
+			dropoffRate: 20,
+		});
+
+		const compliance = postSubmit.find(
+			(row) => row.key === "awaiting_compliance_path_choice",
+		);
+		expect(compliance?.label).toBe("Choix parcours conformité");
+		expect(compliance?.dropoffRate).toBe(5);
+
+		const corrective = postSubmit.find(
+			(row) => row.key === "corrective_actions_chosen",
+		);
+		expect(corrective?.dropoffRate).toBe(20);
+	});
+
+	it("S-K5-11 — `awaiting_cse_opinion` row shows up with stagnation when cseRequired path is exercised in SQL", async () => {
+		const db = buildDropoffDb(
+			[],
+			[{ phase: "awaiting_cse_opinion", total: 30 }],
+			[{ phase: "awaiting_cse_opinion", abandoned: 6 }],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+		});
+
+		const cse = result.find((row) => row.key === "awaiting_cse_opinion");
+		expect(cse).toEqual({
+			key: "awaiting_cse_opinion",
+			phase: "post_submit",
+			step: null,
+			label: "Avis CSE",
+			total: 30,
+			abandoned: 6,
+			dropoffRate: 20,
+		});
+
+		const totalsCall = db.execute.mock.calls[1]?.[0];
+		const serializedTotals = flattenSql(totalsCall);
+		expect(serializedTotals).toContain("cseRequired");
+		expect(serializedTotals).toMatch(/awaiting_cse_opinion/);
+
+		const abandonedCall = db.execute.mock.calls[2]?.[0];
+		const serializedAbandoned = flattenSql(abandonedCall);
+		expect(serializedAbandoned).toMatch(/awaiting_cse_opinion/);
+	});
+
+	it("S-K5-12 — post-submit phase with total=0 has dropoffRate=0 (no division by zero)", async () => {
+		const db = buildDropoffDb(
+			[],
+			[],
+			[{ phase: "awaiting_compliance_path_choice", abandoned: 0 }],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+		});
+
+		const compliance = result.find(
+			(row) => row.key === "awaiting_compliance_path_choice",
+		);
+		expect(compliance).toEqual({
+			key: "awaiting_compliance_path_choice",
+			phase: "post_submit",
+			step: null,
+			label: "Choix parcours conformité",
+			total: 0,
+			abandoned: 0,
+			dropoffRate: 0,
+		});
+	});
+
+	it("S-K5-13 — post-submit SQL targets the 6 FSM statuses (compliance path, corrective, joint, revision, revised joint, CSE)", async () => {
+		const db = buildDropoffDb([], [], []);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 30 });
+
+		const abandonedCall = db.execute.mock.calls[2]?.[0];
+		const serialized = flattenSql(abandonedCall);
+		expect(serialized).toContain("awaiting_compliance_path_choice");
+		expect(serialized).toContain("corrective_actions_chosen");
+		expect(serialized).toContain("joint_evaluation_chosen");
+		expect(serialized).toContain("awaiting_revision_choice");
+		expect(serialized).toContain("revised_joint_evaluation_chosen");
+		expect(serialized).toContain("awaiting_cse_opinion");
 	});
 
 	it("rejects invalid stagnationDays (below 1 / above 180)", async () => {
@@ -958,7 +1165,7 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 	});
 
 	it("defaults stagnationDays to 30 when omitted", async () => {
-		const db = buildDropoffDb([]);
+		const db = buildDropoffDb([], [], []);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
 			db,
@@ -967,7 +1174,7 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 		} as never);
 
 		await caller.getStepDropoffRate({ year: 2025 });
-		expect(db.execute).toHaveBeenCalledTimes(1);
+		expect(db.execute).toHaveBeenCalledTimes(3);
 	});
 });
 

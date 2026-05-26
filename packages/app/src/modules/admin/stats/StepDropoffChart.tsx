@@ -32,8 +32,18 @@ type DropoffTooltipProps = {
 	payload?: TooltipEntry[];
 };
 
-const NORMAL_COLOR = "var(--background-action-high-blue-france)";
-const ALERT_COLOR = "var(--background-action-high-red-marianne)";
+const WIZARD_NORMAL_COLOR = "var(--background-action-high-blue-france)";
+const WIZARD_ALERT_COLOR = "var(--background-action-high-red-marianne)";
+const POST_SUBMIT_NORMAL_COLOR = "var(--background-action-low-blue-france)";
+const POST_SUBMIT_ALERT_COLOR = "var(--background-action-low-red-marianne)";
+
+function getBarColor(row: StepDropoffRow): string {
+	const isAlert = row.dropoffRate > DROPOFF_RATE_ALERT_THRESHOLD;
+	if (row.phase === "wizard") {
+		return isAlert ? WIZARD_ALERT_COLOR : WIZARD_NORMAL_COLOR;
+	}
+	return isAlert ? POST_SUBMIT_ALERT_COLOR : POST_SUBMIT_NORMAL_COLOR;
+}
 
 function formatPercent(value: number): string {
 	return `${value.toLocaleString("fr-FR", {
@@ -52,18 +62,19 @@ function DropoffTooltip({ active, payload }: DropoffTooltipProps) {
 	}
 	const row = payload[0]?.payload;
 	if (!row) return null;
+	const isWizard = row.phase === "wizard";
 	return (
 		<div className="fr-p-2w fr-background-alt--grey">
 			<p className="fr-text--sm fr-text--bold fr-mb-1w">
-				Étape « {row.label} »
+				{isWizard ? "Étape" : "Phase"} « {row.label} »
 			</p>
 			<ul className={styles.tooltipList}>
 				<li className={styles.tooltipItem}>
 					{formatPercent(row.dropoffRate)} d'abandon
 				</li>
 				<li className={styles.tooltipItem}>
-					{formatCount(row.abandoned)} sur {formatCount(row.total)} entreprises
-					entrées sur l'étape
+					{formatCount(row.abandoned)} sur {formatCount(row.total)} déclarations{" "}
+					{isWizard ? "entrées sur l'étape" : "entrées dans la phase"}
 				</li>
 			</ul>
 		</div>
@@ -84,10 +95,11 @@ export function StepDropoffChart({ rows }: Props) {
 	return (
 		<figure className={styles.chartWrapper}>
 			<figcaption className="fr-sr-only">
-				Taux d'abandon par étape du parcours indicateurs : pourcentage de
-				déclarations entrées sur chaque étape et qui n'ont pas progressé depuis
-				le délai sélectionné. Les barres rouges signalent une étape dont le taux
-				dépasse {DROPOFF_RATE_ALERT_THRESHOLD} %. Les données équivalentes sont
+				Taux d'abandon par phase de la démarche déclarative : pourcentage de
+				déclarations entrées sur chaque étape du wizard ou phase post-soumission
+				et qui n'ont pas progressé depuis le délai sélectionné. Les barres
+				rouges signalent une phase dont le taux dépasse{" "}
+				{DROPOFF_RATE_ALERT_THRESHOLD} %. Les données équivalentes sont
 				disponibles dans le tableau ci-dessous.
 			</figcaption>
 			<ResponsiveContainer>
@@ -99,7 +111,7 @@ export function StepDropoffChart({ rows }: Props) {
 					<XAxis
 						dataKey="label"
 						interval={0}
-						label={{ value: "Étape", position: "insideBottom", offset: -16 }}
+						label={{ value: "Phase", position: "insideBottom", offset: -16 }}
 						tick={{ fontSize: 12 }}
 					/>
 					<YAxis
@@ -113,16 +125,13 @@ export function StepDropoffChart({ rows }: Props) {
 						type="number"
 					/>
 					<Tooltip content={<DropoffTooltip />} />
-					<Bar dataKey="dropoffRate" fill={NORMAL_COLOR} name="Taux d'abandon">
+					<Bar
+						dataKey="dropoffRate"
+						fill={WIZARD_NORMAL_COLOR}
+						name="Taux d'abandon"
+					>
 						{rows.map((row) => (
-							<Cell
-								fill={
-									row.dropoffRate > DROPOFF_RATE_ALERT_THRESHOLD
-										? ALERT_COLOR
-										: NORMAL_COLOR
-								}
-								key={`step_${row.step}`}
-							/>
+							<Cell fill={getBarColor(row)} key={row.key} />
 						))}
 					</Bar>
 				</BarChart>
