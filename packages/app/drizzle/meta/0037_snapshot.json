@@ -67,12 +67,8 @@
 					"name": "app_admin_impersonation_event_admin_user_id_app_user_id_fk",
 					"tableFrom": "app_admin_impersonation_event",
 					"tableTo": "app_user",
-					"columnsFrom": [
-						"admin_user_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["admin_user_id"],
+					"columnsTo": ["id"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				},
@@ -80,12 +76,8 @@
 					"name": "app_admin_impersonation_event_siren_app_company_siren_fk",
 					"tableFrom": "app_admin_impersonation_event",
 					"tableTo": "app_company",
-					"columnsFrom": [
-						"siren"
-					],
-					"columnsTo": [
-						"siren"
-					],
+					"columnsFrom": ["siren"],
+					"columnsTo": ["siren"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				}
@@ -305,12 +297,8 @@
 					"name": "app_cse_opinion_declaration_id_app_declaration_id_fk",
 					"tableFrom": "app_cse_opinion",
 					"tableTo": "app_declaration",
-					"columnsFrom": [
-						"declaration_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["declaration_id"],
+					"columnsTo": ["id"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				}
@@ -320,11 +308,7 @@
 				"cse_opinion_decl_number_type_idx": {
 					"name": "cse_opinion_decl_number_type_idx",
 					"nullsNotDistinct": false,
-					"columns": [
-						"declaration_id",
-						"declaration_number",
-						"type"
-					]
+					"columns": ["declaration_id", "declaration_number", "type"]
 				}
 			},
 			"policies": {},
@@ -407,12 +391,8 @@
 					"name": "app_declaration_status_history_declaration_id_app_declaration_id_fk",
 					"tableFrom": "app_declaration_status_history",
 					"tableTo": "app_declaration",
-					"columnsFrom": [
-						"declaration_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["declaration_id"],
+					"columnsTo": ["id"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
@@ -420,12 +400,8 @@
 					"name": "app_declaration_status_history_actor_user_id_app_user_id_fk",
 					"tableFrom": "app_declaration_status_history",
 					"tableTo": "app_user",
-					"columnsFrom": [
-						"actor_user_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["actor_user_id"],
+					"columnsTo": ["id"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				}
@@ -1020,12 +996,8 @@
 					"name": "app_declaration_siren_app_company_siren_fk",
 					"tableFrom": "app_declaration",
 					"tableTo": "app_company",
-					"columnsFrom": [
-						"siren"
-					],
-					"columnsTo": [
-						"siren"
-					],
+					"columnsFrom": ["siren"],
+					"columnsTo": ["siren"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				},
@@ -1033,12 +1005,8 @@
 					"name": "app_declaration_declarant_id_app_user_id_fk",
 					"tableFrom": "app_declaration",
 					"tableTo": "app_user",
-					"columnsFrom": [
-						"declarant_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["declarant_id"],
+					"columnsTo": ["id"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				}
@@ -1151,12 +1119,8 @@
 					"name": "app_employee_category_job_category_id_app_job_category_id_fk",
 					"tableFrom": "app_employee_category",
 					"tableTo": "app_job_category",
-					"columnsFrom": [
-						"job_category_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["job_category_id"],
+					"columnsTo": ["id"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				}
@@ -1166,10 +1130,7 @@
 				"employee_category_job_type_idx": {
 					"name": "employee_category_job_type_idx",
 					"nullsNotDistinct": false,
-					"columns": [
-						"job_category_id",
-						"declaration_type"
-					]
+					"columns": ["job_category_id", "declaration_type"]
 				}
 			},
 			"policies": {},
@@ -1231,10 +1192,7 @@
 				"export_year_version_idx": {
 					"name": "export_year_version_idx",
 					"nullsNotDistinct": false,
-					"columns": [
-						"year",
-						"version"
-					]
+					"columns": ["year", "version"]
 				}
 			},
 			"policies": {},
@@ -1327,12 +1285,8 @@
 					"name": "app_file_declaration_id_app_declaration_id_fk",
 					"tableFrom": "app_file",
 					"tableTo": "app_declaration",
-					"columnsFrom": [
-						"declaration_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["declaration_id"],
+					"columnsTo": ["id"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				}
@@ -1820,12 +1774,8 @@
 					"name": "app_gip_mds_data_siren_app_company_siren_fk",
 					"tableFrom": "app_gip_mds_data",
 					"tableTo": "app_company",
-					"columnsFrom": [
-						"siren"
-					],
-					"columnsTo": [
-						"siren"
-					],
+					"columnsFrom": ["siren"],
+					"columnsTo": ["siren"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				}
@@ -1833,10 +1783,7 @@
 			"compositePrimaryKeys": {
 				"app_gip_mds_data_siren_year_pk": {
 					"name": "app_gip_mds_data_siren_year_pk",
-					"columns": [
-						"siren",
-						"year"
-					]
+					"columns": ["siren", "year"]
 				}
 			},
 			"uniqueConstraints": {},
@@ -1880,12 +1827,8 @@
 					"name": "app_global_setting_updated_by_app_user_id_fk",
 					"tableFrom": "app_global_setting",
 					"tableTo": "app_user",
-					"columnsFrom": [
-						"updated_by"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["updated_by"],
+					"columnsTo": ["id"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				}
@@ -1937,12 +1880,8 @@
 					"name": "app_job_category_declaration_id_app_declaration_id_fk",
 					"tableFrom": "app_job_category",
 					"tableTo": "app_declaration",
-					"columnsFrom": [
-						"declaration_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["declaration_id"],
+					"columnsTo": ["id"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				}
@@ -1952,10 +1891,7 @@
 				"job_category_declaration_index_idx": {
 					"name": "job_category_declaration_index_idx",
 					"nullsNotDistinct": false,
-					"columns": [
-						"declaration_id",
-						"category_index"
-					]
+					"columns": ["declaration_id", "category_index"]
 				}
 			},
 			"policies": {},
@@ -2104,12 +2040,8 @@
 					"name": "app_user_company_user_id_app_user_id_fk",
 					"tableFrom": "app_user_company",
 					"tableTo": "app_user",
-					"columnsFrom": [
-						"user_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				},
@@ -2117,12 +2049,8 @@
 					"name": "app_user_company_siren_app_company_siren_fk",
 					"tableFrom": "app_user_company",
 					"tableTo": "app_company",
-					"columnsFrom": [
-						"siren"
-					],
-					"columnsTo": [
-						"siren"
-					],
+					"columnsFrom": ["siren"],
+					"columnsTo": ["siren"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				}
@@ -2130,10 +2058,7 @@
 			"compositePrimaryKeys": {
 				"app_user_company_user_id_siren_pk": {
 					"name": "app_user_company_user_id_siren_pk",
-					"columns": [
-						"user_id",
-						"siren"
-					]
+					"columns": ["user_id", "siren"]
 				}
 			},
 			"uniqueConstraints": {},
@@ -2405,11 +2330,7 @@
 		"public.compliance_path": {
 			"name": "compliance_path",
 			"schema": "public",
-			"values": [
-				"justify",
-				"corrective_action",
-				"joint_evaluation"
-			]
+			"values": ["justify", "corrective_action", "joint_evaluation"]
 		},
 		"public.declaration_event_type": {
 			"name": "declaration_event_type",
@@ -2442,26 +2363,17 @@
 		"public.declaration_type": {
 			"name": "declaration_type",
 			"schema": "public",
-			"values": [
-				"initial",
-				"correction"
-			]
+			"values": ["initial", "correction"]
 		},
 		"public.file_type": {
 			"name": "file_type",
 			"schema": "public",
-			"values": [
-				"cse_opinion",
-				"joint_evaluation"
-			]
+			"values": ["cse_opinion", "joint_evaluation"]
 		},
 		"public.referent_type": {
 			"name": "referent_type",
 			"schema": "public",
-			"values": [
-				"email",
-				"url"
-			]
+			"values": ["email", "url"]
 		}
 	},
 	"schemas": {

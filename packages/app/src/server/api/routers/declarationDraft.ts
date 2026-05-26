@@ -1,12 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
-import type { DraftBlob } from "~/modules/declaration-remuneration";
 import {
 	clearDraftInput,
 	getDraftInput,
 	saveDraftInput,
-} from "~/modules/declaration-remuneration";
+} from "~/modules/declaration-remuneration/shared/draft/schemas";
+import type { DraftBlob } from "~/modules/declaration-remuneration/shared/draft/schemas";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { isImpersonatingSiren } from "~/server/auth/companyAccess";
