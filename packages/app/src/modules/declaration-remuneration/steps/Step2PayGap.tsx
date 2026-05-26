@@ -225,7 +225,6 @@ export function Step2PayGap({
 			/>
 
 			<FormActions
-				className="fr-mt-0"
 				isSubmitting={mutation.isPending}
 				mimoquageNextHref={
 					hasSavedData ? "/declaration-remuneration/etape/3" : undefined
