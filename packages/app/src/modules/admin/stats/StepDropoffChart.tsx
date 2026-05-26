@@ -105,24 +105,26 @@ export function StepDropoffChart({ rows }: Props) {
 			<ResponsiveContainer>
 				<BarChart
 					data={rows}
-					margin={{ top: 16, right: 24, bottom: 24, left: 16 }}
+					layout="vertical"
+					margin={{ top: 16, right: 32, bottom: 24, left: 8 }}
 				>
 					<CartesianGrid strokeDasharray="3 3" />
 					<XAxis
-						dataKey="label"
-						interval={0}
-						label={{ value: "Phase", position: "insideBottom", offset: -16 }}
-						tick={{ fontSize: 12 }}
-					/>
-					<YAxis
 						domain={[0, 100]}
 						label={{
 							value: "Taux d'abandon (%)",
-							angle: -90,
-							position: "insideLeft",
+							position: "insideBottom",
+							offset: -8,
 						}}
 						tickFormatter={(value: number) => `${value}`}
 						type="number"
+					/>
+					<YAxis
+						dataKey="label"
+						interval={0}
+						tick={{ fontSize: 12 }}
+						type="category"
+						width={260}
 					/>
 					<Tooltip content={<DropoffTooltip />} />
 					<Bar
