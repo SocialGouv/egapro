@@ -31,6 +31,7 @@ type StepPageClientProps = {
 	step4Data: Step4Data;
 	step5Categories: EmployeeCategoryRow[];
 	initialSource?: string;
+	hasCse?: boolean | null;
 };
 
 export function StepPageClient({
@@ -43,6 +44,7 @@ export function StepPageClient({
 	step4Data,
 	step5Categories,
 	initialSource,
+	hasCse = null,
 }: StepPageClientProps) {
 	switch (step) {
 		case 1:
@@ -101,6 +103,7 @@ export function StepPageClient({
 				<Step6Review
 					declaration={declaration}
 					declarationYear={declaration.year}
+					hasCse={hasCse}
 					isSubmitted={
 						declaration.status !== null && declaration.status !== "draft"
 					}

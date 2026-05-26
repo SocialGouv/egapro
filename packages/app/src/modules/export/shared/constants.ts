@@ -27,8 +27,11 @@ export const DECLARATION_COLUMNS: Array<{
 		key: "secondDeclarationPathChoice",
 		header: "Parcours_apres_declaration_2",
 	},
-	{ key: "phase2Required", header: "Phase_2_requise" },
-	{ key: "phase2RevisionRequired", header: "Phase_2_revision_requise" },
+	{ key: "complianceProcessRequired", header: "Parcours_de_conformite_requis" },
+	{
+		key: "complianceProcessRevisionRequired",
+		header: "Parcours_de_conformite_revision_requis",
+	},
 	{ key: "cseRequired", header: "Avis_CSE_requis" },
 	{ key: "indicatorGRequired", header: "Indicateur_G_requis" },
 	{ key: "rulesVersion", header: "Version_regles" },

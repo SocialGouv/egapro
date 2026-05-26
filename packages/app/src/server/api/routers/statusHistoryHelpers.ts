@@ -119,6 +119,30 @@ export function buildHistoryInserts(
 	}));
 }
 
+/**
+ * Build a `step_change` history row payload for the declaration A–F stepper.
+ *
+ * `fromStep === null` flags the creation transition (no previous step).
+ * Encoded into the existing `value` column as `from:<N>|to:<M>` to avoid a
+ * dedicated columns set ; the readable `toStep` also goes into `round` for
+ * lightweight SQL aggregation downstream (KPI K4, future funnel).
+ */
+export function buildStepChangeInsert(args: {
+	declarationId: string;
+	fromStep: number | null;
+	toStep: number;
+	actorUserId: string | null;
+}): DbInsertableHistory {
+	const fromLabel = args.fromStep === null ? "null" : String(args.fromStep);
+	return {
+		declarationId: args.declarationId,
+		eventType: "step_change",
+		value: `from:${fromLabel}|to:${args.toStep}`,
+		round: args.toStep,
+		actorUserId: args.actorUserId,
+	};
+}
+
 export async function getLatestPathChoice(
 	database: StatusHistoryReader,
 	declarationId: string,

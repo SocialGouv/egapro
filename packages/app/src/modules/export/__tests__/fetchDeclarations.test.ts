@@ -24,8 +24,8 @@ const baseRow = {
 	jointEvaluationSubmittedAt: null as Date | null,
 	cseOpinionCompletedAt: null as Date | null,
 	demarcheCompletedAt: null as Date | null,
-	phase2Required: false,
-	phase2RevisionRequired: false,
+	complianceProcessRequired: false,
+	complianceProcessRevisionRequired: false,
 	cseRequired: false,
 	indicatorGRequired: false,
 	rulesVersion: "2027.1",
@@ -120,6 +120,12 @@ const baseRow = {
 	hourlyQuartile3ProportionMen: "0.5410",
 	hourlyQuartile4ProportionWomen: "0.3509",
 	hourlyQuartile4ProportionMen: "0.6491",
+	statusHistoryArray: [] as Array<{
+		eventType: string;
+		value: string | null;
+		round: number | null;
+		createdAt: string;
+	}>,
 };
 
 describe("buildIndicators", () => {
@@ -163,7 +169,7 @@ describe("buildIndicators", () => {
 		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_H).toBe(
 			"0.4444",
 		);
-		expect(result.F.annuel.Seuil_Q4_Rem_globale).toBeNull();
+		expect(result.F.annuel).not.toHaveProperty("Seuil_Q4_Rem_globale");
 		expect(result.F.annuel.Quartile4_Rem_globale_annuelle_proportion_F).toBe(
 			"0.4355",
 		);
@@ -171,6 +177,7 @@ describe("buildIndicators", () => {
 		expect(result.F.horaire.Quartile1_Taux_horaire_global_proportion_F).toBe(
 			"0.6154",
 		);
+		expect(result.F.horaire).not.toHaveProperty("Seuil_Q4_Taux_horaire_global");
 	});
 
 	it("should expose gap labels for indicators A/B/C/D", () => {
@@ -524,5 +531,247 @@ describe("assembleDeclaration", () => {
 		expect(result.Indicateurs.G?.[0]?.Effectif_F).toBe(12);
 		expect(result.SIREN).toBe("123456789");
 		expect(result.Effectif).toBe(250);
+	});
+
+	it("should expose Historique_statuts as empty array when no history (S7)", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		expect(result.Historique_statuts).toEqual([]);
+	});
+
+	it("should expose Historique_statuts with FR labels for submit + demarche_complete (S1)", () => {
+		const row = {
+			...baseRow,
+			statusHistoryArray: [
+				{
+					eventType: "submit",
+					value: null,
+					round: null,
+					createdAt: "2027-03-15T10:00:00.123Z",
+				},
+				{
+					eventType: "demarche_complete",
+					value: null,
+					round: null,
+					createdAt: "2027-10-15T14:00:00.456Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts).toEqual([
+			{
+				Statut: "submit",
+				Libelle_statut: "Soumission de la déclaration",
+				Date: "2027-03-15T10:00:00.123Z",
+			},
+			{
+				Statut: "demarche_complete",
+				Libelle_statut: "Démarche terminée",
+				Date: "2027-10-15T14:00:00.456Z",
+			},
+		]);
+	});
+
+	it("should expose Numero_declaration and Libelle for path_choice corrective_action (S2)", () => {
+		const row = {
+			...baseRow,
+			statusHistoryArray: [
+				{
+					eventType: "path_choice",
+					value: "corrective_action",
+					round: 1,
+					createdAt: "2027-04-01T10:00:00.000Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts).toEqual([
+			{
+				Statut: "path_choice",
+				Libelle_statut: "Choix du parcours — Actions correctives",
+				Date: "2027-04-01T10:00:00.000Z",
+				Numero_declaration: 1,
+			},
+		]);
+	});
+
+	it("should expose all 5 lifecycle entries with FR labels (S3)", () => {
+		const row = {
+			...baseRow,
+			statusHistoryArray: [
+				{
+					eventType: "submit",
+					value: null,
+					round: null,
+					createdAt: "2027-03-15T10:00:00.000Z",
+				},
+				{
+					eventType: "path_choice",
+					value: "joint_evaluation",
+					round: 1,
+					createdAt: "2027-04-01T10:00:00.000Z",
+				},
+				{
+					eventType: "joint_evaluation_submit",
+					value: null,
+					round: null,
+					createdAt: "2027-09-01T12:00:00.000Z",
+				},
+				{
+					eventType: "cse_opinion_submit",
+					value: null,
+					round: null,
+					createdAt: "2027-10-01T13:00:00.000Z",
+				},
+				{
+					eventType: "demarche_complete",
+					value: null,
+					round: null,
+					createdAt: "2027-10-15T14:00:00.000Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts).toHaveLength(5);
+		expect(result.Historique_statuts[0]?.Libelle_statut).toBe(
+			"Soumission de la déclaration",
+		);
+		expect(result.Historique_statuts[1]?.Libelle_statut).toBe(
+			"Choix du parcours — Évaluation conjointe",
+		);
+		expect(result.Historique_statuts[1]).toHaveProperty(
+			"Numero_declaration",
+			1,
+		);
+		expect(result.Historique_statuts[2]?.Libelle_statut).toBe(
+			"Dépôt du rapport d'évaluation conjointe",
+		);
+		expect(result.Historique_statuts[3]?.Libelle_statut).toBe(
+			"Dépôt d'un avis CSE",
+		);
+		expect(result.Historique_statuts[4]?.Libelle_statut).toBe(
+			"Démarche terminée",
+		);
+	});
+
+	it("should expose two path_choice entries with their own Numero_declaration (S4)", () => {
+		const row = {
+			...baseRow,
+			statusHistoryArray: [
+				{
+					eventType: "path_choice",
+					value: "justify",
+					round: 1,
+					createdAt: "2027-04-01T10:00:00.000Z",
+				},
+				{
+					eventType: "path_choice",
+					value: "corrective_action",
+					round: 2,
+					createdAt: "2027-08-01T10:00:00.000Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts).toHaveLength(2);
+		expect(result.Historique_statuts[0]).toMatchObject({
+			Statut: "path_choice",
+			Libelle_statut: "Choix du parcours — Justification de l'écart",
+			Numero_declaration: 1,
+		});
+		expect(result.Historique_statuts[1]).toMatchObject({
+			Statut: "path_choice",
+			Libelle_statut: "Choix du parcours — Actions correctives",
+			Numero_declaration: 2,
+		});
+	});
+
+	it("should expose cancel entry with FR label while keeping Date_annulation (S5)", () => {
+		const row = {
+			...baseRow,
+			cancelledAt: new Date("2027-04-15T08:00:00Z"),
+			statusHistoryArray: [
+				{
+					eventType: "submit",
+					value: null,
+					round: null,
+					createdAt: "2027-03-15T10:00:00.000Z",
+				},
+				{
+					eventType: "cancel",
+					value: null,
+					round: null,
+					createdAt: "2027-04-15T08:00:00.000Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts).toHaveLength(2);
+		expect(result.Historique_statuts[1]).toEqual({
+			Statut: "cancel",
+			Libelle_statut: "Annulation de la déclaration",
+			Date: "2027-04-15T08:00:00.000Z",
+		});
+		expect(result.Date_annulation).toBe("2027-04-15T08:00:00.000Z");
+	});
+
+	it("should preserve the order returned by the query without re-sorting", () => {
+		const row = {
+			...baseRow,
+			statusHistoryArray: [
+				{
+					eventType: "demarche_complete",
+					value: null,
+					round: null,
+					createdAt: "2027-10-15T14:00:00.000Z",
+				},
+				{
+					eventType: "submit",
+					value: null,
+					round: null,
+					createdAt: "2027-03-15T10:00:00.000Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts.map((e) => e.Statut)).toEqual([
+			"demarche_complete",
+			"submit",
+		]);
+	});
+
+	it("should not add Numero_declaration key when path_choice round is null", () => {
+		const row = {
+			...baseRow,
+			statusHistoryArray: [
+				{
+					eventType: "path_choice",
+					value: null,
+					round: null,
+					createdAt: "2027-04-01T10:00:00.000Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts[0]).not.toHaveProperty(
+			"Numero_declaration",
+		);
+		expect(result.Historique_statuts[0]?.Libelle_statut).toBe(
+			"Choix du parcours",
+		);
 	});
 });

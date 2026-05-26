@@ -60,7 +60,6 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		indicator_f_annual_threshold1: "GIP-MDS | SUIT: Seuil_Q1_Rem_globale",
 		indicator_f_annual_threshold2: "GIP-MDS | SUIT: Seuil_Q2_Rem_globale",
 		indicator_f_annual_threshold3: "GIP-MDS | SUIT: Seuil_Q3_Rem_globale",
-		indicator_f_annual_threshold4: "GIP-MDS | SUIT: Seuil_Q4_Rem_globale",
 		// Indicator F — quartile women proportions, annual (GIP-MDS → SUIT)
 		indicator_f_annual_women1:
 			"GIP-MDS | SUIT: Quartile1_Rem_globale_annuelle_proportion_F",
@@ -86,8 +85,6 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 			"GIP-MDS | SUIT: Seuil_Q2_Taux_horaire_global",
 		indicator_f_hourly_threshold3:
 			"GIP-MDS | SUIT: Seuil_Q3_Taux_horaire_global",
-		indicator_f_hourly_threshold4:
-			"GIP-MDS | SUIT: Seuil_Q4_Taux_horaire_global",
 		// Indicator F — quartile women proportions, hourly (GIP-MDS → SUIT)
 		indicator_f_hourly_women1:
 			"GIP-MDS | SUIT: Quartile1_Taux_horaire_global_proportion_F",
@@ -155,11 +152,11 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		declaration_id:
 			"Référence vers la déclaration concernée. Append-only — chaque event capture une transition métier (submit / path_choice / *_submit / cse_opinion_submit / cancel / demarche_complete).",
 		event_type:
-			"Type d'event métier. Source de vérité de la trajectoire FSM (la colonne app_declaration.status est une projection dérivée du dernier event).",
+			"Type d'event métier. Source de vérité de la trajectoire FSM (la colonne app_declaration.status est une projection dérivée du dernier event). Inclut step_change pour les transitions du stepper Indicateurs A–F (alimente le KPI K4).",
 		value:
-			"Charge utile facultative selon le type d'event. Pour path_choice: 'justify' | 'corrective_action' | 'joint_evaluation'.",
+			"Charge utile facultative selon le type d'event. Pour path_choice: 'justify' | 'corrective_action' | 'joint_evaluation'. Pour step_change: 'from:N|to:M' (N peut être 'null' à la création).",
 		round:
-			"1 = première déclaration, 2 = seconde déclaration. Renseigné pour path_choice, second_declaration_submit, joint_evaluation_submit.",
+			"1 = première déclaration, 2 = seconde déclaration. Renseigné pour path_choice, second_declaration_submit, joint_evaluation_submit. Pour step_change : numéro de l'étape atteinte (toStep) — facilite l'agrégation côté SQL.",
 		actor_user_id:
 			"Auteur de l'event. NULL = event système (cron, demarche_complete, etc.).",
 		created_at:

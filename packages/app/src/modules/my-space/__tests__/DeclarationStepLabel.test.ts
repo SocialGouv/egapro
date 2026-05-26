@@ -12,7 +12,7 @@ describe("getDeclarationProcessStepLabel", () => {
 		{ fsm: "draft", label: "Déclaration des indicateurs de rémunération" },
 		{
 			fsm: "awaiting_compliance_path_choice",
-			label: "(Première déclaration) Choix du parcours de mise en conformité",
+			label: "Choix du parcours de mise en conformité",
 		},
 		{
 			fsm: "corrective_actions_chosen",
@@ -20,7 +20,7 @@ describe("getDeclarationProcessStepLabel", () => {
 		},
 		{
 			fsm: "awaiting_revision_choice",
-			label: "(Deuxième déclaration) Choix du parcours de mise en conformité",
+			label: "Choix du parcours de mise en conformité (Deuxième déclaration)",
 		},
 		{
 			fsm: "joint_evaluation_chosen",

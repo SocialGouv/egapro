@@ -15,6 +15,7 @@ describe("GET /api/v1/export/declarations — Date_annulation integration", () =
 
 	afterAll(async () => {
 		if (!sql) return;
+		await sql`DELETE FROM app_declaration_status_history WHERE declaration_id IN ('export-decl-cancelled-1', 'export-decl-cancelled-2', 'export-decl-active')`;
 		await sql`DELETE FROM app_declaration WHERE siren = ${SIREN} AND year = ${YEAR}`;
 		await sql`DELETE FROM app_company WHERE siren = ${SIREN}`;
 		await sql`DELETE FROM app_user WHERE id = ${USER_ID}`;
@@ -22,6 +23,7 @@ describe("GET /api/v1/export/declarations — Date_annulation integration", () =
 	});
 
 	beforeEach(async () => {
+		await sql`DELETE FROM app_declaration_status_history WHERE declaration_id IN ('export-decl-cancelled-1', 'export-decl-cancelled-2', 'export-decl-active')`;
 		await sql`DELETE FROM app_declaration WHERE siren = ${SIREN} AND year = ${YEAR}`;
 		await sql`DELETE FROM app_company WHERE siren = ${SIREN}`;
 		await sql`DELETE FROM app_user WHERE id = ${USER_ID}`;
@@ -42,6 +44,12 @@ describe("GET /api/v1/export/declarations — Date_annulation integration", () =
 				('export-decl-cancelled-1', ${SIREN}, ${YEAR}, ${USER_ID}, 'submitted', '2025-04-15T12:00:00Z', '2025-03-01T00:00:00Z', '2025-03-01T00:00:00Z'),
 				('export-decl-cancelled-2', ${SIREN}, ${YEAR}, ${USER_ID}, 'submitted', '2025-04-20T12:00:00Z', '2025-03-15T00:00:00Z', '2025-03-15T00:00:00Z'),
 				('export-decl-active',      ${SIREN}, ${YEAR}, ${USER_ID}, 'submitted', NULL,                   '2025-05-01T00:00:00Z', '2025-05-01T00:00:00Z')
+		`;
+		await sql`
+			INSERT INTO app_declaration_status_history (id, declaration_id, event_type, value, round, created_at)
+			VALUES
+				('hist-active-submit',       'export-decl-active', 'submit',            NULL, NULL, '2025-04-30T09:00:00Z'),
+				('hist-active-demarche',     'export-decl-active', 'demarche_complete', NULL, NULL, '2025-04-30T11:00:00Z')
 		`;
 	});
 
@@ -105,5 +113,42 @@ describe("GET /api/v1/export/declarations — Date_annulation integration", () =
 			expect(decl.Indicateurs).toBeDefined();
 			expect(decl.SIREN).toBe(SIREN);
 		}
+	});
+
+	it("returns Historique_statuts as an ASC-ordered list of FR-labelled events (S1)", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const response = await GET(
+			gatewayRequest({ date_begin: "2025-05-01", date_end: "2025-05-02" }),
+		);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.Nombre).toBe(1);
+		const decl = body.Declarations[0];
+		expect(decl.Historique_statuts).toEqual([
+			{
+				Statut: "submit",
+				Libelle_statut: "Soumission de la déclaration",
+				Date: "2025-04-30T09:00:00.000Z",
+			},
+			{
+				Statut: "demarche_complete",
+				Libelle_statut: "Démarche terminée",
+				Date: "2025-04-30T11:00:00.000Z",
+			},
+		]);
+	});
+
+	it("returns Historique_statuts as [] when the declaration has no history rows (S7)", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const response = await GET(
+			gatewayRequest({ date_begin: "2025-04-15", date_end: "2025-04-16" }),
+		);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.Nombre).toBe(1);
+		const decl = body.Declarations[0];
+		expect(decl.Historique_statuts).toEqual([]);
 	});
 });

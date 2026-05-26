@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller } from "react-hook-form";
 
@@ -34,6 +35,7 @@ type Props = {
 	email?: string;
 	firstDeclarationPathChoice?: string | null;
 	hasSecondDeclaration?: boolean;
+	previousHref?: string;
 };
 
 export function Step1Opinions({
@@ -42,6 +44,7 @@ export function Step1Opinions({
 	email,
 	firstDeclarationPathChoice,
 	hasSecondDeclaration = true,
+	previousHref = "/declaration-remuneration/etape/6",
 }: Props) {
 	const isJointEvaluation = firstDeclarationPathChoice === "joint_evaluation";
 	const router = useRouter();
@@ -240,13 +243,12 @@ export function Step1Opinions({
 			</div>
 
 			<div className={`fr-mt-4w ${formStyles.actions}`}>
-				<button
+				<Link
 					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
-					onClick={() => router.back()}
-					type="button"
+					href={previousHref}
 				>
 					Précédent
-				</button>
+				</Link>
 				<span>
 					<button
 						{...readOnlyGuard.buttonProps}
