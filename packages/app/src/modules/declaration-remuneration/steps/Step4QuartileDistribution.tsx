@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared";
@@ -9,7 +9,10 @@ import { api } from "~/trpc/react";
 import { updateStep4Schema } from "../schemas";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY } from "../shared/devFillData";
+import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
+import { useDraftAutoSave } from "../shared/draft/useDraftAutoSave";
+import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
@@ -101,7 +104,15 @@ export function Step4QuartileDistribution({
 		[hasSavedData, initialData],
 	);
 
-	const { draft, setField, clearDraft, hasDraft } = useDeclarationDraft({
+	const {
+		draft,
+		setField,
+		clearDraft,
+		hasDraft,
+		isLoadingDraft,
+		isSaving,
+		isPendingSave,
+	} = useDeclarationDraft({
 		siren: declarationSiren,
 		year: declarationYear,
 		step: 4,
@@ -116,26 +127,23 @@ export function Step4QuartileDistribution({
 		},
 	});
 
-	useEffect(() => {
-		if (draft.annual) form.setValue("annual", draft.annual);
-		if (draft.hourly) form.setValue("hourly", draft.hourly);
-	}, [draft.annual, draft.hourly, form]);
+	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
+		if (d.annual) form.setValue("annual", d.annual);
+		if (d.hourly) form.setValue("hourly", d.hourly);
+	});
 
-	useEffect(() => {
-		const sub = form.watch((values) =>
-			setField({
-				annual: values.annual as QuartileTuple,
-				hourly: values.hourly as QuartileTuple,
-			}),
-		);
-		return () => sub.unsubscribe();
-	}, [form, setField]);
+	useDraftAutoSave(form, draftHydrated, (values) =>
+		setField({
+			annual: values.annual as QuartileTuple,
+			hourly: values.hourly as QuartileTuple,
+		}),
+	);
 
 	const annual = form.watch("annual");
 	const hourly = form.watch("hourly");
 
 	const [maxError, setMaxError] = useState<string | null>(null);
-	const saved = !hasDraft && hasSavedData;
+	const hasData = hasSavedData || hasDraft;
 	const [fieldErrors, setFieldErrors] = useState<FieldErrorMap>(emptyErrorMap);
 	const [showRecap, setShowRecap] = useState(false);
 
@@ -145,6 +153,8 @@ export function Step4QuartileDistribution({
 			router.push("/declaration-remuneration/etape/5");
 		},
 	});
+
+	if (!draftHydrated) return <DraftLoadingState />;
 
 	function setQuartileField(
 		tableType: TableType,
@@ -244,6 +254,9 @@ export function Step4QuartileDistribution({
 	return (
 		<form className={stepStyles.formColumn} noValidate onSubmit={onSubmit}>
 			<StepTitleRow
+				hasData={hasData}
+				isPendingSave={isPendingSave}
+				isSaving={isSaving}
 				onDevFill={() => {
 					form.setValue(
 						"annual",
@@ -260,7 +273,6 @@ export function Step4QuartileDistribution({
 					setFieldErrors(emptyErrorMap());
 					setShowRecap(false);
 				}}
-				saved={saved}
 				title={
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {declarationYear}

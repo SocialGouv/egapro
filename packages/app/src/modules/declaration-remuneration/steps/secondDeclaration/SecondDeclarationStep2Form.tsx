@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
+import { DraftLoadingState } from "~/modules/declaration-remuneration/shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
+import { useDraftHydration } from "~/modules/declaration-remuneration/shared/draft/useDraftHydration";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { api } from "~/trpc/react";
 import { CategoryForm } from "../step5/CategoryForm";
@@ -52,7 +54,7 @@ export function SecondDeclarationStep2Form({
 		[initialStartDate, initialEndDate],
 	);
 
-	const { draft, setField, clearDraft } = useDeclarationDraft({
+	const { draft, setField, clearDraft, isLoadingDraft } = useDeclarationDraft({
 		siren: declarationSiren,
 		year: declarationYear,
 		step: "second-2",
@@ -60,22 +62,15 @@ export function SecondDeclarationStep2Form({
 		dbValues,
 	});
 
-	const didHydrate = useRef(false);
-	useEffect(() => {
-		if (didHydrate.current) return;
-		if (
-			typeof draft.startDate !== "string" &&
-			typeof draft.endDate !== "string"
-		)
-			return;
-		if (typeof draft.startDate === "string") setStartDate(draft.startDate);
-		if (typeof draft.endDate === "string") setEndDate(draft.endDate);
-		didHydrate.current = true;
-	}, [draft.startDate, draft.endDate]);
+	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
+		if (typeof d.startDate === "string") setStartDate(d.startDate);
+		if (typeof d.endDate === "string") setEndDate(d.endDate);
+	});
 
 	useEffect(() => {
+		if (!draftHydrated) return;
 		setField({ startDate, endDate });
-	}, [startDate, endDate, setField]);
+	}, [draftHydrated, startDate, endDate, setField]);
 
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
 		onSuccess: () => {
@@ -83,6 +78,8 @@ export function SecondDeclarationStep2Form({
 			router.push(`${BASE_PATH}/etape/3`);
 		},
 	});
+
+	if (!draftHydrated) return <DraftLoadingState />;
 
 	return (
 		<CategoryForm

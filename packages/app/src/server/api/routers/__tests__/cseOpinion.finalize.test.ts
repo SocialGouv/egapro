@@ -20,6 +20,7 @@ function createMockDbForFinalize(
 		status: "awaiting_cse_opinion",
 		rulesVersion: "2027.1",
 	},
+	txDraft: Record<string, unknown> | null = null,
 ) {
 	const declarationLookupRow = { id: "decl-1" };
 
@@ -34,6 +35,9 @@ function createMockDbForFinalize(
 		if (call === 1) return Promise.resolve([declarationLookupRow]);
 		if (call === 4) {
 			return Promise.resolve(declaration ? [declaration] : []);
+		}
+		if (call === 5 && txDraft !== null) {
+			return Promise.resolve([{ draft: txDraft }]);
 		}
 		return Promise.resolve([]);
 	});
@@ -176,5 +180,50 @@ describe("cseOpinionRouter.finalize", () => {
 
 		await expect(caller.finalize()).rejects.toThrow("Mode mimoquage");
 		expect(ctx.update).not.toHaveBeenCalled();
+	});
+
+	it("purges the cse draft slice and keeps other slices after finalize", async () => {
+		const txDraft = { cse: { step1: { foo: "bar" } }, main: { step1: {} } };
+		const ctx = createMockDbForFinalize(2, 1, undefined, txDraft);
+		const caller = await createCaller(ctx.db);
+
+		await caller.finalize();
+
+		const setCalls = ctx.updateSet.mock.calls.map(
+			(c) => c[0] as Record<string, unknown>,
+		);
+		const purgeCall = setCalls.find((c) => "draft" in c);
+		expect(purgeCall).toBeDefined();
+		expect(purgeCall?.draft).toEqual({ main: { step1: {} } });
+		expect(purgeCall?.draftUpdatedAt).toBeInstanceOf(Date);
+	});
+
+	it("sets draft to null when cse was the only slice after finalize", async () => {
+		const txDraft = { cse: { step1: { foo: "bar" } } };
+		const ctx = createMockDbForFinalize(2, 1, undefined, txDraft);
+		const caller = await createCaller(ctx.db);
+
+		await caller.finalize();
+
+		const setCalls = ctx.updateSet.mock.calls.map(
+			(c) => c[0] as Record<string, unknown>,
+		);
+		const purgeCall = setCalls.find((c) => "draft" in c);
+		expect(purgeCall).toBeDefined();
+		expect(purgeCall?.draft).toBeNull();
+		expect(purgeCall?.draftUpdatedAt).toBeNull();
+	});
+
+	it("does not call draft update when no draft exists in cse finalize", async () => {
+		const ctx = createMockDbForFinalize(2, 1, undefined, null);
+		const caller = await createCaller(ctx.db);
+
+		await caller.finalize();
+
+		const setCalls = ctx.updateSet.mock.calls.map(
+			(c) => c[0] as Record<string, unknown>,
+		);
+		const purgeCall = setCalls.find((c) => "draft" in c);
+		expect(purgeCall).toBeUndefined();
 	});
 });

@@ -1,11 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import { useIsImpersonating } from "~/modules/auth";
 import { saveCompliancePathSchema } from "~/modules/declaration-remuneration/schemas";
+import { DraftLoadingState } from "~/modules/declaration-remuneration/shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
+import { useDraftAutoSave } from "~/modules/declaration-remuneration/shared/draft/useDraftAutoSave";
+import { useDraftHydration } from "~/modules/declaration-remuneration/shared/draft/useDraftHydration";
 import type { CampaignDeadlines } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { useZodForm } from "~/modules/shared/useZodForm";
@@ -48,7 +51,15 @@ export function CompliancePathChoice({
 
 	const dbValues = useMemo(() => ({ path: initialPath }), [initialPath]);
 
-	const { draft, setField, clearDraft, hasDraft } = useDeclarationDraft({
+	const {
+		draft,
+		setField,
+		clearDraft,
+		hasDraft,
+		isLoadingDraft,
+		isSaving,
+		isPendingSave,
+	} = useDeclarationDraft({
 		siren: declarationSiren,
 		year: declarationYear,
 		step: "compliance",
@@ -60,22 +71,19 @@ export function CompliancePathChoice({
 		defaultValues: { path: initialPath },
 	});
 
-	useEffect(() => {
-		if (draft.path !== undefined) {
-			form.setValue("path", draft.path as CompliancePathValue);
+	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
+		if (d.path !== undefined) {
+			form.setValue("path", d.path as CompliancePathValue);
 		}
-	}, [draft.path, form]);
+	});
 
-	useEffect(() => {
-		const sub = form.watch((values) =>
-			setField(values as { path: CompliancePathValue | undefined }),
-		);
-		return () => sub.unsubscribe();
-	}, [form, setField]);
+	useDraftAutoSave(form, draftHydrated, (values) =>
+		setField(values as { path: CompliancePathValue | undefined }),
+	);
 
 	const selectedPath = form.watch("path");
 	const hasInitialData = !!initialPath;
-	const saved = !hasDraft && hasInitialData;
+	const hasData = hasInitialData || hasDraft;
 
 	const mutation = api.declaration.saveCompliancePath.useMutation({
 		onSuccess: (_, { path }) => {
@@ -92,6 +100,8 @@ export function CompliancePathChoice({
 		},
 	});
 
+	if (!draftHydrated) return <DraftLoadingState />;
+
 	const onSubmit = form.handleSubmit((data) => {
 		if (!data.path) return;
 		mutation.mutate({ path: data.path });
@@ -103,7 +113,11 @@ export function CompliancePathChoice({
 				<h1 className="fr-h4 fr-mb-0">
 					Déclaration des indicateurs de rémunération {currentYear}
 				</h1>
-				{saved && <SavedIndicator />}
+				<SavedIndicator
+					hasData={hasData}
+					isPendingSave={isPendingSave}
+					isSaving={isSaving}
+				/>
 			</div>
 
 			<DeclarationSuccessBanner

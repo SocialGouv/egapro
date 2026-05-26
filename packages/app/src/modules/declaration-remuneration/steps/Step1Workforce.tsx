@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { useZodForm } from "~/modules/shared/useZodForm";
@@ -10,7 +10,9 @@ import { updateStep1Schema } from "../schemas";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP1_CATEGORIES } from "../shared/devFillData";
+import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
+import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
@@ -49,7 +51,15 @@ export function Step1Workforce({
 		[initialData.totalWomen, initialData.totalMen],
 	);
 
-	const { draft, setField, clearDraft, hasDraft } = useDeclarationDraft({
+	const {
+		draft,
+		setField,
+		clearDraft,
+		hasDraft,
+		isLoadingDraft,
+		isSaving,
+		isPendingSave,
+	} = useDeclarationDraft({
 		siren: declarationSiren,
 		year: declarationYear,
 		step: 1,
@@ -65,16 +75,13 @@ export function Step1Workforce({
 	const totalMen = form.watch("totalMen");
 	const total = totalWomen + totalMen;
 
-	useEffect(() => {
-		if (typeof draft.totalWomen === "number") {
-			form.setValue("totalWomen", draft.totalWomen);
-		}
-		if (typeof draft.totalMen === "number") {
-			form.setValue("totalMen", draft.totalMen);
-		}
-	}, [draft.totalWomen, draft.totalMen, form]);
+	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
+		if (typeof d.totalWomen === "number")
+			form.setValue("totalWomen", d.totalWomen);
+		if (typeof d.totalMen === "number") form.setValue("totalMen", d.totalMen);
+	});
 
-	const saved = !hasDraft && hasInitialData;
+	const hasData = hasInitialData || hasDraft;
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const [showResetWarning, setShowResetWarning] = useState(false);
 
@@ -109,6 +116,8 @@ export function Step1Workforce({
 		setField({ totalWomen, totalMen: value });
 	}
 
+	if (!draftHydrated) return <DraftLoadingState />;
+
 	const onSubmit = form.handleSubmit((data) => {
 		if (data.totalWomen + data.totalMen === 0) {
 			setValidationError(
@@ -123,6 +132,9 @@ export function Step1Workforce({
 	return (
 		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
 			<StepTitleRow
+				hasData={hasData}
+				isPendingSave={isPendingSave}
+				isSaving={isSaving}
 				onDevFill={() => {
 					const womenValue = DEV_STEP1_CATEGORIES[0]?.women ?? 50;
 					const menValue = DEV_STEP1_CATEGORIES[0]?.men ?? 50;
@@ -130,7 +142,6 @@ export function Step1Workforce({
 					form.setValue("totalMen", menValue);
 					setField({ totalWomen: womenValue, totalMen: menValue });
 				}}
-				saved={saved}
 				title={
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {declarationYear}

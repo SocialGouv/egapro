@@ -50,6 +50,8 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 				hasSecondDeclaration={hasSecondDeclaration}
 				initialData={initialData}
 				previousHref={previousHref}
+				siren={declarationData.declaration.siren}
+				year={declarationData.declaration.year}
 			/>
 		);
 	}
@@ -65,6 +67,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 				declarationYear={declarationData.declaration.year}
 				existingFiles={files}
 				hasSecondDeclaration={hasSecondDeclaration}
+				siren={declarationData.declaration.siren}
 			/>
 		);
 	}
