@@ -667,6 +667,8 @@ export const adminStatsRouter = createTRPCRouter({
 				total: number | string;
 			}>(sql`
 				WITH phase_totals AS (
+					-- Phase 1: awaiting_compliance_path_choice
+					-- Entry signal: declaration was submitted (first 'submit' event).
 					SELECT 'awaiting_compliance_path_choice'::text AS phase,
 						COUNT(DISTINCT h.declaration_id)::int AS total
 					FROM ${declarationStatusHistory} h
@@ -679,6 +681,8 @@ export const adminStatsRouter = createTRPCRouter({
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
 					UNION ALL
+					-- Phase 2: corrective_actions_chosen
+					-- Entry signal: round 1 path_choice = 'corrective_action'.
 					SELECT 'corrective_actions_chosen'::text,
 						COUNT(DISTINCT h.declaration_id)::int
 					FROM ${declarationStatusHistory} h
@@ -693,6 +697,8 @@ export const adminStatsRouter = createTRPCRouter({
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
 					UNION ALL
+					-- Phase 3: joint_evaluation_chosen
+					-- Entry signal: round 1 path_choice = 'joint_evaluation'.
 					SELECT 'joint_evaluation_chosen'::text,
 						COUNT(DISTINCT h.declaration_id)::int
 					FROM ${declarationStatusHistory} h
@@ -707,6 +713,8 @@ export const adminStatsRouter = createTRPCRouter({
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
 					UNION ALL
+					-- Phase 4: awaiting_revision_choice
+					-- Entry signal: second_declaration_submit on round 2.
 					SELECT 'awaiting_revision_choice'::text,
 						COUNT(DISTINCT h.declaration_id)::int
 					FROM ${declarationStatusHistory} h
@@ -720,6 +728,8 @@ export const adminStatsRouter = createTRPCRouter({
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
 					UNION ALL
+					-- Phase 5: revised_joint_evaluation_chosen
+					-- Entry signal: a round 2 path_choice (revised path picked).
 					SELECT 'revised_joint_evaluation_chosen'::text,
 						COUNT(DISTINCT h.declaration_id)::int
 					FROM ${declarationStatusHistory} h
@@ -733,6 +743,9 @@ export const adminStatsRouter = createTRPCRouter({
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
 					UNION ALL
+					-- Phase 6: awaiting_cse_opinion
+					-- No single entry event — approximation via cseRequired = true
+					-- plus the existence of at least one journey event.
 					SELECT 'awaiting_cse_opinion'::text,
 						COUNT(DISTINCT ${declarations.id})::int
 					FROM ${declarations}

@@ -4,6 +4,7 @@ export { CampaignProgressionChart } from "./CampaignProgressionChart";
 export { CampaignProgressionTable } from "./CampaignProgressionTable";
 export { CampaignRateTile } from "./CampaignRateTile";
 export { CampaignStatsPage } from "./CampaignStatsPage";
+export { formatCount, formatDays, formatPercent } from "./formatters";
 export { StagnationDaysFilter } from "./StagnationDaysFilter";
 export { StepDropoffChart } from "./StepDropoffChart";
 export { StepDropoffTable } from "./StepDropoffTable";

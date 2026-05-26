@@ -1,19 +1,9 @@
+import { formatCount, formatPercent } from "./formatters";
 import type { StepDropoffRow } from "./types";
 
 type Props = {
 	rows: StepDropoffRow[];
 };
-
-function formatPercent(value: number): string {
-	return value.toLocaleString("fr-FR", {
-		maximumFractionDigits: 1,
-		minimumFractionDigits: 1,
-	});
-}
-
-function formatCount(value: number): string {
-	return value.toLocaleString("fr-FR");
-}
 
 const PHASE_HEADERS: Record<StepDropoffRow["phase"], string> = {
 	wizard: "Parcours initial (wizard A–F)",

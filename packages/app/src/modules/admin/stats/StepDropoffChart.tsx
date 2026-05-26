@@ -13,6 +13,7 @@ import {
 
 import { DROPOFF_RATE_ALERT_THRESHOLD } from "~/modules/domain";
 
+import { formatCount, formatPercent } from "./formatters";
 import styles from "./StepDropoffChart.module.scss";
 import type { StepDropoffRow } from "./types";
 
@@ -45,17 +46,6 @@ function getBarColor(row: StepDropoffRow): string {
 	return isAlert ? POST_SUBMIT_ALERT_COLOR : POST_SUBMIT_NORMAL_COLOR;
 }
 
-function formatPercent(value: number): string {
-	return `${value.toLocaleString("fr-FR", {
-		maximumFractionDigits: 1,
-		minimumFractionDigits: 1,
-	})} %`;
-}
-
-function formatCount(value: number): string {
-	return value.toLocaleString("fr-FR");
-}
-
 function DropoffTooltip({ active, payload }: DropoffTooltipProps) {
 	if (!active || !payload || payload.length === 0) {
 		return null;
@@ -70,7 +60,7 @@ function DropoffTooltip({ active, payload }: DropoffTooltipProps) {
 			</p>
 			<ul className={styles.tooltipList}>
 				<li className={styles.tooltipItem}>
-					{formatPercent(row.dropoffRate)} d'abandon
+					{formatPercent(row.dropoffRate, { withUnit: true })} d'abandon
 				</li>
 				<li className={styles.tooltipItem}>
 					{formatCount(row.abandoned)} sur {formatCount(row.total)} déclarations{" "}
