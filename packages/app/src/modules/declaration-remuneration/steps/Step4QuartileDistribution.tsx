@@ -403,7 +403,6 @@ export function Step4QuartileDistribution({
 			/>
 
 			<FormActions
-				className="fr-mt-0"
 				isSubmitting={mutation.isPending}
 				mimoquageNextHref={
 					hasSavedData ? "/declaration-remuneration/etape/5" : undefined

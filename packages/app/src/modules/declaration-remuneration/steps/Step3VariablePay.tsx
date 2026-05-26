@@ -408,7 +408,6 @@ export function Step3VariablePay({
 			/>
 
 			<FormActions
-				className="fr-mt-0"
 				isSubmitting={mutation.isPending}
 				mimoquageNextHref={
 					hasSavedData ? "/declaration-remuneration/etape/4" : undefined
