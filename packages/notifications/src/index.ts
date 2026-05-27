@@ -1,208 +1,102 @@
-import nodemailer, { type Transporter } from "nodemailer";
-import { PgBoss, type JobWithMetadata } from "pg-boss";
+import { type JobWithMetadata, PgBoss } from "pg-boss";
 import postgres, { type Sql } from "postgres";
 
 import { resolveNotificationsDbUrl, resolvePgUrl } from "./db.js";
 import { buildMail, MAIL_BUILDERS } from "./mails/index.js";
 import { QUEUE_NAME, validateJobData } from "./queue.js";
 import { registerSchedules, SCHEDULES } from "./schedules/index.js";
-
-type SerializableJson =
-	| null
-	| string
-	| number
-	| boolean
-	| Date
-	| { [key: string]: SerializableJson }
-	| SerializableJson[];
+import { logAuditMain } from "./worker/auditLog.js";
+import { makeJobHandler } from "./worker/jobHandler.js";
+import { installShutdownHooks } from "./worker/lifecycle.js";
+import { buildTransporter, getMailEnabled } from "./worker/transporter.js";
 
 /**
  * Notifications worker — long-running pg-boss consumer.
  *
- * Connects to NOTIFICATIONS_DATABASE_URL (pg-boss schema, isolated from the
- * main app DB by design) and processes `email-notification` jobs published
- * by the app's `enqueueNotification` helper. Lives in its own workspace
- * (`packages/notifications/`) so the Next.js bundle never imports a single
- * line of worker code.
+ * Two job sources:
+ * 1. **Event-driven** — the app's `enqueueNotification` helper pushes
+ *    `email-notification` jobs on the `QUEUE_NAME` queue, processed by
+ *    `makeJobHandler` (validates payload, renders the React Email
+ *    template, sends via SMTP, audits success/failure).
+ * 2. **Schedule-driven** — pg-boss native `boss.schedule()` ticks N
+ *    reminder queues at their cron schedule. Each tick runs the matching
+ *    handler which queries the app DB for eligible recipients and
+ *    re-enqueues a normal `email-notification` job per recipient.
  *
- * Job lifecycle:
- * - `validateJobData` runs first. Schema errors are *poison pills* — they can
- *   never succeed, so the handler logs the failure and returns clean (marking
- *   the job complete) rather than throwing. Throwing would trigger up to 5
- *   retries for nothing.
- * - SMTP / transient errors throw, so pg-boss retries them according to the
- *   per-job retry policy (`retryLimit`, `retryBackoff`) set at publish time.
+ * Lives in its own workspace (`packages/notifications/`) so the Next.js
+ * bundle never imports a single line of worker code.
  *
- * Audit rows go to the main DB (`DATABASE_URL`) when available — failure to
- * log audit never aborts the send. When `DATABASE_URL` is absent the worker
- * still runs, it just stops emitting `audit.action_log` rows.
+ * Job lifecycle (event queue):
+ * - `validateJobData` runs first. Schema errors are *poison pills* — they
+ *   can never succeed, so the handler logs the failure and returns clean
+ *   (marking the job complete) rather than throwing.
+ * - SMTP / transient errors throw, so pg-boss retries them according to
+ *   the per-job retry policy.
  *
- * Sub-second graceful shutdown via SIGTERM/SIGINT (call `boss.stop()` then
- * exit). pg-boss flushes in-flight jobs and ACKs them so the next pod start
- * resumes cleanly.
+ * Audit rows go to the main DB (`DATABASE_URL`) when available. Failure to
+ * log audit never aborts the send. When `DATABASE_URL` is absent the
+ * worker still runs the event queue, but reminders are disabled (the
+ * eligibility queries need the app DB).
  */
 
-export { MAIL_BUILDERS, buildMail };
-export { QUEUE_NAME, validateJobData };
-export { SCHEDULES };
 export type { EmailJobData } from "./queue.js";
-
-const SEND_AUDIT_ACTION = "notification.send";
-const SEND_AUDIT_CATEGORY = "system";
-
-type AuditRow = {
-	action: string;
-	category: string;
-	status: "success" | "failure";
-	userId?: string | null;
-	userEmail?: string | null;
-	siren?: string | null;
-	resourceType?: string | null;
-	resourceId?: string | null;
-	errorMessage?: string | null;
-	metadata?: SerializableJson;
+export {
+	buildMail,
+	logAuditMain,
+	MAIL_BUILDERS,
+	makeJobHandler,
+	QUEUE_NAME,
+	SCHEDULES,
+	validateJobData,
 };
 
-function getMailEnabled(): boolean {
-	return (process.env.MAIL_ENABLED ?? "false").toLowerCase() === "true";
-}
+const BOOT_MAX_ATTEMPTS = Number.parseInt(
+	process.env.NOTIFICATIONS_BOOT_RETRY_MAX ?? "30",
+	10,
+);
+const BOOT_DELAY_MS = Number.parseInt(
+	process.env.NOTIFICATIONS_BOOT_RETRY_DELAY_MS ?? "5000",
+	10,
+);
 
-function buildTransporter(): Transporter {
-	const host = process.env.SMTP_HOST;
-	if (!host) {
-		throw new Error("SMTP_HOST must be set when MAIL_ENABLED=true");
-	}
-	const port = parseInt(process.env.SMTP_PORT ?? "1025", 10);
-	const secure = (process.env.SMTP_SECURE ?? "false").toLowerCase() === "true";
-	const auth =
-		process.env.SMTP_USER && process.env.SMTP_PASS
-			? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-			: undefined;
-	return nodemailer.createTransport({ host, port, secure, auth });
-}
-
-async function logAuditMain(mainSql: Sql | null, row: AuditRow): Promise<void> {
-	if (!mainSql) return;
-	try {
-		await mainSql`
-			INSERT INTO audit.action_log (
-				id, created_at, action, category, status,
-				user_id, user_email, siren, resource_type, resource_id,
-				error_message, metadata
-			)
-			VALUES (
-				${crypto.randomUUID()},
-				${new Date()},
-				${row.action},
-				${row.category},
-				${row.status},
-				${row.userId ?? null},
-				${row.userEmail ?? null},
-				${row.siren ?? null},
-				${row.resourceType ?? null},
-				${row.resourceId ?? null},
-				${row.errorMessage ?? null},
-				${mainSql.json(row.metadata ?? null)}
-			)
-		`;
-	} catch (auditError) {
-		console.error("[notifications] audit insert failed:", auditError);
-	}
-}
-
-export type JobHandlerDeps = {
-	transporter: Transporter | null;
-	mailFrom: string;
-	mailEnabled: boolean;
-	mainSql: Sql | null;
-};
-
-export function makeJobHandler(
-	deps: JobHandlerDeps,
-): (job: JobWithMetadata<unknown>) => Promise<void> {
-	const { transporter, mailFrom, mailEnabled, mainSql } = deps;
-	return async (job) => {
-		const attempt = (job.retryCount ?? 0) + 1;
-		const result = validateJobData(job.data);
-
-		if (!result.ok) {
-			// Poison pill: malformed payload can never succeed. Log + return clean
-			// so pg-boss marks the job complete and stops retrying.
-			console.error(
-				`[notifications] dropping malformed job ${job.id}: ${result.reason}`,
-			);
-			void logAuditMain(mainSql, {
-				action: SEND_AUDIT_ACTION,
-				category: SEND_AUDIT_CATEGORY,
-				status: "failure",
-				resourceType: "notification",
-				resourceId: job.id,
-				errorMessage: result.reason,
-				metadata: { attempt, poisonPill: true },
-			});
-			return;
-		}
-
-		const {
-			type,
-			payload,
-			recipientEmail,
-			recipientUserId,
-			siren,
-			attachments,
-		} = result.data;
-
+// On a fresh review app, pg-app may not accept connections yet when the
+// notifications pod starts. Without a wait, pg-boss throws, the worker exits
+// non-zero, and the kontinuous `deploy-sidecars/progressing` plugin gives up
+// after the very first crash. Ping the DB with a lightweight `SELECT 1` loop
+// before handing the connection string to pg-boss — once the server answers
+// we know `boss.start()` + `createQueue` + `work` + `schedule` will all hit a
+// live socket, so the entire boot sequence runs in a single shot.
+async function waitForDatabase(connectionString: string): Promise<void> {
+	for (let attempt = 1; attempt <= BOOT_MAX_ATTEMPTS; attempt++) {
+		// `ssl: 'prefer'` lets postgres.js handshake with both plain (review-app
+		// docker postgres) and self-signed TLS (in-cluster pg-rw) backends, since
+		// `sslmode=no-verify` from db.ts is a node-postgres extension and not
+		// recognised by postgres.js.
+		const probe = postgres(connectionString, {
+			max: 1,
+			connect_timeout: 5,
+			idle_timeout: 1,
+			ssl: "prefer",
+		});
 		try {
-			const { subject, html, text } = await buildMail(type, payload);
-			let messageId: string | null = null;
-			if (!mailEnabled || !transporter) {
+			await probe`select 1`;
+			await probe.end({ timeout: 1 });
+			if (attempt > 1) {
 				console.log(
-					`[notifications] MAIL_ENABLED=false — would send ${type} to ${recipientEmail}`,
+					`[notifications] database reachable after ${attempt} attempts`,
 				);
-			} else {
-				const decodedAttachments = attachments?.map((att) => ({
-					filename: att.filename,
-					content: Buffer.from(att.contentBase64, "base64"),
-					contentType: att.contentType,
-				}));
-				const info = await transporter.sendMail({
-					from: mailFrom,
-					to: recipientEmail,
-					subject,
-					text,
-					html,
-					...(decodedAttachments ? { attachments: decodedAttachments } : {}),
-				});
-				messageId = info.messageId ?? null;
 			}
-			void logAuditMain(mainSql, {
-				action: SEND_AUDIT_ACTION,
-				category: SEND_AUDIT_CATEGORY,
-				status: "success",
-				userId: recipientUserId,
-				userEmail: recipientEmail,
-				siren,
-				resourceType: "notification",
-				resourceId: job.id,
-				metadata: { type, attempt, messageId },
-			});
+			return;
 		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error);
-			void logAuditMain(mainSql, {
-				action: SEND_AUDIT_ACTION,
-				category: SEND_AUDIT_CATEGORY,
-				status: "failure",
-				userId: recipientUserId,
-				userEmail: recipientEmail,
-				siren,
-				resourceType: "notification",
-				resourceId: job.id,
-				errorMessage: message,
-				metadata: { type, attempt },
-			});
-			throw error;
+			await probe.end({ timeout: 1 }).catch(() => undefined);
+			if (attempt === BOOT_MAX_ATTEMPTS) throw error;
+			const reason = error instanceof Error ? error.message : String(error);
+			console.warn(
+				`[notifications] database not reachable (attempt ${attempt}/${BOOT_MAX_ATTEMPTS}): ${reason} — retrying in ${BOOT_DELAY_MS}ms`,
+			);
+			await new Promise((resolve) => setTimeout(resolve, BOOT_DELAY_MS));
 		}
-	};
+	}
 }
 
 async function main(): Promise<void> {
@@ -217,7 +111,9 @@ async function main(): Promise<void> {
 	const transporter = mailEnabled ? buildTransporter() : null;
 	const mailFrom = process.env.MAIL_FROM ?? "no-reply@egapro.local";
 
-	const mainSql: Sql | null = mainUrl ? postgres(mainUrl, { max: 1 }) : null;
+	const mainSql: Sql | null = mainUrl ? postgres(mainUrl, { max: 2 }) : null;
+
+	await waitForDatabase(notifUrl);
 
 	const boss = new PgBoss({
 		connectionString: notifUrl,
@@ -259,22 +155,7 @@ async function main(): Promise<void> {
 
 	await registerSchedules(boss, mainSql);
 
-	const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
-		console.log(`[notifications] received ${signal}, shutting down...`);
-		try {
-			await boss.stop({ graceful: true, timeout: 15_000 });
-			if (mainSql) await mainSql.end();
-		} catch (error) {
-			console.error("[notifications] shutdown error:", error);
-		}
-		process.exit(0);
-	};
-	process.on("SIGTERM", () => {
-		void shutdown("SIGTERM");
-	});
-	process.on("SIGINT", () => {
-		void shutdown("SIGINT");
-	});
+	installShutdownHooks({ boss, mainSql });
 }
 
 const isCli = (() => {
