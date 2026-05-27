@@ -5,6 +5,7 @@ import postgres, { type Sql } from "postgres";
 import { resolveNotificationsDbUrl, resolvePgUrl } from "./db.js";
 import { buildMail, MAIL_BUILDERS } from "./mails/index.js";
 import { QUEUE_NAME, validateJobData } from "./queue.js";
+import { registerSchedules, SCHEDULES } from "./schedules/index.js";
 
 type SerializableJson =
 	| null
@@ -43,6 +44,7 @@ type SerializableJson =
 
 export { MAIL_BUILDERS, buildMail };
 export { QUEUE_NAME, validateJobData };
+export { SCHEDULES };
 export type { EmailJobData } from "./queue.js";
 
 const SEND_AUDIT_ACTION = "notification.send";
@@ -254,6 +256,8 @@ async function main(): Promise<void> {
 			}
 		},
 	);
+
+	await registerSchedules(boss, mainSql);
 
 	const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
 		console.log(`[notifications] received ${signal}, shutting down...`);
