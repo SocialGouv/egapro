@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-import { COMPANY_SIZE_RANGES } from "~/modules/domain";
+import {
+	COMPANY_SIZE_RANGES,
+	DROPOFF_STAGNATION_DAYS_DEFAULT,
+	DROPOFF_STAGNATION_DAYS_MAX,
+	DROPOFF_STAGNATION_DAYS_MIN,
+} from "~/modules/domain";
 
 const COMPANY_SIZE_RANGE_KEYS = Object.keys(COMPANY_SIZE_RANGES) as Array<
 	keyof typeof COMPANY_SIZE_RANGES
@@ -45,3 +50,41 @@ export const getStepDurationsSchema = z.object({
 });
 
 export type GetStepDurationsInput = z.infer<typeof getStepDurationsSchema>;
+
+/**
+ * Input for `adminStats.getStepDropoffRate`.
+ *
+ * `stagnationDays`: a declaration is counted as abandoned on step E when its
+ * latest entry on E is older than this many days. Defaults to 30 days; bounded
+ * (1..180) so the query stays meaningful for a campaign cycle.
+ */
+export const getStepDropoffRateSchema = z.object({
+	year: z.number().int().min(2000).max(2100),
+	sizeRange: z.enum(COMPANY_SIZE_RANGE_KEYS).optional(),
+	stagnationDays: z
+		.number()
+		.int()
+		.min(DROPOFF_STAGNATION_DAYS_MIN)
+		.max(DROPOFF_STAGNATION_DAYS_MAX)
+		.default(DROPOFF_STAGNATION_DAYS_DEFAULT),
+});
+
+export type GetStepDropoffRateInput = z.infer<typeof getStepDropoffRateSchema>;
+
+/**
+ * Input for `adminStats.getCompletionFunnel`.
+ *
+ * `year`: campaign year scoped for the K19 funnels — one year at a time, the
+ * funnels compare step counts not inter-year curves.
+ *
+ * `sizeRange`: optional workforce bucket scoping the aggregation (undefined =
+ * all sizes).
+ */
+export const getCompletionFunnelSchema = z.object({
+	year: z.number().int().min(2000).max(2100),
+	sizeRange: z.enum(COMPANY_SIZE_RANGE_KEYS).optional(),
+});
+
+export type GetCompletionFunnelInput = z.infer<
+	typeof getCompletionFunnelSchema
+>;

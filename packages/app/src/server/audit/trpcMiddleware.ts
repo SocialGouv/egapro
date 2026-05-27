@@ -64,9 +64,18 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 		AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION,
 	"adminStats.getCampaignStats": AUDIT_ACTIONS.ADMIN_STATS_GET_CAMPAIGN_STATS,
 	"adminStats.getStepDurations": AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DURATIONS,
+	"adminStats.getStepDropoffRate":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DROPOFF_RATE,
+	"adminStats.getCompletionFunnel":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_COMPLETION_FUNNEL,
 
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,
+
+	// ── declaration draft ─────────────────────────────────
+	"declarationDraft.get": AUDIT_ACTIONS.DRAFT_READ,
+	"declarationDraft.save": AUDIT_ACTIONS.DRAFT_SAVE,
+	"declarationDraft.clear": AUDIT_ACTIONS.DRAFT_CLEAR,
 
 	// ── mail ──────────────────────────────────────────────
 	"mail.resendReceipt": AUDIT_ACTIONS.MAIL_RECEIPT_RESEND,
@@ -232,4 +241,5 @@ const SENSITIVE_KEYS = new Set([
 	"accesskey",
 	"access_key",
 	"private_key",
+	"data",
 ]);

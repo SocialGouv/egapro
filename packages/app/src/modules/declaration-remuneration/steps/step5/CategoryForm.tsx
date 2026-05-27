@@ -76,7 +76,9 @@ type Props = {
 	descriptionText?: string;
 	disabled?: boolean;
 	mimoquageNextHref?: string;
-	savedOverride?: boolean;
+	hasDataOverride?: boolean;
+	isSavingOverride?: boolean;
+	isPendingSaveOverride?: boolean;
 	onValuesChange?: (values: {
 		source: string;
 		categories: {
@@ -131,7 +133,9 @@ export function CategoryForm({
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
 	disabled = false,
 	mimoquageNextHref,
-	savedOverride,
+	hasDataOverride,
+	isSavingOverride = false,
+	isPendingSaveOverride = false,
 	onValuesChange,
 	defaultValuesOverride,
 }: Props) {
@@ -165,8 +169,9 @@ export function CategoryForm({
 	});
 
 	const hasInitialData = initialCategories.length > 0;
-	const [savedInternal, setSaved] = useState(hasInitialData);
-	const saved = savedOverride !== undefined ? savedOverride : savedInternal;
+	const [hasDataInternal, setHasData] = useState(hasInitialData);
+	const hasData =
+		hasDataOverride !== undefined ? hasDataOverride : hasDataInternal;
 	const [workforceError, setWorkforceError] = useState("");
 	const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 	const deleteDialogRef = useRef<HTMLDialogElement>(null);
@@ -186,14 +191,14 @@ export function CategoryForm({
 			const formField = field as Exclude<keyof EmployeeCategory, "id">;
 			if (raw === "") {
 				form.setValue(`categories.${index}.${formField}`, raw);
-				setSaved(false);
+				setHasData(false);
 				return;
 			}
 			if (isInteger && /\D/.test(raw)) return;
 			const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
 			if (Number.isNaN(n) || n < 0) return;
 			form.setValue(`categories.${index}.${formField}`, raw);
-			setSaved(false);
+			setHasData(false);
 		};
 	}
 
@@ -204,7 +209,7 @@ export function CategoryForm({
 				form.getValues(`categories.${index}.${formField}`),
 				(padded) => {
 					form.setValue(`categories.${index}.${formField}`, padded);
-					setSaved(false);
+					setHasData(false);
 				},
 			);
 		};
@@ -214,12 +219,12 @@ export function CategoryForm({
 		const empty = createEmptyCategory(nextId());
 		const formEntry = toFormValues([empty])[0];
 		if (formEntry) append(formEntry);
-		setSaved(false);
+		setHasData(false);
 	}
 
 	function handleImportCategories(imported: EmployeeCategory[]) {
 		form.setValue("categories", toFormValues(imported));
-		setSaved(false);
+		setHasData(false);
 	}
 
 	function askRemoveCategory(index: number) {
@@ -247,7 +252,7 @@ export function CategoryForm({
 	function confirmRemoveCategory() {
 		if (deleteIndex !== null) {
 			remove(deleteIndex);
-			setSaved(false);
+			setHasData(false);
 		}
 		closeDeleteDialog();
 	}
@@ -316,16 +321,22 @@ export function CategoryForm({
 	});
 
 	return (
-		<form className={stepStyles.form} onSubmit={handleFormSubmit}>
+		<form
+			autoComplete="off"
+			className={stepStyles.form}
+			onSubmit={handleFormSubmit}
+		>
 			<StepTitleRow
+				hasData={hasData}
+				isPendingSave={isPendingSaveOverride}
+				isSaving={isSavingOverride}
 				onDevFill={() => {
 					if (maxWomen == null || maxMen == null) return;
 					const devCats = createDevStep5Categories(nextId, maxWomen, maxMen);
 					form.setValue("categories", toFormValues(devCats));
 					form.setValue("source", DEV_STEP5_SOURCE);
-					setSaved(false);
+					setHasData(false);
 				}}
-				saved={saved}
 				title={title}
 			/>
 
@@ -362,7 +373,7 @@ export function CategoryForm({
 								form.setValue("source", e.target.value, {
 									shouldValidate: true,
 								});
-								setSaved(false);
+								setHasData(false);
 							}}
 						>
 							<option disabled value="">
@@ -471,7 +482,7 @@ export function CategoryForm({
 														`categories.${index}.name`,
 														e.target.value,
 													);
-													setSaved(false);
+													setHasData(false);
 												}}
 												type="text"
 											/>

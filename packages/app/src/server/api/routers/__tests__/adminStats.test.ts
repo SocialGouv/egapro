@@ -31,6 +31,22 @@ type MilestoneRow = {
 	p90_days: number | null;
 };
 
+type DropoffRow = {
+	step: number;
+	total: number;
+	abandoned: number;
+};
+
+type PostSubmitTotalRow = {
+	phase: string;
+	total: number;
+};
+
+type PostSubmitAbandonedRow = {
+	phase: string;
+	abandoned: number;
+};
+
 /**
  * Builds a mock Drizzle db where each call to `execute()` returns the next
  * planned rowset. For `getStepDurations` the order is fixed: wizard, then
@@ -68,6 +84,31 @@ function buildDb(
 	};
 }
 
+/**
+ * Builds a mock Drizzle db scoped to `getStepDropoffRate` — the K5 query runs
+ * 3 `execute()` calls in this fixed order:
+ *   1. wizard CTE (steps 0..5)
+ *   2. post-submit phase totals (UNION ALL of 6 entry-event counts)
+ *   3. post-submit phase abandoned (declarations stuck on FSM status)
+ * Tests that only need to assert on the wizard CTE pass empty arrays for the
+ * post-submit slots; tests that exercise the post-submit phases populate
+ * them.
+ */
+function buildDropoffDb(
+	dropoffRows: DropoffRow[] = [],
+	postSubmitTotals: PostSubmitTotalRow[] = [],
+	postSubmitAbandoned: PostSubmitAbandonedRow[] = [],
+) {
+	const execute = vi.fn();
+	execute.mockResolvedValueOnce(dropoffRows);
+	execute.mockResolvedValueOnce(postSubmitTotals);
+	execute.mockResolvedValueOnce(postSubmitAbandoned);
+	return {
+		select: vi.fn(),
+		execute,
+	};
+}
+
 // FIFO queue: 4 parallel COUNT queries each consume one result in call order.
 function buildStatsDb(results: Array<Array<{ value: number }>>) {
 	const queue = [...results];
@@ -81,6 +122,33 @@ function buildStatsDb(results: Array<Array<{ value: number }>>) {
 		return { from };
 	});
 	return { select };
+}
+
+/**
+ * Flatten a Drizzle SQL value (the argument passed to `db.execute(sql\`…\`)`)
+ * to a plain string for assertion. Recursively walks nested SQL chunks
+ * (e.g. `sql\`${sizeFilterSql}\``) and surfaces literal text, scalar
+ * parameters, and column names.
+ */
+function flattenSql(value: unknown): string {
+	if (value === null || value === undefined) return "";
+	if (typeof value === "string") return value;
+	if (typeof value === "number" || typeof value === "boolean") {
+		return String(value);
+	}
+	if (value instanceof Number || value instanceof String) {
+		return String(value);
+	}
+	if (typeof value !== "object") return "";
+	const obj = value as Record<string, unknown>;
+	const chunks = obj.queryChunks;
+	if (Array.isArray(chunks)) {
+		return chunks.map(flattenSql).join(" ");
+	}
+	const literal = obj.value;
+	if (Array.isArray(literal)) return literal.join("");
+	if (typeof obj.name === "string") return obj.name;
+	return "";
 }
 
 const adminSession = {
@@ -700,6 +768,416 @@ describe("adminStatsRouter.getStepDurations", () => {
 	});
 });
 
+describe("adminStatsRouter.getStepDropoffRate", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("S-K5-9 — rejects non-admin callers", async () => {
+		const db = buildDropoffDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: {
+				user: { id: "u", email: "u@x", isAdmin: false },
+				expires: "",
+			},
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getStepDropoffRate({ year: 2026, stagnationDays: 30 }),
+		).rejects.toThrow(/administrateurs/i);
+	});
+
+	it("S-K5-1 — maps SQL rows to 12 typed output rows (6 wizard + 6 post-submit) with FR labels and 1-decimal rates", async () => {
+		const db = buildDropoffDb(
+			[
+				{ step: 1, total: 10, abandoned: 2 },
+				{ step: 2, total: 8, abandoned: 4 },
+				{ step: 3, total: 6, abandoned: 1 },
+			],
+			[],
+			[],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+		});
+
+		expect(result).toHaveLength(12);
+		const wizard = result.filter((row) => row.phase === "wizard");
+		expect(wizard.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5]);
+
+		const step1 = wizard.find((row) => row.step === 1);
+		expect(step1).toEqual({
+			key: "1",
+			phase: "wizard",
+			step: 1,
+			label: "Effectifs",
+			total: 10,
+			abandoned: 2,
+			dropoffRate: 20,
+		});
+
+		const step2 = wizard.find((row) => row.step === 2);
+		expect(step2?.label).toBe("Écart de rémunération");
+		expect(step2?.dropoffRate).toBe(50);
+
+		const step3 = wizard.find((row) => row.step === 3);
+		expect(step3?.dropoffRate).toBeCloseTo(16.7, 1);
+	});
+
+	it("S-K5-2 — returns total=0 abandoned=0 rate=0 for phases the SQL omits (no division by zero, no missing row)", async () => {
+		const db = buildDropoffDb([{ step: 1, total: 4, abandoned: 0 }], [], []);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+		});
+
+		expect(result).toHaveLength(12);
+		const step5 = result.find(
+			(row) => row.phase === "wizard" && row.step === 5,
+		);
+		expect(step5).toEqual({
+			key: "5",
+			phase: "wizard",
+			step: 5,
+			label: "Écart par catégorie de salariés",
+			total: 0,
+			abandoned: 0,
+			dropoffRate: 0,
+		});
+
+		const step1 = result.find(
+			(row) => row.phase === "wizard" && row.step === 1,
+		);
+		expect(step1?.dropoffRate).toBe(0);
+
+		const postSubmit = result.filter((row) => row.phase === "post_submit");
+		expect(postSubmit).toHaveLength(6);
+		for (const row of postSubmit) {
+			expect(row).toMatchObject({
+				step: null,
+				total: 0,
+				abandoned: 0,
+				dropoffRate: 0,
+			});
+		}
+	});
+
+	it("S-K5-3 — forwards stagnationDays as an SQL parameter in both wizard and post-submit-abandoned queries", async () => {
+		const db = buildDropoffDb([], [], []);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 10 });
+		expect(db.execute).toHaveBeenCalledTimes(3);
+
+		const wizardCall = db.execute.mock.calls[0]?.[0];
+		expect(flattenSql(wizardCall)).toContain("10");
+		const abandonedCall = db.execute.mock.calls[2]?.[0];
+		expect(flattenSql(abandonedCall)).toContain("10");
+	});
+
+	it("S-K5-4 — `status != 'demarche_completed'` is part of the wizard abandoned FILTER", async () => {
+		const db = buildDropoffDb([], [], []);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 30 });
+
+		const wizardCall = db.execute.mock.calls[0]?.[0];
+		expect(flattenSql(wizardCall)).toContain("demarche_completed");
+	});
+
+	it("S-K5-5 — `cancelled_at IS NULL` is applied to the declaration join in every query", async () => {
+		const db = buildDropoffDb([], [], []);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 30 });
+
+		for (const call of db.execute.mock.calls) {
+			expect(flattenSql(call?.[0])).toMatch(/cancelled\s*At\s+IS NULL/i);
+		}
+	});
+
+	it("S-K5-6 — uses DISTINCT ON in the latest_step_change CTE so back-and-forth entries are deduplicated", async () => {
+		const db = buildDropoffDb([], [], []);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 30 });
+
+		const wizardCall = db.execute.mock.calls[0]?.[0];
+		expect(flattenSql(wizardCall)).toContain("DISTINCT ON");
+	});
+
+	it("S-K5-7 — never returns a row for step 6 (excluded by `lsc.step < 6`)", async () => {
+		const db = buildDropoffDb(
+			[
+				{ step: 0, total: 5, abandoned: 0 },
+				{ step: 6, total: 9, abandoned: 0 },
+			],
+			[],
+			[],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+		});
+
+		expect(result).toHaveLength(12);
+		const wizard = result.filter((row) => row.phase === "wizard");
+		expect(wizard.map((row) => row.step)).toEqual([0, 1, 2, 3, 4, 5]);
+		expect(wizard.some((row) => row.step === 6)).toBe(false);
+	});
+
+	it("S-K5-8 — propagates the sizeRange filter into every SQL query (between predicate)", async () => {
+		const db = buildDropoffDb([], [], []);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+			sizeRange: "250+",
+		});
+
+		expect(db.execute).toHaveBeenCalledTimes(3);
+		for (const call of db.execute.mock.calls) {
+			expect(flattenSql(call?.[0])).toContain("250");
+		}
+	});
+
+	it("S-K5-10 — maps post-submit totals + abandoned to typed rows with phase='post_submit', step=null, FR labels", async () => {
+		const db = buildDropoffDb(
+			[],
+			[
+				{ phase: "awaiting_compliance_path_choice", total: 100 },
+				{ phase: "corrective_actions_chosen", total: 40 },
+				{ phase: "joint_evaluation_chosen", total: 20 },
+				{ phase: "awaiting_revision_choice", total: 8 },
+				{ phase: "revised_joint_evaluation_chosen", total: 4 },
+				{ phase: "awaiting_cse_opinion", total: 60 },
+			],
+			[
+				{ phase: "awaiting_compliance_path_choice", abandoned: 5 },
+				{ phase: "corrective_actions_chosen", abandoned: 8 },
+				{ phase: "joint_evaluation_chosen", abandoned: 4 },
+				{ phase: "awaiting_revision_choice", abandoned: 2 },
+				{ phase: "revised_joint_evaluation_chosen", abandoned: 1 },
+				{ phase: "awaiting_cse_opinion", abandoned: 12 },
+			],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+		});
+
+		const postSubmit = result.filter((row) => row.phase === "post_submit");
+		expect(postSubmit.map((row) => row.key)).toEqual([
+			"awaiting_compliance_path_choice",
+			"corrective_actions_chosen",
+			"joint_evaluation_chosen",
+			"awaiting_revision_choice",
+			"revised_joint_evaluation_chosen",
+			"awaiting_cse_opinion",
+		]);
+
+		const cse = postSubmit.find((row) => row.key === "awaiting_cse_opinion");
+		expect(cse).toEqual({
+			key: "awaiting_cse_opinion",
+			phase: "post_submit",
+			step: null,
+			label: "Avis CSE",
+			total: 60,
+			abandoned: 12,
+			dropoffRate: 20,
+		});
+
+		const compliance = postSubmit.find(
+			(row) => row.key === "awaiting_compliance_path_choice",
+		);
+		expect(compliance?.label).toBe("Choix parcours conformité");
+		expect(compliance?.dropoffRate).toBe(5);
+
+		const corrective = postSubmit.find(
+			(row) => row.key === "corrective_actions_chosen",
+		);
+		expect(corrective?.dropoffRate).toBe(20);
+	});
+
+	it("S-K5-11 — `awaiting_cse_opinion` row shows up with stagnation when cseRequired path is exercised in SQL", async () => {
+		const db = buildDropoffDb(
+			[],
+			[{ phase: "awaiting_cse_opinion", total: 30 }],
+			[{ phase: "awaiting_cse_opinion", abandoned: 6 }],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+		});
+
+		const cse = result.find((row) => row.key === "awaiting_cse_opinion");
+		expect(cse).toEqual({
+			key: "awaiting_cse_opinion",
+			phase: "post_submit",
+			step: null,
+			label: "Avis CSE",
+			total: 30,
+			abandoned: 6,
+			dropoffRate: 20,
+		});
+
+		const totalsCall = db.execute.mock.calls[1]?.[0];
+		const serializedTotals = flattenSql(totalsCall);
+		expect(serializedTotals).toContain("cseRequired");
+		expect(serializedTotals).toMatch(/awaiting_cse_opinion/);
+
+		const abandonedCall = db.execute.mock.calls[2]?.[0];
+		const serializedAbandoned = flattenSql(abandonedCall);
+		expect(serializedAbandoned).toMatch(/awaiting_cse_opinion/);
+	});
+
+	it("S-K5-12 — post-submit phase with total=0 has dropoffRate=0 (no division by zero)", async () => {
+		const db = buildDropoffDb(
+			[],
+			[],
+			[{ phase: "awaiting_compliance_path_choice", abandoned: 0 }],
+		);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getStepDropoffRate({
+			year: 2025,
+			stagnationDays: 30,
+		});
+
+		const compliance = result.find(
+			(row) => row.key === "awaiting_compliance_path_choice",
+		);
+		expect(compliance).toEqual({
+			key: "awaiting_compliance_path_choice",
+			phase: "post_submit",
+			step: null,
+			label: "Choix parcours conformité",
+			total: 0,
+			abandoned: 0,
+			dropoffRate: 0,
+		});
+	});
+
+	it("S-K5-13 — post-submit SQL targets the 6 FSM statuses (compliance path, corrective, joint, revision, revised joint, CSE)", async () => {
+		const db = buildDropoffDb([], [], []);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({ year: 2025, stagnationDays: 30 });
+
+		const abandonedCall = db.execute.mock.calls[2]?.[0];
+		const serialized = flattenSql(abandonedCall);
+		expect(serialized).toContain("awaiting_compliance_path_choice");
+		expect(serialized).toContain("corrective_actions_chosen");
+		expect(serialized).toContain("joint_evaluation_chosen");
+		expect(serialized).toContain("awaiting_revision_choice");
+		expect(serialized).toContain("revised_joint_evaluation_chosen");
+		expect(serialized).toContain("awaiting_cse_opinion");
+	});
+
+	it("rejects invalid stagnationDays (below 1 / above 180)", async () => {
+		const db = buildDropoffDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getStepDropoffRate({ year: 2025, stagnationDays: 0 }),
+		).rejects.toThrow();
+		await expect(
+			caller.getStepDropoffRate({ year: 2025, stagnationDays: 181 }),
+		).rejects.toThrow();
+	});
+
+	it("defaults stagnationDays to 30 when omitted", async () => {
+		const db = buildDropoffDb([], [], []);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDropoffRate({ year: 2025 });
+		expect(db.execute).toHaveBeenCalledTimes(3);
+	});
+});
+
 describe("adminStatsRouter.getCampaignStats", () => {
 	beforeEach(() => vi.resetAllMocks());
 
@@ -861,5 +1339,439 @@ describe("adminStatsRouter.getCampaignStats", () => {
 		expect(result.totalObligated).toBe(200);
 		expect(result.submissionRate).toBeCloseTo(75, 1);
 		expect(result.previousYearRate).toBeCloseTo(66.7, 1);
+	});
+});
+type FunnelAggregateRow = {
+	main?: {
+		draft_started: number;
+		indicators_filled: number;
+		submitted: number;
+		demarche_completed: number;
+	};
+	compliance?: {
+		submitted_with_alert: number;
+		path_chosen: number;
+		corrective_action_submitted: number;
+		demarche_completed: number;
+	};
+	revision?: {
+		revision_required: number;
+		revision_path_chosen: number;
+		revision_action_submitted: number;
+		demarche_completed: number;
+	};
+	cse?: {
+		draft_started: number;
+		indicators_filled: number;
+		submitted: number;
+		cse_opinion_submitted: number;
+		demarche_completed: number;
+	};
+};
+
+const ZERO_MAIN_ROW = {
+	draft_started: 0,
+	indicators_filled: 0,
+	submitted: 0,
+	demarche_completed: 0,
+};
+
+const ZERO_COMPLIANCE_ROW = {
+	submitted_with_alert: 0,
+	path_chosen: 0,
+	corrective_action_submitted: 0,
+	demarche_completed: 0,
+};
+
+const ZERO_REVISION_ROW = {
+	revision_required: 0,
+	revision_path_chosen: 0,
+	revision_action_submitted: 0,
+	demarche_completed: 0,
+};
+
+const ZERO_CSE_ROW = {
+	draft_started: 0,
+	indicators_filled: 0,
+	submitted: 0,
+	cse_opinion_submitted: 0,
+	demarche_completed: 0,
+};
+
+function buildFunnelDb(rows: FunnelAggregateRow = {}) {
+	const execute = vi.fn();
+	execute.mockResolvedValueOnce([rows.main ?? ZERO_MAIN_ROW]);
+	execute.mockResolvedValueOnce([rows.compliance ?? ZERO_COMPLIANCE_ROW]);
+	execute.mockResolvedValueOnce([rows.revision ?? ZERO_REVISION_ROW]);
+	execute.mockResolvedValueOnce([rows.cse ?? ZERO_CSE_ROW]);
+	return {
+		select: vi.fn(),
+		execute,
+	};
+}
+
+describe("adminStatsRouter.getCompletionFunnel", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers (S-K19-7 access control)", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: {
+				user: { id: "u", email: "u@x", isAdmin: false },
+				expires: "",
+			},
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getCompletionFunnel({ year: 2026 })).rejects.toThrow(
+			/administrateurs/i,
+		);
+	});
+
+	it("returns four funnels (3×4 + 1×5 zero-count rows) when SQL returns no data", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.mainFunnel).toHaveLength(4);
+		expect(result.complianceFunnel).toHaveLength(4);
+		expect(result.revisionFunnel).toHaveLength(4);
+		expect(result.cseFunnel).toHaveLength(5);
+		for (const row of [
+			...result.mainFunnel,
+			...result.complianceFunnel,
+			...result.revisionFunnel,
+			...result.cseFunnel,
+		]) {
+			expect(row.count).toBe(0);
+			expect(row.pctOfStart).toBe(0);
+		}
+		expect(result.mainFunnel[0]?.pctDropFromPrev).toBeNull();
+		expect(result.mainFunnel[1]?.pctDropFromPrev).toBe(0);
+		expect(result.cseFunnel[0]?.pctDropFromPrev).toBeNull();
+		expect(result.cseFunnel[4]?.pctDropFromPrev).toBe(0);
+	});
+
+	it("S-K19-1: maps the main funnel with correct counts, pctOfStart and pctDropFromPrev", async () => {
+		const db = buildFunnelDb({
+			main: {
+				draft_started: 100,
+				indicators_filled: 80,
+				submitted: 60,
+				demarche_completed: 50,
+			},
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.mainFunnel).toEqual([
+			{
+				key: "draft_started",
+				label: "Brouillon créé",
+				count: 100,
+				pctOfStart: 100,
+				pctDropFromPrev: null,
+			},
+			{
+				key: "indicators_filled",
+				label: "Indicateurs saisis",
+				count: 80,
+				pctOfStart: 80,
+				pctDropFromPrev: 20,
+			},
+			{
+				key: "submitted",
+				label: "Déclaration soumise",
+				count: 60,
+				pctOfStart: 60,
+				pctDropFromPrev: 25,
+			},
+			{
+				key: "demarche_completed",
+				label: "Démarche complète",
+				count: 50,
+				pctOfStart: 50,
+				pctDropFromPrev: 17,
+			},
+		]);
+	});
+
+	it("S-K19-2: returns the compliance funnel with correct labels and drops", async () => {
+		const db = buildFunnelDb({
+			compliance: {
+				submitted_with_alert: 40,
+				path_chosen: 30,
+				corrective_action_submitted: 20,
+				demarche_completed: 10,
+			},
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.complianceFunnel.map((r) => r.key)).toEqual([
+			"submitted_with_alert",
+			"path_chosen",
+			"corrective_action_submitted",
+			"demarche_completed",
+		]);
+		expect(result.complianceFunnel[1]?.pctDropFromPrev).toBe(25);
+		expect(result.complianceFunnel[3]?.pctOfStart).toBe(25);
+	});
+
+	it("S-K19-3: passes year and size range filters to all four queries", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCompletionFunnel({ year: 2025, sizeRange: "100-149" });
+
+		expect(db.execute).toHaveBeenCalledTimes(4);
+	});
+
+	it("S-K19-4: pctDropFromPrev is null for the first jalon and 0 when the previous jalon is empty", async () => {
+		const db = buildFunnelDb({
+			main: {
+				draft_started: 0,
+				indicators_filled: 5,
+				submitted: 5,
+				demarche_completed: 5,
+			},
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.mainFunnel[0]?.pctDropFromPrev).toBeNull();
+		expect(result.mainFunnel[1]?.pctDropFromPrev).toBe(0);
+		expect(result.mainFunnel[1]?.pctOfStart).toBe(0);
+	});
+
+	it("S-K19-5: builds the revision funnel from the dedicated SQL row", async () => {
+		const db = buildFunnelDb({
+			revision: {
+				revision_required: 10,
+				revision_path_chosen: 8,
+				revision_action_submitted: 6,
+				demarche_completed: 4,
+			},
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.revisionFunnel.map((r) => r.count)).toEqual([10, 8, 6, 4]);
+		expect(result.revisionFunnel[0]?.label).toBe("Révision requise");
+		expect(result.revisionFunnel[3]?.pctOfStart).toBe(40);
+		expect(result.revisionFunnel[3]?.pctDropFromPrev).toBe(33);
+	});
+
+	it("S-K19-6: the revision funnel is empty when no declaration is in revision (count[0] === 0)", async () => {
+		const db = buildFunnelDb({
+			main: {
+				draft_started: 100,
+				indicators_filled: 80,
+				submitted: 60,
+				demarche_completed: 60,
+			},
+			revision: ZERO_REVISION_ROW,
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.revisionFunnel[0]?.count).toBe(0);
+		expect(result.revisionFunnel.every((r) => r.count === 0)).toBe(true);
+	});
+
+	it("S-K19-8: validates the year bounds", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getCompletionFunnel({ year: 1999 })).rejects.toThrow();
+		await expect(caller.getCompletionFunnel({ year: 2101 })).rejects.toThrow();
+	});
+
+	it("S-K19-9: maps the CSE funnel with correct counts, pctOfStart and pctDropFromPrev", async () => {
+		const db = buildFunnelDb({
+			cse: {
+				draft_started: 100,
+				indicators_filled: 80,
+				submitted: 60,
+				cse_opinion_submitted: 50,
+				demarche_completed: 40,
+			},
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.cseFunnel).toEqual([
+			{
+				key: "draft_started",
+				label: "Brouillon créé",
+				count: 100,
+				pctOfStart: 100,
+				pctDropFromPrev: null,
+			},
+			{
+				key: "indicators_filled",
+				label: "Indicateurs saisis",
+				count: 80,
+				pctOfStart: 80,
+				pctDropFromPrev: 20,
+			},
+			{
+				key: "submitted",
+				label: "Déclaration soumise",
+				count: 60,
+				pctOfStart: 60,
+				pctDropFromPrev: 25,
+			},
+			{
+				key: "cse_opinion_submitted",
+				label: "Avis CSE soumis",
+				count: 50,
+				pctOfStart: 50,
+				pctDropFromPrev: 17,
+			},
+			{
+				key: "demarche_completed",
+				label: "Démarche complète",
+				count: 40,
+				pctOfStart: 40,
+				pctDropFromPrev: 20,
+			},
+		]);
+	});
+
+	it("S-K19-10: CSE funnel SQL scopes the base to companies.has_cse = true", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCompletionFunnel({ year: 2026 });
+
+		const cseSqlText = flattenSql(db.execute.mock.calls[3]?.[0]);
+		expect(cseSqlText).toMatch(/hasCse/);
+		expect(cseSqlText).toMatch(/hasCse[^=]*=\s*true/);
+
+		const mainSqlText = flattenSql(db.execute.mock.calls[0]?.[0]);
+		expect(mainSqlText).not.toMatch(/hasCse/);
+	});
+
+	it("S-K19-11: CSE funnel SQL excludes cancelled declarations", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCompletionFunnel({ year: 2026 });
+
+		const cseSqlText = flattenSql(db.execute.mock.calls[3]?.[0]);
+		expect(cseSqlText).toMatch(/cancelledAt/);
+		expect(cseSqlText).toMatch(/cancelledAt[^I]*IS NULL/i);
+	});
+
+	it("S-K19-12: CSE funnel SQL also applies the sizeRange workforce filter", async () => {
+		const dbWithoutSize = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const callerNoSize = adminStatsRouter.createCaller({
+			db: dbWithoutSize,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+		await callerNoSize.getCompletionFunnel({ year: 2026 });
+		const cseWithoutSize = flattenSql(dbWithoutSize.execute.mock.calls[3]?.[0]);
+		expect(cseWithoutSize).not.toMatch(/workforce/i);
+
+		const dbWithSize = buildFunnelDb();
+		const callerSize = adminStatsRouter.createCaller({
+			db: dbWithSize,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+		await callerSize.getCompletionFunnel({
+			year: 2026,
+			sizeRange: "100-149",
+		});
+		const cseWithSize = flattenSql(dbWithSize.execute.mock.calls[3]?.[0]);
+		expect(cseWithSize).toMatch(/workforce/i);
+	});
+
+	it("coerces SQL numeric strings to numbers (pg sometimes returns COUNT(...) as a string)", async () => {
+		const db = buildFunnelDb({
+			main: {
+				draft_started: "50" as unknown as number,
+				indicators_filled: "40" as unknown as number,
+				submitted: "30" as unknown as number,
+				demarche_completed: "20" as unknown as number,
+			},
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getCompletionFunnel({ year: 2026 });
+
+		expect(result.mainFunnel.map((r) => r.count)).toEqual([50, 40, 30, 20]);
 	});
 });

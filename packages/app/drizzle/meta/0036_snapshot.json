@@ -1,5 +1,5 @@
 {
-	"id": "6cf8f8fd-d111-479a-a07f-df7898b2714e",
+	"id": "94cda144-458a-4392-bb97-72c5ec8d9ce7",
 	"prevId": "b0a674aa-5ec7-4d36-88aa-de06f79e956f",
 	"version": "7",
 	"dialect": "postgresql",
@@ -947,6 +947,18 @@
 				},
 				"updated_at": {
 					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"draft": {
+					"name": "draft",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"draft_updated_at": {
+					"name": "draft_updated_at",
 					"type": "timestamp with time zone",
 					"primaryKey": false,
 					"notNull": false
@@ -2342,8 +2354,7 @@
 				"joint_evaluation_submit",
 				"cse_opinion_submit",
 				"cancel",
-				"demarche_complete",
-				"step_change"
+				"demarche_complete"
 			]
 		},
 		"public.declaration_status": {

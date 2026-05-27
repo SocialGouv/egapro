@@ -150,6 +150,70 @@ test.describe("admin campaign progression stats", () => {
 			}),
 		).toBeVisible();
 	});
+
+	test("K5 step dropoff section is visible with chart, table, stagnation filter and both phase rowgroups", async ({
+		page,
+	}) => {
+		await page.goto("/admin/stats/campagne");
+
+		await expect(
+			page.getByRole("heading", {
+				name: /Taux d'abandon par phase/i,
+				level: 2,
+			}),
+		).toBeVisible();
+
+		const k5Section = page.getByLabel(/Taux d'abandon par phase/i);
+
+		await expect(
+			k5Section.getByLabel(/Considérer une déclaration abandonnée après/i),
+		).toBeVisible();
+
+		// Scope the disclosure summary to K5 — the same label appears under K2
+		// and K4 (cf. fix `6c9de927`).
+		await k5Section
+			.locator("summary", {
+				hasText: /consulter les données du graphique sous forme de tableau/i,
+			})
+			.click();
+
+		await expect(
+			k5Section.getByRole("columnheader", { name: /Taux d'abandon/i }),
+		).toBeVisible();
+		await expect(
+			k5Section.getByRole("rowheader", { name: "Introduction" }),
+		).toBeVisible();
+		await expect(
+			k5Section.getByRole("rowheader", {
+				name: /Parcours initial \(wizard A–F\)/i,
+			}),
+		).toBeVisible();
+		await expect(
+			k5Section.getByRole("rowheader", { name: "Démarche post-soumission" }),
+		).toBeVisible();
+		await expect(
+			k5Section.getByRole("rowheader", { name: "Choix parcours conformité" }),
+		).toBeVisible();
+		await expect(
+			k5Section.getByRole("rowheader", { name: "Avis CSE" }),
+		).toBeVisible();
+	});
+
+	test("K5 stagnation filter is editable and stays in sync with the input", async ({
+		page,
+	}) => {
+		await page.goto("/admin/stats/campagne");
+
+		const k5Section = page.getByLabel(/Taux d'abandon par phase/i);
+		const filter = k5Section.getByLabel(
+			/Considérer une déclaration abandonnée après/i,
+		);
+
+		await expect(filter).toHaveValue("30");
+
+		await filter.fill("60");
+		await expect(filter).toHaveValue("60");
+	});
 });
 
 test("non-admin users are redirected away from the stats page", async ({

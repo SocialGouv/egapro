@@ -101,7 +101,11 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 									.
 								</p>
 
-								<form id="company-edit-form" onSubmit={onSubmit}>
+								<form
+									autoComplete="off"
+									id="company-edit-form"
+									onSubmit={onSubmit}
+								>
 									<CompanyReadonlySection company={initialCompany} />
 									<Controller
 										control={form.control}

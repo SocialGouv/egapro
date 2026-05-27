@@ -12,6 +12,7 @@ import {
 	YAxis,
 } from "recharts";
 
+import { formatCount, formatDays } from "./formatters";
 import styles from "./StepDurationsChart.module.scss";
 import type { StepDurationRow } from "./types";
 
@@ -38,14 +39,6 @@ const WIZARD_P90_COLOR = "var(--background-action-low-blue-france)";
 const POST_SUBMIT_MEDIAN_COLOR = "var(--background-action-high-red-marianne)";
 const POST_SUBMIT_P90_COLOR = "var(--background-action-low-red-marianne)";
 
-function formatDays(value: number | null): string {
-	if (value === null) return "—";
-	return `${value.toLocaleString("fr-FR", {
-		maximumFractionDigits: 1,
-		minimumFractionDigits: 1,
-	})} j`;
-}
-
 function DurationsTooltip({ active, payload }: DurationsTooltipProps) {
 	if (!active || !payload || payload.length === 0) {
 		return null;
@@ -60,10 +53,11 @@ function DurationsTooltip({ active, payload }: DurationsTooltipProps) {
 			</p>
 			<ul className={styles.tooltipList}>
 				<li className={styles.tooltipItem}>
-					médiane {formatDays(row.medianDays)} — p90 {formatDays(row.p90Days)}
+					médiane {formatDays(row.medianDays, { withUnit: true })} — p90{" "}
+					{formatDays(row.p90Days, { withUnit: true })}
 				</li>
 				<li className={styles.tooltipItem}>
-					sur {row.sampleSize.toLocaleString("fr-FR")}{" "}
+					sur {formatCount(row.sampleSize)}{" "}
 					{isWizard
 						? "déclarations passées par cette étape"
 						: "déclarations concernées par ce jalon"}
@@ -107,7 +101,7 @@ export function StepDurationsChart({ rows }: Props) {
 							position: "insideBottom",
 							offset: -4,
 						}}
-						tickFormatter={(value: number) => value.toLocaleString("fr-FR")}
+						tickFormatter={(value: number) => formatCount(value)}
 						type="number"
 					/>
 					<YAxis dataKey="label" interval={0} type="category" width={220} />

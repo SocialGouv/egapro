@@ -4,22 +4,37 @@ export { CampaignProgressionChart } from "./CampaignProgressionChart";
 export { CampaignProgressionTable } from "./CampaignProgressionTable";
 export { CampaignRateTile } from "./CampaignRateTile";
 export { CampaignStatsPage } from "./CampaignStatsPage";
+export { CompletionFunnelChart } from "./CompletionFunnelChart";
+export { CompletionFunnelTable } from "./CompletionFunnelTable";
+export { formatCount, formatDays, formatPercent } from "./formatters";
+export { PlatformStatsPage } from "./PlatformStatsPage";
+export { StagnationDaysFilter } from "./StagnationDaysFilter";
+export { StepDropoffChart } from "./StepDropoffChart";
+export { StepDropoffTable } from "./StepDropoffTable";
 export { StepDurationsChart } from "./StepDurationsChart";
 export { StepDurationsTable } from "./StepDurationsTable";
 export type {
 	GetCampaignProgressionInput,
 	GetCampaignStatsInput,
+	GetCompletionFunnelInput,
+	GetStepDropoffRateInput,
 	GetStepDurationsInput,
 } from "./schemas";
 export {
 	getCampaignProgressionSchema,
 	getCampaignStatsSchema,
+	getCompletionFunnelSchema,
+	getStepDropoffRateSchema,
 	getStepDurationsSchema,
 } from "./schemas";
 export type {
 	CampaignProgressionPoint,
 	CampaignProgressionSeries,
 	CampaignStats,
+	CompletionFunnelOutput,
+	FunnelRow,
+	StepDropoffRow,
 	StepDurationRow,
 } from "./types";
+export { useDebouncedValue } from "./useDebouncedValue";
 export { YearsFilter } from "./YearsFilter";

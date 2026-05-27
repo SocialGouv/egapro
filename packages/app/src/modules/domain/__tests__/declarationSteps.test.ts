@@ -2,7 +2,17 @@ import { describe, expect, it } from "vitest";
 
 import {
 	DECLARATION_STEPS,
+	DROPOFF_RATE_ALERT_THRESHOLD,
+	DROPOFF_STAGNATION_DAYS_DEFAULT,
+	DROPOFF_STAGNATION_DAYS_MAX,
+	DROPOFF_STAGNATION_DAYS_MIN,
+	FUNNEL_COMPLIANCE_KEY_STEPS,
+	FUNNEL_CSE_KEY_STEPS,
+	FUNNEL_DROP_ALERT_THRESHOLD,
+	FUNNEL_MAIN_KEY_STEPS,
+	FUNNEL_REVISION_KEY_STEPS,
 	getStepLabel,
+	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
 } from "../shared/declarationSteps";
 
@@ -75,5 +85,144 @@ describe("POST_SUBMIT_MILESTONES", () => {
 	it("uses unique keys", () => {
 		const keys = POST_SUBMIT_MILESTONES.map((m) => m.key);
 		expect(new Set(keys).size).toBe(keys.length);
+	});
+});
+
+describe("POST_SUBMIT_DROPOFF_PHASES", () => {
+	it("S-K5-D2 — exposes the 6 post-submission FSM phases in chronological order", () => {
+		expect(POST_SUBMIT_DROPOFF_PHASES.map((p) => p.key)).toEqual([
+			"awaiting_compliance_path_choice",
+			"corrective_actions_chosen",
+			"joint_evaluation_chosen",
+			"awaiting_revision_choice",
+			"revised_joint_evaluation_chosen",
+			"awaiting_cse_opinion",
+		]);
+	});
+
+	it("uses French user-facing labels with no empty strings", () => {
+		for (const phase of POST_SUBMIT_DROPOFF_PHASES) {
+			expect(phase.label.length).toBeGreaterThan(0);
+		}
+	});
+
+	it("uses unique keys and unique FSM statuses", () => {
+		const keys = POST_SUBMIT_DROPOFF_PHASES.map((p) => p.key);
+		const statuses = POST_SUBMIT_DROPOFF_PHASES.map((p) => p.status);
+		expect(new Set(keys).size).toBe(keys.length);
+		expect(new Set(statuses).size).toBe(statuses.length);
+	});
+
+	it("maps each phase to the matching blocking FSM status (`status` mirrors `key`)", () => {
+		for (const phase of POST_SUBMIT_DROPOFF_PHASES) {
+			expect(phase.status).toBe(phase.key);
+		}
+	});
+});
+
+describe("K5 dropoff constants", () => {
+	it("uses 15 % as the alert threshold for the dropoff chart", () => {
+		expect(DROPOFF_RATE_ALERT_THRESHOLD).toBe(15);
+	});
+
+	it("defaults the stagnation window to 30 days", () => {
+		expect(DROPOFF_STAGNATION_DAYS_DEFAULT).toBe(30);
+	});
+
+	it("bounds the stagnation window between 1 and 180 days", () => {
+		expect(DROPOFF_STAGNATION_DAYS_MIN).toBe(1);
+		expect(DROPOFF_STAGNATION_DAYS_MAX).toBe(180);
+		expect(DROPOFF_STAGNATION_DAYS_DEFAULT).toBeGreaterThanOrEqual(
+			DROPOFF_STAGNATION_DAYS_MIN,
+		);
+		expect(DROPOFF_STAGNATION_DAYS_DEFAULT).toBeLessThanOrEqual(
+			DROPOFF_STAGNATION_DAYS_MAX,
+		);
+	});
+});
+
+describe("FUNNEL_MAIN_KEY_STEPS (S-K19-D1)", () => {
+	it("exposes the 4 main funnel jalons in chronological order", () => {
+		expect(FUNNEL_MAIN_KEY_STEPS.map((s) => s.key)).toEqual([
+			"draft_started",
+			"indicators_filled",
+			"submitted",
+			"demarche_completed",
+		]);
+	});
+
+	it("uses non-empty French labels and unique keys within the funnel", () => {
+		for (const entry of FUNNEL_MAIN_KEY_STEPS) {
+			expect(entry.label.length).toBeGreaterThan(0);
+		}
+		const keys = FUNNEL_MAIN_KEY_STEPS.map((s) => s.key);
+		expect(new Set(keys).size).toBe(keys.length);
+	});
+});
+
+describe("FUNNEL_COMPLIANCE_KEY_STEPS (S-K19-D2)", () => {
+	it("exposes the 4 compliance funnel jalons in chronological order", () => {
+		expect(FUNNEL_COMPLIANCE_KEY_STEPS.map((s) => s.key)).toEqual([
+			"submitted_with_alert",
+			"path_chosen",
+			"corrective_action_submitted",
+			"demarche_completed",
+		]);
+	});
+
+	it("uses non-empty French labels and unique keys within the funnel", () => {
+		for (const entry of FUNNEL_COMPLIANCE_KEY_STEPS) {
+			expect(entry.label.length).toBeGreaterThan(0);
+		}
+		const keys = FUNNEL_COMPLIANCE_KEY_STEPS.map((s) => s.key);
+		expect(new Set(keys).size).toBe(keys.length);
+	});
+});
+
+describe("FUNNEL_REVISION_KEY_STEPS (S-K19-D4)", () => {
+	it("exposes the 4 revision funnel jalons in chronological order", () => {
+		expect(FUNNEL_REVISION_KEY_STEPS.map((s) => s.key)).toEqual([
+			"revision_required",
+			"revision_path_chosen",
+			"revision_action_submitted",
+			"demarche_completed",
+		]);
+	});
+
+	it("uses non-empty French labels and unique keys within the funnel", () => {
+		for (const entry of FUNNEL_REVISION_KEY_STEPS) {
+			expect(entry.label.length).toBeGreaterThan(0);
+		}
+		const keys = FUNNEL_REVISION_KEY_STEPS.map((s) => s.key);
+		expect(new Set(keys).size).toBe(keys.length);
+	});
+});
+
+describe("FUNNEL_CSE_KEY_STEPS (S-K19-D5)", () => {
+	it("exposes the 5 CSE funnel jalons in chronological order", () => {
+		expect(FUNNEL_CSE_KEY_STEPS).toHaveLength(5);
+		expect(FUNNEL_CSE_KEY_STEPS.map((s) => s.key)).toEqual([
+			"draft_started",
+			"indicators_filled",
+			"submitted",
+			"cse_opinion_submitted",
+			"demarche_completed",
+		]);
+	});
+
+	it("uses non-empty French labels and unique keys within the funnel", () => {
+		for (const entry of FUNNEL_CSE_KEY_STEPS) {
+			expect(entry.label.length).toBeGreaterThan(0);
+		}
+		const keys = FUNNEL_CSE_KEY_STEPS.map((s) => s.key);
+		expect(new Set(keys).size).toBe(keys.length);
+	});
+});
+
+describe("FUNNEL_DROP_ALERT_THRESHOLD (S-K19-D3)", () => {
+	it("is a positive number strictly between 0 and 100", () => {
+		expect(typeof FUNNEL_DROP_ALERT_THRESHOLD).toBe("number");
+		expect(FUNNEL_DROP_ALERT_THRESHOLD).toBeGreaterThan(0);
+		expect(FUNNEL_DROP_ALERT_THRESHOLD).toBeLessThan(100);
 	});
 });

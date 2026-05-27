@@ -172,6 +172,25 @@ export const cseOpinionRouter = createTRPCRouter({
 				.update(declarations)
 				.set({ ...projection, updatedAt: new Date() })
 				.where(eq(declarations.id, ctx.declarationId));
+
+			const [declRow] = await tx
+				.select()
+				.from(declarations)
+				.where(eq(declarations.id, ctx.declarationId))
+				.limit(1);
+
+			if (declRow?.draft) {
+				const current = declRow.draft as Record<string, unknown>;
+				const { cse: _removed, ...remaining } = current;
+				const isEmpty = Object.keys(remaining).length === 0;
+				await tx
+					.update(declarations)
+					.set({
+						draft: isEmpty ? null : remaining,
+						draftUpdatedAt: isEmpty ? null : new Date(),
+					})
+					.where(eq(declarations.id, ctx.declarationId));
+			}
 		});
 
 		return { success: true };

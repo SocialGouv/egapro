@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { padDecimalToTwo } from "~/modules/domain";
 import { api } from "~/trpc/react";
+import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
 import { StepIndicator } from "../shared/StepIndicator";
 import type { EmployeeCategoryRow } from "../types";
@@ -69,28 +70,21 @@ export function Step5EmployeeCategories({
 		[initialCategories, initialSource],
 	);
 
-	const { draft, setField, clearDraft, hasDraft } =
-		useDeclarationDraft<Step5FormValues>({
-			siren: declarationSiren,
-			year: declarationYear,
-			step: 5,
-			kind: "main",
-			dbValues,
-		});
-
-	const [draftLoaded, setDraftLoaded] = useState(false);
-
-	useEffect(() => {
-		if (hasDraft && !draftLoaded) setDraftLoaded(true);
-	}, [hasDraft, draftLoaded]);
-
-	const categoryFormKey = draftLoaded ? 1 : 0;
-	const categoryFormDefaultOverride = draftLoaded
-		? {
-				source: draft.source ?? initialSource ?? "",
-				categories: draft.categories ?? dbValues.categories,
-			}
-		: undefined;
+	const {
+		draft,
+		setField,
+		clearDraft,
+		hasDraft,
+		isLoadingDraft,
+		isSaving,
+		isPendingSave,
+	} = useDeclarationDraft<Step5FormValues>({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: 5,
+		kind: "main",
+		dbValues,
+	});
 
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
 		onSuccess: () => {
@@ -99,16 +93,29 @@ export function Step5EmployeeCategories({
 		},
 	});
 
+	if (isLoadingDraft) {
+		return <DraftLoadingState />;
+	}
+
+	const categoryFormDefaultOverride = hasDraft
+		? {
+				source: draft.source ?? initialSource ?? "",
+				categories: draft.categories ?? dbValues.categories,
+			}
+		: undefined;
+
 	return (
 		<CategoryForm
 			accordionId="accordion-step5"
 			defaultValuesOverride={categoryFormDefaultOverride}
 			disabled={isImpersonating}
+			hasDataOverride={hasInitialData || hasDraft}
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
 			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
+			isPendingSaveOverride={isPendingSave}
+			isSavingOverride={isSaving}
 			isSubmitting={mutation.isPending}
-			key={categoryFormKey}
 			maxMen={maxMen}
 			maxWomen={maxWomen}
 			mimoquageNextHref={
@@ -124,7 +131,6 @@ export function Step5EmployeeCategories({
 			onValuesChange={(values) => setField(values)}
 			previousHref="/declaration-remuneration/etape/4"
 			referenceYear={declarationYear - 1}
-			savedOverride={!hasDraft && hasInitialData}
 			stepper={<StepIndicator currentStep={5} />}
 			submitError={mutation.error?.message}
 			title={

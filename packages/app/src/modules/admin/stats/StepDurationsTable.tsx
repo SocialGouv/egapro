@@ -1,16 +1,9 @@
+import { formatCount, formatDays } from "./formatters";
 import type { StepDurationRow } from "./types";
 
 type Props = {
 	rows: StepDurationRow[];
 };
-
-function formatDays(value: number | null): string {
-	if (value === null) return "—";
-	return value.toLocaleString("fr-FR", {
-		maximumFractionDigits: 1,
-		minimumFractionDigits: 1,
-	});
-}
 
 const PHASE_HEADERS: Record<StepDurationRow["phase"], string> = {
 	wizard: "Parcours initial (wizard A–F)",
@@ -69,7 +62,7 @@ export function StepDurationsTable({ rows }: Props) {
 												<th scope="row">{row.label}</th>
 												<td>{formatDays(row.medianDays)}</td>
 												<td>{formatDays(row.p90Days)}</td>
-												<td>{row.sampleSize.toLocaleString("fr-FR")}</td>
+												<td>{formatCount(row.sampleSize)}</td>
 											</tr>
 										))}
 									</tbody>
@@ -90,7 +83,7 @@ export function StepDurationsTable({ rows }: Props) {
 												<th scope="row">{row.label}</th>
 												<td>{formatDays(row.medianDays)}</td>
 												<td>{formatDays(row.p90Days)}</td>
-												<td>{row.sampleSize.toLocaleString("fr-FR")}</td>
+												<td>{formatCount(row.sampleSize)}</td>
 											</tr>
 										))}
 									</tbody>
