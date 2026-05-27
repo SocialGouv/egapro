@@ -11,6 +11,7 @@ import { jointEvaluationRouter } from "~/server/api/routers/jointEvaluation";
 import { mailRouter } from "~/server/api/routers/mail";
 import { profileRouter } from "~/server/api/routers/profile";
 import { publicReferentsRouter } from "~/server/api/routers/publicReferents";
+import { publicStatsRouter } from "~/server/api/routers/publicStats";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -32,6 +33,7 @@ export const appRouter = createTRPCRouter({
 	mail: mailRouter,
 	profile: profileRouter,
 	publicReferents: publicReferentsRouter,
+	publicStats: publicStatsRouter,
 });
 
 // export type definition of API

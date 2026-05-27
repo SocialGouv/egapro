@@ -55,6 +55,10 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"publicReferents.search": AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH,
 	"publicReferents.getById": AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW,
 
+	// ── public stats reads ─────────────────────────────────
+	"publicStats.getCurrentCampaignRate":
+		AUDIT_ACTIONS.PUBLIC_STATS_GET_CURRENT_CAMPAIGN_RATE,
+
 	// ── admin settings mutations ──────────────────────────
 	"adminSettings.upsertCampaignDeadlines":
 		AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES,

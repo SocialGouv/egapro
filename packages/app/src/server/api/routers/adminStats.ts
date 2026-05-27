@@ -16,6 +16,7 @@ import {
 	COMPANY_SIZE_RANGES,
 	COMPANY_SIZE_VOLUNTARY_MAX,
 	type CompanySizeRange,
+	computeRate,
 	DECLARATION_STEPS,
 	getStepLabel,
 	isTriennialYear,
@@ -87,15 +88,6 @@ function obligationWorkforceFilter(
 			? sql`${ema} >= ${min}`
 			: sql`${ema} BETWEEN ${min} AND ${max}`;
 	return sql`(${bucket}) AND ${baseObligation}`;
-}
-
-function roundOneDecimal(value: number): number {
-	return Math.round(value * 10) / 10;
-}
-
-function computeRate(submitted: number, obligated: number): number {
-	if (obligated === 0) return 0;
-	return roundOneDecimal((submitted / obligated) * 100);
 }
 
 type AggregatedMilestone = {

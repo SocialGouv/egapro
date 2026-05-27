@@ -82,18 +82,23 @@ export {
 	hasEvent,
 	hasSubmittedSecondDeclaration,
 } from "./shared/declarationTrajectory";
-// Display formatting (%, €, units)
+// Display formatting (%, €, units, rates, counts, points)
 export {
 	computePercentage,
 	computeProportion,
+	formatCount,
 	formatCurrency,
 	formatGap,
 	formatGapCompact,
 	formatLongDate,
 	formatMonthDay,
+	formatPointsAbs,
+	formatRate,
 	formatShortDate,
 	formatShortDateTime,
 	formatTotal,
+	NARROW_NBSP,
+	roundOneDecimal,
 } from "./shared/format";
 // Gap business rules (calculations & threshold classification)
 export {
@@ -135,6 +140,12 @@ export {
 } from "./shared/regions";
 // SIREN utilities
 export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
+// Submission rate helpers (shared by admin/public stats routers and KPI tiles)
+export type { CampaignRateTileProps } from "./shared/submissionRate";
+export {
+	buildCampaignRateTileProps,
+	computeRate,
+} from "./shared/submissionRate";
 export type {
 	CampaignDeadlines,
 	CompanySize,
