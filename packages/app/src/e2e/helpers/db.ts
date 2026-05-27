@@ -52,7 +52,9 @@ export async function resetDeclarationToDraft() {
 			UPDATE app_declaration
 			SET status = 'draft', current_step = 1,
 			    first_declaration_path_choice = NULL,
-			    second_declaration_path_choice = NULL
+			    second_declaration_path_choice = NULL,
+			    total_women = NULL,
+			    total_men = NULL
 			WHERE siren = ${TEST_SIREN}
 		`;
 

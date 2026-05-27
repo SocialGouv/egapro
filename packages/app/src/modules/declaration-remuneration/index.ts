@@ -32,6 +32,7 @@ export type {
 	GipQuartileData,
 } from "./shared/gipMdsMapping";
 export { CSV_TO_SCHEMA_MAP, mapGipToFormData } from "./shared/gipMdsMapping";
+export { getEffectiveGipPrefillData } from "./shared/gipToStepData";
 export { ComplianceConfirmation } from "./steps/ComplianceConfirmation";
 export { CompliancePathChoice } from "./steps/CompliancePathChoice";
 export { CompliancePathPage } from "./steps/CompliancePathPage";

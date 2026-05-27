@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Step1Workforce } from "../Step1Workforce";
 
 const mockMutate = vi.fn();
@@ -22,6 +22,10 @@ vi.mock("~/trpc/react", () => ({
 const emptyStep1Data = () => ({ totalWomen: 0, totalMen: 0 });
 
 describe("Step1Workforce", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	it("disables browser autofill on the form", () => {
 		const { container } = render(
 			<Step1Workforce
@@ -173,7 +177,7 @@ describe("Step1Workforce", () => {
 		});
 	});
 
-	it("shows validation error message when submitting with zero total", async () => {
+	it("shows field-level error messages when submitting with empty inputs", async () => {
 		const user = userEvent.setup();
 		render(
 			<Step1Workforce
@@ -187,9 +191,29 @@ describe("Step1Workforce", () => {
 		await user.click(submitButton);
 
 		expect(
-			screen.getByText(
-				"Veuillez renseigner les effectifs avant de passer à l'étape suivante.",
-			),
+			screen.getByText("Veuillez renseigner le nombre de femmes."),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Veuillez renseigner le nombre d'hommes."),
+		).toBeInTheDocument();
+	});
+
+	it("blocks submit when one field is cleared after having a value", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={{ totalWomen: 10, totalMen: 20 }}
+			/>,
+		);
+
+		await user.clear(screen.getByLabelText("Nombre de femmes"));
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(mockMutate).not.toHaveBeenCalled();
+		expect(
+			screen.getByText("Veuillez renseigner le nombre de femmes."),
 		).toBeInTheDocument();
 	});
 
@@ -220,7 +244,212 @@ describe("Step1Workforce", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("shows the reset warning when an input with a value receives focus", async () => {
+	it("shows the reset warning when a prefilled value is modified", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				gipPrefillData={{
+					step1: { totalWomen: 50, totalMen: 100 },
+					step2: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+					},
+					step3: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+						beneficiaryCountWomen: null,
+						beneficiaryCountMen: null,
+					},
+					step4: {
+						annual: {
+							thresholds: [null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+						hourly: {
+							thresholds: [null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+					},
+					confidenceIndex: null,
+					periodEnd: null,
+				}}
+				initialData={{ totalWomen: 50, totalMen: 100 }}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Nombre de femmes");
+		await user.clear(womenInput);
+		await user.type(womenInput, "49");
+
+		expect(
+			screen.getByText(/réinitialise les indicateurs préremplis/),
+		).toBeInTheDocument();
+	});
+
+	it("shows reset warning when GIP prefilled field is cleared to empty", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				gipPrefillData={{
+					step1: { totalWomen: 50, totalMen: 100 },
+					step2: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+					},
+					step3: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+						beneficiaryCountWomen: null,
+						beneficiaryCountMen: null,
+					},
+					step4: {
+						annual: {
+							thresholds: [null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+						hourly: {
+							thresholds: [null, null, null],
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+					},
+					confidenceIndex: null,
+					periodEnd: null,
+				}}
+				initialData={{ totalWomen: 50, totalMen: 100 }}
+			/>,
+		);
+
+		await user.clear(screen.getByLabelText("Nombre de femmes"));
+
+		expect(
+			screen.getByText(/réinitialise les indicateurs préremplis/),
+		).toBeInTheDocument();
+	});
+
+	describe("confirmation modal", () => {
+		beforeEach(() => {
+			HTMLDialogElement.prototype.showModal = vi
+				.fn()
+				.mockImplementation(function (this: HTMLDialogElement) {
+					this.setAttribute("open", "");
+				});
+			HTMLDialogElement.prototype.close = vi.fn().mockImplementation(function (
+				this: HTMLDialogElement,
+			) {
+				this.removeAttribute("open");
+			});
+		});
+
+		it("shows modal on submit when saved values are changed", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Workforce
+					declarationSiren="123456789"
+					declarationYear={2026}
+					initialData={{ totalWomen: 50, totalMen: 100 }}
+				/>,
+			);
+
+			await user.clear(screen.getByLabelText("Nombre de femmes"));
+			await user.type(screen.getByLabelText("Nombre de femmes"), "49");
+			await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+			expect(mockMutate).not.toHaveBeenCalled();
+			expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
+		});
+
+		it("calls mutation after confirming", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Workforce
+					declarationSiren="123456789"
+					declarationYear={2026}
+					initialData={{ totalWomen: 50, totalMen: 100 }}
+				/>,
+			);
+
+			await user.clear(screen.getByLabelText("Nombre de femmes"));
+			await user.type(screen.getByLabelText("Nombre de femmes"), "49");
+			await user.click(screen.getByRole("button", { name: /suivant/i }));
+			await user.click(screen.getByRole("button", { name: /continuer/i }));
+
+			expect(mockMutate).toHaveBeenCalledWith({
+				totalWomen: 49,
+				totalMen: 100,
+			});
+		});
+
+		it("does not call mutation when cancelling", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Workforce
+					declarationSiren="123456789"
+					declarationYear={2026}
+					initialData={{ totalWomen: 50, totalMen: 100 }}
+				/>,
+			);
+
+			await user.clear(screen.getByLabelText("Nombre de femmes"));
+			await user.type(screen.getByLabelText("Nombre de femmes"), "49");
+			await user.click(screen.getByRole("button", { name: /suivant/i }));
+			await user.click(screen.getByRole("button", { name: /annuler/i }));
+
+			expect(mockMutate).not.toHaveBeenCalled();
+		});
+
+		it("does not show modal when values match initial data", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Workforce
+					declarationSiren="123456789"
+					declarationYear={2026}
+					initialData={{ totalWomen: 50, totalMen: 100 }}
+				/>,
+			);
+
+			await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+			expect(HTMLDialogElement.prototype.showModal).not.toHaveBeenCalled();
+			expect(mockMutate).toHaveBeenCalledWith({
+				totalWomen: 50,
+				totalMen: 100,
+			});
+		});
+	});
+
+	it("does not show the reset warning when no GIP data is provided", async () => {
 		const user = userEvent.setup();
 		render(
 			<Step1Workforce
@@ -230,24 +459,9 @@ describe("Step1Workforce", () => {
 			/>,
 		);
 
-		await user.click(screen.getByLabelText("Nombre de femmes"));
-
-		expect(
-			screen.getByText(/réinitialise les indicateurs préremplis/),
-		).toBeInTheDocument();
-	});
-
-	it("does not show the reset warning when focusing an empty input", async () => {
-		const user = userEvent.setup();
-		render(
-			<Step1Workforce
-				declarationSiren="123456789"
-				declarationYear={2026}
-				initialData={emptyStep1Data()}
-			/>,
-		);
-
-		await user.click(screen.getByLabelText("Nombre de femmes"));
+		const womenInput = screen.getByLabelText("Nombre de femmes");
+		await user.clear(womenInput);
+		await user.type(womenInput, "49");
 
 		expect(
 			screen.queryByText(/réinitialise les indicateurs préremplis/),
