@@ -35,6 +35,18 @@ function buildStatsDb(results: Array<Array<{ value: number }>>) {
 	return { select };
 }
 
+type DistributionRow = { bucket: string; count: number };
+
+function buildDistributionDb(rows: DistributionRow[]) {
+	const select = vi.fn(() => {
+		const groupBy = vi.fn(() => Promise.resolve(rows));
+		const where = vi.fn(() => ({ groupBy }));
+		const from = vi.fn(() => ({ where }));
+		return { from };
+	});
+	return { select };
+}
+
 const publicCtx = {
 	session: null,
 	headers: new Headers(),
@@ -142,11 +154,137 @@ describe("publicStatsRouter.getCurrentCampaignRate", () => {
 		]);
 		const { publicStatsRouter } = await import("../publicStats");
 		const caller = publicStatsRouter.createCaller({
+			...publicCtx,
+			db,
+		} as never);
+
+		await expect(caller.getCurrentCampaignRate()).resolves.toBeDefined();
+	});
+});
+
+async function callDistribution(
+	rows: DistributionRow[],
+	{ year = 2026 }: { year?: number } = {},
+) {
+	getCurrentYearMock.mockReturnValue(year);
+	const db = buildDistributionDb(rows);
+	const { publicStatsRouter } = await import("../publicStats");
+	const caller = publicStatsRouter.createCaller({
+		...publicCtx,
+		db,
+	} as never);
+	const result = await caller.getScoreDistribution();
+	return { db, result };
+}
+
+describe("publicStatsRouter.getScoreDistribution", () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+		getCurrentYearMock.mockReturnValue(2026);
+	});
+
+	it("returns the 8 canonical brackets in fixed order with NC last", async () => {
+		const { result } = await callDistribution([
+			{ bucket: "lt50", count: 12 },
+			{ bucket: "50-59", count: 25 },
+			{ bucket: "60-69", count: 48 },
+			{ bucket: "70-79", count: 110 },
+			{ bucket: "80-89", count: 230 },
+			{ bucket: "90-99", count: 320 },
+			{ bucket: "100", count: 80 },
+			{ bucket: "nc", count: 35 },
+		]);
+
+		expect(result.brackets.map((b) => b.id)).toEqual([
+			"lt50",
+			"50-59",
+			"60-69",
+			"70-79",
+			"80-89",
+			"90-99",
+			"100",
+			"nc",
+		]);
+	});
+
+	it("fills missing buckets with zero counts to guarantee 8 entries", async () => {
+		const { result } = await callDistribution([{ bucket: "80-89", count: 5 }]);
+
+		expect(result.brackets).toHaveLength(8);
+		expect(result.brackets.find((b) => b.id === "80-89")?.count).toBe(5);
+		expect(result.brackets.find((b) => b.id === "lt50")?.count).toBe(0);
+		expect(result.brackets.find((b) => b.id === "nc")?.count).toBe(0);
+		expect(result.total).toBe(5);
+	});
+
+	it("returns 8 brackets at count=0 / 0% when no declaration has been submitted", async () => {
+		const { result } = await callDistribution([]);
+
+		expect(result.brackets).toHaveLength(8);
+		expect(result.brackets.every((b) => b.count === 0)).toBe(true);
+		expect(result.brackets.every((b) => b.percentage === 0)).toBe(true);
+		expect(result.total).toBe(0);
+	});
+
+	it("computes percentages rounded to one decimal", async () => {
+		const { result } = await callDistribution([
+			{ bucket: "80-89", count: 1 },
+			{ bucket: "90-99", count: 2 },
+		]);
+
+		const bucket80 = result.brackets.find((b) => b.id === "80-89");
+		const bucket90 = result.brackets.find((b) => b.id === "90-99");
+		expect(bucket80?.percentage).toBeCloseTo(33.3, 1);
+		expect(bucket90?.percentage).toBeCloseTo(66.7, 1);
+	});
+
+	it("attaches the human-readable label to each bracket", async () => {
+		const { result } = await callDistribution([{ bucket: "lt50", count: 1 }]);
+
+		expect(result.brackets.find((b) => b.id === "lt50")?.label).toBe("<50");
+		expect(result.brackets.find((b) => b.id === "100")?.label).toBe("100");
+		expect(result.brackets.find((b) => b.id === "nc")?.label).toBe("NC");
+	});
+
+	it("returns the current year from the domain helper", async () => {
+		const { result } = await callDistribution([], { year: 2027 });
+		expect(result.year).toBe(2027);
+	});
+
+	it("computes a total equal to the sum of all bracket counts", async () => {
+		const { result } = await callDistribution([
+			{ bucket: "60-69", count: 3 },
+			{ bucket: "80-89", count: 7 },
+			{ bucket: "nc", count: 2 },
+		]);
+
+		expect(result.total).toBe(12);
+	});
+
+	it("counts NC declarations (null global score) in the dedicated bracket", async () => {
+		const { result } = await callDistribution([
+			{ bucket: "nc", count: 42 },
+			{ bucket: "100", count: 8 },
+		]);
+
+		expect(result.brackets.find((b) => b.id === "nc")?.count).toBe(42);
+		expect(result.brackets.find((b) => b.id === "100")?.count).toBe(8);
+	});
+
+	it("issues a single grouped select to the declarations table", async () => {
+		const { db } = await callDistribution([{ bucket: "100", count: 1 }]);
+		expect(db.select).toHaveBeenCalledTimes(1);
+	});
+
+	it("is callable without authentication (publicProcedure)", async () => {
+		const db = buildDistributionDb([{ bucket: "100", count: 1 }]);
+		const { publicStatsRouter } = await import("../publicStats");
+		const caller = publicStatsRouter.createCaller({
 			session: null,
 			headers: new Headers(),
 			db,
 		} as never);
 
-		await expect(caller.getCurrentCampaignRate()).resolves.toBeDefined();
+		await expect(caller.getScoreDistribution()).resolves.toBeDefined();
 	});
 });

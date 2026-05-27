@@ -1,4 +1,5 @@
 import { CurrentCampaignRateTile } from "./CurrentCampaignRateTile";
+import { ScoreDistributionTile } from "./ScoreDistributionTile";
 
 export function PublicStatsPage() {
 	return (
@@ -8,6 +9,7 @@ export function PublicStatsPage() {
 				Indicateurs clés sur l'égalité professionnelle femmes-hommes en France.
 			</p>
 			<CurrentCampaignRateTile />
+			<ScoreDistributionTile />
 		</div>
 	);
 }

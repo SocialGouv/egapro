@@ -7,6 +7,9 @@ vi.mock("~/trpc/react", () => ({
 			getCurrentCampaignRate: {
 				useQuery: () => ({ data: undefined, isLoading: true, isError: false }),
 			},
+			getScoreDistribution: {
+				useQuery: () => ({ data: undefined, isLoading: true, isError: false }),
+			},
 		},
 	},
 }));
@@ -34,5 +37,12 @@ describe("PublicStatsPage", () => {
 	it("embeds the current campaign rate tile", () => {
 		render(<PublicStatsPage />);
 		expect(screen.getByText(/chargement du taux/i)).toBeInTheDocument();
+	});
+
+	it("embeds the score distribution tile", () => {
+		render(<PublicStatsPage />);
+		expect(
+			screen.getByText(/chargement de la distribution/i),
+		).toBeInTheDocument();
 	});
 });
