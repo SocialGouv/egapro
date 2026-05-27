@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import {
+	getEffectiveGipPrefillData,
 	StepPageClient,
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
@@ -48,6 +49,12 @@ export default async function StepPage({ params }: StepPageProps) {
 		totalMen: d.totalMen ?? gip?.step1.totalMen ?? 0,
 	};
 
+	const effectiveGipPrefillData = getEffectiveGipPrefillData(
+		gip,
+		d.totalWomen,
+		d.totalMen,
+	);
+
 	const { step2Data, step3Data, step4Data } = mapToStepData(d);
 
 	const hasCurrentYearCategories = data.jobCategories.length > 0;
@@ -80,7 +87,7 @@ export default async function StepPage({ params }: StepPageProps) {
 		<HydrateClient>
 			<StepPageClient
 				declaration={d}
-				gipPrefillData={data.gipPrefillData ?? undefined}
+				gipPrefillData={effectiveGipPrefillData ?? undefined}
 				hasCse={company.hasCse}
 				initialSource={initialSource}
 				step={step}

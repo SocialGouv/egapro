@@ -1,6 +1,18 @@
 import type { Step2Data, Step3Data } from "../types";
 import type { GipPrefillData } from "./gipMdsMapping";
 
+export function getEffectiveGipPrefillData(
+	gip: GipPrefillData | null,
+	totalWomen: number | null,
+	totalMen: number | null,
+): GipPrefillData | null {
+	if (gip === null || totalWomen === null) return gip;
+	const gipMatchesSaved =
+		totalWomen === (gip.step1.totalWomen ?? 0) &&
+		totalMen === (gip.step1.totalMen ?? 0);
+	return gipMatchesSaved ? gip : null;
+}
+
 export function gipToStep2(gip: GipPrefillData["step2"]): Step2Data {
 	return {
 		indicatorAAnnualWomen: gip.annualMeanWomen ?? "",

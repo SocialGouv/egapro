@@ -45,7 +45,7 @@ export function ResourceBanner() {
 		>
 			<div className="fr-container">
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
-					<div className="fr-col-12 fr-col-md-9">
+					<div className="fr-col-12 fr-col-md-10">
 						<div className="fr-grid-row fr-grid-row--gutters">
 							<div className="fr-col-12 fr-col-md-4">
 								<ResourceTile
@@ -75,15 +75,17 @@ export function ResourceBanner() {
 					</div>
 					<div
 						aria-hidden="true"
-						className="fr-col-12 fr-col-md-3 fr-hidden fr-unhidden-md"
+						className="fr-col-12 fr-col-md-2 fr-hidden fr-unhidden-md"
 					>
-						<Image
-							alt=""
-							height={147}
-							src="/assets/images/home/help-illustration.svg"
-							unoptimized
-							width={210}
-						/>
+						<div className="fr-grid-row fr-grid-row--right">
+							<Image
+								alt=""
+								height={147}
+								src="/assets/images/home/help-illustration.svg"
+								unoptimized
+								width={210}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
