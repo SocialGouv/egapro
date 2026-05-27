@@ -76,7 +76,9 @@ beforeEach(() => {
 
 describe("Step1Opinions", () => {
 	it("disables browser autofill on the form", () => {
-		const { container } = render(<Step1Opinions cseDeadline={cseDeadline} />);
+		const { container } = render(
+			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,
+		);
 
 		expect(container.querySelector("form")).toHaveAttribute(
 			"autocomplete",
