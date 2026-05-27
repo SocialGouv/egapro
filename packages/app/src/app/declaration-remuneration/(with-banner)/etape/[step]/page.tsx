@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import {
+	getEffectiveGipPrefillData,
 	StepPageClient,
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
@@ -48,14 +49,11 @@ export default async function StepPage({ params }: StepPageProps) {
 		totalMen: d.totalMen ?? gip?.step1.totalMen ?? 0,
 	};
 
-	// When step1 has been saved with values different from GIP, the GIP indicators
-	// for steps 2–4 are no longer valid (updateStep1 already reset them in the DB).
-	const gipMatchesSavedStep1 =
-		gip === null ||
-		d.totalWomen === null ||
-		(d.totalWomen === (gip.step1.totalWomen ?? 0) &&
-			d.totalMen === (gip.step1.totalMen ?? 0));
-	const effectiveGipPrefillData = gipMatchesSavedStep1 ? gip : null;
+	const effectiveGipPrefillData = getEffectiveGipPrefillData(
+		gip,
+		d.totalWomen,
+		d.totalMen,
+	);
 
 	const { step2Data, step3Data, step4Data } = mapToStepData(d);
 
