@@ -50,6 +50,55 @@ export {
 	validateJobData,
 };
 
+const BOOT_MAX_ATTEMPTS = Number.parseInt(
+	process.env.NOTIFICATIONS_BOOT_RETRY_MAX ?? "30",
+	10,
+);
+const BOOT_DELAY_MS = Number.parseInt(
+	process.env.NOTIFICATIONS_BOOT_RETRY_DELAY_MS ?? "5000",
+	10,
+);
+
+// On a fresh review app, pg-app may not accept connections yet when the
+// notifications pod starts. Without a wait, pg-boss throws, the worker exits
+// non-zero, and the kontinuous `deploy-sidecars/progressing` plugin gives up
+// after the very first crash. Ping the DB with a lightweight `SELECT 1` loop
+// before handing the connection string to pg-boss — once the server answers
+// we know `boss.start()` + `createQueue` + `work` + `schedule` will all hit a
+// live socket, so the entire boot sequence runs in a single shot.
+async function waitForDatabase(connectionString: string): Promise<void> {
+	for (let attempt = 1; attempt <= BOOT_MAX_ATTEMPTS; attempt++) {
+		// `ssl: 'prefer'` lets postgres.js handshake with both plain (review-app
+		// docker postgres) and self-signed TLS (in-cluster pg-rw) backends, since
+		// `sslmode=no-verify` from db.ts is a node-postgres extension and not
+		// recognised by postgres.js.
+		const probe = postgres(connectionString, {
+			max: 1,
+			connect_timeout: 5,
+			idle_timeout: 1,
+			ssl: "prefer",
+		});
+		try {
+			await probe`select 1`;
+			await probe.end({ timeout: 1 });
+			if (attempt > 1) {
+				console.log(
+					`[notifications] database reachable after ${attempt} attempts`,
+				);
+			}
+			return;
+		} catch (error) {
+			await probe.end({ timeout: 1 }).catch(() => undefined);
+			if (attempt === BOOT_MAX_ATTEMPTS) throw error;
+			const reason = error instanceof Error ? error.message : String(error);
+			console.warn(
+				`[notifications] database not reachable (attempt ${attempt}/${BOOT_MAX_ATTEMPTS}): ${reason} — retrying in ${BOOT_DELAY_MS}ms`,
+			);
+			await new Promise((resolve) => setTimeout(resolve, BOOT_DELAY_MS));
+		}
+	}
+}
+
 async function main(): Promise<void> {
 	const notifUrl = resolveNotificationsDbUrl();
 	if (!notifUrl) {
@@ -63,6 +112,8 @@ async function main(): Promise<void> {
 	const mailFrom = process.env.MAIL_FROM ?? "no-reply@egapro.local";
 
 	const mainSql: Sql | null = mainUrl ? postgres(mainUrl, { max: 2 }) : null;
+
+	await waitForDatabase(notifUrl);
 
 	const boss = new PgBoss({
 		connectionString: notifUrl,
