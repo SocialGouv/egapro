@@ -7,9 +7,11 @@ import {
 	formatGap,
 	formatGapCompact,
 	formatMonthDay,
+	formatPointsAbs,
 	formatShortDate,
 	formatShortDateTime,
 	formatTotal,
+	roundOneDecimal,
 } from "../shared/format";
 
 describe("formatGap", () => {
@@ -104,5 +106,29 @@ describe("formatMonthDay", () => {
 	it("swaps a MM-DD fragment to the French DD/MM form", () => {
 		expect(formatMonthDay("02-15")).toBe("15/02");
 		expect(formatMonthDay("12-01")).toBe("01/12");
+	});
+});
+
+describe("roundOneDecimal", () => {
+	it("rounds to one decimal place (banker-agnostic)", () => {
+		expect(roundOneDecimal(73.42)).toBe(73.4);
+		expect(roundOneDecimal(73.45)).toBe(73.5);
+		expect(roundOneDecimal(73.44)).toBe(73.4);
+		expect(roundOneDecimal(73.0)).toBe(73);
+	});
+
+	it("handles negatives", () => {
+		expect(roundOneDecimal(-2.07)).toBe(-2.1);
+		expect(roundOneDecimal(-0.04)).toBeCloseTo(0, 10);
+	});
+});
+
+describe("formatPointsAbs", () => {
+	it("returns absolute value rounded to 1 decimal, French separator", () => {
+		expect(formatPointsAbs(2.07)).toBe("2,1");
+		expect(formatPointsAbs(-2.07)).toBe("2,1");
+		expect(formatPointsAbs(0)).toBe("0,0");
+		expect(formatPointsAbs(0.5)).toBe("0,5");
+		expect(formatPointsAbs(-0.04)).toBe("0,0");
 	});
 });

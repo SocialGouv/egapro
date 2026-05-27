@@ -9,6 +9,30 @@
  * For gap calculation and threshold classification, see `gap.ts`.
  */
 
+/** Narrow no-break space (U+202F) — French thousand separator and unit-prefix glue. */
+export const NARROW_NBSP = " ";
+
+/** Round a number to one decimal place. `73.45` → `73.5`. */
+export function roundOneDecimal(value: number): number {
+	return Math.round(value * 10) / 10;
+}
+
+/** Format an absolute points value with one decimal and French decimal separator: `2.07` → `"2,1"`. */
+export function formatPointsAbs(points: number): string {
+	const rounded = roundOneDecimal(Math.abs(points));
+	return rounded.toFixed(1).replace(".", ",");
+}
+
+/** Format a rate with one decimal and French decimal separator: `73.4` → `"73,4"`. */
+export function formatRate(rate: number): string {
+	return rate.toFixed(1).replace(".", ",");
+}
+
+/** Format an integer count with French locale grouping and narrow no-break spaces: `1234` → `"1 234"`. */
+export function formatCount(count: number): string {
+	return count.toLocaleString("fr-FR").replace(/ /g, NARROW_NBSP);
+}
+
 /** Format a gap value with one decimal and a percent sign: `5.3` → `"5,3 %"`. */
 export function formatGap(gap: number | null): string {
 	if (gap === null) return "-";

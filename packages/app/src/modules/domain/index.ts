@@ -82,18 +82,23 @@ export {
 	hasEvent,
 	hasSubmittedSecondDeclaration,
 } from "./shared/declarationTrajectory";
-// Display formatting (%, €, units)
+// Display formatting (%, €, units, rates, counts, points)
 export {
 	computePercentage,
 	computeProportion,
+	formatCount,
 	formatCurrency,
 	formatGap,
 	formatGapCompact,
 	formatLongDate,
 	formatMonthDay,
+	formatPointsAbs,
+	formatRate,
 	formatShortDate,
 	formatShortDateTime,
 	formatTotal,
+	NARROW_NBSP,
+	roundOneDecimal,
 } from "./shared/format";
 // Gap business rules (calculations & threshold classification)
 export {
@@ -140,11 +145,6 @@ export type { CampaignRateTileProps } from "./shared/submissionRate";
 export {
 	buildCampaignRateTileProps,
 	computeRate,
-	formatCount,
-	formatPointsAbs,
-	formatRate,
-	NARROW_NBSP,
-	roundOneDecimal,
 } from "./shared/submissionRate";
 export type {
 	CampaignDeadlines,
