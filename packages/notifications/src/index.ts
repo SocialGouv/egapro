@@ -1,4 +1,3 @@
-import { convert as htmlToText } from "html-to-text";
 import nodemailer, { type Transporter } from "nodemailer";
 import { PgBoss, type JobWithMetadata } from "pg-boss";
 import postgres, { type Sql } from "postgres";
@@ -152,7 +151,7 @@ export function makeJobHandler(
 		} = result.data;
 
 		try {
-			const { subject, html } = buildMail(type, payload);
+			const { subject, html, text } = await buildMail(type, payload);
 			let messageId: string | null = null;
 			if (!mailEnabled || !transporter) {
 				console.log(
@@ -168,7 +167,7 @@ export function makeJobHandler(
 					from: mailFrom,
 					to: recipientEmail,
 					subject,
-					text: htmlToText(html, { wordwrap: 80 }),
+					text,
 					html,
 					...(decodedAttachments ? { attachments: decodedAttachments } : {}),
 				});

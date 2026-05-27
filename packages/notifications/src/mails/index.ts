@@ -1,7 +1,9 @@
-import { buildCseOpinionReceiptMail } from "./cseOpinionReceipt.js";
-import { buildDeclarationConfirmationMail } from "./declarationConfirmation.js";
-import { buildJointEvaluationSubmittedMail } from "./jointEvaluationSubmitted.js";
-import { buildSecondDeclarationConfirmationMail } from "./secondDeclarationConfirmation.js";
+import {
+	buildCseOpinionReceiptMail,
+	buildDeclarationConfirmationMail,
+	buildJointEvaluationSubmittedMail,
+	buildSecondDeclarationConfirmationMail,
+} from "./builders/index.js";
 import {
 	type MailBuilderRegistry,
 	NOTIFICATION_TYPES,
@@ -24,10 +26,10 @@ export function isNotificationType(value: unknown): value is NotificationType {
 	);
 }
 
-export function buildMail<T extends NotificationType>(
+export async function buildMail<T extends NotificationType>(
 	type: T,
 	payload: NotificationPayloadMap[T],
-): RenderedMail {
+): Promise<RenderedMail> {
 	const builder = MAIL_BUILDERS[type];
 	if (!builder) {
 		throw new Error(`Unknown notification type: ${String(type)}`);
@@ -36,8 +38,8 @@ export function buildMail<T extends NotificationType>(
 }
 
 export {
-	NOTIFICATION_TYPES,
 	type MailBuilderRegistry,
+	NOTIFICATION_TYPES,
 	type NotificationPayloadMap,
 	type NotificationType,
 	type RenderedMail,

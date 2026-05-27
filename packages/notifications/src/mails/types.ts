@@ -22,11 +22,12 @@ export type NotificationPayloadMap = {
 export type RenderedMail = {
 	subject: string;
 	html: string;
+	text: string;
 };
 
 export type MailBuilder<T extends NotificationType> = (
 	payload: NotificationPayloadMap[T],
-) => RenderedMail;
+) => Promise<RenderedMail>;
 
 export type MailBuilderRegistry = {
 	[T in NotificationType]: MailBuilder<T>;
