@@ -1,8 +1,15 @@
 import {
+	buildCompliancePathChoiceReminderMail,
 	buildCseOpinionReceiptMail,
+	buildCseOpinionReminderMail,
+	buildCycleOpeningInfoMail,
 	buildDeclarationConfirmationMail,
+	buildDeclarationDeadlineReminderMail,
+	buildJointEvaluationReminderMail,
 	buildJointEvaluationSubmittedMail,
+	buildNextCycleHandoverMail,
 	buildSecondDeclarationConfirmationMail,
+	buildSecondDeclarationReminderMail,
 } from "./builders/index.js";
 import {
 	type MailBuilderRegistry,
@@ -17,6 +24,13 @@ export const MAIL_BUILDERS: MailBuilderRegistry = {
 	second_declaration_confirmation: buildSecondDeclarationConfirmationMail,
 	cse_opinion_receipt: buildCseOpinionReceiptMail,
 	joint_evaluation_submitted: buildJointEvaluationSubmittedMail,
+	cycle_opening_info: buildCycleOpeningInfoMail,
+	declaration_deadline_reminder: buildDeclarationDeadlineReminderMail,
+	compliance_path_choice_reminder: buildCompliancePathChoiceReminderMail,
+	second_declaration_reminder: buildSecondDeclarationReminderMail,
+	joint_evaluation_reminder: buildJointEvaluationReminderMail,
+	cse_opinion_reminder: buildCseOpinionReminderMail,
+	next_cycle_handover: buildNextCycleHandoverMail,
 };
 
 export function isNotificationType(value: unknown): value is NotificationType {
