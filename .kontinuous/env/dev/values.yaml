@@ -1,3 +1,12 @@
+global:
+  # Review-auto apps bootstrap their Postgres cluster concurrently with the
+  # app, so `pg-rw` stays unresolvable for the first few minutes. The
+  # notifications worker (non-critical, no readiness probe) would crash-loop
+  # trying to reach it during that window and fail the whole rollout. Disable
+  # it on ephemeral review apps — preprod/prod run a persistent pg where the
+  # worker boots cleanly, so it stays enabled there.
+  notificationsEnabled: false
+
 app:
   annotations:
     oblik.socialgouv.io/min-limit-cpu: 2
