@@ -4,7 +4,7 @@ import common from "~/modules/declaration-remuneration/shared/common.module.scss
 import {
 	computeGap,
 	computeTotal,
-	displayInputDecimalWithGrouping,
+	displayDecimal,
 	formatTotal,
 } from "~/modules/domain";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
@@ -146,9 +146,7 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "annualBaseWomen")}
 												onChange={pos(catIndex, "annualBaseWomen", false)}
 												type="text"
-												value={displayInputDecimalWithGrouping(
-													cat.annualBaseWomen,
-												)}
+												value={displayDecimal(cat.annualBaseWomen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -164,9 +162,7 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "annualBaseMen")}
 												onChange={pos(catIndex, "annualBaseMen", false)}
 												type="text"
-												value={displayInputDecimalWithGrouping(
-													cat.annualBaseMen,
-												)}
+												value={displayDecimal(cat.annualBaseMen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -194,9 +190,7 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "annualVariableWomen")}
 												onChange={pos(catIndex, "annualVariableWomen", false)}
 												type="text"
-												value={displayInputDecimalWithGrouping(
-													cat.annualVariableWomen,
-												)}
+												value={displayDecimal(cat.annualVariableWomen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -212,9 +206,7 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "annualVariableMen")}
 												onChange={pos(catIndex, "annualVariableMen", false)}
 												type="text"
-												value={displayInputDecimalWithGrouping(
-													cat.annualVariableMen,
-												)}
+												value={displayDecimal(cat.annualVariableMen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -263,9 +255,7 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "hourlyBaseWomen")}
 												onChange={pos(catIndex, "hourlyBaseWomen", false)}
 												type="text"
-												value={displayInputDecimalWithGrouping(
-													cat.hourlyBaseWomen,
-												)}
+												value={displayDecimal(cat.hourlyBaseWomen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -281,9 +271,7 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "hourlyBaseMen")}
 												onChange={pos(catIndex, "hourlyBaseMen", false)}
 												type="text"
-												value={displayInputDecimalWithGrouping(
-													cat.hourlyBaseMen,
-												)}
+												value={displayDecimal(cat.hourlyBaseMen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -311,9 +299,7 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "hourlyVariableWomen")}
 												onChange={pos(catIndex, "hourlyVariableWomen", false)}
 												type="text"
-												value={displayInputDecimalWithGrouping(
-													cat.hourlyVariableWomen,
-												)}
+												value={displayDecimal(cat.hourlyVariableWomen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -329,9 +315,7 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "hourlyVariableMen")}
 												onChange={pos(catIndex, "hourlyVariableMen", false)}
 												type="text"
-												value={displayInputDecimalWithGrouping(
-													cat.hourlyVariableMen,
-												)}
+												value={displayDecimal(cat.hourlyVariableMen)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>

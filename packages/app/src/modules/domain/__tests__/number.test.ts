@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
 	displayDecimal,
-	displayInputDecimalWithGrouping,
 	normalizeDecimalInput,
 	padDecimalOnBlur,
 	padDecimalToTwo,
@@ -72,36 +71,6 @@ describe("displayDecimal", () => {
 
 	it("formats large number with decimals", () => {
 		expect(displayDecimal("1234567.89")).toBe("1 234 567,89");
-	});
-});
-
-describe("displayInputDecimalWithGrouping", () => {
-	const NNBSP = " ";
-
-	it("returns empty string as-is", () => {
-		expect(displayInputDecimalWithGrouping("")).toBe("");
-	});
-
-	it("returns small integers unchanged in format", () => {
-		expect(displayInputDecimalWithGrouping("42")).toBe("42");
-	});
-
-	it("groups thousands with narrow no-break space", () => {
-		expect(displayInputDecimalWithGrouping("1234")).toBe(`1${NNBSP}234`);
-	});
-
-	it("groups large integers and converts decimal separator", () => {
-		expect(displayInputDecimalWithGrouping("1234567.89")).toBe(
-			`1${NNBSP}234${NNBSP}567,89`,
-		);
-	});
-
-	it("preserves decimal part without padding", () => {
-		expect(displayInputDecimalWithGrouping("25000.5")).toBe(`25${NNBSP}000,5`);
-	});
-
-	it("handles non-numeric integer parts by passing them through", () => {
-		expect(displayInputDecimalWithGrouping("abc.5")).toBe("abc,5");
 	});
 });
 
