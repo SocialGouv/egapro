@@ -4,7 +4,7 @@ import common from "~/modules/declaration-remuneration/shared/common.module.scss
 import {
 	computeGap,
 	computeTotal,
-	displayInputDecimal,
+	displayInputDecimalWithGrouping,
 	formatTotal,
 } from "~/modules/domain";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
@@ -90,7 +90,7 @@ export function CategoryDataTable({
 										</strong>
 									</td>
 								</tr>
-								<tr>
+								<tr className={stepStyles.dataRow}>
 									<td>Effectif physique</td>
 									<td>
 										<div className={stepStyles.inputCell}>
@@ -133,7 +133,7 @@ export function CategoryDataTable({
 										<strong>Rémunération annuelle brute moyenne</strong>
 									</td>
 								</tr>
-								<tr>
+								<tr className={stepStyles.dataRow}>
 									<td>Salaire de base</td>
 									<td>
 										<div className={stepStyles.inputCell}>
@@ -146,7 +146,9 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "annualBaseWomen")}
 												onChange={pos(catIndex, "annualBaseWomen", false)}
 												type="text"
-												value={displayInputDecimal(cat.annualBaseWomen)}
+												value={displayInputDecimalWithGrouping(
+													cat.annualBaseWomen,
+												)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -162,7 +164,9 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "annualBaseMen")}
 												onChange={pos(catIndex, "annualBaseMen", false)}
 												type="text"
-												value={displayInputDecimal(cat.annualBaseMen)}
+												value={displayInputDecimalWithGrouping(
+													cat.annualBaseMen,
+												)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -173,7 +177,7 @@ export function CategoryDataTable({
 										/>
 									</td>
 								</tr>
-								<tr>
+								<tr className={stepStyles.dataRow}>
 									<td>
 										Composantes variables
 										<br />
@@ -190,7 +194,9 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "annualVariableWomen")}
 												onChange={pos(catIndex, "annualVariableWomen", false)}
 												type="text"
-												value={displayInputDecimal(cat.annualVariableWomen)}
+												value={displayInputDecimalWithGrouping(
+													cat.annualVariableWomen,
+												)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -206,7 +212,9 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "annualVariableMen")}
 												onChange={pos(catIndex, "annualVariableMen", false)}
 												type="text"
-												value={displayInputDecimal(cat.annualVariableMen)}
+												value={displayInputDecimalWithGrouping(
+													cat.annualVariableMen,
+												)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -221,12 +229,16 @@ export function CategoryDataTable({
 									</td>
 								</tr>
 								{/* Total annuel */}
-								<tr>
+								<tr className={stepStyles.dataRow}>
 									<td>
 										<strong>Total</strong>
 									</td>
-									<td>{formatTotal(annualTotalWomen, "€")}</td>
-									<td>{formatTotal(annualTotalMen, "€")}</td>
+									<td className={stepStyles.totalCell}>
+										{formatTotal(annualTotalWomen, "€")}
+									</td>
+									<td className={stepStyles.totalCell}>
+										{formatTotal(annualTotalMen, "€")}
+									</td>
 									<td>
 										<GapBadge gap={annualTotalGap} />
 									</td>
@@ -238,7 +250,7 @@ export function CategoryDataTable({
 										<strong>Rémunération horaire brute moyenne</strong>
 									</td>
 								</tr>
-								<tr>
+								<tr className={stepStyles.dataRow}>
 									<td>Salaire de base</td>
 									<td>
 										<div className={stepStyles.inputCell}>
@@ -251,7 +263,9 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "hourlyBaseWomen")}
 												onChange={pos(catIndex, "hourlyBaseWomen", false)}
 												type="text"
-												value={displayInputDecimal(cat.hourlyBaseWomen)}
+												value={displayInputDecimalWithGrouping(
+													cat.hourlyBaseWomen,
+												)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -267,7 +281,9 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "hourlyBaseMen")}
 												onChange={pos(catIndex, "hourlyBaseMen", false)}
 												type="text"
-												value={displayInputDecimal(cat.hourlyBaseMen)}
+												value={displayInputDecimalWithGrouping(
+													cat.hourlyBaseMen,
+												)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -278,7 +294,7 @@ export function CategoryDataTable({
 										/>
 									</td>
 								</tr>
-								<tr>
+								<tr className={stepStyles.dataRow}>
 									<td>
 										Composantes variables
 										<br />
@@ -295,7 +311,9 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "hourlyVariableWomen")}
 												onChange={pos(catIndex, "hourlyVariableWomen", false)}
 												type="text"
-												value={displayInputDecimal(cat.hourlyVariableWomen)}
+												value={displayInputDecimalWithGrouping(
+													cat.hourlyVariableWomen,
+												)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -311,7 +329,9 @@ export function CategoryDataTable({
 												onBlur={blur(catIndex, "hourlyVariableMen")}
 												onChange={pos(catIndex, "hourlyVariableMen", false)}
 												type="text"
-												value={displayInputDecimal(cat.hourlyVariableMen)}
+												value={displayInputDecimalWithGrouping(
+													cat.hourlyVariableMen,
+												)}
 											/>
 											<span className="fr-text--sm">€</span>
 										</div>
@@ -326,12 +346,16 @@ export function CategoryDataTable({
 									</td>
 								</tr>
 								{/* Total horaire */}
-								<tr>
+								<tr className={stepStyles.dataRow}>
 									<td>
 										<strong>Total</strong>
 									</td>
-									<td>{formatTotal(hourlyTotalWomen, "€")}</td>
-									<td>{formatTotal(hourlyTotalMen, "€")}</td>
+									<td className={stepStyles.totalCell}>
+										{formatTotal(hourlyTotalWomen, "€")}
+									</td>
+									<td className={stepStyles.totalCell}>
+										{formatTotal(hourlyTotalMen, "€")}
+									</td>
 									<td>
 										<GapBadge gap={hourlyTotalGap} />
 									</td>

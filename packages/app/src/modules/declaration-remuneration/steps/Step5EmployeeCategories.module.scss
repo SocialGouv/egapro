@@ -6,7 +6,9 @@
 }
 
 .sourceSelectGroup {
-	max-width: 18rem;
+	:global(.fr-select) {
+		max-width: 18rem;
+	}
 }
 
 .obligatoiresRow {
@@ -31,6 +33,15 @@
 .compactInput {
 	width: 100px;
 	max-width: 100px;
+	padding: 0.25rem 0.5rem;
+}
+
+.dataRow {
+	height: 64px;
+}
+
+:global(.fr-table__content) table tbody td.totalCell {
+	text-align: right;
 }
 
 .nameColumnHeader {
@@ -68,7 +79,6 @@
 }
 
 .descriptionTitle {
-	font-size: 1.125rem;
 	font-weight: 500;
 }
 

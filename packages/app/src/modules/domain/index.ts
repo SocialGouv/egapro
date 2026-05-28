@@ -135,6 +135,7 @@ export {
 export {
 	displayDecimal,
 	displayInputDecimal,
+	displayInputDecimalWithGrouping,
 	normalizeDecimalInput,
 	padDecimalOnBlur,
 	padDecimalToTwo,

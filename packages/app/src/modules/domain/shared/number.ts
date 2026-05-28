@@ -49,6 +49,24 @@ export function displayInputDecimal(value: string): string {
 }
 
 /**
+ * Display a stored decimal for use inside an `<input>` element, with
+ * French-locale thousand grouping (narrow no-break space) and comma
+ * as decimal separator.
+ *
+ * Example: `"25000.5"` → `"25 000,5"`, `"1234567.89"` → `"1 234 567,89"`.
+ * Empty or non-numeric integer parts pass through gracefully.
+ */
+export function displayInputDecimalWithGrouping(value: string): string {
+	if (!value) return value;
+	const [intPart, decPart] = value.split(".");
+	const n = Number.parseInt(intPart ?? "0", 10);
+	const formattedInt = Number.isNaN(n)
+		? (intPart ?? "")
+		: thousandFormatter.format(n);
+	return decPart !== undefined ? `${formattedInt},${decPart}` : formattedInt;
+}
+
+/**
  * Display a stored decimal value with French locale conventions:
  * comma as decimal separator and narrow no-break spaces between thousands.
  *
