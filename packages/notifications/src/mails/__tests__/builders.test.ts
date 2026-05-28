@@ -11,12 +11,47 @@ import {
 
 const SIREN = "552100554";
 const YEAR = 2027;
+const DEADLINE = "2027-06-01T00:00:00.000Z";
 
 const PAYLOADS: NotificationPayloadMap = {
 	declaration_confirmation: { siren: SIREN, year: YEAR },
 	second_declaration_confirmation: { siren: SIREN, year: YEAR },
 	cse_opinion_receipt: { siren: SIREN, year: YEAR },
 	joint_evaluation_submitted: { siren: SIREN, year: YEAR },
+	cycle_opening_info: { siren: SIREN, year: YEAR, deadline: DEADLINE },
+	declaration_deadline_reminder: {
+		siren: SIREN,
+		year: YEAR,
+		deadline: DEADLINE,
+		daysRemaining: 30,
+	},
+	compliance_path_choice_reminder: {
+		siren: SIREN,
+		year: YEAR,
+		deadline: "2027-07-01T00:00:00.000Z",
+	},
+	second_declaration_reminder: {
+		siren: SIREN,
+		year: YEAR,
+		deadline: "2028-01-01T00:00:00.000Z",
+		daysRemaining: 90,
+	},
+	joint_evaluation_reminder: {
+		siren: SIREN,
+		year: YEAR,
+		deadline: "2027-09-01T00:00:00.000Z",
+	},
+	cse_opinion_reminder: {
+		siren: SIREN,
+		year: YEAR,
+		deadline: "2028-03-01T00:00:00.000Z",
+		variant: "compliance",
+	},
+	next_cycle_handover: {
+		siren: SIREN,
+		previousYear: YEAR,
+		nextYear: YEAR + 1,
+	},
 };
 
 describe("mail registry", () => {
@@ -108,6 +143,95 @@ describe("per-type rendering details", () => {
 		expect(mail.subject).toContain("évaluation conjointe");
 		expect(mail.html.toLowerCase()).toContain("évaluation conjointe");
 		expect(mail.html).toContain("Prochaine étape");
+	});
+
+	it("cycle_opening_info announces the declaration period", async () => {
+		const mail = await buildMail("cycle_opening_info", {
+			siren: SIREN,
+			year: YEAR,
+			deadline: DEADLINE,
+		});
+		expect(mail.subject).toBe(
+			"Egapro - Ouverture de la période de déclaration des indicateurs Egapro",
+		);
+		expect(mail.html.toLowerCase()).toContain("1ᵉʳ juin");
+		expect(mail.html).toContain("/connexion");
+	});
+
+	it.each([
+		30, 10,
+	] as const)("declaration_deadline_reminder J-%i exposes the count", async (daysRemaining) => {
+		const mail = await buildMail("declaration_deadline_reminder", {
+			siren: SIREN,
+			year: YEAR,
+			deadline: DEADLINE,
+			daysRemaining,
+		});
+		expect(mail.subject).toContain(`${daysRemaining} jours`);
+		expect(mail.html).toContain(`${daysRemaining} jours`);
+	});
+
+	it("compliance_path_choice_reminder names the 5 % threshold", async () => {
+		const mail = await buildMail("compliance_path_choice_reminder", {
+			siren: SIREN,
+			year: YEAR,
+			deadline: "2027-07-01T00:00:00.000Z",
+		});
+		expect(mail.subject.toLowerCase()).toContain("parcours");
+		expect(mail.html).toContain("5 %");
+	});
+
+	it.each([
+		90, 30,
+	] as const)("second_declaration_reminder J-%i exposes the count", async (daysRemaining) => {
+		const mail = await buildMail("second_declaration_reminder", {
+			siren: SIREN,
+			year: YEAR,
+			deadline: "2028-01-01T00:00:00.000Z",
+			daysRemaining,
+		});
+		expect(mail.subject).toContain(`${daysRemaining} jours`);
+		expect(mail.html).toContain("actions correctives");
+	});
+
+	it("joint_evaluation_reminder references the report deadline", async () => {
+		const mail = await buildMail("joint_evaluation_reminder", {
+			siren: SIREN,
+			year: YEAR,
+			deadline: "2027-09-01T00:00:00.000Z",
+		});
+		expect(mail.subject.toLowerCase()).toContain("évaluation conjointe");
+		expect(mail.html).toContain("1ᵉʳ septembre");
+	});
+
+	it.each([
+		["compliance", "exactitude"],
+		["justify_oct", "1er octobre"],
+		["justify_dec", "justification"],
+		["corrective", "actions correctives"],
+		["joint_eval", "évaluation conjointe"],
+	] as const)("cse_opinion_reminder variant=%s shows %s context", async (variant, marker) => {
+		const mail = await buildMail("cse_opinion_reminder", {
+			siren: SIREN,
+			year: YEAR,
+			deadline: "2028-03-01T00:00:00.000Z",
+			variant,
+		});
+		expect(mail.subject).toContain("CSE");
+		expect(mail.html.toLowerCase()).toContain(marker.toLowerCase());
+	});
+
+	it("next_cycle_handover announces closure and next cycle", async () => {
+		const mail = await buildMail("next_cycle_handover", {
+			siren: SIREN,
+			previousYear: YEAR,
+			nextYear: YEAR + 1,
+		});
+		expect(mail.subject).toBe(
+			"Egapro - Clôture de votre déclaration et ouverture du prochain cycle",
+		);
+		expect(mail.html).toContain(String(YEAR));
+		expect(mail.html).toContain(String(YEAR + 1));
 	});
 });
 

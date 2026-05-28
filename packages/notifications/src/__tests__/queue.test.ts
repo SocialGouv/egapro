@@ -51,8 +51,7 @@ describe("validateJobData", () => {
 	it("rejects a payload missing siren/year", () => {
 		const result = validateJobData({ ...VALID, payload: { foo: "bar" } });
 		expect(result.ok).toBe(false);
-		if (!result.ok)
-			expect(result.reason).toContain("payload is missing required fields");
+		if (!result.ok) expect(result.reason).toContain("siren");
 	});
 
 	it("accepts a well-formed attachments array", () => {
