@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { RecapitulatifPage } from "~/modules/declaration-remuneration/recapitulatif";
 import { api } from "~/trpc/react";
 
 import { CancelDeclarationButton } from "./CancelDeclarationButton";
@@ -21,6 +22,9 @@ type Props = {
 
 export function AdminDeclarationDetailPage({ declarationId }: Props) {
 	const { data, isLoading } = api.adminDeclarations.getById.useQuery({
+		id: declarationId,
+	});
+	const { data: recap } = api.adminDeclarations.getRecap.useQuery({
 		id: declarationId,
 	});
 
@@ -70,6 +74,12 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 			)}
 			{data.files.length > 0 && <FilesSection files={data.files} />}
 			<SiblingDeclarationsSection siblings={data.siblings} />
+			{recap && (
+				<section className="fr-mt-6w">
+					<h2 className="fr-h3">Récapitulatif déclaré</h2>
+					<RecapitulatifPage {...recap} />
+				</section>
+			)}
 		</div>
 	);
 }

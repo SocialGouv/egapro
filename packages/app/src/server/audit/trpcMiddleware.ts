@@ -47,6 +47,7 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	// ── admin sensitive reads ─────────────────────────────
 	"adminDeclarations.search": AUDIT_ACTIONS.ADMIN_DECLARATIONS_SEARCH,
 	"adminDeclarations.getById": AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID,
+	"adminDeclarations.getRecap": AUDIT_ACTIONS.ADMIN_DECLARATIONS_GET_RECAP,
 
 	// ── admin declaration mutations ───────────────────────
 	"adminDeclarations.cancel": AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL,

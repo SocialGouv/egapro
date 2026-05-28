@@ -7,6 +7,7 @@ import {
 	eq,
 	gte,
 	ilike,
+	inArray,
 	isNotNull,
 	isNull,
 	lt,
@@ -18,16 +19,23 @@ import {
 import {
 	cancelDeclarationSchema,
 	getDeclarationByIdSchema,
+	getRecapSchema,
 	searchDeclarationsSchema,
 } from "~/modules/admin/declarations/schemas";
 import { getCurrentYear } from "~/modules/domain";
+import {
+	mapToEmployeeCategoryRows,
+	mapToStepData,
+} from "~/server/api/routers/declarationHelpers";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
 	companies,
 	cseOpinions,
 	declarationStatusHistory,
 	declarations,
+	employeeCategories,
 	files,
+	jobCategories,
 	users,
 } from "~/server/db/schema";
 
@@ -283,5 +291,99 @@ export const adminDeclarationsRouter = createTRPCRouter({
 			});
 
 			return { id: input.id, cancelledAt };
+		}),
+
+	getRecap: adminProcedure
+		.input(getRecapSchema)
+		.query(async ({ ctx, input }) => {
+			const rows = await ctx.db
+				.select({
+					declaration: declarations,
+					companyName: companies.name,
+					companySiren: companies.siren,
+					companyNafCode: companies.nafCode,
+					companyAddress: companies.address,
+					companyWorkforce: companies.workforce,
+					declarantEmail: users.email,
+					declarantFirstName: users.firstName,
+					declarantLastName: users.lastName,
+				})
+				.from(declarations)
+				.innerJoin(companies, eq(declarations.siren, companies.siren))
+				.innerJoin(users, eq(declarations.declarantId, users.id))
+				.where(eq(declarations.id, input.id))
+				.limit(1);
+
+			const row = rows[0];
+			if (!row) {
+				throw new TRPCError({ code: "NOT_FOUND" });
+			}
+
+			const [secondSubmitHistory, jobs] = await Promise.all([
+				ctx.db
+					.select({ id: declarationStatusHistory.id })
+					.from(declarationStatusHistory)
+					.where(
+						and(
+							eq(declarationStatusHistory.declarationId, input.id),
+							eq(
+								declarationStatusHistory.eventType,
+								"second_declaration_submit",
+							),
+						),
+					)
+					.limit(1),
+				ctx.db
+					.select()
+					.from(jobCategories)
+					.where(eq(jobCategories.declarationId, input.id)),
+			]);
+
+			const isCorrection = secondSubmitHistory.length > 0;
+
+			const jobIds = jobs.map((j) => j.id);
+			const empCats =
+				jobIds.length > 0
+					? await ctx.db
+							.select()
+							.from(employeeCategories)
+							.where(inArray(employeeCategories.jobCategoryId, jobIds))
+					: [];
+
+			const d = row.declaration;
+			const { step2Data, step3Data, step4Data } = mapToStepData(d);
+			const step5Categories = mapToEmployeeCategoryRows(
+				jobs,
+				empCats,
+				isCorrection ? "correction" : "initial",
+			);
+			const step5Source = jobs[0]?.source ?? null;
+			const referencePeriod = `01/01/${d.year} - 31/12/${d.year}`;
+			const declarantName =
+				[row.declarantFirstName, row.declarantLastName]
+					.filter(Boolean)
+					.join(" ") || null;
+
+			return {
+				company: {
+					name: row.companyName,
+					siren: row.companySiren,
+					nafCode: row.companyNafCode,
+					address: row.companyAddress,
+					workforce: row.companyWorkforce,
+				},
+				declarationYear: d.year,
+				referencePeriod,
+				declarantName: declarantName ?? "",
+				declarantEmail: row.declarantEmail,
+				isCorrection,
+				totalWomen: d.totalWomen,
+				totalMen: d.totalMen,
+				step2Data,
+				step3Data,
+				step4Data,
+				step5Categories,
+				step5Source,
+			};
 		}),
 });
