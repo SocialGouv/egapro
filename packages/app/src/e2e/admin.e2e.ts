@@ -53,3 +53,28 @@ test("admin user can access /admin/parametres and sees settings page", async ({
 		page.getByRole("heading", { name: "Année de campagne active", level: 2 }),
 	).not.toBeVisible();
 });
+
+test("admin layout uses fluid container with fixed-width sidemenu on desktop", async ({
+	page,
+}) => {
+	await page.setViewportSize({ width: 1280, height: 800 });
+	await page.goto("/admin");
+	await expect(
+		page.getByRole("heading", { name: "Backoffice", level: 1 }),
+	).toBeVisible();
+
+	const nav = page.locator("nav.fr-sidemenu");
+	const navBox = await nav.boundingBox();
+	expect(navBox).not.toBeNull();
+	if (navBox) {
+		expect(navBox.width).toBeGreaterThanOrEqual(260);
+		expect(navBox.width).toBeLessThanOrEqual(300);
+	}
+
+	const heading = page.getByRole("heading", { name: "Backoffice", level: 1 });
+	const headingBox = await heading.boundingBox();
+	expect(headingBox).not.toBeNull();
+	if (headingBox) {
+		expect(headingBox.width).toBeGreaterThan(800);
+	}
+});
