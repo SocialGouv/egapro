@@ -15,6 +15,7 @@ import { CampaignRateTile } from "./CampaignRateTile";
 import { CompletionFunnelChart } from "./CompletionFunnelChart";
 import { CompletionFunnelTable } from "./CompletionFunnelTable";
 import { StagnationDaysFilter } from "./StagnationDaysFilter";
+import styles from "./StatsDashboard.module.scss";
 import { StepDropoffChart } from "./StepDropoffChart";
 import { StepDropoffTable } from "./StepDropoffTable";
 import { StepDurationsChart } from "./StepDurationsChart";
@@ -114,35 +115,42 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 
 				<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
 					<div className="fr-col-12 fr-col-md-6">
-						<CampaignRateTile sizeRange={sizeRange} year={activeYear} />
+						<div className={styles.card}>
+							<CampaignRateTile sizeRange={sizeRange} year={activeYear} />
+						</div>
 					</div>
 					<div className="fr-col-12 fr-col-md-6">
-						{selectedYears.length === 0 && (
-							<p className="fr-text--sm fr-text-mention--grey">
-								Sélectionnez au moins une année pour afficher le graphique.
-							</p>
-						)}
-						{progressionQuery.isLoading && !progressionQuery.data && (
-							<p aria-live="polite">Chargement du graphique…</p>
-						)}
-						{progressionQuery.isError && (
-							<div aria-live="polite" className="fr-alert fr-alert--error">
-								<p>
-									Une erreur est survenue lors du chargement des statistiques.
+						<div className={styles.card}>
+							{selectedYears.length === 0 && (
+								<p className="fr-text--sm fr-text-mention--grey">
+									Sélectionnez au moins une année pour afficher le graphique.
 								</p>
-							</div>
-						)}
-						{progressionQuery.data && (
-							<CampaignProgressionChart
-								currentYear={currentYear}
-								series={progressionQuery.data}
-							/>
-						)}
+							)}
+							{progressionQuery.isLoading && !progressionQuery.data && (
+								<p aria-live="polite">Chargement du graphique…</p>
+							)}
+							{progressionQuery.isError && (
+								<div aria-live="polite" className="fr-alert fr-alert--error">
+									<p>
+										Une erreur est survenue lors du chargement des statistiques.
+									</p>
+								</div>
+							)}
+							{progressionQuery.data && (
+								<CampaignProgressionChart
+									currentYear={currentYear}
+									series={progressionQuery.data}
+								/>
+							)}
+						</div>
 					</div>
 				</div>
 
 				{progressionQuery.data && (
-					<section aria-label="Progression dans le temps" className="fr-mt-2w">
+					<section
+						aria-label="Progression dans le temps"
+						className={`fr-mt-2w ${styles.card}`}
+					>
 						<CampaignProgressionTable series={progressionQuery.data} />
 					</section>
 				)}
@@ -151,7 +159,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 					<div className="fr-col-12 fr-col-md-6">
 						<section
 							aria-labelledby="step-durations-heading"
-							className="fr-mt-2w"
+							className={styles.card}
 						>
 							<h3 className="fr-h3" id="step-durations-heading">
 								Délai moyen par étape — campagne {activeYear}
@@ -183,7 +191,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 					<div className="fr-col-12 fr-col-md-6">
 						<section
 							aria-labelledby="step-dropoff-heading"
-							className="fr-mt-2w"
+							className={styles.card}
 						>
 							<h3 className="fr-h3" id="step-dropoff-heading">
 								Taux d'abandon par phase — campagne {activeYear}
@@ -236,7 +244,10 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 				{funnelQuery.data && (
 					<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
 						<div className="fr-col-12 fr-col-md-6">
-							<section aria-labelledby="completion-funnel-main-heading">
+							<section
+								aria-labelledby="completion-funnel-main-heading"
+								className={styles.card}
+							>
 								<h3 className="fr-h3" id="completion-funnel-main-heading">
 									Funnel principal — toutes les déclarations
 								</h3>
@@ -253,7 +264,10 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 						</div>
 
 						<div className="fr-col-12 fr-col-md-6">
-							<section aria-labelledby="completion-funnel-compliance-heading">
+							<section
+								aria-labelledby="completion-funnel-compliance-heading"
+								className={styles.card}
+							>
 								<h3 className="fr-h3" id="completion-funnel-compliance-heading">
 									Funnel parcours conformité — déclarations avec écart ≥ 5 %
 								</h3>
@@ -270,7 +284,10 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 						</div>
 
 						<div className="fr-col-12 fr-col-md-6">
-							<section aria-labelledby="completion-funnel-revision-heading">
+							<section
+								aria-labelledby="completion-funnel-revision-heading"
+								className={styles.card}
+							>
 								<h3 className="fr-h3" id="completion-funnel-revision-heading">
 									Funnel cycle de révision — déclarations ayant nécessité une
 									révision
@@ -296,7 +313,10 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 						</div>
 
 						<div className="fr-col-12 fr-col-md-6">
-							<section aria-labelledby="completion-funnel-cse-heading">
+							<section
+								aria-labelledby="completion-funnel-cse-heading"
+								className={styles.card}
+							>
 								<h3 className="fr-h3" id="completion-funnel-cse-heading">
 									Funnel cycle CSE — déclarations d'entreprises ayant un CSE
 								</h3>
