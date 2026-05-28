@@ -27,30 +27,23 @@ describe("AdminNavigation", () => {
 		).toBeInTheDocument();
 		expect(screen.getByRole("link", { name: "Référents" })).toBeInTheDocument();
 		expect(
-			screen.getByRole("link", { name: "Statistiques campagne" }),
+			screen.getByRole("link", { name: "Statistiques" }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("link", { name: "Statistiques plateforme" }),
-		).toBeInTheDocument();
+			screen.queryByRole("link", { name: "Statistiques campagne" }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("link", { name: "Statistiques plateforme" }),
+		).not.toBeInTheDocument();
 	});
 
-	it("marks /admin/stats/plateforme as active on that page", () => {
-		(usePathname as Mock).mockReturnValue("/admin/stats/plateforme");
+	it("marks /admin/stats as active on the stats page", () => {
+		(usePathname as Mock).mockReturnValue("/admin/stats");
 		render(<AdminNavigation />);
-		expect(
-			screen.getByRole("link", { name: "Statistiques plateforme" }),
-		).toHaveAttribute("aria-current", "page");
-		expect(
-			screen.getByRole("link", { name: "Statistiques campagne" }),
-		).not.toHaveAttribute("aria-current");
-	});
-
-	it("marks /admin/stats/campagne as active on that page", () => {
-		(usePathname as Mock).mockReturnValue("/admin/stats/campagne");
-		render(<AdminNavigation />);
-		expect(
-			screen.getByRole("link", { name: "Statistiques campagne" }),
-		).toHaveAttribute("aria-current", "page");
+		expect(screen.getByRole("link", { name: "Statistiques" })).toHaveAttribute(
+			"aria-current",
+			"page",
+		);
 		expect(screen.getByRole("link", { name: "Accueil" })).not.toHaveAttribute(
 			"aria-current",
 		);
