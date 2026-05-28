@@ -59,44 +59,48 @@ const BOOT_DELAY_MS = Number.parseInt(
 	10,
 );
 
-// On a fresh review app, pg-app may not accept connections yet when the
-// notifications pod starts. Without a wait, pg-boss throws, the worker exits
-// non-zero, and the kontinuous `deploy-sidecars/progressing` plugin gives up
-// after the very first crash. Ping the DB with a lightweight `SELECT 1` loop
-// before handing the connection string to pg-boss — once the server answers
-// we know `boss.start()` + `createQueue` + `work` + `schedule` will all hit a
-// live socket, so the entire boot sequence runs in a single shot.
-async function waitForDatabase(connectionString: string): Promise<void> {
+// On a fresh review app the queue DB (`pg-rw`, the main app Postgres used as
+// fallback when no dedicated pg-notifications secret exists) may not resolve
+// or accept connections yet when this pod starts. pg-boss runs on
+// node-postgres, so a transient `ENOTFOUND` / `ECONNREFUSED` during
+// `boss.start()` throws, the worker exits non-zero, the container goes to
+// `Error`, and the kontinuous `deploy-sidecars/progressing` plugin gives up
+// on the very first crash. Retry the real pg-boss connection — probing with a
+// different driver beforehand is unreliable, since a probe can succeed while
+// pg-boss's own connect still races DNS. Recreate the instance each attempt
+// so the next try gets a fresh pool; staying alive while retrying keeps the
+// pod Running so the rollout succeeds.
+async function startBoss(connectionString: string): Promise<PgBoss> {
+	let lastError: unknown;
 	for (let attempt = 1; attempt <= BOOT_MAX_ATTEMPTS; attempt++) {
-		// `ssl: 'prefer'` lets postgres.js handshake with both plain (review-app
-		// docker postgres) and self-signed TLS (in-cluster pg-rw) backends, since
-		// `sslmode=no-verify` from db.ts is a node-postgres extension and not
-		// recognised by postgres.js.
-		const probe = postgres(connectionString, {
-			max: 1,
-			connect_timeout: 5,
-			idle_timeout: 1,
-			ssl: "prefer",
+		const boss = new PgBoss({
+			connectionString,
+			application_name: "egapro-notifications",
+		});
+		boss.on("error", (error) => {
+			console.error("[notifications] pg-boss error:", error);
 		});
 		try {
-			await probe`select 1`;
-			await probe.end({ timeout: 1 });
+			await boss.start();
+			await boss.createQueue(QUEUE_NAME);
 			if (attempt > 1) {
 				console.log(
-					`[notifications] database reachable after ${attempt} attempts`,
+					`[notifications] pg-boss connected after ${attempt} attempts`,
 				);
 			}
-			return;
+			return boss;
 		} catch (error) {
-			await probe.end({ timeout: 1 }).catch(() => undefined);
-			if (attempt === BOOT_MAX_ATTEMPTS) throw error;
+			lastError = error;
+			await boss.stop({ graceful: false }).catch(() => undefined);
+			if (attempt === BOOT_MAX_ATTEMPTS) break;
 			const reason = error instanceof Error ? error.message : String(error);
 			console.warn(
-				`[notifications] database not reachable (attempt ${attempt}/${BOOT_MAX_ATTEMPTS}): ${reason} — retrying in ${BOOT_DELAY_MS}ms`,
+				`[notifications] pg-boss connection failed (attempt ${attempt}/${BOOT_MAX_ATTEMPTS}): ${reason} — retrying in ${BOOT_DELAY_MS}ms`,
 			);
 			await new Promise((resolve) => setTimeout(resolve, BOOT_DELAY_MS));
 		}
 	}
+	throw lastError;
 }
 
 async function main(): Promise<void> {
@@ -113,18 +117,7 @@ async function main(): Promise<void> {
 
 	const mainSql: Sql | null = mainUrl ? postgres(mainUrl, { max: 2 }) : null;
 
-	await waitForDatabase(notifUrl);
-
-	const boss = new PgBoss({
-		connectionString: notifUrl,
-		application_name: "egapro-notifications",
-	});
-	boss.on("error", (error) => {
-		console.error("[notifications] pg-boss error:", error);
-	});
-
-	await boss.start();
-	await boss.createQueue(QUEUE_NAME);
+	const boss = await startBoss(notifUrl);
 	console.log(
 		`[notifications] pg-boss started (queue=${QUEUE_NAME}, mailEnabled=${mailEnabled})`,
 	);
