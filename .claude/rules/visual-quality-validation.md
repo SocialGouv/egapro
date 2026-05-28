@@ -10,11 +10,11 @@ La validation visuelle est faite **par Claude** (capacité vision native), pas p
 
 ## Entrées
 
-- **Screenshots de référence** : `/tmp/egapro-mocks/epic-<NNN>/screenshots/*.png` produits par le `designer` lors de la phase `/ticket`. Chemins exacts référencés dans le commentaire `## Designer: proposition d'écrans` sur l'epic. **Jamais committés**, hors du repo.
+- **Screenshots de référence** : URLs gist publiques (format `https://gist.githubusercontent.com/.../raw/...`) embeddées dans le commentaire `## Designer: proposition d'écrans` posté sur l'epic. Cohérent avec la règle d'hosting gist actée le 2026-05-28 (cf. mémoire `feedback_github_outputs_must_be_visible`).
 - **Rendu de l'app** : page rendue par le dev server sur `http://localhost:<port>` (port assigné par `/epic` au worktree courant)
 - **Route cible** : indiquée dans le ticket (section "Fichiers impactés" → route `src/app/<path>/page.tsx`)
 
-Si les fichiers `/tmp/egapro-mocks/...` ont disparu (ex : `/tmp` purgé au reboot), renvoyer **REFACTO** avec recommandation de re-jouer la phase designer. Ne jamais « deviner » sans référence visuelle.
+Si les URLs gist sont 404 (gist supprimé, rotation auth du token) ou si le commentaire designer est absent, renvoyer **REFACTO** avec recommandation de re-jouer la phase designer. Ne jamais « deviner » sans référence visuelle.
 
 ---
 
@@ -31,7 +31,7 @@ Fichiers écrits dans `/tmp/playwright-mcp/` (jamais dans le projet).
 
 ### 2. Charger les screenshots de référence
 
-Lire directement les PNG déjà présents dans `/tmp/egapro-mocks/epic-<NNN>/screenshots/` (desktop + mobile), produits par le `designer` lors de `/ticket`. **Pas besoin de re-rendre le mockup HTML** — les screenshots sont la source de vérité.
+Récupérer les URLs gist depuis le commentaire `## Designer: proposition d'écrans` posté sur l'epic, fetcher les PNG (desktop + mobile) localement via `curl -s -o /tmp/playwright-mcp/ref-<screen>-<viewport>.png <gist-raw-url>` puis les charger dans Claude vision. **Pas besoin de re-rendre le mockup HTML** — les screenshots gist sont la source de vérité.
 
 ### 3. Comparer (Claude vision)
 
@@ -47,13 +47,13 @@ Pour l'a11y approfondie, déléguer à l'agent `rgaa-auditor` (lui, applique les
 
 ### 4. Verdict
 
-Dans un commentaire GitHub sur le ticket, avec préfixe identifiable `design-validator:` :
+Dans un commentaire GitHub sur le ticket, header standard `## Design Validator: <PASS | RETRY | REFACTO>` (cf. `rules/comment-formats.md` §5) :
 
-- **PASS** — tout conforme. `code-dev` peut passer le ticket en **In review** (= prêt pour validation humaine)
+- **PASS** — tout conforme. `code-dev` continue son cycle ; le ticket reste en **In progress** jusqu'au squash-merge (sub-task d'epic) ou jusqu'à intervention humaine (standalone).
 - **RETRY** — écart mineur corrigeable (couleur, espacement, bold manquant) → description précise de l'écart → `code-dev` corrige, ticket reste en **In progress**
 - **REFACTO** — écart structurel (mauvais composant DSFR, layout cassé, composants manquants) → le ticket retourne en **To Do** avec recommandation
 
-Joindre **les 4 screenshots** (2 rendus app + 2 références designer) dans le commentaire via upload GitHub. **Obligatoire** même en cas de PASS : ça permet à l'utilisateur de valider d'un coup d'œil.
+Joindre **les 4 screenshots** (2 rendus app + 2 références designer) dans le commentaire **via embeds gist** (`![alt](https://gist.githubusercontent.com/.../raw/...)`). Les rendus app sont d'abord uploadés en gist (`gh gist create /tmp/playwright-mcp/<file>.png -p`) avant d'être référencés. **Obligatoire** même en cas de PASS : ça permet à l'utilisateur de valider d'un coup d'œil.
 
 ---
 

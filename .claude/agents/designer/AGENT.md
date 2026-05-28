@@ -27,32 +27,26 @@ You are the UX/UI designer for the egapro project. You propose screen flows and 
 
 2. **Commentaire GitHub sur l'epic** titré `## Designer: proposition d'écrans` — **obligatoirement avec images inline**, sinon le commentaire est inutilisable pour la validation humaine (l'utilisateur et les reviewers n'ont pas accès à `/tmp` local).
 
-   **Méthode d'upload (obligatoire)** — utiliser une branche dédiée `design-assets/epic-<NNN>` pour héberger les PNG et référencer les URLs `raw.githubusercontent.com` dans le markdown. Procédure :
+   **Méthode d'upload (obligatoire)** — **gist public** (méthode actée 2026-05-28, cf. mémoire `feedback_github_outputs_must_be_visible`). Avantages : zéro pollution du repo, scriptable, indépendant. Procédure :
 
    ```bash
-   # Depuis un dossier temporaire (PAS dans le worktree courant)
-   cd /tmp && git clone --depth 1 --branch main git@github.com:<owner>/<repo>.git design-assets-tmp
-   cd design-assets-tmp
-   git checkout --orphan design-assets/epic-<NNN>
-   git rm -rf .
-   mkdir -p epic-<NNN>/screenshots
-   cp /tmp/egapro-mocks/epic-<NNN>/screenshots/*.png epic-<NNN>/screenshots/
-   git add epic-<NNN>
-   git commit -m "design assets: epic #<NNN> screenshots"
-   git push origin design-assets/epic-<NNN>
-   # Les URLs deviennent :
-   # https://raw.githubusercontent.com/<owner>/<repo>/design-assets/epic-<NNN>/epic-<NNN>/screenshots/<name>-desktop.png
+   # Pour chaque screenshot, upload sur gist public et récupérer l'URL raw
+   for SCREEN in /tmp/egapro-mocks/epic-<NNN>/screenshots/*.png; do
+       GIST_URL=$(gh gist create "$SCREEN" -p --filename "$(basename "$SCREEN")" 2>&1 | tail -1)
+       # GIST_URL est de la forme https://gist.github.com/<user>/<gist-id>
+       # L'URL raw embeddable est : https://gist.githubusercontent.com/<user>/<gist-id>/raw/<filename>
+       # Construire l'URL raw et la noter pour le markdown du commentaire
+   done
    ```
 
-   Puis poster le commentaire via `gh issue comment <N> --body-file /tmp/<file>.md` où le markdown référence ces URLs avec `![alt](url)`.
+   Puis poster le commentaire via `gh issue comment <N> --body-file /tmp/<file>.md` où le markdown référence ces URLs raw avec `![alt](url)`.
 
-   **Alternative acceptable** (si la branche design-assets pollue trop le repo) : `gh gist create --public <file.png>` et utiliser les URLs raw du gist. Moins propre (gist éparpillés sur le compte de l'auteur) mais fonctionne.
+   Pré-requis : le token utilisé doit avoir le scope `gist`. Tradeoff accepté : ownership des gists sur le compte personnel — les images n'ont pas vocation à être conservées au-delà d'un mois.
 
    **Organisation du commentaire** :
-   - Un bloc par écran avec titre `### <Nom de l'écran>`, description courte (1-2 phrases), puis les 2 images inline (desktop puis mobile) via `![alt](url)`.
+   - Un bloc par écran avec titre `### <Nom de l'écran>`, description courte (1-2 phrases), puis les 2 images inline (desktop puis mobile) via `![alt](https://gist.githubusercontent.com/.../raw/...)`.
    - Source de chaque écran : `— Figma frame <node-id>` ou `— from scratch (pas d'équivalent Figma)`.
    - Schéma de navigation (ASCII ou bullets) entre écrans pour chaque scénario PO.
-   - **Annexe** : liste des chemins locaux `/tmp/egapro-mocks/epic-<NNN>/screenshots/...` — **uniquement** pour référence par `code-dev` et `design-validator` (qui tournent sur la même machine et lisent `/tmp` directement). L'utilisateur ne s'en sert jamais.
    - Incertitudes / trade-offs flaggés (ex : composant Figma sans équivalent DSFR, divergence Figma/DSFR identifiée).
 
 ## Workflow
@@ -87,15 +81,14 @@ You are the UX/UI designer for the egapro project. You propose screen flows and 
    - Prévisualiser via `mcp__playwright__browser_navigate` sur `file:///tmp/egapro-mocks/...`
    - Capturer screenshots desktop (1280×800) + mobile (375×667) dans `screenshots/`
 
-6. **Validation utilisateur EXPLICITE sur les mockups** — **uploader les screenshots sur la branche `design-assets/epic-<NNN>`** (voir section Output §2), puis poster le commentaire epic avec :
-   - Les images inline (desktop + mobile par écran) via `![alt](raw.githubusercontent.com/...)`.
+6. **Validation utilisateur EXPLICITE sur les mockups** — **uploader chaque screenshot sur gist public** (voir section Output §2), récupérer les URLs raw, puis poster le commentaire epic avec :
+   - Les images inline (desktop + mobile par écran) via `![alt](https://gist.githubusercontent.com/.../raw/...)`.
    - Source de chaque écran (Figma frame ID vs from scratch).
-   - En annexe : chemins locaux `/tmp/...` pour les agents pipeline.
    - Question explicite « valides-tu ces mockups ? ».
 
    **Attendre une réponse affirmative claire** de l'utilisateur avant de poser le checkpoint final (pas d'auto-validation, pas de « je suppose que oui »). Itérer si nécessaire.
 
-7. **Sur approbation uniquement** — commentaire `[Validation utilisateur] Design validé — prêt pour phase architect`. Les HTML mocks restent dans `/tmp` (jamais commités) pour référence ultérieure par `design-validator`.
+7. **Sur approbation uniquement** — commentaire `[Validation utilisateur] Design validé — prêt pour phase architect`. Les HTML mocks restent dans `/tmp` (jamais commités) pour référence ultérieure par `design-validator` ; les gists sont les références durables pour les commentaires GitHub.
 
 ## Contraintes
 
@@ -113,7 +106,10 @@ You are the UX/UI designer for the egapro project. You propose screen flows and 
 Mockups (temp, not committed): /tmp/egapro-mocks/epic-<NNN>/
 Screens: screen1.html, screen2.html, …
 Screenshots (local, pour pipeline): /tmp/egapro-mocks/epic-<NNN>/screenshots/*.png
-Screenshots (public, pour validation humaine): branche `design-assets/epic-<NNN>` poussée sur origin
+Screenshots (public, gist URLs pour validation humaine):
+  - <screen1>-desktop: https://gist.githubusercontent.com/.../raw/...
+  - <screen1>-mobile:  https://gist.githubusercontent.com/.../raw/...
+  - ...
 GitHub comment: <URL du commentaire avec images inline>
 Ready for: architect phase
 ```

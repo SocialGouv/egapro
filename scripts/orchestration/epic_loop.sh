@@ -25,8 +25,14 @@ fi
 #   2  user intervention required (one or more tickets carry dispatch=escalate)
 #   3  MAX_TICKS reached without convergence
 #
-# Hard rule: NEVER merges PRs, NEVER sets a ticket to 'Done'. validated means
-# code-dev has set 'In review' and pr ready — the human takes over from there.
+# Hard rules:
+# - NEVER merges into alpha/master. The only merge is the per-ticket squash-merge
+#   into epic/<N> done by process_tick_result.sh when code-dev returns validated.
+# - NEVER sets a ticket to 'Done' — user-only in all circumstances.
+# - 'In review' is set by process_tick_result.sh (via --post-merge flag) ONLY
+#   after a successful squash-merge of a sub-task PR into epic/<N>.
+# - Assigns each dispatched sub-task to Viczei at spawn time, so PR / review
+#   notifications come back to the user directly.
 #
 # Env (defaults shown):
 #   EPIC_LOOP_MAX_TICKS       30     (≈ 2-3h max with 5-min ticks)
@@ -367,6 +373,11 @@ while [ $TICK -lt $MAX_TICKS ]; do
 
         # Set ticket 'In progress' on the board (idempotent)
         bash "$SCRIPT_DIR/set_ticket_status.sh" "$TICKET" "In progress" >/dev/null 2>&1 || true
+
+        # Assign ticket to the primary user so PR / review notifications come
+        # back to them directly. Idempotent — gh issue edit no-ops if already
+        # assigned. cf. rules/github-board.md snippet 8.
+        gh issue edit "$TICKET" --add-assignee Viczei >/dev/null 2>&1 || true
 
         # Provision worktree + docker stack (no-op if already done)
         WT_PATH=$(ensure_worktree "$TICKET" "$INDEX" "$EPIC" "$BASE")

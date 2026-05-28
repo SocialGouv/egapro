@@ -15,7 +15,15 @@ description: "Conception pipeline. Détecte le mode (epic/task/bug) selon le typ
 
 Chaque agent gère lui-même un gate de validation utilisateur explicite avant de poster sur GitHub. L'orchestrateur (toi qui exécutes ce skill) chaîne et ne ré-interroge pas l'utilisateur entre étapes.
 
-**Règle absolue** : aucun agent conception ne bouge un ticket sur le board. Les transitions `To Do → In progress → In review` sont la responsabilité de `/implement`.
+**Règle absolue** :
+- Aucun agent conception ne bouge un ticket sur le board. Les transitions sont gérées par `/implement` (`To Do → In progress` + assignation) et par `process_tick_result.sh` (`In progress → In review` post-merge des sub-tasks d'epic).
+- Aucun agent ne touche au **body** de l'issue (cf. `rules/comment-formats.md` règle 0). Le body est rédigé par l'humain (Task/Bug) ou par le PO à création (Epic) ou par l'architect à création (sub-issue d'epic), puis figé. Toute analyse / révision vit dans des commentaires séparés (`## Besoin métier`, `## Analyse PO`, `## Analyse architecte`, `## Analyse du bug`).
+
+**Rules à charger** par les agents conception (ordre de priorité) :
+- `rules/comment-formats.md` — templates des commentaires
+- `rules/test-strategy.md` — choix du type de test (unit > E2E)
+- `rules/ticket-spec-format.md` — structure obligatoire avec `## Résultat attendu`
+- `rules/github-board.md` — IDs, snippets, transitions
 
 ---
 
@@ -132,7 +140,9 @@ Next: /implement NNN
 
 ## Notes
 
-- **Pas de transition de statut board** — l'issue reste dans son statut courant (`Backlog` ou `To Do`). C'est `/implement` qui bouge à `In progress` puis `In review`.
+- **Pas de transition de statut board** — l'issue reste dans son statut courant (`Backlog` ou `To Do`). C'est `/implement` qui bouge à `In progress` (+ assigne à l'utilisateur), et `process_tick_result.sh` qui bouge à `In review` post-merge (sub-tasks d'epic). Pour standalone Task/Bug, c'est l'utilisateur qui bouge à `In review` puis `Done` à la main après merge de la PR.
 - Si un agent revient sans validation utilisateur (utilisateur a refusé après Q&A) → arrêter la pipeline, laisser l'utilisateur reformuler.
 - En mode `epic-enrich`, ne **jamais effacer** les commentaires précédents (`## Besoin métier`, `## Analyse PO`). Préférer un commentaire `(révisé YYYY-MM-DD)` pointant vers le précédent — la traçabilité historique est précieuse.
-- En mode `task` et `bug`, le **body reste intact**. Tout vit dans des commentaires. `code-dev` est briefé pour lire le commentaire d'analyse comme spec canonique.
+- En mode `task` et `bug`, le **body reste intact** (cf. `rules/comment-formats.md` règle 0). Tout vit dans des commentaires. `code-dev` est briefé pour lire le commentaire d'analyse comme spec canonique.
+- Le `product-owner` se base désormais sur **`docs/` + exploration via Playwright MCP**, plus sur le code. Il produit des screenshots de l'app actuelle qu'il pousse sur **gist public** (`gh gist create -p`) pour les embedder dans `## Analyse PO`. L'architect recopie ces URLs gist dans les sub-tasks UI.
+- **Pas de tickets E2E-only** — l'architect n'a plus le droit de créer une sub-task dont le seul but est d'ajouter un test E2E, sauf si la demande utilisateur l'explicite (cf. `rules/test-strategy.md`).

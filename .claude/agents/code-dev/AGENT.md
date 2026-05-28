@@ -7,6 +7,13 @@ You execute one pre-specified ticket end-to-end : edit code, write/update tests,
 - **Model:** sonnet par défaut. **opus si le ticket a le label `complexe`**.
 - **Tools:** all (Bash, Read, Write, Edit, Grep, Glob, Playwright, next-devtools, dsfr)
 
+## Sources de référence (à charger avant toute action)
+
+- `rules/comment-formats.md` — règle 0 (jamais d'édition du body de l'issue), formats des messages de réponse aux reviews
+- `rules/ticket-spec-format.md` — structure du spec (incluant la nouvelle section `## Résultat attendu`)
+- `rules/test-strategy.md` — préférer unit/component tests aux E2E, adapter un E2E existant plutôt qu'en créer un nouveau, inventaire des 25 E2E existants
+- `rules/github-board.md` — snippet 8 pour assigner l'utilisateur, transitions autorisées
+
 ## Inputs
 
 - Ticket issue number
@@ -57,7 +64,11 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
 
 2. **Si bug** (issue type Bug ou label `bug`) — appliquer `rules/bug-fix-workflow.md` : test qui échoue **avant** le fix. Pour les bugs de type "visual mismatch Figma ↔ app", le test n'est pas un test automatisé classique (cf. section visual mismatch de `bug-fix-workflow.md`) — la validation est la relecture structurelle Figma.
 
-3. **Status ticket** → **In progress** via `bash scripts/orchestration/set_ticket_status.sh <N> "In progress"`.
+3. **Status ticket → In progress + assigner l'utilisateur** :
+   - `bash scripts/orchestration/set_ticket_status.sh <N> "In progress"`
+   - `gh issue edit <N> --add-assignee Viczei` (snippet 8 de `rules/github-board.md` ; idempotent — si déjà assigné, no-op)
+
+   En mode epic, l'assignation est posée par `epic_loop.sh` au dispatch du sub-ticket ; le `code-dev` n'a pas à la repasser dans ce cas (l'appel reste idempotent et sans danger).
 
 4. **Checkout la branche linkée pré-créée** (la `Working branch` reçue en input). **Ne pas créer une nouvelle branche** — la branche existe déjà sur GitHub, est linkée à l'issue, et c'est sur elle que tu dois pousser :
    - `cd <worktree>` (le worktree est en mode `--detach` sur la base)
@@ -71,10 +82,12 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
    - Modifier les fichiers listés dans le ticket
    - Respecter `packages/app/CLAUDE.md` et les rules projet
    - **Aucun commentaire dans le code écrit ou modifié** — voir `rules/code-quality.md` section "No comments by default". Pas de JSDoc, pas de `// fetch user`, pas de `// for ticket #N`, pas de TODO/FIXME, pas de header de section. Seule exception : un `// ` court qui explique un WHY non-évident (workaround documenté, invariant subtil). Si le commentaire paraphrase le code juste en dessous, supprimer.
+   - **Choix du type de test** : suivre `rules/test-strategy.md` strict — unit/component tests en priorité (vitest, testing-library), integration si la composition de modules est testée, E2E **seulement** si le ticket le précise OU si un parcours critique non couvert est touché. Si un E2E existant couvre déjà le parcours → **adapter cet E2E**, ne pas en créer un nouveau.
    - `pnpm typecheck` après chaque modif de types/schemas
    - `nextjs_call(get_errors)` si dev server tourne
+   - **Rejouer les scénarios pendant l'impl, pas seulement à la fin** : pour chaque scénario `S1..SN` de la section `## Scénarios de validation` du ticket, naviguer via `mcp__playwright__*` sur la page concernée et vérifier que le résultat attendu est atteint **avant** de passer à l'étape 6. C'est ta validation interne : `functional-validator` en étape 9a sera une confirmation, pas une découverte. Si un scénario ne passe pas → revenir à l'implémentation, ne pas attendre.
    - **Tests unitaires : 100% de couverture sur le code produit** (statements, branches, functions, lines). Vérifier via `pnpm test --coverage` + lecture du rapport — chaque fichier modifié ou créé doit être à 100%. Pas de « ça couvre assez » : 100% strict.
-   - Logger `DEV_OK "attempt=<K>"` quand typecheck + tests passent localement.
+   - Logger `DEV_OK "attempt=<K>"` quand typecheck + tests + scénarios passent localement.
 
 6. **Quality gates (ticket reste en In progress)** — `bash scripts/orchestration/log_event.sh code-dev-<N> VALIDATION_START "attempt=1"`. Déléguer en parallèle aux 4 agents existants :
    - `validator` (typecheck + test + lint + format)
@@ -268,14 +281,16 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
    - `gh pr ready <PR>` (sort la PR du draft)
    - **Re-poll les checks après `gh pr ready`** : marquer la PR `ready` peut re-déclencher certains workflows (Deploy review notamment, qui n'a pas de `pull_request: types: [opened, synchronize]` strict). Attendre encore une fois que **toutes** les conclusions soient SUCCESS / SKIPPED / NEUTRAL — même critère qu'en 9b. Si un check repasse en FAILURE après `pr ready`, retourner en 9b (corriger, push, watch). Ne **jamais** retourner `validated` avec un check rouge.
    - Logger `PR_READY` avec le numéro de PR
-   - **Le ticket reste en `In progress`** — c'est l'utilisateur qui passe à `In review` puis `Done` selon son rythme de revue humaine. AI's terminus = `gh pr ready` + retour `validated`. `set_ticket_status.sh` refusera explicitement la transition `In review`.
+   - **Le ticket reste en `In progress`** au retour `validated` — c'est `process_tick_result.sh` qui le bouge en `In review` après squash-merge dans `epic/<N>` (sub-task d'epic uniquement, via le flag `--post-merge` de `set_ticket_status.sh`). Pour les standalone Task/Bug, le ticket reste en `In progress` au retour : c'est l'utilisateur qui merge la PR, ferme l'issue (via `Closes #N`), et bouge le board en `In review` puis `Done` à la main.
+   - **Tu ne dois jamais** bouger le ticket en `In review` toi-même — `set_ticket_status.sh` refuse explicitement la transition sans flag `--post-merge`, qui n'est posé QUE par `process_tick_result.sh`.
    - Logger `COMPLETE`
    - **Pas de merge depuis `code-dev`** — le squash-merge dans `epic/<N>` est fait par `process_tick_result.sh` après ton retour `validated`. Si le merge échoue (conflit avec la branche d'intégration parce qu'une autre PR a été mergée entre-temps), le pipeline te redispatchera avec le ticket en `In progress` ; tu n'as qu'à rebaser sur `origin/epic/<N>` et re-pousser.
    - Les nouveaux commentaires posés **après** le retour `validated` relèvent de la skill `/review` (existante), plus du `code-dev`.
 
 ## Contraintes
 
-- **Jamais `In review` ni `Done` automatique** — les deux transitions sont user-only (le script `set_ticket_status.sh` refuse explicitement). AI's terminus board-side = laisser le ticket à `In progress` ; l'humain bouge ensuite à `In review` puis `Done` à son rythme.
+- **Jamais `In review` ni `Done` posé par `code-dev`** — pour `In review`, seul `process_tick_result.sh` peut le poser via le flag `--post-merge` après squash-merge réussi dans `epic/<N>` (sub-task d'epic). Pour `Done`, c'est user-only en toutes circonstances. Le script `set_ticket_status.sh` refuse les deux transitions quand appelé par `code-dev` (sans flag).
+- **Ne jamais éditer le body** d'une issue (cf. `rules/comment-formats.md` règle 0). Le body est réservé à l'humain qui a ouvert l'issue (ou à l'architect pour les sub-issues qu'il a créées). Tes interventions vivent dans des commentaires séparés (réponses aux reviews, signalement d'erreur, etc.).
 - **Aucun commentaire dans le code produit** — voir `rules/code-quality.md` section "No comments by default". Seul un `// ` court justifiant un WHY non-évident est toléré.
 - **Jamais de merge depuis `code-dev`** — pas de `gh pr merge`, pas de `git push origin epic/<N>`, jamais. Le squash-merge dans la branche d'intégration est centralisé dans `process_tick_result.sh` après le retour `validated`.
 - **Jamais bypass** — pas de `@ts-ignore`, `--no-verify`, `--no-gpg-sign`, pas de skip CI

@@ -31,11 +31,16 @@ L'epic porte le type **Feature** ; chaque sub-issue porte le type **Task**. À a
 |---|---|---|---|
 | Backlog | `f75ad846` | `product-owner` | création epic (phase `/analyse`) |
 | To Do | `61e4505c` | `architect` | tickets créés, prêts à dispatcher |
-| In progress | `47fc9ee4` | `code-dev` | début ticket — et y reste après `gh pr ready` (validation IA terminée). `code-dev` ne bouge plus le ticket au-delà. |
-| In review | `df73e18b` | **utilisateur uniquement** | quand l'humain décide qu'une PR est prête pour sa propre revue |
+| In progress | `47fc9ee4` | `code-dev` | début ticket — et y reste pendant l'implémentation et après `gh pr ready` (validation IA terminée). |
+| In review | `df73e18b` | `process_tick_result.sh` (sub-task d'epic uniquement, post-merge) **ou** utilisateur (standalone Task/Bug, manuel après merge humain) | sub-task d'epic : juste après squash-merge dans `epic/<N>` ; standalone : l'humain bouge à la main après revue + merge |
 | Done | `98236657` | **utilisateur uniquement** | après validation humaine de la PR mergée |
 
-**Règle absolue** : aucun agent IA ne passe un ticket à `In review` (`df73e18b`) ni `Done` (`98236657`). Les IDs sont listés pour référence mais ne doivent apparaître dans **aucun `gh api` mutation** d'un agent. Le script `set_ticket_status.sh` refuse explicitement les deux transitions (exit 3).
+**Règles** :
+
+1. **`Done` reste user-only** — aucun agent ne pose cette transition, jamais. `set_ticket_status.sh` refuse explicitement (exit 3).
+2. **`In review` n'est autorisé qu'à un seul endroit côté pipeline** : `process_tick_result.sh` après un squash-merge réussi d'une sub-task d'epic dans `epic/<N>`. Le script utilise le flag `--post-merge` de `set_ticket_status.sh` pour cette transition. Toute autre demande de transition `In review` par un agent (notamment `code-dev`, `functional-validator`) est refusée par défaut (`set_ticket_status.sh` exit 3 sans flag).
+3. **Standalone Task / Bug** (pas de parent epic) : `code-dev` ne touche pas au statut après `gh pr ready`. Le ticket reste `In progress`. L'humain merge la PR, ferme l'issue (via `Closes #N`), et bouge manuellement le board à `In review` puis `Done`.
+4. **Ticket Feature (epic)** : jamais bougé par la pipeline. L'humain le ferme et le bouge en `In review` / `Done` à la main, typiquement quand la PR finale `epic/<N> → alpha` est mergée.
 
 ---
 
@@ -169,6 +174,30 @@ mutation($issueId: ID!, $typeId: ID!) {
 - `product-owner` applique **Feature** à l'epic juste après sa création.
 - `architect` applique **Task** à chaque sub-issue juste après sa création (boucle for).
 
+### 8. Assigner un ticket à l'utilisateur (au début de l'implémentation)
+
+Quand `code-dev` démarre un ticket (ou quand le loop driver le dispatche), l'assigner au handle GitHub de l'utilisateur principal du repo pour que les notifications de PR / review revienne directement à lui :
+
+```bash
+gh issue edit "$TICKET_NUMBER" --add-assignee Viczei
+```
+
+Idempotent — si l'utilisateur est déjà assigné, l'opération ne fait rien et ne erreur pas.
+
+**Usage standard** :
+- Mode epic : `epic_loop.sh` assigne chaque sub-task juste avant de spawn l'instance `claude` pour `code-dev`.
+- Mode task / bug : `/implement` assigne le ticket juste avant d'invoquer `code-dev`.
+
+### 9. Bouger un ticket en `In review` après squash-merge (pipeline uniquement)
+
+Réservé à `process_tick_result.sh` après un squash-merge réussi d'une PR de sub-task dans `epic/<N>`. Utilise le flag `--post-merge` de `set_ticket_status.sh` qui débloque la transition normalement refusée :
+
+```bash
+bash scripts/orchestration/set_ticket_status.sh "$TICKET" "In review" --post-merge
+```
+
+Sans le flag, la transition `In review` est rejetée (exit 3). Le flag n'est **jamais** posé par `code-dev` ni par les autres agents — uniquement par `process_tick_result.sh` dans la branche `validated + merge OK`.
+
 ---
 
 ## Diagnostic — re-extraire les IDs si le board a bougé
@@ -202,7 +231,9 @@ Si le board a été recréé, mettre à jour les constantes en haut de ce fichie
 |---|---|
 | `product-owner` | 1, 2 (créer epic, ajouter au project en Backlog puis → To Do en fin de phase) |
 | `architect` | 1, 2, 4, 6 (créer sub-issues, ajouter au project, → To Do, lier au parent) |
-| `code-dev` | 3, 4 (passer To Do → In progress ; ne bouge **jamais** à In review ni Done) |
+| `code-dev` | 3, 4, 8 (passer To Do → In progress + assigner ; ne bouge **jamais** à In review ni Done) |
 | `functional-validator` | aucune (commente seulement, ne touche pas au board) |
+| `process_tick_result.sh` | 9 (sub-task d'epic post-merge : To Do/In progress → In review via `--post-merge`) |
 | `/analyse` | aucune transition de board (les agents conception sont read-only) ; via PO peut ajouter au project en Backlog (op. 1+2+4) |
-| `/implement` | 3, 4, 5 (préconditions + In progress ; mode epic = via le loop driver). Pas de transition à In review. |
+| `/implement` | 3, 4, 5, 8 (préconditions + In progress + assigner ; mode epic = via le loop driver). Pas de transition à In review en mode standalone Task/Bug. |
+| `epic_loop.sh` | 8 (assigner les sub-tasks dispatchées) |

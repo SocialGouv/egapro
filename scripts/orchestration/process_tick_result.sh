@@ -27,18 +27,24 @@ fi
 #
 # Per-status actions:
 #
-# | Status                  | Board change           | Labels                                    | Counter / merge       |
-# |-------------------------|------------------------|-------------------------------------------|-----------------------|
-# | validated               | stays In progress      | clear attempt=N                           | squash-merge into epic/<N> |
-# | needs_opus_escalation   | → To Do                | + complexe                                | reset                 |
-# | refacto                 | → To Do                | bump attempt=N (1→2→3); +dispatch=escalate at 3 | +1              |
-# | rate_limited            | none                   | none (handled by loop driver)             | unchanged             |
-# | failed                  | → To Do                | none (technical, not semantic)            | unchanged             |
+# | Status                  | Board change                                      | Labels                                    | Counter / merge       |
+# |-------------------------|---------------------------------------------------|-------------------------------------------|-----------------------|
+# | validated (sub-task)    | In progress → In review (post-merge succès)       | clear attempt=N                           | squash-merge into epic/<N> |
+# | validated (standalone)  | stays In progress (no auto-merge, human merges)   | clear attempt=N                           | no merge              |
+# | needs_opus_escalation   | → To Do                                           | + complexe                                | reset                 |
+# | refacto                 | → To Do                                           | bump attempt=N (1→2→3); +dispatch=escalate at 3 | +1              |
+# | rate_limited            | none                                              | none (handled by loop driver)             | unchanged             |
+# | failed                  | → To Do                                           | none (technical, not semantic)            | unchanged             |
 #
 # === HARD RULES ===
-# - Never sets a ticket to 'In review' or 'Done' — both transitions are
-#   user-only. The agent's terminus is the squash-merge of the validated PR
-#   into epic/<N>; the ticket stays at 'In progress' until the human moves it.
+# - 'Done' is user-only — this script NEVER posts it.
+# - 'In review' is posted by this script ONLY in one branch :
+#   a successful squash-merge of a sub-task PR into epic/<N>.
+#   The call uses `set_ticket_status.sh <ticket> "In review" --post-merge` ;
+#   any other caller (including agents and the standalone Task/Bug branch)
+#   is refused by `set_ticket_status.sh` with exit 3.
+# - For standalone Task/Bug (no parent epic), the ticket stays at 'In progress'
+#   and the human moves it to 'In review' manually after merging the PR.
 # - Never merges into alpha/master. The only merge done by this script is the
 #   squash-merge of a validated ticket PR into its `epic/<N>` integration
 #   branch — gated by the per-ticket validators (CI green, Sonar green,
@@ -126,14 +132,19 @@ while read -r result; do
     case "$STATUS" in
         validated)
             # code-dev has gh-pr-ready'd the PR and returned validated. The
-            # ticket stays at 'In progress' (board transitions to In review
-            # and Done are user-only). Squash-merge the validated PR into
-            # epic/<N> right now — the next dispatch_plan tick can then
-            # unlock children that depend on this ticket (parent's branch
-            # will be gone after merge).
+            # ticket stays at 'In progress' during the merge attempt. Squash-
+            # merge the validated PR into epic/<N> right now — the next
+            # dispatch_plan tick can then unlock children that depend on this
+            # ticket (parent's branch will be gone after merge).
+            #
+            # Sub-task of an epic, merge succeeds : the ticket is moved to
+            # 'In review' via the --post-merge flag of set_ticket_status.sh.
+            # That's the ONE branch where the pipeline is allowed to post
+            # 'In review' — see the HARD RULES at the top of this file.
             #
             # Standalone Task / Bug (no parent epic) : no auto-merge, the
-            # PR stays open for human review and merge into alpha.
+            # PR stays open for human review and merge into alpha ; ticket
+            # stays at 'In progress' until the human moves it.
             clear_attempt_labels "$TICKET"
             invalidate_caches "$TICKET"
 
@@ -149,7 +160,20 @@ while read -r result; do
                 case "$MERGE_RC" in
                     0)
                         bash "$SCRIPT_DIR/log_event.sh" "$AID" MERGED "ticket=$TICKET pr=$PR epic=$EPIC"
-                        echo "  ✓ ticket #$TICKET validated + squash-merged into epic/$EPIC (PR #$PR)"
+                        # Move ticket to 'In review' post-merge (sub-task of epic only) —
+                        # the --post-merge flag is required ; set_ticket_status.sh refuses
+                        # otherwise (HARD RULE).
+                        set +e
+                        bash "$SCRIPT_DIR/set_ticket_status.sh" "$TICKET" "In review" --post-merge >/dev/null 2>&1
+                        REVIEW_RC=$?
+                        set -e
+                        if [ "$REVIEW_RC" -eq 0 ]; then
+                            bash "$SCRIPT_DIR/log_event.sh" "$AID" IN_REVIEW "ticket=$TICKET pr=$PR epic=$EPIC"
+                            echo "  ✓ ticket #$TICKET validated + squash-merged into epic/$EPIC (PR #$PR) + moved to In review"
+                        else
+                            bash "$SCRIPT_DIR/log_event.sh" "$AID" IN_REVIEW_FAIL "ticket=$TICKET rc=$REVIEW_RC"
+                            echo "  ✓ ticket #$TICKET validated + squash-merged into epic/$EPIC (PR #$PR) — In review transition failed (rc=$REVIEW_RC), manual move needed"
+                        fi
                         N_VALIDATED=$((N_VALIDATED + 1))
                         N_MERGED=$((N_MERGED + 1))
                         ;;

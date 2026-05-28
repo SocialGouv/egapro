@@ -6,7 +6,7 @@ if [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
   echo "Bash 4+ required. Install via 'brew install bash'." >&2
   exit 1
 fi
-# set_ticket_status.sh <ticket_number> <status_label>
+# set_ticket_status.sh <ticket_number> <status_label> [--post-merge]
 #
 # Moves an issue to the given status on the EGAPRO V2 GitHub project board.
 # Encapsulates the 3 GraphQL calls described in .claude/rules/github-board.md
@@ -20,17 +20,27 @@ fi
 # the board: "Backlog", "To Do", "In progress", "In review", "Done".
 #
 # === HARD RULES ===
-# Two transitions are USER-ONLY — agents must never trigger them :
-# 1. "Done" — set by the user once they validate the merged work.
-# 2. "In review" — set by the user once they decide a PR is ready for their
-#    own review. AI's terminus is the JSON `validated` return + the PR being
-#    out of draft (`gh pr ready`) ; the ticket stays at `In progress` until
-#    the human moves it.
-# This script REJECTS both transitions with exit code 3.
+#
+# 1. "Done" — set by the user once they validate the merged work. NEVER set
+#    by an agent or by the pipeline. This script ALWAYS rejects "Done"
+#    (exit 3) regardless of any flag.
+#
+# 2. "In review" — refused by default (exit 3). Two semantics co-exist :
+#
+#    a. Agent / direct caller (no flag) — REFUSED. The agent's terminus is
+#       the JSON `validated` return + the PR being out of draft
+#       (`gh pr ready`) ; the ticket stays at `In progress` until either the
+#       pipeline moves it post-merge, or the human moves it for standalone
+#       Task/Bug.
+#
+#    b. process_tick_result.sh, after a successful squash-merge of a
+#       sub-task PR into epic/<N> — ALLOWED via the `--post-merge` flag.
+#       The pipeline is responsible for posting this transition and only in
+#       that exact branch. Any other use of the flag is a misuse.
 #
 # Usage:
 #   set_ticket_status.sh 123 "In progress"
-#   set_ticket_status.sh 123 "In review"
+#   set_ticket_status.sh 123 "In review" --post-merge   # pipeline only
 #
 # Env:
 #   EGAPRO_PROJECT_ID       — override project ID (default: PVT_kwDOAh0HH84BFsK7)
@@ -39,13 +49,15 @@ fi
 set -euo pipefail
 
 if [ $# -lt 2 ]; then
-    echo "Usage: $0 <ticket_number> <status_label>" >&2
+    echo "Usage: $0 <ticket_number> <status_label> [--post-merge]" >&2
     echo "  status_label: Backlog | To Do | In progress | In review" >&2
+    echo "  --post-merge: required to transition to 'In review' (pipeline only)" >&2
     exit 2
 fi
 
 TICKET="$1"
 STATUS_RAW="$2"
+POST_MERGE_FLAG="${3:-}"
 
 PROJECT_ID="${EGAPRO_PROJECT_ID:-PVT_kwDOAh0HH84BFsK7}"
 STATUS_FIELD_ID="${EGAPRO_STATUS_FIELD_ID:-PVTSSF_lADOAh0HH84BFsK7zg29EI8}"
@@ -57,19 +69,25 @@ case "$STATUS_RAW" in
     "To Do"|"To do"|"to do"|Todo|todo) OPTION_ID="61e4505c" ;;
     "In progress"|"In Progress"|"in progress"|"In-progress") OPTION_ID="47fc9ee4" ;;
     "In review"|"In Review"|"in review"|"In-review")
-        echo "REFUSED: AI agents must never set a ticket to 'In review' — that's user-only." >&2
-        echo "  AI's terminus is `validated` JSON + `gh pr ready`; ticket #$TICKET stays at 'In progress'." >&2
-        exit 3
+        if [ "$POST_MERGE_FLAG" != "--post-merge" ]; then
+            echo "REFUSED: 'In review' requires the --post-merge flag (pipeline only)." >&2
+            echo "  Agent's terminus is 'validated' JSON + 'gh pr ready'; ticket #$TICKET stays at 'In progress'." >&2
+            echo "  For sub-tasks of an epic, process_tick_result.sh handles the post-merge transition." >&2
+            echo "  For standalone Task/Bug, the human moves the board to 'In review' manually after merging the PR." >&2
+            exit 3
+        fi
+        OPTION_ID="df73e18b"
         ;;
     Done|done)
-        echo "REFUSED: AI agents must never set a ticket to 'Done' — that's user-only." >&2
+        echo "REFUSED: 'Done' is user-only — neither agents nor the pipeline ever post this transition." >&2
         echo "  Ticket #$TICKET stays at its current status." >&2
         exit 3
         ;;
     *)
         echo "ERROR: unknown status label '$STATUS_RAW'" >&2
         echo "  Accepted (agents): Backlog | To Do | In progress" >&2
-        echo "  Accepted (user): + In review | Done" >&2
+        echo "  Accepted (pipeline post-merge): + In review" >&2
+        echo "  Accepted (user only, not callable): + Done" >&2
         exit 2
         ;;
 esac

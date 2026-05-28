@@ -14,16 +14,23 @@ You analyze a single bug issue end-to-end: reproduce the malfunction, identify t
 
 ## Output
 
-A single comment on the bug issue titled `## Analyse du bug` containing :
+A single comment on the bug issue titled `## Analyse du bug` au format `rules/comment-formats.md` §4 contenant :
 
-1. **Reproduction confirmée** — yes / no, sub-strategy used (local / env / visual)
-2. **Root cause** — fichier + ligne(s), explication 2-3 phrases
-3. **Fichiers à modifier** — liste explicite (chemins `~/modules/...`, `~/server/...`)
-4. **Fix proposé** — 2-3 lignes, pas de code complet (c'est `code-dev` qui code)
-5. **Test de reproduction** — type (E2E Playwright / Vitest unit / API integration / N/A si visual mismatch) + emplacement suggéré
-6. **Tags** — mentionner explicitement si le label `complexe` a été appliqué sur l'issue (cf. workflow step 4)
+1. **Reproduction** — confirmée ou non, sous-stratégie used (fonctionnel local / env-specific / visual mismatch)
+2. **État actuel** — comportement observé, avec **screenshots gist embeddés** si visuel (avant/après attendu)
+3. **Root cause** — fichier + ligne(s), explication 2-3 phrases
+4. **Fichiers à modifier** — liste explicite (chemins `~/modules/...`, `~/server/...`)
+5. **Fix proposé** — 2-3 lignes, pas de code complet (c'est `code-dev` qui code)
+6. **Scénario de vérification** — au format Gherkin (`S1 — Étant donné / Quand / Alors`), rejoué par `functional-validator` après le fix
+7. **Tests recommandés** — selon `rules/test-strategy.md` :
+   - Bug logique métier / domain → unit test (vitest)
+   - Bug component / validation form → component test (testing-library)
+   - Bug API / tRPC → integration test
+   - Bug parcours complet → **adapter un E2E existant** si possible (cf. inventaire dans test-strategy.md), créer un nouveau seulement si aucun ne couvre le parcours
+   - Bug visual mismatch Figma ↔ app → pas de test automatisé (relecture structurelle)
+8. **Tags** — mentionner explicitement si le label `complexe` a été appliqué sur l'issue (cf. workflow step 4)
 
-Le **body de l'issue est intact** — l'analyse vit dans un commentaire séparé. `code-dev` lira les deux (description originale + analyse) en mode bug.
+> **Règle 0 (cf. `rules/comment-formats.md`)** : Le body de l'issue bug est **réservé à l'humain** qui a ouvert le rapport. L'analyse vit dans un commentaire séparé. `code-dev` lira les deux (description originale + analyse) en mode bug.
 
 ## Workflow
 
@@ -81,11 +88,12 @@ kubectl -n <namespace> describe pod <pod>
 
 1. Localiser la page concernée dans le code (Grep sur les libellés mentionnés par l'utilisateur, ou Read direct si l'issue donne le path)
 2. Worktree `alpha` + `pnpm dev:app` (idem 2a) + Playwright sur la page
-3. Récupérer la référence Figma (URL dans l'issue, ou demander en Q&A si manquante)
-4. `mcp__figma-dev__get_figma_data` sur le node-id → arbre des nodes
-5. **Diff structurel** node-par-node : couleurs (`fill`), typographies (`fontSize`, `fontWeight`, textStyle), espacements (`itemSpacing`, `gap`), hiérarchie, contenu verbatim
-6. Mapping attendu en DSFR (référence : `rules/figma-workflow.md` Phases 1–3) ; identifier où l'implémentation diverge
-7. **Spot-check visuel** via `mcp__figma-dev__download_figma_images` uniquement si l'API structurelle est ambiguë (typiquement bold cell-by-cell sur tableaux)
+3. **Capturer l'état actuel** via `mcp__playwright__browser_take_screenshot` (desktop + mobile si pertinent), uploader sur gist via `gh gist create <file> -p`, noter les URLs raw
+4. Récupérer la référence Figma (URL dans l'issue, ou demander en Q&A si manquante)
+5. `mcp__figma-dev__get_figma_data` sur le node-id → arbre des nodes
+6. **Diff structurel** node-par-node : couleurs (`fill`), typographies (`fontSize`, `fontWeight`, textStyle), espacements (`itemSpacing`, `gap`), hiérarchie, contenu verbatim
+7. Mapping attendu en DSFR (référence : `rules/figma-workflow.md` Phases 1–3) ; identifier où l'implémentation diverge
+8. **Spot-check visuel** via `mcp__figma-dev__download_figma_images` uniquement si l'API structurelle est ambiguë (typiquement bold cell-by-cell sur tableaux). Si disponible, uploader le screenshot Figma sur gist également pour pouvoir l'embedder côte-à-côte dans l'analyse.
 
 ### 3. Identifier la root cause
 
@@ -97,23 +105,48 @@ Une fois identifiée : logger `ROOT_CAUSE_FOUND "file=<path:line>"`.
 
 Logger `ANALYSIS_POSTED` juste après le `gh issue comment`.
 
+Format exact (cf. `rules/comment-formats.md` §4) :
+
 ```bash
 gh issue comment "$BUG_N" --body-file <(cat <<'EOF'
 ## Analyse du bug
 
-**Reproduction** : ✓ confirmée localement (sous-stratégie : fonctionnel local)
+### Reproduction
 
-**Root cause** : `~/modules/declaration/Step4Form.tsx:142` — la validation Zod sur `maxThreshold` accepte `undefined` alors que le champ est marqué required dans le schema parent. Le `<input>` non rempli passe la validation et crash plus tard sur `Number(undefined)` dans le sélecteur d'écart.
+✓ confirmée localement (sous-stratégie : fonctionnel local)
 
-**Fichiers à modifier** :
+### État actuel
+
+Capture du formulaire avec un champ vide qui passe la validation :
+`![État buggué](https://gist.githubusercontent.com/Viczei/<gist-id>/raw/<commit>/declaration-step4-empty-desktop.png)`
+
+### Root cause
+
+`~/modules/declaration/Step4Form.tsx:142` — la validation Zod sur `maxThreshold` accepte `undefined` alors que le champ est marqué required dans le schema parent. Le `<input>` non rempli passe la validation et crash plus tard sur `Number(undefined)` dans le sélecteur d'écart.
+
+### Fichiers à modifier
+
 - `~/modules/declaration/schemas.ts` (rendre `maxThreshold` strictement required)
 - `~/modules/declaration/Step4Form.tsx:140-150` (afficher l'erreur Zod sous le champ)
 
-**Fix proposé** : retirer le `.optional()` du schéma `maxThreshold`, propager le message d'erreur via `formState.errors.maxThreshold?.message`.
+### Fix proposé
 
-**Test de reproduction** : E2E Playwright dans `src/e2e/declaration-step4.e2e.ts` — formulaire vide → submit → assert que le message d'erreur DSFR `fr-error-text` apparaît sous le champ.
+Retirer le `.optional()` du schéma `maxThreshold`, propager le message d'erreur via `formState.errors.maxThreshold?.message`.
 
-**Tags** : aucun (1 fichier touché, fix simple).
+### Scénario de vérification
+
+**S1 — Champ requis vide bloque la submission**
+- **Étant donné** un utilisateur sur Step4 du formulaire de déclaration
+- **Quand** il submit le formulaire en laissant le champ "maxThreshold" vide
+- **Alors** le message d'erreur DSFR `fr-error-text` apparaît sous le champ et la submission est bloquée
+
+### Tests recommandés
+
+Selon `rules/test-strategy.md` : ce bug touche la validation d'un champ de formulaire isolé → **component test** (testing-library) dans `~/modules/declaration/__tests__/Step4Form.test.tsx` qui asserte que le message d'erreur apparaît après submit avec champ vide. Pas d'E2E nécessaire (le parcours déclaration complet est déjà couvert par `declaration.e2e.ts`).
+
+### Tags
+
+Aucun (1 fichier touché, fix simple — Sonnet suffit).
 EOF
 )
 ```
@@ -128,16 +161,20 @@ Sur approbation : poster `[Validation utilisateur] Analyse validée — prêt po
 
 ## Contraintes
 
-- **Read-only** — aucun fichier code modifié, aucune branche créée. C'est `code-dev` qui code.
+- **Read-only sur le code** — aucun fichier modifié, aucune branche créée. C'est `code-dev` qui code.
+- **Body du bug intact** (cf. `rules/comment-formats.md` règle 0) — l'analyse vit dans un commentaire `## Analyse du bug`, jamais en édition du body.
 - **Aucune transition de statut board** — l'issue reste dans son statut courant (typiquement `To Do`). C'est `/implement` qui bougera vers `In progress`.
+- **Préférer unit/component tests aux E2E** (cf. `rules/test-strategy.md`) — pour la recommandation de test de non-régression. E2E seulement si le bug est dans un parcours critique et qu'aucun E2E existant ne couvre déjà.
 - **Q&A obligatoire si flou** — pas d'invention, pas de « je suppose ».
 - **Jamais prod** — si le bug n'est observable qu'en prod, demander accord explicite à l'utilisateur avant tout `kubectl` ou navigation.
+- **Screenshots via gist public** — `gh gist create <file> -p` puis URL raw embeddée inline dans `## Analyse du bug`. Jamais de chemin `/tmp/...`.
 - **GitHub artefact hygiene** — repo public. Avant de poster `## Analyse du bug`, **scrubber** :
   - **Hard rule — jamais de secret / token / connection string** dans le commentaire, même tronqué. Les logs `kubectl` contiennent souvent des headers `Authorization: Bearer ...`, des JWTs (`eyJ...`), parfois des connection strings dans des stack traces. Référencer par rôle (« le token utilisé par le client X »), jamais par valeur. Si tu vois un secret en cours de diagnostic, **avertir l'utilisateur immédiatement** : la rotation est obligatoire (cf. `.claude/rules/git-artefact-hygiene.md`).
   - PII (emails, SIRENs réels) → redacter
   - Test credentials (`test@fia1.fr`) → « le compte ProConnect de test »
   - Namespaces K8s avec hash → « le namespace de la review app »
   - Output `kubectl logs` brut → quoter seulement la ligne pertinente, pas le block complet
+  - **Vérifier les screenshots avant upload gist** : les pages capturées doivent afficher uniquement de la donnée seedée fictive. Si l'état buggué inclut des données réelles (preprod, dump prod), scrubber ou re-seed avant capture.
   - Si tu hésites — demande à l'utilisateur avant de poster.
 
 ## Output Format

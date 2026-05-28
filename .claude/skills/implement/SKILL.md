@@ -141,18 +141,23 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
    bash scripts/orchestration/create_linked_branch.sh "$ISSUE_N" "$BASE_BRANCH"
    ```
 
-3. **Status board** : `set_ticket_status.sh "$ISSUE_N" "In progress"`.
+3. **Status board + assignation** :
+   ```bash
+   bash scripts/orchestration/set_ticket_status.sh "$ISSUE_N" "In progress"
+   gh issue edit "$ISSUE_N" --add-assignee Viczei
+   ```
+   L'assignation est idempotente (no-op si déjà assigné). Cf. `rules/github-board.md` snippet 8.
 
 4. **Invoquer `code-dev`** en foreground via le subagent :
    - Inputs : ticket number, worktree path, worktree index, base branch (sans préfixe `origin/`), working branch.
    - Si label `complexe` → model `opus`, sinon `sonnet`.
-   - L'agent suit `code-dev/AGENT.md` : implémente, push, ouvre PR draft, force PR↔issue link, fait passer les 4 quality gates + `functional-validator`, `gh pr ready`, retourne JSON. **Le ticket reste en `In progress`** — les transitions `In review` et `Done` sont user-only.
+   - L'agent suit `code-dev/AGENT.md` : implémente, push, ouvre PR draft, force PR↔issue link, fait passer les 4 quality gates + `functional-validator`, `gh pr ready`, retourne JSON. **Le ticket reste en `In progress`** au retour — c'est l'humain qui le bouge à `In review` puis `Done` après revue + merge de la PR sur `alpha` (mode standalone Task/Bug).
 
 5. **Parser le JSON retourné** :
 
    | `.status` | Action skill | Markdown affiché |
    |---|---|---|
-   | `validated` | aucune (ticket reste In progress, l'utilisateur le bouge à In review à son rythme) | `## Code: PASS` + ticket/branche/PR + next-step revue humaine |
+   | `validated` | aucune (ticket reste In progress ; l'utilisateur revoit, merge la PR, et bouge le board) | `## Code: PASS` + ticket/branche/PR + next-step revue humaine |
    | `needs_opus_escalation` | re-invoquer immédiatement `code-dev` en `model: "opus"` avec les mêmes inputs ; afficher le verdict final | `## Code: PASS` ou `## Code: REFACTO` selon le retour Opus |
    | `refacto` | aucune (le ticket est en To Do) | `## Code: REFACTO` + diagnostic + next-step `/analyse <N>` (re-spec) |
    | `rate_limited` | proposer de retenter dans `retry_in` secondes ou abandonner | `## Code: RATE_LIMITED` + délai suggéré |
@@ -161,8 +166,10 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 6. **Pour les sub-issues d'epic validées en mode synchrone** : `process_tick_result.sh` n'est pas appelé (c'est un mécanisme du loop driver). Le squash-merge de la PR validée dans `epic/<N>` peut être déclenché manuellement :
    ```bash
    bash scripts/orchestration/merge_validated_ticket.sh "$PR_N" "$EPIC_N" "$ISSUE_N"
+   # En cas de succès, déplacer aussi le board à In review (cohérent avec le mode epic)
+   bash scripts/orchestration/set_ticket_status.sh "$ISSUE_N" "In review" --post-merge
    ```
-   À déclencher seulement si l'utilisateur veut que les enfants suivants se débloquent. Pour une Task / Bug standalone, pas de squash-merge auto — l'humain merge la PR sur `alpha` à la review.
+   À déclencher seulement si l'utilisateur veut que les enfants suivants se débloquent. Pour une Task / Bug **standalone** (pas de parent epic), **pas de squash-merge auto** et **pas de transition `In review` posée par la pipeline** — l'humain merge la PR sur `alpha` à la review, GitHub ferme l'issue via `Closes #N`, et l'humain bouge le board en `In review` puis `Done` à son rythme.
 
 ---
 
@@ -228,6 +235,10 @@ L'utilisateur retire `dispatch=escalate` (et `attempt=3`) après orientation pou
 - **NE PAS** attendre le retour du loop driver en mode epic (`nohup ... &; disown`)
 - **NE PAS** poll l'état — utiliser `/report`
 - **En mode task/bug**, c'est synchrone : tu invoques `code-dev` et tu attends le JSON final, comme l'ancien `/code`
+- **Toujours assigner** le ticket à l'utilisateur au démarrage (mode epic : géré par `epic_loop.sh` ; mode task/bug : géré ici en step 3). C'est ce qui garantit que les notifs PR / review reviennent à l'utilisateur.
+- **Transition `In review`** : posée par `process_tick_result.sh` après squash-merge réussi (sub-task d'epic uniquement). Pour standalone Task/Bug, jamais posée par la pipeline. Le ticket reste en `In progress` jusqu'à intervention humaine.
+- **`Done`** : toujours user-only.
+- **Préférer unit/component tests aux E2E** (cf. `rules/test-strategy.md`) — `code-dev` est briefé pour ça mais c'est aussi le rôle de l'architect de l'imposer dans la section `## Tests recommandés` du spec.
 - Avant tout dispatch : check **analyse présente** (cf. Step 1) ; sinon proposer `/analyse <N>` et exit
 
 ---

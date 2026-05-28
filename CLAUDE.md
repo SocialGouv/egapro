@@ -151,26 +151,39 @@ Quality checks run **automatically** après chaque itération de code — pas de
                                                    (avec bug-fix-workflow)
  Sortie :                                   Sortie :
    epic = epic GitHub + N sub-issues          epic = N PRs squash-mergées dans
-   task = ## Analyse architecte sur l'issue          epic/<N>, PR finale → alpha
-   bug  = ## Analyse du bug sur l'issue       task = PR sur alpha, ticket reste "In progress"
-                                              bug  = PR sur alpha, ticket reste "In progress"
-                                              (l'utilisateur passe à "In review" puis "Done" lui-même)
+   task = ## Analyse architecte sur l'issue          epic/<N> (sub-tasks auto → In review post-merge),
+   bug  = ## Analyse du bug sur l'issue              PR finale epic/<N> → alpha (humain merge)
+                                              task = PR draft → ready, ticket reste "In progress"
+                                              bug  = PR draft → ready, ticket reste "In progress"
+                                              (l'humain merge la PR puis bouge le board
+                                               à "In review" puis "Done" lui-même)
 ```
+
+**Points clés du flow** :
+- **Body intact** (cf. `rules/comment-formats.md` règle 0) : aucun agent ne réécrit le body d'une issue. Exception unique : l'architect écrit le body des sub-issues qu'il vient de créer en mode `epic-*`. Toute analyse / révision vit dans des **commentaires séparés** avec des headers stables (`## Besoin métier`, `## Analyse PO`, `## Analyse architecte`, `## Analyse du bug`).
+- Le `product-owner` se base sur **`docs/` + exploration Playwright MCP** (plus sur le code) et joint des **screenshots gist** de l'état actuel de l'app à ses scénarios.
+- L'`architect` recopie les scénarios PO + screenshots gist dans les sub-tasks UI (mode `epic-*`) ou dans le commentaire `## Analyse architecte` (mode `task`), avec une section `## Résultat attendu` détaillée.
+- **Tests** : préférence forte pour **unit/component tests** sur E2E (cf. `rules/test-strategy.md`). Pas de ticket E2E-only sauf si la demande utilisateur l'explicite ; sinon **adapter un E2E existant** (inventaire dans `rules/test-strategy.md`).
+- **Assignation** : chaque ticket en implémentation est assigné à `Viczei` (le user principal) au démarrage par `epic_loop.sh` (mode epic) ou `/implement` (mode task/bug).
+- **Transition `In review`** :
+  - **Sub-task d'epic** : posée automatiquement par `process_tick_result.sh` après squash-merge réussi dans `epic/<N>` (via le flag `--post-merge` de `set_ticket_status.sh`). L'issue est aussi fermée par GitHub via `Closes #N` à ce moment-là.
+  - **Standalone Task/Bug** : pas posée par la pipeline. L'humain merge la PR sur `alpha` à son rythme, GitHub ferme l'issue, et l'humain bouge le board en `In review` puis `Done` à la main.
+- **`Done`** : toujours user-only (jamais posé par un agent ou par la pipeline).
 
 ### Agents (`.claude/agents/`)
 
 **Pipeline conception** (Opus, invoqués par `/analyse`) :
 | Agent | Rôle |
 |---|---|
-| `product-owner` | Refine le besoin, rédige les scénarios PO sur l'epic (mode epic uniquement) |
-| `architect` | 3 modes : `epic-create` / `epic-enrich` (sub-issues d'un epic), `task` (commentaire `## Analyse architecte` sur une task isolée) |
-| `bug-analyst` | Reproduit + diagnostique un bug (3 sous-stratégies : local / env / Figma diff). Poste `## Analyse du bug`. |
+| `product-owner` | Refine le besoin (sources : `docs/` + Playwright MCP, plus le code), rédige les scénarios PO sur l'epic avec **screenshots gist** de l'app actuelle (mode epic uniquement) |
+| `architect` | 3 modes : `epic-create` / `epic-enrich` (sub-issues d'un epic, body avec scénarios PO + gist embeddés + `## Résultat attendu` détaillé), `task` (commentaire `## Analyse architecte` sur une task isolée — **jamais le body**). Refuse les tickets E2E-only sauf demande explicite. |
+| `bug-analyst` | Reproduit + diagnostique un bug (3 sous-stratégies : local / env / Figma diff). Poste `## Analyse du bug` avec screenshots gist si visual et scénario de vérification Gherkin. **Body intact.** |
 
 **Pipeline exécution** (invoqués par `/implement`) :
 | Agent | Rôle |
 |---|---|
-| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature) ou le commentaire d'analyse (Task / Bug). Pour les tickets UI, vérifie lui-même la fidélité Figma via le MCP `figma-dev`. |
-| `functional-validator` | Rejoue les scénarios PO dans le dev server |
+| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature sub-task) ou le commentaire d'analyse (Task / Bug). Rejoue les scénarios pendant l'impl. Pour les tickets UI, vérifie lui-même la fidélité Figma via le MCP `figma-dev`. Assigne le ticket à `Viczei` au démarrage. |
+| `functional-validator` | Agent QA. Rejoue les scénarios de validation du ticket (Feature : body ; Task : commentaire architect ; Bug : commentaire bug-analyst) dans le dev server. Verdict PASS/RETRY/REFACTO. |
 | `doc-writer` | Régénère `docs/*.md` from scratch à partir de l'état courant du code. Invoqué par `epic_loop.sh` en fin d'epic (juste avant `open_epic_final_pr.sh`) ou par le skill `/doc` (humain). Sonnet, sans worktree dédié — opère sur la branche courante. |
 
 **Pipeline review** (invoqué par `/review`) :
@@ -197,7 +210,7 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | `/review [<issue#>\|<PR#>]` | Adresse les commentaires de revue (humain + bots). Détecte le mode (epic / task / bug) selon le type d'issue ; en mode epic, traite toutes les sub-task PRs liées à la feature et applique les fixes sur `epic/<N>`. Délègue à l'agent `review-fixer` qui tourne en worktree. |
 | `/doc [<issue#>]` | Régénère `docs/features.md` / `architecture.md` / `parcours-utilisateurs.md` à partir de l'état courant du code. Sans arg : commit local sur la branche courante (l'humain push). Avec `<issue#>` (epic ou task) : se positionne sur la branche cible, commit + push. Délègue à l'agent `doc-writer`. Hors pipeline / en complément de l'invocation auto par `epic_loop.sh`. |
 
-Workflow standard : `/analyse <issue>` pour la conception (modes auto-détectés), puis `/implement <issue>` pour l'exécution. Le ticket reste en `In progress` même quand l'IA a fini — c'est l'utilisateur qui le bouge à `In review` puis `Done` à son rythme. `/review` prend le relais quand les humains commentent les PR. `/doc` régénère la doc utilisateur depuis le code (auto en fin d'epic, manuel hors pipeline).
+Workflow standard : `/analyse <issue>` pour la conception (modes auto-détectés), puis `/implement <issue>` pour l'exécution. Pour les **sub-tasks d'epic**, le ticket bouge automatiquement à `In review` après squash-merge dans `epic/<N>` (via `process_tick_result.sh`) ; pour les **standalone Task/Bug**, le ticket reste en `In progress` et l'humain bouge à `In review` puis `Done` après merge de la PR. `/review` prend le relais quand les humains commentent les PR. `/doc` régénère la doc utilisateur depuis le code (auto en fin d'epic, manuel hors pipeline).
 
 ### Orchestration (`scripts/orchestration/`)
 
@@ -213,8 +226,8 @@ Tous les scripts shell portent leur propre header `--help`-friendly. Le mode epi
 | `run_doc_writer.sh` | Invoque l'agent `doc-writer` sur `epic/<N>` (depuis le main worktree, pas de worktree dédié). Régénère `docs/*.md` from scratch et commit + push. Best-effort : un échec/rate-limit ne bloque pas l'ouverture de la PR finale. Budget Sonnet par défaut $5 (`EPIC_LOOP_BUDGET_DOC`). |
 | `cleanup_terminal_worktrees.sh` | Scan les worktrees `egapro-epic<E>-t<N>` ; teardown + remove ceux dont le ticket a été squash-mergé dans `epic/<N>` (signal canonique : la branche `ticket/<N>-*` est gone d'origin). Appelé à chaque tick par `epic_loop.sh` pour libérer les slots dynamiquement. |
 | `dispatch_plan.sh` | Calcule la JSON list des tickets dispatchables : parse `## Depends on`, gate les enfants dont le parent n'est pas encore squash-mergé dans `epic/<N>` (= sa branche n'existe plus sur origin), alloue les indices libres dans `[0, EPIC_MAX_PARALLEL[`. Base = `origin/epic/<N>` toujours. |
-| `process_tick_result.sh` | Applique les mutations board selon le statut JSON retourné par `code-dev`. Sur `validated` (NEW mode) → invoke `merge_validated_ticket.sh`. Compteur `attempt=N` pour anti-boucle 3 refacto consécutifs → `dispatch=escalate`. |
-| `set_ticket_status.sh` | Encapsule les 3 GraphQL calls de `rules/github-board.md`. **Refuse explicitement la transition `Done`** (user-only). |
+| `process_tick_result.sh` | Applique les mutations board selon le statut JSON retourné par `code-dev`. Sur `validated` (sub-task d'epic) → invoke `merge_validated_ticket.sh` puis bouge le ticket à `In review` via `set_ticket_status.sh ... --post-merge`. Compteur `attempt=N` pour anti-boucle 3 refacto consécutifs → `dispatch=escalate`. |
+| `set_ticket_status.sh` | Encapsule les 3 GraphQL calls de `rules/github-board.md`. **Refuse `Done` toujours** (user-only). **Refuse `In review` par défaut** ; accepté uniquement avec le flag `--post-merge` (utilisé exclusivement par `process_tick_result.sh` après squash-merge d'une sub-task). |
 | `create_linked_branch.sh` | Crée une branche linkée à l'issue via `createLinkedBranch` GraphQL — la branche apparaît dans la sidebar Development de l'issue. Base = `epic/<N>` en NEW mode. |
 | `force_pr_issue_link.sh` | Appelé par `code-dev` juste après `gh pr create` pour forcer le `closingIssuesReferences` à se peupler (sinon, l'auto-linker GitHub ne fire que quand la PR cible `master`). Workaround : flip la base sur `master`, sleep 3, revenir sur la base d'origine. Idempotent. ~2 CI runs supplémentaires par appel. |
 | `open_worktree.sh` | Recrée un worktree pour une PR donnée (skill `/open <PR>`). Utile pour tester localement après auto-cleanup. |
@@ -223,7 +236,7 @@ Tous les scripts shell portent leur propre header `--help`-friendly. Le mode epi
 | `epic_state.sh` | Tableau compact des sous-tickets d'un epic (status board + last log event + retries + PR liée). |
 | `render_dashboard.sh` | Dashboard `/report` agents actifs, triés par inactivité, avec alertes >10min. |
 
-**Modèle de branche d'intégration** : chaque epic a sa branche `epic/<N>` créée depuis `alpha` au startup d'`epic_loop.sh`. Toutes les PRs des sous-tickets ciblent `epic/<N>`. Une fois validée par toute la pipeline (CI + Sonar + validators IA + bots), `process_tick_result.sh` squash-merge la PR dans `epic/<N>` (le ticket reste en `In progress` côté board — `In review` est user-only). Les tickets enfants (qui dépendent d'un parent) ne démarrent qu'une fois leur parent squash-mergé (signal canonique : la branche `ticket/<parent>-*` n'existe plus sur origin, le board status est décoratif). Entre ticks, `epic/<N>` est rebasée sur `origin/alpha` pour rester fraîche. À la fin, une PR unique `epic/<N> → alpha` est ouverte pour la **review humaine** — c'est le seul point d'intervention humain pour valider l'epic complet.
+**Modèle de branche d'intégration** : chaque epic a sa branche `epic/<N>` créée depuis `alpha` au startup d'`epic_loop.sh`. Toutes les PRs des sous-tickets ciblent `epic/<N>`. Une fois validée par toute la pipeline (CI + Sonar + validators IA + bots), `process_tick_result.sh` squash-merge la PR dans `epic/<N>` (l'issue est fermée par GitHub via `Closes #N`) et bouge le ticket à `In review` sur le board (via `set_ticket_status.sh ... --post-merge`). Les tickets enfants (qui dépendent d'un parent) ne démarrent qu'une fois leur parent squash-mergé (signal canonique : la branche `ticket/<parent>-*` n'existe plus sur origin). Entre ticks, `epic/<N>` est rebasée sur `origin/alpha` pour rester fraîche. À la fin, une PR unique `epic/<N> → alpha` est ouverte pour la **review humaine** — c'est le seul point d'intervention humain pour valider l'epic complet. Le **ticket Feature (epic)** reste user-only pour les transitions `In review` et `Done` ; l'humain le bouge quand il veut.
 
 **Note migration** : les epics créés avant l'introduction de ce modèle (mode legacy historique : stacked PRs, base `alpha`, pas d'auto-merge) ne sont **pas** repris par la pipeline actuelle — l'utilisateur les gère à la main jusqu'à clôture.
 
