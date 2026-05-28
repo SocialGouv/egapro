@@ -1,4 +1,5 @@
 import { auth } from "~/server/auth";
+import { api } from "~/trpc/server";
 import { HeaderQuickAccessLinks } from "./HeaderQuickAccessLinks";
 import { MobileUserBlock } from "./MobileUserBlock";
 import { Navigation } from "./Navigation";
@@ -20,6 +21,12 @@ import { Navigation } from "./Navigation";
 export async function MobileMenu() {
 	const session = await auth();
 
+	// Read phone fresh from DB (cf. HeaderQuickAccess for the rationale).
+	const profile = session?.user
+		? await api.profile.get().catch(() => null)
+		: null;
+	const userPhone = profile?.phone ?? null;
+
 	return (
 		<div className="fr-header__menu fr-modal" id="modal-menu">
 			<div className="fr-container">
@@ -31,13 +38,13 @@ export async function MobileMenu() {
 					Fermer
 				</button>
 				<div className="fr-header__menu-links">
-					<HeaderQuickAccessLinks session={session} />
+					<HeaderQuickAccessLinks session={session} userPhone={userPhone} />
 				</div>
 				{session?.user && (
 					<MobileUserBlock
 						userEmail={session.user.email ?? ""}
 						userName={session.user.name ?? "Utilisateur"}
-						userPhone={session.user.phone ?? undefined}
+						userPhone={userPhone ?? undefined}
 					/>
 				)}
 				{!session?.user && <Navigation />}
