@@ -314,7 +314,6 @@ test.describe("admin unified stats dashboard — platform funnel section (S5/S6)
 	}) => {
 		await page.goto("/admin/stats");
 
-		// Select the seeded year so funnel data renders.
 		const firstYear = page.locator(".fr-grid-row").filter({
 			hasText: /tranche d'effectif/i,
 		});

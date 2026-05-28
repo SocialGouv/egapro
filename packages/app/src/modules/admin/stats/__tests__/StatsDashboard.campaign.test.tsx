@@ -59,13 +59,6 @@ vi.mock("../CampaignRateTile", () => ({
 
 import { StatsDashboard } from "../StatsDashboard";
 
-const emptyFunnelData = {
-	mainFunnel: [],
-	complianceFunnel: [],
-	revisionFunnel: [],
-	cseFunnel: [],
-};
-
 const defaultMocks = () => {
 	progressionUseQueryMock.mockReturnValue({
 		data: [],
@@ -88,13 +81,18 @@ const defaultMocks = () => {
 		isError: false,
 	});
 	funnelUseQueryMock.mockReturnValue({
-		data: emptyFunnelData,
+		data: {
+			mainFunnel: [],
+			complianceFunnel: [],
+			revisionFunnel: [],
+			cseFunnel: [],
+		},
 		isLoading: false,
 		isError: false,
 	});
 };
 
-describe("StatsDashboard — structure and filters", () => {
+describe("StatsDashboard — campaign section states", () => {
 	beforeEach(() => {
 		progressionUseQueryMock.mockReset();
 		stepDurationsUseQueryMock.mockReset();
@@ -104,76 +102,21 @@ describe("StatsDashboard — structure and filters", () => {
 		defaultMocks();
 	});
 
-	it("renders the h1 Statistiques heading", () => {
-		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
-		);
-		expect(
-			screen.getByRole("heading", { name: /^Statistiques$/i, level: 1 }),
-		).toBeInTheDocument();
-	});
-
-	it("renders the campaign section h2 heading", () => {
-		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
-		);
-		expect(
-			screen.getByRole("heading", { name: /Suivi de campagne/i, level: 2 }),
-		).toBeInTheDocument();
-	});
-
-	it("renders the funnel section h2 heading", () => {
-		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
-		);
-		expect(
-			screen.getByRole("heading", { name: /Funnels de complétion/i, level: 2 }),
-		).toBeInTheDocument();
-	});
-
-	it("renders the global filters: YearsFilter, CompanySizeFilter, StagnationDaysFilter", () => {
-		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
-		);
-		expect(screen.getByLabelText(/tranche d'effectif/i)).toBeInTheDocument();
-		expect(
-			screen.getByLabelText(/considérer une déclaration abandonnée après/i),
-		).toBeInTheDocument();
-	});
-
-	it("renders the CampaignRateTile", () => {
-		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
-		);
-		expect(screen.getByTestId("campaign-rate-tile")).toBeInTheDocument();
-	});
-
-	it("shows campaign progression empty-state when no years are selected", () => {
+	it("renders campaign progression chart and table when data is available", () => {
 		progressionUseQueryMock.mockReturnValue({
-			data: undefined,
+			data: [{ year: 2026, points: [{ day: "2026-01-01", cumulative: 5 }] }],
 			isLoading: false,
 			isError: false,
-			enabled: false,
 		});
-		render(<StatsDashboard availableYears={[]} currentYear={2026} />);
-		expect(
-			screen.getByText(/sélectionnez au moins une année/i),
-		).toBeInTheDocument();
-	});
-});
-
-describe("StatsDashboard — funnel section", () => {
-	beforeEach(() => {
-		progressionUseQueryMock.mockReset();
-		stepDurationsUseQueryMock.mockReset();
-		stepDropoffUseQueryMock.mockReset();
-		funnelUseQueryMock.mockReset();
-		statsUseQueryMock.mockReset();
-		defaultMocks();
+		render(
+			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+		);
+		expect(screen.getByTestId("progression-chart")).toBeInTheDocument();
+		expect(screen.getByTestId("progression-table")).toBeInTheDocument();
 	});
 
-	it("shows funnel loading state", () => {
-		funnelUseQueryMock.mockReturnValue({
+	it("shows campaign progression loading state", () => {
+		progressionUseQueryMock.mockReturnValue({
 			data: undefined,
 			isLoading: true,
 			isError: false,
@@ -181,11 +124,13 @@ describe("StatsDashboard — funnel section", () => {
 		render(
 			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
 		);
-		expect(screen.getByText(/Chargement des funnels/i)).toBeInTheDocument();
+		expect(
+			screen.getAllByText(/chargement du graphique/i).length,
+		).toBeGreaterThan(0);
 	});
 
-	it("shows funnel error state", () => {
-		funnelUseQueryMock.mockReturnValue({
+	it("shows campaign progression error state", () => {
+		progressionUseQueryMock.mockReturnValue({
 			data: undefined,
 			isLoading: false,
 			isError: true,
@@ -194,77 +139,134 @@ describe("StatsDashboard — funnel section", () => {
 			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
 		);
 		expect(
-			screen.getByText(/erreur est survenue lors du chargement des funnels/i),
+			screen.getByText(
+				/erreur est survenue lors du chargement des statistiques/i,
+			),
 		).toBeInTheDocument();
 	});
 
-	it("shows the main and compliance funnel headings when data is available", () => {
-		funnelUseQueryMock.mockReturnValue({
-			data: {
-				mainFunnel: [{ step: "draft", count: 100 }],
-				complianceFunnel: [{ step: "draft", count: 50 }],
-				revisionFunnel: [],
-				cseFunnel: [],
-			},
-			isLoading: false,
+	it("shows step durations loading state", () => {
+		stepDurationsUseQueryMock.mockReturnValue({
+			data: undefined,
+			isLoading: true,
 			isError: false,
 		});
 		render(
 			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
 		);
 		expect(
-			screen.getByRole("heading", { name: /Funnel principal/i }),
-		).toBeInTheDocument();
+			screen.getAllByText(/chargement du graphique/i).length,
+		).toBeGreaterThan(0);
+	});
+
+	it("shows step durations error state", () => {
+		stepDurationsUseQueryMock.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isError: true,
+		});
+		render(
+			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+		);
 		expect(
-			screen.getByRole("heading", { name: /Funnel parcours conformité/i }),
+			screen.getByText(
+				/erreur est survenue lors du chargement des délais par étape/i,
+			),
 		).toBeInTheDocument();
 	});
 
-	it("shows empty messages for revision and CSE funnels when no data", () => {
-		funnelUseQueryMock.mockReturnValue({
-			data: emptyFunnelData,
+	it("renders step durations chart and table when data is available", () => {
+		stepDurationsUseQueryMock.mockReturnValue({
+			data: [{ step: "intro", median: 2, p90: 5 }],
 			isLoading: false,
 			isError: false,
 		});
 		render(
 			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
 		);
-		expect(
-			screen.getByText(/Aucune révision pour ces filtres/i),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText(/Aucune déclaration avec CSE pour ces filtres/i),
-		).toBeInTheDocument();
+		expect(screen.getByTestId("step-durations-chart")).toBeInTheDocument();
+		expect(screen.getByTestId("step-durations-table")).toBeInTheDocument();
 	});
 
-	it("renders revision and CSE funnel charts when data is available", () => {
-		funnelUseQueryMock.mockReturnValue({
-			data: {
-				mainFunnel: [{ step: "draft", count: 100 }],
-				complianceFunnel: [{ step: "draft", count: 50 }],
-				revisionFunnel: [{ step: "draft", count: 10 }],
-				cseFunnel: [{ step: "draft", count: 5 }],
-			},
-			isLoading: false,
+	it("shows step dropoff loading state", () => {
+		stepDropoffUseQueryMock.mockReturnValue({
+			data: undefined,
+			isLoading: true,
 			isError: false,
 		});
 		render(
 			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
 		);
 		expect(
-			screen.getByRole("heading", { name: /Funnel cycle de révision/i }),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("heading", { name: /Funnel cycle CSE/i }),
-		).toBeInTheDocument();
-		expect(screen.getAllByTestId("funnel-chart")).toHaveLength(4);
+			screen.getAllByText(/chargement du graphique/i).length,
+		).toBeGreaterThan(0);
 	});
 
-	it("passes placeholderData (prev) through for funnel query", () => {
+	it("shows step dropoff error state", () => {
+		stepDropoffUseQueryMock.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isError: true,
+		});
 		render(
 			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
 		);
-		const options = funnelUseQueryMock.mock.calls[0]?.[1] as
+		expect(
+			screen.getByText(
+				/erreur est survenue lors du chargement des taux d'abandon/i,
+			),
+		).toBeInTheDocument();
+	});
+
+	it("renders step dropoff chart and table when data is available", () => {
+		stepDropoffUseQueryMock.mockReturnValue({
+			data: [{ step: "intro", dropoffRate: 0.05 }],
+			isLoading: false,
+			isError: false,
+		});
+		render(
+			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+		);
+		expect(screen.getByTestId("step-dropoff-chart")).toBeInTheDocument();
+		expect(screen.getByTestId("step-dropoff-table")).toBeInTheDocument();
+	});
+});
+
+describe("StatsDashboard — query options", () => {
+	beforeEach(() => {
+		progressionUseQueryMock.mockReset();
+		stepDurationsUseQueryMock.mockReset();
+		stepDropoffUseQueryMock.mockReset();
+		funnelUseQueryMock.mockReset();
+		statsUseQueryMock.mockReset();
+		defaultMocks();
+	});
+
+	it("passes placeholderData (prev) through for progression query", () => {
+		render(
+			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+		);
+		const options = progressionUseQueryMock.mock.calls[0]?.[1] as
+			| { placeholderData: (prev: unknown) => unknown }
+			| undefined;
+		expect(options?.placeholderData("prev-value")).toBe("prev-value");
+	});
+
+	it("passes placeholderData (prev) through for step durations query", () => {
+		render(
+			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+		);
+		const options = stepDurationsUseQueryMock.mock.calls[0]?.[1] as
+			| { placeholderData: (prev: unknown) => unknown }
+			| undefined;
+		expect(options?.placeholderData("prev-value")).toBe("prev-value");
+	});
+
+	it("passes placeholderData (prev) through for step dropoff query", () => {
+		render(
+			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+		);
+		const options = stepDropoffUseQueryMock.mock.calls[0]?.[1] as
 			| { placeholderData: (prev: unknown) => unknown }
 			| undefined;
 		expect(options?.placeholderData("prev-value")).toBe("prev-value");
