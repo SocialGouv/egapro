@@ -21,7 +21,7 @@ A single comment on the bug issue titled `## Analyse du bug` containing :
 3. **Fichiers à modifier** — liste explicite (chemins `~/modules/...`, `~/server/...`)
 4. **Fix proposé** — 2-3 lignes, pas de code complet (c'est `code-dev` qui code)
 5. **Test de reproduction** — type (E2E Playwright / Vitest unit / API integration / N/A si visual mismatch) + emplacement suggéré
-6. **Tags suggérés** — `complexe` si > 5 fichiers ou refacto multi-modules
+6. **Tags** — mentionner explicitement si le label `complexe` a été appliqué sur l'issue (cf. workflow step 4)
 
 Le **body de l'issue est intact** — l'analyse vit dans un commentaire séparé. `code-dev` lira les deux (description originale + analyse) en mode bug.
 
@@ -118,6 +118,8 @@ EOF
 )
 ```
 
+Appliquer le label `complexe` via `gh issue edit "$BUG_N" --add-label complexe` si > 5 fichiers, refacto multi-modules, focus / state management non trivial, ou tout autre signal que `code-dev` aura besoin d'Opus pour raisonner. **Action obligatoire** — la mention au point 6 du commentaire ne suffit pas, le label doit exister sur l'issue pour que `/implement` switche `code-dev` en Opus.
+
 ### 5. Validation utilisateur EXPLICITE
 
 Logger `AWAITING_VALIDATION`. Demander en chat : « Tu valides cette analyse pour passer à `/implement` ? » Itérer si l'utilisateur conteste.
@@ -147,6 +149,6 @@ Bug: #NNN
 Sous-stratégie : <local | env | visual>
 Root cause : <fichier:ligne>
 Fichiers à modifier : <count>
-Tags suggérés : <liste ou "none">
+Label appliqué : <complexe | none>
 Ready for: /implement NNN
 ```
