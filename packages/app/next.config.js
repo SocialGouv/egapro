@@ -11,6 +11,20 @@ import { withSentryConfig } from "@sentry/nextjs";
 /** @type {import("next").NextConfig} */
 const config = {
 	output: "standalone",
+	async redirects() {
+		return [
+			{
+				source: "/admin/stats/campagne",
+				destination: "/admin/stats#campagne",
+				permanent: false,
+			},
+			{
+				source: "/admin/stats/plateforme",
+				destination: "/admin/stats#plateforme",
+				permanent: false,
+			},
+		];
+	},
 	cacheHandler: fileURLToPath(new URL("./cache-handler.cjs", import.meta.url)),
 	cacheMaxMemorySize: 0,
 	outputFileTracingIncludes: {
