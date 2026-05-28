@@ -59,9 +59,9 @@ test("admin layout uses fluid container with fixed-width sidemenu on desktop", a
 }) => {
 	await page.setViewportSize({ width: 1280, height: 800 });
 	await page.goto("/admin");
-	await expect(
-		page.getByRole("heading", { name: "Backoffice", level: 1 }),
-	).toBeVisible();
+	await page.waitForLoadState("networkidle");
+	const heading = page.getByRole("heading", { name: "Backoffice", level: 1 });
+	await expect(heading).toBeVisible();
 
 	const nav = page.locator("nav.fr-sidemenu");
 	const navBox = await nav.boundingBox();
@@ -71,10 +71,11 @@ test("admin layout uses fluid container with fixed-width sidemenu on desktop", a
 		expect(navBox.width).toBeLessThanOrEqual(300);
 	}
 
-	const heading = page.getByRole("heading", { name: "Backoffice", level: 1 });
+	// The old fr-container fr-col-md-8 layout capped the content area at ~810px
+	// on 1280px viewports; the fluid layout reaches ~944px. > 900 discriminates.
 	const headingBox = await heading.boundingBox();
 	expect(headingBox).not.toBeNull();
 	if (headingBox) {
-		expect(headingBox.width).toBeGreaterThan(800);
+		expect(headingBox.width).toBeGreaterThan(900);
 	}
 });

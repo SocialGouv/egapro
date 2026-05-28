@@ -12,15 +12,16 @@ import { withSentryConfig } from "@sentry/nextjs";
 const config = {
 	output: "standalone",
 	async redirects() {
+		// Hash fragments are stripped by the browser before the request reaches the server.
 		return [
 			{
 				source: "/admin/stats/campagne",
-				destination: "/admin/stats#campagne",
+				destination: "/admin/stats",
 				permanent: false,
 			},
 			{
 				source: "/admin/stats/plateforme",
-				destination: "/admin/stats#plateforme",
+				destination: "/admin/stats",
 				permanent: false,
 			},
 		];

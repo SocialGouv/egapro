@@ -340,12 +340,12 @@ test("revision funnel shows empty message when no data for the selected year", a
 
 test("redirect: /admin/stats/campagne → /admin/stats", async ({ page }) => {
 	await page.goto("/admin/stats/campagne");
-	await expect(page).toHaveURL(/\/admin\/stats/);
+	await expect(page).toHaveURL(/\/admin\/stats$/);
 });
 
 test("redirect: /admin/stats/plateforme → /admin/stats", async ({ page }) => {
 	await page.goto("/admin/stats/plateforme");
-	await expect(page).toHaveURL(/\/admin\/stats/);
+	await expect(page).toHaveURL(/\/admin\/stats$/);
 });
 
 test("non-admin users are redirected away from the stats page", async ({

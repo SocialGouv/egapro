@@ -57,17 +57,26 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 
 	const stepDurationsQuery = api.adminStats.getStepDurations.useQuery(
 		{ year: activeYear, sizeRange },
-		{ placeholderData: (prev) => prev },
+		{
+			enabled: selectedYears.length > 0,
+			placeholderData: (prev) => prev,
+		},
 	);
 
 	const stepDropoffQuery = api.adminStats.getStepDropoffRate.useQuery(
 		{ year: activeYear, sizeRange, stagnationDays: debouncedStagnationDays },
-		{ placeholderData: (prev) => prev },
+		{
+			enabled: selectedYears.length > 0,
+			placeholderData: (prev) => prev,
+		},
 	);
 
 	const funnelQuery = api.adminStats.getCompletionFunnel.useQuery(
 		{ year: activeYear, sizeRange },
-		{ placeholderData: (prev) => prev },
+		{
+			enabled: selectedYears.length > 0,
+			placeholderData: (prev) => prev,
+		},
 	);
 
 	const hasRevisionData = (funnelQuery.data?.revisionFunnel[0]?.count ?? 0) > 0;
