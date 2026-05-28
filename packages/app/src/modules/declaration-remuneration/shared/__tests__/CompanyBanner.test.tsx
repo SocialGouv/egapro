@@ -11,7 +11,7 @@ const defaultCompany = {
 };
 
 describe("CompanyBanner", () => {
-	it("renders breadcrumb with 'Mon espace' link and current page label", () => {
+	it("renders breadcrumb with 3 items: Mon espace, company name and current page label", () => {
 		render(
 			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
 		);
@@ -20,22 +20,30 @@ describe("CompanyBanner", () => {
 		expect(link).toHaveAttribute("href", "/");
 
 		expect(screen.getByText("Déclaration")).toBeInTheDocument();
+
+		const nav = screen.getByRole("navigation");
+		expect(nav).toHaveTextContent("Alpha Solutions");
 	});
 
-	it("renders formatted SIREN", () => {
+	it("renders formatted SIREN with label", () => {
 		render(
 			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
 		);
 
+		expect(screen.getByText("SIREN :")).toBeInTheDocument();
 		expect(screen.getByText(/123 456 789/)).toBeInTheDocument();
 	});
 
-	it("renders company name", () => {
+	it("renders company name as bold paragraph", () => {
 		render(
 			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
 		);
 
-		expect(screen.getByText(/Alpha Solutions/)).toBeInTheDocument();
+		const boldName = screen.getByText("Alpha Solutions", {
+			selector: "p",
+		});
+		expect(boldName).toBeInTheDocument();
+		expect(boldName).toHaveClass("fr-text--bold");
 	});
 
 	it("renders workforce and CSE values", () => {
