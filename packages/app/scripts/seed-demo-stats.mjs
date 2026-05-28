@@ -106,7 +106,12 @@ const COMPANIES = [
 	// Small (< 50) — wizard stuck cases
 	{ siren: "999100001", name: "Démo Brouillon", workforce: 30, hasCse: false },
 	{ siren: "999100002", name: "Démo Step1", workforce: 40, hasCse: false },
-	{ siren: "999100003", name: "Démo Step3 Stuck", workforce: 35, hasCse: false },
+	{
+		siren: "999100003",
+		name: "Démo Step3 Stuck",
+		workforce: 35,
+		hasCse: false,
+	},
 	{ siren: "999100004", name: "Démo Récap", workforce: 50, hasCse: false },
 
 	// 50-99 — complete direct (no alert)
@@ -122,19 +127,59 @@ const COMPANIES = [
 	{ siren: "999120002", name: "Démo Justify 2", workforce: 70, hasCse: true },
 
 	// 50-99 — corrective_action + 2nd declaration
-	{ siren: "999130001", name: "Démo Corrective 1", workforce: 55, hasCse: false },
-	{ siren: "999130002", name: "Démo Corrective 2", workforce: 65, hasCse: true },
-	{ siren: "999130003", name: "Démo Corrective 3", workforce: 75, hasCse: true },
-	{ siren: "999130004", name: "Démo Corrective 4", workforce: 85, hasCse: true },
-	{ siren: "999130005", name: "Démo Corrective 5", workforce: 90, hasCse: false },
-	{ siren: "999130006", name: "Démo Corrective 6", workforce: 95, hasCse: true },
+	{
+		siren: "999130001",
+		name: "Démo Corrective 1",
+		workforce: 55,
+		hasCse: false,
+	},
+	{
+		siren: "999130002",
+		name: "Démo Corrective 2",
+		workforce: 65,
+		hasCse: true,
+	},
+	{
+		siren: "999130003",
+		name: "Démo Corrective 3",
+		workforce: 75,
+		hasCse: true,
+	},
+	{
+		siren: "999130004",
+		name: "Démo Corrective 4",
+		workforce: 85,
+		hasCse: true,
+	},
+	{
+		siren: "999130005",
+		name: "Démo Corrective 5",
+		workforce: 90,
+		hasCse: false,
+	},
+	{
+		siren: "999130006",
+		name: "Démo Corrective 6",
+		workforce: 95,
+		hasCse: true,
+	},
 
 	// 50-99 — joint_evaluation round=1
-	{ siren: "999140001", name: "Démo JointEval 1", workforce: 55, hasCse: false },
+	{
+		siren: "999140001",
+		name: "Démo JointEval 1",
+		workforce: 55,
+		hasCse: false,
+	},
 	{ siren: "999140002", name: "Démo JointEval 2", workforce: 65, hasCse: true },
 	{ siren: "999140003", name: "Démo JointEval 3", workforce: 75, hasCse: true },
 	{ siren: "999140004", name: "Démo JointEval 4", workforce: 85, hasCse: true },
-	{ siren: "999140005", name: "Démo JointEval 5", workforce: 90, hasCse: false },
+	{
+		siren: "999140005",
+		name: "Démo JointEval 5",
+		workforce: 90,
+		hasCse: false,
+	},
 	{ siren: "999140006", name: "Démo JointEval 6", workforce: 95, hasCse: true },
 
 	// 100+ — revision cycle (corrective then joint_eval round=2) — all have CSE
@@ -154,26 +199,81 @@ const COMPANIES = [
 	{ siren: "999160006", name: "Démo CSE 6", workforce: 350, hasCse: true },
 
 	// Additional wizard stucks for K5 (steps 2 and 4 — fill gap in coverage)
-	{ siren: "999100005", name: "Démo Step2 Stuck", workforce: 45, hasCse: false },
+	{
+		siren: "999100005",
+		name: "Démo Step2 Stuck",
+		workforce: 45,
+		hasCse: false,
+	},
 	{ siren: "999100006", name: "Démo Step4 Stuck", workforce: 60, hasCse: true },
 
 	// Compliance funnel stucks — submitted with alert, no path choice yet
-	{ siren: "999170001", name: "Démo Await Path 1", workforce: 60, hasCse: false },
-	{ siren: "999170002", name: "Démo Await Path 2 CSE", workforce: 75, hasCse: true },
+	{
+		siren: "999170001",
+		name: "Démo Await Path 1",
+		workforce: 60,
+		hasCse: false,
+	},
+	{
+		siren: "999170002",
+		name: "Démo Await Path 2 CSE",
+		workforce: 75,
+		hasCse: true,
+	},
 
 	// Compliance funnel stucks — path chosen but no action submitted
-	{ siren: "999180001", name: "Démo Corrective Stuck", workforce: 70, hasCse: false },
-	{ siren: "999180002", name: "Démo Corrective Stuck CSE", workforce: 85, hasCse: true },
-	{ siren: "999180003", name: "Démo JointEval Stuck", workforce: 80, hasCse: false },
+	{
+		siren: "999180001",
+		name: "Démo Corrective Stuck",
+		workforce: 70,
+		hasCse: false,
+	},
+	{
+		siren: "999180002",
+		name: "Démo Corrective Stuck CSE",
+		workforce: 85,
+		hasCse: true,
+	},
+	{
+		siren: "999180003",
+		name: "Démo JointEval Stuck",
+		workforce: 80,
+		hasCse: false,
+	},
 
 	// CSE funnel stucks — action submitted, awaiting CSE opinion
-	{ siren: "999190001", name: "Démo Await CSE Corrective", workforce: 110, hasCse: true },
-	{ siren: "999190002", name: "Démo Await CSE JointEval", workforce: 130, hasCse: true },
-	{ siren: "999190003", name: "Démo Await CSE No-Alert", workforce: 150, hasCse: true },
+	{
+		siren: "999190001",
+		name: "Démo Await CSE Corrective",
+		workforce: 110,
+		hasCse: true,
+	},
+	{
+		siren: "999190002",
+		name: "Démo Await CSE JointEval",
+		workforce: 130,
+		hasCse: true,
+	},
+	{
+		siren: "999190003",
+		name: "Démo Await CSE No-Alert",
+		workforce: 150,
+		hasCse: true,
+	},
 
 	// Revision sub-funnel stucks
-	{ siren: "999195001", name: "Démo Revision Chosen Stuck", workforce: 160, hasCse: true },
-	{ siren: "999195002", name: "Démo Await Revision Choice", workforce: 180, hasCse: true },
+	{
+		siren: "999195001",
+		name: "Démo Revision Chosen Stuck",
+		workforce: 160,
+		hasCse: true,
+	},
+	{
+		siren: "999195002",
+		name: "Démo Await Revision Choice",
+		workforce: 180,
+		hasCse: true,
+	},
 ];
 
 const ALL_SIRENS = COMPANIES.map((c) => c.siren);
@@ -235,7 +335,12 @@ function declarationJustify(siren, startIso) {
 	};
 }
 
-function declarationCorrective(siren, startIso, daysBeforeChoice = 10, daysBeforeAction = 60) {
+function declarationCorrective(
+	siren,
+	startIso,
+	daysBeforeChoice = 10,
+	daysBeforeAction = 60,
+) {
 	const wizard = wizardEvents(startIso);
 	const submittedAt = wizard[wizard.length - 1].at;
 	const pathChoiceAt = addDays(submittedAt, daysBeforeChoice);
@@ -249,14 +354,24 @@ function declarationCorrective(siren, startIso, daysBeforeChoice = 10, daysBefor
 		events: [
 			...wizard,
 			{ type: "submit", round: 1, at: submittedAt },
-			{ type: "path_choice", round: 1, value: "corrective_action", at: pathChoiceAt },
+			{
+				type: "path_choice",
+				round: 1,
+				value: "corrective_action",
+				at: pathChoiceAt,
+			},
 			{ type: "second_declaration_submit", round: 2, at: secondDeclAt },
 			{ type: "demarche_complete", round: null, at: completedAt },
 		],
 	};
 }
 
-function declarationJointEvaluation(siren, startIso, daysBeforeChoice = 8, daysBeforeAction = 45) {
+function declarationJointEvaluation(
+	siren,
+	startIso,
+	daysBeforeChoice = 8,
+	daysBeforeAction = 45,
+) {
 	const wizard = wizardEvents(startIso);
 	const submittedAt = wizard[wizard.length - 1].at;
 	const pathChoiceAt = addDays(submittedAt, daysBeforeChoice);
@@ -270,7 +385,12 @@ function declarationJointEvaluation(siren, startIso, daysBeforeChoice = 8, daysB
 		events: [
 			...wizard,
 			{ type: "submit", round: 1, at: submittedAt },
-			{ type: "path_choice", round: 1, value: "joint_evaluation", at: pathChoiceAt },
+			{
+				type: "path_choice",
+				round: 1,
+				value: "joint_evaluation",
+				at: pathChoiceAt,
+			},
 			{ type: "joint_evaluation_submit", round: 1, at: jointEvalAt },
 			{ type: "demarche_complete", round: null, at: completedAt },
 		],
@@ -294,9 +414,19 @@ function declarationRevision(siren, startIso) {
 		events: [
 			...wizard,
 			{ type: "submit", round: 1, at: submittedAt },
-			{ type: "path_choice", round: 1, value: "corrective_action", at: pathChoiceAt },
+			{
+				type: "path_choice",
+				round: 1,
+				value: "corrective_action",
+				at: pathChoiceAt,
+			},
 			{ type: "second_declaration_submit", round: 2, at: secondDeclAt },
-			{ type: "path_choice", round: 2, value: "joint_evaluation", at: revisionChoiceAt },
+			{
+				type: "path_choice",
+				round: 2,
+				value: "joint_evaluation",
+				at: revisionChoiceAt,
+			},
 			{ type: "joint_evaluation_submit", round: 2, at: jointEvalRevAt },
 			{ type: "demarche_complete", round: null, at: completedAt },
 		],
@@ -351,7 +481,12 @@ function declarationAwaitingCseAfterCorrective(siren, startIso) {
 		events: [
 			...wizard,
 			{ type: "submit", round: 1, at: submittedAt },
-			{ type: "path_choice", round: 1, value: "corrective_action", at: pathChoiceAt },
+			{
+				type: "path_choice",
+				round: 1,
+				value: "corrective_action",
+				at: pathChoiceAt,
+			},
 			{ type: "second_declaration_submit", round: 2, at: secondDeclAt },
 		],
 	};
@@ -370,7 +505,12 @@ function declarationAwaitingCseAfterJointEval(siren, startIso) {
 		events: [
 			...wizard,
 			{ type: "submit", round: 1, at: submittedAt },
-			{ type: "path_choice", round: 1, value: "joint_evaluation", at: pathChoiceAt },
+			{
+				type: "path_choice",
+				round: 1,
+				value: "joint_evaluation",
+				at: pathChoiceAt,
+			},
 			{ type: "joint_evaluation_submit", round: 1, at: jointEvalAt },
 		],
 	};
@@ -403,7 +543,12 @@ function declarationAwaitingRevisionChoice(siren, startIso) {
 		events: [
 			...wizard,
 			{ type: "submit", round: 1, at: submittedAt },
-			{ type: "path_choice", round: 1, value: "corrective_action", at: pathChoiceAt },
+			{
+				type: "path_choice",
+				round: 1,
+				value: "corrective_action",
+				at: pathChoiceAt,
+			},
 			{ type: "second_declaration_submit", round: 2, at: secondDeclAt },
 		],
 	};
@@ -424,9 +569,19 @@ function declarationRevisionChosenNoSubmit(siren, startIso) {
 		events: [
 			...wizard,
 			{ type: "submit", round: 1, at: submittedAt },
-			{ type: "path_choice", round: 1, value: "corrective_action", at: pathChoiceAt },
+			{
+				type: "path_choice",
+				round: 1,
+				value: "corrective_action",
+				at: pathChoiceAt,
+			},
 			{ type: "second_declaration_submit", round: 2, at: secondDeclAt },
-			{ type: "path_choice", round: 2, value: "joint_evaluation", at: revisionChoiceAt },
+			{
+				type: "path_choice",
+				round: 2,
+				value: "joint_evaluation",
+				at: revisionChoiceAt,
+			},
 		],
 	};
 }
@@ -447,7 +602,12 @@ function declarationCseRequired(siren, startIso) {
 		events: [
 			...wizard,
 			{ type: "submit", round: 1, at: submittedAt },
-			{ type: "path_choice", round: 1, value: "corrective_action", at: pathChoiceAt },
+			{
+				type: "path_choice",
+				round: 1,
+				value: "corrective_action",
+				at: pathChoiceAt,
+			},
 			{ type: "second_declaration_submit", round: 2, at: secondDeclAt },
 			{ type: "cse_opinion_submit", round: 2, at: cseAt },
 			{ type: "demarche_complete", round: null, at: completedAt },
@@ -535,7 +695,14 @@ const RAW_DECLARATIONS = [
 		currentStep: 0,
 		status: "draft",
 		path: null,
-		events: [{ type: "step_change", round: 0, value: "from:null|to:0", at: dateUtc(YEAR, 2, 18) }],
+		events: [
+			{
+				type: "step_change",
+				round: 0,
+				value: "from:null|to:0",
+				at: dateUtc(YEAR, 2, 18),
+			},
+		],
 	},
 	declarationStuckAtStep("999100002", 1, dateUtc(YEAR, 2, 10)),
 	declarationStuckAtStep("999100003", 3, dateUtc(YEAR, 1, 5)),
@@ -594,9 +761,21 @@ const RAW_DECLARATIONS = [
 	declarationSubmittedAwaitingPath("999170002", dateUtc(YEAR, 1, 22)),
 
 	// Compliance funnel stucks — path chosen but action not yet submitted
-	declarationPathChosenNoAction("999180001", dateUtc(YEAR, 1, 5), "corrective_action"),
-	declarationPathChosenNoAction("999180002", dateUtc(YEAR, 1, 8), "corrective_action"),
-	declarationPathChosenNoAction("999180003", dateUtc(YEAR, 1, 12), "joint_evaluation"),
+	declarationPathChosenNoAction(
+		"999180001",
+		dateUtc(YEAR, 1, 5),
+		"corrective_action",
+	),
+	declarationPathChosenNoAction(
+		"999180002",
+		dateUtc(YEAR, 1, 8),
+		"corrective_action",
+	),
+	declarationPathChosenNoAction(
+		"999180003",
+		dateUtc(YEAR, 1, 12),
+		"joint_evaluation",
+	),
 
 	// CSE funnel stucks — action submitted, awaiting CSE opinion
 	declarationAwaitingCseAfterCorrective("999190001", dateUtc(YEAR, 0, 8)),
