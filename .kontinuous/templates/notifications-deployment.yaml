@@ -29,6 +29,45 @@ spec:
       securityContext:
         runAsUser: 1000
         runAsNonRoot: true
+      initContainers:
+        # Review-app namespaces bootstrap Postgres concurrently with the app,
+        # so the queue DB host (pg-rw, the main DB used as fallback when no
+        # dedicated pg-notifications secret exists) is unresolvable for the
+        # first minutes. Block startup until it accepts TCP connections so the
+        # worker never crash-loops and fails the rollout — the pod stays in
+        # Init (not Error) while waiting. On preprod/prod the persistent pg
+        # answers on the first probe, so this is a no-op there.
+        - name: wait-for-pg
+          image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/app:{{ .Values.global.imageTag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+          command:
+            - node
+            - -e
+            - |
+              const net = require("net");
+              const host = process.env.PGHOST;
+              const port = Number(process.env.PGPORT || "5432");
+              const probe = () => {
+                const socket = net.connect(port, host);
+                socket.once("connect", () => { socket.end(); process.exit(0); });
+                socket.once("error", () => {
+                  console.log(`waiting for ${host}:${port} ...`);
+                  setTimeout(probe, 3000);
+                });
+              };
+              probe();
+          env:
+            - name: PGHOST
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGHOST
+            - name: PGPORT
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGPORT
       containers:
         - name: notifications
           image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/app:{{ .Values.global.imageTag }}"
