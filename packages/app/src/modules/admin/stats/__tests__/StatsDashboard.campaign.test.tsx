@@ -58,39 +58,16 @@ vi.mock("../CampaignRateTile", () => ({
 }));
 
 import { StatsDashboard } from "../StatsDashboard";
+import { setDefaultMocks } from "./helpers/statsDashboardMocks";
 
-const defaultMocks = () => {
-	progressionUseQueryMock.mockReturnValue({
-		data: [],
-		isLoading: false,
-		isError: false,
+const defaultMocks = () =>
+	setDefaultMocks({
+		progressionUseQueryMock,
+		statsUseQueryMock,
+		stepDurationsUseQueryMock,
+		stepDropoffUseQueryMock,
+		funnelUseQueryMock,
 	});
-	statsUseQueryMock.mockReturnValue({
-		data: { totalObligated: 0, totalSubmitted: 0, submissionRate: 0 },
-		isLoading: false,
-		isError: false,
-	});
-	stepDurationsUseQueryMock.mockReturnValue({
-		data: [],
-		isLoading: false,
-		isError: false,
-	});
-	stepDropoffUseQueryMock.mockReturnValue({
-		data: [],
-		isLoading: false,
-		isError: false,
-	});
-	funnelUseQueryMock.mockReturnValue({
-		data: {
-			mainFunnel: [],
-			complianceFunnel: [],
-			revisionFunnel: [],
-			cseFunnel: [],
-		},
-		isLoading: false,
-		isError: false,
-	});
-};
 
 describe("StatsDashboard — campaign section states", () => {
 	beforeEach(() => {

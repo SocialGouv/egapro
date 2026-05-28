@@ -11,8 +11,6 @@ import {
 	seedFunnelDeclarations,
 } from "./helpers/db-funnel";
 
-// 9-digit SIRENs reserved for this test only — chosen outside any legitimate
-// range so we don't collide with real data.
 const CAMPAIGN_SIRENS = {
 	smallA: "999300001",
 	smallB: "999300002",
@@ -312,11 +310,6 @@ test.describe("admin unified stats dashboard — platform funnel section (S5/S6)
 	}) => {
 		await page.goto("/admin/stats");
 
-		const firstYear = page.locator(".fr-grid-row").filter({
-			hasText: /tranche d'effectif/i,
-		});
-		void firstYear; // sections use selectedYears[0]; default is currentYear
-
 		// Wait for at least one funnel figure.
 		await expect(page.locator("figure").first()).toBeVisible();
 
@@ -339,11 +332,6 @@ test.describe("admin unified stats dashboard — platform funnel section (S5/S6)
 	}) => {
 		await page.goto("/admin/stats");
 
-		// Deselect all years and re-select only 2018 (no seed).
-		// YearsFilter checkboxes: uncheck all then check 2018 if available.
-		// Simpler: navigate directly with a year known to have no data.
-		// The global filters default to the 3 most recent years.
-		// We rely on the funnel query returning empty for years without seeds.
 		await expect(
 			page.getByText(/Aucune révision pour ces filtres/i),
 		).toBeVisible();
