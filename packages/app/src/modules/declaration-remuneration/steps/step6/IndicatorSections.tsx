@@ -1,4 +1,3 @@
-import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
 import stepStyles from "~/modules/declaration-remuneration/steps/Step6Review.module.scss";
 import type {
@@ -28,9 +27,7 @@ type Props = {
 };
 
 function EmptyDataNotice() {
-	return (
-		<p className={`fr-mb-0 ${common.mentionGrey}`}>Aucune donnée renseignée.</p>
-	);
+	return <p className="fr-mb-0">Aucune donnée renseignée.</p>;
 }
 
 /**
@@ -130,11 +127,7 @@ export function IndicatorSections({
 									</p>
 									<div className={stepStyles.subSection}>
 										<div className={stepStyles.flex1}>
-											<p
-												className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}
-											>
-												Femmes
-											</p>
+											<p className="fr-text--xs fr-mb-0">Femmes</p>
 											<strong>
 												{step3Data.indicatorEWomen
 													? `${step3Data.indicatorEWomen} %`
@@ -142,11 +135,7 @@ export function IndicatorSections({
 											</strong>
 										</div>
 										<div className={stepStyles.flex1}>
-											<p
-												className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}
-											>
-												Hommes
-											</p>
+											<p className="fr-text--xs fr-mb-0">Hommes</p>
 											<strong>
 												{step3Data.indicatorEMen
 													? `${step3Data.indicatorEMen} %`

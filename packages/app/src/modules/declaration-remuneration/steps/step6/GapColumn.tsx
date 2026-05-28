@@ -1,4 +1,3 @@
-import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import stepStyles from "../Step6Review.module.scss";
 import { GapBadge } from "./GapBadge";
 
@@ -7,7 +6,6 @@ type Props = {
 	columns: Array<{ label: string; gap: number | null }>;
 };
 
-/** Column within a side-by-side section: header row + value row */
 export function GapColumn({ title, columns }: Props) {
 	return (
 		<div className={stepStyles.column}>
@@ -15,9 +13,7 @@ export function GapColumn({ title, columns }: Props) {
 			<div className={stepStyles.subSection}>
 				{columns.map((col) => (
 					<div className={stepStyles.flex1} key={col.label}>
-						<p className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}>
-							{col.label}
-						</p>
+						<p className="fr-text--xs fr-mb-0">{col.label}</p>
 						<GapBadge gap={col.gap} />
 					</div>
 				))}

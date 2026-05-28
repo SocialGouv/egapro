@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { computeGap, GAP_ALERT_THRESHOLD } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -158,7 +159,7 @@ export function Step6Review({
 
 			<StepIndicator currentStep={6} />
 
-			<p className="fr-mb-0">
+			<p className={`fr-mb-0 ${common.fontMedium}`}>
 				Vérifiez que toutes les informations ont été complétées avant de
 				soumettre votre déclaration aux services du ministère chargé du travail.
 			</p>
