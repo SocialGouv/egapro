@@ -1,6 +1,8 @@
 .shell {
 	display: flex;
 	gap: 1.5rem;
+	max-width: 1600px;
+	margin-inline: auto;
 
 	@include respond-to(sm) {
 		flex-direction: column;
