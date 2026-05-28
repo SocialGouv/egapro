@@ -44,10 +44,10 @@
 
 .userEmail {
 	margin: 0;
-	font-size: 0.75rem;
-	line-height: 1.67em;
+	font-size: 0.875rem;
+	line-height: 1.5rem;
 	font-weight: 400;
-	color: var(--border-contrast-grey);
+	color: var(--text-mention-grey);
 }
 
 .links {
@@ -60,7 +60,7 @@
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
-	padding: 0.25rem 0.75rem 0.25rem 1rem;
+	padding: 0.75rem 0.75rem 0.75rem 1rem;
 	width: 100%;
 	font-size: 1rem;
 	line-height: 1.5em;
