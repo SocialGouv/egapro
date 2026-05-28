@@ -195,6 +195,9 @@ type SeededCampaignDeclaration = {
 	year: number;
 	submittedAt: string;
 	workforce: number;
+	remunerationScore?: number | null;
+	quartileScore?: number | null;
+	categoryScore?: number | null;
 };
 
 export async function seedSubmittedDeclarationsForStats(
@@ -218,17 +221,26 @@ export async function seedSubmittedDeclarationsForStats(
 				VALUES (${row.siren}, ${`E2E Stats Co. ${row.siren}`}, ${row.workforce}, NOW(), NOW())
 				ON CONFLICT (siren) DO UPDATE SET workforce = EXCLUDED.workforce
 			`;
+			const remunerationScore = row.remunerationScore ?? null;
+			const quartileScore = row.quartileScore ?? null;
+			const categoryScore = row.categoryScore ?? null;
 			const inserted = await sql<[{ id: string }]>`
 				INSERT INTO app_declaration (
 					id, siren, year, declarant_id, current_step, status,
+					remuneration_score, quartile_score, category_score,
 					created_at, updated_at
 				)
 				VALUES (
 					gen_random_uuid(), ${row.siren}, ${row.year}, ${declarantId}, 6,
-					'demarche_completed', NOW(), NOW()
+					'demarche_completed',
+					${remunerationScore}, ${quartileScore}, ${categoryScore},
+					NOW(), NOW()
 				)
 				ON CONFLICT (siren, year) WHERE cancelled_at IS NULL DO UPDATE SET
-					status = 'demarche_completed'
+					status = 'demarche_completed',
+					remuneration_score = EXCLUDED.remuneration_score,
+					quartile_score = EXCLUDED.quartile_score,
+					category_score = EXCLUDED.category_score
 				RETURNING id
 			`;
 			const declarationId = inserted[0]?.id;

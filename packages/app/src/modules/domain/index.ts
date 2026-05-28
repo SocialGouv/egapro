@@ -18,6 +18,9 @@ export {
 	classifyCompanySize,
 	isCseRequired,
 } from "./shared/companySize";
+// Global score computation (sum of sub-scores from the EgaPro index)
+export type { GlobalScoreInputs } from "./shared/computeGlobalScore";
+export { computeGlobalScore } from "./shared/computeGlobalScore";
 // Constants
 export {
 	COMPANY_SIZE_ANNUAL_MIN,
@@ -148,8 +151,22 @@ export {
 	REGIONS,
 	REGIONS_TO_COUNTIES,
 } from "./shared/regions";
+// Score brackets for public stats distribution chart
+export type { ScoreBracket, ScoreBracketId } from "./shared/scoreBracket";
+export { getScoreBracket, SCORE_BRACKETS } from "./shared/scoreBracket";
 // SIREN utilities
 export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
+// Submission rate helpers (shared by admin/public stats routers and KPI tiles)
+export type { CampaignRateTileProps } from "./shared/submissionRate";
+export {
+	buildCampaignRateTileProps,
+	computeRate,
+	formatCount,
+	formatPointsAbs,
+	formatRate,
+	NARROW_NBSP,
+	roundOneDecimal,
+} from "./shared/submissionRate";
 export type {
 	CampaignDeadlines,
 	CompanySize,
