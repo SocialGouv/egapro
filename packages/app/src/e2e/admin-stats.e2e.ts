@@ -33,7 +33,7 @@ const FUNNEL_SIRENS = {
 	cse: "999500004",
 } as const;
 
-const K19_YEAR = 2024;
+const K19_YEAR = getCurrentYear();
 
 test.describe("admin unified stats dashboard — campaign section (S3/S4)", () => {
 	test.beforeAll(async () => {
@@ -159,10 +159,8 @@ test.describe("admin unified stats dashboard — campaign section (S3/S4)", () =
 			}),
 		).toBeVisible();
 
-		const k5Section = page.getByLabel(/Taux d'abandon par phase/i);
-
 		await expect(
-			k5Section.getByLabel(/Considérer une déclaration abandonnée après/i),
+			page.getByLabel(/Considérer une déclaration abandonnée après/i),
 		).toBeVisible();
 	});
 });

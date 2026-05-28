@@ -133,9 +133,9 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 				</div>
 
 				{progressionQuery.data && (
-					<div className="fr-mt-2w">
+					<section aria-label="Progression dans le temps" className="fr-mt-2w">
 						<CampaignProgressionTable series={progressionQuery.data} />
-					</div>
+					</section>
 				)}
 
 				<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
