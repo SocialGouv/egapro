@@ -326,16 +326,16 @@ test.describe("admin unified stats dashboard — platform funnel section (S5/S6)
 			mainSection.getByRole("rowheader", { name: "Brouillon créé" }),
 		).toBeVisible();
 	});
+});
 
-	test("revision funnel shows empty message when no data for the selected year", async ({
-		page,
-	}) => {
-		await page.goto("/admin/stats");
+test("revision funnel shows empty message when no data for the selected year", async ({
+	page,
+}) => {
+	await page.goto("/admin/stats");
 
-		await expect(
-			page.getByText(/Aucune révision pour ces filtres/i),
-		).toBeVisible();
-	});
+	await expect(
+		page.getByText(/Aucune révision pour ces filtres/i),
+	).toBeVisible();
 });
 
 test("redirect: /admin/stats/campagne → /admin/stats", async ({ page }) => {
