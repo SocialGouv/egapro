@@ -47,8 +47,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Start services
-        run: docker compose up -d
       - uses: pnpm/action-setup@v4
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -64,11 +62,6 @@ jobs:
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
-      - name: Build
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: pnpm build
-      - name: Apply database schema
-        run: pnpm db:push
       - name: Install Playwright browsers (with retry)
         shell: bash
         timeout-minutes: 12
@@ -95,6 +88,13 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
           NEEDRESTART_MODE: a
+      - name: Start services
+        run: docker compose up -d
+      - name: Build
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: pnpm build
+      - name: Apply database schema
+        run: pnpm db:push
       - name: Run E2E tests
         run: pnpm test:e2e
       - name: Stop services
