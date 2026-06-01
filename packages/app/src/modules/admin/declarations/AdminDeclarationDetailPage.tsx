@@ -24,9 +24,10 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 	const { data, isLoading } = api.adminDeclarations.getById.useQuery({
 		id: declarationId,
 	});
-	const { data: recap } = api.adminDeclarations.getRecap.useQuery({
-		id: declarationId,
-	});
+	const { data: recap } = api.adminDeclarations.getRecap.useQuery(
+		{ id: declarationId },
+		{ enabled: !!data },
+	);
 
 	if (isLoading) {
 		return (

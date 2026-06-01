@@ -1,5 +1,12 @@
-import { TRPCError } from "@trpc/server";
+import { getTableName } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import {
+	declarations,
+	declarationStatusHistory,
+	employeeCategories,
+	jobCategories,
+} from "~/server/db/schema";
 
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
@@ -73,27 +80,32 @@ function buildDb(options: {
 	empCats?: Array<unknown>;
 }) {
 	const { row, hasSecondSubmit = false, jobs = [], empCats = [] } = options;
-	let selectCall = 0;
+
+	const resultByTable: Record<string, unknown[]> = {
+		[getTableName(declarations)]: row ? [row] : [],
+		[getTableName(declarationStatusHistory)]: hasSecondSubmit
+			? [{ id: "h1" }]
+			: [],
+		[getTableName(jobCategories)]: jobs,
+		[getTableName(employeeCategories)]: empCats,
+	};
+
 	return {
 		select: vi.fn().mockImplementation(() => {
-			selectCall++;
-			const idx = selectCall;
+			let result: unknown[] = [];
+			const resolve = () => {
+				const promise = Promise.resolve(result);
+				return Object.assign(promise, {
+					limit: vi.fn().mockImplementation(() => Promise.resolve(result)),
+				});
+			};
 			const chain = {
-				from: vi.fn().mockReturnThis(),
+				from: vi.fn().mockImplementation((table: unknown) => {
+					result = resultByTable[getTableName(table as never)] ?? [];
+					return chain;
+				}),
 				innerJoin: vi.fn().mockReturnThis(),
-				where: vi.fn().mockImplementation(() => {
-					// calls 1 and 2 chain into .limit(); calls 3+ resolve directly.
-					if (idx === 1 || idx === 2) return chain;
-					if (idx === 3) return Promise.resolve(jobs);
-					if (idx === 4) return Promise.resolve(empCats);
-					return Promise.resolve([]);
-				}),
-				limit: vi.fn().mockImplementation(() => {
-					if (idx === 1) return Promise.resolve(row ? [row] : []);
-					if (idx === 2)
-						return Promise.resolve(hasSecondSubmit ? [{ id: "h1" }] : []);
-					return Promise.resolve([]);
-				}),
+				where: vi.fn().mockImplementation(resolve),
 			};
 			return chain;
 		}),
@@ -112,9 +124,9 @@ describe("adminDeclarationsRouter — getRecap", () => {
 			headers: new Headers(),
 		} as never);
 
-		await expect(caller.getRecap({ id: MISSING_ID })).rejects.toThrow(
-			TRPCError,
-		);
+		await expect(caller.getRecap({ id: MISSING_ID })).rejects.toMatchObject({
+			code: "NOT_FOUND",
+		});
 	});
 
 	it("returns full recap shape for a submitted declaration without correction", async () => {

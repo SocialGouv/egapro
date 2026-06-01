@@ -334,7 +334,12 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					)
 					.limit(1),
 				ctx.db
-					.select()
+					.select({
+						id: jobCategories.id,
+						name: jobCategories.name,
+						categoryIndex: jobCategories.categoryIndex,
+						source: jobCategories.source,
+					})
 					.from(jobCategories)
 					.where(eq(jobCategories.declarationId, input.id)),
 			]);
@@ -345,7 +350,20 @@ export const adminDeclarationsRouter = createTRPCRouter({
 			const empCats =
 				jobIds.length > 0
 					? await ctx.db
-							.select()
+							.select({
+								jobCategoryId: employeeCategories.jobCategoryId,
+								declarationType: employeeCategories.declarationType,
+								womenCount: employeeCategories.womenCount,
+								menCount: employeeCategories.menCount,
+								annualBaseWomen: employeeCategories.annualBaseWomen,
+								annualBaseMen: employeeCategories.annualBaseMen,
+								annualVariableWomen: employeeCategories.annualVariableWomen,
+								annualVariableMen: employeeCategories.annualVariableMen,
+								hourlyBaseWomen: employeeCategories.hourlyBaseWomen,
+								hourlyBaseMen: employeeCategories.hourlyBaseMen,
+								hourlyVariableWomen: employeeCategories.hourlyVariableWomen,
+								hourlyVariableMen: employeeCategories.hourlyVariableMen,
+							})
 							.from(employeeCategories)
 							.where(inArray(employeeCategories.jobCategoryId, jobIds))
 					: [];
@@ -359,10 +377,9 @@ export const adminDeclarationsRouter = createTRPCRouter({
 			);
 			const step5Source = jobs[0]?.source ?? null;
 			const referencePeriod = `01/01/${d.year} - 31/12/${d.year}`;
-			const declarantName =
-				[row.declarantFirstName, row.declarantLastName]
-					.filter(Boolean)
-					.join(" ") || null;
+			const declarantName = [row.declarantFirstName, row.declarantLastName]
+				.filter(Boolean)
+				.join(" ");
 
 			return {
 				company: {
@@ -374,7 +391,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				},
 				declarationYear: d.year,
 				referencePeriod,
-				declarantName: declarantName ?? "",
+				declarantName,
 				declarantEmail: row.declarantEmail,
 				isCorrection,
 				totalWomen: d.totalWomen,
