@@ -69,14 +69,16 @@ jobs:
         run: pnpm build
       - name: Apply database schema
         run: pnpm db:push
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('packages/app/package.json') }}
+      - name: Diagnostic — runner state before Playwright install
+        run: |
+          echo "=== disk usage ===" && df -h /
+          echo "=== memory ===" && free -h
+          echo "=== /tmp size ===" && du -sh /tmp 2>/dev/null || true
+          echo "=== ~/.cache size ===" && du -sh ~/.cache 2>/dev/null || true
+          echo "=== ms-playwright dir ===" && ls -la ~/.cache/ms-playwright 2>/dev/null || echo "(absent)"
+          echo "=== load ===" && cat /proc/loadavg
+          echo "=== runner ===" && cat /etc/os-release | grep -E '^(NAME|VERSION)='
       - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: pnpm --filter app exec playwright install --no-shell chromium
         timeout-minutes: 8
         env:
