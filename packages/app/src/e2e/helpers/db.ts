@@ -54,7 +54,9 @@ export async function resetDeclarationToDraft() {
 			    first_declaration_path_choice = NULL,
 			    second_declaration_path_choice = NULL,
 			    total_women = NULL,
-			    total_men = NULL
+			    total_men = NULL,
+			    draft = NULL,
+			    draft_updated_at = NULL
 			WHERE siren = ${TEST_SIREN}
 		`;
 
