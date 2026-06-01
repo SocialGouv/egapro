@@ -1,5 +1,6 @@
 export { AdminHomePage } from "./AdminHomePage";
 export { AdminNavigation } from "./AdminNavigation";
+export { AdminShell } from "./AdminShell";
 export {
 	AdminDeclarationDetailPage,
 	AdminDeclarationsPage,
