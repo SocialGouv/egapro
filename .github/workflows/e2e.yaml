@@ -69,8 +69,22 @@ jobs:
         run: pnpm build
       - name: Apply database schema
         run: pnpm db:push
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('packages/app/package.json') }}
       - name: Install Playwright browsers
-        run: pnpm playwright:install
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter app exec playwright install chromium
+        timeout-minutes: 5
+      - name: Install Playwright system dependencies
+        run: pnpm --filter app exec playwright install-deps chromium
+        timeout-minutes: 5
+        env:
+          DEBIAN_FRONTEND: noninteractive
+          NEEDRESTART_MODE: a
       - name: Run E2E tests
         run: pnpm test:e2e
       - name: Stop services
