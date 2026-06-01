@@ -42,7 +42,19 @@ const baseDeclarationRow = {
 	step4ReferenceClassificationSource: null,
 };
 
-const baseJoinedRow = {
+type JoinedRow = {
+	declaration: typeof baseDeclarationRow;
+	companyName: string;
+	companySiren: string;
+	companyNafCode: string | null;
+	companyAddress: string | null;
+	companyWorkforce: number | null;
+	declarantEmail: string;
+	declarantFirstName: string | null;
+	declarantLastName: string | null;
+};
+
+const baseJoinedRow: JoinedRow = {
 	declaration: baseDeclarationRow,
 	companyName: "ACME Corp",
 	companySiren: "123456789",
@@ -55,7 +67,7 @@ const baseJoinedRow = {
 };
 
 function buildDb(options: {
-	row: typeof baseJoinedRow | null;
+	row: JoinedRow | null;
 	hasSecondSubmit?: boolean;
 	jobs?: Array<{ id: string; source: string | null }>;
 	empCats?: Array<unknown>;
