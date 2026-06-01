@@ -1,11 +1,15 @@
 import { expect, test } from "@playwright/test";
-import { resetDeclarationToDraft } from "./helpers/db";
+import {
+	pushCampaignDeadlinesFarFuture,
+	resetDeclarationToDraft,
+} from "./helpers/db";
 import { AUTH_FILE } from "./helpers/login";
 
 test.describe("Declaration draft round-trip", () => {
 	test.describe.configure({ mode: "serial" });
 
 	test.beforeAll(async () => {
+		await pushCampaignDeadlinesFarFuture();
 		await resetDeclarationToDraft();
 	});
 
