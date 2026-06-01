@@ -69,22 +69,40 @@ jobs:
           set -euo pipefail
           CHROMIUM_VERSION=1217
           CFT_BUILD=147.0.7727.15
-          DEST="$HOME/.cache/ms-playwright/chromium-${CHROMIUM_VERSION}"
-          mkdir -p "$DEST"
-          echo "::group::Download Chromium zip"
-          time curl --fail --location --silent --show-error \
-            --max-time 120 \
-            -o /tmp/chrome.zip \
-            "https://cdn.playwright.dev/builds/cft/${CFT_BUILD}/linux64/chrome-linux64.zip"
-          ls -lh /tmp/chrome.zip
-          echo "::endgroup::"
-          echo "::group::Extract with system unzip"
-          time unzip -q /tmp/chrome.zip -d "$DEST"
-          mv "$DEST/chrome-linux64" "$DEST/chrome-linux"
-          touch "$DEST/INSTALLATION_COMPLETE"
-          rm /tmp/chrome.zip
-          ls -la "$DEST" "$DEST/chrome-linux" | head -20
-          echo "::endgroup::"
+
+          install_browser() {
+            local zip_name="$1" dest_subdir="$2" extracted_dir="$3" final_dir="$4"
+            local dest="$HOME/.cache/ms-playwright/${dest_subdir}"
+            mkdir -p "$dest"
+            echo "::group::Download ${zip_name}"
+            time curl --fail --location --silent --show-error \
+              --max-time 120 \
+              -o "/tmp/${zip_name}" \
+              "https://cdn.playwright.dev/builds/cft/${CFT_BUILD}/linux64/${zip_name}"
+            ls -lh "/tmp/${zip_name}"
+            echo "::endgroup::"
+            echo "::group::Extract ${zip_name} with system unzip"
+            time unzip -q "/tmp/${zip_name}" -d "$dest"
+            if [ "$extracted_dir" != "$final_dir" ]; then
+              mv "$dest/$extracted_dir" "$dest/$final_dir"
+            fi
+            touch "$dest/INSTALLATION_COMPLETE"
+            rm "/tmp/${zip_name}"
+            ls -la "$dest" | head -5
+            echo "::endgroup::"
+          }
+
+          install_browser \
+            "chrome-linux64.zip" \
+            "chromium-${CHROMIUM_VERSION}" \
+            "chrome-linux64" \
+            "chrome-linux"
+
+          install_browser \
+            "chrome-headless-shell-linux64.zip" \
+            "chromium_headless_shell-${CHROMIUM_VERSION}" \
+            "chrome-headless-shell-linux64" \
+            "chrome-headless-shell-linux64"
       - name: Install Playwright system dependencies
         run: pnpm --filter app exec playwright install-deps chromium
         timeout-minutes: 5
