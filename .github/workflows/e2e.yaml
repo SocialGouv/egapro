@@ -62,26 +62,29 @@ jobs:
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
-      - name: Install Playwright browsers (with retry)
+      - name: Install Chromium manually (bypass Playwright extractor)
         shell: bash
-        timeout-minutes: 12
-        env:
-          DEBUG: pw:install
+        timeout-minutes: 5
         run: |
-          for attempt in 1 2 3; do
-            echo "::group::Playwright install attempt #$attempt"
-            if timeout 180 pnpm --filter app exec playwright install --no-shell chromium; then
-              echo "::endgroup::"
-              echo "Playwright browsers installed on attempt #$attempt"
-              exit 0
-            fi
-            echo "::endgroup::"
-            echo "::warning::Attempt #$attempt failed/timed out — cleaning up and retrying"
-            rm -rf /tmp/playwright-download-* ~/.cache/ms-playwright/chromium-* || true
-            sleep 5
-          done
-          echo "::error::Playwright install failed after 3 attempts (each timeout 180s)"
-          exit 1
+          set -euo pipefail
+          CHROMIUM_VERSION=1217
+          CFT_BUILD=147.0.7727.15
+          DEST="$HOME/.cache/ms-playwright/chromium-${CHROMIUM_VERSION}"
+          mkdir -p "$DEST"
+          echo "::group::Download Chromium zip"
+          time curl --fail --location --silent --show-error \
+            --max-time 120 \
+            -o /tmp/chrome.zip \
+            "https://cdn.playwright.dev/builds/cft/${CFT_BUILD}/linux64/chrome-linux64.zip"
+          ls -lh /tmp/chrome.zip
+          echo "::endgroup::"
+          echo "::group::Extract with system unzip"
+          time unzip -q /tmp/chrome.zip -d "$DEST"
+          mv "$DEST/chrome-linux64" "$DEST/chrome-linux"
+          touch "$DEST/INSTALLATION_COMPLETE"
+          rm /tmp/chrome.zip
+          ls -la "$DEST" "$DEST/chrome-linux" | head -20
+          echo "::endgroup::"
       - name: Install Playwright system dependencies
         run: pnpm --filter app exec playwright install-deps chromium
         timeout-minutes: 5
