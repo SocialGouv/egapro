@@ -77,8 +77,10 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('packages/app/package.json') }}
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm --filter app exec playwright install chromium
-        timeout-minutes: 5
+        run: pnpm --filter app exec playwright install --no-shell chromium
+        timeout-minutes: 8
+        env:
+          DEBUG: pw:install
       - name: Install Playwright system dependencies
         run: pnpm --filter app exec playwright install-deps chromium
         timeout-minutes: 5
