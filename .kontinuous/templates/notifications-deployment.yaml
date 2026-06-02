@@ -14,6 +14,12 @@ metadata:
     # secret and fails with `CreateContainerConfigError: secret "pg-app" not
     # found`. The `pg` build being ready guarantees `pg-app` exists.
     kontinuous/plugin.needs: "[pg]"
+    # This Deployment is a root-chart template, not a `~chart` build, so the
+    # `05.0-needs` patch never assigns it a `chartNameTop` (it only does for
+    # sub-charts). Without one, kontinuous's dependency-graph renderer derives
+    # an empty node name and `Graph::Easy` rejects the malformed `-> pg` edge,
+    # failing the deploy. Set it explicitly so the node renders as `notifications`.
+    kontinuous/depname.chartNameTop: notifications
 spec:
   # Single replica is enough: pg-boss already handles fan-out via batchSize
   # inside the process. Scaling horizontally is safe (pg-boss uses Postgres
