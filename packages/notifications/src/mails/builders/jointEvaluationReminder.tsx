@@ -1,6 +1,6 @@
 import { formatFrenchDate } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
-import { getConnectionUrl } from "../shared/urls.js";
+import { getMySpaceUrl } from "../shared/urls.js";
 import {
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -40,10 +40,7 @@ export const buildJointEvaluationReminderMail: MailBuilder<
 			<EmailParagraph>
 				Le dépôt doit intervenir au plus tard le {formattedDeadline}.
 			</EmailParagraph>
-			<EmailCtaWithLink
-				href={getConnectionUrl()}
-				label="Téléverser le rapport"
-			/>
+			<EmailCtaWithLink href={getMySpaceUrl()} label="Téléverser le rapport" />
 			<EmailParagraph>
 				Pour tout renseignement, vous pouvez contacter votre référent égalité
 				professionnelle femmes-hommes au sein de votre DREETS en répondant à ce

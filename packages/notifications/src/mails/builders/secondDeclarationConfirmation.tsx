@@ -1,5 +1,5 @@
 import { renderEmail } from "../shared/render.js";
-import { getConnectionUrl } from "../shared/urls.js";
+import { getDeclarationUrl } from "../shared/urls.js";
 import {
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -11,7 +11,7 @@ import type { MailBuilder } from "../types.js";
 
 export const buildSecondDeclarationConfirmationMail: MailBuilder<
 	"second_declaration_confirmation"
-> = async () => {
+> = async ({ siren, year }) => {
 	const subject = "Egapro - Accusé de réception de votre seconde déclaration";
 	const previewText =
 		"Votre seconde déclaration au titre des actions correctives a bien été enregistrée.";
@@ -36,7 +36,7 @@ export const buildSecondDeclarationConfirmationMail: MailBuilder<
 				Egapro.
 			</EmailParagraph>
 			<EmailCtaWithLink
-				href={getConnectionUrl()}
+				href={getDeclarationUrl(siren, year)}
 				label="Consulter ma déclaration"
 			/>
 			<EmailParagraph>

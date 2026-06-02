@@ -1,6 +1,6 @@
 import { formatFrenchDate } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
-import { getConnectionUrl } from "../shared/urls.js";
+import { getDeclarationUrl } from "../shared/urls.js";
 import {
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -44,7 +44,7 @@ export const buildCompliancePathChoiceReminderMail: MailBuilder<
 				La sélection doit intervenir au plus tard le {formattedDeadline}.
 			</EmailParagraph>
 			<EmailCtaWithLink
-				href={getConnectionUrl()}
+				href={getDeclarationUrl(payload.siren, payload.year)}
 				label="Choisir mon parcours"
 			/>
 			<EmailParagraph>

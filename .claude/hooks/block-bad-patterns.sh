@@ -94,11 +94,13 @@ check_pattern '\.(ts|tsx)$' \
   'Explicit `any` type is forbidden. Use `unknown` with type narrowing instead.' \
   '(__tests__|\.test\.|\.spec\.)'
 
-# Raw <img> tags — use next/image Image component instead (allow test files)
+# Raw <img> tags — use next/image Image component instead (allow test files).
+# packages/notifications/ is excluded: emails need raw <img> with absolute URLs
+# (next/image is unusable in mail clients).
 check_pattern '\.(tsx|jsx)$' \
   '<img[[:space:]>]' \
   'Raw <img> is forbidden. Use: import Image from "next/image".' \
-  '(__tests__|\.test\.|\.spec\.|setup\.ts)'
+  '(__tests__|\.test\.|\.spec\.|setup\.ts|packages/notifications/)'
 
 # Domain layer — getFullYear() must come from ~/modules/domain (allow domain/ itself and tests)
 check_pattern '\.(ts|tsx)$' \

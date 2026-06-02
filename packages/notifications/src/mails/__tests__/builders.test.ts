@@ -110,7 +110,7 @@ describe("per-type rendering details", () => {
 			"Egapro - Accusé de réception de votre déclaration des indicateurs",
 		);
 		expect(mail.html.toLowerCase()).toContain("récapitulatif");
-		expect(mail.html).toContain("/connexion");
+		expect(mail.html).toContain("/declaration?siren=552100554");
 	});
 
 	it("second_declaration_confirmation mentions the corrective second declaration", async () => {
@@ -122,7 +122,7 @@ describe("per-type rendering details", () => {
 			"Egapro - Accusé de réception de votre seconde déclaration",
 		);
 		expect(mail.html.toLowerCase()).toContain("actions correctives");
-		expect(mail.html).toContain("/connexion");
+		expect(mail.html).toContain("/declaration?siren=552100554");
 	});
 
 	it("cse_opinion_receipt mentions CSE", async () => {
@@ -132,7 +132,7 @@ describe("per-type rendering details", () => {
 		});
 		expect(mail.subject).toBe("Egapro - Réception de l'avis du CSE");
 		expect(mail.html).toContain("CSE");
-		expect(mail.html).toContain("/connexion");
+		expect(mail.html).toContain("/declaration?siren=552100554");
 	});
 
 	it("joint_evaluation_submitted confirms upload", async () => {
@@ -143,6 +143,7 @@ describe("per-type rendering details", () => {
 		expect(mail.subject).toContain("évaluation conjointe");
 		expect(mail.html.toLowerCase()).toContain("évaluation conjointe");
 		expect(mail.html).toContain("Prochaine étape");
+		expect(mail.html).toContain("/mon-espace");
 	});
 
 	it("cycle_opening_info announces the declaration period", async () => {
@@ -155,7 +156,7 @@ describe("per-type rendering details", () => {
 			"Egapro - Ouverture de la période de déclaration des indicateurs Egapro",
 		);
 		expect(mail.html.toLowerCase()).toContain("1ᵉʳ juin");
-		expect(mail.html).toContain("/connexion");
+		expect(mail.html).toContain("/declaration?siren=552100554");
 	});
 
 	it.each([
@@ -202,6 +203,7 @@ describe("per-type rendering details", () => {
 		});
 		expect(mail.subject.toLowerCase()).toContain("évaluation conjointe");
 		expect(mail.html).toContain("1ᵉʳ septembre");
+		expect(mail.html).toContain("/mon-espace");
 	});
 
 	it.each([
@@ -232,6 +234,7 @@ describe("per-type rendering details", () => {
 		);
 		expect(mail.html).toContain(String(YEAR));
 		expect(mail.html).toContain(String(YEAR + 1));
+		expect(mail.html).toContain("/mon-espace");
 	});
 });
 
