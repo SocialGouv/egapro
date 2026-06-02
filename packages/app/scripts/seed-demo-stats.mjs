@@ -68,8 +68,17 @@ function addDays(isoDate, days) {
 	return d.toISOString();
 }
 
+// Per-year offset so cumulative curves stay legible when plotted on a
+// shared MM-DD axis: each cohort sits on a different sub-window of the year.
+// 2024 → Jan-Mar, 2025 → Feb-Apr, 2026 → Mar-May, etc.
+function yearShiftDays(year) {
+	return (year - 2024) * 30;
+}
+
 function dateUtc(year, monthIdx, day, hour = 10) {
-	return new Date(Date.UTC(year, monthIdx, day, hour, 0, 0)).toISOString();
+	const base = new Date(Date.UTC(year, monthIdx, day, hour, 0, 0));
+	base.setUTCDate(base.getUTCDate() + yearShiftDays(year));
+	return base.toISOString();
 }
 
 // --- Wizard event generator ----------------------------------------------
