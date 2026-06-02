@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { COMPLIANCE_PATHS } from "~/modules/declaration-remuneration/steps/compliancePath/constants";
-import { sirenInputSchema } from "~/modules/my-space";
+import { sirenInputSchema } from "~/modules/my-space/schemas";
 
 export const submitDeclarationSchema = z.object({}).optional();
 
