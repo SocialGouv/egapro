@@ -81,6 +81,20 @@ function yearVolumeRatio(year, refYear) {
 	return Math.max(0.3, 1 - stepsBack * 0.3);
 }
 
+// Uniform downsample: keeps `Math.round(arr.length * ratio)` items evenly
+// spread across the array so the kept subset still covers the full date
+// range (rather than just the first N items / earliest dates).
+function sampleUniform(arr, ratio) {
+	if (ratio >= 1) return arr;
+	const target = Math.round(arr.length * ratio);
+	if (target <= 0) return [];
+	return arr.filter(
+		(_, i) =>
+			Math.floor(((i + 1) * target) / arr.length) >
+			Math.floor((i * target) / arr.length),
+	);
+}
+
 // --- Wizard event generator ----------------------------------------------
 // Generates the 7 step_change events 0..6 spread over ~stepGapDays each.
 
@@ -855,14 +869,12 @@ async function main() {
 		}
 	}
 
-	// Slice current-year declarations so older cohorts produce a smaller
-	// cumulative curve than the current campaign — keeps every year's line
-	// visible but visibly distinct on the shared MM-DD axis.
-	const currentCohortKeep = Math.round(
-		DECLARATIONS.length * yearVolumeRatio(YEAR, new Date().getUTCFullYear()),
-	);
+	// Spread the volume reduction uniformly across the array so the kept
+	// declarations still cover the full date range. Otherwise the cohort
+	// curve would stop early (slice(0, N) only keeps the earliest dates).
+	const ratio = yearVolumeRatio(YEAR, new Date().getUTCFullYear());
 	const ALL_DECLARATIONS = [
-		...DECLARATIONS.slice(0, currentCohortKeep),
+		...sampleUniform(DECLARATIONS, ratio),
 		...PREVIOUS_YEAR_DECLARATIONS,
 	];
 	for (const d of ALL_DECLARATIONS) {
