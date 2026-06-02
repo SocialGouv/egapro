@@ -69,7 +69,7 @@ describe("getHistoryEventDisplay", () => {
 	it("demarche_complete: links to the declaration recap page", () => {
 		const result = getHistoryEventDisplay(buildEvent("demarche_complete"));
 		expect(result.label).toBe("Démarche finalisée");
-		expect(result.pageLabel).toBe("Récapitulatif de votre déclaration");
+		expect(result.pageLabel).toBe("Démarche finalisée");
 		expect(result.pageHref).toBe("/declaration-remuneration/recapitulatif");
 	});
 

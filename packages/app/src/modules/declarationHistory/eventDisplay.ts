@@ -82,7 +82,7 @@ export function getHistoryEventDisplay(
 		case "demarche_complete":
 			return {
 				label: "Démarche finalisée",
-				pageLabel: "Récapitulatif de votre déclaration",
+				pageLabel: "Démarche finalisée",
 				pageHref: "/declaration-remuneration/recapitulatif",
 			};
 		default: {
