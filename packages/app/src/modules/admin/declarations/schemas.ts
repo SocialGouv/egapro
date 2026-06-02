@@ -76,3 +76,7 @@ export const getDeclarationByIdSchema = z.object({
 export const cancelDeclarationSchema = z.object({
 	id: z.string().uuid(),
 });
+
+export const getRecapSchema = z.object({
+	id: z.string().uuid(),
+});

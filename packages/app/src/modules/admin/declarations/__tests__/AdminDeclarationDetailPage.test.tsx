@@ -52,6 +52,9 @@ vi.mock("~/trpc/react", () => ({
 					isLoading: false,
 				}),
 			},
+			getRecap: {
+				useQuery: vi.fn().mockReturnValue({ data: undefined }),
+			},
 		},
 	},
 }));
