@@ -1587,8 +1587,14 @@ describe("declarationRouter", () => {
 			actorEmail: "alice@example.fr",
 		};
 
+		type SelectSpies = {
+			limit: ReturnType<typeof vi.fn>;
+			offset: ReturnType<typeof vi.fn>;
+		};
+
 		function buildMockDb(responses: unknown[][]) {
 			let callIndex = 0;
+			const selectSpies: SelectSpies[] = [];
 
 			const select = vi.fn().mockImplementation(() => {
 				const idx = callIndex++;
@@ -1606,14 +1612,15 @@ describe("declarationRouter", () => {
 				const leftJoin = vi.fn().mockReturnValue({ where });
 				const from = vi.fn().mockReturnValue({ where, leftJoin });
 
+				selectSpies.push({ limit, offset });
 				return { from };
 			});
 
-			return { select } as unknown;
+			return { db: { select } as unknown, selectSpies };
 		}
 
 		it("returns history items with actor for an authorized user", async () => {
-			const mockDb = buildMockDb([
+			const { db: mockDb } = buildMockDb([
 				[{ siren: SIREN }],
 				[{ id: "decl-1" }],
 				[mockHistoryItem],
@@ -1641,7 +1648,7 @@ describe("declarationRouter", () => {
 
 		it("returns null actor when actorEmail is null", async () => {
 			const itemWithoutActor = { ...mockHistoryItem, actorEmail: null };
-			const mockDb = buildMockDb([
+			const { db: mockDb } = buildMockDb([
 				[{ siren: SIREN }],
 				[{ id: "decl-1" }],
 				[itemWithoutActor],
@@ -1658,7 +1665,7 @@ describe("declarationRouter", () => {
 		});
 
 		it("throws FORBIDDEN when user has no access to the siren", async () => {
-			const mockDb = buildMockDb([[]]);
+			const { db: mockDb } = buildMockDb([[]]);
 			const caller = await createCaller(mockDb);
 
 			await expect(
@@ -1667,7 +1674,7 @@ describe("declarationRouter", () => {
 		});
 
 		it("throws NOT_FOUND when declaration does not exist", async () => {
-			const mockDb = buildMockDb([[{ siren: SIREN }], []]);
+			const { db: mockDb } = buildMockDb([[{ siren: SIREN }], []]);
 			const caller = await createCaller(mockDb);
 
 			await expect(
@@ -1677,7 +1684,7 @@ describe("declarationRouter", () => {
 
 		it("skips access check when admin is impersonating the siren", async () => {
 			const impersonation = { siren: SIREN, name: "Test Co" };
-			const mockDb = buildMockDb([
+			const { db: mockDb } = buildMockDb([
 				[{ id: "decl-1" }],
 				[mockHistoryItem],
 				[{ total: 1 }],
@@ -1694,7 +1701,7 @@ describe("declarationRouter", () => {
 
 		it("returns correct total and subset for paginated queries", async () => {
 			const item2 = { ...mockHistoryItem, id: "hist-2" };
-			const mockDb = buildMockDb([
+			const { db: mockDb, selectSpies } = buildMockDb([
 				[{ siren: SIREN }],
 				[{ id: "decl-1" }],
 				[item2],
@@ -1711,6 +1718,8 @@ describe("declarationRouter", () => {
 
 			expect(result.items).toHaveLength(1);
 			expect(result.total).toBe(5);
+			expect(selectSpies[2]?.limit).toHaveBeenCalledWith(1);
+			expect(selectSpies[2]?.offset).toHaveBeenCalledWith(1);
 		});
 	});
 });
