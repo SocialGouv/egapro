@@ -4,7 +4,7 @@ import {
 	type DeclarationEventType,
 	getHistoryEventDisplay,
 	type HistoryEvent,
-} from "../eventDisplay";
+} from "../index";
 
 function buildEvent(
 	eventType: DeclarationEventType,
@@ -126,6 +126,8 @@ describe("getHistoryEventDisplay", () => {
 			value: null,
 			round: null,
 		};
-		expect(() => getHistoryEventDisplay(unknownEvent)).toThrow("Unknown event type");
+		expect(() => getHistoryEventDisplay(unknownEvent)).toThrow(
+			"Unknown event type",
+		);
 	});
 });
