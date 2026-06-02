@@ -1,4 +1,4 @@
-import { STEP_TITLES } from "~/modules/declaration-remuneration";
+import { STEP_TITLES } from "~/modules/declaration-remuneration/types";
 import type { DeclarationEventType as DomainEventType } from "~/modules/domain";
 
 export type DeclarationEventType = DomainEventType | "step_change";
