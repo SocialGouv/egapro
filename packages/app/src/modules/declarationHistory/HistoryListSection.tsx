@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "~/trpc/react";
 import type { HistoryItem } from "./HistoryEntry";
 import { HistoryEntry } from "./HistoryEntry";
+import styles from "./HistoryListSection.module.scss";
 
 const LIMIT = 10;
 
@@ -12,17 +13,6 @@ type Props = {
 	siren: string;
 	year: number;
 };
-
-type EntryRowProps = { item: HistoryItem; showDivider: boolean };
-
-function EntryRow({ item, showDivider }: EntryRowProps) {
-	return (
-		<>
-			{showDivider && <hr className="fr-hr fr-mt-0" />}
-			<HistoryEntry item={item} />
-		</>
-	);
-}
 
 export function HistoryListSection({ siren, year }: Props) {
 	const [offset, setOffset] = useState(0);
@@ -54,9 +44,9 @@ export function HistoryListSection({ siren, year }: Props) {
 
 	return (
 		<>
-			<ul className="fr-m-0 fr-p-0">
-				{allItems.map((item, index) => (
-					<EntryRow item={item} key={item.id} showDivider={index > 0} />
+			<ul className={`fr-m-0 fr-p-0 ${styles.list}`}>
+				{allItems.map((item) => (
+					<HistoryEntry item={item} key={item.id} />
 				))}
 			</ul>
 

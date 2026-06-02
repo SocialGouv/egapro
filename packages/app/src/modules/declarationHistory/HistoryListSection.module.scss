@@ -1,0 +1,7 @@
+.list {
+	list-style: none;
+
+	> li:not(:first-child) {
+		border-top: 1px solid var(--border-default-grey);
+	}
+}
