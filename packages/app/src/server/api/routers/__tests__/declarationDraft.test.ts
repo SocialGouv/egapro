@@ -28,15 +28,11 @@ vi.mock("~/server/audit/log", () => ({
 	logAction: (...args: unknown[]) => mockLogAction(...args),
 }));
 
-const mockGetDefaultCampaignDeadlines = vi.fn();
-vi.mock("~/modules/domain", async (importOriginal) => {
-	const original = await importOriginal<typeof import("~/modules/domain")>();
-	return {
-		...original,
-		getDefaultCampaignDeadlines: (...args: unknown[]) =>
-			mockGetDefaultCampaignDeadlines(...args),
-	};
-});
+const mockGetCampaignDeadlines = vi.fn();
+vi.mock("~/server/db/getCampaignDeadlines", () => ({
+	getCampaignDeadlines: (...args: unknown[]) =>
+		mockGetCampaignDeadlines(...args),
+}));
 
 const SIREN = "123456789";
 const YEAR = 2024;
@@ -119,7 +115,7 @@ function pastDeadline() {
 describe("declarationDraftRouter", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
-		mockGetDefaultCampaignDeadlines.mockReturnValue(futureDeadline());
+		mockGetCampaignDeadlines.mockResolvedValue(futureDeadline());
 	});
 
 	afterEach(() => {
@@ -176,7 +172,7 @@ describe("declarationDraftRouter", () => {
 		});
 
 		it("returns null when decl1ModificationDeadline has passed", async () => {
-			mockGetDefaultCampaignDeadlines.mockReturnValue(pastDeadline());
+			mockGetCampaignDeadlines.mockResolvedValue(pastDeadline());
 
 			const draftData = { main: { step1: { workforce: 50 } } };
 			const { db } = createMockDb([
