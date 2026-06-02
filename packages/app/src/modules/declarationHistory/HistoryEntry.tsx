@@ -37,8 +37,10 @@ function formatActorName(actor: HistoryItem["actor"]): string {
 	return parts.length > 0 ? parts.join(" ") : actor.email;
 }
 
-function PageLink({ display }: { display: HistoryEventDisplay }) {
-	if (!display.pageLabel) return null;
+function EntryAction({ display }: { display: HistoryEventDisplay }) {
+	if (!display.pageLabel) {
+		return <span className="fr-text--sm">{display.label}</span>;
+	}
 
 	return (
 		<span>
@@ -90,7 +92,7 @@ export function HistoryEntry({ item }: Props) {
 					)}
 				</div>
 				<div className="fr-col-12 fr-col-md-6">
-					<PageLink display={display} />
+					<EntryAction display={display} />
 				</div>
 			</div>
 		</li>

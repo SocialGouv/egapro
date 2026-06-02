@@ -66,12 +66,15 @@ describe("HistoryEntry", () => {
 		expect(screen.getAllByText("only@email.fr").length).toBeGreaterThan(0);
 	});
 
-	it("renders page label as plain text when pageHref is null", () => {
+	it("renders the action label as plain text when the event has no page", () => {
 		render(
 			<ul>
 				<HistoryEntry item={{ ...baseItem, eventType: "cancel" }} />
 			</ul>,
 		);
+		expect(
+			screen.getByText("Annulation de la déclaration"),
+		).toBeInTheDocument();
 		expect(
 			screen.queryByRole("link", { name: /annulation/i }),
 		).not.toBeInTheDocument();
