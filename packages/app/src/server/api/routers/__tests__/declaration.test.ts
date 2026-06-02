@@ -1571,4 +1571,146 @@ describe("declarationRouter", () => {
 			expect(stepChange).toBeUndefined();
 		});
 	});
+
+	describe("getStatusHistory", () => {
+		const SIREN = "339787277";
+		const YEAR = 2026;
+
+		const mockHistoryItem = {
+			id: "hist-1",
+			eventType: "declaration_submit" as const,
+			value: null,
+			round: 1,
+			createdAt: new Date("2026-01-15T10:00:00Z"),
+			actorFirstName: "Alice",
+			actorLastName: "Dupont",
+			actorEmail: "alice@example.fr",
+		};
+
+		function buildMockDb(responses: unknown[][]) {
+			let callIndex = 0;
+
+			const select = vi.fn().mockImplementation(() => {
+				const idx = callIndex++;
+				const rows = responses[idx] ?? [];
+
+				const offset = vi.fn().mockResolvedValue(rows);
+				const limitResult = Object.assign(Promise.resolve(rows), { offset });
+				const limit = vi.fn().mockReturnValue(limitResult);
+				const orderBy = vi.fn().mockReturnValue({ limit });
+				const where = vi
+					.fn()
+					.mockImplementation(() =>
+						Object.assign(Promise.resolve(rows), { limit, orderBy }),
+					);
+				const leftJoin = vi.fn().mockReturnValue({ where });
+				const from = vi.fn().mockReturnValue({ where, leftJoin });
+
+				return { from };
+			});
+
+			return { select } as unknown;
+		}
+
+		it("returns history items with actor for an authorized user", async () => {
+			const mockDb = buildMockDb([
+				[{ siren: SIREN }],
+				[{ id: "decl-1" }],
+				[mockHistoryItem],
+				[{ total: 1 }],
+			]);
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.getStatusHistory({
+				siren: SIREN,
+				year: YEAR,
+			});
+
+			expect(result.items).toHaveLength(1);
+			expect(result.total).toBe(1);
+			expect(result.items[0]).toMatchObject({
+				id: "hist-1",
+				eventType: "declaration_submit",
+				actor: {
+					firstName: "Alice",
+					lastName: "Dupont",
+					email: "alice@example.fr",
+				},
+			});
+		});
+
+		it("returns null actor when actorEmail is null", async () => {
+			const itemWithoutActor = { ...mockHistoryItem, actorEmail: null };
+			const mockDb = buildMockDb([
+				[{ siren: SIREN }],
+				[{ id: "decl-1" }],
+				[itemWithoutActor],
+				[{ total: 1 }],
+			]);
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.getStatusHistory({
+				siren: SIREN,
+				year: YEAR,
+			});
+
+			expect(result.items[0]?.actor).toBeNull();
+		});
+
+		it("throws FORBIDDEN when user has no access to the siren", async () => {
+			const mockDb = buildMockDb([[]]);
+			const caller = await createCaller(mockDb);
+
+			await expect(
+				caller.getStatusHistory({ siren: SIREN, year: YEAR }),
+			).rejects.toMatchObject({ code: "FORBIDDEN" });
+		});
+
+		it("throws NOT_FOUND when declaration does not exist", async () => {
+			const mockDb = buildMockDb([[{ siren: SIREN }], []]);
+			const caller = await createCaller(mockDb);
+
+			await expect(
+				caller.getStatusHistory({ siren: SIREN, year: YEAR }),
+			).rejects.toMatchObject({ code: "NOT_FOUND" });
+		});
+
+		it("skips access check when admin is impersonating the siren", async () => {
+			const impersonation = { siren: SIREN, name: "Test Co" };
+			const mockDb = buildMockDb([
+				[{ id: "decl-1" }],
+				[mockHistoryItem],
+				[{ total: 1 }],
+			]);
+			const caller = await createCaller(mockDb, null, impersonation);
+
+			const result = await caller.getStatusHistory({
+				siren: SIREN,
+				year: YEAR,
+			});
+
+			expect(result.total).toBe(1);
+		});
+
+		it("returns correct total and subset for paginated queries", async () => {
+			const item2 = { ...mockHistoryItem, id: "hist-2" };
+			const mockDb = buildMockDb([
+				[{ siren: SIREN }],
+				[{ id: "decl-1" }],
+				[item2],
+				[{ total: 5 }],
+			]);
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.getStatusHistory({
+				siren: SIREN,
+				year: YEAR,
+				limit: 1,
+				offset: 1,
+			});
+
+			expect(result.items).toHaveLength(1);
+			expect(result.total).toBe(5);
+		});
+	});
 });
