@@ -66,11 +66,11 @@ describe("getHistoryEventDisplay", () => {
 		expect(result.pageHref).toBeNull();
 	});
 
-	it("demarche_complete: returns non-empty label and no page link", () => {
+	it("demarche_complete: links to the declaration recap page", () => {
 		const result = getHistoryEventDisplay(buildEvent("demarche_complete"));
 		expect(result.label).toBe("Démarche finalisée");
-		expect(result.pageLabel).toBeNull();
-		expect(result.pageHref).toBeNull();
+		expect(result.pageLabel).toBe("Récapitulatif de votre déclaration");
+		expect(result.pageHref).toBe("/declaration-remuneration/recapitulatif");
 	});
 
 	it("step_change with round=5: maps via STEP_TITLES and builds etape href", () => {
