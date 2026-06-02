@@ -68,17 +68,17 @@ function addDays(isoDate, days) {
 	return d.toISOString();
 }
 
-// Per-year offset so cumulative curves stay legible when plotted on a
-// shared MM-DD axis: each cohort sits on a different sub-window of the year.
-// 2024 → Jan-Mar, 2025 → Feb-Apr, 2026 → Mar-May, etc.
-function yearShiftDays(year) {
-	return (year - 2024) * 30;
+function dateUtc(year, monthIdx, day, hour = 10) {
+	return new Date(Date.UTC(year, monthIdx, day, hour, 0, 0)).toISOString();
 }
 
-function dateUtc(year, monthIdx, day, hour = 10) {
-	const base = new Date(Date.UTC(year, monthIdx, day, hour, 0, 0));
-	base.setUTCDate(base.getUTCDate() + yearShiftDays(year));
-	return base.toISOString();
+// Per-year volume ratio so cumulative curves end at clearly different
+// heights on the campaign progression chart: current year = full set,
+// each previous year cohort drops by 30 % so 2025 ≈ 70 % of 2026 etc.
+// Bottoms at 30 % so even old cohorts produce a visible line.
+function yearVolumeRatio(year, refYear) {
+	const stepsBack = Math.max(0, refYear - year);
+	return Math.max(0.3, 1 - stepsBack * 0.3);
 }
 
 // --- Wizard event generator ----------------------------------------------
@@ -855,7 +855,16 @@ async function main() {
 		}
 	}
 
-	const ALL_DECLARATIONS = [...DECLARATIONS, ...PREVIOUS_YEAR_DECLARATIONS];
+	// Slice current-year declarations so older cohorts produce a smaller
+	// cumulative curve than the current campaign — keeps every year's line
+	// visible but visibly distinct on the shared MM-DD axis.
+	const currentCohortKeep = Math.round(
+		DECLARATIONS.length * yearVolumeRatio(YEAR, new Date().getUTCFullYear()),
+	);
+	const ALL_DECLARATIONS = [
+		...DECLARATIONS.slice(0, currentCohortKeep),
+		...PREVIOUS_YEAR_DECLARATIONS,
+	];
 	for (const d of ALL_DECLARATIONS) {
 		const year = d.year ?? YEAR;
 		const earliest = d.events[0].at;
