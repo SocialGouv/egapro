@@ -44,9 +44,9 @@ export function EmailFooter({
 				<tr>
 					<td style={{ padding: "20px 10px" }}>
 						<p style={mention}>
-							Ce courriel est envoyé automatiquement. Merci de ne pas y répondre.
-							Pour toute question, vous pouvez joindre votre référent égalité
-							professionnelle :{" "}
+							Ce courriel est envoyé automatiquement. Merci de ne pas y
+							répondre. Pour toute question, vous pouvez joindre votre référent
+							égalité professionnelle :{" "}
 							<a href={`mailto:${referentMail}`} style={link}>
 								{referentMail}
 							</a>

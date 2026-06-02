@@ -10,9 +10,7 @@ export function EmailBody({ children }: EmailBodyProps) {
 	return (
 		<EmailFrameRow gradient background={COLORS.bgWhite}>
 			<tr>
-				<td style={{ padding: "20px 10px" }}>
-					{children}
-				</td>
+				<td style={{ padding: "20px 10px" }}>{children}</td>
 			</tr>
 		</EmailFrameRow>
 	);
