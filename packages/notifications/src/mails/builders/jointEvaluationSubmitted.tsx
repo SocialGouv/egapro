@@ -1,5 +1,5 @@
 import { renderEmail } from "../shared/render.js";
-import { getConnectionUrl } from "../shared/urls.js";
+import { getMySpaceUrl } from "../shared/urls.js";
 import {
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -37,7 +37,7 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 				portail Egapro.
 			</EmailParagraph>
 			<EmailCtaWithLink
-				href={getConnectionUrl()}
+				href={getMySpaceUrl()}
 				label="Voir la suite du parcours"
 			/>
 			<EmailParagraph>

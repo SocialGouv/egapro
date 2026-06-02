@@ -1,107 +1,71 @@
-import { Hr, Section } from "@react-email/components";
 import { getPublicUrl } from "../shared/urls.js";
-import { BlocMarque } from "./BlocMarque.js";
-import { BORDER, BRAND, COLORS, FONT, LAYOUT, SPACING } from "./tokens.js";
-
-type EmailFooterProps = {
-	directionName?: string;
-	referentMailLabel?: string;
-};
+import { EmailFrameRow } from "./EmailFrameRow.js";
+import { MarianneLogoBlock } from "./MarianneLogoBlock.js";
+import { COLORS, FONT } from "./tokens.js";
 
 const DREETS_MAIL = "dreets@travail.gouv.fr";
+const REFERENT_MAIL = "referent-egalite@dreets.gouv.fr";
+
+type EmailFooterProps = {
+	referentMail?: string;
+};
 
 export function EmailFooter({
-	directionName = BRAND.directionName,
-	referentMailLabel = "[Mail du référent départemental]",
+	referentMail = REFERENT_MAIL,
 }: EmailFooterProps) {
-	const publicUrl = getPublicUrl();
-	const personalDataUrl = `${publicUrl}/web/donnees-personnelles`;
+	const personalDataUrl = `${getPublicUrl()}/web/donnees-personnelles`;
+	const mention = {
+		margin: 0,
+		fontFamily: FONT.family,
+		fontSize: FONT.size.sm,
+		lineHeight: FONT.lineHeight.sm,
+		color: COLORS.footerGrey,
+	} as const;
+	const link = {
+		color: COLORS.blueFrance,
+		textDecoration: "underline",
+	} as const;
 	return (
 		<>
-			<Section
-				style={{
-					padding: `${SPACING.lg}px ${LAYOUT.headerPaddingX}px`,
-					backgroundColor: COLORS.bgWhite,
-					borderTop: BORDER.thin,
-				}}
-			>
-				<table
-					role="presentation"
-					cellSpacing={0}
-					cellPadding={0}
-					border={0}
-					width="100%"
-					style={{ borderCollapse: "collapse" }}
-				>
-					<tbody>
-						<tr>
-							<td align="left" style={{ verticalAlign: "top", padding: 0 }}>
-								<BlocMarque />
-							</td>
-							<td
-								align="right"
-								style={{
-									verticalAlign: "top",
-									fontFamily: FONT.family,
-									fontSize: FONT.size.sm,
-									fontWeight: FONT.weight.bold,
-									color: COLORS.textTitle,
-									lineHeight: FONT.lineHeight.sm,
-								}}
-							>
-								{directionName}
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</Section>
-			<Hr style={{ margin: 0, borderColor: COLORS.border }} />
-			<Section
-				style={{
-					padding: `${SPACING.md}px ${LAYOUT.headerPaddingX}px ${SPACING.lg}px`,
-					backgroundColor: COLORS.bgWhite,
-				}}
-			>
-				<p
-					style={{
-						margin: 0,
-						fontFamily: FONT.family,
-						fontSize: FONT.size.sm,
-						lineHeight: FONT.lineHeight.sm,
-						color: COLORS.textGrey,
-					}}
-				>
-					Ce courriel est envoyé automatiquement. Merci de ne pas y répondre.
-					Pour toute question, vous pouvez joindre votre référent égalité
-					professionnelle : {referentMailLabel}
-				</p>
-				<p
-					style={{
-						margin: `${SPACING.sm}px 0 0`,
-						fontFamily: FONT.family,
-						fontSize: FONT.size.sm,
-						lineHeight: FONT.lineHeight.sm,
-						color: COLORS.textGrey,
-					}}
-				>
-					Si les données personnelles mentionnées vous concernent, vous disposez
-					d'un droit d'accès, de rectification, de limitation et d'opposition
-					(RGPD). Pour l'exercer :{" "}
-					<a
-						href={`mailto:${DREETS_MAIL}`}
-						style={{ color: COLORS.blueFrance, textDecoration: "underline" }}
+			<EmailFrameRow edge="bottom" gradient>
+				<tr>
+					<td
+						style={{
+							paddingTop: 20,
+							paddingBottom: 20,
+							borderTop: `1px solid ${COLORS.frameBorder}`,
+						}}
 					>
-						{DREETS_MAIL}
-					</a>
-					. Pour en savoir plus :{" "}
-					<a
-						href={personalDataUrl}
-						style={{ color: COLORS.blueFrance, textDecoration: "underline" }}
-					>
-						{personalDataUrl}
-					</a>
-				</p>
-			</Section>
+						<MarianneLogoBlock />
+					</td>
+				</tr>
+			</EmailFrameRow>
+			<EmailFrameRow bordered={false}>
+				<tr>
+					<td style={{ padding: "20px 10px" }}>
+						<p style={mention}>
+							Ce courriel est envoyé automatiquement. Merci de ne pas y répondre.
+							Pour toute question, vous pouvez joindre votre référent égalité
+							professionnelle :{" "}
+							<a href={`mailto:${referentMail}`} style={link}>
+								{referentMail}
+							</a>
+						</p>
+						<p style={{ ...mention, marginTop: 8 }}>
+							Si les données personnelles mentionnées vous concernent, vous
+							disposez d'un droit d'accès, de rectification, de limitation et
+							d'opposition (RGPD). Pour l'exercer :{" "}
+							<a href={`mailto:${DREETS_MAIL}`} style={link}>
+								{DREETS_MAIL}
+							</a>
+							. Pour en savoir plus :{" "}
+							<a href={personalDataUrl} style={link}>
+								{personalDataUrl}
+							</a>
+						</p>
+					</td>
+				</tr>
+			</EmailFrameRow>
 		</>
 	);
 }

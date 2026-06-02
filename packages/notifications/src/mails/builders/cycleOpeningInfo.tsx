@@ -1,6 +1,6 @@
 import { formatFrenchDate } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
-import { getConnectionUrl } from "../shared/urls.js";
+import { getDeclarationUrl } from "../shared/urls.js";
 import {
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -44,7 +44,7 @@ export const buildCycleOpeningInfoMail: MailBuilder<
 				remercions de bien vouloir la finaliser dans ce délai.
 			</EmailParagraph>
 			<EmailCtaWithLink
-				href={getConnectionUrl()}
+				href={getDeclarationUrl(payload.siren, payload.year)}
 				label="Commencer ma déclaration"
 			/>
 			<EmailParagraph>

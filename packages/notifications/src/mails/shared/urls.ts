@@ -23,3 +23,8 @@ export function getAssetUrl(path: string): string {
 	const cleaned = path.replace(/^\/+/, "");
 	return `${getPublicUrl()}/assets/email/${cleaned}`;
 }
+
+export function getImageUrl(path: string): string {
+	const cleaned = path.replace(/^\/+/, "");
+	return `${getPublicUrl()}/assets/images/mails/${cleaned}`;
+}

@@ -1,6 +1,6 @@
 import { formatFrenchDate } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
-import { getConnectionUrl } from "../shared/urls.js";
+import { getDeclarationUrl } from "../shared/urls.js";
 import {
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -42,7 +42,7 @@ export const buildSecondDeclarationReminderMail: MailBuilder<
 				avant cette date, votre déclaration sera marquée comme non conforme.
 			</EmailParagraph>
 			<EmailCtaWithLink
-				href={getConnectionUrl()}
+				href={getDeclarationUrl(payload.siren, payload.year)}
 				label="Déposer ma seconde déclaration"
 			/>
 			<EmailParagraph>
