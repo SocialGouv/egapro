@@ -37,7 +37,7 @@ test.describe("Declaration history page", () => {
 			page.getByText(`Démarche des indicateurs de rémunération ${year}`),
 		).toBeVisible();
 
-		const items = page.locator("ul > li");
+		const items = page.locator("main ul > li");
 		await expect(items).toHaveCount(3);
 	});
 
@@ -47,11 +47,11 @@ test.describe("Declaration history page", () => {
 
 		await expect(page.getByRole("button", { name: "Voir plus" })).toBeVisible();
 
-		await expect(page.locator("ul > li")).toHaveCount(10);
+		await expect(page.locator("main ul > li")).toHaveCount(10);
 
 		await page.getByRole("button", { name: "Voir plus" }).click();
 
-		await expect(page.locator("ul > li")).toHaveCount(13);
+		await expect(page.locator("main ul > li")).toHaveCount(13);
 		await expect(
 			page.getByRole("button", { name: "Voir plus" }),
 		).not.toBeVisible();
