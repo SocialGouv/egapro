@@ -1,10 +1,19 @@
 import Link from "next/link";
-import type { RouterOutputs } from "~/trpc/react";
-import type { HistoryEventDisplay } from "./eventDisplay";
+import type { DeclarationEventType, HistoryEventDisplay } from "./eventDisplay";
 import { getHistoryEventDisplay } from "./eventDisplay";
 
-export type HistoryItem =
-	RouterOutputs["declaration"]["getStatusHistory"]["items"][number];
+export type HistoryItem = {
+	id: string;
+	eventType: DeclarationEventType;
+	value: string | null;
+	round: number | null;
+	createdAt: Date;
+	actor: {
+		firstName: string | null;
+		lastName: string | null;
+		email: string;
+	} | null;
+};
 
 type Props = {
 	item: HistoryItem;
