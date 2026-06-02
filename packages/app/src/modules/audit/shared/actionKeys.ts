@@ -68,6 +68,7 @@ export const AUDIT_ACTIONS = {
 	DRAFT_CLEAR: "declaration_draft.clear",
 
 	// ── Sensitive reads ────────────────────────────────────
+	DECLARATION_HISTORY_READ: "declaration_history.read",
 	ADMIN_FILE_DOWNLOAD: "admin.file_download",
 	PROFILE_READ: "profile.read",
 	DECLARATION_READ_GIP_DATA: "declaration.read_gip_data",
@@ -151,6 +152,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.DRAFT_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DRAFT_SAVE]: "mutation",
 	[AUDIT_ACTIONS.DRAFT_CLEAR]: "mutation",
+	[AUDIT_ACTIONS.DECLARATION_HISTORY_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PROFILE_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA]: "read_sensitive",
