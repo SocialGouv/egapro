@@ -60,6 +60,8 @@ These gates trigger **automatically** without user input. Do NOT wait to be aske
 
 Within the `/implement` pipeline, the unit/integration tests are written by the `tu-dev` agent (always Opus, invoked by `code-dev` at step 5.5) right after implementation — `code-dev` no longer writes, runs, or reads any unit/integration test itself. `tu-dev` triages failures and hands control back to `code-dev` on a genuine regression (comment `tu-dev:` on the ticket). Then the quality gates are delegated by the `code-dev` agent (step 6) — it invokes the 4 auditors in parallel, before opening the draft PR. `tu-dev` runs **only** inside the pipeline.
 
+Because `code-dev` spawns these agents itself (`tu-dev` + the 4 gates + `functional-validator`), it must run as a **main agent** — its own `claude --agent code-dev` process — since a subagent cannot spawn subagents. The pipeline therefore always launches code-dev as a CLI process: epic mode via `epic_loop.sh`, task/bug mode via a synchronous `claude --agent code-dev` foreground call in `/implement` (never via the Task tool).
+
 **Outside the pipeline** (direct edits, manual fixes, hotfixes), the same rule applies : before reporting ANY task as done, launch the **4 parallel agents** :
 
 1. **Validator** — delegate to `.claude/agents/validator/AGENT.md` (typecheck + test + lint + format)
