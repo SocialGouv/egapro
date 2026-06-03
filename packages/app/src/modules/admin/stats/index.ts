@@ -6,6 +6,8 @@ export { CampaignRateTile } from "./CampaignRateTile";
 export { CompletionFunnelChart } from "./CompletionFunnelChart";
 export { CompletionFunnelTable } from "./CompletionFunnelTable";
 export { formatCount, formatDays, formatPercent } from "./formatters";
+export { MatomoFunnelChart } from "./MatomoFunnelChart";
+export { MatomoFunnelTable } from "./MatomoFunnelTable";
 export { StagnationDaysFilter } from "./StagnationDaysFilter";
 export { StatsDashboard } from "./StatsDashboard";
 export { StepDropoffChart } from "./StepDropoffChart";
