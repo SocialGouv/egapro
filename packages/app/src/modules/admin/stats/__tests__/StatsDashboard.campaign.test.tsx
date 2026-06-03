@@ -5,6 +5,7 @@ const progressionUseQueryMock = vi.fn();
 const stepDurationsUseQueryMock = vi.fn();
 const stepDropoffUseQueryMock = vi.fn();
 const funnelUseQueryMock = vi.fn();
+const matomoFunnelUseQueryMock = vi.fn();
 const statsUseQueryMock = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
@@ -24,6 +25,9 @@ vi.mock("~/trpc/react", () => ({
 			},
 			getCompletionFunnel: {
 				useQuery: (...args: unknown[]) => funnelUseQueryMock(...args),
+			},
+			getMatomoFunnel: {
+				useQuery: (...args: unknown[]) => matomoFunnelUseQueryMock(...args),
 			},
 		},
 	},
@@ -53,6 +57,12 @@ vi.mock("../CompletionFunnelChart", () => ({
 vi.mock("../CompletionFunnelTable", () => ({
 	CompletionFunnelTable: () => <div data-testid="funnel-table" />,
 }));
+vi.mock("../MatomoFunnelChart", () => ({
+	MatomoFunnelChart: () => <div data-testid="matomo-funnel-chart" />,
+}));
+vi.mock("../MatomoFunnelTable", () => ({
+	MatomoFunnelTable: () => <div data-testid="matomo-funnel-table" />,
+}));
 vi.mock("../CampaignRateTile", () => ({
 	CampaignRateTile: () => <div data-testid="campaign-rate-tile" />,
 }));
@@ -67,6 +77,7 @@ const defaultMocks = () =>
 		stepDurationsUseQueryMock,
 		stepDropoffUseQueryMock,
 		funnelUseQueryMock,
+		matomoFunnelUseQueryMock,
 	});
 
 describe("StatsDashboard — campaign section states", () => {
@@ -75,6 +86,7 @@ describe("StatsDashboard — campaign section states", () => {
 		stepDurationsUseQueryMock.mockReset();
 		stepDropoffUseQueryMock.mockReset();
 		funnelUseQueryMock.mockReset();
+		matomoFunnelUseQueryMock.mockReset();
 		statsUseQueryMock.mockReset();
 		defaultMocks();
 	});
@@ -215,6 +227,7 @@ describe("StatsDashboard — query options", () => {
 		stepDurationsUseQueryMock.mockReset();
 		stepDropoffUseQueryMock.mockReset();
 		funnelUseQueryMock.mockReset();
+		matomoFunnelUseQueryMock.mockReset();
 		statsUseQueryMock.mockReset();
 		defaultMocks();
 	});
