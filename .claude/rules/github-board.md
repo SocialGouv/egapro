@@ -1,6 +1,6 @@
 # GitHub Board Reference
 
-> **Used by**: `product-owner`, `architect`, `bug-analyst`, `code-dev` (déplacent les tickets — uniquement code-dev en pratique, les autres ne touchent pas au board), skills `/analyse`, `/implement`. `functional-validator` commente seulement.
+> **Used by**: `product-owner`, `architect`, `bug-analyst`, `code-dev` (déplacent les tickets — uniquement code-dev en pratique, les autres ne touchent pas au board), skills `/analyse`, `/implement`. `functional-validator` et `tu-dev` commentent seulement (jamais de transition de board).
 
 IDs et snippets GraphQL prêts à l'emploi pour que les agents (`architect`, `code-dev`) et skills (`/analyse`, `/implement`) pilotent le project board **EGAPRO V2**.
 

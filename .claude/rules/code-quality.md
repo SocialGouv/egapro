@@ -4,7 +4,7 @@ description: General code quality rules — always loaded
 
 # Code Quality
 
-> **Used by**: toute personne ou agent écrivant du code. Enforced par `structural-auditor` (17 règles), `block-bad-patterns.sh` hook, et `code-dev` pendant l'implémentation.
+> **Used by**: toute personne ou agent écrivant du code. Enforced par `structural-auditor` (17 règles), `block-bad-patterns.sh` hook, `code-dev` pendant l'implémentation, et `tu-dev` pour le code de test (mocks DRY, no-comments).
 
 ## Zero suppression comments
 

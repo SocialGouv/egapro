@@ -58,7 +58,7 @@ These gates trigger **automatically** without user input. Do NOT wait to be aske
 
 ### Quality gates — agent delegation
 
-Within the `/implement` pipeline, quality gates are delegated by the `code-dev` agent (step 6) — it invokes the 4 auditors in parallel after implementation, before opening the draft PR.
+Within the `/implement` pipeline, the unit/integration tests are written by the `tu-dev` agent (always Opus, invoked by `code-dev` at step 5.5) right after implementation — `code-dev` no longer writes, runs, or reads any unit/integration test itself. `tu-dev` triages failures and hands control back to `code-dev` on a genuine regression (comment `tu-dev:` on the ticket). Then the quality gates are delegated by the `code-dev` agent (step 6) — it invokes the 4 auditors in parallel, before opening the draft PR. `tu-dev` runs **only** inside the pipeline.
 
 **Outside the pipeline** (direct edits, manual fixes, hotfixes), the same rule applies : before reporting ANY task as done, launch the **4 parallel agents** :
 
@@ -138,6 +138,8 @@ Agents in `.claude/agents/` are delegated to automatically by skills and quality
 | `security-auditor` | OWASP Top 10 + RGS security review | sonnet |
 
 These agents are **read-only** — they report findings but never modify files. Fixes are applied by the main agent after review.
+
+The `tu-dev` agent (Opus) precedes these 4 gates in the `/implement` pipeline (step 5.5 of `code-dev`). Unlike them, it is a **writer**: it creates/fixes the vitest tests (unit + integration). It runs only inside the pipeline and hands control back to `code-dev` on a genuine regression. See `.claude/agents/tu-dev/AGENT.md`.
 
 ---
 

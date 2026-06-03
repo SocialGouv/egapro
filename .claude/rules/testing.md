@@ -5,7 +5,7 @@ paths:
 
 # Testing
 
-> **Used by**: `code-dev` (écrit TU + E2E), `validator` (exécute `pnpm test`), `structural-auditor` (règle 2.13). Auto-chargé via `paths:`.
+> **Used by**: `tu-dev` (écrit les TU + tests d'intégration), `code-dev` (écrit les E2E), `validator` (exécute `pnpm test`), `structural-auditor` (règle 2.13). Auto-chargé via `paths:`.
 
 ## 75% minimum code coverage (enforced)
 

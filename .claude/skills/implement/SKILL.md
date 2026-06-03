@@ -146,7 +146,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 4. **Invoquer `code-dev`** en foreground via le subagent :
    - Inputs : ticket number, worktree path, worktree index, base branch (sans préfixe `origin/`), working branch.
    - Si label `complexe` → model `opus`, sinon `sonnet`.
-   - L'agent suit `code-dev/AGENT.md` : implémente, push, ouvre PR draft, force PR↔issue link, fait passer les 4 quality gates + `functional-validator`, `gh pr ready`, retourne JSON. **Le ticket reste en `In progress`** — les transitions `In review` et `Done` sont user-only.
+   - L'agent suit `code-dev/AGENT.md` : implémente, **délègue tous les tests (TU + intégration) à `tu-dev`** (Opus, étape 5.5 — `tu-dev` rend la main sur une vraie régression), push, ouvre PR draft, force PR↔issue link, fait passer les 4 quality gates + `functional-validator`, `gh pr ready`, retourne JSON. **Le ticket reste en `In progress`** — les transitions `In review` et `Done` sont user-only.
 
 5. **Parser le JSON retourné** :
 
