@@ -1,9 +1,15 @@
 import { and, between, eq, gte, inArray, type SQL, sql } from "drizzle-orm";
 
 import {
+	buildMatomoFunnelSegment,
+	mapMatomoFunnel,
+	MATOMO_FUNNEL_DATE_RANGE,
+} from "~/modules/admin/stats/matomoFunnel";
+import {
 	getCampaignProgressionSchema,
 	getCampaignStatsSchema,
 	getCompletionFunnelSchema,
+	getMatomoFunnelSchema,
 	getStepDropoffRateSchema,
 	getStepDurationsSchema,
 } from "~/modules/admin/stats/schemas";
@@ -13,9 +19,11 @@ import type {
 	CampaignStats,
 	CompletionFunnelOutput,
 	FunnelRow,
+	MatomoFunnelOutput,
 	StepDropoffRow,
 	StepDurationRow,
 } from "~/modules/admin/stats/types";
+import { MATOMO_DECLARATION_ACTION } from "~/modules/analytics";
 import {
 	COMPANY_SIZE_ANNUAL_MIN,
 	COMPANY_SIZE_RANGES,
@@ -40,6 +48,7 @@ import {
 	declarations,
 	gipMdsData,
 } from "~/server/db/schema";
+import { fetchMatomoEventsReport } from "~/server/services/matomo";
 
 /** Minimum number of completed transitions before showing a median / p90. */
 const STEP_DURATION_MIN_SAMPLE = 5;
@@ -996,6 +1005,26 @@ export const adminStatsRouter = createTRPCRouter({
 				),
 				cseFunnel: buildFunnelRows(FUNNEL_CSE_KEY_STEPS, cseCounts),
 			};
+		}),
+	getMatomoFunnel: adminProcedure
+		.input(getMatomoFunnelSchema)
+		.query(async ({ input }): Promise<MatomoFunnelOutput> => {
+			const segment = buildMatomoFunnelSegment(input);
+			const [actionRows, stepRows] = await Promise.all([
+				fetchMatomoEventsReport({
+					method: "Events.getAction",
+					period: "range",
+					date: MATOMO_FUNNEL_DATE_RANGE,
+					segment,
+				}),
+				fetchMatomoEventsReport({
+					method: "Events.getName",
+					period: "range",
+					date: MATOMO_FUNNEL_DATE_RANGE,
+					segment: `${segment};eventAction==${MATOMO_DECLARATION_ACTION.STEP_COMPLETE}`,
+				}),
+			]);
+			return mapMatomoFunnel(actionRows, stepRows);
 		}),
 });
 function countDeclarationsWithEvent(opts: {

@@ -88,3 +88,15 @@ export const getCompletionFunnelSchema = z.object({
 export type GetCompletionFunnelInput = z.infer<
 	typeof getCompletionFunnelSchema
 >;
+
+/**
+ * Input for `adminStats.getMatomoFunnel`. Same `{ year, sizeRange? }` filter
+ * couple as the DB-backed widgets — but applied to Matomo via a segment on the
+ * campaign-year / workforce custom dimensions, never a calendar date range.
+ */
+export const getMatomoFunnelSchema = z.object({
+	year: z.number().int().min(2000).max(2100),
+	sizeRange: z.enum(COMPANY_SIZE_RANGE_KEYS).optional(),
+});
+
+export type GetMatomoFunnelInput = z.infer<typeof getMatomoFunnelSchema>;
