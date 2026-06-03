@@ -16,6 +16,7 @@ export type {
 	GetCampaignProgressionInput,
 	GetCampaignStatsInput,
 	GetCompletionFunnelInput,
+	GetMatomoFunnelInput,
 	GetStepDropoffRateInput,
 	GetStepDurationsInput,
 } from "./schemas";
@@ -23,6 +24,7 @@ export {
 	getCampaignProgressionSchema,
 	getCampaignStatsSchema,
 	getCompletionFunnelSchema,
+	getMatomoFunnelSchema,
 	getStepDropoffRateSchema,
 	getStepDurationsSchema,
 } from "./schemas";
@@ -32,6 +34,8 @@ export type {
 	CampaignStats,
 	CompletionFunnelOutput,
 	FunnelRow,
+	MatomoFunnelOutput,
+	MatomoFunnelRow,
 	StepDropoffRow,
 	StepDurationRow,
 } from "./types";
