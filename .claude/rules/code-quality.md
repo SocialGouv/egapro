@@ -1,10 +1,14 @@
 ---
-description: General code quality rules — always loaded
+paths:
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
+  - "src/**/*.js"
+  - "src/**/*.jsx"
 ---
 
 # Code Quality
 
-> **Used by**: toute personne ou agent écrivant du code. Enforced par `structural-auditor` (17 règles), `block-bad-patterns.sh` hook, `code-dev` pendant l'implémentation, et `tu-dev` pour le code de test (mocks DRY, no-comments).
+> **Used by**: toute personne ou agent écrivant du code. Auto-chargé via `paths:` quand un fichier `.ts/.tsx/.js/.jsx` sous `src/` est lu ou édité (donc pas dans les contextes qui ne touchent pas au code — PO, analyse, etc.). Enforced par `structural-auditor` (17 règles), `block-bad-patterns.sh` hook, `code-dev` pendant l'implémentation, et `tu-dev` pour le code de test (mocks DRY, no-comments).
 
 ## Zero suppression comments
 
