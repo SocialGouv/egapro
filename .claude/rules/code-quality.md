@@ -37,10 +37,11 @@ Enforced par `structural-auditor` (rule 2.17) sur les fichiers modifiés.
 If the same logic or markup appears 3 or more times, extract it into a shared function or component.
 
 Common duplication hotspots to watch for:
-- **Test mocks** — standard mocks (next/link, next/navigation, server-only) live in `src/test/setup.ts`. Never duplicate them in test files.
 - **Constants** — shared domain constants go in the module's `shared/constants.ts`. Never duplicate a constant across multiple files.
 - **Validation schemas** — shared Zod schemas go in a module-level file (e.g. `phone.ts`). Never duplicate regex or validation logic.
 - **Utility functions** — shared formatting functions (formatSiren, formatPhone, etc.) go in the module's barrel or a shared utils file.
+
+> La règle DRY spécifique aux **tests** (mocks centralisés dans `src/test/setup.ts`, jamais redupliqués) vit dans `rules/testing.md` — le rule de `tu-dev`, scopé aux `__tests__/`. Pas de duplication ici : `testing.md` en est la source unique.
 
 ## No useless constants
 
