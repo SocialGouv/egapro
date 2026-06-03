@@ -1,6 +1,13 @@
+---
+paths:
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
+  - "src/e2e/**"
+---
+
 # Bug Fix Workflow
 
-> **Used by**: `code-dev` (issue type Bug, ou label `bug` — écrit le fix + l'éventuel test de reproduction **E2E**), `tu-dev` (écrit le test de reproduction **unitaire / intégration** par revert-verify), `bug-analyst` (phase analyse). Hors pipeline : l'agent principal quand il traite un fix.
+> **Used by**: `code-dev` (issue type Bug, ou label `bug` — écrit le fix + l'éventuel test de reproduction **E2E**), `tu-dev` (écrit le test de reproduction **unitaire / intégration** par revert-verify), `bug-analyst` (phase analyse). Hors pipeline : l'agent principal quand il traite un fix. Auto-chargé via `paths:` (`.ts/.tsx`, `src/e2e/**`).
 
 Quand un ticket est un **bug** (issue type Bug, label `bug`, ou description explicite d'un comportement incorrect), `code-dev` suit un protocole strict **reproduire → fixer → valider**, en s'appuyant sur l'analyse postée par `bug-analyst` dans le commentaire `## Analyse du bug` (root cause, fichiers à modifier, fix proposé).
 

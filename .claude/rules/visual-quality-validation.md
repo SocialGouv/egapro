@@ -1,3 +1,10 @@
+---
+paths:
+  - "src/**/*.tsx"
+---
+
+<!-- NOTE: rule liée aux agents dépréciés `designer` / `design-validator` (cf. code-dev étape 7 : « plus de design-validator externe »). Scopée pour ne plus charger partout ; à supprimer avec ces agents lors d'un cleanup dédié. -->
+
 # Visual Quality Validation
 
 > **Used by**: `design-validator` (exclusif). Invoqué par `code-dev` step 9a après PR draft.
