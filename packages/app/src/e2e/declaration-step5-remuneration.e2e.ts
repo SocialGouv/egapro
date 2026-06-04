@@ -23,7 +23,6 @@ test.describe("Step 5 — Remuneration by category", () => {
 	}) => {
 		await goToStep5(page);
 		const heading = page.getByRole("heading", {
-			level: 1,
 			name: /Écart de rémunération par catégories de salariés/,
 		});
 		await expect(heading).toBeVisible();

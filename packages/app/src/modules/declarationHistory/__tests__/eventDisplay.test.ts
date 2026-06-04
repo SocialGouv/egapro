@@ -77,7 +77,7 @@ describe("getHistoryEventDisplay", () => {
 		const result = getHistoryEventDisplay(buildEvent("step_change", 5));
 		expect(result.label).toBe("Modification de la page");
 		expect(result.pageLabel).toBe(
-			"Écart de rémunération par catégories de salariés (salaire de base et primes)",
+			"Écart de rémunération par catégories de salariés",
 		);
 		expect(result.pageHref).toBe("/declaration-remuneration/etape/5");
 	});

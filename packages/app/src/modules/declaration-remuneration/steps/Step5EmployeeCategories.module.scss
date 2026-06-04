@@ -36,8 +36,8 @@
 .compactInput {
 	// Wide enough, with trimmed horizontal padding, to fit a 7-figure amount
 	// (e.g. "1 234 567,00") without clipping.
-	width: 120px;
-	max-width: 120px;
+	width: 140px;
+	max-width: 140px;
 	padding: 0.25rem;
 }
 
