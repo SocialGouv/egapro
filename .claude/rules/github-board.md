@@ -1,6 +1,13 @@
+---
+paths:
+  - "scripts/orchestration/**"
+---
+
 # GitHub Board Reference
 
-> **Used by**: `product-owner`, `architect`, `bug-analyst`, `code-dev` (déplacent les tickets — uniquement code-dev en pratique, les autres ne touchent pas au board), skills `/analyse`, `/implement`. `functional-validator` commente seulement.
+> **Used by**: `product-owner`, `architect`, `bug-analyst`, `code-dev` (déplacent les tickets — uniquement code-dev en pratique, les autres ne touchent pas au board), skills `/analyse`, `/implement`. `functional-validator` et `tu-dev` commentent seulement (jamais de transition de board).
+>
+> **Chargement** : auto-chargé via `paths:` quand on édite `scripts/orchestration/**` (où les IDs sont utilisés par les scripts board). `code-dev` n'en a pas besoin en contexte (il passe par `set_ticket_status.sh` / `create_linked_branch.sh` qui encapsulent les IDs). `architect` / `product-owner` font des ops board en GraphQL brut → **ils doivent lire ce fichier à la demande** (les IDs ne sont pas devinables).
 
 IDs et snippets GraphQL prêts à l'emploi pour que les agents (`architect`, `code-dev`) et skills (`/analyse`, `/implement`) pilotent le project board **EGAPRO V2**.
 

@@ -20,7 +20,7 @@ fi
 # Decision rules:
 #   stuck — at least one of:
 #     (a) process dead AND last event ∉ {COMPLETE, STUCK, ESCALATED, ANALYSIS_FAIL}
-#     (b) ≥ 3 RETRY events on the same axis (DEV / VALIDATION / FUNCTIONAL / CI / SONAR / BOT)
+#     (b) ≥ 3 RETRY events on the same axis (DEV / TU / VALIDATION / FUNCTIONAL / CI / SONAR / BOT)
 #     (c) > 20 min in same phase without any progression event between start/ok
 #     (d) BOT_WAIT > 15 min without BOT_REPLIED
 #     (e) ≥ 3 consecutive CI_FAIL on the same check name
@@ -200,9 +200,9 @@ if [ -n "$LAST_BOT_WAIT" ]; then
 fi
 
 # Rule (c) — > STUCK_PHASE_SEC since the last START-style phase event
-# Phase-START events: ANALYSIS_START, DEV_START, VALIDATION_START, FUNCTIONAL_START,
-# CI_WAIT, SONAR_WAIT, BOT_WAIT
-PHASE_START_RE='\[(ANALYSIS_START|DEV_START|VALIDATION_START|FUNCTIONAL_START|CI_WAIT|SONAR_WAIT|BOT_WAIT)\]'
+# Phase-START events: ANALYSIS_START, DEV_START, TU_START, VALIDATION_START,
+# FUNCTIONAL_START, CI_WAIT, SONAR_WAIT, BOT_WAIT
+PHASE_START_RE='\[(ANALYSIS_START|DEV_START|TU_START|VALIDATION_START|FUNCTIONAL_START|CI_WAIT|SONAR_WAIT|BOT_WAIT)\]'
 LAST_PHASE_LINE=$(grep -E "$PHASE_START_RE" "$LOG_FILE" | tail -1 || echo "")
 if [ -n "$LAST_PHASE_LINE" ]; then
     LAST_PHASE_HMS=$(echo "$LAST_PHASE_LINE" | grep -oE '^\[[0-9]{2}:[0-9]{2}:[0-9]{2}\]' | tr -d '[]')
