@@ -1,25 +1,18 @@
-import {
-	Body,
-	Container,
-	Font,
-	Head,
-	Html,
-	Preview,
-} from "@react-email/components";
+import { Body, Font, Head, Html, Preview } from "@react-email/components";
 import type { ReactNode } from "react";
 import { getPublicUrl } from "../shared/urls.js";
-import { COLORS, FONT, LAYOUT } from "./tokens.js";
+import { BASE_CSS } from "./baseCss.js";
+import { COLORS, FONT } from "./tokens.js";
 
 type EmailLayoutProps = {
 	previewText: string;
 	children: ReactNode;
 };
 
-// Marianne is the typographic identity of the French Republic — required by
-// the DSFR. Mail clients can't load the DSFR CSS bundle so we declare the
-// three weights we use (Regular/Medium/Bold) explicitly. Sources live under
-// `${EGAPRO_PUBLIC_URL}/dsfr/fonts/` (deployed by `scripts/copy-dsfr.mjs` on
-// every app build, so the URL is stable across all environments).
+// Marianne is the typographic identity of the French Republic — required by the
+// DSFR. Mail clients can't load the DSFR CSS bundle so we declare the three
+// weights we use explicitly. Sources live under `${EGAPRO_PUBLIC_URL}/dsfr/fonts/`
+// (deployed by `scripts/copy-dsfr.mjs` on every app build, URL stable per env).
 const MARIANNE_FALLBACK: ("Arial" | "Helvetica" | "sans-serif")[] = [
 	"Arial",
 	"Helvetica",
@@ -62,38 +55,39 @@ export function EmailLayout({ previewText, children }: EmailLayoutProps) {
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<meta name="x-apple-disable-message-reformatting" />
+				<meta name="color-scheme" content="light" />
+				<meta name="supported-color-schemes" content="light" />
 				<MarianneFonts />
+				<style>{BASE_CSS}</style>
 			</Head>
 			<Preview>{previewText}</Preview>
 			<Body
 				style={{
 					margin: 0,
 					padding: 0,
-					backgroundColor: COLORS.bgAltGrey,
+					width: "100%",
 					fontFamily: FONT.family,
 					color: COLORS.textTitle,
 					WebkitFontSmoothing: "antialiased",
 				}}
 			>
-				<div
-					style={{
-						width: "100%",
-						height: 32,
-						backgroundColor: COLORS.topBar,
-					}}
-				/>
-				<Container
-					style={{
-						width: "100%",
-						maxWidth: LAYOUT.contentWidth,
-						margin: "0 auto",
-						backgroundColor: COLORS.bgWhite,
-						borderLeft: `1px solid ${COLORS.border}`,
-						borderRight: `1px solid ${COLORS.border}`,
-					}}
+				{children}
+				<table
+					role="presentation"
+					width="100%"
+					cellSpacing={0}
+					cellPadding={0}
+					border={0}
+					style={{ borderCollapse: "collapse", width: "100%" }}
 				>
-					{children}
-				</Container>
+					<tbody>
+						<tr>
+							<td style={{ height: 40, lineHeight: "40px", fontSize: 40 }}>
+								&nbsp;
+							</td>
+						</tr>
+					</tbody>
+				</table>
 			</Body>
 		</Html>
 	);

@@ -1,5 +1,5 @@
 import { renderEmail } from "../shared/render.js";
-import { getConnectionUrl } from "../shared/urls.js";
+import { getDeclarationUrl } from "../shared/urls.js";
 import {
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -11,7 +11,7 @@ import type { MailBuilder } from "../types.js";
 
 export const buildCseOpinionReceiptMail: MailBuilder<
 	"cse_opinion_receipt"
-> = async () => {
+> = async ({ siren, year }) => {
 	const subject = "Egapro - Réception de l'avis du CSE";
 	const previewText =
 		"L'avis du CSE déposé pour votre déclaration des indicateurs a bien été pris en compte.";
@@ -37,7 +37,7 @@ export const buildCseOpinionReceiptMail: MailBuilder<
 				Egapro.
 			</EmailParagraph>
 			<EmailCtaWithLink
-				href={getConnectionUrl()}
+				href={getDeclarationUrl(siren, year)}
 				label="Consulter mon dossier"
 			/>
 			<EmailParagraph>

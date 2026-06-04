@@ -3,9 +3,9 @@ paths:
   - "src/**/__tests__/**"
 ---
 
-# Testing
+# Testing (unit + integration)
 
-> **Used by**: `code-dev` (écrit TU + E2E), `validator` (exécute `pnpm test`), `structural-auditor` (règle 2.13). Auto-chargé via `paths:`.
+> **Used by**: `tu-dev` (écrit les TU + tests d'intégration), `validator` (exécute `pnpm test`), `structural-auditor` (règle 2.13). Pour les tests E2E → `rules/e2e.md`. Auto-chargé via `paths:`.
 
 ## 75% minimum code coverage (enforced)
 
@@ -42,6 +42,8 @@ For each function/component, test:
 - Error cases (invalid input, network failure, missing data)
 - Edge cases (empty arrays, boundary values, null/undefined)
 
+Count distinct behaviors and equivalence classes, not `if`/`else` branches — one branch may need several tests, and several branches may collapse into one. For a business threshold, test both sides of and exactly on the boundary (a 5% alert threshold → 4.9 / 5.0 / 5.1), using the domain constant from `~/modules/domain`, never a hardcoded `5`. Rule of thumb: one test = one behavior.
+
 ## Mock boundaries only
 
 Mock external dependencies (next/navigation, next/link, server-only, tRPC, DB).
@@ -59,18 +61,38 @@ All common mocks are defined once in `setup.ts` and auto-loaded by Vitest. Never
 
 Tests needing specific overrides can call `vi.mock()` locally — it takes precedence over `setup.ts`.
 
-## E2E: every page must be tested
+## Writing reliable tests
 
-Every route in `src/app/` **must** have corresponding E2E tests in `src/e2e/`. When creating or modifying a page, verify that an E2E test exists for it and update it if needed.
+- **Real, complete mock data** — type the mock with the real type and fill every required field. No partial mocks, no `any` (also blocked by hook). When unsure, open the model and compare fields.
+- **Assert the real initial state** — verify the state the code actually starts in (e.g. `loading: true`); never invent a state that does not exist.
+- **Async** — always `await waitFor(() => expect(...))`; never `setTimeout`/`setImmediate`.
+- **Re-render** — change the mock *before* calling `rerender()`; `rerender()` alone changes nothing.
+- **Console spy** — only spy on `console.error`/`console.warn` when the code actually calls it; otherwise don't.
 
-E2E tests must cover at minimum:
-- The page renders without errors
-- Key content/headings are visible
-- Error pages (404, 500, 503) display correct status and messaging
+## Test skeleton (two-path service)
 
-Run `pnpm test:e2e` to execute all E2E tests (requires the dev server running on port 3000).
+```ts
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { FetchResult } from "~/modules/example/types";
 
-**Checklist before completing any page-related task:**
-1. List all routes in `src/app/**/page.tsx`
-2. Verify each has a matching E2E test in `src/e2e/*.e2e.ts`
-3. Add missing E2E tests for any uncovered page
+describe("fetchDeclaration", () => {
+  const mockResponse: FetchResult = { id: "123", gap: 4.2, valid: true };
+
+  const mockApiSuccess = (data: FetchResult) =>
+    vi.spyOn(api, "get").mockResolvedValue(data);
+  const mockApiError = (error: Error) =>
+    vi.spyOn(api, "get").mockRejectedValue(error);
+
+  beforeEach(() => vi.clearAllMocks());
+
+  it("returns the declaration on success", async () => {
+    mockApiSuccess(mockResponse);
+    await expect(fetchDeclaration("123")).resolves.toEqual(mockResponse);
+  });
+
+  it("propagates the error on network failure", async () => {
+    mockApiError(new Error("Network down"));
+    await expect(fetchDeclaration("123")).rejects.toThrow("Network down");
+  });
+});
+```

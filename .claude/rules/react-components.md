@@ -81,3 +81,22 @@ Never import from a shared `common.module.scss`. Each component must have its ow
 
 Name components after **what they display**, not where they sit in the tree.
 `DeclarationSummaryCard` not `LeftPanelCard`.
+
+## No useEffect for derived data
+
+Anything computable from props/state is computed **during render**, not mirrored into state through an effect. Reserve `useEffect` for syncing with the outside world: subscriptions, DOM, timers, analytics, non-React APIs.
+
+```tsx
+// FORBIDDEN — derived state via effect
+const [fullName, setFullName] = useState("");
+useEffect(() => { setFullName(`${first} ${last}`); }, [first, last]);
+
+// CORRECT — derive at render
+const fullName = `${first} ${last}`;
+```
+
+**Allowed (external sync, not derivation):** hydrating a form from an async source — `form.reset(query.data)` / `setValue(...)` inside an effect once a tRPC query or draft resolves. Never "fix" these into render-time computations.
+
+## Stable IDs with useId
+
+Generate any id that wires a `<label>`/`<input>` (or aria attribute) with `useId()` — never `Math.random()` or a render-time counter (unstable across re-renders, breaks a11y). A component may accept an `id` prop for composition; only non-deterministic ids generated at render are forbidden.

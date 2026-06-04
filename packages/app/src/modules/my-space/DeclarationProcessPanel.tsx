@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef } from "react";
 
 import type {
@@ -66,7 +67,11 @@ export function DeclarationProcessPanel({
 				</div>
 				<div className={styles.panelContent}>
 					<div>
-						<PanelHeader lastActionDate={lastActionDate} year={year} />
+						<PanelHeader
+							lastActionDate={lastActionDate}
+							siren={siren}
+							year={year}
+						/>
 						{(variant === "start" || variant === "compliance_choice") && (
 							<StartAlert />
 						)}
@@ -105,9 +110,11 @@ function getCtaLabel(variant: PanelVariant): string {
 
 function PanelHeader({
 	year,
+	siren,
 	lastActionDate,
 }: {
 	year: number;
+	siren: string;
 	lastActionDate: string | null;
 }) {
 	return (
@@ -125,9 +132,12 @@ function PanelHeader({
 						<span>Dernière action le {lastActionDate}</span>
 					</>
 				)}
-				<button className={`fr-link ${styles.historyLink}`} type="button">
+				<Link
+					className={`fr-link ${styles.historyLink}`}
+					href={`/mon-espace/historique/${siren}/${year}`}
+				>
 					Voir l'historique
-				</button>
+				</Link>
 			</div>
 		</div>
 	);

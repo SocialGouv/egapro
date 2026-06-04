@@ -1,6 +1,12 @@
+---
+paths:
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
+---
+
 # Ticket Spec Format
 
-> **Used by**: `architect` (écrit le spec — body en mode epic-*, commentaire `## Analyse architecte` en mode task), `bug-analyst` (commentaire `## Analyse du bug` qui sert de spec implicite pour les bugs), `code-dev` (valide le format avant exécution, retourne en To Do si manquant), skill `/implement` (préconditions).
+> **Used by**: `architect` (écrit le spec — body en mode epic-*, commentaire `## Analyse architecte` en mode task), `bug-analyst` (commentaire `## Analyse du bug` qui sert de spec implicite pour les bugs), `code-dev` (valide le format avant exécution, retourne en To Do si manquant), `tu-dev` (lit la section `## Scénarios de test` pour cadrer les tests), skill `/implement` (préconditions). Auto-chargé via `paths:` sur `.ts/.tsx` (code-dev / tu-dev pendant l'édition) ; `architect` (auteur du spec, non-coding) le lit à la demande.
 
 Format standardisé des tickets **code** consommés par `code-dev` (Sonnet par défaut, Opus si label `complexe`). Selon le type d'issue, l'emplacement du spec change :
 

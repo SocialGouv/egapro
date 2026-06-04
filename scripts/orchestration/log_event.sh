@@ -28,6 +28,7 @@ fi
 # code-dev specific (with attempt=K when iterating):
 #   ANALYSIS_START / ANALYSIS_OK / ANALYSIS_FAIL  (step 1: ticket spec check)
 #   DEV_START / DEV_OK                            (step 5: implementation)
+#   TU_START / TU_OK / TU_REGRESSION              (step 5.5: tu-dev — TU + integration)
 #   VALIDATION_START / VALIDATION_OK              (step 6: 4 quality auditors)
 #   FUNCTIONAL_START / FUNCTIONAL_OK              (step 9a: functional-validator)
 #   CI_WAIT / CI_OK / CI_FAIL                     (step 9b: GitHub Actions)

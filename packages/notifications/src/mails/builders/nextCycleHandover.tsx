@@ -1,5 +1,5 @@
 import { renderEmail } from "../shared/render.js";
-import { getConnectionUrl } from "../shared/urls.js";
+import { getMySpaceUrl } from "../shared/urls.js";
 import {
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -40,10 +40,7 @@ export const buildNextCycleHandoverMail: MailBuilder<
 			<EmailParagraph>
 				La prochaine campagne ouvrira le 1ᵉʳ mars {payload.nextYear}.
 			</EmailParagraph>
-			<EmailCtaWithLink
-				href={getConnectionUrl()}
-				label="Accéder à mon espace"
-			/>
+			<EmailCtaWithLink href={getMySpaceUrl()} label="Accéder à mon espace" />
 			<EmailParagraph>
 				Pour tout renseignement, vous pouvez contacter votre référent égalité
 				professionnelle femmes-hommes au sein de votre DREETS en répondant à ce
