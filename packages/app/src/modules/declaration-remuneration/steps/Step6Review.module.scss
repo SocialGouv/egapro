@@ -61,6 +61,15 @@
 
 .flex1 {
 	flex: 1;
+	// Stack label + value and pin the value to the bottom so values stay aligned
+	// across columns even when a label wraps to two lines (e.g. "Composantes
+	// variables ou complémentaires" next to "Salaire de base"). The parent
+	// `.subSection` stretches columns to equal height, so this is a no-op when
+	// every label is single-line (quartiles, proportion).
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: space-between;
 }
 
 .intro {
