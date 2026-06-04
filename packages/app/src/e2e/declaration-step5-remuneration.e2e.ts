@@ -39,7 +39,7 @@ test.describe("Step 5 — Remuneration by category", () => {
 		await expect(importButton).not.toHaveClass(/fr-icon-upload-line/);
 	});
 
-	test("adding a category moves focus to the new accordion header", async ({
+	test("adding a category moves focus to the new category's first field", async ({
 		page,
 	}) => {
 		await goToStep5(page);
@@ -47,11 +47,11 @@ test.describe("Step 5 — Remuneration by category", () => {
 			name: "Ajouter une catégorie d'emplois",
 		});
 		await addButton.click();
-		const newCategoryHeader = page.getByRole("button", {
-			name: /Catégorie d'emplois n°2/,
-		});
-		await expect(newCategoryHeader).toBeFocused();
-		await expect(newCategoryHeader).toHaveAttribute("aria-expanded", "true");
+		// Focus lands on the first field (the "Libellé" input) of the new
+		// category, not on the accordion header.
+		const firstField = page.locator("#cat-1-name");
+		await expect(firstField).toBeVisible();
+		await expect(firstField).toBeFocused();
 	});
 
 	test("euro inputs display amounts with a thousand separator", async ({

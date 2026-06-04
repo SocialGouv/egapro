@@ -187,7 +187,10 @@ export function CategoryForm({
 		const reveal = () => {
 			const collapse = accordionCollapseRefs.current[index];
 			if (collapse) getDsfrCollapse(collapse)?.disclose();
-			accordionHeaderRefs.current[index]?.focus();
+			// Focus the new category's first field (the "Libellé" input) rather than
+			// the accordion header, so the user can start filling it in immediately.
+			const firstField = document.getElementById(`cat-${index}-name`);
+			(firstField ?? accordionHeaderRefs.current[index])?.focus();
 		};
 		const id = window.requestAnimationFrame(reveal);
 		return () => window.cancelAnimationFrame(id);
