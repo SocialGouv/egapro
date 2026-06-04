@@ -6,6 +6,20 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     app: notifications
+  annotations:
+    # Gate the rollout on the `pg` build, exactly like the `app` build does via
+    # `~needs: [pg]`. Review-app namespaces bootstrap Postgres concurrently, and
+    # both the wait-for-pg init container and the worker reference the `pg-app`
+    # secret at pod creation — without this dependency the deploy races the
+    # secret and fails with `CreateContainerConfigError: secret "pg-app" not
+    # found`. The `pg` build being ready guarantees `pg-app` exists.
+    kontinuous/plugin.needs: "[pg]"
+    # This Deployment is a root-chart template, not a `~chart` build, so the
+    # `05.0-needs` patch never assigns it a `chartNameTop` (it only does for
+    # sub-charts). Without one, kontinuous's dependency-graph renderer derives
+    # an empty node name and `Graph::Easy` rejects the malformed `-> pg` edge,
+    # failing the deploy. Set it explicitly so the node renders as `notifications`.
+    kontinuous/depname.chartNameTop: notifications
 spec:
   # Single replica is enough: pg-boss already handles fan-out via batchSize
   # inside the process. Scaling horizontally is safe (pg-boss uses Postgres

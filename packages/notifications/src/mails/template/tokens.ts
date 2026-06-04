@@ -1,27 +1,21 @@
-// DSFR design tokens for transactional emails.
-//
-// Extracted from the Figma source of truth
-// (https://www.figma.com/design/axsrSDEVqsrFvHdWrZJIkQ/-Refonte--Egapro?node-id=9564-114784).
-//
-// Email clients do not load the DSFR CSS, so every token below is **inlined**
-// directly into HTML via React Email's `style` props. Keep values literal
-// (hex / px / numeric line-height) — never reference CSS custom properties
-// or Tailwind classes, they will not resolve in Outlook / Gmail.
+// Email clients do not load the DSFR CSS bundle, so every token below is
+// inlined directly into HTML via React Email `style` props. Keep values literal
+// (hex / px / numeric line-height) — CSS custom properties and Tailwind classes
+// do not resolve in Outlook / Gmail.
 
 export const COLORS = {
 	blueFrance: "#000091",
 	blueFranceActive: "#1212ff",
-	mariannRed: "#E0000F",
-	mariannBlue: "#00008F",
 	textTitle: "#161616",
 	textDefault: "#161616",
 	textGrey: "#3A3A3A",
 	textMention: "#666666",
+	footerGrey: "#6b6b6b",
 	border: "#DDDDDD",
+	frameBorder: "#e5e5e5",
 	bgWhite: "#FFFFFF",
 	bgAltBlueFrance: "#F5F5FE",
-	bgAltGrey: "#F6F6F6",
-	topBar: "#D8D8D8",
+	bgIllustration: "#ECECFE",
 	successText: "#18753c",
 } as const;
 
@@ -39,6 +33,7 @@ export const FONT = {
 		body: 16,
 		bodyMd: 18,
 		h5: 22,
+		title: 24,
 	},
 	lineHeight: {
 		xs: "20px",
@@ -46,6 +41,8 @@ export const FONT = {
 		body: "24px",
 		bodyMd: "28px",
 		h5: "28px",
+		cta: "21px",
+		title: "32px",
 	},
 } as const;
 
@@ -59,12 +56,17 @@ export const SPACING = {
 	max: 64,
 } as const;
 
+// DSFR frame: each module re-opens a 620 (gradient) → 600 (side-bordered) → 496
+// (inner) nested-table structure. Widths are fixed px (no responsive in mail).
 export const LAYOUT = {
-	contentWidth: 600,
-	innerPaddingX: 52,
-	innerPaddingY: 32,
-	headerPaddingX: 64,
-	headerPaddingY: 24,
+	frameOuterWidth: 620,
+	frameWidth: 600,
+	frameInnerWidth: 496,
+	frameGradient:
+		"linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(234,234,234,1) 5%, rgba(234,234,234,1) 95%, rgba(255,255,255,1) 100%)",
+	marianneLogoWidth: 76,
+	illustrationTitleWidth: 331,
+	illustrationImageWidth: 160,
 } as const;
 
 export const RADIUS = {
@@ -76,14 +78,18 @@ export const BORDER = {
 	thin: `1px solid ${COLORS.border}`,
 } as const;
 
-// Bloc-marque DSFR: 3 horizontal lines for the ministry name and 3 for the
-// devise. Email clients render each line as a separate <div> for layout
-// stability across Outlook / Gmail / Apple Mail.
+// DSFR button geometry: a fixed 32px-tall cell with 16px horizontal padding.
+export const BUTTON = {
+	height: 32,
+	paddingX: 16,
+} as const;
+
 export const BRAND = {
-	ministryLines: ["Ministère", "du travail", "et des solidarités"] as const,
-	deviseLines: ["Liberté", "Égalité", "Fraternité"] as const,
-	directionName: "Direction Générale du Travail",
+	marianneAlt: "République française",
+	ministryLines: ["Ministère", "du travail", "et des solidarités"],
+	deviseLines: ["Liberté", "Égalité", "Fraternité"],
+	directionLines: ["Direction Générale", "du Travail"],
 	serviceTitle: "Egapro",
-	serviceBaseline: "Indicateurs d'égalité professionnelle femmes-hommes",
+	illustrationAlt: "Index de l'égalité professionnelle femmes-hommes",
 	signerName: "Le ministère chargé du travail",
 } as const;

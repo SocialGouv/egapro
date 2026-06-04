@@ -270,11 +270,11 @@ describe("Step2Upload", () => {
 		render(
 			<Step2Upload
 				declarationYear={2026}
-				siren="123456789"
 				existingFiles={[
 					makeFile("avis-1.pdf", "file-1"),
 					makeFile("avis-2.pdf", "file-2"),
 				]}
+				siren="123456789"
 			/>,
 		);
 
@@ -287,11 +287,11 @@ describe("Step2Upload", () => {
 		render(
 			<Step2Upload
 				declarationYear={2026}
-				siren="123456789"
 				existingFiles={[
 					makeFile("avis-1.pdf", "file-1"),
 					makeFile("avis-2.pdf", "file-2"),
 				]}
+				siren="123456789"
 			/>,
 		);
 
@@ -306,8 +306,8 @@ describe("Step2Upload", () => {
 		render(
 			<Step2Upload
 				declarationYear={2026}
-				siren="123456789"
 				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
+				siren="123456789"
 			/>,
 		);
 
@@ -320,11 +320,11 @@ describe("Step2Upload", () => {
 		render(
 			<Step2Upload
 				declarationYear={2026}
-				siren="123456789"
 				existingFiles={[
 					makeFile("avis-1.pdf", "file-1"),
 					makeFile("avis-2.pdf", "file-2"),
 				]}
+				siren="123456789"
 			/>,
 		);
 
@@ -335,13 +335,13 @@ describe("Step2Upload", () => {
 		render(
 			<Step2Upload
 				declarationYear={2026}
-				siren="123456789"
 				existingFiles={[
 					makeFile("avis-1.pdf", "f1"),
 					makeFile("avis-2.pdf", "f2"),
 					makeFile("avis-3.pdf", "f3"),
 					makeFile("avis-4.pdf", "f4"),
 				]}
+				siren="123456789"
 			/>,
 		);
 
@@ -397,8 +397,8 @@ describe("Step2Upload", () => {
 		render(
 			<Step2Upload
 				declarationYear={2026}
-				siren="123456789"
 				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
+				siren="123456789"
 			/>,
 		);
 
@@ -426,8 +426,8 @@ describe("Step2Upload", () => {
 		render(
 			<Step2Upload
 				declarationYear={2026}
-				siren="123456789"
 				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
+				siren="123456789"
 			/>,
 		);
 
@@ -447,8 +447,8 @@ describe("Step2Upload", () => {
 		render(
 			<Step2Upload
 				declarationYear={2026}
-				siren="123456789"
 				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
+				siren="123456789"
 			/>,
 		);
 
@@ -468,8 +468,8 @@ describe("Step2Upload", () => {
 		render(
 			<Step2Upload
 				declarationYear={2026}
-				siren="123456789"
 				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
+				siren="123456789"
 			/>,
 		);
 

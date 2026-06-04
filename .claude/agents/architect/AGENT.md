@@ -25,6 +25,8 @@ L'agent reçoit un mode du skill `/analyse` :
 - Pour mode task : la description du body de la task (par l'utilisateur ou triager)
 - **URL Figma** si UI (passée par `/analyse` ou trouvée dans le body/commentaires). `code-dev` la consommera via le MCP `figma-dev` (Phases 1–3 de `rules/figma-workflow.md`). Aucun mockup HTML intermédiaire.
 
+> **Règles à charger à la demande** : `rules/github-board.md` (IDs de projet + snippets GraphQL — **non devinables**) et `rules/ticket-spec-format.md` (format normatif des specs) ne sont plus always-loaded (scopées par `paths:`). **Lis-les explicitement** avant respectivement toute opération board (`gh issue create` / ajout au project / type / parent / status) et toute rédaction de spec, s'ils ne sont pas déjà dans ton contexte.
+
 ---
 
 ## Workflow — modes `epic-create` / `epic-enrich`

@@ -1,5 +1,6 @@
 export type { SaveCompliancePathInput } from "./schemas";
 export {
+	declarationHistoryInputSchema,
 	saveCompliancePathInputSchema,
 	saveCompliancePathSchema,
 	submitDeclarationSchema,

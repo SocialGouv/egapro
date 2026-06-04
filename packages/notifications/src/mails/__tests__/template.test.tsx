@@ -10,37 +10,48 @@ import { EmailParagraph } from "../template/EmailParagraph.js";
 import { EmailShell } from "../template/EmailShell.js";
 
 describe("EmailShell", () => {
-	it("renders the DSFR brand line, info-bar title and footer notice", async () => {
+	it("renders the DSFR header, illustration band and footer", async () => {
 		const { html, text } = await renderEmail(
 			<EmailShell previewText="Sample">
 				<EmailGreeting>Bonjour</EmailGreeting>
 				<EmailParagraph>Body</EmailParagraph>
 			</EmailShell>,
 		);
-		// Bloc-marque DSFR — drapeau + ministère + devise
+		// RF Marianne emblem + bloc-marque text (ministry + devise + direction)
+		expect(html).toContain("republique-francaise@2x.png");
+		expect(html).toContain("République française");
 		expect(html).toContain("Ministère");
-		expect(html).toContain("du travail");
 		expect(html).toContain("et des solidarités");
 		expect(html).toContain("Liberté");
-		expect(html).toContain("Égalité");
 		expect(html).toContain("Fraternité");
-		// Direction signataire (colonne droite header + footer)
-		expect(html).toContain("Direction Générale du Travail");
-		// Info bar
+		expect(html).toContain("Direction Générale");
+		expect(html).toContain("du Travail");
+		// Illustration band: title + egapro icon
 		expect(html).toContain("Egapro");
-		expect(html).toContain("Indicateurs");
+		expect(html).toContain("icon@2x.png");
 		expect(html).toContain("femmes-hommes");
-		// Drapeau RF en SVG inline
-		expect(html).toContain("Drapeau français");
-		// Pictogramme récépissé dans la barre d'info
-		expect(html).toContain("Récépissé");
+		expect(html).toContain("Indicateurs d&#x27;égalité professionnelle femmes");
+		// Footer keeps the egapro legal notice + data-policy link
+		expect(html).toContain("envoyé automatiquement");
+		expect(html).toContain("/web/donnees-personnelles");
+		expect(html).toContain(getPublicUrl());
+		// Référent mail is a DSFR underlined mailto link (example address)
+		expect(html).toContain("referent-egalite@dreets.gouv.fr");
 		// Body
 		expect(html).toContain("Bonjour");
 		expect(html).toContain("Body");
-		// Footer
-		expect(html).toContain("envoyé automatiquement");
-		expect(html).toContain(getPublicUrl());
 		expect(text).toContain("Bonjour");
+	});
+
+	it("opts out of dark mode (light-only stylesheet)", async () => {
+		const { html } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailParagraph>x</EmailParagraph>
+			</EmailShell>,
+		);
+		expect(html).toContain("color-scheme: light");
+		expect(html).not.toContain("prefers-color-scheme: dark");
+		expect(html).not.toContain("darkmode");
 	});
 
 	it("uses the DSFR blue France primary color", async () => {
@@ -73,18 +84,20 @@ describe("EmailInfoList", () => {
 });
 
 describe("EmailCtaWithLink", () => {
-	it("renders a DSFR button plus the URL as a visible underlined link", async () => {
-		const href = "https://test.example/connexion";
+	it("renders a DSFR button plus a fallback link to the same destination", async () => {
+		const href = "https://test.example/mon-espace";
 		const { html } = await renderEmail(
 			<EmailShell previewText="t">
 				<EmailCtaWithLink href={href} label="Commencer ma déclaration" />
 			</EmailShell>,
 		);
+		// The label is shown on the button (and as the fallback link text)
 		expect(html).toContain("Commencer ma déclaration");
-		expect(html).toContain(href);
-		expect(html).toContain("underline");
+		// The href backs both the button and the fallback link
 		const occurrences = html.split(href).length - 1;
 		expect(occurrences).toBeGreaterThanOrEqual(2);
+		// The DSFR primary-button border construct
+		expect(html).toContain("solid 1px #000091");
 	});
 });
 
