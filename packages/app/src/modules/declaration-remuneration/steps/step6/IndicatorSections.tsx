@@ -207,7 +207,7 @@ export function IndicatorSections({
 										columns={[
 											{ label: "Salaire de base", gap: cat.annualBaseGap },
 											{
-												label: "Composantes variables",
+												label: "Composantes variables ou complémentaires",
 												gap: cat.annualVariableGap,
 											},
 										]}
@@ -218,7 +218,7 @@ export function IndicatorSections({
 										columns={[
 											{ label: "Salaire de base", gap: cat.hourlyBaseGap },
 											{
-												label: "Composantes variables",
+												label: "Composantes variables ou complémentaires",
 												gap: cat.hourlyVariableGap,
 											},
 										]}
