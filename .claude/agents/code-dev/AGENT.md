@@ -73,7 +73,7 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
    - **Aucun commentaire dans le code écrit ou modifié** — voir `rules/code-quality.md` section "No comments by default". Pas de JSDoc, pas de `// fetch user`, pas de `// for ticket #N`, pas de TODO/FIXME, pas de header de section. Seule exception : un `// ` court qui explique un WHY non-évident (workaround documenté, invariant subtil). Si le commentaire paraphrase le code juste en dessous, supprimer.
    - `pnpm typecheck` après chaque modif de types/schemas
    - `nextjs_call(get_errors)` si dev server tourne
-   - **Ne pas écrire, lancer, ni lire de tests** (TU, intégration) — c'est entièrement le rôle de `tu-dev` (étape 5.5). Tu conserves uniquement les E2E Playwright (`src/e2e/`) selon `rules/testing.md`.
+   - **Ne pas écrire, lancer, ni lire de tests** (TU, intégration) — c'est entièrement le rôle de `tu-dev` (étape 5.5). Tu conserves uniquement les E2E Playwright (`src/e2e/`) selon `rules/e2e.md`.
    - Logger `DEV_OK "attempt=<K>"` quand le typecheck passe et que le code source du ticket est complet.
 
 5.5. **Tests (déléguer à `tu-dev`)** — `bash scripts/orchestration/log_event.sh code-dev-<N> TU_START "attempt=1"`. Invoquer l'agent `tu-dev` (**`model: opus` — toujours**) via l'outil Agent, en lui passant : le numéro de ticket (+ son type), le worktree path, la working branch (déjà checkout), la base branch (`origin/...`). `tu-dev` lit ton diff, lance la suite vitest, trie les échecs, corrige les tests dont l'échec est une conséquence **légitime** de l'évolution, ajoute les nouveaux tests (DRY), et — si le diff touche le DB-layer/SQL — ajoute un test d'intégration. Il **ne touche jamais au code source**.
@@ -293,7 +293,7 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
   - Les screenshots dev server doivent afficher uniquement de la donnée seedée fictive — vérifier la stack docker locale avant capture.
 - **Screenshots PR obligatoires** pour toute modif UI
 - **Un ticket = une branche = une PR** — pas de bundle
-- **Tests = responsabilité exclusive de `tu-dev`** — `code-dev` n'écrit, ne lance, ni ne lit aucun test unitaire / intégration. La suite verte et la couverture (100% sur les fichiers de logique) sont garanties par `tu-dev` à l'étape 5.5. `code-dev` conserve uniquement les E2E Playwright (`src/e2e/`, cf. `rules/testing.md`).
+- **Tests = responsabilité exclusive de `tu-dev`** — `code-dev` n'écrit, ne lance, ni ne lit aucun test unitaire / intégration. La suite verte et la couverture (100% sur les fichiers de logique) sont garanties par `tu-dev` à l'étape 5.5. `code-dev` conserve uniquement les E2E Playwright (`src/e2e/`, cf. `rules/e2e.md`).
 - **CI + Sonar verts obligatoires** avant `gh pr ready` — aucune exception
 - **Zéro commentaire de review non-adressé** — bot ou humain, corriger ou répondre avec justification. Jamais d'ignorance silencieuse.
 - **Pas d'auto-délégation Opus** — sur 3-retry Sonnet, retourner `needs_opus_escalation`, le pipeline re-dispatche au prochain tick. C'est plus simple, plus testable, et offre un budget API isolé à l'instance Opus. (Invoquer l'agent `tu-dev` en Opus à l'étape 5.5 n'est **pas** concerné : c'est une délégation à un spécialiste distinct, comme pour les validators, pas une auto-escalade de `code-dev`.)

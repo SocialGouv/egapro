@@ -124,7 +124,7 @@ Apply these rules **as you write code**, before any agent runs:
 
 ### E2E tests (when relevant)
 
-Write or update Playwright E2E tests when a user journey is created, modified, or its underlying API/data changes.
+Write or update Playwright E2E tests when a user journey is created, modified, or its underlying API/data changes. Full E2E rules: `rules/e2e.md`.
 
 ---
 
