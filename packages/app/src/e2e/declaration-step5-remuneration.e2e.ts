@@ -67,5 +67,48 @@ test.describe("Step 5 — Remuneration by category", () => {
 		const value = await amountInput.inputValue();
 		expect(value).toContain(",");
 		expect(value.replace(/\s/g, "")).toBe("1234567,00");
+
+		// The full 7-figure amount must stay visible: with the trimmed horizontal
+		// padding "1 234 567,00" fits the field without being clipped (no overflow).
+		await page.evaluate(() => document.fonts.ready);
+		const overflow = await amountInput.evaluate(
+			(el) => el.scrollWidth - el.clientWidth,
+		);
+		expect(overflow).toBeLessThanOrEqual(1);
+	});
+
+	test("remuneration fields and units are right-aligned in their column", async ({
+		page,
+	}) => {
+		await goToStep5(page);
+		const layout = await page.evaluate(() => {
+			const fieldOf = (label: string) =>
+				document.querySelector(`[aria-label="${label}"]`);
+			const baseInput = fieldOf("Salaire de base annuel femmes, catégorie 1");
+			const variableInput = fieldOf(
+				"Composantes variables annuelles femmes, catégorie 1",
+			);
+			const cell = baseInput?.parentElement;
+			const baseUnit = baseInput?.nextElementSibling;
+			const variableUnit = variableInput?.nextElementSibling;
+			if (!baseInput || !cell || !baseUnit || !variableUnit) return null;
+			return {
+				justify: getComputedStyle(cell).justifyContent,
+				textAlign: getComputedStyle(baseInput).textAlign,
+				baseUnitRight: baseUnit.getBoundingClientRect().right,
+				variableUnitRight: variableUnit.getBoundingClientRect().right,
+			};
+		});
+
+		expect(layout).not.toBeNull();
+		if (!layout) return;
+		// The number is right-aligned and the field + unit are pushed to the right
+		// of the cell, matching the right-aligned Total values.
+		expect(layout.textAlign).toBe("right");
+		expect(layout.justify).toBe("flex-end");
+		// The € units therefore line up vertically from one row to the next.
+		expect(
+			Math.abs(layout.baseUnitRight - layout.variableUnitRight),
+		).toBeLessThanOrEqual(1);
 	});
 });
