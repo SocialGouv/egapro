@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
 import stepStyles from "~/modules/declaration-remuneration/steps/Step6Review.module.scss";
 import type {
@@ -199,34 +200,46 @@ export function IndicatorSections({
 						Écart de rémunération par catégories de salariés
 					</CardTitle>
 					{step5Parsed.length > 0 ? (
-						step5Parsed.map((cat) => (
-							<div key={cat.index}>
-								<p className="fr-text--bold fr-text--sm fr-mb-0">{cat.name}</p>
-								<div className={stepStyles.sideBySide}>
-									<GapColumn
-										columns={[
-											{ label: "Salaire de base", gap: cat.annualBaseGap },
-											{
-												label: "Composantes variables ou complémentaires",
-												gap: cat.annualVariableGap,
-											},
-										]}
-										title="Annuelle brute"
-									/>
-									<div className={stepStyles.verticalSeparator} />
-									<GapColumn
-										columns={[
-											{ label: "Salaire de base", gap: cat.hourlyBaseGap },
-											{
-												label: "Composantes variables ou complémentaires",
-												gap: cat.hourlyVariableGap,
-											},
-										]}
-										title="Horaire brute"
-									/>
+						step5Parsed.map((cat) => {
+							const categoryColumns = [
+								{
+									title: "Annuelle brute",
+									base: cat.annualBaseGap,
+									variable: cat.annualVariableGap,
+								},
+								{
+									title: "Horaire brute",
+									base: cat.hourlyBaseGap,
+									variable: cat.hourlyVariableGap,
+								},
+							];
+							return (
+								<div key={cat.index}>
+									<p className="fr-text--bold fr-text--sm fr-mb-0">
+										{cat.name}
+									</p>
+									<div className={stepStyles.sideBySide}>
+										{categoryColumns.map((col, index) => (
+											<Fragment key={col.title}>
+												{index > 0 && (
+													<div className={stepStyles.verticalSeparator} />
+												)}
+												<GapColumn
+													columns={[
+														{ label: "Salaire de base", gap: col.base },
+														{
+															label: "Composantes variables ou complémentaires",
+															gap: col.variable,
+														},
+													]}
+													title={col.title}
+												/>
+											</Fragment>
+										))}
+									</div>
 								</div>
-							</div>
-						))
+							);
+						})
 					) : (
 						<EmptyDataNotice />
 					)}
