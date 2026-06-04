@@ -12,8 +12,10 @@
 		"declaration": true,
 		"sourceMap": false,
 		"noUncheckedIndexedAccess": true,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"jsx": "react-jsx",
+		"jsxImportSource": "react"
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*.ts", "src/**/*.tsx"],
 	"exclude": ["dist", "node_modules", "src/**/__tests__/**"]
 }

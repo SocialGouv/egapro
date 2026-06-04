@@ -134,47 +134,10 @@ app:
           name: "{{ .Values.global.notificationsPgSecretName | default \"pg-notifications\" }}"
           key: PGSSLMODE
           optional: true
-    # SMTP (Tipimail in prod, MailDev on dev/preprod). The smtp-app
-    # sealed-secret is kept as-is from the V1 prod setup, with MAILER_*
-    # keys. We remap to the V2 SMTP_* names expected by src/env.js.
-    #
-    # Kubernetes precedence: `env` runs AFTER `envFrom`, so an `env` entry
-    # would normally override a same-named envFrom value. But with
-    # `optional: true` on a missing secret/key, the env entry is silently
-    # dropped and the envFrom value is preserved. That is exactly the
-    # fallback we rely on for dev/preprod review apps (no smtp-app
-    # secret) where SMTP_HOST, SMTP_PORT, etc. come from the `mail`
-    # configmap pointing at the in-cluster MailDev service.
-    - name: SMTP_HOST
-      valueFrom:
-        secretKeyRef:
-          name: smtp-app
-          key: MAILER_SMTP_HOST
-          optional: true
-    - name: SMTP_PORT
-      valueFrom:
-        secretKeyRef:
-          name: smtp-app
-          key: MAILER_SMTP_PORT
-          optional: true
-    - name: SMTP_USER
-      valueFrom:
-        secretKeyRef:
-          name: smtp-app
-          key: MAILER_SMTP_LOGIN
-          optional: true
-    - name: SMTP_PASS
-      valueFrom:
-        secretKeyRef:
-          name: smtp-app
-          key: MAILER_SMTP_PASSWORD
-          optional: true
-    - name: SMTP_SECURE
-      valueFrom:
-        secretKeyRef:
-          name: smtp-app
-          key: MAILER_SMTP_SSL
-          optional: true
+    # SMTP_* / MAIL_* are intentionally NOT injected into the app pod —
+    # they are consumed exclusively by the notifications worker. See
+    # `.kontinuous/templates/notifications-deployment.yaml` for the
+    # worker-side wiring (same smtp-app sealed-secret + mail configmap).
   vars:
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
     NEXT_PUBLIC_EGAPRO_ENV: "{{ .Values.global.env }}"

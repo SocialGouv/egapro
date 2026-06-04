@@ -319,8 +319,25 @@ export async function fetchPreviousYearJobCategories(
 	};
 }
 
-type JobCategoryRow = typeof jobCategories.$inferSelect;
-type EmployeeCategoryDbRow = typeof employeeCategories.$inferSelect;
+type JobCategoryRow = Pick<
+	typeof jobCategories.$inferSelect,
+	"id" | "name" | "categoryIndex"
+>;
+type EmployeeCategoryDbRow = Pick<
+	typeof employeeCategories.$inferSelect,
+	| "jobCategoryId"
+	| "declarationType"
+	| "womenCount"
+	| "menCount"
+	| "annualBaseWomen"
+	| "annualBaseMen"
+	| "annualVariableWomen"
+	| "annualVariableMen"
+	| "hourlyBaseWomen"
+	| "hourlyBaseMen"
+	| "hourlyVariableWomen"
+	| "hourlyVariableMen"
+>;
 
 export function mapToEmployeeCategoryRows(
 	jobs: JobCategoryRow[],

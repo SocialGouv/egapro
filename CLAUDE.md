@@ -122,10 +122,11 @@ pnpm db:studio            # opens Drizzle Studio
 
 ## Automatic quality gates
 
-Quality checks run **automatically** après chaque itération de code — pas de commande à lancer. Dans la pipeline `/implement`, ils sont invoqués par `code-dev` step 6. Hors pipeline (hotfix, edit direct), délégués par l'agent principal. Voir `.claude/rules/automation.md`.
+Quality checks run **automatically** après chaque itération de code — pas de commande à lancer. Dans la pipeline `/implement`, les tests sont écrits par `tu-dev` (step 5.5), puis les gates sont invoqués par `code-dev` step 6. Hors pipeline (hotfix, edit direct), délégués par l'agent principal. Voir `.claude/rules/automation.md`.
 
 | Gate | When | How |
 |---|---|---|
+| **Tests unitaires** | Inside `/implement`, avant les gates (step 5.5) | `tu-dev` agent (Opus) écrit/corrige les TU + intégration, renvoie à `code-dev` sur régression |
 | **Validation** | After every task | `validator` agent (typecheck + test + lint + format) |
 | **Structure** | After every task | `structural-auditor` agent (17 rules: forms, schemas, DRY, imports, no-comments…) |
 | **RGAA** | After every task | `rgaa-auditor` agent on modified `.tsx` files |
@@ -169,7 +170,8 @@ Quality checks run **automatically** après chaque itération de code — pas de
 **Pipeline exécution** (invoqués par `/implement`) :
 | Agent | Rôle |
 |---|---|
-| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature) ou le commentaire d'analyse (Task / Bug). Pour les tickets UI, vérifie lui-même la fidélité Figma via le MCP `figma-dev`. |
+| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature) ou le commentaire d'analyse (Task / Bug). Pour les tickets UI, vérifie lui-même la fidélité Figma via le MCP `figma-dev`. Délègue **tous** les tests (TU + intégration) à `tu-dev`. |
+| `tu-dev` | Écrit/corrige **tous** les tests vitest (TU + intégration) du ticket, juste après `code-dev` et avant les validators (step 5.5). Toujours Opus. Trie les échecs : sur **vraie régression** il rend la main à `code-dev` (commentaire `tu-dev:` + verdict) ; sinon corrige les tests en échec légitime et ajoute la couverture du nouveau code (DRY). |
 | `functional-validator` | Rejoue les scénarios PO dans le dev server |
 | `doc-writer` | Régénère `docs/*.md` from scratch à partir de l'état courant du code. Invoqué par `epic_loop.sh` en fin d'epic (juste avant `open_epic_final_pr.sh`) ou par le skill `/doc` (humain). Sonnet, sans worktree dédié — opère sur la branche courante. |
 

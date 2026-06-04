@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, count, desc, eq, isNull } from "drizzle-orm";
 import {
+	declarationHistoryInputSchema,
 	saveCompliancePathInputSchema,
 	submitJointEvaluationSchema,
 } from "~/modules/declaration/schemas";
@@ -22,8 +23,12 @@ import {
 	companyProcedure,
 	companyWriteProcedure,
 	createTRPCRouter,
+	protectedProcedure,
 } from "~/server/api/trpc";
-import { assertNotImpersonating } from "~/server/auth/companyAccess";
+import {
+	assertNotImpersonating,
+	isImpersonatingSiren,
+} from "~/server/auth/companyAccess";
 import {
 	companies,
 	declarationStatusHistory,
@@ -31,6 +36,8 @@ import {
 	employeeCategories,
 	gipMdsData,
 	jobCategories,
+	userCompanies,
+	users,
 } from "~/server/db/schema";
 import { applyAction, loadRules } from "~/server/rules/engine";
 import {
@@ -908,5 +915,98 @@ export const declarationRouter = createTRPCRouter({
 			});
 
 			return { success: true };
+		}),
+
+	getStatusHistory: protectedProcedure
+		.input(declarationHistoryInputSchema)
+		.query(async ({ ctx, input }) => {
+			if (!isImpersonatingSiren(ctx.session, input.siren)) {
+				const access = await ctx.db
+					.select({ siren: userCompanies.siren })
+					.from(userCompanies)
+					.where(
+						and(
+							eq(userCompanies.userId, ctx.session.user.id),
+							eq(userCompanies.siren, input.siren),
+						),
+					)
+					.limit(1);
+
+				if (access.length === 0) {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Accès refusé à cette entreprise.",
+					});
+				}
+			}
+
+			const [declaration] = await ctx.db
+				.select({ id: declarations.id })
+				.from(declarations)
+				.where(
+					and(
+						eq(declarations.siren, input.siren),
+						eq(declarations.year, input.year),
+						isNull(declarations.cancelledAt),
+					),
+				)
+				.limit(1);
+
+			if (!declaration) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Déclaration introuvable.",
+				});
+			}
+
+			const historyWhere = eq(
+				declarationStatusHistory.declarationId,
+				declaration.id,
+			);
+
+			const [items, totalResult] = await Promise.all([
+				ctx.db
+					.select({
+						id: declarationStatusHistory.id,
+						eventType: declarationStatusHistory.eventType,
+						value: declarationStatusHistory.value,
+						round: declarationStatusHistory.round,
+						createdAt: declarationStatusHistory.createdAt,
+						actorFirstName: users.firstName,
+						actorLastName: users.lastName,
+						actorEmail: users.email,
+					})
+					.from(declarationStatusHistory)
+					.leftJoin(users, eq(declarationStatusHistory.actorUserId, users.id))
+					.where(historyWhere)
+					.orderBy(desc(declarationStatusHistory.createdAt))
+					.limit(input.limit)
+					.offset(input.offset),
+				ctx.db
+					.select({ total: count() })
+					.from(declarationStatusHistory)
+					.where(historyWhere),
+			]);
+
+			const total = totalResult[0]?.total ?? 0;
+
+			return {
+				items: items.map((row) => ({
+					id: row.id,
+					eventType: row.eventType,
+					value: row.value,
+					round: row.round,
+					createdAt: row.createdAt,
+					actor:
+						row.actorEmail !== null
+							? {
+									firstName: row.actorFirstName ?? null,
+									lastName: row.actorLastName ?? null,
+									email: row.actorEmail,
+								}
+							: null,
+				})),
+				total,
+			};
 		}),
 });
