@@ -158,6 +158,7 @@ type CompanyInsert = {
 	name: string;
 	address?: string | null;
 	nafCode?: string | null;
+	nafLabel?: string | null;
 	workforce?: number | null;
 };
 
@@ -178,6 +179,7 @@ async function fetchCompanyInfoBatch(
 								name: info.name,
 								address: info.address,
 								nafCode: info.nafCode,
+								nafLabel: info.nafLabel,
 								workforce: info.workforce,
 							}
 						: { siren, name: `Entreprise ${siren}` };

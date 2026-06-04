@@ -23,6 +23,8 @@ describe("fetchCompanyBySiren", () => {
 						denominationunitelegale: "Alpha Solutions",
 						raisonsociale: null,
 						activiteprincipalenaf25unitelegale: "6202A",
+						nomenclatureactiviteprincipalelibelleunitelegale:
+							"Conseil en systèmes et logiciels informatiques",
 						effectiftotal: 256,
 						numerovoie: "12",
 						typevoie: "RUE",
@@ -42,6 +44,7 @@ describe("fetchCompanyBySiren", () => {
 			name: "Alpha Solutions",
 			address: "12 RUE DES INNOVATEURS, 75011 PARIS",
 			nafCode: "6202A",
+			nafLabel: "Conseil en systèmes et logiciels informatiques",
 			workforce: 256,
 		});
 
@@ -61,6 +64,7 @@ describe("fetchCompanyBySiren", () => {
 						denominationunitelegale: null,
 						raisonsociale: null,
 						activiteprincipalenaf25unitelegale: null,
+						nomenclatureactiviteprincipalelibelleunitelegale: null,
 						effectiftotal: 50,
 						numerovoie: null,
 						typevoie: null,
@@ -80,6 +84,7 @@ describe("fetchCompanyBySiren", () => {
 			name: "Entreprise non diffusible",
 			address: null,
 			nafCode: null,
+			nafLabel: null,
 			workforce: 50,
 		});
 	});
@@ -120,6 +125,8 @@ describe("fetchCompanyBySiren", () => {
 						denominationunitelegale: null,
 						raisonsociale: "Société Beta",
 						activiteprincipalenaf25unitelegale: "7022Z",
+						nomenclatureactiviteprincipalelibelleunitelegale:
+							"Conseil pour les affaires et autres conseils de gestion",
 						effectiftotal: null,
 						numerovoie: null,
 						typevoie: null,
@@ -139,7 +146,43 @@ describe("fetchCompanyBySiren", () => {
 			name: "Société Beta",
 			address: "69001 LYON",
 			nafCode: "7022Z",
+			nafLabel: "Conseil pour les affaires et autres conseils de gestion",
 			workforce: null,
+		});
+	});
+
+	it("returns nafLabel null when the activity label is absent", async () => {
+		fetchSpy.mockResolvedValueOnce({
+			ok: true,
+			json: async () => ({
+				content: [
+					{
+						siren: "777888999",
+						denominationunitelegale: "Gamma SARL",
+						raisonsociale: null,
+						activiteprincipalenaf25unitelegale: "4321A",
+						nomenclatureactiviteprincipalelibelleunitelegale: null,
+						effectiftotal: 12,
+						numerovoie: null,
+						typevoie: null,
+						libellevoie: null,
+						codepostal: "33000",
+						libellecommune: "BORDEAUX",
+						statutdiffusionunitelegale: "O",
+					},
+				],
+				totalElements: 1,
+			}),
+		});
+
+		const result = await fetchCompanyBySiren("777888999");
+
+		expect(result).toEqual({
+			name: "Gamma SARL",
+			address: "33000 BORDEAUX",
+			nafCode: "4321A",
+			nafLabel: null,
+			workforce: 12,
 		});
 	});
 });

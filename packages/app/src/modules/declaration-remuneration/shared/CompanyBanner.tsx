@@ -8,6 +8,8 @@ type CompanyBannerProps = {
 	company: {
 		name: string;
 		siren: string;
+		nafCode: string | null;
+		nafLabel: string | null;
 		workforce: number | null;
 		hasCse: boolean | null;
 	};
@@ -36,6 +38,17 @@ export function CompanyBanner({
 						<span>{"SIREN :"}</span>
 						<strong>{formatSiren(company.siren)}</strong>
 					</div>
+
+					{company.nafCode && (
+						<div className={styles.datapoint}>
+							<span>{"Code NAF :"}</span>
+							<strong>
+								{company.nafLabel
+									? `${company.nafCode} — ${company.nafLabel}`
+									: company.nafCode}
+							</strong>
+						</div>
+					)}
 
 					{company.workforce !== null && (
 						<div className={styles.datapoint}>

@@ -6,6 +6,8 @@ import { CompanyBanner } from "../CompanyBanner";
 const defaultCompany = {
 	name: "Alpha Solutions",
 	siren: "123456789",
+	nafCode: "62.01Z",
+	nafLabel: "Programmation informatique",
 	workforce: 256,
 	hasCse: true,
 };
@@ -44,6 +46,43 @@ describe("CompanyBanner", () => {
 		});
 		expect(boldName).toBeInTheDocument();
 		expect(boldName).toHaveClass("fr-text--bold");
+	});
+
+	it("renders NAF code with its activity label", () => {
+		render(
+			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
+		);
+
+		expect(screen.getByText("Code NAF :")).toBeInTheDocument();
+		expect(
+			screen.getByText("62.01Z — Programmation informatique"),
+		).toBeInTheDocument();
+	});
+
+	it("renders NAF code alone when the label is null", () => {
+		render(
+			<CompanyBanner
+				company={{ ...defaultCompany, nafLabel: null }}
+				currentPageLabel="Déclaration"
+			/>,
+		);
+
+		expect(screen.getByText("Code NAF :")).toBeInTheDocument();
+		expect(screen.getByText("62.01Z")).toBeInTheDocument();
+		expect(
+			screen.queryByText(/Programmation informatique/),
+		).not.toBeInTheDocument();
+	});
+
+	it("hides the NAF datapoint when nafCode is null", () => {
+		render(
+			<CompanyBanner
+				company={{ ...defaultCompany, nafCode: null, nafLabel: null }}
+				currentPageLabel="Déclaration"
+			/>,
+		);
+
+		expect(screen.queryByText("Code NAF :")).not.toBeInTheDocument();
 	});
 
 	it("renders workforce and CSE values", () => {
