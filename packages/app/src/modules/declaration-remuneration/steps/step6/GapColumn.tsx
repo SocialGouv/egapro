@@ -13,7 +13,7 @@ export function GapColumn({ title, columns }: Props) {
 			<div className={stepStyles.subSection}>
 				{columns.map((col) => (
 					<div className={stepStyles.flex1} key={col.label}>
-						<p className="fr-text--xs fr-mb-0">{col.label}</p>
+						<p className="fr-text--sm fr-mb-0">{col.label}</p>
 						<GapBadge gap={col.gap} />
 					</div>
 				))}

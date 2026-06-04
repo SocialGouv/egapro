@@ -87,141 +87,150 @@ export function IndicatorSections({
 
 	return (
 		<>
-			<h2 className="fr-h6 fr-mb-0">
-				Indicateurs pour l&apos;ensemble de vos salariés
-			</h2>
+			<div className={stepStyles.group}>
+				<h2 className="fr-h6 fr-mb-0">
+					Indicateurs pour l&apos;ensemble de vos salariés
+				</h2>
 
-			<div className={stepStyles.section}>
-				{/* Card: Pay gap (Step 2) */}
-				<div className={stepStyles.card}>
-					<CardTitle>Écart de rémunération</CardTitle>
-					{hasStep2Data ? (
-						<GapSideBySide
-							annualMeanGap={annualMeanGap}
-							annualMedianGap={annualMedianGap}
-							hourlyMeanGap={hourlyMeanGap}
-							hourlyMedianGap={hourlyMedianGap}
-						/>
-					) : (
-						<EmptyDataNotice />
-					)}
-				</div>
-
-				{/* Card: Variable pay (Step 3) */}
-				<div className={stepStyles.card}>
-					<CardTitle>
-						Écart de rémunération variable ou complémentaire
-					</CardTitle>
-					{hasStep3Data ? (
-						<>
+				<div className={stepStyles.section}>
+					{/* Card: Pay gap (Step 2) */}
+					<div className={stepStyles.card}>
+						<CardTitle>Écart de rémunération</CardTitle>
+						{hasStep2Data ? (
 							<GapSideBySide
-								annualMeanGap={step3AnnualMeanGap}
-								annualMedianGap={step3AnnualMedianGap}
-								hourlyMeanGap={step3HourlyMeanGap}
-								hourlyMedianGap={step3HourlyMedianGap}
+								annualMeanGap={annualMeanGap}
+								annualMedianGap={annualMedianGap}
+								hourlyMeanGap={hourlyMeanGap}
+								hourlyMedianGap={hourlyMedianGap}
 							/>
-							<div className={stepStyles.sideBySide}>
-								<div className={stepStyles.column}>
-									<p className="fr-text--bold fr-text--sm fr-mb-0">
-										Proportion
-									</p>
-									<div className={stepStyles.subSection}>
-										<div className={stepStyles.flex1}>
-											<p className="fr-text--xs fr-mb-0">Femmes</p>
-											<strong>
-												{step3Data.indicatorEWomen
-													? `${step3Data.indicatorEWomen} %`
-													: "-"}
-											</strong>
-										</div>
-										<div className={stepStyles.flex1}>
-											<p className="fr-text--xs fr-mb-0">Hommes</p>
-											<strong>
-												{step3Data.indicatorEMen
-													? `${step3Data.indicatorEMen} %`
-													: "-"}
-											</strong>
+						) : (
+							<EmptyDataNotice />
+						)}
+					</div>
+
+					{/* Card: Variable pay (Step 3) */}
+					<div className={stepStyles.card}>
+						<CardTitle>
+							Écart de rémunération variable ou complémentaire
+						</CardTitle>
+						{hasStep3Data ? (
+							<>
+								<GapSideBySide
+									annualMeanGap={step3AnnualMeanGap}
+									annualMedianGap={step3AnnualMedianGap}
+									hourlyMeanGap={step3HourlyMeanGap}
+									hourlyMedianGap={step3HourlyMedianGap}
+								/>
+								<div className={stepStyles.sideBySide}>
+									<div className={stepStyles.column}>
+										<p className="fr-text--bold fr-text--sm fr-mb-0">
+											Proportion
+										</p>
+										<div className={stepStyles.subSection}>
+											<div className={stepStyles.flex1}>
+												<p className="fr-text--sm fr-mb-0">Femmes</p>
+												<strong className="fr-text--sm">
+													{step3Data.indicatorEWomen
+														? `${step3Data.indicatorEWomen} %`
+														: "-"}
+												</strong>
+											</div>
+											<div className={stepStyles.flex1}>
+												<p className="fr-text--sm fr-mb-0">Hommes</p>
+												<strong className="fr-text--sm">
+													{step3Data.indicatorEMen
+														? `${step3Data.indicatorEMen} %`
+														: "-"}
+												</strong>
+											</div>
 										</div>
 									</div>
+									<div className={stepStyles.verticalSeparator} />
+									<div className={stepStyles.column} />
 								</div>
-								<div className={stepStyles.verticalSeparator} />
-								<div className={stepStyles.column} />
-							</div>
-						</>
-					) : (
-						<EmptyDataNotice />
-					)}
-				</div>
+							</>
+						) : (
+							<EmptyDataNotice />
+						)}
+					</div>
 
-				{/* Card: Quartile distribution (Step 4) */}
-				<div className={stepStyles.card}>
-					<CardTitle tooltipId={withTooltips ? "tooltip-quartile" : undefined}>
-						Proportion de femmes et d&apos;hommes dans chaque quartile salarial
-					</CardTitle>
-					{hasStep4Data ? (
-						<>
-							<QuartileColumn
-								quartiles={step4Data.annual.map((q, i) => ({
-									label: QUARTILE_NAMES[i] ?? "",
-									womenCount: q.women ?? 0,
-									menCount: q.men ?? 0,
-								}))}
-								title="Rémunération annuelle brute moyenne"
-							/>
-							<QuartileColumn
-								quartiles={step4Data.hourly.map((q, i) => ({
-									label: QUARTILE_NAMES[i] ?? "",
-									womenCount: q.women ?? 0,
-									menCount: q.men ?? 0,
-								}))}
-								title="Rémunération horaire brute moyenne"
-							/>
-						</>
-					) : (
-						<EmptyDataNotice />
-					)}
+					{/* Card: Quartile distribution (Step 4) */}
+					<div className={stepStyles.card}>
+						<CardTitle
+							tooltipId={withTooltips ? "tooltip-quartile" : undefined}
+						>
+							Proportion de femmes et d&apos;hommes dans chaque quartile
+							salarial
+						</CardTitle>
+						{hasStep4Data ? (
+							<>
+								<QuartileColumn
+									quartiles={step4Data.annual.map((q, i) => ({
+										label: QUARTILE_NAMES[i] ?? "",
+										womenCount: q.women ?? 0,
+										menCount: q.men ?? 0,
+									}))}
+									title="Rémunération annuelle brute moyenne"
+								/>
+								<QuartileColumn
+									quartiles={step4Data.hourly.map((q, i) => ({
+										label: QUARTILE_NAMES[i] ?? "",
+										womenCount: q.women ?? 0,
+										menCount: q.men ?? 0,
+									}))}
+									title="Rémunération horaire brute moyenne"
+								/>
+							</>
+						) : (
+							<EmptyDataNotice />
+						)}
+					</div>
 				</div>
 			</div>
 
-			<h2 className="fr-h6 fr-mb-0">Indicateurs par catégorie de salariés</h2>
+			<div className={stepStyles.group}>
+				<h2 className="fr-h6 fr-mb-0">Indicateurs par catégorie de salariés</h2>
 
-			{/* Card: Employee categories (Step 5) */}
-			<div className={stepStyles.card}>
-				<CardTitle tooltipId={withTooltips ? "tooltip-categories" : undefined}>
-					Écart de rémunération par catégories de salariés
-				</CardTitle>
-				{step5Parsed.length > 0 ? (
-					step5Parsed.map((cat) => (
-						<div key={cat.index}>
-							<p className="fr-text--bold fr-mb-0">{cat.name}</p>
-							<div className={stepStyles.sideBySide}>
-								<GapColumn
-									columns={[
-										{ label: "Salaire de base", gap: cat.annualBaseGap },
-										{
-											label: "Composantes variables",
-											gap: cat.annualVariableGap,
-										},
-									]}
-									title="Annuelle brute"
-								/>
-								<div className={stepStyles.verticalSeparator} />
-								<GapColumn
-									columns={[
-										{ label: "Salaire de base", gap: cat.hourlyBaseGap },
-										{
-											label: "Composantes variables",
-											gap: cat.hourlyVariableGap,
-										},
-									]}
-									title="Horaire brute"
-								/>
+				{/* Card: Employee categories (Step 5) */}
+				<div className={stepStyles.card}>
+					<CardTitle
+						tooltipId={withTooltips ? "tooltip-categories" : undefined}
+					>
+						Écart de rémunération par catégories de salariés
+					</CardTitle>
+					{step5Parsed.length > 0 ? (
+						step5Parsed.map((cat) => (
+							<div key={cat.index}>
+								<p className="fr-text--bold fr-text--sm fr-mb-0">{cat.name}</p>
+								<div className={stepStyles.sideBySide}>
+									<GapColumn
+										columns={[
+											{ label: "Salaire de base", gap: cat.annualBaseGap },
+											{
+												label: "Composantes variables",
+												gap: cat.annualVariableGap,
+											},
+										]}
+										title="Annuelle brute"
+									/>
+									<div className={stepStyles.verticalSeparator} />
+									<GapColumn
+										columns={[
+											{ label: "Salaire de base", gap: cat.hourlyBaseGap },
+											{
+												label: "Composantes variables",
+												gap: cat.hourlyVariableGap,
+											},
+										]}
+										title="Horaire brute"
+									/>
+								</div>
 							</div>
-						</div>
-					))
-				) : (
-					<EmptyDataNotice />
-				)}
+						))
+					) : (
+						<EmptyDataNotice />
+					)}
+				</div>
 			</div>
 		</>
 	);
