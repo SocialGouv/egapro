@@ -44,6 +44,10 @@ type FinalizeOptions = {
 	txDraft?: Record<string, unknown> | null;
 	opinions?: Opinion[];
 	associations?: Association[];
+	// When true, the matching count query resolves to [] so its row is undefined,
+	// exercising the `?? 0` fallback in finalize().
+	emptyOpinionCountRow?: boolean;
+	emptyFileCountRow?: boolean;
 };
 
 // Select sequence of finalize():
@@ -62,6 +66,8 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 		txDraft = null,
 		opinions = FIRST_GAP_CONSULTED,
 		associations = ASSOCIATIONS_FIRST_GAP,
+		emptyOpinionCountRow = false,
+		emptyFileCountRow = false,
 	} = options;
 
 	const declarationLookupRow = { id: "decl-1" };
@@ -87,14 +93,16 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 	where.mockImplementation(() => {
 		const call = selectCallCount;
 		if (call === 2) {
-			return Object.assign(Promise.resolve([{ count: opinionCount }]), {
-				limit,
-			});
+			return Object.assign(
+				Promise.resolve(emptyOpinionCountRow ? [] : [{ count: opinionCount }]),
+				{ limit },
+			);
 		}
 		if (call === 3) {
-			return Object.assign(Promise.resolve([{ count: fileCount }]), {
-				limit,
-			});
+			return Object.assign(
+				Promise.resolve(emptyFileCountRow ? [] : [{ count: fileCount }]),
+				{ limit },
+			);
 		}
 		if (call === 5) {
 			return Object.assign(Promise.resolve(associations), { limit });
@@ -198,6 +206,26 @@ describe("cseOpinionRouter.finalize", () => {
 
 		await expect(caller.finalize()).rejects.toThrow(
 			"Les avis du CSE doivent être renseignés avant validation.",
+		);
+		expect(ctx.update).not.toHaveBeenCalled();
+	});
+
+	it("throws PRECONDITION_FAILED when the opinion count query returns no row", async () => {
+		const ctx = createMockDbForFinalize({ emptyOpinionCountRow: true });
+		const caller = await createCaller(ctx.db);
+
+		await expect(caller.finalize()).rejects.toThrow(
+			"Les avis du CSE doivent être renseignés avant validation.",
+		);
+		expect(ctx.update).not.toHaveBeenCalled();
+	});
+
+	it("throws PRECONDITION_FAILED when the file count query returns no row", async () => {
+		const ctx = createMockDbForFinalize({ emptyFileCountRow: true });
+		const caller = await createCaller(ctx.db);
+
+		await expect(caller.finalize()).rejects.toThrow(
+			"Au moins un fichier d'avis CSE doit être transmis.",
 		);
 		expect(ctx.update).not.toHaveBeenCalled();
 	});
