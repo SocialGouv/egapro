@@ -402,3 +402,43 @@ export async function setUserPhone(phone: string | null) {
 		await sql.end();
 	}
 }
+
+export async function setCseFileAssociationsForCurrentDeclaration(
+	associations: { declarationNumber: number; type: string }[],
+) {
+	const sql = createConnection();
+	try {
+		const decls = await sql<[{ id: string }]>`
+			SELECT id FROM app_declaration
+			WHERE siren = ${TEST_SIREN}
+			  AND year = EXTRACT(YEAR FROM CURRENT_DATE)::int
+			LIMIT 1
+		`;
+		const declarationId = decls[0]?.id;
+		if (!declarationId) return;
+
+		const fileRows = await sql<[{ id: string }]>`
+			SELECT id FROM app_file
+			WHERE declaration_id = ${declarationId}
+			  AND type = 'cse_opinion'
+			ORDER BY uploaded_at DESC
+			LIMIT 1
+		`;
+		const fileId = fileRows[0]?.id;
+		if (!fileId) return;
+
+		await sql`
+			DELETE FROM app_cse_opinion_file
+			WHERE declaration_id = ${declarationId}
+		`;
+
+		for (const assoc of associations) {
+			await sql`
+				INSERT INTO app_cse_opinion_file (id, declaration_id, declaration_number, type, file_id, created_at, updated_at)
+				VALUES (gen_random_uuid(), ${declarationId}, ${assoc.declarationNumber}, ${assoc.type}, ${fileId}, NOW(), NOW())
+			`;
+		}
+	} finally {
+		await sql.end();
+	}
+}
