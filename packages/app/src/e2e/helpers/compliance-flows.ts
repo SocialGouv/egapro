@@ -1,6 +1,6 @@
 import path from "node:path";
 import type { Page } from "@playwright/test";
-import { setCseFileAssociationsForCurrentDeclaration } from "./db";
+import { insertCseOpinionFileWithAssociations } from "./db";
 
 const DUMMY_PDF = path.join(import.meta.dirname, "../fixtures/dummy.pdf");
 export const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
@@ -26,12 +26,14 @@ export async function submitCseStep2(
 		{ declarationNumber: 1, type: "accuracy" },
 	],
 ) {
-	await page.locator("#cse-file-upload").setInputFiles(DUMMY_PDF);
+	await page.waitForURL("**/avis-cse/etape/2");
+	await insertCseOpinionFileWithAssociations(associations);
+	await page.reload();
+	await page.waitForURL("**/avis-cse/etape/2");
 	await page.getByRole("button", { name: "Soumettre" }).click();
 	await page
 		.getByText(/Je certifie que les avis transmis sont conformes/)
 		.waitFor({ state: "visible" });
-	await setCseFileAssociationsForCurrentDeclaration(associations);
 	await page
 		.getByText(/Je certifie que les avis transmis sont conformes/)
 		.click();
