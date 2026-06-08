@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { AUDIT_ACTIONS, type AuditActionKey } from "~/modules/audit";
 import { getCurrentYear } from "~/modules/domain";
-import { parseSiren, validateFileName } from "~/modules/shared";
+import { validateFileName } from "~/modules/shared/fileNameValidation";
+import { parseSiren } from "~/modules/shared/parseSiren";
 import {
 	ALLOWED_UPLOAD_MIME_TYPES,
 	type FlowType,
