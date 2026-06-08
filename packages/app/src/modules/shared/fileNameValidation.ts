@@ -3,11 +3,11 @@ import { z } from "zod";
 export const MAX_FILENAME_LENGTH = 200;
 
 const CONTROL_CHARS_PATTERN = "[\\u0000-\\u001F]|\\u007F";
-export const FORBIDDEN_FILENAME_CHARS = new RegExp(
+const FORBIDDEN_FILENAME_CHARS = new RegExp(
 	`[<>:"|?*;/\\\\]|${CONTROL_CHARS_PATTERN}`,
 );
 
-export const INVISIBLE_FILENAME_CHARS = /‮|​|‌|‍|﻿/;
+const INVISIBLE_FILENAME_CHARS = /‮|​|‌|‍|﻿/;
 
 export const EXTENSION_MIME_MAP: Readonly<
 	Record<string, ReadonlyArray<string>>
