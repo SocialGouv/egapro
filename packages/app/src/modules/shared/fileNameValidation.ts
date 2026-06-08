@@ -7,7 +7,7 @@ const FORBIDDEN_FILENAME_CHARS = new RegExp(
 	`[<>:"|?*;/\\\\]|${CONTROL_CHARS_PATTERN}`,
 );
 
-const INVISIBLE_FILENAME_CHARS = /‮|​|‌|‍|﻿/;
+const INVISIBLE_FILENAME_CHARS = /\u202E|\u200B|\u200C|\u200D|\uFEFF/u;
 
 export const EXTENSION_MIME_MAP: Readonly<
 	Record<string, ReadonlyArray<string>>
