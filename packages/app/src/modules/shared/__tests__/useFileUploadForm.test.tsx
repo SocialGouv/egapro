@@ -9,6 +9,7 @@ import {
 	vi,
 } from "vitest";
 
+import { FILENAME_ERROR_MESSAGES } from "../fileNameValidation";
 import type { UploadFileResult } from "../uploadFile";
 import { useFileUploadForm } from "../useFileUploadForm";
 
@@ -93,6 +94,48 @@ describe("useFileUploadForm", () => {
 		});
 
 		expect(result.current.uploadError).toBe("Boom");
+	});
+
+	it("surfaces a validateFileName rejection in uploadError and keeps no file selected", () => {
+		const { result } = renderHook(() =>
+			useFileUploadForm({ flowType: "cse_opinion" }),
+		);
+
+		act(() => {
+			result.current.handleFilesChange(
+				[],
+				FILENAME_ERROR_MESSAGES.forbidden_char,
+			);
+		});
+
+		expect(result.current.uploadError).toBe(
+			FILENAME_ERROR_MESSAGES.forbidden_char,
+		);
+		expect(result.current.selectedFiles).toEqual([]);
+	});
+
+	it("never calls uploadFile for a file rejected by validateFileName", async () => {
+		const onAllUploaded = vi.fn();
+		const { result } = renderHook(() =>
+			useFileUploadForm({ flowType: "cse_opinion", onAllUploaded }),
+		);
+		attachDialog(result);
+
+		act(() => {
+			result.current.handleFilesChange(
+				[],
+				FILENAME_ERROR_MESSAGES.invisible_char,
+			);
+		});
+		await act(async () => {
+			await result.current.handleConfirm();
+		});
+
+		expect(uploadFileMock).not.toHaveBeenCalled();
+		expect(onAllUploaded).not.toHaveBeenCalled();
+		expect(result.current.uploadError).toBe(
+			FILENAME_ERROR_MESSAGES.invisible_char,
+		);
 	});
 
 	it("handleSubmit prevents default and shows an error when no file is selected", () => {
