@@ -6,21 +6,34 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
-import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { FileUpload, getDsfrModal, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
-
+import { ContentTypeMatrix } from "./components/ContentTypeMatrix";
 import { CseStepIndicator } from "./components/CseStepIndicator";
 import { OpinionSummaryBox } from "./components/OpinionSummaryBox";
 import { SubmitConfirmationModal } from "./components/SubmitConfirmationModal";
+import {
+	buildAssociationMap,
+	clearFileAssociations,
+	getMissingColumns,
+	toAssociationPayload,
+} from "./contentTypeColumns";
 import formStyles from "./shared/formActions.module.scss";
-import { MAX_CSE_FILES, type UploadedFile } from "./types";
+import {
+	type AssociationMap,
+	type ContentTypeColumn,
+	MAX_CSE_FILES,
+	type StoredFileContentType,
+	type UploadedFile,
+} from "./types";
 
 type Props = {
 	declarationYear: number;
 	siren: string;
 	hasSecondDeclaration?: boolean;
 	existingFiles?: UploadedFile[];
+	columns: ContentTypeColumn[];
+	initialAssociations?: StoredFileContentType[];
 };
 
 export function Step2Upload({
@@ -28,11 +41,17 @@ export function Step2Upload({
 	siren,
 	hasSecondDeclaration = true,
 	existingFiles = [],
+	columns,
+	initialAssociations = [],
 }: Props) {
 	const router = useRouter();
 	const utils = api.useUtils();
 	const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
 	const [finalizeError, setFinalizeError] = useState<string | null>(null);
+	const [associationError, setAssociationError] = useState<string | null>(null);
+	const [associations, setAssociations] = useState<AssociationMap>(() =>
+		buildAssociationMap(columns, initialAssociations),
+	);
 	const readOnlyGuard = useReadOnlyGuard();
 
 	const emptyDbValues = useMemo(() => ({}), []);
@@ -46,12 +65,36 @@ export function Step2Upload({
 
 	const refreshFileList = useCallback(() => {
 		void utils.cseOpinion.getFiles.invalidate();
+		void utils.cseOpinion.getFileContentTypes.invalidate();
 		router.refresh();
 	}, [utils, router]);
 
+	const setTypesMutation = api.cseOpinion.setFileContentTypes.useMutation({
+		onError: () =>
+			setAssociationError(
+				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
+			),
+		onSuccess: () => setAssociationError(null),
+	});
+
+	const handleToggle = useCallback(
+		(columnId: string, fileId: string, checked: boolean) => {
+			const next: AssociationMap = {
+				...associations,
+				[columnId]: checked ? fileId : null,
+			};
+			setAssociations(next);
+			setTypesMutation.mutate({
+				associations: toAssociationPayload(columns, next),
+			});
+		},
+		[associations, columns, setTypesMutation],
+	);
+
 	const deleteMutation = api.cseOpinion.deleteFile.useMutation({
-		onSuccess: () => {
+		onSuccess: (_data, variables) => {
 			setDeletingFileId(null);
+			setAssociations((prev) => clearFileAssociations(prev, variables.fileId));
 			refreshFileList();
 		},
 		onError: () => setDeletingFileId(null),
@@ -76,52 +119,76 @@ export function Step2Upload({
 		closeModal,
 		handleConfirm,
 		handleFilesChange,
-		handleSubmit,
 		isPending,
 		modalRef,
 		selectedFiles,
 		uploadError,
 	} = useFileUploadForm({
 		flowType: "cse_opinion",
-		onUploaded: refreshFileList,
-		onAllUploaded: () => {
-			void finalizeAndRedirect();
-		},
+		onAllUploaded: refreshFileList,
 	});
 
-	const skipUploadSubmit = useCallback(
+	const missingColumns = useMemo(
+		() => getMissingColumns(columns, associations),
+		[columns, associations],
+	);
+
+	const hasSelectedFiles = selectedFiles.length > 0;
+	const hasExistingFiles = existingFiles.length > 0;
+	const isComplete = missingColumns.length === 0;
+	const isSubmitting = isPending || finalizeMutation.isPending;
+	const showMissingError = !hasSelectedFiles && hasExistingFiles && !isComplete;
+
+	const openFinalizeModal = useCallback(() => {
+		const dialog = modalRef.current;
+		if (!dialog) return;
+		const modal = getDsfrModal(dialog);
+		if (modal) {
+			modal.disclose();
+		} else {
+			dialog.showModal();
+		}
+	}, [modalRef]);
+
+	const handleFormSubmit = useCallback(
 		(event: React.FormEvent) => {
 			event.preventDefault();
 			setFinalizeError(null);
-			const dialog = modalRef.current;
-			if (!dialog) return;
-			const modal = getDsfrModal(dialog);
-			if (modal) {
-				modal.disclose();
-			} else {
-				dialog.showModal();
+			if (hasSelectedFiles) {
+				void handleConfirm();
+				return;
 			}
+			if (!hasExistingFiles || !isComplete) return;
+			openFinalizeModal();
 		},
-		[modalRef],
+		[
+			hasSelectedFiles,
+			handleConfirm,
+			hasExistingFiles,
+			isComplete,
+			openFinalizeModal,
+		],
 	);
 
-	const hasExistingFiles = existingFiles.length > 0;
-	const hasSelectedFiles = selectedFiles.length > 0;
-	const formSubmit =
-		!hasSelectedFiles && hasExistingFiles ? skipUploadSubmit : handleSubmit;
-	const confirmAction = hasSelectedFiles
-		? handleConfirm
-		: () => {
-				closeModal();
-				void finalizeAndRedirect();
-			};
+	const confirmFinalize = useCallback(() => {
+		closeModal();
+		void finalizeAndRedirect();
+	}, [closeModal, finalizeAndRedirect]);
 
 	const remainingSlots = MAX_CSE_FILES - existingFiles.length;
-	const isSubmitting = isPending || finalizeMutation.isPending;
+	const submitDisabled =
+		isSubmitting ||
+		readOnlyGuard.isReadOnly ||
+		(!hasSelectedFiles && (!hasExistingFiles || !isComplete));
+	const submitLabel = isSubmitting
+		? "Envoi en cours…"
+		: hasSelectedFiles
+			? "Importer le ou les fichiers"
+			: "Soumettre";
 
 	return (
 		<>
-			<form autoComplete="off" onSubmit={formSubmit}>
+			<form autoComplete="off" onSubmit={handleFormSubmit}>
 				<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
 					<div className="fr-col">
 						<h1 className="fr-h4 fr-mb-0">
@@ -134,7 +201,8 @@ export function Step2Upload({
 
 				<div>
 					<label className="fr-label" htmlFor="cse-file-upload">
-						Veuillez importer l&apos;ensemble des avis de votre CSE
+						Veuillez joindre les avis émis par votre CSE et renseigner le type
+						de document correspondant.
 						<span className="fr-hint-text">
 							Taille maximale : 10 Mo par fichier. Format supporté : pdf.
 							{existingFiles.length > 0 &&
@@ -142,18 +210,6 @@ export function Step2Upload({
 						</span>
 					</label>
 				</div>
-
-				{existingFiles.map((file) => (
-					<ExistingFileCard
-						file={file}
-						isDeleting={deletingFileId === file.id}
-						key={file.id}
-						onDelete={(fileId) => {
-							setDeletingFileId(fileId);
-							deleteMutation.mutate({ fileId });
-						}}
-					/>
-				))}
 
 				<FileUpload
 					accept=".pdf"
@@ -166,6 +222,39 @@ export function Step2Upload({
 					onFilesChange={handleFilesChange}
 					selectedFiles={selectedFiles}
 				/>
+
+				{hasExistingFiles && (
+					<div className="fr-mt-4w">
+						<ContentTypeMatrix
+							associations={associations}
+							columns={columns}
+							deletingFileId={deletingFileId}
+							disabled={readOnlyGuard.isReadOnly}
+							files={existingFiles}
+							onDelete={(fileId) => {
+								setDeletingFileId(fileId);
+								deleteMutation.mutate({ fileId });
+							}}
+							onToggle={handleToggle}
+						/>
+					</div>
+				)}
+
+				<div aria-live="polite">
+					{showMissingError && (
+						<div className="fr-alert fr-alert--error fr-mt-3w">
+							<h2 className="fr-alert__title">Un avis CSE est manquant</h2>
+							{missingColumns.map((column) => (
+								<p key={column.id}>{column.missingMessage}</p>
+							))}
+						</div>
+					)}
+					{associationError && (
+						<div className="fr-alert fr-alert--error fr-mt-3w">
+							<p>{associationError}</p>
+						</div>
+					)}
+				</div>
 
 				<div className="fr-mt-4w">
 					<OpinionSummaryBox
@@ -193,10 +282,10 @@ export function Step2Upload({
 						<button
 							{...readOnlyGuard.buttonProps}
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-							disabled={isSubmitting || readOnlyGuard.isReadOnly}
+							disabled={submitDisabled}
 							type="submit"
 						>
-							{isSubmitting ? "Envoi en cours\u2026" : "Soumettre"}
+							{submitLabel}
 						</button>
 						{readOnlyGuard.tooltip}
 					</span>
@@ -207,58 +296,8 @@ export function Step2Upload({
 				declarationYear={declarationYear}
 				modalRef={modalRef}
 				onClose={closeModal}
-				onSubmit={confirmAction}
+				onSubmit={confirmFinalize}
 			/>
 		</>
-	);
-}
-
-type ExistingFileCardProps = {
-	file: UploadedFile;
-	isDeleting: boolean;
-	onDelete: (fileId: string) => void;
-};
-
-function ExistingFileCard({
-	file,
-	isDeleting,
-	onDelete,
-}: ExistingFileCardProps) {
-	const readOnlyGuard = useReadOnlyGuard();
-	return (
-		<div className="fr-card fr-card--no-border fr-p-3w fr-mb-2w">
-			<p className="fr-text--md fr-mb-0">{file.fileName}</p>
-			<p className="fr-text--xs fr-text--mention-grey fr-mb-1w">
-				PDF — Importé le {new Date(file.uploadedAt).toLocaleDateString("fr-FR")}
-			</p>
-			<div>
-				<p className="fr-message fr-message--valid fr-mb-0">Fichier transmis</p>
-				<div className="fr-mt-1w">
-					<a
-						className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-eye-line"
-						href={`/api/v1/files/${file.id}`}
-						rel="noopener noreferrer"
-						target="_blank"
-						title={`Visualiser ${file.fileName}`}
-					>
-						Visualiser
-						<NewTabNotice />
-					</a>
-					<span>
-						<button
-							{...readOnlyGuard.buttonProps}
-							className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line fr-ml-1w"
-							disabled={isDeleting || readOnlyGuard.isReadOnly}
-							onClick={() => onDelete(file.id)}
-							title={`Supprimer ${file.fileName}`}
-							type="button"
-						>
-							{isDeleting ? "Suppression\u2026" : "Supprimer"}
-						</button>
-						{readOnlyGuard.tooltip}
-					</span>
-				</div>
-			</div>
-		</div>
 	);
 }
