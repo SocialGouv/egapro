@@ -114,7 +114,7 @@ describe("FileUpload filename validation", () => {
 	it("S5: rejects an invisible character with the invisible_char message", async () => {
 		const onChange = vi.fn();
 		render(<ControlledFileUpload onChange={onChange} />);
-		const file = new File(["pdf-bytes"], "avis‮cse.pdf", {
+		const file = new File(["pdf-bytes"], "avis\u202Ecse.pdf", {
 			type: PDF_MIME,
 		});
 
