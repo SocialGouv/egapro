@@ -189,6 +189,7 @@ export function FileUpload({
 				accept={accept}
 				aria-describedby={messagesId}
 				aria-invalid={error !== null}
+				aria-label="Sélectionner des fichiers"
 				className="fr-sr-only"
 				disabled={disabled}
 				id={inputId}
