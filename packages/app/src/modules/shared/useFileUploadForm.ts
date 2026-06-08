@@ -122,6 +122,8 @@ function formatUploadError(
 			return "Non authentifié. Merci de vous reconnecter.";
 		case "not_found":
 			return "Déclaration introuvable pour l'année en cours.";
+		case "invalid_filename":
+			return serverError;
 		case "too_large":
 		case "wrong_type":
 		case "empty":
