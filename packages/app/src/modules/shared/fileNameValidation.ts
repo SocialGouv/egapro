@@ -2,9 +2,12 @@ import { z } from "zod";
 
 export const MAX_FILENAME_LENGTH = 200;
 
-export const FORBIDDEN_FILENAME_CHARS = /[<>:"|?*;/\\]|\x00|[\x01-\x1F]|\x7F/;
+const CONTROL_CHARS_PATTERN = "[\\u0000-\\u001F]|\\u007F";
+export const FORBIDDEN_FILENAME_CHARS = new RegExp(
+	`[<>:"|?*;/\\\\]|${CONTROL_CHARS_PATTERN}`,
+);
 
-export const INVISIBLE_FILENAME_CHARS = /[‮​‌‍﻿]/;
+export const INVISIBLE_FILENAME_CHARS = /‮|​|‌|‍|﻿/;
 
 export const EXTENSION_MIME_MAP: Readonly<
 	Record<string, ReadonlyArray<string>>
@@ -83,7 +86,7 @@ export function validateFileName(
 	const ext = trimmed.slice(lastDot).toLowerCase();
 	const allowedMimes = EXTENSION_MIME_MAP[ext];
 
-	if (!allowedMimes || !allowedMimes.includes(declaredMimeType.toLowerCase())) {
+	if (!allowedMimes?.includes(declaredMimeType.toLowerCase())) {
 		return {
 			ok: false,
 			reason: "extension_mime_mismatch",
