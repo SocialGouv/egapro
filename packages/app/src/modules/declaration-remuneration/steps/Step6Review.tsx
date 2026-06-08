@@ -2,10 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
-import { computeGap, GAP_ALERT_THRESHOLD } from "~/modules/domain";
+import {
+	computeGap,
+	GAP_ALERT_THRESHOLD,
+	getCompanySizeRange,
+} from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { getCurrentStageHref } from "../shared/complianceNavigation";
+import { trackFunnelComplete } from "../shared/useFunnelTracking";
 import { FormActions } from "../shared/FormActions";
 import { NextStepsBox } from "../shared/NextStepsBox";
 import { SavedIndicator } from "../shared/SavedIndicator";
@@ -54,8 +59,16 @@ export function Step6Review({
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
+	const workforce =
+		declaration.totalWomen !== null && declaration.totalMen !== null
+			? declaration.totalWomen + declaration.totalMen
+			: null;
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: () => {
+			trackFunnelComplete({
+				sizeRange:
+					workforce !== null ? getCompanySizeRange(workforce) : undefined,
+			});
 			router.push("/declaration-remuneration/parcours-conformite");
 		},
 	});

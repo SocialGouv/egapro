@@ -59,6 +59,9 @@ app:
     - secretRef:
         name: "admin"
         optional: true
+    - secretRef:
+        name: "matomo"
+        optional: true
     - configMapRef:
         name: "valkey"
         optional: true

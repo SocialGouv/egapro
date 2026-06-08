@@ -1,6 +1,8 @@
 "use client";
 
+import { getCompanySizeRange } from "~/modules/domain";
 import type { GipPrefillData } from "./shared/gipMdsMapping";
+import { useFunnelTracking } from "./shared/useFunnelTracking";
 import { Step1Workforce } from "./steps/Step1Workforce";
 import { Step2PayGap } from "./steps/Step2PayGap";
 import { Step3VariablePay } from "./steps/Step3VariablePay";
@@ -46,6 +48,15 @@ export function StepPageClient({
 	initialSource,
 	hasCse = null,
 }: StepPageClientProps) {
+	const workforce =
+		declaration.totalWomen !== null && declaration.totalMen !== null
+			? declaration.totalWomen + declaration.totalMen
+			: null;
+	const sizeRange =
+		workforce !== null ? getCompanySizeRange(workforce) : undefined;
+
+	useFunnelTracking({ step, year: declaration.year, sizeRange });
+
 	switch (step) {
 		case 1:
 			return (
