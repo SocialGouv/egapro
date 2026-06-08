@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { AUDIT_ACTIONS, type AuditActionKey } from "~/modules/audit";
 import { getCurrentYear } from "~/modules/domain";
+import { validateFileName } from "~/modules/shared/fileNameValidation";
 import { parseSiren } from "~/modules/shared/parseSiren";
 import {
 	ALLOWED_UPLOAD_MIME_TYPES,
@@ -182,6 +183,26 @@ export async function POST(request: Request): Promise<Response> {
 			{
 				error: `Type de fichier non autorisé : ${contentType}. Types acceptés : ${ALLOWED_UPLOAD_MIME_TYPES.join(", ")}.`,
 			},
+			{ status: 400 },
+		);
+	}
+
+	const fileNameValidation = validateFileName(fileName, contentType);
+	if (!fileNameValidation.ok) {
+		writeFailure({
+			action,
+			flowType,
+			fileName,
+			fileId: null,
+			errorMessage: `HTTP 400 invalid_filename: ${fileNameValidation.reason}`,
+			userId,
+			userEmail,
+			siren,
+			requestContext,
+			startedAt,
+		});
+		return Response.json(
+			{ reason: "invalid_filename", error: fileNameValidation.message },
 			{ status: 400 },
 		);
 	}
