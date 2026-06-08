@@ -4,6 +4,14 @@ export {
 } from "./CampaignRateTileStates";
 export { CompanySizeFilter } from "./CompanySizeFilter";
 export { FileUpload } from "./FileUpload";
+export type { FileNameError } from "./fileNameValidation";
+export {
+	EXTENSION_MIME_MAP,
+	FILENAME_ERROR_MESSAGES,
+	fileNameSchema,
+	MAX_FILENAME_LENGTH,
+	validateFileName,
+} from "./fileNameValidation";
 export { getDsfrCollapse } from "./getDsfrCollapse";
 export { getDsfrModal } from "./getDsfrModal";
 export type { KpiBadgeDelta } from "./KpiBadge";
