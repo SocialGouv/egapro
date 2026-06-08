@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 
 import styles from "./FileUpload.module.scss";
+import { validateFileName } from "./fileNameValidation";
 import { FILE_TOO_LARGE_ERROR, MAX_FILE_SIZE } from "./uploadConfig";
 
 function formatFileSize(bytes: number): string {
@@ -54,6 +55,10 @@ export function FileUpload({
 
 	const validateFile = useCallback(
 		(file: File): string | null => {
+			const fileNameResult = validateFileName(file.name, file.type);
+			if (!fileNameResult.ok) {
+				return fileNameResult.message;
+			}
 			if (!allowedMimeTypes.includes(file.type)) {
 				return `Format de fichier non supporté. Formats acceptés : ${acceptLabel}.`;
 			}
