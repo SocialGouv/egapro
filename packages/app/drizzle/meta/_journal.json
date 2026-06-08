@@ -267,6 +267,13 @@
 			"when": 1779271468704,
 			"tag": "0037_pale_mikhail_rasputin",
 			"breakpoints": true
+		},
+		{
+			"idx": 38,
+			"version": "7",
+			"when": 1780674283597,
+			"tag": "0038_striped_xavin",
+			"breakpoints": true
 		}
 	]
 }

@@ -246,6 +246,7 @@ export const declarationsRelations = relations(
 		jobCategories: many(jobCategories),
 		cseOpinions: many(cseOpinions),
 		files: many(files),
+		cseOpinionFiles: many(cseOpinionFiles),
 		statusHistory: many(declarationStatusHistory),
 	}),
 );
@@ -573,12 +574,60 @@ export const files = createTable(
 	],
 );
 
-export const filesRelations = relations(files, ({ one }) => ({
+export const filesRelations = relations(files, ({ one, many }) => ({
 	declaration: one(declarations, {
 		fields: [files.declarationId],
 		references: [declarations.id],
 	}),
+	cseOpinionFiles: many(cseOpinionFiles),
 }));
+
+// ── CSE opinion file associations ──────────────────────────────────
+
+export const cseOpinionFiles = createTable(
+	"cse_opinion_file",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		declarationId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => declarations.id),
+		declarationNumber: d.integer().notNull(),
+		type: d.varchar({ length: 20 }).notNull(),
+		fileId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => files.id, { onDelete: "cascade" }),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [
+		unique("cse_opinion_file_decl_number_type_idx").on(
+			t.declarationId,
+			t.declarationNumber,
+			t.type,
+		),
+		index("cse_opinion_file_declaration_idx").on(t.declarationId),
+	],
+);
+
+export const cseOpinionFilesRelations = relations(
+	cseOpinionFiles,
+	({ one }) => ({
+		declaration: one(declarations, {
+			fields: [cseOpinionFiles.declarationId],
+			references: [declarations.id],
+		}),
+		file: one(files, {
+			fields: [cseOpinionFiles.fileId],
+			references: [files.id],
+		}),
+	}),
+);
 
 // ── Campaign deadlines (configurable per year) ────────────────────
 
