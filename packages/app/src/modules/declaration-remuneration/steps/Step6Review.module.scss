@@ -10,6 +10,12 @@
 	gap: 1.5rem;
 }
 
+.group {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
 .card {
 	border: 1px solid var(--border-default-grey);
 	border-radius: 4px;
@@ -18,6 +24,9 @@
 	display: flex;
 	flex-direction: column;
 	gap: 1.5rem;
+	// Figma spec: recap card text uses title-grey, not the default body grey.
+	// Set once here so every title/label/value inherits it.
+	color: var(--text-title-grey);
 }
 
 .sideBySide {
@@ -52,4 +61,19 @@
 
 .flex1 {
 	flex: 1;
+	// Stack label + value and pin the value to the bottom so values stay aligned
+	// across columns even when a label wraps to two lines (e.g. "Composantes
+	// variables ou complémentaires" next to "Salaire de base"). The parent
+	// `.subSection` stretches columns to equal height, so this is a no-op when
+	// every label is single-line (quartiles, proportion).
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: space-between;
+}
+
+.intro {
+	font-weight: 500;
+	// Figma spec: intro paragraph uses title-grey, not the default body grey.
+	color: var(--text-title-grey);
 }

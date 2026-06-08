@@ -364,7 +364,9 @@ describe("Step6Review", () => {
 			1,
 		);
 		expect(screen.getAllByText("Salaire de base").length).toBe(2);
-		expect(screen.getAllByText("Composantes variables").length).toBe(2);
+		expect(
+			screen.getAllByText("Composantes variables ou complémentaires").length,
+		).toBe(2);
 		expect(screen.getAllByText("élevé").length).toBeGreaterThanOrEqual(1);
 	});
 

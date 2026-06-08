@@ -82,3 +82,10 @@
 .alertBadge {
 	text-transform: uppercase;
 }
+
+// Figma spec: the warning badge uses orange-terre-battue, matching the
+// "élevé" gap badges, rather than DSFR's default warning brown. Double class
+// for specificity over `.fr-badge--warning`.
+.alertBadge.alertBadge {
+	color: var(--orange-terre-battue-main-645);
+}

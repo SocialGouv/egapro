@@ -158,7 +158,7 @@ export function Step6Review({
 
 			<StepIndicator currentStep={6} />
 
-			<p className="fr-mb-0">
+			<p className={`fr-mb-0 ${stepStyles.intro}`}>
 				Vérifiez que toutes les informations ont été complétées avant de
 				soumettre votre déclaration aux services du ministère chargé du travail.
 			</p>

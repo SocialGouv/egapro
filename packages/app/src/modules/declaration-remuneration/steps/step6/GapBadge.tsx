@@ -11,11 +11,11 @@ type Props = {
 
 /** Displays a formatted gap value with an optional severity badge */
 export function GapBadge({ gap }: Props) {
-	if (gap === null) return <span>-</span>;
+	if (gap === null) return <span className="fr-text--sm">-</span>;
 	const level = gapLevel(gap);
-	if (!level) return <span>{formatGap(gap)}</span>;
+	if (!level) return <span className="fr-text--sm">{formatGap(gap)}</span>;
 	return (
-		<span className={stepStyles.inlineGap}>
+		<span className={`fr-text--sm ${stepStyles.inlineGap}`}>
 			<strong>{formatGap(gap)}</strong>
 			{level === "high" && (
 				<span className={gapBadgeClass(level)}>{GAP_LEVEL_LABELS[level]}</span>
