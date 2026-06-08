@@ -23,6 +23,7 @@ import type {
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
 import { padDecimalOnBlur, padDecimalToTwo } from "~/modules/domain";
+import { getDsfrCollapse } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./CategoryDataTable";
@@ -175,6 +176,25 @@ export function CategoryForm({
 	const [workforceError, setWorkforceError] = useState("");
 	const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 	const deleteDialogRef = useRef<HTMLDialogElement>(null);
+	const accordionHeaderRefs = useRef<Array<HTMLButtonElement | null>>([]);
+	const accordionCollapseRefs = useRef<Array<HTMLDivElement | null>>([]);
+	const pendingFocusIndex = useRef<number | null>(null);
+
+	useEffect(() => {
+		if (pendingFocusIndex.current === null) return;
+		const index = pendingFocusIndex.current;
+		pendingFocusIndex.current = null;
+		const reveal = () => {
+			const collapse = accordionCollapseRefs.current[index];
+			if (collapse) getDsfrCollapse(collapse)?.disclose();
+			// Focus the new category's first field (the "Libellé" input) rather than
+			// the accordion header, so the user can start filling it in immediately.
+			const firstField = document.getElementById(`cat-${index}-name`);
+			(firstField ?? accordionHeaderRefs.current[index])?.focus();
+		};
+		const id = window.requestAnimationFrame(reveal);
+		return () => window.cancelAnimationFrame(id);
+	});
 
 	const closeDeleteDialog = useCallback(() => {
 		deleteDialogRef.current?.close();
@@ -218,7 +238,10 @@ export function CategoryForm({
 	function addCategory() {
 		const empty = createEmptyCategory(nextId());
 		const formEntry = toFormValues([empty])[0];
-		if (formEntry) append(formEntry);
+		if (formEntry) {
+			pendingFocusIndex.current = fields.length;
+			append(formEntry);
+		}
 		setHasData(false);
 	}
 
@@ -345,6 +368,19 @@ export function CategoryForm({
 			<div className={stepStyles.categoryBlock}>
 				<p className="fr-mb-0">{descriptionText}</p>
 
+				{referencePeriodPicker ?? (
+					<div className={stepStyles.categoryHeader}>
+						<p className="fr-mb-0">
+							Période de référence pour le calcul des indicateurs : 01/01/
+							{referenceYear} - 31/12/{referenceYear}.
+						</p>
+						<TooltipButton
+							id={`${tooltipPrefix}-period`}
+							label="Information sur la période de référence"
+						/>
+					</div>
+				)}
+
 				{readOnlyLabel ? (
 					<p className="fr-mb-0">
 						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
@@ -390,19 +426,6 @@ export function CategoryForm({
 								{sourceError}
 							</p>
 						)}
-					</div>
-				)}
-
-				{referencePeriodPicker ?? (
-					<div className={stepStyles.categoryHeader}>
-						<p className="fr-mb-0">
-							Période de référence pour le calcul des indicateurs : 01/01/
-							{referenceYear} - 31/12/{referenceYear}.
-						</p>
-						<TooltipButton
-							id={`${tooltipPrefix}-period`}
-							label="Information sur la période de référence"
-						/>
 					</div>
 				)}
 			</div>
@@ -452,6 +475,9 @@ export function CategoryForm({
 									className="fr-accordion__btn"
 									id={headingId}
 									onClick={handleAccordionToggle}
+									ref={(node) => {
+										accordionHeaderRefs.current[index] = node;
+									}}
 									type="button"
 								>
 									{categoryLabel}
@@ -460,6 +486,9 @@ export function CategoryForm({
 							<div
 								className="fr-collapse fr-collapse--expanded"
 								id={collapseId}
+								ref={(node) => {
+									accordionCollapseRefs.current[index] = node;
+								}}
 							>
 								<div className={stepStyles.categoryBlock}>
 									{readOnlyLabel ? (

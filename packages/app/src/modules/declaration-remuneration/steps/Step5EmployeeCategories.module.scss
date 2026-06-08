@@ -6,7 +6,9 @@
 }
 
 .sourceSelectGroup {
-	max-width: 18rem;
+	:global(.fr-select) {
+		max-width: 18rem;
+	}
 }
 
 .obligatoiresRow {
@@ -25,12 +27,26 @@
 .inputCell {
 	display: flex;
 	align-items: center;
+	// Push the input + unit to the right edge of the cell so the units (€ / nb)
+	// line up vertically across rows and align with the right-aligned Total values.
+	justify-content: flex-end;
 	gap: 0.375rem;
 }
 
 .compactInput {
-	width: 100px;
-	max-width: 100px;
+	// Wide enough, with trimmed horizontal padding, to fit a 7-figure amount
+	// (e.g. "1 234 567,00") without clipping.
+	width: 140px;
+	max-width: 140px;
+	padding: 0.25rem;
+}
+
+.dataRow {
+	height: 64px;
+}
+
+:global(.fr-table__content) table tbody td.totalCell {
+	text-align: right;
 }
 
 .nameColumnHeader {
@@ -68,7 +84,6 @@
 }
 
 .descriptionTitle {
-	font-size: 1.125rem;
 	font-weight: 500;
 }
 
