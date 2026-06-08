@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { FILENAME_ERROR_MESSAGES } from "~/modules/shared";
 import { Step2Upload } from "../Step2Upload";
 
 const pushMock = vi.fn();
@@ -187,10 +188,23 @@ describe("Step2Upload", () => {
 		expect(fileInput).toHaveAttribute("aria-invalid", "true");
 	});
 
-	it("shows error for non-PDF file", () => {
+	it("shows the extension/MIME error for a .txt file", () => {
 		render(<Step2Upload declarationYear={2026} siren="123456789" />);
 
 		const file = new File(["content"], "test.txt", { type: "text/plain" });
+		const fileInput = getFileInput();
+
+		fireEvent.change(fileInput, { target: { files: [file] } });
+
+		expect(
+			screen.getByText(FILENAME_ERROR_MESSAGES.extension_mime_mismatch),
+		).toBeInTheDocument();
+	});
+
+	it("shows the unsupported-format error for a valid-named non-PDF file", () => {
+		render(<Step2Upload declarationYear={2026} siren="123456789" />);
+
+		const file = new File(["content"], "image.png", { type: "image/png" });
 		const fileInput = getFileInput();
 
 		fireEvent.change(fileInput, { target: { files: [file] } });
