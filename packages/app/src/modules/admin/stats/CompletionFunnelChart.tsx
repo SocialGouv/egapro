@@ -26,6 +26,7 @@ type Props = {
 	caption: string;
 	rows: FunnelRow[];
 	dropThreshold: number;
+	unitNoun?: string;
 };
 
 // DSFR illustration palette tokens. ECharts only accepts resolved CSS color
@@ -150,12 +151,13 @@ type LabelFormatterParams = {
 export function buildTooltipFormatter(
 	dropThreshold: number,
 	dsfrPalette: DsfrPalette = FALLBACK_DSFR_PALETTE,
+	unitNoun = "déclarations",
 ): (params: TooltipFormatterParams) => string {
 	return (params) => {
 		const { row } = params.data;
 		const head =
 			`<strong>${row.label}</strong><br/>` +
-			`${formatCount(row.count)} déclarations (${row.pctOfStart} % du funnel)`;
+			`${formatCount(row.count)} ${unitNoun} (${row.pctOfStart} % du funnel)`;
 		if (row.pctDropFromPrev === null) {
 			return head;
 		}
@@ -175,11 +177,12 @@ export function buildEchartsOption(
 	rows: FunnelRow[],
 	dropThreshold: number,
 	dsfrPalette: DsfrPalette = FALLBACK_DSFR_PALETTE,
+	unitNoun = "déclarations",
 ): echarts.EChartsCoreOption {
 	return {
 		tooltip: {
 			trigger: "item",
-			formatter: buildTooltipFormatter(dropThreshold, dsfrPalette),
+			formatter: buildTooltipFormatter(dropThreshold, dsfrPalette, unitNoun),
 		},
 		legend: {
 			show: true,
@@ -245,7 +248,12 @@ export function buildEchartsOption(
 	};
 }
 
-export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
+export function CompletionFunnelChart({
+	caption,
+	rows,
+	dropThreshold,
+	unitNoun = "déclarations",
+}: Props) {
 	const dsfrPalette = useDsfrPalette();
 	const hasData = rows.some((row) => row.count > 0);
 	if (!hasData) {
@@ -259,12 +267,12 @@ export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 		);
 	}
 
-	const option = buildEchartsOption(rows, dropThreshold, dsfrPalette);
+	const option = buildEchartsOption(rows, dropThreshold, dsfrPalette, unitNoun);
 
 	return (
 		<figure className={styles.chartWrapper}>
 			<figcaption className="fr-sr-only">
-				{caption}. Nombre de déclarations à chaque jalon du funnel, avec le
+				{caption}. Nombre de {unitNoun} à chaque jalon du funnel, avec le
 				pourcentage du funnel et la chute par rapport à l'étape précédente. Les
 				données équivalentes sont disponibles dans le tableau ci-dessous.
 			</figcaption>
