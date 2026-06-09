@@ -1,15 +1,15 @@
 # Stratégie de tracking Matomo
 
 > Ce qu'on mesure, **pourquoi**, et comment c'est implémenté. Pour la liste
-> brute des événements, voir [`plan-de-tracking.md`](./plan-de-tracking.md).
+> brute des événements et de leurs déclencheurs, voir
+> [`plan-de-tracking.md`](./plan-de-tracking.md).
 
 ## Sommaire
 
 - [Objectif](#objectif)
 - [Ce qu'on mesure](#ce-quon-mesure)
-- [Les funnels](#les-funnels)
+- [Détail par funnel — on track quoi ?](#détail-par-funnel--on-track-quoi)
 - [Les dimensions personnalisées](#les-dimensions-personnalisées)
-- [Politique RGPD / vie privée](#politique-rgpd--vie-privée)
 - [Architecture technique](#architecture-technique)
 - [Ajouter un nouvel événement](#ajouter-un-nouvel-événement)
 - [Configuration Matomo (hors code)](#configuration-matomo-hors-code)
@@ -18,8 +18,8 @@
 
 Donner aux analystes DGT de quoi calculer les KPIs d'usage de la plateforme
 (K19–K25) **sans visualisation embarquée** : EGAPRO se contente d'**émettre**
-des événements propres et anonymisés ; l'analyse et les tableaux de bord se
-font dans Matomo. Aucune API de reporting, aucun graphique côté application.
+des événements anonymisés ; l'analyse et les tableaux de bord se font dans
+Matomo. Aucune API de reporting, aucun graphique côté application.
 
 ## Ce qu'on mesure
 
@@ -29,61 +29,125 @@ Deux natures de signaux :
    par `MatomoAnalytics` monté dans le layout racine. Il alimente le nombre de
    visites (K20), la source de trafic (K22, rapport « Référents » natif), et les
    pages d'aide consultées (K21).
-
-2. **Les événements personnalisés** — deux familles :
-   - les **funnels** multi-étapes (où les gens décrochent dans un parcours) ;
-   - les **actions ponctuelles** (recherche, téléchargement, upload, login,
-     ouverture d'une section d'aide, démarrage d'une déclaration).
+2. **Les événements personnalisés** — deux familles : les **funnels** multi-étapes
+   (où les gens décrochent) et les **actions ponctuelles** (recherche,
+   téléchargement, upload, login, ouverture d'une section d'aide, démarrage d'une
+   déclaration). Liste complète dans [`plan-de-tracking.md`](./plan-de-tracking.md).
 
 Le croisement « visiteurs » (pages vues) vs. « acteurs » (événements d'action)
 donne le **taux de consultation K20**.
 
-## Les funnels
+## Détail par funnel — on track quoi ?
 
 Un funnel mesure la progression étape par étape et **où les utilisateurs
-abandonnent**. Quatre événements : `funnel_start`, `step_complete` (avec la
-durée passée sur l'étape), `funnel_abandon` (sur `beforeunload`), et
-`funnel_complete` (sur la soumission / la page de confirmation).
+décrochent**. Les quatre mêmes événements sont émis pour chaque funnel
+(`MATOMO_FUNNEL_ACTION`) :
 
-| Funnel | Scénario (KPI K19) | Étapes |
-|---|---|---|
-| **Déclaration Index** (`declaration`) | Saisie des indicateurs A–F jusqu'à la soumission | 6 |
-| **Avis CSE** (`cse_opinion`) | Renseigner les avis du CSE → déposer le(s) document(s) | 2 |
-| **Parcours-conformité** (`compliance_path`) | Seconde déclaration / actions correctives → récapitulatif | 3 |
+- `funnel_start` — à l'entrée sur la 1ʳᵉ étape suivie ;
+- `step_complete` — à chaque passage vers une étape **supérieure** (navigation
+  avant) ; `name` = clé de l'étape **quittée**, `value` = durée passée dessus (s) ;
+- `funnel_abandon` — sur `beforeunload` (fermeture/changement d'onglet) tant que
+  le funnel est en cours ; `name` = étape courante, `value` = durée totale (s) ;
+- `funnel_complete` — à la finalisation ; `value` = durée totale (s).
 
-Chaque funnel possède sa propre clé `sessionStorage` (`egapro:*-funnel`) pour
-que les parcours ne se télescopent pas. La détection d'abandon est conservée
-volontairement : c'est elle qui rend une analyse de funnel utile.
+L'état est conservé en `sessionStorage` (clé propre à chaque funnel) pour
+survivre à la navigation pleine page entre étapes. Un retour en arrière ne
+ré-émet rien (mise à jour silencieuse de l'étape courante).
 
-> Le terme « par scénario » du KPI K19 correspond à la `category` du funnel.
+### 1. Déclaration Index — `declaration`
+
+Saisie des indicateurs A–F jusqu'à la soumission.
+`storageKey` : `egapro:declaration-funnel`.
+Émis par `useFunnelTracking` dans `declaration-remuneration/StepPageClient.tsx`
+(start / step / abandon) et `trackFunnelComplete` dans `steps/Step6Review.tsx`
+(complete). **Dimensions : année de campagne + tranche d'effectif.**
+
+Étapes suivies (`/declaration-remuneration/etape/<n>`) :
+
+| Clé | Étape |
+|---|---|
+| `step_1` | Effectifs |
+| `step_2` | Écart de rémunération |
+| `step_3` | Écart de rémunération variable |
+| `step_4` | Quartiles de rémunération |
+| `step_5` | Écart par catégorie de salariés |
+| `step_6` | Récapitulatif |
+
+| Événement | Déclencheur précis |
+|---|---|
+| `funnel_start` | Arrivée sur l'étape 1 sans funnel en cours |
+| `step_complete` | Passage `étape n → n+1` (bouton « Suivant ») |
+| `funnel_abandon` | `beforeunload` pendant la saisie |
+| `funnel_complete` | Succès de la mutation `declaration.submit` (recap, étape 6) |
+
+### 2. Avis CSE — `cse_opinion`
+
+Renseigner les avis du CSE, puis déposer le(s) document(s).
+`storageKey` : `egapro:cse-funnel`.
+Émis par `FunnelStepTracker` monté sur `/avis-cse/etape/[step]` (start / step /
+abandon) et `FunnelCompleteTracker` sur `/avis-cse/confirmation` (complete).
+**Dimensions : année de campagne.**
+
+Étapes suivies (`/avis-cse/etape/<n>`) :
+
+| Clé | Étape |
+|---|---|
+| `step_1` | Renseigner les avis émis par le CSE |
+| `step_2` | Importer / déposer l'avis ou les avis du CSE |
+
+| Événement | Déclencheur précis |
+|---|---|
+| `funnel_start` | Arrivée sur `/avis-cse/etape/1` |
+| `step_complete` | Passage `étape 1 → 2` (`name = step_1`) |
+| `funnel_abandon` | `beforeunload` pendant le parcours |
+| `funnel_complete` | Affichage de `/avis-cse/confirmation` (avis soumis) |
+
+### 3. Parcours-conformité — `compliance_path`
+
+Seconde déclaration / actions correctives jusqu'au récapitulatif.
+`storageKey` : `egapro:compliance-funnel`.
+Émis par `FunnelStepTracker` dans
+`secondDeclaration/SecondDeclarationStepPage.tsx` (start / step / abandon) et
+`FunnelCompleteTracker` sur
+`/declaration-remuneration/parcours-conformite/confirmation` (complete).
+**Dimensions : année de campagne (étapes) ; aucune (complete).**
+
+Étapes suivies (`/declaration-remuneration/parcours-conformite/etape/<n>`) :
+
+| Clé | Étape |
+|---|---|
+| `step_1` | Actions correctives et seconde déclaration |
+| `step_2` | Seconde déclaration des écarts par catégorie de salariés |
+| `step_3` | Récapitulatif de votre déclaration |
+
+| Événement | Déclencheur précis |
+|---|---|
+| `funnel_start` | Arrivée sur `/parcours-conformite/etape/1` |
+| `step_complete` | Passage `étape n → n+1` |
+| `funnel_abandon` | `beforeunload` pendant le parcours |
+| `funnel_complete` | Affichage de `/parcours-conformite/confirmation` |
+
+> Les `funnel_complete` montés sur une page de confirmation (CSE, conformité)
+> sont **idempotents** : ils vident l'état du funnel après émission, donc un
+> rechargement de la confirmation ne re-compte pas.
 
 ## Les dimensions personnalisées
 
-Deux dimensions anonymisées, attachées aux événements de funnel (et au
-téléchargement PDF) :
+Deux dimensions **anonymisées** — aucune PII (jamais de SIREN, email, nom
+d'entreprise, ni de requête de recherche) :
 
 | Slot Matomo | Contenu | Pourquoi |
 |---|---|---|
 | 1 — `CAMPAIGN_YEAR` | Année de campagne | Comparer les campagnes entre elles |
-| 2 — `WORKFORCE_RANGE` | Tranche d'effectif (`getCompanySizeRange`) | Segmenter par taille d'entreprise (obligations différentes < 50 / 50–99 / ≥ 100) |
+| 2 — `WORKFORCE_RANGE` | Tranche d'effectif (`getCompanySizeRange`) | Segmenter par taille d'entreprise (obligations < 50 / 50–99 / ≥ 100) |
 
 ⚠️ **Les IDs de slot doivent être configurés à l'identique dans l'admin Matomo.**
 Un ID erroné fait silencieusement ignorer la dimension. Les IDs sont centralisés
-dans `MATOMO_CUSTOM_DIMENSION` (`events.ts`) pour ne jamais être dupliqués.
+dans `MATOMO_CUSTOM_DIMENSION` (`events.ts`).
 
-## Politique RGPD / vie privée
-
-Règle absolue : **aucun événement ne porte de donnée personnelle.**
-
-- Pas de SIREN, d'email, de nom d'entreprise, de téléphone dans `name` ou les dimensions.
-- Les **recherches** n'émettent que les **noms des facettes utilisées** (`query+region`…),
-  **jamais leurs valeurs** : la requête libre peut contenir un SIREN ou une raison sociale.
-- Les dimensions se limitent à l'année de campagne et à la tranche d'effectif (anonymisée).
-- Les noms d'événements d'aide/de ressources sont des **identifiants structurels**
-  stables (`accordion-…`, `nouveau-site`…), pas du texte saisi par l'utilisateur.
-
-Les événements de tracking sont **client-side Matomo** : ils ne passent pas par
-tRPC et ne relèvent donc pas de l'audit logging applicatif (`PROCEDURE_TO_ACTION`).
+Les recherches n'émettent que les **noms des facettes utilisées** (`query+region`…),
+**jamais leurs valeurs**. Les événements de tracking sont **client-side Matomo** :
+ils ne passent pas par tRPC, donc hors périmètre de l'audit logging applicatif.
 
 ## Architecture technique
 
@@ -92,7 +156,7 @@ modules/analytics/
   trackEvent.ts            → wrapper typé bas niveau (no-op si Matomo non configuré)
   shared/events.ts         → taxonomie : catégories, actions, dimensions, FunnelConfig
   useFunnelTracking.ts     → hook générique de funnel (+ trackFunnelComplete)
-  FunnelStepTracker.tsx    → composant client « rends rien » pour pages serveur (étape)
+  FunnelStepTracker.tsx    → composant client « rend rien » pour pages serveur (étape)
   FunnelCompleteTracker.tsx→ idem pour la page de confirmation (complete)
   MatomoAnalytics.tsx      → suivi de pages (monté dans app/layout.tsx)
 ```
@@ -101,11 +165,12 @@ modules/analytics/
   `NEXT_PUBLIC_MATOMO_SITE_ID` ne sont pas définis (et côté serveur). Le code
   reste donc sûr à appeler partout.
 - Le **hook de funnel est agnostique** : chaque funnel fournit un `FunnelConfig`
-  (`{ category, stepKeys, storageKey }`). Voir les `funnelConfig.ts` co-localisés
-  dans chaque module métier.
+  (`{ category, stepKeys, storageKey }`), co-localisé dans un `funnelConfig.ts`
+  de son module métier.
 - Les pages d'étape étant des **Server Components**, on y monte `FunnelStepTracker`
   / `FunnelCompleteTracker` (composants client qui ne rendent rien) plutôt que
-  d'appeler le hook directement.
+  d'appeler le hook directement. La déclaration Index, dont le wizard est déjà un
+  Client Component, appelle le hook directement.
 
 ## Ajouter un nouvel événement
 

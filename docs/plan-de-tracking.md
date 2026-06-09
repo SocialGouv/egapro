@@ -1,16 +1,19 @@
 # Plan de tracking Matomo
 
-> Table de référence **exhaustive** des événements Matomo émis par la plateforme.
-> Toute ligne ici correspond à un appel réel dans le code, et inversement.
+> Table de référence **exhaustive** de tous les événements Matomo émis par la
+> plateforme, **et à partir de quel déclencheur** chacun part. Toute ligne ici
+> correspond à un appel réel dans le code, et inversement.
 > Source de vérité du code : `packages/app/src/modules/analytics/shared/events.ts`.
-> Pour le « pourquoi » (funnels, dimensions, politique RGPD), voir
-> [`strategie-tracking.md`](./strategie-tracking.md).
+> Pour le « pourquoi », voir [`strategie-tracking.md`](./strategie-tracking.md).
 
 ## Sommaire
 
 - [Conventions](#conventions)
 - [Suivi de pages (natif)](#suivi-de-pages-natif)
 - [Événements de funnel](#événements-de-funnel)
+  - [Déclaration Index](#funnel--déclaration-index-declaration)
+  - [Avis CSE](#funnel--avis-cse-cse_opinion)
+  - [Parcours-conformité](#funnel--parcours-conformité-compliance_path)
 - [Événements d'action ponctuelle](#événements-daction-ponctuelle)
 - [Dimensions personnalisées](#dimensions-personnalisées)
 - [Couverture des KPIs](#couverture-des-kpis)
@@ -30,48 +33,78 @@ Les **dimensions personnalisées** (année de campagne, tranche d'effectif) sont
 
 ## Suivi de pages (natif)
 
-Le composant `MatomoAnalytics` (`modules/analytics/MatomoAnalytics.tsx`), monté dans `app/layout.tsx`, suit **automatiquement chaque page vue** (`trackAppRouter` de `@socialgouv/matomo-next`). Aucun événement custom n'est nécessaire pour :
-
-- le **nombre de visites / pages vues** (base du KPI K20) ;
-- la **source de visite** (Google, accès direct, autre) — rapport « Référents » natif de Matomo (KPI **K22**) ;
-- les **pages d'aide / FAQ visitées** (en complément des événements `HELP` ci-dessous).
+| Quoi | Déclencheur | Émis par | KPI |
+|---|---|---|---|
+| Page vue | Chaque navigation (App Router) | `MatomoAnalytics` (`trackAppRouter`), monté dans `app/layout.tsx` | K20, K21, K24 |
+| Source de visite | Calculé par Matomo à partir du référent de la page vue | Rapport « Référents » natif (aucun code) | K22 |
 
 ## Événements de funnel
 
-Tous les funnels partagent les quatre mêmes actions (`MATOMO_FUNNEL_ACTION`) émises par le hook générique `useFunnelTracking` (+ `trackFunnelComplete`) :
+Les quatre mêmes actions (`MATOMO_FUNNEL_ACTION`) sont émises pour chaque funnel par le hook `useFunnelTracking` / `trackFunnelComplete` :
 
-| `action` | Quand | `name` | `value` |
+- `funnel_start` — entrée sur la 1ʳᵉ étape suivie ;
+- `step_complete` — passage vers une étape **supérieure** ; `name` = étape **quittée**, `value` = durée passée dessus (s) ;
+- `funnel_abandon` — `beforeunload` tant que le funnel est en cours ; `name` = étape courante, `value` = durée totale (s) ;
+- `funnel_complete` — finalisation ; `value` = durée totale (s).
+
+### Funnel — Déclaration Index (`declaration`)
+
+`storageKey` : `egapro:declaration-funnel` · Dimensions : **année + tranche d'effectif** · Émis par `StepPageClient.tsx` (start/step/abandon) et `Step6Review.tsx` (complete).
+
+Clés d'étape : `step_1` Effectifs · `step_2` Écart de rémunération · `step_3` Écart de rémunération variable · `step_4` Quartiles de rémunération · `step_5` Écart par catégorie de salariés · `step_6` Récapitulatif.
+
+| `action` | Déclencheur | `name` | `value` |
 |---|---|---|---|
-| `funnel_start` | Entrée sur la 1ʳᵉ étape | — | — |
-| `step_complete` | Passage à l'étape suivante | `step_<n>` (étape quittée) | durée passée sur l'étape (s) |
-| `funnel_abandon` | `beforeunload` avec funnel en cours | `step_<n>` (étape courante) | durée totale (s) |
-| `funnel_complete` | Soumission / page de confirmation | — | durée totale (s) |
+| `funnel_start` | Arrivée sur `/declaration-remuneration/etape/1` sans funnel en cours | — | — |
+| `step_complete` | Passage `étape n → n+1` (bouton « Suivant ») | `step_<n quittée>` | durée sur l'étape (s) |
+| `funnel_abandon` | `beforeunload` pendant la saisie | `step_<n courante>` | durée totale (s) |
+| `funnel_complete` | Succès de la mutation `declaration.submit` (étape 6, récap) | — | durée totale (s) |
 
-| Funnel | `category` | Étapes | `storageKey` | Émis par |
-|---|---|---|---|---|
-| Déclaration Index | `declaration` | 6 (`step_1`→`step_6`) | `egapro:declaration-funnel` | `declaration-remuneration/StepPageClient.tsx` (start/step/abandon) · `steps/Step6Review.tsx` (complete) |
-| Avis CSE | `cse_opinion` | 2 (`step_1`→`step_2`) | `egapro:cse-funnel` | `app/avis-cse/etape/[step]` via `FunnelStepTracker` · `app/avis-cse/confirmation` via `FunnelCompleteTracker` |
-| Parcours-conformité (seconde déclaration) | `compliance_path` | 3 (`step_1`→`step_3`) | `egapro:compliance-funnel` | `secondDeclaration/SecondDeclarationStepPage.tsx` via `FunnelStepTracker` · `app/.../parcours-conformite/confirmation` via `FunnelCompleteTracker` |
+### Funnel — Avis CSE (`cse_opinion`)
 
-Dimensions attachées : déclaration Index → année + tranche d'effectif ; avis CSE → année ; parcours-conformité → année (étapes), aucune (complete).
+`storageKey` : `egapro:cse-funnel` · Dimensions : **année** · Émis par `FunnelStepTracker` sur `/avis-cse/etape/[step]` (start/step/abandon) et `FunnelCompleteTracker` sur `/avis-cse/confirmation` (complete).
+
+Clés d'étape : `step_1` Renseigner les avis émis par le CSE · `step_2` Importer / déposer l'avis du CSE.
+
+| `action` | Déclencheur | `name` | `value` |
+|---|---|---|---|
+| `funnel_start` | Arrivée sur `/avis-cse/etape/1` | — | — |
+| `step_complete` | Passage `étape 1 → 2` | `step_1` | durée sur l'étape (s) |
+| `funnel_abandon` | `beforeunload` pendant le parcours | `step_<n courante>` | durée totale (s) |
+| `funnel_complete` | Affichage de `/avis-cse/confirmation` (avis soumis) | — | durée totale (s) |
+
+### Funnel — Parcours-conformité (`compliance_path`)
+
+`storageKey` : `egapro:compliance-funnel` · Dimensions : **année** (étapes) / **aucune** (complete) · Émis par `FunnelStepTracker` dans `SecondDeclarationStepPage.tsx` (start/step/abandon) et `FunnelCompleteTracker` sur `/declaration-remuneration/parcours-conformite/confirmation` (complete).
+
+Clés d'étape : `step_1` Actions correctives et seconde déclaration · `step_2` Seconde déclaration des écarts par catégorie · `step_3` Récapitulatif.
+
+| `action` | Déclencheur | `name` | `value` |
+|---|---|---|---|
+| `funnel_start` | Arrivée sur `/parcours-conformite/etape/1` | — | — |
+| `step_complete` | Passage `étape n → n+1` | `step_<n quittée>` | durée sur l'étape (s) |
+| `funnel_abandon` | `beforeunload` pendant le parcours | `step_<n courante>` | durée totale (s) |
+| `funnel_complete` | Affichage de `/parcours-conformite/confirmation` | — | durée totale (s) |
 
 ## Événements d'action ponctuelle
 
-| `category` | `action` | `name` | `value` | Composant émetteur | KPI |
+| `category` / `action` | Déclencheur | `name` | `value` | Émis par | KPI |
 |---|---|---|---|---|---|
-| `search` | `search_submit` | facettes utilisées (ex. `query+region`, sinon `empty`) | — | `home/HomeSearchForm.tsx`, `referents/shared/ReferentsSearchForm.tsx` | K25, K24 |
-| `search` | `consultation_outbound` | — | — | `layout/shared/ConsultationNavLink.tsx` (lien « Observatoire » du header) | K24 |
-| `help` | `faq_section_open` | id structurel de l'accordéon (`accordion-<section>-<sous-section>-<index>`) | — | `faq/FaqAccordionGroup.tsx` | K21 |
-| `help` | `aide_resource_click` | id de la ressource (`nouveau-site`, `indicateurs-remuneration`, `indicateurs-representation`) | — | `aide/AideResourceCards.tsx` | K21 |
-| `document` | `pdf_download` | `main` \| `correction` | — | `declarationPdf/DownloadDeclarationPdfButton.tsx` | K20 |
-| `document` | `file_upload` | `flowType` (enum non-PII du flux d'upload) | nombre de fichiers | `shared/useFileUploadForm.ts` | K20 |
-| `document` | `category_import` | — | nombre de catégories | `declaration-remuneration/steps/step5/CategoryImportExport.tsx` | K20 |
-| `auth` | `login_start` | — | — | `login/ProConnectButton.tsx` | K20 |
-| `dashboard` | `declaration_start` | `remuneration` | — | `my-space/DeclarationLink.tsx` | K19, K20 |
+| `search` / `search_submit` | Soumission du formulaire de recherche entreprise (page d'accueil) | facettes utilisées (`query+region`…, sinon `empty`) | — | `home/HomeSearchForm.tsx` | K25, K24 |
+| `search` / `search_submit` | Soumission du formulaire de recherche de référents | facettes utilisées (`region+county`…, sinon `empty`) | — | `referents/shared/ReferentsSearchForm.tsx` | K25 |
+| `search` / `consultation_outbound` | Clic sur le lien « Observatoire » du header (vers le site de consultation) | — | — | `layout/shared/ConsultationNavLink.tsx` | K24 |
+| `help` / `faq_section_open` | Ouverture d'un accordéon FAQ (passage à `aria-expanded=true`, pas la fermeture) | id structurel `accordion-<section>-<sous-section>-<index>` | — | `faq/FaqAccordionGroup.tsx` | K21 |
+| `help` / `aide_resource_click` | Clic sur une carte ressource de `/aide` | id de la ressource (`nouveau-site`, `indicateurs-remuneration`, `indicateurs-representation`) | — | `aide/AideResourceCards.tsx` | K21 |
+| `document` / `pdf_download` | Clic sur le bouton « Télécharger le récapitulatif (PDF) » | `main` \| `correction` | — | `declarationPdf/DownloadDeclarationPdfButton.tsx` | K20 |
+| `document` / `file_upload` | Upload réussi de **tous** les fichiers sélectionnés | `flowType` (enum non-PII du flux) | nombre de fichiers | `shared/useFileUploadForm.ts` | K20 |
+| `document` / `category_import` | Import réussi d'un fichier de catégories (étape 5) | — | nombre de catégories | `declaration-remuneration/steps/step5/CategoryImportExport.tsx` | K20 |
+| `auth` / `login_start` | Clic sur « S'identifier avec ProConnect » (avant la redirection OIDC) | — | — | `login/ProConnectButton.tsx` | K20 |
+| `dashboard` / `declaration_start` | Clic sur le lien de démarrage d'une déclaration rémunération depuis `mon-espace` | `remuneration` | — | `my-space/DeclarationLink.tsx` | K19, K20 |
 
-> Le téléchargement PDF porte la dimension année quand elle est connue. Les
-> recherches n'émettent **que** les noms de facettes utilisées, jamais leurs
-> valeurs (la requête libre peut contenir un SIREN ou un nom d'entreprise).
+> Dimension : `pdf_download` porte l'année quand elle est connue. Aucune autre
+> action ne porte de dimension. Les recherches n'émettent **que** les noms de
+> facettes, jamais leurs valeurs (la requête libre peut contenir un SIREN ou un
+> nom d'entreprise).
 
 ## Dimensions personnalisées
 
