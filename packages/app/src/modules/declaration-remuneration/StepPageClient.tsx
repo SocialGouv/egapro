@@ -1,8 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
+import { useFunnelTracking } from "~/modules/analytics";
 import { getCompanySizeRange } from "~/modules/domain";
+import {
+	DECLARATION_FUNNEL,
+	declarationFunnelDimensions,
+} from "./shared/funnelConfig";
 import type { GipPrefillData } from "./shared/gipMdsMapping";
-import { useFunnelTracking } from "./shared/useFunnelTracking";
 import { Step1Workforce } from "./steps/Step1Workforce";
 import { Step2PayGap } from "./steps/Step2PayGap";
 import { Step3VariablePay } from "./steps/Step3VariablePay";
@@ -55,7 +60,11 @@ export function StepPageClient({
 	const sizeRange =
 		workforce !== null ? getCompanySizeRange(workforce) : undefined;
 
-	useFunnelTracking({ step, year: declaration.year, sizeRange });
+	const dimensions = useMemo(
+		() => declarationFunnelDimensions(declaration.year, sizeRange),
+		[declaration.year, sizeRange],
+	);
+	useFunnelTracking(DECLARATION_FUNNEL, { step, dimensions });
 
 	switch (step) {
 		case 1:

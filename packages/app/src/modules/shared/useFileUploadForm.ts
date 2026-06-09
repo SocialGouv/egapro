@@ -1,6 +1,11 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import {
+	MATOMO_ACTION,
+	MATOMO_EVENT_CATEGORY,
+	trackEvent,
+} from "~/modules/analytics";
 import { getDsfrModal } from "./getDsfrModal";
 import type { FlowType } from "./uploadConfig";
 import { type UploadFailureReason, uploadFile } from "./uploadFile";
@@ -65,6 +70,7 @@ export function useFileUploadForm({
 		if (selectedFiles.length === 0) return;
 
 		setIsUploading(true);
+		const uploadCount = selectedFiles.length;
 		try {
 			for (const file of selectedFiles) {
 				const result = await uploadFile(file, { flowType });
@@ -77,6 +83,14 @@ export function useFileUploadForm({
 				}
 				onUploaded?.({ fileId: result.fileId, fileName: result.fileName });
 			}
+			// `flowType` is a non-PII enum (e.g. the CSE opinion flow); the file
+			// names themselves are never sent.
+			trackEvent({
+				category: MATOMO_EVENT_CATEGORY.DOCUMENT,
+				action: MATOMO_ACTION.FILE_UPLOAD,
+				name: flowType,
+				value: uploadCount,
+			});
 			setSelectedFiles([]);
 			setIsUploading(false);
 			onAllUploaded?.();

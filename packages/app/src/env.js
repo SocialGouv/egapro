@@ -64,10 +64,6 @@ export const env = createEnv({
 		NEXTAUTH_URL: z.string().url(),
 		EGAPRO_GIP_MDS_API_URL: z.string().url().optional(),
 		EGAPRO_GIP_MDS_API_TOKEN: z.string().optional(),
-		// token_auth for the Matomo Reporting API (server-side read of custom
-		// events). Optional: when absent the admin Matomo widgets degrade to an
-		// error state instead of breaking the rest of the dashboard.
-		MATOMO_API_TOKEN: z.string().optional(),
 		EGAPRO_MOCK_SUIT_SANCTION: z.coerce.boolean().optional().default(false),
 		/**
 		 * Comma-separated list of emails that should be granted the admin role
@@ -139,7 +135,6 @@ export const env = createEnv({
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 		EGAPRO_GIP_MDS_API_URL: process.env.EGAPRO_GIP_MDS_API_URL,
 		EGAPRO_GIP_MDS_API_TOKEN: process.env.EGAPRO_GIP_MDS_API_TOKEN,
-		MATOMO_API_TOKEN: process.env.MATOMO_API_TOKEN,
 		EGAPRO_MOCK_SUIT_SANCTION: process.env.EGAPRO_MOCK_SUIT_SANCTION,
 		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS:

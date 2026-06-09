@@ -16,10 +16,10 @@ vi.mock("@socialgouv/matomo-next", () => ({
 }));
 
 import {
+	buildFunnelStepKeys,
 	MATOMO_CUSTOM_DIMENSION,
-	MATOMO_DECLARATION_ACTION,
 	MATOMO_EVENT_CATEGORY,
-	MATOMO_FUNNEL_STEP_KEYS,
+	MATOMO_FUNNEL_ACTION,
 } from "../shared/events";
 import { trackEvent } from "../trackEvent";
 
@@ -34,7 +34,7 @@ describe("trackEvent", () => {
 	it("emits a typed event via sendEvent when Matomo is configured", () => {
 		trackEvent({
 			category: MATOMO_EVENT_CATEGORY.DECLARATION,
-			action: MATOMO_DECLARATION_ACTION.STEP_COMPLETE,
+			action: MATOMO_FUNNEL_ACTION.STEP_COMPLETE,
 			name: "step_2",
 			value: 42,
 		});
@@ -50,7 +50,7 @@ describe("trackEvent", () => {
 	it("omits name and value when they are not provided", () => {
 		trackEvent({
 			category: MATOMO_EVENT_CATEGORY.DECLARATION,
-			action: MATOMO_DECLARATION_ACTION.FUNNEL_START,
+			action: MATOMO_FUNNEL_ACTION.FUNNEL_START,
 		});
 
 		expect(sendEventMock).toHaveBeenCalledWith({
@@ -62,7 +62,7 @@ describe("trackEvent", () => {
 	it("sets each custom dimension before emitting the event", () => {
 		trackEvent({
 			category: MATOMO_EVENT_CATEGORY.DECLARATION,
-			action: MATOMO_DECLARATION_ACTION.FUNNEL_START,
+			action: MATOMO_FUNNEL_ACTION.FUNNEL_START,
 			dimensions: {
 				[MATOMO_CUSTOM_DIMENSION.CAMPAIGN_YEAR]: "2025",
 				[MATOMO_CUSTOM_DIMENSION.WORKFORCE_RANGE]: "50-99",
@@ -90,7 +90,7 @@ describe("trackEvent", () => {
 
 		trackEvent({
 			category: MATOMO_EVENT_CATEGORY.DECLARATION,
-			action: MATOMO_DECLARATION_ACTION.FUNNEL_START,
+			action: MATOMO_FUNNEL_ACTION.FUNNEL_START,
 		});
 
 		expect(sendEventMock).not.toHaveBeenCalled();
@@ -98,9 +98,9 @@ describe("trackEvent", () => {
 	});
 });
 
-describe("MATOMO_FUNNEL_STEP_KEYS", () => {
-	it("derives one stable, untranslated key per declaration step", () => {
-		expect(MATOMO_FUNNEL_STEP_KEYS).toEqual([
+describe("buildFunnelStepKeys", () => {
+	it("derives one stable, untranslated key per step, indexed by step number", () => {
+		expect(buildFunnelStepKeys(6)).toEqual([
 			"step_0",
 			"step_1",
 			"step_2",
@@ -109,5 +109,9 @@ describe("MATOMO_FUNNEL_STEP_KEYS", () => {
 			"step_5",
 			"step_6",
 		]);
+	});
+
+	it("returns a single key for a zero-step funnel", () => {
+		expect(buildFunnelStepKeys(0)).toEqual(["step_0"]);
 	});
 });

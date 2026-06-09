@@ -113,25 +113,3 @@ export type CompletionFunnelOutput = {
 	revisionFunnel: FunnelRow[];
 	cseFunnel: FunnelRow[];
 };
-
-/**
- * One declaration-funnel step as measured by Matomo (`adminStats.getMatomoFunnel`).
- * `avgDurationSeconds` is null when Matomo reported no timed completion.
- */
-export type MatomoFunnelRow = {
-	stepKey: string;
-	label: string;
-	completedCount: number;
-	avgDurationSeconds: number | null;
-};
-
-/**
- * Output of `adminStats.getMatomoFunnel` — the behavioural funnel of the
- * declaration journey collected via Matomo events (K20/K21).
- */
-export type MatomoFunnelOutput = {
-	startedCount: number;
-	completedCount: number;
-	abandonedCount: number;
-	steps: MatomoFunnelRow[];
-};

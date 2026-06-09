@@ -14,9 +14,6 @@ import { CampaignProgressionTable } from "./CampaignProgressionTable";
 import { CampaignRateTile } from "./CampaignRateTile";
 import { CompletionFunnelChart } from "./CompletionFunnelChart";
 import { CompletionFunnelTable } from "./CompletionFunnelTable";
-import { formatCount } from "./formatters";
-import { MatomoFunnelChart } from "./MatomoFunnelChart";
-import { MatomoFunnelTable } from "./MatomoFunnelTable";
 import { StagnationDaysFilter } from "./StagnationDaysFilter";
 import styles from "./StatsDashboard.module.scss";
 import { StepDropoffChart } from "./StepDropoffChart";
@@ -76,14 +73,6 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 	);
 
 	const funnelQuery = api.adminStats.getCompletionFunnel.useQuery(
-		{ year: activeYear, sizeRange },
-		{
-			enabled: selectedYears.length > 0,
-			placeholderData: (prev) => prev,
-		},
-	);
-
-	const matomoFunnelQuery = api.adminStats.getMatomoFunnel.useQuery(
 		{ year: activeYear, sizeRange },
 		{
 			enabled: selectedYears.length > 0,
@@ -348,60 +337,6 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 										Aucune déclaration avec CSE pour ces filtres.
 									</p>
 								)}
-							</section>
-						</div>
-					</div>
-				)}
-			</section>
-
-			<section className="fr-mt-6w" id="comportement">
-				<h2 className="fr-h2">
-					Parcours de déclaration — comportement réel (Matomo)
-				</h2>
-				<p>
-					Funnel comportemental du parcours de déclaration mesuré via Matomo :
-					entrées dans le tunnel, progression et durée moyenne par étape,
-					complétions et abandons — pour la campagne {activeYear}.
-				</p>
-
-				{matomoFunnelQuery.isLoading && !matomoFunnelQuery.data && (
-					<p aria-live="polite" className="fr-mt-4w">
-						Chargement des données Matomo…
-					</p>
-				)}
-				{matomoFunnelQuery.isError && (
-					<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-4w">
-						<p>
-							Les statistiques Matomo sont indisponibles pour le moment. Les
-							autres indicateurs de cette page restent consultables.
-						</p>
-					</div>
-				)}
-
-				{matomoFunnelQuery.data && (
-					<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
-						<div className="fr-col-12">
-							<section
-								aria-labelledby="matomo-funnel-heading"
-								className={styles.card}
-							>
-								<h3 className="fr-h3" id="matomo-funnel-heading">
-									Funnel du parcours de déclaration
-								</h3>
-								<p className="fr-text--sm fr-text-mention--grey">
-									{formatCount(matomoFunnelQuery.data.startedCount)} entrées ·{" "}
-									{formatCount(matomoFunnelQuery.data.completedCount)}{" "}
-									complétions ·{" "}
-									{formatCount(matomoFunnelQuery.data.abandonedCount)} abandons
-								</p>
-								<MatomoFunnelChart
-									caption="Funnel du parcours de déclaration — comportement réel (Matomo)"
-									data={matomoFunnelQuery.data}
-								/>
-								<MatomoFunnelTable
-									caption="Funnel du parcours de déclaration — comportement réel (Matomo)"
-									data={matomoFunnelQuery.data}
-								/>
 							</section>
 						</div>
 					</div>

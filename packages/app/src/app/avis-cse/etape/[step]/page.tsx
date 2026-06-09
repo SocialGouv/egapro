@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import { campaignYearDimension, FunnelStepTracker } from "~/modules/analytics";
 import {
+	CSE_FUNNEL,
 	mapOpinionsFromDb,
 	Step1Opinions,
 	Step2Upload,
@@ -41,18 +43,25 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 			hasSubmittedSecondDeclaration: hasSecondDeclaration,
 		});
 		return (
-			<Step1Opinions
-				cseDeadline={campaignDeadlines.decl2JointEvaluationDeadline}
-				email={session?.user?.email ?? undefined}
-				firstDeclarationPathChoice={
-					declarationData.declaration.firstDeclarationPathChoice
-				}
-				hasSecondDeclaration={hasSecondDeclaration}
-				initialData={initialData}
-				previousHref={previousHref}
-				siren={declarationData.declaration.siren}
-				year={declarationData.declaration.year}
-			/>
+			<>
+				<FunnelStepTracker
+					config={CSE_FUNNEL}
+					dimensions={campaignYearDimension(declarationData.declaration.year)}
+					step={step}
+				/>
+				<Step1Opinions
+					cseDeadline={campaignDeadlines.decl2JointEvaluationDeadline}
+					email={session?.user?.email ?? undefined}
+					firstDeclarationPathChoice={
+						declarationData.declaration.firstDeclarationPathChoice
+					}
+					hasSecondDeclaration={hasSecondDeclaration}
+					initialData={initialData}
+					previousHref={previousHref}
+					siren={declarationData.declaration.siren}
+					year={declarationData.declaration.year}
+				/>
+			</>
 		);
 	}
 
@@ -63,12 +72,19 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		]);
 		const hasSecondDeclaration = declarationData.hasSubmittedSecondDeclaration;
 		return (
-			<Step2Upload
-				declarationYear={declarationData.declaration.year}
-				existingFiles={files}
-				hasSecondDeclaration={hasSecondDeclaration}
-				siren={declarationData.declaration.siren}
-			/>
+			<>
+				<FunnelStepTracker
+					config={CSE_FUNNEL}
+					dimensions={campaignYearDimension(declarationData.declaration.year)}
+					step={step}
+				/>
+				<Step2Upload
+					declarationYear={declarationData.declaration.year}
+					existingFiles={files}
+					hasSecondDeclaration={hasSecondDeclaration}
+					siren={declarationData.declaration.siren}
+				/>
+			</>
 		);
 	}
 

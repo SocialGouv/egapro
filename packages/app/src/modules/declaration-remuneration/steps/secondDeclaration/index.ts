@@ -4,6 +4,7 @@ export {
 	SECOND_DECLARATION_STEP_TITLES,
 	SECOND_DECLARATION_TOTAL_STEPS,
 } from "./constants";
+export { COMPLIANCE_FUNNEL } from "./funnelConfig";
 export { SecondDeclarationStep1Info } from "./SecondDeclarationStep1Info";
 export { SecondDeclarationStep2Form } from "./SecondDeclarationStep2Form";
 export { SecondDeclarationStep3Review } from "./SecondDeclarationStep3Review";

@@ -13,7 +13,6 @@ type QueryMocks = {
 	stepDurationsUseQueryMock: Mock;
 	stepDropoffUseQueryMock: Mock;
 	funnelUseQueryMock: Mock;
-	matomoFunnelUseQueryMock: Mock;
 };
 
 export function setDefaultMocks(mocks: QueryMocks) {
@@ -39,16 +38,6 @@ export function setDefaultMocks(mocks: QueryMocks) {
 	});
 	mocks.funnelUseQueryMock.mockReturnValue({
 		data: emptyFunnelData,
-		isLoading: false,
-		isError: false,
-	});
-	mocks.matomoFunnelUseQueryMock.mockReturnValue({
-		data: {
-			startedCount: 0,
-			completedCount: 0,
-			abandonedCount: 0,
-			steps: [],
-		},
 		isLoading: false,
 		isError: false,
 	});

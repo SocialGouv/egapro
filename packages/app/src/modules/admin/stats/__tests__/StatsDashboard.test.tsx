@@ -5,7 +5,6 @@ const progressionUseQueryMock = vi.fn();
 const stepDurationsUseQueryMock = vi.fn();
 const stepDropoffUseQueryMock = vi.fn();
 const funnelUseQueryMock = vi.fn();
-const matomoFunnelUseQueryMock = vi.fn();
 const statsUseQueryMock = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
@@ -25,9 +24,6 @@ vi.mock("~/trpc/react", () => ({
 			},
 			getCompletionFunnel: {
 				useQuery: (...args: unknown[]) => funnelUseQueryMock(...args),
-			},
-			getMatomoFunnel: {
-				useQuery: (...args: unknown[]) => matomoFunnelUseQueryMock(...args),
 			},
 		},
 	},
@@ -57,12 +53,6 @@ vi.mock("../CompletionFunnelChart", () => ({
 vi.mock("../CompletionFunnelTable", () => ({
 	CompletionFunnelTable: () => <div data-testid="funnel-table" />,
 }));
-vi.mock("../MatomoFunnelChart", () => ({
-	MatomoFunnelChart: () => <div data-testid="matomo-funnel-chart" />,
-}));
-vi.mock("../MatomoFunnelTable", () => ({
-	MatomoFunnelTable: () => <div data-testid="matomo-funnel-table" />,
-}));
 vi.mock("../CampaignRateTile", () => ({
 	CampaignRateTile: () => <div data-testid="campaign-rate-tile" />,
 }));
@@ -80,7 +70,6 @@ const defaultMocks = () =>
 		stepDurationsUseQueryMock,
 		stepDropoffUseQueryMock,
 		funnelUseQueryMock,
-		matomoFunnelUseQueryMock,
 	});
 
 describe("StatsDashboard — structure and filters", () => {
@@ -89,7 +78,6 @@ describe("StatsDashboard — structure and filters", () => {
 		stepDurationsUseQueryMock.mockReset();
 		stepDropoffUseQueryMock.mockReset();
 		funnelUseQueryMock.mockReset();
-		matomoFunnelUseQueryMock.mockReset();
 		statsUseQueryMock.mockReset();
 		defaultMocks();
 	});
@@ -258,71 +246,5 @@ describe("StatsDashboard — funnel section", () => {
 			| { placeholderData: (prev: unknown) => unknown }
 			| undefined;
 		expect(options?.placeholderData("prev-value")).toBe("prev-value");
-	});
-});
-
-describe("StatsDashboard — Matomo behavioural funnel (K20/K21)", () => {
-	beforeEach(() => {
-		progressionUseQueryMock.mockReset();
-		stepDurationsUseQueryMock.mockReset();
-		stepDropoffUseQueryMock.mockReset();
-		funnelUseQueryMock.mockReset();
-		matomoFunnelUseQueryMock.mockReset();
-		statsUseQueryMock.mockReset();
-		defaultMocks();
-	});
-
-	it("renders the Matomo funnel section with chart and table when data is available (S8)", () => {
-		matomoFunnelUseQueryMock.mockReturnValue({
-			data: {
-				startedCount: 120,
-				completedCount: 80,
-				abandonedCount: 40,
-				steps: [
-					{
-						stepKey: "step_1",
-						label: "Effectifs",
-						completedCount: 110,
-						avgDurationSeconds: 12,
-					},
-				],
-			},
-			isLoading: false,
-			isError: false,
-		});
-		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
-		);
-		expect(
-			screen.getByRole("heading", { name: /comportement réel \(Matomo\)/i }),
-		).toBeInTheDocument();
-		expect(screen.getByTestId("matomo-funnel-chart")).toBeInTheDocument();
-		expect(screen.getByTestId("matomo-funnel-table")).toBeInTheDocument();
-	});
-
-	it("shows a Matomo error alert without breaking the DB widgets (S13)", () => {
-		matomoFunnelUseQueryMock.mockReturnValue({
-			data: undefined,
-			isLoading: false,
-			isError: true,
-		});
-		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
-		);
-		expect(
-			screen.getByText(/statistiques Matomo sont indisponibles/i),
-		).toBeInTheDocument();
-		expect(screen.getAllByTestId("funnel-chart").length).toBeGreaterThan(0);
-		expect(screen.queryByTestId("matomo-funnel-chart")).not.toBeInTheDocument();
-	});
-
-	it("synchronises the Matomo query with the active year filter (S11)", () => {
-		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
-		);
-		const input = matomoFunnelUseQueryMock.mock.calls[0]?.[0] as {
-			year: number;
-		};
-		expect(input.year).toBe(2026);
 	});
 });

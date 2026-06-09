@@ -74,7 +74,6 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 		AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DROPOFF_RATE,
 	"adminStats.getCompletionFunnel":
 		AUDIT_ACTIONS.ADMIN_STATS_GET_COMPLETION_FUNNEL,
-	"adminStats.getMatomoFunnel": AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_FUNNEL,
 
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,

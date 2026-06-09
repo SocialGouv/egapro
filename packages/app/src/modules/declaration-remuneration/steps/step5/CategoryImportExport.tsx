@@ -2,6 +2,11 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import {
+	MATOMO_ACTION,
+	MATOMO_EVENT_CATEGORY,
+	trackEvent,
+} from "~/modules/analytics";
 import { getDsfrModal } from "~/modules/shared";
 import { type ImportError, parseImportFile } from "./categoryFileHandler";
 import type { EmployeeCategory } from "./categorySerializer";
@@ -35,6 +40,11 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 			const result = await parseImportFile(file);
 			if (result.ok) {
 				onImport(result.categories);
+				trackEvent({
+					category: MATOMO_EVENT_CATEGORY.DOCUMENT,
+					action: MATOMO_ACTION.CATEGORY_IMPORT,
+					value: result.categories.length,
+				});
 				const modal = document.getElementById(importModalId);
 				if (modal) {
 					getDsfrModal(modal)?.conceal();
