@@ -337,6 +337,7 @@ export const authConfig = {
 						name: string;
 						address?: string | null;
 						nafCode?: string | null;
+						nafLabel?: string | null;
 						workforce?: number | null;
 					};
 					try {
@@ -347,6 +348,7 @@ export const authConfig = {
 									name: companyInfo.name,
 									address: companyInfo.address,
 									nafCode: companyInfo.nafCode,
+									nafLabel: companyInfo.nafLabel,
 									workforce: companyInfo.workforce,
 								}
 							: { siren, name: `Entreprise ${siren}` };

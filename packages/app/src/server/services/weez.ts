@@ -9,6 +9,8 @@ type WeezLegalEntity = {
 	denominationunitelegale: string | null;
 	raisonsociale: string | null;
 	activiteprincipalenaf25unitelegale: string | null;
+	// NAF rév. 2 activity label; describes the same activity as the mapped NAF 2025 nafCode above.
+	nomenclatureactiviteprincipalelibelleunitelegale: string | null;
 	effectiftotal: number | null;
 	numerovoie: string | null;
 	typevoie: string | null;
@@ -30,6 +32,7 @@ export type CompanyInfo = {
 	name: string;
 	address: string | null;
 	nafCode: string | null;
+	nafLabel: string | null;
 	workforce: number | null;
 };
 
@@ -91,6 +94,7 @@ export async function fetchCompanyBySiren(
 				NON_DIFFUSIBLE_NAME,
 			address: null,
 			nafCode: null,
+			nafLabel: null,
 			workforce: entity.effectiftotal ?? null,
 		};
 	}
@@ -102,6 +106,10 @@ export async function fetchCompanyBySiren(
 			`Entreprise ${siren}`,
 		address: buildAddress(entity),
 		nafCode: entity.activiteprincipalenaf25unitelegale ?? null,
+		// Clamp to the companies.nafLabel column width (varchar 255) to avoid insert overflow.
+		nafLabel:
+			entity.nomenclatureactiviteprincipalelibelleunitelegale?.slice(0, 255) ??
+			null,
 		workforce: entity.effectiftotal ?? null,
 	};
 }
