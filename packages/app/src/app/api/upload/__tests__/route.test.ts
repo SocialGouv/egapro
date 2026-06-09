@@ -251,7 +251,7 @@ describe("POST /api/upload", () => {
 					"Content-Type": "application/pdf",
 					"X-Flow-Type": "cse_opinion",
 				},
-				"avis‮cse.pdf",
+				"avis\u202Ecse.pdf",
 			),
 		);
 
