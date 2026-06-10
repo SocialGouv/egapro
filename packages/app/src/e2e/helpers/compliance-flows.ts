@@ -62,13 +62,9 @@ export async function submitCseStep2(
 
 	await page.waitForURL("**/avis-cse/etape/2");
 
-	// Phase A — upload through the UI (two steps: select, then "Importer").
+	// Phase A — selecting the file auto-uploads it (no intermediate "Importer"
+	// step), after which the page re-renders with the matrix.
 	await page.locator("#cse-file-upload").setInputFiles(DUMMY_PDF);
-	await page
-		.getByRole("button", { name: "Importer le ou les fichiers" })
-		.click();
-	// Upload = S3 + antivirus scan + tRPC save, after which the page re-renders
-	// with the matrix. Wait for the matrix table rather than a fixed delay.
 	await expect(
 		page.getByRole("table", { name: /Associez chaque fichier déposé/ }),
 	).toBeVisible({ timeout: 30_000 });

@@ -211,10 +211,10 @@ describe("Step2Upload", () => {
 		).toBeInTheDocument();
 	});
 
-	it("disables the submit button when no file has been added yet", () => {
+	it("keeps the submit button enabled even before any file is added", () => {
 		renderStep();
 
-		expect(screen.getByRole("button", { name: "Soumettre" })).toBeDisabled();
+		expect(screen.getByRole("button", { name: "Soumettre" })).toBeEnabled();
 	});
 
 	it("does not render the matrix when there is no existing file", () => {
@@ -257,8 +257,7 @@ describe("Step2Upload", () => {
 		expect(dialog).toHaveAttribute("id", "cse-submit-modal");
 	});
 
-	it("stages a PDF file, switches the submit label to import and uploads without finalizing", async () => {
-		const user = userEvent.setup();
+	it("auto-uploads a selected PDF immediately, never showing an import action, and does not finalize", async () => {
 		uploadFileMock.mockResolvedValue({
 			ok: true,
 			fileId: "new-file",
@@ -270,13 +269,7 @@ describe("Step2Upload", () => {
 		const file = new File(["content"], "avis.pdf", { type: "application/pdf" });
 		fireEvent.change(getFileInput(), { target: { files: [file] } });
 
-		expect(screen.getByText("avis.pdf")).toBeInTheDocument();
-		const submit = screen.getByRole("button", {
-			name: "Importer le ou les fichiers",
-		});
-
-		await user.click(submit);
-
+		// Selection alone triggers the upload — no intermediate "Importer" step.
 		await waitFor(() => {
 			expect(uploadFileMock).toHaveBeenCalledWith(file, {
 				flowType: "cse_opinion",
@@ -287,6 +280,10 @@ describe("Step2Upload", () => {
 		});
 		expect(invalidateTypesMock).toHaveBeenCalled();
 		expect(refreshMock).toHaveBeenCalled();
+		expect(
+			screen.queryByRole("button", { name: "Importer le ou les fichiers" }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Soumettre" })).toBeEnabled();
 		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
 		expect(pushMock).not.toHaveBeenCalled();
 	});
@@ -331,20 +328,49 @@ describe("Step2Upload", () => {
 		).toBeDisabled();
 	});
 
-	it("blocks the submit and lists the missing content type when the matrix is incomplete (S8)", () => {
+	it("reveals the missing-content error only after a submit attempt, blocking finalize (S8)", async () => {
+		const user = userEvent.setup();
 		renderStep({
 			columns: DUAL_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
 			hasSecondDeclaration: true,
 		});
 
-		expect(screen.getByRole("button", { name: "Soumettre" })).toBeDisabled();
+		// Loading files must not surface the error, and the button stays enabled.
+		expect(
+			screen.queryByText("Un avis CSE est manquant"),
+		).not.toBeInTheDocument();
+		const submit = screen.getByRole("button", { name: "Soumettre" });
+		expect(submit).toBeEnabled();
+
+		await user.click(submit);
+
 		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
 		expect(
 			screen.getByText(
 				"Ajoutez l'avis d'exactitude des données et des méthodes de calcul de la première déclaration, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.",
 			),
 		).toBeInTheDocument();
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+	});
+
+	it("hides the missing-content error again once the required association is completed", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+
+		expect(
+			screen.queryByText("Un avis CSE est manquant"),
+		).not.toBeInTheDocument();
 	});
 
 	it("persists the full association payload through setFileContentTypes when a checkbox is toggled (S7)", async () => {

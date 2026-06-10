@@ -49,6 +49,7 @@ export function Step2Upload({
 	const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
 	const [finalizeError, setFinalizeError] = useState<string | null>(null);
 	const [associationError, setAssociationError] = useState<string | null>(null);
+	const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 	const [associations, setAssociations] = useState<AssociationMap>(() =>
 		buildAssociationMap(columns, initialAssociations),
 	);
@@ -117,15 +118,15 @@ export function Step2Upload({
 
 	const {
 		closeModal,
-		handleConfirm,
 		handleFilesChange,
-		isPending,
+		isPending: isUploadingFiles,
 		modalRef,
 		selectedFiles,
 		uploadError,
 	} = useFileUploadForm({
 		flowType: "cse_opinion",
 		onAllUploaded: refreshFileList,
+		autoUpload: true,
 	});
 
 	const missingColumns = useMemo(
@@ -133,11 +134,11 @@ export function Step2Upload({
 		[columns, associations],
 	);
 
-	const hasSelectedFiles = selectedFiles.length > 0;
 	const hasExistingFiles = existingFiles.length > 0;
 	const isComplete = missingColumns.length === 0;
-	const isSubmitting = isPending || finalizeMutation.isPending;
-	const showMissingError = !hasSelectedFiles && hasExistingFiles && !isComplete;
+	// The missing-content error is revealed only once the user has tried to
+	// submit (besoin epic-3476): loading files must never trigger it on its own.
+	const showMissingError = hasAttemptedSubmit && !isComplete;
 
 	const openFinalizeModal = useCallback(() => {
 		const dialog = modalRef.current;
@@ -154,20 +155,15 @@ export function Step2Upload({
 		(event: React.FormEvent) => {
 			event.preventDefault();
 			setFinalizeError(null);
-			if (hasSelectedFiles) {
-				void handleConfirm();
+			if (!isComplete) {
+				setHasAttemptedSubmit(true);
 				return;
 			}
-			if (!hasExistingFiles || !isComplete) return;
+			setHasAttemptedSubmit(false);
+			if (finalizeMutation.isPending) return;
 			openFinalizeModal();
 		},
-		[
-			hasSelectedFiles,
-			handleConfirm,
-			hasExistingFiles,
-			isComplete,
-			openFinalizeModal,
-		],
+		[isComplete, finalizeMutation.isPending, openFinalizeModal],
 	);
 
 	const confirmFinalize = useCallback(() => {
@@ -176,15 +172,6 @@ export function Step2Upload({
 	}, [closeModal, finalizeAndRedirect]);
 
 	const remainingSlots = MAX_CSE_FILES - existingFiles.length;
-	const submitDisabled =
-		isSubmitting ||
-		readOnlyGuard.isReadOnly ||
-		(!hasSelectedFiles && (!hasExistingFiles || !isComplete));
-	const submitLabel = isSubmitting
-		? "Envoi en cours…"
-		: hasSelectedFiles
-			? "Importer le ou les fichiers"
-			: "Soumettre";
 
 	return (
 		<>
@@ -215,13 +202,21 @@ export function Step2Upload({
 					accept=".pdf"
 					acceptLabel="pdf"
 					allowedMimeTypes={["application/pdf"]}
-					disabled={readOnlyGuard.isReadOnly}
+					disabled={readOnlyGuard.isReadOnly || isUploadingFiles}
 					error={uploadError}
 					inputId="cse-file-upload"
 					maxFiles={remainingSlots}
 					onFilesChange={handleFilesChange}
 					selectedFiles={selectedFiles}
 				/>
+
+				<div aria-live="polite" className="fr-messages-group fr-mt-2w">
+					{isUploadingFiles && (
+						<p className="fr-message fr-message--info fr-mb-0">
+							Import du ou des fichiers en cours…
+						</p>
+					)}
+				</div>
 
 				{hasExistingFiles && (
 					<div className="fr-mt-4w">
@@ -282,10 +277,10 @@ export function Step2Upload({
 						<button
 							{...readOnlyGuard.buttonProps}
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-							disabled={submitDisabled}
+							disabled={readOnlyGuard.isReadOnly}
 							type="submit"
 						>
-							{submitLabel}
+							Soumettre
 						</button>
 						{readOnlyGuard.tooltip}
 					</span>
