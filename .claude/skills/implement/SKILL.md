@@ -110,20 +110,42 @@ Workflow identique à l'ex-`/epic` :
    ```
    Skill("loop", args="/report <N>")
    ```
-   Le `/loop` va run `/report <N>` immédiatement, puis re-schedule un wakeup avec délai adaptatif (60-3600s) basé sur ce que `/report` observe. À chaque wakeup, après le rendu du dashboard, **vérifier la condition d'arrêt** : la PR finale `epic/<N> → alpha` est-elle ouverte ?
+   Le `/loop` va run `/report <N>` immédiatement, puis re-schedule un wakeup avec délai adaptatif (60-3600s) basé sur ce que `/report` observe. À chaque wakeup, après le rendu du dashboard, **vérifier la condition de transition** : la PR finale `epic/<N> → alpha` est-elle ouverte ?
    ```bash
-   gh pr list --repo SocialGouv/egapro --base alpha --head "epic/<N>" --state open --json number --jq 'length'
+   gh pr list --repo SocialGouv/egapro --base alpha --head "epic/<N>" --state open --json number --jq '.[0].number // ""'
    ```
-   Si > 0 → omettre `ScheduleWakeup` → loop s'arrête. Sinon → re-schedule.
+   - **PR pas encore ouverte** → re-schedule (le loop continue ses ticks).
+   - **PR ouverte** → la pipeline auto a fini (tickets mergés + **gate E2E verte** + **doc régénérée**). Ne **pas** re-scheduler : passer à l'étape 6 (**gate d'acceptation utilisateur**).
 
    Cadence recommandée :
    - **Activité récente côté logs** (phase qui bouge, agent qui spawn) → 60-270s (cache prompt warm)
    - **État stable** (agent silent, rien à observer) → 1200-1800s (un seul cache miss)
    - **Sortie 5 min** → toujours mauvais choix (300s = cache miss sans amortissement)
 
-5. Rendre la main immédiatement (le /loop continue en arrière-plan, t'auto-rapporte jusqu'à fin de l'epic).
+5. Rendre la main immédiatement (le /loop continue en arrière-plan et t'auto-rapporte jusqu'à l'ouverture de la PR finale, point où il déclenche la gate d'acceptation de l'étape 6).
 
-> **Note** : le main worktree reste sur `epic/<N>` pendant toute la durée du loop (ticks + final PR). Pour faire du travail sur `alpha` en parallèle (hotfix, autre branche), monter un worktree dédié (`git worktree add /tmp/egapro-alpha alpha`). À la fin de l'epic — quand la PR finale est mergée sur alpha — basculer manuellement le main worktree avec `git checkout alpha && git pull`.
+6. **Gate d'acceptation utilisateur** (quand la PR finale est ouverte) — c'est le **dernier maillon** de la pipeline epic, après doc-writer + la gate E2E. Inviter l'utilisateur à **tester l'implémentation**, puis router une éventuelle demande de changement vers `architect-rework` (exactement comme un renvoi depuis `e2e-dev`).
+
+   1. **Présenter + inviter à tester** : afficher le lien de la PR `#<PR>`, le résumé de l'epic, et **comment tester** :
+      - Review app : la PR déploie un env de review (`https://egapro-<branche>-<hash>.ovh.fabrique.social.gouv.fr`) — pointer l'URL exacte depuis les checks/deployment de la PR.
+      - Test local : `/open <PR>` recrée un worktree + stack pour tester en local.
+   2. **Demander** via `AskUserQuestion` : « L'epic #N est implémenté (PR #<PR>, doc + E2E OK). Après test, veux-tu des changements ? » Options : **« Tout est bon »** / **« Demander des changements »**.
+   3. **« Tout est bon »** → terminé. Rappeler que c'est l'utilisateur qui passe le ticket à `In review`/`Done` et merge la PR `epic/<N> → alpha`. **Fin du loop.**
+   4. **« Demander des changements »** → récupérer la **description précise** des changements souhaités (texte libre de l'utilisateur), puis :
+      ```bash
+      # a. Réinitialiser l'état de la gate E2E pour cet epic (le nouveau code doit re-valider)
+      rm -f ".claude/state/epic_run/ticks/${EPICS_KEY}/e2e_gate/passed_${ISSUE_N}" \
+            ".claude/state/epic_run/ticks/${EPICS_KEY}/e2e_gate/round_${ISSUE_N}"
+
+      # b. Router vers architect-rework en mode user-feedback (foreground, sur le main worktree epic/<N>)
+      bash scripts/orchestration/run_architect_rework.sh "$ISSUE_N" "<description des changements>"
+      ```
+      - Parser le JSON retourné par `run_architect_rework.sh` :
+        - `tickets_created` → **relancer la pipeline** : `nohup bash scripts/orchestration/epic_loop.sh $EPICS > "$LOG_FILE" 2>&1 &` puis relancer l'auto-report (`Skill("loop", args="/report <N>")`). Le loop traite les tickets de fix → re-passe la gate E2E (réinitialisée) → doc-writer → met à jour la PR → re-déclenche cette gate d'acceptation. **Boucle jusqu'à « Tout est bon ».**
+        - `needs_user` (doute fonctionnel) → l'utilisateur étant présent, **lui relayer la question** d'`architect-rework`, récupérer sa réponse, puis ré-invoquer `run_architect_rework.sh "$ISSUE_N" "<feedback clarifié>"`.
+        - `failed` / `rate_limited` → signaler et proposer de retenter.
+
+> **Note** : le main worktree reste sur `epic/<N>` pendant toute la durée du loop (ticks + final PR + gate d'acceptation + rounds de rework). Pour faire du travail sur `alpha` en parallèle (hotfix, autre branche), monter un worktree dédié (`git worktree add /tmp/egapro-alpha alpha`). Une fois la PR finale acceptée et mergée sur alpha — basculer manuellement le main worktree avec `git checkout alpha && git pull`.
 
 ### Mode task ou bug — code-dev synchrone foreground (puis e2e-dev)
 
