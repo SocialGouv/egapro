@@ -46,6 +46,7 @@ function buildPresetDeadlines(preset: "future" | "past"): CampaignDeadlines {
 		decl2ModificationDeadline: new Date(base, 11, 1),
 		decl2JustificationDeadline: new Date(base, 11, 1),
 		decl2JointEvaluationDeadline: new Date(base + 1, 1, 1),
+		pathChoiceDeadline: new Date(base + 1, 0, 1),
 	};
 }
 
