@@ -57,7 +57,9 @@ export function FileUpload({
 		const urls = selectedFiles.map((file) => URL.createObjectURL(file));
 		setObjectUrls(urls);
 		return () => {
-			urls.forEach((url) => URL.revokeObjectURL(url));
+			urls.forEach((url) => {
+				URL.revokeObjectURL(url);
+			});
 		};
 	}, [selectedFiles]);
 
@@ -185,9 +187,9 @@ export function FileUpload({
 							</span>
 						</a>
 						<button
+							aria-label={`Supprimer ${file.name}`}
 							className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line"
 							onClick={() => handleRemove(index)}
-							title={`Supprimer ${file.name}`}
 							type="button"
 						>
 							Supprimer
