@@ -122,7 +122,7 @@ pnpm db:studio            # opens Drizzle Studio
 
 ## Automatic quality gates
 
-Quality checks run **automatically** après chaque itération de code — pas de commande à lancer. Dans la pipeline `/implement`, les tests sont écrits par `tu-dev` (step 5.5), puis les gates sont invoqués par `code-dev` step 6. Hors pipeline (hotfix, edit direct), délégués par l'agent principal. Voir `.claude/rules/automation.md`.
+Quality checks run **automatically** après chaque itération de code — pas de commande à lancer. Dans la pipeline `/implement`, les tests unitaires/intégration sont écrits par `tu-dev` (step 5.5), puis les gates sont invoqués par `code-dev` step 6. Les tests **E2E** sont écrits par `e2e-dev` en **fin de pipeline** (après dev terminé + sous-tickets mergés pour une Feature, ou après `code-dev validated` pour une Task/Bug). Hors pipeline (hotfix, edit direct), délégués par l'agent principal. Voir `.claude/rules/automation.md`.
 
 | Gate | When | How |
 |---|---|---|
@@ -132,6 +132,7 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | **RGAA** | After every task | `rgaa-auditor` agent on modified `.tsx` files |
 | **Security** | After every task | `security-auditor` agent on modified server files |
 | **Functional** | Inside `/implement` | `functional-validator` rejoue les scénarios PO |
+| **Tests E2E** | Fin de pipeline (epic-end pour Feature, après `code-dev validated` pour Task/Bug) | `e2e-dev` agent (Opus) lance la suite E2E (triage régression), imbrique/crée le scénario Playwright, renvoie sur vraie régression |
 | **Visual** | Inside `/implement` (UI tickets) | `code-dev` compare lui-même le rendu à Figma via le MCP `figma-dev` (voir `rules/figma-workflow.md`) |
 | **Domain layer** | While writing | Inline rules (also enforced by hooks + structural-auditor) |
 | **PR review** | When on a PR branch | `check-pr-reviews.sh` hook at session start + `/review` skill |
@@ -170,10 +171,11 @@ Quality checks run **automatically** après chaque itération de code — pas de
 **Pipeline exécution** (invoqués par `/implement`) :
 | Agent | Rôle |
 |---|---|
-| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature) ou le commentaire d'analyse (Task / Bug). Pour les tickets UI, vérifie lui-même la fidélité Figma via le MCP `figma-dev`. Délègue **tous** les tests (TU + intégration) à `tu-dev`. |
+| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature) ou le commentaire d'analyse (Task / Bug). Pour les tickets UI, vérifie lui-même la fidélité Figma via le MCP `figma-dev`. Délègue **tous** les tests TU + intégration à `tu-dev` ; **n'écrit aucun test E2E** (c'est `e2e-dev`). |
 | `tu-dev` | Écrit/corrige **tous** les tests vitest (TU + intégration) du ticket, juste après `code-dev` et avant les validators (step 5.5). Toujours Opus. Trie les échecs : sur **vraie régression** il rend la main à `code-dev` (commentaire `tu-dev:` + verdict) ; sinon corrige les tests en échec légitime et ajoute la couverture du nouveau code (DRY). |
+| `e2e-dev` | Écrit/maintient **tous** les tests E2E Playwright (`src/e2e/**`) en **fin de pipeline** : pour une Feature après que les sous-tickets sont squash-mergés dans `epic/<N>` (via `run_e2e_dev.sh`) ; pour une Task/Bug après le `validated` de `code-dev` (via `/implement`). Toujours Opus. Lance la suite E2E (triage régression vs évolution légitime, handback sur vraie régression), puis décide d'**imbriquer** la nouvelle fonctionnalité dans un scénario global existant ou d'en créer un nouveau (et juge la **criticité** pour les bugs). Ne touche jamais au code source. |
 | `functional-validator` | Rejoue les scénarios PO dans le dev server |
-| `doc-writer` | Régénère `docs/*.md` from scratch à partir de l'état courant du code. Invoqué par `epic_loop.sh` en fin d'epic (juste avant `open_epic_final_pr.sh`) ou par le skill `/doc` (humain). Sonnet, sans worktree dédié — opère sur la branche courante. |
+| `doc-writer` | Régénère `docs/*.md` from scratch à partir de l'état courant du code. Invoqué par `epic_loop.sh` en fin d'epic (avant `run_e2e_dev.sh` puis `open_epic_final_pr.sh`) ou par le skill `/doc` (humain). Sonnet, sans worktree dédié — opère sur la branche courante. |
 
 **Pipeline review** (invoqué par `/review`) :
 | Agent | Rôle |
@@ -209,12 +211,13 @@ Tous les scripts shell portent leur propre header `--help`-friendly. Le mode epi
 
 | Script | Rôle |
 |---|---|
-| `epic_loop.sh` | Loop driver background. Tick = cleanup terminal worktrees → rebase epic branches → plan → spawn N `claude` CLIs en parallèle (budget USD isolé) → aggregate JSON returns → process. Plafond `EPIC_LOOP_MAX_TICKS=30`. À la fin, pour chaque epic : invoke `run_doc_writer.sh` (best-effort, non-blocking) puis `open_epic_final_pr.sh`. |
+| `epic_loop.sh` | Loop driver background. Tick = cleanup terminal worktrees → rebase epic branches → plan → spawn N `claude` CLIs en parallèle (budget USD isolé) → aggregate JSON returns → process. Plafond `EPIC_LOOP_MAX_TICKS=30`. À la fin, pour chaque epic : invoke `run_doc_writer.sh` puis `run_e2e_dev.sh` (les deux best-effort, non-blocking) puis `open_epic_final_pr.sh`. |
 | `ensure_epic_branch.sh` | Idempotent. Crée la branche d'intégration `epic/<N>` depuis `origin/alpha` si absente. Appelé au startup d'`epic_loop.sh` pour chaque epic NEW-mode. |
 | `merge_validated_ticket.sh` | Squash-merge la PR d'un ticket validé dans `epic/<N>` via `gh pr merge --squash`. Branche auto-supprimée par les settings repo. Sur conflit : commente la PR + remet le ticket en `In progress` (le pipeline redispatchera pour rebaser). |
 | `rebase_epic_branch.sh` | Entre ticks, rebase `epic/<N>` sur `origin/alpha` dans un worktree dédié (`/tmp/egapro-rebase-epic<N>`). Force-with-lease push. Sur conflit : commente l'epic + label `dispatch=escalate` + exit 2 (halt orchestration). |
 | `open_epic_final_pr.sh` | Ouvre (ou réutilise) la PR finale `epic/<N> → alpha` avec body listant chaque sub-ticket via `Closes #N`. Appelé en fin de loop pour la review humaine. |
 | `run_doc_writer.sh` | Invoque l'agent `doc-writer` sur `epic/<N>` (depuis le main worktree, pas de worktree dédié). Régénère `docs/*.md` from scratch et commit + push. Best-effort : un échec/rate-limit ne bloque pas l'ouverture de la PR finale. Budget Sonnet par défaut $5 (`EPIC_LOOP_BUDGET_DOC`). |
+| `run_e2e_dev.sh` | Invoque l'agent `e2e-dev` (Opus) sur `epic/<N>` en fin de loop, **après** `run_doc_writer.sh`. Provisionne un **worktree dédié + stack docker** (détaché sur `origin/epic/<N>`, index `E2E_WORKTREE_INDEX`) car l'E2E exige un dev server + DB ; l'agent lance la suite E2E, imbrique/crée le scénario, push sur `epic/<N>`, puis teardown. Best-effort : `exit 3` sur vraie régression (signalée par un commentaire `e2e-dev:` sur l'epic — non-bloquant, la PR finale s'ouvre quand même). Budget Opus par défaut $15 (`EPIC_LOOP_BUDGET_E2E`). |
 | `cleanup_terminal_worktrees.sh` | Scan les worktrees `egapro-epic<E>-t<N>` ; teardown + remove ceux dont le ticket a été squash-mergé dans `epic/<N>` (signal canonique : la branche `ticket/<N>-*` est gone d'origin). Appelé à chaque tick par `epic_loop.sh` pour libérer les slots dynamiquement. |
 | `dispatch_plan.sh` | Calcule la JSON list des tickets dispatchables : parse `## Depends on`, gate les enfants dont le parent n'est pas encore squash-mergé dans `epic/<N>` (= sa branche n'existe plus sur origin), alloue les indices libres dans `[0, EPIC_MAX_PARALLEL[`. Base = `origin/epic/<N>` toujours. |
 | `process_tick_result.sh` | Applique les mutations board selon le statut JSON retourné par `code-dev`. Sur `validated` (NEW mode) → invoke `merge_validated_ticket.sh`. Compteur `attempt=N` pour anti-boucle 3 refacto consécutifs → `dispatch=escalate`. |
@@ -230,7 +233,7 @@ Tous les scripts shell portent leur propre header `--help`-friendly. Le mode epi
 | `epic_state.sh` | Tableau compact des sous-tickets d'un epic (status board + last log event + retries + PR liée). |
 | `render_dashboard.sh` | Dashboard `/report` agents actifs, triés par inactivité, avec alertes >10min. |
 
-**Modèle de branche d'intégration** : chaque epic a sa branche `epic/<N>` créée depuis `alpha` au startup d'`epic_loop.sh`. Toutes les PRs des sous-tickets ciblent `epic/<N>`. Une fois validée par toute la pipeline (CI + Sonar + validators IA + bots), `process_tick_result.sh` squash-merge la PR dans `epic/<N>` (le ticket reste en `In progress` côté board — `In review` est user-only). Les tickets enfants (qui dépendent d'un parent) ne démarrent qu'une fois leur parent squash-mergé (signal canonique : la branche `ticket/<parent>-*` n'existe plus sur origin, le board status est décoratif). Entre ticks, `epic/<N>` est rebasée sur `origin/alpha` pour rester fraîche. À la fin, une PR unique `epic/<N> → alpha` est ouverte pour la **review humaine** — c'est le seul point d'intervention humain pour valider l'epic complet.
+**Modèle de branche d'intégration** : chaque epic a sa branche `epic/<N>` créée depuis `alpha` au startup d'`epic_loop.sh`. Toutes les PRs des sous-tickets ciblent `epic/<N>`. Une fois validée par toute la pipeline (CI + Sonar + validators IA + bots), `process_tick_result.sh` squash-merge la PR dans `epic/<N>` (le ticket reste en `In progress` côté board — `In review` est user-only). Les tickets enfants (qui dépendent d'un parent) ne démarrent qu'une fois leur parent squash-mergé (signal canonique : la branche `ticket/<parent>-*` n'existe plus sur origin, le board status est décoratif). Entre ticks, `epic/<N>` est rebasée sur `origin/alpha` pour rester fraîche. Une fois **tous** les sous-tickets squash-mergés, la pipeline régénère la doc (`run_doc_writer.sh`) puis lance l'agent **`e2e-dev`** (`run_e2e_dev.sh`) sur `epic/<N>` : il rejoue la suite E2E pour détecter une régression de parcours et ajoute la couverture E2E de la feature complète. Enfin, une PR unique `epic/<N> → alpha` est ouverte pour la **review humaine** — c'est le seul point d'intervention humain pour valider l'epic complet.
 
 **Note migration** : les epics créés avant l'introduction de ce modèle (mode legacy historique : stacked PRs, base `alpha`, pas d'auto-merge) ne sont **pas** repris par la pipeline actuelle — l'utilisateur les gère à la main jusqu'à clôture.
 

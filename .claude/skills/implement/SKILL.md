@@ -9,12 +9,12 @@ description: "Phase exécution. Détecte le mode (epic/task/bug) selon le type d
 
 | Type d'issue | Mode | Mécanisme |
 |---|---|---|
-| `Feature` (epic) | epic | `nohup bash scripts/orchestration/epic_loop.sh <N> > /tmp/epic_loop_<KEY>.log 2>&1 &` (background, parallèle, plusieurs sub-tickets) |
-| `Task` | task | Lance `code-dev` en **CLI foreground** (`claude --agent code-dev`, bloquant) sur l'issue |
-| `Bug` | bug | Lance `code-dev` en **CLI foreground** (`claude --agent code-dev`, bloquant) avec `rules/bug-fix-workflow.md` |
+| `Feature` (epic) | epic | `nohup bash scripts/orchestration/epic_loop.sh <N> > /tmp/epic_loop_<KEY>.log 2>&1 &` (background, parallèle, plusieurs sub-tickets ; **e2e-dev** lancé en fin de loop sur `epic/<N>`) |
+| `Task` | task | Lance `code-dev` en **CLI foreground** (`claude --agent code-dev`, bloquant), puis **e2e-dev** une fois `validated` |
+| `Bug` | bug | Lance `code-dev` en **CLI foreground** (`claude --agent code-dev`, bloquant) avec `rules/bug-fix-workflow.md`, puis **e2e-dev** une fois `validated` |
 | sub-issue d'un epic (non-feature) | task-debug | Comme `task` — utile pour re-rouler un sous-ticket d'un epic plus large (ex: après `refacto` ou debug) |
 
-`/implement` n'orchestre rien lui-même : pour epic c'est `epic_loop.sh` qui parallèlise, pour task/bug c'est un process CLI `claude --agent code-dev` foreground. **Dans les deux cas code-dev tourne comme _main agent_ (process CLI)** — obligatoire pour qu'il puisse lancer ses propres sous-agents (`tu-dev`, les 4 validateurs, `functional-validator`) : un sous-agent ne peut pas en spawner d'autres.
+`/implement` n'orchestre rien lui-même : pour epic c'est `epic_loop.sh` qui parallèlise (et lance `run_e2e_dev.sh` en fin de loop), pour task/bug c'est un process CLI `claude --agent code-dev` foreground suivi d'un `claude --agent e2e-dev`. **`code-dev` tourne comme _main agent_ (process CLI)** — obligatoire pour qu'il puisse lancer ses propres sous-agents (`tu-dev`, les 4 validateurs, `functional-validator`) : un sous-agent ne peut pas en spawner d'autres. **`e2e-dev` tourne en fin de pipeline** (après dev terminé + sous-tickets mergés pour une Feature, ou après `code-dev validated` pour une Task/Bug) et possède toute la couverture E2E — `code-dev` n'écrit plus aucun test E2E.
 
 ---
 
@@ -125,9 +125,9 @@ Workflow identique à l'ex-`/epic` :
 
 > **Note** : le main worktree reste sur `epic/<N>` pendant toute la durée du loop (ticks + final PR). Pour faire du travail sur `alpha` en parallèle (hotfix, autre branche), monter un worktree dédié (`git worktree add /tmp/egapro-alpha alpha`). À la fin de l'epic — quand la PR finale est mergée sur alpha — basculer manuellement le main worktree avec `git checkout alpha && git pull`.
 
-### Mode task ou bug — code-dev synchrone foreground
+### Mode task ou bug — code-dev synchrone foreground (puis e2e-dev)
 
-Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement), le pipeline parallèle est overkill. On invoque `code-dev` directement, en foreground, avec un worktree dédié :
+Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement), le pipeline parallèle est overkill. On invoque `code-dev` directement, en foreground, avec un worktree dédié — puis, une fois `code-dev` `validated`, on enchaîne sur `e2e-dev` (même worktree, dev server + stack déjà debout) pour la couverture E2E + le triage de régression (`code-dev` ne touche plus aux E2E) :
 
 1. **Worktree + stack docker** :
    - Identifier la base branch :
@@ -163,13 +163,35 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 
    | `.status` | Action skill | Markdown affiché |
    |---|---|---|
-   | `validated` | aucune (ticket reste In progress, l'utilisateur le bouge à In review à son rythme) | `## Code: PASS` + ticket/branche/PR + next-step revue humaine |
-   | `needs_opus_escalation` | relancer immédiatement le **CLI `code-dev`** avec `--model opus` et le même `$PROMPT` ; afficher le verdict final | `## Code: PASS` ou `## Code: REFACTO` selon le retour Opus |
-   | `refacto` | aucune (le ticket est en To Do) | `## Code: REFACTO` + diagnostic + next-step `/analyse <N>` (re-spec) |
+   | `validated` | enchaîner sur **e2e-dev** (étape 5bis) ; le ticket reste In progress, l'utilisateur le bouge à In review à son rythme | `## Code: PASS` + ticket/branche/PR, puis le verdict E2E |
+   | `needs_opus_escalation` | relancer immédiatement le **CLI `code-dev`** avec `--model opus` et le même `$PROMPT` ; si le retour Opus est `validated`, enchaîner sur e2e-dev (étape 5bis) | `## Code: PASS` ou `## Code: REFACTO` selon le retour Opus |
+   | `refacto` | aucune (le ticket est en To Do) ; pas d'e2e-dev | `## Code: REFACTO` + diagnostic + next-step `/analyse <N>` (re-spec) |
    | `rate_limited` | proposer de retenter dans `retry_in` secondes ou abandonner | `## Code: RATE_LIMITED` + délai suggéré |
-   | `failed` | propager l'erreur sans modifier le ticket | `## Code: FAILED` + raison technique |
+   | `failed` | propager l'erreur sans modifier le ticket ; pas d'e2e-dev | `## Code: FAILED` + raison technique |
 
-6. **Pour les sub-issues d'epic validées en mode synchrone** : `process_tick_result.sh` n'est pas appelé (c'est un mécanisme du loop driver). Le squash-merge de la PR validée dans `epic/<N>` peut être déclenché manuellement :
+5bis. **Lancer `e2e-dev` en CLI foreground** (uniquement si le verdict terminal de `code-dev` est `validated`) — `code-dev` ne possède plus les E2E ; `e2e-dev` (toujours Opus) lance la suite E2E actuelle (triage régression vs évolution légitime), puis décide d'imbriquer la nouvelle fonctionnalité dans un scénario E2E existant ou d'en créer un nouveau (et, pour un Bug, juge sa criticité). Il pousse ses commits de test sur **la branche de la PR** (ce qui re-déclenche la CI). Même worktree que `code-dev` (dev server + stack docker déjà debout) :
+
+   ```bash
+   env -u CLAUDECODE timeout 3600 claude \
+     --agent e2e-dev --model opus \
+     --print --output-format json \
+     --dangerously-skip-permissions --max-budget-usd 15 \
+     "$E2E_PROMPT" 2>&1 | tee "/tmp/e2e-dev-${ISSUE_N}.json"
+   ```
+
+   - `$E2E_PROMPT` : unité = ticket `#<N>` (+ type Task/Bug), worktree path, index → port `3001+index`, base de comparaison `origin/...` (la même que `code-dev`), branche de la PR déjà checkout, « suivre STRICTEMENT `e2e-dev/AGENT.md` », push sur `HEAD` (la branche de la PR), retour JSON strict en dernier message. Pour un Bug, rappeler le critère de **criticité** (`e2e-dev` décide s'il vaut un E2E).
+   - **Récupérer le verdict JSON** (dernier objet `{"status":...}`) et l'afficher :
+
+     | `.status` e2e-dev | Action skill | Markdown affiché |
+     |---|---|---|
+     | `validated` | aucune (tests poussés sur la branche, CI re-déclenchée) | `## E2E: PASS` + mode (`nested`/`new`/`none`) + fichiers + note « CI re-déclenchée par le push » |
+     | `regression` | afficher la régression + lien vers le commentaire `e2e-dev:` ; l'utilisateur (ou un nouveau `/implement`) corrige la source | `## E2E: REGRESSION` + tests en régression + fichier source suspecté |
+     | `rate_limited` | proposer de retenter ou de lancer `e2e-dev` plus tard | `## E2E: RATE_LIMITED` + délai |
+     | `failed` | non-bloquant — noter l'échec technique (dev server / infra) | `## E2E: FAILED` + raison |
+
+   - **e2e-dev est non-bloquant côté board** : le ticket reste en `In progress` quel que soit le verdict E2E ; l'utilisateur arbitre une régression à la revue.
+
+6. **Pour les sub-issues d'epic validées en mode synchrone** : `process_tick_result.sh` n'est pas appelé (c'est un mécanisme du loop driver). Le squash-merge de la PR validée dans `epic/<N>` peut être déclenché manuellement (de préférence **après** que `e2e-dev` a poussé sa couverture, pour que les E2E partent avec) :
    ```bash
    bash scripts/orchestration/merge_validated_ticket.sh "$PR_N" "$EPIC_N" "$ISSUE_N"
    ```
@@ -238,7 +260,8 @@ L'utilisateur retire `dispatch=escalate` (et `attempt=3`) après orientation pou
 - **NE JAMAIS** dupliquer la logique d'orchestration ici — tout est dans `scripts/orchestration/`
 - **NE PAS** attendre le retour du loop driver en mode epic (`nohup ... &; disown`)
 - **NE PAS** poll l'état — utiliser `/report`
-- **En mode task/bug**, c'est synchrone : tu lances le **CLI `claude --agent code-dev`** (bloquant) et tu attends le JSON final, comme l'ancien `/code`. **PAS** le Task tool — code-dev doit être main agent pour lancer ses sous-agents (`tu-dev`, validateurs, `functional-validator`).
+- **En mode task/bug**, c'est synchrone : tu lances le **CLI `claude --agent code-dev`** (bloquant) et tu attends le JSON final, comme l'ancien `/code`. **PAS** le Task tool — code-dev doit être main agent pour lancer ses sous-agents (`tu-dev`, validateurs, `functional-validator`). Puis, si `validated`, tu lances le **CLI `claude --agent e2e-dev`** (bloquant) sur le même worktree pour la couverture E2E (étape 5bis).
+- **E2E = exclusivement `e2e-dev`** — ni `/implement` ni `code-dev` n'écrivent de test E2E ; `e2e-dev` est le seul propriétaire de `src/e2e/**`, lancé en fin de pipeline.
 - Avant tout dispatch : check **analyse présente** (cf. Step 1) ; sinon proposer `/analyse <N>` et exit
 
 ---
@@ -247,6 +270,7 @@ L'utilisateur retire `dispatch=escalate` (et `attempt=3`) après orientation pou
 
 - Loop driver : `scripts/orchestration/epic_loop.sh`
 - Branche d'intégration (NEW mode) : `scripts/orchestration/{ensure_epic_branch,merge_validated_ticket,rebase_epic_branch,open_epic_final_pr}.sh`
+- Fin de loop epic (best-effort) : `scripts/orchestration/{run_doc_writer,run_e2e_dev}.sh` (doc-writer puis e2e-dev, avant la PR finale)
 - Computation du plan : `scripts/orchestration/dispatch_plan.sh`
 - Mutations board : `scripts/orchestration/process_tick_result.sh`
 - Helpers : `scripts/orchestration/{cache_gh,log_event,set_ticket_status,epic_state,render_dashboard,create_linked_branch,force_pr_issue_link}.sh`

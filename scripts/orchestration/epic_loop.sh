@@ -499,8 +499,15 @@ fi
 # For each epic in scope:
 #   1. Regenerate docs/*.md from the current state of epic/<N> (best-effort,
 #      non-blocking — a doc-writer failure just logs and continues).
-#   2. Open the final integration PR `epic/<N> → alpha` (idempotent —
+#   2. Run the e2e-dev agent on epic/<N>: regression triage + E2E coverage for
+#      the feature, pushed onto epic/<N> (best-effort, non-blocking).
+#   3. Open the final integration PR `epic/<N> → alpha` (idempotent —
 #      reuses an existing open PR if any).
+#
+# Order matters: doc-writer runs FIRST (commits + pushes docs from the main
+# worktree, which holds epic/<N>). e2e-dev runs AFTER in a dedicated detached
+# worktree freshly created from origin/epic/<N> — so it already has the doc
+# commit and pushes its test commit on top without a non-fast-forward conflict.
 for N in $EPICS; do
     # ---- Doc regeneration (best-effort, non-blocking) ----
     set +e
@@ -510,6 +517,23 @@ for N in $EPICS; do
     if [ "$DOC_RC" != "0" ]; then
         bash "$SCRIPT_DIR/log_event.sh" "$AID" DOC_WRITER_FAIL "epic=$N rc=$DOC_RC"
         echo "WARN epic=$N: doc-writer exited $DOC_RC — final PR will be opened without doc updates" >&2
+    fi
+
+    # ---- E2E coverage + regression triage (best-effort, non-blocking) ----
+    # Provisions a dedicated worktree + docker stack on epic/<N>, runs the full
+    # E2E suite, nests/creates the feature's scenario, pushes onto epic/<N>.
+    # rc=3 means a real E2E regression was found: surfaced via an `e2e-dev:`
+    # comment on the epic (visible at final-PR review) — still NON-BLOCKING.
+    set +e
+    bash "$SCRIPT_DIR/run_e2e_dev.sh" "$N"
+    E2E_RC=$?
+    set -e
+    if [ "$E2E_RC" = "3" ]; then
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" E2E_REGRESSION "epic=$N — see e2e-dev: comment on the epic"
+        echo "WARN epic=$N: e2e-dev found an E2E regression — see the e2e-dev: comment on the epic (final PR opened anyway for human review)" >&2
+    elif [ "$E2E_RC" != "0" ]; then
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" E2E_DEV_FAIL "epic=$N rc=$E2E_RC"
+        echo "WARN epic=$N: e2e-dev exited $E2E_RC — final PR will be opened without new E2E coverage" >&2
     fi
 
     # ---- Final integration PR ----

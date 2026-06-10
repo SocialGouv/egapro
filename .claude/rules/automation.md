@@ -60,6 +60,8 @@ These gates trigger **automatically** without user input. Do NOT wait to be aske
 
 Within the `/implement` pipeline, the unit/integration tests are written by the `tu-dev` agent (always Opus, invoked by `code-dev` at step 5.5) right after implementation — `code-dev` no longer writes, runs, or reads any unit/integration test itself. `tu-dev` triages failures and hands control back to `code-dev` on a genuine regression (comment `tu-dev:` on the ticket). Then the quality gates are delegated by the `code-dev` agent (step 6) — it invokes the 4 auditors in parallel, before opening the draft PR. `tu-dev` runs **only** inside the pipeline.
 
+The **E2E** tests are owned by a separate agent, `e2e-dev` (always Opus), which runs at the **end of the pipeline** — `code-dev` no longer writes any E2E test either. For a **Feature**, `e2e-dev` runs once every sub-ticket is squash-merged into `epic/<N>` (via `run_e2e_dev.sh`, before the final PR). For a **Task/Bug**, it runs after `code-dev` returns `validated` (invoked by `/implement` on the same worktree). It replays the current E2E suite (regression triage, handback on a genuine regression via a comment `e2e-dev:`), then decides whether to **nest** the new behavior into an existing global scenario or create a new `*.e2e.ts`, and judges **criticality** for bugs. E2E is **not** run in CI, so `e2e-dev`'s local run is the authoritative E2E gate. See `.claude/agents/e2e-dev/AGENT.md`.
+
 Because `code-dev` spawns these agents itself (`tu-dev` + the 4 gates + `functional-validator`), it must run as a **main agent** — its own `claude --agent code-dev` process — since a subagent cannot spawn subagents. The pipeline therefore always launches code-dev as a CLI process: epic mode via `epic_loop.sh`, task/bug mode via a synchronous `claude --agent code-dev` foreground call in `/implement` (never via the Task tool).
 
 **Outside the pipeline** (direct edits, manual fixes, hotfixes), the same rule applies : before reporting ANY task as done, launch the **4 parallel agents** :
@@ -122,9 +124,9 @@ Apply these rules **as you write code**, before any agent runs:
 - `metadata` jsonb must not contain secrets (auto-stripped keys: `password`, `token`, `refresh_token`, `secret`, `client_secret`, `authorization`, `apikey`, `api_key`, `accesskey`, `access_key`, `private_key`)
 - DB-layer changes in `packages/app/scripts/audit-cleanup.mjs` (or any file that touches `audit.action_log` via non-trivial SQL) → add an integration test (`*.integration.test.ts`, runs via `pnpm test:integration`) — unit tests mock the DB driver and miss driver bugs
 
-### E2E tests (when relevant)
+### E2E tests — owned by `e2e-dev`
 
-Write or update Playwright E2E tests when a user journey is created, modified, or its underlying API/data changes. Full E2E rules: `rules/e2e.md`.
+Playwright E2E tests are written/maintained **exclusively** by the `e2e-dev` agent (Opus), at the **end of the pipeline** — never by `code-dev` and never inline by the main agent. `e2e-dev` decides whether a journey warrants a new `*.e2e.ts` or should be **nested** into an existing global scenario, and judges criticality for bugs. Full E2E rules: `rules/e2e.md` ; agent workflow: `.claude/agents/e2e-dev/AGENT.md`.
 
 ---
 
@@ -142,6 +144,8 @@ Agents in `.claude/agents/` are delegated to automatically by skills and quality
 These agents are **read-only** — they report findings but never modify files. Fixes are applied by the main agent after review.
 
 The `tu-dev` agent (Opus) precedes these 4 gates in the `/implement` pipeline (step 5.5 of `code-dev`). Unlike them, it is a **writer**: it creates/fixes the vitest tests (unit + integration). It runs only inside the pipeline and hands control back to `code-dev` on a genuine regression. See `.claude/agents/tu-dev/AGENT.md`.
+
+The `e2e-dev` agent (Opus) is the other **writer**: it owns all Playwright E2E tests and runs at the **end of the pipeline** (epic-end for a Feature via `run_e2e_dev.sh`, or after `code-dev`'s `validated` verdict for a Task/Bug). It replays the E2E suite, triages regressions (handback via `e2e-dev:` comment), and nests/creates the scenario. See `.claude/agents/e2e-dev/AGENT.md`.
 
 ---
 
