@@ -17,11 +17,9 @@ export function NextStepsBox({
 	siren,
 	isSecondDeclaration,
 }: Props) {
-	const containerClass = styles.nextSteps;
-
 	return (
 		<>
-			<div className={containerClass}>
+			<div className={styles.nextSteps}>
 				<h3 className="fr-h4 fr-mb-0">Prochaines étapes</h3>
 
 				<div className={styles.section}>
