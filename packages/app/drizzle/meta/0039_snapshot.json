@@ -1,6 +1,6 @@
 {
-	"id": "d2728dfc-3231-440e-803a-89856edb50d3",
-	"prevId": "6cf8f8fd-d111-479a-a07f-df7898b2714e",
+	"id": "6f9c4032-993c-484f-a605-f8a8a3f8ba2b",
+	"prevId": "d2728dfc-3231-440e-803a-89856edb50d3",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
@@ -218,6 +218,102 @@
 			"foreignKeys": {},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.app_cse_opinion_file": {
+			"name": "app_cse_opinion_file",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"declaration_id": {
+					"name": "declaration_id",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"declaration_number": {
+					"name": "declaration_number",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"type": {
+					"name": "type",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"file_id": {
+					"name": "file_id",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {
+				"cse_opinion_file_declaration_idx": {
+					"name": "cse_opinion_file_declaration_idx",
+					"columns": [
+						{
+							"expression": "declaration_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"app_cse_opinion_file_declaration_id_app_declaration_id_fk": {
+					"name": "app_cse_opinion_file_declaration_id_app_declaration_id_fk",
+					"tableFrom": "app_cse_opinion_file",
+					"tableTo": "app_declaration",
+					"columnsFrom": ["declaration_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"app_cse_opinion_file_file_id_app_file_id_fk": {
+					"name": "app_cse_opinion_file_file_id_app_file_id_fk",
+					"tableFrom": "app_cse_opinion_file",
+					"tableTo": "app_file",
+					"columnsFrom": ["file_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"cse_opinion_file_decl_number_type_idx": {
+					"name": "cse_opinion_file_decl_number_type_idx",
+					"nullsNotDistinct": false,
+					"columns": ["declaration_id", "declaration_number", "type"]
+				}
+			},
 			"policies": {},
 			"checkConstraints": {},
 			"isRLSEnabled": false
