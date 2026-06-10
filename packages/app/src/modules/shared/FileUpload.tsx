@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import styles from "./FileUpload.module.scss";
 import { FILE_TOO_LARGE_ERROR, MAX_FILE_SIZE } from "./uploadConfig";
@@ -51,6 +51,15 @@ export function FileUpload({
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const dropzoneRef = useRef<HTMLElement>(null);
 	const [isDragging, setIsDragging] = useState(false);
+	const [objectUrls, setObjectUrls] = useState<string[]>([]);
+
+	useEffect(() => {
+		const urls = selectedFiles.map((file) => URL.createObjectURL(file));
+		setObjectUrls(urls);
+		return () => {
+			urls.forEach((url) => URL.revokeObjectURL(url));
+		};
+	}, [selectedFiles]);
 
 	const validateFile = useCallback(
 		(file: File): string | null => {
@@ -165,9 +174,16 @@ export function FileUpload({
 						{getExtensionLabel(file.name)} – {formatFileSize(file.size)}
 					</p>
 					<div className={styles.fileCardFooter}>
-						<p className="fr-message fr-message--valid fr-mb-0">
-							Importation réussie
-						</p>
+						<a
+							className="fr-link fr-link--download"
+							download={file.name}
+							href={objectUrls[index] ?? "#"}
+						>
+							Télécharger {file.name}
+							<span className="fr-link__detail">
+								{getExtensionLabel(file.name)} – {formatFileSize(file.size)}
+							</span>
+						</a>
 						<button
 							className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line"
 							onClick={() => handleRemove(index)}
