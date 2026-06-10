@@ -239,9 +239,14 @@ describe("Step2Upload", () => {
 		fireEvent.change(fileInput, { target: { files: [file] } });
 
 		expect(screen.getByText("avis-cse.pdf")).toBeInTheDocument();
-		expect(screen.getByText("Importation réussie")).toBeInTheDocument();
+		const downloadLink = screen.getByRole("link", {
+			name: /Télécharger avis-cse\.pdf/,
+		});
+		expect(downloadLink).toHaveClass("fr-link--download");
+		expect(downloadLink).toHaveAttribute("download", "avis-cse.pdf");
+		expect(downloadLink).toHaveAttribute("href", "blob:mock/avis-cse.pdf");
 		expect(
-			screen.getByRole("button", { name: /Supprimer/ }),
+			screen.getByRole("button", { name: "Supprimer avis-cse.pdf" }),
 		).toBeInTheDocument();
 	});
 
