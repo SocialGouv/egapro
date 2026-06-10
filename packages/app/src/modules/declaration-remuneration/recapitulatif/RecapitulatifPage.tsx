@@ -192,7 +192,6 @@ export function RecapitulatifPage({
 				</div>
 			</section>
 
-			{/* Action — return to Mon Espace */}
 			<Link
 				className={`fr-btn fr-btn--secondary ${styles.primaryAction}`}
 				href="/mon-espace"
