@@ -55,7 +55,12 @@ L'agent reçoit un mode du skill `/analyse` :
    - Section `Depends on` dans chaque body listant les tickets parents (format `- #<N>`)
    - Label `complexe` uniquement si refacto multi-fichiers, perf critique, algo non trivial → déclenche Opus dans `code-dev`
    - Sur erreur partielle (rate limit, timeout) : **ne pas retenter à l'aveugle** — relire ce qui a déjà été créé, compléter uniquement le reste, mentionner le recovery dans le rapport.
-7. **Commentaire final sur l'epic** : `[Validation utilisateur] Architecture validée — N tickets créés, prêt pour /implement`. Logger `ISSUES_CREATED "count=<N>"` puis `COMPLETE`.
+7. **Sizing de chaque sub-issue (complexité t-shirt)** : lire `rules/complexity-estimation.md` (rubrique + anchors), puis pour **chaque** sub-issue créée/amendée poser sa taille :
+   ```bash
+   bash scripts/orchestration/set_ticket_size.sh <sub_issue_N> <XS|S|M|L|XL>
+   ```
+   Écrit `Size` + `Estimate` (points Fibonacci) sur le board → alimente `/velocity`. **Ne jamais sizer l'epic lui-même** (sa charge = somme des feuilles). Un ticket évalué **XL** est un signal de re-découpage : préférer le scinder. Inscrire la taille + justification dans le body de chaque sub-issue sous une section `## Complexité` (ex. `**M (3 pts)** — 1 composant DSFR + 1 query tRPC, pas de migration`).
+8. **Commentaire final sur l'epic** : `[Validation utilisateur] Architecture validée — N tickets créés (sizés), prêt pour /implement`. Logger `ISSUES_CREATED "count=<N>"` puis `COMPLETE`.
 
 ---
 
@@ -117,7 +122,15 @@ L'objectif : transformer une task vague en un spec exécutable, **sans découpag
    ```
    Appliquer le label `complexe` si > 5 fichiers ou refacto multi-modules attendu (op. via `gh issue edit --add-label`).
 
-8. **Commentaire final** : `[Validation utilisateur] Analyse validée — prêt pour /implement`. Logger `ANALYSIS_POSTED` puis `COMPLETE`.
+   Inclure dans le commentaire une section `## Complexité` : **taille t-shirt + points + justification 1 ligne** (cf. `rules/complexity-estimation.md`, rubrique + anchors).
+
+8. **Sizing de la task (complexité t-shirt)** : poser la taille sur le board :
+   ```bash
+   bash scripts/orchestration/set_ticket_size.sh "$TASK_N" <XS|S|M|L|XL>
+   ```
+   Écrit `Size` + `Estimate` → alimente `/velocity`.
+
+9. **Commentaire final** : `[Validation utilisateur] Analyse validée (taille <T>) — prêt pour /implement`. Logger `ANALYSIS_POSTED` puis `COMPLETE`.
 
 ---
 
