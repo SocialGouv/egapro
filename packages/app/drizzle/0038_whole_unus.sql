@@ -1,0 +1,1 @@
+ALTER TABLE "app_company" ADD COLUMN "naf_label" varchar(255);

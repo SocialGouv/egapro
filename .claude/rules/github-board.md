@@ -20,7 +20,22 @@ Les IDs sont **stables** tant que le board n'est pas recréé. Si un snippet éc
 ```
 PROJECT_ID       = PVT_kwDOAh0HH84BFsK7
 STATUS_FIELD_ID  = PVTSSF_lADOAh0HH84BFsK7zg29EI8
+SIZE_FIELD_ID    = PVTSSF_lADOAh0HH84BFsK7zg29ENU   # single-select XS/S/M/L/XL
+ESTIMATE_FIELD_ID= PVTF_lADOAh0HH84BFsK7zg29ENY     # number (points Fibonacci)
+SPRINT_FIELD_ID  = PVTIF_lADOAh0HH84BFsK7zg8pCDM    # iteration
 ```
+
+### Size options (complexité t-shirt)
+
+| Size | Option ID | Points (`Estimate`) |
+|---|---|---|
+| XS | `6c6483d2` | 1 |
+| S | `f784b110` | 2 |
+| M | `7515a9f1` | 3 |
+| L | `817d0097` | 5 |
+| XL | `db339eb2` | 8 |
+
+Ne jamais écrire `Size` / `Estimate` en GraphQL brut : passer par `scripts/orchestration/set_ticket_size.sh <ticket> <XS|S|M|L|XL>` (écrit les deux champs d'un coup). Rubrique de sizing : `rules/complexity-estimation.md`. Lecture de la vélocité : `scripts/orchestration/sprint_velocity.sh` (skill `/velocity`).
 
 ### Issue types (GitHub native)
 
