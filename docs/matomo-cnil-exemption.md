@@ -41,22 +41,24 @@ configuration respecte toutes les conditions ci-dessous.
 
 ## Checklist CNIL → où c'est traité
 
-Légende : ✅ code applicatif · ⚙️ configuration de l'instance Matomo · 📄 documentaire.
+Légende — **Nature** : ✅ code applicatif · ⚙️ configuration de l'instance Matomo · 📄 documentaire.
+La colonne *Statut & paramètre* donne la valeur exacte appliquée (et automatisée en
+local par le service `matomo-init`, cf. [Vérifier en local](#vérifier-en-local-docker-compose)).
 
-| # | Exigence CNIL | Traité | Statut |
-|---|---|---|---|
-| 1 | Désactiver les exports de données (Journal des visites & Profil visiteur) | ⚙️ | Réglages `Live.disable_visitor_log` + `disable_visitor_profile` |
-| 2 | Offrir un Opt-out aux visiteurs | ✅ | Iframe Matomo officielle sur `/gestion-des-cookies` |
-| 3a | Adresses IP anonymisées (≥ 2 octets masqués) | ⚙️ | Anonymisation IP activée, masque 2 octets |
-| 3b | First-party uniquement, pas de cross-domain / cookies tiers | ⚙️ | Défaut Matomo, non modifié |
-| 3c | Pas de mesure du « User ID » | ⚙️ | Non utilisé + pseudonymisation activée |
-| 3d | Pas de e-commerce | ⚙️ | Site déclaré « N'est pas un site d'e-commerce » |
-| 3e | Heatmaps & enregistrements de session désactivés | ✅ | `_paq.push(['HeatmapSessionRecording::disable'])` |
-| 4 | Pas de données personnelles (dimensions, URLs, titres, events) | ✅ | `cleanUrl`, taxonomie sans PII, dimensions = année + tranche |
-| + | Respect du signal « Do Not Track » | ✅ ⚙️ | `setDoNotTrack(true)` côté client + DNT activé côté serveur |
-| + | Conservation : traceurs ≤ 13 mois, données brutes ≤ 25 mois | ⚙️ | Cookie 13 mois (défaut), purge des logs à 750 jours |
-| + | Inscription au registre RGPD | 📄 | À tracer dans le registre des traitements |
-| + | Pages légales à jour | ✅ | `/gestion-des-cookies` et `/donnees-personnelles` |
+| Étape du guide CNIL | Nature | Statut egapro & paramètre appliqué |
+|---|---|---|
+| **1.** Désactiver les exports de données (Journal des visites / Profil visiteur) | ⚙️ | ✅ `Live.disable_visitor_log = 1` + `Live.disable_visitor_profile = 1` |
+| **2.** Mécanisme d'opt-out sur le site | ✅ code | ✅ iframe Matomo `action=optOut` sur `/gestion-des-cookies` (`MatomoOptOut`) |
+| **3a.** Anonymisation IP (masque 2 octets — défaut) | ⚙️ | ✅ `ipAnonymizerEnabled = 1`, `ipAddressMaskLength = 2`, `useAnonymizedIpForVisitEnrichment = 1` |
+| **3b.** Cookies first-party uniquement, pas de cross-domain (défaut) | ⚙️ | ✅ défaut Matomo conservé (rien activé) |
+| **3c.** Pas de « User ID » | ⚙️ | ✅ non utilisé + `anonymizeUserId = 1` (pseudonymisation) |
+| **3d.** Site « n'est pas un site d'e-commerce » | ⚙️ | ✅ `ecommerce = 0` à la création du site |
+| **3e.** `_paq.push(['HeatmapSessionRecording::disable'])` | ✅ code | ✅ poussé dans `onInitialization` de `MatomoAnalytics` |
+| **4.** Pas de PII (dimensions / URLs / titres / events) | ✅ code | ✅ `cleanUrl = true` ; taxonomie sans PII ; dimensions = `2024` / `50-99` |
+| **+** Respect du « Do Not Track » | ✅ ⚙️ | ✅ `setDoNotTrack(true)` (client) + `PrivacyManager.doNotTrackEnabled = 1` (serveur) |
+| **+** Conservation : traceurs ≤ 13 mois, données brutes ≤ 25 mois | ⚙️ | ✅ cookie `_pk_id` 13 mois (défaut) + `delete_logs_older_than = 750` jours |
+| **+** Inscription au registre RGPD | 📄 | ⏳ à tracer dans le registre des traitements |
+| **+** Pages légales à jour | ✅ code | ✅ `/gestion-des-cookies` + `/donnees-personnelles` |
 
 ## Côté application (code)
 
@@ -130,47 +132,53 @@ Ces durées sont reprises dans le tableau de la page `/gestion-des-cookies`.
 ## Vérifier en local (docker compose)
 
 Une instance Matomo jetable est fournie en **profil opt-in** dans
-`docker-compose.yml` (services `matomo` + `matomo-db`). Elle ne démarre pas avec
-le `docker compose up` habituel.
+`docker-compose.yml` (services `matomo`, `matomo-db`, `matomo-init`). Elle ne
+démarre pas avec le `docker compose up` habituel. Le service **`matomo-init`**
+(`scripts/matomo-local/cnil-setup.py`) installe Matomo en mode headless puis
+**applique automatiquement toute la configuration CNIL du tableau ci-dessus**
+(anonymisation IP 2 octets, DNT, purge 750 j, désactivation des exports,
+e-commerce off, dimensions slots 1 & 2). Le script est **idempotent** : un
+nouveau `up` ré-affirme les réglages sans les dupliquer.
 
 ```bash
-# 1. Démarrer l'instance Matomo locale
-docker compose --profile matomo up -d matomo matomo-db
+# 1. Démarrer + auto-configurer (matomo-db, matomo, puis matomo-init en one-shot)
+docker compose --profile matomo up -d
+docker compose logs -f matomo-init      # suivre l'install + la config CNIL
 
-# 2. Installer Matomo (assistant web sur http://localhost:8080) :
-#    - base de données pré-remplie (host matomo-db / matomo / matomo)
-#    - créer le Super User et le site « http://localhost:3000 »
-
-# 3. Appliquer la configuration CNIL (cf. tableau « Côté instance Matomo ») :
-#    anonymisation IP 2 octets, DNT, purge 750 j, désactivation des exports,
-#    e-commerce off, et les 2 dimensions personnalisées (slots 1 et 2).
-
-# 4. Pointer l'application sur l'instance locale (packages/app/.env) :
+# 2. Pointer l'application sur l'instance locale (packages/app/.env) :
 #    NEXT_PUBLIC_MATOMO_URL="http://localhost:8080"
 #    NEXT_PUBLIC_MATOMO_SITE_ID="1"
 #    puis `pnpm dev:app` et parcourir les funnels / déclencher les actions.
 
-# 5. Relire les événements reçus, sans PII, via l'API de reporting Matomo
-#    (rapports « Comportement → Événements » et « Visiteurs → Journal »).
+# 3. UI Matomo : http://localhost:8080  (admin / adminadmin12 — local uniquement)
+#    Les events arrivent dans « Comportement → Événements ».
+
+# Pour repartir d'un Matomo vierge :
+#   docker compose --profile matomo down && docker volume rm egapro_matomodata egapro_matomodbdata
 ```
 
-Pour rejouer **toute** la taxonomie d'un coup (sans parcourir l'UI), on peut
-envoyer chaque événement de [`plan-de-tracking.md`](./plan-de-tracking.md)
-directement sur `http://localhost:8080/matomo.php` (`idsite=1&rec=1`,
-`e_c`/`e_a`/`e_n`/`e_v`, `dimension1`/`dimension2`) puis relire le tout via
-`Live.getLastVisitsDetails`.
+Pour rejouer **toute** la taxonomie d'un coup (sans parcourir l'UI), envoyer
+chaque événement de [`plan-de-tracking.md`](./plan-de-tracking.md) directement
+sur `http://localhost:8080/matomo.php` (`idsite=1&rec=1`,
+`e_c`/`e_a`/`e_n`/`e_v`, `dimension1`/`dimension2`), puis relire l'agrégat via la
+Reporting API (`Events.getCategory`).
+
+> ⚠️ Le **journal des visites (Live)** est volontairement désactivé (étape 1 du
+> guide CNIL). La vérification se fait donc sur les **rapports agrégés**
+> (`Comportement → Événements`), pas sur le log par visite.
 
 ## Résultat de la vérification
 
-Vérification réalisée sur une instance **Matomo 5.11** locale, configurée comme
-ci-dessus, avec rejeu des **26 hits** de la taxonomie (4 pages vues + 22
-événements distincts) :
+Vérification réalisée sur une instance **Matomo 5.11** locale, montée et
+**configurée automatiquement par `matomo-init`**, avec rejeu des hits de la
+taxonomie (pages vues + 22 événements distincts) :
 
 - 🔒 **IP anonymisée** : une IP de test `203.0.113.45` est stockée masquée en
   `203.0.0.0` (2 octets) — anonymisation effective.
 - ✅ **Tous les événements reçus** : les 3 funnels (start / step / abandon /
   complete) **et** les 10 actions ponctuelles remontent avec la bonne
-  `category` / `action` / `name` / `value`.
+  `category` / `action` / `name` / `value` (21 couples `category/action` dans
+  le rapport agrégé `Events.getCategory`).
 - ✅ **URLs propres** : les pages vues n'enregistrent que le chemin, sans query
   string.
 - ✅ **Dimensions non personnelles** : slot 1 = `2024`, slot 2 = `50-99` ;
