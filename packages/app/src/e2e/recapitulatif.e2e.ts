@@ -62,7 +62,12 @@ test.describe("Recapitulatif page", () => {
 	test("displays return button", async ({ page }) => {
 		await page.goto("/declaration-remuneration/recapitulatif");
 
-		await expect(page.getByRole("link", { name: "Mon espace" })).toBeVisible();
+		await expect(
+			page
+				.locator("main")
+				.getByRole("link", { name: "Mon espace", exact: true })
+				.last(),
+		).toBeVisible();
 	});
 
 	test("returns 404 for non-submitted declaration with correction type", async ({
