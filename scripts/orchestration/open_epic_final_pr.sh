@@ -58,7 +58,7 @@ SUB_LINES=$(gh api graphql -f query="{
 
 BODY="Intégration finale de l'epic #${EPIC} — **${EPIC_TITLE}**.
 
-Cette PR rassemble les commits squashés de chaque sous-ticket validé par la pipeline. Chaque sous-ticket a déjà passé : tests écrits/validés par \`tu-dev\` (TU + intégration), CI verte, validators IA (validator / structural-auditor / rgaa-auditor / security-auditor / functional-validator), Sonar Quality Gate, et réponse aux review bots. La fidélité visuelle vs. Figma a été vérifiée par \`code-dev\` lui-même via le MCP \`figma-dev\`. Une fois la feature intégrée, l'agent \`e2e-dev\` a rejoué la suite E2E (triage de régression) et ajouté la couverture E2E Playwright du parcours (commit \`test(e2e): …\` sur \`${BRANCH}\`) — toute régression E2E détectée est signalée par un commentaire \`e2e-dev:\` sur l'epic. Cette PR est le **point unique de revue humaine** pour l'epic.
+Cette PR rassemble les commits squashés de chaque sous-ticket validé par la pipeline. Chaque sous-ticket a déjà passé : tests écrits/validés par \`tu-dev\` (TU + intégration), CI verte, validators IA (validator / structural-auditor / rgaa-auditor / security-auditor / functional-validator), Sonar Quality Gate, et réponse aux review bots. La fidélité visuelle vs. Figma a été vérifiée par \`code-dev\` lui-même via le MCP \`figma-dev\`. La **gate E2E bloquante** est verte : l'agent \`e2e-dev\` a rejoué toute la suite E2E sur la feature intégrée (aucune régression de parcours) et ajouté la couverture E2E Playwright (commit \`test(e2e): …\` sur \`${BRANCH}\`). Cette PR est le **point unique de revue humaine** pour l'epic.
 
 ## Sous-tickets
 

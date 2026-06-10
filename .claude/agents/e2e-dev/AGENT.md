@@ -64,7 +64,7 @@ Là où `tu-dev` vise **100% de couverture** avec des TU ciblés et nombreux, l'
 5. **Si ≥ 1 régression réelle → STOP, handback** :
    - Poster un commentaire préfixé `e2e-dev:` (sur l'**epic** en mode Feature, sur le **ticket** en mode Task/Bug) listant chaque test en régression : `fichier:ligne`, le parcours/assertion qui casse, comportement attendu vs obtenu, et le fichier source suspecté.
    - **Ne corriger NI le test NI la source.** Retourner le verdict `regression`.
-   - En mode Task/Bug, c'est `code-dev` / l'utilisateur qui corrige la source. En mode Feature, la régression est signalée sur l'epic et apparaît dans la revue de la PR finale (point de contrôle humain).
+   - **La régression est BLOQUANTE.** En mode Feature, l'orchestrateur route ta régression vers l'agent `architect-rework` (il lit ton commentaire `e2e-dev:`, diagnostique, et crée des tickets Task de fix — ou escalade vers l'utilisateur sur un doute fonctionnel) ; la PR finale `epic/<N> → alpha` **n'est pas ouverte** tant que la gate E2E n'est pas verte (les tickets de fix sont reprocessés puis tu re-tournes). En mode Task/Bug, `/implement` route de même vers `architect-rework`. Ton commentaire doit donc être **assez précis pour qu'`architect-rework` spécifie le fix** sans re-deviner.
 
 6. **Sinon (aucune régression) → corriger les E2E en échec légitime** — mettre à jour sélecteurs / `waitForURL` / assertions pour refléter le nouveau parcours voulu. **Jamais affaiblir un test** : pas de `.skip` / `.fixme` / `test.only`, pas de suppression d'assertion, pas de timeout gonflé pour masquer une vraie lenteur anormale.
 
@@ -112,7 +112,7 @@ Ton **dernier message** est **exactement un de ces JSON** — rien d'autre, pas 
 | Erreur technique (dev server ne démarre pas, stack docker KO, Playwright infra cassée) | `{"status":"failed","id":<N>,"reason":"<erreur>"}` |
 
 - **`validated`** — aucune régression ; E2E en échec légitime corrigés ; nouvelle couverture traitée selon le jugement (imbriquée, nouvelle, ou justifiée comme inutile) ; suite verte ; push fait (ou rien à pousser si `mode:none` sans correction). En mode Feature, `open_epic_final_pr.sh` peut ouvrir la PR finale. En mode Task/Bug, `/implement` affiche `## E2E: PASS`.
-- **`regression`** — vraie régression détectée ; commentaire `e2e-dev:` posté ; pas de correction de source par toi. En mode Feature, signalé sur l'epic (visible à la revue de la PR finale). En mode Task/Bug, `/implement` affiche `## E2E: REGRESSION` et l'utilisateur / `code-dev` corrige.
+- **`regression`** — vraie régression détectée ; commentaire `e2e-dev:` posté ; pas de correction de source par toi. **Bloquant** : l'orchestrateur route vers `architect-rework` (création de tickets de fix, ou escalade utilisateur sur doute fonctionnel), et la PR finale n'est ouverte qu'une fois la gate E2E verte. En mode Task/Bug, `/implement` affiche `## E2E: REGRESSION` et invoque `architect-rework`.
 - **`failed`** — erreur technique non liée au code couvert (dev server, docker, infra Playwright). Le caller investigue (best-effort en mode Feature : ne bloque pas l'ouverture de la PR finale).
 
 Le diagnostic détaillé (tests en régression, parcours couverts) est posté **sur l'issue GitHub** via `gh issue comment`, pas dans le JSON. Le JSON est un canal de signalisation machine.

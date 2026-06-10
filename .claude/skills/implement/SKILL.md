@@ -14,7 +14,7 @@ description: "Phase exécution. Détecte le mode (epic/task/bug) selon le type d
 | `Bug` | bug | Lance `code-dev` en **CLI foreground** (`claude --agent code-dev`, bloquant) avec `rules/bug-fix-workflow.md`, puis **e2e-dev** une fois `validated` |
 | sub-issue d'un epic (non-feature) | task-debug | Comme `task` — utile pour re-rouler un sous-ticket d'un epic plus large (ex: après `refacto` ou debug) |
 
-`/implement` n'orchestre rien lui-même : pour epic c'est `epic_loop.sh` qui parallèlise (et lance `run_e2e_dev.sh` en fin de loop), pour task/bug c'est un process CLI `claude --agent code-dev` foreground suivi d'un `claude --agent e2e-dev`. **`code-dev` tourne comme _main agent_ (process CLI)** — obligatoire pour qu'il puisse lancer ses propres sous-agents (`tu-dev`, les 4 validateurs, `functional-validator`) : un sous-agent ne peut pas en spawner d'autres. **`e2e-dev` tourne en fin de pipeline** (après dev terminé + sous-tickets mergés pour une Feature, ou après `code-dev validated` pour une Task/Bug) et possède toute la couverture E2E — `code-dev` n'écrit plus aucun test E2E.
+`/implement` n'orchestre rien lui-même : pour epic c'est `epic_loop.sh` qui parallèlise (et exécute la **gate E2E bloquante** `run_e2e_dev.sh` → `run_architect_rework.sh` en fin de loop), pour task/bug c'est un process CLI `claude --agent code-dev` foreground suivi d'un `claude --agent e2e-dev`. **`code-dev` tourne comme _main agent_ (process CLI)** — obligatoire pour qu'il puisse lancer ses propres sous-agents (`tu-dev`, les 4 validateurs, `functional-validator`) : un sous-agent ne peut pas en spawner d'autres. **`e2e-dev` tourne en fin de pipeline** (après dev terminé + sous-tickets mergés pour une Feature, ou après `code-dev validated` pour une Task/Bug) et possède toute la couverture E2E — `code-dev` n'écrit plus aucun test E2E.
 
 ---
 
@@ -185,11 +185,12 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
      | `.status` e2e-dev | Action skill | Markdown affiché |
      |---|---|---|
      | `validated` | aucune (tests poussés sur la branche, CI re-déclenchée) | `## E2E: PASS` + mode (`nested`/`new`/`none`) + fichiers + note « CI re-déclenchée par le push » |
-     | `regression` | afficher la régression + lien vers le commentaire `e2e-dev:` ; l'utilisateur (ou un nouveau `/implement`) corrige la source | `## E2E: REGRESSION` + tests en régression + fichier source suspecté |
+     | `regression` | **bloquant** : invoquer `architect-rework` (CLI foreground) sur le ticket pour analyser la régression et créer le(s) ticket(s) de fix — ou escalader sur doute fonctionnel ; afficher les tickets créés / la question | `## E2E: REGRESSION` + tests en régression + fichier source suspecté + tickets de fix créés (next-step `/implement <fix>`) |
      | `rate_limited` | proposer de retenter ou de lancer `e2e-dev` plus tard | `## E2E: RATE_LIMITED` + délai |
-     | `failed` | non-bloquant — noter l'échec technique (dev server / infra) | `## E2E: FAILED` + raison |
+     | `failed` | noter l'échec technique (dev server / infra), proposer de relancer | `## E2E: FAILED` + raison |
 
-   - **e2e-dev est non-bloquant côté board** : le ticket reste en `In progress` quel que soit le verdict E2E ; l'utilisateur arbitre une régression à la revue.
+   - **Sur `regression`** : lancer `architect-rework` exactement comme `e2e-dev` (CLI foreground, `claude --agent architect-rework --model opus`), en lui passant le ticket et la base de comparaison. Il lit le commentaire `e2e-dev:`, crée des tickets Task de fix (To Do) ou pose une question à l'utilisateur (`needs_user`). Comme on est en foreground (utilisateur présent), afficher le verdict et la **next-step** (`/implement <ticket-de-fix>`), plutôt que de relancer l'orchestrateur automatiquement.
+   - **e2e-dev ne bouge pas le board** : le ticket reste en `In progress` ; une régression est traitée par les tickets de fix d'`architect-rework` (l'utilisateur les implémente, puis `e2e-dev` re-valide).
 
 6. **Pour les sub-issues d'epic validées en mode synchrone** : `process_tick_result.sh` n'est pas appelé (c'est un mécanisme du loop driver). Le squash-merge de la PR validée dans `epic/<N>` peut être déclenché manuellement (de préférence **après** que `e2e-dev` a poussé sa couverture, pour que les E2E partent avec) :
    ```bash
@@ -270,7 +271,8 @@ L'utilisateur retire `dispatch=escalate` (et `attempt=3`) après orientation pou
 
 - Loop driver : `scripts/orchestration/epic_loop.sh`
 - Branche d'intégration (NEW mode) : `scripts/orchestration/{ensure_epic_branch,merge_validated_ticket,rebase_epic_branch,open_epic_final_pr}.sh`
-- Fin de loop epic (best-effort) : `scripts/orchestration/{run_doc_writer,run_e2e_dev}.sh` (doc-writer puis e2e-dev, avant la PR finale)
+- Gate E2E bloquante (fin d'epic, avant doc-writer + PR finale) : `scripts/orchestration/run_e2e_dev.sh` → sur régression `scripts/orchestration/run_architect_rework.sh` (crée les tickets de fix, reprocessés par le loop)
+- Régénération doc (best-effort, après la gate E2E verte) : `scripts/orchestration/run_doc_writer.sh`
 - Computation du plan : `scripts/orchestration/dispatch_plan.sh`
 - Mutations board : `scripts/orchestration/process_tick_result.sh`
 - Helpers : `scripts/orchestration/{cache_gh,log_event,set_ticket_status,epic_state,render_dashboard,create_linked_branch,force_pr_issue_link}.sh`

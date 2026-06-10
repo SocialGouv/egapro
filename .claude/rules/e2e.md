@@ -11,10 +11,12 @@ paths:
 
 `code-dev` n'écrit plus aucun test E2E. La couverture E2E est ajoutée **après l'intégration du code**, par l'agent `e2e-dev` :
 
-- **Feature (epic)** → en fin d'`epic_loop.sh`, une fois tous les sous-tickets squash-mergés dans `epic/<N>`.
+- **Feature (epic)** → **gate E2E bloquante** en fin d'`epic_loop.sh`, une fois tous les sous-tickets squash-mergés dans `epic/<N>` (avant doc-writer + PR finale).
 - **Task / Bug** → après le verdict `validated` de `code-dev`, invoqué par `/implement`.
 
-Voir `.claude/agents/e2e-dev/AGENT.md` pour le workflow complet (triage de régression, décision d'imbrication, critère de criticité pour les bugs).
+La gate est **bloquante** : sur une vraie régression, `e2e-dev` rend la main (commentaire `e2e-dev:`) et l'orchestrateur route vers l'agent `architect-rework` (création de tickets de fix reprocessés, ou escalade utilisateur sur doute fonctionnel). La PR finale n'est ouverte qu'une fois la suite E2E verte.
+
+Voir `.claude/agents/e2e-dev/AGENT.md` (workflow : triage de régression, décision d'imbrication, criticité bugs) et `.claude/agents/architect-rework/AGENT.md`.
 
 ## Préférer l'imbrication aux fichiers isolés
 

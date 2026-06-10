@@ -23,17 +23,19 @@ fi
 # Usage:
 #   bash scripts/orchestration/run_e2e_dev.sh <epic_N>
 #
-# Exit codes:
-#   0  agent returned `validated` (suite green, coverage handled, pushed)
-#   1  technical failure (claude CLI missing, malformed JSON, agent `failed`)
-#   2  agent returned `rate_limited` (transient, caller may retry later)
-#   3  agent returned `regression` (a real E2E regression — surfaced on the epic;
-#      NON-BLOCKING for the epic, the final PR is still opened for human review)
+# Exit codes (consumed by epic_loop.sh's BLOCKING E2E gate):
+#   0  agent returned `validated` (suite green, coverage handled, pushed) → gate passes
+#   1  technical failure (claude CLI missing, malformed JSON, agent `failed`) → gate retries
+#   2  agent returned `rate_limited` (transient) → gate retries on a later tick
+#   3  agent returned `regression` (a real E2E regression) → epic_loop routes to
+#      architect-rework (run_architect_rework.sh), which creates fix Task tickets
+#      the loop reprocesses before re-running this gate. BLOCKING: the final PR
+#      is NOT opened while the gate is red.
 #
-# Hard rule: NEVER fails the epic. Like doc-writer, any non-`validated` outcome
-# just logs + surfaces and the caller (epic_loop.sh) proceeds to open the final
-# PR. A `regression` is surfaced prominently (agent posts an `e2e-dev:` comment
-# on the epic; this script logs E2E_REGRESSION) so the human sees it on the PR.
+# This script itself only runs the agent + parses its verdict + manages the
+# worktree lifecycle. The blocking/rework decision lives in epic_loop.sh (the
+# gate); the agent posts an `e2e-dev:` comment on the epic on a regression so
+# architect-rework has the failure details.
 #
 # Env (defaults shown):
 #   EPIC_LOOP_BUDGET_E2E      15     USD max for the e2e-dev Opus run
@@ -202,7 +204,7 @@ case "$STATUS" in
         ;;
     regression)
         bash "$SCRIPT_DIR/log_event.sh" "$AID" E2E_REGRESSION "epic=$EPIC_N — see e2e-dev: comment on the epic"
-        echo "WARN e2e-dev epic=$EPIC_N: REGRESSION détectée — voir le commentaire e2e-dev: sur l'epic. Final PR ouverte quand même (revue humaine)." >&2
+        echo "BLOCKING e2e-dev epic=$EPIC_N: REGRESSION détectée — voir le commentaire e2e-dev: sur l'epic. epic_loop va router vers architect-rework (création de tickets de fix)." >&2
         exit 3
         ;;
     rate_limited)
