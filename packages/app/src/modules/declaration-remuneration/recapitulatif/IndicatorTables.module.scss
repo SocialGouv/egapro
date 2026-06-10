@@ -4,6 +4,11 @@
 	gap: 1.5rem;
 }
 
+:global(.fr-table__content) td,
+:global(.fr-table__content) th {
+	height: 56px;
+}
+
 .numeric {
 	text-align: right;
 	font-variant-numeric: tabular-nums;

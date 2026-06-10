@@ -4,6 +4,11 @@
 	gap: 1rem;
 }
 
+:global(.fr-table__content) td,
+:global(.fr-table__content) th {
+	height: 56px;
+}
+
 .heading {
 	margin: 0;
 }
