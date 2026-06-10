@@ -7,6 +7,7 @@ import {
 	TOTAL_STEPS,
 } from "~/modules/cseOpinion";
 import { getCseOpinionPreviousHref } from "~/modules/declaration-remuneration/shared/complianceNavigation";
+import { hasGapsAboveThreshold } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
@@ -72,10 +73,18 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		const secondGap = opinions.find(
 			(opinion) => opinion.declarationNumber === 2 && opinion.type === "gap",
 		);
+		const initialCategories = declarationData.employeeCategories.filter(
+			(category) => category.declarationType === "initial",
+		);
+		const correctionCategories = declarationData.employeeCategories.filter(
+			(category) => category.declarationType === "correction",
+		);
 		const columns = computeContentTypeColumns({
 			hasSecondDeclaration,
 			firstDeclGapConsulted: firstGap?.gapConsulted ?? null,
 			secondDeclGapConsulted: secondGap?.gapConsulted ?? null,
+			firstDeclGapHigh: hasGapsAboveThreshold(initialCategories),
+			secondDeclGapHigh: hasGapsAboveThreshold(correctionCategories),
 		});
 		return (
 			<Step2Upload

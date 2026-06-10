@@ -24,6 +24,13 @@ export type ContentTypeColumnsInput = {
 	hasSecondDeclaration: boolean;
 	firstDeclGapConsulted: boolean | null;
 	secondDeclGapConsulted: boolean | null;
+	firstDeclGapHigh: boolean;
+	secondDeclGapHigh: boolean;
+};
+
+export type ContentTypeKey = {
+	declarationNumber: DeclarationNumber;
+	type: ContentType;
 };
 
 export type FileContentTypeAssociation = {

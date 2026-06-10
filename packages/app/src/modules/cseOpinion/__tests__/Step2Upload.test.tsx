@@ -86,12 +86,16 @@ const SINGLE_COLUMN = computeContentTypeColumns({
 	hasSecondDeclaration: false,
 	firstDeclGapConsulted: false,
 	secondDeclGapConsulted: null,
+	firstDeclGapHigh: false,
+	secondDeclGapHigh: false,
 });
 
 const DUAL_COLUMNS = computeContentTypeColumns({
 	hasSecondDeclaration: true,
 	firstDeclGapConsulted: true,
 	secondDeclGapConsulted: true,
+	firstDeclGapHigh: true,
+	secondDeclGapHigh: true,
 });
 
 function getFileInput() {
@@ -580,7 +584,7 @@ describe("Step2Upload", () => {
 			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
 		).toBeChecked();
 
-		fireEvent.click(screen.getByRole("button", { name: "Supprimer" }));
+		fireEvent.click(screen.getByRole("button", { name: /Supprimer/ }));
 		expect(deleteMutateMock).toHaveBeenCalledWith({ fileId: "file-1" });
 
 		act(() => {
@@ -601,7 +605,7 @@ describe("Step2Upload", () => {
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
 		});
 
-		fireEvent.click(screen.getByRole("button", { name: "Supprimer" }));
+		fireEvent.click(screen.getByRole("button", { name: /Supprimer/ }));
 
 		expect(() => {
 			act(() => {

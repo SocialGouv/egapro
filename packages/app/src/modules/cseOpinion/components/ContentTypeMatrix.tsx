@@ -1,9 +1,12 @@
 "use client";
 
+import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 
 import type { AssociationMap, ContentTypeColumn, UploadedFile } from "../types";
 import styles from "./ContentTypeMatrix.module.scss";
+
+const ACTIONS_HEADER_ID = "matrix-col-actions";
 
 type Props = {
 	files: UploadedFile[];
@@ -17,6 +20,10 @@ type Props = {
 
 function columnHeaderId(column: ContentTypeColumn): string {
 	return `matrix-col-${column.declarationNumber}-${column.type}`;
+}
+
+function tooltipId(column: ContentTypeColumn): string {
+	return `matrix-tooltip-${column.declarationNumber}-${column.type}`;
 }
 
 function checkboxLabel(column: ContentTypeColumn, fileName: string): string {
@@ -56,7 +63,14 @@ export function ContentTypeMatrix({
 											key={column.id}
 											scope="col"
 										>
-											<span className={styles.columnLabel}>{column.label}</span>
+											<span className={styles.columnLabel}>
+												{column.label}
+												<TooltipButton
+													id={tooltipId(column)}
+													label={`Informations sur « ${column.label}${column.declarationLabel ? ` — ${column.declarationLabel}` : ""} »`}
+													text={column.description}
+												/>
+											</span>
 											{column.declarationLabel && (
 												<span className={styles.columnSubLabel}>
 													{column.declarationLabel}
@@ -64,6 +78,13 @@ export function ContentTypeMatrix({
 											)}
 										</th>
 									))}
+									<th
+										className="fr-cell--center"
+										id={ACTIONS_HEADER_ID}
+										scope="col"
+									>
+										<span className="fr-sr-only">Actions</span>
+									</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -90,16 +111,6 @@ export function ContentTypeMatrix({
 													<span className="fr-text--xs fr-text--mention-grey fr-mb-0">
 														PDF
 													</span>
-													<button
-														className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-delete-line fr-btn--icon-left"
-														disabled={disabled || deletingFileId === file.id}
-														onClick={() => onDelete(file.id)}
-														type="button"
-													>
-														{deletingFileId === file.id
-															? "Suppression…"
-															: "Supprimer"}
-													</button>
 												</span>
 											</th>
 											{columns.map((column) => {
@@ -130,16 +141,31 @@ export function ContentTypeMatrix({
 																}
 																type="checkbox"
 															/>
-															<label
-																className="fr-label fr-sr-only"
-																htmlFor={inputId}
-															>
-																{checkboxLabel(column, file.fileName)}
+															<label className="fr-label" htmlFor={inputId}>
+																<span className="fr-sr-only">
+																	{checkboxLabel(column, file.fileName)}
+																</span>
 															</label>
 														</div>
 													</td>
 												);
 											})}
+											<td
+												className="fr-cell--center"
+												headers={`${fileHeaderId} ${ACTIONS_HEADER_ID}`}
+											>
+												<button
+													aria-label={
+														deletingFileId === file.id
+															? `Suppression de ${file.fileName} en cours`
+															: `Supprimer ${file.fileName}`
+													}
+													className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-delete-line"
+													disabled={disabled || deletingFileId === file.id}
+													onClick={() => onDelete(file.id)}
+													type="button"
+												/>
+											</td>
 										</tr>
 									);
 								})}

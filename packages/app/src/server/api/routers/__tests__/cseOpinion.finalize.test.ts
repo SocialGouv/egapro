@@ -37,6 +37,40 @@ const ASSOCIATIONS_FIRST_GAP: Association[] = [
 	{ declarationNumber: 1, type: "gap" },
 ];
 
+type CategoryRow = {
+	declarationType: string;
+	annualBaseWomen: string | null;
+	annualBaseMen: string | null;
+	annualVariableWomen: string | null;
+	annualVariableMen: string | null;
+	hourlyBaseWomen: string | null;
+	hourlyBaseMen: string | null;
+	hourlyVariableWomen: string | null;
+	hourlyVariableMen: string | null;
+};
+
+// A category with a ~9% salary gap (>= the 5% alert threshold).
+function gapCategory(declarationType: string): CategoryRow {
+	return {
+		declarationType,
+		annualBaseWomen: "1000",
+		annualBaseMen: "1100",
+		annualVariableWomen: null,
+		annualVariableMen: null,
+		hourlyBaseWomen: null,
+		hourlyBaseMen: null,
+		hourlyVariableWomen: null,
+		hourlyVariableMen: null,
+	};
+}
+
+// Both declarations have a gap >= 5% by default, so the Justification gate turns
+// purely on gapConsulted in the pre-existing guard tests.
+const DEFAULT_CATEGORIES: CategoryRow[] = [
+	gapCategory("initial"),
+	gapCategory("correction"),
+];
+
 type FinalizeOptions = {
 	opinionCount?: number;
 	fileCount?: number;
@@ -44,6 +78,7 @@ type FinalizeOptions = {
 	txDraft?: Record<string, unknown> | null;
 	opinions?: Opinion[];
 	associations?: Association[];
+	categories?: CategoryRow[];
 	// When true, the matching count query resolves to [] so its row is undefined,
 	// exercising the `?? 0` fallback in finalize().
 	emptyOpinionCountRow?: boolean;
@@ -57,7 +92,8 @@ type FinalizeOptions = {
 //   4 declarationRow (.where().limit)
 //   5 existingAssociations (.where)
 //   6 opinions with gapConsulted (.where)
-//   7 (inside tx) declRow for draft purge (.where().limit)
+//   7 employee categories for the gap >= 5% gate (.innerJoin().where)
+//   8 (inside tx) declRow for draft purge (.where().limit)
 function createMockDbForFinalize(options: FinalizeOptions = {}) {
 	const {
 		opinionCount = 2,
@@ -66,6 +102,7 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 		txDraft = null,
 		opinions = FIRST_GAP_CONSULTED,
 		associations = ASSOCIATIONS_FIRST_GAP,
+		categories = DEFAULT_CATEGORIES,
 		emptyOpinionCountRow = false,
 		emptyFileCountRow = false,
 	} = options;
@@ -75,6 +112,7 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 	let selectCallCount = 0;
 	const limit = vi.fn();
 	const where = vi.fn();
+	const innerJoin = vi.fn();
 	const from = vi.fn();
 	const select = vi.fn();
 
@@ -84,7 +122,7 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 		if (call === 4) {
 			return Promise.resolve(declaration ? [declaration] : []);
 		}
-		if (call === 7 && txDraft !== null) {
+		if (call === 8 && txDraft !== null) {
 			return Promise.resolve([{ draft: txDraft }]);
 		}
 		return Promise.resolve([]);
@@ -110,10 +148,14 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 		if (call === 6) {
 			return Object.assign(Promise.resolve(opinions), { limit });
 		}
+		if (call === 7) {
+			return Object.assign(Promise.resolve(categories), { limit });
+		}
 		return Object.assign(Promise.resolve([declarationLookupRow]), { limit });
 	});
 
-	from.mockReturnValue({ where });
+	innerJoin.mockReturnValue({ where });
+	from.mockReturnValue({ where, innerJoin });
 	select.mockImplementation(() => {
 		selectCallCount++;
 		return { from };
@@ -340,10 +382,12 @@ describe("cseOpinionRouter.finalize", () => {
 			expect(ctx.update).not.toHaveBeenCalled();
 		});
 
-		it("requires (2, accuracy) when a second declaration step exists", async () => {
+		it("requires (2, accuracy) when a second declaration was submitted (its opinions exist)", async () => {
 			const ctx = createMockDbForFinalize({
-				declaration: { ...DEFAULT_DECLARATION, secondDeclarationStep: "step1" },
-				opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: false }],
+				opinions: [
+					{ declarationNumber: 1, type: "gap", gapConsulted: false },
+					{ declarationNumber: 2, type: "gap", gapConsulted: false },
+				],
 				associations: [{ declarationNumber: 1, type: "accuracy" }],
 			});
 			const caller = await createCaller(ctx.db);
@@ -354,9 +398,23 @@ describe("cseOpinionRouter.finalize", () => {
 			expect(ctx.update).not.toHaveBeenCalled();
 		});
 
+		it("does not require a second-declaration association when correction was only started (secondDeclarationStep set, no second-declaration opinion)", async () => {
+			// Regression guard (epic #3476): finalize keys off submitted second-
+			// declaration opinions, like the Step 2 matrix — not secondDeclarationStep,
+			// which is set as soon as correction data is saved. Relying on the column
+			// would demand a (2, accuracy) association the matrix never offers.
+			const ctx = createMockDbForFinalize({
+				declaration: { ...DEFAULT_DECLARATION, secondDeclarationStep: 2 },
+				opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: false }],
+				associations: [{ declarationNumber: 1, type: "accuracy" }],
+			});
+			const caller = await createCaller(ctx.db);
+
+			await expect(caller.finalize()).resolves.toEqual({ success: true });
+		});
+
 		it("requires (2, gap) when second declaration gapConsulted is true", async () => {
 			const ctx = createMockDbForFinalize({
-				declaration: { ...DEFAULT_DECLARATION, secondDeclarationStep: "step1" },
 				opinions: [
 					{ declarationNumber: 1, type: "gap", gapConsulted: false },
 					{ declarationNumber: 2, type: "gap", gapConsulted: true },
@@ -376,7 +434,6 @@ describe("cseOpinionRouter.finalize", () => {
 
 		it("passes with a full two-declaration set when every required type is covered", async () => {
 			const ctx = createMockDbForFinalize({
-				declaration: { ...DEFAULT_DECLARATION, secondDeclarationStep: "step1" },
 				opinions: [
 					{ declarationNumber: 1, type: "gap", gapConsulted: true },
 					{ declarationNumber: 2, type: "gap", gapConsulted: true },
@@ -395,7 +452,6 @@ describe("cseOpinionRouter.finalize", () => {
 
 		it("does not require (2, gap) when second declaration gapConsulted is false", async () => {
 			const ctx = createMockDbForFinalize({
-				declaration: { ...DEFAULT_DECLARATION, secondDeclarationStep: "step1" },
 				opinions: [
 					{ declarationNumber: 1, type: "gap", gapConsulted: false },
 					{ declarationNumber: 2, type: "gap", gapConsulted: false },
@@ -404,6 +460,34 @@ describe("cseOpinionRouter.finalize", () => {
 					{ declarationNumber: 1, type: "accuracy" },
 					{ declarationNumber: 2, type: "accuracy" },
 				],
+			});
+			const caller = await createCaller(ctx.db);
+
+			await expect(caller.finalize()).resolves.toEqual({ success: true });
+		});
+
+		it("does not require (1, gap) when gapConsulted is true but there is no gap >= 5%", async () => {
+			const ctx = createMockDbForFinalize({
+				opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: true }],
+				associations: [{ declarationNumber: 1, type: "accuracy" }],
+				categories: [],
+			});
+			const caller = await createCaller(ctx.db);
+
+			await expect(caller.finalize()).resolves.toEqual({ success: true });
+		});
+
+		it("does not require (2, gap) when gapConsulted is true but there is no gap >= 5% on the second declaration", async () => {
+			const ctx = createMockDbForFinalize({
+				opinions: [
+					{ declarationNumber: 1, type: "gap", gapConsulted: false },
+					{ declarationNumber: 2, type: "gap", gapConsulted: true },
+				],
+				associations: [
+					{ declarationNumber: 1, type: "accuracy" },
+					{ declarationNumber: 2, type: "accuracy" },
+				],
+				categories: [gapCategory("initial")],
 			});
 			const caller = await createCaller(ctx.db);
 

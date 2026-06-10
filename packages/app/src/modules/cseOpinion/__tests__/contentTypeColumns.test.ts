@@ -26,6 +26,8 @@ describe("computeContentTypeColumns", () => {
 			hasSecondDeclaration: false,
 			firstDeclGapConsulted: false,
 			secondDeclGapConsulted: null,
+			firstDeclGapHigh: false,
+			secondDeclGapHigh: false,
 		});
 
 		expect(columns.map((column) => column.id)).toEqual(["1:accuracy"]);
@@ -38,6 +40,8 @@ describe("computeContentTypeColumns", () => {
 			hasSecondDeclaration: false,
 			firstDeclGapConsulted: true,
 			secondDeclGapConsulted: null,
+			firstDeclGapHigh: true,
+			secondDeclGapHigh: false,
 		});
 
 		expect(columns.map((column) => column.id)).toEqual(["1:accuracy", "1:gap"]);
@@ -52,6 +56,8 @@ describe("computeContentTypeColumns", () => {
 			hasSecondDeclaration: true,
 			firstDeclGapConsulted: true,
 			secondDeclGapConsulted: true,
+			firstDeclGapHigh: true,
+			secondDeclGapHigh: true,
 		});
 
 		expect(columns.map((column) => column.id)).toEqual([
@@ -69,6 +75,36 @@ describe("computeContentTypeColumns", () => {
 			hasSecondDeclaration: true,
 			firstDeclGapConsulted: true,
 			secondDeclGapConsulted: false,
+			firstDeclGapHigh: true,
+			secondDeclGapHigh: true,
+		});
+
+		expect(columns.map((column) => column.id)).toEqual([
+			"1:accuracy",
+			"1:gap",
+			"2:accuracy",
+		]);
+	});
+
+	it("hides the first-declaration gap column when consulted but there is no gap >= 5%", () => {
+		const columns = computeContentTypeColumns({
+			hasSecondDeclaration: false,
+			firstDeclGapConsulted: true,
+			secondDeclGapConsulted: null,
+			firstDeclGapHigh: false,
+			secondDeclGapHigh: false,
+		});
+
+		expect(columns.map((column) => column.id)).toEqual(["1:accuracy"]);
+	});
+
+	it("hides the second-declaration gap column when consulted but there is no gap >= 5% on the second declaration", () => {
+		const columns = computeContentTypeColumns({
+			hasSecondDeclaration: true,
+			firstDeclGapConsulted: true,
+			secondDeclGapConsulted: true,
+			firstDeclGapHigh: true,
+			secondDeclGapHigh: false,
 		});
 
 		expect(columns.map((column) => column.id)).toEqual([
@@ -83,6 +119,8 @@ describe("computeContentTypeColumns", () => {
 			hasSecondDeclaration: true,
 			firstDeclGapConsulted: false,
 			secondDeclGapConsulted: true,
+			firstDeclGapHigh: true,
+			secondDeclGapHigh: true,
 		});
 
 		expect(columns.map((column) => column.id)).toEqual([
@@ -97,6 +135,8 @@ describe("computeContentTypeColumns", () => {
 			hasSecondDeclaration: true,
 			firstDeclGapConsulted: null,
 			secondDeclGapConsulted: null,
+			firstDeclGapHigh: true,
+			secondDeclGapHigh: true,
 		});
 
 		expect(columns.map((column) => column.id)).toEqual([
@@ -110,11 +150,15 @@ describe("computeContentTypeColumns", () => {
 			hasSecondDeclaration: false,
 			firstDeclGapConsulted: true,
 			secondDeclGapConsulted: null,
+			firstDeclGapHigh: true,
+			secondDeclGapHigh: false,
 		});
 		const dual = computeContentTypeColumns({
 			hasSecondDeclaration: true,
 			firstDeclGapConsulted: true,
 			secondDeclGapConsulted: true,
+			firstDeclGapHigh: true,
+			secondDeclGapHigh: true,
 		});
 
 		expect(single[0]?.missingMessage).toBe(
@@ -130,6 +174,8 @@ describe("computeContentTypeColumns", () => {
 			hasSecondDeclaration: true,
 			firstDeclGapConsulted: true,
 			secondDeclGapConsulted: true,
+			firstDeclGapHigh: true,
+			secondDeclGapHigh: true,
 		});
 
 		expect(columns[0]?.description).toContain("l'ensemble des indicateurs");

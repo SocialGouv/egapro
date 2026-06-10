@@ -13,6 +13,8 @@ const COLUMNS = computeContentTypeColumns({
 	hasSecondDeclaration: true,
 	firstDeclGapConsulted: true,
 	secondDeclGapConsulted: true,
+	firstDeclGapHigh: true,
+	secondDeclGapHigh: true,
 });
 
 const SINGLE_FILE: UploadedFile = {
@@ -67,6 +69,25 @@ describe("ContentTypeMatrix", () => {
 		expect(screen.getAllByRole("checkbox")).toHaveLength(
 			FILES.length * COLUMNS.length,
 		);
+	});
+
+	it("keeps each checkbox label visible so the DSFR box renders (regression guard for epic-3476)", () => {
+		renderMatrix();
+
+		// DSFR paints the visible checkbox via the label::before pseudo-element
+		// (the native input is opacity:0). If the label itself carries fr-sr-only
+		// it is clipped to 1px and the box disappears — the original epic-3476 bug,
+		// invisible to jsdom and to Playwright (which ignores opacity). Guard it:
+		// the label must stay un-clipped and carry the accessible name in a nested
+		// sr-only span instead.
+		for (const checkbox of screen.getAllByRole("checkbox")) {
+			const label = checkbox
+				.closest(".fr-checkbox-group")
+				?.querySelector("label");
+			expect(label).not.toBeNull();
+			expect(label).not.toHaveClass("fr-sr-only");
+			expect(label?.querySelector(".fr-sr-only")).not.toBeNull();
+		}
 	});
 
 	it("checks only the checkbox of the column associated to a file", () => {
@@ -145,17 +166,20 @@ describe("ContentTypeMatrix", () => {
 		const user = userEvent.setup();
 		const { props } = renderMatrix({ files: [SINGLE_FILE] });
 
-		await user.click(screen.getByRole("button", { name: "Supprimer" }));
+		await user.click(screen.getByRole("button", { name: /Supprimer/ }));
 
 		expect(props.onDelete).toHaveBeenCalledWith("file-1");
 	});
 
-	it("shows the deleting label and disables only the deleting file's button", () => {
+	it("shows the deleting state and disables only the deleting file's button", () => {
 		renderMatrix({ deletingFileId: "file-1" });
 
-		expect(screen.getByText("Suppression…")).toBeInTheDocument();
-		expect(screen.getByText("Suppression…")).toBeDisabled();
-		expect(screen.getByRole("button", { name: "Supprimer" })).toBeEnabled();
+		expect(
+			screen.getByRole("button", { name: /Suppression de avis-1\.pdf/ }),
+		).toBeDisabled();
+		expect(
+			screen.getByRole("button", { name: "Supprimer avis-2.pdf" }),
+		).toBeEnabled();
 	});
 
 	it("disables every interactive control when the matrix is globally disabled", () => {
@@ -164,7 +188,7 @@ describe("ContentTypeMatrix", () => {
 		for (const checkbox of screen.getAllByRole("checkbox")) {
 			expect(checkbox).toBeDisabled();
 		}
-		for (const button of screen.getAllByRole("button", { name: "Supprimer" })) {
+		for (const button of screen.getAllByRole("button", { name: /Supprimer/ })) {
 			expect(button).toBeDisabled();
 		}
 	});
@@ -174,6 +198,8 @@ describe("ContentTypeMatrix", () => {
 			hasSecondDeclaration: false,
 			firstDeclGapConsulted: true,
 			secondDeclGapConsulted: null,
+			firstDeclGapHigh: true,
+			secondDeclGapHigh: false,
 		});
 		const associations = singleColumns.reduce<AssociationMap>((map, column) => {
 			map[column.id] = null;

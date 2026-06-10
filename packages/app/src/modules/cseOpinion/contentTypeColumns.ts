@@ -3,6 +3,7 @@ import type {
 	ContentType,
 	ContentTypeColumn,
 	ContentTypeColumnsInput,
+	ContentTypeKey,
 	DeclarationNumber,
 	FileContentTypeAssociation,
 	StoredFileContentType,
@@ -66,28 +67,39 @@ function buildColumn(
 	};
 }
 
-export function computeContentTypeColumns({
+// Single source of truth for the content types the parcours requires. Justification
+// (gap) is required only when the declaration has a gap >= 5% AND the CSE was
+// consulted on justifying it (besoin epic-3476). Shared by the Step 2 matrix (UI)
+// and the finalize guard (server) so the displayed columns and the validated types
+// can never diverge.
+export function computeRequiredContentTypes({
 	hasSecondDeclaration,
 	firstDeclGapConsulted,
 	secondDeclGapConsulted,
-}: ContentTypeColumnsInput): ContentTypeColumn[] {
-	const specs: { declarationNumber: DeclarationNumber; type: ContentType }[] = [
-		{ declarationNumber: 1, type: "accuracy" },
-	];
+	firstDeclGapHigh,
+	secondDeclGapHigh,
+}: ContentTypeColumnsInput): ContentTypeKey[] {
+	const specs: ContentTypeKey[] = [{ declarationNumber: 1, type: "accuracy" }];
 
-	if (firstDeclGapConsulted === true) {
+	if (firstDeclGapHigh && firstDeclGapConsulted === true) {
 		specs.push({ declarationNumber: 1, type: "gap" });
 	}
 
 	if (hasSecondDeclaration) {
 		specs.push({ declarationNumber: 2, type: "accuracy" });
-		if (secondDeclGapConsulted === true) {
+		if (secondDeclGapHigh && secondDeclGapConsulted === true) {
 			specs.push({ declarationNumber: 2, type: "gap" });
 		}
 	}
 
-	return specs.map((spec) =>
-		buildColumn(spec.declarationNumber, spec.type, hasSecondDeclaration),
+	return specs;
+}
+
+export function computeContentTypeColumns(
+	input: ContentTypeColumnsInput,
+): ContentTypeColumn[] {
+	return computeRequiredContentTypes(input).map((spec) =>
+		buildColumn(spec.declarationNumber, spec.type, input.hasSecondDeclaration),
 	);
 }
 

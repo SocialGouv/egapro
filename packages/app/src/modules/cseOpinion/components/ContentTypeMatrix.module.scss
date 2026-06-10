@@ -26,7 +26,13 @@
 .checkboxCell {
 	text-align: center;
 
+	// The label has no visible text (accessible name is a nested sr-only span),
+	// so the DSFR box (label::before, position:absolute) is the only visible
+	// content. Reserve room so the box stays inside the cell and the row keeps
+	// a stable height.
 	:global(.fr-checkbox-group) {
 		display: inline-flex;
+		min-width: 1.5rem;
+		min-height: 1.5rem;
 	}
 }
