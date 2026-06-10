@@ -242,7 +242,13 @@ describe("POST /api/upload", () => {
 		);
 	});
 
-	it("returns 400 invalid_filename when the name contains an invisible character", async () => {
+	it.each([
+		["RLO override", "avis\u202Ecse.pdf"],
+		["RLI isolate", "avis\u2067cse.pdf"],
+		["soft hyphen before the real extension", "evil.exe\u00AD.pdf"],
+		["leading BOM", "\uFEFFavis.pdf"],
+		["trailing BOM", "avis.pdf\uFEFF"],
+	])("returns 400 invalid_filename when the name contains %s", async (_label, rawFileName) => {
 		validSession();
 		const { POST } = await import("../route");
 		const response = await POST(
@@ -251,7 +257,7 @@ describe("POST /api/upload", () => {
 					"Content-Type": "application/pdf",
 					"X-Flow-Type": "cse_opinion",
 				},
-				"avis\u202Ecse.pdf",
+				rawFileName,
 			),
 		);
 
@@ -359,6 +365,41 @@ describe("POST /api/upload", () => {
 					fileId: "file-uuid",
 					fileName: "avis-cse.pdf",
 				}),
+			}),
+		);
+	});
+
+	it("passes the trimmed filename to the pipeline and audits it for a padded name", async () => {
+		validSession();
+		mocks.runUploadPipeline.mockResolvedValue({
+			ok: true,
+			fileId: "file-uuid",
+			fileName: "avis.pdf",
+			filePath: "123456789/2027/file-uuid.pdf",
+		});
+
+		// The padded value is injected past header normalisation (a real Headers
+		// instance trims surrounding spaces), so the route's own trim() is what
+		// must produce "avis.pdf".
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequestWithRawFilename(
+				{
+					"Content-Type": "application/pdf",
+					"X-Flow-Type": "cse_opinion",
+				},
+				"  avis.pdf  ",
+			),
+		);
+
+		expect(response.status).toBe(200);
+		expect(mocks.runUploadPipeline).toHaveBeenCalledWith(
+			expect.objectContaining({ fileName: "avis.pdf" }),
+		);
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "success",
+				metadata: expect.objectContaining({ fileName: "avis.pdf" }),
 			}),
 		);
 	});

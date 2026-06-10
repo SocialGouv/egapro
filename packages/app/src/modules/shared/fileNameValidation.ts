@@ -7,7 +7,11 @@ const FORBIDDEN_FILENAME_CHARS = new RegExp(
 	`[<>:"|?*;/\\\\]|${CONTROL_CHARS_PATTERN}`,
 );
 
-const INVISIBLE_FILENAME_CHARS = /\u202E|\u200B|\u200C|\u200D|\uFEFF/u;
+// Reject every Unicode "format" character (category Cf): zero-width chars and
+// all bidirectional controls: RLO/LRO/RLE/LRE/PDF, the LRI/RLI/FSI/PDI
+// isolates, RLM/LRM/ALM, word joiner, soft hyphen and the BOM. They enable
+// invisible filename / extension spoofing (Trojan Source, CVE-2021-42574).
+const INVISIBLE_FILENAME_CHARS = /\p{Cf}/u;
 
 export const EXTENSION_MIME_MAP: Readonly<
 	Record<string, ReadonlyArray<string>>
@@ -58,7 +62,7 @@ export function validateFileName(
 		};
 	}
 
-	if (FORBIDDEN_FILENAME_CHARS.test(trimmed)) {
+	if (FORBIDDEN_FILENAME_CHARS.test(fileName)) {
 		return {
 			ok: false,
 			reason: "forbidden_char",
@@ -66,7 +70,7 @@ export function validateFileName(
 		};
 	}
 
-	if (INVISIBLE_FILENAME_CHARS.test(trimmed)) {
+	if (INVISIBLE_FILENAME_CHARS.test(fileName)) {
 		return {
 			ok: false,
 			reason: "invisible_char",

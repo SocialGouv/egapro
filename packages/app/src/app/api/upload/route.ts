@@ -207,6 +207,8 @@ export async function POST(request: Request): Promise<Response> {
 		);
 	}
 
+	// Persist the normalised (trimmed) name; validation already ran on it.
+	const safeFileName = fileName.trim();
 	const year = getCurrentYear();
 
 	let result: UploadPipelineResult;
@@ -214,7 +216,7 @@ export async function POST(request: Request): Promise<Response> {
 		result = await runUploadPipeline({
 			siren,
 			year,
-			fileName,
+			fileName: safeFileName,
 			contentType,
 			stream: request.body,
 			flowType,
