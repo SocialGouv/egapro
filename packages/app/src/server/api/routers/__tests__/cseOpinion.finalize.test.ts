@@ -242,6 +242,20 @@ describe("cseOpinionRouter.finalize", () => {
 		]);
 	});
 
+	it("re-accepts finalize when the declaration is already completed (editable after submission)", async () => {
+		const ctx = createMockDbForFinalize({
+			declaration: { ...DEFAULT_DECLARATION, status: "demarche_completed" },
+		});
+		const caller = await createCaller(ctx.db);
+
+		const result = await caller.finalize();
+
+		expect(result).toEqual({ success: true });
+		expect(ctx.updateSet).toHaveBeenCalledWith(
+			expect.objectContaining({ status: "demarche_completed" }),
+		);
+	});
+
 	it("throws PRECONDITION_FAILED when no opinions exist", async () => {
 		const ctx = createMockDbForFinalize({ opinionCount: 0 });
 		const caller = await createCaller(ctx.db);
