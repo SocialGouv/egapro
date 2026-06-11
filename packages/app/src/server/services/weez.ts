@@ -4,6 +4,34 @@ import { env } from "~/env";
 
 const NON_DIFFUSIBLE_NAME = "Entreprise non diffusible";
 
+// INSEE "tranche d'effectif salarié" code → lower bound of the size band, used
+// as a workforce proxy when the registry exposes the band but not an exact
+// `effectiftotal` (the usual case for public administrations and many ETI/GE).
+// Lower bounds line up with the legal thresholds (50 / 100 / 250). Code "NN"
+// (non-employer) and unknown values yield null.
+const WORKFORCE_BY_INSEE_TRANCHE: Record<string, number> = {
+	"00": 0,
+	"01": 1,
+	"02": 3,
+	"03": 6,
+	"11": 10,
+	"12": 20,
+	"21": 50,
+	"22": 100,
+	"31": 200,
+	"32": 250,
+	"41": 500,
+	"42": 1000,
+	"51": 2000,
+	"52": 5000,
+	"53": 10000,
+};
+
+export function trancheToWorkforce(code: string | null): number | null {
+	if (!code) return null;
+	return WORKFORCE_BY_INSEE_TRANCHE[code] ?? null;
+}
+
 type WeezLegalEntity = {
 	siren: string;
 	denominationunitelegale: string | null;
@@ -12,6 +40,8 @@ type WeezLegalEntity = {
 	// NAF rév. 2 activity label; describes the same activity as the mapped NAF 2025 nafCode above.
 	nomenclatureactiviteprincipalelibelleunitelegale: string | null;
 	effectiftotal: number | null;
+	// INSEE size-band code; fallback for workforce when `effectiftotal` is null.
+	trancheeffectifsunitelegale: string | null;
 	numerovoie: string | null;
 	typevoie: string | null;
 	libellevoie: string | null;
@@ -95,7 +125,9 @@ export async function fetchCompanyBySiren(
 			address: null,
 			nafCode: null,
 			nafLabel: null,
-			workforce: entity.effectiftotal ?? null,
+			workforce:
+				entity.effectiftotal ??
+				trancheToWorkforce(entity.trancheeffectifsunitelegale),
 		};
 	}
 
@@ -110,6 +142,8 @@ export async function fetchCompanyBySiren(
 		nafLabel:
 			entity.nomenclatureactiviteprincipalelibelleunitelegale?.slice(0, 255) ??
 			null,
-		workforce: entity.effectiftotal ?? null,
+		workforce:
+			entity.effectiftotal ??
+			trancheToWorkforce(entity.trancheeffectifsunitelegale),
 	};
 }
