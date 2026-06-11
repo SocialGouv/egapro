@@ -37,9 +37,11 @@ vi.mock("~/server/db/schema", () => ({
 }));
 
 const mockDeleteS3File = vi.fn();
+const mockGetFileSize = vi.fn();
 
 vi.mock("~/server/services/s3", () => ({
 	deleteFile: (...args: unknown[]) => mockDeleteS3File(...args),
+	getFileSize: (...args: unknown[]) => mockGetFileSize(...args),
 }));
 
 const mockWhere = vi.fn();
@@ -124,6 +126,7 @@ describe("cseOpinionRouter", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 		mockDeleteS3File.mockResolvedValue(undefined);
+		mockGetFileSize.mockResolvedValue(null);
 	});
 
 	afterEach(() => {
@@ -254,21 +257,34 @@ describe("cseOpinionRouter", () => {
 	});
 
 	describe("getFiles", () => {
-		it("returns files for the current declaration", async () => {
-			const files = [
+		it("returns files for the current declaration with their storage size", async () => {
+			const uploadedAt = new Date("2026-03-15");
+			const rows = [
 				{
 					id: "file-1",
 					fileName: "avis-cse.pdf",
-					uploadedAt: new Date("2026-03-15"),
+					filePath: "339787277/2026/file-1.pdf",
+					uploadedAt,
 				},
 			];
-			const mockDb = createMockDb(files);
+			mockGetFileSize.mockResolvedValue(63365);
+			const mockDb = createMockDb(rows);
 			const caller = await createCaller(mockDb);
 
 			const result = await caller.getFiles();
 
 			expect(mockSelect).toHaveBeenCalled();
-			expect(result).toEqual({ files });
+			expect(mockGetFileSize).toHaveBeenCalledWith("339787277/2026/file-1.pdf");
+			expect(result).toEqual({
+				files: [
+					{
+						id: "file-1",
+						fileName: "avis-cse.pdf",
+						uploadedAt,
+						fileSize: 63365,
+					},
+				],
+			});
 		});
 
 		it("returns empty files when none exist", async () => {

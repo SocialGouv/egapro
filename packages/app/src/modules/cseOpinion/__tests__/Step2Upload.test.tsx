@@ -103,7 +103,12 @@ function getFileInput() {
 }
 
 function makeFile(name: string, id: string): UploadedFile {
-	return { id, fileName: name, uploadedAt: new Date("2026-03-15") };
+	return {
+		id,
+		fileName: name,
+		uploadedAt: new Date("2026-03-15"),
+		fileSize: 63365,
+	};
 }
 
 function renderStep(
@@ -111,7 +116,6 @@ function renderStep(
 		existingFiles?: UploadedFile[];
 		columns?: ContentTypeColumn[];
 		initialAssociations?: StoredFileContentType[];
-		hasSecondDeclaration?: boolean;
 	} = {},
 ) {
 	return render(
@@ -119,7 +123,6 @@ function renderStep(
 			columns={props.columns ?? SINGLE_COLUMN}
 			declarationYear={2026}
 			existingFiles={props.existingFiles}
-			hasSecondDeclaration={props.hasSecondDeclaration}
 			initialAssociations={props.initialAssociations}
 			siren="123456789"
 		/>,
@@ -194,7 +197,7 @@ describe("Step2Upload", () => {
 	});
 
 	it("renders the opinion summary box", () => {
-		renderStep({ hasSecondDeclaration: true });
+		renderStep({ columns: DUAL_COLUMNS });
 
 		expect(screen.getByText("Avis CSE à transmettre :")).toBeInTheDocument();
 		expect(screen.getByText("Première déclaration")).toBeInTheDocument();
@@ -292,7 +295,6 @@ describe("Step2Upload", () => {
 		renderStep({
 			columns: DUAL_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
-			hasSecondDeclaration: true,
 		});
 
 		expect(screen.getByRole("link", { name: /avis-1\.pdf/ })).toHaveAttribute(
@@ -302,7 +304,7 @@ describe("Step2Upload", () => {
 		expect(screen.getAllByRole("checkbox")).toHaveLength(DUAL_COLUMNS.length);
 	});
 
-	it("shows the file count in the hint text", () => {
+	it("does not show a file counter in the hint text", () => {
 		renderStep({
 			existingFiles: [
 				makeFile("avis-1.pdf", "file-1"),
@@ -310,7 +312,7 @@ describe("Step2Upload", () => {
 			],
 		});
 
-		expect(screen.getByText(/2\/4 fichiers/)).toBeInTheDocument();
+		expect(screen.queryByText(/fichiers\)/)).not.toBeInTheDocument();
 	});
 
 	it("disables the dropzone when the max number of files is reached", () => {
@@ -333,7 +335,6 @@ describe("Step2Upload", () => {
 		renderStep({
 			columns: DUAL_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
-			hasSecondDeclaration: true,
 		});
 
 		// Loading files must not surface the error, and the button stays enabled.
@@ -378,7 +379,6 @@ describe("Step2Upload", () => {
 		renderStep({
 			columns: DUAL_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
-			hasSecondDeclaration: true,
 		});
 
 		await user.click(
@@ -399,7 +399,6 @@ describe("Step2Upload", () => {
 		renderStep({
 			columns: DUAL_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
-			hasSecondDeclaration: true,
 		});
 
 		await user.click(

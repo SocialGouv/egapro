@@ -91,7 +91,6 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 				columns={columns}
 				declarationYear={declarationData.declaration.year}
 				existingFiles={files}
-				hasSecondDeclaration={hasSecondDeclaration}
 				initialAssociations={associations}
 				siren={declarationData.declaration.siren}
 			/>

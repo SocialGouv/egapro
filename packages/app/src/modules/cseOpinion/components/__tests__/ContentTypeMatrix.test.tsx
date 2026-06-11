@@ -21,11 +21,17 @@ const SINGLE_FILE: UploadedFile = {
 	id: "file-1",
 	fileName: "avis-1.pdf",
 	uploadedAt: new Date("2026-03-15"),
+	fileSize: 63365,
 };
 
 const FILES: UploadedFile[] = [
 	SINGLE_FILE,
-	{ id: "file-2", fileName: "avis-2.pdf", uploadedAt: new Date("2026-03-16") },
+	{
+		id: "file-2",
+		fileName: "avis-2.pdf",
+		uploadedAt: new Date("2026-03-16"),
+		fileSize: null,
+	},
 ];
 
 function emptyMap(): AssociationMap {
@@ -61,6 +67,13 @@ describe("ContentTypeMatrix", () => {
 			"href",
 			"/api/v1/files/file-2",
 		);
+	});
+
+	it("shows the file type and size, falling back to the type alone when size is unknown", () => {
+		renderMatrix();
+
+		expect(screen.getByText("PDF – 61,88 Ko")).toBeInTheDocument();
+		expect(screen.getByText("PDF")).toBeInTheDocument();
 	});
 
 	it("renders one checkbox per file and column combination", () => {

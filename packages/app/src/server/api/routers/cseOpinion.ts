@@ -22,7 +22,7 @@ import {
 	jobCategories,
 } from "~/server/db/schema";
 import { applyAction, loadRules } from "~/server/rules/engine";
-import { deleteFile as deleteS3File } from "~/server/services/s3";
+import { deleteFile as deleteS3File, getFileSize } from "~/server/services/s3";
 import {
 	buildHistoryInserts,
 	computeProjectionUpdates,
@@ -101,6 +101,7 @@ export const cseOpinionRouter = createTRPCRouter({
 			.select({
 				id: files.id,
 				fileName: files.fileName,
+				filePath: files.filePath,
 				uploadedAt: files.uploadedAt,
 			})
 			.from(files)
@@ -111,7 +112,16 @@ export const cseOpinionRouter = createTRPCRouter({
 				),
 			);
 
-		return { files: rows };
+		// Object size is not persisted on the file row; read it from S3 (best
+		// effort, in parallel). A failed HEAD yields a null size, never a 500.
+		const filesWithSize = await Promise.all(
+			rows.map(async ({ filePath, ...file }) => ({
+				...file,
+				fileSize: await getFileSize(filePath),
+			})),
+		);
+
+		return { files: filesWithSize };
 	}),
 
 	getFileContentTypes: declarationProcedure.query(async ({ ctx }) => {

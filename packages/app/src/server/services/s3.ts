@@ -8,6 +8,7 @@ import {
 	DeleteObjectCommand,
 	GetObjectCommand,
 	HeadBucketCommand,
+	HeadObjectCommand,
 	PutObjectCommand,
 	S3Client,
 	UploadPartCommand,
@@ -66,6 +67,25 @@ export async function uploadFile(
 			ContentType: contentType,
 		}),
 	);
+}
+
+/**
+ * Returns the stored object size in bytes, or null when it cannot be read
+ * (missing object, S3 error). Best-effort: callers must treat null as "unknown"
+ * rather than failing the request.
+ */
+export async function getFileSize(key: string): Promise<number | null> {
+	try {
+		const response = await s3Client.send(
+			new HeadObjectCommand({
+				Bucket: env.S3_BUCKET_NAME,
+				Key: key,
+			}),
+		);
+		return response.ContentLength ?? null;
+	} catch {
+		return null;
+	}
 }
 
 export async function getFile(

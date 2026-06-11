@@ -17,6 +17,13 @@
 	font-weight: 400;
 }
 
+// Figma: the file-name row header reads like a normal cell — white background
+// and regular weight — even though it stays a <th scope="row"> for RGAA.
+.fileHeaderCell {
+	font-weight: 400;
+	background-color: var(--background-default-grey);
+}
+
 .fileCell {
 	display: flex;
 	flex-direction: column;

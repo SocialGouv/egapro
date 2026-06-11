@@ -30,7 +30,6 @@ import {
 type Props = {
 	declarationYear: number;
 	siren: string;
-	hasSecondDeclaration?: boolean;
 	existingFiles?: UploadedFile[];
 	columns: ContentTypeColumn[];
 	initialAssociations?: StoredFileContentType[];
@@ -39,7 +38,6 @@ type Props = {
 export function Step2Upload({
 	declarationYear,
 	siren,
-	hasSecondDeclaration = true,
 	existingFiles = [],
 	columns,
 	initialAssociations = [],
@@ -192,8 +190,6 @@ export function Step2Upload({
 						de document correspondant.
 						<span className="fr-hint-text">
 							Taille maximale : 10 Mo par fichier. Format supporté : pdf.
-							{existingFiles.length > 0 &&
-								` (${existingFiles.length}/${MAX_CSE_FILES} fichier${existingFiles.length > 1 ? "s" : ""})`}
 						</span>
 					</label>
 				</div>
@@ -252,12 +248,7 @@ export function Step2Upload({
 				</div>
 
 				<div className="fr-mt-4w">
-					<OpinionSummaryBox
-						firstDeclTitle="Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs"
-						secondDeclGapTitle="Justification des écarts ≥ 5 % par des critères objectifs et non sexistes de l'indicateur de rémunération par catégorie de salariés"
-						secondDeclTitle="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
-						showSecondDeclaration={hasSecondDeclaration}
-					/>
+					<OpinionSummaryBox associations={associations} columns={columns} />
 				</div>
 
 				{finalizeError && (

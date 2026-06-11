@@ -4,6 +4,8 @@ export type UploadedFile = {
 	id: string;
 	fileName: string;
 	uploadedAt: Date;
+	/** Object size in bytes, or null when it could not be read from storage. */
+	fileSize: number | null;
 };
 
 export type DeclarationNumber = 1 | 2;

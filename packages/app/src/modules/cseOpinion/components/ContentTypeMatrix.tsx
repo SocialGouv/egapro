@@ -2,6 +2,7 @@
 
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
+import { formatFileSize } from "~/modules/shared";
 
 import type { AssociationMap, ContentTypeColumn, UploadedFile } from "../types";
 import styles from "./ContentTypeMatrix.module.scss";
@@ -20,6 +21,11 @@ type Props = {
 
 function columnHeaderId(column: ContentTypeColumn): string {
 	return `matrix-col-${column.declarationNumber}-${column.type}`;
+}
+
+function fileMeta(fileSize: number | null): string {
+	const size = formatFileSize(fileSize);
+	return size ? `PDF – ${size}` : "PDF";
 }
 
 function tooltipId(column: ContentTypeColumn): string {
@@ -43,7 +49,7 @@ export function ContentTypeMatrix({
 	disabled = false,
 }: Props) {
 	return (
-		<div className={`fr-table fr-table--bordered ${styles.matrix}`}>
+		<div className={`fr-table ${styles.matrix}`}>
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">
@@ -93,7 +99,7 @@ export function ContentTypeMatrix({
 									return (
 										<tr key={file.id}>
 											<th
-												className="fr-cell--fixed fr-cell--multiline"
+												className={`fr-cell--fixed fr-cell--multiline ${styles.fileHeaderCell}`}
 												id={fileHeaderId}
 												scope="row"
 											>
@@ -109,7 +115,7 @@ export function ContentTypeMatrix({
 														<NewTabNotice />
 													</a>
 													<span className="fr-text--xs fr-text--mention-grey fr-mb-0">
-														PDF
+														{fileMeta(file.fileSize)}
 													</span>
 												</span>
 											</th>
@@ -160,7 +166,7 @@ export function ContentTypeMatrix({
 															? `Suppression de ${file.fileName} en cours`
 															: `Supprimer ${file.fileName}`
 													}
-													className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-delete-line"
+													className="fr-btn fr-btn--secondary fr-btn--sm fr-icon-delete-line"
 													disabled={disabled || deletingFileId === file.id}
 													onClick={() => onDelete(file.id)}
 													type="button"
