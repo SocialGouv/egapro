@@ -9,12 +9,21 @@
 	height: 56px;
 }
 
-.numeric {
+/* Right-align monetary and count values. Scoped under `.fr-table__content`
+   (a global DSFR class on the table wrapper) so the compound specificity
+   beats DSFR's own `.fr-table__content td { text-align: left }` rule — a
+   bare `.numeric` class loses the cascade and the values fall back to left.
+   Percentages stay left (see `.percent` / `.gapNumeric`). */
+:global(.fr-table__content) td.numeric,
+:global(.fr-table__content) th.numeric {
 	text-align: right;
 	font-variant-numeric: tabular-nums;
 }
 
-.gapNumeric {
+:global(.fr-table__content) td.percent,
+:global(.fr-table__content) th.percent,
+:global(.fr-table__content) td.gapNumeric,
+:global(.fr-table__content) th.gapNumeric {
 	text-align: left;
 	font-variant-numeric: tabular-nums;
 }
