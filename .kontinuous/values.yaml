@@ -62,6 +62,13 @@ app:
     - configMapRef:
         name: "valkey"
         optional: true
+    # Matomo Reporting API token for the admin funnel widget (issue #3646).
+    # Optional: the admin chart degrades to "no data" when absent. The base
+    # URL falls back to NEXT_PUBLIC_MATOMO_URL, so only the token is a secret —
+    # ops creates the `matomo` sealed-secret (key MATOMO_API_TOKEN) per env.
+    - secretRef:
+        name: "matomo"
+        optional: true
   env:
     - name: POSTGRES_HOST
       valueFrom:

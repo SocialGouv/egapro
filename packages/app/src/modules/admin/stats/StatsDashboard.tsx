@@ -80,6 +80,14 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 		},
 	);
 
+	const matomoFunnelQuery = api.adminStats.getMatomoFunnel.useQuery(
+		{ year: activeYear, sizeRange },
+		{
+			enabled: selectedYears.length > 0,
+			placeholderData: (prev) => prev,
+		},
+	);
+
 	const hasRevisionData = (funnelQuery.data?.revisionFunnel[0]?.count ?? 0) > 0;
 	const hasCseData = (funnelQuery.data?.cseFunnel[0]?.count ?? 0) > 0;
 
@@ -337,6 +345,92 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 										Aucune déclaration avec CSE pour ces filtres.
 									</p>
 								)}
+							</section>
+						</div>
+					</div>
+				)}
+			</section>
+
+			<section className="fr-mt-6w" id="matomo">
+				<h2 className="fr-h2">Funnels Matomo (parcours client)</h2>
+				<p>
+					Parcours mesurés côté navigateur par Matomo pour la campagne
+					sélectionnée, lus en direct via la Reporting API. Le filtre par
+					tranche d'effectif ne s'applique qu'au funnel de déclaration.
+				</p>
+
+				{matomoFunnelQuery.isLoading && !matomoFunnelQuery.data && (
+					<p aria-live="polite" className="fr-mt-4w">
+						Chargement des funnels Matomo…
+					</p>
+				)}
+				{matomoFunnelQuery.isError && (
+					<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-4w">
+						<p>
+							Une erreur est survenue lors du chargement des funnels Matomo.
+						</p>
+					</div>
+				)}
+
+				{matomoFunnelQuery.data && (
+					<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
+						<div className="fr-col-12 fr-col-md-6">
+							<section
+								aria-labelledby="matomo-funnel-declaration-heading"
+								className={styles.card}
+							>
+								<h3 className="fr-h3" id="matomo-funnel-declaration-heading">
+									Déclaration des indicateurs
+								</h3>
+								<CompletionFunnelChart
+									caption="Funnel Matomo — déclaration des indicateurs"
+									dropThreshold={FUNNEL_DROP_ALERT_THRESHOLD}
+									rows={matomoFunnelQuery.data.declarationFunnel}
+								/>
+								<CompletionFunnelTable
+									caption="Funnel Matomo — déclaration des indicateurs"
+									rows={matomoFunnelQuery.data.declarationFunnel}
+								/>
+							</section>
+						</div>
+
+						<div className="fr-col-12 fr-col-md-6">
+							<section
+								aria-labelledby="matomo-funnel-cse-heading"
+								className={styles.card}
+							>
+								<h3 className="fr-h3" id="matomo-funnel-cse-heading">
+									Avis du CSE
+								</h3>
+								<CompletionFunnelChart
+									caption="Funnel Matomo — avis du CSE"
+									dropThreshold={FUNNEL_DROP_ALERT_THRESHOLD}
+									rows={matomoFunnelQuery.data.cseFunnel}
+								/>
+								<CompletionFunnelTable
+									caption="Funnel Matomo — avis du CSE"
+									rows={matomoFunnelQuery.data.cseFunnel}
+								/>
+							</section>
+						</div>
+
+						<div className="fr-col-12 fr-col-md-6">
+							<section
+								aria-labelledby="matomo-funnel-compliance-heading"
+								className={styles.card}
+							>
+								<h3 className="fr-h3" id="matomo-funnel-compliance-heading">
+									Parcours conformité
+								</h3>
+								<CompletionFunnelChart
+									caption="Funnel Matomo — parcours conformité"
+									dropThreshold={FUNNEL_DROP_ALERT_THRESHOLD}
+									rows={matomoFunnelQuery.data.complianceFunnel}
+								/>
+								<CompletionFunnelTable
+									caption="Funnel Matomo — parcours conformité"
+									rows={matomoFunnelQuery.data.complianceFunnel}
+								/>
 							</section>
 						</div>
 					</div>

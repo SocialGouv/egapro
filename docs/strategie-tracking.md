@@ -17,9 +17,12 @@
 ## Objectif
 
 Donner aux analystes DGT de quoi calculer les KPIs d'usage de la plateforme
-(K19–K25) **sans visualisation embarquée** : EGAPRO se contente d'**émettre**
-des événements anonymisés ; l'analyse et les tableaux de bord se font dans
-Matomo. Aucune API de reporting, aucun graphique côté application.
+(K19–K25). EGAPRO **émet** des événements anonymisés (le socle), et l'analyse
+fine se fait dans Matomo. Un **dashboard d'administration** (`/admin/stats`)
+rapatrie en plus les funnels de parcours via la **Reporting API** de Matomo
+(procédure tRPC `adminStats.getMatomoFunnel`, service `~/server/services/matomo.ts`,
+secret `MATOMO_API_TOKEN`) pour offrir une vue intégrée aux admins, sans
+recalcul en base.
 
 ## Ce qu'on mesure
 

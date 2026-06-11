@@ -113,3 +113,18 @@ export type CompletionFunnelOutput = {
 	revisionFunnel: FunnelRow[];
 	cseFunnel: FunnelRow[];
 };
+
+/**
+ * Output of `adminStats.getMatomoFunnel` — the client-side funnels measured by
+ * Matomo, read live from the Reporting API rather than the DB.
+ *
+ * One `FunnelRow[]` per tracked scenario of the taxonomy
+ * (`MATOMO_EVENT_CATEGORY`): the jalons are `funnel_start` → each
+ * `step_complete` (by `step_<n>` name) → `funnel_complete`. Every funnel is
+ * empty (all `count = 0`) when `MATOMO_API_TOKEN` is not configured.
+ */
+export type MatomoFunnelOutput = {
+	declarationFunnel: FunnelRow[];
+	cseFunnel: FunnelRow[];
+	complianceFunnel: FunnelRow[];
+};
