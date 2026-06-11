@@ -176,16 +176,19 @@ export function FileUpload({
 			{selectedFiles.map((file, index) => (
 				<div className={`${styles.fileCard} fr-mt-2w`} key={file.name}>
 					<div className={styles.fileCardFooter}>
-						<a
-							className="fr-link fr-link--download"
-							download={file.name}
-							href={objectUrls[index] ?? "#"}
-						>
-							Télécharger {file.name}
-							<span className="fr-link__detail">
+						<div className={styles.fileCardInfo}>
+							<a
+								aria-label={`Télécharger ${file.name}`}
+								className="fr-link fr-icon-download-line fr-link--icon-right"
+								download={file.name}
+								href={objectUrls[index] ?? "#"}
+							>
+								{file.name}
+							</a>
+							<p className="fr-text--xs fr-text--mention-grey fr-mb-0">
 								{getExtensionLabel(file.name)} – {formatFileSize(file.size)}
-							</span>
-						</a>
+							</p>
+						</div>
 						<button
 							aria-label={`Supprimer ${file.name}`}
 							className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line"

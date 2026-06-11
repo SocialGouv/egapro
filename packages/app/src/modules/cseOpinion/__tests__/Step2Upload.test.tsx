@@ -241,7 +241,7 @@ describe("Step2Upload", () => {
 		const downloadLink = screen.getByRole("link", {
 			name: /Télécharger avis-cse\.pdf/,
 		});
-		expect(downloadLink).toHaveClass("fr-link--download");
+		expect(downloadLink).toHaveClass("fr-link");
 		expect(downloadLink).toHaveAttribute("download", "avis-cse.pdf");
 		expect(downloadLink).toHaveAttribute("href", "blob:mock/avis-cse.pdf");
 		expect(

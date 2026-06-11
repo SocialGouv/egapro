@@ -77,10 +77,14 @@ describe("FileUpload", () => {
 		);
 
 		const link = screen.getByRole("link", { name: /Télécharger avis\.pdf/ });
-		expect(link).toHaveClass("fr-link", "fr-link--download");
+		expect(link).toHaveClass("fr-link");
 		expect(link).toHaveAttribute("download", "avis.pdf");
 		expect(link).toHaveAttribute("href", "blob:mock/avis.pdf");
-		expect(link).toHaveTextContent("PDF – 2.00 Ko");
+		// The file meta is rendered outside the link (only the file name is the
+		// underlined link target).
+		expect(link).toHaveTextContent("avis.pdf");
+		expect(link).not.toHaveTextContent("PDF – 2.00 Ko");
+		expect(screen.getByText("PDF – 2.00 Ko")).toBeInTheDocument();
 	});
 
 	it("creates an object URL per file and revokes it on unmount", () => {
@@ -150,8 +154,10 @@ describe("FileUpload", () => {
 			/>,
 		);
 
-		const link = screen.getByRole("link", { name: /Télécharger doc\.pdf/ });
-		expect(link).toHaveTextContent(`PDF – ${label}`);
+		expect(
+			screen.getByRole("link", { name: /Télécharger doc\.pdf/ }),
+		).toBeInTheDocument();
+		expect(screen.getByText(`PDF – ${label}`)).toBeInTheDocument();
 	});
 
 	it("falls back to a generic extension label when the name has no extension", () => {
@@ -164,8 +170,10 @@ describe("FileUpload", () => {
 			/>,
 		);
 
-		const link = screen.getByRole("link", { name: /Télécharger noextension/ });
-		expect(link).toHaveTextContent("NOEXTENSION – 1.00 Ko");
+		expect(
+			screen.getByRole("link", { name: /Télécharger noextension/ }),
+		).toBeInTheDocument();
+		expect(screen.getByText("NOEXTENSION – 1.00 Ko")).toBeInTheDocument();
 	});
 
 	it("accepts a valid file through the input", () => {
