@@ -42,9 +42,9 @@ describe("FileUpload", () => {
 		);
 
 		expect(
-			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 		).toBeInTheDocument();
-		expect(screen.getByText("ou glisser-les ici")).toBeInTheDocument();
+		expect(screen.getByText("ou glisser-le ici")).toBeInTheDocument();
 	});
 
 	it("opens the file dialog when the select button is clicked", async () => {
@@ -60,7 +60,7 @@ describe("FileUpload", () => {
 		const clickSpy = vi.spyOn(getInput(), "click");
 
 		await user.click(
-			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 		);
 
 		expect(clickSpy).toHaveBeenCalled();
@@ -344,7 +344,7 @@ describe("FileUpload", () => {
 		);
 
 		expect(
-			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 		).toBeDisabled();
 		expect(getInput()).toBeDisabled();
 	});

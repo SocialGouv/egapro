@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { formatLongDate } from "~/modules/domain";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
 
@@ -20,9 +21,11 @@ export async function JointEvaluationPage() {
 	const company = await api.company.get({ siren: data.declaration.siren });
 	const currentYear = data.declaration.year;
 	const campaignDeadlines = await getCampaignDeadlines(currentYear);
-	const declarationDate = data.declaration.updatedAt
-		? new Date(data.declaration.updatedAt).toLocaleDateString("fr-FR")
-		: new Date().toLocaleDateString("fr-FR");
+	const declarationDate = formatLongDate(
+		data.declaration.updatedAt
+			? new Date(data.declaration.updatedAt)
+			: new Date(),
+	);
 
 	return (
 		<JointEvaluationForm

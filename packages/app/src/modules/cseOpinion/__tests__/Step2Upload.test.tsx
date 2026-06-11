@@ -238,7 +238,6 @@ describe("Step2Upload", () => {
 
 		fireEvent.change(fileInput, { target: { files: [file] } });
 
-		expect(screen.getByText("avis-cse.pdf")).toBeInTheDocument();
 		const downloadLink = screen.getByRole("link", {
 			name: /Télécharger avis-cse\.pdf/,
 		});
@@ -261,11 +260,15 @@ describe("Step2Upload", () => {
 
 		fireEvent.change(fileInput, { target: { files: [file] } });
 
-		expect(screen.getByText("avis-cse.pdf")).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: /Télécharger avis-cse\.pdf/ }),
+		).toBeInTheDocument();
 
 		await user.click(screen.getByRole("button", { name: /Supprimer/ }));
 
-		expect(screen.queryByText("avis-cse.pdf")).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("link", { name: /Télécharger avis-cse\.pdf/ }),
+		).not.toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
 		).toBeInTheDocument();

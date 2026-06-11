@@ -159,22 +159,22 @@ export function FileUpload({
 						onClick={() => fileInputRef.current?.click()}
 						type="button"
 					>
-						Sélectionner des fichiers
+						{maxFiles === 1
+							? "Sélectionner un fichier"
+							: "Sélectionner des fichiers"}
 						<span
 							aria-hidden="true"
 							className="fr-icon-upload-line fr-icon--sm"
 						/>
 					</button>
 				</span>
-				<p className="fr-text--sm fr-mb-0">ou glisser-les ici</p>
+				<p className="fr-text--sm fr-mb-0">
+					{maxFiles === 1 ? "ou glisser-le ici" : "ou glisser-les ici"}
+				</p>
 			</section>
 
 			{selectedFiles.map((file, index) => (
 				<div className={`${styles.fileCard} fr-mt-2w`} key={file.name}>
-					<p className="fr-text--md fr-mb-0">{file.name}</p>
-					<p className="fr-text--xs fr-text--mention-grey fr-mb-1w">
-						{getExtensionLabel(file.name)} – {formatFileSize(file.size)}
-					</p>
 					<div className={styles.fileCardFooter}>
 						<a
 							className="fr-link fr-link--download"
