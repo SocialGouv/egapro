@@ -183,7 +183,7 @@ export function Step2Upload({
 	return (
 		<>
 			<form autoComplete="off" onSubmit={handleFormSubmit}>
-				<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
+				<div className="fr-grid-row fr-grid-row--middle fr-mb-4w">
 					<div className="fr-col">
 						<h1 className="fr-h4 fr-mb-0">
 							Transmettre l&apos;avis ou les avis du CSE
@@ -203,19 +203,21 @@ export function Step2Upload({
 					</label>
 				</div>
 
-				<FileUpload
-					accept=".pdf"
-					acceptLabel="pdf"
-					allowedMimeTypes={["application/pdf"]}
-					disabled={readOnlyGuard.isReadOnly || isUploadingFiles}
-					error={uploadError}
-					inputId="cse-file-upload"
-					maxFiles={remainingSlots}
-					onFilesChange={handleFilesChange}
-					selectedFiles={selectedFiles}
-				/>
+				<div className="fr-mt-4w">
+					<FileUpload
+						accept=".pdf"
+						acceptLabel="pdf"
+						allowedMimeTypes={["application/pdf"]}
+						disabled={readOnlyGuard.isReadOnly || isUploadingFiles}
+						error={uploadError}
+						inputId="cse-file-upload"
+						maxFiles={remainingSlots}
+						onFilesChange={handleFilesChange}
+						selectedFiles={selectedFiles}
+					/>
+				</div>
 
-				<div aria-live="polite" className="fr-messages-group fr-mt-2w">
+				<div aria-live="polite" className="fr-messages-group">
 					{isUploadingFiles && (
 						<p className="fr-message fr-message--info fr-mb-0">
 							Import du ou des fichiers en cours…
@@ -242,7 +244,7 @@ export function Step2Upload({
 
 				<div aria-live="polite">
 					{showMissingError && (
-						<div className="fr-alert fr-alert--error fr-mt-3w">
+						<div className="fr-alert fr-alert--error fr-mt-4w">
 							<h2 className="fr-alert__title">Un avis CSE est manquant</h2>
 							{missingColumns.map((column) => (
 								<p key={column.id}>{column.missingMessage}</p>
@@ -250,7 +252,7 @@ export function Step2Upload({
 						</div>
 					)}
 					{showUnassociatedError && (
-						<div className="fr-alert fr-alert--error fr-mt-3w">
+						<div className="fr-alert fr-alert--error fr-mt-4w">
 							<h2 className="fr-alert__title">
 								Chaque fichier doit être associé à au moins un type de contenu
 							</h2>
@@ -264,7 +266,7 @@ export function Step2Upload({
 						</div>
 					)}
 					{associationError && (
-						<div className="fr-alert fr-alert--error fr-mt-3w">
+						<div className="fr-alert fr-alert--error fr-mt-4w">
 							<p>{associationError}</p>
 						</div>
 					)}
