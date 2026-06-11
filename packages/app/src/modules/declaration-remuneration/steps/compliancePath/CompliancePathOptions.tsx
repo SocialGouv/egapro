@@ -120,10 +120,10 @@ export function SecondRoundOptions({
 				onChange={() => setSelectedPath("justify")}
 			/>
 
-			<h3 className="fr-h6 fr-mt-3w fr-mb-0">
+			<h2 className="fr-h6 fr-mt-3w fr-mb-0">
 				Si la justification n&apos;est pas possible par des critères objectifs
 				et non sexistes
-			</h3>
+			</h2>
 
 			<JointEvaluationOption
 				checked={selectedPath === "joint_evaluation"}
@@ -160,10 +160,10 @@ export function FirstRoundOptions({
 				onChange={() => setSelectedPath("justify")}
 			/>
 
-			<h3 className="fr-h6 fr-mt-3w fr-mb-0">
+			<h2 className="fr-h6 fr-mt-3w fr-mb-0">
 				Si la justification n&apos;est pas possible par des critères objectifs
 				et non sexistes
-			</h3>
+			</h2>
 
 			<div className="fr-fieldset__element fr-mt-2w">
 				<CompliancePathOption

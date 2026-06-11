@@ -17,6 +17,7 @@ import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { FormActions } from "../shared/FormActions";
 import { SavedIndicator } from "../shared/SavedIndicator";
+import styles from "./CompliancePathChoice.module.scss";
 import {
 	FirstRoundOptions,
 	getCompliancePathHref,
@@ -136,13 +137,8 @@ export function CompliancePathChoice({
 				year={currentYear}
 			/>
 
-			<h2 className="fr-h4 fr-mb-0">
-				Parcours de mise en conformité pour l&apos;indicateur par catégorie de
-				salariés
-			</h2>
-
 			<div className={common.flexColumnGap1}>
-				<p className="fr-mb-0 fr-text--medium">
+				<p className={`fr-mb-0 ${styles.instructions}`}>
 					{isSecondRound
 						? "Des écarts ≥ 5 % ont de nouveau été détectés, vous devez engager l'un des parcours suivants."
 						: "Des écarts ≥ 5 % ont été constatés, vous devez engager l'un des parcours suivants."}
@@ -160,10 +156,10 @@ export function CompliancePathChoice({
 
 			<div className={common.dataSection}>
 				<div className={common.flexColumnGapHalf}>
-					<h3 className="fr-h6 fr-mb-0">
+					<h2 className="fr-h6 fr-mb-0">
 						La justification est possible par des critères objectifs et non
 						sexistes
-					</h3>
+					</h2>
 					<p className="fr-mb-0">
 						<a
 							className="fr-link"
