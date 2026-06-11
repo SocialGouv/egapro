@@ -145,6 +145,18 @@ export function getMissingColumns(
 	return columns.filter((column) => !map[column.id]);
 }
 
+// Files that are not associated to any content type (no checkbox checked on
+// their row). Finalize must reject these orphans before submission.
+export function getUnassociatedFiles<T extends { id: string }>(
+	files: T[],
+	map: AssociationMap,
+): T[] {
+	const associatedFileIds = new Set(
+		Object.values(map).filter((fileId): fileId is string => fileId !== null),
+	);
+	return files.filter((file) => !associatedFileIds.has(file.id));
+}
+
 export function clearFileAssociations(
 	map: AssociationMap,
 	fileId: string,

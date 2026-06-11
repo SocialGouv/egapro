@@ -374,6 +374,37 @@ describe("Step2Upload", () => {
 		).not.toBeInTheDocument();
 	});
 
+	it("blocks finalize and names a file row left without any checked checkbox", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [
+				makeFile("avis-1.pdf", "file-1"),
+				makeFile("avis-2.pdf", "file-2"),
+			],
+			// file-1 covers the only required column; file-2 stays orphan.
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+
+		// The required column is covered, so the missing-content error stays hidden.
+		expect(
+			screen.queryByText("Un avis CSE est manquant"),
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Chaque fichier doit être associé à au moins un type de contenu",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(/Le fichier «\s*avis-2\.pdf\s*» n'est associé/),
+		).toBeInTheDocument();
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+	});
+
 	it("persists the full association payload through setFileContentTypes when a checkbox is toggled (S7)", async () => {
 		const user = userEvent.setup();
 		renderStep({

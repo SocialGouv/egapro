@@ -16,6 +16,7 @@ import {
 	buildAssociationMap,
 	clearFileAssociations,
 	getMissingColumns,
+	getUnassociatedFiles,
 	toAssociationPayload,
 } from "./contentTypeColumns";
 import formStyles from "./shared/formActions.module.scss";
@@ -132,11 +133,19 @@ export function Step2Upload({
 		[columns, associations],
 	);
 
+	const unassociatedFiles = useMemo(
+		() => getUnassociatedFiles(existingFiles, associations),
+		[existingFiles, associations],
+	);
+
 	const hasExistingFiles = existingFiles.length > 0;
 	const isComplete = missingColumns.length === 0;
-	// The missing-content error is revealed only once the user has tried to
-	// submit (besoin epic-3476): loading files must never trigger it on its own.
+	const hasUnassociatedFiles = unassociatedFiles.length > 0;
+	const canSubmit = isComplete && !hasUnassociatedFiles;
+	// The validation errors are revealed only once the user has tried to submit
+	// (besoin epic-3476): loading files must never trigger them on their own.
 	const showMissingError = hasAttemptedSubmit && !isComplete;
+	const showUnassociatedError = hasAttemptedSubmit && hasUnassociatedFiles;
 
 	const openFinalizeModal = useCallback(() => {
 		const dialog = modalRef.current;
@@ -153,7 +162,7 @@ export function Step2Upload({
 		(event: React.FormEvent) => {
 			event.preventDefault();
 			setFinalizeError(null);
-			if (!isComplete) {
+			if (!canSubmit) {
 				setHasAttemptedSubmit(true);
 				return;
 			}
@@ -161,7 +170,7 @@ export function Step2Upload({
 			if (finalizeMutation.isPending) return;
 			openFinalizeModal();
 		},
-		[isComplete, finalizeMutation.isPending, openFinalizeModal],
+		[canSubmit, finalizeMutation.isPending, openFinalizeModal],
 	);
 
 	const confirmFinalize = useCallback(() => {
@@ -237,6 +246,20 @@ export function Step2Upload({
 							<h2 className="fr-alert__title">Un avis CSE est manquant</h2>
 							{missingColumns.map((column) => (
 								<p key={column.id}>{column.missingMessage}</p>
+							))}
+						</div>
+					)}
+					{showUnassociatedError && (
+						<div className="fr-alert fr-alert--error fr-mt-3w">
+							<h2 className="fr-alert__title">
+								Chaque fichier doit être associé à au moins un type de contenu
+							</h2>
+							{unassociatedFiles.map((file) => (
+								<p key={file.id}>
+									Le fichier «&nbsp;{file.fileName}&nbsp;» n&apos;est associé à
+									aucun type de contenu. Cochez au moins un type, ou supprimez
+									le fichier.
+								</p>
 							))}
 						</div>
 					)}

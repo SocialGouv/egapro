@@ -5,6 +5,7 @@ import {
 	clearFileAssociations,
 	computeContentTypeColumns,
 	getMissingColumns,
+	getUnassociatedFiles,
 	toAssociationPayload,
 } from "../contentTypeColumns";
 import type {
@@ -266,6 +267,40 @@ describe("getMissingColumns", () => {
 		const cols = columns([1, "accuracy"]);
 
 		expect(getMissingColumns(cols, { "1:accuracy": "file-a" })).toEqual([]);
+	});
+});
+
+describe("getUnassociatedFiles", () => {
+	const files = [{ id: "file-a" }, { id: "file-b" }, { id: "file-c" }];
+
+	it("returns files whose id is not referenced by any column", () => {
+		const map: AssociationMap = {
+			"1:accuracy": "file-a",
+			"1:gap": null,
+			"2:accuracy": "file-c",
+		};
+
+		expect(getUnassociatedFiles(files, map).map((file) => file.id)).toEqual([
+			"file-b",
+		]);
+	});
+
+	it("returns an empty list when every file is associated to at least one column", () => {
+		const map: AssociationMap = {
+			"1:accuracy": "file-a",
+			"1:gap": "file-b",
+			"2:accuracy": "file-c",
+		};
+
+		expect(getUnassociatedFiles(files, map)).toEqual([]);
+	});
+
+	it("returns every file when the map is empty", () => {
+		expect(getUnassociatedFiles(files, {}).map((file) => file.id)).toEqual([
+			"file-a",
+			"file-b",
+			"file-c",
+		]);
 	});
 });
 

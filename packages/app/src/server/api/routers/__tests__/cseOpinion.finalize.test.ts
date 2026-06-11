@@ -24,7 +24,15 @@ type Opinion = {
 	type: string;
 	gapConsulted: boolean | null;
 };
-type Association = { declarationNumber: number; type: string };
+type Association = { declarationNumber: number; type: string; fileId?: string };
+type FileRow = { id: string; fileName: string };
+
+// Default file every association points to, so the orphan-file guard passes
+// unless a test supplies extra files.
+const DEFAULT_FILE_ID = "file-1";
+const DEFAULT_FILES: FileRow[] = [
+	{ id: DEFAULT_FILE_ID, fileName: "avis-1.pdf" },
+];
 
 const FIRST_GAP_CONSULTED: Opinion[] = [
 	{ declarationNumber: 1, type: "accuracy", gapConsulted: null },
@@ -73,22 +81,21 @@ const DEFAULT_CATEGORIES: CategoryRow[] = [
 
 type FinalizeOptions = {
 	opinionCount?: number;
-	fileCount?: number;
+	files?: FileRow[];
 	declaration?: Record<string, unknown> | null;
 	txDraft?: Record<string, unknown> | null;
 	opinions?: Opinion[];
 	associations?: Association[];
 	categories?: CategoryRow[];
-	// When true, the matching count query resolves to [] so its row is undefined,
+	// When true, the opinion count query resolves to [] so its row is undefined,
 	// exercising the `?? 0` fallback in finalize().
 	emptyOpinionCountRow?: boolean;
-	emptyFileCountRow?: boolean;
 };
 
 // Select sequence of finalize():
 //   1 middleware declaration-id lookup (.where().limit)
 //   2 opinionCount (.where)
-//   3 fileCount (.where)
+//   3 file rows id + name (.where)
 //   4 declarationRow (.where().limit)
 //   5 existingAssociations (.where)
 //   6 opinions with gapConsulted (.where)
@@ -97,15 +104,21 @@ type FinalizeOptions = {
 function createMockDbForFinalize(options: FinalizeOptions = {}) {
 	const {
 		opinionCount = 2,
-		fileCount = 1,
+		files = DEFAULT_FILES,
 		declaration = DEFAULT_DECLARATION,
 		txDraft = null,
 		opinions = FIRST_GAP_CONSULTED,
 		associations = ASSOCIATIONS_FIRST_GAP,
 		categories = DEFAULT_CATEGORIES,
 		emptyOpinionCountRow = false,
-		emptyFileCountRow = false,
 	} = options;
+
+	// Each association points to a real file (default: the single DEFAULT_FILE)
+	// so the orphan-file guard only fires when a test adds an unreferenced file.
+	const associationsWithFileId = associations.map((association) => ({
+		...association,
+		fileId: association.fileId ?? DEFAULT_FILE_ID,
+	}));
 
 	const declarationLookupRow = { id: "decl-1" };
 
@@ -137,13 +150,10 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 			);
 		}
 		if (call === 3) {
-			return Object.assign(
-				Promise.resolve(emptyFileCountRow ? [] : [{ count: fileCount }]),
-				{ limit },
-			);
+			return Object.assign(Promise.resolve(files), { limit });
 		}
 		if (call === 5) {
-			return Object.assign(Promise.resolve(associations), { limit });
+			return Object.assign(Promise.resolve(associationsWithFileId), { limit });
 		}
 		if (call === 6) {
 			return Object.assign(Promise.resolve(opinions), { limit });
@@ -276,8 +286,8 @@ describe("cseOpinionRouter.finalize", () => {
 		expect(ctx.update).not.toHaveBeenCalled();
 	});
 
-	it("throws PRECONDITION_FAILED when the file count query returns no row", async () => {
-		const ctx = createMockDbForFinalize({ emptyFileCountRow: true });
+	it("throws PRECONDITION_FAILED when no file has been uploaded", async () => {
+		const ctx = createMockDbForFinalize({ files: [] });
 		const caller = await createCaller(ctx.db);
 
 		await expect(caller.finalize()).rejects.toThrow(
@@ -286,12 +296,20 @@ describe("cseOpinionRouter.finalize", () => {
 		expect(ctx.update).not.toHaveBeenCalled();
 	});
 
-	it("throws PRECONDITION_FAILED when no file has been uploaded", async () => {
-		const ctx = createMockDbForFinalize({ fileCount: 0 });
+	it("throws PRECONDITION_FAILED when a file row carries no content type", async () => {
+		const ctx = createMockDbForFinalize({
+			opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: false }],
+			// Only (1, accuracy) is required and file-1 covers it; file-2 is orphan.
+			associations: [{ declarationNumber: 1, type: "accuracy" }],
+			files: [
+				{ id: "file-1", fileName: "avis-1.pdf" },
+				{ id: "file-2", fileName: "avis-2.pdf" },
+			],
+		});
 		const caller = await createCaller(ctx.db);
 
 		await expect(caller.finalize()).rejects.toThrow(
-			"Au moins un fichier d'avis CSE doit être transmis.",
+			"Le fichier « avis-2.pdf » n'est associé à aucun type de contenu. Cochez au moins un type, ou supprimez le fichier.",
 		);
 		expect(ctx.update).not.toHaveBeenCalled();
 	});

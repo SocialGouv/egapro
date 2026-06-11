@@ -195,14 +195,14 @@ export const cseOpinionRouter = createTRPCRouter({
 		}),
 
 	finalize: declarationWriteProcedure.mutation(async ({ ctx }) => {
-		const [opinionCount, fileCount, declarationRow, existingAssociations] =
+		const [opinionCount, fileRows, declarationRow, existingAssociations] =
 			await Promise.all([
 				ctx.db
 					.select({ count: sql<number>`count(*)::int` })
 					.from(cseOpinions)
 					.where(eq(cseOpinions.declarationId, ctx.declarationId)),
 				ctx.db
-					.select({ count: sql<number>`count(*)::int` })
+					.select({ id: files.id, fileName: files.fileName })
 					.from(files)
 					.where(
 						and(
@@ -219,6 +219,7 @@ export const cseOpinionRouter = createTRPCRouter({
 					.select({
 						declarationNumber: cseOpinionFiles.declarationNumber,
 						type: cseOpinionFiles.type,
+						fileId: cseOpinionFiles.fileId,
 					})
 					.from(cseOpinionFiles)
 					.where(eq(cseOpinionFiles.declarationId, ctx.declarationId)),
@@ -230,7 +231,7 @@ export const cseOpinionRouter = createTRPCRouter({
 				message: "Les avis du CSE doivent être renseignés avant validation.",
 			});
 		}
-		if ((fileCount[0]?.count ?? 0) === 0) {
+		if (fileRows.length === 0) {
 			throw new TRPCError({
 				code: "PRECONDITION_FAILED",
 				message: "Au moins un fichier d'avis CSE doit être transmis.",
@@ -325,6 +326,21 @@ export const cseOpinionRouter = createTRPCRouter({
 					message: `Le type de contenu « ${typeLabel} » de la ${declLabel} doit être associé à un fichier avant validation.`,
 				});
 			}
+		}
+
+		// Every uploaded file must carry at least one content type: a file row left
+		// with no checkbox checked is an orphan and blocks finalize. Checked after
+		// the required-type guard so a fully-empty matrix reports the missing type
+		// first.
+		const associatedFileIds = new Set(
+			existingAssociations.map((association) => association.fileId),
+		);
+		const orphanFile = fileRows.find((file) => !associatedFileIds.has(file.id));
+		if (orphanFile) {
+			throw new TRPCError({
+				code: "PRECONDITION_FAILED",
+				message: `Le fichier « ${orphanFile.fileName} » n'est associé à aucun type de contenu. Cochez au moins un type, ou supprimez le fichier.`,
+			});
 		}
 
 		const rules = loadRules(declaration.rulesVersion);
