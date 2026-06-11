@@ -24,6 +24,7 @@ export function DeclarationSuccessBanner({
 				<div className={styles.content}>
 					<div className={styles.titleRow}>
 						<DsfrPictogram
+							className="fr-artwork--green-emeraude"
 							path="/dsfr/artwork/pictograms/system/success.svg"
 							size={44}
 						/>
