@@ -119,11 +119,12 @@ export function RecapitulatifPage({
 
 	return (
 		<div className={common.flexColumnGap2}>
-			{/* Title row — Marianne Bold 24/32 per Figma (DSFR fr-h4) */}
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 				<div className="fr-col">
 					<h1 className="fr-h4 fr-mb-0">
-						Déclaration des indicateurs de rémunération {declarationYear}
+						{isCorrection
+							? `Seconde déclaration des écarts de rémunération par catégorie de salariés ${declarationYear}`
+							: `Déclaration des indicateurs de rémunération ${declarationYear}`}
 					</h1>
 				</div>
 				<div className="fr-col-auto">
@@ -146,24 +147,24 @@ export function RecapitulatifPage({
 				title="Informations calcul"
 			/>
 
-			{/* Indicators for all employees */}
-			<section>
-				<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
-					Indicateurs pour l&apos;ensemble de vos salariés
-				</h2>
-				<div className={styles.indicatorsSection}>
-					<IndicatorTables
-						declarationYear={declarationYear}
-						step2Data={step2Data}
-						step3Data={step3Data}
-						step4Data={step4Data}
-						totalMen={totalMen}
-						totalWomen={totalWomen}
-					/>
-				</div>
-			</section>
+			{!isCorrection && (
+				<section>
+					<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
+						Indicateurs pour l&apos;ensemble de vos salariés
+					</h2>
+					<div className={styles.indicatorsSection}>
+						<IndicatorTables
+							declarationYear={declarationYear}
+							step2Data={step2Data}
+							step3Data={step3Data}
+							step4Data={step4Data}
+							totalMen={totalMen}
+							totalWomen={totalWomen}
+						/>
+					</div>
+				</section>
+			)}
 
-			{/* Indicators by employee category */}
 			<section>
 				<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
 					Indicateurs par catégorie de salariés
@@ -193,10 +194,10 @@ export function RecapitulatifPage({
 			</section>
 
 			<Link
-				className={`fr-btn fr-btn--secondary ${styles.primaryAction}`}
+				className={`fr-btn ${isCorrection ? "fr-btn--secondary" : "fr-btn--primary"} ${styles.primaryAction}`}
 				href="/mon-espace"
 			>
-				Mon espace
+				{isCorrection ? "Mon espace" : "Retour à Mon Espace"}
 			</Link>
 		</div>
 	);
