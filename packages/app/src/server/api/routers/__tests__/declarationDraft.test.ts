@@ -28,12 +28,6 @@ vi.mock("~/server/audit/log", () => ({
 	logAction: (...args: unknown[]) => mockLogAction(...args),
 }));
 
-const mockGetCampaignDeadlines = vi.fn();
-vi.mock("~/server/db/getCampaignDeadlines", () => ({
-	getCampaignDeadlines: (...args: unknown[]) =>
-		mockGetCampaignDeadlines(...args),
-}));
-
 const SIREN = "123456789";
 const YEAR = 2024;
 const USER_SIRET = "12345678900015";
@@ -102,20 +96,9 @@ function createCaller(
 	);
 }
 
-function futureDeadline() {
-	return {
-		decl1ModificationDeadline: new Date(Date.now() + 365 * 24 * 3600 * 1000),
-	};
-}
-
-function pastDeadline() {
-	return { decl1ModificationDeadline: new Date(Date.now() - 1000) };
-}
-
 describe("declarationDraftRouter", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
-		mockGetCampaignDeadlines.mockResolvedValue(futureDeadline());
 	});
 
 	afterEach(() => {
@@ -171,9 +154,8 @@ describe("declarationDraftRouter", () => {
 			expect(result).toBeNull();
 		});
 
-		it("returns null when decl1ModificationDeadline has passed", async () => {
-			mockGetCampaignDeadlines.mockResolvedValue(pastDeadline());
-
+		it("returns draft when campaign deadline is past but TTL is not expired", async () => {
+			// #3594: draft read is decoupled from the campaign deadline — only the 30-day TTL gates it.
 			const draftData = { main: { step1: { workforce: 50 } } };
 			const { db } = createMockDb([
 				[{ siren: SIREN }],
@@ -183,7 +165,7 @@ describe("declarationDraftRouter", () => {
 
 			const result = await caller.get({ siren: SIREN, year: YEAR });
 
-			expect(result).toBeNull();
+			expect(result).toEqual(draftData);
 		});
 
 		it("throws FORBIDDEN when user does not own the siren", async () => {
