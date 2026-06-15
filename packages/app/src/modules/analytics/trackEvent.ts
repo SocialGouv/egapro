@@ -1,4 +1,12 @@
-import { push, sendEvent } from "@socialgouv/matomo-next";
+// Import from the package's deep subpaths instead of its barrel entry: the
+// barrel statically pulls `track-pages-router`, which `require`s `next/router`.
+// `trackEvent` is isomorphic and reachable from Route Handler (app-route)
+// module graphs, where `next/router` resolves to a vendored context that does
+// not exist — breaking the Turbopack production build (MODULE_UNPARSABLE on
+// `app-route/vendored/contexts/router-context.js`). `tracker`/`events` are
+// router-free.
+import { sendEvent } from "@socialgouv/matomo-next/lib/events";
+import { push } from "@socialgouv/matomo-next/lib/tracker";
 
 import { env } from "~/env.js";
 

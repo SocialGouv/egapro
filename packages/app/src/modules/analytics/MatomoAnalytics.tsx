@@ -1,6 +1,9 @@
 "use client";
 
-import { trackAppRouter } from "@socialgouv/matomo-next";
+// Deep subpath import: the package barrel statically pulls `track-pages-router`
+// (`next/router`), which must not enter app-route module graphs. `track-app-router`
+// is router-free aside from the App Router `next/navigation` hooks used here.
+import { trackAppRouter } from "@socialgouv/matomo-next/lib/track-app-router";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 

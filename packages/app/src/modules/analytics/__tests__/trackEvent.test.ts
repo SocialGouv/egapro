@@ -10,8 +10,10 @@ const { mockEnv, pushMock, sendEventMock } = vi.hoisted(() => ({
 }));
 
 vi.mock("~/env", () => ({ env: mockEnv }));
-vi.mock("@socialgouv/matomo-next", () => ({
+vi.mock("@socialgouv/matomo-next/lib/tracker", () => ({
 	push: pushMock,
+}));
+vi.mock("@socialgouv/matomo-next/lib/events", () => ({
 	sendEvent: sendEventMock,
 }));
 
