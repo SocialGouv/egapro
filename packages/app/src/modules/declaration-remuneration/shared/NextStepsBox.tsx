@@ -17,21 +17,15 @@ export function NextStepsBox({
 	siren,
 	isSecondDeclaration,
 }: Props) {
-	const containerClass = isSecondDeclaration
-		? styles.nextStepsCompact
-		: styles.nextSteps;
-
 	return (
 		<>
-			<div className={containerClass}>
+			<div className={styles.nextSteps}>
 				<h3 className="fr-h4 fr-mb-0">Prochaines étapes</h3>
 
 				<div className={styles.section}>
-					{!isSecondDeclaration && (
-						<h4 className="fr-text--bold fr-text--md fr-mb-0">
-							Informer et consulter le CSE
-						</h4>
-					)}
+					<h4 className="fr-text--bold fr-text--md fr-mb-0">
+						Informer et consulter le CSE
+					</h4>
 
 					<p className="fr-mb-0">
 						Au cours du temps imparti pour réaliser votre déclaration, vous
@@ -64,45 +58,26 @@ export function NextStepsBox({
 					</div>
 				</div>
 
-				{!isSecondDeclaration && hasGapsAboveThreshold && (
-					<hr className={styles.separator} />
-				)}
+				{hasGapsAboveThreshold && <hr className={styles.separator} />}
 
 				{hasGapsAboveThreshold && (
 					<div className={styles.section}>
-						{isSecondDeclaration ? (
-							<p className="fr-text--bold fr-mb-0">
-								Des écarts ont été de nouveau détectés
+						<div className={styles.alertHeader}>
+							<p
+								className={`fr-badge fr-badge--warning fr-badge--sm ${styles.alertBadge}`}
+							>
+								Écarts détectés
 							</p>
-						) : (
-							<div className={styles.alertHeader}>
-								<p
-									className={`fr-badge fr-badge--warning fr-badge--sm ${styles.alertBadge}`}
-								>
-									Écarts détectés
-								</p>
-								<h4 className="fr-text--bold fr-text--md fr-mb-0">
-									Actions à engager
-								</h4>
-							</div>
-						)}
+							<h4 className="fr-text--bold fr-text--md fr-mb-0">
+								Actions à engager
+							</h4>
+						</div>
 
 						<p className="fr-mb-0">
 							Suite à l&apos;analyse de vos données de l&apos;indicateur par
-							catégorie de salariés,{" "}
-							{isSecondDeclaration ? (
-								<>
-									<strong>des écarts &ge; 5 % ont été identifiés</strong>. Vous
-									devez{" "}
-									<strong>engager un des parcours de mise en conformité</strong>{" "}
-									suivant&nbsp;:
-								</>
-							) : (
-								<>
-									des écarts &ge; 5 % ont été identifiés. Vous devez engager un
-									des parcours de mise en conformité suivant&nbsp;:
-								</>
-							)}
+							catégorie de salariés, des écarts &ge; 5 % ont été identifiés.
+							Vous devez engager un des parcours de mise en conformité
+							suivant&nbsp;:
 						</p>
 
 						<ul>
