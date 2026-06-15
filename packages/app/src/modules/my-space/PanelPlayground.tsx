@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 
 import type { CampaignDeadlines } from "~/modules/domain";
-import { getDeclarationDisplayContext } from "~/modules/domain";
+import {
+	getDeclarationDisplayContext,
+	getDefaultCampaignDeadlines,
+} from "~/modules/domain";
 import {
 	DECLARATION_PROCESS_PANEL_ID,
 	DeclarationProcessPanel,
@@ -36,18 +39,10 @@ function toInputDate(d: Date): string {
 }
 
 function buildPresetDeadlines(preset: "future" | "past"): CampaignDeadlines {
+	// Reuse the domain deadline rules; the playground only picks a base year
+	// far in the future or in the past to force the "open" / "closed" states.
 	const base = preset === "future" ? 2099 : 2020;
-	return {
-		gipPublicationDate: null,
-		campaignStartDate: null,
-		decl1ModificationDeadline: new Date(base, 5, 1),
-		decl1JustificationDeadline: new Date(base, 5, 1),
-		decl1JointEvaluationDeadline: new Date(base, 7, 1),
-		decl2ModificationDeadline: new Date(base, 11, 1),
-		decl2JustificationDeadline: new Date(base, 11, 1),
-		decl2JointEvaluationDeadline: new Date(base + 1, 1, 1),
-		pathChoiceDeadline: new Date(base + 1, 0, 1),
-	};
+	return getDefaultCampaignDeadlines(base);
 }
 
 /**
