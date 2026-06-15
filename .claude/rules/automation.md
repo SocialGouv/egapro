@@ -147,11 +147,13 @@ The `tu-dev` agent (Opus) precedes these 4 gates in the `/implement` pipeline (s
 
 ## Skills (manual)
 
-Five skills split the lifecycle:
+Les skills couvrent le cycle de vie (conception → exécution → review) et le pilotage de sprint (sizing → vélocité → planification) :
 
 | Command | When to use |
 |---|---|
-| `/analyse [<issue#>] [<description>]` | Phase conception. Détecte le mode (epic / task / bug) selon le type d'issue ou le prompt et invoque les agents appropriés (PO + architect, architect-task, ou bug-analyst). |
+| `/analyse [<issue#>] [<description>]` | Phase conception. Détecte le mode (epic / task / bug) selon le type d'issue ou le prompt et invoque les agents appropriés (PO + architect, architect-task, ou bug-analyst). Size chaque feuille en fin d'analyse (`Size` + `Estimate`). |
 | `/implement <issue#>` | Phase exécution. Détecte le mode selon le type d'issue : Feature → loop driver background (`epic_loop.sh`) ; Task / Bug → `code-dev` synchrone foreground. Vérifie qu'une analyse a été faite avant de dispatcher. |
 | `/report [<N> ...]` | Dashboard live des agents en cours + état des sous-tickets d'un epic. Pure bash, zéro LLM. |
 | `/review [<issue#>\|<PR#>]` | Adresse les commentaires de revue (humain + bots). 3 modes auto-détectés : Feature → toutes les sub-task PRs + PR finale, fixes sur `epic/<N>` ; Task / Bug → la seule PR du ticket. Délègue à `review-fixer` en worktree. |
+| `/velocity [<sprint>]` | Vélocité des sprints terminés + capacité conseillée pour le prochain. Σ points des feuilles livrées (Done ∪ In review), moyenne glissante 3 sprints. Pure bash, read-only. |
+| `/plan-sprint [<sprint>]` | Planifie le prochain sprint (capacité, report des non-livrés, fill backlog par priorité). Plan → validation explicite → assignation Sprint des tickets. Ne crée pas l'itération (limite API GitHub → clic UI). |

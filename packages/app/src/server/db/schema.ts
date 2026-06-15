@@ -452,6 +452,7 @@ export const companies = createTable("company", (d) => ({
 	name: d.varchar({ length: 255 }).notNull(),
 	address: d.varchar({ length: 500 }),
 	nafCode: d.varchar({ length: 10 }),
+	nafLabel: d.varchar({ length: 255 }),
 	workforce: d.integer(),
 	hasCse: d.boolean(),
 	createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),

@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { computeDeclarationStatus } from "~/modules/my-space/declarationStatus";
 
 vi.mock("~/server/services/suit");
+vi.mock("~/server/services/weez");
 
 describe("computeDeclarationStatus", () => {
 	it("returns to_complete when no declaration exists", () => {
@@ -94,7 +95,9 @@ function createMockDb(rows: unknown[]) {
 	mockLimit.mockResolvedValue(rows);
 	mockWhere.mockReturnValue({ limit: mockLimit });
 	mockInnerJoin.mockReturnValue({ where: mockWhere });
-	mockFrom.mockReturnValue({ innerJoin: mockInnerJoin });
+	// `where` on the from() result supports the impersonation bypass path
+	// (no innerJoin); `innerJoin` supports the owner path.
+	mockFrom.mockReturnValue({ innerJoin: mockInnerJoin, where: mockWhere });
 	mockSelect.mockReturnValue({ from: mockFrom });
 
 	mockUpdateWhere.mockResolvedValue(undefined);
@@ -218,6 +221,138 @@ describe("findUserCompany CSE auto-fetch", () => {
 		await expect(caller.get({ siren: "000000000" })).rejects.toThrow(
 			"Company not found or access denied",
 		);
+	});
+});
+
+describe("findUserCompany NAF label enrichment", () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	async function callGet(companyRow: unknown) {
+		const mockDb = createMockDb([companyRow]);
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+		return caller.get({ siren: "339787277" });
+	}
+
+	it("backfills nafLabel from Weez when null and persists it", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+		vi.mocked(fetchCompanyBySiren).mockResolvedValue({
+			name: "Test Company",
+			address: null,
+			nafCode: "62.01Z",
+			nafLabel: "Programmation informatique",
+			workforce: 100,
+		});
+
+		const result = await callGet({
+			siren: "339787277",
+			name: "Test Company",
+			address: null,
+			nafCode: "62.01Z",
+			nafLabel: null,
+			workforce: 100,
+			hasCse: true,
+		});
+
+		expect(fetchCompanyBySiren).toHaveBeenCalledWith("339787277");
+		expect(mockSet).toHaveBeenCalledWith({
+			nafLabel: "Programmation informatique",
+		});
+		expect(result.nafLabel).toBe("Programmation informatique");
+	});
+
+	it("does not call Weez when nafLabel is already present", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+
+		const result = await callGet({
+			siren: "339787277",
+			name: "Test Company",
+			address: null,
+			nafCode: "62.01Z",
+			nafLabel: "Programmation informatique",
+			workforce: 100,
+			hasCse: true,
+		});
+
+		expect(fetchCompanyBySiren).not.toHaveBeenCalled();
+		expect(result.nafLabel).toBe("Programmation informatique");
+	});
+
+	it("does not call Weez for a non-diffusible company (no nafCode)", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+
+		const result = await callGet({
+			siren: "339787277",
+			name: "Entreprise non diffusible",
+			address: null,
+			nafCode: null,
+			nafLabel: null,
+			workforce: 100,
+			hasCse: true,
+		});
+
+		expect(fetchCompanyBySiren).not.toHaveBeenCalled();
+		expect(result.nafLabel).toBeNull();
+	});
+
+	it("keeps nafLabel null and does not throw when Weez fails", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+		vi.mocked(fetchCompanyBySiren).mockRejectedValue(new Error("Weez down"));
+
+		const result = await callGet({
+			siren: "339787277",
+			name: "Test Company",
+			address: null,
+			nafCode: "62.01Z",
+			nafLabel: null,
+			workforce: 100,
+			hasCse: true,
+		});
+
+		expect(result.nafLabel).toBeNull();
+	});
+
+	it("does not backfill during admin impersonation (read-only)", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+		const mockDb = createMockDb([
+			{
+				siren: "339787277",
+				name: "Test Company",
+				address: null,
+				nafCode: "62.01Z",
+				nafLabel: null,
+				workforce: 100,
+				hasCse: true,
+			},
+		]);
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: {
+				user: {
+					id: "admin-1",
+					isAdmin: true,
+					impersonation: { siren: "339787277" },
+				},
+				expires: "",
+			},
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.get({ siren: "339787277" });
+
+		expect(fetchCompanyBySiren).not.toHaveBeenCalled();
+		expect(result.nafLabel).toBeNull();
 	});
 });
 

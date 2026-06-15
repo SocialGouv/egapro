@@ -24,6 +24,7 @@ export type CompanyDetail = {
 	name: string;
 	address: string | null;
 	nafCode: string | null;
+	nafLabel: string | null;
 	workforce: number | null;
 	hasCse: boolean | null;
 };

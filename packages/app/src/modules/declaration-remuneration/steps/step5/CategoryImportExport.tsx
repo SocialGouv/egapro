@@ -64,7 +64,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 		<>
 			<button
 				aria-controls={importModalId}
-				className="fr-btn fr-btn--secondary fr-icon-upload-line fr-btn--icon-left"
+				className="fr-btn fr-btn--secondary fr-icon-file-download-line fr-btn--icon-left"
 				data-fr-opened="false"
 				disabled={disabled}
 				type="button"

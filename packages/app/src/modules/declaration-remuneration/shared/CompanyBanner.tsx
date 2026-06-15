@@ -8,6 +8,8 @@ type CompanyBannerProps = {
 	company: {
 		name: string;
 		siren: string;
+		nafCode: string | null;
+		nafLabel: string | null;
 		workforce: number | null;
 		hasCse: boolean | null;
 	};
@@ -24,38 +26,48 @@ export function CompanyBanner({
 				<Breadcrumb
 					items={[
 						{ label: "Mon espace", href: "/" },
+						{ label: company.name },
 						{ label: currentPageLabel },
 					]}
 				/>
 
-				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
-					<div className="fr-col-auto">
-						<p
-							className={`fr-text--bold fr-mb-0 fr-flex fr-flex--align-center ${styles.companyInfo}`}
-						>
-							<span aria-hidden="true" className="fr-icon-building-line" />
-							{company.name} - {formatSiren(company.siren)}
-						</p>
+				<div className={styles.companyRow}>
+					<p className="fr-text--bold fr-mb-0">{company.name}</p>
+
+					<div className={styles.datapoint}>
+						<span>{"SIREN :"}</span>
+						<strong>{formatSiren(company.siren)}</strong>
 					</div>
-					{company.workforce !== null && (
-						<div className="fr-col-auto">
-							<p className="fr-mb-0 fr-text--sm">
-								Effectif annuel moyen en {getWorkforceYear()} :{" "}
-								<strong>{company.workforce}</strong>
-							</p>
+
+					{company.nafCode && (
+						<div className={styles.datapoint}>
+							<span>{"Code NAF :"}</span>
+							<strong>
+								{company.nafLabel
+									? `${company.nafCode} — ${company.nafLabel}`
+									: company.nafCode}
+							</strong>
 						</div>
 					)}
-					<div className="fr-col-auto">
-						<p className="fr-mb-0 fr-text--sm">
-							Existence d'un CSE :{" "}
-							<strong>
-								{company.hasCse === null
-									? "Non renseigné"
-									: company.hasCse
-										? "Oui"
-										: "Non"}
-							</strong>
-						</p>
+
+					{company.workforce !== null && (
+						<div className={styles.datapoint}>
+							<span>
+								{"Effectif annuel moyen en"} {getWorkforceYear()} {":"}
+							</span>
+							<strong>{company.workforce}</strong>
+						</div>
+					)}
+
+					<div className={styles.datapoint}>
+						<span>{"Existence d'un CSE :"}</span>
+						<strong>
+							{company.hasCse === null
+								? "Non renseigné"
+								: company.hasCse
+									? "Oui"
+									: "Non"}
+						</strong>
 					</div>
 				</div>
 			</div>

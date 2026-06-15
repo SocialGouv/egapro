@@ -247,7 +247,7 @@ describe("Step5EmployeeCategories", () => {
 		);
 
 		await user.type(input, "25000");
-		expect(input).toHaveValue("25000");
+		expect(input).toHaveValue("25 000");
 	});
 
 	it("rejects negative values in number inputs", async () => {

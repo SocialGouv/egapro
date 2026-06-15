@@ -4,6 +4,7 @@ export {
 } from "./CampaignRateTileStates";
 export { CompanySizeFilter } from "./CompanySizeFilter";
 export { FileUpload } from "./FileUpload";
+export { getDsfrCollapse } from "./getDsfrCollapse";
 export { getDsfrModal } from "./getDsfrModal";
 export type { KpiBadgeDelta } from "./KpiBadge";
 export { getKpiBadgeRendering, KpiBadge } from "./KpiBadge";

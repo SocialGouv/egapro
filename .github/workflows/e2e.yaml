@@ -1,7 +1,9 @@
 name: 🧪 E2E Tests
 
 on:
-  push:
+  pull_request:
+    branches:
+      - alpha
   workflow_dispatch:
 
 concurrency:
@@ -21,9 +23,6 @@ jobs:
       EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
       EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
       EGAPRO_SUIT_API_URL: ${{ secrets.EGAPRO_SUIT_API_URL }}
-      # Deterministic dev value matching the E2E test's hardcoded secret.
-      # The real secret is only needed in deployed environments (where the
-      # APISIX gateway injects it into the X-Gateway-Forwarded header).
       EGAPRO_GATEWAY_SHARED_SECRET: dev-gateway-shared-secret-minimum-32-chars
       S3_ENDPOINT: http://localhost:9000
       S3_REGION: us-east-1
@@ -33,10 +32,6 @@ jobs:
       CLAMAV_HOST: localhost
       CLAMAV_PORT: 3310
       ADMIN_EMAILS: test@fia1.fr
-      # Notifications worker + publisher wiring (separate Postgres + MailDev
-      # SMTP). The dev server reads NOTIFICATIONS_DATABASE_URL when calling
-      # `enqueueNotification`; the worker is spawned by the E2E test itself
-      # and inherits these from process.env.
       NOTIFICATIONS_DATABASE_URL: postgresql://postgres:postgres@localhost:5439/egapro_notifications
       MAIL_ENABLED: "true"
       SMTP_HOST: localhost

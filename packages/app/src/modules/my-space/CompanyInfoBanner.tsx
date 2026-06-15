@@ -55,7 +55,12 @@ export function CompanyInfoBanner({ company }: Props) {
 				<div className={styles.infoRow}>
 					{company.nafCode && (
 						<p className={styles.datapoint}>
-							Code NAF : <strong>{company.nafCode}</strong>
+							Code NAF :{" "}
+							<strong>
+								{company.nafLabel
+									? `${company.nafCode} — ${company.nafLabel}`
+									: company.nafCode}
+							</strong>
 						</p>
 					)}
 					{company.workforce !== null && (
