@@ -28,7 +28,7 @@ type Props = {
 	/** Human-readable hint displayed under the label (e.g. "pdf, docx, jpg"). */
 	acceptLabel: string;
 	/** Maximum number of files that can be selected. */
-	maxFiles?: number;
+	maxFileCount?: number;
 	/**
 	 * When true, the dropzone, file input and selection button are all
 	 * disabled. Consumers can still render the component to preserve layout,
@@ -45,7 +45,7 @@ export function FileUpload({
 	accept,
 	allowedMimeTypes,
 	acceptLabel,
-	maxFiles = 1,
+	maxFileCount = 1,
 	disabled = false,
 }: Props) {
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -79,7 +79,7 @@ export function FileUpload({
 	const processFiles = useCallback(
 		(newFiles: FileList | File[]) => {
 			const filesToAdd = Array.from(newFiles);
-			const remainingSlots = maxFiles - selectedFiles.length;
+			const remainingSlots = maxFileCount - selectedFiles.length;
 			const capped = filesToAdd.slice(0, remainingSlots);
 
 			for (const file of capped) {
@@ -91,7 +91,7 @@ export function FileUpload({
 			}
 			onFilesChange([...selectedFiles, ...capped], null);
 		},
-		[onFilesChange, validateFile, selectedFiles, maxFiles],
+		[onFilesChange, validateFile, selectedFiles, maxFileCount],
 	);
 
 	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -131,7 +131,7 @@ export function FileUpload({
 	}
 
 	const messagesId = `${inputId}-messages`;
-	const canAddMore = !disabled && selectedFiles.length < maxFiles;
+	const canAddMore = !disabled && selectedFiles.length < maxFileCount;
 
 	return (
 		<div>
@@ -159,7 +159,7 @@ export function FileUpload({
 						onClick={() => fileInputRef.current?.click()}
 						type="button"
 					>
-						{maxFiles === 1
+						{maxFileCount === 1
 							? "Sélectionner un fichier"
 							: "Sélectionner des fichiers"}
 						<span
@@ -169,7 +169,7 @@ export function FileUpload({
 					</button>
 				</span>
 				<p className="fr-text--sm fr-mb-0">
-					{maxFiles === 1 ? "ou glisser-le ici" : "ou glisser-les ici"}
+					{maxFileCount === 1 ? "ou glisser-le ici" : "ou glisser-les ici"}
 				</p>
 			</section>
 
@@ -208,7 +208,7 @@ export function FileUpload({
 				className="fr-sr-only"
 				disabled={disabled}
 				id={inputId}
-				multiple={maxFiles > 1}
+				multiple={maxFileCount > 1}
 				name={inputId}
 				onChange={handleFileChange}
 				ref={fileInputRef}

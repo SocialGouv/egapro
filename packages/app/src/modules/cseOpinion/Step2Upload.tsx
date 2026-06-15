@@ -162,7 +162,7 @@ export function Step2Upload({
 					disabled={readOnlyGuard.isReadOnly}
 					error={uploadError}
 					inputId="cse-file-upload"
-					maxFiles={remainingSlots}
+					maxFileCount={remainingSlots}
 					onFilesChange={handleFilesChange}
 					selectedFiles={selectedFiles}
 				/>

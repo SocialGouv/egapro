@@ -128,7 +128,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
-				maxFiles={2}
+				maxFileCount={2}
 				onFilesChange={onFilesChange}
 				selectedFiles={[makePdf("a.pdf"), makePdf("b.pdf")]}
 			/>,
@@ -325,7 +325,7 @@ describe("FileUpload", () => {
 			<FileUpload
 				{...baseProps}
 				error={null}
-				maxFiles={2}
+				maxFileCount={2}
 				onFilesChange={onFilesChange}
 				selectedFiles={[makePdf("a.pdf")]}
 			/>,
