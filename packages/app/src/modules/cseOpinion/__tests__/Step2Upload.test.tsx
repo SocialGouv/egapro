@@ -304,6 +304,28 @@ describe("Step2Upload", () => {
 		expect(screen.getAllByRole("checkbox")).toHaveLength(DUAL_COLUMNS.length);
 	});
 
+	it("renders the second-declaration column headers when a second declaration must be displayed", () => {
+		renderStep({
+			columns: DUAL_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		const secondDeclarationColumns = DUAL_COLUMNS.filter(
+			(column) => column.declarationNumber === 2,
+		);
+		expect(secondDeclarationColumns).toHaveLength(2);
+		expect(screen.getAllByText("2e déclaration")).toHaveLength(
+			secondDeclarationColumns.length,
+		);
+		for (const column of secondDeclarationColumns) {
+			expect(
+				screen.getByRole("columnheader", {
+					name: new RegExp(`${column.label}[\\s\\S]*2e déclaration`),
+				}),
+			).toBeInTheDocument();
+		}
+	});
+
 	it("does not show a file counter in the hint text", () => {
 		renderStep({
 			existingFiles: [
