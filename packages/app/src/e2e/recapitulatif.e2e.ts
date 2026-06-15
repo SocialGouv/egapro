@@ -65,7 +65,7 @@ test.describe("Recapitulatif page", () => {
 		await expect(
 			page
 				.locator("main")
-				.getByRole("link", { name: "Mon espace", exact: true })
+				.getByRole("link", { name: "Retour à Mon Espace", exact: true })
 				.last(),
 		).toBeVisible();
 	});

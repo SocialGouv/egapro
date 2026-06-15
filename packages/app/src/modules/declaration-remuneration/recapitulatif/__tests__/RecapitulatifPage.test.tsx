@@ -41,8 +41,8 @@ describe("RecapitulatifPage", () => {
 		expect(
 			screen.queryByRole("navigation", { name: /vous êtes ici/i }),
 		).not.toBeInTheDocument();
-		// The only navigation link at the bottom is the secondary "Mon espace"
-		// button — there is no top "Retour" link.
+		// The bottom action is the full "Retour à Mon Espace" button — there is
+		// no standalone top "Retour" breadcrumb link.
 		expect(
 			screen.queryByRole("link", { name: "Retour" }),
 		).not.toBeInTheDocument();
@@ -272,12 +272,14 @@ describe("RecapitulatifPage", () => {
 		expect(screen.getByText("Accord d'entreprise")).toBeInTheDocument();
 	});
 
-	it("renders secondary 'Mon espace' button linking to mon-espace", () => {
+	it("renders primary 'Retour à Mon Espace' button linking to mon-espace", () => {
 		render(<RecapitulatifPage {...defaultProps()} />);
-		const returnLink = screen.getByRole("link", { name: "Mon espace" });
+		const returnLink = screen.getByRole("link", {
+			name: "Retour à Mon Espace",
+		});
 		expect(returnLink).toHaveAttribute("href", "/mon-espace");
-		expect(returnLink.className).toContain("fr-btn--secondary");
-		expect(returnLink.className).not.toContain("fr-btn--primary");
+		expect(returnLink.className).toContain("fr-btn--primary");
+		expect(returnLink.className).not.toContain("fr-btn--secondary");
 	});
 
 	it("does not render its own ResourceBanner (PublicChrome handles it)", () => {
