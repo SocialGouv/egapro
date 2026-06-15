@@ -197,7 +197,7 @@ function ProportionTable({
 									<td className={styles.numeric}>
 										{Number.isNaN(eWomen) ? "-" : eWomen}
 									</td>
-									<td className={styles.numeric}>
+									<td className={styles.percent}>
 										<strong>
 											{Number.isNaN(eWomen)
 												? "-"
@@ -213,7 +213,7 @@ function ProportionTable({
 									<td className={styles.numeric}>
 										{Number.isNaN(eMen) ? "-" : eMen}
 									</td>
-									<td className={styles.numeric}>
+									<td className={styles.percent}>
 										<strong>
 											{Number.isNaN(eMen) ? "-" : computePercentage(eMen, tMen)}
 										</strong>
@@ -321,12 +321,12 @@ function QuartileDistributionTable({
 												<td className={styles.numeric}>
 													{q.men !== undefined ? q.men : "-"}
 												</td>
-												<td className={styles.numeric}>
+												<td className={styles.percent}>
 													{lineTotal > 0
 														? computePercentage(q.women ?? 0, lineTotal)
 														: "-"}
 												</td>
-												<td className={styles.numeric}>
+												<td className={styles.percent}>
 													{lineTotal > 0
 														? computePercentage(q.men ?? 0, lineTotal)
 														: "-"}
@@ -343,12 +343,12 @@ function QuartileDistributionTable({
 										<td className={styles.numeric}>
 											<strong>{totalMen || "-"}</strong>
 										</td>
-										<td className={styles.numeric}>
+										<td className={styles.percent}>
 											<strong>
 												{total > 0 ? computePercentage(totalWomen, total) : "-"}
 											</strong>
 										</td>
-										<td className={styles.numeric}>
+										<td className={styles.percent}>
 											<strong>
 												{total > 0 ? computePercentage(totalMen, total) : "-"}
 											</strong>

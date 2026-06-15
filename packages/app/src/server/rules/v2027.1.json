@@ -273,7 +273,7 @@
 
 		{
 			"id": "submit_cse_opinion",
-			"from": ["awaiting_cse_opinion"],
+			"from": ["awaiting_cse_opinion", "demarche_completed"],
 			"action": "submit_cse_opinion",
 			"to": "demarche_completed",
 			"events": [

@@ -282,8 +282,12 @@ flowchart LR
     B --> C[Saisir les avis<br/>première déclaration<br/>+ optionnellement seconde]
     C --> D[/avis-cse/etape/2]
     D --> E[Upload PDF<br/>jusqu'à 4/an]
-    E --> F[Bouton Finaliser]
-    F --> G([Confirmation<br/>+ mail])
+    E --> F{Fichiers uploadés ?}
+    F -->|Oui| M[Matrice d'association<br/>fichier × type de contenu]
+    M --> G{Toutes les colonnes<br/>associées ?}
+    G -->|Non| M
+    G -->|Oui| H[Bouton Finaliser]
+    H --> I([Confirmation<br/>+ mail])
 ```
 
 ### 7.1 Saisie de l'étape 1 (avis textuels)
@@ -294,7 +298,7 @@ Pour la première déclaration (et optionnellement la seconde), deux avis :
 - **Avis sur les écarts** — favorable / défavorable + date
   - Si l'avis sur les écarts n'a **pas été consulté** par le CSE, on coche `gapConsulted = false` et l'avis est nullable
 
-### 7.2 Étape 2 — upload des PDF
+### 7.2 Étape 2 — upload des PDF et association des types de contenu
 
 Limite : **4 PDF par année** (`MAX_CSE_FILES = 4`). Chaque fichier passe par :
 
@@ -304,9 +308,30 @@ Limite : **4 PDF par année** (`MAX_CSE_FILES = 4`). Chaque fichier passe par :
 4. Upload S3 (clé `<siren>/<year>/cse_opinion/<uuid>.pdf`)
 5. Insertion en base (`files` table)
 
+Dès qu'au moins un fichier est uploadé, la **matrice d'association** (`ContentTypeMatrix`) s'affiche. Elle comporte une colonne par type de contenu requis :
+
+| Colonne | Présente si… |
+|---|---|
+| Exactitude — 1re déclaration | toujours |
+| Justification des écarts — 1re déclaration | `gapConsulted = true` pour la 1re déclaration |
+| Exactitude — 2e déclaration | seconde déclaration présente |
+| Justification des écarts — 2e déclaration | seconde déclaration présente + `gapConsulted = true` |
+
+Pour chaque ligne (fichier) × colonne (type de contenu), une **case à cocher** permet d'associer le fichier au type. Une colonne ne peut être associée qu'à un seul fichier à la fois. L'association est enregistrée immédiatement en base à chaque changement de case (appel `setFileContentTypes`).
+
+Le bouton **« Soumettre »** reste désactivé tant que des colonnes obligatoires ne sont pas couvertes. Une alerte explicite liste les types de contenu manquants.
+
 ### 7.3 Finalisation
 
-Le clic sur **« Finaliser »** bascule la déclaration en `cseStatus = submitted`. À partir de là, les fichiers sont en lecture seule (mais on peut toujours en uploader d'autres dans la limite des 4).
+Le clic sur **« Soumettre »** (quand toutes les associations sont présentes) :
+
+1. Ouvre une modale de confirmation (`SubmitConfirmationModal`).
+2. Déclenche la procédure `finalize` qui vérifie côté serveur que :
+   - au moins un avis CSE est enregistré
+   - au moins un fichier est uploadé
+   - chaque couple `(declarationNumber, type)` requis est couvert par une association dans `cseOpinionFiles`
+3. Bascule la déclaration en `cseStatus = submitted` et enregistre l'événement dans `declarationStatusHistory`.
+4. Redirige vers `/avis-cse/confirmation`.
 
 > **Pourquoi cette séparation déclaration / CSE ?** Le calendrier de mise au CSE est différent : il faut d'abord déclarer les indicateurs, puis attendre la convocation du CSE, faire passer en réunion, déposer le PV. Ces deux temps peuvent s'étaler sur plusieurs semaines.
 

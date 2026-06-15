@@ -18,3 +18,13 @@ export const saveOpinionsSchema = z.object({
 export const deleteFileSchema = z.object({
 	fileId: z.string().min(1),
 });
+
+export const setFileContentTypesSchema = z.object({
+	associations: z.array(
+		z.object({
+			declarationNumber: z.number().int().min(1).max(2),
+			type: z.enum(["accuracy", "gap"]),
+			fileId: z.string().min(1),
+		}),
+	),
+});
