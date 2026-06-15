@@ -84,9 +84,12 @@ test.describe("Path 3: gap + hasCse → compliance choice → justify", () => {
 			}),
 		).toBeVisible();
 		await expect(
-			page.getByText("Évaluation conjointe des rémunérations", {
-				exact: true,
-			}),
+			page.getByText(
+				"Mettre en place une évaluation conjointe des rémunérations",
+				{
+					exact: true,
+				},
+			),
 		).toBeVisible();
 		await expect(
 			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
@@ -212,9 +215,12 @@ test.describe("Path 8: gap + corrective action (gap persists) → second round c
 			}),
 		).toBeVisible();
 		await expect(
-			page.getByText("Évaluation conjointe des rémunérations", {
-				exact: true,
-			}),
+			page.getByText(
+				"Mettre en place une évaluation conjointe des rémunérations",
+				{
+					exact: true,
+				},
+			),
 		).toBeVisible();
 		await expect(
 			page.getByText("Actions correctives et seconde déclaration", {

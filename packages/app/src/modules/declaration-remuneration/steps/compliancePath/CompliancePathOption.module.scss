@@ -2,4 +2,10 @@
 	border: 1px solid var(--border-default-grey);
 	border-radius: 4px;
 	padding: 1rem;
+
+	// Nested so the selector outranks DSFR's `.fr-label` colour, which has the
+	// same specificity but is loaded later in the cascade.
+	.title {
+		color: var(--text-action-high-blue-france);
+	}
 }

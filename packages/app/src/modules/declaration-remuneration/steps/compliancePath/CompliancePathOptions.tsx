@@ -13,27 +13,33 @@ export function getCompliancePathHref(path: CompliancePathValue): string {
 
 export function JointEvaluationOption({
 	checked,
+	className,
 	deadline,
 	disabled,
 	onChange,
 }: {
 	checked: boolean;
+	className?: string;
 	deadline: Date;
 	disabled?: boolean;
 	onChange: () => void;
 }) {
+	const elementClassName = ["fr-fieldset__element", className]
+		.filter(Boolean)
+		.join(" ");
+
 	return (
-		<div className="fr-fieldset__element">
+		<div className={elementClassName}>
 			<CompliancePathOption
 				checked={checked}
 				deadline={deadline}
 				disabled={disabled}
 				id="path-joint"
 				learnMoreHref="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
-				learnMoreLabel="En savoir plus sur évaluation conjointe des rémunérations"
+				learnMoreLabel="En savoir plus sur l'évaluation conjointe des rémunérations"
 				name="compliance-path"
 				onChange={onChange}
-				title="Évaluation conjointe des rémunérations"
+				title="Mettre en place une évaluation conjointe des rémunérations"
 				value="joint_evaluation"
 			>
 				<p className="fr-mb-0">
@@ -113,8 +119,15 @@ export function SecondRoundOptions({
 				disabled={disabled}
 				onChange={() => setSelectedPath("justify")}
 			/>
+
+			<h2 className="fr-h6 fr-mt-3w fr-mb-0">
+				Si la justification n&apos;est pas possible par des critères objectifs
+				et non sexistes
+			</h2>
+
 			<JointEvaluationOption
 				checked={selectedPath === "joint_evaluation"}
+				className="fr-mt-2w"
 				deadline={jointEvaluationDeadline}
 				disabled={disabled}
 				onChange={() => setSelectedPath("joint_evaluation")}
@@ -147,10 +160,10 @@ export function FirstRoundOptions({
 				onChange={() => setSelectedPath("justify")}
 			/>
 
-			<h3 className="fr-h6 fr-mt-3w fr-mb-0">
+			<h2 className="fr-h6 fr-mt-3w fr-mb-0">
 				Si la justification n&apos;est pas possible par des critères objectifs
 				et non sexistes
-			</h3>
+			</h2>
 
 			<div className="fr-fieldset__element fr-mt-2w">
 				<CompliancePathOption
