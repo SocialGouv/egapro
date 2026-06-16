@@ -38,10 +38,11 @@ function hasAnyHighGap(gaps: (number | null)[]): boolean {
 type Props = {
 	declaration: {
 		siren: string;
-		totalWomen: number | null;
-		totalMen: number | null;
 		status: string | null;
 	};
+	// Official GIP/DSN workforce — canonical source for the Matomo size bucket
+	// (see StepPageClient), kept consistent with all business decisions.
+	companyWorkforce: number | null;
 	declarationYear: number;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
@@ -53,6 +54,7 @@ type Props = {
 
 export function Step6Review({
 	declaration,
+	companyWorkforce,
 	declarationYear,
 	step2Data,
 	step3Data,
@@ -63,17 +65,15 @@ export function Step6Review({
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
-	const workforce =
-		declaration.totalWomen !== null && declaration.totalMen !== null
-			? declaration.totalWomen + declaration.totalMen
-			: null;
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: () => {
 			trackFunnelComplete(
 				DECLARATION_FUNNEL,
 				declarationFunnelDimensions(
 					declarationYear,
-					workforce !== null ? getCompanySizeRange(workforce) : undefined,
+					companyWorkforce !== null
+						? getCompanySizeRange(companyWorkforce)
+						: undefined,
 				),
 			);
 			router.push("/declaration-remuneration/parcours-conformite");

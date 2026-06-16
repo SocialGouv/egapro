@@ -31,6 +31,11 @@ type StepPageClientProps = {
 		totalMen: number | null;
 		status: string | null;
 	};
+	// Official GIP/DSN workforce on the company — the canonical source for every
+	// size-based decision. Used here only to bucket the Matomo funnel dimension,
+	// so analytics segments match the business logic (never the self-reported
+	// `totalWomen + totalMen`, which may differ or be empty early in the funnel).
+	companyWorkforce: number | null;
 	gipPrefillData?: GipPrefillData;
 	step1Data: Step1Data;
 	step2Data: Step2Data;
@@ -44,6 +49,7 @@ type StepPageClientProps = {
 export function StepPageClient({
 	step,
 	declaration,
+	companyWorkforce,
 	gipPrefillData,
 	step1Data,
 	step2Data,
@@ -53,12 +59,10 @@ export function StepPageClient({
 	initialSource,
 	hasCse = null,
 }: StepPageClientProps) {
-	const workforce =
-		declaration.totalWomen !== null && declaration.totalMen !== null
-			? declaration.totalWomen + declaration.totalMen
-			: null;
 	const sizeRange =
-		workforce !== null ? getCompanySizeRange(workforce) : undefined;
+		companyWorkforce !== null
+			? getCompanySizeRange(companyWorkforce)
+			: undefined;
 
 	const dimensions = useMemo(
 		() => declarationFunnelDimensions(declaration.year, sizeRange),
@@ -121,6 +125,7 @@ export function StepPageClient({
 		case 6:
 			return (
 				<Step6Review
+					companyWorkforce={companyWorkforce}
 					declaration={declaration}
 					declarationYear={declaration.year}
 					hasCse={hasCse}
