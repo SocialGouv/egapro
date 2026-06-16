@@ -1,5 +1,6 @@
 "use client";
 
+import type { FormEvent } from "react";
 import {
 	MATOMO_ACTION,
 	MATOMO_EVENT_CATEGORY,
@@ -23,7 +24,7 @@ function usedFacets(form: HTMLFormElement): string {
 
 /** Public company search form — submits (GET) to the external consultation site. */
 export function HomeSearchForm() {
-	function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
+	function handleSubmit(event: FormEvent<HTMLFormElement>): void {
 		trackEvent({
 			category: MATOMO_EVENT_CATEGORY.SEARCH,
 			action: MATOMO_ACTION.SEARCH_SUBMIT,

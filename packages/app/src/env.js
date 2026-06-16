@@ -70,7 +70,7 @@ export const env = createEnv({
 		MATOMO_API_TOKEN: z.string().optional(),
 		// Server-side Matomo base URL for the Reporting API. Falls back to
 		// NEXT_PUBLIC_MATOMO_URL when unset.
-		MATOMO_API_URL: z.string().url().optional(),
+		MATOMO_API_URL: z.url().optional(),
 		EGAPRO_MOCK_SUIT_SANCTION: z.coerce.boolean().optional().default(false),
 		/**
 		 * Comma-separated list of emails that should be granted the admin role

@@ -72,7 +72,10 @@ export function ReferentsSearchForm({
 			trackEvent({
 				category: MATOMO_EVENT_CATEGORY.SEARCH,
 				action: MATOMO_ACTION.SEARCH_SUBMIT,
-				name: usedFacets.length > 0 ? usedFacets.sort().join("+") : "empty",
+				name:
+					usedFacets.length > 0
+						? [...usedFacets].sort((a, b) => a.localeCompare(b)).join("+")
+						: "empty",
 			});
 			router.push(`${basePath}?${params.toString()}`);
 		},
