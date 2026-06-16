@@ -1,0 +1,57 @@
+.matrix {
+	margin-bottom: 0;
+}
+
+.columnHeader {
+	vertical-align: top;
+	place-items: center;
+}
+
+.columnLabel {
+	display: block;
+	font-weight: 700;
+}
+
+.columnSubLabel {
+	display: block;
+	font-weight: 400;
+}
+
+// DSFR styles a row-header <th> like a header cell: grey background plus a
+// bottom AND a right gradient border. Figma wants a plain white cell keeping
+// only the horizontal separator (it stays a <th scope="row"> for RGAA). The
+// `.matrix` ancestor raises specificity above `.fr-table__content table tbody th`.
+.matrix .fileHeaderCell {
+	font-weight: 400;
+	background-color: var(--background-default-grey);
+	// Redraw only the bottom separator — drop DSFR's right vertical border.
+	background-image: linear-gradient(
+		0deg,
+		var(--border-contrast-grey),
+		var(--border-contrast-grey)
+	);
+	background-size: 100% 1px;
+	background-repeat: no-repeat;
+	background-position: 0 100%;
+}
+
+.fileCell {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.25rem;
+}
+
+.checkboxCell {
+	text-align: center;
+
+	// The label has no visible text (accessible name is a nested sr-only span),
+	// so the DSFR box (label::before, position:absolute) is the only visible
+	// content. Reserve room so the box stays inside the cell and the row keeps
+	// a stable height.
+	:global(.fr-checkbox-group) {
+		display: inline-flex;
+		min-width: 1.5rem;
+		min-height: 1.5rem;
+	}
+}

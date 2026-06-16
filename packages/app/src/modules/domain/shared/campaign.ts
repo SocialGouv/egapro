@@ -20,6 +20,11 @@ export function getSecondDeclarationDeadline(year: number): string {
 	return `1 décembre ${year}`;
 }
 
+/** Returns the derived deadline to choose a compliance path (January 1st of the following year). */
+export function getPathChoiceDeadline(year: number): Date {
+	return new Date(year + 1, 0, 1);
+}
+
 /** Returns default campaign deadlines for a given year (fallback when no DB config exists). */
 export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 	return {
@@ -31,6 +36,7 @@ export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 		decl2ModificationDeadline: new Date(year, 11, 1),
 		decl2JustificationDeadline: new Date(year, 11, 1),
 		decl2JointEvaluationDeadline: new Date(year + 1, 1, 1),
+		pathChoiceDeadline: getPathChoiceDeadline(year),
 	};
 }
 

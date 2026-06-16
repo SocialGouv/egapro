@@ -1,1 +1,1 @@
-ALTER TABLE "app_company" ADD COLUMN "naf_label" varchar(255);
+ALTER TABLE "app_company" ADD COLUMN IF NOT EXISTS "naf_label" varchar(255);

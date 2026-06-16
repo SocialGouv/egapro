@@ -2,12 +2,14 @@ import { notFound } from "next/navigation";
 import { campaignYearDimension, FunnelStepTracker } from "~/modules/analytics";
 import {
 	CSE_FUNNEL,
+	computeContentTypeColumns,
 	mapOpinionsFromDb,
 	Step1Opinions,
 	Step2Upload,
 	TOTAL_STEPS,
 } from "~/modules/cseOpinion";
 import { getCseOpinionPreviousHref } from "~/modules/declaration-remuneration/shared/complianceNavigation";
+import { hasGapsAboveThreshold } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
@@ -66,11 +68,33 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 	}
 
 	if (step === 2) {
-		const [declarationData, { files }] = await Promise.all([
-			api.declaration.getOrCreate(),
-			api.cseOpinion.getFiles(),
-		]);
+		const [declarationData, { files }, { opinions }, { associations }] =
+			await Promise.all([
+				api.declaration.getOrCreate(),
+				api.cseOpinion.getFiles(),
+				api.cseOpinion.get(),
+				api.cseOpinion.getFileContentTypes(),
+			]);
 		const hasSecondDeclaration = declarationData.hasSubmittedSecondDeclaration;
+		const firstGap = opinions.find(
+			(opinion) => opinion.declarationNumber === 1 && opinion.type === "gap",
+		);
+		const secondGap = opinions.find(
+			(opinion) => opinion.declarationNumber === 2 && opinion.type === "gap",
+		);
+		const initialCategories = declarationData.employeeCategories.filter(
+			(category) => category.declarationType === "initial",
+		);
+		const correctionCategories = declarationData.employeeCategories.filter(
+			(category) => category.declarationType === "correction",
+		);
+		const columns = computeContentTypeColumns({
+			hasSecondDeclaration,
+			firstDeclGapConsulted: firstGap?.gapConsulted ?? null,
+			secondDeclGapConsulted: secondGap?.gapConsulted ?? null,
+			firstDeclGapHigh: hasGapsAboveThreshold(initialCategories),
+			secondDeclGapHigh: hasGapsAboveThreshold(correctionCategories),
+		});
 		return (
 			<>
 				<FunnelStepTracker
@@ -79,9 +103,10 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 					step={step}
 				/>
 				<Step2Upload
+					columns={columns}
 					declarationYear={declarationData.declaration.year}
 					existingFiles={files}
-					hasSecondDeclaration={hasSecondDeclaration}
+					initialAssociations={associations}
 					siren={declarationData.declaration.siren}
 				/>
 			</>

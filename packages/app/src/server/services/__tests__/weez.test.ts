@@ -1,6 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { fetchCompanyBySiren } from "../weez";
+import { fetchCompanyBySiren, trancheToWorkforce } from "../weez";
+
+describe("trancheToWorkforce", () => {
+	it("maps INSEE size-band codes to their lower bound", () => {
+		expect(trancheToWorkforce("21")).toBe(50);
+		expect(trancheToWorkforce("22")).toBe(100);
+		expect(trancheToWorkforce("31")).toBe(200);
+		expect(trancheToWorkforce("32")).toBe(250);
+		expect(trancheToWorkforce("53")).toBe(10000);
+	});
+
+	it("returns null for non-employer, unknown or empty codes", () => {
+		expect(trancheToWorkforce("NN")).toBeNull();
+		expect(trancheToWorkforce("99")).toBeNull();
+		expect(trancheToWorkforce(null)).toBeNull();
+	});
+});
 
 describe("fetchCompanyBySiren", () => {
 	const fetchSpy = vi.fn();
@@ -87,6 +103,68 @@ describe("fetchCompanyBySiren", () => {
 			nafLabel: null,
 			workforce: 50,
 		});
+	});
+
+	it("falls back to the effectif band when effectiftotal is null", async () => {
+		fetchSpy.mockResolvedValueOnce({
+			ok: true,
+			json: async () => ({
+				content: [
+					{
+						siren: "130025265",
+						denominationunitelegale:
+							"DIRECTION INTERMINISTERIELLE DU NUMERIQUE",
+						raisonsociale: null,
+						activiteprincipalenaf25unitelegale: "8411Z",
+						nomenclatureactiviteprincipalelibelleunitelegale:
+							"Administration publique générale",
+						effectiftotal: null,
+						trancheeffectifsunitelegale: "32",
+						numerovoie: null,
+						typevoie: null,
+						libellevoie: null,
+						codepostal: "75007",
+						libellecommune: "PARIS",
+						statutdiffusionunitelegale: "O",
+					},
+				],
+				totalElements: 1,
+			}),
+		});
+
+		const result = await fetchCompanyBySiren("130025265");
+
+		expect(result?.workforce).toBe(250);
+	});
+
+	it("prefers the exact effectiftotal over the effectif band", async () => {
+		fetchSpy.mockResolvedValueOnce({
+			ok: true,
+			json: async () => ({
+				content: [
+					{
+						siren: "451678973",
+						denominationunitelegale: "CASTORAMA FRANCE",
+						raisonsociale: null,
+						activiteprincipalenaf25unitelegale: "4759A",
+						nomenclatureactiviteprincipalelibelleunitelegale: null,
+						effectiftotal: 12148,
+						trancheeffectifsunitelegale: "53",
+						numerovoie: null,
+						typevoie: null,
+						libellevoie: null,
+						codepostal: null,
+						libellecommune: null,
+						statutdiffusionunitelegale: "O",
+					},
+				],
+				totalElements: 1,
+			}),
+		});
+
+		const result = await fetchCompanyBySiren("451678973");
+
+		expect(result?.workforce).toBe(12148);
 	});
 
 	it("returns null when no company found", async () => {

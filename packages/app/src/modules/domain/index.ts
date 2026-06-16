@@ -5,6 +5,7 @@ export {
 	getCurrentYear,
 	getDeclarationDeadline,
 	getDefaultCampaignDeadlines,
+	getPathChoiceDeadline,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
 	isDeadlinePassed,
