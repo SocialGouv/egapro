@@ -44,6 +44,8 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT, Session {
     email: string;
+    // ProConnect id_token, kept for RP-initiated logout (id_token_hint).
+    id_token?: string | null;
   }
 }
 
@@ -199,6 +201,10 @@ export const authConfig: AuthOptions = {
           }
         }
         if (trigger !== "signUp") return token;
+        // Keep the ProConnect id_token for RP-initiated logout.
+        if (account?.id_token) {
+          token.id_token = account.id_token;
+        }
         token.user = {
           companiesHash: "",
           email: token.email,
