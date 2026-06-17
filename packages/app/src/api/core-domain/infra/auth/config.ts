@@ -258,7 +258,13 @@ export const authConfig: AuthOptions = {
               logger.error({ error }, "Error while syncing ownerships");
             }
           }
-          const companiesList = organizations.map(orga => ({
+          // ProConnect mono-entreprise: the session carries only the single
+          // active organization the user authenticated as (the one selected in
+          // the ProConnect picker). Switching company requires re-authentication.
+          // Ownership of every org ProConnect returns is still synced above, so
+          // historical access to the user's other companies is preserved in DB.
+          const activeOrganization = organizations.slice(0, 1);
+          const companiesList = activeOrganization.map(orga => ({
             siren: orga.siren || orga.siret.substring(0, 9),
             label: orga.label,
           }));

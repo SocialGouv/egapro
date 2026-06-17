@@ -36,7 +36,11 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     allowDangerousEmailAccountLinking: true,
     wellKnown: `${proconnectDiscoveryUrl}/.well-known/openid-configuration`,
     authorization: {
-      params: { scope },
+      // eidas0 = lowest *authorized* assurance level, i.e. the most permissive
+      // request we can make: the user keeps all their organizations selectable
+      // in the ProConnect picker (a stricter level would filter the list).
+      // https://partenaires.proconnect.gouv.fr/docs/ressources/norme_eidas
+      params: { scope, acr_values: "eidas0" },
     },
     checks: ["pkce", "state"],
     userinfo: {
