@@ -20,6 +20,7 @@ export { parseSiren } from "./parseSiren";
 export { SubmitModal } from "./SubmitModal";
 export {
 	FILE_TOO_LARGE_ERROR,
+	formatFileSize,
 	MAX_FILE_SIZE,
 	MAX_FILE_SIZE_LABEL,
 	S3_PART_MIN_SIZE,

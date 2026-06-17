@@ -148,22 +148,28 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 
 **Pour qui** : entreprises **≥ 100 salariés** (l'avis CSE est obligatoire à partir de ce seuil ; il est interdit en dessous).
 
-**À quoi ça sert** : recueillir l'**avis formel du Comité Social et Économique** sur la déclaration et sur les écarts constatés, avec dépôt du PV au format PDF.
+**À quoi ça sert** : recueillir l'**avis formel du Comité Social et Économique** sur la déclaration et sur les écarts constatés, avec dépôt du ou des PV au format PDF, et association de chaque fichier à son type de contenu.
 
 **Routes** :
 
 - `/avis-cse/etape/1` — saisie des avis (favorable / défavorable + dates)
-- `/avis-cse/etape/2` — upload des PDF
+- `/avis-cse/etape/2` — upload des PDF + association fichier ↔ type de contenu
 - `/avis-cse/confirmation` — confirmation après finalisation
 
 **Modules** : `~/modules/cseOpinion`.
 
 **Router tRPC** : `~/server/api/routers/cseOpinion.ts`. Procédures :
 
-- `cseOpinion.get` — lecture des avis enregistrés
-- `cseOpinion.saveOpinions` — sauvegarde du formulaire (delete + insert)
-- `cseOpinion.deleteFile` — suppression d'un PDF S3 + ligne BDD
-- `cseOpinion.finalize` — clôt l'avis (`cseStatus = submitted`)
+| Procédure | Type | Rôle |
+|---|---|---|
+| `cseOpinion.get` | query | Lecture des avis enregistrés |
+| `cseOpinion.saveOpinions` | mutation | Sauvegarde du formulaire étape 1 (delete + insert) |
+| `cseOpinion.uploadFile` | mutation | Upload d'un PDF vers S3 (scan ClamAV inclus) |
+| `cseOpinion.deleteFile` | mutation | Suppression d'un PDF (S3 + BDD) |
+| `cseOpinion.getFiles` | query | Liste des PDF uploadés |
+| `cseOpinion.getFileContentTypes` | query | Lecture des associations fichier ↔ type de contenu |
+| `cseOpinion.setFileContentTypes` | mutation | Enregistre (replace-all) les associations fichier ↔ type de contenu |
+| `cseOpinion.finalize` | mutation | Clôt l'avis (`cseStatus = submitted`) après validation des pré-conditions |
 
 **Upload de PDF** : l'upload ne passe **pas** par tRPC mais par la Route Handler `POST /api/upload` avec l'en-tête `X-Flow-Type: cse_opinion` (voir §12.6).
 
@@ -171,14 +177,20 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 
 - Disponible **uniquement si `isCseRequired(workforce)` est vrai** (≥ 100 salariés, voir `~/modules/domain/shared/companySize.ts`).
 - Deux types d'avis par déclaration :
-  - **Avis sur l'exactitude** des données (favorable / défavorable, date)
-  - **Avis sur les écarts** (favorable / défavorable, date) — peut être marqué `gapConsulted = false` si non requis
+  - **Avis sur l'exactitude** (`type = "accuracy"`) des données (favorable / défavorable, date)
+  - **Avis sur les écarts** (`type = "gap"`) — peut être marqué `gapConsulted = false` si non requis
 - Le formulaire couvre la **première et la seconde déclaration** (champ `declarationNumber: 1 | 2`).
-- **Limite** : `MAX_CSE_FILES = 4` PDF par année (un seul format accepté, vérifié côté serveur).
+- **Limite** : `MAX_CSE_FILES = 4` PDF par année.
+- Après upload, chaque fichier doit être **associé à son type de contenu** via la matrice (`ContentTypeMatrix`) :
+  - La matrice comporte entre 1 et 4 colonnes selon `hasSecondDeclaration` et les valeurs de `gapConsulted`.
+  - Chaque colonne correspond à un couple `(declarationNumber, type)` (ex : `1:accuracy`, `1:gap`, `2:accuracy`).
+  - Une colonne ne peut être associée qu'à **un seul** fichier à la fois (contrainte unicité en BDD + validation serveur).
+  - L'association est sauvegardée immédiatement à chaque changement de case (appel `setFileContentTypes`).
+- **Validation avant finalisation** : la procédure `finalize` vérifie que tous les couples `(declarationNumber, type)` requis sont couverts par une association dans `cseOpinionFiles`. Si une colonne obligatoire n'est pas associée, une erreur `PRECONDITION_FAILED` est retournée avec le libellé précis du type manquant.
 - Stockage S3 segmenté par siren et année.
-- Audit : `CSE_OPINION_SAVE`, `CSE_OPINION_UPLOAD_FILE`, `CSE_OPINION_DELETE_FILE`, `CSE_OPINION_FINALIZE`.
+- Audit : `CSE_OPINION_SAVE`, `CSE_OPINION_UPLOAD_FILE`, `CSE_OPINION_DELETE_FILE`, `CSE_OPINION_SET_FILE_TYPES`, `CSE_OPINION_FINALIZE`.
 
-**Données persistées** : `cseOpinions`, `files` (`type = cse_opinion`).
+**Données persistées** : `cseOpinions`, `files` (`type = cse_opinion`), `cseOpinionFiles` (associations fichier ↔ type de contenu).
 
 ---
 
@@ -513,8 +525,9 @@ Tableau de correspondance feature → tables, pour les développeurs qui débarq
 | `declarationStatusHistory` | Historique des modifications d'une démarche |
 | `jobCategories` | Déclaration index (étape 5, optionnel) |
 | `employeeCategories` | Déclaration index (indicateur G) |
-| `cseOpinions` | Avis CSE |
+| `cseOpinions` | Avis CSE (avis textuels) |
 | `files` | Avis CSE (`type = cse_opinion`), évaluation conjointe (`type = joint_evaluation`) |
+| `cseOpinionFiles` | Avis CSE — associations fichier ↔ type de contenu (`declarationNumber`, `type`) |
 | `referents` | Annuaire public, gestion admin |
 | `campaignDeadlines` | Paramétrage admin (deadlines par année) |
 | `gipMdsData` | Pré-remplissage GIP |

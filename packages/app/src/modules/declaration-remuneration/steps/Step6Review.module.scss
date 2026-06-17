@@ -77,3 +77,10 @@
 	// Figma spec: intro paragraph uses title-grey, not the default body grey.
 	color: var(--text-title-grey);
 }
+
+.gapGrid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	column-gap: 1.5rem;
+	row-gap: 0.25rem;
+}

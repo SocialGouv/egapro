@@ -21,6 +21,7 @@ import {
 	userCompanies,
 } from "~/server/db/schema";
 import { fetchCseBySiren, fetchSanctionBySiren } from "~/server/services/suit";
+import { fetchCompanyBySiren } from "~/server/services/weez";
 
 async function findUserCompany(db: DB, session: Session, siren: string) {
 	const userId = session.user.id;
@@ -32,6 +33,7 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 			name: companies.name,
 			address: companies.address,
 			nafCode: companies.nafCode,
+			nafLabel: companies.nafLabel,
 			workforce: companies.workforce,
 			hasCse: companies.hasCse,
 		})
@@ -59,6 +61,27 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 				.set({ hasCse })
 				.where(eq(companies.siren, company.siren));
 			company.hasCse = hasCse;
+		}
+	}
+
+	// Backfill the NAF label from Weez when missing — owner reads only
+	// (impersonation stays read-only); best-effort, never breaks the read.
+	if (
+		!bypassOwnership &&
+		company.nafCode !== null &&
+		company.nafLabel === null
+	) {
+		try {
+			const info = await fetchCompanyBySiren(company.siren);
+			if (info?.nafLabel) {
+				await db
+					.update(companies)
+					.set({ nafLabel: info.nafLabel })
+					.where(eq(companies.siren, company.siren));
+				company.nafLabel = info.nafLabel;
+			}
+		} catch {
+			// keep the cached code-only display when Weez is unavailable
 		}
 	}
 

@@ -512,4 +512,60 @@ describe("useFileUploadForm", () => {
 		expect(result.current.isPending).toBe(false);
 		expect(onAllUploaded).not.toHaveBeenCalled();
 	});
+
+	describe("autoUpload mode", () => {
+		it("uploads immediately on selection, without staging or a confirm step", async () => {
+			const onUploaded = vi.fn();
+			const onAllUploaded = vi.fn();
+			const { result } = renderHook(() =>
+				useFileUploadForm({
+					flowType: "cse_opinion",
+					onUploaded,
+					onAllUploaded,
+					autoUpload: true,
+				}),
+			);
+			uploadFileMock.mockResolvedValue({
+				ok: true,
+				fileId: "id-1",
+				fileName: "a.pdf",
+			} satisfies UploadFileResult);
+
+			await act(async () => {
+				result.current.handleFilesChange([makeFile("a.pdf")], null);
+				await new Promise((resolve) => setTimeout(resolve, 0));
+			});
+
+			expect(uploadFileMock).toHaveBeenCalledWith(expect.any(File), {
+				flowType: "cse_opinion",
+			});
+			expect(onUploaded).toHaveBeenCalledWith({
+				fileId: "id-1",
+				fileName: "a.pdf",
+			});
+			expect(onAllUploaded).toHaveBeenCalledTimes(1);
+			// Files surface through the consumer's listing, never staged here.
+			expect(result.current.selectedFiles).toEqual([]);
+			expect(result.current.isPending).toBe(false);
+		});
+
+		it("does not upload when the selection carries a validation error", () => {
+			const onAllUploaded = vi.fn();
+			const { result } = renderHook(() =>
+				useFileUploadForm({
+					flowType: "cse_opinion",
+					onAllUploaded,
+					autoUpload: true,
+				}),
+			);
+
+			act(() => {
+				result.current.handleFilesChange([], "Format non supporté");
+			});
+
+			expect(uploadFileMock).not.toHaveBeenCalled();
+			expect(onAllUploaded).not.toHaveBeenCalled();
+			expect(result.current.uploadError).toBe("Format non supporté");
+		});
+	});
 });

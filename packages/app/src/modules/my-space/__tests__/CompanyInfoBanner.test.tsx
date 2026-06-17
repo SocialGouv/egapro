@@ -9,6 +9,7 @@ const baseCompany: CompanyDetail = {
 	name: "Alpha Solutions",
 	address: null,
 	nafCode: null,
+	nafLabel: null,
 	workforce: null,
 	hasCse: null,
 };
@@ -49,6 +50,21 @@ describe("CompanyInfoBanner", () => {
 			<CompanyInfoBanner company={{ ...baseCompany, nafCode: "62.01Z" }} />,
 		);
 		expect(screen.getByText("62.01Z")).toBeInTheDocument();
+	});
+
+	it("renders the NAF code with its activity label when provided", () => {
+		render(
+			<CompanyInfoBanner
+				company={{
+					...baseCompany,
+					nafCode: "62.01Z",
+					nafLabel: "Programmation informatique",
+				}}
+			/>,
+		);
+		expect(
+			screen.getByText("62.01Z — Programmation informatique"),
+		).toBeInTheDocument();
 	});
 
 	it("renders the workforce when provided", () => {

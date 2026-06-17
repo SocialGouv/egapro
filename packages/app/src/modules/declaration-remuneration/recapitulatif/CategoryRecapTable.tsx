@@ -112,8 +112,8 @@ export function CategoryRecapTable({
 									</tr>
 									<tr className={styles.regularRow}>
 										<th scope="row">Effectif physique</th>
-										<td className={indicatorStyles.numeric}>{womenCount}</td>
-										<td className={indicatorStyles.numeric}>{menCount}</td>
+										<td className={indicatorStyles.numeric}>{womenCount} nb</td>
+										<td className={indicatorStyles.numeric}>{menCount} nb</td>
 										<td />
 									</tr>
 

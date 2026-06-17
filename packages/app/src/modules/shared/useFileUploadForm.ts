@@ -9,21 +9,66 @@ type Options = {
 	flowType: FlowType;
 	onUploaded?: (file: { fileId: string; fileName: string }) => void;
 	onAllUploaded?: () => void;
+	/**
+	 * When true, files are uploaded as soon as they are selected — there is no
+	 * staging step and no confirmation modal. `selectedFiles` then stays empty
+	 * (uploaded files surface through the consumer's own listing, e.g. the CSE
+	 * content-type matrix). Defaults to the staged flow (select → confirm modal
+	 * → upload) used by the other upload forms.
+	 */
+	autoUpload?: boolean;
 };
 
 export function useFileUploadForm({
 	flowType,
 	onUploaded,
 	onAllUploaded,
+	autoUpload = false,
 }: Options) {
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [uploadError, setUploadError] = useState<string | null>(null);
 	const [isUploading, setIsUploading] = useState(false);
 
+	const uploadFiles = useCallback(
+		async (filesToUpload: File[]) => {
+			if (filesToUpload.length === 0) return;
+			setIsUploading(true);
+			try {
+				for (const file of filesToUpload) {
+					const result = await uploadFile(file, { flowType });
+					if (!result.ok) {
+						setUploadError(
+							formatUploadError(result.reason, result.error, result.virusName),
+						);
+						setIsUploading(false);
+						return;
+					}
+					onUploaded?.({ fileId: result.fileId, fileName: result.fileName });
+				}
+				setSelectedFiles([]);
+				setIsUploading(false);
+				onAllUploaded?.();
+			} catch {
+				setUploadError("Erreur lors de l'upload du fichier");
+				setIsUploading(false);
+			}
+		},
+		[flowType, onUploaded, onAllUploaded],
+	);
+
 	function handleFilesChange(files: File[], error: string | null) {
+		if (error) {
+			setSelectedFiles(files);
+			setUploadError(error);
+			return;
+		}
+		setUploadError(null);
+		if (autoUpload) {
+			void uploadFiles(files);
+			return;
+		}
 		setSelectedFiles(files);
-		setUploadError(error);
 	}
 
 	function openModal() {
@@ -62,28 +107,7 @@ export function useFileUploadForm({
 
 	async function handleConfirm() {
 		closeModal();
-		if (selectedFiles.length === 0) return;
-
-		setIsUploading(true);
-		try {
-			for (const file of selectedFiles) {
-				const result = await uploadFile(file, { flowType });
-				if (!result.ok) {
-					setUploadError(
-						formatUploadError(result.reason, result.error, result.virusName),
-					);
-					setIsUploading(false);
-					return;
-				}
-				onUploaded?.({ fileId: result.fileId, fileName: result.fileName });
-			}
-			setSelectedFiles([]);
-			setIsUploading(false);
-			onAllUploaded?.();
-		} catch {
-			setUploadError("Erreur lors de l'upload du fichier");
-			setIsUploading(false);
-		}
+		await uploadFiles(selectedFiles);
 	}
 
 	return {

@@ -114,15 +114,26 @@ gh issue comment "$BUG_N" --body-file <(cat <<'EOF'
 **Test de reproduction** : E2E Playwright dans `src/e2e/declaration-step4.e2e.ts` — formulaire vide → submit → assert que le message d'erreur DSFR `fr-error-text` apparaît sous le champ.
 
 **Tags** : aucun (1 fichier touché, fix simple).
+
+## Complexité
+**Taille : S (2 pts)** — 2 fichiers, schéma Zod + affichage erreur, pas de migration, incertitude faible.
 EOF
 )
 ```
+
+> La section `## Complexité` est obligatoire : taille t-shirt + points + justification 1 ligne, selon la rubrique + anchors de `rules/complexity-estimation.md` (à lire avant de trancher).
 
 ### 5. Validation utilisateur EXPLICITE
 
 Logger `AWAITING_VALIDATION`. Demander en chat : « Tu valides cette analyse pour passer à `/implement` ? » Itérer si l'utilisateur conteste.
 
-Sur approbation : poster `[Validation utilisateur] Analyse validée — prêt pour /implement` en commentaire, logger `COMPLETE`, et retourner.
+Sur approbation :
+1. **Sizer le bug** sur le board (`Size` + `Estimate`, alimente `/velocity`) :
+   ```bash
+   bash scripts/orchestration/set_ticket_size.sh "$BUG_N" <XS|S|M|L|XL>
+   ```
+   (Même taille que la section `## Complexité` du commentaire.)
+2. Poster `[Validation utilisateur] Analyse validée — prêt pour /implement` en commentaire, logger `COMPLETE`, et retourner.
 
 ## Contraintes
 

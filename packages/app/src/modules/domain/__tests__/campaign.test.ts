@@ -4,6 +4,7 @@ import {
 	getCurrentYear,
 	getDeclarationDeadline,
 	getDefaultCampaignDeadlines,
+	getPathChoiceDeadline,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
 	isDeadlinePassed,
@@ -57,6 +58,16 @@ describe("getSecondDeclarationDeadline", () => {
 	});
 });
 
+describe("getPathChoiceDeadline", () => {
+	it("returns January 1st of the following year", () => {
+		expect(getPathChoiceDeadline(2027)).toEqual(new Date(2027 + 1, 0, 1));
+	});
+
+	it("rolls over the year boundary", () => {
+		expect(getPathChoiceDeadline(2026)).toEqual(new Date(2027, 0, 1));
+	});
+});
+
 describe("getDefaultCampaignDeadlines", () => {
 	it("returns Date objects for a given year", () => {
 		const deadlines = getDefaultCampaignDeadlines(2027);
@@ -70,6 +81,12 @@ describe("getDefaultCampaignDeadlines", () => {
 		expect(deadlines.decl2JointEvaluationDeadline).toEqual(
 			new Date(2028, 1, 1),
 		);
+	});
+
+	it("exposes the derived path choice deadline at January 1st of year + 1", () => {
+		const deadlines = getDefaultCampaignDeadlines(2027);
+		expect(deadlines.pathChoiceDeadline).toEqual(getPathChoiceDeadline(2027));
+		expect(deadlines.pathChoiceDeadline).toEqual(new Date(2028, 0, 1));
 	});
 
 	it("leaves optional campaign dates null by default", () => {

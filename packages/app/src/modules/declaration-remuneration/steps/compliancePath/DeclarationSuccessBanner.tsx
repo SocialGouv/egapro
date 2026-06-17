@@ -1,5 +1,7 @@
 import { formatLongDate } from "~/modules/domain";
+import { DsfrPictogram } from "~/modules/layout/shared/DsfrPictogram";
 import { ResendReceiptButton } from "~/modules/mail";
+import styles from "./DeclarationSuccessBanner.module.scss";
 
 type Props = {
 	email: string;
@@ -19,36 +21,34 @@ export function DeclarationSuccessBanner({
 	return (
 		<div className="fr-grid-row fr-grid-row--gutters fr-p-4w fr-background-alt--blue-france">
 			<div className="fr-col-12 fr-col-md-6">
-				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
-					<div className="fr-col-auto">
-						<span
-							aria-hidden="true"
-							className="fr-icon-checkbox-circle-fill fr-icon--lg fr-text-default--success"
+				<div className={styles.content}>
+					<div className={styles.titleRow}>
+						<DsfrPictogram
+							className="fr-artwork--green-emeraude"
+							path="/dsfr/artwork/pictograms/system/success.svg"
+							size={44}
 						/>
-					</div>
-					<div className="fr-col">
-						<p className="fr-text--bold fr-text--lg fr-mb-1w">
+						<p className="fr-text--bold fr-text--lg fr-mb-0">
 							{isSecondDeclaration
 								? "Votre seconde déclaration a été transmise"
 								: "Votre déclaration a été transmise"}
 						</p>
-						<p className="fr-mb-1w">
-							Vous pouvez modifier votre déclaration jusqu'au{" "}
-							<strong>{formatLongDate(modificationDeadline)}</strong>
-						</p>
-						{pdfDownloadHref && (
-							<a
-								className="fr-link fr-link--download"
-								download
-								href={pdfDownloadHref}
-							>
-								{isSecondDeclaration
-									? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
-									: "Télécharger le récapitulatif de la déclaration des indicateurs"}
-								<span className="fr-link__detail">PDF</span>
-							</a>
-						)}
 					</div>
+					<p className="fr-mb-0">
+						Vous pouvez modifier votre déclaration jusqu'au{" "}
+						<strong>{formatLongDate(modificationDeadline)}</strong>
+					</p>
+					{pdfDownloadHref && (
+						<a
+							className="fr-link fr-link--download"
+							download
+							href={pdfDownloadHref}
+						>
+							{isSecondDeclaration
+								? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
+								: "Télécharger le récapitulatif de la déclaration des indicateurs"}
+						</a>
+					)}
 				</div>
 			</div>
 			<div className="fr-col-12 fr-col-md-6">

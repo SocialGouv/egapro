@@ -1,0 +1,6 @@
+.instructions {
+	// Figma: "MD - Texte standard - Medium" (500) in title-grey. DSFR ships no
+	// 500 weight utility (only regular/bold/heavy/light), hence the scoped rule.
+	color: var(--text-title-grey);
+	font-weight: 500;
+}

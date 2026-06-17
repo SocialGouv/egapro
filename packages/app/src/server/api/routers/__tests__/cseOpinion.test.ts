@@ -27,12 +27,21 @@ vi.mock("~/server/db/schema", () => ({
 		uploadedAt: "uploadedAt",
 		type: "type",
 	},
+	cseOpinionFiles: {
+		id: "id",
+		declarationId: "declarationId",
+		declarationNumber: "declarationNumber",
+		type: "type",
+		fileId: "fileId",
+	},
 }));
 
 const mockDeleteS3File = vi.fn();
+const mockGetFileSize = vi.fn();
 
 vi.mock("~/server/services/s3", () => ({
 	deleteFile: (...args: unknown[]) => mockDeleteS3File(...args),
+	getFileSize: (...args: unknown[]) => mockGetFileSize(...args),
 }));
 
 const mockWhere = vi.fn();
@@ -117,6 +126,7 @@ describe("cseOpinionRouter", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 		mockDeleteS3File.mockResolvedValue(undefined);
+		mockGetFileSize.mockResolvedValue(null);
 	});
 
 	afterEach(() => {
@@ -247,21 +257,34 @@ describe("cseOpinionRouter", () => {
 	});
 
 	describe("getFiles", () => {
-		it("returns files for the current declaration", async () => {
-			const files = [
+		it("returns files for the current declaration with their storage size", async () => {
+			const uploadedAt = new Date("2026-03-15");
+			const rows = [
 				{
 					id: "file-1",
 					fileName: "avis-cse.pdf",
-					uploadedAt: new Date("2026-03-15"),
+					filePath: "339787277/2026/file-1.pdf",
+					uploadedAt,
 				},
 			];
-			const mockDb = createMockDb(files);
+			mockGetFileSize.mockResolvedValue(63365);
+			const mockDb = createMockDb(rows);
 			const caller = await createCaller(mockDb);
 
 			const result = await caller.getFiles();
 
 			expect(mockSelect).toHaveBeenCalled();
-			expect(result).toEqual({ files });
+			expect(mockGetFileSize).toHaveBeenCalledWith("339787277/2026/file-1.pdf");
+			expect(result).toEqual({
+				files: [
+					{
+						id: "file-1",
+						fileName: "avis-cse.pdf",
+						uploadedAt,
+						fileSize: 63365,
+					},
+				],
+			});
 		});
 
 		it("returns empty files when none exist", async () => {
@@ -280,6 +303,166 @@ describe("cseOpinionRouter", () => {
 			await expect(caller.getFiles()).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
 			);
+		});
+	});
+
+	describe("getFileContentTypes", () => {
+		it("returns associations for the current declaration", async () => {
+			const associations = [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				{ declarationNumber: 1, type: "gap", fileId: "file-1" },
+			];
+			const mockDb = createMockDb(associations);
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.getFileContentTypes();
+
+			expect(mockSelect).toHaveBeenCalled();
+			expect(result).toEqual({ associations });
+		});
+
+		it("returns empty associations when none exist", async () => {
+			const mockDb = createMockDb([]);
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.getFileContentTypes();
+
+			expect(result).toEqual({ associations: [] });
+		});
+
+		it("throws when siret is missing", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb, null as never);
+
+			await expect(caller.getFileContentTypes()).rejects.toThrow(
+				"SIRET manquant ou invalide dans la session",
+			);
+		});
+	});
+
+	describe("setFileContentTypes", () => {
+		it("replaces associations transactionally after validating files", async () => {
+			const mockDb = createMockDb([{ id: "file-1" }]);
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.setFileContentTypes({
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+					{ declarationNumber: 1, type: "gap", fileId: "file-1" },
+				],
+			});
+
+			expect(result).toEqual({ success: true });
+			expect(mockTransaction).toHaveBeenCalled();
+			expect(mockDelete).toHaveBeenCalled();
+			expect(mockInsert).toHaveBeenCalled();
+			expect(mockValues).toHaveBeenCalledWith([
+				expect.objectContaining({
+					declarationId: "decl-1",
+					declarationNumber: 1,
+					type: "accuracy",
+					fileId: "file-1",
+				}),
+				expect.objectContaining({
+					declarationId: "decl-1",
+					declarationNumber: 1,
+					type: "gap",
+					fileId: "file-1",
+				}),
+			]);
+		});
+
+		it("allows one file to be associated with several types", async () => {
+			const mockDb = createMockDb([{ id: "file-1" }]);
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.setFileContentTypes({
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+					{ declarationNumber: 2, type: "gap", fileId: "file-1" },
+				],
+			});
+
+			expect(result).toEqual({ success: true });
+			expect(mockValues).toHaveBeenCalledWith([
+				expect.objectContaining({ type: "accuracy", fileId: "file-1" }),
+				expect.objectContaining({ type: "gap", fileId: "file-1" }),
+			]);
+		});
+
+		it("throws BAD_REQUEST when the same (declarationNumber, type) is duplicated", async () => {
+			const mockDb = createMockDb([{ id: "file-1" }]);
+			const caller = await createCaller(mockDb);
+
+			await expect(
+				caller.setFileContentTypes({
+					associations: [
+						{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+						{ declarationNumber: 1, type: "accuracy", fileId: "file-2" },
+					],
+				}),
+			).rejects.toThrow(
+				"Chaque couple (numéro de déclaration, type) ne peut être associé qu'à un seul fichier.",
+			);
+			expect(mockTransaction).not.toHaveBeenCalled();
+		});
+
+		it("throws BAD_REQUEST when a fileId does not belong to the declaration", async () => {
+			const mockDb = createMockDb([]);
+			const caller = await createCaller(mockDb);
+
+			await expect(
+				caller.setFileContentTypes({
+					associations: [
+						{ declarationNumber: 1, type: "accuracy", fileId: "ghost" },
+					],
+				}),
+			).rejects.toThrow(
+				"Un ou plusieurs fichiers sont introuvables ou invalides pour cette déclaration.",
+			);
+			expect(mockTransaction).not.toHaveBeenCalled();
+		});
+
+		it("clears associations and skips validation when input is empty", async () => {
+			const mockDb = createMockDb([]);
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.setFileContentTypes({ associations: [] });
+
+			expect(result).toEqual({ success: true });
+			expect(mockTransaction).toHaveBeenCalled();
+			expect(mockDelete).toHaveBeenCalled();
+			expect(mockInsert).not.toHaveBeenCalled();
+		});
+
+		it("throws when siret is missing", async () => {
+			const mockDb = createMockDb([{ id: "file-1" }]);
+			const caller = await createCaller(mockDb, null as never);
+
+			await expect(
+				caller.setFileContentTypes({
+					associations: [
+						{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+					],
+				}),
+			).rejects.toThrow("SIRET manquant ou invalide dans la session");
+		});
+
+		it("refuses setFileContentTypes when the admin is impersonating", async () => {
+			const mockDb = createMockDb([{ id: "file-1" }]);
+			const caller = await createCaller(mockDb, null, {
+				siren: "339787277",
+				name: "Acme",
+			});
+
+			await expect(
+				caller.setFileContentTypes({
+					associations: [
+						{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+					],
+				}),
+			).rejects.toThrow("Mode mimoquage");
+			expect(mockTransaction).not.toHaveBeenCalled();
 		});
 	});
 
