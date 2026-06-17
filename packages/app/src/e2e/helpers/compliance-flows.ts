@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 const DUMMY_PDF = path.join(import.meta.dirname, "../fixtures/dummy.pdf");
 export const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
@@ -19,14 +19,81 @@ export async function fillCseStep1(page: Page, hasSecondDeclaration = false) {
 	await page.waitForURL("**/avis-cse/etape/2");
 }
 
-export async function submitCseStep2(page: Page) {
+// A matrix column to associate to the uploaded file, expressed the way the UI
+// exposes it (declaration number + content type), not as a database row.
+type CseColumn = { declarationNumber: 1 | 2; type: "accuracy" | "gap" };
+
+const CSE_TYPE_LABELS = {
+	accuracy: "Exactitude",
+	gap: "Justification",
+} as const;
+const CSE_DECLARATION_LABELS = {
+	1: "1re déclaration",
+	2: "2e déclaration",
+} as const;
+
+// Mirror of checkboxLabel() in ContentTypeMatrix.tsx — the accessible name of a
+// matrix checkbox. The declaration segment is omitted in single-declaration mode.
+function cseCheckboxName(
+	column: CseColumn,
+	fileName: string,
+	hasSecondDeclaration: boolean,
+): string {
+	const declarationPart = hasSecondDeclaration
+		? ` — ${CSE_DECLARATION_LABELS[column.declarationNumber]}`
+		: "";
+	return `${CSE_TYPE_LABELS[column.type]}${declarationPart} — ${fileName}`;
+}
+
+/**
+ * Complete CSE step 2 through the real UI: upload the PDF, associate the required
+ * content types via the matrix, then submit and certify. Exercises the matrix
+ * introduced by epic #3476 instead of injecting rows directly in the database.
+ */
+export async function submitCseStep2(
+	page: Page,
+	options: { columns?: CseColumn[]; hasSecondDeclaration?: boolean } = {},
+) {
+	const {
+		columns = [{ declarationNumber: 1, type: "accuracy" }],
+		hasSecondDeclaration = false,
+	} = options;
+	const fileName = path.basename(DUMMY_PDF);
+
+	await page.waitForURL("**/avis-cse/etape/2");
+
+	// Phase A — selecting the file auto-uploads it (no intermediate "Importer"
+	// step), after which the page re-renders with the matrix.
 	await page.locator("#cse-file-upload").setInputFiles(DUMMY_PDF);
-	await page.getByRole("button", { name: "Soumettre" }).click();
+	await expect(
+		page.getByRole("table", { name: /Associez chaque fichier déposé/ }),
+	).toBeVisible({ timeout: 30_000 });
+
+	// Phase B — tick the required columns, waiting for each association to persist
+	// before submitting. The client submit gate is optimistic, so finalize could
+	// otherwise race the setFileContentTypes mutation.
+	for (const column of columns) {
+		const persisted = page.waitForResponse(
+			(response) =>
+				response.url().includes("setFileContentTypes") && response.ok(),
+		);
+		await page
+			.getByRole("checkbox", {
+				name: cseCheckboxName(column, fileName, hasSecondDeclaration),
+			})
+			.check();
+		await persisted;
+	}
+
+	// Phase C — submit, certify, validate, then wait for the confirmation page.
+	const submit = page.getByRole("button", { name: "Soumettre" });
+	await expect(submit).toBeEnabled();
+	await submit.click();
 	await page
 		.getByText(/Je certifie que les avis transmis sont conformes/)
 		.click();
 	await page.getByRole("button", { name: "Valider" }).click();
-	await page.waitForURL("**/avis-cse/confirmation", { timeout: 10_000 });
+	await page.waitForURL("**/avis-cse/confirmation", { timeout: 30_000 });
 }
 
 export async function uploadJointEvalPdf(page: Page) {

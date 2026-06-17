@@ -10,7 +10,7 @@ export function CseStepIndicator({ currentStep }: Props) {
 		currentStep < TOTAL_STEPS ? STEP_TITLES[currentStep + 1] : undefined;
 
 	return (
-		<div className="fr-stepper fr-mb-3w">
+		<div className="fr-stepper fr-mb-4w">
 			<h2 className="fr-stepper__title">
 				{title}
 				<span className="fr-stepper__state">

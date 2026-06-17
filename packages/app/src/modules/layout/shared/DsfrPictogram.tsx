@@ -1,4 +1,5 @@
 type Props = {
+	className?: string;
 	path: string;
 	size?: number;
 };
@@ -6,12 +7,14 @@ type Props = {
 /**
  * Official DSFR pictogram pattern using SVG <use> references.
  * Wraps the 3-layer artwork structure (decorative, minor, major).
+ * Pass a DSFR colour-scheme modifier (e.g. "fr-artwork--green-emeraude")
+ * through `className` to recolour the artwork.
  */
-export function DsfrPictogram({ path, size = 40 }: Props) {
+export function DsfrPictogram({ className, path, size = 40 }: Props) {
 	return (
 		<svg
 			aria-hidden="true"
-			className="fr-artwork"
+			className={className ? `fr-artwork ${className}` : "fr-artwork"}
 			height={`${size}px`}
 			viewBox="0 0 80 80"
 			width={`${size}px`}

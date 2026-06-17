@@ -69,6 +69,26 @@ export async function resetDeclarationToDraft() {
 			    WHERE d.siren = ${TEST_SIREN}
 			  )
 		`;
+
+		// CSE opinion files + associations accumulate on the shared declaration
+		// record (the suite uploads through the real UI now). Wipe them so each
+		// test starts with no file and free upload slots. Deleting the files
+		// cascades to app_cse_opinion_file, but we clear associations first to be
+		// explicit and order-safe.
+		await sql`
+			DELETE FROM app_cse_opinion_file
+			WHERE declaration_id IN (
+			    SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
+			)
+		`;
+
+		await sql`
+			DELETE FROM app_file
+			WHERE type = 'cse_opinion'
+			  AND declaration_id IN (
+			    SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
+			)
+		`;
 	} finally {
 		await sql.end();
 	}
