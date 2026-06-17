@@ -13,7 +13,6 @@ import { EmailOwnerList } from "../EmailOwnerList";
 import { SelectSiren } from "./SelectSiren";
 
 const proconnectSignInUrl = config.proconnect.signinUrl;
-const proconnectManageOrganisationsUrl = config.proconnect.manageOrganisationUrl;
 
 export const MesEntreprisesInfoAlert = () => (
   <Alert
@@ -33,13 +32,6 @@ export const MesEntreprisesInfoAlert = () => (
             créer un nouveau compte ProConnect
           </Link>{" "}
           avec cette adresse.
-        </p>
-        <p>
-          <br />
-          Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-          <Link target="_blank" href={`${proconnectManageOrganisationsUrl}`}>
-            cliquez ici
-          </Link>
         </p>
       </>
     }
