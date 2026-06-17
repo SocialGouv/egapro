@@ -5,6 +5,7 @@ const progressionUseQueryMock = vi.fn();
 const stepDurationsUseQueryMock = vi.fn();
 const stepDropoffUseQueryMock = vi.fn();
 const funnelUseQueryMock = vi.fn();
+const matomoFunnelUseQueryMock = vi.fn();
 const statsUseQueryMock = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
@@ -24,6 +25,9 @@ vi.mock("~/trpc/react", () => ({
 			},
 			getCompletionFunnel: {
 				useQuery: (...args: unknown[]) => funnelUseQueryMock(...args),
+			},
+			getMatomoFunnel: {
+				useQuery: (...args: unknown[]) => matomoFunnelUseQueryMock(...args),
 			},
 		},
 	},
@@ -67,6 +71,7 @@ const defaultMocks = () =>
 		stepDurationsUseQueryMock,
 		stepDropoffUseQueryMock,
 		funnelUseQueryMock,
+		matomoFunnelUseQueryMock,
 	});
 
 describe("StatsDashboard — campaign section states", () => {

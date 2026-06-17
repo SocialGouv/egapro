@@ -2,11 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
-import { computeGap, GAP_ALERT_THRESHOLD } from "~/modules/domain";
+import { trackFunnelComplete } from "~/modules/analytics";
+import {
+	computeGap,
+	GAP_ALERT_THRESHOLD,
+	getCompanySizeRange,
+} from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { getCurrentStageHref } from "../shared/complianceNavigation";
 import { FormActions } from "../shared/FormActions";
+import {
+	DECLARATION_FUNNEL,
+	declarationFunnelDimensions,
+} from "../shared/funnelConfig";
 import { NextStepsBox } from "../shared/NextStepsBox";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
@@ -29,10 +38,11 @@ function hasAnyHighGap(gaps: (number | null)[]): boolean {
 type Props = {
 	declaration: {
 		siren: string;
-		totalWomen: number | null;
-		totalMen: number | null;
 		status: string | null;
 	};
+	// Official GIP/DSN workforce — canonical source for the Matomo size bucket
+	// (see StepPageClient), kept consistent with all business decisions.
+	companyWorkforce: number | null;
 	declarationYear: number;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
@@ -44,6 +54,7 @@ type Props = {
 
 export function Step6Review({
 	declaration,
+	companyWorkforce,
 	declarationYear,
 	step2Data,
 	step3Data,
@@ -56,6 +67,15 @@ export function Step6Review({
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: () => {
+			trackFunnelComplete(
+				DECLARATION_FUNNEL,
+				declarationFunnelDimensions(
+					declarationYear,
+					companyWorkforce !== null
+						? getCompanySizeRange(companyWorkforce)
+						: undefined,
+				),
+			);
 			router.push("/declaration-remuneration/parcours-conformite");
 		},
 	});

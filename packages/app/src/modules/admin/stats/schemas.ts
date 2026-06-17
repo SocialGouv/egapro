@@ -88,3 +88,18 @@ export const getCompletionFunnelSchema = z.object({
 export type GetCompletionFunnelInput = z.infer<
 	typeof getCompletionFunnelSchema
 >;
+
+/**
+ * Input for `adminStats.getMatomoFunnel`.
+ *
+ * Same year/workforce filter couple as the sibling procedures. The workforce
+ * bucket only segments the declaration funnel — `cse_opinion` /
+ * `compliance_path` emit only the campaign-year dimension, so the service
+ * applies `sizeRange` to the declaration funnel alone.
+ */
+export const getMatomoFunnelSchema = z.object({
+	year: z.number().int().min(2000).max(2100),
+	sizeRange: z.enum(COMPANY_SIZE_RANGE_KEYS).optional(),
+});
+
+export type GetMatomoFunnelInput = z.infer<typeof getMatomoFunnelSchema>;

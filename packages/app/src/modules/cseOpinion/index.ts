@@ -1,6 +1,7 @@
 export { ConfirmationPage } from "./ConfirmationPage";
 export { CseOpinionLayout } from "./CseOpinionLayout";
 export { computeContentTypeColumns } from "./contentTypeColumns";
+export { CSE_FUNNEL } from "./funnelConfig";
 export { mapOpinionsFromDb } from "./mapOpinionsFromDb";
 export { Step1Opinions } from "./Step1Opinions";
 export { Step2Upload } from "./Step2Upload";

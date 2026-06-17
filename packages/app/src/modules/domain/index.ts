@@ -17,6 +17,7 @@ export { isObligatedForYear } from "./shared/companyObligation";
 export {
 	COMPANY_SIZE_RANGES,
 	classifyCompanySize,
+	getCompanySizeRange,
 	isCseRequired,
 } from "./shared/companySize";
 // Global score computation (sum of sub-scores from the EgaPro index)
