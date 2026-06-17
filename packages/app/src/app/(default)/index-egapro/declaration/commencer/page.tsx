@@ -83,7 +83,7 @@ const CommencerPage = async () => {
         }
         className={fr.cx("fr-mb-4w")}
       />
-      <CommencerForm monCompteProHost={proconnectManageOrganisationsUrl ?? ""} />
+      <CommencerForm />
     </>
   );
 };
