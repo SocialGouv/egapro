@@ -11,8 +11,12 @@ const { mockEnv, trackAppRouterMock, pushMock } = vi.hoisted(() => ({
 }));
 
 vi.mock("~/env", () => ({ env: mockEnv }));
-vi.mock("@socialgouv/matomo-next", () => ({
+// Mock the router-free deep subpaths the component imports (the barrel pulls
+// `track-pages-router`/`next/router`, kept out of app-route graphs).
+vi.mock("@socialgouv/matomo-next/lib/track-app-router", () => ({
 	trackAppRouter: trackAppRouterMock,
+}));
+vi.mock("@socialgouv/matomo-next/lib/tracker", () => ({
 	push: pushMock,
 }));
 vi.mock("next/navigation", () => ({
