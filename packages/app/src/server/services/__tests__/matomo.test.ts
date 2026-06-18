@@ -162,4 +162,21 @@ describe("fetchMatomoFunnel", () => {
 			"Matomo Reporting API error: 502 Bad Gateway",
 		);
 	});
+
+	it("degrades to empty funnels when a response row fails schema validation", async () => {
+		// Reporting API returns a 200 with a malformed row (no `label`): the
+		// boundary schema rejects it, so the call yields no rows → empty funnel
+		// rather than a corrupted or crashing dashboard.
+		fetchSpy.mockResolvedValue({
+			ok: true,
+			json: async () => [{ nb_events: 5 }],
+		});
+
+		const result = await fetchMatomoFunnel({ year: 2024 });
+
+		expect(result.declarationFunnel.every((r) => r.count === 0)).toBe(true);
+		expect(result.declarationFunnel).toHaveLength(7);
+		expect(result.cseFunnel.every((r) => r.count === 0)).toBe(true);
+		expect(result.complianceFunnel.every((r) => r.count === 0)).toBe(true);
+	});
 });

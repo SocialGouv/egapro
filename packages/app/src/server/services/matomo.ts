@@ -1,6 +1,10 @@
 import "server-only";
 
 import { env } from "~/env";
+import {
+	type MatomoEventRow,
+	matomoReportingResponseSchema,
+} from "~/modules/admin/stats/schemas";
 import type {
 	FunnelRow,
 	MatomoFunnelOutput,
@@ -103,12 +107,6 @@ const FUNNELS: Record<keyof MatomoFunnelOutput, FunnelDef> = {
 	},
 };
 
-type MatomoEventRow = {
-	label: string;
-	nb_events?: number;
-	idsubdatatable?: number | string;
-};
-
 function countKey(jalon: Jalon): string {
 	return jalon.kind === "step" ? jalon.step : jalon.kind;
 }
@@ -201,15 +199,17 @@ async function callReportingApi(
 		);
 	}
 
-	const data = (await response.json()) as
-		| MatomoEventRow[]
-		| { result?: string; message?: string };
-	if (!Array.isArray(data)) {
+	// Validate the external response at the boundary rather than trusting an
+	// `as` cast. An unexpected shape degrades to no rows (empty funnel); a
+	// well-formed Matomo error object is surfaced.
+	const parsed = matomoReportingResponseSchema.safeParse(await response.json());
+	if (!parsed.success) return [];
+	if (!Array.isArray(parsed.data)) {
 		throw new Error(
-			`Matomo Reporting API error: ${data.message ?? "unexpected response"}`,
+			`Matomo Reporting API error: ${parsed.data.message ?? "unexpected response"}`,
 		);
 	}
-	return data;
+	return parsed.data;
 }
 
 function toCount(value: number | undefined): number {
