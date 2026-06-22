@@ -62,7 +62,7 @@ La séparation **body / besoin / analyse** permet à l'utilisateur (et aux relec
 
 3. **Validation utilisateur EXPLICITE** — logger `AWAITING_VALIDATION`, poser la question « valides-tu cette rédaction ? » et **attendre une réponse affirmative claire** de l'utilisateur avant tout `gh issue create` (pas d'auto-validation, pas de « je suppose que oui », pas d'enchaînement silencieux). Itérer autant que nécessaire (souvent : besoin métier OK mais découpage des scénarios à ajuster).
 
-4. **Sur approbation uniquement — Création GitHub** (snippets exacts dans `rules/github-board.md`) :
+4. **Sur approbation uniquement — Création GitHub** (snippets exacts + IDs **non devinables** dans `rules/github-board.md` — ce fichier n'est plus always-loaded, **lis-le** s'il n'est pas dans ton contexte avant ces opérations) :
    - `gh issue create --label Epic` avec **body = citation de la demande utilisateur originale** (préfixée `> ` ou en bloc `quote`). Pas plus.
    - **Renommer le log file** : `mv .claude/state/epic_run/agents/po-pending.log .claude/state/epic_run/agents/po-<N>.log`
    - Logger `ISSUE_CREATED "epic=<N>"` (sur le nouveau path)

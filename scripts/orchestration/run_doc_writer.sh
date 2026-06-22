@@ -65,6 +65,13 @@ fi
 
 git fetch origin alpha "$EXPECTED" --quiet
 
+# The E2E gate (run_e2e_dev.sh) runs before doc-writer and pushes its coverage
+# commit onto origin/epic/<N> from a detached worktree. The main worktree's
+# local epic/<N> is therefore behind origin — fast-forward it so doc-writer's
+# commit lands on top and `git push origin HEAD` is not rejected (non-ff).
+# Safe: the working tree is clean (checked above) and we only ever ff.
+git merge --ff-only "origin/$EXPECTED" --quiet 2>/dev/null || true
+
 bash "$SCRIPT_DIR/log_event.sh" "$AID" START "epic=$EPIC_N branch=$EXPECTED"
 
 # ---- timeout binary detection (mirror epic_loop.sh) ----

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	COMPANY_SIZE_RANGES,
 	classifyCompanySize,
+	getCompanySizeRange,
 	isCseRequired,
 } from "../shared/companySize";
 
@@ -76,5 +77,20 @@ describe("COMPANY_SIZE_RANGES", () => {
 			max: null,
 			label: "250 salariés et plus",
 		});
+	});
+});
+
+describe("getCompanySizeRange", () => {
+	it("maps a workforce to its bucket key", () => {
+		expect(getCompanySizeRange(0)).toBe("<50");
+		expect(getCompanySizeRange(49)).toBe("<50");
+		expect(getCompanySizeRange(50)).toBe("50-99");
+		expect(getCompanySizeRange(99)).toBe("50-99");
+		expect(getCompanySizeRange(100)).toBe("100-149");
+		expect(getCompanySizeRange(149)).toBe("100-149");
+		expect(getCompanySizeRange(150)).toBe("150-249");
+		expect(getCompanySizeRange(249)).toBe("150-249");
+		expect(getCompanySizeRange(250)).toBe("250+");
+		expect(getCompanySizeRange(10000)).toBe("250+");
 	});
 });

@@ -9,7 +9,7 @@ import { DraftLoadingState } from "~/modules/declaration-remuneration/shared/dra
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { useDraftAutoSave } from "~/modules/declaration-remuneration/shared/draft/useDraftAutoSave";
 import { useDraftHydration } from "~/modules/declaration-remuneration/shared/draft/useDraftHydration";
-import type { CampaignDeadlines } from "~/modules/domain";
+import { type CampaignDeadlines, formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -17,6 +17,7 @@ import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { FormActions } from "../shared/FormActions";
 import { SavedIndicator } from "../shared/SavedIndicator";
+import styles from "./CompliancePathChoice.module.scss";
 import {
 	FirstRoundOptions,
 	getCompliancePathHref,
@@ -136,79 +137,86 @@ export function CompliancePathChoice({
 				year={currentYear}
 			/>
 
-			<h2 className="fr-h4 fr-mb-0">
-				Parcours de mise en conformité pour l&apos;indicateur par catégorie de
-				salariés
-			</h2>
-
-			<p className="fr-mb-0">
-				Des écarts ≥ 5 % ont été constatés,{" "}
-				<span className="fr-text--medium">
-					vous devez engager l&apos;un des parcours suivants.
-				</span>
-			</p>
-
 			<div className={common.flexColumnGap1}>
-				<h3 className="fr-h6 fr-mb-0">
-					La justification est possible par des critères objectifs et non
-					sexistes
-				</h3>
-				<p className="fr-mb-0">
-					<a
-						className="fr-link"
-						href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
-						rel="noopener noreferrer"
-						target="_blank"
-					>
-						Qu&apos;entend-on par critères objectifs et non sexistes ?
-						<NewTabNotice />
-					</a>
+				<p className={`fr-mb-0 ${styles.instructions}`}>
+					{isSecondRound
+						? "Des écarts ≥ 5 % ont de nouveau été détectés, vous devez engager l'un des parcours suivants."
+						: "Des écarts ≥ 5 % ont été constatés, vous devez engager l'un des parcours suivants."}
 				</p>
+
+				<div className="fr-highlight fr-mb-0">
+					<p className="fr-mb-1w">
+						Date limite pour choisir un parcours de mise en conformité
+					</p>
+					<p className="fr-text--lg fr-text--bold fr-mb-0">
+						{formatLongDate(campaignDeadlines.pathChoiceDeadline)}
+					</p>
+				</div>
 			</div>
 
-			<Controller
-				control={form.control}
-				name="path"
-				render={({ field }) => (
-					<fieldset
-						aria-labelledby="compliance-path-legend"
-						className="fr-fieldset"
-					>
-						<legend className="fr-sr-only" id="compliance-path-legend">
-							Choix du parcours de mise en conformité
-						</legend>
+			<div className={common.dataSection}>
+				<div className={common.flexColumnGapHalf}>
+					<h2 className="fr-h6 fr-mb-0">
+						La justification est possible par des critères objectifs et non
+						sexistes
+					</h2>
+					<p className="fr-mb-0">
+						<a
+							className="fr-link"
+							href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
+							rel="noopener noreferrer"
+							target="_blank"
+						>
+							Qu&apos;entend-on par critères objectifs et non sexistes ?
+							<NewTabNotice />
+						</a>
+					</p>
+				</div>
 
-						{isSecondRound ? (
-							<SecondRoundOptions
-								disabled={isImpersonating}
-								jointEvaluationDeadline={
-									campaignDeadlines.decl2JointEvaluationDeadline
-								}
-								justificationDeadline={
-									campaignDeadlines.decl2JustificationDeadline
-								}
-								selectedPath={field.value}
-								setSelectedPath={field.onChange}
-							/>
-						) : (
-							<FirstRoundOptions
-								correctiveActionDeadline={
-									campaignDeadlines.decl2ModificationDeadline
-								}
-								disabled={isImpersonating}
-								jointEvaluationDeadline={
-									campaignDeadlines.decl1JointEvaluationDeadline
-								}
-								justificationDeadline={
-									campaignDeadlines.decl1JustificationDeadline
-								}
-								selectedPath={field.value}
-								setSelectedPath={field.onChange}
-							/>
-						)}
-					</fieldset>
-				)}
-			/>
+				<Controller
+					control={form.control}
+					name="path"
+					render={({ field }) => (
+						<fieldset
+							aria-labelledby="compliance-path-legend"
+							className="fr-fieldset"
+						>
+							<legend className="fr-sr-only" id="compliance-path-legend">
+								Choix du parcours de mise en conformité
+							</legend>
+
+							{isSecondRound ? (
+								<SecondRoundOptions
+									disabled={isImpersonating}
+									jointEvaluationDeadline={
+										campaignDeadlines.decl2JointEvaluationDeadline
+									}
+									justificationDeadline={
+										campaignDeadlines.decl2JustificationDeadline
+									}
+									selectedPath={field.value}
+									setSelectedPath={field.onChange}
+								/>
+							) : (
+								<FirstRoundOptions
+									correctiveActionDeadline={
+										campaignDeadlines.decl2ModificationDeadline
+									}
+									disabled={isImpersonating}
+									jointEvaluationDeadline={
+										campaignDeadlines.decl1JointEvaluationDeadline
+									}
+									justificationDeadline={
+										campaignDeadlines.decl1JustificationDeadline
+									}
+									selectedPath={field.value}
+									setSelectedPath={field.onChange}
+								/>
+							)}
+						</fieldset>
+					)}
+				/>
+			</div>
 
 			<FormActions
 				isSubmitting={mutation.isPending}

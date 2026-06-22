@@ -65,7 +65,7 @@ Trois grandes catégories de surface technique :
 
 - **Pages publiques** (recherche, FAQ, mentions légales) : Server Components, lecture seule, pas d'authentification
 - **Espace déclarant** (`/mon-espace`, `/declaration-remuneration/*`, `/avis-cse/*`) : authentifié via ProConnect, écritures protégées par tRPC
-- **API privées** : tRPC interne (`/api/trpc/*`) pour le front, et REST-like (`/api/v1/*`, `/api/export/*`, `/api/pdf/*`) pour les intégrations externes
+- **API privées** : tRPC interne (`/api/trpc/*`) pour le front, et REST-like (`/api/v1/*`, `/api/export/*`, `/api/pdf/*`, `/api/upload`) pour les intégrations externes et les uploads
 
 ---
 
@@ -147,7 +147,8 @@ modules/
   audit/          # Constantes & types audit
   mail/           # Mails transactionnels
   analytics/      # Matomo
-  shared/         # Hooks partagés (useZodForm, useFileUploadForm, …)
+  shared/         # Hooks et composants transverses (useZodForm, useFileUploadForm,
+                  #   FileUpload, uploadFile, fileNameValidation, …)
 ```
 
 Règle d'or : **pas de composant custom dans `src/app/`**. Les fichiers `page.tsx` sont des wrappers fins qui importent depuis un module. Cette règle est **bloquée par le hook `block-bad-patterns`** (rejet de l'edit).
@@ -163,7 +164,7 @@ server/
   auth/           # Configuration NextAuth (ProConnect provider + callbacks)
   audit/          # Middleware tRPC + withAuditedRoute + cachedAuth + logAction
   db/             # Schéma Drizzle + connexion PostgreSQL
-  services/       # Intégrations tierces (gipMds, …)
+  services/       # Intégrations tierces (gipMds, uploadPipeline, …)
 ```
 
 ---
@@ -319,6 +320,7 @@ Définition dans `src/server/db/`. Tables principales :
 | `jobCategories` | Catégories d'emploi (déclaration, optionnel) |
 | `employeeCategories` | Indicateur G (par catégorie) |
 | `cseOpinions` | Avis CSE (deux types : exactitude + écarts) |
+| `cseOpinionFiles` | Associations fichier ↔ type de contenu (par `declarationNumber` + `type`) |
 | `files` | PDF stockés sur S3 (cse_opinion, joint_evaluation) |
 | `referents` | Annuaire référents régionaux |
 | `campaignDeadlines` | Deadlines par année (configuration admin) |
@@ -353,6 +355,8 @@ Les PDF (avis CSE, évaluation conjointe) sont stockés sur **MinIO** en local (
 
 ### 8.1 Flux upload
 
+L'upload est centralisé dans la Route Handler `POST /api/upload` (`src/app/api/upload/route.ts`). Le flux de traitement s'exécute en une seule requête, sans fenêtre d'orphelin S3 :
+
 ```mermaid
 sequenceDiagram
     participant User
@@ -361,25 +365,54 @@ sequenceDiagram
     participant S3
     participant DB
 
-    User->>App: POST /api/trpc/cseOpinion.uploadFile (PDF blob)
-    App->>App: validate Zod (mime type, taille)
-    App->>AV: scan PDF
-    alt PDF infecté
+    User->>App: POST /api/upload<br/>(X-Flow-Type, X-Filename, Content-Type, body=stream)
+    App->>App: auth (401 si pas de session)
+    App->>App: validation nom de fichier (400 si invalide)
+    App->>App: validation MIME (400 si type non autorisé)
+    App->>AV: scan du flux
+    alt Virus détecté
         AV-->>App: virus detected
-        App-->>User: 422 Error
-    else PDF clean
+        App-->>User: 422 + nom du virus
+    else Fichier sain
         AV-->>App: clean
-        App->>S3: PutObject (key = siren/year/cse_opinion/<uuid>.pdf)
+        App->>S3: PutObject (key = siren/year/<flow>/<uuid>.pdf)
         App->>DB: insert files (declarationId, type, s3Key, fileName)
         App-->>User: { fileId, fileName }
     end
 ```
 
-### 8.2 Antivirus ClamAV
+**En-têtes requis** :
 
-Le service `clamavd` scanne les uploads via le protocole ClamAV (TCP). Si le scanner refuse, le fichier est **rejeté avant** stockage S3 (jamais persisté).
+| En-tête | Rôle |
+|---|---|
+| `X-Flow-Type` | `cse_opinion` ou `joint_evaluation` — sélectionne la logique métier |
+| `X-Filename` | Nom du fichier (validé côté serveur) |
+| `Content-Type` | MIME type déclaré (vérifié contre la liste autorisée) |
 
-### 8.3 Téléchargement
+### 8.2 Validation du nom de fichier
+
+Le module `~/modules/shared/fileNameValidation.ts` fournit `validateFileName(fileName, mimeType)`. Cette validation est appliquée :
+
+- **Côté client** : dans le composant `FileUpload.tsx`, avant la vérification MIME et la vérification de taille, afin de rejeter immédiatement les fichiers au nom invalide sans déclencher d'upload.
+- **Côté serveur** : dans la Route Handler `POST /api/upload`, après la vérification MIME déclarée, avant de lancer le pipeline (ClamAV + S3).
+
+Règles :
+
+| Vérification | Détail |
+|---|---|
+| Non vide | Refus si la valeur trimmée est vide |
+| Longueur | Refus si > `MAX_FILENAME_LENGTH` (200 caractères) |
+| Caractères interdits | `< > : " \| ? * ; / \` et plage de contrôle U+0000–U+001F / U+007F |
+| Caractères invisibles | U+202E (RLO), U+200B, U+200C, U+200D, U+FEFF bloqués |
+| Cohérence extension-MIME | Extension de `EXTENSION_MIME_MAP` doit correspondre au MIME déclaré |
+
+Le schéma Zod `fileNameSchema` (exporté depuis le même fichier) encapsule ces règles pour les réutiliser dans des formulaires ou procédures.
+
+### 8.3 Antivirus ClamAV
+
+Le service `clamavd` scanne les uploads via le protocole ClamAV (TCP). Si le scanner est indisponible, le fichier est rejeté (503). Si un virus est détecté, le fichier est rejeté avant tout stockage S3 (422 + nom de la signature).
+
+### 8.4 Téléchargement
 
 Les fichiers sont servis via une Route Handler `/api/v1/files/:fileId` qui fait du **streaming** depuis S3 (pas de signed URL exposée publiquement). Auth duale : header APISIX (côté SUIT) ou session NextAuth (côté front).
 
@@ -409,7 +442,7 @@ Définies dans `src/modules/audit/shared/constants.ts` :
 | Catégorie | Rétention | Exemples |
 |---|---|---|
 | `mutation` | 365 j | Toutes les écritures (déclaration, CSE, admin) |
-| `read_sensitive` | 180 j | `profile.get`, `declaration.getOrCreate`, recherche admin, téléchargement PDF |
+| `read_sensitive` | 180 j | `profile.get`, `declaration.getOrCreate`, `declaration.getStatusHistory`, recherche admin, téléchargement PDF |
 | `public_search` | 180 j | Recherche / vue de référents publics |
 | `auth` | 365 j | Login OK / KO, logout |
 | `export` | 365 j | API publique d'export |
@@ -427,6 +460,8 @@ Toute nouvelle action audited requiert **3 points** :
    - Pour une procédure tRPC → entrée dans `PROCEDURE_TO_ACTION` (middleware auto)
    - Pour une Route Handler → wrapper `withAuditedRoute({ action, resolveContext }, handler)`
    - Pour un événement auth ou un cron → appel direct à `logAction(...)`
+
+La Route Handler `POST /api/upload` écrit directement via `logAction` (pas de wrapper `withAuditedRoute`) pour contrôler précisément le timing et les métadonnées enrichies (flowType, fileId, durée, nom du virus).
 
 ### 9.5 Cron de cleanup
 
@@ -468,6 +503,8 @@ Toute entrée externe est validée via **Zod** :
 - Procédures tRPC (`.input(schema)`)
 - Route Handlers (parse explicite du body / query)
 - Variables d'environnement (`@t3-oss/env-nextjs` dans `src/env.js`)
+
+Pour les uploads de fichiers, la validation couvre également **le nom de fichier** via `validateFileName` (`~/modules/shared/fileNameValidation.ts`) — appliquée côté client avant l'envoi et côté serveur dans `POST /api/upload` avant d'entrer dans le pipeline.
 
 ### 10.3 Variables d'environnement
 

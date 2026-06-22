@@ -63,7 +63,10 @@ test.describe("Recapitulatif page", () => {
 		await page.goto("/declaration-remuneration/recapitulatif");
 
 		await expect(
-			page.getByRole("link", { name: /Retour à Mon Espace/ }),
+			page
+				.locator("main")
+				.getByRole("link", { name: "Retour à Mon Espace", exact: true })
+				.last(),
 		).toBeVisible();
 	});
 

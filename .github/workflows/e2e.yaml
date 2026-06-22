@@ -1,7 +1,9 @@
 name: 🧪 E2E Tests
 
 on:
-  push:
+  pull_request:
+    branches:
+      - alpha
   workflow_dispatch:
 
 concurrency:
@@ -11,7 +13,7 @@ concurrency:
 jobs:
   e2e:
     name: "Test e2e"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5438/egapro
       AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
@@ -21,9 +23,6 @@ jobs:
       EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
       EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
       EGAPRO_SUIT_API_URL: ${{ secrets.EGAPRO_SUIT_API_URL }}
-      # Deterministic dev value matching the E2E test's hardcoded secret.
-      # The real secret is only needed in deployed environments (where the
-      # APISIX gateway injects it into the X-Gateway-Forwarded header).
       EGAPRO_GATEWAY_SHARED_SECRET: dev-gateway-shared-secret-minimum-32-chars
       S3_ENDPOINT: http://localhost:9000
       S3_REGION: us-east-1
@@ -33,10 +32,6 @@ jobs:
       CLAMAV_HOST: localhost
       CLAMAV_PORT: 3310
       ADMIN_EMAILS: test@fia1.fr
-      # Notifications worker + publisher wiring (separate Postgres + MailDev
-      # SMTP). The dev server reads NOTIFICATIONS_DATABASE_URL when calling
-      # `enqueueNotification`; the worker is spawned by the E2E test itself
-      # and inherits these from process.env.
       NOTIFICATIONS_DATABASE_URL: postgresql://postgres:postgres@localhost:5439/egapro_notifications
       MAIL_ENABLED: "true"
       SMTP_HOST: localhost
@@ -47,8 +42,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Start services
-        run: docker compose up -d
       - uses: pnpm/action-setup@v4
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -64,13 +57,60 @@ jobs:
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
+      - name: Install Chromium manually (bypass Playwright extractor)
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          CHROMIUM_VERSION=1217
+          CFT_BUILD=147.0.7727.15
+
+          install_browser() {
+            local zip_name="$1" dest_subdir="$2" extracted_dir="$3" final_dir="$4"
+            local dest="$HOME/.cache/ms-playwright/${dest_subdir}"
+            mkdir -p "$dest"
+            echo "::group::Download ${zip_name}"
+            time curl --fail --location --silent --show-error \
+              --max-time 120 \
+              -o "/tmp/${zip_name}" \
+              "https://cdn.playwright.dev/builds/cft/${CFT_BUILD}/linux64/${zip_name}"
+            ls -lh "/tmp/${zip_name}"
+            echo "::endgroup::"
+            echo "::group::Extract ${zip_name} with system unzip"
+            time unzip -q "/tmp/${zip_name}" -d "$dest"
+            if [ "$extracted_dir" != "$final_dir" ]; then
+              mv "$dest/$extracted_dir" "$dest/$final_dir"
+            fi
+            touch "$dest/INSTALLATION_COMPLETE"
+            rm "/tmp/${zip_name}"
+            ls -la "$dest" | head -5
+            echo "::endgroup::"
+          }
+
+          install_browser \
+            "chrome-linux64.zip" \
+            "chromium-${CHROMIUM_VERSION}" \
+            "chrome-linux64" \
+            "chrome-linux"
+
+          install_browser \
+            "chrome-headless-shell-linux64.zip" \
+            "chromium_headless_shell-${CHROMIUM_VERSION}" \
+            "chrome-headless-shell-linux64" \
+            "chrome-headless-shell-linux64"
+      - name: Install Playwright system dependencies
+        run: pnpm --filter app exec playwright install-deps chromium
+        timeout-minutes: 5
+        env:
+          DEBIAN_FRONTEND: noninteractive
+          NEEDRESTART_MODE: a
+      - name: Start services
+        run: docker compose up -d
       - name: Build
         if: steps.cache.outputs.cache-hit != 'true'
         run: pnpm build
       - name: Apply database schema
         run: pnpm db:push
-      - name: Install Playwright browsers
-        run: pnpm playwright:install
       - name: Run E2E tests
         run: pnpm test:e2e
       - name: Stop services
@@ -83,3 +123,11 @@ jobs:
           name: playwright-report
           path: packages/app/playwright-report/
           retention-days: 7
+      - name: Upload Playwright traces
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-traces
+          path: packages/app/test-results/
+          retention-days: 7
+          if-no-files-found: ignore

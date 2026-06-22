@@ -56,6 +56,14 @@ vi.mock("next-auth/react", () => ({
 // Global mock for server-only — avoids error in jsdom.
 vi.mock("server-only", () => ({}));
 
+// Deterministic blob URL factory: jsdom returns a random `blob:nodedata:<uuid>`
+// which makes the FileUpload download-link `href` non-assertable. A stable
+// `blob:mock/<name>` lets tests verify the generated object URL precisely.
+URL.createObjectURL = vi.fn(
+	(blob: Blob) => `blob:mock/${blob instanceof File ? blob.name : "blob"}`,
+) as unknown as typeof URL.createObjectURL;
+URL.revokeObjectURL = vi.fn() as unknown as typeof URL.revokeObjectURL;
+
 // Global mock for ~/env — provides test values for all server env vars.
 vi.mock("~/env", () => ({
 	env: {

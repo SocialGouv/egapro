@@ -5,6 +5,7 @@ import { UserAccountMenu } from "./UserAccountMenu";
 
 type Props = {
 	session: Session | null;
+	userPhone?: string | null;
 };
 
 /**
@@ -15,8 +16,11 @@ type Props = {
  * Both containers MUST render byte-identical HTML, otherwise the DSFR JS
  * `HeaderLinks.init()` clones the desktop tools into the mobile menu (via
  * `innerHTML`), which strips React event listeners and breaks the menu.
+ *
+ * `userPhone` is fetched fresh server-side (not read from the JWT) because
+ * `session.user.phone` goes stale after profile updates.
  */
-export function HeaderQuickAccessLinks({ session }: Props) {
+export function HeaderQuickAccessLinks({ session, userPhone }: Props) {
 	return (
 		<ul className="fr-btns-group">
 			<li>
@@ -33,7 +37,7 @@ export function HeaderQuickAccessLinks({ session }: Props) {
 						isAdmin={session.user.isAdmin}
 						userEmail={session.user.email ?? ""}
 						userName={session.user.name ?? "Utilisateur"}
-						userPhone={session.user.phone ?? undefined}
+						userPhone={userPhone ?? undefined}
 					/>
 				) : (
 					<Link

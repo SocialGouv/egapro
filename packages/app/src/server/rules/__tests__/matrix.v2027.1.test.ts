@@ -265,6 +265,21 @@ describe("matrix v2027.1 — all 18 transitions", () => {
 	});
 });
 
+describe("submit_cse_opinion is re-entrant from demarche_completed", () => {
+	it("re-accepts the action once the démarche is completed, staying completed", () => {
+		// The CSE deposit form stays editable and re-submittable after completion,
+		// so submit_cse_opinion must loop on demarche_completed instead of throwing.
+		const facts = base("demarche_completed");
+		const result = applyAction(facts, "submit_cse_opinion", rules);
+
+		expect(result.nextStatus).toBe("demarche_completed");
+		expect(result.events).toEqual([
+			{ type: "cse_opinion_submit" },
+			{ type: "demarche_complete" },
+		]);
+	});
+});
+
 describe("applyAction — no matching transition throws", () => {
 	it("throws when no transition matches the current state + action", () => {
 		const facts = base("demarche_completed");

@@ -19,6 +19,7 @@ vi.mock("@aws-sdk/client-s3", () => {
 		DeleteObjectCommand: vi.fn(),
 		GetObjectCommand: vi.fn(),
 		HeadBucketCommand: vi.fn(),
+		HeadObjectCommand: vi.fn(),
 		PutObjectCommand: vi.fn(),
 		UploadPartCommand: vi.fn(),
 	};
@@ -72,6 +73,28 @@ describe("s3 service", () => {
 			const result = await getFile("key.pdf");
 			expect(result.contentType).toBe("application/pdf");
 			expect(result.body).toBeInstanceOf(ReadableStream);
+		});
+	});
+
+	describe("getFileSize", () => {
+		it("returns the object ContentLength", async () => {
+			sendMock.mockResolvedValueOnce({ ContentLength: 63365 });
+			const { HeadObjectCommand } = await import("@aws-sdk/client-s3");
+			const { getFileSize } = await import("../s3");
+
+			const size = await getFileSize("key.pdf");
+
+			expect(size).toBe(63365);
+			expect(HeadObjectCommand).toHaveBeenCalledWith(
+				expect.objectContaining({ Key: "key.pdf" }),
+			);
+		});
+
+		it("returns null when the head request fails", async () => {
+			sendMock.mockRejectedValueOnce(new Error("NoSuchKey"));
+			const { getFileSize } = await import("../s3");
+
+			expect(await getFileSize("missing.pdf")).toBeNull();
 		});
 	});
 

@@ -1,13 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
+import type { DraftBlob } from "~/modules/declaration-remuneration/shared/draft/schemas";
 import {
 	clearDraftInput,
 	getDraftInput,
 	saveDraftInput,
 } from "~/modules/declaration-remuneration/shared/draft/schemas";
-import type { DraftBlob } from "~/modules/declaration-remuneration/shared/draft/schemas";
-import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { isImpersonatingSiren } from "~/server/auth/companyAccess";
 import type { DB } from "~/server/db";
@@ -39,11 +38,8 @@ async function assertOwnership(
 	}
 }
 
-function isDraftExpired(draftUpdatedAt: Date, year: number): boolean {
-	const now = Date.now();
-	if (now - draftUpdatedAt.getTime() > DRAFT_TTL_MS) return true;
-	const deadline = getDefaultCampaignDeadlines(year).decl1ModificationDeadline;
-	return now > deadline.getTime();
+function isDraftExpired(draftUpdatedAt: Date): boolean {
+	return Date.now() - draftUpdatedAt.getTime() > DRAFT_TTL_MS;
 }
 
 export const declarationDraftRouter = createTRPCRouter({
@@ -74,7 +70,7 @@ export const declarationDraftRouter = createTRPCRouter({
 		const row = rows[0];
 		if (!row || row.draft === null || row.draftUpdatedAt === null) return null;
 
-		if (isDraftExpired(row.draftUpdatedAt, year)) return null;
+		if (isDraftExpired(row.draftUpdatedAt)) return null;
 
 		return row.draft as DraftBlob;
 	}),
