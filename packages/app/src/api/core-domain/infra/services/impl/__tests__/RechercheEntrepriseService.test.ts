@@ -165,6 +165,40 @@ describe("RechercheEntrepriseService", () => {
 			await expect(service.siren(siren)).rejects.toBeInstanceOf(EntrepriseServiceError);
 			expect(global.fetch).toHaveBeenCalledTimes(1);
 		});
+
+		it("does not retry a non-transient network error (e.g. DNS ENOTFOUND)", async () => {
+			global.fetch = jest
+				.fn()
+				.mockRejectedValue(Object.assign(new TypeError("fetch failed"), { cause: { code: "ENOTFOUND" } }));
+
+			await expect(service.siren(siren)).rejects.toBeInstanceOf(EntrepriseServiceError);
+			expect(global.fetch).toHaveBeenCalledTimes(1);
+		});
+
+		it("does not retry an aborted request", async () => {
+			global.fetch = jest.fn().mockRejectedValue(Object.assign(new Error("aborted"), { name: "AbortError" }));
+
+			await expect(service.siren(siren)).rejects.toBeInstanceOf(EntrepriseServiceError);
+			expect(global.fetch).toHaveBeenCalledTimes(1);
+		});
+
+		it("retries an AggregateError whose sub-errors are transient (dual-stack)", async () => {
+			global.fetch = jest
+				.fn()
+				.mockRejectedValueOnce(
+					Object.assign(new TypeError("fetch failed"), { cause: { errors: [{ code: "ECONNREFUSED" }] } }),
+				)
+				.mockResolvedValueOnce({
+					ok: true,
+					status: 200,
+					json: async () => ({ results: [{ siren: TEST_SIREN, nom_raison_sociale: "ACME SARL" }] }),
+				} as Response);
+
+			const entreprise = await service.siren(siren);
+
+			expect(entreprise.simpleLabel).toBe("ACME SARL");
+			expect(global.fetch).toHaveBeenCalledTimes(2);
+		});
 	});
 
 	describe("search", () => {
