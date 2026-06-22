@@ -6,8 +6,9 @@ import {
 import { RepresentationEquilibreeSpecification } from "@common/core-domain/domain/specification/RepresentationEquilibreeSpecification";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateRepresentationEquilibreeDTO } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
+import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
 import { companyMap } from "@common/core-domain/mappers/companyMap";
-import { AppError, type EntityPropsToJson, type UseCase } from "@common/shared-domain";
+import { AppError, type EntityPropsToJson, type UseCase, ValidationError } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { add, isAfter } from "date-fns";
 
@@ -89,7 +90,17 @@ export class SaveRepresentationEquilibree implements UseCase<Input, void> {
 
         representationEquilibree = found.fromJson(partialProps);
       } else {
-        const company = companyMap.toDomain(await this.entrepriseService.siren(pk[0]));
+        // Server-side guard: block the creation of a representation for an already-closed company. The
+        // client checks this at "commencer", but that check is bypassed on non-funnel paths. The API is
+        // only fetched here on creation; staff (override) and non-diffusible companies (no dateCessation,
+        // so isCompanyClosed returns false) stay allowed, mirroring the declaration funnel.
+        const rawEntreprise = await this.entrepriseService.siren(pk[0]);
+        if (!override && isCompanyClosed(rawEntreprise, repEq.year)) {
+          throw new SaveRepresentationEquilibreeClosedCompanyError(
+            "Ce Siren correspond a une entreprise fermée. Veuillez vérifier votre saisie",
+          );
+        }
+        const company = companyMap.toDomain(rawEntreprise);
         representationEquilibree = RepresentationEquilibree.fromJson({
           ...partialProps,
           declaredAt: now,
@@ -116,6 +127,10 @@ export class SaveRepresentationEquilibree implements UseCase<Input, void> {
         throw specification.lastError;
       }
     } catch (error: unknown) {
+      // Surface the closed-company guard as itself instead of collapsing it into the generic error.
+      if (error instanceof SaveRepresentationEquilibreeClosedCompanyError) {
+        throw error;
+      }
       throw new SaveRepresentationEquilibreeError("Cannot save representation equilibree", error as Error);
     }
   }
@@ -123,3 +138,4 @@ export class SaveRepresentationEquilibree implements UseCase<Input, void> {
 
 export class SaveRepresentationEquilibreeError extends AppError {}
 export class SaveRepresentationEquilibreeOverOneYearError extends AppError {}
+export class SaveRepresentationEquilibreeClosedCompanyError extends ValidationError {}
