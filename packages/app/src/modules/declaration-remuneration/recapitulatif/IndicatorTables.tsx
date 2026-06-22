@@ -263,15 +263,20 @@ function QuartileDistributionTable({
 	}
 
 	const trancheKind = unit === "€" ? "annuelle brute" : "horaire brute";
+	const summaryId = `quartile-recap-summary-${unit === "€" ? "annual" : "hourly"}`;
+	const tableSummary = `Tableau complexe de répartition des effectifs par quartile de rémunération ${trancheKind}. Sept colonnes : l'intitulé du quartile, la tranche de rémunération (bornes minimale et maximale regroupées sous un en-tête commun), le nombre de femmes, le nombre d'hommes, le pourcentage de femmes et le pourcentage d'hommes. Les lignes correspondent aux quatre quartiles, suivies d'une ligne de total pour l'ensemble des salariés.`;
 
 	return (
 		<div className={styles.subTable}>
 			<p className={`fr-text--bold ${styles.subTitle}`}>{title}</p>
+			<p className="fr-sr-only" id={summaryId}>
+				{tableSummary}
+			</p>
 			<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">
 						<div className="fr-table__content">
-							<table>
+							<table aria-describedby={summaryId}>
 								<caption>{caption}</caption>
 								<thead>
 									<tr>

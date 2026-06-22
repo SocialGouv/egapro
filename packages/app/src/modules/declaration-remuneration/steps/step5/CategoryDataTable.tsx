@@ -208,103 +208,111 @@ export function CategoryDataTable({
 		!Number.isNaN(womenInt) && !Number.isNaN(menInt) ? womenInt + menInt : null;
 
 	const idPrefix = `cat-${catIndex}`;
+	const summaryId = `${idPrefix}-summary`;
+	const tableSummary =
+		"Tableau complexe de saisie de la rémunération des femmes et des hommes pour cette catégorie d'emplois. Quatre colonnes : intitulé de la ligne, champ de saisie pour les femmes, champ de saisie pour les hommes, et écart calculé en pourcentage (seuil réglementaire de 5 %). Les lignes sont regroupées en trois sections : l'effectif physique, la rémunération annuelle brute moyenne, puis la rémunération horaire brute moyenne, chacune avec le salaire de base, les composantes variables ou complémentaires, et le total.";
 	return (
-		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
-			<div className="fr-table__wrapper">
-				<div className="fr-table__container">
-					<div className="fr-table__content">
-						<table>
-							<caption>Données catégorie {catIndex + 1}</caption>
-							<thead>
-								<tr>
-									<th className={stepStyles.nameColumnHeader} scope="col">
-										{/* row label */}
-									</th>
-									<th scope="col">Femmes</th>
-									<th scope="col">Hommes</th>
-									<th scope="col">
-										<strong>Écart</strong>
-										<br />
-										<span className={common.fontRegular}>
-											Seuil réglementaire : 5%
-										</span>
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td className={stepStyles.sectionHeader} colSpan={4}>
-										<strong>
-											Total salariés
-											{totalEmployees !== null ? ` : ${totalEmployees}` : ""}
-										</strong>
-									</td>
-								</tr>
-								<tr className={stepStyles.dataRow}>
-									<td>Effectif physique</td>
-									<td>
-										<div className={stepStyles.inputCell}>
-											<input
-												aria-label={`Effectif femmes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
-												disabled={disabled}
-												id={`${idPrefix}-women-count`}
-												inputMode="numeric"
-												onChange={pos(catIndex, "womenCount", true)}
-												pattern="[0-9]*"
-												type="text"
-												value={cat.womenCount}
-											/>
-											<span className="fr-text--sm">nb</span>
-										</div>
-									</td>
-									<td>
-										<div className={stepStyles.inputCell}>
-											<input
-												aria-label={`Effectif hommes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
-												disabled={disabled}
-												id={`${idPrefix}-men-count`}
-												inputMode="numeric"
-												onChange={pos(catIndex, "menCount", true)}
-												pattern="[0-9]*"
-												type="text"
-												value={cat.menCount}
-											/>
-											<span className="fr-text--sm">nb</span>
-										</div>
-									</td>
-									<td />
-								</tr>
+		<>
+			<p className="fr-sr-only" id={summaryId}>
+				{tableSummary}
+			</p>
+			<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
+				<div className="fr-table__wrapper">
+					<div className="fr-table__container">
+						<div className="fr-table__content">
+							<table aria-describedby={summaryId}>
+								<caption>Données catégorie {catIndex + 1}</caption>
+								<thead>
+									<tr>
+										<th className={stepStyles.nameColumnHeader} scope="col">
+											{/* row label */}
+										</th>
+										<th scope="col">Femmes</th>
+										<th scope="col">Hommes</th>
+										<th scope="col">
+											<strong>Écart</strong>
+											<br />
+											<span className={common.fontRegular}>
+												Seuil réglementaire : 5%
+											</span>
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td className={stepStyles.sectionHeader} colSpan={4}>
+											<strong>
+												Total salariés
+												{totalEmployees !== null ? ` : ${totalEmployees}` : ""}
+											</strong>
+										</td>
+									</tr>
+									<tr className={stepStyles.dataRow}>
+										<td>Effectif physique</td>
+										<td>
+											<div className={stepStyles.inputCell}>
+												<input
+													aria-label={`Effectif femmes, catégorie ${catIndex + 1}`}
+													className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
+													disabled={disabled}
+													id={`${idPrefix}-women-count`}
+													inputMode="numeric"
+													onChange={pos(catIndex, "womenCount", true)}
+													pattern="[0-9]*"
+													type="text"
+													value={cat.womenCount}
+												/>
+												<span className="fr-text--sm">nb</span>
+											</div>
+										</td>
+										<td>
+											<div className={stepStyles.inputCell}>
+												<input
+													aria-label={`Effectif hommes, catégorie ${catIndex + 1}`}
+													className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
+													disabled={disabled}
+													id={`${idPrefix}-men-count`}
+													inputMode="numeric"
+													onChange={pos(catIndex, "menCount", true)}
+													pattern="[0-9]*"
+													type="text"
+													value={cat.menCount}
+												/>
+												<span className="fr-text--sm">nb</span>
+											</div>
+										</td>
+										<td />
+									</tr>
 
-								<RemunerationSection
-									blur={blur}
-									cat={cat}
-									catIndex={catIndex}
-									disabled={disabled}
-									fields={ANNUAL_FIELDS}
-									idPrefix={idPrefix}
-									pos={pos}
-									scope="annuel"
-									sectionLabel="Rémunération annuelle brute moyenne"
-								/>
+									<RemunerationSection
+										blur={blur}
+										cat={cat}
+										catIndex={catIndex}
+										disabled={disabled}
+										fields={ANNUAL_FIELDS}
+										idPrefix={idPrefix}
+										pos={pos}
+										scope="annuel"
+										sectionLabel="Rémunération annuelle brute moyenne"
+									/>
 
-								<RemunerationSection
-									blur={blur}
-									cat={cat}
-									catIndex={catIndex}
-									disabled={disabled}
-									fields={HOURLY_FIELDS}
-									idPrefix={idPrefix}
-									pos={pos}
-									scope="horaire"
-									sectionLabel="Rémunération horaire brute moyenne"
-								/>
-							</tbody>
-						</table>
+									<RemunerationSection
+										blur={blur}
+										cat={cat}
+										catIndex={catIndex}
+										disabled={disabled}
+										fields={HOURLY_FIELDS}
+										idPrefix={idPrefix}
+										pos={pos}
+										scope="horaire"
+										sectionLabel="Rémunération horaire brute moyenne"
+									/>
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+		</>
 	);
 }

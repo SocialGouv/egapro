@@ -81,15 +81,21 @@ export function CategoryRecapTable({
 			: null;
 
 	const heading = `Catégorie d'emplois n°${index + 1}${category.name ? ` : ${category.name}` : ""}`;
+	const summaryId = `category-recap-summary-${index}`;
+	const tableSummary =
+		"Tableau complexe comparant la rémunération des femmes et des hommes pour cette catégorie d'emplois. Quatre colonnes : intitulé de la ligne, valeur pour les femmes, valeur pour les hommes, et écart en pourcentage (seuil réglementaire de 5 %). Les lignes sont regroupées en trois sections : l'effectif physique, la rémunération annuelle brute, puis la rémunération horaire brute, chacune détaillant le salaire de base, les composantes variables ou complémentaires, et le total.";
 
 	return (
 		<section className={styles.section}>
 			<p className={`fr-text--bold ${styles.heading}`}>{heading}</p>
+			<p className="fr-sr-only" id={summaryId}>
+				{tableSummary}
+			</p>
 			<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">
 						<div className="fr-table__content">
-							<table>
+							<table aria-describedby={summaryId}>
 								<caption>{`${heading} – ${declarationYear}`}</caption>
 								<thead>
 									<tr>

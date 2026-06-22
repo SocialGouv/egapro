@@ -47,19 +47,24 @@ export function QuartileTable({
 	const totalAll = totalWomen + totalMen;
 	const trancheSuffix =
 		tableType === "annual" ? "annuelle brute" : "horaire brute";
+	const summaryId = `quartile-summary-${tableType}`;
+	const tableSummary = `Tableau complexe de répartition des effectifs par quartile de rémunération ${trancheSuffix}. Sept colonnes : l'intitulé du quartile, la tranche de rémunération (bornes minimale et maximale regroupées sous un en-tête commun), le nombre de femmes, le nombre d'hommes, le pourcentage de femmes et le pourcentage d'hommes. Les lignes correspondent aux quatre quartiles, suivies d'une ligne de total pour l'ensemble des salariés.`;
 
 	return (
 		<div className={stepStyles.tableWrapper}>
 			<h3 className="fr-h5 fr-mb-0">{title}</h3>
 			<div className={stepStyles.tableSection}>
 				{readingNote}
+				<p className="fr-sr-only" id={summaryId}>
+					{tableSummary}
+				</p>
 				<div
 					className={`fr-table fr-table--no-scroll fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
 				>
 					<div className="fr-table__wrapper">
 						<div className="fr-table__container">
 							<div className="fr-table__content">
-								<table>
+								<table aria-describedby={summaryId}>
 									<caption className="fr-sr-only">{title}</caption>
 									<colgroup>
 										<col className={stepStyles.colRowLabel} />
