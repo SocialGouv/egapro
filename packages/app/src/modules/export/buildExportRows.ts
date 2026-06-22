@@ -1,5 +1,6 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNotNull, ne, or } from "drizzle-orm";
 
+import { GAP_ALERT_THRESHOLD, isIndicatorGRequired } from "~/modules/domain";
 import type { DB } from "~/server/db";
 import { companies, declarations, users } from "~/server/db/schema";
 import { mapCseOpinions } from "./mapIndicators";
@@ -7,13 +8,25 @@ import {
 	fetchCseOpinionsByDeclaration,
 	getDeclarationsWithIndicatorG,
 	indicatorColumns,
+	statusHistoryProjection,
 } from "./queries";
 import type { ExportRow } from "./types";
 
-/**
- * Query all submitted declarations for a given year
- * and flatten them into ExportRow objects ready for XLSX generation.
- */
+const COMPLIANCE_PROCESS_SIZE_MIN = 100;
+
+function computeComplianceProcessRequired(
+	workforce: number | null,
+	hasIndicatorG: boolean,
+	globalAnnualMeanGap: number | null,
+): boolean {
+	if (workforce === null || globalAnnualMeanGap === null) return false;
+	return (
+		workforce >= COMPLIANCE_PROCESS_SIZE_MIN &&
+		hasIndicatorG &&
+		Math.abs(globalAnnualMeanGap) >= GAP_ALERT_THRESHOLD
+	);
+}
+
 export async function buildExportRows(
 	db: DB,
 	year: number,
@@ -23,19 +36,22 @@ export async function buildExportRows(
 			siren: declarations.siren,
 			year: declarations.year,
 			status: declarations.status,
-			compliancePath: declarations.compliancePath,
+			firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
+			secondDeclarationPathChoice: declarations.secondDeclarationPathChoice,
 			totalWomen: declarations.totalWomen,
 			totalMen: declarations.totalMen,
 			remunerationScore: declarations.remunerationScore,
 			variableRemunerationScore: declarations.variableRemunerationScore,
 			quartileScore: declarations.quartileScore,
 			categoryScore: declarations.categoryScore,
-			secondDeclarationStatus: declarations.secondDeclarationStatus,
+			cseRequired: declarations.cseRequired,
+			rulesVersion: declarations.rulesVersion,
 			secondDeclReferencePeriodStart:
 				declarations.secondDeclReferencePeriodStart,
 			secondDeclReferencePeriodEnd: declarations.secondDeclReferencePeriodEnd,
 			createdAt: declarations.createdAt,
 			updatedAt: declarations.updatedAt,
+			cancelledAt: declarations.cancelledAt,
 			declarationId: declarations.id,
 			companyName: companies.name,
 			workforce: companies.workforce,
@@ -46,13 +62,20 @@ export async function buildExportRows(
 			declarantLastName: users.lastName,
 			declarantEmail: users.email,
 			declarantPhone: users.phone,
+			...statusHistoryProjection,
 			...indicatorColumns,
 		})
 		.from(declarations)
 		.innerJoin(companies, eq(declarations.siren, companies.siren))
 		.innerJoin(users, eq(declarations.declarantId, users.id))
 		.where(
-			and(eq(declarations.status, "submitted"), eq(declarations.year, year)),
+			and(
+				eq(declarations.year, year),
+				or(
+					ne(declarations.status, "draft"),
+					isNotNull(declarations.cancelledAt),
+				),
+			),
 		);
 
 	const declarationIds = rows.map((r) => r.declarationId);
@@ -63,6 +86,27 @@ export async function buildExportRows(
 	]);
 
 	return rows.map((row) => {
+		const hasIndicatorGForThisDecl = hasIndicatorG.has(row.declarationId);
+		const globalAnnualMeanGap = row.globalAnnualMeanGap
+			? Number(row.globalAnnualMeanGap) * 100
+			: null;
+		const variableAnnualMeanGap = row.variableAnnualMeanGap
+			? Number(row.variableAnnualMeanGap) * 100
+			: null;
+		const complianceProcessRequired = computeComplianceProcessRequired(
+			row.workforce,
+			hasIndicatorGForThisDecl,
+			globalAnnualMeanGap,
+		);
+		const complianceProcessRevisionRequired =
+			complianceProcessRequired &&
+			row.secondDeclarationSubmittedAt !== null &&
+			variableAnnualMeanGap !== null &&
+			Math.abs(variableAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
+		const indicatorGRequired = isIndicatorGRequired(
+			row.workforce ?? 0,
+			row.year,
+		);
 		return {
 			siren: row.siren,
 			companyName: row.companyName,
@@ -72,12 +116,28 @@ export async function buildExportRows(
 			hasCse: row.hasCse,
 			year: row.year,
 			status: row.status,
-			declarationType: hasIndicatorG.has(row.declarationId)
+			declarationType: hasIndicatorGForThisDecl
 				? ("7_indicateurs" as const)
 				: ("6_indicateurs" as const),
-			compliancePath: row.compliancePath,
+			firstDeclarationPathChoice: row.firstDeclarationPathChoice,
+			secondDeclarationPathChoice: row.secondDeclarationPathChoice,
 			createdAt: row.createdAt?.toISOString() ?? null,
 			updatedAt: row.updatedAt?.toISOString() ?? null,
+			submittedAt: row.submittedAt?.toISOString() ?? null,
+			firstDeclarationPathChoiceAt:
+				row.firstDeclarationPathChoiceAt?.toISOString() ?? null,
+			secondDeclarationPathChoiceAt:
+				row.secondDeclarationPathChoiceAt?.toISOString() ?? null,
+			jointEvaluationSubmittedAt:
+				row.jointEvaluationSubmittedAt?.toISOString() ?? null,
+			cseOpinionCompletedAt: row.cseOpinionCompletedAt?.toISOString() ?? null,
+			demarcheCompletedAt: row.demarcheCompletedAt?.toISOString() ?? null,
+			complianceProcessRequired,
+			complianceProcessRevisionRequired,
+			cseRequired: row.cseRequired,
+			indicatorGRequired,
+			rulesVersion: row.rulesVersion,
+			cancelledAt: row.cancelledAt?.toISOString() ?? null,
 			totalWomen: row.totalWomen,
 			totalMen: row.totalMen,
 			remunerationScore: row.remunerationScore,
@@ -117,7 +177,6 @@ export async function buildExportRows(
 			indFAnnualQ3Threshold: row.indicatorFAnnualThreshold3,
 			indFAnnualQ3Women: row.indicatorFAnnualWomen3,
 			indFAnnualQ3Men: row.indicatorFAnnualMen3,
-			indFAnnualQ4Threshold: row.indicatorFAnnualThreshold4,
 			indFAnnualQ4Women: row.indicatorFAnnualWomen4,
 			indFAnnualQ4Men: row.indicatorFAnnualMen4,
 			// Indicator F — hourly
@@ -130,10 +189,11 @@ export async function buildExportRows(
 			indFHourlyQ3Threshold: row.indicatorFHourlyThreshold3,
 			indFHourlyQ3Women: row.indicatorFHourlyWomen3,
 			indFHourlyQ3Men: row.indicatorFHourlyMen3,
-			indFHourlyQ4Threshold: row.indicatorFHourlyThreshold4,
 			indFHourlyQ4Women: row.indicatorFHourlyWomen4,
 			indFHourlyQ4Men: row.indicatorFHourlyMen4,
-			secondDeclarationStatus: row.secondDeclarationStatus,
+			secondDeclarationSubmittedAt:
+				row.secondDeclarationSubmittedAt?.toISOString() ?? null,
+			secondDeclarationSubmitted: row.secondDeclarationSubmittedAt !== null,
 			secondDeclReferencePeriodStart: row.secondDeclReferencePeriodStart,
 			secondDeclReferencePeriodEnd: row.secondDeclReferencePeriodEnd,
 			declarantFirstName: row.declarantFirstName,

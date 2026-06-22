@@ -34,7 +34,7 @@ export type Step3Data = {
 };
 
 export type QuartileData = {
-	threshold?: string;
+	threshold?: string; // undefined for Q4 (no upper bound)
 	women?: number;
 	men?: number;
 };
@@ -105,7 +105,7 @@ export const STEP_TITLES = [
 	"Écart de rémunération",
 	"Écart de rémunération variable ou complémentaire",
 	"Proportion de femmes et d'hommes dans chaque quartile de rémunération",
-	"Écart de rémunération par catégories de salariés (salaire de base et primes)",
+	"Écart de rémunération par catégories de salariés",
 	"Récapitulatif de votre déclaration",
 ] as const;
 

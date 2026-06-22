@@ -12,15 +12,28 @@ const baseRow = {
 	declarationId: "decl-1",
 	siren: "123456789",
 	year: 2027,
-	status: "submitted",
-	compliancePath: null,
+	status: "awaiting_compliance_path_choice" as const,
+	firstDeclarationPathChoice: null,
+	secondDeclarationPathChoice: null,
 	totalWomen: 100,
 	totalMen: 150,
-	secondDeclarationStatus: null,
+	submittedAt: null as Date | null,
+	firstDeclarationPathChoiceAt: null as Date | null,
+	secondDeclarationPathChoiceAt: null as Date | null,
+	secondDeclarationSubmittedAt: null as Date | null,
+	jointEvaluationSubmittedAt: null as Date | null,
+	cseOpinionCompletedAt: null as Date | null,
+	demarcheCompletedAt: null as Date | null,
+	complianceProcessRequired: false,
+	complianceProcessRevisionRequired: false,
+	cseRequired: false,
+	indicatorGRequired: false,
+	rulesVersion: "2027.1",
 	secondDeclReferencePeriodStart: null,
 	secondDeclReferencePeriodEnd: null,
 	createdAt: new Date("2027-03-15T10:00:00Z"),
 	updatedAt: new Date("2027-03-15T12:00:00Z"),
+	cancelledAt: null as Date | null,
 	companyName: "ACME Corp",
 	workforce: 250,
 	nafCode: "62.02",
@@ -63,7 +76,6 @@ const baseRow = {
 	indicatorFAnnualThreshold3: "36000",
 	indicatorFAnnualWomen3: 28,
 	indicatorFAnnualMen3: 33,
-	indicatorFAnnualThreshold4: null,
 	indicatorFAnnualWomen4: 27,
 	indicatorFAnnualMen4: 35,
 	// Indicator F — hourly
@@ -76,9 +88,44 @@ const baseRow = {
 	indicatorFHourlyThreshold3: "18.00",
 	indicatorFHourlyWomen3: 28,
 	indicatorFHourlyMen3: 33,
-	indicatorFHourlyThreshold4: null,
 	indicatorFHourlyWomen4: 20,
 	indicatorFHourlyMen4: 37,
+	// Gaps A/B/C/D (ratio -1..1)
+	globalAnnualMeanGap: "0.0455",
+	globalHourlyMeanGap: "0.0360",
+	variableAnnualMeanGap: "0.1500",
+	variableHourlyMeanGap: "0.0750",
+	globalAnnualMedianGap: "0.0390",
+	globalHourlyMedianGap: "0.0310",
+	variableAnnualMedianGap: "0.1200",
+	variableHourlyMedianGap: "0.0600",
+	// Proportions E
+	variableProportionWomen: "0.4523",
+	variableProportionMen: "0.5477",
+	// Proportions F annual (persisted)
+	annualQuartile1ProportionWomen: "0.5556",
+	annualQuartile1ProportionMen: "0.4444",
+	annualQuartile2ProportionWomen: "0.4839",
+	annualQuartile2ProportionMen: "0.5161",
+	annualQuartile3ProportionWomen: "0.4590",
+	annualQuartile3ProportionMen: "0.5410",
+	annualQuartile4ProportionWomen: "0.4355",
+	annualQuartile4ProportionMen: "0.5645",
+	// Proportions F hourly (persisted)
+	hourlyQuartile1ProportionWomen: "0.6154",
+	hourlyQuartile1ProportionMen: "0.3846",
+	hourlyQuartile2ProportionWomen: "0.5161",
+	hourlyQuartile2ProportionMen: "0.4839",
+	hourlyQuartile3ProportionWomen: "0.4590",
+	hourlyQuartile3ProportionMen: "0.5410",
+	hourlyQuartile4ProportionWomen: "0.3509",
+	hourlyQuartile4ProportionMen: "0.6491",
+	statusHistoryArray: [] as Array<{
+		eventType: string;
+		value: string | null;
+		round: number | null;
+		createdAt: string;
+	}>,
 };
 
 describe("buildIndicators", () => {
@@ -112,49 +159,48 @@ describe("buildIndicators", () => {
 		expect(result.E.Effectif_H_rem_annuelle_variable).toBe("110");
 	});
 
-	it("should expose indicator F as flat objects with thresholds + proportions", () => {
+	it("should expose indicator F proportions read from persisted DB columns", () => {
 		const result = buildIndicators(baseRow);
 
-		// Q1 annual: women 35, men 28 → total 63; F = 35/63 = 0.5556, H = 28/63 = 0.4444
 		expect(result.F.annuel.Seuil_Q1_Rem_globale).toBe("22000");
 		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_F).toBe(
-			0.5556,
+			"0.5556",
 		);
 		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_H).toBe(
-			0.4444,
+			"0.4444",
 		);
-		// Q4 annual: threshold null, women 27 / men 35 → total 62
-		expect(result.F.annuel.Seuil_Q4_Rem_globale).toBeNull();
+		expect(result.F.annuel).not.toHaveProperty("Seuil_Q4_Rem_globale");
 		expect(result.F.annuel.Quartile4_Rem_globale_annuelle_proportion_F).toBe(
-			Math.round((27 / 62) * 10_000) / 10_000,
+			"0.4355",
 		);
-		// Q1 hourly: women 40, men 25 → total 65
 		expect(result.F.horaire.Seuil_Q1_Taux_horaire_global).toBe("11.50");
 		expect(result.F.horaire.Quartile1_Taux_horaire_global_proportion_F).toBe(
-			Math.round((40 / 65) * 10_000) / 10_000,
+			"0.6154",
 		);
+		expect(result.F.horaire).not.toHaveProperty("Seuil_Q4_Taux_horaire_global");
 	});
 
-	it("should return null on both sides when only one gender count is null", () => {
-		// Half-missing data must not surface as 1.0/null — GIP consumers
-		// should see both as null to signal the data-quality issue.
-		const row = {
-			...baseRow,
-			indicatorFAnnualWomen1: 30,
-			indicatorFAnnualMen1: null,
-		};
+	it("should expose gap labels for indicators A/B/C/D", () => {
+		const result = buildIndicators(baseRow);
 
-		const result = buildIndicators(row);
-
-		expect(
-			result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_F,
-		).toBeNull();
-		expect(
-			result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_H,
-		).toBeNull();
+		expect(result.A.Rem_globale_annuelle_moyenne_ecart).toBe("0.0455");
+		expect(result.A.Taux_horaire_global_moyen_ecart).toBe("0.0360");
+		expect(result.B.Rem_variable_annuelle_moyenne_ecart).toBe("0.1500");
+		expect(result.B.Taux_horaire_variable_moyen_ecart).toBe("0.0750");
+		expect(result.C.Rem_globale_annuelle_médiane_ecart).toBe("0.0390");
+		expect(result.C.Taux_horaire_global_médian_ecart).toBe("0.0310");
+		expect(result.D.Rem_variable_annuelle_médiane_ecart).toBe("0.1200");
+		expect(result.D.Taux_horaire_variable_médian_ecart).toBe("0.0600");
 	});
 
-	it("should return null proportions when counts are missing or quartile is empty", () => {
+	it("should expose proportion labels for indicator E", () => {
+		const result = buildIndicators(baseRow);
+
+		expect(result.E.Proportion_variable_F).toBe("0.4523");
+		expect(result.E.Proportion_variable_H).toBe("0.5477");
+	});
+
+	it("should return null for F proportions and gap labels when DB columns are null", () => {
 		const nullRow = {
 			...baseRow,
 			indicatorAAnnualWomen: null,
@@ -164,15 +210,19 @@ describe("buildIndicators", () => {
 			indicatorFAnnualThreshold1: null,
 			indicatorFAnnualWomen1: null,
 			indicatorFAnnualMen1: null,
-			// Q2: both zero → total 0 → proportions must be null, not NaN
-			indicatorFAnnualWomen2: 0,
-			indicatorFAnnualMen2: 0,
+			globalAnnualMeanGap: null,
+			variableProportionWomen: null,
+			annualQuartile1ProportionWomen: null,
+			annualQuartile1ProportionMen: null,
+			annualQuartile2ProportionWomen: null,
 		};
 
 		const result = buildIndicators(nullRow);
 
 		expect(result.A.Rem_globale_annuelle_moyenne_F).toBeNull();
+		expect(result.A.Rem_globale_annuelle_moyenne_ecart).toBeNull();
 		expect(result.E.Effectif_F_rem_annuelle_variable).toBeNull();
+		expect(result.E.Proportion_variable_F).toBeNull();
 		expect(result.F.annuel.Seuil_Q1_Rem_globale).toBeNull();
 		expect(
 			result.F.annuel.Quartile1_Rem_globale_annuelle_proportion_F,
@@ -241,6 +291,8 @@ describe("assembleDeclaration", () => {
 	it("should assemble a full declaration with French top-level keys", () => {
 		const result = assembleDeclaration(baseRow, [], []);
 
+		expect(result.id).toBe("decl-1");
+		expect(Object.keys(result)[0]).toBe("id");
 		expect(result.SIREN).toBe("123456789");
 		expect(result.Raison_sociale).toBe("ACME Corp");
 		expect(result.Effectif).toBe(250);
@@ -431,5 +483,295 @@ describe("assembleDeclaration", () => {
 
 		expect(result.Date_creation).toBeNull();
 		expect(result.Date_modification).toBeNull();
+	});
+
+	it("should expose Date_annulation as null for an active declaration", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		expect(result.Date_annulation).toBeNull();
+	});
+
+	it("should expose Date_annulation as ISO string for a cancelled declaration", () => {
+		const cancelledRow = {
+			...baseRow,
+			cancelledAt: new Date("2027-04-15T08:00:00Z"),
+		};
+		const result = assembleDeclaration(cancelledRow, [], []);
+
+		expect(result.Date_annulation).toBe("2027-04-15T08:00:00.000Z");
+	});
+
+	it("should preserve indicator data on a cancelled declaration", () => {
+		const cancelledRow = {
+			...baseRow,
+			cancelledAt: new Date("2027-04-15T08:00:00Z"),
+		};
+		const indicatorG: IndicatorGEntry[] = [
+			{
+				categoryName: "Cadres",
+				declarationType: "initial",
+				womenCount: 12,
+				menCount: 18,
+				annualBaseWomen: "52000",
+				annualBaseMen: "56000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+		];
+
+		const result = assembleDeclaration(cancelledRow, indicatorG, []);
+
+		expect(result.Date_annulation).toBe("2027-04-15T08:00:00.000Z");
+		expect(result.Indicateurs.A.Rem_globale_annuelle_moyenne_F).toBe("35000");
+		expect(result.Indicateurs.G).toHaveLength(1);
+		expect(result.Indicateurs.G?.[0]?.Effectif_F).toBe(12);
+		expect(result.SIREN).toBe("123456789");
+		expect(result.Effectif).toBe(250);
+	});
+
+	it("should expose Historique_statuts as empty array when no history (S7)", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		expect(result.Historique_statuts).toEqual([]);
+	});
+
+	it("should expose Historique_statuts with FR labels for submit + demarche_complete (S1)", () => {
+		const row = {
+			...baseRow,
+			statusHistoryArray: [
+				{
+					eventType: "submit",
+					value: null,
+					round: null,
+					createdAt: "2027-03-15T10:00:00.123Z",
+				},
+				{
+					eventType: "demarche_complete",
+					value: null,
+					round: null,
+					createdAt: "2027-10-15T14:00:00.456Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts).toEqual([
+			{
+				Statut: "submit",
+				Libelle_statut: "Soumission de la déclaration",
+				Date: "2027-03-15T10:00:00.123Z",
+			},
+			{
+				Statut: "demarche_complete",
+				Libelle_statut: "Démarche terminée",
+				Date: "2027-10-15T14:00:00.456Z",
+			},
+		]);
+	});
+
+	it("should expose Numero_declaration and Libelle for path_choice corrective_action (S2)", () => {
+		const row = {
+			...baseRow,
+			statusHistoryArray: [
+				{
+					eventType: "path_choice",
+					value: "corrective_action",
+					round: 1,
+					createdAt: "2027-04-01T10:00:00.000Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts).toEqual([
+			{
+				Statut: "path_choice",
+				Libelle_statut: "Choix du parcours — Actions correctives",
+				Date: "2027-04-01T10:00:00.000Z",
+				Numero_declaration: 1,
+			},
+		]);
+	});
+
+	it("should expose all 5 lifecycle entries with FR labels (S3)", () => {
+		const row = {
+			...baseRow,
+			statusHistoryArray: [
+				{
+					eventType: "submit",
+					value: null,
+					round: null,
+					createdAt: "2027-03-15T10:00:00.000Z",
+				},
+				{
+					eventType: "path_choice",
+					value: "joint_evaluation",
+					round: 1,
+					createdAt: "2027-04-01T10:00:00.000Z",
+				},
+				{
+					eventType: "joint_evaluation_submit",
+					value: null,
+					round: null,
+					createdAt: "2027-09-01T12:00:00.000Z",
+				},
+				{
+					eventType: "cse_opinion_submit",
+					value: null,
+					round: null,
+					createdAt: "2027-10-01T13:00:00.000Z",
+				},
+				{
+					eventType: "demarche_complete",
+					value: null,
+					round: null,
+					createdAt: "2027-10-15T14:00:00.000Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts).toHaveLength(5);
+		expect(result.Historique_statuts[0]?.Libelle_statut).toBe(
+			"Soumission de la déclaration",
+		);
+		expect(result.Historique_statuts[1]?.Libelle_statut).toBe(
+			"Choix du parcours — Évaluation conjointe",
+		);
+		expect(result.Historique_statuts[1]).toHaveProperty(
+			"Numero_declaration",
+			1,
+		);
+		expect(result.Historique_statuts[2]?.Libelle_statut).toBe(
+			"Dépôt du rapport d'évaluation conjointe",
+		);
+		expect(result.Historique_statuts[3]?.Libelle_statut).toBe(
+			"Dépôt d'un avis CSE",
+		);
+		expect(result.Historique_statuts[4]?.Libelle_statut).toBe(
+			"Démarche terminée",
+		);
+	});
+
+	it("should expose two path_choice entries with their own Numero_declaration (S4)", () => {
+		const row = {
+			...baseRow,
+			statusHistoryArray: [
+				{
+					eventType: "path_choice",
+					value: "justify",
+					round: 1,
+					createdAt: "2027-04-01T10:00:00.000Z",
+				},
+				{
+					eventType: "path_choice",
+					value: "corrective_action",
+					round: 2,
+					createdAt: "2027-08-01T10:00:00.000Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts).toHaveLength(2);
+		expect(result.Historique_statuts[0]).toMatchObject({
+			Statut: "path_choice",
+			Libelle_statut: "Choix du parcours — Justification de l'écart",
+			Numero_declaration: 1,
+		});
+		expect(result.Historique_statuts[1]).toMatchObject({
+			Statut: "path_choice",
+			Libelle_statut: "Choix du parcours — Actions correctives",
+			Numero_declaration: 2,
+		});
+	});
+
+	it("should expose cancel entry with FR label while keeping Date_annulation (S5)", () => {
+		const row = {
+			...baseRow,
+			cancelledAt: new Date("2027-04-15T08:00:00Z"),
+			statusHistoryArray: [
+				{
+					eventType: "submit",
+					value: null,
+					round: null,
+					createdAt: "2027-03-15T10:00:00.000Z",
+				},
+				{
+					eventType: "cancel",
+					value: null,
+					round: null,
+					createdAt: "2027-04-15T08:00:00.000Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts).toHaveLength(2);
+		expect(result.Historique_statuts[1]).toEqual({
+			Statut: "cancel",
+			Libelle_statut: "Annulation de la déclaration",
+			Date: "2027-04-15T08:00:00.000Z",
+		});
+		expect(result.Date_annulation).toBe("2027-04-15T08:00:00.000Z");
+	});
+
+	it("should preserve the order returned by the query without re-sorting", () => {
+		const row = {
+			...baseRow,
+			statusHistoryArray: [
+				{
+					eventType: "demarche_complete",
+					value: null,
+					round: null,
+					createdAt: "2027-10-15T14:00:00.000Z",
+				},
+				{
+					eventType: "submit",
+					value: null,
+					round: null,
+					createdAt: "2027-03-15T10:00:00.000Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts.map((e) => e.Statut)).toEqual([
+			"demarche_complete",
+			"submit",
+		]);
+	});
+
+	it("should not add Numero_declaration key when path_choice round is null", () => {
+		const row = {
+			...baseRow,
+			statusHistoryArray: [
+				{
+					eventType: "path_choice",
+					value: null,
+					round: null,
+					createdAt: "2027-04-01T10:00:00.000Z",
+				},
+			],
+		};
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts[0]).not.toHaveProperty(
+			"Numero_declaration",
+		);
+		expect(result.Historique_statuts[0]?.Libelle_statut).toBe(
+			"Choix du parcours",
+		);
 	});
 });

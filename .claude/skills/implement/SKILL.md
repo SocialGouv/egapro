@@ -10,11 +10,11 @@ description: "Phase exécution. Détecte le mode (epic/task/bug) selon le type d
 | Type d'issue | Mode | Mécanisme |
 |---|---|---|
 | `Feature` (epic) | epic | `nohup bash scripts/orchestration/epic_loop.sh <N> > /tmp/epic_loop_<KEY>.log 2>&1 &` (background, parallèle, plusieurs sub-tickets) |
-| `Task` | task | Invoque `code-dev` agent en **foreground synchrone** sur l'issue |
-| `Bug` | bug | Invoque `code-dev` agent en **foreground synchrone** avec `rules/bug-fix-workflow.md` |
+| `Task` | task | Lance `code-dev` en **CLI foreground** (`claude --agent code-dev`, bloquant) sur l'issue |
+| `Bug` | bug | Lance `code-dev` en **CLI foreground** (`claude --agent code-dev`, bloquant) avec `rules/bug-fix-workflow.md` |
 | sub-issue d'un epic (non-feature) | task-debug | Comme `task` — utile pour re-rouler un sous-ticket d'un epic plus large (ex: après `refacto` ou debug) |
 
-`/implement` n'orchestre rien lui-même : pour epic c'est `epic_loop.sh` qui parallèlise, pour task/bug c'est l'agent `code-dev` qui exécute.
+`/implement` n'orchestre rien lui-même : pour epic c'est `epic_loop.sh` qui parallèlise, pour task/bug c'est un process CLI `claude --agent code-dev` foreground. **Dans les deux cas code-dev tourne comme _main agent_ (process CLI)** — obligatoire pour qu'il puisse lancer ses propres sous-agents (`tu-dev`, les 4 validateurs, `functional-validator`) : un sous-agent ne peut pas en spawner d'autres.
 
 ---
 
@@ -76,16 +76,54 @@ Workflow identique à l'ex-`/epic` :
    ```
    Si oui : avertir, proposer (a) attendre via `/report`, (b) `pkill -f "epic_loop.sh.*${EPICS_KEY}"` puis relancer, (c) annuler.
 
-2. Lancer le bash loop driver en background :
+2. **Aligner le main worktree sur `epic/<N>`** — la pipeline orchestrate doit tourner sur la branche d'intégration de l'epic, pas depuis `alpha` ni un worktree dédié. Sinon : `rebase_epic_branch.sh` entre ticks plante (`epic/<N> is already used by worktree at ...`), et l'état dans `.claude/state/epic_run/` finit sur le mauvais worktree (cassant `/report`).
+   ```bash
+   # Sécurité : refuser si working tree dirty (commit/stash d'abord)
+   if [ -n "$(git status --porcelain)" ]; then
+       echo "ERROR: working tree dirty — commit ou stash avant /implement <N>"
+       exit 1
+   fi
+
+   # S'assurer que la branche d'intégration existe sur origin (idempotent)
+   bash scripts/orchestration/ensure_epic_branch.sh "$ISSUE_N"
+
+   # Checkout epic/<N> sur le main worktree
+   git fetch origin "epic/${ISSUE_N}" --quiet
+   if git rev-parse --verify --quiet "epic/${ISSUE_N}" >/dev/null; then
+       git checkout "epic/${ISSUE_N}"
+       git pull --ff-only origin "epic/${ISSUE_N}"
+   else
+       git checkout -B "epic/${ISSUE_N}" "origin/epic/${ISSUE_N}"
+   fi
+   ```
+
+3. Lancer le bash loop driver en background **depuis le main worktree** (qui est désormais sur `epic/<N>`) :
    ```bash
    LOG_FILE="/tmp/epic_loop_${EPICS_KEY}.log"
    nohup bash scripts/orchestration/epic_loop.sh $EPICS > "$LOG_FILE" 2>&1 &
    PID=$!
    disown
-   echo "epic_loop lancé en background (PID $PID, log: $LOG_FILE). Suivi via /report."
+   echo "epic_loop lancé en background (PID $PID, log: $LOG_FILE)."
    ```
 
-3. Rendre la main immédiatement (pas de polling — utiliser `/report`).
+4. **Lancer l'auto-report dynamique** — invoquer le skill `/loop` avec args `/report <N>` (mode dynamic-pacing, pas d'intervalle fixe).
+   ```
+   Skill("loop", args="/report <N>")
+   ```
+   Le `/loop` va run `/report <N>` immédiatement, puis re-schedule un wakeup avec délai adaptatif (60-3600s) basé sur ce que `/report` observe. À chaque wakeup, après le rendu du dashboard, **vérifier la condition d'arrêt** : la PR finale `epic/<N> → alpha` est-elle ouverte ?
+   ```bash
+   gh pr list --repo SocialGouv/egapro --base alpha --head "epic/<N>" --state open --json number --jq 'length'
+   ```
+   Si > 0 → omettre `ScheduleWakeup` → loop s'arrête. Sinon → re-schedule.
+
+   Cadence recommandée :
+   - **Activité récente côté logs** (phase qui bouge, agent qui spawn) → 60-270s (cache prompt warm)
+   - **État stable** (agent silent, rien à observer) → 1200-1800s (un seul cache miss)
+   - **Sortie 5 min** → toujours mauvais choix (300s = cache miss sans amortissement)
+
+5. Rendre la main immédiatement (le /loop continue en arrière-plan, t'auto-rapporte jusqu'à fin de l'epic).
+
+> **Note** : le main worktree reste sur `epic/<N>` pendant toute la durée du loop (ticks + final PR). Pour faire du travail sur `alpha` en parallèle (hotfix, autre branche), monter un worktree dédié (`git worktree add /tmp/egapro-alpha alpha`). À la fin de l'epic — quand la PR finale est mergée sur alpha — basculer manuellement le main worktree avec `git checkout alpha && git pull`.
 
 ### Mode task ou bug — code-dev synchrone foreground
 
@@ -105,17 +143,28 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 
 3. **Status board** : `set_ticket_status.sh "$ISSUE_N" "In progress"`.
 
-4. **Invoquer `code-dev`** en foreground via le subagent :
-   - Inputs : ticket number, worktree path, worktree index, base branch (sans préfixe `origin/`), working branch.
-   - Si label `complexe` → model `opus`, sinon `sonnet`.
-   - L'agent suit `code-dev/AGENT.md` : implémente, push, ouvre PR draft, force PR↔issue link, fait passer les 4 quality gates + `functional-validator`, `gh pr ready`, retourne JSON. **Le ticket reste en `In progress`** — les transitions `In review` et `Done` sont user-only.
+4. **Lancer `code-dev` en CLI foreground** (PAS via le Task tool) — code-dev DOIT être *main agent* de son propre process pour pouvoir lancer ses sous-agents (`tu-dev` étape 5.5, les 4 quality gates étape 6, `functional-validator` étape 9a) ; un sous-agent ne peut pas en spawner d'autres. Même invocation que `epic_loop.sh` (`spawn_agent`), mais **synchrone/bloquante** pour un seul ticket :
+
+   ```bash
+   MODEL=$(gh issue view "$ISSUE_N" --json labels --jq '.labels[].name' | grep -qx complexe && echo opus || echo sonnet)
+   BUDGET=$([ "$MODEL" = opus ] && echo 40 || echo 10)
+   env -u CLAUDECODE timeout 5400 claude \
+     --agent code-dev --model "$MODEL" \
+     --print --output-format stream-json --verbose \
+     --dangerously-skip-permissions --max-budget-usd "$BUDGET" \
+     "$PROMPT" 2>&1 | tee "/tmp/code-dev-${ISSUE_N}.jsonl"
+   ```
+
+   - `$PROMPT` : le même brief par ticket que construit `epic_loop.sh` (numéro de ticket + type, worktree path, index → port `3001+index`, base branch `origin/...`, working branch déjà checkout, « suivre STRICTEMENT `code-dev/AGENT.md` », retour JSON strict en dernier message). Pour un Bug, rappeler `rules/bug-fix-workflow.md`.
+   - **Récupérer le verdict JSON** depuis la sortie stream-json (dernier objet `{"status":...}`) — même extraction que `epic_loop.sh` : essayer `jq -e '.status'`, fallback bloc ` ```json `, puis premier `{...}` contenant `"status"`.
+   - L'agent suit `code-dev/AGENT.md` : implémente, **délègue tous les tests (TU + intégration) à `tu-dev`** (Opus, étape 5.5 — `tu-dev` rend la main sur une vraie régression), push, ouvre PR draft, force PR↔issue link, fait passer les 4 quality gates + `functional-validator`, `gh pr ready`, retourne JSON. **Le ticket reste en `In progress`** — `In review` / `Done` user-only.
 
 5. **Parser le JSON retourné** :
 
    | `.status` | Action skill | Markdown affiché |
    |---|---|---|
    | `validated` | aucune (ticket reste In progress, l'utilisateur le bouge à In review à son rythme) | `## Code: PASS` + ticket/branche/PR + next-step revue humaine |
-   | `needs_opus_escalation` | re-invoquer immédiatement `code-dev` en `model: "opus"` avec les mêmes inputs ; afficher le verdict final | `## Code: PASS` ou `## Code: REFACTO` selon le retour Opus |
+   | `needs_opus_escalation` | relancer immédiatement le **CLI `code-dev`** avec `--model opus` et le même `$PROMPT` ; afficher le verdict final | `## Code: PASS` ou `## Code: REFACTO` selon le retour Opus |
    | `refacto` | aucune (le ticket est en To Do) | `## Code: REFACTO` + diagnostic + next-step `/analyse <N>` (re-spec) |
    | `rate_limited` | proposer de retenter dans `retry_in` secondes ou abandonner | `## Code: RATE_LIMITED` + délai suggéré |
    | `failed` | propager l'erreur sans modifier le ticket | `## Code: FAILED` + raison technique |
@@ -130,8 +179,8 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 
 ## Suivi de la progression (mode epic)
 
-- `/report` — dashboard live agents actifs + état du board
-- `/report <N>` — état détaillé des sous-tickets de l'epic
+- **Auto-report `/loop /report <N>`** lancé automatiquement à l'étape 4 — délivre des dashboards adaptatifs jusqu'à la fin de l'epic, puis s'auto-arrête (cf. condition d'arrêt en step 4)
+- `/report <N>` — déclencher manuellement à tout moment pour un check on-demand (n'interfère pas avec le loop dynamique)
 - `tail -f /tmp/epic_loop_<EPICS_KEY>.log`
 - `ls .claude/state/epic_run/ticks/<EPICS_KEY>/` — JSON des ticks (plan + result + agent returns)
 
@@ -189,7 +238,7 @@ L'utilisateur retire `dispatch=escalate` (et `attempt=3`) après orientation pou
 - **NE JAMAIS** dupliquer la logique d'orchestration ici — tout est dans `scripts/orchestration/`
 - **NE PAS** attendre le retour du loop driver en mode epic (`nohup ... &; disown`)
 - **NE PAS** poll l'état — utiliser `/report`
-- **En mode task/bug**, c'est synchrone : tu invoques `code-dev` et tu attends le JSON final, comme l'ancien `/code`
+- **En mode task/bug**, c'est synchrone : tu lances le **CLI `claude --agent code-dev`** (bloquant) et tu attends le JSON final, comme l'ancien `/code`. **PAS** le Task tool — code-dev doit être main agent pour lancer ses sous-agents (`tu-dev`, validateurs, `functional-validator`).
 - Avant tout dispatch : check **analyse présente** (cf. Step 1) ; sinon proposer `/analyse <N>` et exit
 
 ---

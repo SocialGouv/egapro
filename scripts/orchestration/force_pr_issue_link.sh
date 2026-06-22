@@ -12,14 +12,18 @@ fi
 #
 # GitHub's auto-linker (the one that populates closingIssuesReferences and
 # creates the ConnectedEvent so the PR shows up in the issue's Development
-# sidebar) only fires when the PR base is the repository's **default branch**
-# (`master`). Our PRs target `alpha` or `epic/<N>`, so the `Closes #N` keyword
-# stays in the body but no formal link is created at `gh pr create` time.
+# sidebar) only fires when the PR base is the repository's **default branch**.
+# Our sub-task PRs target `epic/<N>`, so the `Closes #N` keyword stays in the
+# body but no formal link is created at `gh pr create` time.
 #
-# Workaround: flip the PR base to `master`, wait, flip it back. The linker
-# fires on the master flip, and the link persists across the second flip.
-# There is no public GraphQL/REST mutation for the link itself (the GitHub
-# web UI's "Link an issue" button uses a private mutation).
+# Workaround: flip the PR base to the default branch, wait, flip it back. The
+# linker fires on the default-branch flip, and the link persists across the
+# second flip. There is no public GraphQL/REST mutation for the link itself
+# (the GitHub web UI's "Link an issue" button uses a private mutation).
+#
+# The default branch is read dynamically — historically the repo used
+# `master` and now uses `alpha`, so hardcoding either one would silently
+# break the workaround.
 #
 # Idempotent: if the link is already in place (closingIssuesReferences not
 # empty) this script exits 0 without flipping.
@@ -42,15 +46,22 @@ fi
 
 PR="$1"
 
+# Resolve the repo's default branch — auto-linker only fires there.
+DEFAULT_BRANCH=$(gh repo view SocialGouv/egapro --json defaultBranchRef --jq '.defaultBranchRef.name' 2>/dev/null || echo "")
+if [ -z "$DEFAULT_BRANCH" ]; then
+    echo "[force_pr_issue_link] ERROR: cannot resolve default branch of repo" >&2
+    exit 2
+fi
+
 ORIG_BASE=$(gh pr view "$PR" --json baseRefName --jq '.baseRefName' 2>/dev/null || echo "")
 if [ -z "$ORIG_BASE" ]; then
     echo "[force_pr_issue_link] ERROR: cannot read base of PR #$PR" >&2
     exit 2
 fi
 
-# If already on master, the auto-linker fired at creation time
-if [ "$ORIG_BASE" = "master" ]; then
-    echo "[force_pr_issue_link] PR #$PR base is already master — no flip needed" >&2
+# If already on default branch, the auto-linker fired at creation time
+if [ "$ORIG_BASE" = "$DEFAULT_BRANCH" ]; then
+    echo "[force_pr_issue_link] PR #$PR base is already $DEFAULT_BRANCH (default) — no flip needed" >&2
     exit 0
 fi
 
@@ -78,8 +89,8 @@ if ! echo "$BODY" | grep -qiE '(close[sd]?|fix(es|ed)?|resolve[sd]?)[[:space:]]+
     exit 1
 fi
 
-echo "[force_pr_issue_link] flipping PR #$PR base $ORIG_BASE → master to fire the auto-linker" >&2
-gh pr edit "$PR" --base master >/dev/null
+echo "[force_pr_issue_link] flipping PR #$PR base $ORIG_BASE → $DEFAULT_BRANCH to fire the auto-linker" >&2
+gh pr edit "$PR" --base "$DEFAULT_BRANCH" >/dev/null
 sleep 3
 gh pr edit "$PR" --base "$ORIG_BASE" >/dev/null
 sleep 2

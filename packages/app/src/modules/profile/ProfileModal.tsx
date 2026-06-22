@@ -108,7 +108,7 @@ export function ProfileModal() {
 									de vérifier les données affichées et de compléter les
 									informations manquantes si nécessaire.
 								</p>
-								<form id="profile-form" onSubmit={onSubmit}>
+								<form autoComplete="off" id="profile-form" onSubmit={onSubmit}>
 									<div className="fr-grid-row fr-grid-row--gutters fr-mb-3w">
 										<div className="fr-col-12 fr-col-md-6">
 											<ReadonlyField

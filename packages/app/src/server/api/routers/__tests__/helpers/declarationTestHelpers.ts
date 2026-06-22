@@ -1,0 +1,67 @@
+export const mockDeclaration = {
+	id: "decl-1",
+	siren: "339787277",
+	year: 2026,
+	currentStep: 0,
+	status: "draft",
+	declarantId: "user-1",
+	totalWomen: null,
+	totalMen: null,
+	indicatorAAnnualWomen: null,
+	indicatorAAnnualMen: null,
+	indicatorAHourlyWomen: null,
+	indicatorAHourlyMen: null,
+	indicatorBAnnualWomen: null,
+	indicatorBAnnualMen: null,
+	indicatorBHourlyWomen: null,
+	indicatorBHourlyMen: null,
+	indicatorCAnnualWomen: null,
+	indicatorCAnnualMen: null,
+	indicatorCHourlyWomen: null,
+	indicatorCHourlyMen: null,
+	indicatorDAnnualWomen: null,
+	indicatorDAnnualMen: null,
+	indicatorDHourlyWomen: null,
+	indicatorDHourlyMen: null,
+	indicatorEWomen: null,
+	indicatorEMen: null,
+	indicatorFAnnualWomen1: null,
+	indicatorFAnnualWomen2: null,
+	indicatorFAnnualWomen3: null,
+	indicatorFAnnualWomen4: null,
+	indicatorFAnnualMen1: null,
+	indicatorFAnnualMen2: null,
+	indicatorFAnnualMen3: null,
+	indicatorFAnnualMen4: null,
+	indicatorFHourlyWomen1: null,
+	indicatorFHourlyWomen2: null,
+	indicatorFHourlyWomen3: null,
+	indicatorFHourlyWomen4: null,
+	indicatorFHourlyMen1: null,
+	indicatorFHourlyMen2: null,
+	indicatorFHourlyMen3: null,
+	indicatorFHourlyMen4: null,
+};
+
+export function createCaller(
+	mockDb: unknown,
+	siret: string | null = "33978727700015",
+	impersonation: { siren: string; name: string } | null = null,
+) {
+	return import("~/server/api/routers/declaration").then(
+		({ declarationRouter }) =>
+			declarationRouter.createCaller({
+				db: mockDb,
+				session: {
+					user: {
+						id: "user-1",
+						siret,
+						isAdmin: impersonation !== null,
+						impersonation,
+					},
+					expires: "",
+				},
+				headers: new Headers(),
+			} as never),
+	);
+}

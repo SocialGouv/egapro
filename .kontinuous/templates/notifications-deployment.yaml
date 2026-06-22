@@ -1,0 +1,223 @@
+{{- if .Values.global.notificationsEnabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifications
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: notifications
+  annotations:
+    # Gate the rollout on the `pg` build, exactly like the `app` build does via
+    # `~needs: [pg]`. Review-app namespaces bootstrap Postgres concurrently, and
+    # both the wait-for-pg init container and the worker reference the `pg-app`
+    # secret at pod creation — without this dependency the deploy races the
+    # secret and fails with `CreateContainerConfigError: secret "pg-app" not
+    # found`. The `pg` build being ready guarantees `pg-app` exists.
+    kontinuous/plugin.needs: "[pg]"
+    # This Deployment is a root-chart template, not a `~chart` build, so the
+    # `05.0-needs` patch never assigns it a `chartNameTop` (it only does for
+    # sub-charts). Without one, kontinuous's dependency-graph renderer derives
+    # an empty node name and `Graph::Easy` rejects the malformed `-> pg` edge,
+    # failing the deploy. Set it explicitly so the node renders as `notifications`.
+    kontinuous/depname.chartNameTop: notifications
+spec:
+  # Single replica is enough: pg-boss already handles fan-out via batchSize
+  # inside the process. Scaling horizontally is safe (pg-boss uses Postgres
+  # row locks under the hood) but unnecessary at this volume.
+  replicas: 1
+  strategy:
+    # Re-create on rollout so we don't have two workers polling the queue
+    # during a rolling deploy.
+    type: Recreate
+  selector:
+    matchLabels:
+      app: notifications
+  template:
+    metadata:
+      labels:
+        app: notifications
+    spec:
+      # Long enough for `boss.stop({ graceful: true, timeout: 15_000 })` to
+      # flush in-flight jobs before SIGKILL.
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsUser: 1000
+        runAsNonRoot: true
+      initContainers:
+        # Review-app namespaces bootstrap Postgres concurrently with the app,
+        # so the queue DB host (pg-rw, the main DB used as fallback when no
+        # dedicated pg-notifications secret exists) is unresolvable for the
+        # first minutes. Block startup until it accepts TCP connections so the
+        # worker never crash-loops and fails the rollout — the pod stays in
+        # Init (not Error) while waiting. On preprod/prod the persistent pg
+        # answers on the first probe, so this is a no-op there.
+        - name: wait-for-pg
+          image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/app:{{ .Values.global.imageTag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+          command:
+            - node
+            - -e
+            - |
+              const net = require("net");
+              const host = process.env.PGHOST;
+              const port = Number(process.env.PGPORT || "5432");
+              const probe = () => {
+                const socket = net.connect(port, host);
+                socket.once("connect", () => { socket.end(); process.exit(0); });
+                socket.once("error", () => {
+                  console.log(`waiting for ${host}:${port} ...`);
+                  setTimeout(probe, 3000);
+                });
+              };
+              probe();
+          env:
+            - name: PGHOST
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGHOST
+            - name: PGPORT
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGPORT
+      containers:
+        - name: notifications
+          image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/app:{{ .Values.global.imageTag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+          command:
+            - node
+            - packages/notifications/dist/index.js
+          # The worker is the single consumer of MAIL_*/SMTP_* — the app pod
+          # no longer mounts these vars (removed from `global.env` once the
+          # publisher pattern landed). The `mail` configmap exposes
+          # MAIL_ENABLED / SMTP_HOST / SMTP_PORT / SMTP_SECURE / MAIL_FROM
+          # pointing at the in-cluster MailDev for dev / preprod review
+          # apps. The `notifications` configmap is optional and lets ops
+          # tune retry / batch knobs without rebuilding.
+          envFrom:
+            - configMapRef:
+                name: mail
+                optional: true
+            - configMapRef:
+                name: notifications
+                optional: true
+          env:
+            # pg-boss queue DB — dedicated infra, isolated from the main app
+            # so a crash here does not block business mutations. The secret
+            # name is overridable; `optional: true` keeps the pod alive when
+            # the secret is absent (the worker exits cleanly at startup —
+            # see src/index.ts).
+            - name: NOTIFICATIONS_POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGHOST
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGDATABASE
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGPORT
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGUSER
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGPASSWORD
+                  optional: true
+            - name: NOTIFICATIONS_POSTGRES_SSLMODE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.notificationsPgSecretName | default "pg-notifications" }}
+                  key: PGSSLMODE
+                  optional: true
+            # Main app DB — used only to append rows to `audit.action_log`.
+            # The worker tolerates a missing DATABASE_URL (it just stops
+            # emitting audit rows), so an outage here will not stop emails.
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGHOST
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGDATABASE
+            - name: POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGPORT
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGUSER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGPASSWORD
+            - name: POSTGRES_SSLMODE
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGSSLMODE
+            # SMTP — `smtp-app` sealed-secret with MAILER_* keys = Tipimail
+            # in prod, directly bound to this pod (the app pod has been
+            # disconnected from this secret). `optional: true` keeps the
+            # `mail` configmap fallback (MailDev) usable in dev / preprod.
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_HOST
+                  optional: true
+            - name: SMTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_PORT
+                  optional: true
+            - name: SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_LOGIN
+                  optional: true
+            - name: SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_PASSWORD
+                  optional: true
+            - name: SMTP_SECURE
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-app
+                  key: MAILER_SMTP_SSL
+                  optional: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 96Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+{{- end }}

@@ -2,13 +2,14 @@
  * Generate a realistic mock GIP MDS CSV file from real company data.
  *
  * Prerequisites:
- *   npx tsx scripts/fetch-large-companies.ts   # generates data/companies.json
+ *   npx tsx scripts/fetch-companies.ts   # generates data/companies.json
  *
  * Usage:
  *   npx tsx scripts/generate-mock-gip-data.ts
  *
  * Reads real SIRENs from data/companies.json (fetched from API Recherche
  * d'Entreprises) and generates mock GIP-MDS indicator data for each.
+ * Profile selection is deterministic based on bucket, not random.
  *
  * The generated CSV follows the exact GIP MDS format:
  * - Line 1: metadata headers
@@ -29,10 +30,26 @@ type CompanyProfile =
 	| "services_low_pay"
 	| "finance_high_gap";
 
+type Bucket =
+	| "medium-50"
+	| "medium-100"
+	| "large-250"
+	| "large-1000"
+	| "large-5000";
+
 type CompanyData = {
 	siren: string;
 	workforce: number;
 	profile: CompanyProfile;
+	bucket: Bucket;
+};
+
+const BUCKET_PROFILES: Record<Bucket, [CompanyProfile, CompanyProfile]> = {
+	"medium-50": ["balanced", "industry_moderate"],
+	"medium-100": ["balanced", "services_low_pay"],
+	"large-250": ["women_disfavored_low", "balanced"],
+	"large-1000": ["women_disfavored_high", "tech_high_pay"],
+	"large-5000": ["finance_high_gap", "women_disfavored_low"],
 };
 
 // ── Deterministic PRNG (Mulberry32) ────────────────────────────────
@@ -58,10 +75,6 @@ function randInt(min: number, max: number): number {
 	return Math.round(randBetween(min, max));
 }
 
-function pick<T>(arr: T[]): T {
-	return arr[Math.floor(rand() * arr.length)] as T;
-}
-
 function fmt2(n: number): string {
 	return n.toFixed(2).replace(".", ",");
 }
@@ -76,6 +89,15 @@ type InputCompany = {
 	siren: string;
 	name: string;
 	workforce: number | null;
+	bucket?: Bucket;
+};
+
+const BUCKET_WORKFORCE_RANGES: Record<Bucket, [number, number]> = {
+	"medium-50": [50, 99],
+	"medium-100": [100, 249],
+	"large-250": [250, 999],
+	"large-1000": [1000, 4999],
+	"large-5000": [5000, 20000],
 };
 
 async function loadCompanies(): Promise<InputCompany[]> {
@@ -90,31 +112,25 @@ async function loadCompanies(): Promise<InputCompany[]> {
 
 	if (!fs.existsSync(filePath)) {
 		console.error("Error: data/companies.json not found.");
-		console.error("Run first: npx tsx scripts/fetch-large-companies.ts");
+		console.error("Run first: npx tsx scripts/fetch-companies.ts");
 		process.exit(1);
 	}
 
 	return JSON.parse(fs.readFileSync(filePath, "utf-8")) as InputCompany[];
 }
 
-const PROFILES: CompanyProfile[] = [
-	"balanced",
-	"women_disfavored_low",
-	"women_disfavored_high",
-	"men_disfavored",
-	"tech_high_pay",
-	"industry_moderate",
-	"services_low_pay",
-	"finance_high_gap",
-];
+function toCompanyData(input: InputCompany, bucketIndex: number): CompanyData {
+	const bucket: Bucket = input.bucket ?? "large-250";
+	const profiles = BUCKET_PROFILES[bucket];
+	const profile = profiles[bucketIndex % 2] as CompanyProfile;
 
-function toCompanyData(input: InputCompany): CompanyData {
-	return {
-		siren: input.siren,
-		// Use real workforce estimate if available, otherwise generate one (large)
-		workforce: input.workforce ?? randInt(250, 5000),
-		profile: pick(PROFILES),
-	};
+	let workforce = input.workforce;
+	if (workforce === null || workforce === undefined) {
+		const range = BUCKET_WORKFORCE_RANGES[bucket];
+		workforce = randInt(range[0], range[1]);
+	}
+
+	return { siren: input.siren, workforce, profile, bucket };
 }
 
 // ── Data generation per profile ────────────────────────────────────
@@ -261,11 +277,10 @@ function generateRow(company: CompanyData): string[] {
 		totalWomen > 0 ? variableWomen / totalWomen : 0;
 	const proportionVariableMen = totalMen > 0 ? variableMen / totalMen : 0;
 
-	// Quartile distribution (annual)
+	// Quartile distribution (annual) — Q1-Q3 thresholds only; Q4 has none in GIP model
 	const q1Threshold = baseSalaryMen * randBetween(0.5, 0.7);
 	const q2Threshold = baseSalaryMen * randBetween(0.7, 0.9);
 	const q3Threshold = baseSalaryMen * randBetween(0.9, 1.1);
-	const q4Threshold = baseSalaryMen * randBetween(1.1, 1.5);
 
 	// Women proportion tends to decrease in higher quartiles for disfavored profiles
 	const q1WomenProp = Math.min(
@@ -292,11 +307,10 @@ function generateRow(company: CompanyData): string[] {
 		),
 	);
 
-	// Hourly quartile thresholds
+	// Hourly quartile thresholds — Q1-Q3 only
 	const hq1 = q1Threshold / 1820;
 	const hq2 = q2Threshold / 1820;
 	const hq3 = q3Threshold / 1820;
-	const hq4 = q4Threshold / 1820;
 
 	// Hourly quartile proportions (slight variation from annual)
 	const hq1WomenProp = Math.min(
@@ -374,11 +388,10 @@ function generateRow(company: CompanyData): string[] {
 		// Indicator E — Variable pay proportions
 		fmt4(proportionVariableWomen),
 		fmt4(proportionVariableMen),
-		// Indicator F — Annual quartile thresholds
+		// Indicator F — Annual quartile thresholds (Q1-Q3 only)
 		fmt2(q1Threshold),
 		fmt2(q2Threshold),
 		fmt2(q3Threshold),
-		fmt2(q4Threshold),
 		// Annual quartile proportions (women)
 		fmt4(q1WomenProp),
 		fmt4(q2WomenProp),
@@ -389,11 +402,10 @@ function generateRow(company: CompanyData): string[] {
 		fmt4(1 - q2WomenProp),
 		fmt4(1 - q3WomenProp),
 		fmt4(1 - q4WomenProp),
-		// Hourly quartile thresholds
+		// Hourly quartile thresholds (Q1-Q3 only)
 		fmt2(hq1),
 		fmt2(hq2),
 		fmt2(hq3),
-		fmt2(hq4),
 		// Hourly quartile proportions (women)
 		fmt4(hq1WomenProp),
 		fmt4(hq2WomenProp),
@@ -463,7 +475,6 @@ const HEADERS = [
 	"Seuil_Q1_Rem_globale",
 	"Seuil_Q2_Rem_globale",
 	"Seuil_Q3_Rem_globale",
-	"Seuil_Q4_Rem_globale",
 	"Quartile1_Rem_globale_annuelle_proportion_F",
 	"Quartile2_Rem_globale_annuelle_proportion_F",
 	"Quartile3_Rem_globale_annuelle_proportion_F",
@@ -475,7 +486,6 @@ const HEADERS = [
 	"Seuil_Q1_Taux_horaire_global",
 	"Seuil_Q2_Taux_horaire_global",
 	"Seuil_Q3_Taux_horaire_global",
-	"Seuil_Q4_Taux_horaire_global",
 	"Quartile1_Taux_horaire_global_proportion_F",
 	"Quartile2_Taux_horaire_global_proportion_F",
 	"Quartile3_Taux_horaire_global_proportion_F",
@@ -520,7 +530,13 @@ function generateCsv(companies: CompanyData[]): string {
 // ── Main ───────────────────────────────────────────────────────────
 
 const inputCompanies = await loadCompanies();
-const companies = inputCompanies.map(toCompanyData);
+const bucketIndexes = new Map<Bucket, number>();
+const companies = inputCompanies.map((input) => {
+	const bucket: Bucket = input.bucket ?? "large-250";
+	const idx = bucketIndexes.get(bucket) ?? 0;
+	bucketIndexes.set(bucket, idx + 1);
+	return toCompanyData(input, idx);
+});
 
 const csv = generateCsv(companies);
 
@@ -538,12 +554,24 @@ console.error(
 	`Generated ${companies.length} mock companies → ${outputPath} (${(csv.length / 1024).toFixed(1)} KB)`,
 );
 
-// Print profile distribution
+console.error("\nBucket distribution:");
+const buckets: Bucket[] = [
+	"medium-50",
+	"medium-100",
+	"large-250",
+	"large-1000",
+	"large-5000",
+];
+for (const b of buckets) {
+	const n = companies.filter((c) => c.bucket === b).length;
+	console.error(`  ${b}: ${n} (${((n / companies.length) * 100).toFixed(0)}%)`);
+}
+
+console.error("\nProfile distribution:");
 const profileCounts: Record<string, number> = {};
 for (const c of companies) {
 	profileCounts[c.profile] = (profileCounts[c.profile] ?? 0) + 1;
 }
-console.error("\nProfile distribution:");
 for (const [p, n] of Object.entries(profileCounts).sort(
 	(a, b) => b[1] - a[1],
 )) {

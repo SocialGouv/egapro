@@ -1,14 +1,36 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
+import { padDecimalToTwo } from "~/modules/domain";
 import { api } from "~/trpc/react";
+import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
+import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
 import { StepIndicator } from "../shared/StepIndicator";
 import type { EmployeeCategoryRow } from "../types";
 import { CategoryForm } from "./step5/CategoryForm";
 
+type Step5FormValues = {
+	source: string;
+	categories: {
+		name: string;
+		womenCount: string;
+		menCount: string;
+		annualBaseWomen: string;
+		annualBaseMen: string;
+		annualVariableWomen: string;
+		annualVariableMen: string;
+		hourlyBaseWomen: string;
+		hourlyBaseMen: string;
+		hourlyVariableWomen: string;
+		hourlyVariableMen: string;
+	}[];
+};
+
 type Props = {
+	declarationSiren: string;
 	declarationYear: number;
 	initialCategories?: EmployeeCategoryRow[];
 	initialSource?: string;
@@ -17,6 +39,7 @@ type Props = {
 };
 
 export function Step5EmployeeCategories({
+	declarationSiren,
 	declarationYear,
 	initialCategories,
 	initialSource,
@@ -27,17 +50,71 @@ export function Step5EmployeeCategories({
 	const isImpersonating = useIsImpersonating();
 	const hasInitialData = (initialCategories?.length ?? 0) > 0;
 
-	const mutation = api.declaration.updateEmployeeCategories.useMutation({
-		onSuccess: () => router.push("/declaration-remuneration/etape/6"),
+	const dbValues = useMemo<Step5FormValues>(
+		() => ({
+			source: initialSource ?? "",
+			categories: (initialCategories ?? []).map((row) => ({
+				name: row.name,
+				womenCount: row.womenCount?.toString() ?? "",
+				menCount: row.menCount?.toString() ?? "",
+				annualBaseWomen: padDecimalToTwo(row.annualBaseWomen ?? ""),
+				annualBaseMen: padDecimalToTwo(row.annualBaseMen ?? ""),
+				annualVariableWomen: padDecimalToTwo(row.annualVariableWomen ?? ""),
+				annualVariableMen: padDecimalToTwo(row.annualVariableMen ?? ""),
+				hourlyBaseWomen: padDecimalToTwo(row.hourlyBaseWomen ?? ""),
+				hourlyBaseMen: padDecimalToTwo(row.hourlyBaseMen ?? ""),
+				hourlyVariableWomen: padDecimalToTwo(row.hourlyVariableWomen ?? ""),
+				hourlyVariableMen: padDecimalToTwo(row.hourlyVariableMen ?? ""),
+			})),
+		}),
+		[initialCategories, initialSource],
+	);
+
+	const {
+		draft,
+		setField,
+		clearDraft,
+		hasDraft,
+		isLoadingDraft,
+		isSaving,
+		isPendingSave,
+	} = useDeclarationDraft<Step5FormValues>({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: 5,
+		kind: "main",
+		dbValues,
 	});
+
+	const mutation = api.declaration.updateEmployeeCategories.useMutation({
+		onSuccess: () => {
+			clearDraft();
+			router.push("/declaration-remuneration/etape/6");
+		},
+	});
+
+	if (isLoadingDraft) {
+		return <DraftLoadingState />;
+	}
+
+	const categoryFormDefaultOverride = hasDraft
+		? {
+				source: draft.source ?? initialSource ?? "",
+				categories: draft.categories ?? dbValues.categories,
+			}
+		: undefined;
 
 	return (
 		<CategoryForm
 			accordionId="accordion-step5"
+			defaultValuesOverride={categoryFormDefaultOverride}
 			disabled={isImpersonating}
+			hasDataOverride={hasInitialData || hasDraft}
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
 			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
+			isPendingSaveOverride={isPendingSave}
+			isSavingOverride={isSaving}
 			isSubmitting={mutation.isPending}
 			maxMen={maxMen}
 			maxWomen={maxWomen}
@@ -51,6 +128,7 @@ export function Step5EmployeeCategories({
 					categories: data.categories,
 				})
 			}
+			onValuesChange={(values) => setField(values)}
 			previousHref="/declaration-remuneration/etape/4"
 			referenceYear={declarationYear - 1}
 			stepper={<StepIndicator currentStep={5} />}

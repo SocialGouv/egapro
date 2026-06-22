@@ -2,7 +2,6 @@ import Link from "next/link";
 import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
 import { DsfrPictogram } from "~/modules/layout";
 import { api } from "~/trpc/server";
-import { ComplianceCompletionEffect } from "../shared/ComplianceCompletionEffect";
 import common from "../shared/common.module.scss";
 
 export async function ComplianceConfirmation() {
@@ -11,7 +10,6 @@ export async function ComplianceConfirmation() {
 
 	return (
 		<div className={common.flexColumnGap2}>
-			<ComplianceCompletionEffect />
 			<h1 className="fr-h4 fr-mb-0">
 				Parcours de mise en conformité pour l&apos;indicateur par catégorie de
 				salariés

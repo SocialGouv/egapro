@@ -1,20 +1,50 @@
 import { render, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import type { DeclarationDisplayContext } from "~/modules/domain";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import type { PanelVariant } from "../DeclarationProcessPanel";
 import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
 
-// Use a far-future year so "future deadline" assertions stay valid regardless
-// of when the tests run.
 const FUTURE_YEAR = 2099;
+
+type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
+
+function makeDisplayContext(
+	overrides: Partial<DeclarationDisplayContext> = {},
+): DeclarationDisplayContext {
+	return {
+		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: null,
+		shouldShowGapJustification: false,
+		shouldShowCorrectiveActions: false,
+		shouldShowJointEvaluation: false,
+		shouldShowCseOpinion: false,
+		...overrides,
+	};
+}
+
+function makeDisplayContextFromPaths(
+	first: CompliancePath | null,
+	second: CompliancePath | null = null,
+): DeclarationDisplayContext {
+	const paths: Array<CompliancePath | null> = [first, second];
+	return {
+		firstDeclarationPathChoice: first,
+		secondDeclarationPathChoice: second,
+		shouldShowGapJustification: paths.includes("justify"),
+		shouldShowCorrectiveActions: paths.includes("corrective_action"),
+		shouldShowJointEvaluation: paths.includes("joint_evaluation"),
+		shouldShowCseOpinion: false,
+	};
+}
 
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
 	year: FUTURE_YEAR,
 	lastActionDate: "12 mars 2026" as string | null,
-	compliancePath: null as string | null,
-	secondDeclarationStatus: null as string | null,
+	displayContext: makeDisplayContext(),
+	hasSubmittedSecondDeclaration: false,
 	siren: "532847196",
 	ctaHref: "/declaration-remuneration?siren=532847196",
 };
@@ -52,9 +82,14 @@ describe("DeclarationProcessPanel", () => {
 			).toBeInTheDocument();
 		});
 
-		it("renders the history link", () => {
-			const { panel } = renderPanel("start");
-			expect(panel.getByText("Voir l'historique")).toBeInTheDocument();
+		it("renders the history link pointing to the history route", () => {
+			const { dialog } = renderPanel("start");
+			const link = dialog.querySelector("a.fr-link");
+			expect(link).toBeInTheDocument();
+			expect(link).toHaveAttribute(
+				"href",
+				`/mon-espace/historique/${BASE_PROPS.siren}/${BASE_PROPS.year}`,
+			);
 		});
 
 		it("renders the info alert", () => {
@@ -117,19 +152,19 @@ describe("DeclarationProcessPanel", () => {
 			).not.toBeInTheDocument();
 		});
 
-		it('renders "Continuer la déclaration" CTA', () => {
+		it('renders "Continuer" CTA', () => {
 			const { dialog } = renderPanel("compliance");
 			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
 			const cta = ctaLinks[ctaLinks.length - 1];
-			expect(cta).toHaveTextContent("Continuer la déclaration");
+			expect(cta).toHaveTextContent("Continuer");
 		});
 	});
 
 	describe("variant: evaluation", () => {
 		it("renders second declaration transmitted message when submitted", () => {
 			const { panel } = renderPanel("evaluation", {
-				compliancePath: "joint_evaluation",
-				secondDeclarationStatus: "submitted",
+				displayContext: makeDisplayContextFromPaths("joint_evaluation"),
+				hasSubmittedSecondDeclaration: true,
 			});
 			expect(
 				panel.getByText("Votre seconde déclaration a été transmise"),
@@ -138,8 +173,8 @@ describe("DeclarationProcessPanel", () => {
 
 		it("does not render second declaration row when joint_evaluation chosen directly", () => {
 			const { panel } = renderPanel("evaluation", {
-				compliancePath: "joint_evaluation",
-				secondDeclarationStatus: null,
+				displayContext: makeDisplayContextFromPaths("joint_evaluation"),
+				hasSubmittedSecondDeclaration: false,
 			});
 			expect(
 				panel.queryByText("Votre seconde déclaration a été transmise"),
@@ -151,7 +186,7 @@ describe("DeclarationProcessPanel", () => {
 
 		it("renders evaluation conjointe bullet on joint_evaluation path", () => {
 			const { panel } = renderPanel("evaluation", {
-				compliancePath: "joint_evaluation",
+				displayContext: makeDisplayContextFromPaths("joint_evaluation"),
 			});
 			expect(
 				panel.getByText("Évaluation conjointe des rémunérations"),
@@ -160,8 +195,8 @@ describe("DeclarationProcessPanel", () => {
 
 		it("hides evaluation conjointe bullet in second-round choice (corrective_action + 2nd decl submitted)", () => {
 			const { panel } = renderPanel("evaluation", {
-				compliancePath: "corrective_action",
-				secondDeclarationStatus: "submitted",
+				displayContext: makeDisplayContextFromPaths("corrective_action"),
+				hasSubmittedSecondDeclaration: true,
 			});
 			expect(
 				panel.getByText("Votre seconde déclaration a été transmise"),
@@ -175,7 +210,7 @@ describe("DeclarationProcessPanel", () => {
 	describe("variant: cse", () => {
 		it("renders CSE deposit step with deadline", () => {
 			const { panel } = renderPanel("cse", {
-				compliancePath: "corrective_action",
+				displayContext: makeDisplayContextFromPaths("corrective_action"),
 			});
 			expect(
 				panel.getByText("Déposer le ou les avis du CSE"),
@@ -183,7 +218,9 @@ describe("DeclarationProcessPanel", () => {
 		});
 
 		it("renders justification bullet for justify path", () => {
-			const { panel } = renderPanel("cse", { compliancePath: "justify" });
+			const { panel } = renderPanel("cse", {
+				displayContext: makeDisplayContextFromPaths("justify"),
+			});
 			expect(
 				panel.getByText("Justification des écarts de rémunération"),
 			).toBeInTheDocument();
@@ -191,8 +228,8 @@ describe("DeclarationProcessPanel", () => {
 
 		it("renders second declaration when submitted, even with justify path", () => {
 			const { panel } = renderPanel("cse", {
-				compliancePath: "justify",
-				secondDeclarationStatus: "submitted",
+				displayContext: makeDisplayContextFromPaths("justify"),
+				hasSubmittedSecondDeclaration: true,
 			});
 			expect(
 				panel.getByText("Votre seconde déclaration a été transmise"),
@@ -204,7 +241,7 @@ describe("DeclarationProcessPanel", () => {
 
 		it("renders evaluation conjointe for joint_evaluation path", () => {
 			const { panel } = renderPanel("cse", {
-				compliancePath: "joint_evaluation",
+				displayContext: makeDisplayContextFromPaths("joint_evaluation"),
 			});
 			expect(
 				panel.getByText(
@@ -215,8 +252,8 @@ describe("DeclarationProcessPanel", () => {
 
 		it("renders second declaration and evaluation conjointe for corrective_action path", () => {
 			const { panel } = renderPanel("cse", {
-				compliancePath: "corrective_action",
-				secondDeclarationStatus: "submitted",
+				displayContext: makeDisplayContextFromPaths("corrective_action"),
+				hasSubmittedSecondDeclaration: true,
 			});
 			expect(
 				panel.getByText("Votre seconde déclaration a été transmise"),
@@ -225,8 +262,8 @@ describe("DeclarationProcessPanel", () => {
 
 		it("does not render second declaration when not submitted", () => {
 			const { panel } = renderPanel("cse", {
-				compliancePath: "corrective_action",
-				secondDeclarationStatus: null,
+				displayContext: makeDisplayContextFromPaths("corrective_action"),
+				hasSubmittedSecondDeclaration: false,
 			});
 			expect(
 				panel.queryByText("Votre seconde déclaration a été transmise"),

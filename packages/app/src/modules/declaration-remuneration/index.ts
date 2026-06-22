@@ -12,8 +12,19 @@ export {
 	updateStep3Schema,
 	updateStep4Schema,
 } from "./schemas";
-export { ComplianceCompletionEffect } from "./shared/ComplianceCompletionEffect";
+export { computeIndicatorPercentages } from "./shared/computeIndicatorPercentages";
 export { DevFillButton } from "./shared/DevFillButton";
+export type {
+	ClearDraftInput,
+	DraftBlob,
+	GetDraftInput,
+	SaveDraftInput,
+} from "./shared/draft/schemas";
+export {
+	clearDraftInput,
+	getDraftInput,
+	saveDraftInput,
+} from "./shared/draft/schemas";
 export { GAP_LEVEL_LABELS, gapBadgeClass } from "./shared/gapBadge";
 export type {
 	GipMdsRow,
@@ -21,6 +32,7 @@ export type {
 	GipQuartileData,
 } from "./shared/gipMdsMapping";
 export { CSV_TO_SCHEMA_MAP, mapGipToFormData } from "./shared/gipMdsMapping";
+export { getEffectiveGipPrefillData } from "./shared/gipToStepData";
 export { ComplianceConfirmation } from "./steps/ComplianceConfirmation";
 export { CompliancePathChoice } from "./steps/CompliancePathChoice";
 export { CompliancePathPage } from "./steps/CompliancePathPage";
@@ -32,6 +44,7 @@ export { Step4QuartileDistribution } from "./steps/Step4QuartileDistribution";
 export { Step5EmployeeCategories } from "./steps/Step5EmployeeCategories";
 export { Step6Review } from "./steps/Step6Review";
 export {
+	COMPLIANCE_FUNNEL,
 	SECOND_DECLARATION_TOTAL_STEPS,
 	SecondDeclarationStep1Info,
 	SecondDeclarationStep2Form,

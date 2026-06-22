@@ -14,7 +14,7 @@ import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
-import { GapColumn } from "../step6/GapColumn";
+import { GapBadge } from "../step6/GapBadge";
 import { parseEmployeeCategories } from "../step6/parseStep5Categories";
 import { BASE_PATH } from "./constants";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
@@ -76,18 +76,22 @@ export function SecondDeclarationStep3Review({
 	}
 
 	return (
-		<form className={common.flexColumnGap2} onSubmit={handleSubmit}>
+		<form
+			autoComplete="off"
+			className={common.flexColumnGap2}
+			onSubmit={handleSubmit}
+		>
 			<div className={common.flexBetween}>
 				<h1 className="fr-h4 fr-mb-0">
-					Parcours de mise en conformité pour l&apos;indicateur par catégorie de
-					salariés
+					Parcours de mise en conformité pour l&apos;indicateur
+					par&nbsp;catégorie de salariés
 				</h1>
-				<SavedIndicator />
+				<SavedIndicator hasData={true} />
 			</div>
 
 			<SecondDeclarationStepIndicator currentStep={3} />
 
-			<p className={`fr-mb-0 ${common.mentionGrey}`}>
+			<p className={`fr-mb-0 ${stepStyles.intro}`}>
 				Vérifiez que toutes les informations ont été complétées avant de
 				soumettre votre seconde déclaration des écarts de rémunération par
 				catégorie de salariés aux services du ministère chargé du travail.
@@ -97,37 +101,42 @@ export function SecondDeclarationStep3Review({
 
 			<div className={stepStyles.card}>
 				<CardTitle tooltipId="tooltip-second-decl-categories">
-					Écart de rémunération par catégories de salariés (salaire de base et
-					primes)
+					Écart de rémunération par catégories de salariés
 				</CardTitle>
 				{parsed.length > 0 ? (
 					parsed.map((cat) => (
 						<div key={cat.index}>
-							<p className="fr-text--bold fr-mb-0">
-								[Catégorie d&apos;emplois n°{cat.index + 1}]
+							<p className="fr-text--sm fr-text--bold fr-mb-0">
+								Catégorie d&apos;emplois n°{cat.index + 1} : {cat.name}
 							</p>
 							<div className={stepStyles.sideBySide}>
-								<GapColumn
-									columns={[
-										{ label: "Salaire de base", gap: cat.annualBaseGap },
-										{
-											label: "Composantes variables ou complémentaires",
-											gap: cat.annualVariableGap,
-										},
-									]}
-									title="Annuelle brute"
-								/>
+								<div className={stepStyles.column}>
+									<p className="fr-text--bold fr-text--sm fr-mb-0">
+										Annuelle brute
+									</p>
+									<div className={stepStyles.gapGrid}>
+										<p className="fr-text--sm fr-mb-0">Salaire de base</p>
+										<p className="fr-text--sm fr-mb-0">
+											Composantes variables ou complémentaires
+										</p>
+										<GapBadge gap={cat.annualBaseGap} />
+										<GapBadge gap={cat.annualVariableGap} />
+									</div>
+								</div>
 								<div className={stepStyles.verticalSeparator} />
-								<GapColumn
-									columns={[
-										{ label: "Salaire de base", gap: cat.hourlyBaseGap },
-										{
-											label: "Composantes variables ou complémentaires",
-											gap: cat.hourlyVariableGap,
-										},
-									]}
-									title="Horaire brute"
-								/>
+								<div className={stepStyles.column}>
+									<p className="fr-text--bold fr-text--sm fr-mb-0">
+										Horaire brute
+									</p>
+									<div className={stepStyles.gapGrid}>
+										<p className="fr-text--sm fr-mb-0">Salaire de base</p>
+										<p className="fr-text--sm fr-mb-0">
+											Composantes variables ou complémentaires
+										</p>
+										<GapBadge gap={cat.hourlyBaseGap} />
+										<GapBadge gap={cat.hourlyVariableGap} />
+									</div>
+								</div>
 							</div>
 						</div>
 					))

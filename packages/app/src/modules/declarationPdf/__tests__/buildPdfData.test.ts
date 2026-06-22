@@ -33,11 +33,17 @@ vi.mock("~/server/api/routers/declarationHelpers", () => ({
 		_empCats: unknown[],
 		_type: string,
 	) => [],
+	activeDeclarationFilter: (siren: string, year: number) => ({
+		siren,
+		year,
+		cancelledAt: "IS NULL",
+	}),
 }));
 
 vi.mock("drizzle-orm", () => ({
 	and: (...args: unknown[]) => args,
 	eq: (col: unknown, val: unknown) => ({ col, val }),
+	isNull: (col: unknown) => ({ col, op: "isNull" }),
 }));
 
 function resetMocks() {
@@ -47,6 +53,16 @@ function resetMocks() {
 
 describe("buildPdfData", () => {
 	it("throws when declaration not found", async () => {
+		resetMocks();
+		queryResults.push([]);
+
+		const { buildPdfData } = await import("../buildPdfData");
+		await expect(
+			buildPdfData("123456789", 2026, new Date("2026-03-09")),
+		).rejects.toThrow("Déclaration introuvable");
+	});
+
+	it("throws when only cancelled declarations exist for (siren, year)", async () => {
 		resetMocks();
 		queryResults.push([]);
 
@@ -104,7 +120,6 @@ describe("buildPdfData", () => {
 				indicatorFAnnualThreshold1: "40000",
 				indicatorFAnnualThreshold2: "50000",
 				indicatorFAnnualThreshold3: "60000",
-				indicatorFAnnualThreshold4: "70000",
 				indicatorFAnnualWomen1: 10,
 				indicatorFAnnualWomen2: 12,
 				indicatorFAnnualWomen3: 14,
@@ -117,7 +132,6 @@ describe("buildPdfData", () => {
 				indicatorFHourlyThreshold1: null,
 				indicatorFHourlyThreshold2: null,
 				indicatorFHourlyThreshold3: null,
-				indicatorFHourlyThreshold4: null,
 				indicatorFHourlyWomen1: null,
 				indicatorFHourlyWomen2: null,
 				indicatorFHourlyWomen3: null,
@@ -197,7 +211,7 @@ describe("buildPdfData", () => {
 				name: "annual:4e quartile",
 				womenCount: 14,
 				menCount: 10,
-				womenValue: "70000",
+				womenValue: undefined,
 			},
 			{
 				name: "hourly:1er quartile",
@@ -272,5 +286,44 @@ describe("buildPdfData", () => {
 		]);
 		expect(result.step3Data.beneficiaryWomen).toBe("");
 		expect(result.step3Data.beneficiaryMen).toBe("");
+	});
+
+	it("fetches employee categories when job categories exist", async () => {
+		resetMocks();
+		// Query 1: declarations
+		queryResults.push([
+			{
+				id: "decl-uuid-3",
+				siren: "111222333",
+				year: 2026,
+				status: "submitted",
+				totalWomen: 10,
+				totalMen: 10,
+			},
+		]);
+		// Query 2: companies
+		queryResults.push([{ siren: "111222333", name: "Test Corp" }]);
+		// Query 3: jobCategories — returns one job
+		queryResults.push([{ id: "job-1" }]);
+		// Query 4: employeeCategories for job-1
+		queryResults.push([{ jobCategoryId: "job-1" }]);
+
+		const { buildPdfData } = await import("../buildPdfData");
+		const result = await buildPdfData(
+			"111222333",
+			2026,
+			new Date("2026-03-09"),
+		);
+
+		// step5Categories still empty because mapToEmployeeCategoryRows is mocked to return []
+		expect(result.step5Categories).toEqual([]);
+		expect(result.companyName).toBe("Test Corp");
+		expect(result.step4Categories).toHaveLength(8);
+		expect(result.step4Categories[0]).toMatchObject({
+			name: "annual:1er quartile",
+			womenCount: undefined,
+			menCount: undefined,
+			womenValue: undefined,
+		});
 	});
 });

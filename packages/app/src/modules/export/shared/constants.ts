@@ -19,9 +19,44 @@ export const DECLARATION_COLUMNS: Array<{
 	{ key: "year", header: "Annee" },
 	{ key: "status", header: "Statut" },
 	{ key: "declarationType", header: "Type_declaration" },
-	{ key: "compliancePath", header: "Parcours_conformite" },
+	{
+		key: "firstDeclarationPathChoice",
+		header: "Parcours_apres_declaration_1",
+	},
+	{
+		key: "secondDeclarationPathChoice",
+		header: "Parcours_apres_declaration_2",
+	},
+	{ key: "complianceProcessRequired", header: "Parcours_de_conformite_requis" },
+	{
+		key: "complianceProcessRevisionRequired",
+		header: "Parcours_de_conformite_revision_requis",
+	},
+	{ key: "cseRequired", header: "Avis_CSE_requis" },
+	{ key: "indicatorGRequired", header: "Indicateur_G_requis" },
+	{ key: "rulesVersion", header: "Version_regles" },
 	{ key: "createdAt", header: "Date_creation" },
 	{ key: "updatedAt", header: "Date_modification" },
+	{ key: "submittedAt", header: "Date_soumission" },
+	{
+		key: "firstDeclarationPathChoiceAt",
+		header: "Date_parcours_apres_declaration_1",
+	},
+	{
+		key: "secondDeclarationPathChoiceAt",
+		header: "Date_parcours_apres_declaration_2",
+	},
+	{
+		key: "secondDeclarationSubmittedAt",
+		header: "Date_seconde_declaration",
+	},
+	{
+		key: "jointEvaluationSubmittedAt",
+		header: "Date_evaluation_conjointe",
+	},
+	{ key: "cseOpinionCompletedAt", header: "Date_avis_CSE" },
+	{ key: "demarcheCompletedAt", header: "Date_fin_demarche" },
+	{ key: "cancelledAt", header: "Date_annulation" },
 
 	// Employees
 	{ key: "totalWomen", header: "Total_femmes" },
@@ -73,7 +108,6 @@ export const DECLARATION_COLUMNS: Array<{
 	{ key: "indFAnnualQ3Threshold", header: "Ind_F_Annuel_Q3_seuil" },
 	{ key: "indFAnnualQ4Women", header: "Ind_F_Annuel_Q4_F" },
 	{ key: "indFAnnualQ4Men", header: "Ind_F_Annuel_Q4_H" },
-	{ key: "indFAnnualQ4Threshold", header: "Ind_F_Annuel_Q4_seuil" },
 
 	// Indicator F — Quartile distribution (hourly)
 	{ key: "indFHourlyQ1Women", header: "Ind_F_Horaire_Q1_F" },
@@ -87,10 +121,9 @@ export const DECLARATION_COLUMNS: Array<{
 	{ key: "indFHourlyQ3Threshold", header: "Ind_F_Horaire_Q3_seuil" },
 	{ key: "indFHourlyQ4Women", header: "Ind_F_Horaire_Q4_F" },
 	{ key: "indFHourlyQ4Men", header: "Ind_F_Horaire_Q4_H" },
-	{ key: "indFHourlyQ4Threshold", header: "Ind_F_Horaire_Q4_seuil" },
 
 	// Second declaration
-	{ key: "secondDeclarationStatus", header: "Seconde_declaration_statut" },
+	{ key: "secondDeclarationSubmitted", header: "Seconde_declaration_statut" },
 	{
 		key: "secondDeclReferencePeriodStart",
 		header: "Seconde_declaration_periode_debut",

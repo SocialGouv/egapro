@@ -25,19 +25,24 @@ L'agent reçoit un mode du skill `/analyse` :
 - Pour mode task : la description du body de la task (par l'utilisateur ou triager)
 - **URL Figma** si UI (passée par `/analyse` ou trouvée dans le body/commentaires). `code-dev` la consommera via le MCP `figma-dev` (Phases 1–3 de `rules/figma-workflow.md`). Aucun mockup HTML intermédiaire.
 
+> **Règles à charger à la demande** : `rules/github-board.md` (IDs de projet + snippets GraphQL — **non devinables**) et `rules/ticket-spec-format.md` (format normatif des specs) ne sont plus always-loaded (scopées par `paths:`). **Lis-les explicitement** avant respectivement toute opération board (`gh issue create` / ajout au project / type / parent / status) et toute rédaction de spec, s'ils ne sont pas déjà dans ton contexte.
+
 ---
 
 ## Workflow — modes `epic-create` / `epic-enrich`
 
+**Agent-id pour le logging** : `architect-<EPIC_N>`.
+
+0. `bash scripts/orchestration/log_event.sh architect-<EPIC_N> START "mode=<epic-create|epic-enrich>"`.
 1. **Lire** epic (body + commentaires `## Besoin métier`, `## Analyse PO`) + URL Figma + fichiers source pertinents. Pour les epics UI, parcourir Figma via `mcp__figma-dev__get_figma_data` pour identifier les écrans/composants à découper en tickets.
-2. **Cartographier** — modules, patterns existants, fichiers à toucher.
+2. **Cartographier** — modules, patterns existants, fichiers à toucher. Logger `MAPPING`.
 3. **Découper + établir le DAG de dépendances** :
    - Chaque ticket = unité cohérente (≤ 8 critères d'acceptation)
    - Pour chaque paire de tickets, identifier si A doit être livré avant B
    - Ces dépendances iront dans la section `Depends on` du body
    - **Filtrer les non-tickets** (voir « Éligibilité d'un ticket » ci-dessous) : toute tâche sans changement de code concret devient une case à cocher sur l'epic, pas une sub-issue
-4. **Draft inline** montré à l'utilisateur : titre, résumé 1 ligne, fichiers impactés, dépendances.
-5. **Validation utilisateur EXPLICITE** : « valides-tu ce découpage ? ». Pas d'auto-validation.
+4. **Draft inline** montré à l'utilisateur : titre, résumé 1 ligne, fichiers impactés, dépendances. Logger `BREAKDOWN_READY "tickets=<N>"`.
+5. **Validation utilisateur EXPLICITE** : logger `AWAITING_VALIDATION`. « valides-tu ce découpage ? ». Pas d'auto-validation.
 6. **Sur approbation** :
    - **`epic-create`** : créer toutes les sub-issues via `gh issue create` en un passage
    - **`epic-enrich`** : pour chaque sub-issue existante, décider :
@@ -50,7 +55,12 @@ L'agent reçoit un mode du skill `/analyse` :
    - Section `Depends on` dans chaque body listant les tickets parents (format `- #<N>`)
    - Label `complexe` uniquement si refacto multi-fichiers, perf critique, algo non trivial → déclenche Opus dans `code-dev`
    - Sur erreur partielle (rate limit, timeout) : **ne pas retenter à l'aveugle** — relire ce qui a déjà été créé, compléter uniquement le reste, mentionner le recovery dans le rapport.
-7. **Commentaire final sur l'epic** : `[Validation utilisateur] Architecture validée — N tickets créés, prêt pour /implement`.
+7. **Sizing de chaque sub-issue (complexité t-shirt)** : lire `rules/complexity-estimation.md` (rubrique + anchors), puis pour **chaque** sub-issue créée/amendée poser sa taille :
+   ```bash
+   bash scripts/orchestration/set_ticket_size.sh <sub_issue_N> <XS|S|M|L|XL>
+   ```
+   Écrit `Size` + `Estimate` (points Fibonacci) sur le board → alimente `/velocity`. **Ne jamais sizer l'epic lui-même** (sa charge = somme des feuilles). Un ticket évalué **XL** est un signal de re-découpage : préférer le scinder. Inscrire la taille + justification dans le body de chaque sub-issue sous une section `## Complexité` (ex. `**M (3 pts)** — 1 composant DSFR + 1 query tRPC, pas de migration`).
+8. **Commentaire final sur l'epic** : `[Validation utilisateur] Architecture validée — N tickets créés (sizés), prêt pour /implement`. Logger `ISSUES_CREATED "count=<N>"` puis `COMPLETE`.
 
 ---
 
@@ -58,7 +68,10 @@ L'agent reçoit un mode du skill `/analyse` :
 
 L'objectif : transformer une task vague en un spec exécutable, **sans découpage**, en posant un seul commentaire `## Analyse architecte` sur l'issue. Le body de la task **reste intact** — `code-dev` lira `body + commentaire` pour reconstituer le spec.
 
-1. **Lire** le body de la task + tous les commentaires + fichiers source pertinents. Si UI : `mcp__figma-dev__get_figma_data` sur l'URL Figma fournie.
+**Agent-id pour le logging** : `architect-<TASK_N>`.
+
+0. `bash scripts/orchestration/log_event.sh architect-<TASK_N> START "mode=task"`.
+1. **Lire** le body de la task + tous les commentaires + fichiers source pertinents. Si UI : `mcp__figma-dev__get_figma_data` sur l'URL Figma fournie. Logger `MAPPING` une fois la cartographie initiale faite.
 
 2. **Q&A utilisateur si la task est trop floue**. Avant de produire le moindre spec, vérifier que les éléments suivants sont identifiables :
    - Quel(s) fichier(s) le `code-dev` va modifier ?
@@ -70,7 +83,7 @@ L'objectif : transformer une task vague en un spec exécutable, **sans découpag
 
 3. **Cartographier** la zone de code touchée.
 
-4. **Draft inline du spec** au format `rules/ticket-spec-format.md`, montré à l'utilisateur :
+4. **Draft inline du spec** au format `rules/ticket-spec-format.md`, montré à l'utilisateur (logger `BREAKDOWN_READY "files=<N>"`) :
    - Contexte (1-3 phrases)
    - Fichiers impactés
    - Changement attendu (précis : props, méthodes, types de retour, comportement)
@@ -80,9 +93,25 @@ L'objectif : transformer une task vague en un spec exécutable, **sans découpag
    - Depends on (rare en task — la plupart des tasks sont autonomes)
    - Requires services (rare — typiquement core stack suffit)
 
-5. **Validation utilisateur EXPLICITE** : « valides-tu cette analyse ? ». Itérer si besoin.
+5. **Évaluation du scope** — avant de demander la validation utilisateur, comparer le draft à ces seuils. Une task standard est une **unité cohérente exécutable par un seul `code-dev`**. Si **au moins un** seuil est franchement dépassé, le ticket doit basculer en Feature (epic) plutôt qu'en task :
 
-6. **Sur approbation** : poster un seul commentaire sur la task (pas de modification du body) :
+   - \> 8 critères d'acceptation
+   - \> 5 fichiers à modifier
+   - Refacto multi-modules (touche plusieurs `~/modules/*` distincts, ou couches multiples comme domain + UI + tRPC + tests + scripts)
+   - Création d'un nouveau sous-module (nouveau dossier sous `~/modules/<feature>/<sous-module>/`)
+   - Plus d'un flow utilisateur indépendant impacté (ex : Step1 du parcours principal + JointEvaluationForm + CompliancePathChoice)
+   - Présence de dépendances internes naturelles (foundation → câblage répétitif sur N forms) qui se découperaient en T1 + T2 + T3 parallélisables
+
+   **Cas limite** : un spec avec exactement 8 critères et 5 fichiers reste une task. Le dépassement doit être franc, pas marginal.
+
+   **Si dépassement** :
+   - Présenter le constat au user en 2-3 lignes : « Le scope dépasse une task standard ([raison concrète : X fichiers, Y modules touchés, Z critères]). Je recommande de convertir cette issue en Feature et de relancer `/analyse` en mode epic-create pour découper en sub-tasks parallélisables. »
+   - **Si user accepte** : convertir l'issue type Task → Feature via la mutation GraphQL `updateIssueIssueType` (cf. `rules/github-board.md` snippet 7, ID Feature = `IT_kwDOAh0HH84Aa_K4`), poster un commentaire `[Architect] Converti en Feature — relancer /analyse #N pour le découpage`, puis **exiter le mode task** (ne pas poster d'analyse architecte). L'utilisateur relancera `/analyse #N` qui passera automatiquement en mode `epic-create`.
+   - **Si user refuse** : poursuivre en mode task malgré le scope. Mentionner dans le draft que le ticket est volumineux et appliquer le label `complexe` (Opus) systématiquement.
+
+6. **Validation utilisateur EXPLICITE** : logger `AWAITING_VALIDATION`. « valides-tu cette analyse ? ». Itérer si besoin.
+
+7. **Sur approbation** : poster un seul commentaire sur la task (pas de modification du body) :
    ```bash
    gh issue comment "$TASK_N" --body-file <(cat <<'EOF'
    ## Analyse architecte
@@ -93,7 +122,15 @@ L'objectif : transformer une task vague en un spec exécutable, **sans découpag
    ```
    Appliquer le label `complexe` si > 5 fichiers ou refacto multi-modules attendu (op. via `gh issue edit --add-label`).
 
-7. **Commentaire final** : `[Validation utilisateur] Analyse validée — prêt pour /implement`.
+   Inclure dans le commentaire une section `## Complexité` : **taille t-shirt + points + justification 1 ligne** (cf. `rules/complexity-estimation.md`, rubrique + anchors).
+
+8. **Sizing de la task (complexité t-shirt)** : poser la taille sur le board :
+   ```bash
+   bash scripts/orchestration/set_ticket_size.sh "$TASK_N" <XS|S|M|L|XL>
+   ```
+   Écrit `Size` + `Estimate` → alimente `/velocity`.
+
+9. **Commentaire final** : `[Validation utilisateur] Analyse validée (taille <T>) — prêt pour /implement`. Logger `ANALYSIS_POSTED` puis `COMPLETE`.
 
 ---
 

@@ -1,8 +1,16 @@
+"use client";
+
 import Image from "next/image";
 
+import {
+	MATOMO_ACTION,
+	MATOMO_EVENT_CATEGORY,
+	trackEvent,
+} from "~/modules/analytics";
 import styles from "./AideResourceCards.module.scss";
 
 type ResourceCardProps = {
+	trackingId: string;
 	badge?: string;
 	title: string;
 	description: string;
@@ -15,6 +23,7 @@ type ResourceCardProps = {
 };
 
 function ResourceCard({
+	trackingId,
 	badge,
 	title,
 	description,
@@ -38,7 +47,18 @@ function ResourceCard({
 						</div>
 					)}
 					<h2 className="fr-card__title">
-						<a href={href}>{title}</a>
+						<a
+							href={href}
+							onClick={() =>
+								trackEvent({
+									category: MATOMO_EVENT_CATEGORY.HELP,
+									action: MATOMO_ACTION.AIDE_RESOURCE_CLICK,
+									name: trackingId,
+								})
+							}
+						>
+							{title}
+						</a>
 					</h2>
 					<p className="fr-card__desc">{description}</p>
 				</div>
@@ -70,6 +90,7 @@ export function AideResourceCards() {
 					imageSrc="/assets/images/aide/nouveau-site.png"
 					size="sm"
 					title="Nouveau site : ce qui change pour votre déclaration"
+					trackingId="nouveau-site"
 				/>
 			</div>
 			<div className="fr-col-12 fr-col-md-6">
@@ -79,6 +100,7 @@ export function AideResourceCards() {
 					imageSrc="/assets/images/aide/indicateurs-remuneration.png"
 					size="sm"
 					title="Indicateurs de rémunération"
+					trackingId="indicateurs-remuneration"
 				/>
 			</div>
 			<div className="fr-col-12 fr-col-md-6">
@@ -88,6 +110,7 @@ export function AideResourceCards() {
 					imageSrc="/assets/images/aide/indicateurs-representation.png"
 					size="sm"
 					title="Indicateurs de représentation"
+					trackingId="indicateurs-representation"
 				/>
 			</div>
 		</div>

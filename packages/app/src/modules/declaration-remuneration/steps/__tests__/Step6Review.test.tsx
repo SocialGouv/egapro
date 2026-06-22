@@ -48,8 +48,6 @@ function makeCategory(
 
 const emptyDeclaration = () => ({
 	siren: "",
-	totalWomen: null,
-	totalMen: null,
 	status: null,
 });
 
@@ -96,6 +94,7 @@ describe("Step6Review", () => {
 	it("renders title and stepper at step 6", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -112,6 +111,7 @@ describe("Step6Review", () => {
 	it("renders description text", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -127,6 +127,7 @@ describe("Step6Review", () => {
 	it("renders section headings", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -145,6 +146,7 @@ describe("Step6Review", () => {
 	it("renders SavedIndicator", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -158,6 +160,7 @@ describe("Step6Review", () => {
 	it("renders all 4 recap card titles", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -186,6 +189,7 @@ describe("Step6Review", () => {
 	it("does not render Modifier buttons", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -199,6 +203,7 @@ describe("Step6Review", () => {
 	it("does not render check icons on cards", () => {
 		const { container } = render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -213,6 +218,7 @@ describe("Step6Review", () => {
 	it("renders tooltip buttons on cards 3 and 4 only", () => {
 		const { container } = render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -227,6 +233,7 @@ describe("Step6Review", () => {
 	it("shows side-by-side Annuelle/Horaire brute with gaps for step 2", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={{
@@ -260,6 +267,7 @@ describe("Step6Review", () => {
 	it("shows 'Aucune donnée renseignée' for empty steps", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -274,6 +282,7 @@ describe("Step6Review", () => {
 	it("renders step 3 with side-by-side gaps and proportion", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -300,6 +309,7 @@ describe("Step6Review", () => {
 	it("renders quartile data stacked annual then hourly", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -334,6 +344,7 @@ describe("Step6Review", () => {
 	it("renders step 5 category gaps side-by-side", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -364,13 +375,16 @@ describe("Step6Review", () => {
 			1,
 		);
 		expect(screen.getAllByText("Salaire de base").length).toBe(2);
-		expect(screen.getAllByText("Composantes variables").length).toBe(2);
+		expect(
+			screen.getAllByText("Composantes variables ou complémentaires").length,
+		).toBe(2);
 		expect(screen.getAllByText("élevé").length).toBeGreaterThanOrEqual(1);
 	});
 
 	it("renders previous link pointing to step 5", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -387,6 +401,7 @@ describe("Step6Review", () => {
 	it("renders next as a submit button when not submitted", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={emptyStep2Data()}
@@ -402,6 +417,7 @@ describe("Step6Review", () => {
 	it("renders next link pointing to compliance path when already submitted", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				isSubmitted
@@ -416,9 +432,32 @@ describe("Step6Review", () => {
 		);
 	});
 
-	it("renders previous link to home and next link to compliance path when already submitted", () => {
+	it("routes next link to /avis-cse when status is awaiting_cse_opinion", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
+				declaration={{
+					...emptyDeclaration(),
+					status: "awaiting_cse_opinion",
+				}}
+				declarationYear={2025}
+				hasCse={true}
+				isSubmitted
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			"/avis-cse",
+		);
+	});
+
+	it("renders previous link to step 5 and next link to compliance path when already submitted", () => {
+		render(
+			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				isSubmitted
@@ -429,7 +468,7 @@ describe("Step6Review", () => {
 		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
-			"/",
+			"/declaration-remuneration/etape/5",
 		);
 		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
 			"href",
@@ -440,6 +479,7 @@ describe("Step6Review", () => {
 	it("does not render PDF download button when submitted", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				isSubmitted
@@ -456,10 +496,9 @@ describe("Step6Review", () => {
 	it("shows 'Prochaines étapes' callout when a gap >= 5%", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={{
 					siren: "532847196",
-					totalWomen: null,
-					totalMen: null,
 					status: null,
 				}}
 				declarationYear={2025}
@@ -498,6 +537,7 @@ describe("Step6Review", () => {
 	it("does not show 'Prochaines étapes' callout when all gaps < 5%", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
 				step2Data={{

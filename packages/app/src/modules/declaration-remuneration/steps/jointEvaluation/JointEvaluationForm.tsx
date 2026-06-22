@@ -2,29 +2,62 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
-import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
+import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { FileUpload, useFileUploadForm } from "~/modules/shared";
+import { api } from "~/trpc/react";
 
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
+const EMPTY_DB_VALUES = {} as Record<string, never>;
+
 type Props = {
 	declarationDate: string;
+	declarationSiren: string;
+	declarationYear: number;
 	hasCse: boolean | null;
 	jointEvaluationDeadline: Date;
 };
 
 export function JointEvaluationForm({
 	declarationDate,
+	declarationSiren,
+	declarationYear,
 	hasCse,
 	jointEvaluationDeadline,
 }: Props) {
 	const router = useRouter();
 	const readOnlyGuard = useReadOnlyGuard();
+
+	const { clearDraft } = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: "joint",
+		kind: "joint",
+		dbValues: EMPTY_DB_VALUES,
+	});
+
+	const submitJointEvaluationMutation =
+		api.declaration.submitJointEvaluation.useMutation();
+
+	const onAllUploaded = useCallback(() => {
+		clearDraft();
+		// The upload writes the joint evaluation files to S3; the FSM transition
+		// (`joint_evaluation_chosen` / `revised_joint_evaluation_chosen` →
+		// `awaiting_cse_opinion` or `demarche_completed`) is decoupled and must
+		// be triggered explicitly so the `joint_evaluation_submit` event is
+		// recorded and the "Mon espace" panel + table reflect the new step.
+		submitJointEvaluationMutation.mutate(undefined, {
+			onSettled: () => {
+				router.push(getPostComplianceDestination(hasCse));
+			},
+		});
+	}, [clearDraft, hasCse, router, submitJointEvaluationMutation]);
 
 	const {
 		closeModal,
@@ -37,18 +70,21 @@ export function JointEvaluationForm({
 		uploadError,
 	} = useFileUploadForm({
 		flowType: "joint_evaluation",
-		onAllUploaded: () => router.push(getPostComplianceDestination(hasCse)),
+		onAllUploaded,
 	});
 
 	return (
 		<>
-			<form className={common.flexColumnGap2} onSubmit={handleSubmit}>
+			<form
+				autoComplete="off"
+				className={common.flexColumnGap2}
+				onSubmit={handleSubmit}
+			>
 				<div className={common.flexBetween}>
 					<h1 className="fr-h4 fr-mb-0">
 						Parcours de mise en conformité pour l&apos;indicateur par catégorie
 						de salariés
 					</h1>
-					<SavedIndicator />
 				</div>
 
 				<div className={common.flexColumnGap1}>

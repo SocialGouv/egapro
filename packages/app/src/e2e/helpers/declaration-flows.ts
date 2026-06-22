@@ -14,47 +14,71 @@ async function fillPayGapTable(page: Page) {
 	}
 }
 
-/** Fill step 4 quartile data with consistent values (total = step 1 workforce). */
-async function fillStep4Quartiles(page: Page) {
-	// Total must equal step 1 workforce: 10 women, 15 men
-	// Split across 4 quartiles: 3+3+2+2=10 women, 4+4+4+3=15 men
-	const quartiles = [
-		{ name: "1er quartile", women: "3", men: "4" },
-		{ name: "2e quartile", women: "3", men: "4" },
-		{ name: "3e quartile", women: "2", men: "4" },
-		{ name: "4e quartile", women: "2", men: "3" },
-	] as const;
+type QuartileInputRow = {
+	ordinal: "1er" | "2e" | "3e" | "4e";
+	threshold?: string;
+	women: string;
+	men: string;
+};
 
-	for (const q of quartiles) {
-		// Each quartile appears twice (annual table + hourly table) — fill both
+const DEFAULT_ANNUAL_QUARTILES: QuartileInputRow[] = [
+	{ ordinal: "1er", threshold: "10000", women: "3", men: "4" },
+	{ ordinal: "2e", threshold: "20000", women: "3", men: "4" },
+	{ ordinal: "3e", threshold: "30000", women: "2", men: "4" },
+	{ ordinal: "4e", women: "2", men: "3" },
+];
+
+const DEFAULT_HOURLY_QUARTILES: QuartileInputRow[] = [
+	{ ordinal: "1er", threshold: "10", women: "3", men: "4" },
+	{ ordinal: "2e", threshold: "20", women: "3", men: "4" },
+	{ ordinal: "3e", threshold: "30", women: "2", men: "4" },
+	{ ordinal: "4e", women: "2", men: "3" },
+];
+
+async function fillQuartileRow(
+	page: Page,
+	tableSuffix: "annuel" | "horaire",
+	row: QuartileInputRow,
+) {
+	if (row.threshold !== undefined && row.ordinal !== "4e") {
 		await page
-			.getByRole("textbox", { name: `Nombre de femmes ${q.name}` })
-			.nth(0)
-			.fill(q.women);
-		await page
-			.getByRole("textbox", { name: `Nombre d'hommes ${q.name}` })
-			.nth(0)
-			.fill(q.men);
-		await page
-			.getByRole("textbox", { name: `Rémunération brute ${q.name}` })
-			.nth(0)
-			.fill("1000");
+			.getByRole("textbox", {
+				name: `Seuil maximum ${row.ordinal} quartile ${tableSuffix}`,
+			})
+			.fill(row.threshold);
 	}
+	await page
+		.getByRole("textbox", {
+			name: `Nombre de femmes ${row.ordinal} quartile ${tableSuffix}`,
+		})
+		.fill(row.women);
+	await page
+		.getByRole("textbox", {
+			name: `Nombre d'hommes ${row.ordinal} quartile ${tableSuffix}`,
+		})
+		.fill(row.men);
+}
 
-	// Hourly table (same quartile names, second occurrence)
-	for (const q of quartiles) {
-		await page
-			.getByRole("textbox", { name: `Nombre de femmes ${q.name}` })
-			.nth(1)
-			.fill(q.women);
-		await page
-			.getByRole("textbox", { name: `Nombre d'hommes ${q.name}` })
-			.nth(1)
-			.fill(q.men);
-		await page
-			.getByRole("textbox", { name: `Rémunération brute ${q.name}` })
-			.nth(1)
-			.fill("10");
+/**
+ * Fill step 4 quartile data with consistent values (total = step 1 workforce).
+ *
+ * Each table accepts 3 thresholds (Q1/Q2/Q3 max) and 4 F/H counts.
+ * Q4 has no upper threshold by spec.
+ */
+export async function fillStep4Quartiles(
+	page: Page,
+	options: {
+		annualThresholds?: QuartileInputRow[];
+		hourlyThresholds?: QuartileInputRow[];
+	} = {},
+) {
+	const annual = options.annualThresholds ?? DEFAULT_ANNUAL_QUARTILES;
+	const hourly = options.hourlyThresholds ?? DEFAULT_HOURLY_QUARTILES;
+	for (const row of annual) {
+		await fillQuartileRow(page, "annuel", row);
+	}
+	for (const row of hourly) {
+		await fillQuartileRow(page, "horaire", row);
 	}
 }
 

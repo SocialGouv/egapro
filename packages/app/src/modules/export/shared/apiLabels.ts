@@ -39,6 +39,36 @@ export const INDICATOR_D_LABELS = {
 	hourlyMen: "Taux_horaire_variable_médian_H",
 } as const;
 
+/** Indicator A gap label — signed ratio (m - w) / m, range -1..1, mirrors GIP CSV. */
+export const INDICATOR_A_GAP_LABELS = {
+	annual: "Rem_globale_annuelle_moyenne_ecart",
+	hourly: "Taux_horaire_global_moyen_ecart",
+} as const;
+
+/** Indicator B gap label — signed ratio (m - w) / m, range -1..1, mirrors GIP CSV. */
+export const INDICATOR_B_GAP_LABELS = {
+	annual: "Rem_variable_annuelle_moyenne_ecart",
+	hourly: "Taux_horaire_variable_moyen_ecart",
+} as const;
+
+/** Indicator C gap label — signed ratio (m - w) / m, range -1..1, mirrors GIP CSV. */
+export const INDICATOR_C_GAP_LABELS = {
+	annual: "Rem_globale_annuelle_médiane_ecart",
+	hourly: "Taux_horaire_global_médian_ecart",
+} as const;
+
+/** Indicator D gap label — signed ratio (m - w) / m, range -1..1, mirrors GIP CSV. */
+export const INDICATOR_D_GAP_LABELS = {
+	annual: "Rem_variable_annuelle_médiane_ecart",
+	hourly: "Taux_horaire_variable_médian_ecart",
+} as const;
+
+/** Indicator E proportion labels — ratio 0..1, mirrors GIP CSV. */
+export const INDICATOR_E_PROPORTION_LABELS = {
+	women: "Proportion_variable_F",
+	men: "Proportion_variable_H",
+} as const;
+
 /** Indicator E — variable pay beneficiary counts. */
 export const INDICATOR_E_LABELS = {
 	women: "Effectif_F_rem_annuelle_variable",
@@ -50,14 +80,12 @@ export const INDICATOR_F_ANNUAL_THRESHOLD_LABELS = [
 	"Seuil_Q1_Rem_globale",
 	"Seuil_Q2_Rem_globale",
 	"Seuil_Q3_Rem_globale",
-	"Seuil_Q4_Rem_globale",
 ] as const;
 
 export const INDICATOR_F_HOURLY_THRESHOLD_LABELS = [
 	"Seuil_Q1_Taux_horaire_global",
 	"Seuil_Q2_Taux_horaire_global",
 	"Seuil_Q3_Taux_horaire_global",
-	"Seuil_Q4_Taux_horaire_global",
 ] as const;
 
 export const INDICATOR_F_ANNUAL_WOMEN_LABELS = [

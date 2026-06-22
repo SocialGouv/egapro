@@ -1,7 +1,15 @@
 // Domain re-exports (canonical source: ~/modules/domain)
-export type { DeclarationStatus, DeclarationType } from "~/modules/domain";
+export type {
+	DeclarationFsmStatus,
+	DeclarationStatus,
+	DeclarationType,
+} from "~/modules/domain";
 
-import type { DeclarationStatus, DeclarationType } from "~/modules/domain";
+import type {
+	DeclarationFsmStatus,
+	DeclarationStatus,
+	DeclarationType,
+} from "~/modules/domain";
 
 export type CompanyItem = {
 	siren: string;
@@ -16,21 +24,26 @@ export type CompanyDetail = {
 	name: string;
 	address: string | null;
 	nafCode: string | null;
+	nafLabel: string | null;
 	workforce: number | null;
 	hasCse: boolean | null;
 };
+
+type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
 
 export type DeclarationItem = {
 	type: DeclarationType;
 	siren: string;
 	year: number;
 	status: DeclarationStatus;
+	fsmStatus: DeclarationFsmStatus | null;
 	currentStep: number;
 	updatedAt: Date | null;
-	compliancePath: string | null;
-	secondDeclarationStatus: string | null;
-	complianceCompletedAt: Date | null;
-	cseOpinionCompletedAt: Date | null;
+	firstDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationPathChoice: CompliancePath | null;
+	hasSubmittedSecondDeclaration: boolean;
+	hasSubmittedCseOpinion: boolean;
+	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
 };

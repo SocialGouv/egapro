@@ -60,7 +60,7 @@ export function ImpersonateForm() {
 
 	return (
 		<div className="fr-mt-4w">
-			<form noValidate onSubmit={onSearch}>
+			<form autoComplete="off" noValidate onSubmit={onSearch}>
 				<div
 					className={
 						sirenError

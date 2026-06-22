@@ -4,16 +4,22 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	auth: vi.fn(),
+	profileGet: vi.fn(),
 }));
 
 vi.mock("~/server/auth", () => ({
 	auth: mocks.auth,
 }));
 
+vi.mock("~/trpc/server", () => ({
+	api: { profile: { get: mocks.profileGet } },
+}));
+
 import { MobileMenu } from "../MobileMenu";
 
 beforeEach(() => {
 	vi.mocked(usePathname).mockReturnValue("/");
+	mocks.profileGet.mockResolvedValue({ phone: null });
 });
 
 describe("MobileMenu", () => {
@@ -60,5 +66,20 @@ describe("MobileMenu", () => {
 		expect(
 			screen.getByRole("link", { name: "Se déconnecter" }),
 		).toBeInTheDocument();
+	});
+
+	it("renders the fresh phone from the profile table, ignoring the stale JWT", async () => {
+		mocks.auth.mockResolvedValue({
+			user: {
+				email: "jean.dupont@example.fr",
+				name: "Jean Dupont",
+				phone: null,
+			},
+		});
+		mocks.profileGet.mockResolvedValue({ phone: "06 12 34 56 78" });
+
+		render(await MobileMenu());
+
+		expect(screen.getByText("06 12 34 56 78")).toBeInTheDocument();
 	});
 });

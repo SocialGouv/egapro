@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
@@ -92,6 +92,10 @@ describe("SecondDeclarationStep3Review", () => {
 				/Parcours de mise en conformité pour l.indicateur par catégorie de salariés/,
 			),
 		).toBeInTheDocument();
+		// Non-breaking space keeps "par catégorie" on the same line (Figma spec)
+		expect(screen.getByRole("heading", { level: 1 }).textContent).toContain(
+			"par\u00A0catégorie",
+		);
 		expect(screen.getByText("Étape 3 sur 3")).toBeInTheDocument();
 	});
 
@@ -104,7 +108,54 @@ describe("SecondDeclarationStep3Review", () => {
 				siren="532847196"
 			/>,
 		);
-		expect(screen.getByText(/Catégorie d.emplois n°1/)).toBeInTheDocument();
+		expect(
+			screen.getByText("Catégorie d'emplois n°1 : Ingénieurs"),
+		).toBeInTheDocument();
+	});
+
+	it("does not bracket the category title", () => {
+		render(
+			<SecondDeclarationStep3Review
+				declarationYear={2025}
+				hasCse={null}
+				secondDeclarationCategories={mockCategories}
+				siren="532847196"
+			/>,
+		);
+		expect(
+			screen.queryByText(/\[Catégorie d.emplois n°1\]/),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders the card title without the base-and-bonus parenthetical", () => {
+		render(
+			<SecondDeclarationStep3Review
+				declarationYear={2025}
+				hasCse={null}
+				secondDeclarationCategories={mockCategories}
+				siren="532847196"
+			/>,
+		);
+		expect(
+			screen.getByText("Écart de rémunération par catégories de salariés"),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(/salaire de base et primes/),
+		).not.toBeInTheDocument();
+	});
+
+	it("always shows the CSE consultation heading for second declaration", () => {
+		render(
+			<SecondDeclarationStep3Review
+				declarationYear={2025}
+				hasCse={null}
+				secondDeclarationCategories={mockCategories}
+				siren="532847196"
+			/>,
+		);
+		expect(
+			screen.getByRole("heading", { name: "Informer et consulter le CSE" }),
+		).toBeInTheDocument();
 	});
 
 	it("renders gap columns", () => {
@@ -208,8 +259,9 @@ describe("SecondDeclarationStep3Review", () => {
 				siren="532847196"
 			/>,
 		);
+		expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
 		expect(
-			screen.getByText("Des écarts ont été de nouveau détectés"),
+			screen.getByRole("heading", { name: "Actions à engager" }),
 		).toBeInTheDocument();
 	});
 
@@ -238,8 +290,9 @@ describe("SecondDeclarationStep3Review", () => {
 				siren="532847196"
 			/>,
 		);
+		expect(screen.queryByText("Écarts détectés")).not.toBeInTheDocument();
 		expect(
-			screen.queryByText("Des écarts ont été de nouveau détectés"),
+			screen.queryByRole("heading", { name: "Actions à engager" }),
 		).not.toBeInTheDocument();
 	});
 
@@ -358,5 +411,29 @@ describe("SecondDeclarationStep3Review", () => {
 			/>,
 		);
 		expect(screen.getByText("Aucune donnée renseignée.")).toBeInTheDocument();
+	});
+
+	it("closes the modal without submitting when Annuler is clicked", async () => {
+		const user = userEvent.setup();
+		render(
+			<SecondDeclarationStep3Review
+				declarationYear={2025}
+				hasCse={null}
+				secondDeclarationCategories={mockCategories}
+				siren="532847196"
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: /soumettre/i }));
+		const submitDialog = document.getElementById("submit-declaration-modal");
+		if (!submitDialog) throw new Error("submit dialog not found");
+		const cancelButton = within(submitDialog).getByRole("button", {
+			name: /annuler/i,
+			hidden: true,
+		});
+		await user.click(cancelButton);
+
+		expect(mockMutate).not.toHaveBeenCalled();
+		expect(mockPush).not.toHaveBeenCalled();
 	});
 });

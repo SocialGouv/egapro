@@ -8,7 +8,12 @@ import { JointEvaluationForm } from "./JointEvaluationForm";
 export async function JointEvaluationPage() {
 	const data = await api.declaration.getOrCreate();
 
-	if (data.declaration.compliancePath !== "joint_evaluation") {
+	const isInitialJoint =
+		data.declaration.firstDeclarationPathChoice === "joint_evaluation";
+	const isRevisedJoint =
+		data.declaration.secondDeclarationPathChoice === "joint_evaluation";
+
+	if (!isInitialJoint && !isRevisedJoint) {
 		redirect("/declaration-remuneration/parcours-conformite");
 	}
 
@@ -22,6 +27,8 @@ export async function JointEvaluationPage() {
 	return (
 		<JointEvaluationForm
 			declarationDate={declarationDate}
+			declarationSiren={data.declaration.siren}
+			declarationYear={currentYear}
 			hasCse={company.hasCse}
 			jointEvaluationDeadline={campaignDeadlines.decl1JointEvaluationDeadline}
 		/>

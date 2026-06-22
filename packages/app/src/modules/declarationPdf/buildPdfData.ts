@@ -1,8 +1,11 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { formatLongDate } from "~/modules/domain";
-import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
+import {
+	activeDeclarationFilter,
+	mapToEmployeeCategoryRows,
+} from "~/server/api/routers/declarationHelpers";
 import { db } from "~/server/db";
 import {
 	companies,
@@ -82,7 +85,7 @@ function buildQuartileCategories(d: Declaration): QuartileCategory[] {
 		d.indicatorFAnnualThreshold1,
 		d.indicatorFAnnualThreshold2,
 		d.indicatorFAnnualThreshold3,
-		d.indicatorFAnnualThreshold4,
+		null, // Q4 has no threshold (column removed in migration #3352)
 	];
 	const annualWomen = [
 		d.indicatorFAnnualWomen1,
@@ -101,7 +104,7 @@ function buildQuartileCategories(d: Declaration): QuartileCategory[] {
 		d.indicatorFHourlyThreshold1,
 		d.indicatorFHourlyThreshold2,
 		d.indicatorFHourlyThreshold3,
-		d.indicatorFHourlyThreshold4,
+		null, // Q4 has no threshold (column removed in migration #3352)
 	];
 	const hourlyWomen = [
 		d.indicatorFHourlyWomen1,
@@ -146,14 +149,14 @@ export async function buildPdfData(
 	const [declaration] = await db
 		.select()
 		.from(declarations)
-		.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+		.where(activeDeclarationFilter(siren, year))
 		.limit(1);
 
 	if (!declaration) {
 		throw new Error("Déclaration introuvable");
 	}
 
-	if (declaration.status !== "submitted") {
+	if (declaration.status === "draft") {
 		throw new Error("La déclaration n'est pas encore soumise");
 	}
 

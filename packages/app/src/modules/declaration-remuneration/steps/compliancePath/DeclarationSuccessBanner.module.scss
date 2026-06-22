@@ -1,0 +1,16 @@
+.content {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.titleRow {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+
+	// Keep the success pictogram at its intrinsic size when the title wraps.
+	> svg {
+		flex-shrink: 0;
+	}
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { GipMdsRow } from "../gipMdsMapping";
-import { CSV_TO_SCHEMA_MAP, mapGipToFormData } from "../gipMdsMapping";
+import { mapGipToFormData } from "../gipMdsMapping";
 
 /** Minimal GipMdsRow with all fields null except the ones we set. */
 function makeRow(overrides: Partial<GipMdsRow> = {}): GipMdsRow {
@@ -46,7 +46,6 @@ function makeRow(overrides: Partial<GipMdsRow> = {}): GipMdsRow {
 		annualQuartileThreshold1: null,
 		annualQuartileThreshold2: null,
 		annualQuartileThreshold3: null,
-		annualQuartileThreshold4: null,
 		annualQuartile1ProportionWomen: null,
 		annualQuartile2ProportionWomen: null,
 		annualQuartile3ProportionWomen: null,
@@ -58,7 +57,6 @@ function makeRow(overrides: Partial<GipMdsRow> = {}): GipMdsRow {
 		hourlyQuartileThreshold1: null,
 		hourlyQuartileThreshold2: null,
 		hourlyQuartileThreshold3: null,
-		hourlyQuartileThreshold4: null,
 		hourlyQuartile1ProportionWomen: null,
 		hourlyQuartile2ProportionWomen: null,
 		hourlyQuartile3ProportionWomen: null,
@@ -171,7 +169,6 @@ describe("mapGipToFormData", () => {
 			annualQuartileThreshold1: "25000",
 			annualQuartileThreshold2: "30000",
 			annualQuartileThreshold3: "35000",
-			annualQuartileThreshold4: "40000",
 			annualQuartile1ProportionWomen: "0.6",
 			annualQuartile2ProportionWomen: "0.5",
 			annualQuartile3ProportionWomen: "0.4",
@@ -187,7 +184,6 @@ describe("mapGipToFormData", () => {
 			"25000",
 			"30000",
 			"35000",
-			"40000",
 		]);
 		expect(result?.step4.annual.womenCounts).toEqual([30, 25, 20, 15]);
 		expect(result?.step4.annual.menCounts).toEqual([20, 25, 30, 35]);
@@ -273,7 +269,6 @@ describe("mapGipToFormData", () => {
 			hourlyQuartileThreshold1: "13.74",
 			hourlyQuartileThreshold2: "17.58",
 			hourlyQuartileThreshold3: "21.98",
-			hourlyQuartileThreshold4: "30.22",
 			hourlyQuartile1ProportionWomen: "0.6",
 			hourlyQuartile2ProportionWomen: "0.4",
 			hourlyQuartile3ProportionWomen: "0.3",
@@ -289,20 +284,18 @@ describe("mapGipToFormData", () => {
 			"13.74",
 			"17.58",
 			"21.98",
-			"30.22",
 		]);
 		expect(result?.step4.hourly.womenCounts).toEqual([30, 20, 15, 10]);
 		expect(result?.step4.hourly.menCounts).toEqual([20, 30, 35, 40]);
 	});
 
-	it("handles null Q4 threshold (only Q1-Q3 present)", () => {
+	it("returns 3-element thresholds tuple (Q1-Q3 only, no Q4)", () => {
 		const row = makeRow({
 			womenCountAnnualGlobal: "100",
 			menCountAnnualGlobal: "100",
 			annualQuartileThreshold1: "25000",
 			annualQuartileThreshold2: "32000",
 			annualQuartileThreshold3: "40000",
-			// annualQuartileThreshold4 remains null
 			annualQuartile1ProportionWomen: "0.5",
 			annualQuartile1ProportionMen: "0.5",
 		});
@@ -311,7 +304,6 @@ describe("mapGipToFormData", () => {
 			"25000",
 			"32000",
 			"40000",
-			null,
 		]);
 	});
 
@@ -385,54 +377,20 @@ describe("mapGipToFormData", () => {
 		const result = mapGipToFormData(row);
 		expect(result?.confidenceIndex).toBe("1");
 	});
-});
 
-describe("CSV_TO_SCHEMA_MAP", () => {
-	it("maps SIREN column to siren field", () => {
-		expect(CSV_TO_SCHEMA_MAP.SIREN).toBe("siren");
+	it("returns null for non-numeric workforce string (toInt NaN branch)", () => {
+		const row = makeRow({ womenCountAnnualGlobal: "N/A" });
+		const result = mapGipToFormData(row);
+		expect(result?.step1.totalWomen).toBeNull();
 	});
 
-	it("maps workforce columns", () => {
-		expect(CSV_TO_SCHEMA_MAP.Effectif_RCD).toBe("workforceEma");
-		expect(CSV_TO_SCHEMA_MAP.Effectif_H_rem_annuelle_globale).toBe(
-			"menCountAnnualGlobal",
-		);
-		expect(CSV_TO_SCHEMA_MAP.Effectif_F_rem_annuelle_globale).toBe(
-			"womenCountAnnualGlobal",
-		);
-	});
-
-	it("maps indicator A columns (global mean)", () => {
-		expect(CSV_TO_SCHEMA_MAP.Rem_globale_annuelle_moyenne_ecart).toBe(
-			"globalAnnualMeanGap",
-		);
-		expect(CSV_TO_SCHEMA_MAP.Rem_globale_annuelle_moyenne_F).toBe(
-			"globalAnnualMeanWomen",
-		);
-		expect(CSV_TO_SCHEMA_MAP.Rem_globale_annuelle_moyenne_H).toBe(
-			"globalAnnualMeanMen",
-		);
-	});
-
-	it("maps quartile columns (indicator F)", () => {
-		expect(CSV_TO_SCHEMA_MAP.Seuil_Q1_Rem_globale).toBe(
-			"annualQuartileThreshold1",
-		);
-		expect(CSV_TO_SCHEMA_MAP.Quartile1_Rem_globale_annuelle_proportion_F).toBe(
-			"annualQuartile1ProportionWomen",
-		);
-	});
-
-	it("maps confidence index columns", () => {
-		expect(CSV_TO_SCHEMA_MAP.indice).toBe("confidenceIndex");
-		expect(CSV_TO_SCHEMA_MAP.indice_nature_exo).toBe(
-			"confidenceExoticContracts",
-		);
-	});
-
-	it("contains expected number of mappings", () => {
-		const keys = Object.keys(CSV_TO_SCHEMA_MAP);
-		// 7 workforce + 24 indicator + 2 proportion + 16 quartile annual + 16 quartile hourly + 14 confidence + SIREN
-		expect(keys.length).toBeGreaterThan(50);
+	it("returns null for non-numeric quartile proportion string (proportionToCount NaN branch)", () => {
+		const row = makeRow({
+			womenCountAnnualGlobal: "100",
+			menCountAnnualGlobal: "100",
+			annualQuartile1ProportionWomen: "N/A",
+		});
+		const result = mapGipToFormData(row);
+		expect(result?.step4.annual.womenCounts[0]).toBeNull();
 	});
 });

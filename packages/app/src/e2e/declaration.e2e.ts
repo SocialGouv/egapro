@@ -36,11 +36,12 @@ test.describe("Declaration workflow", () => {
 
 	test("shows company name and SIREN in banner", async ({ page }) => {
 		await expect(page.getByText(/130 025 265/)).toBeVisible();
-		// Company name comes from external Weez API; may fall back to "Entreprise {siren}"
+		await expect(page.getByText("SIREN :")).toBeVisible();
 		await expect(
-			page.getByText(
-				/DIRECTION INTERMINISTERIELLE DU NUMERIQUE|Entreprise 130025265/,
-			),
+			page.locator("p.fr-text--bold").filter({
+				hasText:
+					/DIRECTION INTERMINISTERIELLE DU NUMERIQUE|Entreprise 130025265/,
+			}),
 		).toBeVisible();
 	});
 
@@ -112,17 +113,149 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 	});
 
-	test("step 4 - Proportion quartiles page structure", async ({ page }) => {
+	test("step 4 - inverted quartile table layout (rows = quartiles, columns = F/H/%F/%H)", async ({
+		page,
+	}) => {
 		await goToStep(page, 4);
 
 		await expect(page.getByText("Étape 4 sur 6")).toBeVisible();
 
-		// Verify quartile column headers exist in the table
+		// S1 — quartile labels live in rowheaders (rows are quartiles in the new layout)
 		await expect(
-			page.getByRole("columnheader", { name: "1er quartile" }).first(),
+			page.getByRole("rowheader", { name: /1er quartile/ }).first(),
 		).toBeVisible();
 		await expect(
-			page.getByRole("columnheader", { name: "4e quartile" }).first(),
+			page.getByRole("rowheader", { name: /4e quartile/ }).first(),
+		).toBeVisible();
+		// "Tous les salariés" total row exists in both tables
+		await expect(
+			page.getByRole("rowheader", { name: "Tous les salariés" }),
+		).toHaveCount(2);
+		// Header row exposes the new column "Nombre de femmes" / "Nombre d'hommes"
+		await expect(
+			page.getByRole("columnheader", { name: /Nombre de femmes/ }).first(),
+		).toBeVisible();
+		// Accordion present
+		await expect(
+			page.getByRole("button", { name: /Définitions et méthode de calcul/ }),
+		).toBeVisible();
+	});
+
+	test("step 4 - cascade: filling Q1 threshold updates Q2 lower bound live", async ({
+		page,
+	}) => {
+		await goToStep(page, 4);
+
+		// Scope to the annual table — the hourly table is pre-populated with
+		// GIP-MDS data for the test SIREN.
+		const annualTable = page.getByRole("table", {
+			name: "Rémunération annuelle brute moyenne",
+		});
+
+		// S2 — fill annual Q1 max (the only threshold input on the Q1 row)
+		const seuil1Annual = annualTable.getByRole("textbox", {
+			name: "Seuil maximum 1er quartile annuel",
+		});
+		await seuil1Annual.fill("20000");
+
+		// Q2 row's first cell is the lower-bound, computed from Q1 threshold
+		// + 0,01 → "20 000,01 €" (live cascade update).
+		const q2Row = annualTable.locator("tbody > tr").filter({
+			has: page.getByRole("rowheader", { name: "2e quartile" }),
+		});
+		await expect(q2Row.locator("td").first()).toHaveText("20 000,01 €");
+	});
+
+	test("step 4 - non-crescent thresholds trigger recap alert with anchors (S3)", async ({
+		page,
+	}) => {
+		await goToStep(page, 4);
+
+		// Fill non-crescent annual thresholds : 30000, 20000, 40000
+		await page
+			.getByRole("textbox", { name: "Seuil maximum 1er quartile annuel" })
+			.fill("30000");
+		await page
+			.getByRole("textbox", { name: "Seuil maximum 2e quartile annuel" })
+			.fill("20000");
+		await page
+			.getByRole("textbox", { name: "Seuil maximum 3e quartile annuel" })
+			.fill("40000");
+
+		// Fill hourly thresholds (valid) and all 8 counts to isolate the croissance error
+		await page
+			.getByRole("textbox", { name: "Seuil maximum 1er quartile horaire" })
+			.fill("10");
+		await page
+			.getByRole("textbox", { name: "Seuil maximum 2e quartile horaire" })
+			.fill("20");
+		await page
+			.getByRole("textbox", { name: "Seuil maximum 3e quartile horaire" })
+			.fill("30");
+		for (const ordinal of ["1er", "2e", "3e", "4e"] as const) {
+			await page
+				.getByRole("textbox", {
+					name: `Nombre de femmes ${ordinal} quartile annuel`,
+				})
+				.fill("1");
+			await page
+				.getByRole("textbox", {
+					name: `Nombre d'hommes ${ordinal} quartile annuel`,
+				})
+				.fill("1");
+			await page
+				.getByRole("textbox", {
+					name: `Nombre de femmes ${ordinal} quartile horaire`,
+				})
+				.fill("1");
+			await page
+				.getByRole("textbox", {
+					name: `Nombre d'hommes ${ordinal} quartile horaire`,
+				})
+				.fill("1");
+		}
+
+		await page.getByRole("button", { name: "Suivant" }).click();
+
+		// Recap alert with anchor links
+		const alert = page.getByRole("alert").first();
+		await expect(alert).toBeVisible();
+		await expect(alert).toContainText(/Le formulaire contient des erreurs/);
+		await expect(
+			alert
+				.getByRole("link")
+				.filter({
+					has: page.locator("text=/quartile/"),
+				})
+				.first(),
+		).toBeVisible();
+	});
+
+	test("step 4 - empty submission shows 'Le seuil est obligatoire' on threshold cells (S4)", async ({
+		page,
+	}) => {
+		await goToStep(page, 4);
+
+		// The test SIREN has GIP-MDS prefilled thresholds — clear them so the
+		// "all empty → required errors" path is exercised.
+		for (const ordinal of ["1er", "2e", "3e"] as const) {
+			await page
+				.getByRole("textbox", {
+					name: `Seuil maximum ${ordinal} quartile annuel`,
+				})
+				.fill("");
+			await page
+				.getByRole("textbox", {
+					name: `Seuil maximum ${ordinal} quartile horaire`,
+				})
+				.fill("");
+		}
+
+		await page.getByRole("button", { name: "Suivant" }).click();
+
+		// At least one error message per missing threshold
+		await expect(
+			page.getByText("Le seuil est obligatoire").first(),
 		).toBeVisible();
 	});
 

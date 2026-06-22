@@ -26,16 +26,18 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 		AUDIT_ACTIONS.DECLARATION_SUBMIT_SECOND,
 	"declaration.saveCompliancePath":
 		AUDIT_ACTIONS.DECLARATION_SAVE_COMPLIANCE_PATH,
-	"declaration.completeCompliancePath":
-		AUDIT_ACTIONS.DECLARATION_COMPLETE_COMPLIANCE_PATH,
+	"declaration.submitJointEvaluation":
+		AUDIT_ACTIONS.DECLARATION_SUBMIT_JOINT_EVALUATION,
 
 	// ── declaration sensitive query (returns GIP MDS data) ─
 	"declaration.getOrCreate": AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA,
+	"declaration.getStatusHistory": AUDIT_ACTIONS.DECLARATION_HISTORY_READ,
 
 	// ── cse opinion mutations ──────────────────────────────
 	"cseOpinion.saveOpinions": AUDIT_ACTIONS.CSE_OPINION_SAVE,
 	"cseOpinion.deleteFile": AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE,
 	"cseOpinion.finalize": AUDIT_ACTIONS.CSE_OPINION_FINALIZE,
+	"cseOpinion.setFileContentTypes": AUDIT_ACTIONS.CSE_OPINION_SET_FILE_TYPES,
 
 	// ── company mutations ──────────────────────────────────
 	"company.updateHasCse": AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE,
@@ -47,10 +49,18 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	// ── admin sensitive reads ─────────────────────────────
 	"adminDeclarations.search": AUDIT_ACTIONS.ADMIN_DECLARATIONS_SEARCH,
 	"adminDeclarations.getById": AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID,
+	"adminDeclarations.getRecap": AUDIT_ACTIONS.ADMIN_DECLARATIONS_GET_RECAP,
+
+	// ── admin declaration mutations ───────────────────────
+	"adminDeclarations.cancel": AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL,
 
 	// ── public searches ────────────────────────────────────
 	"publicReferents.search": AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH,
 	"publicReferents.getById": AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW,
+
+	// ── public stats reads ─────────────────────────────────
+	"publicStats.getCurrentCampaignRate":
+		AUDIT_ACTIONS.PUBLIC_STATS_GET_CURRENT_CAMPAIGN_RATE,
 
 	// ── admin settings mutations ──────────────────────────
 	"adminSettings.upsertCampaignDeadlines":
@@ -59,9 +69,21 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	// ── admin stats sensitive reads ──────────────────────
 	"adminStats.getCampaignProgression":
 		AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION,
+	"adminStats.getCampaignStats": AUDIT_ACTIONS.ADMIN_STATS_GET_CAMPAIGN_STATS,
+	"adminStats.getStepDurations": AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DURATIONS,
+	"adminStats.getStepDropoffRate":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DROPOFF_RATE,
+	"adminStats.getCompletionFunnel":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_COMPLETION_FUNNEL,
+	"adminStats.getMatomoFunnel": AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_FUNNEL,
 
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,
+
+	// ── declaration draft ─────────────────────────────────
+	"declarationDraft.get": AUDIT_ACTIONS.DRAFT_READ,
+	"declarationDraft.save": AUDIT_ACTIONS.DRAFT_SAVE,
+	"declarationDraft.clear": AUDIT_ACTIONS.DRAFT_CLEAR,
 
 	// ── mail ──────────────────────────────────────────────
 	"mail.resendReceipt": AUDIT_ACTIONS.MAIL_RECEIPT_RESEND,
@@ -227,4 +249,5 @@ const SENSITIVE_KEYS = new Set([
 	"accesskey",
 	"access_key",
 	"private_key",
+	"data",
 ]);

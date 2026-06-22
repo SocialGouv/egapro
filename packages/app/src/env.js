@@ -64,6 +64,13 @@ export const env = createEnv({
 		NEXTAUTH_URL: z.string().url(),
 		EGAPRO_GIP_MDS_API_URL: z.string().url().optional(),
 		EGAPRO_GIP_MDS_API_TOKEN: z.string().optional(),
+		// Matomo Reporting API — server-side token for the admin funnel widget.
+		// Optional: when absent the matomo service degrades to an empty funnel
+		// (the admin chart shows "no data") instead of throwing.
+		MATOMO_API_TOKEN: z.string().optional(),
+		// Server-side Matomo base URL for the Reporting API. Falls back to
+		// NEXT_PUBLIC_MATOMO_URL when unset.
+		MATOMO_API_URL: z.url().optional(),
 		EGAPRO_MOCK_SUIT_SANCTION: z.coerce.boolean().optional().default(false),
 		/**
 		 * Comma-separated list of emails that should be granted the admin role
@@ -84,19 +91,9 @@ export const env = createEnv({
 			.int()
 			.positive()
 			.default(365),
-		MAIL_ENABLED: z
-			.enum(["true", "false"])
-			.default("false")
-			.transform((v) => v === "true"),
-		SMTP_HOST: z.string().optional().default(""),
-		SMTP_PORT: z.coerce.number().int().positive().default(1025),
-		SMTP_USER: z.string().optional(),
-		SMTP_PASS: z.string().optional(),
-		SMTP_SECURE: z
-			.string()
-			.default("false")
-			.transform((v) => v.toLowerCase() === "true"),
-		MAIL_FROM: z.string().default("no-reply@egapro.local"),
+		// MAIL_*, SMTP_* are intentionally NOT declared here — they are consumed
+		// exclusively by the notifications worker (packages/notifications).
+		// See packages/notifications/README.md for the runtime config surface.
 		// Valkey cache URL — optional. When absent, the custom
 		// cache handler (cache-handler.cjs) gracefully degrades to no-op.
 		// The handler reads process.env.VALKEY_URL directly (it runs outside
@@ -145,19 +142,14 @@ export const env = createEnv({
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 		EGAPRO_GIP_MDS_API_URL: process.env.EGAPRO_GIP_MDS_API_URL,
 		EGAPRO_GIP_MDS_API_TOKEN: process.env.EGAPRO_GIP_MDS_API_TOKEN,
+		MATOMO_API_TOKEN: process.env.MATOMO_API_TOKEN,
+		MATOMO_API_URL: process.env.MATOMO_API_URL,
 		EGAPRO_MOCK_SUIT_SANCTION: process.env.EGAPRO_MOCK_SUIT_SANCTION,
 		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS:
 			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,
 		EGAPRO_AUDIT_RETENTION_LONG_DAYS:
 			process.env.EGAPRO_AUDIT_RETENTION_LONG_DAYS,
-		MAIL_ENABLED: process.env.MAIL_ENABLED,
-		SMTP_HOST: process.env.SMTP_HOST,
-		SMTP_PORT: process.env.SMTP_PORT,
-		SMTP_USER: process.env.SMTP_USER,
-		SMTP_PASS: process.env.SMTP_PASS,
-		SMTP_SECURE: process.env.SMTP_SECURE,
-		MAIL_FROM: process.env.MAIL_FROM,
 		VALKEY_URL: process.env.VALKEY_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,

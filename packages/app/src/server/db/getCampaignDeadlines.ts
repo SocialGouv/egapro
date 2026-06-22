@@ -2,7 +2,10 @@ import { eq } from "drizzle-orm";
 import { cache } from "react";
 
 import type { CampaignDeadlines } from "~/modules/domain";
-import { getDefaultCampaignDeadlines } from "~/modules/domain";
+import {
+	getDefaultCampaignDeadlines,
+	getPathChoiceDeadline,
+} from "~/modules/domain";
 
 import { db } from ".";
 import { campaignDeadlines } from "./schema";
@@ -43,6 +46,7 @@ export const getCampaignDeadlines = cache(
 			decl2ModificationDeadline: parseDate(row.decl2ModificationDeadline),
 			decl2JustificationDeadline: parseDate(row.decl2JustificationDeadline),
 			decl2JointEvaluationDeadline: parseDate(row.decl2JointEvaluationDeadline),
+			pathChoiceDeadline: getPathChoiceDeadline(year),
 		};
 	},
 );

@@ -13,17 +13,21 @@ export type SchemaColumnComments = Record<string, Record<string, string>>;
 
 export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 	declaration: {
+		cancelled_at:
+			"Timestamp d'annulation administrative (soft-cancel). null = déclaration active. La déclaration est conservée intacte pour audit et transmission API SUIT.",
 		// ── Identity & meta (T2 — SUIT, not GIP-MDS) ──
 		siren: "SUIT: SIREN",
 		year: "SUIT: Annee",
 		status: "SUIT: Statut",
-		compliance_path: "SUIT: Parcours_conformite",
+		first_declaration_path_choice: "SUIT: Parcours_apres_declaration_1",
+		second_declaration_path_choice: "SUIT: Parcours_apres_declaration_2",
+		cse_required: "SUIT: Avis_CSE_requis",
+		rules_version: "SUIT: Version_regles",
 		total_women: "SUIT: Effectif_F_rem_annuelle_globale",
 		total_men: "SUIT: Effectif_H_rem_annuelle_globale",
 		created_at: "SUIT: Date_creation",
 		updated_at: "SUIT: Date_modification",
 		// ── Second declaration ──
-		second_declaration_status: "SUIT: Seconde_declaration.Statut",
 		second_decl_reference_period_start:
 			"SUIT: Seconde_declaration.Periode_reference_debut",
 		second_decl_reference_period_end:
@@ -56,7 +60,6 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		indicator_f_annual_threshold1: "GIP-MDS | SUIT: Seuil_Q1_Rem_globale",
 		indicator_f_annual_threshold2: "GIP-MDS | SUIT: Seuil_Q2_Rem_globale",
 		indicator_f_annual_threshold3: "GIP-MDS | SUIT: Seuil_Q3_Rem_globale",
-		indicator_f_annual_threshold4: "GIP-MDS | SUIT: Seuil_Q4_Rem_globale",
 		// Indicator F — quartile women proportions, annual (GIP-MDS → SUIT)
 		indicator_f_annual_women1:
 			"GIP-MDS | SUIT: Quartile1_Rem_globale_annuelle_proportion_F",
@@ -82,8 +85,6 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 			"GIP-MDS | SUIT: Seuil_Q2_Taux_horaire_global",
 		indicator_f_hourly_threshold3:
 			"GIP-MDS | SUIT: Seuil_Q3_Taux_horaire_global",
-		indicator_f_hourly_threshold4:
-			"GIP-MDS | SUIT: Seuil_Q4_Taux_horaire_global",
 		// Indicator F — quartile women proportions, hourly (GIP-MDS → SUIT)
 		indicator_f_hourly_women1:
 			"GIP-MDS | SUIT: Quartile1_Taux_horaire_global_proportion_F",
@@ -102,6 +103,23 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 			"GIP-MDS | SUIT: Quartile3_Taux_horaire_global_proportion_H",
 		indicator_f_hourly_men4:
 			"GIP-MDS | SUIT: Quartile4_Taux_horaire_global_proportion_H",
+		global_annual_mean_gap:
+			"GIP-MDS | SUIT: Rem_globale_annuelle_moyenne_ecart",
+		global_hourly_mean_gap: "GIP-MDS | SUIT: Taux_horaire_global_moyen_ecart",
+		variable_annual_mean_gap:
+			"GIP-MDS | SUIT: Rem_variable_annuelle_moyenne_ecart",
+		variable_hourly_mean_gap:
+			"GIP-MDS | SUIT: Taux_horaire_variable_moyen_ecart",
+		global_annual_median_gap:
+			"GIP-MDS | SUIT: Rem_globale_annuelle_médiane_ecart",
+		global_hourly_median_gap:
+			"GIP-MDS | SUIT: Taux_horaire_global_médian_ecart",
+		variable_annual_median_gap:
+			"GIP-MDS | SUIT: Rem_variable_annuelle_médiane_ecart",
+		variable_hourly_median_gap:
+			"GIP-MDS | SUIT: Taux_horaire_variable_médian_ecart",
+		variable_proportion_women: "GIP-MDS | SUIT: Proportion_variable_F",
+		variable_proportion_men: "GIP-MDS | SUIT: Proportion_variable_H",
 	},
 	company: {
 		name: "SUIT: Raison_sociale",
@@ -129,6 +147,20 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 	},
 	job_category: {
 		name: "SUIT: Indicateurs.G.Nom_categorie",
+	},
+	declaration_status_history: {
+		declaration_id:
+			"Référence vers la déclaration concernée. Append-only — chaque event capture une transition métier (submit / path_choice / *_submit / cse_opinion_submit / cancel / demarche_complete).",
+		event_type:
+			"Type d'event métier. Source de vérité de la trajectoire FSM (la colonne app_declaration.status est une projection dérivée du dernier event). Inclut step_change pour les transitions du stepper Indicateurs A–F (alimente le KPI K4).",
+		value:
+			"Charge utile facultative selon le type d'event. Pour path_choice: 'justify' | 'corrective_action' | 'joint_evaluation'. Pour step_change: 'from:N|to:M' (N peut être 'null' à la création).",
+		round:
+			"1 = première déclaration, 2 = seconde déclaration. Renseigné pour path_choice, second_declaration_submit, joint_evaluation_submit. Pour step_change : numéro de l'étape atteinte (toStep) — facilite l'agrégation côté SQL.",
+		actor_user_id:
+			"Auteur de l'event. NULL = event système (cron, demarche_complete, etc.).",
+		created_at:
+			"Timestamp d'émission de l'event (rétention permanente, hors purge CNIL applicable à audit.action_log).",
 	},
 	employee_category: {
 		women_count: "SUIT: Indicateurs.G.Effectif_F",

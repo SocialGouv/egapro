@@ -104,9 +104,14 @@ echo "[setup-worktree] Starting services: $SERVICES"
 docker compose --env-file "$ENV_FILE" up -d $SERVICES
 
 # Wait for Postgres health.
+# We check both internal (via docker exec) AND host-port reachability — on cold
+# start, pg_isready inside the container can return ready before Docker has
+# fully wired up the host port forwarding, causing drizzle-kit to fail with a
+# silent ECONNREFUSED hidden by its progress spinner.
 echo "[setup-worktree] Waiting for Postgres (port $POSTGRES_HOST_PORT)..."
 for _ in $(seq 1 60); do
-  if docker compose --env-file "$ENV_FILE" exec -T db pg_isready -U postgres >/dev/null 2>&1; then
+  if docker compose --env-file "$ENV_FILE" exec -T db pg_isready -U postgres >/dev/null 2>&1 \
+     && PGPASSWORD=postgres psql -h localhost -p "$POSTGRES_HOST_PORT" -U postgres -d egapro -c 'SELECT 1' >/dev/null 2>&1; then
     echo "[setup-worktree] Postgres ready."
     break
   fi
@@ -124,8 +129,23 @@ fi
 # Run Drizzle migrations against this worktree's DB.
 # drizzle-kit reads process.env directly and does not load .env.local
 # (unlike Next.js), so source the file into the subshell before running.
+# Retry up to 3 times: drizzle-kit's progress spinner hides errors, and
+# transient connect failures can occur on cold-start before Postgres is fully
+# accepting host-port queries even though pg_isready returned ready.
 echo "[setup-worktree] Applying migrations..."
-(cd packages/app && set -a && . ./.env.local && set +a && pnpm db:migrate)
+MIGRATE_OK=0
+for ATTEMPT in 1 2 3; do
+  if (cd packages/app && set -a && . ./.env.local && set +a && pnpm db:migrate); then
+    MIGRATE_OK=1
+    break
+  fi
+  echo "[setup-worktree] Migration attempt $ATTEMPT failed, retrying in 3s..." >&2
+  sleep 3
+done
+if [ "$MIGRATE_OK" -ne 1 ]; then
+  echo "[setup-worktree] Migrations failed after 3 attempts." >&2
+  exit 1
+fi
 
 echo ""
 echo "[setup-worktree] Done. Worktree $N ready."

@@ -1,8 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useRef } from "react";
 
-import type { CampaignDeadlines } from "~/modules/domain";
+import type {
+	CampaignDeadlines,
+	DeclarationDisplayContext,
+} from "~/modules/domain";
 import styles from "./DeclarationProcessPanel.module.scss";
 import { getStepStatuses, VerticalStepper } from "./VerticalStepper";
 
@@ -22,8 +26,8 @@ type Props = {
 	year: number;
 	lastActionDate: string | null;
 	variant: PanelVariant;
-	compliancePath: string | null;
-	secondDeclarationStatus: string | null;
+	displayContext: DeclarationDisplayContext;
+	hasSubmittedSecondDeclaration: boolean;
 	siren: string;
 	ctaHref: string;
 };
@@ -33,8 +37,8 @@ export function DeclarationProcessPanel({
 	year,
 	lastActionDate,
 	variant,
-	compliancePath,
-	secondDeclarationStatus,
+	displayContext,
+	hasSubmittedSecondDeclaration,
 	siren,
 	ctaHref,
 }: Props) {
@@ -63,16 +67,18 @@ export function DeclarationProcessPanel({
 				</div>
 				<div className={styles.panelContent}>
 					<div>
-						<PanelHeader lastActionDate={lastActionDate} year={year} />
+						<PanelHeader
+							lastActionDate={lastActionDate}
+							siren={siren}
+							year={year}
+						/>
 						{(variant === "start" || variant === "compliance_choice") && (
 							<StartAlert />
 						)}
 						<VerticalStepper
 							campaignDeadlines={campaignDeadlines}
-							compliancePath={compliancePath}
-							secondDeclarationSubmitted={
-								secondDeclarationStatus === "submitted"
-							}
+							displayContext={displayContext}
+							secondDeclarationSubmitted={hasSubmittedSecondDeclaration}
 							siren={siren}
 							step1={step1}
 							step2={step2}
@@ -99,14 +105,16 @@ export function DeclarationProcessPanel({
 function getCtaLabel(variant: PanelVariant): string {
 	if (variant === "closed") return "Voir la déclaration";
 	if (variant === "start") return "Commencer la déclaration";
-	return "Continuer la déclaration";
+	return "Continuer";
 }
 
 function PanelHeader({
 	year,
+	siren,
 	lastActionDate,
 }: {
 	year: number;
+	siren: string;
 	lastActionDate: string | null;
 }) {
 	return (
@@ -124,9 +132,12 @@ function PanelHeader({
 						<span>Dernière action le {lastActionDate}</span>
 					</>
 				)}
-				<button className={`fr-link ${styles.historyLink}`} type="button">
+				<Link
+					className={`fr-link ${styles.historyLink}`}
+					href={`/mon-espace/historique/${siren}/${year}`}
+				>
 					Voir l'historique
-				</button>
+				</Link>
 			</div>
 		</div>
 	);

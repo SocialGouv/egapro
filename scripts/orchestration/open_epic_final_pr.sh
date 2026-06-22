@@ -58,7 +58,7 @@ SUB_LINES=$(gh api graphql -f query="{
 
 BODY="Intégration finale de l'epic #${EPIC} — **${EPIC_TITLE}**.
 
-Cette PR rassemble les commits squashés de chaque sous-ticket validé par la pipeline. Chaque sous-ticket a déjà passé : CI verte, validators IA (validator / structural-auditor / rgaa-auditor / security-auditor / functional-validator), Sonar Quality Gate, et réponse aux review bots. La fidélité visuelle vs. Figma a été vérifiée par \`code-dev\` lui-même via le MCP \`figma-dev\`. Cette PR est le **point unique de revue humaine** pour l'epic.
+Cette PR rassemble les commits squashés de chaque sous-ticket validé par la pipeline. Chaque sous-ticket a déjà passé : tests écrits/validés par \`tu-dev\` (TU + intégration), CI verte, validators IA (validator / structural-auditor / rgaa-auditor / security-auditor / functional-validator), Sonar Quality Gate, et réponse aux review bots. La fidélité visuelle vs. Figma a été vérifiée par \`code-dev\` lui-même via le MCP \`figma-dev\`. Cette PR est le **point unique de revue humaine** pour l'epic.
 
 ## Sous-tickets
 
@@ -69,10 +69,16 @@ ${SUB_LINES:-_(aucun sous-ticket trouvé)_}
 - Branche d'intégration : \`${BRANCH}\` (rebasée régulièrement sur \`alpha\` pendant l'exécution)
 - Une fois cette PR mergée dans \`alpha\`, les sous-tickets se fermeront automatiquement à la prochaine release (\`alpha → master\`) via les \`Closes #N\` ci-dessus."
 
+# Conventional-commits prefix so the Semantic PR check passes (alpha base
+# requires a `<type>(<scope>): <subject>` shape). We pick `feat(epic)` since
+# every epic delivers user-facing changes ; the epic number then disambiguates
+# multiple in-flight epics.
+PR_TITLE="feat(epic): #${EPIC} — ${EPIC_TITLE}"
+
 PR_URL=$(gh pr create \
     --base alpha \
     --head "$BRANCH" \
-    --title "Epic #${EPIC} — ${EPIC_TITLE}" \
+    --title "$PR_TITLE" \
     --body "$BODY" 2>&1) || {
     echo "[open_epic_final_pr] ERROR: gh pr create failed:" >&2
     echo "$PR_URL" >&2

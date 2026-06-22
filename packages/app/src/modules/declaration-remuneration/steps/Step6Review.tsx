@@ -2,10 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
-import { computeGap, GAP_ALERT_THRESHOLD } from "~/modules/domain";
+import { trackFunnelComplete } from "~/modules/analytics";
+import {
+	computeGap,
+	GAP_ALERT_THRESHOLD,
+	getCompanySizeRange,
+} from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
+import { getCurrentStageHref } from "../shared/complianceNavigation";
 import { FormActions } from "../shared/FormActions";
+import {
+	DECLARATION_FUNNEL,
+	declarationFunnelDimensions,
+} from "../shared/funnelConfig";
 import { NextStepsBox } from "../shared/NextStepsBox";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
@@ -28,31 +38,44 @@ function hasAnyHighGap(gaps: (number | null)[]): boolean {
 type Props = {
 	declaration: {
 		siren: string;
-		totalWomen: number | null;
-		totalMen: number | null;
 		status: string | null;
 	};
+	// Official GIP/DSN workforce — canonical source for the Matomo size bucket
+	// (see StepPageClient), kept consistent with all business decisions.
+	companyWorkforce: number | null;
 	declarationYear: number;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
 	step5Categories?: EmployeeCategoryRow[];
 	isSubmitted?: boolean;
+	hasCse?: boolean | null;
 };
 
 export function Step6Review({
 	declaration,
+	companyWorkforce,
 	declarationYear,
 	step2Data,
 	step3Data,
 	step4Data,
 	step5Categories = [],
 	isSubmitted = false,
+	hasCse = null,
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: () => {
+			trackFunnelComplete(
+				DECLARATION_FUNNEL,
+				declarationFunnelDimensions(
+					declarationYear,
+					companyWorkforce !== null
+						? getCompanySizeRange(companyWorkforce)
+						: undefined,
+				),
+			);
 			router.push("/declaration-remuneration/parcours-conformite");
 		},
 	});
@@ -136,7 +159,11 @@ export function Step6Review({
 	}
 
 	return (
-		<form className={stepStyles.formColumn} onSubmit={handleSubmit}>
+		<form
+			autoComplete="off"
+			className={stepStyles.formColumn}
+			onSubmit={handleSubmit}
+		>
 			{/* Title + save status */}
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 				<div className="fr-col">
@@ -145,13 +172,13 @@ export function Step6Review({
 					</h1>
 				</div>
 				<div className="fr-col-auto">
-					<SavedIndicator />
+					<SavedIndicator hasData={true} />
 				</div>
 			</div>
 
 			<StepIndicator currentStep={6} />
 
-			<p className="fr-mb-0">
+			<p className={`fr-mb-0 ${stepStyles.intro}`}>
 				Vérifiez que toutes les informations ont été complétées avant de
 				soumettre votre déclaration aux services du ministère chargé du travail.
 			</p>
@@ -172,18 +199,15 @@ export function Step6Review({
 				/>
 			)}
 
-			{isSubmitted ? (
-				<FormActions
-					nextHref="/declaration-remuneration/parcours-conformite"
-					nextLabel="Suivant"
-					previousHref="/"
-				/>
-			) : (
-				<FormActions
-					nextLabel="Suivant"
-					previousHref="/declaration-remuneration/etape/5"
-				/>
-			)}
+			<FormActions
+				nextHref={
+					isSubmitted
+						? getCurrentStageHref(declaration.status, hasCse)
+						: undefined
+				}
+				nextLabel="Suivant"
+				previousHref="/declaration-remuneration/etape/5"
+			/>
 
 			{!isSubmitted && (
 				<SubmitDeclarationModal

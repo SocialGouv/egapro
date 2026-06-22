@@ -1,5 +1,6 @@
-import { and, desc, eq, getTableColumns, lt } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, isNull, lt, ne } from "drizzle-orm";
 
+import { computeIndicatorPercentages } from "~/modules/declaration-remuneration/shared/computeIndicatorPercentages";
 import type {
 	Step2Data,
 	Step3Data,
@@ -12,6 +13,55 @@ import {
 } from "~/server/db/schema";
 
 type DeclarationRow = typeof declarations.$inferSelect;
+
+export function activeDeclarationFilter(siren: string, year: number) {
+	return and(
+		eq(declarations.siren, siren),
+		eq(declarations.year, year),
+		isNull(declarations.cancelledAt),
+	);
+}
+
+type PercentagesTx = {
+	select: () => {
+		from: (table: typeof declarations) => {
+			where: (predicate: ReturnType<typeof and>) => {
+				limit: (n: number) => Promise<DeclarationRow[]>;
+			};
+		};
+	};
+	update: (table: typeof declarations) => {
+		set: (values: Record<string, unknown>) => {
+			where: (predicate: ReturnType<typeof and>) => Promise<unknown>;
+		};
+	};
+};
+
+type DraftPurgeTx = PercentagesTx;
+
+export async function applyPercentagesAfterUpdate(
+	tx: PercentagesTx,
+	siren: string,
+	year: number,
+): Promise<void> {
+	const [fresh] = await tx
+		.select()
+		.from(declarations)
+		.where(activeDeclarationFilter(siren, year))
+		.limit(1);
+	if (!fresh) return;
+	const percentages = computeIndicatorPercentages(fresh);
+	const percentagesForDb = Object.fromEntries(
+		Object.entries(percentages).map(([k, v]) => [
+			k,
+			v === null ? null : v.toString(),
+		]),
+	);
+	await tx
+		.update(declarations)
+		.set(percentagesForDb)
+		.where(activeDeclarationFilter(siren, year));
+}
 
 /**
  * Map a declaration row to the indicator-form step shapes (steps 2, 3, 4).
@@ -69,7 +119,7 @@ export function mapToStepData(d: DeclarationRow): {
 					men: d.indicatorFAnnualMen3 ?? undefined,
 				},
 				{
-					threshold: d.indicatorFAnnualThreshold4 ?? "",
+					threshold: undefined,
 					women: d.indicatorFAnnualWomen4 ?? undefined,
 					men: d.indicatorFAnnualMen4 ?? undefined,
 				},
@@ -91,7 +141,7 @@ export function mapToStepData(d: DeclarationRow): {
 					men: d.indicatorFHourlyMen3 ?? undefined,
 				},
 				{
-					threshold: d.indicatorFHourlyThreshold4 ?? "",
+					threshold: undefined,
 					women: d.indicatorFHourlyWomen4 ?? undefined,
 					men: d.indicatorFHourlyMen4 ?? undefined,
 				},
@@ -241,7 +291,7 @@ export async function fetchPreviousYearJobCategories(
 			and(
 				eq(declarations.siren, siren),
 				lt(declarations.year, currentYear),
-				eq(declarations.status, "submitted"),
+				ne(declarations.status, "draft"),
 			),
 		)
 		.orderBy(desc(declarations.year))
@@ -269,8 +319,25 @@ export async function fetchPreviousYearJobCategories(
 	};
 }
 
-type JobCategoryRow = typeof jobCategories.$inferSelect;
-type EmployeeCategoryDbRow = typeof employeeCategories.$inferSelect;
+type JobCategoryRow = Pick<
+	typeof jobCategories.$inferSelect,
+	"id" | "name" | "categoryIndex"
+>;
+type EmployeeCategoryDbRow = Pick<
+	typeof employeeCategories.$inferSelect,
+	| "jobCategoryId"
+	| "declarationType"
+	| "womenCount"
+	| "menCount"
+	| "annualBaseWomen"
+	| "annualBaseMen"
+	| "annualVariableWomen"
+	| "annualVariableMen"
+	| "hourlyBaseWomen"
+	| "hourlyBaseMen"
+	| "hourlyVariableWomen"
+	| "hourlyVariableMen"
+>;
 
 export function mapToEmployeeCategoryRows(
 	jobs: JobCategoryRow[],
@@ -298,4 +365,31 @@ export function mapToEmployeeCategoryRows(
 				hourlyVariableMen: emp?.hourlyVariableMen ?? null,
 			};
 		});
+}
+
+export async function purgeDraftSlice(
+	tx: DraftPurgeTx,
+	siren: string,
+	year: number,
+	kind: string,
+): Promise<void> {
+	const [row] = await tx
+		.select()
+		.from(declarations)
+		.where(activeDeclarationFilter(siren, year))
+		.limit(1);
+
+	if (!row?.draft) return;
+
+	const current = row.draft as Record<string, unknown>;
+	const { [kind]: _removed, ...remaining } = current;
+	const isEmpty = Object.keys(remaining).length === 0;
+
+	await tx
+		.update(declarations)
+		.set({
+			draft: isEmpty ? null : remaining,
+			draftUpdatedAt: isEmpty ? null : new Date(),
+		})
+		.where(activeDeclarationFilter(siren, year));
 }

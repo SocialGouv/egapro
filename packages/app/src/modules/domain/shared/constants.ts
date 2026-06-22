@@ -21,3 +21,13 @@ export const MAX_CSE_FILES = 4;
 
 /** First year the Egapro platform started collecting declarations. */
 export const FIRST_DECLARATION_YEAR = 2018;
+
+// Quartile thresholds
+/** Number of quartiles in the pay gap table. */
+export const QUARTILE_COUNT = 4;
+
+/** Number of user-entered thresholds (Q4 has no upper threshold). */
+export const QUARTILE_THRESHOLD_COUNT = 3;
+
+/** Minimum increment in € applied to the previous threshold to compute the next quartile's lower bound. */
+export const QUARTILE_MIN_INCREMENT = 0.01;

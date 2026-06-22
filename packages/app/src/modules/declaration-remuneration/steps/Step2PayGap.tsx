@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
@@ -11,6 +11,10 @@ import { updateStep2Schema } from "../schemas";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP2_ROWS } from "../shared/devFillData";
+import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
+import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
+import { useDraftAutoSave } from "../shared/draft/useDraftAutoSave";
+import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
@@ -25,12 +29,14 @@ import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapField, Step2Data } from "../types";
 
 type Step2PayGapProps = {
+	declarationSiren: string;
 	declarationYear: number;
 	initialData: Step2Data;
 	gipPrefillData?: GipPrefillData;
 };
 
 export function Step2PayGap({
+	declarationSiren,
 	declarationYear,
 	initialData,
 	gipPrefillData,
@@ -50,17 +56,57 @@ export function Step2PayGap({
 
 	const hasInitialData = hasSavedData;
 
+	const dbValues = useMemo(
+		() =>
+			Object.fromEntries(
+				Object.entries(initialData).map(([k, v]) => [k, padDecimalToTwo(v)]),
+			) as Step2Data,
+		[initialData],
+	);
+
+	const {
+		draft,
+		setField,
+		clearDraft,
+		hasDraft,
+		isLoadingDraft,
+		isSaving,
+		isPendingSave,
+	} = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: 2,
+		kind: "main",
+		dbValues,
+	});
+
 	const form = useZodForm(updateStep2Schema, { defaultValues });
+
+	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
+		(Object.keys(d) as Array<keyof Step2Data>).forEach((key) => {
+			const value = d[key];
+			if (value !== undefined) form.setValue(key, value as string);
+		});
+	});
+
+	useDraftAutoSave(form, draftHydrated, (values) =>
+		setField(values as Step2Data),
+	);
 
 	const formData = form.watch();
 	const rows = step2ToRows(formData as Step2Data);
 
-	const [saved, setSaved] = useState(hasInitialData);
+	const hasData = hasInitialData || hasDraft;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const mutation = api.declaration.updateStep2.useMutation({
-		onSuccess: () => router.push("/declaration-remuneration/etape/3"),
+		onSuccess: () => {
+			clearDraft();
+			router.push("/declaration-remuneration/etape/3");
+		},
 	});
+
+	if (!draftHydrated) return <DraftLoadingState />;
 
 	function handleRowChange(index: number, field: PayGapField, value: string) {
 		const normalized = normalizeDecimalInput(value);
@@ -68,7 +114,6 @@ export function Step2PayGap({
 		if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
 		const fieldName = getStep2FieldName(index, field);
 		form.setValue(fieldName, normalized);
-		setSaved(false);
 	}
 
 	const onSubmit = form.handleSubmit(() => {
@@ -84,8 +129,15 @@ export function Step2PayGap({
 	});
 
 	return (
-		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
+		<form
+			autoComplete="off"
+			className={common.flexColumnGap2}
+			onSubmit={onSubmit}
+		>
 			<StepTitleRow
+				hasData={hasData}
+				isPendingSave={isPendingSave}
+				isSaving={isSaving}
 				onDevFill={() => {
 					DEV_STEP2_ROWS.forEach((row, i) => {
 						const womenField = getStep2FieldName(i, "womenValue");
@@ -93,9 +145,7 @@ export function Step2PayGap({
 						form.setValue(womenField, padDecimalToTwo(row.womenValue));
 						form.setValue(menField, padDecimalToTwo(row.menValue));
 					});
-					setSaved(false);
 				}}
-				saved={saved}
 				title={
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {declarationYear}
@@ -105,7 +155,6 @@ export function Step2PayGap({
 
 			<StepIndicator currentStep={2} />
 
-			{/* Introduction */}
 			<div className={common.flexColumnGap1}>
 				<p className="fr-mb-0">
 					Ces indicateurs mesurent la différence de rémunération, moyenne et
@@ -131,7 +180,6 @@ export function Step2PayGap({
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 			</div>
 
-			{/* Data section */}
 			<div className={common.dataSection}>
 				<div className={common.flexColumnGapHalf}>
 					<PayGapTable
@@ -195,7 +243,6 @@ export function Step2PayGap({
 			/>
 
 			<FormActions
-				className="fr-mt-0"
 				isSubmitting={mutation.isPending}
 				mimoquageNextHref={
 					hasSavedData ? "/declaration-remuneration/etape/3" : undefined

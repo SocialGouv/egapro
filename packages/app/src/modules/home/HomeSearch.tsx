@@ -1,6 +1,6 @@
 import Image from "next/image";
-
 import styles from "./HomeSearch.module.scss";
+import { HomeSearchForm } from "./HomeSearchForm";
 
 /** Company search section by SIREN, region, department or sector. */
 export function HomeSearch() {
@@ -45,108 +45,7 @@ export function HomeSearch() {
 					</div>
 
 					<search className="fr-col-12 fr-col-md-9">
-						<form
-							action="/index-egapro/recherche"
-							aria-label="Rechercher une entreprise"
-							method="GET"
-						>
-							<div className="fr-input-group">
-								<label className="fr-label" htmlFor="search-query">
-									Numéro Siren ou le nom de l&apos;entreprise
-									<span className="fr-hint-text">
-										Le numéro Siren se compose de 9 chiffres
-									</span>
-								</label>
-								<input
-									className="fr-input"
-									id="search-query"
-									name="query"
-									placeholder="[siren] [raison sociale]"
-									type="search"
-								/>
-							</div>
-
-							<div className="fr-grid-row fr-grid-row--gutters">
-								<div className="fr-col-12 fr-col-md-4">
-									<div className="fr-select-group">
-										<label className="fr-label" htmlFor="search-region">
-											Région
-										</label>
-										<select
-											className="fr-select"
-											defaultValue=""
-											id="search-region"
-											name="region"
-										>
-											<option disabled hidden value="">
-												Sélectionner une option
-											</option>
-											<option value="11">Île-de-France</option>
-											<option value="24">Centre-Val de Loire</option>
-											<option value="27">Bourgogne-Franche-Comté</option>
-											<option value="28">Normandie</option>
-											<option value="32">Hauts-de-France</option>
-											<option value="44">Grand Est</option>
-											<option value="52">Pays de la Loire</option>
-											<option value="53">Bretagne</option>
-											<option value="75">Nouvelle-Aquitaine</option>
-											<option value="76">Occitanie</option>
-											<option value="84">Auvergne-Rhône-Alpes</option>
-											<option value="93">Provence-Alpes-Côte d'Azur</option>
-											<option value="94">Corse</option>
-											<option value="01">Guadeloupe</option>
-											<option value="02">Martinique</option>
-											<option value="03">Guyane</option>
-											<option value="04">La Réunion</option>
-											<option value="06">Mayotte</option>
-										</select>
-									</div>
-								</div>
-
-								<div className="fr-col-12 fr-col-md-4">
-									<div className="fr-select-group">
-										<label className="fr-label" htmlFor="search-departement">
-											Département
-										</label>
-										<select
-											className="fr-select"
-											defaultValue=""
-											id="search-departement"
-											name="departement"
-										>
-											<option disabled hidden value="">
-												Sélectionner une option
-											</option>
-										</select>
-									</div>
-								</div>
-
-								<div className="fr-col-12 fr-col-md-4">
-									<div className="fr-select-group">
-										<label className="fr-label" htmlFor="search-secteur">
-											Secteur d'activité
-										</label>
-										<select
-											className="fr-select"
-											defaultValue=""
-											id="search-secteur"
-											name="secteur"
-										>
-											<option disabled hidden value="">
-												Sélectionner une option
-											</option>
-										</select>
-									</div>
-								</div>
-							</div>
-
-							<button
-								className="fr-btn fr-btn--secondary fr-icon-search-line fr-btn--icon-right fr-mt-2w"
-								type="submit"
-							>
-								Rechercher
-							</button>
-						</form>
+						<HomeSearchForm />
 					</search>
 				</div>
 			</div>

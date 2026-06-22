@@ -31,6 +31,7 @@ describe("Step5EmployeeCategories dev fill", () => {
 		const user = userEvent.setup();
 		render(
 			<Step5EmployeeCategories
+				declarationSiren="123456789"
 				declarationYear={2025}
 				maxMen={130}
 				maxWomen={120}

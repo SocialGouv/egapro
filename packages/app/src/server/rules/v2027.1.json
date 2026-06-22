@@ -1,0 +1,285 @@
+{
+	"version": "2027.1",
+	"effectiveFrom": "2027-03-01",
+	"effectiveUntil": "2028-02-28",
+	"description": "Entrée en vigueur V2 — 6 ind A-F obligatoires 50+, 7e ind G obligatoire 150+ (triennal an 1 pour 150-249, annuel 250+). FSM avec convergence : 8 états. Modèle event-sourced (T8) : applyAction émet des events typés persistés dans declaration_status_history. La projection declarations.status / first|second_declaration_path_choice est dérivée du dernier event de chaque type.",
+
+	"thresholds": {
+		"gapAlertPercent": 5,
+		"phase2SizeMin": 100,
+		"indicatorGAnnualSizeMin": 250,
+		"indicatorGTriennialSizeMin": 150,
+		"voluntarySizeMax": 50,
+		"mandatorySizeMin": 50
+	},
+
+	"stages": [
+		{ "id": 1, "name": "Déclaration des indicateurs de rémunération" },
+		{
+			"id": 2,
+			"name": "(1ère déclaration) Choix du parcours de mise en conformité"
+		},
+		{ "id": 3, "name": "Actions correctives et seconde déclaration" },
+		{
+			"id": 4,
+			"name": "(2e déclaration) Choix du parcours de mise en conformité"
+		},
+		{ "id": 5, "name": "Évaluation conjointe des rémunérations" },
+		{ "id": 6, "name": "Déposer le ou les avis CSE" },
+		{
+			"id": 7,
+			"name": "Finalisation - Démarche des indicateurs de rémunération"
+		}
+	],
+
+	"states": [
+		{ "id": "draft", "stage": null },
+		{ "id": "awaiting_compliance_path_choice", "stage": 2 },
+		{ "id": "corrective_actions_chosen", "stage": 3 },
+		{ "id": "joint_evaluation_chosen", "stage": 5 },
+		{ "id": "awaiting_revision_choice", "stage": 4 },
+		{ "id": "revised_joint_evaluation_chosen", "stage": 5 },
+		{ "id": "awaiting_cse_opinion", "stage": 6 },
+		{ "id": "demarche_completed", "stage": 7 }
+	],
+
+	"computations": {
+		"phase2Required": {
+			"all": [
+				{ "fact": "workforce", "op": ">=", "threshold": "phase2SizeMin" },
+				{ "fact": "indicatorGCalculated", "op": "==", "value": true },
+				{ "fact": "gap", "op": ">=", "threshold": "gapAlertPercent" }
+			]
+		},
+		"cseRequired": {
+			"all": [
+				{ "fact": "workforce", "op": ">=", "threshold": "phase2SizeMin" },
+				{ "fact": "hasCse", "op": "==", "value": true }
+			]
+		},
+		"indicatorGRequired": {
+			"any": [
+				{
+					"fact": "workforce",
+					"op": ">=",
+					"threshold": "indicatorGAnnualSizeMin"
+				},
+				{
+					"all": [
+						{
+							"fact": "workforce",
+							"op": ">=",
+							"threshold": "indicatorGTriennialSizeMin"
+						},
+						{
+							"fact": "workforce",
+							"op": "<",
+							"threshold": "indicatorGAnnualSizeMin"
+						},
+						{ "fact": "isTriennialYear", "op": "==", "value": true }
+					]
+				}
+			]
+		}
+	},
+
+	"transitions": [
+		{
+			"id": "submit_to_compliance_path_choice",
+			"from": ["draft"],
+			"action": "submit",
+			"guard": { "compute": "phase2Required" },
+			"to": "awaiting_compliance_path_choice",
+			"events": [{ "type": "submit" }]
+		},
+		{
+			"id": "submit_to_cse_opinion_directly",
+			"from": ["draft"],
+			"action": "submit",
+			"guard": {
+				"all": [
+					{ "not": { "compute": "phase2Required" } },
+					{ "compute": "cseRequired" }
+				]
+			},
+			"to": "awaiting_cse_opinion",
+			"events": [{ "type": "submit" }]
+		},
+		{
+			"id": "submit_to_demarche_completed_directly",
+			"from": ["draft"],
+			"action": "submit",
+			"guard": {
+				"all": [
+					{ "not": { "compute": "phase2Required" } },
+					{ "not": { "compute": "cseRequired" } }
+				]
+			},
+			"to": "demarche_completed",
+			"events": [{ "type": "submit" }, { "type": "demarche_complete" }]
+		},
+
+		{
+			"id": "choose_path_initial_justify_with_cse",
+			"from": ["awaiting_compliance_path_choice"],
+			"action": "choose_compliance_path",
+			"matchPayload": { "path": "justify" },
+			"guard": { "fact": "cseRequired", "op": "==", "value": true },
+			"to": "awaiting_cse_opinion",
+			"events": [{ "type": "path_choice", "value": "justify", "round": 1 }]
+		},
+		{
+			"id": "choose_path_initial_justify_without_cse",
+			"from": ["awaiting_compliance_path_choice"],
+			"action": "choose_compliance_path",
+			"matchPayload": { "path": "justify" },
+			"guard": { "fact": "cseRequired", "op": "==", "value": false },
+			"to": "demarche_completed",
+			"events": [
+				{ "type": "path_choice", "value": "justify", "round": 1 },
+				{ "type": "demarche_complete" }
+			]
+		},
+		{
+			"id": "choose_path_initial_corrective_action",
+			"from": ["awaiting_compliance_path_choice"],
+			"action": "choose_compliance_path",
+			"matchPayload": { "path": "corrective_action" },
+			"to": "corrective_actions_chosen",
+			"events": [
+				{ "type": "path_choice", "value": "corrective_action", "round": 1 }
+			]
+		},
+		{
+			"id": "choose_path_initial_joint_evaluation",
+			"from": ["awaiting_compliance_path_choice"],
+			"action": "choose_compliance_path",
+			"matchPayload": { "path": "joint_evaluation" },
+			"to": "joint_evaluation_chosen",
+			"events": [
+				{ "type": "path_choice", "value": "joint_evaluation", "round": 1 }
+			]
+		},
+
+		{
+			"id": "submit_second_declaration_persistent_gap",
+			"from": ["corrective_actions_chosen"],
+			"action": "submit_second_declaration",
+			"guard": { "fact": "action.stillHasGap", "op": "==", "value": true },
+			"to": "awaiting_revision_choice",
+			"events": [{ "type": "second_declaration_submit", "round": 2 }]
+		},
+		{
+			"id": "submit_second_declaration_resolved_with_cse",
+			"from": ["corrective_actions_chosen"],
+			"action": "submit_second_declaration",
+			"guard": {
+				"all": [
+					{ "fact": "action.stillHasGap", "op": "==", "value": false },
+					{ "fact": "cseRequired", "op": "==", "value": true }
+				]
+			},
+			"to": "awaiting_cse_opinion",
+			"events": [{ "type": "second_declaration_submit", "round": 2 }]
+		},
+		{
+			"id": "submit_second_declaration_resolved_without_cse",
+			"from": ["corrective_actions_chosen"],
+			"action": "submit_second_declaration",
+			"guard": {
+				"all": [
+					{ "fact": "action.stillHasGap", "op": "==", "value": false },
+					{ "fact": "cseRequired", "op": "==", "value": false }
+				]
+			},
+			"to": "demarche_completed",
+			"events": [
+				{ "type": "second_declaration_submit", "round": 2 },
+				{ "type": "demarche_complete" }
+			]
+		},
+
+		{
+			"id": "submit_joint_evaluation_initial_with_cse",
+			"from": ["joint_evaluation_chosen"],
+			"action": "submit_joint_evaluation",
+			"guard": { "fact": "cseRequired", "op": "==", "value": true },
+			"to": "awaiting_cse_opinion",
+			"events": [{ "type": "joint_evaluation_submit", "round": 1 }]
+		},
+		{
+			"id": "submit_joint_evaluation_initial_without_cse",
+			"from": ["joint_evaluation_chosen"],
+			"action": "submit_joint_evaluation",
+			"guard": { "fact": "cseRequired", "op": "==", "value": false },
+			"to": "demarche_completed",
+			"events": [
+				{ "type": "joint_evaluation_submit", "round": 1 },
+				{ "type": "demarche_complete" }
+			]
+		},
+
+		{
+			"id": "choose_path_revised_justify_with_cse",
+			"from": ["awaiting_revision_choice"],
+			"action": "choose_compliance_path",
+			"matchPayload": { "path": "justify" },
+			"guard": { "fact": "cseRequired", "op": "==", "value": true },
+			"to": "awaiting_cse_opinion",
+			"events": [{ "type": "path_choice", "value": "justify", "round": 2 }]
+		},
+		{
+			"id": "choose_path_revised_justify_without_cse",
+			"from": ["awaiting_revision_choice"],
+			"action": "choose_compliance_path",
+			"matchPayload": { "path": "justify" },
+			"guard": { "fact": "cseRequired", "op": "==", "value": false },
+			"to": "demarche_completed",
+			"events": [
+				{ "type": "path_choice", "value": "justify", "round": 2 },
+				{ "type": "demarche_complete" }
+			]
+		},
+		{
+			"id": "choose_path_revised_joint_evaluation",
+			"from": ["awaiting_revision_choice"],
+			"action": "choose_compliance_path",
+			"matchPayload": { "path": "joint_evaluation" },
+			"to": "revised_joint_evaluation_chosen",
+			"events": [
+				{ "type": "path_choice", "value": "joint_evaluation", "round": 2 }
+			]
+		},
+
+		{
+			"id": "submit_joint_evaluation_revised_with_cse",
+			"from": ["revised_joint_evaluation_chosen"],
+			"action": "submit_joint_evaluation",
+			"guard": { "fact": "cseRequired", "op": "==", "value": true },
+			"to": "awaiting_cse_opinion",
+			"events": [{ "type": "joint_evaluation_submit", "round": 2 }]
+		},
+		{
+			"id": "submit_joint_evaluation_revised_without_cse",
+			"from": ["revised_joint_evaluation_chosen"],
+			"action": "submit_joint_evaluation",
+			"guard": { "fact": "cseRequired", "op": "==", "value": false },
+			"to": "demarche_completed",
+			"events": [
+				{ "type": "joint_evaluation_submit", "round": 2 },
+				{ "type": "demarche_complete" }
+			]
+		},
+
+		{
+			"id": "submit_cse_opinion",
+			"from": ["awaiting_cse_opinion", "demarche_completed"],
+			"action": "submit_cse_opinion",
+			"to": "demarche_completed",
+			"events": [
+				{ "type": "cse_opinion_submit" },
+				{ "type": "demarche_complete" }
+			]
+		}
+	]
+}

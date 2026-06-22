@@ -1,10 +1,33 @@
 import { describe, expect, it, vi } from "vitest";
-
+import { declarations } from "~/server/db/schema";
 import {
+	activeDeclarationFilter,
 	buildEmployeeCategoryValues,
 	mapToEmployeeCategoryRows,
 	mapToStepData,
 } from "../declarationHelpers";
+
+describe("activeDeclarationFilter", () => {
+	it("filters siren, year, and cancelled_at IS NULL", async () => {
+		const { PgDialect } = await import("drizzle-orm/pg-core");
+		const dialect = new PgDialect({ casing: "snake_case" });
+
+		const filter = activeDeclarationFilter("123456789", 2025);
+		expect(filter).toBeDefined();
+		const compiled = dialect.sqlToQuery(filter as never);
+
+		expect(compiled.sql).toMatch(/"siren"\s*=\s*\$1/);
+		expect(compiled.sql).toMatch(/"year"\s*=\s*\$2/);
+		expect(compiled.sql).toMatch(/"cancelled_at"\s+is\s+null/i);
+		expect(compiled.params).toEqual(["123456789", 2025]);
+	});
+
+	it("targets the declarations.cancelledAt column", () => {
+		const filter = activeDeclarationFilter("987654321", 2030);
+		expect(filter).toBeDefined();
+		expect(declarations.cancelledAt).toBeDefined();
+	});
+});
 
 describe("buildEmployeeCategoryValues", () => {
 	it("maps all fields from data to values object", () => {
@@ -352,7 +375,6 @@ describe("mapToStepData", () => {
 		indicatorFAnnualThreshold3: null,
 		indicatorFAnnualWomen3: null,
 		indicatorFAnnualMen3: null,
-		indicatorFAnnualThreshold4: null,
 		indicatorFAnnualWomen4: null,
 		indicatorFAnnualMen4: null,
 		indicatorFHourlyThreshold1: null,
@@ -364,7 +386,6 @@ describe("mapToStepData", () => {
 		indicatorFHourlyThreshold3: null,
 		indicatorFHourlyWomen3: null,
 		indicatorFHourlyMen3: null,
-		indicatorFHourlyThreshold4: null,
 		indicatorFHourlyWomen4: null,
 		indicatorFHourlyMen4: null,
 	};
@@ -396,14 +417,21 @@ describe("mapToStepData", () => {
 		});
 	});
 
-	it("coerces null F-indicator quartiles to empty threshold + undefined women/men", () => {
+	it("coerces null F-indicator quartiles to empty threshold (Q1-Q3) / undefined (Q4) + undefined women/men", () => {
 		const { step4Data } = mapToStepData(emptyDeclaration as never);
 
 		expect(step4Data.annual).toHaveLength(4);
 		expect(step4Data.hourly).toHaveLength(4);
-		for (const row of [...step4Data.annual, ...step4Data.hourly]) {
-			expect(row).toEqual({
-				threshold: "",
+		for (const table of [step4Data.annual, step4Data.hourly]) {
+			for (const row of table.slice(0, 3)) {
+				expect(row).toEqual({
+					threshold: "",
+					women: undefined,
+					men: undefined,
+				});
+			}
+			expect(table[3]).toEqual({
+				threshold: undefined,
 				women: undefined,
 				men: undefined,
 			});
@@ -420,7 +448,6 @@ describe("mapToStepData", () => {
 			indicatorFAnnualThreshold1: "30000",
 			indicatorFAnnualWomen1: 5,
 			indicatorFAnnualMen1: 6,
-			indicatorFHourlyThreshold4: "80000",
 			indicatorFHourlyWomen4: 1,
 			indicatorFHourlyMen4: 2,
 		};
@@ -439,7 +466,7 @@ describe("mapToStepData", () => {
 			men: 6,
 		});
 		expect(step4Data.hourly[3]).toEqual({
-			threshold: "80000",
+			threshold: undefined,
 			women: 1,
 			men: 2,
 		});

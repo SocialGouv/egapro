@@ -8,6 +8,7 @@ import {
 	getLatestJointEvaluationFileIdForTestSiren,
 	resetDeclarationToDraft,
 	setCompanyHasCse,
+	setCompanyWorkforce,
 } from "./helpers/db";
 import { completeDeclaration } from "./helpers/declaration-flows";
 
@@ -50,6 +51,7 @@ test.describe("file upload + view access control", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
 	});
 
 	test.afterAll(async () => {

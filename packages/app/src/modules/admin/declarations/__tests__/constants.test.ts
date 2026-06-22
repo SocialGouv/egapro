@@ -7,7 +7,7 @@ describe("STATUS_LABELS", () => {
 		expect(STATUS_LABELS.draft).toBe("Brouillon");
 	});
 
-	it("maps submitted to Transmise", () => {
-		expect(STATUS_LABELS.submitted).toBe("Transmise");
+	it("maps awaiting_compliance_path_choice to Transmise", () => {
+		expect(STATUS_LABELS.awaiting_compliance_path_choice).toBe("Transmise");
 	});
 });

@@ -39,6 +39,7 @@ describe("Step3VariablePay dev fill", () => {
 		const user = userEvent.setup();
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep3Data()}
 			/>,

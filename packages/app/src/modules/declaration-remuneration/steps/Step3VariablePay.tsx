@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import {
 	computeProportion,
@@ -18,6 +18,10 @@ import {
 	DEV_STEP3_BENEFICIARY_WOMEN,
 	DEV_STEP3_ROWS,
 } from "../shared/devFillData";
+import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
+import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
+import { useDraftAutoSave } from "../shared/draft/useDraftAutoSave";
+import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
@@ -33,6 +37,7 @@ import type { PayGapField, Step3Data } from "../types";
 import stepStyles from "./Step3VariablePay.module.scss";
 
 type Step3VariablePayProps = {
+	declarationSiren: string;
 	declarationYear: number;
 	initialData: Step3Data;
 	gipPrefillData?: GipPrefillData;
@@ -40,7 +45,18 @@ type Step3VariablePayProps = {
 	maxMen?: number;
 };
 
+function padStep3(data: Step3Data): Step3Data {
+	return Object.fromEntries(
+		Object.entries(data).map(([k, v]) =>
+			k === "indicatorEWomen" || k === "indicatorEMen"
+				? [k, v]
+				: [k, padDecimalToTwo(v)],
+		),
+	) as Step3Data;
+}
+
 export function Step3VariablePay({
+	declarationSiren,
 	declarationYear,
 	initialData,
 	gipPrefillData,
@@ -51,22 +67,43 @@ export function Step3VariablePay({
 	const isImpersonating = useIsImpersonating();
 
 	const hasSavedData = Object.values(initialData).some((v) => v !== "");
+
 	const rawDefaults = hasSavedData
 		? initialData
 		: gipPrefillData
 			? gipToStep3(gipPrefillData.step3)
 			: initialData;
-	const defaultValues = Object.fromEntries(
-		Object.entries(rawDefaults).map(([k, v]) =>
-			k === "indicatorEWomen" || k === "indicatorEMen"
-				? [k, v]
-				: [k, padDecimalToTwo(v)],
-		),
-	) as Step3Data;
+	const defaultValues = padStep3(rawDefaults);
+	const dbValues = useMemo(() => padStep3(initialData), [initialData]);
 
-	const hasInitialData = hasSavedData;
+	const {
+		draft,
+		setField,
+		clearDraft,
+		hasDraft,
+		isLoadingDraft,
+		isSaving,
+		isPendingSave,
+	} = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: 3,
+		kind: "main",
+		dbValues,
+	});
 
 	const form = useZodForm(updateStep3Schema, { defaultValues });
+
+	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
+		(Object.keys(d) as Array<keyof Step3Data>).forEach((key) => {
+			const value = d[key];
+			if (value !== undefined) form.setValue(key, value as string);
+		});
+	});
+
+	useDraftAutoSave(form, draftHydrated, (values) =>
+		setField(values as Step3Data),
+	);
 
 	const formData = form.watch();
 	const rows = step3ToRows(formData as Step3Data);
@@ -76,12 +113,17 @@ export function Step3VariablePay({
 	const [benefValidationError, setBenefValidationError] = useState<
 		string | null
 	>(null);
-	const [saved, setSaved] = useState(hasInitialData);
+	const hasData = hasSavedData || hasDraft;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const mutation = api.declaration.updateStep3.useMutation({
-		onSuccess: () => router.push("/declaration-remuneration/etape/4"),
+		onSuccess: () => {
+			clearDraft();
+			router.push("/declaration-remuneration/etape/4");
+		},
 	});
+
+	if (!draftHydrated) return <DraftLoadingState />;
 
 	function handleRowChange(index: number, field: PayGapField, value: string) {
 		const normalized = normalizeDecimalInput(value);
@@ -89,7 +131,6 @@ export function Step3VariablePay({
 		if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
 		const fieldName = getStep3FieldName(index, field);
 		form.setValue(fieldName, normalized);
-		setSaved(false);
 	}
 
 	function handleBenefChange(
@@ -113,7 +154,6 @@ export function Step3VariablePay({
 		}
 		setBenefValidationError(null);
 		form.setValue(field, value);
-		setSaved(false);
 	}
 
 	const onSubmit = form.handleSubmit(() => {
@@ -130,8 +170,15 @@ export function Step3VariablePay({
 	});
 
 	return (
-		<form className={common.flexColumnGap2} onSubmit={onSubmit}>
+		<form
+			autoComplete="off"
+			className={common.flexColumnGap2}
+			onSubmit={onSubmit}
+		>
 			<StepTitleRow
+				hasData={hasData}
+				isPendingSave={isPendingSave}
+				isSaving={isSaving}
 				onDevFill={() => {
 					DEV_STEP3_ROWS.forEach((row, i) => {
 						const womenField = getStep3FieldName(i, "womenValue");
@@ -141,9 +188,7 @@ export function Step3VariablePay({
 					});
 					form.setValue("indicatorEWomen", DEV_STEP3_BENEFICIARY_WOMEN);
 					form.setValue("indicatorEMen", DEV_STEP3_BENEFICIARY_MEN);
-					setSaved(false);
 				}}
-				saved={saved}
 				title={
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {declarationYear}
@@ -153,7 +198,6 @@ export function Step3VariablePay({
 
 			<StepIndicator currentStep={3} />
 
-			{/* Introduction */}
 			<div className={common.flexColumnGap1}>
 				<p className="fr-mb-0">
 					Ces indicateurs évaluent et comparent les rémunérations variables
@@ -179,9 +223,7 @@ export function Step3VariablePay({
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 			</div>
 
-			{/* Data section */}
 			<div className={common.dataSection}>
-				{/* Table 1 - Variable pay gap + source */}
 				<div className={common.flexColumnGapHalf}>
 					<PayGapTable
 						caption="Écart de rémunération variable ou complémentaire"
@@ -206,7 +248,6 @@ export function Step3VariablePay({
 					)}
 				</div>
 
-				{/* Table 2 - Beneficiaries + source */}
 				<div className={common.flexColumnGapHalf}>
 					<div
 						className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.payGapTable}`}
@@ -367,7 +408,6 @@ export function Step3VariablePay({
 			/>
 
 			<FormActions
-				className="fr-mt-0"
 				isSubmitting={mutation.isPending}
 				mimoquageNextHref={
 					hasSavedData ? "/declaration-remuneration/etape/4" : undefined

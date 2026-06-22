@@ -19,7 +19,19 @@ export const searchDeclarationsSchema = z.object({
 	year: z.coerce.number().int().min(2018).max(2100).optional(),
 	dateFrom: z.string().date().optional().or(z.literal("")),
 	dateTo: z.string().date().optional().or(z.literal("")),
-	status: z.enum(["draft", "submitted"]).optional(),
+	status: z
+		.enum([
+			"draft",
+			"awaiting_compliance_path_choice",
+			"corrective_actions_chosen",
+			"joint_evaluation_chosen",
+			"awaiting_revision_choice",
+			"revised_joint_evaluation_chosen",
+			"awaiting_cse_opinion",
+			"demarche_completed",
+			"cancelled",
+		])
+		.optional(),
 	page: z.coerce.number().int().min(1).default(1),
 	pageSize: z.coerce.number().int().min(10).max(100).default(DEFAULT_PAGE_SIZE),
 	sortBy: z.enum(SORT_COLUMNS).default("createdAt"),
@@ -37,7 +49,20 @@ export const searchDeclarationsFormSchema = z.object({
 	year: z.string().optional(),
 	dateFrom: z.string().optional(),
 	dateTo: z.string().optional(),
-	status: z.enum(["", "draft", "submitted"]).optional(),
+	status: z
+		.enum([
+			"",
+			"draft",
+			"awaiting_compliance_path_choice",
+			"corrective_actions_chosen",
+			"joint_evaluation_chosen",
+			"awaiting_revision_choice",
+			"revised_joint_evaluation_chosen",
+			"awaiting_cse_opinion",
+			"demarche_completed",
+			"cancelled",
+		])
+		.optional(),
 });
 
 export type SearchDeclarationsFormValues = z.infer<
@@ -45,5 +70,13 @@ export type SearchDeclarationsFormValues = z.infer<
 >;
 
 export const getDeclarationByIdSchema = z.object({
+	id: z.string().uuid(),
+});
+
+export const cancelDeclarationSchema = z.object({
+	id: z.string().uuid(),
+});
+
+export const getRecapSchema = z.object({
 	id: z.string().uuid(),
 });

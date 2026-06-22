@@ -122,10 +122,11 @@ pnpm db:studio            # opens Drizzle Studio
 
 ## Automatic quality gates
 
-Quality checks run **automatically** après chaque itération de code — pas de commande à lancer. Dans la pipeline `/implement`, ils sont invoqués par `code-dev` step 6. Hors pipeline (hotfix, edit direct), délégués par l'agent principal. Voir `.claude/rules/automation.md`.
+Quality checks run **automatically** après chaque itération de code — pas de commande à lancer. Dans la pipeline `/implement`, les tests sont écrits par `tu-dev` (step 5.5), puis les gates sont invoqués par `code-dev` step 6. Hors pipeline (hotfix, edit direct), délégués par l'agent principal. Voir `.claude/rules/automation.md`.
 
 | Gate | When | How |
 |---|---|---|
+| **Tests unitaires** | Inside `/implement`, avant les gates (step 5.5) | `tu-dev` agent (Opus) écrit/corrige les TU + intégration, renvoie à `code-dev` sur régression |
 | **Validation** | After every task | `validator` agent (typecheck + test + lint + format) |
 | **Structure** | After every task | `structural-auditor` agent (17 rules: forms, schemas, DRY, imports, no-comments…) |
 | **RGAA** | After every task | `rgaa-auditor` agent on modified `.tsx` files |
@@ -169,8 +170,10 @@ Quality checks run **automatically** après chaque itération de code — pas de
 **Pipeline exécution** (invoqués par `/implement`) :
 | Agent | Rôle |
 |---|---|
-| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature) ou le commentaire d'analyse (Task / Bug). Pour les tickets UI, vérifie lui-même la fidélité Figma via le MCP `figma-dev`. |
+| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature) ou le commentaire d'analyse (Task / Bug). Pour les tickets UI, vérifie lui-même la fidélité Figma via le MCP `figma-dev`. Délègue **tous** les tests (TU + intégration) à `tu-dev`. |
+| `tu-dev` | Écrit/corrige **tous** les tests vitest (TU + intégration) du ticket, juste après `code-dev` et avant les validators (step 5.5). Toujours Opus. Trie les échecs : sur **vraie régression** il rend la main à `code-dev` (commentaire `tu-dev:` + verdict) ; sinon corrige les tests en échec légitime et ajoute la couverture du nouveau code (DRY). |
 | `functional-validator` | Rejoue les scénarios PO dans le dev server |
+| `doc-writer` | Régénère `docs/*.md` from scratch à partir de l'état courant du code. Invoqué par `epic_loop.sh` en fin d'epic (juste avant `open_epic_final_pr.sh`) ou par le skill `/doc` (humain). Sonnet, sans worktree dédié — opère sur la branche courante. |
 
 **Pipeline review** (invoqué par `/review`) :
 | Agent | Rôle |
@@ -192,10 +195,13 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | `/analyse [<issue#>] [<description>]` | **Phase conception**. Détecte le mode (epic / task / bug) selon le type d'issue ou le prompt et invoque les agents appropriés (PO + architect, architect-task, ou bug-analyst). Si ambigu → demande à l'utilisateur. |
 | `/implement <issue#>` | **Phase exécution**. Détecte le mode selon le type d'issue : Feature → loop driver background ; Task / Bug → `code-dev` synchrone foreground. Vérifie qu'une analyse a été faite avant de dispatcher (sinon propose `/analyse`). |
 | `/report [<N> ...]` | Dashboard live des agents actifs + état des sous-tickets de l'epic. Pure bash, zéro LLM. |
+| `/velocity [<sprint>]` | Calcule la vélocité des sprints terminés (Σ points des feuilles livrées : Done ∪ In review) et recommande la capacité du prochain sprint (moyenne glissante 3 sprints). À lancer en fin de sprint. Thin wrapper bash sur `sprint_velocity.sh`. |
+| `/plan-sprint [<sprint>]` | Planifie le prochain sprint : capacité (vélocité glissante), report des non-livrés du sprint courant, complétion depuis le backlog par priorité jusqu'à la capacité. Présente le plan → validation explicite → assigne les tickets au sprint. Ne crée pas l'itération (limite API GitHub → clic UI). Backing : `plan_sprint.sh`. |
 | `/open <PR>` | Recrée un worktree local pour une PR (typique après auto-cleanup de `/implement`) — utile pour tester la PR avant merge. |
 | `/review [<issue#>\|<PR#>]` | Adresse les commentaires de revue (humain + bots). Détecte le mode (epic / task / bug) selon le type d'issue ; en mode epic, traite toutes les sub-task PRs liées à la feature et applique les fixes sur `epic/<N>`. Délègue à l'agent `review-fixer` qui tourne en worktree. |
+| `/doc [<issue#>]` | Régénère `docs/features.md` / `architecture.md` / `parcours-utilisateurs.md` à partir de l'état courant du code. Sans arg : commit local sur la branche courante (l'humain push). Avec `<issue#>` (epic ou task) : se positionne sur la branche cible, commit + push. Délègue à l'agent `doc-writer`. Hors pipeline / en complément de l'invocation auto par `epic_loop.sh`. |
 
-Workflow standard : `/analyse <issue>` pour la conception (modes auto-détectés), puis `/implement <issue>` pour l'exécution. Le ticket reste en `In progress` même quand l'IA a fini — c'est l'utilisateur qui le bouge à `In review` puis `Done` à son rythme. `/review` prend le relais quand les humains commentent les PR.
+Workflow standard : `/analyse <issue>` pour la conception (modes auto-détectés), puis `/implement <issue>` pour l'exécution. Le ticket reste en `In progress` même quand l'IA a fini — c'est l'utilisateur qui le bouge à `In review` puis `Done` à son rythme. `/review` prend le relais quand les humains commentent les PR. `/doc` régénère la doc utilisateur depuis le code (auto en fin d'epic, manuel hors pipeline).
 
 ### Orchestration (`scripts/orchestration/`)
 
@@ -203,15 +209,19 @@ Tous les scripts shell portent leur propre header `--help`-friendly. Le mode epi
 
 | Script | Rôle |
 |---|---|
-| `epic_loop.sh` | Loop driver background. Tick = cleanup terminal worktrees → rebase epic branches → plan → spawn N `claude` CLIs en parallèle (budget USD isolé) → aggregate JSON returns → process. Plafond `EPIC_LOOP_MAX_TICKS=30`. À la fin, ouvre la PR finale `epic/<N> → alpha`. |
+| `epic_loop.sh` | Loop driver background. Tick = cleanup terminal worktrees → rebase epic branches → plan → spawn N `claude` CLIs en parallèle (budget USD isolé) → aggregate JSON returns → process. Plafond `EPIC_LOOP_MAX_TICKS=30`. À la fin, pour chaque epic : invoke `run_doc_writer.sh` (best-effort, non-blocking) puis `open_epic_final_pr.sh`. |
 | `ensure_epic_branch.sh` | Idempotent. Crée la branche d'intégration `epic/<N>` depuis `origin/alpha` si absente. Appelé au startup d'`epic_loop.sh` pour chaque epic NEW-mode. |
 | `merge_validated_ticket.sh` | Squash-merge la PR d'un ticket validé dans `epic/<N>` via `gh pr merge --squash`. Branche auto-supprimée par les settings repo. Sur conflit : commente la PR + remet le ticket en `In progress` (le pipeline redispatchera pour rebaser). |
 | `rebase_epic_branch.sh` | Entre ticks, rebase `epic/<N>` sur `origin/alpha` dans un worktree dédié (`/tmp/egapro-rebase-epic<N>`). Force-with-lease push. Sur conflit : commente l'epic + label `dispatch=escalate` + exit 2 (halt orchestration). |
 | `open_epic_final_pr.sh` | Ouvre (ou réutilise) la PR finale `epic/<N> → alpha` avec body listant chaque sub-ticket via `Closes #N`. Appelé en fin de loop pour la review humaine. |
+| `run_doc_writer.sh` | Invoque l'agent `doc-writer` sur `epic/<N>` (depuis le main worktree, pas de worktree dédié). Régénère `docs/*.md` from scratch et commit + push. Best-effort : un échec/rate-limit ne bloque pas l'ouverture de la PR finale. Budget Sonnet par défaut $5 (`EPIC_LOOP_BUDGET_DOC`). |
 | `cleanup_terminal_worktrees.sh` | Scan les worktrees `egapro-epic<E>-t<N>` ; teardown + remove ceux dont le ticket a été squash-mergé dans `epic/<N>` (signal canonique : la branche `ticket/<N>-*` est gone d'origin). Appelé à chaque tick par `epic_loop.sh` pour libérer les slots dynamiquement. |
 | `dispatch_plan.sh` | Calcule la JSON list des tickets dispatchables : parse `## Depends on`, gate les enfants dont le parent n'est pas encore squash-mergé dans `epic/<N>` (= sa branche n'existe plus sur origin), alloue les indices libres dans `[0, EPIC_MAX_PARALLEL[`. Base = `origin/epic/<N>` toujours. |
 | `process_tick_result.sh` | Applique les mutations board selon le statut JSON retourné par `code-dev`. Sur `validated` (NEW mode) → invoke `merge_validated_ticket.sh`. Compteur `attempt=N` pour anti-boucle 3 refacto consécutifs → `dispatch=escalate`. |
 | `set_ticket_status.sh` | Encapsule les 3 GraphQL calls de `rules/github-board.md`. **Refuse explicitement la transition `Done`** (user-only). |
+| `set_ticket_size.sh` | Écrit la complexité t-shirt (`Size` XS→XL) **et** les points (`Estimate`, Fibonacci) d'un ticket en une commande. Appelé par `architect` / `bug-analyst` en fin d'analyse. Rubrique : `rules/complexity-estimation.md`. |
+| `sprint_velocity.sh` | Calcule la vélocité par sprint (Σ `Estimate` des feuilles Done∪In review, epic exclu) + reco glissante 3 sprints. Pure bash + `gh` + `jq`, read-only. Backing du skill `/velocity`. |
+| `plan_sprint.sh` | Planifie le prochain sprint : capacité glissante, report des non-livrés, fill backlog par priorité (petits d'abord) sans dépasser la capacité. Mode plan (read-only) par défaut, `--apply` pour assigner. Ne crée pas l'itération (l'API régénère les `iterationId` → exit 4 + instruction UI). Backing du skill `/plan-sprint`. |
 | `create_linked_branch.sh` | Crée une branche linkée à l'issue via `createLinkedBranch` GraphQL — la branche apparaît dans la sidebar Development de l'issue. Base = `epic/<N>` en NEW mode. |
 | `force_pr_issue_link.sh` | Appelé par `code-dev` juste après `gh pr create` pour forcer le `closingIssuesReferences` à se peupler (sinon, l'auto-linker GitHub ne fire que quand la PR cible `master`). Workaround : flip la base sur `master`, sleep 3, revenir sur la base d'origine. Idempotent. ~2 CI runs supplémentaires par appel. |
 | `open_worktree.sh` | Recrée un worktree pour une PR donnée (skill `/open <PR>`). Utile pour tester localement après auto-cleanup. |

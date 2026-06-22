@@ -42,28 +42,31 @@ check_pattern '\.(ts|tsx|js|jsx)$' \
   'biome-ignore|eslint-disable|@ts-ignore|@ts-expect-error' \
   'Suppression comments are forbidden. Fix the underlying issue instead.'
 
-# Inline styles — JSX files only (exclude @react-pdf/renderer components which require style={})
+# Inline styles — JSX files only (exclude @react-pdf/renderer + @react-email components which require style={})
 check_pattern '\.(tsx|jsx)$' \
   'style=\{' \
   'Inline style={{}} is forbidden. Use DSFR classes or a scoped SCSS module.' \
-  '(declarationPdf/|noSanctionAttestation/)'
+  '(declarationPdf/|noSanctionAttestation/|packages/notifications/)'
 
 # Inline SVG — JSX files only (DsfrPictogram is the only allowed SVG wrapper)
+# packages/notifications/ is excluded: emails need inline SVG (Outlook strips
+# linked images by default, next/image is browser-only).
 check_pattern '\.(tsx|jsx)$' \
   '<svg[[:space:]>]' \
   'Inline <svg> is forbidden. Use DsfrPictogram, public/assets/*.svg + <Image> (next/image), or DSFR icon classes (fr-icon-*).' \
-  '(DsfrPictogram\.tsx|ErrorArtwork\.tsx)'
+  '(DsfrPictogram\.tsx|ErrorArtwork\.tsx|packages/notifications/)'
 
 # Direct process.env — use ~/env.js instead (exclude env.js, instrumentation, next.config, sentry configs)
 check_pattern '\.(ts|tsx)$' \
   'process\.env' \
   'Direct process.env is forbidden. Use: import { env } from "~/env.js".' \
-  '(env\.js|instrumentation(-client)?\.ts|next\.config|trpc/react\.tsx|sentry\.(client|server|edge)\.config\.ts|global-setup\.ts|integration-setup\.ts|playwright\.config|drizzle\.config|migrate\.mjs|e2e/helpers/)'
+  '(env\.js|instrumentation(-client)?\.ts|next\.config|trpc/react\.tsx|sentry\.(client|server|edge)\.config\.ts|global-setup\.ts|integration-setup\.ts|playwright\.config|drizzle[^/]*\.config|migrate.*\.mjs|e2e/helpers/|packages/notifications/)'
 
-# Deep relative imports — use ~/ path alias
+# Deep relative imports — use ~/ path alias (exclude packages/notifications which has no path alias)
 check_pattern '\.(ts|tsx)$' \
   '(\.\./){2,}' \
-  'Deep relative imports (../../ or deeper) are forbidden. Use the ~/ path alias.'
+  'Deep relative imports (../../ or deeper) are forbidden. Use the ~/ path alias.' \
+  '(packages/notifications/)'
 
 # Hardcoded hex colors in SCSS — use DSFR CSS custom properties
 check_pattern '\.scss$' \
@@ -91,11 +94,13 @@ check_pattern '\.(ts|tsx)$' \
   'Explicit `any` type is forbidden. Use `unknown` with type narrowing instead.' \
   '(__tests__|\.test\.|\.spec\.)'
 
-# Raw <img> tags — use next/image Image component instead (allow test files)
+# Raw <img> tags — use next/image Image component instead (allow test files).
+# packages/notifications/ is excluded: emails need raw <img> with absolute URLs
+# (next/image is unusable in mail clients).
 check_pattern '\.(tsx|jsx)$' \
   '<img[[:space:]>]' \
   'Raw <img> is forbidden. Use: import Image from "next/image".' \
-  '(__tests__|\.test\.|\.spec\.|setup\.ts)'
+  '(__tests__|\.test\.|\.spec\.|setup\.ts|packages/notifications/)'
 
 # Domain layer — getFullYear() must come from ~/modules/domain (allow domain/ itself and tests)
 check_pattern '\.(ts|tsx)$' \

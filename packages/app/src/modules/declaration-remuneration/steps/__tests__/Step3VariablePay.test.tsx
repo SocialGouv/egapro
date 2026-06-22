@@ -36,6 +36,7 @@ describe("Step3VariablePay", () => {
 	it("renders the pay gap table with 4 rows", () => {
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep3Data()}
 			/>,
@@ -49,6 +50,7 @@ describe("Step3VariablePay", () => {
 	it("renders the beneficiaries table with workforce totals", () => {
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep3Data()}
 				maxMen={60}
@@ -64,6 +66,7 @@ describe("Step3VariablePay", () => {
 	it("renders instruction text and mandatory fields notice", () => {
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep3Data()}
 			/>,
@@ -81,6 +84,7 @@ describe("Step3VariablePay", () => {
 	it("renders table headers with line break in column header", () => {
 		const { container } = render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep3Data()}
 			/>,
@@ -95,6 +99,7 @@ describe("Step3VariablePay", () => {
 	it("shows SavedIndicator when initialData has data", () => {
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={{
 					indicatorBAnnualWomen: "100",
@@ -116,6 +121,7 @@ describe("Step3VariablePay", () => {
 	it("does not show SavedIndicator when initialData is empty", () => {
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep3Data()}
 			/>,
@@ -127,6 +133,7 @@ describe("Step3VariablePay", () => {
 		const user = userEvent.setup();
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep3Data()}
 			/>,
@@ -153,6 +160,7 @@ describe("Step3VariablePay", () => {
 		const user = userEvent.setup();
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep3Data()}
 			/>,
@@ -175,6 +183,7 @@ describe("Step3VariablePay", () => {
 		const user = userEvent.setup();
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep3Data()}
 			/>,
@@ -196,6 +205,7 @@ describe("Step3VariablePay", () => {
 		const user = userEvent.setup();
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep3Data()}
 				maxMen={25}
@@ -215,6 +225,7 @@ describe("Step3VariablePay", () => {
 	it("renders previous link pointing to step 2", () => {
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				initialData={emptyStep3Data()}
 			/>,
@@ -228,6 +239,7 @@ describe("Step3VariablePay", () => {
 	it("uses gipPrefillData when no initialData", () => {
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 80, totalMen: 100 },
@@ -255,12 +267,12 @@ describe("Step3VariablePay", () => {
 					},
 					step4: {
 						annual: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
 						hourly: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
@@ -282,6 +294,7 @@ describe("Step3VariablePay", () => {
 	it("uses gipPrefillData with null beneficiary counts", () => {
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 80, totalMen: 100 },
@@ -309,12 +322,12 @@ describe("Step3VariablePay", () => {
 					},
 					step4: {
 						annual: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
 						hourly: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
@@ -335,6 +348,7 @@ describe("Step3VariablePay", () => {
 	it("uses gipPrefillData with zero beneficiary counts", () => {
 		render(
 			<Step3VariablePay
+				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 80, totalMen: 100 },
@@ -362,12 +376,12 @@ describe("Step3VariablePay", () => {
 					},
 					step4: {
 						annual: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
 						hourly: {
-							thresholds: [null, null, null, null],
+							thresholds: [null, null, null],
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},

@@ -188,11 +188,22 @@ cd ${WT_PATH}
 git fetch origin ${BRANCH}
 git checkout ${BRANCH}
 \`\`\`
-Puis implémenter, push tes commits sur ${BRANCH}, créer la PR draft (\`gh pr create --base ${BASE#origin/} --head ${BRANCH}\`), faire les 4 + 2 validators internes, itérer sur les RETRY, retourner le verdict final JSON.
+Puis implémenter le code source, **déléguer tous les tests (TU + intégration) à l'agent tu-dev** (Opus, étape 5.5 — il rend la main sur une vraie régression), push tes commits sur ${BRANCH}, créer la PR draft (\`gh pr create --base ${BASE#origin/} --head ${BRANCH}\`), faire les 4 + 2 validators internes, itérer sur les RETRY, retourner le verdict final JSON.
 
 **Ne crée PAS une autre branche** (pas de \`checkout -b\`). La branche ${BRANCH} est déjà créée et linkée — utilise-la telle quelle.
 
 REGLES STRICTES (appliquer sans exception) :
+- **DISCIPLINE DE LOGGING (BLOCKING)** — à chaque transition de phase tu DOIS
+  exécuter \`bash scripts/orchestration/log_event.sh code-dev-${TICKET} <EVENT> [msg]\`
+  AVANT de commencer la phase suivante. Sans ces events, le dashboard /report
+  ne peut pas suivre ta progression et l'utilisateur croit que tu es stuck.
+  Events obligatoires dans l'ordre : START → ANALYSIS_START → ANALYSIS_OK
+  → DEV_START → DEV_OK → TU_START → TU_OK → VALIDATION_START → VALIDATION_OK → PR_DRAFT
+  → FUNCTIONAL_START → FUNCTIONAL_OK → CI_WAIT → CI_OK → SONAR_WAIT → SONAR_OK
+  → BOT_WAIT → BOT_REPLIED → PR_READY → COMPLETE. (RETRY/CI_FAIL/SONAR_FAIL
+  à intercaler en cas d'itération, voir AGENT.md « Logging events ».)
+  Logger AVANT de poursuivre n'est pas optionnel — c'est une étape de la phase,
+  au même titre que git push ou gh pr create.
 - **N'invoque AUCUN skill built-in** (fewer-permission-prompts, update-config,
   claude-api, schedule, loop, etc.). Si une de ces skills semble utile, ignore-la
   et reste concentré sur le ticket.
@@ -226,11 +237,21 @@ Ton dernier message DOIT être uniquement ce JSON (rien d'autre, pas de prose)."
     # word-split lets it disappear cleanly.
     local TIMEOUT_PREFIX=""
     [ -n "$TIMEOUT_BIN" ] && TIMEOUT_PREFIX="$TIMEOUT_BIN $AGENT_TIMEOUT"
-    $TIMEOUT_PREFIX claude \
+    # `env -u CLAUDECODE` lets the spawned claude CLI start even when the
+    # orchestrator was launched from inside a Claude Code session (where
+    # CLAUDECODE=1 would otherwise abort the nested CLI to prevent runtime
+    # collisions). The sub-agent runs in its own process tree with its own
+    # budget, so the anti-nesting guard does not apply here.
+    # stream-json emits a JSONL trace (one event per turn) instead of a single
+    # wrapper at the end. compute_cost.sh tails the file to derive the live
+    # cost; the final `{"type":"result", ...}` line carries total_cost_usd
+    # for the authoritative number.
+    $TIMEOUT_PREFIX env -u CLAUDECODE claude \
         --agent "$AGENT" \
         --model "$MODEL" \
         --print \
-        --output-format json \
+        --output-format stream-json \
+        --verbose \
         --dangerously-skip-permissions \
         --max-budget-usd "$BUDGET" \
         "$PROMPT" \
@@ -390,16 +411,25 @@ while [ $TICK -lt $MAX_TICKS ]; do
         for ticket in "${!AGENT_FILES[@]}"; do
             file="${AGENT_FILES[$ticket]}"
 
-            # The claude CLI emits a wrapper {result, is_error, ...}. Extract .result
-            # and try to parse it as the strict JSON contract.
+            # The claude CLI emits a JSONL trace (--output-format stream-json).
+            # The final `result` event carries the assistant's last message
+            # text (`.result`) and an error flag (`.is_error`).
+            # If the stream was cut short (timeout, killed, budget exhaustion)
+            # there may be no result line — fall back to the last assistant
+            # message text so we can at least diagnose what happened.
             RESULT_TEXT=""
             CLI_ERROR="false"
             if [ -s "$file" ]; then
-                if jq -e '.result' "$file" >/dev/null 2>&1; then
-                    RESULT_TEXT=$(jq -r '.result // ""' "$file")
-                    CLI_ERROR=$(jq -r '.is_error // false' "$file")
+                RESULT_LINE=$(grep '"type":"result"' "$file" | tail -1 || true)
+                if [ -n "$RESULT_LINE" ] && echo "$RESULT_LINE" | jq -e '.result' >/dev/null 2>&1; then
+                    RESULT_TEXT=$(echo "$RESULT_LINE" | jq -r '.result // ""')
+                    CLI_ERROR=$(echo "$RESULT_LINE" | jq -r '.is_error // false')
                 else
-                    RESULT_TEXT=$(head -c 500 "$file")
+                    LAST_ASSISTANT=$(grep '"type":"assistant"' "$file" | tail -1 || true)
+                    if [ -n "$LAST_ASSISTANT" ]; then
+                        RESULT_TEXT=$(echo "$LAST_ASSISTANT" | jq -r '[.message.content[]? | .text? // empty] | join(" ")' 2>/dev/null | head -c 500)
+                    fi
+                    [ -z "$RESULT_TEXT" ] && RESULT_TEXT="(stream cut short — no result event in $file)"
                     CLI_ERROR="true"
                 fi
             else
@@ -466,9 +496,23 @@ if [ $TICK -ge $MAX_TICKS ]; then
 fi
 
 # ---- Done: every sub-ticket squash-merged into epic/<N> ----
-# Open the final integration PR `epic/<N> → alpha` for each epic in scope
-# (idempotent — reuses an existing open PR if any).
+# For each epic in scope:
+#   1. Regenerate docs/*.md from the current state of epic/<N> (best-effort,
+#      non-blocking — a doc-writer failure just logs and continues).
+#   2. Open the final integration PR `epic/<N> → alpha` (idempotent —
+#      reuses an existing open PR if any).
 for N in $EPICS; do
+    # ---- Doc regeneration (best-effort, non-blocking) ----
+    set +e
+    bash "$SCRIPT_DIR/run_doc_writer.sh" "$N"
+    DOC_RC=$?
+    set -e
+    if [ "$DOC_RC" != "0" ]; then
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" DOC_WRITER_FAIL "epic=$N rc=$DOC_RC"
+        echo "WARN epic=$N: doc-writer exited $DOC_RC — final PR will be opened without doc updates" >&2
+    fi
+
+    # ---- Final integration PR ----
     set +e
     FINAL_PR=$(bash "$SCRIPT_DIR/open_epic_final_pr.sh" "$N" 2>/dev/null)
     OPEN_RC=$?

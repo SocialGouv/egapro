@@ -12,9 +12,22 @@ export type ExportRow = {
 	year: number;
 	status: string | null;
 	declarationType: "6_indicateurs" | "7_indicateurs";
-	compliancePath: string | null;
+	firstDeclarationPathChoice: string | null;
+	secondDeclarationPathChoice: string | null;
 	createdAt: string | null;
 	updatedAt: string | null;
+	cancelledAt: string | null;
+	submittedAt: string | null;
+	firstDeclarationPathChoiceAt: string | null;
+	secondDeclarationPathChoiceAt: string | null;
+	jointEvaluationSubmittedAt: string | null;
+	cseOpinionCompletedAt: string | null;
+	demarcheCompletedAt: string | null;
+	complianceProcessRequired: boolean;
+	complianceProcessRevisionRequired: boolean;
+	cseRequired: boolean;
+	indicatorGRequired: boolean;
+	rulesVersion: string | null;
 
 	// Employees
 	totalWomen: number | null;
@@ -64,7 +77,6 @@ export type ExportRow = {
 	indFAnnualQ3Threshold: string | null;
 	indFAnnualQ3Women: number | null;
 	indFAnnualQ3Men: number | null;
-	indFAnnualQ4Threshold: string | null;
 	indFAnnualQ4Women: number | null;
 	indFAnnualQ4Men: number | null;
 
@@ -78,12 +90,12 @@ export type ExportRow = {
 	indFHourlyQ3Threshold: string | null;
 	indFHourlyQ3Women: number | null;
 	indFHourlyQ3Men: number | null;
-	indFHourlyQ4Threshold: string | null;
 	indFHourlyQ4Women: number | null;
 	indFHourlyQ4Men: number | null;
 
 	// Second declaration
-	secondDeclarationStatus: string | null;
+	secondDeclarationSubmittedAt: string | null;
+	secondDeclarationSubmitted: boolean;
 	secondDeclReferencePeriodStart: string | null;
 	secondDeclReferencePeriodEnd: string | null;
 

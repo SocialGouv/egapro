@@ -35,7 +35,7 @@ export function FormActions({
 	const { isReadOnly, buttonProps, tooltip } = useReadOnlyGuard();
 
 	return (
-		<div className={`fr-mt-4w ${styles.actions} ${className ?? ""}`}>
+		<div className={`${styles.actions} ${className ?? ""}`}>
 			{previousHref ? (
 				<Link
 					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"

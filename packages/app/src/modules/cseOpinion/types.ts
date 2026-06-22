@@ -4,7 +4,50 @@ export type UploadedFile = {
 	id: string;
 	fileName: string;
 	uploadedAt: Date;
+	/** Object size in bytes, or null when it could not be read from storage. */
+	fileSize: number | null;
 };
+
+export type DeclarationNumber = 1 | 2;
+
+export type ContentType = "accuracy" | "gap";
+
+export type ContentTypeColumn = {
+	id: string;
+	declarationNumber: DeclarationNumber;
+	type: ContentType;
+	label: string;
+	declarationLabel: string | null;
+	description: string;
+	missingMessage: string;
+};
+
+export type ContentTypeColumnsInput = {
+	hasSecondDeclaration: boolean;
+	firstDeclGapConsulted: boolean | null;
+	secondDeclGapConsulted: boolean | null;
+	firstDeclGapHigh: boolean;
+	secondDeclGapHigh: boolean;
+};
+
+export type ContentTypeKey = {
+	declarationNumber: DeclarationNumber;
+	type: ContentType;
+};
+
+export type FileContentTypeAssociation = {
+	declarationNumber: DeclarationNumber;
+	type: ContentType;
+	fileId: string;
+};
+
+export type StoredFileContentType = {
+	declarationNumber: number;
+	type: string;
+	fileId: string;
+};
+
+export type AssociationMap = Record<string, string | null>;
 
 export type CseOpinionStep1Data = {
 	firstDeclAccuracyOpinion: OpinionType | null;

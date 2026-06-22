@@ -17,14 +17,17 @@ fi
 #   ]
 #
 # Every ticket targets `origin/epic/<N>`. A ticket whose `Depends on`
-# references a parent ticket is dispatchable as soon as the parent's PR has
-# been squash-merged into epic/<N> — detected by the absence of the parent's
-# `ticket/<parent>-*` branch on origin (GitHub auto-deletes the head branch
-# on squash-merge). Until then the child stays blocked.
+# references a parent ticket is dispatchable as soon as the parent's PR
+# has been squash-merged into epic/<N>. We detect this with two combined
+# signals: (a) the parent's `ticket/<parent>-*` branch is gone from
+# origin (auto-deleted on squash-merge), AND (b) a merged PR with that
+# head ref exists on epic/<N>. Both are required — (a) alone would
+# false-positive on parents that haven't been dispatched yet (their
+# branch hasn't been created either, so it's also "absent").
 #
 # The board status of the parent is purely decorative (the user owns the
-# In review / Done transitions); the canonical signal is **branch presence
-# on origin**.
+# In review / Done transitions); the canonical signal is the merged PR
+# record on epic/<N>.
 #
 # Logic:
 #   1. Detect busy worktree indices from existing worktrees `egapro-epic*-t*`
@@ -161,16 +164,27 @@ for EPIC_N in "$@"; do
         ' | grep -oE '#[0-9]+' | tr -d '#' | sort -u || true)
 
         # Resolve deps: each parent must be squash-merged into epic/<N>.
-        # Repo settings auto-delete the head branch on merge, so parent
-        # ticket branch absence on origin == merged. The board status is
-        # decorative (humans own In review / Done) — branch presence is
-        # the canonical signal.
+        # We confirm with two signals: (a) the parent's `ticket/<dep>-*`
+        # branch is gone from origin (auto-deleted on squash-merge), AND
+        # (b) a merged PR with that head ref exists on epic/<N>. Both are
+        # required to disambiguate "merged" from "never started" — a
+        # parent that hasn't been dispatched yet also has no branch, so
+        # signal (a) alone would falsely unblock the child.
         BASE_BRANCH="origin/epic/${EPIC_N}"
         BLOCKED=0
         for DEP in $DEPS; do
             DEP_BRANCH=$(git ls-remote --heads origin "ticket/${DEP}-*" 2>/dev/null | awk '{print $2}' | head -1 || true)
             if [ -n "$DEP_BRANCH" ]; then
-                # Branch still on origin → not yet squash-merged → child blocked
+                # Branch still on origin → in flight → child blocked
+                BLOCKED=1
+                break
+            fi
+            # Branch absent → confirm parent was actually merged (vs.
+            # never started) by looking for a merged PR with that head.
+            DEP_PR_MERGED=$(gh pr list --base "epic/${EPIC_N}" --state merged --json headRefName \
+                --jq "[.[] | select(.headRefName | startswith(\"ticket/${DEP}-\"))] | length" 2>/dev/null || echo "0")
+            if [ "$DEP_PR_MERGED" = "0" ]; then
+                # No merged PR for this dep → parent never finished → child blocked
                 BLOCKED=1
                 break
             fi

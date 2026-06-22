@@ -12,8 +12,8 @@ type ComplianceState =
 	| { type: "second_round" };
 
 export function getComplianceState(
-	compliancePath: string | null,
-	secondDeclarationStatus: string | null,
+	firstDeclarationPathChoice: string | null,
+	hasSubmittedSecondDeclaration: boolean,
 	initialCategories: Parameters<typeof hasGapsAboveThreshold>[0],
 	correctionCategories: Parameters<typeof hasGapsAboveThreshold>[0],
 ): ComplianceState {
@@ -21,14 +21,11 @@ export function getComplianceState(
 		return { type: "no_gap" };
 	}
 
-	const hasSubmittedSecondDeclaration =
-		compliancePath === "corrective_action" &&
-		secondDeclarationStatus === "submitted";
+	const hasFinalisedFirstRound =
+		firstDeclarationPathChoice === "corrective_action" &&
+		hasSubmittedSecondDeclaration;
 
-	if (
-		hasSubmittedSecondDeclaration &&
-		hasGapsAboveThreshold(correctionCategories)
-	) {
+	if (hasFinalisedFirstRound && hasGapsAboveThreshold(correctionCategories)) {
 		return { type: "second_round" };
 	}
 
@@ -39,7 +36,7 @@ export async function CompliancePathPage() {
 	const session = await auth();
 	const data = await api.declaration.getOrCreate();
 
-	if (data.declaration.status !== "submitted") {
+	if (data.declaration.status === "draft") {
 		redirect("/declaration-remuneration/etape/6");
 	}
 
@@ -53,13 +50,24 @@ export async function CompliancePathPage() {
 	);
 
 	const state = getComplianceState(
-		data.declaration.compliancePath,
-		data.declaration.secondDeclarationStatus,
+		data.declaration.firstDeclarationPathChoice,
+		data.hasSubmittedSecondDeclaration,
 		initialCategories,
 		correctionCategories,
 	);
 
-	if (state.type === "no_gap" || data.declaration.complianceCompletedAt) {
+	const hasChosenPath = data.declaration.firstDeclarationPathChoice !== null;
+
+	// Skip the choice page only when the user has nothing to (re-)choose:
+	// no current gap and they never picked a path, or they finalised the
+	// procedure without one. When firstDeclarationPathChoice is set, render
+	// the choice page so the user can review what they picked — the FSM
+	// rejects mutations from demarche_completed, so toggling is harmless.
+	if (
+		!hasChosenPath &&
+		(state.type === "no_gap" ||
+			data.declaration.status === "demarche_completed")
+	) {
 		redirect(getPostComplianceDestination(company.hasCse));
 	}
 
@@ -72,14 +80,10 @@ export async function CompliancePathPage() {
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
 				currentYear={currentYear}
+				declarationSiren={data.declaration.siren}
+				declarationYear={currentYear}
 				email={email}
-				initialPath={
-					(data.declaration.compliancePath as
-						| "justify"
-						| "corrective_action"
-						| "joint_evaluation"
-						| null) ?? undefined
-				}
+				initialPath={data.declaration.firstDeclarationPathChoice ?? undefined}
 				isSecondRound={state.type === "second_round"}
 				pdfDownloadHref={
 					state.type === "second_round"

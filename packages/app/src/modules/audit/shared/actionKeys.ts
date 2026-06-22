@@ -24,13 +24,14 @@ export const AUDIT_ACTIONS = {
 	DECLARATION_SUBMIT: "declaration.submit",
 	DECLARATION_SUBMIT_SECOND: "declaration.submit_second",
 	DECLARATION_SAVE_COMPLIANCE_PATH: "declaration.save_compliance_path",
-	DECLARATION_COMPLETE_COMPLIANCE_PATH: "declaration.complete_compliance_path",
+	DECLARATION_SUBMIT_JOINT_EVALUATION: "declaration.submit_joint_evaluation",
 
 	// ── CSE opinion mutations ──────────────────────────────
 	CSE_OPINION_SAVE: "cse_opinion.save",
 	CSE_OPINION_UPLOAD_FILE: "cse_opinion.upload_file",
 	CSE_OPINION_DELETE_FILE: "cse_opinion.delete_file",
 	CSE_OPINION_FINALIZE: "cse_opinion.finalize",
+	CSE_OPINION_SET_FILE_TYPES: "cse_opinion.set_file_types",
 
 	// ── Joint evaluation mutations ─────────────────────────
 	JOINT_EVALUATION_UPLOAD_FILE: "joint_evaluation.upload_file",
@@ -47,14 +48,29 @@ export const AUDIT_ACTIONS = {
 	// ── Admin reads ───────────────────────────────────────
 	ADMIN_DECLARATIONS_SEARCH: "admin_declarations.search",
 	ADMIN_DECLARATION_GET_BY_ID: "admin_declarations.get_by_id",
+	ADMIN_DECLARATIONS_GET_RECAP: "admin_declarations.get_recap",
+
+	// ── Admin declaration mutations ───────────────────────
+	ADMIN_DECLARATION_CANCEL: "admin_declaration.cancel",
 
 	// ── Admin settings mutations ──────────────────────────
 	ADMIN_SETTINGS_UPSERT_DEADLINES: "admin_settings.upsert_deadlines",
 
 	// ── Admin stats reads ─────────────────────────────────
 	ADMIN_STATS_CAMPAIGN_PROGRESSION: "admin_stats.campaign_progression",
+	ADMIN_STATS_GET_CAMPAIGN_STATS: "admin_stats.get_campaign_stats",
+	ADMIN_STATS_GET_STEP_DURATIONS: "admin_stats.get_step_durations",
+	ADMIN_STATS_GET_STEP_DROPOFF_RATE: "admin_stats.get_step_dropoff_rate",
+	ADMIN_STATS_GET_COMPLETION_FUNNEL: "admin_stats.get_completion_funnel",
+	ADMIN_STATS_GET_MATOMO_FUNNEL: "admin_stats.get_matomo_funnel",
+
+	// ── Declaration draft ─────────────────────────────────
+	DRAFT_READ: "declaration_draft.read",
+	DRAFT_SAVE: "declaration_draft.save",
+	DRAFT_CLEAR: "declaration_draft.clear",
 
 	// ── Sensitive reads ────────────────────────────────────
+	DECLARATION_HISTORY_READ: "declaration_history.read",
 	ADMIN_FILE_DOWNLOAD: "admin.file_download",
 	PROFILE_READ: "profile.read",
 	DECLARATION_READ_GIP_DATA: "declaration.read_gip_data",
@@ -73,9 +89,17 @@ export const AUDIT_ACTIONS = {
 	MAIL_RECEIPT_SEND: "mail.receipt_send",
 	MAIL_RECEIPT_RESEND: "mail.receipt_resend",
 
+	// ── Notifications (queue + worker) ───────────────────
+	NOTIFICATION_ENQUEUE: "notification.enqueue",
+	NOTIFICATION_SEND: "notification.send",
+
 	// ── Public searches ────────────────────────────────────
 	PUBLIC_REFERENT_SEARCH: "public_referents.search",
 	PUBLIC_REFERENT_VIEW: "public_referents.view",
+
+	// ── Public stats reads ─────────────────────────────────
+	PUBLIC_STATS_GET_CURRENT_CAMPAIGN_RATE:
+		"public_stats.get_current_campaign_rate",
 
 	// ── System / cron-triggered ────────────────────────────
 	SYSTEM_AUDIT_CLEANUP: "system.audit_cleanup",
@@ -102,12 +126,13 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.DECLARATION_SUBMIT]: "mutation",
 	[AUDIT_ACTIONS.DECLARATION_SUBMIT_SECOND]: "mutation",
 	[AUDIT_ACTIONS.DECLARATION_SAVE_COMPLIANCE_PATH]: "mutation",
-	[AUDIT_ACTIONS.DECLARATION_COMPLETE_COMPLIANCE_PATH]: "mutation",
+	[AUDIT_ACTIONS.DECLARATION_SUBMIT_JOINT_EVALUATION]: "mutation",
 
 	[AUDIT_ACTIONS.CSE_OPINION_SAVE]: "mutation",
 	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: "mutation",
 	[AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE]: "mutation",
 	[AUDIT_ACTIONS.CSE_OPINION_FINALIZE]: "mutation",
+	[AUDIT_ACTIONS.CSE_OPINION_SET_FILE_TYPES]: "mutation",
 
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: "mutation",
 
@@ -119,8 +144,19 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.ADMIN_DECLARATIONS_SEARCH]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_DECLARATIONS_GET_RECAP]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_CAMPAIGN_STATS]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DURATIONS]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DROPOFF_RATE]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_COMPLETION_FUNNEL]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_FUNNEL]: "read_sensitive",
+	[AUDIT_ACTIONS.DRAFT_READ]: "read_sensitive",
+	[AUDIT_ACTIONS.DRAFT_SAVE]: "mutation",
+	[AUDIT_ACTIONS.DRAFT_CLEAR]: "mutation",
+	[AUDIT_ACTIONS.DECLARATION_HISTORY_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PROFILE_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA]: "read_sensitive",
@@ -137,8 +173,13 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.MAIL_RECEIPT_SEND]: "mutation",
 	[AUDIT_ACTIONS.MAIL_RECEIPT_RESEND]: "mutation",
 
+	[AUDIT_ACTIONS.NOTIFICATION_ENQUEUE]: "mutation",
+	[AUDIT_ACTIONS.NOTIFICATION_SEND]: "system",
+
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: "public_search",
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",
+
+	[AUDIT_ACTIONS.PUBLIC_STATS_GET_CURRENT_CAMPAIGN_RATE]: "public_search",
 
 	[AUDIT_ACTIONS.SYSTEM_AUDIT_CLEANUP]: "system",
 };

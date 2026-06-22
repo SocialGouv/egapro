@@ -74,7 +74,6 @@ const SECTIONS: Section[] = [
 			["Seuil Q1", "annualQuartileThreshold1"],
 			["Seuil Q2", "annualQuartileThreshold2"],
 			["Seuil Q3", "annualQuartileThreshold3"],
-			["Seuil Q4", "annualQuartileThreshold4"],
 			["Q1 — femmes", "annualQuartile1ProportionWomen"],
 			["Q1 — hommes", "annualQuartile1ProportionMen"],
 			["Q2 — femmes", "annualQuartile2ProportionWomen"],

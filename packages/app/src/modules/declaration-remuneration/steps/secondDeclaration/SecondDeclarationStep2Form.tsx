@@ -1,8 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
+import { DraftLoadingState } from "~/modules/declaration-remuneration/shared/draft/DraftLoadingState";
+import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
+import { useDraftHydration } from "~/modules/declaration-remuneration/shared/draft/useDraftHydration";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { api } from "~/trpc/react";
 import { CategoryForm } from "../step5/CategoryForm";
@@ -11,6 +14,7 @@ import { ReferencePeriodPicker } from "./ReferencePeriodPicker";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
+	declarationSiren: string;
 	declarationYear: number;
 	initialFirstDeclarationCategories: EmployeeCategoryRow[];
 	initialSecondDeclarationCategories?: EmployeeCategoryRow[];
@@ -20,6 +24,7 @@ type Props = {
 };
 
 export function SecondDeclarationStep2Form({
+	declarationSiren,
 	declarationYear,
 	initialFirstDeclarationCategories,
 	initialSecondDeclarationCategories,
@@ -41,9 +46,40 @@ export function SecondDeclarationStep2Form({
 	const hasSavedSecondDeclaration =
 		(initialSecondDeclarationCategories?.length ?? 0) > 0;
 
-	const mutation = api.declaration.updateEmployeeCategories.useMutation({
-		onSuccess: () => router.push(`${BASE_PATH}/etape/3`),
+	const dbValues = useMemo(
+		() => ({
+			startDate: initialStartDate ?? "",
+			endDate: initialEndDate ?? "",
+		}),
+		[initialStartDate, initialEndDate],
+	);
+
+	const { draft, setField, clearDraft, isLoadingDraft } = useDeclarationDraft({
+		siren: declarationSiren,
+		year: declarationYear,
+		step: "second-2",
+		kind: "second",
+		dbValues,
 	});
+
+	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
+		if (typeof d.startDate === "string") setStartDate(d.startDate);
+		if (typeof d.endDate === "string") setEndDate(d.endDate);
+	});
+
+	useEffect(() => {
+		if (!draftHydrated) return;
+		setField({ startDate, endDate });
+	}, [draftHydrated, startDate, endDate, setField]);
+
+	const mutation = api.declaration.updateEmployeeCategories.useMutation({
+		onSuccess: () => {
+			clearDraft();
+			router.push(`${BASE_PATH}/etape/3`);
+		},
+	});
+
+	if (!draftHydrated) return <DraftLoadingState />;
 
 	return (
 		<CategoryForm

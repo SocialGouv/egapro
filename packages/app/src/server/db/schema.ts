@@ -15,6 +15,34 @@ import {
  */
 export const createTable = pgTableCreator((name) => `app_${name}`);
 
+export const declarationStatusEnum = pgEnum("declaration_status", [
+	"draft",
+	"awaiting_compliance_path_choice",
+	"corrective_actions_chosen",
+	"joint_evaluation_chosen",
+	"awaiting_revision_choice",
+	"revised_joint_evaluation_chosen",
+	"awaiting_cse_opinion",
+	"demarche_completed",
+]);
+
+export const compliancePathEnum = pgEnum("compliance_path", [
+	"justify",
+	"corrective_action",
+	"joint_evaluation",
+]);
+
+export const declarationEventTypeEnum = pgEnum("declaration_event_type", [
+	"submit",
+	"path_choice",
+	"second_declaration_submit",
+	"joint_evaluation_submit",
+	"cse_opinion_submit",
+	"cancel",
+	"demarche_complete",
+	"step_change",
+]);
+
 export const users = createTable("user", (d) => ({
 	id: d
 		.varchar({ length: 255 })
@@ -57,7 +85,12 @@ export const declarations = createTable(
 		variableRemunerationScore: d.integer(),
 		quartileScore: d.integer(),
 		categoryScore: d.integer(),
-		compliancePath: d.varchar({ length: 30 }),
+		firstDeclarationPathChoice: compliancePathEnum(
+			"first_declaration_path_choice",
+		),
+		secondDeclarationPathChoice: compliancePathEnum(
+			"second_declaration_path_choice",
+		),
 		// ── Indicator A — Global remuneration gap (mean) ──
 		indicatorAAnnualWomen: d.numeric(),
 		indicatorAAnnualMen: d.numeric(),
@@ -85,7 +118,6 @@ export const declarations = createTable(
 		indicatorFAnnualThreshold1: d.numeric(),
 		indicatorFAnnualThreshold2: d.numeric(),
 		indicatorFAnnualThreshold3: d.numeric(),
-		indicatorFAnnualThreshold4: d.numeric(),
 		indicatorFAnnualWomen1: d.integer(),
 		indicatorFAnnualWomen2: d.integer(),
 		indicatorFAnnualWomen3: d.integer(),
@@ -98,7 +130,6 @@ export const declarations = createTable(
 		indicatorFHourlyThreshold1: d.numeric(),
 		indicatorFHourlyThreshold2: d.numeric(),
 		indicatorFHourlyThreshold3: d.numeric(),
-		indicatorFHourlyThreshold4: d.numeric(),
 		indicatorFHourlyWomen1: d.integer(),
 		indicatorFHourlyWomen2: d.integer(),
 		indicatorFHourlyWomen3: d.integer(),
@@ -107,23 +138,98 @@ export const declarations = createTable(
 		indicatorFHourlyMen2: d.integer(),
 		indicatorFHourlyMen3: d.integer(),
 		indicatorFHourlyMen4: d.integer(),
+		// ── Calculated percentages — Indicator A/B (gaps) ──
+		globalAnnualMeanGap: d.numeric({ precision: 9, scale: 4 }),
+		globalHourlyMeanGap: d.numeric({ precision: 9, scale: 4 }),
+		variableAnnualMeanGap: d.numeric({ precision: 9, scale: 4 }),
+		variableHourlyMeanGap: d.numeric({ precision: 9, scale: 4 }),
+		globalAnnualMedianGap: d.numeric({ precision: 9, scale: 4 }),
+		globalHourlyMedianGap: d.numeric({ precision: 9, scale: 4 }),
+		variableAnnualMedianGap: d.numeric({ precision: 9, scale: 4 }),
+		variableHourlyMedianGap: d.numeric({ precision: 9, scale: 4 }),
+		// ── Calculated percentages — Indicator E (proportions) ──
+		variableProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		variableProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		// ── Calculated percentages — Indicator F annual (proportions) ──
+		annualQuartile1ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile2ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile3ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile4ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile1ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile2ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile3ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile4ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		// ── Calculated percentages — Indicator F hourly (proportions) ──
+		hourlyQuartile1ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile2ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile3ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile4ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile1ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile2ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile3ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile4ProportionMen: d.numeric({ precision: 9, scale: 4 }),
 		currentStep: d.integer().default(0),
-		status: d.varchar({ length: 20 }).default("draft"),
+		status: declarationStatusEnum("status").notNull().default("draft"),
 		secondDeclarationStep: d.integer(),
-		secondDeclarationStatus: d.varchar({ length: 20 }),
 		secondDeclReferencePeriodStart: d.varchar({ length: 10 }),
 		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
-		complianceCompletedAt: d.timestamp({ withTimezone: true }),
-		cseOpinionCompletedAt: d.timestamp({ withTimezone: true }),
-		submittedAt: d.timestamp({ withTimezone: true }),
+		cseRequired: d.boolean().notNull().default(false),
+		rulesVersion: d.varchar("rules_version").notNull().default("2027.1"),
+		cancelledAt: d.timestamp({ withTimezone: false, mode: "date" }),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		draft: d.jsonb(),
+		draftUpdatedAt: d.timestamp({ withTimezone: true }),
 	}),
 	(t) => [
-		unique("declaration_siren_year_idx").on(t.siren, t.year),
+		uniqueIndex("declarations_siren_year_active_unique")
+			.on(t.siren, t.year)
+			.where(sql`cancelled_at IS NULL`),
 		index("declaration_declarant_idx").on(t.declarantId),
-		index("declaration_submitted_at_idx").on(t.submittedAt),
 	],
+);
+
+export const declarationStatusHistory = createTable(
+	"declaration_status_history",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		declarationId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => declarations.id, { onDelete: "cascade" }),
+		eventType: declarationEventTypeEnum("event_type").notNull(),
+		value: d.varchar({ length: 50 }),
+		round: d.integer(),
+		actorUserId: d.varchar({ length: 255 }).references(() => users.id),
+		createdAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+	}),
+	(t) => [
+		index("decl_status_history_declaration_idx").on(
+			t.declarationId,
+			t.createdAt.desc(),
+		),
+	],
+);
+
+export const declarationStatusHistoryRelations = relations(
+	declarationStatusHistory,
+	({ one }) => ({
+		declaration: one(declarations, {
+			fields: [declarationStatusHistory.declarationId],
+			references: [declarations.id],
+		}),
+		actor: one(users, {
+			fields: [declarationStatusHistory.actorUserId],
+			references: [users.id],
+		}),
+	}),
 );
 
 export const declarationsRelations = relations(
@@ -140,6 +246,8 @@ export const declarationsRelations = relations(
 		jobCategories: many(jobCategories),
 		cseOpinions: many(cseOpinions),
 		files: many(files),
+		cseOpinionFiles: many(cseOpinionFiles),
+		statusHistory: many(declarationStatusHistory),
 	}),
 );
 
@@ -288,7 +396,6 @@ export const gipMdsData = createTable(
 		annualQuartileThreshold1: d.numeric({ precision: 9, scale: 2 }),
 		annualQuartileThreshold2: d.numeric({ precision: 9, scale: 2 }),
 		annualQuartileThreshold3: d.numeric({ precision: 9, scale: 2 }),
-		annualQuartileThreshold4: d.numeric({ precision: 9, scale: 2 }),
 		annualQuartile1ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
 		annualQuartile2ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
 		annualQuartile3ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
@@ -301,7 +408,6 @@ export const gipMdsData = createTable(
 		hourlyQuartileThreshold1: d.numeric({ precision: 9, scale: 2 }),
 		hourlyQuartileThreshold2: d.numeric({ precision: 9, scale: 2 }),
 		hourlyQuartileThreshold3: d.numeric({ precision: 9, scale: 2 }),
-		hourlyQuartileThreshold4: d.numeric({ precision: 9, scale: 2 }),
 		hourlyQuartile1ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
 		hourlyQuartile2ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
 		hourlyQuartile3ProportionWomen: d.numeric({ precision: 9, scale: 4 }),
@@ -347,6 +453,7 @@ export const companies = createTable("company", (d) => ({
 	name: d.varchar({ length: 255 }).notNull(),
 	address: d.varchar({ length: 500 }),
 	nafCode: d.varchar({ length: 10 }),
+	nafLabel: d.varchar({ length: 255 }),
 	workforce: d.integer(),
 	hasCse: d.boolean(),
 	createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
@@ -468,12 +575,60 @@ export const files = createTable(
 	],
 );
 
-export const filesRelations = relations(files, ({ one }) => ({
+export const filesRelations = relations(files, ({ one, many }) => ({
 	declaration: one(declarations, {
 		fields: [files.declarationId],
 		references: [declarations.id],
 	}),
+	cseOpinionFiles: many(cseOpinionFiles),
 }));
+
+// ── CSE opinion file associations ──────────────────────────────────
+
+export const cseOpinionFiles = createTable(
+	"cse_opinion_file",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		declarationId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => declarations.id),
+		declarationNumber: d.integer().notNull(),
+		type: d.varchar({ length: 20 }).notNull(),
+		fileId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => files.id, { onDelete: "cascade" }),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [
+		unique("cse_opinion_file_decl_number_type_idx").on(
+			t.declarationId,
+			t.declarationNumber,
+			t.type,
+		),
+		index("cse_opinion_file_declaration_idx").on(t.declarationId),
+	],
+);
+
+export const cseOpinionFilesRelations = relations(
+	cseOpinionFiles,
+	({ one }) => ({
+		declaration: one(declarations, {
+			fields: [cseOpinionFiles.declarationId],
+			references: [declarations.id],
+		}),
+		file: one(files, {
+			fields: [cseOpinionFiles.fileId],
+			references: [files.id],
+		}),
+	}),
+);
 
 // ── Campaign deadlines (configurable per year) ────────────────────
 
