@@ -232,6 +232,62 @@
 			"when": 1778071563871,
 			"tag": "0032_sparkling_monster_badoon",
 			"breakpoints": true
+		},
+		{
+			"idx": 33,
+			"version": "7",
+			"when": 1778489783883,
+			"tag": "0033_add_cancelled_at",
+			"breakpoints": true
+		},
+		{
+			"idx": 34,
+			"version": "7",
+			"when": 1778584824979,
+			"tag": "0034_tranquil_catseye",
+			"breakpoints": true
+		},
+		{
+			"idx": 35,
+			"version": "7",
+			"when": 1778682813792,
+			"tag": "0035_status_history",
+			"breakpoints": true
+		},
+		{
+			"idx": 36,
+			"version": "7",
+			"when": 1779271468703,
+			"tag": "0036_add_step_change_event_type",
+			"breakpoints": true
+		},
+		{
+			"idx": 37,
+			"version": "7",
+			"when": 1779271468704,
+			"tag": "0037_pale_mikhail_rasputin",
+			"breakpoints": true
+		},
+		{
+			"idx": 38,
+			"version": "7",
+			"when": 1780580810342,
+			"tag": "0038_whole_unus",
+			"breakpoints": true
+		},
+		{
+			"idx": 39,
+			"version": "7",
+			"when": 1781107611122,
+			"tag": "0039_cse_opinion_file",
+			"breakpoints": true
+		},
+		{
+			"idx": 40,
+			"version": "7",
+			"when": 1781169333713,
+			"tag": "0040_reconcile_drifted_schema",
+			"breakpoints": true
 		}
 	]
 }

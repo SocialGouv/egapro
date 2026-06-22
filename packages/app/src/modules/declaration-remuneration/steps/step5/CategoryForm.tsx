@@ -23,6 +23,7 @@ import type {
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
 import { padDecimalOnBlur, padDecimalToTwo } from "~/modules/domain";
+import { getDsfrCollapse } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./CategoryDataTable";
@@ -76,7 +77,9 @@ type Props = {
 	descriptionText?: string;
 	disabled?: boolean;
 	mimoquageNextHref?: string;
-	savedOverride?: boolean;
+	hasDataOverride?: boolean;
+	isSavingOverride?: boolean;
+	isPendingSaveOverride?: boolean;
 	onValuesChange?: (values: {
 		source: string;
 		categories: {
@@ -131,7 +134,9 @@ export function CategoryForm({
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
 	disabled = false,
 	mimoquageNextHref,
-	savedOverride,
+	hasDataOverride,
+	isSavingOverride = false,
+	isPendingSaveOverride = false,
 	onValuesChange,
 	defaultValuesOverride,
 }: Props) {
@@ -165,11 +170,31 @@ export function CategoryForm({
 	});
 
 	const hasInitialData = initialCategories.length > 0;
-	const [savedInternal, setSaved] = useState(hasInitialData);
-	const saved = savedOverride !== undefined ? savedOverride : savedInternal;
+	const [hasDataInternal, setHasData] = useState(hasInitialData);
+	const hasData =
+		hasDataOverride !== undefined ? hasDataOverride : hasDataInternal;
 	const [workforceError, setWorkforceError] = useState("");
 	const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 	const deleteDialogRef = useRef<HTMLDialogElement>(null);
+	const accordionHeaderRefs = useRef<Array<HTMLButtonElement | null>>([]);
+	const accordionCollapseRefs = useRef<Array<HTMLDivElement | null>>([]);
+	const pendingFocusIndex = useRef<number | null>(null);
+
+	useEffect(() => {
+		if (pendingFocusIndex.current === null) return;
+		const index = pendingFocusIndex.current;
+		pendingFocusIndex.current = null;
+		const reveal = () => {
+			const collapse = accordionCollapseRefs.current[index];
+			if (collapse) getDsfrCollapse(collapse)?.disclose();
+			// Focus the new category's first field (the "Libellé" input) rather than
+			// the accordion header, so the user can start filling it in immediately.
+			const firstField = document.getElementById(`cat-${index}-name`);
+			(firstField ?? accordionHeaderRefs.current[index])?.focus();
+		};
+		const id = window.requestAnimationFrame(reveal);
+		return () => window.cancelAnimationFrame(id);
+	});
 
 	const closeDeleteDialog = useCallback(() => {
 		deleteDialogRef.current?.close();
@@ -186,14 +211,14 @@ export function CategoryForm({
 			const formField = field as Exclude<keyof EmployeeCategory, "id">;
 			if (raw === "") {
 				form.setValue(`categories.${index}.${formField}`, raw);
-				setSaved(false);
+				setHasData(false);
 				return;
 			}
 			if (isInteger && /\D/.test(raw)) return;
 			const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
 			if (Number.isNaN(n) || n < 0) return;
 			form.setValue(`categories.${index}.${formField}`, raw);
-			setSaved(false);
+			setHasData(false);
 		};
 	}
 
@@ -204,7 +229,7 @@ export function CategoryForm({
 				form.getValues(`categories.${index}.${formField}`),
 				(padded) => {
 					form.setValue(`categories.${index}.${formField}`, padded);
-					setSaved(false);
+					setHasData(false);
 				},
 			);
 		};
@@ -213,13 +238,16 @@ export function CategoryForm({
 	function addCategory() {
 		const empty = createEmptyCategory(nextId());
 		const formEntry = toFormValues([empty])[0];
-		if (formEntry) append(formEntry);
-		setSaved(false);
+		if (formEntry) {
+			pendingFocusIndex.current = fields.length;
+			append(formEntry);
+		}
+		setHasData(false);
 	}
 
 	function handleImportCategories(imported: EmployeeCategory[]) {
 		form.setValue("categories", toFormValues(imported));
-		setSaved(false);
+		setHasData(false);
 	}
 
 	function askRemoveCategory(index: number) {
@@ -247,12 +275,13 @@ export function CategoryForm({
 	function confirmRemoveCategory() {
 		if (deleteIndex !== null) {
 			remove(deleteIndex);
-			setSaved(false);
+			setHasData(false);
 		}
 		closeDeleteDialog();
 	}
 
 	const categories = form.watch("categories");
+	const sourceError = form.formState.errors.source?.message;
 
 	const handleFormSubmit = form.handleSubmit((data) => {
 		setWorkforceError("");
@@ -315,16 +344,22 @@ export function CategoryForm({
 	});
 
 	return (
-		<form className={stepStyles.form} onSubmit={handleFormSubmit}>
+		<form
+			autoComplete="off"
+			className={stepStyles.form}
+			onSubmit={handleFormSubmit}
+		>
 			<StepTitleRow
+				hasData={hasData}
+				isPendingSave={isPendingSaveOverride}
+				isSaving={isSavingOverride}
 				onDevFill={() => {
 					if (maxWomen == null || maxMen == null) return;
 					const devCats = createDevStep5Categories(nextId, maxWomen, maxMen);
 					form.setValue("categories", toFormValues(devCats));
 					form.setValue("source", DEV_STEP5_SOURCE);
-					setSaved(false);
+					setHasData(false);
 				}}
-				saved={saved}
 				title={title}
 			/>
 
@@ -332,41 +367,6 @@ export function CategoryForm({
 
 			<div className={stepStyles.categoryBlock}>
 				<p className="fr-mb-0">{descriptionText}</p>
-
-				{readOnlyLabel ? (
-					<p className="fr-mb-0">
-						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
-						<span className="fr-text--bold">
-							{SOURCE_LABELS[form.watch("source")] ?? form.watch("source")}
-						</span>
-					</p>
-				) : (
-					<div className={`fr-select-group ${stepStyles.sourceSelectGroup}`}>
-						<label className="fr-label" htmlFor="source-select">
-							Quelle est la source utilisée pour déterminer les catégories
-							d&apos;emplois ?
-						</label>
-						<select
-							className="fr-select"
-							disabled={disabled}
-							id="source-select"
-							{...form.register("source")}
-							onChange={(e) => {
-								form.setValue("source", e.target.value);
-								setSaved(false);
-							}}
-						>
-							<option disabled value="">
-								Sélectionner une option
-							</option>
-							{CATEGORY_SOURCES.map((s) => (
-								<option key={s.value} value={s.value}>
-									{s.label}
-								</option>
-							))}
-						</select>
-					</div>
-				)}
 
 				{referencePeriodPicker ?? (
 					<div className={stepStyles.categoryHeader}>
@@ -378,6 +378,54 @@ export function CategoryForm({
 							id={`${tooltipPrefix}-period`}
 							label="Information sur la période de référence"
 						/>
+					</div>
+				)}
+
+				{readOnlyLabel ? (
+					<p className="fr-mb-0">
+						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
+						<span className="fr-text--bold">
+							{SOURCE_LABELS[form.watch("source")] ?? form.watch("source")}
+						</span>
+					</p>
+				) : (
+					<div
+						className={`fr-select-group ${
+							sourceError ? "fr-select-group--error" : ""
+						} ${stepStyles.sourceSelectGroup}`}
+					>
+						<label className="fr-label" htmlFor="source-select">
+							Quelle est la source utilisée pour déterminer les catégories
+							d&apos;emplois ?
+						</label>
+						<select
+							aria-describedby={sourceError ? "source-error" : undefined}
+							aria-invalid={Boolean(sourceError)}
+							className="fr-select"
+							disabled={disabled}
+							id="source-select"
+							{...form.register("source")}
+							onChange={(e) => {
+								form.setValue("source", e.target.value, {
+									shouldValidate: true,
+								});
+								setHasData(false);
+							}}
+						>
+							<option disabled value="">
+								Sélectionner une option
+							</option>
+							{CATEGORY_SOURCES.map((s) => (
+								<option key={s.value} value={s.value}>
+									{s.label}
+								</option>
+							))}
+						</select>
+						{sourceError && (
+							<p className="fr-error-text" id="source-error">
+								{sourceError}
+							</p>
+						)}
 					</div>
 				)}
 			</div>
@@ -427,6 +475,9 @@ export function CategoryForm({
 									className="fr-accordion__btn"
 									id={headingId}
 									onClick={handleAccordionToggle}
+									ref={(node) => {
+										accordionHeaderRefs.current[index] = node;
+									}}
 									type="button"
 								>
 									{categoryLabel}
@@ -435,6 +486,9 @@ export function CategoryForm({
 							<div
 								className="fr-collapse fr-collapse--expanded"
 								id={collapseId}
+								ref={(node) => {
+									accordionCollapseRefs.current[index] = node;
+								}}
 							>
 								<div className={stepStyles.categoryBlock}>
 									{readOnlyLabel ? (
@@ -457,7 +511,7 @@ export function CategoryForm({
 														`categories.${index}.name`,
 														e.target.value,
 													);
-													setSaved(false);
+													setHasData(false);
 												}}
 												type="text"
 											/>

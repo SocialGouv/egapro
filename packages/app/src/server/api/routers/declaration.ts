@@ -1,35 +1,142 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, count, desc, eq, isNull } from "drizzle-orm";
 import {
-	saveCompliancePathSchema,
+	declarationHistoryInputSchema,
+	saveCompliancePathInputSchema,
+	submitJointEvaluationSchema,
+} from "~/modules/declaration/schemas";
+import {
 	updateEmployeeCategoriesSchema,
 	updateStep1Schema,
 	updateStep2Schema,
 	updateStep3Schema,
 	updateStep4Schema,
 } from "~/modules/declaration-remuneration/schemas";
-import { computeIndicatorPercentages } from "~/modules/declaration-remuneration/shared/computeIndicatorPercentages";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
-import { getCurrentYear } from "~/modules/domain";
+import {
+	COMPANY_SIZE_ANNUAL_MIN,
+	getCurrentYear,
+	hasGapsAboveThreshold,
+	isTriennialYear,
+} from "~/modules/domain";
 import {
 	companyProcedure,
 	companyWriteProcedure,
 	createTRPCRouter,
+	protectedProcedure,
 } from "~/server/api/trpc";
-import { assertNotImpersonating } from "~/server/auth/companyAccess";
 import {
+	assertNotImpersonating,
+	isImpersonatingSiren,
+} from "~/server/auth/companyAccess";
+import {
+	companies,
+	declarationStatusHistory,
 	declarations,
 	employeeCategories,
 	gipMdsData,
 	jobCategories,
+	userCompanies,
+	users,
 } from "~/server/db/schema";
+import { applyAction, loadRules } from "~/server/rules/engine";
 import {
+	activeDeclarationFilter,
+	applyPercentagesAfterUpdate,
 	buildEmployeeCategoryValues,
 	buildPlaceholderDeclaration,
 	deleteJobAndEmployeeCategories,
 	fetchAllCategories,
 	fetchPreviousYearJobCategories,
+	purgeDraftSlice,
 } from "./declarationHelpers";
+import {
+	buildHistoryInserts,
+	buildStepChangeInsert,
+	computeProjectionUpdates,
+	getCurrentRound,
+	hasLockingEventForRound,
+} from "./statusHistoryHelpers";
+
+const PATH_LOCKED_ERROR =
+	"Le choix du parcours ne peut plus être modifié : une action aval a déjà été enregistrée.";
+
+type DeclarationRow = typeof declarations.$inferSelect;
+type CompanyRow = typeof companies.$inferSelect;
+type EmployeeCategoryRow = typeof employeeCategories.$inferSelect;
+
+type DbLike = {
+	select: () => {
+		from: (table: typeof employeeCategories) => {
+			innerJoin: (
+				table: typeof jobCategories,
+				predicate: ReturnType<typeof eq>,
+			) => {
+				where: (
+					predicate: ReturnType<typeof and>,
+				) => Promise<Array<{ employee_category: EmployeeCategoryRow }>>;
+			};
+		};
+	};
+};
+
+async function loadEmployeeCategoriesForDeclaration(
+	database: DbLike,
+	declarationId: string,
+	type: "initial" | "correction",
+): Promise<EmployeeCategoryRow[]> {
+	const rows = await database
+		.select()
+		.from(employeeCategories)
+		.innerJoin(
+			jobCategories,
+			eq(employeeCategories.jobCategoryId, jobCategories.id),
+		)
+		.where(
+			and(
+				eq(jobCategories.declarationId, declarationId),
+				eq(employeeCategories.declarationType, type),
+			),
+		);
+	return rows.map((r) => r.employee_category);
+}
+
+function buildSubmitFacts(
+	declaration: DeclarationRow,
+	company: CompanyRow,
+	hasIndicatorGData: boolean,
+	hasGap: boolean,
+): Record<string, unknown> {
+	const workforce = company.workforce ?? 0;
+	return {
+		currentState: declaration.status,
+		workforce,
+		hasCse: company.hasCse === true,
+		indicatorGCalculated: hasIndicatorGData,
+		gap: hasGap ? 100 : 0,
+		isTriennialYear: isTriennialYear(declaration.year),
+	};
+}
+
+function buildSecondDeclarationFacts(
+	declaration: DeclarationRow,
+	stillHasGap: boolean,
+): Record<string, unknown> {
+	return {
+		currentState: declaration.status,
+		cseRequired: declaration.cseRequired,
+		action: { stillHasGap },
+	};
+}
+
+function buildJointEvaluationFacts(
+	declaration: DeclarationRow,
+): Record<string, unknown> {
+	return {
+		currentState: declaration.status,
+		cseRequired: declaration.cseRequired,
+	};
+}
 
 export const declarationRouter = createTRPCRouter({
 	getOrCreate: companyProcedure.query(async ({ ctx }) => {
@@ -40,7 +147,7 @@ export const declarationRouter = createTRPCRouter({
 			const existing = await tx
 				.select()
 				.from(declarations)
-				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+				.where(activeDeclarationFilter(siren, year))
 				.limit(1);
 
 			if (existing.length > 0) {
@@ -56,11 +163,6 @@ export const declarationRouter = createTRPCRouter({
 				};
 			}
 
-			// Admins impersonating a company can view an existing declaration in
-			// read-only mode, but must not silently create a new draft in the
-			// user's name (issue #3230). When no row exists yet, return a
-			// transient placeholder so the read-only UI can still render — it
-			// is never persisted.
 			if (ctx.session.user.isAdmin && ctx.session.user.impersonation) {
 				return {
 					declaration: buildPlaceholderDeclaration({
@@ -86,14 +188,11 @@ export const declarationRouter = createTRPCRouter({
 				.onConflictDoNothing()
 				.returning();
 
-			// Handle concurrent insert: if onConflictDoNothing returned nothing, re-select
 			if (newDeclaration.length === 0) {
 				const retried = await tx
 					.select()
 					.from(declarations)
-					.where(
-						and(eq(declarations.siren, siren), eq(declarations.year, year)),
-					)
+					.where(activeDeclarationFilter(siren, year))
 					.limit(1);
 				const declaration = retried[0];
 				if (!declaration)
@@ -113,6 +212,16 @@ export const declarationRouter = createTRPCRouter({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Erreur lors de la création",
 				});
+
+			await tx.insert(declarationStatusHistory).values(
+				buildStepChangeInsert({
+					declarationId: declaration.id,
+					fromStep: null,
+					toStep: 0,
+					actorUserId: ctx.session.user.id,
+				}),
+			);
+
 			return {
 				declaration,
 				jobCategories: [],
@@ -120,7 +229,6 @@ export const declarationRouter = createTRPCRouter({
 			};
 		});
 
-		// Fetch GIP data for automatic prefilling (no user choice needed)
 		const gipRow = await ctx.db
 			.select()
 			.from(gipMdsData)
@@ -129,17 +237,36 @@ export const declarationRouter = createTRPCRouter({
 
 		const gipPrefillData = gipRow[0] ? mapGipToFormData(gipRow[0]) : null;
 
-		// Fetch job categories from the most recent previous declaration that
-		// contains indicator 7, for automatic prefilling when step 5 is empty.
 		const hasCurrentCategories = (result.jobCategories ?? []).length > 0;
 		const previousYearCategories = hasCurrentCategories
 			? null
 			: await fetchPreviousYearJobCategories(ctx.db, siren, year);
 
+		const declarationId = result.declaration.id;
+		let hasSubmittedSecondDeclaration = false;
+		let hasSubmittedCseOpinion = false;
+		if (declarationId !== "") {
+			const eventRows = await ctx.db
+				.select({ eventType: declarationStatusHistory.eventType })
+				.from(declarationStatusHistory)
+				.where(eq(declarationStatusHistory.declarationId, declarationId));
+			if (Array.isArray(eventRows)) {
+				for (const row of eventRows) {
+					if (row.eventType === "second_declaration_submit") {
+						hasSubmittedSecondDeclaration = true;
+					} else if (row.eventType === "cse_opinion_submit") {
+						hasSubmittedCseOpinion = true;
+					}
+				}
+			}
+		}
+
 		return {
 			...result,
 			gipPrefillData,
 			previousYearCategories,
+			hasSubmittedSecondDeclaration,
+			hasSubmittedCseOpinion,
 		};
 	}),
 
@@ -153,9 +280,7 @@ export const declarationRouter = createTRPCRouter({
 				const existing = await tx
 					.select()
 					.from(declarations)
-					.where(
-						and(eq(declarations.siren, siren), eq(declarations.year, year)),
-					)
+					.where(activeDeclarationFilter(siren, year))
 					.limit(1);
 
 				const hasChanged =
@@ -168,6 +293,9 @@ export const declarationRouter = createTRPCRouter({
 						await deleteJobAndEmployeeCategories(tx, declarationId);
 					}
 				}
+
+				const previousStep = existing[0]?.currentStep ?? null;
+				const declarationId = existing[0]?.id ?? null;
 
 				await tx
 					.update(declarations)
@@ -225,9 +353,20 @@ export const declarationRouter = createTRPCRouter({
 								}
 							: {}),
 					})
-					.where(
-						and(eq(declarations.siren, siren), eq(declarations.year, year)),
+					.where(activeDeclarationFilter(siren, year));
+
+				if (declarationId && previousStep !== 1) {
+					await tx.insert(declarationStatusHistory).values(
+						buildStepChangeInsert({
+							declarationId,
+							fromStep: previousStep,
+							toStep: 1,
+							actorUserId: ctx.session.user.id,
+						}),
 					);
+				}
+
+				await applyPercentagesAfterUpdate(tx, siren, year);
 			});
 
 			return { success: true };
@@ -239,21 +378,45 @@ export const declarationRouter = createTRPCRouter({
 			const siren = ctx.siren;
 			const year = getCurrentYear();
 
-			await ctx.db
-				.update(declarations)
-				.set({
-					indicatorAAnnualWomen: input.indicatorAAnnualWomen ?? null,
-					indicatorAAnnualMen: input.indicatorAAnnualMen ?? null,
-					indicatorAHourlyWomen: input.indicatorAHourlyWomen ?? null,
-					indicatorAHourlyMen: input.indicatorAHourlyMen ?? null,
-					indicatorCAnnualWomen: input.indicatorCAnnualWomen ?? null,
-					indicatorCAnnualMen: input.indicatorCAnnualMen ?? null,
-					indicatorCHourlyWomen: input.indicatorCHourlyWomen ?? null,
-					indicatorCHourlyMen: input.indicatorCHourlyMen ?? null,
-					currentStep: 2,
-					updatedAt: new Date(),
-				})
-				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+			await ctx.db.transaction(async (tx) => {
+				const [existing] = await tx
+					.select({
+						id: declarations.id,
+						currentStep: declarations.currentStep,
+					})
+					.from(declarations)
+					.where(activeDeclarationFilter(siren, year))
+					.limit(1);
+
+				await tx
+					.update(declarations)
+					.set({
+						indicatorAAnnualWomen: input.indicatorAAnnualWomen ?? null,
+						indicatorAAnnualMen: input.indicatorAAnnualMen ?? null,
+						indicatorAHourlyWomen: input.indicatorAHourlyWomen ?? null,
+						indicatorAHourlyMen: input.indicatorAHourlyMen ?? null,
+						indicatorCAnnualWomen: input.indicatorCAnnualWomen ?? null,
+						indicatorCAnnualMen: input.indicatorCAnnualMen ?? null,
+						indicatorCHourlyWomen: input.indicatorCHourlyWomen ?? null,
+						indicatorCHourlyMen: input.indicatorCHourlyMen ?? null,
+						currentStep: 2,
+						updatedAt: new Date(),
+					})
+					.where(activeDeclarationFilter(siren, year));
+
+				if (existing && existing.currentStep !== 2) {
+					await tx.insert(declarationStatusHistory).values(
+						buildStepChangeInsert({
+							declarationId: existing.id,
+							fromStep: existing.currentStep,
+							toStep: 2,
+							actorUserId: ctx.session.user.id,
+						}),
+					);
+				}
+
+				await applyPercentagesAfterUpdate(tx, siren, year);
+			});
 
 			return { success: true };
 		}),
@@ -264,23 +427,47 @@ export const declarationRouter = createTRPCRouter({
 			const siren = ctx.siren;
 			const year = getCurrentYear();
 
-			await ctx.db
-				.update(declarations)
-				.set({
-					indicatorBAnnualWomen: input.indicatorBAnnualWomen ?? null,
-					indicatorBAnnualMen: input.indicatorBAnnualMen ?? null,
-					indicatorBHourlyWomen: input.indicatorBHourlyWomen ?? null,
-					indicatorBHourlyMen: input.indicatorBHourlyMen ?? null,
-					indicatorDAnnualWomen: input.indicatorDAnnualWomen ?? null,
-					indicatorDAnnualMen: input.indicatorDAnnualMen ?? null,
-					indicatorDHourlyWomen: input.indicatorDHourlyWomen ?? null,
-					indicatorDHourlyMen: input.indicatorDHourlyMen ?? null,
-					indicatorEWomen: input.indicatorEWomen ?? null,
-					indicatorEMen: input.indicatorEMen ?? null,
-					currentStep: 3,
-					updatedAt: new Date(),
-				})
-				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+			await ctx.db.transaction(async (tx) => {
+				const [existing] = await tx
+					.select({
+						id: declarations.id,
+						currentStep: declarations.currentStep,
+					})
+					.from(declarations)
+					.where(activeDeclarationFilter(siren, year))
+					.limit(1);
+
+				await tx
+					.update(declarations)
+					.set({
+						indicatorBAnnualWomen: input.indicatorBAnnualWomen ?? null,
+						indicatorBAnnualMen: input.indicatorBAnnualMen ?? null,
+						indicatorBHourlyWomen: input.indicatorBHourlyWomen ?? null,
+						indicatorBHourlyMen: input.indicatorBHourlyMen ?? null,
+						indicatorDAnnualWomen: input.indicatorDAnnualWomen ?? null,
+						indicatorDAnnualMen: input.indicatorDAnnualMen ?? null,
+						indicatorDHourlyWomen: input.indicatorDHourlyWomen ?? null,
+						indicatorDHourlyMen: input.indicatorDHourlyMen ?? null,
+						indicatorEWomen: input.indicatorEWomen ?? null,
+						indicatorEMen: input.indicatorEMen ?? null,
+						currentStep: 3,
+						updatedAt: new Date(),
+					})
+					.where(activeDeclarationFilter(siren, year));
+
+				if (existing && existing.currentStep !== 3) {
+					await tx.insert(declarationStatusHistory).values(
+						buildStepChangeInsert({
+							declarationId: existing.id,
+							fromStep: existing.currentStep,
+							toStep: 3,
+							actorUserId: ctx.session.user.id,
+						}),
+					);
+				}
+
+				await applyPercentagesAfterUpdate(tx, siren, year);
+			});
 
 			return { success: true };
 		}),
@@ -291,35 +478,59 @@ export const declarationRouter = createTRPCRouter({
 			const siren = ctx.siren;
 			const year = getCurrentYear();
 
-			await ctx.db
-				.update(declarations)
-				.set({
-					indicatorFAnnualThreshold1: input.annual[0].threshold || null,
-					indicatorFAnnualThreshold2: input.annual[1].threshold || null,
-					indicatorFAnnualThreshold3: input.annual[2].threshold || null,
-					indicatorFAnnualWomen1: input.annual[0].women ?? null,
-					indicatorFAnnualWomen2: input.annual[1].women ?? null,
-					indicatorFAnnualWomen3: input.annual[2].women ?? null,
-					indicatorFAnnualWomen4: input.annual[3].women ?? null,
-					indicatorFAnnualMen1: input.annual[0].men ?? null,
-					indicatorFAnnualMen2: input.annual[1].men ?? null,
-					indicatorFAnnualMen3: input.annual[2].men ?? null,
-					indicatorFAnnualMen4: input.annual[3].men ?? null,
-					indicatorFHourlyThreshold1: input.hourly[0].threshold || null,
-					indicatorFHourlyThreshold2: input.hourly[1].threshold || null,
-					indicatorFHourlyThreshold3: input.hourly[2].threshold || null,
-					indicatorFHourlyWomen1: input.hourly[0].women ?? null,
-					indicatorFHourlyWomen2: input.hourly[1].women ?? null,
-					indicatorFHourlyWomen3: input.hourly[2].women ?? null,
-					indicatorFHourlyWomen4: input.hourly[3].women ?? null,
-					indicatorFHourlyMen1: input.hourly[0].men ?? null,
-					indicatorFHourlyMen2: input.hourly[1].men ?? null,
-					indicatorFHourlyMen3: input.hourly[2].men ?? null,
-					indicatorFHourlyMen4: input.hourly[3].men ?? null,
-					currentStep: 4,
-					updatedAt: new Date(),
-				})
-				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+			await ctx.db.transaction(async (tx) => {
+				const [existing] = await tx
+					.select({
+						id: declarations.id,
+						currentStep: declarations.currentStep,
+					})
+					.from(declarations)
+					.where(activeDeclarationFilter(siren, year))
+					.limit(1);
+
+				await tx
+					.update(declarations)
+					.set({
+						indicatorFAnnualThreshold1: input.annual[0].threshold || null,
+						indicatorFAnnualThreshold2: input.annual[1].threshold || null,
+						indicatorFAnnualThreshold3: input.annual[2].threshold || null,
+						indicatorFAnnualWomen1: input.annual[0].women ?? null,
+						indicatorFAnnualWomen2: input.annual[1].women ?? null,
+						indicatorFAnnualWomen3: input.annual[2].women ?? null,
+						indicatorFAnnualWomen4: input.annual[3].women ?? null,
+						indicatorFAnnualMen1: input.annual[0].men ?? null,
+						indicatorFAnnualMen2: input.annual[1].men ?? null,
+						indicatorFAnnualMen3: input.annual[2].men ?? null,
+						indicatorFAnnualMen4: input.annual[3].men ?? null,
+						indicatorFHourlyThreshold1: input.hourly[0].threshold || null,
+						indicatorFHourlyThreshold2: input.hourly[1].threshold || null,
+						indicatorFHourlyThreshold3: input.hourly[2].threshold || null,
+						indicatorFHourlyWomen1: input.hourly[0].women ?? null,
+						indicatorFHourlyWomen2: input.hourly[1].women ?? null,
+						indicatorFHourlyWomen3: input.hourly[2].women ?? null,
+						indicatorFHourlyWomen4: input.hourly[3].women ?? null,
+						indicatorFHourlyMen1: input.hourly[0].men ?? null,
+						indicatorFHourlyMen2: input.hourly[1].men ?? null,
+						indicatorFHourlyMen3: input.hourly[2].men ?? null,
+						indicatorFHourlyMen4: input.hourly[3].men ?? null,
+						currentStep: 4,
+						updatedAt: new Date(),
+					})
+					.where(activeDeclarationFilter(siren, year));
+
+				if (existing && existing.currentStep !== 4) {
+					await tx.insert(declarationStatusHistory).values(
+						buildStepChangeInsert({
+							declarationId: existing.id,
+							fromStep: existing.currentStep,
+							toStep: 4,
+							actorUserId: ctx.session.user.id,
+						}),
+					);
+				}
+
+				await applyPercentagesAfterUpdate(tx, siren, year);
+			});
 
 			return { success: true };
 		}),
@@ -334,9 +545,7 @@ export const declarationRouter = createTRPCRouter({
 				const [declaration] = await tx
 					.select()
 					.from(declarations)
-					.where(
-						and(eq(declarations.siren, siren), eq(declarations.year, year)),
-					)
+					.where(activeDeclarationFilter(siren, year))
 					.limit(1);
 
 				if (!declaration)
@@ -345,14 +554,12 @@ export const declarationRouter = createTRPCRouter({
 						message: "Déclaration introuvable",
 					});
 
-				// Check existing job categories
 				const existingJobs = await tx
 					.select()
 					.from(jobCategories)
 					.where(eq(jobCategories.declarationId, declaration.id));
 
 				if (input.declarationType === "initial") {
-					// For initial: recreate job categories + employee data
 					await deleteJobAndEmployeeCategories(tx, declaration.id);
 
 					for (let i = 0; i < input.categories.length; i++) {
@@ -378,8 +585,18 @@ export const declarationRouter = createTRPCRouter({
 						.update(declarations)
 						.set({ currentStep: 5, updatedAt: new Date() })
 						.where(eq(declarations.id, declaration.id));
+
+					if (declaration.currentStep !== 5) {
+						await tx.insert(declarationStatusHistory).values(
+							buildStepChangeInsert({
+								declarationId: declaration.id,
+								fromStep: declaration.currentStep,
+								toStep: 5,
+								actorUserId: ctx.session.user.id,
+							}),
+						);
+					}
 				} else {
-					// For correction: reuse existing job categories, upsert employee data
 					for (const job of existingJobs) {
 						const cat = input.categories[job.categoryIndex];
 						if (!cat) continue;
@@ -416,109 +633,96 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	submitSecondDeclaration: companyWriteProcedure.mutation(async ({ ctx }) => {
-		const siren = ctx.siren;
-		const year = getCurrentYear();
-
-		await ctx.db
-			.update(declarations)
-			.set({
-				secondDeclarationStatus: "submitted",
-				secondDeclarationStep: 3,
-				updatedAt: new Date(),
-			})
-			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
-
-		const email = ctx.session.user.email;
-		if (email) {
-			const { sendReceipt } = await import("~/modules/mail/server");
-			await sendReceipt({
-				kind: "secondDeclaration",
-				to: email,
-				siren,
-				year,
-				userId: ctx.session.user.id,
-				isResend: false,
-			});
-		}
-
-		return { success: true };
-	}),
-
 	submit: companyWriteProcedure.mutation(async ({ ctx }) => {
 		const siren = ctx.siren;
 		const year = getCurrentYear();
-		const now = new Date();
 
-		// Preserve the very first submission date — resubmissions after
-		// corrections must not move the campaign progression curve.
-		const [existing] = await ctx.db
-			.select({
-				submittedAt: declarations.submittedAt,
-				indicatorAAnnualWomen: declarations.indicatorAAnnualWomen,
-				indicatorAAnnualMen: declarations.indicatorAAnnualMen,
-				indicatorAHourlyWomen: declarations.indicatorAHourlyWomen,
-				indicatorAHourlyMen: declarations.indicatorAHourlyMen,
-				indicatorBAnnualWomen: declarations.indicatorBAnnualWomen,
-				indicatorBAnnualMen: declarations.indicatorBAnnualMen,
-				indicatorBHourlyWomen: declarations.indicatorBHourlyWomen,
-				indicatorBHourlyMen: declarations.indicatorBHourlyMen,
-				indicatorCAnnualWomen: declarations.indicatorCAnnualWomen,
-				indicatorCAnnualMen: declarations.indicatorCAnnualMen,
-				indicatorCHourlyWomen: declarations.indicatorCHourlyWomen,
-				indicatorCHourlyMen: declarations.indicatorCHourlyMen,
-				indicatorDAnnualWomen: declarations.indicatorDAnnualWomen,
-				indicatorDAnnualMen: declarations.indicatorDAnnualMen,
-				indicatorDHourlyWomen: declarations.indicatorDHourlyWomen,
-				indicatorDHourlyMen: declarations.indicatorDHourlyMen,
-				indicatorEWomen: declarations.indicatorEWomen,
-				indicatorEMen: declarations.indicatorEMen,
-				indicatorFAnnualWomen1: declarations.indicatorFAnnualWomen1,
-				indicatorFAnnualWomen2: declarations.indicatorFAnnualWomen2,
-				indicatorFAnnualWomen3: declarations.indicatorFAnnualWomen3,
-				indicatorFAnnualWomen4: declarations.indicatorFAnnualWomen4,
-				indicatorFAnnualMen1: declarations.indicatorFAnnualMen1,
-				indicatorFAnnualMen2: declarations.indicatorFAnnualMen2,
-				indicatorFAnnualMen3: declarations.indicatorFAnnualMen3,
-				indicatorFAnnualMen4: declarations.indicatorFAnnualMen4,
-				indicatorFHourlyWomen1: declarations.indicatorFHourlyWomen1,
-				indicatorFHourlyWomen2: declarations.indicatorFHourlyWomen2,
-				indicatorFHourlyWomen3: declarations.indicatorFHourlyWomen3,
-				indicatorFHourlyWomen4: declarations.indicatorFHourlyWomen4,
-				indicatorFHourlyMen1: declarations.indicatorFHourlyMen1,
-				indicatorFHourlyMen2: declarations.indicatorFHourlyMen2,
-				indicatorFHourlyMen3: declarations.indicatorFHourlyMen3,
-				indicatorFHourlyMen4: declarations.indicatorFHourlyMen4,
-			})
+		const [declaration] = await ctx.db
+			.select()
 			.from(declarations)
-			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+			.where(activeDeclarationFilter(siren, year))
 			.limit(1);
 
-		if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
+		if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
 
-		const percentages = computeIndicatorPercentages(existing);
-		const percentagesForDb = Object.fromEntries(
-			Object.entries(percentages).map(([k, v]) => [
-				k,
-				v === null ? null : v.toString(),
-			]),
+		const [company] = await ctx.db
+			.select()
+			.from(companies)
+			.where(eq(companies.siren, siren))
+			.limit(1);
+
+		if (!company)
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: "Entreprise introuvable",
+			});
+
+		const initialCategories = await loadEmployeeCategoriesForDeclaration(
+			ctx.db,
+			declaration.id,
+			"initial",
+		);
+		const hasIndicatorGData = initialCategories.length > 0;
+		const hasGap =
+			hasIndicatorGData && hasGapsAboveThreshold(initialCategories);
+
+		const rules = loadRules(declaration.rulesVersion);
+		const facts = buildSubmitFacts(
+			declaration,
+			company,
+			hasIndicatorGData,
+			hasGap,
+		);
+		const { nextStatus, events } = applyAction(facts, "submit", rules);
+
+		const projection = computeProjectionUpdates(events, nextStatus);
+		const historyInserts = buildHistoryInserts(
+			declaration.id,
+			events,
+			ctx.session.user.id,
 		);
 
-		await ctx.db
-			.update(declarations)
-			.set({
-				status: "submitted",
-				currentStep: 6,
-				submittedAt: existing.submittedAt ?? now,
-				updatedAt: now,
-				...percentagesForDb,
-			})
-			.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+		// Snapshot `cseRequired` à la soumission (figé pour le reste du cycle FSM
+		// même si l'admin modifie ensuite `companies.hasCse`). C'est cette valeur
+		// que les transitions FSM aval (saveCompliancePath, submitJointEvaluation,
+		// cseOpinion.finalize) liront comme guard.
+		const cseRequiredSnapshot =
+			(company.workforce ?? 0) >= COMPANY_SIZE_ANNUAL_MIN &&
+			company.hasCse === true;
+
+		await ctx.db.transaction(async (tx) => {
+			if (declaration.status === "draft" && historyInserts.length > 0) {
+				await tx.insert(declarationStatusHistory).values(historyInserts);
+			}
+			await tx
+				.update(declarations)
+				.set({
+					...projection,
+					cseRequired: cseRequiredSnapshot,
+					currentStep: 6,
+					updatedAt: new Date(),
+				})
+				.where(activeDeclarationFilter(siren, year));
+
+			if (declaration.currentStep !== 6) {
+				await tx.insert(declarationStatusHistory).values(
+					buildStepChangeInsert({
+						declarationId: declaration.id,
+						fromStep: declaration.currentStep,
+						toStep: 6,
+						actorUserId: ctx.session.user.id,
+					}),
+				);
+			}
+
+			await applyPercentagesAfterUpdate(tx, siren, year);
+			await purgeDraftSlice(tx, siren, year, "main");
+		});
 
 		const email = ctx.session.user.email;
 		if (email) {
-			const { sendReceipt } = await import("~/modules/mail/server");
-			await sendReceipt({
+			const { enqueueReceipt } = await import("~/modules/mail/server");
+			await enqueueReceipt({
 				kind: "declaration",
 				to: email,
 				siren,
@@ -532,42 +736,277 @@ export const declarationRouter = createTRPCRouter({
 	}),
 
 	saveCompliancePath: companyWriteProcedure
-		.input(saveCompliancePathSchema)
+		.input(saveCompliancePathInputSchema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
 			const year = getCurrentYear();
 
-			await ctx.db
-				.update(declarations)
-				.set({
-					compliancePath: input.path,
-					updatedAt: new Date(),
-				})
-				.where(and(eq(declarations.siren, siren), eq(declarations.year, year)));
+			const [declaration] = await ctx.db
+				.select()
+				.from(declarations)
+				.where(activeDeclarationFilter(siren, year))
+				.limit(1);
+
+			if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
+
+			const round = await getCurrentRound(ctx.db, declaration.id);
+			const isRound2 = round === 2;
+
+			if (isRound2 && input.path === "corrective_action") {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message:
+						"L'action corrective n'est pas un parcours disponible lors de la révision.",
+				});
+			}
+
+			const locked = await hasLockingEventForRound(
+				ctx.db,
+				declaration.id,
+				round,
+			);
+			if (locked) {
+				throw new TRPCError({
+					code: "CONFLICT",
+					message: PATH_LOCKED_ERROR,
+				});
+			}
+
+			let fsmCurrentState = declaration.status;
+			if (isRound2 && fsmCurrentState !== "awaiting_revision_choice") {
+				fsmCurrentState = "awaiting_revision_choice";
+			} else if (
+				!isRound2 &&
+				fsmCurrentState !== "awaiting_compliance_path_choice"
+			) {
+				fsmCurrentState = "awaiting_compliance_path_choice";
+			}
+
+			const rules = loadRules(declaration.rulesVersion);
+			const facts = {
+				currentState: fsmCurrentState,
+				cseRequired: declaration.cseRequired,
+				action: { path: input.path },
+			};
+			const { nextStatus, events } = applyAction(
+				facts,
+				"choose_compliance_path",
+				rules,
+			);
+
+			const projection = computeProjectionUpdates(events, nextStatus);
+			const historyInserts = buildHistoryInserts(
+				declaration.id,
+				events,
+				ctx.session.user.id,
+			);
+
+			await ctx.db.transaction(async (tx) => {
+				await tx.insert(declarationStatusHistory).values(historyInserts);
+				await tx
+					.update(declarations)
+					.set({ ...projection, updatedAt: new Date() })
+					.where(activeDeclarationFilter(siren, year));
+				await purgeDraftSlice(tx, siren, year, "compliance");
+			});
 
 			return { success: true };
 		}),
 
-	completeCompliancePath: companyWriteProcedure.mutation(async ({ ctx }) => {
+	submitSecondDeclaration: companyWriteProcedure.mutation(async ({ ctx }) => {
 		const siren = ctx.siren;
 		const year = getCurrentYear();
-		const now = new Date();
 
-		// Idempotent: only set complianceCompletedAt on first completion
-		// Also requires status = 'submitted' to prevent stale fire-and-forget
-		// mutations from overwriting a reset declaration.
-		await ctx.db
-			.update(declarations)
-			.set({ complianceCompletedAt: now, updatedAt: now })
-			.where(
-				and(
-					eq(declarations.siren, siren),
-					eq(declarations.year, year),
-					eq(declarations.status, "submitted"),
-					isNull(declarations.complianceCompletedAt),
-				),
-			);
+		const [declaration] = await ctx.db
+			.select()
+			.from(declarations)
+			.where(activeDeclarationFilter(siren, year))
+			.limit(1);
+
+		if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
+
+		const correctionCategories = await loadEmployeeCategoriesForDeclaration(
+			ctx.db,
+			declaration.id,
+			"correction",
+		);
+		const stillHasGap = hasGapsAboveThreshold(correctionCategories);
+
+		const rules = loadRules(declaration.rulesVersion);
+		const facts = buildSecondDeclarationFacts(declaration, stillHasGap);
+		const { nextStatus, events } = applyAction(
+			facts,
+			"submit_second_declaration",
+			rules,
+		);
+
+		const projection = computeProjectionUpdates(events, nextStatus);
+		const historyInserts = buildHistoryInserts(
+			declaration.id,
+			events,
+			ctx.session.user.id,
+		);
+
+		await ctx.db.transaction(async (tx) => {
+			await tx.insert(declarationStatusHistory).values(historyInserts);
+			await tx
+				.update(declarations)
+				.set({
+					...projection,
+					secondDeclarationStep: 3,
+					updatedAt: new Date(),
+				})
+				.where(activeDeclarationFilter(siren, year));
+			await purgeDraftSlice(tx, siren, year, "second");
+		});
+
+		const email = ctx.session.user.email;
+		if (email) {
+			const { enqueueReceipt } = await import("~/modules/mail/server");
+			await enqueueReceipt({
+				kind: "secondDeclaration",
+				to: email,
+				siren,
+				year,
+				userId: ctx.session.user.id,
+				isResend: false,
+			});
+		}
 
 		return { success: true };
 	}),
+
+	submitJointEvaluation: companyWriteProcedure
+		.input(submitJointEvaluationSchema)
+		.mutation(async ({ ctx }) => {
+			const siren = ctx.siren;
+			const year = getCurrentYear();
+
+			const [declaration] = await ctx.db
+				.select()
+				.from(declarations)
+				.where(activeDeclarationFilter(siren, year))
+				.limit(1);
+
+			if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
+
+			const rules = loadRules(declaration.rulesVersion);
+			const facts = buildJointEvaluationFacts(declaration);
+			const { nextStatus, events } = applyAction(
+				facts,
+				"submit_joint_evaluation",
+				rules,
+			);
+
+			const projection = computeProjectionUpdates(events, nextStatus);
+			const historyInserts = buildHistoryInserts(
+				declaration.id,
+				events,
+				ctx.session.user.id,
+			);
+
+			await ctx.db.transaction(async (tx) => {
+				await tx.insert(declarationStatusHistory).values(historyInserts);
+				await tx
+					.update(declarations)
+					.set({ ...projection, updatedAt: new Date() })
+					.where(activeDeclarationFilter(siren, year));
+				await purgeDraftSlice(tx, siren, year, "joint");
+			});
+
+			return { success: true };
+		}),
+
+	getStatusHistory: protectedProcedure
+		.input(declarationHistoryInputSchema)
+		.query(async ({ ctx, input }) => {
+			if (!isImpersonatingSiren(ctx.session, input.siren)) {
+				const access = await ctx.db
+					.select({ siren: userCompanies.siren })
+					.from(userCompanies)
+					.where(
+						and(
+							eq(userCompanies.userId, ctx.session.user.id),
+							eq(userCompanies.siren, input.siren),
+						),
+					)
+					.limit(1);
+
+				if (access.length === 0) {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Accès refusé à cette entreprise.",
+					});
+				}
+			}
+
+			const [declaration] = await ctx.db
+				.select({ id: declarations.id })
+				.from(declarations)
+				.where(
+					and(
+						eq(declarations.siren, input.siren),
+						eq(declarations.year, input.year),
+						isNull(declarations.cancelledAt),
+					),
+				)
+				.limit(1);
+
+			if (!declaration) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Déclaration introuvable.",
+				});
+			}
+
+			const historyWhere = eq(
+				declarationStatusHistory.declarationId,
+				declaration.id,
+			);
+
+			const [items, totalResult] = await Promise.all([
+				ctx.db
+					.select({
+						id: declarationStatusHistory.id,
+						eventType: declarationStatusHistory.eventType,
+						value: declarationStatusHistory.value,
+						round: declarationStatusHistory.round,
+						createdAt: declarationStatusHistory.createdAt,
+						actorFirstName: users.firstName,
+						actorLastName: users.lastName,
+						actorEmail: users.email,
+					})
+					.from(declarationStatusHistory)
+					.leftJoin(users, eq(declarationStatusHistory.actorUserId, users.id))
+					.where(historyWhere)
+					.orderBy(desc(declarationStatusHistory.createdAt))
+					.limit(input.limit)
+					.offset(input.offset),
+				ctx.db
+					.select({ total: count() })
+					.from(declarationStatusHistory)
+					.where(historyWhere),
+			]);
+
+			const total = totalResult[0]?.total ?? 0;
+
+			return {
+				items: items.map((row) => ({
+					id: row.id,
+					eventType: row.eventType,
+					value: row.value,
+					round: row.round,
+					createdAt: row.createdAt,
+					actor:
+						row.actorEmail !== null
+							? {
+									firstName: row.actorFirstName ?? null,
+									lastName: row.actorLastName ?? null,
+									email: row.actorEmail,
+								}
+							: null,
+				})),
+				total,
+			};
+		}),
 });

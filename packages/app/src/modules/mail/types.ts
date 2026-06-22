@@ -3,8 +3,3 @@ export type MailAttachment = {
 	content: Buffer;
 	contentType: string;
 };
-
-export type ReceiptContext = {
-	siren: string;
-	year: number;
-};

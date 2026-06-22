@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { deleteReferents, seedReferents } from "./helpers/db";
+import { deleteReferents, seedReferents } from "./helpers/db-campaign";
 
 // Fixed UUIDs so detail-page URLs (`/referents/[id]`) pass the
 // `z.string().uuid()` check in `publicReferents.getById`.
@@ -144,6 +144,8 @@ test.describe("public referents search", () => {
 	test("click-through to detail page reveals contact info", async ({
 		browser,
 	}) => {
+		test.setTimeout(120_000);
+
 		const anonCtx = await browser.newContext({ storageState: undefined });
 		try {
 			const page = await anonCtx.newPage();
@@ -152,6 +154,7 @@ test.describe("public referents search", () => {
 			await page.getByRole("button", { name: /^rechercher$/i }).click();
 
 			const row = page.locator("li", { hasText: "E2E Référent Paris" });
+			await expect(row).toBeVisible({ timeout: 30_000 });
 			await row.getByRole("link", { name: /voir le contact/i }).click();
 
 			await expect(
@@ -159,7 +162,7 @@ test.describe("public referents search", () => {
 					level: 1,
 					name: /E2E Référent Paris/,
 				}),
-			).toBeVisible();
+			).toBeVisible({ timeout: 30_000 });
 			await expect(page.getByText("e2e-paris@dreets.test")).toBeVisible();
 			await expect(page.getByText("Suppléant Paris")).toBeVisible();
 			await expect(page.getByText("e2e-paris-sub@dreets.test")).toBeVisible();

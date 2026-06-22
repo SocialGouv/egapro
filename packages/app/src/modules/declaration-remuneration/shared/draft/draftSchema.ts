@@ -11,8 +11,10 @@ export const draftPayloadSchema = z.object({
 		z.literal("second-2"),
 		z.literal("joint"),
 		z.literal("compliance"),
+		z.literal("opinions"),
+		z.literal("upload"),
 	]),
-	kind: z.enum(["main", "second", "joint", "compliance"]),
+	kind: z.enum(["main", "second", "joint", "compliance", "cse"]),
 	timestamp: z.number().int(),
 	fields: z.record(z.string(), z.unknown()),
 });

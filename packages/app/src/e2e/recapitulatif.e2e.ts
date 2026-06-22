@@ -4,7 +4,7 @@ import { setDeclarationComplianceState } from "./helpers/db";
 test.describe("Recapitulatif page", () => {
 	test.beforeAll(async () => {
 		await setDeclarationComplianceState({
-			status: "submitted",
+			status: "awaiting_compliance_path_choice",
 			currentStep: 6,
 		});
 	});
@@ -63,7 +63,10 @@ test.describe("Recapitulatif page", () => {
 		await page.goto("/declaration-remuneration/recapitulatif");
 
 		await expect(
-			page.getByRole("link", { name: /Retour à Mon Espace/ }),
+			page
+				.locator("main")
+				.getByRole("link", { name: "Retour à Mon Espace", exact: true })
+				.last(),
 		).toBeVisible();
 	});
 

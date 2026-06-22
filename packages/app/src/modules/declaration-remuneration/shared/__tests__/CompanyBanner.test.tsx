@@ -6,12 +6,14 @@ import { CompanyBanner } from "../CompanyBanner";
 const defaultCompany = {
 	name: "Alpha Solutions",
 	siren: "123456789",
+	nafCode: "62.01Z",
+	nafLabel: "Programmation informatique",
 	workforce: 256,
 	hasCse: true,
 };
 
 describe("CompanyBanner", () => {
-	it("renders breadcrumb with 'Mon espace' link and current page label", () => {
+	it("renders breadcrumb with 3 items: Mon espace, company name and current page label", () => {
 		render(
 			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
 		);
@@ -20,22 +22,67 @@ describe("CompanyBanner", () => {
 		expect(link).toHaveAttribute("href", "/");
 
 		expect(screen.getByText("Déclaration")).toBeInTheDocument();
+
+		const nav = screen.getByRole("navigation");
+		expect(nav).toHaveTextContent("Alpha Solutions");
 	});
 
-	it("renders formatted SIREN", () => {
+	it("renders formatted SIREN with label", () => {
 		render(
 			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
 		);
 
+		expect(screen.getByText("SIREN :")).toBeInTheDocument();
 		expect(screen.getByText(/123 456 789/)).toBeInTheDocument();
 	});
 
-	it("renders company name", () => {
+	it("renders company name as bold paragraph", () => {
 		render(
 			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
 		);
 
-		expect(screen.getByText(/Alpha Solutions/)).toBeInTheDocument();
+		const boldName = screen.getByText("Alpha Solutions", {
+			selector: "p",
+		});
+		expect(boldName).toBeInTheDocument();
+		expect(boldName).toHaveClass("fr-text--bold");
+	});
+
+	it("renders NAF code with its activity label", () => {
+		render(
+			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
+		);
+
+		expect(screen.getByText("Code NAF :")).toBeInTheDocument();
+		expect(
+			screen.getByText("62.01Z — Programmation informatique"),
+		).toBeInTheDocument();
+	});
+
+	it("renders NAF code alone when the label is null", () => {
+		render(
+			<CompanyBanner
+				company={{ ...defaultCompany, nafLabel: null }}
+				currentPageLabel="Déclaration"
+			/>,
+		);
+
+		expect(screen.getByText("Code NAF :")).toBeInTheDocument();
+		expect(screen.getByText("62.01Z")).toBeInTheDocument();
+		expect(
+			screen.queryByText(/Programmation informatique/),
+		).not.toBeInTheDocument();
+	});
+
+	it("hides the NAF datapoint when nafCode is null", () => {
+		render(
+			<CompanyBanner
+				company={{ ...defaultCompany, nafCode: null, nafLabel: null }}
+				currentPageLabel="Déclaration"
+			/>,
+		);
+
+		expect(screen.queryByText("Code NAF :")).not.toBeInTheDocument();
 	});
 
 	it("renders workforce and CSE values", () => {

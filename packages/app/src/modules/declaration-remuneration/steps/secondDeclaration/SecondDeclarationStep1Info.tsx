@@ -1,6 +1,7 @@
 "use client";
 
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import { DraftLoadingState } from "~/modules/declaration-remuneration/shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
@@ -23,7 +24,7 @@ export function SecondDeclarationStep1Info({
 	declarationYear,
 	modificationDeadline,
 }: Props) {
-	const { hasDraft } = useDeclarationDraft({
+	const { isLoadingDraft } = useDeclarationDraft({
 		siren: declarationSiren,
 		year: declarationYear,
 		step: "second-1",
@@ -31,7 +32,9 @@ export function SecondDeclarationStep1Info({
 		dbValues: EMPTY_DB_VALUES,
 	});
 
-	const saved = !hasDraft;
+	if (isLoadingDraft) {
+		return <DraftLoadingState />;
+	}
 
 	return (
 		<div className={common.flexColumnGap2}>
@@ -40,7 +43,7 @@ export function SecondDeclarationStep1Info({
 					Parcours de mise en conformité pour l&apos;indicateur par catégorie de
 					salariés
 				</h1>
-				{saved && <SavedIndicator />}
+				<SavedIndicator hasData={true} />
 			</div>
 
 			<SecondDeclarationStepIndicator currentStep={1} />

@@ -2,6 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
+vi.mock("~/server/api/routers/declarationHelpers", () => ({
+	activeDeclarationFilter: (siren: string, year: number) => ({
+		siren,
+		year,
+		cancelledAt: "IS NULL",
+	}),
+}));
+
 const mockLimit = vi.fn();
 const mockWhere = vi.fn();
 const mockFrom = vi.fn();
@@ -102,6 +110,18 @@ describe("buildTransmittedPdfData", () => {
 	});
 
 	it("throws when declaration is not found", async () => {
+		setupMockDb({ name: "ACME", siren: "123456789" }, null);
+
+		const { buildTransmittedPdfData } = await import(
+			"../buildTransmittedPdfData"
+		);
+
+		await expect(
+			buildTransmittedPdfData("123456789", 2025, new Date()),
+		).rejects.toThrow("Déclaration introuvable");
+	});
+
+	it("throws when only cancelled declarations exist for (siren, year)", async () => {
 		setupMockDb({ name: "ACME", siren: "123456789" }, null);
 
 		const { buildTransmittedPdfData } = await import(

@@ -7,7 +7,11 @@ import {
 	submitCseStep2,
 	uploadJointEvalPdf,
 } from "./helpers/compliance-flows";
-import { resetDeclarationToDraft, setCompanyHasCse } from "./helpers/db";
+import {
+	resetDeclarationToDraft,
+	setCompanyHasCse,
+	setCompanyWorkforce,
+} from "./helpers/db";
 import { completeDeclaration } from "./helpers/declaration-flows";
 
 test.describe.configure({ mode: "serial" });
@@ -20,6 +24,7 @@ test.describe("Path 1: no gap + hasCse → /avis-cse → full CSE flow", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
 	});
 
 	test("complete declaration without gap, then CSE opinion flow", async ({
@@ -42,6 +47,7 @@ test.describe("Path 2: no gap + no hasCse → /confirmation", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(false);
+		await setCompanyWorkforce(200);
 	});
 
 	test("complete declaration without gap, redirects to confirmation", async ({
@@ -62,6 +68,7 @@ test.describe("Path 3: gap + hasCse → compliance choice → justify", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
 	});
 
 	test("complete declaration with gap, shows 3 compliance options", async ({
@@ -77,9 +84,12 @@ test.describe("Path 3: gap + hasCse → compliance choice → justify", () => {
 			}),
 		).toBeVisible();
 		await expect(
-			page.getByText("Évaluation conjointe des rémunérations", {
-				exact: true,
-			}),
+			page.getByText(
+				"Mettre en place une évaluation conjointe des rémunérations",
+				{
+					exact: true,
+				},
+			),
 		).toBeVisible();
 		await expect(
 			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
@@ -98,6 +108,7 @@ test.describe("Path 4: gap + hasCse → joint evaluation → /avis-cse", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
 	});
 
 	test("complete declaration with gap, joint evaluation → CSE", async ({
@@ -115,6 +126,7 @@ test.describe("Path 5: gap + no hasCse → joint evaluation → /confirmation", 
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(false);
+		await setCompanyWorkforce(200);
 	});
 
 	test("shows all 3 options including justify (hasCse=false)", async ({
@@ -141,6 +153,7 @@ test.describe("Path 6: gap + corrective action (no gap after) + hasCse → /avis
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
 	});
 
 	test("declaration → corrective action → correct without gap → /avis-cse", async ({
@@ -158,6 +171,7 @@ test.describe("Path 7: gap + corrective action (no gap after) + no hasCse → /c
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(false);
+		await setCompanyWorkforce(200);
 	});
 
 	test("declaration → corrective action → correct without gap → /confirmation", async ({
@@ -177,6 +191,7 @@ test.describe("Path 8: gap + corrective action (gap persists) → second round c
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
 	});
 
 	test("declaration → corrective action → correct WITH gap → back to compliance choice", async ({
@@ -200,9 +215,12 @@ test.describe("Path 8: gap + corrective action (gap persists) → second round c
 			}),
 		).toBeVisible();
 		await expect(
-			page.getByText("Évaluation conjointe des rémunérations", {
-				exact: true,
-			}),
+			page.getByText(
+				"Mettre en place une évaluation conjointe des rémunérations",
+				{
+					exact: true,
+				},
+			),
 		).toBeVisible();
 		await expect(
 			page.getByText("Actions correctives et seconde déclaration", {
@@ -224,6 +242,7 @@ test.describe("Path 10: second round + joint evaluation + hasCse → /avis-cse",
 		// Fresh run: declaration → corrective action with gap → second round
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
 	});
 
 	test("full flow → second round → joint evaluation → /avis-cse", async ({
@@ -244,6 +263,7 @@ test.describe("Path 11: second round + joint evaluation + no hasCse → /confirm
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(false);
+		await setCompanyWorkforce(200);
 	});
 
 	test("full flow → second round → joint evaluation → /confirmation", async ({
@@ -259,12 +279,74 @@ test.describe("Path 11: second round + joint evaluation + no hasCse → /confirm
 	});
 });
 
-// === GROUP F: Redirect guard (complianceCompletedAt) ===
+// === GROUP F.0: /avis-cse Précédent button routes via rule-engine state ===
+
+test.describe("Path 13.a: no gap → /avis-cse Précédent → /etape/6 (recap)", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
+	});
+
+	test("after no-gap submission, Précédent on /avis-cse goes to step 6", async ({
+		page,
+	}) => {
+		test.slow();
+		await completeDeclaration(page, { hasGap: false });
+		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.getByRole("link", { name: /Précédent/ }).click();
+		await page.waitForURL("**/declaration-remuneration/etape/6", {
+			timeout: 10_000,
+		});
+	});
+});
+
+test.describe("Path 13.b: justify round 1 → /avis-cse Précédent → /parcours-conformite", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
+	});
+
+	test("after justify choice, Précédent on /avis-cse goes back to compliance choice", async ({
+		page,
+	}) => {
+		test.slow();
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-justify");
+		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.getByRole("link", { name: /Précédent/ }).click();
+		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+	});
+});
+
+test.describe("Path 13.c: corrective second decl resolved → /avis-cse Précédent → /etape/3", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
+	});
+
+	test("after second-decl resolved, Précédent on /avis-cse goes to second-decl recap", async ({
+		page,
+	}) => {
+		test.slow();
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-corrective");
+		await completeSecondDeclaration(page, { hasGap: false });
+		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.getByRole("link", { name: /Précédent/ }).click();
+		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/3`, { timeout: 10_000 });
+	});
+});
+
+// === GROUP F: Redirect guard (demarcheCompletedAt) ===
 
 test.describe("Path 12: compliance already completed → redirect", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
 	});
 
 	test("complete full flow, then verify compliance path redirects away", async ({
@@ -277,7 +359,7 @@ test.describe("Path 12: compliance already completed → redirect", () => {
 		await fillCseStep1(page, false);
 		await submitCseStep2(page);
 
-		// complianceCompletedAt is now set — navigating back should redirect
+		// demarcheCompletedAt is now set — navigating back should redirect
 		await page.goto(COMPLIANCE_PATH);
 		await page.waitForURL(
 			(url) => !url.pathname.endsWith("/parcours-conformite"),

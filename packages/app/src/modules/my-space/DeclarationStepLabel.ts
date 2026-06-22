@@ -1,15 +1,20 @@
-const STEP_LABELS: Record<number, string> = {
-	0: "Non commencée",
-	1: "Effectifs par catégorie",
-	2: "Rémunération de base",
-	3: "Écart de rémunération",
-	4: "Répartition par quartile",
-	5: "Catégories personnalisées",
-	6: "Complétée",
+import type { DeclarationFsmStatus } from "~/modules/domain";
+
+const PROCESS_STEP_LABELS: Record<DeclarationFsmStatus, string> = {
+	draft: "Déclaration des indicateurs de rémunération",
+	awaiting_compliance_path_choice: "Choix du parcours de mise en conformité",
+	corrective_actions_chosen: "Actions correctives et seconde déclaration",
+	awaiting_revision_choice:
+		"Choix du parcours de mise en conformité (Deuxième déclaration)",
+	joint_evaluation_chosen: "Évaluation conjointe des rémunérations",
+	revised_joint_evaluation_chosen: "Évaluation conjointe des rémunérations",
+	awaiting_cse_opinion: "Déposer le ou les avis CSE",
+	demarche_completed: "Finalisation - Démarche des indicateurs de rémunération",
 };
 
-/** Returns a French label describing the current step of a declaration. */
-export function getDeclarationStepLabel(currentStep: number): string {
-	if (currentStep === 0) return "-";
-	return STEP_LABELS[currentStep] ?? "-";
+export function getDeclarationProcessStepLabel(
+	fsmStatus: DeclarationFsmStatus | null,
+): string {
+	if (fsmStatus === null) return "Non commencée";
+	return PROCESS_STEP_LABELS[fsmStatus];
 }

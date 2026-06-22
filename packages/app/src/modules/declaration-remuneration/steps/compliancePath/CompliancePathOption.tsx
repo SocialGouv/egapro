@@ -44,7 +44,10 @@ export function CompliancePathOption({
 					type="radio"
 					value={value}
 				/>
-				<label className="fr-label fr-text--bold fr-h6 fr-mb-0" htmlFor={id}>
+				<label
+					className={`fr-label fr-text--bold fr-h6 fr-mb-0 ${styles.title}`}
+					htmlFor={id}
+				>
 					{title}
 				</label>
 			</div>

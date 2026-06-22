@@ -58,7 +58,9 @@ These gates trigger **automatically** without user input. Do NOT wait to be aske
 
 ### Quality gates — agent delegation
 
-Within the `/implement` pipeline, quality gates are delegated by the `code-dev` agent (step 6) — it invokes the 4 auditors in parallel after implementation, before opening the draft PR.
+Within the `/implement` pipeline, the unit/integration tests are written by the `tu-dev` agent (always Opus, invoked by `code-dev` at step 5.5) right after implementation — `code-dev` no longer writes, runs, or reads any unit/integration test itself. `tu-dev` triages failures and hands control back to `code-dev` on a genuine regression (comment `tu-dev:` on the ticket). Then the quality gates are delegated by the `code-dev` agent (step 6) — it invokes the 4 auditors in parallel, before opening the draft PR. `tu-dev` runs **only** inside the pipeline.
+
+Because `code-dev` spawns these agents itself (`tu-dev` + the 4 gates + `functional-validator`), it must run as a **main agent** — its own `claude --agent code-dev` process — since a subagent cannot spawn subagents. The pipeline therefore always launches code-dev as a CLI process: epic mode via `epic_loop.sh`, task/bug mode via a synchronous `claude --agent code-dev` foreground call in `/implement` (never via the Task tool).
 
 **Outside the pipeline** (direct edits, manual fixes, hotfixes), the same rule applies : before reporting ANY task as done, launch the **4 parallel agents** :
 
@@ -122,7 +124,7 @@ Apply these rules **as you write code**, before any agent runs:
 
 ### E2E tests (when relevant)
 
-Write or update Playwright E2E tests when a user journey is created, modified, or its underlying API/data changes.
+Write or update Playwright E2E tests when a user journey is created, modified, or its underlying API/data changes. Full E2E rules: `rules/e2e.md`.
 
 ---
 
@@ -139,15 +141,19 @@ Agents in `.claude/agents/` are delegated to automatically by skills and quality
 
 These agents are **read-only** — they report findings but never modify files. Fixes are applied by the main agent after review.
 
+The `tu-dev` agent (Opus) precedes these 4 gates in the `/implement` pipeline (step 5.5 of `code-dev`). Unlike them, it is a **writer**: it creates/fixes the vitest tests (unit + integration). It runs only inside the pipeline and hands control back to `code-dev` on a genuine regression. See `.claude/agents/tu-dev/AGENT.md`.
+
 ---
 
 ## Skills (manual)
 
-Five skills split the lifecycle:
+Les skills couvrent le cycle de vie (conception → exécution → review) et le pilotage de sprint (sizing → vélocité → planification) :
 
 | Command | When to use |
 |---|---|
-| `/analyse [<issue#>] [<description>]` | Phase conception. Détecte le mode (epic / task / bug) selon le type d'issue ou le prompt et invoque les agents appropriés (PO + architect, architect-task, ou bug-analyst). |
+| `/analyse [<issue#>] [<description>]` | Phase conception. Détecte le mode (epic / task / bug) selon le type d'issue ou le prompt et invoque les agents appropriés (PO + architect, architect-task, ou bug-analyst). Size chaque feuille en fin d'analyse (`Size` + `Estimate`). |
 | `/implement <issue#>` | Phase exécution. Détecte le mode selon le type d'issue : Feature → loop driver background (`epic_loop.sh`) ; Task / Bug → `code-dev` synchrone foreground. Vérifie qu'une analyse a été faite avant de dispatcher. |
 | `/report [<N> ...]` | Dashboard live des agents en cours + état des sous-tickets d'un epic. Pure bash, zéro LLM. |
 | `/review [<issue#>\|<PR#>]` | Adresse les commentaires de revue (humain + bots). 3 modes auto-détectés : Feature → toutes les sub-task PRs + PR finale, fixes sur `epic/<N>` ; Task / Bug → la seule PR du ticket. Délègue à `review-fixer` en worktree. |
+| `/velocity [<sprint>]` | Vélocité des sprints terminés + capacité conseillée pour le prochain. Σ points des feuilles livrées (Done ∪ In review), moyenne glissante 3 sprints. Pure bash, read-only. |
+| `/plan-sprint [<sprint>]` | Planifie le prochain sprint (capacité, report des non-livrés, fill backlog par priorité). Plan → validation explicite → assignation Sprint des tickets. Ne crée pas l'itération (limite API GitHub → clic UI). |

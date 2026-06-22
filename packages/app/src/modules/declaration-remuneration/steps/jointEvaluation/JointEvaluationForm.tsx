@@ -10,6 +10,7 @@ import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/d
 import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { FileUpload, useFileUploadForm } from "~/modules/shared";
+import { api } from "~/trpc/react";
 
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
@@ -41,10 +42,22 @@ export function JointEvaluationForm({
 		dbValues: EMPTY_DB_VALUES,
 	});
 
+	const submitJointEvaluationMutation =
+		api.declaration.submitJointEvaluation.useMutation();
+
 	const onAllUploaded = useCallback(() => {
 		clearDraft();
-		router.push(getPostComplianceDestination(hasCse));
-	}, [clearDraft, hasCse, router]);
+		// The upload writes the joint evaluation files to S3; the FSM transition
+		// (`joint_evaluation_chosen` / `revised_joint_evaluation_chosen` →
+		// `awaiting_cse_opinion` or `demarche_completed`) is decoupled and must
+		// be triggered explicitly so the `joint_evaluation_submit` event is
+		// recorded and the "Mon espace" panel + table reflect the new step.
+		submitJointEvaluationMutation.mutate(undefined, {
+			onSettled: () => {
+				router.push(getPostComplianceDestination(hasCse));
+			},
+		});
+	}, [clearDraft, hasCse, router, submitJointEvaluationMutation]);
 
 	const {
 		closeModal,
@@ -62,7 +75,11 @@ export function JointEvaluationForm({
 
 	return (
 		<>
-			<form className={common.flexColumnGap2} onSubmit={handleSubmit}>
+			<form
+				autoComplete="off"
+				className={common.flexColumnGap2}
+				onSubmit={handleSubmit}
+			>
 				<div className={common.flexBetween}>
 					<h1 className="fr-h4 fr-mb-0">
 						Parcours de mise en conformité pour l&apos;indicateur par catégorie

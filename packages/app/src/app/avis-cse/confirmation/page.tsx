@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
-import { ConfirmationPage } from "~/modules/cseOpinion";
 import {
-	hasSubmittedSecondDeclaration,
-	isDeclarationSubmitted,
-} from "~/modules/cseOpinion/confirmationHelpers";
+	campaignYearDimension,
+	FunnelCompleteTracker,
+} from "~/modules/analytics";
+import { ConfirmationPage, CSE_FUNNEL } from "~/modules/cseOpinion";
+import { isDeclarationSubmitted } from "~/modules/cseOpinion/confirmationHelpers";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -18,13 +19,17 @@ export default async function CseOpinionConfirmationPage() {
 	}
 
 	return (
-		<ConfirmationPage
-			dataYear={declarationData.declaration.year - 1}
-			declarationYear={declarationData.declaration.year}
-			email={session?.user?.email ?? undefined}
-			hasSecondDeclaration={hasSubmittedSecondDeclaration(
-				declarationData.declaration.secondDeclarationStatus,
-			)}
-		/>
+		<>
+			<FunnelCompleteTracker
+				config={CSE_FUNNEL}
+				dimensions={campaignYearDimension(declarationData.declaration.year)}
+			/>
+			<ConfirmationPage
+				dataYear={declarationData.declaration.year - 1}
+				declarationYear={declarationData.declaration.year}
+				email={session?.user?.email ?? undefined}
+				hasSecondDeclaration={declarationData.hasSubmittedSecondDeclaration}
+			/>
+		</>
 	);
 }

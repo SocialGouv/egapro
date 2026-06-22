@@ -99,6 +99,12 @@ const nullIndicators = {
 	hourlyQuartile2ProportionMen: null,
 	hourlyQuartile3ProportionMen: null,
 	hourlyQuartile4ProportionMen: null,
+	statusHistoryArray: [] as Array<{
+		eventType: string;
+		value: string | null;
+		round: number | null;
+		createdAt: string;
+	}>,
 };
 
 describe("GET /api/v1/export/declarations", () => {
@@ -206,10 +212,22 @@ describe("GET /api/v1/export/declarations", () => {
 				siren: "111111111",
 				year: 2027,
 				status: "submitted",
-				compliancePath: null,
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				totalWomen: 50,
 				totalMen: 50,
-				secondDeclarationStatus: null,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
 				secondDeclReferencePeriodStart: null,
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-01-01T00:00:00Z"),
@@ -230,10 +248,22 @@ describe("GET /api/v1/export/declarations", () => {
 				siren: "222222222",
 				year: 2027,
 				status: "submitted",
-				compliancePath: null,
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				totalWomen: 60,
 				totalMen: 40,
-				secondDeclarationStatus: null,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
 				secondDeclReferencePeriodStart: null,
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-01-02T00:00:00Z"),
@@ -272,10 +302,22 @@ describe("GET /api/v1/export/declarations", () => {
 				siren: "123456789",
 				year: 2027,
 				status: "submitted",
-				compliancePath: null,
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				totalWomen: 100,
 				totalMen: 150,
-				secondDeclarationStatus: null,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
 				secondDeclReferencePeriodStart: null,
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
@@ -332,10 +374,22 @@ describe("GET /api/v1/export/declarations", () => {
 				siren: "123456789",
 				year: 2027,
 				status: "submitted",
-				compliancePath: null,
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				totalWomen: 100,
 				totalMen: 150,
-				secondDeclarationStatus: null,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
 				secondDeclReferencePeriodStart: null,
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
@@ -422,10 +476,22 @@ describe("GET /api/v1/export/declarations", () => {
 				siren: "123456789",
 				year: 2027,
 				status: "submitted",
-				compliancePath: null,
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				totalWomen: 100,
 				totalMen: 150,
-				secondDeclarationStatus: null,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
 				secondDeclReferencePeriodStart: null,
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
@@ -489,10 +555,22 @@ describe("GET /api/v1/export/declarations", () => {
 				siren: "123456789",
 				year: 2027,
 				status: "submitted",
-				compliancePath: null,
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				totalWomen: 100,
 				totalMen: 150,
-				secondDeclarationStatus: null,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
 				secondDeclReferencePeriodStart: null,
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
@@ -544,10 +622,22 @@ describe("GET /api/v1/export/declarations", () => {
 				siren: "123456789",
 				year: 2027,
 				status: "submitted",
-				compliancePath: null,
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				totalWomen: 100,
 				totalMen: 150,
-				secondDeclarationStatus: null,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
 				secondDeclReferencePeriodStart: null,
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
@@ -609,10 +699,22 @@ describe("GET /api/v1/export/declarations", () => {
 				siren: "123456789",
 				year: 2027,
 				status: "submitted",
-				compliancePath: null,
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				totalWomen: 100,
 				totalMen: 150,
-				secondDeclarationStatus: null,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
 				secondDeclReferencePeriodStart: null,
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
@@ -658,10 +760,22 @@ describe("GET /api/v1/export/declarations", () => {
 				siren: "123456789",
 				year: 2027,
 				status: "submitted",
-				compliancePath: null,
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				totalWomen: 100,
 				totalMen: 150,
-				secondDeclarationStatus: null,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
 				secondDeclReferencePeriodStart: null,
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
@@ -714,10 +828,22 @@ describe("GET /api/v1/export/declarations", () => {
 				siren: "123456789",
 				year: 2027,
 				status: "submitted",
-				compliancePath: null,
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				totalWomen: 100,
 				totalMen: 150,
-				secondDeclarationStatus: null,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
 				secondDeclReferencePeriodStart: null,
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
@@ -759,10 +885,22 @@ describe("GET /api/v1/export/declarations", () => {
 				siren: "123456789",
 				year: 2027,
 				status: "submitted",
-				compliancePath: null,
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
 				totalWomen: 100,
 				totalMen: 150,
-				secondDeclarationStatus: null,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
 				secondDeclReferencePeriodStart: null,
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
@@ -831,5 +969,231 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(Object.keys(decl.Indicateurs.E)).toContain("Proportion_variable_H");
 
 		expect(expectedKeys).toHaveLength(10);
+	});
+
+	it("should expose new lifecycle SUIT fields (T5)", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "demarche_completed",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "joint_evaluation",
+				totalWomen: 100,
+				totalMen: 150,
+				submittedAt: new Date("2027-03-15T10:00:00Z"),
+				firstDeclarationPathChoiceAt: new Date("2027-04-01T10:00:00Z"),
+				secondDeclarationPathChoiceAt: new Date("2027-08-01T10:00:00Z"),
+				secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
+				jointEvaluationSubmittedAt: new Date("2027-09-01T12:00:00Z"),
+				cseOpinionCompletedAt: new Date("2027-10-01T13:00:00Z"),
+				demarcheCompletedAt: new Date("2027-10-15T14:00:00Z"),
+				cseRequired: true,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-10-15T14:00:00Z"),
+				companyName: "ACME Corp",
+				workforce: 250,
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: true,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+				globalAnnualMeanGap: "0.10",
+				variableAnnualMeanGap: "0.08",
+			},
+		]);
+		mockFetchIndicatorG.mockResolvedValueOnce(
+			new Map([
+				[
+					"decl-1",
+					[
+						{
+							categoryName: "cadres",
+							declarationType: "initial",
+							womenCount: 10,
+							menCount: 10,
+							annualBaseWomen: "100",
+							annualBaseMen: "100",
+							annualVariableWomen: null,
+							annualVariableMen: null,
+							hourlyBaseWomen: null,
+							hourlyBaseMen: null,
+							hourlyVariableWomen: null,
+							hourlyVariableMen: null,
+						},
+					],
+				],
+			]),
+		);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-10-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		const decl = body.Declarations[0];
+
+		expect(decl).not.toHaveProperty("Parcours_conformite");
+		expect(decl.Parcours_apres_declaration_1).toBe("corrective_action");
+		expect(decl.Parcours_apres_declaration_2).toBe("joint_evaluation");
+		expect(decl.Parcours_de_conformite_requis).toBe(true);
+		expect(decl.Parcours_de_conformite_revision_requis).toBe(true);
+		expect(decl).not.toHaveProperty("Phase_2_requise");
+		expect(decl).not.toHaveProperty("Phase_2_revision_requise");
+		expect(decl.Avis_CSE_requis).toBe(true);
+		expect(decl.Indicateur_G_requis).toBe(true);
+		expect(decl.Version_regles).toBe("2027.1");
+		expect(decl.Date_soumission).toBe("2027-03-15T10:00:00.000Z");
+		expect(decl.Date_parcours_apres_declaration_1).toBe(
+			"2027-04-01T10:00:00.000Z",
+		);
+		expect(decl.Date_parcours_apres_declaration_2).toBe(
+			"2027-08-01T10:00:00.000Z",
+		);
+		expect(decl.Date_seconde_declaration).toBe("2027-06-01T11:00:00.000Z");
+		expect(decl.Date_evaluation_conjointe).toBe("2027-09-01T12:00:00.000Z");
+		expect(decl.Date_avis_CSE).toBe("2027-10-01T13:00:00.000Z");
+		expect(decl.Date_fin_demarche).toBe("2027-10-15T14:00:00.000Z");
+		expect(decl.Seconde_declaration.Statut).toBe(true);
+	});
+
+	it("should include Historique_statuts with FR labels and Numero_declaration on path_choice entries", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "submitted",
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: null,
+				totalWomen: 100,
+				totalMen: 150,
+				submittedAt: new Date("2027-03-15T10:00:00Z"),
+				firstDeclarationPathChoiceAt: new Date("2027-04-01T10:00:00Z"),
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				phase2Required: false,
+				phase2RevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-04-01T10:00:00Z"),
+				companyName: "ACME Corp",
+				workforce: 250,
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: false,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+				statusHistoryArray: [
+					{
+						eventType: "submit",
+						value: null,
+						round: null,
+						createdAt: "2027-03-15T10:00:00.000Z",
+					},
+					{
+						eventType: "path_choice",
+						value: "corrective_action",
+						round: 1,
+						createdAt: "2027-04-01T10:00:00.000Z",
+					},
+				],
+			},
+		]);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		const decl = body.Declarations[0];
+		expect(decl.Historique_statuts).toEqual([
+			{
+				Statut: "submit",
+				Libelle_statut: "Soumission de la déclaration",
+				Date: "2027-03-15T10:00:00.000Z",
+			},
+			{
+				Statut: "path_choice",
+				Libelle_statut: "Choix du parcours — Actions correctives",
+				Date: "2027-04-01T10:00:00.000Z",
+				Numero_declaration: 1,
+			},
+		]);
+	});
+
+	it("should expose Seconde_declaration.Statut=false when secondDeclarationSubmittedAt is null", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "awaiting_compliance_path_choice",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+				totalWomen: 100,
+				totalMen: 150,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				companyName: "ACME Corp",
+				workforce: 250,
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: false,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.Declarations[0].Seconde_declaration.Statut).toBe(false);
+		expect(body.Declarations[0].Date_seconde_declaration).toBeNull();
 	});
 });

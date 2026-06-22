@@ -13,11 +13,24 @@ function makeRow(overrides: Partial<ExportRow> = {}): ExportRow {
 		address: "1 rue de Paris, 75001 Paris",
 		hasCse: true,
 		year: 2027,
-		status: "submitted",
+		status: "demarche_completed",
 		declarationType: "6_indicateurs",
-		compliancePath: null,
+		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: null,
 		createdAt: "2027-03-15T10:00:00.000Z",
 		updatedAt: "2027-03-15T10:00:00.000Z",
+		cancelledAt: null,
+		submittedAt: null,
+		firstDeclarationPathChoiceAt: null,
+		secondDeclarationPathChoiceAt: null,
+		jointEvaluationSubmittedAt: null,
+		cseOpinionCompletedAt: null,
+		demarcheCompletedAt: null,
+		complianceProcessRequired: false,
+		complianceProcessRevisionRequired: false,
+		cseRequired: false,
+		indicatorGRequired: false,
+		rulesVersion: "2027.1",
 		totalWomen: 120,
 		totalMen: 130,
 		remunerationScore: 5,
@@ -64,7 +77,8 @@ function makeRow(overrides: Partial<ExportRow> = {}): ExportRow {
 		indFHourlyQ3Threshold: null,
 		indFHourlyQ4Women: null,
 		indFHourlyQ4Men: null,
-		secondDeclarationStatus: null,
+		secondDeclarationSubmittedAt: null,
+		secondDeclarationSubmitted: false,
 		secondDeclReferencePeriodStart: null,
 		secondDeclReferencePeriodEnd: null,
 		declarantFirstName: "Jean",
@@ -140,6 +154,22 @@ describe("generateXlsx", () => {
 		for (const col of DECLARATION_COLUMNS) {
 			expect(headers).toContain(col.header);
 		}
+	});
+
+	it("should expose Parcours_de_conformite_* headers and not legacy Phase_2_* headers", async () => {
+		const buffer = await generateXlsx([makeRow()], []);
+
+		const workbook = new ExcelJS.Workbook();
+		await workbook.xlsx.load(buffer as never);
+
+		const sheet = workbook.getWorksheet("Déclarations");
+		const headerRow = sheet?.getRow(1);
+		const headers = headerRow?.values as string[];
+
+		expect(headers).toContain("Parcours_de_conformite_requis");
+		expect(headers).toContain("Parcours_de_conformite_revision_requis");
+		expect(headers).not.toContain("Phase_2_requise");
+		expect(headers).not.toContain("Phase_2_revision_requise");
 	});
 
 	it("should have correct headers in Indicateur G sheet", async () => {

@@ -6,21 +6,31 @@ import { SavedIndicator } from "./SavedIndicator";
 type StepTitleRowProps = {
 	title: ReactNode;
 	onDevFill: () => void;
-	saved: boolean;
+	hasData: boolean;
+	isSaving?: boolean;
+	isPendingSave?: boolean;
 };
 
-export function StepTitleRow({ title, onDevFill, saved }: StepTitleRowProps) {
+export function StepTitleRow({
+	title,
+	onDevFill,
+	hasData,
+	isSaving = false,
+	isPendingSave = false,
+}: StepTitleRowProps) {
 	return (
 		<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 			<div className="fr-col">{title}</div>
 			<div className="fr-col-auto">
 				<DevFillButton onFill={onDevFill} />
 			</div>
-			{saved && (
-				<div className="fr-col-auto">
-					<SavedIndicator />
-				</div>
-			)}
+			<div className="fr-col-auto">
+				<SavedIndicator
+					hasData={hasData}
+					isPendingSave={isPendingSave}
+					isSaving={isSaving}
+				/>
+			</div>
 		</div>
 	);
 }

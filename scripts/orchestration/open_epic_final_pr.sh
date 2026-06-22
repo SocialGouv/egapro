@@ -58,7 +58,7 @@ SUB_LINES=$(gh api graphql -f query="{
 
 BODY="Intégration finale de l'epic #${EPIC} — **${EPIC_TITLE}**.
 
-Cette PR rassemble les commits squashés de chaque sous-ticket validé par la pipeline. Chaque sous-ticket a déjà passé : CI verte, validators IA (validator / structural-auditor / rgaa-auditor / security-auditor / functional-validator), Sonar Quality Gate, et réponse aux review bots. La fidélité visuelle vs. Figma a été vérifiée par \`code-dev\` lui-même via le MCP \`figma-dev\`. Cette PR est le **point unique de revue humaine** pour l'epic.
+Cette PR rassemble les commits squashés de chaque sous-ticket validé par la pipeline. Chaque sous-ticket a déjà passé : tests écrits/validés par \`tu-dev\` (TU + intégration), CI verte, validators IA (validator / structural-auditor / rgaa-auditor / security-auditor / functional-validator), Sonar Quality Gate, et réponse aux review bots. La fidélité visuelle vs. Figma a été vérifiée par \`code-dev\` lui-même via le MCP \`figma-dev\`. Cette PR est le **point unique de revue humaine** pour l'epic.
 
 ## Sous-tickets
 

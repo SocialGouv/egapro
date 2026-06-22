@@ -18,16 +18,17 @@ const declaration: DeclarationDetail = {
 	id: "decl-1",
 	siren: "123456789",
 	year: 2024,
-	status: "submitted",
+	status: "awaiting_compliance_path_choice",
 	currentStep: 6,
 	totalWomen: 120,
 	totalMen: 80,
 	remunerationScore: 85,
-	compliancePath: null,
-	complianceCompletedAt: null,
-	secondDeclarationStatus: null,
+	firstDeclarationPathChoice: null,
+	demarcheCompletedAt: null,
+	secondDeclarationSubmittedAt: null,
 	createdAt: new Date("2024-03-01T10:00:00Z"),
 	updatedAt: new Date("2024-06-15T10:00:00Z"),
+	cancelledAt: null,
 	companyName: "ACME Corp",
 	companyAddress: "123 Rue de Paris",
 	companyNafCode: "6201Z",
@@ -53,6 +54,7 @@ const declaration: DeclarationDetail = {
 			opinionDate: "2024-03-15",
 		},
 	],
+	siblings: [],
 };
 
 describe("DeclarationSummary", () => {
@@ -68,7 +70,7 @@ describe("DeclarationSummary", () => {
 	it("renders dash for null fields", () => {
 		render(
 			<DeclarationSummary
-				declaration={{ ...declaration, compliancePath: null }}
+				declaration={{ ...declaration, firstDeclarationPathChoice: null }}
 			/>,
 		);
 		const cells = screen.getAllByText("—");

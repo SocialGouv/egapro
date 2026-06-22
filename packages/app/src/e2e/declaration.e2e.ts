@@ -36,11 +36,12 @@ test.describe("Declaration workflow", () => {
 
 	test("shows company name and SIREN in banner", async ({ page }) => {
 		await expect(page.getByText(/130 025 265/)).toBeVisible();
-		// Company name comes from external Weez API; may fall back to "Entreprise {siren}"
+		await expect(page.getByText("SIREN :")).toBeVisible();
 		await expect(
-			page.getByText(
-				/DIRECTION INTERMINISTERIELLE DU NUMERIQUE|Entreprise 130025265/,
-			),
+			page.locator("p.fr-text--bold").filter({
+				hasText:
+					/DIRECTION INTERMINISTERIELLE DU NUMERIQUE|Entreprise 130025265/,
+			}),
 		).toBeVisible();
 	});
 

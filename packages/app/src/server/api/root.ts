@@ -6,11 +6,13 @@ import { adminStatsRouter } from "~/server/api/routers/adminStats";
 import { companyRouter } from "~/server/api/routers/company";
 import { cseOpinionRouter } from "~/server/api/routers/cseOpinion";
 import { declarationRouter } from "~/server/api/routers/declaration";
+import { declarationDraftRouter } from "~/server/api/routers/declarationDraft";
 import { gipMdsRouter } from "~/server/api/routers/gipMds";
 import { jointEvaluationRouter } from "~/server/api/routers/jointEvaluation";
 import { mailRouter } from "~/server/api/routers/mail";
 import { profileRouter } from "~/server/api/routers/profile";
 import { publicReferentsRouter } from "~/server/api/routers/publicReferents";
+import { publicStatsRouter } from "~/server/api/routers/publicStats";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -27,11 +29,13 @@ export const appRouter = createTRPCRouter({
 	company: companyRouter,
 	cseOpinion: cseOpinionRouter,
 	declaration: declarationRouter,
+	declarationDraft: declarationDraftRouter,
 	gipMds: gipMdsRouter,
 	jointEvaluation: jointEvaluationRouter,
 	mail: mailRouter,
 	profile: profileRouter,
 	publicReferents: publicReferentsRouter,
+	publicStats: publicStatsRouter,
 });
 
 // export type definition of API

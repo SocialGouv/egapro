@@ -67,7 +67,6 @@ const indicatorFAnnualSchema = {
 		Seuil_Q3_Rem_globale: { type: ["string", "null"] },
 		Quartile3_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
 		Quartile3_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
-		Seuil_Q4_Rem_globale: { type: ["string", "null"] },
 		Quartile4_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
 		Quartile4_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
 	},
@@ -87,7 +86,6 @@ const indicatorFHourlySchema = {
 		Seuil_Q3_Taux_horaire_global: { type: ["string", "null"] },
 		Quartile3_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
 		Quartile3_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
-		Seuil_Q4_Taux_horaire_global: { type: ["string", "null"] },
 		Quartile4_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
 		Quartile4_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
 	},
@@ -169,6 +167,12 @@ const indicatorsSchema = {
 const declarationSchema = {
 	type: "object",
 	properties: {
+		id: {
+			type: "string",
+			format: "uuid",
+			description: "Identifiant interne de la déclaration (UUID)",
+			example: "11111111-2222-4333-8444-555555555555",
+		},
 		SIREN: {
 			type: "string",
 			description: "SIREN de l'entreprise (9 chiffres)",
@@ -206,12 +210,126 @@ const declarationSchema = {
 			description: "Statut de la déclaration",
 			example: "submitted",
 		},
-		Parcours_conformite: {
+		Parcours_apres_declaration_1: {
 			type: ["string", "null"],
-			description: "Parcours de conformité choisi par l'entreprise",
+			description:
+				"Parcours après la première déclaration (justify, corrective_action, joint_evaluation)",
+		},
+		Parcours_apres_declaration_2: {
+			type: ["string", "null"],
+			description:
+				"Parcours après la seconde déclaration (justify, corrective_action, joint_evaluation)",
+		},
+		Parcours_de_conformite_requis: {
+			type: "boolean",
+			description:
+				"Indique si le parcours de conformité (mesures correctives après déclaration 1) est requis.",
+		},
+		Parcours_de_conformite_revision_requis: {
+			type: "boolean",
+			description:
+				"Indique si une révision du parcours de conformité est requise après la seconde déclaration.",
+		},
+		Avis_CSE_requis: {
+			type: "boolean",
+			description: "Indique si un avis CSE est requis pour cette déclaration.",
+		},
+		Indicateur_G_requis: {
+			type: "boolean",
+			description:
+				"Indique si l'indicateur G est requis (déclaration à 7 indicateurs).",
+		},
+		Version_regles: {
+			type: ["string", "null"],
+			description:
+				"Version du moteur de règles métier utilisée à la soumission.",
 		},
 		Date_creation: { type: ["string", "null"], format: "date-time" },
 		Date_modification: { type: ["string", "null"], format: "date-time" },
+		Date_soumission: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date de soumission initiale de la déclaration.",
+		},
+		Date_parcours_apres_declaration_1: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date du choix du parcours après la première déclaration.",
+		},
+		Date_parcours_apres_declaration_2: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date du choix du parcours après la seconde déclaration.",
+		},
+		Date_seconde_declaration: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date de soumission de la seconde déclaration.",
+		},
+		Date_evaluation_conjointe: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date de soumission du rapport d'évaluation conjointe.",
+		},
+		Date_avis_CSE: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date de finalisation des avis CSE.",
+		},
+		Date_fin_demarche: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date de finalisation complète de la démarche.",
+		},
+		Date_annulation: {
+			type: ["string", "null"],
+			format: "date-time",
+			description:
+				"Date d'annulation administrative de la déclaration. `null` si la déclaration est active. Une déclaration annulée conserve l'intégralité de ses données pour audit.",
+			example: "2025-04-01T10:30:00.000Z",
+		},
+		Historique_statuts: {
+			type: "array",
+			description:
+				"Historique exhaustif et ordonné chronologiquement (ASC, du plus ancien au plus récent) des transitions de statut de la déclaration. Toutes les occurrences sont listées (pas de dédoublonnage). Vaut `[]` si aucune transition n'est enregistrée — jamais `null`, jamais absent.",
+			items: {
+				type: "object",
+				required: ["Statut", "Libelle_statut", "Date"],
+				properties: {
+					Statut: {
+						type: "string",
+						enum: [
+							"submit",
+							"path_choice",
+							"second_declaration_submit",
+							"joint_evaluation_submit",
+							"cse_opinion_submit",
+							"cancel",
+							"demarche_complete",
+						],
+						description:
+							"Type d'événement brut issu de l'enum `declaration_event_type`.",
+					},
+					Libelle_statut: {
+						type: "string",
+						description:
+							"Libellé FR lisible de l'événement (ex : « Soumission de la déclaration », « Choix du parcours — Actions correctives »).",
+					},
+					Date: {
+						type: "string",
+						format: "date-time",
+						description:
+							"Date de l'événement au format ISO-8601 UTC (`YYYY-MM-DDTHH:MM:SS.sssZ`).",
+					},
+					Numero_declaration: {
+						type: "integer",
+						enum: [1, 2],
+						description:
+							'Numéro de la déclaration concernée par le choix de parcours : 1 = déclaration initiale, 2 = seconde déclaration. Présent uniquement pour `Statut === "path_choice"`. Absent pour les autres événements.',
+					},
+				},
+			},
+		},
 		Effectif_F_rem_annuelle_globale: {
 			type: ["integer", "null"],
 			description:
@@ -228,7 +346,11 @@ const declarationSchema = {
 			description:
 				"Seconde déclaration (requise lorsque l'écart de rémunération atteint 5%)",
 			properties: {
-				Statut: { type: ["string", "null"] },
+				Statut: {
+					type: "boolean",
+					description:
+						"`true` si la seconde déclaration a été soumise, `false` sinon.",
+				},
 				Periode_reference_debut: { type: ["string", "null"], format: "date" },
 				Periode_reference_fin: { type: ["string", "null"], format: "date" },
 				Correction: {
@@ -358,7 +480,7 @@ export const openApiSpec = {
 		title: "EGAPRO — API d'export",
 		description:
 			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une clé API transmise en Bearer token. L'authentification ainsi qu'un quota (rate limit) sont appliqués en amont par la passerelle EGAPRO.",
-		version: "2.0.0",
+		version: "2.1.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},
@@ -379,9 +501,10 @@ export const openApiSpec = {
 		"/api/v1/export/declarations": {
 			get: {
 				operationId: "getDeclarations",
-				summary: "Lister les déclarations par date de soumission",
+				summary:
+					"Lister les déclarations par date de soumission ou d'annulation",
 				description:
-					"Retourne les déclarations soumises dont la date de mise à jour (`Date_modification`) est comprise dans l'intervalle [`date_begin`, `date_end`[. Inclut les indicateurs A–G, la seconde déclaration et les avis CSE. Les libellés des champs reprennent ceux du fichier GIP MDS.",
+					"Retourne les déclarations dont la date de mise à jour (`Date_modification`, pour les déclarations actives soumises) ou la date d'annulation (`Date_annulation`, pour les déclarations annulées) est comprise dans l'intervalle [`date_begin`, `date_end`[. Inclut les indicateurs A–G, la seconde déclaration, les avis CSE et le champ `Date_annulation` (renseigné si la déclaration est annulée). Les libellés des champs reprennent ceux du fichier GIP MDS.",
 				parameters: [
 					{
 						name: "date_begin",

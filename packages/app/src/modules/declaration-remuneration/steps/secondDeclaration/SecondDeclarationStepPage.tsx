@@ -1,10 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 
+import { campaignYearDimension, FunnelStepTracker } from "~/modules/analytics";
 import { shouldRedirectSubmittedToRecap } from "~/modules/domain";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
 import { SECOND_DECLARATION_TOTAL_STEPS } from "./constants";
+import { COMPLIANCE_FUNNEL } from "./funnelConfig";
 import { SecondDeclarationStep1Info } from "./SecondDeclarationStep1Info";
 import { SecondDeclarationStep2Form } from "./SecondDeclarationStep2Form";
 import { SecondDeclarationStep3Review } from "./SecondDeclarationStep3Review";
@@ -27,7 +29,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 	// passed, lock editing by redirecting non-recap steps to the recap.
 	if (
 		shouldRedirectSubmittedToRecap({
-			status: data.declaration.secondDeclarationStatus,
+			status: data.hasSubmittedSecondDeclaration ? "submitted" : null,
 			step,
 			recapStep: 3,
 			modificationDeadline: campaignDeadlines.decl2ModificationDeadline,
@@ -59,36 +61,50 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 		? new Date(data.declaration.updatedAt).toLocaleDateString("fr-FR")
 		: new Date().toLocaleDateString("fr-FR");
 
+	const stepTracker = (
+		<FunnelStepTracker
+			config={COMPLIANCE_FUNNEL}
+			dimensions={campaignYearDimension(currentYear)}
+			step={step}
+		/>
+	);
+
 	if (step === 1) {
 		return (
-			<SecondDeclarationStep1Info
-				declarationDate={declarationDate}
-				declarationSiren={data.declaration.siren}
-				declarationYear={currentYear}
-				modificationDeadline={campaignDeadlines.decl2ModificationDeadline}
-			/>
+			<>
+				{stepTracker}
+				<SecondDeclarationStep1Info
+					declarationDate={declarationDate}
+					declarationSiren={data.declaration.siren}
+					declarationYear={currentYear}
+					modificationDeadline={campaignDeadlines.decl2ModificationDeadline}
+				/>
+			</>
 		);
 	}
 
 	if (step === 2) {
 		return (
-			<HydrateClient>
-				<SecondDeclarationStep2Form
-					declarationSiren={data.declaration.siren}
-					declarationYear={currentYear}
-					initialEndDate={
-						data.declaration.secondDeclReferencePeriodEnd ?? undefined
-					}
-					initialFirstDeclarationCategories={initialCategories}
-					initialSecondDeclarationCategories={
-						correctionCategories.length > 0 ? correctionCategories : undefined
-					}
-					initialSource={initialSource}
-					initialStartDate={
-						data.declaration.secondDeclReferencePeriodStart ?? undefined
-					}
-				/>
-			</HydrateClient>
+			<>
+				{stepTracker}
+				<HydrateClient>
+					<SecondDeclarationStep2Form
+						declarationSiren={data.declaration.siren}
+						declarationYear={currentYear}
+						initialEndDate={
+							data.declaration.secondDeclReferencePeriodEnd ?? undefined
+						}
+						initialFirstDeclarationCategories={initialCategories}
+						initialSecondDeclarationCategories={
+							correctionCategories.length > 0 ? correctionCategories : undefined
+						}
+						initialSource={initialSource}
+						initialStartDate={
+							data.declaration.secondDeclReferencePeriodStart ?? undefined
+						}
+					/>
+				</HydrateClient>
+			</>
 		);
 	}
 
@@ -97,13 +113,16 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 		correctionCategories.length > 0 ? correctionCategories : initialCategories;
 
 	return (
-		<HydrateClient>
-			<SecondDeclarationStep3Review
-				declarationYear={currentYear}
-				hasCse={company.hasCse}
-				secondDeclarationCategories={reviewCategories}
-				siren={data.declaration.siren}
-			/>
-		</HydrateClient>
+		<>
+			{stepTracker}
+			<HydrateClient>
+				<SecondDeclarationStep3Review
+					declarationYear={currentYear}
+					hasCse={company.hasCse}
+					secondDeclarationCategories={reviewCategories}
+					siren={data.declaration.siren}
+				/>
+			</HydrateClient>
+		</>
 	);
 }

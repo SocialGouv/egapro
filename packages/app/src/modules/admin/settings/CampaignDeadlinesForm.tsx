@@ -131,7 +131,7 @@ export function CampaignDeadlinesForm({ initialYear, configuredYears }: Props) {
 				</select>
 			</div>
 
-			<form noValidate onSubmit={onSubmit}>
+			<form autoComplete="off" noValidate onSubmit={onSubmit}>
 				<input
 					type="hidden"
 					{...form.register("year", { valueAsNumber: true })}

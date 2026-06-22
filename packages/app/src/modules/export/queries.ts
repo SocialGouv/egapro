@@ -1,11 +1,12 @@
 import "server-only";
 
-import { and, eq, gte, inArray, lt, or } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
 import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
 	companies,
 	cseOpinions,
+	declarationStatusHistory,
 	declarations,
 	employeeCategories,
 	files,
@@ -14,6 +15,73 @@ import {
 } from "~/server/db/schema";
 import type { CseRow, FileRow, IndicatorGEntry } from "./fetchDeclarations";
 import type { IndicatorGRow } from "./types";
+
+// postgres.js returns ISO strings (not Date) for raw `sql<>` aggregations like
+// MAX(timestamptz) — the column-type metadata is lost. mapWith bridges that
+// gap so callers can rely on a real Date | null.
+const toDate = (value: unknown): Date | null =>
+	value == null ? null : new Date(value as string | number | Date);
+
+export type RawHistoryEntry = {
+	eventType: string;
+	value: string | null;
+	round: number | null;
+	createdAt: string;
+};
+
+function latestEventAt(eventType: string) {
+	return sql<Date | null>`(
+		SELECT MAX(${declarationStatusHistory.createdAt})
+		FROM ${declarationStatusHistory}
+		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
+		AND ${declarationStatusHistory.eventType} = ${eventType}
+	)`.mapWith(toDate);
+}
+
+function latestPathChoiceAt(round: 1 | 2) {
+	return sql<Date | null>`(
+		SELECT MAX(${declarationStatusHistory.createdAt})
+		FROM ${declarationStatusHistory}
+		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
+		AND ${declarationStatusHistory.eventType} = 'path_choice'
+		AND ${declarationStatusHistory.round} = ${round}
+	)`.mapWith(toDate);
+}
+
+function statusHistoryArray() {
+	return sql<RawHistoryEntry[]>`(
+		SELECT COALESCE(
+			json_agg(
+				json_build_object(
+					'eventType', ${declarationStatusHistory.eventType},
+					'value', ${declarationStatusHistory.value},
+					'round', ${declarationStatusHistory.round},
+					'createdAt', to_char(
+						${declarationStatusHistory.createdAt} AT TIME ZONE 'UTC',
+						'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'
+					)
+				)
+				ORDER BY ${declarationStatusHistory.createdAt} ASC
+			),
+			'[]'::json
+		)
+		FROM ${declarationStatusHistory}
+		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
+	)`.mapWith((value: unknown) =>
+		Array.isArray(value) ? (value as RawHistoryEntry[]) : [],
+	);
+}
+
+export const statusHistoryProjection = {
+	submittedAt: latestEventAt("submit"),
+	firstDeclarationPathChoiceAt: latestPathChoiceAt(1),
+	secondDeclarationPathChoiceAt: latestPathChoiceAt(2),
+	secondDeclarationSubmittedAt: latestEventAt("second_declaration_submit"),
+	jointEvaluationSubmittedAt: latestEventAt("joint_evaluation_submit"),
+	cseOpinionCompletedAt: latestEventAt("cse_opinion_submit"),
+	demarcheCompletedAt: latestEventAt("demarche_complete"),
+	statusHistoryArray: statusHistoryArray(),
+};
 
 // ── Shared select columns for indicators A–F ───────────────────────
 
@@ -124,31 +192,42 @@ export async function fetchSubmittedDeclarations(
 			siren: declarations.siren,
 			year: declarations.year,
 			status: declarations.status,
-			compliancePath: declarations.compliancePath,
+			firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
+			secondDeclarationPathChoice: declarations.secondDeclarationPathChoice,
 			totalWomen: declarations.totalWomen,
 			totalMen: declarations.totalMen,
-			secondDeclarationStatus: declarations.secondDeclarationStatus,
+			cseRequired: declarations.cseRequired,
+			rulesVersion: declarations.rulesVersion,
 			secondDeclReferencePeriodStart:
 				declarations.secondDeclReferencePeriodStart,
 			secondDeclReferencePeriodEnd: declarations.secondDeclReferencePeriodEnd,
 			createdAt: declarations.createdAt,
 			updatedAt: declarations.updatedAt,
+			cancelledAt: declarations.cancelledAt,
 			declarationId: declarations.id,
 			companyName: companies.name,
 			workforce: companies.workforce,
 			nafCode: companies.nafCode,
 			address: companies.address,
 			hasCse: companies.hasCse,
+			...statusHistoryProjection,
 			...sharedExportColumns,
 		})
 		.from(declarations)
 		.innerJoin(companies, eq(declarations.siren, companies.siren))
 		.innerJoin(users, eq(declarations.declarantId, users.id))
 		.where(
-			and(
-				eq(declarations.status, "submitted"),
-				gte(declarations.updatedAt, new Date(`${dateBegin}T00:00:00Z`)),
-				lt(declarations.updatedAt, new Date(`${dateEnd}T00:00:00Z`)),
+			or(
+				and(
+					gte(declarations.cancelledAt, new Date(`${dateBegin}T00:00:00Z`)),
+					lt(declarations.cancelledAt, new Date(`${dateEnd}T00:00:00Z`)),
+				),
+				and(
+					ne(declarations.status, "draft"),
+					gte(declarations.updatedAt, new Date(`${dateBegin}T00:00:00Z`)),
+					lt(declarations.updatedAt, new Date(`${dateEnd}T00:00:00Z`)),
+					isNull(declarations.cancelledAt),
+				),
 			),
 		);
 }
@@ -241,9 +320,7 @@ export async function buildIndicatorGRows(
 			employeeCategories,
 			eq(employeeCategories.jobCategoryId, jobCategories.id),
 		)
-		.where(
-			and(eq(declarations.status, "submitted"), eq(declarations.year, year)),
-		);
+		.where(and(ne(declarations.status, "draft"), eq(declarations.year, year)));
 }
 
 // ── Indicator G presence check ──────────────────────────────────────

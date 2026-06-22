@@ -59,7 +59,14 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		const decl = SCHEMA_COLUMN_COMMENTS.declaration;
 		expect(decl?.year).toBe("SUIT: Annee");
 		expect(decl?.status).toBe("SUIT: Statut");
-		expect(decl?.compliance_path).toBe("SUIT: Parcours_conformite");
+		expect(decl?.first_declaration_path_choice).toBe(
+			"SUIT: Parcours_apres_declaration_1",
+		);
+		expect(decl?.second_declaration_path_choice).toBe(
+			"SUIT: Parcours_apres_declaration_2",
+		);
+		expect(decl?.cse_required).toBe("SUIT: Avis_CSE_requis");
+		expect(decl?.rules_version).toBe("SUIT: Version_regles");
 		expect(decl?.total_women).toBe("SUIT: Effectif_F_rem_annuelle_globale");
 		expect(decl?.total_men).toBe("SUIT: Effectif_H_rem_annuelle_globale");
 		expect(decl?.created_at).toBe("SUIT: Date_creation");
@@ -68,15 +75,36 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 
 	it("annotates second declaration columns", () => {
 		const decl = SCHEMA_COLUMN_COMMENTS.declaration;
-		expect(decl?.second_declaration_status).toBe(
-			"SUIT: Seconde_declaration.Statut",
-		);
 		expect(decl?.second_decl_reference_period_start).toBe(
 			"SUIT: Seconde_declaration.Periode_reference_debut",
 		);
 		expect(decl?.second_decl_reference_period_end).toBe(
 			"SUIT: Seconde_declaration.Periode_reference_fin",
 		);
+	});
+
+	it("annotates declaration_status_history columns (T8 — event-sourced history)", () => {
+		const hist = SCHEMA_COLUMN_COMMENTS.declaration_status_history;
+		expect(hist?.declaration_id).toMatch(/Référence vers la déclaration/);
+		expect(hist?.event_type).toMatch(/Type d'event métier/);
+		expect(hist?.value).toMatch(/Charge utile/);
+		expect(hist?.round).toMatch(/première déclaration/);
+		expect(hist?.actor_user_id).toMatch(/Auteur de l'event/);
+		expect(hist?.created_at).toMatch(/Timestamp d'émission/);
+	});
+
+	it("does not annotate dropped legacy columns (T8 — event sourcing)", () => {
+		const decl = SCHEMA_COLUMN_COMMENTS.declaration;
+		expect(decl?.submitted_at).toBeUndefined();
+		expect(decl?.first_declaration_path_choice_at).toBeUndefined();
+		expect(decl?.second_declaration_path_choice_at).toBeUndefined();
+		expect(decl?.second_declaration_submitted_at).toBeUndefined();
+		expect(decl?.joint_evaluation_submitted_at).toBeUndefined();
+		expect(decl?.cse_opinion_completed_at).toBeUndefined();
+		expect(decl?.demarche_completed_at).toBeUndefined();
+		expect(decl?.phase2_required).toBeUndefined();
+		expect(decl?.phase2_revision_required).toBeUndefined();
+		expect(decl?.indicator_g_required).toBeUndefined();
 	});
 
 	it("annotates company identity columns exposed by SUIT", () => {
@@ -192,11 +220,11 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		expect(aToEColumns).toHaveLength(18);
 	});
 
-	it("annotates all indicator F columns (24 columns)", () => {
+	it("annotates all indicator F columns (22 columns)", () => {
 		const fColumns = Object.keys(declarationComments ?? {}).filter((k) =>
 			k.startsWith("indicator_f_"),
 		);
-		expect(fColumns).toHaveLength(24);
+		expect(fColumns).toHaveLength(22);
 	});
 
 	it("uses the strict format 'GIP-MDS | SUIT: <label>' for every indicator A–F comment", () => {
@@ -204,7 +232,7 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		// (siren, year, total_women, etc.) use the `SUIT: ...` format and are
 		// validated by the T2 tests above.
 		const t1Entries = Object.entries(declarationComments ?? {}).filter(
-			([col]) => col.startsWith("indicator_"),
+			([col]) => /^indicator_[a-f]_/.test(col),
 		);
 		for (const [column, comment] of t1Entries) {
 			expect(comment, `column ${column}`).toMatch(/^GIP-MDS \| SUIT: .+$/);
@@ -216,7 +244,7 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		// (siren, year, total_women, …) use the bare `SUIT: …` format and are
 		// validated by the T2 per-key tests above.
 		const t1Entries = Object.entries(declarationComments ?? {}).filter(
-			([col]) => col.startsWith("indicator_"),
+			([col]) => /^indicator_[a-f]_/.test(col),
 		);
 		const t1CommentValues = t1Entries.map(([, v]) =>
 			v.replace("GIP-MDS | SUIT: ", ""),

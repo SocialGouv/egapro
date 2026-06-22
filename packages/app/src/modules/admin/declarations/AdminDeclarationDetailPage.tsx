@@ -2,15 +2,19 @@
 
 import Link from "next/link";
 
+import { RecapitulatifPage } from "~/modules/declaration-remuneration/recapitulatif";
 import { api } from "~/trpc/react";
 
+import { CancelDeclarationButton } from "./CancelDeclarationButton";
 import {
+	CancelledBadge,
 	CompanySection,
 	CseOpinionsSection,
 	DeclarantSection,
 	DeclarationSummary,
 	FilesSection,
 } from "./DetailSections";
+import { SiblingDeclarationsSection } from "./SiblingDeclarationsSection";
 
 type Props = {
 	declarationId: string;
@@ -20,6 +24,10 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 	const { data, isLoading } = api.adminDeclarations.getById.useQuery({
 		id: declarationId,
 	});
+	const { data: recap } = api.adminDeclarations.getRecap.useQuery(
+		{ id: declarationId },
+		{ enabled: !!data },
+	);
 
 	if (isLoading) {
 		return (
@@ -53,6 +61,12 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 			<h1 className="fr-h3 fr-mt-2w">
 				{data.companyName} — {data.year}
 			</h1>
+			{data.cancelledAt && <CancelledBadge cancelledAt={data.cancelledAt} />}
+			<CancelDeclarationButton
+				cancelledAt={data.cancelledAt}
+				declarationId={data.id}
+				year={data.year}
+			/>
 			<DeclarationSummary declaration={data} />
 			<CompanySection declaration={data} />
 			<DeclarantSection declaration={data} />
@@ -60,6 +74,13 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 				<CseOpinionsSection opinions={data.cseOpinions} />
 			)}
 			{data.files.length > 0 && <FilesSection files={data.files} />}
+			<SiblingDeclarationsSection siblings={data.siblings} />
+			{recap && (
+				<section className="fr-mt-6w">
+					<h2 className="fr-h3">Récapitulatif déclaré</h2>
+					<RecapitulatifPage {...recap} />
+				</section>
+			)}
 		</div>
 	);
 }

@@ -22,7 +22,17 @@ export function SearchForm() {
 				dateFrom: searchParams.get("dateFrom") ?? "",
 				dateTo: searchParams.get("dateTo") ?? "",
 				status:
-					(searchParams.get("status") as "" | "draft" | "submitted") ?? "",
+					(searchParams.get("status") as
+						| ""
+						| "draft"
+						| "awaiting_compliance_path_choice"
+						| "corrective_actions_chosen"
+						| "joint_evaluation_chosen"
+						| "awaiting_revision_choice"
+						| "revised_joint_evaluation_chosen"
+						| "awaiting_cse_opinion"
+						| "demarche_completed"
+						| "cancelled") ?? "",
 			},
 		},
 	);
@@ -54,7 +64,11 @@ export function SearchForm() {
 	}, [reset, router]);
 
 	return (
-		<form className="fr-mb-4w" onSubmit={handleSubmit(onSubmit)}>
+		<form
+			autoComplete="off"
+			className="fr-mb-4w"
+			onSubmit={handleSubmit(onSubmit)}
+		>
 			<div className="fr-grid-row fr-grid-row--gutters">
 				<div className="fr-col-12 fr-col-md-4">
 					<div className="fr-input-group">
@@ -135,7 +149,7 @@ export function SearchForm() {
 						>
 							<option value="">Tous</option>
 							<option value="draft">Brouillon</option>
-							<option value="submitted">Transmise</option>
+							<option value="cancelled">Annulée</option>
 						</select>
 					</div>
 				</div>

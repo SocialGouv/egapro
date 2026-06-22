@@ -43,4 +43,27 @@ describe("ResourceBanner", () => {
 		const headings = screen.getAllByRole("heading", { level: 3 });
 		expect(headings).toHaveLength(3);
 	});
+
+	it("uses a 10/2 column ratio so the illustration sits flush right", () => {
+		const { container } = render(<ResourceBanner />);
+
+		const tilesCol = container.querySelector(".fr-col-md-10");
+		expect(tilesCol).not.toBeNull();
+
+		const illustrationCol = container.querySelector(".fr-col-md-2");
+		expect(illustrationCol).not.toBeNull();
+		expect(illustrationCol).toHaveClass("fr-hidden");
+		expect(illustrationCol).toHaveClass("fr-unhidden-md");
+		expect(illustrationCol).toHaveAttribute("aria-hidden", "true");
+
+		const rightAligner = illustrationCol?.querySelector(
+			".fr-grid-row.fr-grid-row--right",
+		);
+		expect(rightAligner).not.toBeNull();
+
+		const image = rightAligner?.querySelector(
+			'[data-src="/assets/images/home/help-illustration.svg"]',
+		);
+		expect(image).not.toBeNull();
+	});
 });

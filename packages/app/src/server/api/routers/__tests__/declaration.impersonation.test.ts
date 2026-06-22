@@ -89,11 +89,11 @@ describe("declarationRouter", () => {
 			).rejects.toThrow("Mode mimoquage");
 		});
 
-		it("refuses completeCompliancePath when the admin is impersonating", async () => {
+		it("refuses submitJointEvaluation when the admin is impersonating", async () => {
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb, null, impersonation);
 
-			await expect(caller.completeCompliancePath()).rejects.toThrow(
+			await expect(caller.submitJointEvaluation()).rejects.toThrow(
 				"Mode mimoquage",
 			);
 		});

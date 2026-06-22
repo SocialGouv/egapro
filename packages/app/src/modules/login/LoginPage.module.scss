@@ -1,3 +1,8 @@
+.container {
+	margin-inline: auto;
+	max-width: 78rem;
+}
+
 .columns {
 	display: flex;
 	flex-direction: column;
@@ -37,12 +42,11 @@
 
 	@include respond-from(md) {
 		flex: 0 0 50%;
-		justify-content: flex-start;
 	}
 }
 
 .illustrationInner {
-	align-items: center;
+	align-items: flex-start;
 	box-sizing: border-box;
 	display: flex;
 	justify-content: center;
@@ -50,10 +54,8 @@
 	width: 100%;
 
 	@include respond-from(md) {
-		justify-content: flex-end;
-		max-width: 39rem;
 		padding-block: 4.5rem;
-		padding-inline: 0 1.5rem;
+		padding-inline: 1.5rem;
 	}
 }
 

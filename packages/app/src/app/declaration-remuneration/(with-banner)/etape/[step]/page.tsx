@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import {
+	getEffectiveGipPrefillData,
 	StepPageClient,
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
@@ -25,8 +26,9 @@ export default async function StepPage({ params }: StepPageProps) {
 
 	const data = await api.declaration.getOrCreate();
 	const d = data.declaration;
+	const company = await api.company.get({ siren: d.siren });
 
-	if (d.status === "submitted" && step !== 6) {
+	if (d.status !== "draft" && step !== 6) {
 		const { decl1ModificationDeadline } = await getCampaignDeadlines(d.year);
 		if (
 			shouldRedirectSubmittedToRecap({
@@ -46,6 +48,12 @@ export default async function StepPage({ params }: StepPageProps) {
 		totalWomen: d.totalWomen ?? gip?.step1.totalWomen ?? 0,
 		totalMen: d.totalMen ?? gip?.step1.totalMen ?? 0,
 	};
+
+	const effectiveGipPrefillData = getEffectiveGipPrefillData(
+		gip,
+		d.totalWomen,
+		d.totalMen,
+	);
 
 	const { step2Data, step3Data, step4Data } = mapToStepData(d);
 
@@ -78,8 +86,10 @@ export default async function StepPage({ params }: StepPageProps) {
 	return (
 		<HydrateClient>
 			<StepPageClient
+				companyWorkforce={company.workforce}
 				declaration={d}
-				gipPrefillData={data.gipPrefillData ?? undefined}
+				gipPrefillData={effectiveGipPrefillData ?? undefined}
+				hasCse={company.hasCse}
 				initialSource={initialSource}
 				step={step}
 				step1Data={step1Data}

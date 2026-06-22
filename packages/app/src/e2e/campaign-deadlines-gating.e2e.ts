@@ -1,15 +1,16 @@
 import { expect, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
-
 import {
-	deleteCampaignDeadlines,
 	resetDeclarationToDraft,
-	setCampaignDeadlines,
 	setCompanyHasCse,
 	setDeclarationComplianceState,
 	setUserPhone,
 } from "./helpers/db";
+import {
+	deleteCampaignDeadlines,
+	setCampaignDeadlines,
+} from "./helpers/db-campaign";
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 import { loginWithProConnect } from "./helpers/login";
 
@@ -46,9 +47,9 @@ test.describe("Campaign deadlines gating", () => {
 	async function seedSubmittedCompliance() {
 		await resetDeclarationToDraft();
 		await setDeclarationComplianceState({
-			status: "submitted",
+			status: "corrective_actions_chosen",
 			currentStep: 6,
-			compliancePath: "corrective_action",
+			firstDeclarationPathChoice: "corrective_action",
 		});
 	}
 

@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 
 import type { CampaignDeadlines } from "~/modules/domain";
 import {
+	getDeclarationDisplayContext,
+	getDefaultCampaignDeadlines,
+} from "~/modules/domain";
+import {
 	DECLARATION_PROCESS_PANEL_ID,
 	DeclarationProcessPanel,
 	type PanelVariant,
@@ -35,17 +39,10 @@ function toInputDate(d: Date): string {
 }
 
 function buildPresetDeadlines(preset: "future" | "past"): CampaignDeadlines {
+	// Reuse the domain deadline rules; the playground only picks a base year
+	// far in the future or in the past to force the "open" / "closed" states.
 	const base = preset === "future" ? 2099 : 2020;
-	return {
-		gipPublicationDate: null,
-		campaignStartDate: null,
-		decl1ModificationDeadline: new Date(base, 5, 1),
-		decl1JustificationDeadline: new Date(base, 5, 1),
-		decl1JointEvaluationDeadline: new Date(base, 7, 1),
-		decl2ModificationDeadline: new Date(base, 11, 1),
-		decl2JustificationDeadline: new Date(base, 11, 1),
-		decl2JointEvaluationDeadline: new Date(base + 1, 1, 1),
-	};
+	return getDefaultCampaignDeadlines(base);
 }
 
 /**
@@ -230,12 +227,14 @@ export function PanelPlayground() {
 
 			<DeclarationProcessPanel
 				campaignDeadlines={deadlines}
-				compliancePath={compliancePath}
 				ctaHref="/declaration-remuneration?siren=000000000"
+				displayContext={getDeclarationDisplayContext({
+					firstDeclarationPathChoice: compliancePath,
+					secondDeclarationPathChoice: null,
+					cseRequired: false,
+				})}
+				hasSubmittedSecondDeclaration={secondDeclarationSubmitted}
 				lastActionDate="12 mars 2026"
-				secondDeclarationStatus={
-					secondDeclarationSubmitted ? "submitted" : null
-				}
 				siren="000000000"
 				variant={variant}
 				year={2027}

@@ -50,10 +50,19 @@ import { JointEvaluationPage } from "../JointEvaluationPage";
 
 const DECLARATION_YEAR = 2025;
 
-function mockDeclaration(compliancePath: string, updatedAt: Date | null) {
+function mockDeclaration(
+	pathChoices: {
+		firstDeclarationPathChoice?: string | null;
+		secondDeclarationPathChoice?: string | null;
+	},
+	updatedAt: Date | null,
+) {
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
 		declaration: {
-			compliancePath,
+			firstDeclarationPathChoice:
+				pathChoices.firstDeclarationPathChoice ?? null,
+			secondDeclarationPathChoice:
+				pathChoices.secondDeclarationPathChoice ?? null,
 			updatedAt,
 			siren: "123456789",
 			year: DECLARATION_YEAR,
@@ -63,8 +72,8 @@ function mockDeclaration(compliancePath: string, updatedAt: Date | null) {
 }
 
 describe("JointEvaluationPage", () => {
-	it("redirects when compliancePath is not joint_evaluation", async () => {
-		mockDeclaration("action_plan", null);
+	it("redirects when neither first nor second path choice is joint_evaluation", async () => {
+		mockDeclaration({ firstDeclarationPathChoice: "corrective_action" }, null);
 
 		await JointEvaluationPage();
 
@@ -73,8 +82,28 @@ describe("JointEvaluationPage", () => {
 		);
 	});
 
-	it("renders the form with deadline when compliancePath is joint_evaluation", async () => {
-		mockDeclaration("joint_evaluation", new Date("2025-06-15"));
+	it("renders the form when firstDeclarationPathChoice is joint_evaluation (initial round)", async () => {
+		mockDeclaration(
+			{ firstDeclarationPathChoice: "joint_evaluation" },
+			new Date("2025-06-15"),
+		);
+
+		const page = await JointEvaluationPage();
+		render(page);
+
+		expect(screen.getByTestId("joint-evaluation-deadline")).toHaveTextContent(
+			new Date("2025-08-01T00:00:00").toLocaleDateString("fr-FR"),
+		);
+	});
+
+	it("renders the form when secondDeclarationPathChoice is joint_evaluation (revised round)", async () => {
+		mockDeclaration(
+			{
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "joint_evaluation",
+			},
+			new Date("2025-06-15"),
+		);
 
 		const page = await JointEvaluationPage();
 		render(page);
@@ -85,7 +114,10 @@ describe("JointEvaluationPage", () => {
 	});
 
 	it("formats declarationDate from updatedAt when available", async () => {
-		mockDeclaration("joint_evaluation", new Date("2025-06-15"));
+		mockDeclaration(
+			{ firstDeclarationPathChoice: "joint_evaluation" },
+			new Date("2025-06-15"),
+		);
 
 		const page = await JointEvaluationPage();
 		render(page);
@@ -96,7 +128,7 @@ describe("JointEvaluationPage", () => {
 	});
 
 	it("falls back to today's date when updatedAt is null", async () => {
-		mockDeclaration("joint_evaluation", null);
+		mockDeclaration({ firstDeclarationPathChoice: "joint_evaluation" }, null);
 
 		const page = await JointEvaluationPage();
 		render(page);
