@@ -8,6 +8,13 @@ vi.mock("~/server/db", () => ({
 	db: {},
 }));
 
+const { fetchMatomoFunnelMock } = vi.hoisted(() => ({
+	fetchMatomoFunnelMock: vi.fn(),
+}));
+vi.mock("~/server/services/matomo", () => ({
+	fetchMatomoFunnel: fetchMatomoFunnelMock,
+}));
+
 type SelectChain = {
 	from: ReturnType<typeof vi.fn>;
 	innerJoin: ReturnType<typeof vi.fn>;
@@ -1773,5 +1780,63 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 		const result = await caller.getCompletionFunnel({ year: 2026 });
 
 		expect(result.mainFunnel.map((r) => r.count)).toEqual([50, 40, 30, 20]);
+	});
+});
+
+describe("adminStatsRouter.getMatomoFunnel", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: {
+				user: { id: "u", email: "u@x", isAdmin: false },
+				expires: "",
+			},
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getMatomoFunnel({ year: 2026 })).rejects.toThrow(
+			/administrateurs/i,
+		);
+	});
+
+	it("delegates to the Matomo service with the year/size filter", async () => {
+		const output = {
+			declarationFunnel: [
+				{
+					key: "start",
+					label: "Démarrage",
+					count: 10,
+					pctOfStart: 100,
+					pctDropFromPrev: null,
+				},
+			],
+			cseFunnel: [],
+			complianceFunnel: [],
+		};
+		fetchMatomoFunnelMock.mockResolvedValue(output);
+
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: {
+				user: { id: "admin", email: "a@x", isAdmin: true },
+				expires: "",
+			},
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getMatomoFunnel({
+			year: 2026,
+			sizeRange: "50-99",
+		});
+
+		expect(fetchMatomoFunnelMock).toHaveBeenCalledWith({
+			year: 2026,
+			sizeRange: "50-99",
+		});
+		expect(result).toBe(output);
 	});
 });

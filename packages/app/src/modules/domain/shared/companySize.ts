@@ -31,3 +31,17 @@ export const COMPANY_SIZE_RANGES: Record<
 	"150-249": { min: 150, max: 249, label: "150 à 249 salariés" },
 	"250+": { min: 250, max: null, label: "250 salariés et plus" },
 };
+
+/** Map a workforce headcount to its `CompanySizeRange` bucket key. */
+export function getCompanySizeRange(workforce: number): CompanySizeRange {
+	const entry = (
+		Object.entries(COMPANY_SIZE_RANGES) as Array<
+			[CompanySizeRange, (typeof COMPANY_SIZE_RANGES)[CompanySizeRange]]
+		>
+	).find(
+		([, { min, max }]) =>
+			workforce >= min && (max === null || workforce <= max),
+	);
+
+	return entry ? entry[0] : "250+";
+}

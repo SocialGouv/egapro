@@ -15,11 +15,11 @@ export default defineConfig({
 	// All tests share the same database record (SIREN 130025265), so parallel
 	// execution causes race conditions between declaration and compliance tests.
 	workers: 1,
-	reporter: process.env.CI ? "github" : "list",
+	reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
 	timeout: 60_000,
 	use: {
 		baseURL,
-		trace: "on-first-retry",
+		trace: "retain-on-failure",
 	},
 	projects: [
 		{

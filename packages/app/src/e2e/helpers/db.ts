@@ -54,7 +54,9 @@ export async function resetDeclarationToDraft() {
 			    first_declaration_path_choice = NULL,
 			    second_declaration_path_choice = NULL,
 			    total_women = NULL,
-			    total_men = NULL
+			    total_men = NULL,
+			    draft = NULL,
+			    draft_updated_at = NULL
 			WHERE siren = ${TEST_SIREN}
 		`;
 
@@ -66,6 +68,66 @@ export async function resetDeclarationToDraft() {
 			    INNER JOIN app_declaration d ON d.id = jc.declaration_id
 			    WHERE d.siren = ${TEST_SIREN}
 			  )
+		`;
+
+		// CSE opinion files + associations accumulate on the shared declaration
+		// record (the suite uploads through the real UI now). Wipe them so each
+		// test starts with no file and free upload slots. Deleting the files
+		// cascades to app_cse_opinion_file, but we clear associations first to be
+		// explicit and order-safe.
+		await sql`
+			DELETE FROM app_cse_opinion_file
+			WHERE declaration_id IN (
+			    SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
+			)
+		`;
+
+		await sql`
+			DELETE FROM app_file
+			WHERE type = 'cse_opinion'
+			  AND declaration_id IN (
+			    SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
+			)
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/**
+ * Inserts (or refreshes) a app_campaign_deadline row for the current year with all
+ * deadlines pushed far into the future. Prevents date-sensitive business rules
+ * (e.g. `isDraftExpired` in declarationDraftRouter.get) from breaking e2e tests
+ * when CI happens to run on or after the default deadline of June 1.
+ */
+export async function pushCampaignDeadlinesFarFuture() {
+	const sql = createConnection();
+	try {
+		await sql`
+			INSERT INTO app_campaign_deadline (
+				year,
+				decl1_modification_deadline,
+				decl1_justification_deadline,
+				decl1_joint_evaluation_deadline,
+				decl2_modification_deadline,
+				decl2_justification_deadline,
+				decl2_joint_evaluation_deadline
+			)
+			SELECT
+				EXTRACT(YEAR FROM CURRENT_DATE)::int,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date
+			ON CONFLICT (year) DO UPDATE SET
+				decl1_modification_deadline = '2099-12-31'::date,
+				decl1_justification_deadline = '2099-12-31'::date,
+				decl1_joint_evaluation_deadline = '2099-12-31'::date,
+				decl2_modification_deadline = '2099-12-31'::date,
+				decl2_justification_deadline = '2099-12-31'::date,
+				decl2_joint_evaluation_deadline = '2099-12-31'::date
 		`;
 	} finally {
 		await sql.end();

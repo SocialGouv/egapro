@@ -82,9 +82,14 @@ describe("DeclarationProcessPanel", () => {
 			).toBeInTheDocument();
 		});
 
-		it("renders the history link", () => {
-			const { panel } = renderPanel("start");
-			expect(panel.getByText("Voir l'historique")).toBeInTheDocument();
+		it("renders the history link pointing to the history route", () => {
+			const { dialog } = renderPanel("start");
+			const link = dialog.querySelector("a.fr-link");
+			expect(link).toBeInTheDocument();
+			expect(link).toHaveAttribute(
+				"href",
+				`/mon-espace/historique/${BASE_PROPS.siren}/${BASE_PROPS.year}`,
+			);
 		});
 
 		it("renders the info alert", () => {

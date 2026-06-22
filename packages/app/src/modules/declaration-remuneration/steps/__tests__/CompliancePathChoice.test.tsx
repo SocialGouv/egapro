@@ -82,7 +82,9 @@ describe("CompliancePathChoice", () => {
 			screen.getByText("Actions correctives et seconde déclaration"),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Évaluation conjointe des rémunérations"),
+			screen.getByText(
+				"Mettre en place une évaluation conjointe des rémunérations",
+			),
 		).toBeInTheDocument();
 	});
 
@@ -129,7 +131,7 @@ describe("CompliancePathChoice", () => {
 			/>,
 		);
 		const radio = screen.getByLabelText(
-			"Évaluation conjointe des rémunérations",
+			"Mettre en place une évaluation conjointe des rémunérations",
 		);
 		fireEvent.click(radio);
 
@@ -203,11 +205,101 @@ describe("CompliancePathChoice", () => {
 			/>,
 		);
 		expect(
-			screen.getByText("Évaluation conjointe des rémunérations"),
+			screen.getByText(
+				"Mettre en place une évaluation conjointe des rémunérations",
+			),
 		).toBeInTheDocument();
 		expect(
 			screen.queryByText("Actions correctives et seconde déclaration"),
 		).not.toBeInTheDocument();
+	});
+
+	it("renders the first-round instruction phrase by default", () => {
+		render(
+			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
+				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
+				email="test@example.fr"
+			/>,
+		);
+		expect(
+			screen.getByText(/Des écarts ≥ 5 % ont été constatés/),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(/ont de nouveau été détectés/),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders the second-round instruction phrase and intermediate heading", () => {
+		render(
+			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
+				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
+				email="test@example.fr"
+				isSecondRound={true}
+			/>,
+		);
+		expect(
+			screen.getByText(/Des écarts ≥ 5 % ont de nouveau été détectés/),
+		).toBeInTheDocument();
+		// Section headings sit at level 2 (the page h1 is the funnel title); the
+		// redundant "Parcours de mise en conformité" subtitle is not rendered, so
+		// the hierarchy must not skip from h1 to h3.
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "Si la justification n'est pas possible par des critères objectifs et non sexistes",
+			}),
+		).toBeInTheDocument();
+	});
+
+	it("uses the funnel title as h1 and keeps section headings at level 2", () => {
+		render(
+			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
+				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
+				email="test@example.fr"
+			/>,
+		);
+		expect(
+			screen.getByRole("heading", {
+				level: 1,
+				name: /Déclaration des indicateurs/,
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "La justification est possible par des critères objectifs et non sexistes",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("heading", { name: /Parcours de mise en conformité/ }),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders the path choice deadline highlight block", () => {
+		render(
+			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
+				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
+				email="test@example.fr"
+			/>,
+		);
+		expect(
+			screen.getByText(
+				"Date limite pour choisir un parcours de mise en conformité",
+			),
+		).toBeInTheDocument();
+		expect(screen.getByText("1 janvier 2027")).toBeInTheDocument();
 	});
 
 	it("renders previous link pointing to step 6", () => {

@@ -132,6 +132,7 @@ Next: /implement NNN
 
 ## Notes
 
+- **Complexité t-shirt en fin d'analyse** — chaque ticket **feuille** (Task / Bug, jamais l'epic) reçoit une taille XS→XL écrite sur le board (`Size` + `Estimate`) par l'agent d'analyse via `set_ticket_size.sh`, avec justification dans le commentaire/body sous `## Complexité`. Rubrique : `rules/complexity-estimation.md`. Ces points alimentent la vélocité de sprint (skill `/velocity`).
 - **Pas de transition de statut board** — l'issue reste dans son statut courant (`Backlog` ou `To Do`). C'est `/implement` qui bouge à `In progress` puis `In review`.
 - Si un agent revient sans validation utilisateur (utilisateur a refusé après Q&A) → arrêter la pipeline, laisser l'utilisateur reformuler.
 - En mode `epic-enrich`, ne **jamais effacer** les commentaires précédents (`## Besoin métier`, `## Analyse PO`). Préférer un commentaire `(révisé YYYY-MM-DD)` pointant vers le précédent — la traçabilité historique est précieuse.

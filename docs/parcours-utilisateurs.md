@@ -11,12 +11,13 @@ Audience : équipe métier / PO (référence pour les tests d'acceptance, les re
 1. [Personas](#1-personas)
 2. [Parcours commun — connexion ProConnect](#2-parcours-commun--connexion-proconnect)
 3. [Employeur — première déclaration de l'index](#3-employeur--première-déclaration-de-lindex)
-4. [Employeur — modification d'une déclaration soumise](#4-employeur--modification-dune-déclaration-soumise)
-5. [Employeur — parcours de conformité (seconde déclaration)](#5-employeur--parcours-de-conformité-seconde-déclaration)
-6. [Employeur — avis du CSE](#6-employeur--avis-du-cse)
-7. [Citoyen — recherche et consultation publique](#7-citoyen--recherche-et-consultation-publique)
-8. [Agent administration DGT](#8-agent-administration-dgt)
-9. [Tableau récapitulatif des branchements clés](#9-tableau-récapitulatif-des-branchements-clés)
+4. [Employeur — consulter l'historique d'une démarche](#4-employeur--consulter-lhistorique-dune-démarche)
+5. [Employeur — modification d'une déclaration soumise](#5-employeur--modification-dune-déclaration-soumise)
+6. [Employeur — parcours de conformité (seconde déclaration)](#6-employeur--parcours-de-conformité-seconde-déclaration)
+7. [Employeur — avis du CSE](#7-employeur--avis-du-cse)
+8. [Citoyen — recherche et consultation publique](#8-citoyen--recherche-et-consultation-publique)
+9. [Agent administration DGT](#9-agent-administration-dgt)
+10. [Tableau récapitulatif des branchements clés](#10-tableau-récapitulatif-des-branchements-clés)
 
 Conventions :
 
@@ -132,7 +133,7 @@ flowchart LR
 | 5 | `/declaration-remuneration/etape/5` | (Optionnel) Liste de catégories d'emploi avec rémunération de base + variable F/H | Indicateur G |
 | 6 | `/declaration-remuneration/etape/6` | Validation finale | — |
 
-À chaque étape, **chaque clic "Suivant"** sauvegarde l'état en base de données (`status = draft`, `currentStep` mis à jour). L'utilisateur peut donc fermer le navigateur et reprendre plus tard.
+À chaque étape, **chaque clic "Suivant"** sauvegarde l'état en base de données (`status = draft`, `currentStep` mis à jour). L'utilisateur peut donc fermer le navigateur et reprendre plus tard. Chaque changement d'étape est aussi consigné dans l'historique de la démarche (voir §4).
 
 ### 3.3 Pré-remplissage GIP-MDS
 
@@ -144,7 +145,7 @@ Si le GIP-MDS a publié les indicateurs A–F pour ce SIREN et cette année (tab
 
 À l'étape 6, le clic sur **« Soumettre »** :
 
-1. Bascule la déclaration en `status = submitted`, fixe `submittedAt = now()`.
+1. Bascule la déclaration en `status = submitted` et fige le snapshot `cseRequired`.
 2. Calcule le `remunerationScore` final.
 3. Envoie un **mail de reçu** à l'utilisateur avec le numéro de soumission, l'année, et un lien vers le récap PDF.
 4. Redirige vers `/declaration-remuneration/recapitulatif/` (vue lecture seule).
@@ -160,11 +161,56 @@ Si le GIP-MDS a publié les indicateurs A–F pour ce SIREN et cette année (tab
 - **Soumission OK** → recap PDF + reçu mail
 - **Abandon en cours** → brouillon en base, disparaît automatiquement au-delà de **2 mois** sans modification (cleanup)
 - **Erreur métier bloquante** → message inline, retour à l'étape concernée
-- **Bascule vers parcours conformité** : si l'écart calculé ≥ 5% **et** entreprise ≥ 100 salariés, l'écran de confirmation propose le parcours de conformité (cf. §5)
+- **Bascule vers parcours conformité** : si l'écart calculé ≥ 5% **et** entreprise ≥ 100 salariés, l'écran de confirmation propose le parcours de conformité (cf. §6)
 
 ---
 
-## 4. Employeur — modification d'une déclaration soumise
+## 4. Employeur — consulter l'historique d'une démarche
+
+Depuis l'espace personnel, l'employeur peut suivre la **chronologie complète** des actions effectuées sur sa démarche pour une année donnée : qui a fait quoi, quand, et sur quelle page.
+
+```mermaid
+flowchart TD
+    A([/mon-espace]) --> B[Panneau de la démarche<br/>lien « Voir l'historique »]
+    B --> C[/mon-espace/historique/&lt;siren&gt;/&lt;year&gt;]
+    C --> D{Rattaché à<br/>l'entreprise ?}
+    D -->|Non| E[Accès refusé]
+    D -->|Oui| F[Liste chronologique<br/>récent → ancien]
+    F --> G{Plus de<br/>10 entrées ?}
+    G -->|Oui| H[Bouton « Voir plus »<br/>charge la page suivante]
+    G -->|Non| I[Liste complète]
+    H --> F
+```
+
+### 4.1 Point d'entrée
+
+Le lien **« Voir l'historique »** se trouve dans le panneau latéral de la démarche sur `/mon-espace` (`DeclarationProcessPanel`). Il mène à `/mon-espace/historique/<siren>/<year>`.
+
+### 4.2 Contenu de la page
+
+Pour chaque action de la démarche, une entrée affiche :
+
+- la **date et l'heure** de l'action (format français)
+- l'**auteur** (nom + email ; « Système » si l'action n'a pas d'auteur identifié)
+- le cas échéant, un lien **« Page : … »** vers l'écran concerné par l'action
+
+Les entrées sont triées **du plus récent au plus ancien**. La liste se charge par tranches de 10 ; un bouton **« Voir plus »** charge la suite tant qu'il reste des entrées. Si aucune action n'a été enregistrée, un message « Aucune action enregistrée pour cette démarche. » s'affiche.
+
+### 4.3 Actions tracées
+
+Sont consignés : les changements d'étape du wizard, la soumission de la déclaration, le choix du parcours de conformité, la soumission de la seconde déclaration, le dépôt de l'évaluation conjointe, le dépôt de l'avis CSE, l'annulation et la finalisation de la démarche.
+
+### 4.4 Accès et confidentialité
+
+- L'accès est **réservé** : l'utilisateur doit être rattaché à l'entreprise (table `userCompanies`). Un agent admin en impersonation sur le SIREN concerné y a également accès.
+- La page exige une session (sinon redirection vers `/login`) et valide les paramètres d'URL (SIREN de 9 caractères, année ≥ 2018) — à défaut, page introuvable.
+- La consultation est **auditée** comme lecture sensible (catégorie `read_sensitive`, action `declaration_history.read`) car elle expose des données nominatives (auteurs des actions).
+
+> **Pourquoi un historique ?** La démarche peut s'étaler sur plusieurs mois et impliquer plusieurs personnes (RH, paie, CSE). L'historique permet à l'employeur de savoir précisément qui est intervenu et quand, utile en cas de contrôle ou de transmission interne du dossier.
+
+---
+
+## 5. Employeur — modification d'une déclaration soumise
 
 Tant que la **deadline de modification** (`decl1ModificationDeadline`, configurée par l'admin DGT par année) n'est pas atteinte, l'employeur peut **rouvrir** sa déclaration.
 
@@ -181,15 +227,15 @@ flowchart TD
 
 > **Pourquoi une deadline ?** L'administration doit pouvoir publier des chiffres stables à un moment donné. La deadline de modification est paramétrable par campagne pour s'adapter aux décisions politiques (extension, urgence sanitaire, etc.).
 
-**Note importante** : la modification ne crée **pas** une nouvelle déclaration ; elle écrase la précédente. Pour ajouter une seconde déclaration (cas écart ≥ 5%), c'est un parcours dédié (cf. §5).
+**Note importante** : la modification ne crée **pas** une nouvelle déclaration ; elle écrase la précédente. Pour ajouter une seconde déclaration (cas écart ≥ 5%), c'est un parcours dédié (cf. §6).
 
 ---
 
-## 5. Employeur — parcours de conformité (seconde déclaration)
+## 6. Employeur — parcours de conformité (seconde déclaration)
 
 Réservé aux entreprises **≥ 100 salariés** dont l'**écart calculé est ≥ 5%**. Vise à matérialiser la **mise en conformité** : nouvelle déclaration sous 6 mois et, optionnellement, dépôt d'un document d'évaluation conjointe.
 
-### 5.1 Conditions d'accès
+### 6.1 Conditions d'accès
 
 ```mermaid
 flowchart TD
@@ -200,7 +246,7 @@ flowchart TD
     Gap -->|Oui| Path[/declaration-remuneration/<br/>parcours-conformite/]
 ```
 
-### 5.2 Étapes du parcours conformité
+### 6.2 Étapes du parcours conformité
 
 | Étape | URL | Contenu |
 |---|---|---|
@@ -209,23 +255,24 @@ flowchart TD
 | Évaluation conjointe | `/parcours-conformite/evaluation-conjointe` | Upload optionnel d'un PDF d'évaluation conjointe |
 | Confirmation | `/parcours-conformite/confirmation` | Page finale après soumission |
 
-### 5.3 Règles métier
+### 6.3 Règles métier
 
 - **Période de référence flexible** : entre la date de première déclaration et le 31 décembre de l'année courante.
 - **Maximum 2 déclarations par année civile** (la première initiale + la corrective).
 - **Évaluation conjointe optionnelle** : un seul fichier par déclaration (le re-upload écrase). PDF uniquement, scanné par ClamAV avant stockage.
+- Le **choix de parcours est verrouillé** dès qu'une action aval a été enregistrée pour le round courant.
 - Plusieurs deadlines admin (toutes configurables, par année) :
   - `decl2ModificationDeadline` — modification de la seconde déclaration
   - `JustificationDeadline` — délai de justification
   - `JointEvaluationDeadline` — délai pour l'évaluation conjointe
 
-### 5.4 Sortie
+### 6.4 Sortie
 
 À la confirmation, mail de reçu + retour à `/mon-espace` avec le statut **« seconde déclaration soumise »** affiché sur la fiche entreprise.
 
 ---
 
-## 6. Employeur — avis du CSE
+## 7. Employeur — avis du CSE
 
 Réservé aux entreprises **≥ 100 salariés** (le CSE est obligatoire à partir de ce seuil).
 
@@ -235,11 +282,15 @@ flowchart LR
     B --> C[Saisir les avis<br/>première déclaration<br/>+ optionnellement seconde]
     C --> D[/avis-cse/etape/2]
     D --> E[Upload PDF<br/>jusqu'à 4/an]
-    E --> F[Bouton Finaliser]
-    F --> G([Confirmation<br/>+ mail])
+    E --> F{Fichiers uploadés ?}
+    F -->|Oui| M[Matrice d'association<br/>fichier × type de contenu]
+    M --> G{Toutes les colonnes<br/>associées ?}
+    G -->|Non| M
+    G -->|Oui| H[Bouton Finaliser]
+    H --> I([Confirmation<br/>+ mail])
 ```
 
-### 6.1 Saisie de l'étape 1 (avis textuels)
+### 7.1 Saisie de l'étape 1 (avis textuels)
 
 Pour la première déclaration (et optionnellement la seconde), deux avis :
 
@@ -247,7 +298,7 @@ Pour la première déclaration (et optionnellement la seconde), deux avis :
 - **Avis sur les écarts** — favorable / défavorable + date
   - Si l'avis sur les écarts n'a **pas été consulté** par le CSE, on coche `gapConsulted = false` et l'avis est nullable
 
-### 6.2 Étape 2 — upload des PDF
+### 7.2 Étape 2 — upload des PDF et association des types de contenu
 
 Limite : **4 PDF par année** (`MAX_CSE_FILES = 4`). Chaque fichier passe par :
 
@@ -257,19 +308,40 @@ Limite : **4 PDF par année** (`MAX_CSE_FILES = 4`). Chaque fichier passe par :
 4. Upload S3 (clé `<siren>/<year>/cse_opinion/<uuid>.pdf`)
 5. Insertion en base (`files` table)
 
-### 6.3 Finalisation
+Dès qu'au moins un fichier est uploadé, la **matrice d'association** (`ContentTypeMatrix`) s'affiche. Elle comporte une colonne par type de contenu requis :
 
-Le clic sur **« Finaliser »** bascule la déclaration en `cseStatus = submitted`. À partir de là, les fichiers sont en lecture seule (mais on peut toujours en uploader d'autres dans la limite des 4).
+| Colonne | Présente si… |
+|---|---|
+| Exactitude — 1re déclaration | toujours |
+| Justification des écarts — 1re déclaration | `gapConsulted = true` pour la 1re déclaration |
+| Exactitude — 2e déclaration | seconde déclaration présente |
+| Justification des écarts — 2e déclaration | seconde déclaration présente + `gapConsulted = true` |
+
+Pour chaque ligne (fichier) × colonne (type de contenu), une **case à cocher** permet d'associer le fichier au type. Une colonne ne peut être associée qu'à un seul fichier à la fois. L'association est enregistrée immédiatement en base à chaque changement de case (appel `setFileContentTypes`).
+
+Le bouton **« Soumettre »** reste désactivé tant que des colonnes obligatoires ne sont pas couvertes. Une alerte explicite liste les types de contenu manquants.
+
+### 7.3 Finalisation
+
+Le clic sur **« Soumettre »** (quand toutes les associations sont présentes) :
+
+1. Ouvre une modale de confirmation (`SubmitConfirmationModal`).
+2. Déclenche la procédure `finalize` qui vérifie côté serveur que :
+   - au moins un avis CSE est enregistré
+   - au moins un fichier est uploadé
+   - chaque couple `(declarationNumber, type)` requis est couvert par une association dans `cseOpinionFiles`
+3. Bascule la déclaration en `cseStatus = submitted` et enregistre l'événement dans `declarationStatusHistory`.
+4. Redirige vers `/avis-cse/confirmation`.
 
 > **Pourquoi cette séparation déclaration / CSE ?** Le calendrier de mise au CSE est différent : il faut d'abord déclarer les indicateurs, puis attendre la convocation du CSE, faire passer en réunion, déposer le PV. Ces deux temps peuvent s'étaler sur plusieurs semaines.
 
 ---
 
-## 7. Citoyen — recherche et consultation publique
+## 8. Citoyen — recherche et consultation publique
 
 Public, sans authentification. Très peu de friction.
 
-### 7.1 Parcours simple
+### 8.1 Parcours simple
 
 ```mermaid
 flowchart LR
@@ -283,7 +355,7 @@ flowchart LR
     G --> F
 ```
 
-### 7.2 Données exposées
+### 8.2 Données exposées
 
 Pour chaque entreprise déclarante :
 
@@ -292,7 +364,7 @@ Pour chaque entreprise déclarante :
   - L'**indicateur G reste confidentiel** (catégories d'emploi définies par l'entreprise)
   - Les fichiers (CSE, évaluation conjointe) ne sont **pas** exposés au public
 
-### 7.3 Export Excel et API publique
+### 8.3 Export Excel et API publique
 
 Pour les analystes / journalistes / chercheurs :
 
@@ -304,7 +376,7 @@ Pour les analystes / journalistes / chercheurs :
 
 Aucune authentification requise. Les téléchargements sont audités (catégorie `export`, rétention 365 jours).
 
-### 7.4 Annuaire des référents
+### 8.4 Annuaire des référents
 
 `/referents` permet aux entreprises de trouver leur **interlocuteur DREETS / inspection du travail**.
 
@@ -313,11 +385,11 @@ Aucune authentification requise. Les téléchargements sont audités (catégorie
 
 ---
 
-## 8. Agent administration DGT
+## 9. Agent administration DGT
 
 Les agents admin DGT/DREETS arrivent sur `/admin/` après connexion (le middleware Edge garantit `isAdmin === true`).
 
-### 8.1 Tableau de bord
+### 9.1 Tableau de bord
 
 `/admin/` propose des raccourcis vers les sous-sections :
 
@@ -327,7 +399,7 @@ Les agents admin DGT/DREETS arrivent sur `/admin/` après connexion (le middlewa
 - Paramètres de campagne
 - Stats de campagne
 
-### 8.2 Recherche de déclarations
+### 9.2 Recherche de déclarations
 
 ```mermaid
 flowchart LR
@@ -339,7 +411,7 @@ flowchart LR
 
 Tous les appels sont audités (`ADMIN_DECLARATIONS_SEARCH`, `ADMIN_DECLARATION_GET_BY_ID`).
 
-### 8.3 Impersonation
+### 9.3 Impersonation
 
 Pour dépanner une entreprise (problème de saisie, incompréhension), l'agent peut **incarner** un compte employeur :
 
@@ -365,7 +437,7 @@ sequenceDiagram
 
 > **Pourquoi cette double protection ?** Une mutation accidentelle d'un agent admin sur le compte d'une entreprise serait juridiquement très problématique (l'admin signerait à la place du déclarant). La règle « jamais d'écriture en impersonation » est inviolable.
 
-### 8.4 Gestion des référents
+### 9.4 Gestion des référents
 
 `/admin/liste-referents` — CRUD complet :
 
@@ -373,7 +445,7 @@ sequenceDiagram
 - Création / édition / suppression à l'unité
 - **Import CSV** en masse (upsert basé sur région + département + nom)
 
-### 8.5 Paramétrage des deadlines de campagne
+### 9.5 Paramétrage des deadlines de campagne
 
 `/admin/parametres` — par année :
 
@@ -388,11 +460,11 @@ sequenceDiagram
 
 Si une année n'a pas de ligne en BDD, des **valeurs par défaut** sont calculées par `getDefaultCampaignDeadlines(year)` dans `~/modules/domain`.
 
-### 8.6 Statistiques de campagne
+### 9.6 Statistiques de campagne
 
 `/admin/stats/campagne` — courbes cumulatives de soumission par jour, **segmentées par tranche d'effectif** (`small / medium / large`, voir `COMPANY_SIZE_RANGES`). Sert au reporting interne et aux rapports annuels au Ministère.
 
-### 8.7 Import GIP-MDS
+### 9.7 Import GIP-MDS
 
 Bouton sur la home admin → mutation tRPC `gipMds.importFromUrl` qui :
 
@@ -404,7 +476,7 @@ L'agent fait cet import **manuellement** une fois par campagne, après publicati
 
 ---
 
-## 9. Tableau récapitulatif des branchements clés
+## 10. Tableau récapitulatif des branchements clés
 
 Pour les arbitrages de spec et la priorisation, ces décisions sont les plus structurantes :
 
@@ -416,6 +488,7 @@ Pour les arbitrages de spec et la priorisation, ces décisions sont les plus str
 | Seconde déclaration applicable ? | Écart calculé + effectif | ≥ 5% **et** ≥ 100 salariés → parcours conformité |
 | Modification possible ? | Date du jour vs deadline | < deadline : oui / ≥ deadline : lecture seule |
 | Pré-remplissage disponible ? | Présence dans `gipMdsData` | Oui = champs A–F pré-remplis (écrasables) |
+| Accès à l'historique d'une démarche ? | Rattachement entreprise | Oui si rattaché (ou admin en impersonation) — sinon refusé |
 | Impersonation : écriture ? | Toujours | Non — lecture seule garantie |
 | Indicateur G publié ? | Toujours | Non — confidentialité par construction |
 | Files (CSE / évaluation) publiés ? | Toujours | Non — accessibles uniquement à l'employeur et à l'admin |

@@ -33,6 +33,7 @@ const company: CompanyDetail = {
 	name: "Alpha Solutions",
 	address: null,
 	nafCode: null,
+	nafLabel: null,
 	workforce: null,
 	hasCse: null,
 };

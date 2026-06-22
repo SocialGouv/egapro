@@ -1,5 +1,10 @@
 "use client";
 
+import {
+	MATOMO_ACTION,
+	MATOMO_EVENT_CATEGORY,
+	trackEvent,
+} from "~/modules/analytics";
 import { useIsImpersonating } from "~/modules/auth";
 import { hasRequiredDeclarationInfo } from "~/modules/domain";
 import { DECLARATION_PROCESS_PANEL_ID } from "./DeclarationProcessPanel";
@@ -44,6 +49,13 @@ export function DeclarationLink({ type, userPhone, hasCse, children }: Props) {
 				aria-controls={DECLARATION_PROCESS_PANEL_ID}
 				className={linkClass}
 				data-fr-opened="false"
+				onClick={() =>
+					trackEvent({
+						category: MATOMO_EVENT_CATEGORY.DASHBOARD,
+						action: MATOMO_ACTION.DECLARATION_START,
+						name: type,
+					})
+				}
 				type="button"
 			>
 				{children}

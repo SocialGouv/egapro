@@ -86,6 +86,7 @@ export default async function StepPage({ params }: StepPageProps) {
 	return (
 		<HydrateClient>
 			<StepPageClient
+				companyWorkforce={company.workforce}
 				declaration={d}
 				gipPrefillData={effectiveGipPrefillData ?? undefined}
 				hasCse={company.hasCse}

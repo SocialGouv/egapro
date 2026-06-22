@@ -1,3 +1,4 @@
+import { ConsultationNavLink } from "../shared/ConsultationNavLink";
 import { NavLink } from "../shared/NavLink";
 
 /** Main navigation with flat links. */
@@ -11,9 +12,12 @@ export function Navigation() {
 					</NavLink>
 				</li>
 				<li className="fr-nav__item">
-					<NavLink className="fr-nav__link" href="/index-egapro/recherche">
+					<ConsultationNavLink
+						className="fr-nav__link"
+						href="/index-egapro/recherche"
+					>
 						Observatoire
-					</NavLink>
+					</ConsultationNavLink>
 				</li>
 			</ul>
 		</nav>

@@ -319,6 +319,7 @@ Définition dans `src/server/db/`. Tables principales :
 | `jobCategories` | Catégories d'emploi (déclaration, optionnel) |
 | `employeeCategories` | Indicateur G (par catégorie) |
 | `cseOpinions` | Avis CSE (deux types : exactitude + écarts) |
+| `cseOpinionFiles` | Associations fichier ↔ type de contenu (par `declarationNumber` + `type`) |
 | `files` | PDF stockés sur S3 (cse_opinion, joint_evaluation) |
 | `referents` | Annuaire référents régionaux |
 | `campaignDeadlines` | Deadlines par année (configuration admin) |
@@ -409,7 +410,7 @@ Définies dans `src/modules/audit/shared/constants.ts` :
 | Catégorie | Rétention | Exemples |
 |---|---|---|
 | `mutation` | 365 j | Toutes les écritures (déclaration, CSE, admin) |
-| `read_sensitive` | 180 j | `profile.get`, `declaration.getOrCreate`, recherche admin, téléchargement PDF |
+| `read_sensitive` | 180 j | `profile.get`, `declaration.getOrCreate`, `declaration.getStatusHistory`, recherche admin, téléchargement PDF |
 | `public_search` | 180 j | Recherche / vue de référents publics |
 | `auth` | 365 j | Login OK / KO, logout |
 | `export` | 365 j | API publique d'export |

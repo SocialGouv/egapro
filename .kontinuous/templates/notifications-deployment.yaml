@@ -6,6 +6,20 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     app: notifications
+  annotations:
+    # Gate the rollout on the `pg` build, exactly like the `app` build does via
+    # `~needs: [pg]`. Review-app namespaces bootstrap Postgres concurrently, and
+    # both the wait-for-pg init container and the worker reference the `pg-app`
+    # secret at pod creation — without this dependency the deploy races the
+    # secret and fails with `CreateContainerConfigError: secret "pg-app" not
+    # found`. The `pg` build being ready guarantees `pg-app` exists.
+    kontinuous/plugin.needs: "[pg]"
+    # This Deployment is a root-chart template, not a `~chart` build, so the
+    # `05.0-needs` patch never assigns it a `chartNameTop` (it only does for
+    # sub-charts). Without one, kontinuous's dependency-graph renderer derives
+    # an empty node name and `Graph::Easy` rejects the malformed `-> pg` edge,
+    # failing the deploy. Set it explicitly so the node renders as `notifications`.
+    kontinuous/depname.chartNameTop: notifications
 spec:
   # Single replica is enough: pg-boss already handles fan-out via batchSize
   # inside the process. Scaling horizontally is safe (pg-boss uses Postgres
@@ -29,6 +43,45 @@ spec:
       securityContext:
         runAsUser: 1000
         runAsNonRoot: true
+      initContainers:
+        # Review-app namespaces bootstrap Postgres concurrently with the app,
+        # so the queue DB host (pg-rw, the main DB used as fallback when no
+        # dedicated pg-notifications secret exists) is unresolvable for the
+        # first minutes. Block startup until it accepts TCP connections so the
+        # worker never crash-loops and fails the rollout — the pod stays in
+        # Init (not Error) while waiting. On preprod/prod the persistent pg
+        # answers on the first probe, so this is a no-op there.
+        - name: wait-for-pg
+          image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/app:{{ .Values.global.imageTag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+          command:
+            - node
+            - -e
+            - |
+              const net = require("net");
+              const host = process.env.PGHOST;
+              const port = Number(process.env.PGPORT || "5432");
+              const probe = () => {
+                const socket = net.connect(port, host);
+                socket.once("connect", () => { socket.end(); process.exit(0); });
+                socket.once("error", () => {
+                  console.log(`waiting for ${host}:${port} ...`);
+                  setTimeout(probe, 3000);
+                });
+              };
+              probe();
+          env:
+            - name: PGHOST
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGHOST
+            - name: PGPORT
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.global.pgSecretName }}"
+                  key: PGPORT
       containers:
         - name: notifications
           image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/app:{{ .Values.global.imageTag }}"
@@ -37,11 +90,13 @@ spec:
           command:
             - node
             - packages/notifications/dist/index.js
-          # Load defaults from the same configmaps as the app pod. The
-          # `mail` configmap exposes MAIL_ENABLED / SMTP_HOST / SMTP_PORT /
-          # SMTP_SECURE / MAIL_FROM pointing at the in-cluster MailDev for
-          # dev / preprod review apps. The `notifications` configmap is
-          # optional and lets ops tune retry / batch knobs without rebuilding.
+          # The worker is the single consumer of MAIL_*/SMTP_* — the app pod
+          # no longer mounts these vars (removed from `global.env` once the
+          # publisher pattern landed). The `mail` configmap exposes
+          # MAIL_ENABLED / SMTP_HOST / SMTP_PORT / SMTP_SECURE / MAIL_FROM
+          # pointing at the in-cluster MailDev for dev / preprod review
+          # apps. The `notifications` configmap is optional and lets ops
+          # tune retry / batch knobs without rebuilding.
           envFrom:
             - configMapRef:
                 name: mail
@@ -124,9 +179,10 @@ spec:
                 secretKeyRef:
                   name: "{{ .Values.global.pgSecretName }}"
                   key: PGSSLMODE
-            # SMTP — same source as the app pod (`smtp-app` sealed-secret with
-            # MAILER_* keys = Tipimail in prod). `optional: true` keeps the
-            # configmap fallback (MailDev) usable in dev / preprod.
+            # SMTP — `smtp-app` sealed-secret with MAILER_* keys = Tipimail
+            # in prod, directly bound to this pod (the app pod has been
+            # disconnected from this secret). `optional: true` keeps the
+            # `mail` configmap fallback (MailDev) usable in dev / preprod.
             - name: SMTP_HOST
               valueFrom:
                 secretKeyRef:
