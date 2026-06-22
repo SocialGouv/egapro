@@ -41,9 +41,9 @@ describe("GET /api/v1/export/declarations — Date_annulation integration", () =
 		await sql`
 			INSERT INTO app_declaration (id, siren, year, declarant_id, status, cancelled_at, created_at, updated_at)
 			VALUES
-				('export-decl-cancelled-1', ${SIREN}, ${YEAR}, ${USER_ID}, 'submitted', '2025-04-15T12:00:00Z', '2025-03-01T00:00:00Z', '2025-03-01T00:00:00Z'),
-				('export-decl-cancelled-2', ${SIREN}, ${YEAR}, ${USER_ID}, 'submitted', '2025-04-20T12:00:00Z', '2025-03-15T00:00:00Z', '2025-03-15T00:00:00Z'),
-				('export-decl-active',      ${SIREN}, ${YEAR}, ${USER_ID}, 'submitted', NULL,                   '2025-05-01T00:00:00Z', '2025-05-01T00:00:00Z')
+				('export-decl-cancelled-1', ${SIREN}, ${YEAR}, ${USER_ID}, 'demarche_completed', '2025-04-15T12:00:00Z', '2025-03-01T00:00:00Z', '2025-03-01T00:00:00Z'),
+				('export-decl-cancelled-2', ${SIREN}, ${YEAR}, ${USER_ID}, 'demarche_completed', '2025-04-20T12:00:00Z', '2025-03-15T00:00:00Z', '2025-03-15T00:00:00Z'),
+				('export-decl-active',      ${SIREN}, ${YEAR}, ${USER_ID}, 'demarche_completed', NULL,                   '2025-05-01T00:00:00Z', '2025-05-01T00:00:00Z')
 		`;
 		await sql`
 			INSERT INTO app_declaration_status_history (id, declaration_id, event_type, value, round, created_at)
