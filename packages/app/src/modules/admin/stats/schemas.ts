@@ -113,6 +113,11 @@ export const matomoEventRowSchema = z.object({
 	label: z.string(),
 	nb_events: z.number().optional(),
 	idsubdatatable: z.union([z.number(), z.string()]).optional(),
+	// `nb_visits` is returned by `DevicesDetection.getType` (device breakdown);
+	// `avg_event_value` by `Events.*` for actions carrying a numeric value (mean
+	// import duration). Matomo occasionally serialises the average as a string.
+	nb_visits: z.number().optional(),
+	avg_event_value: z.union([z.number(), z.string()]).optional(),
 });
 
 export type MatomoEventRow = z.infer<typeof matomoEventRowSchema>;

@@ -12,8 +12,11 @@ import type {
 	CampaignProgressionPoint,
 	CampaignProgressionSeries,
 	CampaignStats,
+	CategoryModelUsage,
 	CompletionFunnelOutput,
+	DeviceBreakdown,
 	FunnelRow,
+	HelpLinkClicks,
 	MatomoFunnelOutput,
 	StepDropoffRow,
 	StepDurationRow,
@@ -42,7 +45,12 @@ import {
 	declarations,
 	gipMdsData,
 } from "~/server/db/schema";
-import { fetchMatomoFunnel } from "~/server/services/matomo";
+import {
+	fetchMatomoCategoryModel,
+	fetchMatomoDeviceBreakdown,
+	fetchMatomoFunnel,
+	fetchMatomoHelpLinks,
+} from "~/server/services/matomo";
 
 /** Minimum number of completed transitions before showing a median / p90. */
 const STEP_DURATION_MIN_SAMPLE = 5;
@@ -1005,6 +1013,33 @@ export const adminStatsRouter = createTRPCRouter({
 		.input(getMatomoFunnelSchema)
 		.query(({ input }): Promise<MatomoFunnelOutput> => {
 			return fetchMatomoFunnel({
+				year: input.year,
+				sizeRange: input.sizeRange,
+			});
+		}),
+
+	getMatomoCategoryModel: adminProcedure
+		.input(getMatomoFunnelSchema)
+		.query(({ input }): Promise<CategoryModelUsage> => {
+			return fetchMatomoCategoryModel({
+				year: input.year,
+				sizeRange: input.sizeRange,
+			});
+		}),
+
+	getMatomoHelpLinks: adminProcedure
+		.input(getMatomoFunnelSchema)
+		.query(({ input }): Promise<HelpLinkClicks> => {
+			return fetchMatomoHelpLinks({
+				year: input.year,
+				sizeRange: input.sizeRange,
+			});
+		}),
+
+	getMatomoDeviceBreakdown: adminProcedure
+		.input(getMatomoFunnelSchema)
+		.query(({ input }): Promise<DeviceBreakdown> => {
+			return fetchMatomoDeviceBreakdown({
 				year: input.year,
 				sizeRange: input.sizeRange,
 			});
