@@ -18,6 +18,29 @@ import {
 
 const RECHERCHE_ENTREPRISE_URL = new URL("https://recherche-entreprises.api.gouv.fr/");
 
+const MAX_FETCH_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 150;
+
+const wait = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+// The public recherche-entreprises API intermittently refuses a connection (ECONNREFUSED) from the
+// cluster's egress. A short retry on thrown network errors absorbs the blip instead of surfacing a
+// server error that blocks the whole declaration funnel. HTTP error statuses are returned untouched.
+async function fetchWithRetry(url: URL | string, init?: RequestInit, attempts = MAX_FETCH_ATTEMPTS): Promise<Response> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      return await fetch(url, init);
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) {
+        await wait(RETRY_BASE_DELAY_MS * attempt);
+      }
+    }
+  }
+  throw lastError;
+}
+
 // API response types
 interface ApiEtablissement {
   activite_principale?: string;
@@ -73,7 +96,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
       ).toString();
       const url = new URL(`search?${stringifiedParams}`, RECHERCHE_ENTREPRISE_URL);
 
-      const response = await fetch(url, {
+      const response = await fetchWithRetry(url, {
         headers: {
           Referer: "egapro",
         },
@@ -136,7 +159,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
       const stringifiedParams = new URLSearchParams({ q: validatedSiren, per_page: "1" }).toString();
       const url = new URL(`search?${stringifiedParams}`, RECHERCHE_ENTREPRISE_URL);
 
-      const response = await fetch(url, {
+      const response = await fetchWithRetry(url, {
         headers: {
           Referer: "egapro",
         },
@@ -176,7 +199,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
       const stringifiedParams = new URLSearchParams({ q: validatedSiret, per_page: "1" }).toString();
       const url = new URL(`search?${stringifiedParams}`, RECHERCHE_ENTREPRISE_URL);
 
-      const response = await fetch(url, {
+      const response = await fetchWithRetry(url, {
         headers: {
           Referer: "egapro",
         },

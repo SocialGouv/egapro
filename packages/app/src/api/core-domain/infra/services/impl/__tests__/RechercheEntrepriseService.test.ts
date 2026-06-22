@@ -133,6 +133,40 @@ describe("RechercheEntrepriseService", () => {
 		});
 	});
 
+	describe("siren — transient network retry", () => {
+		const econnrefused = () => Object.assign(new TypeError("fetch failed"), { cause: { code: "ECONNREFUSED" } });
+
+		it("retries a thrown network error and resolves on a later attempt", async () => {
+			global.fetch = jest
+				.fn()
+				.mockRejectedValueOnce(econnrefused())
+				.mockResolvedValueOnce({
+					ok: true,
+					status: 200,
+					json: async () => ({ results: [{ siren: TEST_SIREN, nom_raison_sociale: "ACME SARL" }] }),
+				} as Response);
+
+			const entreprise = await service.siren(siren);
+
+			expect(entreprise.simpleLabel).toBe("ACME SARL");
+			expect(global.fetch).toHaveBeenCalledTimes(2);
+		});
+
+		it("gives up after the max number of attempts and wraps the error", async () => {
+			global.fetch = jest.fn().mockRejectedValue(econnrefused());
+
+			await expect(service.siren(siren)).rejects.toBeInstanceOf(EntrepriseServiceError);
+			expect(global.fetch).toHaveBeenCalledTimes(3);
+		});
+
+		it("does not retry on an HTTP error status", async () => {
+			mockFetchOnce({}, { status: StatusCodes.INTERNAL_SERVER_ERROR });
+
+			await expect(service.siren(siren)).rejects.toBeInstanceOf(EntrepriseServiceError);
+			expect(global.fetch).toHaveBeenCalledTimes(1);
+		});
+	});
+
 	describe("search", () => {
 		it("maps API results into Entreprise[]", async () => {
 			mockFetchOnce({ results: [makeApiResult()] });
