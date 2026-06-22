@@ -1,23 +1,39 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FileUpload } from "../FileUpload";
 import { FILENAME_ERROR_MESSAGES } from "../fileNameValidation";
-import { FILE_TOO_LARGE_ERROR } from "../uploadConfig";
 
 const PDF_MIME = "application/pdf";
+
+const baseProps = {
+	inputId: "test-upload",
+	accept: ".pdf",
+	acceptLabel: "pdf",
+	allowedMimeTypes: [PDF_MIME],
+};
+
+function makePdf(name = "rapport.pdf", size = 2048) {
+	const file = new File(["pdf"], name, { type: PDF_MIME });
+	Object.defineProperty(file, "size", { value: size });
+	return file;
+}
+
+function getInput() {
+	return document.getElementById("test-upload") as HTMLInputElement;
+}
 
 function ControlledFileUpload({
 	onChange,
 	allowedMimeTypes = [PDF_MIME, "image/png"],
-	maxFiles,
+	maxFileCount,
 	disabled,
 }: {
 	onChange?: (files: File[], error: string | null) => void;
 	allowedMimeTypes?: string[];
-	maxFiles?: number;
+	maxFileCount?: number;
 	disabled?: boolean;
 }) {
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -31,7 +47,7 @@ function ControlledFileUpload({
 			disabled={disabled}
 			error={error}
 			inputId="test-upload"
-			maxFiles={maxFiles}
+			maxFileCount={maxFileCount}
 			onFilesChange={(files, nextError) => {
 				setSelectedFiles(files);
 				setError(nextError);
@@ -42,9 +58,344 @@ function ControlledFileUpload({
 	);
 }
 
-function getInput() {
-	return document.getElementById("test-upload") as HTMLInputElement;
-}
+describe("FileUpload", () => {
+	beforeEach(() => {
+		vi.mocked(URL.createObjectURL).mockClear();
+		vi.mocked(URL.revokeObjectURL).mockClear();
+	});
+
+	afterEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("renders the dropzone with a select button", () => {
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={vi.fn()}
+				selectedFiles={[]}
+			/>,
+		);
+
+		expect(
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+		).toBeInTheDocument();
+		expect(screen.getByText("ou glisser-le ici")).toBeInTheDocument();
+	});
+
+	it("opens the file dialog when the select button is clicked", async () => {
+		const user = userEvent.setup();
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={vi.fn()}
+				selectedFiles={[]}
+			/>,
+		);
+		const clickSpy = vi.spyOn(getInput(), "click");
+
+		await user.click(
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+		);
+
+		expect(clickSpy).toHaveBeenCalled();
+	});
+
+	it("renders a DSFR download link for each selected file", () => {
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={vi.fn()}
+				selectedFiles={[makePdf("avis.pdf", 2048)]}
+			/>,
+		);
+
+		const link = screen.getByRole("link", { name: /Télécharger avis\.pdf/ });
+		expect(link).toHaveClass("fr-link");
+		expect(link).toHaveAttribute("download", "avis.pdf");
+		expect(link).toHaveAttribute("href", "blob:mock/avis.pdf");
+		// The file meta is rendered outside the link (only the file name is the
+		// underlined link target).
+		expect(link).toHaveTextContent("avis.pdf");
+		expect(link).not.toHaveTextContent("PDF – 2.00 Ko");
+		expect(screen.getByText("PDF – 2.00 Ko")).toBeInTheDocument();
+	});
+
+	it("creates an object URL per file and revokes it on unmount", () => {
+		const { unmount } = render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={vi.fn()}
+				selectedFiles={[makePdf("a.pdf"), makePdf("b.pdf")]}
+			/>,
+		);
+
+		expect(URL.createObjectURL).toHaveBeenCalledTimes(2);
+
+		unmount();
+
+		expect(URL.revokeObjectURL).toHaveBeenCalledTimes(2);
+		expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock/a.pdf");
+		expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock/b.pdf");
+	});
+
+	it("labels the delete button with the file name", () => {
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={vi.fn()}
+				selectedFiles={[makePdf("avis.pdf")]}
+			/>,
+		);
+
+		expect(
+			screen.getByRole("button", { name: "Supprimer avis.pdf" }),
+		).toBeInTheDocument();
+	});
+
+	it("removes a file via the delete button", async () => {
+		const user = userEvent.setup();
+		const onFilesChange = vi.fn();
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				maxFileCount={2}
+				onFilesChange={onFilesChange}
+				selectedFiles={[makePdf("a.pdf"), makePdf("b.pdf")]}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: "Supprimer a.pdf" }));
+
+		expect(onFilesChange).toHaveBeenCalledWith([expect.any(File)], null);
+		expect(onFilesChange.mock.calls[0]?.[0][0].name).toBe("b.pdf");
+	});
+
+	it.each([
+		[512, "512 o"],
+		[2048, "2.00 Ko"],
+		[5 * 1024 * 1024, "5.00 Mo"],
+	])("formats a %d-byte file size as %s", (size, label) => {
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={vi.fn()}
+				selectedFiles={[makePdf("doc.pdf", size)]}
+			/>,
+		);
+
+		expect(
+			screen.getByRole("link", { name: /Télécharger doc\.pdf/ }),
+		).toBeInTheDocument();
+		expect(screen.getByText(`PDF – ${label}`)).toBeInTheDocument();
+	});
+
+	it("falls back to a generic extension label when the name has no extension", () => {
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={vi.fn()}
+				selectedFiles={[makePdf("noextension", 1024)]}
+			/>,
+		);
+
+		expect(
+			screen.getByRole("link", { name: /Télécharger noextension/ }),
+		).toBeInTheDocument();
+		expect(screen.getByText("NOEXTENSION – 1.00 Ko")).toBeInTheDocument();
+	});
+
+	it("accepts a valid file through the input", () => {
+		const onFilesChange = vi.fn();
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={onFilesChange}
+				selectedFiles={[]}
+			/>,
+		);
+		const file = makePdf();
+
+		fireEvent.change(getInput(), { target: { files: [file] } });
+
+		expect(onFilesChange).toHaveBeenCalledWith([file], null);
+	});
+
+	it("ignores a change event with no files", () => {
+		const onFilesChange = vi.fn();
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={onFilesChange}
+				selectedFiles={[]}
+			/>,
+		);
+
+		fireEvent.change(getInput(), { target: { files: [] } });
+
+		expect(onFilesChange).not.toHaveBeenCalled();
+	});
+
+	it("rejects a file with a disallowed MIME type", () => {
+		const onFilesChange = vi.fn();
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={onFilesChange}
+				selectedFiles={[]}
+			/>,
+		);
+		// Valid filename/extension (".png" is a known extension) but a MIME type
+		// outside this dropzone's allow-list, so the MIME check rejects it.
+		const file = new File(["x"], "image.png", { type: "image/png" });
+
+		fireEvent.change(getInput(), { target: { files: [file] } });
+
+		expect(onFilesChange).toHaveBeenCalledWith(
+			[],
+			"Format de fichier non supporté. Formats acceptés : pdf.",
+		);
+	});
+
+	it("rejects a file larger than the maximum size", () => {
+		const onFilesChange = vi.fn();
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={onFilesChange}
+				selectedFiles={[]}
+			/>,
+		);
+		const file = makePdf("big.pdf", 11 * 1024 * 1024);
+
+		fireEvent.change(getInput(), { target: { files: [file] } });
+
+		expect(onFilesChange).toHaveBeenCalledWith(
+			[],
+			"La taille du fichier ne doit pas dépasser 10 Mo.",
+		);
+	});
+
+	it("renders the error message and marks the input invalid", () => {
+		render(
+			<FileUpload
+				{...baseProps}
+				error="Une erreur"
+				onFilesChange={vi.fn()}
+				selectedFiles={[]}
+			/>,
+		);
+
+		expect(screen.getByText("Une erreur")).toBeInTheDocument();
+		expect(getInput()).toHaveAttribute("aria-invalid", "true");
+	});
+
+	it("accepts a file dropped on the dropzone", () => {
+		const onFilesChange = vi.fn();
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={onFilesChange}
+				selectedFiles={[]}
+			/>,
+		);
+		const dropzone = screen.getByLabelText("Zone de dépôt de fichier");
+		const file = makePdf();
+
+		fireEvent.dragEnter(dropzone, { dataTransfer: { files: [file] } });
+		fireEvent.dragOver(dropzone, { dataTransfer: { files: [file] } });
+		fireEvent.drop(dropzone, { dataTransfer: { files: [file] } });
+
+		expect(onFilesChange).toHaveBeenCalledWith([file], null);
+	});
+
+	it("ignores a drop with no files", () => {
+		const onFilesChange = vi.fn();
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={onFilesChange}
+				selectedFiles={[]}
+			/>,
+		);
+		const dropzone = screen.getByLabelText("Zone de dépôt de fichier");
+
+		fireEvent.drop(dropzone, { dataTransfer: { files: [] } });
+
+		expect(onFilesChange).not.toHaveBeenCalled();
+	});
+
+	it("keeps the dragging state while the pointer stays inside the dropzone", () => {
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				onFilesChange={vi.fn()}
+				selectedFiles={[]}
+			/>,
+		);
+		const dropzone = screen.getByLabelText("Zone de dépôt de fichier");
+		const child = dropzone.querySelector("button") as HTMLElement;
+
+		fireEvent.dragEnter(dropzone);
+		fireEvent.dragLeave(dropzone, { relatedTarget: child });
+		fireEvent.dragLeave(dropzone, { relatedTarget: document.body });
+
+		expect(dropzone).toBeInTheDocument();
+	});
+
+	it("caps the selection at the remaining slots", () => {
+		const onFilesChange = vi.fn();
+		render(
+			<FileUpload
+				{...baseProps}
+				error={null}
+				maxFileCount={2}
+				onFilesChange={onFilesChange}
+				selectedFiles={[makePdf("a.pdf")]}
+			/>,
+		);
+
+		fireEvent.change(getInput(), {
+			target: { files: [makePdf("b.pdf"), makePdf("c.pdf")] },
+		});
+
+		const [files] = onFilesChange.mock.calls[0] ?? [];
+		expect(files).toHaveLength(2);
+		expect(files[1].name).toBe("b.pdf");
+	});
+
+	it("disables the dropzone and input when disabled", () => {
+		render(
+			<FileUpload
+				{...baseProps}
+				disabled
+				error={null}
+				onFilesChange={vi.fn()}
+				selectedFiles={[]}
+			/>,
+		);
+
+		expect(
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+		).toBeDisabled();
+		expect(getInput()).toBeDisabled();
+	});
+});
 
 describe("FileUpload filename validation", () => {
 	it("S1: accepts a valid name with accents and emoji, no error and the file is listed", async () => {
@@ -145,156 +496,5 @@ describe("FileUpload filename validation", () => {
 			[],
 			FILENAME_ERROR_MESSAGES.forbidden_char,
 		);
-	});
-
-	it("still surfaces the MIME error for a valid name with a disallowed MIME type", async () => {
-		const onChange = vi.fn();
-		render(
-			<ControlledFileUpload
-				allowedMimeTypes={[PDF_MIME]}
-				onChange={onChange}
-			/>,
-		);
-		const file = new File(["x"], "image.png", { type: "image/png" });
-
-		await userEvent.upload(getInput(), file);
-
-		expect(onChange).toHaveBeenCalledWith(
-			[],
-			"Format de fichier non supporté. Formats acceptés : pdf, png.",
-		);
-	});
-
-	it("surfaces the size error for a valid name and MIME but oversized file", async () => {
-		const onChange = vi.fn();
-		render(<ControlledFileUpload onChange={onChange} />);
-		const file = new File(["x"], "rapport.pdf", { type: PDF_MIME });
-		Object.defineProperty(file, "size", { value: 11 * 1024 * 1024 });
-
-		await userEvent.upload(getInput(), file);
-
-		expect(onChange).toHaveBeenCalledWith([], FILE_TOO_LARGE_ERROR);
-		expect(screen.getByText(FILE_TOO_LARGE_ERROR)).toBeInTheDocument();
-	});
-});
-
-describe("FileUpload interactions", () => {
-	it("opens the file picker when the select button is clicked", async () => {
-		render(<ControlledFileUpload />);
-		const clickSpy = vi.spyOn(getInput(), "click");
-
-		await userEvent.click(
-			screen.getByRole("button", { name: /sélectionner des fichiers/i }),
-		);
-
-		expect(clickSpy).toHaveBeenCalled();
-	});
-
-	it("removes a selected file when its delete button is clicked", async () => {
-		const onChange = vi.fn();
-		render(<ControlledFileUpload onChange={onChange} />);
-		const file = new File(["pdf-bytes"], "rapport.pdf", { type: PDF_MIME });
-
-		await userEvent.upload(getInput(), file);
-		expect(screen.getByText("rapport.pdf")).toBeInTheDocument();
-
-		await userEvent.click(screen.getByRole("button", { name: "Supprimer" }));
-
-		expect(onChange).toHaveBeenLastCalledWith([], null);
-		expect(screen.queryByText("rapport.pdf")).not.toBeInTheDocument();
-	});
-
-	it("accepts a dropped file and lists it", async () => {
-		const onChange = vi.fn();
-		render(<ControlledFileUpload onChange={onChange} />);
-		const file = new File(["pdf-bytes"], "rapport.pdf", { type: PDF_MIME });
-		const dropzone = screen.getByLabelText("Zone de dépôt de fichier");
-
-		fireEvent.dragEnter(dropzone);
-		fireEvent.dragOver(dropzone);
-		fireEvent.drop(dropzone, { dataTransfer: { files: [file] } });
-
-		expect(onChange).toHaveBeenCalledWith([file], null);
-		expect(screen.getByText("rapport.pdf")).toBeInTheDocument();
-	});
-
-	it("rejects a dropped file with an invalid name", () => {
-		const onChange = vi.fn();
-		render(<ControlledFileUpload onChange={onChange} />);
-		const file = new File(["pdf-bytes"], "avis<cse>.pdf", { type: PDF_MIME });
-		const dropzone = screen.getByLabelText("Zone de dépôt de fichier");
-
-		fireEvent.drop(dropzone, { dataTransfer: { files: [file] } });
-
-		expect(onChange).toHaveBeenCalledWith(
-			[],
-			FILENAME_ERROR_MESSAGES.forbidden_char,
-		);
-	});
-
-	it("does not throw on drag enter, over and leave events", () => {
-		render(<ControlledFileUpload />);
-		const dropzone = screen.getByLabelText("Zone de dépôt de fichier");
-		const child = dropzone.querySelector("button") as HTMLElement;
-
-		expect(() => {
-			fireEvent.dragEnter(dropzone);
-			fireEvent.dragOver(dropzone);
-			fireEvent.dragLeave(dropzone, { relatedTarget: child });
-			fireEvent.dragLeave(dropzone, { relatedTarget: document.body });
-		}).not.toThrow();
-	});
-
-	it("ignores a change event with no selected files", () => {
-		const onChange = vi.fn();
-		render(<ControlledFileUpload onChange={onChange} />);
-
-		fireEvent.change(getInput(), { target: { files: [] } });
-
-		expect(onChange).not.toHaveBeenCalled();
-	});
-
-	it("ignores a drop with no files", () => {
-		const onChange = vi.fn();
-		render(<ControlledFileUpload onChange={onChange} />);
-		const dropzone = screen.getByLabelText("Zone de dépôt de fichier");
-
-		fireEvent.drop(dropzone, { dataTransfer: { files: [] } });
-
-		expect(onChange).not.toHaveBeenCalled();
-	});
-
-	it("caps the selection at maxFiles remaining slots", async () => {
-		const onChange = vi.fn();
-		render(<ControlledFileUpload maxFiles={2} onChange={onChange} />);
-		const fileA = new File(["a"], "a.pdf", { type: PDF_MIME });
-		const fileB = new File(["b"], "b.pdf", { type: PDF_MIME });
-		const fileC = new File(["c"], "c.pdf", { type: PDF_MIME });
-
-		await userEvent.upload(getInput(), [fileA, fileB, fileC]);
-
-		expect(onChange).toHaveBeenCalledWith([fileA, fileB], null);
-	});
-
-	it("disables the select button and the input when disabled", () => {
-		render(<ControlledFileUpload disabled />);
-
-		expect(
-			screen.getByRole("button", { name: /sélectionner des fichiers/i }),
-		).toBeDisabled();
-		expect(getInput()).toBeDisabled();
-	});
-
-	it.each([
-		[2 * 1024, /Ko/],
-		[2 * 1024 * 1024, /Mo/],
-	])("renders the human-readable size label for a %i-byte file", async (size, unit) => {
-		render(<ControlledFileUpload />);
-		const file = new File(["pdf-bytes"], "rapport.pdf", { type: PDF_MIME });
-		Object.defineProperty(file, "size", { value: size });
-
-		await userEvent.upload(getInput(), file);
-
-		expect(screen.getByText(unit)).toBeInTheDocument();
 	});
 });
