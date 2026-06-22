@@ -18,6 +18,47 @@ import {
 
 const RECHERCHE_ENTREPRISE_URL = new URL("https://recherche-entreprises.api.gouv.fr/");
 
+const MAX_FETCH_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 150;
+// Connection-level failures a retry can plausibly recover from. DNS ENOTFOUND, an aborted request or a
+// malformed URL are deliberately excluded — they never succeed on retry.
+const TRANSIENT_ERROR_CODES = new Set(["ECONNREFUSED", "ECONNRESET", "ETIMEDOUT", "ENOTCONN"]);
+
+const wait = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+function isTransientNetworkError(error: unknown): boolean {
+  if (error instanceof Error && error.name === "AbortError") return false;
+  if (typeof error !== "object" || error === null) return false;
+  // undici exposes the OS code on `error.cause.code`, or on the sub-errors of an AggregateError when
+  // several addresses were tried (dual-stack "Happy Eyeballs").
+  const cause = (error as { cause?: { code?: string; errors?: Array<{ code?: string }> } }).cause;
+  if (!cause) return false;
+  if (cause.code !== undefined) return TRANSIENT_ERROR_CODES.has(cause.code);
+  if (Array.isArray(cause.errors)) {
+    return cause.errors.some(sub => sub?.code !== undefined && TRANSIENT_ERROR_CODES.has(sub.code));
+  }
+  return false;
+}
+
+// The public recherche-entreprises API intermittently refuses a connection (ECONNREFUSED) from the
+// cluster's egress. A short retry on transient connection errors absorbs the blip instead of surfacing a
+// server error that blocks the whole declaration funnel. HTTP error statuses are returned untouched.
+async function fetchWithRetry(url: URL | string, init?: RequestInit): Promise<Response> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt++) {
+    try {
+      return await fetch(url, init);
+    } catch (error) {
+      if (!isTransientNetworkError(error)) throw error;
+      lastError = error;
+      if (attempt < MAX_FETCH_ATTEMPTS) {
+        await wait(RETRY_BASE_DELAY_MS * attempt);
+      }
+    }
+  }
+  throw lastError;
+}
+
 // API response types
 interface ApiEtablissement {
   activite_principale?: string;
@@ -73,7 +114,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
       ).toString();
       const url = new URL(`search?${stringifiedParams}`, RECHERCHE_ENTREPRISE_URL);
 
-      const response = await fetch(url, {
+      const response = await fetchWithRetry(url, {
         headers: {
           Referer: "egapro",
         },
@@ -136,7 +177,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
       const stringifiedParams = new URLSearchParams({ q: validatedSiren, per_page: "1" }).toString();
       const url = new URL(`search?${stringifiedParams}`, RECHERCHE_ENTREPRISE_URL);
 
-      const response = await fetch(url, {
+      const response = await fetchWithRetry(url, {
         headers: {
           Referer: "egapro",
         },
@@ -176,7 +217,7 @@ export class RechercheEntrepriseService implements IEntrepriseService {
       const stringifiedParams = new URLSearchParams({ q: validatedSiret, per_page: "1" }).toString();
       const url = new URL(`search?${stringifiedParams}`, RECHERCHE_ENTREPRISE_URL);
 
-      const response = await fetch(url, {
+      const response = await fetchWithRetry(url, {
         headers: {
           Referer: "egapro",
         },
