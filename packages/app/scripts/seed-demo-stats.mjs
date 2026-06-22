@@ -48,6 +48,14 @@ const args = Object.fromEntries(
 	}),
 );
 
+const KNOWN_ARGS = new Set(["year", "clean"]);
+for (const key of Object.keys(args)) {
+	if (!KNOWN_ARGS.has(key)) {
+		console.error(`ERROR: unknown argument --${key}`);
+		process.exit(1);
+	}
+}
+
 const YEAR = Number.parseInt(args.year ?? "2026", 10);
 const CLEAN = !!args.clean;
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -58,13 +66,19 @@ if (!DATABASE_URL) {
 }
 
 const SEED_USER_EMAIL = "seed-demo@example.fr";
-const SEED_USER_ID = "00000000-9999-4999-8999-seeddemouser00";
+const SEED_USER_ID = "00000000-9999-4999-8999-000000009999";
 
 // --- Date helpers --------------------------------------------------------
 
 function addDays(isoDate, days) {
 	const d = new Date(isoDate);
 	d.setUTCDate(d.getUTCDate() + days);
+	return d.toISOString();
+}
+
+function addHours(isoDate, hours) {
+	const d = new Date(isoDate);
+	d.setUTCHours(d.getUTCHours() + hours);
 	return d.toISOString();
 }
 
@@ -325,7 +339,9 @@ function declarationStuckAtStep(siren, maxStep, startIso) {
 function declarationCompleteDirect(siren, startIso) {
 	const wizard = wizardEvents(startIso);
 	const submittedAt = wizard[wizard.length - 1].at;
-	const completedAt = addDays(submittedAt, 0); // direct complete (no alert)
+	// Direct complete (no alert): same-day completion, +2h only to keep a
+	// strict created_at ordering between submit and demarche_complete.
+	const completedAt = addHours(submittedAt, 2);
 	return {
 		siren,
 		currentStep: 6,
@@ -334,7 +350,7 @@ function declarationCompleteDirect(siren, startIso) {
 		events: [
 			...wizard,
 			{ type: "submit", round: 1, at: submittedAt },
-			{ type: "demarche_complete", round: null, at: addDays(completedAt, 0) },
+			{ type: "demarche_complete", round: null, at: completedAt },
 		],
 	};
 }
@@ -658,7 +674,7 @@ function previousYearCompleted(siren) {
 
 // Half of the 100+ companies submitted last year → ~50 % previous-year rate
 // so the YoY delta is non-trivial in the K1 tile (current year ≈ 100 %).
-const PREVIOUS_YEAR_DECLARATIONS = [
+const RAW_PREVIOUS_YEAR_DECLARATIONS = [
 	previousYearCompleted("999150001"),
 	previousYearCompleted("999150002"),
 	previousYearCompleted("999150003"),
@@ -811,6 +827,9 @@ const RAW_DECLARATIONS = [
 ];
 
 const DECLARATIONS = RAW_DECLARATIONS.map(applyCseTransform);
+const PREVIOUS_YEAR_DECLARATIONS = RAW_PREVIOUS_YEAR_DECLARATIONS.map(
+	applyCseTransform,
+);
 
 async function main() {
 	const sql = postgres(DATABASE_URL, { max: 1 });
@@ -836,39 +855,6 @@ async function main() {
 		`[seed-demo] year=${YEAR}, ${COMPANIES.length} companies, ${DECLARATIONS.length} declarations + ${PREVIOUS_YEAR_DECLARATIONS.length} prev-year (${PREV_YEAR})`,
 	);
 
-	await sql`
-		INSERT INTO app_user (id, email, first_name, last_name, is_admin)
-		VALUES (${SEED_USER_ID}, ${SEED_USER_EMAIL}, 'Seed', 'Demo', false)
-		ON CONFLICT (id) DO NOTHING
-	`;
-
-	for (const c of COMPANIES) {
-		await sql`
-			INSERT INTO app_company (siren, name, workforce, has_cse, created_at, updated_at)
-			VALUES (${c.siren}, ${c.name}, ${c.workforce}, ${c.hasCse ?? false}, NOW(), NOW())
-			ON CONFLICT (siren) DO UPDATE SET
-				name = EXCLUDED.name,
-				workforce = EXCLUDED.workforce,
-				has_cse = EXCLUDED.has_cse,
-				updated_at = NOW()
-		`;
-		await sql`
-			INSERT INTO app_user_company (user_id, siren)
-			VALUES (${SEED_USER_ID}, ${c.siren})
-			ON CONFLICT (user_id, siren) DO NOTHING
-		`;
-
-		for (const yr of [YEAR, PREV_YEAR]) {
-			await sql`
-				INSERT INTO app_gip_mds_data (siren, year, workforce_ema, imported_at)
-				VALUES (${c.siren}, ${yr}, ${c.workforce}, NOW())
-				ON CONFLICT (siren, year) DO UPDATE SET
-					workforce_ema = EXCLUDED.workforce_ema,
-					imported_at = NOW()
-			`;
-		}
-	}
-
 	// Spread the volume reduction uniformly across the array so the kept
 	// declarations still cover the full date range. Otherwise the cohort
 	// curve would stop early (slice(0, N) only keeps the earliest dates).
@@ -877,51 +863,89 @@ async function main() {
 		...sampleUniform(DECLARATIONS, ratio),
 		...PREVIOUS_YEAR_DECLARATIONS,
 	];
-	for (const d of ALL_DECLARATIONS) {
-		const year = d.year ?? YEAR;
-		const earliest = d.events[0].at;
-		const latest = d.events[d.events.length - 1].at;
 
-		await sql`
-			DELETE FROM app_declaration_status_history
-			WHERE declaration_id IN (
-				SELECT id FROM app_declaration WHERE siren = ${d.siren} AND year = ${year}
-			)
+	// Single transaction: either the whole dataset lands or none of it, so an
+	// interrupted run never leaves a half-seeded DB behind.
+	await sql.begin(async (tx) => {
+		await tx`
+			INSERT INTO app_user (id, email, first_name, last_name, is_admin)
+			VALUES (${SEED_USER_ID}, ${SEED_USER_EMAIL}, 'Seed', 'Demo', false)
+			ON CONFLICT (id) DO NOTHING
 		`;
-		await sql`DELETE FROM app_declaration WHERE siren = ${d.siren} AND year = ${year}`;
 
-		const inserted = await sql`
-			INSERT INTO app_declaration (
-				id, siren, year, declarant_id, current_step, status,
-				first_declaration_path_choice, second_declaration_path_choice,
-				cse_required,
-				created_at, updated_at
-			) VALUES (
-				gen_random_uuid(), ${d.siren}, ${year}, ${SEED_USER_ID},
-				${d.currentStep}, ${d.status},
-				${d.path ?? null}, ${d.secondPath ?? null},
-				${d.cseRequired ?? false},
-				${earliest}, ${latest}
-			)
-			RETURNING id
-		`;
-		const declId = inserted[0].id;
+		for (const c of COMPANIES) {
+			await tx`
+				INSERT INTO app_company (siren, name, workforce, has_cse, created_at, updated_at)
+				VALUES (${c.siren}, ${c.name}, ${c.workforce}, ${c.hasCse ?? false}, NOW(), NOW())
+				ON CONFLICT (siren) DO UPDATE SET
+					name = EXCLUDED.name,
+					workforce = EXCLUDED.workforce,
+					has_cse = EXCLUDED.has_cse,
+					updated_at = NOW()
+			`;
+			await tx`
+				INSERT INTO app_user_company (user_id, siren)
+				VALUES (${SEED_USER_ID}, ${c.siren})
+				ON CONFLICT (user_id, siren) DO NOTHING
+			`;
 
-		for (const ev of d.events) {
-			await sql`
-				INSERT INTO app_declaration_status_history
-					(id, declaration_id, event_type, value, round, actor_user_id, created_at)
-				VALUES (
-					gen_random_uuid(), ${declId}, ${ev.type},
-					${ev.value ?? null}, ${ev.round ?? null},
-					${SEED_USER_ID}, ${ev.at}
+			for (const yr of [YEAR, PREV_YEAR]) {
+				await tx`
+					INSERT INTO app_gip_mds_data (siren, year, workforce_ema, imported_at)
+					VALUES (${c.siren}, ${yr}, ${c.workforce}, NOW())
+					ON CONFLICT (siren, year) DO UPDATE SET
+						workforce_ema = EXCLUDED.workforce_ema,
+						imported_at = NOW()
+				`;
+			}
+		}
+
+		for (const d of ALL_DECLARATIONS) {
+			const year = d.year ?? YEAR;
+			const earliest = d.events[0].at;
+			const latest = d.events[d.events.length - 1].at;
+
+			await tx`
+				DELETE FROM app_declaration_status_history
+				WHERE declaration_id IN (
+					SELECT id FROM app_declaration WHERE siren = ${d.siren} AND year = ${year}
 				)
 			`;
+			await tx`DELETE FROM app_declaration WHERE siren = ${d.siren} AND year = ${year}`;
+
+			const inserted = await tx`
+				INSERT INTO app_declaration (
+					id, siren, year, declarant_id, current_step, status,
+					first_declaration_path_choice, second_declaration_path_choice,
+					cse_required,
+					created_at, updated_at
+				) VALUES (
+					gen_random_uuid(), ${d.siren}, ${year}, ${SEED_USER_ID},
+					${d.currentStep}, ${d.status},
+					${d.path ?? null}, ${d.secondPath ?? null},
+					${d.cseRequired ?? false},
+					${earliest}, ${latest}
+				)
+				RETURNING id
+			`;
+			const declId = inserted[0].id;
+
+			for (const ev of d.events) {
+				await tx`
+					INSERT INTO app_declaration_status_history
+						(id, declaration_id, event_type, value, round, actor_user_id, created_at)
+					VALUES (
+						gen_random_uuid(), ${declId}, ${ev.type},
+						${ev.value ?? null}, ${ev.round ?? null},
+						${SEED_USER_ID}, ${ev.at}
+					)
+				`;
+			}
+			console.log(
+				`  → ${d.siren} year=${d.year ?? YEAR} (${d.events.length} events, status=${d.status})`,
+			);
 		}
-		console.log(
-			`  → ${d.siren} year=${d.year ?? YEAR} (${d.events.length} events, status=${d.status})`,
-		);
-	}
+	});
 
 	console.log(
 		`[seed-demo] done. Login as admin (test@fia1.fr), then visit /admin/stats/campagne (K1, K2, K4) or /admin/stats/plateforme (K19)`,
