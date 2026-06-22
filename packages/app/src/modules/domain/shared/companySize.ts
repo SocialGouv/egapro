@@ -43,5 +43,5 @@ export function getCompanySizeRange(workforce: number): CompanySizeRange {
 			workforce >= min && (max === null || workforce <= max),
 	);
 
-	return entry ? entry[0] : "250+";
+	return entry ? entry[0] : "<50";
 }
