@@ -19,16 +19,17 @@ vi.mock("~/env", () => ({
 import { middleware } from "~/middleware";
 
 function makeRequest(
-	pathname = "/admin",
+	pathnameAndSearch = "/admin",
 	headers: Record<string, string> = {},
 ): NextRequest {
-	const url = `http://localhost${pathname}`;
+	const url = `http://localhost${pathnameAndSearch}`;
+	const parsed = new URL(url);
 	const headerMap = new Map(
 		Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]),
 	);
 	return {
 		url,
-		nextUrl: { pathname },
+		nextUrl: { pathname: parsed.pathname, search: parsed.search },
 		headers: {
 			get: (name: string) => headerMap.get(name.toLowerCase()) ?? null,
 		},
@@ -45,6 +46,14 @@ describe("admin middleware", () => {
 		const res = await middleware(makeRequest("/admin/users"));
 		expect(res.headers.get("location")).toBe(
 			"http://localhost/login?callbackUrl=%2Fadmin%2Fusers",
+		);
+	});
+
+	it("preserves the query string in the callbackUrl", async () => {
+		mockGetToken.mockResolvedValue(null);
+		const res = await middleware(makeRequest("/admin/users?tab=active&page=2"));
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/login?callbackUrl=%2Fadmin%2Fusers%3Ftab%3Dactive%26page%3D2",
 		);
 	});
 
@@ -66,6 +75,57 @@ describe("admin middleware", () => {
 		mockGetToken.mockResolvedValue({ id: "u1", isAdmin: true });
 		const res = await middleware(makeRequest("/admin"));
 		// NextResponse.next() does not set a redirect location
+		expect(res.headers.get("location")).toBeNull();
+	});
+});
+
+describe("session middleware (session-gated user routes)", () => {
+	beforeEach(() => {
+		mockGetToken.mockReset();
+	});
+
+	// Routes covered by the matcher block — must capture the requested URL into
+	// `callbackUrl` so the user lands back on the page they originally aimed at
+	// after ProConnect sign-in (ticket #3617).
+	const sessionGatedPaths = [
+		"/mon-espace/historique/123456789/2024",
+		"/declaration-remuneration/commencer",
+		"/avis-cse/2024/123456789",
+	];
+
+	for (const path of sessionGatedPaths) {
+		it(`redirects an unauthenticated user from ${path} to /login with callbackUrl`, async () => {
+			mockGetToken.mockResolvedValue(null);
+			const res = await middleware(makeRequest(path));
+			const expectedCallback = encodeURIComponent(path);
+			expect(res.headers.get("location")).toBe(
+				`http://localhost/login?callbackUrl=${expectedCallback}`,
+			);
+		});
+
+		it(`lets an authenticated user through on ${path}`, async () => {
+			mockGetToken.mockResolvedValue({ id: "u1" });
+			const res = await middleware(makeRequest(path));
+			// NextResponse.next() does not set a redirect location
+			expect(res.headers.get("location")).toBeNull();
+		});
+	}
+
+	it("preserves the query string when redirecting an unauthenticated user", async () => {
+		mockGetToken.mockResolvedValue(null);
+		const res = await middleware(makeRequest("/avis-cse?annee=2024"));
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/login?callbackUrl=%2Favis-cse%3Fannee%3D2024",
+		);
+	});
+
+	it("does not enforce isAdmin on session-gated routes", async () => {
+		// A non-admin authenticated user must reach `/mon-espace`, unlike on
+		// `/admin/*` where they would be redirected away. Guards against a
+		// regression where the session middleware accidentally inherits the
+		// admin check.
+		mockGetToken.mockResolvedValue({ id: "u1", isAdmin: false });
+		const res = await middleware(makeRequest("/mon-espace"));
 		expect(res.headers.get("location")).toBeNull();
 	});
 });

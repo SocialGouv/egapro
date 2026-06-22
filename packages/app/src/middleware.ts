@@ -4,13 +4,19 @@ import { getToken } from "next-auth/jwt";
 import { env } from "~/env";
 
 /**
- * Next.js Edge middleware handling two independent concerns:
+ * Next.js Edge middleware handling three concerns:
  *
  * 1. `/admin/*` — backoffice guard. Decodes the NextAuth JWT and enforces
  *    `isAdmin`. Defense in depth: `src/app/admin/layout.tsx` re-checks the
  *    session on the Node runtime in case the token is missing the flag.
  *
- * 2. `/api/v1/*` — belt-and-suspenders against APISIX bypass. The APISIX
+ * 2. `/mon-espace/*`, `/declaration-remuneration/*`, `/avis-cse/*` — session
+ *    gating only (no `isAdmin` check). Captures the requested URL into
+ *    `callbackUrl` so the user returns to the page they originally aimed at
+ *    after ProConnect sign-in. The Node-runtime `auth()` guards in layouts
+ *    remain as defense in depth.
+ *
+ * 3. `/api/v1/*` — belt-and-suspenders against APISIX bypass. The APISIX
  *    gateway (see `.kontinuous/templates/apisix-suit.configmap.yaml`) injects
  *    `X-Gateway-Forwarded: <EGAPRO_GATEWAY_SHARED_SECRET>` via its
  *    `proxy-rewrite` plugin. A pod compromised in-cluster could otherwise
@@ -29,7 +35,20 @@ export async function middleware(request: NextRequest) {
 		return gatewayMiddleware(request);
 	}
 
-	return adminMiddleware(request);
+	if (pathname.startsWith("/admin")) {
+		return adminMiddleware(request);
+	}
+
+	return sessionMiddleware(request);
+}
+
+function redirectToLogin(request: NextRequest) {
+	const loginUrl = new URL("/login", request.url);
+	loginUrl.searchParams.set(
+		"callbackUrl",
+		`${request.nextUrl.pathname}${request.nextUrl.search}`,
+	);
+	return NextResponse.redirect(loginUrl);
 }
 
 async function adminMiddleware(request: NextRequest) {
@@ -40,13 +59,21 @@ async function adminMiddleware(request: NextRequest) {
 	// the `jwt` callback on sign-in, so a fresh token is the only way to get
 	// the correct flag.
 	if (!token || token.isAdmin === undefined) {
-		const loginUrl = new URL("/login", request.url);
-		loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
-		return NextResponse.redirect(loginUrl);
+		return redirectToLogin(request);
 	}
 
 	if (!token.isAdmin) {
 		return NextResponse.redirect(new URL("/mon-espace", request.url));
+	}
+
+	return NextResponse.next();
+}
+
+async function sessionMiddleware(request: NextRequest) {
+	const token = await getToken({ req: request, secret: env.AUTH_SECRET });
+
+	if (!token) {
+		return redirectToLogin(request);
 	}
 
 	return NextResponse.next();
@@ -94,5 +121,11 @@ function constantTimeEqual(a: string, b: string): boolean {
 }
 
 export const config = {
-	matcher: ["/admin/:path*", "/api/v1/:path*"],
+	matcher: [
+		"/admin/:path*",
+		"/api/v1/:path*",
+		"/mon-espace/:path*",
+		"/declaration-remuneration/:path*",
+		"/avis-cse/:path*",
+	],
 };

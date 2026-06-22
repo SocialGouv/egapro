@@ -11,14 +11,18 @@ import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 
 import styles from "./ProConnectButton.module.scss";
 
+type Props = {
+	callbackUrl?: string;
+};
+
 /** ProConnect authentication button with official branding and info link. */
-export function ProConnectButton() {
+export function ProConnectButton({ callbackUrl }: Props) {
 	function handleLogin(): void {
 		trackEvent({
 			category: MATOMO_EVENT_CATEGORY.AUTH,
 			action: MATOMO_ACTION.LOGIN_START,
 		});
-		void signIn("proconnect");
+		void signIn("proconnect", { callbackUrl: callbackUrl ?? "/mon-espace" });
 	}
 
 	return (
