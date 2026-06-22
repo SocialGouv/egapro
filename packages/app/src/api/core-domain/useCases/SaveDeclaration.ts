@@ -12,6 +12,7 @@ import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/d
 import { DeclarationSource } from "@common/core-domain/domain/valueObjects/declaration/DeclarationSource";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
+import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
 import { companyMap } from "@common/core-domain/mappers/companyMap";
 import { AppError, type EntityPropsToJson, type UseCase, ValidationError } from "@common/shared-domain";
 import { PositiveInteger, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
@@ -44,7 +45,8 @@ export class SaveDeclaration implements UseCase<Input, void> {
 
     const pk: DeclarationPK = [new Siren(siren), new PositiveNumber(year)];
 
-    const company = companyMap.toDomain(await this.entrepriseService.siren(pk[0]));
+    const rawEntreprise = await this.entrepriseService.siren(pk[0]);
+    const company = companyMap.toDomain(rawEntreprise);
 
     const partialDeclaration = {
       siren,
@@ -249,6 +251,16 @@ export class SaveDeclaration implements UseCase<Input, void> {
     try {
       const found = await this.declarationRepo.getOne(pk);
 
+      // Server-side guard: block the creation of a declaration for an already-closed company. The client
+      // checks this at the "commencer" step, but that check is bypassed on edit and on non-funnel paths.
+      // Edits (found) and staff (override) stay allowed, like the over-one-year rule below; a non-diffusible
+      // company has no dateCessation so isCompanyClosed returns false and it remains allowed (see #2181).
+      if (!found && !override && isCompanyClosed(rawEntreprise, year)) {
+        throw new SaveDeclarationClosedCompanyError(
+          "Ce Siren correspond a une entreprise fermée. Veuillez vérifier votre saisie",
+        );
+      }
+
       if (found) {
         const olderThanOneYear = isAfter(new Date(), add(found.declaredAt, { years: 1 }));
 
@@ -334,3 +346,6 @@ export class SaveDeclaration implements UseCase<Input, void> {
 
 export class SaveDeclarationError extends AppError {}
 export class SaveDeclarationOverOneYearError extends AppError {}
+// Extends ValidationError so the existing catch passthrough (instanceof ValidationError) and the server
+// actions surface its message to the declarant instead of collapsing it to a generic error.
+export class SaveDeclarationClosedCompanyError extends ValidationError {}
