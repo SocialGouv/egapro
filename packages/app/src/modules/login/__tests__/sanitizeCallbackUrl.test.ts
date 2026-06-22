@@ -48,4 +48,17 @@ describe("sanitizeCallbackUrl", () => {
 		expect(sanitizeCallbackUrl("javascript:alert(1)")).toBeUndefined();
 		expect(sanitizeCallbackUrl("mailto:foo@bar")).toBeUndefined();
 	});
+
+	it("rejects URL-encoded protocol-relative paths (`/%2F%2Fevil.com`)", () => {
+		expect(sanitizeCallbackUrl("/%2F%2Fevil.com")).toBeUndefined();
+		expect(sanitizeCallbackUrl("/%2Fevil.com")).toBeUndefined();
+	});
+
+	it("rejects URL-encoded backslash paths (`/%5Cevil.com`)", () => {
+		expect(sanitizeCallbackUrl("/%5Cevil.com")).toBeUndefined();
+	});
+
+	it("rejects malformed percent-encoding", () => {
+		expect(sanitizeCallbackUrl("/%E0%A4%A")).toBeUndefined();
+	});
 });
