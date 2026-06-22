@@ -1,10 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const progressionUseQueryMock = vi.fn();
 const stepDurationsUseQueryMock = vi.fn();
 const stepDropoffUseQueryMock = vi.fn();
 const funnelUseQueryMock = vi.fn();
+const matomoFunnelUseQueryMock = vi.fn();
 const statsUseQueryMock = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
@@ -24,6 +25,9 @@ vi.mock("~/trpc/react", () => ({
 			},
 			getCompletionFunnel: {
 				useQuery: (...args: unknown[]) => funnelUseQueryMock(...args),
+			},
+			getMatomoFunnel: {
+				useQuery: (...args: unknown[]) => matomoFunnelUseQueryMock(...args),
 			},
 		},
 	},
@@ -70,6 +74,7 @@ const defaultMocks = () =>
 		stepDurationsUseQueryMock,
 		stepDropoffUseQueryMock,
 		funnelUseQueryMock,
+		matomoFunnelUseQueryMock,
 	});
 
 describe("StatsDashboard — structure and filters", () => {
@@ -235,7 +240,13 @@ describe("StatsDashboard — funnel section", () => {
 		expect(
 			screen.getByRole("heading", { name: /Funnel cycle CSE/i }),
 		).toBeInTheDocument();
-		expect(screen.getAllByTestId("funnel-chart")).toHaveLength(4);
+		// Scope to the completion section — the Matomo section reuses the same
+		// chart component (and so the same test id) for its own funnels.
+		const completionSection = document.getElementById("plateforme");
+		expect(completionSection).not.toBeNull();
+		expect(
+			within(completionSection as HTMLElement).getAllByTestId("funnel-chart"),
+		).toHaveLength(4);
 	});
 
 	it("passes placeholderData (prev) through for funnel query", () => {
@@ -246,5 +257,56 @@ describe("StatsDashboard — funnel section", () => {
 			| { placeholderData: (prev: unknown) => unknown }
 			| undefined;
 		expect(options?.placeholderData("prev-value")).toBe("prev-value");
+	});
+
+	it("renders the three Matomo funnels when data is available", () => {
+		const row = {
+			key: "start",
+			label: "Démarrage",
+			count: 100,
+			pctOfStart: 100,
+			pctDropFromPrev: null,
+		};
+		matomoFunnelUseQueryMock.mockReturnValue({
+			data: {
+				declarationFunnel: [row],
+				cseFunnel: [row],
+				complianceFunnel: [row],
+			},
+			isLoading: false,
+			isError: false,
+		});
+		render(
+			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+		);
+		const matomoSection = document.getElementById("matomo");
+		expect(matomoSection).not.toBeNull();
+		const section = matomoSection as HTMLElement;
+		expect(
+			within(section).getByRole("heading", {
+				name: /Déclaration des indicateurs/i,
+			}),
+		).toBeInTheDocument();
+		expect(
+			within(section).getByRole("heading", { name: /Avis du CSE/i }),
+		).toBeInTheDocument();
+		expect(
+			within(section).getByRole("heading", { name: /Parcours conformité/i }),
+		).toBeInTheDocument();
+		expect(within(section).getAllByTestId("funnel-chart")).toHaveLength(3);
+	});
+
+	it("shows the Matomo funnel error state on query error", () => {
+		matomoFunnelUseQueryMock.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isError: true,
+		});
+		render(
+			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+		);
+		expect(
+			screen.getByText(/chargement des funnels Matomo/i),
+		).toBeInTheDocument();
 	});
 });

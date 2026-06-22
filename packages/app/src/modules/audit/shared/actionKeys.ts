@@ -62,6 +62,7 @@ export const AUDIT_ACTIONS = {
 	ADMIN_STATS_GET_STEP_DURATIONS: "admin_stats.get_step_durations",
 	ADMIN_STATS_GET_STEP_DROPOFF_RATE: "admin_stats.get_step_dropoff_rate",
 	ADMIN_STATS_GET_COMPLETION_FUNNEL: "admin_stats.get_completion_funnel",
+	ADMIN_STATS_GET_MATOMO_FUNNEL: "admin_stats.get_matomo_funnel",
 
 	// ── Declaration draft ─────────────────────────────────
 	DRAFT_READ: "declaration_draft.read",
@@ -151,6 +152,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DURATIONS]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DROPOFF_RATE]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_COMPLETION_FUNNEL]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_FUNNEL]: "read_sensitive",
 	[AUDIT_ACTIONS.DRAFT_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DRAFT_SAVE]: "mutation",
 	[AUDIT_ACTIONS.DRAFT_CLEAR]: "mutation",

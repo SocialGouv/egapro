@@ -53,6 +53,23 @@ function buildRequest(
 	return new Request("http://localhost/api/upload", init as RequestInit);
 }
 
+// HTTP header values are ByteStrings (Latin-1), so a non-Latin-1 filename
+// (e.g. the U+202E RTL-override) cannot be set on a real `Request` header. A
+// browser percent-decodes the value before the handler reads it, so in
+// production the handler does receive the raw codepoint. We reproduce that by
+// overriding `headers.get("x-filename")` while leaving every other header and
+// the body intact, exercising the handler's branch with the exact input.
+function buildRequestWithRawFilename(
+	headers: Record<string, string>,
+	rawFileName: string,
+): Request {
+	const request = buildRequest({ ...headers, "X-Filename": "placeholder.pdf" });
+	const realGet = request.headers.get.bind(request.headers);
+	request.headers.get = (name: string) =>
+		name.toLowerCase() === "x-filename" ? rawFileName : realGet(name);
+	return request;
+}
+
 describe("POST /api/upload", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -176,6 +193,137 @@ describe("POST /api/upload", () => {
 		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
 	});
 
+	it("returns 400 invalid_filename when the name exceeds 200 characters", async () => {
+		validSession();
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "application/pdf",
+				"X-Filename": `${"a".repeat(197)}.pdf`,
+				"X-Flow-Type": "cse_opinion",
+			}),
+		);
+
+		expect(response.status).toBe(400);
+		const body = await response.json();
+		expect(body.reason).toBe("invalid_filename");
+		expect(body.error).toContain("200");
+		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "cse_opinion.upload_file",
+				status: "failure",
+				errorMessage: "HTTP 400 invalid_filename: too_long",
+			}),
+		);
+	});
+
+	it("returns 400 invalid_filename when the name contains a forbidden character", async () => {
+		validSession();
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "application/pdf",
+				"X-Filename": "avis<cse.pdf",
+				"X-Flow-Type": "cse_opinion",
+			}),
+		);
+
+		expect(response.status).toBe(400);
+		const body = await response.json();
+		expect(body.reason).toBe("invalid_filename");
+		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "cse_opinion.upload_file",
+				status: "failure",
+				errorMessage: "HTTP 400 invalid_filename: forbidden_char",
+			}),
+		);
+	});
+
+	it.each([
+		["RLO override", "avis\u202Ecse.pdf"],
+		["RLI isolate", "avis\u2067cse.pdf"],
+		["soft hyphen before the real extension", "evil.exe\u00AD.pdf"],
+		["leading BOM", "\uFEFFavis.pdf"],
+		["trailing BOM", "avis.pdf\uFEFF"],
+	])("returns 400 invalid_filename when the name contains %s", async (_label, rawFileName) => {
+		validSession();
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequestWithRawFilename(
+				{
+					"Content-Type": "application/pdf",
+					"X-Flow-Type": "cse_opinion",
+				},
+				rawFileName,
+			),
+		);
+
+		expect(response.status).toBe(400);
+		const body = await response.json();
+		expect(body.reason).toBe("invalid_filename");
+		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "cse_opinion.upload_file",
+				status: "failure",
+				errorMessage: "HTTP 400 invalid_filename: invisible_char",
+			}),
+		);
+	});
+
+	it("returns 400 invalid_filename when the extension does not match the declared MIME type", async () => {
+		validSession();
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "image/png",
+				"X-Filename": "avis-cse.pdf",
+				"X-Flow-Type": "cse_opinion",
+			}),
+		);
+
+		expect(response.status).toBe(400);
+		const body = await response.json();
+		expect(body.reason).toBe("invalid_filename");
+		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "cse_opinion.upload_file",
+				status: "failure",
+				errorMessage: "HTTP 400 invalid_filename: extension_mime_mismatch",
+			}),
+		);
+	});
+
+	it("does not short-circuit a valid filename: the pipeline runs normally", async () => {
+		validSession();
+		mocks.runUploadPipeline.mockResolvedValue({
+			ok: true,
+			fileId: "file-uuid",
+			fileName: "avis-cse.pdf",
+			filePath: "123456789/2027/file-uuid.pdf",
+		});
+
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "application/pdf",
+				"X-Filename": "avis-cse.pdf",
+				"X-Flow-Type": "cse_opinion",
+			}),
+		);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.reason).toBeUndefined();
+		expect(mocks.runUploadPipeline).toHaveBeenCalledWith(
+			expect.objectContaining({ fileName: "avis-cse.pdf" }),
+		);
+	});
+
 	it("returns 200 with fileId + fileName on pipeline success and audits the success row", async () => {
 		validSession();
 		mocks.runUploadPipeline.mockResolvedValue({
@@ -217,6 +365,41 @@ describe("POST /api/upload", () => {
 					fileId: "file-uuid",
 					fileName: "avis-cse.pdf",
 				}),
+			}),
+		);
+	});
+
+	it("passes the trimmed filename to the pipeline and audits it for a padded name", async () => {
+		validSession();
+		mocks.runUploadPipeline.mockResolvedValue({
+			ok: true,
+			fileId: "file-uuid",
+			fileName: "avis.pdf",
+			filePath: "123456789/2027/file-uuid.pdf",
+		});
+
+		// The padded value is injected past header normalisation (a real Headers
+		// instance trims surrounding spaces), so the route's own trim() is what
+		// must produce "avis.pdf".
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequestWithRawFilename(
+				{
+					"Content-Type": "application/pdf",
+					"X-Flow-Type": "cse_opinion",
+				},
+				"  avis.pdf  ",
+			),
+		);
+
+		expect(response.status).toBe(200);
+		expect(mocks.runUploadPipeline).toHaveBeenCalledWith(
+			expect.objectContaining({ fileName: "avis.pdf" }),
+		);
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "success",
+				metadata: expect.objectContaining({ fileName: "avis.pdf" }),
 			}),
 		);
 	});

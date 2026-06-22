@@ -1,6 +1,11 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import {
+	MATOMO_ACTION,
+	MATOMO_EVENT_CATEGORY,
+	trackEvent,
+} from "~/modules/analytics";
 import { getDsfrModal } from "./getDsfrModal";
 import type { FlowType } from "./uploadConfig";
 import { type UploadFailureReason, uploadFile } from "./uploadFile";
@@ -46,6 +51,14 @@ export function useFileUploadForm({
 					}
 					onUploaded?.({ fileId: result.fileId, fileName: result.fileName });
 				}
+				// `flowType` is a non-PII enum (e.g. the CSE opinion flow); the file
+				// names themselves are never sent.
+				trackEvent({
+					category: MATOMO_EVENT_CATEGORY.DOCUMENT,
+					action: MATOMO_ACTION.FILE_UPLOAD,
+					name: flowType,
+					value: filesToUpload.length,
+				});
 				setSelectedFiles([]);
 				setIsUploading(false);
 				onAllUploaded?.();
@@ -146,6 +159,8 @@ function formatUploadError(
 			return "Non authentifié. Merci de vous reconnecter.";
 		case "not_found":
 			return "Déclaration introuvable pour l'année en cours.";
+		case "invalid_filename":
+			return serverError;
 		case "too_large":
 		case "wrong_type":
 		case "empty":

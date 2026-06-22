@@ -1,24 +1,61 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FileUpload } from "../FileUpload";
+import { FILENAME_ERROR_MESSAGES } from "../fileNameValidation";
+
+const PDF_MIME = "application/pdf";
 
 const baseProps = {
 	inputId: "test-upload",
 	accept: ".pdf",
 	acceptLabel: "pdf",
-	allowedMimeTypes: ["application/pdf"],
+	allowedMimeTypes: [PDF_MIME],
 };
 
 function makePdf(name = "rapport.pdf", size = 2048) {
-	const file = new File(["pdf"], name, { type: "application/pdf" });
+	const file = new File(["pdf"], name, { type: PDF_MIME });
 	Object.defineProperty(file, "size", { value: size });
 	return file;
 }
 
 function getInput() {
 	return document.getElementById("test-upload") as HTMLInputElement;
+}
+
+function ControlledFileUpload({
+	onChange,
+	allowedMimeTypes = [PDF_MIME, "image/png"],
+	maxFileCount,
+	disabled,
+}: {
+	onChange?: (files: File[], error: string | null) => void;
+	allowedMimeTypes?: string[];
+	maxFileCount?: number;
+	disabled?: boolean;
+}) {
+	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+	const [error, setError] = useState<string | null>(null);
+
+	return (
+		<FileUpload
+			accept=".pdf,.png"
+			acceptLabel="pdf, png"
+			allowedMimeTypes={allowedMimeTypes}
+			disabled={disabled}
+			error={error}
+			inputId="test-upload"
+			maxFileCount={maxFileCount}
+			onFilesChange={(files, nextError) => {
+				setSelectedFiles(files);
+				setError(nextError);
+				onChange?.(files, nextError);
+			}}
+			selectedFiles={selectedFiles}
+		/>
+	);
 }
 
 describe("FileUpload", () => {
@@ -209,7 +246,7 @@ describe("FileUpload", () => {
 		expect(onFilesChange).not.toHaveBeenCalled();
 	});
 
-	it("rejects a file with an unsupported MIME type", () => {
+	it("rejects a file with a disallowed MIME type", () => {
 		const onFilesChange = vi.fn();
 		render(
 			<FileUpload
@@ -219,7 +256,9 @@ describe("FileUpload", () => {
 				selectedFiles={[]}
 			/>,
 		);
-		const file = new File(["x"], "note.txt", { type: "text/plain" });
+		// Valid filename/extension (".png" is a known extension) but a MIME type
+		// outside this dropzone's allow-list, so the MIME check rejects it.
+		const file = new File(["x"], "image.png", { type: "image/png" });
 
 		fireEvent.change(getInput(), { target: { files: [file] } });
 
@@ -355,5 +394,107 @@ describe("FileUpload", () => {
 			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 		).toBeDisabled();
 		expect(getInput()).toBeDisabled();
+	});
+});
+
+describe("FileUpload filename validation", () => {
+	it("S1: accepts a valid name with accents and emoji, no error and the file is listed", async () => {
+		const onChange = vi.fn();
+		render(<ControlledFileUpload onChange={onChange} />);
+		const file = new File(["pdf-bytes"], "Mon avis CSE — été 2024 🎉.pdf", {
+			type: PDF_MIME,
+		});
+
+		await userEvent.upload(getInput(), file);
+
+		expect(onChange).toHaveBeenCalledWith([file], null);
+		expect(screen.queryByText(/caractères interdits/i)).not.toBeInTheDocument();
+		expect(
+			screen.queryByText("Mon avis CSE — été 2024 🎉.pdf"),
+		).toBeInTheDocument();
+	});
+
+	it("S2: rejects a forbidden character with the forbidden_char message and no file listed", async () => {
+		const onChange = vi.fn();
+		render(<ControlledFileUpload onChange={onChange} />);
+		const file = new File(["pdf-bytes"], "avis<cse>.pdf", { type: PDF_MIME });
+
+		await userEvent.upload(getInput(), file);
+
+		expect(onChange).toHaveBeenCalledWith(
+			[],
+			FILENAME_ERROR_MESSAGES.forbidden_char,
+		);
+		expect(
+			screen.getByText(FILENAME_ERROR_MESSAGES.forbidden_char),
+		).toBeInTheDocument();
+		expect(screen.queryByText("avis<cse>.pdf")).not.toBeInTheDocument();
+	});
+
+	it("S3: rejects a name over 200 characters with a message mentioning 200", async () => {
+		const onChange = vi.fn();
+		render(<ControlledFileUpload onChange={onChange} />);
+		const longName = `${"a".repeat(201)}.pdf`;
+		const file = new File(["pdf-bytes"], longName, { type: PDF_MIME });
+
+		await userEvent.upload(getInput(), file);
+
+		expect(onChange).toHaveBeenCalledWith([], FILENAME_ERROR_MESSAGES.too_long);
+		expect(screen.getByText(/200/)).toBeInTheDocument();
+		expect(
+			screen.getByText(FILENAME_ERROR_MESSAGES.too_long),
+		).toHaveTextContent("200");
+	});
+
+	it("S4: rejects an extension/MIME mismatch with the extension_mime_mismatch message", async () => {
+		const onChange = vi.fn();
+		render(<ControlledFileUpload onChange={onChange} />);
+		const file = new File(["png-bytes"], "avis-cse.pdf", { type: "image/png" });
+
+		await userEvent.upload(getInput(), file);
+
+		expect(onChange).toHaveBeenCalledWith(
+			[],
+			FILENAME_ERROR_MESSAGES.extension_mime_mismatch,
+		);
+		expect(
+			screen.getByText(FILENAME_ERROR_MESSAGES.extension_mime_mismatch),
+		).toBeInTheDocument();
+	});
+
+	it("S5: rejects an invisible character with the invisible_char message", async () => {
+		const onChange = vi.fn();
+		render(<ControlledFileUpload onChange={onChange} />);
+		const file = new File(["pdf-bytes"], "avis\u202Ecse.pdf", {
+			type: PDF_MIME,
+		});
+
+		await userEvent.upload(getInput(), file);
+
+		expect(onChange).toHaveBeenCalledWith(
+			[],
+			FILENAME_ERROR_MESSAGES.invisible_char,
+		);
+		expect(
+			screen.getByText(FILENAME_ERROR_MESSAGES.invisible_char),
+		).toBeInTheDocument();
+	});
+
+	it("runs the filename check before the MIME check: a bad name with a disallowed MIME yields the filename error", async () => {
+		const onChange = vi.fn();
+		render(
+			<ControlledFileUpload
+				allowedMimeTypes={[PDF_MIME]}
+				onChange={onChange}
+			/>,
+		);
+		const file = new File(["x"], "avis<cse>.png", { type: "image/png" });
+
+		await userEvent.upload(getInput(), file);
+
+		expect(onChange).toHaveBeenCalledWith(
+			[],
+			FILENAME_ERROR_MESSAGES.forbidden_char,
+		);
 	});
 });

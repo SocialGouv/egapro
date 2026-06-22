@@ -44,6 +44,7 @@ export { Step4QuartileDistribution } from "./steps/Step4QuartileDistribution";
 export { Step5EmployeeCategories } from "./steps/Step5EmployeeCategories";
 export { Step6Review } from "./steps/Step6Review";
 export {
+	COMPLIANCE_FUNNEL,
 	SECOND_DECLARATION_TOTAL_STEPS,
 	SecondDeclarationStep1Info,
 	SecondDeclarationStep2Form,

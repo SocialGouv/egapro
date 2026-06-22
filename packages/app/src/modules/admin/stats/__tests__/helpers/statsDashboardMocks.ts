@@ -7,12 +7,19 @@ export const emptyFunnelData = {
 	cseFunnel: [] as { step: string; count: number }[],
 };
 
+export const emptyMatomoFunnelData = {
+	declarationFunnel: [] as { key: string; count: number }[],
+	cseFunnel: [] as { key: string; count: number }[],
+	complianceFunnel: [] as { key: string; count: number }[],
+};
+
 type QueryMocks = {
 	progressionUseQueryMock: Mock;
 	statsUseQueryMock: Mock;
 	stepDurationsUseQueryMock: Mock;
 	stepDropoffUseQueryMock: Mock;
 	funnelUseQueryMock: Mock;
+	matomoFunnelUseQueryMock?: Mock;
 };
 
 export function setDefaultMocks(mocks: QueryMocks) {
@@ -38,6 +45,11 @@ export function setDefaultMocks(mocks: QueryMocks) {
 	});
 	mocks.funnelUseQueryMock.mockReturnValue({
 		data: emptyFunnelData,
+		isLoading: false,
+		isError: false,
+	});
+	mocks.matomoFunnelUseQueryMock?.mockReturnValue({
+		data: emptyMatomoFunnelData,
 		isLoading: false,
 		isError: false,
 	});

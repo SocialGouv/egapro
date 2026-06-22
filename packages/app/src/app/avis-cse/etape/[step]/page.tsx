@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import { campaignYearDimension, FunnelStepTracker } from "~/modules/analytics";
 import {
+	CSE_FUNNEL,
 	computeContentTypeColumns,
 	mapOpinionsFromDb,
 	Step1Opinions,
@@ -43,18 +45,25 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 			hasSubmittedSecondDeclaration: hasSecondDeclaration,
 		});
 		return (
-			<Step1Opinions
-				cseDeadline={campaignDeadlines.decl2JointEvaluationDeadline}
-				email={session?.user?.email ?? undefined}
-				firstDeclarationPathChoice={
-					declarationData.declaration.firstDeclarationPathChoice
-				}
-				hasSecondDeclaration={hasSecondDeclaration}
-				initialData={initialData}
-				previousHref={previousHref}
-				siren={declarationData.declaration.siren}
-				year={declarationData.declaration.year}
-			/>
+			<>
+				<FunnelStepTracker
+					config={CSE_FUNNEL}
+					dimensions={campaignYearDimension(declarationData.declaration.year)}
+					step={step}
+				/>
+				<Step1Opinions
+					cseDeadline={campaignDeadlines.decl2JointEvaluationDeadline}
+					email={session?.user?.email ?? undefined}
+					firstDeclarationPathChoice={
+						declarationData.declaration.firstDeclarationPathChoice
+					}
+					hasSecondDeclaration={hasSecondDeclaration}
+					initialData={initialData}
+					previousHref={previousHref}
+					siren={declarationData.declaration.siren}
+					year={declarationData.declaration.year}
+				/>
+			</>
 		);
 	}
 
@@ -87,13 +96,20 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 			secondDeclGapHigh: hasGapsAboveThreshold(correctionCategories),
 		});
 		return (
-			<Step2Upload
-				columns={columns}
-				declarationYear={declarationData.declaration.year}
-				existingFiles={files}
-				initialAssociations={associations}
-				siren={declarationData.declaration.siren}
-			/>
+			<>
+				<FunnelStepTracker
+					config={CSE_FUNNEL}
+					dimensions={campaignYearDimension(declarationData.declaration.year)}
+					step={step}
+				/>
+				<Step2Upload
+					columns={columns}
+					declarationYear={declarationData.declaration.year}
+					existingFiles={files}
+					initialAssociations={associations}
+					siren={declarationData.declaration.siren}
+				/>
+			</>
 		);
 	}
 

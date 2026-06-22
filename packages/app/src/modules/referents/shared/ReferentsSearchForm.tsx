@@ -2,6 +2,11 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+import {
+	MATOMO_ACTION,
+	MATOMO_EVENT_CATEGORY,
+	trackEvent,
+} from "~/modules/analytics";
 import type { RegionCode } from "~/modules/domain";
 import { COUNTIES, REGIONS, REGIONS_TO_COUNTIES } from "~/modules/domain";
 import {
@@ -54,12 +59,24 @@ export function ReferentsSearchForm({
 	const onSubmit = useCallback(
 		(data: Record<string, unknown>) => {
 			const params = new URLSearchParams();
+			const usedFacets: string[] = [];
 			for (const [key, value] of Object.entries(data)) {
 				if (value !== undefined && value !== "") {
 					params.set(key, String(value));
+					usedFacets.push(key);
 				}
 			}
 			params.set("page", "1");
+			// Facet field names only (region/county codes are non-PII but kept out
+			// of the payload to stay consistent with the no-value policy).
+			trackEvent({
+				category: MATOMO_EVENT_CATEGORY.SEARCH,
+				action: MATOMO_ACTION.SEARCH_SUBMIT,
+				name:
+					usedFacets.length > 0
+						? [...usedFacets].sort((a, b) => a.localeCompare(b)).join("+")
+						: "empty",
+			});
 			router.push(`${basePath}?${params.toString()}`);
 		},
 		[basePath, router],

@@ -4,6 +4,7 @@ import {
 	getCampaignProgressionSchema,
 	getCampaignStatsSchema,
 	getCompletionFunnelSchema,
+	getMatomoFunnelSchema,
 	getStepDropoffRateSchema,
 	getStepDurationsSchema,
 } from "~/modules/admin/stats/schemas";
@@ -13,6 +14,7 @@ import type {
 	CampaignStats,
 	CompletionFunnelOutput,
 	FunnelRow,
+	MatomoFunnelOutput,
 	StepDropoffRow,
 	StepDurationRow,
 } from "~/modules/admin/stats/types";
@@ -40,6 +42,7 @@ import {
 	declarations,
 	gipMdsData,
 } from "~/server/db/schema";
+import { fetchMatomoFunnel } from "~/server/services/matomo";
 
 /** Minimum number of completed transitions before showing a median / p90. */
 const STEP_DURATION_MIN_SAMPLE = 5;
@@ -996,6 +999,15 @@ export const adminStatsRouter = createTRPCRouter({
 				),
 				cseFunnel: buildFunnelRows(FUNNEL_CSE_KEY_STEPS, cseCounts),
 			};
+		}),
+
+	getMatomoFunnel: adminProcedure
+		.input(getMatomoFunnelSchema)
+		.query(({ input }): Promise<MatomoFunnelOutput> => {
+			return fetchMatomoFunnel({
+				year: input.year,
+				sizeRange: input.sizeRange,
+			});
 		}),
 });
 function countDeclarationsWithEvent(opts: {
