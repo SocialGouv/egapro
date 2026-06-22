@@ -95,9 +95,13 @@ Clés d'étape : `step_1` Actions correctives et seconde déclaration · `step_2
 | `search` / `consultation_outbound` | Clic sur le lien « Observatoire » du header (vers le site de consultation) | — | — | `layout/shared/ConsultationNavLink.tsx` | K24 |
 | `help` / `faq_section_open` | Ouverture d'un accordéon FAQ (passage à `aria-expanded=true`, pas la fermeture) | id structurel `accordion-<section>-<sous-section>-<index>` | — | `faq/FaqAccordionGroup.tsx` | K21 |
 | `help` / `aide_resource_click` | Clic sur une carte ressource de `/aide` | id de la ressource (`nouveau-site`, `indicateurs-remuneration`, `indicateurs-representation`) | — | `aide/AideResourceCards.tsx` | K21 |
+| `help` / `help_link_click` | Clic sur un lien d'accompagnement instrumenté (parcours déclaration / conformité) | slug du lien (`cse_models` \| `objective_criteria` \| `corrective_actions` \| `joint_evaluation`) | — | `analytics/TrackedLink.tsx` (`NextStepsBox`, `CompliancePathChoice`, `CompliancePathOption`, `JointEvaluationForm`) | K21 |
 | `document` / `pdf_download` | Clic sur le bouton « Télécharger le récapitulatif (PDF) » | `main` \| `correction` | — | `declarationPdf/DownloadDeclarationPdfButton.tsx` | K20 |
 | `document` / `file_upload` | Upload réussi de **tous** les fichiers sélectionnés | `flowType` (enum non-PII du flux) | nombre de fichiers | `shared/useFileUploadForm.ts` | K20 |
+| `document` / `category_template_download` | Clic sur « Télécharger le modèle » (.xlsx ou .csv) à l'étape 5 | format (`xlsx` \| `csv`) | — | `declaration-remuneration/steps/step5/CategoryTemplateDownload.tsx` | K20 |
 | `document` / `category_import` | Import réussi d'un fichier de catégories (étape 5) | — | nombre de catégories | `declaration-remuneration/steps/step5/CategoryImportExport.tsx` | K20 |
+| `document` / `category_import_duration` | Import réussi, quand un départ est connu dans la session (téléchargement du modèle ou ouverture de la modale d'import) | — | durée écoulée modèle→import (s) | `declaration-remuneration/steps/step5/CategoryImportExport.tsx` (via `categoryModelTracking.ts`) | K20 |
+| `document` / `category_import_failure` | Échec de parsing d'un fichier de catégories importé | type d'erreur (`missing-columns` \| `invalid-value` \| `empty-file`) | — | `declaration-remuneration/steps/step5/CategoryImportExport.tsx` | K20 |
 | `auth` / `login_start` | Clic sur « S'identifier avec ProConnect » (avant la redirection OIDC) | — | — | `login/ProConnectButton.tsx` | K20 |
 | `dashboard` / `declaration_start` | Clic sur le lien de démarrage d'une déclaration rémunération depuis `mon-espace` | `remuneration` | — | `my-space/DeclarationLink.tsx` | K19, K20 |
 
@@ -121,7 +125,7 @@ Configurées côté **admin Matomo** (les IDs de slot doivent correspondre, sino
 |---|---|
 | **K19** — taux de complétion du parcours, par scénario | Événements de funnel des 3 funnels (`funnel_start`/`step_complete`/`funnel_complete`/`funnel_abandon`) + `dashboard/declaration_start` |
 | **K20** — taux de consultation (visiteurs vs. acteurs) | Pages vues natives (`MatomoAnalytics`) **vs.** événements d'action (`document/*`, `auth/login_start`, `search/*`, `dashboard/*`) |
-| **K21** — consultation de l'aide par partie/section | `help/faq_section_open`, `help/aide_resource_click` + pages vues `/aide` et `/faq` |
+| **K21** — consultation de l'aide par partie/section | `help/faq_section_open`, `help/aide_resource_click`, `help/help_link_click` + pages vues `/aide` et `/faq` |
 | **K22** — source de la visite | Rapport « Référents » natif de Matomo (aucun code) |
 | **K23** — bouton « donnez votre avis » | **Hors scope de cette PR** (le bouton n'existe pas encore) |
 | **K24** — visites du site de consultation | `search/consultation_outbound` + `search/search_submit` (départs sortants). Les visites réelles du site externe `/index-egapro/recherche` se mesurent **sur ce site** (Matomo dédié). |

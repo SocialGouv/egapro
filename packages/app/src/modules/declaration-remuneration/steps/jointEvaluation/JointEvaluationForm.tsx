@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import { TrackedLink } from "~/modules/analytics";
 import { useReadOnlyGuard } from "~/modules/auth";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
@@ -92,15 +93,16 @@ export function JointEvaluationForm({
 						Évaluation conjointe des rémunérations
 					</h2>
 					<p className="fr-mb-0">
-						<a
+						<TrackedLink
 							className="fr-link"
 							href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 							rel="noopener noreferrer"
 							target="_blank"
+							trackingId="joint_evaluation"
 						>
 							En savoir plus sur évaluation conjointe des rémunérations
 							<NewTabNotice />
-						</a>
+						</TrackedLink>
 					</p>
 				</div>
 
