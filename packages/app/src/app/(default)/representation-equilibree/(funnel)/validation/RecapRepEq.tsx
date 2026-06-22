@@ -35,6 +35,7 @@ const useStore = storePicker(useRepeqFunnelStore);
 export const ValidationRecapRepEq = () => {
   const router = useRouter();
   const [company, setCompany] = useState<Entreprise | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [funnel, setIsEdit] = useStore("funnel", "setIsEdit");
   const hydrated = useRepeqFunnelStoreHasHydrated();
 
@@ -74,7 +75,12 @@ export const ValidationRecapRepEq = () => {
   }
 
   const sendRepresentationEquilibree = async () => {
-    await saveRepresentationEquilibree(funnel);
+    setSaveError(null);
+    const result = await saveRepresentationEquilibree(funnel);
+    if (!result.ok) {
+      setSaveError(result.error);
+      return;
+    }
     setIsEdit(true);
     router.push("/representation-equilibree/transmission");
   };
@@ -109,6 +115,9 @@ export const ValidationRecapRepEq = () => {
         des données <strong>{funnel.year}</strong>.
       </p>
       <DetailRepEq edit repEq={repEq} />
+      {saveError && (
+        <Alert className={fr.cx("fr-mt-4w")} severity="error" title="La déclaration n'a pas pu être transmise" description={saveError} />
+      )}
       <ButtonsGroup
         className={fr.cx("fr-mt-6w")}
         inlineLayoutWhen="sm and up"

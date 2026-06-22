@@ -15,7 +15,7 @@ import { assertServerSession } from "@api/utils/auth";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
 import { type CreateRepresentationEquilibreeDTO } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
-import { UnexpectedSessionError } from "@common/shared-domain";
+import { UnexpectedSessionError, ValidationError } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { type ServerActionResponse } from "@common/utils/next";
 
@@ -35,7 +35,9 @@ export async function getRepresentationEquilibree(siren: string, year: number) {
   return ret;
 }
 
-export async function saveRepresentationEquilibree(repEq: CreateRepresentationEquilibreeDTO) {
+export async function saveRepresentationEquilibree(
+  repEq: CreateRepresentationEquilibreeDTO,
+): Promise<ServerActionResponse<undefined, string>> {
   const session = await assertServerSession({
     owner: {
       check: repEq.siren,
@@ -45,7 +47,16 @@ export async function saveRepresentationEquilibree(repEq: CreateRepresentationEq
   });
 
   const useCase = new SaveRepresentationEquilibree(representationEquilibreeRepo, entrepriseService);
-  await useCase.execute({ repEq, override: session.user.staff });
+
+  try {
+    await useCase.execute({ repEq, override: session.user.staff });
+  } catch (error: unknown) {
+    if (error instanceof ValidationError) {
+      return { ok: false, error: error.message };
+    }
+    console.error(error);
+    return { ok: false, error: "Une erreur est survenue, veuillez réessayer." };
+  }
 
   const receiptUseCase = new SendRepresentationEquilibreeReceipt(
     representationEquilibreeRepo,
@@ -59,6 +70,8 @@ export async function saveRepresentationEquilibree(repEq: CreateRepresentationEq
   // Note: [revalidatePath bug](https://github.com/vercel/next.js/issues/49387). Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
   // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}`);
   // revalidatePath(`/representation-equilibree/${repEq.siren}/${repEq.year}/pdf`);
+
+  return { ok: true };
 }
 
 export async function sendRepresentationEquilibreeReceipt(siren: string, year: number) {
