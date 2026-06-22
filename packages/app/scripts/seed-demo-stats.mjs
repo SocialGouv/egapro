@@ -827,9 +827,8 @@ const RAW_DECLARATIONS = [
 ];
 
 const DECLARATIONS = RAW_DECLARATIONS.map(applyCseTransform);
-const PREVIOUS_YEAR_DECLARATIONS = RAW_PREVIOUS_YEAR_DECLARATIONS.map(
-	applyCseTransform,
-);
+const PREVIOUS_YEAR_DECLARATIONS =
+	RAW_PREVIOUS_YEAR_DECLARATIONS.map(applyCseTransform);
 
 async function main() {
 	const sql = postgres(DATABASE_URL, { max: 1 });
