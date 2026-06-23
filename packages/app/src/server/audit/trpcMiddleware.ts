@@ -53,6 +53,7 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 
 	// ── admin declaration mutations ───────────────────────
 	"adminDeclarations.cancel": AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL,
+	"adminDeclarations.releaseLock": AUDIT_ACTIONS.ADMIN_DECLARATION_RELEASE_LOCK,
 
 	// ── public searches ────────────────────────────────────
 	"publicReferents.search": AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH,
