@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, gt, sql } from "drizzle-orm";
+import { and, eq, gt, lte, or } from "drizzle-orm";
 
 import type { DB } from "~/server/db";
 import { declarationLocks, users } from "~/server/db/schema";
@@ -86,7 +86,10 @@ export async function acquireOrRefreshLock(
 				lastHeartbeatAt: now,
 				expiresAt,
 			},
-			setWhere: sql`${declarationLocks.lockedByUserId} = ${userId} or ${declarationLocks.expiresAt} <= ${now}`,
+			setWhere: or(
+				eq(declarationLocks.lockedByUserId, userId),
+				lte(declarationLocks.expiresAt, now),
+			),
 		})
 		.returning({ id: declarationLocks.id });
 
