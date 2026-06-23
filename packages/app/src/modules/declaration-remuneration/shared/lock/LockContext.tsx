@@ -1,28 +1,73 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { createContext, useContext } from "react";
 
-import {
-	type DeclarationLockState,
-	useDeclarationLock,
-} from "./useDeclarationLock";
+import { useDeclarationLock } from "./useDeclarationLock";
 
-const LockContext = createContext<DeclarationLockState | null>(null);
-
-type LockProviderProps = {
-	declarationId: string;
-	children: React.ReactNode;
+export type LockHolder = {
+	firstName: string | null;
+	lastName: string | null;
+	email: string | null;
 };
 
-export function LockProvider({ declarationId, children }: LockProviderProps) {
-	const state = useDeclarationLock({ declarationId });
-	return <LockContext.Provider value={state}>{children}</LockContext.Provider>;
+type LockState = {
+	isReadOnly: boolean;
+	holder: LockHolder | null;
+	isLoading?: boolean;
+};
+
+const LockContext = createContext<LockState>({
+	isReadOnly: false,
+	holder: null,
+});
+
+type StaticLockProviderProps = {
+	children: ReactNode;
+	isReadOnly?: boolean;
+	holder?: LockHolder | null;
+};
+
+type DynamicLockProviderProps = {
+	children: ReactNode;
+	declarationId: string;
+};
+
+type LockProviderProps = StaticLockProviderProps | DynamicLockProviderProps;
+
+function StaticLockProvider({
+	children,
+	isReadOnly = false,
+	holder = null,
+}: StaticLockProviderProps) {
+	return (
+		<LockContext.Provider value={{ isReadOnly, holder }}>
+			{children}
+		</LockContext.Provider>
+	);
 }
 
-export function useLockContext(): DeclarationLockState {
-	const context = useContext(LockContext);
-	if (context === null) {
-		throw new Error("useLockContext must be used within a LockProvider");
+function DynamicLockProvider({
+	children,
+	declarationId,
+}: DynamicLockProviderProps) {
+	const { isReadOnly, holder, isLoading } = useDeclarationLock({
+		declarationId,
+	});
+	return (
+		<LockContext.Provider value={{ isReadOnly, holder, isLoading }}>
+			{children}
+		</LockContext.Provider>
+	);
+}
+
+export function LockProvider(props: LockProviderProps) {
+	if ("declarationId" in props) {
+		return <DynamicLockProvider {...props} />;
 	}
-	return context;
+	return <StaticLockProvider {...props} />;
+}
+
+export function useLockContext(): LockState {
+	return useContext(LockContext);
 }
