@@ -263,20 +263,19 @@ async function fetchFunnel(
 		),
 	};
 
-	const stepAction = actions.find(
-		(row) => row.label === MATOMO_FUNNEL_ACTION.STEP_COMPLETE,
+	// Step counts come from the event NAME report scoped by a segment: Matomo
+	// does not reliably archive the action→name subtable that
+	// `Events.getNameFromActionId` would need. The segment is visit-scoped, but
+	// `buildFunnelRows` only reads the `step_<n>` keys, so any name leaked from a
+	// co-occurring event in the same visit is ignored.
+	const stepNames = await callReportingApi(
+		config,
+		"Events.getName",
+		year,
+		`${segment};eventCategory==${def.category};eventAction==${MATOMO_FUNNEL_ACTION.STEP_COMPLETE}`,
 	);
-	if (stepAction?.idsubdatatable !== undefined) {
-		const names = await callReportingApi(
-			config,
-			"Events.getNameFromActionId",
-			year,
-			segment,
-			stepAction.idsubdatatable,
-		);
-		for (const row of names) {
-			counts[row.label] = toCount(row.nb_events);
-		}
+	for (const row of stepNames) {
+		counts[row.label] = toCount(row.nb_events);
 	}
 
 	return buildFunnelRows(def.jalons, counts);
@@ -359,19 +358,24 @@ async function getCategoryActions(
 	);
 }
 
-/** Drill into the `name` subtable of one action (e.g. format, error type). */
-async function getActionNames(
+/**
+ * Names recorded for a (category, action) pair, read via a segment on
+ * `Events.getName`. Matomo does not reliably archive the action→name subtable
+ * that `Events.getNameFromActionId` needs, so we segment instead. The segment is
+ * visit-scoped (a co-occurring event in the same visit can leak its own name),
+ * so callers MUST map or allow-list the result to the keys they expect.
+ */
+async function getEventNames(
 	config: MatomoConfig,
-	action: MatomoEventRow | undefined,
+	category: string,
+	action: string,
 	year: number,
 ): Promise<MatomoEventRow[]> {
-	if (action?.idsubdatatable === undefined) return [];
 	return callReportingApi(
 		config,
-		"Events.getNameFromActionId",
+		"Events.getName",
 		year,
-		"",
-		action.idsubdatatable,
+		`eventCategory==${category};eventAction==${action}`,
 	);
 }
 
@@ -397,14 +401,21 @@ async function fetchCategoryModelUsage(
 		});
 	}
 
-	const failureAction = actions.find(
-		(row) => row.label === MATOMO_ACTION.CATEGORY_IMPORT_FAILURE,
+	// Allow-list the known error types: the segment is visit-scoped, so a name
+	// leaked from a co-occurring event is dropped (it never collides with these
+	// enum values).
+	const failureNames = await getEventNames(
+		config,
+		MATOMO_EVENT_CATEGORY.DOCUMENT,
+		MATOMO_ACTION.CATEGORY_IMPORT_FAILURE,
+		year,
 	);
-	const failureNames = await getActionNames(config, failureAction, year);
 	for (const name of failureNames) {
+		const label = IMPORT_ERROR_LABELS[name.label];
+		if (!label) continue;
 		rows.push({
 			key: `failure_${name.label}`,
-			label: `Échec import — ${IMPORT_ERROR_LABELS[name.label] ?? name.label}`,
+			label: `Échec import — ${label}`,
 			count: toCount(name.nb_events),
 		});
 	}
@@ -423,21 +434,21 @@ async function fetchHelpLinkClicks(
 	config: MatomoConfig,
 	year: number,
 ): Promise<HelpLinkClicks> {
-	const actions = await getCategoryActions(
+	// Allow-list the known help slugs: the segment is visit-scoped, so any name
+	// leaked from a co-occurring event in the same visit is dropped.
+	const names = await getEventNames(
 		config,
 		MATOMO_EVENT_CATEGORY.HELP,
+		MATOMO_ACTION.HELP_LINK_CLICK,
 		year,
 	);
-	const clickAction = actions.find(
-		(row) => row.label === MATOMO_ACTION.HELP_LINK_CLICK,
-	);
-	const names = await getActionNames(config, clickAction, year);
 	const rows = names
-		.map((name) => ({
-			key: name.label,
-			label: HELP_LINK_LABELS[name.label] ?? name.label,
-			count: toCount(name.nb_events),
-		}))
+		.flatMap((name) => {
+			const label = HELP_LINK_LABELS[name.label];
+			return label
+				? [{ key: name.label, label, count: toCount(name.nb_events) }]
+				: [];
+		})
 		.sort((a, b) => b.count - a.count);
 	return { rows };
 }

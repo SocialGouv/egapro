@@ -7,9 +7,9 @@ Bulk Tracking API so the /admin/stats widgets show realistic data:
   * the three funnels (declaration / cse_opinion / compliance_path) with
     drop-off, carrying the campaign_year (dim 1) + workforce_range (dim 2)
     dimensions the Reporting API segments on;
-  * indicator-model usage (document category: template downloads, imports,
-    failures, import durations);
-  * help-link clicks (help category);
+  * indicator-model usage (document category: imports, failures by enumerated
+    error type, import durations);
+  * help-link clicks (help category, by slug);
   * outbound consultations (search category) for the device-split widget.
 
 Events are backdated into the two most recent campaign years and sent with
@@ -44,7 +44,6 @@ A_STEP_COMPLETE = "step_complete"
 A_FUNNEL_COMPLETE = "funnel_complete"
 A_CONSULTATION = "consultation_outbound"
 A_HELP_CLICK = "help_link_click"
-A_CAT_DOWNLOAD = "category_template_download"
 A_CAT_IMPORT = "category_import"
 A_CAT_FAILURE = "category_import_failure"
 A_CAT_DURATION = "category_import_duration"
@@ -64,20 +63,16 @@ USER_AGENTS = {
 # Weighted toward desktop, with a meaningful mobile/tablet share.
 DEVICE_WEIGHTS = [("desktop", 6), ("smartphone", 3), ("tablet", 1)]
 
-HELP_LINKS = [
-    "Comment calculer l'index",
-    "Définition des indicateurs",
-    "FAQ déclaration",
-    "Aide sur l'écart de rémunération",
-    "Contacter le référent égapro",
+# Help-link slugs — must match the app's TrackedLink instrumentation
+# (docs/plan-de-tracking.md); the /admin/stats widget maps them to labels.
+HELP_SLUGS = [
+    "cse_models",
+    "objective_criteria",
+    "corrective_actions",
+    "joint_evaluation",
 ]
-INDICATOR_LABELS = [
-    "remuneration",
-    "augmentations",
-    "promotions",
-    "conges_maternite",
-    "hautes_remunerations",
-]
+# Enumerated import-error types emitted by category_import_failure.
+IMPORT_ERROR_TYPES = ["missing-columns", "invalid-value", "empty-file"]
 
 # Deterministic-ish per run; vary by index so reruns differ without Math.random
 # concerns. (random is available in the real container runtime.)
@@ -225,30 +220,30 @@ def seed_funnel(requests, token, category, steps, visitors, with_size, year):
 
 
 def seed_behaviour(requests, token, year):
-    # Indicator-model usage (document category, no custom dimensions).
+    # Indicator-model usage (document category, no custom dimensions). Names and
+    # values mirror the app taxonomy: a successful import carries the category
+    # count as value (no name), a failure carries an enumerated error type as
+    # name, and a fill-duration carries seconds as value (no name).
     for _ in range(30):
         vid = visitor_id()
         cdt = year_timestamp(year)
-        label = rng.choice(INDICATOR_LABELS)
         roll = rng.random()
-        if roll < 0.4:
-            action, name, value = A_CAT_IMPORT, label, None
-        elif roll < 0.6:
-            action, name, value = A_CAT_DOWNLOAD, label, None
+        if roll < 0.55:
+            action, name, value = A_CAT_IMPORT, None, rng.randint(3, 12)
         elif roll < 0.75:
-            action, name, value = A_CAT_FAILURE, label, None
+            action, name, value = A_CAT_FAILURE, rng.choice(IMPORT_ERROR_TYPES), None
         else:
-            action, name, value = A_CAT_DURATION, label, rng.randint(30, 600)
+            action, name, value = A_CAT_DURATION, None, rng.randint(30, 600)
         requests.append(
             build_request(token, vid=vid, cat=CAT_DOCUMENT, action=action,
                           name=name, value=value, cdt=cdt,
                           ua_key=pick_device())
         )
-    # Help-link clicks (help category, no custom dimensions).
+    # Help-link clicks (help category, no custom dimensions) — name = slug.
     for _ in range(20):
         requests.append(
             build_request(token, vid=visitor_id(), cat=CAT_HELP,
-                          action=A_HELP_CLICK, name=rng.choice(HELP_LINKS),
+                          action=A_HELP_CLICK, name=rng.choice(HELP_SLUGS),
                           cdt=year_timestamp(year), ua_key=pick_device())
         )
     # Outbound consultations (search category) — feeds the device-split widget.

@@ -198,6 +198,12 @@ modules/analytics/
 
 ## Configuration Matomo (hors code)
 
+> La conformité CNIL (exemption de consentement) et le paramétrage attendu de
+> l'instance Matomo sont détaillés dans
+> [`matomo-cnil-exemption.md`](./matomo-cnil-exemption.md) — anonymisation IP,
+> opt-out, Do Not Track, durées de conservation, et la procédure de
+> vérification en local.
+
 - Variables d'environnement : `NEXT_PUBLIC_MATOMO_URL`, `NEXT_PUBLIC_MATOMO_SITE_ID`
   (déclarées dans `env.js`, section client).
 - Créer les **Custom Dimensions** dans l'admin Matomo aux slots **1** (année de
