@@ -6,8 +6,8 @@ import {
 } from "~/modules/analytics";
 
 // Shared timer for the "time to fill the category model" measure. It is started
-// when the user downloads the template or opens the import modal, and consumed
-// on a successful import. Only an elapsed-seconds number is ever emitted — no PII.
+// when the user opens the import modal, and consumed on a successful import.
+// Only an elapsed-seconds number is ever emitted — no PII.
 const TIMER_KEY = "egapro:category-model-started-at";
 
 /** Start the category-model timer if one is not already running. */

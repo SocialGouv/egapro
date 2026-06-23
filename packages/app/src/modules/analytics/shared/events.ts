@@ -29,7 +29,6 @@ export const MATOMO_ACTION = {
 	LOGIN_START: "login_start",
 	DECLARATION_START: "declaration_start",
 	CATEGORY_IMPORT: "category_import",
-	CATEGORY_TEMPLATE_DOWNLOAD: "category_template_download",
 	CATEGORY_IMPORT_FAILURE: "category_import_failure",
 	CATEGORY_IMPORT_DURATION: "category_import_duration",
 	HELP_LINK_CLICK: "help_link_click",

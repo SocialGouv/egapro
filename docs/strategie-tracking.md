@@ -35,8 +35,8 @@ Deux natures de signaux :
 2. **Les événements personnalisés** — deux familles : les **funnels** multi-étapes
    (où les gens décrochent) et les **actions ponctuelles** (recherche,
    téléchargement, upload, login, ouverture d'une section d'aide, clic sur un lien
-   d'accompagnement, usage du modèle de l'indicateur par catégorie — téléchargement
-   du modèle, durée de remplissage, échecs d'import —, démarrage d'une déclaration).
+   d'accompagnement, usage du modèle de l'indicateur par catégorie — durée de
+   remplissage et échecs d'import —, démarrage d'une déclaration).
    Liste complète dans [`plan-de-tracking.md`](./plan-de-tracking.md).
 
 Le croisement « visiteurs » (pages vues) vs. « acteurs » (événements d'action)

@@ -28,7 +28,6 @@ import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryDataTable } from "./CategoryDataTable";
 import { CategoryImportExport } from "./CategoryImportExport";
-import { CategoryTemplateDownload } from "./CategoryTemplateDownload";
 import {
 	createEmptyCategory,
 	type EmployeeCategory,
@@ -282,12 +281,6 @@ export function CategoryForm({
 	}
 
 	const categories = form.watch("categories");
-	// `generateTemplate` only reads names + amounts; the form categories carry no
-	// `id`, so assign the row index to satisfy the EmployeeCategory shape.
-	const templateCategories = categories.map((category, index) => ({
-		...category,
-		id: index,
-	}));
 	const sourceError = form.formState.errors.source?.message;
 
 	const handleFormSubmit = form.handleSubmit((data) => {
@@ -450,16 +443,10 @@ export function CategoryForm({
 				<div className={stepStyles.obligatoiresRow}>
 					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 					{!readOnlyLabel && (
-						<div className={stepStyles.categoryActions}>
-							<CategoryTemplateDownload
-								categories={templateCategories}
-								disabled={disabled}
-							/>
-							<CategoryImportExport
-								disabled={disabled}
-								onImport={handleImportCategories}
-							/>
-						</div>
+						<CategoryImportExport
+							disabled={disabled}
+							onImport={handleImportCategories}
+						/>
 					)}
 				</div>
 			</div>
