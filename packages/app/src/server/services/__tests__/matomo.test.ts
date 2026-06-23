@@ -40,11 +40,16 @@ function stubFetch(responder: (init: { body: URLSearchParams }) => Row[]) {
 	return fetchSpy;
 }
 
-// Subtable ids: category → its action subtable; the step_complete action of
-// each category → its name subtable (`<categorySubtable> + 1`).
+// `funnel_start` / `funnel_complete` counts come from the category's action
+// subtable; the per-step counts come from the event NAME report scoped by a
+// segment (`eventCategory==<cat>;eventAction==step_complete`) — Matomo does not
+// reliably archive the action→name subtable. The segment is visit-scoped, so the
+// declaration response includes an "Event Name not defined" row (a co-occurring
+// nameless event) that `buildFunnelRows` must ignore.
 function eventsApiResponder(init: { body: URLSearchParams }): Row[] {
 	const method = init.body.get("method");
 	const idSubtable = init.body.get("idSubtable");
+	const segment = init.body.get("segment") ?? "";
 	if (method === "Events.getCategory") {
 		return [
 			{ label: "declaration", nb_events: 100, idsubdatatable: 10 },
@@ -57,17 +62,14 @@ function eventsApiResponder(init: { body: URLSearchParams }): Row[] {
 		const completes: Record<string, number> = { "10": 40, "20": 20, "30": 10 };
 		return [
 			{ label: "funnel_start", nb_events: starts[idSubtable ?? ""] ?? 0 },
-			{
-				label: "step_complete",
-				nb_events: 0,
-				idsubdatatable: Number(idSubtable) + 1,
-			},
+			{ label: "step_complete", nb_events: 0 },
 			{ label: "funnel_complete", nb_events: completes[idSubtable ?? ""] ?? 0 },
 		];
 	}
-	if (method === "Events.getNameFromActionId") {
-		if (idSubtable === "11") {
+	if (method === "Events.getName") {
+		if (segment.includes("eventCategory==declaration")) {
 			return [
+				{ label: "Event Name not defined", nb_events: 999 },
 				{ label: "step_1", nb_events: 80 },
 				{ label: "step_2", nb_events: 70 },
 				{ label: "step_3", nb_events: 60 },
@@ -75,8 +77,10 @@ function eventsApiResponder(init: { body: URLSearchParams }): Row[] {
 				{ label: "step_5", nb_events: 50 },
 			];
 		}
-		if (idSubtable === "21") return [{ label: "step_1", nb_events: 30 }];
-		if (idSubtable === "31") {
+		if (segment.includes("eventCategory==cse_opinion")) {
+			return [{ label: "step_1", nb_events: 30 }];
+		}
+		if (segment.includes("eventCategory==compliance_path")) {
 			return [
 				{ label: "step_1", nb_events: 20 },
 				{ label: "step_2", nb_events: 15 },
@@ -108,10 +112,11 @@ describe("fetchMatomoFunnel", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("builds the three funnels from the hierarchical Events API", async () => {
+	it("builds the three funnels from the Events API (ignoring leaked names)", async () => {
 		const result = await fetchMatomoFunnel({ year: 2024 });
 
-		// Declaration: start 100 → step_1 80 → … → complete 40.
+		// Declaration: start 100 → step_1 80 → … → complete 40. The visit-scoped
+		// "Event Name not defined" row is ignored (not a step key).
 		expect(result.declarationFunnel.map((r) => [r.key, r.count])).toEqual([
 			["start", 100],
 			["step_1", 80],
@@ -206,40 +211,34 @@ describe("fetchMatomoFunnel", () => {
 	});
 });
 
-// Subtable ids for the behavioural-usage cascades:
-//   document category → action subtable 40; its actions' name subtables 41/42/43.
-//   help category → action subtable 50; the click action's name subtable 51.
+// `category_import` count + `category_import_duration` avg come from the
+// document action subtable; failure types and help slugs come from the event
+// NAME report scoped by an `eventCategory==…;eventAction==…` segment (the
+// action→name subtable is not reliably archived).
 function behaviourApiResponder(init: { body: URLSearchParams }): Row[] {
 	const method = init.body.get("method");
 	const idSubtable = init.body.get("idSubtable");
+	const segment = init.body.get("segment") ?? "";
 
 	if (method === "Events.getCategory") {
+		return [{ label: "document", nb_events: 200, idsubdatatable: 40 }];
+	}
+	if (method === "Events.getActionFromCategoryId" && idSubtable === "40") {
 		return [
-			{ label: "document", nb_events: 200, idsubdatatable: 40 },
-			{ label: "help", nb_events: 90, idsubdatatable: 50 },
+			{ label: "category_import", nb_events: 55 },
+			{ label: "category_import_failure", nb_events: 8 },
+			{ label: "category_import_duration", avg_event_value: 12.6 },
 		];
 	}
-	if (method === "Events.getActionFromCategoryId") {
-		if (idSubtable === "40") {
-			return [
-				{ label: "category_import", nb_events: 55 },
-				{ label: "category_import_failure", nb_events: 8, idsubdatatable: 42 },
-				{ label: "category_import_duration", avg_event_value: 12.6 },
-			];
-		}
-		if (idSubtable === "50") {
-			return [{ label: "help_link_click", nb_events: 90, idsubdatatable: 51 }];
-		}
-	}
-	if (method === "Events.getNameFromActionId") {
-		if (idSubtable === "42") {
+	if (method === "Events.getName") {
+		if (segment.includes("eventAction==category_import_failure")) {
 			return [
 				{ label: "missing-columns", nb_events: 5 },
 				{ label: "invalid-value", nb_events: 2 },
 				{ label: "empty-file", nb_events: 1 },
 			];
 		}
-		if (idSubtable === "51") {
+		if (segment.includes("eventAction==help_link_click")) {
 			return [
 				{ label: "objective_criteria", nb_events: 30 },
 				{ label: "cse_models", nb_events: 50 },
@@ -310,6 +309,7 @@ describe("fetchMatomoCategoryModel", () => {
 			if (init.body.get("method") === "Events.getActionFromCategoryId") {
 				return [{ label: "category_import", nb_events: 3 }];
 			}
+			if (init.body.get("method") === "Events.getName") return [];
 			return behaviourApiResponder(init);
 		});
 
@@ -323,14 +323,16 @@ describe("fetchMatomoCategoryModel", () => {
 		]);
 	});
 
-	it("scopes the read by calendar year with an empty segment (no custom dimension)", async () => {
+	it("scopes the read by calendar year, never by a campaign custom dimension", async () => {
 		const fetchSpy = stubFetch(behaviourApiResponder);
 
 		await fetchMatomoCategoryModel({ year: 2024 });
 
 		for (const call of fetchSpy.mock.calls) {
 			const body = call[1].body as URLSearchParams;
-			expect(body.get("segment")).toBe("");
+			// Behavioural events carry no campaign dimension — the failure read is
+			// scoped by an event segment, never `dimension1` / `dimension2`.
+			expect(body.get("segment")).not.toContain("dimension");
 			expect(body.get("date")).toBe("2024-12-31");
 			expect(body.get("period")).toBe("year");
 		}
@@ -390,10 +392,19 @@ describe("fetchMatomoHelpLinks", () => {
 		]);
 	});
 
-	it("falls back to the raw slug as label for an unknown help link", async () => {
+	it("drops unknown slugs and leaked names not in the label map (allow-list)", async () => {
 		stubFetch((init) => {
-			if (init.body.get("idSubtable") === "51") {
-				return [{ label: "unknown_slug", nb_events: 7 }];
+			if (
+				init.body.get("method") === "Events.getName" &&
+				(init.body.get("segment") ?? "").includes("help_link_click")
+			) {
+				return [
+					{ label: "cse_models", nb_events: 10 },
+					{ label: "unknown_slug", nb_events: 7 },
+					// `step_1` leaked from a co-occurring funnel event in the same
+					// visit (the segment is visit-scoped) — must be dropped.
+					{ label: "step_1", nb_events: 99 },
+				];
 			}
 			return behaviourApiResponder(init);
 		});
@@ -401,7 +412,7 @@ describe("fetchMatomoHelpLinks", () => {
 		const { rows } = await fetchMatomoHelpLinks({ year: 2024 });
 
 		expect(rows).toEqual([
-			{ key: "unknown_slug", label: "unknown_slug", count: 7 },
+			{ key: "cse_models", label: "Modèles d'avis CSE", count: 10 },
 		]);
 	});
 
