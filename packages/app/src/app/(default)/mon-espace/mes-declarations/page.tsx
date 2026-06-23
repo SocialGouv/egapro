@@ -24,9 +24,8 @@ const InfoText = () => (
   <>
     <p>
       Dans ce menu, vous avez accès à la liste des déclarations de l’index de l’égalité professionnelle et, si vous êtes
-      assujetti, de la représentation équilibrée qui ont été transmises à l’administration, en sélectionnant au
-      préalable dans la liste déroulante le numéro Siren de l'entreprise (ou de l’entreprise ayant déclaré l'index pour
-      le compte de l’unité économique et sociale) concernée si vous gérez plusieurs entreprises.
+      assujetti, de la représentation équilibrée qui ont été transmises à l’administration pour votre entreprise (ou
+      pour l’unité économique et sociale dont elle a déclaré l’index).
     </p>
     <br />
     <p>
