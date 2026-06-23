@@ -48,6 +48,11 @@ export {
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 } from "./shared/declarationFlags";
+// Declaration edit lock constants
+export {
+	DEFAULT_LOCK_TIMEOUT_MINUTES,
+	LOCK_HEARTBEAT_INTERVAL_MS,
+} from "./shared/declarationLock";
 // Declaration prerequisites
 export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";
 // Declaration process step deadline
