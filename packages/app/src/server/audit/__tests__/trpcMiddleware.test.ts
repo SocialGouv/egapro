@@ -69,6 +69,22 @@ describe("auditMiddleware", () => {
 		});
 	});
 
+	it("logs the admin lock-timeout update mutation", async () => {
+		const next = vi.fn(async () => ({ success: true }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "adminSettings.updateLockTimeout",
+			getRawInput: buildGetRawInput({ timeoutMinutes: 45 }),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "admin_settings.update_lock_timeout",
+			status: "success",
+			metadata: { timeoutMinutes: 45 },
+		});
+	});
+
 	it("logs a failed mutation with the error message and re-throws", async () => {
 		const error = new TRPCError({
 			code: "BAD_REQUEST",

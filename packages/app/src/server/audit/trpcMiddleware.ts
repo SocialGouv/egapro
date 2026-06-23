@@ -65,6 +65,8 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	// ── admin settings mutations ──────────────────────────
 	"adminSettings.upsertCampaignDeadlines":
 		AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES,
+	"adminSettings.updateLockTimeout":
+		AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT,
 
 	// ── admin stats sensitive reads ──────────────────────
 	"adminStats.getCampaignProgression":
