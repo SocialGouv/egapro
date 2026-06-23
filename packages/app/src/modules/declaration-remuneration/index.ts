@@ -33,6 +33,13 @@ export type {
 } from "./shared/gipMdsMapping";
 export { CSV_TO_SCHEMA_MAP, mapGipToFormData } from "./shared/gipMdsMapping";
 export { getEffectiveGipPrefillData } from "./shared/gipToStepData";
+export { DeclarationLockAlert } from "./shared/lock/DeclarationLockAlert";
+export { LockProvider, useLockContext } from "./shared/lock/LockContext";
+export type {
+	DeclarationLockState,
+	LockHolder,
+} from "./shared/lock/useDeclarationLock";
+export { useDeclarationLock } from "./shared/lock/useDeclarationLock";
 export { ComplianceConfirmation } from "./steps/ComplianceConfirmation";
 export { CompliancePathChoice } from "./steps/CompliancePathChoice";
 export { CompliancePathPage } from "./steps/CompliancePathPage";
