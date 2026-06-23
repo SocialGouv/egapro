@@ -33,6 +33,10 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"declaration.getOrCreate": AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA,
 	"declaration.getStatusHistory": AUDIT_ACTIONS.DECLARATION_HISTORY_READ,
 
+	// ── declaration lock sensitive read (exposes holder PII) ─
+	"declarationLock.getActiveLockForCurrentDeclaration":
+		AUDIT_ACTIONS.DECLARATION_LOCK_STATE_READ,
+
 	// ── cse opinion mutations ──────────────────────────────
 	"cseOpinion.saveOpinions": AUDIT_ACTIONS.CSE_OPINION_SAVE,
 	"cseOpinion.deleteFile": AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE,

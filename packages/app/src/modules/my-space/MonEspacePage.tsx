@@ -21,11 +21,13 @@ export async function MonEspacePage({ siret, userPhone }: Props) {
 	}
 
 	const siren = siret.slice(0, SIREN_LENGTH);
-	const [data, sanctionStatus, campaignDeadlines] = await Promise.all([
-		api.company.getWithDeclarations({ siren }),
-		api.company.getSanctionStatus({ siren }),
-		getCampaignDeadlines(getCurrentYear()),
-	]);
+	const [data, sanctionStatus, campaignDeadlines, lockState] =
+		await Promise.all([
+			api.company.getWithDeclarations({ siren }),
+			api.company.getSanctionStatus({ siren }),
+			getCampaignDeadlines(getCurrentYear()),
+			api.declarationLock.getActiveLockForCurrentDeclaration(),
+		]);
 
 	const hasNoSanction = sanctionStatus !== null && !sanctionStatus.hasSanction;
 
@@ -35,6 +37,8 @@ export async function MonEspacePage({ siret, userPhone }: Props) {
 			company={data.company}
 			declarations={data.declarations}
 			hasNoSanction={hasNoSanction}
+			lockedByOther={lockState.lockedByOther}
+			lockHolder={lockState.holder}
 			userPhone={userPhone}
 		/>
 	);

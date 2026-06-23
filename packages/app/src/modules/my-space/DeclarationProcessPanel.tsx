@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useRef } from "react";
-
+import { DeclarationLockAlert } from "~/modules/declaration-remuneration";
 import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
 } from "~/modules/domain";
 import styles from "./DeclarationProcessPanel.module.scss";
+import type { LockHolderDisplay } from "./types";
 import { getStepStatuses, VerticalStepper } from "./VerticalStepper";
 
 export const DECLARATION_PROCESS_PANEL_ID = "declaration-process-panel";
@@ -30,6 +31,8 @@ type Props = {
 	hasSubmittedSecondDeclaration: boolean;
 	siren: string;
 	ctaHref: string;
+	lockedByOther: boolean;
+	lockHolder: LockHolderDisplay | null;
 };
 
 export function DeclarationProcessPanel({
@@ -41,6 +44,8 @@ export function DeclarationProcessPanel({
 	hasSubmittedSecondDeclaration,
 	siren,
 	ctaHref,
+	lockedByOther,
+	lockHolder,
 }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -72,6 +77,9 @@ export function DeclarationProcessPanel({
 							siren={siren}
 							year={year}
 						/>
+						{lockedByOther && lockHolder && (
+							<DeclarationLockAlert holder={lockHolder} />
+						)}
 						{(variant === "start" || variant === "compliance_choice") && (
 							<StartAlert />
 						)}
@@ -92,7 +100,9 @@ export function DeclarationProcessPanel({
 						<HelpSection />
 						<div className={styles.footer}>
 							<a className="fr-btn" href={ctaHref}>
-								{getCtaLabel(variant)}
+								{lockedByOther
+									? "Consulter en lecture seule"
+									: getCtaLabel(variant)}
 							</a>
 						</div>
 					</div>
