@@ -1,3 +1,4 @@
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { AUDIT_ACTIONS, type AuditActionKey } from "~/modules/audit";
 import { getCurrentYear } from "~/modules/domain";
@@ -13,6 +14,9 @@ import {
 	type RequestContext,
 } from "~/server/audit/requestContext";
 import { auth } from "~/server/auth";
+import { db } from "~/server/db";
+import { declarations } from "~/server/db/schema";
+import { getActiveLock } from "~/server/services/declarationLockService";
 import {
 	type PipelineFailureReason,
 	runUploadPipeline,
@@ -210,6 +214,40 @@ export async function POST(request: Request): Promise<Response> {
 	// Persist the normalised (trimmed) name; validation already ran on it.
 	const safeFileName = fileName.trim();
 	const year = getCurrentYear();
+
+	// Collaborative edit lock (epic #3556). This route is not tRPC, so the lock
+	// is enforced inline against the service rather than via the
+	// `declarationLockedWriteProcedure` middleware. The upload is refused when
+	// another co-declarant holds an active lock on the same declaration; a free
+	// lock (or one held by this user) lets the upload proceed. The check runs
+	// before the body is streamed so no bandwidth is wasted on a locked target.
+	const declarationRows = await db
+		.select({ id: declarations.id })
+		.from(declarations)
+		.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+		.limit(1);
+	const lockedDeclarationId = declarationRows[0]?.id;
+	if (lockedDeclarationId) {
+		const lock = await getActiveLock(db, lockedDeclarationId);
+		if (lock && lock.userId !== userId) {
+			writeFailure({
+				action,
+				flowType,
+				fileName,
+				fileId: null,
+				errorMessage: "HTTP 409 locked_by_other",
+				userId,
+				userEmail,
+				siren,
+				requestContext,
+				startedAt,
+			});
+			return Response.json(
+				{ error: "Déclaration verrouillée par un autre utilisateur." },
+				{ status: 409 },
+			);
+		}
+	}
 
 	let result: UploadPipelineResult;
 	try {

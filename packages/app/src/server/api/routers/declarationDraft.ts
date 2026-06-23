@@ -11,6 +11,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { isImpersonatingSiren } from "~/server/auth/companyAccess";
 import type { DB } from "~/server/db";
 import { declarations, userCompanies } from "~/server/db/schema";
+import { getActiveLock } from "~/server/services/declarationLockService";
 
 const DRAFT_TTL_MS = 30 * 24 * 3600 * 1000;
 
@@ -87,7 +88,7 @@ export const declarationDraftRouter = createTRPCRouter({
 			await assertOwnership(ctx.db, ctx.session, siren);
 
 			const rows = await ctx.db
-				.select({ draft: declarations.draft })
+				.select({ id: declarations.id, draft: declarations.draft })
 				.from(declarations)
 				.where(
 					and(
@@ -99,6 +100,22 @@ export const declarationDraftRouter = createTRPCRouter({
 				.limit(1);
 
 			const existing = rows[0];
+
+			// Block the autosave only when another co-declarant currently holds the
+			// edit lock. When no declaration exists yet (first save creates it) or
+			// the lock is free / held by this same user, the draft is allowed
+			// through — the strict "must own the lock" rule lives on the explicit
+			// step mutations, not on background draft persistence (epic #3556).
+			if (existing) {
+				const lock = await getActiveLock(ctx.db, existing.id);
+				if (lock && lock.userId !== ctx.session.user.id) {
+					throw new TRPCError({
+						code: "CONFLICT",
+						message: "Déclaration verrouillée par un autre utilisateur.",
+					});
+				}
+			}
+
 			const currentDraft = (existing?.draft ?? {}) as DraftBlob;
 			const kindData = (currentDraft[slice.kind] ?? {}) as Record<
 				string,
