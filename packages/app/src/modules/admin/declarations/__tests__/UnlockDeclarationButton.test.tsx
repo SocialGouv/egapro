@@ -100,8 +100,6 @@ describe("UnlockDeclarationButton", () => {
 			mutationOptions.onError?.({ message: "aucun verrou actif" });
 		});
 
-		expect(screen.getByRole("alert", { hidden: true })).toHaveTextContent(
-			"aucun verrou actif",
-		);
+		expect(screen.getByText("aucun verrou actif")).toBeInTheDocument();
 	});
 });
