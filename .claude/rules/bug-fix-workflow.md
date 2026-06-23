@@ -7,11 +7,11 @@ paths:
 
 # Bug Fix Workflow
 
-> **Used by**: `code-dev` (issue type Bug, ou label `bug` — écrit le fix + l'éventuel test de reproduction **E2E**), `tu-dev` (écrit le test de reproduction **unitaire / intégration** par revert-verify), `bug-analyst` (phase analyse). Hors pipeline : l'agent principal quand il traite un fix. Auto-chargé via `paths:` (`.ts/.tsx`, `src/e2e/**`).
+> **Used by**: `code-dev` (issue type Bug, ou label `bug` — écrit **uniquement le fix source**, plus aucun test), `tu-dev` (écrit le test de reproduction **unitaire / intégration** par revert-verify), `e2e-dev` (écrit le test de reproduction **E2E** en fin de pipeline, s'il juge le bug assez critique), `bug-analyst` (phase analyse). Hors pipeline : l'agent principal quand il traite un fix. Auto-chargé via `paths:` (`.ts/.tsx`, `src/e2e/**`).
 
 Quand un ticket est un **bug** (issue type Bug, label `bug`, ou description explicite d'un comportement incorrect), `code-dev` suit un protocole strict **reproduire → fixer → valider**, en s'appuyant sur l'analyse postée par `bug-analyst` dans le commentaire `## Analyse du bug` (root cause, fichiers à modifier, fix proposé).
 
-> **Répartition tests** (dans la pipeline `/implement`) : `code-dev` écrit le fix source et, pour un bug **UI / parcours**, l'éventuel test de reproduction **E2E** (avant le fix, qui doit échouer). Les tests de reproduction **unitaire / intégration** sont écrits par `tu-dev` (étape 5.5 de `code-dev`), **après** le fix, et prouvés par **revert-verify** (revert du fix → RED → restore → GREEN). `code-dev` ne touche jamais aux TU / tests d'intégration.
+> **Répartition tests** (dans la pipeline `/implement`) : `code-dev` écrit **uniquement le fix source** — il n'écrit plus aucun test, ni unitaire/intégration, ni E2E. Les tests de reproduction **unitaire / intégration** sont écrits par `tu-dev` (étape 5.5 de `code-dev`), **après** le fix, et prouvés par **revert-verify** (revert du fix → RED → restore → GREEN). Le test de reproduction **E2E** (pour un bug UI/parcours **assez critique**) est écrit par `e2e-dev` en fin de pipeline, également prouvé par revert-verify. `code-dev` ne touche jamais aux tests.
 
 Cette discipline évite deux pièges fréquents :
 1. "Je crois que j'ai fixé" sans preuve → régression un mois plus tard
@@ -23,15 +23,13 @@ Cette discipline évite deux pièges fréquents :
 
 ### 1. Reproduire
 
-Un test doit reproduire le bug. **Qui l'écrit et quand dépend du type de test** :
+Un test doit reproduire le bug. **Qui l'écrit et quand dépend du type de test** — et ce n'est jamais `code-dev` :
 
-- **Bug UI / comportement utilisateur** → test E2E Playwright dans `src/e2e/<feature>.e2e.ts`, écrit par **`code-dev`** **avant** le fix. Il **doit échouer** sur la branche de base ; s'il passe avant le fix, il ne reproduit pas le bug → le revoir.
+- **Bug UI / comportement utilisateur** → test E2E Playwright dans `src/e2e/<feature>.e2e.ts`, écrit par **`e2e-dev`** en fin de pipeline, **uniquement s'il juge le bug assez critique** (parcours critique, fort risque de régression). De préférence imbriqué dans le scénario E2E existant qui couvre le parcours. Un bug mineur / cosmétique / visual-mismatch ne reçoit en général pas d'E2E.
 - **Bug logique métier / domain** → test unitaire Vitest dans `__tests__/` à côté du module, écrit par **`tu-dev`** (étape 5.5).
 - **Bug API / tRPC** → test unitaire du router (ou test d'intégration si le bug est au DB-layer), écrit par **`tu-dev`** (étape 5.5).
 
-Pour les tests **unitaire / intégration** (à `tu-dev`), la preuve de reproduction se fait **après** le fix par **revert-verify** : `tu-dev` reverse-applique le diff source de `code-dev` → le test doit être **RED** → ré-applique le fix → **GREEN**. Si le test passe sans le fix, il ne reproduit pas le bug → le retravailler.
-
-Commit intermédiaire possible pour le repro E2E de `code-dev` : `test(<scope>): reproduce bug #NNN` (avant le fix).
+La preuve de reproduction se fait **après** le fix par **revert-verify**, par l'agent qui écrit le test (`tu-dev` pour TU/intégration, `e2e-dev` pour l'E2E) : reverse-appliquer le diff source de `code-dev` → le test doit être **RED** → ré-appliquer le fix → **GREEN**. Si le test passe sans le fix, il ne reproduit pas le bug → le retravailler.
 
 ### 2. Identifier la root cause
 
@@ -49,15 +47,15 @@ Modifier le code pour faire passer le test. Le fix doit cibler la **root cause**
 ### 4. Valider
 
 - `pnpm typecheck` + `pnpm lint:check` verts (côté `code-dev`)
-- Le test de reproduction **E2E** (s'il y en a un) passe
 - La suite **TU + intégration** verte (pas de régression) est garantie par `tu-dev` à l'étape 5.5 — `code-dev` ne lance pas `pnpm test` lui-même. Si `tu-dev` détecte une vraie régression, il rend la main à `code-dev` pour corriger la source.
+- La suite **E2E** verte (pas de régression de parcours) et l'éventuel test de reproduction E2E sont garantis par `e2e-dev` en fin de pipeline.
 - Si le bug touche l'UI : rejouer manuellement le scénario dans le dev server avant de passer en **In review**
 
 ### 5. Commit
 
-Commit du fix : `fix(<scope>): <description courte> (#NNN)`.
+Commit du fix (par `code-dev`) : `fix(<scope>): <description courte> (#NNN)`.
 
-Le test de reproduction (E2E commit par `code-dev`, ou TU / intégration écrit par `tu-dev`) fait partie de la suite de non-régression permanente.
+Le test de reproduction (E2E écrit par `e2e-dev`, ou TU / intégration écrit par `tu-dev`) fait partie de la suite de non-régression permanente, committé séparément par son agent (`test(<scope>): …`).
 
 ---
 

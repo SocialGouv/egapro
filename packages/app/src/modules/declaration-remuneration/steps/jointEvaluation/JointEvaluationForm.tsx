@@ -12,6 +12,7 @@ import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { FileUpload, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
+import styles from "./JointEvaluationForm.module.scss";
 
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
@@ -88,7 +89,7 @@ export function JointEvaluationForm({
 					</h1>
 				</div>
 
-				<div className={common.flexColumnGap1}>
+				<div className={common.flexColumnGapHalf}>
 					<h2 className="fr-h5 fr-mb-0">
 						Évaluation conjointe des rémunérations
 					</h2>
@@ -146,8 +147,8 @@ export function JointEvaluationForm({
 				/>
 
 				<div>
-					<div className="fr-callout fr-callout--blue-france">
-						<h3 className="fr-callout__title fr-h6">
+					<div className={styles.panelBlue}>
+						<h3 className="fr-h6">
 							Ce que vous devez faire dans un délai de 2 mois
 						</h3>
 						<ul className="fr-mb-0">
@@ -157,8 +158,8 @@ export function JointEvaluationForm({
 							</li>
 						</ul>
 					</div>
-					<div className="fr-callout">
-						<h3 className="fr-callout__title fr-h6">Après dépôt du rapport</h3>
+					<div className={styles.panelWhite}>
+						<h3 className="fr-h6">Après dépôt du rapport</h3>
 						<ul className="fr-mb-2w">
 							<li>
 								Réaliser l&apos;analyse conjointe et définir des actions

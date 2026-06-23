@@ -45,6 +45,7 @@ vi.mock("../JointEvaluationForm", () => ({
 }));
 
 import { redirect } from "next/navigation";
+import { formatLongDate } from "~/modules/domain";
 import { api } from "~/trpc/server";
 import { JointEvaluationPage } from "../JointEvaluationPage";
 
@@ -123,7 +124,7 @@ describe("JointEvaluationPage", () => {
 		render(page);
 
 		expect(screen.getByTestId("declaration-date")).toHaveTextContent(
-			new Date("2025-06-15").toLocaleDateString("fr-FR"),
+			formatLongDate(new Date("2025-06-15")),
 		);
 	});
 
@@ -134,7 +135,7 @@ describe("JointEvaluationPage", () => {
 		render(page);
 
 		expect(screen.getByTestId("declaration-date")).toHaveTextContent(
-			new Date().toLocaleDateString("fr-FR"),
+			formatLongDate(new Date()),
 		);
 	});
 });

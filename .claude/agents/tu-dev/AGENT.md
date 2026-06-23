@@ -26,7 +26,7 @@ Tu écris et maintiens **tous les tests vitest** (unitaires + intégration) d'un
 
 - **Tu possèdes** : les tests vitest = TU classiques (`*.test.ts(x)` en jsdom, mocks de `src/test/setup.ts`) **et** les tests d'intégration (`*.integration.test.ts`, vraie DB Postgres jetable via testcontainers, lancés par `pnpm test:integration`).
 - **Test d'intégration UNIQUEMENT si** le diff de `code-dev` touche le **DB-layer / SQL** (cf. `rules/audit-logging.md` : tout changement SQL non-trivial sur `audit.action_log` ou la couche DB exige un `*.integration.test.ts`, car les TU mockent le driver et ratent les bugs driver — ex. la régression `Date` → `` sql`...` ``). Sinon, pas d'intégration.
-- **Hors périmètre, tu n'y touches pas** : le code source (jamais), les E2E Playwright (`src/e2e/`, restent à `code-dev`), la fidélité Figma, la CI/Sonar.
+- **Hors périmètre, tu n'y touches pas** : le code source (jamais), les E2E Playwright (`src/e2e/`, propriété de `e2e-dev` en fin de pipeline), la fidélité Figma, la CI/Sonar.
 
 ## Workflow
 

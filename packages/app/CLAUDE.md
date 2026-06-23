@@ -349,9 +349,9 @@ All code (components, functions, variables, comments, file names) in English. Us
 Tests live in `__tests__/` subfolder next to the module they test. Never in `src/app/`.
 75% minimum global coverage (enforced by Vitest thresholds). 100% coverage on all logic files. Test observable behavior, not implementation details.
 
-> **Pipeline ownership**: inside the `/implement` pipeline, the `tu-dev` agent (Opus) writes/fixes all vitest unit + integration tests at code-dev step 5.5 — before the 4 post-task gates run — and hands control back to code-dev on a genuine regression. code-dev keeps only the Playwright E2E.
+> **Pipeline ownership**: inside the `/implement` pipeline, the `tu-dev` agent (Opus) writes/fixes all vitest unit + integration tests at code-dev step 5.5 — before the 4 post-task gates run — and hands control back to code-dev on a genuine regression. The Playwright **E2E** tests are owned by the `e2e-dev` agent (Opus), which runs at the **end of the pipeline** (epic-end for a Feature, or after code-dev's `validated` verdict for a Task/Bug). `code-dev` writes **no test at all** — neither unit/integration nor E2E.
 
-**E2E completeness**: every route in `src/app/**/page.tsx` must have corresponding E2E tests in `src/e2e/`. Always verify all pages are covered when adding or modifying pages.
+**E2E completeness**: every route in `src/app/**/page.tsx` must have corresponding E2E tests in `src/e2e/`. `e2e-dev` verifies coverage when pages are added or modified, preferring to **nest** new behavior into an existing global scenario over creating many small files.
 
 > Full policy (what to test, mock boundaries, coverage rules, E2E completeness) → `.claude/rules/testing.md`
 
