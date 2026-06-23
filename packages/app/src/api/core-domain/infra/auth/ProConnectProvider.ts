@@ -19,6 +19,9 @@ export interface ProConnectProfile {
   job: string | null;
   organizations: Organization[] | string;
   phone_number: string | null;
+  // ProConnect (eidas0) returns the active organization as a single `siret`
+  // claim instead of the moncomptepro-style `organizations[]` array.
+  siret: string | null;
   sub: string;
   updated_at: Date;
 }

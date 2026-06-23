@@ -1,4 +1,8 @@
-import { type Organization, type ProConnectProfile, ProConnectProvider } from "@api/core-domain/infra/auth/ProConnectProvider";
+import {
+  type Organization,
+  type ProConnectProfile,
+  ProConnectProvider,
+} from "@api/core-domain/infra/auth/ProConnectProvider";
 import { companiesUtils, type Company } from "@api/core-domain/infra/companies-store";
 import { ownershipRepo } from "@api/core-domain/repo";
 import { SyncOwnership } from "@api/core-domain/useCases/SyncOwnership";
@@ -223,10 +227,10 @@ export const authConfig: AuthOptions = {
           }
         } else {
           // Handle both formats:
-          // - Array of Organization objects (ProConnect production)
+          // - Array of Organization objects (legacy moncomptepro / Keycloak local)
           // - Comma-separated SIREN string (Keycloak local)
           const rawOrganizations = profile?.organizations;
-          const organizations: Organization[] =
+          let organizations: Organization[] =
             typeof rawOrganizations === "string"
               ? rawOrganizations
                   .split(",")
@@ -242,6 +246,25 @@ export const authConfig: AuthOptions = {
                     is_service_public: false,
                   }))
               : (rawOrganizations ?? []).filter(orga => !!orga);
+
+          // ProConnect (eidas0) does not return `organizations[]`: the active
+          // organization the user selected in the ProConnect picker comes as a
+          // single `siret` claim. Derive the active org from it so the declarant
+          // session carries their company (otherwise companies stays empty).
+          if (organizations.length === 0 && profile?.siret) {
+            const siret = String(profile.siret);
+            organizations = [
+              {
+                id: 1,
+                siren: siret.substring(0, 9),
+                siret,
+                label: null,
+                is_collectivite_territoriale: false,
+                is_external: false,
+                is_service_public: false,
+              },
+            ];
+          }
 
           const sirenList = organizations.map(orga => orga.siren || orga.siret.substring(0, 9));
           if (profile?.email && sirenList.length > 0) {
