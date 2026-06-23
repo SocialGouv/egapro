@@ -1,10 +1,13 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockRedirect } = vi.hoisted(() => ({
+const { mockRedirect, mockGetActiveLock } = vi.hoisted(() => ({
 	mockRedirect: vi.fn<(url: string) => never>().mockImplementation(() => {
 		throw new Error("NEXT_REDIRECT");
 	}),
+	mockGetActiveLock: vi
+		.fn()
+		.mockResolvedValue({ lockedByOther: false, holder: null }),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -84,6 +87,9 @@ vi.mock("~/trpc/server", () => ({
 				.fn()
 				.mockResolvedValue({ hasSanction: false, validityDate: null }),
 		},
+		declarationLock: {
+			getActiveLockForCurrentDeclaration: mockGetActiveLock,
+		},
 	},
 	HydrateClient: ({ children }: { children: React.ReactNode }) => (
 		<>{children}</>
@@ -93,6 +99,10 @@ vi.mock("~/trpc/server", () => ({
 import { MonEspacePage } from "../MonEspacePage";
 
 describe("MonEspacePage", () => {
+	beforeEach(() => {
+		mockGetActiveLock.mockResolvedValue({ lockedByOther: false, holder: null });
+	});
+
 	it("redirects to mes-entreprises when siret is null", async () => {
 		await expect(
 			MonEspacePage({ siret: null, userPhone: null }),
@@ -126,5 +136,34 @@ describe("MonEspacePage", () => {
 		});
 		render(page);
 		expect(screen.getByRole("main")).toHaveAttribute("id", "content");
+	});
+
+	it("does not render the lock alert when the declaration is unlocked", async () => {
+		const page = await MonEspacePage({
+			siret: "12345678901234",
+			userPhone: "0612345678",
+		});
+		const { container } = render(page);
+		expect(container.querySelector('[role="alert"]')).not.toBeInTheDocument();
+	});
+
+	it("forwards the lock state when another co-declarant holds the lock", async () => {
+		mockGetActiveLock.mockResolvedValueOnce({
+			lockedByOther: true,
+			holder: {
+				firstName: "Alice",
+				lastName: "Martin",
+				email: "alice.martin@example.fr",
+			},
+		});
+		const page = await MonEspacePage({
+			siret: "12345678901234",
+			userPhone: "0612345678",
+		});
+		const { container } = render(page);
+		const alert = container.querySelector('[role="alert"]');
+		expect(alert).toBeInTheDocument();
+		expect(alert).toHaveTextContent("Déclaration en cours de modification");
+		expect(alert).toHaveTextContent("Alice Martin");
 	});
 });

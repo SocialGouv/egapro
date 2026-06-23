@@ -141,6 +141,21 @@ describe("auditMiddleware", () => {
 		});
 	});
 
+	it("logs the declaration lock state read (declarationLock.getActiveLockForCurrentDeclaration)", async () => {
+		const next = vi.fn(async () => ({ lockedByOther: true, holder: {} }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "declarationLock.getActiveLockForCurrentDeclaration",
+			getRawInput: buildGetRawInput(undefined),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "declaration.lock_state_read",
+			status: "success",
+		});
+	});
+
 	it("strips sensitive metadata keys (token, password, …)", async () => {
 		const next = vi.fn(async () => undefined);
 		await auditMiddleware({
