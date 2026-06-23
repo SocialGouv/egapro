@@ -30,6 +30,21 @@ describe("logout route", () => {
     expect(res.headers.get("set-cookie")).toContain("__Secure-next-auth.session-token=;");
   });
 
+  it("builds post_logout_redirect_uri from the public host (x-forwarded-host) behind the proxy", async () => {
+    mockedGetToken.mockResolvedValue({ id_token: "ID_TOKEN" });
+    mockedFetchEndSession.mockResolvedValue("https://issuer.test/session/end");
+
+    // request.url is the internal origin on Kubernetes; the public host arrives
+    // via x-forwarded-host / x-forwarded-proto.
+    const request = new Request("https://localhost:3000/api/auth/logout", {
+      headers: { "x-forwarded-host": "egapro.example.gouv.fr", "x-forwarded-proto": "https" },
+    });
+    const res = await GET(request as never);
+    const location = res.headers.get("location") ?? "";
+    const redirectUri = new URL(location).searchParams.get("post_logout_redirect_uri");
+    expect(redirectUri).toBe("https://egapro.example.gouv.fr/api/auth/logout/callback");
+  });
+
   it("falls back to home when there is no id_token", async () => {
     mockedGetToken.mockResolvedValue(null);
     const res = await call();

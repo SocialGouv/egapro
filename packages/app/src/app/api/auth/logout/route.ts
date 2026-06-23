@@ -1,10 +1,26 @@
 import { fetchEndSessionEndpoint } from "@api/core-domain/infra/auth/proconnect-logout";
 import { config } from "@common/config";
 import { verify } from "jsonwebtoken";
-import { getToken, type JWT } from "next-auth/jwt";
 import { type NextRequest, NextResponse } from "next/server";
+import { getToken, type JWT } from "next-auth/jwt";
 
 const secret = config.api.security.auth.secret;
+
+/**
+ * Resolve the public base URL behind the reverse proxy. On Kubernetes
+ * `request.url` reflects the internal origin (https://localhost:3000), which
+ * makes ProConnect reject the post_logout_redirect_uri and sends the user to a
+ * dead localhost link. The ingress (Traefik) sets `x-forwarded-host` /
+ * `x-forwarded-proto` with the public values, so prefer those.
+ */
+function getPublicBaseUrl(request: NextRequest): string {
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  if (forwardedHost) {
+    const forwardedProto = request.headers.get("x-forwarded-proto") ?? "https";
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+  return new URL(request.url).origin;
+}
 
 /**
  * RP-initiated logout. Reads the (custom HS256) session token to recover the
@@ -29,7 +45,7 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  const baseUrl = new URL(request.url).origin;
+  const baseUrl = getPublicBaseUrl(request);
   const redirectTarget = await buildLogoutRedirectUrl(token?.id_token ?? null, baseUrl);
   const response = NextResponse.redirect(redirectTarget);
 
