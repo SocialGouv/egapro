@@ -215,7 +215,7 @@ export async function POST(request: Request): Promise<Response> {
 	const safeFileName = fileName.trim();
 	const year = getCurrentYear();
 
-	// Collaborative edit lock (epic #3556). This route is not tRPC, so the lock
+	// Collaborative edit lock. This route is not tRPC, so the lock
 	// is enforced inline against the service rather than via the
 	// `declarationLockedWriteProcedure` middleware. The upload is refused when
 	// another co-declarant holds an active lock on the same declaration; a free

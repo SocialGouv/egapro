@@ -105,7 +105,7 @@ export const declarationDraftRouter = createTRPCRouter({
 			// edit lock. When no declaration exists yet (first save creates it) or
 			// the lock is free / held by this same user, the draft is allowed
 			// through — the strict "must own the lock" rule lives on the explicit
-			// step mutations, not on background draft persistence (epic #3556).
+			// step mutations, not on background draft persistence.
 			if (existing) {
 				const lock = await getActiveLock(ctx.db, existing.id);
 				if (lock && lock.userId !== ctx.session.user.id) {

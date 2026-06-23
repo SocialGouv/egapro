@@ -263,8 +263,8 @@ export const declarationWriteProcedure = companyWriteProcedure.use(
  * the request only proceeds when an **active** lock on `ctx.declarationId` is
  * held by the current user. Any other case — no lock, an expired lock, or a
  * lock held by another co-declarant — is rejected with `CONFLICT` so two
- * co-declarants can never write to the same declaration concurrently
- * (epic #3556). The editing UI is responsible for acquiring the lock via
+ * co-declarants can never write to the same declaration concurrently.
+ * The editing UI is responsible for acquiring the lock via
  * `declarationLock.acquireLock` before enabling writes.
  */
 export const declarationLockedWriteProcedure = declarationWriteProcedure.use(
