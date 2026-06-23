@@ -104,10 +104,6 @@ export async function acquireOrRefreshLock(
 	return { acquired: acquiredRows.length > 0, holder };
 }
 
-/**
- * Extend the lock's expiry and heartbeat if it is held by `userId`. Returns
- * `false` when the user does not currently hold the lock.
- */
 export async function refreshLock(
 	db: DbClient,
 	declarationId: string,
@@ -132,7 +128,6 @@ export async function refreshLock(
 	return updated.length > 0;
 }
 
-/** Release the lock on a declaration if it is held by `userId`. */
 export async function releaseLock(
 	db: DbClient,
 	declarationId: string,
@@ -148,7 +143,6 @@ export async function releaseLock(
 		);
 }
 
-/** Release every lock held by `userId` (e.g. on logout). */
 export async function releaseAllLocksForUser(
 	db: DbClient,
 	userId: string,
@@ -158,7 +152,7 @@ export async function releaseAllLocksForUser(
 		.where(eq(declarationLocks.lockedByUserId, userId));
 }
 
-/** Release the lock on a declaration unconditionally (admin override). */
+// No ownership predicate: admin override, callers gate on the admin role.
 export async function releaseLockAsAdmin(
 	db: DbClient,
 	declarationId: string,
