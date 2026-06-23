@@ -136,6 +136,14 @@ spec:
     services:
     - name: nginx
       port: 80
+  - kind: Rule
+    match: Host(`egapro.travail.gouv.fr`) && PathPrefix(`/apiv2/public/referents_egalite_professionnelle`)
+    middlewares:
+    - name: security-headers-nginx
+    priority: 10000
+    services:
+    - name: nginx
+      port: 80
   tls:
     secretName: api-crt
 ---
