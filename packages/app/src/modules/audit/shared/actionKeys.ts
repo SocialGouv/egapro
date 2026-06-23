@@ -26,6 +26,11 @@ export const AUDIT_ACTIONS = {
 	DECLARATION_SAVE_COMPLIANCE_PATH: "declaration.save_compliance_path",
 	DECLARATION_SUBMIT_JOINT_EVALUATION: "declaration.submit_joint_evaluation",
 
+	// ── Declaration edit lock mutations ────────────────────
+	DECLARATION_LOCK_ACQUIRED: "declaration.lock_acquired",
+	DECLARATION_LOCK_RELEASED: "declaration.lock_released",
+	ADMIN_DECLARATION_RELEASE_LOCK: "admin_declaration.release_lock",
+
 	// ── CSE opinion mutations ──────────────────────────────
 	CSE_OPINION_SAVE: "cse_opinion.save",
 	CSE_OPINION_UPLOAD_FILE: "cse_opinion.upload_file",
@@ -127,6 +132,10 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.DECLARATION_SUBMIT_SECOND]: "mutation",
 	[AUDIT_ACTIONS.DECLARATION_SAVE_COMPLIANCE_PATH]: "mutation",
 	[AUDIT_ACTIONS.DECLARATION_SUBMIT_JOINT_EVALUATION]: "mutation",
+
+	[AUDIT_ACTIONS.DECLARATION_LOCK_ACQUIRED]: "mutation",
+	[AUDIT_ACTIONS.DECLARATION_LOCK_RELEASED]: "mutation",
+	[AUDIT_ACTIONS.ADMIN_DECLARATION_RELEASE_LOCK]: "mutation",
 
 	[AUDIT_ACTIONS.CSE_OPINION_SAVE]: "mutation",
 	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: "mutation",
