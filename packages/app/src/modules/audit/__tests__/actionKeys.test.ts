@@ -18,6 +18,15 @@ describe("AUDIT_ACTIONS", () => {
 		const values = Object.values(AUDIT_ACTIONS);
 		expect(new Set(values).size).toBe(values.length);
 	});
+
+	it("maps the lock-timeout admin setting update to a mutation", () => {
+		expect(AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT).toBe(
+			"admin_settings.update_lock_timeout",
+		);
+		expect(
+			AUDIT_ACTION_CATEGORIES[AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT],
+		).toBe("mutation");
+	});
 });
 
 describe("retention constants", () => {

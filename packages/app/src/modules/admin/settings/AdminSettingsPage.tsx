@@ -2,15 +2,12 @@ import { getCurrentYear } from "~/modules/domain";
 import { api, HydrateClient } from "~/trpc/server";
 
 import { CampaignDeadlinesForm } from "./CampaignDeadlinesForm";
+import { LockTimeoutForm } from "./LockTimeoutForm";
 
-/**
- * Backoffice page to edit per-year campaign deadlines (GIP publication,
- * campaign start, CSE and declaration deadlines). The active campaign year is
- * now deduced from the `campaignStartDate` field and no longer edited here.
- */
 export async function AdminSettingsPage() {
 	const overview = await api.adminSettings.getOverview();
 	const initialYear = overview.configuredYears.at(-1) ?? getCurrentYear();
+	const lockTimeout = await api.adminSettings.getLockTimeout();
 
 	return (
 		<HydrateClient>
@@ -28,6 +25,13 @@ export async function AdminSettingsPage() {
 					configuredYears={overview.configuredYears}
 					initialYear={initialYear}
 				/>
+			</section>
+
+			<section aria-labelledby="lock-timeout-heading" className="fr-mt-4w">
+				<h2 className="fr-h3" id="lock-timeout-heading">
+					Verrou de déclaration
+				</h2>
+				<LockTimeoutForm initialTimeoutMinutes={lockTimeout.timeoutMinutes} />
 			</section>
 		</HydrateClient>
 	);

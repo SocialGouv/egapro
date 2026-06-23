@@ -3,10 +3,14 @@ import { eq } from "drizzle-orm";
 import {
 	campaignDeadlinesFormSchema,
 	getCampaignDeadlinesByYearSchema,
+	updateLockTimeoutSchema,
 } from "~/modules/admin/settings/schemas";
-import { getDefaultCampaignDeadlines } from "~/modules/domain";
+import {
+	DEFAULT_LOCK_TIMEOUT_MINUTES,
+	getDefaultCampaignDeadlines,
+} from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
-import { campaignDeadlines } from "~/server/db/schema";
+import { campaignDeadlines, globalSettings } from "~/server/db/schema";
 
 /**
  * Admin / settings router — edits platform-wide global variables.
@@ -86,6 +90,37 @@ export const adminSettingsRouter = createTRPCRouter({
 					defaults.decl2JointEvaluationDeadline,
 				),
 			};
+		}),
+
+	getLockTimeout: adminProcedure.query(async ({ ctx }) => {
+		const [row] = await ctx.db
+			.select({
+				declarationLockTimeoutMinutes:
+					globalSettings.declarationLockTimeoutMinutes,
+			})
+			.from(globalSettings)
+			.where(eq(globalSettings.id, 1))
+			.limit(1);
+
+		return {
+			timeoutMinutes:
+				row?.declarationLockTimeoutMinutes ?? DEFAULT_LOCK_TIMEOUT_MINUTES,
+		};
+	}),
+
+	updateLockTimeout: adminProcedure
+		.input(updateLockTimeoutSchema)
+		.mutation(async ({ ctx, input }) => {
+			await ctx.db
+				.update(globalSettings)
+				.set({
+					declarationLockTimeoutMinutes: input.timeoutMinutes,
+					updatedAt: new Date(),
+					updatedBy: ctx.session.user.id,
+				})
+				.where(eq(globalSettings.id, 1));
+
+			return { success: true as const };
 		}),
 
 	/**

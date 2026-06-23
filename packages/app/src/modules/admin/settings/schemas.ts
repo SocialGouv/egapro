@@ -55,3 +55,9 @@ export type CampaignDeadlinesFormValues = z.output<
 export const getCampaignDeadlinesByYearSchema = z.object({
 	year: campaignYearSchema,
 });
+
+export const updateLockTimeoutSchema = z.object({
+	timeoutMinutes: z.number().int().min(1).max(1440),
+});
+
+export type UpdateLockTimeoutInput = z.infer<typeof updateLockTimeoutSchema>;
