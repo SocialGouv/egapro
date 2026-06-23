@@ -1,0 +1,339 @@
+## egapro_implement_agents — la pipeline /implement d'egapro MISE À PLAT au niveau AGENT.
+## Objectif : voir l'ENCHAÎNEMENT des agents que le skill /implement lance — PAS ré-invoquer
+## le skill ni epic_loop.sh en boîte noire. Chaque nœud = un AGENT RÉEL (.claude/agents/*) ou
+## une étape déterministe (scripts/orchestration/*), dans l'ordre exact du skill + de code-dev.
+## Source : egapro/.claude/skills/implement/SKILL.md + .claude/agents/code-dev/AGENT.md (et ses
+## sous-agents tu-dev / validator / structural-auditor / rgaa-auditor / security-auditor /
+## functional-validator) + doc-writer + scripts/orchestration/*.
+##
+## Le skill /implement = PHASE EXÉCUTION. Il auto-détecte le mode selon l'issueType puis branche :
+##   · Feature (epic)   → epic_loop.sh en BACKGROUND : ticks parallèles, plusieurs sub-tickets.
+##   · Task / Bug / sub-issue → 1× `claude --agent code-dev` SYNCHRONE foreground (bloquant).
+## Dans les DEUX cas code-dev tourne comme MAIN AGENT (process CLI) — obligatoire pour qu'il
+## puisse spawner ses propres sous-agents (tu-dev, les 4 quality gates, functional-validator) :
+## un sous-agent ne peut pas en spawner d'autres. C'est pourquoi la pipeline qualité INTERNE de
+## code-dev est éclatée ici en vrais nœuds (tu_dev, gates //, functional_validator…) : ce sont
+## les sous-agents réels que code-dev orchestre.
+##
+## Limites iterion (assumées, annotées) — comme leviathan_agents.bot :
+##   · pas de fan-out data-driven → le fan-out ×T tickets de l'epic (pool s1..s5) apparaît UNE
+##     fois sur le nœud `code_dev`, annoté. La boucle de ticks (epic_plan → … → merge → tick
+##     suivant, ≤30) est annotée, montrée linéaire (merge → doc_writer après "tous tickets Done").
+##   · le verdict JSON de code-dev a 5 états (validated / needs_opus_escalation / refacto /
+##     rate_limited / failed) ; on le réduit à un judge `passed` (validated) + une arête de
+##     rework bornée, les nuances d'escalade étant gérées par `rework_dispatch` (annoté).
+##   · les boucles internes RETRY (tu-dev régression, gates findings, functional RETRY≤2, CI/
+##     Sonar repush) sont bornées `as <nom>(N)` quand structurantes, sinon annotées.
+##
+## Légende : 🤖 agent · ⚖️ judge (verdict) · 🔀 router (détection / fan-out) · 👤 gate humain ·
+##   🔧 tool (étape déterministe scripts/orchestration). Détail par nœud = commentaire au-dessus.
+
+vars:
+  egapro_dir: string = "."
+  repo: string = "SocialGouv/egapro"
+  issue: string = ""
+
+## ─── Schemas (minimaux : bools des gates/verdicts pour les arêtes `when`) ───
+schema issue_json:
+  result: string
+schema check_out:
+  has_analyse: bool
+schema verdict_out:
+  passed: bool
+schema gate_out:
+  approved: bool
+schema status_out:
+  result: string
+
+## ─── Prompts ───
+prompt dispatch_mode_system:
+  Routeur de dispatch /implement (Step 2). À partir de l'issueType : Feature → `epic_setup`
+  (loop driver background, tickets parallèles) ; Task / Bug / sub-issue non-feature →
+  `task_setup` (code-dev synchrone foreground, 1 ticket). Une sub-issue d'epic re-roulée à la
+  main = mode task-debug → `task_setup` aussi.
+prompt result_router_system:
+  Le verdict de code-dev est `validated`. Route selon le mode de dispatch :
+   · epic (sub-issue d'un epic, lancé via epic_loop.sh) → `merge_validated_ticket` (squash-merge
+     dans epic/<N>, débloque les enfants, tick suivant).
+   · Task / Bug standalone (foreground) → `task_handoff` : la PR reste à merger sur alpha par
+     l'humain, le ticket reste In progress (l'utilisateur le bouge à In review puis Done).
+prompt propose_analyse_instructions:
+  Step 1 — AUCUNE analyse trouvée sur ce ticket (pas de `## Analyse architecte` / `## Analyse du
+  bug`, ou epic sans sub-issues + `## Analyse PO`). code-dev n'aurait pas de spec à exécuter.
+  Le skill propose `/analyse <N>` puis sort. (Précondition non remplie → fail.)
+prompt final_review_instructions:
+  L4 — checkpoint humain FINAL de l'epic (le SEUL). epic_loop.sh a squash-mergé tous les
+  sous-tickets dans epic/<N>, régénéré la doc, et ouvert la PR finale epic/<N> → alpha (Closes #N
+  par sub-issue). Valider = merger la PR (clôt l'epic + toutes ses sub-issues). Refuser = stop.
+
+## ═══════════════════════════════════════════════════════════════════
+## STEP 0 — valider l'argument + récupérer le type d'issue
+## ═══════════════════════════════════════════════════════════════════
+tool fetch_issue:
+  command: `cd {{vars.egapro_dir}} && gh issue view {{vars.issue}} --repo {{vars.repo}} --json number,title,issueType,labels,state --jq '{number, title, issueType: .issueType.name, labels:[.labels[].name], state}'`
+  output: issue_json
+
+## ═══════════════════════════════════════════════════════════════════
+## STEP 1 — vérifier que l'analyse a été faite (sinon → /analyse + exit)
+## ═══════════════════════════════════════════════════════════════════
+## Marqueur attendu selon le type : Feature → subIssues>0 ET `## Analyse PO` ; Task →
+## `## Analyse architecte` ; Bug → `## Analyse du bug`. Déterministe (gh + jq), no-LLM.
+tool check_analyse:
+  command: `cd {{vars.egapro_dir}} && echo "check: ## Analyse architecte / ## Analyse du bug / subIssues+## Analyse PO selon le type — déterministe (has_analyse)"`
+  output: check_out
+
+## Branche sur la présence de l'analyse (Step 1 du SKILL).
+router analyse_router:
+  mode: condition
+
+## Précondition non remplie → le skill propose /analyse <N> et sort.
+human propose_analyse:
+  instructions: propose_analyse_instructions
+  interaction: human
+  output: gate_out
+
+## ═══════════════════════════════════════════════════════════════════
+## STEP 2 — dispatch selon le mode (Feature=epic background / Task|Bug=foreground)
+## ═══════════════════════════════════════════════════════════════════
+router detect_mode:
+  mode: llm
+  model: "anthropic/claude-sonnet-4-6"
+  system: dispatch_mode_system
+
+## ─────────────────────────────────────────────────────────────
+## MODE epic — loop driver background (epic_loop.sh)
+## ─────────────────────────────────────────────────────────────
+## SKILL Step 2 epic — aligne le main worktree sur epic/<N> : refuse si dirty, ensure_epic_branch.sh
+## (crée epic/<N> depuis origin/alpha si absente), checkout + pull --ff-only. Lance epic_loop.sh en
+## nohup background + l'auto-report `/loop /report <N>` (dynamic-pacing, non tracé : canal de suivi).
+tool epic_setup:
+  command: `cd {{vars.egapro_dir}} && echo "ensure_epic_branch.sh {{vars.issue}} + checkout epic/{{vars.issue}} + nohup epic_loop.sh & + /loop /report"`
+  output: status_out
+
+## UN TICK du loop (epic_loop.sh, ×≤30 ticks — EPIC_LOOP_MAX_TICKS) : cleanup_terminal_worktrees.sh
+## (libère les slots des tickets squash-mergés) → rebase_epic_branch.sh (epic/<N> sur origin/alpha)
+## → dispatch_plan.sh (calcule les tickets dispatchables : parse `## Depends on`, gate les enfants
+## dont le parent n'est pas encore mergé, alloue les indices [0, EPIC_MAX_PARALLEL[). Déterministe.
+tool epic_plan:
+  command: `cd {{vars.egapro_dir}} && echo "tick: cleanup_terminal_worktrees → rebase_epic_branch → dispatch_plan (×30 max, pool 1-5)"`
+  output: status_out
+
+## ─────────────────────────────────────────────────────────────
+## MODE task / bug — code-dev synchrone foreground (1 ticket)
+## ─────────────────────────────────────────────────────────────
+## SKILL Step 2 task/bug — worktree dédié + setup-worktree.sh <index> (port 3001+index) ;
+## create_linked_branch.sh (base origin/epic/<E> pour une sub-issue, sinon origin/alpha) ;
+## set_ticket_status.sh In progress. Puis lance `claude --agent code-dev` BLOQUANT (Bug =
+## + rules/bug-fix-workflow.md). Modèle/budget : opus+$40 si label `complexe`, sinon sonnet+$10.
+tool task_setup:
+  command: `cd {{vars.egapro_dir}} && echo "worktree + setup-worktree.sh idx + create_linked_branch.sh + set_ticket_status In progress"`
+  output: status_out
+
+## ═══════════════════════════════════════════════════════════════════
+## CODE-DEV — pipeline qualité INTERNE, partagée par les 2 modes
+## (epic : ×T tickets en // pool s1..s5 ; task/bug : 1 ticket synchrone)
+## ═══════════════════════════════════════════════════════════════════
+## Agent `code-dev` (MAIN AGENT — sonnet, ou opus si label `complexe`). Étapes internes 1-5 :
+## lit le spec selon le type (Feature → body `ticket-spec-format` ; Task → commentaire
+## `## Analyse architecte` ; Bug → `## Analyse du bug` + bug-fix-workflow) ; implémente les
+## fichiers (zéro commentaire de code, pas de tests — c'est tu-dev) ; typecheck. Spec manquant
+## → refacto. Logue chaque transition (log_event.sh) pour /report.
+agent code_dev:
+  backend: "claude_code"
+  output: status_out
+
+## Étape 5.5 — sous-agent `tu-dev` (Opus TOUJOURS, budget isolé). WRITER (tests only, jamais le
+## code source). Lit le diff de code-dev, lance vitest, trie les échecs ; Bug → test revert-verify
+## (revert fix → RED, restore → GREEN). Verdicts : TU PASS (suite verte + coverage) → gates ;
+## TU REGRESSION (vraie régression → handback code-dev qui corrige la SOURCE, boucle ≤3) ;
+## TU FAILED (infra). Au-delà de 3 tentatives sans PASS → escalade (comme étape 9).
+agent tu_dev:
+  backend: "claude_code"
+  output: verdict_out
+
+## Étape 6 — 4 QUALITY GATES en parallèle (sous-agents read-only de code-dev, Sonnet).
+router gates_fanout:
+  mode: fan_out_all
+
+## `validator` — typecheck + test + lint + format (la suite est déjà verte via tu-dev). PASS/FAIL.
+agent validator:
+  backend: "claude_code"
+  output: status_out
+## `structural-auditor` — 17 règles (forms, schemas Zod, DRY, imports ~/, no-comments, file size…).
+agent structural_auditor:
+  backend: "claude_code"
+  output: status_out
+## `rgaa-auditor` — 13 thèmes RGAA sur les `.tsx` modifiés (labels, alt, aria, focus, contrastes…).
+agent rgaa_auditor:
+  backend: "claude_code"
+  output: status_out
+## `security-auditor` — OWASP Top 10 + RGS sur les fichiers server/routers/tRPC (authz, injection…).
+agent security_auditor:
+  backend: "claude_code"
+  output: status_out
+
+## Consolidation des 4 gates. code-dev corrige TOUTES les findings et re-run jusqu'au vert
+## (findings sur fichier de test → re-invoque tu-dev). passed = les 4 PASS → PR draft.
+judge gates_consolidate:
+  await: wait_all
+  output: verdict_out
+  backend: "claude_code"
+
+## Étape 7 (Figma — interne à code-dev, annotée) + Étape 8/8.5 : gh pr create --draft
+## --base epic/<N>|alpha (Closes #N ligne 1), force_pr_issue_link.sh (peuple la sidebar
+## Development). Ticket reste In progress. PR draft pendant les validations 9.
+tool pr_draft:
+  command: `cd {{vars.egapro_dir}} && echo "gh pr create --draft --base <base> (Closes #N) + force_pr_issue_link.sh"`
+  output: status_out
+
+## Étape 9 — 3 axes de validation en parallèle.
+router checks_fanout:
+  mode: fan_out_all
+
+## 9a — sous-agent `functional-validator` (Sonnet). Rejoue les scénarios PO (S1, S2…) dans le
+##  dev server via Playwright + nextjs get_errors. PASS / RETRY (gap mineur, ≤2 → code-dev
+##  corrige + push) / REFACTO (gap structurel → ticket To Do). Read-only.
+agent functional_validator:
+  backend: "claude_code"
+  output: status_out
+## 9b — CI GitHub Actions : gh pr checks --watch. Critère de sortie : TOUTES les conclusions
+##  SUCCESS/SKIPPED/NEUTRAL (y compris Deploy Review, lent). Rouge → code-dev corrige + repush.
+tool ci_check:
+  command: `cd {{vars.egapro_dir}} && echo "gh pr checks --watch (toutes conclusions SUCCESS/SKIPPED/NEUTRAL)"`
+  output: status_out
+## 9c — SonarCloud : le bot commente la PR avec le Quality Gate. Failed → code-dev lit le
+##  dashboard, corrige (bugs / smells / coverage / hotspots), repush. Bloquant avant pr ready.
+tool sonar_check:
+  command: `cd {{vars.egapro_dir}} && echo "SonarCloud Quality Gate (bloquant : bugs/vulns/hotspots)"`
+  output: status_out
+
+## 9d — cycle review UNIQUE (1 itération max), APRÈS 9a+9b+9c verts. code-dev attend la rafale
+## des bots (revu-bot…) avec debounce, lit TOUS les comments bot+humain, corrige les pertinents
+## + répond à CHAQUE thread (post-condition : zéro thread non-répondu), push. Les comments postés
+## APRÈS ce push relèvent du skill /review (pas de re-lecture → pas de boucle infinie).
+agent bot_review:
+  await: wait_all
+  backend: "claude_code"
+  output: status_out
+
+## Verdict final de code-dev (dernier message JSON strict, parsé par jq). passed = `validated`
+## (PR ready, ticket reste In progress). not passed = needs_opus_escalation / refacto /
+## rate_limited / failed → rework_dispatch.
+judge code_dev_verdict:
+  output: verdict_out
+  backend: "claude_code"
+
+## process_tick_result.sh — applique les mutations board selon le verdict + anti-boucle :
+##  needs_opus_escalation → label `complexe` + re-dispatch en Opus (Sonnet épuisé) ;
+##  refacto → re-Todo, compteur attempt=1..3, au 3e consécutif → `dispatch=escalate` (exit 2,
+##  intervention humaine) ; rate_limited → retry après délai ; failed → propage l'erreur.
+tool rework_dispatch:
+  command: `cd {{vars.egapro_dir}} && echo "process_tick_result.sh : escalade Opus / refacto attempt 1-3 / rate_limit / fail"`
+  output: status_out
+
+## ═══════════════════════════════════════════════════════════════════
+## POST-VALIDATED — divergence epic vs task/bug
+## ═══════════════════════════════════════════════════════════════════
+## Le mode (perdu après la convergence sur code_dev) est ré-inféré ici depuis le contexte.
+router result_router:
+  mode: llm
+  model: "anthropic/claude-sonnet-4-6"
+  system: result_router_system
+
+## ── EPIC : squash-merge → (tick suivant ×30, annoté) → doc → PR finale → review humaine ──
+## merge_validated_ticket.sh — squash-merge la PR validée dans epic/<N> (gh pr merge --squash) ;
+## débloque les tickets enfants (leur parent n'existe plus sur origin). Sur conflit : commente +
+## remet le ticket In progress (le tick suivant le redispatchera pour rebaser).
+## [Boucle de ticks : retour à `epic_plan` tant que le board n'est pas vide — montré linéaire.]
+tool merge_validated_ticket:
+  command: `cd {{vars.egapro_dir}} && echo "merge_validated_ticket.sh (squash-merge dans epic/<N>) — puis tick suivant OU, board vide, doc"`
+  output: status_out
+
+## Fin d'epic (best-effort, non-bloquant) — agent `doc-writer` (Sonnet) via run_doc_writer.sh :
+## régénère docs/{features,architecture,parcours-utilisateurs}.md from scratch sur epic/<N>,
+## commit + push. JSON : updated / no_changes / rate_limited / failed. Writer (docs only).
+agent doc_writer:
+  backend: "claude_code"
+  output: status_out
+
+## open_epic_final_pr.sh — ouvre (ou réutilise) la PR finale epic/<N> → alpha, body listant
+## chaque sub-ticket via `Closes #N` (auto-close groupé au merge).
+tool open_final_pr:
+  command: `cd {{vars.egapro_dir}} && echo "open_epic_final_pr.sh (PR epic/<N> → alpha, Closes #N par sub-issue)"`
+  output: status_out
+
+## L4 — SEUL checkpoint humain de l'epic : review + merge de la PR finale.
+human final_review:
+  output: gate_out
+  instructions: final_review_instructions
+  interaction: human
+
+## ── TASK / BUG : la PR reste à merger par l'humain ; le ticket reste In progress ──
+## AI terminus = `gh pr ready` + retour validated. set_ticket_status refuse In review/Done
+## (user-only). L'utilisateur merge la PR sur alpha à la revue.
+tool task_handoff:
+  command: `echo "PR ready — ticket reste In progress ; l'utilisateur passe à In review puis Done + merge la PR sur alpha"`
+  output: status_out
+
+## ═══════════════════════════════════════════════════════════════════
+## WORKFLOW — l'enchaînement
+## ═══════════════════════════════════════════════════════════════════
+workflow egapro_implement_agents:
+  entry: fetch_issue
+
+  budget:
+    max_parallel_branches: 5
+    max_duration: "12h"
+    max_cost_usd: 200
+    max_tokens: 8000000
+    max_iterations: 40
+
+  ## Step 0 + Step 1 — fetch → analyse présente ?
+  fetch_issue -> check_analyse
+  check_analyse -> analyse_router
+  analyse_router -> detect_mode when has_analyse
+  analyse_router -> propose_analyse when not has_analyse
+  propose_analyse -> fail
+
+  ## Step 2 — dispatch
+  detect_mode -> epic_setup
+  detect_mode -> task_setup
+  epic_setup -> epic_plan
+  epic_plan -> code_dev
+  task_setup -> code_dev
+
+  ## code-dev : impl → tu-dev → 4 gates // → PR draft → 3 axes // → review → verdict
+  code_dev -> tu_dev
+  tu_dev -> gates_fanout when passed
+  tu_dev -> code_dev when not passed as tu_rework(3)
+  gates_fanout -> validator
+  gates_fanout -> structural_auditor
+  gates_fanout -> rgaa_auditor
+  gates_fanout -> security_auditor
+  validator -> gates_consolidate
+  structural_auditor -> gates_consolidate
+  rgaa_auditor -> gates_consolidate
+  security_auditor -> gates_consolidate
+  gates_consolidate -> pr_draft when passed
+  gates_consolidate -> code_dev when not passed as gates_rework(3)
+  pr_draft -> checks_fanout
+  checks_fanout -> functional_validator
+  checks_fanout -> ci_check
+  checks_fanout -> sonar_check
+  functional_validator -> bot_review
+  ci_check -> bot_review
+  sonar_check -> bot_review
+  bot_review -> code_dev_verdict
+  code_dev_verdict -> result_router when passed
+  code_dev_verdict -> rework_dispatch when not passed
+  rework_dispatch -> code_dev as dev_rework(3)
+
+  ## post-validated : epic (squash → doc → PR finale → review) vs task/bug (handoff humain)
+  result_router -> merge_validated_ticket
+  result_router -> task_handoff
+  merge_validated_ticket -> doc_writer
+  doc_writer -> open_final_pr
+  open_final_pr -> final_review
+  final_review -> done when approved
+  final_review -> fail when not approved
+  task_handoff -> done

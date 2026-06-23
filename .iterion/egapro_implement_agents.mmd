@@ -1,0 +1,96 @@
+── Diagram: egapro_implement_agents.bot ──
+  Workflow:        egapro_implement_agents
+  View:            compact
+
+flowchart TD
+    analyse_router{"🔀 analyse_router"}
+    bot_review[["🤖 bot_review"]]
+    check_analyse["🔧 check_analyse"]
+    checks_fanout{"🔀 checks_fanout"}
+    ci_check["🔧 ci_check"]
+    code_dev["🤖 code_dev"]
+    code_dev_verdict["⚖️ code_dev_verdict"]
+    detect_mode{"🔀 detect_mode"}
+    doc_writer["🤖 doc_writer"]
+    done(["✅ done"])
+    epic_plan["🔧 epic_plan"]
+    epic_setup["🔧 epic_setup"]
+    fail(["❌ fail"])
+    fetch_issue["🔧 fetch_issue"]
+    final_review>"👤 final_review"]
+    functional_validator["🤖 functional_validator"]
+    gates_consolidate[["⚖️ gates_consolidate"]]
+    gates_fanout{"🔀 gates_fanout"}
+    merge_validated_ticket["🔧 merge_validated_ticket"]
+    open_final_pr["🔧 open_final_pr"]
+    pr_draft["🔧 pr_draft"]
+    propose_analyse>"👤 propose_analyse"]
+    result_router{"🔀 result_router"}
+    rework_dispatch["🔧 rework_dispatch"]
+    rgaa_auditor["🤖 rgaa_auditor"]
+    security_auditor["🤖 security_auditor"]
+    sonar_check["🔧 sonar_check"]
+    structural_auditor["🤖 structural_auditor"]
+    task_handoff["🔧 task_handoff"]
+    task_setup["🔧 task_setup"]
+    tu_dev["🤖 tu_dev"]
+    validator["🤖 validator"]
+
+    fetch_issue --> check_analyse
+    check_analyse --> analyse_router
+    analyse_router -->|"has_analyse"| detect_mode
+    analyse_router -->|"NOT has_analyse"| propose_analyse
+    propose_analyse --> fail
+    detect_mode --> epic_setup
+    detect_mode --> task_setup
+    epic_setup --> epic_plan
+    epic_plan --> code_dev
+    task_setup --> code_dev
+    code_dev --> tu_dev
+    tu_dev -->|"passed"| gates_fanout
+    tu_dev -->|"NOT passed / loop:tu_rework(3)"| code_dev
+    gates_fanout --> validator
+    gates_fanout --> structural_auditor
+    gates_fanout --> rgaa_auditor
+    gates_fanout --> security_auditor
+    validator --> gates_consolidate
+    structural_auditor --> gates_consolidate
+    rgaa_auditor --> gates_consolidate
+    security_auditor --> gates_consolidate
+    gates_consolidate -->|"passed"| pr_draft
+    gates_consolidate -->|"NOT passed / loop:gates_rework(3)"| code_dev
+    pr_draft --> checks_fanout
+    checks_fanout --> functional_validator
+    checks_fanout --> ci_check
+    checks_fanout --> sonar_check
+    functional_validator --> bot_review
+    ci_check --> bot_review
+    sonar_check --> bot_review
+    bot_review --> code_dev_verdict
+    code_dev_verdict -->|"passed"| result_router
+    code_dev_verdict -->|"NOT passed"| rework_dispatch
+    rework_dispatch -->|"loop:dev_rework(3)"| code_dev
+    result_router --> merge_validated_ticket
+    result_router --> task_handoff
+    merge_validated_ticket --> doc_writer
+    doc_writer --> open_final_pr
+    open_final_pr --> final_review
+    final_review -->|"approved"| done
+    final_review -->|"NOT approved"| fail
+    task_handoff --> done
+
+    classDef agent fill:#4A90D9,stroke:#2C5F8A,color:#fff
+    classDef judge fill:#7B68EE,stroke:#5A4CB5,color:#fff
+    classDef router fill:#F5A623,stroke:#C47D0E,color:#fff
+    classDef human fill:#FF6B6B,stroke:#CC4444,color:#fff
+    classDef tool fill:#A0522D,stroke:#6E3720,color:#fff
+    classDef compute fill:#6BB7B7,stroke:#3D7A7A,color:#fff
+    classDef done fill:#2ECC71,stroke:#1A8B4C,color:#fff
+    classDef fail fill:#E74C3C,stroke:#A93226,color:#fff
+    class code_dev_verdict,gates_consolidate judge
+    class analyse_router,checks_fanout,detect_mode,gates_fanout,result_router router
+    class final_review,propose_analyse human
+    class done done
+    class fail fail
+    class check_analyse,ci_check,epic_plan,epic_setup,fetch_issue,merge_validated_ticket,open_final_pr,pr_draft,rework_dispatch,sonar_check,task_handoff,task_setup tool
+    class bot_review,code_dev,doc_writer,functional_validator,rgaa_auditor,security_auditor,structural_auditor,tu_dev,validator agent
