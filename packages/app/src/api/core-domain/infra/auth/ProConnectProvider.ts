@@ -45,13 +45,36 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     checks: ["pkce", "state"],
     userinfo: {
       async request({ tokens: { access_token }, client }) {
-        // logger.child({ tokens: { access_token } }).info(`userinfo request`);
         logger.info(`userinfo request`);
         if (!access_token) {
           throw new Error("ProConnectProvider - Userinfo request is missing access_token.");
         }
 
-        return client.userinfo<ProConnectProfile>(access_token);
+        // ProConnect's /userinfo returns a SIGNED JWT (application/jwt), not JSON.
+        // openid-client's `client.userinfo()` JSON.parses the raw body and throws
+        // ("Unexpected token 'e', \"eyJhbGciOi\"... is not valid JSON"), breaking the
+        // OAuth callback. Fetch the endpoint ourselves and decode the JWT payload
+        // (same approach as the alpha/V2 provider).
+        const userinfoEndpoint = client.issuer.metadata.userinfo_endpoint;
+        if (!userinfoEndpoint) {
+          throw new Error("ProConnectProvider - userinfo_endpoint missing from discovery.");
+        }
+
+        const response = await fetch(userinfoEndpoint, {
+          headers: { Authorization: `Bearer ${access_token}` },
+        });
+        const body = await response.text();
+
+        if (body.startsWith("{")) {
+          return JSON.parse(body) as ProConnectProfile;
+        }
+
+        const payload = body.split(".")[1];
+        if (!payload) {
+          throw new Error("ProConnectProvider - invalid JWT received from userinfo.");
+        }
+
+        return JSON.parse(Buffer.from(payload, "base64url").toString("utf-8")) as ProConnectProfile;
       },
     },
     profile(profile) {
