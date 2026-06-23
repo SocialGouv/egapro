@@ -18,6 +18,7 @@ import { auth } from "~/server/auth";
 import { assertNotImpersonating } from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
 import { declarations } from "~/server/db/schema";
+import { getActiveLock } from "~/server/services/declarationLockService";
 
 /**
  * 1. CONTEXT
@@ -252,5 +253,29 @@ export const declarationWriteProcedure = companyWriteProcedure.use(
 	async ({ ctx, next }) => {
 		const declarationId = await fetchCurrentDeclarationId(ctx.db, ctx.siren);
 		return next({ ctx: { ...ctx, declarationId } });
+	},
+);
+
+/**
+ * Declaration-scoped write procedure guarded by the collaborative edit lock.
+ *
+ * Same as {@link declarationWriteProcedure} plus the `enforceLock` middleware:
+ * the request only proceeds when an **active** lock on `ctx.declarationId` is
+ * held by the current user. Any other case — no lock, an expired lock, or a
+ * lock held by another co-declarant — is rejected with `CONFLICT` so two
+ * co-declarants can never write to the same declaration concurrently.
+ * The editing UI is responsible for acquiring the lock via
+ * `declarationLock.acquireLock` before enabling writes.
+ */
+export const declarationLockedWriteProcedure = declarationWriteProcedure.use(
+	async ({ ctx, next }) => {
+		const lock = await getActiveLock(ctx.db, ctx.declarationId);
+		if (!lock || lock.userId !== ctx.session.user.id) {
+			throw new TRPCError({
+				code: "CONFLICT",
+				message: "Déclaration verrouillée par un autre utilisateur.",
+			});
+		}
+		return next();
 	},
 );

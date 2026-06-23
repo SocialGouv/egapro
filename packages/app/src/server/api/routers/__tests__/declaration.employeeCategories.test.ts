@@ -3,6 +3,14 @@ import {
 	createCaller,
 	mockDeclaration,
 } from "./helpers/declarationTestHelpers";
+import { withLockMiddleware } from "./helpers/lockTestHelpers";
+
+// updateEmployeeCategories runs through `declarationLockedWriteProcedure`, so
+// the lock middleware issues two `ctx.db.select` calls before the handler;
+// `withLockMiddleware` answers both with the current user holding the lock.
+function createLockedCaller(mockDb: unknown) {
+	return createCaller(withLockMiddleware(mockDb));
+}
 
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
@@ -105,7 +113,7 @@ describe("declarationRouter", () => {
 				fn(tx),
 			);
 			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			const result = await caller.updateEmployeeCategories(employeeInput);
 
@@ -124,7 +132,7 @@ describe("declarationRouter", () => {
 				fn(tx),
 			);
 			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			const correctionInput = {
 				declarationType: "correction" as const,
@@ -158,7 +166,7 @@ describe("declarationRouter", () => {
 				fn(tx),
 			);
 			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			await expect(
 				caller.updateEmployeeCategories(employeeInput),
