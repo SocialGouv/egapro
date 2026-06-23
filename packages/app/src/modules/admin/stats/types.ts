@@ -141,10 +141,10 @@ export type LabeledCount = {
 
 /**
  * Output of `adminStats.getMatomoCategoryModel` — usage of the
- * indicator-by-category model for one campaign year: template downloads by
- * format, successful imports, and import failures by error type.
- * `avgImportDurationSeconds` is the mean time between getting the model and a
- * successful import (null when no sample). All-empty / null when
+ * indicator-by-category model for one campaign year: successful imports and
+ * import failures by error type.
+ * `avgImportDurationSeconds` is the mean time between opening the import modal
+ * and a successful import (null when no sample). All-empty / null when
  * `MATOMO_API_TOKEN` is absent.
  */
 export type CategoryModelUsage = {

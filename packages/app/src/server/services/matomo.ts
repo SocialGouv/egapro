@@ -386,18 +386,6 @@ async function fetchCategoryModelUsage(
 	);
 	const rows: LabeledCount[] = [];
 
-	const downloadAction = actions.find(
-		(row) => row.label === MATOMO_ACTION.CATEGORY_TEMPLATE_DOWNLOAD,
-	);
-	const downloadNames = await getActionNames(config, downloadAction, year);
-	for (const name of downloadNames) {
-		rows.push({
-			key: `download_${name.label}`,
-			label: `Téléchargement modèle (.${name.label})`,
-			count: toCount(name.nb_events),
-		});
-	}
-
 	const importAction = actions.find(
 		(row) => row.label === MATOMO_ACTION.CATEGORY_IMPORT,
 	);

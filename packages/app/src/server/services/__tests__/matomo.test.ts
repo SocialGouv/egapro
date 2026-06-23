@@ -222,11 +222,6 @@ function behaviourApiResponder(init: { body: URLSearchParams }): Row[] {
 	if (method === "Events.getActionFromCategoryId") {
 		if (idSubtable === "40") {
 			return [
-				{
-					label: "category_template_download",
-					nb_events: 120,
-					idsubdatatable: 41,
-				},
 				{ label: "category_import", nb_events: 55 },
 				{ label: "category_import_failure", nb_events: 8, idsubdatatable: 42 },
 				{ label: "category_import_duration", avg_event_value: 12.6 },
@@ -237,12 +232,6 @@ function behaviourApiResponder(init: { body: URLSearchParams }): Row[] {
 		}
 	}
 	if (method === "Events.getNameFromActionId") {
-		if (idSubtable === "41") {
-			return [
-				{ label: "xlsx", nb_events: 80 },
-				{ label: "csv", nb_events: 40 },
-			];
-		}
 		if (idSubtable === "42") {
 			return [
 				{ label: "missing-columns", nb_events: 5 },
@@ -266,18 +255,12 @@ describe("fetchMatomoCategoryModel", () => {
 	beforeEach(() => setMatomoEnv());
 	afterEach(() => vi.restoreAllMocks());
 
-	it("splits template downloads by format, counts imports, and splits failures by error type", async () => {
+	it("counts imports and splits failures by error type", async () => {
 		stubFetch(behaviourApiResponder);
 
 		const { rows } = await fetchMatomoCategoryModel({ year: 2024 });
 
 		expect(rows).toEqual([
-			{
-				key: "download_xlsx",
-				label: "Téléchargement modèle (.xlsx)",
-				count: 80,
-			},
-			{ key: "download_csv", label: "Téléchargement modèle (.csv)", count: 40 },
 			{ key: "import", label: "Imports réussis", count: 55 },
 			{
 				key: "failure_missing-columns",

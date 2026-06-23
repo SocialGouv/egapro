@@ -22,8 +22,8 @@ fine se fait dans Matomo. Un **dashboard d'administration** (`/admin/stats`)
 rapatrie en plus, via la **Reporting API** de Matomo (service
 `~/server/services/matomo.ts`, secret `MATOMO_API_TOKEN`), les funnels de
 parcours (`adminStats.getMatomoFunnel`) **ainsi que** l'usage du modèle de
-l'indicateur par catégorie (`getMatomoCategoryModel` — téléchargements par
-format, imports, échecs par type, durée moyenne de remplissage), les clics sur
+l'indicateur par catégorie (`getMatomoCategoryModel` — imports, échecs par
+type, durée moyenne de remplissage), les clics sur
 les liens d'aide (`getMatomoHelpLinks`) et la répartition par appareil
 (`getMatomoDeviceBreakdown`). Ces trois derniers widgets lisent des événements
 sans dimension de campagne : ils sont donc bornés par **année calendaire** et ne
