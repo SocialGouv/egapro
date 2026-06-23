@@ -31,6 +31,12 @@ export type CompanyDetail = {
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
 
+export type LockHolderDisplay = {
+	firstName: string | null;
+	lastName: string | null;
+	email: string | null;
+};
+
 export type DeclarationItem = {
 	type: DeclarationType;
 	siren: string;

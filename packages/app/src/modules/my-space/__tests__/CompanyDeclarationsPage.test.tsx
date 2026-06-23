@@ -78,101 +78,83 @@ const declarations: DeclarationItem[] = [
 	},
 ];
 
+type LockHolder = {
+	firstName: string | null;
+	lastName: string | null;
+	email: string | null;
+};
+
+const BASE_PROPS = {
+	campaignDeadlines,
+	company,
+	declarations,
+	hasNoSanction: false,
+	lockedByOther: false,
+	lockHolder: null as LockHolder | null,
+	userPhone: "0122334455" as string | null,
+};
+
+function renderPage(overrides: Partial<typeof BASE_PROPS> = {}) {
+	return render(<CompanyDeclarationsPage {...BASE_PROPS} {...overrides} />);
+}
+
 describe("CompanyDeclarationsPage", () => {
 	it("renders the main landmark with id 'content'", () => {
-		render(
-			<CompanyDeclarationsPage
-				campaignDeadlines={campaignDeadlines}
-				company={company}
-				declarations={declarations}
-				hasNoSanction={false}
-				userPhone="0122334455"
-			/>,
-		);
+		renderPage();
 		const main = screen.getByRole("main");
 		expect(main).toBeInTheDocument();
 		expect(main).toHaveAttribute("id", "content");
 	});
 
 	it("renders the company name", () => {
-		render(
-			<CompanyDeclarationsPage
-				campaignDeadlines={campaignDeadlines}
-				company={company}
-				declarations={declarations}
-				hasNoSanction={false}
-				userPhone="0122334455"
-			/>,
-		);
+		renderPage();
 		expect(
 			screen.getByRole("heading", { level: 2, name: "Alpha Solutions" }),
 		).toBeInTheDocument();
 	});
 
 	it("renders the 'Démarche en cours' heading", () => {
-		render(
-			<CompanyDeclarationsPage
-				campaignDeadlines={campaignDeadlines}
-				company={company}
-				declarations={declarations}
-				hasNoSanction={false}
-				userPhone="0122334455"
-			/>,
-		);
+		renderPage();
 		expect(
 			screen.getByRole("heading", { level: 2, name: "Démarche en cours" }),
 		).toBeInTheDocument();
 	});
 
 	it("renders the 'Archives' section", () => {
-		render(
-			<CompanyDeclarationsPage
-				campaignDeadlines={campaignDeadlines}
-				company={company}
-				declarations={declarations}
-				hasNoSanction={false}
-				userPhone="0122334455"
-			/>,
-		);
+		renderPage();
 		expect(screen.getByText("Archives")).toBeInTheDocument();
 	});
 
 	it("always renders MissingInfoModal so DSFR conceal/disclose chain works", () => {
-		const { container } = render(
-			<CompanyDeclarationsPage
-				campaignDeadlines={campaignDeadlines}
-				company={{ ...company, hasCse: true }}
-				declarations={declarations}
-				hasNoSanction={false}
-				userPhone="0122334455"
-			/>,
-		);
+		const { container } = renderPage({ company: { ...company, hasCse: true } });
 		expect(container.querySelector("#missing-info-modal")).toBeInTheDocument();
 	});
 
 	it("renders MissingInfoModal when userPhone is null", () => {
-		const { container } = render(
-			<CompanyDeclarationsPage
-				campaignDeadlines={campaignDeadlines}
-				company={{ ...company, hasCse: true }}
-				declarations={declarations}
-				hasNoSanction={false}
-				userPhone={null}
-			/>,
-		);
+		const { container } = renderPage({
+			company: { ...company, hasCse: true },
+			userPhone: null,
+		});
 		expect(container.querySelector("#missing-info-modal")).toBeInTheDocument();
 	});
 
 	it("renders MissingInfoModal when hasCse is null", () => {
-		const { container } = render(
-			<CompanyDeclarationsPage
-				campaignDeadlines={campaignDeadlines}
-				company={{ ...company, hasCse: null }}
-				declarations={declarations}
-				hasNoSanction={false}
-				userPhone="0122334455"
-			/>,
-		);
+		const { container } = renderPage({ company: { ...company, hasCse: null } });
 		expect(container.querySelector("#missing-info-modal")).toBeInTheDocument();
+	});
+
+	it("forwards the lock alert when the declaration is locked by another user", () => {
+		const { container } = renderPage({
+			lockedByOther: true,
+			lockHolder: {
+				firstName: "Alice",
+				lastName: "Martin",
+				email: "alice.martin@example.fr",
+			},
+		});
+		const alert = container.querySelector('[role="alert"]');
+		expect(alert).toBeInTheDocument();
+		expect(alert).toHaveTextContent("Déclaration en cours de modification");
+		expect(alert).toHaveTextContent("Alice Martin");
 	});
 });

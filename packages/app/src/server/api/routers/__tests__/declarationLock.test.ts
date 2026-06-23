@@ -74,6 +74,77 @@ afterEach(() => {
 });
 
 describe("declarationLockRouter", () => {
+	describe("getActiveLockForCurrentDeclaration", () => {
+		it("returns no lock when the caller has no current-year declaration", async () => {
+			const db = createSelectDb([[]]);
+			const caller = await createCaller(db);
+
+			const result = await caller.getActiveLockForCurrentDeclaration();
+
+			expect(result).toEqual({ lockedByOther: false, holder: null });
+			expect(mocks.getActiveLock).not.toHaveBeenCalled();
+		});
+
+		it("returns lockedByOther=false and a null holder when the declaration is unlocked", async () => {
+			mocks.getActiveLock.mockResolvedValue(null);
+			const db = createSelectDb([[{ id: DECLARATION_ID }]]);
+			const caller = await createCaller(db);
+
+			const result = await caller.getActiveLockForCurrentDeclaration();
+
+			expect(result).toEqual({ lockedByOther: false, holder: null });
+			expect(mocks.getActiveLock).toHaveBeenCalledWith(db, DECLARATION_ID);
+		});
+
+		it("reports lockedByOther and exposes the holder identity when another co-declarant holds the lock", async () => {
+			const holder = buildLockHolder({ userId: OTHER_USER_ID });
+			mocks.getActiveLock.mockResolvedValue(holder);
+			const db = createSelectDb([[{ id: DECLARATION_ID }]]);
+			const caller = await createCaller(db);
+
+			const result = await caller.getActiveLockForCurrentDeclaration();
+
+			expect(result).toEqual({
+				lockedByOther: true,
+				holder: {
+					firstName: holder.firstName,
+					lastName: holder.lastName,
+					email: holder.email,
+				},
+			});
+		});
+
+		it("reports lockedByOther=false for the caller's own lock while still exposing the holder", async () => {
+			const holder = buildLockHolder({ userId: USER_ID });
+			mocks.getActiveLock.mockResolvedValue(holder);
+			const db = createSelectDb([[{ id: DECLARATION_ID }]]);
+			const caller = await createCaller(db);
+
+			const result = await caller.getActiveLockForCurrentDeclaration();
+
+			expect(result).toEqual({
+				lockedByOther: false,
+				holder: {
+					firstName: holder.firstName,
+					lastName: holder.lastName,
+					email: holder.email,
+				},
+			});
+		});
+
+		it("never excludes the lock service's expiresAt from the leaked payload", async () => {
+			const holder = buildLockHolder({ userId: OTHER_USER_ID });
+			mocks.getActiveLock.mockResolvedValue(holder);
+			const db = createSelectDb([[{ id: DECLARATION_ID }]]);
+			const caller = await createCaller(db);
+
+			const result = await caller.getActiveLockForCurrentDeclaration();
+
+			expect(result.holder).not.toHaveProperty("expiresAt");
+			expect(result.holder).not.toHaveProperty("userId");
+		});
+	});
+
 	describe("acquireLock", () => {
 		it("acquires the lock, returns the holder, and audits a single acquisition (S11)", async () => {
 			const holder = buildLockHolder({ userId: USER_ID });

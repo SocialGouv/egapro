@@ -71,6 +71,32 @@ async function readLockTimeoutMinutes(db: DB): Promise<number> {
 }
 
 export const declarationLockRouter = createTRPCRouter({
+	getActiveLockForCurrentDeclaration: companyProcedure.query(
+		async ({ ctx }) => {
+			const [row] = await ctx.db
+				.select({ id: declarations.id })
+				.from(declarations)
+				.where(activeDeclarationFilter(ctx.siren, getCurrentYear()))
+				.limit(1);
+
+			if (!row) {
+				return { lockedByOther: false, holder: null };
+			}
+
+			const holder = await getActiveLock(ctx.db, row.id);
+			return {
+				lockedByOther: holder !== null && holder.userId !== ctx.session.user.id,
+				holder: holder
+					? {
+							firstName: holder.firstName,
+							lastName: holder.lastName,
+							email: holder.email,
+						}
+					: null,
+			};
+		},
+	),
+
 	acquireLock: companyWriteProcedure
 		.input(acquireLockSchema)
 		.mutation(async ({ ctx, input }) => {
