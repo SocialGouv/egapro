@@ -168,7 +168,6 @@ export function Step6Review({
 			onSubmit={handleSubmit}
 		>
 			<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
-				{/* Title + save status */}
 				<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 					<div className="fr-col">
 						<h1 className="fr-h4 fr-mb-0">
@@ -196,7 +195,6 @@ export function Step6Review({
 					withTooltips
 				/>
 
-				{/* Next steps callout when high gap detected */}
 				{highGap && declaration.siren && (
 					<NextStepsBox
 						hasGapsAboveThreshold={highGap}
