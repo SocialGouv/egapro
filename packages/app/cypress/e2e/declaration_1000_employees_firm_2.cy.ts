@@ -6,11 +6,15 @@ describe("Declaration", () => {
     cy.clearCookies();
   });
   afterEach(() => {
-    cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false }).then((response) => { cy.log(`Clean endpoint: status=${response.status}, body=${JSON.stringify(response.body)}`); });
+    cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false }).then(
+      response => {
+        cy.log(`Clean endpoint: status=${response.status}, body=${JSON.stringify(response.body)}`);
+      },
+    );
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
-    cy.loginWithKeycloak();
+    cy.loginWithProConnect();
     // Clean any leftover declarations (important for retry attempts)
     cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false });
 
@@ -30,14 +34,12 @@ describe("Declaration", () => {
 
     // Check if we're on the expected page
     cy.checkUrl("/index-egapro/declaration/commencer");
-    cy.selectByLabel(
-      "Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l'unité économique et sociale (UES) *",
-    ).select("820709046");
+    cy.selectByLabel("Numéro Siren").invoke("val").should("include", "130025265");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/declarant");
-    cy.selectByLabel("Nom du déclarant *").should("have.value", "Egapro");
-    cy.selectByLabel("Prénom du déclarant *").should("have.value", "Test");
+    cy.selectByLabel("Nom du déclarant *").should("have.value", "Doe");
+    cy.selectByLabel("Prénom du déclarant *").should("have.value", "John");
     cy.selectByLabel("Téléphone du déclarant *").clear().type("0666666666");
     cy.contains("button", "Suivant").click();
 
@@ -162,14 +164,13 @@ describe("Declaration", () => {
     cy.contains("a", "Mes déclarations").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");
-    cy.selectByLabel("Numéro Siren de l'entreprise").select("820709046");
-    cy.contains("a", "820709046", { timeout: 30000 });
+    cy.contains("a", "130025265", { timeout: 30000 });
     cy.contains("De 1000 à plus");
 
     // Déclaration progression
     cy.contains("a", "À renseigner").click();
 
-    cy.checkUrl("/index-egapro/objectifs-mesures/820709046/2025");
+    cy.checkUrl("/index-egapro/objectifs-mesures/130025265/2025");
     cy.get("#objectifIndicateurUn").within(() => {
       cy.get("textarea")
         .should("be.visible")
@@ -202,7 +203,6 @@ describe("Declaration", () => {
     cy.contains("button", "Retour").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");
-    cy.selectByLabel("Numéro Siren de l'entreprise").select("820709046");
     cy.contains("a", "Renseignés");
   });
 });

@@ -6,11 +6,15 @@ describe("Declaration", () => {
     cy.clearCookies();
   });
   afterEach(() => {
-    cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false }).then((response) => { cy.log(`Clean endpoint: status=${response.status}, body=${JSON.stringify(response.body)}`); });
+    cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false }).then(
+      response => {
+        cy.log(`Clean endpoint: status=${response.status}, body=${JSON.stringify(response.body)}`);
+      },
+    );
   });
 
   it("Doit compléter le parcours du simulateur jusqu'à la page de récapitulatif", () => {
-    cy.loginWithKeycloak();
+    cy.loginWithProConnect();
     // Clean any leftover declarations (important for retry attempts)
     cy.request({ method: "POST", url: "/apiv2/clean-test-user/declaration", failOnStatusCode: false });
 
@@ -29,14 +33,13 @@ describe("Declaration", () => {
     cy.contains("a", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/commencer");
-    cy.selectByLabel(
-      "Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l'unité économique et sociale (UES) *",
-    ).select("491753364");
+    // Mono-entreprise: the SIREN is pre-filled read-only from the ProConnect session.
+    cy.selectByLabel("Numéro Siren").invoke("val").should("include", "130025265");
     cy.contains("button", "Suivant").click();
 
     cy.checkUrl("/index-egapro/declaration/declarant");
-    cy.selectByLabel("Nom du déclarant *").should("have.value", "Egapro");
-    cy.selectByLabel("Prénom du déclarant *").should("have.value", "Test");
+    cy.selectByLabel("Nom du déclarant *").should("have.value", "Doe");
+    cy.selectByLabel("Prénom du déclarant *").should("have.value", "John");
     cy.selectByLabel("Téléphone du déclarant *").clear().type("0123456789");
     cy.contains("button", "Suivant").click();
 
@@ -133,8 +136,7 @@ describe("Declaration", () => {
     cy.contains("a", "Mes déclarations").click();
 
     cy.checkUrl("/mon-espace/mes-declarations");
-    cy.selectByLabel("Numéro Siren de l'entreprise").select("491753364");
-    cy.contains("a", "491753364");
+    cy.contains("a", "130025265");
     cy.contains("De 50 à 250 inclus");
   });
 });
