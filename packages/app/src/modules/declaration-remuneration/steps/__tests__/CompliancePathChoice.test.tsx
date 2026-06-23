@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { CompliancePathChoice } from "../CompliancePathChoice";
 
@@ -11,6 +12,26 @@ const DECLARATION_YEAR = 2026;
 
 const mockMutate = vi.fn();
 const mockPush = vi.fn();
+
+const { mockSetField, draftRef } = vi.hoisted(() => ({
+	mockSetField: vi.fn(),
+	draftRef: { current: {} as Record<string, unknown> },
+}));
+
+vi.mock(
+	"~/modules/declaration-remuneration/shared/draft/useDeclarationDraft",
+	() => ({
+		useDeclarationDraft: () => ({
+			draft: draftRef.current,
+			setField: mockSetField,
+			clearDraft: vi.fn(),
+			hasDraft: false,
+			isLoadingDraft: false,
+			isSaving: false,
+			isPendingSave: false,
+		}),
+	}),
+);
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: mockPush }),
@@ -44,6 +65,8 @@ vi.mock("~/trpc/react", () => ({
 beforeEach(() => {
 	mockMutate.mockClear();
 	mockPush.mockClear();
+	mockSetField.mockClear();
+	draftRef.current = {};
 });
 
 describe("CompliancePathChoice", () => {
@@ -174,6 +197,52 @@ describe("CompliancePathChoice", () => {
 		expect(mockPush).toHaveBeenCalledWith(
 			"/declaration-remuneration/parcours-conformite/etape/1",
 		);
+	});
+
+	it("does not submit when no path is selected", () => {
+		render(
+			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
+				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
+				email="test@example.fr"
+			/>,
+		);
+
+		const form = screen
+			.getByRole("button", { name: /suivant/i })
+			.closest("form") as HTMLFormElement;
+		fireEvent.submit(form);
+
+		expect(mockMutate).not.toHaveBeenCalled();
+		expect(mockPush).not.toHaveBeenCalled();
+	});
+
+	it("navigates to the CSE opinion funnel when justify is selected", async () => {
+		render(
+			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
+				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
+				email="test@example.fr"
+			/>,
+		);
+		const radio = screen.getByLabelText(
+			"Justifier les écarts de rémunération ≥ 5 %",
+		);
+		fireEvent.click(radio);
+
+		const form = screen
+			.getByRole("button", { name: /suivant/i })
+			.closest("form") as HTMLFormElement;
+		fireEvent.submit(form);
+
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalledWith({ path: "justify" });
+		});
+		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
 	});
 
 	it("pre-selects the initial path when provided", () => {
@@ -329,5 +398,88 @@ describe("CompliancePathChoice", () => {
 			/>,
 		);
 		expect(screen.getByText("john@company.fr")).toBeInTheDocument();
+	});
+
+	describe("draft autosave", () => {
+		it("hydrates the selected path from a persisted draft", () => {
+			draftRef.current = { path: "joint_evaluation" };
+
+			render(
+				<CompliancePathChoice
+					campaignDeadlines={campaignDeadlines}
+					currentYear={2026}
+					declarationSiren={DECLARATION_SIREN}
+					declarationYear={DECLARATION_YEAR}
+					email="test@example.fr"
+				/>,
+			);
+
+			const radio = screen.getByLabelText(
+				"Mettre en place une évaluation conjointe des rémunérations",
+			) as HTMLInputElement;
+			expect(radio.checked).toBe(true);
+		});
+
+		it("saves a draft when a path is selected and the lock is inactive", async () => {
+			render(
+				<CompliancePathChoice
+					campaignDeadlines={campaignDeadlines}
+					currentYear={2026}
+					declarationSiren={DECLARATION_SIREN}
+					declarationYear={DECLARATION_YEAR}
+					email="test@example.fr"
+				/>,
+			);
+
+			fireEvent.click(
+				screen.getByLabelText("Actions correctives et seconde déclaration"),
+			);
+
+			await waitFor(() => {
+				expect(mockSetField).toHaveBeenCalledWith({
+					path: "corrective_action",
+				});
+			});
+		});
+
+		it("does not save a draft when the declaration is locked read-only", async () => {
+			render(
+				<LockProvider isReadOnly>
+					<CompliancePathChoice
+						campaignDeadlines={campaignDeadlines}
+						currentYear={2026}
+						declarationSiren={DECLARATION_SIREN}
+						declarationYear={DECLARATION_YEAR}
+						email="test@example.fr"
+					/>
+				</LockProvider>,
+			);
+
+			const radio = screen.getByLabelText(
+				"Actions correctives et seconde déclaration",
+			);
+			fireEvent.click(radio);
+			fireEvent.change(radio, { target: { checked: true } });
+
+			expect(mockSetField).not.toHaveBeenCalled();
+		});
+
+		it("disables the path fieldset when the declaration is locked read-only", () => {
+			const { container } = render(
+				<LockProvider isReadOnly>
+					<CompliancePathChoice
+						campaignDeadlines={campaignDeadlines}
+						currentYear={2026}
+						declarationSiren={DECLARATION_SIREN}
+						declarationYear={DECLARATION_YEAR}
+						email="test@example.fr"
+					/>
+				</LockProvider>,
+			);
+
+			// The outermost fieldset wraps the entire form in read-only mode.
+			expect(container.querySelector("fieldset")).toBeDisabled();
+			expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
+		});
 	});
 });

@@ -106,4 +106,43 @@ describe("CseOpinionLayout", () => {
 
 		expect(screen.getByTestId("lock-probe")).toHaveTextContent("false:none");
 	});
+
+	it("renders 'Non' when the company has no CSE", () => {
+		render(
+			<CseOpinionLayout
+				company={{ ...company, hasCse: false }}
+				declarationYear={2024}
+			>
+				<p>Step content</p>
+			</CseOpinionLayout>,
+		);
+
+		expect(screen.getByText("Non")).toBeInTheDocument();
+	});
+
+	it("renders 'Non renseigné' when the CSE existence is unknown", () => {
+		render(
+			<CseOpinionLayout
+				company={{ ...company, hasCse: null }}
+				declarationYear={2024}
+			>
+				<p>Step content</p>
+			</CseOpinionLayout>,
+		);
+
+		expect(screen.getByText("Non renseigné")).toBeInTheDocument();
+	});
+
+	it("omits the workforce line when the workforce is unknown", () => {
+		render(
+			<CseOpinionLayout
+				company={{ ...company, workforce: null }}
+				declarationYear={2024}
+			>
+				<p>Step content</p>
+			</CseOpinionLayout>,
+		);
+
+		expect(screen.queryByText(/Effectif annuel moyen/)).not.toBeInTheDocument();
+	});
 });
