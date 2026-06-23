@@ -76,6 +76,12 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"adminStats.getCompletionFunnel":
 		AUDIT_ACTIONS.ADMIN_STATS_GET_COMPLETION_FUNNEL,
 	"adminStats.getMatomoFunnel": AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_FUNNEL,
+	"adminStats.getMatomoCategoryModel":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_CATEGORY_MODEL,
+	"adminStats.getMatomoHelpLinks":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_HELP_LINKS,
+	"adminStats.getMatomoDeviceBreakdown":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_DEVICE_BREAKDOWN,
 
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,

@@ -50,3 +50,11 @@ packages/notifications/dist/
 suit-client-certs/
 suit-signing-keys/
 *.key
+
+# Local Matomo — generated API token + credentials (never commit)
+scripts/matomo-local/.secrets/*
+!scripts/matomo-local/.secrets/.gitkeep
+
+# Python bytecode (matomo-local provisioning/seed scripts)
+__pycache__/
+*.pyc

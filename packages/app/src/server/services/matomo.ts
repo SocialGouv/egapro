@@ -1,11 +1,21 @@
 import "server-only";
 
 import { env } from "~/env";
+import {
+	type MatomoEventRow,
+	matomoReportingResponseSchema,
+} from "~/modules/admin/stats/schemas";
 import type {
+	CategoryModelUsage,
+	DeviceBreakdown,
+	DeviceBreakdownRow,
 	FunnelRow,
+	HelpLinkClicks,
+	LabeledCount,
 	MatomoFunnelOutput,
 } from "~/modules/admin/stats/types";
 import {
+	MATOMO_ACTION,
 	MATOMO_EVENT_CATEGORY,
 	MATOMO_FUNNEL_ACTION,
 } from "~/modules/analytics/shared/events";
@@ -103,12 +113,6 @@ const FUNNELS: Record<keyof MatomoFunnelOutput, FunnelDef> = {
 	},
 };
 
-type MatomoEventRow = {
-	label: string;
-	nb_events?: number;
-	idsubdatatable?: number | string;
-};
-
 function countKey(jalon: Jalon): string {
 	return jalon.kind === "step" ? jalon.step : jalon.kind;
 }
@@ -201,15 +205,17 @@ async function callReportingApi(
 		);
 	}
 
-	const data = (await response.json()) as
-		| MatomoEventRow[]
-		| { result?: string; message?: string };
-	if (!Array.isArray(data)) {
+	// Validate the external response at the boundary rather than trusting an
+	// `as` cast. An unexpected shape degrades to no rows (empty funnel); a
+	// well-formed Matomo error object is surfaced.
+	const parsed = matomoReportingResponseSchema.safeParse(await response.json());
+	if (!parsed.success) return [];
+	if (!Array.isArray(parsed.data)) {
 		throw new Error(
-			`Matomo Reporting API error: ${data.message ?? "unexpected response"}`,
+			`Matomo Reporting API error: ${parsed.data.message ?? "unexpected response"}`,
 		);
 	}
-	return data;
+	return parsed.data;
 }
 
 function toCount(value: number | undefined): number {
@@ -299,4 +305,245 @@ export async function fetchMatomoFunnel({
 	]);
 
 	return { declarationFunnel, cseFunnel, complianceFunnel };
+}
+
+// ---------------------------------------------------------------------------
+// Behavioural-usage widgets (model usage, help-link clicks, device split).
+//
+// The `document` / `help` events carry no custom dimension (only the funnels
+// segment by campaign year / workforce), so these reads scope by calendar year
+// via `period=year` + `date=${year}-12-31` and use an empty segment. They are
+// therefore not segmented by workforce — `sizeRange` is accepted for a uniform
+// API but intentionally unused here.
+// ---------------------------------------------------------------------------
+
+const IMPORT_ERROR_LABELS: Record<string, string> = {
+	"missing-columns": "colonnes manquantes",
+	"invalid-value": "valeur invalide",
+	"empty-file": "fichier vide",
+};
+
+const HELP_LINK_LABELS: Record<string, string> = {
+	cse_models: "Modèles d'avis CSE",
+	objective_criteria: "Critères objectifs et non sexistes",
+	corrective_actions: "Actions correctives et seconde déclaration",
+	joint_evaluation: "Évaluation conjointe des rémunérations",
+};
+
+function toAvgSeconds(value: number | string | undefined): number | null {
+	if (value === undefined) return null;
+	const parsed = typeof value === "number" ? value : Number(value);
+	return Number.isFinite(parsed) ? Math.round(parsed) : null;
+}
+
+/** Resolve a Matomo category subtable id for `Events.getActionFromCategoryId`. */
+async function getCategoryActions(
+	config: MatomoConfig,
+	category: string,
+	year: number,
+): Promise<MatomoEventRow[]> {
+	const categories = await callReportingApi(
+		config,
+		"Events.getCategory",
+		year,
+		"",
+	);
+	const categoryRow = categories.find((row) => row.label === category);
+	if (categoryRow?.idsubdatatable === undefined) return [];
+	return callReportingApi(
+		config,
+		"Events.getActionFromCategoryId",
+		year,
+		"",
+		categoryRow.idsubdatatable,
+	);
+}
+
+/** Drill into the `name` subtable of one action (e.g. format, error type). */
+async function getActionNames(
+	config: MatomoConfig,
+	action: MatomoEventRow | undefined,
+	year: number,
+): Promise<MatomoEventRow[]> {
+	if (action?.idsubdatatable === undefined) return [];
+	return callReportingApi(
+		config,
+		"Events.getNameFromActionId",
+		year,
+		"",
+		action.idsubdatatable,
+	);
+}
+
+async function fetchCategoryModelUsage(
+	config: MatomoConfig,
+	year: number,
+): Promise<CategoryModelUsage> {
+	const actions = await getCategoryActions(
+		config,
+		MATOMO_EVENT_CATEGORY.DOCUMENT,
+		year,
+	);
+	const rows: LabeledCount[] = [];
+
+	const importAction = actions.find(
+		(row) => row.label === MATOMO_ACTION.CATEGORY_IMPORT,
+	);
+	if (importAction) {
+		rows.push({
+			key: "import",
+			label: "Imports réussis",
+			count: toCount(importAction.nb_events),
+		});
+	}
+
+	const failureAction = actions.find(
+		(row) => row.label === MATOMO_ACTION.CATEGORY_IMPORT_FAILURE,
+	);
+	const failureNames = await getActionNames(config, failureAction, year);
+	for (const name of failureNames) {
+		rows.push({
+			key: `failure_${name.label}`,
+			label: `Échec import — ${IMPORT_ERROR_LABELS[name.label] ?? name.label}`,
+			count: toCount(name.nb_events),
+		});
+	}
+
+	const durationAction = actions.find(
+		(row) => row.label === MATOMO_ACTION.CATEGORY_IMPORT_DURATION,
+	);
+
+	return {
+		rows,
+		avgImportDurationSeconds: toAvgSeconds(durationAction?.avg_event_value),
+	};
+}
+
+async function fetchHelpLinkClicks(
+	config: MatomoConfig,
+	year: number,
+): Promise<HelpLinkClicks> {
+	const actions = await getCategoryActions(
+		config,
+		MATOMO_EVENT_CATEGORY.HELP,
+		year,
+	);
+	const clickAction = actions.find(
+		(row) => row.label === MATOMO_ACTION.HELP_LINK_CLICK,
+	);
+	const names = await getActionNames(config, clickAction, year);
+	const rows = names
+		.map((name) => ({
+			key: name.label,
+			label: HELP_LINK_LABELS[name.label] ?? name.label,
+			count: toCount(name.nb_events),
+		}))
+		.sort((a, b) => b.count - a.count);
+	return { rows };
+}
+
+// Each behaviour is detected by its marker event. `DevicesDetection.getType`
+// returns device-type rows (`nb_visits`) for visits matching the segment.
+// ⚠️ Segment dimension names and `DevicesDetection.getType` must be validated
+// against the real Matomo instance — in dev (no token) the widget degrades to
+// empty rows.
+const DEVICE_BEHAVIORS = [
+	{
+		key: "modification",
+		label: "Modification (déclaration)",
+		segment: `eventCategory==${MATOMO_EVENT_CATEGORY.DECLARATION};eventAction==${MATOMO_FUNNEL_ACTION.FUNNEL_COMPLETE}`,
+	},
+	{
+		key: "deposit",
+		label: "Dépôt (avis CSE)",
+		segment: `eventCategory==${MATOMO_EVENT_CATEGORY.CSE_OPINION};eventAction==${MATOMO_FUNNEL_ACTION.FUNNEL_COMPLETE}`,
+	},
+	{
+		key: "consultation",
+		label: "Consultation",
+		segment: `eventCategory==${MATOMO_EVENT_CATEGORY.SEARCH};eventAction==${MATOMO_ACTION.CONSULTATION_OUTBOUND}`,
+	},
+] as const;
+
+function classifyDevice(
+	label: string,
+): "desktop" | "smartphone" | "tablet" | null {
+	const normalized = label.toLowerCase();
+	if (normalized.includes("desktop")) return "desktop";
+	if (normalized.includes("smartphone") || normalized.includes("phone")) {
+		return "smartphone";
+	}
+	if (normalized.includes("tablet")) return "tablet";
+	return null;
+}
+
+function emptyDeviceBreakdown(): DeviceBreakdown {
+	return {
+		rows: DEVICE_BEHAVIORS.map((behavior) => ({
+			key: behavior.key,
+			label: behavior.label,
+			desktop: 0,
+			smartphone: 0,
+			tablet: 0,
+		})),
+	};
+}
+
+async function fetchDeviceBreakdownRows(
+	config: MatomoConfig,
+	year: number,
+): Promise<DeviceBreakdown> {
+	const rows = await Promise.all(
+		DEVICE_BEHAVIORS.map(async (behavior): Promise<DeviceBreakdownRow> => {
+			const devices = await callReportingApi(
+				config,
+				"DevicesDetection.getType",
+				year,
+				behavior.segment,
+			);
+			const counts = { desktop: 0, smartphone: 0, tablet: 0 };
+			for (const device of devices) {
+				const type = classifyDevice(device.label);
+				if (type) counts[type] += toCount(device.nb_visits);
+			}
+			return { key: behavior.key, label: behavior.label, ...counts };
+		}),
+	);
+	return { rows };
+}
+
+/** Usage of the indicator-by-category model (downloads / imports / failures). */
+export async function fetchMatomoCategoryModel({
+	year,
+}: {
+	year: number;
+	sizeRange?: CompanySizeRange;
+}): Promise<CategoryModelUsage> {
+	const config = readConfig();
+	if (!config) return { rows: [], avgImportDurationSeconds: null };
+	return fetchCategoryModelUsage(config, year);
+}
+
+/** Clicks on instrumented help links, by slug, descending. */
+export async function fetchMatomoHelpLinks({
+	year,
+}: {
+	year: number;
+	sizeRange?: CompanySizeRange;
+}): Promise<HelpLinkClicks> {
+	const config = readConfig();
+	if (!config) return { rows: [] };
+	return fetchHelpLinkClicks(config, year);
+}
+
+/** Device split (desktop / smartphone / tablet) for the 3 tracked behaviours. */
+export async function fetchMatomoDeviceBreakdown({
+	year,
+}: {
+	year: number;
+	sizeRange?: CompanySizeRange;
+}): Promise<DeviceBreakdown> {
+	const config = readConfig();
+	if (!config) return emptyDeviceBreakdown();
+	return fetchDeviceBreakdownRows(config, year);
 }
