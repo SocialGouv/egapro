@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef } from "react";
-import { DeclarationLockAlert } from "~/modules/declaration-remuneration";
+import { DeclarationLockAlert } from "~/modules/declaration-remuneration/shared/lock/DeclarationLockAlert";
 import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
