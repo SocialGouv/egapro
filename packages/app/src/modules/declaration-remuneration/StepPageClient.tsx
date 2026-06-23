@@ -8,6 +8,7 @@ import {
 	declarationFunnelDimensions,
 } from "./shared/funnelConfig";
 import type { GipPrefillData } from "./shared/gipMdsMapping";
+import { LockProvider } from "./shared/lock/LockContext";
 import { Step1Workforce } from "./steps/Step1Workforce";
 import { Step2PayGap } from "./steps/Step2PayGap";
 import { Step3VariablePay } from "./steps/Step3VariablePay";
@@ -25,6 +26,7 @@ import type {
 type StepPageClientProps = {
 	step: number;
 	declaration: {
+		id: string;
 		siren: string;
 		year: number;
 		totalWomen: number | null;
@@ -70,75 +72,81 @@ export function StepPageClient({
 	);
 	useFunnelTracking(DECLARATION_FUNNEL, { step, dimensions });
 
-	switch (step) {
-		case 1:
-			return (
-				<Step1Workforce
-					declarationSiren={declaration.siren}
-					declarationYear={declaration.year}
-					gipPrefillData={gipPrefillData}
-					initialData={step1Data}
-				/>
-			);
-		case 2:
-			return (
-				<Step2PayGap
-					declarationSiren={declaration.siren}
-					declarationYear={declaration.year}
-					gipPrefillData={gipPrefillData}
-					initialData={step2Data}
-				/>
-			);
-		case 3:
-			return (
-				<Step3VariablePay
-					declarationSiren={declaration.siren}
-					declarationYear={declaration.year}
-					gipPrefillData={gipPrefillData}
-					initialData={step3Data}
-					maxMen={declaration.totalMen ?? undefined}
-					maxWomen={declaration.totalWomen ?? undefined}
-				/>
-			);
-		case 4:
-			return (
-				<Step4QuartileDistribution
-					declarationSiren={declaration.siren}
-					declarationYear={declaration.year}
-					gipPrefillData={gipPrefillData}
-					initialData={step4Data}
-					maxMen={declaration.totalMen ?? undefined}
-					maxWomen={declaration.totalWomen ?? undefined}
-				/>
-			);
-		case 5:
-			return (
-				<Step5EmployeeCategories
-					declarationSiren={declaration.siren}
-					declarationYear={declaration.year}
-					initialCategories={step5Categories}
-					initialSource={initialSource}
-					maxMen={declaration.totalMen ?? undefined}
-					maxWomen={declaration.totalWomen ?? undefined}
-				/>
-			);
-		case 6:
-			return (
-				<Step6Review
-					companyWorkforce={companyWorkforce}
-					declaration={declaration}
-					declarationYear={declaration.year}
-					hasCse={hasCse}
-					isSubmitted={
-						declaration.status !== null && declaration.status !== "draft"
-					}
-					step2Data={step2Data}
-					step3Data={step3Data}
-					step4Data={step4Data}
-					step5Categories={step5Categories}
-				/>
-			);
-		default:
-			return null;
+	function renderStep() {
+		switch (step) {
+			case 1:
+				return (
+					<Step1Workforce
+						declarationSiren={declaration.siren}
+						declarationYear={declaration.year}
+						gipPrefillData={gipPrefillData}
+						initialData={step1Data}
+					/>
+				);
+			case 2:
+				return (
+					<Step2PayGap
+						declarationSiren={declaration.siren}
+						declarationYear={declaration.year}
+						gipPrefillData={gipPrefillData}
+						initialData={step2Data}
+					/>
+				);
+			case 3:
+				return (
+					<Step3VariablePay
+						declarationSiren={declaration.siren}
+						declarationYear={declaration.year}
+						gipPrefillData={gipPrefillData}
+						initialData={step3Data}
+						maxMen={declaration.totalMen ?? undefined}
+						maxWomen={declaration.totalWomen ?? undefined}
+					/>
+				);
+			case 4:
+				return (
+					<Step4QuartileDistribution
+						declarationSiren={declaration.siren}
+						declarationYear={declaration.year}
+						gipPrefillData={gipPrefillData}
+						initialData={step4Data}
+						maxMen={declaration.totalMen ?? undefined}
+						maxWomen={declaration.totalWomen ?? undefined}
+					/>
+				);
+			case 5:
+				return (
+					<Step5EmployeeCategories
+						declarationSiren={declaration.siren}
+						declarationYear={declaration.year}
+						initialCategories={step5Categories}
+						initialSource={initialSource}
+						maxMen={declaration.totalMen ?? undefined}
+						maxWomen={declaration.totalWomen ?? undefined}
+					/>
+				);
+			case 6:
+				return (
+					<Step6Review
+						companyWorkforce={companyWorkforce}
+						declaration={declaration}
+						declarationYear={declaration.year}
+						hasCse={hasCse}
+						isSubmitted={
+							declaration.status !== null && declaration.status !== "draft"
+						}
+						step2Data={step2Data}
+						step3Data={step3Data}
+						step4Data={step4Data}
+						step5Categories={step5Categories}
+					/>
+				);
+			default:
+				return null;
+		}
 	}
+
+	return (
+		<LockProvider declarationId={declaration.id}>{renderStep()}</LockProvider>
+	);
 }
