@@ -14,8 +14,9 @@ export function DeclarationLockAlert({ holder }: DeclarationLockAlertProps) {
 	const emailSuffix = hasEmailSuffix ? ` (${holder.email})` : "";
 
 	return (
-		<div className="fr-alert fr-alert--warning fr-alert--sm">
+		<div className="fr-alert fr-alert--warning fr-alert--sm" role="alert">
 			<p>
+				<span className="fr-sr-only">Attention : </span>
 				<strong>Déclaration en cours de modification</strong> — {editor}
 				{emailSuffix} modifie actuellement cette déclaration. Vous pouvez la
 				consulter en lecture seule jusqu'à la fin de sa modification.

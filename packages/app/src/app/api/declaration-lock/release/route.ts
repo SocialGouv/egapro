@@ -19,16 +19,10 @@ async function resolveCurrentDeclarationId(
 	return row?.id ?? null;
 }
 
-/**
- * POST /api/declaration-lock/release
- *
- * Best-effort lock release for `navigator.sendBeacon`, fired by the parcours
- * when the tab is hidden or closed — a context where a tRPC mutation cannot be
- * guaranteed to flush. The declaration is resolved server-side from the
- * session SIREN (never trusting the beacon body), and the lock is only deleted
- * when held by the caller, so a co-declarant viewer can never release another
- * user's lock.
- */
+// Best-effort lock release for `navigator.sendBeacon` on tab close, where a tRPC
+// mutation cannot be guaranteed to flush. The declaration is resolved server-side
+// from the session SIREN (never the beacon body) and `releaseLock` only deletes a
+// lock held by the caller, closing the IDOR window.
 export const POST = withAuditedRoute(
 	{
 		action: AUDIT_ACTIONS.DECLARATION_LOCK_RELEASED,
