@@ -9,17 +9,16 @@ export function DeclarationLockAlert({ holder }: DeclarationLockAlertProps) {
 		.filter(Boolean)
 		.join(" ")
 		.trim();
-	const hasEmailSuffix = Boolean(fullName) && Boolean(holder.email);
-	const editor = fullName || holder.email || "Un autre utilisateur";
-	const emailSuffix = hasEmailSuffix ? ` (${holder.email})` : "";
+	const identity = fullName
+		? `${fullName}${holder.email ? ` (${holder.email})` : ""}`
+		: (holder.email ?? "Un autre utilisateur");
 
 	return (
-		<div className="fr-alert fr-alert--warning fr-alert--sm" role="alert">
+		<div className="fr-alert fr-alert--warning fr-mb-3w" role="alert">
+			<h3 className="fr-alert__title">Déclaration en cours de modification</h3>
 			<p>
-				<span className="fr-sr-only">Attention : </span>
-				<strong>Déclaration en cours de modification</strong> — {editor}
-				{emailSuffix} modifie actuellement cette déclaration. Vous pouvez la
-				consulter en lecture seule jusqu'à la fin de sa modification.
+				{identity} modifie actuellement cette déclaration. Vous pouvez la
+				consulter en lecture seule jusqu&apos;à la fin de sa modification.
 			</p>
 		</div>
 	);

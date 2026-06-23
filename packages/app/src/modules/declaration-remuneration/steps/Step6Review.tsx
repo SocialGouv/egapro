@@ -10,12 +10,14 @@ import {
 } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
+import common from "../shared/common.module.scss";
 import { getCurrentStageHref } from "../shared/complianceNavigation";
 import { FormActions } from "../shared/FormActions";
 import {
 	DECLARATION_FUNNEL,
 	declarationFunnelDimensions,
 } from "../shared/funnelConfig";
+import { useLockContext } from "../shared/lock/LockContext";
 import { NextStepsBox } from "../shared/NextStepsBox";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
@@ -64,6 +66,7 @@ export function Step6Review({
 	hasCse = null,
 }: Props) {
 	const router = useRouter();
+	const { isReadOnly } = useLockContext();
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: () => {
@@ -164,60 +167,63 @@ export function Step6Review({
 			className={stepStyles.formColumn}
 			onSubmit={handleSubmit}
 		>
-			{/* Title + save status */}
-			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
-				<div className="fr-col">
-					<h1 className="fr-h4 fr-mb-0">
-						Déclaration des indicateurs de rémunération {declarationYear}
-					</h1>
+			<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+				{/* Title + save status */}
+				<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
+					<div className="fr-col">
+						<h1 className="fr-h4 fr-mb-0">
+							Déclaration des indicateurs de rémunération {declarationYear}
+						</h1>
+					</div>
+					<div className="fr-col-auto">
+						<SavedIndicator hasData={true} />
+					</div>
 				</div>
-				<div className="fr-col-auto">
-					<SavedIndicator hasData={true} />
-				</div>
-			</div>
 
-			<StepIndicator currentStep={6} />
+				<StepIndicator currentStep={6} />
 
-			<p className={`fr-mb-0 ${stepStyles.intro}`}>
-				Vérifiez que toutes les informations ont été complétées avant de
-				soumettre votre déclaration aux services du ministère chargé du travail.
-			</p>
+				<p className={`fr-mb-0 ${stepStyles.intro}`}>
+					Vérifiez que toutes les informations ont été complétées avant de
+					soumettre votre déclaration aux services du ministère chargé du
+					travail.
+				</p>
 
-			<IndicatorSections
-				step2Data={step2Data}
-				step3Data={step3Data}
-				step4Data={step4Data}
-				step5Categories={step5Categories}
-				withTooltips
-			/>
-
-			{/* Next steps callout when high gap detected */}
-			{highGap && declaration.siren && (
-				<NextStepsBox
-					hasGapsAboveThreshold={highGap}
-					siren={declaration.siren}
+				<IndicatorSections
+					step2Data={step2Data}
+					step3Data={step3Data}
+					step4Data={step4Data}
+					step5Categories={step5Categories}
+					withTooltips
 				/>
-			)}
 
-			<FormActions
-				nextHref={
-					isSubmitted
-						? getCurrentStageHref(declaration.status, hasCse)
-						: undefined
-				}
-				nextLabel="Suivant"
-				previousHref="/declaration-remuneration/etape/5"
-			/>
+				{/* Next steps callout when high gap detected */}
+				{highGap && declaration.siren && (
+					<NextStepsBox
+						hasGapsAboveThreshold={highGap}
+						siren={declaration.siren}
+					/>
+				)}
 
-			{!isSubmitted && (
-				<SubmitDeclarationModal
-					isPending={submitMutation.isPending}
-					modalRef={modalRef}
-					onClose={closeModal}
-					onSubmit={() => submitMutation.mutate()}
-					year={declarationYear}
+				<FormActions
+					nextHref={
+						isSubmitted
+							? getCurrentStageHref(declaration.status, hasCse)
+							: undefined
+					}
+					nextLabel="Suivant"
+					previousHref="/declaration-remuneration/etape/5"
 				/>
-			)}
+
+				{!isSubmitted && (
+					<SubmitDeclarationModal
+						isPending={submitMutation.isPending}
+						modalRef={modalRef}
+						onClose={closeModal}
+						onSubmit={() => submitMutation.mutate()}
+						year={declarationYear}
+					/>
+				)}
+			</fieldset>
 		</form>
 	);
 }

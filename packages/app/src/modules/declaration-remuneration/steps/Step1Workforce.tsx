@@ -17,6 +17,7 @@ import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
+import { useLockContext } from "../shared/lock/LockContext";
 import { PrefillResetConfirmDialog } from "../shared/PrefillResetConfirmDialog";
 import { PrefillResetWarning } from "../shared/PrefillResetWarning";
 import { PrefillSource } from "../shared/PrefillSource";
@@ -41,6 +42,7 @@ export function Step1Workforce({
 }: Step1WorkforceProps) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
+	const { isReadOnly } = useLockContext();
 	const isPrefilled = !!gipPrefillData;
 
 	const hasInitialData = initialData.totalWomen > 0 || initialData.totalMen > 0;
@@ -193,208 +195,210 @@ export function Step1Workforce({
 				className={common.flexColumnGap2}
 				onSubmit={onSubmit}
 			>
-				<StepTitleRow
-					hasData={hasData}
-					isPendingSave={isPendingSave}
-					isSaving={isSaving}
-					onDevFill={() => {
-						const womenValue = DEV_STEP1_CATEGORIES[0]?.women ?? 50;
-						const menValue = DEV_STEP1_CATEGORIES[0]?.men ?? 50;
-						form.setValue("totalWomen", womenValue);
-						form.setValue("totalMen", menValue);
-						setWomenRaw(String(womenValue));
-						setMenRaw(String(menValue));
-						setField({ totalWomen: womenValue, totalMen: menValue });
-					}}
-					title={
-						<h1 className="fr-h4 fr-mb-0">
-							Déclaration des indicateurs de rémunération {declarationYear}
-						</h1>
-					}
-				/>
+				<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+					<StepTitleRow
+						hasData={hasData}
+						isPendingSave={isPendingSave}
+						isSaving={isSaving}
+						onDevFill={() => {
+							const womenValue = DEV_STEP1_CATEGORIES[0]?.women ?? 50;
+							const menValue = DEV_STEP1_CATEGORIES[0]?.men ?? 50;
+							form.setValue("totalWomen", womenValue);
+							form.setValue("totalMen", menValue);
+							setWomenRaw(String(womenValue));
+							setMenRaw(String(menValue));
+							setField({ totalWomen: womenValue, totalMen: menValue });
+						}}
+						title={
+							<h1 className="fr-h4 fr-mb-0">
+								Déclaration des indicateurs de rémunération {declarationYear}
+							</h1>
+						}
+					/>
 
-				<StepIndicator currentStep={1} />
+					<StepIndicator currentStep={1} />
 
-				<div className={common.flexColumnGap1}>
-					<p className="fr-mb-0">
-						Période de référence pour le calcul des indicateurs : 01/01/2026 -
-						31/12/2026.
-						<TooltipButton
-							id="tooltip-period"
-							label="Information sur la période de référence"
-							text="Pour les entreprises créées en cours d'année, cette période correspond à la durée d'activité effective depuis la date de création jusqu'au 31/12/2026."
-						/>
-					</p>
+					<div className={common.flexColumnGap1}>
+						<p className="fr-mb-0">
+							Période de référence pour le calcul des indicateurs : 01/01/2026 -
+							31/12/2026.
+							<TooltipButton
+								id="tooltip-period"
+								label="Information sur la période de référence"
+								text="Pour les entreprises créées en cours d'année, cette période correspond à la durée d'activité effective depuis la date de création jusqu'au 31/12/2026."
+							/>
+						</p>
 
-					<p className={`fr-mb-0 ${common.fontMedium}`}>
-						{isPrefilled
-							? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
-							: "Renseignez l'effectif physique de votre entreprise."}
-						<TooltipButton
-							id="tooltip-workforce"
-							label="Information sur les effectifs"
-							text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
-						/>
-					</p>
+						<p className={`fr-mb-0 ${common.fontMedium}`}>
+							{isPrefilled
+								? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+								: "Renseignez l'effectif physique de votre entreprise."}
+							<TooltipButton
+								id="tooltip-workforce"
+								label="Information sur les effectifs"
+								text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
+							/>
+						</p>
 
-					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
-				</div>
+						<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
+					</div>
 
-				<div className={common.dataSection}>
-					<div className={common.flexColumnGapHalf}>
-						<div
-							className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${styles.workforceTable}`}
-						>
-							<div className="fr-table__wrapper">
-								<div className="fr-table__container">
-									<div className="fr-table__content">
-										<table>
-											<caption>
-												Effectifs physiques pris en compte pour le calcul des
-												indicateurs
-											</caption>
-											<colgroup>
-												<col className={styles.labelCol} />
-												<col className={styles.inputCol} />
-												<col className={styles.inputCol} />
-												<col className={styles.totalCol} />
-											</colgroup>
-											<thead>
-												<tr>
-													<th scope="col">{/* vide */}</th>
-													<th scope="col">Femmes</th>
-													<th scope="col">Hommes</th>
-													<th scope="col">Total</th>
-												</tr>
-											</thead>
-											<tbody>
-												<tr>
-													<td>
-														<strong>Nombre de salariés</strong>
-													</td>
-													<td>
-														<div
-															className={
-																womenError
-																	? "fr-input-group fr-input-group--error"
-																	: "fr-input-group"
-															}
-														>
-															<input
-																aria-describedby={
-																	womenError ? "women-error" : undefined
+					<div className={common.dataSection}>
+						<div className={common.flexColumnGapHalf}>
+							<div
+								className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${styles.workforceTable}`}
+							>
+								<div className="fr-table__wrapper">
+									<div className="fr-table__container">
+										<div className="fr-table__content">
+											<table>
+												<caption>
+													Effectifs physiques pris en compte pour le calcul des
+													indicateurs
+												</caption>
+												<colgroup>
+													<col className={styles.labelCol} />
+													<col className={styles.inputCol} />
+													<col className={styles.inputCol} />
+													<col className={styles.totalCol} />
+												</colgroup>
+												<thead>
+													<tr>
+														<th scope="col">{/* vide */}</th>
+														<th scope="col">Femmes</th>
+														<th scope="col">Hommes</th>
+														<th scope="col">Total</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td>
+															<strong>Nombre de salariés</strong>
+														</td>
+														<td>
+															<div
+																className={
+																	womenError
+																		? "fr-input-group fr-input-group--error"
+																		: "fr-input-group"
 																}
-																aria-invalid={womenError ? true : undefined}
-																aria-label="Nombre de femmes"
-																className={`fr-input ${common.numericInput}${womenError ? "fr-input--error" : ""}`}
-																disabled={isImpersonating}
-																inputMode="numeric"
-																onChange={handleWomenChange}
-																pattern="[0-9]*"
-																type="text"
-																value={womenRaw}
-															/>
-															{womenError && (
-																<p className="fr-error-text" id="women-error">
-																	{womenError}
-																</p>
-															)}
-														</div>
-													</td>
-													<td>
-														<div
-															className={
-																menError
-																	? "fr-input-group fr-input-group--error"
-																	: "fr-input-group"
-															}
-														>
-															<input
-																aria-describedby={
-																	menError ? "men-error" : undefined
+															>
+																<input
+																	aria-describedby={
+																		womenError ? "women-error" : undefined
+																	}
+																	aria-invalid={womenError ? true : undefined}
+																	aria-label="Nombre de femmes"
+																	className={`fr-input ${common.numericInput}${womenError ? "fr-input--error" : ""}`}
+																	disabled={isImpersonating}
+																	inputMode="numeric"
+																	onChange={handleWomenChange}
+																	pattern="[0-9]*"
+																	type="text"
+																	value={womenRaw}
+																/>
+																{womenError && (
+																	<p className="fr-error-text" id="women-error">
+																		{womenError}
+																	</p>
+																)}
+															</div>
+														</td>
+														<td>
+															<div
+																className={
+																	menError
+																		? "fr-input-group fr-input-group--error"
+																		: "fr-input-group"
 																}
-																aria-invalid={menError ? true : undefined}
-																aria-label="Nombre d'hommes"
-																className={`fr-input ${common.numericInput}${menError ? "fr-input--error" : ""}`}
-																disabled={isImpersonating}
-																inputMode="numeric"
-																onChange={handleMenChange}
-																pattern="[0-9]*"
-																type="text"
-																value={menRaw}
-															/>
-															{menError && (
-																<p className="fr-error-text" id="men-error">
-																	{menError}
-																</p>
-															)}
-														</div>
-													</td>
-													<td>
-														<strong>{total}</strong>
-													</td>
-												</tr>
-											</tbody>
-										</table>
+															>
+																<input
+																	aria-describedby={
+																		menError ? "men-error" : undefined
+																	}
+																	aria-invalid={menError ? true : undefined}
+																	aria-label="Nombre d'hommes"
+																	className={`fr-input ${common.numericInput}${menError ? "fr-input--error" : ""}`}
+																	disabled={isImpersonating}
+																	inputMode="numeric"
+																	onChange={handleMenChange}
+																	pattern="[0-9]*"
+																	type="text"
+																	value={menRaw}
+																/>
+																{menError && (
+																	<p className="fr-error-text" id="men-error">
+																		{menError}
+																	</p>
+																)}
+															</div>
+														</td>
+														<td>
+															<strong>{total}</strong>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
 									</div>
 								</div>
 							</div>
+
+							{isPrefilled && (
+								<PrefillSource periodEnd={gipPrefillData.periodEnd} />
+							)}
+
+							{showResetWarning && <PrefillResetWarning />}
 						</div>
 
-						{isPrefilled && (
-							<PrefillSource periodEnd={gipPrefillData.periodEnd} />
-						)}
-
-						{showResetWarning && <PrefillResetWarning />}
+						<DefinitionAccordion
+							id="accordion-step1"
+							title="Définitions et méthode de calcul"
+						>
+							<div className="fr-callout">
+								<p>Les informations affichées incluront notamment&nbsp;:</p>
+								<ul>
+									<li>Dernière situation connue&nbsp;?</li>
+									<li>Effectif physique moyen&nbsp;?</li>
+									<li>
+										Comment sont intégrés les salariés entrés et sortis&nbsp;?
+									</li>
+									<li>
+										Comment sont traités les changements de situation (ex.
+										passage du temps plein au temps partiel)&nbsp;?
+									</li>
+									<li>
+										Les absences de six mois ou plus, continues ou discontinues,
+										sont-elles exclues du calcul&nbsp;?
+									</li>
+									<li>
+										Comment sont prises en compte les absences de trois mois,
+										avec leur recalcul en équivalent temps plein (ETP)&nbsp;?
+									</li>
+									<li>
+										Le détail des règles de calcul, illustré par des exemples
+										concrets selon les types de salariés&nbsp;? (Salariés à
+										prendre en compte / Salariés à exclure)
+									</li>
+								</ul>
+							</div>
+						</DefinitionAccordion>
 					</div>
 
-					<DefinitionAccordion
-						id="accordion-step1"
-						title="Définitions et méthode de calcul"
-					>
-						<div className="fr-callout">
-							<p>Les informations affichées incluront notamment&nbsp;:</p>
-							<ul>
-								<li>Dernière situation connue&nbsp;?</li>
-								<li>Effectif physique moyen&nbsp;?</li>
-								<li>
-									Comment sont intégrés les salariés entrés et sortis&nbsp;?
-								</li>
-								<li>
-									Comment sont traités les changements de situation (ex. passage
-									du temps plein au temps partiel)&nbsp;?
-								</li>
-								<li>
-									Les absences de six mois ou plus, continues ou discontinues,
-									sont-elles exclues du calcul&nbsp;?
-								</li>
-								<li>
-									Comment sont prises en compte les absences de trois mois, avec
-									leur recalcul en équivalent temps plein (ETP)&nbsp;?
-								</li>
-								<li>
-									Le détail des règles de calcul, illustré par des exemples
-									concrets selon les types de salariés&nbsp;? (Salariés à
-									prendre en compte / Salariés à exclure)
-								</li>
-							</ul>
-						</div>
-					</DefinitionAccordion>
-				</div>
+					<FormErrors
+						mutationError={mutation.error?.message}
+						validationError={validationError}
+					/>
 
-				<FormErrors
-					mutationError={mutation.error?.message}
-					validationError={validationError}
-				/>
-
-				<FormActions
-					className="fr-mt-0"
-					isSubmitting={mutation.isPending}
-					mimoquageNextHref={
-						hasInitialData ? "/declaration-remuneration/etape/2" : undefined
-					}
-					previousHref="/"
-				/>
+					<FormActions
+						className="fr-mt-0"
+						isSubmitting={mutation.isPending}
+						mimoquageNextHref={
+							hasInitialData ? "/declaration-remuneration/etape/2" : undefined
+						}
+						previousHref="/"
+					/>
+				</fieldset>
 			</form>
 			<PrefillResetConfirmDialog
 				dialogRef={dialogRef}

@@ -1,28 +1,42 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { createContext, useContext } from "react";
 
-import {
-	type DeclarationLockState,
-	useDeclarationLock,
-} from "./useDeclarationLock";
-
-const LockContext = createContext<DeclarationLockState | null>(null);
-
-type LockProviderProps = {
-	declarationId: string;
-	children: React.ReactNode;
+export type LockHolder = {
+	firstName: string | null;
+	lastName: string | null;
+	email: string | null;
 };
 
-export function LockProvider({ declarationId, children }: LockProviderProps) {
-	const state = useDeclarationLock({ declarationId });
-	return <LockContext.Provider value={state}>{children}</LockContext.Provider>;
+type LockState = {
+	isReadOnly: boolean;
+	holder: LockHolder | null;
+};
+
+const LockContext = createContext<LockState>({
+	isReadOnly: false,
+	holder: null,
+});
+
+type LockProviderProps = {
+	children: ReactNode;
+	isReadOnly?: boolean;
+	holder?: LockHolder | null;
+};
+
+export function LockProvider({
+	children,
+	isReadOnly = false,
+	holder = null,
+}: LockProviderProps) {
+	return (
+		<LockContext.Provider value={{ isReadOnly, holder }}>
+			{children}
+		</LockContext.Provider>
+	);
 }
 
-export function useLockContext(): DeclarationLockState {
-	const context = useContext(LockContext);
-	if (context === null) {
-		throw new Error("useLockContext must be used within a LockProvider");
-	}
-	return context;
+export function useLockContext(): LockState {
+	return useContext(LockContext);
 }

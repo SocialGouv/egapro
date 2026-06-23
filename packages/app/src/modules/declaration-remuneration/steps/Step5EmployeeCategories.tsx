@@ -8,6 +8,7 @@ import { padDecimalToTwo } from "~/modules/domain";
 import { api } from "~/trpc/react";
 import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
+import { useLockContext } from "../shared/lock/LockContext";
 import { StepIndicator } from "../shared/StepIndicator";
 import type { EmployeeCategoryRow } from "../types";
 import { CategoryForm } from "./step5/CategoryForm";
@@ -48,6 +49,7 @@ export function Step5EmployeeCategories({
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
+	const { isReadOnly: isLocked } = useLockContext();
 	const hasInitialData = (initialCategories?.length ?? 0) > 0;
 
 	const dbValues = useMemo<Step5FormValues>(
@@ -108,7 +110,7 @@ export function Step5EmployeeCategories({
 		<CategoryForm
 			accordionId="accordion-step5"
 			defaultValuesOverride={categoryFormDefaultOverride}
-			disabled={isImpersonating}
+			disabled={isImpersonating || isLocked}
 			hasDataOverride={hasInitialData || hasDraft}
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}

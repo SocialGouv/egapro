@@ -1,4 +1,7 @@
 import { CompanyBanner } from "./shared/CompanyBanner";
+import { DeclarationLockAlert } from "./shared/lock/DeclarationLockAlert";
+import type { LockHolder } from "./shared/lock/LockContext";
+import { LockProvider } from "./shared/lock/LockContext";
 
 type CompanyData = {
 	name: string;
@@ -13,12 +16,16 @@ type DeclarationLayoutProps = {
 	company: CompanyData;
 	declarationYear: number;
 	children: React.ReactNode;
+	isReadOnly?: boolean;
+	lockHolder?: LockHolder | null;
 };
 
 export function DeclarationLayout({
 	company,
 	declarationYear,
 	children,
+	isReadOnly = false,
+	lockHolder = null,
 }: DeclarationLayoutProps) {
 	return (
 		<>
@@ -27,9 +34,16 @@ export function DeclarationLayout({
 				currentPageLabel={`Démarche des indicateurs de rémunération ${declarationYear}`}
 			/>
 			<main className="fr-container fr-py-7w" id="content">
-				<div className="fr-grid-row fr-grid-row--center">
-					<div className="fr-col-12 fr-col-lg-8">{children}</div>
-				</div>
+				<LockProvider holder={lockHolder} isReadOnly={isReadOnly}>
+					<div className="fr-grid-row fr-grid-row--center">
+						<div className="fr-col-12 fr-col-lg-8">
+							{isReadOnly && lockHolder && (
+								<DeclarationLockAlert holder={lockHolder} />
+							)}
+							{children}
+						</div>
+					</div>
+				</LockProvider>
 			</main>
 		</>
 	);
