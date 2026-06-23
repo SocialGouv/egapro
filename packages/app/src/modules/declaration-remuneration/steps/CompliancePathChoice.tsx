@@ -81,7 +81,7 @@ export function CompliancePathChoice({
 		}
 	});
 
-	useDraftAutoSave(form, draftHydrated, (values) =>
+	useDraftAutoSave(form, draftHydrated && !isReadOnly, (values) =>
 		setField(values as { path: CompliancePathValue | undefined }),
 	);
 
