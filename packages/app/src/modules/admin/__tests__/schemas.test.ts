@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { impersonateSearchSchema, startImpersonateSchema } from "../schemas";
+import {
+	impersonateSearchSchema,
+	releaseLockSchema,
+	startImpersonateSchema,
+} from "../schemas";
 import { updateLockTimeoutSchema } from "../settings/schemas";
 
 describe("admin schemas", () => {
@@ -65,5 +69,22 @@ describe("updateLockTimeoutSchema", () => {
 
 	it("rejects a missing timeout", () => {
 		expect(updateLockTimeoutSchema.safeParse({}).success).toBe(false);
+	});
+});
+
+describe("releaseLockSchema", () => {
+	it("accepts a valid UUID declarationId", () => {
+		const result = releaseLockSchema.safeParse({
+			declarationId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it.each([
+		"",
+		"not-a-uuid",
+		"123456789",
+	])("rejects a non-UUID declarationId %s", (declarationId) => {
+		expect(releaseLockSchema.safeParse({ declarationId }).success).toBe(false);
 	});
 });

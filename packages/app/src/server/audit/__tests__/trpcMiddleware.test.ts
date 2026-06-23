@@ -110,6 +110,22 @@ describe("auditMiddleware", () => {
 		});
 	});
 
+	it("logs the admin lock release mutation (adminDeclarations.releaseLock)", async () => {
+		const next = vi.fn(async () => ({ declarationId: "decl-1" }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "adminDeclarations.releaseLock",
+			getRawInput: buildGetRawInput({ declarationId: "decl-1" }),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "admin_declaration.release_lock",
+			status: "success",
+			metadata: { declarationId: "decl-1" },
+		});
+	});
+
 	it("logs sensitive query reads (declaration.getOrCreate)", async () => {
 		const next = vi.fn(async () => ({ declaration: {} }));
 		await auditMiddleware({
