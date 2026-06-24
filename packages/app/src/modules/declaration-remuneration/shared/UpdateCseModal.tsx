@@ -2,8 +2,8 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
+import { useUpdateHasCse } from "~/modules/my-space";
 import { getDsfrModal } from "~/modules/shared";
-import { api } from "~/trpc/react";
 import styles from "./UpdateCseModal.module.scss";
 
 const MODAL_ID = "update-cse-modal";
@@ -24,10 +24,8 @@ export function UpdateCseModal({ siren }: Props) {
 		}
 	}, []);
 
-	const mutation = api.company.updateHasCse.useMutation({
-		onSuccess: () => {
-			closeModal();
-		},
+	const mutation = useUpdateHasCse({
+		onSuccess: closeModal,
 	});
 
 	function handleSave() {

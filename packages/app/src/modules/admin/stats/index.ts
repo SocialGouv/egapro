@@ -5,7 +5,13 @@ export { CampaignProgressionTable } from "./CampaignProgressionTable";
 export { CampaignRateTile } from "./CampaignRateTile";
 export { CompletionFunnelChart } from "./CompletionFunnelChart";
 export { CompletionFunnelTable } from "./CompletionFunnelTable";
-export { formatCount, formatDays, formatPercent } from "./formatters";
+export { CseStatusConfirmationsTile } from "./CseStatusConfirmationsTile";
+export {
+	formatCount,
+	formatDays,
+	formatDecimal,
+	formatPercent,
+} from "./formatters";
 export { StagnationDaysFilter } from "./StagnationDaysFilter";
 export { StatsBarChart } from "./StatsBarChart";
 export { StatsBarTable } from "./StatsBarTable";
@@ -36,6 +42,7 @@ export type {
 	CampaignStats,
 	CategoryModelUsage,
 	CompletionFunnelOutput,
+	CseStatusConfirmations,
 	DeviceBreakdown,
 	DeviceBreakdownRow,
 	FunnelRow,
@@ -44,6 +51,8 @@ export type {
 	MatomoFunnelOutput,
 	StepDropoffRow,
 	StepDurationRow,
+	UsersPerCompany,
 } from "./types";
+export { UsersPerCompanyTile } from "./UsersPerCompanyTile";
 export { useDebouncedValue } from "./useDebouncedValue";
 export { YearsFilter } from "./YearsFilter";

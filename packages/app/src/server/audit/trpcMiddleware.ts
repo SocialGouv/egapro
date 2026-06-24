@@ -82,6 +82,10 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 		AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_HELP_LINKS,
 	"adminStats.getMatomoDeviceBreakdown":
 		AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_DEVICE_BREAKDOWN,
+	"adminStats.getMatomoCseStatusConfirmations":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_CSE_STATUS_CONFIRMATIONS,
+	"adminStats.getUsersPerCompany":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_USERS_PER_COMPANY,
 
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,

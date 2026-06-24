@@ -10,6 +10,7 @@ export const MATOMO_EVENT_CATEGORY = {
 	DOCUMENT: "document",
 	AUTH: "auth",
 	DASHBOARD: "dashboard",
+	CSE_STATUS: "cse_status",
 } as const;
 
 export const MATOMO_FUNNEL_ACTION = {
@@ -32,6 +33,7 @@ export const MATOMO_ACTION = {
 	CATEGORY_IMPORT_FAILURE: "category_import_failure",
 	CATEGORY_IMPORT_DURATION: "category_import_duration",
 	HELP_LINK_CLICK: "help_link_click",
+	CSE_STATUS_CONFIRM: "cse_status_confirm",
 } as const;
 
 // Slot IDs must match the Custom Dimension slots configured in the Matomo

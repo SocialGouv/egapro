@@ -7,6 +7,7 @@ import {
 } from "~/modules/admin/stats/schemas";
 import type {
 	CategoryModelUsage,
+	CseStatusConfirmations,
 	DeviceBreakdown,
 	DeviceBreakdownRow,
 	FunnelRow,
@@ -453,6 +454,33 @@ async function fetchHelpLinkClicks(
 	return { rows };
 }
 
+/**
+ * Volume of CSE-status confirmations for one year, split by the bounded oui/non
+ * label. Mirrors {@link fetchHelpLinkClicks}: `Events.getName` is visit-scoped,
+ * so the result is **allow-listed** to the two expected labels — a co-occurring
+ * event name in the same visit is dropped. Counts confirmation *actions* (a
+ * re-save or a second co-declarant counts again); Matomo carries no SIREN, so
+ * it cannot dedupe to distinct companies.
+ */
+async function fetchCseStatusConfirmationsData(
+	config: MatomoConfig,
+	year: number,
+): Promise<CseStatusConfirmations> {
+	const names = await getEventNames(
+		config,
+		MATOMO_EVENT_CATEGORY.CSE_STATUS,
+		MATOMO_ACTION.CSE_STATUS_CONFIRM,
+		year,
+	);
+	let yes = 0;
+	let no = 0;
+	for (const name of names) {
+		if (name.label === "oui") yes += toCount(name.nb_events);
+		else if (name.label === "non") no += toCount(name.nb_events);
+	}
+	return { total: yes + no, yes, no };
+}
+
 // Each behaviour is detected by its marker event. `DevicesDetection.getType`
 // returns device-type rows (`nb_visits`) for visits matching the segment.
 // ⚠️ Segment dimension names and `DevicesDetection.getType` must be validated
@@ -545,6 +573,18 @@ export async function fetchMatomoHelpLinks({
 	const config = readConfig();
 	if (!config) return { rows: [] };
 	return fetchHelpLinkClicks(config, year);
+}
+
+/** Volume of CSE-status confirmations for one year, split oui / non. */
+export async function fetchMatomoCseStatusConfirmations({
+	year,
+}: {
+	year: number;
+	sizeRange?: CompanySizeRange;
+}): Promise<CseStatusConfirmations> {
+	const config = readConfig();
+	if (!config) return { total: 0, yes: 0, no: 0 };
+	return fetchCseStatusConfirmationsData(config, year);
 }
 
 /** Device split (desktop / smartphone / tablet) for the 3 tracked behaviours. */

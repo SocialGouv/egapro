@@ -103,11 +103,15 @@ Clés d'étape : `step_1` Actions correctives et seconde déclaration · `step_2
 | `document` / `category_import_failure` | Échec de parsing d'un fichier de catégories importé | type d'erreur (`missing-columns` \| `invalid-value` \| `empty-file`) | — | `declaration-remuneration/steps/step5/CategoryImportExport.tsx` | K20 |
 | `auth` / `login_start` | Clic sur « S'identifier avec ProConnect » (avant la redirection OIDC) | — | — | `login/ProConnectButton.tsx` | K20 |
 | `dashboard` / `declaration_start` | Clic sur le lien de démarrage d'une déclaration rémunération depuis `mon-espace` | `remuneration` | — | `my-space/DeclarationLink.tsx` | K19, K20 |
+| `cse_status` / `cse_status_confirm` | Enregistrement du statut CSE d'une entreprise (succès de `company.updateHasCse`) | `oui` \| `non` (jamais de SIREN) | — | `my-space/useUpdateHasCse.ts` (`CompanyEditModal`, `MissingInfoModal`, `UpdateCseModal`) | Engagement CSE (`/admin/stats`) |
 
-> Dimension : `pdf_download` porte l'année quand elle est connue. Aucune autre
-> action ne porte de dimension. Les recherches n'émettent **que** les noms de
-> facettes, jamais leurs valeurs (la requête libre peut contenir un SIREN ou un
-> nom d'entreprise).
+> Dimension : `pdf_download` et `cse_status_confirm` portent l'année de campagne
+> (`cse_status_confirm` toujours, `pdf_download` quand elle est connue). Aucune
+> autre action ne porte de dimension. `cse_status_confirm` n'émet que le label
+> borné `oui`/`non` — jamais le SIREN, pour préserver l'exemption de consentement
+> CNIL : le comptage est donc un **volume de confirmations** (pas d'entreprises
+> distinctes). Les recherches n'émettent **que** les noms de facettes, jamais
+> leurs valeurs (la requête libre peut contenir un SIREN ou un nom d'entreprise).
 
 ## Dimensions personnalisées
 
