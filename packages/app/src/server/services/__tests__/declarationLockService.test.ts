@@ -99,6 +99,46 @@ describe("getActiveLock", () => {
 	});
 });
 
+describe("getLockReadState", () => {
+	it("flags read-only and exposes the holder when another user holds the lock", async () => {
+		const select = selectChain([HOLDER]);
+		const { getLockReadState } = await service();
+
+		const result = await getLockReadState(
+			select as never,
+			DECLARATION_ID,
+			"user-2",
+		);
+
+		expect(result).toEqual({
+			isReadOnly: true,
+			lockHolder: {
+				firstName: HOLDER.firstName,
+				lastName: HOLDER.lastName,
+				email: HOLDER.email,
+			},
+		});
+	});
+
+	it("is not read-only when the current user holds the lock", async () => {
+		const select = selectChain([HOLDER]);
+		const { getLockReadState } = await service();
+
+		expect(
+			await getLockReadState(select as never, DECLARATION_ID, USER_ID),
+		).toEqual({ isReadOnly: false, lockHolder: null });
+	});
+
+	it("is not read-only when no active lock exists", async () => {
+		const select = selectChain([]);
+		const { getLockReadState } = await service();
+
+		expect(
+			await getLockReadState(select as never, DECLARATION_ID, USER_ID),
+		).toEqual({ isReadOnly: false, lockHolder: null });
+	});
+});
+
 describe("acquireOrRefreshLock", () => {
 	it("acquired=true when the upsert returns a row, stamping now + timeout", async () => {
 		const insert = insertChain([{ id: "lock-1" }]);

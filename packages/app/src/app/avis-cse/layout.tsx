@@ -3,7 +3,7 @@ import { CseOpinionLayout } from "~/modules/cseOpinion";
 import { auth } from "~/server/auth";
 import { getEffectiveSiren } from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
-import { getActiveLock } from "~/server/services/declarationLockService";
+import { getLockReadState } from "~/server/services/declarationLockService";
 import { api } from "~/trpc/server";
 
 export default async function CseOpinionRootLayout({
@@ -28,16 +28,11 @@ export default async function CseOpinionRootLayout({
 	]);
 
 	const declaration = declarationData.declaration;
-	const activeLock = await getActiveLock(db, declaration.id);
-	const isReadOnly =
-		activeLock !== null && activeLock.userId !== session.user.id;
-	const lockHolder = isReadOnly
-		? {
-				firstName: activeLock.firstName,
-				lastName: activeLock.lastName,
-				email: activeLock.email,
-			}
-		: null;
+	const { isReadOnly, lockHolder } = await getLockReadState(
+		db,
+		declaration.id,
+		session.user.id,
+	);
 
 	return (
 		<CseOpinionLayout

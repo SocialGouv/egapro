@@ -221,12 +221,11 @@ export function Step1Workforce({
 
 					<div className={common.flexColumnGap1}>
 						<p className="fr-mb-0">
-							Période de référence pour le calcul des indicateurs : 01/01/2026 -
-							31/12/2026.
+							{`Période de référence pour le calcul des indicateurs : 01/01/${declarationYear} - 31/12/${declarationYear}.`}
 							<TooltipButton
 								id="tooltip-period"
 								label="Information sur la période de référence"
-								text="Pour les entreprises créées en cours d'année, cette période correspond à la durée d'activité effective depuis la date de création jusqu'au 31/12/2026."
+								text={`Pour les entreprises créées en cours d'année, cette période correspond à la durée d'activité effective depuis la date de création jusqu'au 31/12/${declarationYear}.`}
 							/>
 						</p>
 

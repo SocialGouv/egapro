@@ -53,6 +53,38 @@ export async function getActiveLock(
 	return rows[0] ?? null;
 }
 
+export type LockReadState = {
+	isReadOnly: boolean;
+	lockHolder: Pick<LockHolder, "firstName" | "lastName" | "email"> | null;
+};
+
+/**
+ * Resolve the read-only display state of a declaration for `currentUserId`:
+ * read-only when an active lock is held by *another* user, exposing only the
+ * holder identity the banner needs. Shared by the funnel layouts
+ * (`declaration-remuneration`, `avis-cse`) so the lock-read logic lives in one
+ * place instead of being duplicated per layout.
+ */
+export async function getLockReadState(
+	db: DbClient,
+	declarationId: string,
+	currentUserId: string,
+): Promise<LockReadState> {
+	const activeLock = await getActiveLock(db, declarationId);
+	if (!activeLock || activeLock.userId === currentUserId) {
+		return { isReadOnly: false, lockHolder: null };
+	}
+
+	return {
+		isReadOnly: true,
+		lockHolder: {
+			firstName: activeLock.firstName,
+			lastName: activeLock.lastName,
+			email: activeLock.email,
+		},
+	};
+}
+
 /**
  * Atomically acquire or refresh the edit lock on a declaration.
  *

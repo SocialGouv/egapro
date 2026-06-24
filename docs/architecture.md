@@ -451,6 +451,16 @@ Le module `~/modules/shared/fileNameValidation.ts` fournit `validateFileName(fil
 - **Côté client** : dans le composant `FileUpload.tsx`, avant la vérification MIME et la vérification de taille.
 - **Côté serveur** : dans la Route Handler `POST /api/upload`, après la vérification MIME déclarée, avant de lancer le pipeline (ClamAV + S3).
 
+| Vérification | Détail |
+|---|---|
+| Non vide | Refus si la valeur trimmée est vide |
+| Longueur | Refus si > `MAX_FILENAME_LENGTH` (200 caractères) |
+| Caractères interdits | `< > : " \| ? * ; / \` et caractères de contrôle (U+0000–U+001F, U+007F) |
+| Caractères de format Unicode | Toute la catégorie Cf est rejetée : largeur nulle (U+200B–U+200D, U+FEFF) et contrôles bidirectionnels (RLO/LRO/RLE/LRE/PDF, LRI/RLI/FSI/PDI) |
+| Cohérence extension-MIME | L'extension (`EXTENSION_MIME_MAP`) doit correspondre au MIME déclaré |
+
+Le schéma Zod `fileNameSchema` (exporté depuis le même module) encapsule ces règles pour les réutiliser dans des formulaires ou des procédures.
+
 ### 8.3 Antivirus ClamAV
 
 Le service `clamavd` scanne les uploads via le protocole ClamAV (TCP). Si le scanner est indisponible, le fichier est rejeté (503). Si un virus est détecté, le fichier est rejeté avant tout stockage S3 (422 + nom de la signature).
@@ -491,7 +501,7 @@ Définies dans `src/modules/audit/shared/constants.ts` :
 | `export` | 365 j | API publique d'export |
 | `system` | 365 j | Import GIP, cron de cleanup |
 
-`AUDIT_RETENTION_DAYS_SHORT = 180`, `AUDIT_RETENTION_DAYS_LONG = 365`.
+`AUDIT_RETENTION_DAYS_SHORT = 180`, `AUDIT_RETENTION_DAYS_LONG = 365`. Surchargeables via les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` / `EGAPRO_AUDIT_RETENTION_LONG_DAYS`.
 
 ### 9.4 Wire-up obligatoire
 
