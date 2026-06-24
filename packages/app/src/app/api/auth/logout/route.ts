@@ -33,8 +33,9 @@ export async function GET(request: NextRequest) {
 		if (token.id) {
 			try {
 				await releaseAllLocksForUser(db, token.id);
-			} catch {
+			} catch (error) {
 				// best-effort: lock release failure must not block logout
+				console.error("[logout] Failed to release locks for user", error);
 			}
 		}
 	}

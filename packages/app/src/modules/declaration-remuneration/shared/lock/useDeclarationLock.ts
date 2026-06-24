@@ -81,6 +81,7 @@ export function useDeclarationLock({
 				if (cancelled) return;
 				isHolderRef.current = false;
 				setIsReadOnly(true);
+				setHolder(null);
 			}
 		};
 

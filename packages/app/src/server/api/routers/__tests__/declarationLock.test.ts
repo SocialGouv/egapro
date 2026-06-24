@@ -132,7 +132,7 @@ describe("declarationLockRouter", () => {
 			});
 		});
 
-		it("never excludes the lock service's expiresAt from the leaked payload", async () => {
+		it("strips internal fields (expiresAt, userId) from the returned holder", async () => {
 			const holder = buildLockHolder({ userId: OTHER_USER_ID });
 			mocks.getActiveLock.mockResolvedValue(holder);
 			const db = createSelectDb([[{ id: DECLARATION_ID }]]);
@@ -302,10 +302,11 @@ describe("declarationLockRouter", () => {
 			});
 
 			expect(result).toEqual({ released: false });
+			expect(mocks.releaseLock).not.toHaveBeenCalled();
 			expect(mockLogAction).not.toHaveBeenCalled();
 		});
 
-		it("returns released=false and does not audit when there is no active lock", async () => {
+		it("returns released=false and does not delete or audit when there is no active lock", async () => {
 			mocks.getActiveLock.mockResolvedValue(null);
 			mocks.releaseLock.mockResolvedValue(undefined);
 			const db = createSelectDb([[{ id: DECLARATION_ID }]]);
@@ -316,7 +317,7 @@ describe("declarationLockRouter", () => {
 			});
 
 			expect(result).toEqual({ released: false });
-			expect(mocks.releaseLock).toHaveBeenCalled();
+			expect(mocks.releaseLock).not.toHaveBeenCalled();
 			expect(mockLogAction).not.toHaveBeenCalled();
 		});
 	});

@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	acquireLockSchema,
+	getLockStateSchema,
 	heartbeatSchema,
 	releaseLockSchema,
 } from "~/modules/declaration-remuneration/schemas";
@@ -169,9 +170,9 @@ export const declarationLockRouter = createTRPCRouter({
 			const active = await getActiveLock(ctx.db, declarationId);
 			const released = active?.userId === userId;
 
-			await releaseLock(ctx.db, declarationId, userId);
-
 			if (released) {
+				await releaseLock(ctx.db, declarationId, userId);
+
 				const requestContext = buildRequestContext(ctx.headers);
 				void logAction({
 					action: AUDIT_ACTIONS.DECLARATION_LOCK_RELEASED,
@@ -190,7 +191,7 @@ export const declarationLockRouter = createTRPCRouter({
 		}),
 
 	getLockState: companyProcedure
-		.input(acquireLockSchema)
+		.input(getLockStateSchema)
 		.query(async ({ ctx, input }) => {
 			const declarationId = await resolveOwnDeclarationId(
 				ctx.db,

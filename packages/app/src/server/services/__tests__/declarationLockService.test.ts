@@ -65,6 +65,10 @@ function deleteChain() {
 	return { delete: vi.fn().mockReturnValue({ where }), where };
 }
 
+function transactionDb(tx: unknown) {
+	return { transaction: vi.fn((cb: (tx: unknown) => unknown) => cb(tx)) };
+}
+
 const service = () => import("~/server/services/declarationLockService");
 
 beforeEach(() => {
@@ -98,7 +102,8 @@ describe("getActiveLock", () => {
 describe("acquireOrRefreshLock", () => {
 	it("acquired=true when the upsert returns a row, stamping now + timeout", async () => {
 		const insert = insertChain([{ id: "lock-1" }]);
-		const db = { ...insert, ...selectChain([HOLDER]) };
+		const tx = { ...insert, ...selectChain([HOLDER]) };
+		const db = transactionDb(tx);
 		const { acquireOrRefreshLock } = await service();
 
 		const result = await acquireOrRefreshLock(
@@ -122,7 +127,8 @@ describe("acquireOrRefreshLock", () => {
 
 	it("acquired=false when the conflict update touches no row", async () => {
 		const insert = insertChain([]);
-		const db = { ...insert, ...selectChain([HOLDER]) };
+		const tx = { ...insert, ...selectChain([HOLDER]) };
+		const db = transactionDb(tx);
 		const { acquireOrRefreshLock } = await service();
 
 		const result = await acquireOrRefreshLock(
@@ -137,7 +143,10 @@ describe("acquireOrRefreshLock", () => {
 	});
 
 	it("throws when the lock row is missing right after the upsert", async () => {
-		const db = { ...insertChain([{ id: "lock-1" }]), ...selectChain([]) };
+		const db = transactionDb({
+			...insertChain([{ id: "lock-1" }]),
+			...selectChain([]),
+		});
 		const { acquireOrRefreshLock } = await service();
 
 		await expect(

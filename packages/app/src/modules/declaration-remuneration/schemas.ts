@@ -141,3 +141,7 @@ export const heartbeatSchema = z.object({
 export const releaseLockSchema = z.object({
 	declarationId: z.string(),
 });
+
+export const getLockStateSchema = z.object({
+	declarationId: z.string(),
+});

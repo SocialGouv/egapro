@@ -60,6 +60,12 @@ export async function getActiveLock(
  * both win: the conflict update only fires when the existing lock is free to
  * take (held by the same user, or expired). If an active lock is held by
  * another user, the row is left untouched and `acquired` is `false`.
+ *
+ * The upsert and the holder read run in a single transaction so the returned
+ * holder is consistent with the row just written: the row-level lock taken by
+ * `INSERT ... ON CONFLICT` is held until commit, so a concurrent caller cannot
+ * overwrite the row between the upsert and the `getActiveLock` read. When `db`
+ * is already a transaction, Drizzle nests this as a savepoint.
  */
 export async function acquireOrRefreshLock(
 	db: DbClient,
@@ -70,38 +76,40 @@ export async function acquireOrRefreshLock(
 	const now = new Date();
 	const expiresAt = computeExpiry(now, timeoutMinutes);
 
-	const acquiredRows = await db
-		.insert(declarationLocks)
-		.values({
-			declarationId,
-			lockedByUserId: userId,
-			lockedAt: now,
-			lastHeartbeatAt: now,
-			expiresAt,
-		})
-		.onConflictDoUpdate({
-			target: declarationLocks.declarationId,
-			set: {
+	return (db as DB).transaction(async (tx) => {
+		const acquiredRows = await tx
+			.insert(declarationLocks)
+			.values({
+				declarationId,
 				lockedByUserId: userId,
+				lockedAt: now,
 				lastHeartbeatAt: now,
 				expiresAt,
-			},
-			setWhere: or(
-				eq(declarationLocks.lockedByUserId, userId),
-				lte(declarationLocks.expiresAt, now),
-			),
-		})
-		.returning({ id: declarationLocks.id });
+			})
+			.onConflictDoUpdate({
+				target: declarationLocks.declarationId,
+				set: {
+					lockedByUserId: userId,
+					lastHeartbeatAt: now,
+					expiresAt,
+				},
+				setWhere: or(
+					eq(declarationLocks.lockedByUserId, userId),
+					lte(declarationLocks.expiresAt, now),
+				),
+			})
+			.returning({ id: declarationLocks.id });
 
-	const holder = await getActiveLock(db, declarationId);
+		const holder = await getActiveLock(tx, declarationId);
 
-	if (!holder) {
-		throw new Error(
-			`Declaration lock row missing right after upsert for ${declarationId}`,
-		);
-	}
+		if (!holder) {
+			throw new Error(
+				`Declaration lock row missing right after upsert for ${declarationId}`,
+			);
+		}
 
-	return { acquired: acquiredRows.length > 0, holder };
+		return { acquired: acquiredRows.length > 0, holder };
+	});
 }
 
 export async function refreshLock(
