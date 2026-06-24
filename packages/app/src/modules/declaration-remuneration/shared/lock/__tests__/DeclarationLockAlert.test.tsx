@@ -38,6 +38,11 @@ describe("DeclarationLockAlert", () => {
 				/Camille Martin \(camille\.martin@example\.fr\) modifie actuellement/,
 			),
 		).toBeInTheDocument();
+
+		const paragraph = screen.getByText(/modifie actuellement/).closest("p");
+		expect(paragraph?.textContent).toContain(
+			"(camille.martin@example.fr) modifie actuellement",
+		);
 	});
 
 	it("shows the name without parentheses when the email is null", () => {
