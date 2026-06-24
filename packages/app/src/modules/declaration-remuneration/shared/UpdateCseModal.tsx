@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
-import { useUpdateHasCse } from "~/modules/my-space";
+import { useUpdateHasCse } from "~/modules/my-space/useUpdateHasCse";
 import { getDsfrModal } from "~/modules/shared";
 import styles from "./UpdateCseModal.module.scss";
 

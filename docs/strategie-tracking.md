@@ -43,7 +43,8 @@ Deux natures de signaux :
    (où les gens décrochent) et les **actions ponctuelles** (recherche,
    téléchargement, upload, login, ouverture d'une section d'aide, clic sur un lien
    d'accompagnement, usage du modèle de l'indicateur par catégorie — durée de
-   remplissage et échecs d'import —, démarrage d'une déclaration).
+   remplissage et échecs d'import —, démarrage d'une déclaration, enregistrement
+   du statut CSE d'une entreprise — label borné `oui`/`non`, jamais le SIREN).
    Liste complète dans [`plan-de-tracking.md`](./plan-de-tracking.md).
 
 Le croisement « visiteurs » (pages vues) vs. « acteurs » (événements d'action)

@@ -375,7 +375,7 @@ Routes publiques (aucune authentification, OpenAPI documentée) :
 | `/admin/liste-referents` | Annuaire admin (CRUD + import CSV) |
 | `/admin/impersonate` | Recherche d'entreprise pour impersonation |
 | `/admin/parametres` | Configuration des deadlines de campagne (par année) |
-| `/admin/stats/campagne` | Courbes de progression des soumissions par segment d'effectif |
+| `/admin/stats` | Tableau de bord statistiques en 3 sections : **Suivi de campagne** (courbes de progression par segment d'effectif, durées et décrochages par étape), **Comptes & engagement CSE** (utilisateurs par entreprise + confirmations de statut CSE), **Funnels de complétion** (Matomo) |
 
 **Modules** : `~/modules/admin/*`.
 
@@ -386,7 +386,7 @@ Routes publiques (aucune authentification, OpenAPI documentée) :
 - L'accès admin est gardé par le **middleware Edge** (`src/middleware.ts`) qui redirige vers `/login` si `isAdmin` est faux.
 - L'**impersonation** est tracée dans `adminImpersonationEvents` (audit trail dédié, lecture par `admin.getLastImpersonated`). Le callback JWT NextAuth injecte un `impersonation: { siren, startedAt }` dans la session active.
 - Les **deadlines** sont par année de campagne ; si aucune ligne n'existe en BDD pour l'année courante, des défauts viennent de `~/modules/domain` (`getDefaultCampaignDeadlines`).
-- Les **stats** segmentent les entreprises par effectif (`small / medium / large`, voir `COMPANY_SIZE_RANGES`).
+- Les **stats** segmentent les entreprises par effectif (`small / medium / large`, voir `COMPANY_SIZE_RANGES`). Deux métriques d'engagement complètent les courbes : les **utilisateurs par entreprise** (agrégat BDD sur `user_company` — répartition mono/multi-utilisateurs, sans PII) et le **volume de confirmations du statut CSE** (event Matomo anonymisé `oui`/`non`, donc un comptage d'actions, pas d'entreprises distinctes).
 - L'**import GIP-MDS** est déclenché manuellement depuis la home admin (pas de cron en V2).
 
 **Audit** : presque toutes les procédures admin sont auditées (`ADMIN_DECLARATIONS_SEARCH`, `ADMIN_SETTINGS_UPSERT_DEADLINES`, etc.).
