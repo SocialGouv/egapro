@@ -9,7 +9,9 @@ const PROCESS_STEP_LABELS: Record<DeclarationFsmStatus, string> = {
 	joint_evaluation_chosen: "Évaluation conjointe des rémunérations",
 	revised_joint_evaluation_chosen: "Évaluation conjointe des rémunérations",
 	awaiting_cse_opinion: "Déposer le ou les avis CSE",
-	demarche_completed: "Démarche des indicateurs de rémunération",
+	// "Finalisation - " prefix disambiguates the terminal step from step 1
+	// ("Déclaration des indicateurs de rémunération") — only one word apart.
+	demarche_completed: "Finalisation - Démarche des indicateurs de rémunération",
 };
 
 export function getDeclarationProcessStepLabel(d: {

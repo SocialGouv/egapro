@@ -53,7 +53,7 @@ describe("getDeclarationProcessStepLabel", () => {
 		{ fsm: "awaiting_cse_opinion", label: "Déposer le ou les avis CSE" },
 		{
 			fsm: "demarche_completed",
-			label: "Démarche des indicateurs de rémunération",
+			label: "Finalisation - Démarche des indicateurs de rémunération",
 		},
 	];
 
