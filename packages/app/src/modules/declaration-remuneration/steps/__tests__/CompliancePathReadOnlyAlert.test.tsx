@@ -13,8 +13,8 @@ const CASES: Array<[CompliancePathReadOnlyReason, RegExp]> = [
 		/Le rapport d'évaluation conjointe a déjà été transmis/,
 	],
 	[
-		"modification_deadline_passed",
-		/La date limite de modification de votre déclaration est dépassée/,
+		"path_choice_deadline_passed",
+		/La date limite pour choisir un parcours de mise en conformité est dépassée/,
 	],
 ];
 

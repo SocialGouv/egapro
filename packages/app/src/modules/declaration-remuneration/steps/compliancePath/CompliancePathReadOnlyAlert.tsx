@@ -9,8 +9,8 @@ const READ_ONLY_MESSAGES: Record<CompliancePathReadOnlyReason, string> = {
 		"La seconde déclaration a déjà été soumise. Le choix du parcours ne peut plus être modifié.",
 	joint_evaluation_submitted:
 		"Le rapport d'évaluation conjointe a déjà été transmis. Le choix du parcours ne peut plus être modifié.",
-	modification_deadline_passed:
-		"La date limite de modification de votre déclaration est dépassée. Le choix du parcours ne peut plus être modifié.",
+	path_choice_deadline_passed:
+		"La date limite pour choisir un parcours de mise en conformité est dépassée. Le choix du parcours ne peut plus être modifié.",
 };
 
 export function CompliancePathReadOnlyAlert({

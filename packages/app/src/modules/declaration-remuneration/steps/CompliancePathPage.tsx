@@ -46,7 +46,7 @@ export function getCompliancePathReadOnlyReason(params: {
 	hasSubmittedSecondDeclaration: boolean;
 	hasSubmittedCseOpinion: boolean;
 	hasSubmittedJointEvaluation: boolean;
-	modificationDeadline: Date;
+	pathChoiceDeadline: Date;
 	now?: Date;
 }): CompliancePathReadOnlyReason | null {
 	const {
@@ -55,7 +55,7 @@ export function getCompliancePathReadOnlyReason(params: {
 		hasSubmittedSecondDeclaration,
 		hasSubmittedCseOpinion,
 		hasSubmittedJointEvaluation,
-		modificationDeadline,
+		pathChoiceDeadline,
 		now,
 	} = params;
 
@@ -66,8 +66,8 @@ export function getCompliancePathReadOnlyReason(params: {
 		return "second_declaration_submitted";
 	if (pathChoice === "joint_evaluation" && hasSubmittedJointEvaluation)
 		return "joint_evaluation_submitted";
-	if (isDeadlinePassed(modificationDeadline, now))
-		return "modification_deadline_passed";
+	if (isDeadlinePassed(pathChoiceDeadline, now))
+		return "path_choice_deadline_passed";
 	return null;
 }
 
@@ -124,9 +124,7 @@ export async function CompliancePathPage() {
 		hasSubmittedSecondDeclaration: data.hasSubmittedSecondDeclaration,
 		hasSubmittedCseOpinion: data.hasSubmittedCseOpinion,
 		hasSubmittedJointEvaluation: data.hasSubmittedJointEvaluation,
-		modificationDeadline: isSecondRound
-			? campaignDeadlines.decl2ModificationDeadline
-			: campaignDeadlines.decl1ModificationDeadline,
+		pathChoiceDeadline: campaignDeadlines.pathChoiceDeadline,
 	});
 
 	return (

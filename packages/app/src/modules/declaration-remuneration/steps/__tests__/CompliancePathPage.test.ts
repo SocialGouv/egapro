@@ -84,7 +84,7 @@ describe("getCompliancePathReadOnlyReason", () => {
 		hasSubmittedSecondDeclaration: false,
 		hasSubmittedCseOpinion: false,
 		hasSubmittedJointEvaluation: false,
-		modificationDeadline: new Date("2026-12-01T00:00:00"),
+		pathChoiceDeadline: new Date("2026-12-01T00:00:00"),
 		now: new Date("2026-06-15T00:00:00"),
 	} satisfies Parameters<typeof getCompliancePathReadOnlyReason>[0];
 
@@ -167,15 +167,15 @@ describe("getCompliancePathReadOnlyReason", () => {
 		).toBeNull();
 	});
 
-	it("returns modification_deadline_passed once the deadline is in the past", () => {
+	it("returns path_choice_deadline_passed once the deadline is in the past", () => {
 		expect(
 			getCompliancePathReadOnlyReason({
 				...baseParams,
 				pathChoice: "justify",
-				modificationDeadline: new Date("2026-06-01T00:00:00"),
+				pathChoiceDeadline: new Date("2026-06-01T00:00:00"),
 				now: new Date("2026-06-02T00:00:00"),
 			}),
-		).toBe("modification_deadline_passed");
+		).toBe("path_choice_deadline_passed");
 	});
 
 	it("prioritises a submitted next step over a passed deadline", () => {
@@ -184,21 +184,21 @@ describe("getCompliancePathReadOnlyReason", () => {
 				...baseParams,
 				pathChoice: "justify",
 				hasSubmittedCseOpinion: true,
-				modificationDeadline: new Date("2026-06-01T00:00:00"),
+				pathChoiceDeadline: new Date("2026-06-01T00:00:00"),
 				now: new Date("2026-06-02T00:00:00"),
 			}),
 		).toBe("cse_opinion_submitted");
 	});
 
-	it("returns modification_deadline_passed even without a chosen path", () => {
+	it("returns path_choice_deadline_passed even without a chosen path", () => {
 		expect(
 			getCompliancePathReadOnlyReason({
 				...baseParams,
 				pathChoice: null,
-				modificationDeadline: new Date("2026-06-01T00:00:00"),
+				pathChoiceDeadline: new Date("2026-06-01T00:00:00"),
 				now: new Date("2026-06-02T00:00:00"),
 			}),
-		).toBe("modification_deadline_passed");
+		).toBe("path_choice_deadline_passed");
 	});
 
 	it("does not lock the second-round revision choice when only the first-round second declaration was submitted", () => {

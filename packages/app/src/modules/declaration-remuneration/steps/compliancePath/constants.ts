@@ -11,4 +11,4 @@ export type CompliancePathReadOnlyReason =
 	| "cse_opinion_submitted"
 	| "second_declaration_submitted"
 	| "joint_evaluation_submitted"
-	| "modification_deadline_passed";
+	| "path_choice_deadline_passed";
