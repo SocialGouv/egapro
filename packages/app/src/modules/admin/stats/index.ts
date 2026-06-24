@@ -7,6 +7,8 @@ export { CompletionFunnelChart } from "./CompletionFunnelChart";
 export { CompletionFunnelTable } from "./CompletionFunnelTable";
 export { formatCount, formatDays, formatPercent } from "./formatters";
 export { StagnationDaysFilter } from "./StagnationDaysFilter";
+export { StatsBarChart } from "./StatsBarChart";
+export { StatsBarTable } from "./StatsBarTable";
 export { StatsDashboard } from "./StatsDashboard";
 export { StepDropoffChart } from "./StepDropoffChart";
 export { StepDropoffTable } from "./StepDropoffTable";
@@ -32,8 +34,13 @@ export type {
 	CampaignProgressionPoint,
 	CampaignProgressionSeries,
 	CampaignStats,
+	CategoryModelUsage,
 	CompletionFunnelOutput,
+	DeviceBreakdown,
+	DeviceBreakdownRow,
 	FunnelRow,
+	HelpLinkClicks,
+	LabeledCount,
 	MatomoFunnelOutput,
 	StepDropoffRow,
 	StepDurationRow,

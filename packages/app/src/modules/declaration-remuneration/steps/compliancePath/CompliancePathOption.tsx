@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { TrackedLink } from "~/modules/analytics";
 import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 
@@ -16,6 +17,7 @@ type Props = {
 	deadline: Date;
 	learnMoreHref?: string;
 	learnMoreLabel?: string;
+	learnMoreTrackingId?: string;
 	disabled?: boolean;
 };
 
@@ -30,6 +32,7 @@ export function CompliancePathOption({
 	deadline,
 	learnMoreHref,
 	learnMoreLabel,
+	learnMoreTrackingId,
 	disabled = false,
 }: Props) {
 	return (
@@ -61,15 +64,16 @@ export function CompliancePathOption({
 					Échéance au {formatLongDate(deadline)}
 				</p>
 				{learnMoreHref && (
-					<a
+					<TrackedLink
 						className="fr-link fr-text--sm"
 						href={learnMoreHref}
 						rel="noopener noreferrer"
 						target="_blank"
+						trackingId={learnMoreTrackingId ?? "compliance_learn_more"}
 					>
 						{learnMoreLabel ?? "En savoir plus"}
 						<NewTabNotice />
-					</a>
+					</TrackedLink>
 				)}
 			</div>
 		</div>

@@ -1,5 +1,7 @@
 import { Breadcrumb } from "~/modules/layout";
 
+import { MatomoOptOut } from "./MatomoOptOut";
+
 /** Gestion des cookies page. */
 export function CookiesPage() {
 	return (
@@ -97,6 +99,21 @@ export function CookiesPage() {
 						</tbody>
 					</table>
 				</div>
+
+				<h2 className="fr-h4">Refuser la mesure d'audience</h2>
+				<p>
+					La mesure d'audience étant exemptée de consentement, elle est active
+					par défaut. Vous pouvez toutefois vous y opposer à tout moment :
+					cochez la case ci-dessous pour ne plus être suivi par notre solution
+					Matomo. Ce choix est conservé dans un cookie dédié sur votre
+					navigateur.
+				</p>
+				<p>
+					Par ailleurs, si votre navigateur émet le signal «&nbsp;Do Not
+					Track&nbsp;» (Ne pas me pister), il est automatiquement respecté et
+					aucune mesure d'audience n'est effectuée.
+				</p>
+				<MatomoOptOut />
 
 				<h2 className="fr-h4">Comment désactiver les cookies ?</h2>
 				<p>

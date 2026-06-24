@@ -63,6 +63,11 @@ export const AUDIT_ACTIONS = {
 	ADMIN_STATS_GET_STEP_DROPOFF_RATE: "admin_stats.get_step_dropoff_rate",
 	ADMIN_STATS_GET_COMPLETION_FUNNEL: "admin_stats.get_completion_funnel",
 	ADMIN_STATS_GET_MATOMO_FUNNEL: "admin_stats.get_matomo_funnel",
+	ADMIN_STATS_GET_MATOMO_CATEGORY_MODEL:
+		"admin_stats.get_matomo_category_model",
+	ADMIN_STATS_GET_MATOMO_HELP_LINKS: "admin_stats.get_matomo_help_links",
+	ADMIN_STATS_GET_MATOMO_DEVICE_BREAKDOWN:
+		"admin_stats.get_matomo_device_breakdown",
 
 	// ── Declaration draft ─────────────────────────────────
 	DRAFT_READ: "declaration_draft.read",
@@ -153,6 +158,9 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DROPOFF_RATE]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_COMPLETION_FUNNEL]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_FUNNEL]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_CATEGORY_MODEL]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_HELP_LINKS]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_DEVICE_BREAKDOWN]: "read_sensitive",
 	[AUDIT_ACTIONS.DRAFT_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DRAFT_SAVE]: "mutation",
 	[AUDIT_ACTIONS.DRAFT_CLEAR]: "mutation",

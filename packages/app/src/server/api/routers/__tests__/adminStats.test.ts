@@ -8,11 +8,22 @@ vi.mock("~/server/db", () => ({
 	db: {},
 }));
 
-const { fetchMatomoFunnelMock } = vi.hoisted(() => ({
+const {
+	fetchMatomoFunnelMock,
+	fetchMatomoCategoryModelMock,
+	fetchMatomoHelpLinksMock,
+	fetchMatomoDeviceBreakdownMock,
+} = vi.hoisted(() => ({
 	fetchMatomoFunnelMock: vi.fn(),
+	fetchMatomoCategoryModelMock: vi.fn(),
+	fetchMatomoHelpLinksMock: vi.fn(),
+	fetchMatomoDeviceBreakdownMock: vi.fn(),
 }));
 vi.mock("~/server/services/matomo", () => ({
 	fetchMatomoFunnel: fetchMatomoFunnelMock,
+	fetchMatomoCategoryModel: fetchMatomoCategoryModelMock,
+	fetchMatomoHelpLinks: fetchMatomoHelpLinksMock,
+	fetchMatomoDeviceBreakdown: fetchMatomoDeviceBreakdownMock,
 }));
 
 type SelectChain = {
@@ -1838,5 +1849,186 @@ describe("adminStatsRouter.getMatomoFunnel", () => {
 			sizeRange: "50-99",
 		});
 		expect(result).toBe(output);
+	});
+});
+
+const nonAdminSession = {
+	user: { id: "u", email: "u@x", isAdmin: false },
+	expires: "",
+};
+
+describe("adminStatsRouter.getMatomoCategoryModel", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: nonAdminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getMatomoCategoryModel({ year: 2026 })).rejects.toThrow(
+			/administrateurs/i,
+		);
+	});
+
+	it("delegates to the Matomo service with the year/size filter", async () => {
+		const output = { rows: [], avgImportDurationSeconds: 12 };
+		fetchMatomoCategoryModelMock.mockResolvedValue(output);
+
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getMatomoCategoryModel({
+			year: 2026,
+			sizeRange: "50-99",
+		});
+
+		expect(fetchMatomoCategoryModelMock).toHaveBeenCalledWith({
+			year: 2026,
+			sizeRange: "50-99",
+		});
+		expect(result).toBe(output);
+	});
+
+	it("validates the year bounds", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getMatomoCategoryModel({ year: 1999 }),
+		).rejects.toThrow();
+		await expect(
+			caller.getMatomoCategoryModel({ year: 2101 }),
+		).rejects.toThrow();
+	});
+});
+
+describe("adminStatsRouter.getMatomoHelpLinks", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: nonAdminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getMatomoHelpLinks({ year: 2026 })).rejects.toThrow(
+			/administrateurs/i,
+		);
+	});
+
+	it("delegates to the Matomo service with the year/size filter", async () => {
+		const output = {
+			rows: [{ key: "cse_models", label: "Modèles", count: 3 }],
+		};
+		fetchMatomoHelpLinksMock.mockResolvedValue(output);
+
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getMatomoHelpLinks({
+			year: 2026,
+			sizeRange: "250+",
+		});
+
+		expect(fetchMatomoHelpLinksMock).toHaveBeenCalledWith({
+			year: 2026,
+			sizeRange: "250+",
+		});
+		expect(result).toBe(output);
+	});
+
+	it("validates the year bounds", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getMatomoHelpLinks({ year: 1999 })).rejects.toThrow();
+		await expect(caller.getMatomoHelpLinks({ year: 2101 })).rejects.toThrow();
+	});
+});
+
+describe("adminStatsRouter.getMatomoDeviceBreakdown", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: nonAdminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getMatomoDeviceBreakdown({ year: 2026 }),
+		).rejects.toThrow(/administrateurs/i);
+	});
+
+	it("delegates to the Matomo service with the year/size filter", async () => {
+		const output = {
+			rows: [
+				{
+					key: "modification",
+					label: "Modification (déclaration)",
+					desktop: 1,
+					smartphone: 2,
+					tablet: 0,
+				},
+			],
+		};
+		fetchMatomoDeviceBreakdownMock.mockResolvedValue(output);
+
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getMatomoDeviceBreakdown({
+			year: 2026,
+			sizeRange: "<50",
+		});
+
+		expect(fetchMatomoDeviceBreakdownMock).toHaveBeenCalledWith({
+			year: 2026,
+			sizeRange: "<50",
+		});
+		expect(result).toBe(output);
+	});
+
+	it("validates the year bounds", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getMatomoDeviceBreakdown({ year: 1999 }),
+		).rejects.toThrow();
+		await expect(
+			caller.getMatomoDeviceBreakdown({ year: 2101 }),
+		).rejects.toThrow();
 	});
 });

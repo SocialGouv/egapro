@@ -79,8 +79,23 @@ SLEEP_WAIT="${EPIC_LOOP_SLEEP_WAIT:-30}"
 BUDGET_SONNET="${EPIC_LOOP_BUDGET_SONNET:-10}"
 BUDGET_OPUS="${EPIC_LOOP_BUDGET_OPUS:-40}"
 AGENT_TIMEOUT="${EPIC_LOOP_AGENT_TIMEOUT:-5400}"
+# Max consecutive e2e-dev regression rounds before escalating to the user.
+# Each round = e2e-dev finds a regression → architect-rework creates fix
+# ticket(s) → the loop reprocesses them → e2e-dev re-runs. Beyond this cap the
+# epic is escalated (dispatch=escalate) for human intervention.
+E2E_MAX_ROUNDS="${EPIC_E2E_MAX_ROUNDS:-3}"
 
 mkdir -p "$TICK_DIR"
+
+# ---- E2E gate state (per epic) ----
+# passed_<N>  : touch'd once e2e-dev returns validated for epic N (gate green).
+# round_<N>   : counter of consecutive e2e-dev regression rounds for epic N.
+E2E_GATE_DIR="$TICK_DIR/e2e_gate"
+mkdir -p "$E2E_GATE_DIR"
+e2e_gate_passed() { [ -f "$E2E_GATE_DIR/passed_$1" ]; }
+mark_e2e_passed()  { touch "$E2E_GATE_DIR/passed_$1"; }
+get_e2e_round()    { cat "$E2E_GATE_DIR/round_$1" 2>/dev/null || echo 0; }
+bump_e2e_round()   { local n; n=$(( $(get_e2e_round "$1") + 1 )); echo "$n" > "$E2E_GATE_DIR/round_$1"; echo "$n"; }
 
 # Invalidate any stale gh cache from a prior run — the very first tick must
 # read fresh board state.
@@ -315,8 +330,12 @@ while [ $TICK -lt $MAX_TICKS ]; do
         # Refresh remote refs so `git ls-remote` reflects recent merges
         (cd "$REPO_ROOT" && git fetch --prune origin >/dev/null 2>&1) || true
 
+        # REMAINING counts work that keeps the loop alive: unmerged sub-ticket
+        # branches AND epics whose E2E gate has not yet passed (a regression
+        # round spawns fix tickets that must be reprocessed before we converge).
         REMAINING=0
         for N in $EPICS; do
+            EPIC_SUB_REMAINING=0
             SUB_NUMBERS=$(gh api graphql -f query="{
                 repository(owner:\"SocialGouv\", name:\"egapro\") {
                     issue(number:${N}) { subIssues(first:50) { nodes { number } } }
@@ -325,15 +344,84 @@ while [ $TICK -lt $MAX_TICKS ]; do
             for SUB in $SUB_NUMBERS; do
                 [ -z "$SUB" ] && continue
                 if git ls-remote --exit-code --heads origin "ticket/${SUB}-*" >/dev/null 2>&1; then
-                    REMAINING=$((REMAINING + 1))
+                    EPIC_SUB_REMAINING=$((EPIC_SUB_REMAINING + 1))
                 fi
             done
+
+            if [ "$EPIC_SUB_REMAINING" -gt 0 ]; then
+                # Sub-tickets still in flight for this epic — not ready to gate yet.
+                REMAINING=$((REMAINING + EPIC_SUB_REMAINING))
+                continue
+            fi
+
+            # All sub-tickets of epic N are squash-merged. Run the BLOCKING E2E
+            # gate once (e2e-dev runs the full suite + adds coverage). The gate
+            # must pass before doc-writer + the final PR (post-loop block).
+            if e2e_gate_passed "$N"; then
+                continue  # epic N fully done (tickets merged + E2E gate green)
+            fi
+
+            bash "$SCRIPT_DIR/log_event.sh" "$AID" E2E_GATE_START "epic=$N round=$(get_e2e_round "$N")"
+            set +e
+            bash "$SCRIPT_DIR/run_e2e_dev.sh" "$N"
+            E2E_RC=$?
+            set -e
+
+            case "$E2E_RC" in
+                0)
+                    # Gate green: suite passed, coverage pushed onto epic/<N>.
+                    mark_e2e_passed "$N"
+                    bash "$SCRIPT_DIR/log_event.sh" "$AID" E2E_GATE_PASS "epic=$N"
+                    continue
+                    ;;
+                3)
+                    # BLOCKING regression. Route to architect-rework: it analyses
+                    # the failure, creates one or more fix Task sub-issues (To Do),
+                    # or — on a functional doubt — escalates to the user
+                    # (dispatch=escalate on the epic). The new tickets are picked
+                    # up by dispatch_plan on the next tick; once merged, the gate
+                    # re-runs. Cap consecutive rounds to avoid an infinite loop.
+                    ROUND=$(bump_e2e_round "$N")
+                    bash "$SCRIPT_DIR/log_event.sh" "$AID" E2E_GATE_REGRESSION "epic=$N round=$ROUND"
+                    if [ "$ROUND" -gt "$E2E_MAX_ROUNDS" ]; then
+                        gh issue edit "$N" --add-label "dispatch=escalate" >/dev/null 2>&1 || true
+                        bash "$SCRIPT_DIR/log_event.sh" "$AID" E2E_GATE_ESCALATE "epic=$N rounds=$ROUND"
+                        echo "E2E GATE: epic/$N still regressing after $E2E_MAX_ROUNDS rework rounds — dispatch=escalate, user intervention" >&2
+                        # Caught by the ESCALATE_TICKETS check at the top of the next tick (exit 2).
+                    else
+                        set +e
+                        bash "$SCRIPT_DIR/run_architect_rework.sh" "$N"
+                        AR_RC=$?
+                        set -e
+                        if [ "$AR_RC" = "0" ]; then
+                            bash "$SCRIPT_DIR/log_event.sh" "$AID" E2E_REWORK_TICKETS "epic=$N round=$ROUND"
+                        elif [ "$AR_RC" = "2" ]; then
+                            # architect-rework needs a user decision → it set
+                            # dispatch=escalate on the epic; next tick exits 2.
+                            bash "$SCRIPT_DIR/log_event.sh" "$AID" E2E_REWORK_NEEDS_USER "epic=$N"
+                        else
+                            bash "$SCRIPT_DIR/log_event.sh" "$AID" E2E_REWORK_FAIL "epic=$N rc=$AR_RC"
+                            echo "WARN epic/$N: architect-rework exited $AR_RC — will retry the gate next tick" >&2
+                        fi
+                    fi
+                    REMAINING=$((REMAINING + 1))  # not converged: keep looping
+                    continue
+                    ;;
+                *)
+                    # rate_limited (2) or technical failure (1): do NOT pass the
+                    # gate (blocking). Retry on a later tick; MAX_TICKS is the
+                    # backstop.
+                    bash "$SCRIPT_DIR/log_event.sh" "$AID" E2E_GATE_RETRY "epic=$N rc=$E2E_RC"
+                    REMAINING=$((REMAINING + 1))
+                    continue
+                    ;;
+            esac
         done
 
         if [ "$REMAINING" -eq 0 ]; then
-            break  # every sub-task squash-merged, exit loop with success
+            break  # every sub-task merged AND every epic's E2E gate green
         fi
-        bash "$SCRIPT_DIR/log_event.sh" "$AID" WAIT "remaining_branches=$REMAINING plan_empty"
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" WAIT "remaining=$REMAINING plan_empty"
         sleep "$SLEEP_WAIT"
         TICK=$((TICK + 1))
         continue
@@ -495,10 +583,15 @@ if [ $TICK -ge $MAX_TICKS ]; then
     exit 3
 fi
 
-# ---- Done: every sub-ticket squash-merged into epic/<N> ----
+# ---- Done: every sub-ticket squash-merged into epic/<N> AND the E2E gate
+#      passed for every epic (the gate runs inside the main loop, blocking —
+#      a regression routes to architect-rework which spawns fix tickets the
+#      loop reprocesses; the loop only exits once e2e-dev returns validated).
 # For each epic in scope:
 #   1. Regenerate docs/*.md from the current state of epic/<N> (best-effort,
-#      non-blocking — a doc-writer failure just logs and continues).
+#      non-blocking — a doc-writer failure just logs and continues). The E2E
+#      coverage commit from the gate is already on origin/epic/<N>, so
+#      run_doc_writer.sh fast-forwards the main worktree before committing.
 #   2. Open the final integration PR `epic/<N> → alpha` (idempotent —
 #      reuses an existing open PR if any).
 for N in $EPICS; do

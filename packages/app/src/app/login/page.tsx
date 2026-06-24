@@ -1,14 +1,21 @@
 import { redirect } from "next/navigation";
 
-import { LoginPage } from "~/modules/login";
+import { LoginPage, sanitizeCallbackUrl } from "~/modules/login";
 import { auth } from "~/server/auth";
 
-export default async function Page() {
+type PageProps = {
+	searchParams: Promise<{ callbackUrl?: string }>;
+};
+
+export default async function Page({ searchParams }: PageProps) {
+	const { callbackUrl } = await searchParams;
+	const safeCallbackUrl = sanitizeCallbackUrl(callbackUrl);
+
 	const session = await auth();
 
 	if (session?.user) {
-		redirect("/mon-espace");
+		redirect(safeCallbackUrl ?? "/mon-espace");
 	}
 
-	return <LoginPage />;
+	return <LoginPage callbackUrl={safeCallbackUrl} />;
 }

@@ -50,7 +50,9 @@ function clearState(storageKey: string): void {
 	sessionStorage.removeItem(storageKey);
 }
 
-function elapsedSeconds(from: number, to: number): number {
+// Exported so non-funnel client instrumentation (e.g. category import
+// duration) can reuse the same elapsed-seconds rounding instead of duplicating it.
+export function elapsedSeconds(from: number, to: number): number {
 	return Math.round((to - from) / 1000);
 }
 

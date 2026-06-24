@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { TrackedLink } from "~/modules/analytics";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import styles from "./NextStepsBox.module.scss";
 import { UpdateCseModal } from "./UpdateCseModal";
@@ -51,9 +51,13 @@ export function NextStepsBox({
 							>
 								Mettre à jour l&apos;existence d&apos;un CSE
 							</button>
-							<Link className="fr-link" href="/avis-cse">
+							<TrackedLink
+								className="fr-link"
+								href="/avis-cse"
+								trackingId="cse_models"
+							>
 								Voir les modèles d&apos;avis CSE
-							</Link>
+							</TrackedLink>
 						</div>
 					</div>
 				</div>
@@ -119,37 +123,40 @@ export function NextStepsBox({
 					<h4 className="fr-text--bold fr-text--md fr-mb-0">Pour vous aider</h4>
 					<ul className="fr-raw-list fr-links-group">
 						<li>
-							<a
+							<TrackedLink
 								className="fr-link"
 								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 								rel="noopener noreferrer"
 								target="_blank"
+								trackingId="objective_criteria"
 							>
 								Qu&apos;entend-on par critères objectifs et non sexistes ?
 								<NewTabNotice />
-							</a>
+							</TrackedLink>
 						</li>
 						<li>
-							<a
+							<TrackedLink
 								className="fr-link"
 								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 								rel="noopener noreferrer"
 								target="_blank"
+								trackingId="corrective_actions"
 							>
 								En savoir plus sur actions correctives et seconde déclaration
 								<NewTabNotice />
-							</a>
+							</TrackedLink>
 						</li>
 						<li>
-							<a
+							<TrackedLink
 								className="fr-link"
 								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 								rel="noopener noreferrer"
 								target="_blank"
+								trackingId="joint_evaluation"
 							>
 								En savoir plus sur évaluation conjointe des rémunérations
 								<NewTabNotice />
-							</a>
+							</TrackedLink>
 						</li>
 					</ul>
 				</div>

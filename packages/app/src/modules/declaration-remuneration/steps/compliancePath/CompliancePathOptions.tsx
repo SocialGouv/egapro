@@ -37,6 +37,7 @@ export function JointEvaluationOption({
 				id="path-joint"
 				learnMoreHref="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 				learnMoreLabel="En savoir plus sur l'évaluation conjointe des rémunérations"
+				learnMoreTrackingId="joint_evaluation"
 				name="compliance-path"
 				onChange={onChange}
 				title="Mettre en place une évaluation conjointe des rémunérations"
@@ -173,6 +174,7 @@ export function FirstRoundOptions({
 					id="path-corrective"
 					learnMoreHref="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 					learnMoreLabel="En savoir plus sur actions correctives et seconde déclaration"
+					learnMoreTrackingId="corrective_actions"
 					name="compliance-path"
 					onChange={() => setSelectedPath("corrective_action")}
 					title="Actions correctives et seconde déclaration"

@@ -6,6 +6,9 @@ const stepDurationsUseQueryMock = vi.fn();
 const stepDropoffUseQueryMock = vi.fn();
 const funnelUseQueryMock = vi.fn();
 const matomoFunnelUseQueryMock = vi.fn();
+const matomoCategoryModelUseQueryMock = vi.fn();
+const matomoHelpLinksUseQueryMock = vi.fn();
+const matomoDeviceUseQueryMock = vi.fn();
 const statsUseQueryMock = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
@@ -28,6 +31,16 @@ vi.mock("~/trpc/react", () => ({
 			},
 			getMatomoFunnel: {
 				useQuery: (...args: unknown[]) => matomoFunnelUseQueryMock(...args),
+			},
+			getMatomoCategoryModel: {
+				useQuery: (...args: unknown[]) =>
+					matomoCategoryModelUseQueryMock(...args),
+			},
+			getMatomoHelpLinks: {
+				useQuery: (...args: unknown[]) => matomoHelpLinksUseQueryMock(...args),
+			},
+			getMatomoDeviceBreakdown: {
+				useQuery: (...args: unknown[]) => matomoDeviceUseQueryMock(...args),
 			},
 		},
 	},
@@ -72,6 +85,9 @@ const defaultMocks = () =>
 		stepDropoffUseQueryMock,
 		funnelUseQueryMock,
 		matomoFunnelUseQueryMock,
+		matomoCategoryModelUseQueryMock,
+		matomoHelpLinksUseQueryMock,
+		matomoDeviceUseQueryMock,
 	});
 
 describe("StatsDashboard — campaign section states", () => {

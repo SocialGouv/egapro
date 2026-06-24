@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
+import { FILENAME_ERROR_MESSAGES } from "~/modules/shared";
 import { computeContentTypeColumns } from "../contentTypeColumns";
 import { Step2Upload } from "../Step2Upload";
 import type {
@@ -226,11 +226,24 @@ describe("Step2Upload", () => {
 		expect(screen.queryByRole("table")).not.toBeInTheDocument();
 	});
 
-	it("shows error for non-PDF file", () => {
+	it("shows the extension/MIME error for a .txt file", () => {
 		renderStep();
 
 		const file = new File(["content"], "test.txt", { type: "text/plain" });
 		fireEvent.change(getFileInput(), { target: { files: [file] } });
+
+		expect(
+			screen.getByText(FILENAME_ERROR_MESSAGES.extension_mime_mismatch),
+		).toBeInTheDocument();
+	});
+
+	it("shows the unsupported-format error for a valid-named non-PDF file", () => {
+		renderStep();
+
+		const file = new File(["content"], "image.png", { type: "image/png" });
+		const fileInput = getFileInput();
+
+		fireEvent.change(fileInput, { target: { files: [file] } });
 
 		expect(
 			screen.getByText(

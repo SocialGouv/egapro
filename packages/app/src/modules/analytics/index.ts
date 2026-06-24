@@ -10,5 +10,10 @@ export {
 	MATOMO_EVENT_CATEGORY,
 	MATOMO_FUNNEL_ACTION,
 } from "./shared/events";
+export { TrackedLink } from "./TrackedLink";
 export { trackEvent } from "./trackEvent";
-export { trackFunnelComplete, useFunnelTracking } from "./useFunnelTracking";
+export {
+	elapsedSeconds,
+	trackFunnelComplete,
+	useFunnelTracking,
+} from "./useFunnelTracking";

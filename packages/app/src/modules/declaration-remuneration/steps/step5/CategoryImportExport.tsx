@@ -9,6 +9,10 @@ import {
 } from "~/modules/analytics";
 import { getDsfrModal } from "~/modules/shared";
 import { type ImportError, parseImportFile } from "./categoryFileHandler";
+import {
+	startCategoryModelTimer,
+	trackCategoryImportDuration,
+} from "./categoryModelTracking";
 import type { EmployeeCategory } from "./categorySerializer";
 
 type Props = {
@@ -45,12 +49,21 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 					action: MATOMO_ACTION.CATEGORY_IMPORT,
 					value: result.categories.length,
 				});
+				trackCategoryImportDuration();
 				const modal = document.getElementById(importModalId);
 				if (modal) {
 					getDsfrModal(modal)?.conceal();
 				}
 			} else {
 				setImportErrors(result.errors);
+				const firstError = result.errors[0];
+				if (firstError) {
+					trackEvent({
+						category: MATOMO_EVENT_CATEGORY.DOCUMENT,
+						action: MATOMO_ACTION.CATEGORY_IMPORT_FAILURE,
+						name: firstError.type,
+					});
+				}
 			}
 		} finally {
 			setIsImporting(false);
@@ -67,6 +80,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 				className="fr-btn fr-btn--secondary fr-icon-file-download-line fr-btn--icon-left"
 				data-fr-opened="false"
 				disabled={disabled}
+				onClick={() => startCategoryModelTimer()}
 				type="button"
 			>
 				Importer les données

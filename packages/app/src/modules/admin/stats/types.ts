@@ -128,3 +128,56 @@ export type MatomoFunnelOutput = {
 	cseFunnel: FunnelRow[];
 	complianceFunnel: FunnelRow[];
 };
+
+/**
+ * One labelled metric of a Matomo behavioural-usage bar widget — a category /
+ * series name and its count. Reused by the model-usage and help-link widgets.
+ */
+export type LabeledCount = {
+	key: string;
+	label: string;
+	count: number;
+};
+
+/**
+ * Output of `adminStats.getMatomoCategoryModel` — usage of the
+ * indicator-by-category model for one campaign year: successful imports and
+ * import failures by error type.
+ * `avgImportDurationSeconds` is the mean time between opening the import modal
+ * and a successful import (null when no sample). All-empty / null when
+ * `MATOMO_API_TOKEN` is absent.
+ */
+export type CategoryModelUsage = {
+	rows: LabeledCount[];
+	avgImportDurationSeconds: number | null;
+};
+
+/**
+ * Output of `adminStats.getMatomoHelpLinks` — clicks on instrumented help links
+ * (`help/help_link_click`), one row per link slug, sorted by descending count.
+ * Empty when Matomo is not configured.
+ */
+export type HelpLinkClicks = {
+	rows: LabeledCount[];
+};
+
+/**
+ * One behaviour of the device-split widget: number of visits per device type
+ * where the behaviour's marker event fired.
+ */
+export type DeviceBreakdownRow = {
+	key: string;
+	label: string;
+	desktop: number;
+	smartphone: number;
+	tablet: number;
+};
+
+/**
+ * Output of `adminStats.getMatomoDeviceBreakdown` — device split for the three
+ * tracked behaviours (modification, dépôt, consultation). Empty when Matomo is
+ * not configured.
+ */
+export type DeviceBreakdown = {
+	rows: DeviceBreakdownRow[];
+};

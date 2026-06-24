@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { Controller } from "react-hook-form";
+import { TrackedLink } from "~/modules/analytics";
 import { useIsImpersonating } from "~/modules/auth";
 import { saveCompliancePathSchema } from "~/modules/declaration-remuneration/schemas";
 import { DraftLoadingState } from "~/modules/declaration-remuneration/shared/draft/DraftLoadingState";
@@ -161,15 +162,16 @@ export function CompliancePathChoice({
 						sexistes
 					</h2>
 					<p className="fr-mb-0">
-						<a
+						<TrackedLink
 							className="fr-link"
 							href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 							rel="noopener noreferrer"
 							target="_blank"
+							trackingId="objective_criteria"
 						>
 							Qu&apos;entend-on par critères objectifs et non sexistes ?
 							<NewTabNotice />
-						</a>
+						</TrackedLink>
 					</p>
 				</div>
 

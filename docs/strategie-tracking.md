@@ -19,10 +19,17 @@
 Donner aux analystes DGT de quoi calculer les KPIs d'usage de la plateforme
 (K19–K25). EGAPRO **émet** des événements anonymisés (le socle), et l'analyse
 fine se fait dans Matomo. Un **dashboard d'administration** (`/admin/stats`)
-rapatrie en plus les funnels de parcours via la **Reporting API** de Matomo
-(procédure tRPC `adminStats.getMatomoFunnel`, service `~/server/services/matomo.ts`,
-secret `MATOMO_API_TOKEN`) pour offrir une vue intégrée aux admins, sans
-recalcul en base.
+rapatrie en plus, via la **Reporting API** de Matomo (service
+`~/server/services/matomo.ts`, secret `MATOMO_API_TOKEN`), les funnels de
+parcours (`adminStats.getMatomoFunnel`) **ainsi que** l'usage du modèle de
+l'indicateur par catégorie (`getMatomoCategoryModel` — imports, échecs par
+type, durée moyenne de remplissage), les clics sur
+les liens d'aide (`getMatomoHelpLinks`) et la répartition par appareil
+(`getMatomoDeviceBreakdown`). Ces trois derniers widgets lisent des événements
+sans dimension de campagne : ils sont donc bornés par **année calendaire** et ne
+réagissent pas au filtre par tranche d'effectif. Le tout offre une vue intégrée
+aux admins sans recalcul en base ; chaque lecture dégrade proprement (sortie
+vide) quand `MATOMO_API_TOKEN` est absent.
 
 ## Ce qu'on mesure
 
@@ -34,8 +41,10 @@ Deux natures de signaux :
    pages d'aide consultées (K21).
 2. **Les événements personnalisés** — deux familles : les **funnels** multi-étapes
    (où les gens décrochent) et les **actions ponctuelles** (recherche,
-   téléchargement, upload, login, ouverture d'une section d'aide, démarrage d'une
-   déclaration). Liste complète dans [`plan-de-tracking.md`](./plan-de-tracking.md).
+   téléchargement, upload, login, ouverture d'une section d'aide, clic sur un lien
+   d'accompagnement, usage du modèle de l'indicateur par catégorie — durée de
+   remplissage et échecs d'import —, démarrage d'une déclaration).
+   Liste complète dans [`plan-de-tracking.md`](./plan-de-tracking.md).
 
 Le croisement « visiteurs » (pages vues) vs. « acteurs » (événements d'action)
 donne le **taux de consultation K20**.
@@ -188,6 +197,12 @@ modules/analytics/
    (la table doit rester 1:1 avec le code) et le rattacher à un KPI.
 
 ## Configuration Matomo (hors code)
+
+> La conformité CNIL (exemption de consentement) et le paramétrage attendu de
+> l'instance Matomo sont détaillés dans
+> [`matomo-cnil-exemption.md`](./matomo-cnil-exemption.md) — anonymisation IP,
+> opt-out, Do Not Track, durées de conservation, et la procédure de
+> vérification en local.
 
 - Variables d'environnement : `NEXT_PUBLIC_MATOMO_URL`, `NEXT_PUBLIC_MATOMO_SITE_ID`
   (déclarées dans `env.js`, section client).

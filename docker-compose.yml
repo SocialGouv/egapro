@@ -113,9 +113,101 @@ services:
       timeout: 5s
       retries: 5
 
+  # ---------------------------------------------------------------------------
+  # Local Matomo stack — lets you test the full tracking plan (events, CNIL
+  # exemption config, and the /admin/stats Reporting-API widgets) end-to-end
+  # without touching the production instance. See scripts/matomo-local/README.md
+  # ---------------------------------------------------------------------------
+  matomo-db:
+    image: mariadb:11.4
+    profiles: ["matomo"]
+    restart: always
+    command: --max-allowed-packet=64MB
+    environment:
+      MARIADB_DATABASE: matomo
+      MARIADB_USER: matomo
+      MARIADB_PASSWORD: matomo
+      MARIADB_ROOT_PASSWORD: matomo
+    volumes:
+      - matomodbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  matomo:
+    image: matomo:5-apache
+    profiles: ["matomo"]
+    restart: always
+    ports:
+      - "${MATOMO_HOST_PORT:-8080}:80"
+    environment:
+      MATOMO_DATABASE_ADAPTER: mysql
+      MATOMO_DATABASE_HOST: matomo-db
+      MATOMO_DATABASE_DBNAME: matomo
+      MATOMO_DATABASE_USERNAME: matomo
+      MATOMO_DATABASE_PASSWORD: matomo
+    volumes:
+      - matomodata:/var/www/html
+    depends_on:
+      matomo-db:
+        condition: service_healthy
+
+  # One-shot provisioner. Installs Matomo (if the volume is empty), then creates
+  # the "Egapro Local" site, the campaign_year / workforce_range custom
+  # dimensions, an app API token, applies the CNIL privacy config and registers
+  # localhost:8080 as a trusted host. Idempotent — safe to re-run on every `up`.
+  matomo-init:
+    image: python:3.13-slim
+    profiles: ["matomo"]
+    restart: "no"
+    environment:
+      MATOMO_URL: http://matomo
+      MATOMO_SU_LOGIN: admin
+      MATOMO_SU_PASSWORD: ${MATOMO_SU_PASSWORD:-changeme123}
+      MATOMO_SU_EMAIL: admin@example.com
+      MATOMO_SITE_NAME: Egapro Local
+      MATOMO_SITE_URL: http://localhost:3000
+      MATOMO_DB_HOST: matomo-db
+      MATOMO_DB_NAME: matomo
+      MATOMO_DB_USER: matomo
+      MATOMO_DB_PASSWORD: matomo
+      MATOMO_TRUSTED_HOSTS: matomo,localhost:8080,127.0.0.1:8080
+    volumes:
+      - ./scripts/matomo-local:/setup:ro
+      - ./scripts/matomo-local/.secrets:/out
+      # Same volume Matomo serves from — lets the script register localhost:8080
+      # as a trusted host in config.ini.php (no API exists for that).
+      - matomodata:/matomo
+    depends_on:
+      matomo:
+        condition: service_started
+    command: ["python", "/setup/cnil-setup.py"]
+
+  # One-shot seeder. Fires synthetic tracking events (the three funnels, model
+  # usage, help-link clicks, device split) so /admin/stats shows realistic data.
+  # Idempotent — skips when the site already has seeded events.
+  matomo-seed:
+    image: python:3.13-slim
+    profiles: ["matomo"]
+    restart: "no"
+    environment:
+      MATOMO_URL: http://matomo
+      MATOMO_SITE_ID: "1"
+    volumes:
+      - ./scripts/matomo-local:/setup:ro
+      - ./scripts/matomo-local/.secrets:/out:ro
+    depends_on:
+      matomo-init:
+        condition: service_completed_successfully
+    command: ["python", "/setup/seed-events.py"]
+
 volumes:
   pgdata:
   notifpgdata:
   miniodata:
   clamdata:
   valkeydata:
+  matomodata:
+  matomodbdata:

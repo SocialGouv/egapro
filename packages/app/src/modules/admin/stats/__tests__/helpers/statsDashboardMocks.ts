@@ -20,6 +20,9 @@ type QueryMocks = {
 	stepDropoffUseQueryMock: Mock;
 	funnelUseQueryMock: Mock;
 	matomoFunnelUseQueryMock?: Mock;
+	matomoCategoryModelUseQueryMock?: Mock;
+	matomoHelpLinksUseQueryMock?: Mock;
+	matomoDeviceUseQueryMock?: Mock;
 };
 
 export function setDefaultMocks(mocks: QueryMocks) {
@@ -50,6 +53,21 @@ export function setDefaultMocks(mocks: QueryMocks) {
 	});
 	mocks.matomoFunnelUseQueryMock?.mockReturnValue({
 		data: emptyMatomoFunnelData,
+		isLoading: false,
+		isError: false,
+	});
+	mocks.matomoCategoryModelUseQueryMock?.mockReturnValue({
+		data: undefined,
+		isLoading: false,
+		isError: false,
+	});
+	mocks.matomoHelpLinksUseQueryMock?.mockReturnValue({
+		data: undefined,
+		isLoading: false,
+		isError: false,
+	});
+	mocks.matomoDeviceUseQueryMock?.mockReturnValue({
+		data: undefined,
 		isLoading: false,
 		isError: false,
 	});
