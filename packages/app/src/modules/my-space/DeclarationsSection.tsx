@@ -235,9 +235,7 @@ function DeclarationsTable({
 												</DeclarationLink>
 											</td>
 											<td>{declaration.year}</td>
-											<td>
-												{getDeclarationProcessStepLabel(declaration.fsmStatus)}
-											</td>
+											<td>{getDeclarationProcessStepLabel(declaration)}</td>
 											<td>{getDeadlineCell(declaration, campaignDeadlines)}</td>
 											<td>
 												<StatusBadge status={declaration.status} />
