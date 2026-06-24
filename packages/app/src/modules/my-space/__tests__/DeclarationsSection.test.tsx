@@ -100,9 +100,7 @@ describe("DeclarationsSection", () => {
 		expect(screen.getAllByText(String(currentYear))).toHaveLength(2);
 		expect(screen.getByText(String(currentYear - 1))).toBeInTheDocument();
 		expect(
-			screen.getByText(
-				"Finalisation - Démarche des indicateurs de rémunération",
-			),
+			screen.getByText("Démarche des indicateurs de rémunération"),
 		).toBeInTheDocument();
 		expect(screen.getAllByText("À compléter")).toHaveLength(2);
 		expect(screen.getByText("Effectué")).toBeInTheDocument();

@@ -4,8 +4,28 @@ import type { DeclarationFsmStatus } from "~/modules/domain";
 import { getDeclarationProcessStepLabel } from "../DeclarationStepLabel";
 
 describe("getDeclarationProcessStepLabel", () => {
-	it("returns 'Non commencée' when fsmStatus is null", () => {
-		expect(getDeclarationProcessStepLabel(null)).toBe("Non commencée");
+	it("returns the first remuneration step label when fsmStatus is null", () => {
+		expect(
+			getDeclarationProcessStepLabel({ type: "remuneration", fsmStatus: null }),
+		).toBe("Déclaration des indicateurs de rémunération");
+	});
+
+	it("returns 'Non commencée' for a representation declaration", () => {
+		expect(
+			getDeclarationProcessStepLabel({
+				type: "representation",
+				fsmStatus: null,
+			}),
+		).toBe("Non commencée");
+	});
+
+	it("returns 'Non commencée' for representation even when fsmStatus is set", () => {
+		expect(
+			getDeclarationProcessStepLabel({
+				type: "representation",
+				fsmStatus: "draft",
+			}),
+		).toBe("Non commencée");
 	});
 
 	const cases: Array<{ fsm: DeclarationFsmStatus; label: string }> = [
@@ -33,13 +53,18 @@ describe("getDeclarationProcessStepLabel", () => {
 		{ fsm: "awaiting_cse_opinion", label: "Déposer le ou les avis CSE" },
 		{
 			fsm: "demarche_completed",
-			label: "Finalisation - Démarche des indicateurs de rémunération",
+			label: "Démarche des indicateurs de rémunération",
 		},
 	];
 
 	for (const { fsm, label } of cases) {
 		it(`returns "${label}" for fsmStatus="${fsm}"`, () => {
-			expect(getDeclarationProcessStepLabel(fsm)).toBe(label);
+			expect(
+				getDeclarationProcessStepLabel({
+					type: "remuneration",
+					fsmStatus: fsm,
+				}),
+			).toBe(label);
 		});
 	}
 });
