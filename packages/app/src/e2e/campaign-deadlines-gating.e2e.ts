@@ -2,15 +2,13 @@ import { expect, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
 import {
+	pushCampaignDeadlinesFarFuture,
 	resetDeclarationToDraft,
 	setCompanyHasCse,
 	setDeclarationComplianceState,
 	setUserPhone,
 } from "./helpers/db";
-import {
-	deleteCampaignDeadlines,
-	setCampaignDeadlines,
-} from "./helpers/db-campaign";
+import { setCampaignDeadlines } from "./helpers/db-campaign";
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 import { loginWithProConnect } from "./helpers/login";
 
@@ -61,7 +59,7 @@ test.describe("Campaign deadlines gating", () => {
 	}
 
 	test.afterAll(async () => {
-		await deleteCampaignDeadlines(testDeclarationYear);
+		await pushCampaignDeadlinesFarFuture();
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
 	});
