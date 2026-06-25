@@ -3,6 +3,19 @@ import {
 	createCaller,
 	mockDeclaration,
 } from "./helpers/declarationTestHelpers";
+import { withLockMiddleware } from "./helpers/lockTestHelpers";
+
+// The 9 write mutations run through `declarationLockedWriteProcedure`, whose
+// middleware issues two extra `ctx.db.select` calls (declaration resolution +
+// active-lock lookup) before the handler. `withLockMiddleware` answers both
+// with the current user holding the lock so the handler logic under test runs.
+function createLockedCaller(
+	mockDb: unknown,
+	siret?: string | null,
+	impersonation?: { siren: string; name: string } | null,
+) {
+	return createCaller(withLockMiddleware(mockDb), siret, impersonation);
+}
 
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
@@ -495,7 +508,7 @@ describe("declarationRouter", () => {
 			const declaration = buildDeclaration({ status: "draft" });
 			const company = buildCompany({ workforce: 80, hasCse: false });
 			const ctx = createSubmitMockDb(declaration, company, []);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			const result = await caller.submit();
 
@@ -522,7 +535,7 @@ describe("declarationRouter", () => {
 				{ annualBaseWomen: "100", annualBaseMen: "100" },
 			];
 			const ctx = createSubmitMockDb(declaration, company, employeeCategories);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submit();
 
@@ -541,7 +554,7 @@ describe("declarationRouter", () => {
 				{ annualBaseWomen: "85", annualBaseMen: "100" },
 			];
 			const ctx = createSubmitMockDb(declaration, company, employeeCategories);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submit();
 
@@ -557,7 +570,7 @@ describe("declarationRouter", () => {
 			const declaration = buildDeclaration({ status: "awaiting_cse_opinion" });
 			const company = buildCompany();
 			const ctx = createSubmitMockDb(declaration, company, []);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 			await expect(caller.submit()).rejects.toThrow(/No matching transition/);
 		});
 
@@ -565,7 +578,7 @@ describe("declarationRouter", () => {
 			const declaration = buildDeclaration({ status: "draft" });
 			const company = buildCompany();
 			const ctx = createSubmitMockDb(declaration, company, []);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submit();
 
@@ -587,7 +600,7 @@ describe("declarationRouter", () => {
 				select: selectQueue.select,
 				update,
 			} as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			await expect(caller.submit()).rejects.toThrow();
 		});
@@ -600,14 +613,14 @@ describe("declarationRouter", () => {
 				select: selectQueue.select,
 				update,
 			} as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			await expect(caller.submit()).rejects.toThrow("Entreprise introuvable");
 		});
 
 		it("throws when siret is missing", async () => {
 			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb, null as never);
+			const caller = await createLockedCaller(mockDb, null as never);
 
 			await expect(caller.submit()).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
@@ -621,7 +634,7 @@ describe("declarationRouter", () => {
 			});
 			const company = buildCompany();
 			const ctx = createSubmitMockDb(declaration, company, []);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submit();
 
@@ -641,7 +654,7 @@ describe("declarationRouter", () => {
 			});
 			const company = buildCompany();
 			const ctx = createSubmitMockDb(declaration, company, []);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submit();
 
@@ -658,7 +671,7 @@ describe("declarationRouter", () => {
 			const declaration = buildDeclaration({ status: "draft", draft: null });
 			const company = buildCompany();
 			const ctx = createSubmitMockDb(declaration, company, []);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submit();
 
@@ -680,7 +693,7 @@ describe("declarationRouter", () => {
 				{ annualBaseWomen: "80", annualBaseMen: "100" },
 			];
 			const ctx = createOneRowSelectDb(declaration, employeeCategories);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			const result = await caller.submitSecondDeclaration();
 
@@ -708,7 +721,7 @@ describe("declarationRouter", () => {
 				{ annualBaseWomen: "100", annualBaseMen: "100" },
 			];
 			const ctx = createOneRowSelectDb(declaration, employeeCategories);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submitSecondDeclaration();
 
@@ -732,7 +745,7 @@ describe("declarationRouter", () => {
 				{ annualBaseWomen: "100", annualBaseMen: "100" },
 			];
 			const ctx = createOneRowSelectDb(declaration, employeeCategories);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submitSecondDeclaration();
 
@@ -746,7 +759,7 @@ describe("declarationRouter", () => {
 				select: selectQueue.select,
 				update: vi.fn(),
 			} as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			await expect(caller.submitSecondDeclaration()).rejects.toThrow();
 		});
@@ -758,7 +771,7 @@ describe("declarationRouter", () => {
 				draft: { second: { step1: { foo: "bar" } }, main: { step1: {} } },
 			});
 			const ctx = createOneRowSelectDb(declaration, [], [declaration]);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submitSecondDeclaration();
 
@@ -778,7 +791,7 @@ describe("declarationRouter", () => {
 				draft: { second: { step1: { foo: "bar" } } },
 			});
 			const ctx = createOneRowSelectDb(declaration, [], [declaration]);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submitSecondDeclaration();
 
@@ -799,7 +812,7 @@ describe("declarationRouter", () => {
 				cseRequired: true,
 			});
 			const ctx = createSimpleSelectDb(declaration);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			const result = await caller.saveCompliancePath({
 				path: "corrective_action",
@@ -829,7 +842,7 @@ describe("declarationRouter", () => {
 				cseRequired: true,
 			});
 			const ctx = createSimpleSelectDb(declaration);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.saveCompliancePath({ path: "justify" });
 
@@ -844,7 +857,7 @@ describe("declarationRouter", () => {
 				cseRequired: false,
 			});
 			const ctx = createSimpleSelectDb(declaration);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.saveCompliancePath({ path: "justify" });
 
@@ -870,7 +883,7 @@ describe("declarationRouter", () => {
 				[{ eventType: "second_declaration_submit" }],
 				[],
 			);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.saveCompliancePath({ path: "justify" });
 
@@ -900,7 +913,7 @@ describe("declarationRouter", () => {
 				[{ eventType: "second_declaration_submit" }],
 				[],
 			);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await expect(
 				caller.saveCompliancePath({ path: "corrective_action" }),
@@ -918,7 +931,7 @@ describe("declarationRouter", () => {
 				[],
 				[{ eventType: "joint_evaluation_submit", round: 1 }],
 			);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await expect(
 				caller.saveCompliancePath({ path: "corrective_action" }),
@@ -937,7 +950,7 @@ describe("declarationRouter", () => {
 				[{ eventType: "second_declaration_submit" }],
 				[{ eventType: "cse_opinion_submit", round: null }],
 			);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await expect(
 				caller.saveCompliancePath({ path: "joint_evaluation" }),
@@ -950,7 +963,7 @@ describe("declarationRouter", () => {
 				cseRequired: true,
 			});
 			const ctx = createSimpleSelectDb(declaration);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await expect(
 				caller.saveCompliancePath({ path: "invalid_path" as never }),
@@ -967,7 +980,7 @@ describe("declarationRouter", () => {
 				},
 			});
 			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.saveCompliancePath({ path: "justify" });
 
@@ -987,7 +1000,7 @@ describe("declarationRouter", () => {
 				draft: { compliance: { step1: { path: "justify" } } },
 			});
 			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.saveCompliancePath({ path: "justify" });
 
@@ -1009,7 +1022,7 @@ describe("declarationRouter", () => {
 				firstDeclarationPathChoice: "joint_evaluation",
 			});
 			const ctx = createSimpleSelectDb(declaration);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			const result = await caller.submitJointEvaluation();
 
@@ -1036,7 +1049,7 @@ describe("declarationRouter", () => {
 				secondDeclarationPathChoice: "joint_evaluation",
 			});
 			const ctx = createSimpleSelectDb(declaration);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submitJointEvaluation();
 
@@ -1057,7 +1070,7 @@ describe("declarationRouter", () => {
 				select: selectQueue.select,
 				update: vi.fn(),
 			} as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			await expect(caller.submitJointEvaluation()).rejects.toThrow();
 		});
@@ -1073,7 +1086,7 @@ describe("declarationRouter", () => {
 				},
 			});
 			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submitJointEvaluation();
 
@@ -1094,7 +1107,7 @@ describe("declarationRouter", () => {
 				draft: { joint: { step1: { foo: "bar" } } },
 			});
 			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
-			const caller = await createCaller(ctx.db);
+			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submitJointEvaluation();
 
@@ -1115,7 +1128,7 @@ describe("declarationRouter", () => {
 				fn(tx),
 			);
 			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			const result = await caller.updateStep1({
 				totalWomen: 30,
@@ -1137,7 +1150,7 @@ describe("declarationRouter", () => {
 				fn(tx),
 			);
 			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			const result = await caller.updateStep1({
 				totalWomen: 30,
@@ -1156,7 +1169,7 @@ describe("declarationRouter", () => {
 				fn(tx),
 			);
 			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			const result = await caller.updateStep1({
 				totalWomen: 50,
@@ -1174,7 +1187,7 @@ describe("declarationRouter", () => {
 
 		it("throws when siret is missing", async () => {
 			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb, null as never);
+			const caller = await createLockedCaller(mockDb, null as never);
 
 			await expect(
 				caller.updateStep1({ totalWomen: 10, totalMen: 20 }),
@@ -1223,7 +1236,7 @@ describe("declarationRouter", () => {
 				fn(tx),
 			);
 			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			await caller.updateStep1({ totalWomen: 50, totalMen: 60 });
 
@@ -1241,7 +1254,7 @@ describe("declarationRouter", () => {
 	describe("updateStep2", () => {
 		it("saves indicator A and C values", async () => {
 			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			const result = await caller.updateStep2({
 				indicatorAAnnualWomen: "30000",
@@ -1262,7 +1275,7 @@ describe("declarationRouter", () => {
 
 		it("saves with all optional fields undefined", async () => {
 			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			const result = await caller.updateStep2({});
 
@@ -1271,7 +1284,7 @@ describe("declarationRouter", () => {
 
 		it("throws when siret is missing", async () => {
 			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb, null as never);
+			const caller = await createLockedCaller(mockDb, null as never);
 
 			await expect(caller.updateStep2({})).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
@@ -1291,7 +1304,7 @@ describe("declarationRouter", () => {
 				update: mockUpdate,
 				transaction: mockTransaction,
 			} as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			await caller.updateStep2({
 				indicatorAAnnualWomen: "200",
@@ -1318,7 +1331,7 @@ describe("declarationRouter", () => {
 	describe("updateStep3", () => {
 		it("saves indicator B, D and E values", async () => {
 			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			const result = await caller.updateStep3({
 				indicatorBAnnualWomen: "31000",
@@ -1341,7 +1354,7 @@ describe("declarationRouter", () => {
 
 		it("saves with all optional fields undefined", async () => {
 			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			const result = await caller.updateStep3({});
 
@@ -1350,7 +1363,7 @@ describe("declarationRouter", () => {
 
 		it("throws when siret is missing", async () => {
 			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb, null as never);
+			const caller = await createLockedCaller(mockDb, null as never);
 
 			await expect(caller.updateStep3({})).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
@@ -1370,7 +1383,7 @@ describe("declarationRouter", () => {
 				update: mockUpdate,
 				transaction: mockTransaction,
 			} as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			await caller.updateStep3({
 				indicatorBAnnualWomen: "100",
@@ -1419,7 +1432,7 @@ describe("declarationRouter", () => {
 
 		it("saves indicator F annual and hourly thresholds", async () => {
 			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			const result = await caller.updateStep4(step4Input);
 
@@ -1431,7 +1444,7 @@ describe("declarationRouter", () => {
 
 		it("maps 3 thresholds + 4 counts per table with no *Threshold4 column", async () => {
 			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			await caller.updateStep4(step4Input);
 
@@ -1450,7 +1463,7 @@ describe("declarationRouter", () => {
 
 		it("stores null for Q4 threshold when it is an empty string", async () => {
 			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			await caller.updateStep4({
 				annual: [
@@ -1480,7 +1493,7 @@ describe("declarationRouter", () => {
 
 		it("throws when siret is missing", async () => {
 			const mockDb = createMockDb();
-			const caller = await createCaller(mockDb, null as never);
+			const caller = await createLockedCaller(mockDb, null as never);
 
 			await expect(caller.updateStep4(step4Input)).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
@@ -1500,7 +1513,7 @@ describe("declarationRouter", () => {
 				update: mockUpdate,
 				transaction: mockTransaction,
 			} as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			await caller.updateStep4(step4Input);
 
@@ -1525,7 +1538,7 @@ describe("declarationRouter", () => {
 				fn(tx),
 			);
 			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			await caller.updateStep1({ totalWomen: 30, totalMen: 40 });
 
@@ -1552,7 +1565,7 @@ describe("declarationRouter", () => {
 				fn(tx),
 			);
 			const mockDb = { transaction: mockTransaction } as unknown;
-			const caller = await createCaller(mockDb);
+			const caller = await createLockedCaller(mockDb);
 
 			await caller.updateStep2({
 				indicatorAAnnualWomen: "30000",

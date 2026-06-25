@@ -57,6 +57,7 @@ Conventions de notation :
 - Le **téléphone est requis** : si la table `profile` n'a pas de ligne pour l'utilisateur, une modale s'ouvre automatiquement à l'accès `/mon-espace`.
 - Les entreprises sont rattachées via la table `userCompanies` (relation N-N entre `users` et `companies`).
 - En environnement local, le fournisseur de test ProConnect est **FIA1V2** (compte `test@fia1.fr`).
+- À la **déconnexion**, tous les verrous de modification détenus par l'utilisateur sont libérés (voir §12.7).
 
 ---
 
@@ -83,7 +84,7 @@ Conventions de notation :
 **Router tRPC** : `~/server/api/routers/declaration.ts`. Procédures principales :
 
 - `declaration.getOrCreate` — création paresseuse du brouillon (seulement si l'utilisateur est propriétaire ; en mode admin impersonation, un placeholder transient est renvoyé sans écriture)
-- `declaration.updateStep1` … `updateStep4` — sauvegarde par étape (audit `mutation`, une action par étape)
+- `declaration.updateStep1` … `updateStep4` — sauvegarde par étape (audit `mutation`, une action par étape) — protégées par `declarationLockedWriteProcedure` (voir §12.7)
 - `declaration.updateEmployeeCategories` — sauvegarde de l'indicateur G
 - `declaration.submit` — bascule `status = submitted`, fixe le snapshot `cseRequired` et envoie le reçu
 
@@ -95,9 +96,10 @@ Conventions de notation :
 - L'**indicateur G** est optionnel ; quand il est renseigné, l'entreprise définit ses propres catégories d'emploi (par accord ou décision unilatérale).
 - Une fois `submitted`, la déclaration peut être modifiée jusqu'à la **deadline `decl1ModificationDeadline`** (configurée par l'admin DGT, voir §11) ; après, elle bascule en lecture seule.
 - En **admin impersonation**, l'écriture est bloquée (procédures `companyWriteProcedure` rejettent ; voir `~/modules/auth/useReadOnlyGuard`).
+- **Verrou collaboratif** : à l'entrée dans le wizard, le hook `useDeclarationLock` acquiert un verrou exclusif. Si une autre session détient déjà un verrou actif, le wizard s'ouvre en lecture seule avec un bandeau d'avertissement (voir §12.7).
 - Chaque transition métier de la démarche (changement d'étape, soumission, choix de parcours, etc.) écrit une ligne dans `declarationStatusHistory`, exploitée par la page d'historique (voir §3).
 
-**Données persistées** : `declarations`, `jobCategories`, `employeeCategories`, `declarationStatusHistory`.
+**Données persistées** : `declarations`, `jobCategories`, `employeeCategories`, `declarationStatusHistory`, `declarationLocks` (verrou d'édition temporaire).
 
 ---
 
@@ -371,10 +373,10 @@ Routes publiques (aucune authentification, OpenAPI documentée) :
 |---|---|
 | `/admin/` | Tableau de bord (raccourcis vers les sous-sections) |
 | `/admin/declarations` | Recherche multi-critères (SIREN, email, année, plage de dates, statut) |
-| `/admin/declarations/[id]` | Détail complet d'une déclaration, export CSV |
+| `/admin/declarations/[id]` | Détail complet d'une déclaration, export CSV, déverrouillage manuel |
 | `/admin/liste-referents` | Annuaire admin (CRUD + import CSV) |
 | `/admin/impersonate` | Recherche d'entreprise pour impersonation |
-| `/admin/parametres` | Configuration des deadlines de campagne (par année) |
+| `/admin/parametres` | Configuration des deadlines de campagne (par année) + délai d'expiration du verrou |
 | `/admin/stats` | Tableau de bord statistiques en 3 sections : **Suivi de campagne** (courbes de progression par segment d'effectif, durées et décrochages par étape), **Comptes & engagement CSE** (utilisateurs par entreprise + confirmations de statut CSE), **Funnels de complétion** (Matomo) |
 
 **Modules** : `~/modules/admin/*`.
@@ -388,8 +390,10 @@ Routes publiques (aucune authentification, OpenAPI documentée) :
 - Les **deadlines** sont par année de campagne ; si aucune ligne n'existe en BDD pour l'année courante, des défauts viennent de `~/modules/domain` (`getDefaultCampaignDeadlines`).
 - Les **stats** segmentent les entreprises par effectif (`small / medium / large`, voir `COMPANY_SIZE_RANGES`). Deux métriques d'engagement complètent les courbes : les **utilisateurs par entreprise** (agrégat BDD sur `user_company` — répartition mono/multi-utilisateurs, sans PII) et le **volume de confirmations du statut CSE** (event Matomo anonymisé `oui`/`non`, donc un comptage d'actions, pas d'entreprises distinctes).
 - L'**import GIP-MDS** est déclenché manuellement depuis la home admin (pas de cron en V2).
+- **Déverrouillage manuel** : depuis le détail d'une déclaration, l'admin peut libérer le verrou d'édition détenu par un autre utilisateur via le bouton `UnlockDeclarationButton` (procédure `adminDeclarations.releaseLock`). La confirmation est demandée dans une modale.
+- **Délai d'expiration du verrou** : dans `/admin/parametres`, l'admin peut configurer la durée (en minutes) au-delà de laquelle un verrou inactif expire (procédures `adminSettings.getLockTimeout` / `adminSettings.updateLockTimeout`, valeur stockée dans `globalSettings.declarationLockTimeoutMinutes`, défaut `DEFAULT_LOCK_TIMEOUT_MINUTES = 30`).
 
-**Audit** : presque toutes les procédures admin sont auditées (`ADMIN_DECLARATIONS_SEARCH`, `ADMIN_SETTINGS_UPSERT_DEADLINES`, etc.).
+**Audit** : presque toutes les procédures admin sont auditées (`ADMIN_DECLARATIONS_SEARCH`, `ADMIN_SETTINGS_UPSERT_DEADLINES`, `ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT`, `ADMIN_DECLARATION_RELEASE_LOCK`, etc.).
 
 ---
 
@@ -417,8 +421,8 @@ Toutes les **mutations** et les **lectures de données sensibles** (PII, donnée
 
 | Catégorie | Rétention | Exemples |
 |---|---|---|
-| `mutation` | 365 jours | toutes les écritures (déclaration, CSE, admin) |
-| `read_sensitive` | 180 jours | `profile.get`, `declaration.getOrCreate`, `declaration.getStatusHistory`, recherche admin, téléchargement PDF |
+| `mutation` | 365 jours | toutes les écritures (déclaration, CSE, admin, verrous) |
+| `read_sensitive` | 180 jours | `profile.get`, `declaration.getOrCreate`, `declaration.getStatusHistory`, recherche admin, téléchargement PDF, état du verrou |
 | `public_search` | 180 jours | recherche / vue d'un référent public |
 | `auth` | 365 jours | login OK / login KO / logout |
 | `export` | 365 jours | téléchargements API publique |
@@ -446,6 +450,8 @@ L'admin DGT peut **incarner** une entreprise pour la dépanner. Le mécanisme :
 4. `useReadOnlyGuard` empêche toute écriture sur `~/modules/auth`
 5. `companyWriteProcedure` rejette les mutations côté serveur
 6. Un événement est inscrit dans `adminImpersonationEvents` (visible dans l'audit)
+
+En mode impersonation, le verrou collaboratif est **désactivé** : le hook `useDeclarationLock` ne tente pas d'acquérir de verrou (l'admin ne peut pas écrire de toute façon).
 
 ### 12.4 Pré-remplissage GIP-MDS
 
@@ -510,6 +516,81 @@ Le schéma Zod `fileNameSchema` (exporté depuis `fileNameValidation.ts`) permet
 | 503 | ClamAV indisponible (transitoire) |
 | 500 | Erreur S3 ou BDD (compensation delete tentée) |
 
+### 12.7 Verrou collaboratif de déclaration
+
+Le verrou collaboratif empêche deux co-déclarants d'un même SIREN de modifier la déclaration simultanément, évitant les conflits de données.
+
+**Principe** : un seul utilisateur à la fois peut détenir le verrou d'édition d'une déclaration donnée. Le verrou est exclusif, temporaire (expire après inactivité), et libéré proprement à la fermeture de l'onglet ou à la déconnexion.
+
+**Constantes** (`~/modules/domain/shared/declarationLock.ts`) :
+
+| Constante | Valeur | Rôle |
+|---|---|---|
+| `DEFAULT_LOCK_TIMEOUT_MINUTES` | 30 | Durée d'inactivité avant expiration du verrou (configurable en admin) |
+| `LOCK_HEARTBEAT_INTERVAL_MS` | 10 000 | Intervalle de renouvellement automatique du verrou (10 s) |
+
+**Flux d'acquisition (côté client)** :
+
+```mermaid
+sequenceDiagram
+    participant User as Utilisateur
+    participant Hook as useDeclarationLock
+    participant tRPC as declarationLock.acquireLock
+    participant DB as PostgreSQL
+
+    User->>Hook: Entrée dans le wizard
+    Hook->>tRPC: acquireLock({ declarationId })
+    tRPC->>DB: INSERT ... ON CONFLICT DO UPDATE (si libre ou expiré)
+    DB-->>tRPC: acquired = true | false
+    tRPC-->>Hook: { acquired, holder }
+    alt acquired = true
+        Hook->>Hook: Démarrer heartbeat (10 s)
+        Hook-->>User: Wizard éditable
+    else acquired = false (verrou tiers actif)
+        Hook-->>User: Wizard en lecture seule + bandeau
+    end
+```
+
+**Cycle de vie du verrou** :
+
+- **Acquisition** : `declarationLock.acquireLock` (tRPC `companyWriteProcedure`) — INSERT ON CONFLICT DO UPDATE atomique. Le serveur n'accorde le verrou que si la ligne est libre ou appartient déjà au demandeur.
+- **Heartbeat** : `declarationLock.heartbeat` toutes les `LOCK_HEARTBEAT_INTERVAL_MS` ms, repousse l'`expiresAt`.
+- **Release explicite** : `declarationLock.releaseLock` à l'unmount du composant.
+- **Release beacon** : `navigator.sendBeacon` vers `POST /api/declaration-lock/release` à la fermeture de l'onglet (event `pagehide`), car les mutations tRPC ne sont pas garanties de flusher dans ce cas.
+- **Release à la déconnexion** : `GET /api/auth/logout` appelle `releaseAllLocksForUser(db, userId)` avant de rediriger vers ProConnect.
+- **Expiration passive** : un verrou dont l'`expiresAt` est passé est ignoré (lecture côté service) sans être supprimé immédiatement (nettoyage paresseux).
+
+**Gating des écritures** : `declarationLockedWriteProcedure` (défini dans `src/server/api/trpc.ts`) est un builder de procédure qui rejette avec `CONFLICT` toute écriture si l'utilisateur ne détient pas le verrou actif. Les procédures de mutation du wizard (`updateStep1`…`submit`) utilisent ce builder.
+
+**Verrou dans le side panel** (`~/modules/my-space/DeclarationProcessPanel.tsx`) : `getActiveLockForCurrentDeclaration` est appelé côté serveur dans `MonEspacePage`. Si une autre session détient le verrou, le panneau affiche le `DeclarationLockAlert` et le bouton CTA est libellé « Consulter en lecture seule ».
+
+**Déverrouillage admin** : la procédure `adminDeclarations.releaseLock` (audit `ADMIN_DECLARATION_RELEASE_LOCK`) appelle `releaseLockAsAdmin` sans vérification de propriété — réservé aux `adminProcedure`. Déclenché depuis `UnlockDeclarationButton` dans la vue détail admin.
+
+**Impersonation** : le hook `useDeclarationLock` désactive entièrement le mécanisme (`isEnabled = false`) si la session porte un contexte d'impersonation, puisque les admins en impersonation ne peuvent pas écrire.
+
+**Service** (`~/server/services/declarationLockService.ts`) :
+
+| Fonction | Rôle |
+|---|---|
+| `getActiveLock(db, declarationId)` | Retourne le détenteur actif (non expiré), ou `null` |
+| `acquireOrRefreshLock(db, declarationId, userId, timeout)` | Upsert atomique, retourne `{ acquired, holder }` |
+| `refreshLock(db, declarationId, userId, timeout)` | Heartbeat — repousse `expiresAt` si le lock appartient à `userId` |
+| `releaseLock(db, declarationId, userId)` | Supprime la ligne si elle appartient à `userId` |
+| `releaseAllLocksForUser(db, userId)` | Supprime toutes les lignes de `userId` (logout) |
+| `releaseLockAsAdmin(db, declarationId)` | Supprime la ligne sans vérification propriétaire (admin) |
+
+**Données persistées** : `declarationLocks` (table `declaration_lock`).
+
+**Actions d'audit** :
+
+| Action | Catégorie | Quand |
+|---|---|---|
+| `DECLARATION_LOCK_ACQUIRED` | mutation | Prise de verrou réelle (pas les refreshs) |
+| `DECLARATION_LOCK_RELEASED` | mutation | Libération (tRPC ou beacon) |
+| `ADMIN_DECLARATION_RELEASE_LOCK` | mutation | Déverrouillage forcé par un admin |
+| `DECLARATION_LOCK_STATE_READ` | read_sensitive | Lecture de l'état du verrou (procédure `getLockState`) |
+| `ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT` | mutation | Modification du délai d'expiration |
+
 ---
 
 ## 13. Annexe : tables Drizzle principales
@@ -523,6 +604,7 @@ Tableau de correspondance feature → tables, pour les développeurs qui débarq
 | `companies` | Authentification, déclaration, admin |
 | `declarations` | Déclaration index, parcours conformité |
 | `declarationStatusHistory` | Historique des modifications d'une démarche |
+| `declarationLocks` | Verrou collaboratif (§12.7) |
 | `jobCategories` | Déclaration index (étape 5, optionnel) |
 | `employeeCategories` | Déclaration index (indicateur G) |
 | `cseOpinions` | Avis CSE (avis textuels) |
@@ -530,6 +612,7 @@ Tableau de correspondance feature → tables, pour les développeurs qui débarq
 | `cseOpinionFiles` | Avis CSE — associations fichier ↔ type de contenu (`declarationNumber`, `type`) |
 | `referents` | Annuaire public, gestion admin |
 | `campaignDeadlines` | Paramétrage admin (deadlines par année) |
+| `globalSettings` | Paramètres globaux : délai d'expiration du verrou (`declarationLockTimeoutMinutes`) |
 | `gipMdsData` | Pré-remplissage GIP |
 | `adminImpersonationEvents` | Audit impersonation admin |
 | `audit.action_log` | Audit logging (schéma Postgres dédié) |

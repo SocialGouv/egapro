@@ -48,6 +48,7 @@ vi.mock("~/trpc/react", () => ({
 							},
 						],
 						siblings: [],
+						lock: null,
 					},
 					isLoading: false,
 				}),
@@ -55,7 +56,18 @@ vi.mock("~/trpc/react", () => ({
 			getRecap: {
 				useQuery: vi.fn().mockReturnValue({ data: undefined }),
 			},
+			releaseLock: {
+				useMutation: vi
+					.fn()
+					.mockReturnValue({ mutate: vi.fn(), isPending: false }),
+			},
 		},
+		useUtils: vi.fn().mockReturnValue({
+			adminDeclarations: {
+				getById: { invalidate: vi.fn() },
+				search: { invalidate: vi.fn() },
+			},
+		}),
 	},
 }));
 
@@ -112,5 +124,13 @@ describe("AdminDeclarationDetailPage", () => {
 		expect(
 			screen.getByRole("link", { name: /Retour à la liste/ }),
 		).toHaveAttribute("href", "/admin/declarations");
+	});
+
+	it("does not display the unlock button when the declaration is not locked", () => {
+		render(<AdminDeclarationDetailPage declarationId="decl-1" />);
+
+		expect(
+			screen.queryByRole("button", { name: "Déverrouiller la déclaration" }),
+		).toBeNull();
 	});
 });

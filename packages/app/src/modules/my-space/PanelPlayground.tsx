@@ -235,6 +235,8 @@ export function PanelPlayground() {
 				})}
 				hasSubmittedSecondDeclaration={secondDeclarationSubmitted}
 				lastActionDate="12 mars 2026"
+				lockedByOther={false}
+				lockHolder={null}
 				siren="000000000"
 				variant={variant}
 				year={2027}

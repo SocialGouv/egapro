@@ -251,6 +251,54 @@ export const declarationsRelations = relations(
 	}),
 );
 
+// ── Declaration edit lock ──────────────────────────────────────────
+
+export const declarationLocks = createTable(
+	"declaration_lock",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		declarationId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => declarations.id, { onDelete: "cascade" }),
+		lockedByUserId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => users.id),
+		lockedAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		lastHeartbeatAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		expiresAt: d.timestamp({ withTimezone: true }).notNull(),
+	}),
+	(t) => [
+		uniqueIndex("declaration_lock_declaration_id_unique").on(t.declarationId),
+		index("declaration_lock_expires_at_idx").on(t.expiresAt),
+	],
+);
+
+export const declarationLocksRelations = relations(
+	declarationLocks,
+	({ one }) => ({
+		declaration: one(declarations, {
+			fields: [declarationLocks.declarationId],
+			references: [declarations.id],
+		}),
+		lockedBy: one(users, {
+			fields: [declarationLocks.lockedByUserId],
+			references: [users.id],
+		}),
+	}),
+);
+
 // ── Employee category tables (indicator G) ─────────────────────────
 
 export const declarationTypeEnum = pgEnum("declaration_type", [
@@ -658,6 +706,7 @@ export const campaignDeadlines = createTable("campaign_deadline", (d) => ({
 export const globalSettings = createTable("global_setting", (d) => ({
 	id: d.integer().notNull().primaryKey().default(1),
 	activeCampaignYear: d.integer(),
+	declarationLockTimeoutMinutes: d.integer().notNull().default(30),
 	updatedAt: d
 		.timestamp({ withTimezone: true })
 		.notNull()

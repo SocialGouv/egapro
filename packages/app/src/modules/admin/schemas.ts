@@ -29,3 +29,9 @@ export const startImpersonateSchema = z.object({
 });
 
 export type StartImpersonateInput = z.infer<typeof startImpersonateSchema>;
+
+export const releaseLockSchema = z.object({
+	declarationId: z.string().uuid(),
+});
+
+export type ReleaseLockInput = z.infer<typeof releaseLockSchema>;

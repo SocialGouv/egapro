@@ -21,8 +21,8 @@ import {
 } from "~/modules/domain";
 import {
 	companyProcedure,
-	companyWriteProcedure,
 	createTRPCRouter,
+	declarationLockedWriteProcedure,
 	protectedProcedure,
 } from "~/server/api/trpc";
 import {
@@ -274,7 +274,7 @@ export const declarationRouter = createTRPCRouter({
 		};
 	}),
 
-	updateStep1: companyWriteProcedure
+	updateStep1: declarationLockedWriteProcedure
 		.input(updateStep1Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -376,7 +376,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateStep2: companyWriteProcedure
+	updateStep2: declarationLockedWriteProcedure
 		.input(updateStep2Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -425,7 +425,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateStep3: companyWriteProcedure
+	updateStep3: declarationLockedWriteProcedure
 		.input(updateStep3Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -476,7 +476,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateStep4: companyWriteProcedure
+	updateStep4: declarationLockedWriteProcedure
 		.input(updateStep4Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -539,7 +539,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateEmployeeCategories: companyWriteProcedure
+	updateEmployeeCategories: declarationLockedWriteProcedure
 		.input(updateEmployeeCategoriesSchema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -637,7 +637,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	submit: companyWriteProcedure.mutation(async ({ ctx }) => {
+	submit: declarationLockedWriteProcedure.mutation(async ({ ctx }) => {
 		const siren = ctx.siren;
 		const year = getCurrentYear();
 
@@ -739,7 +739,7 @@ export const declarationRouter = createTRPCRouter({
 		return { success: true };
 	}),
 
-	saveCompliancePath: companyWriteProcedure
+	saveCompliancePath: declarationLockedWriteProcedure
 		.input(saveCompliancePathInputSchema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -817,70 +817,72 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	submitSecondDeclaration: companyWriteProcedure.mutation(async ({ ctx }) => {
-		const siren = ctx.siren;
-		const year = getCurrentYear();
+	submitSecondDeclaration: declarationLockedWriteProcedure.mutation(
+		async ({ ctx }) => {
+			const siren = ctx.siren;
+			const year = getCurrentYear();
 
-		const [declaration] = await ctx.db
-			.select()
-			.from(declarations)
-			.where(activeDeclarationFilter(siren, year))
-			.limit(1);
+			const [declaration] = await ctx.db
+				.select()
+				.from(declarations)
+				.where(activeDeclarationFilter(siren, year))
+				.limit(1);
 
-		if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
+			if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
 
-		const correctionCategories = await loadEmployeeCategoriesForDeclaration(
-			ctx.db,
-			declaration.id,
-			"correction",
-		);
-		const stillHasGap = hasGapsAboveThreshold(correctionCategories);
+			const correctionCategories = await loadEmployeeCategoriesForDeclaration(
+				ctx.db,
+				declaration.id,
+				"correction",
+			);
+			const stillHasGap = hasGapsAboveThreshold(correctionCategories);
 
-		const rules = loadRules(declaration.rulesVersion);
-		const facts = buildSecondDeclarationFacts(declaration, stillHasGap);
-		const { nextStatus, events } = applyAction(
-			facts,
-			"submit_second_declaration",
-			rules,
-		);
+			const rules = loadRules(declaration.rulesVersion);
+			const facts = buildSecondDeclarationFacts(declaration, stillHasGap);
+			const { nextStatus, events } = applyAction(
+				facts,
+				"submit_second_declaration",
+				rules,
+			);
 
-		const projection = computeProjectionUpdates(events, nextStatus);
-		const historyInserts = buildHistoryInserts(
-			declaration.id,
-			events,
-			ctx.session.user.id,
-		);
+			const projection = computeProjectionUpdates(events, nextStatus);
+			const historyInserts = buildHistoryInserts(
+				declaration.id,
+				events,
+				ctx.session.user.id,
+			);
 
-		await ctx.db.transaction(async (tx) => {
-			await tx.insert(declarationStatusHistory).values(historyInserts);
-			await tx
-				.update(declarations)
-				.set({
-					...projection,
-					secondDeclarationStep: 3,
-					updatedAt: new Date(),
-				})
-				.where(activeDeclarationFilter(siren, year));
-			await purgeDraftSlice(tx, siren, year, "second");
-		});
-
-		const email = ctx.session.user.email;
-		if (email) {
-			const { enqueueReceipt } = await import("~/modules/mail/server");
-			await enqueueReceipt({
-				kind: "secondDeclaration",
-				to: email,
-				siren,
-				year,
-				userId: ctx.session.user.id,
-				isResend: false,
+			await ctx.db.transaction(async (tx) => {
+				await tx.insert(declarationStatusHistory).values(historyInserts);
+				await tx
+					.update(declarations)
+					.set({
+						...projection,
+						secondDeclarationStep: 3,
+						updatedAt: new Date(),
+					})
+					.where(activeDeclarationFilter(siren, year));
+				await purgeDraftSlice(tx, siren, year, "second");
 			});
-		}
 
-		return { success: true };
-	}),
+			const email = ctx.session.user.email;
+			if (email) {
+				const { enqueueReceipt } = await import("~/modules/mail/server");
+				await enqueueReceipt({
+					kind: "secondDeclaration",
+					to: email,
+					siren,
+					year,
+					userId: ctx.session.user.id,
+					isResend: false,
+				});
+			}
 
-	submitJointEvaluation: companyWriteProcedure
+			return { success: true };
+		},
+	),
+
+	submitJointEvaluation: declarationLockedWriteProcedure
 		.input(submitJointEvaluationSchema)
 		.mutation(async ({ ctx }) => {
 			const siren = ctx.siren;

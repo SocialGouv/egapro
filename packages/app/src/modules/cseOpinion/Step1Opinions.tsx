@@ -7,6 +7,7 @@ import { Controller } from "react-hook-form";
 
 import { useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
+import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { getCurrentYear } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -55,6 +56,7 @@ export function Step1Opinions({
 	const isJointEvaluation = firstDeclarationPathChoice === "joint_evaluation";
 	const router = useRouter();
 	const readOnlyGuard = useReadOnlyGuard();
+	const { isReadOnly: isLocked } = useLockContext();
 
 	const dbValues = useMemo(
 		() => ({
@@ -145,12 +147,13 @@ export function Step1Opinions({
 	}, [isLoadingDraft, draft, form, hasSecondDeclaration]);
 
 	const triggerDraftSave = useCallback(() => {
+		if (isLocked) return;
 		const values = form.getValues();
 		setField({
 			firstDeclaration: values.firstDeclaration,
 			secondDeclaration: values.secondDeclaration,
 		});
-	}, [form, setField]);
+	}, [form, isLocked, setField]);
 
 	const mutation = api.cseOpinion.saveOpinions.useMutation({
 		onSuccess: () => router.push("/avis-cse/etape/2"),
@@ -197,168 +200,181 @@ export function Step1Opinions({
 
 	return (
 		<form autoComplete="off" onSubmit={onSubmit}>
-			{isJointEvaluation && (
-				<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
-					<div className="fr-col">
-						<h1 className="fr-h4 fr-mb-0">
-							Parcours de mise en conformité pour l'indicateur par catégorie de
-							salariés
-						</h1>
+			<fieldset className={styles.readOnlyFieldset} disabled={isLocked}>
+				{isJointEvaluation && (
+					<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
+						<div className="fr-col">
+							<h1 className="fr-h4 fr-mb-0">
+								Parcours de mise en conformité pour l'indicateur par catégorie
+								de salariés
+							</h1>
+						</div>
 					</div>
+				)}
+
+				{isJointEvaluation && (
+					<SubmissionBanner
+						deadline={cseDeadline}
+						email={email ?? "adresse@exemple.fr"}
+						year={getCurrentYear()}
+					/>
+				)}
+
+				{isJointEvaluation ? (
+					<h2 className="fr-h4 fr-mt-5w fr-mb-3w">
+						Transmettre l'avis ou les avis du CSE
+					</h2>
+				) : (
+					<h1 className="fr-h4 fr-mb-3w">
+						Transmettre l'avis ou les avis du CSE
+					</h1>
+				)}
+
+				<CseStepIndicator currentStep={1} />
+
+				<p className="fr-text--md fr-mb-2w">
+					Indiquez si le CSE a été consulté et précisez les avis émis avant de
+					soumettre votre déclaration aux services du ministère chargé du
+					Travail.
+				</p>
+				<p className="fr-mb-4w">Tous les champs sont obligatoires.</p>
+
+				{isJointEvaluation ? (
+					<h3 className="fr-h6 fr-mb-3w">Première déclaration</h3>
+				) : (
+					<h2 className="fr-h6 fr-mb-3w">Première déclaration</h2>
+				)}
+
+				<div className={styles.cardStack}>
+					<AccuracyOpinionCard
+						date={firstDeclDate ?? ""}
+						id="first-decl-accuracy"
+						onDateChange={(v) => {
+							form.setValue("firstDeclaration.accuracyDate", v);
+							triggerDraftSave();
+						}}
+						onOpinionChange={(v) => {
+							form.setValue("firstDeclaration.accuracyOpinion", v);
+							triggerDraftSave();
+						}}
+						opinion={firstDeclOpinion ?? null}
+						title="Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs"
+					/>
+
+					<Controller
+						control={form.control}
+						name="firstDeclaration.gapConsulted"
+						render={({ field }) => (
+							<GapConsultationCard
+								consulted={field.value ?? null}
+								date={firstDeclGapDate ?? ""}
+								id="first-decl-gap"
+								onConsultedChange={(v) => {
+									field.onChange(v);
+									triggerDraftSave();
+								}}
+								onDateChange={(v) => {
+									form.setValue("firstDeclaration.gapDate", v);
+									triggerDraftSave();
+								}}
+								onOpinionChange={(v) => {
+									form.setValue("firstDeclaration.gapOpinion", v);
+									triggerDraftSave();
+								}}
+								opinion={firstDeclGapOpinion ?? null}
+							/>
+						)}
+					/>
 				</div>
-			)}
 
-			{isJointEvaluation && (
-				<SubmissionBanner
-					deadline={cseDeadline}
-					email={email ?? "adresse@exemple.fr"}
-					year={getCurrentYear()}
-				/>
-			)}
+				{hasSecondDeclaration && (
+					<>
+						{isJointEvaluation ? (
+							<h3 className="fr-h6 fr-mt-5w fr-mb-3w">Deuxième déclaration</h3>
+						) : (
+							<h2 className="fr-h6 fr-mt-5w fr-mb-3w">Deuxième déclaration</h2>
+						)}
 
-			{isJointEvaluation ? (
-				<h2 className="fr-h4 fr-mt-5w fr-mb-3w">
-					Transmettre l'avis ou les avis du CSE
-				</h2>
-			) : (
-				<h1 className="fr-h4 fr-mb-3w">
-					Transmettre l'avis ou les avis du CSE
-				</h1>
-			)}
+						<div className={styles.cardStack}>
+							<AccuracyOpinionCard
+								date={secondDeclDate ?? ""}
+								id="second-decl-accuracy"
+								onDateChange={(v) => {
+									form.setValue("secondDeclaration.accuracyDate", v);
+									triggerDraftSave();
+								}}
+								onOpinionChange={(v) => {
+									form.setValue("secondDeclaration.accuracyOpinion", v);
+									triggerDraftSave();
+								}}
+								opinion={secondDeclOpinion ?? null}
+								title="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
+							/>
 
-			<CseStepIndicator currentStep={1} />
+							<Controller
+								control={form.control}
+								name="secondDeclaration.gapConsulted"
+								render={({ field }) => (
+									<GapConsultationCard
+										consulted={field.value ?? null}
+										date={secondDeclGapDate ?? ""}
+										id="second-decl-gap"
+										onConsultedChange={(v) => {
+											field.onChange(v);
+											triggerDraftSave();
+										}}
+										onDateChange={(v) => {
+											form.setValue("secondDeclaration.gapDate", v);
+											triggerDraftSave();
+										}}
+										onOpinionChange={(v) => {
+											form.setValue("secondDeclaration.gapOpinion", v);
+											triggerDraftSave();
+										}}
+										opinion={secondDeclGapOpinion ?? null}
+									/>
+								)}
+							/>
+						</div>
+					</>
+				)}
 
-			<p className="fr-text--md fr-mb-2w">
-				Indiquez si le CSE a été consulté et précisez les avis émis avant de
-				soumettre votre déclaration aux services du ministère chargé du Travail.
-			</p>
-			<p className="fr-mb-4w">Tous les champs sont obligatoires.</p>
-
-			<h3 className="fr-h6 fr-mb-3w">Première déclaration</h3>
-
-			<div className={styles.cardStack}>
-				<AccuracyOpinionCard
-					date={firstDeclDate ?? ""}
-					id="first-decl-accuracy"
-					onDateChange={(v) => {
-						form.setValue("firstDeclaration.accuracyDate", v);
-						triggerDraftSave();
-					}}
-					onOpinionChange={(v) => {
-						form.setValue("firstDeclaration.accuracyOpinion", v);
-						triggerDraftSave();
-					}}
-					opinion={firstDeclOpinion ?? null}
-					title="Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs"
-				/>
-
-				<Controller
-					control={form.control}
-					name="firstDeclaration.gapConsulted"
-					render={({ field }) => (
-						<GapConsultationCard
-							consulted={field.value ?? null}
-							date={firstDeclGapDate ?? ""}
-							id="first-decl-gap"
-							onConsultedChange={(v) => {
-								field.onChange(v);
-								triggerDraftSave();
-							}}
-							onDateChange={(v) => {
-								form.setValue("firstDeclaration.gapDate", v);
-								triggerDraftSave();
-							}}
-							onOpinionChange={(v) => {
-								form.setValue("firstDeclaration.gapOpinion", v);
-								triggerDraftSave();
-							}}
-							opinion={firstDeclGapOpinion ?? null}
-						/>
+				<div aria-live="polite">
+					{(form.formState.errors.firstDeclaration ||
+						form.formState.errors.secondDeclaration) && (
+						<div className="fr-alert fr-alert--error fr-mt-3w">
+							<p>Veuillez remplir tous les champs obligatoires.</p>
+						</div>
 					)}
-				/>
-			</div>
+					{mutation.error && (
+						<div className="fr-alert fr-alert--error fr-mt-3w">
+							<p>{mutation.error.message}</p>
+						</div>
+					)}
+				</div>
 
-			{hasSecondDeclaration && (
-				<>
-					<h3 className="fr-h6 fr-mt-5w fr-mb-3w">Deuxième déclaration</h3>
-
-					<div className={styles.cardStack}>
-						<AccuracyOpinionCard
-							date={secondDeclDate ?? ""}
-							id="second-decl-accuracy"
-							onDateChange={(v) => {
-								form.setValue("secondDeclaration.accuracyDate", v);
-								triggerDraftSave();
-							}}
-							onOpinionChange={(v) => {
-								form.setValue("secondDeclaration.accuracyOpinion", v);
-								triggerDraftSave();
-							}}
-							opinion={secondDeclOpinion ?? null}
-							title="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
-						/>
-
-						<Controller
-							control={form.control}
-							name="secondDeclaration.gapConsulted"
-							render={({ field }) => (
-								<GapConsultationCard
-									consulted={field.value ?? null}
-									date={secondDeclGapDate ?? ""}
-									id="second-decl-gap"
-									onConsultedChange={(v) => {
-										field.onChange(v);
-										triggerDraftSave();
-									}}
-									onDateChange={(v) => {
-										form.setValue("secondDeclaration.gapDate", v);
-										triggerDraftSave();
-									}}
-									onOpinionChange={(v) => {
-										form.setValue("secondDeclaration.gapOpinion", v);
-										triggerDraftSave();
-									}}
-									opinion={secondDeclGapOpinion ?? null}
-								/>
-							)}
-						/>
-					</div>
-				</>
-			)}
-
-			<div aria-live="polite">
-				{(form.formState.errors.firstDeclaration ||
-					form.formState.errors.secondDeclaration) && (
-					<div className="fr-alert fr-alert--error fr-mt-3w">
-						<p>Veuillez remplir tous les champs obligatoires.</p>
-					</div>
-				)}
-				{mutation.error && (
-					<div className="fr-alert fr-alert--error fr-mt-3w">
-						<p>{mutation.error.message}</p>
-					</div>
-				)}
-			</div>
-
-			<div className={`fr-mt-4w ${formStyles.actions}`}>
-				<Link
-					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
-					href={previousHref}
-				>
-					Précédent
-				</Link>
-				<span>
-					<button
-						{...readOnlyGuard.buttonProps}
-						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={mutation.isPending || readOnlyGuard.isReadOnly}
-						type="submit"
+				<div className={`fr-mt-4w ${formStyles.actions}`}>
+					<Link
+						className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
+						href={previousHref}
 					>
-						{mutation.isPending ? "Enregistrement…" : "Suivant"}
-					</button>
-					{readOnlyGuard.tooltip}
-				</span>
-			</div>
+						Précédent
+					</Link>
+					<span>
+						<button
+							{...readOnlyGuard.buttonProps}
+							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+							disabled={
+								mutation.isPending || readOnlyGuard.isReadOnly || isLocked
+							}
+							type="submit"
+						>
+							{mutation.isPending ? "Enregistrement…" : "Suivant"}
+						</button>
+						{readOnlyGuard.tooltip}
+					</span>
+				</div>
+			</fieldset>
 		</form>
 	);
 }

@@ -10,6 +10,7 @@ import { DraftLoadingState } from "~/modules/declaration-remuneration/shared/dra
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { useDraftAutoSave } from "~/modules/declaration-remuneration/shared/draft/useDraftAutoSave";
 import { useDraftHydration } from "~/modules/declaration-remuneration/shared/draft/useDraftHydration";
+import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { type CampaignDeadlines, formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { useZodForm } from "~/modules/shared/useZodForm";
@@ -56,7 +57,8 @@ export function CompliancePathChoice({
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
-	const isReadOnly = readOnlyReason !== undefined;
+	const { isReadOnly: isLockReadOnly } = useLockContext();
+	const isReadOnly = isLockReadOnly || readOnlyReason !== undefined;
 
 	const dbValues = useMemo(() => ({ path: initialPath }), [initialPath]);
 
@@ -122,129 +124,131 @@ export function CompliancePathChoice({
 			className={common.flexColumnGap2}
 			onSubmit={onSubmit}
 		>
-			<div className={common.flexBetween}>
-				<h1 className="fr-h4 fr-mb-0">
-					Déclaration des indicateurs de rémunération {currentYear}
-				</h1>
-				<SavedIndicator
-					hasData={hasData}
-					isPendingSave={isPendingSave}
-					isSaving={isSaving}
-				/>
-			</div>
-
-			<DeclarationSuccessBanner
-				email={email}
-				isSecondDeclaration={isSecondRound}
-				modificationDeadline={
-					isSecondRound
-						? campaignDeadlines.decl2ModificationDeadline
-						: campaignDeadlines.decl1ModificationDeadline
-				}
-				pdfDownloadHref={pdfDownloadHref}
-				year={currentYear}
-			/>
-
-			{readOnlyReason ? (
-				<CompliancePathReadOnlyAlert reason={readOnlyReason} />
-			) : null}
-
-			<div className={common.flexColumnGap1}>
-				<p className={`fr-mb-0 ${styles.instructions}`}>
-					{isSecondRound
-						? "Des écarts ≥ 5 % ont de nouveau été détectés, vous devez engager l'un des parcours suivants."
-						: "Des écarts ≥ 5 % ont été constatés, vous devez engager l'un des parcours suivants."}
-				</p>
-
-				<div className="fr-highlight fr-mb-0">
-					<p className="fr-mb-1w">
-						Date limite pour choisir un parcours de mise en conformité
-					</p>
-					<p className="fr-text--lg fr-text--bold fr-mb-0">
-						{formatLongDate(campaignDeadlines.pathChoiceDeadline)}
-					</p>
-				</div>
-			</div>
-
-			<div className={common.dataSection}>
-				<div className={common.flexColumnGapHalf}>
-					<h2 className="fr-h6 fr-mb-0">
-						La justification est possible par des critères objectifs et non
-						sexistes
-					</h2>
-					<p className="fr-mb-0">
-						<TrackedLink
-							className="fr-link"
-							href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
-							rel="noopener noreferrer"
-							target="_blank"
-							trackingId="objective_criteria"
-						>
-							Qu&apos;entend-on par critères objectifs et non sexistes ?
-							<NewTabNotice />
-						</TrackedLink>
-					</p>
+			<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+				<div className={common.flexBetween}>
+					<h1 className="fr-h4 fr-mb-0">
+						Déclaration des indicateurs de rémunération {currentYear}
+					</h1>
+					<SavedIndicator
+						hasData={hasData}
+						isPendingSave={isPendingSave}
+						isSaving={isSaving}
+					/>
 				</div>
 
-				<Controller
-					control={form.control}
-					name="path"
-					render={({ field }) => (
-						<fieldset
-							aria-labelledby="compliance-path-legend"
-							className="fr-fieldset"
-						>
-							<legend className="fr-sr-only" id="compliance-path-legend">
-								Choix du parcours de mise en conformité
-							</legend>
-
-							{isSecondRound ? (
-								<SecondRoundOptions
-									disabled={isImpersonating || isReadOnly}
-									jointEvaluationDeadline={
-										campaignDeadlines.decl2JointEvaluationDeadline
-									}
-									justificationDeadline={
-										campaignDeadlines.decl2JustificationDeadline
-									}
-									selectedPath={field.value}
-									setSelectedPath={field.onChange}
-								/>
-							) : (
-								<FirstRoundOptions
-									correctiveActionDeadline={
-										campaignDeadlines.decl2ModificationDeadline
-									}
-									disabled={isImpersonating || isReadOnly}
-									jointEvaluationDeadline={
-										campaignDeadlines.decl1JointEvaluationDeadline
-									}
-									justificationDeadline={
-										campaignDeadlines.decl1JustificationDeadline
-									}
-									selectedPath={field.value}
-									setSelectedPath={field.onChange}
-								/>
-							)}
-						</fieldset>
-					)}
+				<DeclarationSuccessBanner
+					email={email}
+					isSecondDeclaration={isSecondRound}
+					modificationDeadline={
+						isSecondRound
+							? campaignDeadlines.decl2ModificationDeadline
+							: campaignDeadlines.decl1ModificationDeadline
+					}
+					pdfDownloadHref={pdfDownloadHref}
+					year={currentYear}
 				/>
-			</div>
 
-			<FormActions
-				isSubmitting={mutation.isPending}
-				mimoquageNextHref={
-					initialPath ? getCompliancePathHref(initialPath) : undefined
-				}
-				nextDisabled={!selectedPath || isReadOnly}
-				nextHref={
-					isReadOnly && initialPath
-						? getCompliancePathHref(initialPath)
-						: undefined
-				}
-				nextLabel="Suivant"
-				previousHref="/declaration-remuneration/etape/6"
-			/>
+				{readOnlyReason ? (
+					<CompliancePathReadOnlyAlert reason={readOnlyReason} />
+				) : null}
+
+				<div className={common.flexColumnGap1}>
+					<p className={`fr-mb-0 ${styles.instructions}`}>
+						{isSecondRound
+							? "Des écarts ≥ 5 % ont de nouveau été détectés, vous devez engager l'un des parcours suivants."
+							: "Des écarts ≥ 5 % ont été constatés, vous devez engager l'un des parcours suivants."}
+					</p>
+
+					<div className="fr-highlight fr-mb-0">
+						<p className="fr-mb-1w">
+							Date limite pour choisir un parcours de mise en conformité
+						</p>
+						<p className="fr-text--lg fr-text--bold fr-mb-0">
+							{formatLongDate(campaignDeadlines.pathChoiceDeadline)}
+						</p>
+					</div>
+				</div>
+
+				<div className={common.dataSection}>
+					<div className={common.flexColumnGapHalf}>
+						<h2 className="fr-h6 fr-mb-0">
+							La justification est possible par des critères objectifs et non
+							sexistes
+						</h2>
+						<p className="fr-mb-0">
+							<TrackedLink
+								className="fr-link"
+								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
+								rel="noopener noreferrer"
+								target="_blank"
+								trackingId="objective_criteria"
+							>
+								Qu&apos;entend-on par critères objectifs et non sexistes ?
+								<NewTabNotice />
+							</TrackedLink>
+						</p>
+					</div>
+
+					<Controller
+						control={form.control}
+						name="path"
+						render={({ field }) => (
+							<fieldset
+								aria-labelledby="compliance-path-legend"
+								className="fr-fieldset"
+							>
+								<legend className="fr-sr-only" id="compliance-path-legend">
+									Choix du parcours de mise en conformité
+								</legend>
+
+								{isSecondRound ? (
+									<SecondRoundOptions
+										disabled={isImpersonating || isReadOnly}
+										jointEvaluationDeadline={
+											campaignDeadlines.decl2JointEvaluationDeadline
+										}
+										justificationDeadline={
+											campaignDeadlines.decl2JustificationDeadline
+										}
+										selectedPath={field.value}
+										setSelectedPath={field.onChange}
+									/>
+								) : (
+									<FirstRoundOptions
+										correctiveActionDeadline={
+											campaignDeadlines.decl2ModificationDeadline
+										}
+										disabled={isImpersonating || isReadOnly}
+										jointEvaluationDeadline={
+											campaignDeadlines.decl1JointEvaluationDeadline
+										}
+										justificationDeadline={
+											campaignDeadlines.decl1JustificationDeadline
+										}
+										selectedPath={field.value}
+										setSelectedPath={field.onChange}
+									/>
+								)}
+							</fieldset>
+						)}
+					/>
+				</div>
+
+				<FormActions
+					isSubmitting={mutation.isPending}
+					mimoquageNextHref={
+						initialPath ? getCompliancePathHref(initialPath) : undefined
+					}
+					nextDisabled={!selectedPath || isReadOnly}
+					nextHref={
+						isReadOnly && initialPath
+							? getCompliancePathHref(initialPath)
+							: undefined
+					}
+					nextLabel="Suivant"
+					previousHref="/declaration-remuneration/etape/6"
+				/>
+			</fieldset>
 		</form>
 	);
 }
