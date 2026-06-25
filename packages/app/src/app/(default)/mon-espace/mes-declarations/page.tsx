@@ -4,7 +4,7 @@ import { type DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { type DeclarationOpmcDTO } from "@common/core-domain/dtos/DeclarationOpmcDTO";
 import { type RepresentationEquilibreeDTO } from "@common/core-domain/dtos/RepresentationEquilibreeDTO";
 import { type NextServerPageProps } from "@common/utils/next";
-import { Box, Heading, Link } from "@design-system";
+import { Box, Heading } from "@design-system";
 import { MessageProvider } from "@design-system/client";
 import { getCompany } from "@globalActions/company";
 import { redirect } from "next/navigation";
@@ -20,15 +20,12 @@ import { RepeqList } from "./RepeqList";
 import { SelectSiren } from "./SelectSiren";
 import { SelectSirenStaff } from "./SelectSirenStaff";
 
-const proconnectManageOrganisationsUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
-
 const InfoText = () => (
   <>
     <p>
       Dans ce menu, vous avez accès à la liste des déclarations de l’index de l’égalité professionnelle et, si vous êtes
-      assujetti, de la représentation équilibrée qui ont été transmises à l’administration, en sélectionnant au
-      préalable dans la liste déroulante le numéro Siren de l'entreprise (ou de l’entreprise ayant déclaré l'index pour
-      le compte de l’unité économique et sociale) concernée si vous gérez plusieurs entreprises.
+      assujetti, de la représentation équilibrée qui ont été transmises à l’administration pour votre entreprise (ou
+      pour l’unité économique et sociale dont elle a déclaré l’index).
     </p>
     <br />
     <p>
@@ -36,13 +33,6 @@ const InfoText = () => (
       cliquant sur le Siren, vous accédez à la déclaration transmise. A la colonne « <b>OBJECTIFS ET MESURES</b> », vous
       avez accès à la déclaration des mesures de correction lorsque l’index est inférieur à 75 points et des objectifs
       de progression lorsque l’index est inférieur à 85 points.
-    </p>
-    <p>
-      <br />
-      Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
-      <Link target="_blank" href={`${proconnectManageOrganisationsUrl}`}>
-        cliquez ici
-      </Link>
     </p>
   </>
 );

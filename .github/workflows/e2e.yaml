@@ -34,23 +34,17 @@ jobs:
       - name: Set env
         run: |
           echo "SITE_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
-          echo "KEYCLOAK_URL=https://keycloak-${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
 
       - name: Override subdomain for master branch
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           echo "SITE_URL=https://egapro-preprod.ovh.fabrique.social.gouv.fr" >> $GITHUB_ENV
-          echo "KEYCLOAK_URL=https://keycloak.undercloud.fabrique.social.gouv.fr" >> $GITHUB_ENV
 
-      - name: Wait for app and Keycloak to be ready
+      - name: Wait for app to be ready
         run: |
           echo "Waiting for app at $SITE_URL ..."
           timeout 180 bash -c 'until curl -sf -o /dev/null "$SITE_URL"; do sleep 5; done'
           echo "✓ App is ready"
-
-          echo "Waiting for Keycloak realm egapro at $KEYCLOAK_URL ..."
-          timeout 180 bash -c 'until curl -sf -o /dev/null "$KEYCLOAK_URL/realms/egapro"; do sleep 5; done'
-          echo "✓ Keycloak is ready"
 
       - name: Run test e2e
         run: |
@@ -60,9 +54,6 @@ jobs:
           working-directory: ./packages/app
           config: "pageLoadTimeout=100000,baseUrl=${{ env.SITE_URL }}"
           TEST_BASEURL: ${{ env.SITE_URL }}
-          E2E_USERNAME: ${{ github.ref == 'refs/heads/master' && secrets.E2E_USERNAME || 'test@fia1.fr' }}
-          E2E_PASSWORD: ${{ github.ref == 'refs/heads/master' && secrets.E2E_PASSWORD || 'test' }}
-          KEYCLOAK_URL: ${{ env.KEYCLOAK_URL }}
 
       - name: Upload Cypress artifacts
         if: failure()

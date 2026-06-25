@@ -15,6 +15,17 @@ api:
       memory: 1G
 
 app:
+  env:
+    - name: SECURITY_MONCOMPTEPRO_CLIENT_ID
+      valueFrom:
+        secretKeyRef:
+          name: proconnect
+          key: EGAPRO_PROCONNECT_CLIENT_ID
+    - name: SECURITY_MONCOMPTEPRO_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: proconnect
+          key: EGAPRO_PROCONNECT_CLIENT_SECRET
   vars:
     MAILER_ENABLE: "True"
     MAILER_SMTP_HOST: maildev
@@ -22,9 +33,9 @@ app:
     MAILER_SMTP_SSL: "False"
     NODE_ENV: production
 #    EMAIL_LOGIN: "True"
-    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://keycloak-{{ .Values.global.namespace }}.ovh.fabrique.social.gouv.fr/realms/egapro"
-    EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL: "https://keycloak-{{ .Values.global.namespace }}.ovh.fabrique.social.gouv.fr/realms/egapro/account"
-    EGAPRO_PROCONNECT_PERSONAL_INFORMATION_URL: "https://keycloak-{{ .Values.global.namespace }}.ovh.fabrique.social.gouv.fr/realms/egapro/account"
+    EGAPRO_PROCONNECT_DISCOVERY_URL: "https://egapro-charon.ovh.fabrique.social.gouv.fr/proconnecttest"
+    EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL: "https://identite.proconnect.gouv.fr/manage-organizations"
+    EGAPRO_PROCONNECT_PERSONAL_INFORMATION_URL: "https://identite.proconnect.gouv.fr/personal-information"
     REDIS_SENTINEL_MASTER_NAME: "mymaster"
     REDIS_SENTINEL_HOSTS: |
       [
@@ -36,7 +47,7 @@ app:
     oblik.socialgouv.io/min-request-cpu: 500m
 
 keycloak:
-  enabled: true
+  enabled: false
 
 maildev: {}
 pgweb: {}
