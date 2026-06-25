@@ -33,8 +33,19 @@
 	:global(.fr-table__content),
 	:global(.fr-table__wrapper) {
 		overflow: visible;
-		padding-top: 0;
-		padding-bottom: 0;
+	}
+
+	// DSFR's --no-scroll variant sets the wrapper to fit-content and the table
+	// to width:auto, letting cell content drive column widths. Re-anchor both to
+	// 100% (specificity above the DSFR rules) so table-layout:fixed + colgroup
+	// fully control column sizing, independent of input content.
+	&:global(.fr-table.fr-table--no-scroll) :global(.fr-table__wrapper) {
+		width: 100%;
+	}
+
+	&:global(.fr-table.fr-table--no-scroll) :global(.fr-table__content) table {
+		width: 100%;
+		table-layout: fixed;
 	}
 
 	table {
@@ -44,24 +55,28 @@
 		border-collapse: collapse;
 	}
 
+	// Percentage column widths summing to exactly 100%. With table-layout:fixed
+	// on a width-anchored table, this leaves no deficit for the browser to
+	// redistribute, so columns never shift based on cell content (e.g. a long
+	// "1 000 000,00 €" threshold or a large effectif).
 	.colRowLabel {
-		width: 9rem;
+		width: 18%;
 	}
 
 	.colMin {
-		width: 8rem;
+		width: 17%;
 	}
 
 	.colMax {
-		width: 9.5rem;
+		width: 17%;
 	}
 
 	.colCount {
-		width: 7rem;
+		width: 12%;
 	}
 
 	.colPercent {
-		width: 7rem;
+		width: 12%;
 	}
 
 	th,
@@ -94,6 +109,16 @@
 	.numericCell {
 		text-align: right;
 		font-variant-numeric: tabular-nums;
+	}
+
+	// Neutralize each data cell's intrinsic content width so it can never nudge
+	// the fixed-layout column (long amounts use a non-breaking thousands
+	// separator; counts can reach 6 digits). Content fits within its column, so
+	// nothing is actually clipped — column widths stay strictly content-independent.
+	.minCell,
+	.maxCell,
+	.numericCell {
+		max-width: 0;
 	}
 
 	tbody td input:global(.fr-input) {
@@ -165,6 +190,9 @@
 		.maxCell,
 		.numericCell {
 			text-align: left;
+			// On mobile the table is block-displayed; cells are full width, so the
+			// desktop fixed-layout neutralizer must not collapse them.
+			max-width: none;
 		}
 
 		tbody td input:global(.fr-input) {
