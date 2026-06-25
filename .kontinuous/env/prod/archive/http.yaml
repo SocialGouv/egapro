@@ -204,7 +204,7 @@ spec:
   routes:
   - kind: Rule
     match: Host(`egapro.travail.gouv.fr`) && (Path(`/index-egalite-fh.xlsx`) || Path(`/dgt-export-representation.xlsx`))
-    priority: 100
+    priority: 1000000
     services:
     - name: files
       port: 80
@@ -222,7 +222,7 @@ spec:
   routes:
   - kind: Rule
     match: Host(`egapro.travail.gouv.fr`) && (Path(`/dgt.xlsx`) || Path(`/dgt-representation.xlsx`) || Path(`/full.ndjson`) || Path(`/indexes.csv`))
-    priority: 100
+    priority: 1000000
     services:
     - name: files
       port: 80
