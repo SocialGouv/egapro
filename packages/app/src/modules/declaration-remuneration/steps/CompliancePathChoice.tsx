@@ -24,7 +24,11 @@ import {
 	getCompliancePathHref,
 	SecondRoundOptions,
 } from "./compliancePath/CompliancePathOptions";
-import type { CompliancePathValue } from "./compliancePath/constants";
+import { CompliancePathReadOnlyAlert } from "./compliancePath/CompliancePathReadOnlyAlert";
+import type {
+	CompliancePathReadOnlyReason,
+	CompliancePathValue,
+} from "./compliancePath/constants";
 import { DeclarationSuccessBanner } from "./compliancePath/DeclarationSuccessBanner";
 
 type Props = {
@@ -36,6 +40,7 @@ type Props = {
 	initialPath?: CompliancePathValue;
 	isSecondRound?: boolean;
 	pdfDownloadHref?: string;
+	readOnlyReason?: CompliancePathReadOnlyReason;
 };
 
 export function CompliancePathChoice({
@@ -47,9 +52,11 @@ export function CompliancePathChoice({
 	initialPath,
 	isSecondRound = false,
 	pdfDownloadHref,
+	readOnlyReason,
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
+	const isReadOnly = readOnlyReason !== undefined;
 
 	const dbValues = useMemo(() => ({ path: initialPath }), [initialPath]);
 
@@ -79,7 +86,7 @@ export function CompliancePathChoice({
 		}
 	});
 
-	useDraftAutoSave(form, draftHydrated, (values) =>
+	useDraftAutoSave(form, draftHydrated && !isReadOnly, (values) =>
 		setField(values as { path: CompliancePathValue | undefined }),
 	);
 
@@ -105,7 +112,7 @@ export function CompliancePathChoice({
 	if (!draftHydrated) return <DraftLoadingState />;
 
 	const onSubmit = form.handleSubmit((data) => {
-		if (!data.path) return;
+		if (isReadOnly || !data.path) return;
 		mutation.mutate({ path: data.path });
 	});
 
@@ -137,6 +144,10 @@ export function CompliancePathChoice({
 				pdfDownloadHref={pdfDownloadHref}
 				year={currentYear}
 			/>
+
+			{readOnlyReason ? (
+				<CompliancePathReadOnlyAlert reason={readOnlyReason} />
+			) : null}
 
 			<div className={common.flexColumnGap1}>
 				<p className={`fr-mb-0 ${styles.instructions}`}>
@@ -189,7 +200,7 @@ export function CompliancePathChoice({
 
 							{isSecondRound ? (
 								<SecondRoundOptions
-									disabled={isImpersonating}
+									disabled={isImpersonating || isReadOnly}
 									jointEvaluationDeadline={
 										campaignDeadlines.decl2JointEvaluationDeadline
 									}
@@ -204,7 +215,7 @@ export function CompliancePathChoice({
 									correctiveActionDeadline={
 										campaignDeadlines.decl2ModificationDeadline
 									}
-									disabled={isImpersonating}
+									disabled={isImpersonating || isReadOnly}
 									jointEvaluationDeadline={
 										campaignDeadlines.decl1JointEvaluationDeadline
 									}
@@ -225,7 +236,12 @@ export function CompliancePathChoice({
 				mimoquageNextHref={
 					initialPath ? getCompliancePathHref(initialPath) : undefined
 				}
-				nextDisabled={!selectedPath}
+				nextDisabled={!selectedPath || isReadOnly}
+				nextHref={
+					isReadOnly && initialPath
+						? getCompliancePathHref(initialPath)
+						: undefined
+				}
 				nextLabel="Suivant"
 				previousHref="/declaration-remuneration/etape/6"
 			/>
