@@ -33,6 +33,8 @@
 	:global(.fr-table__content),
 	:global(.fr-table__wrapper) {
 		overflow: visible;
+		padding-top: 0;
+		padding-bottom: 0;
 	}
 
 	table {
@@ -47,11 +49,11 @@
 	}
 
 	.colMin {
-		width: 7rem;
+		width: 8rem;
 	}
 
 	.colMax {
-		width: 7.5rem;
+		width: 9.5rem;
 	}
 
 	.colCount {
@@ -96,16 +98,14 @@
 
 	tbody td input:global(.fr-input) {
 		text-align: right;
-		width: 4.5rem;
-		margin-left: auto;
+		width: 100%;
 		padding-left: 8px;
 		padding-right: 8px;
 	}
 
 	tbody td .inputWithUnit input:global(.fr-input) {
-		width: 5.5rem;
-		min-width: 5.5rem;
-		max-width: 5.5rem;
+		flex: 1;
+		min-width: 0;
 		margin-left: 0;
 		padding-left: 0.25rem;
 		padding-right: 0.25rem;
@@ -207,6 +207,10 @@
 		margin-left: 0.25rem;
 		vertical-align: middle;
 	}
+}
+
+.introMedium {
+	font-weight: 500;
 }
 
 .readonlyCell {

@@ -295,12 +295,18 @@ export function Step4QuartileDistribution({
 					rassemble les salariés les mieux rémunérés.
 				</p>
 
-				<p className="fr-mb-0">
-					<strong>
-						Vérifiez les informations préremplies et modifiez-les si nécessaire
-						avant de valider vos indicateurs.
-					</strong>
-				</p>
+				{gipPrefillData ? (
+					<p className="fr-mb-0">
+						<strong>
+							Vérifiez les informations préremplies et modifiez-les si
+							nécessaire avant de valider vos indicateurs.
+						</strong>
+					</p>
+				) : (
+					<p className={`fr-mb-0 ${stepStyles.introMedium}`}>
+						Renseignez les informations avant de valider vos indicateurs.
+					</p>
+				)}
 
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 			</div>
@@ -336,7 +342,9 @@ export function Step4QuartileDistribution({
 					}
 					quartiles={annual}
 					sourceNote={
-						<PrefillSource periodEnd={gipPrefillData?.periodEnd ?? null} />
+						gipPrefillData ? (
+							<PrefillSource periodEnd={gipPrefillData.periodEnd ?? null} />
+						) : undefined
 					}
 					tableType="annual"
 					title="Rémunération annuelle brute moyenne"
@@ -351,7 +359,9 @@ export function Step4QuartileDistribution({
 					}
 					quartiles={hourly}
 					sourceNote={
-						<PrefillSource periodEnd={gipPrefillData?.periodEnd ?? null} />
+						gipPrefillData ? (
+							<PrefillSource periodEnd={gipPrefillData.periodEnd ?? null} />
+						) : undefined
 					}
 					tableType="hourly"
 					title="Rémunération horaire brute moyenne"

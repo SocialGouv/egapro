@@ -195,4 +195,48 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 		const menTotalCells = totalCells.filter((cell) => cell.textContent === "0");
 		expect(menTotalCells.length).toBeGreaterThanOrEqual(1);
 	});
+
+	it("renders the prefilled intro text and DSN source line on both tables", () => {
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				gipPrefillData={{
+					step1: { totalWomen: 100, totalMen: 100 },
+					step2: nullStep2,
+					step3: nullStep3,
+					step4: {
+						annual: {
+							thresholds: ["25000", "32000", "40000"],
+							womenCounts: [30, 25, 20, 15],
+							menCounts: [20, 25, 30, 35],
+						},
+						hourly: {
+							thresholds: ["13.74", "17.58", "21.98"],
+							womenCounts: [28, 22, 18, 12],
+							menCounts: [22, 28, 32, 38],
+						},
+					},
+					confidenceIndex: "0.85",
+					periodEnd: "2026-12-31",
+				}}
+				initialData={emptyStep4Data()}
+			/>,
+		);
+		expect(
+			screen.getByText(
+				"Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs.",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				"Renseignez les informations avant de valider vos indicateurs.",
+			),
+		).not.toBeInTheDocument();
+		expect(
+			screen.getAllByText(
+				/Source\s*:\s*DSN \(Déclarations Sociales Nominatives\)/,
+			).length,
+		).toBe(2);
+	});
 });
