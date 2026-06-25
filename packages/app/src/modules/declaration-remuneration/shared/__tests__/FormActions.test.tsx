@@ -3,7 +3,12 @@ import { useSession } from "next-auth/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { FormActions } from "../FormActions";
-import { LockProvider } from "../lock/LockContext";
+import { LockProvider, useLockContext } from "../lock/LockContext";
+
+vi.mock("../lock/LockContext", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("../lock/LockContext")>();
+	return { ...actual, useLockContext: vi.fn(actual.useLockContext) };
+});
 
 const mockedUseSession = vi.mocked(useSession);
 
@@ -132,6 +137,18 @@ describe("FormActions", () => {
 			expect(
 				screen.getByRole("button", { name: /suivant/i }),
 			).not.toBeDisabled();
+		});
+
+		it("disables the submit button while the lock is still being acquired", () => {
+			vi.mocked(useLockContext).mockReturnValueOnce({
+				isReadOnly: false,
+				holder: null,
+				isLoading: true,
+			});
+
+			render(<FormActions />);
+
+			expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
 		});
 
 		it("renders a Link instead of the submit button when locked with mimoquageNextHref", () => {

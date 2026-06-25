@@ -33,7 +33,7 @@ export function FormActions({
 	mimoquageNextHref,
 }: FormActionsProps) {
 	const { isReadOnly, buttonProps, tooltip } = useReadOnlyGuard();
-	const { isReadOnly: isLocked } = useLockContext();
+	const { isReadOnly: isLocked, isLoading: isLockLoading } = useLockContext();
 
 	return (
 		<div className={`${styles.actions} ${className ?? ""}`}>
@@ -70,7 +70,13 @@ export function FormActions({
 					<button
 						{...buttonProps}
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={isReadOnly || isLocked || isSubmitting || nextDisabled}
+						disabled={
+							isReadOnly ||
+							isLocked ||
+							isLockLoading ||
+							isSubmitting ||
+							nextDisabled
+						}
 						type="submit"
 					>
 						{isSubmitting ? "Enregistrement…" : nextLabel}

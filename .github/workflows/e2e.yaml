@@ -14,6 +14,7 @@ jobs:
   e2e:
     name: "Test e2e"
     runs-on: ubuntu-22.04
+    timeout-minutes: 20
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5438/egapro
       AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
