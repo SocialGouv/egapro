@@ -12,6 +12,7 @@ import { api } from "~/trpc/react";
 import { DECLARATION_PROCESS_PANEL_ID } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 import { createMissingInfoSchema } from "./schemas";
+import { useUpdateHasCse } from "./useUpdateHasCse";
 
 export const MISSING_INFO_PANEL_ID = "missing-info-modal";
 const PANEL_TITLE_ID = "missing-info-modal-title";
@@ -54,7 +55,7 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 	const cseError = form.formState.errors.hasCse?.message ?? null;
 
 	const updatePhoneMutation = api.profile.updatePhone.useMutation();
-	const updateHasCseMutation = api.company.updateHasCse.useMutation();
+	const updateHasCseMutation = useUpdateHasCse();
 
 	const closeModal = useCallback(() => {
 		const dialog = dialogRef.current;

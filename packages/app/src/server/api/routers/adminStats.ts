@@ -14,12 +14,14 @@ import type {
 	CampaignStats,
 	CategoryModelUsage,
 	CompletionFunnelOutput,
+	CseStatusConfirmations,
 	DeviceBreakdown,
 	FunnelRow,
 	HelpLinkClicks,
 	MatomoFunnelOutput,
 	StepDropoffRow,
 	StepDurationRow,
+	UsersPerCompany,
 } from "~/modules/admin/stats/types";
 import {
 	COMPANY_SIZE_ANNUAL_MIN,
@@ -44,9 +46,11 @@ import {
 	declarationStatusHistory,
 	declarations,
 	gipMdsData,
+	userCompanies,
 } from "~/server/db/schema";
 import {
 	fetchMatomoCategoryModel,
+	fetchMatomoCseStatusConfirmations,
 	fetchMatomoDeviceBreakdown,
 	fetchMatomoFunnel,
 	fetchMatomoHelpLinks,
@@ -1044,6 +1048,53 @@ export const adminStatsRouter = createTRPCRouter({
 				sizeRange: input.sizeRange,
 			});
 		}),
+
+	// CSE-status confirmation volume (oui/non), read anonymously from Matomo —
+	// no SIREN is ever pushed, so this is a confirmation-action count, not a
+	// distinct-company count. `sizeRange` is ignored (the event carries only the
+	// campaign-year dimension).
+	getMatomoCseStatusConfirmations: adminProcedure
+		.input(getMatomoFunnelSchema)
+		.query(({ input }): Promise<CseStatusConfirmations> => {
+			return fetchMatomoCseStatusConfirmations({ year: input.year });
+		}),
+
+	// Distinct users per company, read from the existing `user_company` table.
+	// Aggregate output only (no SIREN / email). This structural "stock" metric
+	// cannot be produced by anonymised Matomo, hence the direct DB read.
+	getUsersPerCompany: adminProcedure.query(
+		async ({ ctx }): Promise<UsersPerCompany> => {
+			const rows = await ctx.db.execute<{
+				total_companies: number | string;
+				mono: number | string;
+				multi: number | string;
+				avg_per_company: number | string;
+				max_users: number | string;
+			}>(sql`
+				WITH per_company AS (
+					SELECT ${userCompanies.siren} AS siren,
+						COUNT(DISTINCT ${userCompanies.userId}) AS c
+					FROM ${userCompanies}
+					GROUP BY ${userCompanies.siren}
+				)
+				SELECT
+					COUNT(*)::int AS total_companies,
+					COUNT(*) FILTER (WHERE c = 1)::int AS mono,
+					COUNT(*) FILTER (WHERE c > 1)::int AS multi,
+					COALESCE(AVG(c), 0)::float AS avg_per_company,
+					COALESCE(MAX(c), 0)::int AS max_users
+				FROM per_company
+			`);
+			const row = rows[0];
+			return {
+				totalCompanies: Number(row?.total_companies ?? 0),
+				mono: Number(row?.mono ?? 0),
+				multi: Number(row?.multi ?? 0),
+				avgPerCompany: Number(row?.avg_per_company ?? 0),
+				maxUsers: Number(row?.max_users ?? 0),
+			};
+		},
+	),
 });
 function countDeclarationsWithEvent(opts: {
 	eventType: string | readonly string[];

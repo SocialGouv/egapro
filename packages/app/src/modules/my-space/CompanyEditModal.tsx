@@ -7,10 +7,10 @@ import { Controller } from "react-hook-form";
 import { getCurrentYear } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
-import { api } from "~/trpc/react";
 import styles from "./CompanyEditModal.module.scss";
 import { formatSiren } from "./formatSiren";
 import { updateHasCseSchema } from "./schemas";
+import { useUpdateHasCse } from "./useUpdateHasCse";
 
 export const MODAL_ID = "company-edit-modal";
 const MODAL_TITLE_ID = "company-edit-modal-title";
@@ -45,7 +45,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 		if (dialog) getDsfrModal(dialog)?.conceal();
 	}, []);
 
-	const updateHasCseMutation = api.company.updateHasCse.useMutation({
+	const updateHasCseMutation = useUpdateHasCse({
 		onSuccess: () => {
 			closeModal();
 			router.refresh();

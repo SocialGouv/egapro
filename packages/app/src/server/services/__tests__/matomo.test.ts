@@ -13,6 +13,7 @@ vi.mock("~/env", () => ({ env: mockEnv }));
 
 import {
 	fetchMatomoCategoryModel,
+	fetchMatomoCseStatusConfirmations,
 	fetchMatomoDeviceBreakdown,
 	fetchMatomoFunnel,
 	fetchMatomoHelpLinks,
@@ -537,5 +538,66 @@ describe("fetchMatomoDeviceBreakdown", () => {
 		for (const row of rows) {
 			expect(row).toMatchObject({ desktop: 0, smartphone: 0, tablet: 0 });
 		}
+	});
+});
+
+// The confirmation volume comes from the event NAME report scoped by an
+// `eventCategory==cse_status;eventAction==cse_status_confirm` segment. The
+// segment is visit-scoped, so a co-occurring event name leaks into the rows and
+// must be dropped by the oui/non allow-list.
+function cseStatusApiResponder(init: { body: URLSearchParams }): Row[] {
+	if (init.body.get("method") !== "Events.getName") return [];
+	const segment = init.body.get("segment") ?? "";
+	if (!segment.includes("eventAction==cse_status_confirm")) return [];
+	return [
+		{ label: "oui", nb_events: 42 },
+		{ label: "non", nb_events: 13 },
+		// Leaked from a co-occurring event in the same visit — not oui/non, so
+		// it must be ignored (and never inflate `total`).
+		{ label: "step_1", nb_events: 999 },
+	];
+}
+
+describe("fetchMatomoCseStatusConfirmations", () => {
+	beforeEach(() => setMatomoEnv());
+	afterEach(() => vi.restoreAllMocks());
+
+	it("splits oui/non and drops leaked labels via the allow-list", async () => {
+		stubFetch(cseStatusApiResponder);
+
+		const result = await fetchMatomoCseStatusConfirmations({ year: 2024 });
+
+		expect(result).toEqual({ total: 55, yes: 42, no: 13 });
+	});
+
+	it("scopes the read by the cse_status / cse_status_confirm event segment", async () => {
+		const fetchSpy = stubFetch(cseStatusApiResponder);
+
+		await fetchMatomoCseStatusConfirmations({ year: 2024 });
+
+		expect(fetchSpy).toHaveBeenCalledTimes(1);
+		const segment = (fetchSpy.mock.calls[0]?.[1].body as URLSearchParams).get(
+			"segment",
+		);
+		expect(segment).toContain("eventCategory==cse_status");
+		expect(segment).toContain("eventAction==cse_status_confirm");
+	});
+
+	it("returns all-zero without a token (no fetch)", async () => {
+		mockEnv.MATOMO_API_TOKEN = undefined;
+		const fetchSpy = stubFetch(cseStatusApiResponder);
+
+		const result = await fetchMatomoCseStatusConfirmations({ year: 2024 });
+
+		expect(fetchSpy).not.toHaveBeenCalled();
+		expect(result).toEqual({ total: 0, yes: 0, no: 0 });
+	});
+
+	it("returns all-zero when Matomo reports no confirmation names", async () => {
+		stubFetch(() => []);
+
+		const result = await fetchMatomoCseStatusConfirmations({ year: 2024 });
+
+		expect(result).toEqual({ total: 0, yes: 0, no: 0 });
 	});
 });
