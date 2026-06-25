@@ -35,14 +35,11 @@ export function useDeclarationLock({
 
 	const acquire = api.declarationLock.acquireLock.useMutation();
 	const heartbeat = api.declarationLock.heartbeat.useMutation();
-	const release = api.declarationLock.releaseLock.useMutation();
 
 	const acquireRef = useRef(acquire.mutateAsync);
 	const heartbeatRef = useRef(heartbeat.mutateAsync);
-	const releaseRef = useRef(release.mutate);
 	acquireRef.current = acquire.mutateAsync;
 	heartbeatRef.current = heartbeat.mutateAsync;
-	releaseRef.current = release.mutate;
 
 	// Tracks whether *this* tab currently holds the editor lock, read by the
 	// pagehide beacon and the unmount cleanup without re-running the effect.
@@ -126,10 +123,12 @@ export function useDeclarationLock({
 			stopHeartbeat();
 			window.removeEventListener("pagehide", handleHide);
 			document.removeEventListener("visibilitychange", handleVisibilityChange);
-			if (isHolderRef.current) {
-				isHolderRef.current = false;
-				releaseRef.current({ declarationId });
-			}
+			// Intentionally NOT releasing on unmount: step-to-step navigation
+			// unmounts then remounts this hook, and a release racing the next step's
+			// acquire would delete the freshly-taken lock (CONFLICT on the next
+			// write). Release is handled by the pagehide/visibilitychange beacon
+			// (tab close), logout, the inactivity timeout, and admin override.
+			isHolderRef.current = false;
 		};
 	}, [declarationId, isEnabled, session.status]);
 

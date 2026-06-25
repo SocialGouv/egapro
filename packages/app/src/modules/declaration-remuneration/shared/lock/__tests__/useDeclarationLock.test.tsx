@@ -178,15 +178,15 @@ describe("useDeclarationLock", () => {
 		expect(heartbeatMutateAsync.mock.calls.length).toBe(heartbeatsAfterLoss);
 	});
 
-	it("releases the lock on unmount when it is the holder", async () => {
+	it("does not release the lock on unmount, even as the holder (step navigation must not churn the lock)", async () => {
 		acquireMutateAsync.mockResolvedValue({ acquired: true, holder: HOLDER });
 		const { unmount } = renderLockHook();
 		await flush();
 
+		// Releasing on unmount would race the next step's acquire and delete the
+		// freshly-taken lock. Release is owned by the beacon / logout / timeout.
 		unmount();
-		expect(releaseMutate).toHaveBeenCalledWith({
-			declarationId: DECLARATION_ID,
-		});
+		expect(releaseMutate).not.toHaveBeenCalled();
 	});
 
 	it("does not release on unmount when it is not the holder", async () => {
