@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
@@ -219,7 +225,7 @@ describe("CompliancePathChoice", () => {
 		expect(mockPush).not.toHaveBeenCalled();
 	});
 
-	it("navigates to the CSE opinion funnel when justify is selected", async () => {
+	it("submits justify and navigates to the CSE opinion page", async () => {
 		render(
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
@@ -481,5 +487,69 @@ describe("CompliancePathChoice", () => {
 			expect(container.querySelector("fieldset")).toBeDisabled();
 			expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
 		});
+	});
+});
+
+describe("CompliancePathChoice read-only mode", () => {
+	it("renders the read-only alert and disables the radios", () => {
+		render(
+			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
+				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
+				email="test@example.fr"
+				initialPath="justify"
+				readOnlyReason="cse_opinion_submitted"
+			/>,
+		);
+		expect(
+			screen.getByText(/L'avis du CSE a déjà été transmis/),
+		).toBeInTheDocument();
+		expect(
+			screen.getByLabelText("Justifier les écarts de rémunération ≥ 5 %"),
+		).toBeDisabled();
+	});
+
+	it("renders Suivant as a navigation link instead of a submit button", () => {
+		render(
+			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
+				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
+				email="test@example.fr"
+				initialPath="justify"
+				readOnlyReason="cse_opinion_submitted"
+			/>,
+		);
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			"/avis-cse",
+		);
+		expect(
+			screen.queryByRole("button", { name: /suivant/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("does not call the save mutation when the read-only form is submitted", async () => {
+		render(
+			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
+				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
+				email="test@example.fr"
+				initialPath="justify"
+				readOnlyReason="cse_opinion_submitted"
+			/>,
+		);
+		const form = screen
+			.getByRole("link", { name: /suivant/i })
+			.closest("form") as HTMLFormElement;
+		await act(async () => {
+			fireEvent.submit(form);
+		});
+		expect(mockMutate).not.toHaveBeenCalled();
 	});
 });

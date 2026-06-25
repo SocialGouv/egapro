@@ -9,6 +9,8 @@ const matomoFunnelUseQueryMock = vi.fn();
 const matomoCategoryModelUseQueryMock = vi.fn();
 const matomoHelpLinksUseQueryMock = vi.fn();
 const matomoDeviceUseQueryMock = vi.fn();
+const cseStatusConfirmationsUseQueryMock = vi.fn();
+const usersPerCompanyUseQueryMock = vi.fn();
 const statsUseQueryMock = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
@@ -41,6 +43,13 @@ vi.mock("~/trpc/react", () => ({
 			},
 			getMatomoDeviceBreakdown: {
 				useQuery: (...args: unknown[]) => matomoDeviceUseQueryMock(...args),
+			},
+			getMatomoCseStatusConfirmations: {
+				useQuery: (...args: unknown[]) =>
+					cseStatusConfirmationsUseQueryMock(...args),
+			},
+			getUsersPerCompany: {
+				useQuery: (...args: unknown[]) => usersPerCompanyUseQueryMock(...args),
 			},
 		},
 	},
@@ -91,6 +100,8 @@ const defaultMocks = () =>
 		matomoCategoryModelUseQueryMock,
 		matomoHelpLinksUseQueryMock,
 		matomoDeviceUseQueryMock,
+		cseStatusConfirmationsUseQueryMock,
+		usersPerCompanyUseQueryMock,
 	});
 
 describe("StatsDashboard — structure and filters", () => {

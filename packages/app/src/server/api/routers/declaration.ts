@@ -245,6 +245,7 @@ export const declarationRouter = createTRPCRouter({
 		const declarationId = result.declaration.id;
 		let hasSubmittedSecondDeclaration = false;
 		let hasSubmittedCseOpinion = false;
+		let hasSubmittedJointEvaluation = false;
 		if (declarationId !== "") {
 			const eventRows = await ctx.db
 				.select({ eventType: declarationStatusHistory.eventType })
@@ -256,6 +257,8 @@ export const declarationRouter = createTRPCRouter({
 						hasSubmittedSecondDeclaration = true;
 					} else if (row.eventType === "cse_opinion_submit") {
 						hasSubmittedCseOpinion = true;
+					} else if (row.eventType === "joint_evaluation_submit") {
+						hasSubmittedJointEvaluation = true;
 					}
 				}
 			}
@@ -267,6 +270,7 @@ export const declarationRouter = createTRPCRouter({
 			previousYearCategories,
 			hasSubmittedSecondDeclaration,
 			hasSubmittedCseOpinion,
+			hasSubmittedJointEvaluation,
 		};
 	}),
 

@@ -23,6 +23,8 @@ type QueryMocks = {
 	matomoCategoryModelUseQueryMock?: Mock;
 	matomoHelpLinksUseQueryMock?: Mock;
 	matomoDeviceUseQueryMock?: Mock;
+	cseStatusConfirmationsUseQueryMock?: Mock;
+	usersPerCompanyUseQueryMock?: Mock;
 };
 
 export function setDefaultMocks(mocks: QueryMocks) {
@@ -68,6 +70,22 @@ export function setDefaultMocks(mocks: QueryMocks) {
 	});
 	mocks.matomoDeviceUseQueryMock?.mockReturnValue({
 		data: undefined,
+		isLoading: false,
+		isError: false,
+	});
+	mocks.cseStatusConfirmationsUseQueryMock?.mockReturnValue({
+		data: { total: 0, yes: 0, no: 0 },
+		isLoading: false,
+		isError: false,
+	});
+	mocks.usersPerCompanyUseQueryMock?.mockReturnValue({
+		data: {
+			totalCompanies: 0,
+			mono: 0,
+			multi: 0,
+			avgPerCompany: 0,
+			maxUsers: 0,
+		},
 		isLoading: false,
 		isError: false,
 	});

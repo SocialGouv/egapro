@@ -17,6 +17,10 @@ export function formatCount(value: number): string {
 	return value.toLocaleString("fr-FR");
 }
 
+export function formatDecimal(value: number): string {
+	return value.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+}
+
 export function formatDays(
 	value: number | null,
 	{ withUnit = false }: WithUnitOption = {},
