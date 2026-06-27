@@ -1,0 +1,193 @@
+## egapro_analyse_agents — la pipeline /analyse d'egapro MISE À PLAT au niveau AGENT.
+## Objectif : voir l'ENCHAÎNEMENT des agents que le skill /analyse lance — PAS ré-invoquer
+## le skill en boîte noire. Chaque nœud = un AGENT RÉEL du repo (.claude/agents/*) ou une
+## étape déterministe, dans l'ordre exact du skill. Source : egapro/.claude/skills/analyse/SKILL.md
+## + les AGENT.md de product-owner / architect / bug-analyst.
+##
+## Le skill /analyse = PHASE CONCEPTION. Il auto-détecte un mode (epic / task / bug) selon
+## l'issueType (ou le prompt) puis chaîne les bons agents Opus. Règle absolue du skill :
+## aucun agent conception ne bouge un ticket sur le board — les transitions sont le job de
+## /implement (cf. egapro_implement_agents.bot).
+##
+## Limite iterion (assumée, annotée), identique au template leviathan_agents.bot :
+##   · les 3 modes sont MUTUELLEMENT EXCLUSIFS → router `mode: llm` (détection ≃ Step 0 du skill).
+##   · les gates de validation utilisateur sont GÉRÉS EN INTERNE par chaque agent (le skill ne
+##     ré-interroge pas entre étapes) ; on les matérialise quand même en nœuds `human` car ce
+##     sont de vrais points de pause qui gatent la suite (l'agent attend le commentaire
+##     `[Validation utilisateur] …` avant de rendre la main). Refus → pipeline stoppée (fail).
+##   · le sizing t-shirt (set_ticket_size.sh, XS→XL + points Fibonacci) et les sous-stratégies
+##     internes (3 repro du bug-analyst, escalade task→epic de l'architect) sont des capacités
+##     INTERNES aux agents → annotées en commentaire, pas éclatées en nœuds.
+##
+## Légende couleur (rendu iterion) : 🤖 agent · ⚖️ judge (verdict) · 🔀 router (détection mode) ·
+##   👤 gate humain (validation utilisateur) · 🔧 tool (étape déterministe).
+## Détail par nœud = commentaire au-dessus (sous-agent réel + mode + capacités internes + réf SKILL).
+
+vars:
+  egapro_dir: string = "."
+  repo: string = "SocialGouv/egapro"
+  issue: string = ""
+
+## ─── Schemas (minimaux : juste de quoi gater les arêtes `when`) ───
+schema issue_json:
+  result: string
+schema gate_out:
+  approved: bool
+schema status_out:
+  result: string
+
+## ─── Prompts ───
+prompt detect_mode_system:
+  Tu es le routeur de /analyse (Step 0 du SKILL). À partir du JSON de l'issue (issueType,
+  title, labels, body) et/ou du prompt, choisis EXACTEMENT un mode :
+   · product_owner  → issueType=Feature, ou « nouvelle feature / parcours / ajouter une page ».
+   · architect_task → issueType=Task, ou « refactor / migrer / ajouter un champ » sans contexte feature.
+   · bug_analyst    → issueType=Bug, ou « bug / cassé / ne marche pas / écart figma / régression ».
+  Doute / type absent → choisis le mode le plus probable mais signale l'ambiguïté (le skill
+  demanderait alors confirmation à l'utilisateur — non tracé ici).
+prompt po_gate_instructions:
+  Step 1 — le PRODUCT-OWNER (Opus) a rédigé le besoin (`## Besoin métier`) + l'analyse PO
+  (`## Analyse PO`) + les scénarios, et attend ta validation. Valider = lancer l'architecte.
+  Marqueur attendu côté agent : `[Validation utilisateur] Epic validé — prêt pour phase architect`
+  (ou `Epic enrichi …`). Refuser = stopper la pipeline (reformuler).
+prompt arch_epic_gate_instructions:
+  Step 2 — l'ARCHITECTE (Opus, epic-create/epic-enrich) a lu le code + l'URL Figma et proposé
+  un découpage en N sous-issues (DAG `## Depends on`). Valider = il crée/amende les sub-issues
+  et les size (XS→XL). Marqueur : `[Validation utilisateur] Architecture validée — N tickets créés,
+  prêt pour /implement`. Refuser = stop.
+prompt arch_task_gate_instructions:
+  L'ARCHITECTE mode task (Opus) a posté `## Analyse architecte` (le body reste intact) et appliqué
+  le label `complexe` si > 5 fichiers / multi-modules. Marqueur :
+  `[Validation utilisateur] Analyse validée — prêt pour /implement`. Refuser = stop.
+prompt bug_gate_instructions:
+  Le BUG-ANALYST (Opus) a reproduit le bug (stratégie local / env-k8s / figma-diff), identifié
+  la root cause + les fichiers, et posté `## Analyse du bug` (body intact). Marqueur :
+  `[Validation utilisateur] Analyse validée — prêt pour /implement`. Refuser = stop.
+
+## ═══════════════════════════════════════════════════════════════════
+## STEP 0 — détection du mode (epic / task / bug)
+## ═══════════════════════════════════════════════════════════════════
+## Récupère le contexte de l'issue (type + labels + body + commentaires). Cas B/C du skill
+## (description libre / aucun argument) = même nœud, l'arg est vide → le router tranche au prompt.
+tool fetch_issue:
+  command: `cd {{vars.egapro_dir}} && gh issue view {{vars.issue}} --repo {{vars.repo}} --json number,title,body,issueType,labels,state --jq '{number, title, issueType: .issueType.name, labels:[.labels[].name], state}' 2>/dev/null || echo "(pas d'issue — description libre, le router infère le mode)"`
+  output: issue_json
+
+## Step 0 du SKILL — branche selon issueType.name (ou mots-clés du prompt). 3 cibles exclusives.
+router detect_mode:
+  mode: llm
+  model: "anthropic/claude-sonnet-4-6"
+  system: detect_mode_system
+
+## ═══════════════════════════════════════════════════════════════════
+## MODE epic   (SKILL §"Mode epic — workflow", Step 1 + Step 2)
+## ═══════════════════════════════════════════════════════════════════
+## Step 1 — agent `product-owner` (Opus). Sous-modes INTERNES : create (epic from scratch) /
+##  enrich (amende un epic existant, commentaires `(révisé YYYY-MM-DD)`, jamais d'effacement).
+##  Gère son propre Q&A (3-5 questions scope) ; écrit `## Besoin métier` + `## Analyse PO` +
+##  scénarios ; obtient validation puis poste l'issue Feature. Read-only côté code.
+agent product_owner:
+  backend: "claude_code"
+  output: status_out
+
+## gate utilisateur géré par le PO lui-même (matérialisé ici).
+human po_gate:
+  output: gate_out
+  instructions: po_gate_instructions
+  interaction: human
+
+## Step 2 — agent `architect` (Opus) modes INTERNES epic-create / epic-enrich. Lit body +
+##  `## Besoin métier` + `## Analyse PO` + Figma → cartographie modules/fichiers → DAG de
+##  sous-issues (`## Depends on`) → validation → crée/amende les sub-issues → size chaque
+##  feuille (set_ticket_size.sh, XS→XL + points). Read-only côté code.
+agent architect_epic:
+  backend: "claude_code"
+  output: status_out
+
+human arch_epic_gate:
+  output: gate_out
+  instructions: arch_epic_gate_instructions
+  interaction: human
+
+## ═══════════════════════════════════════════════════════════════════
+## MODE task   (SKILL §"Mode task — workflow")
+## ═══════════════════════════════════════════════════════════════════
+## agent `architect` mode INTERNE task (Opus). Lit body (intact) + commentaires ; Q&A si flou
+##  (fichiers / comportement / scénario observable / réf Figma — pas d'invention) ; spec inline
+##  format `rules/ticket-spec-format.md` ; ESCALADE possible en epic si > 8 critères / > 5
+##  fichiers / multi-modules (→ convertit en Feature + re-/analyse) ; valide ; poste un seul
+##  commentaire `## Analyse architecte` (body intact) + label `complexe` si > 5 fichiers ; size.
+agent architect_task:
+  backend: "claude_code"
+  output: status_out
+
+human arch_task_gate:
+  output: gate_out
+  instructions: arch_task_gate_instructions
+  interaction: human
+
+## ═══════════════════════════════════════════════════════════════════
+## MODE bug   (SKILL §"Mode bug — workflow")
+## ═══════════════════════════════════════════════════════════════════
+## agent `bug-analyst` (Opus). Q&A si flou (env / repro / attendu vs observé) ; choisit UNE
+##  des 3 sous-stratégies de repro (INTERNES, annotées) : REPRO_LOCAL (worktree alpha + dev
+##  server + Playwright) · REPRO_ENV (kubectl + Playwright sur la review app) · REPRO_VISUAL
+##  (figma-dev MCP + diff structurel) ; root cause + fichiers ; valide ; poste `## Analyse du
+##  bug` (body intact) + `## Complexité` ; size. Read-only côté code.
+agent bug_analyst:
+  backend: "claude_code"
+  output: status_out
+
+human bug_gate:
+  output: gate_out
+  instructions: bug_gate_instructions
+  interaction: human
+
+## ═══════════════════════════════════════════════════════════════════
+## STEP final — Report   (SKILL §"Step final — Report")
+## ═══════════════════════════════════════════════════════════════════
+## Convergence des 3 modes (un seul s'exécute → best_effort). Le ticket reste dans son statut
+## board courant (Backlog/To Do) : aucune transition (c'est /implement qui bouge à In progress).
+tool report:
+  command: `echo "## Analyse: DONE — Next: /implement <issue>"`
+  output: status_out
+  await: best_effort
+
+## ═══════════════════════════════════════════════════════════════════
+## WORKFLOW — l'enchaînement
+## ═══════════════════════════════════════════════════════════════════
+workflow egapro_analyse_agents:
+  entry: fetch_issue
+
+  budget:
+    max_parallel_branches: 3
+    max_duration: "4h"
+    max_cost_usd: 60
+    max_tokens: 3000000
+    max_iterations: 20
+
+  ## Step 0 — détection
+  fetch_issue -> detect_mode
+  detect_mode -> product_owner
+  detect_mode -> architect_task
+  detect_mode -> bug_analyst
+
+  ## epic : PO → (gate) → architect → (gate) → report
+  product_owner -> po_gate
+  po_gate -> architect_epic when approved
+  po_gate -> fail when not approved
+  architect_epic -> arch_epic_gate
+  arch_epic_gate -> report when approved
+  arch_epic_gate -> fail when not approved
+
+  ## task : architect(task) → (gate) → report
+  architect_task -> arch_task_gate
+  arch_task_gate -> report when approved
+  arch_task_gate -> fail when not approved
+
+  ## bug : bug-analyst → (gate) → report
+  bug_analyst -> bug_gate
+  bug_gate -> report when approved
+  bug_gate -> fail when not approved
+
+  report -> done
