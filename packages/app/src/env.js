@@ -91,8 +91,6 @@ export const env = createEnv({
 			.int()
 			.positive()
 			.default(365),
-		// Retention (years) for declaration data — consumed by the
-		// declaration-cleanup CronJob (#3134), default 6 (durée légale retenue).
 		EGAPRO_DECLARATION_RETENTION_YEARS: z.coerce
 			.number()
 			.int()
