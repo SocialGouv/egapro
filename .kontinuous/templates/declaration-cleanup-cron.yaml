@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: declaration-cleanup-daily
+  namespace: {{ .Values.global.namespace }}
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app: declaration-cleanup-daily
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsUser: 1000
+            runAsNonRoot: true
+          containers:
+            - name: declaration-cleanup
+              image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/app:{{ .Values.global.imageTag }}"
+              securityContext:
+                allowPrivilegeEscalation: false
+              env:
+                - name: POSTGRES_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.global.pgSecretName }}"
+                      key: PGHOST
+                - name: POSTGRES_DB
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.global.pgSecretName }}"
+                      key: PGDATABASE
+                - name: POSTGRES_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.global.pgSecretName }}"
+                      key: PGPORT
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.global.pgSecretName }}"
+                      key: PGUSER
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.global.pgSecretName }}"
+                      key: PGPASSWORD
+                - name: POSTGRES_SSLMODE
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.global.pgSecretName }}"
+                      key: PGSSLMODE
+              envFrom:
+                - configMapRef:
+                    name: "s3"
+                - secretRef:
+                    name: "s3"
+                - configMapRef:
+                    name: "declaration-retention"
+                    optional: true
+              command:
+                - node
+                - packages/app/scripts/declaration-cleanup.mjs
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
