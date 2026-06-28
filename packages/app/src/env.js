@@ -91,6 +91,13 @@ export const env = createEnv({
 			.int()
 			.positive()
 			.default(365),
+		// Retention (years) for declaration data — consumed by the
+		// declaration-cleanup CronJob (#3134), default 6 (durée légale retenue).
+		EGAPRO_DECLARATION_RETENTION_YEARS: z.coerce
+			.number()
+			.int()
+			.positive()
+			.default(6),
 		// MAIL_*, SMTP_* are intentionally NOT declared here — they are consumed
 		// exclusively by the notifications worker (packages/notifications).
 		// See packages/notifications/README.md for the runtime config surface.
@@ -150,6 +157,8 @@ export const env = createEnv({
 			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,
 		EGAPRO_AUDIT_RETENTION_LONG_DAYS:
 			process.env.EGAPRO_AUDIT_RETENTION_LONG_DAYS,
+		EGAPRO_DECLARATION_RETENTION_YEARS:
+			process.env.EGAPRO_DECLARATION_RETENTION_YEARS,
 		VALKEY_URL: process.env.VALKEY_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
