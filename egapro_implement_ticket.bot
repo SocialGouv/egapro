@@ -460,9 +460,9 @@ workflow egapro_implement_ticket:
   budget:
     max_parallel_branches: 4
     max_duration: "6h"
-    max_cost_usd: 40
+    max_cost_usd: 60
     max_tokens: 4000000
-    max_iterations: 40
+    max_iterations: 120
 
   ## 🔀 verdict code-dev (déterministe) : source_ready→tu_dev ; needs_opus_escalation→escalate_opus ;
   ## refacto→refacto_done ; rate_limited→rate_limited_stop ; fallback inconditionnel → code_failed.
