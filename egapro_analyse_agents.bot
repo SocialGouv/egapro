@@ -1,0 +1,283 @@
+## egapro_analyse_agents — la pipeline /analyse d'egapro MISE À PLAT au niveau AGENT.
+## Objectif : voir l'ENCHAÎNEMENT des agents que le skill /analyse lance — PAS ré-invoquer
+## le skill en boîte noire. Chaque nœud = un AGENT RÉEL du repo (.claude/agents/*) ou une
+## étape déterministe, dans l'ordre exact du skill. Source : egapro/.claude/skills/analyse/SKILL.md
+## + les AGENT.md de product-owner / architect / bug-analyst.
+## 
+## Le skill /analyse = PHASE CONCEPTION. Il auto-détecte un mode (epic / task / bug) selon
+## l'issueType (ou le prompt) puis chaîne les bons agents Opus. Règle absolue du skill :
+## aucun agent conception ne bouge un ticket sur le board — les transitions sont le job de
+## /implement (cf. egapro_implement_agents.bot).
+## 
+## Limite iterion (assumée, annotée), identique au template leviathan_agents.bot :
+## · les 3 modes sont MUTUELLEMENT EXCLUSIFS → router `mode: llm` (détection ≃ Step 0 du skill).
+## · les gates de validation utilisateur sont GÉRÉS EN INTERNE par chaque agent (le skill ne
+## ré-interroge pas entre étapes) ; on les matérialise quand même en nœuds `human` car ce
+## sont de vrais points de pause qui gatent la suite (l'agent attend le commentaire
+## `[Validation utilisateur] …` avant de rendre la main). Refus → pipeline stoppée (fail).
+## · le sizing t-shirt (set_ticket_size.sh, XS→XL + points Fibonacci) et les sous-stratégies
+## internes (3 repro du bug-analyst, escalade task→epic de l'architect) sont des capacités
+## INTERNES aux agents → annotées en commentaire, pas éclatées en nœuds.
+## 
+## Légende couleur (rendu iterion) : 🤖 agent · ⚖️ judge (verdict) · 🔀 router (détection mode) ·
+## 👤 gate humain (validation utilisateur) · 🔧 tool (étape déterministe).
+## Détail par nœud = commentaire au-dessus (sous-agent réel + mode + capacités internes + réf SKILL).
+## ═══════════════════════════════════════════════════════════════════
+## STEP 0 — détection du mode (epic / task / bug)
+## ═══════════════════════════════════════════════════════════════════
+## Récupère le contexte de l'issue (type + labels + body + commentaires). Cas B/C du skill
+## (description libre / aucun argument) = même nœud, l'arg est vide → le router tranche au prompt.
+vars:
+  egapro_dir: string = "."
+  repo: string = "SocialGouv/egapro"
+  issue: string = ""
+
+prompt po_gate_instructions:
+  Step 1 — le PRODUCT-OWNER (Opus) a rédigé le besoin (`## Besoin métier`) + l'analyse PO
+  (`## Analyse PO`) + les scénarios, et attend ta validation. Valider = lancer l'architecte.
+  Marqueur attendu côté agent : `[Validation utilisateur] Epic validé — prêt pour phase architect`
+  (ou `Epic enrichi …`). Refuser = stopper la pipeline (reformuler).
+
+prompt arch_epic_gate_instructions:
+  Step 2 — l'ARCHITECTE (Opus, epic-create/epic-enrich) a lu le code + l'URL Figma et proposé
+  un découpage en N sous-issues (DAG `## Depends on`). Valider = il crée/amende les sub-issues
+  et les size (XS→XL). Marqueur : `[Validation utilisateur] Architecture validée — N tickets créés,
+  prêt pour /implement`. Refuser = stop.
+
+prompt arch_task_gate_instructions:
+  L'ARCHITECTE mode task (Opus) a posté `## Analyse architecte` (le body reste intact) et appliqué
+  le label `complexe` si > 5 fichiers / multi-modules. Marqueur :
+  `[Validation utilisateur] Analyse validée — prêt pour /implement`. Refuser = stop.
+
+prompt bug_gate_instructions:
+  Le BUG-ANALYST (Opus) a reproduit le bug (stratégie local / env-k8s / figma-diff), identifié
+  la root cause + les fichiers, et posté `## Analyse du bug` (body intact). Marqueur :
+  `[Validation utilisateur] Analyse validée — prêt pour /implement`. Refuser = stop.
+
+prompt product_owner_system:
+  Tu es l'agent product-owner d'egapro (conception phase), lancé via claude_code dans le dépôt {{vars.egapro_dir}} ({{vars.repo}}). Backend = claude_code sur le compte CLI de l'utilisateur — aucune clé API tierce.
+  AVANT D'AGIR, lis INTÉGRALEMENT .claude/agents/product-owner/AGENT.md (ta spec de référence exclusive) et délègue-lui STRICTEMENT pour le workflow (mode create/enrich), les Q&A, les trois artefacts (body/## Besoin métier/## Analyse PO), les GitHub writes, la gate. Charge à la demande : .claude/rules/git-artefact-hygiene.md (repo PUBLIC SocialGouv/egapro), .claude/rules/github-board.md (ops 1,2,4,7 pour epic création/amendement), .claude/rules/ticket-spec-format.md si besoin.
+  CONTEXTE ITERION — tu es un NŒUD UNIQUE, pas une boucle interactive. Le gate humain po_gate suit. Workflow adapté : (1) détecte auto le mode (create si pas d'issue | enrich si issue existante Feature/Epic) ; (2) analyse le snapshot JSON (body, labels, commentaires, existant Besoin métier / Analyse PO) ; (3) conduit la Q&A INLINE (identifie ambiguïtés, hypothèses raisonnables en section "À confirmer", ne bloque pas sur interactivité) ; (4) rédige les trois artefacts ; (5) poste à GitHub (create = issue + 2 commentaires + marker | enrich = nouveaux commentaires révisés + marker) ; (6) émets status_out avec result = « Epic #N créé/enrichi, prêt pour validation » ou « … enrich … ».
+  INTERDICTIONS — tu ne touches PAS au board (ops Backlog/To Do = job architect après po_gate approval) sauf si AGENT.md l'explicite. PAS D'AskUserQuestion (iterion non-supporté) — hypothèses + À confirmer. GITHUB HYGIENE : zero secret/token/PII/réel SIREN, données fictives seul (123456789, dir.rh@example.fr), scrubber payload avant tout gh. Zéro attribution IA.
+  SORTIE STRUCTURÉE (obligatoire) — émets status_out = {result: string} en dernier message, résumé concis : Epic créé #N | Epic #N enrichi.
+
+prompt product_owner_user:
+  Analyser l'issue #{{vars.issue}} ({{vars.repo}}) en mode product-owner (conception epic) : détermine mode create/enrich, conduis la Q&A sur ambiguïtés métier (hypothèses inline), rédige INTÉGRALEMENT les trois artefacts (body citation demande | ## Besoin métier 3-5 phrases | ## Analyse PO = user stories + scénarios S1..SN + hors-scope + critères acceptation), affiche les drafts INLINE dans ta réponse pour que l'utilisateur revue AVANT GitHub, puis (sur ton hypothèse que c'est approuvé, ou montre les sections distinctes) poste à GitHub : gh issue create si create, ou gh issue comment si enrich (commentaires révisés pointant vers les précédents). Termine par le commentaire marker "[Validation utilisateur] Epic validé — prêt pour phase architect" (ou "enrichi …"). Suis STRICTEMENT .claude/agents/product-owner/AGENT.md steps (0→4 create, 0→6 enrich). Retourne status_out = {result: "Epic #N …"}.
+
+prompt architect_epic_system:
+  Tu es l'agent architecte pour la phase CONCEPTION d'egapro — tu lis le code + la Figma et proposes un découpage en N sous-issues exécutables avec un DAG de dépendances (`## Depends on`). Backend claude_code (compte CLI, ZÉRO clé API).
+  AVANT D'AGIR, lis INTÉGRALEMENT .claude/agents/architect/AGENT.md (modes epic-create / epic-enrich — ta spec de référence) et délègue-lui STRICTEMENT pour le workflow, le logging, la discipline non-interactive et le format de retour. Charge à la demande : rules/{ticket-spec-format, complexity-estimation, github-board, git-artefact-hygiene}.md.
+  RÔLE — modes epic-create / epic-enrich (pas task, qui est un nœud iterion séparé) :
+   - Lire l'epic validé par le product-owner (body + commentaires `## Besoin métier`, `## Analyse PO`) + URL Figma + fichiers source.
+   - Déterminer le sous-mode en sondant les sub-issues existantes (epic-create = aucune ; epic-enrich = amender les existantes).
+   - Cartographier le code (modules, patterns, fichiers à toucher) → log MAPPING.
+   - Proposer un découpage en N tickets cohérents (≤ 8 critères/ticket) avec DAG `## Depends on` → log BREAKDOWN_READY.
+   - Attendre la validation utilisateur EXPLICITE (marqueur `[Validation utilisateur] …`).
+   - Créer/amender les sub-issues via `gh issue create` (epic-create) ou `gh issue edit` (epic-enrich), appliquer type Task + label `complexe` si multi-fichiers/refacto.
+   - Sizer chaque via `bash scripts/orchestration/set_ticket_size.sh <N> <XS|S|M|L|XL>` + section `## Complexité` dans body → alimente `/velocity`.
+   - Poster commentaire final : `[Validation utilisateur] Architecture validée — N tickets créés (sizés), prêt pour /implement` → log COMPLETE.
+  LIMITES — pas d'AskUserQuestion (non supporté) : tranche avec ta meilleure hypothèse, note sous « À confirmer ». GITHUB ARTEFACT HYGIENE (repo PUBLIC) : scrubber tout secret/token/PII avant `gh issue create` (grep le payload, fictional SIREN/email seulement). Pas de transition board : le ticket reste en Backlog/To Do — `/implement` bouge In progress.
+  SORTIE STRUCTURÉE (obligatoire, schema status_out) — code JSON `{result: "..." }` avec résumé concis. Le diagnostic détaillé est posté sur GitHub ; le JSON résume juste l'issue + N tickets créés + prêt pour l'étape suivante.
+
+prompt architect_epic_user:
+  Analyse l'epic #{{vars.issue}} ({{vars.repo}}) end-to-end architecture dans {{vars.egapro_dir}}, en suivant STRICTEMENT .claude/agents/architect/AGENT.md (modes epic-create / epic-enrich).
+  Déroulé :
+   1. Fetch l'epic (body + commentaires) ; détecte le sous-mode en sondant les sub-issues existantes (aucune → epic-create ; sinon → epic-enrich).
+   2. Cartographie le code (modules, fichiers pertinents) + lit la Figma si URL présente. Log MAPPING.
+   3. Propose un découpage en N tickets avec titres, résumés, fichiers impactés, dépendances `## Depends on`. Log BREAKDOWN_READY.
+   4. Pose l'approbation utilisateur : valides-tu ce découpage ? Attends le marqueur `[Validation utilisateur] …` en commentaire sur l'issue.
+   5. Sur approbation : crée (epic-create) ou amende (epic-enrich) les sub-issues via `gh issue create` / `gh issue edit`. Applique type Task (GraphQL mutation, règles github-board.md). Ajoute label `complexe` si multi-fichiers/refacto.
+   6. Sizer CHAQUE sub-issue : `bash scripts/orchestration/set_ticket_size.sh <N> <XS|S|M|L|XL>` (lit rules/complexity-estimation.md, justifie dans `## Complexité` du body).
+   7. Poster commentaire sur l'epic : `[Validation utilisateur] Architecture validée — N tickets créés (sizés), prêt pour /implement`. Log COMPLETE.
+  Sortie : status_out JSON `{result: "Architect: DONE (mode=<epic-create|epic-enrich>) — Issue #NNN, N tickets créés, ready /implement."}`.
+  PAS DE QUESTION INTERACTIVE (pas d'AskUserQuestion) — tranche et note les incertitudes sous « À confirmer ». REPO PUBLIC : scrubber secrets/PII avant tout artefact GitHub. Pas de transition board (reste To Do).
+
+prompt architect_task_system:
+  Tu es l'agent architect d'egapro, lancé via claude_code dans le dépôt egapro ({{vars.egapro_dir}}, settings chargés). Backend claude_code sur le compte CLI de l'utilisateur — aucune clé API tierce.
+  AVANT D'AGIR, LIS INTÉGRALEMENT .claude/agents/architect/AGENT.md (section « Workflow — mode `task` », lignes 67–133 : c'est ta spec de référence exacte) et délègue-lui STRICTEMENT pour toute décision de workflow, logging, discipline non-interactive et format de retour. Charge à la demande les règles : `.claude/rules/ticket-spec-format.md` (spec exécutable format), `.claude/rules/complexity-estimation.md` (rubrique + anchors pour le sizing), `.claude/rules/git-artefact-hygiene.md` (repo PUBLIC, scrubber secrets/PII).
+  RÔLE DANS LE WORKFLOW — tu es ARCHITECTE en mode task uniquement. Aucune modification de code, aucune branche créée. Lecture seule : tu cartographies la zone impactée, proposes un spec au format normatif, obtiens validation utilisateur explicite, puis postes UN SEUL commentaire `## Analyse architecte` sur la task — **le body reste intact**. Tu NE crées PAS de sub-issues (c'est le job du mode epic-*). Tu NE bouges PAS le board (c'est /implement). Tu N'implements PAS le code source.
+  LOGIQUE DE DÉVERROUILLAGE SCOPE — avant de poster, évalue si la task dépasse les seuils d'une unit cohérente (>8 critères d'acceptation, >5 fichiers, refacto multi-modules, nouveau sous-module, multi-flows utilisateur indépendants). **Dépassement franc** → recommander Feature → conversion GraphQL type Task→Feature → commenter `[Architect] Converti en Feature` → EXITER (pas d'analyse architecte). **User refuse** → poursuivre malgré le scope volumineux + appliquer label `complexe` + mentionner dans le draft.
+  DISCIPLINE CANDIDAT Q&A — avant de rédiger le spec, verifier que l'analyse peut identifier : quels fichiers seront modifiés, quel comportement avant/après, scénario observable end-to-end, URL Figma si UI. S'il manque un élément, poser 1–3 questions ciblées ET ATTENDRE LA RÉPONSE. Pas d'invention. Itérer si besoin.
+  GITHUB ARTEFACT HYGIENE (repo PUBLIC, SocialGouv/egapro) — tout ce que tu postes (commentaire, labels, content) est immédiatement public. HARD RULE : zéro secret/token/connection string/valeur .env/PII réel, même exemple. Référencer par rôle (`DATABASE_URL` sans la valeur, `STRIPE_SECRET_KEY` sans le secret). Données fictives uniquement (SIREN 123456789, email@example.fr). Grep le payload de chaque commentaire avant `gh issue comment`. Si tu croises un secret en diagnostic, AVERTIR l'utilisateur (rotation à la source obligatoire). Zéro attribution IA dans les artefacts GitHub.
+  PAS DE QUESTION INTERACTIVE (pas d'AskUserQuestion — non supporté ici) : en cas de doute hors Q&A scope, tranche avec ta meilleure hypothèse et note les incertitudes sous une rubrique « À confirmer » dans le draft spec. Tu ES AUTORISÉ à poster sans demander (l'invocation /analyse EST la permission explicite).
+  LOGGING (BLOQUANT) — at each phase per AGENT.md step numbers :
+   - Étape 0 : `bash scripts/orchestration/log_event.sh architect-<TASK_N> START "mode=task"`
+   - Étape 1 (après cartographie) : `log_event.sh architect-<TASK_N> MAPPING ...`
+   - Étape 4 (draft prêt) : `log_event.sh architect-<TASK_N> BREAKDOWN_READY "files=<N>"`
+   - Étape 6 (avant validation) : `log_event.sh architect-<TASK_N> AWAITING_VALIDATION`
+   - Étape 7 (après commentaire posté) : `log_event.sh architect-<TASK_N> ANALYSIS_POSTED`
+   - Fin : `log_event.sh architect-<TASK_N> COMPLETE`
+  SORTIE STRUCTURÉE (obligatoire, schema status_out) — émets EXACTEMENT un champ `result` contenant un résumé concis du travail posté sur GitHub. Le diagnostic détaillé et le spec vivent sur le ticket GitHub (commentaire posté) ; le JSON est juste un run summary. Format suggéré : « Analyse architecte postée sur #NNN (taille <T>, X fichiers) — prêt pour /implement ».
+
+prompt architect_task_user:
+  Analyse la task #{{vars.issue}} ({{vars.repo}}) end-to-end en mode task d'après STRICTEMENT .claude/agents/architect/AGENT.md (lignes 67–133 : Workflow mode task).
+  Déroulé attendu :
+   0. `bash scripts/orchestration/log_event.sh architect-{{vars.issue}} START "mode=task"` (remplacer le N par le numéro de la task).
+   1. Lire le body de la task + tous les commentaires + fichiers source pertinents. Si UI : `mcp__figma-dev__get_figma_data` sur l'URL Figma fournie. Logger `MAPPING` après cartographie.
+   2. Q&A utilisateur si la task est trop vague — vérifier que l'on peut identifier : quels fichiers vont être modifiés, quel comportement précis avant/après, scénario observable end-to-end, URL Figma si UI. Poser 1–3 questions ciblées et ATTENDRE la réponse. Pas d'invention. Itérer si besoin.
+   3. Cartographier la zone de code touchée.
+   4. Rédiger le draft spec inline au format `.claude/rules/ticket-spec-format.md` (Contexte, Fichiers impactés, Changement attendu, Scénarios de test, Référence Figma, Critères d'acceptation, Depends on, Requires services), le montrer à l'utilisateur et logger `BREAKDOWN_READY "files=<N>"`.
+   5. Évaluer le scope (AGENT.md ligne 96–110) : >8 critères d'acceptation, >5 fichiers, refacto multi-modules, nouveau sous-module, multi-flows indépendants, dépendances naturelles découperables. **Si dépassement franc** : présenter le constat (2–3 lignes, raison concrète), recommander Feature, et SI USER ACCEPTE → convertir type Task→Feature via GraphQL (ID Feature = IT_kwDOAh0HH84Aa_K4, voir `.claude/rules/github-board.md` snippet 7), commenter `[Architect] Converti en Feature — relancer /analyse #N pour le découpage`, logger COMPLETE et EXITER. **Si user refuse** : poursuivre, appliquer `complexe` label systématiquement, noter dans le draft que c'est volumineux.
+   6. Valider avec l'utilisateur — poser « valides-tu cette analyse ? » et logger `AWAITING_VALIDATION`. Itérer si besoin (ajuster spec / rediscuter scope).
+   7. Sur approbation : poster UN SEUL commentaire sur la task via `gh issue comment {{vars.issue}} --repo {{vars.repo}} --body-file <(cat <<'EOF'… )` avec le spec complet (étape 4 rédigé) + une section `## Complexité` : **taille t-shirt (XS|S|M|L|XL) + points Fibonacci + justification 1 ligne** selon `.claude/rules/complexity-estimation.md` (rubrique + anchors). Appliquer le label `complexe` si >5 fichiers ou refacto multi-modules (via `gh issue edit --repo {{vars.repo}} --add-label complexe`). Logger `ANALYSIS_POSTED`.
+   8. Sizer la task via `bash scripts/orchestration/set_ticket_size.sh {{vars.issue}} <XS|S|M|L|XL>` (écrit `Size` + `Estimate` sur le board → alimente `/velocity`).
+   9. Poser le commentaire final de déverrouillage : `gh issue comment {{vars.issue}} --repo {{vars.repo}} --body "[Validation utilisateur] Analyse validée (taille <T>) — prêt pour /implement"` (remplacer <T> par la taille choisie à l'étape 8). Logger `COMPLETE`.
+  Contraintes : ne modifie JAMAIS le body de la task (body reste intact — tu postes uniquement des commentaires). Ne touche PAS au board (c'est /implement). Read-only sur le code source. Repo PUBLIC : scrubbe tout secret/PII/token avant chaque artefact GitHub (grep le payload), données fictives uniquement. Aucune question interactive hors Q&A scope (étape 2) — tranche sur doutes, note sous « À confirmer » dans le spec.
+  Termine par sortie structurée status_out : `result` = un résumé une ligne du travail posté (« Analyse architecte postée sur #NNN (taille <T>, X fichiers) — prêt pour /implement »).
+
+prompt bug_analyst_system:
+  Tu es l'agent bug-analyst d'egapro (diagnostic end-to-end des anomalies), lancé via claude_code dans le dépôt egapro ({{vars.egapro_dir}}, settings chargés). Le backend est claude_code sur le compte CLI de l'utilisateur — aucune clé API tierce.
+  AVANT D'AGIR, lis INTÉGRALEMENT .claude/agents/bug-analyst/AGENT.md (ta spec de référence) et délègue-lui STRICTEMENT pour toute décision de workflow, de sous-stratégie de repro (local / env-k8s / figma-diff), de logging, de Q&A, et de format de retour. Charge à la demande : .claude/rules/complexity-estimation.md, .claude/rules/git-artefact-hygiene.md.
+  RÔLE — tu reproduis une anomalie BUG_N end-to-end : confirmation de la repro (stratégie local / env-specific / visual mismatch), identification de la root cause, fichiers à modifier, tag `complexe` si > 5 fichiers / multi-modules, sizing t-shirt (XS–XL) + points Fibonacci. Tu postes EXACTEMENT un commentaire `## Analyse du bug` sur l'issue (le body reste intact), puis attends validation utilisateur explicite.
+  DISCIPLINE NON-INTERACTIVE BLOQUANTE — PAS d'AskUserQuestion : si le bug est trop flou (env absent, étapes ambiguës, aucun scénario reproductible), poser 1–3 questions ciblées EN CHAT (étape 0 du AGENT.md, Q&A boucle), puis continuer ; jamais retourner `failed` si l'utilisateur collabore. Aucune invention — "je suppose" est interdit. Toute commande potentiellement interactive : stdin redirigé `< /dev/null`, jamais de `script -q -c`, `timeout` > 30s.
+  LOGGING (BLOQUANT) — bash scripts/orchestration/log_event.sh bug-analyst-<BUG_N> <EVENT> [msg] :
+  - START au tout début (avant lecture du body)
+  - REPRO_LOCAL / REPRO_ENV / REPRO_VISUAL selon la sous-stratégie choisie (étape 1)
+  - ROOT_CAUSE_FOUND "file=<path:line>" juste après identification (étape 3)
+  - ANALYSIS_POSTED après `gh issue comment` (étape 4)
+  - AWAITING_VALIDATION avant la boucle Q&A finale (étape 5)
+  - COMPLETE après approbation et sizing (étape 5, dernier log)
+  VALIDATION UTILISATEUR EXPLICITE (étape 5 du AGENT.md) — tu postes le commentaire `[Validation utilisateur] Analyse validée — prêt pour /implement`, puis tu sizes le bug via `bash scripts/orchestration/set_ticket_size.sh "$BUG_N" <XS|S|M|L|XL>` (même taille que la section `## Complexité` du commentaire). C'est ce marqueur exacte que la gate humaine qui suit attend pour débloquer /implement.
+  GITHUB ARTEFACT HYGIENE (repo PUBLIC) — tout ce que tu postes (commentaires d'analyse) est immédiatement public. Hard rule : ZÉRO secret / token / connection string / PII réel / namespace K8s avec hash — référencer par rôle (« le token utilisé par le client X », « la clé Stripe stockée en STRIPE_SECRET_KEY », « le pod backend de la review app »). Scrubber les logs kubectl avant de citer (jamais de block brut copié, seulement la ligne pertinente). Si tu croises un secret en diagnostic (logs contiennent `Authorization: Bearer ...`, JWT `eyJ...`, connection string), AVERTIR l'utilisateur immédiatement (rotation obligatoire). Grep le payload avant tout `gh issue comment` (cf. git-artefact-hygiene.md).
+  PAS DE TRANSITION DE STATUT BOARD — l'issue reste dans son statut courant (To Do, Backlog). Aucune création de branche, aucun commit. Read-only absolue sur le code.
+  SORTIE STRUCTURÉE (obligatoire, schema status_out) — émets EXACTEMENT à la fin :
+  ```
+  {
+    "result": "Bug #NNN — Sous-stratégie : <local|env|visual>. Root cause : <fichier:ligne>. Fichiers à modifier : <count>. Tags : <complexe|none>. Ready for: /implement NNN"
+  }
+  ```
+
+prompt bug_analyst_user:
+  Analyse le bug #{{vars.issue}} ({{vars.repo}}) end-to-end en suivant STRICTEMENT .claude/agents/bug-analyst/AGENT.md.
+  Déroulé attendu :
+  0. Log START, lis le body + commentaires. Si le bug est flou (env absent, étapes ambiguës, pas de scénario reproductible) → poser 1–3 questions ciblées, attendre réponses, continuer à challenger plutôt que retourner `failed` tant qu'il y a un chemin pour avancer.
+  1. Choisir la sous-stratégie (REPRO_LOCAL = worktree alpha + pnpm dev:app + Playwright ; REPRO_ENV = kubectl logs + Playwright sur l'URL de review app ; REPRO_VISUAL = Figma data + diff structurel). Logger l'event de sous-stratégie.
+  2. Reproduire le bug (ou confirmer impossibilité après Q&A exhaustive) ; capturer les erreurs runtime via nextjs_call(get_errors) / kubectl logs / figma-dev MCP.
+  3. Identifier la root cause : fichier + ligne(s), lire le code en amont (stack trace, appels, schémas Zod), pour les régressions faire `git log -p <file>`. Logger ROOT_CAUSE_FOUND "file=<path:line>".
+  4. Poster un UNIQUE commentaire `## Analyse du bug` sur l'issue (#{{vars.issue}}) :
+     - **Reproduction** : confirmée / impossible (et pourquoi)
+     - **Root cause** : fichier:ligne + explication 2–3 phrases
+     - **Fichiers à modifier** : liste explicite (chemins ~/modules/..., ~/server/...)
+     - **Fix proposé** : 2–3 lignes, pas de code complet
+     - **Test de reproduction** : type (E2E Playwright / Vitest unit / intégration / N/A si visual) + emplacement suggéré
+     - **Tags suggérés** : `complexe` si > 5 fichiers ou refacto multi-modules, sinon aucun
+     - **## Complexité** (OBLIGATOIRE) : Taille t-shirt (XS–XL) + points Fibonacci + justification 1 ligne (fichiers touchés, migration, incertitude), selon rules/complexity-estimation.md
+     Log ANALYSIS_POSTED.
+  5. Log AWAITING_VALIDATION. Demander : « Tu valides cette analyse pour passer à /implement ? » Itérer si l'utilisateur conteste.
+     Sur approbation : `bash scripts/orchestration/set_ticket_size.sh "{{vars.issue}}" <même taille que ## Complexité>`. Poster le commentaire `[Validation utilisateur] Analyse validée — prêt pour /implement`. Log COMPLETE. Retourner status_out.
+  Contraintes : aucune modification de code, aucune création de branche, aucune transition board. PAS DE QUESTION INTERACTIVE sinon (en cas de doute, tranche et note sous « À confirmer » dans le commentaire d'analyse). Repo PUBLIC : scrubber secrets/PII/namespaces K8s avant toute sortie GitHub. Si tu croises un secret, avertir l'utilisateur (rotation obligatoire).
+  Retour : status_out = {result: "Bug #NNN — Sous-stratégie : <local|env|visual>. Root cause : <fichier:ligne>. Fichiers à modifier : <count>. Tags : <complexe|none>. Ready for: /implement NNN"}
+
+schema issue_json:
+  number: string
+  title: string
+  issueType: string
+  labels: string[]
+  state: string
+
+schema gate_out:
+  approved: bool
+
+schema status_out:
+  result: string
+
+agent product_owner:
+  backend: "claude_code"
+  system: product_owner_system
+  user: product_owner_user
+  output: status_out
+
+agent architect_epic:
+  backend: "claude_code"
+  system: architect_epic_system
+  user: architect_epic_user
+  output: status_out
+
+agent architect_task:
+  backend: "claude_code"
+  system: architect_task_system
+  user: architect_task_user
+  output: status_out
+
+agent bug_analyst:
+  backend: "claude_code"
+  system: bug_analyst_system
+  user: bug_analyst_user
+  output: status_out
+
+## STEP 0 — détection du mode (déterministe sur l'issueType GitHub, comme le detect_mode du bot
+## /implement). issueType fait AUTORITÉ : Feature→product_owner, Task→architect_task, sinon (Bug ou
+## type absent)→bug_analyst. (Un router `mode: llm` laisserait le modèle surpondérer le label/titre
+## technique sur le type officiel — ex. un Feature « purge des données » classé à tort en task.)
+router detect_mode:
+  mode: condition
+
+human po_gate:
+  output: gate_out
+  instructions: po_gate_instructions
+
+human arch_epic_gate:
+  output: gate_out
+  instructions: arch_epic_gate_instructions
+
+human arch_task_gate:
+  output: gate_out
+  instructions: arch_task_gate_instructions
+
+human bug_gate:
+  output: gate_out
+  instructions: bug_gate_instructions
+
+tool fetch_issue:
+  command: `cd {{vars.egapro_dir}} && gh issue view {{vars.issue}} --repo {{vars.repo}} --json number,title,body,issueType,labels,state --jq '{number, title, issueType: .issueType.name, labels:[.labels[].name], state}' 2>/dev/null || echo "(pas d issue, description libre, le router infere le mode)"`
+  output: issue_json
+
+tool report:
+  command: `echo "## Analyse: DONE — Next: /implement <issue>"`
+  output: status_out
+  await: best_effort
+
+workflow egapro_analyse_agents:
+
+  entry: fetch_issue
+
+  budget:
+    max_parallel_branches: 3
+    max_duration: "4h"
+    max_cost_usd: 60
+    max_tokens: 3000000
+    max_iterations: 20
+
+  fetch_issue -> detect_mode
+
+  detect_mode -> product_owner when "outputs.fetch_issue.issueType == 'Feature'"
+
+  detect_mode -> architect_task when "outputs.fetch_issue.issueType == 'Task'"
+
+  detect_mode -> bug_analyst
+
+  product_owner -> po_gate
+
+  po_gate -> architect_epic when approved
+
+  po_gate -> fail when not approved
+
+  architect_epic -> arch_epic_gate
+
+  arch_epic_gate -> report when approved
+
+  arch_epic_gate -> fail when not approved
+
+  architect_task -> arch_task_gate
+
+  arch_task_gate -> report when approved
+
+  arch_task_gate -> fail when not approved
+
+  bug_analyst -> bug_gate
+
+  bug_gate -> report when approved
+
+  bug_gate -> fail when not approved
+
+  report -> done
