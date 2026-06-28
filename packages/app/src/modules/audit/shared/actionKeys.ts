@@ -118,6 +118,7 @@ export const AUDIT_ACTIONS = {
 
 	// ── System / cron-triggered ────────────────────────────
 	SYSTEM_AUDIT_CLEANUP: "system.audit_cleanup",
+	SYSTEM_DECLARATION_CLEANUP: "system.declaration_cleanup",
 } as const;
 
 export type AuditActionKey = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
@@ -208,4 +209,5 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.PUBLIC_STATS_GET_CURRENT_CAMPAIGN_RATE]: "public_search",
 
 	[AUDIT_ACTIONS.SYSTEM_AUDIT_CLEANUP]: "system",
+	[AUDIT_ACTIONS.SYSTEM_DECLARATION_CLEANUP]: "system",
 };
