@@ -227,8 +227,9 @@ if (isMain) {
 		forcePathStyle: true,
 	});
 
-	const deleteObject = (key) =>
-		s3.send(new DeleteObjectCommand({ Bucket: S3_BUCKET_NAME, Key: key }));
+	const deleteObject = async (/** @type {string} */ key) => {
+		await s3.send(new DeleteObjectCommand({ Bucket: S3_BUCKET_NAME, Key: key }));
+	};
 
 	const sql = postgres(getDatabaseUrl(), { max: 1 });
 
