@@ -354,6 +354,13 @@ agent code_dev:
 router code_dev_route:
   mode: condition
 
+## 🔧 format_fix (déterministe) — code_dev ne formate pas toujours le code (hook auto-lint capricieux sur
+## les .mjs) et la gate format:check est ÉLIMINATOIRE. Applique `pnpm check:write` + commit signé + push,
+## puis → tu_dev. Tourne à CHAQUE source_ready (y compris les rounds de gates_src_rework).
+tool format_fix:
+  command: `cd {{vars.egapro_dir}} && pnpm check:write >/dev/null 2>&1 || true; git add -A 2>/dev/null; if ! git diff --cached --quiet 2>/dev/null; then git commit -m "style: biome format" >/dev/null 2>&1 && git push origin HEAD >/dev/null 2>&1; fi; printf '{"result":"ok"}'`
+  output: status_out
+
 agent tu_dev:
   backend: "claude_code"
   system: tu_dev_system
@@ -468,7 +475,9 @@ workflow egapro_implement_ticket:
   ## refacto→refacto_done ; rate_limited→rate_limited_stop ; fallback inconditionnel → code_failed.
   code_dev -> code_dev_route
 
-  code_dev_route -> tu_dev when "outputs.code_dev.status == 'source_ready'"
+  code_dev_route -> format_fix when "outputs.code_dev.status == 'source_ready'"
+
+  format_fix -> tu_dev
 
   code_dev_route -> escalate_opus when "outputs.code_dev.status == 'needs_opus_escalation'"
 
