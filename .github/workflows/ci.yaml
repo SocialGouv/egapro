@@ -161,7 +161,7 @@ jobs:
       - name: Test app with coverage
         run: pnpm test:app:coverage
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v4
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
