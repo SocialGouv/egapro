@@ -55,7 +55,7 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
 
    Sinon → logger `ANALYSIS_OK "format=<feature|task|bug>"` avant de continuer.
 
-2. **Si bug** (issue type Bug ou label `bug`) — appliquer `rules/bug-fix-workflow.md` : implémenter le fix en suivant la root cause posée dans `## Analyse du bug`. **Le test de reproduction est écrit par un autre agent, jamais par toi** : `tu-dev` pour un bug logique/domain/API (test unitaire ou intégration, étape 5.5, prouvé par revert-verify) ; `e2e-dev` pour un bug UI/parcours **s'il le juge assez critique** (test E2E, en fin de pipeline). Pour les bugs de type "visual mismatch Figma ↔ app", il n'y a pas de test automatisé classique (cf. section visual mismatch de `bug-fix-workflow.md`) — la validation est la relecture structurelle Figma (étape 7).
+2. **Si bug** (issue type Bug ou label `bug`) — appliquer `rules/bug-fix-workflow.md` : implémenter le fix en suivant la root cause posée dans `## Analyse du bug`. **Le test de reproduction est écrit par un autre agent, jamais par toi** : `tu-dev` pour un bug logique/domain/API (test unitaire ou intégration, étape 5.5, prouvé par revert-verify) ; `e2e-dev` pour un bug UI/parcours **s'il le juge assez critique** (test E2E, en fin de pipeline). Pour les bugs de type "visual mismatch Figma ↔ app", il n'y a pas de test automatisé classique (cf. section visual mismatch de `bug-fix-workflow.md`) — la validation est la construction fidèle (étape 7) **puis** le gate `design-validator` (étape 9a-bis) qui re-mesure le rendu contre le Figma.
 
 3. **Status ticket** → **In progress** via `bash scripts/orchestration/set_ticket_status.sh <N> "In progress"`.
 
@@ -92,11 +92,10 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
 
    Corriger toutes les findings. **Exception** : toute finding portant sur un **fichier de test** (`*.test.ts(x)`, `*.integration.test.ts`) se corrige en **ré-invoquant `tu-dev`** (tu ne touches pas aux tests). Re-run jusqu'au vert. À chaque nouvelle itération sur un finding : logger `VALIDATION_START "attempt=<K+1>"` avant la re-run. Logger `VALIDATION_OK "attempt=<K>"` quand les 4 agents PASS.
 
-7. **Vérification visuelle Figma** (si UI touchée) — la fidélité au design est **ta** responsabilité, plus de `design-validator` externe :
-   - **Lecture structurelle (le cœur du travail)** : pour chaque URL citée dans la section `## Référence Figma` du ticket, appeler `mcp__figma-dev__get_figma_data` (équivalent `get_design_context`) sur le node-id pour récupérer l'arbre des nodes — couleurs (`fill`), typographies (`fontSize`, `fontWeight`, `textStyle`), espacements (`itemSpacing`, `gap`), hiérarchie, contenu verbatim. Vérifier que ton implémentation **mappe précisément chaque propriété** : couleur Figma → DSFR token / classe, `fontSize` → `fr-text--xs/sm/lg/xl`, `fontWeight ≥ 600` → `<strong>`, `itemSpacing` → `fr-m{b,t,r,l}-Xw`. Suivre `rules/figma-workflow.md` (Phases 1–3) pour la checklist exhaustive.
-   - **Spot-check visuel via `mcp__figma-dev__download_figma_images`** uniquement quand l'API structurelle est ambiguë — typiquement le **bold cell-by-cell** dans les tableaux (l'API ne révèle que le style dominant d'un node, jamais les overrides char-level), ou pour vérifier qu'un node `Group` se rend comme attendu. Pas systématique, ciblé.
-   - **Screenshots dev server** (Playwright, desktop 1280×800 + mobile 375×667) : à inclure dans le body de la PR pour la review humaine. Pas la comparaison principale — c'est juste l'artefact pour le reviewer.
-   - Toute divergence non triviale détectée à la lecture structurelle → corriger avant `gh pr ready`.
+7. **Construire fidèle au Figma** (si UI touchée) — tu construis fidèlement ; la **vérification indépendante** est faite par le gate `design-validator` à l'étape 9a-bis (plus d'auto-validation). Ta discipline de construction :
+   - **Lecture structurelle (le cœur du travail)** : pour chaque URL citée dans la section `## Référence Figma` du ticket, appeler `mcp__figma-dev__get_figma_data` sur le node-id pour récupérer l'arbre des nodes — couleurs (`fill`), typographies (`fontSize`, `fontWeight`, `textStyle`), espacements (`itemSpacing`, `gap`), hiérarchie, contenu verbatim. Vérifier que ton implémentation **mappe précisément chaque propriété** : couleur Figma → DSFR token / classe, `fontSize` → `fr-text--xs/sm/lg/xl`, `fontWeight ≥ 600` → `<strong>`, `itemSpacing` → `fr-m{b,t,r,l}-Xw`. Suivre `rules/figma-workflow.md` (Phases 1–3) pour la checklist exhaustive.
+   - **Spot-check visuel via `mcp__figma-dev__download_figma_images`** quand l'API structurelle est ambiguë — typiquement le **bold cell-by-cell** dans les tableaux (l'API ne révèle que le style dominant d'un node, jamais les overrides char-level), ou pour vérifier qu'un node `Group` se rend comme attendu. Ciblé.
+   - Corriger toute divergence évidente avant la PR — mais ne te repose pas sur ton propre jugement : le gate `design-validator` (9a-bis) re-mesure et tranche. Un `RETRY` de sa part te reviendra.
 
 8. **PR draft** via `gh pr create --draft --base <base-branch>` :
    - Base = la `<base-branch>` reçue en input (sans le préfixe `origin/`) — `epic/<EPIC_N>` (sub-issue d'epic) ou `alpha` (Task / Bug standalone)
@@ -125,7 +124,13 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
    - `RETRY` (max 2) → logger `FUNCTIONAL_START "attempt=<K+1>"`, corriger + push
    - `REFACTO` après 3 RETRY → ticket → **To Do** avec diagnostic
    - PASS → logger `FUNCTIONAL_OK "attempt=<K>"`
-   - Pas de `design-validator` séparé : la fidélité visuelle vs. Figma est vérifiée par `code-dev` lui-même à l'étape 7 (voir `rules/figma-workflow.md`).
+
+   **9a-bis. Validator visuel (`design-validator`)** — `bash scripts/orchestration/log_event.sh code-dev-<N> VISUAL_START "attempt=1"`. **Uniquement si le ticket a touché du `.tsx`/`.scss`** (UI). Invoquer `design-validator` : gate de fidélité **indépendant** (ce n'est pas toi qui te notes) qui compare le rendu au node Figma du ticket — mesure DOM (`getBoundingClientRect`/`getComputedStyle` vs `itemSpacing`/`fontSize`/`fontWeight`/`fill`) + overlay onion-skin + vision, sur ≥2 hauteurs de viewport. Voir `rules/visual-quality-validation.md`. Il partage le dev server déjà démarré par 9a et commente sur le ticket.
+   - `RETRY` (max 2) → logger `VISUAL_START "attempt=<K+1>"`, corriger la propriété signalée (valeur mesurée vs Figma fournie) + push
+   - `REFACTO` après 3 RETRY, **ou** `## Référence Figma` manquante sur un ticket UI → ticket → **To Do** avec diagnostic
+   - PASS → logger `VISUAL_OK "attempt=<K>"` ; récupérer l'overlay + screenshots qu'il a attachés pour le body de la PR
+   - **Écran inatteignable / pas de référence** → `design-validator` dégrade explicitement et logge `VISUAL_DEGRADED` — jamais de PASS silencieux
+   - **Ticket sans `.tsx`/`.scss` modifié** → skip ce sous-axe, logger `VISUAL_SKIP "no UI files"`
 
    **9b. CI GitHub Actions** — `bash scripts/orchestration/log_event.sh code-dev-<N> CI_WAIT "pr=<PR>"`. Watch du pipeline auto-déclenché par le push :
    - Polling : `gh pr checks <PR> --watch` (ou `gh run list --branch <branch>`)
@@ -147,7 +152,7 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
    - Seuils critiques bloquants : bugs, vulnérabilités, security hotspots non reviewed
    - Quand Quality Gate Passed → logger `SONAR_OK "pr=<PR>"`
 
-   **9d. Cycle review unique** — `bash scripts/orchestration/log_event.sh code-dev-<N> BOT_WAIT "pr=<PR>"`. Déclenché **une seule fois**, **uniquement** après que 9a + 9b + 9c sont **tous verts** (vérifie explicitement le critère jq de 9b : toutes conclusions SUCCESS / SKIPPED / NEUTRAL, sans exception).
+   **9d. Cycle review unique** — `bash scripts/orchestration/log_event.sh code-dev-<N> BOT_WAIT "pr=<PR>"`. Déclenché **une seule fois**, **uniquement** après que 9a + 9a-bis + 9b + 9c sont **tous verts** (vérifie explicitement le critère jq de 9b : toutes conclusions SUCCESS / SKIPPED / NEUTRAL, sans exception ; 9a-bis vert = PASS, SKIP, ou DEGRADED assumé).
 
    ### 9d.1 — Wait borné pour les reviews bot (avec debounce)
 
@@ -272,7 +277,7 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
      - Poster un commentaire `code-dev: REFACTO` avec diagnostic complet → intervention `architect` probablement nécessaire (re-découpage du ticket)
      - Logger `STUCK` puis retourner le JSON `{"status":"refacto","ticket":<N>,"reason":"<résumé>"}` (le pipeline incrémente le compteur d'échecs Opus du ticket : au 3ᵉ refacto consécutif il pose `dispatch=escalate` pour intervention humaine)
 
-10. **Fin** — quand 9a + 9b + 9c + 9d sont **tous verts / résolus** :
+10. **Fin** — quand 9a + 9a-bis + 9b + 9c + 9d sont **tous verts / résolus** :
    - `gh pr ready <PR>` (sort la PR du draft)
    - **Re-poll les checks après `gh pr ready`** : marquer la PR `ready` peut re-déclencher certains workflows (Deploy review notamment, qui n'a pas de `pull_request: types: [opened, synchronize]` strict). Attendre encore une fois que **toutes** les conclusions soient SUCCESS / SKIPPED / NEUTRAL — même critère qu'en 9b. Si un check repasse en FAILURE après `pr ready`, retourner en 9b (corriger, push, watch). Ne **jamais** retourner `validated` avec un check rouge.
    - Logger `PR_READY` avec le numéro de PR
@@ -318,6 +323,10 @@ Calls `bash scripts/orchestration/log_event.sh code-dev-<N> <EVENT> [msg]`. Logg
 | `PR_DRAFT` | Étape 8 — PR draft ouverte | `pr=<P>` |
 | `FUNCTIONAL_START` | Étape 9a — début functional-validator | `attempt=<K>` |
 | `FUNCTIONAL_OK` | Étape 9a — PASS | `attempt=<K>` |
+| `VISUAL_START` | Étape 9a-bis — début `design-validator`, à chaque retry | `attempt=<K>` |
+| `VISUAL_OK` | Étape 9a-bis — PASS (fidélité Figma OK) | `attempt=<K>` |
+| `VISUAL_DEGRADED` | Étape 9a-bis — écran inatteignable / pas de référence, validation partielle assumée | `reason=<résumé>` |
+| `VISUAL_SKIP` | Étape 9a-bis — ticket sans `.tsx`/`.scss` modifié | `no UI files` |
 | `CI_WAIT` | Étape 9b — début (ou re-début après push) du watch CI | `pr=<P>` |
 | `CI_FAIL` | Étape 9b — un check rouge identifié | `pr=<P> failed=<check-name>` |
 | `CI_OK` | Étape 9b — toutes les checks vertes | `pr=<P>` |

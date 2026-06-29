@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
+import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { FileUpload, getDsfrModal, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { ContentTypeMatrix } from "./components/ContentTypeMatrix";
@@ -53,6 +54,7 @@ export function Step2Upload({
 		buildAssociationMap(columns, initialAssociations),
 	);
 	const readOnlyGuard = useReadOnlyGuard();
+	const { isReadOnly: isLocked } = useLockContext();
 
 	const emptyDbValues = useMemo(() => ({}), []);
 	useDeclarationDraft({
@@ -208,7 +210,7 @@ export function Step2Upload({
 						accept=".pdf"
 						acceptLabel="pdf"
 						allowedMimeTypes={["application/pdf"]}
-						disabled={readOnlyGuard.isReadOnly || isUploadingFiles}
+						disabled={readOnlyGuard.isReadOnly || isLocked || isUploadingFiles}
 						error={uploadError}
 						inputId="cse-file-upload"
 						maxFileCount={remainingSlots}
@@ -231,7 +233,7 @@ export function Step2Upload({
 							associations={associations}
 							columns={columns}
 							deletingFileId={deletingFileId}
-							disabled={readOnlyGuard.isReadOnly}
+							disabled={readOnlyGuard.isReadOnly || isLocked}
 							files={existingFiles}
 							onDelete={(fileId) => {
 								setDeletingFileId(fileId);
@@ -293,7 +295,7 @@ export function Step2Upload({
 						<button
 							{...readOnlyGuard.buttonProps}
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-							disabled={readOnlyGuard.isReadOnly}
+							disabled={readOnlyGuard.isReadOnly || isLocked}
 							type="submit"
 						>
 							Soumettre

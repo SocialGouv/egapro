@@ -13,17 +13,20 @@ const {
 	fetchMatomoCategoryModelMock,
 	fetchMatomoHelpLinksMock,
 	fetchMatomoDeviceBreakdownMock,
+	fetchMatomoCseStatusConfirmationsMock,
 } = vi.hoisted(() => ({
 	fetchMatomoFunnelMock: vi.fn(),
 	fetchMatomoCategoryModelMock: vi.fn(),
 	fetchMatomoHelpLinksMock: vi.fn(),
 	fetchMatomoDeviceBreakdownMock: vi.fn(),
+	fetchMatomoCseStatusConfirmationsMock: vi.fn(),
 }));
 vi.mock("~/server/services/matomo", () => ({
 	fetchMatomoFunnel: fetchMatomoFunnelMock,
 	fetchMatomoCategoryModel: fetchMatomoCategoryModelMock,
 	fetchMatomoHelpLinks: fetchMatomoHelpLinksMock,
 	fetchMatomoDeviceBreakdown: fetchMatomoDeviceBreakdownMock,
+	fetchMatomoCseStatusConfirmations: fetchMatomoCseStatusConfirmationsMock,
 }));
 
 type SelectChain = {
@@ -1617,6 +1620,28 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 		expect(result.revisionFunnel[3]?.pctDropFromPrev).toBe(33);
 	});
 
+	it("S-K19-9: revision 'action submitted' counts only round-2 joint evaluations, never the pre-revision corrective submit (no funnel inversion)", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCompletionFunnel({ year: 2026 });
+
+		// Promise.all order is main, compliance, revision, cse → revision is #3.
+		const revisionSql = flattenSql(db.execute.mock.calls[2]?.[0]);
+		// The only submit-type action available during a revision is a round-2
+		// joint evaluation (corrective_action is forbidden in revision).
+		expect(revisionSql).toContain("joint_evaluation_submit");
+		// second_declaration_submit is always round 2 but is the PRE-revision
+		// corrective action: counting it would push "action submitted" above
+		// "path chosen" for declarations still in awaiting_revision_choice.
+		expect(revisionSql).not.toContain("second_declaration_submit");
+	});
+
 	it("S-K19-6: the revision funnel is empty when no declaration is in revision (count[0] === 0)", async () => {
 		const db = buildFunnelDb({
 			main: {
@@ -2030,5 +2055,185 @@ describe("adminStatsRouter.getMatomoDeviceBreakdown", () => {
 		await expect(
 			caller.getMatomoDeviceBreakdown({ year: 2101 }),
 		).rejects.toThrow();
+	});
+});
+
+describe("adminStatsRouter.getMatomoCseStatusConfirmations", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: nonAdminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getMatomoCseStatusConfirmations({ year: 2026 }),
+		).rejects.toThrow(/administrateurs/i);
+	});
+
+	it("delegates to the Matomo service with the year only (sizeRange is ignored)", async () => {
+		const output = { total: 55, yes: 42, no: 13 };
+		fetchMatomoCseStatusConfirmationsMock.mockResolvedValue(output);
+
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getMatomoCseStatusConfirmations({
+			year: 2026,
+			sizeRange: "50-99",
+		});
+
+		expect(fetchMatomoCseStatusConfirmationsMock).toHaveBeenCalledWith({
+			year: 2026,
+		});
+		expect(result).toBe(output);
+	});
+
+	it("validates the year bounds", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getMatomoCseStatusConfirmations({ year: 1999 }),
+		).rejects.toThrow();
+		await expect(
+			caller.getMatomoCseStatusConfirmations({ year: 2101 }),
+		).rejects.toThrow();
+	});
+});
+
+type UsersPerCompanyRow = {
+	total_companies: number | string;
+	mono: number | string;
+	multi: number | string;
+	avg_per_company: number | string;
+	max_users: number | string;
+};
+
+function buildUsersPerCompanyDb(row?: UsersPerCompanyRow) {
+	const execute = vi.fn().mockResolvedValue(row ? [row] : []);
+	return { select: vi.fn(), execute };
+}
+
+describe("adminStatsRouter.getUsersPerCompany", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildUsersPerCompanyDb(),
+			session: nonAdminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getUsersPerCompany()).rejects.toThrow(
+			/administrateurs/i,
+		);
+	});
+
+	it("maps the SQL aggregate row to the typed UsersPerCompany shape", async () => {
+		const db = buildUsersPerCompanyDb({
+			total_companies: 3,
+			mono: 1,
+			multi: 2,
+			avg_per_company: 2.3333333333333335,
+			max_users: 4,
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getUsersPerCompany();
+
+		expect(result).toEqual({
+			totalCompanies: 3,
+			mono: 1,
+			multi: 2,
+			avgPerCompany: 2.3333333333333335,
+			maxUsers: 4,
+		});
+	});
+
+	it("coerces SQL numeric strings to numbers (pg may serialise COUNT/AVG as text)", async () => {
+		const db = buildUsersPerCompanyDb({
+			total_companies: "10",
+			mono: "6",
+			multi: "4",
+			avg_per_company: "1.8",
+			max_users: "5",
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getUsersPerCompany();
+
+		expect(result).toEqual({
+			totalCompanies: 10,
+			mono: 6,
+			multi: 4,
+			avgPerCompany: 1.8,
+			maxUsers: 5,
+		});
+	});
+
+	it("defaults every field to 0 when the aggregate query returns no row", async () => {
+		const db = buildUsersPerCompanyDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getUsersPerCompany();
+
+		expect(result).toEqual({
+			totalCompanies: 0,
+			mono: 0,
+			multi: 0,
+			avgPerCompany: 0,
+			maxUsers: 0,
+		});
+	});
+
+	it("counts distinct users per siren via a single grouped CTE", async () => {
+		const db = buildUsersPerCompanyDb({
+			total_companies: 0,
+			mono: 0,
+			multi: 0,
+			avg_per_company: 0,
+			max_users: 0,
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getUsersPerCompany();
+
+		expect(db.execute).toHaveBeenCalledTimes(1);
+		const sqlText = flattenSql(db.execute.mock.calls[0]?.[0]);
+		expect(sqlText).toContain("DISTINCT");
+		expect(sqlText).toMatch(/GROUP BY/i);
 	});
 });

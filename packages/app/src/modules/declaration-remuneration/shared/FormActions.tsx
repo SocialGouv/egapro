@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useReadOnlyGuard } from "~/modules/auth";
-
 import styles from "./FormActions.module.scss";
+import { useLockContext } from "./lock/LockContext";
 
 type FormActionsProps = {
 	previousHref?: string;
@@ -33,6 +33,7 @@ export function FormActions({
 	mimoquageNextHref,
 }: FormActionsProps) {
 	const { isReadOnly, buttonProps, tooltip } = useReadOnlyGuard();
+	const { isReadOnly: isLocked, isLoading: isLockLoading } = useLockContext();
 
 	return (
 		<div className={`${styles.actions} ${className ?? ""}`}>
@@ -53,7 +54,7 @@ export function FormActions({
 				>
 					{nextLabel}
 				</Link>
-			) : isReadOnly && mimoquageNextHref ? (
+			) : (isReadOnly || isLocked) && mimoquageNextHref ? (
 				<span>
 					<Link
 						aria-describedby={buttonProps["aria-describedby"]}
@@ -69,7 +70,13 @@ export function FormActions({
 					<button
 						{...buttonProps}
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={isReadOnly || isSubmitting || nextDisabled}
+						disabled={
+							isReadOnly ||
+							isLocked ||
+							isLockLoading ||
+							isSubmitting ||
+							nextDisabled
+						}
 						type="submit"
 					>
 						{isSubmitting ? "Enregistrement…" : nextLabel}

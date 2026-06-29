@@ -14,6 +14,7 @@ import { CampaignProgressionTable } from "./CampaignProgressionTable";
 import { CampaignRateTile } from "./CampaignRateTile";
 import { CompletionFunnelChart } from "./CompletionFunnelChart";
 import { CompletionFunnelTable } from "./CompletionFunnelTable";
+import { CseStatusConfirmationsTile } from "./CseStatusConfirmationsTile";
 import { StagnationDaysFilter } from "./StagnationDaysFilter";
 import { type BarSeries, StatsBarChart } from "./StatsBarChart";
 import { StatsBarTable, type StatsTableColumn } from "./StatsBarTable";
@@ -23,6 +24,7 @@ import { StepDropoffTable } from "./StepDropoffTable";
 import { StepDurationsChart } from "./StepDurationsChart";
 import { StepDurationsTable } from "./StepDurationsTable";
 import type { DeviceBreakdownRow, LabeledCount } from "./types";
+import { UsersPerCompanyTile } from "./UsersPerCompanyTile";
 import { useDebouncedValue } from "./useDebouncedValue";
 import { YearsFilter } from "./YearsFilter";
 
@@ -83,7 +85,12 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 		STAGNATION_DEBOUNCE_MS,
 	);
 
-	const activeYear = selectedYears[0] ?? currentYear;
+	// Single-year widgets key off the most recent selected campaign. `YearsFilter`
+	// emits the selection sorted ascending, so `selectedYears[0]` is the OLDEST
+	// year — using it would blank every per-campaign widget as soon as the user
+	// toggles a year. Take the max so the active campaign is order-independent.
+	const activeYear =
+		selectedYears.length > 0 ? Math.max(...selectedYears) : currentYear;
 
 	const progressionQuery = api.adminStats.getCampaignProgression.useQuery(
 		{ years: selectedYears, sizeRange },
@@ -288,6 +295,28 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 								</>
 							)}
 						</section>
+					</div>
+				</div>
+			</section>
+
+			<section className="fr-mt-6w" id="comptes">
+				<h2 className="fr-h2">Comptes &amp; engagement CSE</h2>
+				<p>
+					Confirmations du statut CSE mesurées côté navigateur (Matomo,
+					anonymisé — volume de confirmations sur l&apos;année, pas
+					d&apos;entreprises distinctes) et répartition des utilisateurs par
+					entreprise (lecture directe en base).
+				</p>
+				<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
+					<div className="fr-col-12 fr-col-md-6">
+						<div className={styles.card}>
+							<UsersPerCompanyTile />
+						</div>
+					</div>
+					<div className="fr-col-12 fr-col-md-6">
+						<div className={styles.card}>
+							<CseStatusConfirmationsTile year={activeYear} />
+						</div>
 					</div>
 				</div>
 			</section>

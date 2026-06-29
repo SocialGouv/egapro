@@ -39,6 +39,12 @@ function makeDisplayContextFromPaths(
 	};
 }
 
+type LockHolder = {
+	firstName: string | null;
+	lastName: string | null;
+	email: string | null;
+};
+
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
 	year: FUTURE_YEAR,
@@ -47,6 +53,8 @@ const BASE_PROPS = {
 	hasSubmittedSecondDeclaration: false,
 	siren: "532847196",
 	ctaHref: "/declaration-remuneration?siren=532847196",
+	lockedByOther: false,
+	lockHolder: null as LockHolder | null,
 };
 
 function renderPanel(
@@ -318,6 +326,75 @@ describe("DeclarationProcessPanel", () => {
 			expect(
 				panel.getByText(/Modification close depuis le/),
 			).toBeInTheDocument();
+		});
+	});
+
+	describe("lock held by another co-declarant", () => {
+		const lockHolder = {
+			firstName: "Alice",
+			lastName: "Martin",
+			email: "alice.martin@example.fr",
+		};
+
+		it("renders the lock alert naming the current editor", () => {
+			const { dialog } = renderPanel("start", {
+				lockedByOther: true,
+				lockHolder,
+			});
+			const alert = dialog.querySelector('[role="alert"]');
+			expect(alert).toBeInTheDocument();
+			expect(alert).toHaveTextContent("Déclaration en cours de modification");
+			expect(alert).toHaveTextContent("Alice Martin");
+		});
+
+		it('replaces the CTA label with "Consulter en lecture seule"', () => {
+			const { dialog } = renderPanel("start", {
+				lockedByOther: true,
+				lockHolder,
+			});
+			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
+			const cta = ctaLinks[ctaLinks.length - 1];
+			expect(cta).toHaveTextContent("Consulter en lecture seule");
+			expect(cta).not.toHaveTextContent("Commencer la déclaration");
+		});
+
+		it("keeps the CTA href pointing to the declaration for read-only access", () => {
+			const { dialog } = renderPanel("start", {
+				lockedByOther: true,
+				lockHolder,
+			});
+			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
+			const cta = ctaLinks[ctaLinks.length - 1];
+			expect(cta).toHaveAttribute(
+				"href",
+				"/declaration-remuneration?siren=532847196",
+			);
+		});
+
+		it("does not render the alert when lockedByOther is true but no holder is resolved", () => {
+			const { dialog } = renderPanel("start", {
+				lockedByOther: true,
+				lockHolder: null,
+			});
+			expect(dialog.querySelector('[role="alert"]')).not.toBeInTheDocument();
+		});
+	});
+
+	describe("declaration not locked by another user", () => {
+		it("does not render the lock alert", () => {
+			const { dialog } = renderPanel("start", {
+				lockedByOther: false,
+				lockHolder: null,
+			});
+			expect(dialog.querySelector('[role="alert"]')).not.toBeInTheDocument();
+		});
+
+		it("keeps the regular CTA label", () => {
+			const { dialog } = renderPanel("start", { lockedByOther: false });
+			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
+			const cta = ctaLinks[ctaLinks.length - 1];
+			expect(cta).toHaveTextContent("Commencer la déclaration");
+			expect(cta).not.toHaveTextContent("Consulter en lecture seule");
 		});
 	});
 });

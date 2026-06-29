@@ -3,6 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockGetToken = vi.fn();
 const mockLogAction = vi.fn();
+const mockReleaseAllLocksForUser = vi.fn();
+
+const fakeDb = { __brand: "db" };
 
 vi.mock("next-auth/jwt", () => ({
 	getToken: (...args: unknown[]) => mockGetToken(...args),
@@ -14,6 +17,13 @@ vi.mock("~/server/auth/proconnect-logout", () => ({
 
 vi.mock("~/server/audit/log", () => ({
 	logAction: (...args: unknown[]) => mockLogAction(...args),
+}));
+
+vi.mock("~/server/db", () => ({ db: fakeDb }));
+
+vi.mock("~/server/services/declarationLockService", () => ({
+	releaseAllLocksForUser: (...args: unknown[]) =>
+		mockReleaseAllLocksForUser(...args),
 }));
 
 import { fetchEndSessionEndpoint } from "~/server/auth/proconnect-logout";
@@ -33,6 +43,7 @@ describe("GET /api/auth/logout", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockFetchEndSession.mockResolvedValue(null);
+		mockReleaseAllLocksForUser.mockResolvedValue(undefined);
 	});
 
 	it("redirects to the home page when no session is active", async () => {
@@ -126,5 +137,44 @@ describe("GET /api/auth/logout", () => {
 			userEmail: "user@example.com",
 			siren: "123456789",
 		});
+	});
+
+	it("releases all locks held by the user with the db client and user id", async () => {
+		mockGetToken.mockResolvedValue({ id: "user-123" });
+
+		await GET(buildRequest());
+
+		expect(mockReleaseAllLocksForUser).toHaveBeenCalledOnce();
+		expect(mockReleaseAllLocksForUser).toHaveBeenCalledWith(fakeDb, "user-123");
+	});
+
+	it("does not release any lock when the request is unauthenticated", async () => {
+		mockGetToken.mockResolvedValue(null);
+
+		await GET(buildRequest());
+
+		expect(mockReleaseAllLocksForUser).not.toHaveBeenCalled();
+	});
+
+	it("does not release any lock when the session token carries no user id", async () => {
+		mockGetToken.mockResolvedValue({ email: "user@example.com" });
+
+		await GET(buildRequest());
+
+		expect(mockReleaseAllLocksForUser).not.toHaveBeenCalled();
+	});
+
+	it("still completes the logout redirect when releasing locks throws", async () => {
+		mockGetToken.mockResolvedValue({ id: "user-123" });
+		mockReleaseAllLocksForUser.mockRejectedValue(new Error("DB unavailable"));
+
+		const response = await GET(buildRequest());
+
+		expect(mockReleaseAllLocksForUser).toHaveBeenCalledOnce();
+		expect(response.status).toBe(307);
+		expect(response.headers.get("Location")).toBe("http://localhost:3000/");
+		expect(response.headers.get("set-cookie")).toContain(
+			"next-auth.session-token=",
+		);
 	});
 });

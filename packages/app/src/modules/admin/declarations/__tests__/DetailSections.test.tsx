@@ -55,6 +55,7 @@ const declaration: DeclarationDetail = {
 		},
 	],
 	siblings: [],
+	lock: null,
 };
 
 describe("DeclarationSummary", () => {

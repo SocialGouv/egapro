@@ -150,18 +150,35 @@ docker compose logs -f matomo-init      # suivre l'install + la config CNIL
 #    NEXT_PUBLIC_MATOMO_SITE_ID="1"
 #    puis `pnpm dev:app` et parcourir les funnels / déclencher les actions.
 
-# 3. UI Matomo : http://localhost:8080  (admin / adminadmin12 — local uniquement)
+# 3. UI Matomo : http://localhost:8080  (admin / changeme123 — local uniquement)
 #    Les events arrivent dans « Comportement → Événements ».
 
 # Pour repartir d'un Matomo vierge :
 #   docker compose --profile matomo down && docker volume rm egapro_matomodata egapro_matomodbdata
 ```
 
-Pour rejouer **toute** la taxonomie d'un coup (sans parcourir l'UI), envoyer
-chaque événement de [`plan-de-tracking.md`](./plan-de-tracking.md) directement
-sur `http://localhost:8080/matomo.php` (`idsite=1&rec=1`,
-`e_c`/`e_a`/`e_n`/`e_v`, `dimension1`/`dimension2`), puis relire l'agrégat via la
-Reporting API (`Events.getCategory`).
+Pour rejouer **toute** la taxonomie d'un coup (sans parcourir l'UI), le service
+`matomo-seed` ([`seed-events.py`](../scripts/matomo-local/seed-events.py)) émet
+des événements synthétiques pour **l'ensemble** du
+[`plan-de-tracking.md`](./plan-de-tracking.md) (pages vues, les 3 funnels et
+toutes les actions ponctuelles des 9 catégories) sur les deux dernières années
+de campagne. La conformité « données » se vérifie ensuite automatiquement :
+
+```bash
+# audit live : pas de PII dans les events/dimensions, URLs sans query string
+MATOMO_URL=http://localhost:8080 python3 scripts/matomo-local/seed-events.py verify
+```
+
+La config de confidentialité de l'instance (anonymisation IP 2 octets, DNT,
+purge 750 j, désactivation des exports, pseudonymisation du User ID) est
+appliquée par [`cnil-setup.py`](../scripts/matomo-local/cnil-setup.py) et stockée
+dans la table `option` de Matomo (non exposée par la Reporting API en Matomo 5) :
+
+```bash
+docker exec egapro-matomo-db-1 mariadb -u matomo -pmatomo matomo -N -e \
+  "SELECT option_name, option_value FROM matomo_option \
+   WHERE option_name LIKE 'PrivacyManager%' OR option_name LIKE 'delete_logs%';"
+```
 
 > ⚠️ Le **journal des visites (Live)** est volontairement désactivé (étape 1 du
 > guide CNIL). La vérification se fait donc sur les **rapports agrégés**
@@ -186,6 +203,14 @@ taxonomie (pages vues + 22 événements distincts) :
 - ✅ **DNT respecté** côté serveur (`doNotTrackEnabled = true`) et côté client
   (`setDoNotTrack(true)`).
 - ✅ **Opt-out** : l'iframe `action=optOut` répond et propose la désinscription.
+
+> Snapshot daté de la mise en place de l'exemption. La taxonomie s'est depuis
+> enrichie (liens d'aide, usage du modèle de l'indicateur par catégorie, et
+> l'action **`cse_status` / `cse_status_confirm`** — confirmation du statut CSE).
+> Chaque ajout respecte la même garantie : `cse_status_confirm` n'émet que le
+> label borné `oui`/`non` + l'année de campagne (slot 1), **jamais le SIREN ni
+> aucun identifiant**. La liste 1:1 avec le code est tenue dans
+> [`plan-de-tracking.md`](./plan-de-tracking.md).
 
 Conclusion : la configuration documentée tient les conditions d'exemption de
 consentement de la CNIL. Reste à appliquer ces réglages sur l'instance de

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { buildLockHolder } from "./helpers/lockTestHelpers";
 
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
@@ -10,6 +11,7 @@ vi.mock("~/server/db", () => ({
 
 vi.mock("~/server/db/schema", () => ({
 	declarations: {
+		id: "id",
 		siren: "siren",
 		year: "year",
 		draft: "draft",
@@ -20,6 +22,18 @@ vi.mock("~/server/db/schema", () => ({
 	userCompanies: {
 		siren: "siren",
 		userId: "userId",
+	},
+	declarationLocks: {
+		id: "id",
+		declarationId: "declarationId",
+		lockedByUserId: "lockedByUserId",
+		expiresAt: "expiresAt",
+	},
+	users: {
+		id: "id",
+		email: "email",
+		firstName: "firstName",
+		lastName: "lastName",
 	},
 }));
 
@@ -32,6 +46,12 @@ const SIREN = "123456789";
 const YEAR = 2024;
 const USER_SIRET = "12345678900015";
 const FORBIDDEN_MSG = "Accès refusé à ce SIREN.";
+const DECLARATION_ID = "decl-1";
+
+// The session in createCaller is "user-1"; an own-lock holder must match it,
+// a foreign holder must not.
+const ownLockHolder = () => buildLockHolder({ userId: "user-1" });
+const foreignLockHolder = () => buildLockHolder({ userId: "user-2" });
 
 type SelectResponse = unknown[];
 
@@ -45,7 +65,10 @@ function createMockDb(responses: SelectResponse[] = []) {
 	});
 
 	const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit });
-	const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+	const mockInnerJoin = vi.fn().mockReturnValue({ where: mockWhere });
+	const mockFrom = vi
+		.fn()
+		.mockReturnValue({ where: mockWhere, innerJoin: mockInnerJoin });
 	const mockSelect = vi.fn().mockReturnValue({ from: mockFrom });
 
 	const mockUpdateWhere = vi.fn().mockResolvedValue(undefined);
@@ -209,7 +232,8 @@ describe("declarationDraftRouter", () => {
 			const existingDraft = { main: { step1: { workforce: 40 } } };
 			const { db, mocks } = createMockDb([
 				[{ siren: SIREN }],
-				[{ draft: existingDraft }],
+				[{ id: DECLARATION_ID, draft: existingDraft }],
+				[ownLockHolder()],
 			]);
 			const caller = await createCaller(db);
 
@@ -228,7 +252,8 @@ describe("declarationDraftRouter", () => {
 			const existingDraft = { main: { step1: { workforce: 50 } } };
 			const { db, mocks } = createMockDb([
 				[{ siren: SIREN }],
-				[{ draft: existingDraft }],
+				[{ id: DECLARATION_ID, draft: existingDraft }],
+				[ownLockHolder()],
 			]);
 			const caller = await createCaller(db);
 
@@ -246,6 +271,59 @@ describe("declarationDraftRouter", () => {
 					},
 				}),
 			);
+		});
+
+		it("allows the autosave when no declaration row exists yet (create path)", async () => {
+			const { db, mocks } = createMockDb([[{ siren: SIREN }], []]);
+			const caller = await createCaller(db);
+
+			const result = await caller.save({
+				siren: SIREN,
+				year: YEAR,
+				slice: { kind: "main", step: "step1", data: { workforce: 50 } },
+			});
+
+			expect(result).toEqual({ ok: true });
+			expect(mocks.insert).toHaveBeenCalled();
+		});
+
+		it("allows the autosave when the lock is free (no active holder)", async () => {
+			const existingDraft = { main: { step1: { workforce: 40 } } };
+			const { db, mocks } = createMockDb([
+				[{ siren: SIREN }],
+				[{ id: DECLARATION_ID, draft: existingDraft }],
+				[],
+			]);
+			const caller = await createCaller(db);
+
+			const result = await caller.save({
+				siren: SIREN,
+				year: YEAR,
+				slice: { kind: "main", step: "step1", data: { workforce: 50 } },
+			});
+
+			expect(result).toEqual({ ok: true });
+			expect(mocks.update).toHaveBeenCalled();
+		});
+
+		it("throws CONFLICT when another co-declarant holds the lock", async () => {
+			const existingDraft = { main: { step1: { workforce: 40 } } };
+			const { db, mocks } = createMockDb([
+				[{ siren: SIREN }],
+				[{ id: DECLARATION_ID, draft: existingDraft }],
+				[foreignLockHolder()],
+			]);
+			const caller = await createCaller(db);
+
+			await expect(
+				caller.save({
+					siren: SIREN,
+					year: YEAR,
+					slice: { kind: "main", step: "step1", data: { workforce: 50 } },
+				}),
+			).rejects.toThrow("Déclaration verrouillée par un autre utilisateur.");
+			expect(mocks.update).not.toHaveBeenCalled();
+			expect(mocks.insert).not.toHaveBeenCalled();
 		});
 
 		it("throws FORBIDDEN when user does not own the siren", async () => {

@@ -7,6 +7,7 @@ import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { updateStep4Schema } from "../schemas";
+import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
 import { DEV_STEP4_ANNUAL, DEV_STEP4_HOURLY } from "../shared/devFillData";
 import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
@@ -16,6 +17,7 @@ import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
+import { useLockContext } from "../shared/lock/LockContext";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
@@ -66,6 +68,7 @@ export function Step4QuartileDistribution({
 }: Step4QuartileDistributionProps) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
+	const { isReadOnly } = useLockContext();
 	const alertRef = useRef<HTMLDivElement | null>(null);
 
 	const hasSavedData =
@@ -132,7 +135,7 @@ export function Step4QuartileDistribution({
 		if (d.hourly) form.setValue("hourly", d.hourly);
 	});
 
-	useDraftAutoSave(form, draftHydrated, (values) =>
+	useDraftAutoSave(form, draftHydrated && !isReadOnly, (values) =>
 		setField({
 			annual: values.annual as QuartileTuple,
 			hourly: values.hourly as QuartileTuple,
@@ -258,157 +261,169 @@ export function Step4QuartileDistribution({
 			noValidate
 			onSubmit={onSubmit}
 		>
-			<StepTitleRow
-				hasData={hasData}
-				isPendingSave={isPendingSave}
-				isSaving={isSaving}
-				onDevFill={() => {
-					form.setValue(
-						"annual",
-						padThresholds(
-							DEV_STEP4_ANNUAL.map(toQuartileData) as QuartileTuple,
-						),
-					);
-					form.setValue(
-						"hourly",
-						padThresholds(
-							DEV_STEP4_HOURLY.map(toQuartileData) as QuartileTuple,
-						),
-					);
-					setFieldErrors(emptyErrorMap());
-					setShowRecap(false);
-				}}
-				title={
-					<h1 className="fr-h4 fr-mb-0">
-						Déclaration des indicateurs de rémunération {declarationYear}
-					</h1>
-				}
-			/>
+			<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+				<StepTitleRow
+					hasData={hasData}
+					isPendingSave={isPendingSave}
+					isSaving={isSaving}
+					onDevFill={() => {
+						form.setValue(
+							"annual",
+							padThresholds(
+								DEV_STEP4_ANNUAL.map(toQuartileData) as QuartileTuple,
+							),
+						);
+						form.setValue(
+							"hourly",
+							padThresholds(
+								DEV_STEP4_HOURLY.map(toQuartileData) as QuartileTuple,
+							),
+						);
+						setFieldErrors(emptyErrorMap());
+						setShowRecap(false);
+					}}
+					title={
+						<h1 className="fr-h4 fr-mb-0">
+							Déclaration des indicateurs de rémunération {declarationYear}
+						</h1>
+					}
+				/>
 
-			<StepIndicator currentStep={4} />
+				<StepIndicator currentStep={4} />
 
-			<div className={stepStyles.instructions}>
-				<p className="fr-mb-0">
-					Cet indicateur répartit l&apos;ensemble des salariés en quatre groupes
-					de rémunération appelés quartiles&nbsp;: du quartile inférieur qui
-					regroupe les salariés les moins rémunérés, au quartile supérieur qui
-					rassemble les salariés les mieux rémunérés.
-				</p>
+				<div className={stepStyles.instructions}>
+					<p className="fr-mb-0">
+						Cet indicateur répartit l&apos;ensemble des salariés en quatre
+						groupes de rémunération appelés quartiles&nbsp;: du quartile
+						inférieur qui regroupe les salariés les moins rémunérés, au quartile
+						supérieur qui rassemble les salariés les mieux rémunérés.
+					</p>
 
-				<p className="fr-mb-0">
-					<strong>
-						Vérifiez les informations préremplies et modifiez-les si nécessaire
-						avant de valider vos indicateurs.
-					</strong>
-				</p>
+					{gipPrefillData ? (
+						<p className="fr-mb-0">
+							<strong>
+								Vérifiez les informations préremplies et modifiez-les si
+								nécessaire avant de valider vos indicateurs.
+							</strong>
+						</p>
+					) : (
+						<p className={`fr-mb-0 ${stepStyles.introMedium}`}>
+							Renseignez les informations avant de valider vos indicateurs.
+						</p>
+					)}
 
-				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
-			</div>
-
-			{showAlert && (
-				<div
-					aria-labelledby="step4-error-summary-title"
-					className="fr-alert fr-alert--error"
-					ref={alertRef}
-					role="alert"
-					tabIndex={-1}
-				>
-					<h3 className="fr-alert__title" id="step4-error-summary-title">
-						Le formulaire contient des erreurs
-					</h3>
-					<ul>
-						{recap.map((entry) => (
-							<li key={entry.id}>
-								<a href={`#${entry.id}`}>{entry.label}</a>
-							</li>
-						))}
-					</ul>
+					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 				</div>
-			)}
 
-			<div className={stepStyles.dataContainer}>
-				<QuartileTable
-					disabled={isImpersonating}
-					errors={fieldErrors.annual}
-					mins={annualMins}
-					onQuartileChange={(index, field, value) =>
-						handleQuartileChange("annual", index, field, value)
-					}
-					quartiles={annual}
-					sourceNote={
-						<PrefillSource periodEnd={gipPrefillData?.periodEnd ?? null} />
-					}
-					tableType="annual"
-					title="Rémunération annuelle brute moyenne"
-				/>
-
-				<QuartileTable
-					disabled={isImpersonating}
-					errors={fieldErrors.hourly}
-					mins={hourlyMins}
-					onQuartileChange={(index, field, value) =>
-						handleQuartileChange("hourly", index, field, value)
-					}
-					quartiles={hourly}
-					sourceNote={
-						<PrefillSource periodEnd={gipPrefillData?.periodEnd ?? null} />
-					}
-					tableType="hourly"
-					title="Rémunération horaire brute moyenne"
-				/>
-
-				<DefinitionAccordion
-					id="accordion-step4"
-					title="Définitions et méthode de calcul"
-				>
-					<div className="fr-callout">
+				{showAlert && (
+					<div
+						aria-labelledby="step4-error-summary-title"
+						className="fr-alert fr-alert--error"
+						ref={alertRef}
+						role="alert"
+						tabIndex={-1}
+					>
+						<h3 className="fr-alert__title" id="step4-error-summary-title">
+							Le formulaire contient des erreurs
+						</h3>
 						<ul>
-							<li>
-								Quelles données sont prises en compte dans les calculs&nbsp;?
-							</li>
-							<li>
-								Les calculs incluent-ils uniquement le salaire de base ou
-								également les primes&nbsp;?
-							</li>
-							<li>
-								Sont-ils réalisés en équivalent temps plein, en salaire brut
-								horaire ou selon une autre modalité&nbsp;?
-							</li>
-							<li>
-								Que signifie la notion de «&nbsp;quartile&nbsp;» dans ce
-								contexte&nbsp;? Définir simplement un quartile pour permettre à
-								l&apos;utilisateur de s&apos;assurer qu&apos;il comprend bien
-								cette notion.
-							</li>
-							<li>
-								À quoi servent les quartiles présentés&nbsp;? Quelle est la
-								finalité des quartiles lorsqu&apos;ils sont affichés sans
-								échelle ou référence comparative&nbsp;?
-							</li>
+							{recap.map((entry) => (
+								<li key={entry.id}>
+									<a href={`#${entry.id}`}>{entry.label}</a>
+								</li>
+							))}
 						</ul>
 					</div>
-				</DefinitionAccordion>
-			</div>
+				)}
 
-			{gipPrefillData && (
-				<QuartileInterpretationCallout
-					annualCategories={annual}
-					hourlyCategories={hourly}
+				<div className={stepStyles.dataContainer}>
+					<QuartileTable
+						disabled={isImpersonating}
+						errors={fieldErrors.annual}
+						mins={annualMins}
+						onQuartileChange={(index, field, value) =>
+							handleQuartileChange("annual", index, field, value)
+						}
+						quartiles={annual}
+						sourceNote={
+							gipPrefillData ? (
+								<PrefillSource periodEnd={gipPrefillData.periodEnd ?? null} />
+							) : undefined
+						}
+						tableType="annual"
+						title="Rémunération annuelle brute moyenne"
+					/>
+
+					<QuartileTable
+						disabled={isImpersonating}
+						errors={fieldErrors.hourly}
+						mins={hourlyMins}
+						onQuartileChange={(index, field, value) =>
+							handleQuartileChange("hourly", index, field, value)
+						}
+						quartiles={hourly}
+						sourceNote={
+							gipPrefillData ? (
+								<PrefillSource periodEnd={gipPrefillData.periodEnd ?? null} />
+							) : undefined
+						}
+						tableType="hourly"
+						title="Rémunération horaire brute moyenne"
+					/>
+
+					<DefinitionAccordion
+						id="accordion-step4"
+						title="Définitions et méthode de calcul"
+					>
+						<div className="fr-callout">
+							<ul>
+								<li>
+									Quelles données sont prises en compte dans les calculs&nbsp;?
+								</li>
+								<li>
+									Les calculs incluent-ils uniquement le salaire de base ou
+									également les primes&nbsp;?
+								</li>
+								<li>
+									Sont-ils réalisés en équivalent temps plein, en salaire brut
+									horaire ou selon une autre modalité&nbsp;?
+								</li>
+								<li>
+									Que signifie la notion de «&nbsp;quartile&nbsp;» dans ce
+									contexte&nbsp;? Définir simplement un quartile pour permettre
+									à l&apos;utilisateur de s&apos;assurer qu&apos;il comprend
+									bien cette notion.
+								</li>
+								<li>
+									À quoi servent les quartiles présentés&nbsp;? Quelle est la
+									finalité des quartiles lorsqu&apos;ils sont affichés sans
+									échelle ou référence comparative&nbsp;?
+								</li>
+							</ul>
+						</div>
+					</DefinitionAccordion>
+				</div>
+
+				{gipPrefillData && (
+					<QuartileInterpretationCallout
+						annualCategories={annual}
+						hourlyCategories={hourly}
+					/>
+				)}
+
+				<FormErrors
+					mutationError={mutation.error?.message}
+					validationError={maxError}
 				/>
-			)}
 
-			<FormErrors
-				mutationError={mutation.error?.message}
-				validationError={maxError}
-			/>
-
-			<FormActions
-				isSubmitting={mutation.isPending}
-				mimoquageNextHref={
-					hasSavedData ? "/declaration-remuneration/etape/5" : undefined
-				}
-				previousHref="/declaration-remuneration/etape/3"
-			/>
+				<FormActions
+					isSubmitting={mutation.isPending}
+					mimoquageNextHref={
+						hasSavedData ? "/declaration-remuneration/etape/5" : undefined
+					}
+					previousHref="/declaration-remuneration/etape/3"
+				/>
+			</fieldset>
 		</form>
 	);
 }

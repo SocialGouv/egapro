@@ -54,13 +54,15 @@ export function QuartileTable({
 			<div className={stepStyles.tableSection}>
 				{readingNote}
 				<div
-					className={`fr-table fr-table--no-scroll fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
+					className={`fr-table fr-table--no-scroll fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
 				>
 					<div className="fr-table__wrapper">
 						<div className="fr-table__container">
 							<div className="fr-table__content">
 								<table>
-									<caption className="fr-sr-only">{title}</caption>
+									{/* fr-table--no-caption keeps the caption in the a11y tree (sr-only)
+									    without reserving the DSFR --table-offset top space. */}
+									<caption>{title}</caption>
 									<colgroup>
 										<col className={stepStyles.colRowLabel} />
 										<col className={stepStyles.colMin} />

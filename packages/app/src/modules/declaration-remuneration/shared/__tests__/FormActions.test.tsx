@@ -3,6 +3,12 @@ import { useSession } from "next-auth/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { FormActions } from "../FormActions";
+import { LockProvider, useLockContext } from "../lock/LockContext";
+
+vi.mock("../lock/LockContext", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("../lock/LockContext")>();
+	return { ...actual, useLockContext: vi.fn(actual.useLockContext) };
+});
 
 const mockedUseSession = vi.mocked(useSession);
 
@@ -107,6 +113,58 @@ describe("FormActions", () => {
 			render(<FormActions />);
 
 			expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+		});
+	});
+
+	describe("declaration lock", () => {
+		it("disables the submit button when the declaration is locked by another user", () => {
+			render(
+				<LockProvider isReadOnly>
+					<FormActions />
+				</LockProvider>,
+			);
+
+			expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
+		});
+
+		it("keeps the submit button enabled when the lock is inactive", () => {
+			render(
+				<LockProvider isReadOnly={false}>
+					<FormActions />
+				</LockProvider>,
+			);
+
+			expect(
+				screen.getByRole("button", { name: /suivant/i }),
+			).not.toBeDisabled();
+		});
+
+		it("disables the submit button while the lock is still being acquired", () => {
+			vi.mocked(useLockContext).mockReturnValueOnce({
+				isReadOnly: false,
+				holder: null,
+				isLoading: true,
+			});
+
+			render(<FormActions />);
+
+			expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
+		});
+
+		it("renders a Link instead of the submit button when locked with mimoquageNextHref", () => {
+			render(
+				<LockProvider isReadOnly>
+					<FormActions mimoquageNextHref="/declaration-remuneration/etape/2" />
+				</LockProvider>,
+			);
+
+			expect(
+				screen.queryByRole("button", { name: /suivant/i }),
+			).not.toBeInTheDocument();
+			expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+				"href",
+				"/declaration-remuneration/etape/2",
+			);
 		});
 	});
 });

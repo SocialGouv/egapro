@@ -5,6 +5,8 @@ import {
 } from "~/modules/declaration-remuneration";
 import { auth } from "~/server/auth";
 import { getEffectiveSiren } from "~/server/auth/companyAccess";
+import { db } from "~/server/db";
+import { getLockReadState } from "~/server/services/declarationLockService";
 import { api } from "~/trpc/server";
 
 /**
@@ -33,10 +35,19 @@ export default async function WithBannerLayout({
 		api.declaration.getOrCreate(),
 	]);
 
+	const declaration = declarationData.declaration;
+	const { isReadOnly, lockHolder } = await getLockReadState(
+		db,
+		declaration.id,
+		session.user.id,
+	);
+
 	return (
 		<DeclarationLayout
 			company={company}
-			declarationYear={declarationData.declaration.year}
+			declarationYear={declaration.year}
+			isReadOnly={isReadOnly}
+			lockHolder={lockHolder}
 		>
 			{children}
 		</DeclarationLayout>

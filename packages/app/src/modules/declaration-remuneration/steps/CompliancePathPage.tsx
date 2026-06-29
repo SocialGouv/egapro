@@ -1,10 +1,18 @@
 import { redirect } from "next/navigation";
-import { hasGapsAboveThreshold } from "~/modules/domain";
+import {
+	type DeclarationFsmStatus,
+	hasGapsAboveThreshold,
+	isDeadlinePassed,
+} from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
 import { getPostComplianceDestination } from "../shared/complianceNavigation";
 import { CompliancePathChoice } from "./CompliancePathChoice";
+import type {
+	CompliancePathReadOnlyReason,
+	CompliancePathValue,
+} from "./compliancePath/constants";
 
 type ComplianceState =
 	| { type: "no_gap" }
@@ -30,6 +38,37 @@ export function getComplianceState(
 	}
 
 	return { type: "first_round" };
+}
+
+export function getCompliancePathReadOnlyReason(params: {
+	status: DeclarationFsmStatus;
+	pathChoice: CompliancePathValue | null;
+	hasSubmittedSecondDeclaration: boolean;
+	hasSubmittedCseOpinion: boolean;
+	hasSubmittedJointEvaluation: boolean;
+	pathChoiceDeadline: Date;
+	now?: Date;
+}): CompliancePathReadOnlyReason | null {
+	const {
+		status,
+		pathChoice,
+		hasSubmittedSecondDeclaration,
+		hasSubmittedCseOpinion,
+		hasSubmittedJointEvaluation,
+		pathChoiceDeadline,
+		now,
+	} = params;
+
+	if (status === "demarche_completed") return "demarche_completed";
+	if (pathChoice === "justify" && hasSubmittedCseOpinion)
+		return "cse_opinion_submitted";
+	if (pathChoice === "corrective_action" && hasSubmittedSecondDeclaration)
+		return "second_declaration_submitted";
+	if (pathChoice === "joint_evaluation" && hasSubmittedJointEvaluation)
+		return "joint_evaluation_submitted";
+	if (isDeadlinePassed(pathChoiceDeadline, now))
+		return "path_choice_deadline_passed";
+	return null;
 }
 
 export async function CompliancePathPage() {
@@ -75,6 +114,19 @@ export async function CompliancePathPage() {
 	const currentYear = data.declaration.year;
 	const campaignDeadlines = await getCampaignDeadlines(currentYear);
 
+	const isSecondRound = state.type === "second_round";
+	const pathChoice = isSecondRound
+		? data.declaration.secondDeclarationPathChoice
+		: data.declaration.firstDeclarationPathChoice;
+	const readOnlyReason = getCompliancePathReadOnlyReason({
+		status: data.declaration.status,
+		pathChoice,
+		hasSubmittedSecondDeclaration: data.hasSubmittedSecondDeclaration,
+		hasSubmittedCseOpinion: data.hasSubmittedCseOpinion,
+		hasSubmittedJointEvaluation: data.hasSubmittedJointEvaluation,
+		pathChoiceDeadline: campaignDeadlines.pathChoiceDeadline,
+	});
+
 	return (
 		<HydrateClient>
 			<CompliancePathChoice
@@ -83,13 +135,14 @@ export async function CompliancePathPage() {
 				declarationSiren={data.declaration.siren}
 				declarationYear={currentYear}
 				email={email}
-				initialPath={data.declaration.firstDeclarationPathChoice ?? undefined}
-				isSecondRound={state.type === "second_round"}
+				initialPath={pathChoice ?? undefined}
+				isSecondRound={isSecondRound}
 				pdfDownloadHref={
-					state.type === "second_round"
+					isSecondRound
 						? `/api/declaration-pdf?type=correction&year=${currentYear}`
 						: `/api/declaration-pdf?year=${currentYear}`
 				}
+				readOnlyReason={readOnlyReason ?? undefined}
 			/>
 		</HydrateClient>
 	);

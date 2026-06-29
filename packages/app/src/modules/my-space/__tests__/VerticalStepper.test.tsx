@@ -34,6 +34,8 @@ const BASE_PROPS = {
 	hasSubmittedSecondDeclaration: false,
 	siren: "532847196",
 	ctaHref: "/declaration-remuneration?siren=532847196",
+	lockedByOther: false,
+	lockHolder: null,
 };
 
 function renderPanel(

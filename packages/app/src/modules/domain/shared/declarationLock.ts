@@ -1,0 +1,3 @@
+export const DEFAULT_LOCK_TIMEOUT_MINUTES = 30;
+
+export const LOCK_HEARTBEAT_INTERVAL_MS = 10_000;

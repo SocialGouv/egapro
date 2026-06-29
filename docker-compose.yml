@@ -185,9 +185,11 @@ services:
         condition: service_started
     command: ["python", "/setup/cnil-setup.py"]
 
-  # One-shot seeder. Fires synthetic tracking events (the three funnels, model
-  # usage, help-link clicks, device split) so /admin/stats shows realistic data.
-  # Idempotent — skips when the site already has seeded events.
+  # One-shot seeder. Fires synthetic events for the FULL tracking plan (page
+  # views, the three funnels with abandons, and every standalone action across
+  # the 9 categories) so /admin/stats shows realistic data. Idempotent — skips
+  # a year already seeded. Run `python /setup/seed-events.py verify` to audit
+  # the live instance for CNIL compliance.
   matomo-seed:
     image: python:3.13-slim
     profiles: ["matomo"]

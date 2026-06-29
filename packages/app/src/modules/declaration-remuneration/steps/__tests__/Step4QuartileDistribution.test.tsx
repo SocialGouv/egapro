@@ -96,7 +96,7 @@ describe("Step4QuartileDistribution", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders instruction text and mandatory fields notice", () => {
+	it("renders the non-prefilled instruction text and mandatory fields notice without GIP prefill", () => {
 		render(
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
@@ -106,9 +106,14 @@ describe("Step4QuartileDistribution", () => {
 		);
 		expect(
 			screen.getByText(
-				"Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs.",
+				"Renseignez les informations avant de valider vos indicateurs.",
 			),
 		).toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				"Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs.",
+			),
+		).not.toBeInTheDocument();
 		expect(
 			screen.getByText("Tous les champs sont obligatoires."),
 		).toBeInTheDocument();
@@ -236,7 +241,7 @@ describe("Step4QuartileDistribution", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders DSN source line on both tables even without GIP prefill", () => {
+	it("does not render the DSN source line without GIP prefill", () => {
 		render(
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
@@ -245,10 +250,10 @@ describe("Step4QuartileDistribution", () => {
 			/>,
 		);
 		expect(
-			screen.getAllByText(
+			screen.queryByText(
 				/Source\s*:\s*DSN \(Déclarations Sociales Nominatives\)/,
-			).length,
-		).toBe(2);
+			),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders accordion", () => {
