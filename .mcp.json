@@ -1,16 +1,1 @@
-{
-	"mcpServers": {
-		"next-devtools": {
-			"command": "npx",
-			"args": ["-y", "next-devtools-mcp@latest"]
-		},
-		"dsfr": {
-			"command": "npx",
-			"args": ["dsfr-mcp"]
-		},
-		"figma": {
-			"type": "http",
-			"url": "https://mcp.figma.com/mcp"
-		}
-	}
-}
+{"mcpServers":{}}
