@@ -66,7 +66,7 @@ A genuine regression is **blocking** : `e2e-dev` hands back via an `e2e-dev:` co
 
 `architect-rework` is the same loop used by the **end-of-pipeline acceptance gate** : once the final PR is open (doc + E2E done), `/implement` (foreground) invites the user to test the implementation ; if the user requests changes, they are routed to `architect-rework` (mode `user-feedback`) which creates fix tickets, the orchestrator is relaunched (fix → re-run E2E gate → doc → updated PR → re-invite to test), looping until the user approves. See `.claude/agents/e2e-dev/AGENT.md` and `.claude/agents/architect-rework/AGENT.md`.
 
-Because `code-dev` spawns these agents itself (`tu-dev` + the 4 gates + `functional-validator`), it must run as a **main agent** — its own `claude --agent code-dev` process — since a subagent cannot spawn subagents. The pipeline therefore always launches code-dev as a CLI process: epic mode via `epic_loop.sh`, task/bug mode via a synchronous `claude --agent code-dev` foreground call in `/implement` (never via the Task tool).
+Because `code-dev` spawns these agents itself (`tu-dev` + the 4 gates + `functional-validator` + `design-validator`), it must run as a **main agent** — its own `claude --agent code-dev` process — since a subagent cannot spawn subagents. The pipeline therefore always launches code-dev as a CLI process: epic mode via `epic_loop.sh`, task/bug mode via a synchronous `claude --agent code-dev` foreground call in `/implement` (never via the Task tool).
 
 **Outside the pipeline** (direct edits, manual fixes, hotfixes), the same rule applies : before reporting ANY task as done, launch the **4 parallel agents** :
 
@@ -76,6 +76,8 @@ Because `code-dev` spawns these agents itself (`tu-dev` + the 4 gates + `functio
 4. **Security auditor** — delegate to `.claude/agents/security-auditor/AGENT.md` on all modified `.ts/.tsx` in `server/`, `routers/`, or tRPC. If none → instant `SECURE — no server files`.
 
 If any fails → fix → re-run. Only report completion when all 4 pass.
+
+For **UI changes** (modified `.tsx`/`.scss`), additionally run the `design-validator` gate (render the screen + DOM measurement + onion-skin overlay vs the Figma reference) when a dev server is available — see `.claude/agents/design-validator/AGENT.md` and `rules/visual-quality-validation.md`.
 
 ### Before every push — format & lint check
 
@@ -150,6 +152,8 @@ These agents are **read-only** — they report findings but never modify files. 
 The `tu-dev` agent (Opus) precedes these 4 gates in the `/implement` pipeline (step 5.5 of `code-dev`). Unlike them, it is a **writer**: it creates/fixes the vitest tests (unit + integration). It runs only inside the pipeline and hands control back to `code-dev` on a genuine regression. See `.claude/agents/tu-dev/AGENT.md`.
 
 The `e2e-dev` agent (Opus) is the other **writer**: it owns all Playwright E2E tests and runs at the **end of the pipeline** (epic-end for a Feature via `run_e2e_dev.sh`, or after `code-dev`'s `validated` verdict for a Task/Bug). It replays the E2E suite, triages regressions (handback via `e2e-dev:` comment), and nests/creates the scenario. See `.claude/agents/e2e-dev/AGENT.md`.
+
+The `functional-validator` and `design-validator` agents (sonnet) are the two pipeline-only **browser** validators, spawned by `code-dev` at **step 9** on the running dev server. `functional-validator` replays the PO scenarios (behaviour). `design-validator` is the independent **visual-fidelity** gate (step 9a-bis): for UI tickets it renders the screen and compares it to the ticket's Figma reference via DOM measurement + onion-skin overlay + vision, using `packages/app/scripts/visual-fidelity-probe.mjs`. Both are read-only and emit `PASS` / `RETRY` / `REFACTO` on the ticket (max 2 RETRY → REFACTO). See their `AGENT.md` and `rules/visual-quality-validation.md`.
 
 ---
 
