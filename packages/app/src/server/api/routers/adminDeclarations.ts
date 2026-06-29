@@ -22,6 +22,7 @@ import {
 	getRecapSchema,
 	searchDeclarationsSchema,
 } from "~/modules/admin/declarations/schemas";
+import { releaseLockSchema } from "~/modules/admin/schemas";
 import { getCurrentYear } from "~/modules/domain";
 import {
 	mapToEmployeeCategoryRows,
@@ -38,6 +39,10 @@ import {
 	jobCategories,
 	users,
 } from "~/server/db/schema";
+import {
+	getActiveLock,
+	releaseLockAsAdmin,
+} from "~/server/services/declarationLockService";
 
 const sortColumnMap = {
 	siren: declarations.siren,
@@ -177,7 +182,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				return null;
 			}
 
-			const [declarationFiles, opinions, siblingRows, historyRows] =
+			const [declarationFiles, opinions, siblingRows, historyRows, activeLock] =
 				await Promise.all([
 					ctx.db
 						.select({
@@ -221,6 +226,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 						.from(declarationStatusHistory)
 						.where(eq(declarationStatusHistory.declarationId, input.id))
 						.orderBy(desc(declarationStatusHistory.createdAt)),
+					getActiveLock(ctx.db, input.id),
 				]);
 
 			const siblings = siblingRows.map((s) => ({
@@ -240,6 +246,9 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				files: declarationFiles,
 				cseOpinions: opinions,
 				siblings,
+				lock: activeLock
+					? { holder: activeLock.email, expiresAt: activeLock.expiresAt }
+					: null,
 				demarcheCompletedAt: findLatest("demarche_complete"),
 				secondDeclarationSubmittedAt: findLatest("second_declaration_submit"),
 			};
@@ -291,6 +300,22 @@ export const adminDeclarationsRouter = createTRPCRouter({
 			});
 
 			return { id: input.id, cancelledAt };
+		}),
+
+	releaseLock: adminProcedure
+		.input(releaseLockSchema)
+		.mutation(async ({ input, ctx }) => {
+			const lock = await getActiveLock(ctx.db, input.declarationId);
+			if (!lock) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "aucun verrou actif sur cette déclaration",
+				});
+			}
+
+			await releaseLockAsAdmin(ctx.db, input.declarationId);
+
+			return { declarationId: input.declarationId };
 		}),
 
 	getRecap: adminProcedure

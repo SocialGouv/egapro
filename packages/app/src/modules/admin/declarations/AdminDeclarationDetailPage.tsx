@@ -15,6 +15,7 @@ import {
 	FilesSection,
 } from "./DetailSections";
 import { SiblingDeclarationsSection } from "./SiblingDeclarationsSection";
+import { UnlockDeclarationButton } from "./UnlockDeclarationButton";
 
 type Props = {
 	declarationId: string;
@@ -66,6 +67,10 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 				cancelledAt={data.cancelledAt}
 				declarationId={data.id}
 				year={data.year}
+			/>
+			<UnlockDeclarationButton
+				declarationId={data.id}
+				isLocked={data.lock !== null}
 			/>
 			<DeclarationSummary declaration={data} />
 			<CompanySection declaration={data} />

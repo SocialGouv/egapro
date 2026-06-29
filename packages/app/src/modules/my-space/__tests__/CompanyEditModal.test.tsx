@@ -3,14 +3,22 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockMutate = vi.fn();
 
+vi.mock("~/modules/analytics", () => ({
+	campaignYearDimension: () => ({ 1: "2026" }),
+	MATOMO_ACTION: { CSE_STATUS_CONFIRM: "cse_status_confirm" },
+	MATOMO_EVENT_CATEGORY: { CSE_STATUS: "cse_status" },
+	trackEvent: vi.fn(),
+}));
+
 vi.mock("~/trpc/react", () => ({
 	api: {
 		company: {
 			updateHasCse: {
 				useMutation: vi.fn().mockImplementation(({ onSuccess }) => ({
-					mutate: (...args: unknown[]) => {
-						mockMutate(...args);
-						onSuccess();
+					mutate: (variables: { siren: string; hasCse: boolean }) => {
+						mockMutate(variables);
+						// Mirror the real tRPC contract: onSuccess(data, variables).
+						onSuccess(undefined, variables);
 					},
 					isPending: false,
 				})),

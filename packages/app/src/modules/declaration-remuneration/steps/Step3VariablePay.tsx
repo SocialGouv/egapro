@@ -28,6 +28,7 @@ import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { gipToStep3 } from "../shared/gipToStepData";
 import { getStep3FieldName, step3ToRows } from "../shared/indicatorRowMapping";
+import { useLockContext } from "../shared/lock/LockContext";
 import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
@@ -65,6 +66,7 @@ export function Step3VariablePay({
 }: Step3VariablePayProps) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
+	const { isReadOnly } = useLockContext();
 
 	const hasSavedData = Object.values(initialData).some((v) => v !== "");
 
@@ -101,7 +103,7 @@ export function Step3VariablePay({
 		});
 	});
 
-	useDraftAutoSave(form, draftHydrated, (values) =>
+	useDraftAutoSave(form, draftHydrated && !isReadOnly, (values) =>
 		setField(values as Step3Data),
 	);
 
@@ -175,245 +177,248 @@ export function Step3VariablePay({
 			className={common.flexColumnGap2}
 			onSubmit={onSubmit}
 		>
-			<StepTitleRow
-				hasData={hasData}
-				isPendingSave={isPendingSave}
-				isSaving={isSaving}
-				onDevFill={() => {
-					DEV_STEP3_ROWS.forEach((row, i) => {
-						const womenField = getStep3FieldName(i, "womenValue");
-						const menField = getStep3FieldName(i, "menValue");
-						form.setValue(womenField, padDecimalToTwo(row.womenValue));
-						form.setValue(menField, padDecimalToTwo(row.menValue));
-					});
-					form.setValue("indicatorEWomen", DEV_STEP3_BENEFICIARY_WOMEN);
-					form.setValue("indicatorEMen", DEV_STEP3_BENEFICIARY_MEN);
-				}}
-				title={
-					<h1 className="fr-h4 fr-mb-0">
-						Déclaration des indicateurs de rémunération {declarationYear}
-					</h1>
-				}
-			/>
+			<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+				<StepTitleRow
+					hasData={hasData}
+					isPendingSave={isPendingSave}
+					isSaving={isSaving}
+					onDevFill={() => {
+						DEV_STEP3_ROWS.forEach((row, i) => {
+							const womenField = getStep3FieldName(i, "womenValue");
+							const menField = getStep3FieldName(i, "menValue");
+							form.setValue(womenField, padDecimalToTwo(row.womenValue));
+							form.setValue(menField, padDecimalToTwo(row.menValue));
+						});
+						form.setValue("indicatorEWomen", DEV_STEP3_BENEFICIARY_WOMEN);
+						form.setValue("indicatorEMen", DEV_STEP3_BENEFICIARY_MEN);
+					}}
+					title={
+						<h1 className="fr-h4 fr-mb-0">
+							Déclaration des indicateurs de rémunération {declarationYear}
+						</h1>
+					}
+				/>
 
-			<StepIndicator currentStep={3} />
+				<StepIndicator currentStep={3} />
 
-			<div className={common.flexColumnGap1}>
-				<p className="fr-mb-0">
-					Ces indicateurs évaluent et comparent les rémunérations variables
-					(primes, bonus, avantages…) entre les femmes et les hommes. Ils
-					mesurent à la fois l&apos;écart moyen et médian des montants perçus
-					ainsi que la proportion de femmes et d&apos;hommes bénéficiant de ces
-					rémunérations.
-				</p>
+				<div className={common.flexColumnGap1}>
+					<p className="fr-mb-0">
+						Ces indicateurs évaluent et comparent les rémunérations variables
+						(primes, bonus, avantages…) entre les femmes et les hommes. Ils
+						mesurent à la fois l&apos;écart moyen et médian des montants perçus
+						ainsi que la proportion de femmes et d&apos;hommes bénéficiant de
+						ces rémunérations.
+					</p>
 
-				<p className={`fr-mb-0 ${common.fontMedium}`}>
-					{gipPrefillData
-						? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."
-						: "Renseignez les informations avant de valider vos indicateurs."}
-					{!gipPrefillData && (
-						<TooltipButton
-							id="tooltip-step3-info"
-							label="Information sur la confidentialité des données"
-							text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
-						/>
-					)}
-				</p>
+					<p className={`fr-mb-0 ${common.fontMedium}`}>
+						{gipPrefillData
+							? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."
+							: "Renseignez les informations avant de valider vos indicateurs."}
+						{!gipPrefillData && (
+							<TooltipButton
+								id="tooltip-step3-info"
+								label="Information sur la confidentialité des données"
+								text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
+							/>
+						)}
+					</p>
 
-				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
-			</div>
-
-			<div className={common.dataSection}>
-				<div className={common.flexColumnGapHalf}>
-					<PayGapTable
-						caption="Écart de rémunération variable ou complémentaire"
-						className={stepStyles.payGapTable}
-						columnHeader={
-							<>
-								Rémunération variable
-								<br />
-								ou complémentaire
-							</>
-						}
-						disabled={isImpersonating}
-						onRowChange={handleRowChange}
-						rows={rows}
-					/>
-
-					{gipPrefillData && (
-						<PrefillSource
-							periodEnd={gipPrefillData.periodEnd}
-							tooltipId="tooltip-source-step3-paygap"
-						/>
-					)}
+					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 				</div>
 
-				<div className={common.flexColumnGapHalf}>
-					<div
-						className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.payGapTable}`}
-					>
-						<div className="fr-table__wrapper">
-							<div className="fr-table__container">
-								<div className="fr-table__content">
-									<table>
-										<caption>
-											Bénéficiaires de composantes variables ou complémentaires
-										</caption>
-										<colgroup>
-											<col className={stepStyles.colSex} />
-											<col className={stepStyles.colCount} />
-											<col className={stepStyles.colCount} />
-											<col />
-										</colgroup>
-										<thead>
-											<tr>
-												<th scope="col">Sexe</th>
-												<th scope="col">
-													Total de salariés
-													{maxWomen !== undefined && maxMen !== undefined
-														? ` : ${maxWomen + maxMen}`
-														: ""}
-												</th>
-												<th scope="col">
-													Bénéficiaires de composantes
-													<br />
-													variables ou complémentaires
-												</th>
-												<th scope="col">Proportion</th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr>
-												<td>
-													<strong>Femmes</strong>
-												</td>
-												<td className="fr-cell--right">
-													<strong>{maxWomen ?? "-"}</strong>
-												</td>
-												<td>
-													<input
-														aria-label="Bénéficiaires femmes"
-														className={`fr-input ${common.numericInput}`}
-														disabled={isImpersonating}
-														inputMode="numeric"
-														onChange={(e) =>
-															handleBenefChange(
-																"indicatorEWomen",
-																maxWomen,
-																e.target.value,
-															)
-														}
-														pattern="[0-9]*"
-														type="text"
-														value={beneficiaryWomen}
-													/>
-												</td>
-												<td className="fr-cell--right">
-													<strong>
-														{computeProportion(beneficiaryWomen, maxWomen)}
-													</strong>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<strong>Hommes</strong>
-												</td>
-												<td className="fr-cell--right">
-													<strong>{maxMen ?? "-"}</strong>
-												</td>
-												<td>
-													<input
-														aria-label="Bénéficiaires hommes"
-														className={`fr-input ${common.numericInput}`}
-														disabled={isImpersonating}
-														inputMode="numeric"
-														onChange={(e) =>
-															handleBenefChange(
-																"indicatorEMen",
-																maxMen,
-																e.target.value,
-															)
-														}
-														pattern="[0-9]*"
-														type="text"
-														value={beneficiaryMen}
-													/>
-												</td>
-												<td className="fr-cell--right">
-													<strong>
-														{computeProportion(beneficiaryMen, maxMen)}
-													</strong>
-												</td>
-											</tr>
-										</tbody>
-									</table>
+				<div className={common.dataSection}>
+					<div className={common.flexColumnGapHalf}>
+						<PayGapTable
+							caption="Écart de rémunération variable ou complémentaire"
+							className={stepStyles.payGapTable}
+							columnHeader={
+								<>
+									Rémunération variable
+									<br />
+									ou complémentaire
+								</>
+							}
+							disabled={isImpersonating}
+							onRowChange={handleRowChange}
+							rows={rows}
+						/>
+
+						{gipPrefillData && (
+							<PrefillSource
+								periodEnd={gipPrefillData.periodEnd}
+								tooltipId="tooltip-source-step3-paygap"
+							/>
+						)}
+					</div>
+
+					<div className={common.flexColumnGapHalf}>
+						<div
+							className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.payGapTable}`}
+						>
+							<div className="fr-table__wrapper">
+								<div className="fr-table__container">
+									<div className="fr-table__content">
+										<table>
+											<caption>
+												Bénéficiaires de composantes variables ou
+												complémentaires
+											</caption>
+											<colgroup>
+												<col className={stepStyles.colSex} />
+												<col className={stepStyles.colCount} />
+												<col className={stepStyles.colCount} />
+												<col />
+											</colgroup>
+											<thead>
+												<tr>
+													<th scope="col">Sexe</th>
+													<th scope="col">
+														Total de salariés
+														{maxWomen !== undefined && maxMen !== undefined
+															? ` : ${maxWomen + maxMen}`
+															: ""}
+													</th>
+													<th scope="col">
+														Bénéficiaires de composantes
+														<br />
+														variables ou complémentaires
+													</th>
+													<th scope="col">Proportion</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>
+														<strong>Femmes</strong>
+													</td>
+													<td className="fr-cell--right">
+														<strong>{maxWomen ?? "-"}</strong>
+													</td>
+													<td>
+														<input
+															aria-label="Bénéficiaires femmes"
+															className={`fr-input ${common.numericInput}`}
+															disabled={isImpersonating}
+															inputMode="numeric"
+															onChange={(e) =>
+																handleBenefChange(
+																	"indicatorEWomen",
+																	maxWomen,
+																	e.target.value,
+																)
+															}
+															pattern="[0-9]*"
+															type="text"
+															value={beneficiaryWomen}
+														/>
+													</td>
+													<td className="fr-cell--right">
+														<strong>
+															{computeProportion(beneficiaryWomen, maxWomen)}
+														</strong>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<strong>Hommes</strong>
+													</td>
+													<td className="fr-cell--right">
+														<strong>{maxMen ?? "-"}</strong>
+													</td>
+													<td>
+														<input
+															aria-label="Bénéficiaires hommes"
+															className={`fr-input ${common.numericInput}`}
+															disabled={isImpersonating}
+															inputMode="numeric"
+															onChange={(e) =>
+																handleBenefChange(
+																	"indicatorEMen",
+																	maxMen,
+																	e.target.value,
+																)
+															}
+															pattern="[0-9]*"
+															type="text"
+															value={beneficiaryMen}
+														/>
+													</td>
+													<td className="fr-cell--right">
+														<strong>
+															{computeProportion(beneficiaryMen, maxMen)}
+														</strong>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
 								</div>
 							</div>
 						</div>
+
+						{benefValidationError && (
+							<div
+								aria-live="polite"
+								className="fr-alert fr-alert--error fr-alert--sm"
+							>
+								<p>{benefValidationError}</p>
+							</div>
+						)}
+
+						{gipPrefillData && (
+							<PrefillSource
+								periodEnd={gipPrefillData.periodEnd}
+								tooltipId="tooltip-source-step3"
+							/>
+						)}
 					</div>
 
-					{benefValidationError && (
-						<div
-							aria-live="polite"
-							className="fr-alert fr-alert--error fr-alert--sm"
-						>
-							<p>{benefValidationError}</p>
+					<DefinitionAccordion
+						id="accordion-step3"
+						title="Définitions et méthode de calcul"
+					>
+						<div className="fr-callout">
+							<ul>
+								<li>
+									Quelles composantes de la rémunération sont incluses dans le
+									calcul (ex. véhicule de fonction, repas, prime de
+									participation, etc.)&nbsp;?
+								</li>
+								<li>
+									Les bons codes rubrique DSN sont-ils bien utilisés pour
+									chacune de ces composantes&nbsp;?
+								</li>
+								<li>
+									Comment vérifier ou identifier les codes DSN associés aux
+									éléments de rémunération pris en compte&nbsp;?
+								</li>
+							</ul>
 						</div>
-					)}
-
-					{gipPrefillData && (
-						<PrefillSource
-							periodEnd={gipPrefillData.periodEnd}
-							tooltipId="tooltip-source-step3"
-						/>
-					)}
+					</DefinitionAccordion>
 				</div>
 
-				<DefinitionAccordion
-					id="accordion-step3"
-					title="Définitions et méthode de calcul"
-				>
-					<div className="fr-callout">
-						<ul>
-							<li>
-								Quelles composantes de la rémunération sont incluses dans le
-								calcul (ex. véhicule de fonction, repas, prime de participation,
-								etc.)&nbsp;?
-							</li>
-							<li>
-								Les bons codes rubrique DSN sont-ils bien utilisés pour chacune
-								de ces composantes&nbsp;?
-							</li>
-							<li>
-								Comment vérifier ou identifier les codes DSN associés aux
-								éléments de rémunération pris en compte&nbsp;?
-							</li>
-						</ul>
-					</div>
-				</DefinitionAccordion>
-			</div>
+				<GapInterpretationCallout
+					beneficiaryMen={beneficiaryMen}
+					beneficiaryWomen={beneficiaryWomen}
+					maxMen={maxMen}
+					maxWomen={maxWomen}
+					rows={rows}
+					variant="variablePay"
+				/>
 
-			<GapInterpretationCallout
-				beneficiaryMen={beneficiaryMen}
-				beneficiaryWomen={beneficiaryWomen}
-				maxMen={maxMen}
-				maxWomen={maxWomen}
-				rows={rows}
-				variant="variablePay"
-			/>
+				<FormErrors
+					mutationError={mutation.error?.message}
+					validationError={validationError}
+				/>
 
-			<FormErrors
-				mutationError={mutation.error?.message}
-				validationError={validationError}
-			/>
-
-			<FormActions
-				isSubmitting={mutation.isPending}
-				mimoquageNextHref={
-					hasSavedData ? "/declaration-remuneration/etape/4" : undefined
-				}
-				previousHref="/declaration-remuneration/etape/2"
-			/>
+				<FormActions
+					isSubmitting={mutation.isPending}
+					mimoquageNextHref={
+						hasSavedData ? "/declaration-remuneration/etape/4" : undefined
+					}
+					previousHref="/declaration-remuneration/etape/2"
+				/>
+			</fieldset>
 		</form>
 	);
 }

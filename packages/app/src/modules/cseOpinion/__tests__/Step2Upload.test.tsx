@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { FILENAME_ERROR_MESSAGES } from "~/modules/shared";
 import { computeContentTypeColumns } from "../contentTypeColumns";
 import { Step2Upload } from "../Step2Upload";
@@ -116,16 +117,19 @@ function renderStep(
 		existingFiles?: UploadedFile[];
 		columns?: ContentTypeColumn[];
 		initialAssociations?: StoredFileContentType[];
+		isReadOnly?: boolean;
 	} = {},
 ) {
 	return render(
-		<Step2Upload
-			columns={props.columns ?? SINGLE_COLUMN}
-			declarationYear={2026}
-			existingFiles={props.existingFiles}
-			initialAssociations={props.initialAssociations}
-			siren="123456789"
-		/>,
+		<LockProvider isReadOnly={props.isReadOnly ?? false}>
+			<Step2Upload
+				columns={props.columns ?? SINGLE_COLUMN}
+				declarationYear={2026}
+				existingFiles={props.existingFiles}
+				initialAssociations={props.initialAssociations}
+				siren="123456789"
+			/>
+		</LockProvider>,
 	);
 }
 
@@ -703,5 +707,43 @@ describe("Step2Upload", () => {
 				deleteMutationOptions.onError?.();
 			});
 		}).not.toThrow();
+	});
+
+	describe("declaration lock", () => {
+		it("disables the file upload select button when locked", () => {
+			renderStep({ isReadOnly: true });
+
+			expect(
+				screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+			).toBeDisabled();
+		});
+
+		it("disables the submit button when locked", () => {
+			renderStep({ isReadOnly: true });
+
+			expect(screen.getByRole("button", { name: "Soumettre" })).toBeDisabled();
+		});
+
+		it("disables the matrix delete and checkbox controls when locked", () => {
+			renderStep({
+				columns: SINGLE_COLUMN,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+				isReadOnly: true,
+			});
+
+			expect(
+				screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+			).toBeDisabled();
+			expect(screen.getByRole("button", { name: /Supprimer/ })).toBeDisabled();
+		});
+
+		it("keeps the controls enabled when the lock is inactive", () => {
+			renderStep({ isReadOnly: false });
+
+			expect(
+				screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+			).toBeEnabled();
+			expect(screen.getByRole("button", { name: "Soumettre" })).toBeEnabled();
+		});
 	});
 });

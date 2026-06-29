@@ -18,6 +18,24 @@ describe("AUDIT_ACTIONS", () => {
 		const values = Object.values(AUDIT_ACTIONS);
 		expect(new Set(values).size).toBe(values.length);
 	});
+
+	it("maps the lock-timeout admin setting update to a mutation", () => {
+		expect(AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT).toBe(
+			"admin_settings.update_lock_timeout",
+		);
+		expect(
+			AUDIT_ACTION_CATEGORIES[AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT],
+		).toBe("mutation");
+	});
+
+	it("maps the declaration lock state read to a sensitive read (holder PII)", () => {
+		expect(AUDIT_ACTIONS.DECLARATION_LOCK_STATE_READ).toBe(
+			"declaration.lock_state_read",
+		);
+		expect(
+			AUDIT_ACTION_CATEGORIES[AUDIT_ACTIONS.DECLARATION_LOCK_STATE_READ],
+		).toBe("read_sensitive");
+	});
 });
 
 describe("retention constants", () => {

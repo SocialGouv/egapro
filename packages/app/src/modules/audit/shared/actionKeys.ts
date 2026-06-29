@@ -26,6 +26,12 @@ export const AUDIT_ACTIONS = {
 	DECLARATION_SAVE_COMPLIANCE_PATH: "declaration.save_compliance_path",
 	DECLARATION_SUBMIT_JOINT_EVALUATION: "declaration.submit_joint_evaluation",
 
+	// ── Declaration edit lock mutations & reads ────────────
+	DECLARATION_LOCK_ACQUIRED: "declaration.lock_acquired",
+	DECLARATION_LOCK_RELEASED: "declaration.lock_released",
+	ADMIN_DECLARATION_RELEASE_LOCK: "admin_declaration.release_lock",
+	DECLARATION_LOCK_STATE_READ: "declaration.lock_state_read",
+
 	// ── CSE opinion mutations ──────────────────────────────
 	CSE_OPINION_SAVE: "cse_opinion.save",
 	CSE_OPINION_UPLOAD_FILE: "cse_opinion.upload_file",
@@ -55,6 +61,7 @@ export const AUDIT_ACTIONS = {
 
 	// ── Admin settings mutations ──────────────────────────
 	ADMIN_SETTINGS_UPSERT_DEADLINES: "admin_settings.upsert_deadlines",
+	ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT: "admin_settings.update_lock_timeout",
 
 	// ── Admin stats reads ─────────────────────────────────
 	ADMIN_STATS_CAMPAIGN_PROGRESSION: "admin_stats.campaign_progression",
@@ -68,6 +75,9 @@ export const AUDIT_ACTIONS = {
 	ADMIN_STATS_GET_MATOMO_HELP_LINKS: "admin_stats.get_matomo_help_links",
 	ADMIN_STATS_GET_MATOMO_DEVICE_BREAKDOWN:
 		"admin_stats.get_matomo_device_breakdown",
+	ADMIN_STATS_GET_CSE_STATUS_CONFIRMATIONS:
+		"admin_stats.get_cse_status_confirmations",
+	ADMIN_STATS_GET_USERS_PER_COMPANY: "admin_stats.get_users_per_company",
 
 	// ── Declaration draft ─────────────────────────────────
 	DRAFT_READ: "declaration_draft.read",
@@ -133,6 +143,11 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.DECLARATION_SAVE_COMPLIANCE_PATH]: "mutation",
 	[AUDIT_ACTIONS.DECLARATION_SUBMIT_JOINT_EVALUATION]: "mutation",
 
+	[AUDIT_ACTIONS.DECLARATION_LOCK_ACQUIRED]: "mutation",
+	[AUDIT_ACTIONS.DECLARATION_LOCK_RELEASED]: "mutation",
+	[AUDIT_ACTIONS.ADMIN_DECLARATION_RELEASE_LOCK]: "mutation",
+	[AUDIT_ACTIONS.DECLARATION_LOCK_STATE_READ]: "read_sensitive",
+
 	[AUDIT_ACTIONS.CSE_OPINION_SAVE]: "mutation",
 	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: "mutation",
 	[AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE]: "mutation",
@@ -152,6 +167,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.ADMIN_DECLARATIONS_GET_RECAP]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES]: "mutation",
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_CAMPAIGN_STATS]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DURATIONS]: "read_sensitive",
@@ -161,6 +177,8 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_CATEGORY_MODEL]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_HELP_LINKS]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_DEVICE_BREAKDOWN]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_CSE_STATUS_CONFIRMATIONS]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_USERS_PER_COMPANY]: "read_sensitive",
 	[AUDIT_ACTIONS.DRAFT_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DRAFT_SAVE]: "mutation",
 	[AUDIT_ACTIONS.DRAFT_CLEAR]: "mutation",
