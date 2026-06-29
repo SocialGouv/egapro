@@ -187,6 +187,14 @@ taxonomie (pages vues + 22 événements distincts) :
   (`setDoNotTrack(true)`).
 - ✅ **Opt-out** : l'iframe `action=optOut` répond et propose la désinscription.
 
+> Snapshot daté de la mise en place de l'exemption. La taxonomie s'est depuis
+> enrichie (liens d'aide, usage du modèle de l'indicateur par catégorie, et
+> l'action **`cse_status` / `cse_status_confirm`** — confirmation du statut CSE).
+> Chaque ajout respecte la même garantie : `cse_status_confirm` n'émet que le
+> label borné `oui`/`non` + l'année de campagne (slot 1), **jamais le SIREN ni
+> aucun identifiant**. La liste 1:1 avec le code est tenue dans
+> [`plan-de-tracking.md`](./plan-de-tracking.md).
+
 Conclusion : la configuration documentée tient les conditions d'exemption de
 consentement de la CNIL. Reste à appliquer ces réglages sur l'instance de
 production et à inscrire le traitement au registre RGPD.

@@ -7,6 +7,8 @@ import { parseSiren } from "~/modules/domain";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext } from "~/server/audit/requestContext";
 import { fetchEndSessionEndpoint } from "~/server/auth/proconnect-logout";
+import { db } from "~/server/db";
+import { releaseAllLocksForUser } from "~/server/services/declarationLockService";
 
 export async function GET(request: NextRequest) {
 	const token = await getToken({ req: request });
@@ -27,6 +29,15 @@ export async function GET(request: NextRequest) {
 			ipAddress: requestContext.ipAddress,
 			userAgent: requestContext.userAgent,
 		});
+
+		if (token.id) {
+			try {
+				await releaseAllLocksForUser(db, token.id);
+			} catch (error) {
+				// best-effort: lock release failure must not block logout
+				console.error("[logout] Failed to release locks for user", error);
+			}
+		}
 	}
 
 	const redirectTarget = await buildLogoutRedirectUrl(token?.id_token, baseUrl);

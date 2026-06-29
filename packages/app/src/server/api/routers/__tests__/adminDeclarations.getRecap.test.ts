@@ -2,8 +2,8 @@ import { getTableName } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-	declarations,
 	declarationStatusHistory,
+	declarations,
 	employeeCategories,
 	jobCategories,
 } from "~/server/db/schema";

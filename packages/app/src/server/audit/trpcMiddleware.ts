@@ -33,6 +33,11 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"declaration.getOrCreate": AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA,
 	"declaration.getStatusHistory": AUDIT_ACTIONS.DECLARATION_HISTORY_READ,
 
+	// ── declaration lock sensitive reads (expose holder PII) ─
+	"declarationLock.getActiveLockForCurrentDeclaration":
+		AUDIT_ACTIONS.DECLARATION_LOCK_STATE_READ,
+	"declarationLock.getLockState": AUDIT_ACTIONS.DECLARATION_LOCK_STATE_READ,
+
 	// ── cse opinion mutations ──────────────────────────────
 	"cseOpinion.saveOpinions": AUDIT_ACTIONS.CSE_OPINION_SAVE,
 	"cseOpinion.deleteFile": AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE,
@@ -53,6 +58,7 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 
 	// ── admin declaration mutations ───────────────────────
 	"adminDeclarations.cancel": AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL,
+	"adminDeclarations.releaseLock": AUDIT_ACTIONS.ADMIN_DECLARATION_RELEASE_LOCK,
 
 	// ── public searches ────────────────────────────────────
 	"publicReferents.search": AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH,
@@ -65,6 +71,8 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	// ── admin settings mutations ──────────────────────────
 	"adminSettings.upsertCampaignDeadlines":
 		AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES,
+	"adminSettings.updateLockTimeout":
+		AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT,
 
 	// ── admin stats sensitive reads ──────────────────────
 	"adminStats.getCampaignProgression":
@@ -82,6 +90,10 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 		AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_HELP_LINKS,
 	"adminStats.getMatomoDeviceBreakdown":
 		AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_DEVICE_BREAKDOWN,
+	"adminStats.getMatomoCseStatusConfirmations":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_CSE_STATUS_CONFIRMATIONS,
+	"adminStats.getUsersPerCompany":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_USERS_PER_COMPANY,
 
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,

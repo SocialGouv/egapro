@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
 	auth: vi.fn(),
 	runUploadPipeline: vi.fn(),
 	logAction: vi.fn().mockResolvedValue(undefined),
+	getActiveLock: vi.fn(),
 }));
 
 vi.mock("~/server/auth", () => ({
@@ -16,6 +17,30 @@ vi.mock("~/server/services/uploadPipeline", () => ({
 
 vi.mock("~/server/audit/log", () => ({
 	logAction: mocks.logAction,
+}));
+
+// The route resolves the current-year declaration before streaming the body so
+// it can refuse a target locked by another co-declarant (epic #3556). Mock the
+// db lookup to return one declaration and the lock service to a configurable
+// holder.
+vi.mock("~/server/db", () => ({
+	db: {
+		select: () => ({
+			from: () => ({
+				where: () => ({
+					limit: async () => [{ id: "decl-1" }],
+				}),
+			}),
+		}),
+	},
+}));
+
+vi.mock("~/server/db/schema", () => ({
+	declarations: { id: "id", siren: "siren", year: "year" },
+}));
+
+vi.mock("~/server/services/declarationLockService", () => ({
+	getActiveLock: mocks.getActiveLock,
 }));
 
 function validSession() {
@@ -73,6 +98,8 @@ function buildRequestWithRawFilename(
 describe("POST /api/upload", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// Default: declaration free of any active lock, so the upload proceeds.
+		mocks.getActiveLock.mockResolvedValue(null);
 	});
 
 	it("returns 400 when X-Flow-Type is missing", async () => {
@@ -564,5 +591,66 @@ describe("POST /api/upload", () => {
 		);
 
 		consoleSpy.mockRestore();
+	});
+
+	it("returns 409 and audits a failure row when another co-declarant holds the lock", async () => {
+		validSession();
+		mocks.getActiveLock.mockResolvedValue({
+			userId: "user-2",
+			email: "other@example.com",
+			firstName: "Bob",
+			lastName: "Durand",
+			expiresAt: new Date(Date.now() + 30 * 60_000),
+		});
+
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "application/pdf",
+				"X-Filename": "avis-cse.pdf",
+				"X-Flow-Type": "cse_opinion",
+			}),
+		);
+
+		expect(response.status).toBe(409);
+		const body = await response.json();
+		expect(body.error).toContain("verrouillée");
+		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "cse_opinion.upload_file",
+				status: "failure",
+				errorMessage: "HTTP 409 locked_by_other",
+			}),
+		);
+	});
+
+	it("proceeds when the session user holds the lock", async () => {
+		validSession();
+		mocks.getActiveLock.mockResolvedValue({
+			userId: "user-1",
+			email: "user@example.com",
+			firstName: "Alice",
+			lastName: "Martin",
+			expiresAt: new Date(Date.now() + 30 * 60_000),
+		});
+		mocks.runUploadPipeline.mockResolvedValue({
+			ok: true,
+			fileId: "file-uuid",
+			fileName: "avis-cse.pdf",
+			filePath: "123456789/2027/file-uuid.pdf",
+		});
+
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "application/pdf",
+				"X-Filename": "avis-cse.pdf",
+				"X-Flow-Type": "cse_opinion",
+			}),
+		);
+
+		expect(response.status).toBe(200);
+		expect(mocks.runUploadPipeline).toHaveBeenCalled();
 	});
 });

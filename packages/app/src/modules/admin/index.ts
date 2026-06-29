@@ -10,5 +10,7 @@ export { AdminReferentsPage } from "./referents";
 export {
 	type ImpersonateSearchInput,
 	impersonateSearchSchema,
+	type ReleaseLockInput,
+	releaseLockSchema,
 	sirenSchema,
 } from "./schemas";

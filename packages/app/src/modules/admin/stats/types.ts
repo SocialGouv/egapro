@@ -181,3 +181,30 @@ export type DeviceBreakdownRow = {
 export type DeviceBreakdown = {
 	rows: DeviceBreakdownRow[];
 };
+
+/**
+ * Output of `adminStats.getMatomoCseStatusConfirmations` — volume of CSE-status
+ * confirmations (`cse_status / cse_status_confirm`) for one campaign year, split
+ * by the bounded oui/non label. Read from Matomo (anonymised, no SIREN): it
+ * counts confirmation *actions* (forward-only), not distinct companies. All zero
+ * when Matomo is not configured.
+ */
+export type CseStatusConfirmations = {
+	total: number;
+	yes: number;
+	no: number;
+};
+
+/**
+ * Output of `adminStats.getUsersPerCompany` — distribution of distinct users
+ * per company, read live from the existing `user_company` table. Aggregate only
+ * (no SIREN / email in the payload). `mono` = companies with exactly one user,
+ * `multi` = companies with two or more.
+ */
+export type UsersPerCompany = {
+	totalCompanies: number;
+	mono: number;
+	multi: number;
+	avgPerCompany: number;
+	maxUsers: number;
+};

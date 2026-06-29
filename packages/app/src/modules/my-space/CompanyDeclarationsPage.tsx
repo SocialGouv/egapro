@@ -8,7 +8,11 @@ import { DeclarationProcessPanel } from "./DeclarationProcessPanel";
 import { DeclarationsSection } from "./DeclarationsSection";
 import { computeCtaHref, computePanelVariant } from "./declarationProcessState";
 import { MissingInfoModal } from "./MissingInfoModal";
-import type { CompanyDetail, DeclarationItem } from "./types";
+import type {
+	CompanyDetail,
+	DeclarationItem,
+	LockHolderDisplay,
+} from "./types";
 import { WelcomeBanner } from "./WelcomeBanner";
 
 type Props = {
@@ -16,6 +20,8 @@ type Props = {
 	company: CompanyDetail;
 	declarations: DeclarationItem[];
 	hasNoSanction: boolean;
+	lockedByOther: boolean;
+	lockHolder: LockHolderDisplay | null;
 	userPhone: string | null;
 };
 
@@ -40,6 +46,8 @@ export function CompanyDeclarationsPage({
 	company,
 	declarations,
 	hasNoSanction,
+	lockedByOther,
+	lockHolder,
 	userPhone,
 }: Props) {
 	const currentYear = getCurrentYear();
@@ -83,6 +91,8 @@ export function CompanyDeclarationsPage({
 					currentDeclaration?.hasSubmittedSecondDeclaration ?? false
 				}
 				lastActionDate={lastActionDate}
+				lockedByOther={lockedByOther}
+				lockHolder={lockHolder}
 				siren={company.siren}
 				variant={panelVariant}
 				year={currentYear}

@@ -7,6 +7,7 @@ import { companyRouter } from "~/server/api/routers/company";
 import { cseOpinionRouter } from "~/server/api/routers/cseOpinion";
 import { declarationRouter } from "~/server/api/routers/declaration";
 import { declarationDraftRouter } from "~/server/api/routers/declarationDraft";
+import { declarationLockRouter } from "~/server/api/routers/declarationLock";
 import { gipMdsRouter } from "~/server/api/routers/gipMds";
 import { jointEvaluationRouter } from "~/server/api/routers/jointEvaluation";
 import { mailRouter } from "~/server/api/routers/mail";
@@ -30,6 +31,7 @@ export const appRouter = createTRPCRouter({
 	cseOpinion: cseOpinionRouter,
 	declaration: declarationRouter,
 	declarationDraft: declarationDraftRouter,
+	declarationLock: declarationLockRouter,
 	gipMds: gipMdsRouter,
 	jointEvaluation: jointEvaluationRouter,
 	mail: mailRouter,

@@ -65,7 +65,7 @@ Trois grandes catégories de surface technique :
 
 - **Pages publiques** (recherche, FAQ, mentions légales) : Server Components, lecture seule, pas d'authentification
 - **Espace déclarant** (`/mon-espace`, `/declaration-remuneration/*`, `/avis-cse/*`) : authentifié via ProConnect, écritures protégées par tRPC
-- **API privées** : tRPC interne (`/api/trpc/*`) pour le front, et REST-like (`/api/v1/*`, `/api/export/*`, `/api/pdf/*`, `/api/upload`) pour les intégrations externes et les uploads
+- **API privées** : tRPC interne (`/api/trpc/*`) pour le front, et REST-like (`/api/v1/*`, `/api/export/*`, `/api/pdf/*`, `/api/upload`, `/api/declaration-lock/release`) pour les intégrations externes et les uploads
 
 ---
 
@@ -158,13 +158,16 @@ Règle d'or : **pas de composant custom dans `src/app/`**. Les fichiers `page.ts
 ```
 server/
   api/
-    routers/      # Procédures tRPC, une par domaine (declaration, admin, cseOpinion, …)
-    trpc.ts       # Builder + procédures (publicProcedure, protectedProcedure, …)
+    routers/      # Procédures tRPC, une par domaine
+                  #   (declaration, admin, cseOpinion, declarationLock, …)
+    trpc.ts       # Builder + procédures (publicProcedure, protectedProcedure,
+                  #   declarationLockedWriteProcedure, …)
     root.ts       # Composition : appRouter
   auth/           # Configuration NextAuth (ProConnect provider + callbacks)
   audit/          # Middleware tRPC + withAuditedRoute + cachedAuth + logAction
   db/             # Schéma Drizzle + connexion PostgreSQL
-  services/       # Intégrations tierces (gipMds, uploadPipeline, …)
+  services/       # Intégrations tierces (gipMds, uploadPipeline,
+                  #   declarationLockService, …)
 ```
 
 ---
@@ -184,6 +187,7 @@ domain/
     campaign.ts           # getCurrentYear, getCseYear (règles temporelles)
     declarationStatus.ts  # State machine de statut
     companySize.ts        # isCseRequired, COMPANY_SIZE_RANGES
+    declarationLock.ts    # DEFAULT_LOCK_TIMEOUT_MINUTES, LOCK_HEARTBEAT_INTERVAL_MS
   __tests__/      # 100% coverage sur toutes les fonctions
 ```
 
@@ -203,6 +207,7 @@ Toujours importer depuis le barrel :
 
 ```ts
 import { getCurrentYear, GAP_ALERT_THRESHOLD, isCseRequired } from "~/modules/domain";
+import { DEFAULT_LOCK_TIMEOUT_MINUTES, LOCK_HEARTBEAT_INTERVAL_MS } from "~/modules/domain";
 ```
 
 ---
@@ -271,9 +276,10 @@ sequenceDiagram
     App->>DB: insert adminImpersonationEvents
     Admin->>App: navigate /mon-espace<br/>(en tant que l'entreprise)
     Note over App: useReadOnlyGuard + companyWriteProcedure<br/>bloquent les mutations
+    Note over App: useDeclarationLock désactivé<br/>(pas d'acquisition de verrou)
 ```
 
-L'écriture est bloquée à **deux niveaux** : front (`useReadOnlyGuard`) et back (`companyWriteProcedure` rejette si impersonation). Tracé dans `adminImpersonationEvents` + audit log.
+L'écriture est bloquée à **deux niveaux** : front (`useReadOnlyGuard`) et back (`companyWriteProcedure` rejette si impersonation). Tracé dans `adminImpersonationEvents` + audit log. Le verrou collaboratif est également désactivé en mode impersonation.
 
 ---
 
@@ -291,15 +297,37 @@ Une procédure tRPC = un appel typé bout-en-bout (input Zod, output inféré). 
 | `companyWriteProcedure` | + read-only guard (refus si impersonation) | Utilisateur, écriture |
 | `declarationProcedure` | `companyProcedure` + résolution déclaration | Utilisateur, lecture déclaration |
 | `declarationWriteProcedure` | + read-only guard | Utilisateur, écriture déclaration |
+| `declarationLockedWriteProcedure` | `declarationWriteProcedure` + vérification verrou actif | Utilisateur, écriture déclaration (gardée par le verrou collaboratif) |
 | `adminProcedure` | session + `isAdmin === true` | Admin DGT |
 
 Définies dans `src/server/api/trpc.ts`. Les routers (un par domaine) composent ces builders selon le besoin.
 
-### 6.2 Schémas Zod partagés
+**`declarationLockedWriteProcedure`** : rejette avec `CONFLICT` si aucun verrou actif n'est tenu par l'utilisateur courant sur `ctx.declarationId`. Utilisé par les procédures de mutation du wizard (`updateStep1`…`submit`) pour garantir qu'aucune écriture concurrente n'est possible.
+
+### 6.2 Routers tRPC
+
+| Router | Fichier | Principales procédures |
+|---|---|---|
+| `declaration` | `routers/declaration.ts` | `getOrCreate`, `updateStep1`…`updateStep4`, `updateEmployeeCategories`, `submit`, `saveCompliancePath`, `submitSecondDeclaration`, `submitJointEvaluation` |
+| `declarationLock` | `routers/declarationLock.ts` | `getActiveLockForCurrentDeclaration`, `acquireLock`, `heartbeat`, `releaseLock`, `getLockState` |
+| `declarationDraft` | `routers/declarationDraft.ts` | Gestion du brouillon |
+| `cseOpinion` | `routers/cseOpinion.ts` | `get`, `saveOpinions`, `uploadFile`, `deleteFile`, `getFiles`, `getFileContentTypes`, `setFileContentTypes`, `finalize` |
+| `admin` | `routers/admin.ts` | Gestion admin générale |
+| `adminDeclarations` | `routers/adminDeclarations.ts` | `search`, `getById`, `getRecap`, `releaseLock` |
+| `adminSettings` | `routers/adminSettings.ts` | `getOverview`, `getDeadlinesByYear`, `upsertCampaignDeadlines`, `getLockTimeout`, `updateLockTimeout` |
+| `adminReferents` | `routers/adminReferents.ts` | CRUD référents |
+| `adminStats` | `routers/adminStats.ts` | Statistiques campagne |
+| `profile` | `routers/profile.ts` | `get`, `updatePhone` |
+| `company` | `routers/company.ts` | `get`, `list`, `getWithDeclarations`, `getSanctionStatus` |
+| `publicReferents` | `routers/publicReferents.ts` | `search`, `getById` |
+| `gipMds` | `routers/gipMds.ts` | `importFromUrl` |
+| `mail` | `routers/mail.ts` | `resendReceipt` |
+
+### 6.3 Schémas Zod partagés
 
 Les schémas Zod sont la **single source of truth** : utilisés à la fois par le formulaire React (`useZodForm`) et par la procédure tRPC (`.input(schema)`). Ils vivent dans `src/modules/{domain}/schemas.ts`, **jamais inline dans `src/server/api/routers/`** (règle bloquée par hook).
 
-### 6.3 Audit middleware
+### 6.4 Audit middleware
 
 Un middleware tRPC global lit la map `PROCEDURE_TO_ACTION` (dans `src/server/audit/trpcMiddleware.ts`). Si la procédure courante y figure, un appel à `logAction(...)` est ajouté **après** l'exécution (succès ou échec). Voir §9.
 
@@ -317,6 +345,7 @@ Définition dans `src/server/db/`. Tables principales :
 | `userCompanies` | N-N user × siren (rattachement) |
 | `companies` | Entreprises (siren, name, nafCode, workforce, hasCse) |
 | `declarations` | Déclarations index (id, siren, year, status, currentStep, …) |
+| `declarationLocks` | Verrou collaboratif d'édition (un seul par déclaration) |
 | `jobCategories` | Catégories d'emploi (déclaration, optionnel) |
 | `employeeCategories` | Indicateur G (par catégorie) |
 | `cseOpinions` | Avis CSE (deux types : exactitude + écarts) |
@@ -324,13 +353,39 @@ Définition dans `src/server/db/`. Tables principales :
 | `files` | PDF stockés sur S3 (cse_opinion, joint_evaluation) |
 | `referents` | Annuaire référents régionaux |
 | `campaignDeadlines` | Deadlines par année (configuration admin) |
+| `globalSettings` | Paramètres globaux (table à une seule ligne, `id = 1`) : `declarationLockTimeoutMinutes` |
 | `gipMdsData` | Pré-remplissage GIP-MDS (par siren + year) |
 | `adminImpersonationEvents` | Trace des impersonations admin |
 | `audit.action_log` | Log d'audit (schéma Postgres dédié `audit`) |
 
+#### Table `declarationLocks`
+
+Table `declaration_lock` — au plus une ligne par `declaration_id` (unique index).
+
+| Colonne | Type | Rôle |
+|---|---|---|
+| `id` | `varchar(255) PK` | UUID généré automatiquement |
+| `declarationId` | `varchar(255) FK → declarations.id` | Déclaration concernée (cascade delete) |
+| `lockedByUserId` | `varchar(255) FK → users.id` | Détenteur du verrou |
+| `lockedAt` | `timestamp tz` | Horodatage de l'acquisition initiale |
+| `lastHeartbeatAt` | `timestamp tz` | Dernier heartbeat reçu |
+| `expiresAt` | `timestamp tz` | Date d'expiration (index pour lectures rapides) |
+
+#### Table `globalSettings`
+
+Table `global_setting` — table à **une seule ligne** (`id = 1`).
+
+| Colonne | Type | Rôle |
+|---|---|---|
+| `id` | `integer PK` | Toujours `1` |
+| `activeCampaignYear` | `integer` | Année de campagne active (optionnel) |
+| `declarationLockTimeoutMinutes` | `integer NOT NULL DEFAULT 30` | Délai d'expiration du verrou en minutes |
+| `updatedAt` | `timestamp tz` | Date de dernière mise à jour |
+| `updatedBy` | `varchar FK → users.id` | Admin ayant effectué la dernière mise à jour |
+
 ### 7.2 Convention de casing
 
-Toutes les propriétés de schéma sont **camelCase** côté TypeScript, automatiquement mappées en **snake_case** côté SQL via `casing: "snake_case"` (configuré dans `src/server/db/index.ts` et `drizzle.config.ts`). Ne **jamais** spécifier de nom de colonne explicite (`pgTable('foo', { firstName: text() })` → colonne `first_name`).
+Toutes les propriétés de schéma sont **camelCase** côté TypeScript, automatiquement mappées en **snake_case** côté SQL via `casing: "snake_case"` (configuré dans `src/server/db/index.ts` et `drizzle.config.ts`). Ne **jamais** spécifier de nom de colonne explicite.
 
 ### 7.3 Migrations (Drizzle Kit)
 
@@ -341,7 +396,7 @@ pnpm db:push       # applique le schéma directement (dev only, sans migration)
 pnpm db:studio     # UI Drizzle Studio (inspection)
 ```
 
-Les migrations sont **versionnées dans le repo** (`packages/app/drizzle/`). En CI/CD, le job `migrate` (docker-compose en local, container Kubernetes en cluster) applique les migrations en attente avant de démarrer l'app.
+Les migrations sont **versionnées dans le repo** (`packages/app/drizzle/`). En CI/CD, le job `migrate` applique les migrations en attente avant de démarrer l'app.
 
 ### 7.4 Transactions
 
@@ -393,20 +448,18 @@ sequenceDiagram
 
 Le module `~/modules/shared/fileNameValidation.ts` fournit `validateFileName(fileName, mimeType)`. Cette validation est appliquée :
 
-- **Côté client** : dans le composant `FileUpload.tsx`, avant la vérification MIME et la vérification de taille, afin de rejeter immédiatement les fichiers au nom invalide sans déclencher d'upload.
+- **Côté client** : dans le composant `FileUpload.tsx`, avant la vérification MIME et la vérification de taille.
 - **Côté serveur** : dans la Route Handler `POST /api/upload`, après la vérification MIME déclarée, avant de lancer le pipeline (ClamAV + S3).
-
-Règles :
 
 | Vérification | Détail |
 |---|---|
 | Non vide | Refus si la valeur trimmée est vide |
 | Longueur | Refus si > `MAX_FILENAME_LENGTH` (200 caractères) |
-| Caractères interdits | `< > : " \| ? * ; / \` et plage de contrôle U+0000–U+001F / U+007F |
-| Caractères invisibles | U+202E (RLO), U+200B, U+200C, U+200D, U+FEFF bloqués |
-| Cohérence extension-MIME | Extension de `EXTENSION_MIME_MAP` doit correspondre au MIME déclaré |
+| Caractères interdits | `< > : " \| ? * ; / \` et caractères de contrôle (U+0000–U+001F, U+007F) |
+| Caractères de format Unicode | Toute la catégorie Cf est rejetée : largeur nulle (U+200B–U+200D, U+FEFF) et contrôles bidirectionnels (RLO/LRO/RLE/LRE/PDF, LRI/RLI/FSI/PDI) |
+| Cohérence extension-MIME | L'extension (`EXTENSION_MIME_MAP`) doit correspondre au MIME déclaré |
 
-Le schéma Zod `fileNameSchema` (exporté depuis le même fichier) encapsule ces règles pour les réutiliser dans des formulaires ou procédures.
+Le schéma Zod `fileNameSchema` (exporté depuis le même module) encapsule ces règles pour les réutiliser dans des formulaires ou des procédures.
 
 ### 8.3 Antivirus ClamAV
 
@@ -414,7 +467,7 @@ Le service `clamavd` scanne les uploads via le protocole ClamAV (TCP). Si le sca
 
 ### 8.4 Téléchargement
 
-Les fichiers sont servis via une Route Handler `/api/v1/files/:fileId` qui fait du **streaming** depuis S3 (pas de signed URL exposée publiquement). Auth duale : header APISIX (côté SUIT) ou session NextAuth (côté front).
+Les fichiers sont servis via une Route Handler `/api/v1/files/:fileId` qui fait du **streaming** depuis S3. Auth duale : header APISIX (côté SUIT) ou session NextAuth (côté front).
 
 ---
 
@@ -433,7 +486,7 @@ id, user_id, user_email, siren, action, status,
 ip_address, user_agent, metadata (jsonb), created_at
 ```
 
-Le `metadata` jsonb est **automatiquement sanitizé** : les clés `password`, `token`, `refresh_token`, `secret`, `client_secret`, `authorization`, `apikey`, `api_key`, `accesskey`, `access_key`, `private_key` sont strippées récursivement (peu importe la profondeur).
+Le `metadata` jsonb est **automatiquement sanitizé** : les clés `password`, `token`, `refresh_token`, `secret`, `client_secret`, `authorization`, `apikey`, `api_key`, `accesskey`, `access_key`, `private_key` sont strippées récursivement.
 
 ### 9.3 Catégories et rétention
 
@@ -441,14 +494,14 @@ Définies dans `src/modules/audit/shared/constants.ts` :
 
 | Catégorie | Rétention | Exemples |
 |---|---|---|
-| `mutation` | 365 j | Toutes les écritures (déclaration, CSE, admin) |
-| `read_sensitive` | 180 j | `profile.get`, `declaration.getOrCreate`, `declaration.getStatusHistory`, recherche admin, téléchargement PDF |
+| `mutation` | 365 j | Toutes les écritures (déclaration, CSE, admin, verrou) |
+| `read_sensitive` | 180 j | `profile.get`, `declaration.getOrCreate`, `declaration.getStatusHistory`, recherche admin, PDF, état du verrou |
 | `public_search` | 180 j | Recherche / vue de référents publics |
 | `auth` | 365 j | Login OK / KO, logout |
 | `export` | 365 j | API publique d'export |
 | `system` | 365 j | Import GIP, cron de cleanup |
 
-`AUDIT_RETENTION_DAYS_SHORT = 180`, `AUDIT_RETENTION_DAYS_LONG = 365`. Modifiables via env var (`EGAPRO_AUDIT_RETENTION_*_DAYS`).
+`AUDIT_RETENTION_DAYS_SHORT = 180`, `AUDIT_RETENTION_DAYS_LONG = 365`. Surchargeables via les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` / `EGAPRO_AUDIT_RETENTION_LONG_DAYS`.
 
 ### 9.4 Wire-up obligatoire
 
@@ -461,11 +514,19 @@ Toute nouvelle action audited requiert **3 points** :
    - Pour une Route Handler → wrapper `withAuditedRoute({ action, resolveContext }, handler)`
    - Pour un événement auth ou un cron → appel direct à `logAction(...)`
 
-La Route Handler `POST /api/upload` écrit directement via `logAction` (pas de wrapper `withAuditedRoute`) pour contrôler précisément le timing et les métadonnées enrichies (flowType, fileId, durée, nom du virus).
+### 9.5 Actions du verrou collaboratif
 
-### 9.5 Cron de cleanup
+| Clé `AUDIT_ACTIONS` | Valeur en BDD | Catégorie | Surface |
+|---|---|---|---|
+| `DECLARATION_LOCK_ACQUIRED` | `declaration.lock_acquired` | `mutation` | `declarationLock.acquireLock` (tRPC, logAction direct) |
+| `DECLARATION_LOCK_RELEASED` | `declaration.lock_released` | `mutation` | `declarationLock.releaseLock` (tRPC) + `POST /api/declaration-lock/release` (withAuditedRoute) |
+| `ADMIN_DECLARATION_RELEASE_LOCK` | `admin_declaration.release_lock` | `mutation` | `adminDeclarations.releaseLock` (tRPC, PROCEDURE_TO_ACTION) |
+| `DECLARATION_LOCK_STATE_READ` | `declaration.lock_state_read` | `read_sensitive` | `declarationLock.getLockState` (tRPC, PROCEDURE_TO_ACTION) |
+| `ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT` | `admin_settings.update_lock_timeout` | `mutation` | `adminSettings.updateLockTimeout` (tRPC, PROCEDURE_TO_ACTION) |
 
-`packages/app/scripts/audit-cleanup.mjs` tourne quotidiennement (CronJob Kubernetes) et purge les lignes au-delà de leur fenêtre de rétention (segmentée par catégorie). Modifications de ce script → **test d'intégration obligatoire** (`*.integration.test.ts`, `pnpm test:integration`, requiert Docker) pour attraper les bugs driver.
+### 9.6 Cron de cleanup
+
+`packages/app/scripts/audit-cleanup.mjs` tourne quotidiennement (CronJob Kubernetes) et purge les lignes au-delà de leur fenêtre de rétention. Modifications de ce script → **test d'intégration obligatoire**.
 
 ---
 
@@ -473,7 +534,7 @@ La Route Handler `POST /api/upload` écrit directement via `logAction` (pas de w
 
 ### 10.1 Sécurisation `/api/v1/*` (intégration SUIT)
 
-L'API privée consommée par **SUIT** (Système Unifié d'Inspection du Travail) est protégée par une **passerelle APISIX standalone**, déployée en amont de l'app dans le même cluster :
+L'API privée consommée par **SUIT** est protégée par une **passerelle APISIX standalone** :
 
 ```mermaid
 flowchart LR
@@ -485,41 +546,23 @@ flowchart LR
     RH --> BL[Business logic]
 ```
 
-**Plugins APISIX actifs** :
-
-- `key-auth` — valide le Bearer (`EGAPRO_SUIT_API_KEY`)
-- `limit-req` — rate limit ~10 req/s, burst 5
-- `proxy-rewrite` — injecte `X-Gateway-Forwarded: <EGAPRO_GATEWAY_SHARED_SECRET>`
-
-**Defense in depth** côté app : le middleware Edge vérifie la présence et la valeur du header en **constant-time**. Un pod compromis dans le cluster ne peut donc pas appeler `/api/v1/*` directement (sans passer par la gateway).
-
-Côté client SUIT : un seul header `Authorization: Bearer <clé>`. Plus de signature RSA + timestamp comme en V1 (cf. [docs/SUIT-API.md](SUIT-API.md)).
+**Plugins APISIX actifs** : `key-auth`, `limit-req` (~10 req/s, burst 5), `proxy-rewrite` (injecte `X-Gateway-Forwarded`).
 
 ### 10.2 Validation Zod aux frontières
 
-Toute entrée externe est validée via **Zod** :
-
-- Formulaires (`useZodForm` + `zodResolver`)
-- Procédures tRPC (`.input(schema)`)
-- Route Handlers (parse explicite du body / query)
-- Variables d'environnement (`@t3-oss/env-nextjs` dans `src/env.js`)
-
-Pour les uploads de fichiers, la validation couvre également **le nom de fichier** via `validateFileName` (`~/modules/shared/fileNameValidation.ts`) — appliquée côté client avant l'envoi et côté serveur dans `POST /api/upload` avant d'entrer dans le pipeline.
+Toute entrée externe est validée via **Zod** : formulaires, procédures tRPC, Route Handlers, variables d'environnement (`src/env.js`).
 
 ### 10.3 Variables d'environnement
 
-Déclarées et validées dans `src/env.js` (server / client / runtimeEnv). **Jamais lire `process.env` directement** (bloqué par hook). Pour ajouter une variable :
-
-1. Déclarer dans `src/env.js`
-2. Ajouter à `runtimeEnv`
-3. Ajouter à `.env` local
-4. Ajouter à la config de déploiement (`.kontinuous/templates/egapro.configmap.yaml` pour les valeurs publiques, sealed-secret pour les secrets)
-
-Bypass de la validation : `SKIP_ENV_VALIDATION=1` (Docker build, CI sans secrets).
+Déclarées et validées dans `src/env.js`. **Jamais lire `process.env` directement** (bloqué par hook).
 
 ### 10.4 Secrets
 
-Aucune valeur secrète **dans le repo**. Les secrets cluster sont gérés via des [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) sous `.kontinuous/`. Les rotations clés (clé API SUIT, shared secret APISIX↔app, secret NextAuth) sont documentées dans le [README racine](../README.md#rotation-des-secrets).
+Aucune valeur secrète **dans le repo**. Gérés via des [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) sous `.kontinuous/`.
+
+### 10.5 Verrou collaboratif — sécurité IDOR
+
+Le router `declarationLock` résout toujours l'ID de déclaration côté serveur à partir du SIREN de la session (`resolveOwnDeclarationId`) — jamais depuis le seul input client. Cela empêche un co-déclarant de verrouiller ou libérer une déclaration appartenant à une autre entreprise en forgeant un `declarationId` arbitraire.
 
 ---
 
@@ -545,21 +588,11 @@ Priorité stricte : 1) classes DSFR → 2) utilities DSFR + CSS variables → 3)
 
 ### 11.4 Dark mode
 
-Activé via `data-fr-scheme="system"` sur `<html>`. Cookie `fr-theme` lu par un script inline en tête (évite le flash). Modale `ThemeModal` pour le choix utilisateur (light / dark / system).
+Activé via `data-fr-scheme="system"` sur `<html>`. Cookie `fr-theme` lu par un script inline en tête. Modale `ThemeModal` pour le choix utilisateur.
 
 ### 11.5 RGAA / WCAG 2.1 AA
 
-Score Lighthouse accessibilité **= 100%** (seuil bloquant CI dans `.lighthouserc.json`). Audit quotidien automatisé : workflow `rgaa-audit.yaml` (cron 06:00 UTC tous les jours ouvrés).
-
-Checklist obligatoire (extrait, voir [`packages/app/CLAUDE.md`](../packages/app/CLAUDE.md#accessibility-rgaa--wcag-21-aa) pour le complet) :
-
-- `SkipLinks` en premier enfant de `<body>` (RGAA 12.7)
-- Landmarks sémantiques (`<header>`, `<nav>`, `<main>`, `<footer>`) sans `role` redondant
-- Modales : `role="dialog"` + `aria-modal="true"` + `aria-labelledby`
-- `target="_blank"` toujours accompagné de `<NewTabNotice />`
-- `<NavLink>` pour `aria-current="page"` calculé via `usePathname()`
-- Icônes décoratives : `aria-hidden="true"`
-- Images : toujours `next/image` (raw `<img>` bloqué par hook)
+Score Lighthouse accessibilité **= 100%** (seuil bloquant CI dans `.lighthouserc.json`). Audit quotidien automatisé (`rgaa-audit.yaml`).
 
 ---
 
@@ -573,11 +606,7 @@ Trois entrées Sentry, une par runtime :
 | `src/sentry.edge.config.ts` | Edge | Middleware `src/middleware.ts` |
 | `src/instrumentation-client.ts` | Client (browser) | Erreurs React + global handlers |
 
-`src/app/global-error.tsx` capture les erreurs non gérées de l'arbre React et les remonte à Sentry avant de rendre la page d'erreur.
-
-DSN configurés via env (`NEXT_PUBLIC_SENTRY_DSN` côté client, `SENTRY_DSN` côté serveur).
-
-Pas de dashboard Grafana ou de monitoring custom dédié à l'app — l'observabilité repose sur Sentry + les healthchecks Kubernetes.
+`src/app/global-error.tsx` capture les erreurs non gérées de l'arbre React et les remonte à Sentry.
 
 ---
 
@@ -588,7 +617,7 @@ Pas de dashboard Grafana ou de monitoring custom dédié à l'app — l'observab
 | Unit | Vitest | `src/modules/**/__tests__/` | ≥ 75% global, **100%** sur `domain/` |
 | E2E | Playwright | `packages/app/src/e2e/` | Au moins une E2E par `page.tsx` |
 | A11y | Lighthouse CI | `.lighthouserc.json` | **100%** accessibilité (bloquant) |
-| RGAA quotidien | Workflow GitHub Actions | `.github/workflows/rgaa-audit.yaml` | Cron 06:00 UTC jours ouvrés |
+| RGAA quotidien | Workflow GitHub Actions | `.github/workflows/rgaa-audit.yaml` | Cron 06:00 UTC L–V |
 | Intégration BDD | Vitest + Docker | `*.integration.test.ts` | Obligatoire pour code touchant `audit.action_log` |
 
 ### 13.1 Mocks centralisés
@@ -626,7 +655,7 @@ pnpm test:integration  # Tests intégration BDD (nécessite Docker)
 
 ### 14.2 Kontinuous (déploiement Kubernetes)
 
-[Kontinuous](https://github.com/SocialGouv/kontinuous) est l'outil interne SocialGouv qui templatise les manifests Kubernetes. Structure dans `.kontinuous/` :
+[Kontinuous](https://github.com/SocialGouv/kontinuous) templatise les manifests Kubernetes. Structure dans `.kontinuous/` :
 
 ```
 .kontinuous/

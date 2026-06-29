@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { CseOpinionLayout } from "~/modules/cseOpinion";
 import { auth } from "~/server/auth";
 import { getEffectiveSiren } from "~/server/auth/companyAccess";
+import { db } from "~/server/db";
+import { getLockReadState } from "~/server/services/declarationLockService";
 import { api } from "~/trpc/server";
 
 export default async function CseOpinionRootLayout({
@@ -25,10 +27,19 @@ export default async function CseOpinionRootLayout({
 		api.declaration.getOrCreate(),
 	]);
 
+	const declaration = declarationData.declaration;
+	const { isReadOnly, lockHolder } = await getLockReadState(
+		db,
+		declaration.id,
+		session.user.id,
+	);
+
 	return (
 		<CseOpinionLayout
 			company={company}
-			declarationYear={declarationData.declaration.year}
+			declarationYear={declaration.year}
+			isReadOnly={isReadOnly}
+			lockHolder={lockHolder}
 		>
 			{children}
 		</CseOpinionLayout>

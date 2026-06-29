@@ -69,6 +69,22 @@ describe("auditMiddleware", () => {
 		});
 	});
 
+	it("logs the admin lock-timeout update mutation", async () => {
+		const next = vi.fn(async () => ({ success: true }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "adminSettings.updateLockTimeout",
+			getRawInput: buildGetRawInput({ timeoutMinutes: 45 }),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "admin_settings.update_lock_timeout",
+			status: "success",
+			metadata: { timeoutMinutes: 45 },
+		});
+	});
+
 	it("logs a failed mutation with the error message and re-throws", async () => {
 		const error = new TRPCError({
 			code: "BAD_REQUEST",
@@ -94,6 +110,22 @@ describe("auditMiddleware", () => {
 		});
 	});
 
+	it("logs the admin lock release mutation (adminDeclarations.releaseLock)", async () => {
+		const next = vi.fn(async () => ({ declarationId: "decl-1" }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "adminDeclarations.releaseLock",
+			getRawInput: buildGetRawInput({ declarationId: "decl-1" }),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "admin_declaration.release_lock",
+			status: "success",
+			metadata: { declarationId: "decl-1" },
+		});
+	});
+
 	it("logs sensitive query reads (declaration.getOrCreate)", async () => {
 		const next = vi.fn(async () => ({ declaration: {} }));
 		await auditMiddleware({
@@ -105,6 +137,21 @@ describe("auditMiddleware", () => {
 
 		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
 			action: "declaration.read_gip_data",
+			status: "success",
+		});
+	});
+
+	it("logs the declaration lock state read (declarationLock.getActiveLockForCurrentDeclaration)", async () => {
+		const next = vi.fn(async () => ({ lockedByOther: true, holder: {} }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "declarationLock.getActiveLockForCurrentDeclaration",
+			getRawInput: buildGetRawInput(undefined),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "declaration.lock_state_read",
 			status: "success",
 		});
 	});
