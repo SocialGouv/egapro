@@ -2,6 +2,8 @@ import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import postgres from "postgres";
 
+/** @typedef {import("postgres").Sql} Sql */
+
 const DECLARATION_CLEANUP_ACTION = "system.declaration_cleanup";
 const DECLARATION_CLEANUP_CATEGORY = "system";
 const DEFAULT_RETENTION_YEARS = 6;
@@ -31,6 +33,11 @@ function getDatabaseUrl() {
 	throw new Error("DATABASE_URL or POSTGRES_HOST+POSTGRES_DB must be set");
 }
 
+/**
+ * @param {string | undefined} raw
+ * @param {number} fallback
+ * @returns {number}
+ */
 function toPositiveInt(raw, fallback) {
 	if (raw === undefined || raw === null || raw === "") return fallback;
 	const n = Number(raw);
@@ -42,6 +49,13 @@ function toPositiveInt(raw, fallback) {
 	return n;
 }
 
+/**
+ * @param {Object} args
+ * @param {Sql} args.sql
+ * @param {number} args.retentionYears
+ * @param {Date} [args.now]
+ * @param {(key: string) => Promise<unknown>} args.deleteObject
+ */
 export async function runDeclarationCleanup({
 	sql,
 	retentionYears,
@@ -105,7 +119,10 @@ export async function runDeclarationCleanup({
 			purgedS3Objects++;
 		} catch (s3Error) {
 			failedS3Objects++;
-			console.error(`[declaration-cleanup] S3 delete failed for key ${key}:`, s3Error);
+			console.error(
+				`[declaration-cleanup] S3 delete failed for key ${key}:`,
+				s3Error,
+			);
 		}
 	}
 
@@ -140,6 +157,10 @@ export async function runDeclarationCleanup({
 	return { purgedDeclarations, purgedFiles, purgedS3Objects, failedS3Objects };
 }
 
+/**
+ * @param {Sql} sql
+ * @param {unknown} error
+ */
 async function logFailure(sql, error) {
 	const message = error instanceof Error ? error.message : "Unknown error";
 	try {
@@ -174,9 +195,7 @@ const isMain = (() => {
 })();
 
 if (isMain) {
-	const { DeleteObjectCommand, S3Client } = await import(
-		"@aws-sdk/client-s3"
-	);
+	const { DeleteObjectCommand, S3Client } = await import("@aws-sdk/client-s3");
 
 	const retentionYears = toPositiveInt(
 		process.env.EGAPRO_DECLARATION_RETENTION_YEARS,
@@ -191,15 +210,26 @@ if (isMain) {
 		S3_BUCKET_NAME,
 	} = process.env;
 
-	if (!S3_ENDPOINT || !S3_REGION || !S3_ACCESS_KEY_ID || !S3_SECRET_ACCESS_KEY || !S3_BUCKET_NAME) {
-		console.error("[declaration-cleanup] Missing required S3 environment variables");
+	if (
+		!S3_ENDPOINT ||
+		!S3_REGION ||
+		!S3_ACCESS_KEY_ID ||
+		!S3_SECRET_ACCESS_KEY ||
+		!S3_BUCKET_NAME
+	) {
+		console.error(
+			"[declaration-cleanup] Missing required S3 environment variables",
+		);
 		process.exit(1);
 	}
 
 	const s3Client = new S3Client({
 		endpoint: S3_ENDPOINT,
 		region: S3_REGION,
-		credentials: { accessKeyId: S3_ACCESS_KEY_ID, secretAccessKey: S3_SECRET_ACCESS_KEY },
+		credentials: {
+			accessKeyId: S3_ACCESS_KEY_ID,
+			secretAccessKey: S3_SECRET_ACCESS_KEY,
+		},
 		forcePathStyle: true,
 	});
 
@@ -210,7 +240,9 @@ if (isMain) {
 			sql,
 			retentionYears,
 			deleteObject: (key) =>
-				s3Client.send(new DeleteObjectCommand({ Bucket: S3_BUCKET_NAME, Key: key })),
+				s3Client.send(
+					new DeleteObjectCommand({ Bucket: S3_BUCKET_NAME, Key: key }),
+				),
 		});
 		console.log(
 			`[declaration-cleanup] Success — purgedDeclarations=${result.purgedDeclarations} purgedFiles=${result.purgedFiles} purgedS3Objects=${result.purgedS3Objects} failedS3Objects=${result.failedS3Objects}`,
