@@ -41,26 +41,14 @@
 	height: 1px;
 }
 
-.linksRow {
+// Figma spec: the "Voir les modèles" link sits directly under the paragraph,
+// and the "Mettre à jour l'existence d'un CSE" secondary button stacks below
+// it on its own row. align-items keeps the button hugging its content width.
+.ctaGroup {
 	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-// DSFR's `fr-link` applies the underline via the `[href]` selector,
-// which a <button> does not match. Replicate the same gradient-based
-// underline so the modal trigger button renders identically to an
-// adjacent <a class="fr-link">.
-.linkButton {
-	background:
-		linear-gradient(0deg, currentColor, currentColor) no-repeat 0
-			calc(100% - var(--underline-thickness, 0.0625em)) /
-			var(--underline-idle-width, 100%) var(--underline-thickness, 0.0625em);
-	border: 0;
-	padding: 0;
-	cursor: pointer;
-	font: inherit;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 1rem;
 }
 
 .alertHeader {
