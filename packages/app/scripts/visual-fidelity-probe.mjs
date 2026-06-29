@@ -9,6 +9,11 @@
 // and, in overlay mode, an onion-skin composite of the rendered screenshot over the
 // Figma node export so positional drift shows as ghosting regardless of its cause.
 //
+// Security model: this is a trusted local dev tool. The scenario JSON is authored by
+// the `design-validator` agent (never end-user input) and runs only against an
+// ephemeral local dev server. The `evaluate` setup action and the `measures` selectors
+// are therefore executed as-is in the page context; do not feed it untrusted JSON.
+//
 // Usage:
 //   node scripts/visual-fidelity-probe.mjs --config <scenario.json> --out <dir> [--base-url http://localhost:3000]
 //   node scripts/visual-fidelity-probe.mjs --overlay --a <render.png> --b <figma.png> --out <overlay.png> [--opacity 0.5]
@@ -55,14 +60,17 @@ function parseArgs(argv) {
 	return args;
 }
 
-const measureInPage = `(targets) => {
+const measureInPage = (targets) => {
 	const box = (el) => {
 		if (!el) return null;
 		const r = el.getBoundingClientRect();
 		return {
-			x: Math.round(r.x), y: Math.round(r.y),
-			w: Math.round(r.width), h: Math.round(r.height),
-			top: Math.round(r.top), bottom: Math.round(r.bottom),
+			x: Math.round(r.x),
+			y: Math.round(r.y),
+			w: Math.round(r.width),
+			h: Math.round(r.height),
+			top: Math.round(r.top),
+			bottom: Math.round(r.bottom),
 		};
 	};
 	const textWidth = (el) => {
@@ -94,7 +102,8 @@ const measureInPage = `(targets) => {
 		if (!el) return null;
 		const out = { box: box(el), style: style(el) };
 		out.textWidth = textWidth(el);
-		out.overhang = out.box && out.textWidth != null ? out.box.w - out.textWidth : null;
+		out.overhang =
+			out.box && out.textWidth != null ? out.box.w - out.textWidth : null;
 		return out;
 	};
 
@@ -102,13 +111,16 @@ const measureInPage = `(targets) => {
 	for (const t of targets) {
 		if (t.all) {
 			const els = [...document.querySelectorAll(t.selector)];
-			result[t.name] = els.map((el) => ({ label: el.textContent.trim(), ...describe(el) }));
+			result[t.name] = els.map((el) => ({
+				label: el.textContent.trim(),
+				...describe(el),
+			}));
 		} else {
 			result[t.name] = describe(document.querySelector(t.selector));
 		}
 	}
 	return result;
-}`;
+};
 
 async function runSetup(page, setup) {
 	for (const step of setup ?? []) {
@@ -154,14 +166,12 @@ async function probe(args) {
 		});
 		const page = await ctx.newPage();
 		await page.goto(baseUrl + (config.url ?? "/"), {
-			waitUntil: "networkidle",
+			waitUntil: "load",
 		});
 		await runSetup(page, config.setup);
 		await page.waitForTimeout(200);
 
-		const measures = await page.evaluate(
-			`(${measureInPage})(${JSON.stringify(config.measures ?? [])})`,
-		);
+		const measures = await page.evaluate(measureInPage, config.measures ?? []);
 
 		const gaps = {};
 		for (const [a, b] of config.gaps ?? []) {
@@ -173,6 +183,9 @@ async function probe(args) {
 
 		const shotPath = `${out}/${config.name}-h${height}.png`;
 		const clip = config.clip ? await page.$(config.clip) : null;
+		if (config.clip && !clip) {
+			throw new Error(`clip selector not found: ${config.clip}`);
+		}
 		if (clip) {
 			await clip.screenshot({ path: shotPath });
 		} else {
