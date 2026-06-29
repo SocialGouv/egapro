@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const progressionUseQueryMock = vi.fn();
@@ -156,6 +156,28 @@ describe("StatsDashboard — structure and filters", () => {
 			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
 		);
 		expect(screen.getByTestId("campaign-rate-tile")).toBeInTheDocument();
+	});
+
+	it("keeps the most recent selected year active after toggling a year (regression: dashboard went blank because YearsFilter sorts ascending)", () => {
+		render(
+			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+		);
+		// Single-year widgets initially query the newest selected campaign.
+		expect(funnelUseQueryMock).toHaveBeenLastCalledWith(
+			{ year: 2026, sizeRange: undefined },
+			expect.anything(),
+		);
+
+		// Unchecking a middle year makes YearsFilter re-emit the selection sorted
+		// ascending ([2024, 2026]). `activeYear` must stay 2026 (the max), not flip
+		// to 2024 (the first element) — that older year has no data and blanks out
+		// every per-campaign widget.
+		fireEvent.click(screen.getByRole("checkbox", { name: "2025" }));
+
+		expect(funnelUseQueryMock).toHaveBeenLastCalledWith(
+			{ year: 2026, sizeRange: undefined },
+			expect.anything(),
+		);
 	});
 
 	it("shows campaign progression empty-state when no years are selected", () => {

@@ -1620,6 +1620,28 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 		expect(result.revisionFunnel[3]?.pctDropFromPrev).toBe(33);
 	});
 
+	it("S-K19-9: revision 'action submitted' counts only round-2 joint evaluations, never the pre-revision corrective submit (no funnel inversion)", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCompletionFunnel({ year: 2026 });
+
+		// Promise.all order is main, compliance, revision, cse → revision is #3.
+		const revisionSql = flattenSql(db.execute.mock.calls[2]?.[0]);
+		// The only submit-type action available during a revision is a round-2
+		// joint evaluation (corrective_action is forbidden in revision).
+		expect(revisionSql).toContain("joint_evaluation_submit");
+		// second_declaration_submit is always round 2 but is the PRE-revision
+		// corrective action: counting it would push "action submitted" above
+		// "path chosen" for declarations still in awaiting_revision_choice.
+		expect(revisionSql).not.toContain("second_declaration_submit");
+	});
+
 	it("S-K19-6: the revision funnel is empty when no declaration is in revision (count[0] === 0)", async () => {
 		const db = buildFunnelDb({
 			main: {

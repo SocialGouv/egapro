@@ -916,6 +916,13 @@ export const adminStatsRouter = createTRPCRouter({
 				FROM base
 			`);
 
+			// `revision_action_submitted` counts only round-2 joint evaluations.
+			// During a revision the only submit-type action is a round-2 joint
+			// evaluation (the corrective path is forbidden in revision). The
+			// corrective `second_declaration_submit` is always round 2 but is the
+			// PRE-revision action, so counting it here would push this jalon above
+			// `revision_path_chosen` for declarations still in
+			// `awaiting_revision_choice` (an inverted, >100 % funnel step).
 			const revisionFunnelPromise = ctx.db.execute<{
 				revision_required: number | string;
 				revision_path_chosen: number | string;
@@ -943,7 +950,7 @@ export const adminStatsRouter = createTRPCRouter({
 				SELECT
 					COUNT(DISTINCT base.declaration_id)::int AS revision_required,
 					${countDeclarationsWithEvent({ eventType: "path_choice", round: 2, alias: "revision_path_chosen" })},
-					${countDeclarationsWithEvent({ eventType: ["second_declaration_submit", "joint_evaluation_submit"], round: 2, alias: "revision_action_submitted" })},
+					${countDeclarationsWithEvent({ eventType: "joint_evaluation_submit", round: 2, alias: "revision_action_submitted" })},
 					${countDeclarationsWithEvent({ eventType: "demarche_complete", alias: "demarche_completed" })}
 				FROM base
 			`);
