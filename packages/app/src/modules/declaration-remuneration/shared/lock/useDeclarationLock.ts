@@ -10,8 +10,11 @@ export type LockHolder = NonNullable<
 	RouterOutputs["declarationLock"]["getLockState"]["holder"]
 >;
 
+export type ReadOnlyReason = "impersonation" | "lock";
+
 export type DeclarationLockState = {
 	isReadOnly: boolean;
+	reason: ReadOnlyReason | null;
 	holder: LockHolder | null;
 	isLoading: boolean;
 };
@@ -48,7 +51,10 @@ export function useDeclarationLock({
 	useEffect(() => {
 		if (!isEnabled) {
 			isHolderRef.current = false;
-			setIsReadOnly(false);
+			// Impersonation is a read-only reason too: surface it through the same
+			// state so the shared context exposes a single read-only flag. The lock
+			// itself stays disabled (no acquire/heartbeat) during impersonation.
+			setIsReadOnly(isImpersonating);
 			setHolder(null);
 			// Stay "loading" while the session is still resolving so consumers do
 			// not flash an editable state before ownership is known.
@@ -130,7 +136,13 @@ export function useDeclarationLock({
 			// (tab close), logout, the inactivity timeout, and admin override.
 			isHolderRef.current = false;
 		};
-	}, [declarationId, isEnabled, session.status]);
+	}, [declarationId, isEnabled, isImpersonating, session.status]);
 
-	return { isReadOnly, holder, isLoading };
+	const reason: ReadOnlyReason | null = isImpersonating
+		? "impersonation"
+		: isReadOnly
+			? "lock"
+			: null;
+
+	return { isReadOnly, reason, holder, isLoading };
 }
