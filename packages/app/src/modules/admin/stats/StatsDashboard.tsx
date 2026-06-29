@@ -85,7 +85,12 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 		STAGNATION_DEBOUNCE_MS,
 	);
 
-	const activeYear = selectedYears[0] ?? currentYear;
+	// Single-year widgets key off the most recent selected campaign. `YearsFilter`
+	// emits the selection sorted ascending, so `selectedYears[0]` is the OLDEST
+	// year — using it would blank every per-campaign widget as soon as the user
+	// toggles a year. Take the max so the active campaign is order-independent.
+	const activeYear =
+		selectedYears.length > 0 ? Math.max(...selectedYears) : currentYear;
 
 	const progressionQuery = api.adminStats.getCampaignProgression.useQuery(
 		{ years: selectedYears, sizeRange },
