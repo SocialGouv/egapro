@@ -1,7 +1,9 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useSession } from "next-auth/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { JointEvaluationForm } from "../JointEvaluationForm";
 
 const mockPush = vi.fn();
@@ -194,6 +196,38 @@ describe("JointEvaluationForm", () => {
 		});
 		await waitFor(() => {
 			expect(mockPush).toHaveBeenCalledWith(expectedRedirect);
+		});
+	});
+
+	describe("admin impersonation", () => {
+		afterEach(() => {
+			vi.mocked(useSession).mockReset();
+		});
+
+		it("disables the fieldset and submit button under the static provider when impersonating", () => {
+			vi.mocked(useSession).mockReturnValue({
+				data: {
+					user: {
+						id: "admin-1",
+						impersonation: { siren: "123456789", name: "Acme" },
+					},
+					expires: "2099-01-01",
+				},
+				status: "authenticated",
+			} as unknown as ReturnType<typeof useSession>);
+
+			// The layout feeds `isReadOnly={false}` but impersonation must still
+			// disable writes through the unified context.
+			const { container } = render(
+				<LockProvider isReadOnly={false}>
+					<JointEvaluationForm {...defaultProps} />
+				</LockProvider>,
+			);
+
+			expect(container.querySelector("fieldset")).toBeDisabled();
+			expect(
+				screen.getByRole("button", { name: /transmettre/i }),
+			).toBeDisabled();
 		});
 	});
 });

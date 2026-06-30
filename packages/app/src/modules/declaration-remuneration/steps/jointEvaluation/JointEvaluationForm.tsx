@@ -36,7 +36,7 @@ export function JointEvaluationForm({
 }: Props) {
 	const router = useRouter();
 	const readOnlyGuard = useReadOnlyGuard();
-	const { isReadOnly: isLocked } = useLockContext();
+	const { isReadOnly } = useLockContext();
 
 	const { clearDraft } = useDeclarationDraft({
 		siren: declarationSiren,
@@ -84,7 +84,7 @@ export function JointEvaluationForm({
 				className={common.flexColumnGap2}
 				onSubmit={handleSubmit}
 			>
-				<fieldset className={common.readOnlyFieldset} disabled={isLocked}>
+				<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
 					<div className={common.flexBetween}>
 						<h1 className="fr-h4 fr-mb-0">
 							Parcours de mise en conformité pour l&apos;indicateur par
@@ -143,7 +143,7 @@ export function JointEvaluationForm({
 						accept=".pdf"
 						acceptLabel="pdf"
 						allowedMimeTypes={["application/pdf"]}
-						disabled={readOnlyGuard.isReadOnly || isLocked}
+						disabled={isReadOnly}
 						error={uploadError}
 						inputId="joint-evaluation-file-upload"
 						onFilesChange={handleFilesChange}
@@ -200,7 +200,7 @@ export function JointEvaluationForm({
 							<button
 								{...readOnlyGuard.buttonProps}
 								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-								disabled={isPending || readOnlyGuard.isReadOnly || isLocked}
+								disabled={isPending || isReadOnly}
 								type="submit"
 							>
 								Transmettre

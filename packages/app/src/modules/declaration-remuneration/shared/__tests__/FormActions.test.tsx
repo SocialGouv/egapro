@@ -74,7 +74,14 @@ describe("FormActions", () => {
 		it("disables the submit button and renders a tooltip when impersonating without a saved record", () => {
 			mockImpersonating();
 
-			render(<FormActions />);
+			// The static provider folds impersonation into the unified context the
+			// same way the layouts do in production; FormActions reads `isReadOnly`
+			// from there.
+			render(
+				<LockProvider>
+					<FormActions />
+				</LockProvider>,
+			);
 
 			const button = screen.getByRole("button", { name: /suivant/i });
 			expect(button).toBeDisabled();
@@ -87,7 +94,9 @@ describe("FormActions", () => {
 			mockImpersonating();
 
 			render(
-				<FormActions mimoquageNextHref="/declaration-remuneration/etape/2" />,
+				<LockProvider>
+					<FormActions mimoquageNextHref="/declaration-remuneration/etape/2" />
+				</LockProvider>,
 			);
 
 			expect(
@@ -142,6 +151,7 @@ describe("FormActions", () => {
 		it("disables the submit button while the lock is still being acquired", () => {
 			vi.mocked(useLockContext).mockReturnValueOnce({
 				isReadOnly: false,
+				reason: null,
 				holder: null,
 				isLoading: true,
 			});

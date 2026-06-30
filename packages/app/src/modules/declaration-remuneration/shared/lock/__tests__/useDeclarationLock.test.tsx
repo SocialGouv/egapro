@@ -285,12 +285,32 @@ describe("useDeclarationLock", () => {
 		expect(result.current.isLoading).toBe(true);
 	});
 
-	it("is disabled while impersonating: never acquires the lock", () => {
+	it("is read-only while impersonating with reason 'impersonation', without acquiring the lock", () => {
 		setSession({ impersonating: true });
 		const { result } = renderLockHook();
 
 		expect(acquireMutateAsync).not.toHaveBeenCalled();
+		expect(result.current.isReadOnly).toBe(true);
+		expect(result.current.reason).toBe("impersonation");
+		expect(result.current.holder).toBeNull();
+	});
+
+	it("reports reason 'lock' when the declaration is held by another user", async () => {
+		acquireMutateAsync.mockResolvedValue({ acquired: false, holder: HOLDER });
+		const { result } = renderLockHook();
+		await flush();
+
+		expect(result.current.isReadOnly).toBe(true);
+		expect(result.current.reason).toBe("lock");
+	});
+
+	it("reports a null reason for a normal editor that holds the lock", async () => {
+		acquireMutateAsync.mockResolvedValue({ acquired: true, holder: HOLDER });
+		const { result } = renderLockHook();
+		await flush();
+
 		expect(result.current.isReadOnly).toBe(false);
+		expect(result.current.reason).toBeNull();
 	});
 
 	it("swallows heartbeat rejections without re-reading ownership", async () => {
