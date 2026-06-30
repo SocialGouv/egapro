@@ -11,14 +11,6 @@
 	}
 }
 
-.obligatoiresRow {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	gap: 1rem;
-	flex-wrap: wrap;
-}
-
 .deleteRow {
 	display: flex;
 	justify-content: flex-end;
@@ -84,6 +76,10 @@
 }
 
 .descriptionTitle {
+	font-weight: 500;
+}
+
+.periodDate {
 	font-weight: 500;
 }
 

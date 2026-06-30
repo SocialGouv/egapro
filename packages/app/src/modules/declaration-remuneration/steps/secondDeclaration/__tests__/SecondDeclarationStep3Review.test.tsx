@@ -187,6 +187,22 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
 	});
 
+	it("renders the CSE update trigger as a secondary button", () => {
+		render(
+			<SecondDeclarationStep3Review
+				declarationYear={2025}
+				hasCse={null}
+				secondDeclarationCategories={mockCategories}
+				siren="532847196"
+			/>,
+		);
+		const cseButton = screen.getByRole("button", {
+			name: "Mettre à jour l'existence d'un CSE",
+		});
+		expect(cseButton).toHaveClass("fr-btn", "fr-btn--secondary");
+		expect(cseButton).toHaveAttribute("aria-controls", "update-cse-modal");
+	});
+
 	it("renders Soumettre button", () => {
 		render(
 			<SecondDeclarationStep3Review

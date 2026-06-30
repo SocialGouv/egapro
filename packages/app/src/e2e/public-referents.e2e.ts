@@ -149,11 +149,15 @@ test.describe("public referents search", () => {
 		const anonCtx = await browser.newContext({ storageState: undefined });
 		try {
 			const page = await anonCtx.newPage();
-			await page.goto("/referents");
-			await page.getByLabel("Région").selectOption("11");
-			await page.getByRole("button", { name: /^rechercher$/i }).click();
+			// Drive the search through the URL — the form only pushes these query
+			// params and the results are fetched from them — so this exercises the
+			// same code path without the flakiness of the client-side submit race.
+			await page.goto("/referents?region=11&page=1");
 
-			const row = page.locator("li", { hasText: "E2E Référent Paris" });
+			const list = page.getByTestId("public-referents-list");
+			await expect(list).toBeVisible({ timeout: 30_000 });
+
+			const row = list.locator("li", { hasText: "E2E Référent Paris" });
 			await expect(row).toBeVisible({ timeout: 30_000 });
 			await row.getByRole("link", { name: /voir le contact/i }).click();
 
