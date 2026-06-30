@@ -138,33 +138,39 @@ export function CampaignProgressionChart({ series, currentYear }: Props) {
 				Courbe de progression cumulative des déclarations soumises par année.
 				Les données équivalentes sont disponibles dans le tableau ci-dessous.
 			</figcaption>
-			<ResponsiveContainer>
-				<LineChart data={data}>
-					<CartesianGrid strokeDasharray="3 3" />
-					<XAxis
-						dataKey="dayOfYear"
-						interval={6}
-						tickFormatter={(value: string) => formatMonthDay(value)}
-					/>
-					<YAxis
-						tickFormatter={(value: number) => value.toLocaleString("fr-FR")}
-					/>
-					<Tooltip content={<ProgressionTooltip totals={totals} />} />
-					<Legend />
-					{series.map(({ year }) => (
-						<Line
-							connectNulls
-							dataKey={year}
-							dot={false}
-							key={year}
-							name={String(year)}
-							stroke={colorForYear(year, currentYear)}
-							strokeWidth={year === currentYear ? 3 : 2}
-							type="monotone"
+			<div
+				aria-label="Courbe de progression cumulative des déclarations soumises par année"
+				className={styles.chartContainer}
+				role="img"
+			>
+				<ResponsiveContainer>
+					<LineChart data={data}>
+						<CartesianGrid strokeDasharray="3 3" />
+						<XAxis
+							dataKey="dayOfYear"
+							interval={6}
+							tickFormatter={(value: string) => formatMonthDay(value)}
 						/>
-					))}
-				</LineChart>
-			</ResponsiveContainer>
+						<YAxis
+							tickFormatter={(value: number) => value.toLocaleString("fr-FR")}
+						/>
+						<Tooltip content={<ProgressionTooltip totals={totals} />} />
+						<Legend />
+						{series.map(({ year }) => (
+							<Line
+								connectNulls
+								dataKey={year}
+								dot={false}
+								key={year}
+								name={String(year)}
+								stroke={colorForYear(year, currentYear)}
+								strokeWidth={year === currentYear ? 3 : 2}
+								type="monotone"
+							/>
+						))}
+					</LineChart>
+				</ResponsiveContainer>
+			</div>
 		</figure>
 	);
 }

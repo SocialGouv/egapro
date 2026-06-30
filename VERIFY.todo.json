@@ -1,0 +1,402 @@
+[
+  {
+    "n": 1,
+    "criteriaId": "3.1",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 2,
+    "criteriaId": "5.1",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 3,
+    "criteriaId": "5.2",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 4,
+    "criteriaId": "5.4",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 5,
+    "criteriaId": "5.5",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 6,
+    "criteriaId": "5.6",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 7,
+    "criteriaId": "5.7",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 8,
+    "criteriaId": "5.8",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 9,
+    "criteriaId": "7.3",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 10,
+    "criteriaId": "8.9",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 11,
+    "criteriaId": "9.1",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 12,
+    "criteriaId": "9.2",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 13,
+    "criteriaId": "9.3",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 14,
+    "criteriaId": "9.4",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 15,
+    "criteriaId": "10.1",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 16,
+    "criteriaId": "10.2",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 17,
+    "criteriaId": "11.1",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 18,
+    "criteriaId": "11.5",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 19,
+    "criteriaId": "11.6",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 20,
+    "criteriaId": "11.7",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 21,
+    "criteriaId": "11.8",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 22,
+    "criteriaId": "12.6",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 23,
+    "criteriaId": "13.3",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 24,
+    "criteriaId": "13.4",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/jointEvaluation/JointEvaluationForm.tsx",
+    "line": 87,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 25,
+    "criteriaId": "3.1",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 26,
+    "criteriaId": "5.1",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 27,
+    "criteriaId": "5.2",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 28,
+    "criteriaId": "5.4",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 29,
+    "criteriaId": "5.5",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 30,
+    "criteriaId": "5.6",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 31,
+    "criteriaId": "5.7",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 32,
+    "criteriaId": "5.8",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 33,
+    "criteriaId": "7.3",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 34,
+    "criteriaId": "8.9",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 35,
+    "criteriaId": "9.1",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 36,
+    "criteriaId": "9.2",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 37,
+    "criteriaId": "9.3",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 38,
+    "criteriaId": "9.4",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 39,
+    "criteriaId": "10.1",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  },
+  {
+    "n": 40,
+    "criteriaId": "10.2",
+    "file": "packages/app/src/modules/declaration-remuneration/steps/CompliancePathChoice.tsx",
+    "line": 127,
+    "selector": "fieldset.{common.readOnlyFieldset}",
+    "claim": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+    "verdict": null,
+    "note": ""
+  }
+]

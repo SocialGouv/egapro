@@ -1,0 +1,2073 @@
+{
+  "tool": "ultra11y",
+  "standard": "wcag",
+  "version": "2.2.1",
+  "schemaVersion": 2,
+  "date": "2026-06-30",
+  "scope": {
+    "inputs": [
+      "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/**/*.html"
+    ],
+    "files": 28
+  },
+  "guidelines": [
+    {
+      "key": "1.1",
+      "title": "Text Alternatives",
+      "c": 0,
+      "nc": 1,
+      "na": 0,
+      "manual": 0
+    },
+    {
+      "key": "1.2",
+      "title": "Time-based Media",
+      "c": 0,
+      "nc": 0,
+      "na": 0,
+      "manual": 5
+    },
+    {
+      "key": "1.3",
+      "title": "Adaptable",
+      "c": 0,
+      "nc": 1,
+      "na": 0,
+      "manual": 4
+    },
+    {
+      "key": "1.4",
+      "title": "Distinguishable",
+      "c": 0,
+      "nc": 0,
+      "na": 1,
+      "manual": 8
+    },
+    {
+      "key": "2.1",
+      "title": "Keyboard Accessible",
+      "c": 0,
+      "nc": 0,
+      "na": 0,
+      "manual": 3
+    },
+    {
+      "key": "2.2",
+      "title": "Enough Time",
+      "c": 0,
+      "nc": 0,
+      "na": 0,
+      "manual": 2
+    },
+    {
+      "key": "2.3",
+      "title": "Seizures and Physical Reactions",
+      "c": 0,
+      "nc": 0,
+      "na": 0,
+      "manual": 1
+    },
+    {
+      "key": "2.4",
+      "title": "Navigable",
+      "c": 1,
+      "nc": 1,
+      "na": 0,
+      "manual": 6
+    },
+    {
+      "key": "2.5",
+      "title": "Input Modalities",
+      "c": 0,
+      "nc": 0,
+      "na": 0,
+      "manual": 6
+    },
+    {
+      "key": "3.1",
+      "title": "Readable",
+      "c": 1,
+      "nc": 0,
+      "na": 0,
+      "manual": 1
+    },
+    {
+      "key": "3.2",
+      "title": "Predictable",
+      "c": 0,
+      "nc": 0,
+      "na": 0,
+      "manual": 5
+    },
+    {
+      "key": "3.3",
+      "title": "Input Assistance",
+      "c": 0,
+      "nc": 0,
+      "na": 0,
+      "manual": 6
+    },
+    {
+      "key": "4.1",
+      "title": "Compatible",
+      "c": 0,
+      "nc": 1,
+      "na": 0,
+      "manual": 1
+    }
+  ],
+  "criteria": [
+    {
+      "id": "1.1.1",
+      "guideline": "1.1",
+      "status": "NC",
+      "findings": [
+        {
+          "ruleId": "canvas-fallback-missing",
+          "criteriaId": "1.1.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+          "line": 7,
+          "col": 61749,
+          "selectorHint": "canvas",
+          "severity": "majeur",
+          "message": "<canvas> sans contenu alternatif ni nom accessible.",
+          "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+          "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+          "sourceStart": 83006,
+          "sourceEnd": 83261
+        },
+        {
+          "ruleId": "canvas-fallback-missing",
+          "criteriaId": "1.1.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+          "line": 7,
+          "col": 64454,
+          "selectorHint": "canvas",
+          "severity": "majeur",
+          "message": "<canvas> sans contenu alternatif ni nom accessible.",
+          "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+          "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+          "sourceStart": 85711,
+          "sourceEnd": 85966
+        },
+        {
+          "ruleId": "canvas-fallback-missing",
+          "criteriaId": "1.1.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+          "line": 7,
+          "col": 67210,
+          "selectorHint": "canvas",
+          "severity": "majeur",
+          "message": "<canvas> sans contenu alternatif ni nom accessible.",
+          "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+          "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+          "sourceStart": 88467,
+          "sourceEnd": 88722
+        },
+        {
+          "ruleId": "canvas-fallback-missing",
+          "criteriaId": "1.1.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+          "line": 7,
+          "col": 69936,
+          "selectorHint": "canvas",
+          "severity": "majeur",
+          "message": "<canvas> sans contenu alternatif ni nom accessible.",
+          "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+          "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+          "sourceStart": 91193,
+          "sourceEnd": 91448
+        },
+        {
+          "ruleId": "canvas-fallback-missing",
+          "criteriaId": "1.1.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+          "line": 7,
+          "col": 73054,
+          "selectorHint": "canvas",
+          "severity": "majeur",
+          "message": "<canvas> sans contenu alternatif ni nom accessible.",
+          "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+          "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+          "sourceStart": 94311,
+          "sourceEnd": 94566
+        },
+        {
+          "ruleId": "canvas-fallback-missing",
+          "criteriaId": "1.1.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+          "line": 7,
+          "col": 75988,
+          "selectorHint": "canvas",
+          "severity": "majeur",
+          "message": "<canvas> sans contenu alternatif ni nom accessible.",
+          "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+          "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+          "sourceStart": 97245,
+          "sourceEnd": 97500
+        },
+        {
+          "ruleId": "canvas-fallback-missing",
+          "criteriaId": "1.1.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+          "line": 7,
+          "col": 78468,
+          "selectorHint": "canvas",
+          "severity": "majeur",
+          "message": "<canvas> sans contenu alternatif ni nom accessible.",
+          "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+          "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+          "sourceStart": 99725,
+          "sourceEnd": 99980
+        }
+      ]
+    },
+    {
+      "id": "1.2.1",
+      "guideline": "1.2",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.2.2",
+      "guideline": "1.2",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.2.3",
+      "guideline": "1.2",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.2.4",
+      "guideline": "1.2",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.2.5",
+      "guideline": "1.2",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.3.1",
+      "guideline": "1.3",
+      "status": "NC",
+      "findings": [
+        {
+          "ruleId": "fieldset-legend-missing",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/avis-cse.html",
+          "line": 1,
+          "col": 12883,
+          "selectorHint": "fieldset.Step1Opinions-module-scss-module___g_TDq__readOnlyFieldset",
+          "severity": "majeur",
+          "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+          "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 12882,
+          "sourceEnd": 16739
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/avis-cse.html",
+          "line": 1,
+          "col": 23303,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 23302,
+          "sourceEnd": 23453
+        },
+        {
+          "ruleId": "fieldset-legend-missing",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-1.html",
+          "line": 1,
+          "col": 12648,
+          "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+          "severity": "majeur",
+          "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+          "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 12647,
+          "sourceEnd": 17695
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-1.html",
+          "line": 1,
+          "col": 25048,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 25047,
+          "sourceEnd": 25198
+        },
+        {
+          "ruleId": "fieldset-legend-missing",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-2.html",
+          "line": 1,
+          "col": 12649,
+          "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+          "severity": "majeur",
+          "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+          "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 12648,
+          "sourceEnd": 19667
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-2.html",
+          "line": 1,
+          "col": 26231,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 26230,
+          "sourceEnd": 26381
+        },
+        {
+          "ruleId": "fieldset-legend-missing",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-3.html",
+          "line": 1,
+          "col": 12649,
+          "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+          "severity": "majeur",
+          "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+          "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 12648,
+          "sourceEnd": 21130
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-3.html",
+          "line": 1,
+          "col": 27694,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 27693,
+          "sourceEnd": 27844
+        },
+        {
+          "ruleId": "fieldset-legend-missing",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-4.html",
+          "line": 1,
+          "col": 12679,
+          "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+          "severity": "majeur",
+          "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+          "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 12678,
+          "sourceEnd": 40837
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-4.html",
+          "line": 1,
+          "col": 47401,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 47400,
+          "sourceEnd": 47551
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-5.html",
+          "line": 1,
+          "col": 32888,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 32887,
+          "sourceEnd": 33038
+        },
+        {
+          "ruleId": "fieldset-legend-missing",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-6.html",
+          "line": 1,
+          "col": 12633,
+          "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+          "severity": "majeur",
+          "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+          "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 12632,
+          "sourceEnd": 17760
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-6.html",
+          "line": 1,
+          "col": 24341,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 24340,
+          "sourceEnd": 24491
+        },
+        {
+          "ruleId": "fieldset-legend-missing",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-intro.html",
+          "line": 1,
+          "col": 12648,
+          "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+          "severity": "majeur",
+          "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+          "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 12647,
+          "sourceEnd": 17695
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-intro.html",
+          "line": 1,
+          "col": 25048,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 25047,
+          "sourceEnd": 25198
+        },
+        {
+          "ruleId": "heading-order-skip",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-recapitulatif.html",
+          "line": 1,
+          "col": 61348,
+          "selectorHint": "h3.fr-tile__title",
+          "severity": "majeur",
+          "message": "Saut de niveau de titre : <h3> après <h1> (niveau h2 attendu).",
+          "remediation": "Ne sautez pas de niveau : enchaînez les titres sans omettre de palier.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><link rel=\"stylesh…",
+          "sourceStart": 61347,
+          "sourceEnd": 61411
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-recapitulatif.html",
+          "line": 1,
+          "col": 67399,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><link rel=\"stylesh…",
+          "sourceStart": 67398,
+          "sourceEnd": 67549
+        },
+        {
+          "ruleId": "fieldset-legend-missing",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/parcours-conformite.html",
+          "line": 1,
+          "col": 12632,
+          "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+          "severity": "majeur",
+          "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+          "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 12631,
+          "sourceEnd": 17759
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/parcours-conformite.html",
+          "line": 1,
+          "col": 24340,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 24339,
+          "sourceEnd": 24490
+        },
+        {
+          "ruleId": "heading-order-skip",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/404.html",
+          "line": 1,
+          "col": 12370,
+          "selectorHint": "h3.fr-tile__title",
+          "severity": "majeur",
+          "message": "Saut de niveau de titre : <h3> après <h1> (niveau h2 attendu).",
+          "remediation": "Ne sautez pas de niveau : enchaînez les titres sans omettre de palier.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 12369,
+          "sourceEnd": 12433
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/404.html",
+          "line": 1,
+          "col": 18427,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 18426,
+          "sourceEnd": 18577
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/accueil.html",
+          "line": 1,
+          "col": 23916,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 23915,
+          "sourceEnd": 24066
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/aide-nous-contacter.html",
+          "line": 1,
+          "col": 19503,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 19502,
+          "sourceEnd": 19653
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/aide.html",
+          "line": 1,
+          "col": 22870,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 22869,
+          "sourceEnd": 23020
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/declaration-accessibilite.html",
+          "line": 1,
+          "col": 21157,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 21156,
+          "sourceEnd": 21307
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/donnees-personnelles.html",
+          "line": 1,
+          "col": 25043,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 25042,
+          "sourceEnd": 25193
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/faq.html",
+          "line": 1,
+          "col": 60666,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 60665,
+          "sourceEnd": 60816
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/gestion-des-cookies.html",
+          "line": 1,
+          "col": 21397,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 21396,
+          "sourceEnd": 21547
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/login.html",
+          "line": 1,
+          "col": 16581,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 16580,
+          "sourceEnd": 16731
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/mentions-legales.html",
+          "line": 1,
+          "col": 19599,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 19598,
+          "sourceEnd": 19749
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/plan-du-site.html",
+          "line": 1,
+          "col": 18737,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 18736,
+          "sourceEnd": 18887
+        },
+        {
+          "ruleId": "heading-order-skip",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/referents.html",
+          "line": 1,
+          "col": 13764,
+          "selectorHint": "h3.fr-tile__title",
+          "severity": "majeur",
+          "message": "Saut de niveau de titre : <h3> après <h1> (niveau h2 attendu).",
+          "remediation": "Ne sautez pas de niveau : enchaînez les titres sans omettre de palier.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 13763,
+          "sourceEnd": 13827
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/referents.html",
+          "line": 1,
+          "col": 19821,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 19820,
+          "sourceEnd": 19971
+        },
+        {
+          "ruleId": "h1-multiple",
+          "criteriaId": "1.3.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/stats.html",
+          "line": 1,
+          "col": 31009,
+          "selectorHint": "h1#fr-theme-modal-title",
+          "severity": "mineur",
+          "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+          "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 31008,
+          "sourceEnd": 31159
+        }
+      ]
+    },
+    {
+      "id": "1.3.2",
+      "guideline": "1.3",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.3.3",
+      "guideline": "1.3",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.3.4",
+      "guideline": "1.3",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.3.5",
+      "guideline": "1.3",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.4.1",
+      "guideline": "1.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.4.2",
+      "guideline": "1.4",
+      "status": "NA",
+      "findings": [],
+      "justification": "No element in scope is concerned by this success criterion."
+    },
+    {
+      "id": "1.4.3",
+      "guideline": "1.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.4.4",
+      "guideline": "1.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.4.5",
+      "guideline": "1.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.4.10",
+      "guideline": "1.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.4.11",
+      "guideline": "1.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.4.12",
+      "guideline": "1.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "1.4.13",
+      "guideline": "1.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.1.1",
+      "guideline": "2.1",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.1.2",
+      "guideline": "2.1",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.1.4",
+      "guideline": "2.1",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.2.1",
+      "guideline": "2.2",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.2.2",
+      "guideline": "2.2",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.3.1",
+      "guideline": "2.3",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.4.1",
+      "guideline": "2.4",
+      "status": "NC",
+      "findings": [
+        {
+          "ruleId": "skip-link-target-missing",
+          "criteriaId": "2.4.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-declarations.html",
+          "line": 1,
+          "col": 7983,
+          "selectorHint": "a.fr-link",
+          "severity": "majeur",
+          "message": "Lien interne href=\"#content\" — la cible #content n'existe pas dans la page (lien d'évitement/ancre cassé).",
+          "remediation": "Ajoutez un élément avec id=\"content\" (ex. <main id=\"content\">) ou corrigez l'ancre.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 7982,
+          "sourceEnd": 8027
+        },
+        {
+          "ruleId": "skip-link-target-missing",
+          "criteriaId": "2.4.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-declarations.html",
+          "line": 1,
+          "col": 8038,
+          "selectorHint": "a.fr-link",
+          "severity": "majeur",
+          "message": "Lien interne href=\"#footer\" — la cible #footer n'existe pas dans la page (lien d'évitement/ancre cassé).",
+          "remediation": "Ajoutez un élément avec id=\"footer\" (ex. <main id=\"footer\">) ou corrigez l'ancre.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 8037,
+          "sourceEnd": 8086
+        },
+        {
+          "ruleId": "skip-link-target-missing",
+          "criteriaId": "2.4.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+          "line": 1,
+          "col": 9979,
+          "selectorHint": "a.fr-link",
+          "severity": "majeur",
+          "message": "Lien interne href=\"#content\" — la cible #content n'existe pas dans la page (lien d'évitement/ancre cassé).",
+          "remediation": "Ajoutez un élément avec id=\"content\" (ex. <main id=\"content\">) ou corrigez l'ancre.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 9978,
+          "sourceEnd": 10023
+        },
+        {
+          "ruleId": "skip-link-target-missing",
+          "criteriaId": "2.4.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+          "line": 1,
+          "col": 10034,
+          "selectorHint": "a.fr-link",
+          "severity": "majeur",
+          "message": "Lien interne href=\"#footer\" — la cible #footer n'existe pas dans la page (lien d'évitement/ancre cassé).",
+          "remediation": "Ajoutez un élément avec id=\"footer\" (ex. <main id=\"footer\">) ou corrigez l'ancre.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 10033,
+          "sourceEnd": 10082
+        },
+        {
+          "ruleId": "skip-link-target-missing",
+          "criteriaId": "2.4.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin.html",
+          "line": 1,
+          "col": 7969,
+          "selectorHint": "a.fr-link",
+          "severity": "majeur",
+          "message": "Lien interne href=\"#content\" — la cible #content n'existe pas dans la page (lien d'évitement/ancre cassé).",
+          "remediation": "Ajoutez un élément avec id=\"content\" (ex. <main id=\"content\">) ou corrigez l'ancre.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 7968,
+          "sourceEnd": 8013
+        },
+        {
+          "ruleId": "skip-link-target-missing",
+          "criteriaId": "2.4.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin.html",
+          "line": 1,
+          "col": 8024,
+          "selectorHint": "a.fr-link",
+          "severity": "majeur",
+          "message": "Lien interne href=\"#footer\" — la cible #footer n'existe pas dans la page (lien d'évitement/ancre cassé).",
+          "remediation": "Ajoutez un élément avec id=\"footer\" (ex. <main id=\"footer\">) ou corrigez l'ancre.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 8023,
+          "sourceEnd": 8072
+        },
+        {
+          "ruleId": "skip-link-target-missing",
+          "criteriaId": "2.4.1",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/stats.html",
+          "line": 1,
+          "col": 9155,
+          "selectorHint": "a.fr-link",
+          "severity": "majeur",
+          "message": "Lien interne href=\"#content\" — la cible #content n'existe pas dans la page (lien d'évitement/ancre cassé).",
+          "remediation": "Ajoutez un élément avec id=\"content\" (ex. <main id=\"content\">) ou corrigez l'ancre.",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 9154,
+          "sourceEnd": 9199
+        }
+      ]
+    },
+    {
+      "id": "2.4.2",
+      "guideline": "2.4",
+      "status": "C",
+      "findings": []
+    },
+    {
+      "id": "2.4.3",
+      "guideline": "2.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.4.4",
+      "guideline": "2.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.4.5",
+      "guideline": "2.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.4.6",
+      "guideline": "2.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.4.7",
+      "guideline": "2.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.4.11",
+      "guideline": "2.4",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.5.1",
+      "guideline": "2.5",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.5.2",
+      "guideline": "2.5",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.5.3",
+      "guideline": "2.5",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.5.4",
+      "guideline": "2.5",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.5.7",
+      "guideline": "2.5",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "2.5.8",
+      "guideline": "2.5",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "3.1.1",
+      "guideline": "3.1",
+      "status": "C",
+      "findings": []
+    },
+    {
+      "id": "3.1.2",
+      "guideline": "3.1",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "3.2.1",
+      "guideline": "3.2",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "3.2.2",
+      "guideline": "3.2",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "3.2.3",
+      "guideline": "3.2",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "3.2.4",
+      "guideline": "3.2",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "3.2.6",
+      "guideline": "3.2",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "3.3.1",
+      "guideline": "3.3",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "3.3.2",
+      "guideline": "3.3",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "3.3.3",
+      "guideline": "3.3",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "3.3.4",
+      "guideline": "3.3",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "3.3.7",
+      "guideline": "3.3",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "3.3.8",
+      "guideline": "3.3",
+      "status": "manual",
+      "findings": []
+    },
+    {
+      "id": "4.1.2",
+      "guideline": "4.1",
+      "status": "NC",
+      "findings": [
+        {
+          "ruleId": "aria-hidden-focusable",
+          "criteriaId": "4.1.2",
+          "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/stats.html",
+          "line": 1,
+          "col": 12383,
+          "selectorHint": "div.ScoreDistributionChart-module-scss-module__Ov6rrq__chartWrapper",
+          "severity": "majeur",
+          "message": "aria-hidden=\"true\" sur (ou contenant) un élément focalisable — piège pour les technologies d'assistance.",
+          "remediation": "Retirez aria-hidden, ou rendez l'élément non focalisable (tabindex=\"-1\", disabled).",
+          "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+          "sourceStart": 12382,
+          "sourceEnd": 23054
+        }
+      ]
+    },
+    {
+      "id": "4.1.3",
+      "guideline": "4.1",
+      "status": "manual",
+      "findings": []
+    }
+  ],
+  "findings": [
+    {
+      "ruleId": "skip-link-target-missing",
+      "criteriaId": "2.4.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-declarations.html",
+      "line": 1,
+      "col": 7983,
+      "selectorHint": "a.fr-link",
+      "severity": "majeur",
+      "message": "Lien interne href=\"#content\" — la cible #content n'existe pas dans la page (lien d'évitement/ancre cassé).",
+      "remediation": "Ajoutez un élément avec id=\"content\" (ex. <main id=\"content\">) ou corrigez l'ancre.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 7982,
+      "sourceEnd": 8027
+    },
+    {
+      "ruleId": "skip-link-target-missing",
+      "criteriaId": "2.4.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-declarations.html",
+      "line": 1,
+      "col": 8038,
+      "selectorHint": "a.fr-link",
+      "severity": "majeur",
+      "message": "Lien interne href=\"#footer\" — la cible #footer n'existe pas dans la page (lien d'évitement/ancre cassé).",
+      "remediation": "Ajoutez un élément avec id=\"footer\" (ex. <main id=\"footer\">) ou corrigez l'ancre.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 8037,
+      "sourceEnd": 8086
+    },
+    {
+      "ruleId": "skip-link-target-missing",
+      "criteriaId": "2.4.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+      "line": 1,
+      "col": 9979,
+      "selectorHint": "a.fr-link",
+      "severity": "majeur",
+      "message": "Lien interne href=\"#content\" — la cible #content n'existe pas dans la page (lien d'évitement/ancre cassé).",
+      "remediation": "Ajoutez un élément avec id=\"content\" (ex. <main id=\"content\">) ou corrigez l'ancre.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 9978,
+      "sourceEnd": 10023
+    },
+    {
+      "ruleId": "skip-link-target-missing",
+      "criteriaId": "2.4.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+      "line": 1,
+      "col": 10034,
+      "selectorHint": "a.fr-link",
+      "severity": "majeur",
+      "message": "Lien interne href=\"#footer\" — la cible #footer n'existe pas dans la page (lien d'évitement/ancre cassé).",
+      "remediation": "Ajoutez un élément avec id=\"footer\" (ex. <main id=\"footer\">) ou corrigez l'ancre.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 10033,
+      "sourceEnd": 10082
+    },
+    {
+      "ruleId": "canvas-fallback-missing",
+      "criteriaId": "1.1.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+      "line": 7,
+      "col": 61749,
+      "selectorHint": "canvas",
+      "severity": "majeur",
+      "message": "<canvas> sans contenu alternatif ni nom accessible.",
+      "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+      "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+      "sourceStart": 83006,
+      "sourceEnd": 83261
+    },
+    {
+      "ruleId": "canvas-fallback-missing",
+      "criteriaId": "1.1.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+      "line": 7,
+      "col": 64454,
+      "selectorHint": "canvas",
+      "severity": "majeur",
+      "message": "<canvas> sans contenu alternatif ni nom accessible.",
+      "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+      "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+      "sourceStart": 85711,
+      "sourceEnd": 85966
+    },
+    {
+      "ruleId": "canvas-fallback-missing",
+      "criteriaId": "1.1.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+      "line": 7,
+      "col": 67210,
+      "selectorHint": "canvas",
+      "severity": "majeur",
+      "message": "<canvas> sans contenu alternatif ni nom accessible.",
+      "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+      "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+      "sourceStart": 88467,
+      "sourceEnd": 88722
+    },
+    {
+      "ruleId": "canvas-fallback-missing",
+      "criteriaId": "1.1.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+      "line": 7,
+      "col": 69936,
+      "selectorHint": "canvas",
+      "severity": "majeur",
+      "message": "<canvas> sans contenu alternatif ni nom accessible.",
+      "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+      "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+      "sourceStart": 91193,
+      "sourceEnd": 91448
+    },
+    {
+      "ruleId": "canvas-fallback-missing",
+      "criteriaId": "1.1.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+      "line": 7,
+      "col": 73054,
+      "selectorHint": "canvas",
+      "severity": "majeur",
+      "message": "<canvas> sans contenu alternatif ni nom accessible.",
+      "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+      "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+      "sourceStart": 94311,
+      "sourceEnd": 94566
+    },
+    {
+      "ruleId": "canvas-fallback-missing",
+      "criteriaId": "1.1.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+      "line": 7,
+      "col": 75988,
+      "selectorHint": "canvas",
+      "severity": "majeur",
+      "message": "<canvas> sans contenu alternatif ni nom accessible.",
+      "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+      "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+      "sourceStart": 97245,
+      "sourceEnd": 97500
+    },
+    {
+      "ruleId": "canvas-fallback-missing",
+      "criteriaId": "1.1.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin-stats.html",
+      "line": 7,
+      "col": 78468,
+      "selectorHint": "canvas",
+      "severity": "majeur",
+      "message": "<canvas> sans contenu alternatif ni nom accessible.",
+      "remediation": "Placez un contenu de repli entre <canvas>…</canvas> ou ajoutez role=\"img\" + aria-label.",
+      "snippet": "A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16\" class=\"recharts-legend-icon\"></path></svg><span class…",
+      "sourceStart": 99725,
+      "sourceEnd": 99980
+    },
+    {
+      "ruleId": "skip-link-target-missing",
+      "criteriaId": "2.4.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin.html",
+      "line": 1,
+      "col": 7969,
+      "selectorHint": "a.fr-link",
+      "severity": "majeur",
+      "message": "Lien interne href=\"#content\" — la cible #content n'existe pas dans la page (lien d'évitement/ancre cassé).",
+      "remediation": "Ajoutez un élément avec id=\"content\" (ex. <main id=\"content\">) ou corrigez l'ancre.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 7968,
+      "sourceEnd": 8013
+    },
+    {
+      "ruleId": "skip-link-target-missing",
+      "criteriaId": "2.4.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/admin/admin.html",
+      "line": 1,
+      "col": 8024,
+      "selectorHint": "a.fr-link",
+      "severity": "majeur",
+      "message": "Lien interne href=\"#footer\" — la cible #footer n'existe pas dans la page (lien d'évitement/ancre cassé).",
+      "remediation": "Ajoutez un élément avec id=\"footer\" (ex. <main id=\"footer\">) ou corrigez l'ancre.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 8023,
+      "sourceEnd": 8072
+    },
+    {
+      "ruleId": "fieldset-legend-missing",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/avis-cse.html",
+      "line": 1,
+      "col": 12883,
+      "selectorHint": "fieldset.Step1Opinions-module-scss-module___g_TDq__readOnlyFieldset",
+      "severity": "majeur",
+      "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+      "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 12882,
+      "sourceEnd": 16739
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/avis-cse.html",
+      "line": 1,
+      "col": 23303,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 23302,
+      "sourceEnd": 23453
+    },
+    {
+      "ruleId": "fieldset-legend-missing",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-1.html",
+      "line": 1,
+      "col": 12648,
+      "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+      "severity": "majeur",
+      "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+      "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 12647,
+      "sourceEnd": 17695
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-1.html",
+      "line": 1,
+      "col": 25048,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 25047,
+      "sourceEnd": 25198
+    },
+    {
+      "ruleId": "fieldset-legend-missing",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-2.html",
+      "line": 1,
+      "col": 12649,
+      "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+      "severity": "majeur",
+      "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+      "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 12648,
+      "sourceEnd": 19667
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-2.html",
+      "line": 1,
+      "col": 26231,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 26230,
+      "sourceEnd": 26381
+    },
+    {
+      "ruleId": "fieldset-legend-missing",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-3.html",
+      "line": 1,
+      "col": 12649,
+      "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+      "severity": "majeur",
+      "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+      "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 12648,
+      "sourceEnd": 21130
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-3.html",
+      "line": 1,
+      "col": 27694,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 27693,
+      "sourceEnd": 27844
+    },
+    {
+      "ruleId": "fieldset-legend-missing",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-4.html",
+      "line": 1,
+      "col": 12679,
+      "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+      "severity": "majeur",
+      "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+      "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 12678,
+      "sourceEnd": 40837
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-4.html",
+      "line": 1,
+      "col": 47401,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 47400,
+      "sourceEnd": 47551
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-5.html",
+      "line": 1,
+      "col": 32888,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 32887,
+      "sourceEnd": 33038
+    },
+    {
+      "ruleId": "fieldset-legend-missing",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-6.html",
+      "line": 1,
+      "col": 12633,
+      "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+      "severity": "majeur",
+      "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+      "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 12632,
+      "sourceEnd": 17760
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-etape-6.html",
+      "line": 1,
+      "col": 24341,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 24340,
+      "sourceEnd": 24491
+    },
+    {
+      "ruleId": "fieldset-legend-missing",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-intro.html",
+      "line": 1,
+      "col": 12648,
+      "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+      "severity": "majeur",
+      "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+      "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 12647,
+      "sourceEnd": 17695
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-intro.html",
+      "line": 1,
+      "col": 25048,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 25047,
+      "sourceEnd": 25198
+    },
+    {
+      "ruleId": "heading-order-skip",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-recapitulatif.html",
+      "line": 1,
+      "col": 61348,
+      "selectorHint": "h3.fr-tile__title",
+      "severity": "majeur",
+      "message": "Saut de niveau de titre : <h3> après <h1> (niveau h2 attendu).",
+      "remediation": "Ne sautez pas de niveau : enchaînez les titres sans omettre de palier.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><link rel=\"stylesh…",
+      "sourceStart": 61347,
+      "sourceEnd": 61411
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/declaration-recapitulatif.html",
+      "line": 1,
+      "col": 67399,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><link rel=\"stylesh…",
+      "sourceStart": 67398,
+      "sourceEnd": 67549
+    },
+    {
+      "ruleId": "fieldset-legend-missing",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/parcours-conformite.html",
+      "line": 1,
+      "col": 12632,
+      "selectorHint": "fieldset.common-module-scss-module__Te-8fW__readOnlyFieldset",
+      "severity": "majeur",
+      "message": "<fieldset> sans <legend> (ou légende vide) — regroupement de champs sans légende.",
+      "remediation": "Ajoutez un <legend> non vide en premier enfant du <fieldset>.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 12631,
+      "sourceEnd": 17759
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/auth/parcours-conformite.html",
+      "line": 1,
+      "col": 24340,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 24339,
+      "sourceEnd": 24490
+    },
+    {
+      "ruleId": "heading-order-skip",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/404.html",
+      "line": 1,
+      "col": 12370,
+      "selectorHint": "h3.fr-tile__title",
+      "severity": "majeur",
+      "message": "Saut de niveau de titre : <h3> après <h1> (niveau h2 attendu).",
+      "remediation": "Ne sautez pas de niveau : enchaînez les titres sans omettre de palier.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 12369,
+      "sourceEnd": 12433
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/404.html",
+      "line": 1,
+      "col": 18427,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 18426,
+      "sourceEnd": 18577
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/accueil.html",
+      "line": 1,
+      "col": 23916,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 23915,
+      "sourceEnd": 24066
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/aide-nous-contacter.html",
+      "line": 1,
+      "col": 19503,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 19502,
+      "sourceEnd": 19653
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/aide.html",
+      "line": 1,
+      "col": 22870,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 22869,
+      "sourceEnd": 23020
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/declaration-accessibilite.html",
+      "line": 1,
+      "col": 21157,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 21156,
+      "sourceEnd": 21307
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/donnees-personnelles.html",
+      "line": 1,
+      "col": 25043,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 25042,
+      "sourceEnd": 25193
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/faq.html",
+      "line": 1,
+      "col": 60666,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 60665,
+      "sourceEnd": 60816
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/gestion-des-cookies.html",
+      "line": 1,
+      "col": 21397,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 21396,
+      "sourceEnd": 21547
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/login.html",
+      "line": 1,
+      "col": 16581,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 16580,
+      "sourceEnd": 16731
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/mentions-legales.html",
+      "line": 1,
+      "col": 19599,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 19598,
+      "sourceEnd": 19749
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/plan-du-site.html",
+      "line": 1,
+      "col": 18737,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 18736,
+      "sourceEnd": 18887
+    },
+    {
+      "ruleId": "heading-order-skip",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/referents.html",
+      "line": 1,
+      "col": 13764,
+      "selectorHint": "h3.fr-tile__title",
+      "severity": "majeur",
+      "message": "Saut de niveau de titre : <h3> après <h1> (niveau h2 attendu).",
+      "remediation": "Ne sautez pas de niveau : enchaînez les titres sans omettre de palier.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 13763,
+      "sourceEnd": 13827
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/referents.html",
+      "line": 1,
+      "col": 19821,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 19820,
+      "sourceEnd": 19971
+    },
+    {
+      "ruleId": "skip-link-target-missing",
+      "criteriaId": "2.4.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/stats.html",
+      "line": 1,
+      "col": 9155,
+      "selectorHint": "a.fr-link",
+      "severity": "majeur",
+      "message": "Lien interne href=\"#content\" — la cible #content n'existe pas dans la page (lien d'évitement/ancre cassé).",
+      "remediation": "Ajoutez un élément avec id=\"content\" (ex. <main id=\"content\">) ou corrigez l'ancre.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 9154,
+      "sourceEnd": 9199
+    },
+    {
+      "ruleId": "aria-hidden-focusable",
+      "criteriaId": "4.1.2",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/stats.html",
+      "line": 1,
+      "col": 12383,
+      "selectorHint": "div.ScoreDistributionChart-module-scss-module__Ov6rrq__chartWrapper",
+      "severity": "majeur",
+      "message": "aria-hidden=\"true\" sur (ou contenant) un élément focalisable — piège pour les technologies d'assistance.",
+      "remediation": "Retirez aria-hidden, ou rendez l'élément non focalisable (tabindex=\"-1\", disabled).",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 12382,
+      "sourceEnd": 23054
+    },
+    {
+      "ruleId": "h1-multiple",
+      "criteriaId": "1.3.1",
+      "file": "/private/tmp/claude-501/-Users-maxime-Documents-Code-egapro/3243eb22-9a32-495b-baa0-a41da3fcab2b/scratchpad/corpus/public/stats.html",
+      "line": 1,
+      "col": 31009,
+      "selectorHint": "h1#fr-theme-modal-title",
+      "severity": "mineur",
+      "message": "Plusieurs <h1> dans la page (2) — un seul titre de niveau 1 est recommandé.",
+      "remediation": "Conservez un unique <h1> et hiérarchisez le reste avec h2…h6.",
+      "snippet": "<!DOCTYPE html><html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf…",
+      "sourceStart": 31008,
+      "sourceEnd": 31159
+    }
+  ],
+  "residualRisks": [
+    {
+      "criteriaId": "1.2.1",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "1.2.2",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "1.2.3",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "1.2.4",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "1.2.5",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "1.3.2",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "1.3.3",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "1.3.4",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "1.3.5",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "1.4.1",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "1.4.3",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "1.4.4",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "1.4.5",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "1.4.10",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "1.4.11",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "1.4.12",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "1.4.13",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "2.1.1",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "2.1.2",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "2.1.4",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "2.2.1",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "2.2.2",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "2.3.1",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "2.4.3",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "2.4.4",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "2.4.5",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "2.4.6",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "2.4.7",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "2.4.11",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "2.5.1",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "2.5.2",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "2.5.3",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "2.5.4",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "2.5.7",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "2.5.8",
+      "reason": "Needs a rendered DOM (contrast, focus visibility, zoom/reflow, target size) — verify manually.",
+      "automatability": "needs-rendering"
+    },
+    {
+      "criteriaId": "3.1.2",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "3.2.1",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "3.2.2",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "3.2.3",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "3.2.4",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "3.2.6",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "3.3.1",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "3.3.2",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "3.3.3",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "3.3.4",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "3.3.7",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "3.3.8",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    },
+    {
+      "criteriaId": "4.1.3",
+      "reason": "Judgement criterion — assess manually in context (relevance, wording, reading order).",
+      "automatability": "judgment"
+    }
+  ],
+  "conformancePct": 33
+}

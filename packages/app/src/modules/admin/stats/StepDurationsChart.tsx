@@ -88,55 +88,61 @@ export function StepDurationsChart({ rows }: Props) {
 				post-soumission. Les données équivalentes sont disponibles dans le
 				tableau ci-dessous.
 			</figcaption>
-			<ResponsiveContainer>
-				<BarChart
-					data={rows}
-					layout="vertical"
-					margin={{ top: 16, right: 24, bottom: 16, left: 16 }}
-				>
-					<CartesianGrid strokeDasharray="3 3" />
-					<XAxis
-						label={{
-							value: "Jours",
-							position: "insideBottom",
-							offset: -4,
-						}}
-						tickFormatter={(value: number) => formatCount(value)}
-						type="number"
-					/>
-					<YAxis dataKey="label" interval={0} type="category" width={220} />
-					<Tooltip content={<DurationsTooltip />} />
-					<Legend />
-					<Bar
-						dataKey="medianDays"
-						fill={WIZARD_MEDIAN_COLOR}
-						name="Médiane (j)"
+			<div
+				aria-label="Délai médian et 90e percentile par étape du parcours"
+				className={styles.chartContainer}
+				role="img"
+			>
+				<ResponsiveContainer>
+					<BarChart
+						data={rows}
+						layout="vertical"
+						margin={{ top: 16, right: 24, bottom: 16, left: 16 }}
 					>
-						{rows.map((row) => (
-							<Cell
-								fill={
-									row.phase === "wizard"
-										? WIZARD_MEDIAN_COLOR
-										: POST_SUBMIT_MEDIAN_COLOR
-								}
-								key={row.key}
-							/>
-						))}
-					</Bar>
-					<Bar dataKey="p90Days" fill={WIZARD_P90_COLOR} name="p90 (j)">
-						{rows.map((row) => (
-							<Cell
-								fill={
-									row.phase === "wizard"
-										? WIZARD_P90_COLOR
-										: POST_SUBMIT_P90_COLOR
-								}
-								key={row.key}
-							/>
-						))}
-					</Bar>
-				</BarChart>
-			</ResponsiveContainer>
+						<CartesianGrid strokeDasharray="3 3" />
+						<XAxis
+							label={{
+								value: "Jours",
+								position: "insideBottom",
+								offset: -4,
+							}}
+							tickFormatter={(value: number) => formatCount(value)}
+							type="number"
+						/>
+						<YAxis dataKey="label" interval={0} type="category" width={220} />
+						<Tooltip content={<DurationsTooltip />} />
+						<Legend />
+						<Bar
+							dataKey="medianDays"
+							fill={WIZARD_MEDIAN_COLOR}
+							name="Médiane (j)"
+						>
+							{rows.map((row) => (
+								<Cell
+									fill={
+										row.phase === "wizard"
+											? WIZARD_MEDIAN_COLOR
+											: POST_SUBMIT_MEDIAN_COLOR
+									}
+									key={row.key}
+								/>
+							))}
+						</Bar>
+						<Bar dataKey="p90Days" fill={WIZARD_P90_COLOR} name="p90 (j)">
+							{rows.map((row) => (
+								<Cell
+									fill={
+										row.phase === "wizard"
+											? WIZARD_P90_COLOR
+											: POST_SUBMIT_P90_COLOR
+									}
+									key={row.key}
+								/>
+							))}
+						</Bar>
+					</BarChart>
+				</ResponsiveContainer>
+			</div>
 		</figure>
 	);
 }

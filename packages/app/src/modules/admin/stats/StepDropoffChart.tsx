@@ -92,42 +92,48 @@ export function StepDropoffChart({ rows }: Props) {
 				{DROPOFF_RATE_ALERT_THRESHOLD} %. Les données équivalentes sont
 				disponibles dans le tableau ci-dessous.
 			</figcaption>
-			<ResponsiveContainer>
-				<BarChart
-					data={rows}
-					layout="vertical"
-					margin={{ top: 16, right: 32, bottom: 24, left: 8 }}
-				>
-					<CartesianGrid strokeDasharray="3 3" />
-					<XAxis
-						domain={[0, 100]}
-						label={{
-							value: "Taux d'abandon (%)",
-							position: "insideBottom",
-							offset: -8,
-						}}
-						tickFormatter={(value: number) => `${value}`}
-						type="number"
-					/>
-					<YAxis
-						dataKey="label"
-						interval={0}
-						tick={{ fontSize: 12 }}
-						type="category"
-						width={260}
-					/>
-					<Tooltip content={<DropoffTooltip />} />
-					<Bar
-						dataKey="dropoffRate"
-						fill={WIZARD_NORMAL_COLOR}
-						name="Taux d'abandon"
+			<div
+				aria-label="Taux d'abandon par phase de la démarche déclarative"
+				className={styles.chartContainer}
+				role="img"
+			>
+				<ResponsiveContainer>
+					<BarChart
+						data={rows}
+						layout="vertical"
+						margin={{ top: 16, right: 32, bottom: 24, left: 8 }}
 					>
-						{rows.map((row) => (
-							<Cell fill={getBarColor(row)} key={row.key} />
-						))}
-					</Bar>
-				</BarChart>
-			</ResponsiveContainer>
+						<CartesianGrid strokeDasharray="3 3" />
+						<XAxis
+							domain={[0, 100]}
+							label={{
+								value: "Taux d'abandon (%)",
+								position: "insideBottom",
+								offset: -8,
+							}}
+							tickFormatter={(value: number) => `${value}`}
+							type="number"
+						/>
+						<YAxis
+							dataKey="label"
+							interval={0}
+							tick={{ fontSize: 12 }}
+							type="category"
+							width={260}
+						/>
+						<Tooltip content={<DropoffTooltip />} />
+						<Bar
+							dataKey="dropoffRate"
+							fill={WIZARD_NORMAL_COLOR}
+							name="Taux d'abandon"
+						>
+							{rows.map((row) => (
+								<Cell fill={getBarColor(row)} key={row.key} />
+							))}
+						</Bar>
+					</BarChart>
+				</ResponsiveContainer>
+			</div>
 		</figure>
 	);
 }
