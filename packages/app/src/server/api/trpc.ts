@@ -11,12 +11,13 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, isDeadlinePassed } from "~/modules/domain";
 import { parseSiren } from "~/modules/shared/parseSiren";
 import { auditMiddleware as runAuditMiddleware } from "~/server/audit/trpcMiddleware";
 import { auth } from "~/server/auth";
 import { assertNotImpersonating } from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
+import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { declarations } from "~/server/db/schema";
 import { getActiveLock } from "~/server/services/declarationLockService";
 
@@ -279,3 +280,37 @@ export const declarationLockedWriteProcedure = declarationWriteProcedure.use(
 		return next();
 	},
 );
+
+/**
+ * First-declaration write procedure guarded by the modification deadline.
+ *
+ * Same as {@link declarationLockedWriteProcedure} plus a server-side cutoff:
+ * once the declaration is submitted, writes are rejected with `FORBIDDEN`
+ * after `decl1ModificationDeadline` has passed. This mirrors the client
+ * `modification_closed` read-only state so the deadline is enforced even when
+ * a request bypasses the disabled UI (issue #3716). A draft is never blocked —
+ * the cutoff only applies to an already-submitted declaration.
+ */
+export const declarationModifiableWriteProcedure =
+	declarationLockedWriteProcedure.use(async ({ ctx, next }) => {
+		const rows = await ctx.db
+			.select({ status: declarations.status, year: declarations.year })
+			.from(declarations)
+			.where(eq(declarations.id, ctx.declarationId))
+			.limit(1);
+
+		const declaration = rows[0];
+		if (declaration && declaration.status !== "draft") {
+			const { decl1ModificationDeadline } = await getCampaignDeadlines(
+				declaration.year,
+			);
+			if (isDeadlinePassed(decl1ModificationDeadline)) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message:
+						"La date limite de modification de la déclaration est dépassée.",
+				});
+			}
+		}
+		return next();
+	});

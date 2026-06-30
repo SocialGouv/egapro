@@ -23,6 +23,7 @@ import {
 	companyProcedure,
 	createTRPCRouter,
 	declarationLockedWriteProcedure,
+	declarationModifiableWriteProcedure,
 	protectedProcedure,
 } from "~/server/api/trpc";
 import {
@@ -274,7 +275,7 @@ export const declarationRouter = createTRPCRouter({
 		};
 	}),
 
-	updateStep1: declarationLockedWriteProcedure
+	updateStep1: declarationModifiableWriteProcedure
 		.input(updateStep1Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -376,7 +377,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateStep2: declarationLockedWriteProcedure
+	updateStep2: declarationModifiableWriteProcedure
 		.input(updateStep2Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -425,7 +426,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateStep3: declarationLockedWriteProcedure
+	updateStep3: declarationModifiableWriteProcedure
 		.input(updateStep3Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -476,7 +477,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateStep4: declarationLockedWriteProcedure
+	updateStep4: declarationModifiableWriteProcedure
 		.input(updateStep4Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -539,7 +540,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateEmployeeCategories: declarationLockedWriteProcedure
+	updateEmployeeCategories: declarationModifiableWriteProcedure
 		.input(updateEmployeeCategoriesSchema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -637,7 +638,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	submit: declarationLockedWriteProcedure.mutation(async ({ ctx }) => {
+	submit: declarationModifiableWriteProcedure.mutation(async ({ ctx }) => {
 		const siren = ctx.siren;
 		const year = getCurrentYear();
 
