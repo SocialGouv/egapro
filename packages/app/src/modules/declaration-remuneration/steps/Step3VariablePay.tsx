@@ -358,8 +358,8 @@ export function Step3VariablePay({
 
 						{benefValidationError && (
 							<div
-								aria-live="polite"
 								className="fr-alert fr-alert--error fr-alert--sm"
+								role="alert"
 							>
 								<p>{benefValidationError}</p>
 							</div>

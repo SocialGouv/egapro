@@ -92,6 +92,7 @@ function UnlockDeclarationButtonInner({
 										<div
 											aria-live="polite"
 											className="fr-alert fr-alert--error fr-alert--sm fr-mt-2w"
+											role="alert"
 										>
 											<p>{error}</p>
 										</div>

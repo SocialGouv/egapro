@@ -60,6 +60,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 	return (
 		<dialog
 			aria-labelledby={MODAL_TITLE_ID}
+			aria-modal="true"
 			className="fr-modal"
 			id={MODAL_ID}
 			ref={dialogRef}
