@@ -1,4 +1,5 @@
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
+import styles from "./ReferencePeriodPicker.module.scss";
 
 type Props = {
 	startDate: string;
@@ -19,7 +20,7 @@ export function ReferencePeriodPicker({
 		<div>
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters fr-mb-2w">
 				<div className="fr-col-auto">
-					<p className="fr-mb-0 fr-text--medium">
+					<p className={`fr-mb-0 ${styles.periodLabel}`}>
 						Quelle est la période de référence pour le calcul de
 						l&apos;indicateur ?
 					</p>

@@ -183,7 +183,7 @@ export function Step2PayGap({
 					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 				</div>
 
-				<div className={common.dataSection}>
+				<div className={`${common.dataSection} ${common.tableGap}`}>
 					<div className={common.flexColumnGapHalf}>
 						<PayGapTable
 							caption="Écart de rémunération"
