@@ -12,7 +12,9 @@ export function AdminShell({ children }: Props) {
 				<div className={styles.nav}>
 					<AdminNavigation />
 				</div>
-				<div className={styles.content}>{children}</div>
+				<main className={styles.content} id="content" tabIndex={-1}>
+					{children}
+				</main>
 			</div>
 		</div>
 	);

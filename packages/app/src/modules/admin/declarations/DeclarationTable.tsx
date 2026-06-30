@@ -37,11 +37,13 @@ export function DeclarationTable({
 	sortBy,
 	sortOrder,
 }: Props) {
-	const { handleSort, handlePageChange, sortIcon } = useSortableTable({
-		basePath: "/admin/declarations",
-		sortBy,
-		sortOrder,
-	});
+	const { handleSort, handlePageChange, ariaSort, sortIcon } = useSortableTable(
+		{
+			basePath: "/admin/declarations",
+			sortBy,
+			sortOrder,
+		},
+	);
 
 	return (
 		<>
@@ -54,18 +56,21 @@ export function DeclarationTable({
 			>
 				<thead>
 					<tr>
-						{SORT_COLUMNS.map((col) => (
-							<th key={col} scope="col">
-								<button
-									className="fr-text--sm"
-									onClick={() => handleSort(col)}
-									type="button"
-								>
-									{COLUMN_LABELS[col]}
-									{sortIcon(col)}
-								</button>
-							</th>
-						))}
+						{SORT_COLUMNS.map((col) => {
+							const icon = sortIcon(col);
+							return (
+								<th aria-sort={ariaSort(col)} key={col} scope="col">
+									<button
+										className="fr-text--sm"
+										onClick={() => handleSort(col)}
+										type="button"
+									>
+										{COLUMN_LABELS[col]}
+										{icon ? <span aria-hidden="true">{icon}</span> : null}
+									</button>
+								</th>
+							);
+						})}
 					</tr>
 				</thead>
 				<tbody>

@@ -40,10 +40,13 @@ function ResourceTile({
 export function ResourceBanner() {
 	return (
 		<section
-			aria-label="Ressources et aide"
+			aria-labelledby="resource-banner-heading"
 			className="fr-background-alt--blue-france fr-py-7w"
 		>
 			<div className="fr-container">
+				<h2 className="fr-sr-only" id="resource-banner-heading">
+					Ressources et aide
+				</h2>
 				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
 					<div className="fr-col-12 fr-col-md-10">
 						<div className="fr-grid-row fr-grid-row--gutters">

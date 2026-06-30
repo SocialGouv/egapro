@@ -54,12 +54,18 @@ export function ReferentFormFields({
 					</span>
 				</label>
 				<input
+					aria-describedby={errors.name ? `${modalId}-name-error` : undefined}
+					aria-invalid={Boolean(errors.name)}
 					className={`fr-input ${errors.name ? "fr-input--error" : ""}`}
 					id={`${modalId}-name`}
 					type="text"
 					{...register("name")}
 				/>
-				{errors.name && <p className="fr-error-text">{errors.name.message}</p>}
+				{errors.name && (
+					<p className="fr-error-text" id={`${modalId}-name-error`}>
+						{errors.name.message}
+					</p>
+				)}
 			</div>
 
 			<div className="fr-select-group fr-mb-3w">
@@ -67,6 +73,10 @@ export function ReferentFormFields({
 					Région
 				</label>
 				<select
+					aria-describedby={
+						errors.region ? `${modalId}-region-error` : undefined
+					}
+					aria-invalid={Boolean(errors.region)}
 					className={`fr-select ${errors.region ? "fr-select--error" : ""}`}
 					id={`${modalId}-region`}
 					{...register("region")}
@@ -79,7 +89,9 @@ export function ReferentFormFields({
 					))}
 				</select>
 				{errors.region && (
-					<p className="fr-error-text">{errors.region.message}</p>
+					<p className="fr-error-text" id={`${modalId}-region-error`}>
+						{errors.region.message}
+					</p>
 				)}
 			</div>
 
@@ -143,13 +155,17 @@ export function ReferentFormFields({
 					</span>
 				</label>
 				<input
+					aria-describedby={errors.value ? `${modalId}-value-error` : undefined}
+					aria-invalid={Boolean(errors.value)}
 					className={`fr-input ${errors.value ? "fr-input--error" : ""}`}
 					id={`${modalId}-value`}
 					type={selectedType === "url" ? "url" : "email"}
 					{...register("value")}
 				/>
 				{errors.value && (
-					<p className="fr-error-text">{errors.value.message}</p>
+					<p className="fr-error-text" id={`${modalId}-value-error`}>
+						{errors.value.message}
+					</p>
 				)}
 			</div>
 
@@ -175,13 +191,21 @@ export function ReferentFormFields({
 							Email du suppléant
 						</label>
 						<input
+							aria-describedby={
+								errors.substituteEmail
+									? `${modalId}-sub-email-error`
+									: undefined
+							}
+							aria-invalid={Boolean(errors.substituteEmail)}
 							className={`fr-input ${errors.substituteEmail ? "fr-input--error" : ""}`}
 							id={`${modalId}-sub-email`}
 							type="email"
 							{...register("substituteEmail")}
 						/>
 						{errors.substituteEmail && (
-							<p className="fr-error-text">{errors.substituteEmail.message}</p>
+							<p className="fr-error-text" id={`${modalId}-sub-email-error`}>
+								{errors.substituteEmail.message}
+							</p>
 						)}
 					</div>
 				</div>

@@ -4,7 +4,7 @@ import { ThemeModal } from "./ThemeModal";
 
 export function Footer() {
 	return (
-		<footer className="fr-footer" id="footer">
+		<footer className="fr-footer" id="footer" tabIndex={-1}>
 			<div className="fr-container">
 				<FooterBody />
 				<FooterBottom />

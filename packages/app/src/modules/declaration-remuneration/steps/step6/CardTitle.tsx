@@ -10,7 +10,12 @@ export function CardTitle({ children, tooltipId }: Props) {
 	return (
 		<div className="fr-grid-row fr-grid-row--middle">
 			<p className="fr-text--bold fr-mb-0">{children}</p>
-			{tooltipId && <TooltipButton id={tooltipId} label="Aide" />}
+			{tooltipId && (
+				<TooltipButton
+					id={tooltipId}
+					label={typeof children === "string" ? `Aide : ${children}` : "Aide"}
+				/>
+			)}
 		</div>
 	);
 }
