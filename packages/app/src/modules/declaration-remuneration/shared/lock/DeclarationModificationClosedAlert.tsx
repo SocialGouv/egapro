@@ -14,7 +14,10 @@ export function DeclarationModificationClosedAlert({
 	if (reason !== "modification_closed") return null;
 
 	return (
-		<div className="fr-alert fr-alert--info fr-alert--sm fr-mb-3w" role="status">
+		<div
+			className="fr-alert fr-alert--info fr-alert--sm fr-mb-3w"
+			role="status"
+		>
 			<p>
 				Votre déclaration n'est plus modifiable — modification close depuis le{" "}
 				<OrdinalLongDate date={deadline} />. À titre d'information, vous pouvez
