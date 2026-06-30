@@ -37,28 +37,26 @@ export function NextStepsBox({
 						.
 					</p>
 
-					<div>
+					<div className={styles.ctaGroup}>
 						<p className="fr-mb-0">
 							Le ou les avis du CSE devront être transmis sur le portail lors de
 							la dernière étape.
 						</p>
-						<div className={`fr-mt-1w ${styles.linksRow}`}>
-							<button
-								aria-controls="update-cse-modal"
-								className={`fr-link ${styles.linkButton}`}
-								data-fr-opened="false"
-								type="button"
-							>
-								Mettre à jour l&apos;existence d&apos;un CSE
-							</button>
-							<TrackedLink
-								className="fr-link"
-								href="/avis-cse"
-								trackingId="cse_models"
-							>
-								Voir les modèles d&apos;avis CSE
-							</TrackedLink>
-						</div>
+						<TrackedLink
+							className="fr-link"
+							href="/avis-cse"
+							trackingId="cse_models"
+						>
+							Voir les modèles d&apos;avis CSE
+						</TrackedLink>
+						<button
+							aria-controls="update-cse-modal"
+							className="fr-btn fr-btn--secondary"
+							data-fr-opened="false"
+							type="button"
+						>
+							Mettre à jour l&apos;existence d&apos;un CSE
+						</button>
 					</div>
 				</div>
 
