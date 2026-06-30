@@ -149,7 +149,7 @@ test.describe("Campaign deadlines gating", () => {
 			);
 		});
 
-		test("submitted declaration non-recap step redirects to recap", async ({
+		test("submitted declaration re-enters a non-recap step in read-only", async ({
 			page,
 		}) => {
 			await seedUserProfile();
@@ -158,8 +158,13 @@ test.describe("Campaign deadlines gating", () => {
 			await page.goto("/declaration-remuneration");
 			await seedSubmittedCompliance();
 
+			// After the deadline the step no longer redirects to the recap (#3716):
+			// it stays navigable but renders the modification-closed read-only banner.
 			await page.goto("/declaration-remuneration/etape/2");
-			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/6$/);
+			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/2$/);
+			await expect(
+				page.getByText(/modification close depuis le/i),
+			).toBeVisible();
 		});
 	});
 });

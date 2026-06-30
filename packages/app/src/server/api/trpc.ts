@@ -282,14 +282,21 @@ export const declarationLockedWriteProcedure = declarationWriteProcedure.use(
 );
 
 /**
- * First-declaration write procedure guarded by the modification deadline.
+ * Declaration write procedure guarded by the relevant modification deadline.
  *
  * Same as {@link declarationLockedWriteProcedure} plus a server-side cutoff:
  * once the declaration is submitted, writes are rejected with `FORBIDDEN`
- * after `decl1ModificationDeadline` has passed. This mirrors the client
+ * after the applicable modification deadline has passed. This mirrors the client
  * `modification_closed` read-only state so the deadline is enforced even when
  * a request bypasses the disabled UI (issue #3716). A draft is never blocked —
  * the cutoff only applies to an already-submitted declaration.
+ *
+ * The applicable deadline depends on the declaration phase: the
+ * `updateEmployeeCategories` mutation is shared by the first declaration
+ * (step 5) and the corrective-action second declaration (step 2). The second
+ * declaration legitimately happens after the first deadline, so while the
+ * declaration is in the corrective-action phase the *second*-declaration
+ * deadline applies instead of the first.
  */
 export const declarationModifiableWriteProcedure =
 	declarationLockedWriteProcedure.use(async ({ ctx, next }) => {
@@ -301,10 +308,13 @@ export const declarationModifiableWriteProcedure =
 
 		const declaration = rows[0];
 		if (declaration && declaration.status !== "draft") {
-			const { decl1ModificationDeadline } = await getCampaignDeadlines(
-				declaration.year,
-			);
-			if (isDeadlinePassed(decl1ModificationDeadline)) {
+			const { decl1ModificationDeadline, decl2ModificationDeadline } =
+				await getCampaignDeadlines(declaration.year);
+			const deadline =
+				declaration.status === "corrective_actions_chosen"
+					? decl2ModificationDeadline
+					: decl1ModificationDeadline;
+			if (isDeadlinePassed(deadline)) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
 					message:
