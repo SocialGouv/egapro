@@ -152,19 +152,31 @@ For changed files in `src/server/`:
 
 ```bash
 # Must return ZERO — no inline getFullYear outside domain/
-grep -rn "new Date()\.getFullYear()" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
+grep -rn "getFullYear()" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
 
-# Must return ZERO — no inline slice(0, 9) outside domain/
-grep -rn "slice(0, 9)" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/"
+# Must return ZERO — no inline slice/substring/substr(0, 9) outside domain/
+grep -rn "slice(0, *9)\|substring(0, *9)\|substr(0, *9)" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
+
+# Must return ZERO — no inline date arithmetic outside domain/
+grep -rn "\.getMonth()\|\.getDate()" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
 
 # Must return ZERO — no local function definitions duplicating domain
 grep -rn "function getCurrentYear\|function getCseYear\|function getSiren" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/"
+
+# Must return ZERO — no domain helpers reimplemented inline outside domain/
+grep -rn "cancelledAt !== null\|cancelledAt != null\|workforce >= 100\|effectifs >= 100\|workforce < 50\|effectifs < 50" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
+
+# Must return ZERO (or WARN) — toLocaleString("fr-FR") outside domain/ (likely duplicates formatCount/formatRate/formatCurrency)
+grep -rn 'toLocaleString.*fr-FR\|toLocaleString.*"fr"' src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
 ```
 
-- Inline `new Date().getFullYear()` → **[ERROR]**
-- Inline `siret.slice(0, 9)` → **[ERROR]**
+- Inline `getFullYear()` → **[ERROR]**
+- Inline `slice/substring/substr(0, 9)` for SIREN extraction → **[ERROR]**
+- Inline `.getMonth()` / `.getDate()` for date calculations → **[ERROR]**
 - Local function duplicating domain → **[ERROR]**
-- Hardcoded regulatory thresholds (5%, 50, 100) → **[WARN]**
+- Hardcoded regulatory thresholds (5%, 50, 100) → **[ERROR]**
+- Inline condition reimplementing a domain helper (e.g. `cancelledAt !== null` instead of `isCancelled()`, `workforce >= 100 && hasCse` instead of `isCseRequired()`, `isComplianceProcessRequired()`, `isComplianceProcessRevisionRequired()`) → **[ERROR]**
+- `toLocaleString("fr-FR")` outside `domain/` — probable duplicate of `formatCount`/`formatRate`/`formatCurrency` → **[WARN]**
 
 #### 2.16 Accessibility (quick check)
 
