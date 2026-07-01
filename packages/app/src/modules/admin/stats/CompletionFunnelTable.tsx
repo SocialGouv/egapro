@@ -1,5 +1,4 @@
-import { formatCount } from "~/modules/domain";
-
+import { formatCount } from "./formatters";
 import type { FunnelRow } from "./types";
 
 type Props = {

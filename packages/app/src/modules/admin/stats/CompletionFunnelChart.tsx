@@ -11,9 +11,8 @@ import { CanvasRenderer } from "echarts/renderers";
 import ReactECharts from "echarts-for-react/lib/core";
 import { useEffect, useState } from "react";
 
-import { formatCount } from "~/modules/domain";
-
 import styles from "./CompletionFunnelChart.module.scss";
+import { formatCount } from "./formatters";
 import type { FunnelRow } from "./types";
 
 echarts.use([
