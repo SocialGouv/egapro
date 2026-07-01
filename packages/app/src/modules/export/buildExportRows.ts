@@ -1,6 +1,10 @@
 import { and, eq, isNotNull, ne, or } from "drizzle-orm";
 
-import { GAP_ALERT_THRESHOLD, isIndicatorGRequired } from "~/modules/domain";
+import {
+	isComplianceProcessRequired,
+	isComplianceProcessRevisionRequired,
+	isIndicatorGRequired,
+} from "~/modules/domain";
 import type { DB } from "~/server/db";
 import { companies, declarations, users } from "~/server/db/schema";
 import { mapCseOpinions } from "./mapIndicators";
@@ -11,21 +15,6 @@ import {
 	statusHistoryProjection,
 } from "./queries";
 import type { ExportRow } from "./types";
-
-const COMPLIANCE_PROCESS_SIZE_MIN = 100;
-
-function computeComplianceProcessRequired(
-	workforce: number | null,
-	hasIndicatorG: boolean,
-	globalAnnualMeanGap: number | null,
-): boolean {
-	if (workforce === null || globalAnnualMeanGap === null) return false;
-	return (
-		workforce >= COMPLIANCE_PROCESS_SIZE_MIN &&
-		hasIndicatorG &&
-		Math.abs(globalAnnualMeanGap) >= GAP_ALERT_THRESHOLD
-	);
-}
 
 export async function buildExportRows(
 	db: DB,
@@ -93,16 +82,33 @@ export async function buildExportRows(
 		const variableAnnualMeanGap = row.variableAnnualMeanGap
 			? Number(row.variableAnnualMeanGap) * 100
 			: null;
-		const complianceProcessRequired = computeComplianceProcessRequired(
-			row.workforce,
-			hasIndicatorGForThisDecl,
-			globalAnnualMeanGap,
-		);
+		const complianceInput = {
+			workforce: row.workforce,
+			hasIndicatorG: hasIndicatorGForThisDecl,
+			gap: globalAnnualMeanGap === null ? null : Math.abs(globalAnnualMeanGap),
+		};
+		const complianceProcessRequired =
+			isComplianceProcessRequired(complianceInput);
 		const complianceProcessRevisionRequired =
-			complianceProcessRequired &&
-			row.secondDeclarationSubmittedAt !== null &&
-			variableAnnualMeanGap !== null &&
-			Math.abs(variableAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
+			isComplianceProcessRevisionRequired({
+				...complianceInput,
+				correctionGap:
+					variableAnnualMeanGap === null
+						? null
+						: Math.abs(variableAnnualMeanGap),
+				events:
+					row.secondDeclarationSubmittedAt === null
+						? []
+						: [
+								{
+									eventType: "second_declaration_submit",
+									value: null,
+									round: null,
+									createdAt: row.secondDeclarationSubmittedAt,
+									actorUserId: null,
+								},
+							],
+			});
 		const indicatorGRequired = isIndicatorGRequired(
 			row.workforce ?? 0,
 			row.year,
