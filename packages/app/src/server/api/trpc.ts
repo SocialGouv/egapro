@@ -8,15 +8,16 @@
  */
 
 import { initTRPC, TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, isDeadlinePassed } from "~/modules/domain";
 import { parseSiren } from "~/modules/shared/parseSiren";
 import { auditMiddleware as runAuditMiddleware } from "~/server/audit/trpcMiddleware";
 import { auth } from "~/server/auth";
 import { assertNotImpersonating } from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
+import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { declarations } from "~/server/db/schema";
 import { getActiveLock } from "~/server/services/declarationLockService";
 
@@ -201,6 +202,11 @@ export const companyWriteProcedure = companyProcedure.use(({ ctx, next }) => {
  * `declarationProcedure` (reads) and `declarationWriteProcedure` (mutations)
  * so the lookup logic stays in a single place. Throws `NOT_FOUND` when the
  * declaration does not exist yet.
+ *
+ * Cancelled declarations are excluded (`cancelledAt IS NULL`): after an admin
+ * cancellation a fresh draft is created alongside the cancelled row, so the
+ * resolver must target the active one — otherwise write procedures (and the
+ * modification-deadline guard) would operate on the stale cancelled row.
  */
 async function fetchCurrentDeclarationId(
 	database: typeof db,
@@ -210,7 +216,13 @@ async function fetchCurrentDeclarationId(
 	const rows = await database
 		.select({ id: declarations.id })
 		.from(declarations)
-		.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+		.where(
+			and(
+				eq(declarations.siren, siren),
+				eq(declarations.year, year),
+				isNull(declarations.cancelledAt),
+			),
+		)
 		.limit(1);
 
 	const declaration = rows[0];
@@ -279,3 +291,47 @@ export const declarationLockedWriteProcedure = declarationWriteProcedure.use(
 		return next();
 	},
 );
+
+/**
+ * Declaration write procedure guarded by the relevant modification deadline.
+ *
+ * Same as {@link declarationLockedWriteProcedure} plus a server-side cutoff:
+ * once the declaration is submitted, writes are rejected with `FORBIDDEN`
+ * after the applicable modification deadline has passed. This mirrors the client
+ * `modification_closed` read-only state so the deadline is enforced even when
+ * a request bypasses the disabled UI (issue #3716). A draft is never blocked —
+ * the cutoff only applies to an already-submitted declaration.
+ *
+ * The applicable deadline depends on the declaration phase: the
+ * `updateEmployeeCategories` mutation is shared by the first declaration
+ * (step 5) and the corrective-action second declaration (step 2). The second
+ * declaration legitimately happens after the first deadline, so while the
+ * declaration is in the corrective-action phase the *second*-declaration
+ * deadline applies instead of the first.
+ */
+export const declarationModifiableWriteProcedure =
+	declarationLockedWriteProcedure.use(async ({ ctx, next }) => {
+		const rows = await ctx.db
+			.select({ status: declarations.status, year: declarations.year })
+			.from(declarations)
+			.where(eq(declarations.id, ctx.declarationId))
+			.limit(1);
+
+		const declaration = rows[0];
+		if (declaration && declaration.status !== "draft") {
+			const { decl1ModificationDeadline, decl2ModificationDeadline } =
+				await getCampaignDeadlines(declaration.year);
+			const deadline =
+				declaration.status === "corrective_actions_chosen"
+					? decl2ModificationDeadline
+					: decl1ModificationDeadline;
+			if (isDeadlinePassed(deadline)) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message:
+						"La date limite de modification de la déclaration est dépassée.",
+				});
+			}
+		}
+		return next();
+	});

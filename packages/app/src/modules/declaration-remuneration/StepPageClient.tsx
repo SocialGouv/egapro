@@ -8,6 +8,7 @@ import {
 	declarationFunnelDimensions,
 } from "./shared/funnelConfig";
 import type { GipPrefillData } from "./shared/gipMdsMapping";
+import { DeclarationModificationClosedAlert } from "./shared/lock/DeclarationModificationClosedAlert";
 import { LockProvider } from "./shared/lock/LockContext";
 import { Step1Workforce } from "./steps/Step1Workforce";
 import { Step2PayGap } from "./steps/Step2PayGap";
@@ -46,6 +47,8 @@ type StepPageClientProps = {
 	step5Categories: EmployeeCategoryRow[];
 	initialSource?: string;
 	hasCse?: boolean | null;
+	modificationClosed?: boolean;
+	modificationDeadline?: Date;
 };
 
 export function StepPageClient({
@@ -60,6 +63,8 @@ export function StepPageClient({
 	step5Categories,
 	initialSource,
 	hasCse = null,
+	modificationClosed = false,
+	modificationDeadline,
 }: StepPageClientProps) {
 	const sizeRange =
 		companyWorkforce !== null
@@ -147,6 +152,14 @@ export function StepPageClient({
 	}
 
 	return (
-		<LockProvider declarationId={declaration.id}>{renderStep()}</LockProvider>
+		<LockProvider
+			declarationId={declaration.id}
+			modificationClosed={modificationClosed}
+		>
+			{modificationClosed && modificationDeadline ? (
+				<DeclarationModificationClosedAlert deadline={modificationDeadline} />
+			) : null}
+			{renderStep()}
+		</LockProvider>
 	);
 }

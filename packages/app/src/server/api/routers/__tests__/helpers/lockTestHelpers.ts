@@ -22,7 +22,20 @@ export function buildLockHolder(overrides: LockHolderOverrides = {}) {
 type LockOptions = {
 	declarationId?: string;
 	holder?: ReturnType<typeof buildLockHolder> | null;
+	/**
+	 * Declaration status returned to the `declarationModifiableWriteProcedure`
+	 * deadline guard (`select({ status, year })`). Defaults to `"draft"`, which
+	 * makes the guard a no-op (it only checks the deadline for submitted
+	 * declarations). Override to a submitted status to exercise the guard.
+	 */
+	declarationStatus?: string;
+	/** Declaration year fed to the deadline guard (only read when not draft). */
+	declarationYear?: number;
 };
+
+// Fixed fallback year for the deadline-guard mock. Irrelevant while the status
+// is "draft" (the guard short-circuits before reading the year / deadline).
+const GUARD_FALLBACK_YEAR = 2024;
 
 /**
  * Wrap a test's bespoke mock db so the two middleware selects that
@@ -30,9 +43,12 @@ type LockOptions = {
  * handler's own queries. The middleware always issues, in order: the
  * current-year declaration lookup (`fetchCurrentDeclarationId`, a plain
  * select) followed by the active-lock lookup (`getActiveLock`, the only select
- * that calls `.innerJoin`). Both are served here; every other call — the
- * handler's `transaction`, `update`, `insert`, `delete`, and any later
- * top-level `select` — is delegated to the inner db untouched.
+ * that calls `.innerJoin`). Both are served here. Mutations on
+ * `declarationModifiableWriteProcedure` add a third middleware select — the
+ * deadline guard `select({ status, year })` — which is also served here
+ * (detected by its projection, defaulting to a draft no-op). Every other
+ * call — the handler's `transaction`, `update`, `insert`, `delete`, and any
+ * later top-level `select` — is delegated to the inner db untouched.
  */
 export function withLockMiddleware(
 	innerDb: unknown,
@@ -46,6 +62,32 @@ export function withLockMiddleware(
 	let middlewareSelectIndex = 0;
 
 	const select = vi.fn().mockImplementation((...args: unknown[]) => {
+		// declarationModifiableWriteProcedure deadline guard: a top-level
+		// `select({ status, year })` issued after the two lock-middleware
+		// selects. Detected by its distinctive projection (unique across the
+		// router + middlewares) rather than by call order, so it stays robust
+		// whether the procedure under test is 2-select (locked) or 3-select
+		// (modifiable). Defaulting to "draft" makes the guard a no-op.
+		const cols = args[0];
+		if (cols && typeof cols === "object" && !Array.isArray(cols)) {
+			const keys = Object.keys(cols as Record<string, unknown>);
+			if (
+				keys.length === 2 &&
+				keys.includes("status") &&
+				keys.includes("year")
+			) {
+				const limit = vi.fn().mockResolvedValue([
+					{
+						status: options.declarationStatus ?? "draft",
+						year: options.declarationYear ?? GUARD_FALLBACK_YEAR,
+					},
+				]);
+				const where = vi.fn().mockReturnValue({ limit });
+				const from = vi.fn().mockReturnValue({ where });
+				return { from };
+			}
+		}
+
 		const callIndex = middlewareSelectIndex;
 		middlewareSelectIndex++;
 

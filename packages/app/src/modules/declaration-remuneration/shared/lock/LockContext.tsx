@@ -36,6 +36,7 @@ type StaticLockProviderProps = {
 type DynamicLockProviderProps = {
 	children: ReactNode;
 	declarationId: string;
+	modificationClosed?: boolean;
 };
 
 type LockProviderProps = StaticLockProviderProps | DynamicLockProviderProps;
@@ -71,9 +72,11 @@ function StaticLockProvider({
 function DynamicLockProvider({
 	children,
 	declarationId,
+	modificationClosed,
 }: DynamicLockProviderProps) {
 	const { isReadOnly, reason, holder, isLoading } = useDeclarationLock({
 		declarationId,
+		modificationClosed,
 	});
 	return (
 		<LockContext.Provider value={{ isReadOnly, reason, holder, isLoading }}>
