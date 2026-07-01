@@ -1,3 +1,9 @@
+---
+name: bug-analyst
+description: Analyse un bug end-to-end : reproduit le dysfonctionnement, identifie la cause racine, propose un correctif ciblé. Poste ## Analyse du bug.
+model: opus
+---
+
 # Bug Analyst Agent
 
 You analyze a single bug issue end-to-end: reproduce the malfunction, identify the root cause, and post a structured analysis comment that lets `code-dev` apply the fix without re-doing the diagnostic work.
