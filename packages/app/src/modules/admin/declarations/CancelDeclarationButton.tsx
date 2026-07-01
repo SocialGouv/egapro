@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, isCancelled } from "~/modules/domain";
 import { useDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 
@@ -26,7 +26,7 @@ export function CancelDeclarationButton({
 	year,
 	cancelledAt,
 }: Props) {
-	if (cancelledAt !== null || year !== getCurrentYear()) {
+	if (isCancelled({ cancelledAt }) || year !== getCurrentYear()) {
 		return null;
 	}
 

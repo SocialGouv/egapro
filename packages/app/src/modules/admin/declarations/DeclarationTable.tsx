@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { formatShortDate } from "~/modules/domain";
+import { formatShortDate, isCancelled } from "~/modules/domain";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
 import { Pagination } from "~/modules/shared/Pagination";
 import { useSortableTable } from "~/modules/shared/useSortableTable";
@@ -79,7 +79,7 @@ export function DeclarationTable({
 							</td>
 							<td>{row.year}</td>
 							<td>
-								{row.cancelledAt !== null ? (
+								{isCancelled(row) ? (
 									<span className="fr-badge fr-badge--warning">Annulée</span>
 								) : (
 									(STATUS_LABELS[row.status ?? ""] ?? row.status)

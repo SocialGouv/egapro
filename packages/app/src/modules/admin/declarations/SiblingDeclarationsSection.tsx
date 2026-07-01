@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatShortDateTime } from "~/modules/domain";
+import { formatShortDateTime, isCancelled } from "~/modules/domain";
 import { STATUS_LABELS } from "./shared/constants";
 
 type Sibling = {
@@ -31,7 +31,7 @@ export function SiblingDeclarationsSection({ siblings }: Props) {
 							{formatShortDateTime(sibling.updatedAt)}
 						</Link>
 						{" — "}
-						{sibling.cancelledAt !== null ? (
+						{isCancelled(sibling) ? (
 							<span className="fr-badge fr-badge--warning">Annulée</span>
 						) : (
 							(STATUS_LABELS[sibling.status] ?? sibling.status)
