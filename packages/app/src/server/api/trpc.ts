@@ -8,7 +8,7 @@
  */
 
 import { initTRPC, TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { getCurrentYear, isDeadlinePassed } from "~/modules/domain";
@@ -202,6 +202,11 @@ export const companyWriteProcedure = companyProcedure.use(({ ctx, next }) => {
  * `declarationProcedure` (reads) and `declarationWriteProcedure` (mutations)
  * so the lookup logic stays in a single place. Throws `NOT_FOUND` when the
  * declaration does not exist yet.
+ *
+ * Cancelled declarations are excluded (`cancelledAt IS NULL`): after an admin
+ * cancellation a fresh draft is created alongside the cancelled row, so the
+ * resolver must target the active one — otherwise write procedures (and the
+ * modification-deadline guard) would operate on the stale cancelled row.
  */
 async function fetchCurrentDeclarationId(
 	database: typeof db,
@@ -211,7 +216,13 @@ async function fetchCurrentDeclarationId(
 	const rows = await database
 		.select({ id: declarations.id })
 		.from(declarations)
-		.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+		.where(
+			and(
+				eq(declarations.siren, siren),
+				eq(declarations.year, year),
+				isNull(declarations.cancelledAt),
+			),
+		)
 		.limit(1);
 
 	const declaration = rows[0];
