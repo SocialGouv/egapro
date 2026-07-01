@@ -20,7 +20,7 @@ import {
 	MATOMO_EVENT_CATEGORY,
 	MATOMO_FUNNEL_ACTION,
 } from "~/modules/analytics/shared/events";
-import type { CompanySizeRange } from "~/modules/domain";
+import { type CompanySizeRange, percentageOf } from "~/modules/domain";
 
 const ONE_HOUR = 3_600;
 
@@ -127,12 +127,11 @@ export function buildFunnelRows(
 	const start = numbers[0] ?? 0;
 	return jalons.map((jalon, index) => {
 		const count = numbers[index] ?? 0;
-		const pctOfStart = start === 0 ? 0 : Math.round((count / start) * 100);
+		const pctOfStart = Math.round(percentageOf(count, start));
 		let pctDropFromPrev: number | null = null;
 		if (index > 0) {
 			const prev = numbers[index - 1] ?? 0;
-			pctDropFromPrev =
-				prev === 0 ? 0 : Math.round(((prev - count) / prev) * 100);
+			pctDropFromPrev = Math.round(percentageOf(prev - count, prev));
 		}
 		return {
 			key: jalon.key,
