@@ -1,3 +1,5 @@
+import { formatCount } from "~/modules/domain";
+
 export type StatsTableColumn<Row> = {
 	key: Extract<keyof Row, string>;
 	label: string;
@@ -11,7 +13,7 @@ type Props<Row extends { key: string; label: string }> = {
 };
 
 function formatValue(value: unknown): string {
-	if (typeof value === "number") return value.toLocaleString("fr-FR");
+	if (typeof value === "number") return formatCount(value);
 	if (typeof value === "string") return value;
 	return "0";
 }

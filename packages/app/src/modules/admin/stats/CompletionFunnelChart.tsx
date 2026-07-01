@@ -11,6 +11,8 @@ import { CanvasRenderer } from "echarts/renderers";
 import ReactECharts from "echarts-for-react/lib/core";
 import { useEffect, useState } from "react";
 
+import { formatCount } from "~/modules/domain";
+
 import styles from "./CompletionFunnelChart.module.scss";
 import type { FunnelRow } from "./types";
 
@@ -119,10 +121,6 @@ export function pickFunnelColor(
 	}
 	const colors = dsfrPalette.palette;
 	return colors[index % colors.length] as string;
-}
-
-function formatCount(value: number): string {
-	return value.toLocaleString("fr-FR");
 }
 
 export function isAboveThreshold(

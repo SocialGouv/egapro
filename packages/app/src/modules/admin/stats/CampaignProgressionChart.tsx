@@ -11,7 +11,7 @@ import {
 	YAxis,
 } from "recharts";
 
-import { formatMonthDay } from "~/modules/domain";
+import { formatCount, formatMonthDay, percentageOf } from "~/modules/domain";
 
 import styles from "./CampaignProgressionChart.module.scss";
 import type { CampaignProgressionSeries } from "./types";
@@ -102,11 +102,11 @@ function ProgressionTooltip({
 					if (entry.value == null) return null;
 					const year = Number(entry.name);
 					const total = totals[year] ?? 0;
-					const pct = total > 0 ? Math.round((entry.value / total) * 100) : 0;
+					const pct = Math.round(percentageOf(entry.value, total));
 					return (
 						<li className={styles.tooltipItem} key={entry.name}>
-							{year} : {entry.value.toLocaleString("fr-FR")} déclarations ({pct}{" "}
-							% du total)
+							{year} : {formatCount(entry.value)} déclarations ({pct} % du
+							total)
 						</li>
 					);
 				})}
@@ -146,9 +146,7 @@ export function CampaignProgressionChart({ series, currentYear }: Props) {
 						interval={6}
 						tickFormatter={(value: string) => formatMonthDay(value)}
 					/>
-					<YAxis
-						tickFormatter={(value: number) => value.toLocaleString("fr-FR")}
-					/>
+					<YAxis tickFormatter={(value: number) => formatCount(value)} />
 					<Tooltip content={<ProgressionTooltip totals={totals} />} />
 					<Legend />
 					{series.map(({ year }) => (
