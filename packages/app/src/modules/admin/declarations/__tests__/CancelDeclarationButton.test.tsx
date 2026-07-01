@@ -7,9 +7,13 @@ const { mockMutate, mockOpen, mockClose } = vi.hoisted(() => ({
 	mockClose: vi.fn(),
 }));
 
-vi.mock("~/modules/domain", () => ({
-	getCurrentYear: () => 2026,
-}));
+vi.mock("~/modules/domain", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("~/modules/domain")>();
+	return {
+		...actual,
+		getCurrentYear: () => 2026,
+	};
+});
 
 vi.mock("~/modules/shared", () => ({
 	useDsfrModal: () => ({
