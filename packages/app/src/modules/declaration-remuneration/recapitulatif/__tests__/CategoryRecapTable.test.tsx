@@ -28,6 +28,13 @@ function effectifCells() {
 	return within(row).getAllByRole("cell");
 }
 
+function totalRowGapCell() {
+	const rows = screen
+		.getAllByRole("rowheader", { name: "Total" })
+		.map((th) => th.parentElement as HTMLElement);
+	return rows.map((row) => within(row).getAllByRole("cell").at(-1));
+}
+
 describe("CategoryRecapTable", () => {
 	it("suffixes the 'Effectif physique' counts with 'nb'", () => {
 		render(
@@ -139,5 +146,22 @@ describe("CategoryRecapTable", () => {
 		// Hourly total gap: |((22 - 19) / 22) * 100| = 13,6 % → élevé.
 		expect(screen.getAllByText("élevé").length).toBeGreaterThanOrEqual(2);
 		expect(screen.getAllByRole("row").length).toBeGreaterThan(0);
+	});
+
+	it("renders '-' for the total gap when the men total is zero", () => {
+		render(
+			<CategoryRecapTable
+				category={makeCategory({
+					annualBaseWomen: "1000",
+					annualBaseMen: "0",
+				})}
+				declarationYear={2025}
+				index={0}
+			/>,
+		);
+		const [annualTotalGapCell, hourlyTotalGapCell] = totalRowGapCell();
+		expect(annualTotalGapCell).toHaveTextContent("-");
+		expect(annualTotalGapCell).not.toHaveTextContent("%");
+		expect(hourlyTotalGapCell).toHaveTextContent("-");
 	});
 });
