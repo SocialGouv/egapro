@@ -22,7 +22,11 @@ import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
-import { padDecimalOnBlur, padDecimalToTwo } from "~/modules/domain";
+import {
+	padDecimalOnBlur,
+	padDecimalToTwo,
+	sumCategoryWorkforce,
+} from "~/modules/domain";
 import { getDsfrCollapse } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
@@ -304,15 +308,8 @@ export function CategoryForm({
 		}
 
 		if (maxWomen !== undefined || maxMen !== undefined) {
-			const totalWomen = data.categories.reduce(
-				(sum, cat) =>
-					sum + (cat.womenCount ? Number.parseInt(cat.womenCount, 10) : 0),
-				0,
-			);
-			const totalMen = data.categories.reduce(
-				(sum, cat) =>
-					sum + (cat.menCount ? Number.parseInt(cat.menCount, 10) : 0),
-				0,
+			const { women: totalWomen, men: totalMen } = sumCategoryWorkforce(
+				data.categories,
 			);
 
 			const errors: string[] = [];

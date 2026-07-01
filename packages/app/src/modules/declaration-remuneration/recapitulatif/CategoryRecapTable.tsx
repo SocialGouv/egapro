@@ -1,7 +1,9 @@
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
 	computeGap,
+	computeGapBetween,
 	computeTotal,
+	computeWorkforceTotal,
 	formatCurrency,
 	formatGap,
 	formatTotal,
@@ -34,7 +36,7 @@ export function CategoryRecapTable({
 }: Props) {
 	const womenCount = category.womenCount ?? 0;
 	const menCount = category.menCount ?? 0;
-	const totalSalaries = womenCount + menCount;
+	const totalSalaries = computeWorkforceTotal(womenCount, menCount);
 
 	const annualWomenSum = computeTotal(
 		category.annualBaseWomen ?? "",
@@ -63,8 +65,8 @@ export function CategoryRecapTable({
 		category.annualVariableMen ?? "",
 	);
 	const annualTotalGap =
-		annualWomenSum !== null && annualMenSum !== null && annualMenSum !== 0
-			? Math.abs(((annualMenSum - annualWomenSum) / annualMenSum) * 100)
+		annualWomenSum !== null && annualMenSum !== null
+			? computeGapBetween(annualWomenSum, annualMenSum)
 			: null;
 
 	const hourlyBaseGap = computeGap(
@@ -76,8 +78,8 @@ export function CategoryRecapTable({
 		category.hourlyVariableMen ?? "",
 	);
 	const hourlyTotalGap =
-		hourlyWomenSum !== null && hourlyMenSum !== null && hourlyMenSum !== 0
-			? Math.abs(((hourlyMenSum - hourlyWomenSum) / hourlyMenSum) * 100)
+		hourlyWomenSum !== null && hourlyMenSum !== null
+			? computeGapBetween(hourlyWomenSum, hourlyMenSum)
 			: null;
 
 	const heading = `Catégorie d'emplois n°${index + 1}${category.name ? ` : ${category.name}` : ""}`;

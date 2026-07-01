@@ -4,6 +4,7 @@ import common from "~/modules/declaration-remuneration/shared/common.module.scss
 import {
 	computeGap,
 	computeTotal,
+	computeWorkforceTotal,
 	displayDecimal,
 	formatTotal,
 } from "~/modules/domain";
@@ -205,7 +206,9 @@ export function CategoryDataTable({
 	const womenInt = cat.womenCount ? Number.parseInt(cat.womenCount, 10) : NaN;
 	const menInt = cat.menCount ? Number.parseInt(cat.menCount, 10) : NaN;
 	const totalEmployees =
-		!Number.isNaN(womenInt) && !Number.isNaN(menInt) ? womenInt + menInt : null;
+		!Number.isNaN(womenInt) && !Number.isNaN(menInt)
+			? computeWorkforceTotal(womenInt, menInt)
+			: null;
 
 	const idPrefix = `cat-${catIndex}`;
 	return (

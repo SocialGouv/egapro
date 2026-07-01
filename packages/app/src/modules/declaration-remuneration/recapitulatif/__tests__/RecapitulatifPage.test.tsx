@@ -235,6 +235,44 @@ describe("RecapitulatifPage", () => {
 		).toBeGreaterThanOrEqual(1);
 	});
 
+	it("locks the computed quartile percentages and grand totals (iso-behaviour)", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				step4Data={{
+					annual: [
+						{ threshold: "20700.35", women: 30, men: 60 },
+						{ threshold: "25750.99", women: 40, men: 30 },
+						{ threshold: "34900.99", women: 24, men: 31 },
+						{ threshold: "", women: 15, men: 26 },
+					],
+					hourly: [
+						{ threshold: "10", women: 30, men: 60 },
+						{ threshold: "15", women: 40, men: 30 },
+						{ threshold: "20", women: 24, men: 31 },
+						{ threshold: "", women: 15, men: 26 },
+					],
+				}}
+			/>,
+		);
+		for (const pct of [
+			"33,3 %",
+			"66,7 %",
+			"57,1 %",
+			"42,9 %",
+			"43,6 %",
+			"56,4 %",
+			"36,6 %",
+			"63,4 %",
+			"42,6 %",
+			"57,4 %",
+		]) {
+			expect(screen.getAllByText(pct)).toHaveLength(2);
+		}
+		expect(screen.getAllByText("109")).toHaveLength(2);
+		expect(screen.getAllByText("147")).toHaveLength(2);
+	});
+
 	it("renders one category table per step5 category with matching heading", () => {
 		render(
 			<RecapitulatifPage
