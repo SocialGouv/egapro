@@ -4,7 +4,22 @@ import {
 	computeDeclarationStatus,
 	getCurrentCompliancePath,
 	isCancelled,
+	isDeclarationSubmitted,
 } from "../shared/declarationStatus";
+
+describe("isDeclarationSubmitted", () => {
+	it("returns false when status is null", () => {
+		expect(isDeclarationSubmitted(null)).toBe(false);
+	});
+
+	it("returns false when status is draft", () => {
+		expect(isDeclarationSubmitted("draft")).toBe(false);
+	});
+
+	it("returns true for any non-draft, non-null status", () => {
+		expect(isDeclarationSubmitted("submitted")).toBe(true);
+	});
+});
 
 describe("isCancelled", () => {
 	it("returns false when cancelledAt is null", () => {
