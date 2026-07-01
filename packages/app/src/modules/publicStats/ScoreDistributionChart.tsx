@@ -52,7 +52,7 @@ type ChartTooltipProps = {
 };
 
 export function formatYAxisTick(value: number): string {
-	return value.toLocaleString("fr-FR");
+	return formatCount(value);
 }
 
 export function ChartTooltip({ active, payload }: ChartTooltipProps) {
