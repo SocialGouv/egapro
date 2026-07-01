@@ -255,8 +255,6 @@ describe("RecapitulatifPage", () => {
 				}}
 			/>,
 		);
-		// annual and hourly fixtures share the same counts, so each computed
-		// percentage renders twice (once per distribution table).
 		for (const pct of [
 			"33,3 %",
 			"66,7 %",
