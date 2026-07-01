@@ -683,6 +683,43 @@ describe("declarationRouter", () => {
 		});
 	});
 
+	describe("submit — cseRequired snapshot", () => {
+		async function submitAndReadSnapshot(
+			workforce: number | null,
+			hasCse: boolean | null,
+		): Promise<boolean> {
+			const declaration = buildDeclaration({ status: "draft" });
+			const company = buildCompany({ workforce, hasCse });
+			const ctx = createSubmitMockDb(declaration, company, []);
+			const caller = await createLockedCaller(ctx.db);
+			await caller.submit();
+			const projectionCall = ctx.set.mock.calls
+				.map((c) => c[0] as Record<string, unknown>)
+				.find((c) => "cseRequired" in c);
+			return projectionCall?.cseRequired as boolean;
+		}
+
+		it("snapshots true for >= 100 employees with a CSE", async () => {
+			expect(await submitAndReadSnapshot(100, true)).toBe(true);
+		});
+
+		it("snapshots false just below the 100-employee threshold", async () => {
+			expect(await submitAndReadSnapshot(99, true)).toBe(false);
+		});
+
+		it("snapshots false for >= 100 employees without a CSE", async () => {
+			expect(await submitAndReadSnapshot(120, false)).toBe(false);
+		});
+
+		it("snapshots false when hasCse is null", async () => {
+			expect(await submitAndReadSnapshot(250, null)).toBe(false);
+		});
+
+		it("snapshots false when workforce is null", async () => {
+			expect(await submitAndReadSnapshot(null, true)).toBe(false);
+		});
+	});
+
 	describe("submitSecondDeclaration (rules engine)", () => {
 		it("transitions corrective_actions_chosen → awaiting_revision_choice when gap persists (S15)", async () => {
 			const declaration = buildDeclaration({

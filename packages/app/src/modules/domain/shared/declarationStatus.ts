@@ -2,6 +2,10 @@ import type { DeclarationStatus } from "../types";
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
 
+export function isDeclarationSubmitted(status: string | null): boolean {
+	return status !== null && status !== "draft";
+}
+
 export function getCurrentCompliancePath(declaration: {
 	firstDeclarationPathChoice: CompliancePath | null;
 	secondDeclarationPathChoice: CompliancePath | null;

@@ -14,9 +14,9 @@ import {
 } from "~/modules/declaration-remuneration/schemas";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import {
-	COMPANY_SIZE_ANNUAL_MIN,
 	getCurrentYear,
 	hasGapsAboveThreshold,
+	isCseRequired,
 	isTriennialYear,
 } from "~/modules/domain";
 import {
@@ -692,8 +692,7 @@ export const declarationRouter = createTRPCRouter({
 		// que les transitions FSM aval (saveCompliancePath, submitJointEvaluation,
 		// cseOpinion.finalize) liront comme guard.
 		const cseRequiredSnapshot =
-			(company.workforce ?? 0) >= COMPANY_SIZE_ANNUAL_MIN &&
-			company.hasCse === true;
+			isCseRequired(company.workforce ?? 0) && company.hasCse === true;
 
 		await ctx.db.transaction(async (tx) => {
 			if (declaration.status === "draft" && historyInserts.length > 0) {

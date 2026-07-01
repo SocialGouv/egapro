@@ -1,3 +1,5 @@
+export { formatCount } from "~/modules/domain";
+
 type WithUnitOption = {
 	withUnit?: boolean;
 };
@@ -11,10 +13,6 @@ export function formatPercent(
 		minimumFractionDigits: 1,
 	});
 	return withUnit ? `${formatted} %` : formatted;
-}
-
-export function formatCount(value: number): string {
-	return value.toLocaleString("fr-FR");
 }
 
 export function formatDecimal(value: number): string {

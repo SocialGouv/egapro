@@ -108,10 +108,21 @@ check_pattern '\.(ts|tsx)$' \
   'Inline getFullYear() is forbidden. Use getCurrentYear() or getCseYear() from ~/modules/domain.' \
   '(domain/|__tests__|\.test\.|\.spec\.)'
 
-# Domain layer — slice(0, 9) for SIREN extraction must come from ~/modules/domain
+# Domain layer — slice/substring/substr(0, 9) for SIREN extraction must come from ~/modules/domain
 check_pattern '\.(ts|tsx)$' \
   'slice\(0,[[:space:]]*9\)' \
   'Inline slice(0, 9) is forbidden. Use extractSiren() from ~/modules/domain.' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
+check_pattern '\.(ts|tsx)$' \
+  '(substring|substr)\(0,[[:space:]]*9\)' \
+  'Inline substring/substr(0, 9) is forbidden. Use extractSiren() from ~/modules/domain.' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
+# Domain layer — inline date arithmetic (getMonth/getDate) must use domain campaign helpers
+check_pattern '\.(ts|tsx)$' \
+  '\.(getMonth|getDate)\(\)' \
+  'Inline .getMonth()/.getDate() is forbidden. Use campaign date helpers from ~/modules/domain.' \
   '(domain/|__tests__|\.test\.|\.spec\.)'
 
 # Zod imports forbidden in router files — schemas must be in ~/modules/{domain}/schemas.ts

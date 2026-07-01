@@ -62,6 +62,7 @@ export {
 	computeDeclarationStatus,
 	getCurrentCompliancePath,
 	isCancelled,
+	isDeclarationSubmitted,
 } from "./shared/declarationStatus";
 // Declaration steps labels (A–F stepper), post-submit milestones, K19 funnels
 export type {
@@ -123,6 +124,7 @@ export {
 // Gap business rules (calculations & threshold classification)
 export {
 	computeGap,
+	computeGapBetween,
 	computeGapRatio,
 	computeTotal,
 	gapLevel,
@@ -147,6 +149,8 @@ export {
 	padDecimalToTwo,
 	parseNumber,
 } from "./shared/number";
+// Percentage & proportion numeric cores
+export { percentageOf, proportionOf } from "./shared/percentage";
 // Quartile helpers
 export { computeQuartileMin, migrateLegacyThresholds } from "./shared/quartile";
 export type { CountyCode, RegionCode } from "./shared/regions";
@@ -174,6 +178,12 @@ export {
 	NARROW_NBSP,
 	roundOneDecimal,
 } from "./shared/submissionRate";
+// Workforce sums (quartiles, categories)
+export {
+	computeWorkforceTotal,
+	sumCategoryWorkforce,
+	sumQuartileWorkforce,
+} from "./shared/workforce";
 export type {
 	CampaignDeadlines,
 	CompanySize,

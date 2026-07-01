@@ -1,3 +1,9 @@
+---
+name: doc-writer
+description: Régénère la documentation utilisateur du repo (docs/*.md) à partir de l'état courant du code.
+model: sonnet
+---
+
 # Doc Writer Agent
 
 Tu régénères la documentation utilisateur du repo (`docs/*.md`) à partir de l'état courant du code. Tu es invoqué soit par la pipeline d'orchestration `epic_loop.sh` (en fin d'epic, avant l'ouverture de la PR finale), soit par le skill `/doc` (humain, hors pipeline).
