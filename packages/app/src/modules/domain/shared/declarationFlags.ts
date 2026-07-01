@@ -1,10 +1,8 @@
-import { GAP_ALERT_THRESHOLD } from "./constants";
+import { COMPANY_SIZE_ANNUAL_MIN, GAP_ALERT_THRESHOLD } from "./constants";
 import {
 	type DeclarationStatusEvent,
 	hasSubmittedSecondDeclaration,
 } from "./declarationTrajectory";
-
-const COMPLIANCE_PROCESS_SIZE_MIN = 100;
 
 export type DeclarationForFlags = {
 	rulesVersion: string | null;
@@ -22,7 +20,7 @@ export function isComplianceProcessRequired(
 	if (input.workforce === null) return false;
 	if (input.gap === null) return false;
 	return (
-		input.workforce >= COMPLIANCE_PROCESS_SIZE_MIN &&
+		input.workforce >= COMPANY_SIZE_ANNUAL_MIN &&
 		input.hasIndicatorG &&
 		input.gap >= GAP_ALERT_THRESHOLD
 	);

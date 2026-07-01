@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	computeGap,
+	computeGapBetween,
 	computeGapRatio,
 	computeTotal,
 	gapLevel,
@@ -64,6 +65,24 @@ describe("computeGap", () => {
 	});
 });
 
+describe("computeGapBetween", () => {
+	it("computes the absolute gap as a percentage of the men value", () => {
+		expect(computeGapBetween(90, 100)).toBe(10);
+	});
+
+	it("returns a positive value when women earn more than men", () => {
+		expect(computeGapBetween(110, 100)).toBe(10);
+	});
+
+	it("returns 0 for equal values", () => {
+		expect(computeGapBetween(100, 100)).toBe(0);
+	});
+
+	it("returns null when the men value is zero (division by zero)", () => {
+		expect(computeGapBetween(1, 0)).toBeNull();
+	});
+});
+
 describe("gapLevel", () => {
 	it("returns low for gap below threshold", () => {
 		expect(gapLevel(3)).toBe("low");
@@ -89,6 +108,14 @@ describe("gapLevel", () => {
 describe("computeTotal", () => {
 	it("sums base and variable", () => {
 		expect(computeTotal("100", "50")).toBe(150);
+	});
+
+	it("treats an invalid base as zero when variable is valid", () => {
+		expect(computeTotal("", "50")).toBe(50);
+	});
+
+	it("treats an invalid variable as zero when base is valid", () => {
+		expect(computeTotal("100", "")).toBe(100);
 	});
 
 	it("returns null when both are NaN", () => {

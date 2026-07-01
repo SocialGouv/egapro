@@ -38,6 +38,10 @@ export function computeGap(womenVal: string, menVal: string): number | null {
 	return Math.abs(((m - w) / m) * 100);
 }
 
+export function computeGapBetween(women: number, men: number): number | null {
+	return men === 0 ? null : Math.abs(((men - women) / men) * 100);
+}
+
 /** Classify a gap value against the regulatory threshold (5% by default). */
 export function gapLevel(gap: number | null): GapLevel | null {
 	if (gap === null) return null;
