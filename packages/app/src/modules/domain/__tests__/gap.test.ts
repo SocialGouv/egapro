@@ -110,6 +110,14 @@ describe("computeTotal", () => {
 		expect(computeTotal("100", "50")).toBe(150);
 	});
 
+	it("treats an invalid base as zero when variable is valid", () => {
+		expect(computeTotal("", "50")).toBe(50);
+	});
+
+	it("treats an invalid variable as zero when base is valid", () => {
+		expect(computeTotal("100", "")).toBe(100);
+	});
+
 	it("returns null when both are NaN", () => {
 		expect(computeTotal("", "")).toBeNull();
 	});
