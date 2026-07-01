@@ -1,7 +1,7 @@
 "use client";
 
 import type { QuartileTuple } from "~/modules/declaration-remuneration/types";
-import { computePercentage } from "~/modules/domain";
+import { computePercentage, sumQuartileWorkforce } from "~/modules/domain";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
 import { QuartileTableRow } from "./QuartileTableRow";
 
@@ -42,9 +42,11 @@ export function QuartileTable({
 	onQuartileChange,
 	disabled = false,
 }: Props) {
-	const totalWomen = quartiles.reduce((sum, q) => sum + (q.women ?? 0), 0);
-	const totalMen = quartiles.reduce((sum, q) => sum + (q.men ?? 0), 0);
-	const totalAll = totalWomen + totalMen;
+	const {
+		women: totalWomen,
+		men: totalMen,
+		total: totalAll,
+	} = sumQuartileWorkforce(quartiles);
 	const trancheSuffix =
 		tableType === "annual" ? "annuelle brute" : "horaire brute";
 

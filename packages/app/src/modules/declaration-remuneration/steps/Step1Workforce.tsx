@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
+import { computeWorkforceTotal } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep1Schema } from "../schemas";
@@ -78,7 +79,7 @@ export function Step1Workforce({
 
 	const totalWomen = form.watch("totalWomen");
 	const totalMen = form.watch("totalMen");
-	const total = totalWomen + totalMen;
+	const total = computeWorkforceTotal(totalWomen, totalMen);
 
 	const [womenRaw, setWomenRaw] = useState(() =>
 		initialData.totalWomen > 0 ? String(initialData.totalWomen) : "",

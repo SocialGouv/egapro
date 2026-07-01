@@ -6,9 +6,11 @@ import type {
 import {
 	computeGap,
 	computePercentage,
+	computeWorkforceTotal,
 	formatCurrency,
 	formatGap,
 	GAP_ALERT_THRESHOLD,
+	sumQuartileWorkforce,
 } from "~/modules/domain";
 import styles from "./IndicatorTables.module.scss";
 
@@ -114,7 +116,7 @@ function WorkforceTable({
 	totalWomen: number | null;
 	totalMen: number | null;
 }) {
-	const total = (totalWomen ?? 0) + (totalMen ?? 0);
+	const total = computeWorkforceTotal(totalWomen ?? 0, totalMen ?? 0);
 	return (
 		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 			<div className="fr-table__wrapper">
@@ -165,7 +167,7 @@ function ProportionTable({
 	const eMen = Number.parseInt(indicatorEMen, 10);
 	const tWomen = totalWomen ?? 0;
 	const tMen = totalMen ?? 0;
-	const grandTotal = tWomen + tMen;
+	const grandTotal = computeWorkforceTotal(tWomen, tMen);
 	return (
 		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 			<div className="fr-table__wrapper">
@@ -251,9 +253,11 @@ function QuartileDistributionTable({
 		(q) => q.threshold !== "" || q.women !== undefined || q.men !== undefined,
 	);
 	if (!hasData) return null;
-	const totalWomen = quartiles.reduce((s, q) => s + (q.women ?? 0), 0);
-	const totalMen = quartiles.reduce((s, q) => s + (q.men ?? 0), 0);
-	const total = totalWomen + totalMen;
+	const {
+		women: totalWomen,
+		men: totalMen,
+		total,
+	} = sumQuartileWorkforce(quartiles);
 
 	function fmt(value: string | undefined) {
 		if (!value) return "-";
@@ -309,7 +313,10 @@ function QuartileDistributionTable({
 											i === 0 ? "0" : (quartiles[i - 1]?.threshold ?? "");
 										const min = i === 0 ? `0 ${unit}` : fmt(prev);
 										const max = i === 3 ? "-" : fmt(q.threshold);
-										const lineTotal = (q.women ?? 0) + (q.men ?? 0);
+										const lineTotal = computeWorkforceTotal(
+											q.women ?? 0,
+											q.men ?? 0,
+										);
 										return (
 											<tr key={QUARTILE_LABELS[i]}>
 												<th scope="row">{QUARTILE_LABELS[i]}</th>
