@@ -34,7 +34,9 @@ Blocks edits containing forbidden patterns:
 | `dangerouslySetInnerHTML` | `.tsx/.jsx` | XSS risk — use safe rendering or DOMPurify |
 | `: any`, `as any` | `.ts/.tsx` (excl. test files) | Use `unknown` with type narrowing |
 | `getFullYear()` | `.ts/.tsx` (excl. `domain/`, tests) | Use `getCurrentYear()` / `getCseYear()` from `~/modules/domain` |
-| `slice(0, 9)` | `.ts/.tsx` (excl. `domain/`, tests) | Use `extractSiren()` from `~/modules/domain` |
+| `slice(0, 9)` / `slice(0,9)` | `.ts/.tsx` (excl. `domain/`, tests) | Use `extractSiren()` from `~/modules/domain` |
+| `substring(0, 9)` / `substring(0,9)` / `substr(0, 9)` / `substr(0,9)` | `.ts/.tsx` (excl. `domain/`, tests) | Use `extractSiren()` from `~/modules/domain` |
+| `.getMonth()` / `.getDate()` | `.ts/.tsx` (excl. `domain/`, tests) | Use campaign date helpers from `~/modules/domain` |
 | `from "zod"` | `routers/*.ts`, `.tsx` (excl. tests) | Import schemas from `~/modules/{domain}/schemas.ts` |
 | `#hex`, `rgb()`, `rgba()` | `.scss` | Use DSFR CSS custom properties |
 | Non-route `.tsx` in `src/app/` | `src/app/**/*.tsx` | Move to `src/modules/` and import from barrel |
@@ -105,9 +107,11 @@ Apply these rules **as you write code**, before any agent runs:
 **Domain layer:**
 
 - No `new Date().getFullYear()` → use `getCurrentYear()` or `getCseYear()` from `~/modules/domain`
-- No `siret.slice(0, 9)` → use `extractSiren(siret)` from `~/modules/domain`
+- No `siret.slice(0, 9)`, `substring(0, 9)`, or `substr(0, 9)` → use `extractSiren(siret)` from `~/modules/domain`
+- No `.getMonth()` / `.getDate()` in calculations → use campaign date helpers from `~/modules/domain`
 - No hardcoded thresholds (5%, 50, 100) → use named constants from `~/modules/domain`
 - No local `getCurrentYear`/`getCseYear`/`getSiren` function definitions → import from `~/modules/domain`
+- No inline reimplementation of domain helpers: `cancelledAt !== null` → `isCancelled()`, `workforce >= 100` → `isCseRequired()` / `isComplianceProcessRequired()` / `isComplianceProcessRevisionRequired()`
 - New business rules → add to `~/modules/domain` as pure functions with tests
 
 **Security:**
