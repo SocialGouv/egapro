@@ -309,6 +309,13 @@
 			"when": 1782981445390,
 			"tag": "0043_vengeful_bucky",
 			"breakpoints": true
+		},
+		{
+			"idx": 44,
+			"version": "7",
+			"when": 1782997206329,
+			"tag": "0044_natural_sentinels",
+			"breakpoints": true
 		}
 	]
 }

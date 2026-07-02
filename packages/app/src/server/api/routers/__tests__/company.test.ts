@@ -255,6 +255,7 @@ describe("findUserCompany NAF label enrichment", () => {
 			departmentCode: null,
 			departmentLabel: null,
 			workforce: 100,
+			statutDiffusion: null,
 		});
 
 		const result = await callGet({

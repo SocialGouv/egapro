@@ -69,6 +69,7 @@ export type CompanyInfo = {
 	departmentCode: string | null;
 	departmentLabel: string | null;
 	workforce: number | null;
+	statutDiffusion: string | null;
 };
 
 function buildAddress(entity: WeezLegalEntity): string | null {
@@ -123,7 +124,9 @@ export async function fetchCompanyBySiren(
 	// when `address` becomes null.
 	const location = getLocationFromPostalCode(entity.codepostal);
 
-	if (!isCompanyDiffusible(entity.statutdiffusionunitelegale)) {
+	const statutDiffusion = entity.statutdiffusionunitelegale ?? null;
+
+	if (!isCompanyDiffusible(statutDiffusion)) {
 		return {
 			name:
 				entity.denominationunitelegale ||
@@ -138,6 +141,7 @@ export async function fetchCompanyBySiren(
 			workforce:
 				entity.effectiftotal ??
 				trancheToWorkforce(entity.trancheeffectifsunitelegale),
+			statutDiffusion,
 		};
 	}
 
@@ -158,5 +162,6 @@ export async function fetchCompanyBySiren(
 		workforce:
 			entity.effectiftotal ??
 			trancheToWorkforce(entity.trancheeffectifsunitelegale),
+		statutDiffusion,
 	};
 }
