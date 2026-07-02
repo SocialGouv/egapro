@@ -221,9 +221,7 @@ describe("search redirect (/api/search → /api/public/declarations)", () => {
 	}
 
 	it("redirects to /api/public/declarations with a 308 status", async () => {
-		const res = (await middleware(
-			makeRequest("/api/search"),
-		)) as NextResponse;
+		const res = (await middleware(makeRequest("/api/search"))) as NextResponse;
 		expect(res.status).toBe(308);
 		expect(new URL(res.headers.get("location") ?? "").pathname).toBe(
 			"/api/public/declarations",
