@@ -99,6 +99,26 @@ describe("EmailCtaWithLink", () => {
 		// The DSFR primary-button border construct
 		expect(html).toContain("solid 1px #000091");
 	});
+
+	it("uses linkHref for the fallback link while keeping href on the button", async () => {
+		const href = "https://test.example/declaration";
+		const linkHref = "https://test.example/connexion";
+		const { html } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailCtaWithLink
+					href={href}
+					label="Déposer l'avis"
+					linkHref={linkHref}
+				/>
+			</EmailShell>,
+		);
+		// The button targets href, the fallback link targets linkHref (both href attr and visible text)
+		expect(html).toContain(`href="${href}"`);
+		expect(html).toContain(`href="${linkHref}"`);
+		expect(html).toContain(`>${linkHref}<`);
+		// The button destination is never shown as the fallback link text
+		expect(html).not.toContain(`>${href}<`);
+	});
 });
 
 describe("formatSiren", () => {

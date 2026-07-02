@@ -4,6 +4,7 @@ import { COLORS, FONT, SPACING } from "./tokens.js";
 type EmailCtaWithLinkProps = {
 	href: string;
 	label: string;
+	linkHref?: string;
 };
 
 const SPACER = {
@@ -12,7 +13,12 @@ const SPACER = {
 	fontSize: SPACING.md,
 } as const;
 
-export function EmailCtaWithLink({ href, label }: EmailCtaWithLinkProps) {
+export function EmailCtaWithLink({
+	href,
+	label,
+	linkHref,
+}: EmailCtaWithLinkProps) {
+	const displayedLink = linkHref ?? href;
 	return (
 		<table
 			role="presentation"
@@ -42,12 +48,12 @@ export function EmailCtaWithLink({ href, label }: EmailCtaWithLinkProps) {
 						}}
 					>
 						<a
-							href={href}
+							href={displayedLink}
 							target="_blank"
 							rel="noopener noreferrer"
 							style={{ color: COLORS.blueFrance, textDecoration: "underline" }}
 						>
-							{href}
+							{displayedLink}
 						</a>
 					</td>
 				</tr>
