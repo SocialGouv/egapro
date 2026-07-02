@@ -39,6 +39,8 @@ import {
 	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
 	type PostSubmitMilestoneKey,
+	percentageOf,
+	roundOneDecimal,
 } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
@@ -658,8 +660,7 @@ export const adminStatsRouter = createTRPCRouter({
 				const aggregate = byStep.get(step);
 				const total = aggregate?.total ?? 0;
 				const abandoned = aggregate?.abandoned ?? 0;
-				const dropoffRate =
-					total === 0 ? 0 : Math.round((abandoned / total) * 1000) / 10;
+				const dropoffRate = roundOneDecimal(percentageOf(abandoned, total));
 				return {
 					key: String(step),
 					phase: "wizard",
@@ -838,8 +839,7 @@ export const adminStatsRouter = createTRPCRouter({
 				({ key, label, status }) => {
 					const total = totalsByPhase.get(status) ?? 0;
 					const abandoned = abandonedByPhase.get(status) ?? 0;
-					const dropoffRate =
-						total === 0 ? 0 : Math.round((abandoned / total) * 1000) / 10;
+					const dropoffRate = roundOneDecimal(percentageOf(abandoned, total));
 					return {
 						key,
 						phase: "post_submit",
@@ -1145,12 +1145,11 @@ function buildFunnelRows(
 	const start = numbers[0] ?? 0;
 	return steps.map((step, idx) => {
 		const count = numbers[idx] ?? 0;
-		const pctOfStart = start === 0 ? 0 : Math.round((count / start) * 100);
+		const pctOfStart = Math.round(percentageOf(count, start));
 		let pctDropFromPrev: number | null = null;
 		if (idx > 0) {
 			const prev = numbers[idx - 1] ?? 0;
-			pctDropFromPrev =
-				prev === 0 ? 0 : Math.round(((prev - count) / prev) * 100);
+			pctDropFromPrev = Math.round(percentageOf(prev - count, prev));
 		}
 		return {
 			key: step.key,

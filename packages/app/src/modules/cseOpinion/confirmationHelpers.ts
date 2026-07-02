@@ -1,3 +1,1 @@
-export function isDeclarationSubmitted(status: string | null): boolean {
-	return status !== null && status !== "draft";
-}
+export { isDeclarationSubmitted } from "~/modules/domain";

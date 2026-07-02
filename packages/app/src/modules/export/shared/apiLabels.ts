@@ -7,6 +7,8 @@
  * same underscore-separated French style to stay consistent.
  */
 
+import { proportionOf } from "~/modules/domain";
+
 /** Indicator A — mean global remuneration. */
 export const INDICATOR_A_LABELS = {
 	annualWomen: "Rem_globale_annuelle_moyenne_F",
@@ -126,5 +128,5 @@ export function quartileProportion(
 	totalCount: number | null,
 ): number | null {
 	if (count === null || totalCount === null || totalCount === 0) return null;
-	return Math.round((count / totalCount) * 10_000) / 10_000;
+	return Math.round(proportionOf(count, totalCount) * 10_000) / 10_000;
 }

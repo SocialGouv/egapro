@@ -1,4 +1,8 @@
-import { computeGapRatio } from "~/modules/domain";
+import {
+	computeGapRatio,
+	computeWorkforceTotal,
+	proportionOf,
+} from "~/modules/domain";
 
 type DeclarationRowSubset = {
 	indicatorAAnnualWomen: string | null;
@@ -76,11 +80,11 @@ function proportionFromCounts(
 	men: number | null,
 ): { women: number | null; men: number | null } {
 	if (women === null || men === null) return { women: null, men: null };
-	const total = women + men;
+	const total = computeWorkforceTotal(women, men);
 	if (total === 0) return { women: null, men: null };
 	return {
-		women: Math.round((women / total) * 10_000) / 10_000,
-		men: Math.round((men / total) * 10_000) / 10_000,
+		women: Math.round(proportionOf(women, total) * 10_000) / 10_000,
+		men: Math.round(proportionOf(men, total) * 10_000) / 10_000,
 	};
 }
 
@@ -92,11 +96,11 @@ function proportionFromStrings(
 	const w = Number(women);
 	const m = Number(men);
 	if (Number.isNaN(w) || Number.isNaN(m)) return { women: null, men: null };
-	const total = w + m;
+	const total = computeWorkforceTotal(w, m);
 	if (total === 0) return { women: null, men: null };
 	return {
-		women: w / total,
-		men: m / total,
+		women: proportionOf(w, total),
+		men: proportionOf(m, total),
 	};
 }
 

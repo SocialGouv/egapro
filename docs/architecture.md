@@ -181,13 +181,17 @@ domain/
   index.ts        # Barrel — point d'import unique
   types.ts        # GapLevel, DeclarationStatus, …
   shared/
-    constants.ts          # GAP_ALERT_THRESHOLD, MAX_CSE_FILES, COMPANY_SIZE_*
-    gap.ts                # computeGap, gapLevel, formatGap
-    siren.ts              # extractSiren, formatSiren, validateSiren
-    campaign.ts           # getCurrentYear, getCseYear (règles temporelles)
-    declarationStatus.ts  # State machine de statut
-    companySize.ts        # isCseRequired, COMPANY_SIZE_RANGES
-    declarationLock.ts    # DEFAULT_LOCK_TIMEOUT_MINUTES, LOCK_HEARTBEAT_INTERVAL_MS
+    constants.ts            # GAP_ALERT_THRESHOLD, MAX_CSE_FILES, COMPANY_SIZE_*
+    campaign.ts             # getCurrentYear, getCseYear (règles temporelles)
+    companySize.ts          # isCseRequired, COMPANY_SIZE_RANGES
+    declarationFlags.ts     # isComplianceProcessRequired, isComplianceProcessRevisionRequired
+    declarationLock.ts      # DEFAULT_LOCK_TIMEOUT_MINUTES, LOCK_HEARTBEAT_INTERVAL_MS
+    declarationStatus.ts    # computeDeclarationStatus, isCancelled, isDeclarationSubmitted
+    gap.ts                  # computeGap, computeGapBetween, computeGapRatio, gapLevel, formatGap
+    percentage.ts           # percentageOf, proportionOf
+    siren.ts                # extractSiren, formatSiren, validateSiren
+    workforce.ts            # computeWorkforceTotal, sumQuartileWorkforce, sumCategoryWorkforce
+    …                       # (submissionRate, quartile, regions, number, format, …)
   __tests__/      # 100% coverage sur toutes les fonctions
 ```
 
@@ -196,18 +200,29 @@ domain/
 - Les règles changent peu souvent mais sont **critiques** (un bug ici impacte 100% des déclarations).
 - Centraliser permet de **tester exhaustivement** sans monter une page.
 - Les contraintes du règlement (seuils, calendriers) sont **lisibles à un endroit unique**, ce qui simplifie l'audit métier.
+- La source unique évite les divergences silencieuses entre le wizard, l'export et les routers tRPC.
 
-Hooks de garde :
+Hooks de garde — le hook `block-bad-patterns` bloque les patterns suivants en dehors de `domain/` et des tests :
 
-- `block-bad-patterns` rejette `new Date().getFullYear()` en dehors de `domain/` → forcer `getCurrentYear()`.
-- Idem pour `siret.slice(0, 9)` → forcer `extractSiren(siret)`.
-- Idem pour les seuils 5 / 50 / 100 hardcodés → forcer les constantes nommées.
+| Pattern bloqué | Alternative obligatoire |
+|---|---|
+| `new Date().getFullYear()` | `getCurrentYear()` / `getCseYear()` depuis `~/modules/domain` |
+| `siret.slice(0, 9)`, `.substring(0, 9)`, `.substr(0, 9)` | `extractSiren(siret)` depuis `~/modules/domain` |
+| `.getMonth()` / `.getDate()` | helpers de campagne depuis `~/modules/domain` |
+| `cancelledAt !== null` (réimplémentation de `isCancelled`) | `isCancelled({ cancelledAt })` depuis `~/modules/domain` |
+| `workforce >= 100` (réimplémentation de `isCseRequired`) | `isCseRequired(workforce)` / `isComplianceProcessRequired(...)` depuis `~/modules/domain` |
+| Seuils hardcodés (5, 50, 100) | constantes nommées (`GAP_ALERT_THRESHOLD`, `COMPANY_SIZE_ANNUAL_MIN`, …) |
 
 Toujours importer depuis le barrel :
 
 ```ts
-import { getCurrentYear, GAP_ALERT_THRESHOLD, isCseRequired } from "~/modules/domain";
-import { DEFAULT_LOCK_TIMEOUT_MINUTES, LOCK_HEARTBEAT_INTERVAL_MS } from "~/modules/domain";
+import {
+  getCurrentYear, GAP_ALERT_THRESHOLD,
+  isCseRequired, isCancelled, isDeclarationSubmitted,
+  isComplianceProcessRequired, isComplianceProcessRevisionRequired,
+  computeWorkforceTotal, sumQuartileWorkforce,
+  percentageOf, proportionOf,
+} from "~/modules/domain";
 ```
 
 ---

@@ -1,7 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 
 import { campaignYearDimension, FunnelStepTracker } from "~/modules/analytics";
-import { shouldRedirectSubmittedToRecap } from "~/modules/domain";
+import {
+	formatShortDate,
+	shouldRedirectSubmittedToRecap,
+} from "~/modules/domain";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
@@ -57,9 +60,11 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 
 	const initialSource = data.jobCategories[0]?.source;
 
-	const declarationDate = data.declaration.updatedAt
-		? new Date(data.declaration.updatedAt).toLocaleDateString("fr-FR")
-		: new Date().toLocaleDateString("fr-FR");
+	const declarationDate = formatShortDate(
+		data.declaration.updatedAt
+			? new Date(data.declaration.updatedAt)
+			: new Date(),
+	);
 
 	const stepTracker = (
 		<FunnelStepTracker

@@ -775,3 +775,130 @@ describe("assembleDeclaration", () => {
 		);
 	});
 });
+
+describe("assembleDeclaration — compliance flags", () => {
+	const indicatorG: IndicatorGEntry[] = [
+		{
+			categoryName: "Cadres",
+			declarationType: "initial",
+			womenCount: 50,
+			menCount: 60,
+			annualBaseWomen: "52000",
+			annualBaseMen: "56000",
+			annualVariableWomen: null,
+			annualVariableMen: null,
+			hourlyBaseWomen: null,
+			hourlyBaseMen: null,
+			hourlyVariableWomen: null,
+			hourlyVariableMen: null,
+		},
+	];
+
+	it("requires the compliance process for >= 100 employees with indicator G and a gap >= 5%", () => {
+		const row = { ...baseRow, workforce: 300, globalAnnualMeanGap: "0.0600" };
+
+		const result = assembleDeclaration(row, indicatorG, []);
+
+		expect(result.Parcours_de_conformite_requis).toBe(true);
+	});
+
+	it("does not require the compliance process when the gap is below 5%", () => {
+		const row = { ...baseRow, workforce: 300, globalAnnualMeanGap: "0.0455" };
+
+		const result = assembleDeclaration(row, indicatorG, []);
+
+		expect(result.Parcours_de_conformite_requis).toBe(false);
+		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
+	});
+
+	it("does not require the compliance process below 100 employees even with a gap", () => {
+		const row = { ...baseRow, workforce: 99, globalAnnualMeanGap: "0.0600" };
+
+		const result = assembleDeclaration(row, indicatorG, []);
+
+		expect(result.Parcours_de_conformite_requis).toBe(false);
+	});
+
+	it("does not require the compliance process without indicator G", () => {
+		const row = { ...baseRow, workforce: 300, globalAnnualMeanGap: "0.0600" };
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Parcours_de_conformite_requis).toBe(false);
+	});
+
+	it("does not require the compliance process when the global gap is null", () => {
+		const row = { ...baseRow, workforce: 300, globalAnnualMeanGap: null };
+
+		const result = assembleDeclaration(row, indicatorG, []);
+
+		expect(result.Parcours_de_conformite_requis).toBe(false);
+	});
+
+	it("treats a null workforce as 0 for the derived flags", () => {
+		const row = { ...baseRow, workforce: null, globalAnnualMeanGap: "0.0600" };
+
+		const result = assembleDeclaration(row, indicatorG, []);
+
+		expect(result.Parcours_de_conformite_requis).toBe(false);
+		expect(result.Indicateur_G_requis).toBe(false);
+	});
+
+	it("requires the revision when a second declaration was submitted with a correction gap >= 5%", () => {
+		const row = {
+			...baseRow,
+			workforce: 300,
+			globalAnnualMeanGap: "0.0600",
+			variableAnnualMeanGap: "0.0800",
+			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
+		};
+
+		const result = assembleDeclaration(row, indicatorG, []);
+
+		expect(result.Parcours_de_conformite_requis).toBe(true);
+		expect(result.Parcours_de_conformite_revision_requis).toBe(true);
+	});
+
+	it("does not require the revision without a submitted second declaration", () => {
+		const row = {
+			...baseRow,
+			workforce: 300,
+			globalAnnualMeanGap: "0.0600",
+			variableAnnualMeanGap: "0.0800",
+			secondDeclarationSubmittedAt: null,
+		};
+
+		const result = assembleDeclaration(row, indicatorG, []);
+
+		expect(result.Parcours_de_conformite_requis).toBe(true);
+		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
+	});
+
+	it("does not require the revision when the correction gap is below 5%", () => {
+		const row = {
+			...baseRow,
+			workforce: 300,
+			globalAnnualMeanGap: "0.0600",
+			variableAnnualMeanGap: "0.0400",
+			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
+		};
+
+		const result = assembleDeclaration(row, indicatorG, []);
+
+		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
+	});
+
+	it("does not require the revision when the correction gap is null", () => {
+		const row = {
+			...baseRow,
+			workforce: 300,
+			globalAnnualMeanGap: "0.0600",
+			variableAnnualMeanGap: null,
+			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
+		};
+
+		const result = assembleDeclaration(row, indicatorG, []);
+
+		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
+	});
+});
