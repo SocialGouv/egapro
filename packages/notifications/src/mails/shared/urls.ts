@@ -11,6 +11,10 @@ export function getMySpaceUrl(): string {
 	return `${getPublicUrl()}/mon-espace`;
 }
 
+export function getAvisCseUrl(siren: string): string {
+	return `${getPublicUrl()}/avis-cse?siren=${encodeURIComponent(siren)}`;
+}
+
 export function getConnectionUrl(): string {
 	return `${getPublicUrl()}/connexion`;
 }
