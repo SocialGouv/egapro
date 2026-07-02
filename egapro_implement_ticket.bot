@@ -12,13 +12,21 @@
 ## Légende : 🤖 agent · ⚖️ judge · 🔀 router · 🔧 tool déterministe. Détail = commentaire au-dessus.
 ## ═══════════════════════════════════════════════════════════════════
 
+## NB worktree : ce bot ne déclare PAS `worktree:` → il hérite du défaut `auto`. Lancé en
+## SUB-RUN (un par sous-ticket) par le parent, CHAQUE run enfant obtient donc son worktree
+## isolé `<store>/worktrees/<run-id>` → N tickets en parallèle = N répertoires distincts
+## (plus de `git worktree add` à la main côté parent). `egapro_dir` défaute à ${PROJECT_DIR}
+## (résolu vers CE worktree par le moteur), donc les nœuds `cd {{vars.egapro_dir}}` opèrent
+## dans le worktree sans qu'on passe de chemin /tmp. `_lease_worktree_slot` (injecté par le
+## lease `needs: worktree_slot` du parent, un index distinct de [0,5[) sert à dériver le port
+## dev (3001 + slot). code_dev fait son checkout explicite de la base (worktree:auto part de HEAD).
 vars:
-  egapro_dir: string = "."
+  egapro_dir: string = "${PROJECT_DIR}"
   repo: string = "SocialGouv/egapro"
   issue: string = ""
   base_branch: string = ""
   working_branch: string = ""
-  worktree_index: string = "0"
+  _lease_worktree_slot: string = "0"
   model: string = "sonnet"
   issue_type: string = "Task"
   attempt: string = "1"
@@ -26,7 +34,11 @@ vars:
 
 ## ─── Schemas (verdicts + gating des arêtes `when`) — copiés verbatim du parent ───
 
+## `validated` (bool) : ajouté pour le routage IN-BRANCH du parent — dans une branche
+## fan_out_each le moteur ne route que sur un booléen simple (`when validated`), pas sur une
+## expression `==`. finalize_pr l'émet à true ; le parent (subbot output) le lit pour aiguiller.
 schema verdict5_out:
+  validated: bool
   status: string
   ticket: string
   pr: string
@@ -96,8 +108,8 @@ prompt code_dev_user:
   Implémente le ticket #{{vars.issue}} ({{vars.repo}}) end-to-end côté CODE SOURCE uniquement, dans le worktree assigné, en suivant STRICTEMENT .claude/agents/code-dev/AGENT.md (étapes 0,1,2,3,4,4.5,5,7,8,8.5 seulement).
   Inputs reçus de l'orchestrateur /implement :
    - Ticket : #{{vars.issue}} (type : {{vars.issue_type}})
-   - Worktree path : {{vars.egapro_dir}}
-   - Worktree index : {{vars.worktree_index}}
+   - Worktree path : {{vars.egapro_dir}} (= CE worktree isolé, défaut ${PROJECT_DIR})
+   - Slot loué (worktree_slot) : {{vars._lease_worktree_slot}} → port dev = 3001 + ce slot
    - Base branch (remote-tracking ref, déjà fetchée) : {{vars.base_branch}} — la PR ciblera cette branche SANS le préfixe origin/ (`epic/<N>` pour une sub-issue d'epic, `alpha` pour une Task/Bug standalone)
    - Working branch (pré-créée sur GitHub, linkée à l'issue) : {{vars.working_branch}} — checkout cette branche, NE crée PAS de nouvelle branche
    - Modèle courant : {{vars.model}} (sonnet, ou opus si label `complexe`) — détermine la branche d'escalade (Sonnet → needs_opus_escalation ; Opus → refacto)
@@ -107,7 +119,7 @@ prompt code_dev_user:
    2. Si Bug, applique bug-fix-workflow.md (fix selon la root cause ; pas de test écrit par toi).
    3. Ticket → In progress.
    4. fetch + checkout de {{vars.working_branch}} (pas de checkout -b).
-   4.5 sanity docker (.env.local + COMPOSE_PROJECT_NAME ; sinon setup-worktree.sh {{vars.worktree_index}} avec les extras parsés de `## Requires services`).
+   4.5 sanity docker (.env.local + COMPOSE_PROJECT_NAME ; sinon setup-worktree.sh {{vars._lease_worktree_slot}} avec les extras parsés de `## Requires services`).
    5. Implémente le code source : fichiers du ticket, packages/app/CLAUDE.md respecté, AUCUN commentaire, `pnpm typecheck` < /dev/null jusqu'au vert. Discipline non-interactive bloquante.
    7. Si UI touchée : auto-vérification Figma de tes propres mains (lecture structurelle get_figma_data, spot-check ciblé, screenshots desktop 1280x800 + mobile 375x667 pour le body de PR). Corrige toute divergence avant la PR.
    8. `gh pr create --draft --base <base sans origin/>`, `Closes #{{vars.issue}}` en première ligne du body + résumé + test plan + screenshots + rubrique « À confirmer » si doute.
@@ -311,7 +323,7 @@ prompt functional_validator_user:
   Émets ta sortie structurée func_out : verdict ("PASS" | "RETRY" | "REFACTO") + passed (true ssi PASS) + comment_md (le commentaire "functional-validator:" prêt à coller, scrubbé) + failures (les écarts, vide si PASS).
   N'édite AUCUN fichier, ne commit/push pas, ne bouge PAS le board (le ticket reste In progress), ne spawne AUCUN agent (ni code-dev, ni tu-dev, ni les gates). Repo PUBLIC : scrubber secrets/PII avant de poster. Aucune question interactive — en cas de doute, note-le sous "À confirmer" dans comment_md.
   CONTRAT DE SORTIE STRICT (routage déterministe aval — respecte-le À LA LETTRE, c'est ce qui aiguille le pipeline) : Le champ `status` DOIT valoir EXACTEMENT l'une de : PASS | RETRY | REFACTO (majuscules).
-  GARDE-FOU INFRA (bot aplati) : ce workflow ne provisionne NI worktree NI dev server. AVANT toute autre action, teste si un dev server répond (essaie `curl -sf http://localhost:3001/ >/dev/null 2>&1` puis 3002..3005). Si AUCUN port 3001-3005 ne répond, renvoie IMMÉDIATEMENT ta sortie structurée avec status=PASS et reason='dev server non provisionné (bot aplati) — scénarios PO non rejoués, étape représentée'. Dans ce cas tu NE démarres JAMAIS de dev server / docker / pnpm dev, tu NE lances PAS Playwright, tu NE boucles PAS.
+  GARDE-FOU INFRA (bot aplati) : ce workflow ne provisionne NI dev server. AVANT toute autre action, teste si le dev server du slot loué répond — port = 3001 + {{vars._lease_worktree_slot}} (essaie `curl -sf http://localhost:$((3001+{{vars._lease_worktree_slot}}))/ >/dev/null 2>&1`, puis en repli 3001..3005). Si AUCUN ne répond, renvoie IMMÉDIATEMENT ta sortie structurée avec status=PASS et reason='dev server non provisionné (bot aplati) — scénarios PO non rejoués, étape représentée'. Dans ce cas tu NE démarres JAMAIS de dev server / docker / pnpm dev, tu NE lances PAS Playwright, tu NE boucles PAS.
 
 prompt bot_review_system:
   Tu es le nœud bot_review de la pipeline /implement d'egapro (Step 9d du workflow code-dev), lancé via claude_code dans le dépôt egapro ({{vars.egapro_dir}}, settings chargés), sur le compte Claude CLI de l'opérateur (backend claude_code/OAuth — aucune clé API). Tu es un stand-in annoté de code-dev : tu n'exécutes QUE la phase 9d, pas le ticket entier.
@@ -419,7 +431,7 @@ router func_route:
   mode: condition
 
 tool ci_wait:
-  command: `cd {{vars.egapro_dir}} && PR={{input.pr}} && REPO={{vars.repo}} && RES=red && RERUN=0 && for i in $(seq 1 40); do J=$(gh pr checks "$PR" --repo "$REPO" --json name,bucket,link 2>/dev/null); if [ -z "$J" ]; then sleep 20; continue; fi; PEND=$(echo "$J" | jq '[.[]|select(.bucket=="pending")]|length'); FAILJ=$(echo "$J" | jq -c '[.[]|select(.bucket=="fail" or .bucket=="cancel")]'); NFAIL=$(echo "$FAILJ" | jq 'length'); if [ "$NFAIL" -gt 0 ]; then HARD=$(echo "$FAILJ" | jq -r '[.[]|select((.name|test("Deploy|kontinuous|Deactivate"))|not)]|length'); if [ "$HARD" -gt 0 ]; then RES=red; break; fi; if [ "$RERUN" -lt 3 ]; then RID=$(echo "$FAILJ" | jq -r '.[0].link' | grep -oE 'runs/[0-9]+' | head -1 | cut -d/ -f2); if [ -n "$RID" ]; then gh run rerun "$RID" --repo "$REPO" --failed >/dev/null 2>&1; fi; RERUN=$((RERUN+1)); sleep 30; continue; else RES=green; break; fi; fi; if [ "$PEND" -gt 0 ]; then sleep 25; continue; fi; RES=green; break; done && printf '{"result":"%s"}' "$RES"`
+  command: `cd {{vars.egapro_dir}} && bash scripts/orchestration/ci_wait.sh {{input.pr}} {{vars.repo}}`
   output: status_out
 
 tool sonar_wait:
@@ -436,7 +448,7 @@ router checks_route:
   mode: condition
 
 tool finalize_pr:
-  command: `cd {{vars.egapro_dir}} && PR={{input.pr}} && N={{vars.issue}} && gh pr ready "$PR" --repo {{vars.repo}} && echo "[RE-POLL 9b] gh pr checks $PR --watch (post pr ready)" && jq -nc --arg t "$N" --arg pr "$PR" '{status:"validated",ticket:$t,pr:$pr,reason:"",retry_in:""}'`
+  command: `cd {{vars.egapro_dir}} && PR={{input.pr}} && N={{vars.issue}} && gh pr ready "$PR" --repo {{vars.repo}} && echo "[RE-POLL 9b] gh pr checks $PR --watch (post pr ready)" && jq -nc --arg t "$N" --arg pr "$PR" '{validated:true,status:"validated",ticket:$t,pr:$pr,reason:"",retry_in:""}'`
   output: verdict5_out
 
 tool refacto_done:

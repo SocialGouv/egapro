@@ -12,7 +12,7 @@
 ##    (nœud `run_ticket_task`), EXACTEMENT comme chaque branche du fan-out epic. La chaîne qualité
 ##    (code-dev → tu-dev → 4 gates → functional → ci/sonar/bot → finalize, AVEC ses boucles de retry
 ##    bornées) vit DANS le child et tourne comme un RUN iterion à part — agents = VRAIS NŒUDS VISIBLES,
-##    run imbriqué dans le studio (même store). RC=0 du child ⇒ validated → e2e_dev. En phase implement
+##    run imbriqué dans le studio (même store). Sortie terminale validated du child ⇒ e2e_dev. En phase implement
 ##    Bug ≡ Task (la spécificité bug — repro/diagnostic — est en phase /analyse, pas ici).
 ##  • MODE epic (N tickets) → FAN-OUT DATA-DRIVEN NATIF : epic_plan émet le DAG des sous-tickets
 ##    (id + deps `## Depends on` + model), `epic_dispatch` (router mode:fan_out_each, key:id,
@@ -23,7 +23,7 @@
 ##    `egapro_implement_ticket.bot` (nœud `run_ticket`) : la chaîne qualité aplatie (code_dev →
 ##    tu_dev → 4 gates → functional → ci/sonar/bot → finalize) tourne comme un RUN iterion À PART,
 ##    où les agents sont de VRAIS NŒUDS VISIBLES avec leurs boucles de retry (licites hors fan-out) ;
-##    même store → le studio montre l'epic + un graphe par ticket. RC=0 ⇒ validated → merge_into_epic →
+##    même store → le studio montre l'epic + un graphe par ticket. Sortie validated ⇒ merge_into_epic →
 ##    convergence epic_collect (await:best_effort : un ticket KO ne tue que ses dépendants).
 ##    Gate E2E de fin d'epic + doc + PR finale + acceptation = RÉUTILISÉES depuis le mode task.
 ##
@@ -73,13 +73,14 @@ schema status_out:
 ## Le moteur lit `key:id` + `depends_on:deps` sur ce tableau (champ `json` car le DSL n'a pas de type tableau-d'objets).
 schema tickets_out:
   tickets: json
-## Sortie de ticket_setup : porte le contexte du ticket vers run_ticket via with-mappings.
+  has_tickets: bool
+## Sortie de ticket_setup : porte le contexte du ticket vers le subbot run_ticket (via son with{}).
+## Plus de worktree_index : l'index est loué (worktree_slot → _lease_worktree_slot dans l'enfant).
 schema ticket_setup_out:
   id: string
   base: string
   model: string
   working_branch: string
-  worktree_index: string
 ## Verdict de run_ticket. `validated` est un BOOLÉEN car DANS une branche fan-out le moteur
 ## ne route que sur des champs booléens simples (les `when "expr =="` sont skippés en branche).
 schema ticket_verdict:
@@ -92,14 +93,13 @@ schema ticket_verdict:
 schema epic_collect_out:
   all_merged: bool
   remaining: string
-## Contexte du ticket (mode task/bug) : task_setup → code_dev via with-mappings (le code_dev_user les lit en {{input.x}}).
+## Contexte du ticket (mode task/bug) : task_setup → subbot run_ticket_task (via son with{}).
+## Plus de worktree_path/worktree_index : l'enfant tourne dans son worktree auto + slot loué.
 schema task_ctx:
   issue_type: string
   base_branch: string
   working_branch: string
   model: string
-  worktree_path: string
-  worktree_index: string
   attempt: string
   handback_reason: string
 
@@ -256,8 +256,14 @@ tool epic_guard:
 ## epic_dag.sh = pendant data-driven de dispatch_plan.sh : deps = parents `## Depends on` ENCORE restants
 ## (un parent déjà squash-mergé sort du To Do donc disparaît = dépendance satisfaite). Re-émis à chaque round.
 tool epic_plan:
-  command: `cd {{vars.egapro_dir}} && bash scripts/orchestration/epic_dag.sh {{vars.issue}}`
+  command: `cd {{vars.egapro_dir}} && bash scripts/orchestration/epic_dag.sh {{vars.issue}} | jq -c '{tickets: .tickets, has_tickets: ((.tickets|length) > 0)}'`
   output: tickets_out
+
+## 🔀 epic_plan_route (déterministe) : has_tickets → epic_dispatch (fan-out normal) ; sinon (0 ticket
+## restant = tous les sous-tickets déjà squash-mergés, cas d'une REPRISE) → e2e_dev directement (fin
+## d'epic), au lieu du fan_out_each vide qui route vers `fail`.
+router epic_plan_route:
+  mode: condition
 
 ## 🪢 EPIC DISPATCH — fan_out_each : 1 branche PAR ticket (ticket lié comme `ticket`). key:id + depends_on:deps
 ## = ordonnancement topologique NATIF (Kahn) : un enfant n'admet qu'après la FIN de la branche de CHAQUE parent
@@ -278,18 +284,23 @@ router epic_dispatch:
 ## si re-quotées (`printf "%s" "{{x}}"` → 'val'). On capture donc dans des vars shell puis on émet le
 ## JSON via `jq --arg` (robuste). Les {{outputs.*}} ne résolvent PAS dans un tool — d'où le with-mapping.
 tool ticket_setup:
-  command: `cd {{vars.egapro_dir}} && ID={{input.id}} && BASE={{input.base}} && MODEL={{input.model}} && BR=$(git ls-remote --heads origin "ticket/$ID-*" 2>/dev/null | awk '{print $2}' | sed 's#refs/heads/##' | head -1) && if [ -z "$BR" ]; then BR=$(bash scripts/orchestration/create_linked_branch.sh "$ID" "$BASE" 2>/dev/null | tail -1); fi && if [ -z "$BR" ]; then SLUG=$(gh issue view "$ID" --repo {{vars.repo}} --json title --jq '.title' 2>/dev/null | iconv -t ascii//translit 2>/dev/null | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//' | cut -c1-45); BR="ticket/$ID-$SLUG"; git fetch origin --quiet 2>/dev/null; git push origin "$BASE:refs/heads/$BR" >/dev/null 2>&1; fi && bash scripts/orchestration/set_ticket_status.sh "$ID" "In progress" >/dev/null 2>&1 || true && IDX=0 && for i in $(seq 0 30); do A=$((3001+i)); D=$((5500+10*i)); MN=$((9100+10*i)); ML=$((1100+10*i)); busy=0; for p in $A $D $MN $ML; do (echo > /dev/tcp/127.0.0.1/$p) >/dev/null 2>&1 && busy=1; done; if [ "$busy" = 0 ]; then IDX=$i; break; fi; done && jq -nc --arg id "$ID" --arg base "$BASE" --arg model "$MODEL" --arg wb "$BR" --arg wi "$IDX" '{id:$id,base:$base,model:$model,working_branch:$wb,worktree_index:$wi}'`
+  command: `cd {{vars.egapro_dir}} && ID={{input.id}} && BASE={{input.base}} && MODEL={{input.model}} && BR=$(git ls-remote --heads origin "ticket/$ID-*" 2>/dev/null | awk '{print $2}' | sed 's#refs/heads/##' | head -1) && if [ -z "$BR" ]; then BR=$(bash scripts/orchestration/create_linked_branch.sh "$ID" "$BASE" 2>/dev/null | tail -1); fi && if [ -z "$BR" ]; then SLUG=$(gh issue view "$ID" --repo {{vars.repo}} --json title --jq '.title' 2>/dev/null | iconv -t ascii//translit 2>/dev/null | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//' | cut -c1-45); BR="ticket/$ID-$SLUG"; git fetch origin --quiet 2>/dev/null; git push origin "$BASE:refs/heads/$BR" >/dev/null 2>&1; fi && bash scripts/orchestration/set_ticket_status.sh "$ID" "In progress" >/dev/null 2>&1 || true && jq -nc --arg id "$ID" --arg base "$BASE" --arg model "$MODEL" --arg wb "$BR" '{id:$id,base:$base,model:$model,working_branch:$wb}'`
   output: ticket_setup_out
 
-## 🔧🪢 RUN TICKET (par branche) — SUB-RUN du bot enfant egapro_implement_ticket.bot. La chaîne qualité
-## APLATIE (code_dev → tu_dev → 4 gates // → gates_consolidate → functional → ci/sonar/bot_review →
-## finalize_pr) tourne comme un RUN iterion À PART ENTIÈRE : les agents y sont de VRAIS NŒUDS VISIBLES
-## dans le studio (un graphe par ticket), AVEC leurs boucles de retry bornées — licites car ce n'est PAS
-## une branche fan-out. Même store que le parent → le studio montre l'epic + chaque run-ticket ensemble.
-## RC=0 du run enfant ⇒ validated. `needs: worktree_slot` borne la concurrence (=EPIC_MAX_PARALLEL).
-tool run_ticket:
-  needs: worktree_slot
-  command: `DIR={{vars.egapro_dir}} && ID={{input.id}} && BASE={{input.base}} && WB={{input.working_branch}} && WI={{input.worktree_index}} && MODEL={{input.model}} && REPO={{vars.repo}} && N={{vars.issue}} && WT="/tmp/egapro-epic$N-t$WI" && git -C "$DIR" worktree remove -f "$WT" 2>/dev/null; git -C "$DIR" worktree add -f --detach "$WT" add-iterion-agent-pipelines >/dev/null 2>&1 && printf '%s' '{"mcpServers":{}}' > "$WT/.mcp.json" && RC=0 && (cd "$WT" && env -u CLAUDECODE iterion run egapro_implement_ticket.bot --var issue="$ID" --var repo="$REPO" --var egapro_dir="$WT" --var base_branch="$BASE" --var working_branch="$WB" --var worktree_index="$WI" --var model="$MODEL" --var issue_type=Task --sandbox none --no-interactive --max-cost-usd 60 --timeout 2h --store-dir "$DIR/.iterion-run" --log-level info) >> "/tmp/egapro-ticket-$ID.log" 2>&1 || RC=1 && PR=$(gh pr list --repo "$REPO" --head "$WB" --json number --jq '.[0].number // ""' 2>/dev/null) && git -C "$DIR" worktree remove -f "$WT" 2>/dev/null; if [ "$RC" = 0 ]; then printf '{"validated":true,"status":"validated","ticket":"%s","pr":"%s","reason":""}' "$ID" "$PR"; else printf '{"validated":false,"status":"failed","ticket":"%s","pr":"%s","reason":"child rc=1"}' "$ID" "$PR"; fi`
+## 🪢🤖 RUN TICKET (par branche) — SUB-RUN NATIF du bot enfant egapro_implement_ticket.bot via le
+## primitif `subbot` (remplace l'ancien lanceur shell `iterion run` + git worktree + .mcp.json).
+## La chaîne qualité APLATIE (code_dev → tu_dev → 4 gates // → gates_consolidate → functional →
+## ci/sonar/bot_review → finalize_pr) tourne comme un RUN iterion À PART ENTIÈRE : agents = VRAIS
+## NŒUDS VISIBLES dans le studio (un graphe par ticket), AVEC leurs boucles de retry bornées —
+## licites car c'est un run top-level, pas une branche fan-out. Même store que le parent.
+## `needs: worktree_slot` (1) borne la concurrence à EPIC_MAX_PARALLEL=5 ET (2) loue un index
+## distinct injecté dans l'enfant comme `_lease_worktree_slot` (→ port dev). L'enfant hérite de
+## `worktree: auto` → chaque sub-run a SON worktree isolé `<store>/worktrees/<run-id>` (plus de
+## /tmp à la main). `with {…}` mappe le contexte ticket vers les vars de l'enfant ; sa sortie
+## terminale (verdict5_out, dont `validated:true`) → outputs.run_ticket.* pour le routage aval.
+subbot run_ticket:
+  source: "egapro_implement_ticket.bot"
+  with { issue: "{{outputs.ticket_setup.id}}", base_branch: "{{outputs.ticket_setup.base}}", working_branch: "{{outputs.ticket_setup.working_branch}}", model: "{{outputs.ticket_setup.model}}", issue_type: "Task" }
   output: ticket_verdict
 
 ## 🔧 MERGE INTO EPIC (par branche) — squash-merge la PR VALIDÉE dans epic/<N> (merge_validated_ticket.sh).
@@ -322,14 +333,18 @@ tool epic_incomplete:
 ## branche linkée (create_linked_branch.sh) + statut In progress (set_ticket_status.sh) — ÉCRITS
 ## RÉELS sur GitHub/board. Le worktree+setup-worktree.sh (port libre) est annoté (placeholder).
 tool task_setup:
-  command: `cd {{vars.egapro_dir}} && N={{vars.issue}} && REPO={{vars.repo}} && WP={{vars.egapro_dir}} && BASE=$(gh issue view "$N" --repo "$REPO" --json parent --jq 'if .parent then "origin/epic/" + (.parent.number|tostring) else "origin/alpha" end' 2>/dev/null || echo origin/alpha) && TYPE=$(gh issue view "$N" --repo "$REPO" --json issueType --jq '.issueType.name' 2>/dev/null || echo Bug) && MODEL=sonnet && (gh issue view "$N" --repo "$REPO" --json labels --jq '.labels[].name' 2>/dev/null | grep -qx complexe && MODEL=opus || true) && BR=$(git ls-remote --heads origin "ticket/$N-*" 2>/dev/null | awk '{print $2}' | sed 's#refs/heads/##' | head -1) && if [ -z "$BR" ]; then BR=$(bash scripts/orchestration/create_linked_branch.sh "$N" "$BASE" 2>/dev/null | tail -1); fi && if [ -z "$BR" ]; then SLUG=$(gh issue view "$N" --repo "$REPO" --json title --jq '.title' 2>/dev/null | iconv -t ascii//translit 2>/dev/null | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//' | cut -c1-45); BR="ticket/$N-$SLUG"; git fetch origin --quiet 2>/dev/null; git push origin "$BASE:refs/heads/$BR" >/dev/null 2>&1; fi && bash scripts/orchestration/set_ticket_status.sh "$N" "In progress" >/dev/null 2>&1 || true && IDX=0 && for i in $(seq 0 30); do A=$((3001+i)); D=$((5500+10*i)); MN=$((9100+10*i)); ML=$((1100+10*i)); busy=0; for p in $A $D $MN $ML; do (echo > /dev/tcp/127.0.0.1/$p) >/dev/null 2>&1 && busy=1; done; if [ "$busy" = 0 ]; then IDX=$i; break; fi; done && jq -nc --arg t "$TYPE" --arg base "$BASE" --arg wb "$BR" --arg model "$MODEL" --arg wp "$WP" --arg wi "$IDX" '{issue_type:$t,base_branch:$base,working_branch:$wb,model:$model,worktree_path:$wp,worktree_index:$wi,attempt:"1",handback_reason:""}'`
+  command: `cd {{vars.egapro_dir}} && N={{vars.issue}} && REPO={{vars.repo}} && BASE=$(gh issue view "$N" --repo "$REPO" --json parent --jq 'if .parent then "origin/epic/" + (.parent.number|tostring) else "origin/alpha" end' 2>/dev/null || echo origin/alpha) && TYPE=$(gh issue view "$N" --repo "$REPO" --json issueType --jq '.issueType.name' 2>/dev/null || echo Bug) && MODEL=sonnet && (gh issue view "$N" --repo "$REPO" --json labels --jq '.labels[].name' 2>/dev/null | grep -qx complexe && MODEL=opus || true) && BR=$(git ls-remote --heads origin "ticket/$N-*" 2>/dev/null | awk '{print $2}' | sed 's#refs/heads/##' | head -1) && if [ -z "$BR" ]; then BR=$(bash scripts/orchestration/create_linked_branch.sh "$N" "$BASE" 2>/dev/null | tail -1); fi && if [ -z "$BR" ]; then SLUG=$(gh issue view "$N" --repo "$REPO" --json title --jq '.title' 2>/dev/null | iconv -t ascii//translit 2>/dev/null | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//' | cut -c1-45); BR="ticket/$N-$SLUG"; git fetch origin --quiet 2>/dev/null; git push origin "$BASE:refs/heads/$BR" >/dev/null 2>&1; fi && bash scripts/orchestration/set_ticket_status.sh "$N" "In progress" >/dev/null 2>&1 || true && jq -nc --arg t "$TYPE" --arg base "$BASE" --arg wb "$BR" --arg model "$MODEL" '{issue_type:$t,base_branch:$base,working_branch:$wb,model:$model,attempt:"1",handback_reason:""}'`
   output: task_ctx
 
-## 🔧🪢 RUN TICKET TASK — comme run_ticket (epic) mais pour un ticket Task OU Bug standalone (mono-ticket) : SUB-RUN du bot enfant
-## egapro_implement_ticket.bot (les agents code_dev/tu_dev/4 gates/functional/bot_review/finalize sont de
-## VRAIS NŒUDS VISIBLES dans le studio, avec leurs boucles de retry). RC=0 ⇒ validated → e2e_dev.
-tool run_ticket_task:
-  command: `DIR={{vars.egapro_dir}} && ID={{vars.issue}} && BASE={{input.base_branch}} && WB={{input.working_branch}} && WI={{input.worktree_index}} && MODEL={{input.model}} && TYPE={{input.issue_type}} && REPO={{vars.repo}} && WT="/tmp/egapro-epic$ID-t$WI" && git -C "$DIR" worktree remove -f "$WT" 2>/dev/null; git -C "$DIR" worktree add -f --detach "$WT" add-iterion-agent-pipelines >/dev/null 2>&1 && printf '%s' '{"mcpServers":{}}' > "$WT/.mcp.json" && RC=0 && (cd "$WT" && env -u CLAUDECODE iterion run egapro_implement_ticket.bot --var issue="$ID" --var repo="$REPO" --var egapro_dir="$WT" --var base_branch="$BASE" --var working_branch="$WB" --var worktree_index="$WI" --var model="$MODEL" --var issue_type="$TYPE" --sandbox none --no-interactive --max-cost-usd 60 --timeout 2h --store-dir "$DIR/.iterion-run" --log-level info) >> "/tmp/egapro-ticket-$ID.log" 2>&1 || RC=1 && PR=$(gh pr list --repo "$REPO" --head "$WB" --json number --jq '.[0].number // ""' 2>/dev/null) && git -C "$DIR" worktree remove -f "$WT" 2>/dev/null; if [ "$RC" = 0 ]; then printf '{"status":"validated","ticket":"%s","pr":"%s","reason":"","retry_in":""}' "$ID" "$PR"; else printf '{"status":"failed","ticket":"%s","pr":"%s","reason":"child rc","retry_in":""}' "$ID" "$PR"; fi`
+## 🪢🤖 RUN TICKET TASK — comme run_ticket (epic) mais pour un ticket Task OU Bug standalone
+## (mono-ticket) : SUB-RUN NATIF du même bot enfant egapro_implement_ticket.bot via `subbot`
+## (les agents code_dev/tu_dev/4 gates/functional/bot_review/finalize sont de VRAIS NŒUDS
+## VISIBLES dans le studio, avec leurs boucles de retry). L'enfant tourne dans son worktree
+## auto isolé ; `needs: worktree_slot` lui fournit le slot (→ port dev). Sa sortie terminale
+## (status=validated) → outputs.run_ticket_task.* → e2e_dev. Un échec enfant fait échouer le run.
+subbot run_ticket_task:
+  source: "egapro_implement_ticket.bot"
+  with { issue: "{{vars.issue}}", base_branch: "{{outputs.task_setup.base_branch}}", working_branch: "{{outputs.task_setup.working_branch}}", model: "{{outputs.task_setup.model}}", issue_type: "{{outputs.task_setup.issue_type}}" }
   output: verdict5_out
 
 ## ═══════════════════════════════════════════════════════════════════
@@ -438,13 +453,11 @@ workflow egapro_implement_agents:
     max_tokens: 8000000
     max_iterations: 60
 
-  ## Sémaphore comptant qui borne le fan-out epic à EPIC_MAX_PARALLEL=5 branches lourdes simultanées.
-  ## Posé sur le seul nœud coûteux (run_ticket, `needs: worktree_slot`), libéré à sa sortie (succès
-  ## OU échec → zéro fuite). Comme ≤5 code-dev tournent à la fois, run_ticket choisit lui-même un index
-  ## de worktree libre dans [0,5[ (sonde des ports 3001-3005, cf. dispatch_plan.sh) → toujours un slot dispo.
-  ## Redondant-sûr avec budget.max_parallel_branches=5.
-  resources:
-    worktree_slot: 5
+  ## Concurrence du fan-out epic bornée à 5 sub-runs lourds simultanés par budget.max_parallel_branches.
+  ## Isolation des répertoires : `worktree: auto` hérité par l'enfant (un worktree par sub-run). NB : le
+  ## lease NOMMÉ `worktree_slot` (`needs:` sur run_ticket/run_ticket_task) a été RETIRÉ — iterion ne
+  ## supporte pas `needs:` sur un nœud `subbot` (E012), et le port-lease `_lease_worktree_slot` était
+  ## vestigial dans le bot aplati (garde-fou functional-validator : aucun dev server provisionné).
 
   fetch_issue -> check_analyse with { issueType: "{{outputs.fetch_issue.issueType}}" }
 
@@ -463,14 +476,20 @@ workflow egapro_implement_agents:
   ## --- MODE epic : fan-out data-driven sur le DAG des sous-tickets ---
   epic_guard -> epic_plan
 
-  epic_plan -> epic_dispatch
+  epic_plan -> epic_plan_route
+
+  epic_plan_route -> epic_dispatch when "outputs.epic_plan.has_tickets == true"
+
+  epic_plan_route -> e2e_dev
 
   ## UNE seule arête sortante du fan_out_each (template, inconditionnelle). Le ticket est lié comme
   ## `ticket` ; ses champs par-item DOIVENT transiter par with-mapping (le scope {{outputs.*}} d'une
   ## branche ne voit que les globals pré-fan-out + la sortie du nœud précédent de LA branche).
   epic_dispatch -> ticket_setup with { id: "{{outputs.epic_dispatch.ticket.id}}", base: "{{outputs.epic_dispatch.ticket.base}}", model: "{{outputs.epic_dispatch.ticket.model}}" }
 
-  ticket_setup -> run_ticket with { id: "{{outputs.ticket_setup.id}}", base: "{{outputs.ticket_setup.base}}", model: "{{outputs.ticket_setup.model}}", working_branch: "{{outputs.ticket_setup.working_branch}}", worktree_index: "{{outputs.ticket_setup.worktree_index}}" }
+  ## Le mapping vers les vars de l'enfant est porté par le `with{}` du nœud subbot run_ticket
+  ## (il lit outputs.ticket_setup.* dans le scope de la branche), donc l'arête reste nue.
+  ticket_setup -> run_ticket
 
   ## En branche, on ne route que sur un BOOLÉEN simple (`validated`), jamais sur une expression `==`.
   run_ticket -> merge_into_epic when validated with { id: "{{outputs.ticket_setup.id}}", pr: "{{outputs.run_ticket.pr}}" }
@@ -490,7 +509,8 @@ workflow egapro_implement_agents:
   epic_incomplete -> fail
 
   ## --- MODE mono-ticket (Task ET Bug) : sub-run du bot enfant egapro_implement_ticket.bot (DRY avec Feature) ---
-  task_setup -> run_ticket_task with { base_branch: "{{outputs.task_setup.base_branch}}", working_branch: "{{outputs.task_setup.working_branch}}", model: "{{outputs.task_setup.model}}", worktree_index: "{{outputs.task_setup.worktree_index}}", issue_type: "{{outputs.task_setup.issue_type}}" }
+  ## Mapping vers les vars de l'enfant porté par le `with{}` du subbot run_ticket_task → arête nue.
+  task_setup -> run_ticket_task
 
   run_ticket_task -> e2e_dev with { pr: "{{outputs.run_ticket_task.pr}}", scope: "ticket", trigger_mode: "ticket", base_ref: "origin/alpha", worktree_path: "{{vars.egapro_dir}}", branch: "HEAD" }
 
