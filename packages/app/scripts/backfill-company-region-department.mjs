@@ -17,16 +17,17 @@
  */
 import postgres from "postgres";
 
-import { getLocationFromPostalCode } from "../src/modules/domain/shared/regions.ts";
+import { getLocationFromPostalCode } from "../src/modules/domain/index.ts";
 
 const WEEZ_CONCURRENCY = 5;
 const DELAY_BETWEEN_BATCHES_MS = 150;
 
 const dryRun = process.argv.includes("--dry-run");
 
-const databaseUrl =
-	process.env.DATABASE_URL ??
-	"postgresql://postgres:postgres@localhost:5432/egapro";
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+	throw new Error("DATABASE_URL must be set");
+}
 
 const weezApiUrl = process.env.EGAPRO_WEEZ_API_URL?.replace(/\/$/, "");
 if (!weezApiUrl) {
