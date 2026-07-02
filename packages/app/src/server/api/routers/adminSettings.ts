@@ -56,6 +56,7 @@ export const adminSettingsRouter = createTRPCRouter({
 					exists: true as const,
 					gipPublicationDate: row.gipPublicationDate,
 					campaignStartDate: row.campaignStartDate,
+					publicDataReleaseDate: row.publicDataReleaseDate,
 					decl1ModificationDeadline: row.decl1ModificationDeadline,
 					decl1JustificationDeadline: row.decl1JustificationDeadline,
 					decl1JointEvaluationDeadline: row.decl1JointEvaluationDeadline,
@@ -71,6 +72,7 @@ export const adminSettingsRouter = createTRPCRouter({
 				exists: false as const,
 				gipPublicationDate: toNullableIsoDate(defaults.gipPublicationDate),
 				campaignStartDate: toNullableIsoDate(defaults.campaignStartDate),
+				publicDataReleaseDate: null,
 				decl1ModificationDeadline: toIsoDate(
 					defaults.decl1ModificationDeadline,
 				),
@@ -135,6 +137,7 @@ export const adminSettingsRouter = createTRPCRouter({
 			const values = {
 				year: input.year,
 				campaignStartDate: input.campaignStartDate,
+				publicDataReleaseDate: input.publicDataReleaseDate,
 				decl1ModificationDeadline: input.decl1ModificationDeadline,
 				decl1JustificationDeadline: input.decl1JustificationDeadline,
 				decl1JointEvaluationDeadline: input.decl1JointEvaluationDeadline,

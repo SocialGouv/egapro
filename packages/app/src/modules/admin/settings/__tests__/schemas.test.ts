@@ -16,6 +16,7 @@ describe("campaignDeadlinesFormSchema", () => {
 		const result = campaignDeadlinesFormSchema.safeParse({
 			year: 2026,
 			campaignStartDate: "2026-03-15",
+			publicDataReleaseDate: "2026-06-15",
 			...validDates,
 		});
 		expect(result.success).toBe(true);
@@ -25,11 +26,13 @@ describe("campaignDeadlinesFormSchema", () => {
 		const result = campaignDeadlinesFormSchema.safeParse({
 			year: 2026,
 			campaignStartDate: "",
+			publicDataReleaseDate: "",
 			...validDates,
 		});
 		expect(result.success).toBe(true);
 		if (result.success) {
 			expect(result.data.campaignStartDate).toBeNull();
+			expect(result.data.publicDataReleaseDate).toBeNull();
 		}
 	});
 
@@ -38,6 +41,7 @@ describe("campaignDeadlinesFormSchema", () => {
 			year: 2026,
 			gipPublicationDate: "2026-03-01",
 			campaignStartDate: null,
+			publicDataReleaseDate: null,
 			...validDates,
 		});
 		expect(result.success).toBe(true);
@@ -52,8 +56,19 @@ describe("campaignDeadlinesFormSchema", () => {
 		const result = campaignDeadlinesFormSchema.safeParse({
 			year: 2026,
 			campaignStartDate: null,
+			publicDataReleaseDate: null,
 			...validDates,
 			decl1ModificationDeadline: "2026/06/01",
+		});
+		expect(result.success).toBe(false);
+	});
+
+	it("rejects an invalid publicDataReleaseDate format", () => {
+		const result = campaignDeadlinesFormSchema.safeParse({
+			year: 2026,
+			campaignStartDate: null,
+			publicDataReleaseDate: "2026/06/15",
+			...validDates,
 		});
 		expect(result.success).toBe(false);
 	});
@@ -62,6 +77,7 @@ describe("campaignDeadlinesFormSchema", () => {
 		const result = campaignDeadlinesFormSchema.safeParse({
 			year: 1999,
 			campaignStartDate: null,
+			publicDataReleaseDate: null,
 			...validDates,
 		});
 		expect(result.success).toBe(false);
@@ -71,6 +87,7 @@ describe("campaignDeadlinesFormSchema", () => {
 		const result = campaignDeadlinesFormSchema.safeParse({
 			year: 2026,
 			campaignStartDate: null,
+			publicDataReleaseDate: null,
 			...validDates,
 			decl2ModificationDeadline: "2026-05-01",
 		});
