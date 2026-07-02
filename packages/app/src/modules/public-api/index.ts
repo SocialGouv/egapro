@@ -2,6 +2,7 @@ export {
 	getPublicDeclarationBySirenYear,
 	getPublicDeclarationsBySiren,
 } from "./declarationsBySirenService";
+export { publicOpenApiSpec } from "./openapi";
 export type {
 	PublicCompanySource,
 	PublicDeclarationSource,
