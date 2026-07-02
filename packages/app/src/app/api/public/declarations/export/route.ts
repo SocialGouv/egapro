@@ -1,5 +1,6 @@
 import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import type {
 	PublicCompanySource,
@@ -187,9 +188,13 @@ const CSV_HEADERS: Array<keyof PublicDeclarationDTO> = [
 	"hourlyQuartile4ProportionMen",
 ];
 
+const FORMAT_SCHEMA = z.enum(["json", "csv"]).default("json");
+
 function toCsvField(value: unknown): string {
 	if (value === null || value === undefined) return '""';
-	return `"${String(value).replace(/"/g, '""')}"`;
+	let str = String(value).replace(/"/g, '""');
+	if (/^[=+\-@|]/.test(str)) str = `'${str}`;
+	return `"${str}"`;
 }
 
 function formatCsv(rows: PublicDeclarationDTO[]): string {
@@ -205,15 +210,26 @@ export const GET = withAuditedRoute(
 		action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT,
 		resolveContext: (request) => {
 			const url = new URL(request.url);
+			const raw = url.searchParams.get("format") ?? "json";
+			const parsed = FORMAT_SCHEMA.safeParse(raw);
 			return {
-				metadata: { format: url.searchParams.get("format") ?? "json" },
+				metadata: { format: parsed.success ? parsed.data : raw },
 			};
 		},
 	},
 	async (request) => {
 		try {
 			const { searchParams } = new URL(request.url);
-			const format = searchParams.get("format") ?? "json";
+			const formatResult = FORMAT_SCHEMA.safeParse(
+				searchParams.get("format") ?? "json",
+			);
+			if (!formatResult.success) {
+				return NextResponse.json(
+					{ error: "Le paramètre format doit être 'json' ou 'csv'" },
+					{ status: 400 },
+				);
+			}
+			const format = formatResult.data;
 
 			const rows = await fetchPublishableDeclarations();
 			const data = rows.map(toPublicDTO);
