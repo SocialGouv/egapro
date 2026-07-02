@@ -86,7 +86,7 @@ nginx:
 
 pg:
   cnpg-cluster:
-    storage:
+    persistence:
       size: 20Gi
 
 redis:
