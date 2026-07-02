@@ -1,5 +1,6 @@
+import { formatFrenchDate, formatSiren } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
-import { getDeclarationUrl } from "../shared/urls.js";
+import { getDeclarationUrl, getMySpaceUrl } from "../shared/urls.js";
 import {
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -7,38 +8,81 @@ import {
 	EmailShell,
 	EmailSignature,
 } from "../template/index.js";
-import type { MailBuilder } from "../types.js";
+import type { DeclarationConfirmationVariant, MailBuilder } from "../types.js";
+
+type VariantContent = {
+	subject: string;
+	previewText: string;
+	variantParagraph: string;
+	ctaLabel: string;
+	ctaHref: string;
+};
+
+function getVariantContent(
+	variant: DeclarationConfirmationVariant,
+	siren: string,
+	year: number,
+	complianceDeadline: string | undefined,
+): VariantContent {
+	switch (variant) {
+		case "completed":
+			return {
+				subject:
+					"Egapro - Transmission de la seconde déclaration et fin de démarche",
+				previewText:
+					"Votre seconde déclaration des indicateurs de rémunération a bien été transmise.",
+				variantParagraph:
+					"Votre démarche est désormais terminée. Vous pouvez à tout moment consulter et télécharger vos déclarations depuis votre espace.",
+				ctaLabel: "Mon espace",
+				ctaHref: getMySpaceUrl(),
+			};
+		case "cse_to_deposit":
+			return {
+				subject: "Egapro - Transmission de la seconde déclaration",
+				previewText:
+					"Votre seconde déclaration des indicateurs de rémunération a bien été transmise.",
+				variantParagraph:
+					"Vous devez à présent déposer le ou les avis du CSE portant sur l'exactitude des données et des méthodes de calcul utilisées pour la première et la seconde déclaration.",
+				ctaLabel: "Déposer l'avis",
+				ctaHref: getDeclarationUrl(siren, year),
+			};
+		case "path_to_select": {
+			const formattedDeadline = formatFrenchDate(complianceDeadline);
+			return {
+				subject: "Egapro - Transmission de la seconde déclaration",
+				previewText:
+					"Votre seconde déclaration des indicateurs de rémunération a bien été transmise.",
+				variantParagraph: `L'indicateur d'écart de rémunération par catégorie de salariés fait à nouveau apparaître un ou plusieurs écarts de rémunération supérieurs ou égaux à 5 %. En conséquence, vous devez sélectionner un parcours de mise en conformité au plus tard le ${formattedDeadline}.`,
+				ctaLabel: "Sélectionner le parcours",
+				ctaHref: getDeclarationUrl(siren, year),
+			};
+		}
+	}
+}
 
 export const buildSecondDeclarationConfirmationMail: MailBuilder<
 	"second_declaration_confirmation"
-> = async ({ siren, year }) => {
-	const subject = "Egapro - Accusé de réception de votre seconde déclaration";
-	const previewText =
-		"Votre seconde déclaration au titre des actions correctives a bien été enregistrée.";
+> = async (payload) => {
+	const { siren, year, variant, raisonSociale, complianceDeadline } = payload;
+	const content = getVariantContent(variant, siren, year, complianceDeadline);
+	const formattedSiren = formatSiren(siren);
 	const { html, text } = await renderEmail(
-		<EmailShell previewText={previewText}>
+		<EmailShell previewText={content.previewText}>
 			<EmailGreeting>Bonjour,</EmailGreeting>
 			<EmailParagraph>
-				Votre seconde déclaration au titre des actions correctives a bien été
-				enregistrée.
+				Vous avez transmis aux services du ministre chargé du Travail{" "}
+				<strong>
+					l'indicateur d'écart de rémunération par catégorie de salariée entre
+					les femmes et les hommes
+				</strong>
+				, issu de votre seconde déclaration pour {year}, concernant l'entreprise{" "}
+				<strong>{raisonSociale}</strong> (SIREN : {formattedSiren}).
+				L'administration du travail accuse réception de cette transmission. Cet
+				accusé de réception ne vaut pas contrôle de conformité de votre
+				déclaration.
 			</EmailParagraph>
-			<EmailParagraph>
-				Conformément à la réglementation, dès lors que l'écart de rémunération
-				constaté est supérieur ou égal à 5 %, votre entreprise doit déposer une
-				seconde déclaration retraçant les actions correctives mises en œuvre.
-			</EmailParagraph>
-			<EmailParagraph>
-				Le récapitulatif détaillé de votre seconde déclaration est joint à cet
-				e-mail au format PDF.
-			</EmailParagraph>
-			<EmailParagraph>
-				Vous pouvez à tout moment consulter votre déclaration depuis le portail
-				Egapro.
-			</EmailParagraph>
-			<EmailCtaWithLink
-				href={getDeclarationUrl(siren, year)}
-				label="Consulter ma déclaration"
-			/>
+			<EmailParagraph>{content.variantParagraph}</EmailParagraph>
+			<EmailCtaWithLink href={content.ctaHref} label={content.ctaLabel} />
 			<EmailParagraph>
 				Pour tout renseignement, vous pouvez contacter votre référent égalité
 				professionnelle femmes-hommes au sein de votre DREETS en répondant à ce
@@ -47,5 +91,5 @@ export const buildSecondDeclarationConfirmationMail: MailBuilder<
 			<EmailSignature />
 		</EmailShell>,
 	);
-	return { subject, html, text };
+	return { subject: content.subject, html, text };
 };
