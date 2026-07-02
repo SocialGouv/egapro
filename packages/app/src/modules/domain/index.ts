@@ -155,11 +155,19 @@ export { percentageOf, proportionOf } from "./shared/percentage";
 export { isYearPubliclyReleased } from "./shared/publicData";
 // Quartile helpers
 export { computeQuartileMin, migrateLegacyThresholds } from "./shared/quartile";
-export type { CountyCode, RegionCode } from "./shared/regions";
+export type {
+	CompanyLocation,
+	CountyCode,
+	RegionCode,
+} from "./shared/regions";
 // Regions & counties
 export {
 	COUNTIES,
 	COUNTY_CODES,
+	COUNTY_TO_REGION,
+	getCountyCodeFromPostalCode,
+	getLocationFromPostalCode,
+	getRegionCodeFromCountyCode,
 	REGION_CODES,
 	REGIONS,
 	REGIONS_TO_COUNTIES,
