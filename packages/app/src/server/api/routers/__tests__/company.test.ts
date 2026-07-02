@@ -251,6 +251,9 @@ describe("findUserCompany NAF label enrichment", () => {
 			address: null,
 			nafCode: "62.01Z",
 			nafLabel: "Programmation informatique",
+			region: null,
+			departmentCode: null,
+			departmentLabel: null,
 			workforce: 100,
 		});
 

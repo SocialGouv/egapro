@@ -1,6 +1,7 @@
 import "server-only";
 
 import { env } from "~/env";
+import { getLocationFromPostalCode } from "~/modules/domain";
 
 const NON_DIFFUSIBLE_NAME = "Entreprise non diffusible";
 
@@ -63,6 +64,9 @@ export type CompanyInfo = {
 	address: string | null;
 	nafCode: string | null;
 	nafLabel: string | null;
+	region: string | null;
+	departmentCode: string | null;
+	departmentLabel: string | null;
 	workforce: number | null;
 };
 
@@ -116,6 +120,12 @@ export async function fetchCompanyBySiren(
 
 	if (!entity) return null;
 
+	// Region/department are derived from the establishment postal code, which
+	// INSEE exposes as public data even for non-diffusible legal units — so it
+	// is resolved before the address is masked below, keeping the columns filled
+	// when `address` becomes null.
+	const location = getLocationFromPostalCode(entity.codepostal);
+
 	if (isNonDiffusible(entity)) {
 		return {
 			name:
@@ -125,6 +135,9 @@ export async function fetchCompanyBySiren(
 			address: null,
 			nafCode: null,
 			nafLabel: null,
+			region: location.region,
+			departmentCode: location.departmentCode,
+			departmentLabel: location.departmentLabel,
 			workforce:
 				entity.effectiftotal ??
 				trancheToWorkforce(entity.trancheeffectifsunitelegale),
@@ -142,6 +155,9 @@ export async function fetchCompanyBySiren(
 		nafLabel:
 			entity.nomenclatureactiviteprincipalelibelleunitelegale?.slice(0, 255) ??
 			null,
+		region: location.region,
+		departmentCode: location.departmentCode,
+		departmentLabel: location.departmentLabel,
 		workforce:
 			entity.effectiftotal ??
 			trancheToWorkforce(entity.trancheeffectifsunitelegale),
