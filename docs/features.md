@@ -98,6 +98,7 @@ Conventions de notation :
 - En **admin impersonation**, l'écriture est bloquée (procédures `companyWriteProcedure` rejettent ; voir `~/modules/auth/useReadOnlyGuard`).
 - **Verrou collaboratif** : à l'entrée dans le wizard, le hook `useDeclarationLock` acquiert un verrou exclusif. Si une autre session détient déjà un verrou actif, le wizard s'ouvre en lecture seule avec un bandeau d'avertissement (voir §12.7).
 - Chaque transition métier de la démarche (changement d'étape, soumission, choix de parcours, etc.) écrit une ligne dans `declarationStatusHistory`, exploitée par la page d'historique (voir §3).
+- **Conservation limitée** : les déclarations dont l'année dépasse la fenêtre de rétention (défaut 6 ans) sont purgées automatiquement, avec toutes leurs données rattachées (voir §12.8).
 
 **Données persistées** : `declarations`, `jobCategories`, `employeeCategories`, `declarationStatusHistory`, `declarationLocks` (verrou d'édition temporaire).
 
@@ -323,6 +324,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 
 - Pages **statiques** (pas de BDD), contenu maintenu manuellement dans le code.
 - Le score Lighthouse RGAA cible **100%** (configuré comme seuil bloquant dans `.lighthouserc.json`).
+- La politique de confidentialité `/donnees-personnelles` correspond au dispositif de **conservation limitée** appliqué techniquement par la purge RGPD des déclarations (voir §12.8).
 
 ---
 
@@ -426,7 +428,7 @@ Toutes les **mutations** et les **lectures de données sensibles** (PII, donnée
 | `public_search` | 180 jours | recherche / vue d'un référent public |
 | `auth` | 365 jours | login OK / login KO / logout |
 | `export` | 365 jours | téléchargements API publique |
-| `system` | 365 jours | import GIP, cron de cleanup |
+| `system` | 365 jours | import GIP, crons de purge (audit + déclarations) |
 
 Les rétentions sont définies dans `~/modules/audit/shared/constants.ts` (`AUDIT_RETENTION_DAYS_SHORT = 180`, `AUDIT_RETENTION_DAYS_LONG = 365`, `SHORT_RETENTION_CATEGORIES = ["read_sensitive", "public_search"]`).
 
@@ -434,11 +436,11 @@ Les rétentions sont définies dans `~/modules/audit/shared/constants.ts` (`AUDI
 
 1. Constante dans `~/modules/audit/shared/actionKeys.ts` (`AUDIT_ACTIONS.*`)
 2. Catégorie dans `AUDIT_ACTION_CATEGORIES`
-3. Mapping dans `PROCEDURE_TO_ACTION` (pour tRPC) ou `withAuditedRoute(...)` (pour Route Handlers)
+3. Mapping dans `PROCEDURE_TO_ACTION` (pour tRPC) ou `withAuditedRoute(...)` (pour Route Handlers) ou appel direct `logAction(...)` (auth / cron)
 
 Les clés sensibles (`password`, `token`, `authorization`, etc.) sont **automatiquement strippées** du `metadata` JSONB par `logAction`.
 
-Un **cron quotidien** purge les lignes au-delà de leur fenêtre de rétention (voir `packages/app/scripts/audit-cleanup.mjs`).
+**Crons de purge** : deux tâches planifiées de catégorie `system` écrivent leur propre trace d'audit — `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`, purge du log d'audit lui-même, `packages/app/scripts/audit-cleanup.mjs`) et `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, purge RGPD des déclarations, voir §12.8).
 
 ### 12.3 Impersonation admin
 
@@ -591,6 +593,23 @@ sequenceDiagram
 | `DECLARATION_LOCK_STATE_READ` | read_sensitive | Lecture de l'état du verrou (procédure `getLockState`) |
 | `ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT` | mutation | Modification du délai d'expiration |
 
+### 12.8 Purge RGPD des déclarations
+
+**À quoi ça sert** : appliquer la **conservation limitée** exigée par le RGPD — les déclarations trop anciennes (et toutes leurs données rattachées, y compris les PDF stockés sur S3) sont supprimées automatiquement, sans intervention humaine.
+
+**Déclenchement** : un **CronJob Kubernetes** (`declaration-cleanup-daily`, tous les jours à 03:00 UTC) exécute le script autonome `packages/app/scripts/declaration-cleanup.mjs`. Il n'y a **aucun écran utilisateur ni procédure tRPC** — c'est un traitement de fond. Détail technique et diagramme du flux : [`architecture.md` §9.6](architecture.md#96-traitements-planifiés-crons-de-maintenance-des-données).
+
+**Fenêtre de rétention** : pilotée par `EGAPRO_DECLARATION_RETENTION_YEARS` (défaut **6 ans**). Une déclaration est éligible à la purge si son année est **strictement inférieure** à `annéeCourante − retention` :
+
+- avec le défaut de 6 ans, une exécution en 2026 supprime toutes les déclarations d'année **< 2020** (soit 2019 et antérieures) ;
+- la borne est stricte : une déclaration de l'année de coupe exacte est **conservée**.
+
+**Ce qui est supprimé** : la déclaration et l'ensemble de son graphe de données — catégories d'emploi (`employeeCategories`, `jobCategories`), avis CSE et associations de fichiers (`cseOpinions`, `cseOpinionFiles`), fichiers (`files`), historique (`declarationStatusHistory`) et verrou (`declarationLocks`) — ainsi que les **objets PDF correspondants sur S3**. Les suppressions relationnelles se font dans une **transaction unique** ; la suppression S3 et l'écriture de la trace d'audit sont **best-effort hors transaction** (une donnée déjà effacée ne doit jamais être ressuscitée par un échec en aval).
+
+**Traçabilité** : chaque exécution écrit une ligne d'audit `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, catégorie `system`) récapitulant les compteurs (`purgedDeclarations`, `purgedFiles`, `purgedS3Objects`, `failedS3Objects`, `retentionYears`, `cutoffYear`). Le traitement est **idempotent** : relancé sur un état déjà purgé, il ne supprime rien de plus.
+
+**Données concernées** : `declarations` (+ cascade sur `jobCategories`, `employeeCategories`, `cseOpinions`, `cseOpinionFiles`, `files`, `declarationStatusHistory`, `declarationLocks`), objets S3, `audit.action_log`.
+
 ---
 
 ## 13. Annexe : tables Drizzle principales
@@ -602,20 +621,20 @@ Tableau de correspondance feature → tables, pour les développeurs qui débarq
 | `users` | Authentification, profil, admin |
 | `userCompanies` | Authentification (rattachement entreprise), garde d'accès historique |
 | `companies` | Authentification, déclaration, admin |
-| `declarations` | Déclaration index, parcours conformité |
-| `declarationStatusHistory` | Historique des modifications d'une démarche |
-| `declarationLocks` | Verrou collaboratif (§12.7) |
-| `jobCategories` | Déclaration index (étape 5, optionnel) |
-| `employeeCategories` | Déclaration index (indicateur G) |
-| `cseOpinions` | Avis CSE (avis textuels) |
-| `files` | Avis CSE (`type = cse_opinion`), évaluation conjointe (`type = joint_evaluation`) |
-| `cseOpinionFiles` | Avis CSE — associations fichier ↔ type de contenu (`declarationNumber`, `type`) |
+| `declarations` | Déclaration index, parcours conformité, purge RGPD (§12.8) |
+| `declarationStatusHistory` | Historique des modifications d'une démarche ; purgé par cascade (§12.8) |
+| `declarationLocks` | Verrou collaboratif (§12.7) ; purgé par cascade (§12.8) |
+| `jobCategories` | Déclaration index (étape 5, optionnel) ; purge RGPD (§12.8) |
+| `employeeCategories` | Déclaration index (indicateur G) ; purge RGPD (§12.8) |
+| `cseOpinions` | Avis CSE (avis textuels) ; purge RGPD (§12.8) |
+| `files` | Avis CSE (`type = cse_opinion`), évaluation conjointe (`type = joint_evaluation`) ; purge RGPD (§12.8, + objets S3) |
+| `cseOpinionFiles` | Avis CSE — associations fichier ↔ type de contenu (`declarationNumber`, `type`) ; purge RGPD (§12.8) |
 | `referents` | Annuaire public, gestion admin |
 | `campaignDeadlines` | Paramétrage admin (deadlines par année) |
 | `globalSettings` | Paramètres globaux : délai d'expiration du verrou (`declarationLockTimeoutMinutes`) |
 | `gipMdsData` | Pré-remplissage GIP |
 | `adminImpersonationEvents` | Audit impersonation admin |
-| `audit.action_log` | Audit logging (schéma Postgres dédié) |
+| `audit.action_log` | Audit logging (schéma Postgres dédié) ; purgé par `audit-cleanup` (§9.6 architecture) |
 
 ---
 
@@ -625,3 +644,4 @@ Tableau de correspondance feature → tables, pour les développeurs qui débarq
 - **Parcours utilisateurs** (personas et flux end-to-end) : [`docs/parcours-utilisateurs.md`](parcours-utilisateurs.md)
 - **Spécifications réglementaires** : [wiki Spec V2](https://github.com/SocialGouv/egapro/wiki/Spec-V2)
 - **Conventions de code** : [`CLAUDE.md`](../CLAUDE.md) racine et [`packages/app/CLAUDE.md`](../packages/app/CLAUDE.md)
+</content>
