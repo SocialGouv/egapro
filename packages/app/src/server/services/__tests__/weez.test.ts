@@ -152,6 +152,37 @@ describe("fetchCompanyBySiren", () => {
 		});
 	});
 
+	it("falls back to the effectif band for a non-diffusible company when effectiftotal is null", async () => {
+		fetchSpy.mockResolvedValueOnce({
+			ok: true,
+			json: async () => ({
+				content: [
+					{
+						siren: "222333444",
+						denominationunitelegale: null,
+						raisonsociale: null,
+						activiteprincipalenaf25unitelegale: null,
+						nomenclatureactiviteprincipalelibelleunitelegale: null,
+						effectiftotal: null,
+						trancheeffectifsunitelegale: "22",
+						numerovoie: null,
+						typevoie: null,
+						libellevoie: null,
+						codepostal: null,
+						libellecommune: null,
+						statutdiffusionunitelegale: "N",
+					},
+				],
+				totalElements: 1,
+			}),
+		});
+
+		const result = await fetchCompanyBySiren("222333444");
+
+		expect(result?.workforce).toBe(100);
+		expect(result?.statutDiffusion).toBe("N");
+	});
+
 	it("falls back to the effectif band when effectiftotal is null", async () => {
 		fetchSpy.mockResolvedValueOnce({
 			ok: true,

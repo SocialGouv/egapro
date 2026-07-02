@@ -159,6 +159,54 @@ describe("GET /api/public/declarations/export", () => {
 		expect(row.globalAnnualMeanGap).toBe(10.5);
 	});
 
+	it("treats a null statutDiffusion as diffusible and renders a null workforceEma", async () => {
+		setRows([
+			buildRow({
+				siren: "321321321",
+				statutDiffusion: null,
+				workforceEma: null,
+			}),
+		]);
+
+		const response = await callGet();
+		const body = await response.json();
+		const row = body.data[0];
+
+		// Absent statut → diffusible → identifying fields kept
+		expect(row.name).toBe("Société Démo");
+		expect(row.workforceEma).toBeNull();
+	});
+
+	it("emits an empty quoted field for a null workforceEma in CSV", async () => {
+		setRows([buildRow({ siren: "321321321", workforceEma: null })]);
+
+		const response = await callGet("?format=csv");
+		const csv = await response.text();
+		const line = csv.split("\n")[1] ?? "";
+
+		// workforceEma is the 10th column (index 9), rendered as empty quotes
+		expect(line.split(";")[9]).toBe('""');
+	});
+
+	it("exposes no score, /100 index or indicator-G key in the JSON payload (S6)", async () => {
+		setRows([buildRow()]);
+
+		const response = await callGet();
+		const body = await response.json();
+		const keys = Object.keys(body.data[0]).join(" ").toLowerCase();
+
+		expect(keys).not.toMatch(/score|index|note|categoryg|\bindicatorg/);
+	});
+
+	it("exposes no score, /100 index or indicator-G column in the CSV header (S6)", async () => {
+		setRows([buildRow()]);
+
+		const response = await callGet("?format=csv");
+		const header = (await response.text()).split("\n")[0]?.toLowerCase() ?? "";
+
+		expect(header).not.toMatch(/score|index|note|categoryg|indicatorg/);
+	});
+
 	it("returns CSV with a header row and one line per declaration when format=csv", async () => {
 		setRows([buildRow({ siren: "111222333", name: "Alpha & Co" })]);
 
