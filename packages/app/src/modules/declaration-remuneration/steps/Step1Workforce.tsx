@@ -243,7 +243,7 @@ export function Step1Workforce({
 						<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 					</div>
 
-					<div className={common.dataSection}>
+					<div className={`${common.dataSection} ${common.tableGap}`}>
 						<div className={common.flexColumnGapHalf}>
 							<div
 								className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${styles.workforceTable}`}

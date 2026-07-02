@@ -113,6 +113,22 @@ describe("Step5EmployeeCategories", () => {
 		).toBeInTheDocument();
 	});
 
+	it("renders the obligatoires mention immediately after the description text", () => {
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+			/>,
+		);
+		const descriptionParagraph = screen.getByText(
+			/mesurer l'écart de rémunération/,
+		);
+		const obligatoiresParagraph = screen.getByText(
+			"Tous les champs sont obligatoires.",
+		);
+		expect(descriptionParagraph.nextElementSibling).toBe(obligatoiresParagraph);
+	});
+
 	it("renders table headers for the category", () => {
 		render(
 			<Step5EmployeeCategories
@@ -152,6 +168,20 @@ describe("Step5EmployeeCategories", () => {
 		);
 		expect(document.getElementById("cat-0-name")).toBeInTheDocument();
 		expect(document.getElementById("cat-0-detail")).not.toBeInTheDocument();
+	});
+
+	it("labels the category name input with the full category emploi wording", () => {
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+			/>,
+		);
+		expect(
+			screen.getByLabelText("Libellé de la catégorie d'emploi", {
+				selector: "#cat-0-name",
+			}),
+		).toBeInTheDocument();
 	});
 
 	it("can add a new category", async () => {
@@ -340,9 +370,12 @@ describe("Step5EmployeeCategories", () => {
 			/>,
 		);
 
-		const nameInput = screen.getByLabelText("Libellé", {
-			selector: "#cat-0-name",
-		});
+		const nameInput = screen.getByLabelText(
+			"Libellé de la catégorie d'emploi",
+			{
+				selector: "#cat-0-name",
+			},
+		);
 		expect(nameInput).toHaveValue("Cadres");
 	});
 
@@ -355,9 +388,12 @@ describe("Step5EmployeeCategories", () => {
 			/>,
 		);
 
-		const nameInput = screen.getByLabelText("Libellé", {
-			selector: "#cat-0-name",
-		});
+		const nameInput = screen.getByLabelText(
+			"Libellé de la catégorie d'emploi",
+			{
+				selector: "#cat-0-name",
+			},
+		);
 		await user.type(nameInput, "Techniciens");
 
 		await user.selectOptions(
@@ -389,9 +425,12 @@ describe("Step5EmployeeCategories", () => {
 			/>,
 		);
 
-		const nameInput = screen.getByLabelText("Libellé", {
-			selector: "#cat-0-name",
-		});
+		const nameInput = screen.getByLabelText(
+			"Libellé de la catégorie d'emploi",
+			{
+				selector: "#cat-0-name",
+			},
+		);
 		await user.type(nameInput, "Techniciens");
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));

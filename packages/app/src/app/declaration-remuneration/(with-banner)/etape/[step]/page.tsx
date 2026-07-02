@@ -1,10 +1,10 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import {
 	getEffectiveGipPrefillData,
 	StepPageClient,
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
-import { shouldRedirectSubmittedToRecap } from "~/modules/domain";
+import { isDeadlinePassed } from "~/modules/domain";
 import {
 	mapToEmployeeCategoryRows,
 	mapToStepData,
@@ -28,18 +28,13 @@ export default async function StepPage({ params }: StepPageProps) {
 	const d = data.declaration;
 	const company = await api.company.get({ siren: d.siren });
 
-	if (d.status !== "draft" && step !== 6) {
-		const { decl1ModificationDeadline } = await getCampaignDeadlines(d.year);
-		if (
-			shouldRedirectSubmittedToRecap({
-				status: d.status,
-				step,
-				recapStep: 6,
-				modificationDeadline: decl1ModificationDeadline,
-			})
-		) {
-			redirect("/declaration-remuneration/etape/6");
-		}
+	const isSubmitted = d.status !== null && d.status !== "draft";
+	let modificationDeadline: Date | undefined;
+	let isModificationClosed = false;
+	if (isSubmitted) {
+		const deadlines = await getCampaignDeadlines(d.year);
+		modificationDeadline = deadlines.decl1ModificationDeadline;
+		isModificationClosed = isDeadlinePassed(modificationDeadline);
 	}
 
 	const gip = data.gipPrefillData;
@@ -91,6 +86,8 @@ export default async function StepPage({ params }: StepPageProps) {
 				gipPrefillData={effectiveGipPrefillData ?? undefined}
 				hasCse={company.hasCse}
 				initialSource={initialSource}
+				modificationClosed={isModificationClosed}
+				modificationDeadline={modificationDeadline}
 				step={step}
 				step1Data={step1Data}
 				step2Data={step2Data}

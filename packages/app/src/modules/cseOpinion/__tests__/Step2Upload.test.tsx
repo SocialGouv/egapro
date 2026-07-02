@@ -6,6 +6,7 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useSession } from "next-auth/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { FILENAME_ERROR_MESSAGES } from "~/modules/shared";
@@ -744,6 +745,39 @@ describe("Step2Upload", () => {
 				screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
 			).toBeEnabled();
 			expect(screen.getByRole("button", { name: "Soumettre" })).toBeEnabled();
+		});
+	});
+
+	describe("admin impersonation", () => {
+		afterEach(() => {
+			vi.mocked(useSession).mockReset();
+		});
+
+		it("disables the upload and submit controls under the static provider when impersonating", () => {
+			vi.mocked(useSession).mockReturnValue({
+				data: {
+					user: {
+						id: "admin-1",
+						impersonation: { siren: "123456789", name: "Acme" },
+					},
+					expires: "2099-01-01",
+				},
+				status: "authenticated",
+			} as unknown as ReturnType<typeof useSession>);
+
+			// The layout feeds `isReadOnly={false}` but impersonation must still
+			// disable writes through the unified context.
+			renderStep({
+				columns: SINGLE_COLUMN,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+				isReadOnly: false,
+			});
+
+			expect(
+				screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+			).toBeDisabled();
+			expect(screen.getByRole("button", { name: "Soumettre" })).toBeDisabled();
+			expect(screen.getByRole("button", { name: /Supprimer/ })).toBeDisabled();
 		});
 	});
 });

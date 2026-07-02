@@ -367,12 +367,15 @@ export function CategoryForm({
 
 			<div className={stepStyles.categoryBlock}>
 				<p className="fr-mb-0">{descriptionText}</p>
+				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 
 				{referencePeriodPicker ?? (
 					<div className={stepStyles.categoryHeader}>
 						<p className="fr-mb-0">
-							Période de référence pour le calcul des indicateurs : 01/01/
-							{referenceYear} - 31/12/{referenceYear}.
+							Période de référence pour le calcul des indicateurs :{" "}
+							<span className={stepStyles.periodDate}>
+								01/01/{referenceYear} - 31/12/{referenceYear}.
+							</span>
 						</p>
 						<TooltipButton
 							id={`${tooltipPrefix}-period`}
@@ -440,15 +443,12 @@ export function CategoryForm({
 						label="Information sur la saisie"
 					/>
 				</div>
-				<div className={stepStyles.obligatoiresRow}>
-					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
-					{!readOnlyLabel && (
-						<CategoryImportExport
-							disabled={disabled}
-							onImport={handleImportCategories}
-						/>
-					)}
-				</div>
+				{!readOnlyLabel && (
+					<CategoryImportExport
+						disabled={disabled}
+						onImport={handleImportCategories}
+					/>
+				)}
 			</div>
 
 			<div className="fr-accordions-group" data-fr-group="false">
@@ -493,13 +493,15 @@ export function CategoryForm({
 								<div className={stepStyles.categoryBlock}>
 									{readOnlyLabel ? (
 										<p className="fr-mb-0">
-											<span className="fr-text--bold">Libellé : </span>
+											<span className="fr-text--bold">
+												Libellé de la catégorie d'emploi :{" "}
+											</span>
 											{cat?.name}
 										</p>
 									) : (
 										<div className="fr-input-group fr-mb-0">
 											<label className="fr-label" htmlFor={`cat-${index}-name`}>
-												Libellé
+												Libellé de la catégorie d'emploi
 											</label>
 											<input
 												className="fr-input"

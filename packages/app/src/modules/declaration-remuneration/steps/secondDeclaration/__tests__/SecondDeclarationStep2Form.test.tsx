@@ -77,14 +77,18 @@ describe("SecondDeclarationStep2Form", () => {
 				initialFirstDeclarationCategories={mockCategories}
 			/>,
 		);
-		expect(screen.getByText("Libellé :")).toBeInTheDocument();
+		expect(
+			screen.getByText("Libellé de la catégorie d'emploi :"),
+		).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", {
 				name: "Catégorie d'emplois n°1 : Ouvriers",
 			}),
 		).toBeInTheDocument();
 		expect(screen.getByText("Ouvriers")).toBeInTheDocument();
-		expect(screen.queryByLabelText("Libellé")).not.toBeInTheDocument();
+		expect(
+			screen.queryByLabelText("Libellé de la catégorie d'emploi"),
+		).not.toBeInTheDocument();
 	});
 
 	it("displays source as read-only text", () => {

@@ -88,9 +88,12 @@ async function advance(ms: number) {
 	});
 }
 
-function renderLockHook() {
+function renderLockHook(options: { modificationClosed?: boolean } = {}) {
 	return renderHook(() =>
-		useDeclarationLock({ declarationId: DECLARATION_ID }),
+		useDeclarationLock({
+			declarationId: DECLARATION_ID,
+			modificationClosed: options.modificationClosed,
+		}),
 	);
 }
 
@@ -285,12 +288,32 @@ describe("useDeclarationLock", () => {
 		expect(result.current.isLoading).toBe(true);
 	});
 
-	it("is disabled while impersonating: never acquires the lock", () => {
+	it("is read-only while impersonating with reason 'impersonation', without acquiring the lock", () => {
 		setSession({ impersonating: true });
 		const { result } = renderLockHook();
 
 		expect(acquireMutateAsync).not.toHaveBeenCalled();
+		expect(result.current.isReadOnly).toBe(true);
+		expect(result.current.reason).toBe("impersonation");
+		expect(result.current.holder).toBeNull();
+	});
+
+	it("reports reason 'lock' when the declaration is held by another user", async () => {
+		acquireMutateAsync.mockResolvedValue({ acquired: false, holder: HOLDER });
+		const { result } = renderLockHook();
+		await flush();
+
+		expect(result.current.isReadOnly).toBe(true);
+		expect(result.current.reason).toBe("lock");
+	});
+
+	it("reports a null reason for a normal editor that holds the lock", async () => {
+		acquireMutateAsync.mockResolvedValue({ acquired: true, holder: HOLDER });
+		const { result } = renderLockHook();
+		await flush();
+
 		expect(result.current.isReadOnly).toBe(false);
+		expect(result.current.reason).toBeNull();
 	});
 
 	it("swallows heartbeat rejections without re-reading ownership", async () => {
@@ -349,5 +372,57 @@ describe("useDeclarationLock", () => {
 		await advance(LOCK_HEARTBEAT_INTERVAL_MS);
 		expect(heartbeatMutateAsync).not.toHaveBeenCalled();
 		expect(releaseMutate).not.toHaveBeenCalled();
+	});
+
+	describe("modification closed (#3716)", () => {
+		it("is read-only with reason 'modification_closed' without acquiring the collaborative lock", async () => {
+			const { result } = renderLockHook({ modificationClosed: true });
+			await flush();
+
+			expect(acquireMutateAsync).not.toHaveBeenCalled();
+			expect(result.current.isReadOnly).toBe(true);
+			expect(result.current.reason).toBe("modification_closed");
+			expect(result.current.holder).toBeNull();
+		});
+
+		it("never starts the heartbeat while modification is closed", async () => {
+			renderLockHook({ modificationClosed: true });
+			await flush();
+
+			await advance(LOCK_HEARTBEAT_INTERVAL_MS * 3);
+			expect(heartbeatMutateAsync).not.toHaveBeenCalled();
+		});
+
+		it("prefers 'impersonation' over 'modification_closed' when both apply", () => {
+			setSession({ impersonating: true });
+			const { result } = renderLockHook({ modificationClosed: true });
+
+			expect(acquireMutateAsync).not.toHaveBeenCalled();
+			expect(result.current.reason).toBe("impersonation");
+			expect(result.current.isReadOnly).toBe(true);
+		});
+
+		it("prefers 'modification_closed' over the collaborative lock", async () => {
+			// The lock would otherwise be acquired and could report reason "lock";
+			// a passed deadline must take precedence and skip acquisition entirely.
+			acquireMutateAsync.mockResolvedValue({ acquired: false, holder: HOLDER });
+			const { result } = renderLockHook({ modificationClosed: true });
+			await flush();
+
+			expect(acquireMutateAsync).not.toHaveBeenCalled();
+			expect(result.current.reason).toBe("modification_closed");
+		});
+
+		it("stays editable with a null reason when modification is not closed", async () => {
+			acquireMutateAsync.mockResolvedValue({ acquired: true, holder: HOLDER });
+			const { result } = renderLockHook({ modificationClosed: false });
+			await flush();
+
+			expect(acquireMutateAsync).toHaveBeenCalledWith({
+				declarationId: DECLARATION_ID,
+			});
+			expect(result.current.isReadOnly).toBe(false);
+			expect(result.current.reason).toBeNull();
+		});
 	});
 });

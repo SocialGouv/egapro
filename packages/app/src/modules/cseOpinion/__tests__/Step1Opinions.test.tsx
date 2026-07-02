@@ -1,8 +1,24 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useSession } from "next-auth/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { Step1Opinions } from "../Step1Opinions";
+
+const mockedUseSession = vi.mocked(useSession);
+
+function mockImpersonating() {
+	mockedUseSession.mockReturnValue({
+		data: {
+			user: {
+				id: "admin-1",
+				impersonation: { siren: "123456789", name: "Acme" },
+			},
+			expires: "2099-01-01",
+		},
+		status: "authenticated",
+	} as unknown as ReturnType<typeof useSession>);
+}
 
 const { mockSetField, mockClearDraft, mockUseDeclarationDraft } = vi.hoisted(
 	() => {
@@ -726,6 +742,50 @@ describe("Step1Opinions", () => {
 			expect(
 				screen.getByRole("button", { name: /Suivant/ }),
 			).not.toBeDisabled();
+		});
+	});
+
+	describe("admin impersonation", () => {
+		afterEach(() => {
+			mockedUseSession.mockReset();
+		});
+
+		it("disables the fieldset and next button under the static provider when impersonating", () => {
+			mockImpersonating();
+
+			// The static provider receives `isReadOnly={false}` from the layout but
+			// must still disable writes when an admin is impersonating.
+			const { container } = render(
+				<LockProvider isReadOnly={false}>
+					<Step1Opinions
+						cseDeadline={cseDeadline}
+						siren="123456789"
+						year={2026}
+					/>
+				</LockProvider>,
+			);
+
+			expect(container.querySelector("fieldset")).toBeDisabled();
+			expect(screen.getByRole("button", { name: /Suivant/ })).toBeDisabled();
+		});
+
+		it("does not save a draft while impersonating", async () => {
+			mockImpersonating();
+			const user = userEvent.setup();
+
+			render(
+				<LockProvider isReadOnly={false}>
+					<Step1Opinions
+						cseDeadline={cseDeadline}
+						siren="123456789"
+						year={2026}
+					/>
+				</LockProvider>,
+			);
+
+			await user.click(screen.getAllByLabelText("Favorable")[0] as HTMLElement);
+
+			expect(mockSetField).not.toHaveBeenCalled();
 		});
 	});
 });

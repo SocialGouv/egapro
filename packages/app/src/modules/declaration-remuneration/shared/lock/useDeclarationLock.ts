@@ -10,24 +10,32 @@ export type LockHolder = NonNullable<
 	RouterOutputs["declarationLock"]["getLockState"]["holder"]
 >;
 
+export type ReadOnlyReason = "impersonation" | "modification_closed" | "lock";
+
 export type DeclarationLockState = {
 	isReadOnly: boolean;
+	reason: ReadOnlyReason | null;
 	holder: LockHolder | null;
 	isLoading: boolean;
 };
 
 type UseDeclarationLockOptions = {
 	declarationId: string;
+	modificationClosed?: boolean;
 };
 
 const RELEASE_ENDPOINT = "/api/declaration-lock/release";
 
 export function useDeclarationLock({
 	declarationId,
+	modificationClosed = false,
 }: UseDeclarationLockOptions): DeclarationLockState {
 	const session = useSession();
 	const isImpersonating = Boolean(session.data?.user?.impersonation);
-	const isEnabled = session.status === "authenticated" && !isImpersonating;
+	const isEnabled =
+		session.status === "authenticated" &&
+		!isImpersonating &&
+		!modificationClosed;
 
 	const [holder, setHolder] = useState<LockHolder | null>(null);
 	const [isReadOnly, setIsReadOnly] = useState(false);
@@ -48,7 +56,11 @@ export function useDeclarationLock({
 	useEffect(() => {
 		if (!isEnabled) {
 			isHolderRef.current = false;
-			setIsReadOnly(false);
+			// Impersonation and a passed modification deadline are read-only reasons
+			// too: surface them through the same state so the shared context exposes
+			// a single read-only flag. The collaborative lock stays disabled (no
+			// acquire/heartbeat) in both cases.
+			setIsReadOnly(isImpersonating || modificationClosed);
 			setHolder(null);
 			// Stay "loading" while the session is still resolving so consumers do
 			// not flash an editable state before ownership is known.
@@ -130,7 +142,21 @@ export function useDeclarationLock({
 			// (tab close), logout, the inactivity timeout, and admin override.
 			isHolderRef.current = false;
 		};
-	}, [declarationId, isEnabled, session.status]);
+	}, [
+		declarationId,
+		isEnabled,
+		isImpersonating,
+		modificationClosed,
+		session.status,
+	]);
 
-	return { isReadOnly, holder, isLoading };
+	const reason: ReadOnlyReason | null = isImpersonating
+		? "impersonation"
+		: modificationClosed
+			? "modification_closed"
+			: isReadOnly
+				? "lock"
+				: null;
+
+	return { isReadOnly, reason, holder, isLoading };
 }

@@ -56,7 +56,7 @@ export function Step1Opinions({
 	const isJointEvaluation = firstDeclarationPathChoice === "joint_evaluation";
 	const router = useRouter();
 	const readOnlyGuard = useReadOnlyGuard();
-	const { isReadOnly: isLocked } = useLockContext();
+	const { isReadOnly } = useLockContext();
 
 	const dbValues = useMemo(
 		() => ({
@@ -147,13 +147,13 @@ export function Step1Opinions({
 	}, [isLoadingDraft, draft, form, hasSecondDeclaration]);
 
 	const triggerDraftSave = useCallback(() => {
-		if (isLocked) return;
+		if (isReadOnly) return;
 		const values = form.getValues();
 		setField({
 			firstDeclaration: values.firstDeclaration,
 			secondDeclaration: values.secondDeclaration,
 		});
-	}, [form, isLocked, setField]);
+	}, [form, isReadOnly, setField]);
 
 	const mutation = api.cseOpinion.saveOpinions.useMutation({
 		onSuccess: () => router.push("/avis-cse/etape/2"),
@@ -200,7 +200,7 @@ export function Step1Opinions({
 
 	return (
 		<form autoComplete="off" onSubmit={onSubmit}>
-			<fieldset className={styles.readOnlyFieldset} disabled={isLocked}>
+			<fieldset className={styles.readOnlyFieldset} disabled={isReadOnly}>
 				{isJointEvaluation && (
 					<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
 						<div className="fr-col">
@@ -364,9 +364,7 @@ export function Step1Opinions({
 						<button
 							{...readOnlyGuard.buttonProps}
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-							disabled={
-								mutation.isPending || readOnlyGuard.isReadOnly || isLocked
-							}
+							disabled={mutation.isPending || isReadOnly}
 							type="submit"
 						>
 							{mutation.isPending ? "Enregistrement…" : "Suivant"}

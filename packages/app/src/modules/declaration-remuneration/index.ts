@@ -34,10 +34,15 @@ export type {
 export { CSV_TO_SCHEMA_MAP, mapGipToFormData } from "./shared/gipMdsMapping";
 export { getEffectiveGipPrefillData } from "./shared/gipToStepData";
 export { DeclarationLockAlert } from "./shared/lock/DeclarationLockAlert";
-export { LockProvider, useLockContext } from "./shared/lock/LockContext";
+export {
+	LockProvider,
+	useLockContext,
+	useReadOnlyContext,
+} from "./shared/lock/LockContext";
 export type {
 	DeclarationLockState,
 	LockHolder,
+	ReadOnlyReason,
 } from "./shared/lock/useDeclarationLock";
 export { useDeclarationLock } from "./shared/lock/useDeclarationLock";
 export { ComplianceConfirmation } from "./steps/ComplianceConfirmation";
