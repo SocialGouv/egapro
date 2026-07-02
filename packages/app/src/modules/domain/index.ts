@@ -147,6 +147,8 @@ export {
 	padDecimalToTwo,
 	parseNumber,
 } from "./shared/number";
+// Public data release gate
+export { isYearPubliclyReleased } from "./shared/publicData";
 // Quartile helpers
 export { computeQuartileMin, migrateLegacyThresholds } from "./shared/quartile";
 export type { CountyCode, RegionCode } from "./shared/regions";
