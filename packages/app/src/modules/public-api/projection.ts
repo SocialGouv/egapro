@@ -63,7 +63,10 @@ export function toPublicDeclaration(
 	declaration: PublicDeclarationSource,
 	company: PublicCompanySource,
 ): PublicDeclarationDTO {
-	const diffusible = isCompanyDiffusible(company.statutDiffusion);
+	const diffusible =
+		company.statutDiffusion !== null
+			? isCompanyDiffusible(company.statutDiffusion)
+			: company.address !== null;
 
 	return {
 		year: declaration.year,

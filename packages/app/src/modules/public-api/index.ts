@@ -1,3 +1,7 @@
+export {
+	getPublicDeclarationBySirenYear,
+	getPublicDeclarationsBySiren,
+} from "./declarationsBySirenService";
 export type {
 	PublicCompanySource,
 	PublicDeclarationSource,
