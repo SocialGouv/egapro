@@ -7,7 +7,7 @@
 #   {"tickets":[
 #     {"id":"123","deps":["120"],"model":"sonnet","base":"origin/epic/42","title":"…"},
 #     {"id":"124","deps":[],      "model":"opus",  "base":"origin/epic/42","title":"…"}
-#   ]}
+#   ], "held": 0}
 #
 # This is the data-driven counterpart of dispatch_plan.sh. Where dispatch_plan
 # emits only the tickets dispatchable in the CURRENT bash tick (deps already
@@ -18,18 +18,27 @@
 # / a worktree_slot resource). One emit per fan-out run; on a rework round the
 # iterion loop re-invokes this to pick up newly-created fix tickets.
 #
-# Scheduling contract reproduced here (same rules as dispatch_plan.sh):
-#   * a sub-ticket is "remaining" iff its board Status is To Do and it does NOT
-#     carry the `dispatch=escalate` hold label. A ticket already squash-merged
-#     into epic/<N> has been moved off To Do, so it naturally drops out.
+# Scheduling contract (CANONICAL SIGNAL = merged PR, board decorative):
+#   * a sub-ticket is "done" iff a MERGED pull request references it via
+#     closingIssuesReferences (closedByPullRequestsReferences.merged == true —
+#     force_pr_issue_link.sh guarantees the link populates). Board Status is
+#     NOT consulted: a ticket left "In progress" by a crashed run stays
+#     remaining, so a relaunch re-dispatches it instead of false-converging.
+#   * a remaining sub-ticket carrying the `dispatch=escalate` hold label is
+#     NOT dispatchable but still BLOCKS convergence: it is excluded from
+#     tickets[] and counted in the `held` field. Callers must treat held>0
+#     as "not converged" (never open the final PR over a held ticket).
 #   * `## Depends on` (body section, `#N` tokens) gives the parents. We keep only
 #     the parents that are THEMSELVES still remaining — a parent already merged
 #     is a satisfied dependency and is pruned, so the engine won't wait on it.
 #   * model = opus iff the sub-issue carries the `complexe` label, else sonnet.
 #
-# Deterministic, read-only (no board writes). Exit 0 always emits valid JSON
-# (an empty {"tickets":[]} when the epic has no remaining sub-tickets), so the
-# fan_out_each `over:` source is never nil.
+# Output: {"tickets":[...], "held": K}
+#
+# Deterministic, read-only (no board writes). FAILS LOUDLY (exit 1, stderr) on
+# a GitHub API error after retries — an empty {"tickets":[]} is emitted ONLY
+# when the epic genuinely has zero remaining sub-tickets, never as an error
+# fallback (a transient rate-limit must not read as a converged epic).
 
 set -euo pipefail
 
@@ -41,17 +50,30 @@ if [ -z "$EPIC_N" ]; then
     exit 2
 fi
 
-emit_empty() { printf '{"tickets":[]}'; }
+# Retry wrapper for gh calls: transient API blips (rate-limit, 5xx) get 3
+# attempts; persistent failure is FATAL (exit 1) — never a silent empty plan.
+gh_retry() {
+    local out="" attempt
+    for attempt in 1 2 3; do
+        if out=$("$@" 2>/dev/null) && [ -n "$out" ] && [ "$out" != "null" ]; then
+            printf '%s' "$out"
+            return 0
+        fi
+        sleep 5
+    done
+    return 1
+}
 
 # Resolve the epic's GraphQL node id (needed for the subIssues connection).
-EPIC_ID=$(gh issue view "$EPIC_N" --repo "$REPO" --json id --jq '.id' 2>/dev/null || echo "")
-if [ -z "$EPIC_ID" ]; then
-    emit_empty
-    exit 0
+if ! EPIC_ID=$(gh_retry gh issue view "$EPIC_N" --repo "$REPO" --json id --jq '.id'); then
+    echo "epic_dag.sh: FATAL — cannot resolve epic #$EPIC_N node id (GitHub API failure or bad epic number); refusing to emit an empty plan" >&2
+    exit 1
 fi
 
-# Bulk query: sub-issues + body + labels + board status (single call).
-SUB_ISSUES=$(gh api graphql -f query='
+# Bulk query: sub-issues + body + labels + merged-PR references (single call).
+# closedByPullRequestsReferences(includeClosedPrs:true) + .merged filter = the
+# canonical "squash-merged into epic/<N>" signal (board Status is decorative).
+if ! SUB_ISSUES=$(gh_retry gh api graphql -f query='
 query($id: ID!) {
   node(id: $id) {
     ... on Issue {
@@ -61,36 +83,26 @@ query($id: ID!) {
           title
           body
           labels(first: 10) { nodes { name } }
-          projectItems(first: 1) {
-            nodes {
-              fieldValues(first: 10) {
-                nodes {
-                  ... on ProjectV2ItemFieldSingleSelectValue {
-                    field { ... on ProjectV2SingleSelectField { name } }
-                    name
-                  }
-                }
-              }
-            }
+          closedByPullRequestsReferences(first: 10, includeClosedPrs: true) {
+            nodes { merged }
           }
         }
       }
     }
   }
-}' -f id="$EPIC_ID" --jq '.data.node.subIssues.nodes' 2>/dev/null || echo "")
-
-if [ -z "$SUB_ISSUES" ] || [ "$SUB_ISSUES" = "null" ]; then
-    emit_empty
-    exit 0
+}' -f id="$EPIC_ID" --jq '.data.node.subIssues.nodes'); then
+    echo "epic_dag.sh: FATAL — subIssues query failed for epic #$EPIC_N (GitHub API failure); refusing to emit an empty plan" >&2
+    exit 1
 fi
 
 BASE_BRANCH="origin/epic/${EPIC_N}"
 
-# --- Pass 1: build the "remaining" set (To Do, not held) -----------------------
+# --- Pass 1: build the "remaining" set (NOT merged; escalate-held counted) -----
 declare -A REMAINING=()   # ticket number -> 1
 declare -A MODEL=()       # ticket number -> sonnet|opus
 declare -A TITLE=()       # ticket number -> title
 declare -A BODY=()        # ticket number -> body
+HELD=0                    # unmerged tickets frozen by dispatch=escalate
 
 while IFS= read -r issue; do
     [ -n "$issue" ] || continue
@@ -98,13 +110,15 @@ while IFS= read -r issue; do
     T=$(echo "$issue" | jq -r '.title // ""')
     B=$(echo "$issue" | jq -r '.body // ""')
     L=$(echo "$issue" | jq -r '[.labels.nodes[].name] | join(",")')
-    S=$(echo "$issue" | jq -r '[.projectItems.nodes[0].fieldValues.nodes[]? | select(.field.name == "Status") | .name] | first // ""')
+    M=$(echo "$issue" | jq -r '[.closedByPullRequestsReferences.nodes[]? | select(.merged == true)] | length')
 
-    case "$S" in
-        Todo|"To Do"|"To do") ;;
-        *) continue ;;
-    esac
+    # Canonical done signal: a MERGED PR references this ticket. Board status
+    # is decorative — an "In progress" leftover from a crashed run is NOT done.
+    if [ "${M:-0}" -gt 0 ]; then
+        continue
+    fi
     if echo "$L" | grep -qE '(^|,)dispatch=escalate(,|$)'; then
+        HELD=$((HELD + 1))
         continue
     fi
 
@@ -119,7 +133,7 @@ while IFS= read -r issue; do
 done < <(echo "$SUB_ISSUES" | jq -c '.[]')
 
 if [ ${#REMAINING[@]} -eq 0 ]; then
-    emit_empty
+    printf '{"tickets":[],"held":%s}' "$HELD"
     exit 0
 fi
 
@@ -154,4 +168,4 @@ done
 
 # Stable order (ascending ticket number) for reproducible plans.
 printf '%s\n' "${ENTRIES[@]}" \
-    | jq -sc 'sort_by(.id | tonumber) | {tickets: .}'
+    | jq -sc --argjson held "$HELD" 'sort_by(.id | tonumber) | {tickets: ., held: $held}'
