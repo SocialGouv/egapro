@@ -1,6 +1,12 @@
-import type { DeclarationStatus } from "../types";
+import type { DeclarationFsmStatus, DeclarationStatus } from "../types";
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
+
+export function isDeclarationSubmitted(
+	status: DeclarationFsmStatus | null,
+): boolean {
+	return status !== null && status !== "draft";
+}
 
 export function getCurrentCompliancePath(declaration: {
 	firstDeclarationPathChoice: CompliancePath | null;

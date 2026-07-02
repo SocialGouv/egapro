@@ -1,3 +1,4 @@
+import { computeWorkforceTotal, QUARTILE_COUNT } from "~/modules/domain";
 import type { gipMdsData } from "~/server/db/schema";
 
 /**
@@ -269,8 +270,8 @@ function buildQuartileData(
 	],
 	menProportions: [string | null, string | null, string | null, string | null],
 ): GipQuartileData {
-	const totalAll = (totalWomen ?? 0) + (totalMen ?? 0);
-	const quartileSize = totalAll > 0 ? Math.round(totalAll / 4) : 0;
+	const totalAll = computeWorkforceTotal(totalWomen ?? 0, totalMen ?? 0);
+	const quartileSize = totalAll > 0 ? Math.round(totalAll / QUARTILE_COUNT) : 0;
 
 	return {
 		thresholds,

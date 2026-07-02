@@ -12,6 +12,7 @@ const { mockEnv } = vi.hoisted(() => ({
 vi.mock("~/env", () => ({ env: mockEnv }));
 
 import {
+	buildFunnelRows,
 	fetchMatomoCategoryModel,
 	fetchMatomoCseStatusConfirmations,
 	fetchMatomoDeviceBreakdown,
@@ -599,5 +600,57 @@ describe("fetchMatomoCseStatusConfirmations", () => {
 		const result = await fetchMatomoCseStatusConfirmations({ year: 2024 });
 
 		expect(result).toEqual({ total: 0, yes: 0, no: 0 });
+	});
+});
+
+describe("buildFunnelRows", () => {
+	const jalons = [
+		{ key: "start", label: "Démarrage", kind: "start" as const },
+		{ key: "mid", label: "Milieu", kind: "step" as const, step: "mid" },
+		{ key: "complete", label: "Fin", kind: "complete" as const },
+	];
+
+	it("anchors pctOfStart to the first jalon and rounds to a whole number", () => {
+		const rows = buildFunnelRows(jalons, {
+			start: 200,
+			mid: 150,
+			complete: 50,
+		});
+
+		expect(rows.map((r) => [r.count, r.pctOfStart])).toEqual([
+			[200, 100],
+			[150, 75],
+			[50, 25],
+		]);
+	});
+
+	it("computes pctDropFromPrev as null on the first jalon and rounded thereafter", () => {
+		const rows = buildFunnelRows(jalons, {
+			start: 200,
+			mid: 150,
+			complete: 50,
+		});
+
+		expect(rows[0]?.pctDropFromPrev).toBeNull();
+		expect(rows[1]?.pctDropFromPrev).toBe(25);
+		expect(rows[2]?.pctDropFromPrev).toBe(67);
+	});
+
+	it("yields 0 percentages when the funnel start is empty (no division by zero)", () => {
+		const rows = buildFunnelRows(jalons, {});
+
+		expect(rows.map((r) => r.count)).toEqual([0, 0, 0]);
+		for (const row of rows) {
+			expect(row.pctOfStart).toBe(0);
+		}
+		expect(rows[0]?.pctDropFromPrev).toBeNull();
+		expect(rows[1]?.pctDropFromPrev).toBe(0);
+	});
+
+	it("yields pctDropFromPrev 0 when the previous jalon is empty mid-funnel", () => {
+		const rows = buildFunnelRows(jalons, { start: 100, mid: 0, complete: 0 });
+
+		expect(rows[1]?.pctDropFromPrev).toBe(100);
+		expect(rows[2]?.pctDropFromPrev).toBe(0);
 	});
 });

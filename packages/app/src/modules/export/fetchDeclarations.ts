@@ -13,7 +13,11 @@ export {
 	fetchSubmittedDeclarations,
 } from "./queries";
 
-import { GAP_ALERT_THRESHOLD, isIndicatorGRequired } from "~/modules/domain";
+import {
+	isComplianceProcessRequired,
+	isComplianceProcessRevisionRequired,
+	isIndicatorGRequired,
+} from "~/modules/domain";
 import type { DeclarationRow } from "./queries";
 import {
 	INDICATOR_A_GAP_LABELS,
@@ -38,8 +42,6 @@ import {
 	getStatusHistoryLabel,
 } from "./shared/statusHistoryLabels";
 
-const COMPLIANCE_PROCESS_SIZE_MIN = 100;
-
 function deriveExportFlags(
 	row: DeclarationRow,
 	indicatorGEntries: IndicatorGEntry[],
@@ -56,17 +58,32 @@ function deriveExportFlags(
 		? Number(row.variableAnnualMeanGap) * 100
 		: null;
 	const workforce = row.workforce;
+	const complianceInput = {
+		workforce,
+		hasIndicatorG,
+		gap: globalAnnualMeanGap === null ? null : Math.abs(globalAnnualMeanGap),
+	};
 	const complianceProcessRequired =
-		workforce !== null &&
-		workforce >= COMPLIANCE_PROCESS_SIZE_MIN &&
-		hasIndicatorG &&
-		globalAnnualMeanGap !== null &&
-		Math.abs(globalAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
-	const complianceProcessRevisionRequired =
-		complianceProcessRequired &&
-		row.secondDeclarationSubmittedAt !== null &&
-		variableAnnualMeanGap !== null &&
-		Math.abs(variableAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
+		isComplianceProcessRequired(complianceInput);
+	const complianceProcessRevisionRequired = isComplianceProcessRevisionRequired(
+		{
+			...complianceInput,
+			correctionGap:
+				variableAnnualMeanGap === null ? null : Math.abs(variableAnnualMeanGap),
+			events:
+				row.secondDeclarationSubmittedAt === null
+					? []
+					: [
+							{
+								eventType: "second_declaration_submit",
+								value: null,
+								round: null,
+								createdAt: row.secondDeclarationSubmittedAt,
+								actorUserId: null,
+							},
+						],
+		},
+	);
 	const indicatorGRequiredFlag = isIndicatorGRequired(workforce ?? 0, row.year);
 	return {
 		complianceProcessRequired,

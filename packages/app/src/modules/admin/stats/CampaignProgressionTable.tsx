@@ -1,5 +1,6 @@
 import { formatMonthDay } from "~/modules/domain";
 
+import { formatCount } from "./formatters";
 import type { CampaignProgressionSeries } from "./types";
 
 type Props = {
@@ -63,9 +64,7 @@ export function CampaignProgressionTable({ series }: Props) {
 												const value = byDayByYear.get(year)?.get(key);
 												return (
 													<td key={year}>
-														{value != null
-															? value.toLocaleString("fr-FR")
-															: "—"}
+														{value != null ? formatCount(value) : "—"}
 													</td>
 												);
 											})}
