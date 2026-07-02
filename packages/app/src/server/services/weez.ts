@@ -2,6 +2,7 @@ import "server-only";
 
 import { env } from "~/env";
 import { getLocationFromPostalCode } from "~/modules/domain";
+import { isCompanyDiffusible } from "~/modules/public-api";
 
 const NON_DIFFUSIBLE_NAME = "Entreprise non diffusible";
 
@@ -87,10 +88,6 @@ function buildAddress(entity: WeezLegalEntity): string | null {
 	return null;
 }
 
-function isNonDiffusible(entity: WeezLegalEntity): boolean {
-	return entity.statutdiffusionunitelegale === "N";
-}
-
 export async function fetchCompanyBySiren(
 	siren: string,
 ): Promise<CompanyInfo | null> {
@@ -126,7 +123,7 @@ export async function fetchCompanyBySiren(
 	// when `address` becomes null.
 	const location = getLocationFromPostalCode(entity.codepostal);
 
-	if (isNonDiffusible(entity)) {
+	if (!isCompanyDiffusible(entity.statutdiffusionunitelegale)) {
 		return {
 			name:
 				entity.denominationunitelegale ||
