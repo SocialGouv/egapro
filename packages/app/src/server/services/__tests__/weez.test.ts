@@ -65,6 +65,7 @@ describe("fetchCompanyBySiren", () => {
 			departmentCode: "75",
 			departmentLabel: "Paris",
 			workforce: 256,
+			statutDiffusion: "O",
 		});
 
 		const calledUrl = fetchSpy.mock.calls[0]?.[0] as URL;
@@ -108,6 +109,7 @@ describe("fetchCompanyBySiren", () => {
 			departmentCode: null,
 			departmentLabel: null,
 			workforce: 50,
+			statutDiffusion: "N",
 		});
 	});
 
@@ -146,6 +148,7 @@ describe("fetchCompanyBySiren", () => {
 			departmentCode: "33",
 			departmentLabel: "Gironde",
 			workforce: 50,
+			statutDiffusion: "N",
 		});
 	});
 
@@ -273,7 +276,38 @@ describe("fetchCompanyBySiren", () => {
 			departmentCode: "69",
 			departmentLabel: "Rhône",
 			workforce: null,
+			statutDiffusion: "O",
 		});
+	});
+
+	it("defaults statutDiffusion to null when the INSEE field is absent", async () => {
+		fetchSpy.mockResolvedValueOnce({
+			ok: true,
+			json: async () => ({
+				content: [
+					{
+						siren: "999000111",
+						denominationunitelegale: "Delta SA",
+						raisonsociale: null,
+						activiteprincipalenaf25unitelegale: "6202A",
+						nomenclatureactiviteprincipalelibelleunitelegale: "Conseil",
+						effectiftotal: 42,
+						numerovoie: null,
+						typevoie: null,
+						libellevoie: null,
+						codepostal: "75001",
+						libellecommune: "PARIS",
+					},
+				],
+				totalElements: 1,
+			}),
+		});
+
+		const result = await fetchCompanyBySiren("999000111");
+
+		// Absent statut is treated as diffusible: name/address are kept
+		expect(result?.statutDiffusion).toBeNull();
+		expect(result?.name).toBe("Delta SA");
 	});
 
 	it("returns nafLabel null when the activity label is absent", async () => {
@@ -311,6 +345,7 @@ describe("fetchCompanyBySiren", () => {
 			departmentCode: "33",
 			departmentLabel: "Gironde",
 			workforce: 12,
+			statutDiffusion: "O",
 		});
 	});
 });

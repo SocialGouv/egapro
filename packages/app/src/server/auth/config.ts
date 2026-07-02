@@ -342,6 +342,7 @@ export const authConfig = {
 						departmentCode?: string | null;
 						departmentLabel?: string | null;
 						workforce?: number | null;
+						statutDiffusion?: string | null;
 					};
 					try {
 						const companyInfo = await fetchCompanyBySiren(siren);
@@ -356,6 +357,7 @@ export const authConfig = {
 									departmentCode: companyInfo.departmentCode,
 									departmentLabel: companyInfo.departmentLabel,
 									workforce: companyInfo.workforce,
+									statutDiffusion: companyInfo.statutDiffusion,
 								}
 							: { siren, name: `Entreprise ${siren}` };
 					} catch {

@@ -112,6 +112,8 @@ export const AUDIT_ACTIONS = {
 	PUBLIC_REFERENT_SEARCH: "public_referents.search",
 	PUBLIC_REFERENT_VIEW: "public_referents.view",
 
+	PUBLIC_DECLARATIONS_EXPORT: "public_declarations.export",
+
 	// ── Public stats reads ─────────────────────────────────
 	PUBLIC_STATS_GET_CURRENT_CAMPAIGN_RATE:
 		"public_stats.get_current_campaign_rate",
@@ -204,6 +206,8 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: "public_search",
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",
+
+	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT]: "export",
 
 	[AUDIT_ACTIONS.PUBLIC_STATS_GET_CURRENT_CAMPAIGN_RATE]: "public_search",
 

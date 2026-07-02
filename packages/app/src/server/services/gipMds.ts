@@ -163,6 +163,7 @@ type CompanyInsert = {
 	departmentCode?: string | null;
 	departmentLabel?: string | null;
 	workforce?: number | null;
+	statutDiffusion?: string | null;
 };
 
 async function fetchCompanyInfoBatch(
@@ -187,6 +188,7 @@ async function fetchCompanyInfoBatch(
 								departmentCode: info.departmentCode,
 								departmentLabel: info.departmentLabel,
 								workforce: info.workforce,
+								statutDiffusion: info.statutDiffusion,
 							}
 						: { siren, name: `Entreprise ${siren}` };
 				} catch {
