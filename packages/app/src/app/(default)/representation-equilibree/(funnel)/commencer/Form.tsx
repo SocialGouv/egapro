@@ -1,18 +1,21 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { createSteps } from "@common/core-domain/dtos/CreateRepresentationEquilibreeDTO";
 import { isCompanyClosed } from "@common/core-domain/helpers/entreprise";
 import { REPEQ_ADMIN_YEARS, YEARS } from "@common/dict";
-import { BackNextButtonsGroup, FormLayout } from "@design-system";
+import { BackNextButtonsGroup, FormLayout, Icon, Link } from "@design-system";
 import { getCompany } from "@globalActions/company";
 import { CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
-import { useEffect, useTransition } from "react";
+import { signIn } from "next-auth/react";
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -26,7 +29,7 @@ const buildConfirmMessage = ({ siren, year }: { siren: string; year: number }) =
   `Vous avez commencé une déclaration avec le Siren ${siren} et l'année ${year}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren.";
-export const CommencerForm = ({ session }: { session: Session }) => {
+export const CommencerForm = ({ session, monCompteProHost }: { monCompteProHost: string; session: Session }) => {
   const router = useRouter();
   const { funnel, saveFunnel, resetFunnel, isEdit, setIsEdit } = useRepeqFunnelStore();
   const [isPending, startTransition] = useTransition();
@@ -57,13 +60,6 @@ export const CommencerForm = ({ session }: { session: Session }) => {
     resolver: zodResolver(schemaWithOwnedSiren),
     defaultValues: funnel,
   });
-
-  const activeSiren = companies[0]?.siren;
-  useEffect(() => {
-    if (activeSiren) {
-      setValue("siren", activeSiren, { shouldValidate: true });
-    }
-  }, [activeSiren, setValue]);
 
   const saveAndGoNext = async (siren: string, year: number) =>
     startTransition(async () => {
@@ -172,17 +168,42 @@ export const CommencerForm = ({ session }: { session: Session }) => {
               }}
             />
           ) : (
-            <Input
-              label="Numéro Siren de l’entreprise"
-              hintText="Entreprise sélectionnée lors de la connexion ProConnect."
+            <Select
+              label="Numéro Siren de l’entreprise *"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
-              nativeInputProps={{
-                value: companies[0] ? `${companies[0].siren}${companies[0].label ? ` (${companies[0].label})` : ""}` : "",
-                readOnly: true,
-              }}
-            />
+              nativeSelectProps={register("siren")}
+            >
+              <option value="" disabled>
+                Sélectionnez une entreprise
+              </option>
+              {sortBy(companies, "siren").map(company => (
+                <option key={company.siren} value={company.siren}>
+                  {company.siren}
+                  {company.label ? ` (${company.label})` : ""}
+                </option>
+              ))}
+            </Select>
           )}
+          <p>
+            Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
+            <Link href={`${monCompteProHost}`} target="_blank">
+              cliquez ici
+            </Link>
+          </p>
+          <div className={fr.cx("fr-pt-3v")}>
+            Vous ne trouvez pas dans la liste déroulante l'entreprise rattachée à votre compte ProConnect, cliquez sur
+            ce bouton : <br />
+            <Button
+              onClick={e => {
+                e.preventDefault();
+                signIn("moncomptepro", { redirect: false });
+              }}
+            >
+              <Icon icon="fr-icon-refresh-line" />
+              Rafraichir
+            </Button>
+          </div>
           <BackNextButtonsGroup
             className={fr.cx("fr-my-6w")}
             backProps={{

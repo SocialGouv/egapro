@@ -1,6 +1,7 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { config } from "@common/config";
@@ -17,15 +18,15 @@ import {
 } from "@common/dict";
 import { zodFr } from "@common/utils/zod";
 import { SkeletonForm } from "@components/utils/skeleton/SkeletonForm";
-import { BackNextButtonsGroup } from "@design-system";
+import { BackNextButtonsGroup, Icon, Link } from "@design-system";
 import { getCompany } from "@globalActions/company";
 import { CLOSED_COMPANY_ERROR, CompanyErrorCodes } from "@globalActions/companyErrorCodes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
+import { sortBy } from "lodash";
 import { useRouter } from "next/navigation";
 import { type Session } from "next-auth";
-import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -140,7 +141,7 @@ export const prepareDataWithExistingDeclaration = async (
   }
 };
 
-export const CommencerForm = () => {
+export const CommencerForm = ({ monCompteProHost }: { monCompteProHost: string }) => {
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useDeclarationFormManager();
 
@@ -163,19 +164,11 @@ export const CommencerForm = () => {
     watch,
   } = methods;
 
-  const activeSiren = user?.companies?.[0]?.siren;
-  useEffect(() => {
-    if (activeSiren) {
-      setValue("siren", activeSiren, { shouldValidate: true });
-    }
-  }, [activeSiren, setValue]);
-
   if (!user?.companies.length && !user?.staff) return <SkeletonForm fields={2} />;
 
   const year = watch("annéeIndicateurs");
 
   const companies = user.companies;
-  const activeCompany = companies[0];
 
   const saveAndGoNext = async ({ siren, annéeIndicateurs }: FormType, formData: DeclarationDTO) => {
     try {
@@ -277,18 +270,43 @@ export const CommencerForm = () => {
               }}
             />
           ) : (
-            <Input
-              label="Numéro Siren de l’entreprise"
-              hintText="Entreprise sélectionnée lors de la connexion ProConnect."
+            <Select
+              label="Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l'unité économique et sociale (UES) *"
               state={errors.siren && "error"}
               stateRelatedMessage={errors.siren?.message}
-              nativeInputProps={{
-                value: activeCompany ? `${activeCompany.siren}${activeCompany.label ? ` (${activeCompany.label})` : ""}` : "",
-                readOnly: true,
-              }}
-            />
+              nativeSelectProps={register("siren")}
+            >
+              <option value="" disabled>
+                Sélectionnez une entreprise
+              </option>
+              {sortBy(companies, "siren").map(company => (
+                <option key={company.siren} value={company.siren}>
+                  {company.siren}
+                  {company.label ? ` (${company.label})` : ""}
+                </option>
+              ))}
+            </Select>
           )}
 
+          <p>
+            Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
+            <Link href={`${monCompteProHost}`} target="_blank">
+              cliquez ici
+            </Link>
+          </p>
+          <div className={fr.cx("fr-pt-3v")}>
+            Vous ne trouvez pas dans la liste déroulante l'entreprise rattachée à votre compte ProConnect, cliquez sur
+            ce bouton : <br />
+            <Button
+              onClick={e => {
+                e.preventDefault();
+                signIn("moncomptepro", { redirect: false });
+              }}
+            >
+              <Icon icon="fr-icon-refresh-line" />
+              Rafraichir
+            </Button>
+          </div>
           <BackNextButtonsGroup
             className={fr.cx("fr-my-6w")}
             backLabel="Réinitialiser"

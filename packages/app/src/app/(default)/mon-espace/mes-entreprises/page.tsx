@@ -13,6 +13,7 @@ import { EmailOwnerList } from "../EmailOwnerList";
 import { SelectSiren } from "./SelectSiren";
 
 const proconnectSignInUrl = config.proconnect.signinUrl;
+const proconnectManageOrganisationsUrl = config.proconnect.manageOrganisationUrl;
 
 export const MesEntreprisesInfoAlert = () => (
   <Alert
@@ -20,15 +21,25 @@ export const MesEntreprisesInfoAlert = () => (
     small
     description={
       <>
-        <p>Dans ce menu, vous pouvez consulter les adresses emails rattachées à votre entreprise.</p>
+        <p>
+          Dans ce menu, vous pouvez consulter les adresses emails qui ont été rattachées à votre entreprise, en
+          sélectionnant au préalable dans la liste déroulante le numéro Siren de l'entreprise si vous gérez plusieurs
+          entreprises.
+        </p>
         <br />
         <p>
-          Pour qu'une autre personne puisse déclarer pour cette entreprise, elle doit se connecter à Egapro avec son
-          propre compte{" "}
+          Pour rattacher une adresse email, il faut{" "}
           <Link target="_blank" href={`${proconnectSignInUrl}`}>
-            ProConnect
+            créer un nouveau compte ProConnect
           </Link>{" "}
-          rattaché à cette entreprise.
+          avec cette adresse.
+        </p>
+        <p>
+          <br />
+          Vous souhaitez rattacher votre adresse email à une autre entreprise,{" "}
+          <Link target="_blank" href={`${proconnectManageOrganisationsUrl}`}>
+            cliquez ici
+          </Link>
         </p>
       </>
     }
@@ -56,12 +67,12 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
           ) : (
             <Box mt="4w">
               <MesEntreprisesInfoAlert />
-              Vous n'êtes rattaché à aucune entreprise.
+              Vous n'avez pas encore d'entreprises rattachés.
               <br />
               <a target="_blank" href={`${proconnectSignInUrl}`}>
-                Connectez-vous via ProConnect
+                Connectez-vous sur Mon Compte Pro
               </a>{" "}
-              avec un compte rattaché à votre entreprise.
+              et ajoutez votre entreprise.
             </Box>
           )}
         </Box>
