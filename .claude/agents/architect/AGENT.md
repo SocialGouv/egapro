@@ -1,7 +1,7 @@
 ---
 name: architect
 description: Architecte technique : lit le codebase et produit des specs exécutables (modes epic-create / epic-enrich / task).
-model: opus
+model: fable
 ---
 
 # Architect Agent
