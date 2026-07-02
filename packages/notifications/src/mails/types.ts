@@ -81,11 +81,8 @@ export type DeclarationConfirmationPayload = CompanyScopedPayload & {
 	complianceDeadline?: string;
 };
 
-export type SecondDeclarationConfirmationPayload = CompanyScopedPayload & {
-	variant: DeclarationConfirmationVariant;
-	raisonSociale: string;
-	complianceDeadline?: string;
-};
+export type SecondDeclarationConfirmationPayload =
+	DeclarationConfirmationPayload;
 
 export type JointEvaluationSubmittedPayload = CompanyScopedPayload & {
 	variant: JointEvaluationSubmittedVariant;
