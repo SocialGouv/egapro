@@ -1,3 +1,10 @@
+## [3.18.1](https://github.com/SocialGouv/egapro/compare/v3.18.0...v3.18.1) (2026-07-02)
+
+
+### Bug Fixes
+
+* **prod/pg:** corrige la clé d'override du storage CNPG (storage → persistence) ([#3832](https://github.com/SocialGouv/egapro/issues/3832)) ([bc3af65](https://github.com/SocialGouv/egapro/commit/bc3af6587fe1540af81d648591d747e3de5eb5fb))
+
 # [3.18.0](https://github.com/SocialGouv/egapro/compare/v3.17.3...v3.18.0) (2026-07-02)
 
 
