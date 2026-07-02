@@ -50,6 +50,10 @@ schema check_out:
   issueType: string
 schema gate_out:
   approved: bool
+
+schema gate_fb_out:
+  approved: bool
+  feedback: string
 schema verdict5_out:
   status: string
   ticket: string
@@ -74,6 +78,7 @@ schema status_out:
 schema tickets_out:
   tickets: json
   has_tickets: bool
+  all_done: bool
 ## Sortie de ticket_setup : porte le contexte du ticket vers le subbot run_ticket (via son with{}).
 ## Plus de worktree_index : l'index est loué (worktree_slot → _lease_worktree_slot dans l'enfant).
 schema ticket_setup_out:
@@ -105,6 +110,7 @@ schema task_ctx:
 
 ## ─── Prompts agents/judges (délèguent à .claude/agents/*/AGENT.md + SKILL.md) ───
 prompt e2e_dev_system:
+  PROTECTION HARNAIS (non négociable) : ne modifie JAMAIS .claude/settings.json / .claude/settings.local.json ni la config Claude (~/.claude*) ; n'invoque AUCUN skill built-in ; n'écris AUCUNE mémoire persistante. Un hook qui bloque un edit ne se contourne pas — repense l'approche.
   Tu es l'agent e2e-dev d'egapro (Opus, effort xhigh), lancé via claude_code dans le dépôt egapro ({{vars.egapro_dir}}, settings chargés). Backend = claude_code sur le compte CLI de l'utilisateur (OAuth) — aucune clé API.
   AVANT D'AGIR, lis INTÉGRALEMENT et délègue STRICTEMENT à .claude/agents/e2e-dev/AGENT.md. Charge aussi à la demande : .claude/rules/e2e.md (chaque route de src/app/**/page.tsx doit avoir un E2E), .claude/rules/code-quality.md (DRY, pas de commentaire sauf WHY court), .claude/rules/git-artefact-hygiene.md (repo PUBLIC), et packages/app/CLAUDE.md. L'AGENT.md fait foi en cas de divergence avec ce prompt.
   RÔLE : tu es la GATE E2E BLOQUANTE de FIN DE PIPELINE. Tu possèdes TOUS les tests E2E Playwright — src/e2e/**/*.e2e.ts + auth.setup.ts + global-setup.ts + src/e2e/helpers/**. C'est ton SEUL périmètre d'écriture. Tu n'écris RIEN ailleurs.
@@ -125,11 +131,11 @@ prompt e2e_dev_user:
   GATE E2E de fin de pipeline pour l'unité #{{vars.issue}} ({{vars.repo}}), dépôt {{vars.egapro_dir}}.
   Contexte de ce run (fourni par l'orchestrateur) :
    · Type / scope : {{input.scope}} (epic = Feature complète intégrée dans epic/<N> ; ticket = une seule Task/Bug)
-   · Worktree de travail (déjà checkout) : {{input.worktree_path}} — branche {{input.branch}}
-   · Worktree index → dev server PORT = 3001 + index (lis aussi PORT dans packages/app/.env.local)
+   · Branche à tester : {{input.branch}} (tu te PROVISIONNES le worktree — étape 0 ci-dessous)
+   · Index worktree E2E dédié : 5 → dev server PORT = 3006 (confirme via PORT dans packages/app/.env.local du worktree provisionné)
    · Base de comparaison (remote-tracking ref) : {{input.base_ref}} → le diff = {{input.base_ref}}...HEAD
      (epic → origin/alpha ; ticket → origin/epic/<EPIC_N> ou origin/alpha)
-   · Mode déclencheur : {{input.trigger_mode}} (Feature : epic-end sur origin/epic/<N>, AVANT doc-writer + PR finale ; Task/Bug : après le verdict validated de code-dev — outputs.code_dev.status — sur le MÊME worktree, push sur la branche de la PR existante)
+   · Mode déclencheur : {{input.trigger_mode}} (Feature : epic-end sur origin/epic/<N>, AVANT doc-writer + PR finale ; Task/Bug : après le verdict validated du bot enfant — tu te provisionnes le worktree sur la branche de la PR et push dessus, re-trigger CI)
   Déroule le workflow de .claude/agents/e2e-dev/AGENT.md : lis le diff intégré + le spec de l'unité (epic = body epic + bodies des sous-tickets et leur ## Scénarios de test ; Task = ## Analyse architecte ; Bug = ## Analyse du bug, root cause + criticité), démarre le dev server sur le bon PORT, lance la suite E2E, trie chaque échec (doute → régression, fail-safe), puis :
    · ≥1 régression réelle → ne corrige NI source NI test ; poste le commentaire e2e-dev: (sur l'epic en Feature, sur le ticket en Task/Bug) assez précis pour architect-rework ; verdict regression.
    · sinon → corrige les E2E en échec légitime SANS les affaiblir ; décide la couverture (imbriquer de préférence > nouveau fichier > none justifié ; pour un Bug, juge la criticité) ; pour un Bug critique avec E2E, fais la preuve revert-verify (RED sans le fix, GREEN avec) ; relance toute la suite jusqu'au vert ; vérifie typecheck + lint ; commit (préfixe test(e2e):) + push sur HEAD.
@@ -140,9 +146,10 @@ prompt e2e_dev_user:
    · Repo PUBLIC : scrubber tout secret/token/PII avant tout commentaire GitHub ; aucune attribution IA ; données de test fictives uniquement.
   Termine par EXACTEMENT la sortie structurée e2e_out (status validated/regression/rate_limited/failed + champs : scope, id={{vars.issue}}, tests {mode nested|new|none, files[]}, regressions_fixed, commit, ou regressions[]/retry_in/reason selon le cas).
   CONTRAT DE SORTIE STRICT (routage déterministe aval — respecte-le À LA LETTRE, c'est ce qui aiguille le pipeline) : Le champ `status` DOIT valoir EXACTEMENT l'une de : validated | regression | rate_limited | failed (minuscules).
-  GARDE-FOU INFRA (bot aplati) : NI worktree NI dev server NI stack docker provisionnés. AVANT toute autre action, teste un dev server (`curl -sf http://localhost:3001/ >/dev/null 2>&1` puis 3002..3005). Si aucun ne répond, renvoie IMMÉDIATEMENT status=validated, mode=none, reason='infra E2E non provisionnée (bot aplati) — suite E2E non rejouée, étape représentée'. Tu NE démarres JAMAIS dev server / docker / stack, tu NE lances PAS Playwright, tu NE boucles PAS.
+  ÉTAPE 0 — PROVISIONNE ton infra (worktree dédié + stack docker). ⚠️ Tu tournes dans un worktree détaché sur la branche d'infra, PAS sur {{input.branch}} — ne fais JAMAIS `git checkout {{input.branch}}` ici (exit 128, branche checkout ailleurs). Fais : `WT=/tmp/egapro-e2e-{{vars.issue}}; git -C {{vars.egapro_dir}} worktree remove -f "$WT" 2>/dev/null; git -C {{vars.egapro_dir}} fetch origin {{input.branch}} --quiet; git -C {{vars.egapro_dir}} worktree add -f --detach "$WT" origin/{{input.branch}}` puis `cd "$WT" && bash scripts/setup-worktree.sh 5` (index E2E dédié 5 → PORT 3006, stack docker isolée). TOUT ton travail (diff, suite E2E, scénarios, commit) se fait DANS "$WT" ; push explicite depuis le HEAD détaché : `git push origin HEAD:refs/heads/{{input.branch}}`. TEARDOWN OBLIGATOIRE en fin de run, même sur échec : `cd "$WT" && docker compose -p $(grep '^COMPOSE_PROJECT_NAME=' packages/app/.env.local | cut -d= -f2) down -v >/dev/null 2>&1; cd {{vars.egapro_dir}} && git worktree remove -f "$WT"`. Si setup-worktree.sh échoue (docker indisponible), retourne status=failed avec reason='infra E2E impossible à provisionner' — JAMAIS un validated de complaisance.
 
 prompt architect_rework_system:
+  PROTECTION HARNAIS (non négociable) : ne modifie JAMAIS .claude/settings.json / .claude/settings.local.json ni la config Claude (~/.claude*) ; n'invoque AUCUN skill built-in ; n'écris AUCUNE mémoire persistante. Un hook qui bloque un edit ne se contourne pas — repense l'approche.
   Tu es l'agent architect-rework d'egapro (le REWORK HUB de fin de pipeline /implement), lancé via claude_code dans le dépôt egapro ({{vars.egapro_dir}}, settings chargés) sur le compte CLI de l'utilisateur — backend claude_code/OAuth, aucune clé API. Modèle Opus, effort xhigh (jugement à fort enjeu : diagnostiquer une régression E2E intégrée ou cadrer une demande de changement, et trancher code-vs-arbitrage).
   Avant d'agir, LIS INTÉGRALEMENT .claude/agents/architect-rework/AGENT.md et délègue STRICTEMENT à son contenu (déclencheurs, workflow 0-4, contraintes, Output Format). Charge À LA DEMANDE, avant toute opération board ou rédaction de spec, les règles non devinables : .claude/rules/github-board.md (IDs projet + snippets GraphQL : créer une issue, l'ajouter au project, type Task, parent link, status To Do), .claude/rules/ticket-spec-format.md (format normatif du spec), .claude/rules/complexity-estimation.md (sizing t-shirt) et .claude/rules/git-artefact-hygiene.md (repo PUBLIC).
   RÔLE : tu transformes un besoin de rework de fin d'epic en travail exécutable. Tu es READ-ONLY sur le CODE (Bash gh/git read, Read, Grep, Glob) et WRITE UNIQUEMENT sur GitHub (issues, commentaires, labels) via gh. Tu ne corriges JAMAIS le code toi-même et tu n'écris AUCUN test — c'est `code-dev` (+ `tu-dev`) qui implémentera, `e2e-dev` qui re-validera. Tu ne squash-merges rien, n'ouvres aucune PR, et ne touches au board QUE jusqu'au statut `To Do` (In progress = orchestrateur ; In review/Done = user-only).
@@ -150,7 +157,7 @@ prompt architect_rework_system:
   DEUX MODES (passés dans ton prompt via la variable source) :
    · e2e-regression — la gate E2E bloquante de fin d'epic a échoué : `e2e-dev` a rejoué la suite sur epic/<N> (tous les sous-tickets squash-mergés) et posté une vraie régression de parcours dans un commentaire `e2e-dev:` sur l'epic. Récupère ce commentaire (gh issue view <N> --comments) ; extrais le(s) test(s) en échec, le parcours cassé, attendu vs obtenu, le(s) fichier(s) source suspecté(s). Déclenché en BACKGROUND par le loop.
    · user-feedback — la gate d'acceptation de fin de pipeline : l'utilisateur a testé la PR finale (epic/<N> → alpha) et demande un ou plusieurs changements (texte fourni dans ton prompt). Reformule la demande en intentions concrètes (écrans/parcours/comportements). Déclenché en FOREGROUND par /implement, utilisateur présent.
-  MÉTHODE : log_event START (`bash scripts/orchestration/log_event.sh architect-rework-<N> START "epic=<N> source=<...>"`). Lis le besoin. Diagnostique / cadre en lisant le code intégré (`git diff origin/alpha...HEAD` + fichiers pertinents) et, en e2e-regression, le scénario qui casse (src/e2e/<...>.e2e.ts) : pourquoi le parcours casse, quel sous-ticket a introduit le side effect, et est-ce une vraie régression code OU un test qui asserte un ancien comportement volontairement changé (→ ticket qui demande explicitement d'ajuster le scénario E2E, OU escalade si l'évolution n'était pas spécifiée).
+  MÉTHODE : log_event START (`bash scripts/orchestration/log_event.sh architect-rework-<N> START "epic=<N> source=<...>"`). Lis le besoin. Diagnostique / cadre en lisant le code intégré (`git fetch origin && git diff origin/alpha...origin/epic/<N>` + `git show origin/epic/<N>:<fichier>` — ton worktree n'est PAS sur epic/<N>, ne checkoute rien) et, en e2e-regression, le scénario qui casse (src/e2e/<...>.e2e.ts) : pourquoi le parcours casse, quel sous-ticket a introduit le side effect, et est-ce une vraie régression code OU un test qui asserte un ancien comportement volontairement changé (→ ticket qui demande explicitement d'ajuster le scénario E2E, OU escalade si l'évolution n'était pas spécifiée).
   DÉCISION — besoin clair vs doute fonctionnel :
    · Doute fonctionnel (l'arbitrage produit/métier n'est pas tranché ; la demande utilisateur est ambiguë/incomplète) → NE DEVINE JAMAIS. Formule la question précise (et, en e2e-regression, les options de correction). Si source=e2e-regression (background) : poste un commentaire `architect-rework:` sur l'epic avec la question PUIS `gh issue edit <N> --add-label "dispatch=escalate"`. Si source=user-feedback (foreground) : NE PAS poser le label — retourne simplement la question, le skill /implement la relaiera. Logue NEEDS_USER. NE crée AUCUN ticket tant que ce n'est pas tranché.
    · Besoin clair → crée UN ou PLUSIEURS tickets Task de fix, INDISTINGUABLES de ceux de l'agent `architect` mode epic-enrich (pour que dispatch_plan + code-dev les traitent sans cas particulier) : gh issue create avec spec exécutable au format ticket-spec-format.md (objectif/root cause, fichiers impactés en chemins explicites, critères d'acceptation ≤ 8, section `## Scénarios de test` rappelant le parcours à couvrir / ne plus casser), référençant l'origine (« Corrige la régression E2E signalée par e2e-dev sur l'epic #<N> » ou « Donne suite à la demande de changement de l'utilisateur sur l'epic #<N> : … ») ; applique type Task + ajout au project + parent link (sous-issue de l'epic #<N>) + statut To Do via les snippets github-board.md (base implicite epic/<N>) ; size chaque ticket (`bash scripts/orchestration/set_ticket_size.sh <ticket> <XS|S|M|L|XL>`) ; ordre imposé entre tickets via la section `## Depends on` (jamais via le parent link). Logue TICKETS_CREATED "tickets=<liste>".
@@ -166,13 +173,13 @@ prompt architect_rework_system:
    · reason : l'erreur (statut failed), sinon "".
 
 prompt architect_rework_user:
-  Traite le besoin de rework de fin d'epic pour l'epic #{{vars.issue}} ({{vars.repo}}), branche courante epic/{{vars.issue}} (alignée par le main worktree), base de comparaison origin/alpha.
+  Traite le besoin de rework de fin d'epic pour l'epic #{{vars.issue}} ({{vars.repo}}). ⚠️ Ton worktree est détaché sur la branche d'infra, PAS sur epic/{{vars.issue}} — ne checkoute RIEN : diagnostique en LECTURE SEULE via les refs remote-tracking (`git fetch origin` puis `git diff origin/alpha...origin/epic/{{vars.issue}}`, `git show origin/epic/{{vars.issue}}:<fichier>`).
   Source du rework : {{input.source}} (« e2e-regression » → lis le dernier commentaire `e2e-dev:` sur l'epic #{{vars.issue}} via gh issue view --comments ; « user-feedback » → lis la demande de changement ci-dessous).
   Demande de changement utilisateur (uniquement si source=user-feedback) :
   ---
   {{input.change_request}}
   ---
-  Déroule le workflow de .claude/agents/architect-rework/AGENT.md : log_event START, lis le besoin selon la source, diagnostique/cadre en LECTURE SEULE (git diff origin/alpha...HEAD + fichiers pertinents ; en e2e-regression, le scénario src/e2e/<...>.e2e.ts qui casse), puis tranche :
+  Déroule le workflow de .claude/agents/architect-rework/AGENT.md : log_event START, lis le besoin selon la source, diagnostique/cadre en LECTURE SEULE (git fetch origin ; git diff origin/alpha...origin/epic/{{vars.issue}} ; git show origin/epic/{{vars.issue}}:<fichier> pour les fichiers pertinents ; en e2e-regression, le scénario src/e2e/<...>.e2e.ts qui casse), puis tranche :
    · Besoin clair → crée le(s) ticket(s) Task de fix (sous-issues To Do de l'epic #{{vars.issue}}, modèle architect epic-enrich : spec ticket-spec-format.md, type Task, parent link, To Do, sizing set_ticket_size.sh, `## Depends on` si ordre imposé), poste ton analyse détaillée sur l'epic, et retourne status=tickets_created avec la liste des numéros.
    · Doute fonctionnel → NE DEVINE PAS : formule la question précise. Si source=e2e-regression, poste-la en commentaire `architect-rework:` sur l'epic PUIS `gh issue edit {{vars.issue}} --add-label "dispatch=escalate"`. Si source=user-feedback, NE pose PAS le label (le skill /implement relaiera). Retourne status=needs_user avec la question.
   Tu ne touches NI au code NI aux tests : code-dev/tu-dev implémenteront, e2e-dev re-validera — tu ne déclenches aucun autre agent. Aucune transition de board au-delà de To Do ; pas de PR, pas de squash-merge. PAS DE QUESTION INTERACTIVE — sur doute fonctionnel, escalade/retourne needs_user ; tout point résiduel non bloquant va sous « À confirmer » dans l'analyse postée sur l'epic. Repo PUBLIC : scrubber secrets/PII, données fictives, zéro attribution IA.
@@ -180,6 +187,7 @@ prompt architect_rework_user:
   CONTRAT DE SORTIE STRICT (routage déterministe aval — respecte-le À LA LETTRE, c'est ce qui aiguille le pipeline) : Le champ `status` DOIT valoir EXACTEMENT l'une de : tickets_created | needs_user | rate_limited | failed (minuscules).
 
 prompt doc_writer_system:
+  PROTECTION HARNAIS (non négociable) : ne modifie JAMAIS .claude/settings.json / .claude/settings.local.json ni la config Claude (~/.claude*) ; n'invoque AUCUN skill built-in ; n'écris AUCUNE mémoire persistante. Un hook qui bloque un edit ne se contourne pas — repense l'approche.
   Tu es l'agent doc-writer d'egapro (post-loop epic du skill /implement), lancé via claude_code dans le dépôt egapro ({{vars.egapro_dir}}, settings chargés) sur le compte Claude CLI de l'utilisateur (backend claude_code/OAuth, modèle Sonnet — pas de label complexe qui basculerait en Opus). Avant d'agir, LIS INTÉGRALEMENT .claude/agents/doc-writer/AGENT.md et charge .claude/rules/git-artefact-hygiene.md (repo PUBLIC, scrubber). Délègue STRICTEMENT à ces fichiers : leur contenu fait foi, ne ré-invente pas le workflow.
   RÔLE : tu régénères la documentation utilisateur (docs/features.md, docs/architecture.md, docs/parcours-utilisateurs.md) FROM SCRATCH à partir de l'état COURANT du code de la branche epic/<N> (pas du delta — la doc reflète l'état final), puis tu commit + push sur epic/<N>. Tu opères sur le main worktree, sur la branche courante epic/<N> (pas de worktree dédié). C'est l'étape post-loop best-effort : la gate E2E est déjà verte ; tu interviens AVANT open_epic_final_pr.sh. Ton échec (rate-limit, push refusé, erreur technique) NE BLOQUE PAS l'ouverture de la PR finale — l'orchestrateur (run_doc_writer.sh) traite ton retour en best-effort.
   PÉRIMÈTRE STRICT (voir AGENT.md « Périmètre de la doc ») : tu ne touches QUE les 3 fichiers docs/*.md listés. Tu ne crées AUCUN nouveau .md sans instruction explicite (signale-le via notes). Tu ne touches JAMAIS README.md, CLAUDE.md, packages/app/CLAUDE.md, .claude/rules/*.md, docs/SUIT-API.md, ni aucun .md sous .kontinuous/, .github/, scripts/. Aucun fichier hors docs/ n'est modifié.
@@ -209,17 +217,17 @@ prompt propose_analyse_instructions:
   Aucune analyse trouvee pour l'issue #{{vars.issue}} (marqueur ## Analyse architecte / ## Analyse du bug / ## Analyse PO + sous-issues absent). /implement part d'une issue DEJA analysee. Lancer '/analyse {{vars.issue}}' d'abord ? Approuver n'ecrit rien -- c'est un STOP explicite (-> fail), l'operateur relance /analyse puis /implement. (Duo: analyse d'abord, puis implement.)
 
 prompt rework_human_instructions:
-  L'architect-rework a un doute fonctionnel et REFUSE de deviner. Question relayee : {{outputs.architect_rework.question}}. Donne la reponse/arbitrage ; on re-invoque architect_rework avec le feedback clarifie. En mode e2e-regression (background) le doute pose dispatch=escalate et halte le loop jusqu'a ta decision.
+  L'architect-rework a un doute fonctionnel et REFUSE de deviner. Question relayee : {{outputs.architect_rework.question}}. Mets ta reponse/ton arbitrage dans le champ `feedback` (texte libre) — il est transmis TEL QUEL a architect_rework (change_request) qui re-cadre avec. En mode e2e-regression (background) le doute pose dispatch=escalate et halte le loop jusqu'a ta decision.
 
 prompt accept_gate_instructions:
-  L'epic #{{vars.issue}} est implemente (PR ouverte, doc regeneree, gate E2E verte). TESTE-le : review app https://egapro-<branch>-<hash>.ovh.fabrique.social.gouv.fr (depuis les checks/deploiement de la PR) et/ou local '/open <PR>'. Apres test : 'Tout est bon' = approuver -> done (c'est TOI qui passes le ticket In review/Done et merges epic/{{vars.issue}} -> alpha). 'Demander des changements' = refuser -> architect_rework user-feedback (reset gate E2E, relance le loop), boucle jusqu'a 'Tout est bon'.
+  L'epic #{{vars.issue}} est implemente (PR ouverte, doc regeneree, gate E2E verte). TESTE-le : review app https://egapro-<branch>-<hash>.ovh.fabrique.social.gouv.fr (depuis les checks/deploiement de la PR) et/ou local '/open <PR>'. Apres test : 'Tout est bon' = approuver -> done (c'est TOI qui passes le ticket In review/Done et merges epic/{{vars.issue}} -> alpha). 'Demander des changements' = refuser ET decrire PRECISEMENT les changements demandes dans le champ `feedback` — ce texte part TEL QUEL a architect_rework (mode user-feedback : reset gate E2E, tickets de fix, relance), boucle jusqu'a 'Tout est bon'.
 
 ## ═══════════════════════════════════════════════════════════════════
 ## STEP 0/1 — entrée, précondition analyse (réception du handoff /analyse), dispatch mode
 ## ═══════════════════════════════════════════════════════════════════
 ## STEP 0 — récupère type/state/labels de l'issue (résilient si arg vide). Alimente les 2 routers.
 tool fetch_issue:
-  command: `cd {{vars.egapro_dir}} && gh issue view {{vars.issue}} --repo {{vars.repo}} --json number,title,body,issueType,labels,state --jq '{number, title, body, issueType: .issueType.name, labels:[.labels[].name], state}' 2>/dev/null || echo "(pas d'issue — préciser le numéro et relancer /implement)"`
+  command: `cd {{vars.egapro_dir}} && N={{vars.issue}} && J=$(gh issue view "$N" --repo {{vars.repo}} --json number,title,body,issueType,labels,state --jq '{number, title, body, issueType: (.issueType.name // ""), labels:[.labels[].name], state}') && S=$(echo "$J" | jq -r .state) && { [ "$S" = "OPEN" ] || echo "WARN: issue $N est $S (pas OPEN)" >&2; } && echo "$J"`
   output: issue_json
 
 ## STEP 1 — réception du handoff /analyse : marqueur présent ? Task→`## Analyse architecte`,
@@ -251,19 +259,22 @@ router detect_mode:
 ## (crée epic/<N> depuis origin/alpha si absente — c'est la BASE du fan-out). iterion EST le driver :
 ## plus de nohup epic_loop.sh ni de ticks bash, le moteur ordonnance les branches lui-même.
 tool epic_guard:
-  command: `cd {{vars.egapro_dir}} && if [ -n "$(git status --porcelain --untracked-files=no)" ]; then echo "WORKTREE_DIRTY — commit ou stash avant /implement {{vars.issue}}" && exit 1; fi && bash scripts/orchestration/ensure_epic_branch.sh {{vars.issue}} && echo "[E1 OK] epic/{{vars.issue}} prete — base du fan-out = origin/epic/{{vars.issue}}"`
+  command: `cd {{vars.egapro_dir}} && N={{vars.issue}}; C=$(pgrep -cf "iterion run.*issue=$N([^0-9]|\$)" 2>/dev/null); if [ "${C:-1}" -gt 1 ]; then echo "DOUBLE-RUN — un autre /implement tourne deja pour {{vars.issue}} ($C process iterion) ; attendre ou pkill avant de relancer" && exit 1; fi && bash scripts/orchestration/set_ticket_status.sh {{vars.issue}} "In progress" >/dev/null 2>&1 || true; if [ -n "$(git status --porcelain --untracked-files=no)" ]; then echo "WORKTREE_DIRTY — commit ou stash avant /implement {{vars.issue}}" && exit 1; fi && bash scripts/orchestration/ensure_epic_branch.sh {{vars.issue}} && echo "[E1 OK] epic/{{vars.issue}} prete — base du fan-out = origin/epic/{{vars.issue}}"`
   output: status_out
 
-## 🔧 EPIC PLAN — émet le DAG des sous-tickets RESTANTS (To Do, non mergés) : {id, deps[], model, base}.
-## epic_dag.sh = pendant data-driven de dispatch_plan.sh : deps = parents `## Depends on` ENCORE restants
-## (un parent déjà squash-mergé sort du To Do donc disparaît = dépendance satisfaite). Re-émis à chaque round.
+## 🔧 EPIC PLAN — émet le DAG des sous-tickets RESTANTS : {id, deps[], model, base} + held (tickets gelés
+## dispatch=escalate). Signal canonique « done » = PR MERGÉE référençant le ticket (closedByPullRequests-
+## References, board décoratif) : un ticket laissé In progress par un run crashé RESTE restant → une
+## relance le re-dispatche (pas de fausse convergence). epic_dag.sh échoue BRUYAMMENT (exit 1) sur erreur
+## API GitHub — le nœud échoue alors, jamais de plan vide silencieux. Re-émis à chaque round.
 tool epic_plan:
-  command: `cd {{vars.egapro_dir}} && bash scripts/orchestration/epic_dag.sh {{vars.issue}} | jq -c '{tickets: .tickets, has_tickets: ((.tickets|length) > 0)}'`
+  command: `cd {{vars.egapro_dir}} && J=$(bash scripts/orchestration/epic_dag.sh {{vars.issue}}) && echo "$J" | jq -c '{tickets: .tickets, has_tickets: ((.tickets|length) > 0), all_done: (((.tickets|length) == 0) and ((.held // 0) == 0))}'`
   output: tickets_out
 
-## 🔀 epic_plan_route (déterministe) : has_tickets → epic_dispatch (fan-out normal) ; sinon (0 ticket
-## restant = tous les sous-tickets déjà squash-mergés, cas d'une REPRISE) → e2e_dev directement (fin
-## d'epic), au lieu du fan_out_each vide qui route vers `fail`.
+## 🔀 epic_plan_route (déterministe) : has_tickets → epic_dispatch (fan-out normal) ; all_done (0 restant
+## ET 0 held = tous squash-mergés, cas d'une REPRISE) → rebase_epic puis e2e_dev (fin d'epic) ; fallback
+## (0 dispatchable mais des tickets gelés dispatch=escalate) → epic_incomplete : on n'ouvre JAMAIS la
+## fin d'epic par-dessus un ticket en hold.
 router epic_plan_route:
   mode: condition
 
@@ -304,6 +315,7 @@ subbot run_ticket:
   source: "egapro_implement_ticket.bot"
   with { issue: "{{outputs.ticket_setup.id}}", base_branch: "{{outputs.ticket_setup.base}}", working_branch: "{{outputs.ticket_setup.working_branch}}", model: "{{outputs.ticket_setup.model}}", issue_type: "Task" }
   output: ticket_verdict
+  needs: worktree_slot
 
 ## 🔧 MERGE INTO EPIC (par branche) — squash-merge la PR VALIDÉE dans epic/<N> (merge_validated_ticket.sh).
 ## La FIN de cette branche est LE signal qui débloque les tickets enfants (depends_on). Branche auto-supprimée.
@@ -312,9 +324,10 @@ tool merge_into_epic:
   output: status_out
 
 ## 🔧 EPIC COLLECT — CONVERGENCE du fan-out (await: best_effort → un ticket KO ne tue que ses dépendants,
-## pas les frères). all_merged=true SSI epic_dag n'émet plus aucun ticket restant (tous squash-mergés).
+## pas les frères). all_merged=true SSI epic_dag n'émet plus AUCUN restant NI held (signal canonique =
+## PR mergée par ticket). Échec API epic_dag ⇒ all_merged=false (fail-safe, jamais de fausse convergence).
 tool epic_collect:
-  command: `cd {{vars.egapro_dir}} && REM=$(bash scripts/orchestration/epic_dag.sh {{vars.issue}} | jq -r '.tickets | length' 2>/dev/null || echo 0) && if [ "$REM" = "0" ]; then printf '{"all_merged":true,"remaining":""}'; else printf '{"all_merged":false,"remaining":"%s sous-ticket(s) non merge(s) — echec/refacto/escalation"}' "$REM"; fi`
+  command: `cd {{vars.egapro_dir}} && if J=$(bash scripts/orchestration/epic_dag.sh {{vars.issue}}); then REM=$(echo "$J" | jq -r '.tickets | length'); HELD=$(echo "$J" | jq -r '.held // 0'); if [ "$REM" = "0" ] && [ "$HELD" = "0" ]; then printf '{"all_merged":true,"remaining":""}'; else printf '{"all_merged":false,"remaining":"%s sous-ticket(s) non merge(s) + %s en dispatch=escalate"}' "$REM" "$HELD"; fi; else printf '{"all_merged":false,"remaining":"epic_dag en echec (API GitHub) — convergence NON confirmee, relancer"}'; fi`
   output: epic_collect_out
   await: best_effort
 
@@ -335,7 +348,7 @@ tool epic_incomplete:
 ## branche linkée (create_linked_branch.sh) + statut In progress (set_ticket_status.sh) — ÉCRITS
 ## RÉELS sur GitHub/board. Le worktree+setup-worktree.sh (port libre) est annoté (placeholder).
 tool task_setup:
-  command: `cd {{vars.egapro_dir}} && N={{vars.issue}} && REPO={{vars.repo}} && BASE=$(gh issue view "$N" --repo "$REPO" --json parent --jq 'if .parent then "origin/epic/" + (.parent.number|tostring) else "origin/alpha" end' 2>/dev/null || echo origin/alpha) && TYPE=$(gh issue view "$N" --repo "$REPO" --json issueType --jq '.issueType.name' 2>/dev/null || echo Bug) && MODEL=sonnet && (gh issue view "$N" --repo "$REPO" --json labels --jq '.labels[].name' 2>/dev/null | grep -qx complexe && MODEL=opus || true) && BR=$(git ls-remote --heads origin "ticket/$N-*" 2>/dev/null | awk '{print $2}' | sed 's#refs/heads/##' | head -1) && if [ -z "$BR" ]; then BR=$(bash scripts/orchestration/create_linked_branch.sh "$N" "$BASE" 2>/dev/null | tail -1); fi && if [ -z "$BR" ]; then SLUG=$(gh issue view "$N" --repo "$REPO" --json title --jq '.title' 2>/dev/null | iconv -t ascii//translit 2>/dev/null | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//' | cut -c1-45); BR="ticket/$N-$SLUG"; git fetch origin --quiet 2>/dev/null; git push origin "$BASE:refs/heads/$BR" >/dev/null 2>&1; fi && bash scripts/orchestration/set_ticket_status.sh "$N" "In progress" >/dev/null 2>&1 || true && jq -nc --arg t "$TYPE" --arg base "$BASE" --arg wb "$BR" --arg model "$MODEL" '{issue_type:$t,base_branch:$base,working_branch:$wb,model:$model,attempt:"1",handback_reason:""}'`
+  command: `cd {{vars.egapro_dir}} && N={{vars.issue}}; C=$(pgrep -cf "iterion run.*issue=$N([^0-9]|\$)" 2>/dev/null); if [ "${C:-1}" -gt 1 ]; then echo "DOUBLE-RUN — un autre /implement tourne deja pour {{vars.issue}}" && exit 1; fi && N={{vars.issue}} && REPO={{vars.repo}} && BASE=$(gh issue view "$N" --repo "$REPO" --json parent --jq 'if .parent then "origin/epic/" + (.parent.number|tostring) else "origin/alpha" end' 2>/dev/null || echo origin/alpha) && TYPE=$(gh issue view "$N" --repo "$REPO" --json issueType --jq '.issueType.name' 2>/dev/null || echo Bug) && MODEL=sonnet && (gh issue view "$N" --repo "$REPO" --json labels --jq '.labels[].name' 2>/dev/null | grep -qx complexe && MODEL=opus || true) && BR=$(git ls-remote --heads origin "ticket/$N-*" 2>/dev/null | awk '{print $2}' | sed 's#refs/heads/##' | head -1) && if [ -z "$BR" ]; then BR=$(bash scripts/orchestration/create_linked_branch.sh "$N" "$BASE" 2>/dev/null | tail -1); fi && if [ -z "$BR" ]; then SLUG=$(gh issue view "$N" --repo "$REPO" --json title --jq '.title' 2>/dev/null | iconv -t ascii//translit 2>/dev/null | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//' | cut -c1-45); BR="ticket/$N-$SLUG"; git fetch origin --quiet 2>/dev/null; git push origin "$BASE:refs/heads/$BR" >/dev/null 2>&1; fi && bash scripts/orchestration/set_ticket_status.sh "$N" "In progress" >/dev/null 2>&1 || true && jq -nc --arg t "$TYPE" --arg base "$BASE" --arg wb "$BR" --arg model "$MODEL" '{issue_type:$t,base_branch:$base,working_branch:$wb,model:$model,attempt:"1",handback_reason:""}'`
   output: task_ctx
 
 ## 🪢🤖 RUN TICKET TASK — comme run_ticket (epic) mais pour un ticket Task OU Bug standalone
@@ -348,6 +361,7 @@ subbot run_ticket_task:
   source: "egapro_implement_ticket.bot"
   with { issue: "{{vars.issue}}", base_branch: "{{outputs.task_setup.base_branch}}", working_branch: "{{outputs.task_setup.working_branch}}", model: "{{outputs.task_setup.model}}", issue_type: "{{outputs.task_setup.issue_type}}" }
   output: verdict5_out
+  needs: worktree_slot
 
 ## ═══════════════════════════════════════════════════════════════════
 ## GATE E2E bloquante de fin de pipeline (e2e-dev) + hub de rework (architect-rework)
@@ -385,7 +399,7 @@ router rework_route:
 ## 👤 doute fonctionnel d'architect-rework : relaie la question, récupère l'arbitrage, re-invoque
 ## architect_rework (rework_loop≤5) ; refus → fail.
 human rework_human:
-  output: gate_out
+  output: gate_fb_out
   instructions: rework_human_instructions
   interaction: human
 
@@ -410,13 +424,21 @@ tool open_final_pr:
 ## 👤 EPIC E6 — gate d'acceptation utilisateur (dernière avant le merge epic/<N>→alpha, qui reste manuel).
 ## Inviter à tester (review app / /open <PR>). Approuver→done ; refuser→reset_e2e_gate puis rework user-feedback.
 human accept_gate:
-  output: gate_out
+  output: gate_fb_out
   instructions: accept_gate_instructions
   interaction: human
 
 ## 🔀 acceptation (déterministe) : approved→done ; fallback inconditionnel → reset_e2e_gate (puis rework).
 router accept_route:
   mode: condition
+
+## 🔧 EPIC E5bis — rebase epic/<N> sur origin/alpha AVANT la gate E2E (fraîcheur : la gate valide le
+## code tel qu'il sera mergé). rebase_epic_branch.sh opère dans SON worktree dédié (/tmp/egapro-rebase-
+## epic<N>) ; sur conflit il commente l'epic + pose dispatch=escalate + exit 2 → le run échoue (halt,
+## comportement de la référence epic_loop.sh).
+tool rebase_epic:
+  command: `cd {{vars.egapro_dir}} && bash scripts/orchestration/rebase_epic_branch.sh {{vars.issue}} && printf '{"result":"epic rebasee sur origin/alpha"}'`
+  output: status_out
 
 ## 🔧 EPIC E7 — réinitialise l'état de la gate E2E (le nouveau code doit re-valider) puis route vers
 ## architect_rework en mode user-feedback.
@@ -448,6 +470,9 @@ tool rework_stop:
 workflow egapro_implement_agents:
   entry: fetch_issue
 
+  resources:
+    worktree_slot: ["0", "1", "2", "3", "4"]
+
   budget:
     max_parallel_branches: 5
     max_duration: "12h"
@@ -455,11 +480,12 @@ workflow egapro_implement_agents:
     max_tokens: 8000000
     max_iterations: 60
 
-  ## Concurrence du fan-out epic bornée à 5 sub-runs lourds simultanés par budget.max_parallel_branches.
-  ## Isolation des répertoires : `worktree: auto` hérité par l'enfant (un worktree par sub-run). NB : le
-  ## lease NOMMÉ `worktree_slot` (`needs:` sur run_ticket/run_ticket_task) a été RETIRÉ — iterion ne
-  ## supporte pas `needs:` sur un nœud `subbot` (E012), et le port-lease `_lease_worktree_slot` était
-  ## vestigial dans le bot aplati (garde-fou functional-validator : aucun dev server provisionné).
+  ## Concurrence du fan-out epic : bornée par budget.max_parallel_branches ET par le pool de leases
+  ## `worktree_slot` (5 instances "0".."4"). `needs: worktree_slot` sur run_ticket/run_ticket_task loue
+  ## un index DISTINCT par sub-run, injecté dans l'enfant comme `_lease_worktree_slot` → index
+  ## setup-worktree.sh + port dev 3001+slot (fini les collisions COMPOSE_PROJECT_NAME/port). Requiert
+  ## le fix parser iterion (PR #65 : `needs:` sur subbot jetait E012 à tort — keyword TokenNeeds).
+  ## Isolation des répertoires : `worktree: auto` hérité par l'enfant (un worktree par sub-run).
 
   fetch_issue -> check_analyse with { issueType: "{{outputs.fetch_issue.issueType}}" }
 
@@ -482,7 +508,9 @@ workflow egapro_implement_agents:
 
   epic_plan_route -> epic_dispatch when "outputs.epic_plan.has_tickets == true"
 
-  epic_plan_route -> e2e_dev
+  epic_plan_route -> rebase_epic when "outputs.epic_plan.all_done == true"
+
+  epic_plan_route -> epic_incomplete with { remaining: "sous-ticket(s) en dispatch=escalate (hold) — traiter la question posée sur l'epic, lever le label, puis relancer /implement" }
 
   ## UNE seule arête sortante du fan_out_each (template, inconditionnelle). Le ticket est lié comme
   ## `ticket` ; ses champs par-item DOIVENT transiter par with-mapping (le scope {{outputs.*}} d'une
@@ -504,7 +532,9 @@ workflow egapro_implement_agents:
 
   epic_collect -> epic_collect_route
 
-  epic_collect_route -> e2e_dev when "outputs.epic_collect.all_merged == true"
+  epic_collect_route -> rebase_epic when "outputs.epic_collect.all_merged == true"
+
+  rebase_epic -> e2e_dev with { scope: "epic", trigger_mode: "epic-end", base_ref: "origin/alpha", worktree_path: "(auto-provision — étape 0 du prompt)", branch: "epic/{{vars.issue}}" }
 
   epic_collect_route -> epic_incomplete with { remaining: "{{outputs.epic_collect.remaining}}" }
 
@@ -514,7 +544,7 @@ workflow egapro_implement_agents:
   ## Mapping vers les vars de l'enfant porté par le `with{}` du subbot run_ticket_task → arête nue.
   task_setup -> run_ticket_task
 
-  run_ticket_task -> e2e_dev with { pr: "{{outputs.run_ticket_task.pr}}", scope: "ticket", trigger_mode: "ticket", base_ref: "origin/alpha", worktree_path: "{{vars.egapro_dir}}", branch: "HEAD" }
+  run_ticket_task -> e2e_dev with { pr: "{{outputs.run_ticket_task.pr}}", scope: "ticket", trigger_mode: "ticket", base_ref: "{{outputs.task_setup.base_branch}}", worktree_path: "(auto-provision — étape 0 du prompt)", branch: "{{outputs.task_setup.working_branch}}" }
 
   e2e_dev -> e2e_route
 
@@ -522,7 +552,7 @@ workflow egapro_implement_agents:
 
   e2e_route -> task_handoff when "outputs.e2e_dev.status == 'validated'" with { pr: "{{outputs.run_ticket_task.pr}}" }
 
-  e2e_route -> architect_rework when "outputs.e2e_dev.status == 'regression'" as e2e_rework(3)
+  e2e_route -> architect_rework when "outputs.e2e_dev.status == 'regression'" as e2e_rework(3) with { source: "e2e-regression", change_request: "" }
 
   e2e_route -> e2e_stop
 
@@ -534,7 +564,7 @@ workflow egapro_implement_agents:
 
   rework_route -> rework_stop
 
-  rework_human -> architect_rework when approved as rework_loop(5)
+  rework_human -> architect_rework when approved as rework_loop(5) with { source: "user-feedback", change_request: "{{outputs.rework_human.feedback}}" }
 
   rework_human -> fail
 
@@ -548,7 +578,7 @@ workflow egapro_implement_agents:
 
   accept_route -> reset_e2e_gate
 
-  reset_e2e_gate -> architect_rework
+  reset_e2e_gate -> architect_rework with { source: "user-feedback", change_request: "{{outputs.accept_gate.feedback}}" }
 
   task_handoff -> done
 
