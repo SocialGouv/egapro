@@ -31,6 +31,10 @@ import { env } from "~/env";
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
+	if (pathname === "/api/search") {
+		return searchRedirect(request);
+	}
+
 	if (pathname.startsWith("/api/v1/")) {
 		return gatewayMiddleware(request);
 	}
@@ -40,6 +44,14 @@ export async function middleware(request: NextRequest) {
 	}
 
 	return sessionMiddleware(request);
+}
+
+function searchRedirect(request: NextRequest) {
+	const target = new URL("/api/public/declarations", request.url);
+	for (const [key, value] of request.nextUrl.searchParams.entries()) {
+		target.searchParams.append(key === "section_naf" ? "naf" : key, value);
+	}
+	return NextResponse.redirect(target, 308);
 }
 
 function redirectToLogin(request: NextRequest) {
@@ -124,6 +136,7 @@ export const config = {
 	matcher: [
 		"/admin/:path*",
 		"/api/v1/:path*",
+		"/api/search",
 		"/mon-espace/:path*",
 		"/declaration-remuneration/:path*",
 		"/avis-cse/:path*",
