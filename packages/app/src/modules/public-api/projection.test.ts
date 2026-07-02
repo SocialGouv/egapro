@@ -142,6 +142,32 @@ describe("toPublicDeclaration", () => {
 		}
 	});
 
+	it("derives diffusibility from a non-null address when statutDiffusion is null", () => {
+		const dto = toPublicDeclaration(declarationFixture, {
+			...companyFixture,
+			statutDiffusion: null,
+		});
+
+		expect(dto.name).toBe("Société Démo");
+		expect(dto.address).toBe("1 rue de la Paix, 75002 Paris");
+		expect(dto.region).toBe("Île-de-France");
+		expect(dto.nafCode).toBe("62.01Z");
+	});
+
+	it("masks company identity when statutDiffusion is null and the address is null", () => {
+		const dto = toPublicDeclaration(declarationFixture, {
+			...companyFixture,
+			statutDiffusion: null,
+			address: null,
+		});
+
+		for (const field of MASKED_COMPANY_FIELDS) {
+			expect(dto[field]).toBeNull();
+		}
+		expect(dto.siren).toBe("123456789");
+		expect(dto.workforceEma).toBe(250);
+	});
+
 	it("keeps siren, year, workforceEma and every indicator for a non-diffusible company", () => {
 		const diffusible = toPublicDeclaration(declarationFixture, companyFixture);
 		const nonDiffusible = toPublicDeclaration(declarationFixture, {
