@@ -507,6 +507,7 @@ export const companies = createTable("company", (d) => ({
 	departmentLabel: d.varchar({ length: 255 }),
 	workforce: d.integer(),
 	hasCse: d.boolean(),
+	statutDiffusion: d.varchar({ length: 1 }),
 	createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 	updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 }));

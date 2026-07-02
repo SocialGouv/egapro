@@ -36,6 +36,15 @@ describe("AUDIT_ACTIONS", () => {
 			AUDIT_ACTION_CATEGORIES[AUDIT_ACTIONS.DECLARATION_LOCK_STATE_READ],
 		).toBe("read_sensitive");
 	});
+
+	it("maps the public declarations export to the export category (365-day retention)", () => {
+		expect(AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT).toBe(
+			"public_declarations.export",
+		);
+		expect(
+			AUDIT_ACTION_CATEGORIES[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT],
+		).toBe("export");
+	});
 });
 
 describe("retention constants", () => {
