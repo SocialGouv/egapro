@@ -4,7 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { HeaderQuickAccessItem } from "@codegouvfr/react-dsfr/Header";
 import { ConfigContext } from "@components/utils/ConfigProvider";
 import { Skeleton } from "@design-system/utils/client/skeleton";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useContext } from "react";
 
 import { HeaderAccountMenu } from "./HeaderAccountMenu";
@@ -58,13 +58,9 @@ export const LoginLogoutHeaderItem = () => {
             iconId: "fr-icon-lock-unlock-line",
             buttonProps: {
               className: fr.cx("fr-btn--secondary"),
-              onClick(e) {
+              async onClick(e) {
                 e.preventDefault();
-                // RP-initiated logout: our route clears the local session and
-                // redirects to the ProConnect end_session_endpoint so the IdP
-                // session is terminated too. Without it the next login is
-                // silently re-authenticated on the previous organization.
-                window.location.href = "/api/auth/logout";
+                await signOut({ callbackUrl: "/" });
               },
             },
             text: "Se déconnecter",

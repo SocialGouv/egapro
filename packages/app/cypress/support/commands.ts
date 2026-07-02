@@ -60,22 +60,51 @@ Cypress.Commands.add("checkUrl", url => {
   cy.get("#content").click({ force: true });
 });
 
-Cypress.Commands.add("loginWithProConnect", () => {
-  // Cypress cannot drive the real ProConnect OIDC flow: it spans external
-  // superdomains (fca.integ01 / test-idp) and cy.origin loses the NextAuth
-  // state/PKCE cookies, so the callback fails with "State cookie was missing".
-  // Use the dev-only /api/test-login bypass (disabled in prod) that establishes
-  // the session for the fixed ProConnect sandbox test account server-side.
-  cy.session(
-    "proconnect-test-user",
-    () => {
-      cy.request("POST", "/api/test-login").its("status").should("eq", 200);
-    },
-    {
-      cacheAcrossSpecs: true,
-      validate() {
-        cy.request("/api/auth/session").its("body.user.email").should("be.a", "string");
-      },
-    },
-  );
+Cypress.Commands.add("loginWithKeycloak", () => {
+  const keycloakUrl = Cypress.env("KEYCLOAK_URL") as string;
+
+  // Clear all cookies to ensure clean login
+  cy.clearAllCookies();
+  cy.clearAllSessionStorage();
+  cy.clearAllLocalStorage();
+
+  cy.visit("/login");
+  cy.checkUrl("/login");
+  cy.get(".fr-connect").click();
+
+  const username = Cypress.env("E2E_USERNAME");
+  const password = Cypress.env("E2E_PASSWORD");
+
+  // cy.origin() is needed when the app and Keycloak are on different ports of the
+  // same host (local dev: localhost:3000 vs localhost:8180). In CI, they are on
+  // different subdomains of the same domain (*.ovh.fabrique.social.gouv.fr) which
+  // Cypress treats as same superdomain, so cy.origin() must NOT be used.
+  const baseUrl = new URL(Cypress.config("baseUrl")!);
+  const keycloakParsed = new URL(keycloakUrl);
+  const needsCrossOrigin = baseUrl.hostname === keycloakParsed.hostname && baseUrl.port !== keycloakParsed.port;
+
+  if (needsCrossOrigin) {
+    cy.origin(keycloakUrl, { args: { username, password } }, ({ username, password }) => {
+      // Wait for form or handle SSO auto-redirect (no form if already authenticated)
+      cy.get("body", { timeout: 30000 }).then(($body) => {
+        if ($body.find('input[id="username"]').length > 0) {
+          cy.get('input[id="username"]').clear().type(username);
+          cy.get('input[id="password"]').clear().type(password);
+          cy.get("form").submit();
+        }
+      });
+    });
+  } else {
+    // Same superdomain (CI): interact directly without cy.origin()
+    // Must wait for the redirect to Keycloak before interacting with the form,
+    // otherwise cy.get("body") resolves on the app page before navigation occurs.
+    cy.url({ timeout: 30000 }).should("include", keycloakParsed.hostname);
+    cy.get('input[id="username"]', { timeout: 30000 }).clear().type(username);
+    cy.get('input[id="password"]').clear().type(password);
+    cy.get("form").submit();
+  }
+
+  // Wait for redirect back to app origin after Keycloak login
+  cy.url({ timeout: 30000 }).should("include", Cypress.config("baseUrl")!);
+  cy.get(".fr-header__tools-links", { timeout: 30000 }).should("exist");
 });

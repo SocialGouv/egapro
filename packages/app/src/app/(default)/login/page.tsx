@@ -1,9 +1,11 @@
 import { authConfig } from "@api/core-domain/infra/auth/config";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { config } from "@common/config";
 import { type NextServerPageProps } from "@common/utils/next";
 import { Box, CenteredContainer, Link } from "@design-system";
 import { getServerSession } from "next-auth";
 
+import { EmailLogin } from "./EmailLogin";
 import { GithubLogin } from "./GithubLogin";
 import { ProConnectLogin } from "./ProConnectLogin";
 
@@ -36,6 +38,7 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
   const session = await getServerSession(authConfig);
   const callbackUrl = typeof searchParams.callbackUrl === "string" ? searchParams.callbackUrl : "";
   const error = typeof searchParams.error === "string" ? searchParams.error : "";
+  const isEmailLogin = config.api.security.auth.isEmailLogin;
 
   return (
     <CenteredContainer py="6w">
@@ -54,53 +57,61 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
               <br />
             </>
           )}
-          <Alert
-            severity="info"
-            small
-            description={
-              <>
-                <p>
-                  Egapro utilise le service d’identification ProConnect (anciennement MonComptePro) afin de garantir
-                  l’appartenance de ses utilisateurs aux entreprises déclarantes.
-                </p>
-                <br />
-                <p>
-                  Pour s'identifier avec ProConnect, il convient d'utiliser une <b>adresse email professionnelle</b>,
-                  celle-ci doit correspondre à la personne à contacter par les services de l'inspection du travail en
-                  cas de besoin.
-                </p>
-                <br />
-                <p>
-                  <strong>
-                    Les tiers déclarants (comptables...) ne sont pas autorisés à déclarer pour le compte de leur
-                    entreprise cliente. Cette dernière doit créer son propre compte ProConnect pour déclarer sur
-                    Egapro.
-                  </strong>
-                </p>
-                <br />
-                <p className={"text-dsfr-error"}>
-                  Si vous utilisez une protection contre les spams (ex. MailInBlack), vous devez contacter votre
-                  service informatique pour qu'il autorise les mails en provenance de ProConnect.
-                </p>
-                <br />
-                <p className={"text-dsfr-error"}>
-                  Pour tout problème lié à ProConnect, vous devez contacter le support dédié via le centre d'aide{" "}
-                  <Link href="https://proconnect.crisp.help/fr/" target={"_blank"}>
-                    https://proconnect.crisp.help/fr/
-                  </Link>
-                </p>
-                <br />
-                <p>
-                  Pour consulter l'aide,{" "}
-                  <Link href={"/aide-proconnect"} target={"_blank"}>
-                    cliquez ici
-                  </Link>
-                </p>
-              </>
-            }
-          />
+          {!isEmailLogin && (
+            <Alert
+              severity="info"
+              small
+              description={
+                <>
+                  <p>
+                    Egapro utilise le service d’identification ProConnect (anciennement MonComptePro) afin de garantir
+                    l’appartenance de ses utilisateurs aux entreprises déclarantes.
+                  </p>
+                  <br />
+                  <p>
+                    Pour s'identifier avec ProConnect, il convient d'utiliser une <b>adresse email professionnelle</b>,
+                    celle-ci doit correspondre à la personne à contacter par les services de l'inspection du travail en
+                    cas de besoin.
+                  </p>
+                  <br />
+                  <p>
+                    <strong>
+                      Les tiers déclarants (comptables...) ne sont pas autorisés à déclarer pour le compte de leur
+                      entreprise cliente. Cette dernière doit créer son propre compte ProConnect pour déclarer sur
+                      Egapro.
+                    </strong>
+                  </p>
+                  <br />
+                  <p className={"text-dsfr-error"}>
+                    Si vous utilisez une protection contre les spams (ex. MailInBlack), vous devez contacter votre
+                    service informatique pour qu'il autorise les mails en provenance de ProConnect.
+                  </p>
+                  <br />
+                  <p className={"text-dsfr-error"}>
+                    Pour tout problème lié à ProConnect, vous devez contacter le support dédié via le centre d'aide{" "}
+                    <Link href="https://proconnect.crisp.help/fr/" target={"_blank"}>
+                      https://proconnect.crisp.help/fr/
+                    </Link>
+                  </p>
+                  <br />
+                  <p>
+                    Pour consulter l'aide,{" "}
+                    <Link href={"/aide-proconnect"} target={"_blank"}>
+                      cliquez ici
+                    </Link>
+                  </p>
+                </>
+              }
+            />
+          )}
           <Box className="text-center" mt="2w">
-            <ProConnectLogin callbackUrl={callbackUrl} />
+            {isEmailLogin ? (
+              <EmailLogin callbackUrl={callbackUrl} />
+            ) : (
+              <>
+                <ProConnectLogin callbackUrl={callbackUrl} />
+              </>
+            )}
             <GithubLogin callbackUrl={callbackUrl} />
           </Box>
         </>

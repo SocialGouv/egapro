@@ -1,19 +1,18 @@
-import {
-  type Organization,
-  type ProConnectProfile,
-  ProConnectProvider,
-} from "@api/core-domain/infra/auth/ProConnectProvider";
+import { type Organization, type ProConnectProfile, ProConnectProvider } from "@api/core-domain/infra/auth/ProConnectProvider";
 import { companiesUtils, type Company } from "@api/core-domain/infra/companies-store";
+import { globalMailerService } from "@api/core-domain/infra/mail";
 import { ownershipRepo } from "@api/core-domain/repo";
 import { SyncOwnership } from "@api/core-domain/useCases/SyncOwnership";
 import { logger } from "@api/utils/pino";
 import { config } from "@common/config";
 import { assertImpersonatedSession } from "@common/core-domain/helpers/impersonate";
+import { UnexpectedError } from "@common/shared-domain";
 import { Email } from "@common/shared-domain/domain/valueObjects";
 import { Octokit } from "@octokit/rest";
 import jwt, { sign, verify } from "jsonwebtoken";
 import { type AuthOptions, type Session } from "next-auth";
 import { type DefaultJWT, type JWT } from "next-auth/jwt";
+import EmailProvider from "next-auth/providers/email";
 import GithubProvider, { type GithubProfile } from "next-auth/providers/github";
 
 import { egaproNextAuthAdapter } from "./EgaproNextAuthAdapter";
@@ -45,8 +44,6 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT, Session {
     email: string;
-    // ProConnect id_token, kept for RP-initiated logout (id_token_hint).
-    id_token?: string | null;
   }
 }
 
@@ -111,6 +108,15 @@ export const authConfig: AuthOptions = {
     maxAge: config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60, // 24 hours in prod and preprod, 7 days in dev
   },
   providers: [
+    EmailProvider({
+      async sendVerificationRequest({ identifier: to, url }) {
+        await globalMailerService.init();
+        const [, rejected] = await globalMailerService.sendMail("login_sendVerificationUrl", { to }, url);
+        if (rejected.length) {
+          throw new UnexpectedError(`Cannot send verification request to email(s) : ${rejected.join(", ")}`);
+        }
+      },
+    }),
     GithubProvider({
       ...config.api.security.github,
       ...(useCharon && charonGithubUrl
@@ -193,10 +199,6 @@ export const authConfig: AuthOptions = {
           }
         }
         if (trigger !== "signUp") return token;
-        // Keep the ProConnect id_token for RP-initiated logout.
-        if (account?.id_token) {
-          token.id_token = account.id_token;
-        }
         token.user = {
           companiesHash: "",
           email: token.email,
@@ -227,10 +229,10 @@ export const authConfig: AuthOptions = {
           }
         } else {
           // Handle both formats:
-          // - Array of Organization objects (legacy moncomptepro / Keycloak local)
+          // - Array of Organization objects (ProConnect production)
           // - Comma-separated SIREN string (Keycloak local)
           const rawOrganizations = profile?.organizations;
-          let organizations: Organization[] =
+          const organizations: Organization[] =
             typeof rawOrganizations === "string"
               ? rawOrganizations
                   .split(",")
@@ -247,25 +249,6 @@ export const authConfig: AuthOptions = {
                   }))
               : (rawOrganizations ?? []).filter(orga => !!orga);
 
-          // ProConnect (eidas0) does not return `organizations[]`: the active
-          // organization the user selected in the ProConnect picker comes as a
-          // single `siret` claim. Derive the active org from it so the declarant
-          // session carries their company (otherwise companies stays empty).
-          if (organizations.length === 0 && profile?.siret) {
-            const siret = String(profile.siret);
-            organizations = [
-              {
-                id: 1,
-                siren: siret.substring(0, 9),
-                siret,
-                label: null,
-                is_collectivite_territoriale: false,
-                is_external: false,
-                is_service_public: false,
-              },
-            ];
-          }
-
           const sirenList = organizations.map(orga => orga.siren || orga.siret.substring(0, 9));
           if (profile?.email && sirenList.length > 0) {
             try {
@@ -275,13 +258,7 @@ export const authConfig: AuthOptions = {
               logger.error({ error }, "Error while syncing ownerships");
             }
           }
-          // ProConnect mono-entreprise: the session carries only the single
-          // active organization the user authenticated as (the one selected in
-          // the ProConnect picker). Switching company requires re-authentication.
-          // Ownership of every org ProConnect returns is still synced above, so
-          // historical access to the user's other companies is preserved in DB.
-          const activeOrganization = organizations.slice(0, 1);
-          const companiesList = activeOrganization.map(orga => ({
+          const companiesList = organizations.map(orga => ({
             siren: orga.siren || orga.siret.substring(0, 9),
             label: orga.label,
           }));
