@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server";
+import type { NextRequest, NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const GATEWAY_SECRET = "test-gateway-shared-secret-at-least-32-chars";
@@ -29,7 +29,11 @@ function makeRequest(
 	);
 	return {
 		url,
-		nextUrl: { pathname: parsed.pathname, search: parsed.search },
+		nextUrl: {
+			pathname: parsed.pathname,
+			search: parsed.search,
+			searchParams: parsed.searchParams,
+		},
 		headers: {
 			get: (name: string) => headerMap.get(name.toLowerCase()) ?? null,
 		},
@@ -200,6 +204,66 @@ describe("gateway middleware (/api/v1/*)", () => {
 				"x-gateway-forwarded": GATEWAY_SECRET,
 			}),
 		);
+		expect(mockGetToken).not.toHaveBeenCalled();
+	});
+});
+
+describe("search redirect (/api/search → /api/public/declarations)", () => {
+	async function redirectTarget(pathnameAndSearch: string): Promise<URL> {
+		const res = (await middleware(
+			makeRequest(pathnameAndSearch),
+		)) as NextResponse;
+		const location = res.headers.get("location");
+		if (location === null) {
+			throw new Error("expected a redirect location header");
+		}
+		return new URL(location);
+	}
+
+	it("redirects to /api/public/declarations with a 308 status", async () => {
+		const res = (await middleware(
+			makeRequest("/api/search"),
+		)) as NextResponse;
+		expect(res.status).toBe(308);
+		expect(new URL(res.headers.get("location") ?? "").pathname).toBe(
+			"/api/public/declarations",
+		);
+	});
+
+	it("preserves the passthrough query params unchanged", async () => {
+		const target = await redirectTarget(
+			"/api/search?q=test&departement=75&region=11&limit=20&offset=40",
+		);
+		expect(target.searchParams.get("q")).toBe("test");
+		expect(target.searchParams.get("departement")).toBe("75");
+		expect(target.searchParams.get("region")).toBe("11");
+		expect(target.searchParams.get("limit")).toBe("20");
+		expect(target.searchParams.get("offset")).toBe("40");
+	});
+
+	it("renames section_naf to naf", async () => {
+		const target = await redirectTarget("/api/search?section_naf=A");
+		expect(target.searchParams.get("naf")).toBe("A");
+		expect(target.searchParams.has("section_naf")).toBe(false);
+	});
+
+	it("renames section_naf while keeping the other params (S7)", async () => {
+		const target = await redirectTarget("/api/search?section_naf=A&q=test");
+		expect(target.pathname).toBe("/api/public/declarations");
+		expect(target.searchParams.get("naf")).toBe("A");
+		expect(target.searchParams.get("q")).toBe("test");
+		expect(target.searchParams.has("section_naf")).toBe(false);
+	});
+
+	it("redirects with no query string when none is provided", async () => {
+		const target = await redirectTarget("/api/search");
+		expect(target.pathname).toBe("/api/public/declarations");
+		expect(target.search).toBe("");
+	});
+
+	it("does not call getToken on /api/search (no JWT parsing on a public redirect)", async () => {
+		mockGetToken.mockReset();
+		await middleware(makeRequest("/api/search?q=test"));
 		expect(mockGetToken).not.toHaveBeenCalled();
 	});
 });
