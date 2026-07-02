@@ -1,3 +1,19 @@
+# [3.18.0](https://github.com/SocialGouv/egapro/compare/v3.17.3...v3.18.0) (2026-07-02)
+
+
+### Bug Fixes
+
+* **declaration:** enforce the closed-company check server-side on creation ([#3701](https://github.com/SocialGouv/egapro/issues/3701)) ([42c4614](https://github.com/SocialGouv/egapro/commit/42c46142725461237fb939903359a26cb372314d))
+* **infra:** [#3593](https://github.com/SocialGouv/egapro/issues/3593) — restaure le téléchargement des référents en V1 ([#3708](https://github.com/SocialGouv/egapro/issues/3708)) ([1aa8b58](https://github.com/SocialGouv/egapro/commit/1aa8b5823c5d385fe842e21020367ada507d0a17))
+* **infra:** aligne archive/http.yaml sur la prod (files priority → 1000000) ([#3767](https://github.com/SocialGouv/egapro/issues/3767)) ([335b8a8](https://github.com/SocialGouv/egapro/commit/335b8a8dab2d5beb0f88400d4dbb83304e893851))
+* **prod/pg:** bump CNPG storage from 8Gi to 20Gi ([#3511](https://github.com/SocialGouv/egapro/issues/3511)) ([26420cd](https://github.com/SocialGouv/egapro/commit/26420cd9ab7fa3b563598feff1e69708a9a365b0))
+* **recherche-entreprise:** retry transient network failures on the company lookup ([#3698](https://github.com/SocialGouv/egapro/issues/3698)) ([c5087b8](https://github.com/SocialGouv/egapro/commit/c5087b86573395bc12c9ffaea567e0b8aff0dd99))
+
+
+### Features
+
+* **epic:** [#3647](https://github.com/SocialGouv/egapro/issues/3647) — Switch la V1 de moncomptepro vers proconnect ([#3697](https://github.com/SocialGouv/egapro/issues/3697)) ([67f9b27](https://github.com/SocialGouv/egapro/commit/67f9b27198a0fd5477b6ca1903b8a2739e49bb4c))
+
 ## [3.17.3](https://github.com/SocialGouv/egapro/compare/v3.17.2...v3.17.3) (2026-05-19)
 
 
