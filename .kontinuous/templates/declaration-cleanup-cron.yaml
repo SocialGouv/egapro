@@ -4,7 +4,7 @@ metadata:
   name: declaration-cleanup-daily
   namespace: {{ .Values.global.namespace }}
 spec:
-  schedule: "0 3 * * *"
+  schedule: "0 3 * * *" # Daily at 03:00 UTC — offset from audit-cleanup (04:00) to avoid overlap
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3

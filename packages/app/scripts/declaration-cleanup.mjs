@@ -112,7 +112,10 @@ export async function runDeclarationCleanup({
 	let failedS3Objects = 0;
 	// S3 deletion is outside the transaction — S3 is not rollbackable, and a
 	// failure deleting an object must not undo committed DB deletes (RGPD data
-	// is already gone). Best-effort: log each error but keep going.
+	// is already gone). Best-effort: keep going on error. The key is never logged
+	// verbatim — it embeds a SIREN and app logs ship to broader-access
+	// aggregators; the failure count is surfaced instead (and via the CronJob
+	// exit code), keeping the audit trail PII-free.
 	for (const key of s3Keys) {
 		try {
 			await deleteObject(key);
@@ -120,7 +123,7 @@ export async function runDeclarationCleanup({
 		} catch (s3Error) {
 			failedS3Objects++;
 			console.error(
-				`[declaration-cleanup] S3 delete failed for key ${key}:`,
+				"[declaration-cleanup] S3 delete failed (key redacted — embeds SIREN):",
 				s3Error,
 			);
 		}
@@ -235,6 +238,7 @@ if (isMain) {
 
 	const sql = postgres(getDatabaseUrl(), { max: 1 });
 
+	let exitCode = 0;
 	try {
 		const result = await runDeclarationCleanup({
 			sql,
@@ -247,12 +251,18 @@ if (isMain) {
 		console.log(
 			`[declaration-cleanup] Success — purgedDeclarations=${result.purgedDeclarations} purgedFiles=${result.purgedFiles} purgedS3Objects=${result.purgedS3Objects} failedS3Objects=${result.failedS3Objects}`,
 		);
-		await sql.end();
-		process.exit(0);
+		if (result.failedS3Objects > 0) {
+			console.error(
+				`[declaration-cleanup] ${result.failedS3Objects} S3 object(s) orphaned (DB purge is committed). Exiting non-zero so the CronJob is marked failed and ops are alerted.`,
+			);
+			exitCode = 1;
+		}
 	} catch (error) {
 		console.error("[declaration-cleanup] Failed:", error);
 		await logFailure(sql, error);
+		exitCode = 1;
+	} finally {
 		await sql.end();
-		process.exit(1);
 	}
+	process.exit(exitCode);
 }

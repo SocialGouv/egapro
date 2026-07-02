@@ -91,10 +91,15 @@ export const env = createEnv({
 			.int()
 			.positive()
 			.default(365),
+		// Retention (years) for declaration data, consumed by the
+		// declaration-cleanup CronJob (packages/app/scripts/declaration-cleanup.mjs,
+		// issue #3134). Default 6 (durée légale retenue). The .max(50) guard catches
+		// a misconfigured value that would silently disable the RGPD purge.
 		EGAPRO_DECLARATION_RETENTION_YEARS: z.coerce
 			.number()
 			.int()
 			.positive()
+			.max(50)
 			.default(6),
 		// MAIL_*, SMTP_* are intentionally NOT declared here — they are consumed
 		// exclusively by the notifications worker (packages/notifications).
