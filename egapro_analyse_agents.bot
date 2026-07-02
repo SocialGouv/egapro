@@ -10,7 +10,9 @@
 ## /implement (cf. egapro_implement_agents.bot).
 ## 
 ## Limite iterion (assumée, annotée), identique au template leviathan_agents.bot :
-## · les 3 modes sont MUTUELLEMENT EXCLUSIFS → router `mode: llm` (détection ≃ Step 0 du skill).
+## · les 3 modes sont MUTUELLEMENT EXCLUSIFS → router `mode: condition` sur l'issueType GitHub
+##   (autorité) ; type absent / description libre → gate humaine mode_gate (le skill DEMANDE le
+##   mode plutôt que d'inférer en silence).
 ## · les gates de validation utilisateur sont GÉRÉS EN INTERNE par chaque agent (le skill ne
 ## ré-interroge pas entre étapes) ; on les matérialise quand même en nœuds `human` car ce
 ## sont de vrais points de pause qui gatent la suite (l'agent attend le commentaire
@@ -26,11 +28,19 @@
 ## STEP 0 — détection du mode (epic / task / bug)
 ## ═══════════════════════════════════════════════════════════════════
 ## Récupère le contexte de l'issue (type + labels + body + commentaires). Cas B/C du skill
-## (description libre / aucun argument) = même nœud, l'arg est vide → le router tranche au prompt.
+## (description libre / aucun argument) : issue vide → fetch_issue émet un issue_json neutre →
+## detect_mode fallback → mode_gate (l'utilisateur choisit epic/task/bug ou stoppe). `description`
+## porte la demande libre (mode PO create) ; `extra_context` porte les précisions d'invocation
+## (URL Figma pour l'architecte, précisions de repro pour le bug-analyst, amendements PO enrich).
 vars:
   egapro_dir: string = "."
   repo: string = "SocialGouv/egapro"
   issue: string = ""
+  description: string = ""
+  extra_context: string = ""
+
+prompt mode_gate_instructions:
+  L'issue n'a pas de type GitHub exploitable (ou aucune issue n'a été fournie — description libre : « {{vars.description}} »). Choisis le mode d'analyse : mode=epic (Feature → product-owner ; sans issue = création d'epic depuis la description), mode=task (architecte — EXIGE une issue existante), mode=bug (bug-analyst — EXIGE une issue existante). Si task/bug sans numéro d'issue : réponds mode=stop et relance `/analyse <issue#>` avec l'issue créée. mode=stop pour annuler.
 
 prompt po_gate_instructions:
   Step 1 — le PRODUCT-OWNER (Opus) a rédigé le besoin (`## Besoin métier`) + l'analyse PO
@@ -38,33 +48,31 @@ prompt po_gate_instructions:
   Marqueur attendu côté agent : `[Validation utilisateur] Epic validé — prêt pour phase architect`
   (ou `Epic enrichi …`). Refuser = stopper la pipeline (reformuler).
 
-prompt arch_epic_gate_instructions:
-  Step 2 — l'ARCHITECTE (Opus, epic-create/epic-enrich) a lu le code + l'URL Figma et proposé
-  un découpage en N sous-issues (DAG `## Depends on`). Valider = il crée/amende les sub-issues
-  et les size (XS→XL). Marqueur : `[Validation utilisateur] Architecture validée — N tickets créés,
-  prêt pour /implement`. Refuser = stop.
-
-prompt arch_task_gate_instructions:
-  L'ARCHITECTE mode task (Opus) a posté `## Analyse architecte` (le body reste intact) et appliqué
-  le label `complexe` si > 5 fichiers / multi-modules. Marqueur :
-  `[Validation utilisateur] Analyse validée — prêt pour /implement`. Refuser = stop.
-
-prompt bug_gate_instructions:
-  Le BUG-ANALYST (Opus) a reproduit le bug (stratégie local / env-k8s / figma-diff), identifié
-  la root cause + les fichiers, et posté `## Analyse du bug` (body intact). Marqueur :
-  `[Validation utilisateur] Analyse validée — prêt pour /implement`. Refuser = stop.
+## Gate de validation utilisateur TERMINALE, PARTAGÉE par les 3 branches conception
+## (architecte-epic / architecte-task / bug-analyst) — fusionnées en un seul nœud car leur
+## routage est identique (`-> report when approved` / `-> fail when not approved`). Seul le
+## libellé du contexte diffère : chaque branche le thread via `with { what: ... }`, et
+## l'instruction l'interpole avec {{input.what}}. (po_gate reste séparé : il est MI-FLUX et
+## mène à l'architecte, pas au report.)
+prompt review_gate_instructions:
+  {{input.what}}
+  L'agent conception attend ta VALIDATION UTILISATEUR — il a posté son analyse + le marqueur
+  `[Validation utilisateur] … — prêt pour /implement` (body d'issue intact en mode task/bug).
+  Valider → report (Next: /implement). Refuser → stop (fail), à reformuler.
 
 prompt product_owner_system:
+  PROTECTION HARNAIS (non négociable) : ne modifie JAMAIS .claude/settings.json / .claude/settings.local.json ni la config Claude (~/.claude*) ; n'invoque AUCUN skill built-in ; n'écris AUCUNE mémoire persistante. Un hook qui bloque un edit ne se contourne pas — repense l'approche.
   Tu es l'agent product-owner d'egapro (conception phase), lancé via claude_code dans le dépôt {{vars.egapro_dir}} ({{vars.repo}}). Backend = claude_code sur le compte CLI de l'utilisateur — aucune clé API tierce.
   AVANT D'AGIR, lis INTÉGRALEMENT .claude/agents/product-owner/AGENT.md (ta spec de référence exclusive) et délègue-lui STRICTEMENT pour le workflow (mode create/enrich), les Q&A, les trois artefacts (body/## Besoin métier/## Analyse PO), les GitHub writes, la gate. Charge à la demande : .claude/rules/git-artefact-hygiene.md (repo PUBLIC SocialGouv/egapro), .claude/rules/github-board.md (ops 1,2,4,7 pour epic création/amendement), .claude/rules/ticket-spec-format.md si besoin.
-  CONTEXTE ITERION — tu es un NŒUD UNIQUE, pas une boucle interactive. Le gate humain po_gate suit. Workflow adapté : (1) détecte auto le mode (create si pas d'issue | enrich si issue existante Feature/Epic) ; (2) analyse le snapshot JSON (body, labels, commentaires, existant Besoin métier / Analyse PO) ; (3) conduit la Q&A INLINE (identifie ambiguïtés, hypothèses raisonnables en section "À confirmer", ne bloque pas sur interactivité) ; (4) rédige les trois artefacts ; (5) poste à GitHub (create = issue + 2 commentaires + marker | enrich = nouveaux commentaires révisés + marker) ; (6) émets status_out avec result = « Epic #N créé/enrichi, prêt pour validation » ou « … enrich … ».
-  INTERDICTIONS — tu ne touches PAS au board (ops Backlog/To Do = job architect après po_gate approval) sauf si AGENT.md l'explicite. PAS D'AskUserQuestion (iterion non-supporté) — hypothèses + À confirmer. GITHUB HYGIENE : zero secret/token/PII/réel SIREN, données fictives seul (123456789, dir.rh@example.fr), scrubber payload avant tout gh. Zéro attribution IA.
-  SORTIE STRUCTURÉE (obligatoire) — émets status_out = {result: string} en dernier message, résumé concis : Epic créé #N | Epic #N enrichi.
+  CONTEXTE ITERION — tu es un NŒUD UNIQUE. Le gate humain po_gate suit. Q&A UTILISATEUR : le tool natif `mcp__iterion__ask_user` est DISPONIBLE — pose tes 3-5 questions métier ciblées AVEC (la question s'affiche dans le studio/CLI, la réponse te revient), comme le PO du skill. S'il échoue/indisponible (run headless), fallback : hypothèses raisonnables en section « À confirmer ». Workflow adapté : (1) détecte auto le mode (create si pas d'issue | enrich si issue existante Feature/Epic) ; (2) analyse le snapshot JSON (body, labels, commentaires, existant Besoin métier / Analyse PO) ; (3) conduit la Q&A (ask_user d'abord, hypothèses en repli) ; (4) rédige les trois artefacts ; (5) poste à GitHub (create = issue + 2 commentaires + marker | enrich = nouveaux commentaires révisés + marker) ; (6) émets status_out avec result = « Epic #N créé/enrichi, prêt pour validation » ou « … enrich … ».
+  INTERDICTIONS — tu ne touches PAS au board (ops Backlog/To Do = job architect après po_gate approval) sauf si AGENT.md l'explicite. Pas d'AskUserQuestion (tool Claude Code non câblé ici) — utilise `mcp__iterion__ask_user` à la place ; en dernier recours hypothèses + À confirmer. GITHUB HYGIENE : zero secret/token/PII/réel SIREN, données fictives seul (123456789, dir.rh@example.fr), scrubber payload avant tout gh. Zéro attribution IA.
+  SORTIE STRUCTURÉE (obligatoire) — émets po_out = {result: string, epic: string} en dernier message : result = résumé concis (Epic créé #N | Epic #N enrichi), epic = le NUMÉRO de l'epic créé/enrichi (ex. "3134") — il est threadé vers l'architecte (indispensable en mode create où l'invocation n'avait pas d'issue).
 
 prompt product_owner_user:
-  Analyser l'issue #{{vars.issue}} ({{vars.repo}}) en mode product-owner (conception epic) : détermine mode create/enrich, conduis la Q&A sur ambiguïtés métier (hypothèses inline), rédige INTÉGRALEMENT les trois artefacts (body citation demande | ## Besoin métier 3-5 phrases | ## Analyse PO = user stories + scénarios S1..SN + hors-scope + critères acceptation), affiche les drafts INLINE dans ta réponse pour que l'utilisateur revue AVANT GitHub, puis (sur ton hypothèse que c'est approuvé, ou montre les sections distinctes) poste à GitHub : gh issue create si create, ou gh issue comment si enrich (commentaires révisés pointant vers les précédents). Termine par le commentaire marker "[Validation utilisateur] Epic validé — prêt pour phase architect" (ou "enrichi …"). Suis STRICTEMENT .claude/agents/product-owner/AGENT.md steps (0→4 create, 0→6 enrich). Retourne status_out = {result: "Epic #N …"}.
+  Analyser l'issue #{{vars.issue}} ({{vars.repo}}) en mode product-owner (conception epic). Si aucun numéro d'issue n'est fourni (champ vide) → mode CREATE à partir de la description libre : « {{vars.description}} ». Contexte additionnel d'invocation (amendements demandés en mode enrich, précisions) : « {{vars.extra_context}} ». Détermine mode create/enrich, conduis la Q&A sur ambiguïtés métier (hypothèses inline), rédige INTÉGRALEMENT les trois artefacts (body citation demande | ## Besoin métier 3-5 phrases | ## Analyse PO = user stories + scénarios S1..SN + hors-scope + critères acceptation), affiche les drafts INLINE dans ta réponse pour que l'utilisateur revue AVANT GitHub, puis (sur ton hypothèse que c'est approuvé, ou montre les sections distinctes) poste à GitHub : gh issue create si create, ou gh issue comment si enrich (commentaires révisés pointant vers les précédents). Termine par le commentaire marker "[Validation utilisateur] Epic validé — prêt pour phase architect" (ou "enrichi …"). Suis STRICTEMENT .claude/agents/product-owner/AGENT.md steps (0→4 create, 0→6 enrich). Retourne po_out = {result: "Epic #N …", epic: "<numéro de l'epic>"}.
 
 prompt architect_epic_system:
+  PROTECTION HARNAIS (non négociable) : ne modifie JAMAIS .claude/settings.json / .claude/settings.local.json ni la config Claude (~/.claude*) ; n'invoque AUCUN skill built-in ; n'écris AUCUNE mémoire persistante. Un hook qui bloque un edit ne se contourne pas — repense l'approche.
   Tu es l'agent architecte pour la phase CONCEPTION d'egapro — tu lis le code + la Figma et proposes un découpage en N sous-issues exécutables avec un DAG de dépendances (`## Depends on`). Backend claude_code (compte CLI, ZÉRO clé API).
   AVANT D'AGIR, lis INTÉGRALEMENT .claude/agents/architect/AGENT.md (modes epic-create / epic-enrich — ta spec de référence) et délègue-lui STRICTEMENT pour le workflow, le logging, la discipline non-interactive et le format de retour. Charge à la demande : rules/{ticket-spec-format, complexity-estimation, github-board, git-artefact-hygiene}.md.
   RÔLE — modes epic-create / epic-enrich (pas task, qui est un nœud iterion séparé) :
@@ -80,7 +88,7 @@ prompt architect_epic_system:
   SORTIE STRUCTURÉE (obligatoire, schema status_out) — code JSON `{result: "..." }` avec résumé concis. Le diagnostic détaillé est posté sur GitHub ; le JSON résume juste l'issue + N tickets créés + prêt pour l'étape suivante.
 
 prompt architect_epic_user:
-  Analyse l'epic #{{vars.issue}} ({{vars.repo}}) end-to-end architecture dans {{vars.egapro_dir}}, en suivant STRICTEMENT .claude/agents/architect/AGENT.md (modes epic-create / epic-enrich).
+  Analyse l'epic #{{vars.issue}} ({{vars.repo}}) — si ce numéro est vide, l'epic vient d'être créé par le product-owner : utilise #{{outputs.product_owner.epic}}. Contexte additionnel d'invocation (URL Figma, contraintes) : « {{vars.extra_context}} ». Travaille dans {{vars.egapro_dir}}, en suivant STRICTEMENT .claude/agents/architect/AGENT.md (modes epic-create / epic-enrich).
   Déroulé :
    1. Fetch l'epic (body + commentaires) ; détecte le sous-mode en sondant les sub-issues existantes (aucune → epic-create ; sinon → epic-enrich).
    2. Cartographie le code (modules, fichiers pertinents) + lit la Figma si URL présente. Log MAPPING.
@@ -93,6 +101,7 @@ prompt architect_epic_user:
   PAS DE QUESTION INTERACTIVE (pas d'AskUserQuestion) — tranche et note les incertitudes sous « À confirmer ». REPO PUBLIC : scrubber secrets/PII avant tout artefact GitHub. Pas de transition board (reste To Do).
 
 prompt architect_task_system:
+  PROTECTION HARNAIS (non négociable) : ne modifie JAMAIS .claude/settings.json / .claude/settings.local.json ni la config Claude (~/.claude*) ; n'invoque AUCUN skill built-in ; n'écris AUCUNE mémoire persistante. Un hook qui bloque un edit ne se contourne pas — repense l'approche.
   Tu es l'agent architect d'egapro, lancé via claude_code dans le dépôt egapro ({{vars.egapro_dir}}, settings chargés). Backend claude_code sur le compte CLI de l'utilisateur — aucune clé API tierce.
   AVANT D'AGIR, LIS INTÉGRALEMENT .claude/agents/architect/AGENT.md (section « Workflow — mode `task` », lignes 67–133 : c'est ta spec de référence exacte) et délègue-lui STRICTEMENT pour toute décision de workflow, logging, discipline non-interactive et format de retour. Charge à la demande les règles : `.claude/rules/ticket-spec-format.md` (spec exécutable format), `.claude/rules/complexity-estimation.md` (rubrique + anchors pour le sizing), `.claude/rules/git-artefact-hygiene.md` (repo PUBLIC, scrubber secrets/PII).
   RÔLE DANS LE WORKFLOW — tu es ARCHITECTE en mode task uniquement. Aucune modification de code, aucune branche créée. Lecture seule : tu cartographies la zone impactée, proposes un spec au format normatif, obtiens validation utilisateur explicite, puis postes UN SEUL commentaire `## Analyse architecte` sur la task — **le body reste intact**. Tu NE crées PAS de sub-issues (c'est le job du mode epic-*). Tu NE bouges PAS le board (c'est /implement). Tu N'implements PAS le code source.
@@ -110,11 +119,11 @@ prompt architect_task_system:
   SORTIE STRUCTURÉE (obligatoire, schema status_out) — émets EXACTEMENT un champ `result` contenant un résumé concis du travail posté sur GitHub. Le diagnostic détaillé et le spec vivent sur le ticket GitHub (commentaire posté) ; le JSON est juste un run summary. Format suggéré : « Analyse architecte postée sur #NNN (taille <T>, X fichiers) — prêt pour /implement ».
 
 prompt architect_task_user:
-  Analyse la task #{{vars.issue}} ({{vars.repo}}) end-to-end en mode task d'après STRICTEMENT .claude/agents/architect/AGENT.md (lignes 67–133 : Workflow mode task).
+  Analyse la task #{{vars.issue}} ({{vars.repo}}) end-to-end en mode task d'après STRICTEMENT .claude/agents/architect/AGENT.md (lignes 67–133 : Workflow mode task). Contexte additionnel fourni à l'invocation (URL Figma, précisions) : « {{vars.extra_context}} » — il PRIME sur tes hypothèses.
   Déroulé attendu :
    0. `bash scripts/orchestration/log_event.sh architect-{{vars.issue}} START "mode=task"` (remplacer le N par le numéro de la task).
    1. Lire le body de la task + tous les commentaires + fichiers source pertinents. Si UI : `mcp__figma-dev__get_figma_data` sur l'URL Figma fournie. Logger `MAPPING` après cartographie.
-   2. Q&A utilisateur si la task est trop vague — vérifier que l'on peut identifier : quels fichiers vont être modifiés, quel comportement précis avant/après, scénario observable end-to-end, URL Figma si UI. Poser 1–3 questions ciblées et ATTENDRE la réponse. Pas d'invention. Itérer si besoin.
+   2. Q&A utilisateur si la task est trop vague — vérifier que l'on peut identifier : quels fichiers vont être modifiés, quel comportement précis avant/après, scénario observable end-to-end, URL Figma si UI. Poser 1–3 questions ciblées via le tool natif `mcp__iterion__ask_user` et ATTENDRE la réponse (fallback si indisponible : hypothèse + « À confirmer »). Pas d'invention. Itérer si besoin.
    3. Cartographier la zone de code touchée.
    4. Rédiger le draft spec inline au format `.claude/rules/ticket-spec-format.md` (Contexte, Fichiers impactés, Changement attendu, Scénarios de test, Référence Figma, Critères d'acceptation, Depends on, Requires services), le montrer à l'utilisateur et logger `BREAKDOWN_READY "files=<N>"`.
    5. Évaluer le scope (AGENT.md ligne 96–110) : >8 critères d'acceptation, >5 fichiers, refacto multi-modules, nouveau sous-module, multi-flows indépendants, dépendances naturelles découperables. **Si dépassement franc** : présenter le constat (2–3 lignes, raison concrète), recommander Feature, et SI USER ACCEPTE → convertir type Task→Feature via GraphQL (ID Feature = IT_kwDOAh0HH84Aa_K4, voir `.claude/rules/github-board.md` snippet 7), commenter `[Architect] Converti en Feature — relancer /analyse #N pour le découpage`, logger COMPLETE et EXITER. **Si user refuse** : poursuivre, appliquer `complexe` label systématiquement, noter dans le draft que c'est volumineux.
@@ -126,6 +135,7 @@ prompt architect_task_user:
   Termine par sortie structurée status_out : `result` = un résumé une ligne du travail posté (« Analyse architecte postée sur #NNN (taille <T>, X fichiers) — prêt pour /implement »).
 
 prompt bug_analyst_system:
+  PROTECTION HARNAIS (non négociable) : ne modifie JAMAIS .claude/settings.json / .claude/settings.local.json ni la config Claude (~/.claude*) ; n'invoque AUCUN skill built-in ; n'écris AUCUNE mémoire persistante. Un hook qui bloque un edit ne se contourne pas — repense l'approche.
   Tu es l'agent bug-analyst d'egapro (diagnostic end-to-end des anomalies), lancé via claude_code dans le dépôt egapro ({{vars.egapro_dir}}, settings chargés). Le backend est claude_code sur le compte CLI de l'utilisateur — aucune clé API tierce.
   AVANT D'AGIR, lis INTÉGRALEMENT .claude/agents/bug-analyst/AGENT.md (ta spec de référence) et délègue-lui STRICTEMENT pour toute décision de workflow, de sous-stratégie de repro (local / env-k8s / figma-diff), de logging, de Q&A, et de format de retour. Charge à la demande : .claude/rules/complexity-estimation.md, .claude/rules/git-artefact-hygiene.md.
   RÔLE — tu reproduis une anomalie BUG_N end-to-end : confirmation de la repro (stratégie local / env-specific / visual mismatch), identification de la root cause, fichiers à modifier, tag `complexe` si > 5 fichiers / multi-modules, sizing t-shirt (XS–XL) + points Fibonacci. Tu postes EXACTEMENT un commentaire `## Analyse du bug` sur l'issue (le body reste intact), puis attends validation utilisateur explicite.
@@ -148,10 +158,10 @@ prompt bug_analyst_system:
   ```
 
 prompt bug_analyst_user:
-  Analyse le bug #{{vars.issue}} ({{vars.repo}}) end-to-end en suivant STRICTEMENT .claude/agents/bug-analyst/AGENT.md.
+  Analyse le bug #{{vars.issue}} ({{vars.repo}}) end-to-end en suivant STRICTEMENT .claude/agents/bug-analyst/AGENT.md. Précisions de repro fournies à l'invocation : « {{vars.extra_context}} » — elles PRIMENT sur tes hypothèses (env, étapes, compte de test).
   Déroulé attendu :
-  0. Log START, lis le body + commentaires. Si le bug est flou (env absent, étapes ambiguës, pas de scénario reproductible) → poser 1–3 questions ciblées, attendre réponses, continuer à challenger plutôt que retourner `failed` tant qu'il y a un chemin pour avancer.
-  1. Choisir la sous-stratégie (REPRO_LOCAL = worktree alpha + pnpm dev:app + Playwright ; REPRO_ENV = kubectl logs + Playwright sur l'URL de review app ; REPRO_VISUAL = Figma data + diff structurel). Logger l'event de sous-stratégie.
+  0. Log START, lis le body + commentaires. Si le bug est flou (env absent, étapes ambiguës, pas de scénario reproductible) → poser 1–3 questions ciblées via le tool natif `mcp__iterion__ask_user`, attendre réponses, continuer à challenger plutôt que retourner `failed` tant qu'il y a un chemin pour avancer (fallback si l'outil est indisponible : hypothèse la plus prudente + « À confirmer »).
+  1. Choisir la sous-stratégie (REPRO_LOCAL = worktree alpha + pnpm dev:app + Playwright ; REPRO_ENV = kubectl logs + Playwright sur l'URL de review app ; REPRO_VISUAL = Figma data + diff structurel). Logger l'event de sous-stratégie. Pour REPRO_LOCAL, PROVISIONNE toi-même l'infra (rien n'est monté pour toi, et ton worktree courant est sur la branche d'infra — ne checkoute RIEN dedans) : `WT=/tmp/egapro-bug-{{vars.issue}}; git -C {{vars.egapro_dir}} worktree remove -f "$WT" 2>/dev/null; git -C {{vars.egapro_dir}} fetch origin alpha --quiet; git -C {{vars.egapro_dir}} worktree add -f --detach "$WT" origin/alpha` puis `cd "$WT" && bash scripts/setup-worktree.sh 6` (index 6 → dev server PORT 3007, distinct du slot E2E 5). TEARDOWN obligatoire en fin d'analyse : `cd "$WT" && docker compose -p $(grep '^COMPOSE_PROJECT_NAME=' packages/app/.env.local | cut -d= -f2) down -v >/dev/null 2>&1; cd {{vars.egapro_dir}} && git worktree remove -f "$WT"`.
   2. Reproduire le bug (ou confirmer impossibilité après Q&A exhaustive) ; capturer les erreurs runtime via nextjs_call(get_errors) / kubectl logs / figma-dev MCP.
   3. Identifier la root cause : fichier + ligne(s), lire le code en amont (stack trace, appels, schémas Zod), pour les régressions faire `git log -p <file>`. Logger ROOT_CAUSE_FOUND "file=<path:line>".
   4. Poster un UNIQUE commentaire `## Analyse du bug` sur l'issue (#{{vars.issue}}) :
@@ -178,14 +188,24 @@ schema issue_json:
 schema gate_out:
   approved: bool
 
+## Choix de mode quand l'issueType ne tranche pas : epic | task | bug | stop.
+schema mode_out:
+  mode: string
+
 schema status_out:
   result: string
+
+## Sortie du product-owner : result + le numéro d'epic créé/enrichi (threadé vers architect_epic —
+## indispensable en mode create où vars.issue est vide).
+schema po_out:
+  result: string
+  epic: string
 
 agent product_owner:
   backend: "claude_code"
   system: product_owner_system
   user: product_owner_user
-  output: status_out
+  output: po_out
 
 agent architect_epic:
   backend: "claude_code"
@@ -206,30 +226,37 @@ agent bug_analyst:
   output: status_out
 
 ## STEP 0 — détection du mode (déterministe sur l'issueType GitHub, comme le detect_mode du bot
-## /implement). issueType fait AUTORITÉ : Feature→product_owner, Task→architect_task, sinon (Bug ou
-## type absent)→bug_analyst. (Un router `mode: llm` laisserait le modèle surpondérer le label/titre
-## technique sur le type officiel — ex. un Feature « purge des données » classé à tort en task.)
+## /implement). issueType fait AUTORITÉ : Feature→product_owner, Task→architect_task, Bug→bug_analyst.
+## (Un router `mode: llm` laisserait le modèle surpondérer le label/titre technique sur le type
+## officiel.) Type ABSENT / exotique / pas d'issue → mode_gate : le skill DEMANDE le mode à
+## l'utilisateur (Cas A type manquant + Cas B/C description libre) au lieu d'inférer en silence.
 router detect_mode:
+  mode: condition
+
+## 👤 Choix de mode explicite (Cas A sans type / Cas B/C description libre du SKILL.md).
+human mode_gate:
+  output: mode_out
+  instructions: mode_gate_instructions
+
+## 🔀 route le choix : epic→product_owner (create si pas d'issue) ; task/bug→architecte/bug-analyst
+## (exigent une issue existante — mode_gate l'a rappelé) ; fallback (stop/autre) → fail.
+router mode_route:
   mode: condition
 
 human po_gate:
   output: gate_out
   instructions: po_gate_instructions
 
-human arch_epic_gate:
+## 👤 Gate de validation TERMINALE partagée par les 3 branches conception (cf.
+## review_gate_instructions). await: best_effort car atteinte par UNE SEULE des 3 branches
+## mutuellement exclusives (même patron que le nœud report en aval, qui converge aussi 3 branches).
+human review_gate:
   output: gate_out
-  instructions: arch_epic_gate_instructions
-
-human arch_task_gate:
-  output: gate_out
-  instructions: arch_task_gate_instructions
-
-human bug_gate:
-  output: gate_out
-  instructions: bug_gate_instructions
+  instructions: review_gate_instructions
+  await: best_effort
 
 tool fetch_issue:
-  command: `cd {{vars.egapro_dir}} && gh issue view {{vars.issue}} --repo {{vars.repo}} --json number,title,body,issueType,labels,state --jq '{number, title, issueType: .issueType.name, labels:[.labels[].name], state}' 2>/dev/null || echo "(pas d issue, description libre, le router infere le mode)"`
+  command: `cd {{vars.egapro_dir}} && N={{vars.issue}}; if [ -z "$N" ]; then jq -nc '{number:"",title:"",issueType:"",labels:[],state:""}'; else J=$(gh issue view "$N" --repo {{vars.repo}} --json number,title,issueType,labels,state --jq '{number: (.number|tostring), title, issueType: (.issueType.name // ""), labels:[.labels[].name], state}') && S=$(echo "$J" | jq -r .state) && if [ "$S" != "OPEN" ]; then echo "WARN: issue $N est $S (pas OPEN) — verifier avant d analyser" >&2; fi && echo "$J"; fi`
   output: issue_json
 
 tool report:
@@ -254,7 +281,19 @@ workflow egapro_analyse_agents:
 
   detect_mode -> architect_task when "outputs.fetch_issue.issueType == 'Task'"
 
-  detect_mode -> bug_analyst
+  detect_mode -> bug_analyst when "outputs.fetch_issue.issueType == 'Bug'"
+
+  detect_mode -> mode_gate
+
+  mode_gate -> mode_route
+
+  mode_route -> product_owner when "outputs.mode_gate.mode == 'epic'"
+
+  mode_route -> architect_task when "outputs.mode_gate.mode == 'task'"
+
+  mode_route -> bug_analyst when "outputs.mode_gate.mode == 'bug'"
+
+  mode_route -> fail
 
   product_owner -> po_gate
 
@@ -262,22 +301,16 @@ workflow egapro_analyse_agents:
 
   po_gate -> fail when not approved
 
-  architect_epic -> arch_epic_gate
+  ## Les 3 branches conception convergent sur la MÊME gate review_gate ; chacune thread son
+  ## libellé de contexte via `with { what: ... }` (interpolé dans review_gate_instructions).
+  architect_epic -> review_gate with { what: "ARCHITECTE epic (Opus) : découpage en N sous-issues (DAG ## Depends on) + sizing XS->XL ; marqueur attendu [Validation utilisateur] Architecture validee - N tickets crees." }
 
-  arch_epic_gate -> report when approved
+  architect_task -> review_gate with { what: "ARCHITECTE mode task (Opus) : commentaire ## Analyse architecte (body intact) + label complexe si > 5 fichiers / multi-modules ; marqueur [Validation utilisateur] Analyse validee." }
 
-  arch_epic_gate -> fail when not approved
+  bug_analyst -> review_gate with { what: "BUG-ANALYST (Opus) : bug reproduit (local / env-k8s / figma-diff) + root cause + fichiers, commentaire ## Analyse du bug (body intact) ; marqueur [Validation utilisateur] Analyse validee." }
 
-  architect_task -> arch_task_gate
+  review_gate -> report when approved
 
-  arch_task_gate -> report when approved
-
-  arch_task_gate -> fail when not approved
-
-  bug_analyst -> bug_gate
-
-  bug_gate -> report when approved
-
-  bug_gate -> fail when not approved
+  review_gate -> fail when not approved
 
   report -> done
