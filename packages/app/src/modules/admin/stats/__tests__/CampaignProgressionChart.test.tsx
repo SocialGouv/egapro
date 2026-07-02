@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { cloneElement, isValidElement } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { CampaignProgressionSeries } from "../types";
 
@@ -19,6 +19,14 @@ let capturedYAxisTickFormatter: ((value: number) => string) | undefined;
 let capturedXAxisTickFormatter: ((value: string) => string) | undefined;
 const capturedLineStrokes: Record<string, string> = {};
 const tooltipProbe: TooltipContentProps = {};
+
+beforeEach(() => {
+	capturedYAxisTickFormatter = undefined;
+	capturedXAxisTickFormatter = undefined;
+	for (const key of Object.keys(capturedLineStrokes)) {
+		delete capturedLineStrokes[key];
+	}
+});
 
 vi.mock("recharts", () => ({
 	ResponsiveContainer: ({ children }: { children: ReactElement }) => children,
@@ -74,12 +82,12 @@ function renderWithTooltip(
 	probe: TooltipContentProps,
 	series: CampaignProgressionSeries[] = SERIES,
 ) {
-	Object.assign(tooltipProbe, {
-		active: undefined,
-		label: undefined,
-		payload: undefined,
-		...probe,
-	});
+	for (const key of Object.keys(
+		tooltipProbe,
+	) as (keyof TooltipContentProps)[]) {
+		delete tooltipProbe[key];
+	}
+	Object.assign(tooltipProbe, probe);
 	return render(
 		<CampaignProgressionChart currentYear={2026} series={series} />,
 	);

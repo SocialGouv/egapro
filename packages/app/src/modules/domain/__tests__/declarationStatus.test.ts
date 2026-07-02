@@ -17,7 +17,10 @@ describe("isDeclarationSubmitted", () => {
 	});
 
 	it("returns true for any non-draft, non-null status", () => {
-		expect(isDeclarationSubmitted("submitted")).toBe(true);
+		expect(isDeclarationSubmitted("awaiting_compliance_path_choice")).toBe(
+			true,
+		);
+		expect(isDeclarationSubmitted("demarche_completed")).toBe(true);
 	});
 });
 

@@ -172,7 +172,7 @@ grep -rn "function getCurrentYear\|function getCseYear\|function getSiren" src/ 
 # Must return ZERO — no domain helpers reimplemented inline outside domain/
 grep -rn "cancelledAt !== null\|cancelledAt != null\|workforce >= 100\|effectifs >= 100\|workforce < 50\|effectifs < 50" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
 
-# Must return ZERO (or WARN) — toLocaleString("fr-FR") outside domain/ (likely duplicates formatCount/formatRate/formatCurrency)
+# WARN on matches — toLocaleString("fr-FR") outside domain/ (likely duplicates formatCount/formatRate/formatCurrency)
 grep -rn 'toLocaleString.*fr-FR\|toLocaleString.*"fr"' src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
 ```
 

@@ -1,8 +1,13 @@
 export function sumQuartileWorkforce(
 	quartiles: { women?: number | null; men?: number | null }[],
 ): { women: number; men: number; total: number } {
-	const women = quartiles.reduce((sum, q) => sum + (q.women ?? 0), 0);
-	const men = quartiles.reduce((sum, q) => sum + (q.men ?? 0), 0);
+	const { women, men } = quartiles.reduce<{ women: number; men: number }>(
+		(acc, q) => ({
+			women: acc.women + (q.women ?? 0),
+			men: acc.men + (q.men ?? 0),
+		}),
+		{ women: 0, men: 0 },
+	);
 	return { women, men, total: women + men };
 }
 
