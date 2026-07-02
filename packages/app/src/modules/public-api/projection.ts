@@ -46,7 +46,6 @@ export type PublicCompanySource = Pick<
 	| "nafLabel"
 > & {
 	statutDiffusion: string | null;
-	// Année-1 average annual workforce, sourced from gipMdsData.workforceEma (not companies.workforce).
 	workforceEma: string | null;
 };
 
