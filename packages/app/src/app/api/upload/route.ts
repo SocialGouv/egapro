@@ -311,34 +311,14 @@ export async function POST(request: Request): Promise<Response> {
 					return;
 				}
 				if (flowType === "joint_evaluation") {
-					const { enqueueNotification } = await import(
-						"notifications/publisher"
-					);
-					const enqueueResult = await enqueueNotification({
-						type: "joint_evaluation_submitted",
-						recipientEmail: userEmail,
-						recipientUserId: userId,
+					const { enqueueReceipt } = await import("~/modules/mail/server");
+					await enqueueReceipt({
+						kind: "jointEvaluation",
+						to: userEmail,
 						siren,
-						payload: { siren, year },
-					});
-					void logAction({
-						action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
-						status: enqueueResult.status === "enqueued" ? "success" : "failure",
+						year,
 						userId,
-						userEmail,
-						siren,
-						...(enqueueResult.status === "enqueued"
-							? {
-									resourceType: "notification",
-									resourceId: enqueueResult.id,
-								}
-							: {
-									errorMessage:
-										enqueueResult.status === "error"
-											? enqueueResult.error
-											: "queue_unavailable",
-								}),
-						metadata: { type: "joint_evaluation_submitted" },
+						isResend: false,
 					});
 				}
 			})();

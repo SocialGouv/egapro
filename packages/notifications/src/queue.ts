@@ -1,7 +1,13 @@
 import { isNotificationType } from "./mails/index.js";
 import {
+	CSE_OPINION_RECEIPT_VARIANTS,
 	CSE_OPINION_REMINDER_VARIANTS,
+	type CseOpinionReceiptVariant,
 	type CseOpinionReminderVariant,
+	DECLARATION_CONFIRMATION_VARIANTS,
+	type DeclarationConfirmationVariant,
+	JOINT_EVALUATION_SUBMITTED_VARIANTS,
+	type JointEvaluationSubmittedVariant,
 	type NotificationPayloadMap,
 	type NotificationType,
 } from "./mails/types.js";
@@ -31,9 +37,22 @@ export type JobValidationResult = JobValidationSuccess | JobValidationFailure;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const VARIANT_SET = new Set<string>(CSE_OPINION_REMINDER_VARIANTS);
+const DECLARATION_CONFIRMATION_VARIANT_SET = new Set<string>(
+	DECLARATION_CONFIRMATION_VARIANTS,
+);
+const JOINT_EVALUATION_SUBMITTED_VARIANT_SET = new Set<string>(
+	JOINT_EVALUATION_SUBMITTED_VARIANTS,
+);
+const CSE_OPINION_RECEIPT_VARIANT_SET = new Set<string>(
+	CSE_OPINION_RECEIPT_VARIANTS,
+);
 
 function isString(value: unknown): value is string {
 	return typeof value === "string";
+}
+
+function isNonEmptyString(value: unknown): value is string {
+	return typeof value === "string" && value.length > 0;
 }
 
 function isPositiveInteger(value: unknown): value is number {
@@ -72,12 +91,54 @@ function validatePayloadForType(
 
 	switch (type) {
 		case "declaration_confirmation":
-		case "second_declaration_confirmation":
-		case "cse_opinion_receipt":
+		case "second_declaration_confirmation": {
+			if (!isCompanyScoped(p)) {
+				return "payload requires { siren: string, year: number }";
+			}
+			if (
+				!isString(p.variant) ||
+				!DECLARATION_CONFIRMATION_VARIANT_SET.has(p.variant)
+			) {
+				return `payload.variant must be one of ${DECLARATION_CONFIRMATION_VARIANTS.join(", ")}`;
+			}
+			if (!isNonEmptyString(p.raisonSociale)) {
+				return "payload.raisonSociale must be a non-empty string";
+			}
+			if (
+				p.variant === "path_to_select" &&
+				!isNonEmptyString(p.complianceDeadline)
+			) {
+				return "payload.complianceDeadline is required for the path_to_select variant";
+			}
+			return null;
+		}
 		case "joint_evaluation_submitted": {
-			return isCompanyScoped(p)
+			if (!isCompanyScoped(p)) {
+				return "payload requires { siren: string, year: number }";
+			}
+			if (
+				!isString(p.variant) ||
+				!JOINT_EVALUATION_SUBMITTED_VARIANT_SET.has(p.variant)
+			) {
+				return `payload.variant must be one of ${JOINT_EVALUATION_SUBMITTED_VARIANTS.join(", ")}`;
+			}
+			return isNonEmptyString(p.raisonSociale)
 				? null
-				: "payload requires { siren: string, year: number }";
+				: "payload.raisonSociale must be a non-empty string";
+		}
+		case "cse_opinion_receipt": {
+			if (!isCompanyScoped(p)) {
+				return "payload requires { siren: string, year: number }";
+			}
+			if (
+				!isString(p.variant) ||
+				!CSE_OPINION_RECEIPT_VARIANT_SET.has(p.variant)
+			) {
+				return `payload.variant must be one of ${CSE_OPINION_RECEIPT_VARIANTS.join(", ")}`;
+			}
+			return isNonEmptyString(p.raisonSociale)
+				? null
+				: "payload.raisonSociale must be a non-empty string";
 		}
 		case "cycle_opening_info":
 		case "compliance_path_choice_reminder":
@@ -162,4 +223,9 @@ export function validateJobData(raw: unknown): JobValidationResult {
 	return { ok: true, data: d as unknown as EmailJobData };
 }
 
-export type { CseOpinionReminderVariant };
+export type {
+	CseOpinionReceiptVariant,
+	CseOpinionReminderVariant,
+	DeclarationConfirmationVariant,
+	JointEvaluationSubmittedVariant,
+};

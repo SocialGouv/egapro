@@ -48,6 +48,55 @@ export type CseOpinionReminderPayload = DeadlinePayload & {
 	variant: CseOpinionReminderVariant;
 };
 
+export const DECLARATION_CONFIRMATION_VARIANTS = [
+	"completed",
+	"cse_to_deposit",
+	"path_to_select",
+] as const;
+
+export type DeclarationConfirmationVariant =
+	(typeof DECLARATION_CONFIRMATION_VARIANTS)[number];
+
+export const JOINT_EVALUATION_SUBMITTED_VARIANTS = [
+	"completed",
+	"cse_to_deposit",
+	"cse_first_and_second",
+] as const;
+
+export type JointEvaluationSubmittedVariant =
+	(typeof JOINT_EVALUATION_SUBMITTED_VARIANTS)[number];
+
+export const CSE_OPINION_RECEIPT_VARIANTS = [
+	"single",
+	"with_gap",
+	"first_and_second",
+] as const;
+
+export type CseOpinionReceiptVariant =
+	(typeof CSE_OPINION_RECEIPT_VARIANTS)[number];
+
+export type DeclarationConfirmationPayload = CompanyScopedPayload & {
+	variant: DeclarationConfirmationVariant;
+	raisonSociale: string;
+	complianceDeadline?: string;
+};
+
+export type SecondDeclarationConfirmationPayload = CompanyScopedPayload & {
+	variant: DeclarationConfirmationVariant;
+	raisonSociale: string;
+	complianceDeadline?: string;
+};
+
+export type JointEvaluationSubmittedPayload = CompanyScopedPayload & {
+	variant: JointEvaluationSubmittedVariant;
+	raisonSociale: string;
+};
+
+export type CseOpinionReceiptPayload = CompanyScopedPayload & {
+	variant: CseOpinionReceiptVariant;
+	raisonSociale: string;
+};
+
 export type NextCycleHandoverPayload = {
 	siren: string;
 	previousYear: number;
@@ -55,10 +104,10 @@ export type NextCycleHandoverPayload = {
 };
 
 export type NotificationPayloadMap = {
-	declaration_confirmation: CompanyScopedPayload;
-	second_declaration_confirmation: CompanyScopedPayload;
-	cse_opinion_receipt: CompanyScopedPayload;
-	joint_evaluation_submitted: CompanyScopedPayload;
+	declaration_confirmation: DeclarationConfirmationPayload;
+	second_declaration_confirmation: SecondDeclarationConfirmationPayload;
+	cse_opinion_receipt: CseOpinionReceiptPayload;
+	joint_evaluation_submitted: JointEvaluationSubmittedPayload;
 	cycle_opening_info: DeadlinePayload;
 	declaration_deadline_reminder: DeclarationDeadlineReminderPayload;
 	compliance_path_choice_reminder: DeadlinePayload;
