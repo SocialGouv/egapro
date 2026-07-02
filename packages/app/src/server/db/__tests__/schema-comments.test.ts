@@ -189,7 +189,7 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		// the T2 keys inside `declaration` are already validated verbatim by the
 		// per-key tests above ("annotates all declaration meta columns…",
 		// "annotates second declaration columns"). `company` mixes SUIT columns
-		// with Weez-sourced region/department columns (#3710).
+		// with Weez-sourced region/department columns.
 		const t2Tables = [
 			"company",
 			"user",
@@ -207,7 +207,7 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		}
 	});
 
-	it("annotates the Weez-sourced company region/department columns (#3710)", () => {
+	it("annotates the Weez-sourced company region/department columns", () => {
 		const company = SCHEMA_COLUMN_COMMENTS.company;
 		expect(company?.region).toMatch(/^Weez: /);
 		expect(company?.department_code).toMatch(/^Weez: /);
