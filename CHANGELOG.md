@@ -1,3 +1,15 @@
+## [3.18.2](https://github.com/SocialGouv/egapro/compare/v3.18.1...v3.18.2) (2026-07-02)
+
+
+### Bug Fixes
+
+* **auth:** retour à moncomptepro sur la V1 (revert de [#3697](https://github.com/SocialGouv/egapro/issues/3697)) ([eafb51f](https://github.com/SocialGouv/egapro/commit/eafb51f8859d810b2bd86ad9fd861458ea015a7a))
+
+
+### Reverts
+
+* **epic:** [#3647](https://github.com/SocialGouv/egapro/issues/3647) — switch la V1 de moncomptepro vers proconnect ([#3697](https://github.com/SocialGouv/egapro/issues/3697)) ([#3840](https://github.com/SocialGouv/egapro/issues/3840)) ([e24594d](https://github.com/SocialGouv/egapro/commit/e24594dfa7b924e06e4cfb9026026de84678a685))
+
 ## [3.18.1](https://github.com/SocialGouv/egapro/compare/v3.18.0...v3.18.1) (2026-07-02)
 
 
