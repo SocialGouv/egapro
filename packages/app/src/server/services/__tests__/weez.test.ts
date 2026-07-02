@@ -61,6 +61,9 @@ describe("fetchCompanyBySiren", () => {
 			address: "12 RUE DES INNOVATEURS, 75011 PARIS",
 			nafCode: "6202A",
 			nafLabel: "Conseil en systèmes et logiciels informatiques",
+			region: "Île-de-France",
+			departmentCode: "75",
+			departmentLabel: "Paris",
 			workforce: 256,
 		});
 
@@ -101,6 +104,47 @@ describe("fetchCompanyBySiren", () => {
 			address: null,
 			nafCode: null,
 			nafLabel: null,
+			region: null,
+			departmentCode: null,
+			departmentLabel: null,
+			workforce: 50,
+		});
+	});
+
+	it("keeps region/department for a non-diffusible company while masking the address", async () => {
+		fetchSpy.mockResolvedValueOnce({
+			ok: true,
+			json: async () => ({
+				content: [
+					{
+						siren: "111222333",
+						denominationunitelegale: null,
+						raisonsociale: null,
+						activiteprincipalenaf25unitelegale: "6202A",
+						nomenclatureactiviteprincipalelibelleunitelegale: "Conseil",
+						effectiftotal: 50,
+						numerovoie: "5",
+						typevoie: "RUE",
+						libellevoie: "SECRETE",
+						codepostal: "33000",
+						libellecommune: "BORDEAUX",
+						statutdiffusionunitelegale: "N",
+					},
+				],
+				totalElements: 1,
+			}),
+		});
+
+		const result = await fetchCompanyBySiren("111222333");
+
+		expect(result).toEqual({
+			name: "Entreprise non diffusible",
+			address: null,
+			nafCode: null,
+			nafLabel: null,
+			region: "Nouvelle-Aquitaine",
+			departmentCode: "33",
+			departmentLabel: "Gironde",
 			workforce: 50,
 		});
 	});
@@ -225,6 +269,9 @@ describe("fetchCompanyBySiren", () => {
 			address: "69001 LYON",
 			nafCode: "7022Z",
 			nafLabel: "Conseil pour les affaires et autres conseils de gestion",
+			region: "Auvergne-Rhône-Alpes",
+			departmentCode: "69",
+			departmentLabel: "Rhône",
 			workforce: null,
 		});
 	});
@@ -260,6 +307,9 @@ describe("fetchCompanyBySiren", () => {
 			address: "33000 BORDEAUX",
 			nafCode: "4321A",
 			nafLabel: null,
+			region: "Nouvelle-Aquitaine",
+			departmentCode: "33",
+			departmentLabel: "Gironde",
 			workforce: 12,
 		});
 	});
