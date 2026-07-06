@@ -1,45 +1,125 @@
 import { renderEmail } from "../shared/render.js";
-import { getMySpaceUrl } from "../shared/urls.js";
+import { getAvisCseUrl, getMySpaceUrl } from "../shared/urls.js";
 import {
 	EmailCtaWithLink,
 	EmailGreeting,
 	EmailParagraph,
 	EmailShell,
 	EmailSignature,
+	FONT,
+	SPACING,
 } from "../template/index.js";
 import type { MailBuilder } from "../types.js";
 
+const BULLET_ITEMS = [
+	"l'exactitude des données et des méthodes de calcul utilisées ;",
+	"la justification éventuelle des écarts de rémunération supérieurs ou égaux à 5 %, au regard de critères objectifs et non sexistes, pour l'indicateur de rémunération par catégorie de salariés.",
+];
+
 export const buildJointEvaluationSubmittedMail: MailBuilder<
 	"joint_evaluation_submitted"
-> = async () => {
-	const subject = "Egapro - Réception du rapport d'évaluation conjointe";
+> = async ({ siren, year, variant, raisonSociale }) => {
+	let subject: string;
+	let bodyContent: React.ReactNode;
+
+	const introParagraph = (
+		<EmailParagraph>
+			Vous avez transmis aux services du ministre chargé du Travail le rapport
+			de l'évaluation conjointe des rémunérations pour {year}, concernant
+			l'entreprise <strong>{raisonSociale}</strong> (SIREN : {siren}).
+			L'administration du travail accuse réception de cette transmission. Cet
+			accusé de réception ne vaut pas contrôle de conformité de votre dépôt.
+		</EmailParagraph>
+	);
+
+	const bulletList = (
+		<ul
+			style={{
+				margin: 0,
+				marginBottom: SPACING.md,
+				paddingLeft: SPACING.lg,
+				fontFamily: FONT.family,
+				fontSize: FONT.size.body,
+				lineHeight: FONT.lineHeight.body,
+			}}
+		>
+			{BULLET_ITEMS.map((item) => (
+				<li key={item} style={{ marginBottom: SPACING.xs }}>
+					{item}
+				</li>
+			))}
+		</ul>
+	);
+
+	switch (variant) {
+		case "completed": {
+			subject =
+				"Egapro - Dépôt rapport de l'évaluation conjointe des rémunérations et fin de démarche";
+			bodyContent = (
+				<>
+					{introParagraph}
+					<EmailParagraph>
+						Votre démarche est désormais terminée. Vous pouvez à tout moment
+						consulter et télécharger les documents relatifs à cette démarche
+						depuis votre espace.
+					</EmailParagraph>
+					<EmailCtaWithLink href={getMySpaceUrl()} label="Mon espace" />
+				</>
+			);
+			break;
+		}
+		case "cse_to_deposit": {
+			subject =
+				"Egapro - Dépôt rapport de l'évaluation conjointe des rémunérations";
+			bodyContent = (
+				<>
+					{introParagraph}
+					<EmailParagraph>
+						Vous devez à présent déposer le ou les avis du CSE portant sur :
+					</EmailParagraph>
+					{bulletList}
+					<EmailCtaWithLink
+						href={getAvisCseUrl(siren)}
+						label="Déposer le ou les avis"
+					/>
+				</>
+			);
+			break;
+		}
+		case "cse_first_and_second": {
+			subject =
+				"Egapro - Dépôt rapport de l'évaluation conjointe des rémunérations";
+			bodyContent = (
+				<>
+					{introParagraph}
+					<EmailParagraph>
+						Vous devez à présent déposer, pour la première et la seconde
+						déclaration, le ou les avis du CSE portant sur :
+					</EmailParagraph>
+					{bulletList}
+					<EmailCtaWithLink
+						href={getAvisCseUrl(siren)}
+						label="Déposer le ou les avis"
+					/>
+				</>
+			);
+			break;
+		}
+		default: {
+			const _exhaustive: never = variant;
+			throw new Error(
+				`Unknown joint_evaluation_submitted variant: ${_exhaustive}`,
+			);
+		}
+	}
+
 	const previewText =
-		"Le rapport d'évaluation conjointe déposé pour votre entreprise a bien été pris en compte.";
+		"Vous avez transmis aux services du ministre chargé du Travail le rapport de l'évaluation conjointe des rémunérations.";
+
 	const { html, text } = await renderEmail(
 		<EmailShell previewText={previewText}>
 			<EmailGreeting>Bonjour,</EmailGreeting>
-			<EmailParagraph>
-				Le rapport d'évaluation conjointe déposé pour votre entreprise a bien
-				été pris en compte.
-			</EmailParagraph>
-			<EmailParagraph>
-				Conformément à la réglementation, l'évaluation conjointe menée avec le
-				CSE permet de retracer les mesures correctives décidées en commun pour
-				réduire les écarts de rémunération constatés.
-			</EmailParagraph>
-			<EmailParagraph>
-				Prochaine étape : votre CSE doit désormais rendre son avis sur le
-				rapport déposé. Cet avis devra être téléversé sur la plateforme avant la
-				date limite affichée dans votre espace personnel.
-			</EmailParagraph>
-			<EmailParagraph>
-				Vous pouvez à tout moment consulter la suite de votre parcours depuis le
-				portail Egapro.
-			</EmailParagraph>
-			<EmailCtaWithLink
-				href={getMySpaceUrl()}
-				label="Voir la suite du parcours"
-			/>
+			{bodyContent}
 			<EmailParagraph>
 				Pour tout renseignement, vous pouvez contacter votre référent égalité
 				professionnelle femmes-hommes au sein de votre DREETS en répondant à ce

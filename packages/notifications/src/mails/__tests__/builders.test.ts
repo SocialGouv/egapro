@@ -204,15 +204,76 @@ describe("per-type rendering details", () => {
 		).rejects.toThrow(/complianceDeadline is required/);
 	});
 
-	it("joint_evaluation_submitted confirms upload", async () => {
+	it("joint_evaluation_submitted variant=completed ends the process", async () => {
 		const mail = await buildMail("joint_evaluation_submitted", {
 			siren: SIREN,
 			year: YEAR,
+			variant: "completed",
+			raisonSociale: RAISON_SOCIALE,
 		});
 		expect(mail.subject).toContain("évaluation conjointe");
-		expect(mail.html.toLowerCase()).toContain("évaluation conjointe");
-		expect(mail.html).toContain("Prochaine étape");
+		expect(mail.subject).toContain("et fin de démarche");
+		expect(mail.html).toContain(RAISON_SOCIALE);
+		expect(mail.html).toContain("Votre démarche est désormais terminée");
+		expect(mail.html).toContain("Mon espace");
 		expect(mail.html).toContain("/mon-espace");
+		expect(mail.html).not.toContain("/avis-cse");
+	});
+
+	it("joint_evaluation_submitted variant=cse_to_deposit asks for the CSE opinion", async () => {
+		const mail = await buildMail("joint_evaluation_submitted", {
+			siren: SIREN,
+			year: YEAR,
+			variant: "cse_to_deposit",
+			raisonSociale: RAISON_SOCIALE,
+		});
+		expect(mail.subject).toBe(
+			"Egapro - Dépôt rapport de l'évaluation conjointe des rémunérations",
+		);
+		expect(mail.subject).not.toContain("fin de démarche");
+		expect(mail.html).toContain(
+			"Vous devez à présent déposer le ou les avis du CSE portant sur",
+		);
+		expect(mail.html).toContain(
+			"exactitude des données et des méthodes de calcul utilisées",
+		);
+		expect(mail.html).toContain(
+			"justification éventuelle des écarts de rémunération supérieurs ou égaux à 5 %",
+		);
+		expect(mail.html).toContain("Déposer le ou les avis");
+		expect(mail.html).toContain(`/avis-cse?siren=${SIREN}`);
+	});
+
+	it("joint_evaluation_submitted variant=cse_first_and_second covers both declarations", async () => {
+		const mail = await buildMail("joint_evaluation_submitted", {
+			siren: SIREN,
+			year: YEAR,
+			variant: "cse_first_and_second",
+			raisonSociale: RAISON_SOCIALE,
+		});
+		expect(mail.subject).toBe(
+			"Egapro - Dépôt rapport de l'évaluation conjointe des rémunérations",
+		);
+		expect(mail.html).toContain("pour la première et la seconde déclaration");
+		expect(mail.html).toContain(
+			"exactitude des données et des méthodes de calcul utilisées",
+		);
+		expect(mail.html).toContain(
+			"justification éventuelle des écarts de rémunération supérieurs ou égaux à 5 %",
+		);
+		expect(mail.html).toContain("Déposer le ou les avis");
+		expect(mail.html).toContain(`/avis-cse?siren=${SIREN}`);
+	});
+
+	it("joint_evaluation_submitted throws on an unknown variant", async () => {
+		await expect(
+			buildMail("joint_evaluation_submitted", {
+				siren: SIREN,
+				year: YEAR,
+				variant: "not_a_variant" as never,
+				raisonSociale: RAISON_SOCIALE,
+			}),
+		).rejects.toThrow(/Unknown joint_evaluation_submitted variant/);
 	});
 
 	it("cycle_opening_info announces the declaration period", async () => {
