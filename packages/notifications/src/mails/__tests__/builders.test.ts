@@ -193,6 +193,18 @@ describe("per-type rendering details", () => {
 		expect(mail.html).toContain("/declaration?siren=552100554");
 	});
 
+	it("second_declaration_confirmation variant=path_to_select requires the compliance deadline", async () => {
+		await expect(
+			buildMail("second_declaration_confirmation", {
+				siren: SIREN,
+				year: YEAR,
+				variant: "path_to_select",
+				raisonSociale: "Société Démo",
+			}),
+		).rejects.toThrow(/complianceDeadline is required/);
+	});
+
+
 	it("joint_evaluation_submitted confirms upload", async () => {
 		const mail = await buildMail("joint_evaluation_submitted", {
 			siren: SIREN,
