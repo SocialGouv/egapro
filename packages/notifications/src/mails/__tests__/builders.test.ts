@@ -197,6 +197,9 @@ describe("per-type rendering details", () => {
 		expect(mail.html).toContain(
 			"exactitude des données et des méthodes de calcul utilisées",
 		);
+		expect(mail.html).toContain(
+			"justification éventuelle des écarts de rémunération supérieurs ou égaux à 5 %",
+		);
 		expect(mail.html).toContain("Déposer le ou les avis");
 		expect(mail.html).toContain(`/avis-cse?siren=${SIREN}`);
 	});
@@ -214,6 +217,9 @@ describe("per-type rendering details", () => {
 		expect(mail.html).toContain("pour la première et la seconde déclaration");
 		expect(mail.html).toContain(
 			"exactitude des données et des méthodes de calcul utilisées",
+		);
+		expect(mail.html).toContain(
+			"justification éventuelle des écarts de rémunération supérieurs ou égaux à 5 %",
 		);
 		expect(mail.html).toContain("Déposer le ou les avis");
 		expect(mail.html).toContain(`/avis-cse?siren=${SIREN}`);
