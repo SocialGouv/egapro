@@ -10,6 +10,10 @@ export function formatSiren(siren: string): string {
 	return `${siren.slice(0, 3)} ${siren.slice(3, 6)} ${siren.slice(6, 9)}`;
 }
 
+export function formatSiret(siret: string): string {
+	return `${formatSiren(siret.slice(0, 9))} ${siret.slice(9, 14)}`;
+}
+
 /**
  * Extracts and validates the SIREN from a SIRET string.
  * Returns the 9-digit SIREN, or null if the input is missing or invalid.
