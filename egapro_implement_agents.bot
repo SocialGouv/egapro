@@ -319,8 +319,12 @@ subbot run_ticket:
 
 ## 🔧 MERGE INTO EPIC (par branche) — squash-merge la PR VALIDÉE dans epic/<N> (merge_validated_ticket.sh).
 ## La FIN de cette branche est LE signal qui débloque les tickets enfants (depends_on). Branche auto-supprimée.
+## Retry interne sur exit 3 (mergeabilité UNKNOWN, transitoire ~30s) ≤3× ; exit 2 (conflit) = le script
+## remet le ticket In progress → il reste non-mergé → epic_collect verra remaining>0 → epic_incomplete
+## (relance /implement le re-dispatche + rebase). Toujours exit 0 pour ne PAS faire échouer la branche
+## fan-out sur un conflit transitoire (sinon tout l'epic avorte).
 tool merge_into_epic:
-  command: `cd {{vars.egapro_dir}} && bash scripts/orchestration/merge_validated_ticket.sh {{input.pr}} {{vars.issue}} {{input.id}}`
+  command: `cd {{vars.egapro_dir}} && PR={{input.pr}} && ID={{input.id}} && rc=0; for a in 1 2 3; do bash scripts/orchestration/merge_validated_ticket.sh "$PR" {{vars.issue}} "$ID"; rc=$?; [ "$rc" = 3 ] || break; sleep 15; done; case "$rc" in 0) printf '{"result":"merged"}';; 2) printf '{"result":"conflit — ticket remis In progress, re-dispatch a la relance"}';; *) printf '{"result":"merge rc=%s (non merge)"}' "$rc";; esac`
   output: status_out
 
 ## 🔧 EPIC COLLECT — CONVERGENCE du fan-out (await: best_effort → un ticket KO ne tue que ses dépendants,
@@ -338,7 +342,7 @@ router epic_collect_route:
 
 ## 🔧 TERMINAL epic incomplet — des sous-tickets n'ont pas validé (refacto/escalation). Ne va PAS en E2E.
 tool epic_incomplete:
-  command: `echo "## Epic: INCOMPLET — {{input.remaining}} ; re-spec via /analyse <ticket> ou retire dispatch=escalate, puis relance /implement {{vars.issue}}"`
+  command: `R={{input.remaining}}; echo "## Epic: INCOMPLET — $R ; re-spec via /analyse <ticket> ou retire dispatch=escalate, puis relance /implement {{vars.issue}}"`
   output: status_out
 
 ## ═══════════════════════════════════════════════════════════════════
@@ -454,6 +458,13 @@ tool task_handoff:
   command: `echo "## Code: PASS -- ## E2E: PASS -- PR {{input.pr}} sur alpha, ticket {{vars.issue}} In progress, l humain merge a la review"`
   output: status_out
 
+## 🔧 TERMINAL Task/Bug régression E2E — ticket standalone (pas d'epic → pas de architect_rework/epic_plan
+## qui opèrent sur epic/<N>). Le commentaire e2e-dev: est déjà sur le ticket ; l'humain crée un ticket de
+## fix et relance /implement.
+tool task_regression:
+  command: `echo "## E2E: REGRESSION sur Task/Bug {{vars.issue}} — voir le commentaire e2e-dev: sur le ticket, creer un ticket de fix puis relancer /implement"`
+  output: status_out
+
 ## 🔧 quasi-terminal e2e rate_limited/failed → fail.
 tool e2e_stop:
   command: `echo "## E2E: STOP -- rate_limited/failed, proposer un rerun (best-effort en mode Feature, ne bloque pas la PR)"`
@@ -522,7 +533,7 @@ workflow egapro_implement_agents:
   ticket_setup -> run_ticket
 
   ## En branche, on ne route que sur un BOOLÉEN simple (`validated`), jamais sur une expression `==`.
-  run_ticket -> merge_into_epic when validated with { id: "{{outputs.ticket_setup.id}}", pr: "{{outputs.run_ticket.pr}}" }
+  run_ticket -> merge_into_epic when validated with { id: "{{outputs.run_ticket.ticket}}", pr: "{{outputs.run_ticket.pr}}" }
 
   ## Fallback (non validé) : la branche échoue → ses tickets enfants (depends_on) sont skippés ;
   ## best_effort sur epic_collect → les branches sœurs continuent. Re-tenté au prochain round (rework / re-run).
@@ -544,7 +555,10 @@ workflow egapro_implement_agents:
   ## Mapping vers les vars de l'enfant porté par le `with{}` du subbot run_ticket_task → arête nue.
   task_setup -> run_ticket_task
 
-  run_ticket_task -> e2e_dev with { pr: "{{outputs.run_ticket_task.pr}}", scope: "ticket", trigger_mode: "ticket", base_ref: "{{outputs.task_setup.base_branch}}", worktree_path: "(auto-provision — étape 0 du prompt)", branch: "{{outputs.task_setup.working_branch}}" }
+  run_ticket_task -> e2e_dev when validated with { pr: "{{outputs.run_ticket_task.pr}}", scope: "ticket", trigger_mode: "ticket", base_ref: "{{outputs.task_setup.base_branch}}", worktree_path: "(auto-provision — étape 0 du prompt)", branch: "{{outputs.task_setup.working_branch}}" }
+
+  ## Enfant mono-ticket non validé : le nœud verdict du child a déjà mis le ticket To Do (process_tick_result).
+  run_ticket_task -> fail
 
   e2e_dev -> e2e_route
 
@@ -552,7 +566,9 @@ workflow egapro_implement_agents:
 
   e2e_route -> task_handoff when "outputs.e2e_dev.status == 'validated'" with { pr: "{{outputs.run_ticket_task.pr}}" }
 
-  e2e_route -> architect_rework when "outputs.e2e_dev.status == 'regression'" as e2e_rework(3) with { source: "e2e-regression", change_request: "" }
+  e2e_route -> architect_rework when "outputs.e2e_dev.status == 'regression' && outputs.fetch_issue.issueType == 'Feature'" as e2e_rework(3) with { source: "e2e-regression", change_request: "" }
+
+  e2e_route -> task_regression when "outputs.e2e_dev.status == 'regression'"
 
   e2e_route -> e2e_stop
 
@@ -581,6 +597,8 @@ workflow egapro_implement_agents:
   reset_e2e_gate -> architect_rework with { source: "user-feedback", change_request: "{{outputs.accept_gate.feedback}}" }
 
   task_handoff -> done
+
+  task_regression -> fail
 
   e2e_stop -> fail
 

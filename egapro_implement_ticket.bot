@@ -186,7 +186,7 @@ prompt tu_dev_user:
    7. Si Bug → revert-verify (revert fix → RED, restore → GREEN).
    8. Relance toute la suite (+ test:integration si touchée) → tout vert ; typecheck + lint:check OK sur tes fichiers.
   Contraintes : ne touche JAMAIS au code source (correction de source = handback). Ne crée pas de PR, ne bouge pas le board. Repo PUBLIC : données fictives, scrubber tout secret/PII avant de poster (grep le payload). Aucune question interactive (pas d'AskUserQuestion) — en cas de doute sur un échec, tranche vers la régression et rends la main ; tout autre point ouvert va sous « À confirmer » dans le verdict.
-  Émets le schéma tu_out : verdict ∈ {`TU PASS`, `TU REGRESSION`, `TU FAILED`} (verbatim) + le détail (ticket, tests existants lancés/corrigés/en régression, nouveaux tests + fichiers, intégration aucune/M ajoutés, coverage, régression par test si TU REGRESSION sinon « aucune »).
+  Émets le schéma tu_out : `status` = pass|regression|failed (minuscules, cf. contrat — c'est le champ routé) ; `reason` = le détail (ticket, tests lancés/corrigés/en régression, nouveaux tests + fichiers, intégration aucune/M ajoutés, coverage ; sur regression, fichier:ligne de la régression — c'est le HANDBACK lu par code-dev).
   CONTRAT DE SORTIE STRICT (routage déterministe aval — respecte-le À LA LETTRE, c'est ce qui aiguille le pipeline) : Le champ `status` DOIT valoir EXACTEMENT l'une de : pass | regression | failed (minuscules, SANS le préfixe 'TU '). pass = suite verte ; regression = vraie régression (handback code_dev) ; failed = échec technique.
 
 prompt validator_system:
@@ -310,16 +310,16 @@ prompt gates_consolidate_system:
   SORTIE STRUCTURÉE (obligatoire) — émets EXACTEMENT le schéma gate_verdict :
     · passed : bool, selon la RÈGLE DE VERDICT.
     · route : "test" | "source" (ou "" / "none" si passed = true), selon la RÈGLE DE ROUTE.
-    · summary : markdown court récapitulant les 4 verdicts (un par ligne), la liste des findings bloquants avec leur fichier:catégorie, et le cas échéant une rubrique « À confirmer ». Sans attribution IA (repo PUBLIC, cf. .claude/rules/git-artefact-hygiene.md — scrubber de tout secret/token/PII éventuellement présent dans un finding).
+    · reason : markdown court récapitulant les 4 verdicts (un par ligne), la liste des findings bloquants avec leur fichier:catégorie (c'est le HANDBACK lu par code-dev/tu-dev sur rework), et le cas échéant une rubrique « À confirmer ». Sans attribution IA (repo PUBLIC, cf. .claude/rules/git-artefact-hygiene.md — scrubber de tout secret/token/PII éventuellement présent dans un finding).
 
 prompt gates_consolidate_user:
   Consolide (LECTURE SEULE) les 4 quality gates de l'étape 6 pour le ticket #{{vars.issue}} ({{vars.repo}}), à partir UNIQUEMENT de leurs sorties :
-    · validator        : {{outputs.validator.findings_md}}
-    · structural-auditor : {{outputs.structural_auditor.findings_md}}
-    · rgaa-auditor      : {{outputs.rgaa_auditor.findings_md}}
-    · security-auditor  : {{outputs.security_auditor.findings_md}}
+    · validator        : verdict={{outputs.validator.verdict}} — {{outputs.validator.findings_md}}
+    · structural-auditor : verdict={{outputs.structural_auditor.verdict}} — {{outputs.structural_auditor.findings_md}}
+    · rgaa-auditor      : verdict={{outputs.rgaa_auditor.verdict}} — {{outputs.rgaa_auditor.findings_md}}
+    · security-auditor  : verdict={{outputs.security_auditor.verdict}} — {{outputs.security_auditor.findings_md}}
   Applique la RÈGLE DE VERDICT puis, si passed = false, la RÈGLE DE ROUTE (classe chaque finding bloquant en TEST ou SOURCE par son fichier). Ne ré-audite rien, ne lance aucun outil, ne touche ni au code ni au board. Aucune question interactive — note les incertitudes sous « À confirmer ».
-  Émets le schéma gate_verdict : passed (bool), route ("test" si tous les bloquants sont sur des fichiers de test → tu-dev ; "source" sinon → code-dev ; "" si passed), summary (récap markdown des 4 verdicts + findings bloquants avec fichier:catégorie).
+  Émets le schéma gate_verdict : passed (bool), route ("test" si tous les bloquants sont sur des fichiers de test → tu-dev ; "source" sinon → code-dev ; "" si passed), reason (récap markdown des 4 verdicts + findings bloquants avec fichier:catégorie — c'est le handback de rework).
   CONTRAT DE SORTIE STRICT (routage déterministe aval — respecte-le À LA LETTRE, c'est ce qui aiguille le pipeline) : Le champ `passed` DOIT être un BOOLÉEN true/false (true ssi validator PASS ET structural PASS|MINOR ET rgaa PASS|MINOR ET security SECURE|HARDENING). Le champ `route` DOIT valoir EXACTEMENT test (si seuls des fichiers de test cassent → tu_dev) ou source (sinon → code_dev).
 
 prompt functional_validator_system:
@@ -346,7 +346,7 @@ prompt functional_validator_user:
   Valide fonctionnellement le ticket #{{vars.issue}} ({{vars.repo}}) en LECTURE SEULE : rejoue les scénarios PO (S1, S2…) référencés sur l'epic parent, sur le dev server en cours, via Playwright MCP + nextjs_call(get_errors).
   Contexte fourni par /implement : worktree = {{vars.egapro_dir}}, port dev server = {{outputs.scope.dev_port}}, PR draft = #{{outputs.scope.pr}}. Vérifie le dev server sur ce port (démarre-le seulement si nécessaire).
   Pour CHAQUE scénario : navigate vers la route d'entrée, exécute les actions utilisateur, asserte le résultat observable, puis contrôle console + requêtes réseau + erreurs runtime Next.js.
-  Émets ta sortie structurée func_out : verdict ("PASS" | "RETRY" | "REFACTO") + passed (true ssi PASS) + comment_md (le commentaire "functional-validator:" prêt à coller, scrubbé) + failures (les écarts, vide si PASS).
+  Émets ta sortie structurée func_out : `status` = PASS|RETRY|REFACTO (le champ routé) ; `reason` = le commentaire "functional-validator:" complet scrubbé + les écarts précis (vide si PASS — c'est le HANDBACK lu par code-dev sur RETRY).
   N'édite AUCUN fichier, ne commit/push pas, ne bouge PAS le board (le ticket reste In progress), ne spawne AUCUN agent (ni code-dev, ni tu-dev, ni les gates). Repo PUBLIC : scrubber secrets/PII avant de poster. Aucune question interactive — en cas de doute, note-le sous "À confirmer" dans comment_md.
   CONTRAT DE SORTIE STRICT (routage déterministe aval — respecte-le À LA LETTRE, c'est ce qui aiguille le pipeline) : Le champ `status` DOIT valoir EXACTEMENT l'une de : PASS | RETRY | REFACTO (majuscules).
   GARDE-FOU INFRA : AVANT toute autre action, teste si le dev server du slot répond — port = {{outputs.scope.dev_port}} (`curl -sf http://localhost:{{outputs.scope.dev_port}}/ >/dev/null 2>&1`). S'il ne répond PAS mais que la stack docker du worktree est provisionnée (`.env.local` présent avec COMPOSE_PROJECT_NAME — créée par code-dev step 4.5), DÉMARRE le dev server toi-même : `PORT={{outputs.scope.dev_port}} pnpm dev:app` en arrière-plan, attends qu'il réponde (max 120s), puis déroule les scénarios. Ne renvoie le PASS « étape représentée » (status=PASS, reason='dev server non provisionné — scénarios PO non rejoués, étape représentée') QUE si la stack docker n'existe PAS du tout (pas de .env.local) — dans ce cas seulement, ne démarre ni docker ni Playwright et ne boucle pas.
