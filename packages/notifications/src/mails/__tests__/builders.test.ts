@@ -145,16 +145,63 @@ describe("per-type rendering details", () => {
 		expect(mail.html).toContain(RAISON_SOCIALE);
 	});
 
-	it("second_declaration_confirmation mentions the corrective second declaration", async () => {
+	it("second_declaration_confirmation variant=completed ends the process", async () => {
 		const mail = await buildMail("second_declaration_confirmation", {
 			siren: SIREN,
 			year: YEAR,
+			variant: "completed",
+			raisonSociale: "Société Démo",
 		});
 		expect(mail.subject).toBe(
-			"Egapro - Accusé de réception de votre seconde déclaration",
+			"Egapro - Transmission de la seconde déclaration et fin de démarche",
 		);
-		expect(mail.html.toLowerCase()).toContain("actions correctives");
+		expect(mail.html).toContain("Société Démo");
+		expect(mail.html).toContain("552 100 554");
+		expect(mail.html).toContain("Mon espace");
+		expect(mail.html).toContain("/mon-espace");
+	});
+
+	it("second_declaration_confirmation variant=cse_to_deposit asks for the CSE opinion", async () => {
+		const mail = await buildMail("second_declaration_confirmation", {
+			siren: SIREN,
+			year: YEAR,
+			variant: "cse_to_deposit",
+			raisonSociale: "Société Démo",
+		});
+		expect(mail.subject).toBe(
+			"Egapro - Transmission de la seconde déclaration",
+		);
+		expect(mail.html).toContain("Déposer");
+		expect(mail.html).toContain("première et la seconde déclaration");
 		expect(mail.html).toContain("/declaration?siren=552100554");
+	});
+
+	it("second_declaration_confirmation variant=path_to_select names the compliance deadline", async () => {
+		const mail = await buildMail("second_declaration_confirmation", {
+			siren: SIREN,
+			year: YEAR,
+			variant: "path_to_select",
+			raisonSociale: "Société Démo",
+			complianceDeadline: DEADLINE,
+		});
+		expect(mail.subject).toBe(
+			"Egapro - Transmission de la seconde déclaration",
+		);
+		expect(mail.html).toContain("Sélectionner le parcours");
+		expect(mail.html).toContain("5 %");
+		expect(mail.html).toContain("1ᵉʳ juin 2027");
+		expect(mail.html).toContain("/declaration?siren=552100554");
+	});
+
+	it("second_declaration_confirmation variant=path_to_select requires the compliance deadline", async () => {
+		await expect(
+			buildMail("second_declaration_confirmation", {
+				siren: SIREN,
+				year: YEAR,
+				variant: "path_to_select",
+				raisonSociale: "Société Démo",
+			}),
+		).rejects.toThrow(/complianceDeadline is required/);
 	});
 
 	it("joint_evaluation_submitted confirms upload", async () => {
