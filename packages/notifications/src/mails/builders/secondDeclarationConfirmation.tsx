@@ -47,6 +47,11 @@ function getVariantContent(
 				ctaHref: getDeclarationUrl(siren, year),
 			};
 		case "path_to_select": {
+			if (!complianceDeadline) {
+				throw new Error(
+					"complianceDeadline is required for path_to_select variant",
+				);
+			}
 			const formattedDeadline = formatFrenchDate(complianceDeadline);
 			return {
 				subject: "Egapro - Transmission de la seconde déclaration",
@@ -72,7 +77,7 @@ export const buildSecondDeclarationConfirmationMail: MailBuilder<
 			<EmailParagraph>
 				Vous avez transmis aux services du ministre chargé du Travail{" "}
 				<strong>
-					l'indicateur d'écart de rémunération par catégorie de salariée entre
+					l'indicateur d'écart de rémunération par catégorie de salariés entre
 					les femmes et les hommes
 				</strong>
 				, issu de votre seconde déclaration pour {year}, concernant l'entreprise{" "}
