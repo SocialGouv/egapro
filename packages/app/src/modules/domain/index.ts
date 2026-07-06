@@ -166,7 +166,12 @@ export {
 export type { ScoreBracket, ScoreBracketId } from "./shared/scoreBracket";
 export { getScoreBracket, SCORE_BRACKETS } from "./shared/scoreBracket";
 // SIREN utilities
-export { extractSiren, formatSiren, formatSiret, parseSiren } from "./shared/siren";
+export {
+	extractSiren,
+	formatSiren,
+	formatSiret,
+	parseSiren,
+} from "./shared/siren";
 // Submission rate helpers (shared by admin/public stats routers and KPI tiles)
 export type { CampaignRateTileProps } from "./shared/submissionRate";
 export {

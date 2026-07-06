@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { extractSiren, formatSiren, parseSiren } from "../shared/siren";
+import {
+	extractSiren,
+	formatSiren,
+	formatSiret,
+	parseSiren,
+} from "../shared/siren";
 
 describe("extractSiren", () => {
 	it("extracts first 9 chars from a 14-digit SIRET", () => {
@@ -15,6 +20,16 @@ describe("extractSiren", () => {
 describe("formatSiren", () => {
 	it("formats a 9-digit SIREN with spaces", () => {
 		expect(formatSiren("532847196")).toBe("532 847 196");
+	});
+});
+
+describe("formatSiret", () => {
+	it("formats a 14-digit SIRET with spaces", () => {
+		expect(formatSiret("53284719600015")).toBe("532 847 196 00015");
+	});
+
+	it("formats an all-zero SIRET", () => {
+		expect(formatSiret("00000000000000")).toBe("000 000 000 00000");
 	});
 });
 
