@@ -487,7 +487,7 @@ describe("cse_opinion_receipt variants", () => {
 	it("single: 'exactitude' intro without the gap bullet list", async () => {
 		const mail = await buildReceipt("single");
 		expect(mail.html).toContain(
-			"l&#x27;avis du CSE sur l&#x27;exactitude des données et des méthodes de calcul utilisés",
+			"l&#x27;avis du CSE sur l&#x27;exactitude des données et des méthodes de calcul utilisées",
 		);
 		expect(mail.html).not.toContain("<ul");
 		expect(mail.html).not.toContain("justification éventuelle des écarts");

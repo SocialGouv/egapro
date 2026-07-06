@@ -30,7 +30,7 @@ export const buildCseOpinionReceiptMail: MailBuilder<
 			}}
 		>
 			<li>
-				l&apos;exactitude des données et des méthodes de calcul utilisés ;
+				l&apos;exactitude des données et des méthodes de calcul utilisées ;
 			</li>
 			<li>
 				la justification éventuelle des écarts de rémunération supérieurs ou
@@ -67,7 +67,7 @@ export const buildCseOpinionReceiptMail: MailBuilder<
 						Vous avez transmis aux services du ministre chargé du Travail{" "}
 						<strong>
 							l&apos;avis du CSE sur l&apos;exactitude des données et des
-							méthodes de calcul utilisés
+							méthodes de calcul utilisées
 						</strong>{" "}
 						pour la déclaration des indicateurs de rémunération {year},
 						concernant l&apos;entreprise <strong>{raisonSociale}</strong> (SIREN

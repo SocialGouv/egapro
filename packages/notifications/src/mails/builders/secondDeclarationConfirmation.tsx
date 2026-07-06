@@ -82,6 +82,8 @@ export const buildSecondDeclarationConfirmationMail: MailBuilder<
 				</strong>
 				, issu de votre seconde déclaration pour {year}, concernant l'entreprise{" "}
 				<strong>{raisonSociale}</strong> (SIREN : {formattedSiren}).
+			</EmailParagraph>
+			<EmailParagraph>
 				L'administration du travail accuse réception de cette transmission. Cet
 				accusé de réception ne vaut pas contrôle de conformité de votre
 				déclaration.

@@ -23,13 +23,17 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 	let bodyContent: React.ReactNode;
 
 	const introParagraph = (
-		<EmailParagraph>
-			Vous avez transmis aux services du ministre chargé du Travail le rapport
-			de l'évaluation conjointe des rémunérations pour {year}, concernant
-			l'entreprise <strong>{raisonSociale}</strong> (SIREN : {siren}).
-			L'administration du travail accuse réception de cette transmission. Cet
-			accusé de réception ne vaut pas contrôle de conformité de votre dépôt.
-		</EmailParagraph>
+		<>
+			<EmailParagraph>
+				Vous avez transmis aux services du ministre chargé du Travail le rapport
+				de l'évaluation conjointe des rémunérations pour {year}, concernant
+				l'entreprise <strong>{raisonSociale}</strong> (SIREN : {siren}).
+			</EmailParagraph>
+			<EmailParagraph>
+				L'administration du travail accuse réception de cette transmission. Cet
+				accusé de réception ne vaut pas contrôle de conformité de votre dépôt.
+			</EmailParagraph>
+		</>
 	);
 
 	const bulletList = (
