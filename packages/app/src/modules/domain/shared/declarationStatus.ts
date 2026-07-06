@@ -18,6 +18,30 @@ export function getCurrentCompliancePath(declaration: {
 	);
 }
 
+export function isInComplianceProcess(declaration: {
+	status: DeclarationFsmStatus | null;
+	firstDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationPathChoice: CompliancePath | null;
+}): boolean {
+	return (
+		getCurrentCompliancePath(declaration) !== null ||
+		declaration.status === "awaiting_compliance_path_choice" ||
+		declaration.status === "awaiting_revision_choice"
+	);
+}
+
+// Second declaration *started* (a step was reached or a path chosen). Distinct
+// from `hasSubmittedSecondDeclaration`, which requires the submit event.
+export function hasStartedSecondDeclaration(declaration: {
+	secondDeclarationStep: number | null;
+	secondDeclarationPathChoice: CompliancePath | null;
+}): boolean {
+	return (
+		declaration.secondDeclarationStep !== null ||
+		declaration.secondDeclarationPathChoice !== null
+	);
+}
+
 export function isCancelled(declaration: {
 	cancelledAt: Date | null;
 }): boolean {

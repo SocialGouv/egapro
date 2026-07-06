@@ -6,7 +6,10 @@ import type {
 	NotificationType,
 } from "notifications/queue";
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { getCurrentCompliancePath } from "~/modules/domain";
+import {
+	hasStartedSecondDeclaration,
+	isInComplianceProcess,
+} from "~/modules/domain";
 import { logAction } from "~/server/audit/log";
 import { db } from "~/server/db";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
@@ -92,20 +95,11 @@ async function readReceiptContext(
 		};
 	}
 
-	const hasGapAboveThreshold =
-		getCurrentCompliancePath(row) !== null ||
-		row.status === "awaiting_compliance_path_choice" ||
-		row.status === "awaiting_revision_choice";
-
-	const hasSecondDeclaration =
-		row.secondDeclarationStep !== null ||
-		row.secondDeclarationPathChoice !== null;
-
 	return {
 		raisonSociale,
 		cseRequired: row.cseRequired,
-		hasGapAboveThreshold,
-		hasSecondDeclaration,
+		hasGapAboveThreshold: isInComplianceProcess(row),
+		hasSecondDeclaration: hasStartedSecondDeclaration(row),
 	};
 }
 
