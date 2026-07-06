@@ -9,6 +9,7 @@ export type {
 } from "./projection";
 export {
 	isCompanyDiffusible,
+	publicDeclarationColumns,
 	toPublicDeclaration,
 } from "./projection";
 export type {

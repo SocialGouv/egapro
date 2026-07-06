@@ -1,4 +1,4 @@
-import type { companies, declarations } from "~/server/db/schema";
+import { type companies, declarations } from "~/server/db/schema";
 import type { PublicDeclarationDTO } from "./schemas";
 
 export type PublicDeclarationSource = Pick<
@@ -48,6 +48,46 @@ export type PublicCompanySource = Pick<
 	statutDiffusion: string | null;
 	workforceEma: string | null;
 };
+
+/**
+ * Drizzle column selection for the public declaration indicators.
+ * Spread into `.select({ ...publicDeclarationColumns, ...companyColumns })`
+ * across every public-API query surface so the projected indicator columns
+ * stay in sync with {@link PublicDeclarationSource}. The resulting query row
+ * is directly assignable to {@link PublicDeclarationSource} and can be passed
+ * as-is to {@link toPublicDeclaration}.
+ */
+export const publicDeclarationColumns = {
+	year: declarations.year,
+	totalWomen: declarations.totalWomen,
+	totalMen: declarations.totalMen,
+	globalAnnualMeanGap: declarations.globalAnnualMeanGap,
+	globalAnnualMedianGap: declarations.globalAnnualMedianGap,
+	globalHourlyMeanGap: declarations.globalHourlyMeanGap,
+	globalHourlyMedianGap: declarations.globalHourlyMedianGap,
+	variableAnnualMeanGap: declarations.variableAnnualMeanGap,
+	variableAnnualMedianGap: declarations.variableAnnualMedianGap,
+	variableHourlyMeanGap: declarations.variableHourlyMeanGap,
+	variableHourlyMedianGap: declarations.variableHourlyMedianGap,
+	variableProportionWomen: declarations.variableProportionWomen,
+	variableProportionMen: declarations.variableProportionMen,
+	annualQuartile1ProportionWomen: declarations.annualQuartile1ProportionWomen,
+	annualQuartile2ProportionWomen: declarations.annualQuartile2ProportionWomen,
+	annualQuartile3ProportionWomen: declarations.annualQuartile3ProportionWomen,
+	annualQuartile4ProportionWomen: declarations.annualQuartile4ProportionWomen,
+	annualQuartile1ProportionMen: declarations.annualQuartile1ProportionMen,
+	annualQuartile2ProportionMen: declarations.annualQuartile2ProportionMen,
+	annualQuartile3ProportionMen: declarations.annualQuartile3ProportionMen,
+	annualQuartile4ProportionMen: declarations.annualQuartile4ProportionMen,
+	hourlyQuartile1ProportionWomen: declarations.hourlyQuartile1ProportionWomen,
+	hourlyQuartile2ProportionWomen: declarations.hourlyQuartile2ProportionWomen,
+	hourlyQuartile3ProportionWomen: declarations.hourlyQuartile3ProportionWomen,
+	hourlyQuartile4ProportionWomen: declarations.hourlyQuartile4ProportionWomen,
+	hourlyQuartile1ProportionMen: declarations.hourlyQuartile1ProportionMen,
+	hourlyQuartile2ProportionMen: declarations.hourlyQuartile2ProportionMen,
+	hourlyQuartile3ProportionMen: declarations.hourlyQuartile3ProportionMen,
+	hourlyQuartile4ProportionMen: declarations.hourlyQuartile4ProportionMen,
+} satisfies Record<keyof PublicDeclarationSource, unknown>;
 
 export function isCompanyDiffusible(statutDiffusion: string | null): boolean {
 	return statutDiffusion !== "N";

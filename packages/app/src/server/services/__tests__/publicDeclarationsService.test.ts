@@ -57,6 +57,7 @@ vi.mock("drizzle-orm", () => ({
 }));
 
 vi.mock("~/modules/public-api", () => ({
+	publicDeclarationColumns: {},
 	toPublicDeclaration: mocks.toPublicDeclaration,
 }));
 

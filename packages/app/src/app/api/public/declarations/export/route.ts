@@ -5,9 +5,11 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import type {
 	PublicCompanySource,
 	PublicDeclarationDTO,
-	PublicDeclarationSource,
 } from "~/modules/public-api";
-import { toPublicDeclaration } from "~/modules/public-api";
+import {
+	publicDeclarationColumns,
+	toPublicDeclaration,
+} from "~/modules/public-api";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 import {
@@ -20,43 +22,7 @@ import {
 async function fetchPublishableDeclarations() {
 	return db
 		.select({
-			year: declarations.year,
-			totalWomen: declarations.totalWomen,
-			totalMen: declarations.totalMen,
-			globalAnnualMeanGap: declarations.globalAnnualMeanGap,
-			globalAnnualMedianGap: declarations.globalAnnualMedianGap,
-			globalHourlyMeanGap: declarations.globalHourlyMeanGap,
-			globalHourlyMedianGap: declarations.globalHourlyMedianGap,
-			variableAnnualMeanGap: declarations.variableAnnualMeanGap,
-			variableAnnualMedianGap: declarations.variableAnnualMedianGap,
-			variableHourlyMeanGap: declarations.variableHourlyMeanGap,
-			variableHourlyMedianGap: declarations.variableHourlyMedianGap,
-			variableProportionWomen: declarations.variableProportionWomen,
-			variableProportionMen: declarations.variableProportionMen,
-			annualQuartile1ProportionWomen:
-				declarations.annualQuartile1ProportionWomen,
-			annualQuartile2ProportionWomen:
-				declarations.annualQuartile2ProportionWomen,
-			annualQuartile3ProportionWomen:
-				declarations.annualQuartile3ProportionWomen,
-			annualQuartile4ProportionWomen:
-				declarations.annualQuartile4ProportionWomen,
-			annualQuartile1ProportionMen: declarations.annualQuartile1ProportionMen,
-			annualQuartile2ProportionMen: declarations.annualQuartile2ProportionMen,
-			annualQuartile3ProportionMen: declarations.annualQuartile3ProportionMen,
-			annualQuartile4ProportionMen: declarations.annualQuartile4ProportionMen,
-			hourlyQuartile1ProportionWomen:
-				declarations.hourlyQuartile1ProportionWomen,
-			hourlyQuartile2ProportionWomen:
-				declarations.hourlyQuartile2ProportionWomen,
-			hourlyQuartile3ProportionWomen:
-				declarations.hourlyQuartile3ProportionWomen,
-			hourlyQuartile4ProportionWomen:
-				declarations.hourlyQuartile4ProportionWomen,
-			hourlyQuartile1ProportionMen: declarations.hourlyQuartile1ProportionMen,
-			hourlyQuartile2ProportionMen: declarations.hourlyQuartile2ProportionMen,
-			hourlyQuartile3ProportionMen: declarations.hourlyQuartile3ProportionMen,
-			hourlyQuartile4ProportionMen: declarations.hourlyQuartile4ProportionMen,
+			...publicDeclarationColumns,
 			siren: companies.siren,
 			name: companies.name,
 			address: companies.address,
@@ -99,38 +65,6 @@ type ExportRow = Awaited<
 >[number];
 
 function toPublicDTO(row: ExportRow): PublicDeclarationDTO {
-	const declarationSource: PublicDeclarationSource = {
-		year: row.year,
-		totalWomen: row.totalWomen,
-		totalMen: row.totalMen,
-		globalAnnualMeanGap: row.globalAnnualMeanGap,
-		globalAnnualMedianGap: row.globalAnnualMedianGap,
-		globalHourlyMeanGap: row.globalHourlyMeanGap,
-		globalHourlyMedianGap: row.globalHourlyMedianGap,
-		variableAnnualMeanGap: row.variableAnnualMeanGap,
-		variableAnnualMedianGap: row.variableAnnualMedianGap,
-		variableHourlyMeanGap: row.variableHourlyMeanGap,
-		variableHourlyMedianGap: row.variableHourlyMedianGap,
-		variableProportionWomen: row.variableProportionWomen,
-		variableProportionMen: row.variableProportionMen,
-		annualQuartile1ProportionWomen: row.annualQuartile1ProportionWomen,
-		annualQuartile2ProportionWomen: row.annualQuartile2ProportionWomen,
-		annualQuartile3ProportionWomen: row.annualQuartile3ProportionWomen,
-		annualQuartile4ProportionWomen: row.annualQuartile4ProportionWomen,
-		annualQuartile1ProportionMen: row.annualQuartile1ProportionMen,
-		annualQuartile2ProportionMen: row.annualQuartile2ProportionMen,
-		annualQuartile3ProportionMen: row.annualQuartile3ProportionMen,
-		annualQuartile4ProportionMen: row.annualQuartile4ProportionMen,
-		hourlyQuartile1ProportionWomen: row.hourlyQuartile1ProportionWomen,
-		hourlyQuartile2ProportionWomen: row.hourlyQuartile2ProportionWomen,
-		hourlyQuartile3ProportionWomen: row.hourlyQuartile3ProportionWomen,
-		hourlyQuartile4ProportionWomen: row.hourlyQuartile4ProportionWomen,
-		hourlyQuartile1ProportionMen: row.hourlyQuartile1ProportionMen,
-		hourlyQuartile2ProportionMen: row.hourlyQuartile2ProportionMen,
-		hourlyQuartile3ProportionMen: row.hourlyQuartile3ProportionMen,
-		hourlyQuartile4ProportionMen: row.hourlyQuartile4ProportionMen,
-	};
-
 	const companySource: PublicCompanySource = {
 		siren: row.siren,
 		name: row.name,
@@ -144,7 +78,7 @@ function toPublicDTO(row: ExportRow): PublicDeclarationDTO {
 		workforceEma: row.workforceEma ?? null,
 	};
 
-	return toPublicDeclaration(declarationSource, companySource);
+	return toPublicDeclaration(row, companySource);
 }
 
 const CSV_HEADERS: Array<keyof PublicDeclarationDTO> = [

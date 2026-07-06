@@ -13,7 +13,7 @@ import type {
 	PublicCompanySource,
 	PublicDeclarationSource,
 } from "./projection";
-import { toPublicDeclaration } from "./projection";
+import { publicDeclarationColumns, toPublicDeclaration } from "./projection";
 import type { PublicDeclarationDTO } from "./schemas";
 
 type DeclarationRow = {
@@ -31,43 +31,7 @@ async function fetchRows(
 
 	const rows = await db
 		.select({
-			year: declarations.year,
-			totalWomen: declarations.totalWomen,
-			totalMen: declarations.totalMen,
-			globalAnnualMeanGap: declarations.globalAnnualMeanGap,
-			globalAnnualMedianGap: declarations.globalAnnualMedianGap,
-			globalHourlyMeanGap: declarations.globalHourlyMeanGap,
-			globalHourlyMedianGap: declarations.globalHourlyMedianGap,
-			variableAnnualMeanGap: declarations.variableAnnualMeanGap,
-			variableAnnualMedianGap: declarations.variableAnnualMedianGap,
-			variableHourlyMeanGap: declarations.variableHourlyMeanGap,
-			variableHourlyMedianGap: declarations.variableHourlyMedianGap,
-			variableProportionWomen: declarations.variableProportionWomen,
-			variableProportionMen: declarations.variableProportionMen,
-			annualQuartile1ProportionWomen:
-				declarations.annualQuartile1ProportionWomen,
-			annualQuartile2ProportionWomen:
-				declarations.annualQuartile2ProportionWomen,
-			annualQuartile3ProportionWomen:
-				declarations.annualQuartile3ProportionWomen,
-			annualQuartile4ProportionWomen:
-				declarations.annualQuartile4ProportionWomen,
-			annualQuartile1ProportionMen: declarations.annualQuartile1ProportionMen,
-			annualQuartile2ProportionMen: declarations.annualQuartile2ProportionMen,
-			annualQuartile3ProportionMen: declarations.annualQuartile3ProportionMen,
-			annualQuartile4ProportionMen: declarations.annualQuartile4ProportionMen,
-			hourlyQuartile1ProportionWomen:
-				declarations.hourlyQuartile1ProportionWomen,
-			hourlyQuartile2ProportionWomen:
-				declarations.hourlyQuartile2ProportionWomen,
-			hourlyQuartile3ProportionWomen:
-				declarations.hourlyQuartile3ProportionWomen,
-			hourlyQuartile4ProportionWomen:
-				declarations.hourlyQuartile4ProportionWomen,
-			hourlyQuartile1ProportionMen: declarations.hourlyQuartile1ProportionMen,
-			hourlyQuartile2ProportionMen: declarations.hourlyQuartile2ProportionMen,
-			hourlyQuartile3ProportionMen: declarations.hourlyQuartile3ProportionMen,
-			hourlyQuartile4ProportionMen: declarations.hourlyQuartile4ProportionMen,
+			...publicDeclarationColumns,
 			companySiren: companies.siren,
 			companyName: companies.name,
 			companyAddress: companies.address,
@@ -100,37 +64,7 @@ async function fetchRows(
 		.orderBy(desc(declarations.year));
 
 	return rows.map((row) => ({
-		declaration: {
-			year: row.year,
-			totalWomen: row.totalWomen,
-			totalMen: row.totalMen,
-			globalAnnualMeanGap: row.globalAnnualMeanGap,
-			globalAnnualMedianGap: row.globalAnnualMedianGap,
-			globalHourlyMeanGap: row.globalHourlyMeanGap,
-			globalHourlyMedianGap: row.globalHourlyMedianGap,
-			variableAnnualMeanGap: row.variableAnnualMeanGap,
-			variableAnnualMedianGap: row.variableAnnualMedianGap,
-			variableHourlyMeanGap: row.variableHourlyMeanGap,
-			variableHourlyMedianGap: row.variableHourlyMedianGap,
-			variableProportionWomen: row.variableProportionWomen,
-			variableProportionMen: row.variableProportionMen,
-			annualQuartile1ProportionWomen: row.annualQuartile1ProportionWomen,
-			annualQuartile2ProportionWomen: row.annualQuartile2ProportionWomen,
-			annualQuartile3ProportionWomen: row.annualQuartile3ProportionWomen,
-			annualQuartile4ProportionWomen: row.annualQuartile4ProportionWomen,
-			annualQuartile1ProportionMen: row.annualQuartile1ProportionMen,
-			annualQuartile2ProportionMen: row.annualQuartile2ProportionMen,
-			annualQuartile3ProportionMen: row.annualQuartile3ProportionMen,
-			annualQuartile4ProportionMen: row.annualQuartile4ProportionMen,
-			hourlyQuartile1ProportionWomen: row.hourlyQuartile1ProportionWomen,
-			hourlyQuartile2ProportionWomen: row.hourlyQuartile2ProportionWomen,
-			hourlyQuartile3ProportionWomen: row.hourlyQuartile3ProportionWomen,
-			hourlyQuartile4ProportionWomen: row.hourlyQuartile4ProportionWomen,
-			hourlyQuartile1ProportionMen: row.hourlyQuartile1ProportionMen,
-			hourlyQuartile2ProportionMen: row.hourlyQuartile2ProportionMen,
-			hourlyQuartile3ProportionMen: row.hourlyQuartile3ProportionMen,
-			hourlyQuartile4ProportionMen: row.hourlyQuartile4ProportionMen,
-		},
+		declaration: row,
 		company: {
 			siren: row.companySiren,
 			name: row.companyName,
