@@ -22,6 +22,7 @@
 ## dev (3001 + slot). code_dev fait son checkout explicite de la base (worktree:auto part de HEAD).
 vars:
   egapro_dir: string = "${PROJECT_DIR}"
+  pipeline_dir: string = ""
   repo: string = "SocialGouv/egapro"
   issue: string = ""
   base_branch: string = ""
@@ -465,11 +466,11 @@ router func_route:
   mode: condition
 
 tool ci_wait:
-  command: `cd {{vars.egapro_dir}} && N={{vars.issue}} && PR={{input.pr}} && OUT=$(bash scripts/orchestration/ci_wait.sh "$PR" {{vars.repo}}) && { bash scripts/orchestration/log_event.sh "code-dev-$N" CI_DONE "pr=$PR $OUT" >/dev/null 2>&1 || true; } && echo "$OUT"`
+  command: `cd {{vars.egapro_dir}} && PD={{vars.pipeline_dir}} && N={{vars.issue}} && PR={{input.pr}} && OUT=$(bash "$PD/scripts/orchestration/ci_wait.sh" "$PR" {{vars.repo}}) && { bash "$PD/scripts/orchestration/log_event.sh" "code-dev-$N" CI_DONE "pr=$PR $OUT" >/dev/null 2>&1 || true; } && echo "$OUT"`
   output: status_out
 
 tool sonar_wait:
-  command: `cd {{vars.egapro_dir}} && N={{vars.issue}} && PR={{input.pr}} && { bash scripts/orchestration/log_event.sh "code-dev-$N" SONAR_WAIT "pr=$PR" >/dev/null 2>&1 || true; } && echo "[WAIT 9c] attendre comment sonarcloud[bot] sur PR $PR ; Quality Gate Failed => bugs/smells/coverage/hotspots ; rouge => retour code_dev"`
+  command: `cd {{vars.egapro_dir}} && PD={{vars.pipeline_dir}} && N={{vars.issue}} && PR={{input.pr}} && { bash "$PD/scripts/orchestration/log_event.sh" "code-dev-$N" SONAR_WAIT "pr=$PR" >/dev/null 2>&1 || true; } && echo "[WAIT 9c] attendre comment sonarcloud[bot] sur PR $PR ; Quality Gate Failed => bugs/smells/coverage/hotspots ; rouge => retour code_dev"`
   output: status_out
 
 agent bot_review:
@@ -484,19 +485,19 @@ router checks_route:
 ## NB : finalize_pr fait aussi le TEARDOWN de la stack docker du worktree (down -v sur le
 ## COMPOSE_PROJECT_NAME de .env.local) — sinon les stacks (~1,2 GB) s'accumulent sub-run après sub-run.
 tool finalize_pr:
-  command: `cd {{vars.egapro_dir}} && PR={{input.pr}} && N={{vars.issue}} && gh pr ready "$PR" --repo {{vars.repo}} && { bash scripts/orchestration/log_event.sh "code-dev-$N" PR_READY "pr=$PR" >/dev/null 2>&1 || true; } && { sleep 5; gh pr checks "$PR" --repo {{vars.repo}} 2>/dev/null | grep -qE 'fail|pending' && echo "WARN: checks non verts apres pr ready (re-poll 9b)" >&2 || true; } && { bash scripts/orchestration/log_event.sh "code-dev-$N" COMPLETE "pr=$PR" >/dev/null 2>&1 || true; } && ENVF=packages/app/.env.local; if [ -f "$ENVF" ]; then CP=$(grep '^COMPOSE_PROJECT_NAME=' "$ENVF" | cut -d= -f2); [ -n "$CP" ] && docker compose -p "$CP" down -v >/dev/null 2>&1 || true; fi; jq -nc --arg t "$N" --arg pr "$PR" '{validated:true,status:"validated",ticket:$t,pr:$pr,reason:"",retry_in:""}'`
+  command: `cd {{vars.egapro_dir}} && PD={{vars.pipeline_dir}} && PR={{input.pr}} && N={{vars.issue}} && gh pr ready "$PR" --repo {{vars.repo}} && { bash "$PD/scripts/orchestration/log_event.sh" "code-dev-$N" PR_READY "pr=$PR" >/dev/null 2>&1 || true; } && { sleep 5; gh pr checks "$PR" --repo {{vars.repo}} 2>/dev/null | grep -qE 'fail|pending' && echo "WARN: checks non verts apres pr ready (re-poll 9b)" >&2 || true; } && { bash "$PD/scripts/orchestration/log_event.sh" "code-dev-$N" COMPLETE "pr=$PR" >/dev/null 2>&1 || true; } && ENVF=packages/app/.env.local; if [ -f "$ENVF" ]; then CP=$(grep '^COMPOSE_PROJECT_NAME=' "$ENVF" | cut -d= -f2); [ -n "$CP" ] && docker compose -p "$CP" down -v >/dev/null 2>&1 || true; fi; jq -nc --arg t "$N" --arg pr "$PR" '{validated:true,status:"validated",ticket:$t,pr:$pr,reason:"",retry_in:""}'`
   output: verdict5_out
 
 ## ⛔ refacto : mutations board de la référence via process_tick_result.sh (bump attempt=N, retour
 ## To Do, dispatch=escalate au 3e) — le ticket redevient dispatchable à la relance de /implement.
 tool refacto_done:
-  command: `cd {{vars.egapro_dir}} && ENVF=packages/app/.env.local; if [ -f "$ENVF" ]; then CP=$(grep '^COMPOSE_PROJECT_NAME=' "$ENVF" | cut -d= -f2); [ -n "$CP" ] && docker compose -p "$CP" down -v >/dev/null 2>&1 || true; fi; N={{vars.issue}} && F=$(mktemp) && jq -nc --arg t "$N" '{tick:0,epics:"",results:[{status:"refacto",ticket:$t,reason:"child bot refacto"}]}' > "$F" && bash scripts/orchestration/process_tick_result.sh "$F" >&2 || true; printf '{"result":"refacto -- ticket To Do (attempt bump), spec a revoir"}'`
+  command: `cd {{vars.egapro_dir}} && PD={{vars.pipeline_dir}} && ENVF=packages/app/.env.local; if [ -f "$ENVF" ]; then CP=$(grep '^COMPOSE_PROJECT_NAME=' "$ENVF" | cut -d= -f2); [ -n "$CP" ] && docker compose -p "$CP" down -v >/dev/null 2>&1 || true; fi; N={{vars.issue}} && F=$(mktemp) && jq -nc --arg t "$N" '{tick:0,epics:"",results:[{status:"refacto",ticket:$t,reason:"child bot refacto"}]}' > "$F" && bash "$PD/scripts/orchestration/process_tick_result.sh" "$F" >&2 || true; printf '{"result":"refacto -- ticket To Do (attempt bump), spec a revoir"}'`
   output: status_out
 
 ## ⤴ escalade Opus RÉELLE : pose le label complexe (persistant pour les futurs dispatches), log
 ## l'événement, puis la branche repart sur code_dev_opus (nœud Opus, même system prompt).
 tool escalate_opus:
-  command: `cd {{vars.egapro_dir}} && N={{vars.issue}} && gh issue edit "$N" --repo {{vars.repo}} --add-label complexe >/dev/null 2>&1 || true; bash scripts/orchestration/log_event.sh "code-dev-$N" ESCALATED "needs_opus_escalation -> code_dev_opus in-run" >/dev/null 2>&1 || true; printf '{"result":"escalated"}'`
+  command: `cd {{vars.egapro_dir}} && PD={{vars.pipeline_dir}} && N={{vars.issue}} && gh issue edit "$N" --repo {{vars.repo}} --add-label complexe >/dev/null 2>&1 || true; bash "$PD/scripts/orchestration/log_event.sh" "code-dev-$N" ESCALATED "needs_opus_escalation -> code_dev_opus in-run" >/dev/null 2>&1 || true; printf '{"result":"escalated"}'`
   output: status_out
 
 agent code_dev_opus:
@@ -513,13 +514,13 @@ router code_dev_opus_route:
 ## ⏸ rate_limited : remet le ticket To Do (sans bump attempt) pour que la relance de /implement le
 ## re-dispatche — epic_dag ne plannifie QUE les To Do, le laisser In progress le rendrait invisible.
 tool rate_limited_stop:
-  command: `cd {{vars.egapro_dir}} && ENVF=packages/app/.env.local; if [ -f "$ENVF" ]; then CP=$(grep '^COMPOSE_PROJECT_NAME=' "$ENVF" | cut -d= -f2); [ -n "$CP" ] && docker compose -p "$CP" down -v >/dev/null 2>&1 || true; fi; N={{vars.issue}} && bash scripts/orchestration/set_ticket_status.sh "$N" "To Do" >/dev/null 2>&1 || true; printf '{"result":"rate_limited -- ticket To Do, relancer plus tard"}'`
+  command: `cd {{vars.egapro_dir}} && PD={{vars.pipeline_dir}} && ENVF=packages/app/.env.local; if [ -f "$ENVF" ]; then CP=$(grep '^COMPOSE_PROJECT_NAME=' "$ENVF" | cut -d= -f2); [ -n "$CP" ] && docker compose -p "$CP" down -v >/dev/null 2>&1 || true; fi; N={{vars.issue}} && bash "$PD/scripts/orchestration/set_ticket_status.sh" "$N" "To Do" >/dev/null 2>&1 || true; printf '{"result":"rate_limited -- ticket To Do, relancer plus tard"}'`
   output: status_out
 
 ## ✗ failed : mutations board de la référence via process_tick_result.sh (retour To Do, pas de bump
 ## attempt — échec technique, pas sémantique) — re-dispatché à la relance.
 tool code_failed:
-  command: `cd {{vars.egapro_dir}} && ENVF=packages/app/.env.local; if [ -f "$ENVF" ]; then CP=$(grep '^COMPOSE_PROJECT_NAME=' "$ENVF" | cut -d= -f2); [ -n "$CP" ] && docker compose -p "$CP" down -v >/dev/null 2>&1 || true; fi; N={{vars.issue}} && F=$(mktemp) && jq -nc --arg t "$N" '{tick:0,epics:"",results:[{status:"failed",ticket:$t,reason:"child bot technical failure"}]}' > "$F" && bash scripts/orchestration/process_tick_result.sh "$F" >&2 || true; printf '{"result":"failed -- ticket To Do (retry a la relance)"}'`
+  command: `cd {{vars.egapro_dir}} && PD={{vars.pipeline_dir}} && ENVF=packages/app/.env.local; if [ -f "$ENVF" ]; then CP=$(grep '^COMPOSE_PROJECT_NAME=' "$ENVF" | cut -d= -f2); [ -n "$CP" ] && docker compose -p "$CP" down -v >/dev/null 2>&1 || true; fi; N={{vars.issue}} && F=$(mktemp) && jq -nc --arg t "$N" '{tick:0,epics:"",results:[{status:"failed",ticket:$t,reason:"child bot technical failure"}]}' > "$F" && bash "$PD/scripts/orchestration/process_tick_result.sh" "$F" >&2 || true; printf '{"result":"failed -- ticket To Do (retry a la relance)"}'`
   output: status_out
 
 

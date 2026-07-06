@@ -313,7 +313,7 @@ tool ticket_setup:
 ## terminale (verdict5_out, dont `validated:true`) → outputs.run_ticket.* pour le routage aval.
 subbot run_ticket:
   source: "egapro_implement_ticket.bot"
-  with { issue: "{{outputs.ticket_setup.id}}", base_branch: "{{outputs.ticket_setup.base}}", working_branch: "{{outputs.ticket_setup.working_branch}}", model: "{{outputs.ticket_setup.model}}", issue_type: "Task" }
+  with { issue: "{{outputs.ticket_setup.id}}", base_branch: "{{outputs.ticket_setup.base}}", working_branch: "{{outputs.ticket_setup.working_branch}}", model: "{{outputs.ticket_setup.model}}", issue_type: "Task", pipeline_dir: "{{vars.egapro_dir}}" }
   output: ticket_verdict
   needs: worktree_slot
 
@@ -363,7 +363,7 @@ tool task_setup:
 ## (status=validated) → outputs.run_ticket_task.* → e2e_dev. Un échec enfant fait échouer le run.
 subbot run_ticket_task:
   source: "egapro_implement_ticket.bot"
-  with { issue: "{{vars.issue}}", base_branch: "{{outputs.task_setup.base_branch}}", working_branch: "{{outputs.task_setup.working_branch}}", model: "{{outputs.task_setup.model}}", issue_type: "{{outputs.task_setup.issue_type}}" }
+  with { issue: "{{vars.issue}}", base_branch: "{{outputs.task_setup.base_branch}}", working_branch: "{{outputs.task_setup.working_branch}}", model: "{{outputs.task_setup.model}}", issue_type: "{{outputs.task_setup.issue_type}}", pipeline_dir: "{{vars.egapro_dir}}" }
   output: verdict5_out
   needs: worktree_slot
 
