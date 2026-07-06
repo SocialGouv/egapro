@@ -8,8 +8,8 @@ type EmailButtonProps = {
 	variant?: ButtonVariant;
 };
 
-// DSFR button: a nested table with border-collapse:initial + a fixed 32px cell.
-// This is the Outlook-safe construct from the official template.
+// DSFR button (Primaire / LG): a nested table with border-collapse:initial +
+// a padding-based cell. This is the Outlook-safe construct from the template.
 const VARIANTS: Record<
 	ButtonVariant,
 	{ border: string; bg: string; text: string }
@@ -40,7 +40,7 @@ export function EmailButton({
 	return (
 		<table
 			role="presentation"
-			align="left"
+			align="center"
 			cellPadding={0}
 			cellSpacing={0}
 			border={0}
@@ -48,6 +48,8 @@ export function EmailButton({
 				borderCollapse: "initial",
 				border: `solid 1px ${v.border}`,
 				backgroundColor: v.bg,
+				marginLeft: "auto",
+				marginRight: "auto",
 			}}
 		>
 			<tbody>
@@ -55,11 +57,11 @@ export function EmailButton({
 					<td
 						align="center"
 						style={{
-							fontSize: FONT.size.sm,
-							lineHeight: FONT.lineHeight.sm,
+							fontSize: FONT.size.bodyMd,
+							lineHeight: FONT.lineHeight.bodyMd,
+							fontWeight: FONT.weight.medium,
 							fontFamily: FONT.family,
-							height: BUTTON.height,
-							padding: `0 ${BUTTON.paddingX}px`,
+							padding: `${BUTTON.paddingY}px ${BUTTON.paddingX}px`,
 							backgroundColor: v.bg,
 						}}
 					>

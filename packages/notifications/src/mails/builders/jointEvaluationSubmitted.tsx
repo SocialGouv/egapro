@@ -40,8 +40,8 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 		<ul
 			style={{
 				margin: 0,
-				marginTop: SPACING.lg,
 				marginBottom: SPACING.md,
+				paddingTop: SPACING.sm,
 				paddingLeft: SPACING.lg,
 				fontFamily: FONT.family,
 				fontSize: FONT.size.body,
@@ -79,7 +79,7 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 			bodyContent = (
 				<>
 					{introParagraph}
-					<EmailParagraph>
+					<EmailParagraph noMarginBottom>
 						Vous devez à présent déposer le ou les avis du CSE portant sur :
 					</EmailParagraph>
 					{bulletList}
@@ -97,7 +97,7 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 			bodyContent = (
 				<>
 					{introParagraph}
-					<EmailParagraph>
+					<EmailParagraph noMarginBottom>
 						Vous devez à présent déposer, pour la première et la seconde
 						déclaration, le ou les avis du CSE portant sur :
 					</EmailParagraph>

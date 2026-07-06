@@ -7,12 +7,6 @@ type EmailCtaWithLinkProps = {
 	linkHref?: string;
 };
 
-const SPACER = {
-	height: SPACING.md,
-	lineHeight: `${SPACING.md}px`,
-	fontSize: SPACING.md,
-} as const;
-
 export function EmailCtaWithLink({
 	href,
 	label,
@@ -30,10 +24,7 @@ export function EmailCtaWithLink({
 		>
 			<tbody>
 				<tr>
-					<td style={SPACER}>&nbsp;</td>
-				</tr>
-				<tr>
-					<td>
+					<td align="center">
 						<EmailButton href={href} label={label} />
 					</td>
 				</tr>
