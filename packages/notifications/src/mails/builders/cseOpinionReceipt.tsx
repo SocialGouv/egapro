@@ -30,24 +30,33 @@ export const buildCseOpinionReceiptMail: MailBuilder<
 			}}
 		>
 			<li>
-				l&apos;exactitude des données et des méthodes de calcul utilisées ;
+				<strong>
+					l&apos;exactitude des données et des méthodes de calcul utilisées ;
+				</strong>
 			</li>
 			<li>
-				la justification éventuelle des écarts de rémunération supérieurs ou
-				égaux à 5 %, au regard de critères objectifs et non sexistes, pour
-				l&apos;indicateur de rémunération par catégorie de salariés.
+				<strong>
+					la justification éventuelle des écarts de rémunération supérieurs ou
+					égaux à 5 %, au regard de critères objectifs et non sexistes, pour
+					l&apos;indicateur de rémunération par catégorie de salariés.
+				</strong>
 			</li>
 		</ul>
 	);
 
 	const receiptParagraph = (
-		<EmailParagraph>
-			L&apos;administration du travail accuse réception de cette transmission.
-			Cet accusé de réception ne vaut pas contrôle de conformité de votre dépôt.
-			Votre démarche est désormais terminée. Vous pouvez à tout moment consulter
-			et télécharger les documents relatifs à cette démarche depuis votre
-			espace.
-		</EmailParagraph>
+		<>
+			<EmailParagraph>
+				L&apos;administration du travail accuse réception de cette transmission.
+				Cet accusé de réception ne vaut pas contrôle de conformité de votre
+				dépôt.
+			</EmailParagraph>
+			<EmailParagraph>
+				Votre démarche est désormais terminée. Vous pouvez à tout moment
+				consulter et télécharger les documents relatifs à cette démarche depuis
+				votre espace.
+			</EmailParagraph>
+		</>
 	);
 
 	const contactParagraph = (

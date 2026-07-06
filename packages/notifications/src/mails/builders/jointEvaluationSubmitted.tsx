@@ -40,6 +40,7 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 		<ul
 			style={{
 				margin: 0,
+				marginTop: SPACING.lg,
 				marginBottom: SPACING.md,
 				paddingLeft: SPACING.lg,
 				fontFamily: FONT.family,
@@ -49,7 +50,7 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 		>
 			{BULLET_ITEMS.map((item) => (
 				<li key={item} style={{ marginBottom: SPACING.xs }}>
-					{item}
+					<strong>{item}</strong>
 				</li>
 			))}
 		</ul>
