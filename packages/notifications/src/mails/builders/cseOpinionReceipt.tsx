@@ -1,9 +1,12 @@
 import { renderEmail } from "../shared/render.js";
 import { getMySpaceUrl } from "../shared/urls.js";
 import {
+	COMPLIANCE_CRITERIA_ITEMS,
+	EmailContactParagraph,
 	EmailCtaWithLink,
 	EmailGreeting,
 	EmailParagraph,
+	EmailReceiptDisclaimer,
 	EmailShell,
 	EmailSignature,
 	FONT,
@@ -29,42 +32,23 @@ export const buildCseOpinionReceiptMail: MailBuilder<
 				lineHeight: FONT.lineHeight.body,
 			}}
 		>
-			<li>
-				<strong>
-					l&apos;exactitude des données et des méthodes de calcul utilisées ;
-				</strong>
-			</li>
-			<li>
-				<strong>
-					la justification éventuelle des écarts de rémunération supérieurs ou
-					égaux à 5 %, au regard de critères objectifs et non sexistes, pour
-					l&apos;indicateur de rémunération par catégorie de salariés.
-				</strong>
-			</li>
+			{COMPLIANCE_CRITERIA_ITEMS.map((item) => (
+				<li key={item}>
+					<strong>{item}</strong>
+				</li>
+			))}
 		</ul>
 	);
 
 	const receiptParagraph = (
 		<>
-			<EmailParagraph>
-				L&apos;administration du travail accuse réception de cette transmission.
-				Cet accusé de réception ne vaut pas contrôle de conformité de votre
-				dépôt.
-			</EmailParagraph>
+			<EmailReceiptDisclaimer receiptNoun="dépôt" />
 			<EmailParagraph>
 				Votre démarche est désormais terminée. Vous pouvez à tout moment
 				consulter et télécharger les documents relatifs à cette démarche depuis
 				votre espace.
 			</EmailParagraph>
 		</>
-	);
-
-	const contactParagraph = (
-		<EmailParagraph>
-			Pour tout renseignement, vous pouvez contacter votre référent égalité
-			professionnelle femmes-hommes au sein de votre DREETS en répondant à ce
-			message.
-		</EmailParagraph>
 	);
 
 	switch (variant) {
@@ -84,7 +68,7 @@ export const buildCseOpinionReceiptMail: MailBuilder<
 					</EmailParagraph>
 					{receiptParagraph}
 					<EmailCtaWithLink href={getMySpaceUrl()} label="Mon espace" />
-					{contactParagraph}
+					<EmailContactParagraph />
 					<EmailSignature />
 				</EmailShell>,
 			);
@@ -103,7 +87,7 @@ export const buildCseOpinionReceiptMail: MailBuilder<
 					{gapBullets}
 					{receiptParagraph}
 					<EmailCtaWithLink href={getMySpaceUrl()} label="Mon espace" />
-					{contactParagraph}
+					<EmailContactParagraph />
 					<EmailSignature />
 				</EmailShell>,
 			);
@@ -123,7 +107,7 @@ export const buildCseOpinionReceiptMail: MailBuilder<
 					{gapBullets}
 					{receiptParagraph}
 					<EmailCtaWithLink href={getMySpaceUrl()} label="Mon espace" />
-					{contactParagraph}
+					<EmailContactParagraph />
 					<EmailSignature />
 				</EmailShell>,
 			);

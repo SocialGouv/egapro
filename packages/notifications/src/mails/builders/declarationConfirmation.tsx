@@ -1,9 +1,11 @@
 import { renderEmail } from "../shared/render.js";
 import { getConnectionUrl, getDeclarationUrl } from "../shared/urls.js";
 import {
+	EmailContactParagraph,
 	EmailCtaWithLink,
 	EmailGreeting,
 	EmailParagraph,
+	EmailReceiptDisclaimer,
 	EmailShell,
 	EmailSignature,
 } from "../template/index.js";
@@ -28,21 +30,7 @@ export const buildDeclarationConfirmationMail: MailBuilder<
 		</EmailParagraph>
 	);
 
-	const accuseParagraph = (
-		<EmailParagraph>
-			L&apos;administration du travail accuse réception de cette transmission.
-			Cet accusé de réception ne vaut pas contrôle de conformité de votre
-			déclaration.
-		</EmailParagraph>
-	);
-
-	const contactParagraph = (
-		<EmailParagraph>
-			Pour tout renseignement, vous pouvez contacter votre référent égalité
-			professionnelle femmes-hommes au sein de votre DREETS en répondant à ce
-			message.
-		</EmailParagraph>
-	);
+	const accuseParagraph = <EmailReceiptDisclaimer receiptNoun="déclaration" />;
 
 	switch (variant) {
 		case "completed": {
@@ -59,7 +47,7 @@ export const buildDeclarationConfirmationMail: MailBuilder<
 						consulter et télécharger votre déclaration depuis votre espace.
 					</EmailParagraph>
 					<EmailCtaWithLink href={connectionUrl} label="Mon espace" />
-					{contactParagraph}
+					<EmailContactParagraph />
 					<EmailSignature />
 				</EmailShell>,
 			);
@@ -84,7 +72,7 @@ export const buildDeclarationConfirmationMail: MailBuilder<
 						label="Déposer l'avis"
 						linkHref={connectionUrl}
 					/>
-					{contactParagraph}
+					<EmailContactParagraph />
 					<EmailSignature />
 				</EmailShell>,
 			);
@@ -111,7 +99,7 @@ export const buildDeclarationConfirmationMail: MailBuilder<
 						label="Sélectionner le parcours"
 						linkHref={connectionUrl}
 					/>
-					{contactParagraph}
+					<EmailContactParagraph />
 					<EmailSignature />
 				</EmailShell>,
 			);

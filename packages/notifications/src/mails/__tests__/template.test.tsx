@@ -3,11 +3,14 @@ import { describe, expect, it } from "vitest";
 import { formatFrenchDate, formatSiren } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
 import { getMySpaceUrl, getPublicUrl } from "../shared/urls.js";
+import { EmailContactParagraph } from "../template/EmailContactParagraph.js";
 import { EmailCtaWithLink } from "../template/EmailCtaWithLink.js";
 import { EmailGreeting } from "../template/EmailGreeting.js";
 import { EmailInfoList } from "../template/EmailInfoList.js";
 import { EmailParagraph } from "../template/EmailParagraph.js";
+import { EmailReceiptDisclaimer } from "../template/EmailReceiptDisclaimer.js";
 import { EmailShell } from "../template/EmailShell.js";
+import { COMPLIANCE_CRITERIA_ITEMS } from "../template/mailCopy.js";
 
 describe("EmailShell", () => {
 	it("renders the DSFR header, illustration band and footer", async () => {
@@ -118,6 +121,65 @@ describe("EmailCtaWithLink", () => {
 		expect(html).toContain(`>${linkHref}<`);
 		// The button destination is never shown as the fallback link text
 		expect(html).not.toContain(`>${href}<`);
+	});
+});
+
+describe("EmailContactParagraph", () => {
+	it("renders the shared DREETS contact wording", async () => {
+		const { html } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailContactParagraph />
+			</EmailShell>,
+		);
+		expect(html).toContain(
+			"Pour tout renseignement, vous pouvez contacter votre référent égalité",
+		);
+		expect(html).toContain(
+			"au sein de votre DREETS en répondant à ce message.",
+		);
+	});
+});
+
+describe("EmailReceiptDisclaimer", () => {
+	it("parameterises only the receipt noun (dépôt vs déclaration)", async () => {
+		const { html: depot } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailReceiptDisclaimer receiptNoun="dépôt" />
+			</EmailShell>,
+		);
+		const { html: declaration } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailReceiptDisclaimer receiptNoun="déclaration" />
+			</EmailShell>,
+		);
+		expect(depot).toContain("de votre dépôt.");
+		expect(depot).not.toContain("de votre déclaration");
+		expect(declaration).toContain("de votre déclaration.");
+	});
+
+	it("renders as a single continuous text node (no React separators around the noun)", async () => {
+		// Guards the byte-identical constraint: the disclaimer is built from one
+		// template string, so the sentence stays uninterrupted around the noun. If
+		// it regressed to a `{receiptNoun}` expression, React would split the text
+		// with `<!-- -->` markers and this exact substring would no longer match.
+		const { html } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailReceiptDisclaimer receiptNoun="dépôt" />
+			</EmailShell>,
+		);
+		expect(html).toContain(
+			"ne vaut pas contrôle de conformité de votre dépôt.",
+		);
+	});
+});
+
+describe("COMPLIANCE_CRITERIA_ITEMS", () => {
+	it("holds the two regulatory criteria with the exact wording", () => {
+		expect(COMPLIANCE_CRITERIA_ITEMS).toHaveLength(2);
+		expect(COMPLIANCE_CRITERIA_ITEMS[0]).toContain(
+			"méthodes de calcul utilisées",
+		);
+		expect(COMPLIANCE_CRITERIA_ITEMS[1]).toContain("supérieurs ou égaux à 5 %");
 	});
 });
 

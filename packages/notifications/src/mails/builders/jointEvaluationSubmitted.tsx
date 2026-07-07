@@ -1,20 +1,18 @@
 import { renderEmail } from "../shared/render.js";
 import { getAvisCseUrl, getMySpaceUrl } from "../shared/urls.js";
 import {
+	COMPLIANCE_CRITERIA_ITEMS,
+	EmailContactParagraph,
 	EmailCtaWithLink,
 	EmailGreeting,
 	EmailParagraph,
+	EmailReceiptDisclaimer,
 	EmailShell,
 	EmailSignature,
 	FONT,
 	SPACING,
 } from "../template/index.js";
 import type { MailBuilder } from "../types.js";
-
-const BULLET_ITEMS = [
-	"l'exactitude des données et des méthodes de calcul utilisées ;",
-	"la justification éventuelle des écarts de rémunération supérieurs ou égaux à 5 %, au regard de critères objectifs et non sexistes, pour l'indicateur de rémunération par catégorie de salariés.",
-];
 
 export const buildJointEvaluationSubmittedMail: MailBuilder<
 	"joint_evaluation_submitted"
@@ -29,10 +27,7 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 				de l'évaluation conjointe des rémunérations pour {year}, concernant
 				l'entreprise <strong>{raisonSociale}</strong> (SIREN : {siren}).
 			</EmailParagraph>
-			<EmailParagraph>
-				L'administration du travail accuse réception de cette transmission. Cet
-				accusé de réception ne vaut pas contrôle de conformité de votre dépôt.
-			</EmailParagraph>
+			<EmailReceiptDisclaimer receiptNoun="dépôt" />
 		</>
 	);
 
@@ -48,7 +43,7 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 				lineHeight: FONT.lineHeight.body,
 			}}
 		>
-			{BULLET_ITEMS.map((item) => (
+			{COMPLIANCE_CRITERIA_ITEMS.map((item) => (
 				<li key={item} style={{ marginBottom: SPACING.xs }}>
 					{item}
 				</li>
@@ -125,11 +120,7 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 		<EmailShell previewText={previewText}>
 			<EmailGreeting>Bonjour,</EmailGreeting>
 			{bodyContent}
-			<EmailParagraph>
-				Pour tout renseignement, vous pouvez contacter votre référent égalité
-				professionnelle femmes-hommes au sein de votre DREETS en répondant à ce
-				message.
-			</EmailParagraph>
+			<EmailContactParagraph />
 			<EmailSignature />
 		</EmailShell>,
 	);
