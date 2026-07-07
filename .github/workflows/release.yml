@@ -2,9 +2,6 @@ name: 🔖 Release
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - alpha
 
 permissions:
   contents: write
@@ -20,7 +17,7 @@ env:
 
 jobs:
   release:
-    if: github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha'
+    if: github.ref == 'refs/heads/beta'
     name: Release
     runs-on: ubuntu-latest
     steps:
