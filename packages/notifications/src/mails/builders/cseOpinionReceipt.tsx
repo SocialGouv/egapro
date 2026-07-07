@@ -33,9 +33,7 @@ export const buildCseOpinionReceiptMail: MailBuilder<
 			}}
 		>
 			{COMPLIANCE_CRITERIA_ITEMS.map((item) => (
-				<li key={item}>
-					<strong>{item}</strong>
-				</li>
+				<li key={item}>{item}</li>
 			))}
 		</ul>
 	);
