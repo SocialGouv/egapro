@@ -159,7 +159,11 @@ type CompanyInsert = {
 	address?: string | null;
 	nafCode?: string | null;
 	nafLabel?: string | null;
+	region?: string | null;
+	departmentCode?: string | null;
+	departmentLabel?: string | null;
 	workforce?: number | null;
+	statutDiffusion?: string | null;
 };
 
 async function fetchCompanyInfoBatch(
@@ -180,7 +184,11 @@ async function fetchCompanyInfoBatch(
 								address: info.address,
 								nafCode: info.nafCode,
 								nafLabel: info.nafLabel,
+								region: info.region,
+								departmentCode: info.departmentCode,
+								departmentLabel: info.departmentLabel,
 								workforce: info.workforce,
+								statutDiffusion: info.statutDiffusion,
 							}
 						: { siren, name: `Entreprise ${siren}` };
 				} catch {

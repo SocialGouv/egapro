@@ -197,3 +197,59 @@ export const REGIONS_TO_COUNTIES: Record<RegionCode, CountyCode[]> = {
 		"82",
 	],
 };
+
+export const COUNTY_TO_REGION = Object.fromEntries(
+	Object.entries(REGIONS_TO_COUNTIES).flatMap(([regionCode, counties]) =>
+		counties.map((countyCode) => [countyCode, regionCode as RegionCode]),
+	),
+) as Record<CountyCode, RegionCode>;
+
+export function getRegionCodeFromCountyCode(
+	countyCode: CountyCode | null | undefined,
+): RegionCode | null {
+	if (!countyCode) return null;
+	return COUNTY_TO_REGION[countyCode] ?? null;
+}
+
+export function getCountyCodeFromPostalCode(
+	postalCode: string | null | undefined,
+): CountyCode | null {
+	if (!postalCode) return null;
+	const cp = postalCode.trim();
+	if (!/^\d{5}$/.test(cp)) return null;
+
+	let code: string;
+	if (cp.startsWith("20")) {
+		// Corsica shares postal prefix "20": Ajaccio side (< 20200) is 2A,
+		// Bastia side is 2B.
+		code = Number(cp) < 20200 ? "2A" : "2B";
+	} else if (cp.startsWith("97") || cp.startsWith("98")) {
+		// Overseas départements use a 3-digit code (971–976).
+		code = cp.slice(0, 3);
+	} else {
+		code = cp.slice(0, 2);
+	}
+
+	return code in COUNTIES ? (code as CountyCode) : null;
+}
+
+export type CompanyLocation = {
+	region: string | null;
+	departmentCode: string | null;
+	departmentLabel: string | null;
+};
+
+export function getLocationFromPostalCode(
+	postalCode: string | null | undefined,
+): CompanyLocation {
+	const departmentCode = getCountyCodeFromPostalCode(postalCode);
+	if (!departmentCode) {
+		return { region: null, departmentCode: null, departmentLabel: null };
+	}
+	const regionCode = getRegionCodeFromCountyCode(departmentCode);
+	return {
+		region: regionCode ? REGIONS[regionCode] : null,
+		departmentCode,
+		departmentLabel: COUNTIES[departmentCode],
+	};
+}
