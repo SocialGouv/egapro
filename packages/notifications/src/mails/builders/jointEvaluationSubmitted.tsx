@@ -50,7 +50,7 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 		>
 			{BULLET_ITEMS.map((item) => (
 				<li key={item} style={{ marginBottom: SPACING.xs }}>
-					<strong>{item}</strong>
+					{item}
 				</li>
 			))}
 		</ul>
