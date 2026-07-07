@@ -1,7 +1,7 @@
 import { renderEmail } from "../shared/render.js";
 import { getMySpaceUrl } from "../shared/urls.js";
 import {
-	COMPLIANCE_CRITERIA_ITEMS,
+	EmailComplianceCriteriaList,
 	EmailContactParagraph,
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -9,8 +9,6 @@ import {
 	EmailReceiptDisclaimer,
 	EmailShell,
 	EmailSignature,
-	FONT,
-	SPACING,
 } from "../template/index.js";
 import type { MailBuilder } from "../types.js";
 
@@ -20,23 +18,6 @@ export const buildCseOpinionReceiptMail: MailBuilder<
 	const subject = "Egapro - Dépôt d'avis CSE et fin de démarche";
 	const previewText =
 		"L'administration du travail accuse réception de votre dépôt d'avis CSE. Votre démarche est désormais terminée.";
-
-	const gapBullets = (
-		<ul
-			style={{
-				marginTop: 0,
-				marginBottom: SPACING.md,
-				paddingLeft: SPACING.xl,
-				fontFamily: FONT.family,
-				fontSize: FONT.size.body,
-				lineHeight: FONT.lineHeight.body,
-			}}
-		>
-			{COMPLIANCE_CRITERIA_ITEMS.map((item) => (
-				<li key={item}>{item}</li>
-			))}
-		</ul>
-	);
 
 	const receiptParagraph = (
 		<>
@@ -82,7 +63,7 @@ export const buildCseOpinionReceiptMail: MailBuilder<
 						rémunération {year}, concernant l&apos;entreprise{" "}
 						<strong>{raisonSociale}</strong> (SIREN : {siren}) :
 					</EmailParagraph>
-					{gapBullets}
+					<EmailComplianceCriteriaList />
 					{receiptParagraph}
 					<EmailCtaWithLink href={getMySpaceUrl()} label="Mon espace" />
 					<EmailContactParagraph />
@@ -102,7 +83,7 @@ export const buildCseOpinionReceiptMail: MailBuilder<
 						l&apos;entreprise <strong>{raisonSociale}</strong> (SIREN : {siren})
 						:
 					</EmailParagraph>
-					{gapBullets}
+					<EmailComplianceCriteriaList />
 					{receiptParagraph}
 					<EmailCtaWithLink href={getMySpaceUrl()} label="Mon espace" />
 					<EmailContactParagraph />

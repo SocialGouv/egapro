@@ -1,7 +1,7 @@
 import { renderEmail } from "../shared/render.js";
 import { getAvisCseUrl, getMySpaceUrl } from "../shared/urls.js";
 import {
-	COMPLIANCE_CRITERIA_ITEMS,
+	EmailComplianceCriteriaList,
 	EmailContactParagraph,
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -9,8 +9,6 @@ import {
 	EmailReceiptDisclaimer,
 	EmailShell,
 	EmailSignature,
-	FONT,
-	SPACING,
 } from "../template/index.js";
 import type { MailBuilder } from "../types.js";
 
@@ -29,26 +27,6 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 			</EmailParagraph>
 			<EmailReceiptDisclaimer receiptNoun="dépôt" />
 		</>
-	);
-
-	const bulletList = (
-		<ul
-			style={{
-				margin: 0,
-				marginBottom: SPACING.md,
-				paddingTop: SPACING.sm,
-				paddingLeft: SPACING.lg,
-				fontFamily: FONT.family,
-				fontSize: FONT.size.body,
-				lineHeight: FONT.lineHeight.body,
-			}}
-		>
-			{COMPLIANCE_CRITERIA_ITEMS.map((item) => (
-				<li key={item} style={{ marginBottom: SPACING.xs }}>
-					{item}
-				</li>
-			))}
-		</ul>
 	);
 
 	switch (variant) {
@@ -77,7 +55,7 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 					<EmailParagraph noMarginBottom>
 						Vous devez à présent déposer le ou les avis du CSE portant sur :
 					</EmailParagraph>
-					{bulletList}
+					<EmailComplianceCriteriaList />
 					<EmailCtaWithLink
 						href={getAvisCseUrl(siren)}
 						label="Déposer le ou les avis"
@@ -96,7 +74,7 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 						Vous devez à présent déposer, pour la première et la seconde
 						déclaration, le ou les avis du CSE portant sur :
 					</EmailParagraph>
-					{bulletList}
+					<EmailComplianceCriteriaList />
 					<EmailCtaWithLink
 						href={getAvisCseUrl(siren)}
 						label="Déposer le ou les avis"

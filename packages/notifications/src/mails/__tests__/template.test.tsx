@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { formatFrenchDate, formatSiren } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
 import { getMySpaceUrl, getPublicUrl } from "../shared/urls.js";
+import { EmailComplianceCriteriaList } from "../template/EmailComplianceCriteriaList.js";
 import { EmailContactParagraph } from "../template/EmailContactParagraph.js";
 import { EmailCtaWithLink } from "../template/EmailCtaWithLink.js";
 import { EmailGreeting } from "../template/EmailGreeting.js";
@@ -170,6 +171,24 @@ describe("EmailReceiptDisclaimer", () => {
 		expect(html).toContain(
 			"ne vaut pas contrôle de conformité de votre dépôt.",
 		);
+	});
+});
+
+describe("EmailComplianceCriteriaList", () => {
+	it("renders both regulatory criteria as list items in a shared, unemphasised list", async () => {
+		const { html } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailComplianceCriteriaList />
+			</EmailShell>,
+		);
+		// Both criteria present (apostrophe-free substrings — the HTML escapes ')
+		expect(html).toContain("des méthodes de calcul utilisées");
+		expect(html).toContain("supérieurs ou égaux à 5 %");
+		// Rendered as <li> items with the shared per-item spacing
+		expect(html).toContain('<li style="margin-bottom:4px">');
+		// Plain weight — bold was removed from both mails
+		const ul = html.slice(html.indexOf("<ul"), html.indexOf("</ul>"));
+		expect(ul).not.toContain("<strong>");
 	});
 });
 

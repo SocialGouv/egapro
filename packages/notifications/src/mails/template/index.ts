@@ -1,6 +1,7 @@
 export { BASE_CSS } from "./baseCss.js";
 export { EmailBody } from "./EmailBody.js";
 export { EmailButton } from "./EmailButton.js";
+export { EmailComplianceCriteriaList } from "./EmailComplianceCriteriaList.js";
 export { EmailContactParagraph } from "./EmailContactParagraph.js";
 export { EmailCtaWithLink } from "./EmailCtaWithLink.js";
 export { EmailDivider } from "./EmailDivider.js";
@@ -17,7 +18,6 @@ export { EmailReceiptDisclaimer } from "./EmailReceiptDisclaimer.js";
 export { EmailShell } from "./EmailShell.js";
 export { EmailSignature } from "./EmailSignature.js";
 export { MarianneLogoBlock } from "./MarianneLogoBlock.js";
-export { COMPLIANCE_CRITERIA_ITEMS } from "./mailCopy.js";
 export {
 	BORDER,
 	BUTTON,
