@@ -183,12 +183,13 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		);
 	});
 
-	it("uses SUIT prefix (not GIP-MDS) for all T2 entries", () => {
+	it("uses a SUIT or Weez source prefix (never GIP-MDS) for all T2 entries", () => {
 		// Scoped to T2 tables only. The `declaration` table is excluded because T1
 		// (PR #3312) populates it with `GIP-MDS | SUIT: ...` indicator A–F entries;
 		// the T2 keys inside `declaration` are already validated verbatim by the
 		// per-key tests above ("annotates all declaration meta columns…",
-		// "annotates second declaration columns").
+		// "annotates second declaration columns"). `company` mixes SUIT columns
+		// with Weez-sourced region/department columns.
 		const t2Tables = [
 			"company",
 			"user",
@@ -201,9 +202,16 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 			Object.values(SCHEMA_COLUMN_COMMENTS[table] ?? {}),
 		);
 		for (const comment of allComments) {
-			expect(comment).toMatch(/^SUIT: /);
+			expect(comment).toMatch(/^(SUIT|Weez): /);
 			expect(comment).not.toContain("GIP-MDS");
 		}
+	});
+
+	it("annotates the Weez-sourced company region/department columns", () => {
+		const company = SCHEMA_COLUMN_COMMENTS.company;
+		expect(company?.region).toMatch(/^Weez: /);
+		expect(company?.department_code).toMatch(/^Weez: /);
+		expect(company?.department_label).toMatch(/^Weez: /);
 	});
 
 	// ── T1 tests (PR #3313 — Indicators A–F GIP-MDS | SUIT) ──────────────────

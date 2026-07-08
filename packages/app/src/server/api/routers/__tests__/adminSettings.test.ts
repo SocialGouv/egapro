@@ -12,6 +12,7 @@ const validInput = {
 	year: 2026,
 	gipPublicationDate: "2026-03-01",
 	campaignStartDate: "2026-03-15",
+	publicDataReleaseDate: "2026-06-01",
 	decl1ModificationDeadline: "2026-06-01",
 	decl1JustificationDeadline: "2026-06-01",
 	decl1JointEvaluationDeadline: "2026-08-01",
@@ -111,6 +112,7 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 							year: 2026,
 							gipPublicationDate: "2026-03-01",
 							campaignStartDate: "2026-03-15",
+							publicDataReleaseDate: "2026-06-01",
 							decl1ModificationDeadline: "2026-06-01",
 							decl1JustificationDeadline: "2026-06-01",
 							decl1JointEvaluationDeadline: "2026-08-01",
@@ -131,6 +133,7 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 		const result = await caller.getDeadlinesByYear({ year: 2026 });
 		expect(result.exists).toBe(true);
 		expect(result.gipPublicationDate).toBe("2026-03-01");
+		expect(result.publicDataReleaseDate).toBe("2026-06-01");
 		expect(result.decl1ModificationDeadline).toBe("2026-06-01");
 	});
 
@@ -153,6 +156,7 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 		expect(result.exists).toBe(false);
 		expect(result.gipPublicationDate).toBeNull();
 		expect(result.campaignStartDate).toBeNull();
+		expect(result.publicDataReleaseDate).toBeNull();
 		expect(result.decl1ModificationDeadline).toMatch(/^2027-06-01$/);
 	});
 });
@@ -174,6 +178,7 @@ describe("adminSettingsRouter — upsertCampaignDeadlines", () => {
 		expect(db.__insert.values).toHaveBeenCalledWith(
 			expect.objectContaining({
 				year: 2026,
+				publicDataReleaseDate: "2026-06-01",
 				decl1ModificationDeadline: "2026-06-01",
 			}),
 		);

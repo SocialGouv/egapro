@@ -126,6 +126,9 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		workforce: "SUIT: Effectif",
 		naf_code: "SUIT: Code_NAF",
 		address: "SUIT: Adresse",
+		region: "Weez: libellé région (dérivé du code postal établissement)",
+		department_code: "Weez: code département (dérivé du code postal)",
+		department_label: "Weez: libellé département (dérivé du code postal)",
 		has_cse: "SUIT: CSE_existant",
 	},
 	user: {
