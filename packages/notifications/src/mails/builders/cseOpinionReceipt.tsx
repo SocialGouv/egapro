@@ -1,9 +1,12 @@
 import { renderEmail } from "../shared/render.js";
-import { getDeclarationUrl } from "../shared/urls.js";
+import { getMySpaceUrl } from "../shared/urls.js";
 import {
+	EmailComplianceCriteriaList,
+	EmailContactParagraph,
 	EmailCtaWithLink,
 	EmailGreeting,
 	EmailParagraph,
+	EmailReceiptDisclaimer,
 	EmailShell,
 	EmailSignature,
 } from "../template/index.js";
@@ -11,42 +14,83 @@ import type { MailBuilder } from "../types.js";
 
 export const buildCseOpinionReceiptMail: MailBuilder<
 	"cse_opinion_receipt"
-> = async ({ siren, year }) => {
-	const subject = "Egapro - Réception de l'avis du CSE";
+> = async ({ siren, year, variant, raisonSociale }) => {
+	const subject = "Egapro - Dépôt d'avis CSE et fin de démarche";
 	const previewText =
-		"L'avis du CSE déposé pour votre déclaration des indicateurs a bien été pris en compte.";
-	const { html, text } = await renderEmail(
-		<EmailShell previewText={previewText}>
-			<EmailGreeting>Bonjour,</EmailGreeting>
+		"L'administration du travail accuse réception de votre dépôt d'avis CSE. Votre démarche est désormais terminée.";
+
+	const receiptParagraph = (
+		<>
+			<EmailReceiptDisclaimer receiptNoun="dépôt" />
 			<EmailParagraph>
-				L'avis du CSE déposé pour votre déclaration des indicateurs relatifs à
-				l'égalité professionnelle entre les femmes et les hommes a bien été pris
-				en compte.
+				Votre démarche est désormais terminée. Vous pouvez à tout moment
+				consulter et télécharger les documents relatifs à cette démarche depuis
+				votre espace.
 			</EmailParagraph>
-			<EmailParagraph>
-				Conformément à la réglementation, les entreprises d'au moins 100
-				salariés sont tenues de consulter leur CSE sur les indicateurs publiés
-				et de déposer cet avis sur la plateforme Egapro.
-			</EmailParagraph>
-			<EmailParagraph>
-				Le document que vous avez transmis est conservé dans votre dossier et
-				reste consultable depuis votre espace personnel.
-			</EmailParagraph>
-			<EmailParagraph>
-				Vous pouvez à tout moment consulter votre dossier depuis le portail
-				Egapro.
-			</EmailParagraph>
-			<EmailCtaWithLink
-				href={getDeclarationUrl(siren, year)}
-				label="Consulter mon dossier"
-			/>
-			<EmailParagraph>
-				Pour tout renseignement, vous pouvez contacter votre référent égalité
-				professionnelle femmes-hommes au sein de votre DREETS en répondant à ce
-				message.
-			</EmailParagraph>
-			<EmailSignature />
-		</EmailShell>,
+		</>
 	);
-	return { subject, html, text };
+
+	switch (variant) {
+		case "single": {
+			const { html, text } = await renderEmail(
+				<EmailShell previewText={previewText}>
+					<EmailGreeting>Bonjour,</EmailGreeting>
+					<EmailParagraph>
+						Vous avez transmis aux services du ministre chargé du Travail{" "}
+						<strong>
+							l&apos;avis du CSE sur l&apos;exactitude des données et des
+							méthodes de calcul utilisées
+						</strong>{" "}
+						pour la déclaration des indicateurs de rémunération {year},
+						concernant l&apos;entreprise <strong>{raisonSociale}</strong> (SIREN
+						: {siren}).
+					</EmailParagraph>
+					{receiptParagraph}
+					<EmailCtaWithLink href={getMySpaceUrl()} label="Mon espace" />
+					<EmailContactParagraph />
+					<EmailSignature />
+				</EmailShell>,
+			);
+			return { subject, html, text };
+		}
+		case "with_gap": {
+			const { html, text } = await renderEmail(
+				<EmailShell previewText={previewText}>
+					<EmailGreeting>Bonjour,</EmailGreeting>
+					<EmailParagraph noMarginBottom>
+						Vous avez transmis aux services du ministre chargé du Travail{" "}
+						<strong>les avis CSE</strong> pour la déclaration des indicateurs de
+						rémunération {year}, concernant l&apos;entreprise{" "}
+						<strong>{raisonSociale}</strong> (SIREN : {siren}) :
+					</EmailParagraph>
+					<EmailComplianceCriteriaList />
+					{receiptParagraph}
+					<EmailCtaWithLink href={getMySpaceUrl()} label="Mon espace" />
+					<EmailContactParagraph />
+					<EmailSignature />
+				</EmailShell>,
+			);
+			return { subject, html, text };
+		}
+		case "first_and_second": {
+			const { html, text } = await renderEmail(
+				<EmailShell previewText={previewText}>
+					<EmailGreeting>Bonjour,</EmailGreeting>
+					<EmailParagraph noMarginBottom>
+						Vous avez transmis aux services du ministre chargé du Travail{" "}
+						<strong>les avis CSE</strong> pour la première et la seconde
+						déclaration des indicateurs de rémunération {year}, concernant
+						l&apos;entreprise <strong>{raisonSociale}</strong> (SIREN : {siren})
+						:
+					</EmailParagraph>
+					<EmailComplianceCriteriaList />
+					{receiptParagraph}
+					<EmailCtaWithLink href={getMySpaceUrl()} label="Mon espace" />
+					<EmailContactParagraph />
+					<EmailSignature />
+				</EmailShell>,
+			);
+			return { subject, html, text };
+		}
+	}
 };

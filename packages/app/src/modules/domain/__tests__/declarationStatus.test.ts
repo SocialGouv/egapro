@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
 	computeDeclarationStatus,
 	getCurrentCompliancePath,
+	hasStartedSecondDeclaration,
 	isCancelled,
 	isDeclarationSubmitted,
+	isInComplianceProcess,
 } from "../shared/declarationStatus";
 
 describe("isDeclarationSubmitted", () => {
@@ -169,5 +171,86 @@ describe("getCurrentCompliancePath", () => {
 				secondDeclarationPathChoice: null,
 			}),
 		).toBeNull();
+	});
+});
+
+describe("isInComplianceProcess", () => {
+	const noPath = {
+		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: null,
+	};
+
+	it("returns true when a first-declaration compliance path is chosen", () => {
+		expect(
+			isInComplianceProcess({
+				status: "corrective_actions_chosen",
+				firstDeclarationPathChoice: "justify",
+				secondDeclarationPathChoice: null,
+			}),
+		).toBe(true);
+	});
+
+	it("returns true when a second-declaration compliance path is chosen", () => {
+		expect(
+			isInComplianceProcess({
+				status: "revised_joint_evaluation_chosen",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: "joint_evaluation",
+			}),
+		).toBe(true);
+	});
+
+	it("returns true when awaiting the compliance path choice (no path yet)", () => {
+		expect(
+			isInComplianceProcess({
+				status: "awaiting_compliance_path_choice",
+				...noPath,
+			}),
+		).toBe(true);
+	});
+
+	it("returns true when awaiting the revision choice (no path yet)", () => {
+		expect(
+			isInComplianceProcess({ status: "awaiting_revision_choice", ...noPath }),
+		).toBe(true);
+	});
+
+	it("returns false with no path and a non-compliance status", () => {
+		expect(
+			isInComplianceProcess({ status: "demarche_completed", ...noPath }),
+		).toBe(false);
+	});
+
+	it("returns false when status is null and no path chosen", () => {
+		expect(isInComplianceProcess({ status: null, ...noPath })).toBe(false);
+	});
+});
+
+describe("hasStartedSecondDeclaration", () => {
+	it("returns true when a second-declaration step was reached", () => {
+		expect(
+			hasStartedSecondDeclaration({
+				secondDeclarationStep: 2,
+				secondDeclarationPathChoice: null,
+			}),
+		).toBe(true);
+	});
+
+	it("returns true when a second-declaration path was chosen (no step)", () => {
+		expect(
+			hasStartedSecondDeclaration({
+				secondDeclarationStep: null,
+				secondDeclarationPathChoice: "justify",
+			}),
+		).toBe(true);
+	});
+
+	it("returns false when neither step nor path is set", () => {
+		expect(
+			hasStartedSecondDeclaration({
+				secondDeclarationStep: null,
+				secondDeclarationPathChoice: null,
+			}),
+		).toBe(false);
 	});
 });

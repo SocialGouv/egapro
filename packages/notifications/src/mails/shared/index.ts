@@ -7,6 +7,7 @@ export {
 export { type RenderedEmail, renderEmail } from "./render.js";
 export {
 	getAssetUrl,
+	getAvisCseUrl,
 	getConnectionUrl,
 	getDeclarationUrl,
 	getImageUrl,
