@@ -2,6 +2,7 @@ import { formatFrenchDate } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
 import { getDeclarationUrl } from "../shared/urls.js";
 import {
+	EmailContactParagraph,
 	EmailCtaWithLink,
 	EmailGreeting,
 	EmailParagraph,
@@ -47,11 +48,7 @@ export const buildCycleOpeningInfoMail: MailBuilder<
 				href={getDeclarationUrl(payload.siren, payload.year)}
 				label="Commencer ma déclaration"
 			/>
-			<EmailParagraph>
-				Pour tout renseignement, vous pouvez contacter votre référent égalité
-				professionnelle femmes-hommes au sein de votre DREETS en répondant à ce
-				message.
-			</EmailParagraph>
+			<EmailContactParagraph />
 			<EmailSignature />
 		</EmailShell>,
 	);

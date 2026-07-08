@@ -179,7 +179,10 @@ Si le GIP-MDS a publié les indicateurs A–F pour ce SIREN et cette année (tab
 
 1. Bascule la déclaration en `status = submitted` et fige le snapshot `cseRequired`.
 2. Calcule le `remunerationScore` final.
-3. Envoie un **mail de reçu** à l'utilisateur avec le numéro de soumission, l'année, et un lien vers le récap PDF.
+3. Envoie un **mail de confirmation** (`declaration_confirmation`) à l'utilisateur. Le contenu du mail est adapté au contexte selon le variant sélectionné automatiquement :
+   - **`path_to_select`** : écart ≥ 5% → le mail indique la deadline de choix du parcours de conformité
+   - **`cse_to_deposit`** : CSE requis mais pas d'écart → le mail invite à déposer l'avis CSE
+   - **`completed`** : démarche complète → le mail confirme la soumission
 4. Redirige vers `/declaration-remuneration/recapitulatif/` (vue lecture seule).
 
 **Contrôles bloquants** au moment de la soumission :
@@ -190,7 +193,7 @@ Si le GIP-MDS a publié les indicateurs A–F pour ce SIREN et cette année (tab
 
 ### 3.6 Sorties possibles
 
-- **Soumission OK** → recap PDF + reçu mail
+- **Soumission OK** → recap PDF + mail de confirmation (variant contextualisé)
 - **Abandon en cours** → brouillon en base, disparaît automatiquement au-delà de **2 mois** sans modification (cleanup)
 - **Erreur métier bloquante** → message inline, retour à l'étape concernée
 - **Verrou perdu pendant la saisie** (expiration ou reprise par un tiers) → le prochain "Suivant" reçoit un `CONFLICT`, l'utilisateur doit recharger la page
@@ -261,7 +264,7 @@ flowchart TD
     LockCheck -->|Pris| E2[Lecture seule<br/>+ bandeau verrou]
     E --> F[Navigation libre<br/>entre les étapes]
     F --> G[Re-soumission]
-    G --> H([Reçu mail mis à jour<br/>+ nouveau numéro de version])
+    G --> H([Mail de confirmation mis à jour<br/>+ nouveau numéro de version])
 ```
 
 > **Pourquoi une deadline ?** L'administration doit pouvoir publier des chiffres stables à un moment donné. La deadline de modification est paramétrable par campagne pour s'adapter aux décisions politiques (extension, urgence sanitaire, etc.).
@@ -305,9 +308,18 @@ flowchart TD
   - `JustificationDeadline` — délai de justification
   - `JointEvaluationDeadline` — délai pour l'évaluation conjointe
 
-### 6.4 Sortie
+### 6.4 Mails envoyés dans ce parcours
 
-À la confirmation, mail de reçu + retour à `/mon-espace` avec le statut **« seconde déclaration soumise »** affiché sur la fiche entreprise.
+| Événement | Mail envoyé | Variants |
+|---|---|---|
+| Soumission de la seconde déclaration (`declaration.submitSecondDeclaration`) | `second_declaration_confirmation` | `completed` / `cse_to_deposit` / `path_to_select` |
+| Upload réussi d'un PDF d'évaluation conjointe (`POST /api/upload`, `X-Flow-Type: joint_evaluation`) | `joint_evaluation_submitted` | `cse_first_and_second` (si seconde déclaration) / `cse_to_deposit` (si CSE attendu) / `completed` |
+
+> **Pourquoi des variants pour l'évaluation conjointe ?** L'étape suivante varie selon la situation : si une seconde déclaration est déjà en cours, l'avis CSE doit couvrir les deux rounds ; sinon, la démarche peut être considérée complète ou le CSE reste à déposer.
+
+### 6.5 Sortie
+
+À la confirmation de la seconde déclaration, mail de reçu (variant contextualisé) + retour à `/mon-espace` avec le statut **« seconde déclaration soumise »** affiché sur la fiche entreprise.
 
 ---
 
@@ -326,7 +338,7 @@ flowchart LR
     M --> G{Toutes les colonnes<br/>associées ?}
     G -->|Non| M
     G -->|Oui| H[Bouton Finaliser]
-    H --> I([Confirmation<br/>+ mail])
+    H --> I([Confirmation<br/>+ mail de reçu CSE])
 ```
 
 ### 7.1 Saisie de l'étape 1 (avis textuels)
@@ -369,6 +381,14 @@ Le clic sur **« Soumettre »** (quand toutes les associations sont présentes) 
    - chaque couple `(declarationNumber, type)` requis est couvert par une association dans `cseOpinionFiles`
 3. Bascule la déclaration en `cseStatus = submitted` et enregistre l'événement dans `declarationStatusHistory`.
 4. Redirige vers `/avis-cse/confirmation`.
+
+**Mail de reçu CSE** : lors du dernier upload réussi (`POST /api/upload`, `X-Flow-Type: cse_opinion`), un mail de confirmation `cse_opinion_receipt` est envoyé automatiquement. Le variant est déterminé par le contexte :
+
+| Variant | Condition |
+|---|---|
+| `first_and_second` | L'entreprise a soumis une seconde déclaration |
+| `with_gap` | Écart ≥ 5% (sans seconde déclaration) |
+| `single` | Avis CSE simple, démarche complète |
 
 > **Pourquoi cette séparation déclaration / CSE ?** Le calendrier de mise au CSE est différent : il faut d'abord déclarer les indicateurs, puis attendre la convocation du CSE, faire passer en réunion, déposer le PV. Ces deux temps peuvent s'étaler sur plusieurs semaines.
 
@@ -564,6 +584,9 @@ Pour les arbitrages de spec et la priorisation, ces décisions sont les plus str
 | Verrou d'édition disponible ? | Détenu par une autre session active | Non → wizard en lecture seule + bandeau |
 | Verrou expiré ? | `expiresAt` dépassé | Traité comme libre (acquisition possible) |
 | Déverrouillage forcé ? | Admin uniquement | Possible depuis `/admin/declarations/<id>` |
+| Variant mail déclaration ? | Écart calculé + CSE requis | `path_to_select` si écart ≥ 5% / `cse_to_deposit` si CSE requis / `completed` sinon |
+| Variant mail évaluation conjointe ? | Seconde déclaration + CSE attendu | `cse_first_and_second` / `cse_to_deposit` / `completed` |
+| Variant mail reçu CSE ? | Seconde déclaration + écart ≥ 5% | `first_and_second` / `with_gap` / `single` |
 
 ---
 
@@ -571,5 +594,6 @@ Pour les arbitrages de spec et la priorisation, ces décisions sont les plus str
 
 - **Features** (vue par feature) : [`docs/features.md`](features.md)
 - **Architecture** (mécanismes techniques) : [`docs/architecture.md`](architecture.md)
+- **Mails transactionnels** (détail des 11 types, sujets, corps) : [`docs/mails.md`](mails.md)
 - **Spécifications réglementaires** : [wiki Spec V2](https://github.com/SocialGouv/egapro/wiki/Spec-V2)
 - **README racine** (contexte légal et obligations par taille) : [`README.md`](../README.md)

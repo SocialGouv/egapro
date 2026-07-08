@@ -28,7 +28,7 @@ Audience principale : nouveaux développeurs (onboarding). L'équipe métier / P
 
 ## 1. Vue d'ensemble
 
-EGAPRO V2 est une **application Next.js 16** (App Router, React 19) servant un site public et un espace authentifié, déployée dans un cluster Kubernetes via [Kontinuous](https://github.com/SocialGouv/kontinuous). Le code applicatif vit dans un **monorepo pnpm** (`packages/app/`) ; le package `packages/api/` est un placeholder vide hérité de la V1.
+EGAPRO V2 est une **application Next.js 16** (App Router, React 19) servant un site public et un espace authentifié, déployée dans un cluster Kubernetes via [Kontinuous](https://github.com/SocialGouv/kontinuous). Le code applicatif vit dans un **monorepo pnpm** (`packages/app/`) ; le package `packages/api/` est un placeholder vide hérité de la V1. Le package `packages/notifications/` contient le worker de mails (pg-boss + React Email).
 
 ```mermaid
 flowchart LR
@@ -92,7 +92,8 @@ Trois grandes catégories de surface technique :
 | Tests unit | Vitest | ^4 | + coverage ≥ 75% global, 100% sur `domain/` |
 | Tests E2E | Playwright | ^1.58 | Une E2E par `page.tsx` minimum |
 | Observabilité | Sentry | — | Erreurs serveur + client |
-| Mail | Nodemailer + maildev | — | Transactional, maildev en local |
+| Mails | Nodemailer + maildev | — | Transactionnel ; maildev en local ; rendu HTML par React Email (`packages/notifications`) |
+| File d'attente mails | pg-boss | — | Jobs persistés en PostgreSQL ; worker dans `packages/notifications` |
 | Stockage fichiers | MinIO local / S3 prod | — | Accessible via `@aws-sdk/client-s3` |
 | Antivirus | ClamAV (`clamavd`) | — | Scan des PDF avant stockage |
 | Cache (optionnel) | Valkey (Redis-compat) | — | Présent en docker-compose |
@@ -119,6 +120,13 @@ egapro/
 │   │   ├── public/dsfr/     # Assets DSFR copiés (git-ignored)
 │   │   └── scripts/         # Scripts utilitaires (audit-cleanup.mjs,
 │   │                        #   declaration-cleanup.mjs, copy-dsfr.mjs)
+│   ├── notifications/       # Worker de mails (pg-boss + React Email)
+│   │   └── src/
+│   │       ├── mails/
+│   │       │   ├── builders/  # 11 builders React Email (un par type de notification)
+│   │       │   ├── shared/    # Composants et URLs partagés
+│   │       │   └── types.ts   # NotificationType, variants, payloads
+│   │       └── queue.ts       # Publisher pg-boss
 │   └── api/                 # Placeholder vide (héritage V1)
 ├── .kontinuous/             # Manifests Kubernetes (Helm-like) pour dev/preprod/prod
 ├── .github/workflows/       # CI/CD GitHub Actions
@@ -152,6 +160,10 @@ modules/
   legal/          # Pages légales
   audit/          # Constantes & types audit
   mail/           # Mails transactionnels
+                  #   enqueueReceipt.ts  — wrapper d'envoi (4 kinds event-driven)
+                  #   sendRules.ts       — moteur de sélection des variants
+                  #   buildReceiptAttachments.ts — pièces jointes PDF
+                  #   types.ts           — MailAttachment
   analytics/      # Matomo
   shared/         # Hooks et composants transverses (useZodForm, useFileUploadForm,
                   #   FileUpload, uploadFile, fileNameValidation, …)
@@ -465,6 +477,7 @@ sequenceDiagram
         AV-->>App: clean
         App->>S3: PutObject (key = siren/year/<flow>/<uuid>.pdf)
         App->>DB: insert files (declarationId, type, s3Key, fileName)
+        App->>App: enqueueReceipt (mail de confirmation)
         App-->>User: { fileId, fileName }
     end
 ```
@@ -476,6 +489,8 @@ sequenceDiagram
 | `X-Flow-Type` | `cse_opinion` ou `joint_evaluation` — sélectionne la logique métier |
 | `X-Filename` | Nom du fichier (validé côté serveur) |
 | `Content-Type` | MIME type déclaré (vérifié contre la liste autorisée) |
+
+**Module interne** : `src/app/api/upload/uploadAudit.ts` extrait les helpers d'audit de la route (`mapFailureToHttp`, `writeFailure`, `uploadAuditMetadataSchema`). Ce fichier est **privé** à la Route Handler — ne pas l'importer depuis d'autres modules.
 
 ### 8.2 Validation du nom de fichier
 
@@ -531,7 +546,7 @@ Définies dans `src/modules/audit/shared/constants.ts` :
 
 | Catégorie | Rétention | Exemples |
 |---|---|---|
-| `mutation` | 365 j | Toutes les écritures (déclaration, CSE, admin, verrou) |
+| `mutation` | 365 j | Toutes les écritures (déclaration, CSE, admin, verrou, enqueue notification) |
 | `read_sensitive` | 180 j | `profile.get`, `declaration.getOrCreate`, `declaration.getStatusHistory`, recherche admin, PDF, état du verrou |
 | `public_search` | 180 j | Recherche / vue de référents publics |
 | `auth` | 365 j | Login OK / KO, logout |
@@ -803,5 +818,4 @@ Les pannes de ProConnect bloquent **complètement** la connexion ; aucune procé
 - **Wiki Spec V2** (réglementation) : <https://github.com/SocialGouv/egapro/wiki/Spec-V2>
 - **Features** (vue fonctionnelle) : [`docs/features.md`](features.md)
 - **Parcours utilisateurs** : [`docs/parcours-utilisateurs.md`](parcours-utilisateurs.md)
-</content>
-</invoke>
+- **Mails transactionnels** (détail des 11 types) : [`docs/mails.md`](mails.md)

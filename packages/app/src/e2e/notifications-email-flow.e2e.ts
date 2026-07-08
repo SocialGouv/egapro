@@ -61,13 +61,13 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 
 		const email = await waitForEmail(
 			TEST_USER_EMAIL,
-			(m) => /Déclaration des indicateurs/i.test(m.subject),
+			(m) => /Transmission de déclaration/i.test(m.subject),
 			{ since: startedAt },
 		);
 
-		expect(email.subject).toMatch(/Déclaration des indicateurs/i);
+		expect(email.subject).toMatch(/Transmission de déclaration/i);
 		expect(email.to.some((r) => r.address === TEST_USER_EMAIL)).toBe(true);
-		expect(email.html).toMatch(/récapitulatif/i);
+		expect(email.html).toMatch(/accuse réception de cette transmission/i);
 	});
 
 	test("second declaration submission (corrective action) delivers a second-declaration receipt", async ({
@@ -89,11 +89,11 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 
 		const email = await waitForEmail(
 			TEST_USER_EMAIL,
-			(m) => /Seconde déclaration/i.test(m.subject),
+			(m) => /Transmission de la seconde déclaration/i.test(m.subject),
 			{ since: startedAt },
 		);
 
-		expect(email.subject).toMatch(/Accusé de réception.*Seconde déclaration/i);
+		expect(email.subject).toMatch(/Transmission de la seconde déclaration/i);
 		expect(email.to.some((r) => r.address === TEST_USER_EMAIL)).toBe(true);
 		expect(email.html).toMatch(/seconde déclaration/i);
 	});

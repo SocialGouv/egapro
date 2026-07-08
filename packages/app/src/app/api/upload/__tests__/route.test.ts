@@ -5,10 +5,18 @@ const mocks = vi.hoisted(() => ({
 	runUploadPipeline: vi.fn(),
 	logAction: vi.fn().mockResolvedValue(undefined),
 	getActiveLock: vi.fn(),
+	enqueueReceipt: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("~/server/auth", () => ({
 	auth: mocks.auth,
+}));
+
+// The success path fires a confirmation mail via a dynamic import of
+// ~/modules/mail/server; mock it so the receipt kind can be asserted without
+// touching the real queue.
+vi.mock("~/modules/mail/server", () => ({
+	enqueueReceipt: mocks.enqueueReceipt,
 }));
 
 vi.mock("~/server/services/uploadPipeline", () => ({
@@ -652,5 +660,81 @@ describe("POST /api/upload", () => {
 
 		expect(response.status).toBe(200);
 		expect(mocks.runUploadPipeline).toHaveBeenCalled();
+	});
+
+	describe("confirmation mail on success", () => {
+		function mockUploadSuccess() {
+			mocks.runUploadPipeline.mockResolvedValue({
+				ok: true,
+				fileId: "file-uuid",
+				fileName: "avis.pdf",
+				filePath: "123456789/2027/file-uuid.pdf",
+			});
+		}
+
+		// The mail is dispatched from a fire-and-forget IIFE that awaits a dynamic
+		// import of ~/modules/mail/server, so its work lands after the response is
+		// returned. Yield to the microtask queue before asserting the call.
+		const flushMailDispatch = () =>
+			new Promise((resolve) => setTimeout(resolve, 0));
+
+		async function upload(flowType: string) {
+			const { POST } = await import("../route");
+			const response = await POST(
+				buildRequest({
+					"Content-Type": "application/pdf",
+					"X-Filename": "avis.pdf",
+					"X-Flow-Type": flowType,
+				}),
+			);
+			await flushMailDispatch();
+			return response;
+		}
+
+		it("enqueues a cseOpinion receipt for a cse_opinion flow", async () => {
+			validSession();
+			mockUploadSuccess();
+
+			const response = await upload("cse_opinion");
+
+			expect(response.status).toBe(200);
+			expect(mocks.enqueueReceipt).toHaveBeenCalledWith({
+				kind: "cseOpinion",
+				to: "user@example.com",
+				siren: "123456789",
+				year: expect.any(Number),
+				userId: "user-1",
+				isResend: false,
+			});
+		});
+
+		it("enqueues a jointEvaluation receipt for a joint_evaluation flow", async () => {
+			validSession();
+			mockUploadSuccess();
+
+			const response = await upload("joint_evaluation");
+
+			expect(response.status).toBe(200);
+			expect(mocks.enqueueReceipt).toHaveBeenCalledWith({
+				kind: "jointEvaluation",
+				to: "user@example.com",
+				siren: "123456789",
+				year: expect.any(Number),
+				userId: "user-1",
+				isResend: false,
+			});
+		});
+
+		it("does not enqueue any receipt when the session has no email", async () => {
+			mocks.auth.mockResolvedValue({
+				user: { id: "user-1", siret: "12345678901234" },
+			});
+			mockUploadSuccess();
+
+			const response = await upload("cse_opinion");
+
+			expect(response.status).toBe(200);
+			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+		});
 	});
 });

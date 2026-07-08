@@ -86,7 +86,7 @@ Conventions de notation :
 - `declaration.getOrCreate` — création paresseuse du brouillon (seulement si l'utilisateur est propriétaire ; en mode admin impersonation, un placeholder transient est renvoyé sans écriture)
 - `declaration.updateStep1` … `updateStep4` — sauvegarde par étape (audit `mutation`, une action par étape) — protégées par `declarationLockedWriteProcedure` (voir §12.7)
 - `declaration.updateEmployeeCategories` — sauvegarde de l'indicateur G
-- `declaration.submit` — bascule `status = submitted`, fixe le snapshot `cseRequired` et envoie le reçu
+- `declaration.submit` — bascule `status = submitted`, fixe le snapshot `cseRequired` et envoie le reçu (voir §12.1)
 
 **Règles métier-clés** :
 
@@ -174,7 +174,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 | `cseOpinion.setFileContentTypes` | mutation | Enregistre (replace-all) les associations fichier ↔ type de contenu |
 | `cseOpinion.finalize` | mutation | Clôt l'avis (`cseStatus = submitted`) après validation des pré-conditions |
 
-**Upload de PDF** : l'upload ne passe **pas** par tRPC mais par la Route Handler `POST /api/upload` avec l'en-tête `X-Flow-Type: cse_opinion` (voir §12.6).
+**Upload de PDF** : l'upload ne passe **pas** par tRPC mais par la Route Handler `POST /api/upload` avec l'en-tête `X-Flow-Type: cse_opinion` (voir §12.6). À la fin d'un upload réussi, la route envoie automatiquement le mail de confirmation CSE via `enqueueReceipt({ kind: "cseOpinion" })` (voir §12.1).
 
 **Règles métier-clés** :
 
@@ -214,10 +214,10 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 **Routers tRPC** :
 
 - `declaration.saveCompliancePath` — sauvegarde le chemin de conformité choisi (enum `COMPLIANCE_PATHS`)
-- `declaration.submitSecondDeclaration` — clôture la seconde déclaration (envoie le reçu)
+- `declaration.submitSecondDeclaration` — clôture la seconde déclaration et envoie le reçu (voir §12.1)
 - `declaration.submitJointEvaluation` — enregistre le dépôt de l'évaluation conjointe
 
-**Upload du PDF d'évaluation conjointe** : l'upload utilise la Route Handler `POST /api/upload` avec l'en-tête `X-Flow-Type: joint_evaluation` (voir §12.6).
+**Upload du PDF d'évaluation conjointe** : l'upload utilise la Route Handler `POST /api/upload` avec l'en-tête `X-Flow-Type: joint_evaluation` (voir §12.6). À la fin d'un upload réussi, la route envoie automatiquement le mail de confirmation évaluation conjointe via `enqueueReceipt({ kind: "jointEvaluation" })` (voir §12.1).
 
 **Règles métier-clés** :
 
@@ -407,13 +407,47 @@ Fonctionnalités qui ne sont pas des écrans, mais qui sont mobilisées par plus
 
 **Module** : `~/modules/mail`. **Router tRPC** : `mail.resendReceipt`.
 
-Mails envoyés automatiquement :
+#### 12.1.1 Mails event-driven (4 types)
 
-- Soumission de déclaration → reçu (numéro de soumission, lien vers le récap PDF)
-- Finalisation d'avis CSE → confirmation (nombre de fichiers, raison sociale)
-- Formulaire `/aide/nous-contacter` → routage vers la boîte support
+Envoyés automatiquement à la suite d'une action utilisateur via le wrapper `enqueueReceipt` :
+
+| Kind | Type pg-boss | Déclencheur | Variants possibles |
+|---|---|---|---|
+| `declaration` | `declaration_confirmation` | tRPC `declaration.submit` | `completed` / `cse_to_deposit` / `path_to_select` |
+| `secondDeclaration` | `second_declaration_confirmation` | tRPC `declaration.submitSecondDeclaration` | `completed` / `cse_to_deposit` / `path_to_select` |
+| `cseOpinion` | `cse_opinion_receipt` | `POST /api/upload` (`X-Flow-Type: cse_opinion`) | `single` / `with_gap` / `first_and_second` |
+| `jointEvaluation` | `joint_evaluation_submitted` | `POST /api/upload` (`X-Flow-Type: joint_evaluation`) | `completed` / `cse_to_deposit` / `cse_first_and_second` |
+
+#### 12.1.2 Moteur de règles d'envoi (`sendRules.ts`)
+
+La sélection du variant est centralisée dans `~/modules/mail/sendRules.ts`. Chaque fonction prend un contexte de déclaration et retourne la variante applicable :
+
+| Fonction | Contexte en entrée | Logique de sélection (priorité décroissante) |
+|---|---|---|
+| `selectDeclarationConfirmationVariant` | `{ hasGapAboveThreshold, cseRequired }` | `path_to_select` si écart ≥ 5% → `cse_to_deposit` si CSE requis → `completed` |
+| `selectJointEvaluationSubmittedVariant` | `{ hasSecondDeclaration, cseOpinionExpected }` | `cse_first_and_second` si seconde déclaration → `cse_to_deposit` si CSE attendu → `completed` |
+| `selectCseOpinionReceiptVariant` | `{ forFirstAndSecondDeclaration, hasGapAboveThreshold }` | `first_and_second` si deux déclarations → `with_gap` si écart ≥ 5% → `single` |
+
+#### 12.1.3 Lecture du contexte avant envoi
+
+`enqueueReceipt` lit automatiquement le contexte de la déclaration depuis la BDD avant de construire le payload :
+
+| Champ | Source BDD | Rôle |
+|---|---|---|
+| `raisonSociale` | `companies.name` | Raison sociale affichée dans l'email |
+| `cseRequired` | `declarations.cseRequired` | Détermine si le variant « CSE à déposer » s'applique |
+| `hasGapAboveThreshold` | Statut de la déclaration (`compliancePath`, `status`) | Détermine le variant selon le chemin de conformité |
+| `hasSecondDeclaration` | `declarations.secondDeclarationStep` | Détermine le variant pour l'évaluation conjointe |
+
+Pour le variant `path_to_select`, la deadline de choix de parcours (`pathChoiceDeadline`) est également lue depuis `getCampaignDeadlines(year)` et incluse dans le payload.
+
+Toutes les tentatives d'envoi sont auditées (`AUDIT_ACTIONS.NOTIFICATION_ENQUEUE`) avec les champs `type`, `kind`, `year`, `isResend`, `variant` dans le `metadata`.
+
+#### 12.1.4 Renvoi manuel
 
 L'utilisateur peut **redemander manuellement** le reçu via `mail.resendReceipt` (audit `MAIL_RECEIPT_RESEND`).
+
+> Pour le détail des sujets, corps et logique d'éligibilité des 11 types de mails (4 event-driven + 7 schedule-driven) : [`docs/mails.md`](mails.md).
 
 ### 12.2 Audit logging
 
@@ -479,8 +513,10 @@ L'upload de PDF (avis CSE et évaluation conjointe) est centralisé dans un **pi
 Le flux de la requête est sélectionné via l'en-tête `X-Flow-Type: cse_opinion | joint_evaluation`. Le pipeline s'exécute en une seule requête HTTP :
 
 ```
-auth → validation nom de fichier → validation MIME → stream (ClamAV + S3) → insert BDD
+auth → validation nom de fichier → validation MIME → stream (ClamAV + S3) → insert BDD → enqueueReceipt
 ```
+
+Le module `src/app/api/upload/uploadAudit.ts` extrait les helpers d'audit de la route : `mapFailureToHttp`, `writeFailure` et le schéma Zod `uploadAuditMetadataSchema`. Ce fichier est interne à la Route Handler — ne pas l'importer depuis d'autres modules.
 
 **Modules partagés** (`~/modules/shared/`) :
 
@@ -620,8 +656,8 @@ Tableau de correspondance feature → tables, pour les développeurs qui débarq
 |---|---|
 | `users` | Authentification, profil, admin |
 | `userCompanies` | Authentification (rattachement entreprise), garde d'accès historique |
-| `companies` | Authentification, déclaration, admin |
-| `declarations` | Déclaration index, parcours conformité, purge RGPD (§12.8) |
+| `companies` | Authentification, déclaration, admin, mails (raison sociale) |
+| `declarations` | Déclaration index, parcours conformité, mails (contexte variants), purge RGPD (§12.8) |
 | `declarationStatusHistory` | Historique des modifications d'une démarche ; purgé par cascade (§12.8) |
 | `declarationLocks` | Verrou collaboratif (§12.7) ; purgé par cascade (§12.8) |
 | `jobCategories` | Déclaration index (étape 5, optionnel) ; purge RGPD (§12.8) |
@@ -630,7 +666,7 @@ Tableau de correspondance feature → tables, pour les développeurs qui débarq
 | `files` | Avis CSE (`type = cse_opinion`), évaluation conjointe (`type = joint_evaluation`) ; purge RGPD (§12.8, + objets S3) |
 | `cseOpinionFiles` | Avis CSE — associations fichier ↔ type de contenu (`declarationNumber`, `type`) ; purge RGPD (§12.8) |
 | `referents` | Annuaire public, gestion admin |
-| `campaignDeadlines` | Paramétrage admin (deadlines par année) |
+| `campaignDeadlines` | Paramétrage admin (deadlines par année), mails (`pathChoiceDeadline`) |
 | `globalSettings` | Paramètres globaux : délai d'expiration du verrou (`declarationLockTimeoutMinutes`) |
 | `gipMdsData` | Pré-remplissage GIP |
 | `adminImpersonationEvents` | Audit impersonation admin |
@@ -642,6 +678,7 @@ Tableau de correspondance feature → tables, pour les développeurs qui débarq
 
 - **Architecture technique** (stack, modules, Next.js App Router, tRPC, Drizzle, déploiement) : [`docs/architecture.md`](architecture.md)
 - **Parcours utilisateurs** (personas et flux end-to-end) : [`docs/parcours-utilisateurs.md`](parcours-utilisateurs.md)
+- **Mails transactionnels** (détail des 11 types, sujets, corps, logique d'éligibilité) : [`docs/mails.md`](mails.md)
 - **Spécifications réglementaires** : [wiki Spec V2](https://github.com/SocialGouv/egapro/wiki/Spec-V2)
 - **Conventions de code** : [`CLAUDE.md`](../CLAUDE.md) racine et [`packages/app/CLAUDE.md`](../packages/app/CLAUDE.md)
 </content>

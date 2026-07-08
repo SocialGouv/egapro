@@ -78,10 +78,10 @@ export const BORDER = {
 	thin: `1px solid ${COLORS.border}`,
 } as const;
 
-// DSFR button geometry: a fixed 32px-tall cell with 16px horizontal padding.
+// DSFR button geometry (Primaire / LG): 10px vertical + 24px horizontal padding.
 export const BUTTON = {
-	height: 32,
-	paddingX: 16,
+	paddingX: 24,
+	paddingY: 10,
 } as const;
 
 export const BRAND = {
