@@ -42,6 +42,7 @@ flowchart LR
       DB[(PostgreSQL)]
       S3[(MinIO / S3)]
       AV[clamavd]
+      CR[CronJobs<br/>audit + purge déclarations]
     end
     subgraph "Externes"
       PC[ProConnect]
@@ -59,6 +60,8 @@ flowchart LR
     A <--> PC
     A --> GIP
     A --> SI
+    CR --> DB
+    CR --> S3
 ```
 
 Trois grandes catégories de surface technique :
@@ -66,6 +69,8 @@ Trois grandes catégories de surface technique :
 - **Pages publiques** (recherche, FAQ, mentions légales) : Server Components, lecture seule, pas d'authentification
 - **Espace déclarant** (`/mon-espace`, `/declaration-remuneration/*`, `/avis-cse/*`) : authentifié via ProConnect, écritures protégées par tRPC
 - **API privées** : tRPC interne (`/api/trpc/*`) pour le front, et REST-like (`/api/v1/*`, `/api/export/*`, `/api/pdf/*`, `/api/upload`, `/api/declaration-lock/release`) pour les intégrations externes et les uploads
+
+À côté de la surface HTTP, des **traitements planifiés** (CronJobs Kubernetes) assurent la maintenance des données : purge du log d'audit et **purge RGPD des déclarations expirées** (voir §9.6).
 
 ---
 
@@ -113,7 +118,8 @@ egapro/
 │   │   │   └── instrumentation-client.ts  # Sentry client
 │   │   ├── e2e/             # Tests Playwright
 │   │   ├── public/dsfr/     # Assets DSFR copiés (git-ignored)
-│   │   └── scripts/         # Scripts utilitaires (audit-cleanup.mjs, copy-dsfr.mjs)
+│   │   └── scripts/         # Scripts utilitaires (audit-cleanup.mjs,
+│   │                        #   declaration-cleanup.mjs, copy-dsfr.mjs)
 │   ├── notifications/       # Worker de mails (pg-boss + React Email)
 │   │   └── src/
 │   │       ├── mails/
@@ -181,6 +187,18 @@ server/
   services/       # Intégrations tierces (gipMds, uploadPipeline,
                   #   declarationLockService, …)
 ```
+
+### Scripts hors-application (`packages/app/scripts/`)
+
+Des scripts Node autonomes, exécutés en dehors du serveur Next.js (typiquement par un CronJob Kubernetes ou en tâche ponctuelle) :
+
+| Script | Rôle |
+|---|---|
+| `audit-cleanup.mjs` | Purge les lignes d'`audit.action_log` au-delà de leur fenêtre de rétention (§9.6) |
+| `declaration-cleanup.mjs` | Purge RGPD des déclarations dont l'année est antérieure au seuil de rétention (§9.6) |
+| `copy-dsfr.mjs` | Copie les assets DSFR dans `public/dsfr/` (au `dev` / `build`) |
+
+Ces scripts se connectent directement à PostgreSQL (`postgres`-js) et — pour la purge de déclarations — à S3 (`@aws-sdk/client-s3`) via des variables d'environnement, sans passer par la couche tRPC.
 
 ---
 
@@ -427,7 +445,7 @@ Les migrations sont **versionnées dans le repo** (`packages/app/drizzle/`). En 
 
 ### 7.4 Transactions
 
-Toute opération qui touche **plusieurs tables** doit utiliser `db.transaction(...)`. Règle enforcée par `structural-auditor` et `security-auditor`.
+Toute opération qui touche **plusieurs tables** doit utiliser `db.transaction(...)`. Règle enforcée par `structural-auditor` et `security-auditor`. La purge RGPD des déclarations (§9.6) illustre le pattern : toutes les suppressions BDD relationnelles sont exécutées dans **une seule transaction**, tandis que les effets non transactionnels (suppression S3, écriture de la ligne d'audit) sont volontairement rejetés **hors** de la transaction.
 
 ---
 
@@ -499,6 +517,10 @@ Le service `clamavd` scanne les uploads via le protocole ClamAV (TCP). Si le sca
 
 Les fichiers sont servis via une Route Handler `/api/v1/files/:fileId` qui fait du **streaming** depuis S3. Auth duale : header APISIX (côté SUIT) ou session NextAuth (côté front).
 
+### 8.5 Suppression (purge RGPD)
+
+Lors de la purge RGPD des déclarations (§9.6), les objets S3 rattachés aux déclarations expirées sont supprimés (`DeleteObjectCommand`) **après** le commit des suppressions BDD. S3 n'étant pas transactionnel, cette étape est **best-effort** : chaque échec est loggé et comptabilisé (`failedS3Objects`) sans annuler les suppressions déjà committées.
+
 ---
 
 ## 9. Audit logging
@@ -512,8 +534,8 @@ Conformité **CNIL / DGT** : tracer toutes les actions de mutation et toutes les
 ### 9.2 Schéma `audit.action_log`
 
 ```
-id, user_id, user_email, siren, action, status,
-ip_address, user_agent, metadata (jsonb), created_at
+id, user_id, user_email, siren, action, category, status,
+ip_address, user_agent, metadata (jsonb), error_message, created_at
 ```
 
 Le `metadata` jsonb est **automatiquement sanitizé** : les clés `password`, `token`, `refresh_token`, `secret`, `client_secret`, `authorization`, `apikey`, `api_key`, `accesskey`, `access_key`, `private_key` sont strippées récursivement.
@@ -529,9 +551,9 @@ Définies dans `src/modules/audit/shared/constants.ts` :
 | `public_search` | 180 j | Recherche / vue de référents publics |
 | `auth` | 365 j | Login OK / KO, logout |
 | `export` | 365 j | API publique d'export |
-| `system` | 365 j | Import GIP, cron de cleanup |
+| `system` | 365 j | Import GIP, crons de purge (audit + déclarations) |
 
-`AUDIT_RETENTION_DAYS_SHORT = 180`, `AUDIT_RETENTION_DAYS_LONG = 365`. Surchargeables via les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` / `EGAPRO_AUDIT_RETENTION_LONG_DAYS`.
+`AUDIT_RETENTION_DAYS_SHORT = 180`, `AUDIT_RETENTION_DAYS_LONG = 365`. Surchargeables via les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` / `EGAPRO_AUDIT_RETENTION_LONG_DAYS`. La rétention **des déclarations** (distincte de celle du log d'audit) est pilotée par `EGAPRO_DECLARATION_RETENTION_YEARS` (défaut **6 ans**, voir §9.6).
 
 ### 9.4 Wire-up obligatoire
 
@@ -542,7 +564,7 @@ Toute nouvelle action audited requiert **3 points** :
 3. Surface :
    - Pour une procédure tRPC → entrée dans `PROCEDURE_TO_ACTION` (middleware auto)
    - Pour une Route Handler → wrapper `withAuditedRoute({ action, resolveContext }, handler)`
-   - Pour un événement auth ou un cron → appel direct à `logAction(...)`
+   - Pour un événement auth ou un cron → appel direct à `logAction(...)` (ou, pour les scripts autonomes hors runtime app, un `INSERT` direct dans `audit.action_log`)
 
 ### 9.5 Actions du verrou collaboratif
 
@@ -554,9 +576,56 @@ Toute nouvelle action audited requiert **3 points** :
 | `DECLARATION_LOCK_STATE_READ` | `declaration.lock_state_read` | `read_sensitive` | `declarationLock.getLockState` (tRPC, PROCEDURE_TO_ACTION) |
 | `ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT` | `admin_settings.update_lock_timeout` | `mutation` | `adminSettings.updateLockTimeout` (tRPC, PROCEDURE_TO_ACTION) |
 
-### 9.6 Cron de cleanup
+### 9.6 Traitements planifiés (crons de maintenance des données)
 
-`packages/app/scripts/audit-cleanup.mjs` tourne quotidiennement (CronJob Kubernetes) et purge les lignes au-delà de leur fenêtre de rétention. Modifications de ce script → **test d'intégration obligatoire**.
+Deux CronJobs Kubernetes assurent la maintenance des données. Ils partagent le même modèle de déploiement (`.kontinuous/templates/*-cron.yaml`) : image applicative, `concurrencyPolicy: Forbid`, `backoffLimit: 0`, `restartPolicy: Never`, un `run` par jour.
+
+| CronJob | Script | Horaire (UTC) | Action audit associée | Rôle |
+|---|---|---|---|---|
+| `audit-cleanup-daily` | `packages/app/scripts/audit-cleanup.mjs` | `0 4 * * *` (04:00) | `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`) | Purge les lignes d'`audit.action_log` au-delà de leur fenêtre de rétention |
+| `declaration-cleanup-daily` | `packages/app/scripts/declaration-cleanup.mjs` | `0 3 * * *` (03:00) | `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`) | Purge RGPD des déclarations dont l'année est antérieure au seuil de rétention |
+
+Ces deux actions sont de catégorie `system` (rétention 365 j). Toute modification de ces scripts → **test d'intégration obligatoire** (`*.integration.test.ts`, cf. §13).
+
+#### Purge RGPD des déclarations (`declaration-cleanup.mjs`)
+
+Objectif : supprimer les déclarations (et toutes leurs données rattachées) au-delà de la durée légale de conservation.
+
+**Seuil de rétention** : `EGAPRO_DECLARATION_RETENTION_YEARS` (Zod, entier positif, **défaut 6**). Le script recalcule l'année de coupe :
+
+```
+cutoffYear = (année UTC courante) − retentionYears
+```
+
+Sont éligibles les déclarations telles que `year < cutoffYear`. La borne est **stricte** : une déclaration dont `year === cutoffYear` est **conservée**, celle dont `year === cutoffYear − 1` est purgée.
+
+**Suppression relationnelle (dans une transaction)** — l'ordre respecte les dépendances de clés étrangères :
+
+```mermaid
+flowchart TD
+    A[SELECT id FROM app_declaration<br/>WHERE year &lt; cutoffYear] --> B{ids vides ?}
+    B -->|oui| Z[Rien à purger]
+    B -->|non| C[Collecte des file_path S3<br/>via app_file]
+    C --> D[DELETE app_employee_category]
+    D --> E[DELETE app_job_category]
+    E --> F[DELETE app_cse_opinion_file]
+    F --> G[DELETE app_cse_opinion]
+    G --> H[DELETE app_file]
+    H --> I[DELETE app_declaration]
+    I --> J[(commit)]
+```
+
+`app_declaration_status_history` et `app_declaration_lock` sont supprimés **par cascade** lors du `DELETE` sur `app_declaration` (pas de `DELETE` explicite).
+
+**Effets non transactionnels (best-effort, hors transaction)** — S3 et le log d'audit ne sont pas rollbackables, et une donnée RGPD déjà supprimée en base ne doit jamais être « ressuscitée » par un échec en aval :
+
+1. **Suppression S3** : chaque `file_path` collecté est supprimé sur S3 après le commit. Les échecs sont loggés et comptés (`failedS3Objects`), sans interrompre la boucle.
+2. **Auto-audit** : une ligne `system.declaration_cleanup` (`status = success`) est insérée dans `audit.action_log`, avec un `metadata` récapitulatif : `purgedDeclarations`, `purgedFiles`, `purgedS3Objects`, `failedS3Objects`, `retentionYears`, `cutoffYear`. En cas d'échec global du script, une ligne `status = failure` est écrite avec le message d'erreur.
+
+**Propriétés** :
+
+- **Idempotent** : relancé sur le même état, il ne purge rien de plus et écrit une nouvelle ligne d'audit `success` avec des compteurs à zéro.
+- **Connexion directe** : le script se connecte à PostgreSQL (`DATABASE_URL`, ou reconstruit depuis `POSTGRES_*`) et à S3 (`S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET_NAME`, clés) via des variables d'environnement — sans passer par la couche applicative Next.js/tRPC.
 
 ---
 
@@ -584,11 +653,11 @@ Toute entrée externe est validée via **Zod** : formulaires, procédures tRPC, 
 
 ### 10.3 Variables d'environnement
 
-Déclarées et validées dans `src/env.js`. **Jamais lire `process.env` directement** (bloqué par hook).
+Déclarées et validées dans `src/env.js`. **Jamais lire `process.env` directement** (bloqué par hook). Les scripts autonomes de `packages/app/scripts/` (crons) font exception : n'étant pas des modules du bundle app, ils lisent `process.env` et re-valident eux-mêmes leurs entrées (ex. `EGAPRO_DECLARATION_RETENTION_YEARS` re-parsé en entier positif par la purge, avec repli sur le défaut 6).
 
 ### 10.4 Secrets
 
-Aucune valeur secrète **dans le repo**. Gérés via des [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) sous `.kontinuous/`.
+Aucune valeur secrète **dans le repo**. Gérés via des [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) sous `.kontinuous/`. Les CronJobs récupèrent leurs credentials PostgreSQL et S3 via `secretKeyRef` / `secretRef` (jamais en clair dans les manifests).
 
 ### 10.5 Verrou collaboratif — sécurité IDOR
 
@@ -648,7 +717,7 @@ Trois entrées Sentry, une par runtime :
 | E2E | Playwright | `packages/app/src/e2e/` | Au moins une E2E par `page.tsx` |
 | A11y | Lighthouse CI | `.lighthouserc.json` | **100%** accessibilité (bloquant) |
 | RGAA quotidien | Workflow GitHub Actions | `.github/workflows/rgaa-audit.yaml` | Cron 06:00 UTC L–V |
-| Intégration BDD | Vitest + Docker | `*.integration.test.ts` | Obligatoire pour code touchant `audit.action_log` |
+| Intégration BDD | Vitest + Docker | `*.integration.test.ts` | Obligatoire pour code touchant `audit.action_log` ou les scripts de purge (audit, déclarations) |
 
 ### 13.1 Mocks centralisés
 
@@ -662,6 +731,8 @@ pnpm test:e2e          # Playwright (nécessite pnpm dev sur :3000)
 pnpm test:lighthouse   # Lighthouse CI (nécessite pnpm dev sur :3000)
 pnpm test:integration  # Tests intégration BDD (nécessite Docker)
 ```
+
+> La purge RGPD des déclarations (§9.6) est couverte par un test d'intégration (`declarationCleanupScript.integration.test.ts`) qui vérifie la cascade, la borne d'année stricte, la best-effort S3 et l'idempotence sur une vraie base Postgres.
 
 ---
 
@@ -692,7 +763,8 @@ pnpm test:integration  # Tests intégration BDD (nécessite Docker)
   Chart.yaml          # Sub-charts (app, postgres, apisix-suit, …)
   config.yaml         # Config par défaut
   values.yaml         # Valeurs par défaut
-  templates/          # Manifests (Deployment, Service, ConfigMap, sealed-secrets, …)
+  templates/          # Manifests (Deployment, Service, ConfigMap, sealed-secrets,
+                      #   CronJobs audit-cleanup / declaration-cleanup / …)
   env/
     dev/              # Surcharges dev
     preprod/          # Surcharges preprod
@@ -700,6 +772,8 @@ pnpm test:integration  # Tests intégration BDD (nécessite Docker)
 ```
 
 Trois environnements gérés : **dev** (review apps), **preprod** (branche `beta`), **prod** (tags Git).
+
+**CronJobs** : les traitements planifiés (§9.6) sont déployés comme `kind: CronJob` sous `.kontinuous/templates/*-cron.yaml`. La purge de déclarations lit un override optionnel de la fenêtre de rétention via la ConfigMap `declaration-retention` (`optional: true` — non déployée = repli sur le défaut 6 ans).
 
 ### 14.3 Stack locale
 
@@ -730,7 +804,7 @@ pnpm dev:app           # lance Next.js sur :3000
 | **INSEE Sirene** | Identification des entreprises (raison sociale, NAF, effectif) | Lecture (cache) |
 | **SUIT / Delphes** | Inspection du travail (consomme `/api/v1/*`) | Non (intégration sortante) |
 | **D@ccords** | Dépôt des accords collectifs | Non (lien externe) |
-| **AWS S3** (ou MinIO) | Stockage des PDF | Oui pour l'upload CSE |
+| **AWS S3** (ou MinIO) | Stockage des PDF (upload + purge RGPD) | Oui pour l'upload CSE |
 | **Mailer SMTP** (prod) | Envoi des reçus de déclaration | Important (pas bloquant si défaillant) |
 
 Les pannes de ProConnect bloquent **complètement** la connexion ; aucune procédure de secours côté app.
