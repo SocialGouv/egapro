@@ -1,3 +1,11 @@
+## [3.18.4](https://github.com/SocialGouv/egapro/compare/v3.18.3...v3.18.4) (2026-07-08)
+
+
+### Bug Fixes
+
+* **auth:** prod — retire l'envFrom moncomptepro (réf pendante après suppression du secret) ([#3866](https://github.com/SocialGouv/egapro/issues/3866)) ([988f366](https://github.com/SocialGouv/egapro/commit/988f366482ca044fa1c809e61a1acd8aec718f3e))
+* **auth:** prod — supprime le sealed secret moncomptepro (débloque v3.18.3) ([#3865](https://github.com/SocialGouv/egapro/issues/3865)) ([8281eb4](https://github.com/SocialGouv/egapro/commit/8281eb462e6ac6d28f40fbbfd7795a6cad98811f))
+
 ## [3.18.3](https://github.com/SocialGouv/egapro/compare/v3.18.2...v3.18.3) (2026-07-08)
 
 
