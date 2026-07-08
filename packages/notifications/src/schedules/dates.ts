@@ -29,8 +29,13 @@ export function toIsoDate(year: number, month: number, day: number): string {
 export const DEADLINES = {
 	declarationModification: (year: number) => toIsoDate(year, 6, 1), // 1er juin
 	compliancePathChoice: (year: number) => toIsoDate(year, 7, 1), // 1er juillet
+	// Round 2 compliance path choice, after a non-conform second declaration.
+	compliancePathChoiceAfterSecondDeclaration: (year: number) =>
+		toIsoDate(year + 1, 1, 1), // 1er janvier N+1
 	jointEvaluationReport: (year: number) => toIsoDate(year, 9, 1), // 1er septembre
-	secondDeclaration: (year: number) => toIsoDate(year + 1, 1, 1), // 1er janvier N+1
+	// Round 2 joint evaluation report, after a non-conform second declaration.
+	jointEvaluationReportRevised: (year: number) => toIsoDate(year + 1, 3, 1), // 1er mars N+1
+	secondDeclaration: (year: number) => toIsoDate(year, 12, 1), // 1er décembre N
 	cseOpinionFinal: (year: number) => toIsoDate(year + 1, 3, 1), // 1er mars N+1
 	cseOpinionJustifyOct: (year: number) => toIsoDate(year, 10, 1), // 1er octobre
 } as const;

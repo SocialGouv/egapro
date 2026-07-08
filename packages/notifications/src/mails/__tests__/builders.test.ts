@@ -56,17 +56,19 @@ const PAYLOADS: NotificationPayloadMap = {
 		siren: SIREN,
 		year: YEAR,
 		deadline: "2027-07-01T00:00:00.000Z",
+		round: "first",
 	},
 	second_declaration_reminder: {
 		siren: SIREN,
 		year: YEAR,
-		deadline: "2028-01-01T00:00:00.000Z",
-		daysRemaining: 90,
+		deadline: "2027-12-01T00:00:00.000Z",
+		daysRemaining: 30,
 	},
 	joint_evaluation_reminder: {
 		siren: SIREN,
 		year: YEAR,
 		deadline: "2027-09-01T00:00:00.000Z",
+		round: "first",
 	},
 	cse_opinion_reminder: {
 		siren: SIREN,
@@ -291,66 +293,108 @@ describe("per-type rendering details", () => {
 
 	it.each([
 		30, 10,
-	] as const)("declaration_deadline_reminder J-%i exposes the count", async (daysRemaining) => {
+	] as const)("declaration_deadline_reminder J-%i keeps the Figma copy", async (daysRemaining) => {
 		const mail = await buildMail("declaration_deadline_reminder", {
 			siren: SIREN,
 			year: YEAR,
 			deadline: DEADLINE,
 			daysRemaining,
 		});
-		expect(mail.subject).toContain(`${daysRemaining} jours`);
-		expect(mail.html).toContain(`${daysRemaining} jours`);
+		expect(mail.subject).toBe(
+			`[Rappel] Egapro - Déclarez vos indicateurs d'égalité professionnelle pour l'année ${YEAR}`,
+		);
+		expect(mail.html).toContain("pas encore été transmise");
+		expect(mail.html).toContain(String(YEAR));
+		expect(mail.html).toContain("Compléter ma déclaration");
+		expect(mail.html).toContain(getConnectionUrl());
+		expect(mail.html).toContain("/declaration?siren=552100554");
 	});
 
-	it("compliance_path_choice_reminder names the 5 % threshold", async () => {
+	it("compliance_path_choice_reminder round=first names the 5 % threshold", async () => {
 		const mail = await buildMail("compliance_path_choice_reminder", {
 			siren: SIREN,
 			year: YEAR,
 			deadline: "2027-07-01T00:00:00.000Z",
+			round: "first",
 		});
 		expect(mail.subject.toLowerCase()).toContain("parcours");
 		expect(mail.html).toContain("5 %");
+		expect(mail.html).toContain("fait apparaître");
+		expect(mail.html).not.toContain("de nouveau");
+		expect(mail.html).toContain("Sélectionner le parcours");
 	});
 
-	it.each([
-		90, 30,
-	] as const)("second_declaration_reminder J-%i exposes the count", async (daysRemaining) => {
-		const mail = await buildMail("second_declaration_reminder", {
+	it("compliance_path_choice_reminder round=second references the second declaration", async () => {
+		const mail = await buildMail("compliance_path_choice_reminder", {
 			siren: SIREN,
 			year: YEAR,
 			deadline: "2028-01-01T00:00:00.000Z",
-			daysRemaining,
+			round: "second",
 		});
-		expect(mail.subject).toContain(`${daysRemaining} jours`);
-		expect(mail.html).toContain("actions correctives");
+		expect(mail.html).toContain("de nouveau");
+		expect(mail.html).toContain("dans votre seconde déclaration");
+		expect(mail.html).toContain("1ᵉʳ janvier 2028");
 	});
 
-	it("joint_evaluation_reminder references the report deadline", async () => {
+	it.each([
+		30, 15,
+	] as const)("second_declaration_reminder J-%i keeps the Figma copy", async (daysRemaining) => {
+		const mail = await buildMail("second_declaration_reminder", {
+			siren: SIREN,
+			year: YEAR,
+			deadline: "2027-12-01T00:00:00.000Z",
+			daysRemaining,
+		});
+		expect(mail.subject).toContain("Déclarez à nouveau");
+		expect(mail.html).toContain("actions correctives");
+		expect(mail.html).toContain("seconde déclaration");
+		expect(mail.html).toContain("1ᵉʳ décembre 2027");
+		expect(mail.html).toContain("Mon espace");
+	});
+
+	it("joint_evaluation_reminder round=first references the report deadline", async () => {
 		const mail = await buildMail("joint_evaluation_reminder", {
 			siren: SIREN,
 			year: YEAR,
 			deadline: "2027-09-01T00:00:00.000Z",
+			round: "first",
 		});
 		expect(mail.subject.toLowerCase()).toContain("évaluation conjointe");
 		expect(mail.html).toContain("1ᵉʳ septembre");
+		expect(mail.html).toContain("fait apparaître");
+		expect(mail.html).toContain("Déposer le rapport");
 		expect(mail.html).toContain("/mon-espace");
 	});
 
+	it("joint_evaluation_reminder round=second references the second declaration", async () => {
+		const mail = await buildMail("joint_evaluation_reminder", {
+			siren: SIREN,
+			year: YEAR,
+			deadline: "2028-03-01T00:00:00.000Z",
+			round: "second",
+		});
+		expect(mail.html).toContain("de nouveau");
+		expect(mail.html).toContain("dans votre seconde déclaration");
+		expect(mail.html).toContain("Mon espace");
+	});
+
 	it.each([
-		["compliance", "exactitude"],
-		["justify_oct", "1er octobre"],
-		["justify_dec", "justification"],
-		["corrective", "actions correctives"],
-		["joint_eval", "évaluation conjointe"],
-	] as const)("cse_opinion_reminder variant=%s shows %s context", async (variant, marker) => {
+		"compliance",
+		"justify_oct",
+		"justify_dec",
+		"corrective",
+		"joint_eval",
+	] as const)("cse_opinion_reminder variant=%s renders the unified content", async (variant) => {
 		const mail = await buildMail("cse_opinion_reminder", {
 			siren: SIREN,
 			year: YEAR,
 			deadline: "2028-03-01T00:00:00.000Z",
 			variant,
 		});
-		expect(mail.subject).toContain("CSE");
-		expect(mail.html.toLowerCase()).toContain(marker.toLowerCase());
+		expect(mail.subject).toContain("avis du CSE");
+		expect(mail.html).toContain("exactitude des données");
+		expect(mail.html).toContain("justification des écarts");
+		expect(mail.html).toContain(`/avis-cse?siren=${SIREN}`);
 	});
 
 	it("next_cycle_handover announces closure and next cycle", async () => {

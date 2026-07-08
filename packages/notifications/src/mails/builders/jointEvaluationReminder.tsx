@@ -1,7 +1,8 @@
 import { formatFrenchDate } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
-import { getMySpaceUrl } from "../shared/urls.js";
+import { getConnectionUrl, getMySpaceUrl } from "../shared/urls.js";
 import {
+	EmailClosingParagraph,
 	EmailContactParagraph,
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -14,34 +15,41 @@ import type { MailBuilder } from "../types.js";
 export const buildJointEvaluationReminderMail: MailBuilder<
 	"joint_evaluation_reminder"
 > = async (payload) => {
-	const subject = "Egapro - Rappel : dépôt du rapport d'évaluation conjointe";
+	const { year, round } = payload;
+	const subject = `[Rappel] Egapro - Déposer le rapport de l'évaluation conjointe des rémunérations pour l'année ${year}`;
 	const formattedDeadline = formatFrenchDate(payload.deadline);
-	const previewText =
-		"Le rapport d'évaluation conjointe avec votre CSE n'a pas encore été téléversé sur la plateforme.";
+	const previewText = `Vous devez déposer le rapport de l'évaluation conjointe au plus tard le ${formattedDeadline}.`;
+	const statement =
+		round === "first" ? (
+			<EmailParagraph>
+				Pour rappel, l'indicateur d'écart de rémunération par catégorie de
+				salariés fait apparaître un ou plusieurs écarts de rémunération
+				supérieurs ou égaux à 5 % et vous avez fait le choix de mettre en place
+				une évaluation conjointe des rémunérations. Vous devez, en conséquence,
+				déposer le rapport de cette évaluation au plus tard le{" "}
+				{formattedDeadline}.
+			</EmailParagraph>
+		) : (
+			<EmailParagraph>
+				Pour rappel, l'indicateur d'écart de rémunération par catégorie de
+				salariés fait de nouveau apparaître un ou plusieurs écarts de
+				rémunération supérieurs ou égaux à 5 % dans votre seconde déclaration.
+				Vous avez fait le choix de mettre en place une évaluation conjointe des
+				rémunérations. Vous devez, en conséquence, procéder au dépôt du rapport
+				au plus tard le {formattedDeadline}.
+			</EmailParagraph>
+		);
+	const label = round === "first" ? "Déposer le rapport" : "Mon espace";
 	const { html, text } = await renderEmail(
 		<EmailShell previewText={previewText}>
 			<EmailGreeting>Bonjour,</EmailGreeting>
-			<EmailParagraph>
-				Le rapport d'évaluation conjointe mené avec votre CSE n'a pas encore été
-				téléversé sur la plateforme Egapro.
-			</EmailParagraph>
-			<EmailParagraph>
-				Conformément à la réglementation, l'évaluation conjointe doit retracer
-				les mesures correctives décidées en commun avec le CSE pour réduire les
-				écarts de rémunération constatés.
-			</EmailParagraph>
-			<EmailParagraph>
-				Le rapport doit lister précisément ces mesures correctives ainsi que
-				leur calendrier de mise en œuvre.
-			</EmailParagraph>
-			<EmailParagraph>
-				Nous vous invitons à vous rendre sur le portail Egapro afin de
-				téléverser ce rapport.
-			</EmailParagraph>
-			<EmailParagraph>
-				Le dépôt doit intervenir au plus tard le {formattedDeadline}.
-			</EmailParagraph>
-			<EmailCtaWithLink href={getMySpaceUrl()} label="Téléverser le rapport" />
+			{statement}
+			<EmailClosingParagraph />
+			<EmailCtaWithLink
+				href={getMySpaceUrl()}
+				label={label}
+				linkHref={getConnectionUrl()}
+			/>
 			<EmailContactParagraph />
 			<EmailSignature />
 		</EmailShell>,

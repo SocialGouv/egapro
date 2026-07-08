@@ -10,12 +10,14 @@ export {
 	wasSent,
 } from "./dedup.js";
 export {
-	findAwaitingComplianceChoice,
+	findAwaitingCompliancePathChoiceFirstRound,
+	findAwaitingCompliancePathChoiceSecondRound,
 	findCompletedPreviousCycle,
 	findCorrectiveSecondDeclarationPending,
 	findCseOpinionPending,
 	findDraftDeclarations,
-	findJointEvaluationPending,
+	findJointEvaluationPendingFirstRound,
+	findJointEvaluationPendingSecondRound,
 	findOpenCycleRecipients,
 	type ReminderRecipient,
 } from "./queries.js";

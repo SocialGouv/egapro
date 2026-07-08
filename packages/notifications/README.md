@@ -148,26 +148,22 @@ to current implementation:
 | MH_* | Confirmation avis CSE | event (file upload `cse_opinion`) | `cse_opinion_receipt` |
 | M_PE2 | Confirmation rapport éval. conjointe | event (file upload `joint_evaluation`) | `joint_evaluation_submitted` |
 | MA | Info ouverture cycle (1er mars, dès 2028) | cron `0 8 1 3 *` | `cycle_opening_info` |
-| MR30 | Rappel déclaration J-30 (1er mai) | cron `0 8 2 5 *` | `declaration_deadline_reminder` (variant `d30`) |
-| MR10 | Rappel déclaration J-10 (22 mai) | cron `0 8 22 5 *` | `declaration_deadline_reminder` (variant `d10`) |
-| ME | Rappel choix parcours J-15 (avant 1er juillet) | cron `0 8 16 6 *` | `compliance_path_choice_reminder` (covers round 1 + round 2 revisions) |
-| MSD3 | Rappel 2e déclaration J-90 | cron `0 8 3 10 *` | `second_declaration_reminder` (variant `d90`) |
-| MSD30 | Rappel 2e déclaration J-30 (1er déc) | cron `0 8 1 12 *` | `second_declaration_reminder` (variant `d30`) |
-| MG_E1 | Rappel dépôt éval. conjointe (1er août) | cron `0 8 1 8 *` | `joint_evaluation_reminder` (covers round 1 + round 2 = `corrective → joint_eval`) |
-| MG_J1 | Rappel avis CSE — Justifier (avant 1er oct) | cron `0 8 1 9 *` | `cse_opinion_reminder` variant `justify_oct` |
-| MG_J2 | Rappel avis CSE 1er déc (Justifier) | cron `0 8 1 12 *` | `cse_opinion_reminder` variant `justify_dec` |
-| MG_E2 | Rappel avis CSE 1er déc (Éval. conjointe) | cron `0 8 1 12 *` | `cse_opinion_reminder` variant `joint_eval` |
-| MG_A | Rappel avis CSE (Actions correctives) | cron `0 8 1 2 *` | `cse_opinion_reminder` variant `corrective` |
-| MG_B/C | Rappel avis CSE (exactitude) | cron `0 8 1 2 *` | `cse_opinion_reminder` variant `compliance` |
+| Rappel 1 | Rappel déclaration J-30 / J-10 (avant 1er juin) | cron `0 8 2 5 *` + `0 8 22 5 *` | `declaration_deadline_reminder` (variants `d30` / `d10`) |
+| Rappel 2 | Rappel choix parcours — round 1, J-15 (avant 1er juillet) | cron `0 8 16 6 *` | `compliance_path_choice_reminder` (`round: first`) |
+| Rappel 5 | Rappel choix parcours — round 2, J-15 (avant 1er janvier N+1) | cron `0 8 17 12 *` | `compliance_path_choice_reminder` (`round: second`) |
+| Rappel 3 | Rappel 2e déclaration J-30 / J-15 (avant 1er décembre) | cron `0 8 1 11 *` + `0 8 16 11 *` | `second_declaration_reminder` (variants `d30` / `d15`) |
+| Rappel 4 | Rappel dépôt éval. conjointe — round 1, J-30 / J-15 (avant 1er septembre) | cron `0 8 2 8 *` + `0 8 17 8 *` | `joint_evaluation_reminder` (`round: first`) |
+| Rappel 6 | Rappel dépôt éval. conjointe — round 2, J-30 / J-15 (avant 1er mars N+1) | cron `0 8 30 1 *` + `0 8 14 2 *` | `joint_evaluation_reminder` (`round: second`) |
+| Rappel 7 | Rappel avis CSE (contenu unifié) — 1er sept / 1er déc / 1er févr | cron `0 8 1 9 *` + `0 8 1 12 *` (×2) + `0 8 1 2 *` (×2) | `cse_opinion_reminder` (5 variants d'éligibilité, message unique) |
 | MI_* | Bascule cycle suivant | cron `0 8 2 3 *` | `next_cycle_handover` |
 
 **Couverture événementielle : 4/4** (les 4 confirmations event-driven du
-schéma BRD). **Couverture rappels/cron : 13/13** — implémentés via 7 builders
-schedule-driven et 13 schedules pg-boss (tous en `tz=Europe/Paris`), avec
-déduplication par `notifications.reminder_sent_log` (UNIQUE
-`type/siren/year/variant`) qui garantit l'idempotence des ticks. Voir
-[`docs/mails.md`](../../docs/mails.md) pour le détail des éligibilités SQL,
-des variants, et de l'architecture.
+schéma BRD). **Couverture rappels : 7/7** (les 7 rappels du plan d'envoi
+Figma) — implémentés via 7 builders schedule-driven et 17 schedules pg-boss
+(tous en `tz=Europe/Paris`), avec déduplication par
+`notifications.reminder_sent_log` (UNIQUE `type/siren/year/variant`) qui
+garantit l'idempotence des ticks. Voir [`docs/mails.md`](../../docs/mails.md)
+pour le détail des éligibilités SQL, des variants, et de l'architecture.
 
 ## Adding a new notification type
 

@@ -1,15 +1,20 @@
 import type { Sql } from "postgres";
 import {
 	ensureDedupTable,
-	findAwaitingComplianceChoice,
+	findAwaitingCompliancePathChoiceFirstRound,
+	findAwaitingCompliancePathChoiceSecondRound,
 	findCompletedPreviousCycle,
 	findCorrectiveSecondDeclarationPending,
 	findCseOpinionPending,
 	findDraftDeclarations,
-	findJointEvaluationPending,
+	findJointEvaluationPendingFirstRound,
+	findJointEvaluationPendingSecondRound,
 	findOpenCycleRecipients,
 } from "../eligibility/index.js";
-import type { CseOpinionReminderVariant } from "../mails/types.js";
+import type {
+	CseOpinionReminderVariant,
+	ReminderRound,
+} from "../mails/types.js";
 import { DEADLINES, getCurrentYear } from "./dates.js";
 import { type DispatchResult, dispatchReminder } from "./dispatch.js";
 
@@ -57,24 +62,35 @@ export async function handleDeclarationDeadlineReminder(
 	});
 }
 
+// Compliance path choice reminder. Round 1 fires mid-June (J-15 before the
+// 1er juillet choice deadline); round 2 fires mid-December (J-15 before the
+// 1er janvier N+1 revision deadline). Both run in the campaign year N.
 export async function handleCompliancePathChoiceReminder(
 	sql: Sql,
+	round: ReminderRound,
 ): Promise<DispatchResult> {
 	await ensureDedupTable(sql);
 	const year = getCurrentYear();
-	const recipients = await findAwaitingComplianceChoice(sql, year);
-	const deadline = DEADLINES.compliancePathChoice(year);
+	const recipients =
+		round === "first"
+			? await findAwaitingCompliancePathChoiceFirstRound(sql, year)
+			: await findAwaitingCompliancePathChoiceSecondRound(sql, year);
+	const deadline =
+		round === "first"
+			? DEADLINES.compliancePathChoice(year)
+			: DEADLINES.compliancePathChoiceAfterSecondDeclaration(year);
 	return dispatchReminder({
 		sql,
 		type: "compliance_path_choice_reminder",
 		recipients,
-		payloadFor: ({ siren }) => ({ siren, year, deadline }),
+		payloadFor: ({ siren }) => ({ siren, year, deadline, round }),
+		variant: round,
 	});
 }
 
 export async function handleSecondDeclarationReminder(
 	sql: Sql,
-	daysRemaining: 90 | 30,
+	daysRemaining: 30 | 15,
 ): Promise<DispatchResult> {
 	await ensureDedupTable(sql);
 	const year = getCurrentYear();
@@ -89,18 +105,33 @@ export async function handleSecondDeclarationReminder(
 	});
 }
 
+// Joint evaluation report reminder. Round 1 fires in August (J-30 / J-15
+// before the 1er septembre report deadline of campaign N). Round 2 fires in
+// January / February of N+1 (J-30 / J-15 before the 1er mars N+1 deadline),
+// so — like `handleNextCycleHandover` — the campaign year is the *previous*
+// calendar year.
 export async function handleJointEvaluationReminder(
 	sql: Sql,
+	round: ReminderRound,
+	daysRemaining: 30 | 15,
 ): Promise<DispatchResult> {
 	await ensureDedupTable(sql);
-	const year = getCurrentYear();
-	const recipients = await findJointEvaluationPending(sql, year);
-	const deadline = DEADLINES.jointEvaluationReport(year);
+	const currentYear = getCurrentYear();
+	const year = round === "first" ? currentYear : currentYear - 1;
+	const recipients =
+		round === "first"
+			? await findJointEvaluationPendingFirstRound(sql, year)
+			: await findJointEvaluationPendingSecondRound(sql, year);
+	const deadline =
+		round === "first"
+			? DEADLINES.jointEvaluationReport(year)
+			: DEADLINES.jointEvaluationReportRevised(year);
 	return dispatchReminder({
 		sql,
 		type: "joint_evaluation_reminder",
 		recipients,
-		payloadFor: ({ siren }) => ({ siren, year, deadline }),
+		payloadFor: ({ siren }) => ({ siren, year, deadline, round }),
+		variant: `${round}-d${daysRemaining}`,
 	});
 }
 

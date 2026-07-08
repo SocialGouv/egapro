@@ -17,8 +17,18 @@ function buildBoss(): BossStub {
 }
 
 describe("SCHEDULES", () => {
-	it("declares the expected 13 schedules", () => {
-		expect(SCHEDULES.length).toBe(13);
+	it("declares the expected 17 schedules", () => {
+		expect(SCHEDULES.length).toBe(17);
+	});
+
+	it("splits the compliance and joint-evaluation reminders into two rounds", () => {
+		const names = SCHEDULES.map((s) => s.name);
+		expect(names).toContain("reminder-compliance-path-choice-r1");
+		expect(names).toContain("reminder-compliance-path-choice-r2");
+		expect(names).toContain("reminder-joint-evaluation-r1-30");
+		expect(names).toContain("reminder-joint-evaluation-r1-15");
+		expect(names).toContain("reminder-joint-evaluation-r2-30");
+		expect(names).toContain("reminder-joint-evaluation-r2-15");
 	});
 
 	it("uses unique queue names", () => {

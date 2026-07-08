@@ -1,6 +1,7 @@
 export { BASE_CSS } from "./baseCss.js";
 export { EmailBody } from "./EmailBody.js";
 export { EmailButton } from "./EmailButton.js";
+export { EmailClosingParagraph } from "./EmailClosingParagraph.js";
 export { EmailComplianceCriteriaList } from "./EmailComplianceCriteriaList.js";
 export { EmailContactParagraph } from "./EmailContactParagraph.js";
 export { EmailCtaWithLink } from "./EmailCtaWithLink.js";
