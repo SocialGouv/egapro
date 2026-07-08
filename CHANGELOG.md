@@ -1,3 +1,18 @@
+## [3.18.3](https://github.com/SocialGouv/egapro/compare/v3.18.2...v3.18.3) (2026-07-08)
+
+
+### Bug Fixes
+
+* **auth:** aligne l'id du provider ProConnect sur le callback enregistré (moncomptepro → proconnect) ([8fd9312](https://github.com/SocialGouv/egapro/commit/8fd931285239888231eb531f567e07db12a1a1ef))
+* **auth:** bascule ProConnect de l'Identité vers la Fédération ([#3862](https://github.com/SocialGouv/egapro/issues/3862)) ([821a121](https://github.com/SocialGouv/egapro/commit/821a12120da91e5934d91d0be61d733672967c76))
+* **auth:** logout ProConnect — post_logout_redirect_uri sur /login ([#3863](https://github.com/SocialGouv/egapro/issues/3863)) ([cd32cb6](https://github.com/SocialGouv/egapro/commit/cd32cb684513c43ad8f538d3a9e952fd6ec3f6e0))
+* **auth:** prod — câble le client ProConnect sur le secret proconnect (Fédération) ([#3864](https://github.com/SocialGouv/egapro/issues/3864)) ([2e0e1b3](https://github.com/SocialGouv/egapro/commit/2e0e1b3ce6a9f5dafe0d736cca55c4909f56d79c))
+
+
+### Reverts
+
+* Revert "revert(epic): #3647 — switch la V1 de moncomptepro vers proconnect (#3697) (#3840)" ([fda756a](https://github.com/SocialGouv/egapro/commit/fda756adeeaa3aca49410a40946148abe6c6fd3a)), closes [#3647](https://github.com/SocialGouv/egapro/issues/3647) [#3697](https://github.com/SocialGouv/egapro/issues/3697) [#3840](https://github.com/SocialGouv/egapro/issues/3840)
+
 ## [3.18.2](https://github.com/SocialGouv/egapro/compare/v3.18.1...v3.18.2) (2026-07-02)
 
 
