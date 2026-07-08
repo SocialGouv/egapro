@@ -30,6 +30,22 @@ api:
         name: smtp
 
 app:
+  env:
+    # ProConnect Fédération: le client_id/secret (lus par l'app comme
+    # SECURITY_MONCOMPTEPRO_*) proviennent du nouveau sealed secret `proconnect`.
+    # Ce mapping `env` prend le pas sur le legacy `moncomptepro` (envFrom) pour
+    # ces deux clés. Sans ça, prod enverrait l'ancien client MonComptePro à la
+    # Fédération → invalid_client. Aligne prod sur preprod.
+    - name: SECURITY_MONCOMPTEPRO_CLIENT_ID
+      valueFrom:
+        secretKeyRef:
+          name: proconnect
+          key: EGAPRO_PROCONNECT_CLIENT_ID
+    - name: SECURITY_MONCOMPTEPRO_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: proconnect
+          key: EGAPRO_PROCONNECT_CLIENT_SECRET
   vars:
     MAILER_ENABLE: "True"
     REDIS_SENTINEL_HOSTS: |
