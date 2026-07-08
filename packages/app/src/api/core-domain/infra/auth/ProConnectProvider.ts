@@ -33,7 +33,7 @@ export function ProConnectProvider<P extends ProConnectProfile>(
   const proconnectDiscoveryUrl = process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
 
   return {
-    id: "moncomptepro",
+    id: "proconnect",
     type: "oauth",
     name: "Mon Compte Pro",
     allowDangerousEmailAccountLinking: true,
