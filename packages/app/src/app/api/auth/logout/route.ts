@@ -72,6 +72,10 @@ async function buildLogoutRedirectUrl(idToken: string | null, baseUrl: string): 
   }
   const url = new URL(endSessionEndpoint);
   url.searchParams.set("id_token_hint", idToken);
-  url.searchParams.set("post_logout_redirect_uri", `${baseUrl}/api/auth/logout/callback`);
+  // post_logout_redirect_uri must exactly match a logout URL registered on the
+  // ProConnect FS, which is `${baseUrl}/login` (the IdP rejects anything else
+  // with invalid_request "post_logout_redirect_uri not registered"). The session
+  // cookie is already cleared above, so landing on /login completes the logout.
+  url.searchParams.set("post_logout_redirect_uri", `${baseUrl}/login`);
   return url;
 }
