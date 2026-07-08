@@ -1,3 +1,4 @@
+export { getCampaignDeadlines } from "./campaignDeadlines.js";
 export {
 	__resetAppDbSqlForTests,
 	closeAppDbSql,
