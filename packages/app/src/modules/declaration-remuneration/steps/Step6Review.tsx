@@ -3,11 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import { trackFunnelComplete } from "~/modules/analytics";
-import {
-	computeGap,
-	GAP_ALERT_THRESHOLD,
-	getCompanySizeRange,
-} from "~/modules/domain";
+import { computeGap, gapLevel, getCompanySizeRange } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
@@ -32,9 +28,9 @@ import stepStyles from "./Step6Review.module.scss";
 import { IndicatorSections } from "./step6/IndicatorSections";
 import { parseEmployeeCategories } from "./step6/parseStep5Categories";
 
-/** Check if any gap value is >= the regulatory threshold */
+/** Check if any gap reaches the regulatory alert threshold (positive-only via `gapLevel`). */
 function hasAnyHighGap(gaps: (number | null)[]): boolean {
-	return gaps.some((g) => g !== null && Math.abs(g) >= GAP_ALERT_THRESHOLD);
+	return gaps.some((g) => gapLevel(g) === "high");
 }
 
 type Props = {

@@ -40,12 +40,12 @@ describe("computeGapRatio", () => {
 });
 
 describe("computeGap", () => {
-	it("computes gap as absolute percentage", () => {
+	it("computes a positive gap when men earn more", () => {
 		expect(computeGap("100", "200")).toBeCloseTo(50);
 	});
 
-	it("returns positive value regardless of direction", () => {
-		expect(computeGap("200", "100")).toBeCloseTo(100);
+	it("returns a negative value when women earn more (signed, GIP convention)", () => {
+		expect(computeGap("200", "100")).toBeCloseTo(-100);
 	});
 
 	it("returns null when men value is zero (division by zero)", () => {
@@ -66,12 +66,12 @@ describe("computeGap", () => {
 });
 
 describe("computeGapBetween", () => {
-	it("computes the absolute gap as a percentage of the men value", () => {
+	it("computes a positive gap as a percentage of the men value", () => {
 		expect(computeGapBetween(90, 100)).toBe(10);
 	});
 
-	it("returns a positive value when women earn more than men", () => {
-		expect(computeGapBetween(110, 100)).toBe(10);
+	it("returns a negative value when women earn more than men (signed)", () => {
+		expect(computeGapBetween(110, 100)).toBe(-10);
 	});
 
 	it("returns 0 for equal values", () => {
@@ -103,6 +103,10 @@ describe("gapLevel", () => {
 	it("returns low for zero gap", () => {
 		expect(gapLevel(0)).toBe("low");
 	});
+
+	it("returns low for a negative gap (women earn more, no alert)", () => {
+		expect(gapLevel(-6)).toBe("low");
+	});
 });
 
 describe("computeTotal", () => {
@@ -133,6 +137,12 @@ describe("hasGapsAboveThreshold", () => {
 	it("returns false when all gaps are below 5%", () => {
 		expect(
 			hasGapsAboveThreshold([{ annualBaseWomen: "97", annualBaseMen: "100" }]),
+		).toBe(false);
+	});
+
+	it("returns false when women earn more (negative gap, no alert)", () => {
+		expect(
+			hasGapsAboveThreshold([{ annualBaseWomen: "110", annualBaseMen: "100" }]),
 		).toBe(false);
 	});
 

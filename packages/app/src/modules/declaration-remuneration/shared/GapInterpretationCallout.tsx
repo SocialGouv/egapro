@@ -8,10 +8,14 @@ import {
 import type { PayGapRow } from "../types";
 import styles from "./InterpretationCallout.module.scss";
 
-/** Returns true when at least one row crosses the regulatory gap threshold. */
+/** Gap magnitude (null-safe): the informative callout describes size + both directions, not the sign. */
+const magnitude = (g: number | null): number | null =>
+	g === null ? null : Math.abs(g);
+
+/** Returns true when at least one row crosses the regulatory gap threshold (either direction). */
 export function hasHighPayGap(rows: PayGapRow[]): boolean {
 	return rows.some((r) => {
-		const gap = computeGap(r.womenValue, r.menValue);
+		const gap = magnitude(computeGap(r.womenValue, r.menValue));
 		return gap !== null && gap >= GAP_ALERT_THRESHOLD;
 	});
 }
@@ -35,16 +39,16 @@ function analyzeGaps(rows: PayGapRow[]): GapAnalysis {
 	const hourlyMedian = findRow("Horaire brute médiane");
 
 	const annualMeanGap = annualMean
-		? computeGap(annualMean.womenValue, annualMean.menValue)
+		? magnitude(computeGap(annualMean.womenValue, annualMean.menValue))
 		: null;
 	const annualMedianGap = annualMedian
-		? computeGap(annualMedian.womenValue, annualMedian.menValue)
+		? magnitude(computeGap(annualMedian.womenValue, annualMedian.menValue))
 		: null;
 	const hourlyMeanGap = hourlyMean
-		? computeGap(hourlyMean.womenValue, hourlyMean.menValue)
+		? magnitude(computeGap(hourlyMean.womenValue, hourlyMean.menValue))
 		: null;
 	const hourlyMedianGap = hourlyMedian
-		? computeGap(hourlyMedian.womenValue, hourlyMedian.menValue)
+		? magnitude(computeGap(hourlyMedian.womenValue, hourlyMedian.menValue))
 		: null;
 
 	const gaps = [annualMeanGap, annualMedianGap, hourlyMeanGap, hourlyMedianGap];

@@ -85,17 +85,14 @@ export async function buildExportRows(
 		const complianceInput = {
 			workforce: row.workforce,
 			hasIndicatorG: hasIndicatorGForThisDecl,
-			gap: globalAnnualMeanGap === null ? null : Math.abs(globalAnnualMeanGap),
+			gap: globalAnnualMeanGap,
 		};
 		const complianceProcessRequired =
 			isComplianceProcessRequired(complianceInput);
 		const complianceProcessRevisionRequired =
 			isComplianceProcessRevisionRequired({
 				...complianceInput,
-				correctionGap:
-					variableAnnualMeanGap === null
-						? null
-						: Math.abs(variableAnnualMeanGap),
+				correctionGap: variableAnnualMeanGap,
 				events:
 					row.secondDeclarationSubmittedAt === null
 						? []

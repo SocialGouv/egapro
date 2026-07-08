@@ -5,8 +5,9 @@
  * salary gaps between women and men. These are the regulatory rules
  * that determine whether a company must take corrective action:
  *
- * - `computeGap`: absolute percentage difference between two salary values
- * - `gapLevel`: classify a gap against the regulatory 5% threshold
+ * - `computeGap`: signed percentage difference between two salary values
+ *   (positive when men earn more, negative when women earn more — GIP convention)
+ * - `gapLevel`: classify a gap against the regulatory 5% threshold (positive-only)
  * - `hasGapsAboveThreshold`: detect significant gaps across employee categories
  * - `computeTotal`: sum base + variable compensation components
  *
@@ -30,19 +31,22 @@ export function computeGapRatio(
 	return (m - w) / m;
 }
 
-/** Compute gap as absolute percentage: |((men - women) / men) * 100|. Returns null if inputs are invalid or men is zero. */
+/** Compute gap as a signed percentage: ((men - women) / men) * 100. Returns null if inputs are invalid or men is zero.
+ *  Sign convention (GIP): positive when men earn more (typical case), negative when women earn more. */
 export function computeGap(womenVal: string, menVal: string): number | null {
 	const w = parseNumber(womenVal);
 	const m = parseNumber(menVal);
 	if (Number.isNaN(w) || Number.isNaN(m) || m === 0) return null;
-	return Math.abs(((m - w) / m) * 100);
+	return ((m - w) / m) * 100;
 }
 
+/** Signed gap as a percentage from numeric values: ((men - women) / men) * 100. Null if men is 0. */
 export function computeGapBetween(women: number, men: number): number | null {
-	return men === 0 ? null : Math.abs(((men - women) / men) * 100);
+	return men === 0 ? null : ((men - women) / men) * 100;
 }
 
-/** Classify a gap value against the regulatory threshold (5% by default). */
+/** Classify a gap value against the regulatory threshold (5% by default).
+ *  Positive-only: a negative gap (women earn more) is below the threshold, so classified "low". */
 export function gapLevel(gap: number | null): GapLevel | null {
 	if (gap === null) return null;
 	return gap < GAP_ALERT_THRESHOLD ? "low" : "high";
@@ -72,7 +76,8 @@ type EmployeeCategoryLike = {
 	hourlyVariableMen?: string | null;
 };
 
-/** Returns true if any employee category has a salary gap >= threshold (default: regulatory 5%). */
+/** Returns true if any employee category has a salary gap >= threshold (default: regulatory 5%).
+ *  Positive-only: a negative gap (women earn more) is never counted. */
 export function hasGapsAboveThreshold(
 	categories: EmployeeCategoryLike[],
 	threshold = GAP_ALERT_THRESHOLD,

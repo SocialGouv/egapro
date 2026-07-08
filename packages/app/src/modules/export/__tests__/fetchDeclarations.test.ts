@@ -835,6 +835,15 @@ describe("assembleDeclaration — compliance flags", () => {
 		expect(result.Parcours_de_conformite_requis).toBe(false);
 	});
 
+	it("does not require the compliance process when the gap is negative (women earn more)", () => {
+		// Signed stored gap of -0.06 → |gap| >= 5% but negative, so no obligation.
+		const row = { ...baseRow, workforce: 300, globalAnnualMeanGap: "-0.0600" };
+
+		const result = assembleDeclaration(row, indicatorG, []);
+
+		expect(result.Parcours_de_conformite_requis).toBe(false);
+	});
+
 	it("treats a null workforce as 0 for the derived flags", () => {
 		const row = { ...baseRow, workforce: null, globalAnnualMeanGap: "0.0600" };
 
@@ -880,6 +889,20 @@ describe("assembleDeclaration — compliance flags", () => {
 			workforce: 300,
 			globalAnnualMeanGap: "0.0600",
 			variableAnnualMeanGap: "0.0400",
+			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
+		};
+
+		const result = assembleDeclaration(row, indicatorG, []);
+
+		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
+	});
+
+	it("does not require the revision when the correction gap is negative", () => {
+		const row = {
+			...baseRow,
+			workforce: 300,
+			globalAnnualMeanGap: "0.0600",
+			variableAnnualMeanGap: "-0.0800",
 			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
 		};
 
