@@ -42,7 +42,7 @@ describe("logout route", () => {
     const res = await GET(request as never);
     const location = res.headers.get("location") ?? "";
     const redirectUri = new URL(location).searchParams.get("post_logout_redirect_uri");
-    expect(redirectUri).toBe("https://egapro.example.gouv.fr/api/auth/logout/callback");
+    expect(redirectUri).toBe("https://egapro.example.gouv.fr/login");
   });
 
   it("falls back to home when there is no id_token", async () => {
