@@ -32,10 +32,9 @@ api:
 app:
   env:
     # ProConnect Fédération: le client_id/secret (lus par l'app comme
-    # SECURITY_MONCOMPTEPRO_*) proviennent du nouveau sealed secret `proconnect`.
-    # Ce mapping `env` prend le pas sur le legacy `moncomptepro` (envFrom) pour
-    # ces deux clés. Sans ça, prod enverrait l'ancien client MonComptePro à la
-    # Fédération → invalid_client. Aligne prod sur preprod.
+    # SECURITY_MONCOMPTEPRO_*) proviennent du sealed secret `proconnect`
+    # (client Fédération 4ce62b87). Le legacy secret `moncomptepro` est supprimé
+    # (plus d'envFrom moncomptepro). Aligne prod sur preprod.
     - name: SECURITY_MONCOMPTEPRO_CLIENT_ID
       valueFrom:
         secretKeyRef:
@@ -61,8 +60,6 @@ app:
   envFrom:
     - secretRef:
         name: "{{ .Values.global.pgSecretName }}"
-    - secretRef:
-        name: "moncomptepro"
     - secretRef:
         name: "staff"
     - secretRef:
