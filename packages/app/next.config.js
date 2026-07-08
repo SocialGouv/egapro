@@ -24,6 +24,16 @@ const config = {
 				destination: "/admin/stats",
 				permanent: false,
 			},
+			{
+				source: "/api/public/declaration/:siren",
+				destination: "/api/public/declarations/:siren",
+				permanent: true,
+			},
+			{
+				source: "/api/public/declaration/:siren/:year",
+				destination: "/api/public/declarations/:siren/:year",
+				permanent: true,
+			},
 		];
 	},
 	cacheHandler: fileURLToPath(new URL("./cache-handler.cjs", import.meta.url)),

@@ -61,7 +61,11 @@ describe("fetchCompanyBySiren", () => {
 			address: "12 RUE DES INNOVATEURS, 75011 PARIS",
 			nafCode: "6202A",
 			nafLabel: "Conseil en systèmes et logiciels informatiques",
+			region: "Île-de-France",
+			departmentCode: "75",
+			departmentLabel: "Paris",
 			workforce: 256,
+			statutDiffusion: "O",
 		});
 
 		const calledUrl = fetchSpy.mock.calls[0]?.[0] as URL;
@@ -101,8 +105,82 @@ describe("fetchCompanyBySiren", () => {
 			address: null,
 			nafCode: null,
 			nafLabel: null,
+			region: null,
+			departmentCode: null,
+			departmentLabel: null,
 			workforce: 50,
+			statutDiffusion: "N",
 		});
+	});
+
+	it("keeps region/department for a non-diffusible company while masking the address", async () => {
+		fetchSpy.mockResolvedValueOnce({
+			ok: true,
+			json: async () => ({
+				content: [
+					{
+						siren: "111222333",
+						denominationunitelegale: null,
+						raisonsociale: null,
+						activiteprincipalenaf25unitelegale: "6202A",
+						nomenclatureactiviteprincipalelibelleunitelegale: "Conseil",
+						effectiftotal: 50,
+						numerovoie: "5",
+						typevoie: "RUE",
+						libellevoie: "SECRETE",
+						codepostal: "33000",
+						libellecommune: "BORDEAUX",
+						statutdiffusionunitelegale: "N",
+					},
+				],
+				totalElements: 1,
+			}),
+		});
+
+		const result = await fetchCompanyBySiren("111222333");
+
+		expect(result).toEqual({
+			name: "Entreprise non diffusible",
+			address: null,
+			nafCode: null,
+			nafLabel: null,
+			region: "Nouvelle-Aquitaine",
+			departmentCode: "33",
+			departmentLabel: "Gironde",
+			workforce: 50,
+			statutDiffusion: "N",
+		});
+	});
+
+	it("falls back to the effectif band for a non-diffusible company when effectiftotal is null", async () => {
+		fetchSpy.mockResolvedValueOnce({
+			ok: true,
+			json: async () => ({
+				content: [
+					{
+						siren: "222333444",
+						denominationunitelegale: null,
+						raisonsociale: null,
+						activiteprincipalenaf25unitelegale: null,
+						nomenclatureactiviteprincipalelibelleunitelegale: null,
+						effectiftotal: null,
+						trancheeffectifsunitelegale: "22",
+						numerovoie: null,
+						typevoie: null,
+						libellevoie: null,
+						codepostal: null,
+						libellecommune: null,
+						statutdiffusionunitelegale: "N",
+					},
+				],
+				totalElements: 1,
+			}),
+		});
+
+		const result = await fetchCompanyBySiren("222333444");
+
+		expect(result?.workforce).toBe(100);
+		expect(result?.statutDiffusion).toBe("N");
 	});
 
 	it("falls back to the effectif band when effectiftotal is null", async () => {
@@ -225,8 +303,42 @@ describe("fetchCompanyBySiren", () => {
 			address: "69001 LYON",
 			nafCode: "7022Z",
 			nafLabel: "Conseil pour les affaires et autres conseils de gestion",
+			region: "Auvergne-Rhône-Alpes",
+			departmentCode: "69",
+			departmentLabel: "Rhône",
 			workforce: null,
+			statutDiffusion: "O",
 		});
+	});
+
+	it("defaults statutDiffusion to null when the INSEE field is absent", async () => {
+		fetchSpy.mockResolvedValueOnce({
+			ok: true,
+			json: async () => ({
+				content: [
+					{
+						siren: "999000111",
+						denominationunitelegale: "Delta SA",
+						raisonsociale: null,
+						activiteprincipalenaf25unitelegale: "6202A",
+						nomenclatureactiviteprincipalelibelleunitelegale: "Conseil",
+						effectiftotal: 42,
+						numerovoie: null,
+						typevoie: null,
+						libellevoie: null,
+						codepostal: "75001",
+						libellecommune: "PARIS",
+					},
+				],
+				totalElements: 1,
+			}),
+		});
+
+		const result = await fetchCompanyBySiren("999000111");
+
+		// Absent statut is treated as diffusible: name/address are kept
+		expect(result?.statutDiffusion).toBeNull();
+		expect(result?.name).toBe("Delta SA");
 	});
 
 	it("returns nafLabel null when the activity label is absent", async () => {
@@ -260,7 +372,11 @@ describe("fetchCompanyBySiren", () => {
 			address: "33000 BORDEAUX",
 			nafCode: "4321A",
 			nafLabel: null,
+			region: "Nouvelle-Aquitaine",
+			departmentCode: "33",
+			departmentLabel: "Gironde",
 			workforce: 12,
+			statutDiffusion: "O",
 		});
 	});
 });

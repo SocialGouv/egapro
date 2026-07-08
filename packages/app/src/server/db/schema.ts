@@ -502,8 +502,12 @@ export const companies = createTable("company", (d) => ({
 	address: d.varchar({ length: 500 }),
 	nafCode: d.varchar({ length: 10 }),
 	nafLabel: d.varchar({ length: 255 }),
+	region: d.varchar({ length: 255 }),
+	departmentCode: d.varchar({ length: 3 }),
+	departmentLabel: d.varchar({ length: 255 }),
 	workforce: d.integer(),
 	hasCse: d.boolean(),
+	statutDiffusion: d.varchar({ length: 1 }),
 	createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 	updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 }));
@@ -682,14 +686,12 @@ export const cseOpinionFilesRelations = relations(
 
 export const campaignDeadlines = createTable("campaign_deadline", (d) => ({
 	year: d.integer().notNull().primaryKey(),
-	// Campaign milestones
 	gipPublicationDate: d.date(),
 	campaignStartDate: d.date(),
-	// Declaration 1
+	publicDataReleaseDate: d.date(),
 	decl1ModificationDeadline: d.date().notNull(),
 	decl1JustificationDeadline: d.date().notNull(),
 	decl1JointEvaluationDeadline: d.date().notNull(),
-	// Declaration 2
 	decl2ModificationDeadline: d.date().notNull(),
 	decl2JustificationDeadline: d.date().notNull(),
 	decl2JointEvaluationDeadline: d.date().notNull(),

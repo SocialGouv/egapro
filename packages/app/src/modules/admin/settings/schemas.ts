@@ -29,6 +29,7 @@ export const campaignDeadlinesFormSchema = z
 	.object({
 		year: campaignYearSchema,
 		campaignStartDate: optionalIsoDateString,
+		publicDataReleaseDate: optionalIsoDateString,
 		decl1ModificationDeadline: isoDateString,
 		decl1JustificationDeadline: isoDateString,
 		decl1JointEvaluationDeadline: isoDateString,
