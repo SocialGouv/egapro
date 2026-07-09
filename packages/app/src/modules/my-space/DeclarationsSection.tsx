@@ -8,6 +8,7 @@ import {
 	formatShortDate,
 	getCurrentYear,
 	getDeclarationProcessStepDeadline,
+	getRepresentationDeadline,
 } from "~/modules/domain";
 
 import { Pagination } from "~/modules/shared/Pagination";
@@ -36,14 +37,12 @@ type Props = {
 	hasNoSanction: boolean;
 };
 
-const REPRESENTATION_DEADLINE_PREFIX = "01/03";
-
 function getDeadlineCell(
 	declaration: DeclarationItem,
 	campaignDeadlines: CampaignDeadlines,
 ): string {
 	if (declaration.type === "representation") {
-		return `${REPRESENTATION_DEADLINE_PREFIX}/${declaration.year}`;
+		return getRepresentationDeadline(declaration.year);
 	}
 	const deadline = getDeclarationProcessStepDeadline(
 		declaration.fsmStatus,

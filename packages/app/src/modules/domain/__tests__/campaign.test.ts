@@ -5,11 +5,32 @@ import {
 	getDeclarationDeadline,
 	getDefaultCampaignDeadlines,
 	getPathChoiceDeadline,
+	getReferencePeriod,
+	getRepresentationDeadline,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
+	getWorkforceYearFor,
 	isDeadlinePassed,
 	shouldRedirectSubmittedToRecap,
 } from "../shared/campaign";
+
+describe("getWorkforceYearFor", () => {
+	it("returns the campaign year minus one", () => {
+		expect(getWorkforceYearFor(2025)).toBe(2024);
+	});
+});
+
+describe("getRepresentationDeadline", () => {
+	it("returns March 1st of the given year", () => {
+		expect(getRepresentationDeadline(2025)).toBe("01/03/2025");
+	});
+});
+
+describe("getReferencePeriod", () => {
+	it("returns the full civil year window", () => {
+		expect(getReferencePeriod(2025)).toBe("01/01/2025 - 31/12/2025");
+	});
+});
 
 describe("getCurrentYear", () => {
 	beforeEach(() => {

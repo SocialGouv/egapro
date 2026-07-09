@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { RecapitulatifPage } from "~/modules/declaration-remuneration/recapitulatif";
+import { isCancelled } from "~/modules/domain";
 import { api } from "~/trpc/react";
 
 import { CancelDeclarationButton } from "./CancelDeclarationButton";
@@ -62,7 +63,7 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 			<h1 className="fr-h3 fr-mt-2w">
 				{data.companyName} — {data.year}
 			</h1>
-			{data.cancelledAt && <CancelledBadge cancelledAt={data.cancelledAt} />}
+			{isCancelled(data) && <CancelledBadge cancelledAt={data.cancelledAt} />}
 			<CancelDeclarationButton
 				cancelledAt={data.cancelledAt}
 				declarationId={data.id}

@@ -535,6 +535,30 @@ describe("buildExportRows", () => {
 		});
 	});
 
+	it("should not flag complianceProcessRequired when the gap is negative (women earn more)", async () => {
+		// Signed stored gap -0.10 (women earn more): |gap| >= 5% but negative → no obligation (GIP).
+		const dbRow = makeMinimalDbRow({
+			declarationId: "decl-negative-gap",
+			siren: "200200200",
+			workforce: 300,
+			globalAnnualMeanGap: "-0.10",
+			variableAnnualMeanGap: "-0.08",
+			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
+		});
+
+		mockWhere.mockResolvedValue([dbRow]);
+		mockJobWhere.mockResolvedValue([{ declarationId: "decl-negative-gap" }]);
+		mockCseWhere.mockResolvedValue([]);
+
+		const { buildExportRows } = await import("../buildExportRows");
+		const rows = await buildExportRows(mockDb as never, 2027);
+
+		expect(rows[0]).toMatchObject({
+			complianceProcessRequired: false,
+			complianceProcessRevisionRequired: false,
+		});
+	});
+
 	it("should derive secondDeclarationSubmitted=false when secondDeclarationSubmittedAt is null", async () => {
 		const dbRow = makeMinimalDbRow({
 			secondDeclarationSubmittedAt: null,

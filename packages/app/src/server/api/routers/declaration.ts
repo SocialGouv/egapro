@@ -17,6 +17,7 @@ import {
 	getCurrentYear,
 	hasGapsAboveThreshold,
 	isCseRequired,
+	isDraft,
 	isTriennialYear,
 } from "~/modules/domain";
 import {
@@ -695,7 +696,7 @@ export const declarationRouter = createTRPCRouter({
 			isCseRequired(company.workforce ?? 0) && company.hasCse === true;
 
 		await ctx.db.transaction(async (tx) => {
-			if (declaration.status === "draft" && historyInserts.length > 0) {
+			if (isDraft(declaration.status) && historyInserts.length > 0) {
 				await tx.insert(declarationStatusHistory).values(historyInserts);
 			}
 			await tx

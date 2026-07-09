@@ -537,6 +537,30 @@ describe("Step6Review", () => {
 		).toBeInTheDocument();
 	});
 
+	it("does not show 'Prochaines étapes' callout when women earn more (negative gap)", () => {
+		// Women earn 10% more → signed gap -10%: |gap| >= 5% but negative, so no obligation (GIP).
+		render(
+			<Step6Review
+				companyWorkforce={null}
+				declaration={{ siren: "532847196", status: null }}
+				declarationYear={2025}
+				step2Data={{
+					indicatorAAnnualWomen: "110",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "100",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "100",
+					indicatorCHourlyWomen: "100",
+					indicatorCHourlyMen: "100",
+				}}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
+		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
+	});
+
 	it("does not show 'Prochaines étapes' callout when all gaps < 5%", () => {
 		render(
 			<Step6Review

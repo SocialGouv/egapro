@@ -161,7 +161,8 @@ For changed files in `src/server/`:
 grep -rn "getFullYear()" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
 
 # Must return ZERO — no inline slice/substring/substr(0, 9) outside domain/
-grep -rn "slice(0, *9)\|substring(0, *9)\|substr(0, *9)" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
+# (also catches the `slice(0, SIREN_LENGTH)` evasion and a local `SIREN_LENGTH = 9`)
+grep -rnE 'slice\(0, *9\)|substring\(0, *9\)|substr\(0, *9\)|(slice|substring|substr)\(0, *[A-Za-z_]*SIREN[A-Za-z_]*\)|SIREN_LENGTH *= *9' src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
 
 # Must return ZERO — no inline date arithmetic outside domain/
 grep -rn "\.getMonth()\|\.getDate()" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
@@ -172,17 +173,45 @@ grep -rn "function getCurrentYear\|function getCseYear\|function getSiren" src/ 
 # Must return ZERO — no domain helpers reimplemented inline outside domain/
 grep -rn "cancelledAt !== null\|cancelledAt != null\|workforce >= 100\|effectifs >= 100\|workforce < 50\|effectifs < 50" src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
 
+# Must return ZERO — no inline gap threshold classification (use gapLevel(g) === "high")
+grep -rnE '(>=|<)\s*GAP_ALERT_THRESHOLD' src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
+
+# Must return ZERO — no inline signed-gap formula (use computeGap/computeGapBetween)
+grep -rnE '\(\s*[a-zA-Z_.]*[mM]en[a-zA-Z_.]*\s*-\s*[a-zA-Z_.]*[wW]omen' src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
+
+# Must return ZERO — no inline hardcoded first-declaration year (use FIRST_DECLARATION_YEAR)
+grep -rnE '(year|annee)[a-zA-Z]*\s*(<|>=)\s*2018' src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
+
+# WARN on matches — status-string decisions re-inlined (candidate for a domain predicate: isDraft(), isCancelled(), isDeclarationSubmitted())
+# `status !== "draft"` is the verbatim body of isDeclarationSubmitted — flag === and !== forms.
+grep -rnE 'status\s*(===|!==)\s*"(draft|submitted|validated|cancelled|demarche_completed)"' src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
+
+# WARN on matches — direction determination (comparing gendered values → belongs in gap.ts)
+grep -rnE '[wW]omen[a-zA-Z]*\s*(<|>|<=|>=)\s*[a-zA-Z_.]*[mM]en|[mM]en[a-zA-Z]*\s*(<|>|<=|>=)\s*[a-zA-Z_.]*[wW]omen' src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
+
+# WARN on matches — ratio→percentage on a gap column re-inlined (candidate for a domain helper)
+grep -rnE 'Number\([a-zA-Z_.]*[gG]ap[a-zA-Z_.]*\)\s*\*\s*100' src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
+
 # WARN on matches — toLocaleString("fr-FR") outside domain/ (likely duplicates formatCount/formatRate/formatCurrency)
 grep -rn 'toLocaleString.*fr-FR\|toLocaleString.*"fr"' src/ --include="*.ts" --include="*.tsx" | grep -v "domain/" | grep -v "__tests__" | grep -v "\.test\."
 ```
+
+> These greps are **diff-scoped by default** (the auditor runs on changed files) — but a business rule can leak into a file the current ticket never touches. When doing a broad audit (or on request), run the repo-wide version: `bash packages/app/scripts/audit-domain-leaks.sh` from the repo root, which applies every signature below to the whole tree.
 
 - Inline `getFullYear()` → **[ERROR]**
 - Inline `slice/substring/substr(0, 9)` for SIREN extraction → **[ERROR]**
 - Inline `.getMonth()` / `.getDate()` for date calculations → **[ERROR]**
 - Local function duplicating domain → **[ERROR]**
-- Hardcoded regulatory thresholds (5%, 50, 100) → **[ERROR]**
+- Hardcoded regulatory thresholds (5%, 50, 100, first-declaration year 2018) → **[ERROR]**. Use `GAP_ALERT_THRESHOLD`, `COMPANY_SIZE_*`, `FIRST_DECLARATION_YEAR`.
 - Inline condition reimplementing a domain helper (e.g. `cancelledAt !== null` instead of `isCancelled()`, `workforce >= 100 && hasCse` instead of `isCseRequired()`, `isComplianceProcessRequired()`, `isComplianceProcessRevisionRequired()`) → **[ERROR]**
+- Inline `gap >= GAP_ALERT_THRESHOLD` instead of `gapLevel(gap) === "high"` → **[ERROR]**
+- Inline signed-gap formula `((men - women) / men) * 100` instead of `computeGap()` / `computeGapBetween()` → **[ERROR]**
+- Status-string decision (`status === "draft"` etc.) re-inlined across files → **[WARN]**. Centralize as a domain predicate (`isDraft()`, `isCancelled()`, `isDeclarationSubmitted()`) and consume it everywhere.
+- Direction determination comparing women vs men values (`parseFloat(w) < parseFloat(m)`) → **[WARN]**. Belongs in `gap.ts` — the sign already encodes direction.
+- Ratio→percentage on a gap column (`Number(row.xxxGap) * 100`) re-inlined → **[WARN]**. Extract a named domain helper.
 - `toLocaleString("fr-FR")` outside `domain/` — probable duplicate of `formatCount`/`formatRate`/`formatCurrency` → **[WARN]**
+
+> **Principle** (see `rules/code-quality.md` § Domain layer — *Single source of truth*): a business rule lives in **one** domain function; any inline copy is a `[WARN]`/`[ERROR]` because it drifts the day the regulation changes. When two call sites need different intents from the same inputs, each intent is its own **named** domain function — not look-alike inline code.
 
 #### 2.16 Accessibility (quick check)
 

@@ -1,8 +1,12 @@
 import "server-only";
 
-import { and, eq, gte, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, lt, or, sql } from "drizzle-orm";
 import type { DB } from "~/server/db";
 import { db } from "~/server/db";
+import {
+	notCancelledCondition,
+	submittedDeclarationCondition,
+} from "~/server/db/declarationConditions";
 import {
 	companies,
 	cseOpinions,
@@ -223,10 +227,10 @@ export async function fetchSubmittedDeclarations(
 					lt(declarations.cancelledAt, new Date(`${dateEnd}T00:00:00Z`)),
 				),
 				and(
-					ne(declarations.status, "draft"),
+					submittedDeclarationCondition(),
 					gte(declarations.updatedAt, new Date(`${dateBegin}T00:00:00Z`)),
 					lt(declarations.updatedAt, new Date(`${dateEnd}T00:00:00Z`)),
-					isNull(declarations.cancelledAt),
+					notCancelledCondition(),
 				),
 			),
 		);
@@ -320,7 +324,7 @@ export async function buildIndicatorGRows(
 			employeeCategories,
 			eq(employeeCategories.jobCategoryId, jobCategories.id),
 		)
-		.where(and(ne(declarations.status, "draft"), eq(declarations.year, year)));
+		.where(and(submittedDeclarationCondition(), eq(declarations.year, year)));
 }
 
 // ── Indicator G presence check ──────────────────────────────────────

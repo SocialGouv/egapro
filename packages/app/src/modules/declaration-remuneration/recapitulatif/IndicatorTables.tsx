@@ -9,7 +9,7 @@ import {
 	computeWorkforceTotal,
 	formatCurrency,
 	formatGap,
-	GAP_ALERT_THRESHOLD,
+	gapLevel,
 	sumQuartileWorkforce,
 } from "~/modules/domain";
 import styles from "./IndicatorTables.module.scss";
@@ -34,7 +34,7 @@ function HighGapBadge() {
 }
 
 function GapCell({ gap }: { gap: number | null }) {
-	const isHigh = gap !== null && gap >= GAP_ALERT_THRESHOLD;
+	const isHigh = gapLevel(gap) === "high";
 	return (
 		<span className={styles.gapCell}>
 			<strong>{formatGap(gap)}</strong>

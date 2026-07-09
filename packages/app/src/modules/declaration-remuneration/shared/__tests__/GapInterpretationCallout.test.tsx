@@ -98,6 +98,30 @@ describe("GapInterpretationCallout", () => {
 		).toBeInTheDocument();
 	});
 
+	it("shows gap magnitude (no minus sign) in prose when women earn more", () => {
+		// Women earn more → signed gap is negative; prose must show magnitude, not "-16,7 %".
+		const rows = makeRows({
+			annualMeanW: "35000",
+			annualMeanM: "30000",
+			annualMedianW: "34000",
+			annualMedianM: "29000",
+			hourlyMeanW: "18",
+			hourlyMeanM: "15",
+			hourlyMedianW: "17",
+			hourlyMedianM: "14",
+		});
+
+		const { container } = render(
+			<GapInterpretationCallout rows={rows} variant="payGap" />,
+		);
+
+		expect(
+			screen.getByText(/Écart en défaveur des hommes/),
+		).toBeInTheDocument();
+		expect(container.textContent).not.toMatch(/-\d/);
+		expect(container.textContent).toMatch(/16,7\s*%/);
+	});
+
 	it("renders balanced title for payGap variant when gaps are below 5%", () => {
 		// 2 rows women-lower, 2 rows men-lower => balanced direction, all gaps < 5%
 		const rows = makeRows({

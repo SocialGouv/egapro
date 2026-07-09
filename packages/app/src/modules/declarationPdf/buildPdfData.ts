@@ -1,7 +1,7 @@
 import "server-only";
 
 import { eq } from "drizzle-orm";
-import { formatLongDate } from "~/modules/domain";
+import { formatLongDate, isDraft } from "~/modules/domain";
 import {
 	activeDeclarationFilter,
 	mapToEmployeeCategoryRows,
@@ -156,7 +156,7 @@ export async function buildPdfData(
 		throw new Error("Déclaration introuvable");
 	}
 
-	if (declaration.status === "draft") {
+	if (isDraft(declaration.status)) {
 		throw new Error("La déclaration n'est pas encore soumise");
 	}
 

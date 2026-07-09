@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, isNull, lt, ne } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, lt } from "drizzle-orm";
 
 import { computeIndicatorPercentages } from "~/modules/declaration-remuneration/shared/computeIndicatorPercentages";
 import type {
@@ -6,6 +6,10 @@ import type {
 	Step3Data,
 	Step4Data,
 } from "~/modules/declaration-remuneration/types";
+import {
+	notCancelledCondition,
+	submittedDeclarationCondition,
+} from "~/server/db/declarationConditions";
 import {
 	declarations,
 	employeeCategories,
@@ -18,7 +22,7 @@ export function activeDeclarationFilter(siren: string, year: number) {
 	return and(
 		eq(declarations.siren, siren),
 		eq(declarations.year, year),
-		isNull(declarations.cancelledAt),
+		notCancelledCondition(),
 	);
 }
 
@@ -291,7 +295,7 @@ export async function fetchPreviousYearJobCategories(
 			and(
 				eq(declarations.siren, siren),
 				lt(declarations.year, currentYear),
-				ne(declarations.status, "draft"),
+				submittedDeclarationCondition(),
 			),
 		)
 		.orderBy(desc(declarations.year))

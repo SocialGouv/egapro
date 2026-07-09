@@ -1,18 +1,15 @@
 import styles from "~/modules/declaration-remuneration/shared/InterpretationCallout.module.scss";
 import type { QuartileData } from "~/modules/declaration-remuneration/types";
-import { computePercentage, GAP_ALERT_THRESHOLD } from "~/modules/domain";
+import {
+	computePercentage,
+	isQuartileImbalanced,
+	quartileImbalanceDirection,
+} from "~/modules/domain";
 
 type Props = {
 	annualCategories: QuartileData[];
 	hourlyCategories: QuartileData[];
 };
-
-/**
- * Threshold ratios delimiting balanced vs skewed Q4: parity (50%) ± 5pp.
- * Same alert threshold as the pay-gap indicators.
- */
-const BALANCED_LOWER = 0.5 - GAP_ALERT_THRESHOLD / 100;
-const BALANCED_UPPER = 0.5 + GAP_ALERT_THRESHOLD / 100;
 
 /** Returns true when the highest quartile is more than 5pp away from parity. */
 export function hasHighQuartileImbalance(
@@ -30,7 +27,7 @@ export function hasHighQuartileImbalance(
 	const hourlyRatio =
 		hourlyTotal > 0 ? (hourlyQ4.women ?? 0) / hourlyTotal : 0.5;
 	const avg = (annualRatio + hourlyRatio) / 2;
-	return avg < BALANCED_LOWER || avg > BALANCED_UPPER;
+	return isQuartileImbalanced(avg);
 }
 
 /**
@@ -66,9 +63,10 @@ export function QuartileInterpretationCallout({
 		hourlyQ4Total > 0 ? hourlyQ4Women / hourlyQ4Total : 0.5;
 	const avgRatio = (annualWomenRatio + hourlyWomenRatio) / 2;
 
-	const isWomenUnderrepresented = avgRatio < BALANCED_LOWER;
-	const isMenUnderrepresented = avgRatio > BALANCED_UPPER;
-	const isBalanced = !isWomenUnderrepresented && !isMenUnderrepresented;
+	const direction = quartileImbalanceDirection(avgRatio);
+	const isWomenUnderrepresented = direction === "women";
+	const isMenUnderrepresented = direction === "men";
+	const isBalanced = direction === "balanced";
 
 	const accentClass = isBalanced
 		? "fr-callout--blue-ecume"

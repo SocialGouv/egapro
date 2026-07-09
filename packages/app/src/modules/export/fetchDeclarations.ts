@@ -14,6 +14,7 @@ export {
 } from "./queries";
 
 import {
+	gapRatioToPercent,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isIndicatorGRequired,
@@ -51,25 +52,20 @@ function deriveExportFlags(
 	indicatorGRequired: boolean;
 } {
 	const hasIndicatorG = indicatorGEntries.length > 0;
-	const globalAnnualMeanGap = row.globalAnnualMeanGap
-		? Number(row.globalAnnualMeanGap) * 100
-		: null;
-	const variableAnnualMeanGap = row.variableAnnualMeanGap
-		? Number(row.variableAnnualMeanGap) * 100
-		: null;
+	const globalAnnualMeanGap = gapRatioToPercent(row.globalAnnualMeanGap);
+	const variableAnnualMeanGap = gapRatioToPercent(row.variableAnnualMeanGap);
 	const workforce = row.workforce;
 	const complianceInput = {
 		workforce,
 		hasIndicatorG,
-		gap: globalAnnualMeanGap === null ? null : Math.abs(globalAnnualMeanGap),
+		gap: globalAnnualMeanGap,
 	};
 	const complianceProcessRequired =
 		isComplianceProcessRequired(complianceInput);
 	const complianceProcessRevisionRequired = isComplianceProcessRevisionRequired(
 		{
 			...complianceInput,
-			correctionGap:
-				variableAnnualMeanGap === null ? null : Math.abs(variableAnnualMeanGap),
+			correctionGap: variableAnnualMeanGap,
 			events:
 				row.secondDeclarationSubmittedAt === null
 					? []

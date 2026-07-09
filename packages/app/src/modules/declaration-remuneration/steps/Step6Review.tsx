@@ -3,11 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import { trackFunnelComplete } from "~/modules/analytics";
-import {
-	computeGap,
-	GAP_ALERT_THRESHOLD,
-	getCompanySizeRange,
-} from "~/modules/domain";
+import { computeGap, getCompanySizeRange, hasHighGap } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
@@ -31,11 +27,6 @@ import type {
 import stepStyles from "./Step6Review.module.scss";
 import { IndicatorSections } from "./step6/IndicatorSections";
 import { parseEmployeeCategories } from "./step6/parseStep5Categories";
-
-/** Check if any gap value is >= the regulatory threshold */
-function hasAnyHighGap(gaps: (number | null)[]): boolean {
-	return gaps.some((g) => g !== null && Math.abs(g) >= GAP_ALERT_THRESHOLD);
-}
 
 type Props = {
 	declaration: {
@@ -156,7 +147,7 @@ export function Step6Review({
 			cat.hourlyVariableGap,
 		]),
 	];
-	const highGap = hasAnyHighGap(allGaps);
+	const highGap = hasHighGap(allGaps);
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();

@@ -1,5 +1,5 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { parseSiren } from "~/modules/domain";
+import { FIRST_DECLARATION_YEAR, parseSiren } from "~/modules/domain";
 import { getPublicDeclarationBySirenYear } from "~/modules/public-api";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext } from "~/server/audit/requestContext";
@@ -36,7 +36,7 @@ export async function GET(
 	}
 
 	const year = Number.parseInt(rawYear, 10);
-	if (!Number.isInteger(year) || year < 2018 || year > 2100) {
+	if (!Number.isInteger(year) || year < FIRST_DECLARATION_YEAR || year > 2100) {
 		void logAction({
 			action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN_YEAR,
 			status: "failure",

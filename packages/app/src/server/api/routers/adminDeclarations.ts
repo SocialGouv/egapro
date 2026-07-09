@@ -23,7 +23,7 @@ import {
 	searchDeclarationsSchema,
 } from "~/modules/admin/declarations/schemas";
 import { releaseLockSchema } from "~/modules/admin/schemas";
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, isCancelled } from "~/modules/domain";
 import {
 	mapToEmployeeCategoryRows,
 	mapToStepData,
@@ -233,7 +233,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				id: s.id,
 				cancelledAt: s.cancelledAt,
 				updatedAt: s.updatedAt,
-				status: s.cancelledAt !== null ? "cancelled" : (s.status ?? "draft"),
+				status: isCancelled(s) ? "cancelled" : (s.status ?? "draft"),
 			}));
 
 			const findLatest = (eventType: string): Date | null => {
@@ -272,7 +272,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				throw new TRPCError({ code: "NOT_FOUND" });
 			}
 
-			if (declaration.cancelledAt !== null) {
+			if (isCancelled(declaration)) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
 					message: "déclaration déjà annulée",

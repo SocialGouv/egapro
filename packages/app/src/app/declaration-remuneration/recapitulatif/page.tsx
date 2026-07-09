@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RecapitulatifPage } from "~/modules/declaration-remuneration/recapitulatif";
+import { getReferencePeriod, isDraft } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import {
 	mapToEmployeeCategoryRows,
@@ -47,14 +48,14 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 	if (isCorrection) {
 		if (!data.hasSubmittedSecondDeclaration) notFound();
 	} else {
-		if (d.status === "draft") notFound();
+		if (isDraft(d.status)) notFound();
 	}
 
 	const { step2Data, step3Data, step4Data } = mapToStepData(d);
 
 	// declarations does not store custom period windows — every declaration
 	// covers the full calendar year. The period is derived from d.year.
-	const referencePeriod = `01/01/${d.year} - 31/12/${d.year}`;
+	const referencePeriod = getReferencePeriod(d.year);
 
 	const step5Categories =
 		data.jobCategories.length > 0

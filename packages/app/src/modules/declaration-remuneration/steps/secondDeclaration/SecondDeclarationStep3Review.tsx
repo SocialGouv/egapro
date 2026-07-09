@@ -9,7 +9,7 @@ import { NextStepsBox } from "~/modules/declaration-remuneration/shared/NextStep
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { SubmitDeclarationModal } from "~/modules/declaration-remuneration/shared/SubmitDeclarationModal";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
-import { GAP_ALERT_THRESHOLD } from "~/modules/domain";
+import { hasHighGap } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import stepStyles from "../Step6Review.module.scss";
@@ -36,16 +36,13 @@ export function SecondDeclarationStep3Review({
 	const modalRef = useRef<HTMLDialogElement>(null);
 
 	const parsed = parseEmployeeCategories(secondDeclarationCategories);
-	const gapsExist = parsed.some(
-		(cat) =>
-			(cat.annualBaseGap !== null &&
-				cat.annualBaseGap >= GAP_ALERT_THRESHOLD) ||
-			(cat.annualVariableGap !== null &&
-				cat.annualVariableGap >= GAP_ALERT_THRESHOLD) ||
-			(cat.hourlyBaseGap !== null &&
-				cat.hourlyBaseGap >= GAP_ALERT_THRESHOLD) ||
-			(cat.hourlyVariableGap !== null &&
-				cat.hourlyVariableGap >= GAP_ALERT_THRESHOLD),
+	const gapsExist = parsed.some((cat) =>
+		hasHighGap([
+			cat.annualBaseGap,
+			cat.annualVariableGap,
+			cat.hourlyBaseGap,
+			cat.hourlyVariableGap,
+		]),
 	);
 
 	const mutation = api.declaration.submitSecondDeclaration.useMutation({

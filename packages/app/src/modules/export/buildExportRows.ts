@@ -1,11 +1,13 @@
-import { and, eq, isNotNull, ne, or } from "drizzle-orm";
+import { and, eq, isNotNull, or } from "drizzle-orm";
 
 import {
+	gapRatioToPercent,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isIndicatorGRequired,
 } from "~/modules/domain";
 import type { DB } from "~/server/db";
+import { submittedDeclarationCondition } from "~/server/db/declarationConditions";
 import { companies, declarations, users } from "~/server/db/schema";
 import { mapCseOpinions } from "./mapIndicators";
 import {
@@ -61,7 +63,7 @@ export async function buildExportRows(
 			and(
 				eq(declarations.year, year),
 				or(
-					ne(declarations.status, "draft"),
+					submittedDeclarationCondition(),
 					isNotNull(declarations.cancelledAt),
 				),
 			),
@@ -76,26 +78,19 @@ export async function buildExportRows(
 
 	return rows.map((row) => {
 		const hasIndicatorGForThisDecl = hasIndicatorG.has(row.declarationId);
-		const globalAnnualMeanGap = row.globalAnnualMeanGap
-			? Number(row.globalAnnualMeanGap) * 100
-			: null;
-		const variableAnnualMeanGap = row.variableAnnualMeanGap
-			? Number(row.variableAnnualMeanGap) * 100
-			: null;
+		const globalAnnualMeanGap = gapRatioToPercent(row.globalAnnualMeanGap);
+		const variableAnnualMeanGap = gapRatioToPercent(row.variableAnnualMeanGap);
 		const complianceInput = {
 			workforce: row.workforce,
 			hasIndicatorG: hasIndicatorGForThisDecl,
-			gap: globalAnnualMeanGap === null ? null : Math.abs(globalAnnualMeanGap),
+			gap: globalAnnualMeanGap,
 		};
 		const complianceProcessRequired =
 			isComplianceProcessRequired(complianceInput);
 		const complianceProcessRevisionRequired =
 			isComplianceProcessRevisionRequired({
 				...complianceInput,
-				correctionGap:
-					variableAnnualMeanGap === null
-						? null
-						: Math.abs(variableAnnualMeanGap),
+				correctionGap: variableAnnualMeanGap,
 				events:
 					row.secondDeclarationSubmittedAt === null
 						? []

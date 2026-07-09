@@ -1,5 +1,6 @@
 "use client";
 
+import { getWorkforceYearFor } from "~/modules/domain";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { DeclarationItem } from "./types";
 
@@ -17,7 +18,7 @@ function getResources(declaration: DeclarationItem): DocumentResource[] {
 	const resources: DocumentResource[] = [];
 	if (declaration.type !== "remuneration") return resources;
 
-	const subtitle = `Année ${declaration.year} au titre des données ${declaration.year - 1}`;
+	const subtitle = `Année ${declaration.year} au titre des données ${getWorkforceYearFor(declaration.year)}`;
 
 	// Available as soon as the GIP MDS prefill has been loaded for this year.
 	if (declaration.hasPrefillData) {
