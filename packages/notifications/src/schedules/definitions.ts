@@ -2,13 +2,10 @@ import type { Sql } from "postgres";
 import type { CseOpinionReminderVariant } from "../mails/types.js";
 import type { DispatchResult } from "./dispatch.js";
 import {
-	handleCompliancePathChoiceReminder,
 	handleCseOpinionReminder,
 	handleCycleOpeningInfo,
-	handleDeclarationDeadlineReminder,
-	handleJointEvaluationReminder,
+	handleDailyDeadlineReminders,
 	handleNextCycleHandover,
-	handleSecondDeclarationReminder,
 } from "./handlers.js";
 
 export type ScheduleDefinition = {
@@ -20,23 +17,22 @@ export type ScheduleDefinition = {
 
 const TZ = "Europe/Paris";
 
-// Cron timing rationale (all in Europe/Paris, anchored to the V2 calendar
-// in `docs/parcours-utilisateurs.md`):
+// Scheduling model (all crons in Europe/Paris):
 //
-// - Phase 1 cycle (year N):
-//   - 1er mars → MA   (cycle opening info)
-//   - 2 mai    → MR30 (J-30 before declaration deadline 1er juin)
-//   - 22 mai   → MR10 (J-10 before declaration deadline 1er juin)
-//   - 16 juin  → ME   (J-15 before compliance path choice 1er juillet)
-//   - 1er août → MG_E1 (joint-eval report due 1er septembre)
-//   - 3 oct    → MSD3 (J-90 before second declaration 1er janvier N+1)
-//   - 1er sept → MG_J1 (J-30 before CSE Justify deadline 1er octobre)
-//   - 1er déc  → MSD30 (J-30 before second declaration 1er janvier N+1)
-//   - 1er déc  → MG_J2 / MG_E2 (CSE Justify late + CSE Joint-eval reminders)
+// - The six declaration-process reminders (declaration deadline, compliance
+//   path choice R1/R2, second declaration, joint evaluation R1/R2) run through
+//   a single DAILY tick. Their send date is derived from the campaign deadline
+//   configured by admins in `app_campaign_deadline` (J-30 / J-15 / J-10 before
+//   it) — so moving a deadline in the back-office shifts the reminders. See
+//   `handleDailyDeadlineReminders`.
 //
-// - Phase 1 wrap-up (year N+1):
-//   - 1er fév  → MG_B/C / MG_A (J-30 before CSE final 1er mars N+1)
-//   - 2 mars   → MI_* (next-cycle handover)
+// - The CSE-opinion reminders keep fixed dates (1er sept / 1er déc / 1er févr):
+//   they carry no displayed deadline and follow the compliance calendar, one
+//   schedule per eligibility branch, all rendering the same unified content.
+//
+// - `cycle_opening_info` (1er mars) and `next_cycle_handover` (2 mars) are
+//   fixed informational milestones. `cycle_opening_info` still reads the admin
+//   deadline for the date it prints.
 
 const CSE_VARIANT_SCHEDULES: ReadonlyArray<{
 	suffix: string;
@@ -52,46 +48,16 @@ const CSE_VARIANT_SCHEDULES: ReadonlyArray<{
 
 export const SCHEDULES: ScheduleDefinition[] = [
 	{
+		name: "reminder-deadline-daily-tick",
+		cron: "0 8 * * *",
+		timeZone: TZ,
+		run: handleDailyDeadlineReminders,
+	},
+	{
 		name: "reminder-cycle-opening-info",
 		cron: "0 8 1 3 *",
 		timeZone: TZ,
 		run: handleCycleOpeningInfo,
-	},
-	{
-		name: "reminder-declaration-deadline-30",
-		cron: "0 8 2 5 *",
-		timeZone: TZ,
-		run: (sql) => handleDeclarationDeadlineReminder(sql, 30),
-	},
-	{
-		name: "reminder-declaration-deadline-10",
-		cron: "0 8 22 5 *",
-		timeZone: TZ,
-		run: (sql) => handleDeclarationDeadlineReminder(sql, 10),
-	},
-	{
-		name: "reminder-compliance-path-choice",
-		cron: "0 8 16 6 *",
-		timeZone: TZ,
-		run: handleCompliancePathChoiceReminder,
-	},
-	{
-		name: "reminder-second-declaration-90",
-		cron: "0 8 3 10 *",
-		timeZone: TZ,
-		run: (sql) => handleSecondDeclarationReminder(sql, 90),
-	},
-	{
-		name: "reminder-second-declaration-30",
-		cron: "0 8 1 12 *",
-		timeZone: TZ,
-		run: (sql) => handleSecondDeclarationReminder(sql, 30),
-	},
-	{
-		name: "reminder-joint-evaluation",
-		cron: "0 8 1 8 *",
-		timeZone: TZ,
-		run: handleJointEvaluationReminder,
 	},
 	...CSE_VARIANT_SCHEDULES.map(({ suffix, cron, variant }) => ({
 		name: `reminder-cse-opinion-${suffix}`,

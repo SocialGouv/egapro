@@ -57,7 +57,7 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 					</EmailParagraph>
 					<EmailComplianceCriteriaList />
 					<EmailCtaWithLink
-						href={getAvisCseUrl(siren)}
+						href={getAvisCseUrl()}
 						label="Déposer le ou les avis"
 					/>
 				</>
@@ -76,7 +76,7 @@ export const buildJointEvaluationSubmittedMail: MailBuilder<
 					</EmailParagraph>
 					<EmailComplianceCriteriaList />
 					<EmailCtaWithLink
-						href={getAvisCseUrl(siren)}
+						href={getAvisCseUrl()}
 						label="Déposer le ou les avis"
 					/>
 				</>

@@ -140,12 +140,19 @@ function validatePayloadForType(
 				? null
 				: "payload.raisonSociale must be a non-empty string";
 		}
-		case "cycle_opening_info":
-		case "compliance_path_choice_reminder":
-		case "joint_evaluation_reminder": {
+		case "cycle_opening_info": {
 			return isDeadlinePayload(p)
 				? null
 				: "payload requires { siren, year, deadline }";
+		}
+		case "compliance_path_choice_reminder":
+		case "joint_evaluation_reminder": {
+			if (!isDeadlinePayload(p)) {
+				return "payload requires { siren, year, deadline }";
+			}
+			return p.round === "first" || p.round === "second"
+				? null
+				: "payload.round must be first or second";
 		}
 		case "declaration_deadline_reminder": {
 			if (!isDeadlinePayload(p)) {
@@ -159,9 +166,9 @@ function validatePayloadForType(
 			if (!isDeadlinePayload(p)) {
 				return "payload requires { siren, year, deadline }";
 			}
-			return p.daysRemaining === 90 || p.daysRemaining === 30
+			return p.daysRemaining === 30 || p.daysRemaining === 15
 				? null
-				: "payload.daysRemaining must be 90 or 30";
+				: "payload.daysRemaining must be 30 or 15";
 		}
 		case "cse_opinion_reminder": {
 			if (!isDeadlinePayload(p)) {

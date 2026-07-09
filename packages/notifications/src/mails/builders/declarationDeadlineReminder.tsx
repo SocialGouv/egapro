@@ -1,7 +1,7 @@
-import { formatFrenchDate } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
-import { getDeclarationUrl } from "../shared/urls.js";
+import { getDeclarationUrl, getLoginUrl } from "../shared/urls.js";
 import {
+	EmailClosingParagraph,
 	EmailContactParagraph,
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -14,37 +14,26 @@ import type { MailBuilder } from "../types.js";
 export const buildDeclarationDeadlineReminderMail: MailBuilder<
 	"declaration_deadline_reminder"
 > = async (payload) => {
-	const subject = `Egapro - Rappel : votre déclaration des indicateurs est attendue dans ${payload.daysRemaining} jours`;
-	const formattedDeadline = formatFrenchDate(payload.deadline);
-	const previewText = `Il vous reste ${payload.daysRemaining} jours pour finaliser votre déclaration des indicateurs.`;
+	const { year } = payload;
+	const subject = `[Rappel] Egapro - Déclarez vos indicateurs d'égalité professionnelle pour l'année ${year}`;
+	const previewText = `Votre déclaration des indicateurs de rémunération n'a pas encore été transmise pour l'année ${year}.`;
 	const { html, text } = await renderEmail(
 		<EmailShell previewText={previewText}>
 			<EmailGreeting>Bonjour,</EmailGreeting>
 			<EmailParagraph>
-				Votre déclaration des indicateurs relatifs à l'égalité professionnelle
-				entre les femmes et les hommes n'a pas encore été finalisée. Il vous
-				reste {payload.daysRemaining} jours pour la déposer.
+				Votre déclaration des indicateurs de rémunération de l'égalité
+				professionnelle n'a pas encore été transmise pour l'année {year}.
 			</EmailParagraph>
 			<EmailParagraph>
-				Conformément à la réglementation, votre entreprise est tenue de déclarer
-				chaque année les indicateurs relatifs aux écarts de rémunération.
+				Nous vous rappelons que cette déclaration est obligatoire pour les
+				entreprises concernées. Elle doit être effectuée depuis votre espace
+				Egapro.
 			</EmailParagraph>
-			<EmailParagraph>
-				Votre déclaration est préremplie avec les données connues de
-				l'administration pour les six premiers indicateurs de rémunération,
-				issues de la DSN.
-			</EmailParagraph>
-			<EmailParagraph>
-				Nous vous invitons à vous rendre sur le portail Egapro afin de finaliser
-				et publier votre déclaration.
-			</EmailParagraph>
-			<EmailParagraph>
-				La déclaration est ouverte jusqu'au {formattedDeadline}. Au-delà de
-				cette date, elle ne pourra plus être modifiée.
-			</EmailParagraph>
+			<EmailClosingParagraph />
 			<EmailCtaWithLink
-				href={getDeclarationUrl(payload.siren, payload.year)}
-				label="Reprendre ma déclaration"
+				href={getDeclarationUrl()}
+				label="Compléter ma déclaration"
+				linkHref={getLoginUrl()}
 			/>
 			<EmailContactParagraph />
 			<EmailSignature />

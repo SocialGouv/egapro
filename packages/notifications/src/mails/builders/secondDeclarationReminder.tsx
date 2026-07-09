@@ -1,7 +1,8 @@
 import { formatFrenchDate } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
-import { getDeclarationUrl } from "../shared/urls.js";
+import { getLoginUrl, getMySpaceUrl } from "../shared/urls.js";
 import {
+	EmailClosingParagraph,
 	EmailContactParagraph,
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -14,37 +15,26 @@ import type { MailBuilder } from "../types.js";
 export const buildSecondDeclarationReminderMail: MailBuilder<
 	"second_declaration_reminder"
 > = async (payload) => {
-	const subject = `Egapro - Rappel : votre seconde déclaration est attendue dans ${payload.daysRemaining} jours`;
+	const { year } = payload;
+	const subject = `[Rappel] Egapro - Déclarez à nouveau l'indicateur d'écart de rémunération par catégorie de salariés pour l'année ${year}`;
 	const formattedDeadline = formatFrenchDate(payload.deadline);
-	const previewText = `Il vous reste ${payload.daysRemaining} jours pour déposer votre seconde déclaration au titre des actions correctives.`;
+	const previewText = `Vous devez procéder à votre seconde déclaration au plus tard le ${formattedDeadline}.`;
 	const { html, text } = await renderEmail(
 		<EmailShell previewText={previewText}>
 			<EmailGreeting>Bonjour,</EmailGreeting>
 			<EmailParagraph>
-				Votre seconde déclaration au titre des actions correctives n'a pas
-				encore été déposée. Il vous reste {payload.daysRemaining} jours pour la
-				finaliser.
+				Pour rappel, l'indicateur d'écart de rémunération par catégorie de
+				salariés fait apparaître un ou plusieurs écarts de rémunération
+				supérieurs ou égaux à 5 %, et vous avez fait le choix d'effectuer des
+				actions correctives ainsi qu'une seconde déclaration. Vous devez, en
+				conséquence, procéder à cette seconde déclaration au plus tard le{" "}
+				{formattedDeadline}.
 			</EmailParagraph>
-			<EmailParagraph>
-				Conformément à la réglementation, vous avez engagé un parcours d'actions
-				correctives à la suite d'un écart de rémunération supérieur ou égal à 5
-				%.
-			</EmailParagraph>
-			<EmailParagraph>
-				La seconde déclaration doit retracer les actions correctives mises en
-				œuvre par votre entreprise et leur impact sur les écarts constatés.
-			</EmailParagraph>
-			<EmailParagraph>
-				Nous vous invitons à vous rendre sur le portail Egapro afin de déposer
-				votre seconde déclaration.
-			</EmailParagraph>
-			<EmailParagraph>
-				Le dépôt doit intervenir au plus tard le {formattedDeadline}. Sans dépôt
-				avant cette date, votre déclaration sera marquée comme non conforme.
-			</EmailParagraph>
+			<EmailClosingParagraph />
 			<EmailCtaWithLink
-				href={getDeclarationUrl(payload.siren, payload.year)}
-				label="Déposer ma seconde déclaration"
+				href={getMySpaceUrl()}
+				label="Mon espace"
+				linkHref={getLoginUrl()}
 			/>
 			<EmailContactParagraph />
 			<EmailSignature />

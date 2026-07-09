@@ -1,5 +1,10 @@
 import { renderEmail } from "../shared/render.js";
-import { getConnectionUrl, getDeclarationUrl } from "../shared/urls.js";
+import {
+	getAvisCseUrl,
+	getCompliancePathUrl,
+	getLoginUrl,
+	getMySpaceUrl,
+} from "../shared/urls.js";
 import {
 	EmailContactParagraph,
 	EmailCtaWithLink,
@@ -15,8 +20,7 @@ export const buildDeclarationConfirmationMail: MailBuilder<
 	"declaration_confirmation"
 > = async (payload) => {
 	const { variant, siren, year, raisonSociale, complianceDeadline } = payload;
-	const connectionUrl = getConnectionUrl();
-	const declarationUrl = getDeclarationUrl(siren, year);
+	const loginUrl = getLoginUrl();
 
 	const introParagraph = (
 		<EmailParagraph>
@@ -46,7 +50,7 @@ export const buildDeclarationConfirmationMail: MailBuilder<
 						Votre démarche est désormais terminée. Vous pouvez à tout moment
 						consulter et télécharger votre déclaration depuis votre espace.
 					</EmailParagraph>
-					<EmailCtaWithLink href={connectionUrl} label="Mon espace" />
+					<EmailCtaWithLink href={getMySpaceUrl()} label="Mon espace" />
 					<EmailContactParagraph />
 					<EmailSignature />
 				</EmailShell>,
@@ -68,9 +72,9 @@ export const buildDeclarationConfirmationMail: MailBuilder<
 						déclaration de l&apos;ensemble des indicateurs.
 					</EmailParagraph>
 					<EmailCtaWithLink
-						href={declarationUrl}
+						href={getAvisCseUrl()}
 						label="Déposer l'avis"
-						linkHref={connectionUrl}
+						linkHref={loginUrl}
 					/>
 					<EmailContactParagraph />
 					<EmailSignature />
@@ -95,9 +99,9 @@ export const buildDeclarationConfirmationMail: MailBuilder<
 						{complianceDeadline}.
 					</EmailParagraph>
 					<EmailCtaWithLink
-						href={declarationUrl}
+						href={getCompliancePathUrl()}
 						label="Sélectionner le parcours"
-						linkHref={connectionUrl}
+						linkHref={loginUrl}
 					/>
 					<EmailContactParagraph />
 					<EmailSignature />

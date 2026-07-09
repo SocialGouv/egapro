@@ -25,12 +25,25 @@ export type DeadlinePayload = CompanyScopedPayload & {
 	deadline: string;
 };
 
+// First vs second round of the compliance process. Round 1 follows the
+// initial declaration (gap >= 5 %); round 2 follows the second declaration
+// when the gap persists. Drives the round-specific reminder copy.
+export type ReminderRound = "first" | "second";
+
 export type DeclarationDeadlineReminderPayload = DeadlinePayload & {
 	daysRemaining: 30 | 10;
 };
 
+export type CompliancePathChoiceReminderPayload = DeadlinePayload & {
+	round: ReminderRound;
+};
+
 export type SecondDeclarationReminderPayload = DeadlinePayload & {
-	daysRemaining: 90 | 30;
+	daysRemaining: 30 | 15;
+};
+
+export type JointEvaluationReminderPayload = DeadlinePayload & {
+	round: ReminderRound;
 };
 
 export const CSE_OPINION_REMINDER_VARIANTS = [
@@ -107,9 +120,9 @@ export type NotificationPayloadMap = {
 	joint_evaluation_submitted: JointEvaluationSubmittedPayload;
 	cycle_opening_info: DeadlinePayload;
 	declaration_deadline_reminder: DeclarationDeadlineReminderPayload;
-	compliance_path_choice_reminder: DeadlinePayload;
+	compliance_path_choice_reminder: CompliancePathChoiceReminderPayload;
 	second_declaration_reminder: SecondDeclarationReminderPayload;
-	joint_evaluation_reminder: DeadlinePayload;
+	joint_evaluation_reminder: JointEvaluationReminderPayload;
 	cse_opinion_reminder: CseOpinionReminderPayload;
 	next_cycle_handover: NextCycleHandoverPayload;
 };

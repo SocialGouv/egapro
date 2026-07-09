@@ -3,7 +3,7 @@
 Inventaire exhaustif des mails envoyés par la plateforme. Deux mécanismes :
 
 1. **Event-driven** (4 mails) — émis depuis une mutation tRPC ou un upload, via le wrapper [`enqueueReceipt`](../packages/app/src/modules/mail/enqueueReceipt.ts) côté `packages/app`.
-2. **Schedule-driven** (7 mails, 13 schedules cron pg-boss) — émis depuis le worker `packages/notifications` à intervalles réguliers (cron natif pg-boss avec `tz=Europe/Paris`). Le handler interroge l'app DB pour trouver les destinataires éligibles, déduplique via `notifications.reminder_sent_log`, puis enqueue un job sur la même queue `email-notification` que les mails event-driven.
+2. **Schedule-driven** (7 mails, 8 schedules cron pg-boss) — émis depuis le worker `packages/notifications` à intervalles réguliers (cron natif pg-boss avec `tz=Europe/Paris`). Le handler interroge l'app DB pour trouver les destinataires éligibles, déduplique via `notifications.reminder_sent_log`, puis enqueue un job sur la même queue `email-notification` que les mails event-driven.
 
 Tous les jobs transitent par le même pipeline **publisher → pg-boss → worker → SMTP**. La pile de rendu HTML est **React Email** (composants typés DSFR, inline CSS auto, fallback texte produit par `html-to-text`).
 
@@ -11,7 +11,7 @@ Tous les jobs transitent par le même pipeline **publisher → pg-boss → worke
 
 ---
 
-## Vue d'ensemble — 11 types · 13 schedules
+## Vue d'ensemble — 11 types · 8 schedules
 
 Chaque ligne pointe vers la **fiche détaillée** correspondante : sujet exact, corps complet, requête SQL d'éligibilité (pour les schedule-driven), bouton CTA et référence au flowchart BRD.
 
@@ -26,14 +26,16 @@ Chaque ligne pointe vers la **fiche détaillée** correspondante : sujet exact, 
 
 ### Schedule-driven (cron pg-boss, fuseau Europe/Paris)
 
-| # | Type pg-boss | Fiche détaillée | BRD | Cron | Variants |
+Les six rappels liés à une échéance (déclaration, choix parcours R1/R2, 2ᵉ déclaration, évaluation conjointe R1/R2) sont émis par un **tick quotidien unique** (`0 8 * * *`). L'échéance est résolue depuis `app_campaign_deadline` (config admin, fallback sur les défauts du domaine) et le rappel part **J-30 / J-15 / J-10 avant** — déplacer une échéance dans le back-office déplace donc l'envoi **et** la date affichée. Les rappels CSE et les mails d'information gardent des dates fixes.
+
+| # | Type pg-boss | Fiche détaillée | BRD | Cron / déclenchement | Variants |
 |---|---|---|---|---|---|
-| 5 | `cycle_opening_info` | [`mails/cycle-opening-info.md`](mails/cycle-opening-info.md) | MA | `0 8 1 3 *` | — |
-| 6 | `declaration_deadline_reminder` | [`mails/declaration-deadline-reminder.md`](mails/declaration-deadline-reminder.md) | MR30 / MR10 | `0 8 2 5 *` + `0 8 22 5 *` | `daysRemaining: 30 \| 10` |
-| 7 | `compliance_path_choice_reminder` | [`mails/compliance-path-choice-reminder.md`](mails/compliance-path-choice-reminder.md) | ME | `0 8 16 6 *` | — (couvre **Round 1 + Round 2** depuis le fix) |
-| 8 | `second_declaration_reminder` | [`mails/second-declaration-reminder.md`](mails/second-declaration-reminder.md) | MSD3 / MSD30 | `0 8 3 10 *` + `0 8 1 12 *` | `daysRemaining: 90 \| 30` |
-| 9 | `joint_evaluation_reminder` | [`mails/joint-evaluation-reminder.md`](mails/joint-evaluation-reminder.md) | MG_E1 | `0 8 1 8 *` | — (couvre **Round 1 + Round 2** depuis le fix) |
-| 10 | `cse_opinion_reminder` | [`mails/cse-opinion-reminder.md`](mails/cse-opinion-reminder.md) | MG_B/C/J1/J2/A/E2 | 5 schedules | `variant: compliance \| justify_oct \| justify_dec \| corrective \| joint_eval` |
+| 5 | `cycle_opening_info` | [`mails/cycle-opening-info.md`](mails/cycle-opening-info.md) | MA | `0 8 1 3 *` (échéance affichée lue en admin) | — |
+| 6 | `declaration_deadline_reminder` | [`mails/declaration-deadline-reminder.md`](mails/declaration-deadline-reminder.md) | Rappel 1 | tick quotidien — J-30 / J-10 avant `decl1ModificationDeadline` | `daysRemaining: 30 \| 10` |
+| 7 | `compliance_path_choice_reminder` | [`mails/compliance-path-choice-reminder.md`](mails/compliance-path-choice-reminder.md) | Rappels 2 & 5 | tick quotidien — J-15 avant l'échéance choix parcours (R1 : 1er juillet ; R2 : `pathChoiceDeadline`, 1er janvier N+1) | `round: first \| second` |
+| 8 | `second_declaration_reminder` | [`mails/second-declaration-reminder.md`](mails/second-declaration-reminder.md) | Rappel 3 | tick quotidien — J-30 / J-15 avant `decl2ModificationDeadline` | `daysRemaining: 30 \| 15` |
+| 9 | `joint_evaluation_reminder` | [`mails/joint-evaluation-reminder.md`](mails/joint-evaluation-reminder.md) | Rappels 4 & 6 | tick quotidien — J-30 / J-15 avant `decl1JointEvaluationDeadline` (R1) / `decl2JointEvaluationDeadline` (R2) | `round: first \| second` |
+| 10 | `cse_opinion_reminder` | [`mails/cse-opinion-reminder.md`](mails/cse-opinion-reminder.md) | Rappel 7 | 5 schedules fixes (1er sept / 1er déc / 1er févr) | `variant: compliance \| justify_oct \| justify_dec \| corrective \| joint_eval` — **contenu unifié** |
 | 11 | `next_cycle_handover` | [`mails/next-cycle-handover.md`](mails/next-cycle-handover.md) | MI_* | `0 8 2 3 *` | — |
 
 **Destinataire** : tous les rappels sont envoyés au `declarations.declarantId → app_user.email` (le compte ProConnect qui a soumis la déclaration courante ou Y-1 selon le rappel). Pas de cc/bcc/groupé — un mail par déclaration, par variant.
@@ -49,7 +51,7 @@ Chaque ligne pointe vers la **fiche détaillée** correspondante : sujet exact, 
                                     │  packages/notifications (worker) │
                                     │  - pg-boss instance              │
                                     │  - registerHandlers(11 types)    │
-                                    │  - registerSchedules(13 crons)   │
+                                    │  - registerSchedules(8 crons)   │
                                     └──────┬──────────────────┬────────┘
                                            │                  │
                               ┌────────────┴───────┐  ┌───────┴────────────────────┐
@@ -104,7 +106,7 @@ src/
 │   └── dedup.ts            # ensureDedupTable / wasSent / markSent (notifications.reminder_sent_log)
 ├── schedules/              # pg-boss cron schedules
 │   ├── index.ts            # registerSchedules(boss, sql) — 13 createQueue + work + schedule
-│   ├── definitions.ts      # SCHEDULES const (name, cron, tz, handler) — 13 entries
+│   ├── definitions.ts      # SCHEDULES const (name, cron, tz, handler) — 8 entries
 │   ├── dates.ts            # getCurrentYear (Intl.DateTimeFormat) + DEADLINES helpers
 │   ├── handlers.ts         # 7 handlers — one per NotificationType
 │   └── dispatch.ts         # dispatchReminder() — eligibility loop + dedup + enqueue
@@ -235,8 +237,9 @@ pnpm --filter notifications dev
 import { PgBoss } from "pg-boss";
 const boss = new PgBoss({ connectionString: process.env.NOTIFICATIONS_DATABASE_URL });
 await boss.start();
-await boss.send("reminder-declaration-deadline-30", {});
-// Le worker exécute le handler → eligibility queries → enqueue des jobs notification
+await boss.send("reminder-deadline-daily-tick", {});
+// Le worker exécute le handler → résout les échéances (app_campaign_deadline)
+// → eligibility queries pour les rappels dus ce jour → enqueue des jobs notification
 ```
 
 Le worker consomme le job comme s'il avait été émis par le cron. La dedup `reminder_sent_log` joue son rôle normal — purger la table si on souhaite re-tester sur les mêmes destinataires.

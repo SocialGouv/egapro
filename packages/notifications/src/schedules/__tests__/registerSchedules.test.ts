@@ -17,8 +17,16 @@ function buildBoss(): BossStub {
 }
 
 describe("SCHEDULES", () => {
-	it("declares the expected 13 schedules", () => {
-		expect(SCHEDULES.length).toBe(13);
+	it("declares the expected 8 schedules", () => {
+		expect(SCHEDULES.length).toBe(8);
+	});
+
+	it("drives the deadline reminders from a single daily tick", () => {
+		const tick = SCHEDULES.find(
+			(s) => s.name === "reminder-deadline-daily-tick",
+		);
+		expect(tick).toBeDefined();
+		expect(tick?.cron).toBe("0 8 * * *");
 	});
 
 	it("uses unique queue names", () => {

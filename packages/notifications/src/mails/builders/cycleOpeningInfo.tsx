@@ -45,7 +45,7 @@ export const buildCycleOpeningInfoMail: MailBuilder<
 				remercions de bien vouloir la finaliser dans ce délai.
 			</EmailParagraph>
 			<EmailCtaWithLink
-				href={getDeclarationUrl(payload.siren, payload.year)}
+				href={getDeclarationUrl()}
 				label="Commencer ma déclaration"
 			/>
 			<EmailContactParagraph />

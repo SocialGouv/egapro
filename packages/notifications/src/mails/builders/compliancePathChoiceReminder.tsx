@@ -1,7 +1,8 @@
 import { formatFrenchDate } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
-import { getDeclarationUrl } from "../shared/urls.js";
+import { getCompliancePathUrl, getLoginUrl } from "../shared/urls.js";
 import {
+	EmailClosingParagraph,
 	EmailContactParagraph,
 	EmailCtaWithLink,
 	EmailGreeting,
@@ -14,39 +15,36 @@ import type { MailBuilder } from "../types.js";
 export const buildCompliancePathChoiceReminderMail: MailBuilder<
 	"compliance_path_choice_reminder"
 > = async (payload) => {
-	const subject =
-		"Egapro - Rappel : choix de votre parcours de mise en conformité";
+	const { year, round } = payload;
+	const subject = `[Rappel] Egapro - Choisissez le parcours de mise en conformité pour l'indicateur d'écart de rémunération par catégorie de salariés pour l'année ${year}`;
 	const formattedDeadline = formatFrenchDate(payload.deadline);
-	const previewText =
-		"Vous devez choisir un parcours de mise en conformité avant la date limite.";
+	const previewText = `Vous devez sélectionner un parcours de mise en conformité au plus tard le ${formattedDeadline}.`;
+	const statement =
+		round === "first" ? (
+			<EmailParagraph>
+				Pour rappel, l'indicateur d'écart de rémunération par catégorie de
+				salariés fait apparaître un ou plusieurs écarts de rémunération
+				supérieurs ou égaux à 5 %. Vous devez, en conséquence, sélectionner un
+				parcours de mise en conformité au plus tard le {formattedDeadline}.
+			</EmailParagraph>
+		) : (
+			<EmailParagraph>
+				Pour rappel, l'indicateur d'écart de rémunération par catégorie de
+				salariés fait de nouveau apparaître un ou plusieurs écarts de
+				rémunération supérieurs ou égaux à 5 % dans votre seconde déclaration.
+				Vous devez, en conséquence, sélectionner un parcours de mise en
+				conformité au plus tard le {formattedDeadline}.
+			</EmailParagraph>
+		);
 	const { html, text } = await renderEmail(
 		<EmailShell previewText={previewText}>
 			<EmailGreeting>Bonjour,</EmailGreeting>
-			<EmailParagraph>
-				Votre déclaration des indicateurs fait apparaître un écart de
-				rémunération supérieur ou égal à 5 %. Vous n'avez pas encore choisi
-				votre parcours de mise en conformité.
-			</EmailParagraph>
-			<EmailParagraph>
-				Conformément à la réglementation, lorsque l'écart de rémunération
-				constaté est supérieur ou égal à 5 %, votre entreprise doit choisir un
-				parcours de mise en conformité pour réduire cet écart.
-			</EmailParagraph>
-			<EmailParagraph>
-				Trois parcours sont disponibles : justification des écarts, actions
-				correctives, ou évaluation conjointe avec votre CSE. Le détail et les
-				conséquences de chaque option sont expliqués sur le portail Egapro.
-			</EmailParagraph>
-			<EmailParagraph>
-				Nous vous invitons à vous rendre sur le portail Egapro afin d'effectuer
-				ce choix.
-			</EmailParagraph>
-			<EmailParagraph>
-				La sélection doit intervenir au plus tard le {formattedDeadline}.
-			</EmailParagraph>
+			{statement}
+			<EmailClosingParagraph />
 			<EmailCtaWithLink
-				href={getDeclarationUrl(payload.siren, payload.year)}
-				label="Choisir mon parcours"
+				href={getCompliancePathUrl()}
+				label="Sélectionner le parcours"
+				linkHref={getLoginUrl()}
 			/>
 			<EmailContactParagraph />
 			<EmailSignature />
