@@ -125,6 +125,30 @@ check_pattern '\.(ts|tsx)$' \
   'Inline .getMonth()/.getDate() is forbidden. Use campaign date helpers from ~/modules/domain.' \
   '(domain/|__tests__|\.test\.|\.spec\.)'
 
+# Domain layer — inline gap threshold classification must use gapLevel() from ~/modules/domain
+check_pattern '\.(ts|tsx)$' \
+  '(>=|<)[[:space:]]*GAP_ALERT_THRESHOLD' \
+  'Inline gap threshold comparison is forbidden. Use gapLevel(gap) === "high" from ~/modules/domain (or a named domain helper for the "either direction" intent).' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
+# Domain layer — inline signed-gap formula must use computeGap()/computeGapBetween()
+check_pattern '\.(ts|tsx)$' \
+  '\([[:space:]]*[a-zA-Z_.]*[mM]en[a-zA-Z_.]*[[:space:]]*-[[:space:]]*[a-zA-Z_.]*[wW]omen' \
+  'Inline ((men - women)/men) gap formula is forbidden. Use computeGap()/computeGapBetween() from ~/modules/domain.' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
+# Domain layer — cancelled-declaration check must use isCancelled()
+check_pattern '\.(ts|tsx)$' \
+  'cancelledAt[[:space:]]*!==?[[:space:]]*null' \
+  'Inline cancelledAt !== null is forbidden. Use isCancelled() from ~/modules/domain.' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
+# Domain layer — SIREN extraction via a length const evades the literal slice(0, 9) rule
+check_pattern '\.(ts|tsx)$' \
+  '(slice|substring|substr)\(0,[[:space:]]*[A-Za-z_]*SIREN[A-Za-z_]*\)|SIREN_LENGTH[[:space:]]*=[[:space:]]*9' \
+  'Inline SIREN extraction is forbidden (even via a SIREN_LENGTH const). Use extractSiren()/parseSiren() from ~/modules/domain.' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
 # Zod imports forbidden in router files — schemas must be in ~/modules/{domain}/schemas.ts
 check_pattern 'routers/.*\.ts$' \
   "from ['\"]zod['\"]" \

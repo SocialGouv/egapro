@@ -11,7 +11,11 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { and, eq, isNull } from "drizzle-orm";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { getCurrentYear, isDeadlinePassed } from "~/modules/domain";
+import {
+	getCurrentYear,
+	isDeadlinePassed,
+	isDeclarationSubmitted,
+} from "~/modules/domain";
 import { parseSiren } from "~/modules/shared/parseSiren";
 import { auditMiddleware as runAuditMiddleware } from "~/server/audit/trpcMiddleware";
 import { auth } from "~/server/auth";
@@ -318,7 +322,7 @@ export const declarationModifiableWriteProcedure =
 			.limit(1);
 
 		const declaration = rows[0];
-		if (declaration && declaration.status !== "draft") {
+		if (declaration && isDeclarationSubmitted(declaration.status)) {
 			const { decl1ModificationDeadline, decl2ModificationDeadline } =
 				await getCampaignDeadlines(declaration.year);
 			const deadline =

@@ -2,7 +2,9 @@ import { redirect } from "next/navigation";
 import {
 	type DeclarationFsmStatus,
 	hasGapsAboveThreshold,
+	isComplianceProcessCompleted,
 	isDeadlinePassed,
+	isDraft,
 } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
@@ -59,7 +61,7 @@ export function getCompliancePathReadOnlyReason(params: {
 		now,
 	} = params;
 
-	if (status === "demarche_completed") return "demarche_completed";
+	if (isComplianceProcessCompleted(status)) return "demarche_completed";
 	if (pathChoice === "justify" && hasSubmittedCseOpinion)
 		return "cse_opinion_submitted";
 	if (pathChoice === "corrective_action" && hasSubmittedSecondDeclaration)
@@ -75,7 +77,7 @@ export async function CompliancePathPage() {
 	const session = await auth();
 	const data = await api.declaration.getOrCreate();
 
-	if (data.declaration.status === "draft") {
+	if (isDraft(data.declaration.status)) {
 		redirect("/declaration-remuneration/etape/6");
 	}
 
@@ -105,7 +107,7 @@ export async function CompliancePathPage() {
 	if (
 		!hasChosenPath &&
 		(state.type === "no_gap" ||
-			data.declaration.status === "demarche_completed")
+			isComplianceProcessCompleted(data.declaration.status))
 	) {
 		redirect(getPostComplianceDestination(company.hasCse));
 	}

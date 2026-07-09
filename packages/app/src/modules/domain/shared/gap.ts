@@ -15,7 +15,7 @@
  * For display formatting (%, €, units), see `format.ts`.
  */
 
-import type { GapLevel } from "../types";
+import type { GapDirection, GapLevel } from "../types";
 import { GAP_ALERT_THRESHOLD } from "./constants";
 import { parseNumber } from "./number";
 
@@ -50,6 +50,54 @@ export function computeGapBetween(women: number, men: number): number | null {
 export function gapLevel(gap: number | null): GapLevel | null {
 	if (gap === null) return null;
 	return gap < GAP_ALERT_THRESHOLD ? "low" : "high";
+}
+
+/** Null-safe gap magnitude (absolute value). Use when the display cares about size, not direction. */
+export function gapMagnitude(gap: number | null): number | null {
+	return gap === null ? null : Math.abs(gap);
+}
+
+/** True when any gap in the list reaches the alert threshold in the women-disfavoured direction (positive-only, via `gapLevel`). */
+export function hasHighGap(gaps: ReadonlyArray<number | null>): boolean {
+	return gaps.some((gap) => gapLevel(gap) === "high");
+}
+
+/** True when a gap is significant in EITHER direction (|gap| >= threshold).
+ *  Use for informative callouts that describe both sides, unlike the positive-only `gapLevel`/`hasHighGap`. */
+export function isSignificantGap(
+	gap: number | null,
+	threshold = GAP_ALERT_THRESHOLD,
+): boolean {
+	return gap !== null && Math.abs(gap) >= threshold;
+}
+
+/** Determines which side is more often the lower-paid one across a set of women/men value pairs.
+ *  "women" when women are lower in more rows, "men" for the opposite, "balanced" on a tie or no data. */
+export function gapDirection(
+	pairs: ReadonlyArray<{ women: string; men: string }>,
+): GapDirection {
+	let womenLowerCount = 0;
+	let menLowerCount = 0;
+	for (const { women, men } of pairs) {
+		const w = Number.parseFloat(women);
+		const m = Number.parseFloat(men);
+		if (Number.isNaN(w) || Number.isNaN(m)) continue;
+		if (w < m) womenLowerCount++;
+		if (m < w) menLowerCount++;
+	}
+	if (womenLowerCount > menLowerCount) return "women";
+	if (menLowerCount > womenLowerCount) return "men";
+	return "balanced";
+}
+
+/** Converts a stored gap ratio (e.g. `"0.0523"`) to a signed percentage (`5.23`).
+ *  Null, blank, or non-numeric input → null. Mirrors the ratio→percent step used across exports. */
+export function gapRatioToPercent(
+	ratio: string | number | null | undefined,
+): number | null {
+	if (ratio === null || ratio === undefined || ratio === "") return null;
+	const n = typeof ratio === "number" ? ratio : Number(ratio);
+	return Number.isNaN(n) ? null : n * 100;
 }
 
 /** Sum base and variable compensation. Returns null only when both inputs are invalid. */

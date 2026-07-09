@@ -2,13 +2,11 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, parseSiren } from "~/modules/domain";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
 
 import { CompanyDeclarationsPage } from "./CompanyDeclarationsPage";
-
-const SIREN_LENGTH = 9;
 
 type Props = {
 	siret: string | null;
@@ -16,11 +14,10 @@ type Props = {
 };
 
 export async function MonEspacePage({ siret, userPhone }: Props) {
-	if (!siret || siret.length < SIREN_LENGTH) {
+	const siren = parseSiren(siret);
+	if (siren === null) {
 		redirect("/mon-espace/mes-entreprises");
 	}
-
-	const siren = siret.slice(0, SIREN_LENGTH);
 	const [data, sanctionStatus, campaignDeadlines, lockState] =
 		await Promise.all([
 			api.company.getWithDeclarations({ siren }),

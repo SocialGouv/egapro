@@ -5,9 +5,37 @@ import {
 	getCurrentCompliancePath,
 	hasStartedSecondDeclaration,
 	isCancelled,
+	isComplianceProcessCompleted,
 	isDeclarationSubmitted,
+	isDraft,
 	isInComplianceProcess,
 } from "../shared/declarationStatus";
+
+describe("isDraft", () => {
+	it("returns true only for draft", () => {
+		expect(isDraft("draft")).toBe(true);
+	});
+
+	it("returns false for a submitted status", () => {
+		expect(isDraft("demarche_completed")).toBe(false);
+	});
+
+	it("returns false for null", () => {
+		expect(isDraft(null)).toBe(false);
+	});
+});
+
+describe("isComplianceProcessCompleted", () => {
+	it("returns true only for the terminal FSM state", () => {
+		expect(isComplianceProcessCompleted("demarche_completed")).toBe(true);
+	});
+
+	it("returns false for any other status", () => {
+		expect(isComplianceProcessCompleted("awaiting_cse_opinion")).toBe(false);
+		expect(isComplianceProcessCompleted("draft")).toBe(false);
+		expect(isComplianceProcessCompleted(null)).toBe(false);
+	});
+});
 
 describe("isDeclarationSubmitted", () => {
 	it("returns false when status is null", () => {

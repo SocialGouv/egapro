@@ -83,6 +83,27 @@ Rules:
 - **New business rules** must be added to domain as pure functions with unit tests.
 - **UI-specific helpers** (badge classes, DSFR labels) stay in the feature module — only pure logic goes in domain.
 
+### Single source of truth — keep business rules synchronized
+
+A business rule must exist in **exactly one place**: `~/modules/domain`. Callers **consume** it — they never re-derive it inline. Two parallel implementations of the same rule inevitably drift out of sync: one gets updated when the regulation changes, the other silently keeps the old behaviour.
+
+This is not only DRY — it is **correctness under change**. When a regulatory rule moves (a sign convention, a threshold, a classification), you must be able to edit **one** domain function and have every screen, export, PDF, and router follow. Any copy living outside domain is a latent bug the day the rule changes.
+
+> Real example: the signed-gap convention (`((men − women)/men)×100`, negative = women earn more) lives in `computeGap`/`computeGapBetween`. If a component instead re-derives direction with `parseFloat(w) < parseFloat(m)`, or re-inlines `gap >= GAP_ALERT_THRESHOLD` instead of calling `gapLevel`, that copy will not follow the next convention change — and the screen silently disagrees with the export.
+
+Business rule → single home (never re-inline the right-hand column):
+
+| Business rule | Domain function to call | Never re-inline as |
+|---|---|---|
+| Signed pay gap `((men − women)/men)×100` | `computeGap` / `computeGapBetween` | `((m - w) / m) * 100` in a component/router/export |
+| Gap crosses the 5% alert threshold (positive-only) | `gapLevel(gap) === "high"` | `gap >= GAP_ALERT_THRESHOLD` scattered inline |
+| Which sex a set of gaps disfavours | a named `gap.ts` function | `parseFloat(w) < parseFloat(m)` counting in a component |
+| Stored ratio (0..1) → percentage | a named domain helper | `Number(row.gap) * 100` in the export layer |
+| Cancelled declaration | `isCancelled()` | `cancelledAt !== null` |
+| CSE required (≥100) | `isCseRequired()` | `workforce >= 100` |
+
+Before adding any calculation or classification to a component, router, PDF, or export: ask *is this a business rule?* If yes, it goes in domain (pure function + unit test) and the caller imports it. If the domain function is missing, **add it** — do not re-implement. When two call sites need *different* intents from the same raw inputs (e.g. "gap above threshold in either direction" for a callout vs. "positive-only" for a compliance badge), express **each intent as its own named domain function** — never as look-alike inline code whose divergence reads as an accident.
+
 ## Imports
 
 - Use the `~/` path alias (mapped to `src/`). Never use relative paths that go up more than one level (`../../`).

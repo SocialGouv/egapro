@@ -1,26 +1,22 @@
 import type { ReactNode } from "react";
+import type { GapDirection } from "~/modules/domain";
 import {
 	computeGap,
 	computeProportion,
 	formatGapCompact,
-	GAP_ALERT_THRESHOLD,
+	gapDirection,
+	gapMagnitude,
+	isSignificantGap,
 } from "~/modules/domain";
 import type { PayGapRow } from "../types";
 import styles from "./InterpretationCallout.module.scss";
 
-/** Gap magnitude (null-safe): the informative callout describes size + both directions, not the sign. */
-const magnitude = (g: number | null): number | null =>
-	g === null ? null : Math.abs(g);
-
 /** Returns true when at least one row crosses the regulatory gap threshold (either direction). */
 export function hasHighPayGap(rows: PayGapRow[]): boolean {
-	return rows.some((r) => {
-		const gap = magnitude(computeGap(r.womenValue, r.menValue));
-		return gap !== null && gap >= GAP_ALERT_THRESHOLD;
-	});
+	return rows.some((r) =>
+		isSignificantGap(computeGap(r.womenValue, r.menValue)),
+	);
 }
-
-type GapDirection = "women" | "men" | "balanced";
 
 type GapAnalysis = {
 	direction: GapDirection;
@@ -39,37 +35,26 @@ function analyzeGaps(rows: PayGapRow[]): GapAnalysis {
 	const hourlyMedian = findRow("Horaire brute médiane");
 
 	const annualMeanGap = annualMean
-		? magnitude(computeGap(annualMean.womenValue, annualMean.menValue))
+		? gapMagnitude(computeGap(annualMean.womenValue, annualMean.menValue))
 		: null;
 	const annualMedianGap = annualMedian
-		? magnitude(computeGap(annualMedian.womenValue, annualMedian.menValue))
+		? gapMagnitude(computeGap(annualMedian.womenValue, annualMedian.menValue))
 		: null;
 	const hourlyMeanGap = hourlyMean
-		? magnitude(computeGap(hourlyMean.womenValue, hourlyMean.menValue))
+		? gapMagnitude(computeGap(hourlyMean.womenValue, hourlyMean.menValue))
 		: null;
 	const hourlyMedianGap = hourlyMedian
-		? magnitude(computeGap(hourlyMedian.womenValue, hourlyMedian.menValue))
+		? gapMagnitude(computeGap(hourlyMedian.womenValue, hourlyMedian.menValue))
 		: null;
 
 	const gaps = [annualMeanGap, annualMedianGap, hourlyMeanGap, hourlyMedianGap];
-	const hasHighGap = gaps.some((g) => g !== null && g >= GAP_ALERT_THRESHOLD);
+	const hasHighGap = gaps.some((g) => isSignificantGap(g));
 
 	// When no gap reaches the regulatory threshold, treat the situation as
 	// balanced — sub-threshold deltas are not interpreted as disfavor.
-	let direction: GapDirection = "balanced";
-	if (hasHighGap) {
-		let womenLowerCount = 0;
-		let menLowerCount = 0;
-		for (const row of rows) {
-			const w = Number.parseFloat(row.womenValue);
-			const m = Number.parseFloat(row.menValue);
-			if (Number.isNaN(w) || Number.isNaN(m)) continue;
-			if (w < m) womenLowerCount++;
-			if (m < w) menLowerCount++;
-		}
-		if (womenLowerCount > menLowerCount) direction = "women";
-		else if (menLowerCount > womenLowerCount) direction = "men";
-	}
+	const direction: GapDirection = hasHighGap
+		? gapDirection(rows.map((r) => ({ women: r.womenValue, men: r.menValue })))
+		: "balanced";
 
 	return {
 		direction,

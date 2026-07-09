@@ -7,7 +7,7 @@ import {
 	formatCurrency,
 	formatGap,
 	formatTotal,
-	GAP_ALERT_THRESHOLD,
+	gapLevel,
 } from "~/modules/domain";
 import styles from "./CategoryRecapTable.module.scss";
 import indicatorStyles from "./IndicatorTables.module.scss";
@@ -19,7 +19,7 @@ type Props = {
 };
 
 function GapCell({ gap }: { gap: number | null }) {
-	const isHigh = gap !== null && gap >= GAP_ALERT_THRESHOLD;
+	const isHigh = gapLevel(gap) === "high";
 	return (
 		<span className={indicatorStyles.gapCell}>
 			<strong>{formatGap(gap)}</strong>

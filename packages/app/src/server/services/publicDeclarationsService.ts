@@ -1,16 +1,6 @@
 import "server-only";
 
-import {
-	and,
-	count,
-	eq,
-	ilike,
-	isNotNull,
-	isNull,
-	ne,
-	or,
-	sql,
-} from "drizzle-orm";
+import { and, count, eq, ilike, isNotNull, or, sql } from "drizzle-orm";
 
 import {
 	type PublicSearchInput,
@@ -19,6 +9,10 @@ import {
 	toPublicDeclaration,
 } from "~/modules/public-api";
 import { db } from "~/server/db";
+import {
+	notCancelledCondition,
+	submittedDeclarationCondition,
+} from "~/server/db/declarationConditions";
 import {
 	campaignDeadlines,
 	companies,
@@ -30,8 +24,8 @@ export async function searchPublicDeclarations(
 	input: PublicSearchInput,
 ): Promise<PublicSearchResultDTO> {
 	const baseConditions = [
-		isNull(declarations.cancelledAt),
-		ne(declarations.status, "draft"),
+		notCancelledCondition(),
+		submittedDeclarationCondition(),
 		isNotNull(campaignDeadlines.publicDataReleaseDate),
 		sql`${campaignDeadlines.publicDataReleaseDate} <= CURRENT_DATE`,
 	];

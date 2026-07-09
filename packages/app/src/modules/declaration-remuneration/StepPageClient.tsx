@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useFunnelTracking } from "~/modules/analytics";
-import { getCompanySizeRange } from "~/modules/domain";
+import { getCompanySizeRange, isDeclarationSubmitted } from "~/modules/domain";
 import {
 	DECLARATION_FUNNEL,
 	declarationFunnelDimensions,
@@ -137,9 +137,7 @@ export function StepPageClient({
 						declaration={declaration}
 						declarationYear={declaration.year}
 						hasCse={hasCse}
-						isSubmitted={
-							declaration.status !== null && declaration.status !== "draft"
-						}
+						isSubmitted={isDeclarationSubmitted(declaration.status)}
 						step2Data={step2Data}
 						step3Data={step3Data}
 						step4Data={step4Data}

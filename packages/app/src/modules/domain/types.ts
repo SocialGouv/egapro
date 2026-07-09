@@ -1,6 +1,9 @@
 /** Gap severity classification based on regulatory thresholds. */
 export type GapLevel = "low" | "high";
 
+/** Which side a set of pay gaps disfavours, or "balanced" when neither dominates. */
+export type GapDirection = "women" | "men" | "balanced";
+
 /** Lifecycle state of a declaration from the user's perspective. */
 export type DeclarationStatus = "to_complete" | "in_progress" | "done";
 

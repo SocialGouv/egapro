@@ -1,8 +1,12 @@
 import "server-only";
 
-import { and, desc, eq, isNull, ne } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { isYearPubliclyReleased } from "~/modules/domain";
 import { db } from "~/server/db";
+import {
+	notCancelledCondition,
+	submittedDeclarationCondition,
+} from "~/server/db/declarationConditions";
 import {
 	campaignDeadlines,
 	companies,
@@ -56,8 +60,8 @@ async function fetchRows(
 		.where(
 			and(
 				eq(declarations.siren, siren),
-				isNull(declarations.cancelledAt),
-				ne(declarations.status, "draft"),
+				notCancelledCondition(),
+				submittedDeclarationCondition(),
 				yearFilter,
 			),
 		)

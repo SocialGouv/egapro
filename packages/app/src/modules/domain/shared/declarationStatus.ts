@@ -2,10 +2,16 @@ import type { DeclarationFsmStatus, DeclarationStatus } from "../types";
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
 
-export function isDeclarationSubmitted(
-	status: DeclarationFsmStatus | null,
-): boolean {
+export function isDeclarationSubmitted(status: string | null): boolean {
 	return status !== null && status !== "draft";
+}
+
+export function isDraft(status: string | null): boolean {
+	return status === "draft";
+}
+
+export function isComplianceProcessCompleted(status: string | null): boolean {
+	return status === "demarche_completed";
 }
 
 export function getCurrentCompliancePath(declaration: {
@@ -42,9 +48,9 @@ export function hasStartedSecondDeclaration(declaration: {
 	);
 }
 
-export function isCancelled(declaration: {
-	cancelledAt: Date | null;
-}): boolean {
+export function isCancelled<T extends { cancelledAt: Date | null }>(
+	declaration: T,
+): declaration is T & { cancelledAt: Date } {
 	return declaration.cancelledAt !== null;
 }
 

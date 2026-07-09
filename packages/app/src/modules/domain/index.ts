@@ -6,8 +6,11 @@ export {
 	getDeclarationDeadline,
 	getDefaultCampaignDeadlines,
 	getPathChoiceDeadline,
+	getReferencePeriod,
+	getRepresentationDeadline,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
+	getWorkforceYearFor,
 	isDeadlinePassed,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
@@ -63,7 +66,9 @@ export {
 	getCurrentCompliancePath,
 	hasStartedSecondDeclaration,
 	isCancelled,
+	isComplianceProcessCompleted,
 	isDeclarationSubmitted,
+	isDraft,
 	isInComplianceProcess,
 } from "./shared/declarationStatus";
 // Declaration steps labels (A–F stepper), post-submit milestones, K19 funnels
@@ -129,8 +134,13 @@ export {
 	computeGapBetween,
 	computeGapRatio,
 	computeTotal,
+	gapDirection,
 	gapLevel,
+	gapMagnitude,
+	gapRatioToPercent,
 	hasGapsAboveThreshold,
+	hasHighGap,
+	isSignificantGap,
 } from "./shared/gap";
 // Indicator G — applicability rules (workforce thresholds, triennial cycle, universal year)
 export {
@@ -156,7 +166,12 @@ export { percentageOf, proportionOf } from "./shared/percentage";
 // Public data release gate
 export { isYearPubliclyReleased } from "./shared/publicData";
 // Quartile helpers
-export { computeQuartileMin, migrateLegacyThresholds } from "./shared/quartile";
+export {
+	computeQuartileMin,
+	isQuartileImbalanced,
+	migrateLegacyThresholds,
+	quartileImbalanceDirection,
+} from "./shared/quartile";
 export type {
 	CompanyLocation,
 	CountyCode,
@@ -203,5 +218,6 @@ export type {
 	DeclarationFsmStatus,
 	DeclarationStatus,
 	DeclarationType,
+	GapDirection,
 	GapLevel,
 } from "./types";

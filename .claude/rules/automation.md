@@ -111,7 +111,8 @@ Apply these rules **as you write code**, before any agent runs:
 - No `.getMonth()` / `.getDate()` in calculations → use campaign date helpers from `~/modules/domain`
 - No hardcoded thresholds (5%, 50, 100) → use named constants from `~/modules/domain`
 - No local `getCurrentYear`/`getCseYear`/`getSiren` function definitions → import from `~/modules/domain`
-- No inline reimplementation of domain helpers: `cancelledAt !== null` → `isCancelled()`, `workforce >= 100` → `isCseRequired()` / `isComplianceProcessRequired()` / `isComplianceProcessRevisionRequired()`
+- No inline reimplementation of domain helpers: `cancelledAt !== null` → `isCancelled()`, `workforce >= 100` → `isCseRequired()` / `isComplianceProcessRequired()` / `isComplianceProcessRevisionRequired()`, `gap >= GAP_ALERT_THRESHOLD` → `gapLevel(gap) === "high"`, inline `((men - women) / men) * 100` → `computeGap()` / `computeGapBetween()`
+- Single source of truth: a business rule lives in **one** domain function — never a second copy inline in a component/router/export that can drift when the regulation changes (sign convention, threshold, classification). Two intents on the same inputs → two named domain functions, never look-alike inline code. Full rationale + table → `rules/code-quality.md` § Domain layer
 - New business rules → add to `~/modules/domain` as pure functions with tests
 
 **Security:**

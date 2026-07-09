@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { FIRST_DECLARATION_YEAR } from "~/modules/domain";
+
 export const SORT_COLUMNS = [
 	"siren",
 	"companyName",
@@ -16,7 +18,12 @@ export const DEFAULT_PAGE_SIZE = 20;
 export const searchDeclarationsSchema = z.object({
 	query: z.string().optional(),
 	email: z.string().email().optional().or(z.literal("")),
-	year: z.coerce.number().int().min(2018).max(2100).optional(),
+	year: z.coerce
+		.number()
+		.int()
+		.min(FIRST_DECLARATION_YEAR)
+		.max(2100)
+		.optional(),
 	dateFrom: z.string().date().optional().or(z.literal("")),
 	dateTo: z.string().date().optional().or(z.literal("")),
 	status: z

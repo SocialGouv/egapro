@@ -4,7 +4,7 @@ import {
 	StepPageClient,
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
-import { isDeadlinePassed } from "~/modules/domain";
+import { isDeadlinePassed, isDeclarationSubmitted } from "~/modules/domain";
 import {
 	mapToEmployeeCategoryRows,
 	mapToStepData,
@@ -28,7 +28,7 @@ export default async function StepPage({ params }: StepPageProps) {
 	const d = data.declaration;
 	const company = await api.company.get({ siren: d.siren });
 
-	const isSubmitted = d.status !== null && d.status !== "draft";
+	const isSubmitted = isDeclarationSubmitted(d.status);
 	let modificationDeadline: Date | undefined;
 	let isModificationClosed = false;
 	if (isSubmitted) {

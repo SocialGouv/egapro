@@ -1,7 +1,7 @@
 import "server-only";
 
 import { and, eq } from "drizzle-orm";
-import { formatLongDate } from "~/modules/domain";
+import { formatLongDate, getWorkforceYearFor } from "~/modules/domain";
 import { activeDeclarationFilter } from "~/server/api/routers/declarationHelpers";
 import { db } from "~/server/db";
 import {
@@ -100,7 +100,7 @@ export async function buildTransmittedPdfData(
 	return {
 		companyName: company.name,
 		siren,
-		dataYear: declaration.year - 1,
+		dataYear: getWorkforceYearFor(declaration.year),
 		year: declaration.year,
 		generatedAt: formatLongDate(now),
 		opinions,
