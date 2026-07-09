@@ -7,7 +7,7 @@ import type {
 	Step3Data,
 	Step4Data,
 } from "~/modules/declaration-remuneration/types";
-import { computeGap } from "~/modules/domain";
+import { computeGap, computeProportion } from "~/modules/domain";
 import { CardTitle } from "./CardTitle";
 import { GapColumn } from "./GapColumn";
 import { GapSideBySide } from "./GapSideBySide";
@@ -19,6 +19,8 @@ type Props = {
 	step3Data: Step3Data;
 	step4Data: Step4Data;
 	step5Categories: EmployeeCategoryRow[];
+	totalWomen?: number;
+	totalMen?: number;
 	/**
 	 * In the Step6Review (in-flow) the cards expose tooltips for the quartile
 	 * and category sections. The post-submission recap renders the same cards
@@ -42,6 +44,8 @@ export function IndicatorSections({
 	step3Data,
 	step4Data,
 	step5Categories,
+	totalWomen,
+	totalMen,
 	withTooltips = false,
 }: Props) {
 	const annualMeanGap = computeGap(
@@ -131,17 +135,16 @@ export function IndicatorSections({
 											<div className={stepStyles.flex1}>
 												<p className="fr-text--sm fr-mb-0">Femmes</p>
 												<strong className="fr-text--sm">
-													{step3Data.indicatorEWomen
-														? `${step3Data.indicatorEWomen} %`
-														: "-"}
+													{computeProportion(
+														step3Data.indicatorEWomen,
+														totalWomen,
+													)}
 												</strong>
 											</div>
 											<div className={stepStyles.flex1}>
 												<p className="fr-text--sm fr-mb-0">Hommes</p>
 												<strong className="fr-text--sm">
-													{step3Data.indicatorEMen
-														? `${step3Data.indicatorEMen} %`
-														: "-"}
+													{computeProportion(step3Data.indicatorEMen, totalMen)}
 												</strong>
 											</div>
 										</div>

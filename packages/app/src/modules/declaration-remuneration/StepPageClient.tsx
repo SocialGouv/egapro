@@ -144,6 +144,8 @@ export function StepPageClient({
 						step3Data={step3Data}
 						step4Data={step4Data}
 						step5Categories={step5Categories}
+						totalMen={declaration.totalMen ?? undefined}
+						totalWomen={declaration.totalWomen ?? undefined}
 					/>
 				);
 			default:
