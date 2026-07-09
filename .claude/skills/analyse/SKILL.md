@@ -109,7 +109,7 @@ L'agent :
 3. Choisit la sous-stratégie de repro :
    - **Fonctionnel local** : worktree `alpha` + `pnpm dev:app` + Playwright
    - **Env-specific** : `kubectl` + Playwright sur l'URL de la review app
-   - **Visual mismatch (Figma ↔ app)** : worktree `alpha` + dev server + Playwright + `figma-dev` MCP, diff structurel
+   - **Visual mismatch (Figma ↔ app)** : worktree `alpha` + dev server + Playwright + `figma` MCP, diff structurel
 4. Identifie root cause + fichiers à modifier
 5. Obtient validation explicite
 6. Poste un commentaire `## Analyse du bug` sur l'issue — **le body reste intact**

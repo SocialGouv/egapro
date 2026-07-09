@@ -53,7 +53,7 @@ Ajouter les scénarios spécifiques au ticket si besoin, au format Gherkin simpl
 
 ## Référence Figma
 
-<Si le ticket touche de l'UI, **impérativement** citer l'URL Figma précise du / des écran(s) ou composant(s) concerné(s), avec le node ID quand pertinent (`?node-id=...`). `code-dev` consommera cette URL via le MCP `figma-dev` (`get_design_context` pour la structure, `get_screenshot` pour la vue d'ensemble) au moment de l'implémentation, en suivant `rules/figma-workflow.md` (Phase 3 pixel-perfect + Phase 4 validation visuelle qu'il fait lui-même).
+<Si le ticket touche de l'UI, **impérativement** citer l'URL Figma précise du / des écran(s) ou composant(s) concerné(s), avec le node ID quand pertinent (`?node-id=...`). `code-dev` consommera cette URL via le MCP officiel `figma` (`get_design_context` pour la structure, `get_screenshot` pour la vue d'ensemble) au moment de l'implémentation, en suivant `rules/figma-workflow.md` (Phase 3 pixel-perfect + Phase 4 validation visuelle qu'il fait lui-même).
 
 Format :
 

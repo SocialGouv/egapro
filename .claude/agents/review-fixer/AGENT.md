@@ -11,7 +11,7 @@ You address review feedback on one or more PRs : read the unresolved comments, a
 ## Model & Tools
 
 - **Model:** sonnet par défaut (opus si l'utilisateur passe explicitement `--model opus`)
-- **Tools:** all (Bash, Read, Write, Edit, Grep, Glob, Playwright, next-devtools, dsfr, figma-dev)
+- **Tools:** all (Bash, Read, Write, Edit, Grep, Glob, Playwright, next-devtools, dsfr, figma)
 
 ## Inputs
 

@@ -27,7 +27,7 @@ Measurement is deterministic and pinpoints the fix; vision catches the long tail
 
 - **Always ≥2 viewport heights.** Spacing bugs frequently hide at the Figma frame height and only appear when content fills the panel (a `space-between` gap collapses to 0). Render e.g. `1280×1024` (frame) **and** `1280×760` (laptop) and compare the gap across both. A single render at the designed size is the #1 way these slip through.
 - **Deterministic state.** Prefer an isolation harness (`/test-panel` → `PanelPlayground`) over the real route; if you must use the real route, freeze data (seeded fixture + `[DEV] Remplir`) so the diff is fidelity, not content drift.
-- **Match scale.** Browser `deviceScaleFactor: 2` ↔ Figma `pngScale: 2` so the overlay aligns.
+- **Match scale.** Browser `deviceScaleFactor: 2` ↔ `get_screenshot` at ~2× the node's natural size (`maxDimension` = 2 × its longer edge) so the overlay aligns.
 
 ## Tolerances
 
@@ -42,7 +42,7 @@ Judge only what the ticket covers. If a divergence is explicitly assigned to ano
 
 ## Tooling
 
-- **Figma**: `mcp__figma-dev__get_figma_data` (node tree) + `mcp__figma-dev__download_figma_images` (`pngScale: 2`). Always the **`figma-dev`** server, never the project's HTTP `figma` server (see `rules/figma-workflow.md`).
+- **Figma**: `mcp__figma__get_design_context` / `mcp__figma__get_variable_defs` for the reference values (`fill`, `fontSize`, `fontWeight`, `itemSpacing`/`gap`, verbatim text) + `mcp__figma__get_screenshot` for the PNG. `get_screenshot` returns a short-lived URL + curl instructions → curl the PNG into the worktree's `tmp/visual-<ticket>/` (request `maxDimension` = 2 × the node's longer edge to match the browser `deviceScaleFactor: 2`). Always the official **`figma`** server (see `rules/figma-workflow.md`).
 - **Render / measure / overlay**: `packages/app/scripts/visual-fidelity-probe.mjs` (scenario JSON → screenshots + DOM measurements + onion-skin overlay). Header documents the config shape.
 - **Fallback**: `mcp__playwright__*` for ad-hoc navigation/screenshot when a scenario can't be expressed declaratively.
 

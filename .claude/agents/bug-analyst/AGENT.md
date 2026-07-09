@@ -11,7 +11,7 @@ You analyze a single bug issue end-to-end: reproduce the malfunction, identify t
 ## Model & Tools
 
 - **Model:** opus (diagnostic work, often non-trivial)
-- **Tools:** Bash (gh, kubectl, pnpm), Read, Grep, Glob, Playwright MCP, next-devtools MCP, figma-dev MCP (read-only — never modify code)
+- **Tools:** Bash (gh, kubectl, pnpm), Read, Grep, Glob, Playwright MCP, next-devtools MCP, figma MCP (read-only — never modify code)
 
 ## Inputs
 
@@ -56,7 +56,7 @@ Trois cas, à décider d'après le body et les réponses Q&A. Logger l'event cor
 |---|---|---|---|
 | **Fonctionnel local** | `REPRO_LOCAL` | Bug observable sur la branche `alpha` en local | Worktree `alpha` + `pnpm dev:app` + Playwright |
 | **Env-specific** | `REPRO_ENV` | Bug uniquement sur un env de review / preprod (ex : intégration ProConnect, déploiement, secret manquant) | `kubectl logs` + Playwright sur l'URL de l'env |
-| **Visual mismatch (Figma ↔ app)** | `REPRO_VISUAL` | L'utilisateur signale un écart entre une page de l'app et son design Figma | Worktree `alpha` + `pnpm dev:app` + Playwright + `figma-dev` MCP |
+| **Visual mismatch (Figma ↔ app)** | `REPRO_VISUAL` | L'utilisateur signale un écart entre une page de l'app et son design Figma | Worktree `alpha` + `pnpm dev:app` + Playwright + `figma` MCP |
 
 ### 2a. Fonctionnel local
 
@@ -88,10 +88,10 @@ kubectl -n <namespace> describe pod <pod>
 1. Localiser la page concernée dans le code (Grep sur les libellés mentionnés par l'utilisateur, ou Read direct si l'issue donne le path)
 2. Worktree `alpha` + `pnpm dev:app` (idem 2a) + Playwright sur la page
 3. Récupérer la référence Figma (URL dans l'issue, ou demander en Q&A si manquante)
-4. `mcp__figma-dev__get_figma_data` sur le node-id → arbre des nodes
+4. `mcp__figma__get_design_context` sur le node-id → code de référence + map des tokens + screenshot (`get_metadata` pour cartographier, `get_variable_defs` pour les tokens par nom)
 5. **Diff structurel** node-par-node : couleurs (`fill`), typographies (`fontSize`, `fontWeight`, textStyle), espacements (`itemSpacing`, `gap`), hiérarchie, contenu verbatim
 6. Mapping attendu en DSFR (référence : `rules/figma-workflow.md` Phases 1–3) ; identifier où l'implémentation diverge
-7. **Spot-check visuel** via `mcp__figma-dev__download_figma_images` uniquement si l'API structurelle est ambiguë (typiquement bold cell-by-cell sur tableaux)
+7. **Spot-check visuel** via `mcp__figma__get_screenshot` uniquement si l'API structurelle est ambiguë (typiquement bold cell-by-cell sur tableaux)
 
 ### 3. Identifier la root cause
 
