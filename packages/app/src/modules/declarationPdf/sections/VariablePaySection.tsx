@@ -1,5 +1,6 @@
 import { Text, View } from "@react-pdf/renderer";
 
+import { computeProportion } from "~/modules/domain";
 import { styles } from "../pdfStyles";
 import type { DeclarationPdfData } from "../types";
 import { PayGapTable } from "./PayGapTable";
@@ -18,9 +19,10 @@ export function VariablePaySection({ data }: { data: DeclarationPdfData }) {
 							Proportion de bénéficiaires — Femmes
 						</Text>
 						<Text style={styles.proportionValue}>
-							{data.step3Data.beneficiaryWomen
-								? `${data.step3Data.beneficiaryWomen} %`
-								: "-"}
+							{computeProportion(
+								data.step3Data.beneficiaryWomen,
+								data.totalWomen,
+							)}
 						</Text>
 					</View>
 					<View style={styles.proportionItem}>
@@ -28,9 +30,7 @@ export function VariablePaySection({ data }: { data: DeclarationPdfData }) {
 							Proportion de bénéficiaires — Hommes
 						</Text>
 						<Text style={styles.proportionValue}>
-							{data.step3Data.beneficiaryMen
-								? `${data.step3Data.beneficiaryMen} %`
-								: "-"}
+							{computeProportion(data.step3Data.beneficiaryMen, data.totalMen)}
 						</Text>
 					</View>
 				</View>

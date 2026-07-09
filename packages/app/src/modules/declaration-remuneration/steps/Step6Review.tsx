@@ -50,6 +50,8 @@ type Props = {
 	step3Data: Step3Data;
 	step4Data: Step4Data;
 	step5Categories?: EmployeeCategoryRow[];
+	totalWomen?: number;
+	totalMen?: number;
 	isSubmitted?: boolean;
 	hasCse?: boolean | null;
 };
@@ -62,6 +64,8 @@ export function Step6Review({
 	step3Data,
 	step4Data,
 	step5Categories = [],
+	totalWomen,
+	totalMen,
 	isSubmitted = false,
 	hasCse = null,
 }: Props) {
@@ -192,6 +196,8 @@ export function Step6Review({
 					step3Data={step3Data}
 					step4Data={step4Data}
 					step5Categories={step5Categories}
+					totalMen={totalMen}
+					totalWomen={totalWomen}
 					withTooltips
 				/>
 

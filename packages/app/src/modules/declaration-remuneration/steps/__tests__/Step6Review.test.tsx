@@ -299,10 +299,13 @@ describe("Step6Review", () => {
 					indicatorEMen: "55",
 				}}
 				step4Data={emptyStep4Data()}
+				totalMen={100}
+				totalWomen={90}
 			/>,
 		);
-		expect(screen.getByText("45 %")).toBeInTheDocument();
-		expect(screen.getByText("55 %")).toBeInTheDocument();
+		// Proportion = beneficiaries / workforce total, not the raw beneficiary count
+		expect(screen.getByText("50,0 %")).toBeInTheDocument();
+		expect(screen.getByText("55,0 %")).toBeInTheDocument();
 		expect(screen.getByText("Proportion")).toBeInTheDocument();
 	});
 
