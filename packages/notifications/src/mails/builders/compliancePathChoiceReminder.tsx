@@ -1,6 +1,6 @@
 import { formatFrenchDate } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
-import { getConnectionUrl, getDeclarationUrl } from "../shared/urls.js";
+import { getCompliancePathUrl, getLoginUrl } from "../shared/urls.js";
 import {
 	EmailClosingParagraph,
 	EmailContactParagraph,
@@ -15,7 +15,7 @@ import type { MailBuilder } from "../types.js";
 export const buildCompliancePathChoiceReminderMail: MailBuilder<
 	"compliance_path_choice_reminder"
 > = async (payload) => {
-	const { siren, year, round } = payload;
+	const { year, round } = payload;
 	const subject = `[Rappel] Egapro - Choisissez le parcours de mise en conformité pour l'indicateur d'écart de rémunération par catégorie de salariés pour l'année ${year}`;
 	const formattedDeadline = formatFrenchDate(payload.deadline);
 	const previewText = `Vous devez sélectionner un parcours de mise en conformité au plus tard le ${formattedDeadline}.`;
@@ -42,9 +42,9 @@ export const buildCompliancePathChoiceReminderMail: MailBuilder<
 			{statement}
 			<EmailClosingParagraph />
 			<EmailCtaWithLink
-				href={getDeclarationUrl(siren, year)}
+				href={getCompliancePathUrl()}
 				label="Sélectionner le parcours"
-				linkHref={getConnectionUrl()}
+				linkHref={getLoginUrl()}
 			/>
 			<EmailContactParagraph />
 			<EmailSignature />

@@ -1,5 +1,5 @@
 import { renderEmail } from "../shared/render.js";
-import { getConnectionUrl, getDeclarationUrl } from "../shared/urls.js";
+import { getDeclarationUrl, getLoginUrl } from "../shared/urls.js";
 import {
 	EmailClosingParagraph,
 	EmailContactParagraph,
@@ -14,7 +14,7 @@ import type { MailBuilder } from "../types.js";
 export const buildDeclarationDeadlineReminderMail: MailBuilder<
 	"declaration_deadline_reminder"
 > = async (payload) => {
-	const { siren, year } = payload;
+	const { year } = payload;
 	const subject = `[Rappel] Egapro - Déclarez vos indicateurs d'égalité professionnelle pour l'année ${year}`;
 	const previewText = `Votre déclaration des indicateurs de rémunération n'a pas encore été transmise pour l'année ${year}.`;
 	const { html, text } = await renderEmail(
@@ -31,9 +31,9 @@ export const buildDeclarationDeadlineReminderMail: MailBuilder<
 			</EmailParagraph>
 			<EmailClosingParagraph />
 			<EmailCtaWithLink
-				href={getDeclarationUrl(siren, year)}
+				href={getDeclarationUrl()}
 				label="Compléter ma déclaration"
-				linkHref={getConnectionUrl()}
+				linkHref={getLoginUrl()}
 			/>
 			<EmailContactParagraph />
 			<EmailSignature />

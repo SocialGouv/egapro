@@ -1,6 +1,10 @@
 import { formatFrenchDate, formatSiren } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
-import { getDeclarationUrl, getMySpaceUrl } from "../shared/urls.js";
+import {
+	getAvisCseUrl,
+	getCompliancePathUrl,
+	getMySpaceUrl,
+} from "../shared/urls.js";
 import {
 	EmailContactParagraph,
 	EmailCtaWithLink,
@@ -22,8 +26,6 @@ type VariantContent = {
 
 function getVariantContent(
 	variant: DeclarationConfirmationVariant,
-	siren: string,
-	year: number,
 	complianceDeadline: string | undefined,
 ): VariantContent {
 	switch (variant) {
@@ -46,7 +48,7 @@ function getVariantContent(
 				variantParagraph:
 					"Vous devez à présent déposer le ou les avis du CSE portant sur l'exactitude des données et des méthodes de calcul utilisées pour la première et la seconde déclaration.",
 				ctaLabel: "Déposer l'avis",
-				ctaHref: getDeclarationUrl(siren, year),
+				ctaHref: getAvisCseUrl(),
 			};
 		case "path_to_select": {
 			if (!complianceDeadline) {
@@ -61,7 +63,7 @@ function getVariantContent(
 					"Votre seconde déclaration des indicateurs de rémunération a bien été transmise.",
 				variantParagraph: `L'indicateur d'écart de rémunération par catégorie de salariés fait à nouveau apparaître un ou plusieurs écarts de rémunération supérieurs ou égaux à 5 %. En conséquence, vous devez sélectionner un parcours de mise en conformité au plus tard le ${formattedDeadline}.`,
 				ctaLabel: "Sélectionner le parcours",
-				ctaHref: getDeclarationUrl(siren, year),
+				ctaHref: getCompliancePathUrl(),
 			};
 		}
 	}
@@ -71,7 +73,7 @@ export const buildSecondDeclarationConfirmationMail: MailBuilder<
 	"second_declaration_confirmation"
 > = async (payload) => {
 	const { siren, year, variant, raisonSociale, complianceDeadline } = payload;
-	const content = getVariantContent(variant, siren, year, complianceDeadline);
+	const content = getVariantContent(variant, complianceDeadline);
 	const formattedSiren = formatSiren(siren);
 	const { html, text } = await renderEmail(
 		<EmailShell previewText={content.previewText}>

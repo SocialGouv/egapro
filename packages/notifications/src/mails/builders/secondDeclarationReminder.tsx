@@ -1,6 +1,6 @@
 import { formatFrenchDate } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
-import { getConnectionUrl, getMySpaceUrl } from "../shared/urls.js";
+import { getLoginUrl, getMySpaceUrl } from "../shared/urls.js";
 import {
 	EmailClosingParagraph,
 	EmailContactParagraph,
@@ -34,7 +34,7 @@ export const buildSecondDeclarationReminderMail: MailBuilder<
 			<EmailCtaWithLink
 				href={getMySpaceUrl()}
 				label="Mon espace"
-				linkHref={getConnectionUrl()}
+				linkHref={getLoginUrl()}
 			/>
 			<EmailContactParagraph />
 			<EmailSignature />

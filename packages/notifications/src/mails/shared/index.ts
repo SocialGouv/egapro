@@ -8,9 +8,12 @@ export { type RenderedEmail, renderEmail } from "./render.js";
 export {
 	getAssetUrl,
 	getAvisCseUrl,
-	getConnectionUrl,
+	getCompliancePathUrl,
+	getCorrectiveActionsUrl,
 	getDeclarationUrl,
 	getImageUrl,
+	getJointEvaluationUrl,
+	getLoginUrl,
 	getMySpaceUrl,
 	getPublicUrl,
 } from "./urls.js";

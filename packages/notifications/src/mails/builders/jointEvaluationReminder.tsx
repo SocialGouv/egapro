@@ -1,6 +1,10 @@
 import { formatFrenchDate } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
-import { getConnectionUrl, getMySpaceUrl } from "../shared/urls.js";
+import {
+	getJointEvaluationUrl,
+	getLoginUrl,
+	getMySpaceUrl,
+} from "../shared/urls.js";
 import {
 	EmailClosingParagraph,
 	EmailContactParagraph,
@@ -40,16 +44,15 @@ export const buildJointEvaluationReminderMail: MailBuilder<
 			</EmailParagraph>
 		);
 	const label = round === "first" ? "Déposer le rapport" : "Mon espace";
+	// Round 1 lands on the joint-evaluation upload page; round 2's generic
+	// "Mon espace" CTA lands on the user's space.
+	const ctaHref = round === "first" ? getJointEvaluationUrl() : getMySpaceUrl();
 	const { html, text } = await renderEmail(
 		<EmailShell previewText={previewText}>
 			<EmailGreeting>Bonjour,</EmailGreeting>
 			{statement}
 			<EmailClosingParagraph />
-			<EmailCtaWithLink
-				href={getMySpaceUrl()}
-				label={label}
-				linkHref={getConnectionUrl()}
-			/>
+			<EmailCtaWithLink href={ctaHref} label={label} linkHref={getLoginUrl()} />
 			<EmailContactParagraph />
 			<EmailSignature />
 		</EmailShell>,

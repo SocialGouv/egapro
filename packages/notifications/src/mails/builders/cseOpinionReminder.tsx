@@ -1,5 +1,5 @@
 import { renderEmail } from "../shared/render.js";
-import { getAvisCseUrl, getConnectionUrl } from "../shared/urls.js";
+import { getAvisCseUrl, getLoginUrl } from "../shared/urls.js";
 import {
 	EmailClosingParagraph,
 	EmailContactParagraph,
@@ -18,7 +18,7 @@ import type { MailBuilder } from "../types.js";
 export const buildCseOpinionReminderMail: MailBuilder<
 	"cse_opinion_reminder"
 > = async (payload) => {
-	const { siren, year } = payload;
+	const { year } = payload;
 	const subject = `[Rappel] Egapro - Déposer le ou les avis du CSE pour l'année ${year}`;
 	const previewText =
 		"Vous devez déposer le ou les avis du CSE portant sur l'exactitude des données et la justification éventuelle des écarts de rémunération.";
@@ -33,9 +33,9 @@ export const buildCseOpinionReminderMail: MailBuilder<
 			</EmailParagraph>
 			<EmailClosingParagraph />
 			<EmailCtaWithLink
-				href={getAvisCseUrl(siren)}
+				href={getAvisCseUrl()}
 				label="Déposer le rapport"
-				linkHref={getConnectionUrl()}
+				linkHref={getLoginUrl()}
 			/>
 			<EmailContactParagraph />
 			<EmailSignature />

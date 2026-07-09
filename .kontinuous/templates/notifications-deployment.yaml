@@ -105,6 +105,13 @@ spec:
                 name: notifications
                 optional: true
           env:
+            # Public URL of the environment (prod / preprod / review app), same
+            # host as the app (cf. NEXTAUTH_URL in values.yaml). Injected into
+            # the mail links (CTA, footer, Marianne fonts) rendered by the
+            # worker. Without it, urls.ts falls back to production → wrong links
+            # outside prod.
+            - name: EGAPRO_PUBLIC_URL
+              value: "https://{{ .Values.global.host }}"
             # pg-boss queue DB — dedicated infra, isolated from the main app
             # so a crash here does not block business mutations. The secret
             # name is overridable; `optional: true` keeps the pod alive when
