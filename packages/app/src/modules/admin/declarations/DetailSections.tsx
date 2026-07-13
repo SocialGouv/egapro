@@ -193,7 +193,7 @@ export function FilesSection({ files }: { files: DeclarationDetail["files"] }) {
 							<td>{formatShortDate(file.uploadedAt)}</td>
 							<td>
 								<a
-									aria-label={`Télécharger ${file.fileName}`}
+									aria-label={`Télécharger ${file.fileName} (PDF)`}
 									className="fr-btn fr-btn--sm fr-btn--secondary fr-btn--icon-left fr-icon-download-line"
 									download
 									href={`/api/v1/files/${file.id}`}

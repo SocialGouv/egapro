@@ -22,14 +22,18 @@ describe("RecapitulatifPage", () => {
 
 	it("renders 'Télécharger' tertiary download button", () => {
 		render(<RecapitulatifPage {...defaultProps()} />);
-		const link = screen.getByRole("link", { name: "Télécharger" });
+		const link = screen.getByRole("link", {
+			name: "Télécharger la déclaration des indicateurs de rémunération (PDF)",
+		});
 		expect(link).toHaveAttribute("href", "/api/declaration-pdf?year=2025");
 		expect(link.className).toContain("fr-btn--tertiary");
 	});
 
 	it("renders download link with correction param when isCorrection", () => {
 		render(<RecapitulatifPage {...defaultProps()} isCorrection />);
-		const link = screen.getByRole("link", { name: "Télécharger" });
+		const link = screen.getByRole("link", {
+			name: "Télécharger la déclaration des indicateurs de rémunération (PDF)",
+		});
 		expect(link).toHaveAttribute(
 			"href",
 			"/api/declaration-pdf?year=2025&type=correction",
