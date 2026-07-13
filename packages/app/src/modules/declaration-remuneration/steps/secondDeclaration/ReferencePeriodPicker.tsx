@@ -17,21 +17,17 @@ export function ReferencePeriodPicker({
 	disabled = false,
 }: Props) {
 	return (
-		<div>
-			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters fr-mb-2w">
-				<div className="fr-col-auto">
-					<p className={`fr-mb-0 ${styles.periodLabel}`}>
-						Quelle est la période de référence pour le calcul de
-						l&apos;indicateur ?
-					</p>
-				</div>
-				<div className="fr-col-auto">
-					<TooltipButton
-						id="tooltip-second-decl-period"
-						label="Informations sur la période prise en compte pour la seconde déclaration"
-					/>
-				</div>
-			</div>
+		<fieldset className={styles.fieldset}>
+			<legend className={`fr-mb-2w ${styles.legend}`}>
+				<span>
+					Quelle est la période de référence pour le calcul de l&apos;indicateur
+					?
+				</span>
+				<TooltipButton
+					id="tooltip-second-decl-period"
+					label="Informations sur la période prise en compte pour la seconde déclaration"
+				/>
+			</legend>
 			<div className="fr-grid-row fr-grid-row--gutters">
 				<div className="fr-col-12 fr-col-md-4">
 					<div className="fr-input-group">
@@ -66,6 +62,6 @@ export function ReferencePeriodPicker({
 					</div>
 				</div>
 			</div>
-		</div>
+		</fieldset>
 	);
 }
