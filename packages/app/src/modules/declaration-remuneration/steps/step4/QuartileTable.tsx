@@ -119,8 +119,12 @@ export function QuartileTable({
 										))}
 										<tr>
 											<th scope="row">Tous les salariés</th>
-											<td className={stepStyles.minCell} />
-											<td className={stepStyles.maxCell} />
+											<td className={stepStyles.minCell}>
+												<span className="fr-sr-only">Non applicable</span>
+											</td>
+											<td className={stepStyles.maxCell}>
+												<span className="fr-sr-only">Non applicable</span>
+											</td>
 											<td
 												className={stepStyles.numericCell}
 												data-mobile-label="Nombre de femmes"
