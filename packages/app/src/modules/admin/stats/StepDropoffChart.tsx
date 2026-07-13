@@ -33,6 +33,8 @@ type DropoffTooltipProps = {
 	payload?: TooltipEntry[];
 };
 
+const CHART_CAPTION = `Taux d'abandon par phase de la démarche déclarative : pourcentage de déclarations entrées sur chaque étape du wizard ou phase post-soumission et qui n'ont pas progressé depuis le délai sélectionné. Les barres rouges signalent une phase dont le taux dépasse ${DROPOFF_RATE_ALERT_THRESHOLD} %.`;
+
 const WIZARD_NORMAL_COLOR = "var(--background-action-high-blue-france)";
 const WIZARD_ALERT_COLOR = "var(--background-action-high-red-marianne)";
 const POST_SUBMIT_NORMAL_COLOR = "var(--background-action-low-blue-france)";
@@ -85,49 +87,51 @@ export function StepDropoffChart({ rows }: Props) {
 	return (
 		<figure className={styles.chartWrapper}>
 			<figcaption className="fr-sr-only">
-				Taux d'abandon par phase de la démarche déclarative : pourcentage de
-				déclarations entrées sur chaque étape du wizard ou phase post-soumission
-				et qui n'ont pas progressé depuis le délai sélectionné. Les barres
-				rouges signalent une phase dont le taux dépasse{" "}
-				{DROPOFF_RATE_ALERT_THRESHOLD} %. Les données équivalentes sont
-				disponibles dans le tableau ci-dessous.
+				{CHART_CAPTION} Les données équivalentes sont disponibles dans le
+				tableau ci-dessous.
 			</figcaption>
-			<ResponsiveContainer>
-				<BarChart
-					data={rows}
-					layout="vertical"
-					margin={{ top: 16, right: 32, bottom: 24, left: 8 }}
-				>
-					<CartesianGrid strokeDasharray="3 3" />
-					<XAxis
-						domain={[0, 100]}
-						label={{
-							value: "Taux d'abandon (%)",
-							position: "insideBottom",
-							offset: -8,
-						}}
-						tickFormatter={(value: number) => `${value}`}
-						type="number"
-					/>
-					<YAxis
-						dataKey="label"
-						interval={0}
-						tick={{ fontSize: 12 }}
-						type="category"
-						width={260}
-					/>
-					<Tooltip content={<DropoffTooltip />} />
-					<Bar
-						dataKey="dropoffRate"
-						fill={WIZARD_NORMAL_COLOR}
-						name="Taux d'abandon"
+			<div
+				aria-label={CHART_CAPTION}
+				className={styles.chartContainer}
+				role="img"
+			>
+				<ResponsiveContainer>
+					<BarChart
+						data={rows}
+						layout="vertical"
+						margin={{ top: 16, right: 32, bottom: 24, left: 8 }}
 					>
-						{rows.map((row) => (
-							<Cell fill={getBarColor(row)} key={row.key} />
-						))}
-					</Bar>
-				</BarChart>
-			</ResponsiveContainer>
+						<CartesianGrid strokeDasharray="3 3" />
+						<XAxis
+							domain={[0, 100]}
+							label={{
+								value: "Taux d'abandon (%)",
+								position: "insideBottom",
+								offset: -8,
+							}}
+							tickFormatter={(value: number) => `${value}`}
+							type="number"
+						/>
+						<YAxis
+							dataKey="label"
+							interval={0}
+							tick={{ fontSize: 12 }}
+							type="category"
+							width={260}
+						/>
+						<Tooltip content={<DropoffTooltip />} />
+						<Bar
+							dataKey="dropoffRate"
+							fill={WIZARD_NORMAL_COLOR}
+							name="Taux d'abandon"
+						>
+							{rows.map((row) => (
+								<Cell fill={getBarColor(row)} key={row.key} />
+							))}
+						</Bar>
+					</BarChart>
+				</ResponsiveContainer>
+			</div>
 		</figure>
 	);
 }
