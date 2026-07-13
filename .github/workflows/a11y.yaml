@@ -1,0 +1,55 @@
+name: "♿ Accessibilité (ultra11y RGAA)"
+
+# Gate d'accessibilité RGAA 4.1.2 / WCAG 2.2 AA piloté par ultra11y (vendored, zéro-dép).
+# Remplace les anciens workflows rgaa-audit.yaml (axe daily → wiki) et claude-revue-rgaa.yml.
+# Le moteur statique ultra11y (moteur JSX/TSX AST embarqué) ne requiert ni navigateur ni install.
+# Le tier rendu (scan zoom/reflow/contraste/focus) reste local/optionnel — voir pnpm --filter app a11y:scan.
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1" # lundi 06:00 UTC — rapport RGAA hebdomadaire (artefact)
+  workflow_dispatch:
+
+concurrency:
+  cancel-in-progress: true
+  group: "${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}"
+
+jobs:
+  a11y-gate:
+    name: "RGAA · audit statique (bloquant)"
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+      - name: ultra11y — audit RGAA statique (échoue sur NC bloquante)
+        working-directory: packages/app
+        run: node ../../.claude/skills/ultra11y/scripts/ultra11y.mjs audit "src/**/*.tsx" --jsx --graph --standard rgaa --lang fr --fail-on blocking
+
+  a11y-report:
+    name: "RGAA · rapport de conformité (artefact)"
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+      - name: ultra11y — rapport RGAA
+        working-directory: packages/app
+        run: |
+          node ../../.claude/skills/ultra11y/scripts/ultra11y.mjs audit "src/**/*.tsx" --jsx --graph --standard rgaa --lang fr --out audits
+          node ../../.claude/skills/ultra11y/scripts/ultra11y.mjs report --in audits/audit-latest.json --standard rgaa --lang fr --out audits
+      - name: Upload rapport RGAA
+        uses: actions/upload-artifact@v4
+        with:
+          name: rgaa-report
+          path: packages/app/audits/rgaa-*.md

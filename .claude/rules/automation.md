@@ -74,7 +74,7 @@ Because `code-dev` spawns these agents itself (`tu-dev` + the 4 gates + `functio
 
 1. **Validator** — delegate to `.claude/agents/validator/AGENT.md` (typecheck + test + lint + format)
 2. **Structural auditor** — delegate to `.claude/agents/structural-auditor/AGENT.md` on all modified files
-3. **RGAA auditor** — delegate to `.claude/agents/rgaa-auditor/AGENT.md` on all modified `.tsx` files. If no `.tsx` files → instant `PASS — no UI files`.
+3. **RGAA auditor** — delegate to `.claude/agents/rgaa-auditor/AGENT.md` (pilote **ultra11y**, RGAA 4.1.2 / WCAG 2.2 AA — voir `.claude/rules/rgaa.md`) on all modified `.tsx` files. If no `.tsx` files → instant `PASS — no UI files`.
 4. **Security auditor** — delegate to `.claude/agents/security-auditor/AGENT.md` on all modified `.ts/.tsx` in `server/`, `routers/`, or tRPC. If none → instant `SECURE — no server files`.
 
 If any fails → fix → re-run. Only report completion when all 4 pass.
@@ -149,7 +149,7 @@ Agents in `.claude/agents/` are delegated to automatically by skills and quality
 |---|---|---|
 | `validator` | Typecheck + test + lint + format (parallel) | sonnet |
 | `structural-auditor` | 17-rule structural audit (code quality, forms, schemas, DRY, imports, no-comments…) | sonnet |
-| `rgaa-auditor` | Full 13-theme RGAA accessibility audit | sonnet |
+| `rgaa-auditor` | Audit RGAA 4.1.2 / WCAG 2.2 AA piloté par **ultra11y** | sonnet |
 | `security-auditor` | OWASP Top 10 + RGS security review | sonnet |
 
 These agents are **read-only** — they report findings but never modify files. Fixes are applied by the main agent after review.

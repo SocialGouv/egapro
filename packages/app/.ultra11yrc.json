@@ -1,0 +1,94 @@
+{
+	"standard": "rgaa",
+	"sample": {
+		"pages": [
+			{
+				"id": "accueil",
+				"name": "Page d'accueil",
+				"url": "http://localhost:3000/"
+			},
+			{
+				"id": "authentification",
+				"name": "Connexion ProConnect",
+				"url": "http://localhost:3000/login"
+			},
+			{ "id": "aide", "name": "Aide", "url": "http://localhost:3000/aide" },
+			{
+				"id": "contact",
+				"name": "Nous contacter",
+				"url": "http://localhost:3000/aide/nous-contacter"
+			},
+			{
+				"id": "plan-du-site",
+				"name": "Plan du site",
+				"url": "http://localhost:3000/plan-du-site"
+			},
+			{
+				"id": "mentions-legales",
+				"name": "Mentions légales",
+				"url": "http://localhost:3000/mentions-legales"
+			},
+			{
+				"id": "declaration-accessibilite",
+				"name": "Déclaration d'accessibilité",
+				"url": "http://localhost:3000/declaration-accessibilite"
+			},
+			{
+				"id": "stats",
+				"name": "Statistiques publiques",
+				"url": "http://localhost:3000/stats"
+			},
+			{
+				"id": "mon-espace",
+				"name": "Mon espace",
+				"url": "http://localhost:3000/mon-espace",
+				"auth": true,
+				"storageState": ".auth/user.json",
+				"notes": "connecté"
+			},
+			{
+				"id": "declaration-etape-1",
+				"name": "Déclaration rémunération — étape 1",
+				"url": "http://localhost:3000/declaration-remuneration/parcours-conformite/etape/1",
+				"auth": true,
+				"storageState": ".auth/user.json",
+				"notes": "connecté"
+			},
+			{
+				"id": "declaration-etape-2",
+				"name": "Déclaration rémunération — étape 2",
+				"url": "http://localhost:3000/declaration-remuneration/parcours-conformite/etape/2",
+				"auth": true,
+				"storageState": ".auth/user.json",
+				"notes": "connecté, écarts par catégorie"
+			},
+			{
+				"id": "admin-declarations",
+				"name": "Back-office — déclarations",
+				"url": "http://localhost:3000/admin/declarations",
+				"auth": true,
+				"storageState": ".auth/admin.json",
+				"notes": "session admin"
+			}
+		],
+		"transverse": [
+			"header (bandeau)",
+			"navigation principale",
+			"accès rapides",
+			"modale « Mon profil »",
+			"infobulles d'aide",
+			"pied de page"
+		]
+	},
+	"secondaryMappings": [
+		{
+			"standard": "rgaa",
+			"ruleId": "dyn-live-region",
+			"criterion": "7.4",
+			"note": {
+				"fr": "Ara classe la mise à jour d'une région live sous 7.4 (changement de contexte) ; activé pour egapro (cf. #3873).",
+				"en": "Ara classifies live-region updates under 7.4; enabled for egapro (see #3873)."
+			}
+		}
+	]
+}
