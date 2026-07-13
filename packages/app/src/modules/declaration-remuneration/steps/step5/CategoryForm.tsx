@@ -488,14 +488,7 @@ export function CategoryForm({
 								}}
 							>
 								<div className={stepStyles.categoryBlock}>
-									{readOnlyLabel ? (
-										<p className="fr-mb-0">
-											<span className="fr-text--bold">
-												Libellé de la catégorie d'emploi :{" "}
-											</span>
-											{cat?.name}
-										</p>
-									) : (
+									{!readOnlyLabel && (
 										<div className="fr-input-group fr-mb-0">
 											<label className="fr-label" htmlFor={`cat-${index}-name`}>
 												Libellé de la catégorie d'emploi
