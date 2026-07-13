@@ -282,7 +282,7 @@ Never define schemas in `src/server/api/routers/`. Always in `src/modules/{domai
 - `register()` spreads directly on native `<input>` elements with DSFR classes
 - Use `Controller` for non-standard controls (radios, custom selects)
 - Field errors: `fr-input-group--error` + `<p className="fr-error-text">`
-- Form errors: `fr-alert fr-alert--error` with `aria-live="polite"`
+- Form / server-action errors: `fr-alert fr-alert--error` with **`role="alert"`** (implies assertive — never also set `aria-live`). Info / async status → `aria-live="polite"` + `aria-atomic="true"`. See the Accessibility « Live regions » rule and `.claude/rules/rgaa.md`.
 
 ### File uploads
 

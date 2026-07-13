@@ -10,12 +10,12 @@ export function FormErrors({
 	return (
 		<>
 			{validationError && (
-				<div aria-live="polite" className="fr-alert fr-alert--error">
+				<div className="fr-alert fr-alert--error" role="alert">
 					<p>{validationError}</p>
 				</div>
 			)}
 			{mutationError && (
-				<div aria-live="polite" className="fr-alert fr-alert--error">
+				<div className="fr-alert fr-alert--error" role="alert">
 					<p>{mutationError}</p>
 				</div>
 			)}
