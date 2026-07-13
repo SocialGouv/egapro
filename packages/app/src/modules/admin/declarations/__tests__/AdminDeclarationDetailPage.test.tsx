@@ -113,7 +113,7 @@ describe("AdminDeclarationDetailPage", () => {
 		).toBeInTheDocument();
 		expect(screen.getByText("avis-cse.pdf")).toBeInTheDocument();
 		const downloadLink = screen.getByRole("link", {
-			name: "Télécharger avis-cse.pdf",
+			name: "Télécharger avis-cse.pdf (PDF)",
 		});
 		expect(downloadLink).toHaveAttribute("href", "/api/v1/files/file-1");
 	});

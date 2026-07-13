@@ -129,6 +129,7 @@ export function RecapitulatifPage({
 				</div>
 				<div className="fr-col-auto">
 					<a
+						aria-label="Télécharger la déclaration des indicateurs de rémunération (PDF)"
 						className="fr-btn fr-btn--tertiary fr-btn--icon-left fr-icon-download-line"
 						download
 						href={buildPdfHref(declarationYear, isCorrection)}
