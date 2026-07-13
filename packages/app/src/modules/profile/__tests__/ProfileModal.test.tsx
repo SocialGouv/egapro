@@ -112,20 +112,20 @@ describe("ProfileModal", () => {
 	it("renders the readonly Nom field with label and edit icon", () => {
 		render(<ProfileModal />);
 		expect(screen.getByText("Nom")).toBeInTheDocument();
-		expect(screen.getByText("Martin")).toBeInTheDocument();
+		expect(screen.getByDisplayValue("Martin")).toBeInTheDocument();
 	});
 
 	it("renders the readonly Prénom field with label and edit icon", () => {
 		render(<ProfileModal />);
 		expect(screen.getByText("Prénom")).toBeInTheDocument();
-		expect(screen.getByText("Julien")).toBeInTheDocument();
+		expect(screen.getByDisplayValue("Julien")).toBeInTheDocument();
 	});
 
 	it("renders the readonly Email field", () => {
 		render(<ProfileModal />);
 		expect(screen.getByText("Email du déclarant")).toBeInTheDocument();
 		expect(
-			screen.getByText("julien.martin@alpha-solution.fr"),
+			screen.getByDisplayValue("julien.martin@alpha-solution.fr"),
 		).toBeInTheDocument();
 	});
 

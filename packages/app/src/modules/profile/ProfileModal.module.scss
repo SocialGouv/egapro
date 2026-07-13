@@ -14,10 +14,14 @@
 }
 
 .readonlyValue {
+	width: 100%;
+	box-sizing: border-box;
 	padding: 0.5rem 1rem;
 	background-color: var(--background-contrast-grey);
+	border: none;
 	border-radius: 0.25rem 0.25rem 0 0;
 	border-bottom: 2px solid var(--border-default-grey);
+	font-family: inherit;
 	font-size: 1rem;
 	line-height: 1.5;
 	color: var(--text-mention-grey);
