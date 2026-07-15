@@ -177,7 +177,6 @@ function getProviders(): Provider[] {
 			authorization: {
 				params: {
 					scope: "openid email given_name usual_name siret",
-					acr_values: "eidas2",
 				},
 			},
 			idToken: true,
