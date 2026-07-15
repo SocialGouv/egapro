@@ -11,10 +11,16 @@ import {
 	deleteCampaignDeadlines,
 	setCampaignDeadlines,
 } from "./helpers/db-campaign";
-import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 import { loginWithProConnect } from "./helpers/login";
 
-const PANEL_ID = "declaration-process-panel";
+// The panel's deadline-based rendering (Modifier link + "Modifiable jusqu'au" vs
+// "Modification close depuis" when the deadline has passed) is covered by
+// src/modules/my-space/__tests__/DeclarationProcessPanel.test.tsx
+// ("modify button gating by deadline"). What remains here is the route-level
+// gating that no component test can exercise: a submitted declaration can still
+// re-enter a non-recap step, editable before the deadline and read-only after
+// (#3716).
+
 // Match the year that api.declaration.getOrCreate() uses on first login.
 const testDeclarationYear = getCurrentYear();
 
@@ -71,38 +77,6 @@ test.describe("Campaign deadlines gating", () => {
 			await setCampaignDeadlines(testDeclarationYear, FUTURE_DEADLINES);
 		});
 
-		test("panel shows Modifier link and 'Modifiable jusqu'au' text", async ({
-			page,
-		}) => {
-			await seedUserProfile();
-			await page.context().clearCookies();
-			await loginWithProConnect(page);
-			// The declaration row is only created by getOrCreate() when visiting a
-			// /declaration-remuneration page. /mon-espace does not trigger it, so we
-			// navigate there once before seeding, then go back to /mon-espace.
-			await page.goto("/declaration-remuneration");
-			await seedSubmittedCompliance();
-			await page.goto("/mon-espace");
-			await waitForDsfrModal(page, PANEL_ID);
-
-			const panel = page.locator(`#${PANEL_ID}`);
-			const remuButton = page.getByRole("button", { name: "Rémunération" });
-			await expect(remuButton.first()).toBeVisible();
-			await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
-
-			await expect(
-				panel.getByText("Votre déclaration a été transmise"),
-			).toBeVisible();
-			await expect(panel.getByText(/Modifiable jusqu'au/)).toBeVisible();
-
-			const modifyLink = panel.getByRole("link", { name: "Modifier" }).first();
-			await expect(modifyLink).toBeVisible();
-			await expect(modifyLink).toHaveAttribute(
-				"href",
-				/\/declaration-remuneration\/etape\/1/,
-			);
-		});
-
 		test("submitted declaration can re-enter a non-recap step", async ({
 			page,
 		}) => {
@@ -120,33 +94,6 @@ test.describe("Campaign deadlines gating", () => {
 	test.describe("Deadline in the past", () => {
 		test.beforeAll(async () => {
 			await setCampaignDeadlines(testDeclarationYear, PAST_DEADLINES);
-		});
-
-		test("panel hides Modifier link and shows 'Modification close depuis'", async ({
-			page,
-		}) => {
-			await seedUserProfile();
-			await page.context().clearCookies();
-			await loginWithProConnect(page);
-			await page.goto("/declaration-remuneration");
-			await seedSubmittedCompliance();
-			await page.goto("/mon-espace");
-			await waitForDsfrModal(page, PANEL_ID);
-
-			const panel = page.locator(`#${PANEL_ID}`);
-			const remuButton = page.getByRole("button", { name: "Rémunération" });
-			await expect(remuButton.first()).toBeVisible();
-			await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
-
-			await expect(
-				panel.getByText("Votre déclaration a été transmise"),
-			).toBeVisible();
-			await expect(
-				panel.getByText(/Modification close depuis le/),
-			).toBeVisible();
-			await expect(panel.getByRole("link", { name: "Modifier" })).toHaveCount(
-				0,
-			);
 		});
 
 		test("submitted declaration re-enters a non-recap step in read-only", async ({
