@@ -29,7 +29,7 @@ You receive a list of modified `.tsx` files (or none → audit the git diff).
    ```
    (No file list? use `--changed` instead of the glob to audit exactly the git diff.)
 2. **Adjudicate the judgment criteria** — for every criterion the engine leaves `manual` (alt relevance, link purpose, reading order, on-focus/on-input, keyboard operability and focus order/visibility for the parts decidable from source), read the full component source and rule on it, following the skill's references. Load them via the `ultra11y` skill or read directly: `.claude/skills/ultra11y/references/{judgment,focus-and-logic,false-positives}.md`. Do **not** promote a non-normative recommendation (e.g. a best-practice-only signal) to a non-conformity.
-3. **Flag the rendered-DOM criteria as residual** — computed contrast, visible focus, 200% zoom, reflow 320px, text-spacing, content-on-hover and live-region behaviour are **not** statically decidable. Name them as residual risks to verify with the rendered tier (`pnpm --filter app a11y:scan`), never silently "conforming".
+3. **Flag the rendered-DOM criteria as residual** — computed contrast, visible focus, 200% zoom, reflow 320px, text-spacing, content-on-hover and live-region behaviour are **not** statically decidable. Name them as residual risks, covered by the Lighthouse a11y 100% gate + manual review, never silently "conforming".
 4. **Anti-hallucination** — every reported non-conformity must cite a real, resolvable `file:line` from the engine output or from source you quote. Discard anything you cannot ground.
 
 ## DSFR / project specifics
@@ -50,7 +50,7 @@ Severity:
 - `[ERROR]` — blocking non-conformity (missing label/alt, broken focus/keyboard, ARIA trap, contradictory live region).
 - `[WARN]` — major/minor non-conformity or degraded experience (missing `aria-describedby`, non-descriptive link, redundant role).
 
-List residual (rendered) criteria separately as `[RESIDUAL] RGAA-{criterion} — verify via a11y:scan`.
+List residual (rendered) criteria separately as `[RESIDUAL] RGAA-{criterion} — rendered tier (Lighthouse 100% + manual)`.
 
 End with exactly one verdict:
 - `PASS` — no non-conformity (residual risks may remain, named).

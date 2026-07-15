@@ -3,7 +3,7 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 # Gate d'accessibilité RGAA 4.1.2 / WCAG 2.2 AA piloté par ultra11y (vendored, zéro-dép).
 # Remplace les anciens workflows rgaa-audit.yaml (axe daily → wiki) et claude-revue-rgaa.yml.
 # Le moteur statique ultra11y (moteur JSX/TSX AST embarqué) ne requiert ni navigateur ni install.
-# Le tier rendu (scan zoom/reflow/contraste/focus) reste local/optionnel — voir pnpm --filter app a11y:scan.
+# Les critères « au rendu » (contraste/zoom/reflow/focus visible) sont couverts par la gate Lighthouse a11y 100 %.
 
 on:
   push:

@@ -211,7 +211,7 @@ Cascade: 1) DSFR classes → 2) DSFR utilities + CSS custom properties → 3) Sc
 
 ## Accessibility (RGAA 4.1.2 / WCAG 2.2 AA)
 
-> **Canonical rule → [`.claude/rules/rgaa.md`](../../.claude/rules/rgaa.md)** — the project's a11y system is **ultra11y** (vendored at `.claude/skills/ultra11y/`, committed so every dev has it). Verify with `pnpm --filter app test:a11y` (static gate) + `a11y:scan` (rendered tier) + Lighthouse 100% + the `rgaa-auditor` agent.
+> **Canonical rule → [`.claude/rules/rgaa.md`](../../.claude/rules/rgaa.md)** — the project's a11y system is **ultra11y** (vendored at `.claude/skills/ultra11y/`, committed so every dev has it). Verify with `pnpm --filter app test:a11y` (static gate, run automatically in CI on every push/PR) + Lighthouse 100% (rendered tier) + the `rgaa-auditor` agent.
 
 ### Mandatory checklist (extract — full rules in the canonical rule)
 

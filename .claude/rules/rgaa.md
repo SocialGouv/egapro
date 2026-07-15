@@ -14,24 +14,22 @@ egapro est une plateforme de l'État : le niveau de conformité visé est **RGAA
 
 L'outil d'accessibilité du projet est **ultra11y**, vendoré dans le repo à **`.claude/skills/ultra11y/`** — committé pour que **tous les devs** l'aient automatiquement (skill projet-scopé + moteur CLI zéro-dép, pas d'install par dev). Source : `github.com/maxgfr/ultra11y` (v2.14.0, MIT).
 
-Division du travail : le **moteur** (`node .claude/skills/ultra11y/scripts/ultra11y.mjs`) fait la détection mécanique WCAG et rattache chaque non-conformité au bon critère ; **l'IA adjuge** les critères de jugement (pertinence des `alt`, intitulé de lien en contexte, ordre de lecture, logique clavier/focus) et route les critères « au rendu » vers le tier `scan`. Jamais de statut « conforme » sans verdict enregistré et gaté.
+Division du travail : le **moteur** (`node .claude/skills/ultra11y/scripts/ultra11y.mjs`) fait la détection mécanique WCAG et rattache chaque non-conformité au bon critère ; **l'IA adjuge** les critères de jugement (pertinence des `alt`, intitulé de lien en contexte, ordre de lecture, logique clavier/focus) et **signale les critères « au rendu » comme risques résiduels** (contraste/zoom/reflow/focus visible), couverts par la gate Lighthouse a11y 100 %. Jamais de statut « conforme » sans verdict enregistré et gaté.
 
 | Besoin | Commande (depuis `packages/app`) |
 |---|---|
 | Gate CI statique (bloquant) | `pnpm --filter app test:a11y` |
 | Rapport RGAA complet | `pnpm --filter app a11y:report` → `audits/rgaa-*.md` |
-| Tier rendu (zoom/reflow/contraste/focus/live) — local | `pnpm --filter app a11y:scan` (dev server + `.auth/*.json`) |
 | Sens d'un critère | `node ../../.claude/skills/ultra11y/scripts/ultra11y.mjs criteria --standard rgaa 8.3` |
 
 Voir la doc du skill : `.claude/skills/ultra11y/SKILL.md` + `references/*.md` (`judgment.md`, `focus-and-logic.md`, `false-positives.md`).
 
 ## Vérification (socle)
 
-1. **`pnpm --filter app test:a11y`** — gate statique ultra11y (`--fail-on blocking`), lancé en CI (`.github/workflows/a11y.yaml`) et en local. Aucune NC bloquante ne doit passer.
+1. **`pnpm --filter app test:a11y`** — gate statique ultra11y (`--fail-on blocking`), lancé **automatiquement** en CI (`.github/workflows/a11y.yaml`, sur chaque push/PR) et en local. Aucune NC bloquante ne doit passer.
 2. **`rgaa-auditor`** — gate agent après chaque tâche sur les `.tsx` modifiés (pilote ultra11y + adjuge le jugement). Read-only.
-3. **Lighthouse a11y = 100 %** — `pnpm --filter app test:lighthouse` (seuil bloquant CI dans `.lighthouserc.json`).
-4. **Tier rendu** — `a11y:scan` pour les critères non statiquement décidables (à lancer sur les tickets qui touchent ces critères).
-5. **Hook `block-bad-patterns.sh`** — bloque à l'écriture les anti-patterns (`<img>` brut, `style={}`, `role` redondant, `<svg>` inline…).
+3. **Lighthouse a11y = 100 %** — `pnpm --filter app test:lighthouse` (seuil bloquant CI dans `.lighthouserc.json`) : couvre les critères « au rendu » (contraste/zoom/reflow/focus visible) non statiquement décidables.
+4. **Hook `block-bad-patterns.sh`** — bloque à l'écriture les anti-patterns (`<img>` brut, `style={}`, `role` redondant, `<svg>` inline…).
 
 ## Règles while-writing (natif d'abord, ARIA en dernier)
 
@@ -67,4 +65,4 @@ Voir la doc du skill : `.claude/skills/ultra11y/SKILL.md` + `references/*.md` (`
 
 ## Périmètre & pérennité
 
-Ce dispositif remplace l'ancienne suite `pnpm test:rgaa` (Playwright + `@axe-core/playwright`, harnais de collecte qui n'assertait rien) et les workflows `rgaa-audit.yaml` (audit quotidien → wiki) + `claude-revue-rgaa.yml`, tous supprimés. Le socle est : **ultra11y (statique CI + rendu local) + `rgaa-auditor` + Lighthouse 100 % + hook**. Resync du moteur vendoré : `cp ~/.agents/skills/ultra11y/scripts/ultra11y.mjs .claude/skills/ultra11y/scripts/` (ou `npx skills add maxgfr/ultra11y` puis copie).
+Ce dispositif remplace l'ancienne suite Playwright RGAA (`playwright.rgaa.config.ts`, `src/e2e/rgaa-audit.spec.ts` + `@axe-core/playwright`, harnais de collecte qui n'assertait rien) et les workflows `rgaa-audit.yaml` (audit quotidien → wiki) + `claude-revue-rgaa.yml`, tous supprimés. Le socle est **entièrement automatique** : **ultra11y statique en CI (gate bloquante sur chaque push/PR) + `rgaa-auditor` + Lighthouse 100 % + hook**. Pas de scan Playwright/`.auth` à lancer à la main. Resync du moteur vendoré : `cp ~/.agents/skills/ultra11y/scripts/ultra11y.mjs .claude/skills/ultra11y/scripts/` (ou `npx skills add maxgfr/ultra11y` puis copie).
