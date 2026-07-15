@@ -2,6 +2,12 @@ import { expect, test } from "@playwright/test";
 
 import { deleteReferents, seedReferents } from "./helpers/db-campaign";
 
+// Cross-system journeys only: anonymous access, region-filter + access-control,
+// the click-through reveal, and the 404 status for an unknown detail id. Pure
+// rendering is covered by unit tests in src/modules/referents/__tests__/*
+// (PublicReferentsPage, PublicReferentsSearchForm, PublicReferentDetail,
+// PublicReferentList, schemas) and the query by the publicReferents router test.
+
 // Fixed UUIDs so detail-page URLs (`/referents/[id]`) pass the
 // `z.string().uuid()` check in `publicReferents.getById`.
 const TEST_REFERENTS = [
@@ -68,70 +74,22 @@ test.describe("public referents search", () => {
 		}
 	});
 
-	test("landing on /referents without a filter shows the empty-filter hint and no results", async ({
+	test("region search filters the results and keeps contact details off the list", async ({
 		browser,
 	}) => {
 		const anonCtx = await browser.newContext({ storageState: undefined });
 		try {
 			const page = await anonCtx.newPage();
 			await page.goto("/referents");
-			await expect(
-				page.getByText(/sélectionnez au moins un filtre/i),
-			).toBeVisible();
-			await expect(page.getByText("E2E Référent Paris")).not.toBeVisible();
-		} finally {
-			await anonCtx.close();
-		}
-	});
-
-	test("/referents shows the public help banner", async ({ browser }) => {
-		const anonCtx = await browser.newContext({ storageState: undefined });
-		try {
-			const page = await anonCtx.newPage();
-			await page.goto("/referents");
-			await expect(
-				page.getByRole("region", { name: /ressources et aide/i }),
-			).toBeVisible();
-		} finally {
-			await anonCtx.close();
-		}
-	});
-
-	test("search by region filters the results", async ({ browser }) => {
-		const anonCtx = await browser.newContext({ storageState: undefined });
-		try {
-			const page = await anonCtx.newPage();
-			await page.goto("/referents");
 			await page.getByLabel("Région").selectOption("11");
 			await page.getByRole("button", { name: /^rechercher$/i }).click();
 
+			// Filtering: region 11 matches, region 53 does not.
 			await expect(page.getByText("E2E Référent Paris")).toBeVisible();
 			await expect(page.getByText("E2E Référent Hauts-de-Seine")).toBeVisible();
 			await expect(page.getByText("E2E Référent Rennes")).not.toBeVisible();
-		} finally {
-			await anonCtx.close();
-		}
-	});
 
-	test("name-search input is not exposed", async ({ browser }) => {
-		const anonCtx = await browser.newContext({ storageState: undefined });
-		try {
-			const page = await anonCtx.newPage();
-			await page.goto("/referents");
-			await expect(page.getByLabel("Nom du référent")).toHaveCount(0);
-		} finally {
-			await anonCtx.close();
-		}
-	});
-
-	test("list page does not show contact details", async ({ browser }) => {
-		const anonCtx = await browser.newContext({ storageState: undefined });
-		try {
-			const page = await anonCtx.newPage();
-			await page.goto("/referents");
-			await page.getByLabel("Région").selectOption("11");
-			await page.getByRole("button", { name: /^rechercher$/i }).click();
-			await expect(page.getByText("E2E Référent Paris")).toBeVisible();
+			// Access control: contact details are hidden on the list.
 			await expect(page.getByText("e2e-paris@dreets.test")).not.toBeVisible();
 			await expect(
 				page.getByText("e2e-paris-sub@dreets.test"),
@@ -175,24 +133,6 @@ test.describe("public referents search", () => {
 		}
 	});
 
-	test("URL-type referent is rendered as an external link", async ({
-		browser,
-	}) => {
-		const anonCtx = await browser.newContext({ storageState: undefined });
-		try {
-			const page = await anonCtx.newPage();
-			await page.goto("/referents/22222222-2222-4222-8222-222222222222");
-
-			const externalLink = page.getByRole("link", {
-				name: /dreets\.test\/contact-92/i,
-			});
-			await expect(externalLink).toBeVisible();
-			await expect(externalLink).toHaveAttribute("target", "_blank");
-		} finally {
-			await anonCtx.close();
-		}
-	});
-
 	test("detail page returns 404 for unknown id", async ({ browser }) => {
 		const anonCtx = await browser.newContext({ storageState: undefined });
 		try {
@@ -205,21 +145,4 @@ test.describe("public referents search", () => {
 			await anonCtx.close();
 		}
 	});
-});
-
-test("link from /aide/nous-contacter points to /referents", async ({
-	browser,
-}) => {
-	const anonCtx = await browser.newContext({ storageState: undefined });
-	try {
-		const page = await anonCtx.newPage();
-		await page.goto("/aide/nous-contacter");
-		const searchLink = page.getByRole("link", {
-			name: /rechercher un référent par région ou département/i,
-		});
-		await expect(searchLink).toBeVisible();
-		await expect(searchLink).toHaveAttribute("href", "/referents");
-	} finally {
-		await anonCtx.close();
-	}
 });
