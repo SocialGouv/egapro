@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { useState } from "react";
 
 import type { CampaignDeadlines } from "~/modules/domain";
@@ -100,7 +99,9 @@ export function DeclarationsSection({
 		<div className="fr-container fr-my-6w">
 			<div className="fr-grid-row fr-grid-row--middle fr-mb-4w">
 				<div className="fr-col">
-					<h2 className="fr-mb-0">Démarche en cours</h2>
+					<h2 className="fr-mb-0" id="demarches-en-cours-title">
+						Démarche en cours
+					</h2>
 				</div>
 				{hasNoSanction && (
 					<div className="fr-col-auto">
@@ -117,38 +118,22 @@ export function DeclarationsSection({
 			{visibleCurrentDeclarations.length > 0 && (
 				<DeclarationsTable
 					campaignDeadlines={campaignDeadlines}
-					caption={
-						<>
-							Ce tableau présente la liste des démarches en cours.
-							<br />
-							Chaque ligne correspond à une démarche, avec les informations
-							suivantes : le type de démarche, l'année concernée, l'étape
-							actuelle, la date d'échéance, l'état d'avancement et les
-							ressources disponibles.
-						</>
-					}
 					declarations={visibleCurrentDeclarations}
 					hasCse={hasCse}
+					labelledById="demarches-en-cours-title"
 					userPhone={userPhone}
 				/>
 			)}
 			{visiblePreviousDeclarations.length > 0 && (
 				<>
-					<h2 className="fr-mt-6w fr-mb-3w">Années précédentes</h2>
+					<h2 className="fr-mt-6w fr-mb-3w" id="annees-precedentes-title">
+						Années précédentes
+					</h2>
 					<DeclarationsTable
 						campaignDeadlines={campaignDeadlines}
-						caption={
-							<>
-								Ce tableau présente l'historique des démarches.
-								<br />
-								Chaque ligne correspond à une démarche passée, avec les
-								informations suivantes : le type de démarche, l'année concernée,
-								les différentes étapes, les échéances, l'état final et les
-								ressources associées.
-							</>
-						}
 						declarations={visiblePreviousDeclarations}
 						hasCse={hasCse}
+						labelledById="annees-precedentes-title"
 						userPhone={userPhone}
 					/>
 				</>
@@ -190,7 +175,7 @@ export function DeclarationsSection({
 type DeclarationsTableProps = {
 	campaignDeadlines: CampaignDeadlines;
 	declarations: DeclarationItem[];
-	caption: ReactNode;
+	labelledById: string;
 	userPhone: string | null;
 	hasCse: boolean | null;
 };
@@ -198,7 +183,7 @@ type DeclarationsTableProps = {
 function DeclarationsTable({
 	campaignDeadlines,
 	declarations,
-	caption,
+	labelledById,
 	userPhone,
 	hasCse,
 }: DeclarationsTableProps) {
@@ -207,8 +192,7 @@ function DeclarationsTable({
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">
-						<table className={styles.tableSm}>
-							<caption className="fr-sr-only">{caption}</caption>
+						<table aria-labelledby={labelledById} className={styles.tableSm}>
 							<thead>
 								<tr>
 									<th scope="col">Déclaration</th>
