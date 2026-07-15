@@ -29,6 +29,7 @@ type Props = {
 	sourceNote?: React.ReactNode;
 	onQuartileChange: (index: number, field: Field, value: string) => void;
 	disabled?: boolean;
+	readOnly?: boolean;
 };
 
 export function QuartileTable({
@@ -41,6 +42,7 @@ export function QuartileTable({
 	sourceNote,
 	onQuartileChange,
 	disabled = false,
+	readOnly = false,
 }: Props) {
 	const {
 		women: totalWomen,
@@ -114,6 +116,7 @@ export function QuartileTable({
 												min={mins[i] ?? ""}
 												onQuartileChange={onQuartileChange}
 												quartile={quartiles[i] ?? { threshold: undefined }}
+												readOnly={readOnly}
 												tableType={tableType}
 											/>
 										))}

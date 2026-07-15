@@ -710,11 +710,15 @@ describe("Step1Opinions", () => {
 			);
 		}
 
-		it("disables the whole fieldset when the declaration is locked", () => {
+		it("keeps the fieldset enabled and marks the date inputs read-only when the declaration is locked", () => {
 			const { container } = renderLocked();
 
-			const fieldset = container.querySelector("fieldset");
-			expect(fieldset).toBeDisabled();
+			// The fieldset stays enabled so its content remains exposed to
+			// assistive technologies; each control is locked individually.
+			expect(container.querySelector("fieldset")).not.toBeDisabled();
+			expect(
+				container.querySelector("#first-decl-accuracy-date"),
+			).toHaveAttribute("readonly");
 		});
 
 		it("disables every input and the next button when locked", () => {
@@ -731,8 +735,8 @@ describe("Step1Opinions", () => {
 			renderLocked();
 
 			const favorable = screen.getAllByLabelText("Favorable")[0] as HTMLElement;
-			// A disabled fieldset still lets us fire the handler imperatively; the
-			// click is a no-op but we assert no draft write occurs regardless.
+			// The radio is individually disabled while locked; the click is a
+			// no-op but we assert no draft write occurs regardless.
 			await user.click(favorable);
 
 			expect(mockSetField).not.toHaveBeenCalled();
@@ -760,11 +764,12 @@ describe("Step1Opinions", () => {
 			mockedUseSession.mockReset();
 		});
 
-		it("disables the fieldset and next button under the static provider when impersonating", () => {
+		it("disables the radios and next button under the static provider when impersonating", () => {
 			mockImpersonating();
 
 			// The static provider receives `isReadOnly={false}` from the layout but
-			// must still disable writes when an admin is impersonating.
+			// must still disable writes when an admin is impersonating. The
+			// fieldset itself stays enabled for assistive technologies.
 			const { container } = render(
 				<LockProvider isReadOnly={false}>
 					<Step1Opinions
@@ -775,7 +780,10 @@ describe("Step1Opinions", () => {
 				</LockProvider>,
 			);
 
-			expect(container.querySelector("fieldset")).toBeDisabled();
+			expect(container.querySelector("fieldset")).not.toBeDisabled();
+			for (const radio of screen.getAllByRole("radio")) {
+				expect(radio).toBeDisabled();
+			}
 			expect(screen.getByRole("button", { name: /Suivant/ })).toBeDisabled();
 		});
 
