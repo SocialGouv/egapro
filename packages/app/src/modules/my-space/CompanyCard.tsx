@@ -11,9 +11,9 @@ export function CompanyCard({ company }: Props) {
 		<div className="fr-card fr-card--horizontal fr-card--sm fr-enlarge-link">
 			<div className="fr-card__body">
 				<div className="fr-card__content">
-					<h3 className="fr-card__title">
+					<h2 className="fr-card__title">
 						<Link href="/mon-espace">{company.name}</Link>
-					</h3>
+					</h2>
 					<div className="fr-card__start">
 						<ul className="fr-badges-group">
 							<li>
