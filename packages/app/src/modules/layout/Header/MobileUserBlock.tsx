@@ -49,10 +49,19 @@ export function MobileUserBlock({ userName, userEmail, userPhone }: Props) {
 		};
 
 		const handleDisclose = () => {
+			// Rapid re-opens (or a spurious double event) must not stack two
+			// concurrent polling loops onto the same ref.
+			cancelPendingFocus();
 			let attemptsLeft = FOCUS_TRAP_MAX_FRAMES;
 			const settle = () => {
-				const trapSettled = menuModal.contains(document.activeElement);
-				if (trapSettled || attemptsLeft <= 0) {
+				if (attemptsLeft <= 0) {
+					// The trap never settled within the allowed frames — abort
+					// silently rather than steal focus from wherever it currently is
+					// (e.g. the modal never actually opened).
+					frame = null;
+					return;
+				}
+				if (menuModal.contains(document.activeElement)) {
 					frame = null;
 					userNameRef.current?.focus();
 					return;
