@@ -3,6 +3,13 @@
 		width: 100%;
 	}
 
+	// Keep the entered workforce count readable at 200% zoom / narrow
+	// viewports (RGAA 10.4): the cell must never crush the input below the
+	// width of a 6-digit count — the DSFR table wrapper scrolls instead.
+	input {
+		min-width: 6rem;
+	}
+
 	@include respond-from(md) {
 		table {
 			table-layout: fixed;

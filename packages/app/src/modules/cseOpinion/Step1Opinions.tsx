@@ -200,7 +200,11 @@ export function Step1Opinions({
 
 	return (
 		<form autoComplete="off" onSubmit={onSubmit}>
+			{/* Native `disabled` is kept on purpose: it is the only mechanism
+			    enforcing the read-only mode, and disabled fields remain exposed
+			    to screen readers (#3803). */}
 			<fieldset className={styles.readOnlyFieldset} disabled={isReadOnly}>
+				<legend className="fr-sr-only">Avis du CSE</legend>
 				{isJointEvaluation && (
 					<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
 						<div className="fr-col">

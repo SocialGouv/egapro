@@ -42,6 +42,9 @@ type Props = {
 	step4Data: Step4Data;
 	step5Categories: EmployeeCategoryRow[];
 	step5Source: string | null;
+	// Demote the page title when the recap is embedded in a host page that
+	// already renders its own <h1> (e.g. /admin/declarations/[id]) — RGAA 9.1.
+	titleTag?: "h1" | "h3";
 };
 
 type InfoItem = { label: string; value: string };
@@ -84,6 +87,7 @@ export function RecapitulatifPage({
 	step4Data,
 	step5Categories,
 	step5Source,
+	titleTag: TitleTag = "h1",
 }: Props) {
 	const declarantItems: InfoItem[] = [];
 	if (declarantName) {
@@ -121,11 +125,11 @@ export function RecapitulatifPage({
 		<div className={common.flexColumnGap2}>
 			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 				<div className="fr-col">
-					<h1 className="fr-h4 fr-mb-0">
+					<TitleTag className="fr-h4 fr-mb-0">
 						{isCorrection
 							? `Seconde déclaration des écarts de rémunération par catégorie de salariés ${declarationYear}`
 							: `Déclaration des indicateurs de rémunération ${declarationYear}`}
-					</h1>
+					</TitleTag>
 				</div>
 				<div className="fr-col-auto">
 					<a
