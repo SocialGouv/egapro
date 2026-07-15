@@ -87,6 +87,15 @@ describe("CategoryImportExport import button", () => {
 
 		expect(startTimerMock).toHaveBeenCalledTimes(1);
 	});
+
+	it("uses the file-download icon on the import trigger", () => {
+		render(<CategoryImportExport onImport={vi.fn()} />);
+		const importButton = screen.getByRole("button", {
+			name: "Importer les données",
+		});
+		expect(importButton).toHaveClass("fr-icon-file-download-line");
+		expect(importButton).not.toHaveClass("fr-icon-upload-line");
+	});
 });
 
 describe("CategoryImportExport successful import", () => {

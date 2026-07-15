@@ -1,6 +1,15 @@
 import { expect, type Page, test } from "@playwright/test";
 import { resetDeclarationToDraft } from "./helpers/db";
 
+// Critical declaration funnel: this keeps the functional step-by-step journey
+// (data entry, live computation, threshold cascade + validations, back
+// navigation and final submission). Pure render-structure assertions that were
+// here — company banner, step-4 inverted table layout, step-5 page structure,
+// step-6 review headings, the definitions accordion, and the mere presence of
+// the "Précédent" link — are covered by component unit tests
+// (CompanyBanner, Step4QuartileDistribution, Step5EmployeeCategories,
+// Step6Review in src/modules/declaration-remuneration/**/__tests__).
+
 /** Navigate to a declaration step, ensuring the declaration is initialized first. */
 async function goToStep(page: Page, step: number) {
 	await page.goto("/declaration-remuneration");
@@ -32,17 +41,6 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 
 		await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
-	});
-
-	test("shows company name and SIREN in banner", async ({ page }) => {
-		await expect(page.getByText(/130 025 265/)).toBeVisible();
-		await expect(page.getByText("SIREN :")).toBeVisible();
-		await expect(
-			page.locator("p.fr-text--bold").filter({
-				hasText:
-					/DIRECTION INTERMINISTERIELLE DU NUMERIQUE|Entreprise 130025265/,
-			}),
-		).toBeVisible();
 	});
 
 	test("navigates through step 1 - Effectifs", async ({ page }) => {
@@ -110,34 +108,6 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 		await expect(
 			page.getByRole("textbox", { name: "Bénéficiaires hommes" }),
-		).toBeVisible();
-	});
-
-	test("step 4 - inverted quartile table layout (rows = quartiles, columns = F/H/%F/%H)", async ({
-		page,
-	}) => {
-		await goToStep(page, 4);
-
-		await expect(page.getByText("Étape 4 sur 6")).toBeVisible();
-
-		// S1 — quartile labels live in rowheaders (rows are quartiles in the new layout)
-		await expect(
-			page.getByRole("rowheader", { name: /1er quartile/ }).first(),
-		).toBeVisible();
-		await expect(
-			page.getByRole("rowheader", { name: /4e quartile/ }).first(),
-		).toBeVisible();
-		// "Tous les salariés" total row exists in both tables
-		await expect(
-			page.getByRole("rowheader", { name: "Tous les salariés" }),
-		).toHaveCount(2);
-		// Header row exposes the new column "Nombre de femmes" / "Nombre d'hommes"
-		await expect(
-			page.getByRole("columnheader", { name: /Nombre de femmes/ }).first(),
-		).toBeVisible();
-		// Accordion present
-		await expect(
-			page.getByRole("button", { name: /Définitions et méthode de calcul/ }),
 		).toBeVisible();
 	});
 
@@ -259,62 +229,11 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 	});
 
-	test("step 5 - Catégories de salariés page structure", async ({ page }) => {
-		await goToStep(page, 5);
-
-		await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
-
-		// Verify category source combobox
-		await expect(
-			page.getByRole("combobox", {
-				name: /source utilisée pour déterminer les catégories/i,
-			}),
-		).toBeVisible();
-
-		// Verify category 1 form fields
-		await expect(page.getByRole("textbox", { name: "Libellé" })).toBeVisible();
-		await expect(
-			page.getByRole("textbox", { name: "Effectif femmes, catégorie 1" }),
-		).toBeVisible();
-		await expect(
-			page.getByRole("textbox", {
-				name: "Salaire de base annuel femmes, catégorie 1",
-			}),
-		).toBeVisible();
-	});
-
-	test("step 6 - Review page", async ({ page }) => {
-		await goToStep(page, 6);
-
-		await expect(page.getByText("Étape 6 sur 6")).toBeVisible();
-		await expect(
-			page.getByRole("heading", {
-				name: /Récapitulatif de votre déclaration/i,
-			}),
-		).toBeVisible();
-	});
-
-	test("accordion displays definitions", async ({ page }) => {
-		await goToStep(page, 1);
-
-		const accordion = page.getByRole("button", {
-			name: /Définitions et méthode de calcul/i,
-		});
-		await expect(accordion).toBeVisible();
-	});
-
 	test("previous button navigates back", async ({ page }) => {
 		await page.goto("/declaration-remuneration/etape/2");
 
 		await page.getByRole("link", { name: "Précédent" }).click();
 		await page.waitForURL("**/declaration-remuneration/etape/1");
-	});
-
-	test("previous button is present on step pages", async ({ page }) => {
-		await goToStep(page, 6);
-
-		const previousLink = page.getByRole("link", { name: "Précédent" });
-		await expect(previousLink).toBeVisible();
 	});
 
 	// Must be last — mutates declaration status to 'submitted'

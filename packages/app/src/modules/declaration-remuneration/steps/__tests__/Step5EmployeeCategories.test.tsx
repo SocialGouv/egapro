@@ -62,6 +62,20 @@ describe("Step5EmployeeCategories", () => {
 		expect(screen.getByText("Nombre de catégories : 1")).toBeInTheDocument();
 	});
 
+	it("titles the step without the legacy '(salaire de base et primes)' suffix", () => {
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+			/>,
+		);
+		const heading = screen.getByRole("heading", {
+			name: /Écart de rémunération par catégories de salariés/,
+		});
+		expect(heading).toBeInTheDocument();
+		expect(heading.textContent).not.toMatch(/salaire de base et primes/i);
+	});
+
 	it("renders stepper at step 5", () => {
 		render(
 			<Step5EmployeeCategories

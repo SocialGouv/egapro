@@ -1,6 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { setDeclarationComplianceState } from "./helpers/db";
 
+// The recap page rendering (declarant / company / calcul info, indicator &
+// category sections, download button, return link) is covered by
+// src/modules/declaration-remuneration/recapitulatif/__tests__/RecapitulatifPage.test.tsx
+// (+ RecapitulatifPage.correction.test.tsx). Only the route render smoke and the
+// 404 for a non-submitted correction remain end-to-end.
+
 test.describe("Recapitulatif page", () => {
 	test.beforeAll(async () => {
 		await setDeclarationComplianceState({
@@ -9,7 +15,9 @@ test.describe("Recapitulatif page", () => {
 		});
 	});
 
-	test("displays recap page with h1 and download button", async ({ page }) => {
+	test("renders the recap route with its heading and download button", async ({
+		page,
+	}) => {
 		await page.goto("/declaration-remuneration/recapitulatif");
 
 		await expect(
@@ -18,56 +26,7 @@ test.describe("Recapitulatif page", () => {
 				name: /Déclaration des indicateurs de rémunération/,
 			}),
 		).toBeVisible();
-
 		await expect(page.getByRole("link", { name: "Télécharger" })).toBeVisible();
-	});
-
-	test("displays info sections", async ({ page }) => {
-		await page.goto("/declaration-remuneration/recapitulatif");
-
-		await expect(
-			page.getByRole("heading", {
-				level: 2,
-				name: "Informations déclarant",
-			}),
-		).toBeVisible();
-
-		await expect(
-			page.getByRole("heading", {
-				level: 2,
-				name: "Informations entreprise",
-			}),
-		).toBeVisible();
-
-		await expect(
-			page.getByRole("heading", {
-				level: 2,
-				name: "Informations calcul",
-			}),
-		).toBeVisible();
-	});
-
-	test("displays indicator sections", async ({ page }) => {
-		await page.goto("/declaration-remuneration/recapitulatif");
-
-		await expect(
-			page.getByText("Indicateurs pour l'ensemble de vos salariés"),
-		).toBeVisible();
-
-		await expect(
-			page.getByText("Indicateurs par catégorie de salariés"),
-		).toBeVisible();
-	});
-
-	test("displays return button", async ({ page }) => {
-		await page.goto("/declaration-remuneration/recapitulatif");
-
-		await expect(
-			page
-				.locator("main")
-				.getByRole("link", { name: "Retour à Mon Espace", exact: true })
-				.last(),
-		).toBeVisible();
 	});
 
 	test("returns 404 for non-submitted declaration with correction type", async ({
