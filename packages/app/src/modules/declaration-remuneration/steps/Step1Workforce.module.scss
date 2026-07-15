@@ -1,3 +1,8 @@
+// Minimum width of a workforce-count input, sized for a 6-digit value. Shared
+// between the input rule (which keeps the value readable) and the column rule
+// so both stay in sync (RGAA 10.4).
+$workforce-input-min-width: 6rem;
+
 .workforceTable {
 	table {
 		width: 100%;
@@ -7,7 +12,7 @@
 	// viewports (RGAA 10.4): the cell must never crush the input below the
 	// width of a 6-digit count — the DSFR table wrapper scrolls instead.
 	input {
-		min-width: 6rem;
+		min-width: $workforce-input-min-width;
 	}
 
 	@include respond-from(md) {
@@ -24,7 +29,7 @@
 }
 
 .inputCol {
-	min-width: 6rem;
+	min-width: $workforce-input-min-width;
 
 	@include respond-from(md) {
 		width: 30%;
