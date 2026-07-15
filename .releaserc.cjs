@@ -10,9 +10,27 @@
 // only rely on the tag and the published GitHub release.
 const { execSync } = require("node:child_process")
 
+// In CI, GITHUB_REF_NAME is always set; the git fallback only serves local
+// dry-runs and must fail with an explicit message (detached HEAD, no git…).
 const branch =
   process.env.GITHUB_REF_NAME ||
-  execSync("git rev-parse --abbrev-ref HEAD", { encoding: "utf8" }).trim()
+  (() => {
+    try {
+      return execSync("git rev-parse --abbrev-ref HEAD", {
+        encoding: "utf8",
+      }).trim()
+    } catch (error) {
+      throw new Error(
+        "[.releaserc.cjs] Cannot determine current branch: GITHUB_REF_NAME is unset and `git rev-parse --abbrev-ref HEAD` failed.",
+        { cause: error },
+      )
+    }
+  })()
+
+// Explicit allowlist: only branches the release bot is allowed to push to get
+// the version-bump commit plugins. Any other release branch (current or
+// future) defaults to the safe tag-only flow.
+const COMMIT_PLUGIN_BRANCHES = ["master", "beta"]
 
 const commitPlugins = [
   "@semantic-release/changelog",
@@ -35,7 +53,7 @@ module.exports = {
   plugins: [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
-    ...(branch === "alpha" ? [] : commitPlugins),
+    ...(COMMIT_PLUGIN_BRANCHES.includes(branch) ? commitPlugins : []),
     "@semantic-release/github",
   ],
 }
