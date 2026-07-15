@@ -314,7 +314,9 @@ export function Step3VariablePay({
 															}
 															aria-invalid={
 																benefValidationError?.field ===
-																	"indicatorEWomen" || undefined
+																"indicatorEWomen"
+																	? true
+																	: undefined
 															}
 															aria-label="Bénéficiaires femmes"
 															className={`fr-input ${common.numericInput}`}
@@ -354,8 +356,9 @@ export function Step3VariablePay({
 																	: undefined
 															}
 															aria-invalid={
-																benefValidationError?.field ===
-																	"indicatorEMen" || undefined
+																benefValidationError?.field === "indicatorEMen"
+																	? true
+																	: undefined
 															}
 															aria-label="Bénéficiaires hommes"
 															className={`fr-input ${common.numericInput}`}

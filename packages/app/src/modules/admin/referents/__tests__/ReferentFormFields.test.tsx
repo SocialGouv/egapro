@@ -31,7 +31,9 @@ function Harness({ errors }: { errors: FieldErrors<ReferentFormValues> }) {
 describe("ReferentFormFields", () => {
 	it("renders fields without error attributes when there is no error", () => {
 		render(<Harness errors={{}} />);
-		const nameInput = screen.getByRole("textbox", { name: /Format/ });
+		// Anchored on the field's own label ("Nom"), decoupled from the hint
+		// wording; the negative lookahead avoids matching "Nom du suppléant".
+		const nameInput = screen.getByRole("textbox", { name: /^Nom(?! du)/ });
 		expect(nameInput).not.toHaveAttribute("aria-invalid");
 		expect(nameInput).not.toHaveAttribute("aria-describedby");
 		const regionSelect = screen.getByLabelText("Région");
@@ -47,7 +49,9 @@ describe("ReferentFormFields", () => {
 				}}
 			/>,
 		);
-		const nameInput = screen.getByRole("textbox", { name: /Format/ });
+		// Anchored on the field's own label ("Nom"), decoupled from the hint
+		// wording; the negative lookahead avoids matching "Nom du suppléant".
+		const nameInput = screen.getByRole("textbox", { name: /^Nom(?! du)/ });
 		expect(nameInput).toHaveAttribute("aria-invalid", "true");
 		expect(nameInput).toHaveAttribute(
 			"aria-describedby",
@@ -90,7 +94,7 @@ describe("ReferentFormFields", () => {
 				}}
 			/>,
 		);
-		const valueInput = screen.getByRole("textbox", { name: /Valeur/ });
+		const valueInput = screen.getByRole("textbox", { name: /^Valeur/ });
 		expect(valueInput).toHaveAttribute("aria-invalid", "true");
 		expect(valueInput).toHaveAttribute(
 			"aria-describedby",
