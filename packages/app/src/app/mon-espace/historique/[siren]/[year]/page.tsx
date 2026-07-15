@@ -12,7 +12,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	const { year } = await params;
 	return {
-		title: `Historique des modifications ${year} — Egapro`,
+		title: `Historique des modifications ${year}`,
 	};
 }
 
