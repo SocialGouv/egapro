@@ -36,7 +36,9 @@ describe("PrefillSource", () => {
 		render(<PrefillSource periodEnd={null} />);
 
 		expect(
-			screen.getByLabelText("Information sur la source des données"),
+			screen.getByRole("button", {
+				name: "Information sur la source des données",
+			}),
 		).toBeInTheDocument();
 	});
 });

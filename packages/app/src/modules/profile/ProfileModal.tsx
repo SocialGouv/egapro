@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useId, useRef } from "react";
 
 import { getDsfrModal } from "~/modules/shared";
 import { PhoneField } from "~/modules/shared/PhoneField";
@@ -89,10 +89,11 @@ export function ProfileModal() {
 									<div className="fr-col-auto">
 										<button
 											aria-describedby="profile-tooltip"
-											aria-label="Aide"
 											className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-question-line"
 											type="button"
-										/>
+										>
+											<span className="fr-sr-only">Aide</span>
+										</button>
 										<span
 											className="fr-tooltip fr-placement"
 											id="profile-tooltip"
@@ -180,15 +181,21 @@ function ReadonlyField({
 	showEditIcon = true,
 	value,
 }: ReadonlyFieldProps) {
+	const fieldId = useId();
 	return (
 		<div className={styles.readonlyField}>
-			<div className={styles.readonlyLabel}>
+			<label className={styles.readonlyLabel} htmlFor={fieldId}>
 				<span>{label}</span>
 				{showEditIcon && (
 					<span aria-hidden="true" className="fr-icon-edit-line fr-icon--sm" />
 				)}
-			</div>
-			<div className={styles.readonlyValue}>{value || "—"}</div>
+			</label>
+			<input
+				className={styles.readonlyValue}
+				id={fieldId}
+				readOnly
+				value={value || "—"}
+			/>
 		</div>
 	);
 }
