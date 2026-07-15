@@ -16,12 +16,16 @@ export async function HeaderQuickAccess() {
 
 	return (
 		<div className="fr-header__tools">
-			<div className="fr-header__tools-links">
+			{/* RGAA 9.2: the quick-access zone is a navigation landmark. The <nav>
+			    itself carries `.fr-header__tools-links` so the DSFR `HeaderLinks`
+			    script (which clones this element's innerHTML into the mobile menu)
+			    keeps comparing the exact same inner content. */}
+			<nav aria-label="Accès rapides" className="fr-header__tools-links">
 				<HeaderQuickAccessLinks
 					session={session}
 					userPhone={profile?.phone ?? null}
 				/>
-			</div>
+			</nav>
 		</div>
 	);
 }
