@@ -34,6 +34,9 @@ jobs:
   promote:
     name: "Promote ${{ inputs.release }} → ${{ inputs.target }}-persist"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # the push uses the token-bureau app token, not GITHUB_TOKEN
+      id-token: write # OIDC identity, required by token-bureau
     steps:
       - name: Get GitHub App Token
         id: token
