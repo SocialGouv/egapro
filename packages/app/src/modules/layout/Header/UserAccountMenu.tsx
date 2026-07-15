@@ -114,6 +114,7 @@ export function UserAccountMenu({
 				aria-expanded={isOpen}
 				aria-haspopup="menu"
 				className="fr-btn fr-btn--tertiary fr-icon-account-circle-line fr-btn--icon-left"
+				id="user-account-menu-button"
 				onClick={() => setIsOpen((prev) => !prev)}
 				ref={buttonRef}
 				type="button"
@@ -135,7 +136,11 @@ export function UserAccountMenu({
 					{/* The two inner divs stay role-less: generic containers are
 					    ownership-transparent, so the menuitems remain owned by the
 					    menu (verified against axe aria-required-children). */}
-					<div aria-label="Mon espace" className={styles.menu} role="menu">
+					<div
+						aria-labelledby="user-account-menu-button"
+						className={styles.menu}
+						role="menu"
+					>
 						<div className={styles.links}>
 							{isAdmin && (
 								<Link
