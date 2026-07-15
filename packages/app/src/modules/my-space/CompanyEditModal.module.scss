@@ -38,8 +38,13 @@
 }
 
 .cseFieldset {
+	// A non-zero flex-basis keeps both rich radios at equal widths on wide
+	// screens (same rendering as flex-basis 0) but lets them wrap on their own
+	// line at reduced widths instead of being crushed/overflowing, so the DSFR
+	// focus outline (2px width + 2px offset outside the box) stays fully
+	// visible at every viewport width.
 	:global(.fr-fieldset__element--inline) {
-		flex: 1;
+		flex: 1 1 8rem;
 	}
 
 	> .sourceText {
