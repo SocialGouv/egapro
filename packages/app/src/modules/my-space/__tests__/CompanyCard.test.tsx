@@ -18,6 +18,13 @@ describe("CompanyCard", () => {
 		expect(link).toHaveAttribute("href", "/mon-espace");
 	});
 
+	it("renders the card title as an h2 heading", () => {
+		render(<CompanyCard company={company} />);
+		expect(
+			screen.getByRole("heading", { level: 2, name: "Alpha Solutions" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders the SIREN number", () => {
 		render(<CompanyCard company={company} />);
 		expect(screen.getByText("N° SIREN : 532847196")).toBeInTheDocument();

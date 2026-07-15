@@ -4,9 +4,11 @@ import { describe, expect, it } from "vitest";
 import { ArchivesSection } from "../ArchivesSection";
 
 describe("ArchivesSection", () => {
-	it("renders the 'Archives' title", () => {
+	it("renders the 'Archives' title as an h2 heading", () => {
 		render(<ArchivesSection />);
-		expect(screen.getByText("Archives")).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", { level: 2, name: "Archives" }),
+		).toBeInTheDocument();
 	});
 
 	it("renders the description text", () => {

@@ -54,6 +54,27 @@ describe("CompanyEditModal", () => {
 		);
 	});
 
+	it("marks the dialog as modal for assistive technologies", () => {
+		const { container } = render(<CompanyEditModal company={company} />);
+
+		expect(container.querySelector("dialog")).toHaveAttribute(
+			"aria-modal",
+			"true",
+		);
+	});
+
+	it("structures readonly company data as description lists", () => {
+		const { container } = render(<CompanyEditModal company={company} />);
+
+		const terms = Array.from(container.querySelectorAll("dl dt")).map(
+			(dt) => dt.textContent,
+		);
+		expect(terms).toContain("Raison sociale :");
+		expect(terms).toContain("SIREN :");
+		expect(terms).toContain("Adresse :");
+		expect(terms).toContain("Code NAF :");
+	});
+
 	it("renders the modal with company info", () => {
 		const { container } = render(<CompanyEditModal company={company} />);
 

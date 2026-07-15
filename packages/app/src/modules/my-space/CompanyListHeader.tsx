@@ -4,7 +4,7 @@ export function CompanyListHeader() {
 	return (
 		<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters fr-mb-3w">
 			<div className="fr-col">
-				<h2>Mes entreprises</h2>
+				<h1 className="fr-h2">Mes entreprises</h1>
 			</div>
 			<div className="fr-col-auto">
 				{/* TODO: Replace href with real ProConnect account URL */}
