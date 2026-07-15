@@ -65,6 +65,13 @@ export function UserAccountMenu({
 				case "Escape":
 					close();
 					break;
+				case "Tab":
+					// APG menu pattern: Tab dismisses the menu. Focus is handed back
+					// to the toggle button (via close) instead of letting the default
+					// move happen inside a menu that is about to unmount.
+					event.preventDefault();
+					close();
+					break;
 				case "ArrowDown": {
 					event.preventDefault();
 					const items = getMenuItems();
@@ -115,53 +122,68 @@ export function UserAccountMenu({
 			</button>
 
 			{isOpen && (
-				<div className={styles.dropdown} ref={menuRef} role="menu">
+				<div className={styles.dropdown} ref={menuRef}>
+					{/* The user info block sits outside the role="menu" element: a menu
+					    may only own menuitem/group/separator children, and static text
+					    would be skipped by screen readers in menu navigation mode. */}
 					<div className={styles.userInfo}>
 						<p className={styles.userName}>{userName}</p>
 						<p className={styles.userEmail}>{userEmail}</p>
 						{userPhone && <p className={styles.userEmail}>{userPhone}</p>}
 					</div>
 
-					<div className={styles.links}>
-						{isAdmin && (
+					{/* The two inner divs stay role-less: generic containers are
+					    ownership-transparent, so the menuitems remain owned by the
+					    menu (verified against axe aria-required-children). */}
+					<div aria-label="Mon espace" className={styles.menu} role="menu">
+						<div className={styles.links}>
+							{isAdmin && (
+								<Link
+									className={styles.menuLink}
+									href="/admin"
+									onClick={close}
+									role="menuitem"
+									tabIndex={-1}
+								>
+									Administration
+								</Link>
+							)}
 							<Link
 								className={styles.menuLink}
-								href="/admin"
+								href="/mon-espace/mes-entreprises"
 								onClick={close}
 								role="menuitem"
+								tabIndex={-1}
 							>
-								Administration
+								Mes entreprises
 							</Link>
-						)}
-						<Link
-							className={styles.menuLink}
-							href="/mon-espace/mes-entreprises"
-							onClick={close}
-							role="menuitem"
-						>
-							Mes entreprises
-						</Link>
-						<button
-							className={styles.menuLink}
-							onClick={openProfileModal}
-							role="menuitem"
-							type="button"
-						>
-							Voir mon profil
-						</button>
-					</div>
+							<button
+								className={styles.menuLink}
+								onClick={openProfileModal}
+								role="menuitem"
+								tabIndex={-1}
+								type="button"
+							>
+								Voir mon profil
+							</button>
+						</div>
 
-					<div className={styles.logout}>
-						{/* Native <a> required: this route redirects to an external IdP (ProConnect),
-						    so we need a full browser navigation, not a client-side RSC fetch. */}
-						<a
-							className={styles.logoutLink}
-							href="/api/auth/logout"
-							role="menuitem"
-						>
-							<span aria-hidden="true" className="fr-icon-logout-box-r-line" />
-							Se déconnecter
-						</a>
+						<div className={styles.logout}>
+							{/* Native <a> required: this route redirects to an external IdP (ProConnect),
+							    so we need a full browser navigation, not a client-side RSC fetch. */}
+							<a
+								className={styles.logoutLink}
+								href="/api/auth/logout"
+								role="menuitem"
+								tabIndex={-1}
+							>
+								<span
+									aria-hidden="true"
+									className="fr-icon-logout-box-r-line"
+								/>
+								Se déconnecter
+							</a>
+						</div>
 					</div>
 				</div>
 			)}
