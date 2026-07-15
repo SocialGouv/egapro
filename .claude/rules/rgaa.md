@@ -14,7 +14,7 @@ egapro est une plateforme de l'État : le niveau de conformité visé est **RGAA
 
 L'outil d'accessibilité du projet est **ultra11y**, vendoré dans le repo à **`.claude/skills/ultra11y/`** — committé pour que **tous les devs** l'aient automatiquement (skill projet-scopé + moteur CLI zéro-dép, pas d'install par dev). Source : `github.com/maxgfr/ultra11y` (v2.14.0, MIT).
 
-Division du travail : le **moteur** (`node .claude/skills/ultra11y/scripts/ultra11y.mjs`) fait la détection mécanique WCAG et rattache chaque non-conformité au bon critère ; **l'IA adjuge** les critères de jugement (pertinence des `alt`, intitulé de lien en contexte, ordre de lecture, logique clavier/focus) et **signale les critères « au rendu » comme risques résiduels** (contraste/zoom/reflow/focus visible), couverts par la gate Lighthouse a11y 100 %. Jamais de statut « conforme » sans verdict enregistré et gaté.
+**Toute la logique d'accessibilité passe par le dispositif ultra11y** — il n'y a pas de système a11y parallèle. Le dispositif se décline en tiers complémentaires : le **moteur** (`node .claude/skills/ultra11y/scripts/ultra11y.mjs`) fait la détection mécanique WCAG statique et rattache chaque non-conformité au bon critère ; **l'IA adjuge** les critères de jugement (pertinence des `alt`, intitulé de lien en contexte, ordre de lecture, logique clavier/focus) ; et les critères « au rendu » (contraste/zoom/reflow/focus visible), non statiquement décidables, sont routés vers le **tier rendu du dispositif**, assuré en CI par la gate Lighthouse a11y 100 %. Jamais de statut « conforme » sans verdict enregistré et gaté.
 
 | Besoin | Commande (depuis `packages/app`) |
 |---|---|
@@ -24,12 +24,14 @@ Division du travail : le **moteur** (`node .claude/skills/ultra11y/scripts/ultra
 
 Voir la doc du skill : `.claude/skills/ultra11y/SKILL.md` + `references/*.md` (`judgment.md`, `focus-and-logic.md`, `false-positives.md`).
 
-## Vérification (socle)
+## Vérification (socle) — les 4 tiers du dispositif ultra11y
 
-1. **`pnpm --filter app test:a11y`** — gate statique ultra11y (`--fail-on blocking`), lancé **automatiquement** en CI (`.github/workflows/a11y.yaml`, sur chaque push/PR) et en local. Aucune NC bloquante ne doit passer.
-2. **`rgaa-auditor`** — gate agent après chaque tâche sur les `.tsx` modifiés (pilote ultra11y + adjuge le jugement). Read-only.
-3. **Lighthouse a11y = 100 %** — `pnpm --filter app test:lighthouse` (seuil bloquant CI dans `.lighthouserc.json`) : couvre les critères « au rendu » (contraste/zoom/reflow/focus visible) non statiquement décidables.
-4. **Hook `block-bad-patterns.sh`** — bloque à l'écriture les anti-patterns (`<img>` brut, `style={}`, `role` redondant, `<svg>` inline…).
+Toute la vérification a11y relève du dispositif ultra11y, décliné en 4 tiers complémentaires (aucun n'est un système parallèle) :
+
+1. **Tier statique — `pnpm --filter app test:a11y`** : moteur ultra11y (`--fail-on blocking`), lancé **automatiquement** en CI (`.github/workflows/a11y.yaml`, sur chaque push/PR) et en local. Aucune NC bloquante ne doit passer.
+2. **Tier jugement — `rgaa-auditor`** : gate agent après chaque tâche sur les `.tsx` modifiés (pilote ultra11y + adjuge les critères de jugement). Read-only.
+3. **Tier rendu — Lighthouse a11y = 100 %** : `pnpm --filter app test:lighthouse` (seuil bloquant CI dans `.lighthouserc.json`, workflow `lighthouse.yaml`) — couvre les critères « au rendu » (contraste/zoom/reflow/focus visible) que le moteur statique ne peut décider.
+4. **Tier écriture — hook `block-bad-patterns.sh`** : bloque à la frappe les anti-patterns (`<img>` brut, `style={}`, `role` redondant, `<svg>` inline…).
 
 ## Règles while-writing (natif d'abord, ARIA en dernier)
 
@@ -65,4 +67,4 @@ Voir la doc du skill : `.claude/skills/ultra11y/SKILL.md` + `references/*.md` (`
 
 ## Périmètre & pérennité
 
-Ce dispositif remplace l'ancienne suite Playwright RGAA (`playwright.rgaa.config.ts`, `src/e2e/rgaa-audit.spec.ts` + `@axe-core/playwright`, harnais de collecte qui n'assertait rien) et les workflows `rgaa-audit.yaml` (audit quotidien → wiki) + `claude-revue-rgaa.yml`, tous supprimés. Le socle est **entièrement automatique** : **ultra11y statique en CI (gate bloquante sur chaque push/PR) + `rgaa-auditor` + Lighthouse 100 % + hook**. Pas de scan Playwright/`.auth` à lancer à la main. Resync du moteur vendoré : `cp ~/.agents/skills/ultra11y/scripts/ultra11y.mjs .claude/skills/ultra11y/scripts/` (ou `npx skills add maxgfr/ultra11y` puis copie).
+Le dispositif ultra11y remplace l'ancienne suite Playwright RGAA (`playwright.rgaa.config.ts`, `src/e2e/rgaa-audit.spec.ts` + `@axe-core/playwright`, harnais de collecte qui n'assertait rien) et les workflows `rgaa-audit.yaml` (audit quotidien → wiki) + `claude-revue-rgaa.yml`, tous supprimés. **Toute l'accessibilité passe désormais par ce seul dispositif, entièrement automatique** : tier statique (moteur ultra11y en CI, gate bloquante sur chaque push/PR) + tier jugement (`rgaa-auditor`) + tier rendu (Lighthouse a11y 100 %) + tier écriture (hook). Aucun système a11y parallèle, aucun scan Playwright/`.auth` à lancer à la main. Resync du moteur vendoré : `cp ~/.agents/skills/ultra11y/scripts/ultra11y.mjs .claude/skills/ultra11y/scripts/` (ou `npx skills add maxgfr/ultra11y` puis copie).

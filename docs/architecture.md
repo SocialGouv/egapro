@@ -691,7 +691,7 @@ Activé via `data-fr-scheme="system"` sur `<html>`. Cookie `fr-theme` lu par un 
 
 ### 11.5 RGAA 4.1.2 / WCAG 2.2 AA
 
-Système d'accessibilité du projet : **ultra11y** (vendoré `.claude/skills/ultra11y/`, committé pour tous les devs). Gate statique bloquante en CI (`pnpm --filter app test:a11y`, workflow `.github/workflows/a11y.yaml`, sur chaque push/PR) + agent `rgaa-auditor` + score Lighthouse accessibilité **= 100%** couvrant les critères au rendu (seuil bloquant dans `.lighthouserc.json`). Règle canonique : `.claude/rules/rgaa.md`.
+Toute l'accessibilité passe par un dispositif unique, **ultra11y** (vendoré `.claude/skills/ultra11y/`, committé pour tous les devs), décliné en tiers : tier statique bloquant en CI (`pnpm --filter app test:a11y`, workflow `.github/workflows/a11y.yaml`, sur chaque push/PR) + tier jugement (agent `rgaa-auditor`) + tier rendu (score Lighthouse accessibilité **= 100%** pour contraste/zoom/reflow/focus, seuil bloquant dans `.lighthouserc.json`, workflow `lighthouse.yaml`) + tier écriture (hook). Aucun système a11y parallèle. Règle canonique : `.claude/rules/rgaa.md`.
 
 ---
 
