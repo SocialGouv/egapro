@@ -42,9 +42,12 @@
 	// screens (same rendering as flex-basis 0) but lets them wrap on their own
 	// line at reduced widths instead of being crushed/overflowing, so the DSFR
 	// focus outline (2px width + 2px offset outside the box) stays fully
-	// visible at every viewport width.
+	// visible at every viewport width. The basis matches a rich radio card's
+	// natural width (~10rem incl. padding) so wrapping kicks in before any
+	// compression; no DSFR ancestor sets overflow:hidden, so nothing clips the
+	// outline once it wraps.
 	:global(.fr-fieldset__element--inline) {
-		flex: 1 1 8rem;
+		flex: 1 1 10rem;
 	}
 
 	> .sourceText {
