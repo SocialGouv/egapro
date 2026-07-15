@@ -57,7 +57,12 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
           git_push_gpgsign: false
-          git_tag_gpgsign: true
+          # Tag signing must stay off: semantic-release >= 20 creates
+          # lightweight tags (`git tag <name> <sha>`, no -m), and
+          # tag.gpgSign=true turns them into signed tags that require a
+          # message — git then aborts in CI with "Terminal is dumb, but
+          # EDITOR unset". Release commits (master/beta) remain GPG-signed.
+          git_tag_gpgsign: false
 
       - name: Semantic Release
         env:
