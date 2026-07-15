@@ -177,7 +177,13 @@ export function Step3VariablePay({
 			className={common.flexColumnGap2}
 			onSubmit={onSubmit}
 		>
+			{/* Native `disabled` is kept on purpose: it is the only mechanism
+			    enforcing the read-only mode, and disabled fields remain exposed
+			    to screen readers (#3803). */}
 			<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+				<legend className="fr-sr-only">
+					Rémunérations variables ou complémentaires
+				</legend>
 				<StepTitleRow
 					hasData={hasData}
 					isPendingSave={isPendingSave}

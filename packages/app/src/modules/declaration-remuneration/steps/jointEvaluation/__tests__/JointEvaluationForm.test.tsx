@@ -88,6 +88,16 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 	});
 
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(
+			screen.getByRole("group", {
+				name: "Évaluation conjointe des rémunérations",
+			}),
+		).toBeInTheDocument();
+	});
+
 	it("renders the deadline callout with the current year", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 

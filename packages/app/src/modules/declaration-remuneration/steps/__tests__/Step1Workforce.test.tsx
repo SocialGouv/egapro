@@ -40,6 +40,19 @@ describe("Step1Workforce", () => {
 		);
 	});
 
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={emptyStep1Data()}
+			/>,
+		);
+		expect(
+			screen.getByRole("group", { name: "Effectifs" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders default state with zero totals", () => {
 		render(
 			<Step1Workforce

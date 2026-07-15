@@ -203,7 +203,11 @@ export function Step1Opinions({
 			{/* noValidate: the required radios expose the required state to
 			    assistive tech (RGAA 11.10) without native browser bubbles
 			    preempting the app's own zod + custom validation messages. */}
+			{/* Native `disabled` is kept on purpose: it is the only mechanism
+			    enforcing the read-only mode, and disabled fields remain exposed
+			    to screen readers (#3803). */}
 			<fieldset className={styles.readOnlyFieldset} disabled={isReadOnly}>
+				<legend className="fr-sr-only">Avis du CSE</legend>
 				{isJointEvaluation && (
 					<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
 						<div className="fr-col">
