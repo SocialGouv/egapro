@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 
-import { isAdminRoute } from "../PublicChrome";
+import { isAdminRoute } from "./routeUtils";
 
 /**
  * Skip links — mandatory RGAA criterion 12.7.
