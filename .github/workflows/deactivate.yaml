@@ -8,6 +8,7 @@ on:
       - "!v*"
       - "!master"
       - "!alpha"
+      - "!**-persist"
 
 concurrency:
   cancel-in-progress: true

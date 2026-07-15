@@ -1,0 +1,108 @@
+name: 🎯 Promote test env
+
+# Deploys a published release (including `-alpha.N` prereleases) onto one of
+# the persistent test environments of the dev cluster (`rgaa-persist` /
+# `perf-persist`). The branch is force-pushed to the release tag, which
+# triggers the regular Review Auto build + Kontinuous deploy. Janitor never
+# collects these namespaces: the `*-persist` branch naming matches the
+# kontinuous persist convention (plugins/contrib/lib/persist-convention.js).
+# Promotion is manual only — these environments never track a branch.
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: "Release tag to deploy (e.g. v3.4.0-alpha.2)"
+        required: true
+        type: string
+      target:
+        description: "Target persistent test environment"
+        required: true
+        type: choice
+        options:
+          - rgaa
+          - perf
+
+# Concurrent promotions to the same target are serialized (not cancelled, not
+# deduplicated): runs execute in dispatch order, so the last dispatched release
+# is the one that ends up deployed.
+concurrency:
+  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ inputs.target }}
+
+jobs:
+  promote:
+    name: "Promote ${{ inputs.release }} → ${{ inputs.target }}-persist"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get GitHub App Token
+        id: token
+        uses: SocialGouv/token-bureau@33e29a1f370f19f6c3d1680d6e7f0aa7c36a3847 # v0.0.7
+        with:
+          token-bureau-url: https://token-bureau.fabrique.social.gouv.fr
+          audience: socialgouv
+
+      # The app token (not GITHUB_TOKEN) is required for the push: pushes made
+      # with GITHUB_TOKEN do not trigger workflows, so Review Auto would never
+      # deploy the branch.
+      - name: ⏬ Checkout code repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ steps.token.outputs.token }}
+
+      - name: ✅ Verify the tag is a published release
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          TAG: ${{ inputs.release }}
+        run: |
+          case "$TAG" in
+            v*) ;;
+            *)
+              echo "::error::'$TAG' does not look like a release tag (expected v*)"
+              exit 1
+              ;;
+          esac
+          if ! git rev-parse --verify --quiet "refs/tags/$TAG^{commit}" > /dev/null; then
+            echo "::error::Tag '$TAG' does not exist on this repository"
+            exit 1
+          fi
+          if ! IS_DRAFT=$(gh release view "$TAG" --json isDraft --jq '.isDraft' 2>/dev/null); then
+            echo "::error::No GitHub release found for tag '$TAG'"
+            exit 1
+          fi
+          if [ "$IS_DRAFT" != "false" ]; then
+            echo "::error::The GitHub release for '$TAG' is a draft — publish it first"
+            exit 1
+          fi
+
+      - name: 🚀 Point the branch to the release
+        env:
+          TAG: ${{ inputs.release }}
+          TARGET_BRANCH: ${{ inputs.target }}-persist
+        run: |
+          # Dereference the (annotated, GPG-signed) tag to its commit — a tag
+          # object cannot be pushed onto a branch ref directly.
+          SHA=$(git rev-parse "refs/tags/$TAG^{commit}")
+          git push origin --force "$SHA:refs/heads/$TARGET_BRANCH"
+
+      - name: 🌐 Compute environment URL
+        id: env
+        uses: socialgouv/kontinuous/.github/actions/env@v1
+        with:
+          branch: ${{ inputs.target }}-persist
+
+      - name: 📝 Job summary
+        env:
+          TAG: ${{ inputs.release }}
+          TARGET_BRANCH: ${{ inputs.target }}-persist
+          SUBDOMAIN: ${{ steps.env.outputs.subdomain }}
+        run: |
+          {
+            echo "## Promotion ${TAG} → ${TARGET_BRANCH}"
+            echo ""
+            echo "- Release : [\`${TAG}\`](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG})"
+            echo "- Déploiement : suivre le workflow **👓 Review Auto** sur la branche \`${TARGET_BRANCH}\`"
+            echo "- URL : <https://${SUBDOMAIN}.ovh.fabrique.social.gouv.fr>"
+          } >> "$GITHUB_STEP_SUMMARY"

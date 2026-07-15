@@ -34,7 +34,9 @@ jobs:
               github.ref_name == 'develop' ||
               github.ref_name == 'preprod' ||
               github.ref_name == 'main' ||
-              github.ref_name == 'master'
+              github.ref_name == 'master' ||
+              github.ref_name == 'rgaa-persist' ||
+              github.ref_name == 'perf-persist'
             }},priority=840
             type=sha,prefix=sha-,format=long,priority=890
             type=ref,event=branch,priority=600
