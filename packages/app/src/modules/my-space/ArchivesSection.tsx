@@ -14,7 +14,7 @@ export function ArchivesSection() {
 						/>
 					</div>
 					<div className="fr-col">
-						<h2 className={`fr-mb-1w ${styles.title}`}>Archives</h2>
+						<h2 className="fr-text--md fr-mb-1w">Archives</h2>
 						<p className="fr-text--sm fr-mb-0">
 							Récupérer vos anciennes déclarations de l'index de l'égalité
 							professionnelle femmes-hommes.
