@@ -44,6 +44,16 @@ describe("ResourceBanner", () => {
 		expect(headings).toHaveLength(3);
 	});
 
+	it("renders a screen-reader-only section heading above the tiles", () => {
+		render(<ResourceBanner />);
+
+		const heading = screen.getByRole("heading", {
+			level: 2,
+			name: "Ressources et aides",
+		});
+		expect(heading).toHaveClass("fr-sr-only");
+	});
+
 	it("uses a 10/2 column ratio so the illustration sits flush right", () => {
 		const { container } = render(<ResourceBanner />);
 

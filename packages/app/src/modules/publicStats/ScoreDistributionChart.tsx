@@ -75,9 +75,13 @@ export function ChartTooltip({ active, payload }: ChartTooltipProps) {
 
 export function ScoreDistributionChart({ brackets }: Props) {
 	return (
-		<div aria-hidden="true" className={styles.chartWrapper} role="presentation">
+		<div aria-hidden="true" className={styles.chartWrapper}>
 			<ResponsiveContainer>
-				<BarChart data={brackets} margin={{ top: 16, right: 16, bottom: 8 }}>
+				<BarChart
+					accessibilityLayer={false}
+					data={brackets}
+					margin={{ top: 16, right: 16, bottom: 8 }}
+				>
 					<CartesianGrid strokeDasharray="3 3" vertical={false} />
 					<XAxis dataKey="label" />
 					<YAxis tickFormatter={formatYAxisTick} />
