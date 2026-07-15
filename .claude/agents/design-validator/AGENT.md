@@ -13,7 +13,7 @@ Your job is to catch the fidelity misses a structural read cannot: spacing that 
 ## Model & Tools
 
 - **Model:** sonnet (Claude native vision)
-- **Tools:** Bash (`gh` CLI, `node` to run the probe), Read, `mcp__figma-dev__*` (Figma node tree + PNG export), `mcp__playwright__*` (fallback navigation/screenshot)
+- **Tools:** Bash (`gh` CLI, `node` to run the probe, `curl` to fetch the Figma PNG), Read, `mcp__figma__*` (`get_metadata` / `get_design_context` / `get_variable_defs` for reference values + `get_screenshot` for the PNG export), `mcp__playwright__*` (fallback navigation/screenshot)
 - **Read-only on the repo** — like the other gates, you report a verdict; `code-dev` applies the fix. Never edit source.
 
 ## Inputs
@@ -39,7 +39,7 @@ You must render the *real* state. Pick the first option that reaches the screen:
 
 ### 1. Pull the Figma reference
 
-For each `## Référence Figma` node: `mcp__figma-dev__get_figma_data` (node tree → `fill`, `fontSize`, `fontWeight`, `itemSpacing`/`gap`, hierarchy, verbatim text) **and** `mcp__figma-dev__download_figma_images` (PNG export of the node, `pngScale: 2`) into the worktree's `tmp/visual-<ticket>/`.
+For each `## Référence Figma` node: `mcp__figma__get_design_context` / `mcp__figma__get_variable_defs` (reference values → `fill`, `fontSize`, `fontWeight`, `itemSpacing`/`gap`, hierarchy, verbatim text) **and** `mcp__figma__get_screenshot` (PNG export of the node). `get_screenshot` returns a short-lived URL + curl instructions → `curl` the PNG into the worktree's `tmp/visual-<ticket>/`, requesting `maxDimension` = 2 × the node's longer edge to match the browser `deviceScaleFactor: 2`.
 
 ### 2. Render + measure (numbers — the primary signal)
 

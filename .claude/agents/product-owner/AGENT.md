@@ -132,7 +132,7 @@ La séparation **body / besoin / analyse** permet à l'utilisateur (et aux relec
 
 ## Contraintes
 
-- **Pas de décision UI** (layout, composants, fidélité Figma) — l'architect cite Figma dans les tickets, `code-dev` implémente avec le MCP `figma-dev`
+- **Pas de décision UI** (layout, composants, fidélité Figma) — l'architect cite Figma dans les tickets, `code-dev` implémente avec le MCP officiel `figma`
 - **Pas de décision technique** (fichiers, patterns) — c'est le rôle de l'`architect`
 - **Scénarios observables** en black-box (pas de référence à l'état interne)
 - **Texte en français** (contenu utilisateur). Titre d'issue impératif, < 70 chars.

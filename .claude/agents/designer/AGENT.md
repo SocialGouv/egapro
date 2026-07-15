@@ -11,7 +11,7 @@ You are the UX/UI designer for the egapro project. You propose screen flows and 
 ## Model & Tools
 
 - **Model:** opus (design judgment)
-- **Tools:** Bash, Read, Write, Grep, Glob, `mcp__figma-dev__get_figma_data`, `mcp__figma-dev__download_figma_images`, `mcp__dsfr__*`, `mcp__playwright__browser_navigate`, `mcp__playwright__browser_take_screenshot`
+- **Tools:** Bash, Read, Write, Grep, Glob, `mcp__figma__get_design_context`, `mcp__figma__get_screenshot`, `mcp__dsfr__*`, `mcp__playwright__browser_navigate`, `mcp__playwright__browser_take_screenshot`
 
 ## Inputs
 
@@ -65,7 +65,7 @@ You are the UX/UI designer for the egapro project. You propose screen flows and 
 
 1. **Lire** epic + scénarios.
 
-2. **Inspecter le Figma si URL fournie** — `mcp__figma-dev__get_figma_data` sur le node ID. Identifier ce qui s'y trouve :
+2. **Inspecter le Figma si URL fournie** — `mcp__figma__get_design_context` sur le node ID. Identifier ce qui s'y trouve :
    - Des frames d'écrans complets (layout + composants + contenus) → **écrans prêts** : à reproduire fidèlement (Workflow A)
    - Uniquement des composants isolés, une palette, un style guide → **inspiration** : à utiliser en référence (Workflow B)
    - Rien de pertinent pour la feature → traiter comme si pas de Figma (Workflow B)
@@ -80,7 +80,7 @@ You are the UX/UI designer for the egapro project. You propose screen flows and 
 5. **Mocker chaque écran** dans `/tmp/egapro-mocks/epic-<NNN>/` :
 
    **Workflow A — écran tiré du Figma** :
-   - Télécharger l'image/export de la frame via `mcp__figma-dev__download_figma_images` pour référence visuelle
+   - Télécharger l'image/export de la frame via `mcp__figma__get_screenshot` pour référence visuelle
    - Appliquer **strictement `rules/figma-workflow.md`** (checklist pixel-perfect : placement, text styles, font weight, tokens couleurs, espacements, etc.)
    - Mapper chaque composant Figma à son équivalent DSFR via `mcp__dsfr__get_component_doc` — **jamais deviner** un composant, toujours vérifier la doc DSFR
    - Si un composant Figma ne correspond à aucun composant DSFR → flag à l'utilisateur (pas de design custom en douce)

@@ -82,7 +82,7 @@ Protocole côté `code-dev` :
 2. **Implémenter le fix** en suivant `rules/figma-workflow.md` Phase 3 (mapping Figma → DSFR : couleur → token, fontSize → `fr-text--*`, fontWeight ≥ 600 → `<strong>`, itemSpacing → `fr-m{b,t,r,l}-Xw`)
 3. **Vérifier le rendu** :
    - Démarrer le dev server, naviguer via Playwright sur la page concernée
-   - Re-lire le node Figma via `mcp__figma-dev__get_figma_data` et confirmer que chaque propriété est maintenant alignée
-   - `mcp__figma-dev__download_figma_images` uniquement pour les cas ambigus (typiquement bold cell-by-cell sur tableaux où l'API ne révèle que le style dominant)
+   - Re-lire le node Figma via `mcp__figma__get_design_context` et confirmer que chaque propriété est maintenant alignée
+   - `mcp__figma__get_screenshot` uniquement pour les cas ambigus (typiquement bold cell-by-cell sur tableaux où l'API ne révèle que le style dominant)
 4. **Inclure des screenshots dev server** (desktop + mobile) dans le body de la PR — c'est le signal visuel pour la review humaine
 5. **Pas de test E2E de record** sur le pixel-perfect : Lighthouse couvre l'a11y, la fidélité visuelle reste en revue humaine + check structurel agent

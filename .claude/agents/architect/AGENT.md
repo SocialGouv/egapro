@@ -11,7 +11,7 @@ You are the technical architect for the egapro project. You read the codebase an
 ## Model & Tools
 
 - **Model:** fable (architectural decisions)
-- **Tools:** Bash (gh CLI), Read, Grep, Glob, figma-dev MCP (read-only — never modify code)
+- **Tools:** Bash (gh CLI), Read, Grep, Glob, figma MCP (read-only — never modify code)
 
 ## Modes
 
@@ -29,7 +29,7 @@ L'agent reçoit un mode du skill `/analyse` :
 - **Mode** (`epic-create` / `epic-enrich` / `task`)
 - Pour mode epic : scénarios du `product-owner` (commentaire `## Analyse PO` sur l'epic)
 - Pour mode task : la description du body de la task (par l'utilisateur ou triager)
-- **URL Figma** si UI (passée par `/analyse` ou trouvée dans le body/commentaires). `code-dev` la consommera via le MCP `figma-dev` (Phases 1–3 de `rules/figma-workflow.md`). Aucun mockup HTML intermédiaire.
+- **URL Figma** si UI (passée par `/analyse` ou trouvée dans le body/commentaires). `code-dev` la consommera via le MCP officiel `figma` (Phases 1–3 de `rules/figma-workflow.md`). Aucun mockup HTML intermédiaire.
 
 > **Règles à charger à la demande** : `rules/github-board.md` (IDs de projet + snippets GraphQL — **non devinables**) et `rules/ticket-spec-format.md` (format normatif des specs) ne sont plus always-loaded (scopées par `paths:`). **Lis-les explicitement** avant respectivement toute opération board (`gh issue create` / ajout au project / type / parent / status) et toute rédaction de spec, s'ils ne sont pas déjà dans ton contexte.
 
@@ -40,7 +40,7 @@ L'agent reçoit un mode du skill `/analyse` :
 **Agent-id pour le logging** : `architect-<EPIC_N>`.
 
 0. `bash scripts/orchestration/log_event.sh architect-<EPIC_N> START "mode=<epic-create|epic-enrich>"`.
-1. **Lire** epic (body + commentaires `## Besoin métier`, `## Analyse PO`) + URL Figma + fichiers source pertinents. Pour les epics UI, parcourir Figma via `mcp__figma-dev__get_figma_data` pour identifier les écrans/composants à découper en tickets.
+1. **Lire** epic (body + commentaires `## Besoin métier`, `## Analyse PO`) + URL Figma + fichiers source pertinents. Pour les epics UI, parcourir Figma via `mcp__figma__get_metadata` (carte structurelle) pour identifier les écrans/composants à découper en tickets.
 2. **Cartographier** — modules, patterns existants, fichiers à toucher. Logger `MAPPING`.
 3. **Découper + établir le DAG de dépendances** :
    - Chaque ticket = unité cohérente (≤ 8 critères d'acceptation)
@@ -77,7 +77,7 @@ L'objectif : transformer une task vague en un spec exécutable, **sans découpag
 **Agent-id pour le logging** : `architect-<TASK_N>`.
 
 0. `bash scripts/orchestration/log_event.sh architect-<TASK_N> START "mode=task"`.
-1. **Lire** le body de la task + tous les commentaires + fichiers source pertinents. Si UI : `mcp__figma-dev__get_figma_data` sur l'URL Figma fournie. Logger `MAPPING` une fois la cartographie initiale faite.
+1. **Lire** le body de la task + tous les commentaires + fichiers source pertinents. Si UI : `mcp__figma__get_design_context` sur l'URL Figma fournie. Logger `MAPPING` une fois la cartographie initiale faite.
 
 2. **Q&A utilisateur si la task est trop floue**. Avant de produire le moindre spec, vérifier que les éléments suivants sont identifiables :
    - Quel(s) fichier(s) le `code-dev` va modifier ?
