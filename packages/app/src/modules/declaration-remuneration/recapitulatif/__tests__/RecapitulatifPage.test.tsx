@@ -20,6 +20,17 @@ describe("RecapitulatifPage", () => {
 		).toBeInTheDocument();
 	});
 
+	it("demotes the title to h3 when embedded via titleTag (no second h1)", () => {
+		render(<RecapitulatifPage {...defaultProps()} titleTag="h3" />);
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: /Déclaration des indicateurs de rémunération 2025/,
+			}),
+		).toBeInTheDocument();
+		expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+	});
+
 	it("renders 'Télécharger' tertiary download button", () => {
 		render(<RecapitulatifPage {...defaultProps()} />);
 		const link = screen.getByRole("link", {

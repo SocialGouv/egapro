@@ -84,7 +84,13 @@ export function JointEvaluationForm({
 				className={common.flexColumnGap2}
 				onSubmit={handleSubmit}
 			>
+				{/* Native `disabled` is kept on purpose: it is the only mechanism
+				    enforcing the read-only mode, and disabled fields remain exposed
+				    to screen readers (#3803). */}
 				<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+					<legend className="fr-sr-only">
+						Évaluation conjointe des rémunérations
+					</legend>
 					<div className={common.flexBetween}>
 						<h1 className="fr-h4 fr-mb-0">
 							Parcours de mise en conformité pour l&apos;indicateur par

@@ -27,11 +27,11 @@ export function AccuracyOpinionCard({
 				{title}
 			</p>
 
-			<fieldset
-				aria-labelledby={legendId}
-				aria-required="true"
-				className="fr-fieldset"
-			>
+			{/* No aria-required here: the `group` role does not support it (invalid
+			    ARIA). The required indication is carried by the visible mention
+			    "Tous les champs sont obligatoires." at the top of the form
+			    (RGAA 11.10.1). */}
+			<fieldset aria-labelledby={legendId} className="fr-fieldset">
 				<legend
 					className="fr-fieldset__legend--regular fr-fieldset__legend"
 					id={`${id}-opinion-legend`}
