@@ -218,10 +218,7 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 							</fieldset>
 						)}
 						{submitError && (
-							<div
-								aria-live="polite"
-								className="fr-alert fr-alert--error fr-mt-2w"
-							>
+							<div className="fr-alert fr-alert--error fr-mt-2w" role="alert">
 								<p>{submitError}</p>
 							</div>
 						)}
