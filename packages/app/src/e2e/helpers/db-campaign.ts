@@ -1,87 +1,10 @@
 import postgres from "postgres";
-import { TEST_SIREN } from "../constants";
 
 const DEFAULT_DB_URL = "postgresql://postgres:postgres@localhost:5438/egapro";
 
 function createConnection() {
 	const url = process.env.DATABASE_URL ?? DEFAULT_DB_URL;
 	return postgres(url, { max: 1 });
-}
-
-const PREV_YEAR_DECL_ID_PREFIX = "e2e-prev-year-decl-";
-const PREV_YEAR_DECL_ID_SUFFIX = "-000000000000";
-const PREV_YEAR_JOB_CATEGORY_IDS = [
-	"e2e-jobcat-1111-0000-000000000000",
-	"e2e-jobcat-2222-0000-000000000000",
-	"e2e-jobcat-3333-0000-000000000000",
-] as const;
-
-function previousYearDeclId(yearsBack: number) {
-	return `${PREV_YEAR_DECL_ID_PREFIX}${String(yearsBack).padStart(4, "0")}${PREV_YEAR_DECL_ID_SUFFIX}`;
-}
-
-export async function insertPreviousYearDeclaration(yearsBack = 1) {
-	const sql = createConnection();
-	const yearResult = await sql`
-		SELECT EXTRACT(YEAR FROM CURRENT_DATE)::int - ${yearsBack} AS target_year
-	`;
-	const targetYear = yearResult[0]?.target_year as number;
-	const declId = previousYearDeclId(yearsBack);
-
-	try {
-		const users = await sql`
-			SELECT user_id FROM app_user_company WHERE siren = ${TEST_SIREN} LIMIT 1
-		`;
-		const userId = users[0]?.user_id;
-		if (!userId) return;
-
-		await sql`
-			INSERT INTO app_declaration (id, siren, year, declarant_id, total_women, total_men, current_step, status, created_at, updated_at)
-			VALUES (${declId}, ${TEST_SIREN}, ${targetYear}, ${userId}, 150, 200, 6, 'demarche_completed', NOW(), NOW())
-			ON CONFLICT DO NOTHING
-		`;
-
-		const categories = [
-			{
-				id: PREV_YEAR_JOB_CATEGORY_IDS[0],
-				index: 0,
-				name: "Cadres dirigeants",
-			},
-			{
-				id: PREV_YEAR_JOB_CATEGORY_IDS[1],
-				index: 1,
-				name: "Ingénieurs et cadres",
-			},
-			{
-				id: PREV_YEAR_JOB_CATEGORY_IDS[2],
-				index: 2,
-				name: "Techniciens",
-			},
-		];
-
-		for (const cat of categories) {
-			await sql`
-				INSERT INTO app_job_category (id, declaration_id, category_index, name, source)
-				VALUES (${cat.id}, ${declId}, ${cat.index}, ${cat.name}, 'accord-entreprise')
-				ON CONFLICT DO NOTHING
-			`;
-		}
-	} finally {
-		await sql.end();
-	}
-}
-
-export async function deletePreviousYearDeclaration(yearsBack = 1) {
-	const sql = createConnection();
-	const declId = previousYearDeclId(yearsBack);
-
-	try {
-		await sql`DELETE FROM app_employee_category WHERE job_category_id = ANY(${PREV_YEAR_JOB_CATEGORY_IDS})`;
-		await sql`DELETE FROM app_job_category WHERE declaration_id = ${declId}`;
-		await sql`DELETE FROM app_declaration WHERE id = ${declId}`;
-	} finally {
-		await sql.end();
-	}
 }
 
 type CampaignDeadlineDates = {

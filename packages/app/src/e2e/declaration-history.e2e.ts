@@ -8,10 +8,7 @@ import {
 } from "./helpers/db";
 import { insertHistoryEvents } from "./helpers/declaration-history";
 
-// The history list rendering and the "Voir plus" pagination are covered by
-// src/modules/declarationHistory/__tests__/HistoryListSection.test.tsx and
-// DeclarationHistoryPage.test.tsx. Only the route smoke (the page renders the
-// seeded entries under its heading) remains end-to-end.
+// List rendering + "Voir plus" pagination are covered by declarationHistory/__tests__/HistoryListSection.test.tsx.
 
 test.describe("Declaration history page", () => {
 	test.setTimeout(60_000);

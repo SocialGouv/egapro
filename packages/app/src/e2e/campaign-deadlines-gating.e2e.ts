@@ -13,13 +13,7 @@ import {
 } from "./helpers/db-campaign";
 import { loginWithProConnect } from "./helpers/login";
 
-// The panel's deadline-based rendering (Modifier link + "Modifiable jusqu'au" vs
-// "Modification close depuis" when the deadline has passed) is covered by
-// src/modules/my-space/__tests__/DeclarationProcessPanel.test.tsx
-// ("modify button gating by deadline"). What remains here is the route-level
-// gating that no component test can exercise: a submitted declaration can still
-// re-enter a non-recap step, editable before the deadline and read-only after
-// (#3716).
+// Panel deadline rendering is covered by my-space/__tests__/DeclarationProcessPanel.test.tsx; this keeps the route-level re-entry gating.
 
 // Match the year that api.declaration.getOrCreate() uses on first login.
 const testDeclarationYear = getCurrentYear();
@@ -105,8 +99,7 @@ test.describe("Campaign deadlines gating", () => {
 			await page.goto("/declaration-remuneration");
 			await seedSubmittedCompliance();
 
-			// After the deadline the step no longer redirects to the recap (#3716):
-			// it stays navigable but renders the modification-closed read-only banner.
+			// After the deadline the step stays navigable but renders the read-only modification-closed banner.
 			await page.goto("/declaration-remuneration/etape/2");
 			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/2$/);
 			await expect(

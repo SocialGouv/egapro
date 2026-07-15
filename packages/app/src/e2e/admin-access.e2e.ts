@@ -1,9 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// Consolidated admin access + auth-guard checks (previously split across
-// admin.e2e.ts, admin-declarations.e2e.ts and admin-referents.e2e.ts). The
-// pixel-layout assertion (fluid container / sidemenu width) was dropped — it is
-// not reproducible in jsdom and only pinned DSFR layout CSS.
+// Merged from the former admin / admin-declarations / admin-referents specs.
 
 test.describe("admin access", () => {
 	test("admin can reach the backoffice routes", async ({ page }) => {
@@ -48,9 +45,7 @@ test.describe("admin access", () => {
 	test("admin routes hide the public footer and help banner", async ({
 		page,
 	}) => {
-		// Runs in the authenticated `chromium` project (see playwright.config.ts):
-		// `page.goto("/admin")` reaches the real backoffice, so this exercises the
-		// PublicChrome branch, not a login-redirect fallback that trivially passes.
+		// Authenticated chromium project: /admin reaches the real backoffice, not a login-redirect fallback.
 		await page.goto("/admin");
 		await expect(
 			page.getByRole("heading", { name: "Backoffice", level: 1 }),

@@ -1,11 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// Only the anonymous-access invariant is exercised end-to-end here. The K1
-// declaration-rate tile, the K7 score-distribution chart and its accessible
-// table are covered by unit tests in src/modules/publicStats/__tests__/*
-// (CurrentCampaignRateTile, PublicKpiTile, ScoreDistributionChart,
-// ScoreDistributionTable), and the underlying aggregation by the
-// publicStats router test (src/server/api/routers/__tests__/publicStats.test.ts).
+// K1/K7 tiles, chart and table are covered by src/modules/publicStats/__tests__/*.
 
 test.describe("public stats", () => {
 	test("an anonymous visitor can reach /stats without being redirected to /login", async ({

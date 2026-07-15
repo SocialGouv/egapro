@@ -1,14 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import { resetDeclarationToDraft } from "./helpers/db";
 
-// Critical declaration funnel: this keeps the functional step-by-step journey
-// (data entry, live computation, threshold cascade + validations, back
-// navigation and final submission). Pure render-structure assertions that were
-// here — company banner, step-4 inverted table layout, step-5 page structure,
-// step-6 review headings, the definitions accordion, and the mere presence of
-// the "Précédent" link — are covered by component unit tests
-// (CompanyBanner, Step4QuartileDistribution, Step5EmployeeCategories,
-// Step6Review in src/modules/declaration-remuneration/**/__tests__).
+// Render-structure assertions are covered by the step component tests in declaration-remuneration/**/__tests__.
 
 /** Navigate to a declaration step, ensuring the declaration is initialized first. */
 async function goToStep(page: Page, step: number) {

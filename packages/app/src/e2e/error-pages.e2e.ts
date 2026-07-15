@@ -1,9 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// Cross-system checks only: HTTP status, error-boundary wiring, and route
-// rendering. The copy / artwork / structure of each error page is covered by
-// unit tests in src/modules/error/__tests__/* (NotFoundPage, ErrorPage,
-// MaintenancePage, ErrorArtwork, ErrorLayout).
+// Page copy / artwork is covered by src/modules/error/__tests__/*.
 
 test.describe("Error pages", () => {
 	test("404 — unknown route returns HTTP 404 and renders the Not Found page", async ({

@@ -13,13 +13,7 @@ import {
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 import { loginWithProConnect } from "./helpers/login";
 
-// Per-variant panel rendering (start / compliance / compliance_choice /
-// evaluation / cse / closed, incl. the deadline-based Modifier gating) is
-// covered by the component unit test
-// src/modules/my-space/__tests__/DeclarationProcessPanel.test.tsx. Only the
-// end-to-end wiring remains here: one DB-state → variant smoke (a completed
-// démarche renders the "closed" panel) and the missing-info-modal → panel-open
-// interaction — neither of which the component test can exercise.
+// Per-variant panel rendering is covered by my-space/__tests__/DeclarationProcessPanel.test.tsx.
 
 const PANEL_ID = "declaration-process-panel";
 const CURRENT_YEAR = 2026;

@@ -1,12 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// The stats dashboard rendering — KPI tiles, campaign progression chart/table,
-// step durations, step dropoff, completion funnels, filters and accessible
-// tables — is covered by unit tests in src/modules/admin/stats/__tests__/*
-// (StatsDashboard, StatsDashboard.campaign, and one test per chart/table/tile),
-// and the aggregation + admin-only access control by the adminStats router test
-// (src/server/api/routers/__tests__/adminStats.test.ts). Only the route-level
-// canonical redirects and the page authz guard remain end-to-end.
+// Dashboard rendering is covered by src/modules/admin/stats/__tests__/*.
 
 test.describe("admin stats — routing & access", () => {
 	test("redirect: /admin/stats/campagne → /admin/stats", async ({ page }) => {

@@ -1,11 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { setDeclarationComplianceState } from "./helpers/db";
 
-// The recap page rendering (declarant / company / calcul info, indicator &
-// category sections, download button, return link) is covered by
-// src/modules/declaration-remuneration/recapitulatif/__tests__/RecapitulatifPage.test.tsx
-// (+ RecapitulatifPage.correction.test.tsx). Only the route render smoke and the
-// 404 for a non-submitted correction remain end-to-end.
+// Recap-page rendering is covered by recapitulatif/__tests__/RecapitulatifPage.test.tsx.
 
 test.describe("Recapitulatif page", () => {
 	test.beforeAll(async () => {

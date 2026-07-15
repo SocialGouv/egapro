@@ -2,14 +2,9 @@ import { expect, test } from "@playwright/test";
 
 import { deleteReferents, seedReferents } from "./helpers/db-campaign";
 
-// Cross-system journeys only: anonymous access, region-filter + access-control,
-// the click-through reveal, and the 404 status for an unknown detail id. Pure
-// rendering is covered by unit tests in src/modules/referents/__tests__/*
-// (PublicReferentsPage, PublicReferentsSearchForm, PublicReferentDetail,
-// PublicReferentList, schemas) and the query by the publicReferents router test.
+// Referent rendering is covered by src/modules/referents/__tests__/*.
 
-// Fixed UUIDs so detail-page URLs (`/referents/[id]`) pass the
-// `z.string().uuid()` check in `publicReferents.getById`.
+// Fixed UUIDs so /referents/[id] passes the z.string().uuid() check in publicReferents.getById.
 const TEST_REFERENTS = [
 	{
 		id: "11111111-1111-4111-8111-111111111111",
@@ -107,9 +102,7 @@ test.describe("public referents search", () => {
 		const anonCtx = await browser.newContext({ storageState: undefined });
 		try {
 			const page = await anonCtx.newPage();
-			// Drive the search through the URL — the form only pushes these query
-			// params and the results are fetched from them — so this exercises the
-			// same code path without the flakiness of the client-side submit race.
+			// Drive the search via URL params (same code path) to avoid the client-submit race flakiness.
 			await page.goto("/referents?region=11&page=1");
 
 			const list = page.getByTestId("public-referents-list");
