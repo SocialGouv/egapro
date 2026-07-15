@@ -46,7 +46,15 @@ describe("ScoreDistributionChart", () => {
 			<ScoreDistributionChart brackets={baseBrackets} />,
 		);
 		const wrapper = container.querySelector("[aria-hidden='true']");
-		expect(wrapper).toHaveAttribute("role", "presentation");
+		expect(wrapper).not.toHaveAttribute("role");
+	});
+
+	it("exposes no focusable element under the aria-hidden wrapper", () => {
+		const { container } = render(
+			<ScoreDistributionChart brackets={baseBrackets} />,
+		);
+		const wrapper = container.querySelector("[aria-hidden='true']");
+		expect(wrapper?.querySelector("[tabindex]")).toBeNull();
 	});
 
 	it("renders even with an empty dataset (defensive)", () => {
