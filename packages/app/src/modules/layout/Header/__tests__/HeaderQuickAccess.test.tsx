@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	auth: vi.fn(),
@@ -21,6 +21,10 @@ beforeEach(() => {
 	mocks.profileGet.mockResolvedValue({ phone: null });
 });
 
+afterEach(() => {
+	vi.clearAllMocks();
+});
+
 describe("HeaderQuickAccess", () => {
 	it("wraps the quick access links in a 'Accès rapides' navigation landmark (RGAA 9.2)", async () => {
 		render(await HeaderQuickAccess());
@@ -30,6 +34,8 @@ describe("HeaderQuickAccess", () => {
 		expect(nav).toContainElement(
 			screen.getByRole("link", { name: "Se connecter" }),
 		);
+		// The profile query must stay guarded behind an authenticated session.
+		expect(mocks.profileGet).not.toHaveBeenCalled();
 	});
 
 	it("keeps the DSFR tools-links class on the navigation element (DSFR HeaderLinks hook)", async () => {
