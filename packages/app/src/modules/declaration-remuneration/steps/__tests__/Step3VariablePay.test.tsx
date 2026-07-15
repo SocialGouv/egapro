@@ -237,6 +237,93 @@ describe("Step3VariablePay", () => {
 		expect(screen.getByText(/ne peut pas dépasser/i)).toBeInTheDocument();
 	});
 
+	it("associates the beneficiaries error with the women input (RGAA 11.10)", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep3Data()}
+				maxMen={25}
+				maxWomen={15}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
+		const menInput = screen.getByLabelText("Bénéficiaires hommes");
+
+		await user.clear(womenInput);
+		await user.type(womenInput, "20");
+
+		expect(womenInput).toHaveAttribute("aria-invalid", "true");
+		expect(womenInput).toHaveAttribute(
+			"aria-describedby",
+			"step3-beneficiaries-error",
+		);
+		expect(menInput).not.toHaveAttribute("aria-invalid");
+		expect(menInput).not.toHaveAttribute("aria-describedby");
+		expect(screen.getByText(/ne peut pas dépasser/i)).toHaveAttribute(
+			"id",
+			"step3-beneficiaries-error",
+		);
+	});
+
+	it("associates the beneficiaries error with the men input (RGAA 11.10)", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep3Data()}
+				maxMen={25}
+				maxWomen={15}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
+		const menInput = screen.getByLabelText("Bénéficiaires hommes");
+
+		await user.clear(menInput);
+		await user.type(menInput, "30");
+
+		expect(menInput).toHaveAttribute("aria-invalid", "true");
+		expect(menInput).toHaveAttribute(
+			"aria-describedby",
+			"step3-beneficiaries-error",
+		);
+		expect(womenInput).not.toHaveAttribute("aria-invalid");
+		expect(womenInput).not.toHaveAttribute("aria-describedby");
+		expect(screen.getByText(/ne peut pas dépasser/i)).toHaveAttribute(
+			"id",
+			"step3-beneficiaries-error",
+		);
+	});
+
+	it("clears the error association once the value is valid again", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep3Data()}
+				maxMen={25}
+				maxWomen={15}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
+
+		await user.clear(womenInput);
+		await user.type(womenInput, "20");
+		expect(womenInput).toHaveAttribute("aria-invalid", "true");
+
+		await user.clear(womenInput);
+		await user.type(womenInput, "10");
+		expect(womenInput).not.toHaveAttribute("aria-invalid");
+		expect(womenInput).not.toHaveAttribute("aria-describedby");
+		expect(screen.queryByText(/ne peut pas dépasser/i)).not.toBeInTheDocument();
+	});
+
 	it("renders previous link pointing to step 2", () => {
 		render(
 			<Step3VariablePay
