@@ -207,7 +207,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 								<p aria-live="polite">Chargement du graphique…</p>
 							)}
 							{progressionQuery.isError && (
-								<div aria-live="polite" className="fr-alert fr-alert--error">
+								<div className="fr-alert fr-alert--error" role="alert">
 									<p>
 										Une erreur est survenue lors du chargement des statistiques.
 									</p>
@@ -249,7 +249,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 								<p aria-live="polite">Chargement du graphique…</p>
 							)}
 							{stepDurationsQuery.isError && (
-								<div aria-live="polite" className="fr-alert fr-alert--error">
+								<div className="fr-alert fr-alert--error" role="alert">
 									<p>
 										Une erreur est survenue lors du chargement des délais par
 										étape.
@@ -281,7 +281,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 								<p aria-live="polite">Chargement du graphique…</p>
 							)}
 							{stepDropoffQuery.isError && (
-								<div aria-live="polite" className="fr-alert fr-alert--error">
+								<div className="fr-alert fr-alert--error" role="alert">
 									<p>
 										Une erreur est survenue lors du chargement des taux
 										d'abandon.
@@ -335,7 +335,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 					</p>
 				)}
 				{funnelQuery.isError && (
-					<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-4w">
+					<div className="fr-alert fr-alert--error fr-mt-4w" role="alert">
 						<p>Une erreur est survenue lors du chargement des funnels.</p>
 					</div>
 				)}
@@ -456,7 +456,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 					</p>
 				)}
 				{matomoFunnelQuery.isError && (
-					<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-4w">
+					<div className="fr-alert fr-alert--error fr-mt-4w" role="alert">
 						<p>
 							Une erreur est survenue lors du chargement des funnels Matomo.
 						</p>
@@ -547,7 +547,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 								Usage du modèle (indicateur par catégorie)
 							</h3>
 							{matomoCategoryModelQuery.isError && (
-								<div aria-live="polite" className="fr-alert fr-alert--error">
+								<div className="fr-alert fr-alert--error" role="alert">
 									<p>
 										Une erreur est survenue lors du chargement de l&apos;usage
 										du modèle.
@@ -593,7 +593,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 								Liens d&apos;aide les plus cliqués
 							</h3>
 							{matomoHelpLinksQuery.isError && (
-								<div aria-live="polite" className="fr-alert fr-alert--error">
+								<div className="fr-alert fr-alert--error" role="alert">
 									<p>
 										Une erreur est survenue lors du chargement des liens
 										d&apos;aide.
@@ -631,7 +631,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 								Répartition par appareil
 							</h3>
 							{matomoDeviceQuery.isError && (
-								<div aria-live="polite" className="fr-alert fr-alert--error">
+								<div className="fr-alert fr-alert--error" role="alert">
 									<p>
 										Une erreur est survenue lors du chargement de la répartition
 										par appareil.

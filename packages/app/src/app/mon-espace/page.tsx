@@ -5,6 +5,8 @@ import { auth } from "~/server/auth";
 import { getEffectiveSiren } from "~/server/auth/companyAccess";
 import { api, HydrateClient } from "~/trpc/server";
 
+export const metadata = { title: "Mon espace" };
+
 export default async function Page() {
 	const session = await auth();
 

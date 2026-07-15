@@ -18,6 +18,8 @@ type StepPageProps = {
 	params: Promise<{ step: string }>;
 };
 
+export const metadata = { title: "Déclaration d'un avis du CSE" };
+
 export default async function CseOpinionStepPage({ params }: StepPageProps) {
 	const { step: stepParam } = await params;
 	const step = Number.parseInt(stepParam, 10);
