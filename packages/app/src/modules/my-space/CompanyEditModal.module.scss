@@ -1,8 +1,21 @@
+.infoList {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin: 0;
+}
+
 .infoRow {
 	display: flex;
 	align-items: baseline;
 	flex-wrap: wrap;
 	gap: 0.25rem;
+
+	dt,
+	dd {
+		margin: 0;
+		padding: 0;
+	}
 }
 
 .label {

@@ -22,6 +22,20 @@ describe("CompanyInfoBanner", () => {
 		).toBeInTheDocument();
 	});
 
+	it("structures company data as a description list", () => {
+		const { container } = render(
+			<CompanyInfoBanner
+				company={{ ...baseCompany, address: "12 RUE DE PARIS, 75001 PARIS" }}
+			/>,
+		);
+		const terms = Array.from(container.querySelectorAll("dl dt")).map(
+			(dt) => dt.textContent,
+		);
+		expect(terms).toContain("SIREN :");
+		expect(terms).toContain("Adresse :");
+		expect(terms).toContain("Existence d'un CSE :");
+	});
+
 	it("renders the formatted SIREN", () => {
 		render(<CompanyInfoBanner company={baseCompany} />);
 		expect(screen.getByText("532 847 196")).toBeInTheDocument();
