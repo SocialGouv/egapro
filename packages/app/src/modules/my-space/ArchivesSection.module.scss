@@ -2,3 +2,10 @@
 	border: 1px solid var(--border-default-grey);
 	padding: 1.5rem;
 }
+
+// Heading demoted visually to body-text size (was a bold paragraph before the
+// RGAA 9.1 fix) — keeps the rendering unchanged.
+.title {
+	font-size: 1rem;
+	line-height: 1.5rem;
+}
