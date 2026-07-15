@@ -23,6 +23,9 @@ on:
           - rgaa
           - perf
 
+# Concurrent promotions to the same target are serialized (not cancelled, not
+# deduplicated): runs execute in dispatch order, so the last dispatched release
+# is the one that ends up deployed.
 concurrency:
   cancel-in-progress: false
   group: ${{ github.workflow }}-${{ inputs.target }}
@@ -34,7 +37,7 @@ jobs:
     steps:
       - name: Get GitHub App Token
         id: token
-        uses: SocialGouv/token-bureau@main
+        uses: SocialGouv/token-bureau@33e29a1f370f19f6c3d1680d6e7f0aa7c36a3847 # v0.0.7
         with:
           token-bureau-url: https://token-bureau.fabrique.social.gouv.fr
           audience: socialgouv
@@ -46,6 +49,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
           token: ${{ steps.token.outputs.token }}
 
       - name: ✅ Verify the tag is a published release
@@ -64,9 +68,12 @@ jobs:
             echo "::error::Tag '$TAG' does not exist on this repository"
             exit 1
           fi
-          IS_DRAFT=$(gh release view "$TAG" --json isDraft --jq '.isDraft')
+          if ! IS_DRAFT=$(gh release view "$TAG" --json isDraft --jq '.isDraft' 2>/dev/null); then
+            echo "::error::No GitHub release found for tag '$TAG'"
+            exit 1
+          fi
           if [ "$IS_DRAFT" != "false" ]; then
-            echo "::error::'$TAG' is not a published GitHub release"
+            echo "::error::The GitHub release for '$TAG' is a draft — publish it first"
             exit 1
           fi
 
