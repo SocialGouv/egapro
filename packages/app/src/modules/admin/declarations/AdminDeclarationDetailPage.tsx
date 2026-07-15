@@ -84,7 +84,7 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 			{recap && (
 				<section className="fr-mt-6w">
 					<h2 className="fr-h3">Récapitulatif déclaré</h2>
-					<RecapitulatifPage {...recap} />
+					<RecapitulatifPage {...recap} titleTag="h3" />
 				</section>
 			)}
 		</div>
