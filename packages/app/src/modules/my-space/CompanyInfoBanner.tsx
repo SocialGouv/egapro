@@ -27,7 +27,7 @@ export function CompanyInfoBanner({ company }: Props) {
 
 				<div className="fr-grid-row fr-grid-row--middle fr-mb-1w">
 					<div className="fr-col">
-						<h2 className="fr-h4 fr-mb-0">{company.name}</h2>
+						<h1 className="fr-h4 fr-mb-0">{company.name}</h1>
 					</div>
 					<div className="fr-col-auto">
 						<button
