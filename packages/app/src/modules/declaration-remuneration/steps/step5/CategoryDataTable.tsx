@@ -217,7 +217,11 @@ export function CategoryDataTable({
 				<div className="fr-table__container">
 					<div className="fr-table__content">
 						<table>
-							<caption>Données catégorie {catIndex + 1}</caption>
+							<caption>
+								{cat.name.trim()
+									? `Catégorie d'emplois n°${catIndex + 1} : ${cat.name}`
+									: `Catégorie d'emplois n°${catIndex + 1}`}
+							</caption>
 							<thead>
 								<tr>
 									<th className={stepStyles.nameColumnHeader} scope="col">
@@ -237,7 +241,7 @@ export function CategoryDataTable({
 							<tbody>
 								<tr>
 									<td className={stepStyles.sectionHeader} colSpan={4}>
-										<strong>
+										<strong aria-atomic="true" aria-live="polite">
 											Total salariés
 											{totalEmployees !== null ? ` : ${totalEmployees}` : ""}
 										</strong>
