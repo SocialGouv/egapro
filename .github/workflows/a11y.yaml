@@ -7,6 +7,7 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 
 on:
   push:
+    branches: [alpha, beta, master]
   pull_request:
   schedule:
     - cron: "0 6 * * 1" # lundi 06:00 UTC — rapport RGAA hebdomadaire (artefact)
@@ -14,7 +15,7 @@ on:
 
 concurrency:
   cancel-in-progress: true
-  group: "${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}"
+  group: "${{ github.workflow }}-${{ github.ref }}"
 
 jobs:
   a11y-gate:
