@@ -31,7 +31,11 @@ export function GapConsultationCard({
 				sexistes de l'indicateur de rémunération par catégorie de salariés
 			</p>
 
-			<fieldset aria-labelledby={legendId} className="fr-fieldset">
+			<fieldset
+				aria-labelledby={legendId}
+				aria-required="true"
+				className="fr-fieldset"
+			>
 				<legend
 					className="fr-fieldset__legend--regular fr-fieldset__legend"
 					id={`${id}-question-legend`}

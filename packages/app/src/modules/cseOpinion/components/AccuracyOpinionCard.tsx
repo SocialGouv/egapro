@@ -27,7 +27,11 @@ export function AccuracyOpinionCard({
 				{title}
 			</p>
 
-			<fieldset aria-labelledby={legendId} className="fr-fieldset">
+			<fieldset
+				aria-labelledby={legendId}
+				aria-required="true"
+				className="fr-fieldset"
+			>
 				<legend
 					className="fr-fieldset__legend--regular fr-fieldset__legend"
 					id={`${id}-opinion-legend`}
