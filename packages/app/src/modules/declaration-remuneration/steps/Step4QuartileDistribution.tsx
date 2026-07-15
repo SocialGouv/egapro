@@ -261,7 +261,11 @@ export function Step4QuartileDistribution({
 			noValidate
 			onSubmit={onSubmit}
 		>
+			{/* Native `disabled` is kept on purpose: it is the only mechanism
+			    enforcing the read-only mode, and disabled fields remain exposed
+			    to screen readers (#3803). */}
 			<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+				<legend className="fr-sr-only">Distribution par quartile</legend>
 				<StepTitleRow
 					hasData={hasData}
 					isPendingSave={isPendingSave}

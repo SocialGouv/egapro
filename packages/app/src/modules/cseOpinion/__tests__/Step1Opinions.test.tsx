@@ -128,6 +128,16 @@ describe("Step1Opinions", () => {
 		);
 	});
 
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(
+			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,
+		);
+
+		expect(
+			screen.getByRole("group", { name: "Avis du CSE" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders compliance path title when compliancePath is joint_evaluation", () => {
 		render(
 			<Step1Opinions

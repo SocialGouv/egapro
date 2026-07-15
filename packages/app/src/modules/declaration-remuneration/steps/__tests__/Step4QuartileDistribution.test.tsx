@@ -63,6 +63,19 @@ describe("Step4QuartileDistribution", () => {
 		expect(screen.getAllByText(/Tous les salariés/).length).toBe(2);
 	});
 
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
+		expect(
+			screen.getByRole("group", { name: "Distribution par quartile" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders renumeration tranche header and Pourcentage columns", () => {
 		render(
 			<Step4QuartileDistribution

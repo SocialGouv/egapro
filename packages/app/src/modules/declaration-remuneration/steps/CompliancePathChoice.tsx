@@ -124,7 +124,11 @@ export function CompliancePathChoice({
 			className={common.flexColumnGap2}
 			onSubmit={onSubmit}
 		>
+			{/* Native `disabled` is kept on purpose: it is the only mechanism
+			    enforcing the read-only mode, and disabled fields remain exposed
+			    to screen readers (#3803). */}
 			<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+				<legend className="fr-sr-only">Choix du parcours de conformité</legend>
 				<div className={common.flexBetween}>
 					<h1 className="fr-h4 fr-mb-0">
 						Déclaration des indicateurs de rémunération {currentYear}

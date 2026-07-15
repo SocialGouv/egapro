@@ -108,6 +108,22 @@ describe("Step6Review", () => {
 		).toBeInTheDocument();
 	});
 
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(
+			<Step6Review
+				companyWorkforce={null}
+				declaration={emptyDeclaration()}
+				declarationYear={2025}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
+		expect(
+			screen.getByRole("group", { name: "Récapitulatif de la déclaration" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders description text", () => {
 		render(
 			<Step6Review

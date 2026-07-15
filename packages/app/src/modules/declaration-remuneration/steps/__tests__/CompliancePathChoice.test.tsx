@@ -94,6 +94,21 @@ describe("CompliancePathChoice", () => {
 		).toBeInTheDocument();
 	});
 
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(
+			<CompliancePathChoice
+				campaignDeadlines={campaignDeadlines}
+				currentYear={2026}
+				declarationSiren={DECLARATION_SIREN}
+				declarationYear={DECLARATION_YEAR}
+				email="test@example.fr"
+			/>,
+		);
+		expect(
+			screen.getByRole("group", { name: "Choix du parcours de conformité" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders all 3 compliance path options", () => {
 		render(
 			<CompliancePathChoice
