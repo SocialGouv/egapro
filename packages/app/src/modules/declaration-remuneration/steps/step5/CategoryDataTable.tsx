@@ -281,7 +281,9 @@ export function CategoryDataTable({
 											<span className="fr-text--sm">nb</span>
 										</div>
 									</td>
-									<td />
+									<td>
+										<span className="fr-sr-only">Non applicable</span>
+									</td>
 								</tr>
 
 								<RemunerationSection
