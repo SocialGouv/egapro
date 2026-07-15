@@ -43,6 +43,9 @@ type MergedPoint = {
 	[year: number]: number | null;
 };
 
+const CHART_CAPTION =
+	"Courbe de progression cumulative des déclarations soumises par année.";
+
 // DSFR palette — pulled from design system tokens, not guessed.
 const EMPHASIS_COLOR = "var(--background-action-high-blue-france)";
 const N_MINUS_1_COLOR = "var(--text-mention-grey)";
@@ -136,34 +139,40 @@ export function CampaignProgressionChart({ series, currentYear }: Props) {
 	return (
 		<figure className={styles.chartWrapper}>
 			<figcaption className="fr-sr-only">
-				Courbe de progression cumulative des déclarations soumises par année.
-				Les données équivalentes sont disponibles dans le tableau ci-dessous.
+				{CHART_CAPTION} Les données équivalentes sont disponibles dans le
+				tableau ci-dessous.
 			</figcaption>
-			<ResponsiveContainer>
-				<LineChart data={data}>
-					<CartesianGrid strokeDasharray="3 3" />
-					<XAxis
-						dataKey="dayOfYear"
-						interval={6}
-						tickFormatter={(value: string) => formatMonthDay(value)}
-					/>
-					<YAxis tickFormatter={(value: number) => formatCount(value)} />
-					<Tooltip content={<ProgressionTooltip totals={totals} />} />
-					<Legend />
-					{series.map(({ year }) => (
-						<Line
-							connectNulls
-							dataKey={year}
-							dot={false}
-							key={year}
-							name={String(year)}
-							stroke={colorForYear(year, currentYear)}
-							strokeWidth={year === currentYear ? 3 : 2}
-							type="monotone"
+			<div
+				aria-label={CHART_CAPTION}
+				className={styles.chartContainer}
+				role="img"
+			>
+				<ResponsiveContainer>
+					<LineChart data={data}>
+						<CartesianGrid strokeDasharray="3 3" />
+						<XAxis
+							dataKey="dayOfYear"
+							interval={6}
+							tickFormatter={(value: string) => formatMonthDay(value)}
 						/>
-					))}
-				</LineChart>
-			</ResponsiveContainer>
+						<YAxis tickFormatter={(value: number) => formatCount(value)} />
+						<Tooltip content={<ProgressionTooltip totals={totals} />} />
+						<Legend />
+						{series.map(({ year }) => (
+							<Line
+								connectNulls
+								dataKey={year}
+								dot={false}
+								key={year}
+								name={String(year)}
+								stroke={colorForYear(year, currentYear)}
+								strokeWidth={year === currentYear ? 3 : 2}
+								type="monotone"
+							/>
+						))}
+					</LineChart>
+				</ResponsiveContainer>
+			</div>
 		</figure>
 	);
 }
