@@ -8,6 +8,7 @@ type Props = {
 	date: string;
 	onOpinionChange: (value: OpinionType) => void;
 	onDateChange: (value: string) => void;
+	readOnly?: boolean;
 };
 
 export function AccuracyOpinionCard({
@@ -17,6 +18,7 @@ export function AccuracyOpinionCard({
 	date,
 	onOpinionChange,
 	onDateChange,
+	readOnly = false,
 }: Props) {
 	const legendId = `${id}-legend`;
 	const dateId = `${id}-date`;
@@ -38,6 +40,7 @@ export function AccuracyOpinionCard({
 					<div className="fr-radio-group fr-radio-rich">
 						<input
 							checked={opinion === "favorable"}
+							disabled={readOnly}
 							id={`${id}-favorable`}
 							name={`${id}-opinion`}
 							onChange={() => onOpinionChange("favorable")}
@@ -54,6 +57,7 @@ export function AccuracyOpinionCard({
 					<div className="fr-radio-group fr-radio-rich">
 						<input
 							checked={opinion === "unfavorable"}
+							disabled={readOnly}
 							id={`${id}-unfavorable`}
 							name={`${id}-opinion`}
 							onChange={() => onOpinionChange("unfavorable")}
@@ -83,6 +87,7 @@ export function AccuracyOpinionCard({
 					id={dateId}
 					onChange={(e) => onDateChange(e.target.value)}
 					placeholder="Sélectionner une date"
+					readOnly={readOnly}
 					type="date"
 					value={date}
 				/>

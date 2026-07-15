@@ -177,14 +177,15 @@ export function Step3VariablePay({
 			className={common.flexColumnGap2}
 			onSubmit={onSubmit}
 		>
-			{/* Native `disabled` is kept on purpose: it is the only mechanism
-			    enforcing the read-only mode, and disabled fields remain exposed
-			    to screen readers (#3803). */}
-			<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+			{/* Read-only mode is enforced per control (readOnly inputs, disabled
+			    buttons): a fieldset-level `disabled` would hide the content from
+			    some assistive technologies (#3803). */}
+			<fieldset className={common.readOnlyFieldset}>
 				<legend className="fr-sr-only">
 					Rémunérations variables ou complémentaires
 				</legend>
 				<StepTitleRow
+					devFillDisabled={isReadOnly}
 					hasData={hasData}
 					isPendingSave={isPendingSave}
 					isSaving={isSaving}
@@ -246,6 +247,7 @@ export function Step3VariablePay({
 							}
 							disabled={isImpersonating}
 							onRowChange={handleRowChange}
+							readOnly={isReadOnly}
 							rows={rows}
 						/>
 
@@ -314,6 +316,7 @@ export function Step3VariablePay({
 																)
 															}
 															pattern="[0-9]*"
+															readOnly={isReadOnly}
 															type="text"
 															value={beneficiaryWomen}
 														/>
@@ -345,6 +348,7 @@ export function Step3VariablePay({
 																)
 															}
 															pattern="[0-9]*"
+															readOnly={isReadOnly}
 															type="text"
 															value={beneficiaryMen}
 														/>

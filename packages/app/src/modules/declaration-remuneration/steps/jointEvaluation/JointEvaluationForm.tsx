@@ -84,10 +84,10 @@ export function JointEvaluationForm({
 				className={common.flexColumnGap2}
 				onSubmit={handleSubmit}
 			>
-				{/* Native `disabled` is kept on purpose: it is the only mechanism
-				    enforcing the read-only mode, and disabled fields remain exposed
-				    to screen readers (#3803). */}
-				<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+				{/* Read-only mode is enforced per control (disabled upload and submit
+				    button): a fieldset-level `disabled` would hide the content from
+				    some assistive technologies (#3803). */}
+				<fieldset className={common.readOnlyFieldset}>
 					<legend className="fr-sr-only">
 						Évaluation conjointe des rémunérations
 					</legend>

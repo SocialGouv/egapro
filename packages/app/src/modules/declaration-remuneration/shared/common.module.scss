@@ -70,4 +70,13 @@
 	margin: 0;
 	padding: 0;
 	min-width: 0;
+
+	// Read-only inputs mirror the DSFR disabled styling so the locked state
+	// stays visually identical while the content remains exposed to assistive
+	// technologies (issue 3803).
+	input[readonly] {
+		color: var(--text-disabled-grey);
+		box-shadow: inset 0 -2px 0 0 var(--border-disabled-grey);
+		cursor: default;
+	}
 }

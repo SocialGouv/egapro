@@ -485,7 +485,7 @@ describe("CompliancePathChoice", () => {
 			expect(mockSetField).not.toHaveBeenCalled();
 		});
 
-		it("disables the path fieldset when the declaration is locked read-only", () => {
+		it("disables each control while keeping the fieldset enabled when the declaration is locked read-only", () => {
 			const { container } = render(
 				<LockProvider isReadOnly>
 					<CompliancePathChoice
@@ -498,8 +498,12 @@ describe("CompliancePathChoice", () => {
 				</LockProvider>,
 			);
 
-			// The outermost fieldset wraps the entire form in read-only mode.
-			expect(container.querySelector("fieldset")).toBeDisabled();
+			// The outermost fieldset stays enabled so its content remains exposed
+			// to assistive technologies; each control is disabled individually.
+			expect(container.querySelector("fieldset")).not.toBeDisabled();
+			expect(
+				screen.getByLabelText("Actions correctives et seconde déclaration"),
+			).toBeDisabled();
 			expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
 		});
 	});

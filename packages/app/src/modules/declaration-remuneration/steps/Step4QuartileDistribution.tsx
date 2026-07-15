@@ -261,12 +261,13 @@ export function Step4QuartileDistribution({
 			noValidate
 			onSubmit={onSubmit}
 		>
-			{/* Native `disabled` is kept on purpose: it is the only mechanism
-			    enforcing the read-only mode, and disabled fields remain exposed
-			    to screen readers (#3803). */}
-			<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+			{/* Read-only mode is enforced per control (readOnly inputs, disabled
+			    buttons): a fieldset-level `disabled` would hide the content from
+			    some assistive technologies (#3803). */}
+			<fieldset className={common.readOnlyFieldset}>
 				<legend className="fr-sr-only">Distribution par quartile</legend>
 				<StepTitleRow
+					devFillDisabled={isReadOnly}
 					hasData={hasData}
 					isPendingSave={isPendingSave}
 					isSaving={isSaving}
@@ -349,6 +350,7 @@ export function Step4QuartileDistribution({
 							handleQuartileChange("annual", index, field, value)
 						}
 						quartiles={annual}
+						readOnly={isReadOnly}
 						sourceNote={
 							gipPrefillData ? (
 								<PrefillSource periodEnd={gipPrefillData.periodEnd ?? null} />
@@ -366,6 +368,7 @@ export function Step4QuartileDistribution({
 							handleQuartileChange("hourly", index, field, value)
 						}
 						quartiles={hourly}
+						readOnly={isReadOnly}
 						sourceNote={
 							gipPrefillData ? (
 								<PrefillSource periodEnd={gipPrefillData.periodEnd ?? null} />
