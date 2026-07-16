@@ -86,13 +86,12 @@ function EuroInputCell({
 	);
 }
 
-/** Column headers shared by the annual and hourly remuneration tables. */
 function RemunerationHead() {
 	return (
 		<thead>
 			<tr>
 				<th className={stepStyles.nameColumnHeader} scope="col">
-					{/* row label */}
+					<span className="fr-sr-only">Libellé</span>
 				</th>
 				<th scope="col">Femmes</th>
 				<th scope="col">Hommes</th>
@@ -106,7 +105,6 @@ function RemunerationHead() {
 	);
 }
 
-/** A styled DSFR table wrapper — keeps the fr-table structure in one place. */
 function TableFrame({
 	caption,
 	children,
@@ -273,7 +271,7 @@ export function CategoryDataTable({
 					<thead>
 						<tr>
 							<th className={stepStyles.nameColumnHeader} scope="col">
-								{/* row label */}
+								<span className="fr-sr-only">Libellé</span>
 							</th>
 							<th scope="col">Femmes</th>
 							<th scope="col">Hommes</th>
