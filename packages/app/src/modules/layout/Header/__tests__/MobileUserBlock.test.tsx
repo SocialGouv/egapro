@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { MobileUserBlock } from "../MobileUserBlock";
@@ -42,6 +42,39 @@ describe("MobileUserBlock", () => {
 		render(<MobileUserBlock {...defaultProps} />);
 		const link = screen.getByRole("link", { name: "Se déconnecter" });
 		expect(link).toHaveAttribute("href", "/api/auth/logout");
+	});
+
+	describe("focus on mobile menu opening (RGAA 12.8)", () => {
+		it("moves focus onto the user name once the DSFR focus trap settled", async () => {
+			// Simulate the DSFR mobile menu modal wrapping the block.
+			const menuModal = document.createElement("div");
+			menuModal.id = "modal-menu";
+			const closeButton = document.createElement("button");
+			closeButton.textContent = "Fermer";
+			menuModal.appendChild(closeButton);
+			document.body.appendChild(menuModal);
+
+			const { container } = render(<MobileUserBlock {...defaultProps} />, {
+				container: menuModal.appendChild(document.createElement("div")),
+			});
+
+			// DSFR dispatches dsfr.disclose, then its focus trap moves focus to
+			// the first interactive element (the close button).
+			fireEvent(menuModal, new Event("dsfr.disclose"));
+			closeButton.focus();
+
+			await waitFor(() => {
+				expect(screen.getByText("Jean Dupont")).toHaveFocus();
+			});
+
+			container.remove();
+			menuModal.remove();
+		});
+
+		it("makes the user name programmatically focusable only", () => {
+			render(<MobileUserBlock {...defaultProps} />);
+			expect(screen.getByText("Jean Dupont")).toHaveAttribute("tabindex", "-1");
+		});
 	});
 
 	it("opens the profile modal when 'Voir mon profil' is clicked", () => {
