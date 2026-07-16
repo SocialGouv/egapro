@@ -8,7 +8,7 @@ type Props = {
 
 export function DeclarationHistoryPage({ siren, year }: Props) {
 	return (
-		<main id="content">
+		<main id="content" tabIndex={-1}>
 			<div className="fr-container fr-py-4w">
 				<Breadcrumb
 					items={[

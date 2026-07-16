@@ -66,7 +66,7 @@ export function CompanyDeclarationsPage({
 	});
 
 	return (
-		<main id="content">
+		<main id="content" tabIndex={-1}>
 			<WelcomeBanner />
 			<CompanyInfoBanner company={company} />
 			<DeclarationsSection
