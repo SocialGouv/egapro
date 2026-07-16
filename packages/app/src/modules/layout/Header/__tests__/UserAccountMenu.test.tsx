@@ -36,6 +36,30 @@ describe("UserAccountMenu", () => {
 			expect(screen.getByRole("menu")).toBeInTheDocument();
 		});
 
+		it("names the menu 'Mon espace'", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			expect(
+				screen.getByRole("menu", { name: "Mon espace" }),
+			).toBeInTheDocument();
+		});
+
+		it("keeps the user info block outside the menu element", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			expect(screen.getByRole("menu")).not.toContainElement(
+				screen.getByText("Jean Dupont"),
+			);
+		});
+
+		it("removes menu items from the natural tab order (roving focus)", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			for (const item of screen.getAllByRole("menuitem")) {
+				expect(item).toHaveAttribute("tabindex", "-1");
+			}
+		});
+
 		it("sets aria-expanded=true when open", () => {
 			render(<UserAccountMenu {...defaultProps} />);
 			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
@@ -104,6 +128,16 @@ describe("UserAccountMenu", () => {
 			expect(screen.getByRole("menu")).toBeInTheDocument();
 			fireEvent.keyDown(document, { key: "Escape" });
 			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+		});
+
+		it("closes the menu on Tab and returns focus to the toggle button", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			const toggle = screen.getByRole("button", { name: "Mon espace" });
+			fireEvent.click(toggle);
+			expect(screen.getByRole("menu")).toBeInTheDocument();
+			fireEvent.keyDown(document, { key: "Tab" });
+			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+			expect(toggle).toHaveFocus();
 		});
 
 		it("closes the menu when clicking outside", () => {
