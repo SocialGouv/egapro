@@ -4,10 +4,10 @@ import { describe, expect, it } from "vitest";
 import { CompanyListHeader } from "../CompanyListHeader";
 
 describe("CompanyListHeader", () => {
-	it("renders the H2 title", () => {
+	it("renders the page h1 title", () => {
 		render(<CompanyListHeader />);
 		expect(
-			screen.getByRole("heading", { level: 2, name: "Mes entreprises" }),
+			screen.getByRole("heading", { level: 1, name: "Mes entreprises" }),
 		).toBeInTheDocument();
 	});
 

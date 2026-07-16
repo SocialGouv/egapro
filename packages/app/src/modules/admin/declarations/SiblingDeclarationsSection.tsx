@@ -20,7 +20,7 @@ export function SiblingDeclarationsSection({ siblings }: Props) {
 
 	return (
 		<section className="fr-mt-4w">
-			<h3 className="fr-h5">Autres déclarations pour ce SIREN / cette année</h3>
+			<h2 className="fr-h5">Autres déclarations pour ce SIREN / cette année</h2>
 			<ul className="fr-raw-list">
 				{siblings.map((sibling) => (
 					<li className="fr-mb-1w" key={sibling.id}>

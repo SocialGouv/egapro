@@ -15,10 +15,10 @@ const baseCompany: CompanyDetail = {
 };
 
 describe("CompanyInfoBanner", () => {
-	it("renders the company name as an h2 heading", () => {
+	it("renders the company name as the page h1 heading", () => {
 		render(<CompanyInfoBanner company={baseCompany} />);
 		expect(
-			screen.getByRole("heading", { level: 2, name: "Alpha Solutions" }),
+			screen.getByRole("heading", { level: 1, name: "Alpha Solutions" }),
 		).toBeInTheDocument();
 	});
 

@@ -45,7 +45,7 @@ describe("MyCompaniesPage", () => {
 		const page = await MyCompaniesPage();
 		render(page);
 		expect(
-			screen.getByRole("heading", { level: 2, name: "Mes entreprises" }),
+			screen.getByRole("heading", { level: 1, name: "Mes entreprises" }),
 		).toBeInTheDocument();
 	});
 
