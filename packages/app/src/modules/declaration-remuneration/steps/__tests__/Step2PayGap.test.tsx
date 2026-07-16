@@ -72,8 +72,8 @@ describe("Step2PayGap", () => {
 			/>,
 		);
 		expect(screen.getByText("Rémunération")).toBeInTheDocument();
-		expect(screen.getByText("Femmes")).toBeInTheDocument();
-		expect(screen.getByText("Hommes")).toBeInTheDocument();
+		expect(screen.getByText("Rémunération des femmes")).toBeInTheDocument();
+		expect(screen.getByText("Rémunération des hommes")).toBeInTheDocument();
 		expect(
 			screen.getByText("Écart", { selector: "strong" }),
 		).toBeInTheDocument();

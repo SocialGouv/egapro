@@ -62,8 +62,8 @@ export function PayGapTable({
 							<thead>
 								<tr>
 									<th scope="col">{columnHeader}</th>
-									<th scope="col">Femmes</th>
-									<th scope="col">Hommes</th>
+									<th scope="col">Rémunération des femmes</th>
+									<th scope="col">Rémunération des hommes</th>
 									<th scope="col">
 										<strong>Écart</strong>
 										<br />

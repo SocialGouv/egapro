@@ -136,8 +136,11 @@ describe("Step5EmployeeCategories", () => {
 				declarationYear={2025}
 			/>,
 		);
-		expect(screen.getAllByText("Femmes").length).toBeGreaterThanOrEqual(1);
-		expect(screen.getAllByText("Hommes").length).toBeGreaterThanOrEqual(1);
+		expect(screen.getByText("Nombre de femmes")).toBeInTheDocument();
+		expect(screen.getByText("Nombre d'hommes")).toBeInTheDocument();
+		expect(
+			screen.getAllByText("Rémunération des femmes").length,
+		).toBeGreaterThanOrEqual(1);
 		expect(
 			screen.getAllByText("Seuil réglementaire : 5%").length,
 		).toBeGreaterThanOrEqual(1);

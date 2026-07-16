@@ -93,8 +93,8 @@ function RemunerationHead() {
 				<th className={stepStyles.nameColumnHeader} scope="col">
 					<span className="fr-sr-only">Libellé</span>
 				</th>
-				<th scope="col">Femmes</th>
-				<th scope="col">Hommes</th>
+				<th scope="col">Rémunération des femmes</th>
+				<th scope="col">Rémunération des hommes</th>
 				<th scope="col">
 					<strong>Écart</strong>
 					<br />
@@ -273,8 +273,8 @@ export function CategoryDataTable({
 							<th className={stepStyles.nameColumnHeader} scope="col">
 								<span className="fr-sr-only">Libellé</span>
 							</th>
-							<th scope="col">Femmes</th>
-							<th scope="col">Hommes</th>
+							<th scope="col">Nombre de femmes</th>
+							<th scope="col">Nombre d&apos;hommes</th>
 						</tr>
 					</thead>
 					<tbody>

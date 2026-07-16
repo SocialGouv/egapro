@@ -229,17 +229,13 @@ export function Step3VariablePay({
 				<div className={`${common.dataSection} ${common.tableGap}`}>
 					<div className={common.flexColumnGap1}>
 						<h2 className="fr-h6 fr-mb-0">
-							Écart de rémunération variable ou complémentaire
+							Rémunération variable ou complémentaire
 						</h2>
 						<PayGapTable
 							caption="Écart de rémunération variable ou complémentaire"
 							className={stepStyles.payGapTable}
 							columnHeader={
-								<>
-									Rémunération variable
-									<br />
-									ou complémentaire
-								</>
+								<span className="fr-sr-only">Type de rémunération</span>
 							}
 							disabled={isImpersonating}
 							onRowChange={handleRowChange}
@@ -258,7 +254,7 @@ export function Step3VariablePay({
 
 					<div className={common.flexColumnGap1}>
 						<h2 className="fr-h6 fr-mb-0">
-							Bénéficiaires de composantes variables ou complémentaires
+							Proportion de femmes et d&apos;hommes bénéficiaires
 						</h2>
 						<div
 							className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.payGapTable}`}
