@@ -130,14 +130,14 @@ export function PayGapTable({
 											</td>
 											<td>
 												<span className={styles.gapDisplay}>
-													<span className="fr-text--bold">
-														{formatGap(gap)}
-													</span>
 													{level === "high" && (
 														<span className={gapBadgeClass(level)}>
 															{GAP_LEVEL_LABELS[level]}
 														</span>
 													)}
+													<span className="fr-text--bold">
+														{formatGap(gap)}
+													</span>
 												</span>
 											</td>
 										</tr>

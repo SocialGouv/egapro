@@ -191,7 +191,7 @@ function RemunerationTable({
 							onChange={pos(catIndex, fields.baseMen, false)}
 							value={cat[fields.baseMen]}
 						/>
-						<td>
+						<td className={stepStyles.gapCell}>
 							<GapBadge
 								gap={computeGap(cat[fields.baseWomen], cat[fields.baseMen])}
 							/>
@@ -219,7 +219,7 @@ function RemunerationTable({
 							onChange={pos(catIndex, fields.variableMen, false)}
 							value={cat[fields.variableMen]}
 						/>
-						<td>
+						<td className={stepStyles.gapCell}>
 							<GapBadge
 								gap={computeGap(
 									cat[fields.variableWomen],
@@ -236,7 +236,7 @@ function RemunerationTable({
 						<td className={stepStyles.totalCell}>
 							{formatTotal(totalMen, "€")}
 						</td>
-						<td>
+						<td className={stepStyles.gapCell}>
 							<GapBadge gap={totalGap} />
 						</td>
 					</tr>

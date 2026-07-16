@@ -1,6 +1,8 @@
 .gapDisplay {
+	// Figma: the gap value is pinned to the right of the cell, badge to its left.
 	display: flex;
 	align-items: baseline;
+	justify-content: flex-end;
 	gap: 0.5rem;
 }
 
