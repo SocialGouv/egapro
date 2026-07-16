@@ -41,6 +41,7 @@ export function AccuracyOpinionCard({
 							id={`${id}-favorable`}
 							name={`${id}-opinion`}
 							onChange={() => onOpinionChange("favorable")}
+							required
 							type="radio"
 							value="favorable"
 						/>
@@ -56,6 +57,7 @@ export function AccuracyOpinionCard({
 							id={`${id}-unfavorable`}
 							name={`${id}-opinion`}
 							onChange={() => onOpinionChange("unfavorable")}
+							required
 							type="radio"
 							value="unfavorable"
 						/>
