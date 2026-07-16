@@ -102,16 +102,6 @@ test.describe("Path 3: gap + hasCse → compliance choice → justify", () => {
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
 	});
-
-	// Folded from the former standalone "Path 13.b": reuses the state left by the
-	// justify test above (page on /avis-cse/etape/1) instead of replaying a full
-	// declaration.
-	test("justify → Précédent on /avis-cse returns to the compliance choice", async ({
-		page,
-	}) => {
-		await page.getByRole("link", { name: /Précédent/ }).click();
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
-	});
 });
 
 test.describe("Path 4: gap + hasCse → joint evaluation → /avis-cse", () => {
@@ -174,15 +164,6 @@ test.describe("Path 6: gap + corrective action (no gap after) + hasCse → /avis
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: false });
 		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
-	});
-
-	// Folded from the former standalone "Path 13.c": reuses the state left by the
-	// test above (page on /avis-cse/etape/1) instead of replaying a full flow.
-	test("corrective resolved → Précédent on /avis-cse goes to the second-declaration recap", async ({
-		page,
-	}) => {
-		await page.getByRole("link", { name: /Précédent/ }).click();
-		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/3`, { timeout: 10_000 });
 	});
 });
 
@@ -317,6 +298,45 @@ test.describe("Path 13.a: no gap → /avis-cse Précédent → /etape/6 (recap)"
 		await page.waitForURL("**/declaration-remuneration/etape/6", {
 			timeout: 10_000,
 		});
+	});
+});
+
+test.describe("Path 13.b: justify round 1 → /avis-cse Précédent → /parcours-conformite", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
+	});
+
+	test("after justify choice, Précédent on /avis-cse goes back to compliance choice", async ({
+		page,
+	}) => {
+		test.slow();
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-justify");
+		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.getByRole("link", { name: /Précédent/ }).click();
+		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+	});
+});
+
+test.describe("Path 13.c: corrective second decl resolved → /avis-cse Précédent → /etape/3", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
+	});
+
+	test("after second-decl resolved, Précédent on /avis-cse goes to second-decl recap", async ({
+		page,
+	}) => {
+		test.slow();
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-corrective");
+		await completeSecondDeclaration(page, { hasGap: false });
+		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.getByRole("link", { name: /Précédent/ }).click();
+		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/3`, { timeout: 10_000 });
 	});
 });
 
