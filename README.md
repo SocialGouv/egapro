@@ -263,7 +263,7 @@ Les agents sont des sous-processus specialises avec leur propre checklist. Ils t
 |---|---|---|
 | `validator` | Typecheck + tests + lint + format en parallele | Toutes les gates, `/ship` |
 | `structural-auditor` | 16 regles : forms, schemas, DRY, imports, file size, naming, domain layer... | Gate automatique, `/ship` |
-| `rgaa-auditor` | 13 themes RGAA complets : images, formulaires, navigation, structure, couleurs, modales... | Gate automatique, `/ship` |
+| `rgaa-auditor` | Accessibilite RGAA 4.1.2 / WCAG 2.2 AA pilotee par **ultra11y** (`.claude/skills/ultra11y/`) | Gate automatique, `/ship` |
 | `security-auditor` | OWASP Top 10 + RGS : injection, auth, acces, secrets, headers, SSRF... | Gate automatique, `/ship` |
 
 ### Skills (`.claude/skills/`)

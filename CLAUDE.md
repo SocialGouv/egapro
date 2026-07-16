@@ -129,7 +129,7 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | **Tests unitaires** | Inside `/implement`, avant les gates (step 5.5) | `tu-dev` agent (Opus) écrit/corrige les TU + intégration, renvoie à `code-dev` sur régression |
 | **Validation** | After every task | `validator` agent (typecheck + test + lint + format) |
 | **Structure** | After every task | `structural-auditor` agent (17 rules: forms, schemas, DRY, imports, no-comments…) |
-| **RGAA** | After every task | `rgaa-auditor` agent on modified `.tsx` files |
+| **RGAA** | After every task | `rgaa-auditor` agent (pilote **ultra11y**) sur les `.tsx` modifiés — voir `.claude/rules/rgaa.md` |
 | **Security** | After every task | `security-auditor` agent on modified server files |
 | **Functional** | Inside `/implement` | `functional-validator` rejoue les scénarios PO |
 | **Tests E2E** (bloquant) | Fin de pipeline (epic-end pour Feature, après `code-dev validated` pour Task/Bug) | `e2e-dev` agent (Opus) lance la suite E2E (triage régression), imbrique/crée le scénario Playwright. **Bloquant** : sur vraie régression → `architect-rework` crée des tickets de fix (la PR finale n'est pas ouverte tant que la gate n'est pas verte) |
@@ -189,7 +189,7 @@ Quality checks run **automatically** après chaque itération de code — pas de
 |---|---|
 | `validator` | Typecheck + test + lint + format (parallel) |
 | `structural-auditor` | 17-rule structural audit (code quality, forms, schemas, DRY, imports, no-comments…) |
-| `rgaa-auditor` | 13-theme RGAA accessibility audit |
+| `rgaa-auditor` | Audit accessibilité RGAA 4.1.2 / WCAG 2.2 AA piloté par **ultra11y** (`.claude/skills/ultra11y/`) |
 | `security-auditor` | OWASP Top 10 + RGS security review |
 
 ### Skills (`.claude/skills/`)

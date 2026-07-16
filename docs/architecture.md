@@ -689,9 +689,9 @@ Priorité stricte : 1) classes DSFR → 2) utilities DSFR + CSS variables → 3)
 
 Activé via `data-fr-scheme="system"` sur `<html>`. Cookie `fr-theme` lu par un script inline en tête. Modale `ThemeModal` pour le choix utilisateur.
 
-### 11.5 RGAA / WCAG 2.1 AA
+### 11.5 RGAA 4.1.2 / WCAG 2.2 AA
 
-Score Lighthouse accessibilité **= 100%** (seuil bloquant CI dans `.lighthouserc.json`). Audit quotidien automatisé (`rgaa-audit.yaml`).
+Toute l'accessibilité passe par un dispositif unique, **ultra11y** (vendoré `.claude/skills/ultra11y/`, committé pour tous les devs), décliné en tiers : tier statique bloquant en CI (`pnpm --filter app test:a11y`, workflow `.github/workflows/a11y.yaml`, sur chaque push/PR) + tier jugement (agent `rgaa-auditor`) + tier rendu (score Lighthouse accessibilité **= 100%** pour contraste/zoom/reflow/focus, seuil bloquant dans `.lighthouserc.json`, workflow `lighthouse.yaml`) + tier écriture (hook). Aucun système a11y parallèle. Règle canonique : `.claude/rules/rgaa.md`.
 
 ---
 
@@ -716,7 +716,7 @@ Trois entrées Sentry, une par runtime :
 | Unit | Vitest | `src/modules/**/__tests__/` | ≥ 75% global, **100%** sur `domain/` |
 | E2E | Playwright | `packages/app/src/e2e/` | Au moins une E2E par `page.tsx` |
 | A11y | Lighthouse CI | `.lighthouserc.json` | **100%** accessibilité (bloquant) |
-| RGAA quotidien | Workflow GitHub Actions | `.github/workflows/rgaa-audit.yaml` | Cron 06:00 UTC L–V |
+| RGAA (ultra11y) | Gate statique CI + rapport | `.github/workflows/a11y.yaml` · `pnpm --filter app test:a11y` | Bloquant sur PR/push ; rapport hebdo (artefact) |
 | Intégration BDD | Vitest + Docker | `*.integration.test.ts` | Obligatoire pour code touchant `audit.action_log` ou les scripts de purge (audit, déclarations) |
 
 ### 13.1 Mocks centralisés
@@ -751,8 +751,8 @@ pnpm test:integration  # Tests intégration BDD (nécessite Docker)
 | `preproduction.yaml` | push branche `beta` | Déploiement preprod |
 | `production.yaml` | push tag | Déploiement prod |
 | `release.yml` | manuel | semantic-release (versionnement automatique) |
-| `rgaa-audit.yaml` | cron 06:00 UTC L–V | Audit RGAA quotidien |
-| `claude-question.yml` / `claude-revue-rgaa.yml` | issue/PR labels | Intégrations IA (questions ; revue RGAA) |
+| `a11y.yaml` | push · PR · cron lundi 06:00 UTC | Gate RGAA statique (ultra11y, bloquant) + rapport hebdo |
+| `claude-question.yml` | issue/PR labels | Intégration IA (questions) |
 
 ### 14.2 Kontinuous (déploiement Kubernetes)
 

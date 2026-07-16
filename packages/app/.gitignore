@@ -59,3 +59,8 @@ yarn-error.log*
 
 # playwright auth state
 src/e2e/.auth/
+
+# ultra11y a11y audit artifacts (runtime output + scan session state)
+/audits
+/.ultra11y
+/.auth

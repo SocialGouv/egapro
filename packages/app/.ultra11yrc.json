@@ -1,0 +1,14 @@
+{
+	"standard": "rgaa",
+	"secondaryMappings": [
+		{
+			"standard": "rgaa",
+			"ruleId": "dyn-live-region",
+			"criterion": "7.4",
+			"note": {
+				"fr": "Ara classe la mise à jour d'une région live sous 7.4 (changement de contexte) ; activé pour egapro (cf. #3873).",
+				"en": "Ara classifies live-region updates under 7.4; enabled for egapro (see #3873)."
+			}
+		}
+	]
+}

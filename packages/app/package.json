@@ -35,7 +35,8 @@
 		"test:e2e": "playwright test",
 		"pretest:e2e": "pnpm --filter notifications build",
 		"test:e2e:ui": "playwright test --ui",
-		"test:rgaa": "playwright test --config playwright.rgaa.config.ts",
+		"test:a11y": "node ../../.claude/skills/ultra11y/scripts/ultra11y.mjs audit \"src/**/*.tsx\" --jsx --graph --standard rgaa --lang fr --fail-on blocking",
+		"a11y:report": "node ../../.claude/skills/ultra11y/scripts/ultra11y.mjs audit \"src/**/*.tsx\" --jsx --graph --standard rgaa --lang fr --out audits && node ../../.claude/skills/ultra11y/scripts/ultra11y.mjs report --in audits/audit-latest.json --standard rgaa --lang fr --out audits",
 		"test:lighthouse": "lhci collect --url=${LIGHTHOUSE_URL:-http://localhost:3000} && lhci upload && lhci assert",
 		"typecheck": "tsc --noEmit",
 		"generate:fetch-companies": "tsx scripts/fetch-companies.ts",
@@ -72,7 +73,6 @@
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
-		"@axe-core/playwright": "^4.11.1",
 		"@biomejs/biome": "^2.4.11",
 		"@lhci/cli": "^0.15.1",
 		"@playwright/test": "^1.59.1",

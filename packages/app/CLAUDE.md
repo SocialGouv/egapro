@@ -11,7 +11,7 @@ All quality checks are **automatic** — no manual commands needed:
 
 - **Lint/format**: auto-applied by the `auto-lint` hook after each edit and Bash command
 - **Forbidden patterns**: blocked by the `block-bad-patterns` hook before edits (13 patterns including domain layer violations)
-- **Post-task gates**: 4 parallel agents run automatically after every task: `validator` (typecheck + test + lint), `structural-auditor` (17 rules), `rgaa-auditor` (13 RGAA themes on .tsx), `security-auditor` (OWASP on server files)
+- **Post-task gates**: 4 parallel agents run automatically after every task: `validator` (typecheck + test + lint), `structural-auditor` (17 rules), `rgaa-auditor` (RGAA 4.1.2 / WCAG 2.2 AA via **ultra11y**, on .tsx), `security-auditor` (OWASP on server files)
 
 See `.claude/rules/automation.md` for full details.
 
@@ -209,20 +209,23 @@ Cascade: 1) DSFR classes → 2) DSFR utilities + CSS custom properties → 3) Sc
 
 ---
 
-## Accessibility (RGAA / WCAG 2.1 AA)
+## Accessibility (RGAA 4.1.2 / WCAG 2.2 AA)
 
-### Mandatory checklist
+> **Canonical rule → [`.claude/rules/rgaa.md`](../../.claude/rules/rgaa.md)** — all accessibility goes through a single dispositif, **ultra11y** (vendored at `.claude/skills/ultra11y/`, committed so every dev has it), declined into complementary tiers: static (`pnpm --filter app test:a11y`, run automatically in CI on every push/PR) + judgment (the `rgaa-auditor` agent) + rendered (Lighthouse 100%) + authoring hook. No parallel a11y system.
 
-- **Skip links**: `SkipLinks` as first child of `<body>` (RGAA 12.7)
-- **Landmarks**: use semantic `<header>`, `<nav>`, `<main>`, `<footer>`. Do not add redundant `role` (`role="navigation"` on `<nav>` is forbidden)
-- **Modals**: any `<div>` with `aria-labelledby` or `aria-describedby` must have `role="dialog"` + `aria-modal="true"`
+### Mandatory checklist (extract — full rules in the canonical rule)
+
+- **Skip links**: `SkipLinks` as first child of `<body>` (RGAA 12.7); every skip-link anchor (`#content`, `#footer`) needs a valid target
+- **Landmarks**: semantic `<header>`, `<nav>`, `<main id="content" tabindex="-1">`, `<footer>` — one `<main>` per page. Never add redundant `role` (`role="navigation"` on `<nav>` is forbidden)
+- **Modals**: any `<div>` with `aria-labelledby`/`aria-describedby` must have `role="dialog"` + `aria-modal="true"`; focus trap by DSFR JS
 - **External links**: any `target="_blank"` must contain a `<NewTabNotice />` (text `fr-sr-only`)
-- **aria-current**: use `NavLink` for navigation links — `aria-current="page"` is calculated dynamically via `usePathname()`
+- **aria-current**: use `NavLink` — `aria-current="page"` calculated via `usePathname()`
 - **Icons**: `aria-hidden="true"` on purely decorative elements
-- **Images**: always use `import Image from "next/image"` (raw `<img>` blocked by hook). Descriptive `alt` required, `alt=""` for decorative images
-- **Forms**: each `<input>` must have an associated `<label>` via `htmlFor`/`id`
+- **Images**: `import Image from "next/image"` (raw `<img>` blocked by hook). Descriptive `alt` required, `alt=""` for decorative
+- **Forms**: each `<input>` has an associated `<label>` via `htmlFor`/`id`; required → `aria-required`; error → `aria-invalid` + `aria-describedby`
+- **Live regions**: server-action error → `role="alert"` alone; info/async → `aria-live="polite"` + `aria-atomic="true"` (never both)
 
-Never add redundant `role` on semantic elements (`role="navigation"` on `<nav>` is forbidden). Use `role="dialog"` + `aria-modal="true"` only on `<div>` elements.
+Never add redundant `role` on semantic elements. Use `role="dialog"` + `aria-modal="true"` only on `<div>` elements.
 
 ---
 
