@@ -71,6 +71,25 @@ describe("Step1Workforce", () => {
 		expect(screen.getByLabelText("Nombre d'hommes")).toHaveValue("");
 	});
 
+	it("gives every column header a non-empty accessible name and exposes the row label as a rowheader (RGAA 5.7)", () => {
+		render(
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={emptyStep1Data()}
+			/>,
+		);
+		for (const header of screen.getAllByRole("columnheader")) {
+			expect(header).toHaveAccessibleName();
+		}
+		expect(
+			screen.getByRole("columnheader", { name: "Donnée" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("rowheader", { name: "Nombre de salariés" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders reference period and mandatory fields notice", () => {
 		render(
 			<Step1Workforce
@@ -101,7 +120,7 @@ describe("Step1Workforce", () => {
 			.getByText("Nombre de salariés")
 			.closest("tr") as HTMLElement;
 		const cells = within(row).getAllByRole("cell");
-		expect(cells[3]).toHaveTextContent("30");
+		expect(cells[2]).toHaveTextContent("30");
 	});
 
 	it("shows SavedIndicator when initial data has values", () => {
@@ -152,7 +171,7 @@ describe("Step1Workforce", () => {
 			.getByText("Nombre de salariés")
 			.closest("tr") as HTMLElement;
 		const cells = within(row).getAllByRole("cell");
-		expect(cells[3]).toHaveTextContent("40");
+		expect(cells[2]).toHaveTextContent("40");
 	});
 
 	it("validates total > 0 on submit", async () => {

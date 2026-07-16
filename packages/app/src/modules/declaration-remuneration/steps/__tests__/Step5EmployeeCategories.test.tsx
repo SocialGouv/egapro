@@ -129,6 +129,28 @@ describe("Step5EmployeeCategories", () => {
 		expect(descriptionParagraph.nextElementSibling).toBe(obligatoiresParagraph);
 	});
 
+	it("gives every column header a non-empty accessible name and exposes row labels as rowheaders (RGAA 5.7)", () => {
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+			/>,
+		);
+		for (const header of screen.getAllByRole("columnheader")) {
+			expect(header).toHaveAccessibleName();
+		}
+		expect(
+			screen.getByRole("columnheader", { name: "Donnée" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("rowheader", { name: "Effectif physique" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getAllByRole("rowheader", { name: "Salaire de base" }),
+		).toHaveLength(2);
+		expect(screen.getAllByRole("rowheader", { name: "Total" })).toHaveLength(2);
+	});
+
 	it("renders table headers for the category", () => {
 		render(
 			<Step5EmployeeCategories
