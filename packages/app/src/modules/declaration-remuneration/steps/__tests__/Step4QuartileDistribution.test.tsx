@@ -102,11 +102,11 @@ describe("Step4QuartileDistribution", () => {
 		);
 		const headers = screen.getAllByRole("columnheader");
 		const annualHeader = headers.find((h) =>
-			/Tranche de rémunération[\s\S]*annuelle brute/.test(h.textContent ?? ""),
+			/Montants des tranches[\s\S]*annuelle brut/.test(h.textContent ?? ""),
 		);
 		expect(annualHeader).toBeDefined();
 		const hourlyHeader = headers.find((h) =>
-			/Tranche de rémunération[\s\S]*horaire brute/.test(h.textContent ?? ""),
+			/Montants des tranches[\s\S]*horaire brut/.test(h.textContent ?? ""),
 		);
 		expect(hourlyHeader).toBeDefined();
 		expect(screen.getAllByText(/Pourcentage/).length).toBeGreaterThanOrEqual(4);

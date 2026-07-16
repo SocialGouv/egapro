@@ -90,7 +90,7 @@ function RemunerationHead() {
 	return (
 		<thead>
 			<tr>
-				<th className={stepStyles.nameColumnHeader} scope="col">
+				<th scope="col">
 					<span className="fr-sr-only">Donnée</span>
 				</th>
 				<th scope="col">Rémunération des femmes</th>
@@ -113,7 +113,9 @@ function TableFrame({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
+		<div
+			className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.fixedTable}`}
+		>
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">
@@ -171,6 +173,12 @@ function RemunerationTable({
 			<TableFrame
 				caption={`Catégorie d'emplois n°${catIndex + 1}${cat.name.trim() ? ` : ${cat.name}` : ""} — ${title}`}
 			>
+				<colgroup>
+					<col className={stepStyles.colLabel} />
+					<col className={stepStyles.colRemunData} />
+					<col className={stepStyles.colRemunData} />
+					<col className={stepStyles.colRemunData} />
+				</colgroup>
 				<RemunerationHead />
 				<tbody>
 					<tr className={stepStyles.dataRow}>
@@ -272,9 +280,14 @@ export function CategoryDataTable({
 				<TableFrame
 					caption={`Catégorie d'emplois n°${catIndex + 1}${cat.name.trim() ? ` : ${cat.name}` : ""} — Effectifs physiques`}
 				>
+					<colgroup>
+						<col className={stepStyles.colLabel} />
+						<col className={stepStyles.colWorkforceData} />
+						<col className={stepStyles.colWorkforceData} />
+					</colgroup>
 					<thead>
 						<tr>
-							<th className={stepStyles.nameColumnHeader} scope="col">
+							<th scope="col">
 								<span className="fr-sr-only">Donnée</span>
 							</th>
 							<th scope="col">Nombre de femmes</th>

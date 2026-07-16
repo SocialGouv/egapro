@@ -35,8 +35,28 @@
 	text-align: right;
 }
 
-.nameColumnHeader {
-	width: 230px;
+.fixedTable table {
+	// Column widths come from the <colgroup> below (not content), so all three
+	// category tables share the same wide label column and none overflows the
+	// ~776px card (Figma page 5); narrow viewports scroll via the DSFR table
+	// wrapper (RGAA reflow).
+	table-layout: fixed;
+}
+
+// Shared label column across the effectifs and rémunération tables so their
+// left column lines up (Figma page 5).
+.colLabel {
+	width: 28%;
+}
+
+// Workforce (effectifs) table: two equal data columns (women / men).
+.colWorkforceData {
+	width: 36%;
+}
+
+// Rémunération tables: three equal data columns (women / men / gap).
+.colRemunData {
+	width: 24%;
 }
 
 .form {

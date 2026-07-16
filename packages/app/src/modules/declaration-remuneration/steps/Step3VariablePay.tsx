@@ -285,7 +285,9 @@ export function Step3VariablePay({
 											</colgroup>
 											<thead>
 												<tr>
-													<th scope="col">Sexe</th>
+													<th scope="col">
+														<span className="fr-sr-only">Sexe</span>
+													</th>
 													<th scope="col">
 														Total de salariés
 														{maxWomen !== undefined && maxMen !== undefined
@@ -302,9 +304,7 @@ export function Step3VariablePay({
 											</thead>
 											<tbody>
 												<tr>
-													<td>
-														<strong>Femmes</strong>
-													</td>
+													<th scope="row">Femmes</th>
 													<td className="fr-cell--right">
 														<strong>{maxWomen ?? "-"}</strong>
 													</td>
@@ -346,9 +346,7 @@ export function Step3VariablePay({
 													</td>
 												</tr>
 												<tr>
-													<td>
-														<strong>Hommes</strong>
-													</td>
+													<th scope="row">Hommes</th>
 													<td className="fr-cell--right">
 														<strong>{maxMen ?? "-"}</strong>
 													</td>
