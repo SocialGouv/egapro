@@ -13,7 +13,6 @@ import {
 	DECLARATION_FUNNEL,
 	declarationFunnelDimensions,
 } from "../shared/funnelConfig";
-import { useLockContext } from "../shared/lock/LockContext";
 import { NextStepsBox } from "../shared/NextStepsBox";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
@@ -61,7 +60,6 @@ export function Step6Review({
 	hasCse = null,
 }: Props) {
 	const router = useRouter();
-	const { isReadOnly } = useLockContext();
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: () => {
@@ -162,7 +160,11 @@ export function Step6Review({
 			className={stepStyles.formColumn}
 			onSubmit={handleSubmit}
 		>
-			<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+			{/* Read-only mode is enforced per control (the submit button reads the
+			    lock context): a fieldset-level `disabled` would hide the content
+			    from some assistive technologies (#3803). */}
+			<fieldset className={common.readOnlyFieldset}>
+				<legend className="fr-sr-only">Récapitulatif de la déclaration</legend>
 				<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 					<div className="fr-col">
 						<h1 className="fr-h4 fr-mb-0">
