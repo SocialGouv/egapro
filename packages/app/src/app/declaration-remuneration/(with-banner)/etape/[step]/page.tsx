@@ -1,6 +1,8 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
 	getEffectiveGipPrefillData,
+	STEP_TITLES,
 	StepPageClient,
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
@@ -15,6 +17,20 @@ import { api, HydrateClient } from "~/trpc/server";
 type StepPageProps = {
 	params: Promise<{ step: string }>;
 };
+
+export async function generateMetadata({
+	params,
+}: StepPageProps): Promise<Metadata> {
+	const { step: stepParam } = await params;
+	const step = Number.parseInt(stepParam, 10);
+	const stepTitle = STEP_TITLES[step];
+
+	return {
+		title: stepTitle
+			? `Étape ${step} sur ${TOTAL_STEPS} — ${stepTitle}`
+			: "Déclaration des écarts de rémunération",
+	};
+}
 
 export default async function StepPage({ params }: StepPageProps) {
 	const { step: stepParam } = await params;

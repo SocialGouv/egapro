@@ -112,9 +112,10 @@ export function Step3VariablePay({
 	const beneficiaryWomen = formData.indicatorEWomen ?? "";
 	const beneficiaryMen = formData.indicatorEMen ?? "";
 
-	const [benefValidationError, setBenefValidationError] = useState<
-		string | null
-	>(null);
+	const [benefValidationError, setBenefValidationError] = useState<{
+		field: "indicatorEMen" | "indicatorEWomen";
+		message: string;
+	} | null>(null);
 	const hasData = hasSavedData || hasDraft;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -149,9 +150,10 @@ export function Step3VariablePay({
 		const n = Number.parseInt(value, 10);
 		if (Number.isNaN(n) || n < 0) return;
 		if (max !== undefined && n > max) {
-			setBenefValidationError(
-				`Le nombre de bénéficiaires ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
-			);
+			setBenefValidationError({
+				field,
+				message: `Le nombre de bénéficiaires ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
+			});
 			return;
 		}
 		setBenefValidationError(null);
@@ -304,6 +306,18 @@ export function Step3VariablePay({
 													</td>
 													<td>
 														<input
+															aria-describedby={
+																benefValidationError?.field ===
+																"indicatorEWomen"
+																	? "step3-beneficiaries-error"
+																	: undefined
+															}
+															aria-invalid={
+																benefValidationError?.field ===
+																"indicatorEWomen"
+																	? true
+																	: undefined
+															}
 															aria-label="Bénéficiaires femmes"
 															className={`fr-input ${common.numericInput}`}
 															disabled={isImpersonating}
@@ -336,6 +350,16 @@ export function Step3VariablePay({
 													</td>
 													<td>
 														<input
+															aria-describedby={
+																benefValidationError?.field === "indicatorEMen"
+																	? "step3-beneficiaries-error"
+																	: undefined
+															}
+															aria-invalid={
+																benefValidationError?.field === "indicatorEMen"
+																	? true
+																	: undefined
+															}
 															aria-label="Bénéficiaires hommes"
 															className={`fr-input ${common.numericInput}`}
 															disabled={isImpersonating}
@@ -371,7 +395,9 @@ export function Step3VariablePay({
 								className="fr-alert fr-alert--error fr-alert--sm"
 								role="alert"
 							>
-								<p>{benefValidationError}</p>
+								<p id="step3-beneficiaries-error">
+									{benefValidationError.message}
+								</p>
 							</div>
 						)}
 
