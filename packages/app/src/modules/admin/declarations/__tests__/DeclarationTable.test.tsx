@@ -64,6 +64,23 @@ describe("DeclarationTable", () => {
 		expect(screen.getByText("15/06/2024")).toBeInTheDocument();
 	});
 
+	it("exposes aria-sort on the sorted column and hides the sort glyph", () => {
+		render(<DeclarationTable {...defaultProps} />);
+
+		const sortedHeader = screen
+			.getByRole("button", { name: /date de dépôt/i })
+			.closest("th");
+		expect(sortedHeader).toHaveAttribute("aria-sort", "descending");
+
+		const unsortedHeader = screen
+			.getByRole("button", { name: /^siren/i })
+			.closest("th");
+		expect(unsortedHeader).not.toHaveAttribute("aria-sort");
+
+		const glyph = sortedHeader?.querySelector("[aria-hidden='true']");
+		expect(glyph).not.toBeNull();
+	});
+
 	it("shows empty state when no rows", () => {
 		render(<DeclarationTable {...defaultProps} rows={[]} total={0} />);
 

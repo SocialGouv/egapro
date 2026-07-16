@@ -12,6 +12,7 @@
 	flex-wrap: wrap;
 	gap: 0.5rem 1.5rem;
 	align-items: center;
+	margin: 0;
 }
 
 .datapoint {
@@ -19,4 +20,10 @@
 	align-items: center;
 	gap: 0.25rem;
 	margin: 0;
+
+	dt,
+	dd {
+		margin: 0;
+		padding: 0;
+	}
 }

@@ -41,43 +41,55 @@ export function CompanyInfoBanner({ company }: Props) {
 					</div>
 				</div>
 
-				<div className={`${styles.infoRow} fr-mb-1w`}>
-					<p className={styles.datapoint}>
-						SIREN : <strong>{formatSiren(company.siren)}</strong>
-					</p>
+				<dl className={`${styles.infoRow} fr-mb-1w`}>
+					<div className={styles.datapoint}>
+						<dt>SIREN :</dt>
+						<dd>
+							<strong>{formatSiren(company.siren)}</strong>
+						</dd>
+					</div>
 					{company.address && (
-						<p className={styles.datapoint}>
-							Adresse : <strong>{formatAddress(company.address)}</strong>
-						</p>
+						<div className={styles.datapoint}>
+							<dt>Adresse :</dt>
+							<dd>
+								<strong>{formatAddress(company.address)}</strong>
+							</dd>
+						</div>
 					)}
-				</div>
+				</dl>
 
-				<div className={styles.infoRow}>
+				<dl className={styles.infoRow}>
 					{company.nafCode && (
-						<p className={styles.datapoint}>
-							Code NAF :{" "}
-							<strong>
-								{company.nafLabel
-									? `${company.nafCode} — ${company.nafLabel}`
-									: company.nafCode}
-							</strong>
-						</p>
+						<div className={styles.datapoint}>
+							<dt>Code NAF :</dt>
+							<dd>
+								<strong>
+									{company.nafLabel
+										? `${company.nafCode} — ${company.nafLabel}`
+										: company.nafCode}
+								</strong>
+							</dd>
+						</div>
 					)}
 					{company.workforce !== null && (
-						<p className={styles.datapoint}>
-							Effectif annuel moyen en {currentYear} :{" "}
-							<strong>{company.workforce}</strong>
-						</p>
+						<div className={styles.datapoint}>
+							<dt>Effectif annuel moyen en {currentYear} :</dt>
+							<dd>
+								<strong>{company.workforce}</strong>
+							</dd>
+						</div>
 					)}
-					<p className={styles.datapoint}>
-						Existence d'un CSE :{" "}
-						{company.hasCse !== null ? (
-							<strong>{company.hasCse ? "Oui" : "Non"}</strong>
-						) : (
-							<StatusBadge status="to_complete" />
-						)}
-					</p>
-				</div>
+					<div className={styles.datapoint}>
+						<dt>Existence d'un CSE :</dt>
+						<dd>
+							{company.hasCse !== null ? (
+								<strong>{company.hasCse ? "Oui" : "Non"}</strong>
+							) : (
+								<StatusBadge status="to_complete" />
+							)}
+						</dd>
+					</div>
+				</dl>
 			</div>
 		</div>
 	);
