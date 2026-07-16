@@ -9,6 +9,8 @@ import { getWorkforceYearFor } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
+export const metadata = { title: "Confirmation de l'avis du CSE" };
+
 export default async function CseOpinionConfirmationPage() {
 	const [session, declarationData] = await Promise.all([
 		auth(),

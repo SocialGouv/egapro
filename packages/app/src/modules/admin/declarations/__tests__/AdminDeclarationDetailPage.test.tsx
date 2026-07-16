@@ -71,6 +71,9 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+import { defaultProps as recapProps } from "~/modules/declaration-remuneration/recapitulatif/__tests__/fixtures";
+import { api } from "~/trpc/react";
+
 import { AdminDeclarationDetailPage } from "../AdminDeclarationDetailPage";
 
 describe("AdminDeclarationDetailPage", () => {
@@ -113,7 +116,7 @@ describe("AdminDeclarationDetailPage", () => {
 		).toBeInTheDocument();
 		expect(screen.getByText("avis-cse.pdf")).toBeInTheDocument();
 		const downloadLink = screen.getByRole("link", {
-			name: "Télécharger avis-cse.pdf",
+			name: "Télécharger avis-cse.pdf (PDF)",
 		});
 		expect(downloadLink).toHaveAttribute("href", "/api/v1/files/file-1");
 	});
@@ -132,5 +135,21 @@ describe("AdminDeclarationDetailPage", () => {
 		expect(
 			screen.queryByRole("button", { name: "Déverrouiller la déclaration" }),
 		).toBeNull();
+	});
+
+	it("renders the embedded recap title as h3 so the page keeps a single h1", () => {
+		vi.mocked(api.adminDeclarations.getRecap.useQuery).mockReturnValueOnce({
+			data: recapProps(),
+		} as unknown as ReturnType<typeof api.adminDeclarations.getRecap.useQuery>);
+
+		render(<AdminDeclarationDetailPage declarationId="decl-1" />);
+
+		expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: /Déclaration des indicateurs de rémunération 2025/,
+			}),
+		).toBeInTheDocument();
 	});
 });

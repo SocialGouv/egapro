@@ -13,7 +13,7 @@ import { ProfileModal } from "~/modules/profile";
 import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
-	title: "Egapro",
+	title: { template: "%s — Egapro", default: "Egapro" },
 	description: "Indicateurs d'égalité professionnelle femmes‑hommes",
 };
 

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function MissingSiret() {
 	return (
-		<main className="fr-container fr-my-4w" id="content">
+		<main className="fr-container fr-my-4w" id="content" tabIndex={-1}>
 			<div className="fr-grid-row fr-grid-row--center">
 				<div className="fr-col-12 fr-col-md-8">
 					<h1>SIRET manquant</h1>

@@ -68,6 +68,7 @@ type Props = {
 	min: string;
 	errors: QuartileFieldErrors;
 	disabled: boolean;
+	readOnly?: boolean;
 	onQuartileChange: (index: number, field: Field, value: string) => void;
 };
 
@@ -78,6 +79,7 @@ export function QuartileTableRow({
 	min,
 	errors,
 	disabled,
+	readOnly = false,
 	onQuartileChange,
 }: Props) {
 	const isLast = index === 3;
@@ -139,6 +141,7 @@ export function QuartileTableRow({
 								onChange={(e) =>
 									onQuartileChange(index, "threshold", e.target.value)
 								}
+								readOnly={readOnly}
 								type="text"
 								value={displayDecimal(quartile.threshold ?? "")}
 							/>
@@ -179,6 +182,7 @@ export function QuartileTableRow({
 						inputMode="numeric"
 						onChange={(e) => onQuartileChange(index, "women", e.target.value)}
 						pattern="[0-9]*"
+						readOnly={readOnly}
 						type="text"
 						value={quartile.women ?? ""}
 					/>
@@ -216,6 +220,7 @@ export function QuartileTableRow({
 						inputMode="numeric"
 						onChange={(e) => onQuartileChange(index, "men", e.target.value)}
 						pattern="[0-9]*"
+						readOnly={readOnly}
 						type="text"
 						value={quartile.men ?? ""}
 					/>

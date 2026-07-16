@@ -9,6 +9,7 @@ type Props = {
 	onConsultedChange: (value: boolean) => void;
 	onOpinionChange: (value: OpinionType) => void;
 	onDateChange: (value: string) => void;
+	readOnly?: boolean;
 };
 
 export function GapConsultationCard({
@@ -19,6 +20,7 @@ export function GapConsultationCard({
 	onConsultedChange,
 	onOpinionChange,
 	onDateChange,
+	readOnly = false,
 }: Props) {
 	const legendId = `${id}-legend`;
 	const opinionLegendId = `${id}-opinion-legend`;
@@ -43,9 +45,11 @@ export function GapConsultationCard({
 					<div className="fr-radio-group fr-radio-rich">
 						<input
 							checked={consulted === true}
+							disabled={readOnly}
 							id={`${id}-yes`}
 							name={`${id}-consulted`}
 							onChange={() => onConsultedChange(true)}
+							required
 							type="radio"
 							value="yes"
 						/>
@@ -58,9 +62,11 @@ export function GapConsultationCard({
 					<div className="fr-radio-group fr-radio-rich">
 						<input
 							checked={consulted === false}
+							disabled={readOnly}
 							id={`${id}-no`}
 							name={`${id}-consulted`}
 							onChange={() => onConsultedChange(false)}
+							required
 							type="radio"
 							value="no"
 						/>
@@ -89,9 +95,11 @@ export function GapConsultationCard({
 							<div className="fr-radio-group fr-radio-rich">
 								<input
 									checked={opinion === "favorable"}
+									disabled={readOnly}
 									id={`${id}-favorable`}
 									name={`${id}-opinion`}
 									onChange={() => onOpinionChange("favorable")}
+									required
 									type="radio"
 									value="favorable"
 								/>
@@ -104,9 +112,11 @@ export function GapConsultationCard({
 							<div className="fr-radio-group fr-radio-rich">
 								<input
 									checked={opinion === "unfavorable"}
+									disabled={readOnly}
 									id={`${id}-unfavorable`}
 									name={`${id}-opinion`}
 									onChange={() => onOpinionChange("unfavorable")}
+									required
 									type="radio"
 									value="unfavorable"
 								/>
@@ -127,6 +137,7 @@ export function GapConsultationCard({
 							id={dateId}
 							onChange={(e) => onDateChange(e.target.value)}
 							placeholder="Sélectionner une date"
+							readOnly={readOnly}
 							type="date"
 							value={date}
 						/>

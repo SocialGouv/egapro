@@ -28,12 +28,12 @@ export function DeclarationLayout({
 	lockHolder = null,
 }: DeclarationLayoutProps) {
 	return (
-		<>
+		<main id="content" tabIndex={-1}>
 			<CompanyBanner
 				company={company}
 				currentPageLabel={`Démarche des indicateurs de rémunération ${declarationYear}`}
 			/>
-			<main className="fr-container fr-py-7w" id="content">
+			<div className="fr-container fr-py-7w">
 				<LockProvider holder={lockHolder} isReadOnly={isReadOnly}>
 					<div className="fr-grid-row fr-grid-row--center">
 						<div className="fr-col-12 fr-col-lg-8">
@@ -44,7 +44,7 @@ export function DeclarationLayout({
 						</div>
 					</div>
 				</LockProvider>
-			</main>
-		</>
+			</div>
+		</main>
 	);
 }

@@ -343,7 +343,9 @@ function QuartileDistributionTable({
 									})}
 									<tr>
 										<th scope="row">Tous les salariés</th>
-										<td colSpan={2} />
+										<td colSpan={2}>
+											<span className="fr-sr-only">Non applicable</span>
+										</td>
 										<td className={styles.numeric}>
 											<strong>{totalWomen || "-"}</strong>
 										</td>

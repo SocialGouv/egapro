@@ -45,6 +45,19 @@ describe("Step2PayGap", () => {
 		expect(screen.getByText("Horaire brute médiane")).toBeInTheDocument();
 	});
 
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep2Data()}
+			/>,
+		);
+		expect(
+			screen.getByRole("group", { name: "Écarts de rémunération" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders instruction text and mandatory fields notice", () => {
 		render(
 			<Step2PayGap

@@ -116,7 +116,9 @@ export function CategoryRecapTable({
 										<th scope="row">Effectif physique</th>
 										<td className={indicatorStyles.numeric}>{womenCount} nb</td>
 										<td className={indicatorStyles.numeric}>{menCount} nb</td>
-										<td />
+										<td>
+											<span className="fr-sr-only">Non applicable</span>
+										</td>
 									</tr>
 
 									<tr className={styles.sectionRow}>

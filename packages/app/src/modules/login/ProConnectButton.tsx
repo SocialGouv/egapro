@@ -40,7 +40,6 @@ export function ProConnectButton({ callbackUrl }: Props) {
 					href="https://www.proconnect.gouv.fr/"
 					rel="noopener"
 					target="_blank"
-					title="Qu'est-ce que ProConnect ? - nouvelle fenêtre"
 				>
 					Qu'est-ce que ProConnect ?
 					<NewTabNotice />

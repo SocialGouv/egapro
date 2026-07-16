@@ -63,6 +63,35 @@ describe("Step4QuartileDistribution", () => {
 		expect(screen.getAllByText(/Tous les salariés/).length).toBe(2);
 	});
 
+	it("gives every column header a non-empty accessible name, including the previously empty quartile header (RGAA 5.7)", () => {
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
+		for (const header of screen.getAllByRole("columnheader")) {
+			expect(header).toHaveAccessibleName();
+		}
+		expect(
+			screen.getAllByRole("columnheader", { name: "Quartile" }),
+		).toHaveLength(2);
+	});
+
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialData={emptyStep4Data()}
+			/>,
+		);
+		expect(
+			screen.getByRole("group", { name: "Distribution par quartile" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders renumeration tranche header and Pourcentage columns", () => {
 		render(
 			<Step4QuartileDistribution

@@ -15,13 +15,13 @@ describe("ScoreDistributionLoading", () => {
 });
 
 describe("ScoreDistributionTileError", () => {
-	it("renders a DSFR error alert with a polite live region", () => {
+	it("renders a DSFR error alert with role=alert", () => {
 		const { container } = render(<ScoreDistributionTileError />);
 		expect(
 			screen.getByText(/erreur est survenue lors du chargement/i),
 		).toBeInTheDocument();
 		const alert = container.querySelector(".fr-alert");
 		expect(alert).toHaveClass("fr-alert--error");
-		expect(alert).toHaveAttribute("aria-live", "polite");
+		expect(alert).toHaveAttribute("role", "alert");
 	});
 });

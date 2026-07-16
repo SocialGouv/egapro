@@ -125,7 +125,7 @@ describe("MonEspacePage", () => {
 		render(page);
 		expect(screen.getByRole("main")).toHaveAttribute("id", "content");
 		expect(
-			screen.getByRole("heading", { level: 2, name: "Test Company" }),
+			screen.getByRole("heading", { level: 1, name: "Test Company" }),
 		).toBeInTheDocument();
 	});
 
