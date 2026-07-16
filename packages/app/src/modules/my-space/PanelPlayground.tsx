@@ -80,7 +80,7 @@ export function PanelPlayground() {
 	}
 
 	return (
-		<main className="fr-container fr-py-6w" id="content">
+		<main className="fr-container fr-py-6w" id="content" tabIndex={-1}>
 			<h1 className="fr-h3">DeclarationProcessPanel — Playground</h1>
 			<p className="fr-text--sm fr-text-mention--grey">
 				Dev-only page to visually test the panel with arbitrary variant and

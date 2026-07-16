@@ -27,6 +27,13 @@ describe("PublicStatsPage", () => {
 		).toBeInTheDocument();
 	});
 
+	it("renders a focusable main landmark targeted by the skip link", () => {
+		render(<PublicStatsPage />);
+		const main = screen.getByRole("main");
+		expect(main).toHaveAttribute("id", "content");
+		expect(main).toHaveAttribute("tabindex", "-1");
+	});
+
 	it("renders the lead paragraph describing the page content", () => {
 		render(<PublicStatsPage />);
 		expect(
