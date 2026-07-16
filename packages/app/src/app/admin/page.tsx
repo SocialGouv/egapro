@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
+
 import { AdminHomePage } from "~/modules/admin";
 import { auth } from "~/server/auth";
+
+export const metadata: Metadata = { title: "Backoffice" };
 
 export default async function Page() {
 	// Access control is handled by the edge middleware and the admin layout;

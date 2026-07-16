@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { LoginPage, sanitizeCallbackUrl } from "~/modules/login";
 import { auth } from "~/server/auth";
+
+export const metadata: Metadata = { title: "Connexion" };
 
 type PageProps = {
 	searchParams: Promise<{ callbackUrl?: string }>;
