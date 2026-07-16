@@ -192,7 +192,9 @@ export function Step2PayGap({
 					<div className={common.flexColumnGapHalf}>
 						<PayGapTable
 							caption="Écart de rémunération"
-							columnHeader="Rémunération"
+							columnHeader={
+								<span className="fr-sr-only">Type de rémunération</span>
+							}
 							disabled={isImpersonating}
 							onRowChange={handleRowChange}
 							readOnly={isReadOnly}

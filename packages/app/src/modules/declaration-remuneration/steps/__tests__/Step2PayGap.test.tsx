@@ -84,7 +84,7 @@ describe("Step2PayGap", () => {
 				initialData={emptyStep2Data()}
 			/>,
 		);
-		expect(screen.getByText("Rémunération")).toBeInTheDocument();
+		expect(screen.getByText("Type de rémunération")).toBeInTheDocument();
 		expect(screen.getByText("Rémunération des femmes")).toBeInTheDocument();
 		expect(screen.getByText("Rémunération des hommes")).toBeInTheDocument();
 		expect(

@@ -18,3 +18,22 @@
 		min-width: 7.5rem;
 	}
 }
+
+.fixedTable table {
+	// Figma column widths (label 230 / values 185 / écart 190) so the table
+	// fits the ~790px data container instead of overflowing; narrow viewports
+	// scroll via the DSFR table wrapper (RGAA reflow).
+	table-layout: fixed;
+}
+
+.colLabel {
+	width: 230px;
+}
+
+.colValue {
+	width: 185px;
+}
+
+.colGap {
+	width: 190px;
+}

@@ -54,13 +54,19 @@ export function PayGapTable({
 }: PayGapTableProps) {
 	return (
 		<div
-			className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${className ?? ""}`}
+			className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${styles.fixedTable} ${className ?? ""}`}
 		>
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">
 						<table>
 							<caption>{caption}</caption>
+							<colgroup>
+								<col className={styles.colLabel} />
+								<col className={styles.colValue} />
+								<col className={styles.colValue} />
+								<col className={styles.colGap} />
+							</colgroup>
 							<thead>
 								<tr>
 									<th scope="col">{columnHeader}</th>
