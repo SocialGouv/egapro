@@ -112,9 +112,10 @@ export function Step3VariablePay({
 	const beneficiaryWomen = formData.indicatorEWomen ?? "";
 	const beneficiaryMen = formData.indicatorEMen ?? "";
 
-	const [benefValidationError, setBenefValidationError] = useState<
-		string | null
-	>(null);
+	const [benefValidationError, setBenefValidationError] = useState<{
+		field: "indicatorEMen" | "indicatorEWomen";
+		message: string;
+	} | null>(null);
 	const hasData = hasSavedData || hasDraft;
 	const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -149,9 +150,10 @@ export function Step3VariablePay({
 		const n = Number.parseInt(value, 10);
 		if (Number.isNaN(n) || n < 0) return;
 		if (max !== undefined && n > max) {
-			setBenefValidationError(
-				`Le nombre de bénéficiaires ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
-			);
+			setBenefValidationError({
+				field,
+				message: `Le nombre de bénéficiaires ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
+			});
 			return;
 		}
 		setBenefValidationError(null);
@@ -177,8 +179,15 @@ export function Step3VariablePay({
 			className={common.flexColumnGap2}
 			onSubmit={onSubmit}
 		>
-			<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+			{/* Read-only mode is enforced per control (readOnly inputs, disabled
+			    buttons): a fieldset-level `disabled` would hide the content from
+			    some assistive technologies (#3803). */}
+			<fieldset className={common.readOnlyFieldset}>
+				<legend className="fr-sr-only">
+					Rémunérations variables ou complémentaires
+				</legend>
 				<StepTitleRow
+					devFillDisabled={isReadOnly}
 					hasData={hasData}
 					isPendingSave={isPendingSave}
 					isSaving={isSaving}
@@ -240,6 +249,7 @@ export function Step3VariablePay({
 							}
 							disabled={isImpersonating}
 							onRowChange={handleRowChange}
+							readOnly={isReadOnly}
 							rows={rows}
 						/>
 
@@ -296,6 +306,18 @@ export function Step3VariablePay({
 													</td>
 													<td>
 														<input
+															aria-describedby={
+																benefValidationError?.field ===
+																"indicatorEWomen"
+																	? "step3-beneficiaries-error"
+																	: undefined
+															}
+															aria-invalid={
+																benefValidationError?.field ===
+																"indicatorEWomen"
+																	? true
+																	: undefined
+															}
 															aria-label="Bénéficiaires femmes"
 															className={`fr-input ${common.numericInput}`}
 															disabled={isImpersonating}
@@ -308,6 +330,7 @@ export function Step3VariablePay({
 																)
 															}
 															pattern="[0-9]*"
+															readOnly={isReadOnly}
 															type="text"
 															value={beneficiaryWomen}
 														/>
@@ -327,6 +350,16 @@ export function Step3VariablePay({
 													</td>
 													<td>
 														<input
+															aria-describedby={
+																benefValidationError?.field === "indicatorEMen"
+																	? "step3-beneficiaries-error"
+																	: undefined
+															}
+															aria-invalid={
+																benefValidationError?.field === "indicatorEMen"
+																	? true
+																	: undefined
+															}
 															aria-label="Bénéficiaires hommes"
 															className={`fr-input ${common.numericInput}`}
 															disabled={isImpersonating}
@@ -339,6 +372,7 @@ export function Step3VariablePay({
 																)
 															}
 															pattern="[0-9]*"
+															readOnly={isReadOnly}
 															type="text"
 															value={beneficiaryMen}
 														/>
@@ -361,7 +395,9 @@ export function Step3VariablePay({
 								className="fr-alert fr-alert--error fr-alert--sm"
 								role="alert"
 							>
-								<p>{benefValidationError}</p>
+								<p id="step3-beneficiaries-error">
+									{benefValidationError.message}
+								</p>
 							</div>
 						)}
 

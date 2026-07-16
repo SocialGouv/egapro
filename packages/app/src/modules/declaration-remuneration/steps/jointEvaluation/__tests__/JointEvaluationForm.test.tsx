@@ -88,6 +88,16 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 	});
 
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(
+			screen.getByRole("group", {
+				name: "Évaluation conjointe des rémunérations",
+			}),
+		).toBeInTheDocument();
+	});
+
 	it("renders the deadline callout with the current year", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
@@ -204,7 +214,7 @@ describe("JointEvaluationForm", () => {
 			vi.mocked(useSession).mockReset();
 		});
 
-		it("disables the fieldset and submit button under the static provider when impersonating", () => {
+		it("disables the upload and submit controls under the static provider when impersonating", () => {
 			vi.mocked(useSession).mockReturnValue({
 				data: {
 					user: {
@@ -217,14 +227,19 @@ describe("JointEvaluationForm", () => {
 			} as unknown as ReturnType<typeof useSession>);
 
 			// The layout feeds `isReadOnly={false}` but impersonation must still
-			// disable writes through the unified context.
+			// disable writes through the unified context. The fieldset itself
+			// stays enabled so its content remains exposed to assistive
+			// technologies; each control is disabled individually.
 			const { container } = render(
 				<LockProvider isReadOnly={false}>
 					<JointEvaluationForm {...defaultProps} />
 				</LockProvider>,
 			);
 
-			expect(container.querySelector("fieldset")).toBeDisabled();
+			expect(container.querySelector("fieldset")).not.toBeDisabled();
+			expect(
+				screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+			).toBeDisabled();
 			expect(
 				screen.getByRole("button", { name: /transmettre/i }),
 			).toBeDisabled();

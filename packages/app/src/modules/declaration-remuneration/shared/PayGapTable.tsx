@@ -40,6 +40,7 @@ type PayGapTableProps = {
 	onRowChange: (index: number, field: PayGapField, value: string) => void;
 	className?: string;
 	disabled?: boolean;
+	readOnly?: boolean;
 };
 
 export function PayGapTable({
@@ -49,6 +50,7 @@ export function PayGapTable({
 	onRowChange,
 	className,
 	disabled = false,
+	readOnly = false,
 }: PayGapTableProps) {
 	return (
 		<div
@@ -97,6 +99,7 @@ export function PayGapTable({
 														onChange={(e) =>
 															onRowChange(i, "womenValue", e.target.value)
 														}
+														readOnly={readOnly}
 														type="text"
 														value={displayDecimal(row.womenValue)}
 													/>
@@ -118,6 +121,7 @@ export function PayGapTable({
 														onChange={(e) =>
 															onRowChange(i, "menValue", e.target.value)
 														}
+														readOnly={readOnly}
 														type="text"
 														value={displayDecimal(row.menValue)}
 													/>

@@ -9,6 +9,7 @@ type StepTitleRowProps = {
 	hasData: boolean;
 	isSaving?: boolean;
 	isPendingSave?: boolean;
+	devFillDisabled?: boolean;
 };
 
 export function StepTitleRow({
@@ -17,12 +18,13 @@ export function StepTitleRow({
 	hasData,
 	isSaving = false,
 	isPendingSave = false,
+	devFillDisabled = false,
 }: StepTitleRowProps) {
 	return (
 		<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
 			<div className="fr-col">{title}</div>
 			<div className="fr-col-auto">
-				<DevFillButton onFill={onDevFill} />
+				<DevFillButton disabled={devFillDisabled} onFill={onDevFill} />
 			</div>
 			<div className="fr-col-auto">
 				<SavedIndicator
