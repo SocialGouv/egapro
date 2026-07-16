@@ -174,7 +174,7 @@ function RemunerationTable({
 				<RemunerationHead />
 				<tbody>
 					<tr className={stepStyles.dataRow}>
-						<td>Salaire de base</td>
+						<th scope="row">Salaire de base</th>
 						<EuroInputCell
 							ariaLabel={`Salaire de base ${scope} femmes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
@@ -198,11 +198,11 @@ function RemunerationTable({
 						</td>
 					</tr>
 					<tr className={stepStyles.dataRow}>
-						<td>
+						<th scope="row">
 							Composantes variables
 							<br />
 							ou complémentaires
-						</td>
+						</th>
 						<EuroInputCell
 							ariaLabel={`Composantes variables ${variableScope} femmes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
@@ -229,9 +229,7 @@ function RemunerationTable({
 						</td>
 					</tr>
 					<tr className={stepStyles.dataRow}>
-						<td>
-							<strong>Total</strong>
-						</td>
+						<th scope="row">Total</th>
 						<td className={stepStyles.totalCell}>
 							{formatTotal(totalWomen, "€")}
 						</td>
@@ -283,7 +281,7 @@ export function CategoryDataTable({
 					</thead>
 					<tbody>
 						<tr className={stepStyles.dataRow}>
-							<td>Effectif physique</td>
+							<th scope="row">Effectif physique</th>
 							<td>
 								<div className={stepStyles.inputCell}>
 									<input
