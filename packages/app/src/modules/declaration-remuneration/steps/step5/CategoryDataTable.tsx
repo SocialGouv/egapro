@@ -129,7 +129,7 @@ function RemunerationSection({
 				</td>
 			</tr>
 			<tr className={stepStyles.dataRow}>
-				<td>Salaire de base</td>
+				<th scope="row">Salaire de base</th>
 				<EuroInputCell
 					ariaLabel={`Salaire de base ${scope} femmes, catégorie ${catIndex + 1}`}
 					disabled={disabled}
@@ -153,11 +153,11 @@ function RemunerationSection({
 				</td>
 			</tr>
 			<tr className={stepStyles.dataRow}>
-				<td>
+				<th scope="row">
 					Composantes variables
 					<br />
 					ou complémentaires
-				</td>
+				</th>
 				<EuroInputCell
 					ariaLabel={`Composantes variables ${scope === "annuel" ? "annuelles" : "horaires"} femmes, catégorie ${catIndex + 1}`}
 					disabled={disabled}
@@ -183,9 +183,7 @@ function RemunerationSection({
 				</td>
 			</tr>
 			<tr className={stepStyles.dataRow}>
-				<td>
-					<strong>Total</strong>
-				</td>
+				<th scope="row">Total</th>
 				<td className={stepStyles.totalCell}>{formatTotal(totalWomen, "€")}</td>
 				<td className={stepStyles.totalCell}>{formatTotal(totalMen, "€")}</td>
 				<td>
@@ -225,7 +223,7 @@ export function CategoryDataTable({
 							<thead>
 								<tr>
 									<th className={stepStyles.nameColumnHeader} scope="col">
-										{/* row label */}
+										<span className="fr-sr-only">Donnée</span>
 									</th>
 									<th scope="col">Femmes</th>
 									<th scope="col">Hommes</th>
@@ -248,7 +246,7 @@ export function CategoryDataTable({
 									</td>
 								</tr>
 								<tr className={stepStyles.dataRow}>
-									<td>Effectif physique</td>
+									<th scope="row">Effectif physique</th>
 									<td>
 										<div className={stepStyles.inputCell}>
 											<input

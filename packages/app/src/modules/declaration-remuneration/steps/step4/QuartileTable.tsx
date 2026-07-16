@@ -78,7 +78,9 @@ export function QuartileTable({
 									</colgroup>
 									<thead>
 										<tr>
-											<th scope="col">{/* row label */}</th>
+											<th scope="col">
+												<span className="fr-sr-only">Quartile</span>
+											</th>
 											<th colSpan={2} scope="col">
 												Tranche de rémunération
 												<br />
