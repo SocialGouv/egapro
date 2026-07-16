@@ -200,8 +200,13 @@ export function Step1Workforce({
 				className={common.flexColumnGap2}
 				onSubmit={onSubmit}
 			>
-				<fieldset className={common.readOnlyFieldset} disabled={isReadOnly}>
+				{/* Read-only mode is enforced per control (readOnly inputs, disabled
+				    buttons): a fieldset-level `disabled` would hide the content from
+				    some assistive technologies (#3803). */}
+				<fieldset className={common.readOnlyFieldset}>
+					<legend className="fr-sr-only">Effectifs</legend>
 					<StepTitleRow
+						devFillDisabled={isReadOnly}
 						hasData={hasData}
 						isPendingSave={isPendingSave}
 						isSaving={isSaving}
@@ -268,7 +273,9 @@ export function Step1Workforce({
 												</colgroup>
 												<thead>
 													<tr>
-														<th scope="col">{/* vide */}</th>
+														<th scope="col">
+															<span className="fr-sr-only">Donnée</span>
+														</th>
 														<th scope="col">Femmes</th>
 														<th scope="col">Hommes</th>
 														<th scope="col">Total</th>
@@ -276,9 +283,7 @@ export function Step1Workforce({
 												</thead>
 												<tbody>
 													<tr>
-														<td>
-															<strong>Nombre de salariés</strong>
-														</td>
+														<th scope="row">Nombre de salariés</th>
 														<td>
 															<div
 																className={
@@ -298,6 +303,7 @@ export function Step1Workforce({
 																	inputMode="numeric"
 																	onChange={handleWomenChange}
 																	pattern="[0-9]*"
+																	readOnly={isReadOnly}
 																	type="text"
 																	value={womenRaw}
 																/>
@@ -327,6 +333,7 @@ export function Step1Workforce({
 																	inputMode="numeric"
 																	onChange={handleMenChange}
 																	pattern="[0-9]*"
+																	readOnly={isReadOnly}
 																	type="text"
 																	value={menRaw}
 																/>

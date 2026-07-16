@@ -20,16 +20,31 @@ describe("RecapitulatifPage", () => {
 		).toBeInTheDocument();
 	});
 
+	it("demotes the title to h3 when embedded via titleTag (no second h1)", () => {
+		render(<RecapitulatifPage {...defaultProps()} titleTag="h3" />);
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: /Déclaration des indicateurs de rémunération 2025/,
+			}),
+		).toBeInTheDocument();
+		expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+	});
+
 	it("renders 'Télécharger' tertiary download button", () => {
 		render(<RecapitulatifPage {...defaultProps()} />);
-		const link = screen.getByRole("link", { name: "Télécharger" });
+		const link = screen.getByRole("link", {
+			name: "Télécharger la déclaration des indicateurs de rémunération (PDF)",
+		});
 		expect(link).toHaveAttribute("href", "/api/declaration-pdf?year=2025");
 		expect(link.className).toContain("fr-btn--tertiary");
 	});
 
 	it("renders download link with correction param when isCorrection", () => {
 		render(<RecapitulatifPage {...defaultProps()} isCorrection />);
-		const link = screen.getByRole("link", { name: "Télécharger" });
+		const link = screen.getByRole("link", {
+			name: "Télécharger la déclaration des indicateurs de rémunération (PDF)",
+		});
 		expect(link).toHaveAttribute(
 			"href",
 			"/api/declaration-pdf?year=2025&type=correction",

@@ -37,6 +37,8 @@ export function PhoneField({
 			</label>
 			<input
 				aria-describedby={messagesId}
+				aria-required="true"
+				autoComplete="tel"
 				className="fr-input"
 				id={inputId}
 				type="tel"

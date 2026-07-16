@@ -3,6 +3,8 @@ import { HomePage } from "~/modules/home";
 import { auth } from "~/server/auth";
 import { HydrateClient } from "~/trpc/server";
 
+export const metadata = { title: "Accueil" };
+
 export default async function Page() {
 	const session = await auth();
 

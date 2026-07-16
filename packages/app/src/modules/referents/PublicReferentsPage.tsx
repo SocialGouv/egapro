@@ -55,7 +55,7 @@ function ReferentsContent() {
 				<p aria-live="polite">Chargement des résultats…</p>
 			)}
 			{hasFilter && isError && (
-				<div aria-live="polite" className="fr-alert fr-alert--error">
+				<div className="fr-alert fr-alert--error" role="alert">
 					<p>
 						Une erreur est survenue lors de la recherche. Veuillez réessayer.
 					</p>

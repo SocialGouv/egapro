@@ -10,7 +10,7 @@ export async function MyCompaniesPage() {
 	const companies = await api.company.list();
 
 	return (
-		<main id="content">
+		<main id="content" tabIndex={-1}>
 			<div className="fr-container fr-my-4w">
 				<WelcomeBanner />
 				<CompanyListHeader />

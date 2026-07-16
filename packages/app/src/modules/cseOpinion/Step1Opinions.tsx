@@ -199,8 +199,15 @@ export function Step1Opinions({
 	}
 
 	return (
-		<form autoComplete="off" onSubmit={onSubmit}>
-			<fieldset className={styles.readOnlyFieldset} disabled={isReadOnly}>
+		<form autoComplete="off" noValidate onSubmit={onSubmit}>
+			{/* noValidate: the required radios expose the required state to
+			    assistive tech (RGAA 11.10) without native browser bubbles
+			    preempting the app's own zod + custom validation messages. */}
+			{/* Read-only mode is enforced per control (disabled radios, readOnly
+			    dates, disabled submit button): a fieldset-level `disabled` would
+			    hide the content from some assistive technologies (#3803). */}
+			<fieldset className={styles.readOnlyFieldset}>
+				<legend className="fr-sr-only">Avis du CSE</legend>
 				{isJointEvaluation && (
 					<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
 						<div className="fr-col">
@@ -258,6 +265,7 @@ export function Step1Opinions({
 							triggerDraftSave();
 						}}
 						opinion={firstDeclOpinion ?? null}
+						readOnly={isReadOnly}
 						title="Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs"
 					/>
 
@@ -282,6 +290,7 @@ export function Step1Opinions({
 									triggerDraftSave();
 								}}
 								opinion={firstDeclGapOpinion ?? null}
+								readOnly={isReadOnly}
 							/>
 						)}
 					/>
@@ -308,6 +317,7 @@ export function Step1Opinions({
 									triggerDraftSave();
 								}}
 								opinion={secondDeclOpinion ?? null}
+								readOnly={isReadOnly}
 								title="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
 							/>
 
@@ -332,6 +342,7 @@ export function Step1Opinions({
 											triggerDraftSave();
 										}}
 										opinion={secondDeclGapOpinion ?? null}
+										readOnly={isReadOnly}
 									/>
 								)}
 							/>

@@ -91,7 +91,7 @@ function RemunerationHead() {
 		<thead>
 			<tr>
 				<th className={stepStyles.nameColumnHeader} scope="col">
-					<span className="fr-sr-only">Libellé</span>
+					<span className="fr-sr-only">Donnée</span>
 				</th>
 				<th scope="col">Rémunération des femmes</th>
 				<th scope="col">Rémunération des hommes</th>
@@ -168,7 +168,9 @@ function RemunerationTable({
 	return (
 		<div className={common.flexColumnGap1}>
 			<h3 className="fr-h6 fr-mb-0">{title}</h3>
-			<TableFrame caption={`${title} — catégorie ${catIndex + 1}`}>
+			<TableFrame
+				caption={`Catégorie d'emplois n°${catIndex + 1}${cat.name.trim() ? ` : ${cat.name}` : ""} — ${title}`}
+			>
 				<RemunerationHead />
 				<tbody>
 					<tr className={stepStyles.dataRow}>
@@ -263,15 +265,17 @@ export function CategoryDataTable({
 	return (
 		<div className={common.dataSection}>
 			<div className={common.flexColumnGap1}>
-				<h3 className="fr-h6 fr-mb-0">
+				<h3 aria-atomic="true" aria-live="polite" className="fr-h6 fr-mb-0">
 					Total salariés
 					{totalEmployees !== null ? ` : ${totalEmployees}` : ""}
 				</h3>
-				<TableFrame caption={`Effectifs physiques — catégorie ${catIndex + 1}`}>
+				<TableFrame
+					caption={`Catégorie d'emplois n°${catIndex + 1}${cat.name.trim() ? ` : ${cat.name}` : ""} — Effectifs physiques`}
+				>
 					<thead>
 						<tr>
 							<th className={stepStyles.nameColumnHeader} scope="col">
-								<span className="fr-sr-only">Libellé</span>
+								<span className="fr-sr-only">Donnée</span>
 							</th>
 							<th scope="col">Nombre de femmes</th>
 							<th scope="col">Nombre d&apos;hommes</th>

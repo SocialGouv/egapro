@@ -138,7 +138,7 @@ describe("FilesSection", () => {
 		expect(screen.getByText("avis-cse.pdf")).toBeInTheDocument();
 		expect(screen.getByText("Avis CSE")).toBeInTheDocument();
 		const link = screen.getByRole("link", {
-			name: "Télécharger avis-cse.pdf",
+			name: "Télécharger avis-cse.pdf (PDF)",
 		});
 		expect(link).toHaveAttribute("href", "/api/v1/files/file-1");
 	});

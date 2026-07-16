@@ -109,7 +109,7 @@ describe("CompanyDeclarationsPage", () => {
 	it("renders the company name", () => {
 		renderPage();
 		expect(
-			screen.getByRole("heading", { level: 2, name: "Alpha Solutions" }),
+			screen.getByRole("heading", { level: 1, name: "Alpha Solutions" }),
 		).toBeInTheDocument();
 	});
 

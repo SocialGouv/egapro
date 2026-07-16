@@ -97,7 +97,6 @@ function CancelDeclarationButtonInner({
 									<p>{CANCEL_DECLARATION_MODAL_BODY}</p>
 									{error && (
 										<div
-											aria-live="polite"
 											className="fr-alert fr-alert--error fr-alert--sm fr-mt-2w"
 											role="alert"
 										>

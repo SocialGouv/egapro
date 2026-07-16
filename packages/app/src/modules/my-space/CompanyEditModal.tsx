@@ -60,6 +60,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 	return (
 		<dialog
 			aria-labelledby={MODAL_TITLE_ID}
+			aria-modal="true"
 			className="fr-modal"
 			id={MODAL_ID}
 			ref={dialogRef}
@@ -166,20 +167,24 @@ function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 	return (
 		<>
 			<div className={`fr-mb-4w ${styles.section}`}>
-				<InfoRow label="Raison sociale :" value={company.name} />
-				<InfoRow label="SIREN :" value={formatSiren(company.siren)} />
-				<InfoRow label="Adresse :" value={company.address} />
-				<InfoRow label="Code NAF :" value={company.nafCode} />
+				<dl className={styles.infoList}>
+					<InfoRow label="Raison sociale :" value={company.name} />
+					<InfoRow label="SIREN :" value={formatSiren(company.siren)} />
+					<InfoRow label="Adresse :" value={company.address} />
+					<InfoRow label="Code NAF :" value={company.nafCode} />
+				</dl>
 				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
 					Source : INSEE.
 				</p>
 			</div>
 
 			<div className={`fr-mb-4w ${styles.section}`}>
-				<InfoRow
-					label={`Effectif annuel moyen en ${CURRENT_YEAR} :`}
-					value={company.workforce?.toLocaleString("fr-FR")}
-				/>
+				<dl className={styles.infoList}>
+					<InfoRow
+						label={`Effectif annuel moyen en ${CURRENT_YEAR} :`}
+						value={company.workforce?.toLocaleString("fr-FR")}
+					/>
+				</dl>
 				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
 					Source : DSN (Déclarations sociales nominatives).
 				</p>
@@ -195,10 +200,12 @@ type InfoRowProps = {
 
 function InfoRow({ label, value }: InfoRowProps) {
 	return (
-		<p className={`fr-mb-0 ${styles.infoRow}`}>
-			<span className={styles.label}>{label}</span>
-			<strong>{value ?? "—"}</strong>
-		</p>
+		<div className={styles.infoRow}>
+			<dt className={styles.label}>{label}</dt>
+			<dd>
+				<strong>{value ?? "—"}</strong>
+			</dd>
+		</div>
 	);
 }
 

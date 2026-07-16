@@ -77,15 +77,13 @@ describe("SecondDeclarationStep2Form", () => {
 				initialFirstDeclarationCategories={mockCategories}
 			/>,
 		);
-		expect(
-			screen.getByText("Libellé de la catégorie d'emploi :"),
-		).toBeInTheDocument();
+		// The category label is now carried by the accordion heading and the
+		// table <caption> (RGAA 5.2) — no redundant read-only <p>, no editable input.
 		expect(
 			screen.getByRole("button", {
 				name: "Catégorie d'emplois n°1 : Ouvriers",
 			}),
 		).toBeInTheDocument();
-		expect(screen.getByText("Ouvriers")).toBeInTheDocument();
 		expect(
 			screen.queryByLabelText("Libellé de la catégorie d'emploi"),
 		).not.toBeInTheDocument();
@@ -181,6 +179,5 @@ describe("SecondDeclarationStep2Form", () => {
 				name: "Catégorie d'emplois n°1 : Techniciens",
 			}),
 		).toBeInTheDocument();
-		expect(screen.getByText("Techniciens")).toBeInTheDocument();
 	});
 });

@@ -29,6 +29,7 @@ type Props = {
 	sourceNote?: React.ReactNode;
 	onQuartileChange: (index: number, field: Field, value: string) => void;
 	disabled?: boolean;
+	readOnly?: boolean;
 };
 
 export function QuartileTable({
@@ -41,6 +42,7 @@ export function QuartileTable({
 	sourceNote,
 	onQuartileChange,
 	disabled = false,
+	readOnly = false,
 }: Props) {
 	const {
 		women: totalWomen,
@@ -76,7 +78,9 @@ export function QuartileTable({
 									</colgroup>
 									<thead>
 										<tr>
-											<th scope="col">{/* row label */}</th>
+											<th scope="col">
+												<span className="fr-sr-only">Quartile</span>
+											</th>
 											<th colSpan={2} scope="col">
 												Tranche de rémunération
 												<br />
@@ -114,13 +118,18 @@ export function QuartileTable({
 												min={mins[i] ?? ""}
 												onQuartileChange={onQuartileChange}
 												quartile={quartiles[i] ?? { threshold: undefined }}
+												readOnly={readOnly}
 												tableType={tableType}
 											/>
 										))}
 										<tr>
 											<th scope="row">Tous les salariés</th>
-											<td className={stepStyles.minCell} />
-											<td className={stepStyles.maxCell} />
+											<td className={stepStyles.minCell}>
+												<span className="fr-sr-only">Non applicable</span>
+											</td>
+											<td className={stepStyles.maxCell}>
+												<span className="fr-sr-only">Non applicable</span>
+											</td>
 											<td
 												className={stepStyles.numericCell}
 												data-mobile-label="Nombre de femmes"

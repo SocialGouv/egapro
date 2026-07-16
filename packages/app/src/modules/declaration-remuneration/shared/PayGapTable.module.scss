@@ -10,6 +10,9 @@
 	gap: 0.5rem;
 
 	input {
-		min-width: 5rem;
+		// Keep the entered amount readable at 200% zoom / narrow viewports
+		// (RGAA 10.4): the cell must never crush the input below the width of
+		// a typical amount — the DSFR table wrapper scrolls instead.
+		min-width: 7.5rem;
 	}
 }

@@ -8,7 +8,7 @@ export function ScoreDistributionLoading() {
 
 export function ScoreDistributionTileError() {
 	return (
-		<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-6w">
+		<div className="fr-alert fr-alert--error fr-mt-6w" role="alert">
 			<p>
 				Une erreur est survenue lors du chargement de la distribution des
 				scores.
