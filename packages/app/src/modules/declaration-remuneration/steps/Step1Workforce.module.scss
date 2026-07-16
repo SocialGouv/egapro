@@ -12,7 +12,8 @@
 
 .labelCol {
 	@include respond-from(md) {
-		width: 20%;
+		// Figma: 172 / 790 of the data container.
+		width: 22%;
 	}
 }
 
@@ -20,7 +21,8 @@
 	min-width: 6rem;
 
 	@include respond-from(md) {
-		width: 30%;
+		// Figma: 206 / 790 — the three data columns share equal width.
+		width: 26%;
 	}
 }
 
@@ -28,6 +30,7 @@
 	min-width: 4rem;
 
 	@include respond-from(md) {
-		width: 20%;
+		// Figma: 206 / 790 — same width as the input columns.
+		width: 26%;
 	}
 }

@@ -227,7 +227,10 @@ export function Step3VariablePay({
 				</div>
 
 				<div className={`${common.dataSection} ${common.tableGap}`}>
-					<div className={common.flexColumnGapHalf}>
+					<div className={common.flexColumnGap1}>
+						<h2 className="fr-h6 fr-mb-0">
+							Écart de rémunération variable ou complémentaire
+						</h2>
 						<PayGapTable
 							caption="Écart de rémunération variable ou complémentaire"
 							className={stepStyles.payGapTable}
@@ -246,12 +249,17 @@ export function Step3VariablePay({
 						{gipPrefillData && (
 							<PrefillSource
 								periodEnd={gipPrefillData.periodEnd}
+								periodStart={gipPrefillData.periodStart}
 								tooltipId="tooltip-source-step3-paygap"
+								year={declarationYear}
 							/>
 						)}
 					</div>
 
-					<div className={common.flexColumnGapHalf}>
+					<div className={common.flexColumnGap1}>
+						<h2 className="fr-h6 fr-mb-0">
+							Bénéficiaires de composantes variables ou complémentaires
+						</h2>
 						<div
 							className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.payGapTable}`}
 						>
@@ -368,7 +376,9 @@ export function Step3VariablePay({
 						{gipPrefillData && (
 							<PrefillSource
 								periodEnd={gipPrefillData.periodEnd}
+								periodStart={gipPrefillData.periodStart}
 								tooltipId="tooltip-source-step3"
+								year={declarationYear}
 							/>
 						)}
 					</div>

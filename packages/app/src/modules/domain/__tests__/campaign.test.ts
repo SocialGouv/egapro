@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+	formatIsoDateToFrench,
 	getCurrentYear,
 	getDeclarationDeadline,
 	getDefaultCampaignDeadlines,
@@ -11,6 +12,7 @@ import {
 	getWorkforceYear,
 	getWorkforceYearFor,
 	isDeadlinePassed,
+	resolveGipReferencePeriod,
 	shouldRedirectSubmittedToRecap,
 } from "../shared/campaign";
 
@@ -29,6 +31,41 @@ describe("getRepresentationDeadline", () => {
 describe("getReferencePeriod", () => {
 	it("returns the full civil year window", () => {
 		expect(getReferencePeriod(2025)).toBe("01/01/2025 - 31/12/2025");
+	});
+});
+
+describe("formatIsoDateToFrench", () => {
+	it("formats an ISO date as DD/MM/YYYY", () => {
+		expect(formatIsoDateToFrench("2026-01-01")).toBe("01/01/2026");
+		expect(formatIsoDateToFrench("2026-12-31")).toBe("31/12/2026");
+	});
+
+	it("returns the input unchanged when not a 3-part ISO date", () => {
+		expect(formatIsoDateToFrench("2026")).toBe("2026");
+		expect(formatIsoDateToFrench("")).toBe("");
+	});
+});
+
+describe("resolveGipReferencePeriod", () => {
+	it("uses the GIP collection window when both bounds are present", () => {
+		expect(resolveGipReferencePeriod("2026-01-01", "2026-12-31", 2026)).toBe(
+			"01/01/2026 - 31/12/2026",
+		);
+		expect(resolveGipReferencePeriod("2025-04-01", "2026-03-31", 2026)).toBe(
+			"01/04/2025 - 31/03/2026",
+		);
+	});
+
+	it("falls back to the full civil year when a bound is missing", () => {
+		expect(resolveGipReferencePeriod(null, "2026-12-31", 2026)).toBe(
+			"01/01/2026 - 31/12/2026",
+		);
+		expect(resolveGipReferencePeriod(undefined, "2026-12-31", 2026)).toBe(
+			"01/01/2026 - 31/12/2026",
+		);
+		expect(resolveGipReferencePeriod("2026-01-01", null, 2026)).toBe(
+			"01/01/2026 - 31/12/2026",
+		);
 	});
 });
 
