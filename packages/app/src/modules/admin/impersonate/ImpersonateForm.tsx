@@ -114,7 +114,7 @@ export function ImpersonateForm() {
 
 			{serverError && (
 				<div className="fr-alert fr-alert--error fr-mt-2w" role="alert">
-					<h3 className="fr-alert__title">Erreur</h3>
+					<h2 className="fr-alert__title">Erreur</h2>
 					<p>{serverError}</p>
 				</div>
 			)}

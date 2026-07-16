@@ -46,6 +46,7 @@ export function GapConsultationCard({
 							id={`${id}-yes`}
 							name={`${id}-consulted`}
 							onChange={() => onConsultedChange(true)}
+							required
 							type="radio"
 							value="yes"
 						/>
@@ -61,6 +62,7 @@ export function GapConsultationCard({
 							id={`${id}-no`}
 							name={`${id}-consulted`}
 							onChange={() => onConsultedChange(false)}
+							required
 							type="radio"
 							value="no"
 						/>
@@ -92,6 +94,7 @@ export function GapConsultationCard({
 									id={`${id}-favorable`}
 									name={`${id}-opinion`}
 									onChange={() => onOpinionChange("favorable")}
+									required
 									type="radio"
 									value="favorable"
 								/>
@@ -107,6 +110,7 @@ export function GapConsultationCard({
 									id={`${id}-unfavorable`}
 									name={`${id}-opinion`}
 									onChange={() => onOpinionChange("unfavorable")}
+									required
 									type="radio"
 									value="unfavorable"
 								/>

@@ -199,7 +199,10 @@ export function Step1Opinions({
 	}
 
 	return (
-		<form autoComplete="off" onSubmit={onSubmit}>
+		<form autoComplete="off" noValidate onSubmit={onSubmit}>
+			{/* noValidate: the required radios expose the required state to
+			    assistive tech (RGAA 11.10) without native browser bubbles
+			    preempting the app's own zod + custom validation messages. */}
 			<fieldset className={styles.readOnlyFieldset} disabled={isReadOnly}>
 				{isJointEvaluation && (
 					<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">

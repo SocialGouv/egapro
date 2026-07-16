@@ -8,22 +8,25 @@ type TooltipButtonProps = {
 	text?: string;
 };
 
-const PLACEHOLDER_TEXT =
-	"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
-
 export function TooltipButton({ id, label, text }: TooltipButtonProps) {
+	const labelId = `${id}-label`;
 	return (
 		<>
 			<button
-				aria-describedby={id}
+				aria-describedby={text ? id : undefined}
+				aria-labelledby={labelId}
 				className={`fr-btn--tooltip fr-btn ${styles.button}`}
 				type="button"
 			>
-				<span className="fr-sr-only">{label}</span>
+				<span className="fr-sr-only" id={labelId}>
+					{label}
+				</span>
 			</button>
-			<span className="fr-tooltip fr-placement" id={id} role="tooltip">
-				{text ?? PLACEHOLDER_TEXT}
-			</span>
+			{text && (
+				<span className="fr-tooltip fr-placement" id={id} role="tooltip">
+					{text}
+				</span>
+			)}
 		</>
 	);
 }
