@@ -144,6 +144,13 @@ When a sentence contains mixed styles (e.g. *"écart de **4,5 %**"*), wrap the b
 
 Do not add elements (tooltips, icons, decorations) absent from the Figma design. Every element must have a corresponding Figma node.
 
+#### 10. Bordures, séparateurs, dimensions — mesurer, ne rien retirer
+
+- **Bordures & séparateurs** : chaque cellule / bloc que le Figma borde doit l'être dans le rendu. Un composant « tableau bordé » DSFR trace une bordure sur **chaque** cellule (grille complète) — vérifier cellule par cellule (`get_screenshot` + mesure du `background-image` / `border` dans le DOM), pas seulement l'aspect global.
+- **Ne jamais retirer / fusionner / « simplifier »** un élément que le node montre (bordure, séparateur, sous-cellule). Le point #9 interdit d'*ajouter* du fantôme ; celui-ci interdit l'**inverse** : *supprimer* du réel. Le node fait autorité, pas ton interprétation du layout — en cas de doute (« ces 2 sous-cellules ne forment-elles pas une colonne unique ? »), confirmer sur le node **avant** de retirer quoi que ce soit.
+- **Largeurs / tailles fixes** : lire la **largeur du node** (`get_metadata` → `width`) et la reproduire au ratio, jamais « à peu près égales » à l'œil. Deux colonnes que le Figma donne à 115px / 151px ne sont pas « 15 % / 15 % ».
+- **Règle générale — mesurer, pas comparer à l'œil** : pour toute propriété dimensionnelle (largeur, bordure, gap, taille), confronter la valeur **mesurée** du DOM (`getBoundingClientRect` / `getComputedStyle`) à celle du node. Même discipline que le gate `design-validator`, mais à appliquer **pendant la construction** et sur les **fixes UI ad-hoc hors pipeline** — ce qui « semble à peu près bon » à l'œil est exactement ce qui dérive.
+
 ---
 
 ## Per-screen verification method (mandatory)
