@@ -1,8 +1,5 @@
 .callout {
-	// 32px above the interpretation callout, matching the Figma vertical rhythm
-	// (data container → callout → boutons, tous à 2rem). Scoped to .fr-callout so
-	// it outranks DSFR's own `.fr-callout { margin-top: 0 }` (equal specificity,
-	// which otherwise wins on source order).
+	// scoped to .fr-callout to outrank DSFR's `.fr-callout { margin-top: 0 }` (same specificity, else wins on source order)
 	&:global(.fr-callout) {
 		margin-top: 2rem;
 	}

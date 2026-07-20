@@ -4,10 +4,7 @@
 	gap: 2rem;
 }
 
-// Recap body inside the block fieldset: the intro, the IndicatorSections blocks
-// and the NextStepsBox carry no margins of their own, so space them at 32px like
-// the rest of the flow. Scoped here (not on the shared .group / NextStepsBox) so
-// the second-declaration recap is left untouched.
+// scoped wrapper so the recap blocks get 32px gaps without touching the shared .group / NextStepsBox (second-declaration recap)
 .recapBody {
 	display: flex;
 	flex-direction: column;

@@ -71,11 +71,7 @@
 	flex-direction: column;
 	gap: 2rem;
 
-	// The shared StepIndicator carries block-layout margins (mt/mb 2rem) for the
-	// fieldset steps (1-4, block + margin-collapse). This form spaces its children
-	// with flex `gap`, where margins add instead of collapse — so strip them here to
-	// keep every gap at 32px. (FormActions gets the same treatment via `fr-mt-0` in
-	// CategoryForm, since a trailing <dialog> makes it not the flex `:last-child`.)
+	// this form uses flex `gap` (margins add, not collapse) — strip the shared stepper's mt/mb so gaps stay 32px
 	> :global(.fr-stepper) {
 		margin-top: 0;
 		margin-bottom: 0;

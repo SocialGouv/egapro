@@ -69,8 +69,6 @@
 	}
 
 	.colMax {
-		// Wider input column for the salary-bracket amount (Figma node 10908:44385,
-		// the input cell, is ~1.3x the read-only min cell node 10908:44384).
 		width: 18%;
 	}
 
@@ -95,7 +93,6 @@
 
 	tbody th[scope="row"] {
 		background-color: transparent;
-		// Full grid like the data cells (Figma: every cell bordered): bottom + right.
 		background-image:
 			linear-gradient(0deg, var(--border-contrast-grey), var(--border-contrast-grey)),
 			linear-gradient(0deg, var(--border-contrast-grey), var(--border-contrast-grey));
