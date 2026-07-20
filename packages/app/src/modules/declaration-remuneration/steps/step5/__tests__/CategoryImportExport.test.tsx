@@ -27,10 +27,26 @@ vi.mock("~/modules/analytics", async (importOriginal) => {
 	const actual = await importOriginal<typeof import("~/modules/analytics")>();
 	return { ...actual, trackEvent: trackEventMock };
 });
-vi.mock("~/modules/shared", () => ({ getDsfrModal: getDsfrModalMock }));
-vi.mock("../categoryFileHandler", () => ({
-	parseImportFile: parseImportFileMock,
-}));
+
+// Keep the real FileUpload dropzone and formatFileSize so the test exercises
+// the actual select-file flow and its validation; only getDsfrModal is stubbed
+// to observe the panel closing (DSFR JS is absent in jsdom).
+vi.mock("~/modules/shared", async () => {
+	const { FileUpload } = await vi.importActual<
+		typeof import("~/modules/shared/FileUpload")
+	>("~/modules/shared/FileUpload");
+	const { formatFileSize } = await vi.importActual<
+		typeof import("~/modules/shared/uploadConfig")
+	>("~/modules/shared/uploadConfig");
+	return { FileUpload, formatFileSize, getDsfrModal: getDsfrModalMock };
+});
+
+vi.mock("../categoryFileHandler", async (importOriginal) => {
+	const actual =
+		await importOriginal<typeof import("../categoryFileHandler")>();
+	return { ...actual, parseImportFile: parseImportFileMock };
+});
+
 vi.mock("../categoryModelTracking", () => ({
 	startCategoryModelTimer: startTimerMock,
 	trackCategoryImportDuration: trackDurationMock,
@@ -56,11 +72,21 @@ function category(id: number, name: string): EmployeeCategory {
 	};
 }
 
-function uploadFile(): void {
-	const input = screen.getByLabelText(/Sélectionner un fichier/i);
-	fireEvent.change(input, {
-		target: { files: [new File(["x"], "import.csv", { type: "text/csv" })] },
+const trigger = () =>
+	screen.getByRole("button", { name: "Importer les données" });
+const fileInput = () => screen.getByLabelText("Sélectionner des fichiers");
+const importButton = () =>
+	screen.getByRole("button", { name: "Importer", hidden: true });
+const templateCard = () =>
+	screen.getByRole("button", {
+		name: "Fichier d'import à remplir",
+		hidden: true,
 	});
+
+function selectFile(
+	file = new File(["x"], "import.csv", { type: "text/csv" }),
+): void {
+	fireEvent.change(fileInput(), { target: { files: [file] } });
 }
 
 beforeEach(() => {
@@ -77,29 +103,88 @@ afterEach(() => {
 	vi.clearAllMocks();
 });
 
-describe("CategoryImportExport import button", () => {
-	it("starts the model timer when the import modal trigger is clicked", () => {
+describe("CategoryImportExport trigger button", () => {
+	it("starts the model timer when the import panel trigger is clicked", () => {
 		render(<CategoryImportExport onImport={vi.fn()} />);
 
-		fireEvent.click(
-			screen.getByRole("button", { name: "Importer les données" }),
-		);
+		fireEvent.click(trigger());
 
 		expect(startTimerMock).toHaveBeenCalledTimes(1);
 	});
 
 	it("uses the file-download icon on the import trigger", () => {
 		render(<CategoryImportExport onImport={vi.fn()} />);
-		const importButton = screen.getByRole("button", {
-			name: "Importer les données",
-		});
-		expect(importButton).toHaveClass("fr-icon-file-download-line");
-		expect(importButton).not.toHaveClass("fr-icon-upload-line");
+
+		expect(trigger()).toHaveClass("fr-icon-file-download-line");
+		expect(trigger()).not.toHaveClass("fr-icon-upload-line");
+	});
+
+	it("disables the trigger when the disabled prop is set", () => {
+		render(<CategoryImportExport disabled onImport={vi.fn()} />);
+
+		expect(trigger()).toBeDisabled();
 	});
 });
 
-describe("CategoryImportExport successful import", () => {
-	it("imports categories, emits category_import then the import duration", async () => {
+describe("CategoryImportExport panel contents", () => {
+	it("renders the dropzone, template card, help link and a disabled Importer button", () => {
+		render(<CategoryImportExport onImport={vi.fn()} />);
+
+		expect(fileInput()).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", {
+				name: /Sélectionner un fichier/,
+				hidden: true,
+			}),
+		).toBeInTheDocument();
+		expect(templateCard()).toBeInTheDocument();
+
+		const helpLink = screen.getByRole("link", {
+			name: /Centre d'aide/,
+			hidden: true,
+		});
+		expect(helpLink).toHaveAttribute("href", "/aide");
+
+		expect(importButton()).toBeDisabled();
+	});
+});
+
+describe("CategoryImportExport template download", () => {
+	it("downloads modele-indicateur-g.csv and emits category_template_download", () => {
+		const downloadNames: string[] = [];
+		const clickSpy = vi
+			.spyOn(HTMLAnchorElement.prototype, "click")
+			.mockImplementation(function mockClick(this: HTMLAnchorElement) {
+				downloadNames.push(this.download);
+			});
+
+		render(<CategoryImportExport onImport={vi.fn()} />);
+		fireEvent.click(templateCard());
+
+		expect(downloadNames).toEqual(["modele-indicateur-g.csv"]);
+		expect(trackEventMock).toHaveBeenCalledWith({
+			category: MATOMO_EVENT_CATEGORY.DOCUMENT,
+			action: MATOMO_ACTION.CATEGORY_TEMPLATE_DOWNLOAD,
+			name: "csv",
+		});
+		expect(startTimerMock).toHaveBeenCalledTimes(1);
+
+		clickSpy.mockRestore();
+	});
+});
+
+describe("CategoryImportExport file selection and import", () => {
+	it("enables the Importer button only once a file is selected", () => {
+		render(<CategoryImportExport onImport={vi.fn()} />);
+
+		expect(importButton()).toBeDisabled();
+
+		selectFile();
+
+		expect(importButton()).toBeEnabled();
+	});
+
+	it("imports categories on explicit click, emits category_import then the duration, and closes the panel", async () => {
 		const onImport = vi.fn();
 		const categories = [category(0, "Cadres"), category(1, "Ouvriers")];
 		parseImportFileMock.mockResolvedValue({
@@ -108,7 +193,8 @@ describe("CategoryImportExport successful import", () => {
 		} satisfies ImportResult);
 
 		render(<CategoryImportExport onImport={onImport} />);
-		uploadFile();
+		selectFile();
+		fireEvent.click(importButton());
 
 		await waitFor(() => expect(onImport).toHaveBeenCalledWith(categories));
 
@@ -121,15 +207,13 @@ describe("CategoryImportExport successful import", () => {
 		expect(concealMock).toHaveBeenCalledTimes(1);
 	});
 
-	it("does nothing when the file picker is dismissed without a file", () => {
+	it("does not parse and keeps the button disabled when the picker is dismissed with no file", () => {
 		render(<CategoryImportExport onImport={vi.fn()} />);
 
-		fireEvent.change(screen.getByLabelText(/Sélectionner un fichier/i), {
-			target: { files: [] },
-		});
+		fireEvent.change(fileInput(), { target: { files: [] } });
 
 		expect(parseImportFileMock).not.toHaveBeenCalled();
-		expect(trackEventMock).not.toHaveBeenCalled();
+		expect(importButton()).toBeDisabled();
 	});
 });
 
@@ -138,7 +222,7 @@ describe("CategoryImportExport failed import", () => {
 		"missing-columns",
 		"invalid-value",
 		"empty-file",
-	] as ImportError["type"][])("emits category_import_failure with the %s enum type and never the message", async (type) => {
+	] as ImportError["type"][])("shows the %s error in the panel and emits category_import_failure without leaking the message", async (type) => {
 		const message = "Détail technique sensible 552100554";
 		parseImportFileMock.mockResolvedValue({
 			ok: false,
@@ -146,18 +230,23 @@ describe("CategoryImportExport failed import", () => {
 		} satisfies ImportResult);
 
 		render(<CategoryImportExport onImport={vi.fn()} />);
-		uploadFile();
+		selectFile();
+		fireEvent.click(importButton());
 
 		await waitFor(() => expect(trackEventMock).toHaveBeenCalled());
 
+		expect(screen.getByText(message)).toBeInTheDocument();
 		expect(trackEventMock).toHaveBeenCalledWith({
 			category: MATOMO_EVENT_CATEGORY.DOCUMENT,
 			action: MATOMO_ACTION.CATEGORY_IMPORT_FAILURE,
 			name: type,
 		});
+
 		const payload = JSON.stringify(trackEventMock.mock.calls[0]?.[0]);
 		expect(payload).not.toContain(message);
 		expect(payload).not.toContain("552100554");
+
 		expect(trackDurationMock).not.toHaveBeenCalled();
+		expect(concealMock).not.toHaveBeenCalled();
 	});
 });

@@ -20,6 +20,12 @@ export const EXTENSION_MIME_MAP: Readonly<
 	".png": ["image/png"],
 	".jpg": ["image/jpeg"],
 	".jpeg": ["image/jpeg"],
+	// The OS sometimes reports no MIME type at all for a dragged .csv file.
+	".csv": ["text/csv", "application/csv", "application/vnd.ms-excel", ""],
+	".xlsx": [
+		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		"application/vnd.ms-excel",
+	],
 };
 
 export type FileNameError =

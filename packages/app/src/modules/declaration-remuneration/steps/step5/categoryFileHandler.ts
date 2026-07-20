@@ -1,6 +1,5 @@
 import ExcelJS from "exceljs";
 
-import { DEFAULT_CATEGORIES } from "~/modules/declaration-remuneration/types";
 import type { EmployeeCategory } from "./categorySerializer";
 
 /** Column definitions for the import/export template. */
@@ -33,109 +32,8 @@ export type ImportResult =
 	| { ok: true; categories: EmployeeCategory[] }
 	| { ok: false; errors: ImportError[] };
 
-/**
- * Generate a template file with current form categories or defaults.
- * Returns a Blob ready for download.
- */
-export async function generateTemplate(
-	categories: EmployeeCategory[],
-	format: "xlsx" | "csv",
-): Promise<Blob> {
-	const rows = buildTemplateRows(categories);
-
-	if (format === "csv") {
-		return generateCsvBlob(rows);
-	}
-	return generateXlsxBlob(rows);
-}
-
-type TemplateRow = Record<TemplateKey, string | number>;
-
-type MinimalCategory = { name: string };
-
-function isFullCategory(
-	cat: EmployeeCategory | MinimalCategory,
-): cat is EmployeeCategory {
-	return "womenCount" in cat;
-}
-
-function buildTemplateRows(categories: EmployeeCategory[]): TemplateRow[] {
-	const cats: Array<EmployeeCategory | MinimalCategory> =
-		categories.length > 0 && categories.some((c) => c.name.trim())
-			? categories
-			: DEFAULT_CATEGORIES.map((name) => ({ name }));
-
-	return cats.map((cat) => {
-		const row: TemplateRow = {
-			name: cat.name,
-			womenCount: "",
-			menCount: "",
-			annualBaseWomen: "",
-			annualBaseMen: "",
-			annualVariableWomen: "",
-			annualVariableMen: "",
-			hourlyBaseWomen: "",
-			hourlyBaseMen: "",
-			hourlyVariableWomen: "",
-			hourlyVariableMen: "",
-		};
-
-		if (isFullCategory(cat)) {
-			row.womenCount = cat.womenCount;
-			row.menCount = cat.menCount;
-			row.annualBaseWomen = cat.annualBaseWomen;
-			row.annualBaseMen = cat.annualBaseMen;
-			row.annualVariableWomen = cat.annualVariableWomen;
-			row.annualVariableMen = cat.annualVariableMen;
-			row.hourlyBaseWomen = cat.hourlyBaseWomen;
-			row.hourlyBaseMen = cat.hourlyBaseMen;
-			row.hourlyVariableWomen = cat.hourlyVariableWomen;
-			row.hourlyVariableMen = cat.hourlyVariableMen;
-		}
-
-		return row;
-	});
-}
-
-async function generateXlsxBlob(rows: TemplateRow[]): Promise<Blob> {
-	const workbook = new ExcelJS.Workbook();
-	const sheet = workbook.addWorksheet("Indicateur G");
-
-	sheet.columns = TEMPLATE_COLUMNS.map((col) => ({
-		header: col.header,
-		key: col.key,
-		width: 25,
-	}));
-
-	for (const row of rows) {
-		sheet.addRow(row);
-	}
-
-	const headerRow = sheet.getRow(1);
-	headerRow.font = { bold: true };
-	headerRow.alignment = { horizontal: "center" };
-
-	const buffer = await workbook.xlsx.writeBuffer();
-	return new Blob([buffer], {
-		type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-	});
-}
-
-function generateCsvBlob(rows: TemplateRow[]): Blob {
-	const lines: string[] = [];
-	lines.push(EXPECTED_HEADERS.join(CSV_SEPARATOR));
-
-	for (const row of rows) {
-		const values = TEMPLATE_COLUMNS.map((col) => {
-			const val = String(row[col.key] ?? "");
-			return val.includes(CSV_SEPARATOR) || val.includes('"')
-				? `"${val.replace(/"/g, '""')}"`
-				: val;
-		});
-		lines.push(values.join(CSV_SEPARATOR));
-	}
-
-	return new Blob([`\uFEFF${lines.join("\n")}`], {
+export function generateTemplate(): Blob {
+	return new Blob([`\uFEFF${EXPECTED_HEADERS.join(CSV_SEPARATOR)}`], {
 		type: "text/csv;charset=utf-8",
 	});
 }

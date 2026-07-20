@@ -1,0 +1,61 @@
+.sidePanel {
+	&:global(.fr-modal) {
+		align-items: stretch;
+		justify-content: flex-end;
+	}
+}
+
+.panelContainer {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: min(640px, 100vw);
+	background: var(--background-default-grey);
+	box-shadow: var(--lifted);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.panelHeader {
+	display: flex;
+	justify-content: flex-end;
+	padding: 1rem;
+	flex-shrink: 0;
+}
+
+.panelContent {
+	flex: 1;
+	overflow-y: auto;
+	padding: 0 2rem 1.5rem;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.panelBody {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.helpSection {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.helpSection :global(.fr-hr),
+.helpSection hr {
+	margin: 0;
+	padding: 0;
+	height: 1px;
+}
+
+.footer {
+	display: flex;
+	justify-content: flex-end;
+	flex-shrink: 0;
+	padding: 1.5rem 2rem 2rem;
+}
