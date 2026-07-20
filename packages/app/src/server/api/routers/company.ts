@@ -1,6 +1,10 @@
 import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
-import { computeDeclarationStatus, getCurrentYear } from "~/modules/domain";
+import {
+	computeDeclarationStatus,
+	getCurrentYear,
+	parseGipWorkforce,
+} from "~/modules/domain";
 import { buildDeclarationList } from "~/modules/my-space/buildDeclarationList";
 import {
 	sirenInputSchema,
@@ -34,10 +38,17 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 			address: companies.address,
 			nafCode: companies.nafCode,
 			nafLabel: companies.nafLabel,
-			workforce: companies.workforce,
+			workforceEma: gipMdsData.workforceEma,
 			hasCse: companies.hasCse,
 		})
-		.from(companies);
+		.from(companies)
+		.leftJoin(
+			gipMdsData,
+			and(
+				eq(gipMdsData.siren, companies.siren),
+				eq(gipMdsData.year, getCurrentYear()),
+			),
+		);
 
 	const rows = bypassOwnership
 		? await baseQuery.where(eq(companies.siren, siren)).limit(1)
@@ -48,10 +59,16 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 				)
 				.limit(1);
 
-	const company = rows[0];
-	if (!company) {
+	const row = rows[0];
+	if (!row) {
 		throw new Error("Company not found or access denied");
 	}
+
+	const { workforceEma, ...rest } = row;
+	const company = {
+		...rest,
+		gipWorkforce: parseGipWorkforce(workforceEma),
+	};
 
 	if (company.hasCse === null) {
 		const hasCse = await fetchCseBySiren(company.siren);

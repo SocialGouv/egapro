@@ -24,8 +24,8 @@ import {
 	describe,
 	expect,
 	it,
-	vi,
 	type Mock,
+	vi,
 } from "vitest";
 import { runDeclarationCleanup } from "#scripts/declaration-cleanup.mjs";
 import { env } from "~/env.js";

@@ -19,6 +19,7 @@ type Props = {
 	step3Data: Step3Data;
 	step4Data: Step4Data;
 	step5Categories: EmployeeCategoryRow[];
+	indicatorGRequired: boolean;
 	totalWomen?: number;
 	totalMen?: number;
 	/**
@@ -44,6 +45,7 @@ export function IndicatorSections({
 	step3Data,
 	step4Data,
 	step5Categories,
+	indicatorGRequired,
 	totalWomen,
 	totalMen,
 	withTooltips = false,
@@ -192,62 +194,67 @@ export function IndicatorSections({
 				</div>
 			</div>
 
-			<div className={stepStyles.group}>
-				<h2 className="fr-h6 fr-mb-0">Indicateurs par catégorie de salariés</h2>
+			{indicatorGRequired && (
+				<div className={stepStyles.group}>
+					<h2 className="fr-h6 fr-mb-0">
+						Indicateurs par catégorie de salariés
+					</h2>
 
-				{/* Card: Employee categories (Step 5) */}
-				<div className={stepStyles.card}>
-					<CardTitle
-						tooltipId={withTooltips ? "tooltip-categories" : undefined}
-					>
-						Écart de rémunération par catégories de salariés
-					</CardTitle>
-					{step5Parsed.length > 0 ? (
-						step5Parsed.map((cat) => {
-							const categoryColumns = [
-								{
-									title: "Annuelle brute",
-									base: cat.annualBaseGap,
-									variable: cat.annualVariableGap,
-								},
-								{
-									title: "Horaire brute",
-									base: cat.hourlyBaseGap,
-									variable: cat.hourlyVariableGap,
-								},
-							];
-							return (
-								<div key={cat.index}>
-									<p className="fr-text--bold fr-text--sm fr-mb-0">
-										{cat.name}
-									</p>
-									<div className={stepStyles.sideBySide}>
-										{categoryColumns.map((col, index) => (
-											<Fragment key={col.title}>
-												{index > 0 && (
-													<div className={stepStyles.verticalSeparator} />
-												)}
-												<GapColumn
-													columns={[
-														{ label: "Salaire de base", gap: col.base },
-														{
-															label: "Composantes variables ou complémentaires",
-															gap: col.variable,
-														},
-													]}
-													title={col.title}
-												/>
-											</Fragment>
-										))}
+					{/* Card: Employee categories (Step 5) */}
+					<div className={stepStyles.card}>
+						<CardTitle
+							tooltipId={withTooltips ? "tooltip-categories" : undefined}
+						>
+							Écart de rémunération par catégories de salariés
+						</CardTitle>
+						{step5Parsed.length > 0 ? (
+							step5Parsed.map((cat) => {
+								const categoryColumns = [
+									{
+										title: "Annuelle brute",
+										base: cat.annualBaseGap,
+										variable: cat.annualVariableGap,
+									},
+									{
+										title: "Horaire brute",
+										base: cat.hourlyBaseGap,
+										variable: cat.hourlyVariableGap,
+									},
+								];
+								return (
+									<div key={cat.index}>
+										<p className="fr-text--bold fr-text--sm fr-mb-0">
+											{cat.name}
+										</p>
+										<div className={stepStyles.sideBySide}>
+											{categoryColumns.map((col, index) => (
+												<Fragment key={col.title}>
+													{index > 0 && (
+														<div className={stepStyles.verticalSeparator} />
+													)}
+													<GapColumn
+														columns={[
+															{ label: "Salaire de base", gap: col.base },
+															{
+																label:
+																	"Composantes variables ou complémentaires",
+																gap: col.variable,
+															},
+														]}
+														title={col.title}
+													/>
+												</Fragment>
+											))}
+										</div>
 									</div>
-								</div>
-							);
-						})
-					) : (
-						<EmptyDataNotice />
-					)}
+								);
+							})
+						) : (
+							<EmptyDataNotice />
+						)}
+					</div>
 				</div>
-			</div>
+			)}
 		</>
 	);
 }

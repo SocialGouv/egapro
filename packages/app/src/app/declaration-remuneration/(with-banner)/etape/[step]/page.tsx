@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
 	getEffectiveGipPrefillData,
+	INDICATOR_G_STEP,
 	STEP_TITLES,
 	StepPageClient,
+	stepHref,
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
-import { isDeadlinePassed, isDeclarationSubmitted } from "~/modules/domain";
+import {
+	getObligationWorkforce,
+	isDeadlinePassed,
+	isDeclarationSubmitted,
+	isIndicatorGRequired,
+} from "~/modules/domain";
 import {
 	mapToEmployeeCategoryRows,
 	mapToStepData,
@@ -43,6 +50,15 @@ export default async function StepPage({ params }: StepPageProps) {
 	const data = await api.declaration.getOrCreate();
 	const d = data.declaration;
 	const company = await api.company.get({ siren: d.siren });
+
+	const indicatorGRequired = isIndicatorGRequired(
+		getObligationWorkforce(company.gipWorkforce),
+		d.year,
+	);
+
+	if (step === INDICATOR_G_STEP && !indicatorGRequired) {
+		redirect(stepHref(INDICATOR_G_STEP + 1));
+	}
 
 	const isSubmitted = isDeclarationSubmitted(d.status);
 	let modificationDeadline: Date | undefined;
@@ -97,7 +113,7 @@ export default async function StepPage({ params }: StepPageProps) {
 	return (
 		<HydrateClient>
 			<StepPageClient
-				companyWorkforce={company.workforce}
+				companyWorkforce={company.gipWorkforce}
 				declaration={d}
 				gipPrefillData={effectiveGipPrefillData ?? undefined}
 				hasCse={company.hasCse}

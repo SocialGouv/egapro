@@ -143,6 +143,13 @@ export {
 	hasHighGap,
 	isSignificantGap,
 } from "./shared/gap";
+// GIP annual average workforce — canonical headcount for obligations & display
+export {
+	GIP_WORKFORCE_UNKNOWN_LABEL,
+	getObligationWorkforce,
+	parseGipWorkforce,
+	toDisplayWorkforce,
+} from "./shared/gipWorkforce";
 // Indicator G — applicability rules (workforce thresholds, triennial cycle, universal year)
 export {
 	getApplicableIndicators,

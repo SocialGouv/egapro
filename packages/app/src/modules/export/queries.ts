@@ -14,6 +14,7 @@ import {
 	declarations,
 	employeeCategories,
 	files,
+	gipMdsData,
 	jobCategories,
 	users,
 } from "~/server/db/schema";
@@ -210,7 +211,7 @@ export async function fetchSubmittedDeclarations(
 			cancelledAt: declarations.cancelledAt,
 			declarationId: declarations.id,
 			companyName: companies.name,
-			workforce: companies.workforce,
+			workforceEma: gipMdsData.workforceEma,
 			nafCode: companies.nafCode,
 			address: companies.address,
 			hasCse: companies.hasCse,
@@ -219,6 +220,13 @@ export async function fetchSubmittedDeclarations(
 		})
 		.from(declarations)
 		.innerJoin(companies, eq(declarations.siren, companies.siren))
+		.leftJoin(
+			gipMdsData,
+			and(
+				eq(gipMdsData.siren, declarations.siren),
+				eq(gipMdsData.year, declarations.year),
+			),
+		)
 		.innerJoin(users, eq(declarations.declarantId, users.id))
 		.where(
 			or(

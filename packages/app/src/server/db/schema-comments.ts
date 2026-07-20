@@ -123,7 +123,8 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 	},
 	company: {
 		name: "SUIT: Raison_sociale",
-		workforce: "SUIT: Effectif",
+		workforce:
+			"Weez/INSEE: effectif de référence (stats admin/publiques). SUIT Effectif provient de gip_mds_data.workforce_ema",
 		naf_code: "SUIT: Code_NAF",
 		address: "SUIT: Adresse",
 		region: "Weez: libellé région (dérivé du code postal établissement)",

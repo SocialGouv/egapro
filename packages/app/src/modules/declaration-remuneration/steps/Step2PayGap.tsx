@@ -32,6 +32,7 @@ import type { PayGapField, Step2Data } from "../types";
 type Step2PayGapProps = {
 	declarationSiren: string;
 	declarationYear: number;
+	indicatorGRequired: boolean;
 	initialData: Step2Data;
 	gipPrefillData?: GipPrefillData;
 };
@@ -39,6 +40,7 @@ type Step2PayGapProps = {
 export function Step2PayGap({
 	declarationSiren,
 	declarationYear,
+	indicatorGRequired,
 	initialData,
 	gipPrefillData,
 }: Step2PayGapProps) {
@@ -161,7 +163,10 @@ export function Step2PayGap({
 					}
 				/>
 
-				<StepIndicator currentStep={2} />
+				<StepIndicator
+					currentStep={2}
+					indicatorGRequired={indicatorGRequired}
+				/>
 
 				<div className={common.flexColumnGap1}>
 					<p className="fr-mb-0">

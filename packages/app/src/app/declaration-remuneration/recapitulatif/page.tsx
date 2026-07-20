@@ -102,7 +102,7 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 								siren: company.siren,
 								nafCode: company.nafCode,
 								address: company.address,
-								workforce: company.workforce,
+								gipWorkforce: company.gipWorkforce,
 							}}
 							declarantEmail={session.user.email ?? ""}
 							declarantName={session.user.name ?? ""}

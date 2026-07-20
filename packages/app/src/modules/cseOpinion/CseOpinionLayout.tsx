@@ -1,7 +1,13 @@
 import { DeclarationLockAlert } from "~/modules/declaration-remuneration/shared/lock/DeclarationLockAlert";
 import type { LockHolder } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
-import { getWorkforceYear } from "~/modules/domain";
+import {
+	GIP_WORKFORCE_UNKNOWN_LABEL,
+	getObligationWorkforce,
+	getWorkforceYear,
+	isCseRequired,
+	toDisplayWorkforce,
+} from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
 
@@ -10,7 +16,7 @@ import styles from "./CseOpinionLayout.module.scss";
 type CompanyData = {
 	name: string;
 	siren: string;
-	workforce: number | null;
+	gipWorkforce: number | null;
 	hasCse: boolean | null;
 };
 
@@ -29,6 +35,10 @@ export function CseOpinionLayout({
 	isReadOnly = false,
 	lockHolder = null,
 }: Props) {
+	const cseApplicable = isCseRequired(
+		getObligationWorkforce(company.gipWorkforce),
+	);
+
 	return (
 		<main id="content" tabIndex={-1}>
 			<div className={`fr-py-3w ${styles.banner}`}>
@@ -55,26 +65,32 @@ export function CseOpinionLayout({
 								{company.name} - {formatSiren(company.siren)}
 							</p>
 						</div>
-						{company.workforce !== null && (
+						<div className="fr-col-auto">
+							<p className="fr-mb-0 fr-text--sm">
+								{company.gipWorkforce === null ? (
+									GIP_WORKFORCE_UNKNOWN_LABEL
+								) : (
+									<>
+										Effectif annuel moyen en {getWorkforceYear()} :{" "}
+										<strong>{toDisplayWorkforce(company.gipWorkforce)}</strong>
+									</>
+								)}
+							</p>
+						</div>
+						{cseApplicable && (
 							<div className="fr-col-auto">
 								<p className="fr-mb-0 fr-text--sm">
-									Effectif annuel moyen en {getWorkforceYear()} :{" "}
-									<strong>{company.workforce}</strong>
+									Existence d'un CSE :{" "}
+									<strong>
+										{company.hasCse === null
+											? "Non renseigné"
+											: company.hasCse
+												? "Oui"
+												: "Non"}
+									</strong>
 								</p>
 							</div>
 						)}
-						<div className="fr-col-auto">
-							<p className="fr-mb-0 fr-text--sm">
-								Existence d'un CSE :{" "}
-								<strong>
-									{company.hasCse === null
-										? "Non renseigné"
-										: company.hasCse
-											? "Oui"
-											: "Non"}
-								</strong>
-							</p>
-						</div>
 					</div>
 				</div>
 			</div>

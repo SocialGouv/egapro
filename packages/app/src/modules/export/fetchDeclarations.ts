@@ -15,9 +15,12 @@ export {
 
 import {
 	gapRatioToPercent,
+	getObligationWorkforce,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isIndicatorGRequired,
+	parseGipWorkforce,
+	toDisplayWorkforce,
 } from "~/modules/domain";
 import type { DeclarationRow } from "./queries";
 import {
@@ -54,7 +57,7 @@ function deriveExportFlags(
 	const hasIndicatorG = indicatorGEntries.length > 0;
 	const globalAnnualMeanGap = gapRatioToPercent(row.globalAnnualMeanGap);
 	const variableAnnualMeanGap = gapRatioToPercent(row.variableAnnualMeanGap);
-	const workforce = row.workforce;
+	const workforce = parseGipWorkforce(row.workforceEma);
 	const complianceInput = {
 		workforce,
 		hasIndicatorG,
@@ -80,7 +83,10 @@ function deriveExportFlags(
 						],
 		},
 	);
-	const indicatorGRequiredFlag = isIndicatorGRequired(workforce ?? 0, row.year);
+	const indicatorGRequiredFlag = isIndicatorGRequired(
+		getObligationWorkforce(workforce),
+		row.year,
+	);
 	return {
 		complianceProcessRequired,
 		complianceProcessRevisionRequired,
@@ -313,7 +319,7 @@ export function assembleDeclaration(
 		id: row.declarationId,
 		SIREN: row.siren,
 		Raison_sociale: row.companyName,
-		Effectif: row.workforce,
+		Effectif: toDisplayWorkforce(parseGipWorkforce(row.workforceEma)),
 		Code_NAF: row.nafCode,
 		Adresse: row.address,
 		CSE_existant: row.hasCse,

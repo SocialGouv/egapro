@@ -1,4 +1,10 @@
-import { getCurrentYear } from "~/modules/domain";
+import {
+	GIP_WORKFORCE_UNKNOWN_LABEL,
+	getCurrentYear,
+	getObligationWorkforce,
+	isCseRequired,
+	toDisplayWorkforce,
+} from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 
 import { MODAL_ID as COMPANY_EDIT_MODAL_ID } from "./CompanyEditModal";
@@ -14,6 +20,9 @@ type Props = {
 
 export function CompanyInfoBanner({ company }: Props) {
 	const currentYear = getCurrentYear();
+	const cseApplicable = isCseRequired(
+		getObligationWorkforce(company.gipWorkforce),
+	);
 
 	return (
 		<div className={`fr-pt-3w fr-pb-4w ${styles.banner}`}>
@@ -71,24 +80,28 @@ export function CompanyInfoBanner({ company }: Props) {
 							</dd>
 						</div>
 					)}
-					{company.workforce !== null && (
-						<div className={styles.datapoint}>
-							<dt>Effectif annuel moyen en {currentYear} :</dt>
-							<dd>
-								<strong>{company.workforce}</strong>
-							</dd>
-						</div>
-					)}
 					<div className={styles.datapoint}>
-						<dt>Existence d'un CSE :</dt>
+						<dt>Effectif annuel moyen en {currentYear} :</dt>
 						<dd>
-							{company.hasCse !== null ? (
-								<strong>{company.hasCse ? "Oui" : "Non"}</strong>
+							{company.gipWorkforce === null ? (
+								GIP_WORKFORCE_UNKNOWN_LABEL
 							) : (
-								<StatusBadge status="to_complete" />
+								<strong>{toDisplayWorkforce(company.gipWorkforce)}</strong>
 							)}
 						</dd>
 					</div>
+					{cseApplicable && (
+						<div className={styles.datapoint}>
+							<dt>Existence d'un CSE :</dt>
+							<dd>
+								{company.hasCse !== null ? (
+									<strong>{company.hasCse ? "Oui" : "Non"}</strong>
+								) : (
+									<StatusBadge status="to_complete" />
+								)}
+							</dd>
+						</div>
+					)}
 				</dl>
 			</div>
 		</div>

@@ -3,7 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import { trackFunnelComplete } from "~/modules/analytics";
-import { computeGap, getCompanySizeRange, hasHighGap } from "~/modules/domain";
+import {
+	computeGap,
+	getCompanySizeRange,
+	getObligationWorkforce,
+	hasHighGap,
+	isCseRequired,
+} from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
@@ -13,6 +19,7 @@ import {
 	DECLARATION_FUNNEL,
 	declarationFunnelDimensions,
 } from "../shared/funnelConfig";
+import { getPreviousStepHref } from "../shared/funnelSteps";
 import { NextStepsBox } from "../shared/NextStepsBox";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
@@ -36,6 +43,7 @@ type Props = {
 	// (see StepPageClient), kept consistent with all business decisions.
 	companyWorkforce: number | null;
 	declarationYear: number;
+	indicatorGRequired: boolean;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
@@ -50,6 +58,7 @@ export function Step6Review({
 	declaration,
 	companyWorkforce,
 	declarationYear,
+	indicatorGRequired,
 	step2Data,
 	step3Data,
 	step4Data,
@@ -61,6 +70,7 @@ export function Step6Review({
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
+	const cseApplicable = isCseRequired(getObligationWorkforce(companyWorkforce));
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: () => {
 			trackFunnelComplete(
@@ -176,7 +186,10 @@ export function Step6Review({
 					</div>
 				</div>
 
-				<StepIndicator currentStep={6} />
+				<StepIndicator
+					currentStep={6}
+					indicatorGRequired={indicatorGRequired}
+				/>
 
 				<div className={stepStyles.recapBody}>
 					<p className={`fr-mb-0 ${stepStyles.intro}`}>
@@ -186,6 +199,7 @@ export function Step6Review({
 					</p>
 
 					<IndicatorSections
+						indicatorGRequired={indicatorGRequired}
 						step2Data={step2Data}
 						step3Data={step3Data}
 						step4Data={step4Data}
@@ -197,6 +211,7 @@ export function Step6Review({
 
 					{highGap && declaration.siren && (
 						<NextStepsBox
+							cseApplicable={cseApplicable}
 							hasGapsAboveThreshold={highGap}
 							siren={declaration.siren}
 						/>
@@ -210,7 +225,7 @@ export function Step6Review({
 							: undefined
 					}
 					nextLabel="Suivant"
-					previousHref="/declaration-remuneration/etape/5"
+					previousHref={getPreviousStepHref(6, indicatorGRequired)}
 				/>
 
 				{!isSubmitted && (

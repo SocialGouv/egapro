@@ -4,7 +4,13 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import { Controller } from "react-hook-form";
 
-import { getCurrentYear } from "~/modules/domain";
+import {
+	GIP_WORKFORCE_UNKNOWN_LABEL,
+	getCurrentYear,
+	getObligationWorkforce,
+	isCseRequired,
+	toDisplayWorkforce,
+} from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import styles from "./CompanyEditModal.module.scss";
@@ -22,7 +28,7 @@ type Props = {
 		name: string;
 		address: string | null;
 		nafCode: string | null;
-		workforce: number | null;
+		gipWorkforce: number | null;
 		hasCse: boolean | null;
 	};
 };
@@ -30,6 +36,9 @@ type Props = {
 export function CompanyEditModal({ company: initialCompany }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const router = useRouter();
+	const cseApplicable = isCseRequired(
+		getObligationWorkforce(initialCompany.gipWorkforce),
+	);
 
 	const form = useZodForm(updateHasCseSchema, {
 		defaultValues: {
@@ -84,9 +93,10 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 									Modifier les informations
 								</h2>
 								<p className="fr-mb-4w">
-									Vérifier les données affichées et compléter l'information
-									manquantes sur l'existence d'un CSE si nécessaire. Si vous
-									constatez une erreur, veuillez{" "}
+									{cseApplicable
+										? "Vérifier les données affichées et compléter l'information manquantes sur l'existence d'un CSE si nécessaire."
+										: "Vérifier les données affichées."}{" "}
+									Si vous constatez une erreur, veuillez{" "}
 									<a
 										className="fr-link fr-icon-external-link-line fr-link--icon-right"
 										href="/aide/nous-contacter"
@@ -108,39 +118,43 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 									onSubmit={onSubmit}
 								>
 									<CompanyReadonlySection company={initialCompany} />
-									<Controller
-										control={form.control}
-										name="hasCse"
-										render={({ field }) => (
-											<CseRadioGroup
-												hasCse={field.value ?? null}
-												setHasCse={field.onChange}
-											/>
-										)}
-									/>
+									{cseApplicable && (
+										<Controller
+											control={form.control}
+											name="hasCse"
+											render={({ field }) => (
+												<CseRadioGroup
+													hasCse={field.value ?? null}
+													setHasCse={field.onChange}
+												/>
+											)}
+										/>
+									)}
 								</form>
 							</div>
 							<div className="fr-modal__footer">
 								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
-									<li>
-										<button
-											className="fr-btn"
-											disabled={
-												hasCse === undefined || updateHasCseMutation.isPending
-											}
-											form="company-edit-form"
-											type="submit"
-										>
-											Enregistrer
-										</button>
-									</li>
+									{cseApplicable && (
+										<li>
+											<button
+												className="fr-btn"
+												disabled={
+													hasCse === undefined || updateHasCseMutation.isPending
+												}
+												form="company-edit-form"
+												type="submit"
+											>
+												Enregistrer
+											</button>
+										</li>
+									)}
 									<li>
 										<button
 											aria-controls={MODAL_ID}
 											className="fr-btn fr-btn--secondary"
 											type="button"
 										>
-											Annuler
+											{cseApplicable ? "Annuler" : "Fermer"}
 										</button>
 									</li>
 								</ul>
@@ -159,7 +173,7 @@ type CompanyReadonlySectionProps = {
 		name: string;
 		address: string | null;
 		nafCode: string | null;
-		workforce: number | null;
+		gipWorkforce: number | null;
 	};
 };
 
@@ -182,11 +196,15 @@ function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 				<dl className={styles.infoList}>
 					<InfoRow
 						label={`Effectif annuel moyen en ${CURRENT_YEAR} :`}
-						value={company.workforce?.toLocaleString("fr-FR")}
+						value={
+							toDisplayWorkforce(company.gipWorkforce)?.toLocaleString(
+								"fr-FR",
+							) ?? GIP_WORKFORCE_UNKNOWN_LABEL
+						}
 					/>
 				</dl>
 				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
-					Source : DSN (Déclarations sociales nominatives).
+					Source : GIP-MDS (DSN — Déclarations sociales nominatives).
 				</p>
 			</div>
 		</>

@@ -33,6 +33,7 @@ type Step5FormValues = {
 type Props = {
 	declarationSiren: string;
 	declarationYear: number;
+	indicatorGRequired: boolean;
 	initialCategories?: EmployeeCategoryRow[];
 	initialSource?: string;
 	maxWomen?: number;
@@ -42,6 +43,7 @@ type Props = {
 export function Step5EmployeeCategories({
 	declarationSiren,
 	declarationYear,
+	indicatorGRequired,
 	initialCategories,
 	initialSource,
 	maxWomen,
@@ -133,7 +135,12 @@ export function Step5EmployeeCategories({
 			onValuesChange={(values) => setField(values)}
 			previousHref="/declaration-remuneration/etape/4"
 			referenceYear={declarationYear - 1}
-			stepper={<StepIndicator currentStep={5} />}
+			stepper={
+				<StepIndicator
+					currentStep={5}
+					indicatorGRequired={indicatorGRequired}
+				/>
+			}
 			submitError={mutation.error?.message}
 			title={
 				<h1 className="fr-h4 fr-mb-0">

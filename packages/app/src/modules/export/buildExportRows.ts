@@ -2,13 +2,16 @@ import { and, eq, isNotNull, or } from "drizzle-orm";
 
 import {
 	gapRatioToPercent,
+	getObligationWorkforce,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isIndicatorGRequired,
+	parseGipWorkforce,
+	toDisplayWorkforce,
 } from "~/modules/domain";
 import type { DB } from "~/server/db";
 import { submittedDeclarationCondition } from "~/server/db/declarationConditions";
-import { companies, declarations, users } from "~/server/db/schema";
+import { companies, declarations, gipMdsData, users } from "~/server/db/schema";
 import { mapCseOpinions } from "./mapIndicators";
 import {
 	fetchCseOpinionsByDeclaration,
@@ -45,7 +48,7 @@ export async function buildExportRows(
 			cancelledAt: declarations.cancelledAt,
 			declarationId: declarations.id,
 			companyName: companies.name,
-			workforce: companies.workforce,
+			workforceEma: gipMdsData.workforceEma,
 			nafCode: companies.nafCode,
 			address: companies.address,
 			hasCse: companies.hasCse,
@@ -58,6 +61,13 @@ export async function buildExportRows(
 		})
 		.from(declarations)
 		.innerJoin(companies, eq(declarations.siren, companies.siren))
+		.leftJoin(
+			gipMdsData,
+			and(
+				eq(gipMdsData.siren, declarations.siren),
+				eq(gipMdsData.year, declarations.year),
+			),
+		)
 		.innerJoin(users, eq(declarations.declarantId, users.id))
 		.where(
 			and(
@@ -80,8 +90,9 @@ export async function buildExportRows(
 		const hasIndicatorGForThisDecl = hasIndicatorG.has(row.declarationId);
 		const globalAnnualMeanGap = gapRatioToPercent(row.globalAnnualMeanGap);
 		const variableAnnualMeanGap = gapRatioToPercent(row.variableAnnualMeanGap);
+		const workforce = parseGipWorkforce(row.workforceEma);
 		const complianceInput = {
-			workforce: row.workforce,
+			workforce,
 			hasIndicatorG: hasIndicatorGForThisDecl,
 			gap: globalAnnualMeanGap,
 		};
@@ -105,13 +116,13 @@ export async function buildExportRows(
 							],
 			});
 		const indicatorGRequired = isIndicatorGRequired(
-			row.workforce ?? 0,
+			getObligationWorkforce(workforce),
 			row.year,
 		);
 		return {
 			siren: row.siren,
 			companyName: row.companyName,
-			workforce: row.workforce,
+			workforce: toDisplayWorkforce(workforce),
 			nafCode: row.nafCode,
 			address: row.address,
 			hasCse: row.hasCse,

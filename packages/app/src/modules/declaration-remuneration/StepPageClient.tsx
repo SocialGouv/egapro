@@ -2,7 +2,12 @@
 
 import { useMemo } from "react";
 import { useFunnelTracking } from "~/modules/analytics";
-import { getCompanySizeRange, isDeclarationSubmitted } from "~/modules/domain";
+import {
+	getCompanySizeRange,
+	getObligationWorkforce,
+	isDeclarationSubmitted,
+	isIndicatorGRequired,
+} from "~/modules/domain";
 import {
 	DECLARATION_FUNNEL,
 	declarationFunnelDimensions,
@@ -34,10 +39,7 @@ type StepPageClientProps = {
 		totalMen: number | null;
 		status: string | null;
 	};
-	// Official GIP/DSN workforce on the company — the canonical source for every
-	// size-based decision. Used here only to bucket the Matomo funnel dimension,
-	// so analytics segments match the business logic (never the self-reported
-	// `totalWomen + totalMen`, which may differ or be empty early in the funnel).
+	// GIP-MDS annual average workforce; `null` = absent from the GIP file, i.e. not subject to the declaration.
 	companyWorkforce: number | null;
 	gipPrefillData?: GipPrefillData;
 	step1Data: Step1Data;
@@ -71,6 +73,11 @@ export function StepPageClient({
 			? getCompanySizeRange(companyWorkforce)
 			: undefined;
 
+	const indicatorGRequired = isIndicatorGRequired(
+		getObligationWorkforce(companyWorkforce),
+		declaration.year,
+	);
+
 	const dimensions = useMemo(
 		() => declarationFunnelDimensions(declaration.year, sizeRange),
 		[declaration.year, sizeRange],
@@ -85,6 +92,7 @@ export function StepPageClient({
 						declarationSiren={declaration.siren}
 						declarationYear={declaration.year}
 						gipPrefillData={gipPrefillData}
+						indicatorGRequired={indicatorGRequired}
 						initialData={step1Data}
 					/>
 				);
@@ -94,6 +102,7 @@ export function StepPageClient({
 						declarationSiren={declaration.siren}
 						declarationYear={declaration.year}
 						gipPrefillData={gipPrefillData}
+						indicatorGRequired={indicatorGRequired}
 						initialData={step2Data}
 					/>
 				);
@@ -103,6 +112,7 @@ export function StepPageClient({
 						declarationSiren={declaration.siren}
 						declarationYear={declaration.year}
 						gipPrefillData={gipPrefillData}
+						indicatorGRequired={indicatorGRequired}
 						initialData={step3Data}
 						maxMen={declaration.totalMen ?? undefined}
 						maxWomen={declaration.totalWomen ?? undefined}
@@ -114,6 +124,7 @@ export function StepPageClient({
 						declarationSiren={declaration.siren}
 						declarationYear={declaration.year}
 						gipPrefillData={gipPrefillData}
+						indicatorGRequired={indicatorGRequired}
 						initialData={step4Data}
 						maxMen={declaration.totalMen ?? undefined}
 						maxWomen={declaration.totalWomen ?? undefined}
@@ -124,6 +135,7 @@ export function StepPageClient({
 					<Step5EmployeeCategories
 						declarationSiren={declaration.siren}
 						declarationYear={declaration.year}
+						indicatorGRequired={indicatorGRequired}
 						initialCategories={step5Categories}
 						initialSource={initialSource}
 						maxMen={declaration.totalMen ?? undefined}
@@ -137,6 +149,7 @@ export function StepPageClient({
 						declaration={declaration}
 						declarationYear={declaration.year}
 						hasCse={hasCse}
+						indicatorGRequired={indicatorGRequired}
 						isSubmitted={isDeclarationSubmitted(declaration.status)}
 						step2Data={step2Data}
 						step3Data={step3Data}
