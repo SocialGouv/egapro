@@ -3,6 +3,8 @@ import type { Session } from "next-auth";
 import {
 	computeDeclarationStatus,
 	getCurrentYear,
+	getObligationWorkforce,
+	isCseRequired,
 	parseGipWorkforce,
 } from "~/modules/domain";
 import { buildDeclarationList } from "~/modules/my-space/buildDeclarationList";
@@ -70,7 +72,11 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 		gipWorkforce: parseGipWorkforce(workforceEma),
 	};
 
-	if (company.hasCse === null) {
+	// Below 100 the CSE field is out of scope entirely, so `hasCse` stays null.
+	if (
+		company.hasCse === null &&
+		isCseRequired(getObligationWorkforce(company.gipWorkforce))
+	) {
 		const hasCse = await fetchCseBySiren(company.siren);
 		if (hasCse !== null) {
 			await db

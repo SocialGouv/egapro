@@ -33,6 +33,7 @@ type Props = {
 	declarations: DeclarationItem[];
 	userPhone: string | null;
 	hasCse: boolean | null;
+	cseApplicable: boolean;
 	hasNoSanction: boolean;
 };
 
@@ -59,6 +60,7 @@ export function DeclarationsSection({
 	declarations,
 	userPhone,
 	hasCse,
+	cseApplicable,
 	hasNoSanction,
 }: Props) {
 	const currentYear = getCurrentYear();
@@ -118,6 +120,7 @@ export function DeclarationsSection({
 			{visibleCurrentDeclarations.length > 0 && (
 				<DeclarationsTable
 					campaignDeadlines={campaignDeadlines}
+					cseApplicable={cseApplicable}
 					declarations={visibleCurrentDeclarations}
 					hasCse={hasCse}
 					labelledById="demarches-en-cours-title"
@@ -131,6 +134,7 @@ export function DeclarationsSection({
 					</h2>
 					<DeclarationsTable
 						campaignDeadlines={campaignDeadlines}
+						cseApplicable={cseApplicable}
 						declarations={visiblePreviousDeclarations}
 						hasCse={hasCse}
 						labelledById="annees-precedentes-title"
@@ -178,6 +182,7 @@ type DeclarationsTableProps = {
 	labelledById: string;
 	userPhone: string | null;
 	hasCse: boolean | null;
+	cseApplicable: boolean;
 };
 
 function DeclarationsTable({
@@ -186,6 +191,7 @@ function DeclarationsTable({
 	labelledById,
 	userPhone,
 	hasCse,
+	cseApplicable,
 }: DeclarationsTableProps) {
 	return (
 		<div className={`fr-table ${styles.tableNoCaptionOffset}`}>
@@ -210,6 +216,7 @@ function DeclarationsTable({
 										<tr key={`${declaration.type}-${declaration.year}`}>
 											<td>
 												<DeclarationLink
+													cseApplicable={cseApplicable}
 													hasCse={hasCse}
 													type={declaration.type}
 													userPhone={userPhone}
