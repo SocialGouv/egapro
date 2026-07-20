@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import { TEST_SIREN } from "../constants";
+import { TEST_GIP_WORKFORCE, TEST_SIREN } from "../constants";
 
 const DEFAULT_DB_URL = "postgresql://postgres:postgres@localhost:5438/egapro";
 
@@ -143,6 +143,44 @@ export async function setCompanyHasCse(hasCse: boolean | null) {
 	} finally {
 		await sql.end();
 	}
+}
+
+/**
+ * Set the GIP-MDS annual average workforce of the test company for the current year.
+ *
+ * This is the single source of truth for every size-based rule (banner display, CSE
+ * field, indicator G / step 5 gating, SUIT export). Passing `null` deletes the row,
+ * which models a company absent from the GIP file — treated as "< 50", not subject.
+ */
+export async function setGipWorkforce(workforceEma: number | null) {
+	const sql = createConnection();
+	try {
+		if (workforceEma === null) {
+			await sql`
+				DELETE FROM app_gip_mds_data
+				WHERE siren = ${TEST_SIREN}
+				  AND year = EXTRACT(YEAR FROM CURRENT_DATE)::int
+			`;
+			return;
+		}
+		await sql`
+			INSERT INTO app_gip_mds_data (siren, year, workforce_ema, imported_at)
+			VALUES (
+				${TEST_SIREN},
+				EXTRACT(YEAR FROM CURRENT_DATE)::int,
+				${workforceEma},
+				NOW()
+			)
+			ON CONFLICT (siren, year) DO UPDATE SET workforce_ema = EXCLUDED.workforce_ema
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/** Restore the suite baseline: the test company is a >= 250 GIP company. */
+export async function resetGipWorkforce() {
+	await setGipWorkforce(TEST_GIP_WORKFORCE);
 }
 
 export async function setCompanyWorkforce(workforce: number | null) {
