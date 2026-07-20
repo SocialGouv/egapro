@@ -1,10 +1,3 @@
-.sectionHeader {
-	// DSFR's `.fr-table__content table tbody td` rule wins on specificity, so
-	// override the variable it reads instead of fighting the selector.
-	--background-default-grey: var(--background-contrast-grey);
-	background-color: var(--background-contrast-grey);
-}
-
 .sourceSelectGroup {
 	:global(.fr-select) {
 		max-width: 18rem;
@@ -37,18 +30,52 @@
 	height: 64px;
 }
 
-:global(.fr-table__content) table tbody td.totalCell {
+:global(.fr-table__content) table tbody td.totalCell,
+:global(.fr-table__content) table tbody td.gapCell {
 	text-align: right;
 }
 
-.nameColumnHeader {
-	width: 230px;
+.fixedTable table {
+	// Column widths come from the <colgroup> below (not content), so all three
+	// category tables share the same wide label column and none overflows the
+	// ~776px card (Figma page 5); narrow viewports scroll via the DSFR table
+	// wrapper (RGAA reflow).
+	table-layout: fixed;
+}
+
+.fixedTable table thead th:nth-child(2),
+.fixedTable table thead th:nth-child(3) {
+	// Let "Rémunération des femmes/hommes" wrap instead of overflowing the cell,
+	// without touching the écart header's own two-line layout.
+	white-space: normal;
+}
+
+// Shared label column across the effectifs and rémunération tables so their
+// left column lines up (Figma page 5).
+.colLabel {
+	width: 28%;
+}
+
+// Workforce (effectifs) table: two equal data columns (women / men).
+.colWorkforceData {
+	width: 36%;
+}
+
+// Rémunération tables: three equal data columns (women / men / gap).
+.colRemunData {
+	width: 24%;
 }
 
 .form {
 	display: flex;
 	flex-direction: column;
 	gap: 2rem;
+
+	// this form uses flex `gap` (margins add, not collapse) — strip the shared stepper's mt/mb so gaps stay 32px
+	> :global(.fr-stepper) {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
 }
 
 .categoryBlock {

@@ -50,15 +50,17 @@ export function QuartileTable({
 		total: totalAll,
 	} = sumQuartileWorkforce(quartiles);
 	const trancheSuffix =
-		tableType === "annual" ? "annuelle brute" : "horaire brute";
+		tableType === "annual"
+			? "de rémunération annuelle brut"
+			: "de rémunération horaire brut";
 
 	return (
 		<div className={stepStyles.tableWrapper}>
-			<h3 className="fr-h5 fr-mb-0">{title}</h3>
+			<h3 className="fr-h6 fr-mb-0">{title}</h3>
 			<div className={stepStyles.tableSection}>
 				{readingNote}
 				<div
-					className={`fr-table fr-table--no-scroll fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
+					className={`fr-table fr-table--bordered fr-table--no-scroll fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
 				>
 					<div className="fr-table__wrapper">
 						<div className="fr-table__container">
@@ -82,7 +84,7 @@ export function QuartileTable({
 												<span className="fr-sr-only">Quartile</span>
 											</th>
 											<th colSpan={2} scope="col">
-												Tranche de rémunération
+												Montants des tranches
 												<br />
 												{trancheSuffix}
 											</th>

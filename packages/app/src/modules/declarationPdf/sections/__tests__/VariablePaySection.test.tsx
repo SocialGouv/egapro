@@ -88,7 +88,7 @@ describe("VariablePaySection", () => {
 			/>,
 		);
 
-		expect(screen.getAllByText("-")).toHaveLength(2);
+		expect(screen.getAllByText("- %")).toHaveLength(2);
 	});
 
 	it("omits the proportion row when there are no beneficiary rows", () => {

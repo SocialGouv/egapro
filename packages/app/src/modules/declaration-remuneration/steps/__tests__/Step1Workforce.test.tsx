@@ -249,7 +249,7 @@ describe("Step1Workforce", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders previous link pointing to home", () => {
+	it("does not render a previous link (exit is handled by the breadcrumb)", () => {
 		render(
 			<Step1Workforce
 				declarationSiren="123456789"
@@ -257,10 +257,9 @@ describe("Step1Workforce", () => {
 				initialData={emptyStep1Data()}
 			/>,
 		);
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/",
-		);
+		expect(
+			screen.queryByRole("link", { name: /précédent/i }),
+		).not.toBeInTheDocument();
 	});
 
 	it("hides the reset warning by default", () => {

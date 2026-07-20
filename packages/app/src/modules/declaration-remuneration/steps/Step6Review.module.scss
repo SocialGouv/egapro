@@ -4,6 +4,13 @@
 	gap: 2rem;
 }
 
+// scoped wrapper so the recap blocks get 32px gaps without touching the shared .group / NextStepsBox (second-declaration recap)
+.recapBody {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
 .section {
 	display: flex;
 	flex-direction: column;
@@ -52,6 +59,17 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.5rem;
+}
+
+// Bordered grid cell (étape 5): full-width flex so margin-auto pins the value right, badge at the far left.
+.gapCell {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.gapValue {
+	margin-left: auto;
 }
 
 .subSection {

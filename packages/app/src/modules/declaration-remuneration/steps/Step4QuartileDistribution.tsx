@@ -353,7 +353,12 @@ export function Step4QuartileDistribution({
 						readOnly={isReadOnly}
 						sourceNote={
 							gipPrefillData ? (
-								<PrefillSource periodEnd={gipPrefillData.periodEnd ?? null} />
+								<PrefillSource
+									periodEnd={gipPrefillData.periodEnd ?? null}
+									periodStart={gipPrefillData.periodStart}
+									tooltipId="tooltip-source-step4-annual"
+									year={declarationYear}
+								/>
 							) : undefined
 						}
 						tableType="annual"
@@ -371,7 +376,12 @@ export function Step4QuartileDistribution({
 						readOnly={isReadOnly}
 						sourceNote={
 							gipPrefillData ? (
-								<PrefillSource periodEnd={gipPrefillData.periodEnd ?? null} />
+								<PrefillSource
+									periodEnd={gipPrefillData.periodEnd ?? null}
+									periodStart={gipPrefillData.periodStart}
+									tooltipId="tooltip-source-step4-hourly"
+									year={declarationYear}
+								/>
 							) : undefined
 						}
 						tableType="hourly"

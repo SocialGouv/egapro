@@ -1,7 +1,12 @@
 .gapDisplay {
+	// Écart: value pinned right, badge (when present) at the far left, no divider (single cell).
 	display: flex;
 	align-items: baseline;
 	gap: 0.5rem;
+}
+
+.gapValue {
+	margin-left: auto;
 }
 
 .inputWithUnit {
@@ -15,4 +20,30 @@
 		// a typical amount — the DSFR table wrapper scrolls instead.
 		min-width: 7.5rem;
 	}
+}
+
+.fixedTable table {
+	// Figma column widths (label 230 / values 185 / écart 190) so the table
+	// fits the ~790px data container instead of overflowing; narrow viewports
+	// scroll via the DSFR table wrapper (RGAA reflow).
+	table-layout: fixed;
+}
+
+.fixedTable table thead th:nth-child(2),
+.fixedTable table thead th:nth-child(3) {
+	// Let "Rémunération des femmes/hommes" wrap instead of overflowing the cell,
+	// without touching the écart header's own two-line layout.
+	white-space: normal;
+}
+
+.colLabel {
+	width: 230px;
+}
+
+.colValue {
+	width: 185px;
+}
+
+.colGap {
+	width: 190px;
 }

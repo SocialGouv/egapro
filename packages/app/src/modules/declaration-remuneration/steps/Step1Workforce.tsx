@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
-import { computeWorkforceTotal } from "~/modules/domain";
+import {
+	computeWorkforceTotal,
+	resolveGipReferencePeriod,
+} from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep1Schema } from "../schemas";
@@ -227,7 +230,7 @@ export function Step1Workforce({
 
 					<div className={common.flexColumnGap1}>
 						<p className="fr-mb-0">
-							{`Période de référence pour le calcul des indicateurs : 01/01/${declarationYear} - 31/12/${declarationYear}.`}
+							{`Période de référence pour le calcul des indicateurs : ${resolveGipReferencePeriod(gipPrefillData?.periodStart, gipPrefillData?.periodEnd, declarationYear)}.`}
 							<TooltipButton
 								id="tooltip-period"
 								label="Information sur la période de référence"
@@ -252,7 +255,7 @@ export function Step1Workforce({
 					<div className={`${common.dataSection} ${common.tableGap}`}>
 						<div className={common.flexColumnGapHalf}>
 							<div
-								className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${styles.workforceTable}`}
+								className={`fr-table fr-table--bordered fr-table--no-caption fr-mt-0 fr-mb-0 ${styles.workforceTable}`}
 							>
 								<div className="fr-table__wrapper">
 									<div className="fr-table__container">
@@ -341,7 +344,7 @@ export function Step1Workforce({
 																)}
 															</div>
 														</td>
-														<td>
+														<td className="fr-cell--right">
 															<strong>{total}</strong>
 														</td>
 													</tr>
@@ -353,7 +356,11 @@ export function Step1Workforce({
 							</div>
 
 							{isPrefilled && (
-								<PrefillSource periodEnd={gipPrefillData.periodEnd} />
+								<PrefillSource
+									periodEnd={gipPrefillData.periodEnd}
+									periodStart={gipPrefillData.periodStart}
+									year={declarationYear}
+								/>
 							)}
 
 							{showResetWarning && <PrefillResetWarning />}
@@ -373,12 +380,10 @@ export function Step1Workforce({
 					/>
 
 					<FormActions
-						className="fr-mt-0"
 						isSubmitting={mutation.isPending}
 						mimoquageNextHref={
 							hasInitialData ? "/declaration-remuneration/etape/2" : undefined
 						}
-						previousHref="/"
 					/>
 				</fieldset>
 			</form>

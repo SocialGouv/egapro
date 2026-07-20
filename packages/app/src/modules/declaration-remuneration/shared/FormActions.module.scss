@@ -2,4 +2,6 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	// relies on block margin-collapse (fieldset): stays 2rem with or without a callout above
+	margin-top: 2rem;
 }

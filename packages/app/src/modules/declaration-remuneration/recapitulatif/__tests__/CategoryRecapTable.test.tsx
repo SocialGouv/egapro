@@ -148,7 +148,7 @@ describe("CategoryRecapTable", () => {
 		expect(screen.getAllByRole("row").length).toBeGreaterThan(0);
 	});
 
-	it("renders '-' for the total gap when the men total is zero", () => {
+	it("renders '- %' for the total gap when the men total is zero", () => {
 		render(
 			<CategoryRecapTable
 				category={makeCategory({
@@ -160,8 +160,7 @@ describe("CategoryRecapTable", () => {
 			/>,
 		);
 		const [annualTotalGapCell, hourlyTotalGapCell] = totalRowGapCell();
-		expect(annualTotalGapCell).toHaveTextContent("-");
-		expect(annualTotalGapCell).not.toHaveTextContent("%");
-		expect(hourlyTotalGapCell).toHaveTextContent("-");
+		expect(annualTotalGapCell).toHaveTextContent("- %");
+		expect(hourlyTotalGapCell).toHaveTextContent("- %");
 	});
 });

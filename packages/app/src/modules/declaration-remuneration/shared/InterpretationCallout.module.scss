@@ -1,4 +1,9 @@
 .callout {
+	// scoped to .fr-callout to outrank DSFR's `.fr-callout { margin-top: 0 }` (same specificity, else wins on source order)
+	&:global(.fr-callout) {
+		margin-top: 2rem;
+	}
+
 	:global(.fr-callout__text) {
 		font-size: 1rem;
 	}

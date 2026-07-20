@@ -236,16 +236,15 @@ export function Step3VariablePay({
 				</div>
 
 				<div className={`${common.dataSection} ${common.tableGap}`}>
-					<div className={common.flexColumnGapHalf}>
+					<div className={common.flexColumnGap1}>
+						<h2 className="fr-h6 fr-mb-0">
+							Rémunération variable ou complémentaire
+						</h2>
 						<PayGapTable
 							caption="Écart de rémunération variable ou complémentaire"
 							className={stepStyles.payGapTable}
 							columnHeader={
-								<>
-									Rémunération variable
-									<br />
-									ou complémentaire
-								</>
+								<span className="fr-sr-only">Type de rémunération</span>
 							}
 							disabled={isImpersonating}
 							onRowChange={handleRowChange}
@@ -256,14 +255,19 @@ export function Step3VariablePay({
 						{gipPrefillData && (
 							<PrefillSource
 								periodEnd={gipPrefillData.periodEnd}
+								periodStart={gipPrefillData.periodStart}
 								tooltipId="tooltip-source-step3-paygap"
+								year={declarationYear}
 							/>
 						)}
 					</div>
 
-					<div className={common.flexColumnGapHalf}>
+					<div className={common.flexColumnGap1}>
+						<h2 className="fr-h6 fr-mb-0">
+							Proportion de femmes et d&apos;hommes bénéficiaires
+						</h2>
 						<div
-							className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.payGapTable}`}
+							className={`fr-table fr-table--bordered fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.payGapTable}`}
 						>
 							<div className="fr-table__wrapper">
 								<div className="fr-table__container">
@@ -281,7 +285,9 @@ export function Step3VariablePay({
 											</colgroup>
 											<thead>
 												<tr>
-													<th scope="col">Sexe</th>
+													<th scope="col">
+														<span className="fr-sr-only">Sexe</span>
+													</th>
 													<th scope="col">
 														Total de salariés
 														{maxWomen !== undefined && maxMen !== undefined
@@ -298,9 +304,7 @@ export function Step3VariablePay({
 											</thead>
 											<tbody>
 												<tr>
-													<td>
-														<strong>Femmes</strong>
-													</td>
+													<th scope="row">Femmes</th>
 													<td className="fr-cell--right">
 														<strong>{maxWomen ?? "-"}</strong>
 													</td>
@@ -342,9 +346,7 @@ export function Step3VariablePay({
 													</td>
 												</tr>
 												<tr>
-													<td>
-														<strong>Hommes</strong>
-													</td>
+													<th scope="row">Hommes</th>
 													<td className="fr-cell--right">
 														<strong>{maxMen ?? "-"}</strong>
 													</td>
@@ -404,7 +406,9 @@ export function Step3VariablePay({
 						{gipPrefillData && (
 							<PrefillSource
 								periodEnd={gipPrefillData.periodEnd}
+								periodStart={gipPrefillData.periodStart}
 								tooltipId="tooltip-source-step3"
+								year={declarationYear}
 							/>
 						)}
 					</div>

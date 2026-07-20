@@ -86,8 +86,52 @@ function EuroInputCell({
 	);
 }
 
-type RemunerationSectionProps = {
-	sectionLabel: string;
+function RemunerationHead() {
+	return (
+		<thead>
+			<tr>
+				<th scope="col">
+					<span className="fr-sr-only">Donnée</span>
+				</th>
+				<th scope="col">Rémunération des femmes</th>
+				<th scope="col">Rémunération des hommes</th>
+				<th scope="col">
+					<strong>Écart</strong>
+					<br />
+					<span className={common.fontRegular}>Seuil réglementaire : 5%</span>
+				</th>
+			</tr>
+		</thead>
+	);
+}
+
+function TableFrame({
+	caption,
+	children,
+}: {
+	caption: string;
+	children: React.ReactNode;
+}) {
+	return (
+		<div
+			className={`fr-table fr-table--bordered fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.fixedTable}`}
+		>
+			<div className="fr-table__wrapper">
+				<div className="fr-table__container">
+					<div className="fr-table__content">
+						<table>
+							<caption>{caption}</caption>
+							{children}
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+type RemunerationTableProps = {
+	title: string;
 	scope: "annuel" | "horaire";
 	fields: EuroFields;
 	cat: EmployeeCategory;
@@ -98,8 +142,8 @@ type RemunerationSectionProps = {
 	idPrefix: string;
 };
 
-function RemunerationSection({
-	sectionLabel,
+function RemunerationTable({
+	title,
 	scope,
 	fields,
 	cat,
@@ -108,7 +152,7 @@ function RemunerationSection({
 	pos,
 	blur,
 	idPrefix,
-}: RemunerationSectionProps) {
+}: RemunerationTableProps) {
 	const totalWomen = computeTotal(
 		cat[fields.baseWomen],
 		cat[fields.variableWomen],
@@ -119,78 +163,96 @@ function RemunerationSection({
 			? computeGap(totalWomen.toString(), totalMen.toString())
 			: null;
 
-	const idFor = (suffix: string) => `${idPrefix}-${suffix}`;
+	const scopeId = scope === "annuel" ? "annual" : "hourly";
+	const variableScope = scope === "annuel" ? "annuelles" : "horaires";
+	const idFor = (suffix: string) => `${idPrefix}-${scopeId}-${suffix}`;
 
 	return (
-		<>
-			<tr>
-				<td className={stepStyles.sectionHeader} colSpan={4}>
-					<strong>{sectionLabel}</strong>
-				</td>
-			</tr>
-			<tr className={stepStyles.dataRow}>
-				<th scope="row">Salaire de base</th>
-				<EuroInputCell
-					ariaLabel={`Salaire de base ${scope} femmes, catégorie ${catIndex + 1}`}
-					disabled={disabled}
-					id={idFor(`${scope === "annuel" ? "annual" : "hourly"}-base-women`)}
-					onBlur={blur(catIndex, fields.baseWomen)}
-					onChange={pos(catIndex, fields.baseWomen, false)}
-					value={cat[fields.baseWomen]}
-				/>
-				<EuroInputCell
-					ariaLabel={`Salaire de base ${scope} hommes, catégorie ${catIndex + 1}`}
-					disabled={disabled}
-					id={idFor(`${scope === "annuel" ? "annual" : "hourly"}-base-men`)}
-					onBlur={blur(catIndex, fields.baseMen)}
-					onChange={pos(catIndex, fields.baseMen, false)}
-					value={cat[fields.baseMen]}
-				/>
-				<td>
-					<GapBadge
-						gap={computeGap(cat[fields.baseWomen], cat[fields.baseMen])}
-					/>
-				</td>
-			</tr>
-			<tr className={stepStyles.dataRow}>
-				<th scope="row">
-					Composantes variables
-					<br />
-					ou complémentaires
-				</th>
-				<EuroInputCell
-					ariaLabel={`Composantes variables ${scope === "annuel" ? "annuelles" : "horaires"} femmes, catégorie ${catIndex + 1}`}
-					disabled={disabled}
-					id={idFor(
-						`${scope === "annuel" ? "annual" : "hourly"}-variable-women`,
-					)}
-					onBlur={blur(catIndex, fields.variableWomen)}
-					onChange={pos(catIndex, fields.variableWomen, false)}
-					value={cat[fields.variableWomen]}
-				/>
-				<EuroInputCell
-					ariaLabel={`Composantes variables ${scope === "annuel" ? "annuelles" : "horaires"} hommes, catégorie ${catIndex + 1}`}
-					disabled={disabled}
-					id={idFor(`${scope === "annuel" ? "annual" : "hourly"}-variable-men`)}
-					onBlur={blur(catIndex, fields.variableMen)}
-					onChange={pos(catIndex, fields.variableMen, false)}
-					value={cat[fields.variableMen]}
-				/>
-				<td>
-					<GapBadge
-						gap={computeGap(cat[fields.variableWomen], cat[fields.variableMen])}
-					/>
-				</td>
-			</tr>
-			<tr className={stepStyles.dataRow}>
-				<th scope="row">Total</th>
-				<td className={stepStyles.totalCell}>{formatTotal(totalWomen, "€")}</td>
-				<td className={stepStyles.totalCell}>{formatTotal(totalMen, "€")}</td>
-				<td>
-					<GapBadge gap={totalGap} />
-				</td>
-			</tr>
-		</>
+		<div className={common.flexColumnGap1}>
+			<h3 className="fr-h6 fr-mb-0">{title}</h3>
+			<TableFrame
+				caption={`Catégorie d'emplois n°${catIndex + 1}${cat.name.trim() ? ` : ${cat.name}` : ""} — ${title}`}
+			>
+				<colgroup>
+					<col className={stepStyles.colLabel} />
+					<col className={stepStyles.colRemunData} />
+					<col className={stepStyles.colRemunData} />
+					<col className={stepStyles.colRemunData} />
+				</colgroup>
+				<RemunerationHead />
+				<tbody>
+					<tr className={stepStyles.dataRow}>
+						<th scope="row">Salaire de base</th>
+						<EuroInputCell
+							ariaLabel={`Salaire de base ${scope} femmes, catégorie ${catIndex + 1}`}
+							disabled={disabled}
+							id={idFor("base-women")}
+							onBlur={blur(catIndex, fields.baseWomen)}
+							onChange={pos(catIndex, fields.baseWomen, false)}
+							value={cat[fields.baseWomen]}
+						/>
+						<EuroInputCell
+							ariaLabel={`Salaire de base ${scope} hommes, catégorie ${catIndex + 1}`}
+							disabled={disabled}
+							id={idFor("base-men")}
+							onBlur={blur(catIndex, fields.baseMen)}
+							onChange={pos(catIndex, fields.baseMen, false)}
+							value={cat[fields.baseMen]}
+						/>
+						<td className={stepStyles.gapCell}>
+							<GapBadge
+								gap={computeGap(cat[fields.baseWomen], cat[fields.baseMen])}
+								layout="cell"
+							/>
+						</td>
+					</tr>
+					<tr className={stepStyles.dataRow}>
+						<th scope="row">
+							Composantes variables
+							<br />
+							ou complémentaires
+						</th>
+						<EuroInputCell
+							ariaLabel={`Composantes variables ${variableScope} femmes, catégorie ${catIndex + 1}`}
+							disabled={disabled}
+							id={idFor("variable-women")}
+							onBlur={blur(catIndex, fields.variableWomen)}
+							onChange={pos(catIndex, fields.variableWomen, false)}
+							value={cat[fields.variableWomen]}
+						/>
+						<EuroInputCell
+							ariaLabel={`Composantes variables ${variableScope} hommes, catégorie ${catIndex + 1}`}
+							disabled={disabled}
+							id={idFor("variable-men")}
+							onBlur={blur(catIndex, fields.variableMen)}
+							onChange={pos(catIndex, fields.variableMen, false)}
+							value={cat[fields.variableMen]}
+						/>
+						<td className={stepStyles.gapCell}>
+							<GapBadge
+								gap={computeGap(
+									cat[fields.variableWomen],
+									cat[fields.variableMen],
+								)}
+								layout="cell"
+							/>
+						</td>
+					</tr>
+					<tr className={stepStyles.dataRow}>
+						<th scope="row">Total</th>
+						<td className={stepStyles.totalCell}>
+							{formatTotal(totalWomen, "€")}
+						</td>
+						<td className={stepStyles.totalCell}>
+							{formatTotal(totalMen, "€")}
+						</td>
+						<td className={stepStyles.gapCell}>
+							<GapBadge gap={totalGap} layout="cell" />
+						</td>
+					</tr>
+				</tbody>
+			</TableFrame>
+		</div>
 	);
 }
 
@@ -209,109 +271,88 @@ export function CategoryDataTable({
 			: null;
 
 	const idPrefix = `cat-${catIndex}`;
+
 	return (
-		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
-			<div className="fr-table__wrapper">
-				<div className="fr-table__container">
-					<div className="fr-table__content">
-						<table>
-							<caption>
-								{cat.name.trim()
-									? `Catégorie d'emplois n°${catIndex + 1} : ${cat.name}`
-									: `Catégorie d'emplois n°${catIndex + 1}`}
-							</caption>
-							<thead>
-								<tr>
-									<th className={stepStyles.nameColumnHeader} scope="col">
-										<span className="fr-sr-only">Donnée</span>
-									</th>
-									<th scope="col">Femmes</th>
-									<th scope="col">Hommes</th>
-									<th scope="col">
-										<strong>Écart</strong>
-										<br />
-										<span className={common.fontRegular}>
-											Seuil réglementaire : 5%
-										</span>
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td className={stepStyles.sectionHeader} colSpan={4}>
-										<strong aria-atomic="true" aria-live="polite">
-											Total salariés
-											{totalEmployees !== null ? ` : ${totalEmployees}` : ""}
-										</strong>
-									</td>
-								</tr>
-								<tr className={stepStyles.dataRow}>
-									<th scope="row">Effectif physique</th>
-									<td>
-										<div className={stepStyles.inputCell}>
-											<input
-												aria-label={`Effectif femmes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
-												disabled={disabled}
-												id={`${idPrefix}-women-count`}
-												inputMode="numeric"
-												onChange={pos(catIndex, "womenCount", true)}
-												pattern="[0-9]*"
-												type="text"
-												value={cat.womenCount}
-											/>
-											<span className="fr-text--sm">nb</span>
-										</div>
-									</td>
-									<td>
-										<div className={stepStyles.inputCell}>
-											<input
-												aria-label={`Effectif hommes, catégorie ${catIndex + 1}`}
-												className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
-												disabled={disabled}
-												id={`${idPrefix}-men-count`}
-												inputMode="numeric"
-												onChange={pos(catIndex, "menCount", true)}
-												pattern="[0-9]*"
-												type="text"
-												value={cat.menCount}
-											/>
-											<span className="fr-text--sm">nb</span>
-										</div>
-									</td>
-									<td>
-										<span className="fr-sr-only">Non applicable</span>
-									</td>
-								</tr>
-
-								<RemunerationSection
-									blur={blur}
-									cat={cat}
-									catIndex={catIndex}
+		<div className={common.dataSection}>
+			<div className={common.flexColumnGap1}>
+				<h3 aria-atomic="true" aria-live="polite" className="fr-h6 fr-mb-0">
+					Total salariés
+					{totalEmployees !== null ? ` : ${totalEmployees}` : ""}
+				</h3>
+				<TableFrame
+					caption={`Catégorie d'emplois n°${catIndex + 1}${cat.name.trim() ? ` : ${cat.name}` : ""} — Effectifs physiques`}
+				>
+					<colgroup>
+						<col className={stepStyles.colLabel} />
+						<col className={stepStyles.colWorkforceData} />
+						<col className={stepStyles.colWorkforceData} />
+					</colgroup>
+					<thead>
+						<tr>
+							<th scope="col">
+								<span className="fr-sr-only">Donnée</span>
+							</th>
+							<th scope="col">Nombre de femmes</th>
+							<th scope="col">Nombre d&apos;hommes</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr className={stepStyles.dataRow}>
+							<th scope="row">Effectif physique</th>
+							<td>
+								<input
+									aria-label={`Effectif femmes, catégorie ${catIndex + 1}`}
+									className={`fr-input ${common.numericInput}`}
 									disabled={disabled}
-									fields={ANNUAL_FIELDS}
-									idPrefix={idPrefix}
-									pos={pos}
-									scope="annuel"
-									sectionLabel="Rémunération annuelle brute moyenne"
+									id={`${idPrefix}-women-count`}
+									inputMode="numeric"
+									onChange={pos(catIndex, "womenCount", true)}
+									pattern="[0-9]*"
+									type="text"
+									value={cat.womenCount}
 								/>
-
-								<RemunerationSection
-									blur={blur}
-									cat={cat}
-									catIndex={catIndex}
+							</td>
+							<td>
+								<input
+									aria-label={`Effectif hommes, catégorie ${catIndex + 1}`}
+									className={`fr-input ${common.numericInput}`}
 									disabled={disabled}
-									fields={HOURLY_FIELDS}
-									idPrefix={idPrefix}
-									pos={pos}
-									scope="horaire"
-									sectionLabel="Rémunération horaire brute moyenne"
+									id={`${idPrefix}-men-count`}
+									inputMode="numeric"
+									onChange={pos(catIndex, "menCount", true)}
+									pattern="[0-9]*"
+									type="text"
+									value={cat.menCount}
 								/>
-							</tbody>
-						</table>
-					</div>
-				</div>
+							</td>
+						</tr>
+					</tbody>
+				</TableFrame>
 			</div>
+
+			<RemunerationTable
+				blur={blur}
+				cat={cat}
+				catIndex={catIndex}
+				disabled={disabled}
+				fields={ANNUAL_FIELDS}
+				idPrefix={idPrefix}
+				pos={pos}
+				scope="annuel"
+				title="Rémunération annuelle brute moyenne"
+			/>
+
+			<RemunerationTable
+				blur={blur}
+				cat={cat}
+				catIndex={catIndex}
+				disabled={disabled}
+				fields={HOURLY_FIELDS}
+				idPrefix={idPrefix}
+				pos={pos}
+				scope="horaire"
+				title="Rémunération horaire brute moyenne"
+			/>
 		</div>
 	);
 }

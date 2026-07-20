@@ -192,7 +192,9 @@ export function Step2PayGap({
 					<div className={common.flexColumnGapHalf}>
 						<PayGapTable
 							caption="Écart de rémunération"
-							columnHeader="Rémunération"
+							columnHeader={
+								<span className="fr-sr-only">Type de rémunération</span>
+							}
 							disabled={isImpersonating}
 							onRowChange={handleRowChange}
 							readOnly={isReadOnly}
@@ -202,7 +204,9 @@ export function Step2PayGap({
 						{gipPrefillData && (
 							<PrefillSource
 								periodEnd={gipPrefillData.periodEnd}
+								periodStart={gipPrefillData.periodStart}
 								tooltipId="tooltip-source-step2"
+								year={declarationYear}
 							/>
 						)}
 					</div>
