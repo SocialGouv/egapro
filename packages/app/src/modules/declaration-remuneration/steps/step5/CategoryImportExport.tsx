@@ -8,7 +8,12 @@ import {
 	MATOMO_EVENT_CATEGORY,
 	trackEvent,
 } from "~/modules/analytics";
-import { FileUpload, formatFileSize, getDsfrModal } from "~/modules/shared";
+import {
+	EXTENSION_MIME_MAP,
+	FileUpload,
+	formatFileSize,
+	getDsfrModal,
+} from "~/modules/shared";
 import styles from "./CategoryImportExport.module.scss";
 import {
 	generateTemplate,
@@ -24,11 +29,10 @@ import type { EmployeeCategory } from "./categorySerializer";
 const TEMPLATE_FILE_NAME = "modele-indicateur-g.csv";
 
 const ALLOWED_MIME_TYPES = [
-	"text/csv",
-	"application/csv",
-	"application/vnd.ms-excel",
-	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-	"",
+	...new Set([
+		...(EXTENSION_MIME_MAP[".csv"] ?? []),
+		...(EXTENSION_MIME_MAP[".xlsx"] ?? []),
+	]),
 ];
 
 type Props = {
@@ -196,6 +200,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 							</div>
 							<div className={styles.footer}>
 								<button
+									aria-describedby={messagesId}
 									className="fr-btn"
 									disabled={!selectedFiles[0] || isImporting}
 									onClick={handleImportClick}

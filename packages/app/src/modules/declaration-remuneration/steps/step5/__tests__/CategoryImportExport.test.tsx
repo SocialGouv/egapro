@@ -28,17 +28,10 @@ vi.mock("~/modules/analytics", async (importOriginal) => {
 	return { ...actual, trackEvent: trackEventMock };
 });
 
-// Keep the real FileUpload dropzone and formatFileSize so the test exercises
-// the actual select-file flow and its validation; only getDsfrModal is stubbed
-// to observe the panel closing (DSFR JS is absent in jsdom).
-vi.mock("~/modules/shared", async () => {
-	const { FileUpload } = await vi.importActual<
-		typeof import("~/modules/shared/FileUpload")
-	>("~/modules/shared/FileUpload");
-	const { formatFileSize } = await vi.importActual<
-		typeof import("~/modules/shared/uploadConfig")
-	>("~/modules/shared/uploadConfig");
-	return { FileUpload, formatFileSize, getDsfrModal: getDsfrModalMock };
+// Stub only getDsfrModal; DSFR JS that drives the panel is absent in jsdom.
+vi.mock("~/modules/shared", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("~/modules/shared")>();
+	return { ...actual, getDsfrModal: getDsfrModalMock };
 });
 
 vi.mock("../categoryFileHandler", async (importOriginal) => {

@@ -44,8 +44,7 @@ describe("generateTemplate", () => {
 		expect(blob).toBeInstanceOf(Blob);
 		expect(blob.type).toBe("text/csv;charset=utf-8");
 
-		// `Blob.text()` UTF-8-decodes the bytes, which strips the leading BOM,
-		// so the decoded content is exactly the header line with no data row.
+		// Blob.text() UTF-8-decodes the bytes, stripping the leading BOM.
 		const lines = (await blob.text()).split("\n");
 		expect(lines).toHaveLength(1);
 		expect(lines[0]).toBe(HEADER_LINE);
