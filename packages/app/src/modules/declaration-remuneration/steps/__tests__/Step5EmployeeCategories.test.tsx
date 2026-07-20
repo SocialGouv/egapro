@@ -68,6 +68,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		const heading = screen.getByRole("heading", {
@@ -262,6 +263,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 
