@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DsfrPictogram } from "~/modules/layout";
 import { ResendReceiptButton } from "~/modules/mail";
+import { FeedbackBanner } from "~/modules/shared/FeedbackBanner";
 import styles from "./ConfirmationPage.module.scss";
 import formStyles from "./shared/formActions.module.scss";
 
@@ -93,17 +94,7 @@ export function ConfirmationPage({
 				/>
 			</div>
 
-			<div className={`fr-p-5w fr-mb-4w ${styles.feedbackBanner}`}>
-				<div>
-					<p className="fr-text--bold fr-mb-1w">
-						Comment s&apos;est passée votre démarche ?
-					</p>
-					<p className="fr-text--sm fr-mb-0">
-						Aidez nous à améliorer Egapro en donnant votre avis, cela ne prend
-						que 2 minutes.
-					</p>
-				</div>
-			</div>
+			<FeedbackBanner className="fr-mb-4w" />
 			<div className={formStyles.actions}>
 				<Link
 					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"

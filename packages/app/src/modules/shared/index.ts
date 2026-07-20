@@ -3,6 +3,7 @@ export {
 	CampaignRateTileLoading,
 } from "./CampaignRateTileStates";
 export { CompanySizeFilter } from "./CompanySizeFilter";
+export { FeedbackBanner } from "./FeedbackBanner";
 export { FileUpload } from "./FileUpload";
 export type { FileNameError } from "./fileNameValidation";
 export {
