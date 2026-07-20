@@ -23,10 +23,23 @@ Why a gate at all: a structural read of the Figma tree (`code-dev` step 7) verif
 
 Measurement is deterministic and pinpoints the fix; vision catches the long tail measurement can't enumerate. Neither alone is enough — run both.
 
+## Méthode — espaces verticaux (systématique, jamais à l'œil)
+
+L'écart vertical est l'erreur la plus fréquente et la plus invisible à l'œil. Pour chaque écran :
+
+1. **Depuis Figma** (`get_metadata` du frame) : extraire `y` + `hauteur` de **chaque** bloc de haut en bas (titre, « Étape X sur 6 », sous-titre, chaque paragraphe d'instruction, tableau, accordéon, callout, ligne de boutons…). Écart entre deux blocs consécutifs = `y_suivant − (y_courant + hauteur_courant)`.
+2. **Dans le rendu live** : mesurer les mêmes écarts via `getBoundingClientRect` (`bottom` du bloc N → `top` du bloc N+1), **marge-collapse incluse**.
+3. **Produire le tableau** : `entre A et B | écart Figma | écart live | Δ`. Tout **Δ au-delà du bruit sub-pixel (> ~2px) = bug bloquant** (viser ±1px).
+4. Faire la passe sur **tous les états** (vide / rempli), à **≥2 largeurs** (desktop + mobile), **thème clair forcé**.
+5. Vérifier en plus que les écarts **« snapent » sur l'échelle DSFR** (multiples de 0,25 rem = 4px) : un gap de 30px là où le Figma veut 32px (`2rem`) est un défaut, pas un arrondi.
+
 ## Render conditions (non-negotiable)
 
+- **Force light theme.** The site follows the browser theme; a dark-mode render never matches the (light) mock and throws off both the onion-skin overlay and colour reads. Force light **before any comparison**: `data-fr-scheme="light"` + `data-fr-theme="light"` on `<html>`, or the DSFR « Paramètres d'affichage » footer toggle.
 - **Always ≥2 viewport heights.** Spacing bugs frequently hide at the Figma frame height and only appear when content fills the panel (a `space-between` gap collapses to 0). Render e.g. `1280×1024` (frame) **and** `1280×760` (laptop) and compare the gap across both. A single render at the designed size is the #1 way these slip through.
+- **All states — empty / partial / filled.** Render each: the empty-state placeholders (« - % », « - € ») are validated exactly like computed values. Never judge only the `[DEV] Remplir` state — a missing placeholder when empty is a finding.
 - **Deterministic state.** Prefer an isolation harness (`/test-panel` → `PanelPlayground`) over the real route; if you must use the real route, freeze data (seeded fixture + `[DEV] Remplir`) so the diff is fidelity, not content drift.
+- **Authenticated pages.** A screen behind ProConnect won't render without a valid session (otherwise 500). Ask the user to log in, or unblock the local session (DB seed — memory `project_local_session_500_seed`).
 - **Match scale.** Browser `deviceScaleFactor: 2` ↔ `get_screenshot` at ~2× the node's natural size (`maxDimension` = 2 × its longer edge) so the overlay aligns.
 
 ## Tolerances

@@ -186,7 +186,9 @@ Depuis un design Figma : **mesurer, ne jamais comparer à l'œil.** Chaque dimen
 
 **Ne jamais retirer, fusionner ou « simplifier »** un élément que le node montre (une bordure, un séparateur, une sous-cellule) sur une **interprétation** de l'intention : le node fait autorité, pas ta lecture du layout. En cas de doute (« ces deux sous-cellules ne forment-elles pas une colonne unique ? »), confirmer sur le node **avant** de retirer quoi que ce soit.
 
-Vaut aussi pour les **fixes UI ad-hoc hors pipeline**, pas seulement le gate `design-validator`. Discipline complète → `.claude/rules/figma-workflow.md`.
+Avant toute comparaison : **forcer le thème clair** (`data-fr-scheme="light"` + `data-fr-theme="light"` sur `<html>`) et **tester tous les états** — vide / partiel / rempli, les placeholders « - % » / « - € » de l'état vide comptent autant que les valeurs. Les **espaces verticaux** se mesurent (`bottom(N) → top(N+1)` vs `y` / hauteur Figma), jamais à l'œil.
+
+Vaut aussi pour les **fixes UI ad-hoc hors pipeline**, pas seulement le gate `design-validator`. Discipline complète → `.claude/rules/figma-workflow.md` (construction) + `.claude/rules/visual-quality-validation.md` (vérification, espaces verticaux, états).
 
 ### Styling strategy (strict priority order)
 
