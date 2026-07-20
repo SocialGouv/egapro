@@ -178,28 +178,30 @@ export function Step6Review({
 
 				<StepIndicator currentStep={6} />
 
-				<p className={`fr-mb-0 ${stepStyles.intro}`}>
-					Vérifiez que toutes les informations ont été complétées avant de
-					soumettre votre déclaration aux services du ministère chargé du
-					travail.
-				</p>
+				<div className={stepStyles.recapBody}>
+					<p className={`fr-mb-0 ${stepStyles.intro}`}>
+						Vérifiez que toutes les informations ont été complétées avant de
+						soumettre votre déclaration aux services du ministère chargé du
+						travail.
+					</p>
 
-				<IndicatorSections
-					step2Data={step2Data}
-					step3Data={step3Data}
-					step4Data={step4Data}
-					step5Categories={step5Categories}
-					totalMen={totalMen}
-					totalWomen={totalWomen}
-					withTooltips
-				/>
-
-				{highGap && declaration.siren && (
-					<NextStepsBox
-						hasGapsAboveThreshold={highGap}
-						siren={declaration.siren}
+					<IndicatorSections
+						step2Data={step2Data}
+						step3Data={step3Data}
+						step4Data={step4Data}
+						step5Categories={step5Categories}
+						totalMen={totalMen}
+						totalWomen={totalWomen}
+						withTooltips
 					/>
-				)}
+
+					{highGap && declaration.siren && (
+						<NextStepsBox
+							hasGapsAboveThreshold={highGap}
+							siren={declaration.siren}
+						/>
+					)}
+				</div>
 
 				<FormActions
 					nextHref={
