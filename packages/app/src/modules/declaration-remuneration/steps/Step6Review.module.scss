@@ -49,9 +49,7 @@
 }
 
 .inlineGap {
-	// Écart cell: value pinned right, badge (when present) at the far left, no
-	// divider between them (Figma). Full-width flex so the auto margin can push
-	// the value to the cell's right edge.
+	// Écart cell: full-width flex so margin-auto pins the value right, badge at the far left.
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
