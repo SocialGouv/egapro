@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
 import {
@@ -289,7 +290,14 @@ export const companyRouter = createTRPCRouter({
 		.input(updateHasCseSchema)
 		.mutation(async ({ ctx, input }) => {
 			assertNotImpersonating(ctx.session);
-			await findUserCompany(ctx.db, ctx.session, input.siren);
+			const company = await findUserCompany(ctx.db, ctx.session, input.siren);
+			if (!isCseRequired(getObligationWorkforce(company.gipWorkforce))) {
+				throw new TRPCError({
+					code: "PRECONDITION_FAILED",
+					message:
+						"Le champ CSE est réservé aux entreprises de 100 salariés et plus.",
+				});
+			}
 			await ctx.db
 				.update(companies)
 				.set({ hasCse: input.hasCse })

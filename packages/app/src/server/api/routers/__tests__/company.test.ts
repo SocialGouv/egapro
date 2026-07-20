@@ -494,6 +494,70 @@ describe("companyRouter.updateHasCse", () => {
 		expect(mockSet).toHaveBeenCalledWith({ hasCse: true });
 	});
 
+	it("refuses the update below the CSE threshold (GIP workforce < 100)", async () => {
+		const companyRow = {
+			siren: "339787277",
+			name: "Test Company",
+			address: "1 rue de Paris",
+			nafCode: "6202A",
+			workforceEma: "70.00",
+			hasCse: null,
+		};
+
+		mockLimit.mockResolvedValue([companyRow]);
+		mockWhere.mockReturnValue({ limit: mockLimit });
+		mockInnerJoin.mockReturnValue({ where: mockWhere });
+		mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
+		mockSelect.mockReturnValue({ from: mockFrom });
+
+		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.updateHasCse({ siren: "339787277", hasCse: true }),
+		).rejects.toThrow("réservé aux entreprises de 100 salariés et plus");
+		expect(mockSet).not.toHaveBeenCalled();
+	});
+
+	it("refuses the update when the company is absent from the GIP file", async () => {
+		const companyRow = {
+			siren: "339787277",
+			name: "Test Company",
+			address: "1 rue de Paris",
+			nafCode: "6202A",
+			workforceEma: null,
+			hasCse: null,
+		};
+
+		mockLimit.mockResolvedValue([companyRow]);
+		mockWhere.mockReturnValue({ limit: mockLimit });
+		mockInnerJoin.mockReturnValue({ where: mockWhere });
+		mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
+		mockSelect.mockReturnValue({ from: mockFrom });
+
+		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.updateHasCse({ siren: "339787277", hasCse: true }),
+		).rejects.toThrow("réservé aux entreprises de 100 salariés et plus");
+		expect(mockSet).not.toHaveBeenCalled();
+	});
+
 	it("refuses the update when the admin is impersonating the company", async () => {
 		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
 

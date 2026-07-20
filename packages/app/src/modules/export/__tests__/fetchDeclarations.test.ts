@@ -326,6 +326,33 @@ describe("assembleDeclaration", () => {
 		).toBeNull();
 	});
 
+	it("nulls CSE_existant below the CSE threshold even when a legacy hasCse value exists", () => {
+		expect(
+			assembleDeclaration(
+				{ ...baseRow, workforceEma: "70.00", hasCse: true },
+				[],
+				[],
+			).CSE_existant,
+		).toBeNull();
+		expect(
+			assembleDeclaration(
+				{ ...baseRow, workforceEma: null, hasCse: true },
+				[],
+				[],
+			).CSE_existant,
+		).toBeNull();
+	});
+
+	it("keeps CSE_existant at or above the CSE threshold", () => {
+		expect(
+			assembleDeclaration(
+				{ ...baseRow, workforceEma: "100.00", hasCse: false },
+				[],
+				[],
+			).CSE_existant,
+		).toBe(false);
+	});
+
 	it("should include indicator A–F values with GIP labels", () => {
 		const result = assembleDeclaration(baseRow, [], []);
 

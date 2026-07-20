@@ -18,6 +18,7 @@ import {
 	getObligationWorkforce,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
+	isCseRequired,
 	isIndicatorGRequired,
 	parseGipWorkforce,
 	toDisplayWorkforce,
@@ -322,7 +323,12 @@ export function assembleDeclaration(
 		Effectif: toDisplayWorkforce(parseGipWorkforce(row.workforceEma)),
 		Code_NAF: row.nafCode,
 		Adresse: row.address,
-		CSE_existant: row.hasCse,
+		// The CSE field only exists for companies at or above the CSE threshold; legacy sub-100 values are not exported.
+		CSE_existant: isCseRequired(
+			getObligationWorkforce(parseGipWorkforce(row.workforceEma)),
+		)
+			? row.hasCse
+			: null,
 		Annee: row.year,
 		Statut: row.status,
 		Parcours_apres_declaration_1: row.firstDeclarationPathChoice,
