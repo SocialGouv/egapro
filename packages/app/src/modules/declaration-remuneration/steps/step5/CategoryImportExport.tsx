@@ -147,44 +147,48 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 										Importer vos données depuis un fichier
 									</h2>
 
-									<FileUpload
-										accept=".xlsx,.csv"
-										acceptLabel="xlsx, csv"
-										allowedMimeTypes={ALLOWED_MIME_TYPES}
-										disabled={isImporting}
-										error={fileError}
-										inputId={uploadId}
-										maxFileCount={1}
-										onFilesChange={(files, error) => {
-											setSelectedFiles(files);
-											setFileError(error);
-										}}
-										selectedFiles={selectedFiles}
-									/>
+									<div className={styles.panelInner}>
+										<div className={styles.uploadGroup}>
+											<FileUpload
+												accept=".xlsx,.csv"
+												acceptLabel="xlsx, csv"
+												allowedMimeTypes={ALLOWED_MIME_TYPES}
+												disabled={isImporting}
+												error={fileError}
+												inputId={uploadId}
+												maxFileCount={1}
+												onFilesChange={(files, error) => {
+													setSelectedFiles(files);
+													setFileError(error);
+												}}
+												selectedFiles={selectedFiles}
+											/>
 
-									<p className="fr-mb-0">
-										Téléchargez le fichier à remplir, complétez-le, puis
-										redéposez-le ci-dessus pour importer les données.
-									</p>
-
-									<TemplateDownloadCard
-										onDownload={handleDownloadTemplate}
-										sizeBytes={templateBlob.size}
-									/>
-
-									<div
-										aria-live="polite"
-										className="fr-messages-group"
-										id={messagesId}
-									>
-										{importErrors.map((error) => (
-											<p
-												className="fr-message fr-message--error"
-												key={error.message}
-											>
-												{error.message}
+											<p className="fr-mb-0">
+												Téléchargez le fichier à remplir, complétez-le, puis
+												redéposez-le ci-dessus pour importer les données.
 											</p>
-										))}
+										</div>
+
+										<TemplateDownloadCard
+											onDownload={handleDownloadTemplate}
+											sizeBytes={templateBlob.size}
+										/>
+
+										<div
+											aria-live="polite"
+											className="fr-messages-group"
+											id={messagesId}
+										>
+											{importErrors.map((error) => (
+												<p
+													className="fr-message fr-message--error"
+													key={error.message}
+												>
+													{error.message}
+												</p>
+											))}
+										</div>
 									</div>
 								</div>
 
