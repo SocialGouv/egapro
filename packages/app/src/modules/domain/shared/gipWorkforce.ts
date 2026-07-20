@@ -1,5 +1,4 @@
-// A company absent from the GIP file is deemed below the voluntary threshold,
-// so the banners display "< 50" rather than a raw missing-data mention.
+// Absent from the GIP file ⇒ deemed below the voluntary threshold, so banners display "< 50".
 export const GIP_WORKFORCE_ABSENT_DISPLAY = "< 50";
 
 export function parseGipWorkforce(
