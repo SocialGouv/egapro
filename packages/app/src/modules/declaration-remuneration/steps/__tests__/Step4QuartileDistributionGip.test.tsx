@@ -82,6 +82,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 					confidenceIndex: "0.85",
 					periodEnd: "2026-12-31",
 				}}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -117,6 +118,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -149,6 +151,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -182,6 +185,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -220,6 +224,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 					confidenceIndex: "0.85",
 					periodEnd: "2026-12-31",
 				}}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);

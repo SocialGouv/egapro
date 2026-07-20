@@ -40,6 +40,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -68,6 +69,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -84,6 +86,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -97,6 +100,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -117,6 +121,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -130,6 +135,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -153,6 +159,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -167,6 +174,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -183,6 +191,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -196,6 +205,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -216,6 +226,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -233,6 +244,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 				maxMen={25}
 				maxWomen={15}
@@ -251,6 +263,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -275,6 +288,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -290,6 +304,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -303,6 +318,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -357,6 +373,7 @@ describe("Step4QuartileDistribution", () => {
 					periodStart: "2026-01-01",
 					periodEnd: "2026-12-31",
 				}}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -413,6 +430,7 @@ describe("Step4QuartileDistribution", () => {
 					periodStart: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -427,6 +445,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={{
 					annual: [
 						{ threshold: "20000", women: 60, men: 30 },
@@ -452,6 +471,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={{
 					annual: [
 						{ threshold: "", women: 10, men: 15 },
@@ -476,6 +496,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);

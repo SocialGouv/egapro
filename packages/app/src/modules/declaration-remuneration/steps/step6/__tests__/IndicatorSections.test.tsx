@@ -46,6 +46,7 @@ describe("IndicatorSections", () => {
 	it("renders variable pay proportion as a share of the workforce total, not the raw beneficiary count", () => {
 		render(
 			<IndicatorSections
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={step3WithProportion("95", "80")}
 				step4Data={emptyStep4Data()}
@@ -64,6 +65,7 @@ describe("IndicatorSections", () => {
 	it("renders '- %' for the proportion when the workforce total is zero", () => {
 		render(
 			<IndicatorSections
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={step3WithProportion("95", "80")}
 				step4Data={emptyStep4Data()}
@@ -80,6 +82,7 @@ describe("IndicatorSections", () => {
 	it("renders '- %' for the proportion when the workforce total is missing", () => {
 		render(
 			<IndicatorSections
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={step3WithProportion("95", "80")}
 				step4Data={emptyStep4Data()}
@@ -88,5 +91,43 @@ describe("IndicatorSections", () => {
 		);
 
 		expect(screen.getAllByText("- %")).toHaveLength(2);
+	});
+
+	it("renders the per-category indicator section when indicatorGRequired is true", () => {
+		render(
+			<IndicatorSections
+				indicatorGRequired
+				step2Data={emptyStep2Data()}
+				step3Data={step3WithProportion("95", "80")}
+				step4Data={emptyStep4Data()}
+				step5Categories={[]}
+			/>,
+		);
+
+		expect(
+			screen.getByText("Indicateurs par catégorie de salariés"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Écart de rémunération par catégories de salariés"),
+		).toBeInTheDocument();
+	});
+
+	it("hides the per-category indicator section when indicatorGRequired is false", () => {
+		render(
+			<IndicatorSections
+				indicatorGRequired={false}
+				step2Data={emptyStep2Data()}
+				step3Data={step3WithProportion("95", "80")}
+				step4Data={emptyStep4Data()}
+				step5Categories={[]}
+			/>,
+		);
+
+		expect(
+			screen.queryByText("Indicateurs par catégorie de salariés"),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText("Écart de rémunération par catégories de salariés"),
+		).not.toBeInTheDocument();
 	});
 });

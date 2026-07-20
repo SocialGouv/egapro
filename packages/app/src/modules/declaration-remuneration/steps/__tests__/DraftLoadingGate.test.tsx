@@ -116,6 +116,7 @@ describe("DraftLoadingGate", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1}
 			/>,
 		);
@@ -128,6 +129,7 @@ describe("DraftLoadingGate", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep2}
 			/>,
 		);
@@ -140,6 +142,7 @@ describe("DraftLoadingGate", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep3}
 			/>,
 		);
@@ -152,6 +155,7 @@ describe("DraftLoadingGate", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep4}
 			/>,
 		);
@@ -164,6 +168,7 @@ describe("DraftLoadingGate", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialCategories={[]}
 				initialSource={undefined}
 			/>,

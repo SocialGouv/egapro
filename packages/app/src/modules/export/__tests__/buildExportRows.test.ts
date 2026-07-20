@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("buildExportRows", () => {
-	// Mock DB chain: select().from().innerJoin().innerJoin().where()
+	// Mock DB chain: select().from().innerJoin().leftJoin().innerJoin().where()
 	const mockWhere = vi.fn();
 	const mockInnerJoin2 = vi.fn(() => ({ where: mockWhere }));
-	const mockInnerJoin1 = vi.fn(() => ({ innerJoin: mockInnerJoin2 }));
+	const mockLeftJoin = vi.fn(() => ({ innerJoin: mockInnerJoin2 }));
+	const mockInnerJoin1 = vi.fn(() => ({ leftJoin: mockLeftJoin }));
 	const mockFrom = vi.fn(() => ({ innerJoin: mockInnerJoin1 }));
 	// Mock for getDeclarationsWithIndicatorG: selectDistinct().from().where()
 	const mockJobWhere = vi.fn();
@@ -80,7 +81,7 @@ describe("buildExportRows", () => {
 			updatedAt: new Date("2027-03-15T12:00:00Z"),
 			cancelledAt: null,
 			companyName: "ACME Corp",
-			workforce: 250,
+			workforceEma: "250.00",
 			nafCode: "62.02",
 			address: "1 rue test",
 			hasCse: true,
@@ -190,7 +191,7 @@ describe("buildExportRows", () => {
 			updatedAt: new Date("2027-03-15T12:00:00Z"),
 			cancelledAt: null,
 			companyName: "BigCo",
-			workforce: 500,
+			workforceEma: "500.00",
 			nafCode: "70.10",
 			address: "2 rue test",
 			hasCse: true,
@@ -282,7 +283,7 @@ describe("buildExportRows", () => {
 			updatedAt: new Date("2027-03-15T12:00:00Z"),
 			cancelledAt: null,
 			companyName: "ACME Corp",
-			workforce: 250,
+			workforceEma: "250.00",
 			nafCode: "62.02",
 			address: "1 rue test",
 			hasCse: true,
@@ -396,7 +397,7 @@ describe("buildExportRows", () => {
 			updatedAt: null,
 			cancelledAt: null,
 			companyName: "NullCo",
-			workforce: null,
+			workforceEma: null,
 			nafCode: null,
 			address: null,
 			hasCse: null,
@@ -493,7 +494,7 @@ describe("buildExportRows", () => {
 			declarationId: "decl-completed",
 			siren: "100100100",
 			status: "demarche_completed",
-			workforce: 300,
+			workforceEma: "300.00",
 			globalAnnualMeanGap: "0.10",
 			variableAnnualMeanGap: "0.08",
 			firstDeclarationPathChoice: "corrective_action",
@@ -540,7 +541,7 @@ describe("buildExportRows", () => {
 		const dbRow = makeMinimalDbRow({
 			declarationId: "decl-negative-gap",
 			siren: "200200200",
-			workforce: 300,
+			workforceEma: "300.00",
 			globalAnnualMeanGap: "-0.10",
 			variableAnnualMeanGap: "-0.08",
 			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
@@ -556,6 +557,70 @@ describe("buildExportRows", () => {
 		expect(rows[0]).toMatchObject({
 			complianceProcessRequired: false,
 			complianceProcessRevisionRequired: false,
+		});
+	});
+
+	it("should export the GIP workforce floored, not the Weez company workforce (#3929)", async () => {
+		const dbRow = makeMinimalDbRow({
+			declarationId: "decl-gip",
+			siren: "432491777",
+			workforceEma: "70.00",
+		});
+
+		mockWhere.mockResolvedValue([dbRow]);
+		mockJobWhere.mockResolvedValue([]);
+		mockCseWhere.mockResolvedValue([]);
+
+		const { buildExportRows } = await import("../buildExportRows");
+		const rows = await buildExportRows(mockDb as never, 2027);
+
+		expect(rows[0]).toMatchObject({
+			workforce: 70,
+			indicatorGRequired: false,
+		});
+	});
+
+	it("should floor the GIP workforce so 99,97 never exports as 100", async () => {
+		const dbRow = makeMinimalDbRow({
+			declarationId: "decl-rounding",
+			workforceEma: "99.97",
+			globalAnnualMeanGap: "0.10",
+		});
+
+		mockWhere.mockResolvedValue([dbRow]);
+		mockJobWhere.mockResolvedValue([{ declarationId: "decl-rounding" }]);
+		mockCseWhere.mockResolvedValue([]);
+
+		const { buildExportRows } = await import("../buildExportRows");
+		const rows = await buildExportRows(mockDb as never, 2027);
+
+		expect(rows[0]).toMatchObject({
+			workforce: 99,
+			complianceProcessRequired: false,
+		});
+	});
+
+	it("should keep a declaration whose company is absent from the GIP file, with a null workforce", async () => {
+		const dbRow = makeMinimalDbRow({
+			declarationId: "decl-no-gip",
+			siren: "999999999",
+			workforceEma: null,
+			globalAnnualMeanGap: "0.10",
+		});
+
+		mockWhere.mockResolvedValue([dbRow]);
+		mockJobWhere.mockResolvedValue([{ declarationId: "decl-no-gip" }]);
+		mockCseWhere.mockResolvedValue([]);
+
+		const { buildExportRows } = await import("../buildExportRows");
+		const rows = await buildExportRows(mockDb as never, 2027);
+
+		expect(rows).toHaveLength(1);
+		expect(rows[0]).toMatchObject({
+			siren: "999999999",
+			workforce: null,
+			indicatorGRequired: false,
+			complianceProcessRequired: false,
 		});
 	});
 
@@ -610,7 +675,7 @@ function makeMinimalDbRow(overrides: DbRow): DbRow {
 		updatedAt: new Date("2027-03-15T12:00:00Z"),
 		cancelledAt: null,
 		companyName: "ACME",
-		workforce: null,
+		workforceEma: null,
 		nafCode: null,
 		address: null,
 		hasCse: null,

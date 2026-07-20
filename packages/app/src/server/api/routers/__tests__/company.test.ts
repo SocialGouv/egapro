@@ -85,6 +85,7 @@ vi.mock("~/server/db", () => ({
 const mockLimit = vi.fn();
 const mockWhere = vi.fn();
 const mockInnerJoin = vi.fn();
+const mockLeftJoin = vi.fn();
 const mockFrom = vi.fn();
 const mockSelect = vi.fn();
 const mockUpdate = vi.fn();
@@ -95,9 +96,10 @@ function createMockDb(rows: unknown[]) {
 	mockLimit.mockResolvedValue(rows);
 	mockWhere.mockReturnValue({ limit: mockLimit });
 	mockInnerJoin.mockReturnValue({ where: mockWhere });
-	// `where` on the from() result supports the impersonation bypass path
+	// `where` on the leftJoin() result supports the impersonation bypass path
 	// (no innerJoin); `innerJoin` supports the owner path.
-	mockFrom.mockReturnValue({ innerJoin: mockInnerJoin, where: mockWhere });
+	mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin, where: mockWhere });
+	mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
 	mockSelect.mockReturnValue({ from: mockFrom });
 
 	mockUpdateWhere.mockResolvedValue(undefined);
@@ -129,7 +131,7 @@ describe("findUserCompany CSE auto-fetch", () => {
 			name: "Test Company",
 			address: "1 rue de Paris",
 			nafCode: "6202A",
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: null,
 		};
 
@@ -150,6 +152,94 @@ describe("findUserCompany CSE auto-fetch", () => {
 		expect(result.hasCse).toBe(true);
 	});
 
+	it("does not fetch CSE below 100 GIP employees, comparing on the exact value", async () => {
+		const { fetchCseBySiren } = await import("~/server/services/suit");
+		const fetchCseMock = vi.mocked(fetchCseBySiren);
+
+		const mockDb = createMockDb([
+			{
+				siren: "339787277",
+				name: "Test Company",
+				address: "1 rue de Paris",
+				nafCode: "6202A",
+				workforceEma: "99.97",
+				hasCse: null,
+			},
+		]);
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.get({ siren: "339787277" });
+
+		expect(fetchCseMock).not.toHaveBeenCalled();
+		expect(mockUpdate).not.toHaveBeenCalled();
+		expect(result.hasCse).toBeNull();
+		expect(result.gipWorkforce).toBe(99.97);
+	});
+
+	it("does not fetch CSE when the company is absent from the GIP file", async () => {
+		const { fetchCseBySiren } = await import("~/server/services/suit");
+		const fetchCseMock = vi.mocked(fetchCseBySiren);
+
+		const mockDb = createMockDb([
+			{
+				siren: "339787277",
+				name: "Test Company",
+				address: "1 rue de Paris",
+				nafCode: "6202A",
+				workforceEma: null,
+				hasCse: null,
+			},
+		]);
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.get({ siren: "339787277" });
+
+		expect(fetchCseMock).not.toHaveBeenCalled();
+		expect(result.hasCse).toBeNull();
+		expect(result.gipWorkforce).toBeNull();
+	});
+
+	it("exposes the GIP workforce and never the Weez company workforce (#3929)", async () => {
+		const { fetchCseBySiren } = await import("~/server/services/suit");
+		vi.mocked(fetchCseBySiren).mockResolvedValue(null);
+
+		const mockDb = createMockDb([
+			{
+				siren: "123456789",
+				name: "Test Company",
+				address: "1 rue de Paris",
+				nafCode: "6202A",
+				workforceEma: "70.00",
+				hasCse: null,
+			},
+		]);
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.get({ siren: "123456789" });
+
+		expect(result.gipWorkforce).toBe(70);
+		expect(result).not.toHaveProperty("workforce");
+		expect(result).not.toHaveProperty("workforceEma");
+	});
+
 	it("does not fetch CSE when hasCse is already set", async () => {
 		const { fetchCseBySiren } = await import("~/server/services/suit");
 		const fetchCseMock = vi.mocked(fetchCseBySiren);
@@ -159,7 +249,7 @@ describe("findUserCompany CSE auto-fetch", () => {
 			name: "Test Company",
 			address: "1 rue de Paris",
 			nafCode: "6202A",
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: false,
 		};
 
@@ -188,7 +278,7 @@ describe("findUserCompany CSE auto-fetch", () => {
 			name: "Test Company",
 			address: "1 rue de Paris",
 			nafCode: "6202A",
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: null,
 		};
 
@@ -264,7 +354,7 @@ describe("findUserCompany NAF label enrichment", () => {
 			address: null,
 			nafCode: "62.01Z",
 			nafLabel: null,
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: true,
 		});
 
@@ -284,7 +374,7 @@ describe("findUserCompany NAF label enrichment", () => {
 			address: null,
 			nafCode: "62.01Z",
 			nafLabel: "Programmation informatique",
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: true,
 		});
 
@@ -301,7 +391,7 @@ describe("findUserCompany NAF label enrichment", () => {
 			address: null,
 			nafCode: null,
 			nafLabel: null,
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: true,
 		});
 
@@ -319,7 +409,7 @@ describe("findUserCompany NAF label enrichment", () => {
 			address: null,
 			nafCode: "62.01Z",
 			nafLabel: null,
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: true,
 		});
 
@@ -335,7 +425,7 @@ describe("findUserCompany NAF label enrichment", () => {
 				address: null,
 				nafCode: "62.01Z",
 				nafLabel: null,
-				workforce: 100,
+				workforceEma: "100.00",
 				hasCse: true,
 			},
 		]);
@@ -375,14 +465,15 @@ describe("companyRouter.updateHasCse", () => {
 			name: "Test Company",
 			address: "1 rue de Paris",
 			nafCode: "6202A",
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: false,
 		};
 
 		mockLimit.mockResolvedValue([companyRow]);
 		mockWhere.mockReturnValue({ limit: mockLimit });
 		mockInnerJoin.mockReturnValue({ where: mockWhere });
-		mockFrom.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
 		mockSelect.mockReturnValue({ from: mockFrom });
 
 		mockUpdateWhere.mockResolvedValue(undefined);
@@ -449,7 +540,7 @@ describe("companyRouter.getSanctionStatus", () => {
 			name: "Test Company",
 			address: "1 rue de Paris",
 			nafCode: "6202A",
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: true,
 		};
 
@@ -478,7 +569,7 @@ describe("companyRouter.getSanctionStatus", () => {
 			name: "Test Company",
 			address: "1 rue de Paris",
 			nafCode: "6202A",
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: true,
 		};
 

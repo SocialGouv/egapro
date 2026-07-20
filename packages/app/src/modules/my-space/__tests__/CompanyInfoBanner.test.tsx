@@ -1,16 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { GIP_WORKFORCE_UNKNOWN_LABEL } from "~/modules/domain";
 import { CompanyInfoBanner } from "../CompanyInfoBanner";
 import type { CompanyDetail } from "../types";
 
+// gipWorkforce is >= 100 by default so the CSE row is visible in tests
+// exercising the historical CSE badge/value behavior.
 const baseCompany: CompanyDetail = {
 	siren: "532847196",
 	name: "Alpha Solutions",
 	address: null,
 	nafCode: null,
 	nafLabel: null,
-	workforce: null,
+	gipWorkforce: 250,
 	hasCse: null,
 };
 
@@ -82,7 +85,9 @@ describe("CompanyInfoBanner", () => {
 	});
 
 	it("renders the workforce when provided", () => {
-		render(<CompanyInfoBanner company={{ ...baseCompany, workforce: 150 }} />);
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 150 }} />,
+		);
 		expect(screen.getByText("150")).toBeInTheDocument();
 	});
 
@@ -111,9 +116,28 @@ describe("CompanyInfoBanner", () => {
 		expect(screen.queryByText("Code NAF :")).not.toBeInTheDocument();
 	});
 
-	it("does not render workforce section when workforce is null", () => {
-		render(<CompanyInfoBanner company={baseCompany} />);
-		expect(screen.queryByText(/Effectif annuel moyen/)).not.toBeInTheDocument();
+	it("renders the GIP unknown label and hides the CSE row when gipWorkforce is null", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: null }} />,
+		);
+		expect(screen.getByText(GIP_WORKFORCE_UNKNOWN_LABEL)).toBeInTheDocument();
+		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
+	});
+
+	it("floors the workforce display and hides the CSE row below the 100 threshold", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 99.97 }} />,
+		);
+		expect(screen.getByText("99")).toBeInTheDocument();
+		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
+	});
+
+	it("shows the workforce and the CSE row at or above the 100 threshold", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 250 }} />,
+		);
+		expect(screen.getByText("250")).toBeInTheDocument();
+		expect(screen.getByText("Existence d'un CSE :")).toBeInTheDocument();
 	});
 
 	it("renders the 'Modifier' button", () => {

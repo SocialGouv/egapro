@@ -9,7 +9,7 @@ const company = {
 	siren: "123456789",
 	nafCode: "62.01Z",
 	nafLabel: "Programmation informatique",
-	workforce: 256,
+	gipWorkforce: 256,
 	hasCse: true,
 };
 

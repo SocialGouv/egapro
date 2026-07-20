@@ -81,6 +81,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders the title and step indicator", () => {
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
@@ -102,6 +103,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders category gap card with category name", () => {
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
@@ -116,6 +118,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("does not bracket the category title", () => {
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
@@ -130,6 +133,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders the card title without the base-and-bonus parenthetical", () => {
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
@@ -147,6 +151,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("always shows the CSE consultation heading for second declaration", () => {
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
@@ -161,6 +166,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders gap columns", () => {
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
@@ -178,6 +184,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders the next steps section", () => {
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
@@ -190,6 +197,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders the CSE update trigger as a secondary button", () => {
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
@@ -203,9 +211,27 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(cseButton).toHaveAttribute("aria-controls", "update-cse-modal");
 	});
 
+	it("hides the CSE update trigger when cseApplicable is false", () => {
+		render(
+			<SecondDeclarationStep3Review
+				cseApplicable={false}
+				declarationYear={2025}
+				hasCse={null}
+				secondDeclarationCategories={mockCategories}
+				siren="532847196"
+			/>,
+		);
+		expect(
+			screen.queryByRole("button", {
+				name: "Mettre à jour l'existence d'un CSE",
+			}),
+		).not.toBeInTheDocument();
+	});
+
 	it("renders Soumettre button", () => {
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
@@ -220,6 +246,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders modal with certification checkbox", () => {
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
@@ -238,6 +265,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders previous link to step 2", () => {
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}
@@ -269,6 +297,7 @@ describe("SecondDeclarationStep3Review", () => {
 
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={categoriesWithHighGaps}
@@ -300,6 +329,7 @@ describe("SecondDeclarationStep3Review", () => {
 
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={categoriesWithLowGaps}
@@ -323,6 +353,7 @@ describe("SecondDeclarationStep3Review", () => {
 
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={true}
 				secondDeclarationCategories={categoriesWithHighGaps}
@@ -360,6 +391,7 @@ describe("SecondDeclarationStep3Review", () => {
 
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={true}
 				secondDeclarationCategories={categoriesNoGaps}
@@ -393,6 +425,7 @@ describe("SecondDeclarationStep3Review", () => {
 
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={false}
 				secondDeclarationCategories={categoriesNoGaps}
@@ -420,6 +453,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders empty state when no categories", () => {
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={[]}
@@ -433,6 +467,7 @@ describe("SecondDeclarationStep3Review", () => {
 		const user = userEvent.setup();
 		render(
 			<SecondDeclarationStep3Review
+				cseApplicable
 				declarationYear={2025}
 				hasCse={null}
 				secondDeclarationCategories={mockCategories}

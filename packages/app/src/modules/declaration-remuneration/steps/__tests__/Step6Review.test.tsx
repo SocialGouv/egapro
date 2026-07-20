@@ -97,6 +97,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -114,6 +115,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -130,6 +132,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -146,6 +149,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -165,6 +169,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -179,6 +184,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -208,6 +214,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -222,6 +229,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -237,6 +245,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -252,6 +261,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={{
 					indicatorAAnnualWomen: "95",
 					indicatorAAnnualMen: "100",
@@ -286,6 +296,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -301,6 +312,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={{
 					indicatorBAnnualWomen: "95",
@@ -331,6 +343,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={{
@@ -366,6 +379,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -406,6 +420,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -417,12 +432,31 @@ describe("Step6Review", () => {
 		);
 	});
 
+	it("renders previous link pointing to step 4 when indicatorGRequired is false", () => {
+		render(
+			<Step6Review
+				companyWorkforce={null}
+				declaration={emptyDeclaration()}
+				declarationYear={2025}
+				indicatorGRequired={false}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
+		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/etape/4",
+		);
+	});
+
 	it("renders next as a submit button when not submitted", () => {
 		render(
 			<Step6Review
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -439,6 +473,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
@@ -461,6 +496,7 @@ describe("Step6Review", () => {
 				}}
 				declarationYear={2025}
 				hasCse={true}
+				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
@@ -479,6 +515,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
@@ -501,6 +538,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
@@ -521,6 +559,7 @@ describe("Step6Review", () => {
 					status: null,
 				}}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={{
 					indicatorAAnnualWomen: "90",
 					indicatorAAnnualMen: "100",
@@ -560,6 +599,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={{ siren: "532847196", status: null }}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={{
 					indicatorAAnnualWomen: "110",
 					indicatorAAnnualMen: "100",
@@ -583,6 +623,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={{
 					indicatorAAnnualWomen: "98",
 					indicatorAAnnualMen: "100",

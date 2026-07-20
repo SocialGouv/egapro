@@ -35,7 +35,7 @@ const baseRow = {
 	updatedAt: new Date("2027-03-15T12:00:00Z"),
 	cancelledAt: null as Date | null,
 	companyName: "ACME Corp",
-	workforce: 250,
+	workforceEma: "250.00" as string | null,
 	nafCode: "62.02",
 	address: "1 rue test",
 	hasCse: true,
@@ -307,6 +307,23 @@ describe("assembleDeclaration", () => {
 		expect(result).not.toHaveProperty("Fichiers_CSE");
 		expect(result).not.toHaveProperty("Fichier_evaluation_conjointe");
 		expect(result.Date_creation).toBe("2027-03-15T10:00:00.000Z");
+	});
+
+	it("exposes the GIP annual average workforce as Effectif, floored to the lower integer", () => {
+		expect(
+			assembleDeclaration({ ...baseRow, workforceEma: "99.97" }, [], [])
+				.Effectif,
+		).toBe(99);
+		expect(
+			assembleDeclaration({ ...baseRow, workforceEma: "70.00" }, [], [])
+				.Effectif,
+		).toBe(70);
+	});
+
+	it("exposes a null Effectif when the company is absent from the GIP file", () => {
+		expect(
+			assembleDeclaration({ ...baseRow, workforceEma: null }, [], []).Effectif,
+		).toBeNull();
 	});
 
 	it("should include indicator A–F values with GIP labels", () => {
@@ -795,7 +812,11 @@ describe("assembleDeclaration — compliance flags", () => {
 	];
 
 	it("requires the compliance process for >= 100 employees with indicator G and a gap >= 5%", () => {
-		const row = { ...baseRow, workforce: 300, globalAnnualMeanGap: "0.0600" };
+		const row = {
+			...baseRow,
+			workforceEma: "300.00",
+			globalAnnualMeanGap: "0.0600",
+		};
 
 		const result = assembleDeclaration(row, indicatorG, []);
 
@@ -803,7 +824,11 @@ describe("assembleDeclaration — compliance flags", () => {
 	});
 
 	it("does not require the compliance process when the gap is below 5%", () => {
-		const row = { ...baseRow, workforce: 300, globalAnnualMeanGap: "0.0455" };
+		const row = {
+			...baseRow,
+			workforceEma: "300.00",
+			globalAnnualMeanGap: "0.0455",
+		};
 
 		const result = assembleDeclaration(row, indicatorG, []);
 
@@ -812,7 +837,11 @@ describe("assembleDeclaration — compliance flags", () => {
 	});
 
 	it("does not require the compliance process below 100 employees even with a gap", () => {
-		const row = { ...baseRow, workforce: 99, globalAnnualMeanGap: "0.0600" };
+		const row = {
+			...baseRow,
+			workforceEma: "99.00",
+			globalAnnualMeanGap: "0.0600",
+		};
 
 		const result = assembleDeclaration(row, indicatorG, []);
 
@@ -820,7 +849,11 @@ describe("assembleDeclaration — compliance flags", () => {
 	});
 
 	it("does not require the compliance process without indicator G", () => {
-		const row = { ...baseRow, workforce: 300, globalAnnualMeanGap: "0.0600" };
+		const row = {
+			...baseRow,
+			workforceEma: "300.00",
+			globalAnnualMeanGap: "0.0600",
+		};
 
 		const result = assembleDeclaration(row, [], []);
 
@@ -828,7 +861,11 @@ describe("assembleDeclaration — compliance flags", () => {
 	});
 
 	it("does not require the compliance process when the global gap is null", () => {
-		const row = { ...baseRow, workforce: 300, globalAnnualMeanGap: null };
+		const row = {
+			...baseRow,
+			workforceEma: "300.00",
+			globalAnnualMeanGap: null,
+		};
 
 		const result = assembleDeclaration(row, indicatorG, []);
 
@@ -837,26 +874,81 @@ describe("assembleDeclaration — compliance flags", () => {
 
 	it("does not require the compliance process when the gap is negative (women earn more)", () => {
 		// Signed stored gap of -0.06 → |gap| >= 5% but negative, so no obligation.
-		const row = { ...baseRow, workforce: 300, globalAnnualMeanGap: "-0.0600" };
+		const row = {
+			...baseRow,
+			workforceEma: "300.00",
+			globalAnnualMeanGap: "-0.0600",
+		};
 
 		const result = assembleDeclaration(row, indicatorG, []);
 
 		expect(result.Parcours_de_conformite_requis).toBe(false);
 	});
 
-	it("treats a null workforce as 0 for the derived flags", () => {
-		const row = { ...baseRow, workforce: null, globalAnnualMeanGap: "0.0600" };
+	it("treats a company absent from the GIP file as 0 for the derived flags", () => {
+		const row = {
+			...baseRow,
+			workforceEma: null,
+			globalAnnualMeanGap: "0.0600",
+		};
 
 		const result = assembleDeclaration(row, indicatorG, []);
 
+		expect(result.Effectif).toBeNull();
 		expect(result.Parcours_de_conformite_requis).toBe(false);
 		expect(result.Indicateur_G_requis).toBe(false);
+	});
+
+	it("derives the flags from the GIP workforce, never from the Weez value (#3929)", () => {
+		const row = {
+			...baseRow,
+			workforceEma: "70.00",
+			globalAnnualMeanGap: "0.0600",
+		};
+
+		const result = assembleDeclaration(row, indicatorG, []);
+
+		expect(result.Effectif).toBe(70);
+		expect(result.Indicateur_G_requis).toBe(false);
+		expect(result.Parcours_de_conformite_requis).toBe(false);
+	});
+
+	it("compares the indicator G threshold on the exact GIP value", () => {
+		const below = assembleDeclaration(
+			{ ...baseRow, workforceEma: "149.99" },
+			indicatorG,
+			[],
+		);
+		const atThreshold = assembleDeclaration(
+			{ ...baseRow, workforceEma: "150.00" },
+			indicatorG,
+			[],
+		);
+
+		expect(below.Indicateur_G_requis).toBe(false);
+		expect(atThreshold.Indicateur_G_requis).toBe(true);
+	});
+
+	it("compares the compliance threshold on the exact GIP value", () => {
+		const below = assembleDeclaration(
+			{ ...baseRow, workforceEma: "99.97", globalAnnualMeanGap: "0.0600" },
+			indicatorG,
+			[],
+		);
+		const atThreshold = assembleDeclaration(
+			{ ...baseRow, workforceEma: "100.00", globalAnnualMeanGap: "0.0600" },
+			indicatorG,
+			[],
+		);
+
+		expect(below.Parcours_de_conformite_requis).toBe(false);
+		expect(atThreshold.Parcours_de_conformite_requis).toBe(true);
 	});
 
 	it("requires the revision when a second declaration was submitted with a correction gap >= 5%", () => {
 		const row = {
 			...baseRow,
-			workforce: 300,
+			workforceEma: "300.00",
 			globalAnnualMeanGap: "0.0600",
 			variableAnnualMeanGap: "0.0800",
 			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
@@ -871,7 +963,7 @@ describe("assembleDeclaration — compliance flags", () => {
 	it("does not require the revision without a submitted second declaration", () => {
 		const row = {
 			...baseRow,
-			workforce: 300,
+			workforceEma: "300.00",
 			globalAnnualMeanGap: "0.0600",
 			variableAnnualMeanGap: "0.0800",
 			secondDeclarationSubmittedAt: null,
@@ -886,7 +978,7 @@ describe("assembleDeclaration — compliance flags", () => {
 	it("does not require the revision when the correction gap is below 5%", () => {
 		const row = {
 			...baseRow,
-			workforce: 300,
+			workforceEma: "300.00",
 			globalAnnualMeanGap: "0.0600",
 			variableAnnualMeanGap: "0.0400",
 			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
@@ -900,7 +992,7 @@ describe("assembleDeclaration — compliance flags", () => {
 	it("does not require the revision when the correction gap is negative", () => {
 		const row = {
 			...baseRow,
-			workforce: 300,
+			workforceEma: "300.00",
 			globalAnnualMeanGap: "0.0600",
 			variableAnnualMeanGap: "-0.0800",
 			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
@@ -914,7 +1006,7 @@ describe("assembleDeclaration — compliance flags", () => {
 	it("does not require the revision when the correction gap is null", () => {
 		const row = {
 			...baseRow,
-			workforce: 300,
+			workforceEma: "300.00",
 			globalAnnualMeanGap: "0.0600",
 			variableAnnualMeanGap: null,
 			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),

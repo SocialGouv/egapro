@@ -39,6 +39,7 @@ describe("Step2PayGap dev fill", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);

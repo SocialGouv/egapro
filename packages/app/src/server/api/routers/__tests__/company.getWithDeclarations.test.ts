@@ -10,7 +10,7 @@ function makeCompanyRow() {
 		name: "Test Company",
 		address: "1 rue de Paris",
 		nafCode: "6202A",
-		workforce: 100,
+		workforceEma: "100.00",
 		hasCse: true,
 	};
 }
@@ -22,9 +22,11 @@ function makeSelectMock(declRows: unknown[]) {
 		if (selectCallCount === 1) {
 			return {
 				from: vi.fn().mockReturnValue({
-					innerJoin: vi.fn().mockReturnValue({
-						where: vi.fn().mockReturnValue({
-							limit: vi.fn().mockResolvedValue([makeCompanyRow()]),
+					leftJoin: vi.fn().mockReturnValue({
+						innerJoin: vi.fn().mockReturnValue({
+							where: vi.fn().mockReturnValue({
+								limit: vi.fn().mockResolvedValue([makeCompanyRow()]),
+							}),
 						}),
 					}),
 				}),

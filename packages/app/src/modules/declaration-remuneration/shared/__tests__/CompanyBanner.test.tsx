@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { GIP_WORKFORCE_UNKNOWN_LABEL } from "~/modules/domain";
 import { CompanyBanner } from "../CompanyBanner";
 
 const defaultCompany = {
@@ -8,7 +9,7 @@ const defaultCompany = {
 	siren: "123456789",
 	nafCode: "62.01Z",
 	nafLabel: "Programmation informatique",
-	workforce: 256,
+	gipWorkforce: 256,
 	hasCse: true,
 };
 
@@ -94,15 +95,44 @@ describe("CompanyBanner", () => {
 		expect(screen.getByText("Oui")).toBeInTheDocument();
 	});
 
-	it("hides workforce when null", () => {
+	it("shows 'Effectif non connu du GIP' and hides the CSE datapoint when gipWorkforce is null", () => {
 		render(
 			<CompanyBanner
-				company={{ ...defaultCompany, workforce: null }}
+				company={{ ...defaultCompany, gipWorkforce: null }}
 				currentPageLabel="Déclaration"
 			/>,
 		);
 
-		expect(screen.queryByText(/Effectif annuel/)).not.toBeInTheDocument();
+		expect(screen.getByText(GIP_WORKFORCE_UNKNOWN_LABEL)).toBeInTheDocument();
+		expect(
+			screen.queryByText(/Effectif annuel moyen en/),
+		).not.toBeInTheDocument();
+		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
+	});
+
+	it("floors a decimal gipWorkforce and hides the CSE datapoint below 100", () => {
+		render(
+			<CompanyBanner
+				company={{ ...defaultCompany, gipWorkforce: 99.97 }}
+				currentPageLabel="Déclaration"
+			/>,
+		);
+
+		expect(screen.getByText("99")).toBeInTheDocument();
+		expect(screen.queryByText("100")).not.toBeInTheDocument();
+		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
+	});
+
+	it("shows the CSE datapoint when gipWorkforce is exactly 250", () => {
+		render(
+			<CompanyBanner
+				company={{ ...defaultCompany, gipWorkforce: 250 }}
+				currentPageLabel="Déclaration"
+			/>,
+		);
+
+		expect(screen.getByText("250")).toBeInTheDocument();
+		expect(screen.getByText("Existence d'un CSE :")).toBeInTheDocument();
 	});
 
 	it("shows 'Non renseigné' when hasCse is null", () => {

@@ -51,6 +51,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		expect(
@@ -81,6 +82,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		expect(screen.getByText("Étape 5 sur 6")).toBeInTheDocument();
@@ -91,6 +93,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		expect(
@@ -104,6 +107,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		expect(
@@ -117,6 +121,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		expect(
@@ -132,6 +137,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		const descriptionParagraph = screen.getByText(
@@ -148,6 +154,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		for (const header of screen.getAllByRole("columnheader")) {
@@ -170,6 +177,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		expect(screen.getByText("Nombre de femmes")).toBeInTheDocument();
@@ -187,6 +195,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		expect(screen.getAllByText(/Total salariés/).length).toBe(1);
@@ -203,6 +212,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		expect(document.getElementById("cat-0-name")).toBeInTheDocument();
@@ -214,6 +224,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		expect(
@@ -229,6 +240,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 
@@ -268,6 +280,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 
@@ -303,6 +316,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 
@@ -326,6 +340,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 
@@ -343,6 +358,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 
@@ -364,6 +380,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 
@@ -386,6 +403,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialCategories={[
 					makeCategory({
 						name: "Ingénieurs",
@@ -406,6 +424,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
@@ -416,6 +435,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialCategories={[
 					makeCategory({
 						name: "Cadres",
@@ -442,6 +462,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 
@@ -479,6 +500,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 
@@ -504,6 +526,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				maxMen={20}
 				maxWomen={10}
 			/>,
@@ -538,6 +561,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 
@@ -560,6 +584,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 
@@ -592,6 +617,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
@@ -605,6 +631,7 @@ describe("Step5EmployeeCategories", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 			/>,
 		);
 		expect(

@@ -34,7 +34,7 @@ const company: CompanyDetail = {
 	address: null,
 	nafCode: null,
 	nafLabel: null,
-	workforce: null,
+	gipWorkforce: null,
 	hasCse: null,
 };
 

@@ -31,6 +31,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1Data()}
 			/>,
 		);
@@ -45,6 +46,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1Data()}
 			/>,
 		);
@@ -58,6 +60,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1Data()}
 			/>,
 		);
@@ -76,6 +79,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1Data()}
 			/>,
 		);
@@ -95,6 +99,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1Data()}
 			/>,
 		);
@@ -111,6 +116,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={{ totalWomen: 10, totalMen: 20 }}
 			/>,
 		);
@@ -128,6 +134,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={{ totalWomen: 5, totalMen: 3 }}
 			/>,
 		);
@@ -139,6 +146,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1Data()}
 			/>,
 		);
@@ -151,6 +159,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1Data()}
 			/>,
 		);
@@ -180,6 +189,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1Data()}
 			/>,
 		);
@@ -196,6 +206,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={{ totalWomen: 10, totalMen: 20 }}
 			/>,
 		);
@@ -215,6 +226,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1Data()}
 			/>,
 		);
@@ -236,6 +248,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={{ totalWomen: 10, totalMen: 20 }}
 			/>,
 		);
@@ -254,6 +267,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1Data()}
 			/>,
 		);
@@ -267,6 +281,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={{ totalWomen: 50, totalMen: 100 }}
 			/>,
 		);
@@ -320,6 +335,7 @@ describe("Step1Workforce", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={{ totalWomen: 50, totalMen: 100 }}
 			/>,
 		);
@@ -378,6 +394,7 @@ describe("Step1Workforce", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={{ totalWomen: 50, totalMen: 100 }}
 			/>,
 		);
@@ -409,6 +426,7 @@ describe("Step1Workforce", () => {
 				<Step1Workforce
 					declarationSiren="123456789"
 					declarationYear={2026}
+					indicatorGRequired
 					initialData={{ totalWomen: 50, totalMen: 100 }}
 				/>,
 			);
@@ -427,6 +445,7 @@ describe("Step1Workforce", () => {
 				<Step1Workforce
 					declarationSiren="123456789"
 					declarationYear={2026}
+					indicatorGRequired
 					initialData={{ totalWomen: 50, totalMen: 100 }}
 				/>,
 			);
@@ -448,6 +467,7 @@ describe("Step1Workforce", () => {
 				<Step1Workforce
 					declarationSiren="123456789"
 					declarationYear={2026}
+					indicatorGRequired
 					initialData={{ totalWomen: 50, totalMen: 100 }}
 				/>,
 			);
@@ -466,6 +486,7 @@ describe("Step1Workforce", () => {
 				<Step1Workforce
 					declarationSiren="123456789"
 					declarationYear={2026}
+					indicatorGRequired
 					initialData={{ totalWomen: 50, totalMen: 100 }}
 				/>,
 			);
@@ -486,6 +507,7 @@ describe("Step1Workforce", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={{ totalWomen: 50, totalMen: 100 }}
 			/>,
 		);

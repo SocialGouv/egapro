@@ -24,7 +24,7 @@ export const defaultCompany = () => ({
 	siren: "123456789",
 	nafCode: "6201Z",
 	address: "1 rue de Paris, 75001 Paris",
-	workforce: 250,
+	gipWorkforce: 250,
 });
 
 export const emptyStep2Data = () => ({
