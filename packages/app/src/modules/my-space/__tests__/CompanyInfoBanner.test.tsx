@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { GIP_WORKFORCE_UNKNOWN_LABEL } from "~/modules/domain";
+import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 import { CompanyInfoBanner } from "../CompanyInfoBanner";
 import type { CompanyDetail } from "../types";
 
@@ -116,11 +116,11 @@ describe("CompanyInfoBanner", () => {
 		expect(screen.queryByText("Code NAF :")).not.toBeInTheDocument();
 	});
 
-	it("renders the GIP unknown label and hides the CSE row when gipWorkforce is null", () => {
+	it("renders '< 50' and hides the CSE row when gipWorkforce is null", () => {
 		render(
 			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: null }} />,
 		);
-		expect(screen.getByText(GIP_WORKFORCE_UNKNOWN_LABEL)).toBeInTheDocument();
+		expect(screen.getByText(GIP_WORKFORCE_ABSENT_DISPLAY)).toBeInTheDocument();
 		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
 	});
 
@@ -140,10 +140,37 @@ describe("CompanyInfoBanner", () => {
 		expect(screen.getByText("Existence d'un CSE :")).toBeInTheDocument();
 	});
 
-	it("renders the 'Modifier' button", () => {
+	it("renders the 'Modifier' button at or above the voluntary threshold", () => {
 		render(<CompanyInfoBanner company={baseCompany} />);
 		expect(
 			screen.getByRole("button", { name: "Modifier" }),
 		).toBeInTheDocument();
+	});
+
+	it("keeps the 'Modifier' button between 50 and 99 (read-only modal)", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 70 }} />,
+		);
+		expect(
+			screen.getByRole("button", { name: "Modifier" }),
+		).toBeInTheDocument();
+	});
+
+	it("hides the 'Modifier' button below 50", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 42 }} />,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Modifier" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("hides the 'Modifier' button when the company is absent from the GIP file", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: null }} />,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Modifier" }),
+		).not.toBeInTheDocument();
 	});
 });

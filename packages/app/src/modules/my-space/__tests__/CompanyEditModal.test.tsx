@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { GIP_WORKFORCE_UNKNOWN_LABEL } from "~/modules/domain";
+import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 
 const mockMutate = vi.fn();
 
@@ -114,7 +114,7 @@ describe("CompanyEditModal", () => {
 			<CompanyEditModal company={{ ...company, gipWorkforce: null }} />,
 		);
 
-		expect(container.textContent).toContain(GIP_WORKFORCE_UNKNOWN_LABEL);
+		expect(container.textContent).toContain(GIP_WORKFORCE_ABSENT_DISPLAY);
 	});
 
 	it("disables submit when no CSE is selected", () => {
@@ -202,7 +202,7 @@ describe("CompanyEditModal", () => {
 			);
 
 			expect(screen.queryByLabelText("Oui", { exact: true })).toBeNull();
-			expect(container.textContent).toContain(GIP_WORKFORCE_UNKNOWN_LABEL);
+			expect(container.textContent).toContain(GIP_WORKFORCE_ABSENT_DISPLAY);
 			expect(container.textContent).not.toContain(
 				"Vérifier les données affichées et compléter",
 			);

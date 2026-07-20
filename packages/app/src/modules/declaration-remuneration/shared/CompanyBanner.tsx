@@ -1,5 +1,5 @@
 import {
-	GIP_WORKFORCE_UNKNOWN_LABEL,
+	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getObligationWorkforce,
 	getWorkforceYear,
 	isCseRequired,
@@ -62,7 +62,7 @@ export function CompanyBanner({
 
 					<div className={styles.datapoint}>
 						{company.gipWorkforce === null ? (
-							<span>{GIP_WORKFORCE_UNKNOWN_LABEL}</span>
+							<span>{GIP_WORKFORCE_ABSENT_DISPLAY}</span>
 						) : (
 							<>
 								<span>

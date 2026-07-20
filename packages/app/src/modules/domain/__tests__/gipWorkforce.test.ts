@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { isCseRequired } from "../shared/companySize";
 import {
-	GIP_WORKFORCE_UNKNOWN_LABEL,
+	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getObligationWorkforce,
 	parseGipWorkforce,
 	toDisplayWorkforce,
@@ -86,8 +86,8 @@ describe("toDisplayWorkforce", () => {
 	});
 });
 
-describe("GIP_WORKFORCE_UNKNOWN_LABEL", () => {
+describe("GIP_WORKFORCE_ABSENT_DISPLAY", () => {
 	it("is the label shown instead of any Weez/INSEE fallback value", () => {
-		expect(GIP_WORKFORCE_UNKNOWN_LABEL).toBe("Effectif non connu du GIP");
+		expect(GIP_WORKFORCE_ABSENT_DISPLAY).toBe("< 50");
 	});
 });

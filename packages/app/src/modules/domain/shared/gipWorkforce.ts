@@ -1,4 +1,6 @@
-export const GIP_WORKFORCE_UNKNOWN_LABEL = "Effectif non connu du GIP";
+// A company absent from the GIP file is deemed below the voluntary threshold,
+// so the banners display "< 50" rather than a raw missing-data mention.
+export const GIP_WORKFORCE_ABSENT_DISPLAY = "< 50";
 
 export function parseGipWorkforce(
 	raw: string | number | null | undefined,

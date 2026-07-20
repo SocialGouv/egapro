@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-	GIP_WORKFORCE_UNKNOWN_LABEL,
+	GIP_WORKFORCE_ABSENT_DISPLAY,
 	toDisplayWorkforce,
 } from "~/modules/domain";
 import common from "../shared/common.module.scss";
@@ -113,7 +113,7 @@ export function RecapitulatifPage({
 		label: `Effectif annuel moyen en ${declarationYear}`,
 		value:
 			toDisplayWorkforce(company.gipWorkforce)?.toString() ??
-			GIP_WORKFORCE_UNKNOWN_LABEL,
+			GIP_WORKFORCE_ABSENT_DISPLAY,
 	});
 
 	const sourceLabel = step5Source

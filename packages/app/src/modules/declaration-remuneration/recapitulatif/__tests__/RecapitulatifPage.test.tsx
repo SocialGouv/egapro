@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { GIP_WORKFORCE_UNKNOWN_LABEL } from "~/modules/domain";
+import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 import { RecapitulatifPage } from "../RecapitulatifPage";
 import {
 	defaultCompany,
@@ -378,7 +378,7 @@ describe("RecapitulatifPage", () => {
 		expect(screen.getByText("source-inconnue")).toBeInTheDocument();
 	});
 
-	it("shows 'Effectif non connu du GIP' when company.gipWorkforce is null", () => {
+	it("shows '< 50' when company.gipWorkforce is null", () => {
 		render(
 			<RecapitulatifPage
 				{...defaultProps()}
@@ -388,7 +388,7 @@ describe("RecapitulatifPage", () => {
 		expect(
 			screen.getByText("Effectif annuel moyen en 2025"),
 		).toBeInTheDocument();
-		expect(screen.getByText(GIP_WORKFORCE_UNKNOWN_LABEL)).toBeInTheDocument();
+		expect(screen.getByText(GIP_WORKFORCE_ABSENT_DISPLAY)).toBeInTheDocument();
 	});
 
 	it("floors a decimal company.gipWorkforce for display", () => {

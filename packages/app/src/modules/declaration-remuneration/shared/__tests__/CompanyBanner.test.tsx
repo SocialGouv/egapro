@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { GIP_WORKFORCE_UNKNOWN_LABEL } from "~/modules/domain";
+import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 import { CompanyBanner } from "../CompanyBanner";
 
 const defaultCompany = {
@@ -95,7 +95,7 @@ describe("CompanyBanner", () => {
 		expect(screen.getByText("Oui")).toBeInTheDocument();
 	});
 
-	it("shows 'Effectif non connu du GIP' and hides the CSE datapoint when gipWorkforce is null", () => {
+	it("shows '< 50' and hides the CSE datapoint when gipWorkforce is null", () => {
 		render(
 			<CompanyBanner
 				company={{ ...defaultCompany, gipWorkforce: null }}
@@ -103,7 +103,7 @@ describe("CompanyBanner", () => {
 			/>,
 		);
 
-		expect(screen.getByText(GIP_WORKFORCE_UNKNOWN_LABEL)).toBeInTheDocument();
+		expect(screen.getByText(GIP_WORKFORCE_ABSENT_DISPLAY)).toBeInTheDocument();
 		expect(
 			screen.queryByText(/Effectif annuel moyen en/),
 		).not.toBeInTheDocument();

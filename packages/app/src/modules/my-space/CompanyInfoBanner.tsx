@@ -1,5 +1,6 @@
 import {
-	GIP_WORKFORCE_UNKNOWN_LABEL,
+	classifyCompanySize,
+	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getCurrentYear,
 	getObligationWorkforce,
 	isCseRequired,
@@ -20,9 +21,11 @@ type Props = {
 
 export function CompanyInfoBanner({ company }: Props) {
 	const currentYear = getCurrentYear();
-	const cseApplicable = isCseRequired(
-		getObligationWorkforce(company.gipWorkforce),
-	);
+	const obligationWorkforce = getObligationWorkforce(company.gipWorkforce);
+	const cseApplicable = isCseRequired(obligationWorkforce);
+	// Below the voluntary threshold nothing is editable (the CSE field starts at 100), so the edit entry point is hidden entirely.
+	const editApplicable =
+		classifyCompanySize(obligationWorkforce) !== "voluntary";
 
 	return (
 		<div className={`fr-pt-3w fr-pb-4w ${styles.banner}`}>
@@ -38,16 +41,18 @@ export function CompanyInfoBanner({ company }: Props) {
 					<div className="fr-col">
 						<h1 className="fr-h4 fr-mb-0">{company.name}</h1>
 					</div>
-					<div className="fr-col-auto">
-						<button
-							aria-controls={COMPANY_EDIT_MODAL_ID}
-							className="fr-btn fr-btn--tertiary-no-outline fr-icon-edit-line fr-btn--icon-left"
-							data-fr-opened="false"
-							type="button"
-						>
-							Modifier
-						</button>
-					</div>
+					{editApplicable && (
+						<div className="fr-col-auto">
+							<button
+								aria-controls={COMPANY_EDIT_MODAL_ID}
+								className="fr-btn fr-btn--tertiary-no-outline fr-icon-edit-line fr-btn--icon-left"
+								data-fr-opened="false"
+								type="button"
+							>
+								Modifier
+							</button>
+						</div>
+					)}
 				</div>
 
 				<dl className={`${styles.infoRow} fr-mb-1w`}>
@@ -84,7 +89,7 @@ export function CompanyInfoBanner({ company }: Props) {
 						<dt>Effectif annuel moyen en {currentYear} :</dt>
 						<dd>
 							{company.gipWorkforce === null ? (
-								GIP_WORKFORCE_UNKNOWN_LABEL
+								GIP_WORKFORCE_ABSENT_DISPLAY
 							) : (
 								<strong>{toDisplayWorkforce(company.gipWorkforce)}</strong>
 							)}

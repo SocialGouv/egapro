@@ -5,7 +5,7 @@ import { useCallback, useRef } from "react";
 import { Controller } from "react-hook-form";
 
 import {
-	GIP_WORKFORCE_UNKNOWN_LABEL,
+	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getCurrentYear,
 	getObligationWorkforce,
 	isCseRequired,
@@ -199,7 +199,7 @@ function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 						value={
 							toDisplayWorkforce(company.gipWorkforce)?.toLocaleString(
 								"fr-FR",
-							) ?? GIP_WORKFORCE_UNKNOWN_LABEL
+							) ?? GIP_WORKFORCE_ABSENT_DISPLAY
 						}
 					/>
 				</dl>

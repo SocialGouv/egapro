@@ -2,7 +2,7 @@ import { DeclarationLockAlert } from "~/modules/declaration-remuneration/shared/
 import type { LockHolder } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import {
-	GIP_WORKFORCE_UNKNOWN_LABEL,
+	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getObligationWorkforce,
 	getWorkforceYear,
 	isCseRequired,
@@ -68,7 +68,7 @@ export function CseOpinionLayout({
 						<div className="fr-col-auto">
 							<p className="fr-mb-0 fr-text--sm">
 								{company.gipWorkforce === null ? (
-									GIP_WORKFORCE_UNKNOWN_LABEL
+									GIP_WORKFORCE_ABSENT_DISPLAY
 								) : (
 									<>
 										Effectif annuel moyen en {getWorkforceYear()} :{" "}
