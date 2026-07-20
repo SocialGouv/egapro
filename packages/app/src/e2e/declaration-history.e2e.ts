@@ -8,8 +8,9 @@ import {
 } from "./helpers/db";
 import { insertHistoryEvents } from "./helpers/declaration-history";
 
+// List rendering + "Voir plus" pagination are covered by declarationHistory/__tests__/HistoryListSection.test.tsx.
+
 test.describe("Declaration history page", () => {
-	test.describe.configure({ mode: "serial" });
 	test.setTimeout(60_000);
 
 	let year: number;
@@ -39,21 +40,5 @@ test.describe("Declaration history page", () => {
 
 		const items = page.locator("main ul > li");
 		await expect(items).toHaveCount(3);
-	});
-
-	test("shows Voir plus button and loads more items (S5)", async ({ page }) => {
-		await insertHistoryEvents(13, year);
-		await page.goto(`/mon-espace/historique/${TEST_SIREN}/${year}`);
-
-		await expect(page.getByRole("button", { name: "Voir plus" })).toBeVisible();
-
-		await expect(page.locator("main ul > li")).toHaveCount(10);
-
-		await page.getByRole("button", { name: "Voir plus" }).click();
-
-		await expect(page.locator("main ul > li")).toHaveCount(13);
-		await expect(
-			page.getByRole("button", { name: "Voir plus" }),
-		).not.toBeVisible();
 	});
 });

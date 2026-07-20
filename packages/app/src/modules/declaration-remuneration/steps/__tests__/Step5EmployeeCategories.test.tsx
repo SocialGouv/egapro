@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
@@ -60,6 +60,20 @@ describe("Step5EmployeeCategories", () => {
 			screen.queryByRole("button", { name: "Catégorie d'emplois n°2" }),
 		).not.toBeInTheDocument();
 		expect(screen.getByText("Nombre de catégories : 1")).toBeInTheDocument();
+	});
+
+	it("titles the step without the legacy '(salaire de base et primes)' suffix", () => {
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+			/>,
+		);
+		const heading = screen.getByRole("heading", {
+			name: /Écart de rémunération par catégories de salariés/,
+		});
+		expect(heading).toBeInTheDocument();
+		expect(heading.textContent).not.toMatch(/salaire de base et primes/i);
 	});
 
 	it("renders stepper at step 5", () => {
@@ -225,6 +239,24 @@ describe("Step5EmployeeCategories", () => {
 			screen.getByRole("button", { name: "Catégorie d'emplois n°2" }),
 		).toBeInTheDocument();
 		expect(screen.getByText("Nombre de catégories : 2")).toBeInTheDocument();
+	});
+
+	it("moves focus to the new category's first field when adding a category", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+			/>,
+		);
+
+		await user.click(
+			screen.getByRole("button", { name: /ajouter une catégorie/i }),
+		);
+
+		await waitFor(() =>
+			expect(document.getElementById("cat-1-name")).toHaveFocus(),
+		);
 	});
 
 	it("can remove a category after confirmation", async () => {
