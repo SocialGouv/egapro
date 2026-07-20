@@ -1,3 +1,5 @@
+import { COMPANY_SIZE_VOLUNTARY_MAX } from "./constants";
+
 export const INDICATOR_G_ANNUAL_MIN = 250;
 export const INDICATOR_G_TRIENNIAL_MIN = 150;
 export const INDICATOR_G_UNIVERSAL_YEAR = 2030;
@@ -11,17 +13,12 @@ export function isTriennialYear(year: number): boolean {
 }
 
 export function isIndicatorGRequired(workforce: number, year: number): boolean {
-	if (year >= INDICATOR_G_UNIVERSAL_YEAR) {
-		return workforce >= INDICATOR_G_ANNUAL_MIN;
-	}
 	if (workforce >= INDICATOR_G_ANNUAL_MIN) return true;
-	if (
-		workforce >= INDICATOR_G_TRIENNIAL_MIN &&
-		workforce < INDICATOR_G_ANNUAL_MIN
-	) {
-		return isTriennialYear(year);
+	if (year >= INDICATOR_G_UNIVERSAL_YEAR) {
+		// From 2030 the obligation extends down to every mandatory tier (>= 50), on the triennial cadence.
+		return workforce >= COMPANY_SIZE_VOLUNTARY_MAX && isTriennialYear(year);
 	}
-	return false;
+	return workforce >= INDICATOR_G_TRIENNIAL_MIN && isTriennialYear(year);
 }
 
 type IndicatorCode = "A" | "B" | "C" | "D" | "E" | "F" | "G";

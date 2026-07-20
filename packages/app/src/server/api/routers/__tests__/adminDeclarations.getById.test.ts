@@ -72,6 +72,7 @@ function buildDb(options: {
 			const chain = {
 				from: vi.fn().mockReturnThis(),
 				innerJoin: vi.fn().mockReturnThis(),
+				leftJoin: vi.fn().mockReturnThis(),
 				where: vi.fn().mockReturnThis(),
 				limit: vi.fn().mockImplementation(() => {
 					if (callIndex === 1)

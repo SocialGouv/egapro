@@ -27,6 +27,7 @@ import {
 	getCurrentYear,
 	isCancelled,
 	parseGipWorkforce,
+	toDisplayWorkforce,
 } from "~/modules/domain";
 import {
 	mapToEmployeeCategoryRows,
@@ -169,7 +170,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					companyName: companies.name,
 					companyAddress: companies.address,
 					companyNafCode: companies.nafCode,
-					companyWorkforce: companies.workforce,
+					companyWorkforceEma: gipMdsData.workforceEma,
 					companyHasCse: companies.hasCse,
 					declarantEmail: users.email,
 					declarantFirstName: users.firstName,
@@ -178,14 +179,23 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				})
 				.from(declarations)
 				.innerJoin(companies, eq(declarations.siren, companies.siren))
+				.leftJoin(
+					gipMdsData,
+					and(
+						eq(gipMdsData.siren, declarations.siren),
+						eq(gipMdsData.year, declarations.year),
+					),
+				)
 				.innerJoin(users, eq(declarations.declarantId, users.id))
 				.where(eq(declarations.id, input.id))
 				.limit(1);
 
-			const declaration = rows[0];
-			if (!declaration) {
+			const row = rows[0];
+			if (!row) {
 				return null;
 			}
+
+			const { companyWorkforceEma, ...declaration } = row;
 
 			const [declarationFiles, opinions, siblingRows, historyRows, activeLock] =
 				await Promise.all([
@@ -248,6 +258,9 @@ export const adminDeclarationsRouter = createTRPCRouter({
 
 			return {
 				...declaration,
+				companyWorkforce: toDisplayWorkforce(
+					parseGipWorkforce(companyWorkforceEma),
+				),
 				files: declarationFiles,
 				cseOpinions: opinions,
 				siblings,
