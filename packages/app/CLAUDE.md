@@ -180,6 +180,16 @@ The `next-devtools` MCP provides runtime diagnostics directly from the Next.js d
 
 Before writing any DSFR HTML, use `get_component_doc` or `search_components` to verify the correct structure. Never guess DSFR classes from memory.
 
+### MCP figma — fidélité visuelle (mandatory)
+
+Depuis un design Figma : **mesurer, ne jamais comparer à l'œil.** Chaque dimension (largeur de colonne/cellule, bordure, gap, taille de police) se vérifie en confrontant la valeur **mesurée du DOM** (`getBoundingClientRect` / `getComputedStyle`) à celle du **node Figma** (`get_metadata` → `width`, `get_design_context` / `get_variable_defs` → tokens) — jamais sur le rendu global. Deux colonnes que le Figma donne à 115px / 151px ne sont pas « 15 % / 15 % ».
+
+**Ne jamais retirer, fusionner ou « simplifier »** un élément que le node montre (une bordure, un séparateur, une sous-cellule) sur une **interprétation** de l'intention : le node fait autorité, pas ta lecture du layout. En cas de doute (« ces deux sous-cellules ne forment-elles pas une colonne unique ? »), confirmer sur le node **avant** de retirer quoi que ce soit.
+
+Avant toute comparaison : **forcer le thème clair** (`data-fr-scheme="light"` + `data-fr-theme="light"` sur `<html>`) et **tester tous les états** — vide / partiel / rempli, les placeholders « - % » / « - € » de l'état vide comptent autant que les valeurs. Les **espaces verticaux** se mesurent (`bottom(N) → top(N+1)` vs `y` / hauteur Figma), jamais à l'œil.
+
+Vaut aussi pour les **fixes UI ad-hoc hors pipeline**, pas seulement le gate `design-validator`. Discipline complète → `.claude/rules/figma-workflow.md` (construction) + `.claude/rules/visual-quality-validation.md` (vérification, espaces verticaux, états).
+
 ### Styling strategy (strict priority order)
 
 Inline `style={}` is **blocked by hook** — the edit will be rejected.

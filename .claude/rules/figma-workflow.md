@@ -46,6 +46,7 @@ egapro est en **DSFR vanilla** (`@gouvfr/dsfr`, classes `fr-*` en markup, pas de
 
 - **Une URL = un node précis** (`?node-id=...`). Jamais une URL de fichier générique : `code-dev` doit aller direct au bon écran, sans deviner.
 - **Un frame / composant à la fois.** Un gros node explose le contexte : `get_metadata` d'abord pour cartographier, puis `get_design_context` sur les node-ids enfants pertinents.
+- **Frames archivées.** L'ancienne version d'un écran garde le **même nom** préfixé de `[ARCHIVE]` (posée à gauche de la nouvelle sur le canvas). Ne **jamais** implémenter ni mesurer depuis un frame `[ARCHIVE]` — toujours le node courant. En cas de doute sur lequel est courant, **demander le node-id à l'utilisateur** plutôt que deviner.
 
 ---
 
@@ -144,6 +145,26 @@ When a sentence contains mixed styles (e.g. *"écart de **4,5 %**"*), wrap the b
 
 Do not add elements (tooltips, icons, decorations) absent from the Figma design. Every element must have a corresponding Figma node.
 
+#### 10. Bordures, séparateurs, dimensions — mesurer, ne rien retirer
+
+- **Bordures & séparateurs** : chaque cellule / bloc que le Figma borde doit l'être dans le rendu. Un composant « tableau bordé » DSFR trace une bordure sur **chaque** cellule (grille complète) — vérifier cellule par cellule (`get_screenshot` + mesure du `background-image` / `border` dans le DOM), pas seulement l'aspect global.
+- **Ne jamais retirer / fusionner / « simplifier »** un élément que le node montre (bordure, séparateur, sous-cellule). Le point #9 interdit d'*ajouter* du fantôme ; celui-ci interdit l'**inverse** : *supprimer* du réel. Le node fait autorité, pas ton interprétation du layout — en cas de doute (« ces 2 sous-cellules ne forment-elles pas une colonne unique ? »), confirmer sur le node **avant** de retirer quoi que ce soit.
+- **Largeurs / tailles fixes** : lire la **largeur du node** (`get_metadata` → `width`) et la reproduire au ratio, jamais « à peu près égales » à l'œil. Deux colonnes que le Figma donne à 115px / 151px ne sont pas « 15 % / 15 % ».
+- **Règle générale — mesurer, pas comparer à l'œil** : pour toute propriété dimensionnelle (largeur, bordure, gap, taille), confronter la valeur **mesurée** du DOM (`getBoundingClientRect` / `getComputedStyle`) à celle du node. Même discipline que le gate `design-validator`, mais à appliquer **pendant la construction** et sur les **fixes UI ad-hoc hors pipeline** — ce qui « semble à peu près bon » à l'œil est exactement ce qui dérive.
+
+#### 11. Tableaux — revue colonne par colonne
+
+Pour **chaque** tableau, vérifier explicitement :
+
+- **Alignement** de chaque valeur (gauche / droite) tel que le node le montre — pas seulement la première ligne.
+- **Nombre de lignes de chaque en-tête** : tout wrap ou débordement non prévu par le Figma = défaut (élargir la colonne ou ajuster). Un en-tête qui passe sur 3 lignes au lieu de 2 est bloquant.
+- **Largeur des colonnes** : lue sur le node (`get_metadata` → `width`), jamais « à peu près égales ».
+- **Texte exact des placeholders** quand une valeur n'est pas calculée : « - % », « - € » — **jamais** un « - » nu si le Figma affiche l'unité.
+
+#### 12. Tous les états (vide / partiel / rempli)
+
+Vérifier l'écran **vide**, **partiellement rempli** et **rempli**. Les placeholders de l'état vide comptent **autant** que les valeurs calculées — ne **jamais** vérifier uniquement avec `[DEV] Remplir`. Un « - % » manquant à vide est un défaut au même titre qu'une valeur fausse.
+
 ---
 
 ## Per-screen verification method (mandatory)
@@ -158,11 +179,23 @@ When comparing a Figma screen to existing code, **never** rely on a flat text ex
 
 This prevents missing structural elements (alert blocks, source lines, description paragraphs) that a flat text search would overlook.
 
+### Tableau de diff avant de coder, passe QA après
+
+**Avant de coder**, produire un **tableau de diff** — `élément | spec Figma | rendu actuel | écart` — couvrant **alignement, wrapping d'en-tête, espacement, largeurs, placeholders**. Flag chaque écart *avant* d'écrire la moindre ligne.
+
+**Après avoir codé**, refaire une **passe QA design élément par élément** et lister **toute** déviation, même minime : chacune est **bloquante** (pas de « c'est presque bon »). Idéalement, déléguer cette passe au gate indépendant `design-validator` (`rules/visual-quality-validation.md`).
+
 ---
 
 ## Phase 4 — Final verification
 
 L'implémentation pixel-perfect (Phases 1–3) repose sur la lecture de `get_design_context` + `get_variable_defs` (chaque propriété mappée à sa classe / token DSFR). Quand cette lecture a été faite proprement, la Phase 4 **ferme la boucle** : confirmer que le rendu réel correspond au plan, et produire les artefacts pour la review humaine.
+
+### 0. État de rendu contrôlé (obligatoire avant toute comparaison)
+
+- **Thème clair forcé.** Le site suit le thème du navigateur ; un rendu en sombre ne matche pas la maquette (claire) et fausse l'overlay onion-skin + la lecture des couleurs. Forcer le clair **avant toute comparaison** : `data-fr-scheme="light"` + `data-fr-theme="light"` sur `<html>`, ou le toggle DSFR « Paramètres d'affichage » en pied de page.
+- **Viewport connu, ≥2 largeurs.** Desktop **et** mobile — un `space-between` ou une marge qui collapse ne se voit qu'à certaines hauteurs (cf. `visual-quality-validation.md`).
+- **Pages derrière ProConnect.** Un écran authentifié ne rend pas sans session valide (sinon 500). Demander à l'utilisateur de se connecter, **ou** débloquer la session locale (seed DB — voir la mémoire `project_local_session_500_seed`). Sans session, aucune comparaison n'est possible.
 
 ### 1. Sanity check structurel
 
