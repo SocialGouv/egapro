@@ -17,7 +17,8 @@ export function getNextStepHref(
 	indicatorGRequired: boolean,
 ): string | undefined {
 	const steps = getFunnelSteps(indicatorGRequired);
-	const next = steps[steps.indexOf(currentStep) + 1];
+	const index = steps.indexOf(currentStep);
+	const next = index < 0 ? undefined : steps[index + 1];
 	return next === undefined ? undefined : stepHref(next);
 }
 
