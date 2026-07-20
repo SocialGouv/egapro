@@ -198,7 +198,7 @@ const declarationSchema = {
 		},
 		CSE_existant: {
 			type: ["boolean", "null"],
-			description: "Présence d'un CSE (>= 50 salariés)",
+			description: "Présence d'un CSE (>= 100 salariés)",
 		},
 		Annee: {
 			type: "integer",
