@@ -255,7 +255,7 @@ export function Step1Workforce({
 					<div className={`${common.dataSection} ${common.tableGap}`}>
 						<div className={common.flexColumnGapHalf}>
 							<div
-								className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${styles.workforceTable}`}
+								className={`fr-table fr-table--bordered fr-table--no-caption fr-mt-0 fr-mb-0 ${styles.workforceTable}`}
 							>
 								<div className="fr-table__wrapper">
 									<div className="fr-table__container">

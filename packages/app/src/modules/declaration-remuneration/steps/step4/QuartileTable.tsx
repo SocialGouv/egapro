@@ -60,7 +60,7 @@ export function QuartileTable({
 			<div className={stepStyles.tableSection}>
 				{readingNote}
 				<div
-					className={`fr-table fr-table--no-scroll fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
+					className={`fr-table fr-table--bordered fr-table--no-scroll fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
 				>
 					<div className="fr-table__wrapper">
 						<div className="fr-table__container">

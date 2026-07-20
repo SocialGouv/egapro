@@ -16,10 +16,10 @@ export function GapBadge({ gap }: Props) {
 	if (!level) return <span className="fr-text--sm">{formatGap(gap)}</span>;
 	return (
 		<span className={`fr-text--sm ${stepStyles.inlineGap}`}>
-			<strong>{formatGap(gap)}</strong>
 			{level === "high" && (
 				<span className={gapBadgeClass(level)}>{GAP_LEVEL_LABELS[level]}</span>
 			)}
+			<strong className={stepStyles.gapValue}>{formatGap(gap)}</strong>
 		</span>
 	);
 }

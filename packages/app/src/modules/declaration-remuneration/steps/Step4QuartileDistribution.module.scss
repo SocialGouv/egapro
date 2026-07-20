@@ -122,6 +122,20 @@
 		max-width: 0;
 	}
 
+	// The colspan-2 "Montants des tranches" column is two sub-cells (min | max)
+	// that must read as a single bordered column (Figma): drop the vertical
+	// divider on the min cell, keeping only its bottom border (same contrast
+	// grey as the row separators).
+	&:global(.fr-table--bordered) :global(.fr-table__content) td.minCell {
+		background-image: linear-gradient(
+			0deg,
+			var(--border-contrast-grey),
+			var(--border-contrast-grey)
+		);
+		background-size: 100% 1px;
+		background-position: 0 100%;
+	}
+
 	tbody td input:global(.fr-input) {
 		text-align: right;
 		width: 100%;

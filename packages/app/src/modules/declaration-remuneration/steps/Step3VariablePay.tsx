@@ -267,7 +267,7 @@ export function Step3VariablePay({
 							Proportion de femmes et d&apos;hommes bénéficiaires
 						</h2>
 						<div
-							className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.payGapTable}`}
+							className={`fr-table fr-table--bordered fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.payGapTable}`}
 						>
 							<div className="fr-table__wrapper">
 								<div className="fr-table__container">

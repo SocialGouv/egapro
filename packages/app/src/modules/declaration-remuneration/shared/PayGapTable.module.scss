@@ -1,9 +1,14 @@
 .gapDisplay {
-	// Figma: the gap value is pinned to the right of the cell, badge to its left.
+	// Figma: the écart column reads as two sub-cells [label | value] with no
+	// visible divider. Single cell here: the value is pinned to the right, the
+	// badge (when present) sits at the far left.
 	display: flex;
 	align-items: baseline;
-	justify-content: flex-end;
 	gap: 0.5rem;
+}
+
+.gapValue {
+	margin-left: auto;
 }
 
 .inputWithUnit {

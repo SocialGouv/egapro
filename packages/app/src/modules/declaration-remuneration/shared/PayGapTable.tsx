@@ -54,7 +54,7 @@ export function PayGapTable({
 }: PayGapTableProps) {
 	return (
 		<div
-			className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${styles.fixedTable} ${className ?? ""}`}
+			className={`fr-table fr-table--bordered fr-table--no-caption fr-mt-0 fr-mb-0 ${styles.fixedTable} ${className ?? ""}`}
 		>
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
@@ -141,7 +141,7 @@ export function PayGapTable({
 															{GAP_LEVEL_LABELS[level]}
 														</span>
 													)}
-													<span className="fr-text--bold">
+													<span className={`fr-text--bold ${styles.gapValue}`}>
 														{formatGap(gap)}
 													</span>
 												</span>

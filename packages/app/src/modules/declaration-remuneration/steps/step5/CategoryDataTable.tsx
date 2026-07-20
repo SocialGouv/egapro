@@ -114,7 +114,7 @@ function TableFrame({
 }) {
 	return (
 		<div
-			className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.fixedTable}`}
+			className={`fr-table fr-table--bordered fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.fixedTable}`}
 		>
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
