@@ -300,36 +300,30 @@ export function CategoryDataTable({
 						<tr className={stepStyles.dataRow}>
 							<th scope="row">Effectif physique</th>
 							<td>
-								<div className={stepStyles.inputCell}>
-									<input
-										aria-label={`Effectif femmes, catégorie ${catIndex + 1}`}
-										className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
-										disabled={disabled}
-										id={`${idPrefix}-women-count`}
-										inputMode="numeric"
-										onChange={pos(catIndex, "womenCount", true)}
-										pattern="[0-9]*"
-										type="text"
-										value={cat.womenCount}
-									/>
-									<span className="fr-text--sm">nb</span>
-								</div>
+								<input
+									aria-label={`Effectif femmes, catégorie ${catIndex + 1}`}
+									className={`fr-input ${common.numericInput}`}
+									disabled={disabled}
+									id={`${idPrefix}-women-count`}
+									inputMode="numeric"
+									onChange={pos(catIndex, "womenCount", true)}
+									pattern="[0-9]*"
+									type="text"
+									value={cat.womenCount}
+								/>
 							</td>
 							<td>
-								<div className={stepStyles.inputCell}>
-									<input
-										aria-label={`Effectif hommes, catégorie ${catIndex + 1}`}
-										className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
-										disabled={disabled}
-										id={`${idPrefix}-men-count`}
-										inputMode="numeric"
-										onChange={pos(catIndex, "menCount", true)}
-										pattern="[0-9]*"
-										type="text"
-										value={cat.menCount}
-									/>
-									<span className="fr-text--sm">nb</span>
-								</div>
+								<input
+									aria-label={`Effectif hommes, catégorie ${catIndex + 1}`}
+									className={`fr-input ${common.numericInput}`}
+									disabled={disabled}
+									id={`${idPrefix}-men-count`}
+									inputMode="numeric"
+									onChange={pos(catIndex, "menCount", true)}
+									pattern="[0-9]*"
+									type="text"
+									value={cat.menCount}
+								/>
 							</td>
 						</tr>
 					</tbody>

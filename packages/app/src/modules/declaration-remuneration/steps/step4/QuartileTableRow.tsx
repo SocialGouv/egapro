@@ -45,7 +45,7 @@ function menAriaLabel(tableType: TableType, index: number) {
 
 function pct(q: QuartileData, gender: "women" | "men") {
 	const total = (q.women ?? 0) + (q.men ?? 0);
-	if (total === 0) return "-";
+	if (total === 0) return "- %";
 	return computePercentage(q[gender] ?? 0, total);
 }
 

@@ -344,7 +344,7 @@ export function Step1Workforce({
 																)}
 															</div>
 														</td>
-														<td>
+														<td className="fr-cell--right">
 															<strong>{total}</strong>
 														</td>
 													</tr>

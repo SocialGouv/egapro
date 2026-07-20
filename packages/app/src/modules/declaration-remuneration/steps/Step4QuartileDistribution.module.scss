@@ -65,15 +65,16 @@
 	}
 
 	.colMin {
-		width: 17%;
+		width: 15%;
 	}
 
 	.colMax {
-		width: 17%;
+		width: 15%;
 	}
 
 	.colCount {
-		width: 12%;
+		// Wider so "Nombre de femmes/hommes" wraps to two lines, not three (Figma).
+		width: 14%;
 	}
 
 	.colPercent {

@@ -17,8 +17,8 @@ describe("formatGap", () => {
 		expect(formatGap(5.3)).toBe("5,3 %");
 	});
 
-	it("returns dash for null", () => {
-		expect(formatGap(null)).toBe("-");
+	it("returns '- %' for null", () => {
+		expect(formatGap(null)).toBe("- %");
 	});
 });
 
@@ -37,8 +37,8 @@ describe("computeProportion", () => {
 		expect(computeProportion("25", 100)).toBe("25,0 %");
 	});
 
-	it("returns dash when total is zero", () => {
-		expect(computeProportion("10", 0)).toBe("-");
+	it("returns '- %' when total is zero", () => {
+		expect(computeProportion("10", 0)).toBe("- %");
 	});
 });
 
@@ -57,8 +57,8 @@ describe("computePercentage", () => {
 		expect(computePercentage(25, 100)).toBe("25,0 %");
 	});
 
-	it("returns dash when total is zero", () => {
-		expect(computePercentage(10, 0)).toBe("-");
+	it("returns '- %' when total is zero", () => {
+		expect(computePercentage(10, 0)).toBe("- %");
 	});
 });
 
@@ -67,8 +67,8 @@ describe("formatTotal", () => {
 		expect(formatTotal(1234.5, "€")).toMatch(/1[\s\u202f]234,5 €/);
 	});
 
-	it("returns dash for null", () => {
-		expect(formatTotal(null, "€")).toBe("-");
+	it("returns '- €' for null", () => {
+		expect(formatTotal(null, "€")).toBe("- €");
 	});
 });
 

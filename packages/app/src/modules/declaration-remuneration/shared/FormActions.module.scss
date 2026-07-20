@@ -2,4 +2,8 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	// Consistent spacing above the action row on every screen — with or without
+	// the interpretation callout above it (Figma). The fieldset is a block, so
+	// this margin collapses with any preceding element's margin instead of adding.
+	margin-top: 2rem;
 }

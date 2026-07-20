@@ -29,6 +29,13 @@
 	table-layout: fixed;
 }
 
+.fixedTable table thead th:nth-child(2),
+.fixedTable table thead th:nth-child(3) {
+	// Let "Rémunération des femmes/hommes" wrap instead of overflowing the cell,
+	// without touching the écart header's own two-line layout.
+	white-space: normal;
+}
+
 .colLabel {
 	width: 230px;
 }

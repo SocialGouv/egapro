@@ -61,7 +61,7 @@ describe("IndicatorSections", () => {
 		expect(screen.queryByText("110 %")).not.toBeInTheDocument();
 	});
 
-	it("renders '-' for the proportion when the workforce total is zero", () => {
+	it("renders '- %' for the proportion when the workforce total is zero", () => {
 		render(
 			<IndicatorSections
 				step2Data={emptyStep2Data()}
@@ -74,10 +74,10 @@ describe("IndicatorSections", () => {
 		);
 
 		expect(screen.getByText("Proportion")).toBeInTheDocument();
-		expect(screen.getAllByText("-")).toHaveLength(2);
+		expect(screen.getAllByText("- %")).toHaveLength(2);
 	});
 
-	it("renders '-' for the proportion when the workforce total is missing", () => {
+	it("renders '- %' for the proportion when the workforce total is missing", () => {
 		render(
 			<IndicatorSections
 				step2Data={emptyStep2Data()}
@@ -87,6 +87,6 @@ describe("IndicatorSections", () => {
 			/>,
 		);
 
-		expect(screen.getAllByText("-")).toHaveLength(2);
+		expect(screen.getAllByText("- %")).toHaveLength(2);
 	});
 });
