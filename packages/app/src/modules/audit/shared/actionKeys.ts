@@ -43,6 +43,7 @@ export const AUDIT_ACTIONS = {
 	JOINT_EVALUATION_UPLOAD_FILE: "joint_evaluation.upload_file",
 
 	// ── Company mutations ──────────────────────────────────
+	COMPANY_READ_GIP_DATA: "company.read_gip_data",
 	COMPANY_UPDATE_HAS_CSE: "company.update_has_cse",
 
 	// ── Profile mutations ──────────────────────────────────
@@ -164,6 +165,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: "mutation",
 
+	[AUDIT_ACTIONS.COMPANY_READ_GIP_DATA]: "read_sensitive",
 	[AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE]: "mutation",
 
 	[AUDIT_ACTIONS.PROFILE_UPDATE_PHONE]: "mutation",
