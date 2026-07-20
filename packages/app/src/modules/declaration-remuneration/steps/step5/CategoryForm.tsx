@@ -592,6 +592,7 @@ export function CategoryForm({
 			/>
 
 			<FormActions
+				className="fr-mt-0"
 				isSubmitting={isSubmitting}
 				mimoquageNextHref={mimoquageNextHref}
 				previousHref={previousHref}

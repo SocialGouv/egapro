@@ -380,7 +380,6 @@ export function Step1Workforce({
 					/>
 
 					<FormActions
-						className="fr-mt-0"
 						isSubmitting={mutation.isPending}
 						mimoquageNextHref={
 							hasInitialData ? "/declaration-remuneration/etape/2" : undefined

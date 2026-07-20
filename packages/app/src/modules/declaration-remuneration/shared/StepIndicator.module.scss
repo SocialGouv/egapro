@@ -1,4 +1,6 @@
 .stepper {
-	// Breathing room between the page title and "Étape X sur 6" (Figma).
-	margin-top: 1.5rem;
+	// 32px above and below the stepper, matching the Figma vertical rhythm
+	// (titre → stepper → instructions, tous à 2rem).
+	margin-top: 2rem;
+	margin-bottom: 2rem;
 }

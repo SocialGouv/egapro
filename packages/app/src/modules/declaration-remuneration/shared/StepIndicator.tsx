@@ -11,7 +11,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
 		currentStep < TOTAL_STEPS ? STEP_TITLES[currentStep + 1] : undefined;
 
 	return (
-		<div className={`fr-stepper fr-mb-0 ${styles.stepper}`}>
+		<div className={`fr-stepper ${styles.stepper}`}>
 			<h2 className="fr-stepper__title">
 				{title}
 				<span className="fr-stepper__state">
