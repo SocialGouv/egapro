@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { FIRST_DECLARATION_YEAR } from "~/modules/domain";
+import {
+	DECLARATION_FSM_STATUSES,
+	FIRST_DECLARATION_YEAR,
+} from "~/modules/domain";
 
 export const SORT_COLUMNS = [
 	"siren",
@@ -15,6 +18,18 @@ export type SortColumn = (typeof SORT_COLUMNS)[number];
 
 export const DEFAULT_PAGE_SIZE = 20;
 
+// Admin status filter = the FSM states + the admin-only "cancelled" filter (cancelledAt is set, not an FSM state — see queries.ts). Derived from DECLARATION_FSM_STATUSES so a new engine state propagates here by construction (or breaks tsc), never a hand-copied list.
+export const ADMIN_DECLARATION_STATUS_FILTERS = [
+	...DECLARATION_FSM_STATUSES,
+	"cancelled",
+] as const;
+
+// The form select also offers the empty "all statuses" option.
+const ADMIN_DECLARATION_STATUS_FORM_OPTIONS = [
+	"",
+	...ADMIN_DECLARATION_STATUS_FILTERS,
+] as const;
+
 export const searchDeclarationsSchema = z.object({
 	query: z.string().optional(),
 	email: z.string().email().optional().or(z.literal("")),
@@ -26,19 +41,7 @@ export const searchDeclarationsSchema = z.object({
 		.optional(),
 	dateFrom: z.string().date().optional().or(z.literal("")),
 	dateTo: z.string().date().optional().or(z.literal("")),
-	status: z
-		.enum([
-			"draft",
-			"awaiting_compliance_path_choice",
-			"corrective_actions_chosen",
-			"joint_evaluation_chosen",
-			"awaiting_revision_choice",
-			"revised_joint_evaluation_chosen",
-			"awaiting_cse_opinion",
-			"demarche_completed",
-			"cancelled",
-		])
-		.optional(),
+	status: z.enum(ADMIN_DECLARATION_STATUS_FILTERS).optional(),
 	page: z.coerce.number().int().min(1).default(1),
 	pageSize: z.coerce.number().int().min(10).max(100).default(DEFAULT_PAGE_SIZE),
 	sortBy: z.enum(SORT_COLUMNS).default("createdAt"),
@@ -56,20 +59,7 @@ export const searchDeclarationsFormSchema = z.object({
 	year: z.string().optional(),
 	dateFrom: z.string().optional(),
 	dateTo: z.string().optional(),
-	status: z
-		.enum([
-			"",
-			"draft",
-			"awaiting_compliance_path_choice",
-			"corrective_actions_chosen",
-			"joint_evaluation_chosen",
-			"awaiting_revision_choice",
-			"revised_joint_evaluation_chosen",
-			"awaiting_cse_opinion",
-			"demarche_completed",
-			"cancelled",
-		])
-		.optional(),
+	status: z.enum(ADMIN_DECLARATION_STATUS_FORM_OPTIONS).optional(),
 });
 
 export type SearchDeclarationsFormValues = z.infer<

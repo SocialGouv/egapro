@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { getDeclarationByIdSchema, searchDeclarationsSchema } from "../schemas";
+import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
+import {
+	ADMIN_DECLARATION_STATUS_FILTERS,
+	getDeclarationByIdSchema,
+	searchDeclarationsFormSchema,
+	searchDeclarationsSchema,
+} from "../schemas";
 
 describe("searchDeclarationsSchema", () => {
 	it("accepts minimal input with defaults", () => {
@@ -58,6 +64,38 @@ describe("searchDeclarationsSchema", () => {
 
 	it("rejects page size over 100", () => {
 		expect(() => searchDeclarationsSchema.parse({ pageSize: "200" })).toThrow();
+	});
+});
+
+describe("admin declaration status filter vocabulary", () => {
+	// Built by iterating the derived const — never a hand-copied state list.
+	it("derives from the FSM states plus the admin-only cancelled filter", () => {
+		expect(ADMIN_DECLARATION_STATUS_FILTERS).toEqual([
+			...DECLARATION_FSM_STATUSES,
+			"cancelled",
+		]);
+	});
+
+	it.each(
+		ADMIN_DECLARATION_STATUS_FILTERS,
+	)("searchDeclarationsSchema accepts the derived status %s", (status) => {
+		expect(searchDeclarationsSchema.parse({ status }).status).toBe(status);
+	});
+
+	it("searchDeclarationsSchema rejects a status outside the vocabulary", () => {
+		expect(() =>
+			searchDeclarationsSchema.parse({ status: "not_a_status" }),
+		).toThrow();
+	});
+
+	it("searchDeclarationsFormSchema accepts the empty « all statuses » option", () => {
+		expect(searchDeclarationsFormSchema.parse({ status: "" }).status).toBe("");
+	});
+
+	it.each(
+		ADMIN_DECLARATION_STATUS_FILTERS,
+	)("searchDeclarationsFormSchema accepts the derived status %s", (status) => {
+		expect(searchDeclarationsFormSchema.parse({ status }).status).toBe(status);
 	});
 });
 

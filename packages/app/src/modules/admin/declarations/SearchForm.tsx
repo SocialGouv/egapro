@@ -22,17 +22,9 @@ export function SearchForm() {
 				dateFrom: searchParams.get("dateFrom") ?? "",
 				dateTo: searchParams.get("dateTo") ?? "",
 				status:
-					(searchParams.get("status") as
-						| ""
-						| "draft"
-						| "awaiting_compliance_path_choice"
-						| "corrective_actions_chosen"
-						| "joint_evaluation_chosen"
-						| "awaiting_revision_choice"
-						| "revised_joint_evaluation_chosen"
-						| "awaiting_cse_opinion"
-						| "demarche_completed"
-						| "cancelled") ?? "",
+					(searchParams.get(
+						"status",
+					) as SearchDeclarationsFormValues["status"]) ?? "",
 			},
 		},
 	);
