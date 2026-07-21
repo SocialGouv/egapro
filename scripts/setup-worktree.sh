@@ -82,6 +82,15 @@ VALKEY_HOST_PORT=$VALKEY_HOST_PORT
 PORT=$APP_DEV_PORT
 DATABASE_URL=postgresql://postgres:postgres@localhost:$POSTGRES_HOST_PORT/egapro
 CLAMAV_PORT=$CLAMAV_HOST_PORT
+
+# Service endpoints must follow the index-derived host ports above — the
+# repo-level .env targets the standard single-checkout ports, and a stale
+# endpoint crashes the dev-server boot (instrumentation runs ensureBucket
+# against S3 on startup).
+S3_ENDPOINT=http://localhost:$MINIO_API_PORT
+SMTP_HOST=localhost
+SMTP_PORT=$MAILDEV_SMTP_PORT
+VALKEY_URL=redis://localhost:$VALKEY_HOST_PORT
 EOF
 
 echo "[setup-worktree] Wrote $ENV_FILE"

@@ -64,7 +64,11 @@ BRANCH="epic/${EPIC_N}"
 BUDGET="${EPIC_LOOP_BUDGET_E2E:-15}"
 AGENT_TIMEOUT="${E2E_DEV_TIMEOUT:-3600}"
 INDEX="${E2E_WORKTREE_INDEX:-${EPIC_MAX_PARALLEL:-5}}"
-PORT=$((3001 + INDEX))
+# The dev server must bind :3000 — the ProConnect test gateway only registers
+# the http://localhost:3000 callback; any other port 404s at the authorize step
+# and auth.setup.ts cannot authenticate the suite. The docker stack keeps its
+# index-derived ports.
+PORT=3000
 WT_PATH="${REPO_ROOT}/../egapro-epic${EPIC_N}-e2e"
 
 # ---- Pre-flight: the integration branch must exist on origin ----
@@ -73,6 +77,29 @@ git fetch origin alpha "$BRANCH" --quiet 2>/dev/null || true
 if ! git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
     echo "ERROR: $BRANCH does not exist on origin — nothing to test" >&2
     bash "$SCRIPT_DIR/log_event.sh" "$AID" FAILED "no_epic_branch=$BRANCH"
+    exit 1
+fi
+
+# ---- Pre-flight: port 3000 must be free (ProConnect callback constraint) ----
+# Probe with whatever listener-inspection tool exists (lsof isn't guaranteed on
+# minimal Linux hosts). If none is available, skip the check rather than
+# fail-closed on the absence of tooling — the dev server boot would then surface
+# a bind error itself.
+port_in_use() {
+    local port="$1"
+    if command -v lsof >/dev/null 2>&1; then
+        lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1
+    elif command -v ss >/dev/null 2>&1; then
+        ss -ltnH "sport = :$port" 2>/dev/null | grep -q .
+    elif command -v nc >/dev/null 2>&1; then
+        nc -z 127.0.0.1 "$port" >/dev/null 2>&1
+    else
+        return 1
+    fi
+}
+if port_in_use "$PORT"; then
+    echo "ERROR: port $PORT is busy — the E2E dev server must bind :3000 (ProConnect callback). Stop the process holding it and re-run." >&2
+    bash "$SCRIPT_DIR/log_event.sh" "$AID" FAILED "port_3000_busy"
     exit 1
 fi
 
@@ -111,6 +138,17 @@ if [ ! -f "$WT_PATH/packages/app/.env.local" ]; then
     (cd "$WT_PATH" && bash "$REPO_ROOT/scripts/setup-worktree.sh" "$INDEX") >/dev/null 2>&1 \
         || { bash "$SCRIPT_DIR/log_event.sh" "$AID" STACK_FAIL "setup-worktree.sh failed (index=$INDEX)"; exit 1; }
 fi
+# setup-worktree.sh writes PORT=3001+index; the E2E run overrides it to 3000
+# (ProConnect callback constraint). Rewrite the line if present, otherwise
+# append it — a silent no-op here would let the dev server bind the wrong port
+# and break ProConnect auth. Idempotent across re-runs.
+E2E_ENV_FILE="$WT_PATH/packages/app/.env.local"
+if grep -qE '^PORT=' "$E2E_ENV_FILE"; then
+    perl -pi -e "s/^PORT=.*/PORT=$PORT/" "$E2E_ENV_FILE"
+else
+    printf '\nPORT=%s\n' "$PORT" >> "$E2E_ENV_FILE"
+fi
+
 bash "$SCRIPT_DIR/log_event.sh" "$AID" STACK_READY "wt=$WT_PATH index=$INDEX port=$PORT"
 
 # ---- Build the prompt for the agent ----
@@ -118,7 +156,7 @@ PROMPT="Tu es invoqué par la pipeline d'orchestration en fin d'epic #${EPIC_N},
 
 Unité à couvrir : epic #${EPIC_N} (Feature)
 Worktree : ${WT_PATH} (détaché sur origin/${BRANCH})
-Worktree index : ${INDEX} (dev server port = ${PORT})
+Worktree index : ${INDEX} (ports docker) — dev server port = ${PORT} (imposé par le callback ProConnect)
 Base de comparaison : origin/alpha  (le diff de la feature = origin/alpha...HEAD)
 
 L'orchestrateur a déjà :
@@ -127,7 +165,7 @@ L'orchestrateur a déjà :
 
 Suivre STRICTEMENT le workflow de .claude/agents/e2e-dev/AGENT.md :
 1. Lire le diff intégré (origin/alpha...HEAD) + le body de l'epic et de ses sous-tickets.
-2. Démarrer le dev server sur le port ${PORT} (lire PORT dans packages/app/.env.local) et exporter PLAYWRIGHT_BASE_URL=http://localhost:${PORT}.
+2. Démarrer le dev server sur le port ${PORT} (PORT déjà forcé dans packages/app/.env.local) et exporter PLAYWRIGHT_BASE_URL=http://localhost:${PORT}. Le port 3000 est imposé : la passerelle ProConnect de test n'enregistre que le callback :3000 — ne le change pas.
 3. Lancer la suite E2E actuelle (pnpm --filter app test:e2e), trier les échecs (régression vs évolution légitime).
 4. Sur >=1 régression réelle : commenter \`e2e-dev:\` sur l'epic #${EPIC_N}, NE RIEN corriger côté source, retourner {\"status\":\"regression\",...}.
 5. Sinon : corriger les E2E en échec légitime, puis décider de la couverture de la feature (imbriquer de préférence dans un scénario global existant ; nouveau fichier seulement pour un parcours/page réellement nouveaux).

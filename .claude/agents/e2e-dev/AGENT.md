@@ -26,7 +26,7 @@ Tu es invoqué à deux moments selon le type de ticket :
   - **epic** `#<N>` (Feature) — la couverture porte sur la feature complète intégrée dans `epic/<N>`
   - **ticket** `#<N>` (Task ou Bug) — la couverture porte sur ce seul ticket
 - Worktree path + branche de travail (déjà checkout par l'orchestrateur — tu opères dans ce worktree)
-- Worktree index → dev server port (`3001 + index`, lu depuis `packages/app/.env.local`)
+- Worktree index → ports docker de la stack (DB, minio, maildev, valkey). Le dev server E2E tourne **toujours sur le port 3000** — contrainte ProConnect, cf. Workflow étape 2
 - Base de comparaison au format remote-tracking ref :
   - epic → `origin/alpha` (le diff = toute la feature : `origin/alpha...HEAD`)
   - ticket → `origin/epic/<EPIC_N>` ou `origin/alpha` (le diff = ce ticket)
@@ -51,7 +51,11 @@ Là où `tu-dev` vise **100% de couverture** avec des TU ciblés et nombreux, l'
    - **Task** → commentaire `## Analyse architecte`
    - **Bug** → commentaire `## Analyse du bug` (root cause + criticité)
 
-2. **Démarrer le dev server** sur le port du worktree — lire `PORT` dans `packages/app/.env.local` (= `3001 + index`). Lancer le serveur en background (`pnpm --filter app dev` ou `pnpm dev:app`), attendre qu'il réponde, puis exporter `PLAYWRIGHT_BASE_URL=http://localhost:<PORT>` pour que Playwright cible **ce** serveur (et non `:3000`). La stack docker (DB jetable, minio, maildev, valkey) + migrations ont déjà été provisionnées par `setup-worktree.sh`.
+2. **Démarrer le dev server sur le port 3000 — obligatoire.** La passerelle ProConnect de test n'enregistre que le callback `http://localhost:3000/api/auth/callback/proconnect` : tout autre port échoue en 404 dès l'étape authorize, donc `auth.setup.ts` ne peut pas authentifier la suite. Concrètement :
+   - **Mode epic** : `run_e2e_dev.sh` a déjà forcé `PORT=3000` dans `packages/app/.env.local` (les ports docker restent index-dérivés). Lance simplement le serveur.
+   - **Mode ticket** (worktree partagé avec `code-dev`) : vérifie d'abord que le port 3000 est libre (`lsof -nP -iTCP:3000 -sTCP:LISTEN`). S'il est occupé, retourne `{"status":"failed","reason":"port 3000 occupé — requis pour le callback ProConnect"}` sans préempter le process qui l'occupe. Sinon lance le serveur avec `PORT=3000` (override de la valeur du `.env.local`).
+
+   Lancer le serveur en background (`pnpm --filter app dev` ou `pnpm dev:app`), attendre qu'il réponde, puis exporter `PLAYWRIGHT_BASE_URL=http://localhost:3000`. La stack docker (DB jetable, minio, maildev, valkey) + migrations ont déjà été provisionnées par `setup-worktree.sh` sur les ports index-dérivés.
 
 3. **Lancer la suite E2E actuelle** — `pnpm --filter app test:e2e` (Playwright, `workers:1`). Capturer précisément la liste des tests/projets en échec (`test-results/`, trace `retain-on-failure`).
 
