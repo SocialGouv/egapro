@@ -30,7 +30,7 @@ export const styles = StyleSheet.create({
 		fontSize: 9,
 		color: TEXT_TITLE_GREY,
 		paddingTop: HEADER_HEIGHT + 8,
-		paddingBottom: FOOTER_HEIGHT,
+		paddingBottom: FOOTER_HEIGHT - 6,
 	},
 
 	header: {
@@ -132,7 +132,6 @@ export const styles = StyleSheet.create({
 		backgroundColor: BACKGROUND_ALT_BLUE_FRANCE,
 		paddingHorizontal: 8,
 		paddingVertical: 4,
-		marginTop: 4,
 		marginBottom: 6,
 	},
 	categoryBannerText: {
@@ -239,7 +238,5 @@ export const styles = StyleSheet.create({
 		marginTop: 4,
 	},
 
-	categoryBlock: {
-		marginBottom: 2,
-	},
+	categoryBlock: {},
 });
