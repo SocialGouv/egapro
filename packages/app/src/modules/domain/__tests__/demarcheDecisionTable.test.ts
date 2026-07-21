@@ -32,7 +32,7 @@ const WORKFORCES = [
 	INDICATOR_G_ANNUAL_MIN + 1, // 251
 ];
 
-type Ecart = {
+type GapCase = {
 	label: string;
 	gap: number;
 	significant: boolean;
@@ -41,7 +41,7 @@ type Ecart = {
 	triggers: boolean;
 };
 
-const ECARTS: Ecart[] = [
+const GAP_CASES: GapCase[] = [
 	{
 		label: "aucun écart (G = 0 %)",
 		gap: 0,
@@ -97,40 +97,37 @@ const REGIMES = [
 type Row = {
 	label: string;
 	workforce: number;
-	hasCse: boolean;
-	ecart: Ecart;
+	gapCase: GapCase;
 	regime: (typeof REGIMES)[number];
 };
 
 const ROWS: Row[] = [];
 for (const workforce of WORKFORCES) {
-	for (const hasCse of [true, false]) {
-		for (const ecart of ECARTS) {
-			for (const regime of REGIMES) {
-				ROWS.push({
-					label: `effectif ${workforce} · ${hasCse ? "avec CSE" : "sans CSE"} · ${ecart.label} · ${regime.label}`,
-					workforce,
-					hasCse,
-					ecart,
-					regime,
-				});
-			}
+	for (const gapCase of GAP_CASES) {
+		for (const regime of REGIMES) {
+			ROWS.push({
+				label: `effectif ${workforce} · ${gapCase.label} · ${regime.label}`,
+				workforce,
+				gapCase,
+				regime,
+			});
 		}
 	}
 }
 
-describe("table de décision — effectif × CSE × écart × régime", () => {
-	it.each(ROWS)("$label", ({ workforce, hasCse, ecart, regime }) => {
+// The CSE dimension (hasCse × hasSubmittedCseOpinion) lives in
+// fsmMirrors.conformance.test.ts, where the mirror functions actually consume it.
+// None of the predicates exercised here read hasCse, so crossing it in would only
+// duplicate rows and add a tautological assertion — it is deliberately left out.
+describe("table de décision — effectif × écart × régime", () => {
+	it.each(ROWS)("$label", ({ workforce, gapCase, regime }) => {
 		// Fixture guard: both regimes stay below the universal year so the 150-249
 		// band remains triennial-gated.
 		expect(regime.year).toBeLessThan(INDICATOR_G_UNIVERSAL_YEAR);
 
-		// The CSE-opinion mandate is size-based (>= 100) and ignores the declared
-		// CSE, whereas the effective obligation to deposit an opinion also needs an
-		// actually declared CSE — mirroring the rule-engine `cseRequired` computation.
+		// The CSE-opinion mandate is size-based (>= 100) and ignores the declared CSE.
 		const cseBySize = workforce >= COMPANY_SIZE_ANNUAL_MIN;
 		expect(isCseRequired(workforce)).toBe(cseBySize);
-		expect(isCseRequired(workforce) && hasCse).toBe(cseBySize && hasCse);
 
 		// Indicator G applies in the annual regime from 250 every year, and in the
 		// triennial band 150-249 only during a triennial year.
@@ -142,19 +139,19 @@ describe("table de décision — effectif × CSE × écart × régime", () => {
 
 		// Gap significance is bidirectional, while the display level is positive-only,
 		// so the negative-gap classification is deferred to the #3963 describe.
-		expect(isSignificantGap(ecart.gap)).toBe(ecart.significant);
-		if (ecart.level !== null) {
-			expect(gapLevel(ecart.gap)).toBe(ecart.level);
+		expect(isSignificantGap(gapCase.gap)).toBe(gapCase.significant);
+		if (gapCase.level !== null) {
+			expect(gapLevel(gapCase.gap)).toBe(gapCase.level);
 		}
 
 		// The phase-2 compliance process needs >= 100 employees, a computed
 		// indicator G, and a positive indicator-G gap at or above the threshold.
 		const expectedCompliance =
-			workforce >= COMPANY_SIZE_ANNUAL_MIN && hasIndicatorG && ecart.triggers;
+			workforce >= COMPANY_SIZE_ANNUAL_MIN && hasIndicatorG && gapCase.triggers;
 		const compliance = isComplianceProcessRequired({
 			workforce,
 			hasIndicatorG,
-			gap: ecart.gap,
+			gap: gapCase.gap,
 		});
 		expect(compliance).toBe(expectedCompliance);
 
@@ -163,8 +160,8 @@ describe("table de décision — effectif × CSE × écart × régime", () => {
 		if (compliance) {
 			expect(isCseRequired(workforce)).toBe(true);
 			expect(hasIndicatorG).toBe(true);
-			expect(isSignificantGap(ecart.gap)).toBe(true);
-			expect(gapLevel(ecart.gap)).toBe("high");
+			expect(isSignificantGap(gapCase.gap)).toBe(true);
+			expect(gapLevel(gapCase.gap)).toBe("high");
 		}
 	});
 });
