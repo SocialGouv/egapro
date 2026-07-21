@@ -7,16 +7,19 @@ export type GapDirection = "women" | "men" | "balanced";
 /** Lifecycle state of a declaration from the user's perspective. */
 export type DeclarationStatus = "to_complete" | "in_progress" | "done";
 
-/** FSM status persisted in `declarations.status`; mirrors `declarationStatusEnum` (kept in sync by `declarationFsmStatus.test.ts` — domain layer stays isomorphic, no Drizzle import). */
-export type DeclarationFsmStatus =
-	| "draft"
-	| "awaiting_compliance_path_choice"
-	| "corrective_actions_chosen"
-	| "joint_evaluation_chosen"
-	| "awaiting_revision_choice"
-	| "revised_joint_evaluation_chosen"
-	| "awaiting_cse_opinion"
-	| "demarche_completed";
+/** FSM status persisted in `declarations.status`; mirrors `declarationStatusEnum` (kept in sync by `declarationFsmStatus.test.ts` — domain layer stays isomorphic, no Drizzle import). Single source for the FSM state vocabulary: the rule-engine schema (`server/rules/schema.ts`) and every UI mirror derive from this const, so adding/renaming a state surfaces as a `tsc` or Zod error, never a silent production bug. */
+export const DECLARATION_FSM_STATUSES = [
+	"draft",
+	"awaiting_compliance_path_choice",
+	"corrective_actions_chosen",
+	"joint_evaluation_chosen",
+	"awaiting_revision_choice",
+	"revised_joint_evaluation_chosen",
+	"awaiting_cse_opinion",
+	"demarche_completed",
+] as const;
+
+export type DeclarationFsmStatus = (typeof DECLARATION_FSM_STATUSES)[number];
 
 /** The two types of declarations a company must file each year. */
 export type DeclarationType = "remuneration" | "representation";

@@ -229,3 +229,4 @@ export type {
 	GapDirection,
 	GapLevel,
 } from "./types";
+export { DECLARATION_FSM_STATUSES } from "./types";

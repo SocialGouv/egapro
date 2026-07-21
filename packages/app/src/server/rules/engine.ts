@@ -1,3 +1,4 @@
+import type { DeclarationFsmStatus } from "~/modules/domain";
 import { type RuleEvent, type Rules, RulesSchema } from "./schema";
 import rawV20271 from "./v2027.1.json";
 
@@ -207,7 +208,7 @@ export function applyAction(
 	facts: Facts,
 	action: string,
 	rules: Rules,
-): { nextStatus: string; events: RuleEvent[] } {
+): { nextStatus: DeclarationFsmStatus; events: RuleEvent[] } {
 	const currentState = facts.currentState as string | undefined;
 	const computations = (rules.computations ?? {}) as Record<
 		string,
@@ -217,7 +218,9 @@ export function applyAction(
 
 	for (const transition of rules.transitions) {
 		if (transition.action !== action) continue;
-		if (currentState && !transition.from.includes(currentState)) continue;
+		// `from` is DeclarationFsmStatus[]; `.some(===)` compares the wider `string` currentState without a cast.
+		if (currentState && !transition.from.some((from) => from === currentState))
+			continue;
 
 		if (!matchesPayload(transition.matchPayload, facts)) continue;
 

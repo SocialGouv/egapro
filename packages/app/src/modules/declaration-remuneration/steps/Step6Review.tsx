@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import { trackFunnelComplete } from "~/modules/analytics";
+import type { DeclarationFsmStatus } from "~/modules/domain";
 import {
 	computeGap,
 	getCompanySizeRange,
@@ -36,7 +37,7 @@ import { IndicatorSections } from "./step6/IndicatorSections";
 type Props = {
 	declaration: {
 		siren: string;
-		status: string | null;
+		status: DeclarationFsmStatus | null;
 	};
 	// Official GIP/DSN workforce — canonical source for the Matomo size bucket
 	// (see StepPageClient), kept consistent with all business decisions.

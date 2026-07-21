@@ -1,5 +1,7 @@
+import type { DeclarationFsmStatus } from "~/modules/domain";
 import type { CompliancePathValue } from "../steps/compliancePath/constants";
 
+const DECLARATION_ENTRY_PATH = "/declaration-remuneration";
 const COMPLIANCE_CONFIRMATION_PATH =
 	"/declaration-remuneration/parcours-conformite/confirmation";
 const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
@@ -52,10 +54,16 @@ type CseOpinionPreviousContext = {
  * event-sourced history (FSM final state).
  */
 export function getCurrentStageHref(
-	status: string | null,
+	status: DeclarationFsmStatus | null,
 	hasCse: boolean | null,
 ): string {
+	if (status === null) {
+		return COMPLIANCE_PATH;
+	}
+
 	switch (status) {
+		case "draft":
+			return DECLARATION_ENTRY_PATH;
 		case "awaiting_compliance_path_choice":
 		case "awaiting_revision_choice":
 			return COMPLIANCE_PATH;
@@ -68,8 +76,6 @@ export function getCurrentStageHref(
 			return CSE_OPINION_PATH;
 		case "demarche_completed":
 			return hasCse === true ? CSE_OPINION_PATH : COMPLIANCE_CONFIRMATION_PATH;
-		default:
-			return COMPLIANCE_PATH;
 	}
 }
 

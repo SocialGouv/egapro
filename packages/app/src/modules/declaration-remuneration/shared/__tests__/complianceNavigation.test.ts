@@ -134,11 +134,14 @@ describe("getCurrentStageHref", () => {
 		);
 	});
 
-	it("falls back to the compliance path for unknown or null status", () => {
-		expect(getCurrentStageHref(null, true)).toBe(
-			"/declaration-remuneration/parcours-conformite",
-		);
+	it("returns the declaration entry for draft (no more silent parcours-conformite fallback)", () => {
 		expect(getCurrentStageHref("draft", true)).toBe(
+			"/declaration-remuneration",
+		);
+	});
+
+	it("returns the compliance path for a null status", () => {
+		expect(getCurrentStageHref(null, true)).toBe(
 			"/declaration-remuneration/parcours-conformite",
 		);
 	});
