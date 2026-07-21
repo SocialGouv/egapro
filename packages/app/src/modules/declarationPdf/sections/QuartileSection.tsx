@@ -1,5 +1,4 @@
 import { View } from "@react-pdf/renderer";
-
 import type { Step4Data } from "~/modules/declaration-remuneration";
 import {
 	computePercentage,
@@ -7,15 +6,10 @@ import {
 	formatCurrency,
 	sumQuartileWorkforce,
 } from "~/modules/domain";
-
 import type { DeclarationPdfData } from "../types";
 import { SectionBanner, SubTitle } from "./headings";
 import { Cell, Row, Table } from "./tableParts";
-
-const LABEL_WIDTH = 88;
-const TRANCHE_WIDTH = 79;
-const SPAN_WIDTH = 246; // label + 2 tranche columns
-const NUM_WIDTH = 69.75;
+import { QUARTILE_TABLE } from "./tableWidths";
 
 const QUARTILE_LABELS = [
 	"1er quartile",
@@ -44,26 +38,26 @@ function QuartileRow({
 	);
 	return (
 		<Row>
-			<Cell bold text={label} width={LABEL_WIDTH} />
+			<Cell bold text={label} width={QUARTILE_TABLE.label} />
 			<Cell
 				align="right"
 				text={formatTranche(previousThreshold)}
-				width={TRANCHE_WIDTH}
+				width={QUARTILE_TABLE.tranche}
 			/>
 			<Cell
 				align="right"
 				text={formatTranche(quartile.threshold)}
-				width={TRANCHE_WIDTH}
+				width={QUARTILE_TABLE.tranche}
 			/>
 			<Cell
 				align="right"
 				text={quartile.women !== undefined ? String(quartile.women) : "-"}
-				width={NUM_WIDTH}
+				width={QUARTILE_TABLE.num}
 			/>
 			<Cell
 				align="right"
 				text={quartile.men !== undefined ? String(quartile.men) : "-"}
-				width={NUM_WIDTH}
+				width={QUARTILE_TABLE.num}
 			/>
 			<Cell
 				align="right"
@@ -73,7 +67,7 @@ function QuartileRow({
 						? computePercentage(quartile.women ?? 0, lineTotal)
 						: "- %"
 				}
-				width={NUM_WIDTH}
+				width={QUARTILE_TABLE.num}
 			/>
 			<Cell
 				align="right"
@@ -83,7 +77,7 @@ function QuartileRow({
 						? computePercentage(quartile.men ?? 0, lineTotal)
 						: "- %"
 				}
-				width={NUM_WIDTH}
+				width={QUARTILE_TABLE.num}
 			/>
 		</Row>
 	);
@@ -100,16 +94,24 @@ function QuartileTable({
 	return (
 		<Table>
 			<Row>
-				<Cell header width={LABEL_WIDTH} />
+				<Cell header width={QUARTILE_TABLE.label} />
 				<Cell
 					header
 					text={`Montants des tranches de rémunération ${trancheLabel}`}
-					width={TRANCHE_WIDTH * 2}
+					width={QUARTILE_TABLE.tranche * 2}
 				/>
-				<Cell header text={"Nombre\nde femmes"} width={NUM_WIDTH} />
-				<Cell header text={"Nombre\nd'hommes"} width={NUM_WIDTH} />
-				<Cell header text={"Pourcentage\nde femmes"} width={NUM_WIDTH} />
-				<Cell header text={"Pourcentage\nd'hommes"} width={NUM_WIDTH} />
+				<Cell header text={"Nombre\nde femmes"} width={QUARTILE_TABLE.num} />
+				<Cell header text={"Nombre\nd'hommes"} width={QUARTILE_TABLE.num} />
+				<Cell
+					header
+					text={"Pourcentage\nde femmes"}
+					width={QUARTILE_TABLE.num}
+				/>
+				<Cell
+					header
+					text={"Pourcentage\nd'hommes"}
+					width={QUARTILE_TABLE.num}
+				/>
 			</Row>
 			{quartiles.map((q, i) => (
 				<QuartileRow
@@ -120,18 +122,18 @@ function QuartileTable({
 				/>
 			))}
 			<Row>
-				<Cell bold text="Tous les salariés" width={SPAN_WIDTH} />
+				<Cell bold text="Tous les salariés" width={QUARTILE_TABLE.span} />
 				<Cell
 					align="right"
 					bold
 					text={totals.women > 0 ? String(totals.women) : "-"}
-					width={NUM_WIDTH}
+					width={QUARTILE_TABLE.num}
 				/>
 				<Cell
 					align="right"
 					bold
 					text={totals.men > 0 ? String(totals.men) : "-"}
-					width={NUM_WIDTH}
+					width={QUARTILE_TABLE.num}
 				/>
 				<Cell
 					align="right"
@@ -141,7 +143,7 @@ function QuartileTable({
 							? computePercentage(totals.women, totals.total)
 							: "- %"
 					}
-					width={NUM_WIDTH}
+					width={QUARTILE_TABLE.num}
 				/>
 				<Cell
 					align="right"
@@ -151,7 +153,7 @@ function QuartileTable({
 							? computePercentage(totals.men, totals.total)
 							: "- %"
 					}
-					width={NUM_WIDTH}
+					width={QUARTILE_TABLE.num}
 				/>
 			</Row>
 		</Table>

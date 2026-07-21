@@ -1,10 +1,9 @@
 import { Text } from "@react-pdf/renderer";
-
 import { computeGap, formatCurrency } from "~/modules/domain";
-
 import { styles } from "../recapPdfStyles";
 import { GapCell } from "./GapCell";
 import { Cell, Row, Table } from "./tableParts";
+import { PAY_TABLE } from "./tableWidths";
 
 type PayGapTableRow = {
 	label: string;
@@ -12,21 +11,21 @@ type PayGapTableRow = {
 	men: string;
 };
 
-const LABEL_WIDTH = 141;
-const VALUE_WIDTH = 132;
-const GAP_WIDTH = 120;
-
 function PayGapDataRow({ row }: { row: PayGapTableRow }) {
 	return (
 		<Row>
-			<Cell bold text={row.label} width={LABEL_WIDTH} />
+			<Cell bold text={row.label} width={PAY_TABLE.label} />
 			<Cell
 				align="right"
 				text={formatCurrency(row.women)}
-				width={VALUE_WIDTH}
+				width={PAY_TABLE.value}
 			/>
-			<Cell align="right" text={formatCurrency(row.men)} width={VALUE_WIDTH} />
-			<Cell width={GAP_WIDTH}>
+			<Cell
+				align="right"
+				text={formatCurrency(row.men)}
+				width={PAY_TABLE.value}
+			/>
+			<Cell width={PAY_TABLE.gap}>
 				<GapCell gap={computeGap(row.women, row.men)} />
 			</Cell>
 		</Row>
@@ -41,14 +40,22 @@ export function PayGapTable({ rows }: { rows: PayGapTableRow[] }) {
 	return (
 		<Table>
 			<Row>
-				<Cell header width={LABEL_WIDTH} />
-				<Cell header text={"Rémunération\ndes femmes"} width={VALUE_WIDTH} />
-				<Cell header text={"Rémunération\ndes hommes"} width={VALUE_WIDTH} />
+				<Cell header width={PAY_TABLE.label} />
+				<Cell
+					header
+					text={"Rémunération\ndes femmes"}
+					width={PAY_TABLE.value}
+				/>
+				<Cell
+					header
+					text={"Rémunération\ndes hommes"}
+					width={PAY_TABLE.value}
+				/>
 				<Cell
 					header
 					hint="Seuil réglementaire : 5%"
 					text="Écart"
-					width={GAP_WIDTH}
+					width={PAY_TABLE.gap}
 				/>
 			</Row>
 			{rows.map((row) => (

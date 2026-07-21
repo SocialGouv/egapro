@@ -1,5 +1,4 @@
 import { Text, View } from "@react-pdf/renderer";
-
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration";
 import {
 	computeGap,
@@ -8,17 +7,12 @@ import {
 	formatCurrency,
 	formatTotal,
 } from "~/modules/domain";
-
 import { styles } from "../recapPdfStyles";
 import type { DeclarationPdfData } from "../types";
 import { GapCell } from "./GapCell";
 import { CategoryBanner, SectionBanner, SubTitle } from "./headings";
 import { Cell, Row, Table } from "./tableParts";
-
-const LABEL_WIDTH = 141;
-const VALUE_WIDTH = 132;
-const GAP_WIDTH = 120;
-const EFFECTIF_TOTAL_WIDTH = 120;
+import { PAY_TABLE } from "./tableWidths";
 
 function EffectifTable({ category }: { category: EmployeeCategoryRow }) {
 	const womenCount = category.womenCount ?? 0;
@@ -27,21 +21,16 @@ function EffectifTable({ category }: { category: EmployeeCategoryRow }) {
 	return (
 		<Table>
 			<Row>
-				<Cell header width={LABEL_WIDTH} />
-				<Cell header text="Femmes" width={VALUE_WIDTH} />
-				<Cell header text="Hommes" width={VALUE_WIDTH} />
-				<Cell header text="Total" width={EFFECTIF_TOTAL_WIDTH} />
+				<Cell header width={PAY_TABLE.label} />
+				<Cell header text="Femmes" width={PAY_TABLE.value} />
+				<Cell header text="Hommes" width={PAY_TABLE.value} />
+				<Cell header text="Total" width={PAY_TABLE.total} />
 			</Row>
 			<Row>
-				<Cell bold text="Nombre de salariés" width={LABEL_WIDTH} />
-				<Cell align="right" text={String(womenCount)} width={VALUE_WIDTH} />
-				<Cell align="right" text={String(menCount)} width={VALUE_WIDTH} />
-				<Cell
-					align="right"
-					bold
-					text={String(total)}
-					width={EFFECTIF_TOTAL_WIDTH}
-				/>
+				<Cell bold text="Nombre de salariés" width={PAY_TABLE.label} />
+				<Cell align="right" text={String(womenCount)} width={PAY_TABLE.value} />
+				<Cell align="right" text={String(menCount)} width={PAY_TABLE.value} />
+				<Cell align="right" bold text={String(total)} width={PAY_TABLE.total} />
 			</Row>
 		</Table>
 	);
@@ -63,29 +52,37 @@ function PayTable({
 	return (
 		<Table>
 			<Row>
-				<Cell header width={LABEL_WIDTH} />
-				<Cell header text={"Rémunération\ndes femmes"} width={VALUE_WIDTH} />
-				<Cell header text={"Rémunération\ndes hommes"} width={VALUE_WIDTH} />
+				<Cell header width={PAY_TABLE.label} />
+				<Cell
+					header
+					text={"Rémunération\ndes femmes"}
+					width={PAY_TABLE.value}
+				/>
+				<Cell
+					header
+					text={"Rémunération\ndes hommes"}
+					width={PAY_TABLE.value}
+				/>
 				<Cell
 					header
 					hint="Seuil réglementaire : 5%"
 					text="Écart"
-					width={GAP_WIDTH}
+					width={PAY_TABLE.gap}
 				/>
 			</Row>
 			<Row>
-				<Cell bold text="Salaire de base" width={LABEL_WIDTH} />
+				<Cell bold text="Salaire de base" width={PAY_TABLE.label} />
 				<Cell
 					align="right"
 					text={formatCurrency(baseWomen)}
-					width={VALUE_WIDTH}
+					width={PAY_TABLE.value}
 				/>
 				<Cell
 					align="right"
 					text={formatCurrency(baseMen)}
-					width={VALUE_WIDTH}
+					width={PAY_TABLE.value}
 				/>
-				<Cell width={GAP_WIDTH}>
+				<Cell width={PAY_TABLE.gap}>
 					<GapCell gap={computeGap(baseWomen ?? "", baseMen ?? "")} />
 				</Cell>
 			</Row>
@@ -93,37 +90,37 @@ function PayTable({
 				<Cell
 					bold
 					text={"Composantes variables\nou complémentaires"}
-					width={LABEL_WIDTH}
+					width={PAY_TABLE.label}
 				/>
 				<Cell
 					align="right"
 					text={formatCurrency(variableWomen)}
-					width={VALUE_WIDTH}
+					width={PAY_TABLE.value}
 				/>
 				<Cell
 					align="right"
 					text={formatCurrency(variableMen)}
-					width={VALUE_WIDTH}
+					width={PAY_TABLE.value}
 				/>
-				<Cell width={GAP_WIDTH}>
+				<Cell width={PAY_TABLE.gap}>
 					<GapCell gap={computeGap(variableWomen ?? "", variableMen ?? "")} />
 				</Cell>
 			</Row>
 			<Row>
-				<Cell bold text="Total" width={LABEL_WIDTH} />
+				<Cell bold text="Total" width={PAY_TABLE.label} />
 				<Cell
 					align="right"
 					bold
 					text={formatTotal(womenSum, "€")}
-					width={VALUE_WIDTH}
+					width={PAY_TABLE.value}
 				/>
 				<Cell
 					align="right"
 					bold
 					text={formatTotal(menSum, "€")}
-					width={VALUE_WIDTH}
+					width={PAY_TABLE.value}
 				/>
-				<Cell width={GAP_WIDTH} />
+				<Cell width={PAY_TABLE.gap} />
 			</Row>
 		</Table>
 	);
