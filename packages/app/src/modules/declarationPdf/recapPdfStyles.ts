@@ -102,7 +102,7 @@ export const styles = StyleSheet.create({
 
 	titleBlock: {
 		marginTop: 8,
-		marginBottom: 10,
+		marginBottom: 6,
 	},
 	title: {
 		fontSize: 12,
@@ -119,7 +119,8 @@ export const styles = StyleSheet.create({
 		backgroundColor: BACKGROUND_GREY_ACTIVE,
 		paddingHorizontal: 8,
 		paddingVertical: 4,
-		marginTop: 10,
+		marginTop: 4,
+		marginBottom: 6,
 	},
 	sectionBannerText: {
 		fontSize: 9,
@@ -131,7 +132,8 @@ export const styles = StyleSheet.create({
 		backgroundColor: BACKGROUND_ALT_BLUE_FRANCE,
 		paddingHorizontal: 8,
 		paddingVertical: 4,
-		marginTop: 10,
+		marginTop: 4,
+		marginBottom: 6,
 	},
 	categoryBannerText: {
 		fontSize: 9,
@@ -143,13 +145,14 @@ export const styles = StyleSheet.create({
 		fontSize: 9,
 		fontWeight: BOLD,
 		color: TEXT_TITLE_GREY,
-		marginTop: 10,
+		marginBottom: 2,
 	},
 
 	infoBody: {
 		flexDirection: "row",
 		paddingHorizontal: 8,
-		paddingVertical: 6,
+		paddingBottom: 6,
+		marginBottom: 6,
 	},
 	infoLabelColumn: {
 		width: 142,
@@ -173,7 +176,7 @@ export const styles = StyleSheet.create({
 		borderTopWidth: 1,
 		borderLeftWidth: 1,
 		borderColor: BORDER_CONTRAST_GREY,
-		marginTop: 4,
+		marginBottom: 6,
 	},
 	row: {
 		flexDirection: "row",
