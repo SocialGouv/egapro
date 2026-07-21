@@ -23,7 +23,12 @@ export function FeedbackBanner({ className }: Props) {
 					2 minutes.
 				</p>
 			</div>
-			<a href={FEEDBACK_URL} rel="noopener noreferrer" target="_blank">
+			<a
+				className={styles.link}
+				href={FEEDBACK_URL}
+				rel="noopener noreferrer"
+				target="_blank"
+			>
 				<Image
 					alt="Je donne mon avis"
 					height={85}
