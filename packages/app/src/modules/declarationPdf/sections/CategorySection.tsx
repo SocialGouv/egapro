@@ -1,6 +1,6 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
+import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration";
 import {
 	computeGap,
 	computeTotal,
@@ -167,14 +167,10 @@ function CategoryBlock({
 }
 
 export function CategorySection({ data }: { data: DeclarationPdfData }) {
-	const indexedCategories = data.categories.map((category, position) => ({
-		category,
-		position,
-	}));
 	return (
 		<View>
 			<SectionBanner title="Écart de rémunération par catégories de salariés" />
-			{indexedCategories.length > 0 ? (
+			{data.categories.length > 0 ? (
 				<>
 					<View style={styles.infoBody}>
 						<View style={styles.infoLabelColumn}>
@@ -184,11 +180,11 @@ export function CategorySection({ data }: { data: DeclarationPdfData }) {
 							<Text style={styles.infoValue}>{data.source ?? "-"}</Text>
 						</View>
 					</View>
-					{indexedCategories.map(({ category, position }) => (
+					{data.categories.map((category, position) => (
 						<CategoryBlock
 							category={category}
 							index={position}
-							key={position}
+							key={category.name}
 						/>
 					))}
 				</>

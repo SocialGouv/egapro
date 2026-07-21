@@ -1,9 +1,10 @@
 import { View } from "@react-pdf/renderer";
 
-import type { Step4Data } from "~/modules/declaration-remuneration/types";
+import type { Step4Data } from "~/modules/declaration-remuneration";
 import {
 	computePercentage,
 	computeWorkforceTotal,
+	formatCurrency,
 	sumQuartileWorkforce,
 } from "~/modules/domain";
 
@@ -25,9 +26,67 @@ const QUARTILE_LABELS = [
 
 function formatTranche(value: string | undefined): string {
 	if (!value) return "- €";
-	const n = Number.parseFloat(value);
-	if (Number.isNaN(n)) return "- €";
-	return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} €`;
+	return formatCurrency(value);
+}
+
+function QuartileRow({
+	quartile,
+	previousThreshold,
+	label,
+}: {
+	quartile: Step4Data["annual"][number];
+	previousThreshold: string | undefined;
+	label: string | undefined;
+}) {
+	const lineTotal = computeWorkforceTotal(
+		quartile.women ?? 0,
+		quartile.men ?? 0,
+	);
+	return (
+		<Row>
+			<Cell bold text={label} width={LABEL_WIDTH} />
+			<Cell
+				align="right"
+				text={formatTranche(previousThreshold)}
+				width={TRANCHE_WIDTH}
+			/>
+			<Cell
+				align="right"
+				text={formatTranche(quartile.threshold)}
+				width={TRANCHE_WIDTH}
+			/>
+			<Cell
+				align="right"
+				text={quartile.women !== undefined ? String(quartile.women) : "-"}
+				width={NUM_WIDTH}
+			/>
+			<Cell
+				align="right"
+				text={quartile.men !== undefined ? String(quartile.men) : "-"}
+				width={NUM_WIDTH}
+			/>
+			<Cell
+				align="right"
+				bold
+				text={
+					lineTotal > 0
+						? computePercentage(quartile.women ?? 0, lineTotal)
+						: "- %"
+				}
+				width={NUM_WIDTH}
+			/>
+			<Cell
+				align="right"
+				bold
+				text={
+					lineTotal > 0
+						? computePercentage(quartile.men ?? 0, lineTotal)
+						: "- %"
+				}
+				width={NUM_WIDTH}
+			/>
+		</Row>
+	);
 }
 
 function QuartileTable({
@@ -52,46 +111,14 @@ function QuartileTable({
 				<Cell header text={"Pourcentage\nde femmes"} width={NUM_WIDTH} />
 				<Cell header text={"Pourcentage\nd'hommes"} width={NUM_WIDTH} />
 			</Row>
-			{quartiles.map((q, i) => {
-				const min = formatTranche(quartiles[i - 1]?.threshold);
-				const max = formatTranche(q.threshold);
-				const lineTotal = computeWorkforceTotal(q.women ?? 0, q.men ?? 0);
-				return (
-					<Row key={QUARTILE_LABELS[i]}>
-						<Cell bold text={QUARTILE_LABELS[i]} width={LABEL_WIDTH} />
-						<Cell align="right" text={min} width={TRANCHE_WIDTH} />
-						<Cell align="right" text={max} width={TRANCHE_WIDTH} />
-						<Cell
-							align="right"
-							text={q.women !== undefined ? String(q.women) : "-"}
-							width={NUM_WIDTH}
-						/>
-						<Cell
-							align="right"
-							text={q.men !== undefined ? String(q.men) : "-"}
-							width={NUM_WIDTH}
-						/>
-						<Cell
-							align="right"
-							bold
-							text={
-								lineTotal > 0
-									? computePercentage(q.women ?? 0, lineTotal)
-									: "- %"
-							}
-							width={NUM_WIDTH}
-						/>
-						<Cell
-							align="right"
-							bold
-							text={
-								lineTotal > 0 ? computePercentage(q.men ?? 0, lineTotal) : "- %"
-							}
-							width={NUM_WIDTH}
-						/>
-					</Row>
-				);
-			})}
+			{quartiles.map((q, i) => (
+				<QuartileRow
+					key={QUARTILE_LABELS[i]}
+					label={QUARTILE_LABELS[i]}
+					previousThreshold={quartiles[i - 1]?.threshold}
+					quartile={q}
+				/>
+			))}
 			<Row>
 				<Cell bold text="Tous les salariés" width={SPAN_WIDTH} />
 				<Cell

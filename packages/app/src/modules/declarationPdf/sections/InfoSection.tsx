@@ -2,7 +2,7 @@ import { Text, View } from "@react-pdf/renderer";
 
 import { styles } from "../recapPdfStyles";
 
-export type InfoRow = {
+type InfoRow = {
 	label: string;
 	value: string;
 };

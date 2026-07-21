@@ -6,7 +6,7 @@ import { styles } from "../recapPdfStyles";
 import { GapCell } from "./GapCell";
 import { Cell, Row, Table } from "./tableParts";
 
-export type PayGapTableRow = {
+type PayGapTableRow = {
 	label: string;
 	women: string;
 	men: string;
@@ -15,6 +15,23 @@ export type PayGapTableRow = {
 const LABEL_WIDTH = 141;
 const VALUE_WIDTH = 132;
 const GAP_WIDTH = 120;
+
+function PayGapDataRow({ row }: { row: PayGapTableRow }) {
+	return (
+		<Row>
+			<Cell bold text={row.label} width={LABEL_WIDTH} />
+			<Cell
+				align="right"
+				text={formatCurrency(row.women)}
+				width={VALUE_WIDTH}
+			/>
+			<Cell align="right" text={formatCurrency(row.men)} width={VALUE_WIDTH} />
+			<Cell width={GAP_WIDTH}>
+				<GapCell gap={computeGap(row.women, row.men)} />
+			</Cell>
+		</Row>
+	);
+}
 
 export function PayGapTable({ rows }: { rows: PayGapTableRow[] }) {
 	const allEmpty = rows.every((r) => r.women === "" && r.men === "");
@@ -35,22 +52,7 @@ export function PayGapTable({ rows }: { rows: PayGapTableRow[] }) {
 				/>
 			</Row>
 			{rows.map((row) => (
-				<Row key={row.label}>
-					<Cell bold text={row.label} width={LABEL_WIDTH} />
-					<Cell
-						align="right"
-						text={formatCurrency(row.women)}
-						width={VALUE_WIDTH}
-					/>
-					<Cell
-						align="right"
-						text={formatCurrency(row.men)}
-						width={VALUE_WIDTH}
-					/>
-					<Cell width={GAP_WIDTH}>
-						<GapCell gap={computeGap(row.women, row.men)} />
-					</Cell>
-				</Row>
+				<PayGapDataRow key={row.label} row={row} />
 			))}
 		</Table>
 	);

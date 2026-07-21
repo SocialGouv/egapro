@@ -3,7 +3,7 @@ import type {
 	Step2Data,
 	Step3Data,
 	Step4Data,
-} from "~/modules/declaration-remuneration/types";
+} from "~/modules/declaration-remuneration";
 
 export type DeclarationPdfDeclarant = {
 	name: string;

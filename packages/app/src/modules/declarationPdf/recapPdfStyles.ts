@@ -33,7 +33,6 @@ export const styles = StyleSheet.create({
 		paddingBottom: FOOTER_HEIGHT,
 	},
 
-	// --- Fixed header (all pages) ---
 	header: {
 		position: "absolute",
 		top: 0,
@@ -57,7 +56,6 @@ export const styles = StyleSheet.create({
 		textAlign: "right",
 	},
 
-	// --- Fixed footer (all pages) ---
 	footer: {
 		position: "absolute",
 		bottom: 0,
@@ -75,7 +73,6 @@ export const styles = StyleSheet.create({
 		color: TEXT_DEFAULT_GREY,
 	},
 
-	// --- Egapro banner (page 1 only, full-bleed) ---
 	banner: {
 		backgroundColor: BACKGROUND_ALT_BLUE_FRANCE,
 		flexDirection: "row",
@@ -99,12 +96,10 @@ export const styles = StyleSheet.create({
 		height: 40,
 	},
 
-	// --- Content wrapper (35pt side margins) ---
 	content: {
 		marginHorizontal: CONTENT_MARGIN,
 	},
 
-	// --- Document title block ---
 	titleBlock: {
 		marginTop: 8,
 		marginBottom: 10,
@@ -120,7 +115,6 @@ export const styles = StyleSheet.create({
 		marginTop: 6,
 	},
 
-	// --- Section banner (grey) ---
 	sectionBanner: {
 		backgroundColor: BACKGROUND_GREY_ACTIVE,
 		paddingHorizontal: 8,
@@ -133,7 +127,6 @@ export const styles = StyleSheet.create({
 		color: TEXT_TITLE_GREY,
 	},
 
-	// --- Category banner (light blue) ---
 	categoryBanner: {
 		backgroundColor: BACKGROUND_ALT_BLUE_FRANCE,
 		paddingHorizontal: 8,
@@ -146,7 +139,6 @@ export const styles = StyleSheet.create({
 		color: TEXT_TITLE_GREY,
 	},
 
-	// --- Sub-title (bold, no background) ---
 	subTitle: {
 		fontSize: 9,
 		fontWeight: BOLD,
@@ -155,7 +147,6 @@ export const styles = StyleSheet.create({
 		marginBottom: 4,
 	},
 
-	// --- Info blocks (label / value columns) ---
 	infoBody: {
 		flexDirection: "row",
 		paddingHorizontal: 8,
@@ -179,7 +170,6 @@ export const styles = StyleSheet.create({
 		marginBottom: 4,
 	},
 
-	// --- Tables ---
 	table: {
 		borderTopWidth: 1,
 		borderLeftWidth: 1,
@@ -218,7 +208,6 @@ export const styles = StyleSheet.create({
 		marginTop: 2,
 	},
 
-	// --- Gap cell (value + "ÉLEVÉ" badge) ---
 	gapCell: {
 		flexDirection: "row",
 		alignItems: "center",
@@ -242,7 +231,6 @@ export const styles = StyleSheet.create({
 		color: TEXT_DEFAULT_WARNING,
 	},
 
-	// --- Empty state ---
 	noData: {
 		fontSize: 9,
 		color: TEXT_DEFAULT_GREY,

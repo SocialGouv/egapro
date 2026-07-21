@@ -4,6 +4,7 @@ import { and, desc, eq } from "drizzle-orm";
 
 import { SOURCE_LABELS } from "~/modules/declaration-remuneration";
 import {
+	formatCount,
 	formatShortDate,
 	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getReferencePeriod,
@@ -172,7 +173,7 @@ export async function buildPdfData(
 			nafLabel: company?.nafLabel ?? null,
 			workforceDisplay:
 				displayWorkforce !== null
-					? displayWorkforce.toLocaleString("fr-FR")
+					? formatCount(displayWorkforce)
 					: GIP_WORKFORCE_ABSENT_DISPLAY,
 		},
 		totalWomen: declaration.totalWomen ?? 0,
