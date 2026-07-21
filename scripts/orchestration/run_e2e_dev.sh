@@ -81,7 +81,23 @@ if ! git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
 fi
 
 # ---- Pre-flight: port 3000 must be free (ProConnect callback constraint) ----
-if lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+# Probe with whatever listener-inspection tool exists (lsof isn't guaranteed on
+# minimal Linux hosts). If none is available, skip the check rather than
+# fail-closed on the absence of tooling — the dev server boot would then surface
+# a bind error itself.
+port_in_use() {
+    local port="$1"
+    if command -v lsof >/dev/null 2>&1; then
+        lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1
+    elif command -v ss >/dev/null 2>&1; then
+        ss -ltnH "sport = :$port" 2>/dev/null | grep -q .
+    elif command -v nc >/dev/null 2>&1; then
+        nc -z 127.0.0.1 "$port" >/dev/null 2>&1
+    else
+        return 1
+    fi
+}
+if port_in_use "$PORT"; then
     echo "ERROR: port $PORT is busy — the E2E dev server must bind :3000 (ProConnect callback). Stop the process holding it and re-run." >&2
     bash "$SCRIPT_DIR/log_event.sh" "$AID" FAILED "port_3000_busy"
     exit 1
@@ -123,8 +139,15 @@ if [ ! -f "$WT_PATH/packages/app/.env.local" ]; then
         || { bash "$SCRIPT_DIR/log_event.sh" "$AID" STACK_FAIL "setup-worktree.sh failed (index=$INDEX)"; exit 1; }
 fi
 # setup-worktree.sh writes PORT=3001+index; the E2E run overrides it to 3000
-# (ProConnect callback constraint). Idempotent across re-runs.
-perl -pi -e "s/^PORT=.*/PORT=$PORT/" "$WT_PATH/packages/app/.env.local"
+# (ProConnect callback constraint). Rewrite the line if present, otherwise
+# append it — a silent no-op here would let the dev server bind the wrong port
+# and break ProConnect auth. Idempotent across re-runs.
+E2E_ENV_FILE="$WT_PATH/packages/app/.env.local"
+if grep -qE '^PORT=' "$E2E_ENV_FILE"; then
+    perl -pi -e "s/^PORT=.*/PORT=$PORT/" "$E2E_ENV_FILE"
+else
+    printf '\nPORT=%s\n' "$PORT" >> "$E2E_ENV_FILE"
+fi
 
 bash "$SCRIPT_DIR/log_event.sh" "$AID" STACK_READY "wt=$WT_PATH index=$INDEX port=$PORT"
 

@@ -88,6 +88,7 @@ CLAMAV_PORT=$CLAMAV_HOST_PORT
 # endpoint crashes the dev-server boot (instrumentation runs ensureBucket
 # against S3 on startup).
 S3_ENDPOINT=http://localhost:$MINIO_API_PORT
+SMTP_HOST=localhost
 SMTP_PORT=$MAILDEV_SMTP_PORT
 VALKEY_URL=redis://localhost:$VALKEY_HOST_PORT
 EOF
