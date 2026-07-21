@@ -110,6 +110,16 @@ Pour chaque axe impacté, **régénère le fichier `docs/*.md` correspondant fro
 
 **Anti-hallucination** : pour toute affirmation factuelle (existence d'une route, d'un router, d'une constante, d'un middleware), **vérifie le code** via Read ou Grep avant de l'écrire. Mieux vaut une doc plus courte mais juste qu'une doc large avec des erreurs.
 
+### 3-bis. Régénérer l'inventaire des tests (best-effort)
+
+Dans la foulée, régénère l'inventaire des tests pour qu'il reflète l'état courant du code :
+
+```bash
+pnpm --filter app test:inventory || echo "test:inventory best-effort : ignoré (base/env indisponible)"
+```
+
+`docs/tests-inventory.md` sera ajouté au commit de l'étape 5 s'il a changé (le `git add docs/` le capture). Best-effort comme le reste de doc-writer : un échec (base indisponible pour lister les tests d'intégration, par ex.) **ne bloque pas** — l'inventaire reste régénérable à la demande via le skill `/test-inventory`.
+
 ### 4. Validation
 
 Après écriture :

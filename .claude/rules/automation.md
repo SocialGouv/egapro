@@ -139,6 +139,10 @@ Apply these rules **as you write code**, before any agent runs:
 
 Playwright E2E tests are written/maintained **exclusively** by the `e2e-dev` agent (Opus), at the **end of the pipeline** — never by `code-dev` and never inline by the main agent. `e2e-dev` decides whether a journey warrants a new `*.e2e.ts` or should be **nested** into an existing global scenario, and judges criticality for bugs. Full E2E rules: `rules/e2e.md` ; agent workflow: `.claude/agents/e2e-dev/AGENT.md`.
 
+### Test inventory — `docs/tests-inventory.md` (non-blocking)
+
+`docs/tests-inventory.md` is a generated, human-readable inventory of the whole suite (unit + integration + E2E), grouped by functional domain, synced to the wiki so the team sees what is covered. It is **not** enforced by a CI gate. When a PR **adds, renames, or removes** tests, regenerate it with the `/test-inventory` skill (or `pnpm --filter app test:inventory`) and commit the result. The `doc-writer` agent also regenerates it best-effort at epic-end. Backing: `packages/app/scripts/generate-test-inventory.mjs`.
+
 ---
 
 ## Specialized agents
