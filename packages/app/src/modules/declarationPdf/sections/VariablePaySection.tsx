@@ -94,8 +94,8 @@ export function VariablePaySection({ data }: { data: DeclarationPdfData }) {
 	];
 	return (
 		<View>
-			<SectionBanner title="Écart de rémunération variable ou complémentaire" />
 			<View wrap={false}>
+				<SectionBanner title="Écart de rémunération variable ou complémentaire" />
 				<SubTitle title="Rémunération variable ou complémentaire" />
 				<PayGapTable rows={rows} />
 			</View>

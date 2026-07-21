@@ -161,8 +161,8 @@ function QuartileTable({
 export function QuartileSection({ data }: { data: DeclarationPdfData }) {
 	return (
 		<View>
-			<SectionBanner title="Proportion de femmes et d'hommes dans chaque quartile de rémunération" />
 			<View wrap={false}>
+				<SectionBanner title="Proportion de femmes et d'hommes dans chaque quartile de rémunération" />
 				<SubTitle title="Rémunération annuelle brute moyenne" />
 				<QuartileTable
 					quartiles={data.step4Data.annual}

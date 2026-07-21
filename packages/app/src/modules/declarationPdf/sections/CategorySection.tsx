@@ -169,9 +169,9 @@ function CategoryBlock({
 export function CategorySection({ data }: { data: DeclarationPdfData }) {
 	return (
 		<View>
-			<SectionBanner title="Écart de rémunération par catégories de salariés" />
-			{data.categories.length > 0 ? (
-				<>
+			<View minPresenceAhead={80} wrap={false}>
+				<SectionBanner title="Écart de rémunération par catégories de salariés" />
+				{data.categories.length > 0 ? (
 					<View style={styles.infoBody}>
 						<View style={styles.infoLabelColumn}>
 							<Text style={styles.infoLabel}>Source</Text>
@@ -180,17 +180,17 @@ export function CategorySection({ data }: { data: DeclarationPdfData }) {
 							<Text style={styles.infoValue}>{data.source ?? "-"}</Text>
 						</View>
 					</View>
-					{data.categories.map((category, position) => (
-						<CategoryBlock
-							category={category}
-							index={position}
-							key={category.name}
-						/>
-					))}
-				</>
-			) : (
-				<Text style={styles.noData}>Aucune donnée renseignée.</Text>
-			)}
+				) : (
+					<Text style={styles.noData}>Aucune donnée renseignée.</Text>
+				)}
+			</View>
+			{data.categories.map((category, position) => (
+				<CategoryBlock
+					category={category}
+					index={position}
+					key={category.name}
+				/>
+			))}
 		</View>
 	);
 }

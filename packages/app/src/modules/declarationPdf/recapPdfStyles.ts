@@ -144,7 +144,6 @@ export const styles = StyleSheet.create({
 		fontWeight: BOLD,
 		color: TEXT_TITLE_GREY,
 		marginTop: 10,
-		marginBottom: 4,
 	},
 
 	infoBody: {
