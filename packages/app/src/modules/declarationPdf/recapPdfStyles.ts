@@ -151,25 +151,24 @@ export const styles = StyleSheet.create({
 	infoBody: {
 		flexDirection: "row",
 		paddingHorizontal: 8,
-		paddingBottom: 6,
 		marginBottom: 6,
 	},
 	infoLabelColumn: {
 		width: 142,
+		gap: 4,
 	},
 	infoValueColumn: {
 		flex: 1,
+		gap: 4,
 	},
 	infoLabel: {
 		fontSize: 9,
 		color: TEXT_TITLE_GREY,
-		marginBottom: 4,
 	},
 	infoValue: {
 		fontSize: 9,
 		fontWeight: BOLD,
 		color: TEXT_TITLE_GREY,
-		marginBottom: 4,
 	},
 
 	table: {
