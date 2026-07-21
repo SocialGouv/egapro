@@ -15,9 +15,9 @@ export function FeedbackBanner({ className }: Props) {
 			className={className ? `${styles.banner} ${className}` : styles.banner}
 		>
 			<div className={styles.content}>
-				<h2 className="fr-text--xl fr-text--bold fr-mb-1w">
+				<p className="fr-text--xl fr-text--bold fr-mb-1w">
 					Comment s&apos;est passée votre démarche ?
-				</h2>
+				</p>
 				<p className="fr-text--sm fr-mb-0">
 					Aidez nous à améliorer Egapro en donnant votre avis, cela ne prend que
 					2 minutes.
