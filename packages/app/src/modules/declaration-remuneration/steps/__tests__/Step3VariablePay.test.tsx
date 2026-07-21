@@ -38,6 +38,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -52,6 +53,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -67,6 +69,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 				maxMen={60}
 				maxWomen={50}
@@ -83,6 +86,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -101,6 +105,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -116,6 +121,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={{
 					indicatorBAnnualWomen: "100",
 					indicatorBAnnualMen: "200",
@@ -138,6 +144,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -150,6 +157,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -177,6 +185,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -200,6 +209,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -222,6 +232,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 				maxMen={25}
 				maxWomen={15}
@@ -243,6 +254,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 				maxMen={25}
 				maxWomen={15}
@@ -274,6 +286,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 				maxMen={25}
 				maxWomen={15}
@@ -305,6 +318,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 				maxMen={25}
 				maxWomen={15}
@@ -329,6 +343,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -382,6 +397,7 @@ describe("Step3VariablePay", () => {
 					confidenceIndex: null,
 					periodEnd: "2026-12-31",
 				}}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -437,6 +453,7 @@ describe("Step3VariablePay", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -491,6 +508,7 @@ describe("Step3VariablePay", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);

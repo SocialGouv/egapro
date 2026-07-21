@@ -33,6 +33,7 @@ describe("Step5EmployeeCategories dev fill", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				maxMen={130}
 				maxWomen={120}
 			/>,

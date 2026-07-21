@@ -68,7 +68,7 @@ describe("isIndicatorGRequired", () => {
 	});
 
 	it("returns true for workforce 150-249 in triennial year 2030", () => {
-		expect(isIndicatorGRequired(200, 2030)).toBe(false);
+		expect(isIndicatorGRequired(200, 2030)).toBe(true);
 	});
 
 	it("returns false for workforce < 150 in any year before universal year", () => {
@@ -77,9 +77,23 @@ describe("isIndicatorGRequired", () => {
 		expect(isIndicatorGRequired(100, 2029)).toBe(false);
 	});
 
-	it("returns false for workforce < 250 at universal year (2030) when below annual min", () => {
-		expect(isIndicatorGRequired(100, 2030)).toBe(false);
-		expect(isIndicatorGRequired(249, 2030)).toBe(false);
+	it("extends the obligation to every tier >= 50 on triennial years from 2030", () => {
+		expect(isIndicatorGRequired(50, 2030)).toBe(true);
+		expect(isIndicatorGRequired(70, 2030)).toBe(true);
+		expect(isIndicatorGRequired(100, 2030)).toBe(true);
+		expect(isIndicatorGRequired(249, 2030)).toBe(true);
+		expect(isIndicatorGRequired(70, 2033)).toBe(true);
+	});
+
+	it("keeps sub-250 tiers on the triennial cadence after 2030 (non-triennial years excluded)", () => {
+		expect(isIndicatorGRequired(70, 2031)).toBe(false);
+		expect(isIndicatorGRequired(200, 2031)).toBe(false);
+		expect(isIndicatorGRequired(249, 2032)).toBe(false);
+	});
+
+	it("keeps the voluntary tier (< 50) out of the obligation even from 2030", () => {
+		expect(isIndicatorGRequired(49, 2030)).toBe(false);
+		expect(isIndicatorGRequired(0, 2033)).toBe(false);
 	});
 
 	it("returns true for workforce >= 250 at universal year (2030)", () => {
@@ -121,8 +135,13 @@ describe("getApplicableIndicators", () => {
 		expect(result.indicators).toEqual(["A", "B", "C", "D", "E", "F", "G"]);
 	});
 
-	it("excludes G for workforce 100 at universal year 2030", () => {
+	it("includes G for workforce 100 at universal year 2030 (triennial cadence)", () => {
 		const result = getApplicableIndicators(100, 2030);
+		expect(result.indicators).toEqual(["A", "B", "C", "D", "E", "F", "G"]);
+	});
+
+	it("excludes G for workforce 100 in 2031 (non-triennial year)", () => {
+		const result = getApplicableIndicators(100, 2031);
 		expect(result.indicators).toEqual(["A", "B", "C", "D", "E", "F"]);
 	});
 

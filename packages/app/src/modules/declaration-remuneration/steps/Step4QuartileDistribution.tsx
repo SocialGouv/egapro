@@ -16,6 +16,7 @@ import { useDraftAutoSave } from "../shared/draft/useDraftAutoSave";
 import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
+import { getNextStepHref } from "../shared/funnelSteps";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { useLockContext } from "../shared/lock/LockContext";
 import { PrefillSource } from "../shared/PrefillSource";
@@ -52,6 +53,7 @@ function padThresholds(qs: QuartileTuple): QuartileTuple {
 type Step4QuartileDistributionProps = {
 	declarationSiren: string;
 	declarationYear: number;
+	indicatorGRequired: boolean;
 	initialData: Step4Data;
 	gipPrefillData?: GipPrefillData;
 	maxWomen?: number;
@@ -61,6 +63,7 @@ type Step4QuartileDistributionProps = {
 export function Step4QuartileDistribution({
 	declarationSiren,
 	declarationYear,
+	indicatorGRequired,
 	initialData,
 	gipPrefillData,
 	maxWomen,
@@ -150,10 +153,12 @@ export function Step4QuartileDistribution({
 	const [fieldErrors, setFieldErrors] = useState<FieldErrorMap>(emptyErrorMap);
 	const [showRecap, setShowRecap] = useState(false);
 
+	const nextHref = getNextStepHref(4, indicatorGRequired);
+
 	const mutation = api.declaration.updateStep4.useMutation({
 		onSuccess: () => {
 			clearDraft();
-			router.push("/declaration-remuneration/etape/5");
+			if (nextHref) router.push(nextHref);
 		},
 	});
 
@@ -294,7 +299,10 @@ export function Step4QuartileDistribution({
 					}
 				/>
 
-				<StepIndicator currentStep={4} />
+				<StepIndicator
+					currentStep={4}
+					indicatorGRequired={indicatorGRequired}
+				/>
 
 				<div className={stepStyles.instructions}>
 					<p className="fr-mb-0">
@@ -435,9 +443,7 @@ export function Step4QuartileDistribution({
 
 				<FormActions
 					isSubmitting={mutation.isPending}
-					mimoquageNextHref={
-						hasSavedData ? "/declaration-remuneration/etape/5" : undefined
-					}
+					mimoquageNextHref={hasSavedData ? nextHref : undefined}
 					previousHref="/declaration-remuneration/etape/3"
 				/>
 			</fieldset>

@@ -97,6 +97,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -114,6 +115,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -130,6 +132,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -146,6 +149,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -165,6 +169,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -179,6 +184,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -208,6 +214,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -222,6 +229,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -237,6 +245,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -252,6 +261,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={{
 					indicatorAAnnualWomen: "95",
 					indicatorAAnnualMen: "100",
@@ -286,6 +296,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -301,6 +312,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={{
 					indicatorBAnnualWomen: "95",
@@ -331,6 +343,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={{
@@ -366,6 +379,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -406,6 +420,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -417,12 +432,31 @@ describe("Step6Review", () => {
 		);
 	});
 
+	it("renders previous link pointing to step 4 when indicatorGRequired is false", () => {
+		render(
+			<Step6Review
+				companyWorkforce={null}
+				declaration={emptyDeclaration()}
+				declarationYear={2025}
+				indicatorGRequired={false}
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
+		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/etape/4",
+		);
+	});
+
 	it("renders next as a submit button when not submitted", () => {
 		render(
 			<Step6Review
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
@@ -439,6 +473,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
@@ -461,6 +496,7 @@ describe("Step6Review", () => {
 				}}
 				declarationYear={2025}
 				hasCse={true}
+				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
@@ -479,6 +515,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
@@ -501,6 +538,7 @@ describe("Step6Review", () => {
 				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
@@ -515,12 +553,13 @@ describe("Step6Review", () => {
 	it("shows 'Prochaines étapes' callout when a gap >= 5%", () => {
 		render(
 			<Step6Review
-				companyWorkforce={null}
+				companyWorkforce={300}
 				declaration={{
 					siren: "532847196",
 					status: null,
 				}}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={{
 					indicatorAAnnualWomen: "90",
 					indicatorAAnnualMen: "100",
@@ -557,9 +596,10 @@ describe("Step6Review", () => {
 		// Women earn 10% more → signed gap -10%: |gap| >= 5% but negative, so no obligation (GIP).
 		render(
 			<Step6Review
-				companyWorkforce={null}
+				companyWorkforce={300}
 				declaration={{ siren: "532847196", status: null }}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={{
 					indicatorAAnnualWomen: "110",
 					indicatorAAnnualMen: "100",
@@ -580,9 +620,10 @@ describe("Step6Review", () => {
 	it("does not show 'Prochaines étapes' callout when all gaps < 5%", () => {
 		render(
 			<Step6Review
-				companyWorkforce={null}
+				companyWorkforce={300}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={{
 					indicatorAAnnualWomen: "98",
 					indicatorAAnnualMen: "100",
@@ -591,6 +632,81 @@ describe("Step6Review", () => {
 					indicatorCAnnualWomen: "97",
 					indicatorCAnnualMen: "100",
 					indicatorCHourlyWomen: "99",
+					indicatorCHourlyMen: "100",
+				}}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
+		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
+	});
+
+	it("does not show 'Prochaines étapes' callout below 100 employees even with a high gap", () => {
+		// Phase 2 is reserved to 100+ companies — a 50-99 firm never enters it.
+		render(
+			<Step6Review
+				companyWorkforce={80}
+				declaration={{ siren: "532847196", status: null }}
+				declarationYear={2025}
+				indicatorGRequired
+				step2Data={{
+					indicatorAAnnualWomen: "90",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "100",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "100",
+					indicatorCHourlyWomen: "100",
+					indicatorCHourlyMen: "100",
+				}}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
+		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
+	});
+
+	it("does not show 'Prochaines étapes' callout when indicator G is not part of the declaration", () => {
+		// Phase 2 requires indicator G — a 100+ firm that doesn't declare G stays out.
+		render(
+			<Step6Review
+				companyWorkforce={300}
+				declaration={{ siren: "532847196", status: null }}
+				declarationYear={2025}
+				indicatorGRequired={false}
+				step2Data={{
+					indicatorAAnnualWomen: "90",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "100",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "100",
+					indicatorCHourlyWomen: "100",
+					indicatorCHourlyMen: "100",
+				}}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
+		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
+	});
+
+	it("keys the callout off the global annual mean gap (indicator A), not other indicators", () => {
+		// A annual gap 2% (< 5%) but C annual 10%: the trigger only reads the global annual mean gap.
+		render(
+			<Step6Review
+				companyWorkforce={300}
+				declaration={{ siren: "532847196", status: null }}
+				declarationYear={2025}
+				indicatorGRequired
+				step2Data={{
+					indicatorAAnnualWomen: "98",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "100",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "90",
+					indicatorCAnnualMen: "100",
+					indicatorCHourlyWomen: "100",
 					indicatorCHourlyMen: "100",
 				}}
 				step3Data={emptyStep3Data()}

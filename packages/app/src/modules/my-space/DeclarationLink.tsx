@@ -18,14 +18,22 @@ type Props = {
 	type: DeclarationType;
 	userPhone: string | null;
 	hasCse: boolean | null;
+	cseApplicable: boolean;
 	children: React.ReactNode;
 };
 
 /** Link that opens the missing info modal if phone or CSE is missing, or navigates/opens panel directly. */
-export function DeclarationLink({ type, userPhone, hasCse, children }: Props) {
+export function DeclarationLink({
+	type,
+	userPhone,
+	hasCse,
+	cseApplicable,
+	children,
+}: Props) {
 	const isImpersonating = useIsImpersonating();
 	const hasMissingInfo =
-		!isImpersonating && !hasRequiredDeclarationInfo(userPhone, hasCse);
+		!isImpersonating &&
+		!hasRequiredDeclarationInfo(userPhone, hasCse, cseApplicable);
 
 	// When info is missing, open missing-info modal (for both types)
 	if (hasMissingInfo) {

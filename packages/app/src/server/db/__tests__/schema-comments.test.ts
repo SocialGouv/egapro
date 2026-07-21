@@ -110,7 +110,6 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 	it("annotates company identity columns exposed by SUIT", () => {
 		const company = SCHEMA_COLUMN_COMMENTS.company;
 		expect(company?.name).toBe("SUIT: Raison_sociale");
-		expect(company?.workforce).toBe("SUIT: Effectif");
 		expect(company?.naf_code).toBe("SUIT: Code_NAF");
 		expect(company?.address).toBe("SUIT: Adresse");
 		expect(company?.has_cse).toBe("SUIT: CSE_existant");
@@ -201,10 +200,20 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		const allComments = t2Tables.flatMap((table) =>
 			Object.values(SCHEMA_COLUMN_COMMENTS[table] ?? {}),
 		);
+		// `Weez/INSEE` is the compound source label of `company.workforce`, which is
+		// no longer the SUIT Effectif since #3929 — still a Weez-first declaration.
 		for (const comment of allComments) {
-			expect(comment).toMatch(/^(SUIT|Weez): /);
+			expect(comment).toMatch(/^(SUIT|Weez|Weez\/INSEE): /);
 			expect(comment).not.toContain("GIP-MDS");
 		}
+	});
+
+	it("no longer presents company.workforce as the SUIT Effectif (#3929)", () => {
+		const workforce = SCHEMA_COLUMN_COMMENTS.company?.workforce;
+		expect(workforce).toBeDefined();
+		expect(workforce).not.toBe("SUIT: Effectif");
+		expect(workforce).toMatch(/^Weez\/INSEE: /);
+		expect(workforce).toContain("gip_mds_data.workforce_ema");
 	});
 
 	it("annotates the Weez-sourced company region/department columns", () => {

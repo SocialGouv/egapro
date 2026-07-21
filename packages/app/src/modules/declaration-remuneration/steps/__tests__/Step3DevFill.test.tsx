@@ -41,6 +41,7 @@ describe("Step3VariablePay dev fill", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);

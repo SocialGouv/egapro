@@ -1,5 +1,10 @@
 import type { CampaignDeadlines } from "~/modules/domain";
-import { getCurrentYear, getDeclarationDisplayContext } from "~/modules/domain";
+import {
+	getCurrentYear,
+	getDeclarationDisplayContext,
+	getObligationWorkforce,
+	isCseRequired,
+} from "~/modules/domain";
 
 import { ArchivesSection } from "./ArchivesSection";
 import { CompanyEditModal } from "./CompanyEditModal";
@@ -51,6 +56,9 @@ export function CompanyDeclarationsPage({
 	userPhone,
 }: Props) {
 	const currentYear = getCurrentYear();
+	const cseApplicable = isCseRequired(
+		getObligationWorkforce(company.gipWorkforce),
+	);
 	const lastActionDate = getLastActionDate(declarations, currentYear);
 	const currentDeclaration = declarations.find(
 		(d) => d.type === "remuneration" && d.year === currentYear,
@@ -71,6 +79,7 @@ export function CompanyDeclarationsPage({
 			<CompanyInfoBanner company={company} />
 			<DeclarationsSection
 				campaignDeadlines={campaignDeadlines}
+				cseApplicable={cseApplicable}
 				declarations={declarations}
 				hasCse={company.hasCse}
 				hasNoSanction={hasNoSanction}
@@ -79,6 +88,7 @@ export function CompanyDeclarationsPage({
 			<ArchivesSection />
 			<CompanyEditModal company={company} />
 			<MissingInfoModal
+				cseApplicable={cseApplicable}
 				hasCse={company.hasCse}
 				siren={company.siren}
 				userPhone={userPhone}

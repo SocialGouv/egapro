@@ -21,6 +21,7 @@ type Props = {
 	siren: string;
 	userPhone: string | null;
 	hasCse: boolean | null;
+	cseApplicable: boolean;
 };
 
 function getDescription(needsPhone: boolean, needsCse: boolean): string {
@@ -35,12 +36,17 @@ function getDescription(needsPhone: boolean, needsCse: boolean): string {
 
 type OpenerType = "remuneration" | "representation";
 
-export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
+export function MissingInfoModal({
+	siren,
+	userPhone,
+	hasCse,
+	cseApplicable,
+}: Props) {
 	const isImpersonating = useIsImpersonating();
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const openerTypeRef = useRef<OpenerType>("remuneration");
 	const needsPhone = !userPhone;
-	const needsCse = hasCse === null;
+	const needsCse = cseApplicable && hasCse === null;
 
 	const schema = useMemo(
 		() => createMissingInfoSchema(needsPhone, needsCse),

@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
+
 const mockMutate = vi.fn();
 
 vi.mock("~/modules/analytics", () => ({
@@ -34,7 +36,7 @@ const company = {
 	name: "Alpha Solutions",
 	address: "12 rue des Innovateurs, 75011 Paris",
 	nafCode: "6202A",
-	workforce: 2256,
+	gipWorkforce: 2256,
 	hasCse: null as boolean | null,
 };
 
@@ -95,20 +97,24 @@ describe("CompanyEditModal", () => {
 	it("renders formatted workforce", () => {
 		const { container } = render(<CompanyEditModal company={company} />);
 
-		expect(container.textContent).toMatch(/2\u202f256/);
+		expect(container.textContent).toMatch(/2 256/);
 	});
 
-	it("shows dash when workforce is null", () => {
+	it("floors the workforce display so 99.97 shows as 99", () => {
 		const { container } = render(
-			<CompanyEditModal company={{ ...company, workforce: null }} />,
+			<CompanyEditModal company={{ ...company, gipWorkforce: 99.97 }} />,
 		);
 
-		const dialog = container.querySelector("dialog");
-		const strongElements = dialog?.querySelectorAll("strong") ?? [];
-		const effectifStrong = Array.from(strongElements).find(
-			(el) => el.textContent === "—",
+		expect(container.textContent).toContain("99");
+		expect(container.textContent).not.toContain("100");
+	});
+
+	it("shows the GIP unknown label when gipWorkforce is null", () => {
+		const { container } = render(
+			<CompanyEditModal company={{ ...company, gipWorkforce: null }} />,
 		);
-		expect(effectifStrong).toBeTruthy();
+
+		expect(container.textContent).toContain(GIP_WORKFORCE_ABSENT_DISPLAY);
 	});
 
 	it("disables submit when no CSE is selected", () => {
@@ -158,7 +164,7 @@ describe("CompanyEditModal", () => {
 
 		expect(container.textContent).toContain("Source : INSEE");
 		expect(container.textContent).toContain(
-			"DSN (Déclarations sociales nominatives)",
+			"Source : GIP-MDS (DSN — Déclarations sociales nominatives).",
 		);
 		expect(container.textContent).toContain("élections professionnelles");
 	});
@@ -169,5 +175,37 @@ describe("CompanyEditModal", () => {
 		expect(container.textContent).toContain("Existence d'un CSE (obligatoire)");
 		expect(screen.getByLabelText("Oui", { exact: true })).toBeInTheDocument();
 		expect(screen.getByLabelText("Non", { exact: true })).toBeInTheDocument();
+	});
+
+	describe("when the CSE is not applicable (gipWorkforce below 100 or unknown)", () => {
+		it("hides the CSE fieldset and the Enregistrer button, and shows a Fermer button", () => {
+			const { container } = render(
+				<CompanyEditModal company={{ ...company, gipWorkforce: 45 }} />,
+			);
+
+			expect(screen.queryByLabelText("Oui", { exact: true })).toBeNull();
+			expect(screen.queryByLabelText("Non", { exact: true })).toBeNull();
+			expect(
+				screen.queryByRole("button", { name: "Enregistrer", hidden: true }),
+			).toBeNull();
+
+			const footerButtons = container.querySelectorAll(
+				".fr-modal__footer button",
+			);
+			expect(footerButtons).toHaveLength(1);
+			expect(footerButtons[0]).toHaveTextContent("Fermer");
+		});
+
+		it("hides the CSE fieldset when the company is absent from the GIP file", () => {
+			const { container } = render(
+				<CompanyEditModal company={{ ...company, gipWorkforce: null }} />,
+			);
+
+			expect(screen.queryByLabelText("Oui", { exact: true })).toBeNull();
+			expect(container.textContent).toContain(GIP_WORKFORCE_ABSENT_DISPLAY);
+			expect(container.textContent).not.toContain(
+				"Vérifier les données affichées et compléter",
+			);
+		});
 	});
 });

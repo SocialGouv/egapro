@@ -292,9 +292,17 @@ function createSubmitMockDb(
 	declaration: DeclarationStateRow,
 	company: CompanyRow,
 	employeeCategories: Array<Record<string, unknown>> = [],
+	gipWorkforceEma: string | null = null,
 ) {
 	const joinRows = employeeCategories.map((ec) => ({ employee_category: ec }));
-	const selectQueue = createSelectQueue([[declaration], [company], joinRows]);
+	const gipRows =
+		gipWorkforceEma === null ? [] : [{ workforceEma: gipWorkforceEma }];
+	const selectQueue = createSelectQueue([
+		[declaration],
+		[company],
+		gipRows,
+		joinRows,
+	]);
 
 	const m = createMutationTxMock([declaration]);
 
@@ -534,7 +542,12 @@ describe("declarationRouter", () => {
 			const employeeCategories = [
 				{ annualBaseWomen: "100", annualBaseMen: "100" },
 			];
-			const ctx = createSubmitMockDb(declaration, company, employeeCategories);
+			const ctx = createSubmitMockDb(
+				declaration,
+				company,
+				employeeCategories,
+				"120.00",
+			);
 			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submit();
@@ -553,7 +566,12 @@ describe("declarationRouter", () => {
 			const employeeCategories = [
 				{ annualBaseWomen: "85", annualBaseMen: "100" },
 			];
-			const ctx = createSubmitMockDb(declaration, company, employeeCategories);
+			const ctx = createSubmitMockDb(
+				declaration,
+				company,
+				employeeCategories,
+				"130.00",
+			);
 			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submit();
@@ -564,6 +582,48 @@ describe("declarationRouter", () => {
 				eventType: string;
 			}>;
 			expect(insertedEvents.map((e) => e.eventType)).toEqual(["submit"]);
+		});
+
+		it("drives the FSM from the GIP workforce, not from the Weez company workforce (#3929)", async () => {
+			const declaration = buildDeclaration({ status: "draft" });
+			const company = buildCompany({ workforce: 82, hasCse: true });
+			const employeeCategories = [
+				{ annualBaseWomen: "85", annualBaseMen: "100" },
+			];
+			const ctx = createSubmitMockDb(
+				declaration,
+				company,
+				employeeCategories,
+				"70.00",
+			);
+			const caller = await createLockedCaller(ctx.db);
+
+			await caller.submit();
+
+			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setCall.status).toBe("demarche_completed");
+			expect(setCall.cseRequired).toBe(false);
+		});
+
+		it("treats a company absent from the GIP file as not subject, whatever the Weez workforce says", async () => {
+			const declaration = buildDeclaration({ status: "draft" });
+			const company = buildCompany({ workforce: 1183, hasCse: true });
+			const employeeCategories = [
+				{ annualBaseWomen: "85", annualBaseMen: "100" },
+			];
+			const ctx = createSubmitMockDb(
+				declaration,
+				company,
+				employeeCategories,
+				null,
+			);
+			const caller = await createLockedCaller(ctx.db);
+
+			await caller.submit();
+
+			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setCall.status).toBe("demarche_completed");
+			expect(setCall.cseRequired).toBe(false);
 		});
 
 		it("does not duplicate submit events when called from a non-draft state", async () => {
@@ -685,12 +745,12 @@ describe("declarationRouter", () => {
 
 	describe("submit — cseRequired snapshot", () => {
 		async function submitAndReadSnapshot(
-			workforce: number | null,
+			gipWorkforceEma: string | null,
 			hasCse: boolean | null,
 		): Promise<boolean> {
 			const declaration = buildDeclaration({ status: "draft" });
-			const company = buildCompany({ workforce, hasCse });
-			const ctx = createSubmitMockDb(declaration, company, []);
+			const company = buildCompany({ hasCse });
+			const ctx = createSubmitMockDb(declaration, company, [], gipWorkforceEma);
 			const caller = await createLockedCaller(ctx.db);
 			await caller.submit();
 			const projectionCall = ctx.set.mock.calls
@@ -699,23 +759,27 @@ describe("declarationRouter", () => {
 			return projectionCall?.cseRequired as boolean;
 		}
 
-		it("snapshots true for >= 100 employees with a CSE", async () => {
-			expect(await submitAndReadSnapshot(100, true)).toBe(true);
+		it("snapshots true for >= 100 GIP employees with a CSE", async () => {
+			expect(await submitAndReadSnapshot("100.00", true)).toBe(true);
 		});
 
 		it("snapshots false just below the 100-employee threshold", async () => {
-			expect(await submitAndReadSnapshot(99, true)).toBe(false);
+			expect(await submitAndReadSnapshot("99.00", true)).toBe(false);
 		});
 
-		it("snapshots false for >= 100 employees without a CSE", async () => {
-			expect(await submitAndReadSnapshot(120, false)).toBe(false);
+		it("snapshots false for a fractional GIP workforce just below 100", async () => {
+			expect(await submitAndReadSnapshot("99.97", true)).toBe(false);
+		});
+
+		it("snapshots false for >= 100 GIP employees without a CSE", async () => {
+			expect(await submitAndReadSnapshot("120.00", false)).toBe(false);
 		});
 
 		it("snapshots false when hasCse is null", async () => {
-			expect(await submitAndReadSnapshot(250, null)).toBe(false);
+			expect(await submitAndReadSnapshot("250.00", null)).toBe(false);
 		});
 
-		it("snapshots false when workforce is null", async () => {
+		it("snapshots false when the company is absent from the GIP file", async () => {
 			expect(await submitAndReadSnapshot(null, true)).toBe(false);
 		});
 	});

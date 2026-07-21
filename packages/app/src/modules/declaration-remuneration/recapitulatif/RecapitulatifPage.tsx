@@ -1,4 +1,8 @@
 import Link from "next/link";
+import {
+	GIP_WORKFORCE_ABSENT_DISPLAY,
+	toDisplayWorkforce,
+} from "~/modules/domain";
 import common from "../shared/common.module.scss";
 import type {
 	EmployeeCategoryRow,
@@ -25,7 +29,7 @@ type CompanyInfo = {
 	siren: string;
 	nafCode: string | null;
 	address: string | null;
-	workforce: number | null;
+	gipWorkforce: number | null;
 };
 
 type Props = {
@@ -105,12 +109,12 @@ export function RecapitulatifPage({
 	if (company.nafCode) {
 		companyItems.push({ label: "Code NAF", value: company.nafCode });
 	}
-	if (company.workforce !== null) {
-		companyItems.push({
-			label: `Effectif annuel moyen en ${declarationYear}`,
-			value: String(company.workforce),
-		});
-	}
+	companyItems.push({
+		label: `Effectif annuel moyen en ${declarationYear}`,
+		value:
+			toDisplayWorkforce(company.gipWorkforce)?.toString() ??
+			GIP_WORKFORCE_ABSENT_DISPLAY,
+	});
 
 	const sourceLabel = step5Source
 		? (SOURCE_LABELS[step5Source] ?? step5Source)

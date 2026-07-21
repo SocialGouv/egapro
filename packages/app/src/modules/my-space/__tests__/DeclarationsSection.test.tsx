@@ -57,6 +57,7 @@ function renderSection(
 	return render(
 		<DeclarationsSection
 			campaignDeadlines={campaignDeadlines}
+			cseApplicable={true}
 			declarations={overrides?.declarations ?? declarations}
 			hasCse={true}
 			hasNoSanction={false}

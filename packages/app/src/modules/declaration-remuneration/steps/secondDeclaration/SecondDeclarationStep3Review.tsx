@@ -20,6 +20,7 @@ import { BASE_PATH } from "./constants";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
+	cseApplicable: boolean;
 	declarationYear: number;
 	hasCse: boolean | null;
 	secondDeclarationCategories: EmployeeCategoryRow[];
@@ -27,6 +28,7 @@ type Props = {
 };
 
 export function SecondDeclarationStep3Review({
+	cseApplicable,
 	declarationYear,
 	hasCse,
 	secondDeclarationCategories,
@@ -145,6 +147,7 @@ export function SecondDeclarationStep3Review({
 			</div>
 
 			<NextStepsBox
+				cseApplicable={cseApplicable}
 				hasGapsAboveThreshold={gapsExist}
 				isSecondDeclaration
 				siren={siren}

@@ -2,12 +2,13 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 import { CseOpinionLayout } from "../CseOpinionLayout";
 
 const company = {
 	name: "Alpha Solutions",
 	siren: "123456789",
-	workforce: 256,
+	gipWorkforce: 256,
 	hasCse: true,
 };
 
@@ -133,16 +134,31 @@ describe("CseOpinionLayout", () => {
 		expect(screen.getByText("Non renseigné")).toBeInTheDocument();
 	});
 
-	it("omits the workforce line when the workforce is unknown", () => {
-		render(
+	it("shows the GIP unknown label and hides the CSE line when gipWorkforce is null", () => {
+		const { container } = render(
 			<CseOpinionLayout
-				company={{ ...company, workforce: null }}
+				company={{ ...company, gipWorkforce: null }}
 				declarationYear={2024}
 			>
 				<p>Step content</p>
 			</CseOpinionLayout>,
 		);
 
-		expect(screen.queryByText(/Effectif annuel moyen/)).not.toBeInTheDocument();
+		expect(container.textContent).toContain(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(container.textContent).not.toContain("Existence d'un CSE :");
+	});
+
+	it("shows the workforce value and the CSE line when gipWorkforce is 250", () => {
+		const { container } = render(
+			<CseOpinionLayout
+				company={{ ...company, gipWorkforce: 250 }}
+				declarationYear={2024}
+			>
+				<p>Step content</p>
+			</CseOpinionLayout>,
+		);
+
+		expect(screen.getByText("250")).toBeInTheDocument();
+		expect(container.textContent).toContain("Existence d'un CSE :");
 	});
 });

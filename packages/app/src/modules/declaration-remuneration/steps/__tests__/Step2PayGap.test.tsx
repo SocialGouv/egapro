@@ -36,6 +36,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -50,6 +51,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -63,6 +65,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -81,6 +84,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -98,6 +102,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={{
 					indicatorAAnnualWomen: "100",
 					indicatorAAnnualMen: "200",
@@ -118,6 +123,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -130,6 +136,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -157,6 +164,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -180,6 +188,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -203,6 +212,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -256,6 +266,7 @@ describe("Step2PayGap", () => {
 					confidenceIndex: null,
 					periodEnd: "2026-12-31",
 				}}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -270,6 +281,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);

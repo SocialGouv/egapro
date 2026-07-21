@@ -14,7 +14,12 @@ describe("DeclarationLink", () => {
 
 	it("renders remuneration as a button opening the process panel when info is present", () => {
 		render(
-			<DeclarationLink hasCse={true} type="remuneration" userPhone="0122334455">
+			<DeclarationLink
+				cseApplicable={true}
+				hasCse={true}
+				type="remuneration"
+				userPhone="0122334455"
+			>
 				Rémunération
 			</DeclarationLink>,
 		);
@@ -28,7 +33,12 @@ describe("DeclarationLink", () => {
 
 	it("renders as a button opening missing info modal when userPhone is null", () => {
 		render(
-			<DeclarationLink hasCse={true} type="remuneration" userPhone={null}>
+			<DeclarationLink
+				cseApplicable={true}
+				hasCse={true}
+				type="remuneration"
+				userPhone={null}
+			>
 				Rémunération
 			</DeclarationLink>,
 		);
@@ -37,20 +47,63 @@ describe("DeclarationLink", () => {
 		expect(button).toHaveAttribute("aria-controls", "missing-info-modal");
 	});
 
-	it("renders as a button opening missing info modal when hasCse is null", () => {
+	it("renders as a button opening missing info modal when hasCse is null and CSE is applicable", () => {
 		render(
-			<DeclarationLink hasCse={null} type="remuneration" userPhone="0122334455">
+			<DeclarationLink
+				cseApplicable={true}
+				hasCse={null}
+				type="remuneration"
+				userPhone="0122334455"
+			>
 				Rémunération
 			</DeclarationLink>,
 		);
 		const button = screen.getByRole("button", { name: "Rémunération" });
 		expect(button).toBeInTheDocument();
+		expect(button).toHaveAttribute("aria-controls", "missing-info-modal");
+	});
+
+	it("navigates normally when hasCse is null but CSE is not applicable", () => {
+		render(
+			<DeclarationLink
+				cseApplicable={false}
+				hasCse={null}
+				type="remuneration"
+				userPhone="0122334455"
+			>
+				Rémunération
+			</DeclarationLink>,
+		);
+		const button = screen.getByRole("button", { name: "Rémunération" });
+		expect(button).toHaveAttribute(
+			"aria-controls",
+			"declaration-process-panel",
+		);
+	});
+
+	it("still opens the missing info modal for a missing phone when CSE is not applicable", () => {
+		render(
+			<DeclarationLink
+				cseApplicable={false}
+				hasCse={null}
+				type="remuneration"
+				userPhone={null}
+			>
+				Rémunération
+			</DeclarationLink>,
+		);
+		const button = screen.getByRole("button", { name: "Rémunération" });
 		expect(button).toHaveAttribute("aria-controls", "missing-info-modal");
 	});
 
 	it("stores the declaration type on buttons opening missing info modal", () => {
 		render(
-			<DeclarationLink hasCse={true} type="remuneration" userPhone={null}>
+			<DeclarationLink
+				cseApplicable={true}
+				hasCse={true}
+				type="remuneration"
+				userPhone={null}
+			>
 				Rémunération
 			</DeclarationLink>,
 		);
@@ -61,6 +114,7 @@ describe("DeclarationLink", () => {
 	it("renders representation as a button placeholder when info is present", () => {
 		render(
 			<DeclarationLink
+				cseApplicable={true}
 				hasCse={true}
 				type="representation"
 				userPhone="0122334455"
@@ -76,7 +130,12 @@ describe("DeclarationLink", () => {
 		mockImpersonatingSession(mockedUseSession);
 
 		render(
-			<DeclarationLink hasCse={null} type="remuneration" userPhone={null}>
+			<DeclarationLink
+				cseApplicable={true}
+				hasCse={null}
+				type="remuneration"
+				userPhone={null}
+			>
 				Rémunération
 			</DeclarationLink>,
 		);

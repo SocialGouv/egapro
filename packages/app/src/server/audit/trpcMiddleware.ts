@@ -45,6 +45,8 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"cseOpinion.setFileContentTypes": AUDIT_ACTIONS.CSE_OPINION_SET_FILE_TYPES,
 
 	// ── company mutations ──────────────────────────────────
+	"company.get": AUDIT_ACTIONS.COMPANY_READ_GIP_DATA,
+	"company.getWithDeclarations": AUDIT_ACTIONS.COMPANY_READ_GIP_DATA,
 	"company.updateHasCse": AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE,
 
 	// ── profile mutations + sensitive read ─────────────────

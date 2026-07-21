@@ -1,6 +1,13 @@
+import { TRPCError } from "@trpc/server";
 import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
-import { computeDeclarationStatus, getCurrentYear } from "~/modules/domain";
+import {
+	computeDeclarationStatus,
+	getCurrentYear,
+	getObligationWorkforce,
+	isCseRequired,
+	parseGipWorkforce,
+} from "~/modules/domain";
 import { buildDeclarationList } from "~/modules/my-space/buildDeclarationList";
 import {
 	sirenInputSchema,
@@ -34,10 +41,17 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 			address: companies.address,
 			nafCode: companies.nafCode,
 			nafLabel: companies.nafLabel,
-			workforce: companies.workforce,
+			workforceEma: gipMdsData.workforceEma,
 			hasCse: companies.hasCse,
 		})
-		.from(companies);
+		.from(companies)
+		.leftJoin(
+			gipMdsData,
+			and(
+				eq(gipMdsData.siren, companies.siren),
+				eq(gipMdsData.year, getCurrentYear()),
+			),
+		);
 
 	const rows = bypassOwnership
 		? await baseQuery.where(eq(companies.siren, siren)).limit(1)
@@ -48,12 +62,22 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 				)
 				.limit(1);
 
-	const company = rows[0];
-	if (!company) {
+	const row = rows[0];
+	if (!row) {
 		throw new Error("Company not found or access denied");
 	}
 
-	if (company.hasCse === null) {
+	const { workforceEma, ...rest } = row;
+	const company = {
+		...rest,
+		gipWorkforce: parseGipWorkforce(workforceEma),
+	};
+
+	// Below 100 the CSE field is out of scope entirely, so `hasCse` stays null.
+	if (
+		company.hasCse === null &&
+		isCseRequired(getObligationWorkforce(company.gipWorkforce))
+	) {
 		const hasCse = await fetchCseBySiren(company.siren);
 		if (hasCse !== null) {
 			await db
@@ -266,7 +290,14 @@ export const companyRouter = createTRPCRouter({
 		.input(updateHasCseSchema)
 		.mutation(async ({ ctx, input }) => {
 			assertNotImpersonating(ctx.session);
-			await findUserCompany(ctx.db, ctx.session, input.siren);
+			const company = await findUserCompany(ctx.db, ctx.session, input.siren);
+			if (!isCseRequired(getObligationWorkforce(company.gipWorkforce))) {
+				throw new TRPCError({
+					code: "PRECONDITION_FAILED",
+					message:
+						"Le champ CSE est réservé aux entreprises de 100 salariés et plus.",
+				});
+			}
 			await ctx.db
 				.update(companies)
 				.set({ hasCse: input.hasCse })

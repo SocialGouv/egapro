@@ -30,6 +30,7 @@ describe("Step1Workforce dev fill", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1Data()}
 			/>,
 		);

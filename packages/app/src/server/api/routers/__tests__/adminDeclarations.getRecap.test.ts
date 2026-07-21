@@ -55,7 +55,7 @@ type JoinedRow = {
 	companySiren: string;
 	companyNafCode: string | null;
 	companyAddress: string | null;
-	companyWorkforce: number | null;
+	companyWorkforceEma: string | null;
 	declarantEmail: string;
 	declarantFirstName: string | null;
 	declarantLastName: string | null;
@@ -67,7 +67,7 @@ const baseJoinedRow: JoinedRow = {
 	companySiren: "123456789",
 	companyNafCode: "6201Z",
 	companyAddress: "1 rue de Paris",
-	companyWorkforce: 200,
+	companyWorkforceEma: "200.00",
 	declarantEmail: "alice@example.fr",
 	declarantFirstName: "Alice",
 	declarantLastName: "Dupont",
@@ -105,6 +105,7 @@ function buildDb(options: {
 					return chain;
 				}),
 				innerJoin: vi.fn().mockReturnThis(),
+				leftJoin: vi.fn().mockReturnThis(),
 				where: vi.fn().mockImplementation(resolve),
 			};
 			return chain;
@@ -145,8 +146,9 @@ describe("adminDeclarationsRouter — getRecap", () => {
 			siren: "123456789",
 			nafCode: "6201Z",
 			address: "1 rue de Paris",
-			workforce: 200,
+			gipWorkforce: 200,
 		});
+		expect(result.company).not.toHaveProperty("workforce");
 		expect(result.declarationYear).toBe(2026);
 		expect(result.referencePeriod).toBe("01/01/2026 - 31/12/2026");
 		expect(result.declarantName).toBe("Alice Dupont");
@@ -156,6 +158,38 @@ describe("adminDeclarationsRouter — getRecap", () => {
 		expect(result.totalMen).toBe(50);
 		expect(result.step5Categories).toEqual([]);
 		expect(result.step5Source).toBeNull();
+	});
+
+	it("exposes a null gipWorkforce when the company is absent from the GIP file", async () => {
+		const db = buildDb({
+			row: { ...baseJoinedRow, companyWorkforceEma: null },
+		});
+		const { adminDeclarationsRouter } = await import("../adminDeclarations");
+		const caller = adminDeclarationsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getRecap({ id: DECL_ID });
+
+		expect(result.company.gipWorkforce).toBeNull();
+	});
+
+	it("keeps the exact fractional GIP workforce", async () => {
+		const db = buildDb({
+			row: { ...baseJoinedRow, companyWorkforceEma: "99.97" },
+		});
+		const { adminDeclarationsRouter } = await import("../adminDeclarations");
+		const caller = adminDeclarationsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getRecap({ id: DECL_ID });
+
+		expect(result.company.gipWorkforce).toBe(99.97);
 	});
 
 	it("flags isCorrection=true when a second_declaration_submit event exists", async () => {

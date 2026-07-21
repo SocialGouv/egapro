@@ -1,5 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
-import { resetDeclarationToDraft } from "./helpers/db";
+import {
+	getCurrentDbYear,
+	resetDeclarationToDraft,
+	resetGipWorkforce,
+	setGipWorkforce,
+} from "./helpers/db";
+import { submitStepsThroughQuartiles } from "./helpers/declaration-flows";
 
 // Render-structure assertions are covered by the step component tests in declaration-remuneration/**/__tests__.
 
@@ -247,5 +253,91 @@ test.describe("Declaration workflow", () => {
 			(url) => !url.pathname.includes("/declaration-remuneration/etape/"),
 			{ timeout: 15_000 },
 		);
+	});
+});
+
+// The suite baseline above is a >= 250 GIP company: 6 steps, CSE field, indicator G required.
+// Below, the same journeys are replayed for the two smaller GIP profiles of #3929/#3934.
+test.describe("Workforce comes from the GIP file, not the company registry", () => {
+	test.describe.configure({ mode: "serial" });
+
+	let currentYear: number;
+
+	test.beforeAll(async () => {
+		currentYear = await getCurrentDbYear();
+	});
+
+	test.afterAll(async () => {
+		await resetGipWorkforce();
+		await resetDeclarationToDraft();
+	});
+
+	test.describe("company absent from the GIP file", () => {
+		test.beforeAll(async () => {
+			await setGipWorkforce(null);
+			await resetDeclarationToDraft();
+		});
+
+		test('mon espace shows "< 50" and drops the CSE field and the edit button', async ({
+			page,
+		}) => {
+			await page.goto("/mon-espace");
+
+			const companyInfo = page
+				.locator("dl")
+				.filter({ hasText: "Effectif annuel moyen" })
+				.first();
+			await expect(companyInfo).toContainText(
+				`Effectif annuel moyen en ${currentYear} :`,
+			);
+			await expect(companyInfo).toContainText("< 50");
+			await expect(companyInfo).not.toContainText("Existence d'un CSE");
+			await expect(
+				page.getByRole("button", { exact: true, name: "Modifier" }),
+			).toHaveCount(0);
+		});
+
+		test("the funnel drops the indicator G step", async ({ page }) => {
+			await page.goto("/declaration-remuneration/etape/5");
+			await page.waitForURL("**/declaration-remuneration/etape/6");
+
+			await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+		});
+	});
+
+	test.describe("GIP workforce of 70 — below every indicator G threshold", () => {
+		test.beforeAll(async () => {
+			await setGipWorkforce(70);
+			await resetDeclarationToDraft();
+		});
+
+		test("banners display the GIP workforce and drop the CSE field", async ({
+			page,
+		}) => {
+			await page.goto("/mon-espace");
+
+			const companyInfo = page
+				.locator("dl")
+				.filter({ hasText: "Effectif annuel moyen" })
+				.first();
+			await expect(companyInfo).toContainText("70");
+			await expect(companyInfo).not.toContainText("Existence d'un CSE");
+
+			await page.goto("/declaration-remuneration/etape/1");
+			await expect(page.getByText("Étape 1 sur 5")).toBeVisible();
+			await expect(
+				page.getByText(`Effectif annuel moyen en ${currentYear - 1} :`),
+			).toBeVisible();
+			await expect(page.getByText("Existence d'un CSE :")).toHaveCount(0);
+		});
+
+		test("submitting the quartile step lands on the review step (S1 of #3934)", async ({
+			page,
+		}) => {
+			await submitStepsThroughQuartiles(page);
+
+			await page.waitForURL("**/declaration-remuneration/etape/6");
+			await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+		});
 	});
 });

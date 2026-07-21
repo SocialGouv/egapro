@@ -15,10 +15,12 @@ import {
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import {
 	getCurrentYear,
+	getObligationWorkforce,
 	hasGapsAboveThreshold,
 	isCseRequired,
 	isDraft,
 	isTriennialYear,
+	parseGipWorkforce,
 } from "~/modules/domain";
 import {
 	companyProcedure,
@@ -31,6 +33,7 @@ import {
 	assertNotImpersonating,
 	isImpersonatingSiren,
 } from "~/server/auth/companyAccess";
+import type { DB } from "~/server/db";
 import {
 	companies,
 	declarationStatusHistory,
@@ -82,6 +85,19 @@ type DbLike = {
 	};
 };
 
+async function findGipWorkforce(
+	database: DB,
+	siren: string,
+	year: number,
+): Promise<number | null> {
+	const rows = await database
+		.select({ workforceEma: gipMdsData.workforceEma })
+		.from(gipMdsData)
+		.where(and(eq(gipMdsData.siren, siren), eq(gipMdsData.year, year)))
+		.limit(1);
+	return parseGipWorkforce(rows[0]?.workforceEma);
+}
+
 async function loadEmployeeCategoriesForDeclaration(
 	database: DbLike,
 	declarationId: string,
@@ -106,13 +122,13 @@ async function loadEmployeeCategoriesForDeclaration(
 function buildSubmitFacts(
 	declaration: DeclarationRow,
 	company: CompanyRow,
+	gipWorkforce: number | null,
 	hasIndicatorGData: boolean,
 	hasGap: boolean,
 ): Record<string, unknown> {
-	const workforce = company.workforce ?? 0;
 	return {
 		currentState: declaration.status,
-		workforce,
+		workforce: getObligationWorkforce(gipWorkforce),
 		hasCse: company.hasCse === true,
 		indicatorGCalculated: hasIndicatorGData,
 		gap: hasGap ? 100 : 0,
@@ -663,6 +679,8 @@ export const declarationRouter = createTRPCRouter({
 				message: "Entreprise introuvable",
 			});
 
+		const gipWorkforce = await findGipWorkforce(ctx.db, siren, year);
+
 		const initialCategories = await loadEmployeeCategoriesForDeclaration(
 			ctx.db,
 			declaration.id,
@@ -676,6 +694,7 @@ export const declarationRouter = createTRPCRouter({
 		const facts = buildSubmitFacts(
 			declaration,
 			company,
+			gipWorkforce,
 			hasIndicatorGData,
 			hasGap,
 		);
@@ -693,7 +712,8 @@ export const declarationRouter = createTRPCRouter({
 		// que les transitions FSM aval (saveCompliancePath, submitJointEvaluation,
 		// cseOpinion.finalize) liront comme guard.
 		const cseRequiredSnapshot =
-			isCseRequired(company.workforce ?? 0) && company.hasCse === true;
+			isCseRequired(getObligationWorkforce(gipWorkforce)) &&
+			company.hasCse === true;
 
 		await ctx.db.transaction(async (tx) => {
 			if (isDraft(declaration.status) && historyInserts.length > 0) {

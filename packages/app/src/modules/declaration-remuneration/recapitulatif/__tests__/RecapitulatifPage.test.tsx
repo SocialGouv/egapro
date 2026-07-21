@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 import { RecapitulatifPage } from "../RecapitulatifPage";
 import {
 	defaultCompany,
@@ -90,12 +91,13 @@ describe("RecapitulatifPage", () => {
 		expect(screen.getByText("1 rue de Paris, 75001 Paris")).toBeInTheDocument();
 		expect(screen.getByText("Code NAF")).toBeInTheDocument();
 		expect(screen.getByText("6201Z")).toBeInTheDocument();
-		expect(
-			screen.getByText("Effectif annuel moyen en 2025"),
-		).toBeInTheDocument();
-		// "250" appears both as company.workforce and as 120 + 130 total in the
-		// workforce table — both are expected.
-		expect(screen.getAllByText("250").length).toBeGreaterThanOrEqual(1);
+		const workforceLabel = screen.getByText("Effectif annuel moyen en 2025");
+		expect(workforceLabel).toBeInTheDocument();
+		// "250" also appears as the 120 + 130 total of the workforce table, so the
+		// company value is read from the row that carries the label.
+		expect(workforceLabel.parentElement).toHaveTextContent(
+			"Effectif annuel moyen en 2025250",
+		);
 	});
 
 	it("renders 'Informations calcul' with single-line reference period", () => {
@@ -376,16 +378,30 @@ describe("RecapitulatifPage", () => {
 		expect(screen.getByText("source-inconnue")).toBeInTheDocument();
 	});
 
-	it("hides Effectif annuel moyen when company.workforce is null", () => {
+	it("shows '< 50' when company.gipWorkforce is null", () => {
 		render(
 			<RecapitulatifPage
 				{...defaultProps()}
-				company={{ ...defaultCompany(), workforce: null }}
+				company={{ ...defaultCompany(), gipWorkforce: null }}
 			/>,
 		);
 		expect(
-			screen.queryByText(/Effectif annuel moyen en/),
-		).not.toBeInTheDocument();
+			screen.getByText("Effectif annuel moyen en 2025"),
+		).toBeInTheDocument();
+		expect(screen.getByText(GIP_WORKFORCE_ABSENT_DISPLAY)).toBeInTheDocument();
+	});
+
+	it("floors a decimal company.gipWorkforce for display", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				company={{ ...defaultCompany(), gipWorkforce: 99.97 }}
+			/>,
+		);
+		expect(
+			screen.getByText("Effectif annuel moyen en 2025"),
+		).toBeInTheDocument();
+		expect(screen.getByText("99")).toBeInTheDocument();
 	});
 
 	it("flags 'élevé' badge on high gaps (>= 5%)", () => {

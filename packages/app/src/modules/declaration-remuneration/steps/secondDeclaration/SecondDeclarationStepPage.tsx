@@ -3,6 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { campaignYearDimension, FunnelStepTracker } from "~/modules/analytics";
 import {
 	formatShortDate,
+	getObligationWorkforce,
+	isCseRequired,
 	shouldRedirectSubmittedToRecap,
 } from "~/modules/domain";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
@@ -122,6 +124,9 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 			{stepTracker}
 			<HydrateClient>
 				<SecondDeclarationStep3Review
+					cseApplicable={isCseRequired(
+						getObligationWorkforce(company.gipWorkforce),
+					)}
 					declarationYear={currentYear}
 					hasCse={company.hasCse}
 					secondDeclarationCategories={reviewCategories}

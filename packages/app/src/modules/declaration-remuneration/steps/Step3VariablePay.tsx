@@ -40,6 +40,7 @@ import stepStyles from "./Step3VariablePay.module.scss";
 type Step3VariablePayProps = {
 	declarationSiren: string;
 	declarationYear: number;
+	indicatorGRequired: boolean;
 	initialData: Step3Data;
 	gipPrefillData?: GipPrefillData;
 	maxWomen?: number;
@@ -59,6 +60,7 @@ function padStep3(data: Step3Data): Step3Data {
 export function Step3VariablePay({
 	declarationSiren,
 	declarationYear,
+	indicatorGRequired,
 	initialData,
 	gipPrefillData,
 	maxWomen,
@@ -208,7 +210,10 @@ export function Step3VariablePay({
 					}
 				/>
 
-				<StepIndicator currentStep={3} />
+				<StepIndicator
+					currentStep={3}
+					indicatorGRequired={indicatorGRequired}
+				/>
 
 				<div className={common.flexColumnGap1}>
 					<p className="fr-mb-0">

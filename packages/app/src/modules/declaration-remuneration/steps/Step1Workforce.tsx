@@ -35,6 +35,7 @@ import { Step1WorkforceDefinition } from "./Step1WorkforceDefinition";
 type Step1WorkforceProps = {
 	declarationSiren: string;
 	declarationYear: number;
+	indicatorGRequired: boolean;
 	initialData: Step1Data;
 	gipPrefillData?: GipPrefillData;
 };
@@ -42,6 +43,7 @@ type Step1WorkforceProps = {
 export function Step1Workforce({
 	declarationSiren,
 	declarationYear,
+	indicatorGRequired,
 	initialData,
 	gipPrefillData,
 }: Step1WorkforceProps) {
@@ -226,7 +228,10 @@ export function Step1Workforce({
 						}
 					/>
 
-					<StepIndicator currentStep={1} />
+					<StepIndicator
+						currentStep={1}
+						indicatorGRequired={indicatorGRequired}
+					/>
 
 					<div className={common.flexColumnGap1}>
 						<p className="fr-mb-0">

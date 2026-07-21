@@ -1,4 +1,10 @@
-import { getWorkforceYear } from "~/modules/domain";
+import {
+	GIP_WORKFORCE_ABSENT_DISPLAY,
+	getObligationWorkforce,
+	getWorkforceYear,
+	isCseRequired,
+	toDisplayWorkforce,
+} from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
 
@@ -10,7 +16,7 @@ type CompanyBannerProps = {
 		siren: string;
 		nafCode: string | null;
 		nafLabel: string | null;
-		workforce: number | null;
+		gipWorkforce: number | null;
 		hasCse: boolean | null;
 	};
 	currentPageLabel: string;
@@ -20,6 +26,10 @@ export function CompanyBanner({
 	company,
 	currentPageLabel,
 }: CompanyBannerProps) {
+	const cseApplicable = isCseRequired(
+		getObligationWorkforce(company.gipWorkforce),
+	);
+
 	return (
 		<div className={`fr-py-3w ${styles.banner}`}>
 			<div className="fr-container">
@@ -50,25 +60,31 @@ export function CompanyBanner({
 						</div>
 					)}
 
-					{company.workforce !== null && (
+					<div className={styles.datapoint}>
+						{company.gipWorkforce === null ? (
+							<span>{GIP_WORKFORCE_ABSENT_DISPLAY}</span>
+						) : (
+							<>
+								<span>
+									{"Effectif annuel moyen en"} {getWorkforceYear()} {":"}
+								</span>
+								<strong>{toDisplayWorkforce(company.gipWorkforce)}</strong>
+							</>
+						)}
+					</div>
+
+					{cseApplicable && (
 						<div className={styles.datapoint}>
-							<span>
-								{"Effectif annuel moyen en"} {getWorkforceYear()} {":"}
-							</span>
-							<strong>{company.workforce}</strong>
+							<span>{"Existence d'un CSE :"}</span>
+							<strong>
+								{company.hasCse === null
+									? "Non renseigné"
+									: company.hasCse
+										? "Oui"
+										: "Non"}
+							</strong>
 						</div>
 					)}
-
-					<div className={styles.datapoint}>
-						<span>{"Existence d'un CSE :"}</span>
-						<strong>
-							{company.hasCse === null
-								? "Non renseigné"
-								: company.hasCse
-									? "Oui"
-									: "Non"}
-						</strong>
-					</div>
 				</div>
 			</div>
 		</div>

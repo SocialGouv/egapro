@@ -3,7 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import { trackFunnelComplete } from "~/modules/analytics";
-import { computeGap, getCompanySizeRange, hasHighGap } from "~/modules/domain";
+import {
+	computeGap,
+	getCompanySizeRange,
+	getObligationWorkforce,
+	isComplianceProcessRequired,
+	isCseRequired,
+} from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
@@ -13,6 +19,7 @@ import {
 	DECLARATION_FUNNEL,
 	declarationFunnelDimensions,
 } from "../shared/funnelConfig";
+import { getPreviousStepHref } from "../shared/funnelSteps";
 import { NextStepsBox } from "../shared/NextStepsBox";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
@@ -25,7 +32,6 @@ import type {
 } from "../types";
 import stepStyles from "./Step6Review.module.scss";
 import { IndicatorSections } from "./step6/IndicatorSections";
-import { parseEmployeeCategories } from "./step6/parseStep5Categories";
 
 type Props = {
 	declaration: {
@@ -36,6 +42,7 @@ type Props = {
 	// (see StepPageClient), kept consistent with all business decisions.
 	companyWorkforce: number | null;
 	declarationYear: number;
+	indicatorGRequired: boolean;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
@@ -50,6 +57,7 @@ export function Step6Review({
 	declaration,
 	companyWorkforce,
 	declarationYear,
+	indicatorGRequired,
 	step2Data,
 	step3Data,
 	step4Data,
@@ -61,6 +69,7 @@ export function Step6Review({
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
+	const cseApplicable = isCseRequired(getObligationWorkforce(companyWorkforce));
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: () => {
 			trackFunnelComplete(
@@ -88,64 +97,15 @@ export function Step6Review({
 		}
 	}, []);
 
-	// Step 2 gaps
-	const annualMeanGap = computeGap(
-		step2Data.indicatorAAnnualWomen,
-		step2Data.indicatorAAnnualMen,
-	);
-	const hourlyMeanGap = computeGap(
-		step2Data.indicatorAHourlyWomen,
-		step2Data.indicatorAHourlyMen,
-	);
-	const annualMedianGap = computeGap(
-		step2Data.indicatorCAnnualWomen,
-		step2Data.indicatorCAnnualMen,
-	);
-	const hourlyMedianGap = computeGap(
-		step2Data.indicatorCHourlyWomen,
-		step2Data.indicatorCHourlyMen,
-	);
-
-	// Step 3 gaps
-	const step3AnnualMeanGap = computeGap(
-		step3Data.indicatorBAnnualWomen,
-		step3Data.indicatorBAnnualMen,
-	);
-	const step3HourlyMeanGap = computeGap(
-		step3Data.indicatorBHourlyWomen,
-		step3Data.indicatorBHourlyMen,
-	);
-	const step3AnnualMedianGap = computeGap(
-		step3Data.indicatorDAnnualWomen,
-		step3Data.indicatorDAnnualMen,
-	);
-	const step3HourlyMedianGap = computeGap(
-		step3Data.indicatorDHourlyWomen,
-		step3Data.indicatorDHourlyMen,
-	);
-
-	// Step 5 categories — parsed here to feed `allGaps` below; the cards
-	// re-parse internally inside IndicatorSections (negligible cost).
-	const step5Parsed = parseEmployeeCategories(step5Categories);
-
-	// Check if any gap exceeds the regulatory threshold
-	const allGaps = [
-		annualMeanGap,
-		hourlyMeanGap,
-		annualMedianGap,
-		hourlyMedianGap,
-		step3AnnualMeanGap,
-		step3AnnualMedianGap,
-		step3HourlyMeanGap,
-		step3HourlyMedianGap,
-		...step5Parsed.flatMap((cat) => [
-			cat.annualBaseGap,
-			cat.annualVariableGap,
-			cat.hourlyBaseGap,
-			cat.hourlyVariableGap,
-		]),
-	];
-	const highGap = hasHighGap(allGaps);
+	// Phase 2 gate — domain single source of truth, same rule as the exports/public API.
+	const complianceProcessRequired = isComplianceProcessRequired({
+		workforce: companyWorkforce,
+		hasIndicatorG: indicatorGRequired,
+		gap: computeGap(
+			step2Data.indicatorAAnnualWomen,
+			step2Data.indicatorAAnnualMen,
+		),
+	});
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -176,7 +136,10 @@ export function Step6Review({
 					</div>
 				</div>
 
-				<StepIndicator currentStep={6} />
+				<StepIndicator
+					currentStep={6}
+					indicatorGRequired={indicatorGRequired}
+				/>
 
 				<div className={stepStyles.recapBody}>
 					<p className={`fr-mb-0 ${stepStyles.intro}`}>
@@ -186,6 +149,7 @@ export function Step6Review({
 					</p>
 
 					<IndicatorSections
+						indicatorGRequired={indicatorGRequired}
 						step2Data={step2Data}
 						step3Data={step3Data}
 						step4Data={step4Data}
@@ -195,9 +159,10 @@ export function Step6Review({
 						withTooltips
 					/>
 
-					{highGap && declaration.siren && (
+					{complianceProcessRequired && declaration.siren && (
 						<NextStepsBox
-							hasGapsAboveThreshold={highGap}
+							cseApplicable={cseApplicable}
+							hasGapsAboveThreshold={complianceProcessRequired}
 							siren={declaration.siren}
 						/>
 					)}
@@ -210,7 +175,7 @@ export function Step6Review({
 							: undefined
 					}
 					nextLabel="Suivant"
-					previousHref="/declaration-remuneration/etape/5"
+					previousHref={getPreviousStepHref(6, indicatorGRequired)}
 				/>
 
 				{!isSubmitted && (

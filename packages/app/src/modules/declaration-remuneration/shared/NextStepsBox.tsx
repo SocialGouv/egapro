@@ -6,6 +6,7 @@ import styles from "./NextStepsBox.module.scss";
 import { UpdateCseModal } from "./UpdateCseModal";
 
 type Props = {
+	cseApplicable: boolean;
 	hasGapsAboveThreshold: boolean;
 	siren: string;
 	isSecondDeclaration?: boolean;
@@ -13,6 +14,7 @@ type Props = {
 
 /** Shared "Prochaines étapes" box with CSE consultation info and gap warnings */
 export function NextStepsBox({
+	cseApplicable,
 	hasGapsAboveThreshold,
 	siren,
 	isSecondDeclaration,
@@ -49,14 +51,16 @@ export function NextStepsBox({
 						>
 							Voir les modèles d&apos;avis CSE
 						</TrackedLink>
-						<button
-							aria-controls="update-cse-modal"
-							className="fr-btn fr-btn--secondary"
-							data-fr-opened="false"
-							type="button"
-						>
-							Mettre à jour l&apos;existence d&apos;un CSE
-						</button>
+						{cseApplicable && (
+							<button
+								aria-controls="update-cse-modal"
+								className="fr-btn fr-btn--secondary"
+								data-fr-opened="false"
+								type="button"
+							>
+								Mettre à jour l&apos;existence d&apos;un CSE
+							</button>
+						)}
 					</div>
 				</div>
 
@@ -160,7 +164,7 @@ export function NextStepsBox({
 				</div>
 			</div>
 
-			<UpdateCseModal siren={siren} />
+			{cseApplicable && <UpdateCseModal siren={siren} />}
 		</>
 	);
 }

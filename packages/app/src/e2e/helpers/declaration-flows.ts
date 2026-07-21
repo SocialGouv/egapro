@@ -83,13 +83,10 @@ export async function fillStep4Quartiles(
 }
 
 /**
- * Fill and submit a complete declaration through all 6 steps.
- * Controls whether the employee category data produces a pay gap ≥ 5%.
+ * Fill and submit steps 1 → 4, then click "Suivant" on the quartile step without
+ * asserting the destination: it is step 5 when indicator G applies, step 6 otherwise.
  */
-export async function completeDeclaration(
-	page: Page,
-	options: { hasGap: boolean },
-) {
+export async function submitStepsThroughQuartiles(page: Page) {
 	// Navigate to create/resume declaration → redirects to step 1
 	await page.goto("/declaration-remuneration");
 	await page.waitForURL("**/declaration-remuneration/etape/1");
@@ -115,6 +112,18 @@ export async function completeDeclaration(
 	// Step 4: Quartile distribution — fill 8 quartiles (4 annual + 4 hourly)
 	await fillStep4Quartiles(page);
 	await page.getByRole("button", { name: "Suivant" }).click();
+}
+
+/**
+ * Fill and submit a complete declaration through all 6 steps.
+ * Controls whether the employee category data produces a pay gap ≥ 5%.
+ * Requires a company subject to indicator G (step 5), i.e. the suite baseline workforce.
+ */
+export async function completeDeclaration(
+	page: Page,
+	options: { hasGap: boolean },
+) {
+	await submitStepsThroughQuartiles(page);
 	await page.waitForURL("**/declaration-remuneration/etape/5");
 
 	// Step 5: Employee categories — fill salary data to control gap

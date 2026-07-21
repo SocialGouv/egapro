@@ -4,13 +4,22 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Step4QuartileDistribution } from "../Step4QuartileDistribution";
 
 const mockMutate = vi.fn();
+const mockPush = vi.fn();
+
+vi.mock("next/navigation", () => ({
+	usePathname: vi.fn(),
+	useRouter: () => ({ push: mockPush }),
+}));
 
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
 			updateStep4: {
-				useMutation: () => ({
-					mutate: mockMutate,
+				useMutation: (opts: { onSuccess?: () => void }) => ({
+					mutate: (payload: unknown) => {
+						mockMutate(payload);
+						opts.onSuccess?.();
+					},
 					isPending: false,
 					error: null,
 				}),
@@ -21,6 +30,7 @@ vi.mock("~/trpc/react", () => ({
 
 beforeEach(() => {
 	mockMutate.mockClear();
+	mockPush.mockClear();
 });
 
 const validStep4Data = () => ({
@@ -60,6 +70,7 @@ describe("Step4QuartileDistribution submit behaviour", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={validStep4Data()}
 			/>,
 		);
@@ -82,6 +93,7 @@ describe("Step4QuartileDistribution submit behaviour", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={{
 					annual: [
 						{ threshold: "30000", women: 1, men: 1 },
@@ -117,6 +129,7 @@ describe("Step4QuartileDistribution submit behaviour", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={{
 					annual: [
 						{ threshold: "10000", men: 4 },
@@ -152,6 +165,7 @@ describe("Step4QuartileDistribution submit behaviour", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -165,5 +179,45 @@ describe("Step4QuartileDistribution submit behaviour", () => {
 		// All threshold inputs should be aria-invalid
 		const seuil1 = screen.getByLabelText(/Seuil maximum 1er quartile annuel/i);
 		expect(seuil1).toHaveAttribute("aria-invalid", "true");
+	});
+
+	it("navigates to step 5 after a successful submit when indicatorGRequired is true", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={validStep4Data()}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		await waitFor(() => {
+			expect(mockPush).toHaveBeenCalledWith(
+				"/declaration-remuneration/etape/5",
+			);
+		});
+	});
+
+	it("navigates to step 6 after a successful submit when indicatorGRequired is false", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired={false}
+				initialData={validStep4Data()}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		await waitFor(() => {
+			expect(mockPush).toHaveBeenCalledWith(
+				"/declaration-remuneration/etape/6",
+			);
+		});
 	});
 });

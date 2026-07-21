@@ -1,16 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 import { CompanyInfoBanner } from "../CompanyInfoBanner";
 import type { CompanyDetail } from "../types";
 
+// gipWorkforce is >= 100 by default so the CSE row is visible in tests
+// exercising the historical CSE badge/value behavior.
 const baseCompany: CompanyDetail = {
 	siren: "532847196",
 	name: "Alpha Solutions",
 	address: null,
 	nafCode: null,
 	nafLabel: null,
-	workforce: null,
+	gipWorkforce: 250,
 	hasCse: null,
 };
 
@@ -82,7 +85,9 @@ describe("CompanyInfoBanner", () => {
 	});
 
 	it("renders the workforce when provided", () => {
-		render(<CompanyInfoBanner company={{ ...baseCompany, workforce: 150 }} />);
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 150 }} />,
+		);
 		expect(screen.getByText("150")).toBeInTheDocument();
 	});
 
@@ -111,15 +116,61 @@ describe("CompanyInfoBanner", () => {
 		expect(screen.queryByText("Code NAF :")).not.toBeInTheDocument();
 	});
 
-	it("does not render workforce section when workforce is null", () => {
-		render(<CompanyInfoBanner company={baseCompany} />);
-		expect(screen.queryByText(/Effectif annuel moyen/)).not.toBeInTheDocument();
+	it("renders '< 50' and hides the CSE row when gipWorkforce is null", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: null }} />,
+		);
+		expect(screen.getByText(GIP_WORKFORCE_ABSENT_DISPLAY)).toBeInTheDocument();
+		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
 	});
 
-	it("renders the 'Modifier' button", () => {
+	it("floors the workforce display and hides the CSE row below the 100 threshold", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 99.97 }} />,
+		);
+		expect(screen.getByText("99")).toBeInTheDocument();
+		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
+	});
+
+	it("shows the workforce and the CSE row at or above the 100 threshold", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 250 }} />,
+		);
+		expect(screen.getByText("250")).toBeInTheDocument();
+		expect(screen.getByText("Existence d'un CSE :")).toBeInTheDocument();
+	});
+
+	it("renders the 'Modifier' button at or above the voluntary threshold", () => {
 		render(<CompanyInfoBanner company={baseCompany} />);
 		expect(
 			screen.getByRole("button", { name: "Modifier" }),
 		).toBeInTheDocument();
+	});
+
+	it("keeps the 'Modifier' button between 50 and 99 (read-only modal)", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 70 }} />,
+		);
+		expect(
+			screen.getByRole("button", { name: "Modifier" }),
+		).toBeInTheDocument();
+	});
+
+	it("hides the 'Modifier' button below 50", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 42 }} />,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Modifier" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("hides the 'Modifier' button when the company is absent from the GIP file", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: null }} />,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Modifier" }),
+		).not.toBeInTheDocument();
 	});
 });

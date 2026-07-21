@@ -233,7 +233,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-01-01T00:00:00Z"),
 				updatedAt: new Date("2027-01-01T00:00:00Z"),
 				companyName: "Test",
-				workforce: 100,
+				workforceEma: "100.00",
 				nafCode: "62.01",
 				address: "1 rue",
 				hasCse: false,
@@ -269,7 +269,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-01-02T00:00:00Z"),
 				updatedAt: new Date("2027-01-02T00:00:00Z"),
 				companyName: "Test2",
-				workforce: 200,
+				workforceEma: "200.00",
 				nafCode: "62.02",
 				address: "2 rue",
 				hasCse: true,
@@ -323,7 +323,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: true,
@@ -367,6 +367,111 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl).not.toHaveProperty("Fichier_evaluation_conjointe");
 	});
 
+	it("should send the GIP annual average workforce as Effectif, not the Weez value (#3929)", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "432491777",
+				year: 2027,
+				status: "submitted",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+				totalWomen: 30,
+				totalMen: 40,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				companyName: "ACME Corp",
+				workforceEma: "70.00",
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: null,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const decl = (await response.json()).Declarations[0];
+		expect(decl.Effectif).toBe(70);
+		expect(decl.Indicateur_G_requis).toBe(false);
+	});
+
+	it("should send a null Effectif when the company is absent from the GIP file", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "999999999",
+				year: 2027,
+				status: "submitted",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+				totalWomen: 10,
+				totalMen: 10,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				companyName: "Hors GIP",
+				workforceEma: null,
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: null,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.Nombre).toBe(1);
+		expect(body.Declarations[0].Effectif).toBeNull();
+		expect(body.Declarations[0].Indicateur_G_requis).toBe(false);
+	});
+
 	it("should expose CSE opinion declarationNumber alongside type", async () => {
 		mockFetchSubmitted.mockResolvedValue([
 			{
@@ -395,7 +500,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: true,
@@ -497,7 +602,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: true,
@@ -576,7 +681,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: true,
@@ -643,7 +748,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: true,
@@ -720,7 +825,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: false,
@@ -781,7 +886,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: false,
@@ -849,7 +954,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: false,
@@ -906,7 +1011,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: false,
@@ -996,7 +1101,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-10-15T14:00:00Z"),
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: true,
@@ -1095,7 +1200,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-04-01T10:00:00Z"),
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: false,
@@ -1173,7 +1278,7 @@ describe("GET /api/v1/export/declarations", () => {
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: false,
