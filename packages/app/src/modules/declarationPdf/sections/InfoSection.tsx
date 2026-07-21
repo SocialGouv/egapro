@@ -1,6 +1,7 @@
 import { Text, View } from "@react-pdf/renderer";
 
 import { styles } from "../recapPdfStyles";
+import { normalizeSpaces } from "./tableParts";
 
 type InfoRow = {
 	label: string;
@@ -30,7 +31,7 @@ export function InfoSection({
 				<View style={styles.infoValueColumn}>
 					{rows.map((row) => (
 						<Text key={row.label} style={styles.infoValue}>
-							{row.value}
+							{normalizeSpaces(row.value)}
 						</Text>
 					))}
 				</View>
