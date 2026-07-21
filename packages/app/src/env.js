@@ -46,6 +46,12 @@ export const env = createEnv({
 		EGAPRO_PROCONNECT_ISSUER: z.string().url(),
 		EGAPRO_WEEZ_API_URL: z.string().url(),
 		EGAPRO_SUIT_API_URL: z.string().url(),
+		// « Je donne mon avis » (jedonnemonavis.numerique.gouv.fr) — EGAPRO's
+		// démarche and button identifiers on the JDMA platform. Defaults are the
+		// values registered on JDMA (démarche 4169 / button 4730); overridable per
+		// environment without a code change.
+		EGAPRO_JDMA_DEMARCHE_ID: z.string().default("4169"),
+		EGAPRO_JDMA_BUTTON_ID: z.string().default("4730"),
 		// Shared secret injected by the APISIX gateway (plugin `proxy-rewrite`)
 		// into `X-Gateway-Forwarded` on every SUIT request it proxies. The
 		// middleware (`src/middleware.ts`) verifies this header on
@@ -141,6 +147,8 @@ export const env = createEnv({
 		EGAPRO_PROCONNECT_ISSUER: process.env.EGAPRO_PROCONNECT_ISSUER,
 		EGAPRO_WEEZ_API_URL: process.env.EGAPRO_WEEZ_API_URL,
 		EGAPRO_SUIT_API_URL: process.env.EGAPRO_SUIT_API_URL,
+		EGAPRO_JDMA_DEMARCHE_ID: process.env.EGAPRO_JDMA_DEMARCHE_ID,
+		EGAPRO_JDMA_BUTTON_ID: process.env.EGAPRO_JDMA_BUTTON_ID,
 		EGAPRO_GATEWAY_SHARED_SECRET: process.env.EGAPRO_GATEWAY_SHARED_SECRET,
 		S3_ENDPOINT: process.env.S3_ENDPOINT,
 		S3_REGION: process.env.S3_REGION,

@@ -171,7 +171,7 @@ describe("ConfirmationPage", () => {
 		expect(secondDeclLink).toHaveAttribute("download");
 	});
 
-	it("renders the feedback banner", () => {
+	it("renders the feedback banner with the jedonnemonavis link", () => {
 		render(
 			<ConfirmationPage
 				dataYear={DECLARATION_YEAR - 1}
@@ -181,6 +181,9 @@ describe("ConfirmationPage", () => {
 
 		expect(
 			screen.getByText("Comment s'est passée votre démarche ?"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: /Je donne mon avis/ }),
 		).toBeInTheDocument();
 	});
 

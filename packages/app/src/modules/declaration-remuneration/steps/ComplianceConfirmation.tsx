@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
 import { DsfrPictogram } from "~/modules/layout";
+import { FeedbackBanner } from "~/modules/shared/FeedbackBanner";
 import { api } from "~/trpc/server";
 import common from "../shared/common.module.scss";
 
@@ -32,6 +33,8 @@ export async function ComplianceConfirmation() {
 			</p>
 
 			<DownloadDeclarationPdfButton year={currentYear} />
+
+			<FeedbackBanner />
 
 			<div className="fr-mt-4w">
 				<Link className="fr-btn" href="/mon-espace">

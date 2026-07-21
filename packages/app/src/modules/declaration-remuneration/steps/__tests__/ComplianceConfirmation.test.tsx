@@ -67,4 +67,15 @@ describe("ComplianceConfirmation", () => {
 			`/api/declaration-pdf?year=${DECLARATION_YEAR}`,
 		);
 	});
+
+	it("renders the feedback banner", async () => {
+		render(await ComplianceConfirmation());
+
+		expect(
+			screen.getByText("Comment s'est passée votre démarche ?"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: /Je donne mon avis/ }),
+		).toBeInTheDocument();
+	});
 });
