@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { FeedbackBanner } from "../FeedbackBanner";
 
@@ -7,6 +7,11 @@ const FEEDBACK_URL =
 	"https://jedonnemonavis.numerique.gouv.fr/Demarches/4169?button=4730";
 
 describe("FeedbackBanner", () => {
+	afterEach(() => {
+		vi.doUnmock("~/env");
+		vi.resetModules();
+	});
+
 	it("renders the feedback prompt", () => {
 		render(<FeedbackBanner />);
 
@@ -44,5 +49,24 @@ describe("FeedbackBanner", () => {
 		const { container } = render(<FeedbackBanner className="fr-mb-4w" />);
 
 		expect(container.firstChild).toHaveClass("banner", "fr-mb-4w");
+	});
+
+	it("builds the href from the configured JDMA env identifiers", async () => {
+		vi.resetModules();
+		vi.doMock("~/env", () => ({
+			env: { EGAPRO_JDMA_DEMARCHE_ID: "9999", EGAPRO_JDMA_BUTTON_ID: "8888" },
+		}));
+
+		const { FeedbackBanner: ConfiguredBanner } = await import(
+			"../FeedbackBanner"
+		);
+		render(<ConfiguredBanner />);
+
+		expect(
+			screen.getByRole("link", { name: /Je donne mon avis/ }),
+		).toHaveAttribute(
+			"href",
+			"https://jedonnemonavis.numerique.gouv.fr/Demarches/9999?button=8888",
+		);
 	});
 });

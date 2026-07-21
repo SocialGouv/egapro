@@ -1,9 +1,9 @@
 import Image from "next/image";
+import { env } from "~/env";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import styles from "./FeedbackBanner.module.scss";
 
-const FEEDBACK_URL =
-	"https://jedonnemonavis.numerique.gouv.fr/Demarches/4169?button=4730";
+const FEEDBACK_URL = `https://jedonnemonavis.numerique.gouv.fr/Demarches/${env.EGAPRO_JDMA_DEMARCHE_ID}?button=${env.EGAPRO_JDMA_BUTTON_ID}`;
 
 type Props = {
 	className?: string;
