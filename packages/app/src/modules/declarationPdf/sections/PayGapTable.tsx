@@ -1,69 +1,57 @@
-import { Text, View } from "@react-pdf/renderer";
+import { Text } from "@react-pdf/renderer";
 
-import type { PayGapRow } from "~/modules/declaration-remuneration";
 import { computeGap, formatCurrency } from "~/modules/domain";
 
-import { styles } from "../pdfStyles";
+import { styles } from "../recapPdfStyles";
 import { GapCell } from "./GapCell";
+import { Cell, Row, Table } from "./tableParts";
 
-const LABELS = [
-	"Annuelle brute moyenne",
-	"Annuelle brute médiane",
-	"Horaire brute moyenne",
-	"Horaire brute médiane",
-];
+export type PayGapTableRow = {
+	label: string;
+	women: string;
+	men: string;
+};
 
-function findRow(rows: PayGapRow[], label: string): PayGapRow | undefined {
-	return rows.find((r) => r.label === label);
-}
+const LABEL_WIDTH = 141;
+const VALUE_WIDTH = 132;
+const GAP_WIDTH = 120;
 
-export function PayGapTable({
-	rows,
-	title,
-}: {
-	rows: PayGapRow[];
-	title: string;
-}) {
+export function PayGapTable({ rows }: { rows: PayGapTableRow[] }) {
+	const allEmpty = rows.every((r) => r.women === "" && r.men === "");
+	if (allEmpty) {
+		return <Text style={styles.noData}>Aucune donnée renseignée.</Text>;
+	}
 	return (
-		<View style={styles.card}>
-			<Text style={styles.cardTitle}>{title}</Text>
-			{rows.length > 0 ? (
-				<>
-					<View style={styles.tableHeader}>
-						<Text style={[styles.tableCellLabel, styles.tableHeaderText]}>
-							Rémunération
-						</Text>
-						<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-							Femmes
-						</Text>
-						<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-							Hommes
-						</Text>
-						<Text style={[styles.tableCellGap, styles.tableHeaderText]}>
-							Écart
-						</Text>
-					</View>
-					{LABELS.map((label) => {
-						const row = findRow(rows, label);
-						if (!row) return null;
-						const gap = computeGap(row.womenValue, row.menValue);
-						return (
-							<View key={label} style={styles.tableRow}>
-								<Text style={styles.tableCellLabel}>{label}</Text>
-								<Text style={styles.tableCellValue}>
-									{formatCurrency(row.womenValue)}
-								</Text>
-								<Text style={styles.tableCellValue}>
-									{formatCurrency(row.menValue)}
-								</Text>
-								<GapCell gap={gap} />
-							</View>
-						);
-					})}
-				</>
-			) : (
-				<Text style={styles.noData}>Aucune donnée renseignée.</Text>
-			)}
-		</View>
+		<Table>
+			<Row>
+				<Cell header width={LABEL_WIDTH} />
+				<Cell header text={"Rémunération\ndes femmes"} width={VALUE_WIDTH} />
+				<Cell header text={"Rémunération\ndes hommes"} width={VALUE_WIDTH} />
+				<Cell
+					header
+					hint="Seuil réglementaire : 5%"
+					text="Écart"
+					width={GAP_WIDTH}
+				/>
+			</Row>
+			{rows.map((row) => (
+				<Row key={row.label}>
+					<Cell bold text={row.label} width={LABEL_WIDTH} />
+					<Cell
+						align="right"
+						text={formatCurrency(row.women)}
+						width={VALUE_WIDTH}
+					/>
+					<Cell
+						align="right"
+						text={formatCurrency(row.men)}
+						width={VALUE_WIDTH}
+					/>
+					<Cell width={GAP_WIDTH}>
+						<GapCell gap={computeGap(row.women, row.men)} />
+					</Cell>
+				</Row>
+			))}
+		</Table>
 	);
 }

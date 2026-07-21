@@ -1,96 +1,154 @@
-import { Text, View } from "@react-pdf/renderer";
+import { View } from "@react-pdf/renderer";
 
-import { computePercentage } from "~/modules/domain";
+import type { Step4Data } from "~/modules/declaration-remuneration/types";
+import {
+	computePercentage,
+	computeWorkforceTotal,
+	sumQuartileWorkforce,
+} from "~/modules/domain";
 
-import { styles } from "../pdfStyles";
-import type { DeclarationPdfData, QuartileCategory } from "../types";
+import type { DeclarationPdfData } from "../types";
+import { SectionBanner, SubTitle } from "./headings";
+import { Cell, Row, Table } from "./tableParts";
+
+const LABEL_WIDTH = 88;
+const TRANCHE_WIDTH = 79;
+const SPAN_WIDTH = 246; // label + 2 tranche columns
+const NUM_WIDTH = 69.75;
+
+const QUARTILE_LABELS = [
+	"1er quartile",
+	"2e quartile",
+	"3e quartile",
+	"4e quartile",
+];
+
+function formatTranche(value: string | undefined): string {
+	if (!value) return "- €";
+	const n = Number.parseFloat(value);
+	if (Number.isNaN(n)) return "- €";
+	return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} €`;
+}
 
 function QuartileTable({
 	quartiles,
-	prefix,
-	title,
+	trancheLabel,
 }: {
-	quartiles: QuartileCategory[];
-	prefix: string;
-	title: string;
+	quartiles: Step4Data["annual"];
+	trancheLabel: string;
 }) {
+	const totals = sumQuartileWorkforce(quartiles);
 	return (
-		<View>
-			<Text style={styles.sectionLabel}>{title}</Text>
-			<View style={styles.tableHeader}>
-				<Text style={[styles.tableCellLabel, styles.tableHeaderText]}>
-					Quartile
-				</Text>
-				<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-					Femmes
-				</Text>
-				<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-					Hommes
-				</Text>
-				<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-					% Femmes
-				</Text>
-				<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-					% Hommes
-				</Text>
-			</View>
-			{quartiles.map((q) => {
-				const womenCount = q.womenCount ?? 0;
-				const menCount = q.menCount ?? 0;
-				const total = womenCount + menCount;
+		<Table>
+			<Row>
+				<Cell header width={LABEL_WIDTH} />
+				<Cell
+					header
+					text={`Montants des tranches de rémunération ${trancheLabel}`}
+					width={TRANCHE_WIDTH * 2}
+				/>
+				<Cell header text={"Nombre\nde femmes"} width={NUM_WIDTH} />
+				<Cell header text={"Nombre\nd'hommes"} width={NUM_WIDTH} />
+				<Cell header text={"Pourcentage\nde femmes"} width={NUM_WIDTH} />
+				<Cell header text={"Pourcentage\nd'hommes"} width={NUM_WIDTH} />
+			</Row>
+			{quartiles.map((q, i) => {
+				const min = formatTranche(quartiles[i - 1]?.threshold);
+				const max = formatTranche(q.threshold);
+				const lineTotal = computeWorkforceTotal(q.women ?? 0, q.men ?? 0);
 				return (
-					<View key={q.name} style={styles.tableRow}>
-						<Text style={styles.tableCellLabel}>
-							{q.name.replace(`${prefix}:`, "")}
-						</Text>
-						<Text style={styles.tableCellValue}>{womenCount}</Text>
-						<Text style={styles.tableCellValue}>{menCount}</Text>
-						<Text style={styles.tableCellValue}>
-							{computePercentage(womenCount, total)}
-						</Text>
-						<Text style={styles.tableCellValue}>
-							{computePercentage(menCount, total)}
-						</Text>
-					</View>
+					<Row key={QUARTILE_LABELS[i]}>
+						<Cell bold text={QUARTILE_LABELS[i]} width={LABEL_WIDTH} />
+						<Cell align="right" text={min} width={TRANCHE_WIDTH} />
+						<Cell align="right" text={max} width={TRANCHE_WIDTH} />
+						<Cell
+							align="right"
+							text={q.women !== undefined ? String(q.women) : "-"}
+							width={NUM_WIDTH}
+						/>
+						<Cell
+							align="right"
+							text={q.men !== undefined ? String(q.men) : "-"}
+							width={NUM_WIDTH}
+						/>
+						<Cell
+							align="right"
+							bold
+							text={
+								lineTotal > 0
+									? computePercentage(q.women ?? 0, lineTotal)
+									: "- %"
+							}
+							width={NUM_WIDTH}
+						/>
+						<Cell
+							align="right"
+							bold
+							text={
+								lineTotal > 0 ? computePercentage(q.men ?? 0, lineTotal) : "- %"
+							}
+							width={NUM_WIDTH}
+						/>
+					</Row>
 				);
 			})}
-		</View>
+			<Row>
+				<Cell bold text="Tous les salariés" width={SPAN_WIDTH} />
+				<Cell
+					align="right"
+					bold
+					text={totals.women > 0 ? String(totals.women) : "-"}
+					width={NUM_WIDTH}
+				/>
+				<Cell
+					align="right"
+					bold
+					text={totals.men > 0 ? String(totals.men) : "-"}
+					width={NUM_WIDTH}
+				/>
+				<Cell
+					align="right"
+					bold
+					text={
+						totals.total > 0
+							? computePercentage(totals.women, totals.total)
+							: "- %"
+					}
+					width={NUM_WIDTH}
+				/>
+				<Cell
+					align="right"
+					bold
+					text={
+						totals.total > 0
+							? computePercentage(totals.men, totals.total)
+							: "- %"
+					}
+					width={NUM_WIDTH}
+				/>
+			</Row>
+		</Table>
 	);
 }
 
 export function QuartileSection({ data }: { data: DeclarationPdfData }) {
-	const annualQuartiles = data.step4Categories.filter((c) =>
-		c.name.startsWith("annual:"),
-	);
-	const hourlyQuartiles = data.step4Categories.filter((c) =>
-		c.name.startsWith("hourly:"),
-	);
-
 	return (
-		<View style={styles.card}>
-			<Text style={styles.cardTitle}>
-				Proportion de femmes et d&apos;hommes dans chaque quartile salarial
-			</Text>
-			{annualQuartiles.length > 0 || hourlyQuartiles.length > 0 ? (
-				<>
-					{annualQuartiles.length > 0 && (
-						<QuartileTable
-							prefix="annual"
-							quartiles={annualQuartiles}
-							title="Rémunération annuelle brute moyenne"
-						/>
-					)}
-					{hourlyQuartiles.length > 0 && (
-						<QuartileTable
-							prefix="hourly"
-							quartiles={hourlyQuartiles}
-							title="Rémunération horaire brute moyenne"
-						/>
-					)}
-				</>
-			) : (
-				<Text style={styles.noData}>Aucune donnée renseignée.</Text>
-			)}
+		<View>
+			<SectionBanner title="Proportion de femmes et d'hommes dans chaque quartile de rémunération" />
+			<View wrap={false}>
+				<SubTitle title="Rémunération annuelle brute moyenne" />
+				<QuartileTable
+					quartiles={data.step4Data.annual}
+					trancheLabel="annuelle brute"
+				/>
+			</View>
+			<View wrap={false}>
+				<SubTitle title="Rémunération horaire brute moyenne" />
+				<QuartileTable
+					quartiles={data.step4Data.hourly}
+					trancheLabel="horaire brute"
+				/>
+			</View>
 		</View>
 	);
 }
