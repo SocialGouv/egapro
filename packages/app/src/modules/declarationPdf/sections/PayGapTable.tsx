@@ -1,69 +1,66 @@
-import { Text, View } from "@react-pdf/renderer";
-
-import type { PayGapRow } from "~/modules/declaration-remuneration";
+import { Text } from "@react-pdf/renderer";
 import { computeGap, formatCurrency } from "~/modules/domain";
-
-import { styles } from "../pdfStyles";
+import { styles } from "../recapPdfStyles";
 import { GapCell } from "./GapCell";
+import { Cell, Row, Table } from "./tableParts";
+import { PAY_TABLE } from "./tableWidths";
 
-const LABELS = [
-	"Annuelle brute moyenne",
-	"Annuelle brute médiane",
-	"Horaire brute moyenne",
-	"Horaire brute médiane",
-];
+type PayGapTableRow = {
+	label: string;
+	women: string;
+	men: string;
+};
 
-function findRow(rows: PayGapRow[], label: string): PayGapRow | undefined {
-	return rows.find((r) => r.label === label);
+function PayGapDataRow({ row }: { row: PayGapTableRow }) {
+	return (
+		<Row>
+			<Cell bold text={row.label} width={PAY_TABLE.label} />
+			<Cell
+				align="right"
+				text={formatCurrency(row.women)}
+				width={PAY_TABLE.value}
+			/>
+			<Cell
+				align="right"
+				text={formatCurrency(row.men)}
+				width={PAY_TABLE.value}
+			/>
+			<Cell width={PAY_TABLE.gap}>
+				<GapCell gap={computeGap(row.women, row.men)} />
+			</Cell>
+		</Row>
+	);
 }
 
-export function PayGapTable({
-	rows,
-	title,
-}: {
-	rows: PayGapRow[];
-	title: string;
-}) {
+export function PayGapTable({ rows }: { rows: PayGapTableRow[] }) {
+	const allEmpty = rows.every((r) => r.women === "" && r.men === "");
+	if (allEmpty) {
+		return <Text style={styles.noData}>Aucune donnée renseignée.</Text>;
+	}
 	return (
-		<View style={styles.card}>
-			<Text style={styles.cardTitle}>{title}</Text>
-			{rows.length > 0 ? (
-				<>
-					<View style={styles.tableHeader}>
-						<Text style={[styles.tableCellLabel, styles.tableHeaderText]}>
-							Rémunération
-						</Text>
-						<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-							Femmes
-						</Text>
-						<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-							Hommes
-						</Text>
-						<Text style={[styles.tableCellGap, styles.tableHeaderText]}>
-							Écart
-						</Text>
-					</View>
-					{LABELS.map((label) => {
-						const row = findRow(rows, label);
-						if (!row) return null;
-						const gap = computeGap(row.womenValue, row.menValue);
-						return (
-							<View key={label} style={styles.tableRow}>
-								<Text style={styles.tableCellLabel}>{label}</Text>
-								<Text style={styles.tableCellValue}>
-									{formatCurrency(row.womenValue)}
-								</Text>
-								<Text style={styles.tableCellValue}>
-									{formatCurrency(row.menValue)}
-								</Text>
-								<GapCell gap={gap} />
-							</View>
-						);
-					})}
-				</>
-			) : (
-				<Text style={styles.noData}>Aucune donnée renseignée.</Text>
-			)}
-		</View>
+		<Table>
+			<Row>
+				<Cell header width={PAY_TABLE.label} />
+				<Cell
+					header
+					text={"Rémunération\ndes femmes"}
+					width={PAY_TABLE.value}
+				/>
+				<Cell
+					header
+					text={"Rémunération\ndes hommes"}
+					width={PAY_TABLE.value}
+				/>
+				<Cell
+					header
+					hint="Seuil réglementaire : 5%"
+					text="Écart"
+					width={PAY_TABLE.gap}
+				/>
+			</Row>
+			{rows.map((row) => (
+				<PayGapDataRow key={row.label} row={row} />
+			))}
+		</Table>
 	);
 }

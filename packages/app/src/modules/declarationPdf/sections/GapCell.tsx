@@ -1,24 +1,20 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import { formatGap, gapLevel } from "~/modules/domain";
+import { formatGap, isSignificantGap } from "~/modules/domain";
 
-import { styles } from "../pdfStyles";
+import { styles } from "../recapPdfStyles";
 
 export function GapCell({ gap }: { gap: number | null }) {
-	const level = gapLevel(gap);
+	// No "faible" badge in the maquette — only "ÉLEVÉ", by absolute gap magnitude.
+	const isHigh = isSignificantGap(gap);
 	return (
-		<View style={[styles.tableCellGap, styles.badgeRow]}>
-			<Text>{formatGap(gap)}</Text>
-			{level && (
-				<Text
-					style={[
-						styles.badge,
-						level === "low" ? styles.badgeLow : styles.badgeHigh,
-					]}
-				>
-					{level === "low" ? "faible" : "élevé"}
-				</Text>
-			)}
+		<View style={styles.gapCell}>
+			{isHigh ? (
+				<View style={styles.badge}>
+					<Text style={styles.badgeText}>ÉLEVÉ</Text>
+				</View>
+			) : null}
+			<Text style={styles.gapValue}>{formatGap(gap)}</Text>
 		</View>
 	);
 }

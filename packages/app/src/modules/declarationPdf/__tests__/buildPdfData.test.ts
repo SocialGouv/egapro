@@ -1,329 +1,349 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const queryResults: unknown[][] = [];
 let callIndex = 0;
 
+// Records each query in call order and returns the next queued result set.
+// Supports every chain shape used by buildPdfData: `.where().limit()`,
+// `.where().orderBy().limit()` (status history) and awaited `.where()`
+// (jobs / employeeCategories, no `.limit`).
 vi.mock("~/server/db", () => {
-	const makeChain = () => ({
-		select: () => ({
-			from: () => ({
-				where: () => {
-					const idx = callIndex++;
-					const result = queryResults[idx] ?? [];
-					return Object.assign(Promise.resolve(result), {
-						limit: () => Promise.resolve(result),
-					});
-				},
-			}),
-		}),
-	});
-	return { db: makeChain() };
+	const settle = () => {
+		const result = queryResults[callIndex++] ?? [];
+		const chain = Object.assign(Promise.resolve(result), {
+			limit: () => Promise.resolve(result),
+			orderBy: () => ({ limit: () => Promise.resolve(result) }),
+		});
+		return chain;
+	};
+	return {
+		db: {
+			select: () => ({ from: () => ({ where: () => settle() }) }),
+		},
+	};
 });
 
 vi.mock("~/server/db/schema", () => ({
-	declarations: { siren: "siren", year: "year" },
+	declarations: { id: "id", siren: "siren", year: "year" },
 	companies: { siren: "siren" },
+	users: { id: "id" },
+	gipMdsData: { siren: "siren", year: "year" },
 	jobCategories: { declarationId: "declarationId" },
 	employeeCategories: { jobCategoryId: "jobCategoryId" },
+	declarationStatusHistory: {
+		declarationId: "declarationId",
+		eventType: "eventType",
+		createdAt: "createdAt",
+	},
 }));
 
 vi.mock("~/server/api/routers/declarationHelpers", () => ({
+	activeDeclarationFilter: (siren: string, year: number) => ({ siren, year }),
+	mapToStepData: (d: Record<string, unknown>) => ({
+		step2Data: {
+			indicatorAAnnualWomen: (d.indicatorAAnnualWomen as string) ?? "",
+		},
+		step3Data: { indicatorEWomen: (d.indicatorEWomen as string) ?? "" },
+		step4Data: { annual: [], hourly: [] },
+	}),
 	mapToEmployeeCategoryRows: (
-		_jobs: unknown[],
+		jobs: { name: string }[],
 		_empCats: unknown[],
 		_type: string,
-	) => [],
-	activeDeclarationFilter: (siren: string, year: number) => ({
-		siren,
-		year,
-		cancelledAt: "IS NULL",
-	}),
+	) => jobs.map((j) => ({ name: j.name })),
 }));
 
 vi.mock("drizzle-orm", () => ({
 	and: (...args: unknown[]) => args,
+	desc: (col: unknown) => col,
 	eq: (col: unknown, val: unknown) => ({ col, val }),
-	isNull: (col: unknown) => ({ col, op: "isNull" }),
 }));
 
-function resetMocks() {
+function queue(...results: unknown[][]) {
 	callIndex = 0;
 	queryResults.length = 0;
+	queryResults.push(...results);
+}
+
+const SUBMITTED = new Date("2026-03-05T10:00:00Z");
+const SECOND_SUBMIT = new Date("2026-06-05T10:00:00Z");
+const NOW = new Date("2026-03-09T00:00:00Z");
+
+async function importBuild() {
+	const { buildPdfData } = await import("../buildPdfData");
+	return buildPdfData;
 }
 
 describe("buildPdfData", () => {
-	it("throws when declaration not found", async () => {
-		resetMocks();
-		queryResults.push([]);
-
-		const { buildPdfData } = await import("../buildPdfData");
-		await expect(
-			buildPdfData("123456789", 2026, new Date("2026-03-09")),
-		).rejects.toThrow("Déclaration introuvable");
+	beforeEach(() => {
+		callIndex = 0;
+		queryResults.length = 0;
 	});
 
-	it("throws when only cancelled declarations exist for (siren, year)", async () => {
-		resetMocks();
-		queryResults.push([]);
-
-		const { buildPdfData } = await import("../buildPdfData");
-		await expect(
-			buildPdfData("123456789", 2026, new Date("2026-03-09")),
-		).rejects.toThrow("Déclaration introuvable");
-	});
-
-	it("throws when declaration is not submitted", async () => {
-		resetMocks();
-		queryResults.push([{ siren: "123456789", year: 2026, status: "draft" }]);
-
-		const { buildPdfData } = await import("../buildPdfData");
-		await expect(
-			buildPdfData("123456789", 2026, new Date("2026-03-09")),
-		).rejects.toThrow("La déclaration n'est pas encore soumise");
-	});
-
-	it("returns transformed data for a submitted declaration", async () => {
-		resetMocks();
-		// Query 1: declarations
-		queryResults.push([
-			{
-				id: "decl-uuid",
-				siren: "123456789",
-				year: 2026,
-				status: "submitted",
-				totalWomen: 50,
-				totalMen: 60,
-				// Indicator A (step 2 — mean)
-				indicatorAAnnualWomen: "45000",
-				indicatorAAnnualMen: "50000",
-				indicatorAHourlyWomen: "22",
-				indicatorAHourlyMen: "24",
-				// Indicator C (step 2 — median)
-				indicatorCAnnualWomen: "44000",
-				indicatorCAnnualMen: "49000",
-				indicatorCHourlyWomen: "21",
-				indicatorCHourlyMen: "23",
-				// Indicator B (step 3 — variable mean)
-				indicatorBAnnualWomen: "5000",
-				indicatorBAnnualMen: "6000",
-				indicatorBHourlyWomen: "2",
-				indicatorBHourlyMen: "3",
-				// Indicator D (step 3 — variable median)
-				indicatorDAnnualWomen: "4800",
-				indicatorDAnnualMen: "5800",
-				indicatorDHourlyWomen: "1.9",
-				indicatorDHourlyMen: "2.9",
-				// Indicator E (step 3 — beneficiaries)
-				indicatorEWomen: "80",
-				indicatorEMen: "75",
-				// Indicator F annual (step 4)
-				indicatorFAnnualThreshold1: "40000",
-				indicatorFAnnualThreshold2: "50000",
-				indicatorFAnnualThreshold3: "60000",
-				indicatorFAnnualWomen1: 10,
-				indicatorFAnnualWomen2: 12,
-				indicatorFAnnualWomen3: 14,
-				indicatorFAnnualWomen4: 14,
-				indicatorFAnnualMen1: 15,
-				indicatorFAnnualMen2: 13,
-				indicatorFAnnualMen3: 12,
-				indicatorFAnnualMen4: 10,
-				// Indicator F hourly (step 4)
-				indicatorFHourlyThreshold1: null,
-				indicatorFHourlyThreshold2: null,
-				indicatorFHourlyThreshold3: null,
-				indicatorFHourlyWomen1: null,
-				indicatorFHourlyWomen2: null,
-				indicatorFHourlyWomen3: null,
-				indicatorFHourlyWomen4: null,
-				indicatorFHourlyMen1: null,
-				indicatorFHourlyMen2: null,
-				indicatorFHourlyMen3: null,
-				indicatorFHourlyMen4: null,
-			},
-		]);
-		// Query 2: companies
-		queryResults.push([{ siren: "123456789", name: "Acme Corp" }]);
-		// Query 3: jobCategories (empty — mapToEmployeeCategoryRows is mocked)
-		queryResults.push([]);
-
-		const { buildPdfData } = await import("../buildPdfData");
-		const result = await buildPdfData(
-			"123456789",
-			2026,
-			new Date("2026-03-09"),
+	it("throws when the declaration is not found", async () => {
+		queue([]);
+		const buildPdfData = await importBuild();
+		await expect(buildPdfData("123456789", 2026, NOW)).rejects.toThrow(
+			"Déclaration introuvable",
 		);
+	});
 
-		expect(result.companyName).toBe("Acme Corp");
-		expect(result.siren).toBe("123456789");
+	it("throws when the declaration is still a draft", async () => {
+		queue([{ id: "d1", siren: "123456789", year: 2026, status: "draft" }]);
+		const buildPdfData = await importBuild();
+		await expect(buildPdfData("123456789", 2026, NOW)).rejects.toThrow(
+			"La déclaration n'est pas encore soumise",
+		);
+	});
+
+	it("assembles declarant, company, GIP workforce, source and transmission date for an initial declaration", async () => {
+		queue(
+			// declarations
+			[
+				{
+					id: "d1",
+					siren: "123456789",
+					year: 2026,
+					status: "submitted",
+					declarantId: "user-1",
+					totalWomen: 50,
+					totalMen: 60,
+					updatedAt: new Date("2026-03-01T00:00:00Z"),
+					indicatorAAnnualWomen: "45000",
+					indicatorEWomen: "80",
+				},
+			],
+			// companies
+			[
+				{
+					siren: "123456789",
+					name: "Société Démo",
+					address: "1 rue de la Paix, 75002 Paris",
+					nafCode: "6201Z",
+					nafLabel: "Programmation informatique",
+				},
+			],
+			// users (declarant)
+			[
+				{
+					firstName: "Jean",
+					lastName: "Martin",
+					email: "email@example.fr",
+					phone: "0102030405",
+				},
+			],
+			// gipMdsData
+			[{ workforceEma: "250.7" }],
+			// jobCategories
+			[
+				{
+					id: "job-1",
+					name: "Ouvriers",
+					categoryIndex: 0,
+					source: "accord-entreprise",
+				},
+			],
+			// employeeCategories for job-1
+			[{ jobCategoryId: "job-1" }],
+			// status history: submit
+			[{ createdAt: SUBMITTED }],
+		);
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("123456789", 2026, NOW);
+
 		expect(result.year).toBe(2026);
-		expect(result.generatedAt).toBe("9 mars 2026");
+		expect(result.workforceYear).toBe(2025);
+		expect(result.isSecondDeclaration).toBe(false);
+		expect(result.referencePeriod).toBe("01/01/2026 - 31/12/2026");
+		expect(result.transmittedAt).toBe("05/03/2026");
+
+		expect(result.declarant).toEqual({
+			name: "Jean Martin",
+			email: "email@example.fr",
+			phone: "0102030405",
+		});
+
+		expect(result.company).toEqual({
+			name: "Société Démo",
+			siren: "123456789",
+			address: "1 rue de la Paix, 75002 Paris",
+			nafCode: "6201Z",
+			nafLabel: "Programmation informatique",
+			workforceDisplay: (250).toLocaleString("fr-FR"),
+		});
+
 		expect(result.totalWomen).toBe(50);
 		expect(result.totalMen).toBe(60);
-
-		// step1Categories is empty: per-category workforce breakdown is not stored in flat columns
-		expect(result.step1Categories).toEqual([]);
-
-		expect(result.step2Rows).toEqual([
-			{
-				label: "Annuelle brute moyenne",
-				womenValue: "45000",
-				menValue: "50000",
-			},
-			{ label: "Horaire brute moyenne", womenValue: "22", menValue: "24" },
-			{
-				label: "Annuelle brute médiane",
-				womenValue: "44000",
-				menValue: "49000",
-			},
-			{ label: "Horaire brute médiane", womenValue: "21", menValue: "23" },
-		]);
-
-		expect(result.step3Data.beneficiaryWomen).toBe("80");
-		expect(result.step3Data.beneficiaryMen).toBe("75");
-		expect(result.step3Data.rows).toEqual([
-			{ label: "Annuelle brute moyenne", womenValue: "5000", menValue: "6000" },
-			{ label: "Horaire brute moyenne", womenValue: "2", menValue: "3" },
-			{ label: "Annuelle brute médiane", womenValue: "4800", menValue: "5800" },
-			{ label: "Horaire brute médiane", womenValue: "1.9", menValue: "2.9" },
-		]);
-
-		expect(result.step4Categories).toEqual([
-			{
-				name: "annual:1er quartile",
-				womenCount: 10,
-				menCount: 15,
-				womenValue: "40000",
-			},
-			{
-				name: "annual:2e quartile",
-				womenCount: 12,
-				menCount: 13,
-				womenValue: "50000",
-			},
-			{
-				name: "annual:3e quartile",
-				womenCount: 14,
-				menCount: 12,
-				womenValue: "60000",
-			},
-			{
-				name: "annual:4e quartile",
-				womenCount: 14,
-				menCount: 10,
-				womenValue: undefined,
-			},
-			{
-				name: "hourly:1er quartile",
-				womenCount: undefined,
-				menCount: undefined,
-				womenValue: undefined,
-			},
-			{
-				name: "hourly:2e quartile",
-				womenCount: undefined,
-				menCount: undefined,
-				womenValue: undefined,
-			},
-			{
-				name: "hourly:3e quartile",
-				womenCount: undefined,
-				menCount: undefined,
-				womenValue: undefined,
-			},
-			{
-				name: "hourly:4e quartile",
-				womenCount: undefined,
-				menCount: undefined,
-				womenValue: undefined,
-			},
-		]);
-
-		// step5Categories comes from mapToEmployeeCategoryRows mock (returns [])
-		expect(result.step5Categories).toEqual([]);
+		expect(result.categories).toEqual([{ name: "Ouvriers" }]);
+		expect(result.source).toBe("Accord d'entreprise");
 	});
 
-	it("falls back to default company name when company not found", async () => {
-		resetMocks();
-		// Query 1: declarations
-		queryResults.push([
-			{
-				id: "decl-uuid-2",
-				siren: "999999999",
-				year: 2026,
-				status: "submitted",
-				totalWomen: null,
-				totalMen: null,
-			},
-		]);
-		// Query 2: companies (not found)
-		queryResults.push([]);
-		// Query 3: jobCategories (empty)
-		queryResults.push([]);
-
-		const { buildPdfData } = await import("../buildPdfData");
-		const result = await buildPdfData(
-			"999999999",
-			2026,
-			new Date("2026-03-09"),
+	it("displays the GIP-absent placeholder and a bare source when GIP data and label are missing", async () => {
+		queue(
+			[
+				{
+					id: "d2",
+					siren: "987654321",
+					year: 2026,
+					status: "submitted",
+					declarantId: "user-2",
+					totalWomen: null,
+					totalMen: null,
+					updatedAt: new Date("2026-03-01T00:00:00Z"),
+				},
+			],
+			[{ siren: "987654321", name: "Autre Démo" }],
+			[{ firstName: "Alice", lastName: null, email: null, phone: null }],
+			[], // gipMdsData absent
+			[
+				{
+					id: "job-9",
+					name: "Cadres",
+					categoryIndex: 0,
+					source: "convention-maison",
+				},
+			],
+			[{ jobCategoryId: "job-9" }],
+			[{ createdAt: SUBMITTED }],
 		);
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("987654321", 2026, NOW);
 
-		expect(result.companyName).toBe("Entreprise 999999999");
+		expect(result.company.workforceDisplay).toBe("< 50");
+		expect(result.company.address).toBe("");
+		expect(result.company.nafCode).toBeNull();
+		expect(result.declarant).toEqual({
+			name: "Alice",
+			email: "",
+			phone: "",
+		});
+		// Unknown source value falls back to its raw string.
+		expect(result.source).toBe("convention-maison");
+	});
+
+	it("falls back to a synthesized company name and zeroed totals when the company row is missing", async () => {
+		queue(
+			[
+				{
+					id: "d3",
+					siren: "111222333",
+					year: 2026,
+					status: "submitted",
+					declarantId: null,
+					totalWomen: null,
+					totalMen: null,
+					updatedAt: new Date("2026-03-01T00:00:00Z"),
+				},
+			],
+			[], // companies missing
+			[], // gipMdsData (no declarantId → users query is skipped)
+			[], // jobCategories empty
+			[{ createdAt: SUBMITTED }], // status history: submit
+		);
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("111222333", 2026, NOW);
+
+		expect(result.company.name).toBe("Entreprise 111222333");
 		expect(result.totalWomen).toBe(0);
 		expect(result.totalMen).toBe(0);
-		expect(result.step1Categories).toEqual([]);
-		expect(result.step2Rows).toEqual([
-			{ label: "Annuelle brute moyenne", womenValue: "", menValue: "" },
-			{ label: "Horaire brute moyenne", womenValue: "", menValue: "" },
-			{ label: "Annuelle brute médiane", womenValue: "", menValue: "" },
-			{ label: "Horaire brute médiane", womenValue: "", menValue: "" },
-		]);
-		expect(result.step3Data.rows).toEqual([
-			{ label: "Annuelle brute moyenne", womenValue: "", menValue: "" },
-			{ label: "Horaire brute moyenne", womenValue: "", menValue: "" },
-			{ label: "Annuelle brute médiane", womenValue: "", menValue: "" },
-			{ label: "Horaire brute médiane", womenValue: "", menValue: "" },
-		]);
-		expect(result.step3Data.beneficiaryWomen).toBe("");
-		expect(result.step3Data.beneficiaryMen).toBe("");
+		expect(result.declarant).toEqual({ name: "", email: "", phone: "" });
+		expect(result.categories).toEqual([]);
+		expect(result.source).toBeNull();
 	});
 
-	it("fetches employee categories when job categories exist", async () => {
-		resetMocks();
-		// Query 1: declarations
-		queryResults.push([
-			{
-				id: "decl-uuid-3",
-				siren: "111222333",
-				year: 2026,
-				status: "submitted",
-				totalWomen: 10,
-				totalMen: 10,
-			},
-		]);
-		// Query 2: companies
-		queryResults.push([{ siren: "111222333", name: "Test Corp" }]);
-		// Query 3: jobCategories — returns one job
-		queryResults.push([{ id: "job-1" }]);
-		// Query 4: employeeCategories for job-1
-		queryResults.push([{ jobCategoryId: "job-1" }]);
-
-		const { buildPdfData } = await import("../buildPdfData");
-		const result = await buildPdfData(
-			"111222333",
-			2026,
-			new Date("2026-03-09"),
+	it("uses the second_declaration_submit date for a correction declaration", async () => {
+		queue(
+			[
+				{
+					id: "d4",
+					siren: "123456789",
+					year: 2026,
+					status: "submitted",
+					declarantId: "user-1",
+					totalWomen: 10,
+					totalMen: 10,
+					updatedAt: new Date("2026-03-01T00:00:00Z"),
+				},
+			],
+			[{ siren: "123456789", name: "Société Démo" }],
+			[
+				{
+					firstName: "Jean",
+					lastName: "Martin",
+					email: "email@example.fr",
+					phone: "",
+				},
+			],
+			[{ workforceEma: "120" }],
+			[
+				{
+					id: "job-1",
+					name: "Ouvriers",
+					categoryIndex: 0,
+					source: "accord-groupe",
+				},
+			],
+			[{ jobCategoryId: "job-1" }],
+			// resolveTransmittedDate for correction: second_declaration_submit first
+			[{ createdAt: SECOND_SUBMIT }],
 		);
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("123456789", 2026, NOW, "correction");
 
-		// step5Categories still empty because mapToEmployeeCategoryRows is mocked to return []
-		expect(result.step5Categories).toEqual([]);
-		expect(result.companyName).toBe("Test Corp");
-		expect(result.step4Categories).toHaveLength(8);
-		expect(result.step4Categories[0]).toMatchObject({
-			name: "annual:1er quartile",
-			womenCount: undefined,
-			menCount: undefined,
-			womenValue: undefined,
-		});
+		expect(result.isSecondDeclaration).toBe(true);
+		expect(result.transmittedAt).toBe("05/06/2026");
+	});
+
+	it("falls back through submit then updatedAt when no matching status event exists", async () => {
+		queue(
+			[
+				{
+					id: "d5",
+					siren: "123456789",
+					year: 2026,
+					status: "submitted",
+					declarantId: null,
+					totalWomen: 1,
+					totalMen: 1,
+					updatedAt: new Date("2026-02-14T00:00:00Z"),
+				},
+			],
+			[{ siren: "123456789", name: "Société Démo" }],
+			[], // gipMdsData
+			[], // jobCategories
+			// resolveTransmittedDate for correction: second_declaration_submit (empty)
+			[],
+			// then submit (empty) → falls back to updatedAt
+			[],
+		);
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("123456789", 2026, NOW, "correction");
+
+		expect(result.transmittedAt).toBe("14/02/2026");
+	});
+
+	it("falls back to `now` when the declaration has no updatedAt and no submit event", async () => {
+		queue(
+			[
+				{
+					id: "d6",
+					siren: "123456789",
+					year: 2026,
+					status: "submitted",
+					declarantId: null,
+					totalWomen: 1,
+					totalMen: 1,
+					updatedAt: null,
+				},
+			],
+			[{ siren: "123456789", name: "Société Démo" }],
+			[], // gipMdsData
+			[], // jobCategories
+			[], // status history: submit (empty) → falls back to `now`
+		);
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("123456789", 2026, NOW);
+
+		expect(result.transmittedAt).toBe("09/03/2026");
 	});
 });
