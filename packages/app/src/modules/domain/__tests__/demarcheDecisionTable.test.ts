@@ -20,9 +20,9 @@ import {
 	toDisplayWorkforce,
 } from "~/modules/domain";
 
-// Boundary-focused workforce values, all derived from the named regulatory
-// thresholds so no headcount magic number appears in the matrix.
-const WORKFORCES = [
+// Boundary-focused GIP workforce values (the single obligation source, #3962),
+// all derived from the named regulatory thresholds so no headcount magic number appears in the matrix.
+const GIP_WORKFORCES = [
 	COMPANY_SIZE_VOLUNTARY_MAX - 1, // 49
 	COMPANY_SIZE_VOLUNTARY_MAX, // 50
 	COMPANY_SIZE_ANNUAL_MIN - 1, // 99
@@ -99,18 +99,18 @@ const REGIMES = [
 
 type Row = {
 	label: string;
-	workforce: number;
+	gipWorkforce: number;
 	gapCase: GapCase;
 	regime: (typeof REGIMES)[number];
 };
 
 const ROWS: Row[] = [];
-for (const workforce of WORKFORCES) {
+for (const gipWorkforce of GIP_WORKFORCES) {
 	for (const gapCase of GAP_CASES) {
 		for (const regime of REGIMES) {
 			ROWS.push({
-				label: `effectif ${workforce} · ${gapCase.label} · ${regime.label}`,
-				workforce,
+				label: `effectif GIP ${gipWorkforce} · ${gapCase.label} · ${regime.label}`,
+				gipWorkforce,
 				gapCase,
 				regime,
 			});
@@ -123,7 +123,7 @@ for (const workforce of WORKFORCES) {
 // None of the predicates exercised here read hasCse, so crossing it in would only
 // duplicate rows and add a tautological assertion — it is deliberately left out.
 describe("table de décision — effectif × écart × régime", () => {
-	it.each(ROWS)("$label", ({ workforce: gipWorkforce, gapCase, regime }) => {
+	it.each(ROWS)("$label", ({ gipWorkforce, gapCase, regime }) => {
 		// Fixture guard: both regimes stay below the universal year so the 150-249
 		// band remains triennial-gated.
 		expect(regime.year).toBeLessThan(INDICATOR_G_UNIVERSAL_YEAR);
