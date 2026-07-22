@@ -140,6 +140,31 @@ describe("CategoryImportExport panel contents", () => {
 
 		expect(importButton()).toBeDisabled();
 	});
+
+	it("renders the guide card and the resources link as disabled placeholders", () => {
+		render(<CategoryImportExport onImport={vi.fn()} />);
+
+		expect(
+			screen.getByRole("button", {
+				name: "Guide de remplissage",
+				hidden: true,
+			}),
+		).toBeDisabled();
+		expect(
+			screen.getByRole("button", {
+				name: "Ressources et modèles de fichiers",
+				hidden: true,
+			}),
+		).toBeDisabled();
+	});
+
+	it("mentions the filling guide in the instruction text", () => {
+		render(<CategoryImportExport onImport={vi.fn()} />);
+
+		expect(
+			screen.getByText(/en vous aidant si besoin du guide de remplissage/),
+		).toBeInTheDocument();
+	});
 });
 
 describe("CategoryImportExport template download", () => {

@@ -173,14 +173,28 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 											/>
 
 											<p className="fr-mb-0">
-												Téléchargez le fichier à remplir, complétez-le, puis
+												Téléchargez le fichier à remplir, complétez-le en vous
+												aidant si besoin du guide de remplissage, puis
 												redéposez-le ci-dessus pour importer les données.
 											</p>
 										</div>
 
-										<TemplateDownloadCard
+										<ImportDownloadCard
+											description="Écart de rémunération par catégories de salariés"
+											format="CSV"
 											onDownload={handleDownloadTemplate}
 											sizeBytes={templateBlob.size}
+											title="Fichier d'import à remplir"
+										/>
+
+										{/* TODO(#3732): carte placeholder désactivée — brancher le
+											téléchargement du PDF « Guide de remplissage » (asset absent à
+											ce jour), ajouter fr-enlarge-button, le poids réel du fichier
+											et l'event de tracking une fois le PDF fourni. */}
+										<ImportDownloadCard
+											description="Consignes pour compléter le fichier ci-dessus"
+											format="PDF"
+											title="Guide de remplissage"
 										/>
 
 										<div
@@ -205,9 +219,17 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 									<p className="fr-text--md fr-text--bold fr-mb-0">
 										Pour vous aider
 									</p>
-									<Link className="fr-link" href="/aide">
-										Centre d&apos;aide
-									</Link>
+									<div className={styles.helpLinks}>
+										{/* TODO(#3732): lien placeholder désactivé — brancher
+											« Ressources et modèles de fichiers » quand la page/URL
+											cible existera (aucune destination à ce jour). */}
+										<button className="fr-link" disabled type="button">
+											Ressources et modèles de fichiers
+										</button>
+										<Link className="fr-link" href="/aide">
+											Centre d&apos;aide
+										</Link>
+									</div>
 								</div>
 							</div>
 							<div className={styles.footer}>
@@ -229,27 +251,42 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 	);
 }
 
-function TemplateDownloadCard({
+function ImportDownloadCard({
+	title,
+	description,
+	format,
 	sizeBytes,
 	onDownload,
 }: {
-	sizeBytes: number;
-	onDownload: () => void;
+	title: string;
+	description: string;
+	format: string;
+	sizeBytes?: number;
+	onDownload?: () => void;
 }) {
+	const size = sizeBytes != null ? formatFileSize(sizeBytes) : null;
+	const detail = size ? `${format} – ${size}` : format;
+	const disabled = !onDownload;
+	const cardClassName = [
+		"fr-card",
+		"fr-card--sm",
+		"fr-card--download",
+		onDownload && "fr-enlarge-button",
+	]
+		.filter(Boolean)
+		.join(" ");
 	return (
-		<div className="fr-card fr-card--sm fr-card--download fr-enlarge-button">
+		<div className={cardClassName}>
 			<div className="fr-card__body">
 				<div className="fr-card__content">
 					<h3 className="fr-card__title">
-						<button onClick={onDownload} type="button">
-							Fichier d&apos;import à remplir
+						<button disabled={disabled} onClick={onDownload} type="button">
+							{title}
 						</button>
 					</h3>
-					<p className="fr-card__desc">
-						Écart de rémunération par catégories de salariés
-					</p>
+					<p className="fr-card__desc">{description}</p>
 					<div className="fr-card__end">
-						<p className="fr-card__detail">CSV – {formatFileSize(sizeBytes)}</p>
+						<p className="fr-card__detail">{detail}</p>
 					</div>
 				</div>
 			</div>
