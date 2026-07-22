@@ -1,9 +1,18 @@
-name: 🔖 Release
+name: 🔖 Prerelease (alpha)
 
-# Manual-only releaser for the beta channel. The alpha channel was extracted
-# into release-alpha.yaml (also manual): merging to alpha no longer publishes
-# a prerelease — and therefore no longer auto-deploys to prod — on its own.
-# master is intentionally out of scope here (never in the trigger nor the gate).
+# Manual-only alpha prerelease cutter. Replaces the former automatic
+# `push: alpha` trigger of release.yml: publishing an alpha prerelease — and
+# therefore the production deploy it triggers via production.yaml, plus the AI
+# changelog it triggers on `release: published` — is now an intentional click,
+# not a side effect of every merge.
+#
+# Runs the exact same `pnpm release` (semantic-release) as release.yml, on the
+# alpha branch, so the output is unchanged: a `-alpha.N` GitHub prerelease
+# (tag-only flow — .releaserc.cjs restricts the commit plugins to master/beta,
+# so nothing is pushed back to the protected alpha branch). semantic-release
+# only publishes when release-worthy commits (feat/fix…) exist since the last
+# alpha tag; otherwise the run is a no-op ("no release published").
+
 on:
   workflow_dispatch:
 
@@ -19,10 +28,17 @@ env:
   GIT_COMMITTER_EMAIL: ${{ secrets.SOCIALGROOVYBOT_EMAIL }}
   GIT_COMMITTER_NAME: ${{ secrets.SOCIALGROOVYBOT_NAME }}
 
+# Serialize two quick clicks instead of cancelling a release mid-flight.
+concurrency:
+  group: release-alpha
+  cancel-in-progress: false
+
 jobs:
   release:
-    if: github.ref == 'refs/heads/beta'
-    name: Release
+    # Alpha-only guard: even if dispatched from another branch by mistake, the
+    # job never runs anywhere but alpha — it can never cut a beta/master release.
+    if: github.ref == 'refs/heads/alpha'
+    name: Prerelease (alpha)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

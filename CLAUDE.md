@@ -252,6 +252,7 @@ GitHub Actions workflows are in `.github/workflows/` :
 |---|---|---|
 | `ci.yaml` | each push | build · lint · format · typecheck · tests |
 | `release.yml` | manual (branch `beta`) | semantic-release |
+| `release-alpha.yaml` | manual (branch `alpha`) | semantic-release — prerelease `-alpha.N` (remplace l'ancien auto `push: alpha`) |
 | `review.yaml` | PR | review app deployment |
 | `preproduction.yaml` | push `beta` | preprod deployment |
 | `production.yaml` | push `master` | prod deployment |
