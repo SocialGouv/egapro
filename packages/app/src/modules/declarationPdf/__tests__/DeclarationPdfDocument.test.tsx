@@ -1,20 +1,25 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+	emptyStep2Data,
+	emptyStep3Data,
+	emptyStep4Data,
+	makeCategory,
+} from "~/modules/declaration-remuneration/recapitulatif/__tests__/fixtures";
 import type { DeclarationPdfData } from "../types";
 
 const mocks = vi.hoisted(() => ({
 	ensurePdfFontsRegistered: vi.fn(),
 	workforceSection: vi.fn(),
-	payGapTable: vi.fn(),
 	variablePaySection: vi.fn(),
 	quartileSection: vi.fn(),
 	categorySection: vi.fn(),
+	payGapTable: vi.fn(),
 }));
 
 vi.mock("@react-pdf/renderer", async () => {
 	const React = await import("react");
-
 	return {
 		Document: ({ children }: { children: React.ReactNode }) =>
 			React.createElement("div", { "data-testid": "pdf-document" }, children),
@@ -28,9 +33,8 @@ vi.mock("@react-pdf/renderer", async () => {
 			React.createElement("span", null, children),
 		View: ({ children }: { children: React.ReactNode }) =>
 			React.createElement("div", null, children),
-		StyleSheet: {
-			create: <T,>(styles: T) => styles,
-		},
+		Image: () => React.createElement("div", { "data-testid": "pdf-image" }),
+		StyleSheet: { create: <T,>(styles: T) => styles },
 	};
 });
 
@@ -41,200 +45,185 @@ vi.mock("../pdfFonts", () => ({
 
 vi.mock("../sections/WorkforceSection", async () => {
 	const React = await import("react");
-
 	return {
-		WorkforceSection: ({ data }: { data: DeclarationPdfData }) => {
-			mocks.workforceSection({ data });
-			return React.createElement(
-				"div",
-				{ "data-testid": "workforce-section" },
-				`${data.totalWomen}/${data.totalMen}`,
-			);
-		},
-	};
-});
-
-vi.mock("../sections/PayGapTable", async () => {
-	const React = await import("react");
-
-	return {
-		PayGapTable: ({
-			rows,
-			title,
-		}: {
-			rows: DeclarationPdfData["step2Rows"];
-			title: string;
-		}) => {
-			mocks.payGapTable({ rows, title });
-			return React.createElement(
-				"div",
-				{ "data-testid": "pay-gap-table" },
-				title,
-			);
+		WorkforceSection: () => {
+			mocks.workforceSection();
+			return React.createElement("div", {
+				"data-testid": "workforce-section",
+			});
 		},
 	};
 });
 
 vi.mock("../sections/VariablePaySection", async () => {
 	const React = await import("react");
-
 	return {
-		VariablePaySection: ({ data }: { data: DeclarationPdfData }) => {
-			mocks.variablePaySection({ data });
-			return React.createElement(
-				"div",
-				{ "data-testid": "variable-pay-section" },
-				data.step3Data.rows.length,
-			);
+		VariablePaySection: () => {
+			mocks.variablePaySection();
+			return React.createElement("div", {
+				"data-testid": "variable-pay-section",
+			});
 		},
 	};
 });
 
 vi.mock("../sections/QuartileSection", async () => {
 	const React = await import("react");
-
 	return {
-		QuartileSection: ({ data }: { data: DeclarationPdfData }) => {
-			mocks.quartileSection({ data });
-			return React.createElement(
-				"div",
-				{ "data-testid": "quartile-section" },
-				data.step4Categories.length,
-			);
+		QuartileSection: () => {
+			mocks.quartileSection();
+			return React.createElement("div", {
+				"data-testid": "quartile-section",
+			});
 		},
 	};
 });
 
 vi.mock("../sections/CategorySection", async () => {
 	const React = await import("react");
-
 	return {
-		CategorySection: ({ data }: { data: DeclarationPdfData }) => {
-			mocks.categorySection({ data });
-			return React.createElement(
-				"div",
-				{ "data-testid": "category-section" },
-				data.step5Categories.length,
-			);
+		CategorySection: () => {
+			mocks.categorySection();
+			return React.createElement("div", {
+				"data-testid": "category-section",
+			});
+		},
+	};
+});
+
+vi.mock("../sections/PayGapTable", async () => {
+	const React = await import("react");
+	return {
+		PayGapTable: () => {
+			mocks.payGapTable();
+			return React.createElement("div", { "data-testid": "pay-gap-table" });
 		},
 	};
 });
 
 import { DeclarationPdfDocument } from "../DeclarationPdfDocument";
 
-const declarationPdfData: DeclarationPdfData = {
-	companyName: "Acme Corp",
-	siren: "123456789",
-	year: 2026,
-	generatedAt: "10 mars 2026",
-	isSecondDeclaration: false,
-	totalWomen: 50,
-	totalMen: 60,
-	step1Categories: [{ name: "Cadres", women: 20, men: 30 }],
-	step2Rows: [
-		{
-			label: "Annuelle brute moyenne",
-			womenValue: "45000",
-			menValue: "50000",
+function makeData(
+	overrides: Partial<DeclarationPdfData> = {},
+): DeclarationPdfData {
+	return {
+		year: 2026,
+		workforceYear: 2025,
+		isSecondDeclaration: false,
+		transmittedAt: "05/03/2026",
+		referencePeriod: "01/01/2026 - 31/12/2026",
+		declarant: {
+			name: "Jean Martin",
+			email: "email@example.fr",
+			phone: "0102030405",
 		},
-	],
-	step3Data: {
-		beneficiaryWomen: "80",
-		beneficiaryMen: "75",
-		rows: [
-			{
-				label: "Primes",
-				womenValue: "5000",
-				menValue: "6000",
-			},
-		],
-	},
-	step4Categories: [
-		{
-			name: "Q1",
-			womenCount: 10,
-			menCount: 15,
-			womenValue: "40000",
-			menValue: "42000",
-			womenMedianValue: undefined,
-			menMedianValue: undefined,
+		company: {
+			name: "Société Démo",
+			siren: "123456789",
+			address: "1 rue de la Paix, 75002 Paris",
+			nafCode: "6201Z",
+			nafLabel: "Programmation informatique",
+			workforceDisplay: "250",
 		},
-	],
-	step5Categories: [
-		{
-			name: "Ingénieurs",
-			womenCount: 5,
-			menCount: 8,
-			annualBaseWomen: "55000",
-			annualBaseMen: "58000",
-			annualVariableWomen: null,
-			annualVariableMen: null,
-			hourlyBaseWomen: null,
-			hourlyBaseMen: null,
-			hourlyVariableWomen: null,
-			hourlyVariableMen: null,
-		},
-	],
-};
+		totalWomen: 50,
+		totalMen: 60,
+		step2Data: emptyStep2Data(),
+		step3Data: emptyStep3Data(),
+		step4Data: emptyStep4Data(),
+		categories: [makeCategory({ name: "Ouvriers" })],
+		source: "Accord d'entreprise",
+		...overrides,
+	};
+}
 
 describe("DeclarationPdfDocument", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it("renders the declaration header, footer, and PDF sections", () => {
-		render(<DeclarationPdfDocument data={declarationPdfData} />);
-
+	it("registers fonts and renders an A4 page", () => {
+		render(<DeclarationPdfDocument data={makeData()} />);
 		expect(mocks.ensurePdfFontsRegistered).toHaveBeenCalledTimes(1);
-		expect(screen.getByTestId("pdf-document")).toBeInTheDocument();
 		expect(screen.getByTestId("pdf-page")).toHaveAttribute("data-size", "A4");
-		expect(
-			screen.getByText("Déclaration des indicateurs de rémunération 2026"),
-		).toBeInTheDocument();
-		expect(screen.getByText("Au titre des données 2025")).toBeInTheDocument();
-		expect(screen.getByText("Acme Corp — SIREN 123456789")).toBeInTheDocument();
-		expect(screen.getByText("Écart de rémunération")).toBeInTheDocument();
-		expect(
-			screen.getByText("Document généré le 10 mars 2026"),
-		).toBeInTheDocument();
-		expect(screen.getByTestId("workforce-section")).toHaveTextContent("50/60");
-		expect(screen.getByTestId("variable-pay-section")).toHaveTextContent("1");
-		expect(screen.getByTestId("quartile-section")).toHaveTextContent("1");
-		expect(screen.getByTestId("category-section")).toHaveTextContent("1");
 	});
 
-	it("passes the expected props to each PDF section", () => {
-		render(<DeclarationPdfDocument data={declarationPdfData} />);
-
-		expect(mocks.workforceSection).toHaveBeenCalledWith({
-			data: declarationPdfData,
-		});
-		expect(mocks.payGapTable).toHaveBeenCalledWith({
-			rows: declarationPdfData.step2Rows,
-			title: "Écart de rémunération",
-		});
-		expect(mocks.variablePaySection).toHaveBeenCalledWith({
-			data: declarationPdfData,
-		});
-		expect(mocks.quartileSection).toHaveBeenCalledWith({
-			data: declarationPdfData,
-		});
-		expect(mocks.categorySection).toHaveBeenCalledWith({
-			data: declarationPdfData,
-		});
-	});
-
-	it("renders second declaration title when isSecondDeclaration is true", () => {
-		const secondDeclData = {
-			...declarationPdfData,
-			isSecondDeclaration: true,
-		};
-		render(<DeclarationPdfDocument data={secondDeclData} />);
-
+	it("renders the initial-declaration title and the transmission date", () => {
+		render(<DeclarationPdfDocument data={makeData()} />);
 		expect(
 			screen.getByText(
-				/Seconde déclaration de l.indicateur de rémunération par catégorie de salariés 2026/,
+				"Récapitulatif de la déclaration des indicateurs de rémunération 2026",
 			),
 		).toBeInTheDocument();
+		expect(
+			screen.getByText("La déclaration a été transmise le 05/03/2026"),
+		).toBeInTheDocument();
+	});
+
+	it("renders declarant, company (formatted SIREN + NAF) and reference-period info", () => {
+		render(<DeclarationPdfDocument data={makeData()} />);
+		expect(screen.getByText("Jean Martin")).toBeInTheDocument();
+		expect(screen.getByText("email@example.fr")).toBeInTheDocument();
+		expect(screen.getByText("123 456 789")).toBeInTheDocument();
+		expect(
+			screen.getByText("6201Z - Programmation informatique"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Effectif annuel moyen en 2025"),
+		).toBeInTheDocument();
+		expect(screen.getByText("250")).toBeInTheDocument();
+		expect(screen.getByText("01/01/2026 - 31/12/2026")).toBeInTheDocument();
+	});
+
+	it("renders every indicator section for an initial declaration", () => {
+		render(<DeclarationPdfDocument data={makeData()} />);
+		expect(mocks.workforceSection).toHaveBeenCalledTimes(1);
+		expect(mocks.variablePaySection).toHaveBeenCalledTimes(1);
+		expect(mocks.quartileSection).toHaveBeenCalledTimes(1);
+		expect(mocks.payGapTable).toHaveBeenCalledTimes(1);
+		expect(mocks.categorySection).toHaveBeenCalledTimes(1);
+	});
+
+	it("renders the correction title and gates the indicator sections to categories only", () => {
+		render(
+			<DeclarationPdfDocument data={makeData({ isSecondDeclaration: true })} />,
+		);
+		expect(
+			screen.getByText(
+				"Récapitulatif de la seconde déclaration des écarts de rémunération par catégorie de salariés 2026",
+			),
+		).toBeInTheDocument();
+
+		expect(mocks.workforceSection).not.toHaveBeenCalled();
+		expect(mocks.variablePaySection).not.toHaveBeenCalled();
+		expect(mocks.quartileSection).not.toHaveBeenCalled();
+		expect(mocks.payGapTable).not.toHaveBeenCalled();
+		// Categories are always rendered, in both variants.
+		expect(mocks.categorySection).toHaveBeenCalledTimes(1);
+	});
+
+	it("renders a dash for the NAF cell when neither code nor label is present", () => {
+		render(
+			<DeclarationPdfDocument
+				data={makeData({
+					company: {
+						...makeData().company,
+						nafCode: null,
+						nafLabel: null,
+					},
+				})}
+			/>,
+		);
+		expect(screen.getByText("-")).toBeInTheDocument();
+	});
+
+	it("renders the NAF cell with only the code when the label is missing", () => {
+		render(
+			<DeclarationPdfDocument
+				data={makeData({
+					company: { ...makeData().company, nafLabel: null },
+				})}
+			/>,
+		);
+		expect(screen.getByText("6201Z")).toBeInTheDocument();
 	});
 });

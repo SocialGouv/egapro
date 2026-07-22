@@ -1,10 +1,11 @@
 name: 🔖 Release
 
+# Manual-only releaser for the beta channel. The alpha channel was extracted
+# into release-alpha.yaml (also manual): merging to alpha no longer publishes
+# a prerelease — and therefore no longer auto-deploys to prod — on its own.
+# master is intentionally out of scope here (never in the trigger nor the gate).
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - alpha
 
 permissions:
   contents: write
@@ -20,7 +21,7 @@ env:
 
 jobs:
   release:
-    if: github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha'
+    if: github.ref == 'refs/heads/beta'
     name: Release
     runs-on: ubuntu-latest
     steps:
