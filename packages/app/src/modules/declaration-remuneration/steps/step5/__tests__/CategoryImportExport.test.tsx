@@ -242,4 +242,24 @@ describe("CategoryImportExport failed import", () => {
 		expect(trackDurationMock).not.toHaveBeenCalled();
 		expect(concealMock).not.toHaveBeenCalled();
 	});
+
+	it("clears stale errors and the selected file when the panel is reopened", async () => {
+		const message = "Le fichier ne contient aucune donnée exploitable.";
+		parseImportFileMock.mockResolvedValue({
+			ok: false,
+			errors: [{ type: "empty-file", message }],
+		} satisfies ImportResult);
+
+		render(<CategoryImportExport onImport={vi.fn()} />);
+		selectFile();
+		fireEvent.click(importButton());
+
+		await waitFor(() => expect(screen.getByText(message)).toBeInTheDocument());
+		expect(importButton()).toBeEnabled();
+
+		fireEvent.click(trigger());
+
+		expect(screen.queryByText(message)).not.toBeInTheDocument();
+		expect(importButton()).toBeDisabled();
+	});
 });

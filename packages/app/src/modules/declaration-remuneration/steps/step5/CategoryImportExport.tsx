@@ -56,6 +56,13 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 
 	const templateBlob = useMemo(() => generateTemplate(), []);
 
+	function handleOpenPanel() {
+		setImportErrors([]);
+		setSelectedFiles([]);
+		setFileError(null);
+		startCategoryModelTimer();
+	}
+
 	function handleDownloadTemplate() {
 		const url = URL.createObjectURL(templateBlob);
 		const link = document.createElement("a");
@@ -116,7 +123,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 				className="fr-btn fr-btn--secondary fr-icon-file-download-line fr-btn--icon-left"
 				data-fr-opened="false"
 				disabled={disabled}
-				onClick={() => startCategoryModelTimer()}
+				onClick={handleOpenPanel}
 				type="button"
 			>
 				Importer les données
@@ -176,9 +183,9 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 										/>
 
 										<div
-											aria-live="polite"
 											className="fr-messages-group"
 											id={messagesId}
+											role="alert"
 										>
 											{importErrors.map((error) => (
 												<p
@@ -194,7 +201,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 
 								<div className={styles.helpSection}>
 									<hr className="fr-hr" />
-									<p className="fr-text--lg fr-text--bold fr-mb-0">
+									<p className="fr-text--md fr-text--bold fr-mb-0">
 										Pour vous aider
 									</p>
 									<Link className="fr-link" href="/aide">
