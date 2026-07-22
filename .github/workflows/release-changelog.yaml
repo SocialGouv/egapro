@@ -42,17 +42,20 @@ jobs:
 
       - name: Resolve release tag
         id: tag
-        run: echo "tag=${{ github.event.inputs.tag || github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+        env:
+          RAW_TAG: ${{ github.event.inputs.tag || github.event.release.tag_name }}
+        run: echo "tag=$RAW_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Collect release issues
         id: collect
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.tag.outputs.tag }}
         run: |
-          scripts/release/collect_release_issues.sh "${{ steps.tag.outputs.tag }}" > issues.json
+          scripts/release/collect_release_issues.sh "$TAG" > issues.json
           cat issues.json
           if [ "$(jq 'length' issues.json)" -eq 0 ]; then
-            echo "No business-facing issue/PR found for ${{ steps.tag.outputs.tag }}, skipping AI summary" >&2
+            echo "No business-facing issue/PR found for $TAG, skipping AI summary" >&2
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
@@ -92,9 +95,10 @@ jobs:
         if: steps.collect.outputs.skip == 'false'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.tag.outputs.tag }}
         run: |
           if [ -f summary.md ]; then
-            scripts/release/publish_release_summary.sh "${{ steps.tag.outputs.tag }}" summary.md
+            scripts/release/publish_release_summary.sh "$TAG" summary.md
           else
             echo "summary.md was not produced by the AI step, skipping publish" >&2
           fi
