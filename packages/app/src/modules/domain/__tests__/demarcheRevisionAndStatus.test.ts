@@ -38,15 +38,14 @@ type RevisionRow = {
 const REVISION_ROWS: RevisionRow[] = [
 	{
 		label:
-			"parcours initial non requis (écart G sous le seuil) → jamais de révision",
+			"initial compliance path not required (G gap below threshold) → never a revision",
 		gap: GAP_ALERT_THRESHOLD - 1,
 		events: events("submit", "second_declaration_submit"),
 		correctionGap: GAP_ALERT_THRESHOLD + 1,
 		expected: false,
 	},
 	{
-		label:
-			"parcours requis mais aucune seconde déclaration soumise → pas de révision",
+		label: "path required but no second declaration submitted → no revision",
 		gap: GAP_ALERT_THRESHOLD + 1,
 		events: events("submit"),
 		correctionGap: GAP_ALERT_THRESHOLD + 1,
@@ -54,7 +53,7 @@ const REVISION_ROWS: RevisionRow[] = [
 	},
 	{
 		label:
-			"seconde déclaration soumise mais écart corrigé inconnu (null) → pas de révision",
+			"second declaration submitted but corrected gap unknown (null) → no revision",
 		gap: GAP_ALERT_THRESHOLD + 1,
 		events: events("submit", "second_declaration_submit"),
 		correctionGap: null,
@@ -62,7 +61,7 @@ const REVISION_ROWS: RevisionRow[] = [
 	},
 	{
 		label:
-			"seconde déclaration soumise + écart corrigé pile au seuil → révision requise",
+			"second declaration submitted + corrected gap exactly at the threshold → revision required",
 		gap: GAP_ALERT_THRESHOLD + 1,
 		events: events("submit", "second_declaration_submit"),
 		correctionGap: GAP_ALERT_THRESHOLD,
@@ -70,7 +69,7 @@ const REVISION_ROWS: RevisionRow[] = [
 	},
 	{
 		label:
-			"seconde déclaration soumise + écart corrigé au-dessus du seuil → révision requise",
+			"second declaration submitted + corrected gap above the threshold → revision required",
 		gap: GAP_ALERT_THRESHOLD + 1,
 		events: events("submit", "second_declaration_submit"),
 		correctionGap: GAP_ALERT_THRESHOLD + 1,
@@ -78,7 +77,7 @@ const REVISION_ROWS: RevisionRow[] = [
 	},
 	{
 		label:
-			"seconde déclaration soumise + écart corrigé sous le seuil → résolu, pas de révision",
+			"second declaration submitted + corrected gap below the threshold → resolved, no revision",
 		gap: GAP_ALERT_THRESHOLD + 1,
 		events: events("submit", "second_declaration_submit"),
 		correctionGap: GAP_ALERT_THRESHOLD - 1,
@@ -86,7 +85,7 @@ const REVISION_ROWS: RevisionRow[] = [
 	},
 	{
 		label:
-			"seconde déclaration soumise + écart corrigé négatif → pas de révision (unidirectionnel)",
+			"second declaration submitted + negative corrected gap → no revision (one-directional)",
 		gap: GAP_ALERT_THRESHOLD + 1,
 		events: events("submit", "second_declaration_submit"),
 		correctionGap: -GAP_ALERT_THRESHOLD,
@@ -94,7 +93,7 @@ const REVISION_ROWS: RevisionRow[] = [
 	},
 ];
 
-describe("isComplianceProcessRevisionRequired — frontières de la seconde déclaration", () => {
+describe("isComplianceProcessRevisionRequired — second-declaration boundaries", () => {
 	it.each(REVISION_ROWS)("$label", ({
 		gap,
 		events: evts,
@@ -118,10 +117,10 @@ describe("isComplianceProcessRevisionRequired — frontières de la seconde déc
 	});
 });
 
-describe("computeDeclarationStatus — projection du statut FSM vers le statut utilisateur", () => {
+describe("computeDeclarationStatus — FSM status projection to the user-facing status", () => {
 	it.each(
 		DECLARATION_FSM_STATUSES,
-	)("statut FSM « %s » (en cours de saisie) → done seulement si terminal", (status) => {
+	)("FSM status %s (filling in progress) → done only when terminal", (status) => {
 		const result = computeDeclarationStatus({
 			status,
 			currentStep: 6,
@@ -135,11 +134,11 @@ describe("computeDeclarationStatus — projection du statut FSM vers le statut u
 		}
 	});
 
-	it("déclaration absente → to_complete", () => {
+	it("missing declaration → to_complete", () => {
 		expect(computeDeclarationStatus(undefined)).toBe("to_complete");
 	});
 
-	it("brouillon à l'étape 0 → to_complete ; brouillon entamé → in_progress", () => {
+	it("draft at step 0 → to_complete; started draft → in_progress", () => {
 		expect(computeDeclarationStatus({ status: "draft", currentStep: 0 })).toBe(
 			"to_complete",
 		);
@@ -148,7 +147,7 @@ describe("computeDeclarationStatus — projection du statut FSM vers le statut u
 		);
 	});
 
-	it("annulation → to_complete même si le FSM est terminal", () => {
+	it("cancellation → to_complete even when the FSM is terminal", () => {
 		expect(
 			computeDeclarationStatus({
 				status: "demarche_completed",

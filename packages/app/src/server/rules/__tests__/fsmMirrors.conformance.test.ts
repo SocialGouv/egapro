@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getCurrentStageHref } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
 import type { PanelVariant } from "~/modules/my-space";
-// Cross-module conformance test: computePanelVariant/computeCtaHref/DeclarationItem sont internes à my-space (pas exposés par le barrel) ; les exporter serait un changement de prod hors périmètre de ce ticket test-only.
+// Cross-module conformance test: computePanelVariant/computeCtaHref/DeclarationItem are internal to my-space (not exposed by the barrel); exporting them would be a production change out of scope for this test-only ticket.
 import {
 	computeCtaHref,
 	computePanelVariant,
@@ -65,14 +65,14 @@ function stripSiren(url: string): string {
 	return url.split("?")[0] ?? url;
 }
 
-describe("conformité du moteur au vocabulaire FSM partagé", () => {
-	it("les états de v2027.1.json couvrent exactement DECLARATION_FSM_STATUSES", () => {
+describe("engine conformance to the shared FSM vocabulary", () => {
+	it("the v2027.1.json states cover exactly DECLARATION_FSM_STATUSES", () => {
 		const engineStates = rules.states.map((s) => s.id).sort();
 		const shared = [...DECLARATION_FSM_STATUSES].sort();
 		expect(engineStates).toEqual(shared);
 	});
 
-	it("chaque transition atterrit sur un état connu du moteur", () => {
+	it("every transition lands on a known engine state", () => {
 		const ids = new Set(rules.states.map((s) => s.id));
 		for (const transition of rules.transitions) {
 			expect(ids.has(transition.to)).toBe(true);
@@ -80,10 +80,10 @@ describe("conformité du moteur au vocabulaire FSM partagé", () => {
 	});
 });
 
-describe("conformité des miroirs — états du moteur (hors terminal)", () => {
+describe("mirror conformance — engine states (non-terminal)", () => {
 	it.each(
 		rules.states.filter((s) => s.id !== "demarche_completed"),
-	)("état « $id » (stage $stage) : nav, panel et cta convergent vers le même écran", (state) => {
+	)("state $id (stage $stage): nav, panel and cta converge on the same screen", (state) => {
 		const expected = STAGE_SCREEN[String(state.stage)];
 		if (!expected)
 			throw new Error(`No screen mapping for stage ${state.stage}`);
@@ -97,10 +97,10 @@ describe("conformité des miroirs — états du moteur (hors terminal)", () => {
 	});
 });
 
-describe("conformité des miroirs — destinations des transitions du moteur", () => {
+describe("mirror conformance — engine transition destinations", () => {
 	it.each(
 		rules.transitions,
-	)("transition « $id » → « $to » : miroirs cohérents avec le stage du moteur", (transition) => {
+	)("transition $id → $to: mirrors consistent with the engine stage", (transition) => {
 		const to = transition.to;
 		if (to === "demarche_completed") {
 			// Terminal state: only the healthy hasSubmittedCseOpinion:true branch is asserted here —
@@ -126,10 +126,10 @@ describe("conformité des miroirs — destinations des transitions du moteur", (
 	});
 });
 
-describe("exhaustivité — chaque statut FSM est couvert par les deux miroirs", () => {
+describe("exhaustiveness — every FSM status is covered by both mirrors", () => {
 	it.each(
 		DECLARATION_FSM_STATUSES,
-	)("statut « %s » : nav et panel renvoient une destination définie", (status) => {
+	)("status %s: nav and panel return a defined destination", (status) => {
 		const nav = getCurrentStageHref(status, true);
 		expect(typeof nav).toBe("string");
 		expect(nav.length).toBeGreaterThan(0);
@@ -141,8 +141,8 @@ describe("exhaustivité — chaque statut FSM est couvert par les deux miroirs",
 	});
 });
 
-describe("demarche_completed — cohérence des miroirs × (hasCse × hasSubmittedCseOpinion)", () => {
-	it("avec CSE, avis non déposé : panel « cse » et nav → /avis-cse (cohérent)", () => {
+describe("demarche_completed — mirror coherence × (hasCse × hasSubmittedCseOpinion)", () => {
+	it('with CSE, opinion not yet deposited: panel "cse" and nav → /avis-cse (coherent)', () => {
 		const decl = makeDeclaration({
 			fsmStatus: "demarche_completed",
 			hasSubmittedCseOpinion: false,
@@ -152,7 +152,7 @@ describe("demarche_completed — cohérence des miroirs × (hasCse × hasSubmitt
 		expect(getCurrentStageHref("demarche_completed", true)).toBe(CSE);
 	});
 
-	it("avec CSE, avis déposé : panel « closed » ; nav conserve /avis-cse (dépôt CSE re-soumettable)", () => {
+	it('with CSE, opinion deposited: panel "closed"; nav keeps /avis-cse (CSE deposit re-submittable)', () => {
 		const decl = makeDeclaration({
 			fsmStatus: "demarche_completed",
 			hasSubmittedCseOpinion: true,
@@ -166,7 +166,7 @@ describe("demarche_completed — cohérence des miroirs × (hasCse × hasSubmitt
 		expect(getCurrentStageHref("demarche_completed", true)).toBe(CSE);
 	});
 
-	it.fails("sans CSE, avis non déposé : le panel devrait être « closed », pas « cse » (#3945)", () => {
+	it.fails('without CSE, opinion not deposited: the panel should be "closed", not "cse" (#3945)', () => {
 		const decl = makeDeclaration({
 			fsmStatus: "demarche_completed",
 			hasSubmittedCseOpinion: false,
@@ -180,7 +180,7 @@ describe("demarche_completed — cohérence des miroirs × (hasCse × hasSubmitt
 		expect(computePanelVariant(decl)).toBe("closed");
 	});
 
-	it("sans CSE, avis « déposé » : panel « closed » et nav → /confirmation (cohérent, démarche close)", () => {
+	it('without CSE, opinion "deposited": panel "closed" and nav → /confirmation (coherent, démarche closed)', () => {
 		const decl = makeDeclaration({
 			fsmStatus: "demarche_completed",
 			hasSubmittedCseOpinion: true,

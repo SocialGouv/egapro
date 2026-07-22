@@ -46,35 +46,35 @@ type GapCase = {
 
 const GAP_CASES: GapCase[] = [
 	{
-		label: "aucun écart (G = 0 %)",
+		label: "no gap (G = 0%)",
 		gap: 0,
 		significant: false,
 		level: "low",
 		triggers: false,
 	},
 	{
-		label: "≥ seuil sur les 6 premiers indicateurs seulement (G sous le seuil)",
+		label: "gap ≥ threshold on the first 6 indicators only (G below threshold)",
 		gap: GAP_ALERT_THRESHOLD - 1,
 		significant: false,
 		level: "low",
 		triggers: false,
 	},
 	{
-		label: "écart G pile au seuil",
+		label: "G gap exactly at the threshold",
 		gap: GAP_ALERT_THRESHOLD,
 		significant: true,
 		level: "high",
 		triggers: true,
 	},
 	{
-		label: "écart G au-dessus du seuil",
+		label: "G gap above the threshold",
 		gap: GAP_ALERT_THRESHOLD + 1,
 		significant: true,
 		level: "high",
 		triggers: true,
 	},
 	{
-		label: "écart G négatif au seuil (défavorable aux hommes)",
+		label: "negative G gap at the threshold (unfavourable to men)",
 		gap: -GAP_ALERT_THRESHOLD,
 		significant: true,
 		level: null,
@@ -88,12 +88,12 @@ const REGIMES = [
 	{
 		year: INDICATOR_G_TRIENNIAL_BASE_YEAR, // 2027
 		isTriennial: true,
-		label: "année triennale",
+		label: "triennial year",
 	},
 	{
 		year: INDICATOR_G_TRIENNIAL_BASE_YEAR + 1, // 2028
 		isTriennial: false,
-		label: "année non triennale (régime annuel seul)",
+		label: "non-triennial year (annual regime only)",
 	},
 ];
 
@@ -109,7 +109,7 @@ for (const gipWorkforce of GIP_WORKFORCES) {
 	for (const gapCase of GAP_CASES) {
 		for (const regime of REGIMES) {
 			ROWS.push({
-				label: `effectif GIP ${gipWorkforce} · ${gapCase.label} · ${regime.label}`,
+				label: `GIP workforce ${gipWorkforce} · ${gapCase.label} · ${regime.label}`,
 				gipWorkforce,
 				gapCase,
 				regime,
@@ -122,7 +122,7 @@ for (const gipWorkforce of GIP_WORKFORCES) {
 // fsmMirrors.conformance.test.ts, where the mirror functions actually consume it.
 // None of the predicates exercised here read hasCse, so crossing it in would only
 // duplicate rows and add a tautological assertion — it is deliberately left out.
-describe("table de décision — effectif × écart × régime", () => {
+describe("decision table — workforce × gap × regime", () => {
 	it.each(ROWS)("$label", ({ gipWorkforce, gapCase, regime }) => {
 		// Fixture guard: both regimes stay below the universal year so the 150-249
 		// band remains triennial-gated.
@@ -172,14 +172,14 @@ describe("table de décision — effectif × écart × régime", () => {
 	});
 });
 
-describe("frontières de taille (constantes nommées du domaine)", () => {
-	it("isCseRequired bascule à COMPANY_SIZE_ANNUAL_MIN (100)", () => {
+describe("size boundaries (named domain constants)", () => {
+	it("isCseRequired flips at COMPANY_SIZE_ANNUAL_MIN (100)", () => {
 		expect(isCseRequired(COMPANY_SIZE_ANNUAL_MIN - 1)).toBe(false);
 		expect(isCseRequired(COMPANY_SIZE_ANNUAL_MIN)).toBe(true);
 		expect(isCseRequired(COMPANY_SIZE_ANNUAL_MIN + 1)).toBe(true);
 	});
 
-	it("classifyCompanySize : frontières voluntary / triennial / annual", () => {
+	it("classifyCompanySize: voluntary / triennial / annual boundaries", () => {
 		expect(classifyCompanySize(COMPANY_SIZE_VOLUNTARY_MAX - 1)).toBe(
 			"voluntary",
 		);
@@ -188,7 +188,7 @@ describe("frontières de taille (constantes nommées du domaine)", () => {
 		expect(classifyCompanySize(COMPANY_SIZE_ANNUAL_MIN)).toBe("annual");
 	});
 
-	it("isIndicatorGRequired : régime annuel bascule à INDICATOR_G_ANNUAL_MIN (250)", () => {
+	it("isIndicatorGRequired: annual regime flips at INDICATOR_G_ANNUAL_MIN (250)", () => {
 		const nonTriennial = INDICATOR_G_TRIENNIAL_BASE_YEAR + 1;
 		expect(isIndicatorGRequired(INDICATOR_G_ANNUAL_MIN - 1, nonTriennial)).toBe(
 			false,
@@ -201,7 +201,7 @@ describe("frontières de taille (constantes nommées du domaine)", () => {
 		);
 	});
 
-	it("isIndicatorGRequired : régime triennal bascule à INDICATOR_G_TRIENNIAL_MIN (150) une année triennale", () => {
+	it("isIndicatorGRequired: triennial regime flips at INDICATOR_G_TRIENNIAL_MIN (150) in a triennial year", () => {
 		expect(
 			isIndicatorGRequired(
 				INDICATOR_G_TRIENNIAL_MIN - 1,
@@ -216,7 +216,7 @@ describe("frontières de taille (constantes nommées du domaine)", () => {
 		).toBe(true);
 	});
 
-	it("isIndicatorGRequired : la bande 150-249 n'est pas requise hors année triennale", () => {
+	it("isIndicatorGRequired: the 150-249 band is not required outside a triennial year", () => {
 		const nonTriennial = INDICATOR_G_TRIENNIAL_BASE_YEAR + 1;
 		expect(isIndicatorGRequired(INDICATOR_G_TRIENNIAL_MIN, nonTriennial)).toBe(
 			false,
@@ -226,14 +226,14 @@ describe("frontières de taille (constantes nommées du domaine)", () => {
 		);
 	});
 
-	it("isTriennialYear : cycle triennal à partir de INDICATOR_G_TRIENNIAL_BASE_YEAR", () => {
+	it("isTriennialYear: triennial cycle starting at INDICATOR_G_TRIENNIAL_BASE_YEAR", () => {
 		expect(isTriennialYear(INDICATOR_G_TRIENNIAL_BASE_YEAR - 1)).toBe(false);
 		expect(isTriennialYear(INDICATOR_G_TRIENNIAL_BASE_YEAR)).toBe(true);
 		expect(isTriennialYear(INDICATOR_G_TRIENNIAL_BASE_YEAR + 1)).toBe(false);
 		expect(isTriennialYear(INDICATOR_G_TRIENNIAL_BASE_YEAR + 3)).toBe(true);
 	});
 
-	it("#3934 (CLOSED) — un effectif < 100 ne déclenche jamais le 7e indicateur", () => {
+	it("#3934 (CLOSED) — a workforce < 100 never triggers the 7th indicator", () => {
 		// Regression guard: 97 and 70 are below both COMPANY_SIZE_ANNUAL_MIN and
 		// INDICATOR_G_TRIENNIAL_MIN, so indicator G must never be required, even in
 		// a triennial year.
@@ -246,8 +246,8 @@ describe("frontières de taille (constantes nommées du domaine)", () => {
 	});
 });
 
-describe("effectif GIP — source unique de l'obligation (#3929/#3962)", () => {
-	it("entreprise absente du fichier GIP (null) → aucune obligation", () => {
+describe("GIP workforce — single source for the obligations (#3929/#3962)", () => {
+	it("company absent from the GIP file (null) → no obligation", () => {
 		const workforce = getObligationWorkforce(null);
 		expect(workforce).toBe(0);
 		expect(isCseRequired(workforce)).toBe(false);
@@ -263,7 +263,7 @@ describe("effectif GIP — source unique de l'obligation (#3929/#3962)", () => {
 		).toBe(false);
 	});
 
-	it("effectif GIP décimal : les seuils comparent la valeur exacte, jamais l'arrondi d'affichage", () => {
+	it("decimal GIP workforce: thresholds compare the exact value, never the display rounding", () => {
 		// #3929 class of bug: 99.97 displays as 99 and must NOT trigger the >= 100 obligations.
 		const nearCse = getObligationWorkforce(COMPANY_SIZE_ANNUAL_MIN - 0.03);
 		expect(isCseRequired(nearCse)).toBe(false);
@@ -281,7 +281,7 @@ describe("effectif GIP — source unique de l'obligation (#3929/#3962)", () => {
 		expect(isIndicatorGRequired(nearAnnual, nonTriennial)).toBe(false);
 	});
 
-	it("parseGipWorkforce : chaîne décimale acceptée, valeur invalide → null → non assujetti", () => {
+	it("parseGipWorkforce: decimal string accepted, invalid value → null → not subject to obligations", () => {
 		expect(parseGipWorkforce("99.97")).toBeCloseTo(99.97);
 		expect(parseGipWorkforce(null)).toBeNull();
 		expect(parseGipWorkforce("abc")).toBeNull();
@@ -289,15 +289,15 @@ describe("effectif GIP — source unique de l'obligation (#3929/#3962)", () => {
 	});
 });
 
-describe("classification d'affichage d'un écart", () => {
-	it("gapLevel : frontière positive au seuil (les deux côtés + la valeur pile)", () => {
+describe("gap display classification", () => {
+	it("gapLevel: positive boundary at the threshold (both sides + the exact value)", () => {
 		expect(gapLevel(GAP_ALERT_THRESHOLD - 1)).toBe("low");
 		expect(gapLevel(GAP_ALERT_THRESHOLD)).toBe("high");
 		expect(gapLevel(GAP_ALERT_THRESHOLD + 1)).toBe("high");
 		expect(gapLevel(null)).toBe(null);
 	});
 
-	it("isSignificantGap détecte l'écart significatif dans les deux sens", () => {
+	it("isSignificantGap detects a significant gap in both directions", () => {
 		expect(isSignificantGap(GAP_ALERT_THRESHOLD)).toBe(true);
 		expect(isSignificantGap(-GAP_ALERT_THRESHOLD)).toBe(true);
 		expect(isSignificantGap(GAP_ALERT_THRESHOLD - 1)).toBe(false);
@@ -305,7 +305,7 @@ describe("classification d'affichage d'un écart", () => {
 		expect(isSignificantGap(null)).toBe(false);
 	});
 
-	it.fails("#3963 — un écart négatif au seuil (défavorable aux hommes) doit être classé « high »", () => {
+	it.fails('#3963 — a negative gap at the threshold (unfavourable to men) must be classified "high"', () => {
 		// gapLevel is positive-only today: gapLevel(-5) === "low". The business rule
 		// is that a gap significant in either direction is « élevé » (take the
 		// absolute value). isSignificantGap already honours both directions; gapLevel
@@ -314,8 +314,8 @@ describe("classification d'affichage d'un écart", () => {
 	});
 });
 
-describe("#3946 (côté domaine) — le parcours ne dépend que de l'écart sur l'indicateur G", () => {
-	it("un écart G sous le seuil n'exige pas le parcours, quels que soient les écarts A-F", () => {
+describe("#3946 (domain side) — the compliance path depends only on the indicator-G gap", () => {
+	it("a below-threshold G gap does not require the path, whatever the A-F gaps", () => {
 		// #3946's « écart à justifier » shown for A-F-only gaps is a message-layer
 		// defect. The domain predicate is correct: it reacts solely to the indicator-G
 		// gap, so a below-threshold G gap never triggers the compliance process.
@@ -335,7 +335,7 @@ describe("#3946 (côté domaine) — le parcours ne dépend que de l'écart sur 
 		).toBe(false);
 	});
 
-	it("un écart G négatif (défavorable aux hommes) ne déclenche pas le parcours (obligation unidirectionnelle)", () => {
+	it("a negative G gap (unfavourable to men) does not trigger the path (one-directional obligation)", () => {
 		expect(
 			isComplianceProcessRequired({
 				workforce: INDICATOR_G_ANNUAL_MIN,
