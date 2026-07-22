@@ -51,7 +51,7 @@ export function findViolations(scenarios, tags) {
 	for (const id of scenarios) {
 		if (!tags.has(id)) {
 			violations.push(
-				`${id} est déclaré dans le cahier mais aucune spec E2E ne porte le tag [${id}] — écrire le test ou retirer la ligne (la consigner au §5)`,
+				`${id} est déclaré dans le cahier mais aucune spec E2E ne porte le tag [${id}] — écrire le test qui le couvre`,
 			);
 		}
 	}

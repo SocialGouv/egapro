@@ -23,17 +23,17 @@ Audience : équipe métier / PO (référence d'acceptance) et développeurs (tra
 
 Chaque scénario a un **identifiant stable** (`CAS-xx` pour les cas métier de l'Excel, `ANX-xx` pour les scénarios complémentaires). Le contrat est simple :
 
-> **Une ligne dans les tableaux de ce cahier = au moins un test E2E existant qui la couvre.**
+> **Tous les scénarios du fichier Excel sont dans ce cahier, et la CI n'est verte que quand chaque ligne a son test E2E.**
 
 1. **Côté tests** : le titre du `test.describe(...)` qui couvre un scénario porte le tag entre crochets, ex. `test.describe("[CAS-02] Path 1: no gap + hasCse → ...")`. Un même describe peut porter plusieurs tags.
 2. **Côté cahier** : la colonne « Couverture E2E » décrit ce que le ou les tests déroulent réellement — y compris, honnêtement, ce qu'ils ne déroulent pas encore. Cette profondeur se juge en revue de PR ; l'outillage, lui, ne vérifie que l'existence.
 
-Le script [`packages/app/scripts/check-cahier.mjs`](../packages/app/scripts/check-cahier.mjs) (`pnpm --filter app check:cahier`, exécuté en CI) vérifie la **bijection** :
+Le script [`packages/app/scripts/check-cahier.mjs`](../packages/app/scripts/check-cahier.mjs) (`pnpm --filter app check:cahier`, exécuté en CI) vérifie que :
 
-- toute ligne `CAS-xx` / `ANX-xx` des tableaux doit être taguée dans au moins une spec `packages/app/src/e2e/*.e2e.ts` ;
-- tout tag présent dans une spec doit correspondre à une ligne du cahier.
+- toute ligne `CAS-xx` / `ANX-xx` des tableaux est taguée dans au moins une spec `packages/app/src/e2e/*.e2e.ts` — **une ligne sans test fait échouer la CI** : un trou de couverture est visible en rouge, jamais caché ;
+- tout tag présent dans une spec correspond à une ligne du cahier.
 
-**Règles de mise à jour** : un scénario métier encore sans test **n'entre pas dans les tableaux** — il est consigné au §5 (trous de couverture) et sa ligne arrive **dans la même PR que son test**. Test supprimé ou renommé → répercuter ici. La CI échoue si les deux dérivent.
+**Règles de mise à jour** : nouveau scénario métier (évolution de l'Excel) → ajouter la ligne immédiatement ; la CI reste rouge jusqu'à l'arrivée du test qui la couvre. Test supprimé ou renommé → répercuter ici. La CI échoue si les deux dérivent.
 
 ### Conditions de référence des specs E2E
 
@@ -47,8 +47,6 @@ Les feuilles « 100-149 », « 150-249 » et « 250 et + » de l'Excel déclinen
 
 Les années « 6 premiers indicateurs » (voir matrice §3) ne déclenchent que les cas 1 et 2 (pas d'indicateur G, donc pas de parcours de conformité).
 
-> Le cas 9 de l'Excel (sans CSE, 2ᵉ déclaration avec écart → justification) n'a pas encore de test : il est consigné au §5 et entrera dans ce tableau avec son test, sous l'ID réservé `CAS-09`.
-
 | ID | CSE | Scénario | Dépôts attendus | Couverture E2E |
 |---|---|---|---|---|
 | CAS-01 | non | Aucun écart ≥ 5 % sur l'indicateur G → fin de démarche | — | `compliance.e2e.ts` Path 2 : déclaration complète → `/confirmation` |
@@ -59,6 +57,7 @@ Les années « 6 premiers indicateurs » (voir matrice §3) ne déclenchent que 
 | CAS-06 | oui | ≥ 1 écart ≥ 5 % → évaluation conjointe | Rapport + avis CSE « exactitude (± justification) » | `compliance.e2e.ts` Path 4 : éval. conjointe → upload → `/avis-cse` ; dépôt de l'avis non déroulé (§5) |
 | CAS-07 | non | Écart ≥ 5 % → actions correctives → 2ᵉ déclaration **sans** écart | Nouvelle déclaration de l'indicateur G | `compliance.e2e.ts` Path 7 : 2ᵉ déclaration sans écart → `/confirmation` |
 | CAS-08 | oui | Écart ≥ 5 % → actions correctives → 2ᵉ déclaration **sans** écart | 2ᵉ déclaration + avis CSE sur les 2 déclarations | `compliance.e2e.ts` Path 6 : 2ᵉ déclaration sans écart → `/avis-cse` ; dépôt de l'avis 2-déclarations non déroulé (§5) |
+| CAS-09 | non | Actions correctives → 2ᵉ déclaration **avec** écart → justification | 2ᵉ déclaration + justification | **Aucun test** — le 2ᵉ tour n'est testé qu'avec CSE (CAS-10) ; la CI est rouge tant que ce test n'existe pas |
 | CAS-10 | oui | Actions correctives → 2ᵉ déclaration **avec** écart → justification | 2ᵉ déclaration + justification + avis CSE sur les 2 déclarations | `compliance.e2e.ts` Path 8 : retour au choix de parcours, options restreintes, justification → `/avis-cse/etape/1` ; dépôt de l'avis non déroulé (§5) |
 | CAS-11 | non | Actions correctives → 2ᵉ déclaration **avec** écart → évaluation conjointe | 2ᵉ déclaration + rapport d'évaluation conjointe | `compliance.e2e.ts` Path 11 : 2ᵉ tour → éval. conjointe → upload → `/confirmation` |
 | CAS-12 | oui | Actions correctives → 2ᵉ déclaration **avec** écart → évaluation conjointe | 2ᵉ déclaration + rapport + avis CSE sur les 2 déclarations | `compliance.e2e.ts` Path 10 : 2ᵉ tour → éval. conjointe → upload → `/avis-cse` ; dépôt de l'avis non déroulé (§5) |
@@ -101,9 +100,9 @@ Le socle déclaratif (étapes 1–6, brouillon, historique, panneau de démarche
 
 ## 5. Trous de couverture connus
 
-Scénarios métier encore sans test E2E — ils n'entrent pas dans les tableaux ci-dessus tant que leur test n'existe pas. Par ordre de valeur métier décroissante :
+Au-delà des lignes sans test (visibles en rouge dans la CI, comme CAS-09), les manques qui ne se réduisent pas à une ligne de tableau. Par ordre de valeur métier décroissante :
 
-1. **Cas 9 de l'Excel** (ID réservé `CAS-09`) — 2ᵉ tour sans CSE avec justification : aucun test (la mécanique du 2ᵉ tour n'est testée qu'avec CSE, voir CAS-10).
+1. **CAS-09** — 2ᵉ tour sans CSE avec justification : aucun test (la mécanique du 2ᵉ tour n'est testée qu'avec CSE, voir CAS-10) ; c'est lui qui met la CI en rouge.
 2. **Dépôts d'avis CSE enrichis** — la matrice d'association des fichiers (colonne « Justification », mode 2 déclarations) n'est déroulée par aucun test : tous les dépôts CSE testés sont « exactitude, 1 déclaration ». Concerne CAS-04, CAS-06, CAS-08, CAS-10, CAS-12. Le helper `submitCseStep2` supporte déjà `columns` et `hasSecondDeclaration`.
 3. **CAS-03, flux complet** — la justification sans CSE : seule l'exposition de l'option est vérifiée.
 4. **Variante « 6 indicateurs »** — aucun test E2E ne vérifie que l'étape catégories est masquée (redirection `etape/5` → `etape/6`) et qu'aucun parcours de conformité n'est proposé quand l'indicateur G n'est pas requis (tranche/année hors cadence, cf. §3).
