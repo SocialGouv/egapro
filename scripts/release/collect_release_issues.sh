@@ -21,6 +21,12 @@ fi
 # (issue number + title + labels + originating PR). PRs without a linked
 # issue are used as their own entry.
 #
+# Epic rollup: an epic's integration PR (title `feat(epic): #<N> — …`, from
+# open_epic_final_pr.sh) closes every sub-ticket. Expanding those would flood
+# the changelog with implementation-level tasks and lose the feature-level
+# framing, so such a PR collapses into a single entry — the epic issue itself —
+# and its sub-tickets are skipped.
+#
 # Deterministic pre-filter (exclusion), applied to every entry's title and
 # labels, so purely technical work never reaches the AI prompt:
 #   - conventional-commit type prefix in the title:
@@ -100,6 +106,27 @@ for PR in $PR_NUMBERS; do
     PR_LABELS=$(jq -c '[.labels[].name]' <<<"$PR_JSON")
     LINKED_ISSUES=$(jq -c '[.closingIssuesReferences[].number]' <<<"$PR_JSON")
     LINKED_COUNT=$(jq 'length' <<<"$LINKED_ISSUES")
+
+    # Epic rollup (option A): an epic integration PR is titled
+    # `feat(epic): #<N> — …` and closes every sub-ticket. Collapse it into a
+    # single feature-level entry (the epic issue) instead of expanding the
+    # sub-tickets, which would flood the changelog with implementation detail.
+    EPIC_NUM=$(grep -oiE '^feat\(epic\): #[0-9]+' <<<"$PR_TITLE" | grep -oE '[0-9]+' || true)
+    if [ -n "$EPIC_NUM" ]; then
+        EPIC_JSON=$(gh issue view "$EPIC_NUM" --repo "$REPO" --json title,labels 2>/dev/null) || {
+            echo "[collect_release_issues] WARN: could not fetch epic #${EPIC_NUM}, skipping" >&2
+            continue
+        }
+        EPIC_TITLE=$(jq -r '.title' <<<"$EPIC_JSON")
+        EPIC_LABELS=$(jq -c '[.labels[].name]' <<<"$EPIC_JSON")
+        if is_technical_title "$EPIC_TITLE" || is_technical_labels "$EPIC_LABELS"; then
+            continue
+        fi
+        ENTRY=$(jq -n --argjson issue "$EPIC_NUM" --arg title "$EPIC_TITLE" --argjson labels "$EPIC_LABELS" --argjson pr "$PR" \
+            '{issue: $issue, title: $title, labels: $labels, pr: $pr}')
+        ENTRIES=$(jq --argjson e "$ENTRY" '. + [$e]' <<<"$ENTRIES")
+        continue
+    fi
 
     if [ "$LINKED_COUNT" -eq 0 ]; then
         if is_technical_title "$PR_TITLE" || is_technical_labels "$PR_LABELS"; then

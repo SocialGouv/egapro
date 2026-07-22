@@ -87,6 +87,13 @@ jobs:
             through the pre-filter. If nothing business-facing remains after
             this second filter, leave the file empty.
 
+            Several entries may be sub-tasks or sub-tickets of one larger
+            feature (e.g. many accessibility fixes, or the steps of a single
+            new capability). When several entries clearly describe parts of the
+            same feature, merge them into ONE feature-level bullet rather than
+            listing each part — always prefer the highest-level, user-facing
+            framing over the granular breakdown.
+
             Write the result as plain Markdown bullet points (one line per
             point, starting with "- ", no heading) to `summary.md` at the
             repository root. Do not read or write any other file.
