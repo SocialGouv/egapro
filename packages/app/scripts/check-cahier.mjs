@@ -5,37 +5,23 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const SCENARIO_ID = /\b(?:CAS|ANX)-\d{2}\b/g;
-const COVERED = "✅";
-const PARTIAL = "🟡";
-const UNCOVERED = "❌";
 
 /**
  * Parse the cahier de tests markdown: every table row whose first cell is a
- * scenario ID (| CAS-01 | ... |) declares a scenario, and the row's status
- * marker (✅ / 🟡 / ❌) says whether at least one E2E spec must be tagged with it.
+ * scenario ID (| CAS-01 | ... |) declares a scenario that MUST be covered by
+ * at least one tagged E2E spec. Prose mentions (e.g. reserved IDs in the
+ * coverage-gaps section) are intentionally ignored — only table rows bind.
  */
 export function parseCahier(markdown) {
-	const scenarios = new Map();
+	const scenarios = new Set();
 	for (const line of markdown.split("\n")) {
 		const match = line.match(/^\|\s*((?:CAS|ANX)-\d{2})\s*\|/);
 		if (!match) continue;
 		const id = match[1];
-		const status = line.includes(COVERED)
-			? "covered"
-			: line.includes(PARTIAL)
-				? "partial"
-				: line.includes(UNCOVERED)
-					? "uncovered"
-					: null;
-		if (status === null) {
-			throw new Error(
-				`Ligne du cahier sans statut (✅/🟡/❌) pour ${id}: ${line.trim()}`,
-			);
-		}
 		if (scenarios.has(id)) {
 			throw new Error(`Scénario dupliqué dans le cahier: ${id}`);
 		}
-		scenarios.set(id, status);
+		scenarios.add(id);
 	}
 	return scenarios;
 }
@@ -56,25 +42,23 @@ export function collectSpecTags(e2eDir) {
 	return tags;
 }
 
-/** Cross-check cahier scenarios against spec tags; returns human-readable violations. */
+/**
+ * Cross-check: the cahier's scenario rows and the spec tags must be in
+ * bijection — a row without a tagged test, or a tag without a row, is a drift.
+ */
 export function findViolations(scenarios, tags) {
 	const violations = [];
-	for (const [id, status] of scenarios) {
-		if (status !== "uncovered" && !tags.has(id)) {
+	for (const id of scenarios) {
+		if (!tags.has(id)) {
 			violations.push(
-				`${id} est marqué couvert (✅/🟡) dans le cahier mais aucune spec E2E ne porte le tag [${id}]`,
-			);
-		}
-		if (status === "uncovered" && tags.has(id)) {
-			violations.push(
-				`${id} est marqué ❌ non couvert dans le cahier mais est tagué dans: ${[...tags.get(id)].join(", ")} — mettre à jour le statut dans docs/cahier-de-tests.md`,
+				`${id} est déclaré dans le cahier mais aucune spec E2E ne porte le tag [${id}] — écrire le test ou retirer la ligne (la consigner au §5)`,
 			);
 		}
 	}
 	for (const [id, files] of tags) {
 		if (!scenarios.has(id)) {
 			violations.push(
-				`Tag [${id}] présent dans ${[...files].join(", ")} mais absent du cahier docs/cahier-de-tests.md`,
+				`Tag [${id}] présent dans ${[...files].join(", ")} mais sans ligne dans docs/cahier-de-tests.md — ajouter la ligne au cahier`,
 			);
 		}
 	}
@@ -110,5 +94,5 @@ if (violations.length > 0) {
 }
 
 console.log(
-	`Cahier de tests OK — ${scenarios.size} scénarios, corrélation cahier ↔ specs E2E vérifiée.`,
+	`Cahier de tests OK — ${scenarios.size} scénarios, chacun couvert par au moins une spec E2E taguée.`,
 );
