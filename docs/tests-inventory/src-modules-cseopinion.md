@@ -1,0 +1,193 @@
+# Inventaire des tests — src/modules/cseOpinion
+
+> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`. [← Retour à l'index](../tests-inventory.md)
+
+_Généré le 2026-07-22 — 13 fichier(s), 174 test(s)._
+
+- **`src/modules/cseOpinion/__tests__/AccuracyOpinionCard.test.tsx`** — 8 test(s)
+  - AccuracyOpinionCard > calls onDateChange when typing a date
+  - AccuracyOpinionCard > calls onOpinionChange when selecting a radio
+  - AccuracyOpinionCard > checks the favorable radio when opinion is favorable
+  - AccuracyOpinionCard > checks the unfavorable radio when opinion is unfavorable
+  - AccuracyOpinionCard > displays the date value when provided
+  - AccuracyOpinionCard > has accessible fieldset with legend
+  - AccuracyOpinionCard > renders the date input with label
+  - AccuracyOpinionCard > renders the title and radio options
+- **`src/modules/cseOpinion/__tests__/confirmationHelpers.test.ts`** — 3 test(s)
+  - isDeclarationSubmitted > returns false when status is 'draft'
+  - isDeclarationSubmitted > returns false when status is null
+  - isDeclarationSubmitted > returns true when status is a non-draft FSM status
+- **`src/modules/cseOpinion/__tests__/ConfirmationPage.test.tsx`** — 11 test(s)
+  - ConfirmationPage > renders document download section without second declaration card
+  - ConfirmationPage > renders download cards as links with correct hrefs
+  - ConfirmationPage > renders navigation links
+  - ConfirmationPage > renders second declaration card when hasSecondDeclaration is true
+  - ConfirmationPage > renders second declaration download card with correction href
+  - ConfirmationPage > renders the default email in receipt card
+  - ConfirmationPage > renders the feedback banner with the jedonnemonavis link
+  - ConfirmationPage > renders the page title
+  - ConfirmationPage > renders the provided email in receipt card
+  - ConfirmationPage > renders the resend button
+  - ConfirmationPage > renders the success message
+- **`src/modules/cseOpinion/__tests__/contentTypeColumns.test.ts`** — 23 test(s)
+  - buildAssociationMap > applies stored associations whose column exists
+  - buildAssociationMap > ignores stored associations that target a column not currently displayed
+  - buildAssociationMap > initialises every column to null
+  - buildColumnId > joins the declaration number and the type with a colon
+  - clearFileAssociations > leaves the map unchanged when the file is not associated
+  - clearFileAssociations > nulls every column pointing to the removed file and keeps the others
+  - computeContentTypeColumns > adds the first-declaration gap column without declaration suffix when the gap was consulted on a single declaration (S2)
+  - computeContentTypeColumns > builds the four columns with declaration suffixes when both declarations consulted their gap (S3)
+  - computeContentTypeColumns > exposes a distinct description per accuracy column and a shared gap description
+  - computeContentTypeColumns > hides the first-declaration gap column when consulted but there is no gap >= 5%
+  - computeContentTypeColumns > hides the first-declaration gap column when the first gap was not consulted but the second was
+  - computeContentTypeColumns > hides the second-declaration gap column when consulted but there is no gap >= 5% on the second declaration
+  - computeContentTypeColumns > hides the second-declaration gap column when the second gap was not consulted (S4)
+  - computeContentTypeColumns > includes the ordinal in the missing message only when a second declaration exists
+  - computeContentTypeColumns > returns only the first-declaration accuracy column when there is a single declaration without consulted gap (S1)
+  - computeContentTypeColumns > treats a null gapConsulted as not consulted
+  - getMissingColumns > returns an empty list when every column is filled
+  - getMissingColumns > returns the columns that have no associated file
+  - getUnassociatedFiles > returns an empty list when every file is associated to at least one column
+  - getUnassociatedFiles > returns every file when the map is empty
+  - getUnassociatedFiles > returns files whose id is not referenced by any column
+  - toAssociationPayload > keeps only columns that point to a file
+  - toAssociationPayload > returns an empty payload when no column is associated
+- **`src/modules/cseOpinion/__tests__/CseOpinionLayout.test.tsx`** — 10 test(s)
+  - CseOpinionLayout > does not show the lock alert by default
+  - CseOpinionLayout > does not show the lock alert when read-only but no holder is resolved
+  - CseOpinionLayout > provides a non-readonly lock state to descendants by default
+  - CseOpinionLayout > provides the lock state to descendant consumers when read-only
+  - CseOpinionLayout > renders 'Non renseigné' when the CSE existence is unknown
+  - CseOpinionLayout > renders 'Non' when the company has no CSE
+  - CseOpinionLayout > renders the children inside the banner layout
+  - CseOpinionLayout > shows the GIP unknown label and hides the CSE line when gipWorkforce is null
+  - CseOpinionLayout > shows the lock alert when read-only and a holder is provided
+  - CseOpinionLayout > shows the workforce value and the CSE line when gipWorkforce is 250
+- **`src/modules/cseOpinion/__tests__/GapConsultationCard.test.tsx`** — 12 test(s)
+  - GapConsultationCard > calls onConsultedChange with false when clicking Non
+  - GapConsultationCard > calls onConsultedChange with true when clicking Oui
+  - GapConsultationCard > calls onDateChange when entering a date
+  - GapConsultationCard > calls onOpinionChange when selecting Favorable
+  - GapConsultationCard > checks Non radio when consulted is false
+  - GapConsultationCard > checks Oui radio when consulted is true
+  - GapConsultationCard > does not show opinion/date fields when consulted is false
+  - GapConsultationCard > does not show opinion/date fields when consulted is null
+  - GapConsultationCard > has no radio checked when consulted is null
+  - GapConsultationCard > renders the question legend
+  - GapConsultationCard > renders the title and radio options
+  - GapConsultationCard > shows opinion radios and date field when consulted is true
+- **`src/modules/cseOpinion/__tests__/mapOpinionsFromDb.test.ts`** — 4 test(s)
+  - mapOpinionsFromDb > handles partial rows gracefully
+  - mapOpinionsFromDb > maps all 4 opinion rows to CseOpinionStep1Data
+  - mapOpinionsFromDb > rejects invalid opinion values
+  - mapOpinionsFromDb > returns undefined for empty rows
+- **`src/modules/cseOpinion/__tests__/OpinionSummaryBox.test.tsx`** — 4 test(s)
+  - OpinionSummaryBox > marks only the obligations whose column has an associated file
+  - OpinionSummaryBox > omits both declaration headings when there is a single declaration
+  - OpinionSummaryBox > renders the section title
+  - OpinionSummaryBox > shows per-declaration headings only when two declarations are present
+- **`src/modules/cseOpinion/__tests__/schemas.test.ts`** — 7 test(s)
+  - setFileContentTypesSchema > accepts a valid set of associations
+  - setFileContentTypesSchema > accepts an empty associations array
+  - setFileContentTypesSchema > rejects a declarationNumber above 2
+  - setFileContentTypesSchema > rejects a declarationNumber below 1
+  - setFileContentTypesSchema > rejects a non-integer declarationNumber
+  - setFileContentTypesSchema > rejects an empty fileId
+  - setFileContentTypesSchema > rejects an unknown content type
+- **`src/modules/cseOpinion/__tests__/Step1Opinions.test.tsx`** — 34 test(s)
+  - Step1Opinions > admin impersonation > disables the radios and next button under the static provider when impersonating
+  - Step1Opinions > admin impersonation > does not save a draft while impersonating
+  - Step1Opinions > calls mutation with both declarations when hasSecondDeclaration is true
+  - Step1Opinions > calls mutation without secondDeclaration when hasSecondDeclaration is false
+  - Step1Opinions > declaration lock > disables every input and the next button when locked
+  - Step1Opinions > declaration lock > does not save a draft when an opinion is changed while locked
+  - Step1Opinions > declaration lock > keeps inputs enabled when the lock is inactive
+  - Step1Opinions > declaration lock > keeps the fieldset enabled and marks the date inputs read-only when the declaration is locked
+  - Step1Opinions > disables browser autofill on the form
+  - Step1Opinions > displays email in submission banner for joint_evaluation path
+  - Step1Opinions > does not render compliance path title for other paths
+  - Step1Opinions > does not render the submission banner for other paths
+  - Step1Opinions > draft integration > calls setField when a radio is changed
+  - Step1Opinions > draft integration > hydrates both declarations from a draft with second-declaration data
+  - Step1Opinions > draft integration > hydrates form from draft when available
+  - Step1Opinions > draft integration > saves a draft for the gap opinion and date once consultation is confirmed
+  - Step1Opinions > draft integration > saves a draft for the second-declaration accuracy fields
+  - Step1Opinions > draft integration > saves a draft for the second-declaration gap fields
+  - Step1Opinions > draft integration > saves a draft when the accuracy date changes
+  - Step1Opinions > draft integration > shows loading state while draft is loading
+  - Step1Opinions > gap consultation validation > blocks submission when the first-declaration gap is consulted but incomplete
+  - Step1Opinions > gap consultation validation > blocks submission when the second-declaration gap is consulted but incomplete
+  - Step1Opinions > hides second declaration section when hasSecondDeclaration is false
+  - Step1Opinions > names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)
+  - Step1Opinions > renders both declaration sections when hasSecondDeclaration is true
+  - Step1Opinions > renders compliance path title when compliancePath is joint_evaluation
+  - Step1Opinions > renders h1 as CSE opinion title when no compliance path banner
+  - Step1Opinions > renders previous and next buttons
+  - Step1Opinions > renders the stepper at step 1
+  - Step1Opinions > renders the submission banner for joint_evaluation path
+  - Step1Opinions > renders with initial data pre-filled
+  - Step1Opinions > shows validation error when submitting empty form
+  - Step1Opinions > uses default email when none provided for joint_evaluation path
+  - Step1Opinions > uses the previousHref prop when provided
+- **`src/modules/cseOpinion/__tests__/Step2Upload.test.tsx`** — 37 test(s)
+  - Step2Upload > admin impersonation > disables the upload and submit controls under the static provider when impersonating
+  - Step2Upload > allows one file to cover several content types (S7)
+  - Step2Upload > auto-uploads a selected PDF immediately, never showing an import action, and does not finalize
+  - Step2Upload > blocks finalize and names a file row left without any checked checkbox
+  - Step2Upload > clears the association and refreshes on delete success
+  - Step2Upload > clears the deleting state when the delete mutation fails
+  - Step2Upload > declaration lock > disables the file upload select button when locked
+  - Step2Upload > declaration lock > disables the matrix delete and checkbox controls when locked
+  - Step2Upload > declaration lock > disables the submit button when locked
+  - Step2Upload > declaration lock > keeps the controls enabled when the lock is inactive
+  - Step2Upload > disables the dropzone when the max number of files is reached
+  - Step2Upload > discloses the finalize modal through the DSFR runtime when available
+  - Step2Upload > does not render the matrix when there is no existing file
+  - Step2Upload > does not show a file counter in the hint text
+  - Step2Upload > falls back to a generic error when finalize rejects with a non-Error value
+  - Step2Upload > frees a content type and re-persists when its checkbox is unchecked (S6)
+  - Step2Upload > hides the missing-content error again once the required association is completed
+  - Step2Upload > hydrates the matrix from the stored associations on return (S10)
+  - Step2Upload > keeps the submit button enabled even before any file is added
+  - Step2Upload > opens the finalize modal then finalizes and redirects when the matrix is complete
+  - Step2Upload > persists the full association payload through setFileContentTypes when a checkbox is toggled (S7)
+  - Step2Upload > renders a hidden file input accepting pdf
+  - Step2Upload > renders previous link and submit button
+  - Step2Upload > renders the confirmation modal dialog
+  - Step2Upload > renders the dropzone with select button
+  - Step2Upload > renders the file upload instructions
+  - Step2Upload > renders the matrix with the existing files and the required content-type columns
+  - Step2Upload > renders the opinion summary box
+  - Step2Upload > renders the page title
+  - Step2Upload > renders the second-declaration column headers when a second declaration must be displayed
+  - Step2Upload > renders the stepper at step 2
+  - Step2Upload > reveals the missing-content error only after a submit attempt, blocking finalize (S8)
+  - Step2Upload > shows an error and does not redirect when finalize fails
+  - Step2Upload > shows error for file exceeding 10 MB
+  - Step2Upload > shows the extension/MIME error for a .txt file
+  - Step2Upload > shows the unsupported-format error for a valid-named non-PDF file
+  - Step2Upload > surfaces an error when persisting the association fails
+- **`src/modules/cseOpinion/__tests__/SubmitConfirmationModal.test.tsx`** — 9 test(s)
+  - SubmitConfirmationModal > calls onClose when annuler is clicked
+  - SubmitConfirmationModal > calls onClose when close button is clicked
+  - SubmitConfirmationModal > calls onSubmit when validate is clicked
+  - SubmitConfirmationModal > disables validate button when checkbox is unchecked
+  - SubmitConfirmationModal > enables validate button when checkbox is checked
+  - SubmitConfirmationModal > renders the certification checkbox unchecked by default
+  - SubmitConfirmationModal > renders the description text
+  - SubmitConfirmationModal > renders the modal title
+  - SubmitConfirmationModal > resets certified checkbox when modal is closed
+- **`src/modules/cseOpinion/components/__tests__/ContentTypeMatrix.test.tsx`** — 12 test(s)
+  - ContentTypeMatrix > calls onDelete with the file id when its delete button is clicked
+  - ContentTypeMatrix > calls onToggle with the column id, file id and the new checked state
+  - ContentTypeMatrix > checks only the checkbox of the column associated to a file
+  - ContentTypeMatrix > disables every interactive control when the matrix is globally disabled
+  - ContentTypeMatrix > disables the same column for other files once it is taken (column exclusivity, S5)
+  - ContentTypeMatrix > keeps each checkbox label visible so the DSFR box renders (regression guard for epic-3476)
+  - ContentTypeMatrix > omits the declaration sub-label when there is a single declaration
+  - ContentTypeMatrix > renders one checkbox per file and column combination
+  - ContentTypeMatrix > renders one row per file with a view link pointing to the file endpoint
+  - ContentTypeMatrix > reports unchecking with checked=false so the column frees up (S6)
+  - ContentTypeMatrix > shows the deleting state and disables only the deleting file's button
+  - ContentTypeMatrix > shows the file type and size, falling back to the type alone when size is unknown

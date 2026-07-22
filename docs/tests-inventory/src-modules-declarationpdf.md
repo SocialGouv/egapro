@@ -1,0 +1,82 @@
+# Inventaire des tests — src/modules/declarationPdf
+
+> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`. [← Retour à l'index](../tests-inventory.md)
+
+_Généré le 2026-07-22 — 13 fichier(s), 63 test(s)._
+
+- **`src/modules/declarationPdf/__tests__/buildPdfData.test.ts`** — 8 test(s)
+  - buildPdfData > assembles declarant, company, GIP workforce, source and transmission date for an initial declaration
+  - buildPdfData > displays the GIP-absent placeholder and a bare source when GIP data and label are missing
+  - buildPdfData > falls back through submit then updatedAt when no matching status event exists
+  - buildPdfData > falls back to `now` when the declaration has no updatedAt and no submit event
+  - buildPdfData > falls back to a synthesized company name and zeroed totals when the company row is missing
+  - buildPdfData > throws when the declaration is not found
+  - buildPdfData > throws when the declaration is still a draft
+  - buildPdfData > uses the second_declaration_submit date for a correction declaration
+- **`src/modules/declarationPdf/__tests__/buildTransmittedPdfData.test.ts`** — 5 test(s)
+  - buildTransmittedPdfData > returns assembled PDF data with declaration lookup
+  - buildTransmittedPdfData > returns null jointEvaluationFile when none exists
+  - buildTransmittedPdfData > throws when company is not found
+  - buildTransmittedPdfData > throws when declaration is not found
+  - buildTransmittedPdfData > throws when only cancelled declarations exist for (siren, year)
+- **`src/modules/declarationPdf/__tests__/DeclarationPdfDocument.test.tsx`** — 7 test(s)
+  - DeclarationPdfDocument > registers fonts and renders an A4 page
+  - DeclarationPdfDocument > renders a dash for the NAF cell when neither code nor label is present
+  - DeclarationPdfDocument > renders declarant, company (formatted SIREN + NAF) and reference-period info
+  - DeclarationPdfDocument > renders every indicator section for an initial declaration
+  - DeclarationPdfDocument > renders the correction title and gates the indicator sections to categories only
+  - DeclarationPdfDocument > renders the initial-declaration title and the transmission date
+  - DeclarationPdfDocument > renders the NAF cell with only the code when the label is missing
+- **`src/modules/declarationPdf/__tests__/DownloadDeclarationPdfButton.test.tsx`** — 6 test(s)
+  - DownloadDeclarationPdfButton > appends type=correction when correction is true
+  - DownloadDeclarationPdfButton > appends type=correction without year when year is omitted
+  - DownloadDeclarationPdfButton > defaults to secondary DSFR variant when variant is omitted
+  - DownloadDeclarationPdfButton > renders a download link with year query param when year is provided
+  - DownloadDeclarationPdfButton > renders a download link without year param when year is omitted
+  - DownloadDeclarationPdfButton > uses tertiary DSFR variant when variant=tertiary
+- **`src/modules/declarationPdf/__tests__/TransmittedPdfDocument.test.tsx`** — 9 test(s)
+  - TransmittedPdfDocument > displays gap consulted status for each opinion
+  - TransmittedPdfDocument > formats opinion details correctly
+  - TransmittedPdfDocument > handles opinion with null opinion value
+  - TransmittedPdfDocument > renders CSE file names and upload dates
+  - TransmittedPdfDocument > renders CSE opinion sections grouped by declaration number
+  - TransmittedPdfDocument > renders empty state messages when data is empty
+  - TransmittedPdfDocument > renders the footer with generation date
+  - TransmittedPdfDocument > renders the header with title, subtitle, and company info
+  - TransmittedPdfDocument > renders the joint evaluation file section
+- **`src/modules/declarationPdf/sections/__tests__/CategorySection.test.tsx`** — 5 test(s)
+  - CategorySection > labels the source and numbers each category block by position
+  - CategorySection > numbers an unnamed category without a trailing label
+  - CategorySection > renders a dash for the source when none was provided
+  - CategorySection > renders the effectif total and the base + variable pay totals for a category
+  - CategorySection > renders the empty-state message when there is no category
+- **`src/modules/declarationPdf/sections/__tests__/GapCell.test.tsx`** — 7 test(s)
+  - GapCell > badges a negative gap whose magnitude reaches the threshold
+  - GapCell > badges a positive gap at or above the 5% threshold
+  - GapCell > badges exactly at the threshold boundary
+  - GapCell > does not badge a negative gap below the threshold in magnitude
+  - GapCell > does not badge a positive gap below the threshold
+  - GapCell > never renders a 'faible' badge
+  - GapCell > renders the null placeholder without a badge
+- **`src/modules/declarationPdf/sections/__tests__/pageChrome.test.tsx`** — 4 test(s)
+  - EgaproBanner > renders the Egapro banner title and subtitle
+  - InfoSection > renders each label/value pair under the section title
+  - PdfPageFooter > renders the footer line with formatted SIREN and the dynamic page counter
+  - PdfPageHeader > renders the ministry block with its logo
+- **`src/modules/declarationPdf/sections/__tests__/PayGapTable.test.tsx`** — 3 test(s)
+  - PayGapTable > badges a row whose gap reaches the threshold
+  - PayGapTable > renders formatted amounts, the regulatory hint and a computed gap
+  - PayGapTable > renders the empty-state message when every row is blank
+- **`src/modules/declarationPdf/sections/__tests__/QuartileSection.test.tsx`** — 3 test(s)
+  - QuartileSection > renders '- €' and '- %' placeholders for a fully empty quartile grid
+  - QuartileSection > renders '- €' when a threshold is present but not a number
+  - QuartileSection > renders quartile thresholds, counts and percentages when populated
+- **`src/modules/declarationPdf/sections/__tests__/tableParts.test.tsx`** — 2 test(s)
+  - tableParts > renders a width-less cell using the flex default
+  - tableParts > renders header hint and child content
+- **`src/modules/declarationPdf/sections/__tests__/VariablePaySection.test.tsx`** — 3 test(s)
+  - VariablePaySection > computes the beneficiary proportion as a share of the workforce total, not the raw count
+  - VariablePaySection > renders the '- %' placeholder when a beneficiary count is missing
+  - VariablePaySection > renders the '- %' placeholder when the workforce total is zero
+- **`src/modules/declarationPdf/sections/__tests__/WorkforceSection.test.tsx`** — 1 test(s)
+  - WorkforceSection > renders the women, men and total workforce counts

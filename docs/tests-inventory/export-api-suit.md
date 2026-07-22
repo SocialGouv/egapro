@@ -1,0 +1,190 @@
+# Inventaire des tests — Export & API SUIT
+
+> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`. [← Retour à l'index](../tests-inventory.md)
+
+_Généré le 2026-07-22 — 17 fichier(s), 167 test(s)._
+
+- **`src/modules/export/__tests__/buildExportKey.test.ts`** — 2 test(s)
+  - buildExportKey > should build correct S3 key with year
+  - buildExportKey > should use version in the key path
+- **`src/modules/export/__tests__/buildExportRows.test.ts`** — 12 test(s)
+  - buildExportRows > should derive secondDeclarationSubmitted=false when secondDeclarationSubmittedAt is null
+  - buildExportRows > should export the GIP workforce floored, not the Weez company workforce (#3929)
+  - buildExportRows > should expose both compliance path choices and the 7 lifecycle timestamps for a completed demarche
+  - buildExportRows > should floor the GIP workforce so 99,97 never exports as 100
+  - buildExportRows > should handle null createdAt and updatedAt
+  - buildExportRows > should keep a declaration whose company is absent from the GIP file, with a null workforce
+  - buildExportRows > should map CSE opinions to the correct slots
+  - buildExportRows > should map declaration rows to ExportRow format with year filter
+  - buildExportRows > should not flag complianceProcessRequired when the gap is negative (women earn more)
+  - buildExportRows > should return empty array when no declarations match
+  - buildExportRows > should serialize cancelledAt as ISO string for cancelled declarations
+  - buildExportRows > should set declarationType to 7_indicateurs when job categories exist
+- **`src/modules/export/__tests__/exportApi.integration.test.ts`** — 5 test(s)
+  - GET /api/v1/export/declarations — Date_annulation integration > returns a cancelled declaration with its Date_annulation as ISO string
+  - GET /api/v1/export/declarations — Date_annulation integration > returns all 3 declarations across a wide date window, with 2 cancelled and 1 active
+  - GET /api/v1/export/declarations — Date_annulation integration > returns Historique_statuts as [] when the declaration has no history rows (S7)
+  - GET /api/v1/export/declarations — Date_annulation integration > returns Historique_statuts as an ASC-ordered list of FR-labelled events (S1)
+  - GET /api/v1/export/declarations — Date_annulation integration > returns the active declaration with Date_annulation null
+- **`src/modules/export/__tests__/exportApi.test.ts`** — 22 test(s)
+  - GET /api/v1/export/declarations > should call sub-queries with correct keys from main query results
+  - GET /api/v1/export/declarations > should expose CSE opinion declarationNumber alongside type
+  - GET /api/v1/export/declarations > should expose gap and proportion labels with verbatim CSV names when DB columns are populated (S2)
+  - GET /api/v1/export/declarations > should expose new lifecycle SUIT fields (T5)
+  - GET /api/v1/export/declarations > should expose Seconde_declaration.Statut=false when secondDeclarationSubmittedAt is null
+  - GET /api/v1/export/declarations > should expose some gap values and null others when only some DB columns are populated (S4 — mixed)
+  - GET /api/v1/export/declarations > should include CSE file URLs in the declaration response
+  - GET /api/v1/export/declarations > should include Historique_statuts with FR labels and Numero_declaration on path_choice entries
+  - GET /api/v1/export/declarations > should include jointEvaluationFile with explicit name when uploaded
+  - GET /api/v1/export/declarations > should omit cseOpinions / cseFiles when no CSE file is attached
+  - GET /api/v1/export/declarations > should return 400 when date_begin format is invalid
+  - GET /api/v1/export/declarations > should return 400 when date_begin param is missing
+  - GET /api/v1/export/declarations > should return 400 when date_end format is invalid
+  - GET /api/v1/export/declarations > should return 403 when X-Gateway-Forwarded header is missing
+  - GET /api/v1/export/declarations > should return 500 when fetch throws
+  - GET /api/v1/export/declarations > should return assembled declarations with flat indicator columns
+  - GET /api/v1/export/declarations > should return empty declarations when no match
+  - GET /api/v1/export/declarations > should return null for all 10 new labels when DB columns are null (S5 — historical declaration)
+  - GET /api/v1/export/declarations > should send a null Effectif when the company is absent from the GIP file
+  - GET /api/v1/export/declarations > should send the GIP annual average workforce as Effectif, not the Weez value (#3929)
+  - GET /api/v1/export/declarations > should use date_end when provided
+  - GET /api/v1/export/declarations > should use verbatim CSV label names for all 10 new gap and proportion keys
+- **`src/modules/export/__tests__/fetchDeclarations.test.ts`** — 49 test(s)
+  - assembleDeclaration — compliance flags > compares the compliance threshold on the exact GIP value
+  - assembleDeclaration — compliance flags > compares the indicator G threshold on the exact GIP value
+  - assembleDeclaration — compliance flags > derives the flags from the GIP workforce, never from the Weez value (#3929)
+  - assembleDeclaration — compliance flags > does not require the compliance process below 100 employees even with a gap
+  - assembleDeclaration — compliance flags > does not require the compliance process when the gap is below 5%
+  - assembleDeclaration — compliance flags > does not require the compliance process when the gap is negative (women earn more)
+  - assembleDeclaration — compliance flags > does not require the compliance process when the global gap is null
+  - assembleDeclaration — compliance flags > does not require the compliance process without indicator G
+  - assembleDeclaration — compliance flags > does not require the revision when the correction gap is below 5%
+  - assembleDeclaration — compliance flags > does not require the revision when the correction gap is negative
+  - assembleDeclaration — compliance flags > does not require the revision when the correction gap is null
+  - assembleDeclaration — compliance flags > does not require the revision without a submitted second declaration
+  - assembleDeclaration — compliance flags > requires the compliance process for >= 100 employees with indicator G and a gap >= 5%
+  - assembleDeclaration — compliance flags > requires the revision when a second declaration was submitted with a correction gap >= 5%
+  - assembleDeclaration — compliance flags > treats a company absent from the GIP file as 0 for the derived flags
+  - assembleDeclaration > exposes a null Effectif when the company is absent from the GIP file
+  - assembleDeclaration > exposes the GIP annual average workforce as Effectif, floored to the lower integer
+  - assembleDeclaration > keeps CSE_existant at or above the CSE threshold
+  - assembleDeclaration > nulls CSE_existant below the CSE threshold even when a legacy hasCse value exists
+  - assembleDeclaration > should assemble a full declaration with French top-level keys
+  - assembleDeclaration > should expose all 5 lifecycle entries with FR labels (S3)
+  - assembleDeclaration > should expose cancel entry with FR label while keeping Date_annulation (S5)
+  - assembleDeclaration > should expose CSE files with type, stored fileName and download URLs
+  - assembleDeclaration > should expose Date_annulation as ISO string for a cancelled declaration
+  - assembleDeclaration > should expose Date_annulation as null for an active declaration
+  - assembleDeclaration > should expose Historique_statuts as empty array when no history (S7)
+  - assembleDeclaration > should expose Historique_statuts with FR labels for submit + demarche_complete (S1)
+  - assembleDeclaration > should expose Numero_declaration and Libelle for path_choice corrective_action (S2)
+  - assembleDeclaration > should expose the joint evaluation file with stored fileName
+  - assembleDeclaration > should expose two path_choice entries with their own Numero_declaration (S4)
+  - assembleDeclaration > should handle null dates
+  - assembleDeclaration > should include indicator A–F values with GIP labels
+  - assembleDeclaration > should include indicator G initial in Indicateurs and correction in Seconde_declaration
+  - assembleDeclaration > should keep the most recent joint evaluation file when several exist
+  - assembleDeclaration > should map CSE opinions when at least one CSE file is present
+  - assembleDeclaration > should not add Numero_declaration key when path_choice round is null
+  - assembleDeclaration > should omit Avis_CSE when no CSE file is attached
+  - assembleDeclaration > should preserve indicator data on a cancelled declaration
+  - assembleDeclaration > should preserve the order returned by the query without re-sorting
+  - buildIndicatorG > should return empty arrays when no entries
+  - buildIndicatorG > should separate initial and correction entries with French keys
+  - buildIndicators > should expose gap labels for indicators A/B/C/D
+  - buildIndicators > should expose indicator F proportions read from persisted DB columns
+  - buildIndicators > should expose proportion labels for indicator E
+  - buildIndicators > should map indicator A with GIP labels
+  - buildIndicators > should map indicator B with GIP labels
+  - buildIndicators > should map indicator C and D with GIP labels
+  - buildIndicators > should map indicator E with GIP labels
+  - buildIndicators > should return null for F proportions and gap labels when DB columns are null
+- **`src/modules/export/__tests__/filesApi.test.ts`** — 19 test(s)
+  - GET /api/v1/files > should call queries with correct siren and year
+  - GET /api/v1/files > should return 400 when siren format is invalid
+  - GET /api/v1/files > should return 400 when siren is missing
+  - GET /api/v1/files > should return 400 when year is missing
+  - GET /api/v1/files > should return 400 when year is outside the allowed range
+  - GET /api/v1/files > should return 403 when X-Gateway-Forwarded header is missing
+  - GET /api/v1/files > should return CSE and joint evaluation files with correct types
+  - GET /api/v1/files > should return empty files array when no files exist
+  - GET /api/v1/files/:fileId — session branch (in-app user) > falls back to application/octet-stream for unexpected content types
+  - GET /api/v1/files/:fileId — session branch (in-app user) > returns 401 when no session is present
+  - GET /api/v1/files/:fileId — session branch (in-app user) > returns 401 when session has no SIRET
+  - GET /api/v1/files/:fileId — session branch (in-app user) > returns 401 when SIRET is malformed
+  - GET /api/v1/files/:fileId — session branch (in-app user) > returns 404 when file does not belong to user's SIREN
+  - GET /api/v1/files/:fileId — session branch (in-app user) > returns 500 when S3 throws
+  - GET /api/v1/files/:fileId — session branch (in-app user) > streams file inline on success and writes a sensitive-read audit row
+  - GET /api/v1/files/:fileId — SUIT branch (gateway-forwarded) > should provide an ASCII fallback and UTF-8 filename for non-ASCII names
+  - GET /api/v1/files/:fileId — SUIT branch (gateway-forwarded) > should return 404 when file does not exist
+  - GET /api/v1/files/:fileId — SUIT branch (gateway-forwarded) > should return 500 when S3 throws
+  - GET /api/v1/files/:fileId — SUIT branch (gateway-forwarded) > should stream file as attachment when file exists
+- **`src/modules/export/__tests__/generateXlsx.test.ts`** — 6 test(s)
+  - generateXlsx > should expose Parcours_de_conformite_* headers and not legacy Phase_2_* headers
+  - generateXlsx > should generate a valid XLSX buffer with two sheets
+  - generateXlsx > should handle empty data
+  - generateXlsx > should have correct headers in Déclarations sheet
+  - generateXlsx > should have correct headers in Indicateur G sheet
+  - generateXlsx > should include data rows
+- **`src/modules/export/__tests__/generateYearlyExport.test.ts`** — 2 test(s)
+  - generateYearlyExport > should generate XLSX, upload to S3, and insert metadata for new year
+  - generateYearlyExport > should update metadata when export already exists for year
+- **`src/modules/export/__tests__/gipWorkforceExport.integration.test.ts`** — 4 test(s)
+  - GET /api/v1/export/declarations — GIP workforce integration (#3929) > does not pick up a GIP row from another campaign year
+  - GET /api/v1/export/declarations — GIP workforce integration (#3929) > floors the numeric(9,2) workforce so 99,97 is exported as 99
+  - GET /api/v1/export/declarations — GIP workforce integration (#3929) > keeps the declaration of a company absent from the GIP file, with a null Effectif
+  - GET /api/v1/export/declarations — GIP workforce integration (#3929) > sends the GIP annual average workforce as Effectif, not the Weez company workforce
+- **`src/modules/export/__tests__/mapIndicators.test.ts`** — 2 test(s)
+  - mapCseOpinions > should map up to 4 CSE opinions
+  - mapCseOpinions > should return all nulls when empty
+- **`src/modules/export/__tests__/openapi.test.ts`** — 12 test(s)
+  - openApiSpec > Historique_statuts schema > declares Date as date-time formatted string
+  - openApiSpec > Historique_statuts schema > declares Historique_statuts as an array
+  - openApiSpec > Historique_statuts schema > declares Numero_declaration as optional integer enum [1, 2]
+  - openApiSpec > Historique_statuts schema > lists the 7 declaration_event_type values in Statut.enum
+  - openApiSpec > Historique_statuts schema > requires Statut, Libelle_statut and Date on each item
+  - openApiSpec > should be a valid OpenAPI 3.1 structure
+  - openApiSpec > should declare id as first property of declarationSchema with uuid format
+  - openApiSpec > should define 200, 400, and 500 responses
+  - openApiSpec > should define the declarations endpoint
+  - openApiSpec > should have items schema on 400 details array
+  - openApiSpec > should make date_end optional
+  - openApiSpec > should require date_begin parameter
+- **`src/modules/export/__tests__/openapiRoute.test.ts`** — 3 test(s)
+  - GET /api/v1/openapi.json > should return 404 in production
+  - GET /api/v1/openapi.json > should return the OpenAPI spec as JSON
+  - GET /api/v1/openapi.json > should set CORS and cache headers
+- **`src/modules/export/__tests__/queries.test.ts`** — 6 test(s)
+  - fetchSubmittedDeclarations — composite temporal filter > should compose an OR with two AND branches: cancelled_at-window OR (non-draft + updated_at-window + cancelled_at IS NULL)
+  - fetchSubmittedDeclarations — composite temporal filter > should keep cancelled_at IS NULL on the active-submission arm to avoid double-counting
+  - fetchSubmittedDeclarations — composite temporal filter > should left-join gip_mds_data on siren + year so declarations of companies absent from the GIP file are kept
+  - fetchSubmittedDeclarations — composite temporal filter > should not gate the cancelled-window arm on status check
+  - fetchSubmittedDeclarations — composite temporal filter > should read the SUIT Effectif from gip_mds_data, not from the Weez company workforce (#3929)
+  - fetchSubmittedDeclarations — composite temporal filter > should select cancelledAt alongside the existing columns
+- **`src/modules/export/__tests__/schemas.test.ts`** — 5 test(s)
+  - exportFilesQuerySchema > accepts a valid siren and year
+  - exportFilesQuerySchema > accepts getCurrentYear() + 1 as max valid year
+  - exportFilesQuerySchema > rejects a year above getCurrentYear() + 1
+  - exportFilesQuerySchema > rejects a year below FIRST_DECLARATION_YEAR
+  - exportFilesQuerySchema > rejects an invalid siren
+- **`src/modules/export/__tests__/SwaggerUI.test.tsx`** — 3 test(s)
+  - SwaggerUI > should initialize SwaggerUIBundle when scripts are loaded
+  - SwaggerUI > should not initialize twice on multiple onLoad calls
+  - SwaggerUI > should render the swagger-ui container and load local assets
+- **`src/modules/export/shared/__tests__/apiLabels.test.ts`** — 7 test(s)
+  - quartileProportion > matches raw count/totalCount rounding across a value spread
+  - quartileProportion > returns 0 for a zero count over a non-zero total
+  - quartileProportion > returns null when count is null
+  - quartileProportion > returns null when totalCount is null
+  - quartileProportion > returns null when totalCount is zero (no division by zero)
+  - quartileProportion > returns the exact ratio when it fits within 4 decimals
+  - quartileProportion > rounds to 4 decimals for GIP CSV parity
+- **`src/modules/export/shared/__tests__/statusHistoryLabels.test.ts`** — 8 test(s)
+  - getStatusHistoryLabel > returns a non-empty string for every key in DECLARATION_EVENT_TYPE_LABELS
+  - getStatusHistoryLabel > returns base label for path_choice with null value
+  - getStatusHistoryLabel > returns base label for path_choice with unknown string value
+  - getStatusHistoryLabel > returns combined label for path_choice with corrective_action
+  - getStatusHistoryLabel > returns combined label for path_choice with joint_evaluation
+  - getStatusHistoryLabel > returns combined label for path_choice with justify
+  - getStatusHistoryLabel > returns the base label for cancel
+  - getStatusHistoryLabel > returns the base label for submit

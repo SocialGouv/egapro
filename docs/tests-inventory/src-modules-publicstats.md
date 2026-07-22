@@ -1,0 +1,64 @@
+# Inventaire des tests — src/modules/publicStats
+
+> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`. [← Retour à l'index](../tests-inventory.md)
+
+_Généré le 2026-07-22 — 7 fichier(s), 51 test(s)._
+
+- **`src/modules/publicStats/__tests__/CurrentCampaignRateTile.test.tsx`** — 9 test(s)
+  - CurrentCampaignRateTile > renders a negative delta as an error badge with comparison label from data.year
+  - CurrentCampaignRateTile > renders a neutral delta when submissionRate equals previousYearRate
+  - CurrentCampaignRateTile > renders the tile with rate, subtitle and a positive badge against year-1
+  - CurrentCampaignRateTile > renders the tile without a badge when previousYearRate is null (no history)
+  - CurrentCampaignRateTile > renders zeros gracefully when totalObligated is 0
+  - CurrentCampaignRateTile > returns null when the query has neither data, loading nor error state
+  - CurrentCampaignRateTile > shows a loading message while the query is in flight and no data is cached
+  - CurrentCampaignRateTile > shows an error alert when the query errors out
+  - CurrentCampaignRateTile > uses the previous data as placeholder while a new query is running
+- **`src/modules/publicStats/__tests__/PublicKpiTile.test.tsx`** — 6 test(s)
+  - PublicKpiTile > renders a neutral badge with equals sign for a zero delta
+  - PublicKpiTile > renders a success badge with upward arrow for a positive delta
+  - PublicKpiTile > renders an error badge with downward arrow for a negative delta
+  - PublicKpiTile > renders no badge when delta is null
+  - PublicKpiTile > renders the arrow with aria-hidden so the visual cue is not duplicated for screen readers
+  - PublicKpiTile > renders title, value and subtitle
+- **`src/modules/publicStats/__tests__/PublicStatsPage.test.tsx`** — 5 test(s)
+  - PublicStatsPage > embeds the current campaign rate tile
+  - PublicStatsPage > embeds the score distribution tile
+  - PublicStatsPage > renders a focusable main landmark targeted by the skip link
+  - PublicStatsPage > renders the lead paragraph describing the page content
+  - PublicStatsPage > renders the page heading
+- **`src/modules/publicStats/__tests__/ScoreDistributionChart.test.tsx`** — 13 test(s)
+  - ChartTooltip > renders '0 entreprise' (French convention: 0 takes the singular)
+  - ChartTooltip > renders the plural noun and the verbatim tooltip format for multi-entry buckets
+  - ChartTooltip > returns null when inactive
+  - ChartTooltip > returns null when payload is empty
+  - ChartTooltip > returns null when payload is missing
+  - ChartTooltip > returns null when the payload entry has no datum
+  - ChartTooltip > uses the singular noun when the bucket contains exactly one company
+  - formatYAxisTick > formats integers using the French locale (narrow-no-break-space thousands)
+  - formatYAxisTick > formats zero as '0'
+  - ScoreDistributionChart > exposes no focusable element under the aria-hidden wrapper
+  - ScoreDistributionChart > hides the chart from assistive tech (alternative table provides the data)
+  - ScoreDistributionChart > renders a Recharts container with the bracket dataset
+  - ScoreDistributionChart > renders even with an empty dataset (defensive)
+- **`src/modules/publicStats/__tests__/ScoreDistributionStates.test.tsx`** — 2 test(s)
+  - ScoreDistributionLoading > renders a polite live region with a loading message
+  - ScoreDistributionTileError > renders a DSFR error alert with role=alert
+- **`src/modules/publicStats/__tests__/ScoreDistributionTable.test.tsx`** — 7 test(s)
+  - ScoreDistributionTable > formats counts using French locale (narrow no-break space for thousands)
+  - ScoreDistributionTable > formats percentages with one decimal and a percent sign
+  - ScoreDistributionTable > labels the table via aria-labelledby pointing at the caption id
+  - ScoreDistributionTable > renders 0 / 0,0 % for empty brackets without breaking
+  - ScoreDistributionTable > renders an empty table body when given an empty bracket list
+  - ScoreDistributionTable > renders one row per bracket with the three labelled columns
+  - ScoreDistributionTable > uses scope='row' on the leftmost cell for screen-reader navigation
+- **`src/modules/publicStats/__tests__/ScoreDistributionTile.test.tsx`** — 9 test(s)
+  - ScoreDistributionTile > links the section to its heading via aria-labelledby
+  - ScoreDistributionTile > propagates the caption id to the alternative table component
+  - ScoreDistributionTile > renders a descriptive paragraph mentioning the NC bracket
+  - ScoreDistributionTile > renders both the chart and the accessible table when data is present
+  - ScoreDistributionTile > renders the heading with the current year from the query payload
+  - ScoreDistributionTile > returns null when the query has neither data, loading nor error state
+  - ScoreDistributionTile > shows the error alert when the query errors out
+  - ScoreDistributionTile > shows the loading message while the query has no cached data
+  - ScoreDistributionTile > uses placeholderData (prev) to preserve the previous result during refetch

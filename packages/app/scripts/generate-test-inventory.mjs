@@ -1,7 +1,9 @@
-// Generated file → docs/tests-inventory.md. Regenerate: `pnpm test:inventory` or the /test-inventory skill.
+// Generated files → docs/tests-inventory.md (index) + docs/tests-inventory/<section>.md.
+// Split per section to stay reviewable (revu-bot rejects files over 3000 lines).
+// Regenerate: `pnpm test:inventory` or the /test-inventory skill.
 
 import { execSync } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -76,36 +78,61 @@ function groupBySection(tests, isE2e) {
 	return bySection;
 }
 
-function renderSections(bySection) {
-	const lines = [];
+/** ASCII slug for a section label — used as the detail file name. */
+export function sectionSlug(label) {
+	return (
+		label
+			.normalize("NFD")
+			.replace(/[̀-ͯ]/g, "")
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "-")
+			.replace(/^-+|-+$/g, "") || "section"
+	);
+}
+
+const GENERATED_BANNER =
+	"> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`.";
+
+function renderSectionFile(label, byFile, generatedOn) {
+	const testCount = [...byFile.values()].reduce((n, t) => n + t.length, 0);
+	const lines = [
+		`# Inventaire des tests — ${label}`,
+		"",
+		`${GENERATED_BANNER} [← Retour à l'index](../tests-inventory.md)`,
+		"",
+		`_Généré le ${generatedOn} — ${byFile.size} fichier(s), ${testCount} test(s)._`,
+		"",
+	];
+	const files = [...byFile.keys()].sort((a, b) => a.localeCompare(b, "en"));
+	for (const file of files) {
+		const titles = [...byFile.get(file)].sort((a, b) =>
+			a.localeCompare(b, "fr"),
+		);
+		lines.push(`- **\`${file}\`** — ${titles.length} test(s)`);
+		for (const title of titles) lines.push(`  - ${title}`);
+	}
+	return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function renderIndexRows(bySection) {
 	const labels = [...bySection.keys()].sort((a, b) => a.localeCompare(b, "fr"));
-	for (const label of labels) {
+	return labels.map((label) => {
 		const byFile = bySection.get(label);
 		const testCount = [...byFile.values()].reduce((n, t) => n + t.length, 0);
-		lines.push(
-			`### ${label}`,
-			"",
-			`_${byFile.size} fichier(s), ${testCount} test(s)._`,
-			"",
-		);
-		const files = [...byFile.keys()].sort((a, b) => a.localeCompare(b, "en"));
-		for (const file of files) {
-			const titles = [...byFile.get(file)].sort((a, b) =>
-				a.localeCompare(b, "fr"),
-			);
-			lines.push(`- **\`${file}\`** — ${titles.length} test(s)`);
-			for (const title of titles) lines.push(`  - ${title}`);
-		}
-		lines.push("");
-	}
-	return lines;
+		return `| [${label}](tests-inventory/${sectionSlug(label)}.md) | ${byFile.size} | ${testCount} |`;
+	});
 }
 
 function countFiles(tests) {
 	return new Set(tests.map((t) => t.file)).size;
 }
 
-export function buildInventoryMarkdown({
+/**
+ * Builds the whole inventory as an index file plus one detail file per
+ * section, so no generated file grows past review-tool size limits.
+ * Returns [{ relativePath, content }] with paths relative to docs/.
+ */
+export function buildInventoryFiles({
 	unit,
 	integration,
 	e2e,
@@ -117,7 +144,9 @@ export function buildInventoryMarkdown({
 	const header = [
 		"# Inventaire des tests",
 		"",
-		"> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`.",
+		GENERATED_BANNER,
+		"",
+		"> Le suivi métier par parcours (miroir du classeur « Parcours », couverture e2e cas par cas) vit dans [tests-parcours.md](tests-parcours.md).",
 		"",
 		`_Généré le ${generatedOn}._`,
 		"",
@@ -139,15 +168,38 @@ export function buildInventoryMarkdown({
 	for (const [available, message] of unavailable) {
 		if (!available) header.push(`> ⚠️ ${message}`, "");
 	}
-	const body = [
+
+	const unitSections = groupBySection([...unit, ...integration], false);
+	const e2eSections = groupBySection(e2e, true);
+	const tableHead = ["| Section | Fichiers | Tests |", "| --- | --- | --- |"];
+	const index = [
+		...header,
 		"## Tests unitaires & d'intégration",
 		"",
-		...renderSections(groupBySection([...unit, ...integration], false)),
+		...tableHead,
+		...renderIndexRows(unitSections),
+		"",
 		"## Tests end-to-end",
 		"",
-		...renderSections(groupBySection(e2e, true)),
+		...tableHead,
+		...renderIndexRows(e2eSections),
 	];
-	return `${[...header, ...body].join("\n").trimEnd()}\n`;
+
+	const files = [
+		{
+			relativePath: "tests-inventory.md",
+			content: `${index.join("\n").trimEnd()}\n`,
+		},
+	];
+	for (const sections of [unitSections, e2eSections]) {
+		for (const [label, byFile] of sections) {
+			files.push({
+				relativePath: `tests-inventory/${sectionSlug(label)}.md`,
+				content: renderSectionFile(label, byFile, generatedOn),
+			});
+		}
+	}
+	return files;
 }
 
 function runList(command, appDir) {
@@ -168,11 +220,7 @@ function runList(command, appDir) {
 function main() {
 	const scriptDir = dirname(fileURLToPath(import.meta.url));
 	const appDir = resolve(scriptDir, "..");
-	const outputPath = join(
-		resolve(appDir, "..", ".."),
-		"docs",
-		"tests-inventory.md",
-	);
+	const docsDir = join(resolve(appDir, "..", ".."), "docs");
 
 	const unitOutput = runList("./node_modules/.bin/vitest list", appDir);
 	const integrationOutput = runList(
@@ -188,7 +236,7 @@ function main() {
 	const integration = parseVitest(integrationOutput);
 	const e2e = parsePlaywright(e2eOutput);
 
-	const content = buildInventoryMarkdown({
+	const files = buildInventoryFiles({
 		unit,
 		integration,
 		e2e,
@@ -198,10 +246,16 @@ function main() {
 		generatedOn: new Date().toISOString().slice(0, 10),
 	});
 
-	mkdirSync(dirname(outputPath), { recursive: true });
-	writeFileSync(outputPath, content, "utf8");
+	// Full rewrite of the detail directory so renamed/removed sections never
+	// leave a stale generated file behind.
+	rmSync(join(docsDir, "tests-inventory"), { recursive: true, force: true });
+	for (const { relativePath, content } of files) {
+		const outputPath = join(docsDir, relativePath);
+		mkdirSync(dirname(outputPath), { recursive: true });
+		writeFileSync(outputPath, content, "utf8");
+	}
 	process.stdout.write(
-		`Inventaire écrit : ${outputPath}\n  ${unit.length} tests unitaires · ${integration.length} intégration · ${e2e.length} E2E\n`,
+		`Inventaire écrit : ${join(docsDir, "tests-inventory.md")} + ${files.length - 1} fichier(s) de section\n  ${unit.length} tests unitaires · ${integration.length} intégration · ${e2e.length} E2E\n`,
 	);
 }
 

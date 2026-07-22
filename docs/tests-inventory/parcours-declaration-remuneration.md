@@ -1,0 +1,686 @@
+# Inventaire des tests — Parcours déclaration rémunération
+
+> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`. [← Retour à l'index](../tests-inventory.md)
+
+_Généré le 2026-07-22 — 60 fichier(s), 620 test(s)._
+
+- **`src/modules/declaration-remuneration/__tests__/computeIndicatorPercentages.test.ts`** — 19 test(s)
+  - computeIndicatorPercentages > rounding — F proportions rounded to 4 decimal places > proportion of 1/3 rounds to 0.3333
+  - computeIndicatorPercentages > rounding — F proportions rounded to 4 decimal places > proportion of 2/3 rounds to 0.6667
+  - computeIndicatorPercentages > S1 — nominal case, all values present > computes all 16 F proportions with no nulls
+  - computeIndicatorPercentages > S1 — nominal case, all values present > computes all 8 gaps with no nulls
+  - computeIndicatorPercentages > S1 — nominal case, all values present > computes annual quartile 1 proportions
+  - computeIndicatorPercentages > S1 — nominal case, all values present > computes globalAnnualMeanGap correctly
+  - computeIndicatorPercentages > S1 — nominal case, all values present > computes variableProportionWomen and variableProportionMen
+  - computeIndicatorPercentages > S3 (révisé) — signed ratio for 4.5% gap > globalAnnualMeanGap is positive ratio when men > women
+  - computeIndicatorPercentages > S4 — NULL inputs yield NULL outputs > other gaps remain computed when one gap has null inputs
+  - computeIndicatorPercentages > S4 — NULL inputs yield NULL outputs > other quartile proportions remain when one quartile is zero total
+  - computeIndicatorPercentages > S4 — NULL inputs yield NULL outputs > returns null E proportions for non-numeric string inputs
+  - computeIndicatorPercentages > S4 — NULL inputs yield NULL outputs > returns null E proportions when men count is null
+  - computeIndicatorPercentages > S4 — NULL inputs yield NULL outputs > returns null E proportions when total is zero
+  - computeIndicatorPercentages > S4 — NULL inputs yield NULL outputs > returns null E proportions when women count is null
+  - computeIndicatorPercentages > S4 — NULL inputs yield NULL outputs > returns null for F proportions when count inputs are null
+  - computeIndicatorPercentages > S4 — NULL inputs yield NULL outputs > returns null for globalAnnualMeanGap when men is null
+  - computeIndicatorPercentages > S4 — NULL inputs yield NULL outputs > returns null for globalAnnualMeanGap when women is null
+  - computeIndicatorPercentages > S4 — NULL inputs yield NULL outputs > returns null proportions for quartile with total zero
+  - computeIndicatorPercentages > sign — negative gap when women earn more > variableAnnualMeanGap is negative when women > men
+- **`src/modules/declaration-remuneration/__tests__/DeclarationLayout.test.tsx`** — 5 test(s)
+  - DeclarationLayout > does not show the lock alert by default
+  - DeclarationLayout > does not show the lock alert when read-only but no holder is resolved
+  - DeclarationLayout > provides the lock state to descendant consumers
+  - DeclarationLayout > renders the children inside the banner layout
+  - DeclarationLayout > shows the lock alert when read-only and a holder is provided
+- **`src/modules/declaration-remuneration/__tests__/schemas.test.ts`** — 10 test(s)
+  - updateStep4Schema > accepts valid data with 3 strictly increasing thresholds and Q4 without threshold
+  - updateStep4Schema > rejects when a Q1-Q3 threshold is absent (undefined)
+  - updateStep4Schema > rejects when a Q1-Q3 threshold is empty string
+  - updateStep4Schema > rejects when a Q1-Q3 threshold is non-numeric
+  - updateStep4Schema > rejects when first two thresholds increase but third is lower
+  - updateStep4Schema > rejects when Q4 has a threshold present
+  - updateStep4Schema > rejects when thresholds are not strictly increasing
+  - updateStep4Schema > rejects when tuple has wrong length (3 elements instead of 4)
+  - updateStep4Schema > rejects when two thresholds are equal
+  - updateStep4Schema > rejects when women count is negative
+- **`src/modules/declaration-remuneration/__tests__/StepPageClient.test.tsx`** — 5 test(s)
+  - StepPageClient — modification closed banner (#3716) > does not acquire the collaborative lock when modification is closed
+  - StepPageClient — modification closed banner (#3716) > does not render the banner when closed but no deadline is provided
+  - StepPageClient — modification closed banner (#3716) > does not render the banner when modification is open (the regression: step stays editable)
+  - StepPageClient — modification closed banner (#3716) > renders the read-only banner with the deadline when modification is closed
+  - StepPageClient — modification closed banner (#3716) > renders the recap step (6) under the closed banner
+- **`src/modules/declaration-remuneration/recapitulatif/__tests__/CategoryRecapTable.test.tsx`** — 9 test(s)
+  - CategoryRecapTable > computes annual and hourly total gaps from base + variable components
+  - CategoryRecapTable > flags an 'élevé' badge when a salary gap reaches the 5% threshold
+  - CategoryRecapTable > renders '- %' for the total gap when the men total is zero
+  - CategoryRecapTable > renders '0 nb' when counts are null
+  - CategoryRecapTable > renders no 'élevé' badge when all gaps stay below the threshold
+  - CategoryRecapTable > renders the heading with the category name and 1-based index
+  - CategoryRecapTable > renders the heading without a name suffix when name is empty
+  - CategoryRecapTable > renders the total salariés count from women + men
+  - CategoryRecapTable > suffixes the 'Effectif physique' counts with 'nb'
+- **`src/modules/declaration-remuneration/recapitulatif/__tests__/RecapitulatifPage.correction.test.tsx`** — 5 test(s)
+  - RecapitulatifPage — second declaration (isCorrection) > hides the A→F all-employees indicator section and its workforce table
+  - RecapitulatifPage — second declaration (isCorrection) > hides the A→F gap tables even when step2/step3/step4 data is provided
+  - RecapitulatifPage — second declaration (isCorrection) > renders a secondary 'Mon espace' bottom action instead of the primary one
+  - RecapitulatifPage — second declaration (isCorrection) > renders the second-declaration h1 instead of the standard one
+  - RecapitulatifPage — second declaration (isCorrection) > still renders the per-category indicator section
+- **`src/modules/declaration-remuneration/recapitulatif/__tests__/RecapitulatifPage.test.tsx`** — 27 test(s)
+  - RecapitulatifPage > demotes the title to h3 when embedded via titleTag (no second h1)
+  - RecapitulatifPage > does not render its own breadcrumb or back link (handled by the page route at fr-container width)
+  - RecapitulatifPage > does not render its own ResourceBanner (PublicChrome handles it)
+  - RecapitulatifPage > falls back to the raw source key when it is not a known label
+  - RecapitulatifPage > flags 'élevé' badge on high gaps (>= 5%)
+  - RecapitulatifPage > floors a decimal company.gipWorkforce for display
+  - RecapitulatifPage > hides address when not available
+  - RecapitulatifPage > hides NAF code when not available
+  - RecapitulatifPage > locks the computed quartile percentages and grand totals (iso-behaviour)
+  - RecapitulatifPage > omits the Nom Prénom row when declarantName is empty
+  - RecapitulatifPage > renders 'Informations calcul' with single-line reference period
+  - RecapitulatifPage > renders 'Télécharger' tertiary download button
+  - RecapitulatifPage > renders all indicator section sub-headings
+  - RecapitulatifPage > renders company info with all fields including workforce
+  - RecapitulatifPage > renders declarant info with Nom Prénom and Adresse email
+  - RecapitulatifPage > renders download link with correction param when isCorrection
+  - RecapitulatifPage > renders empty notices for empty indicator/category sections
+  - RecapitulatifPage > renders h1 with year
+  - RecapitulatifPage > renders informations sections without table markup
+  - RecapitulatifPage > renders one category table per step5 category with matching heading
+  - RecapitulatifPage > renders pay-gap rows when step2 data is provided
+  - RecapitulatifPage > renders primary 'Retour à Mon Espace' button linking to mon-espace
+  - RecapitulatifPage > renders proportion table when step3 indicatorE values are present
+  - RecapitulatifPage > renders quartile tables when step4 data is provided
+  - RecapitulatifPage > renders source line when step5Source is provided
+  - RecapitulatifPage > renders the workforce table under the indicator section
+  - RecapitulatifPage > shows '< 50' when company.gipWorkforce is null
+- **`src/modules/declaration-remuneration/shared/__tests__/CompanyBanner.test.tsx`** — 12 test(s)
+  - CompanyBanner > floors a decimal gipWorkforce and hides the CSE datapoint below 100
+  - CompanyBanner > hides the NAF datapoint when nafCode is null
+  - CompanyBanner > renders breadcrumb with 3 items: Mon espace, company name and current page label
+  - CompanyBanner > renders company name as bold paragraph
+  - CompanyBanner > renders formatted SIREN with label
+  - CompanyBanner > renders NAF code alone when the label is null
+  - CompanyBanner > renders NAF code with its activity label
+  - CompanyBanner > renders workforce and CSE values
+  - CompanyBanner > shows '< 50' and hides the CSE datapoint when gipWorkforce is null
+  - CompanyBanner > shows 'Non renseigné' when hasCse is null
+  - CompanyBanner > shows 'Non' when hasCse is false
+  - CompanyBanner > shows the CSE datapoint when gipWorkforce is exactly 250
+- **`src/modules/declaration-remuneration/shared/__tests__/complianceNavigation.test.ts`** — 19 test(s)
+  - getCseOpinionPreviousHref > returns first-decl recap step when arriving from direct submit (no gap, round 1)
+  - getCseOpinionPreviousHref > returns second-decl recap step when second decl submitted with no revision (resolved)
+  - getCseOpinionPreviousHref > returns the compliance path choice when path = justify (round 1)
+  - getCseOpinionPreviousHref > returns the compliance path choice when second-decl path = justify (round 2)
+  - getCseOpinionPreviousHref > returns the joint evaluation page when path = joint_evaluation (round 1)
+  - getCseOpinionPreviousHref > returns the joint evaluation page when second-decl path = joint_evaluation (round 2)
+  - getCurrentStageHref > returns /avis-cse for awaiting_cse_opinion
+  - getCurrentStageHref > returns /avis-cse for demarche_completed when CSE is required
+  - getCurrentStageHref > returns the compliance choice page for awaiting_compliance_path_choice
+  - getCurrentStageHref > returns the compliance choice page for awaiting_revision_choice
+  - getCurrentStageHref > returns the compliance path for a null status
+  - getCurrentStageHref > returns the corrective actions first step for corrective_actions_chosen
+  - getCurrentStageHref > returns the declaration entry for draft (no more silent parcours-conformite fallback)
+  - getCurrentStageHref > returns the joint evaluation page for joint_evaluation_chosen
+  - getCurrentStageHref > returns the joint evaluation page for revised_joint_evaluation_chosen
+  - getCurrentStageHref > returns the no-CSE confirmation page for demarche_completed without CSE
+  - getPostComplianceDestination > returns /avis-cse when hasCse is true
+  - getPostComplianceDestination > returns confirmation path when hasCse is false
+  - getPostComplianceDestination > returns confirmation path when hasCse is null
+- **`src/modules/declaration-remuneration/shared/__tests__/DataTable.test.tsx`** — 6 test(s)
+  - DataTable > calls onCellChange when input changes
+  - DataTable > renders editable inputs for non-readOnly columns
+  - DataTable > renders readOnly values as text without input
+  - DataTable > renders table caption, column headers, and row data
+  - DataTable > renders total row when showTotal is true
+  - DataTable > uses custom totalLabel
+- **`src/modules/declaration-remuneration/shared/__tests__/DevFillButton.test.tsx`** — 3 test(s)
+  - DevFillButton > calls onFill when clicked
+  - DevFillButton > renders button with label when env is dev
+  - DevFillButton > renders nothing when env is not dev
+- **`src/modules/declaration-remuneration/shared/__tests__/devFillData.test.ts`** — 9 test(s)
+  - devFillData > createDevStep5Categories distributes custom workforce totals correctly
+  - devFillData > createDevStep5Categories distributes small totals
+  - devFillData > createDevStep5Categories returns 4 categories with sequential IDs
+  - devFillData > createDevStep5Categories totals match given workforce
+  - devFillData > Step1 has 1 category with 120 women and 130 men
+  - devFillData > Step2 has 4 pay gap rows
+  - devFillData > Step3 has 4 variable pay rows and beneficiary counts
+  - devFillData > Step4 has 4 annual and 4 hourly quartiles
+  - devFillData > Step5 source is accord-entreprise
+- **`src/modules/declaration-remuneration/shared/__tests__/FormActions.test.tsx`** — 14 test(s)
+  - FormActions > admin impersonation > disables the submit button and renders a tooltip when impersonating without a saved record
+  - FormActions > admin impersonation > does not render the tooltip when not impersonating
+  - FormActions > admin impersonation > ignores mimoquageNextHref when not impersonating
+  - FormActions > admin impersonation > renders a Link instead of the submit button when impersonating with mimoquageNextHref
+  - FormActions > declaration lock > disables the submit button when the declaration is locked by another user
+  - FormActions > declaration lock > disables the submit button while the lock is still being acquired
+  - FormActions > declaration lock > keeps the submit button enabled when the lock is inactive
+  - FormActions > declaration lock > renders a Link instead of the submit button when locked with mimoquageNextHref
+  - FormActions > disables button when nextDisabled is true
+  - FormActions > renders custom nextLabel
+  - FormActions > renders next link when nextHref is provided
+  - FormActions > renders previous link when previousHref is provided
+  - FormActions > renders submit button when no nextHref is provided
+  - FormActions > shows 'Enregistrement…' when isSubmitting is true
+- **`src/modules/declaration-remuneration/shared/__tests__/funnelSteps.test.ts`** — 10 test(s)
+  - getFunnelSteps > drops the indicator G step when it is not required
+  - getFunnelSteps > keeps every step when indicator G is required
+  - getNextStepHref > returns undefined on the last step
+  - getNextStepHref > skips from step 4 to step 6 when indicator G is not required
+  - getNextStepHref > walks the full funnel when indicator G is required
+  - getPreviousStepHref > goes back from step 6 to step 4 when indicator G is not required
+  - getPreviousStepHref > returns undefined for a step that is not part of the funnel
+  - getPreviousStepHref > returns undefined on the first step
+  - getPreviousStepHref > walks the full funnel backwards when indicator G is required
+  - stepHref > builds the funnel step URL
+- **`src/modules/declaration-remuneration/shared/__tests__/gapBadge.test.ts`** — 4 test(s)
+  - GAP_LEVEL_LABELS > maps high to French label
+  - GAP_LEVEL_LABELS > maps low to French label
+  - gapBadgeClass > returns info badge for low
+  - gapBadgeClass > returns warning badge for high
+- **`src/modules/declaration-remuneration/shared/__tests__/GapInterpretationCallout.test.tsx`** — 14 test(s)
+  - GapInterpretationCallout > renders balanced title for payGap variant when gaps are below 5%
+  - GapInterpretationCallout > renders men disfavored title for payGap variant when men values are lower
+  - GapInterpretationCallout > renders women disfavored title for payGap variant when women values are lower
+  - GapInterpretationCallout > renders women disfavored title for variablePay variant
+  - GapInterpretationCallout > returns null when no rows have data
+  - GapInterpretationCallout > shows gap magnitude (no minus sign) in prose when women earn more
+  - GapInterpretationCallout > uses blue accent class when all gaps are < 5%
+  - GapInterpretationCallout > uses orange accent class when any gap is >= 5%
+  - GapInterpretationCallout > uses the Figma balanced wording on variablePay variant
+  - GapInterpretationCallout > uses the Figma men-disfavor wording on variablePay variant
+  - hasHighPayGap > returns false on empty rows
+  - hasHighPayGap > returns false when all gaps are below 5%
+  - hasHighPayGap > returns false when no row has data
+  - hasHighPayGap > returns true as soon as one row crosses the 5% threshold
+- **`src/modules/declaration-remuneration/shared/__tests__/gipMdsMapping.test.ts`** — 22 test(s)
+  - mapGipToFormData > computes zero quartile size when workforce is zero
+  - mapGipToFormData > handles confidence index at 0
+  - mapGipToFormData > handles confidence index at 1
+  - mapGipToFormData > handles null quartile proportions
+  - mapGipToFormData > handles proportions at boundary 0 (mono-gender quartile: all men)
+  - mapGipToFormData > handles proportions at boundary 1 (mono-gender quartile: all women)
+  - mapGipToFormData > handles proportions that do not sum to exactly 1 (floating point)
+  - mapGipToFormData > handles zero workforce for variable pay beneficiaries
+  - mapGipToFormData > maps confidence index and period end
+  - mapGipToFormData > maps hourly quartile data from proportions
+  - mapGipToFormData > maps step1 with zero workforce
+  - mapGipToFormData > maps step1 workforce from annual global counts
+  - mapGipToFormData > maps step2 pay gap (indicators A+C)
+  - mapGipToFormData > maps step3 variable pay (indicators B+D+E)
+  - mapGipToFormData > maps step4 quartile data from proportions
+  - mapGipToFormData > returns 3-element thresholds tuple (Q1-Q3 only, no Q4)
+  - mapGipToFormData > returns all null step2 fields when row has no indicator A/C data
+  - mapGipToFormData > returns all null step3 fields when row has no indicator B/D/E data
+  - mapGipToFormData > returns null for non-numeric quartile proportion string (proportionToCount NaN branch)
+  - mapGipToFormData > returns null for non-numeric workforce string (toInt NaN branch)
+  - mapGipToFormData > returns null when input is null
+  - mapGipToFormData > returns null workforce when values are null
+- **`src/modules/declaration-remuneration/shared/__tests__/gipMdsMappingCsv.test.ts`** — 6 test(s)
+  - CSV_TO_SCHEMA_MAP > contains expected number of mappings
+  - CSV_TO_SCHEMA_MAP > maps confidence index columns
+  - CSV_TO_SCHEMA_MAP > maps indicator A columns (global mean)
+  - CSV_TO_SCHEMA_MAP > maps quartile columns (indicator F)
+  - CSV_TO_SCHEMA_MAP > maps SIREN column to siren field
+  - CSV_TO_SCHEMA_MAP > maps workforce columns
+- **`src/modules/declaration-remuneration/shared/__tests__/OrdinalLongDate.test.tsx`** — 3 test(s)
+  - OrdinalLongDate > reads the day in UTC, not the local timezone
+  - OrdinalLongDate > uses the 'e' suffix for any other day
+  - OrdinalLongDate > uses the 'er' suffix for the first of the month
+- **`src/modules/declaration-remuneration/shared/__tests__/PrefillResetWarning.test.tsx`** — 3 test(s)
+  - PrefillResetWarning > has the warning alert class
+  - PrefillResetWarning > mentions the consequence of modifying data
+  - PrefillResetWarning > renders the warning alert
+- **`src/modules/declaration-remuneration/shared/__tests__/PrefillSource.test.tsx`** — 4 test(s)
+  - PrefillSource > falls back to the civil year when a period bound is missing
+  - PrefillSource > renders the DSN source text
+  - PrefillSource > renders the tooltip button
+  - PrefillSource > shows the GIP collection window as the reference period
+- **`src/modules/declaration-remuneration/shared/__tests__/StepIndicator.test.tsx`** — 6 test(s)
+  - StepIndicator > does not render next step on last step
+  - StepIndicator > renders 'Étape X sur 6' text
+  - StepIndicator > renders current step title
+  - StepIndicator > renders next step title when not on last step
+  - StepIndicator > shows 'Étape 4 sur 5' and skips to step 6 as next when indicatorGRequired is false
+  - StepIndicator > shows 'Étape 4 sur 6' and announces step 5 as next when indicatorGRequired is true
+- **`src/modules/declaration-remuneration/shared/draft/__tests__/computeDraftDiff.test.ts`** — 12 test(s)
+  - computeDraftDiff > detects difference when nested object key sets differ
+  - computeDraftDiff > detects difference when same key count but distinct keys
+  - computeDraftDiff > includes a differing nested object
+  - computeDraftDiff > includes only the differing primitive in the diff
+  - computeDraftDiff > keeps the entire array when length differs
+  - computeDraftDiff > keeps the entire array when one cell differs
+  - computeDraftDiff > returns {} for arrays of objects with identical content
+  - computeDraftDiff > returns {} for nested objects with identical content
+  - computeDraftDiff > returns {} when all primitives are strictly equal
+  - computeDraftDiff > treats array vs object as different
+  - computeDraftDiff > treats null and undefined as equal
+  - computeDraftDiff > treats null vs primitive as different
+- **`src/modules/declaration-remuneration/shared/draft/__tests__/DraftLoadingState.test.tsx`** — 1 test(s)
+  - DraftLoadingState > renders an accessible loading status with French label
+- **`src/modules/declaration-remuneration/shared/draft/__tests__/useDeclarationDraft.lifecycle.test.tsx`** — 11 test(s)
+  - useDeclarationDraft (lifecycle & cache) > does nothing on unmount when no debounced mutation is pending
+  - useDeclarationDraft (lifecycle & cache) > flushes a pending clear on unmount when the diff went empty
+  - useDeclarationDraft (lifecycle & cache) > flushes a pending debounced save when the component unmounts
+  - useDeclarationDraft (lifecycle & cache) > flushRef immediately clears the cache so the next mount sees no stale data
+  - useDeclarationDraft (lifecycle & cache) > flushRef immediately writes pending save to cache so the next mount hydrates without waiting for the mutation
+  - useDeclarationDraft (lifecycle & cache) > hasDraft stays false while typing into a blank form (no flash of Enregistré)
+  - useDeclarationDraft (lifecycle & cache) > keeps hasDraft=true when a stale clear from a previous mount resolves after remount (race condition)
+  - useDeclarationDraft (lifecycle & cache) > patches the get cache on clear success (removes the kind slice)
+  - useDeclarationDraft (lifecycle & cache) > patches the get cache on save success
+  - useDeclarationDraft (lifecycle & cache) > returns the cache unchanged on clear success when kind is undefined
+  - useDeclarationDraft (lifecycle & cache) > skips the flush on unmount if the user is no longer enabled
+- **`src/modules/declaration-remuneration/shared/draft/__tests__/useDeclarationDraft.test.tsx`** — 17 test(s)
+  - useDeclarationDraft > clearDraft cancels any pending debounced save
+  - useDeclarationDraft > clearDraft triggers the clear mutation immediately (not debounced)
+  - useDeclarationDraft > debounces save calls (multiple setField in <600ms → 1 mutation)
+  - useDeclarationDraft > disables the query and is a no-op when impersonating
+  - useDeclarationDraft > hasDraft becomes true once the query resolves with a non-empty slice
+  - useDeclarationDraft > honors a custom step in the save payload
+  - useDeclarationDraft > hydrates draft from the query slice when data resolves
+  - useDeclarationDraft > is a no-op when the user is logged out
+  - useDeclarationDraft > keeps a stable draft reference for nested values with identical contents
+  - useDeclarationDraft > keeps a stable draft reference when setField is called with the same values
+  - useDeclarationDraft > reports isLoadingDraft=true when data is undefined even if isLoading is false (enabled/disabled race)
+  - useDeclarationDraft > reports isLoadingDraft=true while the session is loading
+  - useDeclarationDraft > returns an empty draft and loading=true while the query is pending
+  - useDeclarationDraft > returns an empty draft when the kind slice exists but the step is missing
+  - useDeclarationDraft > returns an empty draft when the query data has no slice for this kind
+  - useDeclarationDraft > setField with values equal to dbValues triggers a clear (no save)
+  - useDeclarationDraft > updates the local draft immediately on setField (optimistic)
+- **`src/modules/declaration-remuneration/shared/draft/__tests__/useDraftAutoSave.test.tsx`** — 4 test(s)
+  - useDraftAutoSave > does not subscribe while not ready
+  - useDraftAutoSave > subscribes and propagates values when ready
+  - useDraftAutoSave > unsubscribes on unmount
+  - useDraftAutoSave > uses the latest onChange callback identity without re-subscribing
+- **`src/modules/declaration-remuneration/shared/draft/__tests__/useDraftHydration.test.tsx`** — 4 test(s)
+  - useDraftHydration > calls applyDraft once when loading completes and returns true
+  - useDraftHydration > does not call applyDraft while loading
+  - useDraftHydration > does not re-apply draft when draft changes after hydration
+  - useDraftHydration > uses the latest applyDraft callback identity without re-firing
+- **`src/modules/declaration-remuneration/shared/lock/__tests__/DeclarationLockAlert.test.tsx`** — 6 test(s)
+  - DeclarationLockAlert > falls back to a generic label when neither name nor email is available
+  - DeclarationLockAlert > falls back to the email alone when no name is provided
+  - DeclarationLockAlert > renders a DSFR warning alert with the lock title
+  - DeclarationLockAlert > shows the full name and email when both are present
+  - DeclarationLockAlert > shows the name without parentheses when the email is null
+  - DeclarationLockAlert > uses the available name part when only one of first/last is set
+- **`src/modules/declaration-remuneration/shared/lock/__tests__/DeclarationModificationClosedAlert.test.tsx`** — 5 test(s)
+  - DeclarationModificationClosedAlert > renders nothing when the reason is impersonation
+  - DeclarationModificationClosedAlert > renders nothing when the reason is lock
+  - DeclarationModificationClosedAlert > renders nothing when there is no read-only reason
+  - DeclarationModificationClosedAlert > renders the deadline through OrdinalLongDate (1er mars 2026)
+  - DeclarationModificationClosedAlert > renders the info alert with the deadline when the reason is modification_closed
+- **`src/modules/declaration-remuneration/shared/lock/__tests__/LockContext.test.tsx`** — 7 test(s)
+  - LockContext — dynamic provider > relays the lock state returned by useDeclarationLock
+  - LockContext — hook aliases > useLockContext and useReadOnlyContext return the same context
+  - LockContext — static provider > defaults to non-readonly with no reason or holder when no props are passed
+  - LockContext — static provider > derives reason 'lock' from a holder when read-only without an explicit reason
+  - LockContext — static provider > exposes a default non-readonly state without a provider
+  - LockContext — static provider > folds impersonation into the unified context, overriding the props
+  - LockContext — static provider > keeps an explicit reason prop over the holder-derived default
+- **`src/modules/declaration-remuneration/shared/lock/__tests__/useDeclarationLock.test.tsx`** — 24 test(s)
+  - useDeclarationLock > acquires the lock on mount and stays editable when held (S1)
+  - useDeclarationLock > becomes read-only and exposes the holder when the lock is taken (no heartbeat)
+  - useDeclarationLock > does not emit a beacon on a visibilitychange that is not hidden
+  - useDeclarationLock > does not emit a beacon on pagehide when it is not the holder
+  - useDeclarationLock > does not release on unmount when it is not the holder
+  - useDeclarationLock > does not release the lock on unmount, even as the holder (step navigation must not churn the lock)
+  - useDeclarationLock > emits a release beacon on pagehide when it is the holder (S5)
+  - useDeclarationLock > emits a release beacon when the tab is hidden (S5 visibilitychange)
+  - useDeclarationLock > falls back to read-only without a holder when acquisition throws
+  - useDeclarationLock > ignores a failed acquisition that rejects after unmount
+  - useDeclarationLock > ignores a successful acquisition that resolves after unmount
+  - useDeclarationLock > is disabled while unauthenticated: never acquires, stays editable, not loading
+  - useDeclarationLock > is read-only while impersonating with reason 'impersonation', without acquiring the lock
+  - useDeclarationLock > modification closed (#3716) > is read-only with reason 'modification_closed' without acquiring the collaborative lock
+  - useDeclarationLock > modification closed (#3716) > never starts the heartbeat while modification is closed
+  - useDeclarationLock > modification closed (#3716) > prefers 'impersonation' over 'modification_closed' when both apply
+  - useDeclarationLock > modification closed (#3716) > prefers 'modification_closed' over the collaborative lock
+  - useDeclarationLock > modification closed (#3716) > stays editable with a null reason when modification is not closed
+  - useDeclarationLock > re-reads ownership and stops the heartbeat when the lock is lost
+  - useDeclarationLock > reports a null reason for a normal editor that holds the lock
+  - useDeclarationLock > reports reason 'lock' when the declaration is held by another user
+  - useDeclarationLock > sends periodic heartbeats while it holds the lock (S7)
+  - useDeclarationLock > stays loading while the session is still resolving
+  - useDeclarationLock > swallows heartbeat rejections without re-reading ownership
+- **`src/modules/declaration-remuneration/steps/__tests__/ComplianceConfirmation.test.tsx`** — 6 test(s)
+  - ComplianceConfirmation > displays the completion message with declaration year
+  - ComplianceConfirmation > has a download PDF button with year
+  - ComplianceConfirmation > has a link to mon espace
+  - ComplianceConfirmation > renders the confirmation title
+  - ComplianceConfirmation > renders the feedback banner
+  - ComplianceConfirmation > shows the no CSE message
+- **`src/modules/declaration-remuneration/steps/__tests__/CompliancePathChoice.test.tsx`** — 24 test(s)
+  - CompliancePathChoice > disables next button when no path is selected
+  - CompliancePathChoice > does not submit when no path is selected
+  - CompliancePathChoice > draft autosave > disables each control while keeping the fieldset enabled when the declaration is locked read-only
+  - CompliancePathChoice > draft autosave > does not save a draft when the declaration is locked read-only
+  - CompliancePathChoice > draft autosave > hydrates the selected path from a persisted draft
+  - CompliancePathChoice > draft autosave > saves a draft when a path is selected and the lock is inactive
+  - CompliancePathChoice > enables next button after selecting a path
+  - CompliancePathChoice > names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)
+  - CompliancePathChoice > navigates to second declaration when corrective_action is selected
+  - CompliancePathChoice > pre-selects the initial path when provided
+  - CompliancePathChoice > renders all 3 compliance path options
+  - CompliancePathChoice > renders isSecondRound options when isSecondRound is set
+  - CompliancePathChoice > renders previous link pointing to step 6
+  - CompliancePathChoice > renders the email in the success banner
+  - CompliancePathChoice > renders the first-round instruction phrase by default
+  - CompliancePathChoice > renders the page title and success banner
+  - CompliancePathChoice > renders the path choice deadline highlight block
+  - CompliancePathChoice > renders the second-round instruction phrase and intermediate heading
+  - CompliancePathChoice > submits justify and navigates to the CSE opinion page
+  - CompliancePathChoice > submits the selected path and navigates to evaluation-conjointe
+  - CompliancePathChoice > uses the funnel title as h1 and keeps section headings at level 2
+  - CompliancePathChoice read-only mode > does not call the save mutation when the read-only form is submitted
+  - CompliancePathChoice read-only mode > renders Suivant as a navigation link instead of a submit button
+  - CompliancePathChoice read-only mode > renders the read-only alert and disables the radios
+- **`src/modules/declaration-remuneration/steps/__tests__/CompliancePathPage.test.ts`** — 22 test(s)
+  - getCompliancePathReadOnlyReason > does not lock the second-round revision choice when only the first-round second declaration was submitted
+  - getCompliancePathReadOnlyReason > keeps corrective_action editable while the second declaration is not submitted
+  - getCompliancePathReadOnlyReason > keeps joint_evaluation editable while the report is not submitted
+  - getCompliancePathReadOnlyReason > keeps justify editable while the CSE opinion is not submitted
+  - getCompliancePathReadOnlyReason > locks the second-round revision once its own joint evaluation is submitted
+  - getCompliancePathReadOnlyReason > prioritises a submitted next step over a passed deadline
+  - getCompliancePathReadOnlyReason > prioritises demarche_completed over a submitted next step
+  - getCompliancePathReadOnlyReason > returns cse_opinion_submitted for justify once the CSE opinion is submitted
+  - getCompliancePathReadOnlyReason > returns demarche_completed when the démarche is finalised
+  - getCompliancePathReadOnlyReason > returns joint_evaluation_submitted for joint_evaluation once the report is submitted
+  - getCompliancePathReadOnlyReason > returns null when no condition is met
+  - getCompliancePathReadOnlyReason > returns path_choice_deadline_passed even without a chosen path
+  - getCompliancePathReadOnlyReason > returns path_choice_deadline_passed once the deadline is in the past
+  - getCompliancePathReadOnlyReason > returns second_declaration_submitted for corrective_action once the second declaration is submitted
+  - getComplianceState > returns first_round when gaps exist and no compliance path set
+  - getComplianceState > returns first_round when path is corrective_action but second declaration not submitted
+  - getComplianceState > returns first_round when path is corrective_action, submitted, but correction gaps resolved
+  - getComplianceState > returns first_round when path is joint_evaluation regardless of second declaration
+  - getComplianceState > returns first_round when path is justify
+  - getComplianceState > returns no_gap when no categories have gaps above threshold
+  - getComplianceState > returns no_gap with empty categories
+  - getComplianceState > returns second_round when corrective_action submitted and correction gaps persist
+- **`src/modules/declaration-remuneration/steps/__tests__/CompliancePathReadOnlyAlert.test.tsx`** — 5 test(s)
+  - CompliancePathReadOnlyAlert > renders the cse_opinion_submitted message
+  - CompliancePathReadOnlyAlert > renders the demarche_completed message
+  - CompliancePathReadOnlyAlert > renders the joint_evaluation_submitted message
+  - CompliancePathReadOnlyAlert > renders the path_choice_deadline_passed message
+  - CompliancePathReadOnlyAlert > renders the second_declaration_submitted message
+- **`src/modules/declaration-remuneration/steps/__tests__/DraftLoadingGate.test.tsx`** — 9 test(s)
+  - DraftLoadingGate > CompliancePathChoice renders loading skeleton while draft is loading
+  - DraftLoadingGate > JointEvaluationForm consumes the hook without crashing while draft is loading
+  - DraftLoadingGate > SecondDeclarationStep1Info renders loading skeleton while draft is loading
+  - DraftLoadingGate > SecondDeclarationStep2Form renders loading skeleton while draft is loading
+  - DraftLoadingGate > Step1 renders loading skeleton while draft is loading
+  - DraftLoadingGate > Step2 renders loading skeleton while draft is loading
+  - DraftLoadingGate > Step3 renders loading skeleton while draft is loading
+  - DraftLoadingGate > Step4 renders loading skeleton while draft is loading
+  - DraftLoadingGate > Step5 renders loading skeleton while draft is loading
+- **`src/modules/declaration-remuneration/steps/__tests__/QuartileInterpretationCallout.test.tsx`** — 11 test(s)
+  - hasHighQuartileImbalance > returns false when categories have less than 4 items
+  - hasHighQuartileImbalance > returns false when Q4 has no entries
+  - hasHighQuartileImbalance > returns false when Q4 women ratio is between 45% and 55%
+  - hasHighQuartileImbalance > returns true when Q4 women ratio is above 55%
+  - hasHighQuartileImbalance > returns true when Q4 women ratio is below 45%
+  - QuartileInterpretationCallout > flags imbalance at 5pp from parity (44% women → orange)
+  - QuartileInterpretationCallout > returns null when categories do not have 4 items
+  - QuartileInterpretationCallout > returns null when Q4 totals are both 0
+  - QuartileInterpretationCallout > shows balanced case when women ratio is between 0.4 and 0.6 in Q4
+  - QuartileInterpretationCallout > shows men underrepresented when women ratio > 0.6 in Q4
+  - QuartileInterpretationCallout > shows women underrepresented when women ratio < 0.4 in Q4
+- **`src/modules/declaration-remuneration/steps/__tests__/Step1DevFill.test.tsx`** — 1 test(s)
+  - Step1Workforce dev fill > fills workforce when dev fill button is clicked
+- **`src/modules/declaration-remuneration/steps/__tests__/Step1Workforce.test.tsx`** — 22 test(s)
+  - Step1Workforce > blocks submit when one field is cleared after having a value
+  - Step1Workforce > calls mutation with updated data on valid submit
+  - Step1Workforce > confirmation modal > calls mutation after confirming
+  - Step1Workforce > confirmation modal > does not call mutation when cancelling
+  - Step1Workforce > confirmation modal > does not show modal when values match initial data
+  - Step1Workforce > confirmation modal > shows modal on submit when saved values are changed
+  - Step1Workforce > disables browser autofill on the form
+  - Step1Workforce > does not render a previous link (exit is handled by the breadcrumb)
+  - Step1Workforce > does not show SavedIndicator when no initial data
+  - Step1Workforce > does not show the reset warning when no GIP data is provided
+  - Step1Workforce > gives every column header a non-empty accessible name and exposes the row label as a rowheader (RGAA 5.7)
+  - Step1Workforce > hides the reset warning by default
+  - Step1Workforce > names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)
+  - Step1Workforce > renders default state with zero totals
+  - Step1Workforce > renders initial data with correct values
+  - Step1Workforce > renders reference period and mandatory fields notice
+  - Step1Workforce > shows field-level error messages when submitting with empty inputs
+  - Step1Workforce > shows reset warning when GIP prefilled field is cleared to empty
+  - Step1Workforce > shows SavedIndicator when initial data has values
+  - Step1Workforce > shows the reset warning when a prefilled value is modified
+  - Step1Workforce > updates women/men values via inline inputs
+  - Step1Workforce > validates total > 0 on submit
+- **`src/modules/declaration-remuneration/steps/__tests__/Step2DevFill.test.tsx`** — 1 test(s)
+  - Step2PayGap dev fill > fills pay gap rows when dev fill button is clicked
+- **`src/modules/declaration-remuneration/steps/__tests__/Step2PayGap.test.tsx`** — 12 test(s)
+  - Step2PayGap > computes gap and shows badge after entering values
+  - Step2PayGap > does not show SavedIndicator when initialData is empty
+  - Step2PayGap > names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)
+  - Step2PayGap > renders instruction text and mandatory fields notice
+  - Step2PayGap > renders previous link pointing to step 1
+  - Step2PayGap > renders table headers
+  - Step2PayGap > renders the table with 4 remuneration rows
+  - Step2PayGap > shows no badge when gap is less than 5%
+  - Step2PayGap > shows SavedIndicator when initialData has data
+  - Step2PayGap > shows validation error on submit when fields are incomplete
+  - Step2PayGap > updates values via inline inputs and rejects negative values
+  - Step2PayGap > uses gipPrefillData when no initialData
+- **`src/modules/declaration-remuneration/steps/__tests__/Step3DevFill.test.tsx`** — 1 test(s)
+  - Step3VariablePay dev fill > fills rows and beneficiaries when dev fill button is clicked
+- **`src/modules/declaration-remuneration/steps/__tests__/Step3VariablePay.test.tsx`** — 18 test(s)
+  - Step3VariablePay > associates the beneficiaries error with the men input (RGAA 11.10)
+  - Step3VariablePay > associates the beneficiaries error with the women input (RGAA 11.10)
+  - Step3VariablePay > blocks beneficiary count exceeding max workforce
+  - Step3VariablePay > clears the error association once the value is valid again
+  - Step3VariablePay > computes gap and shows badge after entering values
+  - Step3VariablePay > does not show SavedIndicator when initialData is empty
+  - Step3VariablePay > names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)
+  - Step3VariablePay > renders instruction text and mandatory fields notice
+  - Step3VariablePay > renders previous link pointing to step 2
+  - Step3VariablePay > renders table headers with line break in column header
+  - Step3VariablePay > renders the beneficiaries table with workforce totals
+  - Step3VariablePay > renders the pay gap table with 4 rows
+  - Step3VariablePay > shows SavedIndicator when initialData has data
+  - Step3VariablePay > updates beneficiary values via inline inputs
+  - Step3VariablePay > updates pay gap values via inline inputs and rejects negative values
+  - Step3VariablePay > uses gipPrefillData when no initialData
+  - Step3VariablePay > uses gipPrefillData with null beneficiary counts
+  - Step3VariablePay > uses gipPrefillData with zero beneficiary counts
+- **`src/modules/declaration-remuneration/steps/__tests__/Step4DevFill.test.tsx`** — 1 test(s)
+  - Step4QuartileDistribution dev fill > fills both tables with 3 thresholds + 4 counts each when DevFill is clicked
+- **`src/modules/declaration-remuneration/steps/__tests__/Step4QuartileDistribution.submit.test.tsx`** — 6 test(s)
+  - Step4QuartileDistribution submit behaviour > calls mutation with Q4 threshold=undefined when 3 thresholds + 8 counts are valid
+  - Step4QuartileDistribution submit behaviour > navigates to step 5 after a successful submit when indicatorGRequired is true
+  - Step4QuartileDistribution submit behaviour > navigates to step 6 after a successful submit when indicatorGRequired is false
+  - Step4QuartileDistribution submit behaviour > shows 'Effectif obligatoire' on missing women count cells
+  - Step4QuartileDistribution submit behaviour > shows 'Le seuil est obligatoire' when a threshold is empty and a count is also missing
+  - Step4QuartileDistribution submit behaviour > shows recap alert with anchor links when thresholds are non-crescent
+- **`src/modules/declaration-remuneration/steps/__tests__/Step4QuartileDistribution.test.tsx`** — 21 test(s)
+  - Step4QuartileDistribution > blocks count exceeding max workforce
+  - Step4QuartileDistribution > displays cascade lower bounds live when seuil1 is filled
+  - Step4QuartileDistribution > displays computed percentages for prefilled data
+  - Step4QuartileDistribution > displays empty state with all min = - € and Q4 max = - €
+  - Step4QuartileDistribution > does not render the DSN source line without GIP prefill
+  - Step4QuartileDistribution > does not show SavedIndicator when no initial data
+  - Step4QuartileDistribution > gives every column header a non-empty accessible name, including the previously empty quartile header (RGAA 5.7)
+  - Step4QuartileDistribution > names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)
+  - Step4QuartileDistribution > rejects negative values in threshold inputs
+  - Step4QuartileDistribution > renders 3 threshold inputs per table (Q1/Q2/Q3 only) and Q4 readonly
+  - Step4QuartileDistribution > renders 4 women and 4 men count inputs per table
+  - Step4QuartileDistribution > renders accordion
+  - Step4QuartileDistribution > renders description text about quartiles
+  - Step4QuartileDistribution > renders mobile-label attributes on data cells for responsive reflow
+  - Step4QuartileDistribution > renders previous link pointing to step 3
+  - Step4QuartileDistribution > renders renumeration tranche header and Pourcentage columns
+  - Step4QuartileDistribution > renders the non-prefilled instruction text and mandatory fields notice without GIP prefill
+  - Step4QuartileDistribution > renders two tables with quartile rows and inverted columns
+  - Step4QuartileDistribution > shows SavedIndicator when initialData has data
+  - Step4QuartileDistribution > uses gipPrefillData to pre-populate 3 thresholds and counts
+  - Step4QuartileDistribution > uses gipPrefillData with all null quartile data
+- **`src/modules/declaration-remuneration/steps/__tests__/Step4QuartileDistributionGip.test.tsx`** — 5 test(s)
+  - Step4QuartileDistribution — GIP prefill > renders the prefilled intro text and DSN source line on both tables
+  - Step4QuartileDistribution — GIP prefill > uses gipPrefillData when no initialCategories
+  - Step4QuartileDistribution — GIP prefill > uses gipPrefillData with all null quartile data
+  - Step4QuartileDistribution — GIP prefill > uses gipPrefillData with mono-gender quartiles (100% women)
+  - Step4QuartileDistribution — GIP prefill > uses gipPrefillData with partial null thresholds (Q4 has none)
+- **`src/modules/declaration-remuneration/steps/__tests__/Step5DevFill.test.tsx`** — 1 test(s)
+  - Step5EmployeeCategories dev fill > fills categories when dev fill button is clicked
+- **`src/modules/declaration-remuneration/steps/__tests__/Step5EmployeeCategories.test.tsx`** — 29 test(s)
+  - Step5EmployeeCategories > accepts salary values above 9999
+  - Step5EmployeeCategories > can add a new category
+  - Step5EmployeeCategories > can remove a category after confirmation
+  - Step5EmployeeCategories > computes annual total from base and variable
+  - Step5EmployeeCategories > deserializes initial data into form fields
+  - Step5EmployeeCategories > does not show SavedIndicator with empty initial data
+  - Step5EmployeeCategories > gives every column header a non-empty accessible name and exposes row labels as rowheaders (RGAA 5.7)
+  - Step5EmployeeCategories > labels the category name input with the full category emploi wording
+  - Step5EmployeeCategories > moves focus to the new category's first field when adding a category
+  - Step5EmployeeCategories > rejects negative values in number inputs
+  - Step5EmployeeCategories > renders accordion for definitions
+  - Step5EmployeeCategories > renders description text and reference period
+  - Step5EmployeeCategories > renders instruction text
+  - Step5EmployeeCategories > renders previous link pointing to step 4
+  - Step5EmployeeCategories > renders source dropdown
+  - Step5EmployeeCategories > renders stepper at step 5
+  - Step5EmployeeCategories > renders table headers for the category
+  - Step5EmployeeCategories > renders table section headers
+  - Step5EmployeeCategories > renders the libellé input field for category
+  - Step5EmployeeCategories > renders the obligatoires mention immediately after the description text
+  - Step5EmployeeCategories > renders with 1 empty category by default
+  - Step5EmployeeCategories > shows a friendly error when source is not selected
+  - Step5EmployeeCategories > shows error when category name is empty on submit
+  - Step5EmployeeCategories > shows error when category names are duplicated
+  - Step5EmployeeCategories > shows error when workforce totals do not match step 1
+  - Step5EmployeeCategories > shows SavedIndicator when initial data exists
+  - Step5EmployeeCategories > submits data on form submit
+  - Step5EmployeeCategories > titles the step without the legacy '(salaire de base et primes)' suffix
+  - Step5EmployeeCategories > updates input fields and computes gap
+- **`src/modules/declaration-remuneration/steps/__tests__/Step6Review.test.tsx`** — 27 test(s)
+  - Step6Review > does not render check icons on cards
+  - Step6Review > does not render Modifier buttons
+  - Step6Review > does not render PDF download button when submitted
+  - Step6Review > does not show 'Prochaines étapes' callout below 100 employees even with a high gap
+  - Step6Review > does not show 'Prochaines étapes' callout when all gaps < 5%
+  - Step6Review > does not show 'Prochaines étapes' callout when indicator G is not part of the declaration
+  - Step6Review > does not show 'Prochaines étapes' callout when women earn more (negative gap)
+  - Step6Review > keys the callout off the global annual mean gap (indicator A), not other indicators
+  - Step6Review > names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)
+  - Step6Review > renders all 4 recap card titles
+  - Step6Review > renders description text
+  - Step6Review > renders next as a submit button when not submitted
+  - Step6Review > renders next link pointing to compliance path when already submitted
+  - Step6Review > renders previous link pointing to step 4 when indicatorGRequired is false
+  - Step6Review > renders previous link pointing to step 5
+  - Step6Review > renders previous link to step 5 and next link to compliance path when already submitted
+  - Step6Review > renders quartile data stacked annual then hourly
+  - Step6Review > renders SavedIndicator
+  - Step6Review > renders section headings
+  - Step6Review > renders step 3 with side-by-side gaps and proportion
+  - Step6Review > renders step 5 category gaps side-by-side
+  - Step6Review > renders title and stepper at step 6
+  - Step6Review > renders tooltip buttons on cards 3 and 4 only
+  - Step6Review > routes next link to /avis-cse when status is awaiting_cse_opinion
+  - Step6Review > shows 'Aucune donnée renseignée' for empty steps
+  - Step6Review > shows 'Prochaines étapes' callout when a gap >= 5%
+  - Step6Review > shows side-by-side Annuelle/Horaire brute with gaps for step 2
+- **`src/modules/declaration-remuneration/steps/jointEvaluation/__tests__/JointEvaluationForm.test.tsx`** — 12 test(s)
+  - JointEvaluationForm > admin impersonation > disables the upload and submit controls under the static provider when impersonating
+  - JointEvaluationForm > links back to the compliance path choice page
+  - JointEvaluationForm > names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)
+  - JointEvaluationForm > opens modal after selecting a file and submitting
+  - JointEvaluationForm > renders the deadline callout with the current year
+  - JointEvaluationForm > renders the info boxes
+  - JointEvaluationForm > renders the page title and section heading
+  - JointEvaluationForm > renders the submit modal with correct labels
+  - JointEvaluationForm > shows an error when submitting without a file
+  - JointEvaluationForm > uploads the file and redirects after confirmation when hasCse=false
+  - JointEvaluationForm > uploads the file and redirects after confirmation when hasCse=null
+  - JointEvaluationForm > uploads the file and redirects after confirmation when hasCse=true
+- **`src/modules/declaration-remuneration/steps/jointEvaluation/__tests__/JointEvaluationPage.test.tsx`** — 5 test(s)
+  - JointEvaluationPage > falls back to today's date when updatedAt is null
+  - JointEvaluationPage > formats declarationDate from updatedAt when available
+  - JointEvaluationPage > redirects when neither first nor second path choice is joint_evaluation
+  - JointEvaluationPage > renders the form when firstDeclarationPathChoice is joint_evaluation (initial round)
+  - JointEvaluationPage > renders the form when secondDeclarationPathChoice is joint_evaluation (revised round)
+- **`src/modules/declaration-remuneration/steps/secondDeclaration/__tests__/SecondDeclarationStep1Info.test.tsx`** — 6 test(s)
+  - SecondDeclarationStep1Info > displays the deadline
+  - SecondDeclarationStep1Info > displays the declaration date
+  - SecondDeclarationStep1Info > renders previous link to parcours-conformite and next to step 2
+  - SecondDeclarationStep1Info > renders stepper at step 1 of 3
+  - SecondDeclarationStep1Info > renders the main title
+  - SecondDeclarationStep1Info > renders the obligations callout
+- **`src/modules/declaration-remuneration/steps/secondDeclaration/__tests__/SecondDeclarationStep2Form.test.tsx`** — 7 test(s)
+  - SecondDeclarationStep2Form > displays category label as read-only text
+  - SecondDeclarationStep2Form > displays source as read-only text
+  - SecondDeclarationStep2Form > does not render add category button (read-only categories)
+  - SecondDeclarationStep2Form > renders previous link to step 1
+  - SecondDeclarationStep2Form > renders reference period date pickers
+  - SecondDeclarationStep2Form > renders the title and step indicator
+  - SecondDeclarationStep2Form > uses second declaration data when available
+- **`src/modules/declaration-remuneration/steps/secondDeclaration/__tests__/SecondDeclarationStep3Review.test.tsx`** — 19 test(s)
+  - SecondDeclarationStep3Review > always shows the CSE consultation heading for second declaration
+  - SecondDeclarationStep3Review > closes the modal without submitting when Annuler is clicked
+  - SecondDeclarationStep3Review > does not bracket the category title
+  - SecondDeclarationStep3Review > does not show gap warning when all gaps < 5%
+  - SecondDeclarationStep3Review > hides the CSE update trigger when cseApplicable is false
+  - SecondDeclarationStep3Review > navigates to avis-cse when no gaps and hasCse is true
+  - SecondDeclarationStep3Review > navigates to compliance path when gaps persist after submit
+  - SecondDeclarationStep3Review > navigates to confirmation when no gaps and no CSE
+  - SecondDeclarationStep3Review > renders category gap card with category name
+  - SecondDeclarationStep3Review > renders empty state when no categories
+  - SecondDeclarationStep3Review > renders gap columns
+  - SecondDeclarationStep3Review > renders modal with certification checkbox
+  - SecondDeclarationStep3Review > renders previous link to step 2
+  - SecondDeclarationStep3Review > renders Soumettre button
+  - SecondDeclarationStep3Review > renders the card title without the base-and-bonus parenthetical
+  - SecondDeclarationStep3Review > renders the CSE update trigger as a secondary button
+  - SecondDeclarationStep3Review > renders the next steps section
+  - SecondDeclarationStep3Review > renders the title and step indicator
+  - SecondDeclarationStep3Review > shows gap warning when gaps >= 5% exist
+- **`src/modules/declaration-remuneration/steps/step5/__tests__/categoryFileHandler.test.ts`** — 16 test(s)
+  - generateTemplate > prefixes the raw CSV bytes with a UTF-8 BOM
+  - generateTemplate > returns a synchronous CSV blob holding only the 11 header labels and no data row
+  - parseImportFile — CSV > normalizes comma decimals to dots
+  - parseImportFile — CSV > parses a quoted field that contains the separator and escaped quotes
+  - parseImportFile — CSV > parses a valid CSV file
+  - parseImportFile — CSV > rejects a file larger than 5 MB before reading it
+  - parseImportFile — CSV > returns empty-file error when every CSV data row has an empty name
+  - parseImportFile — CSV > returns error on empty file
+  - parseImportFile — CSV > returns error on missing columns
+  - parseImportFile — CSV > returns error on unsupported file format
+  - parseImportFile — CSV > round-trips: fill the header-only template then parse it
+  - parseImportFile — CSV > skips rows with empty name
+  - parseImportFile — XLSX > parses categories from an XLSX file
+  - parseImportFile — XLSX > reads a formula cell through its cached computed result
+  - parseImportFile — XLSX > returns empty-file error for an XLSX with only the header row
+  - parseImportFile — XLSX > returns empty-file error when every XLSX data row has an empty name
+- **`src/modules/declaration-remuneration/steps/step5/__tests__/CategoryImportExport.test.tsx`** — 15 test(s)
+  - CategoryImportExport failed import > clears stale errors and the selected file when the panel is reopened
+  - CategoryImportExport failed import > clears stale errors when a new file is selected
+  - CategoryImportExport failed import > shows the empty-file error in the panel and emits category_import_failure without leaking the message
+  - CategoryImportExport failed import > shows the invalid-value error in the panel and emits category_import_failure without leaking the message
+  - CategoryImportExport failed import > shows the missing-columns error in the panel and emits category_import_failure without leaking the message
+  - CategoryImportExport file selection and import > does not parse and keeps the button disabled when the picker is dismissed with no file
+  - CategoryImportExport file selection and import > enables the Importer button only once a file is selected
+  - CategoryImportExport file selection and import > imports categories on explicit click, emits category_import then the duration, and closes the panel
+  - CategoryImportExport panel contents > mentions the filling guide in the instruction text
+  - CategoryImportExport panel contents > renders the dropzone, template card, help link and a disabled Importer button
+  - CategoryImportExport panel contents > renders the guide card and the resources link as disabled placeholders
+  - CategoryImportExport template download > downloads modele-indicateur-g.csv and emits category_template_download
+  - CategoryImportExport trigger button > disables the trigger when the disabled prop is set
+  - CategoryImportExport trigger button > starts the model timer when the import panel trigger is clicked
+  - CategoryImportExport trigger button > uses the file-download icon on the import trigger
+- **`src/modules/declaration-remuneration/steps/step5/__tests__/categoryModelTracking.test.ts`** — 7 test(s)
+  - startCategoryModelTimer > does not overwrite an already-running timer (set-once)
+  - startCategoryModelTimer > records the current time when no timer is running
+  - trackCategoryImportDuration > does not emit twice when called again after the timer was consumed
+  - trackCategoryImportDuration > emits a numeric value only — no PII fields
+  - trackCategoryImportDuration > emits the import-duration event with the elapsed seconds and clears the timer
+  - trackCategoryImportDuration > ignores a corrupted timer value and emits no event
+  - trackCategoryImportDuration > is a no-op (no event) when no timer was started
+- **`src/modules/declaration-remuneration/steps/step6/__tests__/IndicatorSections.test.tsx`** — 5 test(s)
+  - IndicatorSections > hides the per-category indicator section when indicatorGRequired is false
+  - IndicatorSections > renders '- %' for the proportion when the workforce total is missing
+  - IndicatorSections > renders '- %' for the proportion when the workforce total is zero
+  - IndicatorSections > renders the per-category indicator section when indicatorGRequired is true
+  - IndicatorSections > renders variable pay proportion as a share of the workforce total, not the raw beneficiary count

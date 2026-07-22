@@ -1,0 +1,109 @@
+# Inventaire des tests — Scénarios E2E
+
+> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`. [← Retour à l'index](../tests-inventory.md)
+
+_Généré le 2026-07-22 — 22 fichier(s), 81 test(s)._
+
+- **`admin-access.e2e.ts`** — 7 test(s)
+  - admin access › admin can reach /admin (backoffice)
+  - admin access › admin can reach /admin/declarations
+  - admin access › admin can reach /admin/impersonate
+  - admin access › admin can reach /admin/liste-referents
+  - admin access › admin can reach /admin/parametres
+  - admin access › admin routes hide the public footer and help banner
+  - admin access › unauthenticated user is redirected to /login
+- **`admin-impersonation-read-only.e2e.ts`** — 3 test(s)
+  - admin impersonation — read-only guards › CSE opinion submit is disabled with a read-only tooltip during mimoquage
+  - admin impersonation — read-only guards › file upload endpoint returns 403 during impersonation
+  - admin impersonation — read-only guards › form submit is disabled with a read-only tooltip during mimoquage
+- **`admin-stats.e2e.ts`** — 3 test(s)
+  - admin stats — routing & access › non-admin users are redirected away from the stats page
+  - admin stats — routing & access › redirect: /admin/stats/campagne → /admin/stats
+  - admin stats — routing & access › redirect: /admin/stats/plateforme → /admin/stats
+- **`auth.setup.ts`** — 1 test(s)
+  - authenticate via ProConnect
+- **`campaign-deadlines-gating.e2e.ts`** — 2 test(s)
+  - Campaign deadlines gating › Deadline in the future › submitted declaration can re-enter a non-recap step
+  - Campaign deadlines gating › Deadline in the past › submitted declaration re-enters a non-recap step in read-only
+- **`compliance-path-change.e2e.ts`** — 1 test(s)
+  - Path change before downstream action — tâtonnement supported › user explores corrective_action then switches to joint_evaluation: both events persisted, latest wins
+- **`compliance.e2e.ts`** — 18 test(s)
+  - Path 1: no gap + hasCse → /avis-cse → full CSE flow › complete declaration without gap, then CSE opinion flow
+  - Path 10: second round + joint evaluation + hasCse → /avis-cse › full flow → second round → joint evaluation → /avis-cse
+  - Path 11: second round + joint evaluation + no hasCse → /confirmation › full flow → second round → joint evaluation → /confirmation
+  - Path 12: compliance already completed → redirect › complete full flow, then verify compliance path redirects away
+  - Path 13.a: no gap → /avis-cse Précédent → /etape/6 (recap) › after no-gap submission, Précédent on /avis-cse goes to step 6
+  - Path 13.b: justify round 1 → /avis-cse Précédent → /parcours-conformite › after justify choice, Précédent on /avis-cse goes back to compliance choice
+  - Path 13.c: corrective second decl resolved → /avis-cse Précédent → /etape/3 › after second-decl resolved, Précédent on /avis-cse goes to second-decl recap
+  - Path 2: no gap + no hasCse → /confirmation › complete declaration without gap, redirects to confirmation
+  - Path 3: gap + hasCse → compliance choice → justify › complete declaration with gap, shows 3 compliance options
+  - Path 3: gap + hasCse → compliance choice → justify › justify → navigates to /avis-cse/etape/1
+  - Path 4: gap + hasCse → joint evaluation → /avis-cse › complete declaration with gap, joint evaluation → CSE
+  - Path 5: gap + no hasCse → joint evaluation → /confirmation › joint evaluation → upload PDF → /confirmation
+  - Path 5: gap + no hasCse → joint evaluation → /confirmation › shows all 3 options including justify (hasCse=false)
+  - Path 6: gap + corrective action (no gap after) + hasCse → /avis-cse › declaration → corrective action → correct without gap → /avis-cse
+  - Path 7: gap + corrective action (no gap after) + no hasCse → /confirmation › declaration → corrective action → correct without gap → /confirmation
+  - Path 8: gap + corrective action (gap persists) → second round choices › declaration → corrective action → correct WITH gap → back to compliance choice
+  - Path 8: gap + corrective action (gap persists) → second round choices › second round shows only justify and joint evaluation (no corrective action)
+  - Path 8: gap + corrective action (gap persists) → second round choices › second round: justify → navigates to /avis-cse/etape/1
+- **`declaration-cancellation.e2e.ts`** — 1 test(s)
+  - Declaration cancellation — full cycle › submit → cancel → resubmit → cancel → resubmit, then verify admin list and cancelled badge
+- **`declaration-history.e2e.ts`** — 1 test(s)
+  - Declaration history page › displays history entries (S2)
+- **`declaration-process-panel.e2e.ts`** — 2 test(s)
+  - Declaration process panel › DB state → variant: closed (compliance completed + CSE deposited) › shows closed variant with démarche close message
+  - Declaration process panel › Opens after missing info modal save › missing info modal save opens the panel for remuneration
+- **`declaration.e2e.ts`** — 13 test(s)
+  - Declaration workflow › displays step 1 after login
+  - Declaration workflow › navigates through step 1 - Effectifs
+  - Declaration workflow › previous button navigates back
+  - Declaration workflow › step 2 - Écart de rémunération inline editing
+  - Declaration workflow › step 3 - Rémunération variable inline editing
+  - Declaration workflow › step 4 - cascade: filling Q1 threshold updates Q2 lower bound live
+  - Declaration workflow › step 4 - empty submission shows 'Le seuil est obligatoire' on threshold cells (S4)
+  - Declaration workflow › step 4 - non-crescent thresholds trigger recap alert with anchors (S3)
+  - Declaration workflow › step 6 submit leaves declaration page
+  - Workforce comes from the GIP file, not the company registry › company absent from the GIP file › mon espace shows "< 50" and drops the CSE field and the edit button
+  - Workforce comes from the GIP file, not the company registry › company absent from the GIP file › the funnel drops the indicator G step
+  - Workforce comes from the GIP file, not the company registry › GIP workforce of 70 — below every indicator G threshold › banners display the GIP workforce and drop the CSE field
+  - Workforce comes from the GIP file, not the company registry › GIP workforce of 70 — below every indicator G threshold › submitting the quartile step lands on the review step (S1 of #3934)
+- **`declarationDraft.e2e.ts`** — 1 test(s)
+  - Declaration draft round-trip › S1 — restores workforce draft from a second browser context
+- **`error-pages.e2e.ts`** — 3 test(s)
+  - Error pages › 404 — unknown route returns HTTP 404 and renders the Not Found page
+  - Error pages › 500 — a thrown client error is caught by the error boundary
+  - Error pages › 503 — the maintenance route renders the unavailable page
+- **`fileUpload.e2e.ts`** — 7 test(s)
+  - file upload + view access control › anonymous request is rejected with 401
+  - file upload + view access control › authenticated request for an unknown fileId returns 404
+  - file upload + view access control › gateway header cannot upload via POST /api/upload (read-only invariant)
+  - file upload + view access control › gateway-forwarded request → 200 attachment
+  - file upload + view access control › invalid gateway shared secret → 403
+  - file upload + view access control › session user fetches their own file → 200 attachment (admin user)
+  - file upload + view access control › uploads a joint evaluation PDF through the real pipeline and returns a fileId
+- **`home.e2e.ts`** — 1 test(s)
+  - home page redirects authenticated user to mon-espace
+- **`login.e2e.ts`** — 4 test(s)
+  - Login page › displays ProConnect button
+  - Login page › hides the public help banner
+  - ProConnect authentication flow › redirects to mon espace after login
+  - ProConnect authentication flow › redirects to mon espace when already logged in
+- **`logout.e2e.ts`** — 1 test(s)
+  - Logout flow › logs out and returns to unauthenticated state
+- **`missing-info-modal.e2e.ts`** — 3 test(s)
+  - Missing info modal › CSE only (phone already set) › opens modal and submits CSE choice
+  - Missing info modal › Phone only (CSE already set) › opens modal and submits phone number
+  - Missing info modal › Validation error on empty phone › shows validation error when phone is empty
+- **`notifications-email-flow.e2e.ts`** — 2 test(s)
+  - notifications email flow (publisher → pg-boss → worker → SMTP → maildev) › declaration submission delivers a confirmation email to MailDev
+  - notifications email flow (publisher → pg-boss → worker → SMTP → maildev) › second declaration submission (corrective action) delivers a second-declaration receipt
+- **`public-referents.e2e.ts`** — 4 test(s)
+  - public referents search › anonymous user can access /referents without authentication
+  - public referents search › click-through to detail page reveals contact info
+  - public referents search › detail page returns 404 for unknown id
+  - public referents search › region search filters the results and keeps contact details off the list
+- **`public-stats.e2e.ts`** — 1 test(s)
+  - public stats › an anonymous visitor can reach /stats without being redirected to /login
+- **`recapitulatif.e2e.ts`** — 2 test(s)
+  - Recapitulatif page › renders the recap route with its heading and download button
+  - Recapitulatif page › returns 404 for non-submitted declaration with correction type

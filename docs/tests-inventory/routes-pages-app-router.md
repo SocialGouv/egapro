@@ -1,0 +1,99 @@
+# Inventaire des tests — Routes & pages (App Router)
+
+> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`. [← Retour à l'index](../tests-inventory.md)
+
+_Généré le 2026-07-22 — 9 fichier(s), 84 test(s)._
+
+- **`src/app/api/declaration-lock/release/__tests__/route.test.ts`** — 5 test(s)
+  - POST /api/declaration-lock/release > releases the resolved declaration lock for the caller and returns 204
+  - POST /api/declaration-lock/release > returns 204 without releasing when no current declaration is found
+  - POST /api/declaration-lock/release > returns 204 without releasing when the caller is impersonating
+  - POST /api/declaration-lock/release > returns 400 when the session has no usable siren
+  - POST /api/declaration-lock/release > returns 401 when there is no session
+- **`src/app/api/no-sanction-pdf/__tests__/route.test.ts`** — 7 test(s)
+  - GET /api/no-sanction-pdf > returns 401 when user has no siret
+  - GET /api/no-sanction-pdf > returns 401 when user is not authenticated
+  - GET /api/no-sanction-pdf > returns 403 when company has a sanction
+  - GET /api/no-sanction-pdf > returns 403 when SUIT returns null
+  - GET /api/no-sanction-pdf > returns 404 when company is not found
+  - GET /api/no-sanction-pdf > returns 500 when PDF generation fails
+  - GET /api/no-sanction-pdf > returns PDF with correct headers on success
+- **`src/app/api/public/declarations/__tests__/route.test.ts`** — 12 test(s)
+  - GET /api/public/declarations > applies defaults for limit and offset when omitted
+  - GET /api/public/declarations > nulls every metadata field when no query param is provided
+  - GET /api/public/declarations > parses and coerces every supported query parameter
+  - GET /api/public/declarations > records every raw query param in the audit metadata
+  - GET /api/public/declarations > returns 400 when a numeric parameter is not a number
+  - GET /api/public/declarations > returns 400 when q is present but blank
+  - GET /api/public/declarations > returns 400 with issue details for an out-of-range limit
+  - GET /api/public/declarations > returns 500 when the service throws
+  - GET /api/public/declarations > returns the search result as JSON with CORS and cache headers
+  - GET /api/public/declarations > writes a failure audit entry when the service throws
+  - GET /api/public/declarations > writes a success audit entry with the raw query params as metadata
+  - OPTIONS /api/public/declarations > answers the CORS preflight with 204 and the CORS headers
+- **`src/app/api/public/declarations/[siren]/__tests__/route.test.ts`** — 7 test(s)
+  - GET /api/public/declarations/[siren] > forwards a valid limit param to the service
+  - GET /api/public/declarations/[siren] > returns 200 with the declarations and CORS headers on success
+  - GET /api/public/declarations/[siren] > returns 400 and logs a failure for an invalid siren
+  - GET /api/public/declarations/[siren] > returns 400 when the limit param exceeds 100
+  - GET /api/public/declarations/[siren] > returns 400 when the limit param is not an integer in [1, 100]
+  - GET /api/public/declarations/[siren] > returns 400 when the limit param is not numeric
+  - GET /api/public/declarations/[siren] > returns 500 and logs a failure when the service throws
+- **`src/app/api/public/declarations/[siren]/[year]/__tests__/route.test.ts`** — 7 test(s)
+  - GET /api/public/declarations/[siren]/[year] > returns 200 with the declaration and CORS headers on success
+  - GET /api/public/declarations/[siren]/[year] > returns 400 and logs a failure for an invalid siren
+  - GET /api/public/declarations/[siren]/[year] > returns 400 for a non-numeric year
+  - GET /api/public/declarations/[siren]/[year] > returns 400 for a year after 2100
+  - GET /api/public/declarations/[siren]/[year] > returns 400 for a year before 2018
+  - GET /api/public/declarations/[siren]/[year] > returns 404 and logs a failure when the declaration is absent or unreleased
+  - GET /api/public/declarations/[siren]/[year] > returns 500 and logs a failure when the service throws
+- **`src/app/api/public/declarations/export/__tests__/route.test.ts`** — 13 test(s)
+  - GET /api/public/declarations/export > audits the export with the format in metadata
+  - GET /api/public/declarations/export > defaults the audited format to json when the param is absent
+  - GET /api/public/declarations/export > emits an empty quoted field for a null workforceEma in CSV
+  - GET /api/public/declarations/export > escapes double quotes in CSV fields and emits empty quotes for null values
+  - GET /api/public/declarations/export > exposes no score, /100 index or indicator-G column in the CSV header (S6)
+  - GET /api/public/declarations/export > exposes no score, /100 index or indicator-G key in the JSON payload (S6)
+  - GET /api/public/declarations/export > masks identifying company fields for a non-diffusible company but keeps the SIREN
+  - GET /api/public/declarations/export > quotes and doubles inner quotes for a diffusible company name in CSV
+  - GET /api/public/declarations/export > returns a 500 payload and audits a failure when the query throws
+  - GET /api/public/declarations/export > returns an empty payload when no declaration matches
+  - GET /api/public/declarations/export > returns CSV with a header row and one line per declaration when format=csv
+  - GET /api/public/declarations/export > returns JSON with data and count by default
+  - GET /api/public/declarations/export > treats a null statutDiffusion as diffusible and renders a null workforceEma
+- **`src/app/api/public/openapi.json/__tests__/route.test.ts`** — 3 test(s)
+  - GET /api/public/openapi.json > returns the public OpenAPI spec as JSON
+  - GET /api/public/openapi.json > sets open CORS and one-hour cache headers
+  - OPTIONS /api/public/openapi.json > answers the preflight with 204 and the CORS headers
+- **`src/app/api/public/referents-egalite-professionnelle/__tests__/route.test.ts`** — 2 test(s)
+  - /api/public/referents-egalite-professionnelle > returns CSV with headers and region/county labels when format=csv
+  - /api/public/referents-egalite-professionnelle > returns JSON by default
+- **`src/app/api/upload/__tests__/route.test.ts`** — 28 test(s)
+  - POST /api/upload > confirmation mail on success > does not enqueue any receipt when the session has no email
+  - POST /api/upload > confirmation mail on success > enqueues a cseOpinion receipt for a cse_opinion flow
+  - POST /api/upload > confirmation mail on success > enqueues a jointEvaluation receipt for a joint_evaluation flow
+  - POST /api/upload > does not short-circuit a valid filename: the pipeline runs normally
+  - POST /api/upload > passes the trimmed filename to the pipeline and audits it for a padded name
+  - POST /api/upload > proceeds when the session user holds the lock
+  - POST /api/upload > returns 200 with fileId + fileName on pipeline success and audits the success row
+  - POST /api/upload > returns 400 invalid_filename when the extension does not match the declared MIME type
+  - POST /api/upload > returns 400 invalid_filename when the name contains a forbidden character
+  - POST /api/upload > returns 400 invalid_filename when the name contains leading BOM
+  - POST /api/upload > returns 400 invalid_filename when the name contains RLI isolate
+  - POST /api/upload > returns 400 invalid_filename when the name contains RLO override
+  - POST /api/upload > returns 400 invalid_filename when the name contains soft hyphen before the real extension
+  - POST /api/upload > returns 400 invalid_filename when the name contains trailing BOM
+  - POST /api/upload > returns 400 invalid_filename when the name exceeds 200 characters
+  - POST /api/upload > returns 400 when Content-Type is not in the whitelist
+  - POST /api/upload > returns 400 when the CSE max files quota is reached
+  - POST /api/upload > returns 400 when X-Filename is missing
+  - POST /api/upload > returns 400 when X-Flow-Type is missing
+  - POST /api/upload > returns 400 when X-Flow-Type is not a known value
+  - POST /api/upload > returns 401 and writes an audit failure row when the session is missing
+  - POST /api/upload > returns 403 and audits a failure row when the admin is impersonating
+  - POST /api/upload > returns 403 when the declaration is not owned by the session SIREN
+  - POST /api/upload > returns 409 and audits a failure row when another co-declarant holds the lock
+  - POST /api/upload > returns 422 with virus name on virus detection
+  - POST /api/upload > returns 500 and logs the s3Cleanup status when the DB write fails after S3 commit
+  - POST /api/upload > returns 500 with generic audit on an unexpected pipeline exception
+  - POST /api/upload > returns 503 when ClamAV is unavailable

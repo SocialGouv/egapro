@@ -1,0 +1,257 @@
+# Inventaire des tests — Mon espace
+
+> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`. [← Retour à l'index](../tests-inventory.md)
+
+_Généré le 2026-07-22 — 24 fichier(s), 227 test(s)._
+
+- **`src/modules/my-space/__tests__/ArchivesSection.test.tsx`** — 3 test(s)
+  - ArchivesSection > renders the 'Archives' title as an h2 heading
+  - ArchivesSection > renders the description text
+  - ArchivesSection > renders the disabled button
+- **`src/modules/my-space/__tests__/buildDeclarationList.test.ts`** — 6 test(s)
+  - buildDeclarationList > includes previous year DB records after current year rows
+  - buildDeclarationList > merges current year DB record with expected types
+  - buildDeclarationList > propagates cseRequired from DB records
+  - buildDeclarationList > returns two rows (remuneration + representation) for the current year when no DB records exist
+  - buildDeclarationList > sorts previous year records by year descending
+  - buildDeclarationList > uses DB data for remuneration when a record exists for the current year
+- **`src/modules/my-space/__tests__/CompanyCard.test.tsx`** — 6 test(s)
+  - CompanyCard > has the correct DSFR card classes
+  - CompanyCard > renders the card title as an h2 heading
+  - CompanyCard > renders the company name as a link
+  - CompanyCard > renders the correct badge for done status
+  - CompanyCard > renders the SIREN number
+  - CompanyCard > renders the status badge
+- **`src/modules/my-space/__tests__/CompanyCardList.test.tsx`** — 3 test(s)
+  - CompanyCardList > renders nothing for an empty list
+  - CompanyCardList > renders one card per company
+  - CompanyCardList > uses the DSFR grid row
+- **`src/modules/my-space/__tests__/CompanyDeclarationsPage.test.tsx`** — 8 test(s)
+  - CompanyDeclarationsPage > always renders MissingInfoModal so DSFR conceal/disclose chain works
+  - CompanyDeclarationsPage > forwards the lock alert when the declaration is locked by another user
+  - CompanyDeclarationsPage > renders MissingInfoModal when hasCse is null
+  - CompanyDeclarationsPage > renders MissingInfoModal when userPhone is null
+  - CompanyDeclarationsPage > renders the 'Archives' section
+  - CompanyDeclarationsPage > renders the 'Démarche en cours' heading
+  - CompanyDeclarationsPage > renders the company name
+  - CompanyDeclarationsPage > renders the main landmark with id 'content'
+- **`src/modules/my-space/__tests__/CompanyEditModal.test.tsx`** — 15 test(s)
+  - CompanyEditModal > calls mutation with correct data on submit
+  - CompanyEditModal > disables browser autofill on the form
+  - CompanyEditModal > disables submit when no CSE is selected
+  - CompanyEditModal > enables submit after selecting a CSE option
+  - CompanyEditModal > floors the workforce display so 99.97 shows as 99
+  - CompanyEditModal > marks the dialog as modal for assistive technologies
+  - CompanyEditModal > pre-selects CSE radio when hasCse is already set
+  - CompanyEditModal > renders CSE fieldset with legend
+  - CompanyEditModal > renders formatted workforce
+  - CompanyEditModal > renders source texts
+  - CompanyEditModal > renders the modal with company info
+  - CompanyEditModal > shows the GIP unknown label when gipWorkforce is null
+  - CompanyEditModal > structures readonly company data as description lists
+  - CompanyEditModal > when the CSE is not applicable (gipWorkforce below 100 or unknown) > hides the CSE fieldset and the Enregistrer button, and shows a Fermer button
+  - CompanyEditModal > when the CSE is not applicable (gipWorkforce below 100 or unknown) > hides the CSE fieldset when the company is absent from the GIP file
+- **`src/modules/my-space/__tests__/CompanyInfoBanner.test.tsx`** — 20 test(s)
+  - CompanyInfoBanner > does not render address when null
+  - CompanyInfoBanner > does not render NAF code section when nafCode is null
+  - CompanyInfoBanner > floors the workforce display and hides the CSE row below the 100 threshold
+  - CompanyInfoBanner > hides the 'Modifier' button below 50
+  - CompanyInfoBanner > hides the 'Modifier' button when the company is absent from the GIP file
+  - CompanyInfoBanner > keeps the 'Modifier' button between 50 and 99 (read-only modal)
+  - CompanyInfoBanner > renders '< 50' and hides the CSE row when gipWorkforce is null
+  - CompanyInfoBanner > renders 'À compléter' badge when hasCse is null
+  - CompanyInfoBanner > renders 'Non' when hasCse is false
+  - CompanyInfoBanner > renders 'Oui' when hasCse is true
+  - CompanyInfoBanner > renders a breadcrumb with a link to /mon-espace/mes-entreprises
+  - CompanyInfoBanner > renders the 'Modifier' button at or above the voluntary threshold
+  - CompanyInfoBanner > renders the address when provided
+  - CompanyInfoBanner > renders the company name as the page h1 heading
+  - CompanyInfoBanner > renders the formatted SIREN
+  - CompanyInfoBanner > renders the NAF code when provided
+  - CompanyInfoBanner > renders the NAF code with its activity label when provided
+  - CompanyInfoBanner > renders the workforce when provided
+  - CompanyInfoBanner > shows the workforce and the CSE row at or above the 100 threshold
+  - CompanyInfoBanner > structures company data as a description list
+- **`src/modules/my-space/__tests__/CompanyListHeader.test.tsx`** — 3 test(s)
+  - CompanyListHeader > opens the add company link in a new tab
+  - CompanyListHeader > renders the add company link with correct DSFR classes
+  - CompanyListHeader > renders the page h1 title
+- **`src/modules/my-space/__tests__/CompanyTable.test.tsx`** — 6 test(s)
+  - CompanyTable > has an accessible caption
+  - CompanyTable > renders company names as links
+  - CompanyTable > renders one row per company
+  - CompanyTable > renders SIREN numbers in cells
+  - CompanyTable > renders status badges
+  - CompanyTable > renders the table with correct column headers
+- **`src/modules/my-space/__tests__/DeclarationLink.test.tsx`** — 8 test(s)
+  - DeclarationLink > bypasses missing info modal during admin impersonation
+  - DeclarationLink > navigates normally when hasCse is null but CSE is not applicable
+  - DeclarationLink > renders as a button opening missing info modal when hasCse is null and CSE is applicable
+  - DeclarationLink > renders as a button opening missing info modal when userPhone is null
+  - DeclarationLink > renders remuneration as a button opening the process panel when info is present
+  - DeclarationLink > renders representation as a button placeholder when info is present
+  - DeclarationLink > still opens the missing info modal for a missing phone when CSE is not applicable
+  - DeclarationLink > stores the declaration type on buttons opening missing info modal
+- **`src/modules/my-space/__tests__/DeclarationProcessPanel.test.tsx`** — 33 test(s)
+  - DeclarationProcessPanel > declaration not locked by another user > does not render the lock alert
+  - DeclarationProcessPanel > declaration not locked by another user > keeps the regular CTA label
+  - DeclarationProcessPanel > does not render last action date when null
+  - DeclarationProcessPanel > lock held by another co-declarant > does not render the alert when lockedByOther is true but no holder is resolved
+  - DeclarationProcessPanel > lock held by another co-declarant > keeps the CTA href pointing to the declaration for read-only access
+  - DeclarationProcessPanel > lock held by another co-declarant > renders the lock alert naming the current editor
+  - DeclarationProcessPanel > lock held by another co-declarant > replaces the CTA label with "Consulter en lecture seule"
+  - DeclarationProcessPanel > modify button gating by deadline > hides the Modifier link when the deadline has passed
+  - DeclarationProcessPanel > modify button gating by deadline > renders the Modifier link when deadline is in the future
+  - DeclarationProcessPanel > variant: closed > exposes a Modifier link for the CSE opinion step
+  - DeclarationProcessPanel > variant: closed > renders "Voir la déclaration" CTA
+  - DeclarationProcessPanel > variant: closed > renders the closed message
+  - DeclarationProcessPanel > variant: compliance > does not render info alert
+  - DeclarationProcessPanel > variant: compliance > renders "Continuer" CTA
+  - DeclarationProcessPanel > variant: compliance > renders actions correctives bullet
+  - DeclarationProcessPanel > variant: compliance > renders transmitted declaration message
+  - DeclarationProcessPanel > variant: cse > does not render second declaration when not submitted
+  - DeclarationProcessPanel > variant: cse > renders CSE deposit step with deadline
+  - DeclarationProcessPanel > variant: cse > renders evaluation conjointe for joint_evaluation path
+  - DeclarationProcessPanel > variant: cse > renders justification bullet for justify path
+  - DeclarationProcessPanel > variant: cse > renders second declaration and evaluation conjointe for corrective_action path
+  - DeclarationProcessPanel > variant: cse > renders second declaration when submitted, even with justify path
+  - DeclarationProcessPanel > variant: evaluation > does not render second declaration row when joint_evaluation chosen directly
+  - DeclarationProcessPanel > variant: evaluation > hides evaluation conjointe bullet in second-round choice (corrective_action + 2nd decl submitted)
+  - DeclarationProcessPanel > variant: evaluation > renders evaluation conjointe bullet on joint_evaluation path
+  - DeclarationProcessPanel > variant: evaluation > renders second declaration transmitted message when submitted
+  - DeclarationProcessPanel > variant: start > renders help section buttons
+  - DeclarationProcessPanel > variant: start > renders step 1 details with bullet points
+  - DeclarationProcessPanel > variant: start > renders the CTA link with correct href
+  - DeclarationProcessPanel > variant: start > renders the history link pointing to the history route
+  - DeclarationProcessPanel > variant: start > renders the info alert
+  - DeclarationProcessPanel > variant: start > renders the last action date
+  - DeclarationProcessPanel > variant: start > renders the title with year
+- **`src/modules/my-space/__tests__/declarationProcessState.test.ts`** — 22 test(s)
+  - computeCtaHref > returns "/avis-cse?siren=532847196" for fsmStatus="awaiting_cse_opinion"
+  - computeCtaHref > returns "/avis-cse?siren=532847196" for fsmStatus="demarche_completed" (demarche_completed without CSE opinion deposited)
+  - computeCtaHref > returns "/declaration-remuneration?siren=532847196" for fsmStatus="demarche_completed" (demarche_completed with CSE opinion deposited)
+  - computeCtaHref > returns "/declaration-remuneration?siren=532847196" for fsmStatus="draft"
+  - computeCtaHref > returns "/declaration-remuneration/parcours-conformite?siren=532847196" for fsmStatus="awaiting_compliance_path_choice"
+  - computeCtaHref > returns "/declaration-remuneration/parcours-conformite?siren=532847196" for fsmStatus="awaiting_revision_choice"
+  - computeCtaHref > returns "/declaration-remuneration/parcours-conformite/etape/1?siren=532847196" for fsmStatus="corrective_actions_chosen"
+  - computeCtaHref > returns "/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=532847196" for fsmStatus="joint_evaluation_chosen"
+  - computeCtaHref > returns "/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=532847196" for fsmStatus="revised_joint_evaluation_chosen"
+  - computeCtaHref > returns declaration URL when fsmStatus is null
+  - computeCtaHref > returns declaration URL when no declaration
+  - computePanelVariant > returns "closed" for fsmStatus="demarche_completed" (demarche_completed with CSE opinion deposited)
+  - computePanelVariant > returns "compliance_choice" for fsmStatus="awaiting_compliance_path_choice"
+  - computePanelVariant > returns "compliance_choice" for fsmStatus="awaiting_revision_choice"
+  - computePanelVariant > returns "compliance" for fsmStatus="corrective_actions_chosen"
+  - computePanelVariant > returns "cse" for fsmStatus="awaiting_cse_opinion"
+  - computePanelVariant > returns "cse" for fsmStatus="demarche_completed" (demarche_completed without CSE opinion deposited)
+  - computePanelVariant > returns "evaluation" for fsmStatus="joint_evaluation_chosen"
+  - computePanelVariant > returns "evaluation" for fsmStatus="revised_joint_evaluation_chosen"
+  - computePanelVariant > returns "start" for fsmStatus="draft"
+  - computePanelVariant > returns "start" when declaration is undefined
+  - computePanelVariant > returns "start" when fsmStatus is null
+- **`src/modules/my-space/__tests__/DeclarationsSection.test.tsx`** — 14 test(s)
+  - DeclarationsSection > does not render the page size selector when there are 20 rows or fewer
+  - DeclarationsSection > does not show pagination when all rows fit in one page
+  - DeclarationsSection > navigates to next, previous, first and last page
+  - DeclarationsSection > renders 'Années précédentes' heading when there are past declarations
+  - DeclarationsSection > renders 'Aucune' for declarations with no resources
+  - DeclarationsSection > renders 'Rémunération' and 'Représentation' buttons
+  - DeclarationsSection > renders a Documents link for completed declarations
+  - DeclarationsSection > renders declaration rows with year, status badge, and process step label
+  - DeclarationsSection > renders ellipsis when there are many pages
+  - DeclarationsSection > renders the 'Démarche en cours' heading
+  - DeclarationsSection > renders the page size selector when there are more than 20 rows
+  - DeclarationsSection > renders the table column headers including Échéance and Ressources
+  - DeclarationsSection > resets to page 1 when page size changes
+  - DeclarationsSection > shows pagination and navigates pages when rows exceed page size
+- **`src/modules/my-space/__tests__/DeclarationStepLabel.test.ts`** — 11 test(s)
+  - getDeclarationProcessStepLabel > returns 'Non commencée' for a representation declaration
+  - getDeclarationProcessStepLabel > returns 'Non commencée' for representation even when fsmStatus is set
+  - getDeclarationProcessStepLabel > returns "Actions correctives et seconde déclaration" for fsmStatus="corrective_actions_chosen"
+  - getDeclarationProcessStepLabel > returns "Choix du parcours de mise en conformité (Deuxième déclaration)" for fsmStatus="awaiting_revision_choice"
+  - getDeclarationProcessStepLabel > returns "Choix du parcours de mise en conformité" for fsmStatus="awaiting_compliance_path_choice"
+  - getDeclarationProcessStepLabel > returns "Déclaration des indicateurs de rémunération" for fsmStatus="draft"
+  - getDeclarationProcessStepLabel > returns "Déposer le ou les avis CSE" for fsmStatus="awaiting_cse_opinion"
+  - getDeclarationProcessStepLabel > returns "Évaluation conjointe des rémunérations" for fsmStatus="joint_evaluation_chosen"
+  - getDeclarationProcessStepLabel > returns "Évaluation conjointe des rémunérations" for fsmStatus="revised_joint_evaluation_chosen"
+  - getDeclarationProcessStepLabel > returns "Finalisation - Démarche des indicateurs de rémunération" for fsmStatus="demarche_completed"
+  - getDeclarationProcessStepLabel > returns the first remuneration step label when fsmStatus is null
+- **`src/modules/my-space/__tests__/formatAddress.test.ts`** — 4 test(s)
+  - formatAddress > handles accents
+  - formatAddress > handles multiple connector words
+  - formatAddress > keeps connector words lowercase except at the start
+  - formatAddress > title-cases a fully uppercase address
+- **`src/modules/my-space/__tests__/formatSiren.test.ts`** — 10 test(s)
+  - formatSiren > formats a 9-digit SIREN with spaces
+  - parseSiren > extracts SIREN from a 9-digit string
+  - parseSiren > extracts SIREN from a valid 14-digit SIRET
+  - parseSiren > returns null for empty string
+  - parseSiren > returns null for mixed alphanumeric SIREN
+  - parseSiren > returns null for non-numeric SIREN
+  - parseSiren > returns null for null
+  - parseSiren > returns null for SIREN with spaces
+  - parseSiren > returns null for too short string
+  - parseSiren > returns null for undefined
+- **`src/modules/my-space/__tests__/MissingInfoModal.test.tsx`** — 13 test(s)
+  - MissingInfoModal > admin impersonation > does not render the modal when impersonating
+  - MissingInfoModal > does not render CSE radio buttons when hasCse is provided
+  - MissingInfoModal > does not render phone field when userPhone is provided
+  - MissingInfoModal > Enregistrer button is not disabled when mutations are idle
+  - MissingInfoModal > hides CSE radios and limits the description to the phone when CSE is not applicable
+  - MissingInfoModal > renders CSE radio buttons when hasCse is null and CSE is applicable
+  - MissingInfoModal > renders Enregistrer and Retour buttons
+  - MissingInfoModal > renders phone field when userPhone is null
+  - MissingInfoModal > renders the close button
+  - MissingInfoModal > renders the modal with correct id and title
+  - MissingInfoModal > shows both phone and CSE description when both are missing
+  - MissingInfoModal > shows CSE-only description when only CSE is missing
+  - MissingInfoModal > shows phone-only description when only phone is missing
+- **`src/modules/my-space/__tests__/MonEspacePage.test.tsx`** — 6 test(s)
+  - MonEspacePage > does not render the lock alert when the declaration is unlocked
+  - MonEspacePage > forwards the lock state when another co-declarant holds the lock
+  - MonEspacePage > passes userPhone to CompanyDeclarationsPage
+  - MonEspacePage > redirects to mes-entreprises when siret is null
+  - MonEspacePage > redirects to mes-entreprises when siret is too short
+  - MonEspacePage > renders company declarations for valid siret
+- **`src/modules/my-space/__tests__/MyCompaniesPage.test.tsx`** — 5 test(s)
+  - MyCompaniesPage > renders companies from the API
+  - MyCompaniesPage > renders the company count
+  - MyCompaniesPage > renders the main landmark with id content
+  - MyCompaniesPage > renders the page title
+  - MyCompaniesPage > renders the welcome banner
+- **`src/modules/my-space/__tests__/StatusBadge.test.tsx`** — 3 test(s)
+  - StatusBadge > renders a success badge without icon for done status
+  - StatusBadge > renders a warning badge for to_complete status
+  - StatusBadge > renders an info badge for in_progress status
+- **`src/modules/my-space/__tests__/useUpdateHasCse.test.tsx`** — 5 test(s)
+  - useUpdateHasCse > does not throw when no caller onSuccess is provided
+  - useUpdateHasCse > invokes the caller's onSuccess after tracking
+  - useUpdateHasCse > never leaks the SIREN / SIRET / any PII into the tracked payload (CNIL anonymisation)
+  - useUpdateHasCse > tracks a non event on success with hasCse:false
+  - useUpdateHasCse > tracks a single oui event on success with hasCse:true
+- **`src/modules/my-space/__tests__/VerticalStepper.test.tsx`** — 11 test(s)
+  - VerticalStepper — bouton œil (viewHref) > 1ère déclaration — deadline future > renders the sr-only text for accessibility
+  - VerticalStepper — bouton œil (viewHref) > 1ère déclaration — deadline future > renders the view link with correct href
+  - VerticalStepper — bouton œil (viewHref) > 1ère déclaration — deadline passée > Modifier link is hidden after deadline but view link remains
+  - VerticalStepper — bouton œil (viewHref) > 1ère déclaration — deadline passée > view link stays present after deadline
+  - VerticalStepper — bouton œil (viewHref) > 2nde déclaration — variant compliance_choice (révision) > does not render second-declaration row when not yet submitted (initial path choice)
+  - VerticalStepper — bouton œil (viewHref) > 2nde déclaration — variant compliance_choice (révision) > renders the Modifier link for second declaration when awaiting_revision_choice
+  - VerticalStepper — bouton œil (viewHref) > 2nde déclaration — variant cse avec secondDeclarationSubmitted > renders view link on the second declaration row (with type=correction)
+  - VerticalStepper — bouton œil (viewHref) > 2nde déclaration — variant evaluation > renders view link on the second declaration row (with type=correction)
+  - VerticalStepper — bouton œil (viewHref) > TransmittedRow sans viewHref — pas de bouton œil sur ces lignes > does not render view link for 2nd decl when secondDeclarationSubmitted is false
+  - VerticalStepper — bouton œil (viewHref) > TransmittedRow sans viewHref — pas de bouton œil sur ces lignes > does not render view link for joint evaluation row (no type=correction link)
+  - VerticalStepper — bouton œil (viewHref) > TransmittedRow sans viewHref — pas de bouton œil sur ces lignes > does not render view link on CSE avis row (closed variant, no decl1 row shown)
+- **`src/modules/my-space/__tests__/ViewToggle.test.tsx`** — 7 test(s)
+  - ViewToggle > renders the company count with plural
+  - ViewToggle > renders the company count with singular for 1
+  - ViewToggle > renders the segmented control with Liste and Tableau options
+  - ViewToggle > selects Liste by default
+  - ViewToggle > shows list view by default
+  - ViewToggle > switches back to list view when Liste is selected
+  - ViewToggle > switches to table view when Tableau is selected
+- **`src/modules/my-space/__tests__/WelcomeBanner.test.tsx`** — 5 test(s)
+  - WelcomeBanner > close button has the correct title attribute
+  - WelcomeBanner > has the DSFR info notice class
+  - WelcomeBanner > hides the banner when close button is clicked
+  - WelcomeBanner > renders the description about ProConnect
+  - WelcomeBanner > renders the info alert with title

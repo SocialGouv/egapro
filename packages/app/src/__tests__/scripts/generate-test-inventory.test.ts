@@ -4,8 +4,13 @@ import { describe, expect, it } from "vitest";
 const APP_ROOT = resolve(import.meta.dirname, "..", "..", "..");
 const SCRIPT_PATH = join(APP_ROOT, "scripts/generate-test-inventory.mjs");
 
-const { parseVitest, parsePlaywright, sectionLabel, buildInventoryMarkdown } =
-	await import(SCRIPT_PATH);
+const {
+	parseVitest,
+	parsePlaywright,
+	sectionLabel,
+	sectionSlug,
+	buildInventoryFiles,
+} = await import(SCRIPT_PATH);
 
 describe("parseVitest", () => {
 	it("keeps only real test files and splits file from the describe/it chain", () => {
@@ -77,7 +82,18 @@ describe("sectionLabel", () => {
 	});
 });
 
-describe("buildInventoryMarkdown", () => {
+describe("sectionSlug", () => {
+	it("slugifies French labels and raw fallback paths into file names", () => {
+		expect(sectionSlug("Règles métier (domaine)")).toBe(
+			"regles-metier-domaine",
+		);
+		expect(sectionSlug("src/modules/unknownmod")).toBe(
+			"src-modules-unknownmod",
+		);
+	});
+});
+
+describe("buildInventoryFiles", () => {
 	const fixture = {
 		unit: [
 			{
@@ -99,29 +115,44 @@ describe("buildInventoryMarkdown", () => {
 		generatedOn: "2026-01-01",
 	};
 
-	it("renders totals, the generation date and French section labels", () => {
-		const md = buildInventoryMarkdown(fixture);
-		expect(md).toContain("_Généré le 2026-01-01._");
-		expect(md).toContain("| Tests unitaires | 2 | 2 |");
-		expect(md).toContain("| Scénarios E2E | 1 | 1 |");
-		expect(md).toContain("### Règles métier (domaine)");
-		expect(md).toContain("### Scénarios E2E");
-		// Unmapped module still appears under its raw path (S3 fallback).
-		expect(md).toContain("### src/modules/unknownmod");
-	});
+	function byPath(files: Array<{ content: string; relativePath: string }>) {
+		return new Map(files.map((f) => [f.relativePath, f.content]));
+	}
 
-	it("is deterministic for a fixed input (idempotence at the pure layer)", () => {
-		expect(buildInventoryMarkdown(fixture)).toBe(
-			buildInventoryMarkdown(fixture),
+	it("renders an index with totals, date and links to one detail file per section", () => {
+		const files = byPath(buildInventoryFiles(fixture));
+		const index = files.get("tests-inventory.md");
+		expect(index).toContain("_Généré le 2026-01-01._");
+		expect(index).toContain("| Tests unitaires | 2 | 2 |");
+		expect(index).toContain("| Scénarios E2E | 1 | 1 |");
+		expect(index).toContain(
+			"[Règles métier (domaine)](tests-inventory/regles-metier-domaine.md)",
+		);
+		// Unmapped module still appears under its raw path (S3 fallback).
+		expect(index).toContain(
+			"[src/modules/unknownmod](tests-inventory/src-modules-unknownmod.md)",
 		);
 	});
 
-	it("shows a warning banner when a source is unavailable", () => {
-		const md = buildInventoryMarkdown({
-			...fixture,
-			integrationAvailable: false,
-		});
-		expect(md).toContain("⚠️");
-		expect(md).toContain("tests d'intégration n'a pas pu être récupérée");
+	it("writes the test detail (files + titles) in the per-section files", () => {
+		const files = byPath(buildInventoryFiles(fixture));
+		const domain = files.get("tests-inventory/regles-metier-domaine.md");
+		expect(domain).toContain("`src/modules/domain/__tests__/gap.test.ts`");
+		expect(domain).toContain("gap > computes");
+		const e2e = files.get("tests-inventory/scenarios-e2e.md");
+		expect(e2e).toContain("admin access › reaches /admin");
+	});
+
+	it("is deterministic for a fixed input (idempotence at the pure layer)", () => {
+		expect(buildInventoryFiles(fixture)).toEqual(buildInventoryFiles(fixture));
+	});
+
+	it("shows a warning banner in the index when a source is unavailable", () => {
+		const files = byPath(
+			buildInventoryFiles({ ...fixture, integrationAvailable: false }),
+		);
+		const index = files.get("tests-inventory.md");
+		expect(index).toContain("⚠️");
+		expect(index).toContain("tests d'intégration n'a pas pu être récupérée");
 	});
 });

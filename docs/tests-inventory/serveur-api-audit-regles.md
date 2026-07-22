@@ -1,0 +1,869 @@
+# Inventaire des tests — Serveur (API, audit, règles)
+
+> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`. [← Retour à l'index](../tests-inventory.md)
+
+_Généré le 2026-07-22 — 66 fichier(s), 797 test(s)._
+
+- **`src/server/api/__tests__/adminProcedure.test.ts`** — 3 test(s)
+  - adminProcedure > resolves for an admin user
+  - adminProcedure > throws FORBIDDEN when the user is not admin
+  - adminProcedure > throws UNAUTHORIZED when there is no session
+- **`src/server/api/__tests__/declarationLockedWriteProcedure.test.ts`** — 4 test(s)
+  - declarationLockedWriteProcedure > passes when the current user holds an active lock
+  - declarationLockedWriteProcedure > throws CONFLICT when the active lock is held by another co-declarant (S2)
+  - declarationLockedWriteProcedure > throws CONFLICT when the lock has expired (getActiveLock returns null on lazy expiry)
+  - declarationLockedWriteProcedure > throws CONFLICT when there is no lock at all
+- **`src/server/api/routers/__tests__/adminDeclarations.cancel.test.ts`** — 5 test(s)
+  - adminDeclarationsRouter — cancel > cancels an active declaration in the current year
+  - adminDeclarationsRouter — cancel > rejects with BAD_REQUEST when the declaration belongs to a past campaign
+  - adminDeclarationsRouter — cancel > rejects with BAD_REQUEST when the declaration is already cancelled
+  - adminDeclarationsRouter — cancel > rejects with UNAUTHORIZED when the caller is not an admin
+  - adminDeclarationsRouter — cancel audit wiring > AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL is wired with category mutation
+- **`src/server/api/routers/__tests__/adminDeclarations.getById.test.ts`** — 6 test(s)
+  - adminDeclarationsRouter — getById > exposes lock as null when the declaration is not locked
+  - adminDeclarationsRouter — getById > exposes the lock holder and expiry when the declaration is locked
+  - adminDeclarationsRouter — getById > includes empty siblings array when no sibling declarations exist
+  - adminDeclarationsRouter — getById > includes siblings with correct status derivation for cancelled sibling
+  - adminDeclarationsRouter — getById > includes siblings with original status for active sibling
+  - adminDeclarationsRouter — getById > returns null when declaration not found
+- **`src/server/api/routers/__tests__/adminDeclarations.getRecap.test.ts`** — 7 test(s)
+  - adminDeclarationsRouter — getRecap > exposes a null gipWorkforce when the company is absent from the GIP file
+  - adminDeclarationsRouter — getRecap > exposes step5Source from the first job category when jobs exist
+  - adminDeclarationsRouter — getRecap > flags isCorrection=true when a second_declaration_submit event exists
+  - adminDeclarationsRouter — getRecap > keeps the exact fractional GIP workforce
+  - adminDeclarationsRouter — getRecap > returns empty declarantName when first and last names are both null
+  - adminDeclarationsRouter — getRecap > returns full recap shape for a submitted declaration without correction
+  - adminDeclarationsRouter — getRecap > throws NOT_FOUND when declaration does not exist
+- **`src/server/api/routers/__tests__/adminDeclarations.releaseLock.test.ts`** — 4 test(s)
+  - adminDeclarationsRouter — releaseLock > rejects with BAD_REQUEST when no active lock exists
+  - adminDeclarationsRouter — releaseLock > rejects with UNAUTHORIZED when the caller is not an admin
+  - adminDeclarationsRouter — releaseLock > releases the lock of a locked declaration
+  - adminDeclarationsRouter — releaseLock audit wiring > AUDIT_ACTIONS.ADMIN_DECLARATION_RELEASE_LOCK is wired with category mutation
+- **`src/server/api/routers/__tests__/adminDeclarations.search.test.ts`** — 4 test(s)
+  - adminDeclarationsRouter — search > excludes cancelled rows when filtering by submitted status
+  - adminDeclarationsRouter — search > includes both active and cancelled rows by default (no status filter)
+  - adminDeclarationsRouter — search > includes cancelledAt field in search results
+  - adminDeclarationsRouter — search > returns only cancelled rows when status=cancelled
+- **`src/server/api/routers/__tests__/adminReferents.test.ts`** — 8 test(s)
+  - adminReferentsRouter > authorization > rejects non-admin users
+  - adminReferentsRouter > create > inserts a referent and strips empty optional strings
+  - adminReferentsRouter > delete > deletes the given ids
+  - adminReferentsRouter > exportAll > returns all referents ordered by region then county
+  - adminReferentsRouter > import > clears and re-inserts all referents in a transaction
+  - adminReferentsRouter > search > applies filters on region and county
+  - adminReferentsRouter > search > returns rows and pagination metadata
+  - adminReferentsRouter > update > updates a referent and returns its id
+- **`src/server/api/routers/__tests__/adminSettings.test.ts`** — 7 test(s)
+  - adminSettingsRouter — access control > rejects non-admin callers on getOverview
+  - adminSettingsRouter — getDeadlinesByYear > returns DB row when present
+  - adminSettingsRouter — getDeadlinesByYear > returns formatted defaults when no row exists
+  - adminSettingsRouter — getOverview > returns an empty list when no deadlines are configured
+  - adminSettingsRouter — getOverview > returns the list of configured years
+  - adminSettingsRouter — upsertCampaignDeadlines > calls insert().onConflictDoUpdate with the validated values
+  - adminSettingsRouter — upsertCampaignDeadlines > rejects when decl2 is not strictly after decl1
+- **`src/server/api/routers/__tests__/adminStats.getUsersPerCompany.integration.test.ts`** — 2 test(s)
+  - adminStatsRouter.getUsersPerCompany (real Postgres) > returns all zeros when no user is linked to any company
+  - adminStatsRouter.getUsersPerCompany (real Postgres) > returns the mono/multi distribution, average and max from user_company
+- **`src/server/api/routers/__tests__/adminStats.test.ts`** — 83 test(s)
+  - adminStatsRouter — access control > rejects non-admin callers from getCampaignProgression
+  - adminStatsRouter — access control > rejects non-admin callers from getCampaignStats
+  - adminStatsRouter.getCampaignProgression > groups points by year and computes a running cumulative total
+  - adminStatsRouter.getCampaignProgression > joins history → declarations always, and additionally on companies when a sizeRange filter is provided
+  - adminStatsRouter.getCampaignProgression > returns an empty array when no rows are found
+  - adminStatsRouter.getCampaignProgression > uses gte (open-ended) workforce filter when sizeRange is 250+
+  - adminStatsRouter.getCampaignProgression > validates the years array (min 1, max 5)
+  - adminStatsRouter.getCampaignStats > computes the obligation predicate differently for triennial vs non-triennial years (smoke check via call wiring)
+  - adminStatsRouter.getCampaignStats > defaults to 0 when a count query returns no row at all
+  - adminStatsRouter.getCampaignStats > handles 250+ sizeRange (open-ended bucket)
+  - adminStatsRouter.getCampaignStats > inflates the size filter when sizeRange covers the voluntary-only bucket (still computes a result)
+  - adminStatsRouter.getCampaignStats > issues four parallel select calls (obligated + submitted, for year and year-1)
+  - adminStatsRouter.getCampaignStats > propagates the sizeRange filter to all four queries (numerator and denominator stay aligned)
+  - adminStatsRouter.getCampaignStats > rejects invalid sizeRange values
+  - adminStatsRouter.getCampaignStats > returns null previousYearRate when no obligated companies existed for year-1
+  - adminStatsRouter.getCampaignStats > returns rate, year-1 rate, and raw counts when all four queries have data
+  - adminStatsRouter.getCampaignStats > returns submissionRate=0 when totalObligated is 0 (avoids division by zero)
+  - adminStatsRouter.getCampaignStats > rounds rates to one decimal place
+  - adminStatsRouter.getCampaignStats > validates the year bounds (rejects year < 2000)
+  - adminStatsRouter.getCampaignStats > validates the year bounds (rejects year > 2100)
+  - adminStatsRouter.getCompletionFunnel > coerces SQL numeric strings to numbers (pg sometimes returns COUNT(...) as a string)
+  - adminStatsRouter.getCompletionFunnel > rejects non-admin callers (S-K19-7 access control)
+  - adminStatsRouter.getCompletionFunnel > returns four funnels (3×4 + 1×5 zero-count rows) when SQL returns no data
+  - adminStatsRouter.getCompletionFunnel > S-K19-1: maps the main funnel with correct counts, pctOfStart and pctDropFromPrev
+  - adminStatsRouter.getCompletionFunnel > S-K19-10: CSE funnel SQL scopes the base to companies.has_cse = true
+  - adminStatsRouter.getCompletionFunnel > S-K19-11: CSE funnel SQL excludes cancelled declarations
+  - adminStatsRouter.getCompletionFunnel > S-K19-12: CSE funnel SQL also applies the sizeRange workforce filter
+  - adminStatsRouter.getCompletionFunnel > S-K19-2: returns the compliance funnel with correct labels and drops
+  - adminStatsRouter.getCompletionFunnel > S-K19-3: passes year and size range filters to all four queries
+  - adminStatsRouter.getCompletionFunnel > S-K19-4: pctDropFromPrev is null for the first jalon and 0 when the previous jalon is empty
+  - adminStatsRouter.getCompletionFunnel > S-K19-5: builds the revision funnel from the dedicated SQL row
+  - adminStatsRouter.getCompletionFunnel > S-K19-6: the revision funnel is empty when no declaration is in revision (count[0] === 0)
+  - adminStatsRouter.getCompletionFunnel > S-K19-8: validates the year bounds
+  - adminStatsRouter.getCompletionFunnel > S-K19-9: maps the CSE funnel with correct counts, pctOfStart and pctDropFromPrev
+  - adminStatsRouter.getCompletionFunnel > S-K19-9: revision 'action submitted' counts only round-2 joint evaluations, never the pre-revision corrective submit (no funnel inversion)
+  - adminStatsRouter.getMatomoCategoryModel > delegates to the Matomo service with the year/size filter
+  - adminStatsRouter.getMatomoCategoryModel > rejects non-admin callers
+  - adminStatsRouter.getMatomoCategoryModel > validates the year bounds
+  - adminStatsRouter.getMatomoCseStatusConfirmations > delegates to the Matomo service with the year only (sizeRange is ignored)
+  - adminStatsRouter.getMatomoCseStatusConfirmations > rejects non-admin callers
+  - adminStatsRouter.getMatomoCseStatusConfirmations > validates the year bounds
+  - adminStatsRouter.getMatomoDeviceBreakdown > delegates to the Matomo service with the year/size filter
+  - adminStatsRouter.getMatomoDeviceBreakdown > rejects non-admin callers
+  - adminStatsRouter.getMatomoDeviceBreakdown > validates the year bounds
+  - adminStatsRouter.getMatomoFunnel > delegates to the Matomo service with the year/size filter
+  - adminStatsRouter.getMatomoFunnel > rejects non-admin callers
+  - adminStatsRouter.getMatomoHelpLinks > delegates to the Matomo service with the year/size filter
+  - adminStatsRouter.getMatomoHelpLinks > rejects non-admin callers
+  - adminStatsRouter.getMatomoHelpLinks > validates the year bounds
+  - adminStatsRouter.getStepDropoffRate > defaults stagnationDays to 30 when omitted
+  - adminStatsRouter.getStepDropoffRate > rejects invalid stagnationDays (below 1 / above 180)
+  - adminStatsRouter.getStepDropoffRate > S-K5-1 — maps SQL rows to 12 typed output rows (6 wizard + 6 post-submit) with FR labels and 1-decimal rates
+  - adminStatsRouter.getStepDropoffRate > S-K5-10 — maps post-submit totals + abandoned to typed rows with phase='post_submit', step=null, FR labels
+  - adminStatsRouter.getStepDropoffRate > S-K5-11 — `awaiting_cse_opinion` row shows up with stagnation when cseRequired path is exercised in SQL
+  - adminStatsRouter.getStepDropoffRate > S-K5-12 — post-submit phase with total=0 has dropoffRate=0 (no division by zero)
+  - adminStatsRouter.getStepDropoffRate > S-K5-13 — post-submit SQL targets the 6 FSM statuses (compliance path, corrective, joint, revision, revised joint, CSE)
+  - adminStatsRouter.getStepDropoffRate > S-K5-2 — returns total=0 abandoned=0 rate=0 for phases the SQL omits (no division by zero, no missing row)
+  - adminStatsRouter.getStepDropoffRate > S-K5-3 — forwards stagnationDays as an SQL parameter in both wizard and post-submit-abandoned queries
+  - adminStatsRouter.getStepDropoffRate > S-K5-4 — `status != 'demarche_completed'` is part of the wizard abandoned FILTER
+  - adminStatsRouter.getStepDropoffRate > S-K5-5 — `cancelled_at IS NULL` is applied to the declaration join in every query
+  - adminStatsRouter.getStepDropoffRate > S-K5-6 — uses DISTINCT ON in the latest_step_change CTE so back-and-forth entries are deduplicated
+  - adminStatsRouter.getStepDropoffRate > S-K5-7 — never returns a row for step 6 (excluded by `lsc.step < 6`)
+  - adminStatsRouter.getStepDropoffRate > S-K5-8 — propagates the sizeRange filter into every SQL query (between predicate)
+  - adminStatsRouter.getStepDropoffRate > S-K5-9 — rejects non-admin callers
+  - adminStatsRouter.getStepDurations > aggregates initial and revision joint-evaluation cycles under a single milestone (S-K4-16)
+  - adminStatsRouter.getStepDurations > excludes declarations still on a step from the percentile (S4 — exited count drives sample, percentile uses completed)
+  - adminStatsRouter.getStepDurations > keeps milestones independent: empty sub-set does not blank out the others (S-K4-10)
+  - adminStatsRouter.getStepDurations > maps post-submit milestone rows to the typed output with FR labels (S-K4-9)
+  - adminStatsRouter.getStepDurations > maps SQL rows to the typed output and attaches French labels
+  - adminStatsRouter.getStepDurations > never returns a wizard row with step === 6 (S-K4-15)
+  - adminStatsRouter.getStepDurations > passes a workforce filter into the SQL when sizeRange is provided (S5)
+  - adminStatsRouter.getStepDurations > rejects non-admin callers
+  - adminStatsRouter.getStepDurations > renders milestones with no data as zero-sample / null-percentile rows (S-K4-13)
+  - adminStatsRouter.getStepDurations > returns null percentiles for milestones with completedSampleSize < 5 (S-K4-12)
+  - adminStatsRouter.getStepDurations > returns null percentiles when fewer than 5 declarations have exited the step (S8 — anti-noisy data)
+  - adminStatsRouter.getStepDurations > returns the 6 wizard steps + 4 post-submit milestones (10 rows) even when SQL returns nothing
+  - adminStatsRouter.getStepDurations > surfaces second_declaration and joint_evaluation as two separate post-submit lines (S-K4-14)
+  - adminStatsRouter.getStepDurations > validates the year input bounds
+  - adminStatsRouter.getUsersPerCompany > coerces SQL numeric strings to numbers (pg may serialise COUNT/AVG as text)
+  - adminStatsRouter.getUsersPerCompany > counts distinct users per siren via a single grouped CTE
+  - adminStatsRouter.getUsersPerCompany > defaults every field to 0 when the aggregate query returns no row
+  - adminStatsRouter.getUsersPerCompany > maps the SQL aggregate row to the typed UsersPerCompany shape
+  - adminStatsRouter.getUsersPerCompany > rejects non-admin callers
+- **`src/server/api/routers/__tests__/company.getWithDeclarations.test.ts`** — 2 test(s)
+  - companyRouter.getWithDeclarations > excludes cancelled declarations from the timeline
+  - companyRouter.getWithDeclarations > returns company with declaration list
+- **`src/server/api/routers/__tests__/company.list.test.ts`** — 5 test(s)
+  - companyRouter.list > returns companies with declaration status
+  - companyRouter.list > returns empty list when user has no companies
+  - companyRouter.list > returns status based on the active declaration when cancelled and active coexist
+  - companyRouter.list > returns to_complete when all declarations for the siren are cancelled
+  - companyRouter.list > skips declaration fetch when no sirens found
+- **`src/server/api/routers/__tests__/company.test.ts`** — 28 test(s)
+  - companyRouter.getSanctionStatus > returns default no-sanction when SUIT returns null
+  - companyRouter.getSanctionStatus > returns sanction status from SUIT API
+  - companyRouter.getSanctionStatus > throws when company is not found
+  - companyRouter.updateHasCse > refuses the update below the CSE threshold (GIP workforce < 100)
+  - companyRouter.updateHasCse > refuses the update when the admin is impersonating the company
+  - companyRouter.updateHasCse > refuses the update when the company is absent from the GIP file
+  - companyRouter.updateHasCse > updates hasCse for the given company
+  - computeDeclarationStatus > returns done only for demarche_completed (terminal FSM state)
+  - computeDeclarationStatus > returns in_progress for awaiting_compliance_path_choice (action still expected)
+  - computeDeclarationStatus > returns in_progress for awaiting_cse_opinion (still expecting CSE deposit)
+  - computeDeclarationStatus > returns in_progress for awaiting_revision_choice (user must pick a revised path)
+  - computeDeclarationStatus > returns in_progress for corrective_actions_chosen (waiting on 2nd decl)
+  - computeDeclarationStatus > returns in_progress for draft status at step > 0
+  - computeDeclarationStatus > returns to_complete for draft status at step 0
+  - computeDeclarationStatus > returns to_complete for draft status with null step
+  - computeDeclarationStatus > returns to_complete when no declaration exists
+  - findUserCompany CSE auto-fetch > does not fetch CSE below 100 GIP employees, comparing on the exact value
+  - findUserCompany CSE auto-fetch > does not fetch CSE when hasCse is already set
+  - findUserCompany CSE auto-fetch > does not fetch CSE when the company is absent from the GIP file
+  - findUserCompany CSE auto-fetch > exposes the GIP workforce and never the Weez company workforce (#3929)
+  - findUserCompany CSE auto-fetch > fetches CSE from SUIT API when hasCse is null and updates the DB
+  - findUserCompany CSE auto-fetch > leaves hasCse as null when SUIT API returns null
+  - findUserCompany CSE auto-fetch > throws when company is not found
+  - findUserCompany NAF label enrichment > backfills nafLabel from Weez when null and persists it
+  - findUserCompany NAF label enrichment > does not backfill during admin impersonation (read-only)
+  - findUserCompany NAF label enrichment > does not call Weez for a non-diffusible company (no nafCode)
+  - findUserCompany NAF label enrichment > does not call Weez when nafLabel is already present
+  - findUserCompany NAF label enrichment > keeps nafLabel null and does not throw when Weez fails
+- **`src/server/api/routers/__tests__/cseOpinion.fileAssociations.integration.test.ts`** — 3 test(s)
+  - cse_opinion_file DB-level constraints > allows the same file to cover several (declarationNumber, type) couples
+  - cse_opinion_file DB-level constraints > cascades the delete of a file to its content-type associations
+  - cse_opinion_file DB-level constraints > rejects two associations for the same (declaration, number, type) couple
+- **`src/server/api/routers/__tests__/cseOpinion.finalize.test.ts`** — 21 test(s)
+  - cseOpinionRouter.finalize > does not call draft update when no draft exists in cse finalize
+  - cseOpinionRouter.finalize > file-content-type association guard > does not require (1, gap) when gapConsulted is true but there is no gap >= 5%
+  - cseOpinionRouter.finalize > file-content-type association guard > does not require (2, gap) when gapConsulted is true but there is no gap >= 5% on the second declaration
+  - cseOpinionRouter.finalize > file-content-type association guard > does not require (2, gap) when second declaration gapConsulted is false
+  - cseOpinionRouter.finalize > file-content-type association guard > does not require a second-declaration association when correction was only started (secondDeclarationStep set, no second-declaration opinion)
+  - cseOpinionRouter.finalize > file-content-type association guard > passes when only (1, accuracy) is required and it is covered
+  - cseOpinionRouter.finalize > file-content-type association guard > passes with a full two-declaration set when every required type is covered
+  - cseOpinionRouter.finalize > file-content-type association guard > requires (1, gap) when first declaration gapConsulted is true
+  - cseOpinionRouter.finalize > file-content-type association guard > requires (2, accuracy) when a second declaration was submitted (its opinions exist)
+  - cseOpinionRouter.finalize > file-content-type association guard > requires (2, gap) when second declaration gapConsulted is true
+  - cseOpinionRouter.finalize > file-content-type association guard > throws PRECONDITION_FAILED when (1, accuracy) is not covered
+  - cseOpinionRouter.finalize > purges the cse draft slice and keeps other slices after finalize
+  - cseOpinionRouter.finalize > re-accepts finalize when the declaration is already completed (editable after submission)
+  - cseOpinionRouter.finalize > refuses to finalize when the admin is impersonating
+  - cseOpinionRouter.finalize > sets draft to null when cse was the only slice after finalize
+  - cseOpinionRouter.finalize > throws NOT_FOUND when declaration row vanished between lookup and finalize
+  - cseOpinionRouter.finalize > throws PRECONDITION_FAILED when a file row carries no content type
+  - cseOpinionRouter.finalize > throws PRECONDITION_FAILED when no file has been uploaded
+  - cseOpinionRouter.finalize > throws PRECONDITION_FAILED when no opinions exist
+  - cseOpinionRouter.finalize > throws PRECONDITION_FAILED when the opinion count query returns no row
+  - cseOpinionRouter.finalize > transitions awaiting_cse_opinion → demarche_completed and inserts cse_opinion_submit + demarche_complete events
+- **`src/server/api/routers/__tests__/cseOpinion.test.ts`** — 24 test(s)
+  - cseOpinionRouter > admin impersonation read-only guard > refuses deleteFile when the admin is impersonating
+  - cseOpinionRouter > admin impersonation read-only guard > refuses saveOpinions when the admin is impersonating
+  - cseOpinionRouter > deleteFile > deletes file from S3 and DB
+  - cseOpinionRouter > deleteFile > throws when file is not found
+  - cseOpinionRouter > deleteFile > throws when siret is missing
+  - cseOpinionRouter > get > returns empty opinions when none exist
+  - cseOpinionRouter > get > returns opinions for the current declaration
+  - cseOpinionRouter > get > throws when siret is missing
+  - cseOpinionRouter > getFileContentTypes > returns associations for the current declaration
+  - cseOpinionRouter > getFileContentTypes > returns empty associations when none exist
+  - cseOpinionRouter > getFileContentTypes > throws when siret is missing
+  - cseOpinionRouter > getFiles > returns empty files when none exist
+  - cseOpinionRouter > getFiles > returns files for the current declaration with their storage size
+  - cseOpinionRouter > getFiles > throws when siret is missing
+  - cseOpinionRouter > saveOpinions > deletes existing opinions and inserts new ones in a transaction
+  - cseOpinionRouter > saveOpinions > inserts second declaration opinions when provided
+  - cseOpinionRouter > saveOpinions > throws when siret is missing
+  - cseOpinionRouter > setFileContentTypes > allows one file to be associated with several types
+  - cseOpinionRouter > setFileContentTypes > clears associations and skips validation when input is empty
+  - cseOpinionRouter > setFileContentTypes > refuses setFileContentTypes when the admin is impersonating
+  - cseOpinionRouter > setFileContentTypes > replaces associations transactionally after validating files
+  - cseOpinionRouter > setFileContentTypes > throws BAD_REQUEST when a fileId does not belong to the declaration
+  - cseOpinionRouter > setFileContentTypes > throws BAD_REQUEST when the same (declarationNumber, type) is duplicated
+  - cseOpinionRouter > setFileContentTypes > throws when siret is missing
+- **`src/server/api/routers/__tests__/declaration.cancellation-flow.test.ts`** — 5 test(s)
+  - declaration cancellation redeposit flow > getOrCreate inserts a fresh row when only a cancelled row exists for (siren, year)
+  - declaration cancellation redeposit flow > getOrCreate reuses the active row when one exists alongside a cancelled row
+  - declaration cancellation redeposit flow > submit fresh insertion preserves submittedAt from the active row only
+  - declaration cancellation redeposit flow > submit only transitions the active row, leaving the cancelled row untouched
+  - declaration cancellation redeposit flow > updateStep1 mutates only the active row when a cancelled row exists
+- **`src/server/api/routers/__tests__/declaration.cancellation.integration.test.ts`** — 2 test(s)
+  - declarations partial unique index (cancelled_at) > allows one active row and one cancelled row for the same (siren, year)
+  - declarations partial unique index (cancelled_at) > rejects a second active row for the same (siren, year)
+- **`src/server/api/routers/__tests__/declaration.employeeCategories.test.ts`** — 3 test(s)
+  - declarationRouter > updateEmployeeCategories > creates job and employee categories for initial declaration
+  - declarationRouter > updateEmployeeCategories > throws when declaration not found
+  - declarationRouter > updateEmployeeCategories > updates employee categories for correction declaration
+- **`src/server/api/routers/__tests__/declaration.impersonation.test.ts`** — 7 test(s)
+  - declarationRouter > admin impersonation read-only guard > allows getOrCreate when an existing declaration is returned
+  - declarationRouter > admin impersonation read-only guard > refuses saveCompliancePath when the admin is impersonating
+  - declarationRouter > admin impersonation read-only guard > refuses submit when the admin is impersonating
+  - declarationRouter > admin impersonation read-only guard > refuses submitJointEvaluation when the admin is impersonating
+  - declarationRouter > admin impersonation read-only guard > refuses submitSecondDeclaration when the admin is impersonating
+  - declarationRouter > admin impersonation read-only guard > refuses updateStep1 when the admin is impersonating
+  - declarationRouter > admin impersonation read-only guard > returns a placeholder declaration in mimoquage when none exists (no insert)
+- **`src/server/api/routers/__tests__/declaration.step4Loader.test.ts`** — 2 test(s)
+  - step4Data loader migration > builds tuple with [3].threshold === undefined from 3 DB thresholds
+  - step4Data loader migration > normalizes null DB thresholds to empty string for Q1-Q3
+- **`src/server/api/routers/__tests__/declaration.test.ts`** — 72 test(s)
+  - declarationRouter > getOrCreate > creates new declaration when none exists
+  - declarationRouter > getOrCreate > retries select after concurrent insert (onConflictDoNothing returns empty)
+  - declarationRouter > getOrCreate > returns existing declaration when found
+  - declarationRouter > getOrCreate > throws INTERNAL_SERVER_ERROR when retry also fails
+  - declarationRouter > getOrCreate > throws NOT_FOUND when existing row is unexpectedly undefined
+  - declarationRouter > getOrCreate > throws when siret is missing
+  - declarationRouter > getStatusHistory > returns correct total and subset for paginated queries
+  - declarationRouter > getStatusHistory > returns history items with actor for an authorized user
+  - declarationRouter > getStatusHistory > returns null actor when actorEmail is null
+  - declarationRouter > getStatusHistory > skips access check when admin is impersonating the siren
+  - declarationRouter > getStatusHistory > throws FORBIDDEN when user has no access to the siren
+  - declarationRouter > getStatusHistory > throws NOT_FOUND when declaration does not exist
+  - declarationRouter > saveCompliancePath (rules engine) > purges the compliance draft slice and keeps other slices after saveCompliancePath
+  - declarationRouter > saveCompliancePath (rules engine) > rejects corrective_action when state is awaiting_revision_choice
+  - declarationRouter > saveCompliancePath (rules engine) > rejects invalid compliance path
+  - declarationRouter > saveCompliancePath (rules engine) > rejects path change after a joint_evaluation_submit event is recorded for the round (path locked)
+  - declarationRouter > saveCompliancePath (rules engine) > rejects path change in round 2 after cse_opinion_submit event (path locked)
+  - declarationRouter > saveCompliancePath (rules engine) > sets draft to null when compliance was the only slice after saveCompliancePath
+  - declarationRouter > saveCompliancePath (rules engine) > transitions awaiting_compliance_path_choice → awaiting_cse_opinion for justify with CSE (S9)
+  - declarationRouter > saveCompliancePath (rules engine) > transitions awaiting_compliance_path_choice → corrective_actions_chosen for corrective_action (S11)
+  - declarationRouter > saveCompliancePath (rules engine) > transitions awaiting_compliance_path_choice → demarche_completed for justify without CSE (S10)
+  - declarationRouter > saveCompliancePath (rules engine) > writes secondDeclarationPathChoice when state is awaiting_revision_choice (S16)
+  - declarationRouter > step_change instrumentation (K4 — délai par étape) > does not insert a step_change row when the new step equals the existing one (idempotent re-save)
+  - declarationRouter > step_change instrumentation (K4 — délai par étape) > inserts a step_change row when updateStep1 advances from step 0 (S1)
+  - declarationRouter > submit — cseRequired snapshot > snapshots false for >= 100 GIP employees without a CSE
+  - declarationRouter > submit — cseRequired snapshot > snapshots false for a fractional GIP workforce just below 100
+  - declarationRouter > submit — cseRequired snapshot > snapshots false just below the 100-employee threshold
+  - declarationRouter > submit — cseRequired snapshot > snapshots false when hasCse is null
+  - declarationRouter > submit — cseRequired snapshot > snapshots false when the company is absent from the GIP file
+  - declarationRouter > submit — cseRequired snapshot > snapshots true for >= 100 GIP employees with a CSE
+  - declarationRouter > submit (rules engine) > does not call draft update when draft is null after submit
+  - declarationRouter > submit (rules engine) > does not duplicate submit events when called from a non-draft state
+  - declarationRouter > submit (rules engine) > drives the FSM from the GIP workforce, not from the Weez company workforce (#3929)
+  - declarationRouter > submit (rules engine) > persists computed percentage columns on submit
+  - declarationRouter > submit (rules engine) > purges the main draft slice and keeps other slices after submit
+  - declarationRouter > submit (rules engine) > sets draft to null when main was the only slice after submit
+  - declarationRouter > submit (rules engine) > throws NOT_FOUND when company is missing
+  - declarationRouter > submit (rules engine) > throws NOT_FOUND when declaration is missing
+  - declarationRouter > submit (rules engine) > throws when siret is missing
+  - declarationRouter > submit (rules engine) > transitions draft → awaiting_compliance_path_choice when gap detected and workforce >= 100 (S8)
+  - declarationRouter > submit (rules engine) > transitions draft → awaiting_cse_opinion for 120-employee with CSE without gap (S3)
+  - declarationRouter > submit (rules engine) > transitions draft → demarche_completed for small company without CSE (S1)
+  - declarationRouter > submit (rules engine) > treats a company absent from the GIP file as not subject, whatever the Weez workforce says
+  - declarationRouter > submitJointEvaluation (rules engine) > purges the joint draft slice and keeps other slices after submitJointEvaluation
+  - declarationRouter > submitJointEvaluation (rules engine) > sets draft to null when joint was the only slice after submitJointEvaluation
+  - declarationRouter > submitJointEvaluation (rules engine) > throws NOT_FOUND when declaration is missing
+  - declarationRouter > submitJointEvaluation (rules engine) > transitions joint_evaluation_chosen → awaiting_cse_opinion with CSE (S12)
+  - declarationRouter > submitJointEvaluation (rules engine) > transitions revised_joint_evaluation_chosen → demarche_completed without CSE (S17)
+  - declarationRouter > submitSecondDeclaration (rules engine) > purges the second draft slice and keeps other slices after submitSecondDeclaration
+  - declarationRouter > submitSecondDeclaration (rules engine) > sets draft to null when second was the only slice after submitSecondDeclaration
+  - declarationRouter > submitSecondDeclaration (rules engine) > throws NOT_FOUND when declaration is missing
+  - declarationRouter > submitSecondDeclaration (rules engine) > transitions corrective_actions_chosen → awaiting_cse_opinion when gap resolved with CSE (S14)
+  - declarationRouter > submitSecondDeclaration (rules engine) > transitions corrective_actions_chosen → awaiting_revision_choice when gap persists (S15)
+  - declarationRouter > submitSecondDeclaration (rules engine) > transitions corrective_actions_chosen → demarche_completed when gap resolved without CSE (S13)
+  - declarationRouter > updateStep1 > resets downstream scores when totals change
+  - declarationRouter > updateStep1 > resets percentage columns when indicators are reset (totals changed)
+  - declarationRouter > updateStep1 > skips reset when totals have not changed
+  - declarationRouter > updateStep1 > throws when siret is missing
+  - declarationRouter > updateStep1 > updates totalWomen and totalMen
+  - declarationRouter > updateStep2 > recomputes percentage columns after updateStep2
+  - declarationRouter > updateStep2 > saves indicator A and C values
+  - declarationRouter > updateStep2 > saves with all optional fields undefined
+  - declarationRouter > updateStep2 > throws when siret is missing
+  - declarationRouter > updateStep3 > recomputes percentage columns after updateStep3
+  - declarationRouter > updateStep3 > saves indicator B, D and E values
+  - declarationRouter > updateStep3 > saves with all optional fields undefined
+  - declarationRouter > updateStep3 > throws when siret is missing
+  - declarationRouter > updateStep4 > maps 3 thresholds + 4 counts per table with no *Threshold4 column
+  - declarationRouter > updateStep4 > recomputes percentage columns after updateStep4
+  - declarationRouter > updateStep4 > saves indicator F annual and hourly thresholds
+  - declarationRouter > updateStep4 > stores null for Q4 threshold when it is an empty string
+  - declarationRouter > updateStep4 > throws when siret is missing
+- **`src/server/api/routers/__tests__/declarationDraft.integration.test.ts`** — 3 test(s)
+  - declarationDraftRouter save/get roundtrip (real Postgres) > merges successive saves of different slices into a single draft
+  - declarationDraftRouter save/get roundtrip (real Postgres) > persists a saved slice and returns it on a subsequent get
+  - declarationDraftRouter save/get roundtrip (real Postgres) > stamps draftUpdatedAt so the freshly saved draft is not TTL-expired
+- **`src/server/api/routers/__tests__/declarationDraft.test.ts`** — 25 test(s)
+  - declarationDraftRouter > clear > drops only the specified kind slice while preserving others
+  - declarationDraftRouter > clear > drops only the specified step while preserving other steps in the same kind
+  - declarationDraftRouter > clear > removes the kind bucket when clearing its last step
+  - declarationDraftRouter > clear > returns ok early when partial clear finds no existing draft
+  - declarationDraftRouter > clear > returns ok without DB mutation when admin is impersonating
+  - declarationDraftRouter > clear > sets draft and draftUpdatedAt to null when no kind is given
+  - declarationDraftRouter > clear > sets draft to null when clearing the last remaining slice
+  - declarationDraftRouter > clear > sets draft to null when clearing the last step of the last kind
+  - declarationDraftRouter > clear > throws FORBIDDEN when user does not own the siren
+  - declarationDraftRouter > get > returns draft when campaign deadline is past but TTL is not expired
+  - declarationDraftRouter > get > returns null when draft column is null
+  - declarationDraftRouter > get > returns null when draft is older than 30 days (TTL expired)
+  - declarationDraftRouter > get > returns null when no declaration row exists
+  - declarationDraftRouter > get > returns null without DB call when admin is impersonating
+  - declarationDraftRouter > get > returns the draft when valid and not expired
+  - declarationDraftRouter > get > throws FORBIDDEN when user does not own the siren
+  - declarationDraftRouter > save > allows the autosave when no declaration row exists yet (create path)
+  - declarationDraftRouter > save > allows the autosave when the lock is free (no active holder)
+  - declarationDraftRouter > save > emits DRAFT_SAVE audit log without slice data payload
+  - declarationDraftRouter > save > inserts a new row when no declaration exists
+  - declarationDraftRouter > save > merges new slice without overwriting existing slices
+  - declarationDraftRouter > save > returns ok without DB mutation when admin is impersonating
+  - declarationDraftRouter > save > throws CONFLICT when another co-declarant holds the lock
+  - declarationDraftRouter > save > throws FORBIDDEN when user does not own the siren
+  - declarationDraftRouter > save > updates the existing row when a declaration exists
+- **`src/server/api/routers/__tests__/declarationHelpers.test.ts`** — 17 test(s)
+  - activeDeclarationFilter > filters siren, year, and cancelled_at IS NULL
+  - activeDeclarationFilter > targets the declarations.cancelledAt column
+  - buildEmployeeCategoryValues > defaults missing fields to null
+  - buildEmployeeCategoryValues > handles partial data correctly
+  - buildEmployeeCategoryValues > maps all fields from data to values object
+  - deleteJobAndEmployeeCategories > deletes employee categories then job categories
+  - deleteJobAndEmployeeCategories > does not delete job categories when none exist
+  - fetchAllCategories > returns empty employeeCategories when no jobs exist
+  - fetchAllCategories > returns jobCategories and employeeCategories
+  - fetchPreviousYearJobCategories > returns categories from the most recent qualifying declaration
+  - fetchPreviousYearJobCategories > returns null when no previous declaration contains indicator 7
+  - mapToEmployeeCategoryRows > filters by declaration type
+  - mapToEmployeeCategoryRows > maps jobs and employee categories into rows sorted by categoryIndex
+  - mapToEmployeeCategoryRows > returns null fields when no employee category matches
+  - mapToStepData > coerces null F-indicator quartiles to empty threshold (Q1-Q3) / undefined (Q4) + undefined women/men
+  - mapToStepData > coerces null indicator values to empty strings for step2 / step3
+  - mapToStepData > preserves provided indicator values verbatim
+- **`src/server/api/routers/__tests__/declarationLock.test.ts`** — 21 test(s)
+  - declarationLockRouter > acquireLock > acquires the lock, returns the holder, and audits a single acquisition (S11)
+  - declarationLockRouter > acquireLock > does not audit when the lock is already held by another user
+  - declarationLockRouter > acquireLock > falls back to the default timeout when no global setting row exists
+  - declarationLockRouter > acquireLock > throws FORBIDDEN when the claimed declarationId is not the caller's (IDOR guard)
+  - declarationLockRouter > acquireLock > throws NOT_FOUND when the caller has no current-year declaration
+  - declarationLockRouter > getActiveLockForCurrentDeclaration > reports lockedByOther and exposes the holder identity when another co-declarant holds the lock
+  - declarationLockRouter > getActiveLockForCurrentDeclaration > reports lockedByOther=false for the caller's own lock while still exposing the holder
+  - declarationLockRouter > getActiveLockForCurrentDeclaration > returns lockedByOther=false and a null holder when the declaration is unlocked
+  - declarationLockRouter > getActiveLockForCurrentDeclaration > returns no lock when the caller has no current-year declaration
+  - declarationLockRouter > getActiveLockForCurrentDeclaration > strips internal fields (expiresAt, userId) from the returned holder
+  - declarationLockRouter > getLockState > never acquires a lock (read-only poll)
+  - declarationLockRouter > getLockState > reports an unlocked declaration when no active lock exists (S7)
+  - declarationLockRouter > getLockState > reports locked + isOwnLock when the caller holds the lock
+  - declarationLockRouter > getLockState > reports locked but not isOwnLock when another co-declarant holds it
+  - declarationLockRouter > getLockState > throws FORBIDDEN on a foreign declarationId (IDOR guard)
+  - declarationLockRouter > heartbeat > refreshes the lock and returns held=true, without auditing (S6)
+  - declarationLockRouter > heartbeat > returns held=false when the lock can no longer be refreshed (S7 lazy expiry)
+  - declarationLockRouter > rejects every procedure when the SIRET is missing from the session
+  - declarationLockRouter > releaseLock > releases an own active lock, returns released=true, and audits it
+  - declarationLockRouter > releaseLock > returns released=false and does not audit when the active lock is held by another user
+  - declarationLockRouter > releaseLock > returns released=false and does not delete or audit when there is no active lock
+- **`src/server/api/routers/__tests__/jointEvaluation.test.ts`** — 3 test(s)
+  - jointEvaluationRouter > getFile > returns file when it exists
+  - jointEvaluationRouter > getFile > returns null when no file exists
+  - jointEvaluationRouter > getFile > throws when siret is missing
+- **`src/server/api/routers/__tests__/publicReferents.test.ts`** — 6 test(s)
+  - publicReferentsRouter > getById > returns null when no referent matches the id
+  - publicReferentsRouter > getById > returns the full referent including contact fields when found
+  - publicReferentsRouter > search > applies filters on region and county
+  - publicReferentsRouter > search > computes totalPages from total and pageSize
+  - publicReferentsRouter > search > returns at least 1 for totalPages even when empty
+  - publicReferentsRouter > search > returns rows and pagination metadata (no contact fields in projection)
+- **`src/server/api/routers/__tests__/publicStats.test.ts`** — 19 test(s)
+  - publicStatsRouter.getCurrentCampaignRate > computes the obligation predicate differently for triennial vs non-triennial years (smoke check via call wiring)
+  - publicStatsRouter.getCurrentCampaignRate > defaults to 0 when a count query returns no row at all
+  - publicStatsRouter.getCurrentCampaignRate > is callable without authentication (publicProcedure)
+  - publicStatsRouter.getCurrentCampaignRate > issues four parallel select calls (obligated + submitted, for year and year-1)
+  - publicStatsRouter.getCurrentCampaignRate > returns null previousYearRate when no obligated companies existed for year-1
+  - publicStatsRouter.getCurrentCampaignRate > returns rate, year-1 rate, and raw counts when all four queries have data
+  - publicStatsRouter.getCurrentCampaignRate > returns submissionRate=0 when totalObligated is 0 (avoids division by zero)
+  - publicStatsRouter.getCurrentCampaignRate > returns the current year from the domain helper in the payload
+  - publicStatsRouter.getCurrentCampaignRate > rounds rates to one decimal place
+  - publicStatsRouter.getScoreDistribution > attaches the human-readable label to each bracket
+  - publicStatsRouter.getScoreDistribution > computes a total equal to the sum of all bracket counts
+  - publicStatsRouter.getScoreDistribution > computes percentages rounded to one decimal
+  - publicStatsRouter.getScoreDistribution > counts NC declarations (null global score) in the dedicated bracket
+  - publicStatsRouter.getScoreDistribution > fills missing buckets with zero counts to guarantee 8 entries
+  - publicStatsRouter.getScoreDistribution > is callable without authentication (publicProcedure)
+  - publicStatsRouter.getScoreDistribution > issues a single grouped select to the declarations table
+  - publicStatsRouter.getScoreDistribution > returns 8 brackets at count=0 / 0% when no declaration has been submitted
+  - publicStatsRouter.getScoreDistribution > returns the 8 canonical brackets in fixed order with NC last
+  - publicStatsRouter.getScoreDistribution > returns the current year from the domain helper
+- **`src/server/api/routers/__tests__/statusHistoryHelpers.test.ts`** — 3 test(s)
+  - buildStepChangeInsert > encodes the previous and next step into the history row
+  - buildStepChangeInsert > flags creation by encoding fromStep as 'null'
+  - buildStepChangeInsert > propagates a null actor for system-triggered transitions
+- **`src/server/audit/__tests__/auditCleanupScript.integration.test.ts`** — 7 test(s)
+  - audit-cleanup.mjs (integration) > applies short and long retention independently in a single run
+  - audit-cleanup.mjs (integration) > deletes non-short-retention rows older than the long retention
+  - audit-cleanup.mjs (integration) > deletes public_search rows older than the short retention (bucket contains multiple categories)
+  - audit-cleanup.mjs (integration) > deletes read_sensitive rows older than the short retention
+  - audit-cleanup.mjs (integration) > executes a Date-based predicate without driver errors (regression guard)
+  - audit-cleanup.mjs (integration) > records a success self-audit even on an empty table
+  - audit-cleanup.mjs (integration) > writes a self-audit entry with the deletion counts in metadata
+- **`src/server/audit/__tests__/cachedAuth.test.ts`** — 3 test(s)
+  - cachedAuth > calls auth() again for a different request object
+  - cachedAuth > calls auth() only once when the same request is passed twice
+  - cachedAuth > shares the in-flight promise when called concurrently
+- **`src/server/audit/__tests__/declarationCleanupScript.integration.test.ts`** — 10 test(s)
+  - declaration-cleanup.mjs (integration) > is a no-op and idempotent when nothing is eligible (S5)
+  - declaration-cleanup.mjs (integration) > keeps a declaration whose year is still within retention (S2)
+  - declaration-cleanup.mjs (integration) > leaves no orphan in any attached table after a purge (S3)
+  - declaration-cleanup.mjs (integration) > purges a declaration whose year is beyond retention, with its S3 objects (S1)
+  - declaration-cleanup.mjs (integration) > purges year = cutoff − 1 but keeps year = cutoff at the exact boundary (S7)
+  - declaration-cleanup.mjs (integration) > records a success self-audit even when the database is empty
+  - declaration-cleanup.mjs (integration) > respects a custom retention window when computing the cutoff
+  - declaration-cleanup.mjs (integration) > rolls back the whole purge atomically when a delete fails mid-transaction (S6)
+  - declaration-cleanup.mjs (integration) > still purges the database when an S3 object delete fails (non-fatal)
+  - declaration-cleanup.mjs (integration) > writes a success self-audit row holding only counter metadata, no PII (S6 trace + RGPD)
+- **`src/server/audit/__tests__/log.test.ts`** — 4 test(s)
+  - logAction > accepts an explicit category override
+  - logAction > inserts a row with all provided fields and resolves the category from the action key
+  - logAction > never throws even when the database insert fails
+  - logAction > normalizes optional fields to null when omitted
+- **`src/server/audit/__tests__/requestContext.test.ts`** — 7 test(s)
+  - buildRequestContext > aggregates IP and user-agent in one call
+  - extractIpAddress > falls back to x-real-ip when x-forwarded-for is missing
+  - extractIpAddress > returns null when no IP header is present
+  - extractIpAddress > returns the first entry of x-forwarded-for
+  - extractIpAddress > trims whitespace around the forwarded entry
+  - extractUserAgent > returns null when missing
+  - extractUserAgent > returns the user-agent header value
+- **`src/server/audit/__tests__/trpcMiddleware.test.ts`** — 12 test(s)
+  - auditMiddleware > handles sessions with no siret gracefully
+  - auditMiddleware > logs a failed mutation with the error message and re-throws
+  - auditMiddleware > logs a successful mutation with user, siren, IP and metadata
+  - auditMiddleware > logs sensitive query reads (declaration.getOrCreate)
+  - auditMiddleware > logs the admin lock release mutation (adminDeclarations.releaseLock)
+  - auditMiddleware > logs the admin lock-timeout update mutation
+  - auditMiddleware > logs the declaration lock state read (declarationLock.getActiveLockForCurrentDeclaration)
+  - auditMiddleware > returns null metadata when input is empty
+  - auditMiddleware > skips logging when the path is not in the action map
+  - auditMiddleware > strips sensitive keys from nested objects and arrays
+  - auditMiddleware > strips sensitive metadata keys (token, password, …)
+  - auditMiddleware > swallows getRawInput errors and still logs the action
+- **`src/server/audit/__tests__/withAuditedRoute.test.ts`** — 5 test(s)
+  - withAuditedRoute > does not propagate resolveContext errors
+  - withAuditedRoute > logs failure and re-throws when the handler throws
+  - withAuditedRoute > logs failure when the handler returns a non-2xx response
+  - withAuditedRoute > logs success when the handler returns a 2xx response
+  - withAuditedRoute > merges audit context returned by resolveContext
+- **`src/server/auth/__tests__/companyAccess.test.ts`** — 10 test(s)
+  - assertNotImpersonating > does not throw for a non-admin with a stray impersonation field
+  - assertNotImpersonating > does not throw for a non-impersonating user
+  - assertNotImpersonating > does not throw for an admin who is not impersonating
+  - assertNotImpersonating > does not throw when session is null
+  - assertNotImpersonating > throws a FORBIDDEN TRPCError when an admin is impersonating
+  - isImpersonatingSiren > returns false for a non-admin even if impersonation is present
+  - isImpersonatingSiren > returns false for an admin with no impersonation
+  - isImpersonatingSiren > returns false when session is null
+  - isImpersonatingSiren > returns false when the SIREN does not match the impersonated one
+  - isImpersonatingSiren > returns true when admin is impersonating exactly this SIREN
+- **`src/server/auth/__tests__/config.test.ts`** — 15 test(s)
+  - auth config > jwt callback > creates user when not found in DB
+  - auth config > jwt callback > preserves existing token data when no user is provided
+  - auth config > jwt callback > stores id_token as null when account has none
+  - auth config > jwt callback > upserts user and populates token on sign-in (existing user)
+  - auth config > pages > uses /login as the sign-in page
+  - auth config > redirect callback > prefixes relative url with baseUrl
+  - auth config > redirect callback > preserves path when url starts with baseUrl and has a non-root path
+  - auth config > redirect callback > redirects to /mon-espace for external urls
+  - auth config > redirect callback > redirects to /mon-espace when url equals baseUrl
+  - auth config > redirect callback > redirects to /mon-espace when url is /
+  - auth config > redirect callback > redirects to /mon-espace when url is baseUrl + /
+  - auth config > session callback > defaults siret and phone to null when token has no values
+  - auth config > session callback > maps token data to session user
+  - auth config > session strategy > has a 30-day max age
+  - auth config > session strategy > uses jwt strategy
+- **`src/server/auth/__tests__/impersonation.test.ts`** — 7 test(s)
+  - jwt callback — impersonation update trigger > clears impersonation when the update payload is null
+  - jwt callback — impersonation update trigger > ignores impersonation update from a non-admin token
+  - jwt callback — impersonation update trigger > rejects malformed impersonation payloads (invalid SIREN)
+  - jwt callback — impersonation update trigger > rejects payload missing the `name` field
+  - jwt callback — impersonation update trigger > writes impersonation into the token when admin updates the session
+  - session callback — impersonation propagation > defaults impersonation to null when token has none
+  - session callback — impersonation propagation > mirrors token.impersonation onto session.user.impersonation
+- **`src/server/auth/__tests__/logout-route.test.ts`** — 11 test(s)
+  - GET /api/auth/logout > deletes the session cookie on the response with correct attributes
+  - GET /api/auth/logout > does not release any lock when the request is unauthenticated
+  - GET /api/auth/logout > does not release any lock when the session token carries no user id
+  - GET /api/auth/logout > does not write an audit log when the request is unauthenticated
+  - GET /api/auth/logout > redirects to end_session_endpoint with id_token_hint and post_logout_redirect_uri when an id_token is present
+  - GET /api/auth/logout > redirects to the home page when end_session_endpoint cannot be discovered
+  - GET /api/auth/logout > redirects to the home page when no session is active
+  - GET /api/auth/logout > redirects to the home page when the session has no id_token
+  - GET /api/auth/logout > releases all locks held by the user with the db client and user id
+  - GET /api/auth/logout > still completes the logout redirect when releasing locks throws
+  - GET /api/auth/logout > writes an audit log with the user identity when a session is active
+- **`src/server/auth/__tests__/parseAdminEmails.test.ts`** — 9 test(s)
+  - parseAdminEmails > deduplicates equivalent entries
+  - parseAdminEmails > drops empty entries (trailing comma, double comma, whitespace-only)
+  - parseAdminEmails > lowercases every entry
+  - parseAdminEmails > parses a comma-separated list
+  - parseAdminEmails > parses a single email
+  - parseAdminEmails > returns an empty set for an empty string
+  - parseAdminEmails > returns an empty set for null
+  - parseAdminEmails > returns an empty set for undefined
+  - parseAdminEmails > trims whitespace around each entry
+- **`src/server/auth/__tests__/proconnect-logout.test.ts`** — 3 test(s)
+  - fetchEndSessionEndpoint > returns null when end_session_endpoint is missing from discovery
+  - fetchEndSessionEndpoint > returns null when the discovery fetch throws
+  - fetchEndSessionEndpoint > returns the end_session_endpoint advertised by the OIDC discovery doc
+- **`src/server/db/__tests__/companyLocation.integration.test.ts`** — 5 test(s)
+  - app_company region/department persistence (real Postgres) > defaults the location columns to null when unset
+  - app_company region/department persistence (real Postgres) > keeps region/department filled while address is null (non-diffusible, S5)
+  - app_company region/department persistence (real Postgres) > maps the camelCase columns to their snake_case physical columns
+  - app_company region/department persistence (real Postgres) > persists and reads back region, department code and label
+  - app_company region/department persistence (real Postgres) > upserts the location columns on conflict (at-login persistence path)
+- **`src/server/db/__tests__/declarationConditions.test.ts`** — 2 test(s)
+  - notCancelledCondition > excludes cancelled declarations (mirror of isCancelled)
+  - submittedDeclarationCondition > excludes draft declarations (mirror of isDeclarationSubmitted)
+- **`src/server/db/__tests__/getGlobalSettings.test.ts`** — 3 test(s)
+  - getActiveCampaignYear > falls back to the current calendar year when no campaign has started
+  - getActiveCampaignYear > returns the most recent year whose campaignStartDate is in the past
+  - GLOBAL_SETTINGS_ID > is pinned to 1
+- **`src/server/db/__tests__/schema-comments.test.ts`** — 23 test(s)
+  - SCHEMA_COLUMN_COMMENTS > annotates all 10 T3 gap and proportion E columns with their SUIT labels
+  - SCHEMA_COLUMN_COMMENTS > annotates all declaration meta columns exposed by SUIT
+  - SCHEMA_COLUMN_COMMENTS > annotates all indicator A–E columns (18 columns)
+  - SCHEMA_COLUMN_COMMENTS > annotates all indicator F columns (22 columns)
+  - SCHEMA_COLUMN_COMMENTS > annotates all indicator G employee_category columns without GIP-MDS prefix
+  - SCHEMA_COLUMN_COMMENTS > annotates company identity columns exposed by SUIT
+  - SCHEMA_COLUMN_COMMENTS > annotates CSE opinion columns exposed by SUIT
+  - SCHEMA_COLUMN_COMMENTS > annotates declarant columns exposed by SUIT
+  - SCHEMA_COLUMN_COMMENTS > annotates declaration_status_history columns (T8 — event-sourced history)
+  - SCHEMA_COLUMN_COMMENTS > annotates declaration.siren as SUIT: SIREN (S1)
+  - SCHEMA_COLUMN_COMMENTS > annotates file columns exposed by SUIT
+  - SCHEMA_COLUMN_COMMENTS > annotates indicator G job_category columns without GIP-MDS prefix
+  - SCHEMA_COLUMN_COMMENTS > annotates second declaration columns
+  - SCHEMA_COLUMN_COMMENTS > annotates the Weez-sourced company region/department columns
+  - SCHEMA_COLUMN_COMMENTS > defines a declaration entry
+  - SCHEMA_COLUMN_COMMENTS > does not annotate dropped legacy columns (T8 — event sourcing)
+  - SCHEMA_COLUMN_COMMENTS > does not annotate file_path (not exposed in SUIT JSON)
+  - SCHEMA_COLUMN_COMMENTS > does not annotate job_category internal columns (not in SUIT JSON)
+  - SCHEMA_COLUMN_COMMENTS > no longer presents company.workforce as the SUIT Effectif (#3929)
+  - SCHEMA_COLUMN_COMMENTS > uses a SUIT or Weez source prefix (never GIP-MDS) for all T2 entries
+  - SCHEMA_COLUMN_COMMENTS > uses each SUIT label verbatim, exactly once (S4)
+  - SCHEMA_COLUMN_COMMENTS > uses the strict format 'GIP-MDS | SUIT: <label>' for every indicator A–F comment
+  - SCHEMA_COLUMN_COMMENTS > uses verbatim CSV labels for all T3 gap and proportion E columns (naming check)
+- **`src/server/rules/__tests__/consistency.test.ts`** — 11 test(s)
+  - v2027.1.json — structural consistency > all stage IDs are unique
+  - v2027.1.json — structural consistency > all state IDs are unique
+  - v2027.1.json — structural consistency > all transition IDs are unique
+  - v2027.1.json — structural consistency > every computation node's internal compute refs are known
+  - v2027.1.json — structural consistency > every compute ref inside guards is a known computation key
+  - v2027.1.json — structural consistency > every event type emitted by a transition is one of the allowed types
+  - v2027.1.json — structural consistency > every state.stage is null or references a known stage
+  - v2027.1.json — structural consistency > every threshold value is a finite positive number
+  - v2027.1.json — structural consistency > every transition.from entry is a known state
+  - v2027.1.json — structural consistency > every transition.to is a known state
+  - v2027.1.json — structural consistency > has at least one terminal state (reachable end)
+- **`src/server/rules/__tests__/fsmMirrors.conformance.test.ts`** — 39 test(s)
+  - demarche_completed — mirror coherence × (hasCse × hasSubmittedCseOpinion) > with CSE, opinion deposited: panel "closed"; nav keeps /avis-cse (CSE deposit re-submittable)
+  - demarche_completed — mirror coherence × (hasCse × hasSubmittedCseOpinion) > with CSE, opinion not yet deposited: panel "cse" and nav → /avis-cse (coherent)
+  - demarche_completed — mirror coherence × (hasCse × hasSubmittedCseOpinion) > without CSE, opinion "deposited": panel "closed" and nav → /confirmation (coherent, démarche closed)
+  - demarche_completed — mirror coherence × (hasCse × hasSubmittedCseOpinion) > without CSE, opinion not deposited: the panel should be "closed", not "cse" (#3945)
+  - engine conformance to the shared FSM vocabulary > every transition lands on a known engine state
+  - engine conformance to the shared FSM vocabulary > the v2027.1.json states cover exactly DECLARATION_FSM_STATUSES
+  - exhaustiveness — every FSM status is covered by both mirrors > status awaiting_compliance_path_choice: nav and panel return a defined destination
+  - exhaustiveness — every FSM status is covered by both mirrors > status awaiting_cse_opinion: nav and panel return a defined destination
+  - exhaustiveness — every FSM status is covered by both mirrors > status awaiting_revision_choice: nav and panel return a defined destination
+  - exhaustiveness — every FSM status is covered by both mirrors > status corrective_actions_chosen: nav and panel return a defined destination
+  - exhaustiveness — every FSM status is covered by both mirrors > status demarche_completed: nav and panel return a defined destination
+  - exhaustiveness — every FSM status is covered by both mirrors > status draft: nav and panel return a defined destination
+  - exhaustiveness — every FSM status is covered by both mirrors > status joint_evaluation_chosen: nav and panel return a defined destination
+  - exhaustiveness — every FSM status is covered by both mirrors > status revised_joint_evaluation_chosen: nav and panel return a defined destination
+  - mirror conformance — engine states (non-terminal) > state 'awaiting_compliance_path_choice' (stage 2): nav, panel and cta converge on the same screen
+  - mirror conformance — engine states (non-terminal) > state 'awaiting_cse_opinion' (stage 6): nav, panel and cta converge on the same screen
+  - mirror conformance — engine states (non-terminal) > state 'awaiting_revision_choice' (stage 4): nav, panel and cta converge on the same screen
+  - mirror conformance — engine states (non-terminal) > state 'corrective_actions_chosen' (stage 3): nav, panel and cta converge on the same screen
+  - mirror conformance — engine states (non-terminal) > state 'draft' (stage null): nav, panel and cta converge on the same screen
+  - mirror conformance — engine states (non-terminal) > state 'joint_evaluation_chosen' (stage 5): nav, panel and cta converge on the same screen
+  - mirror conformance — engine states (non-terminal) > state 'revised_joint_evaluation_chosen' (stage 5): nav, panel and cta converge on the same screen
+  - mirror conformance — engine transition destinations > transition 'choose_path_initial_corrective_action' → 'corrective_actions_chosen': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'choose_path_initial_joint_evaluation' → 'joint_evaluation_chosen': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'choose_path_initial_justify_with_cse' → 'awaiting_cse_opinion': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'choose_path_initial_justify_without_c…' → 'demarche_completed': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'choose_path_revised_joint_evaluation' → 'revised_joint_evaluation_chosen': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'choose_path_revised_justify_with_cse' → 'awaiting_cse_opinion': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'choose_path_revised_justify_without_c…' → 'demarche_completed': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'submit_cse_opinion' → 'demarche_completed': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'submit_joint_evaluation_initial_with_…' → 'awaiting_cse_opinion': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'submit_joint_evaluation_initial_witho…' → 'demarche_completed': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'submit_joint_evaluation_revised_with_…' → 'awaiting_cse_opinion': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'submit_joint_evaluation_revised_witho…' → 'demarche_completed': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'submit_second_declaration_persistent_…' → 'awaiting_revision_choice': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'submit_second_declaration_resolved_wi…' → 'awaiting_cse_opinion': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'submit_second_declaration_resolved_wi…' → 'demarche_completed': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'submit_to_compliance_path_choice' → 'awaiting_compliance_path_choice': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'submit_to_cse_opinion_directly' → 'awaiting_cse_opinion': mirrors consistent with the engine stage
+  - mirror conformance — engine transition destinations > transition 'submit_to_demarche_completed_directly' → 'demarche_completed': mirrors consistent with the engine stage
+- **`src/server/rules/__tests__/matrix.v2027.1.test.ts`** — 26 test(s)
+  - applyAction — no matching transition throws > does not throw when at least one guard matches a draft submit
+  - applyAction — no matching transition throws > throws when no transition matches the current state + action
+  - events shape > path_choice events carry the chosen value and round
+  - events shape > revised path_choice events carry round=2
+  - events shape > submit transitions always emit a `submit` event
+  - loadRules — caching > returns the same object reference on repeated calls
+  - loadRules — caching > throws for unknown version
+  - matrix v2027.1 — all 18 transitions > 'choose_path_initial_corrective_action'
+  - matrix v2027.1 — all 18 transitions > 'choose_path_initial_joint_evaluation'
+  - matrix v2027.1 — all 18 transitions > 'choose_path_initial_justify_with_cse'
+  - matrix v2027.1 — all 18 transitions > 'choose_path_initial_justify_without_c…'
+  - matrix v2027.1 — all 18 transitions > 'choose_path_revised_joint_evaluation'
+  - matrix v2027.1 — all 18 transitions > 'choose_path_revised_justify_with_cse'
+  - matrix v2027.1 — all 18 transitions > 'choose_path_revised_justify_without_c…'
+  - matrix v2027.1 — all 18 transitions > 'submit_cse_opinion → demarche_complet…'
+  - matrix v2027.1 — all 18 transitions > 'submit_joint_evaluation_initial_with_…'
+  - matrix v2027.1 — all 18 transitions > 'submit_joint_evaluation_initial_witho…'
+  - matrix v2027.1 — all 18 transitions > 'submit_joint_evaluation_revised_with_…'
+  - matrix v2027.1 — all 18 transitions > 'submit_joint_evaluation_revised_witho…'
+  - matrix v2027.1 — all 18 transitions > 'submit_second_declaration_persistent_…'
+  - matrix v2027.1 — all 18 transitions > 'submit_second_declaration_resolved_wi…'
+  - matrix v2027.1 — all 18 transitions > 'submit_second_declaration_resolved_wi…'
+  - matrix v2027.1 — all 18 transitions > 'submit_to_compliance_path_choice: com…'
+  - matrix v2027.1 — all 18 transitions > 'submit_to_cse_opinion_directly: no co…'
+  - matrix v2027.1 — all 18 transitions > 'submit_to_demarche_completed_directly…'
+  - submit_cse_opinion is re-entrant from demarche_completed > re-accepts the action once the démarche is completed, staying completed
+- **`src/server/rules/__tests__/schema.test.ts`** — 9 test(s)
+  - RulesSchema > accepts a state with null stage
+  - RulesSchema > accepts states with numeric stage references
+  - RulesSchema > parses v2027.1.json without errors
+  - RulesSchema > rejects a JSON missing required fields
+  - RulesSchema > rejects a JSON with invalid transition structure
+  - RulesSchema > rejects a state id outside the FSM union
+  - RulesSchema > rejects a transition targeting a state outside the FSM union
+  - RulesSchema > rejects a transition whose from references a state outside the FSM union
+  - RulesSchema > returns a typed object with required top-level fields
+- **`src/server/services/__tests__/clamav.test.ts`** — 7 test(s)
+  - clamav service > creates a clamd stream with INSTREAM command
+  - clamav service > destroys the clamd socket immediately when the abort signal fires
+  - clamav service > rejects sendChunk if the abort signal is already aborted at construction
+  - clamav service > rejects with a timeout error when clamd takes longer than SCAN_TIMEOUT_MS
+  - clamav service > returns clean for an uninfected file
+  - clamav service > returns infected for a FOUND reply
+  - clamav service > surfaces a connection error thrown by the socket during sendChunk
+- **`src/server/services/__tests__/declarationLockService.integration.test.ts`** — 15 test(s)
+  - declarationLockService (real Postgres) > acquireOrRefreshLock by the same holder > refreshes in place without creating a second row and extends expiry
+  - declarationLockService (real Postgres) > acquireOrRefreshLock on a free declaration > acquires the lock, creates a row, and stamps expiry near now + timeout
+  - declarationLockService (real Postgres) > acquireOrRefreshLock on an expired lock held by another user > getActiveLock returns null and the new user can take over
+  - declarationLockService (real Postgres) > acquireOrRefreshLock when another user holds an active lock > does not acquire and returns the original holder
+  - declarationLockService (real Postgres) > getActiveLock > returns null on the exact expiry boundary (expiresAt <= now)
+  - declarationLockService (real Postgres) > getActiveLock > returns null when no lock exists for the declaration
+  - declarationLockService (real Postgres) > getActiveLock > returns the holder joined with the user details when active
+  - declarationLockService (real Postgres) > refreshLock > extends expiry and returns true when held by the user
+  - declarationLockService (real Postgres) > refreshLock > returns false and does not touch the row when not held by the user
+  - declarationLockService (real Postgres) > refreshLock > returns false when no lock exists
+  - declarationLockService (real Postgres) > releaseAllLocksForUser > does not remove locks held by other users
+  - declarationLockService (real Postgres) > releaseAllLocksForUser > removes every lock held by the user across declarations
+  - declarationLockService (real Postgres) > releaseLock > leaves another user's lock untouched
+  - declarationLockService (real Postgres) > releaseLock > removes the lock when held by the user
+  - declarationLockService (real Postgres) > releaseLockAsAdmin > removes the lock regardless of who holds it
+- **`src/server/services/__tests__/declarationLockService.test.ts`** — 13 test(s)
+  - acquireOrRefreshLock > acquired=false when the conflict update touches no row
+  - acquireOrRefreshLock > acquired=true when the upsert returns a row, stamping now + timeout
+  - acquireOrRefreshLock > throws when the lock row is missing right after the upsert
+  - getActiveLock > returns null when no active lock row is returned
+  - getActiveLock > returns the holder row when the join yields an active lock
+  - getLockReadState > flags read-only and exposes the holder when another user holds the lock
+  - getLockReadState > is not read-only when no active lock exists
+  - getLockReadState > is not read-only when the current user holds the lock
+  - refreshLock > returns false when no row is updated
+  - refreshLock > returns true and stamps now + timeout when a row is updated
+  - release helpers issue a delete > releaseAllLocksForUser deletes scoped to the user
+  - release helpers issue a delete > releaseLock deletes scoped to the declaration and user
+  - release helpers issue a delete > releaseLockAsAdmin deletes scoped to the declaration
+- **`src/server/services/__tests__/fileStreaming.test.ts`** — 5 test(s)
+  - streamStoredFile > encodes non-ASCII filenames in Content-Disposition
+  - streamStoredFile > falls back to application/octet-stream for non-whitelisted content types
+  - streamStoredFile > propagates S3 errors so the caller can return 500
+  - streamStoredFile > streams a PDF inline with the expected headers
+  - streamStoredFile > streams a PNG as attachment with the expected headers
+- **`src/server/services/__tests__/fileUpload.test.ts`** — 11 test(s)
+  - fileUpload service > aborts S3 and rethrows when sendChunk fails mid-stream
+  - fileUpload service > preserves the original file extension in the S3 key
+  - fileUpload service > rejects a file larger than maxSize
+  - fileUpload service > rejects a file with invalid magic bytes
+  - fileUpload service > rejects a sub-signature-size file with invalid magic bytes
+  - fileUpload service > rejects an empty file
+  - fileUpload service > rejects an infected file
+  - fileUpload service > returns scan_unavailable when clamd.finish() rejects
+  - fileUpload service > returns scan_unavailable when clamd.sendChunk rejects mid-stream
+  - fileUpload service > uploads a clean PDF file successfully
+  - fileUpload service > uploads a clean PNG file successfully
+- **`src/server/services/__tests__/fileValidation.test.ts`** — 9 test(s)
+  - validateFileSignature > matches PDF when all types are allowed
+  - validateFileSignature > returns invalid for a ZIP file when only PDF is allowed
+  - validateFileSignature > returns invalid for an empty buffer
+  - validateFileSignature > returns invalid for an HTML file
+  - validateFileSignature > returns invalid when file type is not in allowed list
+  - validateFileSignature > returns invalid when header is too short for signature
+  - validateFileSignature > returns valid for a JPEG buffer
+  - validateFileSignature > returns valid for a PNG buffer
+  - validateFileSignature > returns valid for a proper PDF buffer
+- **`src/server/services/__tests__/gipMds.test.ts`** — 23 test(s)
+  - fetchGipCsv > returns text content from a successful response
+  - fetchGipCsv > throws on non-OK response
+  - parseGipCsv — publicationDate normalisation > leaves a malformed horodatage as-is
+  - parseGipCsv — publicationDate normalisation > strips the time component from an ISO horodatage
+  - parseGipCsv > converts French decimal commas to dots
+  - parseGipCsv > handles confidence index at 0
+  - parseGipCsv > handles EMA at boundary values
+  - parseGipCsv > handles negative gap values with French comma
+  - parseGipCsv > handles partially filled indicators (A-D filled, E-F empty)
+  - parseGipCsv > handles proportion boundary values (0 and 1)
+  - parseGipCsv > handles row with only SIREN and EMA (all indicators empty)
+  - parseGipCsv > handles zero gap values
+  - parseGipCsv > handles zero values in effectifs
+  - parseGipCsv > ignores CSV columns not present in CSV_TO_SCHEMA_MAP
+  - parseGipCsv > ignores reserve columns not in CSV_TO_SCHEMA_MAP
+  - parseGipCsv > maps CSV columns to schema fields using CSV_TO_SCHEMA_MAP
+  - parseGipCsv > parses valid CSV into metadata and rows
+  - parseGipCsv > preserves SIREN starting with 0 as string
+  - parseGipCsv > preserves SIREN with multiple leading zeros
+  - parseGipCsv > skips empty data rows
+  - parseGipCsv > skips rows without a siren
+  - parseGipCsv > throws on CSV with fewer than 4 lines
+  - parseGipCsv > trims whitespace from header names (trailing space on column)
+- **`src/server/services/__tests__/matomo.test.ts`** — 29 test(s)
+  - buildFunnelRows > anchors pctOfStart to the first jalon and rounds to a whole number
+  - buildFunnelRows > computes pctDropFromPrev as null on the first jalon and rounded thereafter
+  - buildFunnelRows > yields 0 percentages when the funnel start is empty (no division by zero)
+  - buildFunnelRows > yields pctDropFromPrev 0 when the previous jalon is empty mid-funnel
+  - fetchMatomoCategoryModel > coerces a string avg_event_value (Matomo sometimes serialises it as text)
+  - fetchMatomoCategoryModel > counts imports and splits failures by error type
+  - fetchMatomoCategoryModel > degrades to empty rows and a null duration without a token (no fetch)
+  - fetchMatomoCategoryModel > parses avgImportDurationSeconds (rounded) from the duration action's avg_event_value
+  - fetchMatomoCategoryModel > returns a null duration when the duration action is absent
+  - fetchMatomoCategoryModel > scopes the read by calendar year, never by a campaign custom dimension
+  - fetchMatomoCategoryModel > surfaces a well-formed Matomo error object as a thrown error
+  - fetchMatomoCseStatusConfirmations > returns all-zero when Matomo reports no confirmation names
+  - fetchMatomoCseStatusConfirmations > returns all-zero without a token (no fetch)
+  - fetchMatomoCseStatusConfirmations > scopes the read by the cse_status / cse_status_confirm event segment
+  - fetchMatomoCseStatusConfirmations > splits oui/non and drops leaked labels via the allow-list
+  - fetchMatomoDeviceBreakdown > classifies device labels into desktop / smartphone / tablet per behaviour
+  - fetchMatomoDeviceBreakdown > degrades to three all-zero rows without a token (no fetch)
+  - fetchMatomoDeviceBreakdown > fires one DevicesDetection.getType call per behaviour with its event segment
+  - fetchMatomoDeviceBreakdown > ignores device labels that match no known type
+  - fetchMatomoFunnel > applies the workforce filter to the declaration funnel only
+  - fetchMatomoFunnel > builds the three funnels from the Events API (ignoring leaked names)
+  - fetchMatomoFunnel > degrades to empty funnels when a response row fails schema validation
+  - fetchMatomoFunnel > degrades to empty funnels when the token is absent (no fetch)
+  - fetchMatomoFunnel > never puts the token in the URL
+  - fetchMatomoFunnel > scopes every call to the campaign year via dimension1
+  - fetchMatomoFunnel > throws on a non-ok Reporting API response
+  - fetchMatomoHelpLinks > degrades to empty rows without a token (no fetch)
+  - fetchMatomoHelpLinks > drops unknown slugs and leaked names not in the label map (allow-list)
+  - fetchMatomoHelpLinks > maps known slugs to French labels and sorts by descending count
+- **`src/server/services/__tests__/publicDeclarationsService.integration.test.ts`** — 8 test(s)
+  - searchPublicDeclarations (real Postgres) > excludes cancelled declarations even when released and submitted
+  - searchPublicDeclarations (real Postgres) > excludes years whose public release date has not been reached
+  - searchPublicDeclarations (real Postgres) > filters by region, department, naf and year
+  - searchPublicDeclarations (real Postgres) > keeps declarations with no gip row (left join yields null workforce)
+  - searchPublicDeclarations (real Postgres) > left-joins gip workforce and coerces numeric gap columns to numbers
+  - searchPublicDeclarations (real Postgres) > matches the q term against company name and siren, case-insensitively
+  - searchPublicDeclarations (real Postgres) > paginates with limit and offset while keeping the full count
+  - searchPublicDeclarations (real Postgres) > returns only released, non-draft, non-cancelled declarations
+- **`src/server/services/__tests__/publicDeclarationsService.test.ts`** — 13 test(s)
+  - searchPublicDeclarations > adds an equality filter on naf
+  - searchPublicDeclarations > adds an equality filter on region
+  - searchPublicDeclarations > adds an equality filter on year
+  - searchPublicDeclarations > adds an ILIKE OR filter on name and siren when q is provided
+  - searchPublicDeclarations > always applies the public-visibility base filters
+  - searchPublicDeclarations > coalesces nullable company columns to null before mapping
+  - searchPublicDeclarations > defaults the count to 0 when the count query returns no row
+  - searchPublicDeclarations > does not add optional filters when they are absent
+  - searchPublicDeclarations > forwards pagination limit and offset to the data query
+  - searchPublicDeclarations > maps departement to the company department code filter
+  - searchPublicDeclarations > passes declaration and company source columns to toPublicDeclaration
+  - searchPublicDeclarations > returns mapped data and the total count
+  - searchPublicDeclarations > skips the q filter when the OR builder yields no condition
+- **`src/server/services/__tests__/s3.test.ts`** — 9 test(s)
+  - s3 service > createMultipartUpload > aborts the upload on error
+  - s3 service > createMultipartUpload > initializes, sends chunks, and completes
+  - s3 service > deleteFile > sends a DeleteObjectCommand
+  - s3 service > ensureBucket > creates bucket when it does not exist
+  - s3 service > ensureBucket > does nothing when bucket already exists
+  - s3 service > getFile > returns body and content type
+  - s3 service > getFileSize > returns null when the head request fails
+  - s3 service > getFileSize > returns the object ContentLength
+  - s3 service > uploadFile > sends a PutObjectCommand
+- **`src/server/services/__tests__/suit.test.ts`** — 8 test(s)
+  - fetchCseBySiren > returns false when the company has no CSE
+  - fetchCseBySiren > returns null on network error
+  - fetchCseBySiren > returns null on non-ok response
+  - fetchCseBySiren > returns true when the company has a CSE
+  - fetchSanctionBySiren > returns no sanction when SUIT says sanction is false
+  - fetchSanctionBySiren > returns null on network error
+  - fetchSanctionBySiren > returns null on non-ok response
+  - fetchSanctionBySiren > returns sanction when SUIT says sanction is true
+- **`src/server/services/__tests__/uploadPipeline.test.ts`** — 9 test(s)
+  - runUploadPipeline > commits a CSE file row on clean scan and does not touch S3 cleanup
+  - runUploadPipeline > compensates with deleteFile when DB insert fails after the S3 commit
+  - runUploadPipeline > handles the concurrent CSE quota race by compensating the S3 commit
+  - runUploadPipeline > propagates a virus verdict without attempting any DB write or S3 cleanup
+  - runUploadPipeline > propagates scan_unavailable without DB write or S3 cleanup
+  - runUploadPipeline > rejects CSE upload with max_files BEFORE streaming when quota is reached
+  - runUploadPipeline > replaces an existing joint_evaluation file and best-effort deletes the old S3 object
+  - runUploadPipeline > reports s3Cleanup=failed when the compensating delete also fails
+  - runUploadPipeline > returns not_found when no declaration exists for siren/year
+- **`src/server/services/__tests__/weez.test.ts`** — 13 test(s)
+  - fetchCompanyBySiren > defaults statutDiffusion to null when the INSEE field is absent
+  - fetchCompanyBySiren > falls back to the effectif band for a non-diffusible company when effectiftotal is null
+  - fetchCompanyBySiren > falls back to the effectif band when effectiftotal is null
+  - fetchCompanyBySiren > keeps region/department for a non-diffusible company while masking the address
+  - fetchCompanyBySiren > prefers the exact effectiftotal over the effectif band
+  - fetchCompanyBySiren > returns company info for a diffusible company
+  - fetchCompanyBySiren > returns limited info for non-diffusible company
+  - fetchCompanyBySiren > returns nafLabel null when the activity label is absent
+  - fetchCompanyBySiren > returns null when no company found
+  - fetchCompanyBySiren > throws on API error
+  - fetchCompanyBySiren > uses raisonsociale as fallback when denominationunitelegale is null
+  - trancheToWorkforce > maps INSEE size-band codes to their lower bound
+  - trancheToWorkforce > returns null for non-employer, unknown or empty codes

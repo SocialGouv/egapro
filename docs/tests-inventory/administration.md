@@ -1,0 +1,411 @@
+# Inventaire des tests — Administration
+
+> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`. [← Retour à l'index](../tests-inventory.md)
+
+_Généré le 2026-07-22 — 51 fichier(s), 354 test(s)._
+
+- **`src/modules/admin/__tests__/AdminHomePage.test.tsx`** — 1 test(s)
+  - AdminHomePage > displays the admin welcome message with the user name and email
+- **`src/modules/admin/__tests__/AdminLayout.test.tsx`** — 3 test(s)
+  - AdminLayout > redirects non-admin users to /mon-espace
+  - AdminLayout > redirects unauthenticated users to /login
+  - AdminLayout > renders children for an admin user
+- **`src/modules/admin/__tests__/AdminNavigation.test.tsx`** — 8 test(s)
+  - AdminNavigation > marks /admin as active when on /admin
+  - AdminNavigation > marks /admin/declarations as active — and not Accueil
+  - AdminNavigation > marks /admin/declarations/<id> as active on the Déclarations link
+  - AdminNavigation > marks /admin/impersonate as active when on that page
+  - AdminNavigation > marks /admin/liste-referents as active when on that page
+  - AdminNavigation > marks /admin/stats as active on the stats page
+  - AdminNavigation > renders a sidemenu nav with the admin title
+  - AdminNavigation > renders all admin links
+- **`src/modules/admin/__tests__/AdminPage.test.tsx`** — 2 test(s)
+  - AdminPage > falls back to email when name is missing
+  - AdminPage > renders the admin home page with the user name and email
+- **`src/modules/admin/__tests__/AdminShell.test.tsx`** — 4 test(s)
+  - AdminShell > renders children inside the content area
+  - AdminShell > renders the admin navigation
+  - AdminShell > wraps children in a focusable main landmark targeted by the skip link
+  - AdminShell > wraps content in a fluid container
+- **`src/modules/admin/__tests__/schemas.test.ts`** — 22 test(s)
+  - admin schemas > accepts a valid 9-digit SIREN
+  - admin schemas > rejects invalid SIREN
+  - admin schemas > rejects invalid SIREN 12345678
+  - admin schemas > rejects invalid SIREN 1234567890
+  - admin schemas > rejects invalid SIREN 12345678a
+  - admin schemas > rejects invalid SIREN abcdefghi
+  - admin schemas > strips spaces before validating (e.g. '775 670 417')
+  - releaseLockSchema > accepts a valid UUID declarationId
+  - releaseLockSchema > rejects a non-UUID declarationId
+  - releaseLockSchema > rejects a non-UUID declarationId 123456789
+  - releaseLockSchema > rejects a non-UUID declarationId not-a-uuid
+  - updateLockTimeoutSchema > accepts 1 minutes within range
+  - updateLockTimeoutSchema > accepts 1440 minutes within range
+  - updateLockTimeoutSchema > accepts 30 minutes within range
+  - updateLockTimeoutSchema > accepts 720 minutes within range
+  - updateLockTimeoutSchema > rejects -1 minutes out of range
+  - updateLockTimeoutSchema > rejects 0 minutes out of range
+  - updateLockTimeoutSchema > rejects 1441 minutes out of range
+  - updateLockTimeoutSchema > rejects 5000 minutes out of range
+  - updateLockTimeoutSchema > rejects a missing timeout
+  - updateLockTimeoutSchema > rejects a non-integer timeout
+  - updateLockTimeoutSchema > rejects a non-numeric timeout
+- **`src/modules/admin/declarations/__tests__/AdminDeclarationDetailPage.test.tsx`** — 8 test(s)
+  - AdminDeclarationDetailPage > displays back link
+  - AdminDeclarationDetailPage > displays company information
+  - AdminDeclarationDetailPage > displays CSE opinions section
+  - AdminDeclarationDetailPage > displays declarant information
+  - AdminDeclarationDetailPage > displays declaration header
+  - AdminDeclarationDetailPage > displays files section with download link
+  - AdminDeclarationDetailPage > does not display the unlock button when the declaration is not locked
+  - AdminDeclarationDetailPage > renders the embedded recap title as h3 so the page keeps a single h1
+- **`src/modules/admin/declarations/__tests__/AdminDeclarationsPage.test.tsx`** — 4 test(s)
+  - AdminDeclarationsPage > renders page title
+  - AdminDeclarationsPage > renders search form
+  - AdminDeclarationsPage > renders table with data
+  - AdminDeclarationsPage > shows result count
+- **`src/modules/admin/declarations/__tests__/CancelDeclarationButton.test.tsx`** — 3 test(s)
+  - CancelDeclarationButton > renders nothing for a past campaign year
+  - CancelDeclarationButton > renders nothing for an already cancelled declaration
+  - CancelDeclarationButton > renders the button for a current year non-cancelled declaration
+- **`src/modules/admin/declarations/__tests__/constants.test.ts`** — 2 test(s)
+  - STATUS_LABELS > maps awaiting_compliance_path_choice to Transmise
+  - STATUS_LABELS > maps draft to Brouillon
+- **`src/modules/admin/declarations/__tests__/DeclarationTable.test.tsx`** — 9 test(s)
+  - DeclarationTable > does not show pagination when totalPages is 1
+  - DeclarationTable > exposes aria-sort on the sorted column and hides the sort glyph
+  - DeclarationTable > renders rows with company name as link
+  - DeclarationTable > shows cancelled badge when cancelledAt is set
+  - DeclarationTable > shows empty state when no rows
+  - DeclarationTable > shows pagination when totalPages > 1
+  - DeclarationTable > shows result count
+  - DeclarationTable > shows SIREN, year, status, email and date
+  - DeclarationTable > shows status label when cancelledAt is null
+- **`src/modules/admin/declarations/__tests__/DetailSections.test.tsx`** — 8 test(s)
+  - CompanySection > renders company info
+  - CompanySection > renders dash for hasCse null
+  - CompanySection > renders Non for hasCse false
+  - CseOpinionsSection > renders opinions table
+  - DeclarantSection > renders declarant info
+  - DeclarationSummary > renders all declaration fields
+  - DeclarationSummary > renders dash for null fields
+  - FilesSection > renders files table with download links
+- **`src/modules/admin/declarations/__tests__/schemas.test.ts`** — 29 test(s)
+  - admin declaration status filter vocabulary > derives from the FSM states plus the admin-only cancelled filter
+  - admin declaration status filter vocabulary > searchDeclarationsFormSchema accepts the derived status awaiting_compliance_path_choice
+  - admin declaration status filter vocabulary > searchDeclarationsFormSchema accepts the derived status awaiting_cse_opinion
+  - admin declaration status filter vocabulary > searchDeclarationsFormSchema accepts the derived status awaiting_revision_choice
+  - admin declaration status filter vocabulary > searchDeclarationsFormSchema accepts the derived status cancelled
+  - admin declaration status filter vocabulary > searchDeclarationsFormSchema accepts the derived status corrective_actions_chosen
+  - admin declaration status filter vocabulary > searchDeclarationsFormSchema accepts the derived status demarche_completed
+  - admin declaration status filter vocabulary > searchDeclarationsFormSchema accepts the derived status draft
+  - admin declaration status filter vocabulary > searchDeclarationsFormSchema accepts the derived status joint_evaluation_chosen
+  - admin declaration status filter vocabulary > searchDeclarationsFormSchema accepts the derived status revised_joint_evaluation_chosen
+  - admin declaration status filter vocabulary > searchDeclarationsFormSchema accepts the empty « all statuses » option
+  - admin declaration status filter vocabulary > searchDeclarationsSchema accepts the derived status awaiting_compliance_path_choice
+  - admin declaration status filter vocabulary > searchDeclarationsSchema accepts the derived status awaiting_cse_opinion
+  - admin declaration status filter vocabulary > searchDeclarationsSchema accepts the derived status awaiting_revision_choice
+  - admin declaration status filter vocabulary > searchDeclarationsSchema accepts the derived status cancelled
+  - admin declaration status filter vocabulary > searchDeclarationsSchema accepts the derived status corrective_actions_chosen
+  - admin declaration status filter vocabulary > searchDeclarationsSchema accepts the derived status demarche_completed
+  - admin declaration status filter vocabulary > searchDeclarationsSchema accepts the derived status draft
+  - admin declaration status filter vocabulary > searchDeclarationsSchema accepts the derived status joint_evaluation_chosen
+  - admin declaration status filter vocabulary > searchDeclarationsSchema accepts the derived status revised_joint_evaluation_chosen
+  - admin declaration status filter vocabulary > searchDeclarationsSchema rejects a status outside the vocabulary
+  - getDeclarationByIdSchema > accepts a valid UUID
+  - getDeclarationByIdSchema > rejects a non-UUID string
+  - searchDeclarationsSchema > accepts empty email string
+  - searchDeclarationsSchema > accepts minimal input with defaults
+  - searchDeclarationsSchema > parses all fields
+  - searchDeclarationsSchema > rejects invalid sort column
+  - searchDeclarationsSchema > rejects invalid year
+  - searchDeclarationsSchema > rejects page size over 100
+- **`src/modules/admin/declarations/__tests__/SearchForm.test.tsx`** — 3 test(s)
+  - SearchForm > pre-fills fields from search params
+  - SearchForm > renders all search fields and omits the removed Index / Valeur pair
+  - SearchForm > renders search and reset buttons
+- **`src/modules/admin/declarations/__tests__/SiblingDeclarationsSection.test.tsx`** — 6 test(s)
+  - SiblingDeclarationsSection > renders a link to each sibling detail page
+  - SiblingDeclarationsSection > renders multiple siblings
+  - SiblingDeclarationsSection > renders nothing when siblings array is empty
+  - SiblingDeclarationsSection > renders section heading when siblings exist
+  - SiblingDeclarationsSection > shows cancelled badge for cancelled siblings
+  - SiblingDeclarationsSection > shows status label for non-cancelled siblings
+- **`src/modules/admin/declarations/__tests__/UnlockDeclarationButton.test.tsx`** — 6 test(s)
+  - UnlockDeclarationButton > closes the modal and invalidates the detail query on success
+  - UnlockDeclarationButton > closes the modal when the cancel button is clicked
+  - UnlockDeclarationButton > displays the error message returned by the mutation
+  - UnlockDeclarationButton > renders nothing when the declaration is not locked
+  - UnlockDeclarationButton > renders the button when the declaration is locked
+  - UnlockDeclarationButton > triggers the release mutation on confirmation
+- **`src/modules/admin/impersonate/__tests__/CompanyPreviewCard.test.tsx`** — 3 test(s)
+  - CompanyPreviewCard > omits optional fields when null
+  - CompanyPreviewCard > renders all company fields when present
+  - CompanyPreviewCard > renders workforce of 0
+- **`src/modules/admin/impersonate/__tests__/ImpersonateForm.test.tsx`** — 4 test(s)
+  - ImpersonateForm > rejects an invalid SIREN with a Zod error
+  - ImpersonateForm > renders datalist suggestions from getLastImpersonated
+  - ImpersonateForm > renders the preview and triggers session.update on start
+  - ImpersonateForm > submits a valid SIREN to the search mutation
+- **`src/modules/admin/impersonate/__tests__/ImpersonatePage.test.tsx`** — 1 test(s)
+  - ImpersonatePage > renders the heading, description and the form
+- **`src/modules/admin/referents/__tests__/AdminReferentsPage.test.tsx`** — 5 test(s)
+  - AdminReferentsPage > renders action buttons
+  - AdminReferentsPage > renders page title
+  - AdminReferentsPage > renders search form
+  - AdminReferentsPage > renders table with data
+  - AdminReferentsPage > shows result count
+- **`src/modules/admin/referents/__tests__/constants.test.ts`** — 2 test(s)
+  - COLUMN_LABELS > has labels for all columns
+  - REFERENT_TYPE_LABELS > has labels for email and url
+- **`src/modules/admin/referents/__tests__/DeleteConfirmationModal.test.tsx`** — 6 test(s)
+  - DeleteModal > calls onClose on Annuler
+  - DeleteModal > calls onClose on the Fermer button
+  - DeleteModal > calls onClose then onConfirm when confirming
+  - DeleteModal > pluralizes the count when greater than 1
+  - DeleteModal > renders the confirmation title
+  - DeleteModal > uses the singular form when count is 1
+- **`src/modules/admin/referents/__tests__/ImportReferentsModal.test.tsx`** — 7 test(s)
+  - ImportReferentsModal > calls the mutation when the payload is valid
+  - ImportReferentsModal > closes and calls onSuccess when the mutation resolves
+  - ImportReferentsModal > disables Importer until a file is selected
+  - ImportReferentsModal > renders warning and title
+  - ImportReferentsModal > shows an error when the file is not valid JSON
+  - ImportReferentsModal > shows an error when the JSON fails schema validation
+  - ImportReferentsModal > surfaces a server error through the mutation onError hook
+- **`src/modules/admin/referents/__tests__/ReferentFormFields.test.tsx`** — 5 test(s)
+  - ReferentFormFields > associates the name error with its input (RGAA 11.10)
+  - ReferentFormFields > associates the region error with its select (RGAA 11.10)
+  - ReferentFormFields > associates the substitute email error with its input (RGAA 11.10)
+  - ReferentFormFields > associates the value error with its input (RGAA 11.10)
+  - ReferentFormFields > renders fields without error attributes when there is no error
+- **`src/modules/admin/referents/__tests__/ReferentTable.test.tsx`** — 10 test(s)
+  - ReferentTable > calls onEdit when clicking Modifier
+  - ReferentTable > flips sort order when clicking the active sort column
+  - ReferentTable > handles rows without a county
+  - ReferentTable > handles URL type referents
+  - ReferentTable > renders an empty state when there are no rows
+  - ReferentTable > renders rows with region, county and value
+  - ReferentTable > shows pagination when totalPages > 1 and navigates
+  - ReferentTable > switches sort column on inactive column click
+  - ReferentTable > toggles a row selection when its checkbox is clicked
+  - ReferentTable > unselects when clicking an already-selected row
+- **`src/modules/admin/referents/__tests__/schemas.test.ts`** — 17 test(s)
+  - createReferentSchema > rejects empty name
+  - createReferentSchema > rejects invalid email
+  - createReferentSchema > rejects invalid URL
+  - createReferentSchema > validates a URL referent
+  - createReferentSchema > validates an email referent
+  - deleteReferentsSchema > accepts an array of UUIDs
+  - deleteReferentsSchema > rejects empty array
+  - editReferentSchema > rejects missing id
+  - editReferentSchema > requires an id
+  - importReferentsSchema > rejects empty array
+  - importReferentsSchema > validates an array of referents
+  - referentFormSchema > validates form data
+  - searchReferentsSchema > accepts empty region/county strings
+  - searchReferentsSchema > accepts minimal input with defaults
+  - searchReferentsSchema > parses all fields
+  - searchReferentsSchema > rejects invalid region
+  - searchReferentsSchema > rejects invalid sort column
+- **`src/modules/admin/referents/__tests__/SearchForm.test.tsx`** — 5 test(s)
+  - SearchForm > disables the county select until a region is chosen
+  - SearchForm > does not render a name-search input
+  - SearchForm > enables the county select when a region is selected
+  - SearchForm > pushes a URL with the submitted filters on search
+  - SearchForm > resets and pushes the base URL on Réinitialiser
+- **`src/modules/admin/settings/__tests__/AdminSettingsPage.test.tsx`** — 3 test(s)
+  - AdminSettingsPage > falls back to the current calendar year when no year is configured
+  - AdminSettingsPage > renders the deadlines section and passes configured years to the form
+  - AdminSettingsPage > renders the lock timeout section seeded with the stored timeout
+- **`src/modules/admin/settings/__tests__/CampaignDeadlinesForm.test.tsx`** — 6 test(s)
+  - CampaignDeadlinesForm > flags non-configured years with a hint suffix
+  - CampaignDeadlinesForm > lists every year since FIRST_DECLARATION_YEAR up to next year
+  - CampaignDeadlinesForm > populates editable fields from the query and shows the GIP date read-only
+  - CampaignDeadlinesForm > shows a success alert and invalidates queries on success
+  - CampaignDeadlinesForm > submits the form values on save
+  - CampaignDeadlinesForm > surfaces the server error when the mutation fails
+- **`src/modules/admin/settings/__tests__/LockTimeoutForm.test.tsx`** — 6 test(s)
+  - LockTimeoutForm > blocks submission and shows an error for an out-of-range value
+  - LockTimeoutForm > disables the submit button while the mutation is pending
+  - LockTimeoutForm > seeds the input with the initial timeout
+  - LockTimeoutForm > shows a success alert and invalidates the query on success
+  - LockTimeoutForm > submits the entered timeout
+  - LockTimeoutForm > surfaces the server error when the mutation fails
+- **`src/modules/admin/settings/__tests__/schemas.test.ts`** — 7 test(s)
+  - campaignDeadlinesFormSchema > accepts a valid payload
+  - campaignDeadlinesFormSchema > coerces empty optional dates to null
+  - campaignDeadlinesFormSchema > ignores any extra gipPublicationDate field sent from the client
+  - campaignDeadlinesFormSchema > rejects an invalid publicDataReleaseDate format
+  - campaignDeadlinesFormSchema > rejects invalid date formats
+  - campaignDeadlinesFormSchema > rejects when decl2 is not after decl1
+  - campaignDeadlinesFormSchema > rejects years below FIRST_DECLARATION_YEAR
+- **`src/modules/admin/stats/__tests__/AdminKpiTile.test.tsx`** — 8 test(s)
+  - AdminKpiTile > inverts colors when `inverted` is true: negative delta becomes success
+  - AdminKpiTile > inverts colors when `inverted` is true: positive delta becomes error
+  - AdminKpiTile > renders a neutral badge with equals sign for a zero delta
+  - AdminKpiTile > renders a success badge with upward arrow for a positive delta (default)
+  - AdminKpiTile > renders an error badge with downward arrow for a negative delta (default)
+  - AdminKpiTile > renders no badge when delta is null
+  - AdminKpiTile > renders the arrow with aria-hidden so the visual cue is not duplicated for screen readers
+  - AdminKpiTile > renders title, value and subtitle
+- **`src/modules/admin/stats/__tests__/CampaignProgressionChart.test.tsx`** — 14 test(s)
+  - CampaignProgressionChart > renders an accessible figcaption alongside the chart
+  - CampaignProgressionChart > shows an empty state when no series produce any day
+  - CampaignProgressionChart line colors > draws the current year, the previous year and older years each with its own color
+  - CampaignProgressionChart tooltip > falls back to 0 % when the year has no known total
+  - CampaignProgressionChart tooltip > formats the count and the rounded share of the year total
+  - CampaignProgressionChart tooltip > renders nothing when inactive
+  - CampaignProgressionChart tooltip > renders nothing when the label is not a string
+  - CampaignProgressionChart tooltip > renders nothing when the payload is empty
+  - CampaignProgressionChart tooltip > rounds the share to the nearest integer
+  - CampaignProgressionChart tooltip > skips entries whose value is null
+  - CampaignProgressionChart tooltip > treats a year with no data points as a zero total
+  - CampaignProgressionChart X axis > formats MM-DD ticks as a day/month label
+  - CampaignProgressionChart Y axis > formats ticks identically to the French locale (iso-render)
+  - CampaignProgressionChart Y axis > formats zero as '0'
+- **`src/modules/admin/stats/__tests__/CampaignProgressionTable.test.tsx`** — 4 test(s)
+  - CampaignProgressionTable > formats cumulative counts with French thousand separators
+  - CampaignProgressionTable > lists days sorted chronologically and one column per year
+  - CampaignProgressionTable > renders nothing when there are no series
+  - CampaignProgressionTable > shows an em dash when a year has no value for a given day
+- **`src/modules/admin/stats/__tests__/CampaignRateTile.test.tsx`** — 8 test(s)
+  - CampaignRateTile > passes year and sizeRange through to the underlying query
+  - CampaignRateTile > renders the tile with rate, subtitle and a positive badge against year-1
+  - CampaignRateTile > renders the tile without a badge when previousYearRate is null (no history)
+  - CampaignRateTile > renders zeros gracefully when totalObligated is 0
+  - CampaignRateTile > returns null when the query has neither data, loading nor error state
+  - CampaignRateTile > shows a loading message while the query is in flight and no data is cached
+  - CampaignRateTile > shows an error alert when the query errors out
+  - CampaignRateTile > uses the previous data as placeholder while a new query is running
+- **`src/modules/admin/stats/__tests__/CompletionFunnelChart.test.tsx`** — 23 test(s)
+  - buildEchartsOption > colours each datum: palette per index below threshold, alert red above
+  - buildEchartsOption > cycles the palette modulo its length when there are more jalons than colors
+  - buildEchartsOption > exposes a clickable legend with one entry per jalon
+  - buildEchartsOption > preserves the row payload alongside name/value so formatters can use it
+  - buildEchartsOption > uses a horizontal funnel with sort=none to preserve row order
+  - buildTooltipFormatter > omits the drop line when pctDropFromPrev is null (first jalon)
+  - buildTooltipFormatter > renders label, count and percentage of funnel
+  - buildTooltipFormatter > shows the drop line with alert styling when above threshold
+  - buildTooltipFormatter > shows the drop line without alert styling when below threshold
+  - CompletionFunnelChart (S-K19-C1..C5) > exposes the caption via aria-label on the chart container for assistive tech
+  - CompletionFunnelChart (S-K19-C1..C5) > S-K19-C1: shows an empty-state message when every row has zero count
+  - CompletionFunnelChart (S-K19-C1..C5) > S-K19-C2: includes an accessible figcaption when data is present
+  - CompletionFunnelChart (S-K19-C1..C5) > S-K19-C3: renders a figure landmark via figcaption
+  - CompletionFunnelChart (S-K19-C1..C5) > S-K19-C4: assigns palette colors to each jalon when no drop is above the threshold
+  - CompletionFunnelChart (S-K19-C1..C5) > S-K19-C5: tolerates a single-row funnel (no drop computation needed)
+  - isAboveThreshold > returns false when pctDropFromPrev equals the threshold
+  - isAboveThreshold > returns false when pctDropFromPrev is null
+  - isAboveThreshold > returns true when pctDropFromPrev exceeds the threshold
+  - labelFormatter > formats name, count and percentage with localized thousands
+  - pickFunnelColor > returns the alert color when pctDropFromPrev exceeds the threshold
+  - pickFunnelColor > returns the palette color matching the index when the drop is below threshold
+  - pickFunnelColor > uses the dsfrPalette argument when provided (dark-theme override)
+  - pickFunnelColor > wraps the palette index modulo its length
+- **`src/modules/admin/stats/__tests__/CompletionFunnelTable.test.tsx`** — 4 test(s)
+  - CompletionFunnelTable (S-K19-T1..T4) > S-K19-T1: renders nothing when rows are empty
+  - CompletionFunnelTable (S-K19-T1..T4) > S-K19-T2: lists every row with its label, count, pctOfStart and drop
+  - CompletionFunnelTable (S-K19-T1..T4) > S-K19-T3: shows an em-dash for the first row's drop (null)
+  - CompletionFunnelTable (S-K19-T1..T4) > S-K19-T4: exposes the caption to assistive tech (visually hidden)
+- **`src/modules/admin/stats/__tests__/CseStatusConfirmationsTile.test.tsx`** — 5 test(s)
+  - CseStatusConfirmationsTile > passes the year through and a placeholderData identity function to the query
+  - CseStatusConfirmationsTile > renders the total, the year in the title and the oui/non split
+  - CseStatusConfirmationsTile > returns null when the query has neither data, loading nor error state
+  - CseStatusConfirmationsTile > shows a loading message while the query is in flight and no data is cached
+  - CseStatusConfirmationsTile > shows an error alert when the query errors out
+- **`src/modules/admin/stats/__tests__/formatters.test.ts`** — 8 test(s)
+  - formatCount > formats with French thousands separator
+  - formatCount > handles zero
+  - formatDays > appends j suffix when withUnit is true
+  - formatDays > formats a value with one decimal
+  - formatDays > returns em-dash for null
+  - formatPercent > appends % suffix when withUnit is true
+  - formatPercent > formats with one decimal in French locale
+  - formatPercent > pads integers with one decimal
+- **`src/modules/admin/stats/__tests__/StagnationDaysFilter.test.tsx`** — 6 test(s)
+  - StagnationDaysFilter > calls onChange with the parsed number when the user types a valid value
+  - StagnationDaysFilter > clamps a value above the max to 180
+  - StagnationDaysFilter > clamps a value below the min to 1
+  - StagnationDaysFilter > ignores non-numeric input
+  - StagnationDaysFilter > links the label to the input via htmlFor / id
+  - StagnationDaysFilter > renders the current value
+- **`src/modules/admin/stats/__tests__/StatsBarChart.test.tsx`** — 5 test(s)
+  - StatsBarChart > renders an accessible figure with the caption when at least one value is positive
+  - StatsBarChart > renders the empty-state message when every series value is 0
+  - StatsBarChart > renders the figure for a populated multi-series (device) dataset
+  - StatsBarChart > treats a row missing the series value as empty (defensive nullish guard)
+  - StatsBarChart > uses a custom empty label when provided
+- **`src/modules/admin/stats/__tests__/StatsBarTable.test.tsx`** — 6 test(s)
+  - StatsBarTable > exposes the caption to assistive tech (visually hidden)
+  - StatsBarTable > formats numeric values with the French thousands separator
+  - StatsBarTable > renders a row header per row and a data cell per column (single column)
+  - StatsBarTable > renders nothing when given no rows
+  - StatsBarTable > renders one data cell per column for a multi-column (device) dataset
+  - StatsBarTable > renders string values verbatim and falls back to 0 for missing values
+- **`src/modules/admin/stats/__tests__/StatsDashboard.campaign.test.tsx`** — 12 test(s)
+  - StatsDashboard — campaign section states > renders campaign progression chart and table when data is available
+  - StatsDashboard — campaign section states > renders step dropoff chart and table when data is available
+  - StatsDashboard — campaign section states > renders step durations chart and table when data is available
+  - StatsDashboard — campaign section states > shows campaign progression error state
+  - StatsDashboard — campaign section states > shows campaign progression loading state
+  - StatsDashboard — campaign section states > shows step dropoff error state
+  - StatsDashboard — campaign section states > shows step dropoff loading state
+  - StatsDashboard — campaign section states > shows step durations error state
+  - StatsDashboard — campaign section states > shows step durations loading state
+  - StatsDashboard — query options > passes placeholderData (prev) through for progression query
+  - StatsDashboard — query options > passes placeholderData (prev) through for step dropoff query
+  - StatsDashboard — query options > passes placeholderData (prev) through for step durations query
+- **`src/modules/admin/stats/__tests__/StatsDashboard.test.tsx`** — 15 test(s)
+  - StatsDashboard — funnel section > passes placeholderData (prev) through for funnel query
+  - StatsDashboard — funnel section > renders revision and CSE funnel charts when data is available
+  - StatsDashboard — funnel section > renders the three Matomo funnels when data is available
+  - StatsDashboard — funnel section > shows empty messages for revision and CSE funnels when no data
+  - StatsDashboard — funnel section > shows funnel error state
+  - StatsDashboard — funnel section > shows funnel loading state
+  - StatsDashboard — funnel section > shows the main and compliance funnel headings when data is available
+  - StatsDashboard — funnel section > shows the Matomo funnel error state on query error
+  - StatsDashboard — structure and filters > keeps the most recent selected year active after toggling a year (regression: dashboard went blank because YearsFilter sorts ascending)
+  - StatsDashboard — structure and filters > renders the campaign section h2 heading
+  - StatsDashboard — structure and filters > renders the CampaignRateTile
+  - StatsDashboard — structure and filters > renders the funnel section h2 heading
+  - StatsDashboard — structure and filters > renders the global filters: YearsFilter, CompanySizeFilter, StagnationDaysFilter
+  - StatsDashboard — structure and filters > renders the h1 Statistiques heading
+  - StatsDashboard — structure and filters > shows campaign progression empty-state when no years are selected
+- **`src/modules/admin/stats/__tests__/StepDropoffChart.test.tsx`** — 3 test(s)
+  - StepDropoffChart > mentions the alert threshold in the figcaption
+  - StepDropoffChart > renders an accessible figcaption that covers both wizard and post-submit phases
+  - StepDropoffChart > renders an empty-state message when no row has any data
+- **`src/modules/admin/stats/__tests__/StepDropoffTable.test.tsx`** — 6 test(s)
+  - StepDropoffTable > formats a rate of 0 % as '0,0'
+  - StepDropoffTable > formats numeric values with French decimal separator (1 decimal for %)
+  - StepDropoffTable > groups wizard and post-submit rows under two distinct rowgroup headers
+  - StepDropoffTable > renders all 12 rows when given a full wizard + post-submit dataset
+  - StepDropoffTable > renders nothing when given no rows
+  - StepDropoffTable > renders one row per step with the expected columns
+- **`src/modules/admin/stats/__tests__/StepDurationsChart.test.tsx`** — 3 test(s)
+  - StepDurationsChart > includes an accessible figcaption when rows have durations
+  - StepDurationsChart > mentions the post-soumission phase in the figcaption
+  - StepDurationsChart > shows an empty-state message when no row has any duration data
+- **`src/modules/admin/stats/__tests__/StepDurationsTable.test.tsx`** — 5 test(s)
+  - StepDurationsTable > formats numeric values with French decimal separator (1 decimal)
+  - StepDurationsTable > groups wizard and post-submit rows under distinct section headers
+  - StepDurationsTable > renders nothing when given no rows
+  - StepDurationsTable > renders one row per step with the expected columns
+  - StepDurationsTable > shows an em dash when percentiles are null (sample too small)
+- **`src/modules/admin/stats/__tests__/useDebouncedValue.test.ts`** — 3 test(s)
+  - useDebouncedValue > keeps the previous value until the delay has elapsed
+  - useDebouncedValue > resets the timer when the value changes again before the delay
+  - useDebouncedValue > returns the initial value synchronously on first render
+- **`src/modules/admin/stats/__tests__/UsersPerCompanyTile.test.tsx`** — 5 test(s)
+  - UsersPerCompanyTile > passes no input and a placeholderData identity function to the query
+  - UsersPerCompanyTile > renders the average, the title and the companies/multi/max subtitle
+  - UsersPerCompanyTile > returns null when the query has neither data, loading nor error state
+  - UsersPerCompanyTile > shows a loading message while the query is in flight and no data is cached
+  - UsersPerCompanyTile > shows an error alert when the query errors out
+- **`src/modules/admin/stats/__tests__/YearsFilter.test.tsx`** — 6 test(s)
+  - YearsFilter > adds a year to the selection sorted ascending on check
+  - YearsFilter > binds the fieldset legend to the group for screen readers
+  - YearsFilter > disables unchecked checkboxes once maxSelection is reached
+  - YearsFilter > reflects the selected years
+  - YearsFilter > removes a year on uncheck
+  - YearsFilter > renders one checkbox per available year

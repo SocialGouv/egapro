@@ -1,0 +1,105 @@
+# Inventaire des tests — Mise en page & navigation
+
+> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`. [← Retour à l'index](../tests-inventory.md)
+
+_Généré le 2026-07-22 — 12 fichier(s), 87 test(s)._
+
+- **`src/modules/layout/__tests__/Breadcrumb.test.tsx`** — 5 test(s)
+  - Breadcrumb > links aria-controls to collapse container id
+  - Breadcrumb > renders DSFR breadcrumb structure with nav, button, and list
+  - Breadcrumb > renders last item with aria-current='page' and no href
+  - Breadcrumb > renders nothing when items array is empty
+  - Breadcrumb > renders parent items as links with correct href
+- **`src/modules/layout/__tests__/ImpersonateBanner.test.tsx`** — 4 test(s)
+  - ImpersonateBanner > calls session.update(null) and router.refresh on stop click
+  - ImpersonateBanner > renders nothing when not impersonating
+  - ImpersonateBanner > renders nothing when session data is undefined
+  - ImpersonateBanner > renders the banner with company info when impersonating
+- **`src/modules/layout/__tests__/PublicChrome.test.tsx`** — 6 test(s)
+  - PublicChrome > hides ResourceBanner on /login but keeps the Footer
+  - PublicChrome > renders chrome on non-admin nested routes
+  - PublicChrome > renders chrome on sibling routes whose name merely starts with 'admin'
+  - PublicChrome > renders nothing on /admin
+  - PublicChrome > renders nothing on nested /admin/* routes
+  - PublicChrome > renders ResourceBanner + Footer on public routes
+- **`src/modules/layout/__tests__/ResourceBanner.test.tsx`** — 5 test(s)
+  - ResourceBanner > renders a screen-reader-only section heading above the tiles
+  - ResourceBanner > renders detail text for each tile
+  - ResourceBanner > renders three heading level 3 for tile titles
+  - ResourceBanner > renders three resource tiles with correct links
+  - ResourceBanner > uses a 10/2 column ratio so the illustration sits flush right
+- **`src/modules/layout/Header/__tests__/HeaderQuickAccess.test.tsx`** — 3 test(s)
+  - HeaderQuickAccess > keeps the DSFR tools-links class on the navigation element (DSFR HeaderLinks hook)
+  - HeaderQuickAccess > renders the account menu inside the landmark when signed in
+  - HeaderQuickAccess > wraps the quick access links in a 'Accès rapides' navigation landmark (RGAA 9.2)
+- **`src/modules/layout/Header/__tests__/HeaderQuickAccessLinks.test.tsx`** — 2 test(s)
+  - HeaderQuickAccessLinks > renders the help link and login button when no session
+  - HeaderQuickAccessLinks > renders the user account menu when a session exists
+- **`src/modules/layout/Header/__tests__/MobileMenu.test.tsx`** — 3 test(s)
+  - MobileMenu > hides the main navigation and renders the inline user block when signed in
+  - MobileMenu > renders the fresh phone from the profile table, ignoring the stale JWT
+  - MobileMenu > renders the main navigation when no user is signed in
+- **`src/modules/layout/Header/__tests__/MobileUserBlock.test.tsx`** — 9 test(s)
+  - MobileUserBlock > displays the phone number when userPhone is provided
+  - MobileUserBlock > displays the user name and email inline
+  - MobileUserBlock > does not display a phone number when userPhone is not provided
+  - MobileUserBlock > focus on mobile menu opening (RGAA 12.8) > makes the user name programmatically focusable only
+  - MobileUserBlock > focus on mobile menu opening (RGAA 12.8) > moves focus onto the user name once the DSFR focus trap settled
+  - MobileUserBlock > opens the profile modal when 'Voir mon profil' is clicked
+  - MobileUserBlock > renders the 'Mes entreprises' link
+  - MobileUserBlock > renders the 'Se déconnecter' link pointing to the signout endpoint
+  - MobileUserBlock > renders the 'Voir mon profil' button
+- **`src/modules/layout/Header/__tests__/UserAccountMenu.test.tsx`** — 31 test(s)
+  - UserAccountMenu > admin link > displays 'Administration' link when isAdmin is true
+  - UserAccountMenu > admin link > does not display 'Administration' when isAdmin is false
+  - UserAccountMenu > arrow key navigation > moves focus to the first item on Home
+  - UserAccountMenu > arrow key navigation > moves focus to the last item on End
+  - UserAccountMenu > arrow key navigation > moves focus to the next item on ArrowDown
+  - UserAccountMenu > arrow key navigation > moves focus to the previous item on ArrowUp
+  - UserAccountMenu > arrow key navigation > wraps focus to the first item when pressing ArrowDown on the last item
+  - UserAccountMenu > arrow key navigation > wraps focus to the last item when pressing ArrowUp on the first item
+  - UserAccountMenu > closing behavior > closes the menu on Escape key
+  - UserAccountMenu > closing behavior > closes the menu on Tab and returns focus to the toggle button
+  - UserAccountMenu > closing behavior > closes the menu when clicking a menu item button
+  - UserAccountMenu > closing behavior > closes the menu when clicking outside
+  - UserAccountMenu > closing behavior > closes the menu when clicking the toggle button again
+  - UserAccountMenu > does not display the dropdown menu by default
+  - UserAccountMenu > focus management > moves focus to the first menu item when the dropdown opens
+  - UserAccountMenu > focus management > returns focus to the toggle button when closing with Escape
+  - UserAccountMenu > has aria-expanded=false by default
+  - UserAccountMenu > optional userPhone > displays the phone number when userPhone is provided
+  - UserAccountMenu > optional userPhone > does not display a phone number when userPhone is not provided
+  - UserAccountMenu > profile modal integration > closes the dropdown and opens the profile modal on 'Voir mon profil' click
+  - UserAccountMenu > renders the toggle button with 'Mon espace' label
+  - UserAccountMenu > when opened > displays 'Mes entreprises' menu item linking to the companies page
+  - UserAccountMenu > when opened > displays 'Se déconnecter' menu item linking to signout
+  - UserAccountMenu > when opened > displays 'Voir mon profil' menu item
+  - UserAccountMenu > when opened > displays the dropdown menu on button click
+  - UserAccountMenu > when opened > displays the user email
+  - UserAccountMenu > when opened > displays the user name
+  - UserAccountMenu > when opened > keeps the user info block outside the menu element
+  - UserAccountMenu > when opened > names the menu 'Mon espace'
+  - UserAccountMenu > when opened > removes menu items from the natural tab order (roving focus)
+  - UserAccountMenu > when opened > sets aria-expanded=true when open
+- **`src/modules/layout/shared/__tests__/NavLink.test.tsx`** — 9 test(s)
+  - NavLink > aria-current absent when no match > does not use / as prefix for all paths
+  - NavLink > aria-current absent when no match > is absent when path does not match
+  - NavLink > aria-current absent when no match > is absent when path is another section
+  - NavLink > aria-current on exact match > is set to 'page' on root /
+  - NavLink > aria-current on exact match > is set to 'page' when path matches exactly
+  - NavLink > aria-current on prefix match (sub-pages) > is set to 'page' for a deep sub-page
+  - NavLink > aria-current on prefix match (sub-pages) > is set to 'page' for a sub-page of a non-root segment
+  - NavLink > passes className to rendered link
+  - NavLink > renders correct href
+- **`src/modules/layout/shared/__tests__/NewTabNotice.test.tsx`** — 2 test(s)
+  - NewTabNotice > is visually hidden via fr-sr-only class
+  - NewTabNotice > renders announcement text for screen readers
+- **`src/modules/layout/shared/__tests__/SkipLinks.test.tsx`** — 8 test(s)
+  - SkipLinks > on admin routes (no footer rendered) > hides the #footer link on /admin
+  - SkipLinks > on admin routes (no footer rendered) > hides the #footer link on nested /admin/* routes
+  - SkipLinks > on admin routes (no footer rendered) > keeps the #content link on /admin
+  - SkipLinks > on admin routes (no footer rendered) > keeps the #footer link on sibling routes merely starting with 'admin'
+  - SkipLinks > renders a <nav> with aria-label 'Accès rapide'
+  - SkipLinks > renders exactly two skip links
+  - SkipLinks > renders the link to #content
+  - SkipLinks > renders the link to #footer

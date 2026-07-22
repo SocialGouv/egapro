@@ -118,7 +118,7 @@ Dans la foulée, régénère l'inventaire des tests pour qu'il reflète l'état 
 pnpm --filter app test:inventory || echo "test:inventory best-effort : ignoré (base/env indisponible)"
 ```
 
-`docs/tests-inventory.md` sera ajouté au commit de l'étape 5 s'il a changé (le `git add docs/` le capture). Best-effort comme le reste de doc-writer : un échec (base indisponible pour lister les tests d'intégration, par ex.) **ne bloque pas** — l'inventaire reste régénérable à la demande via le skill `/test-inventory`.
+`docs/tests-inventory.md` et `docs/tests-inventory/` seront ajoutés au commit de l'étape 5 s'ils ont changé (le `git add docs/` les capture). Best-effort comme le reste de doc-writer : un échec (base indisponible pour lister les tests d'intégration, par ex.) **ne bloque pas** — l'inventaire reste régénérable à la demande via le skill `/test-inventory`.
 
 ### 4. Validation
 

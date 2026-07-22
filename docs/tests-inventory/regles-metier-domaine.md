@@ -1,0 +1,571 @@
+# Inventaire des tests — Règles métier (domaine)
+
+> Fichier généré — ne pas éditer à la main. Régénérer avec `pnpm test:inventory` (depuis `packages/app/`) ou le skill `/test-inventory`. [← Retour à l'index](../tests-inventory.md)
+
+_Généré le 2026-07-22 — 29 fichier(s), 536 test(s)._
+
+- **`src/modules/domain/__tests__/campaign.test.ts`** — 25 test(s)
+  - formatIsoDateToFrench > formats an ISO date as DD/MM/YYYY
+  - formatIsoDateToFrench > returns the input unchanged when not a 3-part ISO date
+  - getCurrentYear > returns the current calendar year
+  - getCurrentYear > returns the year from the system clock
+  - getDeclarationDeadline > returns 1er juin for the given year
+  - getDefaultCampaignDeadlines > exposes the derived path choice deadline at January 1st of year + 1
+  - getDefaultCampaignDeadlines > leaves optional campaign dates null by default
+  - getDefaultCampaignDeadlines > returns Date objects for a given year
+  - getPathChoiceDeadline > returns January 1st of the following year
+  - getPathChoiceDeadline > rolls over the year boundary
+  - getReferencePeriod > returns the full civil year window
+  - getRepresentationDeadline > returns March 1st of the given year
+  - getSecondDeclarationDeadline > returns 1 décembre for the given year
+  - getWorkforceYear > returns current year - 1
+  - getWorkforceYearFor > returns the campaign year minus one
+  - isDeadlinePassed > returns false when now equals the deadline
+  - isDeadlinePassed > returns false when now is before the deadline
+  - isDeadlinePassed > returns true when now is after the deadline
+  - resolveGipReferencePeriod > falls back to the full civil year when a bound is missing
+  - resolveGipReferencePeriod > uses the GIP collection window when both bounds are present
+  - shouldRedirectSubmittedToRecap > returns false when already on the recap step
+  - shouldRedirectSubmittedToRecap > returns false when status is not submitted
+  - shouldRedirectSubmittedToRecap > returns false when status is null
+  - shouldRedirectSubmittedToRecap > returns false when the deadline is in the future
+  - shouldRedirectSubmittedToRecap > returns true when submitted, off-recap, and deadline is past
+- **`src/modules/domain/__tests__/companyObligation.test.ts`** — 8 test(s)
+  - isObligatedForYear > annual tier (workforce ≥ 100) > returns true for large workforces
+  - isObligatedForYear > annual tier (workforce ≥ 100) > returns true regardless of the triennial cycle
+  - isObligatedForYear > triennial tier (50 ≤ workforce < 100) > returns false on off-cycle years (2026, 2028, 2029)
+  - isObligatedForYear > triennial tier (50 ≤ workforce < 100) > returns true on the triennial base year 2027
+  - isObligatedForYear > triennial tier (50 ≤ workforce < 100) > returns true on triennial-aligned years (2030, 2033)
+  - isObligatedForYear > voluntary tier (workforce < 50) > returns false for 0 employees in any year
+  - isObligatedForYear > voluntary tier (workforce < 50) > returns false for 10 employees in 2026
+  - isObligatedForYear > voluntary tier (workforce < 50) > returns false for 49 employees in 2027 (triennial)
+- **`src/modules/domain/__tests__/companySize.test.ts`** — 9 test(s)
+  - classifyCompanySize > returns annual for workforce >= 100
+  - classifyCompanySize > returns triennial for workforce between 50 and 99
+  - classifyCompanySize > returns voluntary for workforce below 50
+  - COMPANY_SIZE_RANGES > exposes the five buckets in UI order
+  - COMPANY_SIZE_RANGES > leaves the top bucket open-ended
+  - COMPANY_SIZE_RANGES > uses contiguous, non-overlapping bounds
+  - getCompanySizeRange > maps a workforce to its bucket key
+  - isCseRequired > returns false for workforce below 100
+  - isCseRequired > returns true for workforce at or above 100
+- **`src/modules/domain/__tests__/computeGlobalScore.test.ts`** — 7 test(s)
+  - computeGlobalScore > returns 0 when all sub-scores are 0
+  - computeGlobalScore > returns null when all sub-scores are missing
+  - computeGlobalScore > returns null when categoryScore is missing
+  - computeGlobalScore > returns null when quartileScore is missing
+  - computeGlobalScore > returns null when remunerationScore is missing
+  - computeGlobalScore > returns the maximum 100 when all sub-scores are at their max
+  - computeGlobalScore > sums the three sub-scores when all are present
+- **`src/modules/domain/__tests__/declarationDisplay.test.ts`** — 6 test(s)
+  - getDeclarationDisplayContext > returns all booleans false when both pathChoices are null and cseRequired is false
+  - getDeclarationDisplayContext > returns shouldShowCseOpinion true when both paths are null but cseRequired is true
+  - getDeclarationDisplayContext > sets shouldShowCorrectiveActions and shouldShowJointEvaluation when both paths are set
+  - getDeclarationDisplayContext > sets shouldShowGapJustification when firstDeclarationPathChoice is justify
+  - getDeclarationDisplayContext > sets shouldShowGapJustification when justify is the second path choice
+  - getDeclarationDisplayContext > sets shouldShowJointEvaluation and shouldShowCseOpinion together when path is joint_evaluation and cseRequired
+- **`src/modules/domain/__tests__/declarationFlags.test.ts`** — 12 test(s)
+  - isComplianceProcessRequired > returns false when gap < 5%
+  - isComplianceProcessRequired > returns false when gap is null
+  - isComplianceProcessRequired > returns false when no indicator G data
+  - isComplianceProcessRequired > returns false when workforce < 100 even if gap is high
+  - isComplianceProcessRequired > returns false when workforce is null
+  - isComplianceProcessRequired > returns true at the exact 100 / 5 thresholds
+  - isComplianceProcessRequired > returns true when workforce ≥ 100, indicator G computed, and gap ≥ 5%
+  - isComplianceProcessRevisionRequired > returns false when compliance process was not required to start with
+  - isComplianceProcessRevisionRequired > returns false when correctionGap is below 5%
+  - isComplianceProcessRevisionRequired > returns false when correctionGap is null
+  - isComplianceProcessRevisionRequired > returns false when no second_declaration_submit event exists
+  - isComplianceProcessRevisionRequired > returns true when compliance process + second decl + gap persists
+- **`src/modules/domain/__tests__/declarationFsmStatus.test.ts`** — 1 test(s)
+  - DeclarationFsmStatus > mirrors declarationStatusEnum values from Drizzle schema
+- **`src/modules/domain/__tests__/declarationLock.test.ts`** — 4 test(s)
+  - declaration lock constants > defaults the lock timeout to 30 minutes
+  - declaration lock constants > heartbeat interval is well below the lock timeout window
+  - declaration lock constants > re-exports the same values through the domain barrel
+  - declaration lock constants > sets the heartbeat interval to 10 seconds
+- **`src/modules/domain/__tests__/declarationPrerequisites.test.ts`** — 8 test(s)
+  - hasRequiredDeclarationInfo > when the CSE applies (GIP workforce >= 100) > returns false when both are missing
+  - hasRequiredDeclarationInfo > when the CSE applies (GIP workforce >= 100) > returns false when CSE is null
+  - hasRequiredDeclarationInfo > when the CSE applies (GIP workforce >= 100) > returns false when phone is empty string
+  - hasRequiredDeclarationInfo > when the CSE applies (GIP workforce >= 100) > returns false when phone is missing
+  - hasRequiredDeclarationInfo > when the CSE applies (GIP workforce >= 100) > returns true when phone and CSE are provided
+  - hasRequiredDeclarationInfo > when the CSE does not apply (GIP workforce < 100 or company absent from the GIP file) > ignores a legacy hasCse value left over from before the CSE gate
+  - hasRequiredDeclarationInfo > when the CSE does not apply (GIP workforce < 100 or company absent from the GIP file) > returns true with only a phone, since hasCse is not collectable
+  - hasRequiredDeclarationInfo > when the CSE does not apply (GIP workforce < 100 or company absent from the GIP file) > still requires the phone
+- **`src/modules/domain/__tests__/declarationProcessStep.test.ts`** — 9 test(s)
+  - getDeclarationProcessStepDeadline > returns decl1JointEvaluationDeadline for fsmStatus="joint_evaluation_chosen"
+  - getDeclarationProcessStepDeadline > returns decl1ModificationDeadline for fsmStatus="draft"
+  - getDeclarationProcessStepDeadline > returns decl1ModificationDeadline when fsmStatus is null
+  - getDeclarationProcessStepDeadline > returns decl2JointEvaluationDeadline for fsmStatus="awaiting_cse_opinion"
+  - getDeclarationProcessStepDeadline > returns decl2JointEvaluationDeadline for fsmStatus="awaiting_revision_choice"
+  - getDeclarationProcessStepDeadline > returns decl2JointEvaluationDeadline for fsmStatus="revised_joint_evaluation_chosen"
+  - getDeclarationProcessStepDeadline > returns decl2ModificationDeadline for fsmStatus="awaiting_compliance_path_choice"
+  - getDeclarationProcessStepDeadline > returns decl2ModificationDeadline for fsmStatus="corrective_actions_chosen"
+  - getDeclarationProcessStepDeadline > returns null for demarche_completed (Clôturée)
+- **`src/modules/domain/__tests__/declarationStatus.test.ts`** — 35 test(s)
+  - computeDeclarationStatus > returns done only for demarche_completed (terminal FSM state)
+  - computeDeclarationStatus > returns in_progress for awaiting_compliance_path_choice (action still expected)
+  - computeDeclarationStatus > returns in_progress for awaiting_cse_opinion (CSE deposit pending)
+  - computeDeclarationStatus > returns in_progress for awaiting_revision_choice (revised path pending)
+  - computeDeclarationStatus > returns in_progress for corrective_actions_chosen (waiting on 2nd decl)
+  - computeDeclarationStatus > returns in_progress for draft with currentStep > 0
+  - computeDeclarationStatus > returns to_complete for draft with currentStep 0
+  - computeDeclarationStatus > returns to_complete for draft with null currentStep
+  - computeDeclarationStatus > returns to_complete when cancelledAt is set for in-progress declaration
+  - computeDeclarationStatus > returns to_complete when cancelledAt is set, regardless of status
+  - computeDeclarationStatus > returns to_complete when declaration is undefined
+  - computeDeclarationStatus > uses existing logic when cancelledAt is null
+  - computeDeclarationStatus > uses existing logic when cancelledAt is undefined
+  - getCurrentCompliancePath > returns firstDeclarationPathChoice when secondDeclarationPathChoice is null
+  - getCurrentCompliancePath > returns null when both pathChoices are null
+  - getCurrentCompliancePath > returns secondDeclarationPathChoice when it is set, ignoring first
+  - hasStartedSecondDeclaration > returns false when neither step nor path is set
+  - hasStartedSecondDeclaration > returns true when a second-declaration path was chosen (no step)
+  - hasStartedSecondDeclaration > returns true when a second-declaration step was reached
+  - isCancelled > returns false when cancelledAt is null
+  - isCancelled > returns true when cancelledAt is a Date
+  - isComplianceProcessCompleted > returns false for any other status
+  - isComplianceProcessCompleted > returns true only for the terminal FSM state
+  - isDeclarationSubmitted > returns false when status is draft
+  - isDeclarationSubmitted > returns false when status is null
+  - isDeclarationSubmitted > returns true for any non-draft, non-null status
+  - isDraft > returns false for a submitted status
+  - isDraft > returns false for null
+  - isDraft > returns true only for draft
+  - isInComplianceProcess > returns false when status is null and no path chosen
+  - isInComplianceProcess > returns false with no path and a non-compliance status
+  - isInComplianceProcess > returns true when a first-declaration compliance path is chosen
+  - isInComplianceProcess > returns true when a second-declaration compliance path is chosen
+  - isInComplianceProcess > returns true when awaiting the compliance path choice (no path yet)
+  - isInComplianceProcess > returns true when awaiting the revision choice (no path yet)
+- **`src/modules/domain/__tests__/declarationSteps.test.ts`** — 24 test(s)
+  - DECLARATION_STEPS > covers all 7 steps (0..6)
+  - DECLARATION_STEPS > uses French labels with no empty strings
+  - FUNNEL_COMPLIANCE_KEY_STEPS (S-K19-D2) > exposes the 4 compliance funnel jalons in chronological order
+  - FUNNEL_COMPLIANCE_KEY_STEPS (S-K19-D2) > uses non-empty French labels and unique keys within the funnel
+  - FUNNEL_CSE_KEY_STEPS (S-K19-D5) > exposes the 5 CSE funnel jalons in chronological order
+  - FUNNEL_CSE_KEY_STEPS (S-K19-D5) > uses non-empty French labels and unique keys within the funnel
+  - FUNNEL_DROP_ALERT_THRESHOLD (S-K19-D3) > is a positive number strictly between 0 and 100
+  - FUNNEL_MAIN_KEY_STEPS (S-K19-D1) > exposes the 4 main funnel jalons in chronological order
+  - FUNNEL_MAIN_KEY_STEPS (S-K19-D1) > uses non-empty French labels and unique keys within the funnel
+  - FUNNEL_REVISION_KEY_STEPS (S-K19-D4) > exposes the 4 revision funnel jalons in chronological order
+  - FUNNEL_REVISION_KEY_STEPS (S-K19-D4) > uses non-empty French labels and unique keys within the funnel
+  - getStepLabel > returns a sensible fallback for unknown step numbers
+  - getStepLabel > returns the French label for a known step number
+  - K5 dropoff constants > bounds the stagnation window between 1 and 180 days
+  - K5 dropoff constants > defaults the stagnation window to 30 days
+  - K5 dropoff constants > uses 15 % as the alert threshold for the dropoff chart
+  - POST_SUBMIT_DROPOFF_PHASES > maps each phase to the matching blocking FSM status (`status` mirrors `key`)
+  - POST_SUBMIT_DROPOFF_PHASES > S-K5-D2 — exposes the 6 post-submission FSM phases in chronological order
+  - POST_SUBMIT_DROPOFF_PHASES > uses French user-facing labels with no empty strings
+  - POST_SUBMIT_DROPOFF_PHASES > uses unique keys and unique FSM statuses
+  - POST_SUBMIT_MILESTONES > exposes the 4 post-submission jalons in chronological order
+  - POST_SUBMIT_MILESTONES > uses French labels with no empty strings
+  - POST_SUBMIT_MILESTONES > uses the « Temps passé sur » labels for post-path-choice durations
+  - POST_SUBMIT_MILESTONES > uses unique keys
+- **`src/modules/domain/__tests__/declarationTrajectory.test.ts`** — 17 test(s)
+  - event-type-specific getters > getCseOpinionCompletedAt returns the latest cse_opinion_submit event
+  - event-type-specific getters > getDemarcheCompletedAt returns the latest demarche_complete event
+  - event-type-specific getters > getJointEvaluationSubmittedAt returns the latest joint_evaluation_submit event
+  - event-type-specific getters > getPathChoiceAt returns the latest path_choice for the given round
+  - event-type-specific getters > getSecondDeclarationSubmittedAt returns the latest second_declaration_submit event
+  - event-type-specific getters > getSubmittedAt returns the latest submit event timestamp
+  - event-type-specific getters > hasSubmittedSecondDeclaration returns false when no such event exists
+  - event-type-specific getters > hasSubmittedSecondDeclaration returns true when a second_declaration_submit event exists
+  - event-type-specific getters > path tâtonnement: 3 path_choice events round=1 preserves the latest as winner
+  - findLastEvent > returns null when no event matches
+  - findLastEvent > returns the latest event matching the predicate
+  - getDeclarationTrajectory > returns an empty array for an empty history
+  - getDeclarationTrajectory > returns events ordered ascending by createdAt
+  - getEventTimestamp > returns null when no event matches
+  - getEventTimestamp > returns the latest matching event's createdAt
+  - hasEvent > returns false when no event matches
+  - hasEvent > returns true when at least one event matches
+- **`src/modules/domain/__tests__/demarcheDecisionTable.test.ts`** — 115 test(s)
+  - #3946 (domain side) — the compliance path depends only on the indicator-G gap > a below-threshold G gap does not require the path, whatever the A-F gaps
+  - #3946 (domain side) — the compliance path depends only on the indicator-G gap > a negative G gap (unfavourable to men) does not trigger the path (one-directional obligation)
+  - decision table — workforce × gap × regime > 'GIP workforce 100 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 100 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 100 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 100 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 100 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 100 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 100 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 100 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 100 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 100 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 149 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 149 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 149 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 149 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 149 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 149 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 149 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 149 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 149 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 149 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 150 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 150 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 150 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 150 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 150 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 150 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 150 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 150 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 150 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 150 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 151 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 151 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 151 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 151 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 151 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 151 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 151 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 151 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 151 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 151 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 249 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 249 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 249 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 249 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 249 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 249 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 249 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 249 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 249 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 249 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 250 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 250 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 250 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 250 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 250 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 250 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 250 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 250 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 250 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 250 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 251 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 251 · G gap above the t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 251 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 251 · G gap exactly at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 251 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 251 · gap ≥ threshold o…'
+  - decision table — workforce × gap × regime > 'GIP workforce 251 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 251 · negative G gap at…'
+  - decision table — workforce × gap × regime > 'GIP workforce 251 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 251 · no gap (G = 0%) ·…'
+  - decision table — workforce × gap × regime > 'GIP workforce 49 · G gap above the th…'
+  - decision table — workforce × gap × regime > 'GIP workforce 49 · G gap above the th…'
+  - decision table — workforce × gap × regime > 'GIP workforce 49 · G gap exactly at t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 49 · G gap exactly at t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 49 · gap ≥ threshold on…'
+  - decision table — workforce × gap × regime > 'GIP workforce 49 · gap ≥ threshold on…'
+  - decision table — workforce × gap × regime > 'GIP workforce 49 · negative G gap at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 49 · negative G gap at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 49 · no gap (G = 0%) · …'
+  - decision table — workforce × gap × regime > 'GIP workforce 49 · no gap (G = 0%) · …'
+  - decision table — workforce × gap × regime > 'GIP workforce 50 · G gap above the th…'
+  - decision table — workforce × gap × regime > 'GIP workforce 50 · G gap above the th…'
+  - decision table — workforce × gap × regime > 'GIP workforce 50 · G gap exactly at t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 50 · G gap exactly at t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 50 · gap ≥ threshold on…'
+  - decision table — workforce × gap × regime > 'GIP workforce 50 · gap ≥ threshold on…'
+  - decision table — workforce × gap × regime > 'GIP workforce 50 · negative G gap at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 50 · negative G gap at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 50 · no gap (G = 0%) · …'
+  - decision table — workforce × gap × regime > 'GIP workforce 50 · no gap (G = 0%) · …'
+  - decision table — workforce × gap × regime > 'GIP workforce 99 · G gap above the th…'
+  - decision table — workforce × gap × regime > 'GIP workforce 99 · G gap above the th…'
+  - decision table — workforce × gap × regime > 'GIP workforce 99 · G gap exactly at t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 99 · G gap exactly at t…'
+  - decision table — workforce × gap × regime > 'GIP workforce 99 · gap ≥ threshold on…'
+  - decision table — workforce × gap × regime > 'GIP workforce 99 · gap ≥ threshold on…'
+  - decision table — workforce × gap × regime > 'GIP workforce 99 · negative G gap at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 99 · negative G gap at …'
+  - decision table — workforce × gap × regime > 'GIP workforce 99 · no gap (G = 0%) · …'
+  - decision table — workforce × gap × regime > 'GIP workforce 99 · no gap (G = 0%) · …'
+  - gap display classification > #3963 — a negative gap at the threshold (unfavourable to men) must be classified "high"
+  - gap display classification > gapLevel: positive boundary at the threshold (both sides + the exact value)
+  - gap display classification > isSignificantGap detects a significant gap in both directions
+  - GIP workforce — single source for the obligations (#3929/#3962) > company absent from the GIP file (null) → no obligation
+  - GIP workforce — single source for the obligations (#3929/#3962) > decimal GIP workforce: thresholds compare the exact value, never the display rounding
+  - GIP workforce — single source for the obligations (#3929/#3962) > parseGipWorkforce: decimal string accepted, invalid value → null → not subject to obligations
+  - size boundaries (named domain constants) > #3934 (CLOSED) — a workforce < 100 never triggers the 7th indicator
+  - size boundaries (named domain constants) > classifyCompanySize: voluntary / triennial / annual boundaries
+  - size boundaries (named domain constants) > isCseRequired flips at COMPANY_SIZE_ANNUAL_MIN (100)
+  - size boundaries (named domain constants) > isIndicatorGRequired: annual regime flips at INDICATOR_G_ANNUAL_MIN (250)
+  - size boundaries (named domain constants) > isIndicatorGRequired: the 150-249 band is not required outside a triennial year
+  - size boundaries (named domain constants) > isIndicatorGRequired: triennial regime flips at INDICATOR_G_TRIENNIAL_MIN (150) in a triennial year
+  - size boundaries (named domain constants) > isTriennialYear: triennial cycle starting at INDICATOR_G_TRIENNIAL_BASE_YEAR
+- **`src/modules/domain/__tests__/demarcheRevisionAndStatus.test.ts`** — 18 test(s)
+  - computeDeclarationStatus — FSM status projection to the user-facing status > cancellation → to_complete even when the FSM is terminal
+  - computeDeclarationStatus — FSM status projection to the user-facing status > draft at step 0 → to_complete; started draft → in_progress
+  - computeDeclarationStatus — FSM status projection to the user-facing status > FSM status awaiting_compliance_path_choice (filling in progress) → done only when terminal
+  - computeDeclarationStatus — FSM status projection to the user-facing status > FSM status awaiting_cse_opinion (filling in progress) → done only when terminal
+  - computeDeclarationStatus — FSM status projection to the user-facing status > FSM status awaiting_revision_choice (filling in progress) → done only when terminal
+  - computeDeclarationStatus — FSM status projection to the user-facing status > FSM status corrective_actions_chosen (filling in progress) → done only when terminal
+  - computeDeclarationStatus — FSM status projection to the user-facing status > FSM status demarche_completed (filling in progress) → done only when terminal
+  - computeDeclarationStatus — FSM status projection to the user-facing status > FSM status draft (filling in progress) → done only when terminal
+  - computeDeclarationStatus — FSM status projection to the user-facing status > FSM status joint_evaluation_chosen (filling in progress) → done only when terminal
+  - computeDeclarationStatus — FSM status projection to the user-facing status > FSM status revised_joint_evaluation_chosen (filling in progress) → done only when terminal
+  - computeDeclarationStatus — FSM status projection to the user-facing status > missing declaration → to_complete
+  - isComplianceProcessRevisionRequired — second-declaration boundaries > 'initial compliance path not required …'
+  - isComplianceProcessRevisionRequired — second-declaration boundaries > 'path required but no second declarati…'
+  - isComplianceProcessRevisionRequired — second-declaration boundaries > 'second declaration submitted + correc…'
+  - isComplianceProcessRevisionRequired — second-declaration boundaries > 'second declaration submitted + correc…'
+  - isComplianceProcessRevisionRequired — second-declaration boundaries > 'second declaration submitted + correc…'
+  - isComplianceProcessRevisionRequired — second-declaration boundaries > 'second declaration submitted + negati…'
+  - isComplianceProcessRevisionRequired — second-declaration boundaries > 'second declaration submitted but corr…'
+- **`src/modules/domain/__tests__/format.test.ts`** — 18 test(s)
+  - computePercentage > computes percentage from count and total
+  - computePercentage > returns '- %' when total is zero
+  - computeProportion > computes percentage from count and total
+  - computeProportion > returns '- %' when total is zero
+  - formatCurrency > formats a number with euro sign
+  - formatCurrency > returns dash for undefined
+  - formatGap > formats a gap with French decimal separator
+  - formatGap > returns '- %' for null
+  - formatGapCompact > formats without percent sign
+  - formatGapCompact > returns dash for null
+  - formatMonthDay > swaps a MM-DD fragment to the French DD/MM form
+  - formatShortDate > formats a date in dd/mm/yyyy
+  - formatShortDate > returns dash for null
+  - formatShortDate > returns dash for undefined
+  - formatShortDateTime > formats a date with time
+  - formatShortDateTime > returns dash for null
+  - formatTotal > formats value with unit
+  - formatTotal > returns '- €' for null
+- **`src/modules/domain/__tests__/formatLongDate.test.ts`** — 3 test(s)
+  - formatLongDate > formats a date in French locale with day, month name, and year
+  - formatLongDate > formats December 31st correctly
+  - formatLongDate > formats January 1st correctly
+- **`src/modules/domain/__tests__/gap.test.ts`** — 56 test(s)
+  - computeGap > computes 100% gap when women earn 0
+  - computeGap > computes a positive gap when men earn more
+  - computeGap > handles equal values (0% gap)
+  - computeGap > returns a negative value when women earn more (signed, GIP convention)
+  - computeGap > returns null when men value is zero (division by zero)
+  - computeGap > returns null when women value is empty
+  - computeGapBetween > computes a positive gap as a percentage of the men value
+  - computeGapBetween > returns 0 for equal values
+  - computeGapBetween > returns a negative value when women earn more than men (signed)
+  - computeGapBetween > returns null when the men value is zero (division by zero)
+  - computeGapRatio > returns 0 for equal values
+  - computeGapRatio > returns negative ratio when women earn more
+  - computeGapRatio > returns null for non-numeric women value
+  - computeGapRatio > returns null when men value is empty
+  - computeGapRatio > returns null when men value is zero (division by zero)
+  - computeGapRatio > returns null when women value is empty
+  - computeGapRatio > returns positive ratio when men earn more
+  - computeTotal > returns null when both are NaN
+  - computeTotal > sums base and variable
+  - computeTotal > treats an invalid base as zero when variable is valid
+  - computeTotal > treats an invalid variable as zero when base is valid
+  - gapDirection > ignores rows with non-numeric values
+  - gapDirection > returns balanced for no data
+  - gapDirection > returns balanced on a tie
+  - gapDirection > returns men when men are lower-paid in more rows
+  - gapDirection > returns women when women are lower-paid in more rows
+  - gapLevel > returns high for gap above threshold
+  - gapLevel > returns high for gap at threshold (5%)
+  - gapLevel > returns low for a negative gap (women earn more, no alert)
+  - gapLevel > returns low for gap below threshold
+  - gapLevel > returns low for zero gap
+  - gapLevel > returns null for null input
+  - gapMagnitude > returns null for null input
+  - gapMagnitude > returns the absolute value of a negative gap
+  - gapMagnitude > returns the absolute value of a positive gap
+  - gapRatioToPercent > accepts a numeric ratio
+  - gapRatioToPercent > converts a negative ratio
+  - gapRatioToPercent > converts a stored ratio string to a signed percentage
+  - gapRatioToPercent > converts a zero ratio to 0 (not null)
+  - gapRatioToPercent > returns null for a non-numeric string
+  - gapRatioToPercent > returns null for null, undefined, and blank
+  - hasGapsAboveThreshold > detects gaps in hourly fields
+  - hasGapsAboveThreshold > returns false for empty categories
+  - hasGapsAboveThreshold > returns false when all gaps are below 5%
+  - hasGapsAboveThreshold > returns false when women earn more (negative gap, no alert)
+  - hasGapsAboveThreshold > returns true when a category has a gap >= 5%
+  - hasGapsAboveThreshold > uses custom threshold when provided
+  - hasHighGap > returns false for a large negative gap (women earn more)
+  - hasHighGap > returns false for an empty list
+  - hasHighGap > returns false when all gaps are below the threshold
+  - hasHighGap > returns true when a gap reaches the threshold (positive-only)
+  - isSignificantGap > respects a custom threshold
+  - isSignificantGap > returns false for a sub-threshold gap
+  - isSignificantGap > returns false for null
+  - isSignificantGap > returns true for a positive gap at the threshold
+  - isSignificantGap > returns true for a significant negative gap (either direction)
+- **`src/modules/domain/__tests__/gipWorkforce.test.ts`** — 14 test(s)
+  - getObligationWorkforce > compares thresholds on the exact value, so 99,97 stays below 100
+  - getObligationWorkforce > does not promote 149,99 to the triennial indicator G threshold
+  - getObligationWorkforce > makes a company absent from the GIP file non-subject to CSE and indicator G
+  - getObligationWorkforce > returns the exact GIP value when the company is known
+  - getObligationWorkforce > treats a company absent from the GIP file as a sub-50 headcount
+  - GIP_WORKFORCE_ABSENT_DISPLAY > is the label shown instead of any Weez/INSEE fallback value
+  - parseGipWorkforce > keeps a negative value rather than silently coercing it
+  - parseGipWorkforce > parses the numeric(9,2) string returned by the postgres driver
+  - parseGipWorkforce > passes a number through unchanged
+  - parseGipWorkforce > returns null for a non-numeric value
+  - parseGipWorkforce > returns null when the company is absent from the GIP file
+  - toDisplayWorkforce > floors the value so 99,97 never displays as 100
+  - toDisplayWorkforce > leaves an integer value unchanged
+  - toDisplayWorkforce > returns null when the company is absent from the GIP file
+- **`src/modules/domain/__tests__/indicatorG.test.ts`** — 27 test(s)
+  - constants > exports the four regulatory constants
+  - getApplicableIndicators > excludes G for workforce 100 in 2031 (non-triennial year)
+  - getApplicableIndicators > excludes G for workforce 200 in non-triennial year 2028
+  - getApplicableIndicators > excludes G when isIndicatorGRequired is false
+  - getApplicableIndicators > includes G for workforce 100 at universal year 2030 (triennial cadence)
+  - getApplicableIndicators > includes G for workforce 200 in triennial year 2027
+  - getApplicableIndicators > includes G for workforce 250 at universal year 2030
+  - getApplicableIndicators > includes G when isIndicatorGRequired is true
+  - isIndicatorGRequired > boundary: workforce 149 (just below triennial min) in 2027 — not required
+  - isIndicatorGRequired > boundary: workforce 249 (just below annual min) in 2027 — is triennial year, so required
+  - isIndicatorGRequired > extends the obligation to every tier >= 50 on triennial years from 2030
+  - isIndicatorGRequired > keeps sub-250 tiers on the triennial cadence after 2030 (non-triennial years excluded)
+  - isIndicatorGRequired > keeps the voluntary tier (< 50) out of the obligation even from 2030
+  - isIndicatorGRequired > returns false for workforce < 150 in any year before universal year
+  - isIndicatorGRequired > returns false for workforce 150-249 in a non-triennial year (2028)
+  - isIndicatorGRequired > returns false for workforce 150-249 in a non-triennial year (2029)
+  - isIndicatorGRequired > returns true for workforce >= 250 after universal year
+  - isIndicatorGRequired > returns true for workforce >= 250 at universal year (2030)
+  - isIndicatorGRequired > returns true for workforce >= 250 in a normal year
+  - isIndicatorGRequired > returns true for workforce 150-249 in a triennial year (2027)
+  - isIndicatorGRequired > returns true for workforce 150-249 in triennial year 2030
+  - isTriennialYear > returns false for 2028 (off-cycle)
+  - isTriennialYear > returns false for 2029 (off-cycle)
+  - isTriennialYear > returns false for years before 2027
+  - isTriennialYear > returns true for 2030 (2027 + 3)
+  - isTriennialYear > returns true for 2033 (2027 + 6)
+  - isTriennialYear > returns true for the base year 2027
+- **`src/modules/domain/__tests__/number.test.ts`** — 26 test(s)
+  - displayDecimal > adds thousand separator
+  - displayDecimal > formats large number with decimals
+  - displayDecimal > replaces dot with comma
+  - displayDecimal > returns empty string as-is
+  - normalizeDecimalInput > rejects letters
+  - normalizeDecimalInput > rejects minus sign
+  - normalizeDecimalInput > rejects multiple dots
+  - normalizeDecimalInput > replaces comma with dot
+  - normalizeDecimalInput > returns empty string as-is
+  - normalizeDecimalInput > strips spaces
+  - padDecimalOnBlur > calls the setter when only a trailing zero is missing
+  - padDecimalOnBlur > calls the setter with the padded value when padding changes it
+  - padDecimalOnBlur > does not call the setter on a non-numeric value
+  - padDecimalOnBlur > does not call the setter on an empty value
+  - padDecimalOnBlur > does not call the setter when the value is already padded
+  - padDecimalToTwo > keeps a two-digit fraction unchanged
+  - padDecimalToTwo > pads a one-digit fraction with trailing zero
+  - padDecimalToTwo > pads an integer with .00
+  - padDecimalToTwo > returns empty string as-is
+  - padDecimalToTwo > returns non-numeric input unchanged
+  - padDecimalToTwo > rounds fractions longer than two digits
+  - parseNumber > handles combined spaces and comma
+  - parseNumber > handles comma as decimal separator
+  - parseNumber > parses a simple number
+  - parseNumber > returns NaN for empty string
+  - parseNumber > strips spaces (thousand separators)
+- **`src/modules/domain/__tests__/percentage.test.ts`** — 5 test(s)
+  - percentageOf > returns 0 when total is zero (no NaN)
+  - percentageOf > returns the ratio expressed as a percentage
+  - proportionOf > returns 0 when total is zero (no division by zero)
+  - proportionOf > returns the raw ratio of count over total
+  - proportionOf > stays stable under GIP 4-decimal rounding
+- **`src/modules/domain/__tests__/publicData.test.ts`** — 6 test(s)
+  - isYearPubliclyReleased > re-exports the same function through the domain barrel
+  - isYearPubliclyReleased > returns false when no release date has been set
+  - isYearPubliclyReleased > returns false when today is before the release date
+  - isYearPubliclyReleased > returns true when today equals the release date
+  - isYearPubliclyReleased > returns true when today is after the release date
+  - isYearPubliclyReleased > treats a release date one millisecond in the future as not released
+- **`src/modules/domain/__tests__/quartile.test.ts`** — 17 test(s)
+  - computeQuartileMin > returns "0.01" for "0"
+  - computeQuartileMin > returns "20000.01" for "20000"
+  - computeQuartileMin > returns "35000.51" for "35000.50"
+  - computeQuartileMin > returns null for empty string
+  - computeQuartileMin > returns null for non-numeric string
+  - computeQuartileMin > returns null for null
+  - computeQuartileMin > returns null for undefined
+  - isQuartileImbalanced > is false within the band
+  - isQuartileImbalanced > is true outside the band
+  - migrateLegacyThresholds > ignores 4th element in legacy 4-threshold array
+  - migrateLegacyThresholds > normalizes null and undefined to empty string
+  - migrateLegacyThresholds > returns 3-element tuple unchanged
+  - migrateLegacyThresholds > returns empty strings for empty array
+  - quartile balance band > is parity ±5pp
+  - quartileImbalanceDirection > returns balanced within the band
+  - quartileImbalanceDirection > returns men when men are under-represented (above the band)
+  - quartileImbalanceDirection > returns women when women are under-represented (below the band)
+- **`src/modules/domain/__tests__/regions.test.ts`** — 28 test(s)
+  - COUNTIES > COUNTY_CODES matches COUNTIES keys
+  - COUNTIES > has 101 counties
+  - COUNTIES > includes overseas departments
+  - COUNTIES > includes Paris
+  - COUNTY_TO_REGION > maps a Corsican county to Corse
+  - COUNTY_TO_REGION > maps every county to exactly one region
+  - COUNTY_TO_REGION > maps Paris to Île-de-France
+  - getCountyCodeFromPostalCode > derives the 3-digit code for overseas départements
+  - getCountyCodeFromPostalCode > derives the county from a metropolitan postal code
+  - getCountyCodeFromPostalCode > returns null for a non-existent département
+  - getCountyCodeFromPostalCode > returns null for null, undefined or empty input
+  - getCountyCodeFromPostalCode > returns null when the format is not 5 digits
+  - getCountyCodeFromPostalCode > splits Corsica on the 20200 boundary (2A below, 2B at/above)
+  - getCountyCodeFromPostalCode > trims surrounding whitespace before parsing
+  - getLocationFromPostalCode > resolves a Corsican postal code to its department and Corse region
+  - getLocationFromPostalCode > resolves an overseas postal code
+  - getLocationFromPostalCode > resolves region, department code and label for a metropolitan postal code
+  - getLocationFromPostalCode > returns all-null when the postal code is invalid or unknown
+  - getRegionCodeFromCountyCode > returns null for a county absent from the region mapping
+  - getRegionCodeFromCountyCode > returns null for null or undefined
+  - getRegionCodeFromCountyCode > returns the region code for a metropolitan county
+  - getRegionCodeFromCountyCode > returns the region code for an overseas county
+  - REGIONS > has 18 regions
+  - REGIONS > includes Île-de-France
+  - REGIONS > REGION_CODES matches REGIONS keys
+  - REGIONS_TO_COUNTIES > every county in the mapping exists in COUNTIES
+  - REGIONS_TO_COUNTIES > Île-de-France contains Paris
+  - REGIONS_TO_COUNTIES > maps all 18 regions
+- **`src/modules/domain/__tests__/scoreBracket.test.ts`** — 14 test(s)
+  - getScoreBracket > returns '100' for scores above 100 (defensive)
+  - getScoreBracket > returns '100' for the perfect score
+  - getScoreBracket > returns '50-59' for scores in [50, 59]
+  - getScoreBracket > returns '60-69' for scores in [60, 69]
+  - getScoreBracket > returns '70-79' for scores in [70, 79]
+  - getScoreBracket > returns '80-89' for scores in [80, 89]
+  - getScoreBracket > returns '90-99' for scores in [90, 99]
+  - getScoreBracket > returns 'lt50' for scores below 50 (including 0 and 49)
+  - getScoreBracket > returns 'nc' when score is Infinity
+  - getScoreBracket > returns 'nc' when score is NaN
+  - getScoreBracket > returns 'nc' when score is null
+  - SCORE_BRACKETS > declares the 8 brackets in canonical order with NC last
+  - SCORE_BRACKETS > exposes human-readable labels for each bracket
+  - SCORE_BRACKETS > uses null min/max for the NC bracket
+- **`src/modules/domain/__tests__/siren.test.ts`** — 10 test(s)
+  - extractSiren > extracts first 9 chars from a 14-digit SIRET
+  - extractSiren > returns input as-is for a 9-digit string
+  - formatSiren > formats a 9-digit SIREN with spaces
+  - parseSiren > extracts SIREN from a 9-digit string
+  - parseSiren > extracts SIREN from a valid 14-digit SIRET
+  - parseSiren > returns null for empty string
+  - parseSiren > returns null for non-numeric SIREN
+  - parseSiren > returns null for null
+  - parseSiren > returns null for too short string
+  - parseSiren > returns null for undefined
+- **`src/modules/domain/__tests__/submissionRate.test.ts`** — 6 test(s)
+  - computeRate > computes 100 when submitted === obligated
+  - computeRate > returns 0 when obligated = 0 (no division by zero)
+  - computeRate > returns a percentage rounded to one decimal
+  - formatPointsAbs > returns absolute value rounded to 1 decimal, French separator
+  - roundOneDecimal > handles negatives
+  - roundOneDecimal > rounds to one decimal place (banker-agnostic)
+- **`src/modules/domain/__tests__/workforce.test.ts`** — 8 test(s)
+  - computeWorkforceTotal > adds women and men
+  - computeWorkforceTotal > returns zero when both are zero
+  - sumCategoryWorkforce > returns zeros for an empty category list
+  - sumCategoryWorkforce > sums parsed women and men counts across categories
+  - sumCategoryWorkforce > treats empty and non-numeric counts as zero
+  - sumQuartileWorkforce > returns zeros for an empty quartile list
+  - sumQuartileWorkforce > sums women and men across quartiles and computes total
+  - sumQuartileWorkforce > treats missing women/men fields as zero
