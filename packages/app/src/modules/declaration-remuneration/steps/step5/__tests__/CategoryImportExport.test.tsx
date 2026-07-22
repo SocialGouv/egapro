@@ -262,4 +262,22 @@ describe("CategoryImportExport failed import", () => {
 		expect(screen.queryByText(message)).not.toBeInTheDocument();
 		expect(importButton()).toBeDisabled();
 	});
+
+	it("clears stale errors when a new file is selected", async () => {
+		const message = "Le fichier ne contient aucune donnée exploitable.";
+		parseImportFileMock.mockResolvedValue({
+			ok: false,
+			errors: [{ type: "empty-file", message }],
+		} satisfies ImportResult);
+
+		render(<CategoryImportExport onImport={vi.fn()} />);
+		selectFile();
+		fireEvent.click(importButton());
+
+		await waitFor(() => expect(screen.getByText(message)).toBeInTheDocument());
+
+		selectFile(new File(["y"], "retry.csv", { type: "text/csv" }));
+
+		expect(screen.queryByText(message)).not.toBeInTheDocument();
+	});
 });

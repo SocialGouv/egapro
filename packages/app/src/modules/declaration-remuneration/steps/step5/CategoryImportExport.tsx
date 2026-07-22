@@ -167,6 +167,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 												onFilesChange={(files, error) => {
 													setSelectedFiles(files);
 													setFileError(error);
+													setImportErrors([]);
 												}}
 												selectedFiles={selectedFiles}
 											/>
