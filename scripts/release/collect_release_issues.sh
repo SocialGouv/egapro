@@ -47,6 +47,8 @@ fi
 #
 # Env:
 #   GITHUB_REPOSITORY  — "owner/repo" (default: SocialGouv/egapro)
+#   COLLECT_MAX_PRS    — max PRs resolved per run (default: 80); wider ranges
+#                        keep the most recent and log a warning (rate-limit guard)
 #
 # Requires: git, gh (authenticated), jq.
 
@@ -81,6 +83,17 @@ if [ -z "$PR_NUMBERS" ]; then
     echo "[collect_release_issues] no PR numbers found in commit range" >&2
     echo "[]"
     exit 0
+fi
+
+# Rate-limit guard: a manual backfill on a wide range (e.g. the very first
+# alpha tag, hundreds of PRs) would make hundreds of sequential `gh` calls and
+# trip GitHub's secondary rate limits. Cap the number of PRs (most recent
+# kept), and log the drop — never a silent truncation.
+MAX_PRS="${COLLECT_MAX_PRS:-80}"
+PR_COUNT=$(printf '%s\n' "$PR_NUMBERS" | grep -c .)
+if [ "$PR_COUNT" -gt "$MAX_PRS" ]; then
+    echo "[collect_release_issues] WARN: ${PR_COUNT} PRs in range exceeds cap ${MAX_PRS} (wide backfill?); keeping the ${MAX_PRS} most recent to avoid GitHub API rate limits" >&2
+    PR_NUMBERS=$(printf '%s\n' "$PR_NUMBERS" | tail -n "$MAX_PRS")
 fi
 
 TECHNICAL_LABELS_JSON='["cat: technique","tâche technique","type: ci","type: chore","type: build","dependencies","github_actions"]'

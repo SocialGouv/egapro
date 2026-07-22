@@ -1,0 +1,60 @@
+name: ⏰ Alpha release reminder
+
+# The alpha prerelease is now a manual gesture (release-alpha.yaml). This
+# scheduled job closes the "forgot to release" loop it introduces: it checks
+# whether release-worthy commits (conventional commits feat/fix/perf, or a
+# BREAKING CHANGE — i.e. what semantic-release would bump on) sit unreleased on
+# alpha since the last tag, and if so reports it — as a job summary, a workflow
+# warning annotation, and (if configured) a channel ping.
+#
+# Deliberately does NOT invoke semantic-release: a plain git-log scan needs no
+# auth, no node, and no push permission, so it can never fail spuriously.
+
+on:
+  schedule:
+    - cron: "0 8 * * 1-5" # weekdays 08:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: github.ref == 'refs/heads/alpha'
+    name: Check pending alpha release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Report pending release
+        env:
+          WEBHOOK: ${{ secrets.MATTERMOST_RELEASE_WEBHOOK }}
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          RANGE="${PREV_TAG:+${PREV_TAG}..}HEAD"
+          RELEVANT=$(git log --format='%s%n%b' "$RANGE" | grep -ciE '^(feat|fix|perf)(\(.+\))?!?:|BREAKING CHANGE' || true)
+          TOTAL=$(git log --oneline "$RANGE" | wc -l | tr -d ' ')
+          echo "Depuis ${PREV_TAG:-le début} : ${TOTAL} commit(s), dont ${RELEVANT} release-worthy." >&2
+
+          if [ "$RELEVANT" -eq 0 ]; then
+            echo "### ✅ Rien à release — aucun commit feat/fix/perf en attente sur alpha." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          MSG="⏰ **${RELEVANT} changement(s) release-worthy non livrés sur alpha** (${TOTAL} commit(s) au total depuis \`${PREV_TAG:-le début}\`). Lancer le workflow **🔖 Prerelease (alpha)** pour livrer en prod."
+          {
+            echo "### ⚠️ Release alpha en attente"
+            echo ""
+            echo "$MSG"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::warning::${RELEVANT} changement(s) release-worthy non livrés sur alpha. Lancer le workflow Prerelease (alpha)."
+
+          if [ -n "$WEBHOOK" ]; then
+            jq -n --arg text "$MSG" '{text: $text}' \
+              | curl -sS -X POST -H 'Content-Type: application/json' -d @- "$WEBHOOK" >/dev/null \
+              || echo "channel notification failed (non-blocking)" >&2
+          fi

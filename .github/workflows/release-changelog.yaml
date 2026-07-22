@@ -109,3 +109,28 @@ jobs:
           else
             echo "summary.md was not produced by the AI step, skipping publish" >&2
           fi
+
+      # Optional stakeholder ping: posts the French business summary to a chat
+      # channel. Gated on the secret being configured (skips cleanly if not) and
+      # non-blocking (a failed post never fails the workflow).
+      - name: Notify release channel
+        if: steps.collect.outputs.skip == 'false'
+        env:
+          WEBHOOK: ${{ secrets.MATTERMOST_RELEASE_WEBHOOK }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "MATTERMOST_RELEASE_WEBHOOK not set, skipping channel notification" >&2
+            exit 0
+          fi
+          if [ ! -f summary.md ] || ! grep -q '[^[:space:]]' summary.md; then
+            echo "no summary to notify" >&2
+            exit 0
+          fi
+          RELEASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
+          TEXT=$(printf '#### 🚀 Nouvelle release **%s**\n\n%s\n\n[Voir la release](%s)' \
+            "$TAG" "$(cat summary.md)" "$RELEASE_URL")
+          jq -n --arg text "$TEXT" '{text: $text}' \
+            | curl -sS -X POST -H 'Content-Type: application/json' -d @- "$WEBHOOK" >/dev/null \
+            && echo "channel notified" >&2 \
+            || echo "channel notification failed (non-blocking)" >&2

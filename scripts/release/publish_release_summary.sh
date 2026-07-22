@@ -44,8 +44,8 @@ if [ ! -f "$SUMMARY_FILE" ]; then
     exit 2
 fi
 
-if [ ! -s "$SUMMARY_FILE" ]; then
-    echo "[publish_release_summary] summary file is empty, nothing to publish" >&2
+if ! grep -q '[^[:space:]]' "$SUMMARY_FILE"; then
+    echo "[publish_release_summary] summary file is empty or whitespace-only, nothing to publish" >&2
     exit 0
 fi
 
@@ -59,7 +59,7 @@ trap 'rm -f "$SECTION_FILE" "$NEW_BODY_FILE"' EXIT
 {
     echo "$START_MARKER"
     echo ""
-    echo "## 📋 Résumé des changements"
+    echo "## 📋 ${TAG} — Résumé des changements"
     echo ""
     cat "$SUMMARY_FILE"
     echo ""
