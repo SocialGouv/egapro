@@ -1,44 +1,42 @@
-import { Text, View } from "@react-pdf/renderer";
-
-import { styles } from "../pdfStyles";
+import { View } from "@react-pdf/renderer";
+import { computeWorkforceTotal } from "~/modules/domain";
 import type { DeclarationPdfData } from "../types";
+import { SectionBanner } from "./headings";
+import { Cell, Row, Table } from "./tableParts";
+import { PAY_TABLE } from "./tableWidths";
 
 export function WorkforceSection({ data }: { data: DeclarationPdfData }) {
+	const total = computeWorkforceTotal(data.totalWomen, data.totalMen);
 	return (
-		<View style={styles.card}>
-			<Text style={styles.cardTitle}>
-				Effectifs pris en compte pour le calcul
-			</Text>
-			<View style={styles.tableHeader}>
-				<Text style={[styles.tableCellLabel, styles.tableHeaderText]}>
-					Catégorie
-				</Text>
-				<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-					Femmes
-				</Text>
-				<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-					Hommes
-				</Text>
-				<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-					Total
-				</Text>
-			</View>
-			{data.step1Categories.map((cat) => (
-				<View key={cat.name} style={styles.tableRow}>
-					<Text style={styles.tableCellLabel}>{cat.name}</Text>
-					<Text style={styles.tableCellValue}>{cat.women}</Text>
-					<Text style={styles.tableCellValue}>{cat.men}</Text>
-					<Text style={styles.tableCellValue}>{cat.women + cat.men}</Text>
-				</View>
-			))}
-			<View style={styles.tableRowLast}>
-				<Text style={styles.tableCellLabelBold}>Total</Text>
-				<Text style={styles.tableCellValueBold}>{data.totalWomen}</Text>
-				<Text style={styles.tableCellValueBold}>{data.totalMen}</Text>
-				<Text style={styles.tableCellValueBold}>
-					{data.totalWomen + data.totalMen}
-				</Text>
-			</View>
+		<View wrap={false}>
+			<SectionBanner title="Effectifs physiques pris en compte pour le calcul des indicateurs" />
+			<Table>
+				<Row>
+					<Cell header width={PAY_TABLE.label} />
+					<Cell header text="Nombre de femmes" width={PAY_TABLE.value} />
+					<Cell header text="Nombre d'hommes" width={PAY_TABLE.value} />
+					<Cell header text="Total" width={PAY_TABLE.total} />
+				</Row>
+				<Row>
+					<Cell bold text="Effectif physique" width={PAY_TABLE.label} />
+					<Cell
+						align="right"
+						text={String(data.totalWomen)}
+						width={PAY_TABLE.value}
+					/>
+					<Cell
+						align="right"
+						text={String(data.totalMen)}
+						width={PAY_TABLE.value}
+					/>
+					<Cell
+						align="right"
+						bold
+						text={String(total)}
+						width={PAY_TABLE.total}
+					/>
+				</Row>
+			</Table>
 		</View>
 	);
 }

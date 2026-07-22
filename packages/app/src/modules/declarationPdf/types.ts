@@ -1,41 +1,38 @@
 import type {
 	EmployeeCategoryRow,
-	PayGapRow,
-} from "~/modules/declaration-remuneration/types";
+	Step2Data,
+	Step3Data,
+	Step4Data,
+} from "~/modules/declaration-remuneration";
 
-export type CategoryData = {
+export type DeclarationPdfDeclarant = {
 	name: string;
-	women: number;
-	men: number;
+	email: string;
+	phone: string;
 };
 
-export type VariablePayData = {
-	rows: PayGapRow[];
-	beneficiaryWomen: string;
-	beneficiaryMen: string;
-};
-
-export type QuartileCategory = {
+export type DeclarationPdfCompany = {
 	name: string;
-	womenCount?: number;
-	menCount?: number;
-	womenValue?: string;
-	menValue?: string;
-	womenMedianValue?: string;
-	menMedianValue?: string;
+	siren: string;
+	address: string;
+	nafCode: string | null;
+	nafLabel: string | null;
+	workforceDisplay: string;
 };
 
 export type DeclarationPdfData = {
-	companyName: string;
-	siren: string;
 	year: number;
-	generatedAt: string;
+	workforceYear: number;
 	isSecondDeclaration: boolean;
+	transmittedAt: string;
+	referencePeriod: string;
+	declarant: DeclarationPdfDeclarant;
+	company: DeclarationPdfCompany;
 	totalWomen: number;
 	totalMen: number;
-	step1Categories: CategoryData[];
-	step2Rows: PayGapRow[];
-	step3Data: VariablePayData;
-	step4Categories: QuartileCategory[];
-	step5Categories: EmployeeCategoryRow[];
+	step2Data: Step2Data;
+	step3Data: Step3Data;
+	step4Data: Step4Data;
+	categories: EmployeeCategoryRow[];
+	source: string | null;
 };

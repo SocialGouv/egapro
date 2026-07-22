@@ -1,0 +1,122 @@
+name: 🔖 Prerelease (alpha)
+
+# Manual-only alpha prerelease cutter. Replaces the former automatic
+# `push: alpha` trigger of release.yml: publishing an alpha prerelease — and
+# therefore the production deploy it triggers via production.yaml, plus the AI
+# changelog it triggers on `release: published` — is now an intentional click,
+# not a side effect of every merge.
+#
+# Runs the exact same `pnpm release` (semantic-release) as release.yml, on the
+# alpha branch, so the output is unchanged: a `-alpha.N` GitHub prerelease
+# (tag-only flow — .releaserc.cjs restricts the commit plugins to master/beta,
+# so nothing is pushed back to the protected alpha branch). semantic-release
+# only publishes when release-worthy commits (feat/fix…) exist since the last
+# alpha tag; otherwise the run is a no-op ("no release published").
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+env:
+  GIT_AUTHOR_EMAIL: ${{ secrets.SOCIALGROOVYBOT_EMAIL }}
+  GIT_AUTHOR_NAME: ${{ secrets.SOCIALGROOVYBOT_NAME }}
+  GIT_COMMITTER_EMAIL: ${{ secrets.SOCIALGROOVYBOT_EMAIL }}
+  GIT_COMMITTER_NAME: ${{ secrets.SOCIALGROOVYBOT_NAME }}
+
+# Serialize two quick clicks instead of cancelling a release mid-flight.
+concurrency:
+  group: release-alpha
+  cancel-in-progress: false
+
+jobs:
+  release:
+    # Alpha-only guard: even if dispatched from another branch by mistake, the
+    # job never runs anywhere but alpha — it can never cut a beta/master release.
+    if: github.ref == 'refs/heads/alpha'
+    name: Prerelease (alpha)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Get GitHub App Token
+        id: token
+        uses: SocialGouv/token-bureau@main
+        with:
+          token-bureau-url: https://token-bureau.fabrique.social.gouv.fr
+          audience: socialgouv
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.SOCIALGROOVYBOT_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SOCIALGROOVYBOT_GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_push_gpgsign: false
+          # Tag signing must stay off: semantic-release >= 20 creates
+          # lightweight tags (`git tag <name> <sha>`, no -m), and
+          # tag.gpgSign=true turns them into signed tags that require a
+          # message — git then aborts in CI with "Terminal is dumb, but
+          # EDITOR unset". Release commits (master/beta) remain GPG-signed.
+          git_tag_gpgsign: false
+
+      # INVARIANT — keep the GitHub App token (steps.token), NOT the default
+      # secrets.GITHUB_TOKEN: a release/tag created with GITHUB_TOKEN does NOT
+      # trigger downstream workflows (GitHub anti-recursion rule). Both the prod
+      # deploy (production.yaml, on push tag v*) and the AI changelog
+      # (release-changelog.yaml, on release: published) would then silently stop
+      # firing. This is why the whole manual-release → deploy → changelog chain
+      # hinges on the app token here.
+      - name: Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ steps.token.outputs.token }}
+        run: |
+          set -o pipefail
+          pnpm release 2>&1 | tee semantic-release.log
+
+      # Manual runs need explicit feedback: semantic-release exits 0 even when
+      # nothing is released, so a no-op and a successful release look identical
+      # (both green). Surface which one happened in the run summary.
+      - name: Job summary
+        if: always()
+        run: |
+          if grep -q "Published release" semantic-release.log 2>/dev/null; then
+            VERSION=$(grep -oE "Published release [0-9][^ ]*" semantic-release.log | head -1 | awk '{print $3}')
+            {
+              echo "### ✅ Prerelease publiée"
+              echo ""
+              echo "Version **\`${VERSION}\`** publiée sur le canal alpha."
+              echo ""
+              echo "- Déploiement prod : \`production.yaml\` (push tag \`v*\`)"
+              echo "- Changelog IA : \`release-changelog.yaml\` (\`release: published\`)"
+            } >> "$GITHUB_STEP_SUMMARY"
+          elif grep -qE "no new version is released|There are no relevant changes" semantic-release.log 2>/dev/null; then
+            {
+              echo "### ⓘ Aucune release"
+              echo ""
+              echo "Aucun commit \`feat\`/\`fix\` release-worthy depuis le dernier tag alpha — rien n'a été publié (comportement normal)."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### ⚠️ Résultat semantic-release indéterminé — voir les logs du job." >> "$GITHUB_STEP_SUMMARY"
+          fi

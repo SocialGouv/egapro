@@ -300,6 +300,16 @@ File upload forms keep the `useFileUploadForm` hook pattern. They do not need `r
 
 ---
 
+## Declaration step engine (FSM)
+
+The declaration démarche progression (screen-to-screen, step transitions, conditions) is governed by a **single authority**: the FSM `src/server/rules/v2027.1.json` + `engine.ts`, whose state vocabulary is the const `DECLARATION_FSM_STATUSES` in `~/modules/domain` (the `DeclarationFsmStatus` union is derived from it). Since #3974 the link is compiler-enforced (Zod `z.enum` on the engine schema + exhaustive, `default:`-free mirrors).
+
+**Never hand-encode the state graph.** Only two mirrors project it (`declaration-remuneration/shared/complianceNavigation.ts`, `my-space/declarationProcessState.ts`) — do not add a third: any state-aware code types on `DeclarationFsmStatus` with an exhaustive `switch` (no `default:`) or derives from the engine. Progression tests run against the parsed engine, never a hand-copied expectation.
+
+> Full rules → [`.claude/rules/demarche-state-machine.md`](../../.claude/rules/demarche-state-machine.md)
+
+---
+
 ## Audit logging (issue #3174)
 
 **Any new surface that falls under the audit taxonomy must wire its audit log at the same time.** Forgetting the log is a compliance bug, not an enhancement.

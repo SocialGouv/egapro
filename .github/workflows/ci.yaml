@@ -184,3 +184,12 @@ jobs:
         run: pnpm --filter app lint:check
       - name: Format check app
         run: pnpm --filter app format:check
+
+  release-scripts-test:
+    name: Release · Scripts test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run release scripts tests
+        run: bash scripts/release/release-scripts.test.sh
