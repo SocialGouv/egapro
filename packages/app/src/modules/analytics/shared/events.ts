@@ -32,6 +32,7 @@ export const MATOMO_ACTION = {
 	CATEGORY_IMPORT: "category_import",
 	CATEGORY_IMPORT_FAILURE: "category_import_failure",
 	CATEGORY_IMPORT_DURATION: "category_import_duration",
+	CATEGORY_TEMPLATE_DOWNLOAD: "category_template_download",
 	HELP_LINK_CLICK: "help_link_click",
 	CSE_STATUS_CONFIRM: "cse_status_confirm",
 } as const;

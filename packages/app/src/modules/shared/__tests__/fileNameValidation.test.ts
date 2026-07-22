@@ -62,6 +62,29 @@ describe("validateFileName", () => {
 			expect(validateFileName(fileName, mimeType)).toEqual({ ok: true });
 		});
 
+		it.each([
+			["modele-indicateur-g.csv", "text/csv"],
+			["export.csv", "application/csv"],
+			["data.csv", "application/vnd.ms-excel"],
+			// A .csv dragged from the OS often arrives with no declared MIME type.
+			["import.csv", ""],
+			["donnees.CSV", "text/csv"],
+			[
+				"modele.xlsx",
+				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			],
+			["classeur.xlsx", "application/vnd.ms-excel"],
+		])("accepts the tabular import file %j against MIME %j", (fileName, mimeType) => {
+			expect(validateFileName(fileName, mimeType)).toEqual({ ok: true });
+		});
+
+		it("rejects a .csv whose declared MIME belongs to another type", () => {
+			expect(validateFileName("import.csv", "application/pdf")).toMatchObject({
+				ok: false,
+				reason: "extension_mime_mismatch",
+			});
+		});
+
 		it("accepts a name padded with surrounding spaces", () => {
 			expect(validateFileName("  avis.pdf  ", PDF_MIME)).toEqual({ ok: true });
 		});
