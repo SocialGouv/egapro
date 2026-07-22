@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { DeclarationFsmStatus } from "~/modules/domain";
-import type { PanelVariant } from "../DeclarationProcessPanel";
+import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
 import {
 	computeCtaHref,
 	computePanelVariant,
@@ -44,39 +43,8 @@ describe("computePanelVariant", () => {
 		);
 	});
 
-	const fsmCases: Array<{
-		fsm: DeclarationFsmStatus;
-		variant: PanelVariant;
-		overrides?: Partial<DeclarationItem>;
-		label?: string;
-	}> = [
-		{ fsm: "draft", variant: "start" },
-		{ fsm: "awaiting_compliance_path_choice", variant: "compliance_choice" },
-		{ fsm: "corrective_actions_chosen", variant: "compliance" },
-		{ fsm: "awaiting_revision_choice", variant: "compliance_choice" },
-		{ fsm: "joint_evaluation_chosen", variant: "evaluation" },
-		{ fsm: "revised_joint_evaluation_chosen", variant: "evaluation" },
-		{ fsm: "awaiting_cse_opinion", variant: "cse" },
-		{
-			fsm: "demarche_completed",
-			variant: "cse",
-			label: "demarche_completed without CSE opinion deposited",
-		},
-		{
-			fsm: "demarche_completed",
-			variant: "closed",
-			overrides: { hasSubmittedCseOpinion: true },
-			label: "demarche_completed with CSE opinion deposited",
-		},
-	];
-
-	for (const { fsm, variant, overrides, label } of fsmCases) {
-		it(`returns "${variant}" for fsmStatus="${fsm}"${label ? ` (${label})` : ""}`, () => {
-			expect(
-				computePanelVariant(makeDeclaration({ fsmStatus: fsm, ...overrides })),
-			).toBe(variant);
-		});
-	}
+	// Per-status variants live in fsmMirrors.conformance.test.ts (#3975);
+	// only the inputs outside the FSM vocabulary (undefined / null) are owned here.
 });
 
 describe("computeCtaHref", () => {
@@ -92,61 +60,14 @@ describe("computeCtaHref", () => {
 		);
 	});
 
-	const fsmCases: Array<{
-		fsm: DeclarationFsmStatus;
-		href: string;
-		overrides?: Partial<DeclarationItem>;
-		label?: string;
-	}> = [
-		{
-			fsm: "draft",
-			href: `/declaration-remuneration?siren=${SIREN}`,
-		},
-		{
-			fsm: "awaiting_compliance_path_choice",
-			href: `/declaration-remuneration/parcours-conformite?siren=${SIREN}`,
-		},
-		{
-			fsm: "awaiting_revision_choice",
-			href: `/declaration-remuneration/parcours-conformite?siren=${SIREN}`,
-		},
-		{
-			fsm: "corrective_actions_chosen",
-			href: `/declaration-remuneration/parcours-conformite/etape/1?siren=${SIREN}`,
-		},
-		{
-			fsm: "joint_evaluation_chosen",
-			href: `/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=${SIREN}`,
-		},
-		{
-			fsm: "revised_joint_evaluation_chosen",
-			href: `/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=${SIREN}`,
-		},
-		{
-			fsm: "awaiting_cse_opinion",
-			href: `/avis-cse?siren=${SIREN}`,
-		},
-		{
-			fsm: "demarche_completed",
-			href: `/avis-cse?siren=${SIREN}`,
-			label: "demarche_completed without CSE opinion deposited",
-		},
-		{
-			fsm: "demarche_completed",
-			href: `/declaration-remuneration?siren=${SIREN}`,
-			overrides: { hasSubmittedCseOpinion: true },
-			label: "demarche_completed with CSE opinion deposited",
-		},
-	];
-
-	for (const { fsm, href, overrides, label } of fsmCases) {
-		it(`returns "${href}" for fsmStatus="${fsm}"${label ? ` (${label})` : ""}`, () => {
-			expect(
-				computeCtaHref(
-					makeDeclaration({ fsmStatus: fsm, ...overrides }),
-					SIREN,
-				),
-			).toBe(href);
-		});
-	}
+	// Per-status destinations live in fsmMirrors.conformance.test.ts (#3975), which
+	// strips the query — the company-scoping contract is pinned here, across every
+	// branch since the implementation repeats the siren template per status.
+	it("keeps every destination scoped to the company via the siren query parameter", () => {
+		for (const fsmStatus of DECLARATION_FSM_STATUSES) {
+			expect(computeCtaHref(makeDeclaration({ fsmStatus }), SIREN)).toContain(
+				`?siren=${SIREN}`,
+			);
+		}
+	});
 });

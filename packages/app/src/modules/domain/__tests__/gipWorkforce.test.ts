@@ -1,13 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { isCseRequired } from "../shared/companySize";
 import {
 	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getObligationWorkforce,
 	parseGipWorkforce,
 	toDisplayWorkforce,
 } from "../shared/gipWorkforce";
-import { isIndicatorGRequired } from "../shared/indicatorG";
 
 describe("parseGipWorkforce", () => {
 	it("parses the numeric(9,2) string returned by the postgres driver", () => {
@@ -50,23 +48,9 @@ describe("getObligationWorkforce", () => {
 		expect(getObligationWorkforce(null)).toBe(0);
 	});
 
-	it("makes a company absent from the GIP file non-subject to CSE and indicator G", () => {
-		const workforce = getObligationWorkforce(null);
-		expect(isCseRequired(workforce)).toBe(false);
-		expect(isIndicatorGRequired(workforce, 2027)).toBe(false);
-	});
-
-	it("compares thresholds on the exact value, so 99,97 stays below 100", () => {
-		expect(isCseRequired(getObligationWorkforce(99.97))).toBe(false);
-		expect(isCseRequired(getObligationWorkforce(100))).toBe(true);
-	});
-
-	it("does not promote 149,99 to the triennial indicator G threshold", () => {
-		expect(isIndicatorGRequired(getObligationWorkforce(149.99), 2027)).toBe(
-			false,
-		);
-		expect(isIndicatorGRequired(getObligationWorkforce(150), 2027)).toBe(true);
-	});
+	// Downstream obligation consequences (absent company → no obligation;
+	// exact-value comparison for decimal workforces like 99.97) live in the
+	// GIP-workforce describes of demarcheDecisionTable.test.ts (#3975).
 });
 
 describe("toDisplayWorkforce", () => {

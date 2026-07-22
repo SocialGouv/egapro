@@ -1,48 +1,22 @@
 import { describe, expect, it } from "vitest";
 
 import {
-	isComplianceProcessRequired,
-	isComplianceProcessRevisionRequired,
-} from "../shared/declarationFlags";
-import type { DeclarationStatusEvent } from "../shared/declarationTrajectory";
+	COMPANY_SIZE_ANNUAL_MIN,
+	GAP_ALERT_THRESHOLD,
+} from "../shared/constants";
+import { isComplianceProcessRequired } from "../shared/declarationFlags";
 
+// Composed behavior (nominal, G guard, gap guard, revision boundaries) lives in
+// demarcheDecisionTable.test.ts / demarcheRevisionAndStatus.test.ts (#3975);
+// only isolated-predicate inputs their composition cannot produce live here.
 describe("isComplianceProcessRequired", () => {
-	it("returns true when workforce ≥ 100, indicator G computed, and gap ≥ 5%", () => {
-		expect(
-			isComplianceProcessRequired({
-				workforce: 300,
-				hasIndicatorG: true,
-				gap: 10,
-			}),
-		).toBe(true);
-	});
-
 	it("returns false when workforce < 100 even if gap is high", () => {
+		// Below 100 the matrix always derives hasIndicatorG=false, so it cannot isolate this guard.
 		expect(
 			isComplianceProcessRequired({
 				workforce: 80,
 				hasIndicatorG: true,
 				gap: 10,
-			}),
-		).toBe(false);
-	});
-
-	it("returns false when no indicator G data", () => {
-		expect(
-			isComplianceProcessRequired({
-				workforce: 300,
-				hasIndicatorG: false,
-				gap: 10,
-			}),
-		).toBe(false);
-	});
-
-	it("returns false when gap < 5%", () => {
-		expect(
-			isComplianceProcessRequired({
-				workforce: 300,
-				hasIndicatorG: true,
-				gap: 3,
 			}),
 		).toBe(false);
 	});
@@ -67,84 +41,13 @@ describe("isComplianceProcessRequired", () => {
 		).toBe(false);
 	});
 
-	it("returns true at the exact 100 / 5 thresholds", () => {
+	it("returns true at the exact workforce and gap alert thresholds", () => {
+		// Forced hasIndicatorG at exactly 100: pre-2030 the composition derives false there.
 		expect(
 			isComplianceProcessRequired({
-				workforce: 100,
+				workforce: COMPANY_SIZE_ANNUAL_MIN,
 				hasIndicatorG: true,
-				gap: 5,
-			}),
-		).toBe(true);
-	});
-});
-
-describe("isComplianceProcessRevisionRequired", () => {
-	const withSecondDecl: DeclarationStatusEvent[] = [
-		{
-			eventType: "second_declaration_submit",
-			value: null,
-			round: 2,
-			actorUserId: null,
-			createdAt: new Date("2027-06-01T00:00:00Z"),
-		},
-	];
-
-	it("returns false when compliance process was not required to start with", () => {
-		expect(
-			isComplianceProcessRevisionRequired({
-				workforce: 80,
-				hasIndicatorG: true,
-				gap: 10,
-				correctionGap: 10,
-				events: withSecondDecl,
-			}),
-		).toBe(false);
-	});
-
-	it("returns false when no second_declaration_submit event exists", () => {
-		expect(
-			isComplianceProcessRevisionRequired({
-				workforce: 300,
-				hasIndicatorG: true,
-				gap: 10,
-				correctionGap: 10,
-				events: [],
-			}),
-		).toBe(false);
-	});
-
-	it("returns false when correctionGap is null", () => {
-		expect(
-			isComplianceProcessRevisionRequired({
-				workforce: 300,
-				hasIndicatorG: true,
-				gap: 10,
-				correctionGap: null,
-				events: withSecondDecl,
-			}),
-		).toBe(false);
-	});
-
-	it("returns false when correctionGap is below 5%", () => {
-		expect(
-			isComplianceProcessRevisionRequired({
-				workforce: 300,
-				hasIndicatorG: true,
-				gap: 10,
-				correctionGap: 2,
-				events: withSecondDecl,
-			}),
-		).toBe(false);
-	});
-
-	it("returns true when compliance process + second decl + gap persists", () => {
-		expect(
-			isComplianceProcessRevisionRequired({
-				workforce: 300,
-				hasIndicatorG: true,
-				gap: 10,
-				correctionGap: 7,
-				events: withSecondDecl,
+				gap: GAP_ALERT_THRESHOLD,
 			}),
 		).toBe(true);
 	});
