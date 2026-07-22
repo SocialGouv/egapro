@@ -60,7 +60,7 @@ const baseProps = {
 		year: 2025,
 		totalWomen: null,
 		totalMen: null,
-		status: "submitted" as string | null,
+		status: "awaiting_compliance_path_choice" as const,
 	},
 	companyWorkforce: 120,
 	step1Data: {} as never,

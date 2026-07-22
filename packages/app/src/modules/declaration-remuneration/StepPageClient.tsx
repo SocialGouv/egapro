@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { useFunnelTracking } from "~/modules/analytics";
+import type { DeclarationFsmStatus } from "~/modules/domain";
 import {
 	getCompanySizeRange,
 	getObligationWorkforce,
@@ -37,7 +38,7 @@ type StepPageClientProps = {
 		year: number;
 		totalWomen: number | null;
 		totalMen: number | null;
-		status: string | null;
+		status: DeclarationFsmStatus | null;
 	};
 	// GIP-MDS annual average workforce; `null` = absent from the GIP file, i.e. not subject to the declaration.
 	companyWorkforce: number | null;
