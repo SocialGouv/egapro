@@ -1,22 +1,10 @@
 # Parcours métier et couverture de tests
 
-> **Miroir du classeur « Parcours » (Excel).** Ce dispositif remplace le classeur comme outil de suivi. Il a deux niveaux :
->
-> 1. **Les quatre onglets, à dérouler par les testeurs** — un fichier par tranche d'effectif, une section par année, chaque cas répété avec ses étapes, comme dans le classeur ;
-> 2. **Ce document** — pour chaque cas : les tests automatisés qui le couvrent, le verdict, et ce qui reste à tester.
+> **Miroir du classeur « Parcours » (Excel), en un seul document.** Première partie : les quatre onglets du classeur, déroulables par les testeurs — une section par année de campagne, chaque cas répété avec ses étapes, comme dans le classeur. Seconde partie : la couverture par les tests automatisés, cas par cas, avec les manques.
 >
 > Le listing brut de toute la suite vit dans [l'inventaire des tests](tests-inventory.md). Les onglets et cas se mettent à jour à la main quand le classeur évolue ; la couverture est vérifiée contre le code des tests le 2026-07-22 — chaque titre cité existe mot pour mot dans le fichier indiqué.
 
-## Les onglets — l'entrée des testeurs
-
-| Onglet | Fichier à dérouler |
-| --- | --- |
-| Moins de 50 et 50 à 99 salariés | [tests-parcours/moins-de-50-et-50-99.md](tests-parcours/moins-de-50-et-50-99.md) |
-| 100 à 149 salariés | [tests-parcours/100-149.md](tests-parcours/100-149.md) |
-| 150 à 249 salariés | [tests-parcours/150-249.md](tests-parcours/150-249.md) |
-| 250 salariés et plus | [tests-parcours/250-et-plus.md](tests-parcours/250-et-plus.md) |
-
-Mode d'emploi : ouvrir l'onglet de la tranche testée, aller à l'année de campagne, dérouler chaque cas dans l'ordre — les étapes listées sont celles à réaliser dans l'application. Chaque cas renvoie ici pour savoir ce que les tests automatisés couvrent déjà et ce qui mérite l'attention manuelle en priorité.
+Sommaire : [<50 et 50-99](#onglet-50-et-50-99--moins-de-50-et-50-à-99-salariés) · [100-149](#onglet-100-149--100-à-149-salariés) · [150-249](#onglet-150-249--150-à-249-salariés) · [250 et +](#onglet-250-et---250-salariés-et-plus) · [Couverture par cas](#détail-des-cas-et-de-leur-couverture) · [Manques transversaux](#manques-transversaux--ce-quaucun-test-e2e-nexerce-aujourdhui)
 
 ## Comment lire ce document
 
@@ -30,7 +18,7 @@ Mode d'emploi : ouvrir l'onglet de la tranche testée, aller à l'année de camp
 
 | Cas | Intitulé court | Couverture e2e |
 | --- | --- | --- |
-| [Onglet <50 et 50-99](#onglet--50-et-50-99-) | Déclaration seule | 🟠 Partiel |
+| [Déclaration seule (<50 et 50-99)](#déclaration-seule--tranches-50-et-50-99) | Déclaration seule | 🟠 Partiel |
 | [Cas 1](#cas-1--sans-cse-aucun-écart--5-) | Sans CSE, aucun écart | 🟠 Partiel |
 | [Cas 2](#cas-2--avec-cse-aucun-écart--5-) | Avec CSE, aucun écart | ✅ Couvert |
 | [Cas 3](#cas-3--sans-cse-écart--5--justification) | Sans CSE, écart, justification | 🟠 Partiel |
@@ -48,9 +36,1850 @@ Les manques qui reviennent sur presque tous les cas sont regroupés dans [Manque
 
 ---
 
-## Onglet « <50 et 50-99 »
+## Les onglets — à dérouler par les testeurs
 
-À dérouler : [tests-parcours/moins-de-50-et-50-99.md](tests-parcours/moins-de-50-et-50-99.md). Aucun parcours de conformité ni avis CSE pour ces tranches : la démarche se limite à la déclaration (6 premiers indicateurs pour 50-99, 7 en 2030 et 2033).
+Mode d'emploi : aller à l'onglet de la tranche testée, puis à l'année de campagne, et dérouler chaque cas dans l'ordre — les étapes listées sont celles à réaliser dans l'application. La ligne « couverture automatisée » de chaque cas renvoie au détail (tests existants et manques) en seconde partie.
+
+## Onglet <50 et 50-99 — moins de 50 et 50 à 99 salariés
+
+### Année 2027 — <50 et 50-99
+
+#### Moins de 50 salariés (sur la base du volontariat)
+
+1. Déclaration des 7 indicateurs
+
+> ⚠️ Écart classeur ↔ implémentation à arbitrer : les règles implémentées excluent le tier < 50 du 7ᵉ indicateur (y compris à partir de 2030) — l'application proposera donc 6 indicateurs. Voir [la couverture](#déclaration-seule--tranches-50-et-50-99).
+
+#### 50 à 99 salariés
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#déclaration-seule--tranches-50-et-50-99)
+
+### Année 2028 — <50 et 50-99
+
+#### Moins de 50 salariés (sur la base du volontariat)
+
+1. Déclaration des 7 indicateurs
+
+> ⚠️ Écart classeur ↔ implémentation à arbitrer : les règles implémentées excluent le tier < 50 du 7ᵉ indicateur (y compris à partir de 2030) — l'application proposera donc 6 indicateurs. Voir [la couverture](#déclaration-seule--tranches-50-et-50-99).
+
+#### 50 à 99 salariés
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#déclaration-seule--tranches-50-et-50-99)
+
+### Année 2029 — <50 et 50-99
+
+#### Moins de 50 salariés (sur la base du volontariat)
+
+1. Déclaration des 7 indicateurs
+
+> ⚠️ Écart classeur ↔ implémentation à arbitrer : les règles implémentées excluent le tier < 50 du 7ᵉ indicateur (y compris à partir de 2030) — l'application proposera donc 6 indicateurs. Voir [la couverture](#déclaration-seule--tranches-50-et-50-99).
+
+#### 50 à 99 salariés
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#déclaration-seule--tranches-50-et-50-99)
+
+### Année 2030 — <50 et 50-99
+
+#### Moins de 50 salariés (sur la base du volontariat)
+
+1. Déclaration des 7 indicateurs
+
+> ⚠️ Écart classeur ↔ implémentation à arbitrer : les règles implémentées excluent le tier < 50 du 7ᵉ indicateur (y compris à partir de 2030) — l'application proposera donc 6 indicateurs. Voir [la couverture](#déclaration-seule--tranches-50-et-50-99).
+
+#### 50 à 99 salariés
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#déclaration-seule--tranches-50-et-50-99)
+
+### Année 2031 — <50 et 50-99
+
+#### Moins de 50 salariés (sur la base du volontariat)
+
+1. Déclaration des 7 indicateurs
+
+> ⚠️ Écart classeur ↔ implémentation à arbitrer : les règles implémentées excluent le tier < 50 du 7ᵉ indicateur (y compris à partir de 2030) — l'application proposera donc 6 indicateurs. Voir [la couverture](#déclaration-seule--tranches-50-et-50-99).
+
+#### 50 à 99 salariés
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#déclaration-seule--tranches-50-et-50-99)
+
+### Année 2032 — <50 et 50-99
+
+#### Moins de 50 salariés (sur la base du volontariat)
+
+1. Déclaration des 7 indicateurs
+
+> ⚠️ Écart classeur ↔ implémentation à arbitrer : les règles implémentées excluent le tier < 50 du 7ᵉ indicateur (y compris à partir de 2030) — l'application proposera donc 6 indicateurs. Voir [la couverture](#déclaration-seule--tranches-50-et-50-99).
+
+#### 50 à 99 salariés
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#déclaration-seule--tranches-50-et-50-99)
+
+### Année 2033 — <50 et 50-99
+
+#### Moins de 50 salariés (sur la base du volontariat)
+
+1. Déclaration des 7 indicateurs
+
+> ⚠️ Écart classeur ↔ implémentation à arbitrer : les règles implémentées excluent le tier < 50 du 7ᵉ indicateur (y compris à partir de 2030) — l'application proposera donc 6 indicateurs. Voir [la couverture](#déclaration-seule--tranches-50-et-50-99).
+
+#### 50 à 99 salariés
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#déclaration-seule--tranches-50-et-50-99)
+
+## Onglet 100-149 — 100 à 149 salariés
+
+### Année 2027 — 6 premiers indicateurs (pas de 7ᵉ indicateur cette année)
+
+Seuls les cas 1 et 2 existent cette année : sans 7ᵉ indicateur, il ne peut pas y avoir d'écart ≥ 5 % ni de parcours de conformité.
+
+#### Cas 1 — sans CSE
+
+CSE : non
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE
+
+CSE : oui
+
+1. Déclaration des 6 premiers indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+### Année 2028 — 6 premiers indicateurs (pas de 7ᵉ indicateur cette année)
+
+Seuls les cas 1 et 2 existent cette année : sans 7ᵉ indicateur, il ne peut pas y avoir d'écart ≥ 5 % ni de parcours de conformité.
+
+#### Cas 1 — sans CSE
+
+CSE : non
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE
+
+CSE : oui
+
+1. Déclaration des 6 premiers indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+### Année 2029 — 6 premiers indicateurs (pas de 7ᵉ indicateur cette année)
+
+Seuls les cas 1 et 2 existent cette année : sans 7ᵉ indicateur, il ne peut pas y avoir d'écart ≥ 5 % ni de parcours de conformité.
+
+#### Cas 1 — sans CSE
+
+CSE : non
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE
+
+CSE : oui
+
+1. Déclaration des 6 premiers indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+### Année 2030 — 7 indicateurs
+
+#### Cas 1 — sans CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+#### Cas 3 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-3--sans-cse-écart--5--justification)
+
+#### Cas 4 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+3. Dépôt avis CSE sur l'exactitude des données déclarées et la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-4--avec-cse-écart--5--justification)
+
+#### Cas 5 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-5--sans-cse-écart--5--évaluation-conjointe)
+
+#### Cas 6 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+4. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-6--avec-cse-écart--5--évaluation-conjointe)
+
+#### Cas 7 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-7--sans-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 8 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Dépôt avis CSE sur l'exactitude des données déclarées pour la 1ʳᵉ et la 2ᵉ déclaration, et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-8--avec-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 9 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-9--sans-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 10 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+5. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-10--avec-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 11 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-11--sans-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+#### Cas 12 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+6. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ʳᵉ et la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-12--avec-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+### Année 2031 — 6 premiers indicateurs (pas de 7ᵉ indicateur cette année)
+
+Seuls les cas 1 et 2 existent cette année : sans 7ᵉ indicateur, il ne peut pas y avoir d'écart ≥ 5 % ni de parcours de conformité.
+
+#### Cas 1 — sans CSE
+
+CSE : non
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE
+
+CSE : oui
+
+1. Déclaration des 6 premiers indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+### Année 2032 — 6 premiers indicateurs (pas de 7ᵉ indicateur cette année)
+
+Seuls les cas 1 et 2 existent cette année : sans 7ᵉ indicateur, il ne peut pas y avoir d'écart ≥ 5 % ni de parcours de conformité.
+
+#### Cas 1 — sans CSE
+
+CSE : non
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE
+
+CSE : oui
+
+1. Déclaration des 6 premiers indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+### Année 2033 — 7 indicateurs
+
+#### Cas 1 — sans CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+#### Cas 3 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-3--sans-cse-écart--5--justification)
+
+#### Cas 4 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+3. Dépôt avis CSE sur l'exactitude des données déclarées et la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-4--avec-cse-écart--5--justification)
+
+#### Cas 5 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-5--sans-cse-écart--5--évaluation-conjointe)
+
+#### Cas 6 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+4. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-6--avec-cse-écart--5--évaluation-conjointe)
+
+#### Cas 7 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-7--sans-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 8 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Dépôt avis CSE sur l'exactitude des données déclarées pour la 1ʳᵉ et la 2ᵉ déclaration, et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-8--avec-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 9 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-9--sans-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 10 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+5. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-10--avec-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 11 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-11--sans-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+#### Cas 12 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+6. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ʳᵉ et la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-12--avec-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+## Onglet 150-249 — 150 à 249 salariés
+
+### Année 2027 — 7 indicateurs
+
+#### Cas 1 — sans CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+#### Cas 3 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-3--sans-cse-écart--5--justification)
+
+#### Cas 4 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+3. Dépôt avis CSE sur l'exactitude des données déclarées et la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-4--avec-cse-écart--5--justification)
+
+#### Cas 5 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-5--sans-cse-écart--5--évaluation-conjointe)
+
+#### Cas 6 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+4. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-6--avec-cse-écart--5--évaluation-conjointe)
+
+#### Cas 7 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-7--sans-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 8 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Dépôt avis CSE sur l'exactitude des données déclarées pour la 1ʳᵉ et la 2ᵉ déclaration, et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-8--avec-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 9 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-9--sans-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 10 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+5. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-10--avec-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 11 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-11--sans-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+#### Cas 12 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+6. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ʳᵉ et la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-12--avec-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+### Année 2028 — 6 premiers indicateurs (pas de 7ᵉ indicateur cette année)
+
+Seuls les cas 1 et 2 existent cette année : sans 7ᵉ indicateur, il ne peut pas y avoir d'écart ≥ 5 % ni de parcours de conformité.
+
+#### Cas 1 — sans CSE
+
+CSE : non
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE
+
+CSE : oui
+
+1. Déclaration des 6 premiers indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+### Année 2029 — 6 premiers indicateurs (pas de 7ᵉ indicateur cette année)
+
+Seuls les cas 1 et 2 existent cette année : sans 7ᵉ indicateur, il ne peut pas y avoir d'écart ≥ 5 % ni de parcours de conformité.
+
+#### Cas 1 — sans CSE
+
+CSE : non
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE
+
+CSE : oui
+
+1. Déclaration des 6 premiers indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+### Année 2030 — 7 indicateurs
+
+#### Cas 1 — sans CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+#### Cas 3 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-3--sans-cse-écart--5--justification)
+
+#### Cas 4 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+3. Dépôt avis CSE sur l'exactitude des données déclarées et la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-4--avec-cse-écart--5--justification)
+
+#### Cas 5 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-5--sans-cse-écart--5--évaluation-conjointe)
+
+#### Cas 6 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+4. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-6--avec-cse-écart--5--évaluation-conjointe)
+
+#### Cas 7 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-7--sans-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 8 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Dépôt avis CSE sur l'exactitude des données déclarées pour la 1ʳᵉ et la 2ᵉ déclaration, et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-8--avec-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 9 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-9--sans-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 10 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+5. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-10--avec-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 11 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-11--sans-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+#### Cas 12 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+6. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ʳᵉ et la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-12--avec-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+### Année 2031 — 6 premiers indicateurs (pas de 7ᵉ indicateur cette année)
+
+Seuls les cas 1 et 2 existent cette année : sans 7ᵉ indicateur, il ne peut pas y avoir d'écart ≥ 5 % ni de parcours de conformité.
+
+#### Cas 1 — sans CSE
+
+CSE : non
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE
+
+CSE : oui
+
+1. Déclaration des 6 premiers indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+### Année 2032 — 6 premiers indicateurs (pas de 7ᵉ indicateur cette année)
+
+Seuls les cas 1 et 2 existent cette année : sans 7ᵉ indicateur, il ne peut pas y avoir d'écart ≥ 5 % ni de parcours de conformité.
+
+#### Cas 1 — sans CSE
+
+CSE : non
+
+1. Déclaration des 6 premiers indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE
+
+CSE : oui
+
+1. Déclaration des 6 premiers indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+### Année 2033 — 7 indicateurs
+
+#### Cas 1 — sans CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+#### Cas 3 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-3--sans-cse-écart--5--justification)
+
+#### Cas 4 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+3. Dépôt avis CSE sur l'exactitude des données déclarées et la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-4--avec-cse-écart--5--justification)
+
+#### Cas 5 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-5--sans-cse-écart--5--évaluation-conjointe)
+
+#### Cas 6 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+4. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-6--avec-cse-écart--5--évaluation-conjointe)
+
+#### Cas 7 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-7--sans-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 8 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Dépôt avis CSE sur l'exactitude des données déclarées pour la 1ʳᵉ et la 2ᵉ déclaration, et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-8--avec-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 9 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-9--sans-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 10 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+5. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-10--avec-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 11 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-11--sans-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+#### Cas 12 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+6. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ʳᵉ et la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-12--avec-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+## Onglet 250 et + — 250 salariés et plus
+
+### Année 2027 — 7 indicateurs
+
+#### Cas 1 — sans CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+#### Cas 3 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-3--sans-cse-écart--5--justification)
+
+#### Cas 4 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+3. Dépôt avis CSE sur l'exactitude des données déclarées et la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-4--avec-cse-écart--5--justification)
+
+#### Cas 5 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-5--sans-cse-écart--5--évaluation-conjointe)
+
+#### Cas 6 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+4. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-6--avec-cse-écart--5--évaluation-conjointe)
+
+#### Cas 7 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-7--sans-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 8 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Dépôt avis CSE sur l'exactitude des données déclarées pour la 1ʳᵉ et la 2ᵉ déclaration, et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-8--avec-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 9 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-9--sans-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 10 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+5. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-10--avec-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 11 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-11--sans-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+#### Cas 12 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+6. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ʳᵉ et la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-12--avec-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+### Année 2028 — 7 indicateurs
+
+#### Cas 1 — sans CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+#### Cas 3 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-3--sans-cse-écart--5--justification)
+
+#### Cas 4 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+3. Dépôt avis CSE sur l'exactitude des données déclarées et la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-4--avec-cse-écart--5--justification)
+
+#### Cas 5 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-5--sans-cse-écart--5--évaluation-conjointe)
+
+#### Cas 6 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+4. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-6--avec-cse-écart--5--évaluation-conjointe)
+
+#### Cas 7 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-7--sans-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 8 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Dépôt avis CSE sur l'exactitude des données déclarées pour la 1ʳᵉ et la 2ᵉ déclaration, et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-8--avec-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 9 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-9--sans-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 10 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+5. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-10--avec-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 11 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-11--sans-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+#### Cas 12 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+6. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ʳᵉ et la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-12--avec-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+### Année 2029 — 7 indicateurs
+
+#### Cas 1 — sans CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+#### Cas 3 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-3--sans-cse-écart--5--justification)
+
+#### Cas 4 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+3. Dépôt avis CSE sur l'exactitude des données déclarées et la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-4--avec-cse-écart--5--justification)
+
+#### Cas 5 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-5--sans-cse-écart--5--évaluation-conjointe)
+
+#### Cas 6 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+4. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-6--avec-cse-écart--5--évaluation-conjointe)
+
+#### Cas 7 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-7--sans-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 8 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Dépôt avis CSE sur l'exactitude des données déclarées pour la 1ʳᵉ et la 2ᵉ déclaration, et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-8--avec-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 9 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-9--sans-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 10 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+5. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-10--avec-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 11 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-11--sans-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+#### Cas 12 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+6. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ʳᵉ et la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-12--avec-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+### Année 2030 — 7 indicateurs
+
+#### Cas 1 — sans CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+#### Cas 3 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-3--sans-cse-écart--5--justification)
+
+#### Cas 4 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+3. Dépôt avis CSE sur l'exactitude des données déclarées et la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-4--avec-cse-écart--5--justification)
+
+#### Cas 5 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-5--sans-cse-écart--5--évaluation-conjointe)
+
+#### Cas 6 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+4. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-6--avec-cse-écart--5--évaluation-conjointe)
+
+#### Cas 7 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-7--sans-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 8 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Dépôt avis CSE sur l'exactitude des données déclarées pour la 1ʳᵉ et la 2ᵉ déclaration, et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-8--avec-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 9 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-9--sans-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 10 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+5. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-10--avec-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 11 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-11--sans-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+#### Cas 12 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+6. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ʳᵉ et la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-12--avec-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+### Année 2031 — 7 indicateurs
+
+#### Cas 1 — sans CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+#### Cas 3 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-3--sans-cse-écart--5--justification)
+
+#### Cas 4 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+3. Dépôt avis CSE sur l'exactitude des données déclarées et la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-4--avec-cse-écart--5--justification)
+
+#### Cas 5 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-5--sans-cse-écart--5--évaluation-conjointe)
+
+#### Cas 6 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+4. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-6--avec-cse-écart--5--évaluation-conjointe)
+
+#### Cas 7 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-7--sans-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 8 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Dépôt avis CSE sur l'exactitude des données déclarées pour la 1ʳᵉ et la 2ᵉ déclaration, et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-8--avec-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 9 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-9--sans-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 10 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+5. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-10--avec-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 11 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-11--sans-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+#### Cas 12 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+6. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ʳᵉ et la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-12--avec-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+### Année 2032 — 7 indicateurs
+
+#### Cas 1 — sans CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+#### Cas 3 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-3--sans-cse-écart--5--justification)
+
+#### Cas 4 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+3. Dépôt avis CSE sur l'exactitude des données déclarées et la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-4--avec-cse-écart--5--justification)
+
+#### Cas 5 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-5--sans-cse-écart--5--évaluation-conjointe)
+
+#### Cas 6 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+4. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-6--avec-cse-écart--5--évaluation-conjointe)
+
+#### Cas 7 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-7--sans-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 8 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Dépôt avis CSE sur l'exactitude des données déclarées pour la 1ʳᵉ et la 2ᵉ déclaration, et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-8--avec-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 9 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-9--sans-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 10 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+5. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-10--avec-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 11 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-11--sans-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+#### Cas 12 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+6. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ʳᵉ et la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-12--avec-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+### Année 2033 — 7 indicateurs
+
+#### Cas 1 — sans CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-1--sans-cse-aucun-écart--5-)
+
+#### Cas 2 — avec CSE et aucun écart ≥ 5 % pour le 7ᵉ indicateur
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Dépôt avis CSE sur l'exactitude des données déclarées
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-2--avec-cse-aucun-écart--5-)
+
+#### Cas 3 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-3--sans-cse-écart--5--justification)
+
+#### Cas 4 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : justification des écarts
+3. Dépôt avis CSE sur l'exactitude des données déclarées et la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-4--avec-cse-écart--5--justification)
+
+#### Cas 5 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-5--sans-cse-écart--5--évaluation-conjointe)
+
+#### Cas 6 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : évaluation conjointe
+3. Dépôt du rapport de l'évaluation conjointe
+4. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-6--avec-cse-écart--5--évaluation-conjointe)
+
+#### Cas 7 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-7--sans-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 8 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec aucun écart ≥ 5 %
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Dépôt avis CSE sur l'exactitude des données déclarées pour la 1ʳᵉ et la 2ᵉ déclaration, et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-8--avec-cse-actions-correctives-2e-déclaration-sans-écart)
+
+#### Cas 9 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-9--sans-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 10 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et justification des écarts
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : justification des écarts
+5. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ʳᵉ déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-10--avec-cse-actions-correctives-2e-déclaration-avec-écart-justification)
+
+#### Cas 11 — sans CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : non
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+
+Couverture automatisée : ✅ couverte — [détail et manques](#cas-11--sans-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+#### Cas 12 — avec CSE, au moins un écart ≥ 5 % pour le 7ᵉ indicateur, actions correctives, nouvelle déclaration avec au moins un écart ≥ 5 % et évaluation conjointe
+
+CSE : oui
+
+1. Déclaration des 7 indicateurs
+2. Parcours de conformité : actions correctives et nouvelle déclaration
+3. Nouvelle déclaration du 7ᵉ indicateur
+4. Parcours de conformité : évaluation conjointe
+5. Dépôt du rapport de l'évaluation conjointe
+6. Dépôt avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ʳᵉ et la 2ᵉ déclaration
+
+Couverture automatisée : 🟠 partielle — [détail et manques](#cas-12--avec-cse-actions-correctives-2e-déclaration-avec-écart-évaluation-conjointe)
+
+---
+
+## Détail des cas et de leur couverture
+
+Les étapes des cas sont dans les onglets ci-dessus ; cette partie dit ce que les tests automatisés couvrent déjà et ce qui reste à tester. Sauf mention contraire, les scénarios cités sont dans `packages/app/src/e2e/`.
+
+### Déclaration seule — tranches <50 et 50-99
+
+Aucun parcours de conformité ni avis CSE pour ces tranches : la démarche se limite à la déclaration (6 premiers indicateurs pour 50-99, 7 en 2030 et 2033).
 
 **Couverture e2e : 🟠 Partiel.**
 
@@ -70,12 +1899,6 @@ Ce qui manque :
 - La variante **7 indicateurs en 2030 et 2033** pour la tranche 50-99 n'est exercée par aucun e2e (aucun test ne fait varier l'année).
 - Aucun test ne vérifie explicitement l'**absence** de parcours de conformité et d'avis CSE après une soumission dans ces tranches.
 - ⚠️ **Écart classeur ↔ implémentation à arbitrer** : le classeur indique « 7 indicateurs » pour la tranche < 50 (volontariat), mais les règles implémentées excluent le tier < 50 du 7ᵉ indicateur, y compris à partir de 2030 (test « keeps the voluntary tier (< 50) out of the obligation even from 2030 »). L'un des deux doit être corrigé.
-
----
-
-## Détail des cas et de leur couverture
-
-Les étapes reprennent le texte du classeur. Sauf mention contraire, les scénarios cités sont dans `packages/app/src/e2e/`.
 
 ### Cas 1 — sans CSE, aucun écart ≥ 5 %
 
