@@ -103,6 +103,22 @@ jobs:
       - name: Typecheck app
         run: pnpm --filter app typecheck
 
+  app-check-cahier:
+    name: App · Cahier de tests ↔ E2E
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - name: Check cahier de tests correlation
+        run: pnpm --filter app check:cahier
+
   app-check-journal:
     name: App · Journal monotone check
     runs-on: ubuntu-latest

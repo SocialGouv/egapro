@@ -20,7 +20,7 @@ const CONFIRMATION_PATH = `${COMPLIANCE_PATH}/confirmation`;
 
 // === GROUP A: No gap — auto-redirects ===
 
-test.describe("Path 1: no gap + hasCse → /avis-cse → full CSE flow", () => {
+test.describe("[CAS-02] Path 1: no gap + hasCse → /avis-cse → full CSE flow", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
@@ -43,7 +43,7 @@ test.describe("Path 1: no gap + hasCse → /avis-cse → full CSE flow", () => {
 	});
 });
 
-test.describe("Path 2: no gap + no hasCse → /confirmation", () => {
+test.describe("[CAS-01] Path 2: no gap + no hasCse → /confirmation", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(false);
@@ -64,7 +64,7 @@ test.describe("Path 2: no gap + no hasCse → /confirmation", () => {
 
 // === GROUP B: Gap — compliance choice form ===
 
-test.describe("Path 3: gap + hasCse → compliance choice → justify", () => {
+test.describe("[CAS-04] Path 3: gap + hasCse → compliance choice → justify", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
@@ -104,7 +104,7 @@ test.describe("Path 3: gap + hasCse → compliance choice → justify", () => {
 	});
 });
 
-test.describe("Path 4: gap + hasCse → joint evaluation → /avis-cse", () => {
+test.describe("[CAS-06] Path 4: gap + hasCse → joint evaluation → /avis-cse", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
@@ -122,7 +122,7 @@ test.describe("Path 4: gap + hasCse → joint evaluation → /avis-cse", () => {
 	});
 });
 
-test.describe("Path 5: gap + no hasCse → joint evaluation → /confirmation", () => {
+test.describe("[CAS-03][CAS-05] Path 5: gap + no hasCse → joint evaluation → /confirmation", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(false);
@@ -149,7 +149,7 @@ test.describe("Path 5: gap + no hasCse → joint evaluation → /confirmation", 
 
 // === GROUP C: Corrective action — second declaration (no remaining gap) ===
 
-test.describe("Path 6: gap + corrective action (no gap after) + hasCse → /avis-cse", () => {
+test.describe("[CAS-08] Path 6: gap + corrective action (no gap after) + hasCse → /avis-cse", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
@@ -167,7 +167,7 @@ test.describe("Path 6: gap + corrective action (no gap after) + hasCse → /avis
 	});
 });
 
-test.describe("Path 7: gap + corrective action (no gap after) + no hasCse → /confirmation", () => {
+test.describe("[CAS-07] Path 7: gap + corrective action (no gap after) + no hasCse → /confirmation", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(false);
@@ -187,7 +187,7 @@ test.describe("Path 7: gap + corrective action (no gap after) + no hasCse → /c
 
 // === GROUP D: Corrective action with remaining gap → second round ===
 
-test.describe("Path 8: gap + corrective action (gap persists) → second round choices", () => {
+test.describe("[CAS-10] Path 8: gap + corrective action (gap persists) → second round choices", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
@@ -237,7 +237,7 @@ test.describe("Path 8: gap + corrective action (gap persists) → second round c
 	});
 });
 
-test.describe("Path 10: second round + joint evaluation + hasCse → /avis-cse", () => {
+test.describe("[CAS-12] Path 10: second round + joint evaluation + hasCse → /avis-cse", () => {
 	test.beforeAll(async () => {
 		// Fresh run: declaration → corrective action with gap → second round
 		await resetDeclarationToDraft();
@@ -259,7 +259,7 @@ test.describe("Path 10: second round + joint evaluation + hasCse → /avis-cse",
 	});
 });
 
-test.describe("Path 11: second round + joint evaluation + no hasCse → /confirmation", () => {
+test.describe("[CAS-11] Path 11: second round + joint evaluation + no hasCse → /confirmation", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(false);
@@ -281,7 +281,7 @@ test.describe("Path 11: second round + joint evaluation + no hasCse → /confirm
 
 // === GROUP F.0: /avis-cse Précédent button routes via rule-engine state ===
 
-test.describe("Path 13.a: no gap → /avis-cse Précédent → /etape/6 (recap)", () => {
+test.describe("[ANX-03] Path 13.a: no gap → /avis-cse Précédent → /etape/6 (recap)", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
@@ -301,7 +301,7 @@ test.describe("Path 13.a: no gap → /avis-cse Précédent → /etape/6 (recap)"
 	});
 });
 
-test.describe("Path 13.b: justify round 1 → /avis-cse Précédent → /parcours-conformite", () => {
+test.describe("[ANX-03] Path 13.b: justify round 1 → /avis-cse Précédent → /parcours-conformite", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
@@ -320,7 +320,7 @@ test.describe("Path 13.b: justify round 1 → /avis-cse Précédent → /parcour
 	});
 });
 
-test.describe("Path 13.c: corrective second decl resolved → /avis-cse Précédent → /etape/3", () => {
+test.describe("[ANX-03] Path 13.c: corrective second decl resolved → /avis-cse Précédent → /etape/3", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
@@ -342,7 +342,7 @@ test.describe("Path 13.c: corrective second decl resolved → /avis-cse Précéd
 
 // === GROUP F: Redirect guard (demarcheCompletedAt) ===
 
-test.describe("Path 12: compliance already completed → redirect", () => {
+test.describe("[ANX-02] Path 12: compliance already completed → redirect", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);
