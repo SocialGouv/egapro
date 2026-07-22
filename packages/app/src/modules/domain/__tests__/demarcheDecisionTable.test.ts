@@ -6,6 +6,7 @@ import {
 	classifyCompanySize,
 	GAP_ALERT_THRESHOLD,
 	gapLevel,
+	getObligationWorkforce,
 	INDICATOR_G_ANNUAL_MIN,
 	INDICATOR_G_TRIENNIAL_BASE_YEAR,
 	INDICATOR_G_TRIENNIAL_MIN,
@@ -15,6 +16,8 @@ import {
 	isIndicatorGRequired,
 	isSignificantGap,
 	isTriennialYear,
+	parseGipWorkforce,
+	toDisplayWorkforce,
 } from "~/modules/domain";
 
 // Boundary-focused workforce values, all derived from the named regulatory
@@ -120,10 +123,13 @@ for (const workforce of WORKFORCES) {
 // None of the predicates exercised here read hasCse, so crossing it in would only
 // duplicate rows and add a tautological assertion — it is deliberately left out.
 describe("table de décision — effectif × écart × régime", () => {
-	it.each(ROWS)("$label", ({ workforce, gapCase, regime }) => {
+	it.each(ROWS)("$label", ({ workforce: gipWorkforce, gapCase, regime }) => {
 		// Fixture guard: both regimes stay below the universal year so the 150-249
 		// band remains triennial-gated.
 		expect(regime.year).toBeLessThan(INDICATOR_G_UNIVERSAL_YEAR);
+
+		// Same composition as production (#3962): the GIP workforce is the single source feeding every obligation predicate.
+		const workforce = getObligationWorkforce(gipWorkforce);
 
 		// The CSE-opinion mandate is size-based (>= 100) and ignores the declared CSE.
 		const cseBySize = workforce >= COMPANY_SIZE_ANNUAL_MIN;
@@ -237,6 +243,49 @@ describe("frontières de taille (constantes nommées du domaine)", () => {
 		expect(isIndicatorGRequired(70, INDICATOR_G_TRIENNIAL_BASE_YEAR)).toBe(
 			false,
 		);
+	});
+});
+
+describe("effectif GIP — source unique de l'obligation (#3929/#3962)", () => {
+	it("entreprise absente du fichier GIP (null) → aucune obligation", () => {
+		const workforce = getObligationWorkforce(null);
+		expect(workforce).toBe(0);
+		expect(isCseRequired(workforce)).toBe(false);
+		expect(
+			isIndicatorGRequired(workforce, INDICATOR_G_TRIENNIAL_BASE_YEAR),
+		).toBe(false);
+		expect(
+			isComplianceProcessRequired({
+				workforce,
+				hasIndicatorG: false,
+				gap: GAP_ALERT_THRESHOLD,
+			}),
+		).toBe(false);
+	});
+
+	it("effectif GIP décimal : les seuils comparent la valeur exacte, jamais l'arrondi d'affichage", () => {
+		// #3929 class of bug: 99.97 displays as 99 and must NOT trigger the >= 100 obligations.
+		const nearCse = getObligationWorkforce(COMPANY_SIZE_ANNUAL_MIN - 0.03);
+		expect(isCseRequired(nearCse)).toBe(false);
+		expect(toDisplayWorkforce(nearCse)).toBe(COMPANY_SIZE_ANNUAL_MIN - 1);
+
+		const nearTriennial = getObligationWorkforce(
+			INDICATOR_G_TRIENNIAL_MIN - 0.5,
+		);
+		expect(
+			isIndicatorGRequired(nearTriennial, INDICATOR_G_TRIENNIAL_BASE_YEAR),
+		).toBe(false);
+
+		const nearAnnual = getObligationWorkforce(INDICATOR_G_ANNUAL_MIN - 0.1);
+		const nonTriennial = INDICATOR_G_TRIENNIAL_BASE_YEAR + 1;
+		expect(isIndicatorGRequired(nearAnnual, nonTriennial)).toBe(false);
+	});
+
+	it("parseGipWorkforce : chaîne décimale acceptée, valeur invalide → null → non assujetti", () => {
+		expect(parseGipWorkforce("99.97")).toBeCloseTo(99.97);
+		expect(parseGipWorkforce(null)).toBeNull();
+		expect(parseGipWorkforce("abc")).toBeNull();
+		expect(getObligationWorkforce(parseGipWorkforce("abc"))).toBe(0);
 	});
 });
 
