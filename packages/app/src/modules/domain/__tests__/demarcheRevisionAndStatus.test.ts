@@ -127,6 +127,7 @@ describe("computeDeclarationStatus — projection du statut FSM vers le statut u
 			currentStep: 6,
 			cancelledAt: null,
 		});
+		// currentStep 6 = started: even "draft" is in_progress — only draft at step 0 is to_complete (see the dedicated test below).
 		if (status === "demarche_completed") {
 			expect(result).toBe("done");
 		} else {

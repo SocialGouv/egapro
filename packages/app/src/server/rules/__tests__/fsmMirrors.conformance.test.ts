@@ -103,8 +103,8 @@ describe("conformité des miroirs — destinations des transitions du moteur", (
 	)("transition « $id » → « $to » : miroirs cohérents avec le stage du moteur", (transition) => {
 		const to = transition.to;
 		if (to === "demarche_completed") {
-			// Terminal state: the hasCse × hasSubmittedCseOpinion matrix is covered
-			// exhaustively in the dedicated describe below.
+			// Terminal state: only the healthy hasSubmittedCseOpinion:true branch is asserted here —
+			// the full hasCse × hasSubmittedCseOpinion matrix, incl. the known-bad false branch (it.fails #3945), lives in the dedicated describe below.
 			expect(getCurrentStageHref(to, true)).toBe(CSE);
 			expect(getCurrentStageHref(to, false)).toBe(CONFIRMATION);
 			expect(
@@ -133,9 +133,11 @@ describe("exhaustivité — chaque statut FSM est couvert par les deux miroirs",
 		const nav = getCurrentStageHref(status, true);
 		expect(typeof nav).toBe("string");
 		expect(nav.length).toBeGreaterThan(0);
-		expect(
-			computePanelVariant(makeDeclaration({ fsmStatus: status })),
-		).toBeDefined();
+		const decl = makeDeclaration({ fsmStatus: status });
+		expect(computePanelVariant(decl)).toBeDefined();
+		const cta = computeCtaHref(decl, SIREN);
+		expect(typeof cta).toBe("string");
+		expect(cta.length).toBeGreaterThan(0);
 	});
 });
 
