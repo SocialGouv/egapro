@@ -1,8 +1,22 @@
 # Parcours métier et couverture de tests
 
-> **Miroir du classeur « Parcours » (Excel).** Ce document remplace le classeur comme outil de suivi : il reprend ses quatre onglets (tranches d'effectif), ses cas par année et le détail de leurs étapes, et ajoute pour chaque cas **les tests automatisés qui le couvrent** et **ce qui reste à tester**. Le listing brut de toute la suite vit dans [l'inventaire des tests](tests-inventory.md).
+> **Miroir du classeur « Parcours » (Excel).** Ce dispositif remplace le classeur comme outil de suivi. Il a deux niveaux :
 >
-> Partie « onglets et cas » : à mettre à jour à la main quand le classeur évolue. Partie « couverture » : vérifiée contre le code des tests le 2026-07-22 — chaque titre cité existe mot pour mot dans le fichier indiqué.
+> 1. **Les quatre onglets, à dérouler par les testeurs** — un fichier par tranche d'effectif, une section par année, chaque cas répété avec ses étapes, comme dans le classeur ;
+> 2. **Ce document** — pour chaque cas : les tests automatisés qui le couvrent, le verdict, et ce qui reste à tester.
+>
+> Le listing brut de toute la suite vit dans [l'inventaire des tests](tests-inventory.md). Les onglets et cas se mettent à jour à la main quand le classeur évolue ; la couverture est vérifiée contre le code des tests le 2026-07-22 — chaque titre cité existe mot pour mot dans le fichier indiqué.
+
+## Les onglets — l'entrée des testeurs
+
+| Onglet | Fichier à dérouler |
+| --- | --- |
+| Moins de 50 et 50 à 99 salariés | [tests-parcours/moins-de-50-et-50-99.md](tests-parcours/moins-de-50-et-50-99.md) |
+| 100 à 149 salariés | [tests-parcours/100-149.md](tests-parcours/100-149.md) |
+| 150 à 249 salariés | [tests-parcours/150-249.md](tests-parcours/150-249.md) |
+| 250 salariés et plus | [tests-parcours/250-et-plus.md](tests-parcours/250-et-plus.md) |
+
+Mode d'emploi : ouvrir l'onglet de la tranche testée, aller à l'année de campagne, dérouler chaque cas dans l'ordre — les étapes listées sont celles à réaliser dans l'application. Chaque cas renvoie ici pour savoir ce que les tests automatisés couvrent déjà et ce qui mérite l'attention manuelle en priorité.
 
 ## Comment lire ce document
 
@@ -36,12 +50,7 @@ Les manques qui reviennent sur presque tous les cas sont regroupés dans [Manque
 
 ## Onglet « <50 et 50-99 »
 
-Aucun parcours de conformité ni avis CSE pour ces tranches : la démarche se limite à la déclaration.
-
-| Tranche | 2027 | 2028 | 2029 | 2030 | 2031 | 2032 | 2033 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Moins de 50 salariés (volontariat) | 7 indicateurs | 7 | 7 | 7 | 7 | 7 | 7 |
-| 50 à 99 salariés | 6 premiers indicateurs | 6 | 6 | **7** | 6 | 6 | **7** |
+À dérouler : [tests-parcours/moins-de-50-et-50-99.md](tests-parcours/moins-de-50-et-50-99.md). Aucun parcours de conformité ni avis CSE pour ces tranches : la démarche se limite à la déclaration (6 premiers indicateurs pour 50-99, 7 en 2030 et 2033).
 
 **Couverture e2e : 🟠 Partiel.**
 
@@ -61,36 +70,6 @@ Ce qui manque :
 - La variante **7 indicateurs en 2030 et 2033** pour la tranche 50-99 n'est exercée par aucun e2e (aucun test ne fait varier l'année).
 - Aucun test ne vérifie explicitement l'**absence** de parcours de conformité et d'avis CSE après une soumission dans ces tranches.
 - ⚠️ **Écart classeur ↔ implémentation à arbitrer** : le classeur indique « 7 indicateurs » pour la tranche < 50 (volontariat), mais les règles implémentées excluent le tier < 50 du 7ᵉ indicateur, y compris à partir de 2030 (test « keeps the voluntary tier (< 50) out of the obligation even from 2030 »). L'un des deux doit être corrigé.
-
----
-
-## Onglet « 100-149 »
-
-Cette tranche n'est assujettie au 7ᵉ indicateur qu'à partir de 2030, les années triennales (2030, 2033). Les autres années : 6 premiers indicateurs, seuls les cas 1 et 2 existent.
-
-| Cas | 2027 | 2028 | 2029 | 2030 | 2031 | 2032 | 2033 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Cas 1 — sans CSE | ✓ (6 ind.) | ✓ | ✓ | ✓ (7 ind.) | ✓ | ✓ | ✓ (7 ind.) |
-| Cas 2 — avec CSE | ✓ (6 ind.) | ✓ | ✓ | ✓ (7 ind.) | ✓ | ✓ | ✓ (7 ind.) |
-| Cas 3 à 12 (écart ≥ 5 %) | — | — | — | ✓ | — | — | ✓ |
-
-## Onglet « 150-249 »
-
-Cette tranche est assujettie au 7ᵉ indicateur les années triennales (2027, 2030, 2033). Les autres années : 6 premiers indicateurs, seuls les cas 1 et 2 existent.
-
-| Cas | 2027 | 2028 | 2029 | 2030 | 2031 | 2032 | 2033 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Cas 1 — sans CSE | ✓ (7 ind.) | ✓ (6 ind.) | ✓ (6 ind.) | ✓ (7 ind.) | ✓ (6 ind.) | ✓ (6 ind.) | ✓ (7 ind.) |
-| Cas 2 — avec CSE | ✓ (7 ind.) | ✓ (6 ind.) | ✓ (6 ind.) | ✓ (7 ind.) | ✓ (6 ind.) | ✓ (6 ind.) | ✓ (7 ind.) |
-| Cas 3 à 12 (écart ≥ 5 %) | ✓ | — | — | ✓ | — | — | ✓ |
-
-## Onglet « 250 et + »
-
-Cette tranche est assujettie au 7ᵉ indicateur **toutes les années** : les 12 cas existent chaque année, toujours avec les 7 indicateurs.
-
-| Cas | 2027 → 2033 |
-| --- | --- |
-| Cas 1 à 12 | ✓ toutes les années (7 ind.) |
 
 ---
 
