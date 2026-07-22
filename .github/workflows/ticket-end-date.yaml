@@ -1,0 +1,58 @@
+name: 🗓️ Ticket end date
+
+# Stamps the "End date" column of the EGAPRO V2 project board when a ticket's
+# PR is merged. The ticket number is parsed from the linked-branch convention
+# `ticket/<N>-*` (created by scripts/orchestration/create_linked_branch.sh), so
+# the final epic PR (`epic/<N>`) and human non-ticket branches are skipped.
+#
+# Auth: GitHub App token minted by SocialGouv/token-bureau (OIDC), same pattern
+# as release.yml / promote-test-env.yaml.
+#
+# PREREQUISITE — the token-bureau token must carry `organization_projects: write`.
+#   Writing an org Project V2 needs the projects scope; the default GITHUB_TOKEN
+#   cannot, and the token-bureau whitelist (infra-apps) must allow it. As of now
+#   the deployed default whitelist is contents/metadata/issues/pull_requests/
+#   deployments — add `organization_projects: write` (default or an egapro
+#   override) in SocialGouv/infra-apps token-bureau values, and ensure the
+#   backing App has "Organization projects: Read and write", or the board write
+#   step 403s.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  id-token: write # required for token-bureau OIDC
+
+jobs:
+  stamp-end-date:
+    # Only merged PRs, only ticket branches.
+    if: >-
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'ticket/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get GitHub App Token
+        id: token
+        uses: SocialGouv/token-bureau@main
+        with:
+          token-bureau-url: https://token-bureau.fabrique.social.gouv.fr
+          audience: socialgouv
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Stamp End date
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          MERGED_AT: ${{ github.event.pull_request.merged_at }}
+        run: |
+          N="$(printf '%s' "$HEAD_REF" | sed -nE 's#^ticket/([0-9]+)-.*#\1#p')"
+          if [ -z "$N" ]; then
+            echo "Head ref '$HEAD_REF' is not a ticket branch — skipping."
+            exit 0
+          fi
+          MERGE_DATE="$(printf '%s' "$MERGED_AT" | cut -dT -f1)"
+          echo "Stamping End date=$MERGE_DATE on ticket #$N"
+          bash scripts/orchestration/set_ticket_date.sh "$N" end --if-empty "$MERGE_DATE"

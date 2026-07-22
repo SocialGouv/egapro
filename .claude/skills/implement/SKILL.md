@@ -163,7 +163,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
    bash scripts/orchestration/create_linked_branch.sh "$ISSUE_N" "$BASE_BRANCH"
    ```
 
-3. **Status board** : `set_ticket_status.sh "$ISSUE_N" "In progress"`.
+3. **Status board** : `set_ticket_status.sh "$ISSUE_N" "In progress"`. Cette transition **stampe automatiquement la `Start date`** du board (première fois seulement, idempotent) via `set_ticket_date.sh` — c'est le point de passage unique de « implémentation démarrée » pour tous les modes. La `End date` est posée plus tard par le workflow `ticket-end-date.yaml` au merge de la PR.
 
 4. **Lancer `code-dev` en CLI foreground** (PAS via le Task tool) — code-dev DOIT être *main agent* de son propre process pour pouvoir lancer ses sous-agents (`tu-dev` étape 5.5, les 4 quality gates étape 6, `functional-validator` étape 9a) ; un sous-agent ne peut pas en spawner d'autres. Même invocation que `epic_loop.sh` (`spawn_agent`), mais **synchrone/bloquante** pour un seul ticket :
 
@@ -297,5 +297,6 @@ L'utilisateur retire `dispatch=escalate` (et `attempt=3`) après orientation pou
 - Régénération doc (best-effort, après la gate E2E verte) : `scripts/orchestration/run_doc_writer.sh`
 - Computation du plan : `scripts/orchestration/dispatch_plan.sh`
 - Mutations board : `scripts/orchestration/process_tick_result.sh`
-- Helpers : `scripts/orchestration/{cache_gh,log_event,set_ticket_status,epic_state,render_dashboard,create_linked_branch,force_pr_issue_link}.sh`
+- Helpers : `scripts/orchestration/{cache_gh,log_event,set_ticket_status,set_ticket_date,epic_state,render_dashboard,create_linked_branch,force_pr_issue_link}.sh`
+- Colonnes `Start date` / `End date` du board : `scripts/orchestration/{set_ticket_date,backfill_ticket_dates}.sh` + workflow `.github/workflows/ticket-end-date.yaml` (voir `rules/github-board.md` § Date fields)
 - Dashboard : skill `/report`
