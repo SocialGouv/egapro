@@ -6,5 +6,9 @@ export {
 export { extractSiren, formatSiren } from "./formatSiren";
 export { MonEspacePage } from "./MonEspacePage";
 export { MyCompaniesPage } from "./MyCompaniesPage";
-export { sirenInputSchema, updateHasCseSchema } from "./schemas";
+export {
+	createMissingInfoSchema,
+	sirenInputSchema,
+	updateHasCseSchema,
+} from "./schemas";
 export { useUpdateHasCse } from "./useUpdateHasCse";
