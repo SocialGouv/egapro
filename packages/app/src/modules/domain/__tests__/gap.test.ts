@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { GAP_ALERT_THRESHOLD } from "../shared/constants";
 import {
 	computeGap,
 	computeGapBetween,
@@ -13,6 +14,14 @@ import {
 	hasHighGap,
 	isSignificantGap,
 } from "../shared/gap";
+
+describe("regulatory constants", () => {
+	// The decision table (#3975) is fully symbolic — a drifting constant would
+	// silently shift every boundary test, so the literal value is pinned here.
+	it("pins the gap alert threshold at 5%", () => {
+		expect(GAP_ALERT_THRESHOLD).toBe(5);
+	});
+});
 
 describe("computeGapRatio", () => {
 	it("returns positive ratio when men earn more", () => {
@@ -89,26 +98,9 @@ describe("computeGapBetween", () => {
 });
 
 describe("gapLevel", () => {
-	it("returns low for gap below threshold", () => {
-		expect(gapLevel(3)).toBe("low");
-	});
-
-	it("returns high for gap at threshold (5%)", () => {
-		expect(gapLevel(5)).toBe("high");
-	});
-
-	it("returns high for gap above threshold", () => {
-		expect(gapLevel(15)).toBe("high");
-	});
-
-	it("returns null for null input", () => {
-		expect(gapLevel(null)).toBeNull();
-	});
-
-	it("returns low for zero gap", () => {
-		expect(gapLevel(0)).toBe("low");
-	});
-
+	// Positive boundary + null live in demarcheDecisionTable.test.ts (#3975). The
+	// negative case asserts the CURRENT behavior, contested by #3963 (intended
+	// "high" is documented by the table's it.fails) — untouched until that lands.
 	it("returns low for a negative gap (women earn more, no alert)", () => {
 		expect(gapLevel(-6)).toBe("low");
 	});
@@ -204,22 +196,8 @@ describe("hasHighGap", () => {
 });
 
 describe("isSignificantGap", () => {
-	it("returns true for a positive gap at the threshold", () => {
-		expect(isSignificantGap(5)).toBe(true);
-	});
-
-	it("returns true for a significant negative gap (either direction)", () => {
-		expect(isSignificantGap(-6)).toBe(true);
-	});
-
-	it("returns false for a sub-threshold gap", () => {
-		expect(isSignificantGap(3)).toBe(false);
-	});
-
-	it("returns false for null", () => {
-		expect(isSignificantGap(null)).toBe(false);
-	});
-
+	// Default-threshold behavior lives in demarcheDecisionTable.test.ts (#3975);
+	// only the custom-threshold parameter is owned here.
 	it("respects a custom threshold", () => {
 		expect(isSignificantGap(3, 2)).toBe(true);
 	});

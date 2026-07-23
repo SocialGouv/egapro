@@ -90,57 +90,9 @@ describe("getCseOpinionPreviousHref", () => {
 });
 
 describe("getCurrentStageHref", () => {
-	it("returns /avis-cse for awaiting_cse_opinion", () => {
-		expect(getCurrentStageHref("awaiting_cse_opinion", true)).toBe("/avis-cse");
-	});
-
-	it("returns /avis-cse for demarche_completed when CSE is required", () => {
-		expect(getCurrentStageHref("demarche_completed", true)).toBe("/avis-cse");
-	});
-
-	it("returns the no-CSE confirmation page for demarche_completed without CSE", () => {
-		expect(getCurrentStageHref("demarche_completed", false)).toBe(
-			"/declaration-remuneration/parcours-conformite/confirmation",
-		);
-	});
-
-	it("returns the compliance choice page for awaiting_compliance_path_choice", () => {
-		expect(getCurrentStageHref("awaiting_compliance_path_choice", true)).toBe(
-			"/declaration-remuneration/parcours-conformite",
-		);
-	});
-
-	it("returns the compliance choice page for awaiting_revision_choice", () => {
-		expect(getCurrentStageHref("awaiting_revision_choice", true)).toBe(
-			"/declaration-remuneration/parcours-conformite",
-		);
-	});
-
-	it("returns the corrective actions first step for corrective_actions_chosen", () => {
-		expect(getCurrentStageHref("corrective_actions_chosen", true)).toBe(
-			"/declaration-remuneration/parcours-conformite/etape/1",
-		);
-	});
-
-	it("returns the joint evaluation page for joint_evaluation_chosen", () => {
-		expect(getCurrentStageHref("joint_evaluation_chosen", true)).toBe(
-			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
-		);
-	});
-
-	it("returns the joint evaluation page for revised_joint_evaluation_chosen", () => {
-		expect(getCurrentStageHref("revised_joint_evaluation_chosen", true)).toBe(
-			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
-		);
-	});
-
-	it("returns the declaration entry for draft (no more silent parcours-conformite fallback)", () => {
-		expect(getCurrentStageHref("draft", true)).toBe(
-			"/declaration-remuneration",
-		);
-	});
-
-	it("returns the compliance path for a null status", () => {
+	// Per-status destinations live in fsmMirrors.conformance.test.ts (#3975);
+	// only the null status, outside DECLARATION_FSM_STATUSES, is owned here.
+	it("falls back to the compliance path for a declaration without FSM projection (null status)", () => {
 		expect(getCurrentStageHref(null, true)).toBe(
 			"/declaration-remuneration/parcours-conformite",
 		);

@@ -19,62 +19,21 @@ describe("constants", () => {
 	});
 });
 
-describe("isTriennialYear", () => {
-	it("returns true for the base year 2027", () => {
-		expect(isTriennialYear(2027)).toBe(true);
-	});
-
-	it("returns true for 2030 (2027 + 3)", () => {
-		expect(isTriennialYear(2030)).toBe(true);
-	});
-
-	it("returns true for 2033 (2027 + 6)", () => {
-		expect(isTriennialYear(2033)).toBe(true);
-	});
-
-	it("returns false for 2028 (off-cycle)", () => {
-		expect(isTriennialYear(2028)).toBe(false);
-	});
-
-	it("returns false for 2029 (off-cycle)", () => {
-		expect(isTriennialYear(2029)).toBe(false);
-	});
-
-	it("returns false for years before 2027", () => {
-		expect(isTriennialYear(2026)).toBe(false);
-		expect(isTriennialYear(2024)).toBe(false);
+// The triennial cycle around the base year and every pre-2030 isIndicatorGRequired
+// combination are covered symbolically by demarcheDecisionTable.test.ts (#3975).
+describe("isTriennialYear — pre-base guard", () => {
+	// base − 3 is on-modulo, so only the pre-base guard rejects it — the decision
+	// table's base − 1 case cannot discriminate that guard.
+	it("keeps on-cycle years before the base year out of the triennial cadence", () => {
+		expect(isTriennialYear(INDICATOR_G_TRIENNIAL_BASE_YEAR - 3)).toBe(false);
 	});
 });
 
-describe("isIndicatorGRequired", () => {
-	it("returns true for workforce >= 250 in a normal year", () => {
-		expect(isIndicatorGRequired(300, 2027)).toBe(true);
-		expect(isIndicatorGRequired(250, 2027)).toBe(true);
-	});
-
-	it("returns true for workforce 150-249 in a triennial year (2027)", () => {
-		expect(isIndicatorGRequired(200, 2027)).toBe(true);
-		expect(isIndicatorGRequired(150, 2027)).toBe(true);
-		expect(isIndicatorGRequired(249, 2027)).toBe(true);
-	});
-
-	it("returns false for workforce 150-249 in a non-triennial year (2028)", () => {
-		expect(isIndicatorGRequired(200, 2028)).toBe(false);
-		expect(isIndicatorGRequired(150, 2028)).toBe(false);
-	});
-
-	it("returns false for workforce 150-249 in a non-triennial year (2029)", () => {
-		expect(isIndicatorGRequired(200, 2029)).toBe(false);
-	});
-
+// The decision table (#3975) deliberately keeps its matrix below
+// INDICATOR_G_UNIVERSAL_YEAR, so the 2030+ down-extension regime is owned here.
+describe("isIndicatorGRequired — universal year (2030+) regime", () => {
 	it("returns true for workforce 150-249 in triennial year 2030", () => {
 		expect(isIndicatorGRequired(200, 2030)).toBe(true);
-	});
-
-	it("returns false for workforce < 150 in any year before universal year", () => {
-		expect(isIndicatorGRequired(100, 2027)).toBe(false);
-		expect(isIndicatorGRequired(149, 2027)).toBe(false);
-		expect(isIndicatorGRequired(100, 2029)).toBe(false);
 	});
 
 	it("extends the obligation to every tier >= 50 on triennial years from 2030", () => {
@@ -103,14 +62,6 @@ describe("isIndicatorGRequired", () => {
 
 	it("returns true for workforce >= 250 after universal year", () => {
 		expect(isIndicatorGRequired(300, 2035)).toBe(true);
-	});
-
-	it("boundary: workforce 249 (just below annual min) in 2027 — is triennial year, so required", () => {
-		expect(isIndicatorGRequired(249, 2027)).toBe(true);
-	});
-
-	it("boundary: workforce 149 (just below triennial min) in 2027 — not required", () => {
-		expect(isIndicatorGRequired(149, 2027)).toBe(false);
 	});
 });
 
