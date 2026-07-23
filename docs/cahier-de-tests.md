@@ -234,7 +234,8 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - CSE : non
 - Déclaration des 6 premiers indicateurs
 
-**Test E2E** : **aucun test** — la soumission complète en 6 indicateurs (étape catégories masquée, aucun parcours de conformité proposé) n'est pas déroulée ; la CI est rouge tant que ce test n'existe pas.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-01-6IND] Path 14` : effectif GIP 120 (tranche 100-149), funnel en 5 étapes (étape catégories masquée), soumission → fin de démarche directe → `/confirmation`.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-01-6IND\]"`
 
 ---
 
@@ -246,7 +247,8 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Déclaration des 6 premiers indicateurs
 - Dépot avis CSE sur l'exactitude des données déclarées
 
-**Test E2E** : **aucun test** — la soumission complète en 6 indicateurs avec dépôt de l'avis CSE « exactitude » n'est pas déroulée ; la CI est rouge tant que ce test n'existe pas.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-02-6IND] Path 15` : effectif GIP 120, funnel en 5 étapes, soumission → `/avis-cse` → dépôt de l'avis « exactitude » → confirmation.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-02-6IND\]"`
 
 ---
 
@@ -329,7 +331,7 @@ Le socle déclaratif (étapes 1–6, brouillon, historique, panneau de démarche
 Ce que les tests E2E ne peuvent pas rejouer tel quel, et comment c'est compensé :
 
 1. **La dimension année de campagne** — les specs E2E tournent sur l'année de campagne courante, pas sur 2027 → 2033. Le *contenu* de chaque cellule de l'Excel (les parcours) est déroulé par les tests du §2 ; le *cadencement* (quelle année déclenche 6 ou 7 indicateurs pour quelle tranche) est verrouillé par les tests unitaires du domaine (`indicatorG.test.ts`, `companyObligation.test.ts`), qui couvrent chaque tranche × année de la matrice.
-2. **La tranche d'effectif** — les specs conformité tournent en 250 et + (effectif GIP 250) ; les variantes 6 indicateurs doivent tourner avec un effectif GIP dans la tranche 100-149 pour être représentatives.
+2. **La tranche d'effectif** — les parcours de conformité (cas 1 à 12) tournent en 250 et + (effectif GIP 250) ; les variantes 6 indicateurs ([CAS-01-6IND](#cas-01-6ind), [CAS-02-6IND](#cas-02-6ind)) tournent avec un effectif GIP de 120, représentatif de la tranche 100-149.
 3. **Avis CSE défavorables** — tous les tests déposent des avis « favorable » ; les variantes « défavorable » (sans impact de routage attendu, mais affichées au récapitulatif) ne sont pas déroulées.
 
 ---

@@ -9,10 +9,15 @@ import {
 } from "./helpers/compliance-flows";
 import {
 	resetDeclarationToDraft,
+	resetGipWorkforce,
 	setCompanyHasCse,
 	setCompanyWorkforce,
+	setGipWorkforce,
 } from "./helpers/db";
-import { completeDeclaration } from "./helpers/declaration-flows";
+import {
+	completeDeclaration,
+	submitStepsThroughQuartiles,
+} from "./helpers/declaration-flows";
 
 test.describe.configure({ mode: "serial" });
 
@@ -489,5 +494,74 @@ test.describe("[ANX-02] Path 12: compliance already completed → redirect", () 
 			{ timeout: 10_000 },
 		);
 		await expect(page).toHaveURL(/avis-cse/);
+	});
+});
+
+// === GROUP G: "6 premiers indicateurs" variant — indicator G not required ===
+// GIP workforce 120 (bracket 100-149, off-cycle year): the funnel drops the
+// categories step and no compliance path can trigger (Excel: cas 1-2 of the
+// "6 premiers indicateurs" columns). resetGipWorkforce restores the suite
+// baseline (>= 250) for any spec running after this one.
+
+test.describe("[CAS-01-6IND] Path 14: 6 indicators (no G) + no hasCse → direct completion", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setGipWorkforce(120);
+		await setCompanyHasCse(false);
+	});
+
+	test.afterAll(async () => {
+		await resetGipWorkforce();
+	});
+
+	test("submits the 5-step funnel and completes the démarche directly", async ({
+		page,
+	}) => {
+		test.slow(); // 5-step declaration + submission
+		await submitStepsThroughQuartiles(page);
+		// No indicator G → the categories step is skipped: quartiles land on review
+		await page.waitForURL("**/declaration-remuneration/etape/6");
+		await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+
+		// Submit — no indicator G and no CSE → demarche completed directly
+		await page.getByRole("button", { name: "Suivant" }).click();
+		await page.getByText(/Je certifie/).click();
+		await page.getByRole("button", { name: "Valider" }).click();
+		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+		await expect(
+			page.getByText(/Votre parcours .* est (désormais )?terminé/),
+		).toBeVisible();
+	});
+});
+
+test.describe("[CAS-02-6IND] Path 15: 6 indicators (no G) + hasCse → /avis-cse", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setGipWorkforce(120);
+		await setCompanyHasCse(true);
+	});
+
+	test.afterAll(async () => {
+		await resetGipWorkforce();
+	});
+
+	test("submits the 5-step funnel then deposits the CSE accuracy opinion", async ({
+		page,
+	}) => {
+		test.slow(); // 5-step declaration + submission + CSE flow
+		await submitStepsThroughQuartiles(page);
+		await page.waitForURL("**/declaration-remuneration/etape/6");
+
+		// Submit — no indicator G but a CSE → straight to the CSE opinion
+		await page.getByRole("button", { name: "Suivant" }).click();
+		await page.getByText(/Je certifie/).click();
+		await page.getByRole("button", { name: "Valider" }).click();
+		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
+
+		await fillCseStep1(page);
+		await submitCseStep2(page);
+		await expect(
+			page.getByText(/Votre parcours .* est (désormais )?terminé/),
+		).toBeVisible();
 	});
 });
