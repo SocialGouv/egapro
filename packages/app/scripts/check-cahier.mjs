@@ -7,15 +7,18 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCENARIO_ID = /\b(?:CAS|ANX)-\d{2}(?:-[A-Z0-9]+)*\b/g;
 
 /**
- * Parse the cahier de tests markdown: every table row whose first cell is a
- * scenario ID (| CAS-01 | ... |) declares a scenario that MUST be covered by
- * at least one tagged E2E spec. Prose mentions (e.g. reserved IDs in the
- * coverage-gaps section) are intentionally ignored — only table rows bind.
+ * Parse the cahier de tests markdown. A scenario that MUST be covered by at
+ * least one tagged E2E spec is declared either by a fiche heading
+ * (### CAS-01) or by a table row whose first cell is its ID (| ANX-01 | ...).
+ * Prose mentions and links ([CAS-01](#cas-01) in the per-sheet tables) are
+ * intentionally ignored — only fiches and rows bind.
  */
 export function parseCahier(markdown) {
 	const scenarios = new Set();
 	for (const line of markdown.split("\n")) {
-		const match = line.match(/^\|\s*((?:CAS|ANX)-\d{2}(?:-[A-Z0-9]+)*)\s*\|/);
+		const match =
+			line.match(/^#{2,4}\s+((?:CAS|ANX)-\d{2}(?:-[A-Z0-9]+)*)\s*$/) ??
+			line.match(/^\|\s*((?:CAS|ANX)-\d{2}(?:-[A-Z0-9]+)*)\s*\|/);
 		if (!match) continue;
 		const id = match[1];
 		if (scenarios.has(id)) {

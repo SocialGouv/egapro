@@ -4,6 +4,8 @@ Cahier de tests métier, maintenu **en corrélation avec les tests E2E** (issue 
 
 Ce document est le **miroir versionné du fichier `Parcours.xlsx` de Laetitia** (juillet 2026) : chaque feuille, chaque année de campagne (2027 → 2033) et chaque cellule du fichier s'y retrouve, avec ses libellés d'origine. Il remplace l'Excel comme outil de suivi : le métier y lit les parcours à tester, et chaque parcours pointe vers le test E2E qui l'automatise. **En cas d'évolution de l'Excel, c'est ce document qu'il faut mettre à jour**, puis les tests.
 
+**Mode d'emploi** : placez-vous sur votre feuille et votre année au §3 — la ligne donne les cas à dérouler (avec leur résumé), la commande qui exécute exactement ces tests, et chaque cas est cliquable vers sa fiche détaillée (§2, étapes verbatim de l'Excel).
+
 Audience : équipe métier / PO (référence d'acceptance et suivi des tests) et développeurs (traçabilité scénarios ↔ tests).
 
 > Ce document complète [`docs/parcours-utilisateurs.md`](parcours-utilisateurs.md) (narration des flux) : ici on liste **quoi tester**, pas comment l'utilisateur vit le parcours.
@@ -11,7 +13,7 @@ Audience : équipe métier / PO (référence d'acceptance et suivi des tests) et
 ## Sommaire
 
 1. [Comment ce cahier reste corrélé aux tests E2E](#1-comment-ce-cahier-reste-corrélé-aux-tests-e2e)
-2. [Référentiel des parcours à tester (détail des cas de l'Excel)](#2-référentiel-des-parcours-à-tester-détail-des-cas-de-lexcel)
+2. [Les fiches de cas (détail verbatim de l'Excel)](#2-les-fiches-de-cas-détail-verbatim-de-lexcel)
 3. [Les feuilles de l'Excel, année par année](#3-les-feuilles-de-lexcel-année-par-année)
 4. [Scénarios complémentaires hors Excel](#4-scénarios-complémentaires-hors-excel)
 5. [Limites de l'automatisation](#5-limites-de-lautomatisation)
@@ -23,19 +25,19 @@ Audience : équipe métier / PO (référence d'acceptance et suivi des tests) et
 
 Chaque parcours à tester a un **identifiant stable** (`CAS-xx` pour les cas de l'Excel, avec le suffixe `-6IND` pour leurs variantes « 6 premiers indicateurs » ; `ANX-xx` pour les scénarios complémentaires). Le contrat est simple :
 
-> **Tous les parcours du fichier Excel sont dans ce cahier, et la CI n'est verte que quand chaque ligne du référentiel (§2) a son test E2E.**
+> **Tous les parcours du fichier Excel sont dans ce cahier, et la CI n'est verte que quand chaque fiche du §2 a son test E2E.**
 
-Les cellules de l'Excel se **regroupent** : un même cas se répète dans plusieurs feuilles et plusieurs années (ex. le cas 4 apparaît en 2027/2030/2033 pour les 150-249, en 2030/2033 pour les 100-149, et toutes les années pour les 250 et +). Le référentiel (§2) définit chaque parcours **une seule fois**, avec son test ; les sections par feuille (§3) relient chaque cellule de l'Excel à son ID. Le métier peut ainsi lire : « campagne 2030, tranche 100-149 → CAS-01 à CAS-12, automatisés par tels tests ».
+Les cellules de l'Excel se **regroupent** : un même cas se répète dans plusieurs feuilles et plusieurs années (ex. le cas 4 apparaît en 2027/2030/2033 pour les 150-249, en 2030/2033 pour les 100-149, et toutes les années pour les 250 et +). Une fiche (§2) définit chaque parcours **une seule fois**, avec son test ; les feuilles (§3) relient chaque cellule de l'Excel à sa fiche.
 
-1. **Côté tests** : le titre du `test.describe(...)` qui couvre un parcours porte le tag entre crochets, ex. `test.describe("[CAS-02] Path 1: no gap + hasCse → ...")`. Un même describe peut porter plusieurs tags.
-2. **Côté cahier** : la colonne « Test E2E » du référentiel décrit ce que le test déroule réellement — y compris, honnêtement, ce qu'il ne déroule pas encore. Cette profondeur se juge en revue de PR ; l'outillage, lui, ne vérifie que l'existence.
+1. **Côté tests** : le titre du `test.describe(...)` qui couvre un parcours porte le tag entre crochets, ex. `test.describe("[CAS-02] Path 1: no gap + hasCse → ...")`. Un même describe peut porter plusieurs tags. C'est ce tag que ciblent les commandes `--grep` du cahier.
+2. **Côté cahier** : la ligne « Test E2E » de chaque fiche décrit ce que le test déroule réellement — y compris, honnêtement, ce qu'il ne déroule pas encore. Cette profondeur se juge en revue de PR ; l'outillage, lui, ne vérifie que l'existence.
 
 Le script [`packages/app/scripts/check-cahier.mjs`](../packages/app/scripts/check-cahier.mjs) (`pnpm --filter app check:cahier`, exécuté en CI) vérifie que :
 
-- toute ligne `CAS-xx` / `ANX-xx` du référentiel est taguée dans au moins une spec `packages/app/src/e2e/*.e2e.ts` — **une ligne sans test fait échouer la CI** : un trou de couverture est visible en rouge, jamais caché ;
-- tout tag présent dans une spec correspond à une ligne du cahier.
+- toute fiche `CAS-xx` du §2 (et toute ligne `ANX-xx` du §4) est taguée dans au moins une spec `packages/app/src/e2e/*.e2e.ts` — **une fiche sans test fait échouer la CI** : un trou de couverture est visible en rouge, jamais caché ;
+- tout tag présent dans une spec correspond à une fiche ou une ligne du cahier.
 
-**Règles de mise à jour** : nouveau parcours métier (évolution de l'Excel) → ajouter la ligne au référentiel et la référencer dans les feuilles concernées ; la CI reste rouge jusqu'à l'arrivée du test qui la couvre. Test supprimé ou renommé → répercuter ici. La CI échoue si les deux dérivent.
+**Règles de mise à jour** : nouveau parcours métier (évolution de l'Excel) → créer la fiche et la référencer dans les feuilles concernées ; la CI reste rouge jusqu'à l'arrivée du test qui la couvre. Test supprimé ou renommé → répercuter ici. La CI échoue si les deux dérivent.
 
 ### Conditions de référence des specs E2E
 
@@ -43,36 +45,176 @@ Les specs conformité tournent avec l'entreprise de test SIREN `130025265`, **ef
 
 ---
 
-## 2. Référentiel des parcours à tester (détail des cas de l'Excel)
+## 2. Les fiches de cas (détail verbatim de l'Excel)
 
-Chaque ligne reprend **verbatim** les étapes de la cellule correspondante de l'Excel (feuilles « 100-149 », « 150-249 », « 250 et + » — les libellés y sont identiques). Les correspondances de vocabulaire Excel → application sont rappelées en bas de section.
+Une fiche par cas, avec les étapes **verbatim** des cellules de l'Excel (feuilles « 100-149 », « 150-249 », « 250 et + » — les libellés y sont identiques). Les cas 1 et 2 existent en deux variantes selon l'année (voir §3) : années « 7 indicateurs » ([CAS-01](#cas-01), [CAS-02](#cas-02)) et années « 6 premiers indicateurs » ([CAS-01-6IND](#cas-01-6ind), [CAS-02-6IND](#cas-02-6ind), sans indicateur G donc sans parcours de conformité possible). Les cas 3 à 12 n'existent qu'en année « 7 indicateurs ».
 
-Les cas 1 et 2 existent en deux variantes selon l'année (voir §3) : années « 7 indicateurs » (`CAS-01`, `CAS-02`) et années « 6 premiers indicateurs » (`CAS-01-6IND`, `CAS-02-6IND`, sans indicateur G donc sans parcours de conformité possible). Les cas 3 à 12 n'existent qu'en année « 7 indicateurs ».
+Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » = indicateur G, l'écart de rémunération par catégorie de salariés (étape 5 du funnel) ; « Déclaration des 6 premiers indicateurs » = funnel sans l'étape 5 (indicateurs A à F) ; « Parcours de conformité » = page `/declaration-remuneration/parcours-conformite` ; « Nouvelle déclaration du 7ème indicateur » = seconde déclaration (étapes 1 à 3 du parcours actions correctives) ; « Dépot avis CSE » = flux `/avis-cse/etape/1..2` (étape 1 : avis rendus, étape 2 : dépôt des fichiers et matrice d'association) ; « Dépôt du rapport de l'évaluation conjointe » = upload PDF sur `/evaluation-conjointe`.
 
-| ID | Cas de l'Excel | Parcours à dérouler (verbatim Excel) | Test E2E |
-|---|---|---|---|
-| CAS-01 | Cas 1 sans CSE et aucun écart ≥ 5% pour le 7ème indicateur | CSE : non<br>• Déclaration des 7 indicateurs | `compliance.e2e.ts` — `[CAS-01] Path 2` : déclaration complète → `/confirmation` |
-| CAS-02 | Cas 2 avec CSE et aucun écart ≥ 5% pour le 7ème indicateur | CSE : oui<br>• Déclaration des 7 indicateurs<br>• Dépot avis CSE sur l'exactitude des données déclarées | `compliance.e2e.ts` — `[CAS-02] Path 1` : déclaration → `/avis-cse` → dépôt de l'avis → confirmation |
-| CAS-03 | Cas 3 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts | CSE : non<br>• Déclaration des 7 indicateurs<br>• Parcours de conformité : justification des écarts | `compliance.e2e.ts` — `[CAS-03] Path 5` : l'option « Justifier » est proposée sans CSE ; le flux complet n'est pas déroulé |
-| CAS-04 | Cas 4 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts | CSE : oui<br>• Déclaration des 7 indicateurs<br>• Parcours de conformité : justification des écarts<br>• Dépot avis CSE sur l'exactitude des données déclarées et la justification des écarts | `compliance.e2e.ts` — `[CAS-04] Path 3` : choix justification → `/avis-cse/etape/1` ; dépôt de l'avis « exactitude + justification » non déroulé |
-| CAS-05 | Cas 5 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe | CSE : non<br>• Déclaration des 7 indicateurs<br>• Parcours de conformité : évaluation conjointe<br>• Dépôt du rapport de l'évaluation conjointe | `compliance.e2e.ts` — `[CAS-03][CAS-05] Path 5` : éval. conjointe → upload du rapport → `/confirmation` |
-| CAS-06 | Cas 6 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe | CSE : oui<br>• Déclaration des 7 indicateurs<br>• Parcours de conformité : évaluation conjointe<br>• Dépôt du rapport de l'évaluation conjointe<br>• Dépot avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts | `compliance.e2e.ts` — `[CAS-06] Path 4` : éval. conjointe → upload → `/avis-cse` ; dépôt de l'avis non déroulé |
-| CAS-07 | Cas 7 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5% | CSE : non<br>• Déclaration des 7 indicateurs<br>• Parcours de conformité : actions correctives et nouvelle déclaration<br>• Nouvelle déclaration du 7ème indicateur | `compliance.e2e.ts` — `[CAS-07] Path 7` : 2ᵉ déclaration sans écart → `/confirmation` |
-| CAS-08 | Cas 8 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5% | CSE : oui<br>• Déclaration des 7 indicateurs<br>• Parcours de conformité : actions correctives et nouvelle déclaration<br>• Nouvelle déclaration du 7ème indicateur<br>• Dépot avis CSE sur l'exactitude des données déclarées pour la 1ère et la 2ème déclaration, et éventuellement sur la justifications des écarts de la 1ère déclaration | `compliance.e2e.ts` — `[CAS-08] Path 6` : 2ᵉ déclaration sans écart → `/avis-cse` ; dépôt de l'avis 2-déclarations non déroulé |
-| CAS-09 | Cas 9 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts | CSE : non<br>• Déclaration des 7 indicateurs<br>• Parcours de conformité : actions correctives et nouvelle déclaration<br>• Nouvelle déclaration du 7ème indicateur<br>• Parcours de conformité : justification des écarts | **Aucun test** — le 2ᵉ tour n'est testé qu'avec CSE (CAS-10) ; la CI est rouge tant que ce test n'existe pas |
-| CAS-10 | Cas 10 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts | CSE : oui<br>• Déclaration des 7 indicateurs<br>• Parcours de conformité : actions correctives et nouvelle déclaration<br>• Nouvelle déclaration du 7ème indicateur<br>• Parcours de conformité : justification des écarts<br>• Dépot avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ère déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ème déclaration | `compliance.e2e.ts` — `[CAS-10] Path 8` : 2ᵉ tour, options restreintes, justification → `/avis-cse/etape/1` ; dépôt de l'avis non déroulé |
-| CAS-11 | Cas 11 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe | CSE : non<br>• Déclaration des 7 indicateurs<br>• Parcours de conformité : actions correctives et nouvelle déclaration<br>• Nouvelle déclaration du 7ème indicateur<br>• Parcours de conformité : évaluation conjointe<br>• Dépôt du rapport de l'évaluation conjointe | `compliance.e2e.ts` — `[CAS-11] Path 11` : 2ᵉ tour → éval. conjointe → upload → `/confirmation` |
-| CAS-12 | Cas 12 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe | CSE : oui<br>• Déclaration des 7 indicateurs<br>• Parcours de conformité : actions correctives et nouvelle déclaration<br>• Nouvelle déclaration du 7ème indicateur<br>• Parcours de conformité : évaluation conjointe<br>• Dépôt du rapport de l'évaluation conjointe<br>• Dépot avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ère et la 2ème déclaration | `compliance.e2e.ts` — `[CAS-12] Path 10` : 2ᵉ tour → éval. conjointe → upload → `/avis-cse` ; dépôt de l'avis non déroulé |
-| CAS-01-6IND | Cas 1 sans CSE *(années « 6 premiers indicateurs »)* | CSE : non<br>• Déclaration des 6 premiers indicateurs | **Aucun test** — la soumission complète en 6 indicateurs (étape catégories masquée, aucun parcours de conformité proposé) n'est pas déroulée ; la CI est rouge tant que ce test n'existe pas |
-| CAS-02-6IND | Cas 2 avec CSE *(années « 6 premiers indicateurs »)* | CSE : oui<br>• Déclaration des 6 premiers indicateurs<br>• Dépot avis CSE sur l'exactitude des données déclarées | **Aucun test** — idem, variante avec dépôt d'avis CSE ; la CI est rouge tant que ce test n'existe pas |
+### CAS-01
 
-**Correspondances de vocabulaire** (Excel → application) : « 7ᵉ indicateur » = indicateur G, l'écart de rémunération par catégorie de salariés (étape 5 du funnel) ; « Déclaration des 6 premiers indicateurs » = funnel sans l'étape 5 (indicateurs A à F) ; « Parcours de conformité » = page `/declaration-remuneration/parcours-conformite` ; « Nouvelle déclaration du 7ème indicateur » = seconde déclaration (étapes 1 à 3 du parcours actions correctives) ; « Dépot avis CSE » = flux `/avis-cse/etape/1..2` (étape 1 : avis rendus, étape 2 : dépôt des fichiers et matrice d'association) ; « Dépôt du rapport de l'évaluation conjointe » = upload PDF sur `/evaluation-conjointe`.
+**Cas 1 sans CSE et aucun écart ≥ 5% pour le 7ème indicateur** — CSE : non
+
+- Déclaration des 7 indicateurs
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-01] Path 2` : déclaration complète → `/confirmation`.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-01\]"`
+
+### CAS-02
+
+**Cas 2 avec CSE et aucun écart ≥ 5% pour le 7ème indicateur** — CSE : oui
+
+- Déclaration des 7 indicateurs
+- Dépot avis CSE sur l'exactitude des données déclarées
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-02] Path 1` : déclaration → `/avis-cse` → dépôt de l'avis → confirmation.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-02\]"`
+
+### CAS-03
+
+**Cas 3 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts** — CSE : non
+
+- Déclaration des 7 indicateurs
+- Parcours de conformité : justification des écarts
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-03] Path 5` : l'option « Justifier » est proposée sans CSE ; le flux complet n'est pas déroulé.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-03\]"`
+
+### CAS-04
+
+**Cas 4 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts** — CSE : oui
+
+- Déclaration des 7 indicateurs
+- Parcours de conformité : justification des écarts
+- Dépot avis CSE sur l'exactitude des données déclarées et la justification des écarts
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-04] Path 3` : choix justification → `/avis-cse/etape/1` ; dépôt de l'avis « exactitude + justification » non déroulé.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-04\]"`
+
+### CAS-05
+
+**Cas 5 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe** — CSE : non
+
+- Déclaration des 7 indicateurs
+- Parcours de conformité : évaluation conjointe
+- Dépôt du rapport de l'évaluation conjointe
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-03][CAS-05] Path 5` : éval. conjointe → upload du rapport → `/confirmation`.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-05\]"`
+
+### CAS-06
+
+**Cas 6 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe** — CSE : oui
+
+- Déclaration des 7 indicateurs
+- Parcours de conformité : évaluation conjointe
+- Dépôt du rapport de l'évaluation conjointe
+- Dépot avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-06] Path 4` : éval. conjointe → upload → `/avis-cse` ; dépôt de l'avis non déroulé.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-06\]"`
+
+### CAS-07
+
+**Cas 7 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5%** — CSE : non
+
+- Déclaration des 7 indicateurs
+- Parcours de conformité : actions correctives et nouvelle déclaration
+- Nouvelle déclaration du 7ème indicateur
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-07] Path 7` : 2ᵉ déclaration sans écart → `/confirmation`.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-07\]"`
+
+### CAS-08
+
+**Cas 8 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5%** — CSE : oui
+
+- Déclaration des 7 indicateurs
+- Parcours de conformité : actions correctives et nouvelle déclaration
+- Nouvelle déclaration du 7ème indicateur
+- Dépot avis CSE sur l'exactitude des données déclarées pour la 1ère et la 2ème déclaration, et éventuellement sur la justifications des écarts de la 1ère déclaration
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-08] Path 6` : 2ᵉ déclaration sans écart → `/avis-cse` ; dépôt de l'avis 2-déclarations non déroulé.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-08\]"`
+
+### CAS-09
+
+**Cas 9 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts** — CSE : non
+
+- Déclaration des 7 indicateurs
+- Parcours de conformité : actions correctives et nouvelle déclaration
+- Nouvelle déclaration du 7ème indicateur
+- Parcours de conformité : justification des écarts
+
+**Test E2E** : **aucun test** — le 2ᵉ tour n'est testé qu'avec CSE ([CAS-10](#cas-10)) ; la CI est rouge tant que ce test n'existe pas.
+
+### CAS-10
+
+**Cas 10 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts** — CSE : oui
+
+- Déclaration des 7 indicateurs
+- Parcours de conformité : actions correctives et nouvelle déclaration
+- Nouvelle déclaration du 7ème indicateur
+- Parcours de conformité : justification des écarts
+- Dépot avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ère déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ème déclaration
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-10] Path 8` : 2ᵉ tour, options restreintes, justification → `/avis-cse/etape/1` ; dépôt de l'avis non déroulé.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-10\]"`
+
+### CAS-11
+
+**Cas 11 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe** — CSE : non
+
+- Déclaration des 7 indicateurs
+- Parcours de conformité : actions correctives et nouvelle déclaration
+- Nouvelle déclaration du 7ème indicateur
+- Parcours de conformité : évaluation conjointe
+- Dépôt du rapport de l'évaluation conjointe
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-11] Path 11` : 2ᵉ tour → éval. conjointe → upload → `/confirmation`.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-11\]"`
+
+### CAS-12
+
+**Cas 12 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe** — CSE : oui
+
+- Déclaration des 7 indicateurs
+- Parcours de conformité : actions correctives et nouvelle déclaration
+- Nouvelle déclaration du 7ème indicateur
+- Parcours de conformité : évaluation conjointe
+- Dépôt du rapport de l'évaluation conjointe
+- Dépot avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ère et la 2ème déclaration
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-12] Path 10` : 2ᵉ tour → éval. conjointe → upload → `/avis-cse` ; dépôt de l'avis non déroulé.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-12\]"`
+
+### CAS-01-6IND
+
+**Cas 1 sans CSE** *(années « 6 premiers indicateurs »)* — CSE : non
+
+- Déclaration des 6 premiers indicateurs
+
+**Test E2E** : **aucun test** — la soumission complète en 6 indicateurs (étape catégories masquée, aucun parcours de conformité proposé) n'est pas déroulée ; la CI est rouge tant que ce test n'existe pas.
+
+### CAS-02-6IND
+
+**Cas 2 avec CSE** *(années « 6 premiers indicateurs »)* — CSE : oui
+
+- Déclaration des 6 premiers indicateurs
+- Dépot avis CSE sur l'exactitude des données déclarées
+
+**Test E2E** : **aucun test** — idem, variante avec dépôt d'avis CSE ; la CI est rouge tant que ce test n'existe pas.
 
 ---
 
 ## 3. Les feuilles de l'Excel, année par année
 
-Miroir des quatre onglets du fichier. Chaque cellule est restituée par l'ID du parcours correspondant du référentiel (§2) — c'est le lien cellule → test.
+Miroir des quatre onglets du fichier. Placez-vous sur votre feuille et votre année : la ligne donne les cas à dérouler (cliquables vers leur fiche §2) et la commande qui exécute exactement ces tests.
+
+Les deux jeux de cas se répètent d'une cellule à l'autre ; leurs commandes :
+
+- **Année « 7 indicateurs » (les 12 cas)** : `pnpm --filter app test:e2e --grep "\[CAS-(0[1-9]|1[0-2])\]"`
+- **Année « 6 premiers indicateurs » (cas 1-2)** : `pnpm --filter app test:e2e --grep "\[CAS-0[12]-6IND\]"`
 
 ### Feuille « <50 et 50-99 »
 
@@ -83,37 +225,37 @@ Restitution verbatim (cette feuille ne prévoit ni cas CSE ni parcours de confor
 | Moins de 50 salariés (sur la base du volontariat) | Déclaration des 7 indicateurs | idem | idem | idem | idem | idem | idem |
 | 50 à 99 salariés | Déclaration des 6 premiers indicateurs | idem | idem | **Déclaration des 7 indicateurs** | 6 premiers | 6 premiers | **7 indicateurs** |
 
-⚠️ Ces deux lignes sont **suspendues aux arbitrages métier du §6** (divergences 1 à 3 : volontariat < 50 avec ou sans indicateur G, assujettissement des 50-99 hors années triennales, parcours de conformité des 50-99 en année 7 indicateurs). Elles n'ont pas d'ID de parcours testable tant que ces points ne sont pas tranchés — les trancher, puis créer les IDs et les tests.
+⚠️ Ces deux lignes sont **suspendues aux arbitrages métier du §6** (divergences 1 à 3 : volontariat < 50 avec ou sans indicateur G, assujettissement des 50-99 hors années triennales, parcours de conformité des 50-99 en année 7 indicateurs). Elles n'ont pas de fiche testable tant que ces points ne sont pas tranchés — les trancher, puis créer les fiches et les tests.
 
 ### Feuille « 100-149 »
 
-| Année | Déclaration | Parcours à tester (IDs du §2) |
+| Année | Déclaration | Cas à dérouler |
 |---|---|---|
-| 2027 | 6 premiers indicateurs | CAS-01-6IND, CAS-02-6IND |
-| 2028 | 6 premiers indicateurs | CAS-01-6IND, CAS-02-6IND |
-| 2029 | 6 premiers indicateurs | CAS-01-6IND, CAS-02-6IND |
-| **2030** | **7 indicateurs** | **CAS-01 à CAS-12** (les 12 cas) |
-| 2031 | 6 premiers indicateurs | CAS-01-6IND, CAS-02-6IND |
-| 2032 | 6 premiers indicateurs | CAS-01-6IND, CAS-02-6IND |
-| **2033** | **7 indicateurs** | **CAS-01 à CAS-12** (les 12 cas) |
+| 2027 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
+| 2028 | 6 premiers indicateurs | idem 2027 |
+| 2029 | 6 premiers indicateurs | idem 2027 |
+| **2030** | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — idem + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — idem + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe<br>[CAS-12](#cas-12) avec CSE — idem + avis CSE sur les 2 décl. |
+| 2031 | 6 premiers indicateurs | idem 2027 |
+| 2032 | 6 premiers indicateurs | idem 2027 |
+| **2033** | **7 indicateurs** | idem 2030 (les 12 cas) |
 
 ### Feuille « 150-249 »
 
-| Année | Déclaration | Parcours à tester (IDs du §2) |
+| Année | Déclaration | Cas à dérouler |
 |---|---|---|
-| **2027** | **7 indicateurs** | **CAS-01 à CAS-12** (les 12 cas) |
-| 2028 | 6 premiers indicateurs | CAS-01-6IND, CAS-02-6IND |
-| 2029 | 6 premiers indicateurs | CAS-01-6IND, CAS-02-6IND |
-| **2030** | **7 indicateurs** | **CAS-01 à CAS-12** (les 12 cas) |
-| 2031 | 6 premiers indicateurs | CAS-01-6IND, CAS-02-6IND |
-| 2032 | 6 premiers indicateurs | CAS-01-6IND, CAS-02-6IND |
-| **2033** | **7 indicateurs** | **CAS-01 à CAS-12** (les 12 cas) |
+| **2027** | **7 indicateurs** | **Les 12 cas** — même liste que la feuille « 100-149 », année 2030 : [CAS-01](#cas-01) à [CAS-12](#cas-12) |
+| 2028 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
+| 2029 | 6 premiers indicateurs | idem 2028 |
+| **2030** | **7 indicateurs** | idem 2027 (les 12 cas) |
+| 2031 | 6 premiers indicateurs | idem 2028 |
+| 2032 | 6 premiers indicateurs | idem 2028 |
+| **2033** | **7 indicateurs** | idem 2027 (les 12 cas) |
 
 ### Feuille « 250 et + »
 
-| Année | Déclaration | Parcours à tester (IDs du §2) |
+| Année | Déclaration | Cas à dérouler |
 |---|---|---|
-| 2027 → 2033 (chaque année) | **7 indicateurs** | **CAS-01 à CAS-12** (les 12 cas, à l'identique toutes les années) |
+| 2027 → 2033 (chaque année) | **7 indicateurs** | **Les 12 cas**, à l'identique toutes les années — même liste que la feuille « 100-149 », année 2030 : [CAS-01](#cas-01) à [CAS-12](#cas-12) |
 
 **Règles de cadencement sous-jacentes** (implémentées dans `packages/app/src/modules/domain/shared/indicatorG.ts` et `companyObligation.ts`, couvertes par les tests unitaires `indicatorG.test.ts` et `companyObligation.test.ts`) : indicateur G requis chaque année dès 250 salariés ; les années triennales (2027, 2030, 2033) dès 150 salariés avant 2030 puis dès 50 salariés à partir de 2030.
 
