@@ -227,6 +227,7 @@ export function PanelPlayground() {
 
 			<DeclarationProcessPanel
 				campaignDeadlines={deadlines}
+				cseApplicable={true}
 				ctaHref="/declaration-remuneration?siren=000000000"
 				displayContext={getDeclarationDisplayContext({
 					firstDeclarationPathChoice: compliancePath,
@@ -234,6 +235,7 @@ export function PanelPlayground() {
 					cseRequired: false,
 				})}
 				hasSubmittedSecondDeclaration={secondDeclarationSubmitted}
+				indicatorGRequired={true}
 				lastActionDate="12 mars 2026"
 				lockedByOther={false}
 				lockHolder={null}

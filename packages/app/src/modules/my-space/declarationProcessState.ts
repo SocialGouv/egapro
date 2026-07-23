@@ -23,7 +23,9 @@ export function computePanelVariant(
 		case "awaiting_cse_opinion":
 			return "cse";
 		case "demarche_completed":
-			return declaration?.hasSubmittedCseOpinion ? "closed" : "cse";
+			return declaration?.hasSubmittedCseOpinion || !declaration?.cseRequired
+				? "closed"
+				: "cse";
 	}
 }
 
@@ -50,7 +52,7 @@ export function computeCtaHref(
 		case "awaiting_cse_opinion":
 			return `/avis-cse?siren=${siren}`;
 		case "demarche_completed":
-			return declaration?.hasSubmittedCseOpinion
+			return declaration?.hasSubmittedCseOpinion || !declaration?.cseRequired
 				? `/declaration-remuneration?siren=${siren}`
 				: `/avis-cse?siren=${siren}`;
 	}
