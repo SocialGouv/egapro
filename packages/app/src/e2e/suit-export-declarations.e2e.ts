@@ -1,12 +1,15 @@
 import { expect, test } from "@playwright/test";
-import { COMPLIANCE_PATH, selectCompliancePath } from "./helpers/compliance-flows";
+import { TEST_SIREN } from "./constants";
+import {
+	COMPLIANCE_PATH,
+	selectCompliancePath,
+} from "./helpers/compliance-flows";
 import {
 	resetDeclarationToDraft,
 	setCompanyHasCse,
 	setCompanyWorkforce,
 } from "./helpers/db";
 import { completeDeclaration } from "./helpers/declaration-flows";
-import { TEST_SIREN } from "./constants";
 
 /**
  * End-to-end contract test for the SUIT declarations export
@@ -68,7 +71,12 @@ test.describe("SUIT export declarations — status history contract (bug #3950)"
 		// step_change rows that the export must strip.
 		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
 		await selectCompliancePath(page, "path-justify");
-		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		// Without a CSE the justify choice completes the démarche immediately
+		// (FSM transition choose_path_*_justify_without_cse) — the user lands on
+		// the confirmation page, not on the /avis-cse deposit flow.
+		await page.waitForURL(`**${COMPLIANCE_PATH}/confirmation`, {
+			timeout: 10_000,
+		});
 	});
 
 	test("gateway request without the shared secret is rejected with 403", async ({
@@ -126,7 +134,9 @@ test.describe("SUIT export declarations — status history contract (bug #3950)"
 			expect(statuts).toContain("submit");
 			expect(statuts).toContain("path_choice");
 
-			const pathChoice = history.find((entry) => entry.Statut === "path_choice");
+			const pathChoice = history.find(
+				(entry) => entry.Statut === "path_choice",
+			);
 			expect(pathChoice?.Libelle_statut).toBe(
 				"Choix du parcours — Justification de l'écart",
 			);
