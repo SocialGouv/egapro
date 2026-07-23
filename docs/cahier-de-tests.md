@@ -86,7 +86,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Déclaration des 7 indicateurs
 - Parcours de conformité : justification des écarts
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-03] Path 5` : l'option « Justifier » est proposée sans CSE ; le flux complet n'est pas déroulé.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-03] Path 5.b` : choix justification sans CSE → fin de démarche directe → `/confirmation`.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-03\]"`
 
 ---
@@ -100,7 +100,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Parcours de conformité : justification des écarts
 - Dépot avis CSE sur l'exactitude des données déclarées et la justification des écarts
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-04] Path 3` : choix justification → `/avis-cse/etape/1` ; dépôt de l'avis « exactitude + justification » non déroulé.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-04] Path 3` : justification → avis CSE avec colonnes « Exactitude » + « Justification » → confirmation.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-04\]"`
 
 ---
@@ -114,7 +114,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Parcours de conformité : évaluation conjointe
 - Dépôt du rapport de l'évaluation conjointe
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-03][CAS-05] Path 5` : éval. conjointe → upload du rapport → `/confirmation`.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-05] Path 5` : éval. conjointe → upload du rapport → `/confirmation`.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-05\]"`
 
 ---
@@ -129,7 +129,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Dépôt du rapport de l'évaluation conjointe
 - Dépot avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-06] Path 4` : éval. conjointe → upload → `/avis-cse` ; dépôt de l'avis non déroulé.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-06] Path 4` : éval. conjointe → upload du rapport → avis CSE déposé → confirmation.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-06\]"`
 
 ---
@@ -158,7 +158,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Nouvelle déclaration du 7ème indicateur
 - Dépot avis CSE sur l'exactitude des données déclarées pour la 1ère et la 2ème déclaration, et éventuellement sur la justifications des écarts de la 1ère déclaration
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-08] Path 6` : 2ᵉ déclaration sans écart → `/avis-cse` ; dépôt de l'avis 2-déclarations non déroulé.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-08] Path 6` : 2ᵉ déclaration sans écart → avis CSE en mode 2 déclarations (« Exactitude » 1ʳᵉ + 2ᵉ) → confirmation.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-08\]"`
 
 ---
@@ -173,7 +173,8 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Nouvelle déclaration du 7ème indicateur
 - Parcours de conformité : justification des écarts
 
-**Test E2E** : **aucun test** — le 2ᵉ tour n'est testé qu'avec CSE (`CAS-10`) ; la CI est rouge tant que ce test n'existe pas.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-09] Path 9` : 2ᵉ tour → justification sans CSE → fin de démarche directe → `/confirmation`.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-09\]"`
 
 ---
 
@@ -188,7 +189,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Parcours de conformité : justification des écarts
 - Dépot avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts de la 1ère déclaration, sur l'exactitude des données déclarées et la justification des écarts pour la 2ème déclaration
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-10] Path 8` : 2ᵉ tour, options restreintes, justification → `/avis-cse/etape/1` ; dépôt de l'avis non déroulé.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-10] Path 8` : 2ᵉ tour, options restreintes → justification → avis CSE 2 déclarations avec colonne « Justification » sur la 2ᵉ → confirmation.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-10\]"`
 
 ---
@@ -221,7 +222,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Dépôt du rapport de l'évaluation conjointe
 - Dépot avis CSE sur l'exactitude des données déclarées et éventuellement sur la justification des écarts pour la 1ère et la 2ème déclaration
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-12] Path 10` : 2ᵉ tour → éval. conjointe → upload → `/avis-cse` ; dépôt de l'avis non déroulé.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-12] Path 10` : 2ᵉ tour → éval. conjointe → avis CSE en mode 2 déclarations → confirmation.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-12\]"`
 
 ---
@@ -233,7 +234,8 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - CSE : non
 - Déclaration des 6 premiers indicateurs
 
-**Test E2E** : **aucun test** — la soumission complète en 6 indicateurs (étape catégories masquée, aucun parcours de conformité proposé) n'est pas déroulée ; la CI est rouge tant que ce test n'existe pas.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-01-6IND] Path 14` : effectif GIP 120 (tranche 100-149), funnel en 5 étapes (étape catégories masquée), soumission → fin de démarche directe → `/confirmation`.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-01-6IND\]"`
 
 ---
 
@@ -245,7 +247,8 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Déclaration des 6 premiers indicateurs
 - Dépot avis CSE sur l'exactitude des données déclarées
 
-**Test E2E** : **aucun test** — la soumission complète en 6 indicateurs avec dépôt de l'avis CSE « exactitude » n'est pas déroulée ; la CI est rouge tant que ce test n'existe pas.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-02-6IND] Path 15` : effectif GIP 120, funnel en 5 étapes, soumission → `/avis-cse` → dépôt de l'avis « exactitude » → confirmation.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-02-6IND\]"`
 
 ---
 
@@ -328,7 +331,7 @@ Le socle déclaratif (étapes 1–6, brouillon, historique, panneau de démarche
 Ce que les tests E2E ne peuvent pas rejouer tel quel, et comment c'est compensé :
 
 1. **La dimension année de campagne** — les specs E2E tournent sur l'année de campagne courante, pas sur 2027 → 2033. Le *contenu* de chaque cellule de l'Excel (les parcours) est déroulé par les tests du §2 ; le *cadencement* (quelle année déclenche 6 ou 7 indicateurs pour quelle tranche) est verrouillé par les tests unitaires du domaine (`indicatorG.test.ts`, `companyObligation.test.ts`), qui couvrent chaque tranche × année de la matrice.
-2. **La tranche d'effectif** — les specs conformité tournent en 250 et + (effectif GIP 250) ; les variantes 6 indicateurs doivent tourner avec un effectif GIP dans la tranche 100-149 pour être représentatives.
+2. **La tranche d'effectif** — les parcours de conformité (cas 1 à 12) tournent en 250 et + (effectif GIP 250) ; les variantes 6 indicateurs (`CAS-01-6IND`, `CAS-02-6IND`) tournent avec un effectif GIP de 120, représentatif de la tranche 100-149.
 3. **Avis CSE défavorables** — tous les tests déposent des avis « favorable » ; les variantes « défavorable » (sans impact de routage attendu, mais affichées au récapitulatif) ne sont pas déroulées.
 
 ---

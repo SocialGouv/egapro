@@ -4,16 +4,55 @@ import { expect, type Page } from "@playwright/test";
 const DUMMY_PDF = path.join(import.meta.dirname, "../fixtures/dummy.pdf");
 export const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
 
-export async function fillCseStep1(page: Page, hasSecondDeclaration = false) {
+type CseStep1Options = {
+	hasSecondDeclaration?: boolean;
+	/** CSE consulted on justifying the first declaration's gaps ≥ 5% — adds the "Justification" column in step 2 when that declaration has a gap. */
+	firstDeclGapConsulted?: boolean;
+	/** Same, for the corrective (second) declaration. */
+	secondDeclGapConsulted?: boolean;
+};
+
+// Fill one GapConsultationCard: consulted yes/no, and when yes the opinion + date.
+async function fillGapConsultation(
+	page: Page,
+	idPrefix: string,
+	consulted: boolean,
+	date: string,
+) {
+	if (!consulted) {
+		await page.locator(`label[for="${idPrefix}-no"]`).click();
+		return;
+	}
+	await page.locator(`label[for="${idPrefix}-yes"]`).click();
+	await page.locator(`label[for="${idPrefix}-favorable"]`).click();
+	await page.locator(`#${idPrefix}-date`).fill(date);
+}
+
+export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
+	const {
+		hasSecondDeclaration = false,
+		firstDeclGapConsulted = false,
+		secondDeclGapConsulted = false,
+	} = options;
 	await page.waitForURL("**/avis-cse/etape/1");
 	// DSFR hides native radio inputs — click on the associated label instead
 	await page.locator('label[for="first-decl-accuracy-favorable"]').click();
 	await page.locator("#first-decl-accuracy-date").fill("2025-03-15");
-	await page.locator('label[for="first-decl-gap-no"]').click();
+	await fillGapConsultation(
+		page,
+		"first-decl-gap",
+		firstDeclGapConsulted,
+		"2025-03-15",
+	);
 	if (hasSecondDeclaration) {
 		await page.locator('label[for="second-decl-accuracy-favorable"]').click();
 		await page.locator("#second-decl-accuracy-date").fill("2025-06-15");
-		await page.locator('label[for="second-decl-gap-no"]').click();
+		await fillGapConsultation(
+			page,
+			"second-decl-gap",
+			secondDeclGapConsulted,
+			"2025-06-15",
+		);
 	}
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL("**/avis-cse/etape/2");

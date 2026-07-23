@@ -84,6 +84,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 			/>,
 		);
 		expect(
@@ -102,6 +103,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 			/>,
 		);
 		expect(
@@ -117,6 +119,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 			/>,
 		);
 		expect(
@@ -140,6 +143,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 			/>,
 		);
 		const nextButton = screen.getByRole("button", { name: /suivant/i });
@@ -154,6 +158,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 			/>,
 		);
 		const radio = screen.getByLabelText(
@@ -172,6 +177,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 			/>,
 		);
 		const radio = screen.getByLabelText(
@@ -200,6 +206,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 			/>,
 		);
 		const radio = screen.getByLabelText(
@@ -228,6 +235,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 			/>,
 		);
 
@@ -248,6 +256,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 			/>,
 		);
 		const radio = screen.getByLabelText(
@@ -274,6 +283,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 				initialPath="corrective_action"
 			/>,
 		);
@@ -291,6 +301,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 				isSecondRound={true}
 			/>,
 		);
@@ -312,6 +323,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 			/>,
 		);
 		expect(
@@ -330,6 +342,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 				isSecondRound={true}
 			/>,
 		);
@@ -355,6 +368,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 			/>,
 		);
 		expect(
@@ -382,6 +396,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 			/>,
 		);
 		expect(
@@ -400,6 +415,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 			/>,
 		);
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
@@ -416,6 +432,7 @@ describe("CompliancePathChoice", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="john@company.fr"
+				hasCse={true}
 			/>,
 		);
 		expect(screen.getByText("john@company.fr")).toBeInTheDocument();
@@ -432,6 +449,7 @@ describe("CompliancePathChoice", () => {
 					declarationSiren={DECLARATION_SIREN}
 					declarationYear={DECLARATION_YEAR}
 					email="test@example.fr"
+					hasCse={true}
 				/>,
 			);
 
@@ -449,6 +467,7 @@ describe("CompliancePathChoice", () => {
 					declarationSiren={DECLARATION_SIREN}
 					declarationYear={DECLARATION_YEAR}
 					email="test@example.fr"
+					hasCse={true}
 				/>,
 			);
 
@@ -472,6 +491,7 @@ describe("CompliancePathChoice", () => {
 						declarationSiren={DECLARATION_SIREN}
 						declarationYear={DECLARATION_YEAR}
 						email="test@example.fr"
+						hasCse={true}
 					/>
 				</LockProvider>,
 			);
@@ -494,6 +514,7 @@ describe("CompliancePathChoice", () => {
 						declarationSiren={DECLARATION_SIREN}
 						declarationYear={DECLARATION_YEAR}
 						email="test@example.fr"
+						hasCse={true}
 					/>
 				</LockProvider>,
 			);
@@ -518,6 +539,7 @@ describe("CompliancePathChoice read-only mode", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 				initialPath="justify"
 				readOnlyReason="cse_opinion_submitted"
 			/>,
@@ -538,6 +560,7 @@ describe("CompliancePathChoice read-only mode", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 				initialPath="justify"
 				readOnlyReason="cse_opinion_submitted"
 			/>,
@@ -559,6 +582,7 @@ describe("CompliancePathChoice read-only mode", () => {
 				declarationSiren={DECLARATION_SIREN}
 				declarationYear={DECLARATION_YEAR}
 				email="test@example.fr"
+				hasCse={true}
 				initialPath="justify"
 				readOnlyReason="cse_opinion_submitted"
 			/>,

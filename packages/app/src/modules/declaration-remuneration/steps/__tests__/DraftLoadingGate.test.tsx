@@ -195,6 +195,7 @@ describe("DraftLoadingGate", () => {
 				declarationSiren="123456789"
 				declarationYear={2026}
 				email="user@example.com"
+				hasCse={true}
 			/>,
 		);
 		expectLoadingState();
