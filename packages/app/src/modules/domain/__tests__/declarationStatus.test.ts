@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-
 import {
 	computeDeclarationStatus,
 	getCurrentCompliancePath,
@@ -9,7 +8,9 @@ import {
 	isDeclarationSubmitted,
 	isDraft,
 	isInComplianceProcess,
+	isSecondDeclarationDeadlineApplicable,
 } from "../shared/declarationStatus";
+import type { DeclarationFsmStatus } from "../types";
 
 describe("isDraft", () => {
 	it("returns true only for draft", () => {
@@ -211,5 +212,101 @@ describe("hasStartedSecondDeclaration", () => {
 				secondDeclarationPathChoice: null,
 			}),
 		).toBe(false);
+	});
+});
+
+describe("isSecondDeclarationDeadlineApplicable", () => {
+	const NO_SECOND_DECLARATION = {
+		secondDeclarationStep: null,
+		secondDeclarationPathChoice: null,
+	};
+
+	const PHASE_1_STATUSES: (DeclarationFsmStatus | null)[] = [
+		null,
+		"draft",
+		"awaiting_compliance_path_choice",
+		"joint_evaluation_chosen",
+	];
+
+	it.each(
+		PHASE_1_STATUSES,
+	)("returns false for the phase-1 status %s (first-declaration deadline governs)", (status) => {
+		expect(
+			isSecondDeclarationDeadlineApplicable({
+				status,
+				...NO_SECOND_DECLARATION,
+			}),
+		).toBe(false);
+	});
+
+	const ALWAYS_PHASE_2_STATUSES: DeclarationFsmStatus[] = [
+		"corrective_actions_chosen",
+		"awaiting_revision_choice",
+		"revised_joint_evaluation_chosen",
+	];
+
+	it.each(
+		ALWAYS_PHASE_2_STATUSES,
+	)("returns true for the second-declaration status %s even before any step/path is recorded", (status) => {
+		expect(
+			isSecondDeclarationDeadlineApplicable({
+				status,
+				...NO_SECOND_DECLARATION,
+			}),
+		).toBe(true);
+	});
+
+	// Anti-regression for the nominal path (#3955): the very first step-2 correction
+	// write happens in corrective_actions_chosen while secondDeclarationStep and
+	// secondDeclarationPathChoice are still null (this write sets them). The predicate
+	// must already select the second-declaration deadline from the status alone.
+	it("returns true for corrective_actions_chosen with both second-declaration columns still null", () => {
+		expect(
+			isSecondDeclarationDeadlineApplicable({
+				status: "corrective_actions_chosen",
+				secondDeclarationStep: null,
+				secondDeclarationPathChoice: null,
+			}),
+		).toBe(true);
+	});
+
+	const TERMINAL_STATUSES: DeclarationFsmStatus[] = [
+		"awaiting_cse_opinion",
+		"demarche_completed",
+	];
+
+	it.each(
+		TERMINAL_STATUSES,
+	)("returns false for the round-1 terminal status %s when no second declaration was started", (status) => {
+		expect(
+			isSecondDeclarationDeadlineApplicable({
+				status,
+				...NO_SECOND_DECLARATION,
+			}),
+		).toBe(false);
+	});
+
+	it.each(
+		TERMINAL_STATUSES,
+	)("returns true for the terminal status %s once a second-declaration step was reached", (status) => {
+		expect(
+			isSecondDeclarationDeadlineApplicable({
+				status,
+				secondDeclarationStep: 2,
+				secondDeclarationPathChoice: null,
+			}),
+		).toBe(true);
+	});
+
+	it.each(
+		TERMINAL_STATUSES,
+	)("returns true for the terminal status %s once a second-declaration path was chosen", (status) => {
+		expect(
+			isSecondDeclarationDeadlineApplicable({
+				status,
+				secondDeclarationStep: null,
+				secondDeclarationPathChoice: "justify",
+			}),
+		).toBe(true);
 	});
 });

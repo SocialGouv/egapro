@@ -854,6 +854,79 @@ describe("declarationRouter", () => {
 			expect(setCall.status).toBe("awaiting_cse_opinion");
 		});
 
+		// Re-submit (#3955): after a first submit left the démarche in
+		// awaiting_revision_choice, re-modifying and re-submitting must match the
+		// extended transition and re-route on the recomputed residual gap — not
+		// throw « No matching transition ».
+		it("re-submit from awaiting_revision_choice stays awaiting_revision_choice when the gap still persists", async () => {
+			const declaration = buildDeclaration({
+				status: "awaiting_revision_choice",
+				cseRequired: true,
+			});
+			const employeeCategories = [
+				{ annualBaseWomen: "80", annualBaseMen: "100" },
+			];
+			const ctx = createOneRowSelectDb(declaration, employeeCategories);
+			const caller = await createLockedCaller(ctx.db);
+
+			const result = await caller.submitSecondDeclaration();
+
+			expect(result).toEqual({ success: true });
+			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setCall.status).toBe("awaiting_revision_choice");
+			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+				round: number | null;
+			}>;
+			expect(insertedEvents).toEqual([
+				expect.objectContaining({
+					eventType: "second_declaration_submit",
+					round: 2,
+				}),
+			]);
+		});
+
+		it("re-submit from awaiting_revision_choice reaches awaiting_cse_opinion when the gap is resolved with CSE", async () => {
+			const declaration = buildDeclaration({
+				status: "awaiting_revision_choice",
+				cseRequired: true,
+			});
+			const employeeCategories = [
+				{ annualBaseWomen: "100", annualBaseMen: "100" },
+			];
+			const ctx = createOneRowSelectDb(declaration, employeeCategories);
+			const caller = await createLockedCaller(ctx.db);
+
+			await caller.submitSecondDeclaration();
+
+			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setCall.status).toBe("awaiting_cse_opinion");
+		});
+
+		it("re-submit from awaiting_revision_choice completes the démarche when the gap is resolved without CSE", async () => {
+			const declaration = buildDeclaration({
+				status: "awaiting_revision_choice",
+				cseRequired: false,
+			});
+			const employeeCategories = [
+				{ annualBaseWomen: "100", annualBaseMen: "100" },
+			];
+			const ctx = createOneRowSelectDb(declaration, employeeCategories);
+			const caller = await createLockedCaller(ctx.db);
+
+			await caller.submitSecondDeclaration();
+
+			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+			expect(setCall.status).toBe("demarche_completed");
+			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
+				eventType: string;
+			}>;
+			expect(insertedEvents.map((e) => e.eventType)).toEqual([
+				"second_declaration_submit",
+				"demarche_complete",
+			]);
+		});
+
 		it("throws NOT_FOUND when declaration is missing", async () => {
 			const selectQueue = createSelectQueue([[]]);
 			const mockDb = {
