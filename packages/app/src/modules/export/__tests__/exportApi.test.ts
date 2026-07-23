@@ -1172,6 +1172,132 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.Seconde_declaration.Statut).toBe(true);
 	});
 
+	it("should thread the job-category source into Source_categories_emplois (#3944)", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "submitted",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+				totalWomen: 100,
+				totalMen: 150,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				companyName: "ACME Corp",
+				workforceEma: "250.00",
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: true,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+		mockFetchIndicatorG.mockResolvedValueOnce(
+			new Map([
+				[
+					"decl-1",
+					[
+						{
+							categoryName: "cadres",
+							source: "accord-branche",
+							declarationType: "initial",
+							womenCount: 10,
+							menCount: 10,
+							annualBaseWomen: "100",
+							annualBaseMen: "100",
+							annualVariableWomen: null,
+							annualVariableMen: null,
+							hourlyBaseWomen: null,
+							hourlyBaseMen: null,
+							hourlyVariableWomen: null,
+							hourlyVariableMen: null,
+						},
+					],
+				],
+			]),
+		);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const decl = (await response.json()).Declarations[0];
+		expect(decl.Source_categories_emplois).toBe("accord-branche");
+	});
+
+	it("should expose Source_categories_emplois=null when the declaration has no indicator G (#3944)", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "submitted",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+				totalWomen: 100,
+				totalMen: 150,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				companyName: "ACME Corp",
+				workforceEma: "250.00",
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: true,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const decl = (await response.json()).Declarations[0];
+		expect(decl.Source_categories_emplois).toBeNull();
+	});
+
 	it("should include Historique_statuts with FR labels and Numero_declaration on path_choice entries", async () => {
 		mockFetchSubmitted.mockResolvedValue([
 			{

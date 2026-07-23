@@ -340,6 +340,22 @@ const declarationSchema = {
 			description:
 				"Effectif hommes pris en compte pour la rémunération globale annuelle",
 		},
+		Source_categories_emplois: {
+			description:
+				"Source de détermination des catégories d'emplois pour l'indicateur G. `null` si aucun indicateur G déclaré.",
+			oneOf: [
+				{
+					type: "string",
+					enum: [
+						"accord-entreprise",
+						"accord-groupe",
+						"accord-branche",
+						"decision-unilaterale",
+					],
+				},
+				{ type: "null" },
+			],
+		},
 		Indicateurs: indicatorsSchema,
 		Seconde_declaration: {
 			type: "object",
