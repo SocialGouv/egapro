@@ -33,6 +33,7 @@ type CompanyProfile =
 type Bucket =
 	| "medium-50"
 	| "medium-100"
+	| "medium-150"
 	| "large-250"
 	| "large-1000"
 	| "large-5000";
@@ -47,6 +48,7 @@ type CompanyData = {
 const BUCKET_PROFILES: Record<Bucket, [CompanyProfile, CompanyProfile]> = {
 	"medium-50": ["balanced", "industry_moderate"],
 	"medium-100": ["balanced", "services_low_pay"],
+	"medium-150": ["men_disfavored", "industry_moderate"],
 	"large-250": ["women_disfavored_low", "balanced"],
 	"large-1000": ["women_disfavored_high", "tech_high_pay"],
 	"large-5000": ["finance_high_gap", "women_disfavored_low"],
@@ -94,7 +96,8 @@ type InputCompany = {
 
 const BUCKET_WORKFORCE_RANGES: Record<Bucket, [number, number]> = {
 	"medium-50": [50, 99],
-	"medium-100": [100, 249],
+	"medium-100": [100, 149],
+	"medium-150": [150, 249],
 	"large-250": [250, 999],
 	"large-1000": [1000, 4999],
 	"large-5000": [5000, 20000],
@@ -558,6 +561,7 @@ console.error("\nBucket distribution:");
 const buckets: Bucket[] = [
 	"medium-50",
 	"medium-100",
+	"medium-150",
 	"large-250",
 	"large-1000",
 	"large-5000",
