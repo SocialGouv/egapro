@@ -203,7 +203,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Déclaration des 6 premiers indicateurs
 - Dépot avis CSE sur l'exactitude des données déclarées
 
-**Test E2E** : **aucun test** — idem, variante avec dépôt d'avis CSE ; la CI est rouge tant que ce test n'existe pas.
+**Test E2E** : **aucun test** — la soumission complète en 6 indicateurs avec dépôt de l'avis CSE « exactitude » n'est pas déroulée ; la CI est rouge tant que ce test n'existe pas.
 
 ---
 
@@ -222,40 +222,46 @@ Restitution verbatim (cette feuille ne prévoit ni cas CSE ni parcours de confor
 
 | Taille entreprises | 2027 | 2028 | 2029 | 2030 | 2031 | 2032 | 2033 |
 |---|---|---|---|---|---|---|---|
-| Moins de 50 salariés (sur la base du volontariat) | Déclaration des 7 indicateurs | idem | idem | idem | idem | idem | idem |
-| 50 à 99 salariés | Déclaration des 6 premiers indicateurs | idem | idem | **Déclaration des 7 indicateurs** | 6 premiers | 6 premiers | **7 indicateurs** |
+| Moins de 50 salariés (sur la base du volontariat) | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs |
+| 50 à 99 salariés | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | **Déclaration des 7 indicateurs** | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | **Déclaration des 7 indicateurs** |
 
 ⚠️ Ces deux lignes sont **suspendues aux arbitrages métier du §6** (divergences 1 à 3 : volontariat < 50 avec ou sans indicateur G, assujettissement des 50-99 hors années triennales, parcours de conformité des 50-99 en année 7 indicateurs). Elles n'ont pas de fiche testable tant que ces points ne sont pas tranchés — les trancher, puis créer les fiches et les tests.
 
 ### Feuille « 100-149 »
 
+Les années « 6 premiers indicateurs » (2027, 2028, 2029, 2031, 2032) sont identiques entre elles ; les années « 7 indicateurs » (2030, 2033) aussi.
+
 | Année | Déclaration | Cas à dérouler |
 |---|---|---|
 | 2027 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
-| 2028 | 6 premiers indicateurs | idem 2027 |
-| 2029 | 6 premiers indicateurs | idem 2027 |
-| **2030** | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — idem + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — idem + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe<br>[CAS-12](#cas-12) avec CSE — idem + avis CSE sur les 2 décl. |
-| 2031 | 6 premiers indicateurs | idem 2027 |
-| 2032 | 6 premiers indicateurs | idem 2027 |
-| **2033** | **7 indicateurs** | idem 2030 (les 12 cas) |
+| 2028 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
+| 2029 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
+| **2030** | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE « exactitude »<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — actions correctives, 2ᵉ décl. sans écart + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — 2ᵉ décl. avec écart → justification + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport<br>[CAS-12](#cas-12) avec CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport + avis CSE sur les 2 décl. |
+| 2031 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
+| 2032 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
+| **2033** | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE « exactitude »<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — actions correctives, 2ᵉ décl. sans écart + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — 2ᵉ décl. avec écart → justification + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport<br>[CAS-12](#cas-12) avec CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport + avis CSE sur les 2 décl. |
 
 ### Feuille « 150-249 »
 
+Les années « 7 indicateurs » (2027, 2030, 2033) sont identiques entre elles ; les années « 6 premiers indicateurs » (2028, 2029, 2031, 2032) aussi.
+
 | Année | Déclaration | Cas à dérouler |
 |---|---|---|
-| **2027** | **7 indicateurs** | **Les 12 cas** — même liste que la feuille « 100-149 », année 2030 : [CAS-01](#cas-01) à [CAS-12](#cas-12) |
+| **2027** | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE « exactitude »<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — actions correctives, 2ᵉ décl. sans écart + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — 2ᵉ décl. avec écart → justification + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport<br>[CAS-12](#cas-12) avec CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport + avis CSE sur les 2 décl. |
 | 2028 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
-| 2029 | 6 premiers indicateurs | idem 2028 |
-| **2030** | **7 indicateurs** | idem 2027 (les 12 cas) |
-| 2031 | 6 premiers indicateurs | idem 2028 |
-| 2032 | 6 premiers indicateurs | idem 2028 |
-| **2033** | **7 indicateurs** | idem 2027 (les 12 cas) |
+| 2029 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
+| **2030** | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE « exactitude »<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — actions correctives, 2ᵉ décl. sans écart + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — 2ᵉ décl. avec écart → justification + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport<br>[CAS-12](#cas-12) avec CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport + avis CSE sur les 2 décl. |
+| 2031 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
+| 2032 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
+| **2033** | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE « exactitude »<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — actions correctives, 2ᵉ décl. sans écart + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — 2ᵉ décl. avec écart → justification + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport<br>[CAS-12](#cas-12) avec CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport + avis CSE sur les 2 décl. |
 
 ### Feuille « 250 et + »
 
+Toutes les années sont identiques : les 12 cas, chaque année.
+
 | Année | Déclaration | Cas à dérouler |
 |---|---|---|
-| 2027 → 2033 (chaque année) | **7 indicateurs** | **Les 12 cas**, à l'identique toutes les années — même liste que la feuille « 100-149 », année 2030 : [CAS-01](#cas-01) à [CAS-12](#cas-12) |
+| 2027 → 2033 (chaque année) | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE « exactitude »<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — actions correctives, 2ᵉ décl. sans écart + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — 2ᵉ décl. avec écart → justification + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport<br>[CAS-12](#cas-12) avec CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport + avis CSE sur les 2 décl. |
 
 **Règles de cadencement sous-jacentes** (implémentées dans `packages/app/src/modules/domain/shared/indicatorG.ts` et `companyObligation.ts`, couvertes par les tests unitaires `indicatorG.test.ts` et `companyObligation.test.ts`) : indicateur G requis chaque année dès 250 salariés ; les années triennales (2027, 2030, 2033) dès 150 salariés avant 2030 puis dès 50 salariés à partir de 2030.
 
