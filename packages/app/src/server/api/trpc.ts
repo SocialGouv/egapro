@@ -15,6 +15,7 @@ import {
 	getCurrentYear,
 	isDeadlinePassed,
 	isDeclarationSubmitted,
+	isSecondDeclarationDeadlineApplicable,
 } from "~/modules/domain";
 import { parseSiren } from "~/modules/shared/parseSiren";
 import { auditMiddleware as runAuditMiddleware } from "~/server/audit/trpcMiddleware";
@@ -309,14 +310,20 @@ export const declarationLockedWriteProcedure = declarationWriteProcedure.use(
  * The applicable deadline depends on the declaration phase: the
  * `updateEmployeeCategories` mutation is shared by the first declaration
  * (step 5) and the corrective-action second declaration (step 2). The second
- * declaration legitimately happens after the first deadline, so while the
- * declaration is in the corrective-action phase the *second*-declaration
- * deadline applies instead of the first.
+ * declaration legitimately happens after the first deadline, so whenever the
+ * declaration is in the second-declaration phase (including after a re-open
+ * from `awaiting_revision_choice`) the *second*-declaration deadline applies
+ * instead of the first — `isSecondDeclarationDeadlineApplicable` decides.
  */
 export const declarationModifiableWriteProcedure =
 	declarationLockedWriteProcedure.use(async ({ ctx, next }) => {
 		const rows = await ctx.db
-			.select({ status: declarations.status, year: declarations.year })
+			.select({
+				status: declarations.status,
+				year: declarations.year,
+				secondDeclarationStep: declarations.secondDeclarationStep,
+				secondDeclarationPathChoice: declarations.secondDeclarationPathChoice,
+			})
 			.from(declarations)
 			.where(eq(declarations.id, ctx.declarationId))
 			.limit(1);
@@ -325,10 +332,9 @@ export const declarationModifiableWriteProcedure =
 		if (declaration && isDeclarationSubmitted(declaration.status)) {
 			const { decl1ModificationDeadline, decl2ModificationDeadline } =
 				await getCampaignDeadlines(declaration.year);
-			const deadline =
-				declaration.status === "corrective_actions_chosen"
-					? decl2ModificationDeadline
-					: decl1ModificationDeadline;
+			const deadline = isSecondDeclarationDeadlineApplicable(declaration)
+				? decl2ModificationDeadline
+				: decl1ModificationDeadline;
 			if (isDeadlinePassed(deadline)) {
 				throw new TRPCError({
 					code: "FORBIDDEN",

@@ -71,6 +71,7 @@ export {
 	isDeclarationSubmitted,
 	isDraft,
 	isInComplianceProcess,
+	isSecondDeclarationDeadlineApplicable,
 } from "./shared/declarationStatus";
 // Declaration steps labels (A–F stepper), post-submit milestones, K19 funnels
 export type {
