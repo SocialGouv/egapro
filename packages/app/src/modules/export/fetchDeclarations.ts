@@ -14,6 +14,8 @@ export {
 } from "./queries";
 
 import {
+	computeGapRatio,
+	computeTotal,
 	gapRatioToPercent,
 	getObligationWorkforce,
 	isComplianceProcessRequired,
@@ -229,19 +231,55 @@ export function buildIndicators(row: DeclarationRow) {
 
 // ── Indicator G entries ─────────────────────────────────────────────
 
+function roundRatio(r: number | null): number | null {
+	return r === null ? null : Math.round(r * 10000) / 10000;
+}
+
+function computeTotalGapRatio(
+	baseW: string | null,
+	varW: string | null,
+	baseM: string | null,
+	varM: string | null,
+): number | null {
+	const w = computeTotal(baseW ?? "", varW ?? "");
+	const m = computeTotal(baseM ?? "", varM ?? "");
+	if (w === null || m === null || m === 0) return null;
+	return roundRatio((m - w) / m);
+}
+
 function toIndicatorGCategory(entry: IndicatorGEntry) {
+	const {
+		annualBaseWomen: abW,
+		annualBaseMen: abM,
+		annualVariableWomen: avW,
+		annualVariableMen: avM,
+		hourlyBaseWomen: hbW,
+		hourlyBaseMen: hbM,
+		hourlyVariableWomen: hvW,
+		hourlyVariableMen: hvM,
+	} = entry;
 	return {
 		Nom_categorie: entry.categoryName,
 		Effectif_F: entry.womenCount,
 		Effectif_H: entry.menCount,
-		Rem_annuelle_base_F: entry.annualBaseWomen,
-		Rem_annuelle_base_H: entry.annualBaseMen,
-		Rem_annuelle_variable_F: entry.annualVariableWomen,
-		Rem_annuelle_variable_H: entry.annualVariableMen,
-		Taux_horaire_base_F: entry.hourlyBaseWomen,
-		Taux_horaire_base_H: entry.hourlyBaseMen,
-		Taux_horaire_variable_F: entry.hourlyVariableWomen,
-		Taux_horaire_variable_H: entry.hourlyVariableMen,
+		Rem_annuelle_base_F: abW,
+		Rem_annuelle_base_H: abM,
+		Rem_annuelle_variable_F: avW,
+		Rem_annuelle_variable_H: avM,
+		Taux_horaire_base_F: hbW,
+		Taux_horaire_base_H: hbM,
+		Taux_horaire_variable_F: hvW,
+		Taux_horaire_variable_H: hvM,
+		Rem_annuelle_base_ecart: roundRatio(computeGapRatio(abW ?? "", abM ?? "")),
+		Rem_annuelle_variable_ecart: roundRatio(
+			computeGapRatio(avW ?? "", avM ?? ""),
+		),
+		Rem_annuelle_total_ecart: computeTotalGapRatio(abW, avW, abM, avM),
+		Taux_horaire_base_ecart: roundRatio(computeGapRatio(hbW ?? "", hbM ?? "")),
+		Taux_horaire_variable_ecart: roundRatio(
+			computeGapRatio(hvW ?? "", hvM ?? ""),
+		),
+		Taux_horaire_total_ecart: computeTotalGapRatio(hbW, hvW, hbM, hvM),
 	};
 }
 

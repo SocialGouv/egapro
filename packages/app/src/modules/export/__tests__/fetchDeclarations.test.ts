@@ -285,6 +285,87 @@ describe("buildIndicatorG", () => {
 		expect(result.initial).toEqual([]);
 		expect(result.correction).toEqual([]);
 	});
+
+	const gEntry = (overrides: Partial<IndicatorGEntry>): IndicatorGEntry => ({
+		categoryName: "Cadres",
+		declarationType: "initial",
+		womenCount: 50,
+		menCount: 60,
+		annualBaseWomen: "10000",
+		annualBaseMen: "11000",
+		annualVariableWomen: "1000",
+		annualVariableMen: "1010",
+		hourlyBaseWomen: "20",
+		hourlyBaseMen: "22",
+		hourlyVariableWomen: "2",
+		hourlyVariableMen: "2.5",
+		...overrides,
+	});
+
+	it("should compute the six signed gap ratios rounded to 4 decimals", () => {
+		const [category] = buildIndicatorG([gEntry({})]).initial;
+
+		expect(category?.Rem_annuelle_base_ecart).toBe(0.0909);
+		expect(category?.Rem_annuelle_variable_ecart).toBe(0.0099);
+		expect(category?.Rem_annuelle_total_ecart).toBe(0.0841);
+		expect(category?.Taux_horaire_base_ecart).toBe(0.0909);
+		expect(category?.Taux_horaire_variable_ecart).toBe(0.2);
+		expect(category?.Taux_horaire_total_ecart).toBe(0.102);
+	});
+
+	it("nulls a component gap when one of its salary values is missing", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualBaseWomen: null }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_base_ecart).toBeNull();
+		expect(category?.Rem_annuelle_variable_ecart).toBe(0.0099);
+	});
+
+	it("nulls a component gap when the men value is zero", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualBaseMen: "0" }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_base_ecart).toBeNull();
+	});
+
+	it("nulls the total gap when the men total is zero", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualBaseMen: "0", annualVariableMen: "0" }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_total_ecart).toBeNull();
+	});
+
+	it("nulls the total gap when both men components are missing", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualBaseMen: null, annualVariableMen: null }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_total_ecart).toBeNull();
+	});
+
+	it("nulls the total gap when both women components are missing", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualBaseWomen: null, annualVariableWomen: null }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_total_ecart).toBeNull();
+	});
+
+	it("computes the total gap from a single present component (null-safe sum)", () => {
+		const [category] = buildIndicatorG([
+			gEntry({
+				annualBaseWomen: "10000",
+				annualVariableWomen: null,
+				annualBaseMen: "11000",
+				annualVariableMen: null,
+			}),
+		]).initial;
+
+		expect(category?.Rem_annuelle_total_ecart).toBe(0.0909);
+	});
 });
 
 describe("assembleDeclaration", () => {
