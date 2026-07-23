@@ -48,8 +48,9 @@ describe("GET /api/v1/export/declarations — Date_annulation integration", () =
 		await sql`
 			INSERT INTO app_declaration_status_history (id, declaration_id, event_type, value, round, created_at)
 			VALUES
-				('hist-active-submit',       'export-decl-active', 'submit',            NULL, NULL, '2025-04-30T09:00:00Z'),
-				('hist-active-demarche',     'export-decl-active', 'demarche_complete', NULL, NULL, '2025-04-30T11:00:00Z')
+				('hist-active-submit',       'export-decl-active', 'submit',            NULL,          NULL, '2025-04-30T09:00:00Z'),
+				('hist-active-step',         'export-decl-active', 'step_change',       'from:1|to:2', 2,    '2025-04-30T10:00:00Z'),
+				('hist-active-demarche',     'export-decl-active', 'demarche_complete', NULL,          NULL, '2025-04-30T11:00:00Z')
 		`;
 	});
 
@@ -115,7 +116,7 @@ describe("GET /api/v1/export/declarations — Date_annulation integration", () =
 		}
 	});
 
-	it("returns Historique_statuts as an ASC-ordered list of FR-labelled events (S1)", async () => {
+	it("returns Historique_statuts as an ASC-ordered list of FR-labelled events, excluding the seeded internal step_change (S1)", async () => {
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
 		const response = await GET(
 			gatewayRequest({ date_begin: "2025-05-01", date_end: "2025-05-02" }),
@@ -125,6 +126,8 @@ describe("GET /api/v1/export/declarations — Date_annulation integration", () =
 		const body = await response.json();
 		expect(body.Nombre).toBe(1);
 		const decl = body.Declarations[0];
+		// The active declaration is seeded with a step_change row between submit and
+		// demarche_complete; the SQL filter drops it, so only the two public events remain.
 		expect(decl.Historique_statuts).toEqual([
 			{
 				Statut: "submit",
@@ -137,6 +140,27 @@ describe("GET /api/v1/export/declarations — Date_annulation integration", () =
 				Date: "2025-04-30T11:00:00.000Z",
 			},
 		]);
+	});
+
+	it("filters step_change out of Historique_statuts while every returned entry carries a Libelle_statut (#3950)", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const response = await GET(
+			gatewayRequest({ date_begin: "2025-05-01", date_end: "2025-05-02" }),
+		);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		const decl = body.Declarations[0];
+		const statuts = decl.Historique_statuts as Array<{
+			Statut: string;
+			Libelle_statut: string;
+		}>;
+
+		expect(statuts.map((entry) => entry.Statut)).not.toContain("step_change");
+		for (const entry of statuts) {
+			expect(entry.Libelle_statut).toBeTypeOf("string");
+			expect(entry.Libelle_statut.length).toBeGreaterThan(0);
+		}
 	});
 
 	it("returns Historique_statuts as [] when the declaration has no history rows (S7)", async () => {

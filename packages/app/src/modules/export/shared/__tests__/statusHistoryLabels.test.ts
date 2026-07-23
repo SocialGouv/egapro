@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { declarationEventTypeEnum } from "~/server/db/schema";
 import {
 	DECLARATION_EVENT_TYPE_LABELS,
 	getStatusHistoryLabel,
@@ -54,5 +55,20 @@ describe("getStatusHistoryLabel", () => {
 			const result = getStatusHistoryLabel(key, null);
 			expect(result.length).toBeGreaterThan(0);
 		}
+	});
+
+	// The public SUIT vocabulary must expose every DB event type except step_change,
+	// which is an internal stepper-transition event (indicators A–F) that must not
+	// leak into the export (#3950).
+	it("exposes exactly the declaration_event_type DB values minus the internal step_change", () => {
+		const publicVocabulary = Object.keys(DECLARATION_EVENT_TYPE_LABELS).sort();
+		const dbEventTypesExceptInternal = declarationEventTypeEnum.enumValues
+			.filter((value) => value !== "step_change")
+			.sort();
+
+		expect(publicVocabulary).toEqual(dbEventTypesExceptInternal);
+		expect(Object.keys(DECLARATION_EVENT_TYPE_LABELS)).not.toContain(
+			"step_change",
+		);
 	});
 });
