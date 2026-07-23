@@ -47,7 +47,7 @@ Les specs conformité tournent avec l'entreprise de test SIREN `130025265`, **ef
 
 ## 2. Les fiches de cas (détail verbatim de l'Excel)
 
-Une fiche par cas, avec les étapes **verbatim** des cellules de l'Excel (feuilles « 100-149 », « 150-249 », « 250 et + » — les libellés y sont identiques). Les cas 1 et 2 existent en deux variantes selon l'année (voir §3) : années « 7 indicateurs » ([CAS-01](#cas-01), [CAS-02](#cas-02)) et années « 6 premiers indicateurs » ([CAS-01-6IND](#cas-01-6ind), [CAS-02-6IND](#cas-02-6ind), sans indicateur G donc sans parcours de conformité possible). Les cas 3 à 12 n'existent qu'en année « 7 indicateurs ».
+Une fiche par cas, avec les étapes **verbatim** des cellules de l'Excel (feuilles « 100-149 », « 150-249 », « 250 et + » — les libellés y sont identiques). Les cas 1 et 2 existent en deux variantes selon l'année (voir §3) : années « 7 indicateurs » (`CAS-01`, `CAS-02`) et années « 6 premiers indicateurs » (`CAS-01-6IND`, `CAS-02-6IND`, sans indicateur G donc sans parcours de conformité possible). Les cas 3 à 12 n'existent qu'en année « 7 indicateurs ».
 
 Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » = indicateur G, l'écart de rémunération par catégorie de salariés (étape 5 du funnel) ; « Déclaration des 6 premiers indicateurs » = funnel sans l'étape 5 (indicateurs A à F) ; « Parcours de conformité » = page `/declaration-remuneration/parcours-conformite` ; « Nouvelle déclaration du 7ème indicateur » = seconde déclaration (étapes 1 à 3 du parcours actions correctives) ; « Dépot avis CSE » = flux `/avis-cse/etape/1..2` (étape 1 : avis rendus, étape 2 : dépôt des fichiers et matrice d'association) ; « Dépôt du rapport de l'évaluation conjointe » = upload PDF sur `/evaluation-conjointe`.
 
@@ -146,7 +146,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Nouvelle déclaration du 7ème indicateur
 - Parcours de conformité : justification des écarts
 
-**Test E2E** : **aucun test** — le 2ᵉ tour n'est testé qu'avec CSE ([CAS-10](#cas-10)) ; la CI est rouge tant que ce test n'existe pas.
+**Test E2E** : **aucun test** — le 2ᵉ tour n'est testé qu'avec CSE (`CAS-10`) ; la CI est rouge tant que ce test n'existe pas.
 
 ### CAS-10
 
