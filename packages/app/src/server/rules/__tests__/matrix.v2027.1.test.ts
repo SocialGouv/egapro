@@ -166,10 +166,6 @@ const MATRIX: Case[] = [
 		],
 	},
 
-	// Re-submit (#3955): after a first second-declaration submit landed the
-	// démarche in awaiting_revision_choice (persistent gap), the declarant can
-	// re-modify and re-submit before the deadline. The transition recomputes the
-	// residual gap and re-routes exactly like the corrective_actions_chosen path.
 	{
 		label:
 			"submit_second_declaration re-submit from awaiting_revision_choice, gap still persists",

@@ -256,10 +256,6 @@ describe("isSecondDeclarationDeadlineApplicable", () => {
 		).toBe(true);
 	});
 
-	// Anti-regression for the nominal path (#3955): the very first step-2 correction
-	// write happens in corrective_actions_chosen while secondDeclarationStep and
-	// secondDeclarationPathChoice are still null (this write sets them). The predicate
-	// must already select the second-declaration deadline from the status alone.
 	it("returns true for corrective_actions_chosen with both second-declaration columns still null", () => {
 		expect(
 			isSecondDeclarationDeadlineApplicable({

@@ -854,10 +854,6 @@ describe("declarationRouter", () => {
 			expect(setCall.status).toBe("awaiting_cse_opinion");
 		});
 
-		// Re-submit (#3955): after a first submit left the démarche in
-		// awaiting_revision_choice, re-modifying and re-submitting must match the
-		// extended transition and re-route on the recomputed residual gap — not
-		// throw « No matching transition ».
 		it("re-submit from awaiting_revision_choice stays awaiting_revision_choice when the gap still persists", async () => {
 			const declaration = buildDeclaration({
 				status: "awaiting_revision_choice",
