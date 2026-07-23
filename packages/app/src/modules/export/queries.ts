@@ -255,6 +255,7 @@ export async function fetchIndicatorGByDeclaration(
 		.select({
 			declarationId: jobCategories.declarationId,
 			categoryName: jobCategories.name,
+			source: jobCategories.source,
 			declarationType: employeeCategories.declarationType,
 			womenCount: employeeCategories.womenCount,
 			menCount: employeeCategories.menCount,
