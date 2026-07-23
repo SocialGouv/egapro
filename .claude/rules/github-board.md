@@ -18,11 +18,13 @@ Les IDs sont **stables** tant que le board n'est pas recréé. Si un snippet éc
 ## IDs constants
 
 ```
-PROJECT_ID       = PVT_kwDOAh0HH84BFsK7
-STATUS_FIELD_ID  = PVTSSF_lADOAh0HH84BFsK7zg29EI8
-SIZE_FIELD_ID    = PVTSSF_lADOAh0HH84BFsK7zg29ENU   # single-select XS/S/M/L/XL
-ESTIMATE_FIELD_ID= PVTF_lADOAh0HH84BFsK7zg29ENY     # number (points Fibonacci)
-SPRINT_FIELD_ID  = PVTIF_lADOAh0HH84BFsK7zg8pCDM    # iteration
+PROJECT_ID         = PVT_kwDOAh0HH84BFsK7
+STATUS_FIELD_ID    = PVTSSF_lADOAh0HH84BFsK7zg29EI8
+SIZE_FIELD_ID      = PVTSSF_lADOAh0HH84BFsK7zg29ENU   # single-select XS/S/M/L/XL
+ESTIMATE_FIELD_ID  = PVTF_lADOAh0HH84BFsK7zg29ENY     # number (points Fibonacci)
+START_DATE_FIELD_ID= PVTF_lADOAh0HH84BFsK7zg29ENc     # date (implementation start)
+END_DATE_FIELD_ID  = PVTF_lADOAh0HH84BFsK7zg29ENg     # date (PR merge)
+SPRINT_FIELD_ID    = PVTIF_lADOAh0HH84BFsK7zg8pCDM    # iteration
 ```
 
 ### Size options (complexité t-shirt)
@@ -36,6 +38,15 @@ SPRINT_FIELD_ID  = PVTIF_lADOAh0HH84BFsK7zg8pCDM    # iteration
 | XL | `db339eb2` | 8 |
 
 Ne jamais écrire `Size` / `Estimate` en GraphQL brut : passer par `scripts/orchestration/set_ticket_size.sh <ticket> <XS|S|M|L|XL>` (écrit les deux champs d'un coup). Rubrique de sizing : `rules/complexity-estimation.md`. Lecture de la vélocité : `scripts/orchestration/sprint_velocity.sh` (skill `/velocity`).
+
+### Date fields (Start date / End date)
+
+Les deux champs `DATE` donnent une vision de la fenêtre d'implémentation d'un ticket (voir #3956) :
+
+- **Start date** — jour où le ticket entre en implémentation. Écrit automatiquement par `set_ticket_status.sh` sur la transition `→ In progress` (donc via `/implement`, `code-dev` et `epic_loop.sh`), idempotent (le premier passage gagne).
+- **End date** — jour de merge de la PR. Écrit par le workflow `.github/workflows/ticket-end-date.yaml` (résout `<N>` depuis `ticket/<N>-*`).
+
+Ne jamais écrire ces champs en GraphQL brut : passer par `scripts/orchestration/set_ticket_date.sh <ticket> <start|end> [--if-empty] [YYYY-MM-DD]` (write primitive unique). Backfill historique des tickets déjà mergés : `scripts/orchestration/backfill_ticket_dates.sh` (Start = 1ᵉʳ commit de la PR, End = date de merge).
 
 ### Issue types (GitHub native)
 

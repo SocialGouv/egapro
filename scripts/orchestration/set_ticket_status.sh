@@ -38,6 +38,9 @@ fi
 
 set -euo pipefail
 
+# Resolve script dir to locate sibling scripts (set_ticket_date.sh).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 if [ $# -lt 2 ]; then
     echo "Usage: $0 <ticket_number> <status_label>" >&2
     echo "  status_label: Backlog | To Do | In progress | In review" >&2
@@ -133,3 +136,11 @@ mutation($project:ID!, $item:ID!, $field:ID!, $option:String!) {
   --jq '.data.updateProjectV2ItemFieldValue.projectV2Item.id' >/dev/null
 
 echo "ticket #$TICKET → $STATUS_RAW"
+
+# Stamp the Start date on the first "In progress" transition (idempotent).
+# This is the single choke point for "implementation started" across every mode
+# (/implement task/bug, code-dev, epic_loop), so the board's Start date column
+# is populated automatically. Best-effort: never fail the status move on this.
+if [ "$OPTION_ID" = "47fc9ee4" ]; then
+    bash "$SCRIPT_DIR/set_ticket_date.sh" "$TICKET" start --if-empty >/dev/null 2>&1 || true
+fi
