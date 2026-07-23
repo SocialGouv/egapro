@@ -42,10 +42,7 @@ import {
 	INDICATOR_F_HOURLY_THRESHOLD_LABELS,
 	INDICATOR_F_HOURLY_WOMEN_LABELS,
 } from "./shared/apiLabels";
-import {
-	type DeclarationEventType,
-	getStatusHistoryLabel,
-} from "./shared/statusHistoryLabels";
+import { getStatusHistoryLabel } from "./shared/statusHistoryLabels";
 
 function deriveExportFlags(
 	row: DeclarationRow,
@@ -356,10 +353,7 @@ export function assembleDeclaration(
 		Historique_statuts: row.statusHistoryArray.map((entry) => {
 			const base = {
 				Statut: entry.eventType,
-				Libelle_statut: getStatusHistoryLabel(
-					entry.eventType as DeclarationEventType,
-					entry.value,
-				),
+				Libelle_statut: getStatusHistoryLabel(entry.eventType, entry.value),
 				Date: entry.createdAt,
 			};
 			return entry.eventType === "path_choice" && entry.round !== null

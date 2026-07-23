@@ -19,6 +19,7 @@ import {
 	users,
 } from "~/server/db/schema";
 import type { CseRow, FileRow, IndicatorGEntry } from "./fetchDeclarations";
+import type { DeclarationEventType } from "./shared/statusHistoryLabels";
 import type { IndicatorGRow } from "./types";
 
 // postgres.js returns ISO strings (not Date) for raw `sql<>` aggregations like
@@ -28,7 +29,7 @@ const toDate = (value: unknown): Date | null =>
 	value == null ? null : new Date(value as string | number | Date);
 
 export type RawHistoryEntry = {
-	eventType: string;
+	eventType: DeclarationEventType;
 	value: string | null;
 	round: number | null;
 	createdAt: string;
@@ -72,6 +73,7 @@ function statusHistoryArray() {
 		)
 		FROM ${declarationStatusHistory}
 		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
+		AND ${declarationStatusHistory.eventType} != ${"step_change"}
 	)`.mapWith((value: unknown) =>
 		Array.isArray(value) ? (value as RawHistoryEntry[]) : [],
 	);

@@ -1,5 +1,7 @@
 // OpenAPI 3.1 specification for the declarations export API.
 
+import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
+
 const declarantSchema = {
 	type: "object",
 	description: "Personne physique ayant réalisé la déclaration.",
@@ -207,8 +209,10 @@ const declarationSchema = {
 		},
 		Statut: {
 			type: "string",
-			description: "Statut de la déclaration",
-			example: "submitted",
+			description:
+				"Statut courant de la déclaration dans le moteur FSM. Dérivé de l'autorité DECLARATION_FSM_STATUSES — toute évolution du vocabulaire FSM se répercute ici automatiquement. Sémantique : « demarche_completed » signifie qu'aucune action supplémentaire n'est attendue sur Egapro ; il peut être atteint dès le choix du parcours « justify » lorsque l'entreprise n'a pas de CSE (la justification des écarts ne donne lieu à aucun dépôt sur la plateforme).",
+			enum: [...DECLARATION_FSM_STATUSES],
+			example: "demarche_completed",
 		},
 		Parcours_apres_declaration_1: {
 			type: ["string", "null"],
@@ -223,7 +227,7 @@ const declarationSchema = {
 		Parcours_de_conformite_requis: {
 			type: "boolean",
 			description:
-				"Indique si le parcours de conformité (mesures correctives après déclaration 1) est requis.",
+				"Prédicat statique : indique si l'entreprise est soumise au parcours de conformité (effectif ≥ 100, indicateur G calculé, écart ≥ 5 %). Calculé à la soumission et figé — ne change jamais au fil de l'avancement de la démarche. Ne pas confondre avec « Statut » qui, lui, évolue à chaque transition FSM.",
 		},
 		Parcours_de_conformite_revision_requis: {
 			type: "boolean",
