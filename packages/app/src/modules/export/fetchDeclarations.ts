@@ -244,7 +244,7 @@ function computeTotalGapRatio(
 	const w = computeTotal(baseW ?? "", varW ?? "");
 	const m = computeTotal(baseM ?? "", varM ?? "");
 	if (w === null || m === null || m === 0) return null;
-	return roundRatio((m - w) / m);
+	return (m - w) / m;
 }
 
 function toIndicatorGCategory(entry: IndicatorGEntry) {
@@ -274,12 +274,16 @@ function toIndicatorGCategory(entry: IndicatorGEntry) {
 		Rem_annuelle_variable_ecart: roundRatio(
 			computeGapRatio(avW ?? "", avM ?? ""),
 		),
-		Rem_annuelle_total_ecart: computeTotalGapRatio(abW, avW, abM, avM),
+		Rem_annuelle_total_ecart: roundRatio(
+			computeTotalGapRatio(abW, avW, abM, avM),
+		),
 		Taux_horaire_base_ecart: roundRatio(computeGapRatio(hbW ?? "", hbM ?? "")),
 		Taux_horaire_variable_ecart: roundRatio(
 			computeGapRatio(hvW ?? "", hvM ?? ""),
 		),
-		Taux_horaire_total_ecart: computeTotalGapRatio(hbW, hvW, hbM, hvM),
+		Taux_horaire_total_ecart: roundRatio(
+			computeTotalGapRatio(hbW, hvW, hbM, hvM),
+		),
 	};
 }
 
