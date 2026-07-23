@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
 import { openApiSpec } from "../openapi";
 
 describe("openApiSpec", () => {
@@ -60,6 +61,29 @@ describe("openApiSpec", () => {
 		expect(details.type).toBe("array");
 		expect(details.items).toBeDefined();
 		expect(details.items.type).toBe("object");
+	});
+
+	describe("Statut field (declaration FSM status)", () => {
+		const declarationSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items;
+		const statutSchema = declarationSchema.properties.Statut;
+
+		it("declares Statut as a string enum", () => {
+			expect(statutSchema.type).toBe("string");
+			expect(Array.isArray(statutSchema.enum)).toBe(true);
+		});
+
+		it("mirrors the enum exactly on DECLARATION_FSM_STATUSES", () => {
+			expect([...statutSchema.enum].sort()).toEqual(
+				[...DECLARATION_FSM_STATUSES].sort(),
+			);
+			expect(statutSchema.enum).toHaveLength(DECLARATION_FSM_STATUSES.length);
+		});
+
+		it("uses a valid FSM status as its example", () => {
+			expect(DECLARATION_FSM_STATUSES).toContain(statutSchema.example);
+		});
 	});
 
 	describe("Historique_statuts schema", () => {
