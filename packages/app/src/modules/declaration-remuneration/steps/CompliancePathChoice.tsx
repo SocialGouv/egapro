@@ -17,6 +17,7 @@ import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
 import common from "../shared/common.module.scss";
+import { getPostComplianceDestination } from "../shared/complianceNavigation";
 import { FormActions } from "../shared/FormActions";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import styles from "./CompliancePathChoice.module.scss";
@@ -38,6 +39,7 @@ type Props = {
 	declarationSiren: string;
 	declarationYear: number;
 	email: string;
+	hasCse: boolean | null;
 	initialPath?: CompliancePathValue;
 	isSecondRound?: boolean;
 	pdfDownloadHref?: string;
@@ -50,6 +52,7 @@ export function CompliancePathChoice({
 	declarationSiren,
 	declarationYear,
 	email,
+	hasCse,
 	initialPath,
 	isSecondRound = false,
 	pdfDownloadHref,
@@ -106,7 +109,9 @@ export function CompliancePathChoice({
 					"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
 				);
 			} else {
-				router.push("/avis-cse");
+				// "justify": with a CSE the opinion remains to be deposited on
+				// /avis-cse; without one the FSM already completed the démarche.
+				router.push(getPostComplianceDestination(hasCse));
 			}
 		},
 	});
@@ -241,12 +246,12 @@ export function CompliancePathChoice({
 				<FormActions
 					isSubmitting={mutation.isPending}
 					mimoquageNextHref={
-						initialPath ? getCompliancePathHref(initialPath) : undefined
+						initialPath ? getCompliancePathHref(initialPath, hasCse) : undefined
 					}
 					nextDisabled={!selectedPath || isReadOnly}
 					nextHref={
 						isReadOnly && initialPath
-							? getCompliancePathHref(initialPath)
+							? getCompliancePathHref(initialPath, hasCse)
 							: undefined
 					}
 					nextLabel="Suivant"

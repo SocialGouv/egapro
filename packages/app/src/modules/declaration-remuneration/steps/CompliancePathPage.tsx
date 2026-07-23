@@ -137,6 +137,7 @@ export async function CompliancePathPage() {
 				declarationSiren={data.declaration.siren}
 				declarationYear={currentYear}
 				email={email}
+				hasCse={company.hasCse}
 				initialPath={pathChoice ?? undefined}
 				isSecondRound={isSecondRound}
 				pdfDownloadHref={

@@ -14,7 +14,7 @@ import { completeDeclaration } from "./helpers/declaration-flows";
 
 test.describe.configure({ mode: "serial" });
 
-test.describe("Path change before downstream action — tâtonnement supported", () => {
+test.describe("[ANX-01] Path change before downstream action — tâtonnement supported", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(true);

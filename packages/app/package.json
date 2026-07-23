@@ -9,6 +9,7 @@
 		"pretypecheck": "pnpm --filter notifications build",
 		"pretest": "pnpm --filter notifications build",
 		"check": "biome check .",
+		"check:cahier": "node scripts/check-cahier.mjs",
 		"check:journal": "node scripts/check-journal.mjs",
 		"check:unsafe": "biome check --write --unsafe .",
 		"check:write": "biome check --write .",
