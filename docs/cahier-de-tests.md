@@ -51,39 +51,51 @@ Une fiche par cas, avec les étapes **verbatim** des cellules de l'Excel (feuill
 
 Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » = indicateur G, l'écart de rémunération par catégorie de salariés (étape 5 du funnel) ; « Déclaration des 6 premiers indicateurs » = funnel sans l'étape 5 (indicateurs A à F) ; « Parcours de conformité » = page `/declaration-remuneration/parcours-conformite` ; « Nouvelle déclaration du 7ème indicateur » = seconde déclaration (étapes 1 à 3 du parcours actions correctives) ; « Dépot avis CSE » = flux `/avis-cse/etape/1..2` (étape 1 : avis rendus, étape 2 : dépôt des fichiers et matrice d'association) ; « Dépôt du rapport de l'évaluation conjointe » = upload PDF sur `/evaluation-conjointe`.
 
-### CAS-01
+---
 
-**Cas 1 sans CSE et aucun écart ≥ 5% pour le 7ème indicateur** — CSE : non
+<a name="cas-01"></a>
 
+### CAS-01 — Cas 1 sans CSE et aucun écart ≥ 5% pour le 7ème indicateur
+
+- CSE : non
 - Déclaration des 7 indicateurs
 
 **Test E2E** : `compliance.e2e.ts` — `[CAS-01] Path 2` : déclaration complète → `/confirmation`.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-01\]"`
 
-### CAS-02
+---
 
-**Cas 2 avec CSE et aucun écart ≥ 5% pour le 7ème indicateur** — CSE : oui
+<a name="cas-02"></a>
 
+### CAS-02 — Cas 2 avec CSE et aucun écart ≥ 5% pour le 7ème indicateur
+
+- CSE : oui
 - Déclaration des 7 indicateurs
 - Dépot avis CSE sur l'exactitude des données déclarées
 
 **Test E2E** : `compliance.e2e.ts` — `[CAS-02] Path 1` : déclaration → `/avis-cse` → dépôt de l'avis → confirmation.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-02\]"`
 
-### CAS-03
+---
 
-**Cas 3 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts** — CSE : non
+<a name="cas-03"></a>
 
+### CAS-03 — Cas 3 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts
+
+- CSE : non
 - Déclaration des 7 indicateurs
 - Parcours de conformité : justification des écarts
 
 **Test E2E** : `compliance.e2e.ts` — `[CAS-03] Path 5` : l'option « Justifier » est proposée sans CSE ; le flux complet n'est pas déroulé.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-03\]"`
 
-### CAS-04
+---
 
-**Cas 4 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts** — CSE : oui
+<a name="cas-04"></a>
 
+### CAS-04 — Cas 4 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts
+
+- CSE : oui
 - Déclaration des 7 indicateurs
 - Parcours de conformité : justification des écarts
 - Dépot avis CSE sur l'exactitude des données déclarées et la justification des écarts
@@ -91,10 +103,13 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 **Test E2E** : `compliance.e2e.ts` — `[CAS-04] Path 3` : choix justification → `/avis-cse/etape/1` ; dépôt de l'avis « exactitude + justification » non déroulé.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-04\]"`
 
-### CAS-05
+---
 
-**Cas 5 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe** — CSE : non
+<a name="cas-05"></a>
 
+### CAS-05 — Cas 5 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe
+
+- CSE : non
 - Déclaration des 7 indicateurs
 - Parcours de conformité : évaluation conjointe
 - Dépôt du rapport de l'évaluation conjointe
@@ -102,10 +117,13 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 **Test E2E** : `compliance.e2e.ts` — `[CAS-03][CAS-05] Path 5` : éval. conjointe → upload du rapport → `/confirmation`.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-05\]"`
 
-### CAS-06
+---
 
-**Cas 6 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe** — CSE : oui
+<a name="cas-06"></a>
 
+### CAS-06 — Cas 6 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe
+
+- CSE : oui
 - Déclaration des 7 indicateurs
 - Parcours de conformité : évaluation conjointe
 - Dépôt du rapport de l'évaluation conjointe
@@ -114,10 +132,13 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 **Test E2E** : `compliance.e2e.ts` — `[CAS-06] Path 4` : éval. conjointe → upload → `/avis-cse` ; dépôt de l'avis non déroulé.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-06\]"`
 
-### CAS-07
+---
 
-**Cas 7 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5%** — CSE : non
+<a name="cas-07"></a>
 
+### CAS-07 — Cas 7 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5%
+
+- CSE : non
 - Déclaration des 7 indicateurs
 - Parcours de conformité : actions correctives et nouvelle déclaration
 - Nouvelle déclaration du 7ème indicateur
@@ -125,10 +146,13 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 **Test E2E** : `compliance.e2e.ts` — `[CAS-07] Path 7` : 2ᵉ déclaration sans écart → `/confirmation`.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-07\]"`
 
-### CAS-08
+---
 
-**Cas 8 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5%** — CSE : oui
+<a name="cas-08"></a>
 
+### CAS-08 — Cas 8 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5%
+
+- CSE : oui
 - Déclaration des 7 indicateurs
 - Parcours de conformité : actions correctives et nouvelle déclaration
 - Nouvelle déclaration du 7ème indicateur
@@ -137,10 +161,13 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 **Test E2E** : `compliance.e2e.ts` — `[CAS-08] Path 6` : 2ᵉ déclaration sans écart → `/avis-cse` ; dépôt de l'avis 2-déclarations non déroulé.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-08\]"`
 
-### CAS-09
+---
 
-**Cas 9 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts** — CSE : non
+<a name="cas-09"></a>
 
+### CAS-09 — Cas 9 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts
+
+- CSE : non
 - Déclaration des 7 indicateurs
 - Parcours de conformité : actions correctives et nouvelle déclaration
 - Nouvelle déclaration du 7ème indicateur
@@ -148,10 +175,13 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 **Test E2E** : **aucun test** — le 2ᵉ tour n'est testé qu'avec CSE (`CAS-10`) ; la CI est rouge tant que ce test n'existe pas.
 
-### CAS-10
+---
 
-**Cas 10 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts** — CSE : oui
+<a name="cas-10"></a>
 
+### CAS-10 — Cas 10 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts
+
+- CSE : oui
 - Déclaration des 7 indicateurs
 - Parcours de conformité : actions correctives et nouvelle déclaration
 - Nouvelle déclaration du 7ème indicateur
@@ -161,10 +191,13 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 **Test E2E** : `compliance.e2e.ts` — `[CAS-10] Path 8` : 2ᵉ tour, options restreintes, justification → `/avis-cse/etape/1` ; dépôt de l'avis non déroulé.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-10\]"`
 
-### CAS-11
+---
 
-**Cas 11 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe** — CSE : non
+<a name="cas-11"></a>
 
+### CAS-11 — Cas 11 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe
+
+- CSE : non
 - Déclaration des 7 indicateurs
 - Parcours de conformité : actions correctives et nouvelle déclaration
 - Nouvelle déclaration du 7ème indicateur
@@ -174,10 +207,13 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 **Test E2E** : `compliance.e2e.ts` — `[CAS-11] Path 11` : 2ᵉ tour → éval. conjointe → upload → `/confirmation`.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-11\]"`
 
-### CAS-12
+---
 
-**Cas 12 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe** — CSE : oui
+<a name="cas-12"></a>
 
+### CAS-12 — Cas 12 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe
+
+- CSE : oui
 - Déclaration des 7 indicateurs
 - Parcours de conformité : actions correctives et nouvelle déclaration
 - Nouvelle déclaration du 7ème indicateur
@@ -188,18 +224,24 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 **Test E2E** : `compliance.e2e.ts` — `[CAS-12] Path 10` : 2ᵉ tour → éval. conjointe → upload → `/avis-cse` ; dépôt de l'avis non déroulé.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-12\]"`
 
-### CAS-01-6IND
+---
 
-**Cas 1 sans CSE** *(années « 6 premiers indicateurs »)* — CSE : non
+<a name="cas-01-6ind"></a>
 
+### CAS-01-6IND — Cas 1 sans CSE *(années « 6 premiers indicateurs »)*
+
+- CSE : non
 - Déclaration des 6 premiers indicateurs
 
 **Test E2E** : **aucun test** — la soumission complète en 6 indicateurs (étape catégories masquée, aucun parcours de conformité proposé) n'est pas déroulée ; la CI est rouge tant que ce test n'existe pas.
 
-### CAS-02-6IND
+---
 
-**Cas 2 avec CSE** *(années « 6 premiers indicateurs »)* — CSE : oui
+<a name="cas-02-6ind"></a>
 
+### CAS-02-6IND — Cas 2 avec CSE *(années « 6 premiers indicateurs »)*
+
+- CSE : oui
 - Déclaration des 6 premiers indicateurs
 - Dépot avis CSE sur l'exactitude des données déclarées
 

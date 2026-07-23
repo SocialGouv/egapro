@@ -17,7 +17,7 @@ export function parseCahier(markdown) {
 	const scenarios = new Set();
 	for (const line of markdown.split("\n")) {
 		const match =
-			line.match(/^#{2,4}\s+((?:CAS|ANX)-\d{2}(?:-[A-Z0-9]+)*)\s*$/) ??
+			line.match(/^#{2,4}\s+((?:CAS|ANX)-\d{2}(?:-[A-Z0-9]+)*)(?:\s+—.*)?$/) ??
 			line.match(/^\|\s*((?:CAS|ANX)-\d{2}(?:-[A-Z0-9]+)*)\s*\|/);
 		if (!match) continue;
 		const id = match[1];
