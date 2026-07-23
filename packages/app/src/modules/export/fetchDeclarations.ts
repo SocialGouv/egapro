@@ -99,7 +99,7 @@ function deriveExportFlags(
 
 export type IndicatorGEntry = {
 	categoryName: string;
-	source?: string | null;
+	source: string | null;
 	declarationType: string;
 	womenCount: number | null;
 	menCount: number | null;
@@ -369,7 +369,9 @@ export function assembleDeclaration(
 		}),
 		Effectif_F_rem_annuelle_globale: row.totalWomen,
 		Effectif_H_rem_annuelle_globale: row.totalMen,
-		Source_categories_emplois: indicatorGEntries[0]?.source ?? null,
+		Source_categories_emplois:
+			indicatorGEntries.find((e) => e.declarationType === "initial")?.source ??
+			null,
 		Indicateurs: {
 			...buildIndicators(row),
 			G: initial.length > 0 ? initial : null,
