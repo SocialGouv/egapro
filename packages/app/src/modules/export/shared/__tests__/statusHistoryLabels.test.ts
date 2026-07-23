@@ -57,9 +57,6 @@ describe("getStatusHistoryLabel", () => {
 		}
 	});
 
-	// The public SUIT vocabulary must expose every DB event type except step_change,
-	// which is an internal stepper-transition event (indicators A–F) that must not
-	// leak into the export (#3950).
 	it("exposes exactly the declaration_event_type DB values minus the internal step_change", () => {
 		const publicVocabulary = Object.keys(DECLARATION_EVENT_TYPE_LABELS).sort();
 		const dbEventTypesExceptInternal = declarationEventTypeEnum.enumValues

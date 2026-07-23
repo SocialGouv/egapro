@@ -126,8 +126,6 @@ describe("GET /api/v1/export/declarations — Date_annulation integration", () =
 		const body = await response.json();
 		expect(body.Nombre).toBe(1);
 		const decl = body.Declarations[0];
-		// The active declaration is seeded with a step_change row between submit and
-		// demarche_complete; the SQL filter drops it, so only the two public events remain.
 		expect(decl.Historique_statuts).toEqual([
 			{
 				Statut: "submit",
