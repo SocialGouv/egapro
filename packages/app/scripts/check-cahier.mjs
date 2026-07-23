@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const SCENARIO_ID = /\b(?:CAS|ANX)-\d{2}\b/g;
+const SCENARIO_ID = /\b(?:CAS|ANX)-\d{2}(?:-[A-Z0-9]+)*\b/g;
 
 /**
  * Parse the cahier de tests markdown: every table row whose first cell is a
@@ -15,7 +15,7 @@ const SCENARIO_ID = /\b(?:CAS|ANX)-\d{2}\b/g;
 export function parseCahier(markdown) {
 	const scenarios = new Set();
 	for (const line of markdown.split("\n")) {
-		const match = line.match(/^\|\s*((?:CAS|ANX)-\d{2})\s*\|/);
+		const match = line.match(/^\|\s*((?:CAS|ANX)-\d{2}(?:-[A-Z0-9]+)*)\s*\|/);
 		if (!match) continue;
 		const id = match[1];
 		if (scenarios.has(id)) {
