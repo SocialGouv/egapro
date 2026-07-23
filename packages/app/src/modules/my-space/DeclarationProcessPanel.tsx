@@ -24,7 +24,9 @@ export type PanelVariant =
 
 type Props = {
 	campaignDeadlines: CampaignDeadlines;
+	cseApplicable: boolean;
 	year: number;
+	indicatorGRequired: boolean;
 	lastActionDate: string | null;
 	variant: PanelVariant;
 	displayContext: DeclarationDisplayContext;
@@ -37,7 +39,9 @@ type Props = {
 
 export function DeclarationProcessPanel({
 	campaignDeadlines,
+	cseApplicable,
 	year,
+	indicatorGRequired,
 	lastActionDate,
 	variant,
 	displayContext,
@@ -85,7 +89,9 @@ export function DeclarationProcessPanel({
 						)}
 						<VerticalStepper
 							campaignDeadlines={campaignDeadlines}
+							cseApplicable={cseApplicable}
 							displayContext={displayContext}
+							indicatorGRequired={indicatorGRequired}
 							secondDeclarationSubmitted={hasSubmittedSecondDeclaration}
 							siren={siren}
 							step1={step1}
@@ -94,7 +100,9 @@ export function DeclarationProcessPanel({
 							variant={variant}
 							year={year}
 						/>
-						{variant === "closed" && <ClosedMessage />}
+						{variant === "closed" && (
+							<ClosedMessage cseApplicable={cseApplicable} />
+						)}
 					</div>
 					<div>
 						<HelpSection />
@@ -165,13 +173,14 @@ function StartAlert() {
 	);
 }
 
-function ClosedMessage() {
+function ClosedMessage({ cseApplicable }: { cseApplicable: boolean }) {
 	return (
 		<div className={styles.closedMessage}>
 			<p className="fr-text--bold fr-mb-0">Démarche close</p>
 			<p className="fr-mb-0">
-				Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à
-				l'échéance.
+				{cseApplicable
+					? "Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance."
+					: "Cette démarche est terminée."}
 			</p>
 		</div>
 	);

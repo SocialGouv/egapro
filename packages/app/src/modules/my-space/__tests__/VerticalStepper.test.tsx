@@ -28,7 +28,9 @@ function makeDisplayContext(
 
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
+	cseApplicable: true,
 	year: FUTURE_YEAR,
+	indicatorGRequired: true,
 	lastActionDate: null as string | null,
 	displayContext: makeDisplayContext(),
 	hasSubmittedSecondDeclaration: false,
@@ -162,6 +164,62 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 				"recapitulatif?siren=532847196",
 			);
 			expect(correctionLink?.getAttribute("href")).toContain("type=correction");
+		});
+	});
+
+	describe("rendu conditionnel des étapes selon le parcours (#3939)", () => {
+		const STEP2_TITLE = /Parcours de mise en conformité/;
+		const STEP3_TITLE = "Déposer le ou les avis du CSE";
+		const STEP1_TITLE = "Déclaration des indicateurs de rémunération";
+
+		it("renders steps 2 and 3 when both indicatorGRequired and cseApplicable are true", () => {
+			const { panel } = renderPanel("start");
+			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
+			expect(panel.getByText(STEP2_TITLE)).toBeInTheDocument();
+			expect(panel.getByText(STEP3_TITLE)).toBeInTheDocument();
+		});
+
+		it("hides step 2 when indicatorGRequired is false", () => {
+			const { panel } = renderPanel("start", { indicatorGRequired: false });
+			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
+			expect(panel.queryByText(STEP2_TITLE)).not.toBeInTheDocument();
+			expect(panel.getByText(STEP3_TITLE)).toBeInTheDocument();
+		});
+
+		it("hides step 3 when cseApplicable is false", () => {
+			const { panel } = renderPanel("start", { cseApplicable: false });
+			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
+			expect(panel.getByText(STEP2_TITLE)).toBeInTheDocument();
+			expect(panel.queryByText(STEP3_TITLE)).not.toBeInTheDocument();
+		});
+
+		it("hides both steps 2 and 3 for a company without CSE and without indicator G", () => {
+			const { panel } = renderPanel("start", {
+				cseApplicable: false,
+				indicatorGRequired: false,
+			});
+			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
+			expect(panel.queryByText(STEP2_TITLE)).not.toBeInTheDocument();
+			expect(panel.queryByText(STEP3_TITLE)).not.toBeInTheDocument();
+		});
+	});
+
+	describe("ClosedMessage — texte selon cseApplicable (#3939)", () => {
+		it("mentions the CSE opinions still being modifiable when cseApplicable is true", () => {
+			const { panel } = renderPanel("closed", { cseApplicable: true });
+			expect(
+				panel.getByText(/Les avis du CSE restent modifiables/),
+			).toBeInTheDocument();
+		});
+
+		it("shows the plain closed message when cseApplicable is false", () => {
+			const { panel } = renderPanel("closed", { cseApplicable: false });
+			expect(
+				panel.getByText("Cette démarche est terminée."),
+			).toBeInTheDocument();
+			expect(
+				panel.queryByText(/Les avis du CSE restent modifiables/),
+			).not.toBeInTheDocument();
 		});
 	});
 

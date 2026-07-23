@@ -47,7 +47,9 @@ type LockHolder = {
 
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
+	cseApplicable: true,
 	year: FUTURE_YEAR,
+	indicatorGRequired: true,
 	lastActionDate: "12 mars 2026" as string | null,
 	displayContext: makeDisplayContext(),
 	hasSubmittedSecondDeclaration: false,

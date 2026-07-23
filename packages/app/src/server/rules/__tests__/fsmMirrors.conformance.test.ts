@@ -104,7 +104,7 @@ describe("mirror conformance — engine transition destinations", () => {
 		const to = transition.to;
 		if (to === "demarche_completed") {
 			// Terminal state: only the healthy hasSubmittedCseOpinion:true branch is asserted here —
-			// the full hasCse × hasSubmittedCseOpinion matrix, incl. the known-bad false branch (it.fails #3945), lives in the dedicated describe below.
+			// the full hasCse × hasSubmittedCseOpinion matrix, incl. the no-CSE closed branch (#3939), lives in the dedicated describe below.
 			expect(getCurrentStageHref(to, true)).toBe(CSE);
 			expect(getCurrentStageHref(to, false)).toBe(CONFIRMATION);
 			expect(
@@ -146,6 +146,7 @@ describe("demarche_completed — mirror coherence × (hasCse × hasSubmittedCseO
 		const decl = makeDeclaration({
 			fsmStatus: "demarche_completed",
 			hasSubmittedCseOpinion: false,
+			cseRequired: true,
 		});
 		expect(computePanelVariant(decl)).toBe("cse");
 		expect(stripSiren(computeCtaHref(decl, SIREN))).toBe(CSE);
@@ -166,16 +167,14 @@ describe("demarche_completed — mirror coherence × (hasCse × hasSubmittedCseO
 		expect(getCurrentStageHref("demarche_completed", true)).toBe(CSE);
 	});
 
-	it.fails('without CSE, opinion not deposited: the panel should be "closed", not "cse" (#3945)', () => {
+	it('without CSE, opinion not deposited: the panel should be "closed", not "cse" (#3939)', () => {
 		const decl = makeDeclaration({
 			fsmStatus: "demarche_completed",
 			hasSubmittedCseOpinion: false,
 		});
 		// The nav mirror is correct: a no-CSE company lands on /confirmation, never
-		// on the CSE page. The panel input carries no hasCse and cannot tell this
-		// case apart from a with-CSE company, so it wrongly returns « cse » (and a
-		// /avis-cse CTA). Correct behaviour: « closed ». Fails until #3945 lands
-		// (see also the duplicate report #3939).
+		// on the CSE page. computePanelVariant now consumes cseRequired (false by
+		// default in makeDeclaration) and returns "closed" for this case (#3939).
 		expect(getCurrentStageHref("demarche_completed", false)).toBe(CONFIRMATION);
 		expect(computePanelVariant(decl)).toBe("closed");
 	});
