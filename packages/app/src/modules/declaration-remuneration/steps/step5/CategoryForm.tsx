@@ -4,7 +4,11 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useFieldArray } from "react-hook-form";
 
-import { categoryFormSchema } from "~/modules/declaration-remuneration/schemas";
+import {
+	categoryFormSchema,
+	PAY_FIELDS_MEN,
+	PAY_FIELDS_WOMEN,
+} from "~/modules/declaration-remuneration/schemas";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
 import {
 	createDevStep5Categories,
@@ -30,7 +34,7 @@ import {
 import { getDsfrCollapse } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
-import { CategoryDataTable } from "./CategoryDataTable";
+import { CategoryAccordionItem } from "./CategoryAccordionItem";
 import { CategoryImportExport } from "./CategoryImportExport";
 import {
 	createEmptyCategory,
@@ -307,6 +311,23 @@ export function CategoryForm({
 			return;
 		}
 
+		const hasIncompleteRemuneration = data.categories.some((cat) => {
+			const womenCount = Number.parseInt(cat.womenCount, 10);
+			const menCount = Number.parseInt(cat.menCount, 10);
+			const womenNeedData = !Number.isNaN(womenCount) && womenCount >= 1;
+			const menNeedData = !Number.isNaN(menCount) && menCount >= 1;
+			return (
+				(womenNeedData && PAY_FIELDS_WOMEN.some((f) => !cat[f])) ||
+				(menNeedData && PAY_FIELDS_MEN.some((f) => !cat[f]))
+			);
+		});
+		if (hasIncompleteRemuneration) {
+			setWorkforceError(
+				"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",
+			);
+			return;
+		}
+
 		if (maxWomen !== undefined || maxMen !== undefined) {
 			const { women: totalWomen, men: totalMen } = sumCategoryWorkforce(
 				data.categories,
@@ -451,90 +472,35 @@ export function CategoryForm({
 			<div className="fr-accordions-group" data-fr-group="false">
 				{fields.map((field, index) => {
 					const cat = categories[index];
-					const collapseId = `${baseId}-accordion-${index}`;
-					const headingId = `${collapseId}-heading`;
-					const categoryNumber = `Catégorie d'emplois n°${index + 1}`;
-					const catName = cat?.name?.trim() ?? "";
-					const categoryLabel = catName
-						? `${categoryNumber} : ${catName}`
-						: categoryNumber;
-
 					return (
-						<section
-							aria-labelledby={headingId}
-							className="fr-accordion"
+						<CategoryAccordionItem
+							baseId={baseId}
+							category={
+								cat ? { id: index, ...cat } : createEmptyCategory(index)
+							}
+							collapseRef={(node) => {
+								accordionCollapseRefs.current[index] = node;
+							}}
+							disabled={disabled}
+							headerRef={(node) => {
+								accordionHeaderRefs.current[index] = node;
+							}}
+							index={index}
 							key={field.id}
-						>
-							<h2 className="fr-accordion__title">
-								<button
-									aria-controls={collapseId}
-									aria-expanded="true"
-									className="fr-accordion__btn"
-									id={headingId}
-									onClick={handleAccordionToggle}
-									ref={(node) => {
-										accordionHeaderRefs.current[index] = node;
-									}}
-									type="button"
-								>
-									{categoryLabel}
-								</button>
-							</h2>
-							<div
-								className="fr-collapse fr-collapse--expanded"
-								id={collapseId}
-								ref={(node) => {
-									accordionCollapseRefs.current[index] = node;
-								}}
-							>
-								<div className={stepStyles.categoryBlock}>
-									{!readOnlyLabel && (
-										<div className="fr-input-group fr-mb-0">
-											<label className="fr-label" htmlFor={`cat-${index}-name`}>
-												Libellé de la catégorie d'emploi
-											</label>
-											<input
-												className="fr-input"
-												disabled={disabled}
-												id={`cat-${index}-name`}
-												{...form.register(`categories.${index}.name`)}
-												onChange={(e) => {
-													form.setValue(
-														`categories.${index}.name`,
-														e.target.value,
-													);
-													setHasData(false);
-												}}
-												type="text"
-											/>
-										</div>
-									)}
-
-									<CategoryDataTable
-										category={
-											cat ? { id: index, ...cat } : createEmptyCategory(index)
-										}
-										categoryIndex={index}
-										disabled={disabled}
-										onDecimalBlur={handleDecimalBlur}
-										onPositiveNumberChange={handlePositiveNumberChange}
-									/>
-
-									{!readOnlyLabel && fields.length > 1 && (
-										<div className={stepStyles.deleteRow}>
-											<button
-												className="fr-btn fr-btn--tertiary fr-icon-delete-line fr-btn--icon-left fr-btn--sm"
-												disabled={disabled}
-												onClick={() => askRemoveCategory(index)}
-												type="button"
-											>
-												Supprimer
-											</button>
-										</div>
-									)}
-								</div>
-							</div>
-						</section>
+							nameProps={{
+								...form.register(`categories.${index}.name`),
+								onChange: (e) => {
+									form.setValue(`categories.${index}.name`, e.target.value);
+									setHasData(false);
+								},
+							}}
+							onAccordionToggle={handleAccordionToggle}
+							onAskRemove={askRemoveCategory}
+							onDecimalBlur={handleDecimalBlur}
+							onPositiveNumberChange={handlePositiveNumberChange}
+							readOnlyLabel={readOnlyLabel}
+							showDelete={!readOnlyLabel && fields.length > 1}
+						/>
 					);
 				})}
 			</div>

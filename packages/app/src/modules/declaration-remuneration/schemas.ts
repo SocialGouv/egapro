@@ -76,28 +76,60 @@ export const updateStep4Schema = z.object({
 	hourly: tableSchema,
 });
 
-const employeeCategoryDataSchema = z.object({
-	womenCount: z.number().int().min(0).optional(),
-	menCount: z.number().int().min(0).optional(),
-	annualBaseWomen: z.string().optional(),
-	annualBaseMen: z.string().optional(),
-	annualVariableWomen: z.string().optional(),
-	annualVariableMen: z.string().optional(),
-	hourlyBaseWomen: z.string().optional(),
-	hourlyBaseMen: z.string().optional(),
-	hourlyVariableWomen: z.string().optional(),
-	hourlyVariableMen: z.string().optional(),
-});
+export const PAY_FIELDS_WOMEN = [
+	"annualBaseWomen",
+	"annualVariableWomen",
+	"hourlyBaseWomen",
+	"hourlyVariableWomen",
+] as const;
+
+export const PAY_FIELDS_MEN = [
+	"annualBaseMen",
+	"annualVariableMen",
+	"hourlyBaseMen",
+	"hourlyVariableMen",
+] as const;
+
+const employeeCategoryDataSchema = z
+	.object({
+		womenCount: z.number().int().min(0).optional(),
+		menCount: z.number().int().min(0).optional(),
+		annualBaseWomen: z.string().optional(),
+		annualBaseMen: z.string().optional(),
+		annualVariableWomen: z.string().optional(),
+		annualVariableMen: z.string().optional(),
+		hourlyBaseWomen: z.string().optional(),
+		hourlyBaseMen: z.string().optional(),
+		hourlyVariableWomen: z.string().optional(),
+		hourlyVariableMen: z.string().optional(),
+	})
+	.refine(
+		(data) => {
+			if ((data.womenCount ?? 0) >= 1) {
+				if (PAY_FIELDS_WOMEN.some((f) => !data[f])) return false;
+			}
+			if ((data.menCount ?? 0) >= 1) {
+				if (PAY_FIELDS_MEN.some((f) => !data[f])) return false;
+			}
+			return true;
+		},
+		{
+			message:
+				"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",
+		},
+	);
 
 export const updateEmployeeCategoriesSchema = z.object({
 	declarationType: z.enum(["initial", "correction"]),
 	source: z.string().min(1),
-	categories: z.array(
-		z.object({
-			name: z.string().min(1),
-			data: employeeCategoryDataSchema,
-		}),
-	),
+	categories: z
+		.array(
+			z.object({
+				name: z.string().min(1),
+				data: employeeCategoryDataSchema,
+			}),
+		)
+		.max(50),
 	referencePeriodStart: z.string().optional(),
 	referencePeriodEnd: z.string().optional(),
 });

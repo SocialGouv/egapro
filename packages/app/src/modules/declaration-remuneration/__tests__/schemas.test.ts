@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { updateStep4Schema } from "../schemas";
+import { updateEmployeeCategoriesSchema, updateStep4Schema } from "../schemas";
 import type { QuartileData, QuartileTuple } from "../types";
 
 function makeTable(
@@ -182,6 +182,135 @@ describe("updateStep4Schema", () => {
 			const messages = result.error.issues.map((i) => i.message);
 			expect(messages).toContain(
 				"Les seuils doivent être strictement croissants",
+			);
+		}
+	});
+});
+
+const PAY_FIELDS_WOMEN = {
+	annualBaseWomen: "30000",
+	annualVariableWomen: "2000",
+	hourlyBaseWomen: "18",
+	hourlyVariableWomen: "1.5",
+} as const;
+
+const PAY_FIELDS_MEN = {
+	annualBaseMen: "32000",
+	annualVariableMen: "2500",
+	hourlyBaseMen: "19",
+	hourlyVariableMen: "1.8",
+} as const;
+
+const INCOMPLETE_REMUNERATION_MESSAGE =
+	"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.";
+
+function parseCategory(data: Record<string, unknown>) {
+	return updateEmployeeCategoriesSchema.safeParse({
+		declarationType: "initial",
+		source: "dads",
+		categories: [{ name: "Cadres", data }],
+	});
+}
+
+describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)", () => {
+	it("accepts a category with both sexes present and all 8 pay fields filled", () => {
+		const result = parseCategory({
+			womenCount: 2,
+			menCount: 2,
+			...PAY_FIELDS_WOMEN,
+			...PAY_FIELDS_MEN,
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it("accepts womenCount=0 with only the 4 men pay fields", () => {
+		const result = parseCategory({
+			womenCount: 0,
+			menCount: 2,
+			...PAY_FIELDS_MEN,
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it("accepts menCount=0 with only the 4 women pay fields", () => {
+		const result = parseCategory({
+			womenCount: 2,
+			menCount: 0,
+			...PAY_FIELDS_WOMEN,
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it("accepts both sexes at headcount 0 with no pay fields", () => {
+		const result = parseCategory({ womenCount: 0, menCount: 0 });
+		expect(result.success).toBe(true);
+	});
+
+	it("accepts omitted counts (undefined) with no pay fields — treated as 0", () => {
+		const result = parseCategory({});
+		expect(result.success).toBe(true);
+	});
+
+	it("rejects a category with headcounts but zero pay fields", () => {
+		const result = parseCategory({ womenCount: 2, menCount: 2 });
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCOMPLETE_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+
+	it("rejects when only the women pay fields are filled but men have a headcount", () => {
+		const result = parseCategory({
+			womenCount: 2,
+			menCount: 2,
+			...PAY_FIELDS_WOMEN,
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCOMPLETE_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+
+	it("rejects when a sex with a headcount has only one of its 4 pay fields", () => {
+		const result = parseCategory({
+			womenCount: 2,
+			menCount: 2,
+			annualBaseWomen: "30000",
+			...PAY_FIELDS_MEN,
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCOMPLETE_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+
+	it("rejects an empty pay field (empty string counts as missing)", () => {
+		const result = parseCategory({
+			womenCount: 2,
+			menCount: 0,
+			...PAY_FIELDS_WOMEN,
+			annualBaseWomen: "",
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCOMPLETE_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+
+	it("rejects a single-headcount sex with no pay fields (womenCount=1, menCount=0)", () => {
+		const result = parseCategory({ womenCount: 1, menCount: 0 });
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCOMPLETE_REMUNERATION_MESSAGE,
 			);
 		}
 	});

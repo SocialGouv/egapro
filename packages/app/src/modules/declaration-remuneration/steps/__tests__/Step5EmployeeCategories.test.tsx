@@ -26,6 +26,25 @@ beforeEach(() => {
 	HTMLDialogElement.prototype.close = vi.fn();
 });
 
+async function fillAllPayCells(
+	user: ReturnType<typeof userEvent.setup>,
+	catNumber = 1,
+) {
+	const labels = [
+		`Salaire de base annuel femmes, catégorie ${catNumber}`,
+		`Salaire de base annuel hommes, catégorie ${catNumber}`,
+		`Composantes variables annuelles femmes, catégorie ${catNumber}`,
+		`Composantes variables annuelles hommes, catégorie ${catNumber}`,
+		`Salaire de base horaire femmes, catégorie ${catNumber}`,
+		`Salaire de base horaire hommes, catégorie ${catNumber}`,
+		`Composantes variables horaires femmes, catégorie ${catNumber}`,
+		`Composantes variables horaires hommes, catégorie ${catNumber}`,
+	];
+	for (const label of labels) {
+		await user.type(screen.getByLabelText(label), "100");
+	}
+}
+
 function makeCategory(
 	overrides: Partial<EmployeeCategoryRow> = {},
 ): EmployeeCategoryRow {
@@ -548,6 +567,7 @@ describe("Step5EmployeeCategories", () => {
 
 		await user.type(womenInput, "5");
 		await user.type(menInput, "15");
+		await fillAllPayCells(user);
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
@@ -555,6 +575,111 @@ describe("Step5EmployeeCategories", () => {
 			screen.getByText(/ne correspond pas à l'effectif déclaré/),
 		).toBeInTheDocument();
 		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("shows error when a sex has a headcount but missing pay amounts (#3948)", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+			/>,
+		);
+
+		const nameInput = document.getElementById("cat-0-name") as HTMLElement;
+		await user.type(nameInput, "Cadres");
+		await user.selectOptions(
+			screen.getByLabelText(/Quelle est la source utilisée/),
+			"accord-entreprise",
+		);
+		await user.type(screen.getByLabelText("Effectif femmes, catégorie 1"), "2");
+		await user.type(screen.getByLabelText("Effectif hommes, catégorie 1"), "2");
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(
+			screen.getByText(
+				/renseigner toutes les données de rémunération avant de passer/i,
+			),
+		).toBeInTheDocument();
+		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("allows a sex with headcount 0 to leave its pay cells empty (#3948)", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+			/>,
+		);
+
+		const nameInput = document.getElementById("cat-0-name") as HTMLElement;
+		await user.type(nameInput, "Cadres");
+		await user.selectOptions(
+			screen.getByLabelText(/Quelle est la source utilisée/),
+			"accord-entreprise",
+		);
+		await user.type(screen.getByLabelText("Effectif femmes, catégorie 1"), "3");
+		await user.type(screen.getByLabelText("Effectif hommes, catégorie 1"), "0");
+
+		await user.type(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+			"100",
+		);
+		await user.type(
+			screen.getByLabelText(
+				"Composantes variables annuelles femmes, catégorie 1",
+			),
+			"100",
+		);
+		await user.type(
+			screen.getByLabelText("Salaire de base horaire femmes, catégorie 1"),
+			"100",
+		);
+		await user.type(
+			screen.getByLabelText(
+				"Composantes variables horaires femmes, catégorie 1",
+			),
+			"100",
+		);
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(
+			screen.queryByText(/renseigner toutes les données de rémunération/i),
+		).not.toBeInTheDocument();
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+	});
+
+	it("submits when both sexes have complete pay data (#3948)", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+			/>,
+		);
+
+		const nameInput = document.getElementById("cat-0-name") as HTMLElement;
+		await user.type(nameInput, "Cadres");
+		await user.selectOptions(
+			screen.getByLabelText(/Quelle est la source utilisée/),
+			"accord-entreprise",
+		);
+		await user.type(screen.getByLabelText("Effectif femmes, catégorie 1"), "2");
+		await user.type(screen.getByLabelText("Effectif hommes, catégorie 1"), "2");
+		await fillAllPayCells(user);
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(
+			screen.queryByText(/renseigner toutes les données de rémunération/i),
+		).not.toBeInTheDocument();
+		expect(mockMutate).toHaveBeenCalledTimes(1);
 	});
 
 	it("shows error when category name is empty on submit", async () => {
