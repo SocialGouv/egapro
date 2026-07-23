@@ -152,3 +152,100 @@ describe("GET /api/v1/export/declarations — Date_annulation integration", () =
 		expect(decl.Historique_statuts).toEqual([]);
 	});
 });
+
+describe("GET /api/v1/export/declarations — Source_categories_emplois integration (#3944)", () => {
+	let sql!: ReturnType<typeof postgres>;
+
+	const SIREN = "987654321";
+	const YEAR = 2025;
+	const USER_ID = "export-source-integration-test-user";
+	const DECL_G_ID = "export-decl-with-g";
+	const DECL_NO_G_ID = "export-decl-without-g";
+
+	beforeAll(() => {
+		sql = postgres(env.DATABASE_URL, { max: 1 });
+	});
+
+	async function cleanup() {
+		await sql`DELETE FROM app_employee_category WHERE job_category_id IN (SELECT id FROM app_job_category WHERE declaration_id IN (${DECL_G_ID}, ${DECL_NO_G_ID}))`;
+		await sql`DELETE FROM app_job_category WHERE declaration_id IN (${DECL_G_ID}, ${DECL_NO_G_ID})`;
+		await sql`DELETE FROM app_declaration WHERE id IN (${DECL_G_ID}, ${DECL_NO_G_ID})`;
+		await sql`DELETE FROM app_company WHERE siren = ${SIREN}`;
+		await sql`DELETE FROM app_user WHERE id = ${USER_ID}`;
+	}
+
+	afterAll(async () => {
+		if (!sql) return;
+		await cleanup();
+		await sql.end();
+	});
+
+	beforeEach(async () => {
+		await cleanup();
+
+		await sql`
+			INSERT INTO app_user (id, email, first_name, last_name)
+			VALUES (${USER_ID}, 'dir.rh@example.fr', 'Dir', 'RH')
+			ON CONFLICT DO NOTHING
+		`;
+		await sql`
+			INSERT INTO app_company (siren, name, workforce)
+			VALUES (${SIREN}, 'Entreprise Source Test', 250)
+			ON CONFLICT DO NOTHING
+		`;
+		await sql`
+			INSERT INTO app_declaration (id, siren, year, declarant_id, status, created_at, updated_at)
+			VALUES
+				(${DECL_G_ID},    ${SIREN}, ${YEAR}, ${USER_ID}, 'demarche_completed', '2025-05-01T00:00:00Z', '2025-05-01T00:00:00Z'),
+				(${DECL_NO_G_ID}, ${SIREN}, ${YEAR + 1}, ${USER_ID}, 'demarche_completed', '2025-05-01T00:00:00Z', '2025-05-01T00:00:00Z')
+		`;
+		await sql`
+			INSERT INTO app_job_category (id, declaration_id, category_index, name, source)
+			VALUES ('jobcat-1', ${DECL_G_ID}, 0, 'Cadres', 'accord-branche')
+		`;
+		await sql`
+			INSERT INTO app_employee_category (id, job_category_id, declaration_type, women_count, men_count)
+			VALUES ('empcat-1', 'jobcat-1', 'initial', 10, 12)
+		`;
+	});
+
+	it("surfaces the job-category source through the real Drizzle query as Source_categories_emplois", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const response = await GET(
+			gatewayRequest({ date_begin: "2025-05-01", date_end: "2025-05-02" }),
+		);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		const decl = body.Declarations.find(
+			(d: { id: string }) => d.id === DECL_G_ID,
+		);
+		expect(decl).toBeDefined();
+		expect(decl.Source_categories_emplois).toBe("accord-branche");
+		expect(decl.Indicateurs.G).toHaveLength(1);
+	});
+
+	it("returns Source_categories_emplois null for a declaration without any job category", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const response = await GET(
+			gatewayRequest({ date_begin: "2025-05-01", date_end: "2025-05-02" }),
+		);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		const decl = body.Declarations.find(
+			(d: { id: string }) => d.id === DECL_NO_G_ID,
+		);
+		expect(decl).toBeDefined();
+		expect(decl.Source_categories_emplois).toBeNull();
+		expect(decl.Indicateurs.G).toBeNull();
+	});
+
+	function gatewayRequest(params: Record<string, string>): Request {
+		const searchParams = new URLSearchParams(params);
+		return new Request(
+			`http://localhost/api/v1/export/declarations?${searchParams}`,
+			{ headers: { "x-gateway-forwarded": "test-value" } },
+		);
+	}
+});

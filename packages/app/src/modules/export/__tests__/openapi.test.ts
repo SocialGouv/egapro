@@ -62,6 +62,38 @@ describe("openApiSpec", () => {
 		expect(details.items.type).toBe("object");
 	});
 
+	describe("Source_categories_emplois schema (#3944)", () => {
+		const declarationSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items;
+		const sourceSchema = declarationSchema.properties.Source_categories_emplois;
+		const hasEnum = (v: {
+			type: string;
+		}): v is { type: string; enum: readonly string[] } => "enum" in v;
+
+		it("declares Source_categories_emplois as a nullable string enum", () => {
+			expect(sourceSchema).toBeDefined();
+			expect(sourceSchema.oneOf).toHaveLength(2);
+			const stringVariant = sourceSchema.oneOf.find((v) => v.type === "string");
+			const nullVariant = sourceSchema.oneOf.find((v) => v.type === "null");
+			expect(stringVariant).toBeDefined();
+			expect(nullVariant).toBeDefined();
+		});
+
+		it("lists the 4 job-category source values in the string enum", () => {
+			const stringVariant = sourceSchema.oneOf.find((v) => v.type === "string");
+			expect(stringVariant && hasEnum(stringVariant)).toBe(true);
+			expect(
+				stringVariant && hasEnum(stringVariant) && stringVariant.enum,
+			).toEqual([
+				"accord-entreprise",
+				"accord-groupe",
+				"accord-branche",
+				"decision-unilaterale",
+			]);
+		});
+	});
+
 	describe("Historique_statuts schema", () => {
 		const declarationSchema =
 			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
