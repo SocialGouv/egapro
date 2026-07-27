@@ -56,6 +56,8 @@ export function PanelPlayground() {
 		useState<(typeof COMPLIANCE_PATHS)[number]>("corrective_action");
 	const [secondDeclarationSubmitted, setSecondDeclarationSubmitted] =
 		useState(true);
+	const [cseOpinionRequired, setCseOpinionRequired] = useState(true);
+	const [indicatorGRequired, setIndicatorGRequired] = useState(true);
 	const [preset, setPreset] = useState<DatePreset>("future");
 	const [deadlines, setDeadlines] = useState<CampaignDeadlines>(
 		buildPresetDeadlines("future"),
@@ -148,6 +150,30 @@ export function PanelPlayground() {
 							Seconde déclaration soumise
 						</label>
 					</div>
+
+					<div className="fr-checkbox-group">
+						<input
+							checked={indicatorGRequired}
+							id="indicator-g-required"
+							onChange={(e) => setIndicatorGRequired(e.currentTarget.checked)}
+							type="checkbox"
+						/>
+						<label className="fr-label" htmlFor="indicator-g-required">
+							Indicateur G requis (étape 2 visible)
+						</label>
+					</div>
+
+					<div className="fr-checkbox-group">
+						<input
+							checked={cseOpinionRequired}
+							id="cse-opinion-required"
+							onChange={(e) => setCseOpinionRequired(e.currentTarget.checked)}
+							type="checkbox"
+						/>
+						<label className="fr-label" htmlFor="cse-opinion-required">
+							Avis CSE requis (étape 3 visible)
+						</label>
+					</div>
 				</div>
 			</div>
 
@@ -227,15 +253,15 @@ export function PanelPlayground() {
 
 			<DeclarationProcessPanel
 				campaignDeadlines={deadlines}
-				cseOpinionRequired={true}
+				cseOpinionRequired={cseOpinionRequired}
 				ctaHref="/declaration-remuneration?siren=000000000"
 				displayContext={getDeclarationDisplayContext({
 					firstDeclarationPathChoice: compliancePath,
 					secondDeclarationPathChoice: null,
-					cseRequired: false,
+					cseRequired: cseOpinionRequired,
 				})}
 				hasSubmittedSecondDeclaration={secondDeclarationSubmitted}
-				indicatorGRequired={true}
+				indicatorGRequired={indicatorGRequired}
 				lastActionDate="12 mars 2026"
 				lockedByOther={false}
 				lockHolder={null}

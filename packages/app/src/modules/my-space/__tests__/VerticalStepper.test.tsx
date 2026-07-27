@@ -204,6 +204,39 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 	});
 
+	describe("numérotation des étapes visibles (#4000)", () => {
+		function stepNumbers(dialog: HTMLElement): string[] {
+			return Array.from(
+				dialog.querySelectorAll<HTMLElement>('[aria-hidden="true"]'),
+			)
+				.map((el) => el.textContent ?? "")
+				.filter((text) => /^[123]$/.test(text));
+		}
+
+		it("numbers steps 1, 2, 3 in sequence when both steps 2 and 3 are visible", () => {
+			const { dialog } = renderPanel("start");
+			expect(stepNumbers(dialog)).toEqual(["1", "2", "3"]);
+		});
+
+		it("renumbers the CSE step to 2 when step 2 (indicator G) is hidden", () => {
+			const { dialog } = renderPanel("start", { indicatorGRequired: false });
+			expect(stepNumbers(dialog)).toEqual(["1", "2"]);
+		});
+
+		it("keeps step 2 numbered 2 when step 3 (CSE) is hidden", () => {
+			const { dialog } = renderPanel("start", { cseOpinionRequired: false });
+			expect(stepNumbers(dialog)).toEqual(["1", "2"]);
+		});
+
+		it("only shows step 1 when both steps 2 and 3 are hidden", () => {
+			const { dialog } = renderPanel("start", {
+				cseOpinionRequired: false,
+				indicatorGRequired: false,
+			});
+			expect(stepNumbers(dialog)).toEqual(["1"]);
+		});
+	});
+
 	describe("ClosedMessage — texte selon cseOpinionRequired (#3939)", () => {
 		it("mentions the CSE opinions still being modifiable when cseOpinionRequired is true", () => {
 			const { panel } = renderPanel("closed", { cseOpinionRequired: true });

@@ -41,8 +41,14 @@ export {
 	QUARTILE_THRESHOLD_COUNT,
 } from "./shared/constants";
 // Declaration display context
-export type { DeclarationDisplayContext } from "./shared/declarationDisplay";
-export { getDeclarationDisplayContext } from "./shared/declarationDisplay";
+export type {
+	CseOpinionResolvedInput,
+	DeclarationDisplayContext,
+} from "./shared/declarationDisplay";
+export {
+	getDeclarationDisplayContext,
+	isCseOpinionResolved,
+} from "./shared/declarationDisplay";
 // Declaration derived flags (compliance process, revision, indicator G)
 export type {
 	ComplianceProcessRequiredInput,

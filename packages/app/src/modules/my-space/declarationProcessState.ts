@@ -1,5 +1,16 @@
+import { isCseOpinionResolved } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import type { DeclarationItem } from "./types";
+
+function cseOpinionResolvedFor(
+	declaration: DeclarationItem | undefined,
+): boolean {
+	if (!declaration) return true;
+	return isCseOpinionResolved({
+		cseRequired: declaration.cseRequired,
+		hasSubmittedCseOpinion: declaration.hasSubmittedCseOpinion,
+	});
+}
 
 export function computePanelVariant(
 	declaration: DeclarationItem | undefined,
@@ -23,9 +34,7 @@ export function computePanelVariant(
 		case "awaiting_cse_opinion":
 			return "cse";
 		case "demarche_completed":
-			return declaration?.hasSubmittedCseOpinion || !declaration?.cseRequired
-				? "closed"
-				: "cse";
+			return cseOpinionResolvedFor(declaration) ? "closed" : "cse";
 	}
 }
 
@@ -52,7 +61,7 @@ export function computeCtaHref(
 		case "awaiting_cse_opinion":
 			return `/avis-cse?siren=${siren}`;
 		case "demarche_completed":
-			return declaration?.hasSubmittedCseOpinion || !declaration?.cseRequired
+			return cseOpinionResolvedFor(declaration)
 				? `/declaration-remuneration?siren=${siren}`
 				: `/avis-cse?siren=${siren}`;
 	}

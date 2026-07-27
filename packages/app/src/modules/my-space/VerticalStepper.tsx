@@ -53,6 +53,8 @@ export function VerticalStepper({
 	variant: PanelVariant;
 	year: number;
 }) {
+	const step3Number = indicatorGRequired ? 3 : 2;
+
 	return (
 		<div className={`${styles.stepper} fr-mb-4w`}>
 			<div className={`${styles.stepRow} ${stepRowClass(step1)}`}>
@@ -80,7 +82,7 @@ export function VerticalStepper({
 			)}
 			{cseOpinionRequired && (
 				<div className={`${styles.stepRow} ${stepRowClass(step3)}`}>
-					<StepCircle number={3} status={step3} />
+					<StepCircle number={step3Number} status={step3} />
 					<Step3Content
 						campaignDeadlines={campaignDeadlines}
 						siren={siren}
