@@ -3,6 +3,8 @@ import { expect, test } from "@playwright/test";
 import {
 	ensureCurrentYearDeclaration,
 	resetDeclarationToDraft,
+	resetGipWorkforce,
+	setCompanyHasCse,
 } from "./helpers/db";
 import { startImpersonation, stopImpersonation } from "./helpers/impersonation";
 
@@ -16,6 +18,11 @@ test.describe("admin impersonation — read-only guards", () => {
 		// every render and would otherwise throw FORBIDDEN.
 		await ensureCurrentYearDeclaration();
 		await resetDeclarationToDraft();
+		// The CSE test below opens /avis-cse, which is only reachable when an
+		// opinion is actually owed. State it here instead of inheriting whatever
+		// the previously executed spec file happened to leave behind.
+		await resetGipWorkforce();
+		await setCompanyHasCse(true);
 	});
 
 	test.afterEach(async ({ page }) => {
