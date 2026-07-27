@@ -162,6 +162,93 @@ test.describe("Declaration process panel", () => {
 				await setDeclarationComplianceState({
 					status: "demarche_completed",
 					demarcheCompletedAt: new Date(),
+					cseRequired: false,
+				});
+			});
+
+			test("closed variant without any CSE deposit prompt or CTA", async ({
+				page,
+			}) => {
+				await openPanel(page);
+				const panel = page.locator(`#${PANEL_ID}`);
+
+				await expect(panel.getByText("Démarche close")).toBeVisible();
+				await expect(
+					panel.getByText("Cette démarche est terminée.", { exact: true }),
+				).toBeVisible();
+				await expect(
+					panel.getByText(
+						"Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance.",
+					),
+				).toHaveCount(0);
+				await expect(panel.getByText(STEP3_TITLE)).toHaveCount(0);
+
+				const cta = panel.getByRole("link", { name: "Voir la déclaration" });
+				await expect(cta).toBeVisible();
+				await expect(cta).not.toHaveAttribute("href", /avis-cse/);
+			});
+		});
+	});
+
+	// #3939 follow-up: a GIP-derived >= 100 company that declared "sans CSE" is still
+	// subject to indicator G, so the panel keeps the indicator-G path step (step 2),
+	// but must never ask it to deposit a CSE opinion — step 3 and the "avis CSE
+	// modifiables" closing note are hidden, during the démarche and after completion.
+	// Step visibility is driven by isCseOpinionRequired(workforce, hasCse), not the
+	// workforce alone, so this differs from the < 100 case where step 2 is hidden too.
+	test.describe("GIP >= 100 without CSE: indicator-G step shown, CSE step hidden", () => {
+		const STEP2_TITLE =
+			"Parcours de mise en conformité pour l'indicateur par catégorie de salariés";
+		const STEP3_TITLE = "Déposer le ou les avis du CSE";
+
+		test.afterAll(async () => {
+			await resetDeclarationToDraft();
+			await resetGipWorkforce();
+			await setCompanyHasCse(true);
+		});
+
+		async function openPanel(page: Parameters<typeof loginWithProConnect>[0]) {
+			await page.context().clearCookies();
+			await loginWithProConnect(page);
+			await waitForDsfrModal(page, PANEL_ID);
+			const remuButton = page.getByRole("button", { name: "Rémunération" });
+			await expect(remuButton.first()).toBeVisible();
+			await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
+		}
+
+		test.describe("during the démarche (draft)", () => {
+			test.beforeAll(async () => {
+				await ensureCurrentYearDeclaration();
+				await resetGipWorkforce();
+				await setCompanyHasCse(false);
+				await setUserPhone("0122334455");
+				await resetDeclarationToDraft();
+			});
+
+			test("the indicator-G step is announced but not the CSE step", async ({
+				page,
+			}) => {
+				await openPanel(page);
+				const panel = page.locator(`#${PANEL_ID}`);
+
+				await expect(
+					panel.getByText("Déclaration des indicateurs de rémunération"),
+				).toBeVisible();
+				await expect(panel.getByText(STEP2_TITLE)).toBeVisible();
+				await expect(panel.getByText(STEP3_TITLE)).toHaveCount(0);
+			});
+		});
+
+		test.describe("after completion (démarche_completed, no CSE opinion due)", () => {
+			test.beforeAll(async () => {
+				await ensureCurrentYearDeclaration();
+				await resetGipWorkforce();
+				await setCompanyHasCse(false);
+				await setUserPhone("0122334455");
+				await setDeclarationComplianceState({
+					status: "demarche_completed",
+					demarcheCompletedAt: new Date(),
+					cseRequired: false,
 				});
 			});
 
