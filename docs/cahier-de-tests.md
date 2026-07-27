@@ -47,9 +47,11 @@ Les specs conformité tournent avec l'entreprise de test SIREN `130025265`, **ef
 
 ## 2. Les fiches de cas (détail verbatim de l'Excel)
 
-Une fiche par **parcours-type**, avec les étapes **verbatim** des cellules de l'Excel (feuilles « 100-149 », « 150-249 », « 250 et + » — les libellés y sont identiques). Chaque fiche a un ID court (`CAS-01` … `CAS-12`, `CAS-01-6IND`, `CAS-02-6IND`) qui est l'**ancre du test E2E**. C'est la couche « test » ; la couche « désignation métier » est la coordonnée `AAAA-EFFMAX-CASNN` du §3, qui renvoie ici. Un même parcours-type se retrouve dans des dizaines de cellules (années × tranches) mais n'est défini — et testé — qu'une fois.
+Une fiche par **parcours-type**. Chaque fiche a un ID court qui est l'**ancre du test E2E** — c'est la couche « test » ; la couche « désignation métier » est la coordonnée `AAAA-EFFMAX-CASNN` du §3, qui renvoie ici. Un même parcours-type se retrouve dans des dizaines de cellules (années × tranches) mais n'est défini — et testé — qu'une fois.
 
-Les cas 1 et 2 existent en deux variantes selon l'année (voir §3) : années « 7 indicateurs » (`CAS-01`, `CAS-02`) et années « 6 premiers indicateurs » (`CAS-01-6IND`, `CAS-02-6IND`, sans indicateur G donc sans parcours de conformité possible). Les cas 3 à 12 n'existent qu'en année « 7 indicateurs ».
+**Comment lire une fiche.** L'ID `CAS-NN` **reprend le numéro « Cas N » de l'Excel** (`CAS-04` ↔ « Cas 4 » des feuilles) ; le suffixe `-6IND` désigne la variante « 6 premiers indicateurs » (années sans indicateur G). Le titre énonce ensuite les **conditions qui définissent le cas** — nombre d'indicateurs (6 ou 7) · présence d'un CSE · issue du parcours — et le champ **« Libellé Excel »** rappelle le texte exact de la cellule d'origine. Exemple : `CAS-01` = *7 indicateurs, sans CSE, aucun écart ≥ 5 %* → il reprend « Cas 1 » des colonnes 7 indicateurs.
+
+Les cas 1 et 2 existent donc en deux variantes selon l'année (voir §3) : `CAS-01`/`CAS-02` (7 indicateurs) et `CAS-01-6IND`/`CAS-02-6IND` (6 indicateurs, sans indicateur G donc sans parcours de conformité possible). Les cas 3 à 12 n'existent qu'en année « 7 indicateurs ».
 
 Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » = indicateur G, l'écart de rémunération par catégorie de salariés (étape 5 du funnel) ; « Déclaration des 6 premiers indicateurs » = funnel sans l'étape 5 (indicateurs A à F) ; « Parcours de conformité » = page `/declaration-remuneration/parcours-conformite` ; « Nouvelle déclaration du 7ème indicateur » = seconde déclaration (étapes 1 à 3 du parcours actions correctives) ; « Dépot avis CSE » = flux `/avis-cse/etape/1..2` (étape 1 : avis rendus, étape 2 : dépôt des fichiers et matrice d'association) ; « Dépôt du rapport de l'évaluation conjointe » = upload PDF sur `/evaluation-conjointe`.
 
@@ -57,7 +59,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-01"></a>
 
-### CAS-01 — Cas 1 sans CSE et aucun écart ≥ 5% pour le 7ème indicateur
+### CAS-01 — 7 indicateurs · sans CSE · aucun écart ≥ 5 % → fin de démarche
+
+**Libellé Excel** : « Cas 1 sans CSE et aucun écart ≥ 5% pour le 7ème indicateur »
 
 - CSE : non
 - Déclaration des 7 indicateurs
@@ -69,7 +73,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-02"></a>
 
-### CAS-02 — Cas 2 avec CSE et aucun écart ≥ 5% pour le 7ème indicateur
+### CAS-02 — 7 indicateurs · avec CSE · aucun écart ≥ 5 % → avis CSE
+
+**Libellé Excel** : « Cas 2 avec CSE et aucun écart ≥ 5% pour le 7ème indicateur »
 
 - CSE : oui
 - Déclaration des 7 indicateurs
@@ -82,7 +88,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-03"></a>
 
-### CAS-03 — Cas 3 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts
+### CAS-03 — 7 indicateurs · sans CSE · écart ≥ 5 % → justification des écarts
+
+**Libellé Excel** : « Cas 3 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts »
 
 - CSE : non
 - Déclaration des 7 indicateurs
@@ -95,7 +103,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-04"></a>
 
-### CAS-04 — Cas 4 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts
+### CAS-04 — 7 indicateurs · avec CSE · écart ≥ 5 % → justification + avis CSE
+
+**Libellé Excel** : « Cas 4 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts »
 
 - CSE : oui
 - Déclaration des 7 indicateurs
@@ -109,7 +119,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-05"></a>
 
-### CAS-05 — Cas 5 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe
+### CAS-05 — 7 indicateurs · sans CSE · écart ≥ 5 % → évaluation conjointe
+
+**Libellé Excel** : « Cas 5 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe »
 
 - CSE : non
 - Déclaration des 7 indicateurs
@@ -123,7 +135,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-06"></a>
 
-### CAS-06 — Cas 6 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe
+### CAS-06 — 7 indicateurs · avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE
+
+**Libellé Excel** : « Cas 6 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe »
 
 - CSE : oui
 - Déclaration des 7 indicateurs
@@ -138,7 +152,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-07"></a>
 
-### CAS-07 — Cas 7 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5%
+### CAS-07 — 7 indicateurs · sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart
+
+**Libellé Excel** : « Cas 7 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5% »
 
 - CSE : non
 - Déclaration des 7 indicateurs
@@ -152,7 +168,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-08"></a>
 
-### CAS-08 — Cas 8 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5%
+### CAS-08 — 7 indicateurs · avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE
+
+**Libellé Excel** : « Cas 8 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5% »
 
 - CSE : oui
 - Déclaration des 7 indicateurs
@@ -167,7 +185,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-09"></a>
 
-### CAS-09 — Cas 9 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts
+### CAS-09 — 7 indicateurs · sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification
+
+**Libellé Excel** : « Cas 9 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts »
 
 - CSE : non
 - Déclaration des 7 indicateurs
@@ -182,7 +202,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-10"></a>
 
-### CAS-10 — Cas 10 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts
+### CAS-10 — 7 indicateurs · avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE
+
+**Libellé Excel** : « Cas 10 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts »
 
 - CSE : oui
 - Déclaration des 7 indicateurs
@@ -198,7 +220,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-11"></a>
 
-### CAS-11 — Cas 11 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe
+### CAS-11 — 7 indicateurs · sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe
+
+**Libellé Excel** : « Cas 11 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe »
 
 - CSE : non
 - Déclaration des 7 indicateurs
@@ -214,7 +238,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-12"></a>
 
-### CAS-12 — Cas 12 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe
+### CAS-12 — 7 indicateurs · avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE
+
+**Libellé Excel** : « Cas 12 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe »
 
 - CSE : oui
 - Déclaration des 7 indicateurs
@@ -231,7 +257,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-01-6ind"></a>
 
-### CAS-01-6IND — Cas 1 sans CSE *(années « 6 premiers indicateurs »)*
+### CAS-01-6IND — 6 premiers indicateurs · sans CSE
+
+**Libellé Excel** : « Cas 1 sans CSE » *(colonnes « 6 premiers indicateurs » — pas d'indicateur G)*
 
 - CSE : non
 - Déclaration des 6 premiers indicateurs
@@ -243,7 +271,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-02-6ind"></a>
 
-### CAS-02-6IND — Cas 2 avec CSE *(années « 6 premiers indicateurs »)*
+### CAS-02-6IND — 6 premiers indicateurs · avec CSE · avis CSE « exactitude »
+
+**Libellé Excel** : « Cas 2 avec CSE » *(colonnes « 6 premiers indicateurs » — pas d'indicateur G)*
 
 - CSE : oui
 - Déclaration des 6 premiers indicateurs
