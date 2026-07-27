@@ -1,11 +1,13 @@
 import {
 	act,
+	fireEvent,
 	render,
 	renderHook,
 	screen,
 	waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { MouseEvent } from "react";
 import {
 	afterEach,
 	beforeEach,
@@ -16,10 +18,21 @@ import {
 	vi,
 } from "vitest";
 
-import { FileDownloadLink, useFileDownload } from "../FileDownloadLink";
+import {
+	FileDownloadLink,
+	isNativeClick,
+	useFileDownload,
+} from "../FileDownloadLink";
 
 const createObjectURLMock = URL.createObjectURL as unknown as Mock;
 const revokeObjectURLMock = URL.revokeObjectURL as unknown as Mock;
+
+const NATIVE_CLICK_MODIFIERS = [
+	"altKey",
+	"ctrlKey",
+	"metaKey",
+	"shiftKey",
+] as const;
 
 function pdfResponse(
 	disposition?: string,
@@ -37,6 +50,22 @@ function pdfResponse(
 	} as unknown as Response;
 }
 
+function mouseEvent(
+	modifier?: (typeof NATIVE_CLICK_MODIFIERS)[number],
+): MouseEvent {
+	return {
+		altKey: false,
+		ctrlKey: false,
+		metaKey: false,
+		shiftKey: false,
+		...(modifier ? { [modifier]: true } : {}),
+	} as unknown as MouseEvent;
+}
+
+function pendingFetch(): Mock {
+	return vi.fn(() => new Promise<Response>(() => undefined));
+}
+
 // Never lets a real navigation happen (jsdom logs "Not implemented: navigation")
 // and lets us assert the programmatic download click.
 let clickSpy: ReturnType<typeof vi.spyOn>;
@@ -50,8 +79,19 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+	vi.useRealTimers();
 	vi.restoreAllMocks();
 	vi.unstubAllGlobals();
+});
+
+describe("isNativeClick", () => {
+	it.each(NATIVE_CLICK_MODIFIERS)("detects a %s click", (modifier) => {
+		expect(isNativeClick(mouseEvent(modifier))).toBe(true);
+	});
+
+	it("does not detect a plain click", () => {
+		expect(isNativeClick(mouseEvent())).toBe(false);
+	});
 });
 
 describe("useFileDownload", () => {
@@ -71,8 +111,83 @@ describe("useFileDownload", () => {
 		expect(fetch).toHaveBeenCalledWith("/api/declaration-pdf");
 		expect(createObjectURLMock).toHaveBeenCalledTimes(1);
 		expect(clickSpy).toHaveBeenCalledTimes(1);
-		expect(revokeObjectURLMock).toHaveBeenCalledTimes(1);
 		expect(result.current.state).toBe("idle");
+	});
+
+	it("keeps the object URL alive once the click is handed over to the browser", async () => {
+		vi.useFakeTimers();
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(() => Promise.resolve(pdfResponse())),
+		);
+		const { result } = renderHook(() => useFileDownload());
+
+		await act(async () => {
+			await result.current.download("/api/declaration-pdf");
+		});
+
+		expect(clickSpy).toHaveBeenCalledTimes(1);
+		expect(revokeObjectURLMock).not.toHaveBeenCalled();
+	});
+
+	it("revokes the object URL once the retention delay has elapsed", async () => {
+		vi.useFakeTimers();
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(() => Promise.resolve(pdfResponse())),
+		);
+		const { result } = renderHook(() => useFileDownload());
+
+		await act(async () => {
+			await result.current.download("/api/declaration-pdf");
+		});
+		act(() => {
+			vi.runAllTimers();
+		});
+
+		expect(revokeObjectURLMock).toHaveBeenCalledTimes(1);
+		expect(revokeObjectURLMock).toHaveBeenCalledWith(
+			createObjectURLMock.mock.results[0]?.value,
+		);
+	});
+
+	it("attaches the programmatic anchor to the document and detaches it after the click", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(() => Promise.resolve(pdfResponse())),
+		);
+		const { result } = renderHook(() => useFileDownload());
+		const anchor = document.createElement("a");
+		const createElementSpy = vi
+			.spyOn(document, "createElement")
+			.mockReturnValue(anchor);
+		let connectedDuringClick: boolean | undefined;
+		clickSpy.mockImplementation(() => {
+			connectedDuringClick = anchor.isConnected;
+		});
+
+		await act(async () => {
+			await result.current.download("/api/declaration-pdf");
+		});
+		createElementSpy.mockRestore();
+
+		expect(connectedDuringClick).toBe(true);
+		expect(anchor.isConnected).toBe(false);
+	});
+
+	it("ignores a burst of calls fired before the pending state is committed", async () => {
+		const fetchMock = pendingFetch();
+		vi.stubGlobal("fetch", fetchMock);
+		const { result } = renderHook(() => useFileDownload());
+		const { download } = result.current;
+
+		await act(async () => {
+			void download("/api/declaration-pdf");
+			void download("/api/declaration-pdf");
+			void download("/api/declaration-pdf");
+		});
+
+		expect(fetchMock).toHaveBeenCalledTimes(1);
 	});
 
 	it("ignores a second call while a download is pending", async () => {
@@ -133,6 +248,48 @@ describe("useFileDownload", () => {
 		});
 
 		expect(result.current.state).toBe("error");
+	});
+
+	it("accepts a new download after a failed response", async () => {
+		const fetchMock = vi
+			.fn()
+			.mockResolvedValueOnce(pdfResponse(undefined, { ok: false }))
+			.mockResolvedValueOnce(pdfResponse());
+		vi.stubGlobal("fetch", fetchMock);
+		const { result } = renderHook(() => useFileDownload());
+
+		await act(async () => {
+			await result.current.download("/api/declaration-pdf");
+		});
+		expect(result.current.state).toBe("error");
+
+		await act(async () => {
+			await result.current.download("/api/declaration-pdf");
+		});
+
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(result.current.state).toBe("idle");
+	});
+
+	it("accepts a new download after fetch rejected", async () => {
+		const fetchMock = vi
+			.fn()
+			.mockRejectedValueOnce(new Error("network down"))
+			.mockResolvedValueOnce(pdfResponse());
+		vi.stubGlobal("fetch", fetchMock);
+		const { result } = renderHook(() => useFileDownload());
+
+		await act(async () => {
+			await result.current.download("/api/declaration-pdf");
+		});
+		expect(result.current.state).toBe("error");
+
+		await act(async () => {
+			await result.current.download("/api/declaration-pdf");
+		});
+
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(result.current.state).toBe("idle");
 	});
 
 	it("extracts the filename from an ASCII Content-Disposition header", async () => {
@@ -248,7 +405,7 @@ describe("FileDownloadLink", () => {
 					}),
 			),
 		);
-		render(
+		const { container } = render(
 			<FileDownloadLink
 				href="/api/declaration-pdf"
 				pendingLabel="Génération du récapitulatif en cours…"
@@ -263,7 +420,9 @@ describe("FileDownloadLink", () => {
 		expect(link).toHaveAttribute("aria-busy", "true");
 		expect(link).toHaveAttribute("aria-disabled", "true");
 		expect(link).toHaveTextContent("Génération du récapitulatif en cours…");
-		expect(screen.getByRole("status")).toHaveTextContent(
+		const announcement = container.querySelector('[aria-live="polite"]');
+		expect(announcement).toHaveAttribute("aria-atomic", "true");
+		expect(announcement).toHaveTextContent(
 			"Génération du récapitulatif en cours…",
 		);
 
@@ -273,11 +432,12 @@ describe("FileDownloadLink", () => {
 		await waitFor(() =>
 			expect(screen.getByRole("link")).not.toHaveAttribute("aria-busy"),
 		);
+		expect(announcement).toBeEmptyDOMElement();
 	});
 
 	it("does not trigger a second fetch when clicked again while pending", async () => {
 		const user = userEvent.setup();
-		const fetchMock = vi.fn(() => new Promise<Response>(() => undefined));
+		const fetchMock = pendingFetch();
 		vi.stubGlobal("fetch", fetchMock);
 		render(
 			<FileDownloadLink href="/api/declaration-pdf">
@@ -291,6 +451,54 @@ describe("FileDownloadLink", () => {
 		await user.click(link);
 
 		expect(fetchMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("triggers a single fetch for a burst of clicks fired before the re-render", async () => {
+		const fetchMock = pendingFetch();
+		vi.stubGlobal("fetch", fetchMock);
+		render(
+			<FileDownloadLink href="/api/declaration-pdf">
+				Télécharger le récapitulatif
+			</FileDownloadLink>,
+		);
+
+		const link = screen.getByRole("link");
+		await act(async () => {
+			link.dispatchEvent(
+				new MouseEvent("click", { bubbles: true, cancelable: true }),
+			);
+			link.dispatchEvent(
+				new MouseEvent("click", { bubbles: true, cancelable: true }),
+			);
+			link.dispatchEvent(
+				new MouseEvent("click", { bubbles: true, cancelable: true }),
+			);
+		});
+
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("leaves a modifier click to the browser's native behaviour", () => {
+		const fetchMock = pendingFetch();
+		const onBeforeDownload = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+		render(
+			<FileDownloadLink
+				href="/api/declaration-pdf"
+				onBeforeDownload={onBeforeDownload}
+			>
+				Télécharger le récapitulatif
+			</FileDownloadLink>,
+		);
+
+		const notPrevented = fireEvent.click(screen.getByRole("link"), {
+			metaKey: true,
+		});
+
+		expect(notPrevented).toBe(true);
+		expect(fetchMock).not.toHaveBeenCalled();
+		expect(onBeforeDownload).not.toHaveBeenCalled();
+		expect(screen.getByRole("link")).not.toHaveAttribute("aria-busy");
 	});
 
 	it("invokes onBeforeDownload before starting the download", async () => {
@@ -332,12 +540,34 @@ describe("FileDownloadLink", () => {
 		expect(alert).toHaveTextContent("Le téléchargement a échoué, réessayez.");
 	});
 
+	it("clears the error and downloads again when the user retries", async () => {
+		const user = userEvent.setup();
+		const fetchMock = vi
+			.fn()
+			.mockResolvedValueOnce(pdfResponse(undefined, { ok: false }))
+			.mockResolvedValueOnce(pdfResponse());
+		vi.stubGlobal("fetch", fetchMock);
+		render(
+			<FileDownloadLink href="/api/declaration-pdf">
+				Télécharger le récapitulatif
+			</FileDownloadLink>,
+		);
+
+		await user.click(screen.getByRole("link"));
+		expect(await screen.findByRole("alert")).toBeInTheDocument();
+
+		await user.click(screen.getByRole("link"));
+
+		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+		await waitFor(() =>
+			expect(screen.queryByRole("alert")).not.toBeInTheDocument(),
+		);
+		expect(clickSpy).toHaveBeenCalledTimes(1);
+	});
+
 	it("uses the default pending label when none is provided", async () => {
 		const user = userEvent.setup();
-		vi.stubGlobal(
-			"fetch",
-			vi.fn(() => new Promise<Response>(() => undefined)),
-		);
+		vi.stubGlobal("fetch", pendingFetch());
 		render(
 			<FileDownloadLink href="/api/no-sanction-pdf">
 				Télécharger l&apos;attestation
