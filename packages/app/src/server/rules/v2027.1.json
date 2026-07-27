@@ -280,6 +280,15 @@
 				{ "type": "cse_opinion_submit" },
 				{ "type": "demarche_complete" }
 			]
+		},
+
+		{
+			"id": "cse_no_longer_required",
+			"from": ["awaiting_cse_opinion"],
+			"action": "sync_cse_requirement",
+			"guard": { "fact": "cseRequired", "op": "==", "value": false },
+			"to": "demarche_completed",
+			"events": [{ "type": "demarche_complete" }]
 		}
 	]
 }

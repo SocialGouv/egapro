@@ -17,7 +17,7 @@ import {
 	getCurrentYear,
 	getObligationWorkforce,
 	hasGapsAboveThreshold,
-	isCseRequired,
+	isCseOpinionRequired,
 	isDraft,
 	isTriennialYear,
 	parseGipWorkforce,
@@ -707,13 +707,16 @@ export const declarationRouter = createTRPCRouter({
 			ctx.session.user.id,
 		);
 
-		// Snapshot `cseRequired` à la soumission (figé pour le reste du cycle FSM
-		// même si l'admin modifie ensuite `companies.hasCse`). C'est cette valeur
-		// que les transitions FSM aval (saveCompliancePath, submitJointEvaluation,
-		// cseOpinion.finalize) liront comme guard.
-		const cseRequiredSnapshot =
-			isCseRequired(getObligationWorkforce(gipWorkforce)) &&
-			company.hasCse === true;
+		// Snapshot `cseRequired` à la soumission : c'est cette valeur que les
+		// transitions FSM aval (saveCompliancePath, submitJointEvaluation,
+		// cseOpinion.finalize) liront comme guard, plutôt que `companies.hasCse`
+		// qui peut bouger en cours de cycle. Le snapshot n'est resynchronisé que
+		// par `syncCseRequirement` (company.updateHasCse), quand la réponse CSE
+		// elle-même change.
+		const cseRequiredSnapshot = isCseOpinionRequired({
+			workforce: getObligationWorkforce(gipWorkforce),
+			hasCse: company.hasCse,
+		});
 
 		await ctx.db.transaction(async (tx) => {
 			if (isDraft(declaration.status) && historyInserts.length > 0) {

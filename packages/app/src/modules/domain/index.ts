@@ -46,11 +46,13 @@ export { getDeclarationDisplayContext } from "./shared/declarationDisplay";
 export type {
 	ComplianceProcessRequiredInput,
 	ComplianceProcessRevisionRequiredInput,
+	CseOpinionRequiredInput,
 	DeclarationForFlags,
 } from "./shared/declarationFlags";
 export {
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
+	isCseOpinionRequired,
 } from "./shared/declarationFlags";
 // Declaration edit lock constants
 export {

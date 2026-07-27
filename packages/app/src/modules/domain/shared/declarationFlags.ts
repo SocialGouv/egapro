@@ -8,6 +8,23 @@ export type DeclarationForFlags = {
 	rulesVersion: string | null;
 };
 
+export type CseOpinionRequiredInput = {
+	workforce: number;
+	hasCse: boolean | null;
+};
+
+/**
+ * Whether the démarche actually owes a CSE opinion.
+ *
+ * Mirrors the `cseRequired` fact of the rule engine (`server/rules/*.json`):
+ * being large enough for the CSE obligation is not sufficient, the company must
+ * also have a CSE. `isCseRequired` answers the size question alone — it says
+ * whether the CSE field applies, not whether an opinion is due.
+ */
+export function isCseOpinionRequired(input: CseOpinionRequiredInput): boolean {
+	return input.workforce >= COMPANY_SIZE_ANNUAL_MIN && input.hasCse === true;
+}
+
 export type ComplianceProcessRequiredInput = {
 	workforce: number | null;
 	hasIndicatorG: boolean;
