@@ -3,6 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getWorkforceYearFor } from "~/modules/domain";
 import {
+	failingFetch,
+	getLiveRegion,
+	pendingFetch,
+} from "~/test/downloadHelpers";
+import {
 	DocumentsPanel,
 	getDocumentResourceCount,
 	getDocumentsPanelId,
@@ -39,20 +44,6 @@ function makeDeclaration(
 		hasPrefillData: false,
 		...overrides,
 	};
-}
-
-function pendingFetch() {
-	return vi.fn(() => new Promise<Response>(() => undefined));
-}
-
-function failingFetch() {
-	return vi.fn(() =>
-		Promise.resolve({
-			ok: false,
-			blob: () => Promise.resolve(new Blob(["pdf"])),
-			headers: { get: () => null },
-		} as unknown as Response),
-	);
 }
 
 // The panel is a closed <dialog>, so its subtree is display:none and role
@@ -261,7 +252,7 @@ describe("DocumentsPanel", () => {
 		const link = links()[0];
 		expect(link).toHaveAttribute("aria-busy", "true");
 		expect(link).toHaveAttribute("aria-disabled", "true");
-		const announcement = dialog.querySelector('[aria-live="polite"]');
+		const announcement = getLiveRegion(dialog);
 		expect(announcement).toHaveAttribute("aria-atomic", "true");
 		expect(announcement).toHaveTextContent("Téléchargement en cours…");
 		expect(panel.getAllByText("Téléchargement en cours…")).toHaveLength(2);

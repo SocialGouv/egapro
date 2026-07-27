@@ -2,25 +2,16 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+	failingFetch,
+	getLiveRegion,
+	pendingFetch,
+} from "~/test/downloadHelpers";
 import { DownloadCard } from "../DownloadCard";
 
 const DATA_YEAR = 2024;
 const DECLARATION_YEAR = 2025;
 const HREF = "/api/cse-opinion-pdf?year=2025";
-
-function pendingFetch() {
-	return vi.fn(() => new Promise<Response>(() => undefined));
-}
-
-function failingFetch() {
-	return vi.fn(() =>
-		Promise.resolve({
-			ok: false,
-			blob: () => Promise.resolve(new Blob(["pdf"])),
-			headers: { get: () => null },
-		} as unknown as Response),
-	);
-}
 
 function renderCard() {
 	return render(
@@ -69,7 +60,7 @@ describe("DownloadCard", () => {
 		expect(link).toHaveAttribute("aria-busy", "true");
 		expect(link).toHaveAttribute("aria-disabled", "true");
 		expect(link).toHaveTextContent("Téléchargement en cours…");
-		const announcement = container.querySelector('[aria-live="polite"]');
+		const announcement = getLiveRegion(container);
 		expect(announcement).toHaveAttribute("aria-atomic", "true");
 		expect(announcement).toHaveTextContent("Téléchargement en cours…");
 	});
