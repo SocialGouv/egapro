@@ -4,8 +4,8 @@ import { createCaller } from "./helpers/declarationTestHelpers";
 import { withLockMiddleware } from "./helpers/lockTestHelpers";
 
 // The deadline branch of `declarationModifiableWriteProcedure` selects the
-// applicable modification deadline through `isSecondDeclarationDeadlineApplicable`
-// (#3955). It only fires for submitted declarations, so these tests exercise
+// applicable modification deadline through `isSecondDeclarationDeadlineApplicable`.
+// It only fires for submitted declarations, so these tests exercise
 // `updateStep1` (a modifiable write) with a submitted guard status and a
 // campaign whose decl1 deadline is passed but decl2 deadline is still open.
 vi.mock("~/server/auth", () => ({ auth: vi.fn() }));
@@ -107,7 +107,7 @@ async function callUpdateStep1(guard: GuardMockOverrides) {
 	return { caller, set };
 }
 
-describe("declarationModifiableWriteProcedure — second-declaration deadline guard (#3955)", () => {
+describe("declarationModifiableWriteProcedure — second-declaration deadline guard", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockGetCampaignDeadlines.mockResolvedValue(deadlines());
