@@ -6,6 +6,7 @@ import {
 	MATOMO_EVENT_CATEGORY,
 	trackEvent,
 } from "~/modules/analytics";
+import { FileDownloadLink } from "~/modules/shared";
 
 type Props = {
 	year?: number;
@@ -26,7 +27,7 @@ export function DownloadDeclarationPdfButton({
 	const query = params.toString();
 	const href = query ? `/api/declaration-pdf?${query}` : "/api/declaration-pdf";
 
-	function handleClick(): void {
+	function handleBeforeDownload(): void {
 		trackEvent({
 			category: MATOMO_EVENT_CATEGORY.DOCUMENT,
 			action: MATOMO_ACTION.PDF_DOWNLOAD,
@@ -36,13 +37,13 @@ export function DownloadDeclarationPdfButton({
 	}
 
 	return (
-		<a
+		<FileDownloadLink
 			className={`fr-btn fr-btn--${variant} fr-btn--icon-left fr-icon-file-pdf-line`}
-			download
 			href={href}
-			onClick={handleClick}
+			onBeforeDownload={handleBeforeDownload}
+			pendingLabel="Génération du récapitulatif en cours…"
 		>
 			{label}
-		</a>
+		</FileDownloadLink>
 	);
 }

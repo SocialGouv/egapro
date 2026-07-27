@@ -10,6 +10,7 @@ import {
 	getRepresentationDeadline,
 } from "~/modules/domain";
 
+import { FileDownloadLink } from "~/modules/shared";
 import { Pagination } from "~/modules/shared/Pagination";
 
 import { DeclarationLink } from "./DeclarationLink";
@@ -107,13 +108,13 @@ export function DeclarationsSection({
 				</div>
 				{hasNoSanction && (
 					<div className="fr-col-auto">
-						<a
+						<FileDownloadLink
 							className="fr-btn fr-btn--secondary fr-btn--icon-left fr-icon-download-line"
-							download
 							href="/api/no-sanction-pdf"
+							pendingLabel="Téléchargement en cours…"
 						>
-							Télécharger l'attestation de non sanction (PDF)
-						</a>
+							Télécharger l&apos;attestation de non sanction (PDF)
+						</FileDownloadLink>
 					</div>
 				)}
 			</div>

@@ -140,7 +140,7 @@ describe("ConfirmationPage", () => {
 			"href",
 			`/api/declaration-pdf?year=${DECLARATION_YEAR}`,
 		);
-		expect(declarationLink).toHaveAttribute("download");
+		expect(declarationLink).not.toHaveAttribute("download");
 
 		const transmittedLink = screen
 			.getByText(/récapitulatif des éléments transmis/)
@@ -149,7 +149,7 @@ describe("ConfirmationPage", () => {
 			"href",
 			`/api/transmitted-pdf?year=${DECLARATION_YEAR}`,
 		);
-		expect(transmittedLink).toHaveAttribute("download");
+		expect(transmittedLink).not.toHaveAttribute("download");
 	});
 
 	it("renders second declaration download card with correction href", () => {
@@ -168,7 +168,7 @@ describe("ConfirmationPage", () => {
 			"href",
 			`/api/declaration-pdf?type=correction&year=${DECLARATION_YEAR}`,
 		);
-		expect(secondDeclLink).toHaveAttribute("download");
+		expect(secondDeclLink).not.toHaveAttribute("download");
 	});
 
 	it("renders the feedback banner with the jedonnemonavis link", () => {

@@ -1,6 +1,7 @@
 import { formatLongDate } from "~/modules/domain";
 import { DsfrPictogram } from "~/modules/layout/shared/DsfrPictogram";
 import { ResendReceiptButton } from "~/modules/mail";
+import { FileDownloadLink } from "~/modules/shared";
 import styles from "./DeclarationSuccessBanner.module.scss";
 
 type Props = {
@@ -39,15 +40,15 @@ export function DeclarationSuccessBanner({
 						<strong>{formatLongDate(modificationDeadline)}</strong>
 					</p>
 					{pdfDownloadHref && (
-						<a
+						<FileDownloadLink
 							className="fr-link fr-link--download"
-							download
 							href={pdfDownloadHref}
+							pendingLabel="Génération du récapitulatif en cours…"
 						>
 							{isSecondDeclaration
 								? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
 								: "Télécharger le récapitulatif de la déclaration des indicateurs"}
-						</a>
+						</FileDownloadLink>
 					)}
 				</div>
 			</div>

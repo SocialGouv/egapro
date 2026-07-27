@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 
 import { formatCategorySource } from "~/modules/declaration-remuneration";
 import {
@@ -85,51 +85,47 @@ export async function buildPdfData(
 		throw new Error("La déclaration n'est pas encore soumise");
 	}
 
-	const [company] = await db
-		.select()
-		.from(companies)
-		.where(eq(companies.siren, siren))
-		.limit(1);
+	const [[company], [gip], jobs, transmittedDate, declarantRows] =
+		await Promise.all([
+			db.select().from(companies).where(eq(companies.siren, siren)).limit(1),
+			db
+				.select({ workforceEma: gipMdsData.workforceEma })
+				.from(gipMdsData)
+				.where(and(eq(gipMdsData.siren, siren), eq(gipMdsData.year, year)))
+				.limit(1),
+			db
+				.select()
+				.from(jobCategories)
+				.where(eq(jobCategories.declarationId, declaration.id)),
+			resolveTransmittedDate(
+				declaration.id,
+				declaration.updatedAt ?? now,
+				declarationType,
+			),
+			declaration.declarantId
+				? db
+						.select({
+							firstName: users.firstName,
+							lastName: users.lastName,
+							email: users.email,
+							phone: users.phone,
+						})
+						.from(users)
+						.where(eq(users.id, declaration.declarantId))
+						.limit(1)
+				: Promise.resolve([]),
+		]);
 
-	const declarant = declaration.declarantId
-		? (
-				await db
-					.select({
-						firstName: users.firstName,
-						lastName: users.lastName,
-						email: users.email,
-						phone: users.phone,
-					})
-					.from(users)
-					.where(eq(users.id, declaration.declarantId))
-					.limit(1)
-			)[0]
-		: undefined;
-
-	const [gip] = await db
-		.select({ workforceEma: gipMdsData.workforceEma })
-		.from(gipMdsData)
-		.where(and(eq(gipMdsData.siren, siren), eq(gipMdsData.year, year)))
-		.limit(1);
-
-	const jobs = await db
-		.select()
-		.from(jobCategories)
-		.where(eq(jobCategories.declarationId, declaration.id));
+	const declarant = declarantRows[0];
 
 	const jobIds = jobs.map((j) => j.id);
-	let empCats: (typeof employeeCategories.$inferSelect)[] = [];
-	if (jobIds.length > 0) {
-		const results = await Promise.all(
-			jobIds.map((id) =>
-				db
+	const empCats =
+		jobIds.length > 0
+			? await db
 					.select()
 					.from(employeeCategories)
-					.where(eq(employeeCategories.jobCategoryId, id)),
-			),
-		);
-		empCats = results.flat();
-	}
+					.where(inArray(employeeCategories.jobCategoryId, jobIds))
+			: [];
 
 	const categories =
 		jobs.length > 0
@@ -137,12 +133,6 @@ export async function buildPdfData(
 			: [];
 
 	const { step2Data, step3Data, step4Data } = mapToStepData(declaration);
-
-	const transmittedDate = await resolveTransmittedDate(
-		declaration.id,
-		declaration.updatedAt ?? now,
-		declarationType,
-	);
 
 	const displayWorkforce = toDisplayWorkforce(
 		parseGipWorkforce(gip?.workforceEma),
