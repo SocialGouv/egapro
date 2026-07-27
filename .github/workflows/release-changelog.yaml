@@ -115,7 +115,12 @@ jobs:
             point, starting with "- ", no heading) to `summary.md` in the
             current directory. Do not read or write any other file.
         run: |
-          npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+          npm install -g --no-fund --no-audit "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+
+          # Smoke-check the binary here: a PATH problem then fails on this line
+          # with an explicit message, instead of surfacing as a confusing
+          # "command not found" once the prompt is already built.
+          claude --version
 
           # Run in a scratch directory instead of the checkout: the repo ships
           # a CLAUDE.md, .claude/ hooks and a .mcp.json declaring three MCP
@@ -123,7 +128,7 @@ jobs:
           # all from the working directory — slower startup and extra failure
           # modes for nothing. Here the agent sees exactly one file.
           WORKDIR="$(mktemp -d)"
-          cp issues.json "$WORKDIR/issues.json"
+          cp "$GITHUB_WORKSPACE/issues.json" "$WORKDIR/issues.json"
           cd "$WORKDIR"
 
           # `< /dev/null`: nothing is piped in, and without it the CLI waits 3s
