@@ -227,7 +227,7 @@ export function PanelPlayground() {
 
 			<DeclarationProcessPanel
 				campaignDeadlines={deadlines}
-				cseApplicable={true}
+				cseOpinionRequired={true}
 				ctaHref="/declaration-remuneration?siren=000000000"
 				displayContext={getDeclarationDisplayContext({
 					firstDeclarationPathChoice: compliancePath,

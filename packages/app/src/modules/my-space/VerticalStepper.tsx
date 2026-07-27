@@ -30,7 +30,7 @@ export function getStepStatuses(
 
 export function VerticalStepper({
 	campaignDeadlines,
-	cseApplicable,
+	cseOpinionRequired,
 	displayContext,
 	indicatorGRequired,
 	secondDeclarationSubmitted,
@@ -42,7 +42,7 @@ export function VerticalStepper({
 	year,
 }: {
 	campaignDeadlines: CampaignDeadlines;
-	cseApplicable: boolean;
+	cseOpinionRequired: boolean;
 	displayContext: DeclarationDisplayContext;
 	indicatorGRequired: boolean;
 	secondDeclarationSubmitted: boolean;
@@ -78,7 +78,7 @@ export function VerticalStepper({
 					/>
 				</div>
 			)}
-			{cseApplicable && (
+			{cseOpinionRequired && (
 				<div className={`${styles.stepRow} ${stepRowClass(step3)}`}>
 					<StepCircle number={3} status={step3} />
 					<Step3Content

@@ -3,6 +3,7 @@ import {
 	getCurrentYear,
 	getDeclarationDisplayContext,
 	getObligationWorkforce,
+	isCseOpinionRequired,
 	isCseRequired,
 	isIndicatorGRequired,
 } from "~/modules/domain";
@@ -59,6 +60,10 @@ export function CompanyDeclarationsPage({
 	const currentYear = getCurrentYear();
 	const obligationWorkforce = getObligationWorkforce(company.gipWorkforce);
 	const cseApplicable = isCseRequired(obligationWorkforce);
+	const cseOpinionRequired = isCseOpinionRequired(
+		obligationWorkforce,
+		company.hasCse,
+	);
 	const indicatorGRequired = isIndicatorGRequired(
 		obligationWorkforce,
 		currentYear,
@@ -99,7 +104,7 @@ export function CompanyDeclarationsPage({
 			/>
 			<DeclarationProcessPanel
 				campaignDeadlines={campaignDeadlines}
-				cseApplicable={cseApplicable}
+				cseOpinionRequired={cseOpinionRequired}
 				ctaHref={ctaHref}
 				displayContext={displayContext}
 				hasSubmittedSecondDeclaration={
