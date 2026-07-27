@@ -16,7 +16,8 @@ import { describe, expect, it } from "vitest";
 import { PDF_FONT_FAMILY } from "../pdfFonts";
 
 const FONT_SIZE = 100;
-const MAX_MARK_OFFSET_RATIO = 0.75;
+const FRENCH_DIACRITICS = "éèêëàâùûîïôöçÉÈÊÀÇ";
+const GLYPH_ID_LENGTH = 4;
 
 const marianneRegular = createRequire(import.meta.url).resolve(
 	"@gouvfr/dsfr/dist/fonts/Marianne-Regular.woff",
@@ -33,8 +34,8 @@ const styles = StyleSheet.create({
 	superscript: { verticalAlign: "super" },
 });
 
-type GlyphDraw = {
-	hex: string;
+type PositionedRun = {
+	glyphIds: string[];
 	x: number;
 	y: number;
 };
@@ -69,8 +70,21 @@ function extractTextStream(pdf: Buffer): string {
 	);
 }
 
-function extractGlyphDraws(stream: string): GlyphDraw[] {
-	const draws: GlyphDraw[] = [];
+function splitGlyphIds(textShowingOperands: string): string[] {
+	const ids: string[] = [];
+
+	for (const [, hex] of textShowingOperands.matchAll(/<([0-9a-f]+)>/g)) {
+		if (!hex) continue;
+		for (let i = 0; i < hex.length; i += GLYPH_ID_LENGTH) {
+			ids.push(hex.slice(i, i + GLYPH_ID_LENGTH));
+		}
+	}
+
+	return ids;
+}
+
+function extractPositionedRuns(stream: string): PositionedRun[] {
+	const runs: PositionedRun[] = [];
 	let position: { x: number; y: number } | null = null;
 
 	for (const line of stream.split("\n")) {
@@ -80,14 +94,17 @@ function extractGlyphDraws(stream: string): GlyphDraw[] {
 			continue;
 		}
 
-		const glyphs = /^\[<([0-9a-f]+)>/.exec(line);
-		if (glyphs?.[1] && position) draws.push({ hex: glyphs[1], ...position });
+		if (line.startsWith("[<") && position) {
+			runs.push({ glyphIds: splitGlyphIds(line), ...position });
+		}
 	}
 
-	return draws;
+	return runs;
 }
 
-async function renderDraws(content: React.ReactNode): Promise<GlyphDraw[]> {
+async function renderPositionedRuns(
+	content: React.ReactNode,
+): Promise<PositionedRun[]> {
 	const pdf = await renderToBuffer(
 		<Document>
 			<Page size="A4" style={styles.page}>
@@ -96,55 +113,28 @@ async function renderDraws(content: React.ReactNode): Promise<GlyphDraw[]> {
 		</Document>,
 	);
 
-	return extractGlyphDraws(extractTextStream(pdf));
-}
-
-function asGlyphTriplet(draws: GlyphDraw[]): [GlyphDraw, GlyphDraw, GlyphDraw] {
-	const [base, mark, repeatedBase] = draws;
-
-	if (!base || !mark || !repeatedBase || draws.length !== 3) {
-		throw new Error(
-			`Expected a base glyph, its combining mark and the repeated base, got ${draws.length} draw(s)`,
-		);
-	}
-
-	return [base, mark, repeatedBase];
-}
-
-async function expectMarkDrawnOverBase(accented: string, base: string) {
-	const [first, mark, second] = asGlyphTriplet(
-		await renderDraws(`${accented}${base}`),
-	);
-
-	const baseAdvance = second.x - first.x;
-	const markOffset = mark.x - first.x;
-
-	expect(second.hex).toBe(first.hex);
-	expect(mark.hex).not.toBe(first.hex);
-	expect(baseAdvance).toBeGreaterThan(0);
-	expect(markOffset).toBeGreaterThan(0);
-	expect(markOffset).toBeLessThan(MAX_MARK_OFFSET_RATIO * baseAdvance);
+	return extractPositionedRuns(extractTextStream(pdf));
 }
 
 describe("PDF accent rendering", () => {
-	it("draws the combining acute over its base letter, not at its advance", async () => {
-		await expectMarkDrawnOverBase("é", "e");
-	});
+	it("draws one precomposed glyph per accented letter, never a detached mark", async () => {
+		const runs = await renderPositionedRuns(FRENCH_DIACRITICS);
+		const glyphIds = runs.flatMap((run) => run.glyphIds);
 
-	it("draws the combining cedilla over its base letter, not at its advance", async () => {
-		await expectMarkDrawnOverBase("ç", "c");
+		expect(glyphIds).toHaveLength([...FRENCH_DIACRITICS].length);
+		expect(runs).toHaveLength(1);
 	});
 
 	it("lifts a superscript run by a fraction of the font size", async () => {
-		const draws = await renderDraws(
+		const runs = await renderPositionedRuns(
 			<>
 				m<Text style={styles.superscript}>2</Text>
 			</>,
 		);
 
-		const [base, superscript] = draws;
+		const [base, superscript] = runs;
 		if (!base || !superscript) {
-			throw new Error(`Expected 2 glyph draws, got ${draws.length}`);
+			throw new Error(`Expected 2 positioned runs, got ${runs.length}`);
 		}
 
 		const rise = superscript.y - base.y;

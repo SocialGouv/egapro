@@ -4,10 +4,8 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-patchedDependencies:
-  '@react-pdf/render@4.4.1':
-    hash: 7634d9a1a18fcb87fcc9bae322399b5cc877a20bd9111d121d20a6b76f39743d
-    path: patches/@react-pdf__render@4.4.1.patch
+overrides:
+  '@react-pdf/textkit': ^6.3.0
 
 importers:
 
@@ -1970,8 +1968,8 @@ packages:
   '@react-pdf/stylesheet@6.1.4':
     resolution: {integrity: sha512-jiwovO7lUwgccAh3JbVcXnh90AiSKZetdz2ETcWsKApPPLzLUzPkEs6wCVvZqh3lcGOAPFV3AfdMkFnLwv1ryg==}
 
-  '@react-pdf/textkit@6.2.0':
-    resolution: {integrity: sha512-0B22Kue/ALHiEcYNbrx2BdkpHPTq2j3u2xmAyCnf3XJbTyANjljJjtWRohkVLQKqOlieD88BvmQt7OeWLj+ZYg==}
+  '@react-pdf/textkit@6.3.0':
+    resolution: {integrity: sha512-v6+V8nAcVwm7s2s1jIG2MD3Iw//x/k+XrH1foWOELBE4b32pyDgKyPXN/6KJE0dnX7+fVy27uctLNCLNMvzKzQ==}
 
   '@react-pdf/types@2.10.0':
     resolution: {integrity: sha512-iz0NusqQ/9ZHQirWhJqOaxY1UkpvuNkEDtH4/SPCnhZJKBO/IhlFLFHuzbHkmWByBoX6X3m8GCc2b/1QH6QNlA==}
@@ -8461,7 +8459,7 @@ snapshots:
       '@react-pdf/image': 3.0.4
       '@react-pdf/primitives': 4.2.0
       '@react-pdf/stylesheet': 6.1.4
-      '@react-pdf/textkit': 6.2.0
+      '@react-pdf/textkit': 6.3.0
       '@react-pdf/types': 2.10.0
       emoji-regex-xs: 1.0.0
       queue: 6.0.2
@@ -8492,12 +8490,12 @@ snapshots:
       react: 19.2.5
       scheduler: 0.25.0-rc-603e6108-20241029
 
-  '@react-pdf/render@4.4.1(patch_hash=7634d9a1a18fcb87fcc9bae322399b5cc877a20bd9111d121d20a6b76f39743d)':
+  '@react-pdf/render@4.4.1':
     dependencies:
       '@babel/runtime': 7.29.2
       '@react-pdf/fns': 3.1.3
       '@react-pdf/primitives': 4.2.0
-      '@react-pdf/textkit': 6.2.0
+      '@react-pdf/textkit': 6.3.0
       '@react-pdf/types': 2.10.0
       abs-svg-path: 0.1.1
       color-string: 1.9.1
@@ -8514,7 +8512,7 @@ snapshots:
       '@react-pdf/pdfkit': 5.0.0
       '@react-pdf/primitives': 4.2.0
       '@react-pdf/reconciler': 2.0.0(react@19.2.5)
-      '@react-pdf/render': 4.4.1(patch_hash=7634d9a1a18fcb87fcc9bae322399b5cc877a20bd9111d121d20a6b76f39743d)
+      '@react-pdf/render': 4.4.1
       '@react-pdf/types': 2.10.0
       events: 3.3.0
       object-assign: 4.1.1
@@ -8531,7 +8529,7 @@ snapshots:
       media-engine: 1.0.3
       postcss-value-parser: 4.2.0
 
-  '@react-pdf/textkit@6.2.0':
+  '@react-pdf/textkit@6.3.0':
     dependencies:
       '@react-pdf/fns': 3.1.3
       bidi-js: 1.0.3
