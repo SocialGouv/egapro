@@ -1,7 +1,7 @@
 "use client";
 
 import { getWorkforceYearFor } from "~/modules/domain";
-import { useFileDownload } from "~/modules/shared";
+import { isNativeClick, useFileDownload } from "~/modules/shared";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { DeclarationItem } from "./types";
 
@@ -75,6 +75,7 @@ function DocumentCardItem({ resource }: DocumentCardItemProps) {
 								aria-disabled={state === "pending" ? "true" : undefined}
 								href={resource.href}
 								onClick={(e) => {
+									if (isNativeClick(e)) return;
 									e.preventDefault();
 									void download(resource.href);
 								}}
