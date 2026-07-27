@@ -178,7 +178,7 @@ describe("buildPdfData", () => {
 		expect(result.source).toBe("Accord d'entreprise");
 	});
 
-	it("displays the GIP-absent placeholder and a bare source when GIP data and label are missing", async () => {
+	it("displays the GIP-absent placeholder and a humanised source when GIP data and label are missing", async () => {
 		queue(
 			[
 				{
@@ -217,8 +217,8 @@ describe("buildPdfData", () => {
 			email: "",
 			phone: "",
 		});
-		// Unknown source value falls back to its raw string.
-		expect(result.source).toBe("convention-maison");
+		// Unknown source value is humanised rather than printed as a raw slug.
+		expect(result.source).toBe("Convention maison");
 	});
 
 	it("falls back to a synthesized company name and zeroed totals when the company row is missing", async () => {
