@@ -4,7 +4,7 @@ Cahier de tests métier, maintenu **en corrélation avec les tests E2E** (issue 
 
 Ce document est le **miroir versionné du fichier `Parcours.xlsx` de Laetitia** (juillet 2026) : chaque feuille, chaque année de campagne (2027 → 2033) et chaque cellule du fichier s'y retrouve, avec ses libellés d'origine. Il remplace l'Excel comme outil de suivi : le métier y lit les parcours à tester, et chaque parcours pointe vers le test E2E qui l'automatise. **En cas d'évolution de l'Excel, c'est ce document qu'il faut mettre à jour**, puis les tests.
 
-**Mode d'emploi** : placez-vous sur votre feuille et votre année au §3 — la ligne donne les cas à dérouler (avec leur résumé), la commande qui exécute exactement ces tests, et chaque cas est cliquable vers sa fiche détaillée (§2, étapes verbatim de l'Excel).
+**Mode d'emploi** : placez-vous sur votre feuille et votre année au §3 — la cellule liste les cas à dérouler, chacun désigné par une **coordonnée autoportante** `AAAA-EFFMAX-CASNN` (ex. `2027-249-CAS04` = année 2027, tranche 150-249, cas 4) qu'on peut citer sans ambiguïté en réunion. Chaque coordonnée est cliquable vers sa fiche détaillée (§2, étapes verbatim de l'Excel + test E2E). Nomenclature complète en tête du §3.
 
 Audience : équipe métier / PO (référence d'acceptance et suivi des tests) et développeurs (traçabilité scénarios ↔ tests).
 
@@ -47,7 +47,11 @@ Les specs conformité tournent avec l'entreprise de test SIREN `130025265`, **ef
 
 ## 2. Les fiches de cas (détail verbatim de l'Excel)
 
-Une fiche par cas, avec les étapes **verbatim** des cellules de l'Excel (feuilles « 100-149 », « 150-249 », « 250 et + » — les libellés y sont identiques). Les cas 1 et 2 existent en deux variantes selon l'année (voir §3) : années « 7 indicateurs » (`CAS-01`, `CAS-02`) et années « 6 premiers indicateurs » (`CAS-01-6IND`, `CAS-02-6IND`, sans indicateur G donc sans parcours de conformité possible). Les cas 3 à 12 n'existent qu'en année « 7 indicateurs ».
+Une fiche par **parcours-type**. Chaque fiche a un ID court qui est l'**ancre du test E2E** — c'est la couche « test » ; la couche « désignation métier » est la coordonnée `AAAA-EFFMAX-CASNN` du §3, qui renvoie ici. Un même parcours-type se retrouve dans des dizaines de cellules (années × tranches) mais n'est défini — et testé — qu'une fois.
+
+**Comment lire une fiche.** L'ID `CAS-NN` **reprend le numéro « Cas N » de l'Excel** (`CAS-04` ↔ « Cas 4 » des feuilles) ; le suffixe `-6IND` désigne la variante « 6 premiers indicateurs » (années sans indicateur G). Le titre énonce ensuite les **conditions qui définissent le cas** — nombre d'indicateurs (6 ou 7) · présence d'un CSE · issue du parcours — et le champ **« Libellé Excel »** rappelle le texte exact de la cellule d'origine. Exemple : `CAS-01` = *7 indicateurs, sans CSE, aucun écart ≥ 5 %* → il reprend « Cas 1 » des colonnes 7 indicateurs.
+
+Les cas 1 et 2 existent donc en deux variantes selon l'année (voir §3) : `CAS-01`/`CAS-02` (7 indicateurs) et `CAS-01-6IND`/`CAS-02-6IND` (6 indicateurs, sans indicateur G donc sans parcours de conformité possible). Les cas 3 à 12 n'existent qu'en année « 7 indicateurs ».
 
 Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » = indicateur G, l'écart de rémunération par catégorie de salariés (étape 5 du funnel) ; « Déclaration des 6 premiers indicateurs » = funnel sans l'étape 5 (indicateurs A à F) ; « Parcours de conformité » = page `/declaration-remuneration/parcours-conformite` ; « Nouvelle déclaration du 7ème indicateur » = seconde déclaration (étapes 1 à 3 du parcours actions correctives) ; « Dépot avis CSE » = flux `/avis-cse/etape/1..2` (étape 1 : avis rendus, étape 2 : dépôt des fichiers et matrice d'association) ; « Dépôt du rapport de l'évaluation conjointe » = upload PDF sur `/evaluation-conjointe`.
 
@@ -55,7 +59,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-01"></a>
 
-### CAS-01 — Cas 1 sans CSE et aucun écart ≥ 5% pour le 7ème indicateur
+### CAS-01 : 7 indicateurs · sans CSE · aucun écart ≥ 5 % → fin de démarche
+
+**Libellé Excel** : « Cas 1 sans CSE et aucun écart ≥ 5% pour le 7ème indicateur »
 
 - CSE : non
 - Déclaration des 7 indicateurs
@@ -67,7 +73,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-02"></a>
 
-### CAS-02 — Cas 2 avec CSE et aucun écart ≥ 5% pour le 7ème indicateur
+### CAS-02 : 7 indicateurs · avec CSE · aucun écart ≥ 5 % → avis CSE
+
+**Libellé Excel** : « Cas 2 avec CSE et aucun écart ≥ 5% pour le 7ème indicateur »
 
 - CSE : oui
 - Déclaration des 7 indicateurs
@@ -80,7 +88,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-03"></a>
 
-### CAS-03 — Cas 3 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts
+### CAS-03 : 7 indicateurs · sans CSE · écart ≥ 5 % → justification des écarts
+
+**Libellé Excel** : « Cas 3 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts »
 
 - CSE : non
 - Déclaration des 7 indicateurs
@@ -93,7 +103,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-04"></a>
 
-### CAS-04 — Cas 4 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts
+### CAS-04 : 7 indicateurs · avec CSE · écart ≥ 5 % → justification + avis CSE
+
+**Libellé Excel** : « Cas 4 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et justification des écarts »
 
 - CSE : oui
 - Déclaration des 7 indicateurs
@@ -107,7 +119,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-05"></a>
 
-### CAS-05 — Cas 5 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe
+### CAS-05 : 7 indicateurs · sans CSE · écart ≥ 5 % → évaluation conjointe
+
+**Libellé Excel** : « Cas 5 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe »
 
 - CSE : non
 - Déclaration des 7 indicateurs
@@ -121,7 +135,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-06"></a>
 
-### CAS-06 — Cas 6 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe
+### CAS-06 : 7 indicateurs · avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE
+
+**Libellé Excel** : « Cas 6 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur et évaluation conjointe »
 
 - CSE : oui
 - Déclaration des 7 indicateurs
@@ -136,7 +152,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-07"></a>
 
-### CAS-07 — Cas 7 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5%
+### CAS-07 : 7 indicateurs · sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart
+
+**Libellé Excel** : « Cas 7 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5% »
 
 - CSE : non
 - Déclaration des 7 indicateurs
@@ -150,7 +168,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-08"></a>
 
-### CAS-08 — Cas 8 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5%
+### CAS-08 : 7 indicateurs · avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE
+
+**Libellé Excel** : « Cas 8 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec aucun écart ≥ 5% »
 
 - CSE : oui
 - Déclaration des 7 indicateurs
@@ -165,7 +185,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-09"></a>
 
-### CAS-09 — Cas 9 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts
+### CAS-09 : 7 indicateurs · sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification
+
+**Libellé Excel** : « Cas 9 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts »
 
 - CSE : non
 - Déclaration des 7 indicateurs
@@ -180,7 +202,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-10"></a>
 
-### CAS-10 — Cas 10 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts
+### CAS-10 : 7 indicateurs · avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE
+
+**Libellé Excel** : « Cas 10 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et justification des écarts »
 
 - CSE : oui
 - Déclaration des 7 indicateurs
@@ -196,7 +220,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-11"></a>
 
-### CAS-11 — Cas 11 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe
+### CAS-11 : 7 indicateurs · sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe
+
+**Libellé Excel** : « Cas 11 sans CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe »
 
 - CSE : non
 - Déclaration des 7 indicateurs
@@ -212,7 +238,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-12"></a>
 
-### CAS-12 — Cas 12 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe
+### CAS-12 : 7 indicateurs · avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE
+
+**Libellé Excel** : « Cas 12 avec CSE, au moins un écart ≥ 5% pour le 7ème indicateur, actions correctives-nouvelle déclaration avec au moins un écart ≥ 5% et évaluation conjointe »
 
 - CSE : oui
 - Déclaration des 7 indicateurs
@@ -229,7 +257,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-01-6ind"></a>
 
-### CAS-01-6IND — Cas 1 sans CSE *(années « 6 premiers indicateurs »)*
+### CAS-01-6IND : 6 premiers indicateurs · sans CSE
+
+**Libellé Excel** : « Cas 1 sans CSE » *(colonnes « 6 premiers indicateurs » — pas d'indicateur G)*
 
 - CSE : non
 - Déclaration des 6 premiers indicateurs
@@ -241,7 +271,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 <a name="cas-02-6ind"></a>
 
-### CAS-02-6IND — Cas 2 avec CSE *(années « 6 premiers indicateurs »)*
+### CAS-02-6IND : 6 premiers indicateurs · avec CSE · avis CSE « exactitude »
+
+**Libellé Excel** : « Cas 2 avec CSE » *(colonnes « 6 premiers indicateurs » — pas d'indicateur G)*
 
 - CSE : oui
 - Déclaration des 6 premiers indicateurs
@@ -254,9 +286,21 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 ## 3. Les feuilles de l'Excel, année par année
 
-Miroir des quatre onglets du fichier. Placez-vous sur votre feuille et votre année : la ligne donne les cas à dérouler (cliquables vers leur fiche §2) et la commande qui exécute exactement ces tests.
+Miroir des quatre onglets du fichier. Placez-vous sur votre feuille et votre année : la cellule liste les cas à dérouler, chacun désigné par une **coordonnée autoportante** (cliquable vers sa fiche §2).
 
-Les deux jeux de cas se répètent d'une cellule à l'autre ; leurs commandes :
+### Nomenclature des coordonnées
+
+Chaque cas d'une cellule porte un identifiant `AAAA-EFFMAX-CASNN` qui le désigne sans ambiguïté en réunion (« on parle de 2027-249-CAS04 ») :
+
+- `AAAA` — l'année de campagne (2027 → 2033) ;
+- `EFFMAX` — l'effectif **maximum** de la tranche : `49` (< 50), `99` (50-99), `149` (100-149), `249` (150-249), `250P` (250 et plus) ;
+- `CASNN` — le numéro de cas de la feuille Excel (`CAS01` → `CAS12`).
+
+L'année et la tranche fixent déjà la variante « 6 ou 7 indicateurs », donc `2027-249-CAS01` (7 indicateurs) et `2028-249-CAS01` (6 indicateurs) sont deux parcours distincts sans qu'il faille de suffixe.
+
+**Lecture d'une ligne de cellule** : `coordonnée : rappel`. Le texte après les deux-points est un **résumé** du cas (conditions · issue), pas une seconde information : `2027-149-CAS01 : sans CSE → fin de démarche directe` se lit « la coordonnée 2027-149-CAS01, qui correspond au parcours *sans CSE, fin de démarche directe* ». Cliquez la coordonnée pour la fiche complète (§2).
+
+La coordonnée est **au-dessus des tests** : elle pointe vers la **fiche du parcours-type** (§2 — `CAS-01` … `CAS-12`, `CAS-01-6IND`, `CAS-02-6IND`) où vit le test E2E. Comme le contenu d'un cas ne dépend ni de l'année ni de la tranche, un même test couvre toutes les coordonnées qui pointent vers sa fiche — d'où ~14 tests pour toute la grille. Pour lancer **un** cas précis, ouvrez sa fiche : la commande `--grep` y est. Pour lancer **une configuration entière** :
 
 - **Année « 7 indicateurs » (les 12 cas)** : `pnpm --filter app test:e2e --grep "\[CAS-(0[1-9]|1[0-2])\]"`
 - **Année « 6 premiers indicateurs » (cas 1-2)** : `pnpm --filter app test:e2e --grep "\[CAS-0[12]-6IND\]"`
@@ -270,45 +314,52 @@ Restitution verbatim (cette feuille ne prévoit ni cas CSE ni parcours de confor
 | Moins de 50 salariés (sur la base du volontariat) | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs |
 | 50 à 99 salariés | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | **Déclaration des 7 indicateurs** | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | **Déclaration des 7 indicateurs** |
 
-⚠️ Ces deux lignes sont **suspendues aux arbitrages métier du §6** (divergences 1 à 3 : volontariat < 50 avec ou sans indicateur G, assujettissement des 50-99 hors années triennales, parcours de conformité des 50-99 en année 7 indicateurs). Elles n'ont pas de fiche testable tant que ces points ne sont pas tranchés — les trancher, puis créer les fiches et les tests.
+⚠️ Ces deux lignes sont **suspendues aux arbitrages métier du §6** (divergences 1 à 3 : volontariat < 50 avec ou sans indicateur G, assujettissement des 50-99 hors années triennales, parcours de conformité des 50-99 en année 7 indicateurs). Elles n'ont ni coordonnée ni fiche testable tant que ces points ne sont pas tranchés — les trancher, puis créer les fiches et les tests. Pour désigner un point de cette feuille en attendant, « 50-99, 2030 » suffit (un seul contenu par cellule).
 
 ### Feuille « 100-149 »
 
-Les années « 6 premiers indicateurs » (2027, 2028, 2029, 2031, 2032) sont identiques entre elles ; les années « 7 indicateurs » (2030, 2033) aussi.
+Coordonnées préfixées `AAAA-149-…`. Les années « 6 premiers indicateurs » (2027, 2028, 2029, 2031, 2032) sont identiques entre elles ; les années « 7 indicateurs » (2030, 2033) aussi.
 
-| Année | Déclaration | Cas à dérouler |
+| Année | Déclaration | Cas à dérouler (coordonnée — rappel) |
 |---|---|---|
-| 2027 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
-| 2028 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
-| 2029 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
-| **2030** | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE « exactitude »<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — actions correctives, 2ᵉ décl. sans écart + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — 2ᵉ décl. avec écart → justification + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport<br>[CAS-12](#cas-12) avec CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport + avis CSE sur les 2 décl. |
-| 2031 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
-| 2032 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
-| **2033** | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE « exactitude »<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — actions correctives, 2ᵉ décl. sans écart + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — 2ᵉ décl. avec écart → justification + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport<br>[CAS-12](#cas-12) avec CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport + avis CSE sur les 2 décl. |
+| 2027 | 6 premiers indicateurs | Les 2 cas :<br>[2027-149-CAS01](#cas-01-6ind) : sans CSE → fin de démarche directe<br>[2027-149-CAS02](#cas-02-6ind) : avec CSE → avis CSE « exactitude » |
+| 2028 | 6 premiers indicateurs | Les 2 cas :<br>[2028-149-CAS01](#cas-01-6ind) : sans CSE → fin de démarche directe<br>[2028-149-CAS02](#cas-02-6ind) : avec CSE → avis CSE « exactitude » |
+| 2029 | 6 premiers indicateurs | Les 2 cas :<br>[2029-149-CAS01](#cas-01-6ind) : sans CSE → fin de démarche directe<br>[2029-149-CAS02](#cas-02-6ind) : avec CSE → avis CSE « exactitude » |
+| **2030** | **7 indicateurs** | Les 12 cas :<br>[2030-149-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2030-149-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2030-149-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2030-149-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2030-149-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2030-149-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2030-149-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2030-149-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2030-149-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2030-149-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2030-149-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2030-149-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
+| 2031 | 6 premiers indicateurs | Les 2 cas :<br>[2031-149-CAS01](#cas-01-6ind) : sans CSE → fin de démarche directe<br>[2031-149-CAS02](#cas-02-6ind) : avec CSE → avis CSE « exactitude » |
+| 2032 | 6 premiers indicateurs | Les 2 cas :<br>[2032-149-CAS01](#cas-01-6ind) : sans CSE → fin de démarche directe<br>[2032-149-CAS02](#cas-02-6ind) : avec CSE → avis CSE « exactitude » |
+| **2033** | **7 indicateurs** | Les 12 cas :<br>[2033-149-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2033-149-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2033-149-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2033-149-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2033-149-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2033-149-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2033-149-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2033-149-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2033-149-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2033-149-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2033-149-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2033-149-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
 
 ### Feuille « 150-249 »
 
-Les années « 7 indicateurs » (2027, 2030, 2033) sont identiques entre elles ; les années « 6 premiers indicateurs » (2028, 2029, 2031, 2032) aussi.
+Coordonnées préfixées `AAAA-249-…`. Les années « 7 indicateurs » (2027, 2030, 2033) sont identiques entre elles ; les années « 6 premiers indicateurs » (2028, 2029, 2031, 2032) aussi.
 
-| Année | Déclaration | Cas à dérouler |
+| Année | Déclaration | Cas à dérouler (coordonnée — rappel) |
 |---|---|---|
-| **2027** | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE « exactitude »<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — actions correctives, 2ᵉ décl. sans écart + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — 2ᵉ décl. avec écart → justification + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport<br>[CAS-12](#cas-12) avec CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport + avis CSE sur les 2 décl. |
-| 2028 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
-| 2029 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
-| **2030** | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE « exactitude »<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — actions correctives, 2ᵉ décl. sans écart + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — 2ᵉ décl. avec écart → justification + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport<br>[CAS-12](#cas-12) avec CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport + avis CSE sur les 2 décl. |
-| 2031 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
-| 2032 | 6 premiers indicateurs | [CAS-01-6IND](#cas-01-6ind) sans CSE — fin de démarche directe<br>[CAS-02-6IND](#cas-02-6ind) avec CSE — avis CSE « exactitude » |
-| **2033** | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE « exactitude »<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — actions correctives, 2ᵉ décl. sans écart + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — 2ᵉ décl. avec écart → justification + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport<br>[CAS-12](#cas-12) avec CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport + avis CSE sur les 2 décl. |
+| **2027** | **7 indicateurs** | Les 12 cas :<br>[2027-249-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2027-249-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2027-249-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2027-249-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2027-249-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2027-249-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2027-249-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2027-249-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2027-249-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2027-249-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2027-249-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2027-249-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
+| 2028 | 6 premiers indicateurs | Les 2 cas :<br>[2028-249-CAS01](#cas-01-6ind) : sans CSE → fin de démarche directe<br>[2028-249-CAS02](#cas-02-6ind) : avec CSE → avis CSE « exactitude » |
+| 2029 | 6 premiers indicateurs | Les 2 cas :<br>[2029-249-CAS01](#cas-01-6ind) : sans CSE → fin de démarche directe<br>[2029-249-CAS02](#cas-02-6ind) : avec CSE → avis CSE « exactitude » |
+| **2030** | **7 indicateurs** | Les 12 cas :<br>[2030-249-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2030-249-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2030-249-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2030-249-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2030-249-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2030-249-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2030-249-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2030-249-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2030-249-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2030-249-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2030-249-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2030-249-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
+| 2031 | 6 premiers indicateurs | Les 2 cas :<br>[2031-249-CAS01](#cas-01-6ind) : sans CSE → fin de démarche directe<br>[2031-249-CAS02](#cas-02-6ind) : avec CSE → avis CSE « exactitude » |
+| 2032 | 6 premiers indicateurs | Les 2 cas :<br>[2032-249-CAS01](#cas-01-6ind) : sans CSE → fin de démarche directe<br>[2032-249-CAS02](#cas-02-6ind) : avec CSE → avis CSE « exactitude » |
+| **2033** | **7 indicateurs** | Les 12 cas :<br>[2033-249-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2033-249-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2033-249-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2033-249-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2033-249-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2033-249-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2033-249-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2033-249-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2033-249-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2033-249-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2033-249-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2033-249-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
 
 ### Feuille « 250 et + »
 
-Toutes les années sont identiques : les 12 cas, chaque année.
+Coordonnées préfixées `AAAA-250P-…`. Toutes les années suivent le même schéma (les 12 cas) ; une ligne par année pour que chaque coordonnée soit lisible telle quelle.
 
-| Année | Déclaration | Cas à dérouler |
+| Année | Déclaration | Cas à dérouler (coordonnée — rappel) |
 |---|---|---|
-| 2027 → 2033 (chaque année) | **7 indicateurs** | Les 12 cas :<br>[CAS-01](#cas-01) sans CSE, aucun écart — fin de démarche<br>[CAS-02](#cas-02) avec CSE, aucun écart — avis CSE « exactitude »<br>[CAS-03](#cas-03) sans CSE — justification des écarts<br>[CAS-04](#cas-04) avec CSE — justification + avis CSE<br>[CAS-05](#cas-05) sans CSE — éval. conjointe + rapport<br>[CAS-06](#cas-06) avec CSE — éval. conjointe + rapport + avis CSE<br>[CAS-07](#cas-07) sans CSE — actions correctives, 2ᵉ décl. sans écart<br>[CAS-08](#cas-08) avec CSE — actions correctives, 2ᵉ décl. sans écart + avis CSE sur les 2 décl.<br>[CAS-09](#cas-09) sans CSE — 2ᵉ décl. avec écart → justification<br>[CAS-10](#cas-10) avec CSE — 2ᵉ décl. avec écart → justification + avis CSE sur les 2 décl.<br>[CAS-11](#cas-11) sans CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport<br>[CAS-12](#cas-12) avec CSE — 2ᵉ décl. avec écart → éval. conjointe + rapport + avis CSE sur les 2 décl. |
+| **2027** | **7 indicateurs** | Les 12 cas :<br>[2027-250P-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2027-250P-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2027-250P-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2027-250P-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2027-250P-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2027-250P-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2027-250P-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2027-250P-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2027-250P-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2027-250P-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2027-250P-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2027-250P-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
+| **2028** | **7 indicateurs** | Les 12 cas :<br>[2028-250P-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2028-250P-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2028-250P-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2028-250P-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2028-250P-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2028-250P-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2028-250P-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2028-250P-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2028-250P-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2028-250P-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2028-250P-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2028-250P-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
+| **2029** | **7 indicateurs** | Les 12 cas :<br>[2029-250P-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2029-250P-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2029-250P-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2029-250P-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2029-250P-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2029-250P-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2029-250P-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2029-250P-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2029-250P-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2029-250P-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2029-250P-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2029-250P-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
+| **2030** | **7 indicateurs** | Les 12 cas :<br>[2030-250P-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2030-250P-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2030-250P-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2030-250P-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2030-250P-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2030-250P-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2030-250P-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2030-250P-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2030-250P-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2030-250P-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2030-250P-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2030-250P-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
+| **2031** | **7 indicateurs** | Les 12 cas :<br>[2031-250P-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2031-250P-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2031-250P-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2031-250P-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2031-250P-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2031-250P-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2031-250P-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2031-250P-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2031-250P-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2031-250P-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2031-250P-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2031-250P-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
+| **2032** | **7 indicateurs** | Les 12 cas :<br>[2032-250P-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2032-250P-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2032-250P-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2032-250P-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2032-250P-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2032-250P-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2032-250P-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2032-250P-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2032-250P-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2032-250P-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2032-250P-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2032-250P-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
+| **2033** | **7 indicateurs** | Les 12 cas :<br>[2033-250P-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2033-250P-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2033-250P-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2033-250P-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2033-250P-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2033-250P-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2033-250P-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2033-250P-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2033-250P-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2033-250P-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2033-250P-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2033-250P-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
 
 **Règles de cadencement sous-jacentes** (implémentées dans `packages/app/src/modules/domain/shared/indicatorG.ts` et `companyObligation.ts`, couvertes par les tests unitaires `indicatorG.test.ts` et `companyObligation.test.ts`) : indicateur G requis chaque année dès 250 salariés ; les années triennales (2027, 2030, 2033) dès 150 salariés avant 2030 puis dès 50 salariés à partir de 2030.
+
 
 ---
 

@@ -12,12 +12,22 @@ const SCENARIO_ID = /\b(?:CAS|ANX)-\d{2}(?:-[A-Z0-9]+)*\b/g;
  * (### CAS-01) or by a table row whose first cell is its ID (| ANX-01 | ...).
  * Prose mentions and links ([CAS-01](#cas-01) in the per-sheet tables) are
  * intentionally ignored — only fiches and rows bind.
+ *
+ * The §3 per-sheet tables list one autoportant coordinate per cell, e.g.
+ * `2027-249-CAS04` (year-EFFMAX-CASnn). These are NOT scenarios: they are
+ * business designators pointing back to a fiche (the parcours-type that holds
+ * the test), and dozens of coordinates map to the same ~14 fiches. Two things
+ * keep them out of the scenario set on purpose — do not "fix" either:
+ *   1. the coordinate is never the table row's FIRST cell (that's the year);
+ *   2. its case token is `CAS04` (no dash), so the `CAS-\d{2}` id pattern,
+ *      which requires a dash, cannot match it.
+ * Counting coordinates would demand ~100 identical tests for 14 behaviours.
  */
 export function parseCahier(markdown) {
 	const scenarios = new Set();
 	for (const line of markdown.split("\n")) {
 		const match =
-			line.match(/^#{2,4}\s+((?:CAS|ANX)-\d{2}(?:-[A-Z0-9]+)*)(?:\s+—.*)?$/) ??
+			line.match(/^#{2,4}\s+((?:CAS|ANX)-\d{2}(?:-[A-Z0-9]+)*)(?:\s.*)?$/) ??
 			line.match(/^\|\s*((?:CAS|ANX)-\d{2}(?:-[A-Z0-9]+)*)\s*\|/);
 		if (!match) continue;
 		const id = match[1];
