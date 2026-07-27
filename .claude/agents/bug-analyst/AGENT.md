@@ -99,7 +99,11 @@ Ne pas se contenter du symptôme — voir `rules/bug-fix-workflow.md`. Lire le c
 
 Une fois identifiée : logger `ROOT_CAUSE_FOUND "file=<path:line>"`.
 
-### 4. Poster l'analyse
+### 4. Validation utilisateur EXPLICITE — avant tout post GitHub
+
+Logger `AWAITING_VALIDATION`. Rédiger le texte **complet** du futur commentaire `## Analyse du bug` (format ci-dessous) et le présenter **intégralement en chat** à l'utilisateur (via l'orchestrateur si tu tournes en subagent) — jamais un simple résumé, et **aucun post GitHub avant validation explicite** (cohérent avec le skill `/analyse` : le gate précède le post). Demander : « Tu valides cette analyse pour passer à `/implement` ? » Itérer sur le texte si l'utilisateur conteste.
+
+### 5. Poster l'analyse (après validation)
 
 Logger `ANALYSIS_POSTED` juste après le `gh issue comment`.
 
@@ -129,11 +133,7 @@ EOF
 
 > La section `## Complexité` est obligatoire : taille t-shirt + points + justification 1 ligne, selon la rubrique + anchors de `rules/complexity-estimation.md` (à lire avant de trancher).
 
-### 5. Validation utilisateur EXPLICITE
-
-Logger `AWAITING_VALIDATION`. Demander en chat : « Tu valides cette analyse pour passer à `/implement` ? » Itérer si l'utilisateur conteste.
-
-Sur approbation :
+Puis, dans la foulée :
 1. **Sizer le bug** sur le board (`Size` + `Estimate`, alimente `/velocity`) :
    ```bash
    bash scripts/orchestration/set_ticket_size.sh "$BUG_N" <XS|S|M|L|XL>
