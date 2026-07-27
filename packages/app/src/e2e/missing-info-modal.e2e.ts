@@ -122,4 +122,50 @@ test.describe("Missing info modal", () => {
 			expect(page.url()).toContain("/mon-espace");
 		});
 	});
+
+	test.describe("Validation error on empty CSE", () => {
+		test.beforeAll(async () => {
+			await setUserPhone("0122334455");
+			await setCompanyHasCse(null);
+		});
+
+		test.afterAll(async () => {
+			await setCompanyHasCse(true);
+		});
+
+		test("shows explicit French error when CSE choice is empty", async ({
+			page,
+		}) => {
+			await page.context().clearCookies();
+			await loginWithProConnect(page);
+			await waitForDsfrModal(page, MISSING_INFO_MODAL_ID);
+
+			const modal = page.locator(`#${MISSING_INFO_MODAL_ID}`);
+
+			const declarationButton = page.getByRole("button", {
+				name: "Rémunération",
+			});
+			await expect(declarationButton).toBeVisible();
+			await clickAndExpectDialogOpen(
+				page,
+				declarationButton,
+				MISSING_INFO_MODAL_ID,
+			);
+			await expect(
+				modal.getByText("Un CSE a-t-il été mis en place"),
+			).toBeVisible();
+
+			await modal.getByRole("button", { name: "Enregistrer" }).click();
+
+			// Regression guard for #3970: an unanswered CSE radio must surface the
+			// explicit French message, not Zod's default "Invalid input: expected
+			// boolean, received null".
+			await expect(
+				modal.locator(".fr-message--error", {
+					hasText: "Veuillez renseigner si un CSE a été mis en place.",
+				}),
+			).toBeVisible();
+			expect(page.url()).toContain("/mon-espace");
+		});
+	});
 });
