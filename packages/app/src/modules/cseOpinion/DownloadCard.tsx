@@ -1,7 +1,9 @@
 "use client";
 
-import { isNativeClick, useFileDownload } from "~/modules/shared";
+import { DownloadStatusRegion, useDownloadClickGuard } from "~/modules/shared";
 import styles from "./ConfirmationPage.module.scss";
+
+const PENDING_LABEL = "Téléchargement en cours…";
 
 type Props = {
 	dataYear: number;
@@ -11,23 +13,13 @@ type Props = {
 };
 
 export function DownloadCard({ dataYear, href, title, year }: Props) {
-	const { state, download } = useFileDownload();
+	const { anchorProps, state } = useDownloadClickGuard(href);
 
 	return (
 		<>
-			<a
-				aria-busy={state === "pending" ? "true" : undefined}
-				aria-disabled={state === "pending" ? "true" : undefined}
-				className={styles.downloadCard}
-				href={href}
-				onClick={(e) => {
-					if (isNativeClick(e)) return;
-					e.preventDefault();
-					void download(href);
-				}}
-			>
+			<a className={styles.downloadCard} {...anchorProps}>
 				<p className="fr-text--bold fr-text--md fr-mb-1w">
-					{state === "pending" ? "Téléchargement en cours…" : title}
+					{state === "pending" ? PENDING_LABEL : title}
 				</p>
 				<p className="fr-text--sm fr-text--default-grey fr-mb-1w">
 					Année {year} au titre des données {dataYear}
@@ -37,14 +29,7 @@ export function DownloadCard({ dataYear, href, title, year }: Props) {
 					<span aria-hidden="true" className="fr-icon-download-line" />
 				</div>
 			</a>
-			<p aria-atomic="true" aria-live="polite" className="fr-sr-only">
-				{state === "pending" ? "Téléchargement en cours…" : ""}
-			</p>
-			{state === "error" && (
-				<p className="fr-text--xs fr-error-text fr-mt-1w fr-mb-0" role="alert">
-					Le téléchargement a échoué, réessayez.
-				</p>
-			)}
+			<DownloadStatusRegion pendingLabel={PENDING_LABEL} state={state} />
 		</>
 	);
 }

@@ -1,9 +1,11 @@
 "use client";
 
 import { getWorkforceYearFor } from "~/modules/domain";
-import { isNativeClick, useFileDownload } from "~/modules/shared";
+import { DownloadStatusRegion, useDownloadClickGuard } from "~/modules/shared";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { DeclarationItem } from "./types";
+
+const PENDING_LABEL = "Téléchargement en cours…";
 
 export function getDocumentsPanelId(declaration: DeclarationItem): string {
 	return `documents-panel-${declaration.type}-${declaration.year}`;
@@ -62,7 +64,7 @@ type DocumentCardItemProps = {
 };
 
 function DocumentCardItem({ resource }: DocumentCardItemProps) {
-	const { state, download } = useFileDownload();
+	const { anchorProps, state } = useDownloadClickGuard(resource.href);
 
 	return (
 		<li className={styles.documentItem}>
@@ -70,36 +72,18 @@ function DocumentCardItem({ resource }: DocumentCardItemProps) {
 				<div className="fr-card__body">
 					<div className="fr-card__content">
 						<h3 className="fr-card__title">
-							<a
-								aria-busy={state === "pending" ? "true" : undefined}
-								aria-disabled={state === "pending" ? "true" : undefined}
-								href={resource.href}
-								onClick={(e) => {
-									if (isNativeClick(e)) return;
-									e.preventDefault();
-									void download(resource.href);
-								}}
-							>
-								{resource.title}
-							</a>
+							<a {...anchorProps}>{resource.title}</a>
 						</h3>
 						<p className="fr-card__desc">{resource.subtitle}</p>
 						<div className="fr-card__end">
 							<p className="fr-card__detail">
-								{state === "pending" ? "Téléchargement en cours…" : "PDF"}
+								{state === "pending" ? PENDING_LABEL : "PDF"}
 							</p>
 						</div>
 					</div>
 				</div>
 			</div>
-			<p aria-atomic="true" aria-live="polite" className="fr-sr-only">
-				{state === "pending" ? "Téléchargement en cours…" : ""}
-			</p>
-			{state === "error" && (
-				<p className="fr-text--xs fr-error-text fr-mt-1w fr-mb-0" role="alert">
-					Le téléchargement a échoué, réessayez.
-				</p>
-			)}
+			<DownloadStatusRegion pendingLabel={PENDING_LABEL} state={state} />
 		</li>
 	);
 }
