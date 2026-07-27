@@ -322,6 +322,10 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 				.first();
 			await expect(companyInfo).toContainText("70");
 			await expect(companyInfo).not.toContainText("Existence d'un CSE");
+			// Nothing is editable below 100, so the edit entry point is dropped too.
+			await expect(
+				page.getByRole("button", { exact: true, name: "Modifier" }),
+			).toHaveCount(0);
 
 			await page.goto("/declaration-remuneration/etape/1");
 			await expect(page.getByText("Étape 1 sur 5")).toBeVisible();

@@ -140,6 +140,13 @@ describe("DeclarationsSection", () => {
 		expect(represButtons).toHaveLength(1);
 	});
 
+	it("shows the first representation step in the 'Étape' column", () => {
+		renderSection();
+		expect(
+			screen.getByText("Vérification de l'assujettissement"),
+		).toBeInTheDocument();
+	});
+
 	it("does not render the page size selector when there are 20 rows or fewer", () => {
 		renderSection();
 		expect(
