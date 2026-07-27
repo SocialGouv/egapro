@@ -26,6 +26,15 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 	}
 
 	const data = await api.declaration.getOrCreate();
+
+	// This funnel only belongs to the corrective-action path, which the FSM only
+	// offers on the initial round (`saveCompliancePath` rejects it on revision).
+	// Without that choice the company has no second declaration to fill, so send
+	// it back to the compliance path page rather than exposing the steps.
+	if (data.declaration.firstDeclarationPathChoice !== "corrective_action") {
+		redirect("/declaration-remuneration/parcours-conformite");
+	}
+
 	const company = await api.company.get({ siren: data.declaration.siren });
 	const currentYear = data.declaration.year;
 	const campaignDeadlines = await getCampaignDeadlines(currentYear);

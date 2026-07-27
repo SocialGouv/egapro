@@ -71,6 +71,19 @@ export function isSecondDeclarationDeadlineApplicable(declaration: {
 	}
 }
 
+// The corrective-action second declaration may only be written while its funnel
+// is actually open: right after the corrective-action path choice, or once the
+// declaration has been re-opened for revision. Any other status means round 2
+// never started (or is already resolved), so the write is rejected.
+export function isSecondDeclarationWritable(
+	status: DeclarationFsmStatus | null,
+): boolean {
+	return (
+		status === "corrective_actions_chosen" ||
+		status === "awaiting_revision_choice"
+	);
+}
+
 export function isCancelled<T extends { cancelledAt: Date | null }>(
 	declaration: T,
 ): declaration is T & { cancelledAt: Date } {
