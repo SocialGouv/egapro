@@ -30,9 +30,37 @@ describe("formatCategorySource", () => {
 		expect(formatCategorySource("accord_local")).toBe("Accord local");
 	});
 
-	it("returns the value unchanged when it holds no readable characters", () => {
+	it("falls back to the raw value when humanising would leave it empty", () => {
 		expect(formatCategorySource("")).toBe("");
 		expect(formatCategorySource("-")).toBe("-");
+		expect(formatCategorySource("__")).toBe("__");
+	});
+
+	it("labels a known value even if its label were falsy", () => {
+		expect(formatCategorySource("autre")).toBe("Autre");
+		expect(Object.keys(SOURCE_LABELS)).toContain("autre");
+	});
+});
+
+describe("SOURCE_LABELS", () => {
+	it("maps exactly the selectable and legacy values, and nothing else", () => {
+		expect(Object.keys(SOURCE_LABELS).sort()).toEqual(
+			[
+				"accord-branche",
+				"accord-entreprise",
+				"accord-groupe",
+				"autre",
+				"classification-interne",
+				"convention-collective",
+				"decision-unilaterale",
+			].sort(),
+		);
+	});
+
+	it("never maps a value to an empty label", () => {
+		for (const [key, label] of Object.entries(SOURCE_LABELS)) {
+			expect(label, `label for ${key}`).not.toBe("");
+		}
 	});
 });
 
