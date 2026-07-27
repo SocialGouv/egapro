@@ -1,6 +1,6 @@
 "use client";
 
-import { useFileDownload } from "~/modules/shared";
+import { isNativeClick, useFileDownload } from "~/modules/shared";
 import styles from "./ConfirmationPage.module.scss";
 
 type Props = {
@@ -21,6 +21,7 @@ export function DownloadCard({ dataYear, href, title, year }: Props) {
 				className={styles.downloadCard}
 				href={href}
 				onClick={(e) => {
+					if (isNativeClick(e)) return;
 					e.preventDefault();
 					void download(href);
 				}}
