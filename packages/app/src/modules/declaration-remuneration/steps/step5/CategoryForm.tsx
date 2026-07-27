@@ -168,7 +168,7 @@ export function CategoryForm({
 		return () => sub.unsubscribe();
 	}, [form, onValuesChange]);
 
-	const { fields, append, remove } = useFieldArray({
+	const { fields, append, remove, replace } = useFieldArray({
 		control: form.control,
 		name: "categories",
 	});
@@ -250,7 +250,7 @@ export function CategoryForm({
 	}
 
 	function handleImportCategories(imported: EmployeeCategory[]) {
-		form.setValue("categories", toFormValues(imported));
+		replace(toFormValues(imported));
 		setHasData(false);
 	}
 
@@ -353,7 +353,7 @@ export function CategoryForm({
 				onDevFill={() => {
 					if (maxWomen == null || maxMen == null) return;
 					const devCats = createDevStep5Categories(nextId, maxWomen, maxMen);
-					form.setValue("categories", toFormValues(devCats));
+					replace(toFormValues(devCats));
 					form.setValue("source", DEV_STEP5_SOURCE);
 					setHasData(false);
 				}}
@@ -451,7 +451,13 @@ export function CategoryForm({
 			<div className="fr-accordions-group" data-fr-group="false">
 				{fields.map((field, index) => {
 					const cat = categories[index];
-					const collapseId = `${baseId}-accordion-${index}`;
+					// Derive the accordion id from the row's stable identity, never from
+					// its position: DSFR's vanilla JS freezes the id at instantiation and
+					// binds its toggle through a literal `[aria-controls="<id>"]` selector.
+					// Renumbering ids in place (after a delete) makes the live instance
+					// stop matching its own selector and DSFR disposes it, which leaves the
+					// accordion unopenable — cf. #4008.
+					const collapseId = `${baseId}-accordion-${field.id}`;
 					const headingId = `${collapseId}-heading`;
 					const categoryNumber = `Catégorie d'emplois n°${index + 1}`;
 					const catName = cat?.name?.trim() ?? "";
