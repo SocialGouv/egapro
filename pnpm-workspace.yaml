@@ -9,3 +9,6 @@ onlyBuiltDependencies:
   - protobufjs
   - sharp
   - ssh2
+
+patchedDependencies:
+  '@react-pdf/render@4.4.1': patches/@react-pdf__render@4.4.1.patch

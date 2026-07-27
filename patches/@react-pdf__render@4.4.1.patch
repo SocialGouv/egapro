@@ -1,0 +1,15 @@
+diff --git a/lib/index.js b/lib/index.js
+index 763fd3c51587ca2331e95f136eecf7cea7134df7..313f6b5ac198e54923a0a01d81abbdf45636f607 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -192,8 +192,8 @@ const renderGlyphs = (ctx, glyphs, positions, x, y) => {
+     const encodedPositions = positions.map((pos, i) => ({
+         xAdvance: pos.xAdvance * scale,
+         yAdvance: pos.yAdvance * scale,
+-        xOffset: pos.xOffset,
+-        yOffset: pos.yOffset,
++        xOffset: pos.xOffset * scale,
++        yOffset: pos.yOffset * scale,
+         advanceWidth: glyphs[i].advanceWidth * advanceWidthScale,
+     }));
+     return _renderGlyphs(ctx, encodedGlyphs, encodedPositions, x, y);
