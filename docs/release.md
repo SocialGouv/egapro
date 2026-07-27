@@ -26,7 +26,7 @@ Le workflow **⏰ Alpha release reminder** (`release-alpha-reminder.yaml`) tourn
 `release-changelog.yaml` résume, en français et côté métier, ce qui a été livré :
 
 - `collect_release_issues.sh` — issues/PR du tag, avec **rollup epic** (une PR `feat(epic): #N` = une ligne Feature, sans exploser ses sous-tickets) et pré-filtre technique.
-- étape IA (`claude-code-action`) — rédige 3–8 bullets métier, en traitant titres/labels comme donnée non maîtrisée (anti-injection).
+- étape IA — rédige 3–8 bullets métier, en traitant titres/labels comme donnée non maîtrisée (anti-injection). Claude Code est appelé via son **CLI** (`claude -p`), pas via `anthropics/claude-code-action` : cette action rejette l'événement `release` (`Unsupported event type`), et ce job n'a de toute façon besoin d'aucun contexte GitHub. Le CLI tourne dans un répertoire temporaire (ni `CLAUDE.md`, ni hooks, ni MCP chargés) et ne voit que `issues.json`. Version épinglée dans `env.CLAUDE_CODE_VERSION`.
 - `publish_release_summary.sh` — injecte/remplace la section idempotente `<!-- ai-changelog -->` dans le corps de la release.
 
 Le workflow est **découplé** : un échec du changelog ne bloque jamais la release. Il peut être rejoué à la main (`workflow_dispatch` avec un tag) pour un backfill.
