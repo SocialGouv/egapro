@@ -10,10 +10,12 @@ onlyBuiltDependencies:
   - sharp
   - ssh2
 
-# Upstream bug (#4017): renderGlyphs() leaves the GPOS mark offsets in points
-# while the advances are converted back to text-space units, so every diacritic
-# is drawn at 1/1000 of its offset — i.e. next to its letter instead of over it.
-# Still unfixed in 4.5.1. A version bump fails the install with
+# Upstream bug (#4017): renderGlyphs() leaves the horizontal GPOS mark offset in
+# points while the advances are converted back to text-space units, so every
+# diacritic is drawn at 1/1000 of its offset — next to its letter instead of over
+# it. yOffset is deliberately left alone: textkit overwrites the per-glyph value
+# with the run-level verticalAlign offset, which the renderer already scales
+# correctly. Still unfixed in 4.5.1. A version bump fails the install with
 # ERR_PNPM_UNUSED_PATCH: check whether the fix landed upstream, then drop or
 # re-cut the patch. pdfAccentRendering.test.tsx covers the rendered output.
 patchedDependencies:

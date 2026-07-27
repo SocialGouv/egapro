@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   '@react-pdf/render@4.4.1':
-    hash: cefc56c797896ee6a476b693c4531736d94206331898f0da0b5d10fe2254e53e
+    hash: 7634d9a1a18fcb87fcc9bae322399b5cc877a20bd9111d121d20a6b76f39743d
     path: patches/@react-pdf__render@4.4.1.patch
 
 importers:
@@ -8492,7 +8492,7 @@ snapshots:
       react: 19.2.5
       scheduler: 0.25.0-rc-603e6108-20241029
 
-  '@react-pdf/render@4.4.1(patch_hash=cefc56c797896ee6a476b693c4531736d94206331898f0da0b5d10fe2254e53e)':
+  '@react-pdf/render@4.4.1(patch_hash=7634d9a1a18fcb87fcc9bae322399b5cc877a20bd9111d121d20a6b76f39743d)':
     dependencies:
       '@babel/runtime': 7.29.2
       '@react-pdf/fns': 3.1.3
@@ -8514,7 +8514,7 @@ snapshots:
       '@react-pdf/pdfkit': 5.0.0
       '@react-pdf/primitives': 4.2.0
       '@react-pdf/reconciler': 2.0.0(react@19.2.5)
-      '@react-pdf/render': 4.4.1(patch_hash=cefc56c797896ee6a476b693c4531736d94206331898f0da0b5d10fe2254e53e)
+      '@react-pdf/render': 4.4.1(patch_hash=7634d9a1a18fcb87fcc9bae322399b5cc877a20bd9111d121d20a6b76f39743d)
       '@react-pdf/types': 2.10.0
       events: 3.3.0
       object-assign: 4.1.1

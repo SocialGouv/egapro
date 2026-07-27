@@ -30,11 +30,13 @@ Font.register({
 const styles = StyleSheet.create({
 	page: { fontFamily: PDF_FONT_FAMILY, padding: 0 },
 	sample: { fontSize: FONT_SIZE },
+	superscript: { verticalAlign: "super" },
 });
 
 type GlyphDraw = {
 	hex: string;
 	x: number;
+	y: number;
 };
 
 function extractTextStream(pdf: Buffer): string {
@@ -69,27 +71,27 @@ function extractTextStream(pdf: Buffer): string {
 
 function extractGlyphDraws(stream: string): GlyphDraw[] {
 	const draws: GlyphDraw[] = [];
-	let x: number | null = null;
+	let position: { x: number; y: number } | null = null;
 
 	for (const line of stream.split("\n")) {
-		const position = /^1 0 0 1 (-?[\d.]+) -?[\d.]+ Tm$/.exec(line);
-		if (position?.[1]) {
-			x = Number(position[1]);
+		const textMatrix = /^1 0 0 1 (-?[\d.]+) (-?[\d.]+) Tm$/.exec(line);
+		if (textMatrix?.[1] && textMatrix[2]) {
+			position = { x: Number(textMatrix[1]), y: Number(textMatrix[2]) };
 			continue;
 		}
 
 		const glyphs = /^\[<([0-9a-f]+)>/.exec(line);
-		if (glyphs?.[1] && x !== null) draws.push({ hex: glyphs[1], x });
+		if (glyphs?.[1] && position) draws.push({ hex: glyphs[1], ...position });
 	}
 
 	return draws;
 }
 
-async function renderGlyphDraws(text: string): Promise<GlyphDraw[]> {
+async function renderDraws(content: React.ReactNode): Promise<GlyphDraw[]> {
 	const pdf = await renderToBuffer(
 		<Document>
 			<Page size="A4" style={styles.page}>
-				<Text style={styles.sample}>{text}</Text>
+				<Text style={styles.sample}>{content}</Text>
 			</Page>
 		</Document>,
 	);
@@ -111,7 +113,7 @@ function asGlyphTriplet(draws: GlyphDraw[]): [GlyphDraw, GlyphDraw, GlyphDraw] {
 
 async function expectMarkDrawnOverBase(accented: string, base: string) {
 	const [first, mark, second] = asGlyphTriplet(
-		await renderGlyphDraws(`${accented}${base}`),
+		await renderDraws(`${accented}${base}`),
 	);
 
 	const baseAdvance = second.x - first.x;
@@ -131,5 +133,23 @@ describe("PDF accent rendering", () => {
 
 	it("draws the combining cedilla over its base letter, not at its advance", async () => {
 		await expectMarkDrawnOverBase("ç", "c");
+	});
+
+	it("lifts a superscript run by a fraction of the font size", async () => {
+		const draws = await renderDraws(
+			<>
+				m<Text style={styles.superscript}>2</Text>
+			</>,
+		);
+
+		const [base, superscript] = draws;
+		if (!base || !superscript) {
+			throw new Error(`Expected 2 glyph draws, got ${draws.length}`);
+		}
+
+		const rise = superscript.y - base.y;
+
+		expect(rise).toBeGreaterThan(0);
+		expect(rise).toBeLessThan(FONT_SIZE);
 	});
 });
