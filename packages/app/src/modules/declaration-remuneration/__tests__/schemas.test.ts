@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { updateEmployeeCategoriesSchema, updateStep4Schema } from "../schemas";
+import {
+	PAY_FIELDS_MEN,
+	PAY_FIELDS_WOMEN,
+	updateEmployeeCategoriesSchema,
+	updateStep4Schema,
+} from "../schemas";
 import type { QuartileData, QuartileTuple } from "../types";
 
 function makeTable(
@@ -187,19 +192,14 @@ describe("updateStep4Schema", () => {
 	});
 });
 
-const PAY_FIELDS_WOMEN = {
-	annualBaseWomen: "30000",
-	annualVariableWomen: "2000",
-	hourlyBaseWomen: "18",
-	hourlyVariableWomen: "1.5",
-} as const;
+function buildPayFieldValues(
+	fields: readonly string[],
+): Record<string, string> {
+	return Object.fromEntries(fields.map((field, i) => [field, String(i + 1)]));
+}
 
-const PAY_FIELDS_MEN = {
-	annualBaseMen: "32000",
-	annualVariableMen: "2500",
-	hourlyBaseMen: "19",
-	hourlyVariableMen: "1.8",
-} as const;
+const WOMEN_PAY_VALUES = buildPayFieldValues(PAY_FIELDS_WOMEN);
+const MEN_PAY_VALUES = buildPayFieldValues(PAY_FIELDS_MEN);
 
 const INCOMPLETE_REMUNERATION_MESSAGE =
 	"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.";
@@ -217,8 +217,8 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		const result = parseCategory({
 			womenCount: 2,
 			menCount: 2,
-			...PAY_FIELDS_WOMEN,
-			...PAY_FIELDS_MEN,
+			...WOMEN_PAY_VALUES,
+			...MEN_PAY_VALUES,
 		});
 		expect(result.success).toBe(true);
 	});
@@ -227,7 +227,7 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		const result = parseCategory({
 			womenCount: 0,
 			menCount: 2,
-			...PAY_FIELDS_MEN,
+			...MEN_PAY_VALUES,
 		});
 		expect(result.success).toBe(true);
 	});
@@ -236,7 +236,7 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		const result = parseCategory({
 			womenCount: 2,
 			menCount: 0,
-			...PAY_FIELDS_WOMEN,
+			...WOMEN_PAY_VALUES,
 		});
 		expect(result.success).toBe(true);
 	});
@@ -265,7 +265,7 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		const result = parseCategory({
 			womenCount: 2,
 			menCount: 2,
-			...PAY_FIELDS_WOMEN,
+			...WOMEN_PAY_VALUES,
 		});
 		expect(result.success).toBe(false);
 		if (!result.success) {
@@ -279,8 +279,8 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		const result = parseCategory({
 			womenCount: 2,
 			menCount: 2,
-			annualBaseWomen: "30000",
-			...PAY_FIELDS_MEN,
+			annualBaseWomen: WOMEN_PAY_VALUES.annualBaseWomen,
+			...MEN_PAY_VALUES,
 		});
 		expect(result.success).toBe(false);
 		if (!result.success) {
@@ -294,7 +294,7 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		const result = parseCategory({
 			womenCount: 2,
 			menCount: 0,
-			...PAY_FIELDS_WOMEN,
+			...WOMEN_PAY_VALUES,
 			annualBaseWomen: "",
 		});
 		expect(result.success).toBe(false);

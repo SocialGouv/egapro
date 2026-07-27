@@ -27,6 +27,7 @@ import type {
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
 import {
+	isSexRemunerationComplete,
 	padDecimalOnBlur,
 	padDecimalToTwo,
 	sumCategoryWorkforce,
@@ -182,6 +183,9 @@ export function CategoryForm({
 	const hasData =
 		hasDataOverride !== undefined ? hasDataOverride : hasDataInternal;
 	const [workforceError, setWorkforceError] = useState("");
+	const [expandedByFieldId, setExpandedByFieldId] = useState<
+		Record<string, boolean>
+	>({});
 	const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 	const deleteDialogRef = useRef<HTMLDialogElement>(null);
 	const accordionHeaderRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -268,7 +272,10 @@ export function CategoryForm({
 	// land at the top instead of staying near the category they just folded.
 	// Snapshot the button's viewport offset before the toggle and restore it
 	// after the next layout pass so the click feels in-place.
-	function handleAccordionToggle(e: React.MouseEvent<HTMLButtonElement>) {
+	function handleAccordionToggle(
+		e: React.MouseEvent<HTMLButtonElement>,
+		fieldId: string,
+	) {
 		const button = e.currentTarget;
 		const offsetBefore = button.getBoundingClientRect().top;
 		requestAnimationFrame(() => {
@@ -277,6 +284,10 @@ export function CategoryForm({
 			if (Math.abs(drift) > 1) {
 				window.scrollBy({ top: drift, behavior: "instant" });
 			}
+			setExpandedByFieldId((prev) => ({
+				...prev,
+				[fieldId]: button.getAttribute("aria-expanded") === "true",
+			}));
 		});
 	}
 
@@ -314,11 +325,15 @@ export function CategoryForm({
 		const hasIncompleteRemuneration = data.categories.some((cat) => {
 			const womenCount = Number.parseInt(cat.womenCount, 10);
 			const menCount = Number.parseInt(cat.menCount, 10);
-			const womenNeedData = !Number.isNaN(womenCount) && womenCount >= 1;
-			const menNeedData = !Number.isNaN(menCount) && menCount >= 1;
 			return (
-				(womenNeedData && PAY_FIELDS_WOMEN.some((f) => !cat[f])) ||
-				(menNeedData && PAY_FIELDS_MEN.some((f) => !cat[f]))
+				!isSexRemunerationComplete(
+					womenCount,
+					PAY_FIELDS_WOMEN.map((f) => cat[f]),
+				) ||
+				!isSexRemunerationComplete(
+					menCount,
+					PAY_FIELDS_MEN.map((f) => cat[f]),
+				)
 			);
 		});
 		if (hasIncompleteRemuneration) {
@@ -486,6 +501,7 @@ export function CategoryForm({
 								accordionHeaderRefs.current[index] = node;
 							}}
 							index={index}
+							isExpanded={expandedByFieldId[field.id] ?? true}
 							key={field.id}
 							nameProps={{
 								...form.register(`categories.${index}.name`),
@@ -494,7 +510,7 @@ export function CategoryForm({
 									setHasData(false);
 								},
 							}}
-							onAccordionToggle={handleAccordionToggle}
+							onAccordionToggle={(e) => handleAccordionToggle(e, field.id)}
 							onAskRemove={askRemoveCategory}
 							onDecimalBlur={handleDecimalBlur}
 							onPositiveNumberChange={handlePositiveNumberChange}

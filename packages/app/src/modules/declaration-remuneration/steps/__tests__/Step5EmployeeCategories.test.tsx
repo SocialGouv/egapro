@@ -739,6 +739,36 @@ describe("Step5EmployeeCategories", () => {
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
 
+	it("keeps an accordion's aria-expanded state across unrelated re-renders (#3948)", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+			/>,
+		);
+
+		const toggleButton = screen.getByRole("button", {
+			name: "Catégorie d'emplois n°1",
+		});
+		expect(toggleButton).toHaveAttribute("aria-expanded", "true");
+
+		toggleButton.setAttribute("aria-expanded", "false");
+		await user.click(toggleButton);
+
+		await waitFor(() =>
+			expect(toggleButton).toHaveAttribute("aria-expanded", "false"),
+		);
+
+		await user.type(
+			document.getElementById("cat-0-name") as HTMLElement,
+			"Cadres",
+		);
+
+		expect(toggleButton).toHaveAttribute("aria-expanded", "false");
+	});
+
 	it("renders previous link pointing to step 4", () => {
 		render(
 			<Step5EmployeeCategories

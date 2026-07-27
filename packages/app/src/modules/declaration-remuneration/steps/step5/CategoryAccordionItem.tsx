@@ -10,6 +10,7 @@ type Props = {
 	index: number;
 	category: EmployeeCategory & { id: number };
 	disabled: boolean;
+	isExpanded: boolean;
 	readOnlyLabel: boolean;
 	showDelete: boolean;
 	nameProps: React.ComponentPropsWithRef<"input">;
@@ -30,6 +31,7 @@ export function CategoryAccordionItem({
 	index,
 	category,
 	disabled,
+	isExpanded,
 	readOnlyLabel,
 	showDelete,
 	nameProps,
@@ -53,7 +55,7 @@ export function CategoryAccordionItem({
 			<h2 className="fr-accordion__title">
 				<button
 					aria-controls={collapseId}
-					aria-expanded="true"
+					aria-expanded={isExpanded}
 					className="fr-accordion__btn"
 					id={headingId}
 					onClick={onAccordionToggle}
@@ -64,7 +66,7 @@ export function CategoryAccordionItem({
 				</button>
 			</h2>
 			<div
-				className="fr-collapse fr-collapse--expanded"
+				className={`fr-collapse ${isExpanded ? "fr-collapse--expanded" : ""}`}
 				id={collapseId}
 				ref={collapseRef}
 			>

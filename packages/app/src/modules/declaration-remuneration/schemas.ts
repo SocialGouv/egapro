@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { isSexRemunerationComplete } from "~/modules/domain";
 import { COMPLIANCE_PATHS } from "./steps/compliancePath/constants";
 
 export const updateStep1Schema = z.object({
@@ -104,15 +105,15 @@ const employeeCategoryDataSchema = z
 		hourlyVariableMen: z.string().optional(),
 	})
 	.refine(
-		(data) => {
-			if ((data.womenCount ?? 0) >= 1) {
-				if (PAY_FIELDS_WOMEN.some((f) => !data[f])) return false;
-			}
-			if ((data.menCount ?? 0) >= 1) {
-				if (PAY_FIELDS_MEN.some((f) => !data[f])) return false;
-			}
-			return true;
-		},
+		(data) =>
+			isSexRemunerationComplete(
+				data.womenCount,
+				PAY_FIELDS_WOMEN.map((f) => data[f]),
+			) &&
+			isSexRemunerationComplete(
+				data.menCount,
+				PAY_FIELDS_MEN.map((f) => data[f]),
+			),
 		{
 			message:
 				"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",

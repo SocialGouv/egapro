@@ -116,6 +116,10 @@ export {
 	hasEvent,
 	hasSubmittedSecondDeclaration,
 } from "./shared/declarationTrajectory";
+export {
+	isSexRemunerationComplete,
+	MIN_HEADCOUNT_REQUIRING_PAY_DATA,
+} from "./shared/employeeCategoryRemuneration";
 // Display formatting (%, €, units)
 export {
 	computePercentage,
