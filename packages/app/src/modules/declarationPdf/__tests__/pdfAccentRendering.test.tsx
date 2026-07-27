@@ -16,6 +16,7 @@ import { describe, expect, it } from "vitest";
 import { PDF_FONT_FAMILY } from "../pdfFonts";
 
 const FONT_SIZE = 100;
+const MAX_MARK_OFFSET_RATIO = 0.75;
 
 const marianneRegular = createRequire(import.meta.url).resolve(
 	"@gouvfr/dsfr/dist/fonts/Marianne-Regular.woff",
@@ -37,6 +38,7 @@ type GlyphDraw = {
 };
 
 function extractTextStream(pdf: Buffer): string {
+	const inflateFailures: string[] = [];
 	let cursor = 0;
 
 	while (cursor < pdf.length) {
@@ -55,10 +57,14 @@ function extractTextStream(pdf: Buffer): string {
 				pdf.subarray(contentStart, contentEnd),
 			).toString("latin1");
 			if (content.includes("Tf") && content.includes("TJ")) return content;
-		} catch {}
+		} catch (error) {
+			inflateFailures.push(`${streamStart}: ${String(error)}`);
+		}
 	}
 
-	throw new Error("No text content stream found in the rendered PDF");
+	throw new Error(
+		`No text content stream found in the rendered PDF (${inflateFailures.length} stream(s) could not be inflated: ${inflateFailures.join(" | ")})`,
+	);
 }
 
 function extractGlyphDraws(stream: string): GlyphDraw[] {
@@ -91,29 +97,39 @@ async function renderGlyphDraws(text: string): Promise<GlyphDraw[]> {
 	return extractGlyphDraws(extractTextStream(pdf));
 }
 
+function asGlyphTriplet(draws: GlyphDraw[]): [GlyphDraw, GlyphDraw, GlyphDraw] {
+	const [base, mark, repeatedBase] = draws;
+
+	if (!base || !mark || !repeatedBase || draws.length !== 3) {
+		throw new Error(
+			`Expected a base glyph, its combining mark and the repeated base, got ${draws.length} draw(s)`,
+		);
+	}
+
+	return [base, mark, repeatedBase];
+}
+
+async function expectMarkDrawnOverBase(accented: string, base: string) {
+	const [first, mark, second] = asGlyphTriplet(
+		await renderGlyphDraws(`${accented}${base}`),
+	);
+
+	const baseAdvance = second.x - first.x;
+	const markOffset = mark.x - first.x;
+
+	expect(second.hex).toBe(first.hex);
+	expect(mark.hex).not.toBe(first.hex);
+	expect(baseAdvance).toBeGreaterThan(0);
+	expect(markOffset).toBeGreaterThan(0);
+	expect(markOffset).toBeLessThan(MAX_MARK_OFFSET_RATIO * baseAdvance);
+}
+
 describe("PDF accent rendering", () => {
-	it("draws the combining acute over its base letter, not after it", async () => {
-		const draws = await renderGlyphDraws("é");
-
-		expect(draws).toHaveLength(2);
-
-		const [base, accent] = draws as [GlyphDraw, GlyphDraw];
-		const offset = accent.x - base.x;
-
-		expect(accent.hex).not.toBe(base.hex);
-		expect(offset).toBeGreaterThan(0.1 * FONT_SIZE);
-		expect(offset).toBeLessThan(0.45 * FONT_SIZE);
+	it("draws the combining acute over its base letter, not at its advance", async () => {
+		await expectMarkDrawnOverBase("é", "e");
 	});
 
-	it("draws the combining cedilla under its base letter, not after it", async () => {
-		const draws = await renderGlyphDraws("ç");
-
-		expect(draws).toHaveLength(2);
-
-		const [base, cedilla] = draws as [GlyphDraw, GlyphDraw];
-		const offset = cedilla.x - base.x;
-
-		expect(offset).toBeGreaterThan(0.1 * FONT_SIZE);
-		expect(offset).toBeLessThan(0.45 * FONT_SIZE);
+	it("draws the combining cedilla over its base letter, not at its advance", async () => {
+		await expectMarkDrawnOverBase("ç", "c");
 	});
 });
