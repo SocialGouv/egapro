@@ -7,8 +7,6 @@ import { CompanyBanner } from "../CompanyBanner";
 const defaultCompany = {
 	name: "Alpha Solutions",
 	siren: "123456789",
-	nafCode: "62.01Z",
-	nafLabel: "Programmation informatique",
 	gipWorkforce: 256,
 	hasCse: true,
 };
@@ -49,43 +47,6 @@ describe("CompanyBanner", () => {
 		expect(boldName).toHaveClass("fr-text--bold");
 	});
 
-	it("renders NAF code with its activity label", () => {
-		render(
-			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
-		);
-
-		expect(screen.getByText("Code NAF :")).toBeInTheDocument();
-		expect(
-			screen.getByText("62.01Z — Programmation informatique"),
-		).toBeInTheDocument();
-	});
-
-	it("renders NAF code alone when the label is null", () => {
-		render(
-			<CompanyBanner
-				company={{ ...defaultCompany, nafLabel: null }}
-				currentPageLabel="Déclaration"
-			/>,
-		);
-
-		expect(screen.getByText("Code NAF :")).toBeInTheDocument();
-		expect(screen.getByText("62.01Z")).toBeInTheDocument();
-		expect(
-			screen.queryByText(/Programmation informatique/),
-		).not.toBeInTheDocument();
-	});
-
-	it("hides the NAF datapoint when nafCode is null", () => {
-		render(
-			<CompanyBanner
-				company={{ ...defaultCompany, nafCode: null, nafLabel: null }}
-				currentPageLabel="Déclaration"
-			/>,
-		);
-
-		expect(screen.queryByText("Code NAF :")).not.toBeInTheDocument();
-	});
-
 	it("renders workforce and CSE values", () => {
 		render(
 			<CompanyBanner company={defaultCompany} currentPageLabel="Déclaration" />,
@@ -95,7 +56,7 @@ describe("CompanyBanner", () => {
 		expect(screen.getByText("Oui")).toBeInTheDocument();
 	});
 
-	it("shows '< 50' and hides the CSE datapoint when gipWorkforce is null", () => {
+	it("keeps the workforce label and shows '< 50' as value when gipWorkforce is null, hiding the CSE datapoint", () => {
 		render(
 			<CompanyBanner
 				company={{ ...defaultCompany, gipWorkforce: null }}
@@ -103,10 +64,8 @@ describe("CompanyBanner", () => {
 			/>,
 		);
 
+		expect(screen.getByText(/Effectif annuel moyen en/)).toBeInTheDocument();
 		expect(screen.getByText(GIP_WORKFORCE_ABSENT_DISPLAY)).toBeInTheDocument();
-		expect(
-			screen.queryByText(/Effectif annuel moyen en/),
-		).not.toBeInTheDocument();
 		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
 	});
 

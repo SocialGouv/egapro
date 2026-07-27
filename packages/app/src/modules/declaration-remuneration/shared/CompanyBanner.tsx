@@ -14,8 +14,6 @@ type CompanyBannerProps = {
 	company: {
 		name: string;
 		siren: string;
-		nafCode: string | null;
-		nafLabel: string | null;
 		gipWorkforce: number | null;
 		hasCse: boolean | null;
 	};
@@ -49,28 +47,15 @@ export function CompanyBanner({
 						<strong>{formatSiren(company.siren)}</strong>
 					</div>
 
-					{company.nafCode && (
-						<div className={styles.datapoint}>
-							<span>{"Code NAF :"}</span>
-							<strong>
-								{company.nafLabel
-									? `${company.nafCode} — ${company.nafLabel}`
-									: company.nafCode}
-							</strong>
-						</div>
-					)}
-
 					<div className={styles.datapoint}>
-						{company.gipWorkforce === null ? (
-							<span>{GIP_WORKFORCE_ABSENT_DISPLAY}</span>
-						) : (
-							<>
-								<span>
-									{"Effectif annuel moyen en"} {getWorkforceYear()} {":"}
-								</span>
-								<strong>{toDisplayWorkforce(company.gipWorkforce)}</strong>
-							</>
-						)}
+						<span>
+							{"Effectif annuel moyen en"} {getWorkforceYear()} {":"}
+						</span>
+						<strong>
+							{company.gipWorkforce !== null
+								? toDisplayWorkforce(company.gipWorkforce)
+								: GIP_WORKFORCE_ABSENT_DISPLAY}
+						</strong>
 					</div>
 
 					{cseApplicable && (
