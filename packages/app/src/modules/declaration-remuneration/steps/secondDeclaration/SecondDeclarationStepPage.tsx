@@ -137,10 +137,10 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 					cseApplicable={isCseRequired(
 						getObligationWorkforce(company.gipWorkforce),
 					)}
-					cseOpinionRequired={isCseOpinionRequired(
-						getObligationWorkforce(company.gipWorkforce),
-						company.hasCse,
-					)}
+					cseOpinionRequired={isCseOpinionRequired({
+						workforce: getObligationWorkforce(company.gipWorkforce),
+						hasCse: company.hasCse,
+					})}
 					declarationYear={currentYear}
 					hasCse={company.hasCse}
 					secondDeclarationCategories={reviewCategories}

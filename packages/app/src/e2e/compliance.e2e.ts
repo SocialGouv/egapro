@@ -66,6 +66,16 @@ test.describe("[CAS-01] Path 2: no gap + no hasCse → /confirmation", () => {
 			page.getByText(/Votre parcours .* est (désormais )?terminé/),
 		).toBeVisible();
 	});
+
+	test("reaching /avis-cse directly redirects away when there is no CSE", async ({
+		page,
+	}) => {
+		// Every field of that funnel is required, so a company without a CSE
+		// cannot fill it in — the screen must stay out of reach even by URL.
+		await page.goto("/avis-cse/etape/1");
+
+		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+	});
 });
 
 // === GROUP B: Gap — compliance choice form ===
@@ -603,7 +613,9 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion 
 		await expect(page.getByText(CSE_JUSTIFY_PARENTHESIS)).toHaveCount(0);
 
 		// Gap actions stay fully visible
-		await expect(page.getByText("Écarts détectés", { exact: true })).toBeVisible();
+		await expect(
+			page.getByText("Écarts détectés", { exact: true }),
+		).toBeVisible();
 		await expect(
 			page.getByRole("heading", { name: "Actions à engager" }),
 		).toBeVisible();

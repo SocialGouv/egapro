@@ -2,8 +2,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { computeDeclarationStatus } from "~/modules/my-space/declarationStatus";
 
+const { syncCseRequirementMock } = vi.hoisted(() => ({
+	syncCseRequirementMock: vi.fn(),
+}));
+
 vi.mock("~/server/services/suit");
 vi.mock("~/server/services/weez");
+vi.mock("~/server/services/cseRequirementSync", () => ({
+	syncCseRequirement: syncCseRequirementMock,
+}));
 
 describe("computeDeclarationStatus", () => {
 	it("returns to_complete when no declaration exists", () => {
@@ -492,6 +499,48 @@ describe("companyRouter.updateHasCse", () => {
 		await caller.updateHasCse({ siren: "339787277", hasCse: true });
 
 		expect(mockSet).toHaveBeenCalledWith({ hasCse: true });
+	});
+
+	it("realigns the declaration on the new CSE answer", async () => {
+		const companyRow = {
+			siren: "339787277",
+			name: "Test Company",
+			address: "1 rue de Paris",
+			nafCode: "6202A",
+			workforceEma: "250.00",
+			hasCse: true,
+		};
+
+		mockLimit.mockResolvedValue([companyRow]);
+		mockWhere.mockReturnValue({ limit: mockLimit });
+		mockInnerJoin.mockReturnValue({ where: mockWhere });
+		mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
+		mockSelect.mockReturnValue({ from: mockFrom });
+
+		mockUpdateWhere.mockResolvedValue(undefined);
+		mockSet.mockReturnValue({ where: mockUpdateWhere });
+		mockUpdate.mockReturnValue({ set: mockSet });
+
+		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		await caller.updateHasCse({ siren: "339787277", hasCse: false });
+
+		expect(syncCseRequirementMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				siren: "339787277",
+				hasCse: false,
+				workforce: 250,
+				actorUserId: "user-1",
+			}),
+		);
 	});
 
 	it("refuses the update below the CSE threshold (GIP workforce < 100)", async () => {

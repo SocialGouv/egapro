@@ -17,7 +17,9 @@ async function fillPayGapTable(
 	];
 	for (const row of rows) {
 		const men =
-			row === "Annuelle brute moyenne" ? (options.annualMeanMen ?? "1000") : "1000";
+			row === "Annuelle brute moyenne"
+				? (options.annualMeanMen ?? "1000")
+				: "1000";
 		await page.getByRole("textbox", { name: `${row} — Femmes` }).fill("1000");
 		await page.getByRole("textbox", { name: `${row} — Hommes` }).fill(men);
 	}

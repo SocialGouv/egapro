@@ -99,11 +99,18 @@ export function JustifyOption({
 					Vous avez la possibilité de justifier vos écarts par des critères
 					objectifs et non sexistes :
 				</p>
-				{cseOpinionRequired && (
+				{/* Announcing the CSE steps to a company that has none sends it looking
+				    for a screen it will never have to fill in. */}
+				{cseOpinionRequired ? (
 					<ul className="fr-mt-1w fr-mb-0">
 						<li>Informer et consulter votre CSE sur cette justification</li>
 						<li>Transmettre l&apos;avis du CSE</li>
 					</ul>
+				) : (
+					<p className="fr-mt-1w fr-mb-0">
+						En l&apos;absence de CSE, aucun avis n&apos;est à transmettre :
+						votre démarche est finalisée dès ce choix.
+					</p>
 				)}
 			</CompliancePathOption>
 		</div>

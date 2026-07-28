@@ -135,10 +135,10 @@ export async function CompliancePathPage() {
 		<HydrateClient>
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
-				cseOpinionRequired={isCseOpinionRequired(
-					getObligationWorkforce(company.gipWorkforce),
-					company.hasCse,
-				)}
+				cseOpinionRequired={isCseOpinionRequired({
+					workforce: getObligationWorkforce(company.gipWorkforce),
+					hasCse: company.hasCse,
+				})}
 				currentYear={currentYear}
 				declarationSiren={data.declaration.siren}
 				declarationYear={currentYear}

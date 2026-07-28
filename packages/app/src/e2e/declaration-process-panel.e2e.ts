@@ -194,7 +194,7 @@ test.describe("Declaration process panel", () => {
 	// subject to indicator G, so the panel keeps the indicator-G path step (step 2),
 	// but must never ask it to deposit a CSE opinion — step 3 and the "avis CSE
 	// modifiables" closing note are hidden, during the démarche and after completion.
-	// Step visibility is driven by isCseOpinionRequired(workforce, hasCse), not the
+	// Step visibility is driven by isCseOpinionRequired({ workforce, hasCse }), not the
 	// workforce alone, so this differs from the < 100 case where step 2 is hidden too.
 	test.describe("GIP >= 100 without CSE: indicator-G step shown, CSE step hidden", () => {
 		const STEP2_TITLE =

@@ -27,6 +27,7 @@ import {
 	gipMdsData,
 	userCompanies,
 } from "~/server/db/schema";
+import { syncCseRequirement } from "~/server/services/cseRequirementSync";
 import { fetchCseBySiren, fetchSanctionBySiren } from "~/server/services/suit";
 import { fetchCompanyBySiren } from "~/server/services/weez";
 
@@ -302,6 +303,18 @@ export const companyRouter = createTRPCRouter({
 				.update(companies)
 				.set({ hasCse: input.hasCse })
 				.where(eq(companies.siren, input.siren));
+
+			// The engine reads a snapshot of the CSE requirement taken at
+			// submission; realign it, otherwise a démarche parked on the CSE step
+			// can never complete once the answer turns to "no CSE".
+			await syncCseRequirement({
+				db: ctx.db,
+				siren: input.siren,
+				year: getCurrentYear(),
+				workforce: getObligationWorkforce(company.gipWorkforce),
+				hasCse: input.hasCse,
+				actorUserId: ctx.session.user.id,
+			});
 		}),
 
 	getSanctionStatus: protectedProcedure

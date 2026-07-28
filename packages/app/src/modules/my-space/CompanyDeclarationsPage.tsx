@@ -60,10 +60,10 @@ export function CompanyDeclarationsPage({
 	const currentYear = getCurrentYear();
 	const obligationWorkforce = getObligationWorkforce(company.gipWorkforce);
 	const cseApplicable = isCseRequired(obligationWorkforce);
-	const cseOpinionRequired = isCseOpinionRequired(
-		obligationWorkforce,
-		company.hasCse,
-	);
+	const cseOpinionRequired = isCseOpinionRequired({
+		workforce: obligationWorkforce,
+		hasCse: company.hasCse,
+	});
 	const indicatorGRequired = isIndicatorGRequired(
 		obligationWorkforce,
 		currentYear,

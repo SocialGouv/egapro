@@ -16,14 +16,6 @@ export function isCseRequired(workforce: number): boolean {
 	return workforce >= COMPANY_SIZE_ANNUAL_MIN;
 }
 
-/** Returns true if the company must deposit a CSE opinion: large enough to require a CSE (>= 100) AND having declared one exists. */
-export function isCseOpinionRequired(
-	workforce: number,
-	hasCse: boolean | null,
-): boolean {
-	return isCseRequired(workforce) && hasCse === true;
-}
-
 /**
  * Workforce range buckets shared by admin and public statistics filters.
  * `max: null` means the bucket is open-ended (no upper bound).

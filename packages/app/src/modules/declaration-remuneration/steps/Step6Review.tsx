@@ -72,10 +72,10 @@ export function Step6Review({
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const cseApplicable = isCseRequired(getObligationWorkforce(companyWorkforce));
-	const cseOpinionRequired = isCseOpinionRequired(
-		getObligationWorkforce(companyWorkforce),
+	const cseOpinionRequired = isCseOpinionRequired({
+		workforce: getObligationWorkforce(companyWorkforce),
 		hasCse,
-	);
+	});
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: () => {
 			trackFunnelComplete(

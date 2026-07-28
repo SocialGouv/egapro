@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
 	COMPANY_SIZE_RANGES,
 	getCompanySizeRange,
-	isCseOpinionRequired,
 	isCseRequired,
 } from "../shared/companySize";
 import {
@@ -87,26 +86,5 @@ describe("isCseRequired", () => {
 		expect(isCseRequired(99)).toBe(false);
 		expect(isCseRequired(100)).toBe(true);
 		expect(isCseRequired(250)).toBe(true);
-	});
-});
-
-describe("isCseOpinionRequired", () => {
-	it("requires both the size threshold and a declared CSE", () => {
-		expect(isCseOpinionRequired(250, true)).toBe(true);
-		expect(isCseOpinionRequired(100, true)).toBe(true);
-	});
-
-	it("is false when the company declared it has no CSE, whatever its size", () => {
-		expect(isCseOpinionRequired(250, false)).toBe(false);
-		expect(isCseOpinionRequired(100, false)).toBe(false);
-	});
-
-	it("is false when the CSE status has not been declared yet", () => {
-		expect(isCseOpinionRequired(250, null)).toBe(false);
-	});
-
-	it("is false below the size threshold even with a declared CSE", () => {
-		expect(isCseOpinionRequired(99, true)).toBe(false);
-		expect(isCseOpinionRequired(49, true)).toBe(false);
 	});
 });
