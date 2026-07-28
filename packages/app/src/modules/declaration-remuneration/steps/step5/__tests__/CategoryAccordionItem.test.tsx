@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { CATEGORY_NAME_MAX_LENGTH } from "~/modules/declaration-remuneration/schemas";
+import {
+	CATEGORY_NAME_MAX_LENGTH,
+	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
+} from "~/modules/declaration-remuneration/schemas";
 import { CategoryAccordionItem } from "../CategoryAccordionItem";
 import type { EmployeeCategory } from "../categorySerializer";
 
@@ -51,7 +54,7 @@ describe("CategoryAccordionItem — name length cap (#3943)", () => {
 	it("shows the max-length hint and caps the input with maxLength", () => {
 		renderItem();
 		expect(
-			screen.getByText(`${CATEGORY_NAME_MAX_LENGTH} caractères maximum`),
+			screen.getByText(CATEGORY_NAME_MAX_LENGTH_MESSAGE),
 		).toBeInTheDocument();
 		const input = document.getElementById("cat-0-name") as HTMLInputElement;
 		expect(input).toHaveAttribute(
@@ -66,7 +69,7 @@ describe("CategoryAccordionItem — name length cap (#3943)", () => {
 		expect(input).not.toHaveAttribute("aria-invalid");
 		expect(input).toHaveAttribute("aria-describedby", "cat-0-name-hint");
 		expect(
-			screen.queryByText(`${CATEGORY_NAME_MAX_LENGTH} caractères maximum`, {
+			screen.queryByText(CATEGORY_NAME_MAX_LENGTH_MESSAGE, {
 				selector: ".fr-error-text",
 			}),
 		).not.toBeInTheDocument();
@@ -80,7 +83,7 @@ describe("CategoryAccordionItem — name length cap (#3943)", () => {
 	});
 
 	it("renders the error text and wires aria-invalid/aria-describedby when nameError is set", () => {
-		const message = `${CATEGORY_NAME_MAX_LENGTH} caractères maximum`;
+		const message = CATEGORY_NAME_MAX_LENGTH_MESSAGE;
 		renderItem({ nameError: message });
 		const error = document.getElementById("cat-0-name-error");
 		expect(error).toHaveClass("fr-error-text");

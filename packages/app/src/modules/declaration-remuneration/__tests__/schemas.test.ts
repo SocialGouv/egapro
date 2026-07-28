@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	CATEGORY_NAME_MAX_LENGTH,
+	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
 	categoryFormSchema,
 	PAY_FIELDS_MEN,
 	PAY_FIELDS_WOMEN,
@@ -318,7 +319,6 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 	});
 });
 
-const CATEGORY_NAME_TOO_LONG_MESSAGE = `${CATEGORY_NAME_MAX_LENGTH} caractères maximum`;
 const NAME_AT_MAX = "a".repeat(CATEGORY_NAME_MAX_LENGTH);
 const NAME_OVER_MAX = "a".repeat(CATEGORY_NAME_MAX_LENGTH + 1);
 
@@ -372,7 +372,7 @@ describe("category name length cap (#3943)", () => {
 		expect(result.success).toBe(false);
 		if (!result.success) {
 			expect(result.error.issues.map((i) => i.message)).toContain(
-				CATEGORY_NAME_TOO_LONG_MESSAGE,
+				CATEGORY_NAME_MAX_LENGTH_MESSAGE,
 			);
 		}
 	});
@@ -387,7 +387,7 @@ describe("category name length cap (#3943)", () => {
 		expect(result.success).toBe(false);
 		if (!result.success) {
 			expect(result.error.issues.map((i) => i.message)).toContain(
-				CATEGORY_NAME_TOO_LONG_MESSAGE,
+				CATEGORY_NAME_MAX_LENGTH_MESSAGE,
 			);
 		}
 	});
