@@ -12,6 +12,9 @@ import {
 import { ProfileModal } from "~/modules/profile";
 import { TRPCReactProvider } from "~/trpc/react";
 
+// Loaded after the DSFR stylesheet links below so these overrides win.
+import "~/modules/layout/dsfrFixes.scss";
+
 export const metadata: Metadata = {
 	title: { template: "%s — Egapro", default: "Egapro" },
 	description: "Indicateurs d'égalité professionnelle femmes‑hommes",
