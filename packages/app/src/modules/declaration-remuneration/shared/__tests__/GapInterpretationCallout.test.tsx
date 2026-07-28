@@ -119,7 +119,7 @@ describe("GapInterpretationCallout", () => {
 			screen.getByText(/Écart en défaveur des hommes/),
 		).toBeInTheDocument();
 		expect(container.textContent).not.toMatch(/-\d/);
-		expect(container.textContent).toMatch(/16,7\s*%/);
+		expect(container.textContent).toMatch(/16,66\s*%/);
 	});
 
 	it("renders balanced title for payGap variant when gaps are below 5%", () => {

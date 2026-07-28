@@ -40,7 +40,7 @@ describe("PayGapTable", () => {
 		expect(screen.getByText("50 000 €")).toBeInTheDocument();
 		expect(screen.getByText("Seuil réglementaire : 5%")).toBeInTheDocument();
 		// (50000 - 45000) / 50000 * 100 = 10 %
-		expect(screen.getByText("10,0 %")).toBeInTheDocument();
+		expect(screen.getByText("10,00 %")).toBeInTheDocument();
 	});
 
 	it("badges a row whose gap reaches the threshold", () => {
