@@ -19,6 +19,7 @@ import {
 	hasGapsAboveThreshold,
 	isCseOpinionRequired,
 	isDraft,
+	isSecondDeclarationWritable,
 	isTriennialYear,
 	parseGipWorkforce,
 } from "~/modules/domain";
@@ -619,6 +620,12 @@ export const declarationRouter = createTRPCRouter({
 						);
 					}
 				} else {
+					if (!isSecondDeclarationWritable(declaration.status))
+						throw new TRPCError({
+							code: "FORBIDDEN",
+							message: "La seconde déclaration n'est pas ouverte à la saisie.",
+						});
+
 					for (const job of existingJobs) {
 						const cat = input.categories[job.categoryIndex];
 						if (!cat) continue;
