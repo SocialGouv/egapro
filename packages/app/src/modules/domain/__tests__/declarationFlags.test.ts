@@ -4,7 +4,10 @@ import {
 	COMPANY_SIZE_ANNUAL_MIN,
 	GAP_ALERT_THRESHOLD,
 } from "../shared/constants";
-import { isComplianceProcessRequired } from "../shared/declarationFlags";
+import {
+	isComplianceProcessRequired,
+	isCseOpinionRequired,
+} from "../shared/declarationFlags";
 
 // Composed behavior (nominal, G guard, gap guard, revision boundaries) lives in
 // demarcheDecisionTable.test.ts / demarcheRevisionAndStatus.test.ts (#3975);
@@ -48,6 +51,39 @@ describe("isComplianceProcessRequired", () => {
 				workforce: COMPANY_SIZE_ANNUAL_MIN,
 				hasIndicatorG: true,
 				gap: GAP_ALERT_THRESHOLD,
+			}),
+		).toBe(true);
+	});
+});
+
+describe("isCseOpinionRequired", () => {
+	it("requires both the size threshold and an actual CSE", () => {
+		expect(isCseOpinionRequired({ workforce: 250, hasCse: true })).toBe(true);
+	});
+
+	it("returns false above the threshold when the company has no CSE", () => {
+		// The #3951 case: a large company without a CSE owes no opinion.
+		expect(isCseOpinionRequired({ workforce: 601, hasCse: false })).toBe(false);
+	});
+
+	it("treats an unanswered CSE question as no opinion due", () => {
+		expect(isCseOpinionRequired({ workforce: 250, hasCse: null })).toBe(false);
+	});
+
+	it("returns false below the threshold even with a CSE", () => {
+		expect(
+			isCseOpinionRequired({
+				workforce: COMPANY_SIZE_ANNUAL_MIN - 1,
+				hasCse: true,
+			}),
+		).toBe(false);
+	});
+
+	it("is true at the exact threshold", () => {
+		expect(
+			isCseOpinionRequired({
+				workforce: COMPANY_SIZE_ANNUAL_MIN,
+				hasCse: true,
 			}),
 		).toBe(true);
 	});

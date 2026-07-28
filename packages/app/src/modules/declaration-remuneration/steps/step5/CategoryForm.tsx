@@ -173,7 +173,7 @@ export function CategoryForm({
 		return () => sub.unsubscribe();
 	}, [form, onValuesChange]);
 
-	const { fields, append, remove } = useFieldArray({
+	const { fields, append, remove, replace } = useFieldArray({
 		control: form.control,
 		name: "categories",
 	});
@@ -258,7 +258,7 @@ export function CategoryForm({
 	}
 
 	function handleImportCategories(imported: EmployeeCategory[]) {
-		form.setValue("categories", toFormValues(imported));
+		replace(toFormValues(imported));
 		setHasData(false);
 	}
 
@@ -389,7 +389,7 @@ export function CategoryForm({
 				onDevFill={() => {
 					if (maxWomen == null || maxMen == null) return;
 					const devCats = createDevStep5Categories(nextId, maxWomen, maxMen);
-					form.setValue("categories", toFormValues(devCats));
+					replace(toFormValues(devCats));
 					form.setValue("source", DEV_STEP5_SOURCE);
 					setHasData(false);
 				}}
@@ -497,6 +497,7 @@ export function CategoryForm({
 								accordionCollapseRefs.current[index] = node;
 							}}
 							disabled={disabled}
+							fieldId={field.id}
 							headerRef={(node) => {
 								accordionHeaderRefs.current[index] = node;
 							}}
