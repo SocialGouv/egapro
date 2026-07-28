@@ -3,6 +3,8 @@ export { MissingSiret } from "./MissingSiret";
 export { RecapitulatifPage } from "./recapitulatif";
 export { StepPageClient } from "./StepPageClient";
 export {
+	CATEGORY_NAME_MAX_LENGTH,
+	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
 	categoryFormEntrySchema,
 	categoryFormSchema,
 	saveCompliancePathSchema,

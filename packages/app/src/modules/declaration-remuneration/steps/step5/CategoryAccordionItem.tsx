@@ -1,6 +1,9 @@
 import type React from "react";
 
-import { CATEGORY_NAME_MAX_LENGTH } from "~/modules/declaration-remuneration/schemas";
+import {
+	CATEGORY_NAME_MAX_LENGTH,
+	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
+} from "~/modules/declaration-remuneration/schemas";
 import stepStyles from "~/modules/declaration-remuneration/steps/Step5EmployeeCategories.module.scss";
 
 import { CategoryDataTable } from "./CategoryDataTable";
@@ -85,7 +88,7 @@ export function CategoryAccordionItem({
 							<label className="fr-label" htmlFor={`cat-${index}-name`}>
 								Libellé de la catégorie d&apos;emploi
 								<span className="fr-hint-text" id={`cat-${index}-name-hint`}>
-									{CATEGORY_NAME_MAX_LENGTH} caractères maximum
+									{CATEGORY_NAME_MAX_LENGTH_MESSAGE}
 								</span>
 							</label>
 							<input
