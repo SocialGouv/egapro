@@ -371,11 +371,23 @@ describe("RecapitulatifPage", () => {
 		expect(screen.getByText("marie@acme.fr")).toBeInTheDocument();
 	});
 
-	it("falls back to the raw source key when it is not a known label", () => {
+	it("humanises the source key when it is not a known label", () => {
 		render(
 			<RecapitulatifPage {...defaultProps()} step5Source="source-inconnue" />,
 		);
-		expect(screen.getByText("source-inconnue")).toBeInTheDocument();
+		expect(screen.getByText("Source inconnue")).toBeInTheDocument();
+		expect(screen.queryByText("source-inconnue")).not.toBeInTheDocument();
+	});
+
+	// Regression #4014: legacy values must render identically here and in the PDF.
+	it("labels a legacy source value saved before the step 5 options changed", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				step5Source="convention-collective"
+			/>,
+		);
+		expect(screen.getByText("Convention collective")).toBeInTheDocument();
 	});
 
 	it("shows '< 50' when company.gipWorkforce is null", () => {

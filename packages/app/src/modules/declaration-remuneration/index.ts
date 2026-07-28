@@ -71,7 +71,7 @@ export {
 	SecondDeclarationStep3Review,
 	SecondDeclarationStepPage,
 } from "./steps/secondDeclaration";
-export { SOURCE_LABELS } from "./steps/step5/sources";
+export { formatCategorySource } from "./steps/step5/sources";
 export { parseEmployeeCategories } from "./steps/step6";
 export type {
 	EmployeeCategoryRow,

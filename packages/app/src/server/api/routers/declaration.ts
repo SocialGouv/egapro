@@ -17,7 +17,7 @@ import {
 	getCurrentYear,
 	getObligationWorkforce,
 	hasGapsAboveThreshold,
-	isCseRequired,
+	isCseOpinionRequired,
 	isDraft,
 	isTriennialYear,
 	parseGipWorkforce,
@@ -711,9 +711,10 @@ export const declarationRouter = createTRPCRouter({
 		// même si l'admin modifie ensuite `companies.hasCse`). C'est cette valeur
 		// que les transitions FSM aval (saveCompliancePath, submitJointEvaluation,
 		// cseOpinion.finalize) liront comme guard.
-		const cseRequiredSnapshot =
-			isCseRequired(getObligationWorkforce(gipWorkforce)) &&
-			company.hasCse === true;
+		const cseRequiredSnapshot = isCseOpinionRequired(
+			getObligationWorkforce(gipWorkforce),
+			company.hasCse,
+		);
 
 		await ctx.db.transaction(async (tx) => {
 			if (isDraft(declaration.status) && historyInserts.length > 0) {

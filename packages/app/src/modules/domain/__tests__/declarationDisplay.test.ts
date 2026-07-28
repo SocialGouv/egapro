@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { getDeclarationDisplayContext } from "../shared/declarationDisplay";
+import {
+	getDeclarationDisplayContext,
+	isCseOpinionResolved,
+} from "../shared/declarationDisplay";
 
 describe("getDeclarationDisplayContext", () => {
 	it("sets shouldShowGapJustification when firstDeclarationPathChoice is justify", () => {
@@ -91,5 +94,43 @@ describe("getDeclarationDisplayContext", () => {
 		expect(result.shouldShowCorrectiveActions).toBe(true);
 		expect(result.shouldShowJointEvaluation).toBe(false);
 		expect(result.shouldShowCseOpinion).toBe(false);
+	});
+});
+
+describe("isCseOpinionResolved", () => {
+	it("returns true when the CSE opinion is not required", () => {
+		expect(
+			isCseOpinionResolved({
+				cseRequired: false,
+				hasSubmittedCseOpinion: false,
+			}),
+		).toBe(true);
+	});
+
+	it("returns true when the CSE opinion has already been submitted", () => {
+		expect(
+			isCseOpinionResolved({
+				cseRequired: true,
+				hasSubmittedCseOpinion: true,
+			}),
+		).toBe(true);
+	});
+
+	it("returns false when the CSE opinion is required and not yet submitted", () => {
+		expect(
+			isCseOpinionResolved({
+				cseRequired: true,
+				hasSubmittedCseOpinion: false,
+			}),
+		).toBe(false);
+	});
+
+	it("returns true when neither required nor submitted", () => {
+		expect(
+			isCseOpinionResolved({
+				cseRequired: false,
+				hasSubmittedCseOpinion: true,
+			}),
+		).toBe(true);
 	});
 });

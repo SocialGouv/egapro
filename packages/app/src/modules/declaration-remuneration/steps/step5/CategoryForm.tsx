@@ -20,7 +20,7 @@ import { StepTitleRow } from "~/modules/declaration-remuneration/shared/StepTitl
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import {
 	CATEGORY_SOURCES,
-	SOURCE_LABELS,
+	formatCategorySource,
 } from "~/modules/declaration-remuneration/steps/step5/sources";
 import type {
 	EmployeeCategoryRow,
@@ -421,7 +421,7 @@ export function CategoryForm({
 					<p className="fr-mb-0">
 						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
 						<span className="fr-text--bold">
-							{SOURCE_LABELS[form.watch("source")] ?? form.watch("source")}
+							{formatCategorySource(form.watch("source"))}
 						</span>
 					</p>
 				) : (

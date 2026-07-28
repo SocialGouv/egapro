@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useSession } from "next-auth/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -6,13 +6,17 @@ import { mockImpersonatingSession } from "~/test/impersonationMock";
 
 const mockedUseSession = vi.mocked(useSession);
 
+const { updateHasCseAsync } = vi.hoisted(() => ({
+	updateHasCseAsync: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock("~/trpc/react", () => ({
 	api: {
 		company: {
 			updateHasCse: {
 				useMutation: vi.fn().mockReturnValue({
 					mutate: vi.fn(),
-					mutateAsync: vi.fn(),
+					mutateAsync: updateHasCseAsync,
 					isPending: false,
 				}),
 			},
@@ -21,7 +25,7 @@ vi.mock("~/trpc/react", () => ({
 			updatePhone: {
 				useMutation: vi.fn().mockReturnValue({
 					mutate: vi.fn(),
-					mutateAsync: vi.fn(),
+					mutateAsync: vi.fn().mockResolvedValue(undefined),
 					isPending: false,
 				}),
 			},
@@ -218,6 +222,86 @@ describe("MissingInfoModal", () => {
 		expect(
 			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
 		).not.toBeDisabled();
+	});
+
+	it("shows the explicit CSE error when submitting without selecting a radio", async () => {
+		render(
+			<MissingInfoModal
+				cseApplicable={true}
+				hasCse={null}
+				siren="532847196"
+				userPhone="0122334455"
+			/>,
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
+		);
+		await waitFor(() => {
+			const error = document.querySelector(
+				"#missing-info-cse-error .fr-message--error",
+			);
+			expect(error).toHaveTextContent(
+				"Veuillez renseigner si un CSE a été mis en place.",
+			);
+		});
+	});
+
+	it("parses the selected CSE radio to a boolean and clears the error on resubmit", async () => {
+		updateHasCseAsync.mockClear();
+		render(
+			<MissingInfoModal
+				cseApplicable={true}
+				hasCse={null}
+				siren="532847196"
+				userPhone="0122334455"
+			/>,
+		);
+		const enregistrer = screen.getByRole("button", {
+			name: "Enregistrer",
+			hidden: true,
+		});
+
+		fireEvent.click(enregistrer);
+		await waitFor(() => {
+			expect(
+				document.querySelector("#missing-info-cse-error .fr-message--error"),
+			).toBeInTheDocument();
+		});
+
+		fireEvent.click(screen.getByLabelText("Non"));
+		fireEvent.click(enregistrer);
+		await waitFor(() => {
+			expect(updateHasCseAsync).toHaveBeenCalledWith({
+				siren: "532847196",
+				hasCse: false,
+			});
+		});
+		expect(
+			document.querySelector("#missing-info-cse-error"),
+		).not.toBeInTheDocument();
+	});
+
+	it("parses the Oui CSE radio to true on submit", async () => {
+		updateHasCseAsync.mockClear();
+		render(
+			<MissingInfoModal
+				cseApplicable={true}
+				hasCse={null}
+				siren="532847196"
+				userPhone="0122334455"
+			/>,
+		);
+
+		fireEvent.click(screen.getByLabelText("Oui"));
+		fireEvent.click(
+			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
+		);
+		await waitFor(() => {
+			expect(updateHasCseAsync).toHaveBeenCalledWith({
+				siren: "532847196",
+				hasCse: true,
+			});
+		});
 	});
 
 	describe("admin impersonation", () => {

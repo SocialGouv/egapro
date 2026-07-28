@@ -2,7 +2,7 @@ import "server-only";
 
 import { and, desc, eq } from "drizzle-orm";
 
-import { SOURCE_LABELS } from "~/modules/declaration-remuneration";
+import { formatCategorySource } from "~/modules/declaration-remuneration";
 import {
 	formatCount,
 	formatShortDate,
@@ -150,7 +150,7 @@ export async function buildPdfData(
 
 	const rawSource = jobs.sort((a, b) => a.categoryIndex - b.categoryIndex)[0]
 		?.source;
-	const source = rawSource ? (SOURCE_LABELS[rawSource] ?? rawSource) : null;
+	const source = rawSource ? formatCategorySource(rawSource) : null;
 
 	return {
 		year,
