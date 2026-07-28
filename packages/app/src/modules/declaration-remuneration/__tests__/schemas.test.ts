@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { updateStep4Schema } from "../schemas";
+import {
+	PAY_FIELDS_MEN,
+	PAY_FIELDS_WOMEN,
+	updateEmployeeCategoriesSchema,
+	updateStep4Schema,
+} from "../schemas";
 import type { QuartileData, QuartileTuple } from "../types";
 
 function makeTable(
@@ -182,6 +187,130 @@ describe("updateStep4Schema", () => {
 			const messages = result.error.issues.map((i) => i.message);
 			expect(messages).toContain(
 				"Les seuils doivent être strictement croissants",
+			);
+		}
+	});
+});
+
+function buildPayFieldValues(
+	fields: readonly string[],
+): Record<string, string> {
+	return Object.fromEntries(fields.map((field, i) => [field, String(i + 1)]));
+}
+
+const WOMEN_PAY_VALUES = buildPayFieldValues(PAY_FIELDS_WOMEN);
+const MEN_PAY_VALUES = buildPayFieldValues(PAY_FIELDS_MEN);
+
+const INCOMPLETE_REMUNERATION_MESSAGE =
+	"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.";
+
+function parseCategory(data: Record<string, unknown>) {
+	return updateEmployeeCategoriesSchema.safeParse({
+		declarationType: "initial",
+		source: "dads",
+		categories: [{ name: "Cadres", data }],
+	});
+}
+
+describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)", () => {
+	it("accepts a category with both sexes present and all 8 pay fields filled", () => {
+		const result = parseCategory({
+			womenCount: 2,
+			menCount: 2,
+			...WOMEN_PAY_VALUES,
+			...MEN_PAY_VALUES,
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it("accepts womenCount=0 with only the 4 men pay fields", () => {
+		const result = parseCategory({
+			womenCount: 0,
+			menCount: 2,
+			...MEN_PAY_VALUES,
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it("accepts menCount=0 with only the 4 women pay fields", () => {
+		const result = parseCategory({
+			womenCount: 2,
+			menCount: 0,
+			...WOMEN_PAY_VALUES,
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it("accepts both sexes at headcount 0 with no pay fields", () => {
+		const result = parseCategory({ womenCount: 0, menCount: 0 });
+		expect(result.success).toBe(true);
+	});
+
+	it("accepts omitted counts (undefined) with no pay fields — treated as 0", () => {
+		const result = parseCategory({});
+		expect(result.success).toBe(true);
+	});
+
+	it("rejects a category with headcounts but zero pay fields", () => {
+		const result = parseCategory({ womenCount: 2, menCount: 2 });
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCOMPLETE_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+
+	it("rejects when only the women pay fields are filled but men have a headcount", () => {
+		const result = parseCategory({
+			womenCount: 2,
+			menCount: 2,
+			...WOMEN_PAY_VALUES,
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCOMPLETE_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+
+	it("rejects when a sex with a headcount has only one of its 4 pay fields", () => {
+		const result = parseCategory({
+			womenCount: 2,
+			menCount: 2,
+			annualBaseWomen: WOMEN_PAY_VALUES.annualBaseWomen,
+			...MEN_PAY_VALUES,
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCOMPLETE_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+
+	it("rejects an empty pay field (empty string counts as missing)", () => {
+		const result = parseCategory({
+			womenCount: 2,
+			menCount: 0,
+			...WOMEN_PAY_VALUES,
+			annualBaseWomen: "",
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCOMPLETE_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+
+	it("rejects a single-headcount sex with no pay fields (womenCount=1, menCount=0)", () => {
+		const result = parseCategory({ womenCount: 1, menCount: 0 });
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCOMPLETE_REMUNERATION_MESSAGE,
 			);
 		}
 	});
