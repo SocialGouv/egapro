@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import {
-	computeProportion,
+	formatVariablePayProportion,
 	normalizeDecimalInput,
 	padDecimalToTwo,
 } from "~/modules/domain";
@@ -346,7 +346,10 @@ export function Step3VariablePay({
 													</td>
 													<td className="fr-cell--right">
 														<strong>
-															{computeProportion(beneficiaryWomen, maxWomen)}
+															{formatVariablePayProportion(
+																beneficiaryWomen,
+																maxWomen,
+															)}
 														</strong>
 													</td>
 												</tr>
@@ -386,7 +389,10 @@ export function Step3VariablePay({
 													</td>
 													<td className="fr-cell--right">
 														<strong>
-															{computeProportion(beneficiaryMen, maxMen)}
+															{formatVariablePayProportion(
+																beneficiaryMen,
+																maxMen,
+															)}
 														</strong>
 													</td>
 												</tr>

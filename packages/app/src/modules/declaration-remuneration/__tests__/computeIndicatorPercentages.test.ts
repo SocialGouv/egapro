@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import { computeIndicatorPercentages } from "../shared/computeIndicatorPercentages";
 
+// totalWomen/totalMen are deliberately different from the indicator E
+// beneficiary counts (30/70): the E proportions divide by the workforce of the
+// same sex, so a fixture where both denominators coincide would not catch a
+// regression back to "share among beneficiaries" (issue #3940).
 const nominalRow = {
+	totalWomen: 80,
+	totalMen: 140,
 	indicatorAAnnualWomen: "100",
 	indicatorAAnnualMen: "110",
 	indicatorAHourlyWomen: "20",
@@ -58,10 +64,18 @@ describe("computeIndicatorPercentages", () => {
 			expect(result.variableHourlyMedianGap).not.toBeNull();
 		});
 
-		it("computes variableProportionWomen and variableProportionMen", () => {
+		it("divides each E proportion by the workforce of the same sex", () => {
 			const result = computeIndicatorPercentages(nominalRow);
-			expect(result.variableProportionWomen).toBeCloseTo(30 / 100);
-			expect(result.variableProportionMen).toBeCloseTo(70 / 100);
+			expect(result.variableProportionWomen).toBeCloseTo(30 / 80);
+			expect(result.variableProportionMen).toBeCloseTo(70 / 140);
+		});
+
+		it("does not make the two E proportions sum to 1", () => {
+			const result = computeIndicatorPercentages(nominalRow);
+			const sum =
+				(result.variableProportionWomen ?? 0) +
+				(result.variableProportionMen ?? 0);
+			expect(sum).not.toBeCloseTo(1);
 		});
 
 		it("computes annual quartile 1 proportions", () => {
@@ -147,14 +161,16 @@ describe("computeIndicatorPercentages", () => {
 			expect(result.annualQuartile2ProportionWomen).not.toBeNull();
 		});
 
-		it("returns null E proportions when total is zero", () => {
+		// Zero beneficiaries is real data, not missing data: nobody in a
+		// non-empty workforce receives variable pay, which is 0 %, not null.
+		it("returns zero E proportions when nobody benefits from variable pay", () => {
 			const result = computeIndicatorPercentages({
 				...nominalRow,
 				indicatorEWomen: "0",
 				indicatorEMen: "0",
 			});
-			expect(result.variableProportionWomen).toBeNull();
-			expect(result.variableProportionMen).toBeNull();
+			expect(result.variableProportionWomen).toBe(0);
+			expect(result.variableProportionMen).toBe(0);
 		});
 
 		it("returns null for F proportions when count inputs are null", () => {
@@ -166,30 +182,48 @@ describe("computeIndicatorPercentages", () => {
 			expect(result.annualQuartile1ProportionMen).toBeNull();
 		});
 
-		it("returns null E proportions when women count is null", () => {
+		it("nulls only the women E proportion when the women count is null", () => {
 			const result = computeIndicatorPercentages({
 				...nominalRow,
 				indicatorEWomen: null,
 			});
 			expect(result.variableProportionWomen).toBeNull();
-			expect(result.variableProportionMen).toBeNull();
+			expect(result.variableProportionMen).toBeCloseTo(70 / 140);
 		});
 
-		it("returns null E proportions when men count is null", () => {
+		it("nulls only the men E proportion when the men count is null", () => {
 			const result = computeIndicatorPercentages({
 				...nominalRow,
 				indicatorEMen: null,
 			});
-			expect(result.variableProportionWomen).toBeNull();
+			expect(result.variableProportionWomen).toBeCloseTo(30 / 80);
 			expect(result.variableProportionMen).toBeNull();
 		});
 
-		it("returns null E proportions for non-numeric string inputs", () => {
+		it("returns a null E proportion for a non-numeric string input", () => {
 			const result = computeIndicatorPercentages({
 				...nominalRow,
 				indicatorEWomen: "abc",
 			});
 			expect(result.variableProportionWomen).toBeNull();
+			expect(result.variableProportionMen).toBeCloseTo(70 / 140);
+		});
+
+		it("returns a null E proportion when the workforce is missing", () => {
+			const result = computeIndicatorPercentages({
+				...nominalRow,
+				totalWomen: null,
+			});
+			expect(result.variableProportionWomen).toBeNull();
+			expect(result.variableProportionMen).toBeCloseTo(70 / 140);
+		});
+
+		it("returns a null E proportion when the workforce is zero", () => {
+			const result = computeIndicatorPercentages({
+				...nominalRow,
+				totalMen: 0,
+			});
+			expect(result.variableProportionWomen).toBeCloseTo(30 / 80);
 			expect(result.variableProportionMen).toBeNull();
 		});
 	});
@@ -222,6 +256,15 @@ describe("computeIndicatorPercentages", () => {
 				indicatorFAnnualMen1: 2,
 			});
 			expect(result.annualQuartile1ProportionMen).toBe(0.6667);
+		});
+
+		it("rounds E proportions to 4 decimal places too", () => {
+			const result = computeIndicatorPercentages({
+				...nominalRow,
+				indicatorEWomen: "1",
+				totalWomen: 3,
+			});
+			expect(result.variableProportionWomen).toBe(0.3333);
 		});
 	});
 });

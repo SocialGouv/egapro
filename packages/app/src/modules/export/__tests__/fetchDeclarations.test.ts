@@ -101,8 +101,9 @@ const baseRow = {
 	variableAnnualMedianGap: "0.1200",
 	variableHourlyMedianGap: "0.0600",
 	// Proportions E
-	variableProportionWomen: "0.4523",
-	variableProportionMen: "0.5477",
+	// Indicator E proportions are per-sex coverage rates: they do NOT sum to 1.
+	variableProportionWomen: "0.5625",
+	variableProportionMen: "0.6000",
 	// Proportions F annual (persisted)
 	annualQuartile1ProportionWomen: "0.5556",
 	annualQuartile1ProportionMen: "0.4444",
@@ -199,8 +200,8 @@ describe("buildIndicators", () => {
 	it("should expose proportion labels for indicator E", () => {
 		const result = buildIndicators(baseRow);
 
-		expect(result.E.Proportion_variable_F).toBe("0.4523");
-		expect(result.E.Proportion_variable_H).toBe("0.5477");
+		expect(result.E.Proportion_variable_F).toBe("0.5625");
+		expect(result.E.Proportion_variable_H).toBe("0.6000");
 	});
 
 	it("should return null for F proportions and gap labels when DB columns are null", () => {

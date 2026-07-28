@@ -7,7 +7,7 @@ import type {
 	Step3Data,
 	Step4Data,
 } from "~/modules/declaration-remuneration/types";
-import { computeGap, computeProportion } from "~/modules/domain";
+import { computeGap, formatVariablePayProportion } from "~/modules/domain";
 import { CardTitle } from "./CardTitle";
 import { GapColumn } from "./GapColumn";
 import { GapSideBySide } from "./GapSideBySide";
@@ -137,7 +137,7 @@ export function IndicatorSections({
 											<div className={stepStyles.flex1}>
 												<p className="fr-text--sm fr-mb-0">Femmes</p>
 												<strong className="fr-text--sm">
-													{computeProportion(
+													{formatVariablePayProportion(
 														step3Data.indicatorEWomen,
 														totalWomen,
 													)}
@@ -146,7 +146,10 @@ export function IndicatorSections({
 											<div className={stepStyles.flex1}>
 												<p className="fr-text--sm fr-mb-0">Hommes</p>
 												<strong className="fr-text--sm">
-													{computeProportion(step3Data.indicatorEMen, totalMen)}
+													{formatVariablePayProportion(
+														step3Data.indicatorEMen,
+														totalMen,
+													)}
 												</strong>
 											</div>
 										</div>

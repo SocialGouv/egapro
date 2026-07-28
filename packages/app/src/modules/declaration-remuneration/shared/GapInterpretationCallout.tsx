@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import type { GapDirection } from "~/modules/domain";
 import {
 	computeGap,
-	computeProportion,
 	formatGapCompact,
+	formatVariablePayProportion,
 	gapDirection,
 	gapLevel,
 	gapMagnitude,
@@ -142,8 +142,8 @@ function buildVariablePayBody(
 	const fmtGap = (g: number | null) =>
 		g !== null ? `${formatGapCompact(g)} %` : "-";
 
-	const womenPct = computeProportion(beneficiaryWomen ?? "", maxWomen);
-	const menPct = computeProportion(beneficiaryMen ?? "", maxMen);
+	const womenPct = formatVariablePayProportion(beneficiaryWomen, maxWomen);
+	const menPct = formatVariablePayProportion(beneficiaryMen, maxMen);
 
 	if (direction === "women") {
 		return {
