@@ -9,6 +9,7 @@ import {
 	getCompanySizeRange,
 	getObligationWorkforce,
 	isComplianceProcessRequired,
+	isCseOpinionRequired,
 	isCseRequired,
 } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
@@ -71,6 +72,10 @@ export function Step6Review({
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const cseApplicable = isCseRequired(getObligationWorkforce(companyWorkforce));
+	const cseOpinionRequired = isCseOpinionRequired(
+		getObligationWorkforce(companyWorkforce),
+		hasCse,
+	);
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: () => {
 			trackFunnelComplete(
@@ -163,6 +168,7 @@ export function Step6Review({
 					{complianceProcessRequired && declaration.siren && (
 						<NextStepsBox
 							cseApplicable={cseApplicable}
+							cseOpinionRequired={cseOpinionRequired}
 							hasGapsAboveThreshold={complianceProcessRequired}
 							siren={declaration.siren}
 						/>

@@ -463,6 +463,77 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(screen.getByText("Aucune donnée renseignée.")).toBeInTheDocument();
 	});
 
+	describe("CSE consultation section gating (issue #3945)", () => {
+		const highGapCategories: EmployeeCategoryRow[] = [
+			makeCategory({
+				name: "Ouvriers",
+				womenCount: 10,
+				menCount: 15,
+				annualBaseWomen: "1000",
+				annualBaseMen: "2000",
+				annualVariableWomen: "100",
+				annualVariableMen: "200",
+				hourlyBaseWomen: "10",
+				hourlyBaseMen: "20",
+				hourlyVariableWomen: "1",
+				hourlyVariableMen: "2",
+			}),
+		];
+
+		it("hides the CSE consultation section but keeps gap actions and the CSE update button when cseOpinionRequired is false", () => {
+			render(
+				<SecondDeclarationStep3Review
+					cseApplicable
+					cseOpinionRequired={false}
+					declarationYear={2025}
+					hasCse={false}
+					secondDeclarationCategories={highGapCategories}
+					siren="532847196"
+				/>,
+			);
+
+			expect(
+				screen.queryByRole("heading", { name: "Informer et consulter le CSE" }),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(/obligatoirement informer et consulter le CSE/),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(/avis à transmettre sur le portail/),
+			).not.toBeInTheDocument();
+
+			expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
+			expect(
+				screen.getByRole("heading", { name: "Actions à engager" }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("button", {
+					name: "Mettre à jour l'existence d'un CSE",
+				}),
+			).toBeInTheDocument();
+		});
+
+		it("shows the CSE consultation section when cseOpinionRequired is true", () => {
+			render(
+				<SecondDeclarationStep3Review
+					cseApplicable
+					cseOpinionRequired={true}
+					declarationYear={2025}
+					hasCse={true}
+					secondDeclarationCategories={highGapCategories}
+					siren="532847196"
+				/>,
+			);
+
+			expect(
+				screen.getByRole("heading", { name: "Informer et consulter le CSE" }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(/avis à transmettre sur le portail/),
+			).toBeInTheDocument();
+		});
+	});
+
 	it("closes the modal without submitting when Annuler is clicked", async () => {
 		const user = userEvent.setup();
 		render(

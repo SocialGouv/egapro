@@ -1,4 +1,4 @@
-import { getPostComplianceDestination } from "../../shared/complianceNavigation";
+import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { CompliancePathOption } from "./CompliancePathOption";
 import type { CompliancePathValue } from "./constants";
 
@@ -74,11 +74,13 @@ export function JustifyOption({
 	checked,
 	deadline,
 	disabled,
+	hasCse,
 	onChange,
 }: {
 	checked: boolean;
 	deadline: Date;
 	disabled?: boolean;
+	hasCse: boolean | null;
 	onChange: () => void;
 }) {
 	return (
@@ -98,8 +100,10 @@ export function JustifyOption({
 					objectifs et non sexistes :
 				</p>
 				<ul className="fr-mt-1w fr-mb-0">
-					<li>Informer et consulter votre CSE sur cette justification</li>
-					<li>Transmettre l&apos;avis du CSE</li>
+					{hasCse === true && (
+						<li>Informer et consulter votre CSE sur cette justification</li>
+					)}
+					{hasCse === true && <li>Transmettre l&apos;avis du CSE</li>}
 				</ul>
 			</CompliancePathOption>
 		</div>
@@ -108,12 +112,14 @@ export function JustifyOption({
 
 export function SecondRoundOptions({
 	disabled,
+	hasCse,
 	justificationDeadline,
 	jointEvaluationDeadline,
 	selectedPath,
 	setSelectedPath,
 }: {
 	disabled?: boolean;
+	hasCse: boolean | null;
 	justificationDeadline: Date;
 	jointEvaluationDeadline: Date;
 	selectedPath: CompliancePathValue | undefined;
@@ -125,6 +131,7 @@ export function SecondRoundOptions({
 				checked={selectedPath === "justify"}
 				deadline={justificationDeadline}
 				disabled={disabled}
+				hasCse={hasCse}
 				onChange={() => setSelectedPath("justify")}
 			/>
 
@@ -147,6 +154,7 @@ export function SecondRoundOptions({
 export function FirstRoundOptions({
 	correctiveActionDeadline,
 	disabled,
+	hasCse,
 	jointEvaluationDeadline,
 	justificationDeadline,
 	selectedPath,
@@ -154,6 +162,7 @@ export function FirstRoundOptions({
 }: {
 	correctiveActionDeadline: Date;
 	disabled?: boolean;
+	hasCse: boolean | null;
 	jointEvaluationDeadline: Date;
 	justificationDeadline: Date;
 	selectedPath: CompliancePathValue | undefined;
@@ -165,6 +174,7 @@ export function FirstRoundOptions({
 				checked={selectedPath === "justify"}
 				deadline={justificationDeadline}
 				disabled={disabled}
+				hasCse={hasCse}
 				onChange={() => setSelectedPath("justify")}
 			/>
 
@@ -201,11 +211,15 @@ export function FirstRoundOptions({
 							Redéclarer l&apos;indicateur dans un délai de 6 mois après votre
 							première déclaration
 						</li>
-						<li>
-							Informer et consulter votre CSE sur l&apos;exactitude des données
-							et éventuellement, sur la justification des écarts ≥ 5 %
-						</li>
-						<li>Transmettre l&apos;avis ou les avis du CSE</li>
+						{hasCse === true && (
+							<li>
+								Informer et consulter votre CSE sur l&apos;exactitude des
+								données et éventuellement, sur la justification des écarts ≥ 5 %
+							</li>
+						)}
+						{hasCse === true && (
+							<li>Transmettre l&apos;avis ou les avis du CSE</li>
+						)}
 					</ul>
 					<p className="fr-mt-1w fr-mb-0">
 						Si des écarts non justifiés persistent, vous devez engager une

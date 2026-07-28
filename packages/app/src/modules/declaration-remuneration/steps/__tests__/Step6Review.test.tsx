@@ -715,4 +715,80 @@ describe("Step6Review", () => {
 		);
 		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
 	});
+
+	describe("CSE consultation section gating (issue #3945)", () => {
+		// A annual gap 5% at 300 employees → the "Prochaines étapes" callout renders;
+		// only the CSE consultation part is driven by hasCse.
+		const gappedStep2 = () => ({
+			indicatorAAnnualWomen: "95",
+			indicatorAAnnualMen: "100",
+			indicatorAHourlyWomen: "100",
+			indicatorAHourlyMen: "100",
+			indicatorCAnnualWomen: "100",
+			indicatorCAnnualMen: "100",
+			indicatorCHourlyWomen: "100",
+			indicatorCHourlyMen: "100",
+		});
+
+		function renderWithHasCse(hasCse: boolean | null) {
+			return render(
+				<Step6Review
+					companyWorkforce={300}
+					declaration={{ siren: "532847196", status: null }}
+					declarationYear={2025}
+					hasCse={hasCse}
+					indicatorGRequired
+					step2Data={gappedStep2()}
+					step3Data={emptyStep3Data()}
+					step4Data={emptyStep4Data()}
+				/>,
+			);
+		}
+
+		it.each([
+			false,
+			null,
+		] as const)("hides the CSE consultation section but keeps gap actions and the CSE update button when hasCse is %s", (hasCse) => {
+			renderWithHasCse(hasCse);
+
+			expect(
+				screen.queryByRole("heading", {
+					name: "Informer et consulter le CSE",
+				}),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(/obligatoirement informer et consulter le CSE/),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(/avis du CSE devront être transmis sur le portail/),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(/avis à transmettre sur le portail/),
+			).not.toBeInTheDocument();
+
+			expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
+			expect(
+				screen.getByRole("heading", { name: "Actions à engager" }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("button", {
+					name: "Mettre à jour l'existence d'un CSE",
+				}),
+			).toBeInTheDocument();
+		});
+
+		it("shows the CSE consultation section when hasCse is true", () => {
+			renderWithHasCse(true);
+
+			expect(
+				screen.getByRole("heading", { name: "Informer et consulter le CSE" }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(/avis du CSE devront être transmis sur le portail/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(/avis à transmettre sur le portail/),
+			).toBeInTheDocument();
+		});
+	});
 });

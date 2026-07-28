@@ -4,6 +4,7 @@ import { campaignYearDimension, FunnelStepTracker } from "~/modules/analytics";
 import {
 	formatShortDate,
 	getObligationWorkforce,
+	isCseOpinionRequired,
 	isCseRequired,
 	shouldRedirectSubmittedToRecap,
 } from "~/modules/domain";
@@ -135,6 +136,10 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 				<SecondDeclarationStep3Review
 					cseApplicable={isCseRequired(
 						getObligationWorkforce(company.gipWorkforce),
+					)}
+					cseOpinionRequired={isCseOpinionRequired(
+						getObligationWorkforce(company.gipWorkforce),
+						company.hasCse,
 					)}
 					declarationYear={currentYear}
 					hasCse={company.hasCse}

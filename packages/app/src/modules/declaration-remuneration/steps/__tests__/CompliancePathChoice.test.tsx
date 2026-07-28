@@ -438,6 +438,60 @@ describe("CompliancePathChoice", () => {
 		expect(screen.getByText("john@company.fr")).toBeInTheDocument();
 	});
 
+	describe("CSE consultation items gating (issue #3945)", () => {
+		function renderWithHasCse(hasCse: boolean | null) {
+			return render(
+				<CompliancePathChoice
+					campaignDeadlines={campaignDeadlines}
+					currentYear={2026}
+					declarationSiren={DECLARATION_SIREN}
+					declarationYear={DECLARATION_YEAR}
+					email="test@example.fr"
+					hasCse={hasCse}
+				/>,
+			);
+		}
+
+		it("shows the CSE consultation items in both the justify and corrective-action options when hasCse is true", () => {
+			renderWithHasCse(true);
+
+			expect(
+				screen.getByText(
+					"Informer et consulter votre CSE sur cette justification",
+				),
+			).toBeInTheDocument();
+			expect(screen.getByText("Transmettre l'avis du CSE")).toBeInTheDocument();
+			expect(
+				screen.getByText(/Informer et consulter votre CSE sur l'exactitude/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText("Transmettre l'avis ou les avis du CSE"),
+			).toBeInTheDocument();
+		});
+
+		it.each([
+			false,
+			null,
+		] as const)("hides all CSE consultation items when hasCse is %s", (hasCse) => {
+			renderWithHasCse(hasCse);
+
+			expect(
+				screen.queryByText(
+					"Informer et consulter votre CSE sur cette justification",
+				),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText("Transmettre l'avis du CSE"),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(/Informer et consulter votre CSE sur l'exactitude/),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText("Transmettre l'avis ou les avis du CSE"),
+			).not.toBeInTheDocument();
+		});
+	});
+
 	describe("draft autosave", () => {
 		it("hydrates the selected path from a persisted draft", () => {
 			draftRef.current = { path: "joint_evaluation" };
