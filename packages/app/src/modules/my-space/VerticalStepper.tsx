@@ -30,7 +30,9 @@ export function getStepStatuses(
 
 export function VerticalStepper({
 	campaignDeadlines,
+	cseOpinionRequired,
 	displayContext,
+	indicatorGRequired,
 	secondDeclarationSubmitted,
 	siren,
 	step1,
@@ -40,7 +42,9 @@ export function VerticalStepper({
 	year,
 }: {
 	campaignDeadlines: CampaignDeadlines;
+	cseOpinionRequired: boolean;
 	displayContext: DeclarationDisplayContext;
+	indicatorGRequired: boolean;
 	secondDeclarationSubmitted: boolean;
 	siren: string;
 	step1: StepStatus;
@@ -49,6 +53,8 @@ export function VerticalStepper({
 	variant: PanelVariant;
 	year: number;
 }) {
+	const step3Number = indicatorGRequired ? 3 : 2;
+
 	return (
 		<div className={`${styles.stepper} fr-mb-4w`}>
 			<div className={`${styles.stepRow} ${stepRowClass(step1)}`}>
@@ -61,26 +67,30 @@ export function VerticalStepper({
 					year={year}
 				/>
 			</div>
-			<div className={`${styles.stepRow} ${stepRowClass(step2)}`}>
-				<StepCircle number={2} status={step2} />
-				<Step2Content
-					campaignDeadlines={campaignDeadlines}
-					displayContext={displayContext}
-					secondDeclarationSubmitted={secondDeclarationSubmitted}
-					siren={siren}
-					status={step2}
-					variant={variant}
-				/>
-			</div>
-			<div className={`${styles.stepRow} ${stepRowClass(step3)}`}>
-				<StepCircle number={3} status={step3} />
-				<Step3Content
-					campaignDeadlines={campaignDeadlines}
-					siren={siren}
-					status={step3}
-					variant={variant}
-				/>
-			</div>
+			{indicatorGRequired && (
+				<div className={`${styles.stepRow} ${stepRowClass(step2)}`}>
+					<StepCircle number={2} status={step2} />
+					<Step2Content
+						campaignDeadlines={campaignDeadlines}
+						displayContext={displayContext}
+						secondDeclarationSubmitted={secondDeclarationSubmitted}
+						siren={siren}
+						status={step2}
+						variant={variant}
+					/>
+				</div>
+			)}
+			{cseOpinionRequired && (
+				<div className={`${styles.stepRow} ${stepRowClass(step3)}`}>
+					<StepCircle number={step3Number} status={step3} />
+					<Step3Content
+						campaignDeadlines={campaignDeadlines}
+						siren={siren}
+						status={step3}
+						variant={variant}
+					/>
+				</div>
+			)}
 		</div>
 	);
 }

@@ -85,9 +85,10 @@ test.describe("SUIT declarations export — indicator G computed gaps", () => {
 				}
 			}
 
-			// The funnel fills category 1's annual base at women 1000 / men 1100,
-			// leaving variable and hourly amounts empty. Numeric strings keep their
-			// DB scale ("1100.00"), so compare on the parsed value.
+			// The funnel fills category 1's four pay measures with the same
+			// women 1000 / men 1100 pair (since #3948 a headcount >= 1 requires
+			// all four amounts). Numeric strings keep their DB scale ("1100.00"),
+			// so compare on the parsed value.
 			const filled = categories.find(
 				(c: { Rem_annuelle_base_H: string | null }) =>
 					c.Rem_annuelle_base_H !== null &&
@@ -95,15 +96,12 @@ test.describe("SUIT declarations export — indicator G computed gaps", () => {
 			);
 			expect(filled).toBeDefined();
 
-			// (1100 − 1000) / 1100 = 0.0909, rounded to 4 decimals.
-			expect(filled.Rem_annuelle_base_ecart).toBe(0.0909);
-			// No variable amount → total equals base.
-			expect(filled.Rem_annuelle_total_ecart).toBe(0.0909);
-			// Null-safe: variable and hourly amounts were never entered.
-			expect(filled.Rem_annuelle_variable_ecart).toBeNull();
-			expect(filled.Taux_horaire_base_ecart).toBeNull();
-			expect(filled.Taux_horaire_variable_ecart).toBeNull();
-			expect(filled.Taux_horaire_total_ecart).toBeNull();
+			// Every measure carries the same pair, so every gap is the same:
+			// (1100 − 1000) / 1100 = 0.0909, rounded to 4 decimals. The totals
+			// (base + variable) scale identically: (2200 − 2000) / 2200.
+			for (const key of ECART_KEYS) {
+				expect(filled[key]).toBe(0.0909);
+			}
 		} finally {
 			await anonCtx.close();
 		}

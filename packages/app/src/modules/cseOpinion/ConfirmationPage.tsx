@@ -3,29 +3,8 @@ import { DsfrPictogram } from "~/modules/layout";
 import { ResendReceiptButton } from "~/modules/mail";
 import { FeedbackBanner } from "~/modules/shared/FeedbackBanner";
 import styles from "./ConfirmationPage.module.scss";
+import { DownloadCard } from "./DownloadCard";
 import formStyles from "./shared/formActions.module.scss";
-
-type DownloadCardProps = {
-	dataYear: number;
-	href: string;
-	title: string;
-	year: number;
-};
-
-function DownloadCard({ dataYear, href, title, year }: DownloadCardProps) {
-	return (
-		<a className={styles.downloadCard} download={title} href={href}>
-			<p className="fr-text--bold fr-text--md fr-mb-1w">{title}</p>
-			<p className="fr-text--sm fr-text--default-grey fr-mb-1w">
-				Année {year} au titre des données {dataYear}
-			</p>
-			<div className={styles.downloadFooter}>
-				<span className="fr-text--xs fr-text--mention-grey">PDF</span>
-				<span aria-hidden="true" className="fr-icon-download-line" />
-			</div>
-		</a>
-	);
-}
 
 type Props = {
 	dataYear: number;

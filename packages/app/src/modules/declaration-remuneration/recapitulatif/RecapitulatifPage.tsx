@@ -4,6 +4,7 @@ import {
 	toDisplayWorkforce,
 } from "~/modules/domain";
 import common from "../shared/common.module.scss";
+import { formatCategorySource } from "../steps/step5/sources";
 import type {
 	EmployeeCategoryRow,
 	Step2Data,
@@ -13,16 +14,6 @@ import type {
 import { CategoryRecapTable } from "./CategoryRecapTable";
 import { EmptyNotice, IndicatorTables } from "./IndicatorTables";
 import styles from "./RecapitulatifPage.module.scss";
-
-const SOURCE_LABELS: Record<string, string> = {
-	"convention-collective": "Convention collective",
-	"accord-entreprise": "Accord d'entreprise",
-	"accord-groupe": "Accord de groupe",
-	"accord-branche": "Accord de branche",
-	"decision-unilaterale": "Décision unilatérale",
-	"classification-interne": "Classification interne",
-	autre: "Autre",
-};
 
 type CompanyInfo = {
 	name: string;
@@ -116,9 +107,7 @@ export function RecapitulatifPage({
 			GIP_WORKFORCE_ABSENT_DISPLAY,
 	});
 
-	const sourceLabel = step5Source
-		? (SOURCE_LABELS[step5Source] ?? step5Source)
-		: null;
+	const sourceLabel = step5Source ? formatCategorySource(step5Source) : null;
 
 	const indexedCategories = step5Categories.map((cat, i) => ({
 		...cat,

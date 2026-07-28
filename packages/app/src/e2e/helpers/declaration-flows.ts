@@ -14,6 +14,38 @@ async function fillPayGapTable(page: Page) {
 	}
 }
 
+/**
+ * Fill every pay measure of one indicator G category with the same women/men
+ * pair. Since #3948 a category whose headcount is >= 1 for a sex requires all
+ * four of that sex's pay amounts, so filling the annual base alone now blocks
+ * the submit. Reusing one pair across the four measures keeps every computed
+ * gap equal to the caller's intended gap.
+ */
+export async function fillCategoryPayAmounts(
+	page: Page,
+	options: { categoryIndex?: number; women: string; men: string },
+) {
+	const { categoryIndex = 1, women, men } = options;
+	const measures = [
+		"Salaire de base annuel",
+		"Composantes variables annuelles",
+		"Salaire de base horaire",
+		"Composantes variables horaires",
+	];
+	for (const measure of measures) {
+		await page
+			.getByRole("textbox", {
+				name: `${measure} femmes, catégorie ${categoryIndex}`,
+			})
+			.fill(women);
+		await page
+			.getByRole("textbox", {
+				name: `${measure} hommes, catégorie ${categoryIndex}`,
+			})
+			.fill(men);
+	}
+}
+
 type QuartileInputRow = {
 	ordinal: "1er" | "2e" | "3e" | "4e";
 	threshold?: string;
@@ -149,16 +181,7 @@ export async function completeDeclaration(
 	}
 
 	// Fill salary data on category 1 (works for both fresh and pre-populated)
-	await page
-		.getByRole("textbox", {
-			name: "Salaire de base annuel femmes, catégorie 1",
-		})
-		.fill("1000");
-	await page
-		.getByRole("textbox", {
-			name: "Salaire de base annuel hommes, catégorie 1",
-		})
-		.fill(menSalary);
+	await fillCategoryPayAmounts(page, { men: menSalary, women: "1000" });
 
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL("**/declaration-remuneration/etape/6");

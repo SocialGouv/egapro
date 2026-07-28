@@ -4,7 +4,11 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useFieldArray } from "react-hook-form";
 
-import { categoryFormSchema } from "~/modules/declaration-remuneration/schemas";
+import {
+	categoryFormSchema,
+	PAY_FIELDS_MEN,
+	PAY_FIELDS_WOMEN,
+} from "~/modules/declaration-remuneration/schemas";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
 import {
 	createDevStep5Categories,
@@ -16,13 +20,14 @@ import { StepTitleRow } from "~/modules/declaration-remuneration/shared/StepTitl
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import {
 	CATEGORY_SOURCES,
-	SOURCE_LABELS,
+	formatCategorySource,
 } from "~/modules/declaration-remuneration/steps/step5/sources";
 import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
 import {
+	isSexRemunerationComplete,
 	padDecimalOnBlur,
 	padDecimalToTwo,
 	sumCategoryWorkforce,
@@ -30,7 +35,7 @@ import {
 import { getDsfrCollapse } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
-import { CategoryDataTable } from "./CategoryDataTable";
+import { CategoryAccordionItem } from "./CategoryAccordionItem";
 import { CategoryImportExport } from "./CategoryImportExport";
 import {
 	createEmptyCategory,
@@ -178,6 +183,9 @@ export function CategoryForm({
 	const hasData =
 		hasDataOverride !== undefined ? hasDataOverride : hasDataInternal;
 	const [workforceError, setWorkforceError] = useState("");
+	const [expandedByFieldId, setExpandedByFieldId] = useState<
+		Record<string, boolean>
+	>({});
 	const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 	const deleteDialogRef = useRef<HTMLDialogElement>(null);
 	const accordionHeaderRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -264,7 +272,10 @@ export function CategoryForm({
 	// land at the top instead of staying near the category they just folded.
 	// Snapshot the button's viewport offset before the toggle and restore it
 	// after the next layout pass so the click feels in-place.
-	function handleAccordionToggle(e: React.MouseEvent<HTMLButtonElement>) {
+	function handleAccordionToggle(
+		e: React.MouseEvent<HTMLButtonElement>,
+		fieldId: string,
+	) {
 		const button = e.currentTarget;
 		const offsetBefore = button.getBoundingClientRect().top;
 		requestAnimationFrame(() => {
@@ -273,6 +284,10 @@ export function CategoryForm({
 			if (Math.abs(drift) > 1) {
 				window.scrollBy({ top: drift, behavior: "instant" });
 			}
+			setExpandedByFieldId((prev) => ({
+				...prev,
+				[fieldId]: button.getAttribute("aria-expanded") === "true",
+			}));
 		});
 	}
 
@@ -303,6 +318,27 @@ export function CategoryForm({
 		if (hasDuplicates) {
 			setWorkforceError(
 				"Les noms des catégories d'emplois doivent être uniques.",
+			);
+			return;
+		}
+
+		const hasIncompleteRemuneration = data.categories.some((cat) => {
+			const womenCount = Number.parseInt(cat.womenCount, 10);
+			const menCount = Number.parseInt(cat.menCount, 10);
+			return (
+				!isSexRemunerationComplete(
+					womenCount,
+					PAY_FIELDS_WOMEN.map((f) => cat[f]),
+				) ||
+				!isSexRemunerationComplete(
+					menCount,
+					PAY_FIELDS_MEN.map((f) => cat[f]),
+				)
+			);
+		});
+		if (hasIncompleteRemuneration) {
+			setWorkforceError(
+				"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",
 			);
 			return;
 		}
@@ -385,7 +421,7 @@ export function CategoryForm({
 					<p className="fr-mb-0">
 						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
 						<span className="fr-text--bold">
-							{SOURCE_LABELS[form.watch("source")] ?? form.watch("source")}
+							{formatCategorySource(form.watch("source"))}
 						</span>
 					</p>
 				) : (
@@ -451,96 +487,37 @@ export function CategoryForm({
 			<div className="fr-accordions-group" data-fr-group="false">
 				{fields.map((field, index) => {
 					const cat = categories[index];
-					// Derive the accordion id from the row's stable identity, never from
-					// its position: DSFR's vanilla JS freezes the id at instantiation and
-					// binds its toggle through a literal `[aria-controls="<id>"]` selector.
-					// Renumbering ids in place (after a delete) makes the live instance
-					// stop matching its own selector and DSFR disposes it, which leaves the
-					// accordion unopenable — cf. #4008.
-					const collapseId = `${baseId}-accordion-${field.id}`;
-					const headingId = `${collapseId}-heading`;
-					const categoryNumber = `Catégorie d'emplois n°${index + 1}`;
-					const catName = cat?.name?.trim() ?? "";
-					const categoryLabel = catName
-						? `${categoryNumber} : ${catName}`
-						: categoryNumber;
-
 					return (
-						<section
-							aria-labelledby={headingId}
-							className="fr-accordion"
+						<CategoryAccordionItem
+							baseId={baseId}
+							category={
+								cat ? { id: index, ...cat } : createEmptyCategory(index)
+							}
+							collapseRef={(node) => {
+								accordionCollapseRefs.current[index] = node;
+							}}
+							disabled={disabled}
+							fieldId={field.id}
+							headerRef={(node) => {
+								accordionHeaderRefs.current[index] = node;
+							}}
+							index={index}
+							isExpanded={expandedByFieldId[field.id] ?? true}
 							key={field.id}
-						>
-							<h2 className="fr-accordion__title">
-								<button
-									aria-controls={collapseId}
-									aria-expanded="true"
-									className="fr-accordion__btn"
-									id={headingId}
-									onClick={handleAccordionToggle}
-									ref={(node) => {
-										accordionHeaderRefs.current[index] = node;
-									}}
-									type="button"
-								>
-									{categoryLabel}
-								</button>
-							</h2>
-							<div
-								className="fr-collapse fr-collapse--expanded"
-								id={collapseId}
-								ref={(node) => {
-									accordionCollapseRefs.current[index] = node;
-								}}
-							>
-								<div className={stepStyles.categoryBlock}>
-									{!readOnlyLabel && (
-										<div className="fr-input-group fr-mb-0">
-											<label className="fr-label" htmlFor={`cat-${index}-name`}>
-												Libellé de la catégorie d'emploi
-											</label>
-											<input
-												className="fr-input"
-												disabled={disabled}
-												id={`cat-${index}-name`}
-												{...form.register(`categories.${index}.name`)}
-												onChange={(e) => {
-													form.setValue(
-														`categories.${index}.name`,
-														e.target.value,
-													);
-													setHasData(false);
-												}}
-												type="text"
-											/>
-										</div>
-									)}
-
-									<CategoryDataTable
-										category={
-											cat ? { id: index, ...cat } : createEmptyCategory(index)
-										}
-										categoryIndex={index}
-										disabled={disabled}
-										onDecimalBlur={handleDecimalBlur}
-										onPositiveNumberChange={handlePositiveNumberChange}
-									/>
-
-									{!readOnlyLabel && fields.length > 1 && (
-										<div className={stepStyles.deleteRow}>
-											<button
-												className="fr-btn fr-btn--tertiary fr-icon-delete-line fr-btn--icon-left fr-btn--sm"
-												disabled={disabled}
-												onClick={() => askRemoveCategory(index)}
-												type="button"
-											>
-												Supprimer
-											</button>
-										</div>
-									)}
-								</div>
-							</div>
-						</section>
+							nameProps={{
+								...form.register(`categories.${index}.name`),
+								onChange: (e) => {
+									form.setValue(`categories.${index}.name`, e.target.value);
+									setHasData(false);
+								},
+							}}
+							onAccordionToggle={(e) => handleAccordionToggle(e, field.id)}
+							onAskRemove={askRemoveCategory}
+							onDecimalBlur={handleDecimalBlur}
+							onPositiveNumberChange={handlePositiveNumberChange}
+							readOnlyLabel={readOnlyLabel}
+							showDelete={!readOnlyLabel && fields.length > 1}
+						/>
 					);
 				})}
 			</div>

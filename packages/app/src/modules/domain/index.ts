@@ -22,6 +22,7 @@ export {
 	COMPANY_SIZE_RANGES,
 	classifyCompanySize,
 	getCompanySizeRange,
+	isCseOpinionRequired,
 	isCseRequired,
 } from "./shared/companySize";
 // Global score computation (sum of sub-scores from the EgaPro index)
@@ -40,8 +41,14 @@ export {
 	QUARTILE_THRESHOLD_COUNT,
 } from "./shared/constants";
 // Declaration display context
-export type { DeclarationDisplayContext } from "./shared/declarationDisplay";
-export { getDeclarationDisplayContext } from "./shared/declarationDisplay";
+export type {
+	CseOpinionResolvedInput,
+	DeclarationDisplayContext,
+} from "./shared/declarationDisplay";
+export {
+	getDeclarationDisplayContext,
+	isCseOpinionResolved,
+} from "./shared/declarationDisplay";
 // Declaration derived flags (compliance process, revision, indicator G)
 export type {
 	ComplianceProcessRequiredInput,
@@ -116,6 +123,10 @@ export {
 	hasEvent,
 	hasSubmittedSecondDeclaration,
 } from "./shared/declarationTrajectory";
+export {
+	isSexRemunerationComplete,
+	MIN_HEADCOUNT_REQUIRING_PAY_DATA,
+} from "./shared/employeeCategoryRemuneration";
 // Display formatting (%, €, units)
 export {
 	computePercentage,

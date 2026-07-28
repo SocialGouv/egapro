@@ -1,6 +1,8 @@
 import path from "node:path";
 import { expect, type Page } from "@playwright/test";
 
+import { fillCategoryPayAmounts } from "./declaration-flows";
+
 const DUMMY_PDF = path.join(import.meta.dirname, "../fixtures/dummy.pdf");
 export const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
 
@@ -173,16 +175,7 @@ export async function completeSecondDeclaration(
 	// Step 2: Edit correction employee category data
 	// women=1000, men=1100 → 9% gap | women=1000, men=1020 → 2% gap
 	const menSalary = options.hasGap ? "1100" : "1020";
-	await page
-		.getByRole("textbox", {
-			name: "Salaire de base annuel femmes, catégorie 1",
-		})
-		.fill("1000");
-	await page
-		.getByRole("textbox", {
-			name: "Salaire de base annuel hommes, catégorie 1",
-		})
-		.fill(menSalary);
+	await fillCategoryPayAmounts(page, { men: menSalary, women: "1000" });
 
 	// Fill required reference period dates
 	await page.locator("#period-start-date").fill("2026-01-01");
