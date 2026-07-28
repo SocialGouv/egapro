@@ -1,36 +1,57 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const queryResults: unknown[][] = [];
-let callIndex = 0;
+type TableKey =
+	| "declarations"
+	| "companies"
+	| "users"
+	| "gipMdsData"
+	| "jobCategories"
+	| "employeeCategories"
+	| "declarationStatusHistory";
 
-// Records each query in call order and returns the next queued result set.
-// Supports every chain shape used by buildPdfData: `.where().limit()`,
-// `.where().orderBy().limit()` (status history) and awaited `.where()`
-// (jobs / employeeCategories, no `.limit`).
-vi.mock("~/server/db", () => {
-	const settle = () => {
-		const result = queryResults[callIndex++] ?? [];
-		const chain = Object.assign(Promise.resolve(result), {
-			limit: () => Promise.resolve(result),
-			orderBy: () => ({ limit: () => Promise.resolve(result) }),
-		});
-		return chain;
-	};
-	return {
-		db: {
-			select: () => ({ from: () => ({ where: () => settle() }) }),
-		},
-	};
-});
+// Result sets keyed by the queried table. buildPdfData issues most queries via
+// `Promise.all`, so execution order is not stable — the mock keys results by the
+// table passed to `.from()` (via the schema token's `__table` tag) instead of by
+// call order. `declarationStatusHistory` is queried up to twice per build
+// (second_declaration_submit then submit), so it holds a FIFO sub-queue.
+const results = new Map<TableKey, unknown[][]>();
+
+function settle(table: TableKey) {
+	const queued = results.get(table);
+	const result = queued?.shift() ?? [];
+	return Object.assign(Promise.resolve(result), {
+		limit: () => Promise.resolve(result),
+		orderBy: () => ({ limit: () => Promise.resolve(result) }),
+	});
+}
+
+vi.mock("~/server/db", () => ({
+	db: {
+		select: () => ({
+			from: (table: { __table: TableKey }) => ({
+				where: () => settle(table.__table),
+			}),
+		}),
+	},
+}));
 
 vi.mock("~/server/db/schema", () => ({
-	declarations: { id: "id", siren: "siren", year: "year" },
-	companies: { siren: "siren" },
-	users: { id: "id" },
-	gipMdsData: { siren: "siren", year: "year" },
-	jobCategories: { declarationId: "declarationId" },
-	employeeCategories: { jobCategoryId: "jobCategoryId" },
+	declarations: {
+		__table: "declarations",
+		id: "id",
+		siren: "siren",
+		year: "year",
+	},
+	companies: { __table: "companies", siren: "siren" },
+	users: { __table: "users", id: "id" },
+	gipMdsData: { __table: "gipMdsData", siren: "siren", year: "year" },
+	jobCategories: { __table: "jobCategories", declarationId: "declarationId" },
+	employeeCategories: {
+		__table: "employeeCategories",
+		jobCategoryId: "jobCategoryId",
+	},
 	declarationStatusHistory: {
+		__table: "declarationStatusHistory",
 		declarationId: "declarationId",
 		eventType: "eventType",
 		createdAt: "createdAt",
@@ -57,12 +78,24 @@ vi.mock("drizzle-orm", () => ({
 	and: (...args: unknown[]) => args,
 	desc: (col: unknown) => col,
 	eq: (col: unknown, val: unknown) => ({ col, val }),
+	inArray: (col: unknown, values: unknown) => ({ col, values }),
 }));
 
-function queue(...results: unknown[][]) {
-	callIndex = 0;
-	queryResults.length = 0;
-	queryResults.push(...results);
+// One entry per table. `declarationStatusHistory` takes an array of result sets
+// (consumed FIFO) since it can be queried twice within one build.
+type QueueSpec = Partial<
+	Record<Exclude<TableKey, "declarationStatusHistory">, unknown[]>
+> & { declarationStatusHistory?: unknown[][] };
+
+function queue(spec: QueueSpec) {
+	results.clear();
+	for (const [table, value] of Object.entries(spec)) {
+		if (table === "declarationStatusHistory") {
+			results.set(table, value as unknown[][]);
+		} else {
+			results.set(table as TableKey, [value as unknown[]]);
+		}
+	}
 }
 
 const SUBMITTED = new Date("2026-03-05T10:00:00Z");
@@ -76,12 +109,11 @@ async function importBuild() {
 
 describe("buildPdfData", () => {
 	beforeEach(() => {
-		callIndex = 0;
-		queryResults.length = 0;
+		results.clear();
 	});
 
 	it("throws when the declaration is not found", async () => {
-		queue([]);
+		queue({ declarations: [] });
 		const buildPdfData = await importBuild();
 		await expect(buildPdfData("123456789", 2026, NOW)).rejects.toThrow(
 			"Déclaration introuvable",
@@ -89,7 +121,11 @@ describe("buildPdfData", () => {
 	});
 
 	it("throws when the declaration is still a draft", async () => {
-		queue([{ id: "d1", siren: "123456789", year: 2026, status: "draft" }]);
+		queue({
+			declarations: [
+				{ id: "d1", siren: "123456789", year: 2026, status: "draft" },
+			],
+		});
 		const buildPdfData = await importBuild();
 		await expect(buildPdfData("123456789", 2026, NOW)).rejects.toThrow(
 			"La déclaration n'est pas encore soumise",
@@ -97,9 +133,8 @@ describe("buildPdfData", () => {
 	});
 
 	it("assembles declarant, company, GIP workforce, source and transmission date for an initial declaration", async () => {
-		queue(
-			// declarations
-			[
+		queue({
+			declarations: [
 				{
 					id: "d1",
 					siren: "123456789",
@@ -113,8 +148,7 @@ describe("buildPdfData", () => {
 					indicatorEWomen: "80",
 				},
 			],
-			// companies
-			[
+			companies: [
 				{
 					siren: "123456789",
 					name: "Société Démo",
@@ -123,8 +157,7 @@ describe("buildPdfData", () => {
 					nafLabel: "Programmation informatique",
 				},
 			],
-			// users (declarant)
-			[
+			users: [
 				{
 					firstName: "Jean",
 					lastName: "Martin",
@@ -132,10 +165,8 @@ describe("buildPdfData", () => {
 					phone: "0102030405",
 				},
 			],
-			// gipMdsData
-			[{ workforceEma: "250.7" }],
-			// jobCategories
-			[
+			gipMdsData: [{ workforceEma: "250.7" }],
+			jobCategories: [
 				{
 					id: "job-1",
 					name: "Ouvriers",
@@ -143,11 +174,9 @@ describe("buildPdfData", () => {
 					source: "accord-entreprise",
 				},
 			],
-			// employeeCategories for job-1
-			[{ jobCategoryId: "job-1" }],
-			// status history: submit
-			[{ createdAt: SUBMITTED }],
-		);
+			employeeCategories: [{ jobCategoryId: "job-1" }],
+			declarationStatusHistory: [[{ createdAt: SUBMITTED }]],
+		});
 		const buildPdfData = await importBuild();
 		const result = await buildPdfData("123456789", 2026, NOW);
 
@@ -178,9 +207,9 @@ describe("buildPdfData", () => {
 		expect(result.source).toBe("Accord d'entreprise");
 	});
 
-	it("displays the GIP-absent placeholder and a bare source when GIP data and label are missing", async () => {
-		queue(
-			[
+	it("displays the GIP-absent placeholder and a humanised source when GIP data and label are missing", async () => {
+		queue({
+			declarations: [
 				{
 					id: "d2",
 					siren: "987654321",
@@ -192,10 +221,10 @@ describe("buildPdfData", () => {
 					updatedAt: new Date("2026-03-01T00:00:00Z"),
 				},
 			],
-			[{ siren: "987654321", name: "Autre Démo" }],
-			[{ firstName: "Alice", lastName: null, email: null, phone: null }],
-			[], // gipMdsData absent
-			[
+			companies: [{ siren: "987654321", name: "Autre Démo" }],
+			users: [{ firstName: "Alice", lastName: null, email: null, phone: null }],
+			gipMdsData: [], // GIP data absent
+			jobCategories: [
 				{
 					id: "job-9",
 					name: "Cadres",
@@ -203,9 +232,9 @@ describe("buildPdfData", () => {
 					source: "convention-maison",
 				},
 			],
-			[{ jobCategoryId: "job-9" }],
-			[{ createdAt: SUBMITTED }],
-		);
+			employeeCategories: [{ jobCategoryId: "job-9" }],
+			declarationStatusHistory: [[{ createdAt: SUBMITTED }]],
+		});
 		const buildPdfData = await importBuild();
 		const result = await buildPdfData("987654321", 2026, NOW);
 
@@ -217,13 +246,13 @@ describe("buildPdfData", () => {
 			email: "",
 			phone: "",
 		});
-		// Unknown source value falls back to its raw string.
-		expect(result.source).toBe("convention-maison");
+		// Unknown source value is humanised rather than printed as a raw slug.
+		expect(result.source).toBe("Convention maison");
 	});
 
 	it("falls back to a synthesized company name and zeroed totals when the company row is missing", async () => {
-		queue(
-			[
+		queue({
+			declarations: [
 				{
 					id: "d3",
 					siren: "111222333",
@@ -235,11 +264,12 @@ describe("buildPdfData", () => {
 					updatedAt: new Date("2026-03-01T00:00:00Z"),
 				},
 			],
-			[], // companies missing
-			[], // gipMdsData (no declarantId → users query is skipped)
-			[], // jobCategories empty
-			[{ createdAt: SUBMITTED }], // status history: submit
-		);
+			companies: [], // company row missing
+			gipMdsData: [],
+			jobCategories: [], // empty → employeeCategories query is skipped
+			// no declarantId → users query is skipped
+			declarationStatusHistory: [[{ createdAt: SUBMITTED }]],
+		});
 		const buildPdfData = await importBuild();
 		const result = await buildPdfData("111222333", 2026, NOW);
 
@@ -252,8 +282,8 @@ describe("buildPdfData", () => {
 	});
 
 	it("uses the second_declaration_submit date for a correction declaration", async () => {
-		queue(
-			[
+		queue({
+			declarations: [
 				{
 					id: "d4",
 					siren: "123456789",
@@ -265,8 +295,8 @@ describe("buildPdfData", () => {
 					updatedAt: new Date("2026-03-01T00:00:00Z"),
 				},
 			],
-			[{ siren: "123456789", name: "Société Démo" }],
-			[
+			companies: [{ siren: "123456789", name: "Société Démo" }],
+			users: [
 				{
 					firstName: "Jean",
 					lastName: "Martin",
@@ -274,8 +304,8 @@ describe("buildPdfData", () => {
 					phone: "",
 				},
 			],
-			[{ workforceEma: "120" }],
-			[
+			gipMdsData: [{ workforceEma: "120" }],
+			jobCategories: [
 				{
 					id: "job-1",
 					name: "Ouvriers",
@@ -283,10 +313,10 @@ describe("buildPdfData", () => {
 					source: "accord-groupe",
 				},
 			],
-			[{ jobCategoryId: "job-1" }],
-			// resolveTransmittedDate for correction: second_declaration_submit first
-			[{ createdAt: SECOND_SUBMIT }],
-		);
+			employeeCategories: [{ jobCategoryId: "job-1" }],
+			// correction: second_declaration_submit event resolves first
+			declarationStatusHistory: [[{ createdAt: SECOND_SUBMIT }]],
+		});
 		const buildPdfData = await importBuild();
 		const result = await buildPdfData("123456789", 2026, NOW, "correction");
 
@@ -295,8 +325,8 @@ describe("buildPdfData", () => {
 	});
 
 	it("falls back through submit then updatedAt when no matching status event exists", async () => {
-		queue(
-			[
+		queue({
+			declarations: [
 				{
 					id: "d5",
 					siren: "123456789",
@@ -308,14 +338,13 @@ describe("buildPdfData", () => {
 					updatedAt: new Date("2026-02-14T00:00:00Z"),
 				},
 			],
-			[{ siren: "123456789", name: "Société Démo" }],
-			[], // gipMdsData
-			[], // jobCategories
-			// resolveTransmittedDate for correction: second_declaration_submit (empty)
-			[],
-			// then submit (empty) → falls back to updatedAt
-			[],
-		);
+			companies: [{ siren: "123456789", name: "Société Démo" }],
+			gipMdsData: [],
+			jobCategories: [],
+			// correction: second_declaration_submit (empty), then submit (empty)
+			// → falls back to updatedAt
+			declarationStatusHistory: [[], []],
+		});
 		const buildPdfData = await importBuild();
 		const result = await buildPdfData("123456789", 2026, NOW, "correction");
 
@@ -323,8 +352,8 @@ describe("buildPdfData", () => {
 	});
 
 	it("falls back to `now` when the declaration has no updatedAt and no submit event", async () => {
-		queue(
-			[
+		queue({
+			declarations: [
 				{
 					id: "d6",
 					siren: "123456789",
@@ -336,11 +365,12 @@ describe("buildPdfData", () => {
 					updatedAt: null,
 				},
 			],
-			[{ siren: "123456789", name: "Société Démo" }],
-			[], // gipMdsData
-			[], // jobCategories
-			[], // status history: submit (empty) → falls back to `now`
-		);
+			companies: [{ siren: "123456789", name: "Société Démo" }],
+			gipMdsData: [],
+			jobCategories: [],
+			// submit event empty → falls back to `now`
+			declarationStatusHistory: [[]],
+		});
 		const buildPdfData = await importBuild();
 		const result = await buildPdfData("123456789", 2026, NOW);
 

@@ -3,6 +3,13 @@ export {
 	CampaignRateTileLoading,
 } from "./CampaignRateTileStates";
 export { CompanySizeFilter } from "./CompanySizeFilter";
+export { DownloadStatusRegion } from "./DownloadStatusRegion";
+export { FileDownloadLink } from "./FileDownloadLink";
+export {
+	type DownloadState,
+	isNativeClick,
+	useDownloadClickGuard,
+} from "./useDownloadClickGuard";
 export { FileUpload } from "./FileUpload";
 export type { FileNameError } from "./fileNameValidation";
 export {

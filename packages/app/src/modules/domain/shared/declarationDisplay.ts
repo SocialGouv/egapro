@@ -32,3 +32,14 @@ export function getDeclarationDisplayContext(
 		shouldShowCseOpinion: declaration.cseRequired,
 	};
 }
+
+export type CseOpinionResolvedInput = {
+	cseRequired: boolean;
+	hasSubmittedCseOpinion: boolean;
+};
+
+export function isCseOpinionResolved(
+	declaration: CseOpinionResolvedInput,
+): boolean {
+	return declaration.hasSubmittedCseOpinion || !declaration.cseRequired;
+}

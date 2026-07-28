@@ -1,8 +1,11 @@
 "use client";
 
 import { getWorkforceYearFor } from "~/modules/domain";
+import { DownloadStatusRegion, useDownloadClickGuard } from "~/modules/shared";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { DeclarationItem } from "./types";
+
+const PENDING_LABEL = "Téléchargement en cours…";
 
 export function getDocumentsPanelId(declaration: DeclarationItem): string {
 	return `documents-panel-${declaration.type}-${declaration.year}`;
@@ -20,7 +23,6 @@ function getResources(declaration: DeclarationItem): DocumentResource[] {
 
 	const subtitle = `Année ${declaration.year} au titre des données ${getWorkforceYearFor(declaration.year)}`;
 
-	// Available as soon as the GIP MDS prefill has been loaded for this year.
 	if (declaration.hasPrefillData) {
 		resources.push({
 			title: "Télécharger les données préremplies (issues des données DSN)",
@@ -29,7 +31,6 @@ function getResources(declaration: DeclarationItem): DocumentResource[] {
 		});
 	}
 
-	// Available once the initial declaration has been submitted.
 	if (declaration.status === "done") {
 		resources.push({
 			title: "Télécharger le récapitulatif de la déclaration des indicateurs",
@@ -43,7 +44,6 @@ function getResources(declaration: DeclarationItem): DocumentResource[] {
 		});
 	}
 
-	// Available once the second (corrective) declaration has been submitted.
 	if (declaration.hasSubmittedSecondDeclaration) {
 		resources.push({
 			title: "Télécharger le récapitulatif de la seconde déclaration",
@@ -57,6 +57,35 @@ function getResources(declaration: DeclarationItem): DocumentResource[] {
 
 export function getDocumentResourceCount(declaration: DeclarationItem): number {
 	return getResources(declaration).length;
+}
+
+type DocumentCardItemProps = {
+	resource: DocumentResource;
+};
+
+function DocumentCardItem({ resource }: DocumentCardItemProps) {
+	const { anchorProps, state } = useDownloadClickGuard(resource.href);
+
+	return (
+		<li className={styles.documentItem}>
+			<div className="fr-card fr-card--sm fr-card--download fr-enlarge-link">
+				<div className="fr-card__body">
+					<div className="fr-card__content">
+						<h3 className="fr-card__title">
+							<a {...anchorProps}>{resource.title}</a>
+						</h3>
+						<p className="fr-card__desc">{resource.subtitle}</p>
+						<div className="fr-card__end">
+							<p className="fr-card__detail">
+								{state === "pending" ? PENDING_LABEL : "PDF"}
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<DownloadStatusRegion pendingLabel={PENDING_LABEL} state={state} />
+		</li>
+	);
 }
 
 type Props = {
@@ -97,23 +126,7 @@ export function DocumentsPanel({ declaration }: Props) {
 						</h2>
 						<ul className={styles.documentList}>
 							{resources.map((resource) => (
-								<li className={styles.documentItem} key={resource.href}>
-									<div className="fr-card fr-card--sm fr-card--download fr-enlarge-link">
-										<div className="fr-card__body">
-											<div className="fr-card__content">
-												<h3 className="fr-card__title">
-													<a download href={resource.href}>
-														{resource.title}
-													</a>
-												</h3>
-												<p className="fr-card__desc">{resource.subtitle}</p>
-												<div className="fr-card__end">
-													<p className="fr-card__detail">PDF</p>
-												</div>
-											</div>
-										</div>
-									</div>
-								</li>
+								<DocumentCardItem key={resource.href} resource={resource} />
 							))}
 						</ul>
 					</div>

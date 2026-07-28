@@ -28,7 +28,9 @@ function makeDisplayContext(
 
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
+	cseOpinionRequired: true,
 	year: FUTURE_YEAR,
+	indicatorGRequired: true,
 	lastActionDate: null as string | null,
 	displayContext: makeDisplayContext(),
 	hasSubmittedSecondDeclaration: false,
@@ -162,6 +164,95 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 				"recapitulatif?siren=532847196",
 			);
 			expect(correctionLink?.getAttribute("href")).toContain("type=correction");
+		});
+	});
+
+	describe("rendu conditionnel des étapes selon le parcours (#3939)", () => {
+		const STEP2_TITLE = /Parcours de mise en conformité/;
+		const STEP3_TITLE = "Déposer le ou les avis du CSE";
+		const STEP1_TITLE = "Déclaration des indicateurs de rémunération";
+
+		it("renders steps 2 and 3 when both indicatorGRequired and cseOpinionRequired are true", () => {
+			const { panel } = renderPanel("start");
+			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
+			expect(panel.getByText(STEP2_TITLE)).toBeInTheDocument();
+			expect(panel.getByText(STEP3_TITLE)).toBeInTheDocument();
+		});
+
+		it("hides step 2 when indicatorGRequired is false", () => {
+			const { panel } = renderPanel("start", { indicatorGRequired: false });
+			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
+			expect(panel.queryByText(STEP2_TITLE)).not.toBeInTheDocument();
+			expect(panel.getByText(STEP3_TITLE)).toBeInTheDocument();
+		});
+
+		it("hides step 3 when cseOpinionRequired is false", () => {
+			const { panel } = renderPanel("start", { cseOpinionRequired: false });
+			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
+			expect(panel.getByText(STEP2_TITLE)).toBeInTheDocument();
+			expect(panel.queryByText(STEP3_TITLE)).not.toBeInTheDocument();
+		});
+
+		it("hides both steps 2 and 3 for a company without CSE and without indicator G", () => {
+			const { panel } = renderPanel("start", {
+				cseOpinionRequired: false,
+				indicatorGRequired: false,
+			});
+			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
+			expect(panel.queryByText(STEP2_TITLE)).not.toBeInTheDocument();
+			expect(panel.queryByText(STEP3_TITLE)).not.toBeInTheDocument();
+		});
+	});
+
+	describe("numérotation des étapes visibles (#4000)", () => {
+		function stepNumbers(dialog: HTMLElement): string[] {
+			return Array.from(
+				dialog.querySelectorAll<HTMLElement>('[aria-hidden="true"]'),
+			)
+				.map((el) => el.textContent ?? "")
+				.filter((text) => /^[123]$/.test(text));
+		}
+
+		it("numbers steps 1, 2, 3 in sequence when both steps 2 and 3 are visible", () => {
+			const { dialog } = renderPanel("start");
+			expect(stepNumbers(dialog)).toEqual(["1", "2", "3"]);
+		});
+
+		it("renumbers the CSE step to 2 when step 2 (indicator G) is hidden", () => {
+			const { dialog } = renderPanel("start", { indicatorGRequired: false });
+			expect(stepNumbers(dialog)).toEqual(["1", "2"]);
+		});
+
+		it("keeps step 2 numbered 2 when step 3 (CSE) is hidden", () => {
+			const { dialog } = renderPanel("start", { cseOpinionRequired: false });
+			expect(stepNumbers(dialog)).toEqual(["1", "2"]);
+		});
+
+		it("only shows step 1 when both steps 2 and 3 are hidden", () => {
+			const { dialog } = renderPanel("start", {
+				cseOpinionRequired: false,
+				indicatorGRequired: false,
+			});
+			expect(stepNumbers(dialog)).toEqual(["1"]);
+		});
+	});
+
+	describe("ClosedMessage — texte selon cseOpinionRequired (#3939)", () => {
+		it("mentions the CSE opinions still being modifiable when cseOpinionRequired is true", () => {
+			const { panel } = renderPanel("closed", { cseOpinionRequired: true });
+			expect(
+				panel.getByText(/Les avis du CSE restent modifiables/),
+			).toBeInTheDocument();
+		});
+
+		it("shows the plain closed message when cseOpinionRequired is false", () => {
+			const { panel } = renderPanel("closed", { cseOpinionRequired: false });
+			expect(
+				panel.getByText("Cette démarche est terminée."),
+			).toBeInTheDocument();
+			expect(
+				panel.queryByText(/Les avis du CSE restent modifiables/),
+			).not.toBeInTheDocument();
 		});
 	});
 

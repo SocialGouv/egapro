@@ -3,7 +3,9 @@ import {
 	getCurrentYear,
 	getDeclarationDisplayContext,
 	getObligationWorkforce,
+	isCseOpinionRequired,
 	isCseRequired,
+	isIndicatorGRequired,
 } from "~/modules/domain";
 
 import { ArchivesSection } from "./ArchivesSection";
@@ -56,8 +58,15 @@ export function CompanyDeclarationsPage({
 	userPhone,
 }: Props) {
 	const currentYear = getCurrentYear();
-	const cseApplicable = isCseRequired(
-		getObligationWorkforce(company.gipWorkforce),
+	const obligationWorkforce = getObligationWorkforce(company.gipWorkforce);
+	const cseApplicable = isCseRequired(obligationWorkforce);
+	const cseOpinionRequired = isCseOpinionRequired({
+		workforce: obligationWorkforce,
+		hasCse: company.hasCse,
+	});
+	const indicatorGRequired = isIndicatorGRequired(
+		obligationWorkforce,
+		currentYear,
 	);
 	const lastActionDate = getLastActionDate(declarations, currentYear);
 	const currentDeclaration = declarations.find(
@@ -95,11 +104,13 @@ export function CompanyDeclarationsPage({
 			/>
 			<DeclarationProcessPanel
 				campaignDeadlines={campaignDeadlines}
+				cseOpinionRequired={cseOpinionRequired}
 				ctaHref={ctaHref}
 				displayContext={displayContext}
 				hasSubmittedSecondDeclaration={
 					currentDeclaration?.hasSubmittedSecondDeclaration ?? false
 				}
+				indicatorGRequired={indicatorGRequired}
 				lastActionDate={lastActionDate}
 				lockedByOther={lockedByOther}
 				lockHolder={lockHolder}

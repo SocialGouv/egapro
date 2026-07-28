@@ -244,6 +244,7 @@ describe("buildIndicatorG", () => {
 		const entries: IndicatorGEntry[] = [
 			{
 				categoryName: "Ouvriers",
+				source: null,
 				declarationType: "initial",
 				womenCount: 40,
 				menCount: 45,
@@ -258,6 +259,7 @@ describe("buildIndicatorG", () => {
 			},
 			{
 				categoryName: "Ouvriers",
+				source: null,
 				declarationType: "correction",
 				womenCount: 42,
 				menCount: 44,
@@ -291,6 +293,7 @@ describe("buildIndicatorG", () => {
 
 	const gEntry = (overrides: Partial<IndicatorGEntry>): IndicatorGEntry => ({
 		categoryName: "Cadres",
+		source: null,
 		declarationType: "initial",
 		womenCount: 50,
 		menCount: 60,
@@ -450,6 +453,7 @@ describe("assembleDeclaration", () => {
 		const indicatorG: IndicatorGEntry[] = [
 			{
 				categoryName: "Cadres",
+				source: null,
 				declarationType: "initial",
 				womenCount: 50,
 				menCount: 60,
@@ -464,6 +468,7 @@ describe("assembleDeclaration", () => {
 			},
 			{
 				categoryName: "Cadres",
+				source: null,
 				declarationType: "correction",
 				womenCount: 52,
 				menCount: 58,
@@ -484,6 +489,138 @@ describe("assembleDeclaration", () => {
 		expect(result.Indicateurs.G?.[0]?.Effectif_F).toBe(50);
 		expect(result.Seconde_declaration.Correction).toHaveLength(1);
 		expect(result.Seconde_declaration.Correction?.[0]?.Effectif_F).toBe(52);
+	});
+
+	it("should expose the job-category source as Source_categories_emplois (#3944)", () => {
+		const indicatorG: IndicatorGEntry[] = [
+			{
+				categoryName: "Cadres",
+				source: "accord-branche",
+				declarationType: "initial",
+				womenCount: 50,
+				menCount: 60,
+				annualBaseWomen: "52000",
+				annualBaseMen: "56000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+		];
+
+		const result = assembleDeclaration(baseRow, indicatorG, []);
+
+		expect(result.Source_categories_emplois).toBe("accord-branche");
+	});
+
+	it("should read Source_categories_emplois from the first entry, all entries sharing the same source (#3944)", () => {
+		const indicatorG: IndicatorGEntry[] = [
+			{
+				categoryName: "Cadres",
+				source: "decision-unilaterale",
+				declarationType: "initial",
+				womenCount: 50,
+				menCount: 60,
+				annualBaseWomen: "52000",
+				annualBaseMen: "56000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+			{
+				categoryName: "Employés",
+				source: "decision-unilaterale",
+				declarationType: "initial",
+				womenCount: 30,
+				menCount: 20,
+				annualBaseWomen: "30000",
+				annualBaseMen: "31000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+		];
+
+		const result = assembleDeclaration(baseRow, indicatorG, []);
+
+		expect(result.Source_categories_emplois).toBe("decision-unilaterale");
+	});
+
+	it("should set Source_categories_emplois to null when the declaration has no indicator G (#3944)", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		expect(result.Source_categories_emplois).toBeNull();
+	});
+
+	it("should read Source_categories_emplois from the first initial entry even when correction entries appear first (#3944)", () => {
+		const indicatorG: IndicatorGEntry[] = [
+			{
+				categoryName: "Cadres",
+				source: "accord-entreprise",
+				declarationType: "correction",
+				womenCount: 50,
+				menCount: 60,
+				annualBaseWomen: "52000",
+				annualBaseMen: "56000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+			{
+				categoryName: "Cadres",
+				source: "accord-branche",
+				declarationType: "initial",
+				womenCount: 50,
+				menCount: 60,
+				annualBaseWomen: "52000",
+				annualBaseMen: "56000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+		];
+
+		const result = assembleDeclaration(baseRow, indicatorG, []);
+
+		expect(result.Source_categories_emplois).toBe("accord-branche");
+	});
+
+	it("should fall back to null when the first indicator G entry carries no source (#3944)", () => {
+		const indicatorG: IndicatorGEntry[] = [
+			{
+				categoryName: "Cadres",
+				source: null,
+				declarationType: "initial",
+				womenCount: 50,
+				menCount: 60,
+				annualBaseWomen: "52000",
+				annualBaseMen: "56000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+		];
+
+		const result = assembleDeclaration(baseRow, indicatorG, []);
+
+		expect(result.Source_categories_emplois).toBeNull();
 	});
 
 	it("should map CSE opinions when at least one CSE file is present", () => {
@@ -637,6 +774,7 @@ describe("assembleDeclaration", () => {
 		const indicatorG: IndicatorGEntry[] = [
 			{
 				categoryName: "Cadres",
+				source: null,
 				declarationType: "initial",
 				womenCount: 12,
 				menCount: 18,
@@ -889,6 +1027,7 @@ describe("assembleDeclaration — compliance flags", () => {
 	const indicatorG: IndicatorGEntry[] = [
 		{
 			categoryName: "Cadres",
+			source: null,
 			declarationType: "initial",
 			womenCount: 50,
 			menCount: 60,

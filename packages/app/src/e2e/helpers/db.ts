@@ -202,6 +202,7 @@ export async function setDeclarationComplianceState(state: {
 	secondDeclarationSubmittedAt?: Date | null;
 	demarcheCompletedAt?: Date | null;
 	cseOpinionCompletedAt?: Date | null;
+	cseRequired?: boolean;
 }) {
 	const sql = createConnection();
 	try {
@@ -213,6 +214,16 @@ export async function setDeclarationComplianceState(state: {
 			    second_declaration_path_choice = ${state.secondDeclarationPathChoice ?? null}
 			WHERE siren = ${TEST_SIREN}
 		`;
+
+		// The panel's closed-vs-cse decision reads the frozen `cse_required` snapshot,
+		// so tests that model completion must pin it explicitly (it is otherwise left
+		// over from whichever submit flow last ran on the shared declaration record).
+		if (state.cseRequired !== undefined) {
+			await sql`
+				UPDATE app_declaration SET cse_required = ${state.cseRequired}
+				WHERE siren = ${TEST_SIREN}
+			`;
+		}
 
 		const decl = await sql`
 			SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} LIMIT 1

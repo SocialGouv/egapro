@@ -95,6 +95,21 @@ describe("declarationRouter", () => {
 			};
 		}
 
+		// A category with a non-zero headcount for a sex must carry that sex's 4
+		// pay cells, otherwise the schema `.refine()` rejects the input (bug #3948).
+		const completePayData = {
+			womenCount: 10,
+			menCount: 15,
+			annualBaseWomen: "30000",
+			annualVariableWomen: "2000",
+			hourlyBaseWomen: "18",
+			hourlyVariableWomen: "1.5",
+			annualBaseMen: "32000",
+			annualVariableMen: "2500",
+			hourlyBaseMen: "19",
+			hourlyVariableMen: "1.8",
+		};
+
 		const employeeInput = {
 			declarationType: "initial" as const,
 			source: "dads",
@@ -102,7 +117,7 @@ describe("declarationRouter", () => {
 				{
 					name: "Cadres",
 					detail: "Senior",
-					data: { womenCount: 10, menCount: 15 },
+					data: completePayData,
 				},
 			],
 		};
@@ -141,7 +156,7 @@ describe("declarationRouter", () => {
 					{
 						name: "Cadres",
 						detail: "Senior",
-						data: { womenCount: 12, menCount: 18 },
+						data: { ...completePayData, womenCount: 12, menCount: 18 },
 					},
 				],
 				referencePeriodStart: "2025-01-01",
@@ -171,6 +186,34 @@ describe("declarationRouter", () => {
 			await expect(
 				caller.updateEmployeeCategories(employeeInput),
 			).rejects.toThrow("Déclaration introuvable");
+		});
+
+		it("rejects a category with headcounts but no pay amounts (#3948)", async () => {
+			const tx = createEmployeeTx(mockDeclaration);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createLockedCaller(mockDb);
+
+			const incompleteInput = {
+				declarationType: "initial" as const,
+				source: "dads",
+				categories: [
+					{
+						name: "Cadres",
+						detail: "Senior",
+						data: { womenCount: 2, menCount: 2 },
+					},
+				],
+			};
+
+			await expect(
+				caller.updateEmployeeCategories(incompleteInput),
+			).rejects.toThrow(
+				"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",
+			);
+			expect(mockTransaction).not.toHaveBeenCalled();
 		});
 	});
 });
