@@ -35,6 +35,7 @@ function renderItem(
 			category={categoryOverride ?? category}
 			collapseRef={vi.fn()}
 			disabled={false}
+			fieldId="field-1"
 			headerRef={vi.fn()}
 			index={0}
 			isExpanded
