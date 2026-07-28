@@ -25,8 +25,9 @@ Le workflow **⏰ Alpha release reminder** (`release-alpha-reminder.yaml`) tourn
 
 `release-changelog.yaml` résume, en français et côté métier, ce qui a été livré :
 
-- `collect_release_issues.sh` — issues/PR du tag, avec **rollup epic** (une PR `feat(epic): #N` = une ligne Feature, sans exploser ses sous-tickets) et pré-filtre technique.
-- étape IA — rédige 3–8 bullets métier, en traitant titres/labels comme donnée non maîtrisée (anti-injection). Claude Code est appelé via son **CLI** (`claude -p`), pas via `anthropics/claude-code-action` : cette action rejette l'événement `release` (`Unsupported event type`), et ce job n'a de toute façon besoin d'aucun contexte GitHub. Le CLI tourne dans un répertoire temporaire (ni `CLAUDE.md`, ni hooks, ni MCP chargés) et ne voit que `issues.json`. Version épinglée dans `env.CLAUDE_CODE_VERSION`.
+- `collect_release_issues.sh` — issues/PR du tag, avec **rollup epic** (une PR `feat(epic): #N` = une ligne Feature, sans exploser ses sous-tickets) et **pré-filtre technique à deux niveaux** : au niveau PR (le préfixe conventional-commit `chore|ci|build|perf|test|refactor|style|docs` ne figure que sur le titre de PR — un titre d'issue est en français et ne matche jamais), puis au niveau issue (label technique). Un scope technique (`fix(release): …`) n'est pas un type technique et passe le filtre.
+- étape IA — applique un **contrat de couverture** (une puce par entrée par défaut, fusion uniquement si même fonctionnalité) en traitant titres/labels comme donnée non maîtrisée (anti-injection). Claude Code est appelé via son **CLI** (`claude -p`), pas via `anthropics/claude-code-action` : cette action rejette l'événement `release` (`Unsupported event type`), et ce job n'a de toute façon besoin d'aucun contexte GitHub. Le CLI tourne dans un répertoire temporaire (ni `CLAUDE.md`, ni hooks, ni MCP chargés) et ne voit que `issues.json`. Version épinglée dans `env.CLAUDE_CODE_VERSION`.
+- **vérification de couverture** — compare le nombre d'entrées collectées au nombre de puces du résumé ; fait échouer le job si le résumé est vide alors que des entrées ont été collectées (couverture abandonnée par l'IA).
 - `publish_release_summary.sh` — injecte/remplace la section idempotente `<!-- ai-changelog -->` dans le corps de la release.
 
 Le workflow est **découplé** : un échec du changelog ne bloque jamais la release. Il peut être rejoué à la main (`workflow_dispatch` avec un tag) pour un backfill.
@@ -38,6 +39,10 @@ Le workflow est **découplé** : un échec du changelog ne bloque jamais la rele
 ## Canal beta / master
 
 `release.yml` (manuel, `workflow_dispatch`) gère le canal **beta** (préprod). `master` n'est ni dans son trigger ni dans son gate : aucune release stable n'est produite dans le flux courant.
+
+### Preset conventional-commits
+
+`.releaserc.cjs` utilise le preset `conventionalcommits` avec un `presetConfig.types` qui rend visibles, dans les notes générées par semantic-release, les types auppos cachés par le preset angular par défaut (`refactor`, `docs`, `perf`, `revert`), sous des sections françaises. Les types purement techniques (`chore`, `ci`, `build`, `style`, `test`) restent masqués. Le **déclenchement** des releases est inchangé : `@semantic-release/commit-analyzer` dérive le niveau de bump de ses `default-release-rules` (breaking→major, feat→minor, fix|perf|revert→patch), indépendantes du preset.
 
 ## Tests
 
