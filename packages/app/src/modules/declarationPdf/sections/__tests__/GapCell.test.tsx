@@ -26,7 +26,7 @@ describe("GapCell", () => {
 	it("does not badge a positive gap below the threshold", () => {
 		render(<GapCell gap={4.6} />);
 		expect(screen.queryByText(BADGE)).not.toBeInTheDocument();
-		expect(screen.getByText("4,59 %")).toBeInTheDocument();
+		expect(screen.getByText("4,60 %")).toBeInTheDocument();
 	});
 
 	it("badges a negative gap whose magnitude reaches the threshold", () => {

@@ -42,6 +42,18 @@ describe("formatGap", () => {
 		expect(formatGap(-5.04)).toBe("-5,04 %");
 	});
 
+	// Values already exact at two decimals must survive truncation untouched.
+	// A naive `Math.trunc(gap * 100)` drops a whole cent here, because the
+	// product carries binary representation error (4.6 * 100 = 459.99999…).
+	it("does not shave a cent off values already exact at two decimals", () => {
+		expect(formatGap(4.6)).toBe("4,60 %");
+		expect(formatGap(5.1)).toBe("5,10 %");
+		expect(formatGap(2.3)).toBe("2,30 %");
+		expect(formatGap(8.7)).toBe("8,70 %");
+		expect(formatGap(1.15)).toBe("1,15 %");
+		expect(formatGap(-4.6)).toBe("-4,60 %");
+	});
+
 	it("returns '- %' for null", () => {
 		expect(formatGap(null)).toBe("- %");
 	});
