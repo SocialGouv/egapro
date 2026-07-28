@@ -38,6 +38,7 @@ type Props = {
 	currentYear: number;
 	declarationSiren: string;
 	declarationYear: number;
+	cseOpinionRequired: boolean;
 	email: string;
 	hasCse: boolean | null;
 	initialPath?: CompliancePathValue;
@@ -48,6 +49,7 @@ type Props = {
 
 export function CompliancePathChoice({
 	campaignDeadlines,
+	cseOpinionRequired,
 	currentYear,
 	declarationSiren,
 	declarationYear,
@@ -212,8 +214,8 @@ export function CompliancePathChoice({
 
 								{isSecondRound ? (
 									<SecondRoundOptions
+										cseOpinionRequired={cseOpinionRequired}
 										disabled={isImpersonating || isReadOnly}
-										hasCse={hasCse}
 										jointEvaluationDeadline={
 											campaignDeadlines.decl2JointEvaluationDeadline
 										}
@@ -228,8 +230,8 @@ export function CompliancePathChoice({
 										correctiveActionDeadline={
 											campaignDeadlines.decl2ModificationDeadline
 										}
+										cseOpinionRequired={cseOpinionRequired}
 										disabled={isImpersonating || isReadOnly}
-										hasCse={hasCse}
 										jointEvaluationDeadline={
 											campaignDeadlines.decl1JointEvaluationDeadline
 										}

@@ -21,7 +21,7 @@ import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator
 
 type Props = {
 	cseApplicable: boolean;
-	cseOpinionRequired?: boolean;
+	cseOpinionRequired: boolean;
 	declarationYear: number;
 	hasCse: boolean | null;
 	secondDeclarationCategories: EmployeeCategoryRow[];
@@ -30,7 +30,7 @@ type Props = {
 
 export function SecondDeclarationStep3Review({
 	cseApplicable,
-	cseOpinionRequired = true,
+	cseOpinionRequired,
 	declarationYear,
 	hasCse,
 	secondDeclarationCategories,
