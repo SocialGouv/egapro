@@ -167,6 +167,46 @@ const MATRIX: Case[] = [
 	},
 
 	{
+		label:
+			"submit_second_declaration re-submit from awaiting_revision_choice, gap still persists",
+		from: "awaiting_revision_choice",
+		action: "submit_second_declaration",
+		facts: base("awaiting_revision_choice", {
+			cseRequired: true,
+			action: { stillHasGap: true },
+		}),
+		expectedTo: "awaiting_revision_choice",
+		expectedEvents: [{ type: "second_declaration_submit", round: 2 }],
+	},
+	{
+		label:
+			"submit_second_declaration re-submit from awaiting_revision_choice, gap resolved with CSE",
+		from: "awaiting_revision_choice",
+		action: "submit_second_declaration",
+		facts: base("awaiting_revision_choice", {
+			cseRequired: true,
+			action: { stillHasGap: false },
+		}),
+		expectedTo: "awaiting_cse_opinion",
+		expectedEvents: [{ type: "second_declaration_submit", round: 2 }],
+	},
+	{
+		label:
+			"submit_second_declaration re-submit from awaiting_revision_choice, gap resolved without CSE",
+		from: "awaiting_revision_choice",
+		action: "submit_second_declaration",
+		facts: base("awaiting_revision_choice", {
+			cseRequired: false,
+			action: { stillHasGap: false },
+		}),
+		expectedTo: "demarche_completed",
+		expectedEvents: [
+			{ type: "second_declaration_submit", round: 2 },
+			{ type: "demarche_complete" },
+		],
+	},
+
+	{
 		label: "submit_joint_evaluation_initial_with_cse",
 		from: "joint_evaluation_chosen",
 		action: "submit_joint_evaluation",
@@ -266,7 +306,7 @@ const MATRIX: Case[] = [
 	},
 ];
 
-describe("matrix v2027.1 — all 19 transitions", () => {
+describe("matrix v2027.1 — all 22 transitions (incl. every from-state)", () => {
 	it.each(MATRIX)("$label", ({ facts, action, expectedTo, expectedEvents }) => {
 		const result = applyAction(facts, action, rules);
 		expect(result.nextStatus).toBe(expectedTo);

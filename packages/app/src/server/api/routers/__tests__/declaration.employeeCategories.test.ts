@@ -122,6 +122,20 @@ describe("declarationRouter", () => {
 			],
 		};
 
+		const correctionInput = {
+			declarationType: "correction" as const,
+			source: "dads",
+			categories: [
+				{
+					name: "Cadres",
+					detail: "Senior",
+					data: { ...completePayData, womenCount: 12, menCount: 18 },
+				},
+			],
+			referencePeriodStart: "2025-01-01",
+			referencePeriodEnd: "2025-12-31",
+		};
+
 		it("creates job and employee categories for initial declaration", async () => {
 			const tx = createEmployeeTx(mockDeclaration);
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
@@ -142,26 +156,15 @@ describe("declarationRouter", () => {
 
 		it("updates employee categories for correction declaration", async () => {
 			const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
-			const tx = createEmployeeTx(mockDeclaration, existingJobs);
+			const tx = createEmployeeTx(
+				{ ...mockDeclaration, status: "corrective_actions_chosen" },
+				existingJobs,
+			);
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
 				fn(tx),
 			);
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createLockedCaller(mockDb);
-
-			const correctionInput = {
-				declarationType: "correction" as const,
-				source: "dads",
-				categories: [
-					{
-						name: "Cadres",
-						detail: "Senior",
-						data: { ...completePayData, womenCount: 12, menCount: 18 },
-					},
-				],
-				referencePeriodStart: "2025-01-01",
-				referencePeriodEnd: "2025-12-31",
-			};
 
 			const result = await caller.updateEmployeeCategories(correctionInput);
 
@@ -173,6 +176,52 @@ describe("declarationRouter", () => {
 					secondDeclReferencePeriodEnd: "2025-12-31",
 				}),
 			);
+		});
+
+		it("accepts a correction write once the declaration awaits a revision choice", async () => {
+			const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
+			const tx = createEmployeeTx(
+				{ ...mockDeclaration, status: "awaiting_revision_choice" },
+				existingJobs,
+			);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createLockedCaller(mockDb);
+
+			const result = await caller.updateEmployeeCategories(correctionInput);
+
+			expect(result).toEqual({ success: true });
+			expect(mockSet).toHaveBeenCalledWith(
+				expect.objectContaining({ secondDeclarationStep: 2 }),
+			);
+		});
+
+		// A correction write outside the round-2 funnel would otherwise plant
+		// `secondDeclarationStep`, which the deadline guard reads to grant the
+		// later second-declaration deadline — letting the company edit its
+		// first-declaration figures past the legal cutoff.
+		it.each([
+			"draft",
+			"awaiting_compliance_path_choice",
+			"joint_evaluation_chosen",
+			"demarche_completed",
+		])("rejects a correction write from %s", async (status) => {
+			const existingJobs = [{ id: "job-1", categoryIndex: 0, name: "Cadres" }];
+			const tx = createEmployeeTx({ ...mockDeclaration, status }, existingJobs);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = { transaction: mockTransaction } as unknown;
+			const caller = await createLockedCaller(mockDb);
+
+			await expect(
+				caller.updateEmployeeCategories(correctionInput),
+			).rejects.toThrow(
+				"La seconde déclaration n'est pas ouverte à la saisie.",
+			);
+			expect(mockSet).not.toHaveBeenCalled();
 		});
 
 		it("throws when declaration not found", async () => {
