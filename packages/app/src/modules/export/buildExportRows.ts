@@ -3,6 +3,7 @@ import { and, eq, isNotNull, or } from "drizzle-orm";
 import {
 	gapRatioToPercent,
 	getObligationWorkforce,
+	hasHighGap,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isIndicatorGRequired,
@@ -94,14 +95,16 @@ export async function buildExportRows(
 		const complianceInput = {
 			workforce,
 			hasIndicatorG: hasIndicatorGForThisDecl,
-			gap: globalAnnualMeanGap,
+			hasSignificantIndicatorGGap: hasHighGap([globalAnnualMeanGap]),
 		};
 		const complianceProcessRequired =
 			isComplianceProcessRequired(complianceInput);
 		const complianceProcessRevisionRequired =
 			isComplianceProcessRevisionRequired({
 				...complianceInput,
-				correctionGap: variableAnnualMeanGap,
+				hasSignificantCorrectionIndicatorGGap: hasHighGap([
+					variableAnnualMeanGap,
+				]),
 				events:
 					row.secondDeclarationSubmittedAt === null
 						? []

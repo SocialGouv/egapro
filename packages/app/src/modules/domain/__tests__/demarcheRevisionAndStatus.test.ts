@@ -24,7 +24,7 @@ function events(...types: DeclarationEventType[]): DeclarationStatusEvent[] {
 const COMPLIANCE_BASE = {
 	workforce: INDICATOR_G_ANNUAL_MIN,
 	hasIndicatorG: true,
-	gap: GAP_ALERT_THRESHOLD + 1,
+	hasSignificantIndicatorGGap: true,
 };
 
 type RevisionRow = {
@@ -84,24 +84,12 @@ const REVISION_ROWS: RevisionRow[] = [
 		expected: false,
 	},
 	{
-		// Over-correction: a company that started above the threshold and
-		// corrected past it, ending up significantly unfavourable to men.
-		// The threshold is symmetric, so this is still a significant gap and
-		// a revision is required — a correction cannot overshoot into resolution.
 		label:
-			"second declaration submitted + negative corrected gap at the threshold → revision required (symmetric)",
+			"second declaration submitted + negative corrected gap → revision required",
 		gap: GAP_ALERT_THRESHOLD + 1,
 		events: events("submit", "second_declaration_submit"),
 		correctionGap: -GAP_ALERT_THRESHOLD,
 		expected: true,
-	},
-	{
-		label:
-			"second declaration submitted + small negative corrected gap → resolved, no revision",
-		gap: GAP_ALERT_THRESHOLD + 1,
-		events: events("submit", "second_declaration_submit"),
-		correctionGap: -(GAP_ALERT_THRESHOLD - 1),
-		expected: false,
 	},
 ];
 
@@ -114,17 +102,22 @@ describe("isComplianceProcessRevisionRequired — second-declaration boundaries"
 	}) => {
 		const result = isComplianceProcessRevisionRequired({
 			...COMPLIANCE_BASE,
-			gap,
+			hasSignificantIndicatorGGap: Math.abs(gap) >= GAP_ALERT_THRESHOLD,
 			events: evts,
-			correctionGap,
+			hasSignificantCorrectionIndicatorGGap:
+				correctionGap !== null &&
+				Math.abs(correctionGap) >= GAP_ALERT_THRESHOLD,
 		});
 		expect(result).toBe(expected);
 		// Cross-consistency: a revision is only ever required when the initial
 		// compliance process itself was required.
 		if (result) {
-			expect(isComplianceProcessRequired({ ...COMPLIANCE_BASE, gap })).toBe(
-				true,
-			);
+			expect(
+				isComplianceProcessRequired({
+					...COMPLIANCE_BASE,
+					hasSignificantIndicatorGGap: Math.abs(gap) >= GAP_ALERT_THRESHOLD,
+				}),
+			).toBe(true);
 		}
 	});
 });

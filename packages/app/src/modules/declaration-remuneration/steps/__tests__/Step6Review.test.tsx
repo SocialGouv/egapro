@@ -101,6 +101,9 @@ describe("Step6Review", () => {
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
 			/>,
 		);
 		expect(screen.getByText("Étape 6 sur 6")).toBeInTheDocument();
@@ -119,6 +122,9 @@ describe("Step6Review", () => {
 				step2Data={emptyStep2Data()}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
 			/>,
 		);
 		expect(
@@ -274,6 +280,9 @@ describe("Step6Review", () => {
 				}}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
 			/>,
 		);
 		expect(screen.getAllByText("Annuelle brute").length).toBeGreaterThanOrEqual(
@@ -550,7 +559,7 @@ describe("Step6Review", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("shows 'Prochaines étapes' callout when a gap >= 5%", () => {
+	it("shows 'Prochaines étapes' callout when an indicator-G gap is at least 5%", () => {
 		render(
 			<Step6Review
 				companyWorkforce={300}
@@ -572,6 +581,9 @@ describe("Step6Review", () => {
 				}}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
 			/>,
 		);
 		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
@@ -592,8 +604,7 @@ describe("Step6Review", () => {
 		).toBeInTheDocument();
 	});
 
-	it("shows 'Prochaines étapes' callout when women earn more past the threshold (negative gap, #3963)", () => {
-		// Women earn 10% more → signed gap -10%: |gap| >= 5%, so the symmetric threshold triggers the obligation.
+	it("does not show 'Prochaines étapes' for an A-F-only negative gap", () => {
 		render(
 			<Step6Review
 				companyWorkforce={300}
@@ -614,6 +625,25 @@ describe("Step6Review", () => {
 				step4Data={emptyStep4Data()}
 			/>,
 		);
+		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
+	});
+
+	it("shows 'Prochaines étapes' when an indicator-G gap is unfavourable to men", () => {
+		render(
+			<Step6Review
+				companyWorkforce={300}
+				declaration={{ siren: "532847196", status: null }}
+				declarationYear={2025}
+				indicatorGRequired
+				step2Data={emptyStep2Data()}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "110", annualBaseMen: "100" }),
+				]}
+			/>,
+		);
+
 		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
 	});
 
@@ -636,8 +666,39 @@ describe("Step6Review", () => {
 				}}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "98", annualBaseMen: "100" }),
+				]}
 			/>,
 		);
+		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
+	});
+
+	it("does not show 'Prochaines étapes' for an A-F-only gap when G is below the threshold", () => {
+		render(
+			<Step6Review
+				companyWorkforce={300}
+				declaration={{ siren: "532847196", status: null }}
+				declarationYear={2025}
+				indicatorGRequired
+				step2Data={{
+					indicatorAAnnualWomen: "90",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "100",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "100",
+					indicatorCHourlyWomen: "100",
+					indicatorCHourlyMen: "100",
+				}}
+				step3Data={emptyStep3Data()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "98", annualBaseMen: "100" }),
+				]}
+			/>,
+		);
+
 		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
 	});
 
@@ -661,6 +722,9 @@ describe("Step6Review", () => {
 				}}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
 			/>,
 		);
 		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
@@ -686,13 +750,15 @@ describe("Step6Review", () => {
 				}}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
 			/>,
 		);
 		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
 	});
 
-	it("keys the callout off the global annual mean gap (indicator A), not other indicators", () => {
-		// A annual gap 2% (< 5%) but C annual 10%: the trigger only reads the global annual mean gap.
+	it("keys the callout off the indicator-G gap, not the A-F gaps", () => {
 		render(
 			<Step6Review
 				companyWorkforce={300}
@@ -711,25 +777,17 @@ describe("Step6Review", () => {
 				}}
 				step3Data={emptyStep3Data()}
 				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
 			/>,
 		);
-		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
+		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
 	});
 
 	describe("CSE consultation section gating (issue #3945)", () => {
-		// A annual gap 5% at 300 employees → the "Prochaines étapes" callout renders;
-		// only the CSE consultation part is driven by hasCse.
-		const gappedStep2 = () => ({
-			indicatorAAnnualWomen: "95",
-			indicatorAAnnualMen: "100",
-			indicatorAHourlyWomen: "100",
-			indicatorAHourlyMen: "100",
-			indicatorCAnnualWomen: "100",
-			indicatorCAnnualMen: "100",
-			indicatorCHourlyWomen: "100",
-			indicatorCHourlyMen: "100",
-		});
-
+		// An indicator-G gap of 10% at 300 employees → the "Prochaines étapes"
+		// callout renders; only the CSE consultation part is driven by hasCse.
 		function renderWithHasCse(hasCse: boolean | null) {
 			return render(
 				<Step6Review
@@ -738,9 +796,12 @@ describe("Step6Review", () => {
 					declarationYear={2025}
 					hasCse={hasCse}
 					indicatorGRequired
-					step2Data={gappedStep2()}
+					step2Data={emptyStep2Data()}
 					step3Data={emptyStep3Data()}
 					step4Data={emptyStep4Data()}
+					step5Categories={[
+						makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+					]}
 				/>,
 			);
 		}

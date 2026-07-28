@@ -536,8 +536,8 @@ describe("buildExportRows", () => {
 		});
 	});
 
-	it("should flag complianceProcessRequired when the gap is negative past the threshold (women earn more, #3963)", async () => {
-		// Signed stored gap -0.10 (women earn more): |gap| >= 5% → the symmetric threshold triggers the obligation.
+	it("should flag significant negative gaps for the compliance process", async () => {
+		// Signed stored gaps are unfavourable to men, but remain significant.
 		const dbRow = makeMinimalDbRow({
 			declarationId: "decl-negative-gap",
 			siren: "200200200",

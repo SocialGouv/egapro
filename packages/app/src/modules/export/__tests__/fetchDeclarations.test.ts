@@ -1103,8 +1103,8 @@ describe("assembleDeclaration — compliance flags", () => {
 		expect(result.Parcours_de_conformite_requis).toBe(false);
 	});
 
-	it("requires the compliance process when the gap is negative past the threshold (women earn more, #3963)", () => {
-		// Signed stored gap of -0.06 → |gap| >= 5%, so the symmetric threshold triggers the obligation.
+	it("requires the compliance process when the gap is negative and significant", () => {
+		// Signed stored gap of -0.06 means the gap is unfavourable to men.
 		const row = {
 			...baseRow,
 			workforceEma: "300.00",
@@ -1220,9 +1220,7 @@ describe("assembleDeclaration — compliance flags", () => {
 		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
 	});
 
-	it("requires the revision when the correction over-corrects past the threshold (#3963)", () => {
-		// Over-correction: initial +6% triggers the path, corrected to -8% → |gap| >= 5%,
-		// so the symmetric threshold keeps the revision required (assumed behavior).
+	it("requires the revision when the correction gap is negative and significant", () => {
 		const row = {
 			...baseRow,
 			workforceEma: "300.00",

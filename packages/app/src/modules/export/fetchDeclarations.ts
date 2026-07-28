@@ -18,6 +18,7 @@ import {
 	computeTotal,
 	gapRatioToPercent,
 	getObligationWorkforce,
+	hasHighGap,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isCseRequired,
@@ -61,14 +62,16 @@ function deriveExportFlags(
 	const complianceInput = {
 		workforce,
 		hasIndicatorG,
-		gap: globalAnnualMeanGap,
+		hasSignificantIndicatorGGap: hasHighGap([globalAnnualMeanGap]),
 	};
 	const complianceProcessRequired =
 		isComplianceProcessRequired(complianceInput);
 	const complianceProcessRevisionRequired = isComplianceProcessRevisionRequired(
 		{
 			...complianceInput,
-			correctionGap: variableAnnualMeanGap,
+			hasSignificantCorrectionIndicatorGGap: hasHighGap([
+				variableAnnualMeanGap,
+			]),
 			events:
 				row.secondDeclarationSubmittedAt === null
 					? []
