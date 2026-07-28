@@ -375,9 +375,7 @@ test.describe("Indicator G — category label is bounded to 255 characters (#394
 		const sourceSelect = page.getByRole("combobox", {
 			name: /source utilisée pour déterminer les catégories/i,
 		});
-		if (
-			await sourceSelect.isVisible({ timeout: 1_000 }).catch(() => false)
-		) {
+		if (await sourceSelect.isVisible({ timeout: 1_000 }).catch(() => false)) {
 			await sourceSelect.selectOption("accord-entreprise");
 		}
 
