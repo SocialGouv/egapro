@@ -8,6 +8,7 @@ import type { EmployeeCategory } from "./categorySerializer";
 type Props = {
 	baseId: string;
 	index: number;
+	fieldId: string;
 	category: EmployeeCategory & { id: number };
 	disabled: boolean;
 	isExpanded: boolean;
@@ -29,6 +30,7 @@ type Props = {
 export function CategoryAccordionItem({
 	baseId,
 	index,
+	fieldId,
 	category,
 	disabled,
 	isExpanded,
@@ -42,7 +44,13 @@ export function CategoryAccordionItem({
 	onDecimalBlur,
 	onAskRemove,
 }: Props) {
-	const collapseId = `${baseId}-accordion-${index}`;
+	// Derive the accordion id from the row's stable identity, never from its
+	// position: DSFR's vanilla JS freezes the id at instantiation and binds its
+	// toggle through a literal `[aria-controls="<id>"]` selector. Renumbering
+	// ids in place (after a delete) makes the live instance stop matching its
+	// own selector and DSFR disposes it, which leaves the accordion unopenable
+	// — cf. #4008.
+	const collapseId = `${baseId}-accordion-${fieldId}`;
 	const headingId = `${collapseId}-heading`;
 	const categoryNumber = `Catégorie d'emplois n°${index + 1}`;
 	const catName = category.name?.trim() ?? "";
