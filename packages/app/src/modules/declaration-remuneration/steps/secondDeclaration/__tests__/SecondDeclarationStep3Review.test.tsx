@@ -1,5 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { SecondDeclarationStep3Review } from "../SecondDeclarationStep3Review";
@@ -72,6 +73,61 @@ const mockCategories: EmployeeCategoryRow[] = [
 	}),
 ];
 
+const highGapCategories: EmployeeCategoryRow[] = [
+	makeCategory({
+		name: "Ouvriers",
+		womenCount: 10,
+		menCount: 15,
+		annualBaseWomen: "1000",
+		annualBaseMen: "2000",
+		annualVariableWomen: "100",
+		annualVariableMen: "200",
+		hourlyBaseWomen: "10",
+		hourlyBaseMen: "20",
+		hourlyVariableWomen: "1",
+		hourlyVariableMen: "2",
+	}),
+];
+
+const noGapCategories: EmployeeCategoryRow[] = [
+	makeCategory({
+		annualBaseWomen: "9800",
+		annualBaseMen: "10000",
+	}),
+];
+
+// Defaults mirror `isCseOpinionRequired(workforce, null)` → false: an unknown
+// CSE flag requires no opinion, exactly like an explicit `false`.
+function renderStep3(
+	overrides: Partial<ComponentProps<typeof SecondDeclarationStep3Review>> = {},
+) {
+	return render(
+		<SecondDeclarationStep3Review
+			cseApplicable
+			cseOpinionRequired={false}
+			declarationYear={2025}
+			hasCse={null}
+			secondDeclarationCategories={mockCategories}
+			siren="532847196"
+			{...overrides}
+		/>,
+	);
+}
+
+async function submitDeclaration() {
+	const user = userEvent.setup();
+	await user.click(screen.getByRole("button", { name: /soumettre/i }));
+	const checkbox = screen.getByLabelText(/Je certifie/, {
+		selector: "input",
+	});
+	await user.click(checkbox);
+	const validerButton = screen.getByRole("button", {
+		name: /valider/i,
+		hidden: true,
+	});
+	await user.click(validerButton);
+}
+
 describe("SecondDeclarationStep3Review", () => {
 	beforeEach(() => {
 		mockMutate.mockClear();
@@ -79,15 +135,7 @@ describe("SecondDeclarationStep3Review", () => {
 	});
 
 	it("renders the title and step indicator", () => {
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-				siren="532847196"
-			/>,
-		);
+		renderStep3();
 		expect(
 			screen.getByText(
 				/Parcours de mise en conformité pour l.indicateur par catégorie de salariés/,
@@ -101,45 +149,21 @@ describe("SecondDeclarationStep3Review", () => {
 	});
 
 	it("renders category gap card with category name", () => {
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-				siren="532847196"
-			/>,
-		);
+		renderStep3();
 		expect(
 			screen.getByText("Catégorie d'emplois n°1 : Ingénieurs"),
 		).toBeInTheDocument();
 	});
 
 	it("does not bracket the category title", () => {
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-				siren="532847196"
-			/>,
-		);
+		renderStep3();
 		expect(
 			screen.queryByText(/\[Catégorie d.emplois n°1\]/),
 		).not.toBeInTheDocument();
 	});
 
 	it("renders the card title without the base-and-bonus parenthetical", () => {
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-				siren="532847196"
-			/>,
-		);
+		renderStep3();
 		expect(
 			screen.getByText("Écart de rémunération par catégories de salariés"),
 		).toBeInTheDocument();
@@ -148,31 +172,8 @@ describe("SecondDeclarationStep3Review", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("always shows the CSE consultation heading for second declaration", () => {
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-				siren="532847196"
-			/>,
-		);
-		expect(
-			screen.getByRole("heading", { name: "Informer et consulter le CSE" }),
-		).toBeInTheDocument();
-	});
-
 	it("renders gap columns", () => {
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-				siren="532847196"
-			/>,
-		);
+		renderStep3();
 		expect(screen.getAllByText("Annuelle brute").length).toBeGreaterThanOrEqual(
 			1,
 		);
@@ -182,28 +183,12 @@ describe("SecondDeclarationStep3Review", () => {
 	});
 
 	it("renders the next steps section", () => {
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-				siren="532847196"
-			/>,
-		);
+		renderStep3();
 		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
 	});
 
 	it("renders the CSE update trigger as a secondary button", () => {
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-				siren="532847196"
-			/>,
-		);
+		renderStep3();
 		const cseButton = screen.getByRole("button", {
 			name: "Mettre à jour l'existence d'un CSE",
 		});
@@ -212,15 +197,7 @@ describe("SecondDeclarationStep3Review", () => {
 	});
 
 	it("hides the CSE update trigger when cseApplicable is false", () => {
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable={false}
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-				siren="532847196"
-			/>,
-		);
+		renderStep3({ cseApplicable: false });
 		expect(
 			screen.queryByRole("button", {
 				name: "Mettre à jour l'existence d'un CSE",
@@ -229,30 +206,14 @@ describe("SecondDeclarationStep3Review", () => {
 	});
 
 	it("renders Soumettre button", () => {
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-				siren="532847196"
-			/>,
-		);
+		renderStep3();
 		expect(
 			screen.getByRole("button", { name: /soumettre/i }),
 		).toBeInTheDocument();
 	});
 
 	it("renders modal with certification checkbox", () => {
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-				siren="532847196"
-			/>,
-		);
+		renderStep3();
 		expect(
 			screen.getAllByText(/seconde déclaration des écarts de rémunération/)
 				.length,
@@ -263,15 +224,7 @@ describe("SecondDeclarationStep3Review", () => {
 	});
 
 	it("renders previous link to step 2", () => {
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-				siren="532847196"
-			/>,
-		);
+		renderStep3();
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
 			"/declaration-remuneration/parcours-conformite/etape/2",
@@ -279,31 +232,7 @@ describe("SecondDeclarationStep3Review", () => {
 	});
 
 	it("shows gap warning when gaps >= 5% exist", () => {
-		const categoriesWithHighGaps: EmployeeCategoryRow[] = [
-			makeCategory({
-				name: "Ouvriers",
-				womenCount: 10,
-				menCount: 15,
-				annualBaseWomen: "1000",
-				annualBaseMen: "2000",
-				annualVariableWomen: "100",
-				annualVariableMen: "200",
-				hourlyBaseWomen: "10",
-				hourlyBaseMen: "20",
-				hourlyVariableWomen: "1",
-				hourlyVariableMen: "2",
-			}),
-		];
-
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={categoriesWithHighGaps}
-				siren="532847196"
-			/>,
-		);
+		renderStep3({ secondDeclarationCategories: highGapCategories });
 		expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
 		expect(
 			screen.getByRole("heading", { name: "Actions à engager" }),
@@ -327,15 +256,7 @@ describe("SecondDeclarationStep3Review", () => {
 			}),
 		];
 
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={categoriesWithLowGaps}
-				siren="532847196"
-			/>,
-		);
+		renderStep3({ secondDeclarationCategories: categoriesWithLowGaps });
 		expect(screen.queryByText("Écarts détectés")).not.toBeInTheDocument();
 		expect(
 			screen.queryByRole("heading", { name: "Actions à engager" }),
@@ -343,36 +264,15 @@ describe("SecondDeclarationStep3Review", () => {
 	});
 
 	it("navigates to compliance path when gaps persist after submit", async () => {
-		const user = userEvent.setup();
-		const categoriesWithHighGaps: EmployeeCategoryRow[] = [
-			makeCategory({
-				annualBaseWomen: "1000",
-				annualBaseMen: "2000",
-			}),
-		];
-
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={true}
-				secondDeclarationCategories={categoriesWithHighGaps}
-				siren="532847196"
-			/>,
-		);
-
-		// Click Soumettre to trigger the modal open (modal stays in DOM but hidden in JSDOM)
-		await user.click(screen.getByRole("button", { name: /soumettre/i }));
-		// Interact with modal elements using hidden option (dialog is not open in JSDOM)
-		const checkbox = screen.getByLabelText(/Je certifie/, {
-			selector: "input",
+		renderStep3({
+			cseOpinionRequired: true,
+			hasCse: true,
+			secondDeclarationCategories: [
+				makeCategory({ annualBaseWomen: "1000", annualBaseMen: "2000" }),
+			],
 		});
-		await user.click(checkbox);
-		const validerButton = screen.getByRole("button", {
-			name: /valider/i,
-			hidden: true,
-		});
-		await user.click(validerButton);
+
+		await submitDeclaration();
 
 		expect(mockMutate).toHaveBeenCalledTimes(1);
 		expect(mockPush).toHaveBeenCalledWith(
@@ -381,68 +281,25 @@ describe("SecondDeclarationStep3Review", () => {
 	});
 
 	it("navigates to avis-cse when no gaps and hasCse is true", async () => {
-		const user = userEvent.setup();
-		const categoriesNoGaps: EmployeeCategoryRow[] = [
-			makeCategory({
-				annualBaseWomen: "9800",
-				annualBaseMen: "10000",
-			}),
-		];
-
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={true}
-				secondDeclarationCategories={categoriesNoGaps}
-				siren="532847196"
-			/>,
-		);
-
-		await user.click(screen.getByRole("button", { name: /soumettre/i }));
-		const checkbox = screen.getByLabelText(/Je certifie/, {
-			selector: "input",
+		renderStep3({
+			cseOpinionRequired: true,
+			hasCse: true,
+			secondDeclarationCategories: noGapCategories,
 		});
-		await user.click(checkbox);
-		const validerButton = screen.getByRole("button", {
-			name: /valider/i,
-			hidden: true,
-		});
-		await user.click(validerButton);
+
+		await submitDeclaration();
 
 		expect(mockMutate).toHaveBeenCalledTimes(1);
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
 	});
 
 	it("navigates to confirmation when no gaps and no CSE", async () => {
-		const user = userEvent.setup();
-		const categoriesNoGaps: EmployeeCategoryRow[] = [
-			makeCategory({
-				annualBaseWomen: "9800",
-				annualBaseMen: "10000",
-			}),
-		];
-
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={false}
-				secondDeclarationCategories={categoriesNoGaps}
-				siren="532847196"
-			/>,
-		);
-
-		await user.click(screen.getByRole("button", { name: /soumettre/i }));
-		const checkbox = screen.getByLabelText(/Je certifie/, {
-			selector: "input",
+		renderStep3({
+			hasCse: false,
+			secondDeclarationCategories: noGapCategories,
 		});
-		await user.click(checkbox);
-		const validerButton = screen.getByRole("button", {
-			name: /valider/i,
-			hidden: true,
-		});
-		await user.click(validerButton);
+
+		await submitDeclaration();
 
 		expect(mockMutate).toHaveBeenCalledTimes(1);
 		expect(mockPush).toHaveBeenCalledWith(
@@ -451,29 +308,75 @@ describe("SecondDeclarationStep3Review", () => {
 	});
 
 	it("renders empty state when no categories", () => {
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={[]}
-				siren="532847196"
-			/>,
-		);
+		renderStep3({ secondDeclarationCategories: [] });
 		expect(screen.getByText("Aucune donnée renseignée.")).toBeInTheDocument();
+	});
+
+	describe("CSE consultation section gating (issue #3945)", () => {
+		it("hides the CSE consultation section but keeps gap actions and the CSE update button when cseOpinionRequired is false", () => {
+			renderStep3({
+				cseOpinionRequired: false,
+				hasCse: false,
+				secondDeclarationCategories: highGapCategories,
+			});
+
+			expect(
+				screen.queryByRole("heading", { name: "Informer et consulter le CSE" }),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(/obligatoirement informer et consulter le CSE/),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(/avis à transmettre sur le portail/),
+			).not.toBeInTheDocument();
+
+			expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
+			expect(
+				screen.getByRole("heading", { name: "Actions à engager" }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("button", {
+					name: "Mettre à jour l'existence d'un CSE",
+				}),
+			).toBeInTheDocument();
+		});
+
+		it("hides the CSE consultation section when the CSE flag is unknown", () => {
+			renderStep3({
+				cseOpinionRequired: false,
+				hasCse: null,
+				secondDeclarationCategories: highGapCategories,
+			});
+
+			expect(
+				screen.queryByRole("heading", { name: "Informer et consulter le CSE" }),
+			).not.toBeInTheDocument();
+		});
+
+		it("shows the CSE consultation section when cseOpinionRequired is true", () => {
+			renderStep3({
+				cseOpinionRequired: true,
+				hasCse: true,
+				secondDeclarationCategories: highGapCategories,
+			});
+
+			expect(
+				screen.getByRole("heading", { name: "Informer et consulter le CSE" }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(/avis à transmettre sur le portail/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("button", {
+					name: "Mettre à jour l'existence d'un CSE",
+				}),
+			).toBeInTheDocument();
+		});
 	});
 
 	it("closes the modal without submitting when Annuler is clicked", async () => {
 		const user = userEvent.setup();
-		render(
-			<SecondDeclarationStep3Review
-				cseApplicable
-				declarationYear={2025}
-				hasCse={null}
-				secondDeclarationCategories={mockCategories}
-				siren="532847196"
-			/>,
-		);
+		renderStep3();
 
 		await user.click(screen.getByRole("button", { name: /soumettre/i }));
 		const submitDialog = document.getElementById("submit-declaration-modal");

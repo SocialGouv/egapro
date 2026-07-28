@@ -16,6 +16,7 @@ import {
 } from "./helpers/db";
 import {
 	completeDeclaration,
+	reachStep6ComplianceRecap,
 	submitStepsThroughQuartiles,
 } from "./helpers/declaration-flows";
 
@@ -572,6 +573,129 @@ test.describe("[CAS-02-6IND] Path 15: 6 indicators (no G) + hasCse → /avis-cse
 		await submitCseStep2(page);
 		await expect(
 			page.getByText(/Votre parcours .* est (désormais )?terminé/),
+		).toBeVisible();
+	});
+});
+
+// === GROUP H: [#3945] CSE opinion mentions gated by the declared CSE existence ===
+// A company >= 100 that declared it has no CSE (hasCse false or null) must no
+// longer be told to deposit a CSE opinion: the recap "Prochaines étapes" box and
+// the compliance-choice options drop every CSE-opinion mention, while the gap
+// actions and the "Mettre à jour l'existence d'un CSE" escape hatch stay.
+
+const CSE_OPINION_RECAP_TEXT = /avis du CSE devront être transmis/;
+const CSE_JUSTIFY_PARENTHESIS = /avis à transmettre sur le portail/;
+const UPDATE_CSE_BUTTON = /Mettre à jour l.existence d.un CSE/;
+
+test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion mention", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(false);
+		await setCompanyWorkforce(200);
+	});
+
+	test("step 6 recap hides the CSE opinion but keeps the gap actions and the update-CSE button", async ({
+		page,
+	}) => {
+		test.slow(); // Full 5-step declaration up to the recap
+		await reachStep6ComplianceRecap(page);
+
+		await expect(
+			page.getByRole("heading", { name: "Prochaines étapes" }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("heading", { name: "Informer et consulter le CSE" }),
+		).toHaveCount(0);
+		await expect(page.getByText(CSE_OPINION_RECAP_TEXT)).toHaveCount(0);
+		await expect(
+			page.getByRole("link", { name: /Voir les modèles d.avis CSE/ }),
+		).toHaveCount(0);
+		await expect(page.getByText(CSE_JUSTIFY_PARENTHESIS)).toHaveCount(0);
+
+		// Gap actions stay fully visible
+		await expect(
+			page.getByText("Écarts détectés", { exact: true }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("heading", { name: "Actions à engager" }),
+		).toBeVisible();
+		// Escape hatch for a mis-declared CSE flag stays available
+		await expect(
+			page.getByRole("button", { name: UPDATE_CSE_BUTTON }),
+		).toBeVisible();
+	});
+
+	test("compliance choice page drops the CSE opinion bullets", async ({
+		page,
+	}) => {
+		test.slow(); // Full declaration + submission
+		await completeDeclaration(page, { hasGap: true });
+		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+
+		await expect(
+			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
+				exact: true,
+			}),
+		).toBeVisible();
+		await expect(
+			page.getByText("Transmettre l'avis du CSE", { exact: true }),
+		).toHaveCount(0);
+		await expect(
+			page.getByText(/Transmettre l.avis ou les avis du CSE/),
+		).toHaveCount(0);
+	});
+});
+
+test.describe("[#3945] gap + workforce >= 100 + hasCse=null → no CSE opinion mention", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(null);
+		await setCompanyWorkforce(200);
+	});
+
+	test("step 6 recap treats an unset CSE flag like an absent CSE", async ({
+		page,
+	}) => {
+		test.slow(); // Full 5-step declaration up to the recap
+		await reachStep6ComplianceRecap(page);
+
+		await expect(
+			page.getByRole("heading", { name: "Informer et consulter le CSE" }),
+		).toHaveCount(0);
+		await expect(page.getByText(CSE_OPINION_RECAP_TEXT)).toHaveCount(0);
+		await expect(
+			page.getByRole("button", { name: UPDATE_CSE_BUTTON }),
+		).toBeVisible();
+	});
+});
+
+test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion still shown", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
+	});
+
+	test("step 6 recap shows the CSE opinion mention", async ({ page }) => {
+		test.slow(); // Full 5-step declaration up to the recap
+		await reachStep6ComplianceRecap(page);
+
+		await expect(
+			page.getByRole("heading", { name: "Informer et consulter le CSE" }),
+		).toBeVisible();
+		await expect(page.getByText(CSE_OPINION_RECAP_TEXT)).toBeVisible();
+		await expect(page.getByText(CSE_JUSTIFY_PARENTHESIS)).toBeVisible();
+	});
+
+	test("compliance choice page keeps the CSE opinion bullet", async ({
+		page,
+	}) => {
+		test.slow(); // Full declaration + submission
+		await completeDeclaration(page, { hasGap: true });
+		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+
+		await expect(
+			page.getByText("Transmettre l'avis du CSE", { exact: true }),
 		).toBeVisible();
 	});
 });

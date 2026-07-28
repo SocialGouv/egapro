@@ -7,6 +7,7 @@ import { UpdateCseModal } from "./UpdateCseModal";
 
 type Props = {
 	cseApplicable: boolean;
+	cseOpinionRequired: boolean;
 	hasGapsAboveThreshold: boolean;
 	siren: string;
 	isSecondDeclaration?: boolean;
@@ -15,6 +16,7 @@ type Props = {
 /** Shared "Prochaines étapes" box with CSE consultation info and gap warnings */
 export function NextStepsBox({
 	cseApplicable,
+	cseOpinionRequired,
 	hasGapsAboveThreshold,
 	siren,
 	isSecondDeclaration,
@@ -24,34 +26,51 @@ export function NextStepsBox({
 			<div className={styles.nextSteps}>
 				<h3 className="fr-h4 fr-mb-0">Prochaines étapes</h3>
 
-				<div className={styles.section}>
-					<h4 className="fr-text--bold fr-text--md fr-mb-0">
-						Informer et consulter le CSE
-					</h4>
+				{cseOpinionRequired && (
+					<div className={styles.section}>
+						<h4 className="fr-text--bold fr-text--md fr-mb-0">
+							Informer et consulter le CSE
+						</h4>
 
-					<p className="fr-mb-0">
-						Au cours du temps imparti pour réaliser votre déclaration, vous
-						devez{" "}
-						<strong>
-							obligatoirement informer et consulter le CSE sur l&apos;exactitude
-							des données déclarées
-						</strong>
-						.
-					</p>
-
-					<div className={styles.ctaGroup}>
 						<p className="fr-mb-0">
-							Le ou les avis du CSE devront être transmis sur le portail lors de
-							la dernière étape.
+							Au cours du temps imparti pour réaliser votre déclaration, vous
+							devez{" "}
+							<strong>
+								obligatoirement informer et consulter le CSE sur
+								l&apos;exactitude des données déclarées
+							</strong>
+							.
 						</p>
-						<TrackedLink
-							className="fr-link"
-							href="/avis-cse"
-							trackingId="cse_models"
-						>
-							Voir les modèles d&apos;avis CSE
-						</TrackedLink>
-						{cseApplicable && (
+
+						<div className={styles.ctaGroup}>
+							<p className="fr-mb-0">
+								Le ou les avis du CSE devront être transmis sur le portail lors
+								de la dernière étape.
+							</p>
+							<TrackedLink
+								className="fr-link"
+								href="/avis-cse"
+								trackingId="cse_models"
+							>
+								Voir les modèles d&apos;avis CSE
+							</TrackedLink>
+							{cseApplicable && (
+								<button
+									aria-controls="update-cse-modal"
+									className="fr-btn fr-btn--secondary"
+									data-fr-opened="false"
+									type="button"
+								>
+									Mettre à jour l&apos;existence d&apos;un CSE
+								</button>
+							)}
+						</div>
+					</div>
+				)}
+
+				{!cseOpinionRequired && cseApplicable && (
+					<div className={styles.section}>
+						<div className={styles.ctaGroup}>
 							<button
 								aria-controls="update-cse-modal"
 								className="fr-btn fr-btn--secondary"
@@ -60,9 +79,9 @@ export function NextStepsBox({
 							>
 								Mettre à jour l&apos;existence d&apos;un CSE
 							</button>
-						)}
+						</div>
 					</div>
-				</div>
+				)}
 
 				{hasGapsAboveThreshold && <hr className={styles.separator} />}
 
@@ -93,8 +112,9 @@ export function NextStepsBox({
 									sexistes.
 								</strong>{" "}
 								Si vous choisissez ce parcours, vous devez informer et consulter
-								le CSE (avis à transmettre sur le portail lors de la dernière
-								étape)
+								le CSE
+								{cseOpinionRequired &&
+									" (avis à transmettre sur le portail lors de la dernière étape)"}
 							</li>
 						</ul>
 						<p className="fr-mb-0">
