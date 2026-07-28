@@ -503,6 +503,9 @@ export function CategoryForm({
 							index={index}
 							isExpanded={expandedByFieldId[field.id] ?? true}
 							key={field.id}
+							nameError={
+								form.formState.errors.categories?.[index]?.name?.message
+							}
 							nameProps={{
 								...form.register(`categories.${index}.name`),
 								onChange: (e) => {

@@ -3,6 +3,8 @@ import { z } from "zod";
 import { isSexRemunerationComplete } from "~/modules/domain";
 import { COMPLIANCE_PATHS } from "./steps/compliancePath/constants";
 
+export const CATEGORY_NAME_MAX_LENGTH = 255;
+
 export const updateStep1Schema = z.object({
 	totalWomen: z.number().int().min(0),
 	totalMen: z.number().int().min(0),
@@ -126,7 +128,13 @@ export const updateEmployeeCategoriesSchema = z.object({
 	categories: z
 		.array(
 			z.object({
-				name: z.string().min(1),
+				name: z
+					.string()
+					.min(1)
+					.max(
+						CATEGORY_NAME_MAX_LENGTH,
+						`${CATEGORY_NAME_MAX_LENGTH} caractères maximum`,
+					),
 				data: employeeCategoryDataSchema,
 			}),
 		)
@@ -136,7 +144,12 @@ export const updateEmployeeCategoriesSchema = z.object({
 });
 
 export const categoryFormEntrySchema = z.object({
-	name: z.string(),
+	name: z
+		.string()
+		.max(
+			CATEGORY_NAME_MAX_LENGTH,
+			`${CATEGORY_NAME_MAX_LENGTH} caractères maximum`,
+		),
 	womenCount: z.string(),
 	menCount: z.string(),
 	annualBaseWomen: z.string(),
