@@ -5,16 +5,16 @@ import {
 	computeProportion,
 	formatGapCompact,
 	gapDirection,
+	gapLevel,
 	gapMagnitude,
-	isSignificantGap,
 } from "~/modules/domain";
 import type { PayGapRow } from "../types";
 import styles from "./InterpretationCallout.module.scss";
 
 /** Returns true when at least one row crosses the regulatory gap threshold (either direction). */
 export function hasHighPayGap(rows: PayGapRow[]): boolean {
-	return rows.some((r) =>
-		isSignificantGap(computeGap(r.womenValue, r.menValue)),
+	return rows.some(
+		(r) => gapLevel(computeGap(r.womenValue, r.menValue)) === "high",
 	);
 }
 
@@ -48,7 +48,7 @@ function analyzeGaps(rows: PayGapRow[]): GapAnalysis {
 		: null;
 
 	const gaps = [annualMeanGap, annualMedianGap, hourlyMeanGap, hourlyMedianGap];
-	const hasHighGap = gaps.some((g) => isSignificantGap(g));
+	const hasHighGap = gaps.some((g) => gapLevel(g) === "high");
 
 	// When no gap reaches the regulatory threshold, treat the situation as
 	// balanced — sub-threshold deltas are not interpreted as disfavor.

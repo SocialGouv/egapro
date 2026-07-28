@@ -536,8 +536,8 @@ describe("buildExportRows", () => {
 		});
 	});
 
-	it("should not flag complianceProcessRequired when the gap is negative (women earn more)", async () => {
-		// Signed stored gap -0.10 (women earn more): |gap| >= 5% but negative → no obligation (GIP).
+	it("should flag complianceProcessRequired when the gap is negative past the threshold (women earn more, #3963)", async () => {
+		// Signed stored gap -0.10 (women earn more): |gap| >= 5% → the symmetric threshold triggers the obligation.
 		const dbRow = makeMinimalDbRow({
 			declarationId: "decl-negative-gap",
 			siren: "200200200",
@@ -555,8 +555,8 @@ describe("buildExportRows", () => {
 		const rows = await buildExportRows(mockDb as never, 2027);
 
 		expect(rows[0]).toMatchObject({
-			complianceProcessRequired: false,
-			complianceProcessRevisionRequired: false,
+			complianceProcessRequired: true,
+			complianceProcessRevisionRequired: true,
 		});
 	});
 

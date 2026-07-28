@@ -1103,8 +1103,8 @@ describe("assembleDeclaration — compliance flags", () => {
 		expect(result.Parcours_de_conformite_requis).toBe(false);
 	});
 
-	it("does not require the compliance process when the gap is negative (women earn more)", () => {
-		// Signed stored gap of -0.06 → |gap| >= 5% but negative, so no obligation.
+	it("requires the compliance process when the gap is negative past the threshold (women earn more, #3963)", () => {
+		// Signed stored gap of -0.06 → |gap| >= 5%, so the symmetric threshold triggers the obligation.
 		const row = {
 			...baseRow,
 			workforceEma: "300.00",
@@ -1113,7 +1113,7 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		const result = assembleDeclaration(row, indicatorG, []);
 
-		expect(result.Parcours_de_conformite_requis).toBe(false);
+		expect(result.Parcours_de_conformite_requis).toBe(true);
 	});
 
 	it("treats a company absent from the GIP file as 0 for the derived flags", () => {
@@ -1220,7 +1220,9 @@ describe("assembleDeclaration — compliance flags", () => {
 		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
 	});
 
-	it("does not require the revision when the correction gap is negative", () => {
+	it("requires the revision when the correction over-corrects past the threshold (#3963)", () => {
+		// Over-correction: initial +6% triggers the path, corrected to -8% → |gap| >= 5%,
+		// so the symmetric threshold keeps the revision required (assumed behavior).
 		const row = {
 			...baseRow,
 			workforceEma: "300.00",
@@ -1231,7 +1233,7 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		const result = assembleDeclaration(row, indicatorG, []);
 
-		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
+		expect(result.Parcours_de_conformite_revision_requis).toBe(true);
 	});
 
 	it("does not require the revision when the correction gap is null", () => {

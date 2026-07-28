@@ -12,7 +12,6 @@ import {
 	gapRatioToPercent,
 	hasGapsAboveThreshold,
 	hasHighGap,
-	isSignificantGap,
 } from "../shared/gap";
 
 describe("regulatory constants", () => {
@@ -98,11 +97,22 @@ describe("computeGapBetween", () => {
 });
 
 describe("gapLevel", () => {
-	// Positive boundary + null live in demarcheDecisionTable.test.ts (#3975). The
-	// negative case asserts the CURRENT behavior, contested by #3963 (intended
-	// "high" is documented by the table's it.fails) — untouched until that lands.
-	it("returns low for a negative gap (women earn more, no alert)", () => {
-		expect(gapLevel(-6)).toBe("low");
+	// Positive boundary + null live in demarcheDecisionTable.test.ts (#3975).
+	it("returns high for a negative gap reaching the threshold (unfavourable to men)", () => {
+		expect(gapLevel(-6)).toBe("high");
+	});
+
+	// #3963 — the 5% threshold is symmetric: a gap is classified by absolute
+	// magnitude, so gapLevel(x) and gapLevel(-x) must always agree.
+	it("classifies a gap identically in both directions (symmetric threshold)", () => {
+		expect(gapLevel(-6)).toBe("high");
+		expect(gapLevel(-20)).toBe("high");
+		expect(gapLevel(6)).toBe(gapLevel(-6));
+		expect(gapLevel(20)).toBe(gapLevel(-20));
+		expect(gapLevel(GAP_ALERT_THRESHOLD)).toBe(gapLevel(-GAP_ALERT_THRESHOLD));
+		expect(gapLevel(GAP_ALERT_THRESHOLD - 1)).toBe(
+			gapLevel(-(GAP_ALERT_THRESHOLD - 1)),
+		);
 	});
 });
 
@@ -137,10 +147,10 @@ describe("hasGapsAboveThreshold", () => {
 		).toBe(false);
 	});
 
-	it("returns false when women earn more (negative gap, no alert)", () => {
+	it("returns true when women earn more past the threshold (symmetric alert, #3963)", () => {
 		expect(
 			hasGapsAboveThreshold([{ annualBaseWomen: "110", annualBaseMen: "100" }]),
-		).toBe(false);
+		).toBe(true);
 	});
 
 	it("returns false for empty categories", () => {
@@ -178,7 +188,7 @@ describe("gapMagnitude", () => {
 });
 
 describe("hasHighGap", () => {
-	it("returns true when a gap reaches the threshold (positive-only)", () => {
+	it("returns true when a gap reaches the threshold in either direction", () => {
 		expect(hasHighGap([2, 5, null])).toBe(true);
 	});
 
@@ -186,20 +196,12 @@ describe("hasHighGap", () => {
 		expect(hasHighGap([2, 3, null])).toBe(false);
 	});
 
-	it("returns false for a large negative gap (women earn more)", () => {
-		expect(hasHighGap([-20])).toBe(false);
+	it("returns true for a large negative gap (unfavourable to men, #3963)", () => {
+		expect(hasHighGap([-20])).toBe(true);
 	});
 
 	it("returns false for an empty list", () => {
 		expect(hasHighGap([])).toBe(false);
-	});
-});
-
-describe("isSignificantGap", () => {
-	// Default-threshold behavior lives in demarcheDecisionTable.test.ts (#3975);
-	// only the custom-threshold parameter is owned here.
-	it("respects a custom threshold", () => {
-		expect(isSignificantGap(3, 2)).toBe(true);
 	});
 });
 
