@@ -1,7 +1,14 @@
 import type { Page } from "@playwright/test";
 
-/** Fill all pay gap textboxes on steps 2 and 3 with equal values (no gap). */
-async function fillPayGapTable(page: Page) {
+/**
+ * Fill all pay gap textboxes on steps 2 and 3. Every row is equal (no gap) by
+ * default; passing annualMeanMen introduces a gap on the mean annual row, which
+ * is the indicator A annual gap that drives the step 6 recap compliance box.
+ */
+async function fillPayGapTable(
+	page: Page,
+	options: { annualMeanMen?: string } = {},
+) {
 	const rows = [
 		"Annuelle brute moyenne",
 		"Horaire brute moyenne",
@@ -9,8 +16,10 @@ async function fillPayGapTable(page: Page) {
 		"Horaire brute médiane",
 	];
 	for (const row of rows) {
+		const men =
+			row === "Annuelle brute moyenne" ? (options.annualMeanMen ?? "1000") : "1000";
 		await page.getByRole("textbox", { name: `${row} — Femmes` }).fill("1000");
-		await page.getByRole("textbox", { name: `${row} — Hommes` }).fill("1000");
+		await page.getByRole("textbox", { name: `${row} — Hommes` }).fill(men);
 	}
 }
 
@@ -118,7 +127,10 @@ export async function fillStep4Quartiles(
  * Fill and submit steps 1 → 4, then click "Suivant" on the quartile step without
  * asserting the destination: it is step 5 when indicator G applies, step 6 otherwise.
  */
-export async function submitStepsThroughQuartiles(page: Page) {
+export async function submitStepsThroughQuartiles(
+	page: Page,
+	options: { annualMeanGap?: boolean } = {},
+) {
 	// Navigate to create/resume declaration → redirects to step 1
 	await page.goto("/declaration-remuneration");
 	await page.waitForURL("**/declaration-remuneration/etape/1");
@@ -129,8 +141,10 @@ export async function submitStepsThroughQuartiles(page: Page) {
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL("**/declaration-remuneration/etape/2");
 
-	// Step 2: Pay gap — fill all 8 fields with equal values
-	await fillPayGapTable(page);
+	// Step 2: Pay gap — mean annual row optionally carries the indicator A gap
+	await fillPayGapTable(page, {
+		annualMeanMen: options.annualMeanGap ? "1100" : "1000",
+	});
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL("**/declaration-remuneration/etape/3");
 
@@ -147,21 +161,11 @@ export async function submitStepsThroughQuartiles(page: Page) {
 }
 
 /**
- * Fill and submit a complete declaration through all 6 steps.
- * Controls whether the employee category data produces a pay gap ≥ 5%.
- * Requires a company subject to indicator G (step 5), i.e. the suite baseline workforce.
+ * Fill step 5 employee categories so the computed indicator G gap lands above or
+ * below the 5% alert threshold. women=1000, men=1100 → 9% gap (triggers
+ * compliance); women=1000, men=1020 → 2% gap (no compliance).
  */
-export async function completeDeclaration(
-	page: Page,
-	options: { hasGap: boolean },
-) {
-	await submitStepsThroughQuartiles(page);
-	await page.waitForURL("**/declaration-remuneration/etape/5");
-
-	// Step 5: Employee categories — fill salary data to control gap
-	// Gap formula: |((men - women) / men) * 100|
-	// women=1000, men=1100 → 9% gap (triggers compliance)
-	// women=1000, men=1020 → 2% gap (no compliance)
+async function fillStep5Categories(page: Page, options: { hasGap: boolean }) {
 	const menSalary = options.hasGap ? "1100" : "1020";
 
 	// If categories are pre-populated (from getOrCreate), the source select
@@ -182,9 +186,48 @@ export async function completeDeclaration(
 
 	// Fill salary data on category 1 (works for both fresh and pre-populated)
 	await fillCategoryPayAmounts(page, { men: menSalary, women: "1000" });
+}
 
+/**
+ * Fill steps 1 → 5 and stop on the step 6 review recap without submitting, so a
+ * caller can assert on the recap ("Prochaines étapes" box) before certification.
+ * Requires a company subject to indicator G (step 5), i.e. the suite baseline workforce.
+ */
+export async function reachStep6Recap(
+	page: Page,
+	options: { hasGap: boolean },
+) {
+	await submitStepsThroughQuartiles(page);
+	await page.waitForURL("**/declaration-remuneration/etape/5");
+	await fillStep5Categories(page, options);
 	await page.getByRole("button", { name: "Suivant" }).click();
 	await page.waitForURL("**/declaration-remuneration/etape/6");
+}
+
+/**
+ * Fill steps 1 → 5 with an indicator A annual gap ≥ 5% and stop on the step 6
+ * review recap. The annual gap makes isComplianceProcessRequired true, so the
+ * recap renders the "Prochaines étapes" (NextStepsBox) compliance box — the
+ * surface that must gate its CSE-opinion mention on the declared CSE existence.
+ */
+export async function reachStep6ComplianceRecap(page: Page) {
+	await submitStepsThroughQuartiles(page, { annualMeanGap: true });
+	await page.waitForURL("**/declaration-remuneration/etape/5");
+	await fillStep5Categories(page, { hasGap: true });
+	await page.getByRole("button", { name: "Suivant" }).click();
+	await page.waitForURL("**/declaration-remuneration/etape/6");
+}
+
+/**
+ * Fill and submit a complete declaration through all 6 steps.
+ * Controls whether the employee category data produces a pay gap ≥ 5%.
+ * Requires a company subject to indicator G (step 5), i.e. the suite baseline workforce.
+ */
+export async function completeDeclaration(
+	page: Page,
+	options: { hasGap: boolean },
+) {
+	await reachStep6Recap(page, options);
 
 	// Step 6: Submit declaration
 	await page.getByRole("button", { name: "Suivant" }).click();
