@@ -293,6 +293,7 @@ describe("buildIndicatorG", () => {
 
 	const gEntry = (overrides: Partial<IndicatorGEntry>): IndicatorGEntry => ({
 		categoryName: "Cadres",
+		source: null,
 		declarationType: "initial",
 		womenCount: 50,
 		menCount: 60,
