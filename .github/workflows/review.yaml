@@ -13,6 +13,7 @@ jobs:
     permissions:
       contents: read
       id-token: write # OIDC identity for buildkit-operator /route auth
+      pull-requests: read # resolve the PR number for the footer version link
     environment: build-review
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
@@ -20,6 +21,18 @@ jobs:
     steps:
       - name: ⏬ Checkout code repository
         uses: actions/checkout@v4
+
+      # Resolve the PR number from the commit SHA (review builds trigger on
+      # `push`, so it is not in the event context). Empty if no PR is open yet;
+      # the footer then falls back to a branch-scoped PR search link.
+      - name: 🔍 Resolve pull request number
+        id: pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          N=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" \
+                --jq '.[0].number // empty' 2>/dev/null || true)
+          echo "number=$N" >> "$GITHUB_OUTPUT"
 
       - name: 📌 Extract metadata (tags, labels) for Docker
         id: meta
@@ -64,6 +77,8 @@ jobs:
           secrets: |
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
             sentry_release=${{ github.ref_name }}
+            app_version=${{ github.ref_name }}
+            pr_number=${{ steps.pr.outputs.number }}
           push: true
 
   kontinuous:

@@ -129,6 +129,12 @@ export const env = createEnv({
 			.default("dev"),
 		NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
 		NEXT_PUBLIC_SENTRY_RELEASE: z.string().optional(),
+		// Release identifier shown in the footer (git tag in prod, branch name on
+		// review apps). Inlined at build time, so optional — absent in local dev.
+		NEXT_PUBLIC_APP_VERSION: z.string().optional(),
+		// Pull-request number resolved at build time on review apps, for the
+		// footer's PR link. Digits only; absent outside review builds.
+		NEXT_PUBLIC_PR_NUMBER: z.string().regex(/^\d+$/).optional(),
 		NEXT_PUBLIC_MATOMO_URL: z.string().url().optional(),
 		NEXT_PUBLIC_MATOMO_SITE_ID: z.string().optional(),
 	},
@@ -174,6 +180,8 @@ export const env = createEnv({
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
+		NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
+		NEXT_PUBLIC_PR_NUMBER: process.env.NEXT_PUBLIC_PR_NUMBER,
 		NEXT_PUBLIC_MATOMO_URL: process.env.NEXT_PUBLIC_MATOMO_URL,
 		NEXT_PUBLIC_MATOMO_SITE_ID: process.env.NEXT_PUBLIC_MATOMO_SITE_ID,
 	},
