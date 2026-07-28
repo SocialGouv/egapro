@@ -16,9 +16,8 @@ export {
 import {
 	computeGapRatio,
 	computeTotal,
-	gapRatioToPercent,
 	getObligationWorkforce,
-	hasHighGap,
+	hasGapsAboveThreshold,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isCseRequired,
@@ -56,22 +55,29 @@ function deriveExportFlags(
 	indicatorGRequired: boolean;
 } {
 	const hasIndicatorG = indicatorGEntries.length > 0;
-	const globalAnnualMeanGap = gapRatioToPercent(row.globalAnnualMeanGap);
-	const variableAnnualMeanGap = gapRatioToPercent(row.variableAnnualMeanGap);
 	const workforce = parseGipWorkforce(row.workforceEma);
+	// Compliance flags are driven by indicator G (per job-category gaps), the
+	// same source as the UI (Step6Review) and the declaration router — NOT by
+	// the aggregate indicators A/B stored on the row. The initial declaration's
+	// categories gate the compliance process; the correction's gate the revision.
+	const initialEntries = indicatorGEntries.filter(
+		(e) => e.declarationType === "initial",
+	);
+	const correctionEntries = indicatorGEntries.filter(
+		(e) => e.declarationType === "correction",
+	);
 	const complianceInput = {
 		workforce,
 		hasIndicatorG,
-		hasSignificantIndicatorGGap: hasHighGap([globalAnnualMeanGap]),
+		hasSignificantIndicatorGGap: hasGapsAboveThreshold(initialEntries),
 	};
 	const complianceProcessRequired =
 		isComplianceProcessRequired(complianceInput);
 	const complianceProcessRevisionRequired = isComplianceProcessRevisionRequired(
 		{
 			...complianceInput,
-			hasSignificantCorrectionIndicatorGGap: hasHighGap([
-				variableAnnualMeanGap,
-			]),
+			hasSignificantCorrectionIndicatorGGap:
+				hasGapsAboveThreshold(correctionEntries),
 			events:
 				row.secondDeclarationSubmittedAt === null
 					? []

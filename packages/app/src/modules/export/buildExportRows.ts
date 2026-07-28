@@ -1,9 +1,8 @@
 import { and, eq, isNotNull, or } from "drizzle-orm";
 
 import {
-	gapRatioToPercent,
 	getObligationWorkforce,
-	hasHighGap,
+	hasGapsAboveThreshold,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isIndicatorGRequired,
@@ -16,6 +15,7 @@ import { companies, declarations, gipMdsData, users } from "~/server/db/schema";
 import { mapCseOpinions } from "./mapIndicators";
 import {
 	fetchCseOpinionsByDeclaration,
+	fetchIndicatorGByDeclaration,
 	getDeclarationsWithIndicatorG,
 	indicatorColumns,
 	statusHistoryProjection,
@@ -82,29 +82,37 @@ export async function buildExportRows(
 
 	const declarationIds = rows.map((r) => r.declarationId);
 
-	const [hasIndicatorG, cseMap] = await Promise.all([
+	const [hasIndicatorG, cseMap, indicatorGMap] = await Promise.all([
 		getDeclarationsWithIndicatorG(db, declarationIds),
 		fetchCseOpinionsByDeclaration(declarationIds, db),
+		fetchIndicatorGByDeclaration(declarationIds, db),
 	]);
 
 	return rows.map((row) => {
 		const hasIndicatorGForThisDecl = hasIndicatorG.has(row.declarationId);
-		const globalAnnualMeanGap = gapRatioToPercent(row.globalAnnualMeanGap);
-		const variableAnnualMeanGap = gapRatioToPercent(row.variableAnnualMeanGap);
 		const workforce = parseGipWorkforce(row.workforceEma);
+		// Compliance flags are driven by indicator G (per job-category gaps),
+		// the same source as the UI and the declaration router — not by the
+		// aggregate indicators A/B on the row.
+		const indicatorGEntries = indicatorGMap.get(row.declarationId) ?? [];
+		const initialEntries = indicatorGEntries.filter(
+			(e) => e.declarationType === "initial",
+		);
+		const correctionEntries = indicatorGEntries.filter(
+			(e) => e.declarationType === "correction",
+		);
 		const complianceInput = {
 			workforce,
 			hasIndicatorG: hasIndicatorGForThisDecl,
-			hasSignificantIndicatorGGap: hasHighGap([globalAnnualMeanGap]),
+			hasSignificantIndicatorGGap: hasGapsAboveThreshold(initialEntries),
 		};
 		const complianceProcessRequired =
 			isComplianceProcessRequired(complianceInput);
 		const complianceProcessRevisionRequired =
 			isComplianceProcessRevisionRequired({
 				...complianceInput,
-				hasSignificantCorrectionIndicatorGGap: hasHighGap([
-					variableAnnualMeanGap,
-				]),
+				hasSignificantCorrectionIndicatorGGap:
+					hasGapsAboveThreshold(correctionEntries),
 				events:
 					row.secondDeclarationSubmittedAt === null
 						? []
