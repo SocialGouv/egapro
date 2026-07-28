@@ -74,11 +74,13 @@ export function JustifyOption({
 	checked,
 	deadline,
 	disabled,
+	hasCse,
 	onChange,
 }: {
 	checked: boolean;
 	deadline: Date;
 	disabled?: boolean;
+	hasCse: boolean | null;
 	onChange: () => void;
 }) {
 	return (
@@ -97,10 +99,19 @@ export function JustifyOption({
 					Vous avez la possibilité de justifier vos écarts par des critères
 					objectifs et non sexistes :
 				</p>
-				<ul className="fr-mt-1w fr-mb-0">
-					<li>Informer et consulter votre CSE sur cette justification</li>
-					<li>Transmettre l&apos;avis du CSE</li>
-				</ul>
+				{/* Announcing the CSE steps to a company that has none sends it looking
+				    for a screen it will never have to fill in. */}
+				{hasCse === true ? (
+					<ul className="fr-mt-1w fr-mb-0">
+						<li>Informer et consulter votre CSE sur cette justification</li>
+						<li>Transmettre l&apos;avis du CSE</li>
+					</ul>
+				) : (
+					<p className="fr-mt-1w fr-mb-0">
+						En l&apos;absence de CSE, aucun avis n&apos;est à transmettre :
+						votre démarche est finalisée dès ce choix.
+					</p>
+				)}
 			</CompliancePathOption>
 		</div>
 	);
@@ -108,12 +119,14 @@ export function JustifyOption({
 
 export function SecondRoundOptions({
 	disabled,
+	hasCse,
 	justificationDeadline,
 	jointEvaluationDeadline,
 	selectedPath,
 	setSelectedPath,
 }: {
 	disabled?: boolean;
+	hasCse: boolean | null;
 	justificationDeadline: Date;
 	jointEvaluationDeadline: Date;
 	selectedPath: CompliancePathValue | undefined;
@@ -125,6 +138,7 @@ export function SecondRoundOptions({
 				checked={selectedPath === "justify"}
 				deadline={justificationDeadline}
 				disabled={disabled}
+				hasCse={hasCse}
 				onChange={() => setSelectedPath("justify")}
 			/>
 
@@ -147,6 +161,7 @@ export function SecondRoundOptions({
 export function FirstRoundOptions({
 	correctiveActionDeadline,
 	disabled,
+	hasCse,
 	jointEvaluationDeadline,
 	justificationDeadline,
 	selectedPath,
@@ -154,6 +169,7 @@ export function FirstRoundOptions({
 }: {
 	correctiveActionDeadline: Date;
 	disabled?: boolean;
+	hasCse: boolean | null;
 	jointEvaluationDeadline: Date;
 	justificationDeadline: Date;
 	selectedPath: CompliancePathValue | undefined;
@@ -165,6 +181,7 @@ export function FirstRoundOptions({
 				checked={selectedPath === "justify"}
 				deadline={justificationDeadline}
 				disabled={disabled}
+				hasCse={hasCse}
 				onChange={() => setSelectedPath("justify")}
 			/>
 

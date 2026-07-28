@@ -295,9 +295,18 @@ const MATRIX: Case[] = [
 			{ type: "demarche_complete" },
 		],
 	},
+
+	{
+		label: "cse_no_longer_required → demarche_completed",
+		from: "awaiting_cse_opinion",
+		action: "sync_cse_requirement",
+		facts: base("awaiting_cse_opinion", { cseRequired: false }),
+		expectedTo: "demarche_completed",
+		expectedEvents: [{ type: "demarche_complete" }],
+	},
 ];
 
-describe("matrix v2027.1 — all 18 transitions (incl. every from-state)", () => {
+describe("matrix v2027.1 — all 22 transitions (incl. every from-state)", () => {
 	it.each(MATRIX)("$label", ({ facts, action, expectedTo, expectedEvents }) => {
 		const result = applyAction(facts, action, rules);
 		expect(result.nextStatus).toBe(expectedTo);
@@ -317,6 +326,26 @@ describe("submit_cse_opinion is re-entrant from demarche_completed", () => {
 			{ type: "cse_opinion_submit" },
 			{ type: "demarche_complete" },
 		]);
+	});
+});
+
+describe("sync_cse_requirement only fires when the opinion is no longer owed", () => {
+	it("throws while the CSE opinion is still due", () => {
+		// Guarded on the refreshed snapshot: a company that still has a CSE must
+		// stay on the deposit step.
+		const facts = base("awaiting_cse_opinion", { cseRequired: true });
+
+		expect(() => applyAction(facts, "sync_cse_requirement", rules)).toThrow(
+			/No matching transition/,
+		);
+	});
+
+	it("throws from any state other than awaiting_cse_opinion", () => {
+		const facts = base("demarche_completed", { cseRequired: false });
+
+		expect(() => applyAction(facts, "sync_cse_requirement", rules)).toThrow(
+			/No matching transition/,
+		);
 	});
 });
 

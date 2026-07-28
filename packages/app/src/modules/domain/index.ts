@@ -22,7 +22,6 @@ export {
 	COMPANY_SIZE_RANGES,
 	classifyCompanySize,
 	getCompanySizeRange,
-	isCseOpinionRequired,
 	isCseRequired,
 } from "./shared/companySize";
 // Global score computation (sum of sub-scores from the EgaPro index)
@@ -53,11 +52,13 @@ export {
 export type {
 	ComplianceProcessRequiredInput,
 	ComplianceProcessRevisionRequiredInput,
+	CseOpinionRequiredInput,
 	DeclarationForFlags,
 } from "./shared/declarationFlags";
 export {
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
+	isCseOpinionRequired,
 } from "./shared/declarationFlags";
 // Declaration edit lock constants
 export {

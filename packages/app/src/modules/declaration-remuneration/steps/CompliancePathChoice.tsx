@@ -213,6 +213,7 @@ export function CompliancePathChoice({
 								{isSecondRound ? (
 									<SecondRoundOptions
 										disabled={isImpersonating || isReadOnly}
+										hasCse={hasCse}
 										jointEvaluationDeadline={
 											campaignDeadlines.decl2JointEvaluationDeadline
 										}
@@ -228,6 +229,7 @@ export function CompliancePathChoice({
 											campaignDeadlines.decl2ModificationDeadline
 										}
 										disabled={isImpersonating || isReadOnly}
+										hasCse={hasCse}
 										jointEvaluationDeadline={
 											campaignDeadlines.decl1JointEvaluationDeadline
 										}
