@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+	CATEGORY_NAME_MAX_LENGTH,
+	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
+	categoryFormSchema,
 	PAY_FIELDS_MEN,
 	PAY_FIELDS_WOMEN,
 	updateEmployeeCategoriesSchema,
@@ -311,6 +314,80 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		if (!result.success) {
 			expect(result.error.issues.map((i) => i.message)).toContain(
 				INCOMPLETE_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+});
+
+const NAME_AT_MAX = "a".repeat(CATEGORY_NAME_MAX_LENGTH);
+const NAME_OVER_MAX = "a".repeat(CATEGORY_NAME_MAX_LENGTH + 1);
+
+function parseCategoryWithName(name: string) {
+	return updateEmployeeCategoriesSchema.safeParse({
+		declarationType: "initial",
+		source: "dads",
+		categories: [
+			{
+				name,
+				data: {
+					womenCount: 2,
+					menCount: 2,
+					...WOMEN_PAY_VALUES,
+					...MEN_PAY_VALUES,
+				},
+			},
+		],
+	});
+}
+
+function parseCategoryForm(name: string) {
+	return categoryFormSchema.safeParse({
+		source: "dads",
+		categories: [
+			{
+				name,
+				womenCount: "",
+				menCount: "",
+				annualBaseWomen: "",
+				annualBaseMen: "",
+				annualVariableWomen: "",
+				annualVariableMen: "",
+				hourlyBaseWomen: "",
+				hourlyBaseMen: "",
+				hourlyVariableWomen: "",
+				hourlyVariableMen: "",
+			},
+		],
+	});
+}
+
+describe("category name length cap (#3943)", () => {
+	it("updateEmployeeCategoriesSchema accepts a name of exactly 255 characters", () => {
+		const result = parseCategoryWithName(NAME_AT_MAX);
+		expect(result.success).toBe(true);
+	});
+
+	it("updateEmployeeCategoriesSchema rejects a name of 256 characters with the max-length message", () => {
+		const result = parseCategoryWithName(NAME_OVER_MAX);
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				CATEGORY_NAME_MAX_LENGTH_MESSAGE,
+			);
+		}
+	});
+
+	it("categoryFormSchema accepts a name of exactly 255 characters", () => {
+		const result = parseCategoryForm(NAME_AT_MAX);
+		expect(result.success).toBe(true);
+	});
+
+	it("categoryFormSchema rejects a name of 256 characters with the max-length message", () => {
+		const result = parseCategoryForm(NAME_OVER_MAX);
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				CATEGORY_NAME_MAX_LENGTH_MESSAGE,
 			);
 		}
 	});
