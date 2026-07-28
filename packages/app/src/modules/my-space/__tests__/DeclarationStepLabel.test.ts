@@ -10,22 +10,22 @@ describe("getDeclarationProcessStepLabel", () => {
 		).toBe("Déclaration des indicateurs de rémunération");
 	});
 
-	it("returns 'Non commencée' for a representation declaration", () => {
+	it("returns the first representation step for a representation declaration", () => {
 		expect(
 			getDeclarationProcessStepLabel({
 				type: "representation",
 				fsmStatus: null,
 			}),
-		).toBe("Non commencée");
+		).toBe("Vérification de l'assujettissement");
 	});
 
-	it("returns 'Non commencée' for representation even when fsmStatus is set", () => {
+	it("returns the first representation step even when fsmStatus is set", () => {
 		expect(
 			getDeclarationProcessStepLabel({
 				type: "representation",
 				fsmStatus: "draft",
 			}),
-		).toBe("Non commencée");
+		).toBe("Vérification de l'assujettissement");
 	});
 
 	const cases: Array<{ fsm: DeclarationFsmStatus; label: string }> = [

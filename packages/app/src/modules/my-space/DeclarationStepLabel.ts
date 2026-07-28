@@ -18,6 +18,8 @@ export function getDeclarationProcessStepLabel(d: {
 	type: DeclarationType;
 	fsmStatus: DeclarationFsmStatus | null;
 }): string {
-	if (d.type === "representation") return "Non commencée";
+	// The représentation équilibrée journey has no state machine yet, so every row
+	// sits on its first step: checking whether the company is in scope.
+	if (d.type === "representation") return "Vérification de l'assujettissement";
 	return PROCESS_STEP_LABELS[d.fsmStatus ?? "draft"];
 }

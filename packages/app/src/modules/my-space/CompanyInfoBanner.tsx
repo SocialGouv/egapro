@@ -1,5 +1,4 @@
 import {
-	classifyCompanySize,
 	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getCurrentYear,
 	getObligationWorkforce,
@@ -22,10 +21,9 @@ type Props = {
 export function CompanyInfoBanner({ company }: Props) {
 	const currentYear = getCurrentYear();
 	const obligationWorkforce = getObligationWorkforce(company.gipWorkforce);
+	// The CSE field is the only editable datapoint and it starts at 100, so below
+	// that threshold the modal has nothing to offer and the entry point is hidden.
 	const cseApplicable = isCseRequired(obligationWorkforce);
-	// Below the voluntary threshold nothing is editable (the CSE field starts at 100), so the edit entry point is hidden entirely.
-	const editApplicable =
-		classifyCompanySize(obligationWorkforce) !== "voluntary";
 
 	return (
 		<div className={`fr-pt-3w fr-pb-4w ${styles.banner}`}>
@@ -41,7 +39,7 @@ export function CompanyInfoBanner({ company }: Props) {
 					<div className="fr-col">
 						<h1 className="fr-h4 fr-mb-0">{company.name}</h1>
 					</div>
-					{editApplicable && (
+					{cseApplicable && (
 						<div className="fr-col-auto">
 							<button
 								aria-controls={COMPANY_EDIT_MODAL_ID}
