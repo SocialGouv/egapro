@@ -74,50 +74,50 @@ const publicDeclarationSchema = {
 		globalAnnualMeanGap: {
 			type: ["number", "null"],
 			description:
-				"Écart moyen de rémunération globale annuelle (F/H). Exprimé en pourcentage (ex. `-12.5` = les femmes gagnent 12,5 % de moins en moyenne). `null` si non disponible.",
-			example: -12.5,
+				"Écart moyen de rémunération globale annuelle (F/H). Ratio entre −1 et 1 : une valeur positive signifie que les hommes gagnent davantage, une valeur négative que les femmes gagnent davantage. Multiplier par 100 pour obtenir un pourcentage. `null` si non disponible.",
+			example: -0.125,
 		},
 		globalAnnualMedianGap: {
 			type: ["number", "null"],
 			description:
-				"Écart médian de rémunération globale annuelle (F/H). `null` si non disponible.",
-			example: -10.2,
+				"Écart médian de rémunération globale annuelle (F/H). Ratio entre −1 et 1 (même convention que `globalAnnualMeanGap`). Multiplier par 100 pour obtenir un pourcentage. `null` si non disponible.",
+			example: -0.102,
 		},
 		globalHourlyMeanGap: {
 			type: ["number", "null"],
 			description:
-				"Écart moyen de taux horaire global (F/H). `null` si non disponible.",
-			example: -8.1,
+				"Écart moyen de taux horaire global (F/H). Ratio entre −1 et 1 (même convention que `globalAnnualMeanGap`). Multiplier par 100 pour obtenir un pourcentage. `null` si non disponible.",
+			example: -0.081,
 		},
 		globalHourlyMedianGap: {
 			type: ["number", "null"],
 			description:
-				"Écart médian de taux horaire global (F/H). `null` si non disponible.",
-			example: -7.3,
+				"Écart médian de taux horaire global (F/H). Ratio entre −1 et 1 (même convention que `globalAnnualMeanGap`). Multiplier par 100 pour obtenir un pourcentage. `null` si non disponible.",
+			example: -0.073,
 		},
 		variableAnnualMeanGap: {
 			type: ["number", "null"],
 			description:
-				"Écart moyen de rémunération variable annuelle (F/H). `null` si non disponible.",
-			example: -18.4,
+				"Écart moyen de rémunération variable annuelle (F/H). Ratio entre −1 et 1 (même convention que `globalAnnualMeanGap`). Multiplier par 100 pour obtenir un pourcentage. `null` si non disponible.",
+			example: -0.184,
 		},
 		variableAnnualMedianGap: {
 			type: ["number", "null"],
 			description:
-				"Écart médian de rémunération variable annuelle (F/H). `null` si non disponible.",
-			example: -15.0,
+				"Écart médian de rémunération variable annuelle (F/H). Ratio entre −1 et 1 (même convention que `globalAnnualMeanGap`). Multiplier par 100 pour obtenir un pourcentage. `null` si non disponible.",
+			example: -0.15,
 		},
 		variableHourlyMeanGap: {
 			type: ["number", "null"],
 			description:
-				"Écart moyen de taux horaire variable (F/H). `null` si non disponible.",
-			example: -11.2,
+				"Écart moyen de taux horaire variable (F/H). Ratio entre −1 et 1 (même convention que `globalAnnualMeanGap`). Multiplier par 100 pour obtenir un pourcentage. `null` si non disponible.",
+			example: -0.112,
 		},
 		variableHourlyMedianGap: {
 			type: ["number", "null"],
 			description:
-				"Écart médian de taux horaire variable (F/H). `null` si non disponible.",
-			example: -9.8,
+				"Écart médian de taux horaire variable (F/H). Ratio entre −1 et 1 (même convention que `globalAnnualMeanGap`). Multiplier par 100 pour obtenir un pourcentage. `null` si non disponible.",
+			example: -0.098,
 		},
 		variableProportionWomen: {
 			type: ["number", "null"],
