@@ -345,3 +345,57 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 		});
 	});
 });
+
+// Regression guard for #3943: the indicator G category label maps to a
+// varchar(255) column. Before the fix the field accepted unbounded input, so an
+// over-long label made Postgres reject the insert and surfaced the raw Drizzle
+// SQL query to the user (broken UX + technical disclosure). The fix bounds the
+// input client-side and documents the limit with a DSFR hint.
+test.describe("Indicator G — category label is bounded to 255 characters (#3943)", () => {
+	test.describe.configure({ mode: "serial" });
+
+	test.beforeAll(async () => {
+		// >= 250 workforce → the funnel keeps step 5 / indicator G.
+		await resetGipWorkforce();
+		await resetDeclarationToDraft();
+	});
+
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+	});
+
+	test("caps the label input at 255 chars and exposes the DSFR hint", async ({
+		page,
+	}) => {
+		await submitStepsThroughQuartiles(page);
+		await page.waitForURL("**/declaration-remuneration/etape/5");
+
+		// Pick a source when categories aren't pre-populated, so the editable
+		// category form (with its label input) is rendered.
+		const sourceSelect = page.getByRole("combobox", {
+			name: /source utilisée pour déterminer les catégories/i,
+		});
+		if (await sourceSelect.isVisible({ timeout: 1_000 }).catch(() => false)) {
+			await sourceSelect.selectOption("accord-entreprise");
+		}
+
+		const nameInput = page.locator("#cat-0-name");
+		await expect(nameInput).toBeVisible();
+
+		// Hint added by the fix, wired to the field for assistive tech.
+		await expect(page.locator("#cat-0-name-hint")).toHaveText(
+			"255 caractères maximum",
+		);
+		await expect(nameInput).toHaveAttribute(
+			"aria-describedby",
+			/cat-0-name-hint/,
+		);
+
+		// The guard that prevents the varchar(255) overflow (and thus the raw SQL
+		// error at submit) is the maxLength cap on the native input.
+		await expect(nameInput).toHaveAttribute("maxlength", "255");
+
+		await nameInput.fill("a".repeat(300));
+		await expect(nameInput).toHaveJSProperty("value.length", 255);
+	});
+});

@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import {
 	type DeclarationFsmStatus,
+	getObligationWorkforce,
 	hasGapsAboveThreshold,
 	isComplianceProcessCompleted,
+	isCseOpinionRequired,
 	isDeadlinePassed,
 	isDraft,
 } from "~/modules/domain";
@@ -133,6 +135,10 @@ export async function CompliancePathPage() {
 		<HydrateClient>
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
+				cseOpinionRequired={isCseOpinionRequired({
+					workforce: getObligationWorkforce(company.gipWorkforce),
+					hasCse: company.hasCse,
+				})}
 				currentYear={currentYear}
 				declarationSiren={data.declaration.siren}
 				declarationYear={currentYear}
