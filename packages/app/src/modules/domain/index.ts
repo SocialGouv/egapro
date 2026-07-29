@@ -155,7 +155,6 @@ export {
 	gapRatioToPercent,
 	hasGapsAboveThreshold,
 	hasHighGap,
-	isSignificantGap,
 } from "./shared/gap";
 // GIP annual average workforce — canonical headcount for obligations & display
 export {

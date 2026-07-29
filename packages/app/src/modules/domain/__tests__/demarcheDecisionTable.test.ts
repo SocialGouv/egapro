@@ -14,7 +14,6 @@ import {
 	isComplianceProcessRequired,
 	isCseRequired,
 	isIndicatorGRequired,
-	isSignificantGap,
 	isTriennialYear,
 	parseGipWorkforce,
 	toDisplayWorkforce,
@@ -38,9 +37,7 @@ const GIP_WORKFORCES = [
 type GapCase = {
 	label: string;
 	gap: number;
-	significant: boolean;
-	// null → display classification deferred to the #3963 describe (negative gap)
-	level: GapLevel | null;
+	level: GapLevel;
 	triggers: boolean;
 };
 
@@ -48,37 +45,33 @@ const GAP_CASES: GapCase[] = [
 	{
 		label: "no gap (G = 0%)",
 		gap: 0,
-		significant: false,
 		level: "low",
 		triggers: false,
 	},
 	{
 		label: "gap ≥ threshold on the first 6 indicators only (G below threshold)",
 		gap: GAP_ALERT_THRESHOLD - 1,
-		significant: false,
 		level: "low",
 		triggers: false,
 	},
 	{
 		label: "G gap exactly at the threshold",
 		gap: GAP_ALERT_THRESHOLD,
-		significant: true,
 		level: "high",
 		triggers: true,
 	},
 	{
 		label: "G gap above the threshold",
 		gap: GAP_ALERT_THRESHOLD + 1,
-		significant: true,
 		level: "high",
 		triggers: true,
 	},
 	{
+		// #3963 — symmetric threshold: a gap unfavourable to men triggers the path like the positive one.
 		label: "negative G gap at the threshold (unfavourable to men)",
 		gap: -GAP_ALERT_THRESHOLD,
-		significant: true,
-		level: null,
-		triggers: false,
+		level: "high",
+		triggers: true,
 	},
 ];
 
@@ -143,15 +136,12 @@ describe("decision table — workforce × gap × regime", () => {
 		const hasIndicatorG = isIndicatorGRequired(workforce, regime.year);
 		expect(hasIndicatorG).toBe(expectedIndicatorG);
 
-		// Gap significance is bidirectional, while the display level is positive-only,
-		// so the negative-gap classification is deferred to the #3963 describe.
-		expect(isSignificantGap(gapCase.gap)).toBe(gapCase.significant);
-		if (gapCase.level !== null) {
-			expect(gapLevel(gapCase.gap)).toBe(gapCase.level);
-		}
+		// #3963 — the display level is symmetric: a gap is classified by absolute
+		// magnitude, so both directions share the same expected level.
+		expect(gapLevel(gapCase.gap)).toBe(gapCase.level);
 
 		// The phase-2 compliance process needs >= 100 employees, a computed
-		// indicator G, and a positive indicator-G gap at or above the threshold.
+		// indicator G, and an indicator-G gap whose magnitude reaches the threshold.
 		const expectedCompliance =
 			workforce >= COMPANY_SIZE_ANNUAL_MIN && hasIndicatorG && gapCase.triggers;
 		const compliance = isComplianceProcessRequired({
@@ -162,11 +152,10 @@ describe("decision table — workforce × gap × regime", () => {
 		expect(compliance).toBe(expectedCompliance);
 
 		// Whenever the process fires, the canonical predicates must agree: the size
-		// already forces a CSE, indicator G is computed, and the gap is a high positive.
+		// already forces a CSE, indicator G is computed, and the gap is high (either direction).
 		if (compliance) {
 			expect(isCseRequired(workforce)).toBe(true);
 			expect(hasIndicatorG).toBe(true);
-			expect(isSignificantGap(gapCase.gap)).toBe(true);
 			expect(gapLevel(gapCase.gap)).toBe("high");
 		}
 	});
@@ -290,27 +279,32 @@ describe("GIP workforce — single source for the obligations (#3929/#3962)", ()
 });
 
 describe("gap display classification", () => {
-	it("gapLevel: positive boundary at the threshold (both sides + the exact value)", () => {
+	it("gapLevel: boundary at the threshold in both directions + the exact value", () => {
 		expect(gapLevel(GAP_ALERT_THRESHOLD - 1)).toBe("low");
 		expect(gapLevel(GAP_ALERT_THRESHOLD)).toBe("high");
 		expect(gapLevel(GAP_ALERT_THRESHOLD + 1)).toBe("high");
+		expect(gapLevel(-(GAP_ALERT_THRESHOLD - 1))).toBe("low");
+		expect(gapLevel(-GAP_ALERT_THRESHOLD)).toBe("high");
+		expect(gapLevel(-(GAP_ALERT_THRESHOLD + 1))).toBe("high");
 		expect(gapLevel(null)).toBe(null);
 	});
 
-	it("isSignificantGap detects a significant gap in both directions", () => {
-		expect(isSignificantGap(GAP_ALERT_THRESHOLD)).toBe(true);
-		expect(isSignificantGap(-GAP_ALERT_THRESHOLD)).toBe(true);
-		expect(isSignificantGap(GAP_ALERT_THRESHOLD - 1)).toBe(false);
-		expect(isSignificantGap(-(GAP_ALERT_THRESHOLD - 1))).toBe(false);
-		expect(isSignificantGap(null)).toBe(false);
+	it('#3963 — a negative gap at the threshold (unfavourable to men) is classified "high"', () => {
+		// The regulatory 5% threshold is symmetric: a gap significant in either
+		// direction is « élevé ». gapLevel classifies by absolute magnitude.
+		expect(gapLevel(-GAP_ALERT_THRESHOLD)).toBe("high");
 	});
 
-	it.fails('#3963 — a negative gap at the threshold (unfavourable to men) must be classified "high"', () => {
-		// gapLevel is positive-only today: gapLevel(-5) === "low". The business rule
-		// is that a gap significant in either direction is « élevé » (take the
-		// absolute value). isSignificantGap already honours both directions; gapLevel
-		// does not. Fails until #3963 lands.
-		expect(gapLevel(-GAP_ALERT_THRESHOLD)).toBe("high");
+	it("#3963 — gapLevel is symmetric: gapLevel(x) === gapLevel(-x)", () => {
+		for (const magnitude of [
+			0,
+			GAP_ALERT_THRESHOLD - 1,
+			GAP_ALERT_THRESHOLD,
+			GAP_ALERT_THRESHOLD + 1,
+			20,
+		]) {
+			expect(gapLevel(magnitude)).toBe(gapLevel(-magnitude));
+		}
 	});
 });
 
@@ -335,13 +329,25 @@ describe("#3946 (domain side) — the compliance path depends only on the indica
 		).toBe(false);
 	});
 
-	it("a negative G gap (unfavourable to men) does not trigger the path (one-directional obligation)", () => {
+	it("#3963 — a negative G gap (unfavourable to men) triggers the path (bidirectional obligation)", () => {
 		expect(
 			isComplianceProcessRequired({
 				workforce: INDICATOR_G_ANNUAL_MIN,
 				hasIndicatorG: true,
 				gap: -GAP_ALERT_THRESHOLD,
 			}),
-		).toBe(false);
+		).toBe(true);
+	});
+
+	it("#3963 — isComplianceProcessRequired is symmetric at ±GAP_ALERT_THRESHOLD", () => {
+		const base = { workforce: INDICATOR_G_ANNUAL_MIN, hasIndicatorG: true };
+		expect(
+			isComplianceProcessRequired({ ...base, gap: GAP_ALERT_THRESHOLD }),
+		).toBe(isComplianceProcessRequired({ ...base, gap: -GAP_ALERT_THRESHOLD }));
+		expect(
+			isComplianceProcessRequired({ ...base, gap: GAP_ALERT_THRESHOLD - 1 }),
+		).toBe(
+			isComplianceProcessRequired({ ...base, gap: -(GAP_ALERT_THRESHOLD - 1) }),
+		);
 	});
 });

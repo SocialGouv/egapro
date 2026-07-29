@@ -39,7 +39,7 @@ export function isComplianceProcessRequired(
 	return (
 		input.workforce >= COMPANY_SIZE_ANNUAL_MIN &&
 		input.hasIndicatorG &&
-		input.gap >= GAP_ALERT_THRESHOLD
+		Math.abs(input.gap) >= GAP_ALERT_THRESHOLD
 	);
 }
 
@@ -55,5 +55,5 @@ export function isComplianceProcessRevisionRequired(
 	if (!isComplianceProcessRequired(input)) return false;
 	if (!hasSubmittedSecondDeclaration(input.events)) return false;
 	if (input.correctionGap === null) return false;
-	return input.correctionGap >= GAP_ALERT_THRESHOLD;
+	return Math.abs(input.correctionGap) >= GAP_ALERT_THRESHOLD;
 }

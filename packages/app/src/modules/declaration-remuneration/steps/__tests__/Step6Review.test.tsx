@@ -592,8 +592,8 @@ describe("Step6Review", () => {
 		).toBeInTheDocument();
 	});
 
-	it("does not show 'Prochaines étapes' callout when women earn more (negative gap)", () => {
-		// Women earn 10% more → signed gap -10%: |gap| >= 5% but negative, so no obligation (GIP).
+	it("shows 'Prochaines étapes' callout when women earn more past the threshold (negative gap, #3963)", () => {
+		// Women earn 10% more → signed gap -10%: |gap| >= 5%, so the symmetric threshold triggers the obligation.
 		render(
 			<Step6Review
 				companyWorkforce={300}
@@ -614,7 +614,7 @@ describe("Step6Review", () => {
 				step4Data={emptyStep4Data()}
 			/>,
 		);
-		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
+		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
 	});
 
 	it("does not show 'Prochaines étapes' callout when all gaps < 5%", () => {

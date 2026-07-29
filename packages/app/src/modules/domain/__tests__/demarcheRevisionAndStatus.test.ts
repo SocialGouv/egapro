@@ -84,11 +84,23 @@ const REVISION_ROWS: RevisionRow[] = [
 		expected: false,
 	},
 	{
+		// Over-correction: a company that started above the threshold and
+		// corrected past it, ending up significantly unfavourable to men.
+		// The threshold is symmetric, so this is still a significant gap and
+		// a revision is required — a correction cannot overshoot into resolution.
 		label:
-			"second declaration submitted + negative corrected gap → no revision (one-directional)",
+			"second declaration submitted + negative corrected gap at the threshold → revision required (symmetric)",
 		gap: GAP_ALERT_THRESHOLD + 1,
 		events: events("submit", "second_declaration_submit"),
 		correctionGap: -GAP_ALERT_THRESHOLD,
+		expected: true,
+	},
+	{
+		label:
+			"second declaration submitted + small negative corrected gap → resolved, no revision",
+		gap: GAP_ALERT_THRESHOLD + 1,
+		events: events("submit", "second_declaration_submit"),
+		correctionGap: -(GAP_ALERT_THRESHOLD - 1),
 		expected: false,
 	},
 ];
