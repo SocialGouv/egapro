@@ -5,10 +5,10 @@ import {
 	COMPANY_SIZE_VOLUNTARY_MAX,
 	computeRate,
 	getCurrentYear,
-	isTriennialYear,
 	roundOneDecimal,
 	SCORE_BRACKETS,
 	type ScoreBracketId,
+	V2_FIRST_CAMPAIGN_YEAR,
 } from "~/modules/domain";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { declarations, gipMdsData } from "~/server/db/schema";
@@ -34,13 +34,13 @@ type ScoreDistribution = {
 	year: number;
 };
 
+// Mirrors `isObligatedForYear` (domain) as a SQL predicate: mandatory from >= 50
+// since the V2 scheme (V2_FIRST_CAMPAIGN_YEAR), >= 100 for earlier years.
 function buildObligationFilter(year: number): SQL {
 	const ema = sql<number>`floor(${gipMdsData.workforceEma})`;
-	const triennialClause = isTriennialYear(year)
-		? sql`${ema} >= ${COMPANY_SIZE_VOLUNTARY_MAX} AND ${ema} < ${COMPANY_SIZE_ANNUAL_MIN}`
-		: sql`false`;
-	const annualClause = sql`${ema} >= ${COMPANY_SIZE_ANNUAL_MIN}`;
-	return sql`((${triennialClause}) OR (${annualClause}))`;
+	return year >= V2_FIRST_CAMPAIGN_YEAR
+		? sql`${ema} >= ${COMPANY_SIZE_VOLUNTARY_MAX}`
+		: sql`${ema} >= ${COMPANY_SIZE_ANNUAL_MIN}`;
 }
 
 export const publicStatsRouter = createTRPCRouter({

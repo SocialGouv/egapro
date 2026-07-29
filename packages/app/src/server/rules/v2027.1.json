@@ -1,14 +1,14 @@
 {
 	"version": "2027.1",
 	"effectiveFrom": "2027-03-01",
-	"effectiveUntil": "2028-02-28",
-	"description": "Entrée en vigueur V2 — 6 ind A-F obligatoires 50+, 7e ind G obligatoire 150+ (triennal an 1 pour 150-249, annuel 250+). FSM avec convergence : 8 états. Modèle event-sourced (T8) : applyAction émet des events typés persistés dans declaration_status_history. La projection declarations.status / first|second_declaration_path_choice est dérivée du dernier event de chaque type.",
+	"description": "7 indicateurs pour les < 50 (volontariat) et assujettissement annuel dès 50 salariés (arbitrage 2026-07) ; indicateur G étendu aux ≥ 50 les années triennales à partir de 2030 ; Entrée en vigueur V2 — 6 ind A-F obligatoires 50+, 7e ind G obligatoire 150+ (triennal an 1 pour 150-249, annuel 250+). FSM avec convergence : 8 états. Modèle event-sourced (T8) : applyAction émet des events typés persistés dans declaration_status_history. La projection declarations.status / first|second_declaration_path_choice est dérivée du dernier event de chaque type.",
 
 	"thresholds": {
 		"gapAlertPercent": 5,
 		"phase2SizeMin": 100,
 		"indicatorGAnnualSizeMin": 250,
 		"indicatorGTriennialSizeMin": 150,
+		"indicatorGUniversalYear": 2030,
 		"voluntarySizeMax": 50,
 		"mandatorySizeMin": 50
 	},
@@ -59,6 +59,7 @@
 		},
 		"indicatorGRequired": {
 			"any": [
+				{ "fact": "workforce", "op": "<", "threshold": "voluntarySizeMax" },
 				{
 					"fact": "workforce",
 					"op": ">=",
@@ -69,12 +70,22 @@
 						{
 							"fact": "workforce",
 							"op": ">=",
-							"threshold": "indicatorGTriennialSizeMin"
+							"threshold": "mandatorySizeMin"
 						},
 						{
+							"fact": "year",
+							"op": ">=",
+							"threshold": "indicatorGUniversalYear"
+						},
+						{ "fact": "isTriennialYear", "op": "==", "value": true }
+					]
+				},
+				{
+					"all": [
+						{
 							"fact": "workforce",
-							"op": "<",
-							"threshold": "indicatorGAnnualSizeMin"
+							"op": ">=",
+							"threshold": "indicatorGTriennialSizeMin"
 						},
 						{ "fact": "isTriennialYear", "op": "==", "value": true }
 					]

@@ -35,12 +35,12 @@ import {
 	FUNNEL_MAIN_KEY_STEPS,
 	FUNNEL_REVISION_KEY_STEPS,
 	getStepLabel,
-	isTriennialYear,
 	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
 	type PostSubmitMilestoneKey,
 	percentageOf,
 	roundOneDecimal,
+	V2_FIRST_CAMPAIGN_YEAR,
 } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
@@ -93,19 +93,18 @@ function buildSeries(rows: AggregatedRow[]): CampaignProgressionSeries[] {
 		.map(([year, points]) => ({ year, points }));
 }
 
-// Mirrors `isObligatedForYear` (domain) as a SQL predicate so the workforce
-// bracket is enforced server-side and stays symmetric between numerator and denominator.
+// Mirrors `isObligatedForYear` (domain) as a SQL predicate: mandatory from >= 50
+// since the V2 scheme (V2_FIRST_CAMPAIGN_YEAR), >= 100 for earlier years. Kept
+// symmetric between numerator and denominator by construction.
 function obligationWorkforceFilter(
 	year: number,
 	sizeRange: CompanySizeRange | undefined,
 ): SQL {
 	const ema = sql<number>`floor(${gipMdsData.workforceEma})`;
-	const triennialActive = isTriennialYear(year);
-	const triennialClause = triennialActive
-		? sql`${ema} >= ${COMPANY_SIZE_VOLUNTARY_MAX} AND ${ema} < ${COMPANY_SIZE_ANNUAL_MIN}`
-		: sql`false`;
-	const annualClause = sql`${ema} >= ${COMPANY_SIZE_ANNUAL_MIN}`;
-	const baseObligation = sql`((${triennialClause}) OR (${annualClause}))`;
+	const baseObligation =
+		year >= V2_FIRST_CAMPAIGN_YEAR
+			? sql`${ema} >= ${COMPANY_SIZE_VOLUNTARY_MAX}`
+			: sql`${ema} >= ${COMPANY_SIZE_ANNUAL_MIN}`;
 
 	if (!sizeRange) return baseObligation;
 

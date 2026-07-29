@@ -39,6 +39,7 @@ export {
 	QUARTILE_COUNT,
 	QUARTILE_MIN_INCREMENT,
 	QUARTILE_THRESHOLD_COUNT,
+	V2_FIRST_CAMPAIGN_YEAR,
 } from "./shared/constants";
 // Declaration display context
 export type {
