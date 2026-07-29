@@ -9,6 +9,7 @@ import {
 	computeWorkforceTotal,
 	formatCurrency,
 	formatGap,
+	formatVariablePayProportion,
 	gapLevel,
 	sumQuartileWorkforce,
 } from "~/modules/domain";
@@ -201,9 +202,7 @@ function ProportionTable({
 									</td>
 									<td className={styles.percent}>
 										<strong>
-											{Number.isNaN(eWomen)
-												? "-"
-												: computePercentage(eWomen, tWomen)}
+											{formatVariablePayProportion(eWomen, tWomen)}
 										</strong>
 									</td>
 								</tr>
@@ -216,9 +215,7 @@ function ProportionTable({
 										{Number.isNaN(eMen) ? "-" : eMen}
 									</td>
 									<td className={styles.percent}>
-										<strong>
-											{Number.isNaN(eMen) ? "-" : computePercentage(eMen, tMen)}
-										</strong>
+										<strong>{formatVariablePayProportion(eMen, tMen)}</strong>
 									</td>
 								</tr>
 							</tbody>

@@ -1,5 +1,8 @@
 import { View } from "@react-pdf/renderer";
-import { computePercentage, computeWorkforceTotal } from "~/modules/domain";
+import {
+	computeWorkforceTotal,
+	formatVariablePayProportion,
+} from "~/modules/domain";
 import type { DeclarationPdfData } from "../types";
 import { SectionBanner, SubTitle } from "./headings";
 import { PayGapTable } from "./PayGapTable";
@@ -44,9 +47,7 @@ function ProportionTable({ data }: { data: DeclarationPdfData }) {
 				<Cell
 					align="right"
 					bold
-					text={
-						Number.isNaN(eWomen) ? "- %" : computePercentage(eWomen, tWomen)
-					}
+					text={formatVariablePayProportion(eWomen, tWomen)}
 					width={BENEFICIARY_TABLE.total}
 				/>
 			</Row>
@@ -66,7 +67,7 @@ function ProportionTable({ data }: { data: DeclarationPdfData }) {
 				<Cell
 					align="right"
 					bold
-					text={Number.isNaN(eMen) ? "- %" : computePercentage(eMen, tMen)}
+					text={formatVariablePayProportion(eMen, tMen)}
 					width={BENEFICIARY_TABLE.total}
 				/>
 			</Row>

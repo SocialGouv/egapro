@@ -835,7 +835,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarantPhone: "0612345678",
 				...nullIndicators,
 				globalAnnualMeanGap: "0.0455",
-				variableProportionWomen: "0.4523",
+				variableProportionWomen: "0.5625",
 				annualQuartile1ProportionWomen: "0.3333",
 			},
 		]);
@@ -852,7 +852,7 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.Indicateurs.A.Rem_globale_annuelle_moyenne_ecart).toBe(
 			"0.0455",
 		);
-		expect(decl.Indicateurs.E.Proportion_variable_F).toBe("0.4523");
+		expect(decl.Indicateurs.E.Proportion_variable_F).toBe("0.5625");
 		expect(
 			decl.Indicateurs.F.annuel.Quartile1_Rem_globale_annuelle_proportion_F,
 		).toBe("0.3333");

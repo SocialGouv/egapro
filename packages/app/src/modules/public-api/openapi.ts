@@ -122,14 +122,14 @@ const publicDeclarationSchema = {
 		variableProportionWomen: {
 			type: ["number", "null"],
 			description:
-				"Proportion de femmes bénéficiaires d'une rémunération variable (entre 0 et 1). `null` si non disponible.",
-			example: 0.32,
+				"Part des femmes de l'effectif qui bénéficient d'une rémunération variable, soit `bénéficiaires femmes / totalWomen` (entre 0 et 1). Indépendante de `variableProportionMen` : les deux ne somment pas à 1. `null` si non disponible.",
+			example: 0.5625,
 		},
 		variableProportionMen: {
 			type: ["number", "null"],
 			description:
-				"Proportion d'hommes bénéficiaires d'une rémunération variable (entre 0 et 1). `null` si non disponible.",
-			example: 0.68,
+				"Part des hommes de l'effectif qui bénéficient d'une rémunération variable, soit `bénéficiaires hommes / totalMen` (entre 0 et 1). Indépendante de `variableProportionWomen` : les deux ne somment pas à 1. `null` si non disponible.",
+			example: 0.6,
 		},
 		annualQuartile1ProportionWomen: {
 			type: ["number", "null"],

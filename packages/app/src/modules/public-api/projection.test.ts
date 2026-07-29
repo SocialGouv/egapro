@@ -19,8 +19,10 @@ const declarationFixture: PublicDeclarationSource = {
 	variableAnnualMedianGap: "0.0410",
 	variableHourlyMeanGap: "0.0330",
 	variableHourlyMedianGap: "0.0220",
-	variableProportionWomen: "45.0000",
-	variableProportionMen: "55.0000",
+	// Indicator E proportions are 0..1 per-sex coverage rates, not percentages,
+	// and they do NOT sum to 1 (unlike the quartile proportions below).
+	variableProportionWomen: "0.5625",
+	variableProportionMen: "0.6000",
 	annualQuartile1ProportionWomen: "60.0000",
 	annualQuartile2ProportionWomen: "55.0000",
 	annualQuartile3ProportionWomen: "50.0000",
@@ -202,7 +204,7 @@ describe("toPublicDeclaration", () => {
 		expect(dto.totalWomen).toBe(120);
 		expect(dto.totalMen).toBe(80);
 		expect(dto.globalAnnualMeanGap).toBe(0.1234);
-		expect(dto.variableProportionWomen).toBe(45);
+		expect(dto.variableProportionWomen).toBe(0.5625);
 		expect(dto.annualQuartile4ProportionMen).toBe(60);
 		expect(dto.hourlyQuartile1ProportionWomen).toBe(61);
 		expect(dto.workforceEma).toBe(250);
