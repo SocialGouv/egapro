@@ -19,7 +19,9 @@ describe("buildExportRows", () => {
 	// Mock for fetchIndicatorGByDeclaration: select().from().innerJoin().where()
 	const mockIndicatorGWhere = vi.fn();
 	const mockIndicatorGInnerJoin = vi.fn(() => ({ where: mockIndicatorGWhere }));
-	const mockIndicatorGFrom = vi.fn(() => ({ innerJoin: mockIndicatorGInnerJoin }));
+	const mockIndicatorGFrom = vi.fn(() => ({
+		innerJoin: mockIndicatorGInnerJoin,
+	}));
 
 	const mockSelectGeneric = vi.fn<(...args: unknown[]) => unknown>();
 
@@ -46,7 +48,6 @@ describe("buildExportRows", () => {
 		});
 	});
 
-
 	it("should return empty array when no declarations match", async () => {
 		mockWhere.mockResolvedValue([]);
 		mockJobWhere.mockResolvedValue([]);
@@ -59,7 +60,6 @@ describe("buildExportRows", () => {
 		expect(rows).toEqual([]);
 		expect(mockSelectGeneric).toHaveBeenCalled();
 	});
-
 
 	it("should map declaration rows to ExportRow format with year filter", async () => {
 		const dbRow = {
@@ -172,7 +172,6 @@ describe("buildExportRows", () => {
 		});
 	});
 
-
 	it("should set declarationType to 7_indicateurs when job categories exist", async () => {
 		const dbRow = {
 			declarationId: "decl-1",
@@ -265,7 +264,6 @@ describe("buildExportRows", () => {
 
 		expect(rows[0]?.declarationType).toBe("7_indicateurs");
 	});
-
 
 	it("should map CSE opinions to the correct slots", async () => {
 		const dbRow = {
@@ -369,7 +367,6 @@ describe("buildExportRows", () => {
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
-
 
 		expect(rows[0]).toMatchObject({
 			cseOpinion1Type: "accuracy",
@@ -480,7 +477,6 @@ describe("buildExportRows", () => {
 		});
 	});
 
-
 	it("should serialize cancelledAt as ISO string for cancelled declarations", async () => {
 		const dbRow = makeMinimalDbRow({
 			declarationId: "decl-cancelled",
@@ -547,12 +543,18 @@ describe("buildExportRows", () => {
 			hourlyVariableWomen: null,
 			hourlyVariableMen: null,
 		};
-		const indicatorGCorrection = { ...indicatorGInitial, declarationType: "correction" };
+		const indicatorGCorrection = {
+			...indicatorGInitial,
+			declarationType: "correction",
+		};
 
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([{ declarationId: "decl-completed" }]);
 		mockCseWhere.mockResolvedValue([]);
-		mockIndicatorGWhere.mockResolvedValue([indicatorGInitial, indicatorGCorrection]);
+		mockIndicatorGWhere.mockResolvedValue([
+			indicatorGInitial,
+			indicatorGCorrection,
+		]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -575,7 +577,6 @@ describe("buildExportRows", () => {
 			secondDeclarationSubmitted: true,
 		});
 	});
-
 
 	it("should flag significant negative gaps for the compliance process", async () => {
 		// Gaps unfavourable to men: bidirectional rule → still triggers compliance + revision.
@@ -601,12 +602,18 @@ describe("buildExportRows", () => {
 			hourlyVariableWomen: null,
 			hourlyVariableMen: null,
 		};
-		const indicatorGNegativeCorrection = { ...indicatorGNegative, declarationType: "correction" };
+		const indicatorGNegativeCorrection = {
+			...indicatorGNegative,
+			declarationType: "correction",
+		};
 
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([{ declarationId: "decl-negative-gap" }]);
 		mockCseWhere.mockResolvedValue([]);
-		mockIndicatorGWhere.mockResolvedValue([indicatorGNegative, indicatorGNegativeCorrection]);
+		mockIndicatorGWhere.mockResolvedValue([
+			indicatorGNegative,
+			indicatorGNegativeCorrection,
+		]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -616,7 +623,6 @@ describe("buildExportRows", () => {
 			complianceProcessRevisionRequired: true,
 		});
 	});
-
 
 	it("should export the GIP workforce floored, not the Weez company workforce (#3929)", async () => {
 		const dbRow = makeMinimalDbRow({
@@ -639,7 +645,6 @@ describe("buildExportRows", () => {
 		});
 	});
 
-
 	it("should floor the GIP workforce so 99,97 never exports as 100", async () => {
 		const dbRow = makeMinimalDbRow({
 			declarationId: "decl-rounding",
@@ -660,7 +665,6 @@ describe("buildExportRows", () => {
 			complianceProcessRequired: false,
 		});
 	});
-
 
 	it("should keep a declaration whose company is absent from the GIP file, with a null workforce", async () => {
 		const dbRow = makeMinimalDbRow({
@@ -687,7 +691,6 @@ describe("buildExportRows", () => {
 		});
 	});
 
-
 	it("should derive secondDeclarationSubmitted=false when secondDeclarationSubmittedAt is null", async () => {
 		const dbRow = makeMinimalDbRow({
 			secondDeclarationSubmittedAt: null,
@@ -704,7 +707,6 @@ describe("buildExportRows", () => {
 		expect(rows[0]?.secondDeclarationSubmitted).toBe(false);
 		expect(rows[0]?.secondDeclarationSubmittedAt).toBeNull();
 	});
-
 });
 
 type DbRow = Record<string, unknown>;
