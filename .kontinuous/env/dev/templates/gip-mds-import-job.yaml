@@ -22,10 +22,17 @@ metadata:
   name: gip-mds-import
   namespace: {{ .Values.global.namespace }}
 rules:
+  # `get` can be scoped to the deployment name, but `list`/`watch` cannot:
+  # RBAC resourceNames never match collection requests, and `kubectl rollout
+  # status` sets up its watch through list+watch on the deployments
+  # collection (with a fieldSelector). The rule stays namespace-scoped.
   - apiGroups: ["apps"]
     resources: ["deployments"]
     resourceNames: ["app"]
-    verbs: ["get", "watch"]
+    verbs: ["get"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -101,23 +108,19 @@ spec:
             - /bin/sh
             - -c
             - |
-              echo "Waiting for app to be ready..."
-              for i in $(seq 1 60); do
-                if curl -sf "http://app/api/healthz" > /dev/null 2>&1; then
-                  echo "App is ready, importing GIP MDS data..."
-                  curl -X POST "http://app/api/gip-mds/import" \
-                    -H "Authorization: Bearer ${EGAPRO_GIP_MDS_API_TOKEN}" \
-                    --connect-timeout 10 \
-                    --max-time 60 \
-                    --fail \
-                    --show-error
-                  exit $?
-                fi
-                echo "App not ready yet, retrying in 5s... ($i/60)"
-                sleep 5
-              done
-              echo "App did not become ready in time"
-              exit 1
+              # The rollout gate (init container) guarantees the app is ready;
+              # retries only cover transient Service endpoint propagation. The
+              # import endpoint is safe to retry (delete+insert transaction).
+              echo "Importing GIP MDS data..."
+              curl -X POST "http://app/api/gip-mds/import" \
+                -H "Authorization: Bearer ${EGAPRO_GIP_MDS_API_TOKEN}" \
+                --retry 10 \
+                --retry-delay 5 \
+                --retry-all-errors \
+                --connect-timeout 10 \
+                --max-time 60 \
+                --fail \
+                --show-error
           resources:
             requests:
               cpu: 50m
