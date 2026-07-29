@@ -5,6 +5,7 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/react";
+import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
@@ -68,6 +69,23 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+function compliancePathChoice(
+	overrides: Partial<ComponentProps<typeof CompliancePathChoice>> = {},
+) {
+	return (
+		<CompliancePathChoice
+			campaignDeadlines={campaignDeadlines}
+			cseOpinionRequired={true}
+			currentYear={2026}
+			declarationSiren={DECLARATION_SIREN}
+			declarationYear={DECLARATION_YEAR}
+			email="test@example.fr"
+			hasCse={true}
+			{...overrides}
+		/>
+	);
+}
+
 beforeEach(() => {
 	mockMutate.mockClear();
 	mockPush.mockClear();
@@ -77,16 +95,7 @@ beforeEach(() => {
 
 describe("CompliancePathChoice", () => {
 	it("renders the page title and success banner", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice());
 		expect(
 			screen.getByText(/Déclaration des indicateurs de rémunération/),
 		).toBeInTheDocument();
@@ -96,32 +105,14 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice());
 		expect(
 			screen.getByRole("group", { name: "Choix du parcours de conformité" }),
 		).toBeInTheDocument();
 	});
 
 	it("renders all 3 compliance path options", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice());
 		expect(
 			screen.getByText("Justifier les écarts de rémunération ≥ 5 %"),
 		).toBeInTheDocument();
@@ -136,31 +127,13 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("disables next button when no path is selected", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice());
 		const nextButton = screen.getByRole("button", { name: /suivant/i });
 		expect(nextButton).toBeDisabled();
 	});
 
 	it("enables next button after selecting a path", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice());
 		const radio = screen.getByLabelText(
 			"Actions correctives et seconde déclaration",
 		);
@@ -170,16 +143,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("submits the selected path and navigates to evaluation-conjointe", async () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice());
 		const radio = screen.getByLabelText(
 			"Mettre en place une évaluation conjointe des rémunérations",
 		);
@@ -199,16 +163,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("navigates to second declaration when corrective_action is selected", async () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice());
 		const radio = screen.getByLabelText(
 			"Actions correctives et seconde déclaration",
 		);
@@ -228,16 +183,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("does not submit when no path is selected", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice());
 
 		const form = screen
 			.getByRole("button", { name: /suivant/i })
@@ -249,16 +195,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("submits justify and navigates to the CSE opinion page", async () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice());
 		const radio = screen.getByLabelText(
 			"Justifier les écarts de rémunération ≥ 5 %",
 		);
@@ -275,18 +212,28 @@ describe("CompliancePathChoice", () => {
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
 	});
 
-	it("pre-selects the initial path when provided", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-				initialPath="corrective_action"
-			/>,
+	it("submits justify and navigates to the confirmation page without a CSE", async () => {
+		render(compliancePathChoice({ cseOpinionRequired: false, hasCse: false }));
+		const radio = screen.getByLabelText(
+			"Justifier les écarts de rémunération ≥ 5 %",
 		);
+		fireEvent.click(radio);
+
+		const form = screen
+			.getByRole("button", { name: /suivant/i })
+			.closest("form") as HTMLFormElement;
+		fireEvent.submit(form);
+
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalledWith({ path: "justify" });
+		});
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite/confirmation",
+		);
+	});
+
+	it("pre-selects the initial path when provided", () => {
+		render(compliancePathChoice({ initialPath: "corrective_action" }));
 		const radio = screen.getByLabelText(
 			"Actions correctives et seconde déclaration",
 		) as HTMLInputElement;
@@ -294,17 +241,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("renders isSecondRound options when isSecondRound is set", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-				isSecondRound={true}
-			/>,
-		);
+		render(compliancePathChoice({ isSecondRound: true }));
 		expect(
 			screen.getByText(
 				"Mettre en place une évaluation conjointe des rémunérations",
@@ -316,16 +253,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("renders the first-round instruction phrase by default", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice());
 		expect(
 			screen.getByText(/Des écarts ≥ 5 % ont été constatés/),
 		).toBeInTheDocument();
@@ -335,17 +263,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("renders the second-round instruction phrase and intermediate heading", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-				isSecondRound={true}
-			/>,
-		);
+		render(compliancePathChoice({ isSecondRound: true }));
 		expect(
 			screen.getByText(/Des écarts ≥ 5 % ont de nouveau été détectés/),
 		).toBeInTheDocument();
@@ -361,16 +279,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("uses the funnel title as h1 and keeps section headings at level 2", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice());
 		expect(
 			screen.getByRole("heading", {
 				level: 1,
@@ -389,16 +298,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("renders the path choice deadline highlight block", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice());
 		expect(
 			screen.getByText(
 				"Date limite pour choisir un parcours de mise en conformité",
@@ -408,16 +308,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("renders previous link pointing to step 6", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice());
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
 			"href",
 			"/declaration-remuneration/etape/6",
@@ -425,33 +316,94 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("renders the email in the success banner", () => {
-		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="john@company.fr"
-				hasCse={true}
-			/>,
-		);
+		render(compliancePathChoice({ email: "john@company.fr" }));
 		expect(screen.getByText("john@company.fr")).toBeInTheDocument();
+	});
+
+	describe("CSE consultation items gating (issue #3945)", () => {
+		it.each([
+			false,
+			true,
+		])("shows the justify CSE consultation items when a CSE opinion is required (isSecondRound: %s)", (isSecondRound) => {
+			render(compliancePathChoice({ cseOpinionRequired: true, isSecondRound }));
+
+			expect(
+				screen.getByText(
+					"Informer et consulter votre CSE sur cette justification",
+				),
+			).toBeInTheDocument();
+			expect(screen.getByText("Transmettre l'avis du CSE")).toBeInTheDocument();
+		});
+
+		it.each([
+			false,
+			true,
+		])("hides the justify CSE consultation items when no CSE opinion is required (isSecondRound: %s)", (isSecondRound) => {
+			render(
+				compliancePathChoice({
+					cseOpinionRequired: false,
+					hasCse: false,
+					isSecondRound,
+				}),
+			);
+
+			expect(
+				screen.queryByText(
+					"Informer et consulter votre CSE sur cette justification",
+				),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText("Transmettre l'avis du CSE"),
+			).not.toBeInTheDocument();
+		});
+
+		it("shows the corrective-action CSE consultation items when a CSE opinion is required", () => {
+			render(compliancePathChoice({ cseOpinionRequired: true }));
+
+			expect(
+				screen.getByText(/Informer et consulter votre CSE sur l'exactitude/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText("Transmettre l'avis ou les avis du CSE"),
+			).toBeInTheDocument();
+		});
+
+		it("hides the corrective-action CSE consultation items when no CSE opinion is required", () => {
+			render(
+				compliancePathChoice({ cseOpinionRequired: false, hasCse: false }),
+			);
+
+			expect(
+				screen.queryByText(/Informer et consulter votre CSE sur l'exactitude/),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText("Transmettre l'avis ou les avis du CSE"),
+			).not.toBeInTheDocument();
+		});
+
+		it("keeps the non-CSE corrective-action items when no CSE opinion is required", () => {
+			render(
+				compliancePathChoice({ cseOpinionRequired: false, hasCse: false }),
+			);
+
+			expect(
+				screen.getByText(
+					"Mettre en place des actions correctives par accord ou par plan d'action",
+				),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					"Redéclarer l'indicateur dans un délai de 6 mois après votre première déclaration",
+				),
+			).toBeInTheDocument();
+		});
 	});
 
 	describe("draft autosave", () => {
 		it("hydrates the selected path from a persisted draft", () => {
 			draftRef.current = { path: "joint_evaluation" };
 
-			render(
-				<CompliancePathChoice
-					campaignDeadlines={campaignDeadlines}
-					currentYear={2026}
-					declarationSiren={DECLARATION_SIREN}
-					declarationYear={DECLARATION_YEAR}
-					email="test@example.fr"
-					hasCse={true}
-				/>,
-			);
+			render(compliancePathChoice());
 
 			const radio = screen.getByLabelText(
 				"Mettre en place une évaluation conjointe des rémunérations",
@@ -460,16 +412,7 @@ describe("CompliancePathChoice", () => {
 		});
 
 		it("saves a draft when a path is selected and the lock is inactive", async () => {
-			render(
-				<CompliancePathChoice
-					campaignDeadlines={campaignDeadlines}
-					currentYear={2026}
-					declarationSiren={DECLARATION_SIREN}
-					declarationYear={DECLARATION_YEAR}
-					email="test@example.fr"
-					hasCse={true}
-				/>,
-			);
+			render(compliancePathChoice());
 
 			fireEvent.click(
 				screen.getByLabelText("Actions correctives et seconde déclaration"),
@@ -483,18 +426,7 @@ describe("CompliancePathChoice", () => {
 		});
 
 		it("does not save a draft when the declaration is locked read-only", async () => {
-			render(
-				<LockProvider isReadOnly>
-					<CompliancePathChoice
-						campaignDeadlines={campaignDeadlines}
-						currentYear={2026}
-						declarationSiren={DECLARATION_SIREN}
-						declarationYear={DECLARATION_YEAR}
-						email="test@example.fr"
-						hasCse={true}
-					/>
-				</LockProvider>,
-			);
+			render(<LockProvider isReadOnly>{compliancePathChoice()}</LockProvider>);
 
 			const radio = screen.getByLabelText(
 				"Actions correctives et seconde déclaration",
@@ -507,16 +439,7 @@ describe("CompliancePathChoice", () => {
 
 		it("disables each control while keeping the fieldset enabled when the declaration is locked read-only", () => {
 			const { container } = render(
-				<LockProvider isReadOnly>
-					<CompliancePathChoice
-						campaignDeadlines={campaignDeadlines}
-						currentYear={2026}
-						declarationSiren={DECLARATION_SIREN}
-						declarationYear={DECLARATION_YEAR}
-						email="test@example.fr"
-						hasCse={true}
-					/>
-				</LockProvider>,
+				<LockProvider isReadOnly>{compliancePathChoice()}</LockProvider>,
 			);
 
 			// The outermost fieldset stays enabled so its content remains exposed
@@ -533,16 +456,10 @@ describe("CompliancePathChoice", () => {
 describe("CompliancePathChoice read-only mode", () => {
 	it("renders the read-only alert and disables the radios", () => {
 		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-				initialPath="justify"
-				readOnlyReason="cse_opinion_submitted"
-			/>,
+			compliancePathChoice({
+				initialPath: "justify",
+				readOnlyReason: "cse_opinion_submitted",
+			}),
 		);
 		expect(
 			screen.getByText(/L'avis du CSE a déjà été transmis/),
@@ -554,16 +471,10 @@ describe("CompliancePathChoice read-only mode", () => {
 
 	it("renders Suivant as a navigation link instead of a submit button", () => {
 		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-				initialPath="justify"
-				readOnlyReason="cse_opinion_submitted"
-			/>,
+			compliancePathChoice({
+				initialPath: "justify",
+				readOnlyReason: "cse_opinion_submitted",
+			}),
 		);
 		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
 			"href",
@@ -576,16 +487,10 @@ describe("CompliancePathChoice read-only mode", () => {
 
 	it("does not call the save mutation when the read-only form is submitted", async () => {
 		render(
-			<CompliancePathChoice
-				campaignDeadlines={campaignDeadlines}
-				currentYear={2026}
-				declarationSiren={DECLARATION_SIREN}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.fr"
-				hasCse={true}
-				initialPath="justify"
-				readOnlyReason="cse_opinion_submitted"
-			/>,
+			compliancePathChoice({
+				initialPath: "justify",
+				readOnlyReason: "cse_opinion_submitted",
+			}),
 		);
 		const form = screen
 			.getByRole("link", { name: /suivant/i })

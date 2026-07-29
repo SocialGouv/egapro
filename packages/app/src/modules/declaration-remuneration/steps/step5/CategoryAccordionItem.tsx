@@ -1,5 +1,9 @@
 import type React from "react";
 
+import {
+	CATEGORY_NAME_MAX_LENGTH,
+	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
+} from "~/modules/declaration-remuneration/schemas";
 import stepStyles from "~/modules/declaration-remuneration/steps/Step5EmployeeCategories.module.scss";
 
 import { CategoryDataTable } from "./CategoryDataTable";
@@ -15,6 +19,7 @@ type Props = {
 	readOnlyLabel: boolean;
 	showDelete: boolean;
 	nameProps: React.ComponentPropsWithRef<"input">;
+	nameError?: string;
 	onAccordionToggle: (e: React.MouseEvent<HTMLButtonElement>) => void;
 	headerRef: (node: HTMLButtonElement | null) => void;
 	collapseRef: (node: HTMLDivElement | null) => void;
@@ -37,6 +42,7 @@ export function CategoryAccordionItem({
 	readOnlyLabel,
 	showDelete,
 	nameProps,
+	nameError,
 	onAccordionToggle,
 	headerRef,
 	collapseRef,
@@ -80,17 +86,38 @@ export function CategoryAccordionItem({
 			>
 				<div className={stepStyles.categoryBlock}>
 					{!readOnlyLabel && (
-						<div className="fr-input-group fr-mb-0">
+						<div
+							className={
+								nameError
+									? "fr-input-group fr-mb-0 fr-input-group--error"
+									: "fr-input-group fr-mb-0"
+							}
+						>
 							<label className="fr-label" htmlFor={`cat-${index}-name`}>
 								Libellé de la catégorie d&apos;emploi
+								<span className="fr-hint-text" id={`cat-${index}-name-hint`}>
+									{CATEGORY_NAME_MAX_LENGTH_MESSAGE}
+								</span>
 							</label>
 							<input
-								className="fr-input"
+								aria-describedby={
+									nameError
+										? `cat-${index}-name-hint cat-${index}-name-error`
+										: `cat-${index}-name-hint`
+								}
+								aria-invalid={nameError ? true : undefined}
+								className={nameError ? "fr-input fr-input--error" : "fr-input"}
 								disabled={disabled}
 								id={`cat-${index}-name`}
+								maxLength={CATEGORY_NAME_MAX_LENGTH}
 								{...nameProps}
 								type="text"
 							/>
+							{nameError && (
+								<p className="fr-error-text" id={`cat-${index}-name-error`}>
+									{nameError}
+								</p>
+							)}
 						</div>
 					)}
 					<CategoryDataTable

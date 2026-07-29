@@ -248,7 +248,7 @@ describe("Step5EmployeeCategories", () => {
 			/>,
 		);
 		expect(
-			screen.getByLabelText("Libellé de la catégorie d'emploi", {
+			screen.getByLabelText(/^Libellé de la catégorie d'emploi/, {
 				selector: "#cat-0-name",
 			}),
 		).toBeInTheDocument();
@@ -469,7 +469,7 @@ describe("Step5EmployeeCategories", () => {
 		);
 
 		const nameInput = screen.getByLabelText(
-			"Libellé de la catégorie d'emploi",
+			/^Libellé de la catégorie d'emploi/,
 			{
 				selector: "#cat-0-name",
 			},
@@ -488,7 +488,7 @@ describe("Step5EmployeeCategories", () => {
 		);
 
 		const nameInput = screen.getByLabelText(
-			"Libellé de la catégorie d'emploi",
+			/^Libellé de la catégorie d'emploi/,
 			{
 				selector: "#cat-0-name",
 			},
@@ -526,7 +526,7 @@ describe("Step5EmployeeCategories", () => {
 		);
 
 		const nameInput = screen.getByLabelText(
-			"Libellé de la catégorie d'emploi",
+			/^Libellé de la catégorie d'emploi/,
 			{
 				selector: "#cat-0-name",
 			},
