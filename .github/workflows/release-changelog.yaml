@@ -152,16 +152,19 @@ jobs:
         if: steps.collect.outputs.skip == 'false'
         run: |
           # The AI step is a coverage task now (one bullet per entry by
-          # default), so guard it: if entries were collected but the summary
-          # came back empty, the model dropped coverage — fail loudly instead
-          # of silently publishing a blank changelog. This workflow is
-          # decoupled from release-alpha.yaml, so a failure here never blocks
-          # the tag or the release.
+          # default), so guard it. An empty summary is a hard failure. Fewer
+          # bullets than entries is only a warning: the prompt legitimately
+          # allows merging several entries of one feature into one bullet, so
+          # a strict equality would fail on correct summaries. This workflow is
+          # decoupled from release-alpha.yaml, so neither ever blocks the tag.
+          #
+          # `-[[:space:]]` (not a bare `-`) so that a `---` rule or a stray
+          # dash is not counted as a bullet.
           ENTRY_COUNT=$(jq 'length' issues.json)
-          if [ ! -f summary.md ] || ! grep -qE '^[[:space:]]*-' summary.md; then
-            BULLET_COUNT=0
+          if [ -f summary.md ]; then
+            BULLET_COUNT=$(grep -cE '^[[:space:]]*-[[:space:]]' summary.md || true)
           else
-            BULLET_COUNT=$(grep -cE '^[[:space:]]*-' summary.md || true)
+            BULLET_COUNT=0
           fi
           {
             echo "## Changelog coverage"
@@ -173,6 +176,11 @@ jobs:
           if [ "$ENTRY_COUNT" -gt 0 ] && [ "$BULLET_COUNT" -eq 0 ]; then
             echo "ERROR: ${ENTRY_COUNT} business-facing entries collected but summary is empty — AI dropped coverage" >&2
             exit 1
+          fi
+          if [ "$BULLET_COUNT" -lt "$ENTRY_COUNT" ]; then
+            echo "::warning::Changelog moins détaillé que les entrées collectées (${BULLET_COUNT} points pour ${ENTRY_COUNT} entrées) — vérifier que les regroupements sont légitimes."
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "> ⚠️ Moins de points que d'entrées — regroupements à vérifier." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Publish release summary
