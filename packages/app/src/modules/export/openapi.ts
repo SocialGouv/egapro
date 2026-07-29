@@ -170,10 +170,21 @@ const indicatorsSchema = {
 		},
 		E: {
 			type: "object",
-			description: "Effectifs bénéficiaires d'une rémunération variable",
+			description:
+				"Effectifs bénéficiaires d'une rémunération variable, et la part de l'effectif de chaque genre qu'ils représentent. Les deux proportions sont indépendantes et ne somment pas à 1.",
 			properties: {
 				Effectif_F_rem_annuelle_variable: { type: ["string", "null"] },
 				Effectif_H_rem_annuelle_variable: { type: ["string", "null"] },
+				Proportion_variable_F: {
+					type: ["string", "null"],
+					description:
+						"Part des femmes de l'effectif bénéficiant d'une rémunération variable, soit bénéficiaires femmes / effectif femmes (ratio entre 0 et 1).",
+				},
+				Proportion_variable_H: {
+					type: ["string", "null"],
+					description:
+						"Part des hommes de l'effectif bénéficiant d'une rémunération variable, soit bénéficiaires hommes / effectif hommes (ratio entre 0 et 1).",
+				},
 			},
 		},
 		F: {
