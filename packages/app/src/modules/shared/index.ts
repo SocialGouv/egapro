@@ -5,11 +5,6 @@ export {
 export { CompanySizeFilter } from "./CompanySizeFilter";
 export { DownloadStatusRegion } from "./DownloadStatusRegion";
 export { FileDownloadLink } from "./FileDownloadLink";
-export {
-	type DownloadState,
-	isNativeClick,
-	useDownloadClickGuard,
-} from "./useDownloadClickGuard";
 export { FileUpload } from "./FileUpload";
 export type { FileNameError } from "./fileNameValidation";
 export {
@@ -34,6 +29,11 @@ export {
 	SCAN_TIMEOUT_MS,
 } from "./uploadConfig";
 export { uploadFile } from "./uploadFile";
+export {
+	type DownloadState,
+	isNativeClick,
+	useDownloadClickGuard,
+} from "./useDownloadClickGuard";
 export { useDsfrModal } from "./useDsfrModal";
 export { useFileUploadForm } from "./useFileUploadForm";
 export { useZodForm } from "./useZodForm";

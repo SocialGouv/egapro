@@ -1114,6 +1114,8 @@ describe("GET /api/v1/export/declarations", () => {
 				variableAnnualMeanGap: "0.08",
 			},
 		]);
+		// Significant gap (≈9.1% > 5%) for the initial round → complianceProcessRequired=true
+		// Plus a correction entry with the same gap → complianceProcessRevisionRequired=true
 		mockFetchIndicatorG.mockResolvedValueOnce(
 			new Map([
 				[
@@ -1121,11 +1123,27 @@ describe("GET /api/v1/export/declarations", () => {
 					[
 						{
 							categoryName: "cadres",
+							source: null,
 							declarationType: "initial",
 							womenCount: 10,
-							menCount: 10,
-							annualBaseWomen: "100",
-							annualBaseMen: "100",
+							menCount: 11,
+							annualBaseWomen: "10000",
+							annualBaseMen: "11000",
+							annualVariableWomen: null,
+							annualVariableMen: null,
+							hourlyBaseWomen: null,
+							hourlyBaseMen: null,
+							hourlyVariableWomen: null,
+							hourlyVariableMen: null,
+						},
+						{
+							categoryName: "cadres",
+							source: null,
+							declarationType: "correction",
+							womenCount: 10,
+							menCount: 11,
+							annualBaseWomen: "10000",
+							annualBaseMen: "11000",
 							annualVariableWomen: null,
 							annualVariableMen: null,
 							hourlyBaseWomen: null,

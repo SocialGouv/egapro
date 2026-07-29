@@ -1025,106 +1025,92 @@ describe("assembleDeclaration", () => {
 });
 
 describe("assembleDeclaration — compliance flags", () => {
-	const indicatorG: IndicatorGEntry[] = [
-		{
-			categoryName: "Cadres",
-			source: null,
-			declarationType: "initial",
-			womenCount: 50,
-			menCount: 60,
-			annualBaseWomen: "52000",
-			annualBaseMen: "56000",
-			annualVariableWomen: null,
-			annualVariableMen: null,
-			hourlyBaseWomen: null,
-			hourlyBaseMen: null,
-			hourlyVariableWomen: null,
-			hourlyVariableMen: null,
-		},
-	];
+	// Compliance flags are driven by indicator G (per job-category gaps), not by
+	// the aggregate indicators A/B on the row. computeGap = ((men-women)/men)*100,
+	// so 10000/11000 ≈ +9.1% (significant), 10000/10400 ≈ +3.8% (below 5%),
+	// 11000/10000 = -10% (significant, unfavourable to men).
+	const entry = (
+		declarationType: "initial" | "correction",
+		annualBaseWomen: string,
+		annualBaseMen: string,
+	): IndicatorGEntry => ({
+		categoryName: "Cadres",
+		source: null,
+		declarationType,
+		womenCount: 50,
+		menCount: 60,
+		annualBaseWomen,
+		annualBaseMen,
+		annualVariableWomen: null,
+		annualVariableMen: null,
+		hourlyBaseWomen: null,
+		hourlyBaseMen: null,
+		hourlyVariableWomen: null,
+		hourlyVariableMen: null,
+	});
+	const significantInitial = [entry("initial", "10000", "11000")];
+	const smallInitial = [entry("initial", "10000", "10400")];
+	const negativeSignificantInitial = [entry("initial", "11000", "10000")];
+	// Correction entries (same gap magnitudes, different declarationType)
+	const significantCorrection = [entry("correction", "10000", "11000")];
+	const smallCorrection = [entry("correction", "10000", "10400")];
+	const negativeSignificantCorrection = [entry("correction", "11000", "10000")];
 
-	it("requires the compliance process for >= 100 employees with indicator G and a gap >= 5%", () => {
-		const row = {
-			...baseRow,
-			workforceEma: "300.00",
-			globalAnnualMeanGap: "0.0600",
-		};
+	it("requires the compliance process for >= 100 employees with indicator G and a category gap >= 5%", () => {
+		const row = { ...baseRow, workforceEma: "300.00" };
 
-		const result = assembleDeclaration(row, indicatorG, []);
+		const result = assembleDeclaration(row, significantInitial, []);
 
 		expect(result.Parcours_de_conformite_requis).toBe(true);
 	});
 
-	it("does not require the compliance process when the gap is below 5%", () => {
-		const row = {
-			...baseRow,
-			workforceEma: "300.00",
-			globalAnnualMeanGap: "0.0455",
-		};
+	it("does not require the compliance process when the indicator G gap is below 5%", () => {
+		const row = { ...baseRow, workforceEma: "300.00" };
 
-		const result = assembleDeclaration(row, indicatorG, []);
+		const result = assembleDeclaration(row, smallInitial, []);
 
 		expect(result.Parcours_de_conformite_requis).toBe(false);
 		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
 	});
 
 	it("does not require the compliance process below 100 employees even with a gap", () => {
-		const row = {
-			...baseRow,
-			workforceEma: "99.00",
-			globalAnnualMeanGap: "0.0600",
-		};
+		const row = { ...baseRow, workforceEma: "99.00" };
 
-		const result = assembleDeclaration(row, indicatorG, []);
+		const result = assembleDeclaration(row, significantInitial, []);
 
 		expect(result.Parcours_de_conformite_requis).toBe(false);
 	});
 
 	it("does not require the compliance process without indicator G", () => {
-		const row = {
-			...baseRow,
-			workforceEma: "300.00",
-			globalAnnualMeanGap: "0.0600",
-		};
+		const row = { ...baseRow, workforceEma: "300.00" };
 
 		const result = assembleDeclaration(row, [], []);
 
 		expect(result.Parcours_de_conformite_requis).toBe(false);
 	});
 
-	it("does not require the compliance process when the global gap is null", () => {
-		const row = {
-			...baseRow,
-			workforceEma: "300.00",
-			globalAnnualMeanGap: null,
-		};
+	it("does not require the compliance process when the indicator G categories carry no gap data", () => {
+		const row = { ...baseRow, workforceEma: "300.00" };
 
-		const result = assembleDeclaration(row, indicatorG, []);
+		const result = assembleDeclaration(row, [entry("initial", "0", "0")], []);
 
 		expect(result.Parcours_de_conformite_requis).toBe(false);
 	});
 
-	it("requires the compliance process when the gap is negative past the threshold (women earn more, #3963)", () => {
-		// Signed stored gap of -0.06 → |gap| >= 5%, so the symmetric threshold triggers the obligation.
-		const row = {
-			...baseRow,
-			workforceEma: "300.00",
-			globalAnnualMeanGap: "-0.0600",
-		};
+	it("requires the compliance process when the indicator G gap is negative and significant", () => {
+		// Women earn more than men: the gap is unfavourable to men but still opens
+		// the compliance path (bidirectional rule).
+		const row = { ...baseRow, workforceEma: "300.00" };
 
-		const result = assembleDeclaration(row, indicatorG, []);
+		const result = assembleDeclaration(row, negativeSignificantInitial, []);
 
 		expect(result.Parcours_de_conformite_requis).toBe(true);
 	});
 
 	it("treats a company absent from the GIP file as 0 for the derived flags", () => {
-		const row = {
-			...baseRow,
-			workforceEma: null,
-			globalAnnualMeanGap: "0.0600",
-		};
+		const row = { ...baseRow, workforceEma: null };
 
-		const result = assembleDeclaration(row, indicatorG, []);
+		const result = assembleDeclaration(row, significantInitial, []);
 
 		expect(result.Effectif).toBeNull();
 		expect(result.Parcours_de_conformite_requis).toBe(false);
@@ -1132,13 +1118,9 @@ describe("assembleDeclaration — compliance flags", () => {
 	});
 
 	it("derives the flags from the GIP workforce, never from the Weez value (#3929)", () => {
-		const row = {
-			...baseRow,
-			workforceEma: "70.00",
-			globalAnnualMeanGap: "0.0600",
-		};
+		const row = { ...baseRow, workforceEma: "70.00" };
 
-		const result = assembleDeclaration(row, indicatorG, []);
+		const result = assembleDeclaration(row, significantInitial, []);
 
 		expect(result.Effectif).toBe(70);
 		expect(result.Indicateur_G_requis).toBe(false);
@@ -1148,12 +1130,12 @@ describe("assembleDeclaration — compliance flags", () => {
 	it("compares the indicator G threshold on the exact GIP value", () => {
 		const below = assembleDeclaration(
 			{ ...baseRow, workforceEma: "149.99" },
-			indicatorG,
+			significantInitial,
 			[],
 		);
 		const atThreshold = assembleDeclaration(
 			{ ...baseRow, workforceEma: "150.00" },
-			indicatorG,
+			significantInitial,
 			[],
 		);
 
@@ -1163,13 +1145,13 @@ describe("assembleDeclaration — compliance flags", () => {
 
 	it("compares the compliance threshold on the exact GIP value", () => {
 		const below = assembleDeclaration(
-			{ ...baseRow, workforceEma: "99.97", globalAnnualMeanGap: "0.0600" },
-			indicatorG,
+			{ ...baseRow, workforceEma: "99.97" },
+			significantInitial,
 			[],
 		);
 		const atThreshold = assembleDeclaration(
-			{ ...baseRow, workforceEma: "100.00", globalAnnualMeanGap: "0.0600" },
-			indicatorG,
+			{ ...baseRow, workforceEma: "100.00" },
+			significantInitial,
 			[],
 		);
 
@@ -1181,12 +1163,14 @@ describe("assembleDeclaration — compliance flags", () => {
 		const row = {
 			...baseRow,
 			workforceEma: "300.00",
-			globalAnnualMeanGap: "0.0600",
-			variableAnnualMeanGap: "0.0800",
 			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
 		};
 
-		const result = assembleDeclaration(row, indicatorG, []);
+		const result = assembleDeclaration(
+			row,
+			[...significantInitial, ...significantCorrection],
+			[],
+		);
 
 		expect(result.Parcours_de_conformite_requis).toBe(true);
 		expect(result.Parcours_de_conformite_revision_requis).toBe(true);
@@ -1196,12 +1180,14 @@ describe("assembleDeclaration — compliance flags", () => {
 		const row = {
 			...baseRow,
 			workforceEma: "300.00",
-			globalAnnualMeanGap: "0.0600",
-			variableAnnualMeanGap: "0.0800",
 			secondDeclarationSubmittedAt: null,
 		};
 
-		const result = assembleDeclaration(row, indicatorG, []);
+		const result = assembleDeclaration(
+			row,
+			[...significantInitial, ...significantCorrection],
+			[],
+		);
 
 		expect(result.Parcours_de_conformite_requis).toBe(true);
 		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
@@ -1211,42 +1197,45 @@ describe("assembleDeclaration — compliance flags", () => {
 		const row = {
 			...baseRow,
 			workforceEma: "300.00",
-			globalAnnualMeanGap: "0.0600",
-			variableAnnualMeanGap: "0.0400",
 			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
 		};
 
-		const result = assembleDeclaration(row, indicatorG, []);
+		const result = assembleDeclaration(
+			row,
+			[...significantInitial, ...smallCorrection],
+			[],
+		);
 
 		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
 	});
 
-	it("requires the revision when the correction over-corrects past the threshold (#3963)", () => {
-		// Over-correction: initial +6% triggers the path, corrected to -8% → |gap| >= 5%,
-		// so the symmetric threshold keeps the revision required (assumed behavior).
+	it("requires the revision when the correction gap is negative and significant", () => {
+		// Women earn more than men in the correction: still triggers the revision
+		// (bidirectional rule, same as the initial compliance check).
 		const row = {
 			...baseRow,
 			workforceEma: "300.00",
-			globalAnnualMeanGap: "0.0600",
-			variableAnnualMeanGap: "-0.0800",
 			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
 		};
 
-		const result = assembleDeclaration(row, indicatorG, []);
+		const result = assembleDeclaration(
+			row,
+			[...significantInitial, ...negativeSignificantCorrection],
+			[],
+		);
 
 		expect(result.Parcours_de_conformite_revision_requis).toBe(true);
 	});
 
-	it("does not require the revision when the correction gap is null", () => {
+	it("does not require the revision when there are no correction categories", () => {
+		// No correction entries → hasGapsAboveThreshold([]) = false → no revision.
 		const row = {
 			...baseRow,
 			workforceEma: "300.00",
-			globalAnnualMeanGap: "0.0600",
-			variableAnnualMeanGap: null,
 			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
 		};
 
-		const result = assembleDeclaration(row, indicatorG, []);
+		const result = assembleDeclaration(row, significantInitial, []);
 
 		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
 	});

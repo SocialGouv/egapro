@@ -5,9 +5,9 @@ import { useCallback, useRef } from "react";
 import { trackFunnelComplete } from "~/modules/analytics";
 import type { DeclarationFsmStatus } from "~/modules/domain";
 import {
-	computeGap,
 	getCompanySizeRange,
 	getObligationWorkforce,
+	hasGapsAboveThreshold,
 	isComplianceProcessRequired,
 	isCseOpinionRequired,
 	isCseRequired,
@@ -103,14 +103,13 @@ export function Step6Review({
 		}
 	}, []);
 
-	// Phase 2 gate — domain single source of truth, same rule as the exports/public API.
+	const hasSignificantIndicatorGGap = hasGapsAboveThreshold(step5Categories);
+
+	// Phase 2 gate — only significant indicator-G gaps require a compliance path.
 	const complianceProcessRequired = isComplianceProcessRequired({
 		workforce: companyWorkforce,
 		hasIndicatorG: indicatorGRequired,
-		gap: computeGap(
-			step2Data.indicatorAAnnualWomen,
-			step2Data.indicatorAAnnualMen,
-		),
+		hasSignificantIndicatorGGap,
 	});
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {

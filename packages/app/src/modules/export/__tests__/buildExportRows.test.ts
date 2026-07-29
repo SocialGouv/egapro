@@ -12,9 +12,16 @@ describe("buildExportRows", () => {
 	const mockJobFrom = vi.fn(() => ({ where: mockJobWhere }));
 	const mockSelectDistinct = vi.fn(() => ({ from: mockJobFrom }));
 
-	// Mock for getCseOpinionsByDeclaration
+	// Mock for fetchCseOpinionsByDeclaration: select().from().where()
 	const mockCseWhere = vi.fn();
 	const mockCseFrom = vi.fn(() => ({ where: mockCseWhere }));
+
+	// Mock for fetchIndicatorGByDeclaration: select().from().innerJoin().where()
+	const mockIndicatorGWhere = vi.fn();
+	const mockIndicatorGInnerJoin = vi.fn(() => ({ where: mockIndicatorGWhere }));
+	const mockIndicatorGFrom = vi.fn(() => ({
+		innerJoin: mockIndicatorGInnerJoin,
+	}));
 
 	const mockSelectGeneric = vi.fn<(...args: unknown[]) => unknown>();
 
@@ -29,11 +36,15 @@ describe("buildExportRows", () => {
 		vi.clearAllMocks();
 		callCount = 0;
 
-		// Call order: 1) declarations query, 2) CSE query
+		// Call order (Promise.all in buildExportRows):
+		//   1) declarations query  → select → from → innerJoin → leftJoin → innerJoin → where
+		//   2) fetchCseOpinionsByDeclaration → select → from → where
+		//   3) fetchIndicatorGByDeclaration  → select → from → innerJoin → where
 		mockSelectGeneric.mockImplementation(() => {
 			callCount++;
 			if (callCount === 1) return { from: mockFrom };
-			return { from: mockCseFrom };
+			if (callCount === 2) return { from: mockCseFrom };
+			return { from: mockIndicatorGFrom };
 		});
 	});
 
@@ -41,6 +52,7 @@ describe("buildExportRows", () => {
 		mockWhere.mockResolvedValue([]);
 		mockJobWhere.mockResolvedValue([]);
 		mockCseWhere.mockResolvedValue([]);
+		mockIndicatorGWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -141,6 +153,7 @@ describe("buildExportRows", () => {
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([]);
 		mockCseWhere.mockResolvedValue([]);
+		mockIndicatorGWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -244,6 +257,7 @@ describe("buildExportRows", () => {
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([{ declarationId: "decl-1" }]);
 		mockCseWhere.mockResolvedValue([]);
+		mockIndicatorGWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -349,6 +363,7 @@ describe("buildExportRows", () => {
 				opinionDate: "2027-02-20",
 			},
 		]);
+		mockIndicatorGWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -450,6 +465,7 @@ describe("buildExportRows", () => {
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([]);
 		mockCseWhere.mockResolvedValue([]);
+		mockIndicatorGWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -477,6 +493,7 @@ describe("buildExportRows", () => {
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([]);
 		mockCseWhere.mockResolvedValue([]);
+		mockIndicatorGWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -495,8 +512,6 @@ describe("buildExportRows", () => {
 			siren: "100100100",
 			status: "demarche_completed",
 			workforceEma: "300.00",
-			globalAnnualMeanGap: "0.10",
-			variableAnnualMeanGap: "0.08",
 			firstDeclarationPathChoice: "corrective_action",
 			secondDeclarationPathChoice: "joint_evaluation",
 			submittedAt: new Date("2027-03-01T09:00:00Z"),
@@ -510,9 +525,36 @@ describe("buildExportRows", () => {
 			rulesVersion: "2027.1",
 		});
 
+		// The compliance flags are now driven by indicatorG categories, not row-level gaps.
+		// Pass significant initial + correction entries to trigger both flags.
+		const indicatorGInitial = {
+			declarationId: "decl-completed",
+			categoryName: "Cadres",
+			source: null,
+			declarationType: "initial",
+			womenCount: 50,
+			menCount: 60,
+			annualBaseWomen: "10000",
+			annualBaseMen: "11000",
+			annualVariableWomen: null,
+			annualVariableMen: null,
+			hourlyBaseWomen: null,
+			hourlyBaseMen: null,
+			hourlyVariableWomen: null,
+			hourlyVariableMen: null,
+		};
+		const indicatorGCorrection = {
+			...indicatorGInitial,
+			declarationType: "correction",
+		};
+
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([{ declarationId: "decl-completed" }]);
 		mockCseWhere.mockResolvedValue([]);
+		mockIndicatorGWhere.mockResolvedValue([
+			indicatorGInitial,
+			indicatorGCorrection,
+		]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -536,20 +578,42 @@ describe("buildExportRows", () => {
 		});
 	});
 
-	it("should flag complianceProcessRequired when the gap is negative past the threshold (women earn more, #3963)", async () => {
-		// Signed stored gap -0.10 (women earn more): |gap| >= 5% → the symmetric threshold triggers the obligation.
+	it("should flag significant negative gaps for the compliance process", async () => {
+		// Gaps unfavourable to men: bidirectional rule → still triggers compliance + revision.
 		const dbRow = makeMinimalDbRow({
 			declarationId: "decl-negative-gap",
 			siren: "200200200",
 			workforceEma: "300.00",
-			globalAnnualMeanGap: "-0.10",
-			variableAnnualMeanGap: "-0.08",
 			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
 		});
+		const indicatorGNegative = {
+			declarationId: "decl-negative-gap",
+			categoryName: "Cadres",
+			source: null,
+			declarationType: "initial",
+			womenCount: 50,
+			menCount: 60,
+			annualBaseWomen: "11000",
+			annualBaseMen: "10000",
+			annualVariableWomen: null,
+			annualVariableMen: null,
+			hourlyBaseWomen: null,
+			hourlyBaseMen: null,
+			hourlyVariableWomen: null,
+			hourlyVariableMen: null,
+		};
+		const indicatorGNegativeCorrection = {
+			...indicatorGNegative,
+			declarationType: "correction",
+		};
 
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([{ declarationId: "decl-negative-gap" }]);
 		mockCseWhere.mockResolvedValue([]);
+		mockIndicatorGWhere.mockResolvedValue([
+			indicatorGNegative,
+			indicatorGNegativeCorrection,
+		]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -570,6 +634,7 @@ describe("buildExportRows", () => {
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([]);
 		mockCseWhere.mockResolvedValue([]);
+		mockIndicatorGWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -584,12 +649,13 @@ describe("buildExportRows", () => {
 		const dbRow = makeMinimalDbRow({
 			declarationId: "decl-rounding",
 			workforceEma: "99.97",
-			globalAnnualMeanGap: "0.10",
 		});
 
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([{ declarationId: "decl-rounding" }]);
 		mockCseWhere.mockResolvedValue([]);
+		// No significant indicator G gap → compliance not required even though workforce is ~99
+		mockIndicatorGWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -611,6 +677,7 @@ describe("buildExportRows", () => {
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([{ declarationId: "decl-no-gip" }]);
 		mockCseWhere.mockResolvedValue([]);
+		mockIndicatorGWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
@@ -632,6 +699,7 @@ describe("buildExportRows", () => {
 		mockWhere.mockResolvedValue([dbRow]);
 		mockJobWhere.mockResolvedValue([]);
 		mockCseWhere.mockResolvedValue([]);
+		mockIndicatorGWhere.mockResolvedValue([]);
 
 		const { buildExportRows } = await import("../buildExportRows");
 		const rows = await buildExportRows(mockDb as never, 2027);
