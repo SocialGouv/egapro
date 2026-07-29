@@ -81,7 +81,7 @@ test.describe("Declaration workflow", () => {
 
 		// Verify gap is computed and displayed in the table cell
 		await expect(
-			page.getByRole("table").getByText("6,3 %", { exact: true }),
+			page.getByRole("table").getByText("6,25 %", { exact: true }),
 		).toBeVisible();
 	});
 
@@ -99,7 +99,7 @@ test.describe("Declaration workflow", () => {
 			.fill("5500");
 
 		// Verify gap is computed
-		await expect(page.getByText("9,1 %")).toBeVisible();
+		await expect(page.getByText("9,09 %")).toBeVisible();
 
 		// Verify beneficiary inputs are present
 		await expect(

@@ -199,7 +199,7 @@ describe("Step3VariablePay", () => {
 		await user.type(menInput, "100");
 
 		// Gap = 5.0 %
-		expect(screen.getByText("5,0 %")).toBeInTheDocument();
+		expect(screen.getByText("5,00 %")).toBeInTheDocument();
 		expect(screen.getByText("élevé")).toBeInTheDocument();
 	});
 

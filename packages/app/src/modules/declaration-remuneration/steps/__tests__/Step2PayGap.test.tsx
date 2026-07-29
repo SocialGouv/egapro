@@ -178,7 +178,7 @@ describe("Step2PayGap", () => {
 		await user.type(menInput, "100");
 
 		// Gap = |((100-95)/100)*100| = 5.0 % — table cell + interpretation callout
-		expect(screen.getAllByText("5,0 %").length).toBeGreaterThan(0);
+		expect(screen.getAllByText("5,00 %").length).toBeGreaterThan(0);
 		expect(screen.getByText("élevé")).toBeInTheDocument();
 	});
 
@@ -202,7 +202,7 @@ describe("Step2PayGap", () => {
 		await user.type(menInput, "100");
 
 		// Gap = 3.0 % — table cell + interpretation callout
-		expect(screen.getAllByText("3,0 %").length).toBeGreaterThan(0);
+		expect(screen.getAllByText("3,00 %").length).toBeGreaterThan(0);
 		expect(screen.queryByText("faible")).not.toBeInTheDocument();
 		expect(screen.queryByText("élevé")).not.toBeInTheDocument();
 	});

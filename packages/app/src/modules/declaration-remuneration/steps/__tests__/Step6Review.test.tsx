@@ -284,8 +284,8 @@ describe("Step6Review", () => {
 		);
 		expect(screen.getAllByText("Moyenne").length).toBeGreaterThanOrEqual(2);
 		expect(screen.getAllByText("Médiane").length).toBeGreaterThanOrEqual(2);
-		expect(screen.getAllByText("5,0 %").length).toBeGreaterThanOrEqual(1);
-		expect(screen.getAllByText("3,0 %").length).toBeGreaterThanOrEqual(1);
+		expect(screen.getAllByText("5,00 %").length).toBeGreaterThanOrEqual(1);
+		expect(screen.getAllByText("3,00 %").length).toBeGreaterThanOrEqual(1);
 		expect(screen.queryByText("faible")).not.toBeInTheDocument();
 		expect(screen.getAllByText("élevé").length).toBeGreaterThanOrEqual(1);
 	});

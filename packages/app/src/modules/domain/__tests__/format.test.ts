@@ -13,8 +13,45 @@ import {
 } from "../shared/format";
 
 describe("formatGap", () => {
-	it("formats a gap with French decimal separator", () => {
-		expect(formatGap(5.3)).toBe("5,3 %");
+	it("formats a gap with French decimal separator and two decimals", () => {
+		expect(formatGap(5.3)).toBe("5,30 %");
+	});
+
+	it("truncates to two decimals without rounding", () => {
+		expect(formatGap(5.349)).toBe("5,34 %");
+		expect(formatGap(5.341)).toBe("5,34 %");
+		expect(formatGap(99.999)).toBe("99,99 %");
+	});
+
+	// The reported bug: a below-threshold gap rounded up to "5,0 %" and looked
+	// like the alert value. Truncation must never lift a value across the seuil.
+	it("never displays the threshold for a gap strictly below 5", () => {
+		expect(formatGap(4.9617)).toBe("4,96 %");
+		expect(formatGap(4.996)).toBe("4,99 %");
+		expect(formatGap(4.999)).toBe("4,99 %");
+	});
+
+	it("displays exactly the threshold only when the gap reaches it", () => {
+		expect(formatGap(5)).toBe("5,00 %");
+		expect(formatGap(5.04)).toBe("5,04 %");
+	});
+
+	it("truncates negative gaps toward zero, preserving magnitude below the seuil", () => {
+		expect(formatGap(-4.9617)).toBe("-4,96 %");
+		expect(formatGap(-5)).toBe("-5,00 %");
+		expect(formatGap(-5.04)).toBe("-5,04 %");
+	});
+
+	// Values already exact at two decimals must survive truncation untouched.
+	// A naive `Math.trunc(gap * 100)` drops a whole cent here, because the
+	// product carries binary representation error (4.6 * 100 = 459.99999…).
+	it("does not shave a cent off values already exact at two decimals", () => {
+		expect(formatGap(4.6)).toBe("4,60 %");
+		expect(formatGap(5.1)).toBe("5,10 %");
+		expect(formatGap(2.3)).toBe("2,30 %");
+		expect(formatGap(8.7)).toBe("8,70 %");
+		expect(formatGap(1.15)).toBe("1,15 %");
+		expect(formatGap(-4.6)).toBe("-4,60 %");
 	});
 
 	it("returns '- %' for null", () => {
@@ -23,8 +60,14 @@ describe("formatGap", () => {
 });
 
 describe("formatGapCompact", () => {
-	it("formats without percent sign", () => {
-		expect(formatGapCompact(5.3)).toBe("5,3");
+	it("formats without percent sign, two decimals truncated", () => {
+		expect(formatGapCompact(5.3)).toBe("5,30");
+		expect(formatGapCompact(5.349)).toBe("5,34");
+	});
+
+	it("never displays the threshold for a gap strictly below 5", () => {
+		expect(formatGapCompact(4.9617)).toBe("4,96");
+		expect(formatGapCompact(5)).toBe("5,00");
 	});
 
 	it("returns dash for null", () => {
