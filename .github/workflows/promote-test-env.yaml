@@ -118,6 +118,7 @@ jobs:
           secrets: |
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
             sentry_release=${{ inputs.release }}
+            app_version=${{ inputs.release }}
           push: true
 
   deploy:
