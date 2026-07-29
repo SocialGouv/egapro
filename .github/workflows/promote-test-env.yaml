@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        description: "Release tag to deploy (e.g. v3.4.0-alpha.2)"
+        description: "Release tag to deploy (e.g. v3.14.0-alpha.12)"
         required: true
         type: string
       target:
@@ -57,7 +57,9 @@ jobs:
               ;;
           esac
           if ! git rev-parse --verify --quiet "refs/tags/$TAG^{commit}" > /dev/null; then
-            echo "::error::Tag '$TAG' does not exist on this repository"
+            # Listing the latest tags turns the most common failure — a typo in
+            # the version series — into a one-glance fix.
+            echo "::error::Tag '$TAG' does not exist on this repository. Latest tags: $(git tag --sort=-creatordate | head -5 | tr '\n' ' ')"
             exit 1
           fi
           if ! IS_DRAFT=$(gh release view "$TAG" --json isDraft --jq '.isDraft' 2>/dev/null); then
@@ -115,17 +117,25 @@ jobs:
             NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
             NEXT_PUBLIC_MATOMO_URL=${{ vars.NEXT_PUBLIC_MATOMO_URL }}
             NEXT_PUBLIC_MATOMO_SITE_ID=${{ vars.NEXT_PUBLIC_MATOMO_SITE_ID_DEV }}
+            APP_VERSION=${{ inputs.release }}
+            SENTRY_RELEASE=${{ inputs.release }}
           secrets: |
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
-            sentry_release=${{ inputs.release }}
-            app_version=${{ inputs.release }}
           push: true
 
   deploy:
     name: "🐳 Deploy ${{ inputs.release }} → ${{ inputs.target }}-persist"
     needs: build-app
     runs-on: ubuntu-latest
-    environment: review-auto
+    # `name` carries the deploy secrets (KUBECONFIG, KS_*). `url` is what makes
+    # the promotion auditable: the workflow runs on `alpha`, so the deployment
+    # record GitHub writes is `review-auto @ alpha` and any downstream job that
+    # recomputes an URL from that ref targets the alpha env. Declaring the URL
+    # here propagates it as `deployment_status.environment_url`, which the
+    # Lighthouse workflow prefers over its own computation.
+    environment:
+      name: review-auto
+      url: https://egapro-${{ inputs.target }}-persist.ovh.fabrique.social.gouv.fr
     permissions:
       contents: read
     steps:

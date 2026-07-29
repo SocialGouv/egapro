@@ -59,21 +59,23 @@ RUN pnpm --filter notifications build
 # don't use injected workspace packages).
 RUN pnpm --filter notifications deploy --prod --legacy /deploy/notifications
 
-# Build with Next.js cache persisted across builds
-# Sentry auth token and release are mounted as BuildKit secrets to avoid leaking in image layers
-# and to preserve build cache (ARG would invalidate cache on every new release).
-# app_version (git tag / branch name) and pr_number (review apps) follow the same
-# secret path for the same reason — they are inlined into the client bundle by
-# the footer, and must NOT be passed as ARG or the cache would bust every release.
+# Build with Next.js cache persisted across builds.
+# The Sentry auth token stays a BuildKit secret: it is a credential and must never
+# land in an image layer. The three public values below are ARGs on purpose — they
+# are inlined into the client bundle by the footer, and a secret is NOT part of the
+# layer cache key. As a secret, promoting a release would reuse the bundle Review
+# Auto already built for the same commit and ship the branch name instead of the
+# tag. Declaring them here, right before the build, keeps the dependency layers
+# shared: this layer is already invalidated by the source tree itself.
+ARG APP_VERSION
+ARG PR_NUMBER
+ARG SENTRY_RELEASE
 RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
     --mount=type=secret,id=sentry_auth_token \
-    --mount=type=secret,id=sentry_release \
-    --mount=type=secret,id=app_version \
-    --mount=type=secret,id=pr_number \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null) \
-    NEXT_PUBLIC_SENTRY_RELEASE=$(cat /run/secrets/sentry_release 2>/dev/null | tr '/' '-') \
-    NEXT_PUBLIC_APP_VERSION=$(cat /run/secrets/app_version 2>/dev/null) \
-    NEXT_PUBLIC_PR_NUMBER=$(cat /run/secrets/pr_number 2>/dev/null) \
+    NEXT_PUBLIC_SENTRY_RELEASE=$(echo "$SENTRY_RELEASE" | tr '/' '-') \
+    NEXT_PUBLIC_APP_VERSION=$APP_VERSION \
+    NEXT_PUBLIC_PR_NUMBER=$PR_NUMBER \
     pnpm --filter app build
 
 

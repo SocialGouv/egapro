@@ -251,8 +251,20 @@ GitHub Actions workflows are in `.github/workflows/` :
 | File | Trigger | Role |
 |---|---|---|
 | `ci.yaml` | each push | build · lint · format · typecheck · tests |
+| `a11y.yaml` | push `alpha`/`beta`/`master`, PR, cron hebdo, manual | gate RGAA 4.1.2 / WCAG 2.2 AA statique (ultra11y) |
+| `e2e.yaml` | PR → `alpha`, manual | suite Playwright complète |
+| `lighthouse.yaml` | `deployment_status` (success, hors env `build-*`) | audit Lighthouse sur l'URL déployée |
+| `review-auto.yaml` | push sur toute branche sauf `dependabot/**` et `master` | **déploiement des review apps** |
+| `review.yaml` | push `dependabot/**` | review app des branches Dependabot |
+| `deactivate.yaml` | PR closed, `delete` de branche | destruction de la review app |
+| `preproduction.yaml` | push `beta` | preprod deployment |
+| `production.yaml` | push tag `v*` | prod deployment |
+| `promote-test-env.yaml` | manual (inputs `release`, `target`) | déploie une release publiée sur un env de test persistant (`rgaa` / `perf`) |
 | `release.yml` | manual (branch `beta`) | semantic-release |
 | `release-alpha.yaml` | manual (branch `alpha`) | semantic-release — prerelease `-alpha.N` (remplace l'ancien auto `push: alpha`) |
-| `review.yaml` | PR | review app deployment |
-| `preproduction.yaml` | push `beta` | preprod deployment |
-| `production.yaml` | push `master` | prod deployment |
+| `release-alpha-reminder.yaml` | cron lun–ven, manual | alerte sur les commits livrables non releasés |
+| `release-changelog.yaml` | `release: published`, manual | changelog IA FR injecté dans le corps de la release |
+| `db-schema.yaml` | push `alpha`/`master` sur le schéma, manual | publie la doc de schéma DB sur le wiki |
+| `sync-docs-to-wiki.yaml` | push `alpha`/`master` sur `docs/**`, manual | miroir `docs/` → wiki |
+| `ticket-end-date.yaml` | PR closed | estampille « End date » sur le board |
+| `claude-question.yml` | issue labellisée `question` | réponse automatique |
