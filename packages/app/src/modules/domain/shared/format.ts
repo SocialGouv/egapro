@@ -11,13 +11,29 @@ import { GAP_DISPLAY_DECIMALS } from "./constants";
  * For gap calculation and threshold classification, see `gap.ts`.
  */
 
+/**
+ * Significant digits kept when normalising a scaled gap before truncation.
+ *
+ * A gap is a percentage, so `gap * 10 ** GAP_DISPLAY_DECIMALS` carries at most
+ * `3 + GAP_DISPLAY_DECIMALS` digits of real signal (`100 %` being the widest
+ * value). 12 sits well above that, and well below the ~17 digits where IEEE 754
+ * representation noise appears — so it erases the noise without ever touching a
+ * meaningful digit. Raising GAP_DISPLAY_DECIMALS beyond 9 would require raising
+ * this too.
+ */
+const GAP_NORMALISATION_PRECISION = 12;
+
 function truncateGap(gap: number): number {
 	const scale = 10 ** GAP_DISPLAY_DECIMALS;
 	// `gap * scale` carries binary representation error — 4.6 * 100 yields
 	// 459.99999999999994, which Math.trunc would drop to a whole cent below
-	// the real value. Normalising to 12 significant digits absorbs that error
-	// so only genuine sub-cent precision is truncated away.
-	return Math.trunc(Number((gap * scale).toPrecision(12))) / scale;
+	// the real value. Normalising to GAP_NORMALISATION_PRECISION significant
+	// digits absorbs that error so only genuine sub-cent precision is
+	// truncated away.
+	return (
+		Math.trunc(Number((gap * scale).toPrecision(GAP_NORMALISATION_PRECISION))) /
+		scale
+	);
 }
 
 /** Format a gap value with two decimals (truncated) and a percent sign: `5.34` → `"5,34 %"`. */
