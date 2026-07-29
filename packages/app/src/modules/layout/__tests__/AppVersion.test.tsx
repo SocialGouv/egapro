@@ -4,8 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 // `env` is mocked per-test below. Each test redefines the module mock to set
 // the public env vars the component reads.
 async function withEnv(env: Record<string, string | undefined>) {
-	vi.doMock("~/env", () => ({ env }));
 	vi.resetModules();
+	vi.doMock("~/env", () => ({ env }));
 	const mod = await import("../Footer/AppVersion");
 	return mod.AppVersion;
 }
