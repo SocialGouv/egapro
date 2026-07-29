@@ -11,14 +11,14 @@ const declarationFixture: PublicDeclarationSource = {
 	year: 2024,
 	totalWomen: 120,
 	totalMen: 80,
-	globalAnnualMeanGap: "12.3400",
-	globalAnnualMedianGap: "10.0000",
-	globalHourlyMeanGap: "8.5000",
-	globalHourlyMedianGap: "7.2500",
-	variableAnnualMeanGap: "5.5000",
-	variableAnnualMedianGap: "4.1000",
-	variableHourlyMeanGap: "3.3000",
-	variableHourlyMedianGap: "2.2000",
+	globalAnnualMeanGap: "0.1234",
+	globalAnnualMedianGap: "0.1000",
+	globalHourlyMeanGap: "0.0850",
+	globalHourlyMedianGap: "0.0725",
+	variableAnnualMeanGap: "0.0550",
+	variableAnnualMedianGap: "0.0410",
+	variableHourlyMeanGap: "0.0330",
+	variableHourlyMedianGap: "0.0220",
 	variableProportionWomen: "45.0000",
 	variableProportionMen: "55.0000",
 	annualQuartile1ProportionWomen: "60.0000",
@@ -201,11 +201,28 @@ describe("toPublicDeclaration", () => {
 		expect(dto.year).toBe(2024);
 		expect(dto.totalWomen).toBe(120);
 		expect(dto.totalMen).toBe(80);
-		expect(dto.globalAnnualMeanGap).toBe(12.34);
+		expect(dto.globalAnnualMeanGap).toBe(0.1234);
 		expect(dto.variableProportionWomen).toBe(45);
 		expect(dto.annualQuartile4ProportionMen).toBe(60);
 		expect(dto.hourlyQuartile1ProportionWomen).toBe(61);
 		expect(dto.workforceEma).toBe(250);
+	});
+
+	it("serves the raw stored gap ratio without scaling it to a percentage", () => {
+		// A stored ratio of 0.0523 (i.e. a 5.23% gap) must be exposed as-is:
+		// the public API contract is the ratio, so no × 100 conversion may be introduced.
+		const dto = toPublicDeclaration(
+			{
+				...declarationFixture,
+				globalAnnualMeanGap: "0.0523",
+				variableAnnualMedianGap: "-0.0312",
+			},
+			companyFixture,
+		);
+
+		expect(dto.globalAnnualMeanGap).toBe(0.0523);
+		expect(dto.globalAnnualMeanGap).not.toBe(5.23);
+		expect(dto.variableAnnualMedianGap).toBe(-0.0312);
 	});
 
 	it("maps null numeric inputs to null", () => {
