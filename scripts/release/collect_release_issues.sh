@@ -27,12 +27,20 @@ fi
 # framing, so such a PR collapses into a single entry — the epic issue itself —
 # and its sub-tickets are skipped.
 #
-# Deterministic pre-filter (exclusion), applied to every entry's title and
-# labels, so purely technical work never reaches the AI prompt:
-#   - conventional-commit type prefix in the title:
-#     chore|ci|build|perf|test|refactor|style|docs
-#   - labels: "cat: technique", "tâche technique", "type: ci", "type: chore",
-#     "type: build", "dependencies", "github_actions"
+# Deterministic pre-filter (exclusion), so purely technical work never reaches
+# the AI prompt. It runs at TWO levels, and both matter:
+#
+#   1. PR level — the conventional-commit type prefix
+#      (chore|ci|build|perf|test|refactor|style|docs) only ever appears on the
+#      PR title. A linked issue's title is free-form French ("Maintenir un
+#      cahier de tests…") and will never match it, so filtering on the issue
+#      alone lets every technical PR through as soon as it closes a
+#      human-worded ticket. The PR is judged first, for all its entries.
+#   2. Issue level — an issue can carry a technical label even when the PR
+#      title is business-worded, so each linked issue is judged too.
+#
+# Both levels use the same rules: conventional-commit type prefix in the title,
+# or one of TECHNICAL_LABELS_JSON in the labels.
 #
 # Output: JSON array on stdout —
 #   [{"issue": <number|null>, "title": "...", "labels": ["..."], "pr": <number>}, ...]
@@ -96,7 +104,7 @@ if [ "$PR_COUNT" -gt "$MAX_PRS" ]; then
     PR_NUMBERS=$(printf '%s\n' "$PR_NUMBERS" | tail -n "$MAX_PRS")
 fi
 
-TECHNICAL_LABELS_JSON='["cat: technique","tâche technique","type: ci","type: chore","type: build","dependencies","github_actions"]'
+TECHNICAL_LABELS_JSON='["cat: technique","tâche technique","type: ci","type: chore","type: build","dependencies","github_actions","documentation","scope: k8s","scope: docker","scope: gitlab","scope: e2e"]'
 
 is_technical_title() {
     echo "$1" | grep -qiE '^(chore|ci|build|perf|test|refactor|style|docs)(\([^)]*\))?!?:'
@@ -119,6 +127,18 @@ for PR in $PR_NUMBERS; do
     PR_LABELS=$(jq -c '[.labels[].name]' <<<"$PR_JSON")
     LINKED_ISSUES=$(jq -c '[.closingIssuesReferences[].number]' <<<"$PR_JSON")
     LINKED_COUNT=$(jq 'length' <<<"$LINKED_ISSUES")
+
+    # PR-level technical filter. The conventional-commit type prefix
+    # (chore|ci|build|…|docs) only ever appears on the PR title — a linked
+    # issue's title is free-form French and will never match it. Judging only
+    # the issue (the previous behaviour) let every technical PR slip through as
+    # soon as it closed a human-worded ticket, so the PR is judged first: a
+    # technical PR is dropped wholesale, for all its linked entries. A technical
+    # scope (`fix(release): …`) is NOT a technical type and is kept.
+    if is_technical_title "$PR_TITLE" || is_technical_labels "$PR_LABELS"; then
+        echo "[collect_release_issues] PR #${PR} technical (title/labels), skipping" >&2
+        continue
+    fi
 
     # Epic rollup (option A): an epic integration PR is titled
     # `feat(epic): #<N> — …` and closes every sub-ticket. Collapse it into a
