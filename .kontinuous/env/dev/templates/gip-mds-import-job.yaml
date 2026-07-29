@@ -1,3 +1,46 @@
+# GIP MDS import trigger, fired on every deploy (post-upgrade hook).
+#
+# The job MUST wait for the `app` Deployment rollout to complete before
+# triggering the import: during a rolling update the `app` Service still
+# routes to the previous pods, so both the trigger call and the server-side
+# fetch of EGAPRO_GIP_MDS_API_URL (which also goes through the Service) can
+# hit the old version and import its outdated bundled mock CSV. A healthz
+# check is not enough — the old pods answer it too. The init container below
+# gates the import on `kubectl rollout status`, which only returns once the
+# new ReplicaSet is fully ready and the old one is scaled down. The
+# ServiceAccount/Role/RoleBinding grant the read-only access this watch
+# requires, scoped to the single `app` Deployment.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gip-mds-import
+  namespace: {{ .Values.global.namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gip-mds-import
+  namespace: {{ .Values.global.namespace }}
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["app"]
+    verbs: ["get", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gip-mds-import
+  namespace: {{ .Values.global.namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: gip-mds-import
+subjects:
+  - kind: ServiceAccount
+    name: gip-mds-import
+    namespace: {{ .Values.global.namespace }}
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -14,9 +57,35 @@ spec:
         app: gip-mds-import
     spec:
       restartPolicy: OnFailure
+      serviceAccountName: gip-mds-import
       securityContext:
         runAsUser: 100
         runAsNonRoot: true
+      initContainers:
+        - name: wait-app-rollout
+          image: alpine/kubectl:1.33.3
+          securityContext:
+            allowPrivilegeEscalation: false
+          env:
+            # kubectl needs a writable HOME for its cache when running as a
+            # non-root arbitrary uid
+            - name: HOME
+              value: /tmp
+          command:
+            - kubectl
+            - rollout
+            - status
+            - deployment/app
+            - --namespace
+            - {{ .Values.global.namespace }}
+            - --timeout=600s
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
       containers:
         - name: trigger
           image: curlimages/curl:8.12.1
