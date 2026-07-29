@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 async function withEnv(env: Record<string, string | undefined>) {
 	vi.resetModules();
 	vi.doMock("~/env", () => ({ env }));
-	const mod = await import("../Footer/AppVersion");
+	const mod = await import("../AppVersion");
 	return mod.AppVersion;
 }
 
