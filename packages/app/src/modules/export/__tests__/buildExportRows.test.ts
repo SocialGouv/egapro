@@ -616,10 +616,13 @@ describe("buildExportRows", () => {
 		const rows = await buildExportRows(mockDb as never, 2027);
 
 		expect(rows).toHaveLength(1);
+		// No GIP workforce → obligation flags stay false, but the workforce-0
+		// declarant is in the voluntary (< 50) tier, so indicator G is required
+		// (7-indicator volunteering, #4043).
 		expect(rows[0]).toMatchObject({
 			siren: "999999999",
 			workforce: null,
-			indicatorGRequired: false,
+			indicatorGRequired: true,
 			complianceProcessRequired: false,
 		});
 	});

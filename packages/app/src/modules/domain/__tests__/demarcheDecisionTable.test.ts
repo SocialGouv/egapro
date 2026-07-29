@@ -128,9 +128,11 @@ describe("decision table — workforce × gap × regime", () => {
 		const cseBySize = workforce >= COMPANY_SIZE_ANNUAL_MIN;
 		expect(isCseRequired(workforce)).toBe(cseBySize);
 
-		// Indicator G applies in the annual regime from 250 every year, and in the
+		// Indicator G applies to the voluntary tier (< 50, 7-indicator volunteering,
+		// #4043) every year, in the annual regime from 250 every year, and in the
 		// triennial band 150-249 only during a triennial year.
 		const expectedIndicatorG =
+			workforce < COMPANY_SIZE_VOLUNTARY_MAX ||
 			workforce >= INDICATOR_G_ANNUAL_MIN ||
 			(workforce >= INDICATOR_G_TRIENNIAL_MIN && regime.isTriennial);
 		const hasIndicatorG = isIndicatorGRequired(workforce, regime.year);
@@ -168,13 +170,15 @@ describe("size boundaries (named domain constants)", () => {
 		expect(isCseRequired(COMPANY_SIZE_ANNUAL_MIN + 1)).toBe(true);
 	});
 
-	it("classifyCompanySize: voluntary / triennial / annual boundaries", () => {
+	it("classifyCompanySize: voluntary / mandatory / mandatory_with_compliance boundaries", () => {
 		expect(classifyCompanySize(COMPANY_SIZE_VOLUNTARY_MAX - 1)).toBe(
 			"voluntary",
 		);
-		expect(classifyCompanySize(COMPANY_SIZE_VOLUNTARY_MAX)).toBe("triennial");
-		expect(classifyCompanySize(COMPANY_SIZE_ANNUAL_MIN - 1)).toBe("triennial");
-		expect(classifyCompanySize(COMPANY_SIZE_ANNUAL_MIN)).toBe("annual");
+		expect(classifyCompanySize(COMPANY_SIZE_VOLUNTARY_MAX)).toBe("mandatory");
+		expect(classifyCompanySize(COMPANY_SIZE_ANNUAL_MIN - 1)).toBe("mandatory");
+		expect(classifyCompanySize(COMPANY_SIZE_ANNUAL_MIN)).toBe(
+			"mandatory_with_compliance",
+		);
 	});
 
 	it("isIndicatorGRequired: annual regime flips at INDICATOR_G_ANNUAL_MIN (250)", () => {
@@ -222,10 +226,10 @@ describe("size boundaries (named domain constants)", () => {
 		expect(isTriennialYear(INDICATOR_G_TRIENNIAL_BASE_YEAR + 3)).toBe(true);
 	});
 
-	it("#3934 (CLOSED) — a workforce < 100 never triggers the 7th indicator", () => {
-		// Regression guard: 97 and 70 are below both COMPANY_SIZE_ANNUAL_MIN and
-		// INDICATOR_G_TRIENNIAL_MIN, so indicator G must never be required, even in
-		// a triennial year.
+	it("#3934 (CLOSED) — the 50-99 band does not trigger the 7th indicator before the 2030 down-extension", () => {
+		// Regression guard: 97 and 70 are in the mandatory 50-99 band, below
+		// INDICATOR_G_TRIENNIAL_MIN, so indicator G stays excluded in a pre-2030
+		// triennial year (the < 50 volunteering branch does not reach up here).
 		expect(isIndicatorGRequired(97, INDICATOR_G_TRIENNIAL_BASE_YEAR)).toBe(
 			false,
 		);
@@ -236,13 +240,12 @@ describe("size boundaries (named domain constants)", () => {
 });
 
 describe("GIP workforce — single source for the obligations (#3929/#3962)", () => {
-	it("company absent from the GIP file (null) → no obligation", () => {
+	it("company absent from the GIP file (null) → no legal obligation but a 7-indicator voluntary declaration", () => {
 		const workforce = getObligationWorkforce(null);
 		expect(workforce).toBe(0);
+		// Obligation predicates stay false: a company with no GIP workforce owes
+		// nothing (no CSE, no compliance process).
 		expect(isCseRequired(workforce)).toBe(false);
-		expect(
-			isIndicatorGRequired(workforce, INDICATOR_G_TRIENNIAL_BASE_YEAR),
-		).toBe(false);
 		expect(
 			isComplianceProcessRequired({
 				workforce,
@@ -250,6 +253,11 @@ describe("GIP workforce — single source for the obligations (#3929/#3962)", ()
 				gap: GAP_ALERT_THRESHOLD,
 			}),
 		).toBe(false);
+		// But indicator G is still part of the funnel: a workforce-0 declarant is in
+		// the voluntary (< 50) tier, which carries all 7 indicators (#4043).
+		expect(
+			isIndicatorGRequired(workforce, INDICATOR_G_TRIENNIAL_BASE_YEAR),
+		).toBe(true);
 	});
 
 	it("decimal GIP workforce: thresholds compare the exact value, never the display rounding", () => {

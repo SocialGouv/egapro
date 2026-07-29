@@ -469,7 +469,9 @@ describe("GET /api/v1/export/declarations", () => {
 		const body = await response.json();
 		expect(body.Nombre).toBe(1);
 		expect(body.Declarations[0].Effectif).toBeNull();
-		expect(body.Declarations[0].Indicateur_G_requis).toBe(false);
+		// Workforce-0 (absent from GIP) is in the voluntary (< 50) tier → 7-indicator
+		// volunteering, so indicator G is required (#4043).
+		expect(body.Declarations[0].Indicateur_G_requis).toBe(true);
 	});
 
 	it("should expose CSE opinion declarationNumber alongside type", async () => {

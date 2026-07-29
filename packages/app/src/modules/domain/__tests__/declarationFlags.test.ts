@@ -54,6 +54,23 @@ describe("isComplianceProcessRequired", () => {
 			}),
 		).toBe(true);
 	});
+
+	// Rule 3 lock (#4043): a company under 100 employees owes no gap-alert
+	// obligation even with a computed indicator G and a gap at the threshold. The
+	// < 50 and 50-99 bands now file 7 / 6 indicators, but the compliance package
+	// still gates at COMPANY_SIZE_ANNUAL_MIN — unchanged behavior, pinned so the
+	// arbitrage does not silently pull it below 100.
+	it("stays false under 100 employees even with a computed indicator G at the gap threshold (rule 3)", () => {
+		for (const workforce of [30, 75]) {
+			expect(
+				isComplianceProcessRequired({
+					workforce,
+					hasIndicatorG: true,
+					gap: GAP_ALERT_THRESHOLD,
+				}),
+			).toBe(false);
+		}
+	});
 });
 
 describe("isCseOpinionRequired", () => {
@@ -77,6 +94,12 @@ describe("isCseOpinionRequired", () => {
 				hasCse: true,
 			}),
 		).toBe(false);
+	});
+
+	it("owes no opinion for a 50-99 company with a CSE (rule 3, #4043)", () => {
+		// The 50-99 band is mandatory yearly since the arbitrage, but the CSE
+		// opinion is a compliance-package obligation that still starts at 100.
+		expect(isCseOpinionRequired({ workforce: 75, hasCse: true })).toBe(false);
 	});
 
 	it("is true at the exact threshold", () => {
