@@ -713,8 +713,11 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 // own indicator G years, and neither owes anything when a gap ≥ 5 % shows up — the
 // compliance process, the second declaration, the joint evaluation and the CSE
 // opinion all stay gated at 100 salariés (Excel sheet "<50 et 50-99").
-// `hasCse` is left unset: the question is never asked below 100. Each describe
-// restores the file's exit state (GIP >= 250 + hasCse true) for the specs after it.
+// `hasCse` starts unset, as the question is never asked below 100 — but the CSE
+// probe of [CAS-14] declares one on purpose: `isCseOpinionRequired` is an AND of
+// the effectif and the CSE, so leaving `hasCse` unset would keep that probe green
+// even with no threshold at all, and [CAS-01] already covers the absent CSE. Each
+// describe restores the file's exit state (GIP >= 250 + hasCse true) after it.
 
 test.describe("[CAS-13] 7 indicators + GIP 30 (< 50) + no gap → direct completion", () => {
 	test.beforeAll(async () => {
@@ -795,14 +798,32 @@ test.describe("[CAS-14] 7 indicators + GIP 30 (< 50) + gap ≥ 5 % → no obliga
 			page.getByText(/Votre parcours .* est (désormais )?terminé/),
 		).toBeVisible();
 
-		// Neither the compliance path choice (which carries the second declaration
-		// and the joint evaluation) nor the CSE opinion funnel is reachable, even by
-		// URL: below 100 salariés a gap ≥ 5 % triggers none of them.
+		// The compliance path choice, which carries the second declaration and the
+		// joint evaluation, is unreachable even by URL: below 100 salariés a gap
+		// ≥ 5 % opens none of them.
 		await page.goto(COMPLIANCE_PATH);
 		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
 
-		await page.goto("/avis-cse/etape/1");
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+		// Declaring a CSE leaves the effectif as the only unmet term of
+		// `isCseOpinionRequired`, so this probe fails if the 100-salarié gate goes
+		// away — which an unset `hasCse` would have hidden.
+		await setCompanyHasCse(true);
+		const cseFunnelResponse = await page.goto("/avis-cse/etape/1");
+
+		// Read off the settled navigation instead of polling for the URL: a gate
+		// bouncing this company back into /avis-cse loops, and must surface as a
+		// redirect error or as the funnel pathname, never as a silent timeout.
+		expect(cseFunnelResponse?.ok()).toBe(true);
+		expect(new URL(page.url()).pathname).toBe(CONFIRMATION_PATH);
+		await expect(
+			page.getByRole("heading", {
+				name: "Transmettre l'avis ou les avis du CSE",
+			}),
+		).toHaveCount(0);
+		await expect(page.locator("#first-decl-accuracy-favorable")).toHaveCount(0);
+		await expect(
+			page.getByText(/Votre parcours .* est (désormais )?terminé/),
+		).toBeVisible();
 	});
 });
 
