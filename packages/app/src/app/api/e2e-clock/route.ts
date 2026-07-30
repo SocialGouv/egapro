@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { env } from "~/env.js";
-import { e2eClockSchema } from "~/modules/declaration/schemas";
+import { e2eClockSchema } from "~/modules/declaration";
 import { getCurrentYear } from "~/modules/domain";
 
 /**
