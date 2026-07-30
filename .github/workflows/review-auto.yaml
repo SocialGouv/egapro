@@ -14,6 +14,9 @@ concurrency:
 
 jobs:
   build-app:
+    permissions:
+      contents: read
+      id-token: write # OIDC identity for buildkit-operator /route auth
     environment: build-review-auto
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
@@ -47,21 +50,25 @@ jobs:
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
 
-      - name: 📦 Build and push Docker image for app
-        uses: socialgouv/workflows/actions/buildkit@v1
+      - name: 🔑 Login to registry
+        uses: docker/login-action@v4
         with:
+          registry: ${{ vars.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: 📦 Build and push Docker image for app
+        uses: socialgouv/buildkit-operator@v1
+        with:
+          buildd-url: ${{ vars.BUILDKIT_OPERATOR_BUILDD_URL }}
+          gateway-host: ${{ vars.BUILDKIT_OPERATOR_GATEWAY_HOST }}
+          ca: ${{ secrets.BUILDKIT_OPERATOR_CA }}
+          cert: ${{ secrets.BUILDKIT_OPERATOR_CERT }}
+          key: ${{ secrets.BUILDKIT_OPERATOR_KEY }}
           context: "."
-          dockerfile: "packages/app/Dockerfile"
+          file: "packages/app/Dockerfile"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          registry: "${{ vars.REGISTRY_URL }}"
-          registry-username: "${{ secrets.REGISTRY_USERNAME }}"
-          registry-password: "${{ secrets.REGISTRY_PASSWORD }}"
-          buildkit-cert-ca: "${{ secrets.BUILDKIT_CERT_CA }}"
-          buildkit-cert: "${{ secrets.BUILDKIT_CERT }}"
-          buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
-          buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
-          buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
           build-args: |
             NEXT_PUBLIC_API_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr/api
             NEXT_PUBLIC_API_V2_URL=https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr/apiv2
@@ -75,8 +82,12 @@ jobs:
             SENTRY_RELEASE=${{ github.sha }}
           secrets: |
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
+          push: true
 
   build-api:
+    permissions:
+      contents: read
+      id-token: write # OIDC identity for buildkit-operator /route auth
     environment: build-review-auto
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
@@ -101,22 +112,30 @@ jobs:
             type=sha,prefix=sha-,format=long,priority=890
             type=ref,event=branch,priority=600
 
-      - name: 📦 Build and push Docker image for api
-        uses: socialgouv/workflows/actions/buildkit@v1
+      - name: 🔑 Login to registry
+        uses: docker/login-action@v4
         with:
+          registry: ${{ vars.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: 📦 Build and push Docker image for api
+        uses: socialgouv/buildkit-operator@v1
+        with:
+          buildd-url: ${{ vars.BUILDKIT_OPERATOR_BUILDD_URL }}
+          gateway-host: ${{ vars.BUILDKIT_OPERATOR_GATEWAY_HOST }}
+          ca: ${{ secrets.BUILDKIT_OPERATOR_CA }}
+          cert: ${{ secrets.BUILDKIT_OPERATOR_CERT }}
+          key: ${{ secrets.BUILDKIT_OPERATOR_KEY }}
           context: "packages/api"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          registry: "${{ vars.REGISTRY_URL }}"
-          registry-username: "${{ secrets.REGISTRY_USERNAME }}"
-          registry-password: "${{ secrets.REGISTRY_PASSWORD }}"
-          buildkit-cert-ca: "${{ secrets.BUILDKIT_CERT_CA }}"
-          buildkit-cert: "${{ secrets.BUILDKIT_CERT }}"
-          buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
-          buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
-          buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
+          push: true
 
   build-nginx:
+    permissions:
+      contents: read
+      id-token: write # OIDC identity for buildkit-operator /route auth
     environment: build-review-auto
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
@@ -141,22 +160,30 @@ jobs:
             type=sha,prefix=sha-,format=long,priority=890
             type=ref,event=branch,priority=600
 
-      - name: 📦 Build and push Docker image for nginx
-        uses: socialgouv/workflows/actions/buildkit@v1
+      - name: 🔑 Login to registry
+        uses: docker/login-action@v4
         with:
+          registry: ${{ vars.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: 📦 Build and push Docker image for nginx
+        uses: socialgouv/buildkit-operator@v1
+        with:
+          buildd-url: ${{ vars.BUILDKIT_OPERATOR_BUILDD_URL }}
+          gateway-host: ${{ vars.BUILDKIT_OPERATOR_GATEWAY_HOST }}
+          ca: ${{ secrets.BUILDKIT_OPERATOR_CA }}
+          cert: ${{ secrets.BUILDKIT_OPERATOR_CERT }}
+          key: ${{ secrets.BUILDKIT_OPERATOR_KEY }}
           context: "packages/nginx"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          registry: "${{ vars.REGISTRY_URL }}"
-          registry-username: "${{ secrets.REGISTRY_USERNAME }}"
-          registry-password: "${{ secrets.REGISTRY_PASSWORD }}"
-          buildkit-cert-ca: "${{ secrets.BUILDKIT_CERT_CA }}"
-          buildkit-cert: "${{ secrets.BUILDKIT_CERT }}"
-          buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
-          buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
-          buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
+          push: true
 
   build-files:
+    permissions:
+      contents: read
+      id-token: write # OIDC identity for buildkit-operator /route auth
     environment: build-review-auto
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
@@ -181,20 +208,25 @@ jobs:
             type=sha,prefix=sha-,format=long,priority=890
             type=ref,event=branch,priority=600
 
-      - name: 📦 Build and push Docker image for files
-        uses: socialgouv/workflows/actions/buildkit@v1
+      - name: 🔑 Login to registry
+        uses: docker/login-action@v4
         with:
+          registry: ${{ vars.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: 📦 Build and push Docker image for files
+        uses: socialgouv/buildkit-operator@v1
+        with:
+          buildd-url: ${{ vars.BUILDKIT_OPERATOR_BUILDD_URL }}
+          gateway-host: ${{ vars.BUILDKIT_OPERATOR_GATEWAY_HOST }}
+          ca: ${{ secrets.BUILDKIT_OPERATOR_CA }}
+          cert: ${{ secrets.BUILDKIT_OPERATOR_CERT }}
+          key: ${{ secrets.BUILDKIT_OPERATOR_KEY }}
           context: "packages/files"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          registry: "${{ vars.REGISTRY_URL }}"
-          registry-username: "${{ secrets.REGISTRY_USERNAME }}"
-          registry-password: "${{ secrets.REGISTRY_PASSWORD }}"
-          buildkit-cert-ca: "${{ secrets.BUILDKIT_CERT_CA }}"
-          buildkit-cert: "${{ secrets.BUILDKIT_CERT }}"
-          buildkit-cert-key: "${{ secrets.BUILDKIT_CERT_KEY }}"
-          buildkit-svc-count: ${{ vars.BUILDKIT_SVC_COUNT }}
-          buildkit-daemon-address: ${{ vars.BUILDKIT_DAEMON_ADDRESS }}
+          push: true
 
   kontinuous:
     needs: [build-app, build-api, build-nginx, build-files]
