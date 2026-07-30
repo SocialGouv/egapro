@@ -5,7 +5,10 @@ import {
 	resetGipWorkforce,
 	setGipWorkforce,
 } from "./helpers/db";
-import { submitStepsThroughQuartiles } from "./helpers/declaration-flows";
+import {
+	submitFromStep6Recap,
+	submitStepsThroughQuartiles,
+} from "./helpers/declaration-flows";
 
 // Render-structure assertions are covered by the step component tests in declaration-remuneration/**/__tests__.
 
@@ -239,12 +242,7 @@ test.describe("Declaration workflow", () => {
 	test("step 6 submit leaves declaration page", async ({ page }) => {
 		await goToStep(page, 6);
 
-		// Click the "Suivant" submit button to open the confirmation modal
-		await page.getByRole("button", { name: "Suivant" }).click();
-
-		// Check the certification checkbox (click on the label, as DSFR checkbox label intercepts pointer events)
-		await page.getByText(/Je certifie/).click();
-		await page.getByRole("button", { name: "Valider" }).click();
+		await submitFromStep6Recap(page);
 
 		// After submission, compliance path kicks in. Destination depends on hasCse
 		// and gap state — exact routing is tested in compliance.e2e.ts.
@@ -297,11 +295,19 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 			).toHaveCount(0);
 		});
 
-		test("the funnel drops the indicator G step", async ({ page }) => {
+		// #4043: absent from the GIP file → obligation workforce 0 → voluntary tier,
+		// which declares all 7 indicators every year. Step 5 is therefore presented
+		// (it used to be skipped), and the funnel keeps its 6 steps.
+		test("the funnel keeps the indicator G step", async ({ page }) => {
 			await page.goto("/declaration-remuneration/etape/5");
-			await page.waitForURL("**/declaration-remuneration/etape/6");
 
-			await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/5$/);
+			await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
+			await expect(
+				page.getByRole("heading", {
+					name: /Écart de rémunération par catégories de salariés/,
+				}),
+			).toBeVisible();
 		});
 	});
 

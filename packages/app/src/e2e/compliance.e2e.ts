@@ -17,6 +17,8 @@ import {
 import {
 	completeDeclaration,
 	reachStep6ComplianceRecap,
+	reachStep6Recap,
+	submitFromStep6Recap,
 	submitStepsThroughQuartiles,
 } from "./helpers/declaration-flows";
 
@@ -535,9 +537,7 @@ test.describe("[CAS-01-6IND] Path 14: 6 indicators (no G) + no hasCse → direct
 		await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
 
 		// Submit — no indicator G and no CSE → demarche completed directly
-		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.getByText(/Je certifie/).click();
-		await page.getByRole("button", { name: "Valider" }).click();
+		await submitFromStep6Recap(page);
 		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
 		await expect(
 			page.getByText(/Votre parcours .* est (désormais )?terminé/),
@@ -564,9 +564,7 @@ test.describe("[CAS-02-6IND] Path 15: 6 indicators (no G) + hasCse → /avis-cse
 		await page.waitForURL("**/declaration-remuneration/etape/6");
 
 		// Submit — no indicator G but a CSE → straight to the CSE opinion
-		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.getByText(/Je certifie/).click();
-		await page.getByRole("button", { name: "Valider" }).click();
+		await submitFromStep6Recap(page);
 		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
 
 		await fillCseStep1(page);
@@ -696,6 +694,138 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 
 		await expect(
 			page.getByText("Transmettre l'avis du CSE", { exact: true }),
+		).toBeVisible();
+	});
+});
+
+// === GROUP I: tranches < 100 — the gap ≥ 5 % obligations stop at 100 salariés ===
+// Arbitrage 2026-07 (#4043, cahier de tests §6): the voluntary tier (< 50) declares
+// all 7 indicators every year, the 50-99 tier declares the 6 first ones outside its
+// own indicator G years, and neither owes anything when a gap ≥ 5 % shows up — the
+// compliance process, the second declaration, the joint evaluation and the CSE
+// opinion all stay gated at 100 salariés (Excel sheet "<50 et 50-99").
+// `hasCse` is left unset: the question is never asked below 100. Each describe
+// restores the file's exit state (GIP >= 250 + hasCse true) for the specs after it.
+
+test.describe("[CAS-13] 7 indicators + GIP 30 (< 50) + no gap → direct completion", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setGipWorkforce(30);
+		await setCompanyHasCse(null);
+	});
+
+	test.afterAll(async () => {
+		await resetGipWorkforce();
+		await setCompanyHasCse(true);
+	});
+
+	test("declares the 7 indicators and completes the démarche directly", async ({
+		page,
+	}) => {
+		test.slow(); // 6-step declaration + submission
+		await reachStep6Recap(page, { hasGap: false });
+
+		// Step 5 was presented: 6-step funnel + indicator G block on the recap.
+		// `exact` scopes to the stepper — the Next.js route announcer repeats the
+		// label followed by the step title.
+		await expect(
+			page.getByText("Étape 6 sur 6", { exact: true }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("heading", {
+				name: "Indicateurs par catégorie de salariés",
+			}),
+		).toBeVisible();
+
+		await submitFromStep6Recap(page);
+		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+		await expect(
+			page.getByText(/Votre parcours .* est (désormais )?terminé/),
+		).toBeVisible();
+	});
+});
+
+test.describe("[CAS-14] 7 indicators + GIP 30 (< 50) + gap ≥ 5 % → no obligation triggered", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setGipWorkforce(30);
+		await setCompanyHasCse(null);
+	});
+
+	test.afterAll(async () => {
+		await resetGipWorkforce();
+		await setCompanyHasCse(true);
+	});
+
+	test("the recap proposes no compliance action despite the gap", async ({
+		page,
+	}) => {
+		test.slow(); // 6-step declaration up to the recap
+		await reachStep6ComplianceRecap(page);
+
+		// Same gap inputs that render the "Prochaines étapes" box at 200 salariés
+		// (GROUP H): below 100 nothing is due, so the box is absent altogether.
+		await expect(
+			page.getByRole("heading", { name: "Prochaines étapes" }),
+		).toHaveCount(0);
+		await expect(
+			page.getByText("Écarts détectés", { exact: true }),
+		).toHaveCount(0);
+		await expect(
+			page.getByRole("heading", { name: "Actions à engager" }),
+		).toHaveCount(0);
+	});
+
+	test("submits into a direct completion, with every compliance surface out of reach", async ({
+		page,
+	}) => {
+		await page.goto("/declaration-remuneration/etape/6");
+		await submitFromStep6Recap(page);
+		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+		await expect(
+			page.getByText(/Votre parcours .* est (désormais )?terminé/),
+		).toBeVisible();
+
+		// Neither the compliance path choice (which carries the second declaration
+		// and the joint evaluation) nor the CSE opinion funnel is reachable, even by
+		// URL: below 100 salariés a gap ≥ 5 % triggers none of them.
+		await page.goto(COMPLIANCE_PATH);
+		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+
+		await page.goto("/avis-cse/etape/1");
+		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+	});
+});
+
+test.describe("[CAS-13-6IND] 6 indicators + GIP 75 (50-99) → direct completion", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setGipWorkforce(75);
+		await setCompanyHasCse(null);
+	});
+
+	test.afterAll(async () => {
+		await resetGipWorkforce();
+		await setCompanyHasCse(true);
+	});
+
+	test("submits the 5-step funnel and completes the démarche directly", async ({
+		page,
+	}) => {
+		test.slow(); // 5-step declaration + submission
+		// Outside the 50-99 tier's own indicator G years, step 5 is out of reach
+		// even by URL — unlike the < 50 tier, which always carries it.
+		await page.goto("/declaration-remuneration/etape/5");
+		await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/6$/);
+
+		await submitStepsThroughQuartiles(page);
+		await page.waitForURL("**/declaration-remuneration/etape/6");
+		await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+
+		await submitFromStep6Recap(page);
+		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+		await expect(
+			page.getByText(/Votre parcours .* est (désormais )?terminé/),
 		).toBeVisible();
 	});
 });

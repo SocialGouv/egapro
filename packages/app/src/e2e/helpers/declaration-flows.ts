@@ -221,6 +221,17 @@ export async function reachStep6ComplianceRecap(page: Page) {
 }
 
 /**
+ * Certify and submit from the step 6 recap, leaving the destination to the caller:
+ * post-submission routing depends on the workforce, the gap and the CSE.
+ */
+export async function submitFromStep6Recap(page: Page) {
+	await page.getByRole("button", { name: "Suivant" }).click();
+	// Click the label, as the DSFR checkbox label intercepts pointer events.
+	await page.getByText(/Je certifie/).click();
+	await page.getByRole("button", { name: "Valider" }).click();
+}
+
+/**
  * Fill and submit a complete declaration through all 6 steps.
  * Controls whether the employee category data produces a pay gap ≥ 5%.
  * Requires a company subject to indicator G (step 5), i.e. the suite baseline workforce.
@@ -230,12 +241,7 @@ export async function completeDeclaration(
 	options: { hasGap: boolean },
 ) {
 	await reachStep6Recap(page, options);
-
-	// Step 6: Submit declaration
-	await page.getByRole("button", { name: "Suivant" }).click();
-	// Certification modal
-	await page.getByText(/Je certifie/).click();
-	await page.getByRole("button", { name: "Valider" }).click();
+	await submitFromStep6Recap(page);
 
 	// Wait for post-submission routing (compliance path or CSE or confirmation)
 	await page.waitForURL(
