@@ -5,21 +5,26 @@ import {
 	getPostComplianceDestination,
 } from "../complianceNavigation";
 
+const CONFIRMATION_PATH =
+	"/declaration-remuneration/parcours-conformite/confirmation";
+const CSE_OPINION_PATH = "/avis-cse";
+
 describe("getPostComplianceDestination", () => {
-	it("returns /avis-cse when hasCse is true", () => {
-		expect(getPostComplianceDestination(true)).toBe("/avis-cse");
+	it("sends a démarche that still owes an opinion to the CSE funnel", () => {
+		expect(getPostComplianceDestination(true)).toBe(CSE_OPINION_PATH);
 	});
 
-	it("returns confirmation path when hasCse is false", () => {
-		expect(getPostComplianceDestination(false)).toBe(
-			"/declaration-remuneration/parcours-conformite/confirmation",
-		);
+	it("sends a démarche that owes no opinion to the confirmation page", () => {
+		expect(getPostComplianceDestination(false)).toBe(CONFIRMATION_PATH);
 	});
 
-	it("returns confirmation path when hasCse is null", () => {
-		expect(getPostComplianceDestination(null)).toBe(
-			"/declaration-remuneration/parcours-conformite/confirmation",
-		);
+	// The /avis-cse layout redirects here once it establishes no opinion is due,
+	// so any destination under /avis-cse makes that layout redirect onto itself.
+	it("never sends a démarche that owes no opinion into the CSE funnel", () => {
+		const destination = getPostComplianceDestination(false);
+
+		expect(destination).not.toBe(CSE_OPINION_PATH);
+		expect(destination.startsWith(`${CSE_OPINION_PATH}/`)).toBe(false);
 	});
 });
 
@@ -90,11 +95,25 @@ describe("getCseOpinionPreviousHref", () => {
 });
 
 describe("getCurrentStageHref", () => {
-	// Per-status destinations live in fsmMirrors.conformance.test.ts (#3975);
-	// only the null status, outside DECLARATION_FSM_STATUSES, is owned here.
+	// Engine-stage-driven destinations live in fsmMirrors.conformance.test.ts
+	// (#3975). Owned here: the null status, outside DECLARATION_FSM_STATUSES, and
+	// the terminal status, whose destination branches on a caller-supplied flag
+	// the engine does not model.
 	it("falls back to the compliance path for a declaration without FSM projection (null status)", () => {
 		expect(getCurrentStageHref(null, true)).toBe(
 			"/declaration-remuneration/parcours-conformite",
+		);
+	});
+
+	it("keeps a completed démarche that still owes an opinion on the CSE funnel", () => {
+		expect(getCurrentStageHref("demarche_completed", true)).toBe(
+			CSE_OPINION_PATH,
+		);
+	});
+
+	it("sends a completed démarche that owes no opinion to the confirmation page", () => {
+		expect(getCurrentStageHref("demarche_completed", false)).toBe(
+			CONFIRMATION_PATH,
 		);
 	});
 });

@@ -1,6 +1,10 @@
 import { redirect } from "next/navigation";
 
-import { formatLongDate } from "~/modules/domain";
+import {
+	formatLongDate,
+	getObligationWorkforce,
+	isCseOpinionRequired,
+} from "~/modules/domain";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
 
@@ -29,10 +33,13 @@ export async function JointEvaluationPage() {
 
 	return (
 		<JointEvaluationForm
+			cseOpinionRequired={isCseOpinionRequired({
+				workforce: getObligationWorkforce(company.gipWorkforce),
+				hasCse: company.hasCse,
+			})}
 			declarationDate={declarationDate}
 			declarationSiren={data.declaration.siren}
 			declarationYear={currentYear}
-			hasCse={company.hasCse}
 			jointEvaluationDeadline={campaignDeadlines.decl1JointEvaluationDeadline}
 		/>
 	);

@@ -11,15 +11,12 @@ const SECOND_DECLARATION_RECAP_PATH = `${COMPLIANCE_PATH}/etape/3`;
 const CSE_OPINION_PATH = "/avis-cse";
 const CORRECTIVE_ACTIONS_FIRST_STEP_PATH = `${COMPLIANCE_PATH}/etape/1`;
 
-/**
- * Returns the destination URL after completing a compliance path step,
- * based on whether the company has a CSE (works council).
- *
- * - Has CSE → redirect to CSE opinion page
- * - No CSE or unknown → redirect to the compliance confirmation page
- */
-export function getPostComplianceDestination(hasCse: boolean | null): string {
-	return hasCse === true ? "/avis-cse" : COMPLIANCE_CONFIRMATION_PATH;
+// Takes the decision, not its inputs: on `hasCse` alone this sent a company
+// under 100 salariés into /avis-cse, whose layout bounced it straight back here.
+export function getPostComplianceDestination(
+	cseOpinionRequired: boolean,
+): string {
+	return cseOpinionRequired ? CSE_OPINION_PATH : COMPLIANCE_CONFIRMATION_PATH;
 }
 
 type CseOpinionPreviousContext = {
@@ -55,7 +52,7 @@ type CseOpinionPreviousContext = {
  */
 export function getCurrentStageHref(
 	status: DeclarationFsmStatus | null,
-	hasCse: boolean | null,
+	cseOpinionRequired: boolean,
 ): string {
 	if (status === null) {
 		return COMPLIANCE_PATH;
@@ -75,7 +72,7 @@ export function getCurrentStageHref(
 		case "awaiting_cse_opinion":
 			return CSE_OPINION_PATH;
 		case "demarche_completed":
-			return hasCse === true ? CSE_OPINION_PATH : COMPLIANCE_CONFIRMATION_PATH;
+			return getPostComplianceDestination(cseOpinionRequired);
 	}
 }
 

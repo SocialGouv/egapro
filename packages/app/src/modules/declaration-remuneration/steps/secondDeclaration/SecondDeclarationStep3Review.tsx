@@ -23,7 +23,6 @@ type Props = {
 	cseApplicable: boolean;
 	cseOpinionRequired: boolean;
 	declarationYear: number;
-	hasCse: boolean | null;
 	secondDeclarationCategories: EmployeeCategoryRow[];
 	siren: string;
 };
@@ -32,7 +31,6 @@ export function SecondDeclarationStep3Review({
 	cseApplicable,
 	cseOpinionRequired,
 	declarationYear,
-	hasCse,
 	secondDeclarationCategories,
 	siren,
 }: Props) {
@@ -54,7 +52,7 @@ export function SecondDeclarationStep3Review({
 			if (gapsExist) {
 				router.push(BASE_PATH);
 			} else {
-				router.push(getPostComplianceDestination(hasCse));
+				router.push(getPostComplianceDestination(cseOpinionRequired));
 			}
 		},
 	});

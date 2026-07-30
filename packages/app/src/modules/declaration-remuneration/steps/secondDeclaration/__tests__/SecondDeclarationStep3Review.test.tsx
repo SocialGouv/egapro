@@ -96,8 +96,6 @@ const noGapCategories: EmployeeCategoryRow[] = [
 	}),
 ];
 
-// Defaults mirror `isCseOpinionRequired(workforce, null)` → false: an unknown
-// CSE flag requires no opinion, exactly like an explicit `false`.
 function renderStep3(
 	overrides: Partial<ComponentProps<typeof SecondDeclarationStep3Review>> = {},
 ) {
@@ -106,7 +104,6 @@ function renderStep3(
 			cseApplicable
 			cseOpinionRequired={false}
 			declarationYear={2025}
-			hasCse={null}
 			secondDeclarationCategories={mockCategories}
 			siren="532847196"
 			{...overrides}
@@ -266,7 +263,6 @@ describe("SecondDeclarationStep3Review", () => {
 	it("navigates to compliance path when gaps persist after submit", async () => {
 		renderStep3({
 			cseOpinionRequired: true,
-			hasCse: true,
 			secondDeclarationCategories: [
 				makeCategory({ annualBaseWomen: "1000", annualBaseMen: "2000" }),
 			],
@@ -280,10 +276,9 @@ describe("SecondDeclarationStep3Review", () => {
 		);
 	});
 
-	it("navigates to avis-cse when no gaps and hasCse is true", async () => {
+	it("navigates to avis-cse when no gaps remain and a CSE opinion is due", async () => {
 		renderStep3({
 			cseOpinionRequired: true,
-			hasCse: true,
 			secondDeclarationCategories: noGapCategories,
 		});
 
@@ -293,9 +288,9 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
 	});
 
-	it("navigates to confirmation when no gaps and no CSE", async () => {
+	it("navigates to confirmation when no gaps remain and no CSE opinion is due", async () => {
 		renderStep3({
-			hasCse: false,
+			cseOpinionRequired: false,
 			secondDeclarationCategories: noGapCategories,
 		});
 
@@ -316,7 +311,6 @@ describe("SecondDeclarationStep3Review", () => {
 		it("hides the CSE consultation section but keeps gap actions and the CSE update button when cseOpinionRequired is false", () => {
 			renderStep3({
 				cseOpinionRequired: false,
-				hasCse: false,
 				secondDeclarationCategories: highGapCategories,
 			});
 
@@ -341,22 +335,9 @@ describe("SecondDeclarationStep3Review", () => {
 			).toBeInTheDocument();
 		});
 
-		it("hides the CSE consultation section when the CSE flag is unknown", () => {
-			renderStep3({
-				cseOpinionRequired: false,
-				hasCse: null,
-				secondDeclarationCategories: highGapCategories,
-			});
-
-			expect(
-				screen.queryByRole("heading", { name: "Informer et consulter le CSE" }),
-			).not.toBeInTheDocument();
-		});
-
 		it("shows the CSE consultation section when cseOpinionRequired is true", () => {
 			renderStep3({
 				cseOpinionRequired: true,
-				hasCse: true,
 				secondDeclarationCategories: highGapCategories,
 			});
 
