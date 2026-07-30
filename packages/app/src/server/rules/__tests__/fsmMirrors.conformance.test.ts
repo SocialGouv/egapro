@@ -87,8 +87,8 @@ describe("mirror conformance — engine states (non-terminal)", () => {
 		const expected = STAGE_SCREEN[String(state.stage)];
 		if (!expected)
 			throw new Error(`No screen mapping for stage ${state.stage}`);
-		// hasCse is only consulted by the nav mirror in the terminal state, so a
-		// non-terminal state must resolve to the same screen for both hasCse values.
+		// cseOpinionRequired is only consulted by the nav mirror in the terminal
+		// state, so a non-terminal state resolves to the same screen either way.
 		expect(getCurrentStageHref(state.id, true)).toBe(expected.screen);
 		expect(getCurrentStageHref(state.id, false)).toBe(expected.screen);
 		const decl = makeDeclaration({ fsmStatus: state.id });
@@ -104,7 +104,7 @@ describe("mirror conformance — engine transition destinations", () => {
 		const to = transition.to;
 		if (to === "demarche_completed") {
 			// Terminal state: only the healthy hasSubmittedCseOpinion:true branch is asserted here —
-			// the full hasCse × hasSubmittedCseOpinion matrix, incl. the no-CSE closed branch (#3939), lives in the dedicated describe below.
+			// the full cseOpinionRequired × hasSubmittedCseOpinion matrix, incl. the no-opinion closed branch (#3939), lives in the dedicated describe below.
 			expect(getCurrentStageHref(to, true)).toBe(CSE);
 			expect(getCurrentStageHref(to, false)).toBe(CONFIRMATION);
 			expect(
@@ -141,8 +141,8 @@ describe("exhaustiveness — every FSM status is covered by both mirrors", () =>
 	});
 });
 
-describe("demarche_completed — mirror coherence × (hasCse × hasSubmittedCseOpinion)", () => {
-	it('with CSE, opinion not yet deposited: panel "cse" and nav → /avis-cse (coherent)', () => {
+describe("demarche_completed — mirror coherence × (cseOpinionRequired × hasSubmittedCseOpinion)", () => {
+	it('opinion due, not yet deposited: panel "cse" and nav → /avis-cse (coherent)', () => {
 		const decl = makeDeclaration({
 			fsmStatus: "demarche_completed",
 			hasSubmittedCseOpinion: false,
@@ -153,7 +153,7 @@ describe("demarche_completed — mirror coherence × (hasCse × hasSubmittedCseO
 		expect(getCurrentStageHref("demarche_completed", true)).toBe(CSE);
 	});
 
-	it('with CSE, opinion deposited: panel "closed"; nav keeps /avis-cse (CSE deposit re-submittable)', () => {
+	it('opinion due and deposited: panel "closed"; nav keeps /avis-cse (CSE deposit re-submittable)', () => {
 		const decl = makeDeclaration({
 			fsmStatus: "demarche_completed",
 			hasSubmittedCseOpinion: true,
@@ -167,19 +167,20 @@ describe("demarche_completed — mirror coherence × (hasCse × hasSubmittedCseO
 		expect(getCurrentStageHref("demarche_completed", true)).toBe(CSE);
 	});
 
-	it('without CSE, opinion not deposited: the panel should be "closed", not "cse" (#3939)', () => {
+	it('no opinion due, none deposited: the panel should be "closed", not "cse" (#3939)', () => {
 		const decl = makeDeclaration({
 			fsmStatus: "demarche_completed",
 			hasSubmittedCseOpinion: false,
 		});
-		// The nav mirror is correct: a no-CSE company lands on /confirmation, never
-		// on the CSE page. computePanelVariant now consumes cseRequired (false by
-		// default in makeDeclaration) and returns "closed" for this case (#3939).
+		// The nav mirror is correct: a démarche owing no opinion lands on
+		// /confirmation, never on the CSE page. computePanelVariant now consumes
+		// cseRequired (false by default in makeDeclaration) and returns "closed"
+		// for this case (#3939).
 		expect(getCurrentStageHref("demarche_completed", false)).toBe(CONFIRMATION);
 		expect(computePanelVariant(decl)).toBe("closed");
 	});
 
-	it('without CSE, opinion "deposited": panel "closed" and nav → /confirmation (coherent, démarche closed)', () => {
+	it('no opinion due, one "deposited": panel "closed" and nav → /confirmation (coherent, démarche closed)', () => {
 		const decl = makeDeclaration({
 			fsmStatus: "demarche_completed",
 			hasSubmittedCseOpinion: true,

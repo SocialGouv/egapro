@@ -20,18 +20,18 @@ import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 const EMPTY_DB_VALUES = {} as Record<string, never>;
 
 type Props = {
+	cseOpinionRequired: boolean;
 	declarationDate: string;
 	declarationSiren: string;
 	declarationYear: number;
-	hasCse: boolean | null;
 	jointEvaluationDeadline: Date;
 };
 
 export function JointEvaluationForm({
+	cseOpinionRequired,
 	declarationDate,
 	declarationSiren,
 	declarationYear,
-	hasCse,
 	jointEvaluationDeadline,
 }: Props) {
 	const router = useRouter();
@@ -58,10 +58,10 @@ export function JointEvaluationForm({
 		// recorded and the "Mon espace" panel + table reflect the new step.
 		submitJointEvaluationMutation.mutate(undefined, {
 			onSettled: () => {
-				router.push(getPostComplianceDestination(hasCse));
+				router.push(getPostComplianceDestination(cseOpinionRequired));
 			},
 		});
-	}, [clearDraft, hasCse, router, submitJointEvaluationMutation]);
+	}, [clearDraft, cseOpinionRequired, router, submitJointEvaluationMutation]);
 
 	const {
 		closeModal,

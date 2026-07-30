@@ -1,5 +1,10 @@
 import Link from "next/link";
 import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
+import {
+	COMPANY_SIZE_ANNUAL_MIN,
+	getObligationWorkforce,
+	isCseRequired,
+} from "~/modules/domain";
 import { DsfrPictogram } from "~/modules/layout";
 import { FeedbackBanner } from "~/modules/shared/FeedbackBanner";
 import { api } from "~/trpc/server";
@@ -8,6 +13,16 @@ import common from "../shared/common.module.scss";
 export async function ComplianceConfirmation() {
 	const data = await api.declaration.getOrCreate();
 	const currentYear = data.declaration.year;
+	const company = await api.company.get({ siren: data.declaration.siren });
+
+	// Branches on the workforce, not on hasCse: below the threshold no opinion is
+	// ever due whatever the company answered, so that reason takes precedence —
+	// and above it, the only way to land here is having no CSE.
+	const noOpinionReason = isCseRequired(
+		getObligationWorkforce(company.gipWorkforce),
+	)
+		? "Votre entreprise ne dispose pas de CSE."
+		: `Votre effectif est inférieur à ${COMPANY_SIZE_ANNUAL_MIN} salariés.`;
 
 	return (
 		<div className={common.flexColumnGap2}>
@@ -28,8 +43,7 @@ export async function ComplianceConfirmation() {
 			</p>
 
 			<p className="fr-mb-0">
-				Votre entreprise ne dispose pas de CSE. Aucun avis CSE n&apos;est
-				requis.
+				{noOpinionReason} Aucun avis CSE n&apos;est requis.
 			</p>
 
 			<DownloadDeclarationPdfButton year={currentYear} />

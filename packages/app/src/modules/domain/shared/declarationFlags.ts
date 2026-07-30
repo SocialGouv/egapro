@@ -1,4 +1,4 @@
-import { COMPANY_SIZE_ANNUAL_MIN, GAP_ALERT_THRESHOLD } from "./constants";
+import { COMPANY_SIZE_ANNUAL_MIN } from "./constants";
 import {
 	type DeclarationStatusEvent,
 	hasSubmittedSecondDeclaration,
@@ -28,25 +28,24 @@ export function isCseOpinionRequired(input: CseOpinionRequiredInput): boolean {
 export type ComplianceProcessRequiredInput = {
 	workforce: number | null;
 	hasIndicatorG: boolean;
-	gap: number | null;
+	hasSignificantIndicatorGGap: boolean;
 };
 
 export function isComplianceProcessRequired(
 	input: ComplianceProcessRequiredInput,
 ): boolean {
 	if (input.workforce === null) return false;
-	if (input.gap === null) return false;
 	return (
 		input.workforce >= COMPANY_SIZE_ANNUAL_MIN &&
 		input.hasIndicatorG &&
-		Math.abs(input.gap) >= GAP_ALERT_THRESHOLD
+		input.hasSignificantIndicatorGGap
 	);
 }
 
 export type ComplianceProcessRevisionRequiredInput =
 	ComplianceProcessRequiredInput & {
 		events: ReadonlyArray<DeclarationStatusEvent>;
-		correctionGap: number | null;
+		hasSignificantCorrectionIndicatorGGap: boolean;
 	};
 
 export function isComplianceProcessRevisionRequired(
@@ -54,6 +53,5 @@ export function isComplianceProcessRevisionRequired(
 ): boolean {
 	if (!isComplianceProcessRequired(input)) return false;
 	if (!hasSubmittedSecondDeclaration(input.events)) return false;
-	if (input.correctionGap === null) return false;
-	return Math.abs(input.correctionGap) >= GAP_ALERT_THRESHOLD;
+	return input.hasSignificantCorrectionIndicatorGGap;
 }

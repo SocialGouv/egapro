@@ -2,9 +2,10 @@ name: 🎯 Promote test env
 
 # Deploys a published release (including `-alpha.N` prereleases) onto one of
 # the persistent test environments of the dev cluster (`rgaa-persist` /
-# `perf-persist`). The branch is force-pushed to the release tag, which
-# triggers the regular Review Auto build + Kontinuous deploy. Janitor never
-# collects these namespaces: the `*-persist` branch naming matches the
+# `perf-persist`). The Docker image is built from the release tag and pushed
+# as `app:<version>`, then deployed straight to the target namespace with
+# kontinuous — the pods reference a version like production, not a sha.
+# Janitor never collects these namespaces: the deployed ref matches the
 # kontinuous persist convention (plugins/contrib/lib/persist-convention.js).
 # Promotion is manual only — these environments never track a branch.
 
@@ -31,33 +32,21 @@ concurrency:
   group: ${{ github.workflow }}-${{ inputs.target }}
 
 jobs:
-  promote:
-    name: "Promote ${{ inputs.release }} → ${{ inputs.target }}-persist"
+  verify:
+    name: "✅ Verify ${{ inputs.release }} is a published release"
     runs-on: ubuntu-latest
     permissions:
-      contents: read # the push uses the token-bureau app token, not GITHUB_TOKEN
-      id-token: write # OIDC identity, required by token-bureau
+      contents: read
     steps:
-      - name: Get GitHub App Token
-        id: token
-        uses: SocialGouv/token-bureau@33e29a1f370f19f6c3d1680d6e7f0aa7c36a3847 # v0.0.7
-        with:
-          token-bureau-url: https://token-bureau.fabrique.social.gouv.fr
-          audience: socialgouv
-
-      # The app token (not GITHUB_TOKEN) is required for the push: pushes made
-      # with GITHUB_TOKEN do not trigger workflows, so Review Auto would never
-      # deploy the branch.
       - name: ⏬ Checkout code repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           fetch-tags: true
-          token: ${{ steps.token.outputs.token }}
 
       - name: ✅ Verify the tag is a published release
         env:
-          GH_TOKEN: ${{ steps.token.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.release }}
         run: |
           case "$TAG" in
@@ -80,15 +69,92 @@ jobs:
             exit 1
           fi
 
-      - name: 🚀 Point the branch to the release
+  build-app:
+    name: "📦 Build image app:${{ inputs.release }}"
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: build-review-auto
+    permissions:
+      contents: read
+      id-token: write # OIDC identity for buildkit-operator /route auth
+    steps:
+      - name: ⏬ Checkout code repository
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.release }}
+
+      - name: 📌 Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.REGISTRY_URL }}/${{ vars.PROJECT_NAME }}/${{ github.event.repository.name }}/app
+          tags: |
+            type=raw,value=${{ inputs.release }}
+
+      - name: 🔑 Login to registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ vars.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: 📦 Build and push Docker image for app
+        uses: socialgouv/buildkit-operator@v1
+        with:
+          buildd-url: ${{ vars.BUILDKIT_OPERATOR_BUILDD_URL }}
+          gateway-host: ${{ vars.BUILDKIT_OPERATOR_GATEWAY_HOST }}
+          ca: ${{ secrets.BUILDKIT_OPERATOR_CA }}
+          cert: ${{ secrets.BUILDKIT_OPERATOR_CERT }}
+          key: ${{ secrets.BUILDKIT_OPERATOR_KEY }}
+          context: "."
+          file: "packages/app/Dockerfile"
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_EGAPRO_ENV=dev
+            NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
+            NEXT_PUBLIC_MATOMO_URL=${{ vars.NEXT_PUBLIC_MATOMO_URL }}
+            NEXT_PUBLIC_MATOMO_SITE_ID=${{ vars.NEXT_PUBLIC_MATOMO_SITE_ID_DEV }}
+          secrets: |
+            sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
+            sentry_release=${{ inputs.release }}
+            app_version=${{ inputs.release }}
+          push: true
+
+  deploy:
+    name: "🐳 Deploy ${{ inputs.release }} → ${{ inputs.target }}-persist"
+    needs: build-app
+    runs-on: ubuntu-latest
+    environment: review-auto
+    permissions:
+      contents: read
+    steps:
+      # The manifests deployed must be the ones of the promoted version, so
+      # the checkout is done on the release tag, not on the workflow ref.
+      - name: ⏬ Checkout code repository
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.release }}
+          fetch-depth: 0
+
+      # KS_GIT_BRANCH drives the kontinuous naming: namespace
+      # `egapro-<target>-persist`, `kontinuous/ref` labels and the janitor
+      # persist exemption — without any real git branch involved.
+      # `inlineSet` is the final values override: it replaces the
+      # `persist-<sha>` image tag computed by the kontinuous dev defaults
+      # with the version tag built above.
+      - name: 🐳 Deploy on Kubernetes
+        uses: socialgouv/kontinuous/.github/actions/deploy-via-github@v1
         env:
-          TAG: ${{ inputs.release }}
-          TARGET_BRANCH: ${{ inputs.target }}-persist
-        run: |
-          # Dereference the (annotated, GPG-signed) tag to its commit — a tag
-          # object cannot be pushed onto a branch ref directly.
-          SHA=$(git rev-parse "refs/tags/$TAG^{commit}")
-          git push origin --force "$SHA:refs/heads/$TARGET_BRANCH"
+          KS_GIT_BRANCH: ${{ inputs.target }}-persist
+        with:
+          environment: dev
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+          inlineSet: "global.imageTag: ${{ inputs.release }}"
+          sentryDSN: ${{ secrets.KS_SENTRY_DSN }}
+          notifyWebhookUrl: ${{ secrets.KS_NOTIFY_MATTERMOST_WEBHOOK_URL }}
+          projectName: ${{ vars.KS_PROJECT_NAME }}
+          ciNamespace: ${{ vars.KS_CI_NAMESPACE }}
 
       - name: 🌐 Compute environment URL
         id: env
@@ -99,13 +165,13 @@ jobs:
       - name: 📝 Job summary
         env:
           TAG: ${{ inputs.release }}
-          TARGET_BRANCH: ${{ inputs.target }}-persist
+          TARGET: ${{ inputs.target }}-persist
           SUBDOMAIN: ${{ steps.env.outputs.subdomain }}
         run: |
           {
-            echo "## Promotion ${TAG} → ${TARGET_BRANCH}"
+            echo "## Promotion ${TAG} → ${TARGET}"
             echo ""
             echo "- Release : [\`${TAG}\`](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG})"
-            echo "- Déploiement : suivre le workflow **👓 Review Auto** sur la branche \`${TARGET_BRANCH}\`"
+            echo "- Image : \`app:${TAG}\`"
             echo "- URL : <https://${SUBDOMAIN}.ovh.fabrique.social.gouv.fr>"
           } >> "$GITHUB_STEP_SUMMARY"

@@ -837,7 +837,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarantPhone: "0612345678",
 				...nullIndicators,
 				globalAnnualMeanGap: "0.0455",
-				variableProportionWomen: "0.4523",
+				variableProportionWomen: "0.5625",
 				annualQuartile1ProportionWomen: "0.3333",
 			},
 		]);
@@ -854,7 +854,7 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.Indicateurs.A.Rem_globale_annuelle_moyenne_ecart).toBe(
 			"0.0455",
 		);
-		expect(decl.Indicateurs.E.Proportion_variable_F).toBe("0.4523");
+		expect(decl.Indicateurs.E.Proportion_variable_F).toBe("0.5625");
 		expect(
 			decl.Indicateurs.F.annuel.Quartile1_Rem_globale_annuelle_proportion_F,
 		).toBe("0.3333");
@@ -1116,6 +1116,8 @@ describe("GET /api/v1/export/declarations", () => {
 				variableAnnualMeanGap: "0.08",
 			},
 		]);
+		// Significant gap (≈9.1% > 5%) for the initial round → complianceProcessRequired=true
+		// Plus a correction entry with the same gap → complianceProcessRevisionRequired=true
 		mockFetchIndicatorG.mockResolvedValueOnce(
 			new Map([
 				[
@@ -1123,11 +1125,27 @@ describe("GET /api/v1/export/declarations", () => {
 					[
 						{
 							categoryName: "cadres",
+							source: null,
 							declarationType: "initial",
 							womenCount: 10,
-							menCount: 10,
-							annualBaseWomen: "100",
-							annualBaseMen: "100",
+							menCount: 11,
+							annualBaseWomen: "10000",
+							annualBaseMen: "11000",
+							annualVariableWomen: null,
+							annualVariableMen: null,
+							hourlyBaseWomen: null,
+							hourlyBaseMen: null,
+							hourlyVariableWomen: null,
+							hourlyVariableMen: null,
+						},
+						{
+							categoryName: "cadres",
+							source: null,
+							declarationType: "correction",
+							womenCount: 10,
+							menCount: 11,
+							annualBaseWomen: "10000",
+							annualBaseMen: "11000",
 							annualVariableWomen: null,
 							annualVariableMen: null,
 							hourlyBaseWomen: null,

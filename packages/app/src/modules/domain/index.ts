@@ -228,6 +228,11 @@ export {
 	NARROW_NBSP,
 	roundOneDecimal,
 } from "./shared/submissionRate";
+// Indicator E — variable pay proportion (beneficiaries over same-sex workforce)
+export {
+	formatVariablePayProportion,
+	variablePayProportion,
+} from "./shared/variablePay";
 // Workforce sums (quartiles, categories)
 export {
 	computeWorkforceTotal,

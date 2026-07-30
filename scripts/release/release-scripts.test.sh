@@ -71,23 +71,34 @@ c "feat: nouvelle fonctionnalité métier (#101)"
 c "chore(deps): bump lodash (#102)"
 c "feat(epic): #200 — Grande feature utilisateur (#103)"
 c "fix: correction du parcours (#104)"
+c "docs(tests): maintenir le cahier de tests (#105)"
+c "fix(release): ajuster le workflow (#106)"
 git -C "$REPO_DIR" tag v1
 
 printf '%s\n' '{"title":"feat: nouvelle fonctionnalité métier","labels":[],"closingIssuesReferences":[]}' >"$FIX/pr-101.json"
 printf '%s\n' '{"title":"chore(deps): bump lodash","labels":[{"name":"dependencies"}],"closingIssuesReferences":[]}' >"$FIX/pr-102.json"
 printf '%s\n' '{"title":"feat(epic): #200 — Grande feature utilisateur","labels":[],"closingIssuesReferences":[{"number":201},{"number":202}]}' >"$FIX/pr-103.json"
 printf '%s\n' '{"title":"fix: correction du parcours","labels":[],"closingIssuesReferences":[{"number":300}]}' >"$FIX/pr-104.json"
+# #105 is technical BY PR TITLE (docs:) but closes a human-worded issue — the
+# exact regression of issue #4023: filtering only the issue title let it through.
+printf '%s\n' '{"title":"docs(tests): maintenir le cahier de tests","labels":[],"closingIssuesReferences":[{"number":400}]}' >"$FIX/pr-105.json"
+printf '%s\n' '{"title":"Maintenir un cahier de tests en corrélation avec nos tests E2E","labels":[]}' >"$FIX/issue-400.json"
+# #106 has a technical SCOPE (release) but a non-technical TYPE (fix) — must be kept.
+printf '%s\n' '{"title":"fix(release): ajuster le workflow","labels":[],"closingIssuesReferences":[]}' >"$FIX/pr-106.json"
 printf '%s\n' '{"title":"Grande feature utilisateur","labels":[{"name":"Epic"}]}' >"$FIX/issue-200.json"
 printf '%s\n' '{"title":"Un besoin métier concret","labels":[{"name":"cat: autre"}]}' >"$FIX/issue-300.json"
 
 OUT=$(cd "$REPO_DIR" && GITHUB_REPOSITORY="test/test" bash "$COLLECT" v1 2>/dev/null)
 
-assert_eq "3 entrées au total (fallback PR + rollup epic + issue)" "3" "$(jq 'length' <<<"$OUT")"
+assert_eq "4 entrées au total (2 fallback PR + rollup epic + issue)" "4" "$(jq 'length' <<<"$OUT")"
 assert_eq "epic #200 présent (rollup)" "1" "$(jq '[.[]|select(.issue==200)]|length' <<<"$OUT")"
 assert_eq "sous-tickets 201/202 NON explosés" "0" "$(jq '[.[]|select(.issue==201 or .issue==202)]|length' <<<"$OUT")"
 assert_eq "PR technique #102 (dependencies) filtrée" "0" "$(jq '[.[]|select(.pr==102)]|length' <<<"$OUT")"
 assert_eq "PR #101 sans issue liée → entrée fallback (issue null)" "1" "$(jq '[.[]|select(.pr==101 and .issue==null)]|length' <<<"$OUT")"
 assert_eq "issue #300 résolue via la fix PR #104" "1" "$(jq '[.[]|select(.issue==300)]|length' <<<"$OUT")"
+assert_eq "PR #105 (docs:) filtrée au niveau PR malgré une issue en français" "0" "$(jq '[.[]|select(.pr==105)]|length' <<<"$OUT")"
+assert_eq "issue #400 non explosée depuis la PR docs filtrée" "0" "$(jq '[.[]|select(.issue==400)]|length' <<<"$OUT")"
+assert_eq "PR #106 fix(release) conservée (scope technique ≠ type technique)" "1" "$(jq '[.[]|select(.pr==106 and .issue==null)]|length' <<<"$OUT")"
 
 # ============================================================
 echo "== publish_release_summary.sh =="

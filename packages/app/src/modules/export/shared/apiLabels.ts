@@ -65,7 +65,7 @@ export const INDICATOR_D_GAP_LABELS = {
 	hourly: "Taux_horaire_variable_médian_ecart",
 } as const;
 
-/** Indicator E proportion labels — ratio 0..1, mirrors GIP CSV. */
+/** Indicator E proportion labels — ratio 0..1 of the same-sex workforce, independent of each other. */
 export const INDICATOR_E_PROPORTION_LABELS = {
 	women: "Proportion_variable_F",
 	men: "Proportion_variable_H",

@@ -29,17 +29,17 @@ export default async function CseOpinionRootLayout({
 		api.declaration.getOrCreate(),
 	]);
 
-	// Without a CSE there is no opinion to transmit, and this funnel's fields are
-	// all required — landing here is a dead end. Reads the company's live answer
-	// rather than the declaration snapshot, so a démarche already parked here by
-	// a stale snapshot recovers on its own.
-	if (
-		!isCseOpinionRequired({
-			workforce: getObligationWorkforce(company.gipWorkforce),
-			hasCse: company.hasCse,
-		})
-	) {
-		redirect(getPostComplianceDestination(company.hasCse));
+	// Reads the company's live answer rather than the declaration snapshot, so a
+	// démarche parked here by a stale snapshot recovers on its own.
+	const cseOpinionRequired = isCseOpinionRequired({
+		workforce: getObligationWorkforce(company.gipWorkforce),
+		hasCse: company.hasCse,
+	});
+
+	// This funnel's fields are all required, so landing here with no opinion to
+	// transmit is a dead end.
+	if (!cseOpinionRequired) {
+		redirect(getPostComplianceDestination(cseOpinionRequired));
 	}
 
 	const declaration = declarationData.declaration;

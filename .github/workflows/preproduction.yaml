@@ -58,6 +58,7 @@ jobs:
           secrets: |
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
             sentry_release=${{ github.ref_name }}
+            app_version=${{ github.ref_name }}
           push: true
 
   kontinuous:

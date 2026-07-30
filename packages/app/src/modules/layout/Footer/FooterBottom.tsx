@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { NewTabNotice } from "../shared/NewTabNotice";
 
+import { AppVersion } from "./AppVersion";
+
 /** Footer bottom bar: legal links, display settings, license. */
 export function FooterBottom() {
 	return (
@@ -57,6 +59,7 @@ export function FooterBottom() {
 						<NewTabNotice />
 					</a>
 				</p>
+				<AppVersion />
 			</div>
 		</div>
 	);

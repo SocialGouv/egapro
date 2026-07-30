@@ -44,6 +44,38 @@ const commitPlugins = [
   ],
 ]
 
+// Conventional-commits preset shared by the analyzer and the notes generator.
+// The default `angular` preset hardcodes its type→section map in
+// conventional-changelog-angular/src/writer.js: every type other than
+// feat/fix/perf/revert (and breaking changes) is `return undefined` — hidden.
+// That silently drops ~1 commit in 5 from the release notes. The
+// `conventionalcommits` preset honours `presetConfig.types`, so we control
+// which types render and under which (French) section heading.
+//
+// `releaseRules` is intentionally NOT set: @semantic-release/commit-analyzer
+// derives the bump level from its own default-release-rules.js
+// (breaking→major, feat→minor, fix|perf|revert→patch), independent of the
+// preset, so the preset only supplies parserOpts and does not change WHEN a
+// release is cut.
+const conventionalPreset = {
+  preset: "conventionalcommits",
+  presetConfig: {
+    types: [
+      { type: "feat", section: "Nouveautés" },
+      { type: "fix", section: "Corrections" },
+      { type: "perf", section: "Performances" },
+      { type: "revert", section: "Retours-arrière" },
+      { type: "refactor", section: "Refactorisation" },
+      { type: "docs", section: "Documentation" },
+      { type: "chore", hidden: true },
+      { type: "ci", hidden: true },
+      { type: "build", hidden: true },
+      { type: "style", hidden: true },
+      { type: "test", hidden: true },
+    ],
+  },
+}
+
 module.exports = {
   branches: [
     "master",
@@ -51,8 +83,8 @@ module.exports = {
     { name: "alpha", prerelease: true },
   ],
   plugins: [
-    "@semantic-release/commit-analyzer",
-    "@semantic-release/release-notes-generator",
+    ["@semantic-release/commit-analyzer", conventionalPreset],
+    ["@semantic-release/release-notes-generator", conventionalPreset],
     ...(COMMIT_PLUGIN_BRANCHES.includes(branch) ? commitPlugins : []),
     "@semantic-release/github",
   ],

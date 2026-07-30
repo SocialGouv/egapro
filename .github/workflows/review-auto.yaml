@@ -15,6 +15,7 @@ jobs:
     permissions:
       contents: read
       id-token: write # OIDC identity for buildkit-operator /route auth
+      pull-requests: read # resolve the PR number for the footer version link
     environment: build-review-auto
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
@@ -22,6 +23,28 @@ jobs:
     steps:
       - name: ⏬ Checkout code repository
         uses: actions/checkout@v4
+
+      # The footer exposes a direct link to the PR on review apps. Review builds
+      # trigger on `push` (not `pull_request`), so the PR number is not in the
+      # event context — resolve it from the commit SHA. Empty on the first push
+      # of a branch (PR not opened yet); the footer then falls back to a
+      # branch-scoped PR search link.
+      - name: 🔍 Resolve pull request number
+        id: pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # No PR yet is a normal state and must not fail the build, but an API
+          # error must stay visible: without this, a bad token or a rate limit
+          # is indistinguishable from "branch has no PR".
+          if ERR=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" \
+                     --jq '.[0].number // empty' 2>&1 >pr-number.txt); then
+            N=$(cat pr-number.txt)
+          else
+            N=""
+            echo "::warning::Numéro de PR non résolu (${ERR}) — le pied de page pointera vers une recherche par branche."
+          fi
+          echo "number=$N" >> "$GITHUB_OUTPUT"
 
       - name: 📌 Extract metadata (tags, labels) for Docker
         id: meta
@@ -68,6 +91,8 @@ jobs:
           secrets: |
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
             sentry_release=${{ github.ref_name }}
+            app_version=${{ github.ref_name }}
+            pr_number=${{ steps.pr.outputs.number }}
           push: true
 
   kontinuous:

@@ -2,9 +2,12 @@ import {
 	computeGapRatio,
 	computeWorkforceTotal,
 	proportionOf,
+	variablePayProportion,
 } from "~/modules/domain";
 
 type DeclarationRowSubset = {
+	totalWomen: number | null;
+	totalMen: number | null;
 	indicatorAAnnualWomen: string | null;
 	indicatorAAnnualMen: string | null;
 	indicatorAHourlyWomen: string | null;
@@ -88,27 +91,9 @@ function proportionFromCounts(
 	};
 }
 
-function proportionFromStrings(
-	women: string | null,
-	men: string | null,
-): { women: number | null; men: number | null } {
-	if (women === null || men === null) return { women: null, men: null };
-	const w = Number(women);
-	const m = Number(men);
-	if (Number.isNaN(w) || Number.isNaN(m)) return { women: null, men: null };
-	const total = computeWorkforceTotal(w, m);
-	if (total === 0) return { women: null, men: null };
-	return {
-		women: proportionOf(w, total),
-		men: proportionOf(m, total),
-	};
-}
-
 export function computeIndicatorPercentages(
 	row: DeclarationRowSubset,
 ): ComputedPercentages {
-	const eProps = proportionFromStrings(row.indicatorEWomen, row.indicatorEMen);
-
 	const fAnnual1 = proportionFromCounts(
 		row.indicatorFAnnualWomen1,
 		row.indicatorFAnnualMen1,
@@ -176,8 +161,14 @@ export function computeIndicatorPercentages(
 			row.indicatorDHourlyWomen,
 			row.indicatorDHourlyMen,
 		),
-		variableProportionWomen: eProps.women,
-		variableProportionMen: eProps.men,
+		variableProportionWomen: variablePayProportion(
+			row.indicatorEWomen,
+			row.totalWomen,
+		),
+		variableProportionMen: variablePayProportion(
+			row.indicatorEMen,
+			row.totalMen,
+		),
 		annualQuartile1ProportionWomen: fAnnual1.women,
 		annualQuartile2ProportionWomen: fAnnual2.women,
 		annualQuartile3ProportionWomen: fAnnual3.women,

@@ -250,10 +250,11 @@ export async function fetchSubmittedDeclarations(
 
 export async function fetchIndicatorGByDeclaration(
 	declarationIds: string[],
+	database: DB = db,
 ): Promise<Map<string, IndicatorGEntry[]>> {
 	if (declarationIds.length === 0) return new Map();
 
-	const rows = await db
+	const rows = await database
 		.select({
 			declarationId: jobCategories.declarationId,
 			categoryName: jobCategories.name,
