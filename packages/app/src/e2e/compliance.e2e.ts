@@ -16,11 +16,15 @@ import {
 } from "./helpers/db";
 import {
 	completeDeclaration,
+	reachRecapWithoutGap,
 	reachStep6ComplianceRecap,
 	reachStep6Recap,
 	submitFromStep6Recap,
-	submitStepsThroughQuartiles,
 } from "./helpers/declaration-flows";
+import {
+	indicatorGRequiredForGip,
+	recapStepperLabel,
+} from "./helpers/indicator-g";
 
 test.describe.configure({ mode: "serial" });
 
@@ -510,13 +514,15 @@ test.describe("[ANX-02] Path 12: compliance already completed → redirect", () 
 	});
 });
 
-// === GROUP G: "6 premiers indicateurs" variant — indicator G not required ===
-// GIP workforce 120 (bracket 100-149, off-cycle year): the funnel drops the
-// categories step and no compliance path can trigger (Excel: cas 1-2 of the
-// "6 premiers indicateurs" columns). resetGipWorkforce restores the suite
-// baseline (>= 250) for any spec running after this one.
+// === GROUP G: "6 premiers indicateurs" variant — the 100-149 bracket ===
+// GIP workforce 120 (bracket 100-149): the funnel drops the categories step and no
+// compliance path can trigger (Excel: cas 1-2 of the "6 premiers indicateurs" columns).
+// That bracket owes indicator G on the triennial years from 2030, so the funnel shape
+// is read from the domain — the submission outcome under test is the same either way.
+// resetGipWorkforce restores the suite baseline (>= 250) for any spec running after this one.
+const GIP_120_INDICATOR_G = indicatorGRequiredForGip(120);
 
-test.describe("[CAS-01-6IND] Path 14: 6 indicators (no G) + no hasCse → direct completion", () => {
+test.describe("[CAS-01-6IND] Path 14: GIP 120 (100-149) + no hasCse → direct completion", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setGipWorkforce(120);
@@ -527,16 +533,18 @@ test.describe("[CAS-01-6IND] Path 14: 6 indicators (no G) + no hasCse → direct
 		await resetGipWorkforce();
 	});
 
-	test("submits the 5-step funnel and completes the démarche directly", async ({
+	test("submits the tier's funnel and completes the démarche directly", async ({
 		page,
 	}) => {
-		test.slow(); // 5-step declaration + submission
-		await submitStepsThroughQuartiles(page);
-		// No indicator G → the categories step is skipped: quartiles land on review
-		await page.waitForURL("**/declaration-remuneration/etape/6");
-		await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+		test.slow(); // Full declaration + submission
+		await reachRecapWithoutGap(page, {
+			indicatorGRequired: GIP_120_INDICATOR_G,
+		});
+		await expect(
+			page.getByText(recapStepperLabel(GIP_120_INDICATOR_G), { exact: true }),
+		).toBeVisible();
 
-		// Submit — no indicator G and no CSE → demarche completed directly
+		// Submit — no gap and no CSE → demarche completed directly
 		await submitFromStep6Recap(page);
 		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
 		await expect(
@@ -545,7 +553,7 @@ test.describe("[CAS-01-6IND] Path 14: 6 indicators (no G) + no hasCse → direct
 	});
 });
 
-test.describe("[CAS-02-6IND] Path 15: 6 indicators (no G) + hasCse → /avis-cse", () => {
+test.describe("[CAS-02-6IND] Path 15: GIP 120 (100-149) + hasCse → /avis-cse", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setGipWorkforce(120);
@@ -556,14 +564,15 @@ test.describe("[CAS-02-6IND] Path 15: 6 indicators (no G) + hasCse → /avis-cse
 		await resetGipWorkforce();
 	});
 
-	test("submits the 5-step funnel then deposits the CSE accuracy opinion", async ({
+	test("submits the tier's funnel then deposits the CSE accuracy opinion", async ({
 		page,
 	}) => {
-		test.slow(); // 5-step declaration + submission + CSE flow
-		await submitStepsThroughQuartiles(page);
-		await page.waitForURL("**/declaration-remuneration/etape/6");
+		test.slow(); // Full declaration + submission + CSE flow
+		await reachRecapWithoutGap(page, {
+			indicatorGRequired: GIP_120_INDICATOR_G,
+		});
 
-		// Submit — no indicator G but a CSE → straight to the CSE opinion
+		// Submit — no gap but a CSE → straight to the CSE opinion
 		await submitFromStep6Recap(page);
 		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
 
@@ -797,7 +806,14 @@ test.describe("[CAS-14] 7 indicators + GIP 30 (< 50) + gap ≥ 5 % → no obliga
 	});
 });
 
-test.describe("[CAS-13-6IND] 6 indicators + GIP 75 (50-99) → direct completion", () => {
+// The cahier describes this case on the 6-indicator variant, which is what the 50-99
+// tier declares outside its own indicator G years. On those years (2030, 2033, …) the
+// same company declares the 7 indicators instead, so the funnel shape is read from the
+// domain — what is under test either way is the outcome: below 100 salariés a gap-free
+// declaration completes the démarche directly, with no compliance obligation.
+test.describe("[CAS-13-6IND] GIP 75 (50-99) → direct completion", () => {
+	const indicatorGRequired = indicatorGRequiredForGip(75);
+
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
 		await setGipWorkforce(75);
@@ -809,18 +825,28 @@ test.describe("[CAS-13-6IND] 6 indicators + GIP 75 (50-99) → direct completion
 		await setCompanyHasCse(true);
 	});
 
-	test("submits the 5-step funnel and completes the démarche directly", async ({
+	test("submits the tier's funnel and completes the démarche directly", async ({
 		page,
 	}) => {
-		test.slow(); // 5-step declaration + submission
-		// Outside the 50-99 tier's own indicator G years, step 5 is out of reach
-		// even by URL — unlike the < 50 tier, which always carries it.
+		test.slow(); // Full declaration + submission
 		await page.goto("/declaration-remuneration/etape/5");
-		await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/6$/);
+		if (indicatorGRequired) {
+			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/5$/);
+			await expect(
+				page.getByRole("heading", {
+					name: /Écart de rémunération par catégories de salariés/,
+				}),
+			).toBeVisible();
+		} else {
+			// Off those years step 5 is out of reach even by URL — unlike the < 50
+			// tier, which always carries it.
+			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/6$/);
+		}
 
-		await submitStepsThroughQuartiles(page);
-		await page.waitForURL("**/declaration-remuneration/etape/6");
-		await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+		await reachRecapWithoutGap(page, { indicatorGRequired });
+		await expect(
+			page.getByText(recapStepperLabel(indicatorGRequired), { exact: true }),
+		).toBeVisible();
 
 		await submitFromStep6Recap(page);
 		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });

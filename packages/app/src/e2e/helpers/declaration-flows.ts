@@ -191,6 +191,19 @@ async function fillStep5Categories(page: Page, options: { hasGap: boolean }) {
 }
 
 /**
+ * Fill the indicator G categories step and submit it, landing on the review step.
+ * Only reachable when the company's tier owes indicator G on the campaign year.
+ */
+export async function submitIndicatorGStep(
+	page: Page,
+	options: { hasGap: boolean },
+) {
+	await fillStep5Categories(page, options);
+	await page.getByRole("button", { name: "Suivant" }).click();
+	await page.waitForURL("**/declaration-remuneration/etape/6");
+}
+
+/**
  * Fill steps 1 → 5 and stop on the step 6 review recap without submitting, so a
  * caller can assert on the recap ("Prochaines étapes" box) before certification.
  * Requires a company subject to indicator G (step 5), i.e. the suite baseline workforce.
@@ -201,8 +214,24 @@ export async function reachStep6Recap(
 ) {
 	await submitStepsThroughQuartiles(page);
 	await page.waitForURL("**/declaration-remuneration/etape/5");
-	await fillStep5Categories(page, options);
-	await page.getByRole("button", { name: "Suivant" }).click();
+	await submitIndicatorGStep(page, options);
+}
+
+/**
+ * Fill a gap-free funnel up to the review step, whatever shape the campaign year gives
+ * it: the categories step is only presented when the tier owes indicator G that year, so
+ * the quartiles land either on it or straight on the review. Callers pass the expectation
+ * derived from the domain (`indicatorGRequiredForGip`).
+ */
+export async function reachRecapWithoutGap(
+	page: Page,
+	options: { indicatorGRequired: boolean },
+) {
+	if (options.indicatorGRequired) {
+		await reachStep6Recap(page, { hasGap: false });
+		return;
+	}
+	await submitStepsThroughQuartiles(page);
 	await page.waitForURL("**/declaration-remuneration/etape/6");
 }
 
@@ -215,9 +244,7 @@ export async function reachStep6Recap(
 export async function reachStep6ComplianceRecap(page: Page) {
 	await submitStepsThroughQuartiles(page, { annualMeanGap: true });
 	await page.waitForURL("**/declaration-remuneration/etape/5");
-	await fillStep5Categories(page, { hasGap: true });
-	await page.getByRole("button", { name: "Suivant" }).click();
-	await page.waitForURL("**/declaration-remuneration/etape/6");
+	await submitIndicatorGStep(page, { hasGap: true });
 }
 
 /**

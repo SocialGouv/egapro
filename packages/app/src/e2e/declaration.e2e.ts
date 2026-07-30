@@ -7,8 +7,14 @@ import {
 } from "./helpers/db";
 import {
 	submitFromStep6Recap,
+	submitIndicatorGStep,
 	submitStepsThroughQuartiles,
 } from "./helpers/declaration-flows";
+import {
+	funnelStepCount,
+	indicatorGRequiredForGip,
+	recapStepperLabel,
+} from "./helpers/indicator-g";
 
 // Render-structure assertions are covered by the step component tests in declaration-remuneration/**/__tests__.
 
@@ -311,7 +317,12 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 		});
 	});
 
-	test.describe("GIP workforce of 70 — below every indicator G threshold", () => {
+	// The 50-99 tier declares the 6 first indicators, except on its own indicator G
+	// years (2030, 2033, …) where the categories step joins the funnel. Both the step
+	// count and the quartile landing are therefore read from the domain.
+	test.describe("GIP workforce of 70 — the 50-99 mandatory tier", () => {
+		const indicatorGRequired = indicatorGRequiredForGip(70);
+
 		test.beforeAll(async () => {
 			await setGipWorkforce(70);
 			await resetDeclarationToDraft();
@@ -334,20 +345,36 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 			).toHaveCount(0);
 
 			await page.goto("/declaration-remuneration/etape/1");
-			await expect(page.getByText("Étape 1 sur 5")).toBeVisible();
+			await expect(
+				page.getByText(`Étape 1 sur ${funnelStepCount(indicatorGRequired)}`, {
+					exact: true,
+				}),
+			).toBeVisible();
 			await expect(
 				page.getByText(`Effectif annuel moyen en ${currentYear - 1} :`),
 			).toBeVisible();
 			await expect(page.getByText("Existence d'un CSE :")).toHaveCount(0);
 		});
 
-		test("submitting the quartile step lands on the review step (S1 of #3934)", async ({
+		test("submitting the quartile step lands on the next step of the tier's funnel (S1 of #3934)", async ({
 			page,
 		}) => {
 			await submitStepsThroughQuartiles(page);
 
-			await page.waitForURL("**/declaration-remuneration/etape/6");
-			await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+			// Without indicator G the quartiles flow straight into the review step;
+			// on the tier's indicator G years the categories step sits in between.
+			if (indicatorGRequired) {
+				await page.waitForURL("**/declaration-remuneration/etape/5");
+				await expect(
+					page.getByText("Étape 5 sur 6", { exact: true }),
+				).toBeVisible();
+				await submitIndicatorGStep(page, { hasGap: false });
+			} else {
+				await page.waitForURL("**/declaration-remuneration/etape/6");
+			}
+			await expect(
+				page.getByText(recapStepperLabel(indicatorGRequired), { exact: true }),
+			).toBeVisible();
 		});
 	});
 });
