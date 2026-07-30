@@ -1,4 +1,5 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
+import { getCurrentYear } from "~/modules/domain";
 import { generateYearlyExport } from "~/modules/export";
 import { exportYearOptionalQuerySchema } from "~/modules/export/schemas";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
@@ -37,7 +38,7 @@ async function exportGenerateHandler(request: Request): Promise<Response> {
 			);
 		}
 
-		const year = parsed.data.year ?? new Date().getUTCFullYear();
+		const year = parsed.data.year ?? getCurrentYear();
 		const result = await generateYearlyExport(db, year);
 
 		return Response.json({
