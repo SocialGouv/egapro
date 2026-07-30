@@ -1,8 +1,15 @@
 import type { CampaignDeadlines } from "../types";
 
-/** Returns the current calendar year (declaration campaign year). */
+/** Test-only seam: the E2E grid pilots the campaign year (issue #4022).
+ * Reads globalThis so one value covers the Node server and the browser bundle
+ * alike. Only ever written server-side by the guarded /api/e2e-clock route,
+ * and browser-side by the Playwright fixture. campaign.ts keeps zero imports:
+ * reading globalThis directly adds no outgoing dependency (no ~/env.js, no env
+ * var), so the domain stays pure in the sense that matters. */
 export function getCurrentYear(): number {
-	return new Date().getFullYear();
+	const override = (globalThis as { __egaproCampaignYear?: number })
+		.__egaproCampaignYear;
+	return typeof override === "number" ? override : new Date().getFullYear();
 }
 
 /** Returns the workforce/reference year for a given campaign year (N-1: a declaration reports the prior year's data). */
