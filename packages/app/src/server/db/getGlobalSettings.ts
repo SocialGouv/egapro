@@ -16,6 +16,11 @@ export const GLOBAL_SETTINGS_ID = 1;
  *
  * Falls back to the current calendar year when no campaign has started yet.
  * Wrapped in React `cache()` to deduplicate calls within a single request.
+ *
+ * Deliberately NOT rewired onto the E2E clock seam (issue #4022): its only
+ * caller is AidePage.tsx, outside the declaration path, and with no
+ * `campaignStartDate` configured it already falls back to getCurrentYear() —
+ * which honours the override. Do not "fix" it to read globalThis directly.
  */
 export const getActiveCampaignYear = cache(async (): Promise<number> => {
 	// `.date` columns are stored as "YYYY-MM-DD" in Europe/Paris civil time, so
