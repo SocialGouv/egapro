@@ -572,11 +572,11 @@ test.describe("[CAS-02-6IND] Path 15: 6 indicators (no G) + hasCse → /avis-cse
 	});
 });
 
-// The OTHER branch of CAS-01/02-6IND: the very same 100-149 company gains step 5
+// ANX-04 — the OTHER branch of CAS-01/02-6IND: the same 100-149 company gains step 5
 // in a triennial year from 2030 — the assertion that would have silently broken
 // without #4067. Kept lightweight (funnel shape only): the full compliance flows
 // for a 7-indicator company are already covered by the >= 250 baseline cases.
-test.describe("[CAS-01-7IND] Path 14bis: 100-149 company regains indicator G in a triennial year >= 2030", () => {
+test.describe("[ANX-04] Path 14bis: 100-149 company regains indicator G in a triennial year >= 2030", () => {
 	test("the funnel carries the indicator-G step (6 steps)", async ({
 		page,
 	}) => {
@@ -592,9 +592,9 @@ test.describe("[CAS-01-7IND] Path 14bis: 100-149 company regains indicator G in 
 	});
 });
 
-// CAS-13-6IND — the 50-99 tranche (scenarios S1/S2 of #4067): indicator G is
+// ANX-05 — the 50-99 tranche (scenarios S1/S2 of #4067): indicator G is
 // absent below 2030 and returns only in a triennial year from 2030.
-test.describe("[CAS-13-6IND] Path 13: 50-99 tranche — indicator G gated by the pinned year", () => {
+test.describe("[ANX-05] Path 13: 50-99 tranche — indicator G gated by the pinned year", () => {
 	test.describe.configure({ mode: "serial" });
 
 	test("6-indicator year (2029): step 5 is absent and unreachable by direct URL", async ({

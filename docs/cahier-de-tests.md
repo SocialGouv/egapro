@@ -284,35 +284,6 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 ---
 
-<a name="cas-01-7ind"></a>
-
-### CAS-01-7IND : 7 indicateurs · l'indicateur G revient en année triennale ≥ 2030
-
-**Libellé Excel** : *(contre-branche des variantes « 6 premiers indicateurs » — colonnes « 7 indicateurs » pour la tranche 100-149)*
-
-- Effectif GIP 120 (tranche 100-149), année épinglée sur une année triennale ≥ 2030
-- L'indicateur G redevient obligatoire → funnel en 6 étapes (étape catégories présente)
-
-**Test E2E** : `compliance.e2e.ts` — `[CAS-01-7IND] Path 14bis` : épinglé sur 2030 via `withCampaignYear`, le funnel porte l'étape 5 (« Étape 5 sur 6 »). C'est l'assertion qui basculerait silencieusement au rouge en 2030 sans l'épinglage (#4067). Le parcours complet 7 indicateurs est couvert par les cas baseline ≥ 250.
-**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-01-7IND\]"`
-
----
-
-<a name="cas-13-6ind"></a>
-
-### CAS-13-6IND : tranche 50-99 · indicateur G gouverné par l'année épinglée
-
-**Libellé Excel** : *(colonnes « 6 premiers indicateurs » — tranche 50-99, scénarios S1/S2 de #4067)*
-
-- Effectif GIP 75 (tranche 50-99)
-- Année « 6 indicateurs » (< 2030) : étape catégories absente et inatteignable par URL directe (redirection vers le récapitulatif)
-- Année « 7 indicateurs » (triennale ≥ 2030) : étape catégories présente, stepper « sur 6 »
-
-**Test E2E** : `compliance.e2e.ts` — `[CAS-13-6IND] Path 13` : deux branches épinglées via `withCampaignYear` — 2029 (funnel 5 étapes, `/etape/5` redirige vers `/etape/6`) et 2030 (funnel 6 étapes, « Étape 5 sur 6 »).
-**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-13-6IND\]"`
-
----
-
 ## 3. Les feuilles de l'Excel, année par année
 
 Miroir des quatre onglets du fichier. Placez-vous sur votre feuille et votre année : la cellule liste les cas à dérouler, chacun désigné par une **coordonnée autoportante** (cliquable vers sa fiche §2).
@@ -401,6 +372,8 @@ Comportements testés en E2E qui ne figurent pas dans le fichier de Laetitia mai
 | ANX-01 | Tâtonnement : changer de parcours de conformité avant toute action aval (le dernier choix gagne, les deux événements sont historisés) | `compliance-path-change.e2e.ts` |
 | ANX-02 | Démarche terminée → toute navigation vers le parcours de conformité redirige | `compliance.e2e.ts` — `[ANX-02] Path 12` |
 | ANX-03 | Bouton « Précédent » sur `/avis-cse` : retour contextuel selon l'état (récap étape 6, choix de parcours, récap 2ᵉ déclaration) | `compliance.e2e.ts` — `[ANX-03] Paths 13.a / 13.b / 13.c` |
+| ANX-04 | Tranche 100-149, année triennale ≥ 2030 : l'indicateur G redevient obligatoire, le funnel repasse à 6 étapes. Contre-branche de `CAS-01-6IND` / `CAS-02-6IND`, qui n'exerceraient sinon qu'une seule de leurs deux branches — et basculeraient silencieusement au rouge en 2030 | `compliance.e2e.ts` — `[ANX-04] Path 14bis` (effectif GIP 120, année épinglée 2030) |
+| ANX-05 | Tranche 50-99 : la composition du funnel suit l'année épinglée — étape catégories absente et inatteignable par URL directe en année « 6 indicateurs » (2029), présente en année triennale ≥ 2030 | `compliance.e2e.ts` — `[ANX-05] Path 13` (effectif GIP 75, années épinglées 2029 et 2030) |
 
 Le socle déclaratif (étapes 1–6, brouillon, historique, panneau de démarche, deadlines de campagne, annulation, saut de l'étape 5 quand l'indicateur G ne s'applique pas…) est couvert par les autres specs (`declaration.e2e.ts`, `declarationDraft.e2e.ts`, `declaration-history.e2e.ts`, `declaration-process-panel.e2e.ts`, `campaign-deadlines-gating.e2e.ts`, `declaration-cancellation.e2e.ts`) — hors périmètre de ce cahier, qui trace les parcours du fichier Excel.
 
