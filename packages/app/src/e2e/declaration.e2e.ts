@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { withCampaignYear } from "./helpers/campaign-year";
 import {
 	getCurrentDbYear,
 	resetDeclarationToDraft,
@@ -305,43 +306,88 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 		});
 	});
 
-	test.describe("GIP workforce of 70 — below every indicator G threshold", () => {
-		test.beforeAll(async () => {
-			await setGipWorkforce(70);
-			await resetDeclarationToDraft();
-		});
+	// GIP workforce of 70 (bracket 50-99): whether indicator G / step 5 applies
+	// flips on the campaign year via isIndicatorGRequired(70, year) — never below
+	// 2030, and only in a triennial year from 2030. Pinning both years keeps the
+	// two branches exercised instead of letting the assertion silently flip red
+	// when the calendar reaches 2030 (#4067). withCampaignYear seeds the GIP row
+	// for the pinned year and tears the coordinate down afterwards.
+	test.describe("GIP workforce of 70 — indicator G gated by the pinned year", () => {
+		test.describe.configure({ mode: "serial" });
 
-		test("banners display the GIP workforce and drop the CSE field", async ({
+		test("6-indicator year (2029): banners show the workforce and the funnel drops step 5", async ({
 			page,
 		}) => {
+			await withCampaignYear({ page, year: 2029, workforce: 70 }, async () => {
+				await page.goto("/mon-espace");
+
+				const companyInfo = page
+					.locator("dl")
+					.filter({ hasText: "Effectif annuel moyen" })
+					.first();
+				await expect(companyInfo).toContainText("70");
+				await expect(companyInfo).not.toContainText("Existence d'un CSE");
+				// Nothing is editable below 100, so the edit entry point is dropped too.
+				await expect(
+					page.getByRole("button", { exact: true, name: "Modifier" }),
+				).toHaveCount(0);
+
+				await page.goto("/declaration-remuneration/etape/1");
+				await expect(page.getByText("Étape 1 sur 5")).toBeVisible();
+				// 2029 campaign → workforce reference year N-1 = 2028 (getWorkforceYear).
+				await expect(
+					page.getByText("Effectif annuel moyen en 2028 :"),
+				).toBeVisible();
+				await expect(page.getByText("Existence d'un CSE :")).toHaveCount(0);
+
+				await submitStepsThroughQuartiles(page);
+				await page.waitForURL("**/declaration-remuneration/etape/6");
+				await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+			});
+		});
+
+		test("7-indicator year (2030): the funnel regains the indicator-G step", async ({
+			page,
+		}) => {
+			await withCampaignYear({ page, year: 2030, workforce: 70 }, async () => {
+				await page.goto("/declaration-remuneration/etape/1");
+				await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
+				await page.goto("/declaration-remuneration/etape/5");
+				await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
+			});
+		});
+	});
+});
+
+// #4067 — withCampaignYear isolates one coordinate from the next. After a full
+// declaration is built under year N, moving to year N+1 must leave no trace of N
+// (declaration, files, CSE opinion, has_cse). This proves it at the /mon-espace
+// listing, which aggregates every year's declaration for the SIREN — the very
+// surface interference #1 of the spec warns would otherwise show 7 rows after a
+// grid run. The rigorous, row-count proof of resetCampaignYear lives in
+// db-campaign.integration.test.ts.
+test.describe("withCampaignYear leaves no residue between two year coordinates (#4067)", () => {
+	test("a run pinned on 2033 lists exactly one declaration", async ({
+		page,
+	}) => {
+		test.slow();
+		// Coordinate A: create a declaration under 2032, then let the fixture tear it down.
+		await withCampaignYear({ page, year: 2032, workforce: 250 }, async () => {
+			await page.goto("/declaration-remuneration");
+			await page.waitForURL("**/declaration-remuneration/etape/**");
+		});
+
+		// Coordinate B: only 2033's declaration may exist — A left no residue.
+		await withCampaignYear({ page, year: 2033, workforce: 250 }, async () => {
+			await page.goto("/declaration-remuneration");
+			await page.waitForURL("**/declaration-remuneration/etape/**");
+
 			await page.goto("/mon-espace");
-
-			const companyInfo = page
-				.locator("dl")
-				.filter({ hasText: "Effectif annuel moyen" })
-				.first();
-			await expect(companyInfo).toContainText("70");
-			await expect(companyInfo).not.toContainText("Existence d'un CSE");
-			// Nothing is editable below 100, so the edit entry point is dropped too.
-			await expect(
-				page.getByRole("button", { exact: true, name: "Modifier" }),
-			).toHaveCount(0);
-
-			await page.goto("/declaration-remuneration/etape/1");
-			await expect(page.getByText("Étape 1 sur 5")).toBeVisible();
-			await expect(
-				page.getByText(`Effectif annuel moyen en ${currentYear - 1} :`),
-			).toBeVisible();
-			await expect(page.getByText("Existence d'un CSE :")).toHaveCount(0);
-		});
-
-		test("submitting the quartile step lands on the review step (S1 of #3934)", async ({
-			page,
-		}) => {
-			await submitStepsThroughQuartiles(page);
-
-			await page.waitForURL("**/declaration-remuneration/etape/6");
-			await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+			const currentDeclarations = page.locator(
+				'table[aria-labelledby="demarches-en-cours-title"] tbody tr',
+			);
+			await expect(currentDeclarations).toHaveCount(1);
+			await expect(page.getByText("2032")).toHaveCount(0);
 		});
 	});
 });

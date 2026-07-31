@@ -1,4 +1,11 @@
 import type { Page } from "@playwright/test";
+import {
+	getCurrentDbYear,
+	pushCampaignDeadlinesFarFuture,
+	resetGipWorkforce,
+	setGipWorkforce,
+} from "./db";
+import { resetCampaignYear as resetCampaignYearData } from "./db-campaign";
 
 // Drives the campaign-year seam of issue #4022 from a Playwright run. The year
 // is read by getCurrentYear() through globalThis.__egaproCampaignYear, a value
@@ -62,4 +69,49 @@ export async function resetCampaignYear(page: Page): Promise<void> {
 		(globalThis as { __egaproCampaignYear?: number }).__egaproCampaignYear =
 			undefined;
 	});
+}
+
+/** One campaign-year coordinate of the E2E grid (#4022): a pinned year and the
+ * GIP workforce that decides the funnel shape (indicator G / step 5 gating). */
+export type CampaignCoordinate = {
+	page: Page;
+	year: number;
+	workforce: number;
+};
+
+/**
+ * Run `fn` under a fully isolated campaign-year coordinate (#4067).
+ *
+ * Pins the clock on both surfaces, wipes any residue of the target year, seeds
+ * its deadlines (never a `campaign_start_date` — see pushCampaignDeadlinesFarFuture)
+ * and its GIP workforce, then runs the body. The teardown always runs (even when
+ * `fn` throws) and double-resets: the coordinate's own year, plus the calendar
+ * year as a safety net for any residue a default-year helper wrote inside `fn`
+ * (`setCompanyHasCse`, an unpinned `setGipWorkforce`, …). The calendar year is
+ * then restored to the baseline the unpinned suite depends on (far-future
+ * deadlines + the >= 250 GIP workforce), so a pinned spec never leaves the shared
+ * company GIP-less for the next spec file. It leaves no declaration, file, CSE
+ * opinion, lock or `has_cse` flag of the coordinate behind — the invariant the
+ * grid relies on to chain 185 coordinates without cross-contamination.
+ */
+export async function withCampaignYear(
+	coordinate: CampaignCoordinate,
+	fn: () => Promise<void>,
+): Promise<void> {
+	const { page, year, workforce } = coordinate;
+	await pinCampaignYear(page, year);
+	await resetCampaignYearData(year);
+	await pushCampaignDeadlinesFarFuture(year);
+	await setGipWorkforce(workforce, year);
+	try {
+		await fn();
+	} finally {
+		await resetCampaignYearData(year);
+		const calendarYear = await getCurrentDbYear();
+		if (calendarYear !== year) {
+			await resetCampaignYearData(calendarYear);
+			await pushCampaignDeadlinesFarFuture();
+			await resetGipWorkforce();
+		}
+	}
 }

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { withCampaignYear } from "./helpers/campaign-year";
 import {
 	COMPLIANCE_PATH,
 	completeSecondDeclaration,
@@ -9,10 +10,8 @@ import {
 } from "./helpers/compliance-flows";
 import {
 	resetDeclarationToDraft,
-	resetGipWorkforce,
 	setCompanyHasCse,
 	setCompanyWorkforce,
-	setGipWorkforce,
 } from "./helpers/db";
 import {
 	completeDeclaration,
@@ -508,72 +507,125 @@ test.describe("[ANX-02] Path 12: compliance already completed → redirect", () 
 	});
 });
 
-// === GROUP G: "6 premiers indicateurs" variant — indicator G not required ===
-// GIP workforce 120 (bracket 100-149, off-cycle year): the funnel drops the
-// categories step and no compliance path can trigger (Excel: cas 1-2 of the
-// "6 premiers indicateurs" columns). resetGipWorkforce restores the suite
-// baseline (>= 250) for any spec running after this one.
+// === GROUP G: indicator G gated by the campaign year (#4022 / #4067) ===
+// Whether the funnel carries the categories step (step 5 / indicator G) is
+// decided by isIndicatorGRequired(workforce, year): below 250 it only applies on
+// the triennial cadence (base 2027), and — from 2030 — down to every mandatory
+// 50+ company. Every spec here PINS its campaign year through withCampaignYear so
+// both branches stay exercised instead of silently flipping when the calendar
+// reaches 2030; the fixture also tears the coordinate down, leaving no residue.
+
+// 2029: < 2030 and off the triennial cadence → indicator G not required for < 250.
+const SIX_INDICATOR_YEAR = 2029;
+// 2030: triennial ((2030-2027) % 3 === 0) and >= 2030 → indicator G required for 50+.
+const SEVEN_INDICATOR_YEAR = 2030;
 
 test.describe("[CAS-01-6IND] Path 14: 6 indicators (no G) + no hasCse → direct completion", () => {
-	test.beforeAll(async () => {
-		await resetDeclarationToDraft();
-		await setGipWorkforce(120);
-		await setCompanyHasCse(false);
-	});
-
-	test.afterAll(async () => {
-		await resetGipWorkforce();
-	});
-
 	test("submits the 5-step funnel and completes the démarche directly", async ({
 		page,
 	}) => {
 		test.slow(); // 5-step declaration + submission
-		await submitStepsThroughQuartiles(page);
-		// No indicator G → the categories step is skipped: quartiles land on review
-		await page.waitForURL("**/declaration-remuneration/etape/6");
-		await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+		await withCampaignYear(
+			{ page, year: SIX_INDICATOR_YEAR, workforce: 120 },
+			async () => {
+				await setCompanyHasCse(false);
+				await submitStepsThroughQuartiles(page);
+				await page.waitForURL("**/declaration-remuneration/etape/6");
+				await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
 
-		// Submit — no indicator G and no CSE → demarche completed directly
-		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.getByText(/Je certifie/).click();
-		await page.getByRole("button", { name: "Valider" }).click();
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+				await page.getByRole("button", { name: "Suivant" }).click();
+				await page.getByText(/Je certifie/).click();
+				await page.getByRole("button", { name: "Valider" }).click();
+				await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+				await expect(
+					page.getByText(/Votre parcours .* est (désormais )?terminé/),
+				).toBeVisible();
+			},
+		);
 	});
 });
 
 test.describe("[CAS-02-6IND] Path 15: 6 indicators (no G) + hasCse → /avis-cse", () => {
-	test.beforeAll(async () => {
-		await resetDeclarationToDraft();
-		await setGipWorkforce(120);
-		await setCompanyHasCse(true);
-	});
-
-	test.afterAll(async () => {
-		await resetGipWorkforce();
-	});
-
 	test("submits the 5-step funnel then deposits the CSE accuracy opinion", async ({
 		page,
 	}) => {
 		test.slow(); // 5-step declaration + submission + CSE flow
-		await submitStepsThroughQuartiles(page);
-		await page.waitForURL("**/declaration-remuneration/etape/6");
+		await withCampaignYear(
+			{ page, year: SIX_INDICATOR_YEAR, workforce: 120 },
+			async () => {
+				await setCompanyHasCse(true);
+				await submitStepsThroughQuartiles(page);
+				await page.waitForURL("**/declaration-remuneration/etape/6");
 
-		// Submit — no indicator G but a CSE → straight to the CSE opinion
-		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.getByText(/Je certifie/).click();
-		await page.getByRole("button", { name: "Valider" }).click();
-		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
+				await page.getByRole("button", { name: "Suivant" }).click();
+				await page.getByText(/Je certifie/).click();
+				await page.getByRole("button", { name: "Valider" }).click();
+				await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
 
-		await fillCseStep1(page);
-		await submitCseStep2(page);
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+				await fillCseStep1(page);
+				await submitCseStep2(page);
+				await expect(
+					page.getByText(/Votre parcours .* est (désormais )?terminé/),
+				).toBeVisible();
+			},
+		);
+	});
+});
+
+// The OTHER branch of CAS-01/02-6IND: the very same 100-149 company gains step 5
+// in a triennial year from 2030 — the assertion that would have silently broken
+// without #4067. Kept lightweight (funnel shape only): the full compliance flows
+// for a 7-indicator company are already covered by the >= 250 baseline cases.
+test.describe("[CAS-01-7IND] Path 14bis: 100-149 company regains indicator G in a triennial year >= 2030", () => {
+	test("the funnel carries the indicator-G step (6 steps)", async ({
+		page,
+	}) => {
+		await withCampaignYear(
+			{ page, year: SEVEN_INDICATOR_YEAR, workforce: 120 },
+			async () => {
+				await page.goto("/declaration-remuneration/etape/1");
+				await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
+				await page.goto("/declaration-remuneration/etape/5");
+				await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
+			},
+		);
+	});
+});
+
+// CAS-13-6IND — the 50-99 tranche (scenarios S1/S2 of #4067): indicator G is
+// absent below 2030 and returns only in a triennial year from 2030.
+test.describe("[CAS-13-6IND] Path 13: 50-99 tranche — indicator G gated by the pinned year", () => {
+	test.describe.configure({ mode: "serial" });
+
+	test("6-indicator year (2029): step 5 is absent and unreachable by direct URL", async ({
+		page,
+	}) => {
+		await withCampaignYear(
+			{ page, year: SIX_INDICATOR_YEAR, workforce: 75 },
+			async () => {
+				await page.goto("/declaration-remuneration/etape/1");
+				await expect(page.getByText("Étape 1 sur 5")).toBeVisible();
+				// The categories step is out of reach even by URL: it redirects to the recap.
+				await page.goto("/declaration-remuneration/etape/5");
+				await page.waitForURL("**/declaration-remuneration/etape/6");
+				await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+			},
+		);
+	});
+
+	test("7-indicator year (2030): step 5 is present and the stepper counts 6", async ({
+		page,
+	}) => {
+		await withCampaignYear(
+			{ page, year: SEVEN_INDICATOR_YEAR, workforce: 75 },
+			async () => {
+				// Initialise the declaration first so the step 5 URL is reachable.
+				await page.goto("/declaration-remuneration/etape/1");
+				await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
+				await page.goto("/declaration-remuneration/etape/5");
+				await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
+			},
+		);
 	});
 });
 
