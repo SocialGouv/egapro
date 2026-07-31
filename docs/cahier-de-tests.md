@@ -284,6 +284,35 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 ---
 
+<a name="cas-01-7ind"></a>
+
+### CAS-01-7IND : 7 indicateurs · l'indicateur G revient en année triennale ≥ 2030
+
+**Libellé Excel** : *(contre-branche des variantes « 6 premiers indicateurs » — colonnes « 7 indicateurs » pour la tranche 100-149)*
+
+- Effectif GIP 120 (tranche 100-149), année épinglée sur une année triennale ≥ 2030
+- L'indicateur G redevient obligatoire → funnel en 6 étapes (étape catégories présente)
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-01-7IND] Path 14bis` : épinglé sur 2030 via `withCampaignYear`, le funnel porte l'étape 5 (« Étape 5 sur 6 »). C'est l'assertion qui basculerait silencieusement au rouge en 2030 sans l'épinglage (#4067). Le parcours complet 7 indicateurs est couvert par les cas baseline ≥ 250.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-01-7IND\]"`
+
+---
+
+<a name="cas-13-6ind"></a>
+
+### CAS-13-6IND : tranche 50-99 · indicateur G gouverné par l'année épinglée
+
+**Libellé Excel** : *(colonnes « 6 premiers indicateurs » — tranche 50-99, scénarios S1/S2 de #4067)*
+
+- Effectif GIP 75 (tranche 50-99)
+- Année « 6 indicateurs » (< 2030) : étape catégories absente et inatteignable par URL directe (redirection vers le récapitulatif)
+- Année « 7 indicateurs » (triennale ≥ 2030) : étape catégories présente, stepper « sur 6 »
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-13-6IND] Path 13` : deux branches épinglées via `withCampaignYear` — 2029 (funnel 5 étapes, `/etape/5` redirige vers `/etape/6`) et 2030 (funnel 6 étapes, « Étape 5 sur 6 »).
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-13-6IND\]"`
+
+---
+
 ## 3. Les feuilles de l'Excel, année par année
 
 Miroir des quatre onglets du fichier. Placez-vous sur votre feuille et votre année : la cellule liste les cas à dérouler, chacun désigné par une **coordonnée autoportante** (cliquable vers sa fiche §2).
