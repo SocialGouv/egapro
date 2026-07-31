@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { EXPECTED_DECLARATION_TYPES } from "~/modules/domain";
 import { withCampaignYear } from "./helpers/campaign-year";
 import {
 	getCurrentDbYear,
@@ -359,15 +360,21 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 	});
 });
 
-// #4067 — withCampaignYear isolates one coordinate from the next. After a full
+// #4067 — withCampaignYear isolates one coordinate from the next. After a
 // declaration is built under year N, moving to year N+1 must leave no trace of N
 // (declaration, files, CSE opinion, has_cse). This proves it at the /mon-espace
 // listing, which aggregates every year's declaration for the SIREN — the very
 // surface interference #1 of the spec warns would otherwise show 7 rows after a
 // grid run. The rigorous, row-count proof of resetCampaignYear lives in
-// db-campaign.integration.test.ts.
+// db-campaign.resetCampaignYear.integration.test.ts.
+//
+// Two things make the assertion narrower than it looks. The listing carries one
+// row per expected declaration type (rémunération + représentation), so a bare
+// row count would encode that arity instead of the isolation property. And a row
+// cannot be matched on its text: a campaign-year row legitimately mentions N-1,
+// the reference year its figures describe. Only the Année cell discriminates.
 test.describe("withCampaignYear leaves no residue between two year coordinates (#4067)", () => {
-	test("a run pinned on 2033 lists exactly one declaration", async ({
+	test("a run pinned on 2033 leaves no trace of the 2032 coordinate", async ({
 		page,
 	}) => {
 		test.slow();
@@ -377,7 +384,7 @@ test.describe("withCampaignYear leaves no residue between two year coordinates (
 			await page.waitForURL("**/declaration-remuneration/etape/**");
 		});
 
-		// Coordinate B: only 2033's declaration may exist — A left no residue.
+		// Coordinate B: 2033 is listed, 2032 is gone — A left no residue.
 		await withCampaignYear({ page, year: 2033, workforce: 250 }, async () => {
 			await page.goto("/declaration-remuneration");
 			await page.waitForURL("**/declaration-remuneration/etape/**");
@@ -386,8 +393,15 @@ test.describe("withCampaignYear leaves no residue between two year coordinates (
 			const currentDeclarations = page.locator(
 				'table[aria-labelledby="demarches-en-cours-title"] tbody tr',
 			);
-			await expect(currentDeclarations).toHaveCount(1);
-			await expect(page.getByText("2032")).toHaveCount(0);
+			const rowsForYear = (year: string) =>
+				currentDeclarations.filter({
+					has: page.getByRole("cell", { name: year, exact: true }),
+				});
+
+			await expect(rowsForYear("2032")).toHaveCount(0);
+			await expect(rowsForYear("2033")).toHaveCount(
+				EXPECTED_DECLARATION_TYPES.length,
+			);
 		});
 	});
 });
