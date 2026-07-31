@@ -106,6 +106,11 @@ export async function withCampaignYear(
 	try {
 		await fn();
 	} finally {
+		// Clear the SERVER clock override first: pinCampaignYear pins it on the Node
+		// process (a global that survives across tests, unlike the per-page browser
+		// init script), so without this every later unpinned spec would keep reading
+		// this coordinate's year and lose its GIP row / funnel shape (#4067).
+		await setServerCampaignYear(null);
 		await resetCampaignYearData(year);
 		const calendarYear = await getCurrentDbYear();
 		if (calendarYear !== year) {
