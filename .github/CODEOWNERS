@@ -1,6 +1,3 @@
-# Default reviewers for all PRs
-* @SocialGouv/admins-egapro
-
 # Protect workflow files
 .github/workflows/*.yml @socialgouv/sre @SocialGouv/admins-egapro
 .github/CODEOWNERS @socialgouv/sre @SocialGouv/admins-egapro
