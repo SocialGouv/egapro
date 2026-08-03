@@ -80,7 +80,10 @@ query($owner:String!, $repo:String!, $n:Int!) {
   repository(owner:$owner, name:$repo) {
     issue(number:$n) { id }
   }
-}' -f owner=SocialGouv -f repo=egapro -F n="$TICKET" --jq '.data.repository.issue.id')
+}' -f owner=SocialGouv -f repo=egapro -F n="$TICKET" --jq '.data.repository.issue.id') || {
+    echo "ERROR: [1/4] could not resolve issue #$TICKET (needs \`issues: read\`)" >&2
+    exit 1
+}
 
 if [ -z "$NODE_ID" ] || [ "$NODE_ID" = "null" ]; then
     echo "ERROR: issue #$TICKET not found in SocialGouv/egapro" >&2
@@ -98,8 +101,12 @@ query($owner:String!, $repo:String!, $n:Int!) {
     }
   }
 }' -f owner=SocialGouv -f repo=egapro -F n="$TICKET" \
-  --jq ".data.repository.issue.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id" \
-  | head -1 || true)
+  --jq ".data.repository.issue.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id") || {
+    echo "ERROR: [2/4] could not list project items of issue #$TICKET" >&2
+    exit 1
+}
+# Piping straight into `head` would hide a failed query behind an empty result.
+ITEM_ID=$(printf '%s\n' "$ITEM_ID" | head -1)
 
 if [ -z "$ITEM_ID" ]; then
     ITEM_ID=$(gh api graphql -f query='
@@ -107,7 +114,10 @@ mutation($project:ID!, $content:ID!) {
   addProjectV2ItemById(input: { projectId: $project, contentId: $content }) {
     item { id }
   }
-}' -f project="$PROJECT_ID" -f content="$NODE_ID" --jq '.data.addProjectV2ItemById.item.id')
+}' -f project="$PROJECT_ID" -f content="$NODE_ID" --jq '.data.addProjectV2ItemById.item.id') || {
+        echo "ERROR: [2/4] could not add issue #$TICKET to the board (needs \`organization_projects: write\`)" >&2
+        exit 1
+    }
 fi
 
 if [ -z "$ITEM_ID" ] || [ "$ITEM_ID" = "null" ]; then
@@ -117,7 +127,8 @@ fi
 
 # 3. Idempotency guard — skip if the field already holds a value.
 # Read by field ID (same key the write uses) so an EGAPRO_*_FIELD_ID env
-# override stays consistent between the guard and the mutation.
+# override stays consistent between the guard and the mutation. A failed read
+# aborts: swallowing it would read as "field is empty" and trigger a write.
 if [ "$IF_EMPTY" = "1" ]; then
     CURRENT=$(gh api graphql -f query='
 query($item:ID!) {
@@ -135,8 +146,10 @@ query($item:ID!) {
     }
   }
 }' -f item="$ITEM_ID" \
-      --jq "[.data.node.fieldValues.nodes[] | select(.field.id == \"$FIELD_ID\") | .date] | .[0] // \"\"" \
-      2>/dev/null || echo "")
+      --jq "[.data.node.fieldValues.nodes[] | select(.field.id == \"$FIELD_ID\") | .date] | .[0] // \"\"") || {
+        echo "ERROR: [3/4] could not read $FIELD_NAME on item $ITEM_ID (needs \`organization_projects: read\`)" >&2
+        exit 1
+    }
     if [ -n "$CURRENT" ] && [ "$CURRENT" != "null" ]; then
         echo "ticket #$TICKET → $FIELD_NAME already set ($CURRENT), skipping" >&2
         exit 0
@@ -157,6 +170,9 @@ mutation($project:ID!, $item:ID!, $field:ID!, $date:Date!) {
   -f item="$ITEM_ID" \
   -f field="$FIELD_ID" \
   -f date="$DATE" \
-  --jq '.data.updateProjectV2ItemFieldValue.projectV2Item.id' >/dev/null
+  --jq '.data.updateProjectV2ItemFieldValue.projectV2Item.id' >/dev/null || {
+    echo "ERROR: [4/4] could not write $FIELD_NAME on item $ITEM_ID (needs \`organization_projects: write\`)" >&2
+    exit 1
+}
 
 echo "ticket #$TICKET → $FIELD_NAME = $DATE"

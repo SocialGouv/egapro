@@ -6,16 +6,9 @@ name: 🗓️ Ticket end date
 # the final epic PR (`epic/<N>`) and human non-ticket branches are skipped.
 #
 # Auth: GitHub App token minted by SocialGouv/token-bureau (OIDC), same pattern
-# as release.yml / promote-test-env.yaml.
-#
-# PREREQUISITE — the token-bureau token must carry `organization_projects: write`.
-#   Writing an org Project V2 needs the projects scope; the default GITHUB_TOKEN
-#   cannot, and the token-bureau whitelist (infra-apps) must allow it. As of now
-#   the deployed default whitelist is contents/metadata/issues/pull_requests/
-#   deployments — add `organization_projects: write` (default or an egapro
-#   override) in SocialGouv/infra-apps token-bureau values, and ensure the
-#   backing App has "Organization projects: Read and write", or the board write
-#   step 403s.
+# as release.yml / promote-test-env.yaml. Writing an org Project V2 board needs
+# `organization_projects: write`, which the default GITHUB_TOKEN cannot carry;
+# it comes from the egapro override in SocialGouv/infra-apps token-bureau values.
 
 on:
   pull_request:
@@ -23,6 +16,7 @@ on:
 
 permissions:
   id-token: write # required for token-bureau OIDC
+  contents: read # checkout
 
 jobs:
   stamp-end-date:
@@ -38,6 +32,9 @@ jobs:
         with:
           token-bureau-url: https://token-bureau.fabrique.social.gouv.fr
           audience: socialgouv
+          # Only what the stamping step needs: read the issue node id, write the
+          # board field. Checkout uses the job's own GITHUB_TOKEN.
+          permissions: '{"issues": "read", "organization_projects": "write"}'
 
       - name: Checkout repository
         uses: actions/checkout@v4

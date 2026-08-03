@@ -101,8 +101,9 @@ query($owner:String!, $repo:String!, $n:Int!) {
     }
   }
 }' -f owner=SocialGouv -f repo=egapro -F n="$TICKET" \
-  --jq ".data.repository.issue.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id" \
-  | head -1 || true)
+  --jq ".data.repository.issue.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id")
+# Piping straight into `head` would hide a failed query behind an empty result.
+ITEM_ID=$(printf '%s\n' "$ITEM_ID" | head -1)
 
 if [ -z "$ITEM_ID" ]; then
     # Not on the project yet — add it
