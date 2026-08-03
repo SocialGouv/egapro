@@ -598,6 +598,7 @@ describe("main — CLI entrypoint", () => {
 	}
 
 	it("does not write the output file when the module is imported without direct invocation", async () => {
+		rmSync(OUTPUT_PATH, { force: true });
 		process.argv = ["node", "/fake/test-runner"];
 		vi.resetModules();
 		await import("#scripts/report-grille");
