@@ -18,6 +18,7 @@ Audience : équipe métier / PO (référence d'acceptance et suivi des tests) et
 4. [Scénarios complémentaires hors Excel](#4-scénarios-complémentaires-hors-excel)
 5. [Limites de l'automatisation](#5-limites-de-lautomatisation)
 6. [Arbitrages métier (divergences résolues)](#6-arbitrages-métier-divergences-résolues)
+7. [Lancer la recette](#7-lancer-la-recette)
 
 ---
 
@@ -32,10 +33,11 @@ Les cellules de l'Excel se **regroupent** : un même cas se répète dans plusie
 1. **Côté tests** : le titre du `test.describe(...)` qui couvre un parcours porte le tag entre crochets, ex. `test.describe("[CAS-02] Path 1: no gap + hasCse → ...")`. Un même describe peut porter plusieurs tags. C'est ce tag que ciblent les commandes `--grep` du cahier.
 2. **Côté cahier** : la ligne « Test E2E » de chaque fiche décrit ce que le test déroule réellement — y compris, honnêtement, ce qu'il ne déroule pas encore. Cette profondeur se juge en revue de PR ; l'outillage, lui, ne vérifie que l'existence.
 
-Le script [`packages/app/scripts/check-cahier.mjs`](../packages/app/scripts/check-cahier.mjs) (`pnpm --filter app check:cahier`, exécuté en CI) vérifie que :
+Le script [`packages/app/scripts/check-cahier.ts`](../packages/app/scripts/check-cahier.ts) (`pnpm --filter app check:cahier`, exécuté en CI) vérifie trois niveaux :
 
 - toute fiche `CAS-xx` du §2 (et toute ligne `ANX-xx` du §4) est taguée dans au moins une spec `packages/app/src/e2e/*.e2e.ts` — **une fiche sans test fait échouer la CI** : un trou de couverture est visible en rouge, jamais caché ;
-- tout tag présent dans une spec correspond à une fiche ou une ligne du cahier.
+- tout tag présent dans une spec correspond à une fiche ou une ligne du cahier ;
+- **bijection au niveau coordonnée** : toute coordonnée `AAAA-EFFMAX-CASnn` du §3 est produite par `buildGrid()` et réciproquement — un §3 ou une règle de cadence désynchronisés font échouer la CI.
 
 **Règles de mise à jour** : nouveau parcours métier (évolution de l'Excel) → créer la fiche et la référencer dans les feuilles concernées ; la CI reste rouge jusqu'à l'arrivée du test qui la couvre. Test supprimé ou renommé → répercuter ici. La CI échoue si les deux dérivent.
 
@@ -345,11 +347,12 @@ L'année et la tranche fixent déjà la variante « 6 ou 7 indicateurs », donc 
 
 **Lecture d'une ligne de cellule** : `coordonnée : rappel`. Le texte après les deux-points est un **résumé** du cas (conditions · issue), pas une seconde information : `2027-149-CAS01 : sans CSE → fin de démarche directe` se lit « la coordonnée 2027-149-CAS01, qui correspond au parcours *sans CSE, fin de démarche directe* ». Cliquez la coordonnée pour la fiche complète (§2).
 
-La coordonnée est **au-dessus des tests** : elle pointe vers la **fiche du parcours-type** (§2 — `CAS-01` … `CAS-12`, `CAS-01-6IND`, `CAS-02-6IND`) où vit le test E2E. Comme le contenu d'un cas ne dépend ni de l'année ni de la tranche, un même test couvre toutes les coordonnées qui pointent vers sa fiche — d'où ~14 tests pour toute la grille. Pour lancer **un** cas précis, ouvrez sa fiche : la commande `--grep` y est. Pour lancer **une configuration entière** :
+La coordonnée est **au-dessus des tests** : elle pointe vers la **fiche du parcours-type** (§2 — `CAS-01` … `CAS-12`, `CAS-01-6IND`, `CAS-02-6IND`) où vit le test E2E. Comme le contenu d'un cas ne dépend ni de l'année ni de la tranche, un même test couvre toutes les coordonnées qui pointent vers sa fiche — d'où ~14 tests pour toute la grille. Pour lancer **un** cas précis, ouvrez sa fiche : la commande `--grep` y est. Pour lancer **une configuration entière** par coordonnée (via `test:e2e:grille`, voir §7) :
 
-- **Année « 7 indicateurs » (les 12 cas)** : `pnpm --filter app test:e2e --grep "\[CAS-(0[1-9]|1[0-2])\]"`
-- **Année « 6 premiers indicateurs » (cas 1-2)** : `pnpm --filter app test:e2e --grep "\[CAS-0[12]-6IND\]"`
-- **Tranches < 100** : `pnpm --filter app test:e2e --grep "\[CAS-1[34](-6IND)?\]"`
+- **Une année entière** : `pnpm --filter app test:e2e:grille -- --grep "\[2030-"`
+- **Une tranche entière** : `pnpm --filter app test:e2e:grille -- --grep "-149-CAS"`
+- **Une cellule précise (année × tranche)** : `pnpm --filter app test:e2e:grille -- --grep "\[2030-149-"`
+- **Toute la grille** : `pnpm --filter app test:e2e:grille`
 
 ### Feuille « <50 et 50-99 »
 
@@ -451,11 +454,11 @@ Le socle déclaratif (étapes 1–6, brouillon, historique, panneau de démarche
 
 ## 5. Limites de l'automatisation
 
-Ce que les tests E2E ne peuvent pas rejouer tel quel, et comment c'est compensé :
+Ce que les tests E2E ne peuvent pas rejouer tel quel :
 
-1. **La dimension année de campagne** — les specs E2E tournent sur l'année de campagne courante, pas sur 2027 → 2033. Le *contenu* de chaque cellule de l'Excel (les parcours) est déroulé par les tests du §2 ; le *cadencement* (quelle année déclenche 6 ou 7 indicateurs pour quelle tranche) est verrouillé par les tests unitaires du domaine (`indicatorG.test.ts`, `companyObligation.test.ts`), qui couvrent chaque tranche × année de la matrice.
-2. **La tranche d'effectif** — les parcours de conformité (cas 1 à 12) tournent en 250 et + (effectif GIP 250) ; les variantes 6 indicateurs (`CAS-01-6IND`, `CAS-02-6IND`) tournent avec un effectif GIP de 120, représentatif de la tranche 100-149 ; les nouveaux parcours < 100 tournent avec un effectif GIP de 30 (représentatif < 50) pour `CAS-13`/`CAS-14` et de 75 (représentatif 50-99) pour `CAS-13-6IND`.
-3. **Avis CSE défavorables** — tous les tests déposent des avis « favorable » ; les variantes « défavorable » (sans impact de routage attendu, mais affichées au récapitulatif) ne sont pas déroulées.
+1. **Le jugement humain** — l'ergonomie, la formulation des textes, la lisibilité du PDF généré et la cohérence visuelle d'ensemble ne sont pas mesurables par des assertions automatisées.
+2. **Les autres navigateurs et le mobile** — la grille tourne uniquement sur Chromium (bureau). Compatibilité Firefox/Safari et rendu mobile restent hors périmètre automatisé.
+3. **Les années hors 2027 → 2033** — le seam d'horloge (`withCampaignYear`) permet d'épingler les années 2027 à 2033 ; les années antérieures (données historiques) et les années futures au-delà de 2033 ne sont pas couvertes.
 
 ---
 
@@ -466,3 +469,27 @@ Les 3 divergences relevées en transcrivant le fichier Excel ont été arbitrée
 1. **Moins de 50 salariés (volontariat)** — déclarent **les 7 indicateurs chaque année**, indicateur G compris. La déclaration reste volontaire ; c'est son *contenu* qui change. *Statut : répercutée dans le code par #4043 (`isIndicatorGRequired` renvoie `true` sous 50 salariés, toutes années).*
 2. **50 à 99 salariés** — sont assujetties **chaque année** dès 2027 : les **6 premiers indicateurs** en 2027, 2028, 2029, 2031 et 2032, et les **7 indicateurs** en **2030 et 2033**. *Statut : répercutée dans le code par #4043 (`isObligatedForYear` assujettit les 50-99 chaque année dès `V2_FIRST_CAMPAIGN_YEAR`).*
 3. **Sous 100 salariés en année « 7 indicateurs »** — les tranches < 100 (50-99 comprises en 2030/2033, et les < 50 volontaires) ne sont **pas** concernées par les obligations déclenchées par un écart ≥ 5 % : pas de parcours de conformité, pas de seconde déclaration, pas de rapport d'évaluation conjointe, pas d'avis CSE. Le seuil de ces obligations reste **100 salariés**. *Statut : le code était déjà conforme — le seuil 100 vit dans `isComplianceProcessRequired`/`isCseOpinionRequired` (domaine) et `phase2Required`/`cseRequired` (moteur de règles) ; la divergence décrivait un état antérieur du code (« sans condition de tranche ») qui n'existe plus. Verrouillée par des tests, sans changement de comportement.*
+
+---
+
+## 7. Lancer la recette
+
+### Depuis l'onglet Actions (déclenchement manuel)
+
+1. Accédez à **Actions → Recette grille (nightly)** dans le dépôt GitHub.
+2. Cliquez **Run workflow**.
+3. Choisissez l'**Année de campagne** (`toutes` pour les 185 coordonnées, ou une année précise de 2027 à 2033) et la **Tranche d'effectif** (`toutes`, `49`, `99`, `149`, `249`, `250P`).
+4. Le rapport de recette apparaît dans le **résumé du run** et est téléchargeable en artefact (`grille-recette`).
+
+Le workflow tourne aussi automatiquement chaque nuit à 2h UTC. Un échec nocturne fait échouer le job et notifie les watchers du dépôt — aucune pull request n'est bloquée.
+
+### En local
+
+```bash
+pnpm --filter app test:e2e:grille                        # les 185 coordonnées
+pnpm --filter app test:e2e:grille -- --grep "\[2030-"    # une année
+pnpm --filter app test:e2e:grille -- --grep "\-149-CAS"  # une tranche
+pnpm --filter app report:grille                          # le rapport de recette
+```
+
+Le dev server doit tourner sur le port 3000 avec `EGAPRO_E2E_CLOCK=true` (actif dans `.github/workflows/e2e-grille.yaml` ; à passer manuellement en local).
