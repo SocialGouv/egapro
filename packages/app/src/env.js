@@ -41,9 +41,25 @@ export const env = createEnv({
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
-		EGAPRO_PROCONNECT_CLIENT_ID: z.string(),
-		EGAPRO_PROCONNECT_CLIENT_SECRET: z.string(),
-		EGAPRO_PROCONNECT_ISSUER: z.string().url(),
+		// ProConnect is the production identity provider. The three values are
+		// optional so a fresh checkout boots without them: `getProviders()`
+		// registers the provider only when all three are present. Requiring
+		// them used to force contributors — and the pipeline's browser
+		// validators, which provision a worktree from scratch — to invent
+		// placeholder values just to satisfy this schema, producing an app
+		// that booted with a sign-in button that could never work.
+		EGAPRO_PROCONNECT_CLIENT_ID: z.string().optional(),
+		EGAPRO_PROCONNECT_CLIENT_SECRET: z.string().optional(),
+		EGAPRO_PROCONNECT_ISSUER: z.string().url().optional(),
+		// Dev-only credentials sign-in, off by default. Registered only when
+		// NODE_ENV is not production — `getProviders()` throws outright if this
+		// is ever true in a production runtime. Parsed as a literal string
+		// rather than `z.coerce.boolean()`, which would turn "false" into true.
+		EGAPRO_DEV_AUTH: z
+			.enum(["true", "false"])
+			.optional()
+			.default("false")
+			.transform((value) => value === "true"),
 		EGAPRO_WEEZ_API_URL: z.string().url(),
 		EGAPRO_SUIT_API_URL: z.string().url(),
 		// « Je donne mon avis » (jedonnemonavis.numerique.gouv.fr) — EGAPRO's
@@ -151,6 +167,7 @@ export const env = createEnv({
 		EGAPRO_PROCONNECT_CLIENT_SECRET:
 			process.env.EGAPRO_PROCONNECT_CLIENT_SECRET,
 		EGAPRO_PROCONNECT_ISSUER: process.env.EGAPRO_PROCONNECT_ISSUER,
+		EGAPRO_DEV_AUTH: process.env.EGAPRO_DEV_AUTH,
 		EGAPRO_WEEZ_API_URL: process.env.EGAPRO_WEEZ_API_URL,
 		EGAPRO_SUIT_API_URL: process.env.EGAPRO_SUIT_API_URL,
 		EGAPRO_JDMA_DEMARCHE_ID: process.env.EGAPRO_JDMA_DEMARCHE_ID,

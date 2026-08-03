@@ -1,11 +1,13 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { headers as nextHeaders } from "next/headers";
 import type { DefaultSession, NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
 import { sirenSchema } from "~/modules/admin/schemas";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { extractSiren, parseSiren } from "~/modules/domain";
+import { devLoginSchema } from "~/modules/login/schemas";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
 import { db } from "~/server/db";
@@ -159,6 +161,47 @@ declare module "next-auth/jwt" {
  */
 const ADMIN_EMAILS: Set<string> = parseAdminEmails(env.ADMIN_EMAILS);
 
+/**
+ * Dev-only sign-in. Trusts whatever email and SIRET the form supplies — it
+ * exists so local dev and the pipeline's browser validators can reach
+ * authenticated screens without the external ProConnect sandbox, and it must
+ * never be reachable in a deployed environment. Two independent guards keep
+ * it out: `EGAPRO_DEV_AUTH` defaults to false, and `getProviders()` throws if
+ * it is ever true while `NODE_ENV` is production.
+ *
+ * The returned shape is the same one the ProConnect `profile()` callback
+ * produces, so the `jwt` callback below (user upsert, company linking, admin
+ * flag) runs identically for both providers.
+ */
+function devAuthProvider(): Provider {
+	return CredentialsProvider({
+		id: "dev-auth",
+		name: "Connexion de développement",
+		credentials: {
+			email: { label: "Adresse e-mail", type: "email" },
+			siret: { label: "SIRET", type: "text" },
+		},
+		authorize(credentials) {
+			const parsed = devLoginSchema.safeParse({
+				email: credentials?.email ?? "",
+				siret: credentials?.siret ?? "",
+			});
+			if (!parsed.success) return null;
+
+			const { email, siret } = parsed.data;
+			const localPart = email.split("@")[0] ?? email;
+			return {
+				id: email,
+				name: localPart,
+				email,
+				siret,
+				firstName: localPart,
+				lastName: null,
+			};
+		},
+	});
+}
+
 function getProviders(): Provider[] {
 	const providers: Provider[] = [];
 
@@ -217,6 +260,19 @@ function getProviders(): Provider[] {
 				};
 			},
 		});
+	}
+
+	if (env.EGAPRO_DEV_AUTH) {
+		// Fail loudly rather than silently registering a password-less
+		// provider on a deployed environment. Unreachable during `next build`
+		// (SKIP_ENV_VALIDATION leaves EGAPRO_DEV_AUTH undefined), so this only
+		// fires on an actual misconfigured production runtime.
+		if (env.NODE_ENV === "production") {
+			throw new Error(
+				"EGAPRO_DEV_AUTH is enabled while NODE_ENV=production — refusing to register the dev sign-in provider.",
+			);
+		}
+		providers.push(devAuthProvider());
 	}
 
 	return providers;
