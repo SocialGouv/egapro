@@ -101,9 +101,7 @@ export function CompliancePathChoice({
 	const hasInitialData = !!initialPath;
 	const hasData = hasInitialData || hasDraft;
 
-	// Scroll-to-top must wait for hydration: on the short loading placeholder
-	// it has no effect, and the browser then restores the previous offset
-	// once the (much taller) real form mounts, stranding the user below.
+	// Waits for hydration so the browser doesn't restore scroll on the short placeholder, then re-grow into the taller form (#3576).
 	useEffect(() => {
 		if (draftHydrated) {
 			window.scrollTo(0, 0);

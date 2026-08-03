@@ -1,5 +1,4 @@
-// Plain flex instead of fr-grid-row--gutters: DSFR gutters rely on a
-// negative margin trick that overflows the blue background this row sits on.
+// Plain flex, not fr-grid-row--gutters: its negative-margin gutters overflow this row's background.
 .wrapper {
 	display: flex;
 	flex-direction: column;
