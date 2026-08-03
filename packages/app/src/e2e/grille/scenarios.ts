@@ -273,7 +273,6 @@ export const FICHE_SCENARIOS = {
 
 	"CAS-13": async ({ page }) => {
 		await reachStep6Recap(page, { hasGap: false });
-		// Step 5 was presented: 6-step funnel + indicator G block on the recap.
 		await expect(
 			page.getByText("Étape 6 sur 6", { exact: true }),
 		).toBeVisible();

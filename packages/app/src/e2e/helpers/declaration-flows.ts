@@ -154,7 +154,6 @@ export async function submitStepsThroughQuartiles(
 	});
 
 	await test.step("étape 3 — composantes variables", async () => {
-		// Same table + beneficiary counts
 		await fillPayGapTable(page);
 		await page.getByRole("textbox", { name: "Bénéficiaires femmes" }).fill("5");
 		await page.getByRole("textbox", { name: "Bénéficiaires hommes" }).fill("5");
@@ -163,7 +162,6 @@ export async function submitStepsThroughQuartiles(
 	});
 
 	await test.step("étape 4 — répartition par quartile", async () => {
-		// Fill 8 quartiles (4 annual + 4 hourly)
 		await fillStep4Quartiles(page);
 		await page.getByRole("button", { name: "Suivant" }).click();
 	});
