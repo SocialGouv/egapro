@@ -17,6 +17,9 @@ const campaignDeadlines = getDefaultCampaignDeadlines(2026);
 const DECLARATION_SIREN = "123456789";
 const DECLARATION_YEAR = 2026;
 
+const CORRECTIVE_ACTION_TITLE =
+	"Effectuer des actions correctives et une seconde déclaration";
+
 const mockMutate = vi.fn();
 const mockPush = vi.fn();
 
@@ -116,9 +119,7 @@ describe("CompliancePathChoice", () => {
 		expect(
 			screen.getByText("Justifier les écarts de rémunération ≥ 5 %"),
 		).toBeInTheDocument();
-		expect(
-			screen.getByText("Actions correctives et seconde déclaration"),
-		).toBeInTheDocument();
+		expect(screen.getByText(CORRECTIVE_ACTION_TITLE)).toBeInTheDocument();
 		expect(
 			screen.getByText(
 				"Mettre en place une évaluation conjointe des rémunérations",
@@ -134,9 +135,7 @@ describe("CompliancePathChoice", () => {
 
 	it("enables next button after selecting a path", () => {
 		render(compliancePathChoice());
-		const radio = screen.getByLabelText(
-			"Actions correctives et seconde déclaration",
-		);
+		const radio = screen.getByLabelText(CORRECTIVE_ACTION_TITLE);
 		fireEvent.click(radio);
 		const nextButton = screen.getByRole("button", { name: /suivant/i });
 		expect(nextButton).not.toBeDisabled();
@@ -164,9 +163,7 @@ describe("CompliancePathChoice", () => {
 
 	it("navigates to second declaration when corrective_action is selected", async () => {
 		render(compliancePathChoice());
-		const radio = screen.getByLabelText(
-			"Actions correctives et seconde déclaration",
-		);
+		const radio = screen.getByLabelText(CORRECTIVE_ACTION_TITLE);
 		fireEvent.click(radio);
 
 		const form = screen
@@ -235,7 +232,7 @@ describe("CompliancePathChoice", () => {
 	it("pre-selects the initial path when provided", () => {
 		render(compliancePathChoice({ initialPath: "corrective_action" }));
 		const radio = screen.getByLabelText(
-			"Actions correctives et seconde déclaration",
+			CORRECTIVE_ACTION_TITLE,
 		) as HTMLInputElement;
 		expect(radio.checked).toBe(true);
 	});
@@ -247,9 +244,7 @@ describe("CompliancePathChoice", () => {
 				"Mettre en place une évaluation conjointe des rémunérations",
 			),
 		).toBeInTheDocument();
-		expect(
-			screen.queryByText("Actions correctives et seconde déclaration"),
-		).not.toBeInTheDocument();
+		expect(screen.queryByText(CORRECTIVE_ACTION_TITLE)).not.toBeInTheDocument();
 	});
 
 	it("renders the first-round instruction phrase by default", () => {
@@ -414,9 +409,7 @@ describe("CompliancePathChoice", () => {
 		it("saves a draft when a path is selected and the lock is inactive", async () => {
 			render(compliancePathChoice());
 
-			fireEvent.click(
-				screen.getByLabelText("Actions correctives et seconde déclaration"),
-			);
+			fireEvent.click(screen.getByLabelText(CORRECTIVE_ACTION_TITLE));
 
 			await waitFor(() => {
 				expect(mockSetField).toHaveBeenCalledWith({
@@ -428,9 +421,7 @@ describe("CompliancePathChoice", () => {
 		it("does not save a draft when the declaration is locked read-only", async () => {
 			render(<LockProvider isReadOnly>{compliancePathChoice()}</LockProvider>);
 
-			const radio = screen.getByLabelText(
-				"Actions correctives et seconde déclaration",
-			);
+			const radio = screen.getByLabelText(CORRECTIVE_ACTION_TITLE);
 			fireEvent.click(radio);
 			fireEvent.change(radio, { target: { checked: true } });
 
@@ -445,9 +436,7 @@ describe("CompliancePathChoice", () => {
 			// The outermost fieldset stays enabled so its content remains exposed
 			// to assistive technologies; each control is disabled individually.
 			expect(container.querySelector("fieldset")).not.toBeDisabled();
-			expect(
-				screen.getByLabelText("Actions correctives et seconde déclaration"),
-			).toBeDisabled();
+			expect(screen.getByLabelText(CORRECTIVE_ACTION_TITLE)).toBeDisabled();
 			expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
 		});
 	});

@@ -20,8 +20,8 @@ export function DeclarationSuccessBanner({
 	year,
 }: Props) {
 	return (
-		<div className="fr-grid-row fr-grid-row--gutters fr-p-4w fr-background-alt--blue-france">
-			<div className="fr-col-12 fr-col-md-6">
+		<div className={`fr-p-4w fr-background-alt--blue-france ${styles.wrapper}`}>
+			<div className={styles.column}>
 				<div className={styles.content}>
 					<div className={styles.titleRow}>
 						<DsfrPictogram
@@ -52,13 +52,13 @@ export function DeclarationSuccessBanner({
 					)}
 				</div>
 			</div>
-			<div className="fr-col-12 fr-col-md-6">
+			<div className={styles.column}>
 				<div className="fr-p-2w fr-border fr-background-default--grey">
 					<p className="fr-text--sm fr-mb-1w">
 						Un accusé de réception a été envoyé à l'adresse e-mail{" "}
 						<strong>{email}</strong>.
 					</p>
-					<p className="fr-text--sm fr-text--mention-grey fr-mb-2w">
+					<p className="fr-text--sm fr-text-mention--grey fr-mb-2w">
 						Si ce n'est pas le cas, vérifiez vos courriers indésirables ou SPAM.
 						Sinon, cliquez sur le bouton ci-dessous.
 					</p>

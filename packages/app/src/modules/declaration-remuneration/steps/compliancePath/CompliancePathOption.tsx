@@ -65,7 +65,7 @@ export function CompliancePathOption({
 				</p>
 				{learnMoreHref && (
 					<TrackedLink
-						className="fr-link fr-text--sm"
+						className="fr-link"
 						href={learnMoreHref}
 						rel="noopener noreferrer"
 						target="_blank"

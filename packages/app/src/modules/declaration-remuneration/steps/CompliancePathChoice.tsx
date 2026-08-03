@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Controller } from "react-hook-form";
 import { TrackedLink } from "~/modules/analytics";
 import { useIsImpersonating } from "~/modules/auth";
@@ -101,6 +101,15 @@ export function CompliancePathChoice({
 	const hasInitialData = !!initialPath;
 	const hasData = hasInitialData || hasDraft;
 
+	// Scroll-to-top must wait for hydration: on the short loading placeholder
+	// it has no effect, and the browser then restores the previous offset
+	// once the (much taller) real form mounts, stranding the user below.
+	useEffect(() => {
+		if (draftHydrated) {
+			window.scrollTo(0, 0);
+		}
+	}, [draftHydrated]);
+
 	const mutation = api.declaration.saveCompliancePath.useMutation({
 		onSuccess: (_, { path }) => {
 			clearDraft();
@@ -174,7 +183,7 @@ export function CompliancePathChoice({
 						<p className="fr-mb-1w">
 							Date limite pour choisir un parcours de mise en conformité
 						</p>
-						<p className="fr-text--lg fr-text--bold fr-mb-0">
+						<p className="fr-text--xl fr-text--bold fr-mb-0">
 							{formatLongDate(campaignDeadlines.pathChoiceDeadline)}
 						</p>
 					</div>

@@ -142,7 +142,7 @@ export function SecondRoundOptions({
 				onChange={() => setSelectedPath("justify")}
 			/>
 
-			<h2 className="fr-h6 fr-mt-3w fr-mb-0">
+			<h2 className="fr-h6 fr-mt-3w fr-mb-0 fr-pl-1w">
 				Si la justification n&apos;est pas possible par des critères objectifs
 				et non sexistes
 			</h2>
@@ -185,7 +185,7 @@ export function FirstRoundOptions({
 				onChange={() => setSelectedPath("justify")}
 			/>
 
-			<h2 className="fr-h6 fr-mt-3w fr-mb-0">
+			<h2 className="fr-h6 fr-mt-3w fr-mb-0 fr-pl-1w">
 				Si la justification n&apos;est pas possible par des critères objectifs
 				et non sexistes
 			</h2>
@@ -201,13 +201,13 @@ export function FirstRoundOptions({
 					learnMoreTrackingId="corrective_actions"
 					name="compliance-path"
 					onChange={() => setSelectedPath("corrective_action")}
-					title="Actions correctives et seconde déclaration"
+					title="Effectuer des actions correctives et une seconde déclaration"
 					value="corrective_action"
 				>
 					<p className="fr-mb-0">
 						Vous souhaitez mettre en place des actions correctives, puis
-						recalculer et redéclarer l&apos;indicateur par catégorie de salariés
-						:
+						recalculer et redéclarer l&apos;indicateur par catégorie
+						de&nbsp;salariés :
 					</p>
 					<ul className="fr-mt-1w fr-mb-0">
 						<li>
