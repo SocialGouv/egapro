@@ -10,7 +10,6 @@ import {
 	getRepresentationDeadline,
 } from "~/modules/domain";
 
-import { FileDownloadLink } from "~/modules/shared";
 import { Pagination } from "~/modules/shared/Pagination";
 
 import { DeclarationLink } from "./DeclarationLink";
@@ -35,7 +34,6 @@ type Props = {
 	userPhone: string | null;
 	hasCse: boolean | null;
 	cseApplicable: boolean;
-	hasNoSanction: boolean;
 };
 
 function getDeadlineCell(
@@ -62,7 +60,6 @@ export function DeclarationsSection({
 	userPhone,
 	hasCse,
 	cseApplicable,
-	hasNoSanction,
 }: Props) {
 	const currentYear = getCurrentYear();
 	const currentYearDeclarations = declarations.filter(
@@ -100,24 +97,9 @@ export function DeclarationsSection({
 
 	return (
 		<div className="fr-container fr-my-6w">
-			<div className="fr-grid-row fr-grid-row--middle fr-mb-4w">
-				<div className="fr-col">
-					<h2 className="fr-mb-0" id="demarches-en-cours-title">
-						Démarche en cours
-					</h2>
-				</div>
-				{hasNoSanction && (
-					<div className="fr-col-auto">
-						<FileDownloadLink
-							className="fr-btn fr-btn--secondary fr-btn--icon-left fr-icon-download-line"
-							href="/api/no-sanction-pdf"
-							pendingLabel="Téléchargement en cours…"
-						>
-							Télécharger l&apos;attestation de non sanction (PDF)
-						</FileDownloadLink>
-					</div>
-				)}
-			</div>
+			<h2 className="fr-mb-4w" id="demarches-en-cours-title">
+				Démarche en cours
+			</h2>
 			{visibleCurrentDeclarations.length > 0 && (
 				<DeclarationsTable
 					campaignDeadlines={campaignDeadlines}

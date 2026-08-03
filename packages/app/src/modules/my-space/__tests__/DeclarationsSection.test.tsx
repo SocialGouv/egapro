@@ -60,7 +60,6 @@ function renderSection(
 			cseApplicable={true}
 			declarations={overrides?.declarations ?? declarations}
 			hasCse={true}
-			hasNoSanction={false}
 			userPhone="0122334455"
 		/>,
 	);

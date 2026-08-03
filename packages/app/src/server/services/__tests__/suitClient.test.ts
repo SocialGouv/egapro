@@ -93,7 +93,7 @@ describe("suitFetch", () => {
 		});
 
 		await suitFetch("/suit/api/externe/portail/CSE/339787277");
-		await suitFetch("/suit/api/externe/portail/sanction/339787277");
+		await suitFetch("/suit/api/externe/portail/CSE/987654321");
 
 		expect(AgentMock).toHaveBeenCalledTimes(1);
 		expect(fetchSpy.mock.calls[0]?.[1].dispatcher).toBe(

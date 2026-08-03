@@ -88,7 +88,6 @@ const BASE_PROPS = {
 	campaignDeadlines,
 	company,
 	declarations,
-	hasNoSanction: false,
 	lockedByOther: false,
 	lockHolder: null as LockHolder | null,
 	userPhone: "0122334455" as string | null,
