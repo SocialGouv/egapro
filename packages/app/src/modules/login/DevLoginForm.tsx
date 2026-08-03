@@ -11,6 +11,21 @@ type Props = {
 	callbackUrl?: string;
 };
 
+const DEFAULT_CALLBACK = "/mon-espace";
+
+/**
+ * `callbackUrl` reaches this form straight from the query string. Anything
+ * other than a same-site absolute path — a full URL, a protocol-relative
+ * `//evil.tld`, a `javascript:` URI — is dropped rather than navigated to.
+ */
+function safeCallbackUrl(candidate: string | undefined): string {
+	if (!candidate) return DEFAULT_CALLBACK;
+	if (!candidate.startsWith("/") || candidate.startsWith("//")) {
+		return DEFAULT_CALLBACK;
+	}
+	return candidate;
+}
+
 /**
  * Dev-only sign-in form. Posts to the `dev-auth` credentials provider, which
  * is registered only outside production. Lets a developer — or the pipeline's
@@ -25,11 +40,13 @@ export function DevLoginForm({ callbackUrl }: Props) {
 		defaultValues: { email: "", siret: "" },
 	});
 
+	const target = safeCallbackUrl(callbackUrl);
+
 	const onSubmit = form.handleSubmit(async (values) => {
 		setSubmitting(true);
 		setServerError(null);
 		const result = await signIn("dev-auth", {
-			callbackUrl: callbackUrl ?? "/mon-espace",
+			callbackUrl: target,
 			email: values.email,
 			redirect: false,
 			siret: values.siret,
@@ -39,7 +56,7 @@ export function DevLoginForm({ callbackUrl }: Props) {
 			setSubmitting(false);
 			return;
 		}
-		window.location.assign(result?.url ?? callbackUrl ?? "/mon-espace");
+		window.location.assign(target);
 	});
 
 	const emailError = form.formState.errors.email?.message;

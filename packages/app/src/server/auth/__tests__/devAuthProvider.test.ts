@@ -53,7 +53,11 @@ function findDevProvider(providers: Provider[]) {
 
 type AuthorizeFn = (
 	credentials: Record<string, string> | undefined,
+	req?: { headers?: Record<string, string> },
 ) => unknown | Promise<unknown>;
+
+/** A request as it reaches a locally-served dev server. */
+const LOCAL_REQ = { headers: { host: "localhost:3021" } };
 
 describe("dev-auth provider registration", () => {
 	beforeEach(() => {
@@ -65,8 +69,12 @@ describe("dev-auth provider registration", () => {
 			EGAPRO_DEV_AUTH: false,
 			NODE_ENV: "development",
 		});
-		expect(findDevProvider(providers)).toBeUndefined();
-		expect(providers).toHaveLength(1);
+		// Asserting the exact id set rather than a length: it says which
+		// providers are registered, and fails loudly if `dev-auth` ever slips
+		// in under a different id.
+		expect(providers.map(resolveProvider).map((p) => p.id)).toEqual([
+			"proconnect",
+		]);
 	});
 
 	it("is registered when EGAPRO_DEV_AUTH is on outside production", async () => {
@@ -118,10 +126,10 @@ describe("dev-auth authorize", () => {
 
 	it("returns a ProConnect-shaped profile for a valid email and SIRET", async () => {
 		const authorize = await getAuthorize();
-		const user = await authorize({
-			email: "declarant@example.fr",
-			siret: "55210055400013",
-		});
+		const user = await authorize(
+			{ email: "declarant@example.fr", siret: "55210055400013" },
+			LOCAL_REQ,
+		);
 		expect(user).toEqual({
 			email: "declarant@example.fr",
 			firstName: "declarant",
@@ -134,29 +142,97 @@ describe("dev-auth authorize", () => {
 
 	it("accepts a SIRET typed with spaces", async () => {
 		const authorize = await getAuthorize();
-		const user = await authorize({
-			email: "declarant@example.fr",
-			siret: "552 100 554 00013",
-		});
+		const user = await authorize(
+			{ email: "declarant@example.fr", siret: "552 100 554 00013" },
+			LOCAL_REQ,
+		);
 		expect(user).toMatchObject({ siret: "55210055400013" });
 	});
 
 	it("rejects a malformed email", async () => {
 		const authorize = await getAuthorize();
 		expect(
-			await authorize({ email: "nope", siret: "55210055400013" }),
+			await authorize({ email: "nope", siret: "55210055400013" }, LOCAL_REQ),
 		).toBeNull();
 	});
 
 	it("rejects a SIRET that is not 14 digits", async () => {
 		const authorize = await getAuthorize();
 		expect(
-			await authorize({ email: "declarant@example.fr", siret: "552100554" }),
+			await authorize(
+				{ email: "declarant@example.fr", siret: "552100554" },
+				LOCAL_REQ,
+			),
 		).toBeNull();
 	});
 
 	it("rejects missing credentials", async () => {
 		const authorize = await getAuthorize();
-		expect(await authorize(undefined)).toBeNull();
+		expect(await authorize(undefined, LOCAL_REQ)).toBeNull();
+	});
+});
+
+describe("dev-auth loopback guard", () => {
+	async function authorizeFrom(host: string | undefined) {
+		const providers = await loadProviders({
+			EGAPRO_DEV_AUTH: true,
+			NODE_ENV: "development",
+		});
+		const provider = findDevProvider(providers);
+		if (!provider) throw new Error("dev-auth provider not registered");
+		const authorize = provider.authorize as AuthorizeFn;
+		return authorize(
+			{ email: "declarant@example.fr", siret: "55210055400013" },
+			host === undefined ? { headers: {} } : { headers: { host } },
+		);
+	}
+
+	it.each([
+		["localhost:3021", "localhost with a port"],
+		["localhost", "bare localhost"],
+		["127.0.0.1:3000", "IPv4 loopback"],
+		["[::1]:3000", "IPv6 loopback"],
+	])("accepts %s (%s)", async (host) => {
+		expect(await authorizeFrom(host)).not.toBeNull();
+	});
+
+	it.each([
+		["egapro-review-app.ovh.fabrique.social.gouv.fr", "a review app host"],
+		["egapro.travail.gouv.fr", "the production host"],
+		["localhost.evil.tld", "a host merely prefixed with localhost"],
+		["127.0.0.1.evil.tld", "a host merely prefixed with the loopback IP"],
+	])("rejects %s (%s)", async (host) => {
+		expect(await authorizeFrom(host)).toBeNull();
+	});
+
+	it("rejects a request with no Host header", async () => {
+		expect(await authorizeFrom(undefined)).toBeNull();
+	});
+});
+
+describe("EGAPRO_DEV_AUTH truthiness", () => {
+	// With SKIP_ENV_VALIDATION set — every `next build` — the env helper hands
+	// back raw strings, and "false" is truthy. A loose check would register
+	// the provider (or, in production, abort the build).
+	it('ignores the string "false"', async () => {
+		const providers = await loadProviders({
+			EGAPRO_DEV_AUTH: "false",
+			NODE_ENV: "development",
+		});
+		expect(findDevProvider(providers)).toBeUndefined();
+	});
+
+	it('does not abort a production build when passed the string "false"', async () => {
+		await expect(
+			loadProviders({ EGAPRO_DEV_AUTH: "false", NODE_ENV: "production" }),
+		).resolves.toBeDefined();
+	});
+
+	it('ignores the string "true" — only a real boolean enables it', async () => {
+		const providers = await loadProviders({
+			EGAPRO_DEV_AUTH: "true",
+			NODE_ENV: "development",
+		});
+		expect(findDevProvider(providers)).toBeUndefined();
 	});
 });

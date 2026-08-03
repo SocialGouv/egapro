@@ -213,3 +213,32 @@ export const env = createEnv({
 	 */
 	emptyStringAsUndefined: true,
 });
+
+/**
+ * ProConnect is optional in the schema so a fresh worktree boots without it,
+ * but a production runtime without it is a broken deploy: the app would come
+ * up with an empty provider list, pass its health checks, and leave nobody
+ * able to sign in. Requiring the three values here keeps that failure loud —
+ * the same protection the mandatory schema used to give — without forcing
+ * placeholder values on local checkouts.
+ *
+ * Skipped when env validation is off (`next build` runs with NODE_ENV
+ * production and SKIP_ENV_VALIDATION=1, and the secrets are injected at
+ * runtime, not at build time).
+ */
+if (!process.env.SKIP_ENV_VALIDATION && env.NODE_ENV === "production") {
+	const missing = [
+		["EGAPRO_PROCONNECT_CLIENT_ID", env.EGAPRO_PROCONNECT_CLIENT_ID],
+		["EGAPRO_PROCONNECT_CLIENT_SECRET", env.EGAPRO_PROCONNECT_CLIENT_SECRET],
+		["EGAPRO_PROCONNECT_ISSUER", env.EGAPRO_PROCONNECT_ISSUER],
+	]
+		.filter(([, value]) => !value)
+		.map(([name]) => name);
+
+	if (missing.length > 0) {
+		throw new Error(
+			`Missing ProConnect configuration in production: ${missing.join(", ")}. ` +
+				"Without it no user can sign in — refusing to start.",
+		);
+	}
+}

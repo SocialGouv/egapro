@@ -14,14 +14,16 @@ type Props = {
 };
 
 /**
- * Dev-only sign-in route. Mirrors the guard on the `dev-auth` provider: the
- * page 404s unless `EGAPRO_DEV_AUTH` is on and the runtime is not production,
- * so it cannot be reached on a deployed environment even if the file ships.
+ * Dev-only sign-in route. Convenience only: hiding the page protects nothing
+ * on its own, since the sign-in surface is the `dev-auth` provider itself
+ * (reachable by POSTing to its callback). The provider's own guards — env
+ * flag, production throw, loopback-host check — are what actually keep it
+ * closed; this page just avoids advertising a route that cannot work.
  */
 export default async function DevLoginPage({ searchParams }: Props) {
-	if (!env.EGAPRO_DEV_AUTH || env.NODE_ENV === "production") {
-		notFound();
-	}
+	const isDevAuthEnabled =
+		env.EGAPRO_DEV_AUTH === true && env.NODE_ENV !== "production";
+	if (!isDevAuthEnabled) notFound();
 
 	const { callbackUrl } = await searchParams;
 
