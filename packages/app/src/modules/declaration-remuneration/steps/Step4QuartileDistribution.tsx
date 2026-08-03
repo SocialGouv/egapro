@@ -27,15 +27,17 @@ import stepStyles from "./Step4QuartileDistribution.module.scss";
 import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCallout";
 import { QuartileTable } from "./step4/QuartileTable";
 import {
-	buildRecap,
-	type CountField,
 	coherenceWarningLabel,
 	deriveCoherenceWarnings,
+	type QuartileReferences,
+} from "./step4/quartileCoherence";
+import {
+	buildRecap,
+	type CountField,
 	deriveErrors,
 	emptyErrorMap,
 	type FieldErrorMap,
 	hasAnyError,
-	type QuartileReferences,
 	type TableType,
 } from "./step4/quartileErrors";
 import {
@@ -159,7 +161,6 @@ export function Step4QuartileDistribution({
 		},
 	};
 
-	const [maxError, setMaxError] = useState<string | null>(null);
 	const hasData = hasSavedData || hasDraft;
 	const [fieldErrors, setFieldErrors] = useState<FieldErrorMap>(emptyErrorMap);
 	const [showRecap, setShowRecap] = useState(false);
@@ -206,6 +207,25 @@ export function Step4QuartileDistribution({
 		});
 	}
 
+	function setFieldError(
+		tableType: TableType,
+		index: number,
+		field: "threshold" | CountField,
+		message: string,
+	) {
+		setFieldErrors((prev) => {
+			const next: FieldErrorMap = {
+				annual: [...prev.annual] as FieldErrorMap["annual"],
+				hourly: [...prev.hourly] as FieldErrorMap["hourly"],
+			};
+			next[tableType][index] = {
+				...(next[tableType][index] ?? {}),
+				[field]: message,
+			};
+			return next;
+		});
+	}
+
 	function handleQuartileChange(
 		tableType: TableType,
 		index: number,
@@ -225,7 +245,6 @@ export function Step4QuartileDistribution({
 		} else {
 			if (value === "") {
 				setQuartileField(tableType, index, field, undefined);
-				setMaxError(null);
 				clearFieldError(tableType, index, field);
 				return;
 			}
@@ -235,14 +254,16 @@ export function Step4QuartileDistribution({
 			const reference = references[tableType];
 			const max = field === "women" ? reference.women : reference.men;
 			if (max !== undefined && n > max) {
-				setMaxError(
+				setFieldError(
+					tableType,
+					index,
+					field,
 					tableType === "annual"
 						? `Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`
 						: `Le nombre ne peut pas dépasser l'effectif du fichier GIP pour le taux horaire (${max}).`,
 				);
 				return;
 			}
-			setMaxError(null);
 			setQuartileField(tableType, index, field, n);
 		}
 		clearFieldError(tableType, index, field);
@@ -368,24 +389,24 @@ export function Step4QuartileDistribution({
 					</div>
 				)}
 
-				{coherenceWarnings.length > 0 && (
-					<div
-						aria-atomic="true"
-						aria-live="polite"
-						className="fr-alert fr-alert--warning"
-					>
-						<h3 className="fr-alert__title">
-							Vérifiez la répartition des effectifs
-						</h3>
-						<ul>
-							{coherenceWarnings.map((warning) => (
-								<li key={`${warning.table}-${warning.field}`}>
-									{coherenceWarningLabel(warning)}
-								</li>
-							))}
-						</ul>
-					</div>
-				)}
+				{/* The live region stays mounted at load; only its content toggles,
+				    otherwise assistive tech misses the announcement. */}
+				<div aria-atomic="true" aria-live="polite">
+					{coherenceWarnings.length > 0 && (
+						<div className="fr-alert fr-alert--warning">
+							<h3 className="fr-alert__title">
+								Vérifiez la répartition des effectifs
+							</h3>
+							<ul>
+								{coherenceWarnings.map((warning) => (
+									<li key={`${warning.table}-${warning.field}`}>
+										{coherenceWarningLabel(warning)}
+									</li>
+								))}
+							</ul>
+						</div>
+					)}
+				</div>
 
 				<div className={stepStyles.dataContainer}>
 					<QuartileTable
@@ -478,10 +499,7 @@ export function Step4QuartileDistribution({
 					/>
 				)}
 
-				<FormErrors
-					mutationError={mutation.error?.message}
-					validationError={maxError}
-				/>
+				<FormErrors mutationError={mutation.error?.message} />
 
 				<FormActions
 					isSubmitting={mutation.isPending}

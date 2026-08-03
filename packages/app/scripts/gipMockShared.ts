@@ -1,13 +1,5 @@
-/**
- * Shared helpers for the GIP MDS mock generators.
- * The quartile `nb_F`/`nb_H` counts are the source of truth: distribute a
- * block's reference headcount across the 4 quartiles, then derive proportions.
- */
-
-/**
- * Split `total` people into `weights.length` buckets following `weights`, using
- * the largest remainder method so the parts always sum back exactly to `total`.
- */
+// Largest remainder method: the parts always sum back to `total` exactly, which
+// independent rounding of each bucket cannot guarantee.
 export function distributeByLargestRemainder(
 	total: number,
 	weights: number[],
@@ -38,4 +30,12 @@ export function proportionWomen(women: number, men: number): number {
 
 export function proportionMen(women: number, men: number): number {
 	return women + men > 0 ? men / (women + men) : 0;
+}
+
+export function fmt2(n: number): string {
+	return n.toFixed(2).replace(".", ",");
+}
+
+export function fmt4(n: number): string {
+	return n.toFixed(4).replace(".", ",");
 }

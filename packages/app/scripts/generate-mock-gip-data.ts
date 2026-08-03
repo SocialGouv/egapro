@@ -20,6 +20,8 @@
 
 import {
 	distributeByLargestRemainder,
+	fmt2,
+	fmt4,
 	proportionMen,
 	proportionWomen,
 } from "./gipMockShared";
@@ -81,14 +83,6 @@ function randBetween(min: number, max: number): number {
 
 function randInt(min: number, max: number): number {
 	return Math.round(randBetween(min, max));
-}
-
-function fmt2(n: number): string {
-	return n.toFixed(2).replace(".", ",");
-}
-
-function fmt4(n: number): string {
-	return n.toFixed(4).replace(".", ",");
 }
 
 // ── Company loading ────────────────────────────────────────────────
@@ -339,9 +333,8 @@ function generateRow(company: CompanyData): string[] {
 		Math.max(0, q4WomenProp + randBetween(-0.03, 0.03)),
 	);
 
-	// nb_F / nb_H are the source of truth: distribute each block's reference
-	// headcount across the 4 quartiles (largest remainder → exact sum), then
-	// derive the proportions from the integer counts.
+	// Counts first, proportions derived from them — the reverse cannot guarantee
+	// that the quartile cells sum back to the block's reference headcount.
 	const annualWomenCounts = distributeByLargestRemainder(totalWomen, [
 		q1WomenProp,
 		q2WomenProp,

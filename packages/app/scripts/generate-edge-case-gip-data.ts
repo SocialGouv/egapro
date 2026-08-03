@@ -13,19 +13,11 @@
 
 import {
 	distributeByLargestRemainder,
+	fmt2,
+	fmt4,
 	proportionMen,
 	proportionWomen,
 } from "./gipMockShared";
-
-// ── Formatting helpers ────────────────────────────────────────────
-
-function fmt2(n: number): string {
-	return n.toFixed(2).replace(".", ",");
-}
-
-function fmt4(n: number): string {
-	return n.toFixed(4).replace(".", ",");
-}
 
 const QUARTILE_BLOCKS = [
 	{ prefix: "Rem_globale_annuelle", effF: "Effectif_F_rem_annuelle_globale" },
@@ -38,11 +30,8 @@ function parseCell(value: string | undefined): number | null {
 	return Number.isNaN(parsed) ? null : parsed;
 }
 
-/**
- * Derive coherent `nb_F`/`nb_H` and proportions per block from the row's
- * reference headcounts. Blocks whose effectif is absent are left untouched, so
- * the "all null" edge cases keep their empty quartile cells.
- */
+// Blocks with no effectif are left untouched, so the "all null" edge cases keep
+// their empty quartile cells rather than gaining fabricated zeroes.
 function finalizeQuartileCounts(row: Record<string, string>): void {
 	for (const { prefix, effF } of QUARTILE_BLOCKS) {
 		const effH = effF.replace("Effectif_F", "Effectif_H");

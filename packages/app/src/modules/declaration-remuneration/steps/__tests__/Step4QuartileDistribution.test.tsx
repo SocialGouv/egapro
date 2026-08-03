@@ -579,12 +579,24 @@ describe("Step4QuartileDistribution", () => {
 		).toBeInTheDocument();
 		expect(hourlyWomen).not.toHaveValue("160");
 
+		expect(hourlyWomen).toHaveAttribute("aria-invalid", "true");
+		const describedBy = hourlyWomen.getAttribute("aria-describedby");
+		expect(describedBy).toBeTruthy();
+		expect(document.getElementById(describedBy as string)).toHaveTextContent(
+			/ne peut pas dépasser l'effectif du fichier GIP pour le taux horaire \(153\)/i,
+		);
+
 		const annualWomen = screen.getByLabelText(
 			/Nombre de femmes 1er quartile annuel/i,
 		) as HTMLInputElement;
 		await user.clear(annualWomen);
 		await user.type(annualWomen, "160");
 		expect(annualWomen).toHaveValue("160");
-		expect(screen.queryByText(/ne peut pas dépasser/i)).not.toBeInTheDocument();
+		expect(annualWomen).not.toHaveAttribute("aria-invalid");
+		expect(
+			screen.queryByText(
+				/ne peut pas dépasser l'effectif de l'étape 1 \(177\)/i,
+			),
+		).not.toBeInTheDocument();
 	});
 });

@@ -3,10 +3,9 @@ import type { QuartileTuple } from "~/modules/declaration-remuneration";
 import {
 	coherenceWarningLabel,
 	deriveCoherenceWarnings,
-	deriveErrors,
-	hasAnyError,
 	type QuartileReferences,
-} from "../quartileErrors";
+} from "../quartileCoherence";
+import { deriveErrors, hasAnyError } from "../quartileErrors";
 
 function table(
 	women: Array<number | undefined>,
