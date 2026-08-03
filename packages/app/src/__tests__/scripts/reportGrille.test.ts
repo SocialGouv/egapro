@@ -1,5 +1,6 @@
 import {
 	existsSync,
+	mkdirSync,
 	mkdtempSync,
 	readFileSync,
 	rmSync,
@@ -584,6 +585,14 @@ describe("main — CLI entrypoint", () => {
 	const RESULTS_PATH = join(REPORT_DIR, "grille-results.json");
 	const OUTPUT_PATH = join(REPORT_DIR, "grille-recette.md");
 
+	// The script resolves its paths from process.cwd(), so these tests write into
+	// the package's own playwright-report/. That directory exists on a developer
+	// machine (an E2E run created it) but not on a fresh CI checkout, so each test
+	// creates it rather than relying on whichever test happens to run first.
+	beforeEach(() => {
+		mkdirSync(REPORT_DIR, { recursive: true });
+	});
+
 	afterEach(() => {
 		vi.resetModules();
 		vi.unstubAllEnvs();
@@ -598,6 +607,7 @@ describe("main — CLI entrypoint", () => {
 	}
 
 	it("does not write the output file when the module is imported without direct invocation", async () => {
+		mkdirSync(REPORT_DIR, { recursive: true });
 		rmSync(OUTPUT_PATH, { force: true });
 		process.argv = ["node", "/fake/test-runner"];
 		vi.resetModules();
