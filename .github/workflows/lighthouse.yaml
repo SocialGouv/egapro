@@ -25,6 +25,10 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      # Fallback only: this derives the subdomain from the deployment ref, which
+      # is wrong for a deployment whose environment is not named after its ref
+      # (a promoted test env is deployed from `alpha`). Kept for the deployments
+      # that declare no environment URL.
       - name: Load SocialGouv variables
         id: env
         uses: socialgouv/kontinuous/.github/actions/env@v1
@@ -33,7 +37,7 @@ jobs:
         continue-on-error: true
         id: lighthouse
         env:
-          LIGHTHOUSE_URL: https://${{ steps.env.outputs.subdomain }}.ovh.fabrique.social.gouv.fr
+          LIGHTHOUSE_URL: ${{ github.event.deployment_status.environment_url || format('https://{0}.ovh.fabrique.social.gouv.fr', steps.env.outputs.subdomain) }}
       - name: Show Lighthouse scores
         if: always()
         working-directory: packages/app

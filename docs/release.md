@@ -34,7 +34,11 @@ Le workflow est **découplé** : un échec du changelog ne bloque jamais la rele
 
 ## Env de test
 
-`promote-test-env.yaml` (manuel) déploie une release **existante** sur un env de test persistant (`rgaa-persist` / `perf-persist`). Il ne crée pas de release.
+`promote-test-env.yaml` (manuel) déploie une release **existante** sur un env de test persistant. Il ne crée pas de release.
+
+Le workflow prend un tag (`release`) et une cible (`target` : `rgaa` ou `perf`), vérifie que le tag correspond bien à une release GitHub publiée, construit l'image `app:<tag>` **depuis le tag**, puis la déploie avec `deploy-via-github`. `KS_GIT_BRANCH=<target>-persist` pilote le nommage kontinuous — namespace `egapro-<target>-persist`, labels `kontinuous/ref` et exemption janitor (convention `*-persist`) — et `inlineSet: global.imageTag` force les pods sur le tag promu plutôt que sur le `persist-<sha>` calculé par défaut.
+
+**Aucune branche git n'intervient** : `rgaa` et `perf` ne sont que des refs de nommage pour les préreleases. Le job `deploy` déclare l'URL de l'environnement, ce qui la propage dans `deployment_status.environment_url` — sans quoi l'audit Lighthouse, déclenché sur cet événement, ciblerait l'env de la branche du workflow (`alpha`) au lieu de l'env promu.
 
 ## Canal beta / master
 

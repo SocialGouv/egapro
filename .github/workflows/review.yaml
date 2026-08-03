@@ -82,11 +82,11 @@ jobs:
             NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
             NEXT_PUBLIC_MATOMO_URL=${{ vars.NEXT_PUBLIC_MATOMO_URL }}
             NEXT_PUBLIC_MATOMO_SITE_ID=${{ vars.NEXT_PUBLIC_MATOMO_SITE_ID_DEV }}
+            APP_VERSION=${{ github.ref_name }}
+            SENTRY_RELEASE=${{ github.ref_name }}
+            PR_NUMBER=${{ steps.pr.outputs.number }}
           secrets: |
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
-            sentry_release=${{ github.ref_name }}
-            app_version=${{ github.ref_name }}
-            pr_number=${{ steps.pr.outputs.number }}
           push: true
 
   kontinuous:
