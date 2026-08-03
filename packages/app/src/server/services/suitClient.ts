@@ -82,6 +82,11 @@ export function suitAwareFetch(
  * TLS options are applied when the socket opens, so a corrupt bundle or a wrong
  * passphrase surfaces as a rejected promise here rather than at startup —
  * callers must log their failures.
+ *
+ * Only for the JSON endpoints. A WAF sits in front of SUIT and rejects an
+ * explicit `Accept` header on the GIP-MDS file route with an HTML 403
+ * (`x-waf-blocked: 1`) — observed against SUIT Validation. That route must keep
+ * going through `suitAwareFetch`, which sends no `Accept`.
  */
 export function suitFetch(path: string): Promise<Response> {
 	const baseUrl = env.EGAPRO_SUIT_API_URL.replace(/\/$/, "");
