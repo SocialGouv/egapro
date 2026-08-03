@@ -16,10 +16,22 @@ import {
  * a whole year and reading like a flake.
  */
 export function indicatorGRequiredForGip(gipWorkforce: number | null): boolean {
-	return isIndicatorGRequired(
-		getObligationWorkforce(gipWorkforce),
-		getCurrentYear(),
-	);
+	return indicatorGRequiredForGipInYear(gipWorkforce, getCurrentYear());
+}
+
+/**
+ * Same question, for a campaign year the caller pins itself (`withCampaignYear`).
+ *
+ * `indicatorGRequiredForGip` reads `getCurrentYear()` in the Playwright process,
+ * which the fixture does not pin — it pins the Node server and the browser. A
+ * pinned spec must therefore state its year here, or it would compare the app's
+ * pinned funnel against a calendar-year expectation.
+ */
+export function indicatorGRequiredForGipInYear(
+	gipWorkforce: number | null,
+	year: number,
+): boolean {
+	return isIndicatorGRequired(getObligationWorkforce(gipWorkforce), year);
 }
 
 /** Steps the funnel presents: the indicator G categories step is dropped when not owed. */
