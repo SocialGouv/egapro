@@ -337,6 +337,27 @@ describe("fetchGipCsv", () => {
 		vi.unstubAllGlobals();
 	});
 
+	it("goes through the SUIT client when the URL is on the SUIT origin", async () => {
+		const fetchSpy = vi.fn().mockResolvedValue({
+			ok: true,
+			text: vi.fn().mockResolvedValue(VALID_CSV),
+			status: 200,
+			statusText: "OK",
+		});
+		vi.stubGlobal("fetch", fetchSpy);
+
+		// EGAPRO_SUIT_API_URL is https://api.suit.example.com in the test env.
+		await fetchGipCsv(
+			"https://api.suit.example.com/suit/api/externe/egapro/gipmds/latest",
+		);
+
+		// `redirect: "error"` is only added by suitAwareFetch, so it proves the
+		// GIP fetch is wired through the certificate-bearing path.
+		expect(fetchSpy.mock.calls[0]?.[1].redirect).toBe("error");
+
+		vi.unstubAllGlobals();
+	});
+
 	it("throws on non-OK response", async () => {
 		const mockResponse = {
 			ok: false,

@@ -338,15 +338,12 @@ L'application génère plusieurs documents officiels et expose une API publique 
 |---|---|---|
 | `DeclarationPdfDocument` | Pre-fill / aperçu | `~/modules/declarationPdf` |
 | `TransmittedPdfDocument` | Reçu officiel après soumission | `~/modules/declarationPdf` |
-| `NoSanctionPdfDocument` | Attestation d'absence de sanction | `~/modules/noSanctionAttestation` |
 
 Téléchargement déclenché depuis :
 
 - `/declaration-remuneration/recapitulatif/` (bouton intégré)
 - Page CSE (avis officiel)
 - Vue admin de la déclaration (`/admin/declarations/[id]`)
-
-L'attestation no-sanction est servie via la Route Handler `/api/pdf/no-sanction` (audit `PDF_NO_SANCTION_DOWNLOAD`).
 
 ### 10.2 Export Excel et API publique
 

@@ -1,20 +1,10 @@
 import "server-only";
 
-import { env } from "~/env";
+import { suitFetch } from "./suitClient";
 
 type SuitCseResponse = {
 	siren: string;
 	CSE: boolean;
-};
-
-type SuitSanctionResponse = {
-	siren: string;
-	sanction: boolean;
-};
-
-export type SanctionStatus = {
-	hasSanction: boolean;
-	validityDate: string | null;
 };
 
 /**
@@ -23,52 +13,19 @@ export type SanctionStatus = {
  */
 export async function fetchCseBySiren(siren: string): Promise<boolean | null> {
 	try {
-		const url = `${env.EGAPRO_SUIT_API_URL.replace(/\/$/, "")}/suit/api/externe/portail/CSE/${siren}`;
-		const response = await fetch(url, {
-			headers: { Accept: "application/json" },
-			signal: AbortSignal.timeout(10_000),
-			next: { revalidate: 86_400 },
-		});
+		const response = await suitFetch(`/suit/api/externe/portail/CSE/${siren}`);
 
-		if (!response.ok) return null;
+		if (!response.ok) {
+			// A status at all proves mTLS worked; only a throw means a bad certificate.
+			console.warn(`[suit] CSE lookup: HTTP ${response.status}`);
+			return null;
+		}
 
 		const data = (await response.json()) as SuitCseResponse;
 		return data.CSE;
-	} catch {
-		return null;
-	}
-}
-
-/**
- * Fetch sanction status from the SUIT API for a given SIREN.
- * Returns the sanction status if the API responds, or `null` on error/not found.
- *
- * When EGAPRO_MOCK_SUIT_SANCTION is true, always returns "no sanction"
- * without calling the API (for dev/testing while the API is unavailable).
- */
-export async function fetchSanctionBySiren(
-	siren: string,
-): Promise<SanctionStatus | null> {
-	if (env.EGAPRO_MOCK_SUIT_SANCTION) {
-		return { hasSanction: false, validityDate: null };
-	}
-
-	try {
-		const url = `${env.EGAPRO_SUIT_API_URL.replace(/\/$/, "")}/suit/api/externe/portail/sanction/${siren}`;
-		const response = await fetch(url, {
-			headers: { Accept: "application/json" },
-			signal: AbortSignal.timeout(10_000),
-			next: { revalidate: 86_400 },
-		});
-
-		if (!response.ok) return null;
-
-		const data = (await response.json()) as SuitSanctionResponse;
-		return {
-			hasSanction: data.sanction,
-			validityDate: null,
-		};
-	} catch {
+	} catch (error) {
+		// No response: refused handshake, bad certificate, or timeout.
+		console.error("[suit] CSE lookup failed", error);
 		return null;
 	}
 }
