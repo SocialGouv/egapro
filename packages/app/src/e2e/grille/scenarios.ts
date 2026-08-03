@@ -16,10 +16,7 @@ import {
 	reachStep6Recap,
 	submitFromStep6Recap,
 } from "../helpers/declaration-flows";
-import {
-	indicatorGRequiredForGip,
-	recapStepperLabel,
-} from "../helpers/indicator-g";
+import { recapStepperLabel } from "../helpers/indicator-g";
 import type { Coordinate } from "./coordinates";
 
 export type ScenarioContext = { page: Page; coordinate: Coordinate };
@@ -330,7 +327,7 @@ export const FICHE_SCENARIOS = {
 	},
 
 	"CAS-13-6IND": async ({ page, coordinate }) => {
-		const indicatorGRequired = indicatorGRequiredForGip(coordinate.workforce);
+		const indicatorGRequired = coordinate.indicatorGRequired;
 		await page.goto("/declaration-remuneration/etape/5");
 		if (indicatorGRequired) {
 			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/5$/);
