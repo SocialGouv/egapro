@@ -1,3 +1,7 @@
+import { execSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { expect, test } from "@playwright/test";
 import { buildGrid, pickCoordinate } from "./grille/coordinates";
 import { FICHE_SCENARIOS } from "./grille/scenarios";
@@ -631,5 +635,55 @@ test.describe("[CAS-13-6IND] GIP 75 (50-99) → direct completion", () => {
 	}) => {
 		test.slow();
 		await FICHE_SCENARIOS["CAS-13-6IND"]({ page, coordinate });
+	});
+});
+
+test.describe("[S11] CAS-04 with défavorable opinion — routing unchanged, opinion retained", () => {
+	const coordinate = complianceCoordinate("CAS-04");
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
+	});
+
+	test("défavorable opinion reaches the same fin-de-démarche as favorable", async ({
+		page,
+	}) => {
+		test.slow();
+		await FICHE_SCENARIOS["CAS-04"]({
+			page,
+			coordinate,
+			opinion: "unfavorable",
+		});
+	});
+
+	test("step-1 recap shows Défavorable as the selected opinion", async ({
+		page,
+	}) => {
+		await page.goto("/avis-cse/etape/1");
+		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await expect(
+			page.locator("#first-decl-accuracy-unfavorable"),
+		).toBeChecked();
+	});
+
+	test("transmitted PDF text contains Défavorable", async ({ page }) => {
+		const response = await page.request.get(
+			`/api/transmitted-pdf?year=${coordinate.year}`,
+		);
+		expect(response.ok()).toBe(true);
+		const pdfBytes = await response.body();
+
+		const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "egapro-pdf-"));
+		const pdfPath = path.join(tmpDir, "transmitted.pdf");
+		const txtPath = path.join(tmpDir, "transmitted.txt");
+		try {
+			fs.writeFileSync(pdfPath, pdfBytes);
+			execSync(`pdftotext "${pdfPath}" "${txtPath}"`);
+			const pdfText = fs.readFileSync(txtPath, "utf-8");
+			expect(pdfText).toContain("Défavorable");
+		} finally {
+			fs.rmSync(tmpDir, { recursive: true, force: true });
+		}
 	});
 });

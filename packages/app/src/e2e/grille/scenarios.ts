@@ -19,7 +19,12 @@ import {
 import { recapStepperLabel } from "../helpers/indicator-g";
 import type { Coordinate } from "./coordinates";
 
-export type ScenarioContext = { page: Page; coordinate: Coordinate };
+export type ScenarioContext = {
+	page: Page;
+	coordinate: Coordinate;
+	/** Opinion axis for CSE accuracy and gap steps. Defaults to "favorable" — the grid always runs in favorable mode. */
+	opinion?: "favorable" | "unfavorable";
+};
 
 const CONFIRMATION_PATH = `${COMPLIANCE_PATH}/confirmation`;
 const DEMARCHE_COMPLETED = /Votre parcours .* est (désormais )?terminé/;
@@ -97,7 +102,7 @@ export const FICHE_SCENARIOS = {
 		});
 	},
 
-	"CAS-04": async ({ page }) => {
+	"CAS-04": async ({ page, opinion = "favorable" }) => {
 		await completeDeclaration(page, { hasGap: true });
 		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
 		await expectComplianceOptions(page, {
@@ -107,7 +112,7 @@ export const FICHE_SCENARIOS = {
 		});
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
-		await fillCseStep1(page, { firstDeclGapConsulted: true });
+		await fillCseStep1(page, { firstDeclGapConsulted: true, opinion });
 		await submitCseStep2(page, {
 			columns: [
 				{ declarationNumber: 1, type: "accuracy" },
