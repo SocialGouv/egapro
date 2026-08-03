@@ -3,4 +3,4 @@ apiVersion: v1
 metadata:
   name: suit
 data:
-  EGAPRO_SUIT_API_URL: "https://api.suit.valid.travail.gouv.fr"
+  EGAPRO_SUIT_API_URL: "https://api.suit.travail.gouv.fr"
