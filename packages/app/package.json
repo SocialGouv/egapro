@@ -10,6 +10,7 @@
 		"pretest": "pnpm --filter notifications build",
 		"check": "biome check .",
 		"check:cahier": "tsx scripts/check-cahier.ts",
+		"report:grille": "tsx scripts/report-grille.ts",
 		"check:journal": "node scripts/check-journal.mjs",
 		"check:unsafe": "biome check --write --unsafe .",
 		"check:write": "biome check --write .",
