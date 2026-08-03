@@ -1,4 +1,3 @@
-import { computeWorkforceTotal, QUARTILE_COUNT } from "~/modules/domain";
 import type { gipMdsData } from "~/server/db/schema";
 
 /**
@@ -7,13 +6,16 @@ import type { gipMdsData } from "~/server/db/schema";
  */
 export type GipMdsRow = typeof gipMdsData.$inferSelect;
 
-/** Quartile data computed from GIP proportions + workforce totals. */
+/** Quartile data read from the GIP `nb_F`/`nb_H` columns. */
 export type GipQuartileData = {
 	/** 3 thresholds for Q1-Q3 (lower bound); Q4 has no threshold in the GIP model. */
 	thresholds: [string | null, string | null, string | null];
-	/** Integer women count per quartile, derived from proportion × total/4. */
+	/** Block reference headcount (annual or hourly) the table is checked against. */
+	referenceWomen: number | null;
+	referenceMen: number | null;
+	/** Integer women count per quartile, read verbatim from the GIP `nb_F` columns. */
 	womenCounts: [number | null, number | null, number | null, number | null];
-	/** Integer men count per quartile, derived from proportion × total/4. */
+	/** Integer men count per quartile, read verbatim from the GIP `nb_H` columns. */
 	menCounts: [number | null, number | null, number | null, number | null];
 };
 
@@ -54,7 +56,7 @@ export type GipPrefillData = {
 		/** Number of men benefiting from variable pay (integer from GIP workforce column). */
 		beneficiaryCountMen: number | null;
 	};
-	/** Step 4 — Quartile distribution (Indicator F), with counts computed from proportions. */
+	/** Step 4 — Quartile distribution (Indicator F), counts read from the GIP `nb` columns. */
 	step4: {
 		annual: GipQuartileData;
 		hourly: GipQuartileData;
@@ -114,16 +116,16 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 					row.annualQuartileThreshold3,
 				],
 				[
-					row.annualQuartile1ProportionWomen,
-					row.annualQuartile2ProportionWomen,
-					row.annualQuartile3ProportionWomen,
-					row.annualQuartile4ProportionWomen,
+					row.annualQuartile1WomenCount,
+					row.annualQuartile2WomenCount,
+					row.annualQuartile3WomenCount,
+					row.annualQuartile4WomenCount,
 				],
 				[
-					row.annualQuartile1ProportionMen,
-					row.annualQuartile2ProportionMen,
-					row.annualQuartile3ProportionMen,
-					row.annualQuartile4ProportionMen,
+					row.annualQuartile1MenCount,
+					row.annualQuartile2MenCount,
+					row.annualQuartile3MenCount,
+					row.annualQuartile4MenCount,
 				],
 			),
 			hourly: buildQuartileData(
@@ -135,16 +137,16 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 					row.hourlyQuartileThreshold3,
 				],
 				[
-					row.hourlyQuartile1ProportionWomen,
-					row.hourlyQuartile2ProportionWomen,
-					row.hourlyQuartile3ProportionWomen,
-					row.hourlyQuartile4ProportionWomen,
+					row.hourlyQuartile1WomenCount,
+					row.hourlyQuartile2WomenCount,
+					row.hourlyQuartile3WomenCount,
+					row.hourlyQuartile4WomenCount,
 				],
 				[
-					row.hourlyQuartile1ProportionMen,
-					row.hourlyQuartile2ProportionMen,
-					row.hourlyQuartile3ProportionMen,
-					row.hourlyQuartile4ProportionMen,
+					row.hourlyQuartile1MenCount,
+					row.hourlyQuartile2MenCount,
+					row.hourlyQuartile3MenCount,
+					row.hourlyQuartile4MenCount,
 				],
 			),
 		},
@@ -179,18 +181,18 @@ export const CSV_TO_SCHEMA_MAP: Record<string, keyof GipMdsRow> = {
 	Taux_horaire_variable_moyen_ecart: "variableHourlyMeanGap",
 	Taux_horaire_variable_moyen_F: "variableHourlyMeanWomen",
 	Taux_horaire_variable_moyen_H: "variableHourlyMeanMen",
-	Rem_globale_annuelle_médiane_ecart: "globalAnnualMedianGap",
-	Rem_globale_annuelle_médiane_F: "globalAnnualMedianWomen",
-	Rem_globale_annuelle_médiane_H: "globalAnnualMedianMen",
-	Taux_horaire_global_médian_ecart: "globalHourlyMedianGap",
-	Taux_globale_annuelle_médiane_F: "globalHourlyMedianWomen",
-	Taux_globale_annuelle_médiane_H: "globalHourlyMedianMen",
-	Rem_variable_annuelle_médiane_ecart: "variableAnnualMedianGap",
-	Rem_variable_annuelle_médiane_F: "variableAnnualMedianWomen",
-	Rem_variable_annuelle_médiane_H: "variableAnnualMedianMen",
-	Taux_horaire_variable_médian_ecart: "variableHourlyMedianGap",
-	Taux_horaire_variable_médian_F: "variableHourlyMedianWomen",
-	Taux_horaire_variable_médian_H: "variableHourlyMedianMen",
+	Rem_globale_annuelle_mediane_ecart: "globalAnnualMedianGap",
+	Rem_globale_annuelle_mediane_F: "globalAnnualMedianWomen",
+	Rem_globale_annuelle_mediane_H: "globalAnnualMedianMen",
+	Taux_horaire_global_median_ecart: "globalHourlyMedianGap",
+	Taux_globale_annuelle_mediane_F: "globalHourlyMedianWomen",
+	Taux_globale_annuelle_mediane_H: "globalHourlyMedianMen",
+	Rem_variable_annuelle_mediane_ecart: "variableAnnualMedianGap",
+	Rem_variable_annuelle_mediane_F: "variableAnnualMedianWomen",
+	Rem_variable_annuelle_mediane_H: "variableAnnualMedianMen",
+	Taux_horaire_variable_median_ecart: "variableHourlyMedianGap",
+	Taux_horaire_variable_median_F: "variableHourlyMedianWomen",
+	Taux_horaire_variable_median_H: "variableHourlyMedianMen",
 	Proportion_variable_F: "variableProportionWomen",
 	Proportion_variable_H: "variableProportionMen",
 	Seuil_Q1_Rem_globale: "annualQuartileThreshold1",
@@ -204,6 +206,14 @@ export const CSV_TO_SCHEMA_MAP: Record<string, keyof GipMdsRow> = {
 	Quartile2_Rem_globale_annuelle_proportion_H: "annualQuartile2ProportionMen",
 	Quartile3_Rem_globale_annuelle_proportion_H: "annualQuartile3ProportionMen",
 	Quartile4_Rem_globale_annuelle_proportion_H: "annualQuartile4ProportionMen",
+	Quartile1_Rem_globale_annuelle_nb_F: "annualQuartile1WomenCount",
+	Quartile2_Rem_globale_annuelle_nb_F: "annualQuartile2WomenCount",
+	Quartile3_Rem_globale_annuelle_nb_F: "annualQuartile3WomenCount",
+	Quartile4_Rem_globale_annuelle_nb_F: "annualQuartile4WomenCount",
+	Quartile1_Rem_globale_annuelle_nb_H: "annualQuartile1MenCount",
+	Quartile2_Rem_globale_annuelle_nb_H: "annualQuartile2MenCount",
+	Quartile3_Rem_globale_annuelle_nb_H: "annualQuartile3MenCount",
+	Quartile4_Rem_globale_annuelle_nb_H: "annualQuartile4MenCount",
 	Seuil_Q1_Taux_horaire_global: "hourlyQuartileThreshold1",
 	Seuil_Q2_Taux_horaire_global: "hourlyQuartileThreshold2",
 	Seuil_Q3_Taux_horaire_global: "hourlyQuartileThreshold3",
@@ -215,6 +225,14 @@ export const CSV_TO_SCHEMA_MAP: Record<string, keyof GipMdsRow> = {
 	Quartile2_Taux_horaire_global_proportion_H: "hourlyQuartile2ProportionMen",
 	Quartile3_Taux_horaire_global_proportion_H: "hourlyQuartile3ProportionMen",
 	Quartile4_Taux_horaire_global_proportion_H: "hourlyQuartile4ProportionMen",
+	Quartile1_Taux_horaire_global_nb_F: "hourlyQuartile1WomenCount",
+	Quartile2_Taux_horaire_global_nb_F: "hourlyQuartile2WomenCount",
+	Quartile3_Taux_horaire_global_nb_F: "hourlyQuartile3WomenCount",
+	Quartile4_Taux_horaire_global_nb_F: "hourlyQuartile4WomenCount",
+	Quartile1_Taux_horaire_global_nb_H: "hourlyQuartile1MenCount",
+	Quartile2_Taux_horaire_global_nb_H: "hourlyQuartile2MenCount",
+	Quartile3_Taux_horaire_global_nb_H: "hourlyQuartile3MenCount",
+	Quartile4_Taux_horaire_global_nb_H: "hourlyQuartile4MenCount",
 	indice: "confidenceIndex",
 	indice_nature_exo: "confidenceExoticContracts",
 	indice_unite: "confidenceUnitMeasure",
@@ -240,52 +258,33 @@ function toInt(value: string | null): number | null {
 }
 
 /**
- * Convert a GIP proportion (0-1) to an integer headcount.
- * Each quartile contains ~total/4 people; the proportion gives the gender split.
- * Formula: count = round(proportion × quartileSize).
- */
-function proportionToCount(
-	proportion: string | null,
-	quartileSize: number,
-): number | null {
-	if (proportion === null) return null;
-	const p = Number.parseFloat(proportion);
-	if (Number.isNaN(p)) return null;
-	return Math.round(p * quartileSize);
-}
-
-/**
- * Build quartile data from GIP proportions + workforce totals.
- * The total workforce for each gender is split into 4 quartiles of ~equal size.
+ * Build quartile data from the GIP `nb_F`/`nb_H` columns.
+ * The per-quartile headcounts are the source of truth — never derived from
+ * proportions. A GIP row without `nb` columns yields empty cells (the
+ * declarant fills them by hand); there is no proportion fallback.
  */
 function buildQuartileData(
-	totalWomen: number | null,
-	totalMen: number | null,
+	referenceWomen: number | null,
+	referenceMen: number | null,
 	thresholds: [string | null, string | null, string | null],
-	womenProportions: [
-		string | null,
-		string | null,
-		string | null,
-		string | null,
-	],
-	menProportions: [string | null, string | null, string | null, string | null],
+	womenCounts: [string | null, string | null, string | null, string | null],
+	menCounts: [string | null, string | null, string | null, string | null],
 ): GipQuartileData {
-	const totalAll = computeWorkforceTotal(totalWomen ?? 0, totalMen ?? 0);
-	const quartileSize = totalAll > 0 ? Math.round(totalAll / QUARTILE_COUNT) : 0;
-
 	return {
 		thresholds,
+		referenceWomen,
+		referenceMen,
 		womenCounts: [
-			proportionToCount(womenProportions[0], quartileSize),
-			proportionToCount(womenProportions[1], quartileSize),
-			proportionToCount(womenProportions[2], quartileSize),
-			proportionToCount(womenProportions[3], quartileSize),
+			toInt(womenCounts[0]),
+			toInt(womenCounts[1]),
+			toInt(womenCounts[2]),
+			toInt(womenCounts[3]),
 		],
 		menCounts: [
-			proportionToCount(menProportions[0], quartileSize),
-			proportionToCount(menProportions[1], quartileSize),
-			proportionToCount(menProportions[2], quartileSize),
-			proportionToCount(menProportions[3], quartileSize),
+			toInt(menCounts[0]),
+			toInt(menCounts[1]),
+			toInt(menCounts[2]),
+			toInt(menCounts[3]),
 		],
 	};
 }

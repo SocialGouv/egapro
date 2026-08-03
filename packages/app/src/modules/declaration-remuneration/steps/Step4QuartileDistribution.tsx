@@ -29,10 +29,13 @@ import { QuartileTable } from "./step4/QuartileTable";
 import {
 	buildRecap,
 	type CountField,
+	coherenceWarningLabel,
+	deriveCoherenceWarnings,
 	deriveErrors,
 	emptyErrorMap,
 	type FieldErrorMap,
 	hasAnyError,
+	type QuartileReferences,
 	type TableType,
 } from "./step4/quartileErrors";
 import {
@@ -148,6 +151,14 @@ export function Step4QuartileDistribution({
 	const annual = form.watch("annual");
 	const hourly = form.watch("hourly");
 
+	const references: QuartileReferences = {
+		annual: { women: maxWomen, men: maxMen },
+		hourly: {
+			women: gipPrefillData?.step4.hourly.referenceWomen ?? undefined,
+			men: gipPrefillData?.step4.hourly.referenceMen ?? undefined,
+		},
+	};
+
 	const [maxError, setMaxError] = useState<string | null>(null);
 	const hasData = hasSavedData || hasDraft;
 	const [fieldErrors, setFieldErrors] = useState<FieldErrorMap>(emptyErrorMap);
@@ -221,10 +232,13 @@ export function Step4QuartileDistribution({
 			if (/\D/.test(value)) return;
 			const n = Number.parseInt(value, 10);
 			if (Number.isNaN(n) || n < 0) return;
-			const max = field === "women" ? maxWomen : maxMen;
+			const reference = references[tableType];
+			const max = field === "women" ? reference.women : reference.men;
 			if (max !== undefined && n > max) {
 				setMaxError(
-					`Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
+					tableType === "annual"
+						? `Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`
+						: `Le nombre ne peut pas dépasser l'effectif du fichier GIP pour le taux horaire (${max}).`,
 				);
 				return;
 			}
@@ -258,6 +272,11 @@ export function Step4QuartileDistribution({
 
 	const recap = buildRecap(fieldErrors);
 	const showAlert = showRecap && recap.length > 0;
+
+	const coherenceWarnings = deriveCoherenceWarnings(
+		{ annual, hourly },
+		references,
+	);
 
 	return (
 		<form
@@ -349,6 +368,25 @@ export function Step4QuartileDistribution({
 					</div>
 				)}
 
+				{coherenceWarnings.length > 0 && (
+					<div
+						aria-atomic="true"
+						aria-live="polite"
+						className="fr-alert fr-alert--warning"
+					>
+						<h3 className="fr-alert__title">
+							Vérifiez la répartition des effectifs
+						</h3>
+						<ul>
+							{coherenceWarnings.map((warning) => (
+								<li key={`${warning.table}-${warning.field}`}>
+									{coherenceWarningLabel(warning)}
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
+
 				<div className={stepStyles.dataContainer}>
 					<QuartileTable
 						disabled={isImpersonating}
@@ -359,6 +397,8 @@ export function Step4QuartileDistribution({
 						}
 						quartiles={annual}
 						readOnly={isReadOnly}
+						referenceMen={references.annual.men}
+						referenceWomen={references.annual.women}
 						sourceNote={
 							gipPrefillData ? (
 								<PrefillSource
@@ -382,6 +422,8 @@ export function Step4QuartileDistribution({
 						}
 						quartiles={hourly}
 						readOnly={isReadOnly}
+						referenceMen={references.hourly.men}
+						referenceWomen={references.hourly.women}
 						sourceNote={
 							gipPrefillData ? (
 								<PrefillSource

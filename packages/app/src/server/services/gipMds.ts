@@ -54,6 +54,7 @@ export function parseGipCsv(csvContent: string): {
 
 	const headers = splitCsvLine(lines[2] ?? "").map((h) => h.trim());
 	const rows: Array<Partial<GipMdsRow>> = [];
+	const unknownHeaders = new Set<string>();
 
 	for (let i = 3; i < lines.length; i++) {
 		const line = lines[i];
@@ -67,7 +68,15 @@ export function parseGipCsv(csvContent: string): {
 			if (!header) continue;
 
 			const schemaField = CSV_TO_SCHEMA_MAP[header];
-			if (!schemaField) continue;
+			if (!schemaField) {
+				if (!unknownHeaders.has(header)) {
+					unknownHeaders.add(header);
+					console.warn(
+						`[gip-mds/parse] Unknown CSV header "${header}" — column ignored. Check the file format against the current GIP schema.`,
+					);
+				}
+				continue;
+			}
 
 			const rawValue = values[j]?.trim() ?? "";
 			if (rawValue === "") continue;

@@ -14,9 +14,15 @@
  * The generated CSV follows the exact GIP MDS format:
  * - Line 1: metadata headers
  * - Line 2: metadata values
- * - Line 3: column headers (75 columns)
+ * - Line 3: column headers (87 columns)
  * - Lines 4+: data rows (one per SIREN)
  */
+
+import {
+	distributeByLargestRemainder,
+	proportionMen,
+	proportionWomen,
+} from "./gipMockShared";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -333,6 +339,39 @@ function generateRow(company: CompanyData): string[] {
 		Math.max(0, q4WomenProp + randBetween(-0.03, 0.03)),
 	);
 
+	// nb_F / nb_H are the source of truth: distribute each block's reference
+	// headcount across the 4 quartiles (largest remainder → exact sum), then
+	// derive the proportions from the integer counts.
+	const annualWomenCounts = distributeByLargestRemainder(totalWomen, [
+		q1WomenProp,
+		q2WomenProp,
+		q3WomenProp,
+		q4WomenProp,
+	]);
+	const annualMenCounts = distributeByLargestRemainder(totalMen, [
+		1 - q1WomenProp,
+		1 - q2WomenProp,
+		1 - q3WomenProp,
+		1 - q4WomenProp,
+	]);
+	const hourlyWomenCounts = distributeByLargestRemainder(hourlyWomen, [
+		hq1WomenProp,
+		hq2WomenProp,
+		hq3WomenProp,
+		hq4WomenProp,
+	]);
+	const hourlyMenCounts = distributeByLargestRemainder(hourlyMen, [
+		1 - hq1WomenProp,
+		1 - hq2WomenProp,
+		1 - hq3WomenProp,
+		1 - hq4WomenProp,
+	]);
+	const nb = (counts: number[], i: number): string => String(counts[i] ?? 0);
+	const propF = (w: number[], m: number[], i: number): string =>
+		fmt4(proportionWomen(w[i] ?? 0, m[i] ?? 0));
+	const propH = (w: number[], m: number[], i: number): string =>
+		fmt4(proportionMen(w[i] ?? 0, m[i] ?? 0));
+
 	// Confidence index
 	const confidenceIndex = randBetween(0.5, 0.99);
 	const confExo = randBetween(0, 0.5);
@@ -350,7 +389,7 @@ function generateRow(company: CompanyData): string[] {
 	const confExtRem = randBetween(0, 0.95);
 	const confExtRate = randBetween(0, 0.05);
 
-	// Build the row (75 fields in CSV order)
+	// Build the row (87 fields in CSV order)
 	return [
 		siren,
 		fmt2(workforce),
@@ -391,34 +430,46 @@ function generateRow(company: CompanyData): string[] {
 		// Indicator E — Variable pay proportions
 		fmt4(proportionVariableWomen),
 		fmt4(proportionVariableMen),
-		// Indicator F — Annual quartile thresholds (Q1-Q3 only)
+		// Indicator F — Annual quartiles: thresholds, nb_F, nb_H, then proportions
 		fmt2(q1Threshold),
 		fmt2(q2Threshold),
 		fmt2(q3Threshold),
-		// Annual quartile proportions (women)
-		fmt4(q1WomenProp),
-		fmt4(q2WomenProp),
-		fmt4(q3WomenProp),
-		fmt4(q4WomenProp),
-		// Annual quartile proportions (men = 1 - women)
-		fmt4(1 - q1WomenProp),
-		fmt4(1 - q2WomenProp),
-		fmt4(1 - q3WomenProp),
-		fmt4(1 - q4WomenProp),
-		// Hourly quartile thresholds (Q1-Q3 only)
+		nb(annualWomenCounts, 0),
+		nb(annualWomenCounts, 1),
+		nb(annualWomenCounts, 2),
+		nb(annualWomenCounts, 3),
+		nb(annualMenCounts, 0),
+		nb(annualMenCounts, 1),
+		nb(annualMenCounts, 2),
+		nb(annualMenCounts, 3),
+		propF(annualWomenCounts, annualMenCounts, 0),
+		propF(annualWomenCounts, annualMenCounts, 1),
+		propF(annualWomenCounts, annualMenCounts, 2),
+		propF(annualWomenCounts, annualMenCounts, 3),
+		propH(annualWomenCounts, annualMenCounts, 0),
+		propH(annualWomenCounts, annualMenCounts, 1),
+		propH(annualWomenCounts, annualMenCounts, 2),
+		propH(annualWomenCounts, annualMenCounts, 3),
+		// Indicator F — Hourly quartiles: thresholds, nb_F, nb_H, then proportions
 		fmt2(hq1),
 		fmt2(hq2),
 		fmt2(hq3),
-		// Hourly quartile proportions (women)
-		fmt4(hq1WomenProp),
-		fmt4(hq2WomenProp),
-		fmt4(hq3WomenProp),
-		fmt4(hq4WomenProp),
-		// Hourly quartile proportions (men)
-		fmt4(1 - hq1WomenProp),
-		fmt4(1 - hq2WomenProp),
-		fmt4(1 - hq3WomenProp),
-		fmt4(1 - hq4WomenProp),
+		nb(hourlyWomenCounts, 0),
+		nb(hourlyWomenCounts, 1),
+		nb(hourlyWomenCounts, 2),
+		nb(hourlyWomenCounts, 3),
+		nb(hourlyMenCounts, 0),
+		nb(hourlyMenCounts, 1),
+		nb(hourlyMenCounts, 2),
+		nb(hourlyMenCounts, 3),
+		propF(hourlyWomenCounts, hourlyMenCounts, 0),
+		propF(hourlyWomenCounts, hourlyMenCounts, 1),
+		propF(hourlyWomenCounts, hourlyMenCounts, 2),
+		propF(hourlyWomenCounts, hourlyMenCounts, 3),
+		propH(hourlyWomenCounts, hourlyMenCounts, 0),
+		propH(hourlyWomenCounts, hourlyMenCounts, 1),
+		propH(hourlyWomenCounts, hourlyMenCounts, 2),
+		propH(hourlyWomenCounts, hourlyMenCounts, 3),
 		// Confidence indices
 		fmt4(confidenceIndex),
 		fmt4(confExo),
@@ -461,23 +512,31 @@ const HEADERS = [
 	"Taux_horaire_variable_moyen_ecart",
 	"Taux_horaire_variable_moyen_F",
 	"Taux_horaire_variable_moyen_H",
-	"Rem_globale_annuelle_médiane_ecart",
-	"Rem_globale_annuelle_médiane_F",
-	"Rem_globale_annuelle_médiane_H",
-	"Taux_horaire_global_médian_ecart",
-	"Taux_globale_annuelle_médiane_F",
-	"Taux_globale_annuelle_médiane_H",
-	"Rem_variable_annuelle_médiane_ecart",
-	"Rem_variable_annuelle_médiane_F",
-	"Rem_variable_annuelle_médiane_H",
-	"Taux_horaire_variable_médian_ecart",
-	"Taux_horaire_variable_médian_F ",
-	"Taux_horaire_variable_médian_H",
+	"Rem_globale_annuelle_mediane_ecart",
+	"Rem_globale_annuelle_mediane_F",
+	"Rem_globale_annuelle_mediane_H",
+	"Taux_horaire_global_median_ecart",
+	"Taux_globale_annuelle_mediane_F",
+	"Taux_globale_annuelle_mediane_H",
+	"Rem_variable_annuelle_mediane_ecart",
+	"Rem_variable_annuelle_mediane_F",
+	"Rem_variable_annuelle_mediane_H",
+	"Taux_horaire_variable_median_ecart",
+	"Taux_horaire_variable_median_F ",
+	"Taux_horaire_variable_median_H",
 	"Proportion_variable_F",
 	"Proportion_variable_H",
 	"Seuil_Q1_Rem_globale",
 	"Seuil_Q2_Rem_globale",
 	"Seuil_Q3_Rem_globale",
+	"Quartile1_Rem_globale_annuelle_nb_F",
+	"Quartile2_Rem_globale_annuelle_nb_F",
+	"Quartile3_Rem_globale_annuelle_nb_F",
+	"Quartile4_Rem_globale_annuelle_nb_F",
+	"Quartile1_Rem_globale_annuelle_nb_H",
+	"Quartile2_Rem_globale_annuelle_nb_H",
+	"Quartile3_Rem_globale_annuelle_nb_H",
+	"Quartile4_Rem_globale_annuelle_nb_H",
 	"Quartile1_Rem_globale_annuelle_proportion_F",
 	"Quartile2_Rem_globale_annuelle_proportion_F",
 	"Quartile3_Rem_globale_annuelle_proportion_F",
@@ -489,6 +548,14 @@ const HEADERS = [
 	"Seuil_Q1_Taux_horaire_global",
 	"Seuil_Q2_Taux_horaire_global",
 	"Seuil_Q3_Taux_horaire_global",
+	"Quartile1_Taux_horaire_global_nb_F",
+	"Quartile2_Taux_horaire_global_nb_F",
+	"Quartile3_Taux_horaire_global_nb_F",
+	"Quartile4_Taux_horaire_global_nb_F",
+	"Quartile1_Taux_horaire_global_nb_H",
+	"Quartile2_Taux_horaire_global_nb_H",
+	"Quartile3_Taux_horaire_global_nb_H",
+	"Quartile4_Taux_horaire_global_nb_H",
 	"Quartile1_Taux_horaire_global_proportion_F",
 	"Quartile2_Taux_horaire_global_proportion_F",
 	"Quartile3_Taux_horaire_global_proportion_F",

@@ -126,6 +126,58 @@ export function deriveErrors(values: {
 	return result;
 }
 
+export type QuartileReference = { women?: number; men?: number };
+
+export type QuartileReferences = {
+	annual: QuartileReference;
+	hourly: QuartileReference;
+};
+
+export type CoherenceWarning = {
+	table: TableType;
+	field: CountField;
+	expected: number;
+	total: number;
+};
+
+function sumCounts(table: QuartileTuple, field: CountField): number | null {
+	let sum = 0;
+	for (let i = 0; i < 4; i++) {
+		const value = table[i]?.[field];
+		if (typeof value !== "number") return null;
+		sum += value;
+	}
+	return sum;
+}
+
+/**
+ * Non-blocking coherence check: per table and per sex, warn when the sum of the
+ * quartile cells does not match that table's reference headcount. The two
+ * tables have distinct references (annual vs hourly) and are never compared to
+ * each other. Submission is never blocked by these warnings.
+ */
+export function deriveCoherenceWarnings(
+	values: { annual: QuartileTuple; hourly: QuartileTuple },
+	references: QuartileReferences,
+): CoherenceWarning[] {
+	const out: CoherenceWarning[] = [];
+	for (const table of ["annual", "hourly"] as const) {
+		for (const field of ["women", "men"] as const) {
+			const expected = references[table][field];
+			if (expected === undefined) continue;
+			const total = sumCounts(values[table], field);
+			if (total === null) continue;
+			if (total !== expected) out.push({ table, field, expected, total });
+		}
+	}
+	return out;
+}
+
+export function coherenceWarningLabel(warning: CoherenceWarning): string {
+	const sexLabel = warning.field === "women" ? "de femmes" : "d'hommes";
+	return `Le total des effectifs ${sexLabel} saisis pour la ${TABLE_LABEL[warning.table]} (${warning.total}) ne correspond pas à l'effectif de référence (${warning.expected}).`;
+}
+
 export function hasAnyError(map: FieldErrorMap): boolean {
 	for (const table of ["annual", "hourly"] as const) {
 		for (let i = 0; i < 4; i++) {

@@ -30,6 +30,9 @@ type Props = {
 	onQuartileChange: (index: number, field: Field, value: string) => void;
 	disabled?: boolean;
 	readOnly?: boolean;
+	/** Reference headcount for this table (annual or hourly), when known. */
+	referenceWomen?: number;
+	referenceMen?: number;
 };
 
 export function QuartileTable({
@@ -43,6 +46,8 @@ export function QuartileTable({
 	onQuartileChange,
 	disabled = false,
 	readOnly = false,
+	referenceWomen,
+	referenceMen,
 }: Props) {
 	const {
 		women: totalWomen,
@@ -137,12 +142,22 @@ export function QuartileTable({
 												data-mobile-label="Nombre de femmes"
 											>
 												<strong>{totalAll > 0 ? totalWomen : "-"}</strong>
+												{referenceWomen !== undefined && (
+													<span className="fr-hint-text">
+														Référence&nbsp;: {referenceWomen}
+													</span>
+												)}
 											</td>
 											<td
 												className={stepStyles.numericCell}
 												data-mobile-label="Nombre d'hommes"
 											>
 												<strong>{totalAll > 0 ? totalMen : "-"}</strong>
+												{referenceMen !== undefined && (
+													<span className="fr-hint-text">
+														Référence&nbsp;: {referenceMen}
+													</span>
+												)}
 											</td>
 											<td
 												className={stepStyles.numericCell}
