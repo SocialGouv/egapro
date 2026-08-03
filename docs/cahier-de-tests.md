@@ -442,6 +442,8 @@ Comportements testés en E2E qui ne figurent pas dans le fichier de Laetitia mai
 | ANX-01 | Tâtonnement : changer de parcours de conformité avant toute action aval (le dernier choix gagne, les deux événements sont historisés) | `compliance-path-change.e2e.ts` |
 | ANX-02 | Démarche terminée → toute navigation vers le parcours de conformité redirige | `compliance.e2e.ts` — `[ANX-02] Path 12` |
 | ANX-03 | Bouton « Précédent » sur `/avis-cse` : retour contextuel selon l'état (récap étape 6, choix de parcours, récap 2ᵉ déclaration) | `compliance.e2e.ts` — `[ANX-03] Paths 13.a / 13.b / 13.c` |
+| ANX-04 | Tranche 100-149, année triennale ≥ 2030 : l'indicateur G redevient obligatoire, le funnel repasse à 6 étapes. Contre-branche de `CAS-01-6IND` / `CAS-02-6IND`, qui n'exerceraient sinon qu'une seule de leurs deux branches — et basculeraient silencieusement au rouge en 2030 | `compliance.e2e.ts` — `[ANX-04] Path 14bis` (effectif GIP 120, année épinglée 2030) |
+| ANX-05 | Tranche 50-99 : la composition du funnel suit l'année épinglée — étape catégories absente et inatteignable par URL directe en année « 6 indicateurs » (2029), présente en année triennale ≥ 2030 | `compliance.e2e.ts` — `[ANX-05] Path 13` (effectif GIP 75, années épinglées 2029 et 2030) |
 
 Le socle déclaratif (étapes 1–6, brouillon, historique, panneau de démarche, deadlines de campagne, annulation, saut de l'étape 5 quand l'indicateur G ne s'applique pas…) est couvert par les autres specs (`declaration.e2e.ts`, `declarationDraft.e2e.ts`, `declaration-history.e2e.ts`, `declaration-process-panel.e2e.ts`, `campaign-deadlines-gating.e2e.ts`, `declaration-cancellation.e2e.ts`) — hors périmètre de ce cahier, qui trace les parcours du fichier Excel.
 
