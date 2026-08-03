@@ -9,10 +9,15 @@ import { getCurrentYear } from "~/modules/domain";
  * E2E recette grid can pilot the campaign year across every server call and
  * every browser bundle without a rebuild.
  *
- * Two independent locks make this route non-existent in production: it 404s
- * unless EGAPRO_E2E_CLOCK is enabled AND NODE_ENV is not "production". The flag
- * is declared in no .kontinuous env config, so it is never set in preproduction
- * or production.
+ * EGAPRO_E2E_CLOCK alone gates the route: it 404s unless the flag is enabled,
+ * and the flag is declared in no .kontinuous env config, so it is never set in
+ * preproduction or production — verifiable with a single grep.
+ *
+ * An earlier revision also required NODE_ENV !== "production". That second lock
+ * added nothing the flag did not already give, and it forbade the intended use:
+ * every CI run — the PR gate and the nightly grid alike — serves a production
+ * build (`next build` then `next start`), so the route 404ed in the only
+ * environments that need it. Do not reinstate it; gate on the flag.
  *
  * No withAuditedRoute wrapper: the route is unreachable in production, and a
  * recette run posts it up to 185 times — logging those would pollute
@@ -22,7 +27,7 @@ import { getCurrentYear } from "~/modules/domain";
 type CampaignClockGlobal = { __egaproCampaignYear?: number };
 
 function isDisabled(): boolean {
-	return !env.EGAPRO_E2E_CLOCK || env.NODE_ENV === "production";
+	return !env.EGAPRO_E2E_CLOCK;
 }
 
 export async function POST(request: Request): Promise<Response> {

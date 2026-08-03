@@ -49,14 +49,27 @@ describe("/api/e2e-clock", () => {
 			expect(readOverride()).toBeUndefined();
 		});
 
-		it("404s POST in production even when the flag is on", async () => {
-			mockEnv.EGAPRO_E2E_CLOCK = true;
+		it("404s POST when the flag is off, whatever NODE_ENV says", async () => {
+			mockEnv.EGAPRO_E2E_CLOCK = false;
 			mockEnv.NODE_ENV = "production";
 
 			const response = await POST(buildPost({ campaignYear: 2030 }));
 
 			expect(response.status).toBe(404);
 			expect(readOverride()).toBeUndefined();
+		});
+
+		// The route deliberately no longer gates on NODE_ENV: CI always serves a
+		// production build, so that lock 404ed the route in the only environments
+		// that need it. The flag is the gate, and it is set in no deployed config.
+		it("serves POST in a production build when the flag is on", async () => {
+			mockEnv.EGAPRO_E2E_CLOCK = true;
+			mockEnv.NODE_ENV = "production";
+
+			const response = await POST(buildPost({ campaignYear: 2030 }));
+
+			expect(response.status).toBe(200);
+			expect(readOverride()).toBe(2030);
 		});
 
 		it("404s GET and DELETE when disabled", async () => {
