@@ -87,8 +87,11 @@ if [ -z "$NODE_ID" ] || [ "$NODE_ID" = "null" ]; then
     exit 1
 fi
 
-# 2. Find existing project item ID, or add the issue to the project
-ITEM_ID=$(gh api graphql -f query='
+# 2. Find existing project item ID, or add the issue to the project.
+# A failed *read* must not be mistaken for "issue not on the board yet": that
+# would fall through to addProjectV2ItemById and mutate the board as a side
+# effect of a permission problem.
+if ! ITEMS=$(gh api graphql -f query='
 query($owner:String!, $repo:String!, $n:Int!) {
   repository(owner:$owner, name:$repo) {
     issue(number:$n) {
@@ -98,8 +101,14 @@ query($owner:String!, $repo:String!, $n:Int!) {
     }
   }
 }' -f owner=SocialGouv -f repo=egapro -F n="$TICKET" \
-  --jq ".data.repository.issue.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id" \
-  | head -1 || true)
+  --jq ".data.repository.issue.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id"); then
+    echo "ERROR: cannot read the project items of issue #$TICKET." >&2
+    echo "  The token has no read access to project $PROJECT_ID — see the" >&2
+    echo "  PREREQUISITES header of .github/workflows/ticket-end-date.yaml." >&2
+    exit 1
+fi
+
+ITEM_ID=$(printf '%s\n' "$ITEMS" | head -1)
 
 if [ -z "$ITEM_ID" ]; then
     ITEM_ID=$(gh api graphql -f query='
@@ -119,7 +128,10 @@ fi
 # Read by field ID (same key the write uses) so an EGAPRO_*_FIELD_ID env
 # override stays consistent between the guard and the mutation.
 if [ "$IF_EMPTY" = "1" ]; then
-    CURRENT=$(gh api graphql -f query='
+    # Never swallow the error here: a permission failure on this read used to be
+    # invisible, and the script carried on to a write that failed with a generic
+    # message. Warn loudly and let the write below report the real problem.
+    if CURRENT=$(gh api graphql -f query='
 query($item:ID!) {
   node(id: $item) {
     ... on ProjectV2Item {
@@ -135,16 +147,18 @@ query($item:ID!) {
     }
   }
 }' -f item="$ITEM_ID" \
-      --jq "[.data.node.fieldValues.nodes[] | select(.field.id == \"$FIELD_ID\") | .date] | .[0] // \"\"" \
-      2>/dev/null || echo "")
-    if [ -n "$CURRENT" ] && [ "$CURRENT" != "null" ]; then
-        echo "ticket #$TICKET → $FIELD_NAME already set ($CURRENT), skipping" >&2
-        exit 0
+      --jq "[.data.node.fieldValues.nodes[] | select(.field.id == \"$FIELD_ID\") | .date] | .[0] // \"\""); then
+        if [ -n "$CURRENT" ] && [ "$CURRENT" != "null" ]; then
+            echo "ticket #$TICKET → $FIELD_NAME already set ($CURRENT), skipping" >&2
+            exit 0
+        fi
+    else
+        echo "WARNING: cannot read the current $FIELD_NAME of ticket #$TICKET — writing anyway" >&2
     fi
 fi
 
 # 4. Write the DATE field
-gh api graphql -f query='
+if ! gh api graphql -f query='
 mutation($project:ID!, $item:ID!, $field:ID!, $date:Date!) {
   updateProjectV2ItemFieldValue(input: {
     projectId: $project,
@@ -157,6 +171,14 @@ mutation($project:ID!, $item:ID!, $field:ID!, $date:Date!) {
   -f item="$ITEM_ID" \
   -f field="$FIELD_ID" \
   -f date="$DATE" \
-  --jq '.data.updateProjectV2ItemFieldValue.projectV2Item.id' >/dev/null
+  --jq '.data.updateProjectV2ItemFieldValue.projectV2Item.id' >/dev/null; then
+    echo "ERROR: cannot write $FIELD_NAME on ticket #$TICKET (gh error above)." >&2
+    echo "  If it reads 'Resource not accessible by integration', the token has no" >&2
+    echo "  'organization_projects: write' on the EGAPRO V2 board. Locally, check" >&2
+    echo "  that 'gh auth status' lists the 'project' scope; in CI the token comes" >&2
+    echo "  from token-bureau — see the PREREQUISITES header of" >&2
+    echo "  .github/workflows/ticket-end-date.yaml." >&2
+    exit 1
+fi
 
 echo "ticket #$TICKET → $FIELD_NAME = $DATE"
