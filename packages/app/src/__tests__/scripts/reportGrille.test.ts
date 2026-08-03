@@ -626,8 +626,22 @@ describe("main — CLI entrypoint", () => {
 	// the package's own playwright-report/. That directory exists on a developer
 	// machine (an E2E run created it) but not on a fresh CI checkout, so each test
 	// creates it rather than relying on whichever test happens to run first.
+	//
+	// Those are also the paths a real recette run writes to. Any pre-existing file
+	// is saved here and restored afterwards: without this, running the unit suite
+	// on a developer machine silently destroys the artefacts of the grid run they
+	// just spent ten minutes producing.
+	let savedResults: string | null = null;
+	let savedOutput: string | null = null;
+
 	beforeEach(() => {
 		mkdirSync(REPORT_DIR, { recursive: true });
+		savedResults = existsSync(RESULTS_PATH)
+			? readFileSync(RESULTS_PATH, "utf-8")
+			: null;
+		savedOutput = existsSync(OUTPUT_PATH)
+			? readFileSync(OUTPUT_PATH, "utf-8")
+			: null;
 	});
 
 	afterEach(() => {
@@ -636,6 +650,8 @@ describe("main — CLI entrypoint", () => {
 		process.argv = process.argv.slice(0, 2);
 		rmSync(RESULTS_PATH, { force: true });
 		rmSync(OUTPUT_PATH, { force: true });
+		if (savedResults !== null) writeFileSync(RESULTS_PATH, savedResults);
+		if (savedOutput !== null) writeFileSync(OUTPUT_PATH, savedOutput);
 	});
 
 	async function runMain(): Promise<void> {
