@@ -8,7 +8,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	buildReport,
 	type CoordResult,
@@ -607,7 +607,6 @@ describe("main — CLI entrypoint", () => {
 	}
 
 	it("does not write the output file when the module is imported without direct invocation", async () => {
-		mkdirSync(REPORT_DIR, { recursive: true });
 		rmSync(OUTPUT_PATH, { force: true });
 		process.argv = ["node", "/fake/test-runner"];
 		vi.resetModules();
