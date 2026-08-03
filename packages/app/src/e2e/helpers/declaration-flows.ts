@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { type Page, test } from "@playwright/test";
 
 /**
  * Fill all pay gap textboxes on steps 2 and 3. Every row is equal (no gap) by
@@ -133,33 +133,40 @@ export async function submitStepsThroughQuartiles(
 	page: Page,
 	options: { annualMeanGap?: boolean } = {},
 ) {
-	// Navigate to create/resume declaration → redirects to step 1
-	await page.goto("/declaration-remuneration");
-	await page.waitForURL("**/declaration-remuneration/etape/1");
-
-	// Step 1: Fill workforce (10 women + 15 men = 25 total)
-	await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("10");
-	await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("15");
-	await page.getByRole("button", { name: "Suivant" }).click();
-	await page.waitForURL("**/declaration-remuneration/etape/2");
-
-	// Step 2: Pay gap — mean annual row optionally carries the indicator A gap
-	await fillPayGapTable(page, {
-		annualMeanMen: options.annualMeanGap ? "1100" : "1000",
+	await test.step("étape 1 — effectifs", async () => {
+		// Navigate to create/resume declaration → redirects to step 1
+		await page.goto("/declaration-remuneration");
+		await page.waitForURL("**/declaration-remuneration/etape/1");
+		// 10 women + 15 men = 25 total
+		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("10");
+		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("15");
+		await page.getByRole("button", { name: "Suivant" }).click();
+		await page.waitForURL("**/declaration-remuneration/etape/2");
 	});
-	await page.getByRole("button", { name: "Suivant" }).click();
-	await page.waitForURL("**/declaration-remuneration/etape/3");
 
-	// Step 3: Variable pay — same table + beneficiary counts
-	await fillPayGapTable(page);
-	await page.getByRole("textbox", { name: "Bénéficiaires femmes" }).fill("5");
-	await page.getByRole("textbox", { name: "Bénéficiaires hommes" }).fill("5");
-	await page.getByRole("button", { name: "Suivant" }).click();
-	await page.waitForURL("**/declaration-remuneration/etape/4");
+	await test.step("étape 2 — écarts de rémunération", async () => {
+		// Mean annual row optionally carries the indicator A gap
+		await fillPayGapTable(page, {
+			annualMeanMen: options.annualMeanGap ? "1100" : "1000",
+		});
+		await page.getByRole("button", { name: "Suivant" }).click();
+		await page.waitForURL("**/declaration-remuneration/etape/3");
+	});
 
-	// Step 4: Quartile distribution — fill 8 quartiles (4 annual + 4 hourly)
-	await fillStep4Quartiles(page);
-	await page.getByRole("button", { name: "Suivant" }).click();
+	await test.step("étape 3 — composantes variables", async () => {
+		// Same table + beneficiary counts
+		await fillPayGapTable(page);
+		await page.getByRole("textbox", { name: "Bénéficiaires femmes" }).fill("5");
+		await page.getByRole("textbox", { name: "Bénéficiaires hommes" }).fill("5");
+		await page.getByRole("button", { name: "Suivant" }).click();
+		await page.waitForURL("**/declaration-remuneration/etape/4");
+	});
+
+	await test.step("étape 4 — répartition par quartile", async () => {
+		// Fill 8 quartiles (4 annual + 4 hourly)
+		await fillStep4Quartiles(page);
+		await page.getByRole("button", { name: "Suivant" }).click();
+	});
 }
 
 /**
@@ -198,9 +205,11 @@ export async function submitIndicatorGStep(
 	page: Page,
 	options: { hasGap: boolean },
 ) {
-	await fillStep5Categories(page, options);
-	await page.getByRole("button", { name: "Suivant" }).click();
-	await page.waitForURL("**/declaration-remuneration/etape/6");
+	await test.step("étape 5 — écarts par catégorie", async () => {
+		await fillStep5Categories(page, options);
+		await page.getByRole("button", { name: "Suivant" }).click();
+		await page.waitForURL("**/declaration-remuneration/etape/6");
+	});
 }
 
 /**
@@ -252,10 +261,12 @@ export async function reachStep6ComplianceRecap(page: Page) {
  * post-submission routing depends on the workforce, the gap and the CSE.
  */
 export async function submitFromStep6Recap(page: Page) {
-	await page.getByRole("button", { name: "Suivant" }).click();
-	// Click the label, as the DSFR checkbox label intercepts pointer events.
-	await page.getByText(/Je certifie/).click();
-	await page.getByRole("button", { name: "Valider" }).click();
+	await test.step("étape 6 — récapitulatif et transmission", async () => {
+		await page.getByRole("button", { name: "Suivant" }).click();
+		// Click the label, as the DSFR checkbox label intercepts pointer events.
+		await page.getByText(/Je certifie/).click();
+		await page.getByRole("button", { name: "Valider" }).click();
+	});
 }
 
 /**
