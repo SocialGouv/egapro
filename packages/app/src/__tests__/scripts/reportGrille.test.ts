@@ -362,6 +362,43 @@ describe("extractTestResults", () => {
 		expect(map.get("2030-249-CAS02")?.status).toBe("passed");
 	});
 
+	// Playwright's JSON reporter never hangs tests directly off a suite: it nests
+	// them one level deeper, under specs[]. Reading only suite.tests[] made the
+	// whole grid report "185 non joués" on a fully green run, because the
+	// missing-coordinate fallback fired for every one of them.
+	it("reads tests nested under specs[], the shape Playwright actually emits", () => {
+		const report = reportWith([
+			{
+				title: "grille.grille.ts",
+				suites: [
+					{
+						title: "[2030-250P-CAS12][CAS-12] avec CSE · écart ≥ 5 %",
+						specs: [
+							{
+								title: "avec CSE · écart ≥ 5 %",
+								tests: [
+									{
+										title: "avec CSE · écart ≥ 5 %",
+										ok: true,
+										results: [{ status: "passed", duration: 7800 }],
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+		]);
+
+		const map = extractTestResults(report);
+
+		expect(map.get("2030-250P-CAS12")).toEqual({
+			status: "passed",
+			failingStep: null,
+			duration: 7800,
+		});
+	});
+
 	it("records the deepest failing step for a failed coordinate", () => {
 		const report = reportWith([
 			{

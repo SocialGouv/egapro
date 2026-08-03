@@ -39,9 +39,17 @@ type PlaywrightTest = {
 	results: PlaywrightTestResult[];
 };
 
+/** A `describe` block. Playwright hangs its tests off `specs[].tests[]`; the
+ * bare `tests[]` form only appears on some fixture shapes, so both are read. */
+type PlaywrightSpec = {
+	title: string;
+	tests?: PlaywrightTest[];
+};
+
 type PlaywrightSuite = {
 	title: string;
 	suites?: PlaywrightSuite[];
+	specs?: PlaywrightSpec[];
 	tests?: PlaywrightTest[];
 };
 
@@ -89,8 +97,12 @@ function flattenTests(
 		if (suite.suites) {
 			out.push(...flattenTests(suite.suites, coordId));
 		}
-		if (suite.tests && coordId) {
-			for (const test of suite.tests) {
+		if (!coordId) continue;
+		for (const test of suite.tests ?? []) {
+			out.push({ coordId, test });
+		}
+		for (const spec of suite.specs ?? []) {
+			for (const test of spec.tests ?? []) {
 				out.push({ coordId, test });
 			}
 		}
