@@ -1,6 +1,7 @@
 import {
 	appendFileSync,
 	existsSync,
+	mkdirSync,
 	readFileSync,
 	writeFileSync,
 } from "node:fs";
@@ -343,6 +344,7 @@ function main(): void {
 		noJsonReason,
 	});
 
+	mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
 	writeFileSync(OUTPUT_PATH, content, "utf-8");
 	console.log(`Rapport écrit : ${OUTPUT_PATH}`);
 
@@ -353,4 +355,6 @@ function main(): void {
 	}
 }
 
-main();
+if (process.argv[1]?.endsWith("report-grille.ts")) {
+	main();
+}

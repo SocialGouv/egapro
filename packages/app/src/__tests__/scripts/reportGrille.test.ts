@@ -1,4 +1,10 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+	existsSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -590,6 +596,13 @@ describe("main — CLI entrypoint", () => {
 		vi.resetModules();
 		await import("#scripts/report-grille");
 	}
+
+	it("does not write the output file when the module is imported without direct invocation", async () => {
+		process.argv = ["node", "/fake/test-runner"];
+		vi.resetModules();
+		await import("#scripts/report-grille");
+		expect(existsSync(OUTPUT_PATH)).toBe(false);
+	});
 
 	it("writes the report and the GitHub step summary from a real results file", async () => {
 		const summaryPath = join(
