@@ -266,11 +266,11 @@ describe("parseGipCsv", () => {
 		expect(result.rows[0]).not.toHaveProperty("confidenceExoticContracts");
 	});
 
-	it("trims whitespace from header names (trailing space on column)", () => {
+	it("trims whitespace from header names (trailing space on de-accented v3 median column)", () => {
 		const csv = [
 			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
 			"foo;bar;2026-03-01;2026-01-01;2026-12-31;1",
-			"SIREN;Taux_horaire_variable_médian_F ;Taux_horaire_variable_médian_H",
+			"SIREN;Taux_horaire_variable_median_F ;Taux_horaire_variable_median_H",
 			"123456789;0,47;0,51",
 		].join("\n");
 
