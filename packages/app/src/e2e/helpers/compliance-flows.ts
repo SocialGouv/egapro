@@ -12,6 +12,8 @@ type CseStep1Options = {
 	firstDeclGapConsulted?: boolean;
 	/** Same, for the corrective (second) declaration. */
 	secondDeclGapConsulted?: boolean;
+	/** Opinion on accuracy (and on gap when consulted). Defaults to "favorable" so existing specs are unaffected. */
+	opinion?: "favorable" | "unfavorable";
 };
 
 // Fill one GapConsultationCard: consulted yes/no, and when yes the opinion + date.
@@ -20,13 +22,14 @@ async function fillGapConsultation(
 	idPrefix: string,
 	consulted: boolean,
 	date: string,
+	opinion: "favorable" | "unfavorable" = "favorable",
 ) {
 	if (!consulted) {
 		await page.locator(`label[for="${idPrefix}-no"]`).click();
 		return;
 	}
 	await page.locator(`label[for="${idPrefix}-yes"]`).click();
-	await page.locator(`label[for="${idPrefix}-favorable"]`).click();
+	await page.locator(`label[for="${idPrefix}-${opinion}"]`).click();
 	await page.locator(`#${idPrefix}-date`).fill(date);
 }
 
@@ -35,26 +38,31 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 		hasSecondDeclaration = false,
 		firstDeclGapConsulted = false,
 		secondDeclGapConsulted = false,
+		opinion = "favorable",
 	} = options;
 	await test.step("avis CSE — étape 1 : avis rendus", async () => {
 		await page.waitForURL("**/avis-cse/etape/1");
 		// DSFR hides native radio inputs — click on the associated label instead
-		await page.locator('label[for="first-decl-accuracy-favorable"]').click();
+		await page.locator(`label[for="first-decl-accuracy-${opinion}"]`).click();
 		await page.locator("#first-decl-accuracy-date").fill("2025-03-15");
 		await fillGapConsultation(
 			page,
 			"first-decl-gap",
 			firstDeclGapConsulted,
 			"2025-03-15",
+			opinion,
 		);
 		if (hasSecondDeclaration) {
-			await page.locator('label[for="second-decl-accuracy-favorable"]').click();
+			await page
+				.locator(`label[for="second-decl-accuracy-${opinion}"]`)
+				.click();
 			await page.locator("#second-decl-accuracy-date").fill("2025-06-15");
 			await fillGapConsultation(
 				page,
 				"second-decl-gap",
 				secondDeclGapConsulted,
 				"2025-06-15",
+				opinion,
 			);
 		}
 		await page.getByRole("button", { name: "Suivant" }).click();

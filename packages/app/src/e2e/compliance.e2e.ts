@@ -633,3 +633,41 @@ test.describe("[CAS-13-6IND] GIP 75 (50-99) → direct completion", () => {
 		await FICHE_SCENARIOS["CAS-13-6IND"]({ page, coordinate });
 	});
 });
+
+test.describe("[S11] CAS-04 with défavorable opinion — routing unchanged, opinion retained", () => {
+	const coordinate = complianceCoordinate("CAS-04");
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
+	});
+
+	test("défavorable opinion reaches the same fin-de-démarche as favorable", async ({
+		page,
+	}) => {
+		test.slow();
+		await FICHE_SCENARIOS["CAS-04"]({
+			page,
+			coordinate,
+			opinion: "unfavorable",
+		});
+	});
+
+	test("step-1 recap shows Défavorable as the selected opinion", async ({
+		page,
+	}) => {
+		await page.goto("/avis-cse/etape/1");
+		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await expect(
+			page.locator("#first-decl-accuracy-unfavorable"),
+		).toBeChecked();
+	});
+
+	test("transmitted PDF endpoint returns a valid PDF for défavorable opinion", async ({
+		page,
+	}) => {
+		const response = await page.request.get("/api/transmitted-pdf");
+		expect(response.ok()).toBe(true);
+		expect(response.headers()["content-type"]).toContain("application/pdf");
+	});
+});
