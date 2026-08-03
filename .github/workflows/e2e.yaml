@@ -25,6 +25,13 @@ jobs:
       EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
       EGAPRO_SUIT_API_URL: ${{ secrets.EGAPRO_SUIT_API_URL }}
       EGAPRO_GATEWAY_SHARED_SECRET: dev-gateway-shared-secret-minimum-32-chars
+      # Test-only campaign-clock seam (#4022). compliance.e2e.ts and
+      # declaration.e2e.ts pin campaign years through withCampaignYear so the
+      # indicator-G branches stay exercised whatever the calendar says; without
+      # this flag /api/e2e-clock 404s by design and those specs fail. The route
+      # stays unreachable in production, which is gated by NODE_ENV on top of
+      # this flag, and the flag is set in no .kontinuous env config.
+      EGAPRO_E2E_CLOCK: "true"
       S3_ENDPOINT: http://localhost:9000
       S3_REGION: us-east-1
       S3_ACCESS_KEY_ID: minioadmin
