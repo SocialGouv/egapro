@@ -43,7 +43,8 @@
 		"generate:fetch-companies": "tsx scripts/fetch-companies.ts",
 		"generate:mock-gip": "tsx scripts/generate-mock-gip-data.ts",
 		"mock:refresh": "tsx scripts/fetch-companies.ts --per-bucket=40 && tsx scripts/generate-mock-gip-data.ts",
-		"suit:encode-cert": "node scripts/encode-suit-cert.mjs"
+		"suit:encode-cert": "node scripts/encode-suit-cert.mjs",
+		"suit:check": "node --env-file-if-exists=.env scripts/check-suit-connection.mjs"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.1029.0",

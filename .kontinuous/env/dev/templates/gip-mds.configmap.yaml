@@ -1,16 +1,15 @@
 # Source of the GIP-MDS file consumed by POST /api/gip-mds/import.
 #
-# Points at SUIT Validation rather than the in-image mock (`/api/gip-mds/mock`),
-# so review apps exercise the real payload — 108 columns instead of the mock's
-# 71, and the real `horodatage`.
+# Review apps stay on the in-image mock: the post-upgrade import Job
+# (gip-mds-import-job.yaml) is a `helm.sh/hook`, so pointing this at SUIT before
+# the mTLS certificate is sealed in `suit-client-cert` would fail the handshake,
+# fail the Job, and fail the release on every deploy.
 #
-# Requires the mTLS client certificate to be sealed in `suit-client-cert`:
-# without it SUIT refuses the TLS handshake and the post-upgrade import Job
-# (gip-mds-import-job.yaml, a `helm.sh/hook: post-upgrade`) fails the release.
-# Seal the certificate before this lands, or point the URL back at the mock.
+# To check SUIT connectivity without touching this: `pnpm --filter app suit:check`
+# (runs from a pod too — it only reads env vars).
 kind: ConfigMap
 apiVersion: v1
 metadata:
   name: gip-mds
 data:
-  EGAPRO_GIP_MDS_API_URL: "https://api.suit.valid.travail.gouv.fr/suit/api/externe/egapro/gipmds/latest"
+  EGAPRO_GIP_MDS_API_URL: "http://app/api/gip-mds/mock"
