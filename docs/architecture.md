@@ -647,19 +647,42 @@ flowchart LR
 
 **Plugins APISIX actifs** : `key-auth`, `limit-req` (~10 req/s, burst 5), `proxy-rewrite` (injecte `X-Gateway-Forwarded`).
 
-### 10.2 Validation Zod aux frontières
+### 10.2 Appels sortants vers SUIT (mTLS)
+
+Le sens **inverse** — EGAPRO qui appelle l'API SUIT — est authentifié par un **certificat client**. Ne pas confondre les deux directions :
+
+| Sens | Mécanisme | Variables |
+|---|---|---|
+| SUIT → EGAPRO (`/api/v1/*`) | Passerelle APISIX : `key-auth` + `X-Gateway-Forwarded` | `EGAPRO_SUIT_API_KEY`, `EGAPRO_GATEWAY_SHARED_SECRET` |
+| EGAPRO → SUIT (CSE, sanction) | mTLS, certificat client `.p12` | `EGAPRO_SUIT_CLIENT_CERT_P12_BASE64`, `EGAPRO_SUIT_CLIENT_CERT_PASSWORD` |
+
+Trois appels sortants sont concernés, tous servis par le même hôte SUIT :
+
+| Appel | Chemin | Point de sortie |
+|---|---|---|
+| Existence d'un CSE | `/suit/api/externe/portail/CSE/{siren}` | `suit.ts` → `suitFetch()` |
+| Statut de sanction | `/suit/api/externe/portail/sanction/{siren}` | `suit.ts` → `suitFetch()` |
+| Récupération du fichier GIP-MDS | `/suit/api/externe/egapro/gipmds/latest` | `gipMds.ts` → `suitAwareFetch()` |
+
+Les deux premiers partent de `src/server/services/suit.ts` via `suitFetch()`, qui construit le chemin sous `EGAPRO_SUIT_API_URL`. Le troisième cible une URL **configurable** (`EGAPRO_GIP_MDS_API_URL`), qui pointe sur un mock interne hors production : il passe donc par `suitAwareFetch()`, qui n'attache le certificat que si l'URL est sur la même origine que `EGAPRO_SUIT_API_URL`. Les deux fonctions vivent dans `src/server/services/suitClient.ts`. Le certificat est transporté **encodé en base64 dans une variable d'environnement** (aucun volume à monter), décodé une seule fois, et transformé en dispatcher undici mémoïsé. Ce dispatcher n'est **jamais exporté** : le lier à l'URL construite depuis `EGAPRO_SUIT_API_URL` est ce qui garantit que le certificat client ne peut être présenté qu'à SUIT, et à aucun autre hôte. Les appels posent aussi `redirect: "error"` — une redirection suivie réutilise le même dispatcher et présenterait donc le certificat à l'hôte cible ; l'API JSON de SUIT ne redirige pas, refuser une 3xx transforme une fuite silencieuse en échec journalisé. L'option `dispatcher` traverse le `fetch` patché de Next.js et n'entre pas dans la clé du cache de données : la revalidation de 24 h des deux appels est préservée.
+
+En cluster, les deux variables viennent d'un sealed-secret dédié `suit-client-cert` (un par environnement sous `.kontinuous/env/*/templates/`), monté avec `optional: true`. Il est volontairement distinct du secret `suit` : ce dernier est monté sans `optional`, donc un scellement incomplet y empêcherait le pod de démarrer. En local, `pnpm --filter app suit:encode-cert <cert.p12>` produit les deux lignes à coller dans `.env`.
+
+Les deux variables sont **optionnelles** : quand elles sont absentes, les appels partent sans certificat client — c'est le mode dev local et review app. Comme les options TLS ne sont appliquées qu'à l'ouverture de la socket, un certificat expiré ou un mot de passe erroné ne se manifeste qu'au premier appel ; les deux fonctions dégradent en `null` mais **journalisent** l'erreur (`[suit] …`), sans quoi la panne se lirait comme un simple « CSE inconnu ».
+
+### 10.3 Validation Zod aux frontières
 
 Toute entrée externe est validée via **Zod** : formulaires, procédures tRPC, Route Handlers, variables d'environnement (`src/env.js`).
 
-### 10.3 Variables d'environnement
+### 10.4 Variables d'environnement
 
 Déclarées et validées dans `src/env.js`. **Jamais lire `process.env` directement** (bloqué par hook). Les scripts autonomes de `packages/app/scripts/` (crons) font exception : n'étant pas des modules du bundle app, ils lisent `process.env` et re-valident eux-mêmes leurs entrées (ex. `EGAPRO_DECLARATION_RETENTION_YEARS` re-parsé en entier positif par la purge, avec repli sur le défaut 6).
 
-### 10.4 Secrets
+### 10.5 Secrets
 
 Aucune valeur secrète **dans le repo**. Gérés via des [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) sous `.kontinuous/`. Les CronJobs récupèrent leurs credentials PostgreSQL et S3 via `secretKeyRef` / `secretRef` (jamais en clair dans les manifests).
 
-### 10.5 Verrou collaboratif — sécurité IDOR
+### 10.6 Verrou collaboratif — sécurité IDOR
 
 Le router `declarationLock` résout toujours l'ID de déclaration côté serveur à partir du SIREN de la session (`resolveOwnDeclarationId`) — jamais depuis le seul input client. Cela empêche un co-déclarant de verrouiller ou libérer une déclaration appartenant à une autre entreprise en forgeant un `declarationId` arbitraire.
 

@@ -52,12 +52,17 @@ describe("fetchCseBySiren", () => {
 		expect(result).toBeNull();
 	});
 
-	it("returns null on network error", async () => {
+	it("returns null and logs on network error", async () => {
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 		fetchSpy.mockRejectedValueOnce(new Error("Network error"));
 
 		const result = await fetchCseBySiren("123456789");
 
 		expect(result).toBeNull();
+		expect(errorSpy).toHaveBeenCalledWith(
+			"[suit] CSE lookup failed",
+			expect.any(Error),
+		);
 	});
 });
 
@@ -111,11 +116,16 @@ describe("fetchSanctionBySiren", () => {
 		expect(result).toBeNull();
 	});
 
-	it("returns null on network error", async () => {
+	it("returns null and logs on network error", async () => {
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 		fetchSpy.mockRejectedValueOnce(new Error("Network error"));
 
 		const result = await fetchSanctionBySiren("123456789");
 
 		expect(result).toBeNull();
+		expect(errorSpy).toHaveBeenCalledWith(
+			"[suit] sanction lookup failed",
+			expect.any(Error),
+		);
 	});
 });

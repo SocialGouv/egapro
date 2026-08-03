@@ -1,6 +1,7 @@
 import "server-only";
 
 import { env } from "~/env";
+import { suitFetch } from "./suitClient";
 
 type SuitCseResponse = {
 	siren: string;
@@ -23,18 +24,16 @@ export type SanctionStatus = {
  */
 export async function fetchCseBySiren(siren: string): Promise<boolean | null> {
 	try {
-		const url = `${env.EGAPRO_SUIT_API_URL.replace(/\/$/, "")}/suit/api/externe/portail/CSE/${siren}`;
-		const response = await fetch(url, {
-			headers: { Accept: "application/json" },
-			signal: AbortSignal.timeout(10_000),
-			next: { revalidate: 86_400 },
-		});
+		const response = await suitFetch(`/suit/api/externe/portail/CSE/${siren}`);
 
 		if (!response.ok) return null;
 
 		const data = (await response.json()) as SuitCseResponse;
 		return data.CSE;
-	} catch {
+	} catch (error) {
+		// A misconfigured client certificate fails here on every call. Without
+		// this log it would silently read as "CSE unknown" across the app.
+		console.error("[suit] CSE lookup failed", error);
 		return null;
 	}
 }
@@ -54,12 +53,9 @@ export async function fetchSanctionBySiren(
 	}
 
 	try {
-		const url = `${env.EGAPRO_SUIT_API_URL.replace(/\/$/, "")}/suit/api/externe/portail/sanction/${siren}`;
-		const response = await fetch(url, {
-			headers: { Accept: "application/json" },
-			signal: AbortSignal.timeout(10_000),
-			next: { revalidate: 86_400 },
-		});
+		const response = await suitFetch(
+			`/suit/api/externe/portail/sanction/${siren}`,
+		);
 
 		if (!response.ok) return null;
 
@@ -68,7 +64,8 @@ export async function fetchSanctionBySiren(
 			hasSanction: data.sanction,
 			validityDate: null,
 		};
-	} catch {
+	} catch (error) {
+		console.error("[suit] sanction lookup failed", error);
 		return null;
 	}
 }

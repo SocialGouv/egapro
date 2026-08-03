@@ -46,6 +46,15 @@ export const env = createEnv({
 		EGAPRO_PROCONNECT_ISSUER: z.string().url(),
 		EGAPRO_WEEZ_API_URL: z.string().url(),
 		EGAPRO_SUIT_API_URL: z.string().url(),
+		// Client certificate presented to the SUIT API (mTLS). The .p12 bundle is
+		// base64-encoded so it travels as a plain env var — no volume to mount.
+		// Both are optional: while they are absent, SUIT calls go out without a
+		// client certificate, as they did before (local dev, review apps). In
+		// cluster they come from the dedicated `suit-client-cert` sealed-secret,
+		// mounted `optional: true` so a not-yet-sealed state cannot stop the pod.
+		// Locally: `pnpm suit:encode-cert <cert.p12>` prints both lines.
+		EGAPRO_SUIT_CLIENT_CERT_P12_BASE64: z.string().optional(),
+		EGAPRO_SUIT_CLIENT_CERT_PASSWORD: z.string().optional(),
 		// « Je donne mon avis » (jedonnemonavis.numerique.gouv.fr) — EGAPRO's
 		// démarche and button identifiers on the JDMA platform. Defaults are the
 		// values registered on JDMA (démarche 4169 / button 4730); overridable per
@@ -153,6 +162,10 @@ export const env = createEnv({
 		EGAPRO_PROCONNECT_ISSUER: process.env.EGAPRO_PROCONNECT_ISSUER,
 		EGAPRO_WEEZ_API_URL: process.env.EGAPRO_WEEZ_API_URL,
 		EGAPRO_SUIT_API_URL: process.env.EGAPRO_SUIT_API_URL,
+		EGAPRO_SUIT_CLIENT_CERT_P12_BASE64:
+			process.env.EGAPRO_SUIT_CLIENT_CERT_P12_BASE64,
+		EGAPRO_SUIT_CLIENT_CERT_PASSWORD:
+			process.env.EGAPRO_SUIT_CLIENT_CERT_PASSWORD,
 		EGAPRO_JDMA_DEMARCHE_ID: process.env.EGAPRO_JDMA_DEMARCHE_ID,
 		EGAPRO_JDMA_BUTTON_ID: process.env.EGAPRO_JDMA_BUTTON_ID,
 		EGAPRO_GATEWAY_SHARED_SECRET: process.env.EGAPRO_GATEWAY_SHARED_SECRET,
