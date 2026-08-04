@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 
-import { setCompanyHasCse, setUserPhone } from "./helpers/db";
+import { TEST_USER_PHONE } from "./constants";
+import {
+	resetDeclarationToDraft,
+	resetGipWorkforce,
+	setCompanyHasCse,
+	setDeclarationComplianceState,
+	setUserPhone,
+} from "./helpers/db";
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 import { loginWithProConnect } from "./helpers/login";
 
@@ -12,7 +19,7 @@ test.describe("Missing info modal", () => {
 
 	test.describe("CSE only (phone already set)", () => {
 		test.beforeAll(async () => {
-			await setUserPhone("0122334455");
+			await setUserPhone(TEST_USER_PHONE);
 			await setCompanyHasCse(null);
 		});
 
@@ -57,7 +64,7 @@ test.describe("Missing info modal", () => {
 		});
 
 		test.afterAll(async () => {
-			await setUserPhone("0122334455");
+			await setUserPhone(TEST_USER_PHONE);
 		});
 
 		test("opens modal and submits phone number", async ({ page }) => {
@@ -94,7 +101,7 @@ test.describe("Missing info modal", () => {
 		});
 
 		test.afterAll(async () => {
-			await setUserPhone("0122334455");
+			await setUserPhone(TEST_USER_PHONE);
 		});
 
 		test("shows validation error when phone is empty", async ({ page }) => {
@@ -130,7 +137,7 @@ test.describe("Missing info modal", () => {
 		});
 
 		test.afterAll(async () => {
-			await setUserPhone("0122334455");
+			await setUserPhone(TEST_USER_PHONE);
 			await setCompanyHasCse(true);
 		});
 
@@ -184,7 +191,7 @@ test.describe("Missing info modal", () => {
 
 	test.describe("Validation error on empty CSE", () => {
 		test.beforeAll(async () => {
-			await setUserPhone("0122334455");
+			await setUserPhone(TEST_USER_PHONE);
 			await setCompanyHasCse(null);
 		});
 
@@ -225,6 +232,76 @@ test.describe("Missing info modal", () => {
 				}),
 			).toBeVisible();
 			expect(page.url()).toContain("/mon-espace");
+		});
+	});
+
+	// Regression guard for #3952: the phone + CSE prerequisites were only enforced by
+	// the "Rémunération" link of Mon espace, so every other way in — the home CTA, a
+	// bookmark, a deep link, a callbackUrl coming back from ProConnect — walked
+	// straight into the funnel and skipped the modal above entirely. The guard now
+	// sits on the funnel layout, so it holds whatever the entry point.
+	test.describe("Entering the funnel outside Mon espace (#3952)", () => {
+		test.beforeAll(async () => {
+			await resetGipWorkforce();
+			// Not a draft: the read-only recap asserted below only renders for a
+			// declaration that reached the compliance stage.
+			await setDeclarationComplianceState({
+				currentStep: 6,
+				status: "awaiting_compliance_path_choice",
+			});
+			await setUserPhone(null);
+			await setCompanyHasCse(null);
+		});
+
+		test.afterAll(async () => {
+			await setUserPhone(TEST_USER_PHONE);
+			await setCompanyHasCse(true);
+			await resetDeclarationToDraft();
+		});
+
+		test("a direct URL lands on Mon espace until both prerequisites are answered", async ({
+			page,
+		}) => {
+			await page.context().clearCookies();
+			await loginWithProConnect(page);
+
+			await test.step("neither answered — the funnel entry point bounces", async () => {
+				await page.goto("/declaration-remuneration");
+				await page.waitForURL("**/mon-espace");
+				// Bounced, but not into a dead end: the modal that collects both is right there.
+				await waitForDsfrModal(page, MISSING_INFO_MODAL_ID);
+			});
+
+			await test.step("a deep link into a later step bounces too", async () => {
+				await page.goto("/declaration-remuneration/etape/4");
+				await page.waitForURL("**/mon-espace");
+			});
+
+			// The guard sits on the (with-banner) group, not on the funnel root, so the
+			// read-only recap stays readable — a colleague who never filled the funnel in
+			// must still be able to consult what the company declared.
+			await test.step("the read-only recap stays outside the guard", async () => {
+				await page.goto("/declaration-remuneration/recapitulatif");
+				await expect(
+					page.getByRole("heading", {
+						level: 1,
+						name: /Déclaration des indicateurs de rémunération/,
+					}),
+				).toBeVisible();
+			});
+
+			await test.step("the phone alone is not enough above the CSE threshold", async () => {
+				await setUserPhone(TEST_USER_PHONE);
+				await page.goto("/declaration-remuneration");
+				await page.waitForURL("**/mon-espace");
+			});
+
+			await test.step("both answered — the same deep link now opens the funnel", async () => {
+				await setCompanyHasCse(true);
+				await page.goto("/declaration-remuneration/etape/4");
+				await page.waitForURL("**/declaration-remuneration/etape/4");
+				await expect(page.getByText("Étape 4 sur 6")).toBeVisible();
+			});
 		});
 	});
 });
