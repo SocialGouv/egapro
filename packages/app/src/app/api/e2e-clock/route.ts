@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
 import { env } from "~/env.js";
 import { e2eClockSchema } from "~/modules/declaration";
-import { getCurrentYear } from "~/modules/domain";
+import {
+	clearCampaignYearOverride,
+	getCurrentYear,
+	writeCampaignYearOverride,
+} from "~/modules/domain";
 
 /**
- * Test-only campaign-clock control (issue #4022). Writes the shared
- * globalThis.__egaproCampaignYear override that getCurrentYear() reads, so the
- * E2E recette grid can pilot the campaign year across every server call and
- * every browser bundle without a rebuild.
+ * Test-only campaign-clock control (issue #4022). Server-side write path of
+ * the override owned by ~/modules/domain/shared/campaignClock.ts (which
+ * documents why the seam is a global and its threat model).
  *
  * EGAPRO_E2E_CLOCK alone gates the route: it 404s unless the flag is enabled,
  * and the flag is declared in no .kontinuous env config, so it is never set in
@@ -23,8 +26,6 @@ import { getCurrentYear } from "~/modules/domain";
  * recette run posts it up to 185 times — logging those would pollute
  * audit.action_log for zero compliance value.
  */
-
-type CampaignClockGlobal = { __egaproCampaignYear?: number };
 
 function isDisabled(): boolean {
 	return !env.EGAPRO_E2E_CLOCK;
@@ -42,15 +43,14 @@ export async function POST(request: Request): Promise<Response> {
 		);
 	}
 
-	(globalThis as CampaignClockGlobal).__egaproCampaignYear =
-		parsed.data.campaignYear;
+	writeCampaignYearOverride(parsed.data.campaignYear);
 	return NextResponse.json({ campaignYear: parsed.data.campaignYear });
 }
 
 export async function DELETE(): Promise<Response> {
 	if (isDisabled()) return new NextResponse(null, { status: 404 });
 
-	delete (globalThis as CampaignClockGlobal).__egaproCampaignYear;
+	clearCampaignYearOverride();
 	return NextResponse.json({ campaignYear: getCurrentYear() });
 }
 
