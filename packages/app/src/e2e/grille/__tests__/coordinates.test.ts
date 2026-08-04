@@ -44,6 +44,14 @@ describe("buildGrid — cardinality", () => {
 		expect(grid).toHaveLength(185);
 	});
 
+	// The split is seven-indicator-years × cases-per-cell, sheet by sheet:
+	//   49   → 7 years × 2 cases (CAS-13/14 — voluntary tier owes G every year) = 14
+	//   99   → 2 years (2030/2033) × 2 + 5 six-indicator years × 1 (CAS-13-6IND) =  9
+	//   149  → 2 years (2030/2033) × 12 + 5 years × 2 (CAS-01/02-6IND)           = 34
+	//   249  → 3 triennial years (2027/2030/2033) × 12 + 4 years × 2             = 44
+	//   250P → 7 years × 12 (indicator G owed every year)                        = 84
+	// The literals are expectations only: the counts must keep falling out of
+	// isIndicatorGRequired × caseNumbersFor, never be fed into buildGrid().
 	it("splits 14 / 9 / 34 / 44 / 84 across the five tranches", () => {
 		expect(countByEffmax(grid)).toEqual({
 			"49": 14,

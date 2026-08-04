@@ -349,7 +349,21 @@ L'année et la tranche fixent déjà la variante « 6 ou 7 indicateurs », donc 
 
 **Lecture d'une ligne de cellule** : `coordonnée : rappel`. Le texte après les deux-points est un **résumé** du cas (conditions · issue), pas une seconde information : `2027-149-CAS01 : sans CSE → fin de démarche directe` se lit « la coordonnée 2027-149-CAS01, qui correspond au parcours *sans CSE, fin de démarche directe* ». Cliquez la coordonnée pour la fiche complète (§2).
 
-La coordonnée est **au-dessus des tests** : elle pointe vers la **fiche du parcours-type** (§2 — `CAS-01` … `CAS-12`, `CAS-01-6IND`, `CAS-02-6IND`) où vit le test E2E. Comme le contenu d'un cas ne dépend ni de l'année ni de la tranche, un même test couvre toutes les coordonnées qui pointent vers sa fiche — d'où ~14 tests pour toute la grille. Pour lancer **un** cas précis, ouvrez sa fiche : la commande `--grep` y est. Pour lancer **une configuration entière** par coordonnée (via `test:e2e:grille`, voir §7) :
+La coordonnée est **au-dessus des tests** : elle pointe vers la **fiche du parcours-type** (§2 — `CAS-01` … `CAS-14` et les variantes `-6IND`) où vit le test E2E. Comme le contenu d'un cas ne dépend ni de l'année ni de la tranche, **17 fiches couvrent les 185 coordonnées** — la grille (`test:e2e:grille`) rejoue la fiche de chaque coordonnée, épinglée sur son année et sa tranche.
+
+**D'où viennent les 185.** Le nombre de cas d'une cellule suit les règles du domaine : **12 cas** dès 100 salariés en année « 7 indicateurs » (les parcours de conformité deviennent possibles), **2 cas** en année « 6 premiers indicateurs » (pas d'indicateur G donc pas d'écart — seul le CSE varie) ; sous 100 salariés, **2 cas** avec l'indicateur G (avec/sans écart, [aucune obligation](#6-arbitrages-métier-divergences-résolues) dans les deux cas) et **1 cas** sans. Croisé avec les années où chaque tranche doit l'indicateur G :
+
+| Feuille | Années « 7 indicateurs » | Calcul | Coordonnées |
+|---|---|---|---|
+| < 50 | les 7 (volontariat) | 7 × 2 | **14** |
+| 50-99 | 2030, 2033 | 2 × 2 + 5 × 1 | **9** |
+| 100-149 | 2030, 2033 | 2 × 12 + 5 × 2 | **34** |
+| 150-249 | 2027, 2030, 2033 (triennales) | 3 × 12 + 4 × 2 | **44** |
+| 250 et + | les 7 (annuel) | 7 × 12 | **84** |
+
+Ces comptes ne sont écrits nulle part dans le code : ils **tombent** de la dérivation (`buildGrid()` croise `isIndicatorGRequired` et le contenu des cellules), et le test unitaire `coordinates.test.ts` vérifie qu'ils continuent de tomber juste.
+
+Pour lancer **un** cas précis, ouvrez sa fiche : la commande `--grep` y est. Pour lancer **une configuration entière** par coordonnée (via `test:e2e:grille`, voir §7) :
 
 - **Une année entière** : `pnpm --filter app test:e2e:grille -- --grep "\[2030-"`
 - **Une tranche entière** : `pnpm --filter app test:e2e:grille -- --grep "-149-CAS"`

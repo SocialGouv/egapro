@@ -55,6 +55,15 @@ function padCase(caseNumber: number): string {
 	return String(caseNumber).padStart(2, "0");
 }
 
+/**
+ * Cases an Excel cell carries — one half of the grid's cardinality. Tranches
+ * >= 100 enumerate the 12 compliance cases in a seven-indicator year and the
+ * two CSE variants otherwise; tranches < 100 (July 2026 arbitrage: no CSE, no
+ * gap obligations) carry CAS-13/14 with indicator G and CAS-13 alone without.
+ * Crossed with the years each tranche owes indicator G (isIndicatorGRequired,
+ * the other half), this is what makes the per-sheet totals fall out at
+ * 14 / 9 / 34 / 44 / 84 = 185 — asserted in coordinates.test.ts, never fed in.
+ */
 function caseNumbersFor(
 	requiresCompliance: boolean,
 	sevenIndicators: boolean,
