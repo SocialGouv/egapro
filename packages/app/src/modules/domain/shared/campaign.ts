@@ -5,14 +5,14 @@ export function getCurrentYear(): number {
 	return new Date().getFullYear();
 }
 
-/** Returns the workforce/reference year for a given campaign year (N-1: a declaration reports the prior year's data). */
-export function getWorkforceYearFor(campaignYear: number): number {
+/** Returns the reference year for a given campaign year (N-1: a declaration reports the prior year's data). */
+export function getReferenceYearFor(campaignYear: number): number {
 	return campaignYear - 1;
 }
 
 /** Returns the workforce reference year for the current campaign (previous calendar year, as INSEE publishes N-1 data). */
 export function getWorkforceYear(): number {
-	return getWorkforceYearFor(getCurrentYear());
+	return getReferenceYearFor(getCurrentYear());
 }
 
 /** Representation-declaration deadline for a campaign year (March 1st), display format DD/MM/YYYY. */
@@ -22,7 +22,7 @@ export function getRepresentationDeadline(year: number): string {
 
 /** Regulatory reference period of a declaration campaign: the civil year preceding the campaign (N-1, as a declaration reports the prior year's data), format "DD/MM/YYYY - DD/MM/YYYY". */
 export function getReferencePeriod(campaignYear: number): string {
-	const referenceYear = getWorkforceYearFor(campaignYear);
+	const referenceYear = getReferenceYearFor(campaignYear);
 	return `01/01/${referenceYear} - 31/12/${referenceYear}`;
 }
 

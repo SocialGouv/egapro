@@ -7,10 +7,10 @@ export {
 	getDefaultCampaignDeadlines,
 	getPathChoiceDeadline,
 	getReferencePeriod,
+	getReferenceYearFor,
 	getRepresentationDeadline,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
-	getWorkforceYearFor,
 	isDeadlinePassed,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";

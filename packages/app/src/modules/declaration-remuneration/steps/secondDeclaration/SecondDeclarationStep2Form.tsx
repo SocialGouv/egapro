@@ -7,7 +7,7 @@ import { DraftLoadingState } from "~/modules/declaration-remuneration/shared/dra
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { useDraftHydration } from "~/modules/declaration-remuneration/shared/draft/useDraftHydration";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
-import { getWorkforceYearFor } from "~/modules/domain";
+import { getReferenceYearFor } from "~/modules/domain";
 import { api } from "~/trpc/react";
 import { CategoryForm } from "../step5/CategoryForm";
 import { BASE_PATH } from "./constants";
@@ -121,7 +121,7 @@ export function SecondDeclarationStep2Form({
 					startDate={startDate}
 				/>
 			}
-			referenceYear={getWorkforceYearFor(declarationYear)}
+			referenceYear={getReferenceYearFor(declarationYear)}
 			stepper={<SecondDeclarationStepIndicator currentStep={2} />}
 			submitError={periodError || mutation.error?.message}
 			title={

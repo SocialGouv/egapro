@@ -8,7 +8,7 @@ import { useIsImpersonating } from "~/modules/auth";
 import {
 	computeWorkforceTotal,
 	getReferencePeriod,
-	getWorkforceYearFor,
+	getReferenceYearFor,
 } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -240,7 +240,7 @@ export function Step1Workforce({
 							<TooltipButton
 								id="tooltip-period"
 								label="Information sur la période de référence"
-								text={`Pour les entreprises créées en cours d'année, cette période correspond à la durée d'activité effective depuis la date de création jusqu'au 31/12/${getWorkforceYearFor(declarationYear)}.`}
+								text={`Pour les entreprises créées en cours d'année, cette période correspond à la durée d'activité effective depuis la date de création jusqu'au 31/12/${getReferenceYearFor(declarationYear)}.`}
 							/>
 						</p>
 

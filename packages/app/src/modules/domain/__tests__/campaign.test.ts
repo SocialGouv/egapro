@@ -6,17 +6,17 @@ import {
 	getDefaultCampaignDeadlines,
 	getPathChoiceDeadline,
 	getReferencePeriod,
+	getReferenceYearFor,
 	getRepresentationDeadline,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
-	getWorkforceYearFor,
 	isDeadlinePassed,
 	shouldRedirectSubmittedToRecap,
 } from "../shared/campaign";
 
-describe("getWorkforceYearFor", () => {
+describe("getReferenceYearFor", () => {
 	it("returns the campaign year minus one", () => {
-		expect(getWorkforceYearFor(2025)).toBe(2024);
+		expect(getReferenceYearFor(2025)).toBe(2024);
 	});
 });
 
@@ -34,7 +34,7 @@ describe("getReferencePeriod", () => {
 
 	it("uses the workforce year of the campaign as the reference window", () => {
 		expect(getReferencePeriod(2027)).toBe(
-			`01/01/${getWorkforceYearFor(2027)} - 31/12/${getWorkforceYearFor(2027)}`,
+			`01/01/${getReferenceYearFor(2027)} - 31/12/${getReferenceYearFor(2027)}`,
 		);
 	});
 });
