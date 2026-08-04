@@ -1,8 +1,8 @@
 import type {
 	GipMdsRow,
 	GipPrefillData,
-} from "~/modules/declaration-remuneration/shared/gipMdsMapping";
-import type { PayGapReferences } from "~/modules/declaration-remuneration/shared/indicatorRowMapping";
+	PayGapReferences,
+} from "~/modules/declaration-remuneration";
 
 /**
  * Fixtures for the GIP-supplied pay gaps, shared by every suite that renders a

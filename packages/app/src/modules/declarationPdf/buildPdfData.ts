@@ -16,8 +16,8 @@ import {
 import {
 	activeDeclarationFilter,
 	mapToEmployeeCategoryRows,
-	mapToStepData,
 } from "~/server/api/routers/declarationHelpers";
+import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { db } from "~/server/db";
 import {
 	companies,

@@ -6,8 +6,8 @@ import {
 	applyPercentagesAfterUpdate,
 	buildEmployeeCategoryValues,
 	mapToEmployeeCategoryRows,
-	mapToStepData,
 } from "../declarationHelpers";
+import { mapToStepData } from "../declarationStepMapping";
 
 describe("activeDeclarationFilter", () => {
 	it("filters siren, year, and cancelled_at IS NULL", async () => {
