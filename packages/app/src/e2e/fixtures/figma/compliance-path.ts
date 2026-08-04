@@ -23,8 +23,6 @@ const RADIO_LABEL_TYPE = {
 // Divergences assumées, relevées sur le node et volontairement non assertées :
 // - largeur de colonne : le Figma fixe 790px, la grille DSFR (`fr-col-lg-8`) en
 //   dérive 800px au-delà de 1248px de viewport — la grille fait autorité.
-// - bande de soulignement de `fr-link--download` : DSFR la dessine en bas de la
-//   boîte de l'ancre, le Figma sous chaque ligne de texte. Comportement natif.
 // - apostrophes : le node utilise U+2019, l'app rend `&apos;` (U+0027) partout.
 //   Convention applicative, pas un écart propre à cet écran.
 // - libellés des deux titres de section : le Figma écrit « et non fondée sur le
@@ -63,6 +61,18 @@ export const compliancePathFidelity: FidelitySpec = {
 		},
 		// Structural rather than `.fr-border-default--grey`: naming the utility in
 		// the selector would make the border assertion true by construction.
+		// Figma "Lien / Lien de téléchargement" : le lien puis, 4px dessous, la
+		// mention de format — frère de l'ancre, pas enfant.
+		downloadLink: {
+			selector: "main a.fr-link--icon-right",
+			font: { size: 16, weight: 400, lineHeight: 24 },
+			color: "#000091",
+		},
+		downloadMention: {
+			selector: 'main [class*="download"] > p:last-child',
+			font: { size: 12, weight: 400, lineHeight: 20 },
+			color: "#666666",
+		},
 		receiptCard: {
 			selector:
 				"main .fr-background-alt--blue-france > div:nth-of-type(2) > div",
@@ -188,6 +198,7 @@ export const compliancePathFidelity: FidelitySpec = {
 		{ from: "titleRow", to: "banner", expected: 32 },
 		{ from: "banner", to: "subtitle", expected: 32 },
 		{ from: "subtitle", to: "instructions", expected: 32 },
+		{ from: "downloadLink", to: "downloadMention", expected: 4 },
 		{ from: "instructions", to: "deadlineCallout", expected: 16 },
 		{ from: "deadlineLabel", to: "deadlineDate", expected: 8 },
 		{ from: "deadlineCallout", to: "justifyHeading", expected: 32 },

@@ -40,19 +40,19 @@ export function DeclarationSuccessBanner({
 						<strong>{formatLongDate(modificationDeadline)}</strong>
 					</p>
 					{pdfDownloadHref && (
-						<FileDownloadLink
-							className="fr-link fr-link--download"
-							href={pdfDownloadHref}
-							pendingLabel="Génération du récapitulatif en cours…"
-						>
-							{isSecondDeclaration
-								? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
-								: "Télécharger le récapitulatif de la déclaration des indicateurs"}{" "}
-							{/* `fr-link--download` always reserves a band under the label for
-							    this detail; without it the link renders a dangling empty line.
-							    The PDF is generated on demand, so only the format is known. */}
-							<span className="fr-link__detail">PDF</span>
-						</FileDownloadLink>
+						<div className={styles.download}>
+							<FileDownloadLink
+								className="fr-link fr-icon-download-line fr-link--icon-right"
+								href={pdfDownloadHref}
+								pendingLabel="Génération du récapitulatif en cours…"
+							>
+								{isSecondDeclaration
+									? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
+									: "Télécharger le récapitulatif de la déclaration des indicateurs"}
+							</FileDownloadLink>
+							{/* The PDF is generated on demand, so only the format is known. */}
+							<p className="fr-text--xs fr-text-mention--grey fr-mb-0">PDF</p>
+						</div>
 					)}
 				</div>
 			</div>

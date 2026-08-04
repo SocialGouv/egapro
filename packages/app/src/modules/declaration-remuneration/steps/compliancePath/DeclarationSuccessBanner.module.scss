@@ -30,3 +30,15 @@
 		flex-shrink: 0;
 	}
 }
+
+// Figma places the format mention 4px under the link, as its sibling. A plain
+// block on purpose: a flex item would be blockified and DSFR then paints a
+// single full-width underline at the bottom of the anchor instead of one under
+// each line of the label.
+.download {
+	// Last child: FileDownloadLink also renders a screen-reader live region and,
+	// on failure, an error paragraph — neither carries this spacing.
+	> p:last-child {
+		margin-top: 0.25rem;
+	}
+}

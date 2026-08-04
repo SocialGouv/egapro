@@ -85,12 +85,12 @@ describe("DeclarationSuccessBanner", () => {
 	])("links to the recapitulative PDF when available (isSecondDeclaration: %s)", (isSecondDeclaration, label) => {
 		renderBanner({ isSecondDeclaration, pdfDownloadHref: "/pdf/2026" });
 
-		// `fr-link__detail` lives inside the anchor, so the format is part of the
-		// accessible name — that is the DSFR download-link contract.
-		expect(screen.getByRole("link", { name: `${label} PDF` })).toHaveAttribute(
+		expect(screen.getByRole("link", { name: label })).toHaveAttribute(
 			"href",
 			"/pdf/2026",
 		);
+		// Figma keeps the format mention beside the link, not inside it.
+		expect(screen.getByText("PDF")).toBeInTheDocument();
 	});
 
 	it("lays the two columns out without the DSFR gutter grid, whose negative margin overflows the banner background", () => {
