@@ -3,9 +3,17 @@ import {
 	DeclarationLayout,
 	MissingSiret,
 } from "~/modules/declaration-remuneration";
-import { isDeclarationWritingClosed } from "~/modules/domain";
+import {
+	getObligationWorkforce,
+	hasRequiredDeclarationInfo,
+	isCseRequired,
+	isDeclarationWritingClosed,
+} from "~/modules/domain";
 import { auth } from "~/server/auth";
-import { getEffectiveSiren } from "~/server/auth/companyAccess";
+import {
+	getEffectiveSiren,
+	isImpersonating,
+} from "~/server/auth/companyAccess";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
 
@@ -30,11 +38,28 @@ export default async function WithBannerLayout({
 	const siren = getEffectiveSiren(session);
 	if (!siren) return <MissingSiret />;
 
-	const [company, declarationData] = await Promise.all([
+	const [company, profile] = await Promise.all([
 		api.company.get({ siren }),
-		api.declaration.getOrCreate(),
+		api.profile.get().catch(() => null),
 	]);
 
+	const cseApplicable = isCseRequired(
+		getObligationWorkforce(company.gipWorkforce),
+	);
+	if (
+		!isImpersonating(session) &&
+		!hasRequiredDeclarationInfo(
+			profile?.phone ?? null,
+			company.hasCse,
+			cseApplicable,
+		)
+	) {
+		redirect("/mon-espace");
+	}
+
+	// Kept after the guard: `getOrCreate` inserts a draft declaration, and a
+	// visitor bounced back to Mon espace must not leave one behind.
+	const declarationData = await api.declaration.getOrCreate();
 	const declaration = declarationData.declaration;
 
 	const deadlines = await getCampaignDeadlines(declaration.year);
