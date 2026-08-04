@@ -53,7 +53,7 @@ Une fiche par **parcours-type**. Chaque fiche a un ID court qui est l'**ancre du
 
 **Comment lire une fiche.** Pour les cas 1 à 12, l'ID `CAS-NN` **reprend le numéro « Cas N » de l'Excel** (`CAS-04` ↔ « Cas 4 » des feuilles ≥ 100 salariés) ; le suffixe `-6IND` désigne la variante « 6 premiers indicateurs » (années sans indicateur G). Le titre énonce ensuite les **conditions qui définissent le cas** — nombre d'indicateurs (6 ou 7) · présence d'un CSE · issue du parcours — et le champ **« Libellé Excel »** rappelle le texte exact de la cellule d'origine. Exemple : `CAS-01` = *7 indicateurs, sans CSE, aucun écart ≥ 5 %* → il reprend « Cas 1 » des colonnes 7 indicateurs.
 
-Les cas **13 et 14 prolongent cette numérotation sans exister dans l'Excel** : sa feuille « <50 et 50-99 » n'énumère aucun cas — ses cellules ne portent que le type de déclaration attendu. Ces deux fiches traduisent les arbitrages métier de juillet 2026 (§6) qui ont rendu cette feuille testable : `CAS-13` en déroule les cellules (déclaration → fin de démarche directe), `CAS-14` verrouille l'arbitrage n° 3 (sous 100 salariés, un écart ≥ 5 % ne déclenche aucune obligation — ce que l'Excel exprimait par l'absence de tout cas de conformité sur cette feuille).
+Les cas **13 et 14 prolongent cette numérotation sans exister dans l'Excel** : sa feuille « <50 et 50-99 » n'énumère aucun cas — ses cellules ne portent que le type de déclaration attendu. Ces deux fiches traduisent les arbitrages métier de juillet 2026 ([§6](#6-arbitrages-métier-divergences-résolues)) qui ont rendu cette feuille testable : `CAS-13` en déroule les cellules (déclaration → fin de démarche directe), `CAS-14` verrouille l'arbitrage n° 3 (sous 100 salariés, un écart ≥ 5 % ne déclenche aucune obligation — ce que l'Excel exprimait par l'absence de tout cas de conformité sur cette feuille).
 
 Les cas 1, 2 et 13 existent donc en deux variantes selon l'année (voir §3) : `CAS-01`/`CAS-02`/`CAS-13` (7 indicateurs) et `CAS-01-6IND`/`CAS-02-6IND`/`CAS-13-6IND` (6 indicateurs, sans indicateur G donc sans parcours de conformité possible). Les cas 3 à 12, et le cas 14, n'existent qu'en année « 7 indicateurs ».
 
@@ -278,7 +278,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 ### CAS-14 : 7 indicateurs · tranche < 100 · au moins un écart ≥ 5 % → fin de démarche directe (aucune obligation déclenchée)
 
-**Libellé Excel** : « Déclaration des 7 indicateurs » *(feuille « <50 et 50-99 » — parcours issu de l'arbitrage n° 3 : sous 100 salariés un écart ≥ 5 % ne déclenche aucune obligation)*
+**Libellé Excel** : « Déclaration des 7 indicateurs » *(feuille « <50 et 50-99 » — parcours issu de [l'arbitrage n° 3](#6-arbitrages-métier-divergences-résolues) : sous 100 salariés un écart ≥ 5 % ne déclenche aucune obligation)*
 
 - CSE : non applicable
 - Déclaration des 7 indicateurs avec au moins un écart ≥ 5 % sur l'indicateur G
@@ -365,7 +365,7 @@ Restitution verbatim (cette feuille ne prévoit ni cas CSE ni parcours de confor
 | Moins de 50 salariés (sur la base du volontariat) | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs |
 | 50 à 99 salariés | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | **Déclaration des 7 indicateurs** | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | **Déclaration des 7 indicateurs** |
 
-Les arbitrages du §6 étant rendus, chaque cellule porte désormais ses coordonnées et pointe vers une fiche du §2. Sous 100 salariés, il n'y a jamais de CSE ni de parcours de conformité : un écart ≥ 5 % ne déclenche aucune obligation, la démarche se termine directement (arbitrage n° 3).
+Les arbitrages du [§6](#6-arbitrages-métier-divergences-résolues) étant rendus, chaque cellule porte désormais ses coordonnées et pointe vers une fiche du §2. Sous 100 salariés, il n'y a jamais de CSE ni de parcours de conformité : un écart ≥ 5 % ne déclenche aucune obligation, la démarche se termine directement (arbitrage n° 3).
 
 *Ligne « Moins de 50 salariés »* — coordonnées préfixées `AAAA-49-…`, les 7 années identiques (7 indicateurs sur la base du volontariat).
 
