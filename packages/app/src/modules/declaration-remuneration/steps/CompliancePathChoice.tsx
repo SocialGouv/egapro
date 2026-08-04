@@ -40,7 +40,6 @@ type Props = {
 	declarationYear: number;
 	cseOpinionRequired: boolean;
 	email: string;
-	hasCse: boolean | null;
 	initialPath?: CompliancePathValue;
 	isSecondRound?: boolean;
 	pdfDownloadHref?: string;
@@ -54,7 +53,6 @@ export function CompliancePathChoice({
 	declarationSiren,
 	declarationYear,
 	email,
-	hasCse,
 	initialPath,
 	isSecondRound = false,
 	pdfDownloadHref,
@@ -111,9 +109,9 @@ export function CompliancePathChoice({
 					"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
 				);
 			} else {
-				// "justify": with a CSE the opinion remains to be deposited on
-				// /avis-cse; without one the FSM already completed the démarche.
-				router.push(getPostComplianceDestination(hasCse));
+				// "justify": when an opinion is due it remains to be deposited on
+				// /avis-cse; otherwise the FSM already completed the démarche.
+				router.push(getPostComplianceDestination(cseOpinionRequired));
 			}
 		},
 	});
@@ -250,12 +248,14 @@ export function CompliancePathChoice({
 				<FormActions
 					isSubmitting={mutation.isPending}
 					mimoquageNextHref={
-						initialPath ? getCompliancePathHref(initialPath, hasCse) : undefined
+						initialPath
+							? getCompliancePathHref(initialPath, cseOpinionRequired)
+							: undefined
 					}
 					nextDisabled={!selectedPath || isReadOnly}
 					nextHref={
 						isReadOnly && initialPath
-							? getCompliancePathHref(initialPath, hasCse)
+							? getCompliancePathHref(initialPath, cseOpinionRequired)
 							: undefined
 					}
 					nextLabel="Suivant"

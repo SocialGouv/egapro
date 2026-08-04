@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	COMPANY_SIZE_RANGES,
+	classifyCompanySize,
 	getCompanySizeRange,
 	isCseRequired,
 } from "../shared/companySize";
@@ -14,12 +15,26 @@ describe("regulatory size constants", () => {
 	// Boundary behavior lives symbolically in demarcheDecisionTable.test.ts
 	// (#3975); the literal values are pinned here (COMPANY_SIZE_RANGES below
 	// carries its own literals, independent of these constants).
-	it("pins the voluntary/triennial boundary at 50", () => {
+	it("pins the voluntary/mandatory boundary at 50", () => {
 		expect(COMPANY_SIZE_VOLUNTARY_MAX).toBe(50);
 	});
 
-	it("pins the annual-declaration + CSE boundary at 100", () => {
+	it("pins the compliance-obligation + CSE boundary at 100", () => {
 		expect(COMPANY_SIZE_ANNUAL_MIN).toBe(100);
+	});
+});
+
+describe("classifyCompanySize", () => {
+	it("classifies each obligation package by its workforce band", () => {
+		expect(classifyCompanySize(COMPANY_SIZE_VOLUNTARY_MAX - 1)).toBe(
+			"voluntary",
+		);
+		expect(classifyCompanySize(COMPANY_SIZE_VOLUNTARY_MAX)).toBe("mandatory");
+		expect(classifyCompanySize(COMPANY_SIZE_ANNUAL_MIN - 1)).toBe("mandatory");
+		expect(classifyCompanySize(COMPANY_SIZE_ANNUAL_MIN)).toBe(
+			"mandatory_with_compliance",
+		);
+		expect(classifyCompanySize(300)).toBe("mandatory_with_compliance");
 	});
 });
 

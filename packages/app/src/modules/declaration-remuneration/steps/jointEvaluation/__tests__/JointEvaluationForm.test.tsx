@@ -46,10 +46,10 @@ const { uploadFile: uploadFileMock } = (await import(
 )) as unknown as { uploadFile: ReturnType<typeof vi.fn> };
 
 const defaultProps = {
+	cseOpinionRequired: false,
 	declarationDate: "01/06/2026",
 	declarationSiren: "123456789",
 	declarationYear: 2026,
-	hasCse: null as boolean | null,
 	jointEvaluationDeadline: new Date("2026-08-01T00:00:00"),
 };
 
@@ -170,8 +170,7 @@ describe("JointEvaluationForm", () => {
 	it.each([
 		[true, "/avis-cse"],
 		[false, "/declaration-remuneration/parcours-conformite/confirmation"],
-		[null, "/declaration-remuneration/parcours-conformite/confirmation"],
-	])("uploads the file and redirects after confirmation when hasCse=%s", async (hasCse, expectedRedirect) => {
+	])("uploads the file and redirects after confirmation when cseOpinionRequired=%s", async (cseOpinionRequired, expectedRedirect) => {
 		const user = userEvent.setup();
 		uploadFileMock.mockResolvedValue({
 			ok: true,
@@ -180,7 +179,10 @@ describe("JointEvaluationForm", () => {
 		});
 
 		const { container } = render(
-			<JointEvaluationForm {...defaultProps} hasCse={hasCse} />,
+			<JointEvaluationForm
+				{...defaultProps}
+				cseOpinionRequired={cseOpinionRequired}
+			/>,
 		);
 
 		const input = container.querySelector(

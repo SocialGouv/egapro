@@ -30,6 +30,9 @@ function base(currentState: string, overrides: Partial<Facts> = {}): Facts {
 		indicatorGCalculated: true,
 		gap: 10,
 		hasCse: true,
+		// `year` mirrors the fact now assembled by buildSubmitFacts (#4043); it feeds
+		// the indicatorGRequired computation's 2030 down-extension branch.
+		year: 2027,
 		isTriennialYear: true,
 		...overrides,
 	};
@@ -74,6 +77,38 @@ const MATRIX: Case[] = [
 			gap: 2,
 			indicatorGCalculated: false,
 			hasCse: false,
+		}),
+		expectedTo: "demarche_completed",
+		expectedEvents: [{ type: "submit" }, { type: "demarche_complete" }],
+	},
+	{
+		// #4043 rule 3: a < 50 company with a computed indicator G and a gap >= 5%
+		// still completes directly — no compliance process, no CSE below 100.
+		label:
+			"submit_to_demarche_completed_directly: voluntary tier (workforce 30) with indicator G gap >= 5%",
+		from: "draft",
+		action: "submit",
+		facts: base("draft", {
+			workforce: 30,
+			gap: 10,
+			indicatorGCalculated: true,
+			hasCse: true,
+		}),
+		expectedTo: "demarche_completed",
+		expectedEvents: [{ type: "submit" }, { type: "demarche_complete" }],
+	},
+	{
+		// #4043 rule 3: same for the 50-99 band — mandatory yearly, but a gap >= 5%
+		// triggers no obligation below 100.
+		label:
+			"submit_to_demarche_completed_directly: 50-99 band (workforce 75) with indicator G gap >= 5%",
+		from: "draft",
+		action: "submit",
+		facts: base("draft", {
+			workforce: 75,
+			gap: 10,
+			indicatorGCalculated: true,
+			hasCse: true,
 		}),
 		expectedTo: "demarche_completed",
 		expectedEvents: [{ type: "submit" }, { type: "demarche_complete" }],

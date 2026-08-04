@@ -142,7 +142,6 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 						hasCse: company.hasCse,
 					})}
 					declarationYear={currentYear}
-					hasCse={company.hasCse}
 					secondDeclarationCategories={reviewCategories}
 					siren={data.declaration.siren}
 				/>

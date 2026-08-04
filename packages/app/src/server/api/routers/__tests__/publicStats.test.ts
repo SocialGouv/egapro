@@ -112,15 +112,17 @@ describe("publicStatsRouter.getCurrentCampaignRate", () => {
 		expect(result.year).toBe(2027);
 	});
 
-	it("computes the obligation predicate differently for triennial vs non-triennial years (smoke check via call wiring)", async () => {
-		const { result: triennial } = await callRate([100, 80, 0, 0], {
-			year: 2027,
+	it("computes the obligation predicate differently pre/post the V2 scheme year (smoke check via call wiring)", async () => {
+		// From 2027 the SQL predicate widens to ema >= 50 (50-99 become subject);
+		// before 2027 it stays ema >= 100. Both branches must wire the four queries.
+		const { result: postV2 } = await callRate([100, 80, 0, 0], {
+			year: 2028,
 		});
-		const { result: nonTriennial } = await callRate([100, 80, 0, 0], {
+		const { result: preV2 } = await callRate([100, 80, 0, 0], {
 			year: 2026,
 		});
-		expect(triennial.totalObligated).toBe(100);
-		expect(nonTriennial.totalObligated).toBe(100);
+		expect(postV2.totalObligated).toBe(100);
+		expect(preV2.totalObligated).toBe(100);
 	});
 
 	it("defaults to 0 when a count query returns no row at all", async () => {
