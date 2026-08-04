@@ -1,5 +1,5 @@
 import path from "node:path";
-import { expect, type Page } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 import { fillCategoryPayAmounts } from "./declaration-flows";
 
@@ -12,6 +12,8 @@ type CseStep1Options = {
 	firstDeclGapConsulted?: boolean;
 	/** Same, for the corrective (second) declaration. */
 	secondDeclGapConsulted?: boolean;
+	/** Opinion on accuracy (and on gap when consulted). Defaults to "favorable" so existing specs are unaffected. */
+	opinion?: "favorable" | "unfavorable";
 };
 
 // Fill one GapConsultationCard: consulted yes/no, and when yes the opinion + date.
@@ -20,13 +22,14 @@ async function fillGapConsultation(
 	idPrefix: string,
 	consulted: boolean,
 	date: string,
+	opinion: "favorable" | "unfavorable" = "favorable",
 ) {
 	if (!consulted) {
 		await page.locator(`label[for="${idPrefix}-no"]`).click();
 		return;
 	}
 	await page.locator(`label[for="${idPrefix}-yes"]`).click();
-	await page.locator(`label[for="${idPrefix}-favorable"]`).click();
+	await page.locator(`label[for="${idPrefix}-${opinion}"]`).click();
 	await page.locator(`#${idPrefix}-date`).fill(date);
 }
 
@@ -35,29 +38,36 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 		hasSecondDeclaration = false,
 		firstDeclGapConsulted = false,
 		secondDeclGapConsulted = false,
+		opinion = "favorable",
 	} = options;
-	await page.waitForURL("**/avis-cse/etape/1");
-	// DSFR hides native radio inputs — click on the associated label instead
-	await page.locator('label[for="first-decl-accuracy-favorable"]').click();
-	await page.locator("#first-decl-accuracy-date").fill("2025-03-15");
-	await fillGapConsultation(
-		page,
-		"first-decl-gap",
-		firstDeclGapConsulted,
-		"2025-03-15",
-	);
-	if (hasSecondDeclaration) {
-		await page.locator('label[for="second-decl-accuracy-favorable"]').click();
-		await page.locator("#second-decl-accuracy-date").fill("2025-06-15");
+	await test.step("avis CSE — étape 1 : avis rendus", async () => {
+		await page.waitForURL("**/avis-cse/etape/1");
+		// DSFR hides native radio inputs — click on the associated label instead
+		await page.locator(`label[for="first-decl-accuracy-${opinion}"]`).click();
+		await page.locator("#first-decl-accuracy-date").fill("2025-03-15");
 		await fillGapConsultation(
 			page,
-			"second-decl-gap",
-			secondDeclGapConsulted,
-			"2025-06-15",
+			"first-decl-gap",
+			firstDeclGapConsulted,
+			"2025-03-15",
+			opinion,
 		);
-	}
-	await page.getByRole("button", { name: "Suivant" }).click();
-	await page.waitForURL("**/avis-cse/etape/2");
+		if (hasSecondDeclaration) {
+			await page
+				.locator(`label[for="second-decl-accuracy-${opinion}"]`)
+				.click();
+			await page.locator("#second-decl-accuracy-date").fill("2025-06-15");
+			await fillGapConsultation(
+				page,
+				"second-decl-gap",
+				secondDeclGapConsulted,
+				"2025-06-15",
+				opinion,
+			);
+		}
+		await page.getByRole("button", { name: "Suivant" }).click();
+		await page.waitForURL("**/avis-cse/etape/2");
+	});
 }
 
 // A matrix column to associate to the uploaded file, expressed the way the UI
@@ -101,61 +111,69 @@ export async function submitCseStep2(
 	} = options;
 	const fileName = path.basename(DUMMY_PDF);
 
-	await page.waitForURL("**/avis-cse/etape/2");
+	await test.step("avis CSE — étape 2 : dépôt des fichiers", async () => {
+		await page.waitForURL("**/avis-cse/etape/2");
 
-	// Phase A — selecting the file auto-uploads it (no intermediate "Importer"
-	// step), after which the page re-renders with the matrix.
-	await page.locator("#cse-file-upload").setInputFiles(DUMMY_PDF);
-	await expect(
-		page.getByRole("table", { name: /Associez chaque fichier déposé/ }),
-	).toBeVisible({ timeout: 30_000 });
+		// Phase A — selecting the file auto-uploads it (no intermediate "Importer"
+		// step), after which the page re-renders with the matrix.
+		await page.locator("#cse-file-upload").setInputFiles(DUMMY_PDF);
+		await expect(
+			page.getByRole("table", { name: /Associez chaque fichier déposé/ }),
+		).toBeVisible({ timeout: 30_000 });
 
-	// Phase B — tick the required columns, waiting for each association to persist
-	// before submitting. The client submit gate is optimistic, so finalize could
-	// otherwise race the setFileContentTypes mutation.
-	for (const column of columns) {
-		const persisted = page.waitForResponse(
-			(response) =>
-				response.url().includes("setFileContentTypes") && response.ok(),
-		);
+		// Phase B — tick the required columns, waiting for each association to
+		// persist before submitting. The client submit gate is optimistic, so
+		// finalize could otherwise race the setFileContentTypes mutation.
+		for (const column of columns) {
+			const persisted = page.waitForResponse(
+				(response) =>
+					response.url().includes("setFileContentTypes") && response.ok(),
+			);
+			await page
+				.getByRole("checkbox", {
+					name: cseCheckboxName(column, fileName, hasSecondDeclaration),
+				})
+				.check();
+			await persisted;
+		}
+
+		// Phase C — submit, certify, validate, then wait for the confirmation page.
+		const submit = page.getByRole("button", { name: "Soumettre" });
+		await expect(submit).toBeEnabled();
+		await submit.click();
 		await page
-			.getByRole("checkbox", {
-				name: cseCheckboxName(column, fileName, hasSecondDeclaration),
-			})
-			.check();
-		await persisted;
-	}
-
-	// Phase C — submit, certify, validate, then wait for the confirmation page.
-	const submit = page.getByRole("button", { name: "Soumettre" });
-	await expect(submit).toBeEnabled();
-	await submit.click();
-	await page
-		.getByText(/Je certifie que les avis transmis sont conformes/)
-		.click();
-	await page.getByRole("button", { name: "Valider" }).click();
-	await page.waitForURL("**/avis-cse/confirmation", { timeout: 30_000 });
+			.getByText(/Je certifie que les avis transmis sont conformes/)
+			.click();
+		await page.getByRole("button", { name: "Valider" }).click();
+		await page.waitForURL("**/avis-cse/confirmation", { timeout: 30_000 });
+	});
 }
 
 export async function uploadJointEvalPdf(page: Page) {
-	await page.waitForURL("**/evaluation-conjointe");
-	await page.locator("#joint-evaluation-file-upload").setInputFiles(DUMMY_PDF);
-	await page.getByRole("button", { name: "Transmettre" }).click();
-	await page
-		.getByText(/Je certifie que le rapport transmis est conforme/)
-		.click();
-	await page.getByRole("button", { name: "Valider" }).click();
+	await test.step("dépôt du rapport d'évaluation conjointe", async () => {
+		await page.waitForURL("**/evaluation-conjointe");
+		await page
+			.locator("#joint-evaluation-file-upload")
+			.setInputFiles(DUMMY_PDF);
+		await page.getByRole("button", { name: "Transmettre" }).click();
+		await page
+			.getByText(/Je certifie que le rapport transmis est conforme/)
+			.click();
+		await page.getByRole("button", { name: "Valider" }).click();
+	});
 }
 
 export async function selectCompliancePath(
 	page: Page,
 	pathId: "path-corrective" | "path-joint" | "path-justify",
 ) {
-	await page.goto(COMPLIANCE_PATH);
-	await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
-	// DSFR hides native radio inputs — click on the associated label instead
-	await page.locator(`label[for="${pathId}"]`).click();
-	await page.getByRole("button", { name: "Suivant" }).click();
+	await test.step("choix du parcours de conformité", async () => {
+		await page.goto(COMPLIANCE_PATH);
+		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		// DSFR hides native radio inputs — click on the associated label instead
+		await page.locator(`label[for="${pathId}"]`).click();
+		await page.getByRole("button", { name: "Suivant" }).click();
+	});
 }
 
 /**
@@ -167,27 +185,29 @@ export async function completeSecondDeclaration(
 	page: Page,
 	options: { hasGap: boolean },
 ) {
-	// Step 1: Info page — just click through
-	await page.waitForURL(`**${COMPLIANCE_PATH}/etape/1`, { timeout: 10_000 });
-	await page.getByRole("link", { name: "Suivant" }).click();
-	await page.waitForURL(`**${COMPLIANCE_PATH}/etape/2`);
+	await test.step("seconde déclaration", async () => {
+		// Step 1: Info page — just click through
+		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/1`, { timeout: 10_000 });
+		await page.getByRole("link", { name: "Suivant" }).click();
+		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/2`);
 
-	// Step 2: Edit correction employee category data
-	// women=1000, men=1100 → 9% gap | women=1000, men=1020 → 2% gap
-	const menSalary = options.hasGap ? "1100" : "1020";
-	await fillCategoryPayAmounts(page, { men: menSalary, women: "1000" });
+		// Step 2: Edit correction employee category data
+		// women=1000, men=1100 → 9% gap | women=1000, men=1020 → 2% gap
+		const menSalary = options.hasGap ? "1100" : "1020";
+		await fillCategoryPayAmounts(page, { men: menSalary, women: "1000" });
 
-	// Fill required reference period dates
-	await page.locator("#period-start-date").fill("2026-01-01");
-	await page.locator("#period-end-date").fill("2026-12-31");
+		// Fill required reference period dates
+		await page.locator("#period-start-date").fill("2026-01-01");
+		await page.locator("#period-end-date").fill("2026-12-31");
 
-	await page.getByRole("button", { name: "Suivant" }).click();
-	await page.waitForURL(`**${COMPLIANCE_PATH}/etape/3`);
+		await page.getByRole("button", { name: "Suivant" }).click();
+		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/3`);
 
-	// Step 3: Review and submit (opens confirmation modal)
-	await page.getByRole("button", { name: "Soumettre" }).click();
-	await page
-		.getByText(/Je certifie que les données saisies sont exactes/)
-		.click();
-	await page.getByRole("button", { name: "Valider" }).click();
+		// Step 3: Review and submit (opens confirmation modal)
+		await page.getByRole("button", { name: "Soumettre" }).click();
+		await page
+			.getByText(/Je certifie que les données saisies sont exactes/)
+			.click();
+		await page.getByRole("button", { name: "Valider" }).click();
+	});
 }

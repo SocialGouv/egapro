@@ -1,11 +1,13 @@
 import { expect, test } from "@playwright/test";
+import { buildGrid, pickCoordinate } from "./grille/coordinates";
+import { FICHE_SCENARIOS } from "./grille/scenarios";
+import { withCampaignYear } from "./helpers/campaign-year";
 import {
 	COMPLIANCE_PATH,
 	completeSecondDeclaration,
 	fillCseStep1,
 	selectCompliancePath,
 	submitCseStep2,
-	uploadJointEvalPdf,
 } from "./helpers/compliance-flows";
 import {
 	resetDeclarationToDraft,
@@ -16,416 +18,217 @@ import {
 } from "./helpers/db";
 import {
 	completeDeclaration,
-	reachRecapWithoutGap,
 	reachStep6ComplianceRecap,
-	reachStep6Recap,
-	submitFromStep6Recap,
 } from "./helpers/declaration-flows";
-import {
-	indicatorGRequiredForGip,
-	recapStepperLabel,
-} from "./helpers/indicator-g";
 
 test.describe.configure({ mode: "serial" });
 
-const CONFIRMATION_PATH = `${COMPLIANCE_PATH}/confirmation`;
-// Same literal as the unit tests of CompliancePathOptions: an `exact: true`
-// assertion breaks silently on a wording change, and the negative assertion
-// below would then pass for the wrong reason (text absent because renamed).
-const CORRECTIVE_ACTION_TITLE =
-	"Effectuer des actions correctives et une seconde déclaration";
+// The 185 coordinates are derived from the domain (grille/coordinates.ts); every
+// fiche's parcours-type lives in FICHE_SCENARIOS (grille/scenarios.ts). Each
+// describe below keeps its literal [CAS-xx] tag (read by check-cahier), keeps its
+// configuration, and delegates to the scenario with a representative coordinate of
+// the fiche. Behaviour is unchanged — only extracted.
+const GRID = buildGrid();
+
+// >= 100 tier, a 7-indicator year: exercises the full compliance funnel (step 5)
+// like the current suite baseline. The company workforce (200) drives the CSE and
+// compliance obligations; the baseline GIP workforce (>= 250) drives the funnel.
+function complianceCoordinate(fiche: string) {
+	return pickCoordinate(GRID, { fiche, effmax: "249", year: 2027 });
+}
 
 // === GROUP A: No gap — auto-redirects ===
 
 test.describe("[CAS-02] Path 1: no gap + hasCse → /avis-cse → full CSE flow", () => {
+	const coordinate = complianceCoordinate("CAS-02");
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setCompanyHasCse(true);
-		await setCompanyWorkforce(200);
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
 	});
 
-	test("complete declaration without gap, then CSE opinion flow", async ({
-		page,
-	}) => {
-		test.slow(); // Full declaration (6 steps) + CSE step 1 + CSE step 2
-		await completeDeclaration(page, { hasGap: false });
-
-		// No gap + hasCse → auto-redirect to /avis-cse
-		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
-		await fillCseStep1(page);
-		await submitCseStep2(page);
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+	test("no-gap declaration, then full CSE opinion flow", async ({ page }) => {
+		test.slow();
+		await FICHE_SCENARIOS["CAS-02"]({ page, coordinate });
 	});
 });
 
 test.describe("[CAS-01] Path 2: no gap + no hasCse → /confirmation", () => {
+	const coordinate = complianceCoordinate("CAS-01");
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setCompanyHasCse(false);
-		await setCompanyWorkforce(200);
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
 	});
 
-	test("complete declaration without gap, redirects to confirmation", async ({
+	test("no-gap declaration completes and /avis-cse stays unreachable", async ({
 		page,
 	}) => {
-		await completeDeclaration(page, { hasGap: false });
-
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
-	});
-
-	test("reaching /avis-cse directly redirects away when there is no CSE", async ({
-		page,
-	}) => {
-		// Every field of that funnel is required, so a company without a CSE
-		// cannot fill it in — the screen must stay out of reach even by URL.
-		await page.goto("/avis-cse/etape/1");
-
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+		await FICHE_SCENARIOS["CAS-01"]({ page, coordinate });
 	});
 });
 
 // === GROUP B: Gap — compliance choice form ===
 
 test.describe("[CAS-04] Path 3: gap + hasCse → compliance choice → justify", () => {
+	const coordinate = complianceCoordinate("CAS-04");
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setCompanyHasCse(true);
-		await setCompanyWorkforce(200);
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
 	});
 
-	test("complete declaration with gap, shows 3 compliance options", async ({
+	test("gap declaration → 3 options → justify → CSE opinion with two columns", async ({
 		page,
 	}) => {
-		await completeDeclaration(page, { hasGap: true });
-
-		// Gap + hasCse → compliance choice page
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
-		await expect(
-			page.getByText(CORRECTIVE_ACTION_TITLE, {
-				exact: true,
-			}),
-		).toBeVisible();
-		await expect(
-			page.getByText(
-				"Mettre en place une évaluation conjointe des rémunérations",
-				{
-					exact: true,
-				},
-			),
-		).toBeVisible();
-		await expect(
-			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
-				exact: true,
-			}),
-		).toBeVisible();
-	});
-
-	test("justify → CSE opinion with accuracy + gap justification columns", async ({
-		page,
-	}) => {
-		test.slow(); // CSE step 1 (gap consulted) + step 2 matrix with 2 columns
-		await selectCompliancePath(page, "path-justify");
-		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
-
-		// CSE consulted on gap justification → step 2 requires the
-		// "Justification" column on top of "Exactitude" (Excel: cas 4).
-		await fillCseStep1(page, { firstDeclGapConsulted: true });
-		await submitCseStep2(page, {
-			columns: [
-				{ declarationNumber: 1, type: "accuracy" },
-				{ declarationNumber: 1, type: "gap" },
-			],
-		});
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+		test.slow();
+		await FICHE_SCENARIOS["CAS-04"]({ page, coordinate });
 	});
 });
 
 test.describe("[CAS-06] Path 4: gap + hasCse → joint evaluation → /avis-cse", () => {
+	const coordinate = complianceCoordinate("CAS-06");
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setCompanyHasCse(true);
-		await setCompanyWorkforce(200);
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
 	});
 
-	test("complete declaration with gap, joint evaluation → CSE opinion deposited", async ({
+	test("gap declaration → joint evaluation → CSE opinion deposited", async ({
 		page,
 	}) => {
-		test.slow(); // Full declaration + compliance choice + joint eval upload + CSE flow
-		await completeDeclaration(page, { hasGap: true });
-		await selectCompliancePath(page, "path-joint");
-		await uploadJointEvalPdf(page);
-		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
-
-		// Complete the CSE opinion after the joint evaluation (Excel: cas 6 —
-		// accuracy opinion, gap justification opinion being optional here).
-		await fillCseStep1(page);
-		await submitCseStep2(page);
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+		test.slow();
+		await FICHE_SCENARIOS["CAS-06"]({ page, coordinate });
 	});
 });
 
 test.describe("[CAS-05] Path 5: gap + no hasCse → joint evaluation → /confirmation", () => {
+	const coordinate = complianceCoordinate("CAS-05");
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setCompanyHasCse(false);
-		await setCompanyWorkforce(200);
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
 	});
 
-	test("shows all 3 options including justify (hasCse=false)", async ({
+	test("gap declaration → joint evaluation → /confirmation", async ({
 		page,
 	}) => {
-		await completeDeclaration(page, { hasGap: true });
-		await expect(
-			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
-				exact: true,
-			}),
-		).toBeVisible();
-	});
-
-	test("joint evaluation → upload PDF → /confirmation", async ({ page }) => {
-		await selectCompliancePath(page, "path-joint");
-		await uploadJointEvalPdf(page);
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+		test.slow();
+		await FICHE_SCENARIOS["CAS-05"]({ page, coordinate });
 	});
 });
 
 test.describe("[CAS-03] Path 5.b: gap + no hasCse → justify → /confirmation", () => {
+	const coordinate = complianceCoordinate("CAS-03");
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setCompanyHasCse(false);
-		await setCompanyWorkforce(200);
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
 	});
 
 	test("justify without CSE completes the démarche directly", async ({
 		page,
 	}) => {
-		test.slow(); // Full declaration + compliance choice
-		await completeDeclaration(page, { hasGap: true });
-
-		// No CSE → the justify path has no opinion to deposit: the FSM goes
-		// straight to demarche_completed (Excel: cas 3).
-		await selectCompliancePath(page, "path-justify");
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+		test.slow();
+		await FICHE_SCENARIOS["CAS-03"]({ page, coordinate });
 	});
 });
 
 // === GROUP C: Corrective action — second declaration (no remaining gap) ===
 
 test.describe("[CAS-08] Path 6: gap + corrective action (no gap after) + hasCse → /avis-cse", () => {
+	const coordinate = complianceCoordinate("CAS-08");
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setCompanyHasCse(true);
-		await setCompanyWorkforce(200);
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
 	});
 
-	test("declaration → corrective action → correct without gap → CSE opinion on both declarations", async ({
+	test("corrective action → no gap → CSE opinion on both declarations", async ({
 		page,
 	}) => {
-		test.slow(); // Full declaration + compliance + second declaration + CSE flow
-		await completeDeclaration(page, { hasGap: true });
-		await selectCompliancePath(page, "path-corrective");
-		await completeSecondDeclaration(page, { hasGap: false });
-		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
-
-		// Two declarations submitted → the CSE step asks for both opinions and
-		// the step 2 matrix carries one "Exactitude" column per declaration
-		// (Excel: cas 8).
-		await fillCseStep1(page, { hasSecondDeclaration: true });
-		await submitCseStep2(page, {
-			hasSecondDeclaration: true,
-			columns: [
-				{ declarationNumber: 1, type: "accuracy" },
-				{ declarationNumber: 2, type: "accuracy" },
-			],
-		});
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+		test.slow();
+		await FICHE_SCENARIOS["CAS-08"]({ page, coordinate });
 	});
 });
 
 test.describe("[CAS-07] Path 7: gap + corrective action (no gap after) + no hasCse → /confirmation", () => {
+	const coordinate = complianceCoordinate("CAS-07");
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setCompanyHasCse(false);
-		await setCompanyWorkforce(200);
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
 	});
 
-	test("declaration → corrective action → correct without gap → /confirmation", async ({
-		page,
-	}) => {
-		test.slow(); // Full declaration + compliance + second declaration
-		await completeDeclaration(page, { hasGap: true });
-		await selectCompliancePath(page, "path-corrective");
-		await completeSecondDeclaration(page, { hasGap: false });
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+	test("corrective action → no gap → /confirmation", async ({ page }) => {
+		test.slow();
+		await FICHE_SCENARIOS["CAS-07"]({ page, coordinate });
 	});
 });
 
 // === GROUP D: Corrective action with remaining gap → second round ===
 
 test.describe("[CAS-10] Path 8: gap + corrective action (gap persists) → second round choices", () => {
+	const coordinate = complianceCoordinate("CAS-10");
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setCompanyHasCse(true);
-		await setCompanyWorkforce(200);
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
 	});
 
-	test("declaration → corrective action → correct WITH gap → back to compliance choice", async ({
+	test("second round → justify → CSE opinion on both declarations with justification", async ({
 		page,
 	}) => {
-		test.slow(); // Full declaration + compliance + second declaration
-		await completeDeclaration(page, { hasGap: true });
-		await selectCompliancePath(page, "path-corrective");
-		await completeSecondDeclaration(page, { hasGap: true });
-		// Gap still exists → redirect back to compliance choice
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
-	});
-
-	test("second round shows only justify and joint evaluation (no corrective action)", async ({
-		page,
-	}) => {
-		await page.goto(COMPLIANCE_PATH);
-		await expect(
-			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
-				exact: true,
-			}),
-		).toBeVisible();
-		await expect(
-			page.getByText(
-				"Mettre en place une évaluation conjointe des rémunérations",
-				{
-					exact: true,
-				},
-			),
-		).toBeVisible();
-		await expect(
-			page.getByText(CORRECTIVE_ACTION_TITLE, {
-				exact: true,
-			}),
-		).not.toBeVisible();
-	});
-
-	test("second round: justify → CSE opinion on both declarations with gap justification", async ({
-		page,
-	}) => {
-		test.slow(); // CSE step 1 (2 declarations) + step 2 matrix with 3 columns
-		await selectCompliancePath(page, "path-justify");
-		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
-
-		// Both declarations keep a gap ≥ 5%; the CSE was consulted on justifying
-		// the second one → step 2 requires accuracy ×2 + the second declaration's
-		// "Justification" column (Excel: cas 10).
-		await fillCseStep1(page, {
-			hasSecondDeclaration: true,
-			secondDeclGapConsulted: true,
-		});
-		await submitCseStep2(page, {
-			hasSecondDeclaration: true,
-			columns: [
-				{ declarationNumber: 1, type: "accuracy" },
-				{ declarationNumber: 2, type: "accuracy" },
-				{ declarationNumber: 2, type: "gap" },
-			],
-		});
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+		test.slow();
+		await FICHE_SCENARIOS["CAS-10"]({ page, coordinate });
 	});
 });
 
 test.describe("[CAS-09] Path 9: second round + justify + no hasCse → /confirmation", () => {
+	const coordinate = complianceCoordinate("CAS-09");
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setCompanyHasCse(false);
-		await setCompanyWorkforce(200);
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
 	});
 
 	test("full flow → second round → justify → /confirmation", async ({
 		page,
 	}) => {
-		test.slow(); // Full declaration + compliance + second decl + second round
-		await completeDeclaration(page, { hasGap: true });
-		await selectCompliancePath(page, "path-corrective");
-		await completeSecondDeclaration(page, { hasGap: true });
-		// Gap persists → back to compliance choice for the second round
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
-
-		// No CSE → justify has no opinion to deposit: straight to completion
-		// (Excel: cas 9).
-		await selectCompliancePath(page, "path-justify");
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+		test.slow();
+		await FICHE_SCENARIOS["CAS-09"]({ page, coordinate });
 	});
 });
 
 test.describe("[CAS-12] Path 10: second round + joint evaluation + hasCse → /avis-cse", () => {
+	const coordinate = complianceCoordinate("CAS-12");
 	test.beforeAll(async () => {
-		// Fresh run: declaration → corrective action with gap → second round
 		await resetDeclarationToDraft();
-		await setCompanyHasCse(true);
-		await setCompanyWorkforce(200);
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
 	});
 
-	test("full flow → second round → joint evaluation → CSE opinion on both declarations", async ({
+	test("full flow → second round → joint evaluation → CSE opinion on both", async ({
 		page,
 	}) => {
-		test.slow(); // Full declaration + compliance + second decl + second round + CSE flow
-		await completeDeclaration(page, { hasGap: true });
-		await selectCompliancePath(page, "path-corrective");
-		await completeSecondDeclaration(page, { hasGap: true });
-		// Now in second round
-		await selectCompliancePath(page, "path-joint");
-		await uploadJointEvalPdf(page);
-		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
-
-		// Joint evaluation deposited → close the démarche with the CSE opinion
-		// covering both declarations (Excel: cas 12).
-		await fillCseStep1(page, { hasSecondDeclaration: true });
-		await submitCseStep2(page, {
-			hasSecondDeclaration: true,
-			columns: [
-				{ declarationNumber: 1, type: "accuracy" },
-				{ declarationNumber: 2, type: "accuracy" },
-			],
-		});
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+		test.slow();
+		await FICHE_SCENARIOS["CAS-12"]({ page, coordinate });
 	});
 });
 
 test.describe("[CAS-11] Path 11: second round + joint evaluation + no hasCse → /confirmation", () => {
+	const coordinate = complianceCoordinate("CAS-11");
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setCompanyHasCse(false);
-		await setCompanyWorkforce(200);
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
 	});
 
 	test("full flow → second round → joint evaluation → /confirmation", async ({
 		page,
 	}) => {
-		test.slow(); // Full declaration + compliance + second decl + second round
-		await completeDeclaration(page, { hasGap: true });
-		await selectCompliancePath(page, "path-corrective");
-		await completeSecondDeclaration(page, { hasGap: true });
-		await selectCompliancePath(page, "path-joint");
-		await uploadJointEvalPdf(page);
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+		test.slow();
+		await FICHE_SCENARIOS["CAS-11"]({ page, coordinate });
 	});
 });
 
@@ -502,7 +305,7 @@ test.describe("[ANX-02] Path 12: compliance already completed → redirect", () 
 	test("complete full flow, then verify compliance path redirects away", async ({
 		page,
 	}) => {
-		test.slow(); // Full declaration + CSE step 1 + CSE step 2 + redirect check
+		test.slow();
 		// Complete declaration without gap → auto-redirect to CSE → complete CSE
 		await completeDeclaration(page, { hasGap: false });
 		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
@@ -519,81 +322,109 @@ test.describe("[ANX-02] Path 12: compliance already completed → redirect", () 
 	});
 });
 
-// === GROUP G: "6 premiers indicateurs" variant — the 100-149 bracket ===
-// GIP workforce 120 (bracket 100-149): the funnel drops the categories step and no
-// compliance path can trigger (Excel: cas 1-2 of the "6 premiers indicateurs" columns).
-// That bracket owes indicator G on the triennial years from 2030, so the funnel shape
-// is read from the domain — the submission outcome under test is the same either way.
-// resetGipWorkforce restores the suite baseline (>= 250) for any spec running after this one.
-const GIP_120_INDICATOR_G = indicatorGRequiredForGip(120);
+// === GROUP G: indicator G gated by the campaign year (#4022 / #4067) ===
+// Whether the funnel carries the categories step (step 5 / indicator G) is decided
+// by isIndicatorGRequired(workforce, year): below 250 it only applies on the
+// triennial cadence (base 2027), and — from 2030 — down to every mandatory 50+
+// company. Each 6-indicator fiche pins its campaign year through the coordinate it
+// receives (year 2029, workforce 120), so both branches stay exercised.
 
-test.describe("[CAS-01-6IND] Path 14: GIP 120 (100-149) + no hasCse → direct completion", () => {
-	test.beforeAll(async () => {
-		await resetDeclarationToDraft();
-		await setGipWorkforce(120);
-		await setCompanyHasCse(false);
-	});
-
-	test.afterAll(async () => {
-		await resetGipWorkforce();
+test.describe("[CAS-01-6IND] Path 14: 6 indicators (no G) + no hasCse → direct completion", () => {
+	const coordinate = pickCoordinate(GRID, {
+		fiche: "CAS-01-6IND",
+		effmax: "149",
+		year: 2029,
 	});
 
 	test("submits the tier's funnel and completes the démarche directly", async ({
 		page,
 	}) => {
-		test.slow(); // Full declaration + submission
-		await reachRecapWithoutGap(page, {
-			indicatorGRequired: GIP_120_INDICATOR_G,
-		});
-		await expect(
-			page.getByText(recapStepperLabel(GIP_120_INDICATOR_G), { exact: true }),
-		).toBeVisible();
-
-		// Submit — no gap and no CSE → demarche completed directly
-		await submitFromStep6Recap(page);
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+		test.slow();
+		await FICHE_SCENARIOS["CAS-01-6IND"]({ page, coordinate });
 	});
 });
 
-test.describe("[CAS-02-6IND] Path 15: GIP 120 (100-149) + hasCse → /avis-cse", () => {
-	test.beforeAll(async () => {
-		await resetDeclarationToDraft();
-		await setGipWorkforce(120);
-		await setCompanyHasCse(true);
-	});
-
-	test.afterAll(async () => {
-		await resetGipWorkforce();
+test.describe("[CAS-02-6IND] Path 15: 6 indicators (no G) + hasCse → /avis-cse", () => {
+	const coordinate = pickCoordinate(GRID, {
+		fiche: "CAS-02-6IND",
+		effmax: "149",
+		year: 2029,
 	});
 
 	test("submits the tier's funnel then deposits the CSE accuracy opinion", async ({
 		page,
 	}) => {
-		test.slow(); // Full declaration + submission + CSE flow
-		await reachRecapWithoutGap(page, {
-			indicatorGRequired: GIP_120_INDICATOR_G,
-		});
+		test.slow();
+		await FICHE_SCENARIOS["CAS-02-6IND"]({ page, coordinate });
+	});
+});
 
-		// Submit — no gap but a CSE → straight to the CSE opinion
-		await submitFromStep6Recap(page);
-		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
+// ANX-04 — the OTHER branch of CAS-01/02-6IND: the same 100-149 company gains step 5
+// in a triennial year from 2030 — the assertion that would have silently broken
+// without #4067. Kept lightweight (funnel shape only): the full compliance flows
+// for a 7-indicator company are already covered by the >= 250 baseline cases.
+const SEVEN_INDICATOR_YEAR = 2030;
 
-		await fillCseStep1(page);
-		await submitCseStep2(page);
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+test.describe("[ANX-04] Path 14bis: 100-149 company regains indicator G in a triennial year >= 2030", () => {
+	test("the funnel carries the indicator-G step (6 steps)", async ({
+		page,
+	}) => {
+		await withCampaignYear(
+			{ page, year: SEVEN_INDICATOR_YEAR, workforce: 120 },
+			async () => {
+				await page.goto("/declaration-remuneration/etape/1");
+				await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
+				await page.goto("/declaration-remuneration/etape/5");
+				await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
+			},
+		);
+	});
+});
+
+// ANX-05 — the 50-99 tranche (scenarios S1/S2 of #4067): indicator G is absent
+// below 2030 and returns only in a triennial year from 2030.
+const SIX_INDICATOR_YEAR = 2029;
+
+test.describe("[ANX-05] Path 13: 50-99 tranche — indicator G gated by the pinned year", () => {
+	test.describe.configure({ mode: "serial" });
+
+	test("6-indicator year (2029): step 5 is absent and unreachable by direct URL", async ({
+		page,
+	}) => {
+		await withCampaignYear(
+			{ page, year: SIX_INDICATOR_YEAR, workforce: 75 },
+			async () => {
+				await page.goto("/declaration-remuneration/etape/1");
+				await expect(page.getByText("Étape 1 sur 5")).toBeVisible();
+				// The categories step is out of reach even by URL: it redirects to the recap.
+				await page.goto("/declaration-remuneration/etape/5");
+				await page.waitForURL("**/declaration-remuneration/etape/6");
+				await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+			},
+		);
+	});
+
+	test("7-indicator year (2030): step 5 is present and the stepper counts 6", async ({
+		page,
+	}) => {
+		await withCampaignYear(
+			{ page, year: SEVEN_INDICATOR_YEAR, workforce: 75 },
+			async () => {
+				// Initialise the declaration first so the step 5 URL is reachable.
+				await page.goto("/declaration-remuneration/etape/1");
+				await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
+				await page.goto("/declaration-remuneration/etape/5");
+				await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
+			},
+		);
 	});
 });
 
 // === GROUP H: [#3945] CSE opinion mentions gated by the declared CSE existence ===
-// A company >= 100 that declared it has no CSE (hasCse false or null) must no
-// longer be told to deposit a CSE opinion: the recap "Prochaines étapes" box and
-// the compliance-choice options drop every CSE-opinion mention, while the gap
-// actions and the "Mettre à jour l'existence d'un CSE" escape hatch stay.
+// A company >= 100 that declared it has no CSE (hasCse false or null) must no longer
+// be told to deposit a CSE opinion: the recap "Prochaines étapes" box and the
+// compliance-choice options drop every CSE-opinion mention, while the gap actions
+// and the "Mettre à jour l'existence d'un CSE" escape hatch stay.
 
 const CSE_OPINION_RECAP_TEXT = /avis du CSE devront être transmis/;
 const CSE_JUSTIFY_PARENTHESIS = /avis à transmettre sur le portail/;
@@ -609,7 +440,7 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion 
 	test("step 6 recap hides the CSE opinion but keeps the gap actions and the update-CSE button", async ({
 		page,
 	}) => {
-		test.slow(); // Full 5-step declaration up to the recap
+		test.slow();
 		await reachStep6ComplianceRecap(page);
 
 		await expect(
@@ -640,7 +471,7 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion 
 	test("compliance choice page drops the CSE opinion bullets", async ({
 		page,
 	}) => {
-		test.slow(); // Full declaration + submission
+		test.slow();
 		await completeDeclaration(page, { hasGap: true });
 		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
 
@@ -668,7 +499,7 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=null → no CSE opinion m
 	test("step 6 recap treats an unset CSE flag like an absent CSE", async ({
 		page,
 	}) => {
-		test.slow(); // Full 5-step declaration up to the recap
+		test.slow();
 		await reachStep6ComplianceRecap(page);
 
 		await expect(
@@ -689,7 +520,7 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 	});
 
 	test("step 6 recap shows the CSE opinion mention", async ({ page }) => {
-		test.slow(); // Full 5-step declaration up to the recap
+		test.slow();
 		await reachStep6ComplianceRecap(page);
 
 		await expect(
@@ -702,7 +533,7 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 	test("compliance choice page keeps the CSE opinion bullet", async ({
 		page,
 	}) => {
-		test.slow(); // Full declaration + submission
+		test.slow();
 		await completeDeclaration(page, { hasGap: true });
 		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
 
@@ -715,19 +546,21 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 // === GROUP I: tranches < 100 — the gap ≥ 5 % obligations stop at 100 salariés ===
 // Arbitrage 2026-07 (#4043, cahier de tests §6): the voluntary tier (< 50) declares
 // all 7 indicators every year, the 50-99 tier declares the 6 first ones outside its
-// own indicator G years, and neither owes anything when a gap ≥ 5 % shows up — the
-// compliance process, the second declaration, the joint evaluation and the CSE
-// opinion all stay gated at 100 salariés (Excel sheet "<50 et 50-99").
-// `hasCse` starts unset, as the question is never asked below 100 — but the CSE
-// probe of [CAS-14] declares one on purpose: `isCseOpinionRequired` is an AND of
-// the effectif and the CSE, so leaving `hasCse` unset would keep that probe green
-// even with no threshold at all, and [CAS-01] already covers the absent CSE. Each
+// own indicator G years, and neither owes anything when a gap ≥ 5 % shows up. The
+// [CAS-14] probe declares a CSE on purpose: isCseOpinionRequired is an AND of the
+// effectif and the CSE, so it fails if the 100-salarié gate ever disappears. Each
 // describe restores the file's exit state (GIP >= 250 + hasCse true) after it.
 
 test.describe("[CAS-13] 7 indicators + GIP 30 (< 50) + no gap → direct completion", () => {
+	const coordinate = pickCoordinate(GRID, {
+		fiche: "CAS-13",
+		effmax: "49",
+		year: 2027,
+	});
+
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setGipWorkforce(30);
+		await setGipWorkforce(coordinate.workforce);
 		await setCompanyHasCse(null);
 	});
 
@@ -739,33 +572,21 @@ test.describe("[CAS-13] 7 indicators + GIP 30 (< 50) + no gap → direct complet
 	test("declares the 7 indicators and completes the démarche directly", async ({
 		page,
 	}) => {
-		test.slow(); // 6-step declaration + submission
-		await reachStep6Recap(page, { hasGap: false });
-
-		// Step 5 was presented: 6-step funnel + indicator G block on the recap.
-		// `exact` scopes to the stepper — the Next.js route announcer repeats the
-		// label followed by the step title.
-		await expect(
-			page.getByText("Étape 6 sur 6", { exact: true }),
-		).toBeVisible();
-		await expect(
-			page.getByRole("heading", {
-				name: "Indicateurs par catégorie de salariés",
-			}),
-		).toBeVisible();
-
-		await submitFromStep6Recap(page);
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+		test.slow();
+		await FICHE_SCENARIOS["CAS-13"]({ page, coordinate });
 	});
 });
 
 test.describe("[CAS-14] 7 indicators + GIP 30 (< 50) + gap ≥ 5 % → no obligation triggered", () => {
+	const coordinate = pickCoordinate(GRID, {
+		fiche: "CAS-14",
+		effmax: "49",
+		year: 2027,
+	});
+
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setGipWorkforce(30);
+		await setGipWorkforce(coordinate.workforce);
 		await setCompanyHasCse(null);
 	});
 
@@ -774,61 +595,11 @@ test.describe("[CAS-14] 7 indicators + GIP 30 (< 50) + gap ≥ 5 % → no obliga
 		await setCompanyHasCse(true);
 	});
 
-	test("the recap proposes no compliance action despite the gap", async ({
-		page,
-	}) => {
-		test.slow(); // 6-step declaration up to the recap
-		await reachStep6ComplianceRecap(page);
-
-		// Same gap inputs that render the "Prochaines étapes" box at 200 salariés
-		// (GROUP H): below 100 nothing is due, so the box is absent altogether.
-		await expect(
-			page.getByRole("heading", { name: "Prochaines étapes" }),
-		).toHaveCount(0);
-		await expect(
-			page.getByText("Écarts détectés", { exact: true }),
-		).toHaveCount(0);
-		await expect(
-			page.getByRole("heading", { name: "Actions à engager" }),
-		).toHaveCount(0);
-	});
-
 	test("submits into a direct completion, with every compliance surface out of reach", async ({
 		page,
 	}) => {
-		await page.goto("/declaration-remuneration/etape/6");
-		await submitFromStep6Recap(page);
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
-
-		// The compliance path choice, which carries the second declaration and the
-		// joint evaluation, is unreachable even by URL: below 100 salariés a gap
-		// ≥ 5 % opens none of them.
-		await page.goto(COMPLIANCE_PATH);
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
-
-		// Declaring a CSE leaves the effectif as the only unmet term of
-		// `isCseOpinionRequired`, so this probe fails if the 100-salarié gate goes
-		// away — which an unset `hasCse` would have hidden.
-		await setCompanyHasCse(true);
-		const cseFunnelResponse = await page.goto("/avis-cse/etape/1");
-
-		// Read off the settled navigation instead of polling for the URL: a gate
-		// bouncing this company back into /avis-cse loops, and must surface as a
-		// redirect error or as the funnel pathname, never as a silent timeout.
-		expect(cseFunnelResponse?.ok()).toBe(true);
-		expect(new URL(page.url()).pathname).toBe(CONFIRMATION_PATH);
-		await expect(
-			page.getByRole("heading", {
-				name: "Transmettre l'avis ou les avis du CSE",
-			}),
-		).toHaveCount(0);
-		await expect(page.locator("#first-decl-accuracy-favorable")).toHaveCount(0);
-		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+		test.slow();
+		await FICHE_SCENARIOS["CAS-14"]({ page, coordinate });
 	});
 });
 
@@ -838,11 +609,15 @@ test.describe("[CAS-14] 7 indicators + GIP 30 (< 50) + gap ≥ 5 % → no obliga
 // domain — what is under test either way is the outcome: below 100 salariés a gap-free
 // declaration completes the démarche directly, with no compliance obligation.
 test.describe("[CAS-13-6IND] GIP 75 (50-99) → direct completion", () => {
-	const indicatorGRequired = indicatorGRequiredForGip(75);
+	const coordinate = pickCoordinate(GRID, {
+		fiche: "CAS-13-6IND",
+		effmax: "99",
+		year: 2027,
+	});
 
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
-		await setGipWorkforce(75);
+		await setGipWorkforce(coordinate.workforce);
 		await setCompanyHasCse(null);
 	});
 
@@ -854,30 +629,45 @@ test.describe("[CAS-13-6IND] GIP 75 (50-99) → direct completion", () => {
 	test("submits the tier's funnel and completes the démarche directly", async ({
 		page,
 	}) => {
-		test.slow(); // Full declaration + submission
-		await page.goto("/declaration-remuneration/etape/5");
-		if (indicatorGRequired) {
-			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/5$/);
-			await expect(
-				page.getByRole("heading", {
-					name: /Écart de rémunération par catégories de salariés/,
-				}),
-			).toBeVisible();
-		} else {
-			// Off those years step 5 is out of reach even by URL — unlike the < 50
-			// tier, which always carries it.
-			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/6$/);
-		}
+		test.slow();
+		await FICHE_SCENARIOS["CAS-13-6IND"]({ page, coordinate });
+	});
+});
 
-		await reachRecapWithoutGap(page, { indicatorGRequired });
-		await expect(
-			page.getByText(recapStepperLabel(indicatorGRequired), { exact: true }),
-		).toBeVisible();
+test.describe("[S11] CAS-04 with défavorable opinion — routing unchanged, opinion retained", () => {
+	const coordinate = complianceCoordinate("CAS-04");
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(coordinate.hasCse);
+		await setCompanyWorkforce(coordinate.workforce);
+	});
 
-		await submitFromStep6Recap(page);
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+	test("défavorable opinion reaches the same fin-de-démarche as favorable", async ({
+		page,
+	}) => {
+		test.slow();
+		await FICHE_SCENARIOS["CAS-04"]({
+			page,
+			coordinate,
+			opinion: "unfavorable",
+		});
+	});
+
+	test("step-1 recap shows Défavorable as the selected opinion", async ({
+		page,
+	}) => {
+		await page.goto("/avis-cse/etape/1");
+		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
 		await expect(
-			page.getByText(/Votre parcours .* est (désormais )?terminé/),
-		).toBeVisible();
+			page.locator("#first-decl-accuracy-unfavorable"),
+		).toBeChecked();
+	});
+
+	test("transmitted PDF endpoint returns a valid PDF for défavorable opinion", async ({
+		page,
+	}) => {
+		const response = await page.request.get("/api/transmitted-pdf");
+		expect(response.ok()).toBe(true);
+		expect(response.headers()["content-type"]).toContain("application/pdf");
 	});
 });

@@ -18,6 +18,7 @@ Audience : équipe métier / PO (référence d'acceptance et suivi des tests) et
 4. [Scénarios complémentaires hors Excel](#4-scénarios-complémentaires-hors-excel)
 5. [Limites de l'automatisation](#5-limites-de-lautomatisation)
 6. [Arbitrages métier (divergences résolues)](#6-arbitrages-métier-divergences-résolues)
+7. [Lancer la recette](#7-lancer-la-recette)
 
 ---
 
@@ -32,10 +33,11 @@ Les cellules de l'Excel se **regroupent** : un même cas se répète dans plusie
 1. **Côté tests** : le titre du `test.describe(...)` qui couvre un parcours porte le tag entre crochets, ex. `test.describe("[CAS-02] Path 1: no gap + hasCse → ...")`. Un même describe peut porter plusieurs tags. C'est ce tag que ciblent les commandes `--grep` du cahier.
 2. **Côté cahier** : la ligne « Test E2E » de chaque fiche décrit ce que le test déroule réellement — y compris, honnêtement, ce qu'il ne déroule pas encore. Cette profondeur se juge en revue de PR ; l'outillage, lui, ne vérifie que l'existence.
 
-Le script [`packages/app/scripts/check-cahier.mjs`](../packages/app/scripts/check-cahier.mjs) (`pnpm --filter app check:cahier`, exécuté en CI) vérifie que :
+Le script [`packages/app/scripts/check-cahier.ts`](../packages/app/scripts/check-cahier.ts) (`pnpm --filter app check:cahier`, exécuté en CI) vérifie trois niveaux :
 
 - toute fiche `CAS-xx` du §2 (et toute ligne `ANX-xx` du §4) est taguée dans au moins une spec `packages/app/src/e2e/*.e2e.ts` — **une fiche sans test fait échouer la CI** : un trou de couverture est visible en rouge, jamais caché ;
-- tout tag présent dans une spec correspond à une fiche ou une ligne du cahier.
+- tout tag présent dans une spec correspond à une fiche ou une ligne du cahier ;
+- **bijection au niveau coordonnée** : toute coordonnée `AAAA-EFFMAX-CASnn` du §3 est produite par `buildGrid()` et réciproquement — un §3 ou une règle de cadence désynchronisés font échouer la CI.
 
 **Règles de mise à jour** : nouveau parcours métier (évolution de l'Excel) → créer la fiche et la référencer dans les feuilles concernées ; la CI reste rouge jusqu'à l'arrivée du test qui la couvre. Test supprimé ou renommé → répercuter ici. La CI échoue si les deux dérivent.
 
@@ -49,9 +51,11 @@ Les specs conformité tournent avec l'entreprise de test SIREN `130025265`, **ef
 
 Une fiche par **parcours-type**. Chaque fiche a un ID court qui est l'**ancre du test E2E** — c'est la couche « test » ; la couche « désignation métier » est la coordonnée `AAAA-EFFMAX-CASNN` du §3, qui renvoie ici. Un même parcours-type se retrouve dans des dizaines de cellules (années × tranches) mais n'est défini — et testé — qu'une fois.
 
-**Comment lire une fiche.** L'ID `CAS-NN` **reprend le numéro « Cas N » de l'Excel** (`CAS-04` ↔ « Cas 4 » des feuilles) ; le suffixe `-6IND` désigne la variante « 6 premiers indicateurs » (années sans indicateur G). Le titre énonce ensuite les **conditions qui définissent le cas** — nombre d'indicateurs (6 ou 7) · présence d'un CSE · issue du parcours — et le champ **« Libellé Excel »** rappelle le texte exact de la cellule d'origine. Exemple : `CAS-01` = *7 indicateurs, sans CSE, aucun écart ≥ 5 %* → il reprend « Cas 1 » des colonnes 7 indicateurs.
+**Comment lire une fiche.** Pour les cas 1 à 12, l'ID `CAS-NN` **reprend le numéro « Cas N » de l'Excel** (`CAS-04` ↔ « Cas 4 » des feuilles ≥ 100 salariés) ; le suffixe `-6IND` désigne la variante « 6 premiers indicateurs » (années sans indicateur G). Le titre énonce ensuite les **conditions qui définissent le cas** — nombre d'indicateurs (6 ou 7) · présence d'un CSE · issue du parcours — et le champ **« Libellé Excel »** rappelle le texte exact de la cellule d'origine. Exemple : `CAS-01` = *7 indicateurs, sans CSE, aucun écart ≥ 5 %* → il reprend « Cas 1 » des colonnes 7 indicateurs.
 
-Les cas 1 et 2 existent donc en deux variantes selon l'année (voir §3) : `CAS-01`/`CAS-02` (7 indicateurs) et `CAS-01-6IND`/`CAS-02-6IND` (6 indicateurs, sans indicateur G donc sans parcours de conformité possible). Les cas 3 à 12 n'existent qu'en année « 7 indicateurs ».
+Les cas **13 et 14 prolongent cette numérotation sans exister dans l'Excel** : sa feuille « <50 et 50-99 » n'énumère aucun cas — ses cellules ne portent que le type de déclaration attendu. Ces deux fiches traduisent les arbitrages métier de juillet 2026 ([§6](#6-arbitrages-métier-divergences-résolues)) qui ont rendu cette feuille testable : `CAS-13` en déroule les cellules (déclaration → fin de démarche directe), `CAS-14` verrouille l'arbitrage n° 3 (sous 100 salariés, un écart ≥ 5 % ne déclenche aucune obligation — ce que l'Excel exprimait par l'absence de tout cas de conformité sur cette feuille).
+
+Les cas 1, 2 et 13 existent donc en deux variantes selon l'année (voir §3) : `CAS-01`/`CAS-02`/`CAS-13` (7 indicateurs) et `CAS-01-6IND`/`CAS-02-6IND`/`CAS-13-6IND` (6 indicateurs, sans indicateur G donc sans parcours de conformité possible). Les cas 3 à 12, et le cas 14, n'existent qu'en année « 7 indicateurs ».
 
 Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » = indicateur G, l'écart de rémunération par catégorie de salariés (étape 5 du funnel) ; « Déclaration des 6 premiers indicateurs » = funnel sans l'étape 5 (indicateurs A à F) ; « Parcours de conformité » = page `/declaration-remuneration/parcours-conformite` ; « Nouvelle déclaration du 7ème indicateur » = seconde déclaration (étapes 1 à 3 du parcours actions correctives) ; « Dépot avis CSE » = flux `/avis-cse/etape/1..2` (étape 1 : avis rendus, étape 2 : dépôt des fichiers et matrice d'association) ; « Dépôt du rapport de l'évaluation conjointe » = upload PDF sur `/evaluation-conjointe`.
 
@@ -255,6 +259,36 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 ---
 
+<a name="cas-13"></a>
+
+### CAS-13 : 7 indicateurs · tranche < 100 (sans CSE ni obligations d'écart) · aucun écart ≥ 5 % → fin de démarche directe
+
+**Libellé Excel** : « Déclaration des 7 indicateurs » *(feuille « <50 et 50-99 » — cellules sans numéro de cas)*
+
+- CSE : non applicable (pas de question CSE dans le parcours sous 100 salariés)
+- Déclaration des 7 indicateurs (étape 5 incluse)
+- Soumission → fin de démarche directe
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-13]` : effectif GIP 30 (représentatif < 50), 7 indicateurs sans écart ≥ 5 %, soumission → fin de démarche directe → `/confirmation`.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-13\]"`
+
+---
+
+<a name="cas-14"></a>
+
+### CAS-14 : 7 indicateurs · tranche < 100 · au moins un écart ≥ 5 % → fin de démarche directe (aucune obligation déclenchée)
+
+**Libellé Excel** : « Déclaration des 7 indicateurs » *(feuille « <50 et 50-99 » — parcours issu de [l'arbitrage n° 3](#6-arbitrages-métier-divergences-résolues) : sous 100 salariés un écart ≥ 5 % ne déclenche aucune obligation)*
+
+- CSE : non applicable
+- Déclaration des 7 indicateurs avec au moins un écart ≥ 5 % sur l'indicateur G
+- Ni parcours de conformité, ni seconde déclaration, ni évaluation conjointe, ni avis CSE → fin de démarche directe
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-14]` : effectif GIP 30, écart ≥ 5 % à l'étape 5, soumission → aucune proposition de conformité → `/confirmation`.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-14\]"`
+
+---
+
 <a name="cas-01-6ind"></a>
 
 ### CAS-01-6IND : 6 premiers indicateurs · sans CSE
@@ -281,36 +315,6 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 **Test E2E** : `compliance.e2e.ts` — `[CAS-02-6IND] Path 15` : effectif GIP 120, funnel en 5 étapes, soumission → `/avis-cse` → dépôt de l'avis « exactitude » → confirmation.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-02-6IND\]"`
-
----
-
-<a name="cas-13"></a>
-
-### CAS-13 : 7 indicateurs · tranche < 100 (sans CSE ni obligations d'écart) · aucun écart ≥ 5 % → fin de démarche directe
-
-**Libellé Excel** : « Déclaration des 7 indicateurs » *(feuille « <50 et 50-99 » — cellules sans numéro de cas)*
-
-- CSE : non applicable (pas de question CSE dans le parcours sous 100 salariés)
-- Déclaration des 7 indicateurs (étape 5 incluse)
-- Soumission → fin de démarche directe
-
-**Test E2E** : `compliance.e2e.ts` — `[CAS-13]` : effectif GIP 30 (représentatif < 50), 7 indicateurs sans écart ≥ 5 %, soumission → fin de démarche directe → `/confirmation`.
-**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-13\]"`
-
----
-
-<a name="cas-14"></a>
-
-### CAS-14 : 7 indicateurs · tranche < 100 · au moins un écart ≥ 5 % → fin de démarche directe (aucune obligation déclenchée)
-
-**Libellé Excel** : « Déclaration des 7 indicateurs » *(feuille « <50 et 50-99 » — parcours issu de l'arbitrage n° 3 : sous 100 salariés un écart ≥ 5 % ne déclenche aucune obligation)*
-
-- CSE : non applicable
-- Déclaration des 7 indicateurs avec au moins un écart ≥ 5 % sur l'indicateur G
-- Ni parcours de conformité, ni seconde déclaration, ni évaluation conjointe, ni avis CSE → fin de démarche directe
-
-**Test E2E** : `compliance.e2e.ts` — `[CAS-14]` : effectif GIP 30, écart ≥ 5 % à l'étape 5, soumission → aucune proposition de conformité → `/confirmation`.
-**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-14\]"`
 
 ---
 
@@ -345,11 +349,26 @@ L'année et la tranche fixent déjà la variante « 6 ou 7 indicateurs », donc 
 
 **Lecture d'une ligne de cellule** : `coordonnée : rappel`. Le texte après les deux-points est un **résumé** du cas (conditions · issue), pas une seconde information : `2027-149-CAS01 : sans CSE → fin de démarche directe` se lit « la coordonnée 2027-149-CAS01, qui correspond au parcours *sans CSE, fin de démarche directe* ». Cliquez la coordonnée pour la fiche complète (§2).
 
-La coordonnée est **au-dessus des tests** : elle pointe vers la **fiche du parcours-type** (§2 — `CAS-01` … `CAS-12`, `CAS-01-6IND`, `CAS-02-6IND`) où vit le test E2E. Comme le contenu d'un cas ne dépend ni de l'année ni de la tranche, un même test couvre toutes les coordonnées qui pointent vers sa fiche — d'où ~14 tests pour toute la grille. Pour lancer **un** cas précis, ouvrez sa fiche : la commande `--grep` y est. Pour lancer **une configuration entière** :
+La coordonnée est **au-dessus des tests** : elle pointe vers la **fiche du parcours-type** (§2 — `CAS-01` … `CAS-14` et les variantes `-6IND`) où vit le test E2E. Comme le contenu d'un cas ne dépend ni de l'année ni de la tranche, **17 fiches couvrent les 185 coordonnées** — la grille (`test:e2e:grille`) rejoue la fiche de chaque coordonnée, épinglée sur son année et sa tranche.
 
-- **Année « 7 indicateurs » (les 12 cas)** : `pnpm --filter app test:e2e --grep "\[CAS-(0[1-9]|1[0-2])\]"`
-- **Année « 6 premiers indicateurs » (cas 1-2)** : `pnpm --filter app test:e2e --grep "\[CAS-0[12]-6IND\]"`
-- **Tranches < 100** : `pnpm --filter app test:e2e --grep "\[CAS-1[34](-6IND)?\]"`
+**D'où viennent les 185.** Le nombre de cas d'une cellule suit les règles du domaine : **12 cas** dès 100 salariés en année « 7 indicateurs » (les parcours de conformité deviennent possibles), **2 cas** en année « 6 premiers indicateurs » (pas d'indicateur G donc pas d'écart — seul le CSE varie) ; sous 100 salariés, **2 cas** avec l'indicateur G (avec/sans écart, [aucune obligation](#6-arbitrages-métier-divergences-résolues) dans les deux cas) et **1 cas** sans. Croisé avec les années où chaque tranche doit l'indicateur G :
+
+| Feuille | Années « 7 indicateurs » | Calcul | Coordonnées |
+|---|---|---|---|
+| < 50 | les 7 (volontariat) | 7 × 2 | **14** |
+| 50-99 | 2030, 2033 | 2 × 2 + 5 × 1 | **9** |
+| 100-149 | 2030, 2033 | 2 × 12 + 5 × 2 | **34** |
+| 150-249 | 2027, 2030, 2033 (triennales) | 3 × 12 + 4 × 2 | **44** |
+| 250 et + | les 7 (annuel) | 7 × 12 | **84** |
+
+Ces comptes ne sont écrits nulle part dans le code : ils **tombent** de la dérivation (`buildGrid()` croise `isIndicatorGRequired` et le contenu des cellules), et le test unitaire `coordinates.test.ts` vérifie qu'ils continuent de tomber juste.
+
+Pour lancer **un** cas précis, ouvrez sa fiche : la commande `--grep` y est. Pour lancer **une configuration entière** par coordonnée (via `test:e2e:grille`, voir §7) :
+
+- **Une année entière** : `pnpm --filter app test:e2e:grille -- --grep "\[2030-"`
+- **Une tranche entière** : `pnpm --filter app test:e2e:grille -- --grep "-149-CAS"`
+- **Une cellule précise (année × tranche)** : `pnpm --filter app test:e2e:grille -- --grep "\[2030-149-"`
+- **Toute la grille** : `pnpm --filter app test:e2e:grille`
 
 ### Feuille « <50 et 50-99 »
 
@@ -360,7 +379,7 @@ Restitution verbatim (cette feuille ne prévoit ni cas CSE ni parcours de confor
 | Moins de 50 salariés (sur la base du volontariat) | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs |
 | 50 à 99 salariés | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | **Déclaration des 7 indicateurs** | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | **Déclaration des 7 indicateurs** |
 
-Les arbitrages du §6 étant rendus, chaque cellule porte désormais ses coordonnées et pointe vers une fiche du §2. Sous 100 salariés, il n'y a jamais de CSE ni de parcours de conformité : un écart ≥ 5 % ne déclenche aucune obligation, la démarche se termine directement (arbitrage n° 3).
+Les arbitrages du [§6](#6-arbitrages-métier-divergences-résolues) étant rendus, chaque cellule porte désormais ses coordonnées et pointe vers une fiche du §2. Sous 100 salariés, il n'y a jamais de CSE ni de parcours de conformité : un écart ≥ 5 % ne déclenche aucune obligation, la démarche se termine directement (arbitrage n° 3).
 
 *Ligne « Moins de 50 salariés »* — coordonnées préfixées `AAAA-49-…`, les 7 années identiques (7 indicateurs sur la base du volontariat).
 
@@ -442,6 +461,8 @@ Comportements testés en E2E qui ne figurent pas dans le fichier de Laetitia mai
 | ANX-01 | Tâtonnement : changer de parcours de conformité avant toute action aval (le dernier choix gagne, les deux événements sont historisés) | `compliance-path-change.e2e.ts` |
 | ANX-02 | Démarche terminée → toute navigation vers le parcours de conformité redirige | `compliance.e2e.ts` — `[ANX-02] Path 12` |
 | ANX-03 | Bouton « Précédent » sur `/avis-cse` : retour contextuel selon l'état (récap étape 6, choix de parcours, récap 2ᵉ déclaration) | `compliance.e2e.ts` — `[ANX-03] Paths 13.a / 13.b / 13.c` |
+| ANX-04 | Tranche 100-149, année triennale ≥ 2030 : l'indicateur G redevient obligatoire, le funnel repasse à 6 étapes. Contre-branche de `CAS-01-6IND` / `CAS-02-6IND`, qui n'exerceraient sinon qu'une seule de leurs deux branches — et basculeraient silencieusement au rouge en 2030 | `compliance.e2e.ts` — `[ANX-04] Path 14bis` (effectif GIP 120, année épinglée 2030) |
+| ANX-05 | Tranche 50-99 : la composition du funnel suit l'année épinglée — étape catégories absente et inatteignable par URL directe en année « 6 indicateurs » (2029), présente en année triennale ≥ 2030 | `compliance.e2e.ts` — `[ANX-05] Path 13` (effectif GIP 75, années épinglées 2029 et 2030) |
 
 Le socle déclaratif (étapes 1–6, brouillon, historique, panneau de démarche, deadlines de campagne, annulation, saut de l'étape 5 quand l'indicateur G ne s'applique pas…) est couvert par les autres specs (`declaration.e2e.ts`, `declarationDraft.e2e.ts`, `declaration-history.e2e.ts`, `declaration-process-panel.e2e.ts`, `campaign-deadlines-gating.e2e.ts`, `declaration-cancellation.e2e.ts`) — hors périmètre de ce cahier, qui trace les parcours du fichier Excel.
 
@@ -449,11 +470,11 @@ Le socle déclaratif (étapes 1–6, brouillon, historique, panneau de démarche
 
 ## 5. Limites de l'automatisation
 
-Ce que les tests E2E ne peuvent pas rejouer tel quel, et comment c'est compensé :
+Ce que les tests E2E ne peuvent pas rejouer tel quel :
 
-1. **La dimension année de campagne** — les specs E2E tournent sur l'année de campagne courante, pas sur 2027 → 2033. Le *contenu* de chaque cellule de l'Excel (les parcours) est déroulé par les tests du §2 ; le *cadencement* (quelle année déclenche 6 ou 7 indicateurs pour quelle tranche) est verrouillé par les tests unitaires du domaine (`indicatorG.test.ts`, `companyObligation.test.ts`), qui couvrent chaque tranche × année de la matrice.
-2. **La tranche d'effectif** — les parcours de conformité (cas 1 à 12) tournent en 250 et + (effectif GIP 250) ; les variantes 6 indicateurs (`CAS-01-6IND`, `CAS-02-6IND`) tournent avec un effectif GIP de 120, représentatif de la tranche 100-149 ; les nouveaux parcours < 100 tournent avec un effectif GIP de 30 (représentatif < 50) pour `CAS-13`/`CAS-14` et de 75 (représentatif 50-99) pour `CAS-13-6IND`.
-3. **Avis CSE défavorables** — tous les tests déposent des avis « favorable » ; les variantes « défavorable » (sans impact de routage attendu, mais affichées au récapitulatif) ne sont pas déroulées.
+1. **Le jugement humain** — l'ergonomie, la formulation des textes, la lisibilité du PDF généré et la cohérence visuelle d'ensemble ne sont pas mesurables par des assertions automatisées.
+2. **Les autres navigateurs et le mobile** — la grille tourne uniquement sur Chromium (bureau). Compatibilité Firefox/Safari et rendu mobile restent hors périmètre automatisé.
+3. **Les années hors 2027 → 2033** — le seam d'horloge (`withCampaignYear`) permet d'épingler les années 2027 à 2033 ; les années antérieures (données historiques) et les années futures au-delà de 2033 ne sont pas couvertes.
 
 ---
 
@@ -464,3 +485,27 @@ Les 3 divergences relevées en transcrivant le fichier Excel ont été arbitrée
 1. **Moins de 50 salariés (volontariat)** — déclarent **les 7 indicateurs chaque année**, indicateur G compris. La déclaration reste volontaire ; c'est son *contenu* qui change. *Statut : répercutée dans le code par #4043 (`isIndicatorGRequired` renvoie `true` sous 50 salariés, toutes années).*
 2. **50 à 99 salariés** — sont assujetties **chaque année** dès 2027 : les **6 premiers indicateurs** en 2027, 2028, 2029, 2031 et 2032, et les **7 indicateurs** en **2030 et 2033**. *Statut : répercutée dans le code par #4043 (`isObligatedForYear` assujettit les 50-99 chaque année dès `V2_FIRST_CAMPAIGN_YEAR`).*
 3. **Sous 100 salariés en année « 7 indicateurs »** — les tranches < 100 (50-99 comprises en 2030/2033, et les < 50 volontaires) ne sont **pas** concernées par les obligations déclenchées par un écart ≥ 5 % : pas de parcours de conformité, pas de seconde déclaration, pas de rapport d'évaluation conjointe, pas d'avis CSE. Le seuil de ces obligations reste **100 salariés**. *Statut : le code était déjà conforme — le seuil 100 vit dans `isComplianceProcessRequired`/`isCseOpinionRequired` (domaine) et `phase2Required`/`cseRequired` (moteur de règles) ; la divergence décrivait un état antérieur du code (« sans condition de tranche ») qui n'existe plus. Verrouillée par des tests, sans changement de comportement.*
+
+---
+
+## 7. Lancer la recette
+
+### Depuis l'onglet Actions (déclenchement manuel)
+
+1. Accédez à **Actions → Recette grille (nightly)** dans le dépôt GitHub.
+2. Cliquez **Run workflow**.
+3. Choisissez l'**Année de campagne** (`toutes` pour les 185 coordonnées, ou une année précise de 2027 à 2033) et la **Tranche d'effectif** (`toutes`, `49`, `99`, `149`, `249`, `250P`).
+4. Le rapport de recette apparaît dans le **résumé du run** et est téléchargeable en artefact (`grille-recette`).
+
+Le workflow tourne aussi automatiquement chaque nuit à 2h UTC. Un échec nocturne fait échouer le job et notifie les watchers du dépôt — aucune pull request n'est bloquée.
+
+### En local
+
+```bash
+pnpm --filter app test:e2e:grille                        # les 185 coordonnées
+pnpm --filter app test:e2e:grille -- --grep "\[2030-"    # une année
+pnpm --filter app test:e2e:grille -- --grep "\-149-CAS"  # une tranche
+pnpm --filter app report:grille                          # le rapport de recette
+```
+
+Le dev server doit tourner sur le port 3000 avec `EGAPRO_E2E_CLOCK=true` (actif dans `.github/workflows/e2e-grille.yaml` ; à passer manuellement en local).
