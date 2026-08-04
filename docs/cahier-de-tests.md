@@ -51,9 +51,11 @@ Les specs conformité tournent avec l'entreprise de test SIREN `130025265`, **ef
 
 Une fiche par **parcours-type**. Chaque fiche a un ID court qui est l'**ancre du test E2E** — c'est la couche « test » ; la couche « désignation métier » est la coordonnée `AAAA-EFFMAX-CASNN` du §3, qui renvoie ici. Un même parcours-type se retrouve dans des dizaines de cellules (années × tranches) mais n'est défini — et testé — qu'une fois.
 
-**Comment lire une fiche.** L'ID `CAS-NN` **reprend le numéro « Cas N » de l'Excel** (`CAS-04` ↔ « Cas 4 » des feuilles) ; le suffixe `-6IND` désigne la variante « 6 premiers indicateurs » (années sans indicateur G). Le titre énonce ensuite les **conditions qui définissent le cas** — nombre d'indicateurs (6 ou 7) · présence d'un CSE · issue du parcours — et le champ **« Libellé Excel »** rappelle le texte exact de la cellule d'origine. Exemple : `CAS-01` = *7 indicateurs, sans CSE, aucun écart ≥ 5 %* → il reprend « Cas 1 » des colonnes 7 indicateurs.
+**Comment lire une fiche.** Pour les cas 1 à 12, l'ID `CAS-NN` **reprend le numéro « Cas N » de l'Excel** (`CAS-04` ↔ « Cas 4 » des feuilles ≥ 100 salariés) ; le suffixe `-6IND` désigne la variante « 6 premiers indicateurs » (années sans indicateur G). Le titre énonce ensuite les **conditions qui définissent le cas** — nombre d'indicateurs (6 ou 7) · présence d'un CSE · issue du parcours — et le champ **« Libellé Excel »** rappelle le texte exact de la cellule d'origine. Exemple : `CAS-01` = *7 indicateurs, sans CSE, aucun écart ≥ 5 %* → il reprend « Cas 1 » des colonnes 7 indicateurs.
 
-Les cas 1 et 2 existent donc en deux variantes selon l'année (voir §3) : `CAS-01`/`CAS-02` (7 indicateurs) et `CAS-01-6IND`/`CAS-02-6IND` (6 indicateurs, sans indicateur G donc sans parcours de conformité possible). Les cas 3 à 12 n'existent qu'en année « 7 indicateurs ».
+Les cas **13 et 14 prolongent cette numérotation sans exister dans l'Excel** : sa feuille « <50 et 50-99 » n'énumère aucun cas — ses cellules ne portent que le type de déclaration attendu. Ces deux fiches traduisent les arbitrages métier de juillet 2026 (§6) qui ont rendu cette feuille testable : `CAS-13` en déroule les cellules (déclaration → fin de démarche directe), `CAS-14` verrouille l'arbitrage n° 3 (sous 100 salariés, un écart ≥ 5 % ne déclenche aucune obligation — ce que l'Excel exprimait par l'absence de tout cas de conformité sur cette feuille).
+
+Les cas 1, 2 et 13 existent donc en deux variantes selon l'année (voir §3) : `CAS-01`/`CAS-02`/`CAS-13` (7 indicateurs) et `CAS-01-6IND`/`CAS-02-6IND`/`CAS-13-6IND` (6 indicateurs, sans indicateur G donc sans parcours de conformité possible). Les cas 3 à 12, et le cas 14, n'existent qu'en année « 7 indicateurs ».
 
 Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » = indicateur G, l'écart de rémunération par catégorie de salariés (étape 5 du funnel) ; « Déclaration des 6 premiers indicateurs » = funnel sans l'étape 5 (indicateurs A à F) ; « Parcours de conformité » = page `/declaration-remuneration/parcours-conformite` ; « Nouvelle déclaration du 7ème indicateur » = seconde déclaration (étapes 1 à 3 du parcours actions correctives) ; « Dépot avis CSE » = flux `/avis-cse/etape/1..2` (étape 1 : avis rendus, étape 2 : dépôt des fichiers et matrice d'association) ; « Dépôt du rapport de l'évaluation conjointe » = upload PDF sur `/evaluation-conjointe`.
 
@@ -257,35 +259,6 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 ---
 
-<a name="cas-01-6ind"></a>
-
-### CAS-01-6IND : 6 premiers indicateurs · sans CSE
-
-**Libellé Excel** : « Cas 1 sans CSE » *(colonnes « 6 premiers indicateurs » — pas d'indicateur G)*
-
-- CSE : non
-- Déclaration des 6 premiers indicateurs
-
-**Test E2E** : `compliance.e2e.ts` — `[CAS-01-6IND] Path 14` : effectif GIP 120 (tranche 100-149), funnel en 5 étapes (étape catégories masquée), soumission → fin de démarche directe → `/confirmation`.
-**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-01-6IND\]"`
-
----
-
-<a name="cas-02-6ind"></a>
-
-### CAS-02-6IND : 6 premiers indicateurs · avec CSE · avis CSE « exactitude »
-
-**Libellé Excel** : « Cas 2 avec CSE » *(colonnes « 6 premiers indicateurs » — pas d'indicateur G)*
-
-- CSE : oui
-- Déclaration des 6 premiers indicateurs
-- Dépot avis CSE sur l'exactitude des données déclarées
-
-**Test E2E** : `compliance.e2e.ts` — `[CAS-02-6IND] Path 15` : effectif GIP 120, funnel en 5 étapes, soumission → `/avis-cse` → dépôt de l'avis « exactitude » → confirmation.
-**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-02-6IND\]"`
-
----
-
 <a name="cas-13"></a>
 
 ### CAS-13 : 7 indicateurs · tranche < 100 (sans CSE ni obligations d'écart) · aucun écart ≥ 5 % → fin de démarche directe
@@ -313,6 +286,35 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 **Test E2E** : `compliance.e2e.ts` — `[CAS-14]` : effectif GIP 30, écart ≥ 5 % à l'étape 5, soumission → aucune proposition de conformité → `/confirmation`.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-14\]"`
+
+---
+
+<a name="cas-01-6ind"></a>
+
+### CAS-01-6IND : 6 premiers indicateurs · sans CSE
+
+**Libellé Excel** : « Cas 1 sans CSE » *(colonnes « 6 premiers indicateurs » — pas d'indicateur G)*
+
+- CSE : non
+- Déclaration des 6 premiers indicateurs
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-01-6IND] Path 14` : effectif GIP 120 (tranche 100-149), funnel en 5 étapes (étape catégories masquée), soumission → fin de démarche directe → `/confirmation`.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-01-6IND\]"`
+
+---
+
+<a name="cas-02-6ind"></a>
+
+### CAS-02-6IND : 6 premiers indicateurs · avec CSE · avis CSE « exactitude »
+
+**Libellé Excel** : « Cas 2 avec CSE » *(colonnes « 6 premiers indicateurs » — pas d'indicateur G)*
+
+- CSE : oui
+- Déclaration des 6 premiers indicateurs
+- Dépot avis CSE sur l'exactitude des données déclarées
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-02-6IND] Path 15` : effectif GIP 120, funnel en 5 étapes, soumission → `/avis-cse` → dépôt de l'avis « exactitude » → confirmation.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-02-6IND\]"`
 
 ---
 
