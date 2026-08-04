@@ -63,9 +63,9 @@ export type GipPrefillData = {
 	};
 	/** Confidence index (0-1, for internal DGT use) */
 	confidenceIndex: string | null;
-	/** Start of the data collection period (e.g. "2026-01-01"), used for "Période de référence" display. */
+	/** Start of the GIP file data-collection window (e.g. "2026-01-01"), shown in the prefill PDF. */
 	periodStart?: string | null;
-	/** End of the data collection period (e.g. "2026-12-31"), used for "Source : DSN" display. */
+	/** End of the GIP file data-collection window (e.g. "2026-12-31"), shown in the prefill PDF. */
 	periodEnd: string | null;
 };
 

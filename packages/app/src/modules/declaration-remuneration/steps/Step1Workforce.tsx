@@ -7,7 +7,8 @@ import { useMemo, useRef, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import {
 	computeWorkforceTotal,
-	resolveGipReferencePeriod,
+	getReferencePeriod,
+	getWorkforceYearFor,
 } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -235,11 +236,11 @@ export function Step1Workforce({
 
 					<div className={common.flexColumnGap1}>
 						<p className="fr-mb-0">
-							{`Période de référence pour le calcul des indicateurs : ${resolveGipReferencePeriod(gipPrefillData?.periodStart, gipPrefillData?.periodEnd, declarationYear)}.`}
+							{`Période de référence pour le calcul des indicateurs : ${getReferencePeriod(declarationYear)}.`}
 							<TooltipButton
 								id="tooltip-period"
 								label="Information sur la période de référence"
-								text={`Pour les entreprises créées en cours d'année, cette période correspond à la durée d'activité effective depuis la date de création jusqu'au 31/12/${declarationYear}.`}
+								text={`Pour les entreprises créées en cours d'année, cette période correspond à la durée d'activité effective depuis la date de création jusqu'au 31/12/${getWorkforceYearFor(declarationYear)}.`}
 							/>
 						</p>
 
@@ -360,13 +361,7 @@ export function Step1Workforce({
 								</div>
 							</div>
 
-							{isPrefilled && (
-								<PrefillSource
-									periodEnd={gipPrefillData.periodEnd}
-									periodStart={gipPrefillData.periodStart}
-									year={declarationYear}
-								/>
-							)}
+							{isPrefilled && <PrefillSource year={declarationYear} />}
 
 							{showResetWarning && <PrefillResetWarning />}
 						</div>

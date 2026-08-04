@@ -12,7 +12,6 @@ export {
 	getWorkforceYear,
 	getWorkforceYearFor,
 	isDeadlinePassed,
-	resolveGipReferencePeriod,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
 // Company obligation

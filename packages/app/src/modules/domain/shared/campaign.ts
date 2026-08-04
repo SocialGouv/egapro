@@ -20,28 +20,10 @@ export function getRepresentationDeadline(year: number): string {
 	return `01/03/${year}`;
 }
 
-/** Regulatory reference period of a declaration year: the full civil year, format "DD/MM/YYYY - DD/MM/YYYY". */
-export function getReferencePeriod(year: number): string {
-	return `01/01/${year} - 31/12/${year}`;
-}
-
-/** Formats an ISO date "YYYY-MM-DD" as "DD/MM/YYYY"; returns the input unchanged when it is not a 3-part ISO date. */
-export function formatIsoDateToFrench(isoDate: string): string {
-	const parts = isoDate.split("-");
-	if (parts.length !== 3) return isoDate;
-	return `${parts[2]}/${parts[1]}/${parts[0]}`;
-}
-
-/** Reference-period label under prefilled tables: the GIP collection window (periodStart to periodEnd) when both bounds exist, else the campaign civil year. Format "DD/MM/YYYY - DD/MM/YYYY". */
-export function resolveGipReferencePeriod(
-	periodStart: string | null | undefined,
-	periodEnd: string | null | undefined,
-	campaignYear: number,
-): string {
-	if (!periodStart || !periodEnd) {
-		return getReferencePeriod(campaignYear);
-	}
-	return `${formatIsoDateToFrench(periodStart)} - ${formatIsoDateToFrench(periodEnd)}`;
+/** Regulatory reference period of a declaration campaign: the civil year preceding the campaign (N-1, as a declaration reports the prior year's data), format "DD/MM/YYYY - DD/MM/YYYY". */
+export function getReferencePeriod(campaignYear: number): string {
+	const referenceYear = getWorkforceYearFor(campaignYear);
+	return `01/01/${referenceYear} - 31/12/${referenceYear}`;
 }
 
 /** Returns the declaration modification deadline for a given year. */

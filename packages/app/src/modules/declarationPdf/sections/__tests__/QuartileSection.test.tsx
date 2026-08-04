@@ -30,7 +30,7 @@ function makeData(step4: Step4Data): DeclarationPdfData {
 		workforceYear: 2025,
 		isSecondDeclaration: false,
 		transmittedAt: "05/03/2026",
-		referencePeriod: "01/01/2026 - 31/12/2026",
+		referencePeriod: "01/01/2025 - 31/12/2025",
 		declarant: { name: "", email: "", phone: "" },
 		company: {
 			name: "Société Démo",

@@ -150,7 +150,7 @@ describe("adminDeclarationsRouter — getRecap", () => {
 		});
 		expect(result.company).not.toHaveProperty("workforce");
 		expect(result.declarationYear).toBe(2026);
-		expect(result.referencePeriod).toBe("01/01/2026 - 31/12/2026");
+		expect(result.referencePeriod).toBe("01/01/2025 - 31/12/2025");
 		expect(result.declarantName).toBe("Alice Dupont");
 		expect(result.declarantEmail).toBe("alice@example.fr");
 		expect(result.isCorrection).toBe(false);

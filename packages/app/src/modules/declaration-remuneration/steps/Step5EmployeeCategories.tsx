@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
-import { padDecimalToTwo } from "~/modules/domain";
+import { getWorkforceYearFor, padDecimalToTwo } from "~/modules/domain";
 import { api } from "~/trpc/react";
 import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
@@ -134,7 +134,7 @@ export function Step5EmployeeCategories({
 			}
 			onValuesChange={(values) => setField(values)}
 			previousHref="/declaration-remuneration/etape/4"
-			referenceYear={declarationYear - 1}
+			referenceYear={getWorkforceYearFor(declarationYear)}
 			stepper={
 				<StepIndicator
 					currentStep={5}

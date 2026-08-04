@@ -53,8 +53,6 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 
 	const { step2Data, step3Data, step4Data } = mapToStepData(d);
 
-	// declarations does not store custom period windows — every declaration
-	// covers the full calendar year. The period is derived from d.year.
 	const referencePeriod = getReferencePeriod(d.year);
 
 	const step5Categories =
