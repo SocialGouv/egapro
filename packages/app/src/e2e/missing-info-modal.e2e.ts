@@ -123,6 +123,65 @@ test.describe("Missing info modal", () => {
 		});
 	});
 
+	test.describe("Phone and CSE missing → reopening stays on the process panel", () => {
+		test.beforeAll(async () => {
+			await setUserPhone(null);
+			await setCompanyHasCse(null);
+		});
+
+		test.afterAll(async () => {
+			await setUserPhone("0122334455");
+			await setCompanyHasCse(true);
+		});
+
+		// Regression guard for #4056: after saving phone + CSE from the missing-info
+		// modal, the server-injected props of the "Rémunération" link must be
+		// refreshed (router.refresh) so a later click opens the process panel and no
+		// longer re-opens an empty missing-info modal.
+		test("save then reopen opens the process panel, not the empty modal", async ({
+			page,
+		}) => {
+			await page.context().clearCookies();
+			await loginWithProConnect(page);
+			await waitForDsfrModal(page, MISSING_INFO_MODAL_ID);
+
+			const modal = page.locator(`#${MISSING_INFO_MODAL_ID}`);
+			const panel = page.locator("#declaration-process-panel");
+			const remuButton = page.getByRole("button", { name: "Rémunération" });
+
+			await clickAndExpectDialogOpen(page, remuButton, MISSING_INFO_MODAL_ID);
+			await expect(modal.getByLabel(/Numéro de téléphone/)).toBeVisible();
+			await expect(
+				modal.getByText("Un CSE a-t-il été mis en place"),
+			).toBeVisible();
+
+			await modal.getByLabel(/Numéro de téléphone/).fill("01 22 33 44 55");
+			await modal.locator("label[for='missing-info-cse-yes']").click();
+			await modal.getByRole("button", { name: "Enregistrer" }).click();
+
+			await expect(panel).toHaveAttribute("open", { timeout: 10_000 });
+
+			// router.refresh() reinvalidates the RSC tree so the link stops pointing
+			// at the missing-info modal — the direct, observable effect of the #4056
+			// fix. Without it this attribute would stay "missing-info-modal" forever.
+			await expect(remuButton).toHaveAttribute(
+				"aria-controls",
+				"declaration-process-panel",
+				{ timeout: 10_000 },
+			);
+
+			await panel.getByRole("button", { name: "Fermer" }).click();
+			await expect(panel).not.toHaveAttribute("open", { timeout: 10_000 });
+
+			await clickAndExpectDialogOpen(
+				page,
+				remuButton,
+				"declaration-process-panel",
+			);
+			await expect(modal).not.toHaveAttribute("open");
+		});
+	});
+
 	test.describe("Validation error on empty CSE", () => {
 		test.beforeAll(async () => {
 			await setUserPhone("0122334455");
