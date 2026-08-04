@@ -17,7 +17,7 @@ Audience : équipe métier / PO (référence d'acceptance et suivi des tests) et
 3. [Les feuilles de l'Excel, année par année](#3-les-feuilles-de-lexcel-année-par-année)
 4. [Scénarios complémentaires hors Excel](#4-scénarios-complémentaires-hors-excel)
 5. [Limites de l'automatisation](#5-limites-de-lautomatisation)
-6. [Divergences Excel ↔ code à arbitrer](#6-divergences-excel--code-à-arbitrer)
+6. [Arbitrages métier (divergences résolues)](#6-arbitrages-métier-divergences-résolues)
 
 ---
 
@@ -284,6 +284,51 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 ---
 
+<a name="cas-13"></a>
+
+### CAS-13 : 7 indicateurs · tranche < 100 (sans CSE ni obligations d'écart) · aucun écart ≥ 5 % → fin de démarche directe
+
+**Libellé Excel** : « Déclaration des 7 indicateurs » *(feuille « <50 et 50-99 » — cellules sans numéro de cas)*
+
+- CSE : non applicable (pas de question CSE dans le parcours sous 100 salariés)
+- Déclaration des 7 indicateurs (étape 5 incluse)
+- Soumission → fin de démarche directe
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-13]` : effectif GIP 30 (représentatif < 50), 7 indicateurs sans écart ≥ 5 %, soumission → fin de démarche directe → `/confirmation`.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-13\]"`
+
+---
+
+<a name="cas-14"></a>
+
+### CAS-14 : 7 indicateurs · tranche < 100 · au moins un écart ≥ 5 % → fin de démarche directe (aucune obligation déclenchée)
+
+**Libellé Excel** : « Déclaration des 7 indicateurs » *(feuille « <50 et 50-99 » — parcours issu de l'arbitrage n° 3 : sous 100 salariés un écart ≥ 5 % ne déclenche aucune obligation)*
+
+- CSE : non applicable
+- Déclaration des 7 indicateurs avec au moins un écart ≥ 5 % sur l'indicateur G
+- Ni parcours de conformité, ni seconde déclaration, ni évaluation conjointe, ni avis CSE → fin de démarche directe
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-14]` : effectif GIP 30, écart ≥ 5 % à l'étape 5, soumission → aucune proposition de conformité → `/confirmation`.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-14\]"`
+
+---
+
+<a name="cas-13-6ind"></a>
+
+### CAS-13-6IND : 6 premiers indicateurs · 50-99 → fin de démarche directe
+
+**Libellé Excel** : « Déclaration des 6 premiers indicateurs » *(feuille « <50 et 50-99 » — ligne 50 à 99 salariés)*
+
+- CSE : non applicable (différence avec `CAS-01-6IND` qui tourne en 100-149 avec la question CSE)
+- Funnel sans étape 5 (indicateur G non applicable)
+- Soumission → fin de démarche directe
+
+**Test E2E** : `compliance.e2e.ts` — `[CAS-13-6IND]` : effectif GIP 75 (représentatif 50-99), funnel sans étape 5, soumission → fin de démarche directe → `/confirmation`.
+**Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-13-6IND\]"`
+
+---
+
 ## 3. Les feuilles de l'Excel, année par année
 
 Miroir des quatre onglets du fichier. Placez-vous sur votre feuille et votre année : la cellule liste les cas à dérouler, chacun désigné par une **coordonnée autoportante** (cliquable vers sa fiche §2).
@@ -304,6 +349,7 @@ La coordonnée est **au-dessus des tests** : elle pointe vers la **fiche du parc
 
 - **Année « 7 indicateurs » (les 12 cas)** : `pnpm --filter app test:e2e --grep "\[CAS-(0[1-9]|1[0-2])\]"`
 - **Année « 6 premiers indicateurs » (cas 1-2)** : `pnpm --filter app test:e2e --grep "\[CAS-0[12]-6IND\]"`
+- **Tranches < 100** : `pnpm --filter app test:e2e --grep "\[CAS-1[34](-6IND)?\]"`
 
 ### Feuille « <50 et 50-99 »
 
@@ -314,7 +360,31 @@ Restitution verbatim (cette feuille ne prévoit ni cas CSE ni parcours de confor
 | Moins de 50 salariés (sur la base du volontariat) | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs | Déclaration des 7 indicateurs |
 | 50 à 99 salariés | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | **Déclaration des 7 indicateurs** | Déclaration des 6 premiers indicateurs | Déclaration des 6 premiers indicateurs | **Déclaration des 7 indicateurs** |
 
-⚠️ Ces deux lignes sont **suspendues aux arbitrages métier du §6** (divergences 1 à 3 : volontariat < 50 avec ou sans indicateur G, assujettissement des 50-99 hors années triennales, parcours de conformité des 50-99 en année 7 indicateurs). Elles n'ont ni coordonnée ni fiche testable tant que ces points ne sont pas tranchés — les trancher, puis créer les fiches et les tests. Pour désigner un point de cette feuille en attendant, « 50-99, 2030 » suffit (un seul contenu par cellule).
+Les arbitrages du §6 étant rendus, chaque cellule porte désormais ses coordonnées et pointe vers une fiche du §2. Sous 100 salariés, il n'y a jamais de CSE ni de parcours de conformité : un écart ≥ 5 % ne déclenche aucune obligation, la démarche se termine directement (arbitrage n° 3).
+
+*Ligne « Moins de 50 salariés »* — coordonnées préfixées `AAAA-49-…`, les 7 années identiques (7 indicateurs sur la base du volontariat).
+
+| Année | Déclaration | Cas à dérouler (coordonnée — rappel) |
+|---|---|---|
+| 2027 | 7 indicateurs | Les 2 cas :<br>[2027-49-CAS13](#cas-13) : aucun écart → fin de démarche directe<br>[2027-49-CAS14](#cas-14) : écart ≥ 5 % → fin de démarche directe (aucune obligation) |
+| 2028 | 7 indicateurs | Les 2 cas :<br>[2028-49-CAS13](#cas-13) : aucun écart → fin de démarche directe<br>[2028-49-CAS14](#cas-14) : écart ≥ 5 % → fin de démarche directe (aucune obligation) |
+| 2029 | 7 indicateurs | Les 2 cas :<br>[2029-49-CAS13](#cas-13) : aucun écart → fin de démarche directe<br>[2029-49-CAS14](#cas-14) : écart ≥ 5 % → fin de démarche directe (aucune obligation) |
+| 2030 | 7 indicateurs | Les 2 cas :<br>[2030-49-CAS13](#cas-13) : aucun écart → fin de démarche directe<br>[2030-49-CAS14](#cas-14) : écart ≥ 5 % → fin de démarche directe (aucune obligation) |
+| 2031 | 7 indicateurs | Les 2 cas :<br>[2031-49-CAS13](#cas-13) : aucun écart → fin de démarche directe<br>[2031-49-CAS14](#cas-14) : écart ≥ 5 % → fin de démarche directe (aucune obligation) |
+| 2032 | 7 indicateurs | Les 2 cas :<br>[2032-49-CAS13](#cas-13) : aucun écart → fin de démarche directe<br>[2032-49-CAS14](#cas-14) : écart ≥ 5 % → fin de démarche directe (aucune obligation) |
+| 2033 | 7 indicateurs | Les 2 cas :<br>[2033-49-CAS13](#cas-13) : aucun écart → fin de démarche directe<br>[2033-49-CAS14](#cas-14) : écart ≥ 5 % → fin de démarche directe (aucune obligation) |
+
+*Ligne « 50 à 99 salariés »* — coordonnées préfixées `AAAA-99-…`. Assujetties chaque année dès 2027 : 6 premiers indicateurs, sauf en 2030 et 2033 (7 indicateurs).
+
+| Année | Déclaration | Cas à dérouler (coordonnée — rappel) |
+|---|---|---|
+| 2027 | 6 premiers indicateurs | Le cas :<br>[2027-99-CAS13](#cas-13-6ind) : 6 premiers indicateurs → fin de démarche directe |
+| 2028 | 6 premiers indicateurs | Le cas :<br>[2028-99-CAS13](#cas-13-6ind) : 6 premiers indicateurs → fin de démarche directe |
+| 2029 | 6 premiers indicateurs | Le cas :<br>[2029-99-CAS13](#cas-13-6ind) : 6 premiers indicateurs → fin de démarche directe |
+| **2030** | **7 indicateurs** | Les 2 cas :<br>[2030-99-CAS13](#cas-13) : aucun écart → fin de démarche directe<br>[2030-99-CAS14](#cas-14) : écart ≥ 5 % → fin de démarche directe (aucune obligation) |
+| 2031 | 6 premiers indicateurs | Le cas :<br>[2031-99-CAS13](#cas-13-6ind) : 6 premiers indicateurs → fin de démarche directe |
+| 2032 | 6 premiers indicateurs | Le cas :<br>[2032-99-CAS13](#cas-13-6ind) : 6 premiers indicateurs → fin de démarche directe |
+| **2033** | **7 indicateurs** | Les 2 cas :<br>[2033-99-CAS13](#cas-13) : aucun écart → fin de démarche directe<br>[2033-99-CAS14](#cas-14) : écart ≥ 5 % → fin de démarche directe (aucune obligation) |
 
 ### Feuille « 100-149 »
 
@@ -358,7 +428,7 @@ Coordonnées préfixées `AAAA-250P-…`. Toutes les années suivent le même sc
 | **2032** | **7 indicateurs** | Les 12 cas :<br>[2032-250P-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2032-250P-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2032-250P-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2032-250P-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2032-250P-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2032-250P-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2032-250P-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2032-250P-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2032-250P-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2032-250P-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2032-250P-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2032-250P-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
 | **2033** | **7 indicateurs** | Les 12 cas :<br>[2033-250P-CAS01](#cas-01) : sans CSE · aucun écart → fin de démarche<br>[2033-250P-CAS02](#cas-02) : avec CSE · aucun écart → avis CSE « exactitude »<br>[2033-250P-CAS03](#cas-03) : sans CSE · écart ≥ 5 % → justification des écarts<br>[2033-250P-CAS04](#cas-04) : avec CSE · écart ≥ 5 % → justification + avis CSE<br>[2033-250P-CAS05](#cas-05) : sans CSE · écart ≥ 5 % → évaluation conjointe<br>[2033-250P-CAS06](#cas-06) : avec CSE · écart ≥ 5 % → évaluation conjointe + avis CSE<br>[2033-250P-CAS07](#cas-07) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart<br>[2033-250P-CAS08](#cas-08) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. sans écart + avis CSE<br>[2033-250P-CAS09](#cas-09) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification<br>[2033-250P-CAS10](#cas-10) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → justification + avis CSE<br>[2033-250P-CAS11](#cas-11) : sans CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe<br>[2033-250P-CAS12](#cas-12) : avec CSE · écart ≥ 5 % → actions correctives, 2ᵉ décl. avec écart → évaluation conjointe + avis CSE |
 
-**Règles de cadencement sous-jacentes** (implémentées dans `packages/app/src/modules/domain/shared/indicatorG.ts` et `companyObligation.ts`, couvertes par les tests unitaires `indicatorG.test.ts` et `companyObligation.test.ts`) : indicateur G requis chaque année dès 250 salariés ; les années triennales (2027, 2030, 2033) dès 150 salariés avant 2030 puis dès 50 salariés à partir de 2030.
+**Règles de cadencement sous-jacentes** (implémentées dans `packages/app/src/modules/domain/shared/indicatorG.ts` et `companyObligation.ts`, couvertes par les tests unitaires `indicatorG.test.ts` et `companyObligation.test.ts`) : indicateur G requis chaque année sous 50 salariés (volontariat, 7 indicateurs) et dès 250 salariés ; les années triennales (2027, 2030, 2033) dès 150 salariés avant 2030 puis dès 50 salariés à partir de 2030 ; assujettissement annuel dès 50 salariés à partir de 2027 (6 premiers indicateurs pour les 50-99 hors années « indicateur G »).
 
 
 ---
@@ -382,15 +452,15 @@ Le socle déclaratif (étapes 1–6, brouillon, historique, panneau de démarche
 Ce que les tests E2E ne peuvent pas rejouer tel quel, et comment c'est compensé :
 
 1. **La dimension année de campagne** — les specs E2E tournent sur l'année de campagne courante, pas sur 2027 → 2033. Le *contenu* de chaque cellule de l'Excel (les parcours) est déroulé par les tests du §2 ; le *cadencement* (quelle année déclenche 6 ou 7 indicateurs pour quelle tranche) est verrouillé par les tests unitaires du domaine (`indicatorG.test.ts`, `companyObligation.test.ts`), qui couvrent chaque tranche × année de la matrice.
-2. **La tranche d'effectif** — les parcours de conformité (cas 1 à 12) tournent en 250 et + (effectif GIP 250) ; les variantes 6 indicateurs (`CAS-01-6IND`, `CAS-02-6IND`) tournent avec un effectif GIP de 120, représentatif de la tranche 100-149.
+2. **La tranche d'effectif** — les parcours de conformité (cas 1 à 12) tournent en 250 et + (effectif GIP 250) ; les variantes 6 indicateurs (`CAS-01-6IND`, `CAS-02-6IND`) tournent avec un effectif GIP de 120, représentatif de la tranche 100-149 ; les nouveaux parcours < 100 tournent avec un effectif GIP de 30 (représentatif < 50) pour `CAS-13`/`CAS-14` et de 75 (représentatif 50-99) pour `CAS-13-6IND`.
 3. **Avis CSE défavorables** — tous les tests déposent des avis « favorable » ; les variantes « défavorable » (sans impact de routage attendu, mais affichées au récapitulatif) ne sont pas déroulées.
 
 ---
 
-## 6. Divergences Excel ↔ code à arbitrer
+## 6. Arbitrages métier (divergences résolues)
 
-Constats faits en transcrivant le fichier (état du code : branche `alpha`, juillet 2026). À trancher avec le métier, puis répercuter ici **et** dans le code/les tests :
+Les 3 divergences relevées en transcrivant le fichier Excel ont été arbitrées par le métier (juillet 2026) et répercutées dans le code, les miroirs SQL et le moteur de règles par #4043.
 
-1. **< 50 salariés** : l'Excel affiche « Déclaration des 7 indicateurs » (volontariat) chaque année ; le code n'inclut jamais l'indicateur G sous 50 salariés (`isIndicatorGRequired` → false, donc `getApplicableIndicators` renvoie 6 indicateurs). Un déclarant volontaire n'aurait donc que 6 indicateurs.
-2. **50 – 99, années hors cadence** (2028, 2029, 2031, 2032) : l'Excel affiche « Déclaration des 6 premiers indicateurs » ; le code ne les assujettit pas du tout ces années-là (`isObligatedForYear` → false hors 2027/2030/2033). S'agit-il d'une déclaration volontaire possible chaque année ?
-3. **50 – 99 en 2030/2033 avec écart ≥ 5 %** : l'Excel ne prévoit aucun parcours de conformité pour cette tranche ; côté code, le parcours se déclenche dès que l'indicateur G est requis et qu'un écart ≥ 5 % existe, sans condition de tranche (`Step6Review.tsx` → `isComplianceProcessRequired`). Confirmer le comportement attendu pour une 50-99 en année « 7 indicateurs ».
+1. **Moins de 50 salariés (volontariat)** — déclarent **les 7 indicateurs chaque année**, indicateur G compris. La déclaration reste volontaire ; c'est son *contenu* qui change. *Statut : répercutée dans le code par #4043 (`isIndicatorGRequired` renvoie `true` sous 50 salariés, toutes années).*
+2. **50 à 99 salariés** — sont assujetties **chaque année** dès 2027 : les **6 premiers indicateurs** en 2027, 2028, 2029, 2031 et 2032, et les **7 indicateurs** en **2030 et 2033**. *Statut : répercutée dans le code par #4043 (`isObligatedForYear` assujettit les 50-99 chaque année dès `V2_FIRST_CAMPAIGN_YEAR`).*
+3. **Sous 100 salariés en année « 7 indicateurs »** — les tranches < 100 (50-99 comprises en 2030/2033, et les < 50 volontaires) ne sont **pas** concernées par les obligations déclenchées par un écart ≥ 5 % : pas de parcours de conformité, pas de seconde déclaration, pas de rapport d'évaluation conjointe, pas d'avis CSE. Le seuil de ces obligations reste **100 salariés**. *Statut : le code était déjà conforme — le seuil 100 vit dans `isComplianceProcessRequired`/`isCseOpinionRequired` (domaine) et `phase2Required`/`cseRequired` (moteur de règles) ; la divergence décrivait un état antérieur du code (« sans condition de tranche ») qui n'existe plus. Verrouillée par des tests, sans changement de comportement.*

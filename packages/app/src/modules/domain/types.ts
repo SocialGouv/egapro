@@ -24,8 +24,16 @@ export type DeclarationFsmStatus = (typeof DECLARATION_FSM_STATUSES)[number];
 /** The two types of declarations a company must file each year. */
 export type DeclarationType = "remuneration" | "representation";
 
-/** Company size classification for declaration obligations. */
-export type CompanySize = "voluntary" | "triennial" | "annual";
+/**
+ * Company size classification by obligation package.
+ * `voluntary` (< 50): voluntary declaration; `mandatory` (50-99): annual declaration
+ * without gap-alert obligations; `mandatory_with_compliance` (>= 100): annual
+ * declaration + CSE opinion + gap-alert (>= 5%) obligations.
+ */
+export type CompanySize =
+	| "voluntary"
+	| "mandatory"
+	| "mandatory_with_compliance";
 
 /** Workforce range buckets used by admin/public statistics filters. */
 export type CompanySizeRange = "<50" | "50-99" | "100-149" | "150-249" | "250+";

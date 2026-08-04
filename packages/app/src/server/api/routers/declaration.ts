@@ -133,6 +133,7 @@ function buildSubmitFacts(
 		hasCse: company.hasCse === true,
 		indicatorGCalculated: hasIndicatorGData,
 		gap: hasGap ? 100 : 0,
+		year: declaration.year,
 		isTriennialYear: isTriennialYear(declaration.year),
 	};
 }

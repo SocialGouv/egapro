@@ -50,9 +50,16 @@ describe("isIndicatorGRequired — universal year (2030+) regime", () => {
 		expect(isIndicatorGRequired(249, 2032)).toBe(false);
 	});
 
-	it("keeps the voluntary tier (< 50) out of the obligation even from 2030", () => {
-		expect(isIndicatorGRequired(49, 2030)).toBe(false);
-		expect(isIndicatorGRequired(0, 2033)).toBe(false);
+	it("requires the voluntary tier (< 50) every year — 7-indicator volunteering (2026-07 arbitrage)", () => {
+		for (let year = 2027; year <= 2033; year++) {
+			expect(isIndicatorGRequired(0, year)).toBe(true);
+			expect(isIndicatorGRequired(49, year)).toBe(true);
+		}
+		// Pinned: the < 50 tier carries all 7 indicators with no year cadence, like
+		// the >= 250 branch. The V2 scheme starts fresh in March 2027 with no
+		// pre-2027 declarations, so these pre-campaign pins may never be "corrected".
+		expect(isIndicatorGRequired(0, 2018)).toBe(true);
+		expect(isIndicatorGRequired(49, 2026)).toBe(true);
 	});
 
 	it("returns true for workforce >= 250 at universal year (2030)", () => {
