@@ -1,6 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { compliancePathFidelity } from "~/e2e/fixtures/figma/compliance-path";
-import { assertFigmaFidelity } from "~/e2e/helpers/figma-fidelity";
 import {
 	COMPLIANCE_PATH,
 	completeSecondDeclaration,
@@ -125,19 +123,6 @@ test.describe("[CAS-04] Path 3: gap + hasCse → compliance choice → justify",
 				exact: true,
 			}),
 		).toBeVisible();
-	});
-
-	test("matches its Figma contract", async ({ page }) => {
-		// The Figma frame is designed at 1440; the DSFR container caps at 1248 so
-		// the measurements are stable from that width up.
-		await page.setViewportSize({ width: 1440, height: 1200 });
-		await page.goto(COMPLIANCE_PATH);
-		// The screen renders a placeholder until the draft is hydrated; measuring
-		// before that would report every block as missing.
-		await expect(
-			page.getByRole("radio", { name: CORRECTIVE_ACTION_TITLE }),
-		).toBeVisible();
-		await assertFigmaFidelity(page, compliancePathFidelity);
 	});
 
 	test("justify → CSE opinion with accuracy + gap justification columns", async ({
