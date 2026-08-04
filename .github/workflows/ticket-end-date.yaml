@@ -10,21 +10,23 @@ name: 🗓️ Ticket end date
 # org-level `organization_projects` permission, which the default GITHUB_TOKEN
 # can never carry — hence the App token.
 #
-# PREREQUISITES (both are outside this repo):
+# PREREQUISITES (all outside this repo):
 #   1. token-bureau must GRANT the scope. Already configured: SocialGouv/infra-apps
 #      `token-bureau/values.yaml` carries the `SocialGouv/egapro` override with
-#      `organization_projects: write`, on image v0.0.9.
-#   2. token-bureau must be DEPLOYED with that config. `applications/token-bureau.yaml`
-#      has no `automated:` sync policy, so a values change stays in git until an
-#      ArgoCD sync of `token-bureau-prod` (cluster ovh-prod, namespace token-bureau)
-#      is triggered by hand.
+#      `organization_projects: write`, deployed since 22/07.
+#   2. The deployed token-bureau server must be >= v0.0.10. Up to v0.0.9 it
+#      re-prefixed the OIDC `repository` claim (already `owner/repo`) with the
+#      owner and looked its config up under `SocialGouv/SocialGouv/egapro`. No
+#      per-repo override ever matched, so the server silently fell back to its
+#      default permission set — the actual cause of the two-week outage (#3956).
+#      Fixed by SocialGouv/token-bureau@7553831 and deployed on 03/08.
 #   3. The backing GitHub App must hold "Organization permissions → Projects:
 #      Read and write", approved by an org owner on the SocialGouv installation.
 #      Adding a permission to an App does NOT grant it retroactively.
 #
-# The `permissions:` input on the token step below is what makes a missing
-# prerequisite name itself: token-bureau refuses the request explicitly instead
-# of minting a token that silently cannot write.
+# The `permissions:` input on the token step below is what turns a silent
+# fallback to the default permission set into an explicit refusal at mint time:
+# the request is either honoured or named, never quietly downgraded.
 
 on:
   pull_request:
@@ -61,11 +63,17 @@ jobs:
         with:
           token-bureau-url: https://token-bureau.fabrique.social.gouv.fr
           audience: socialgouv
-          # Least privilege, and a diagnostic. Each layer names itself on failure:
+          # Least privilege, and a diagnostic. The historical failure emitted
+          # NONE of the messages below, precisely because the request was
+          # implicit: the server resolved no config, applied its defaults and
+          # minted a token that could not write. Asking explicitly makes each
+          # layer name itself instead:
           #   "Invalid permission requested: organization_projects"
           #     -> deployed token-bureau server is older than v0.0.8
           #   "Permission organization_projects is not allowed for this repository"
-          #     -> server is current but its permissions ConfigMap is stale
+          #     -> the server resolved no override for SocialGouv/egapro and fell
+          #        back to its defaults: stale permissions ConfigMap, or a server
+          #        older than v0.0.10 (repo-key bug, see the header)
           #   HTTP 422 "permissions requested are not granted to this installation"
           #     -> the GitHub App installation lacks the org Projects permission
           # `issues: read` covers the issue lookup done by set_ticket_date.sh.
@@ -83,6 +91,12 @@ jobs:
           INPUT_DATE: ${{ inputs.date }}
         run: |
           if [ -n "$INPUT_TICKET" ]; then
+            case "$INPUT_TICKET" in
+              *[!0-9]*)
+                echo "ERROR: 'ticket' must be an issue number (got '$INPUT_TICKET')" >&2
+                exit 1
+                ;;
+            esac
             N="$INPUT_TICKET"
             STAMP_DATE="$INPUT_DATE"
             IF_EMPTY=""

@@ -1,4 +1,4 @@
-# Protect workflow files
-.github/workflows/*.yml @socialgouv/sre @SocialGouv/admins-egapro
+# Protect workflow files (*.y*ml: most workflows here use the .yaml extension)
+.github/workflows/*.y*ml @socialgouv/sre @SocialGouv/admins-egapro
 .github/CODEOWNERS @socialgouv/sre @SocialGouv/admins-egapro
 .kontinuous/ @socialgouv/sre @SocialGouv/admins-egapro
