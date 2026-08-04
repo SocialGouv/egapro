@@ -8,7 +8,22 @@ function createConnection() {
 	return postgres(url, { max: 1 });
 }
 
-export async function ensureCurrentYearDeclaration() {
+type Connection = ReturnType<typeof createConnection>;
+
+// The fixture layer runs in the Playwright runner process, which cannot read the
+// campaign-year override the app honours (that lives on the dev-server process,
+// issue #4022). Year-scoped helpers therefore take the year explicitly and fall
+// back to the database calendar year — the single EXTRACT(YEAR FROM CURRENT_DATE)
+// of this module — so unpinned specs keep their pre-#4067 behaviour untouched.
+async function effectiveYear(sql: Connection, year?: number): Promise<number> {
+	if (year !== undefined) return year;
+	const rows = await sql<[{ year: number }]>`
+		SELECT EXTRACT(YEAR FROM CURRENT_DATE)::int AS year
+	`;
+	return rows[0]?.year ?? 2026;
+}
+
+export async function ensureCurrentYearDeclaration(year?: number) {
 	const sql = createConnection();
 	try {
 		const users = await sql`
@@ -16,6 +31,7 @@ export async function ensureCurrentYearDeclaration() {
 		`;
 		const userId = users[0]?.user_id as string | undefined;
 		if (!userId) return;
+		const targetYear = await effectiveYear(sql, year);
 		await sql`
 			INSERT INTO app_declaration (
 				id, siren, year, declarant_id, current_step, status,
@@ -24,7 +40,7 @@ export async function ensureCurrentYearDeclaration() {
 			VALUES (
 				gen_random_uuid(),
 				${TEST_SIREN},
-				EXTRACT(YEAR FROM CURRENT_DATE)::int,
+				${targetYear},
 				${userId},
 				1,
 				'draft',
@@ -95,14 +111,23 @@ export async function resetDeclarationToDraft() {
 }
 
 /**
- * Inserts (or refreshes) a app_campaign_deadline row for the current year with all
- * deadlines pushed far into the future. Prevents date-sensitive business rules
- * (e.g. `isDraftExpired` in declarationDraftRouter.get) from breaking e2e tests
- * when CI happens to run on or after the default deadline of June 1.
+ * Inserts (or refreshes) a app_campaign_deadline row for the given year (calendar
+ * year by default) with all deadlines pushed far into the future. Prevents
+ * date-sensitive business rules (e.g. `isDraftExpired` in
+ * declarationDraftRouter.get) from breaking e2e tests when CI happens to run on
+ * or after the default deadline of June 1.
+ *
+ * Deliberately leaves `campaign_start_date` NULL — do NOT "fix" this by seeding
+ * it. `getActiveCampaignYear()` (`~/server/db/getGlobalSettings.ts`) only keeps
+ * rows whose `campaign_start_date` is non-null and past, then takes their max; a
+ * seeded date here would make every pinned year resolve to the latest one and
+ * collapse the whole 7-year grid onto a single campaign. Left null, that query
+ * falls back to `getCurrentYear()` — i.e. the piloted campaign year (#4022/#4067).
  */
-export async function pushCampaignDeadlinesFarFuture() {
+export async function pushCampaignDeadlinesFarFuture(year?: number) {
 	const sql = createConnection();
 	try {
+		const targetYear = await effectiveYear(sql, year);
 		await sql`
 			INSERT INTO app_campaign_deadline (
 				year,
@@ -114,7 +139,7 @@ export async function pushCampaignDeadlinesFarFuture() {
 				decl2_joint_evaluation_deadline
 			)
 			SELECT
-				EXTRACT(YEAR FROM CURRENT_DATE)::int,
+				${targetYear},
 				'2099-12-31'::date,
 				'2099-12-31'::date,
 				'2099-12-31'::date,
@@ -152,14 +177,18 @@ export async function setCompanyHasCse(hasCse: boolean | null) {
  * field, indicator G / step 5 gating, SUIT export). Passing `null` deletes the row,
  * which models a company absent from the GIP file — treated as "< 50", not subject.
  */
-export async function setGipWorkforce(workforceEma: number | null) {
+export async function setGipWorkforce(
+	workforceEma: number | null,
+	year?: number,
+) {
 	const sql = createConnection();
 	try {
+		const targetYear = await effectiveYear(sql, year);
 		if (workforceEma === null) {
 			await sql`
 				DELETE FROM app_gip_mds_data
 				WHERE siren = ${TEST_SIREN}
-				  AND year = EXTRACT(YEAR FROM CURRENT_DATE)::int
+				  AND year = ${targetYear}
 			`;
 			return;
 		}
@@ -167,7 +196,7 @@ export async function setGipWorkforce(workforceEma: number | null) {
 			INSERT INTO app_gip_mds_data (siren, year, workforce_ema, imported_at)
 			VALUES (
 				${TEST_SIREN},
-				EXTRACT(YEAR FROM CURRENT_DATE)::int,
+				${targetYear},
 				${workforceEma},
 				NOW()
 			)
@@ -345,16 +374,17 @@ export async function deleteCseOpinions() {
 	}
 }
 
-export async function deleteCurrentYearCategories() {
+export async function deleteCurrentYearCategories(year?: number) {
 	const sql = createConnection();
 	try {
+		const targetYear = await effectiveYear(sql, year);
 		await sql`
 			DELETE FROM app_employee_category
 			WHERE job_category_id IN (
 				SELECT jc.id FROM app_job_category jc
 				INNER JOIN app_declaration d ON d.id = jc.declaration_id
 				WHERE d.siren = ${TEST_SIREN}
-				  AND d.year = EXTRACT(YEAR FROM CURRENT_DATE)::int
+				  AND d.year = ${targetYear}
 			)
 		`;
 		await sql`
@@ -362,7 +392,7 @@ export async function deleteCurrentYearCategories() {
 			WHERE declaration_id IN (
 				SELECT id FROM app_declaration
 				WHERE siren = ${TEST_SIREN}
-				  AND year = EXTRACT(YEAR FROM CURRENT_DATE)::int
+				  AND year = ${targetYear}
 			)
 		`;
 	} finally {
@@ -373,50 +403,43 @@ export async function deleteCurrentYearCategories() {
 export async function getCurrentDbYear(): Promise<number> {
 	const sql = createConnection();
 	try {
-		const rows = await sql<[{ year: number }]>`
-			SELECT EXTRACT(YEAR FROM CURRENT_DATE)::int AS year
-		`;
-		return rows[0]?.year ?? 2026;
+		return await effectiveYear(sql);
 	} finally {
 		await sql.end();
 	}
 }
 
-export async function cleanCurrentYearDeclarations() {
+export async function cleanCurrentYearDeclarations(year?: number) {
 	const sql = createConnection();
 	try {
-		const rows = await sql<[{ year: number }]>`
-			SELECT EXTRACT(YEAR FROM CURRENT_DATE)::int AS year
-		`;
-		const year = rows[0]?.year;
-		if (!year) return;
+		const targetYear = await effectiveYear(sql, year);
 		await sql`
 			DELETE FROM app_employee_category
 			WHERE job_category_id IN (
 				SELECT jc.id FROM app_job_category jc
 				INNER JOIN app_declaration d ON d.id = jc.declaration_id
-				WHERE d.siren = ${TEST_SIREN} AND d.year = ${year}
+				WHERE d.siren = ${TEST_SIREN} AND d.year = ${targetYear}
 			)
 		`;
 		await sql`
 			DELETE FROM app_job_category
 			WHERE declaration_id IN (
-				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year}
+				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${targetYear}
 			)
 		`;
 		await sql`
 			DELETE FROM app_cse_opinion
 			WHERE declaration_id IN (
-				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year}
+				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${targetYear}
 			)
 		`;
 		await sql`
 			DELETE FROM app_file
 			WHERE declaration_id IN (
-				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year}
+				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${targetYear}
 			)
 		`;
-		await sql`DELETE FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year}`;
+		await sql`DELETE FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${targetYear}`;
 	} finally {
 		await sql.end();
 	}

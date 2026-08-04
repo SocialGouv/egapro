@@ -5,6 +5,12 @@ import { sirenInputSchema } from "~/modules/my-space/schemas";
 
 export const submitDeclarationSchema = z.object({}).optional();
 
+export const e2eClockSchema = z.object({
+	campaignYear: z.number().int().min(2018).max(2100),
+});
+
+export type E2eClockInput = z.infer<typeof e2eClockSchema>;
+
 export const saveCompliancePathSchema = z.object({
 	path: z.enum(COMPLIANCE_PATHS),
 });

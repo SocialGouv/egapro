@@ -1,8 +1,11 @@
 import type { CampaignDeadlines } from "../types";
+import { readCampaignYearOverride } from "./campaignClock";
 
-/** Returns the current calendar year (declaration campaign year). */
+/** Returns the current campaign year: the E2E recette override when a grid run
+ * pinned one (see campaignClock.ts — test-only, inert in production), the
+ * calendar year otherwise. */
 export function getCurrentYear(): number {
-	return new Date().getFullYear();
+	return readCampaignYearOverride() ?? new Date().getFullYear();
 }
 
 /** Returns the workforce/reference year for a given campaign year (N-1: a declaration reports the prior year's data). */
