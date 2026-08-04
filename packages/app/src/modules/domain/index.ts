@@ -85,6 +85,7 @@ export {
 	isCancelled,
 	isComplianceProcessCompleted,
 	isDeclarationSubmitted,
+	isDeclarationWritingClosed,
 	isDraft,
 	isInComplianceProcess,
 	isSecondDeclarationDeadlineApplicable,

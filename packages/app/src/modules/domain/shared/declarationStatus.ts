@@ -1,4 +1,5 @@
 import type { DeclarationFsmStatus, DeclarationStatus } from "../types";
+import { isDeadlinePassed } from "./campaign";
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
 
@@ -12,6 +13,20 @@ export function isDraft(status: string | null): boolean {
 
 export function isComplianceProcessCompleted(status: string | null): boolean {
 	return status === "demarche_completed";
+}
+
+// Neither condition alone closes writing: `demarche_completed` is reached as
+// early as March for a no-gap declaration, and `decl1ModificationDeadline`
+// routinely elapses months before the compliance-path pages stop needing to
+// write. Distinct from the step-level cutoff, which uses `isDeclarationSubmitted`.
+export function isDeclarationWritingClosed(
+	status: string | null,
+	decl1ModificationDeadline: Date,
+): boolean {
+	return (
+		isComplianceProcessCompleted(status) &&
+		isDeadlinePassed(decl1ModificationDeadline)
+	);
 }
 
 export function getCurrentCompliancePath(declaration: {
