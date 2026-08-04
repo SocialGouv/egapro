@@ -4,6 +4,7 @@ import {
 	type FidelitySpec,
 	type Hex,
 	hexToRgb,
+	type Length,
 	type Measured,
 	measureInPage,
 } from "~/e2e/helpers/figma-fidelity-measure";
@@ -15,10 +16,21 @@ function checkNumber(
 	element: string,
 	property: string,
 	expected: number | undefined,
-	actual: number,
+	actual: Length,
 	tolerance: number,
 ) {
 	if (expected === undefined) return;
+	// A keyword (`normal`, `auto`, `none`) is not a shorter length: reporting it
+	// as 0 would let a contract that expects 0 pass on an unmeasured property.
+	if (actual === null) {
+		deviations.push({
+			element,
+			property,
+			expected: `${expected}px`,
+			actual: "valeur calculée non numérique",
+		});
+		return;
+	}
 	if (Math.abs(actual - expected) > tolerance) {
 		deviations.push({
 			element,
@@ -53,7 +65,7 @@ function checkSides(
 	element: string,
 	property: string,
 	expected: (number | null)[] | undefined,
-	actual: number[],
+	actual: Length[],
 	tolerance: number,
 ) {
 	if (!expected) return;
@@ -65,7 +77,7 @@ function checkSides(
 			element,
 			`${property}-${sides[i]}`,
 			side,
-			actual[i] ?? 0,
+			actual[i] ?? null,
 			tolerance,
 		);
 	});
@@ -157,7 +169,7 @@ export async function assertFigmaFidelity(page: Page, spec: FidelitySpec) {
 				name,
 				`border-${side}-width`,
 				element.border?.width,
-				measured.borderWidths[i] ?? 0,
+				measured.borderWidths[i] ?? null,
 				0,
 			);
 			checkColor(
@@ -174,7 +186,7 @@ export async function assertFigmaFidelity(page: Page, spec: FidelitySpec) {
 				name,
 				`border-radius-${corner}`,
 				element.border?.radius,
-				measured.borderRadii[i] ?? 0,
+				measured.borderRadii[i] ?? null,
 				0,
 			);
 		});

@@ -40,6 +40,9 @@ export type FidelitySpec = {
 	copy?: string[];
 };
 
+/** A computed length in px, or `null` when the property resolved to a keyword. */
+export type Length = number | null;
+
 export type Measured = {
 	found: boolean;
 	box: {
@@ -52,15 +55,15 @@ export type Measured = {
 	};
 	color: string;
 	backgroundColor: string;
-	fontSize: number;
-	fontWeight: number;
-	lineHeight: number;
+	fontSize: Length;
+	fontWeight: Length;
+	lineHeight: Length;
 	backgroundImage: string;
-	borderWidths: [number, number, number, number];
+	borderWidths: [Length, Length, Length, Length];
 	borderColors: [string, string, string, string];
-	borderRadii: [number, number, number, number];
-	padding: [number, number, number, number];
-	margin: [number, number, number, number];
+	borderRadii: [Length, Length, Length, Length];
+	padding: [Length, Length, Length, Length];
+	margin: [Length, Length, Length, Length];
 };
 
 export type Deviation = {
@@ -88,7 +91,10 @@ export function hexToRgb(hex: Hex): string {
 export const measureInPage = (
 	targets: { name: string; selector: string; index: number }[],
 ) => {
-	const px = (value: string) => Number.parseFloat(value) || 0;
+	const px = (value: string) => {
+		const parsed = Number.parseFloat(value);
+		return Number.isNaN(parsed) ? null : parsed;
+	};
 
 	const out: Record<string, unknown> = {};
 	for (const target of targets) {
@@ -114,7 +120,7 @@ export const measureInPage = (
 			color: cs.color,
 			backgroundColor: cs.backgroundColor,
 			fontSize: px(cs.fontSize),
-			fontWeight: Number.parseInt(cs.fontWeight, 10),
+			fontWeight: px(cs.fontWeight),
 			lineHeight: px(cs.lineHeight),
 			backgroundImage: cs.backgroundImage,
 			borderWidths: [
