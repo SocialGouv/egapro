@@ -1,4 +1,5 @@
 import type { CampaignDeadlines } from "../types";
+import { formatLongDate } from "./format";
 
 /** Returns the current calendar year (declaration campaign year). */
 export function getCurrentYear(): number {
@@ -44,14 +45,14 @@ export function resolveGipReferencePeriod(
 	return `${formatIsoDateToFrench(periodStart)} - ${formatIsoDateToFrench(periodEnd)}`;
 }
 
-/** Returns the declaration modification deadline for a given year. */
+/** Returns the declaration modification deadline for a given year: `"1ᵉʳ juin 2027"`. */
 export function getDeclarationDeadline(year: number): string {
-	return `1\u1D49\u02B3 juin ${year}`;
+	return formatLongDate(new Date(year, 5, 1));
 }
 
-/** Returns the second declaration modification deadline for a given year. */
+/** Returns the second declaration modification deadline for a given year: `"1ᵉʳ décembre 2027"`. */
 export function getSecondDeclarationDeadline(year: number): string {
-	return `1 décembre ${year}`;
+	return formatLongDate(new Date(year, 11, 1));
 }
 
 /** Returns the derived deadline to choose a compliance path (January 1st of the following year). */

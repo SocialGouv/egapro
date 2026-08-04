@@ -97,13 +97,18 @@ export function formatShortDateTime(date: Date | null | undefined): string {
 	}).format(new Date(date));
 }
 
-/** Format a date in long French format: `new Date("2026-03-10")` → `"10 mars 2026"`. */
+/**
+ * Format a date in long French format: `new Date("2026-03-10")` → `"10 mars 2026"`.
+ * The first day of a month takes the French ordinal: `"1ᵉʳ juin 2026"` — the same
+ * convention `getDeclarationDeadline` already writes by hand.
+ */
 export function formatLongDate(date: Date): string {
-	return date.toLocaleDateString("fr-FR", {
+	const formatted = date.toLocaleDateString("fr-FR", {
 		day: "numeric",
 		month: "long",
 		year: "numeric",
 	});
+	return date.getDate() === 1 ? formatted.replace(/^1\s/, "1ᵉʳ ") : formatted;
 }
 
 /** Format a `MM-DD` fragment (year-agnostic) to French short form: `"02-15"` → `"15/02"`. */

@@ -262,18 +262,15 @@ describe("CompliancePathChoice", () => {
 		expect(
 			screen.getByText(/Des écarts ≥ 5 % ont de nouveau été détectés/),
 		).toBeInTheDocument();
-		// Section headings sit at level 2 (the page h1 is the funnel title); the
-		// redundant "Parcours de mise en conformité" subtitle is not rendered, so
-		// the hierarchy must not skip from h1 to h3.
 		expect(
 			screen.getByRole("heading", {
-				level: 2,
+				level: 3,
 				name: "Si la justification n'est pas possible par des critères objectifs et non sexistes",
 			}),
 		).toBeInTheDocument();
 	});
 
-	it("uses the funnel title as h1 and keeps section headings at level 2", () => {
+	it("nests the section headings under the compliance-path subtitle", () => {
 		render(compliancePathChoice());
 		expect(
 			screen.getByRole("heading", {
@@ -284,12 +281,15 @@ describe("CompliancePathChoice", () => {
 		expect(
 			screen.getByRole("heading", {
 				level: 2,
-				name: "La justification est possible par des critères objectifs et non sexistes",
+				name: /Parcours de mise en conformité pour l'indicateur/,
 			}),
 		).toBeInTheDocument();
 		expect(
-			screen.queryByRole("heading", { name: /Parcours de mise en conformité/ }),
-		).not.toBeInTheDocument();
+			screen.getByRole("heading", {
+				level: 3,
+				name: "La justification est possible par des critères objectifs et non sexistes",
+			}),
+		).toBeInTheDocument();
 	});
 
 	it("renders the path choice deadline highlight block", () => {
@@ -299,7 +299,7 @@ describe("CompliancePathChoice", () => {
 				"Date limite pour choisir un parcours de mise en conformité",
 			),
 		).toBeInTheDocument();
-		expect(screen.getByText("1 janvier 2027")).toBeInTheDocument();
+		expect(screen.getByText("1ᵉʳ janvier 2027")).toBeInTheDocument();
 	});
 
 	it("renders previous link pointing to step 6", () => {

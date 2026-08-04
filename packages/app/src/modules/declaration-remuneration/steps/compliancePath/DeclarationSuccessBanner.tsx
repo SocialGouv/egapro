@@ -29,7 +29,7 @@ export function DeclarationSuccessBanner({
 							path="/dsfr/artwork/pictograms/system/success.svg"
 							size={44}
 						/>
-						<p className="fr-text--bold fr-text--lg fr-mb-0">
+						<p className="fr-text--bold fr-text--lg fr-text-title--grey fr-mb-0">
 							{isSecondDeclaration
 								? "Votre seconde déclaration a été transmise"
 								: "Votre déclaration a été transmise"}
@@ -47,20 +47,26 @@ export function DeclarationSuccessBanner({
 						>
 							{isSecondDeclaration
 								? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
-								: "Télécharger le récapitulatif de la déclaration des indicateurs"}
+								: "Télécharger le récapitulatif de la déclaration des indicateurs"}{" "}
+							{/* `fr-link--download` always reserves a band under the label for
+							    this detail; without it the link renders a dangling empty line.
+							    The PDF is generated on demand, so only the format is known. */}
+							<span className="fr-link__detail">PDF</span>
 						</FileDownloadLink>
 					)}
 				</div>
 			</div>
 			<div className={styles.column}>
-				<div className="fr-p-2w fr-border fr-background-default--grey">
+				{/* `fr-border` looks like a DSFR utility but does not exist; the real
+				    one is `fr-border-default--grey`. */}
+				<div className="fr-p-2w fr-border-default--grey fr-background-default--grey">
 					<p className="fr-text--sm fr-mb-1w">
 						Un accusé de réception a été envoyé à l'adresse e-mail{" "}
-						<strong>{email}</strong>.
-					</p>
-					<p className="fr-text--sm fr-text-mention--grey fr-mb-2w">
-						Si ce n'est pas le cas, vérifiez vos courriers indésirables ou SPAM.
-						Sinon, cliquez sur le bouton ci-dessous.
+						<strong>{email}</strong>.{" "}
+						<span className="fr-text-mention--grey">
+							Si ce n'est pas le cas, vérifiez vos courriers indésirables ou
+							SPAM. Sinon, cliquez sur le bouton ci-dessous.
+						</span>
 					</p>
 					<ResendReceiptButton
 						kind={isSecondDeclaration ? "secondDeclaration" : "declaration"}

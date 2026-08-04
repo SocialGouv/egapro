@@ -54,9 +54,9 @@ export function CompliancePathOption({
 					{title}
 				</label>
 			</div>
-			<div className="fr-mt-2w fr-pl-4w">
+			<div className={`fr-mt-2w fr-pl-4w ${styles.body}`}>
 				{children}
-				<p className="fr-text--sm fr-mb-1w fr-mt-2w">
+				<p className="fr-text--sm">
 					<span
 						aria-hidden="true"
 						className="fr-icon-calendar-line fr-icon--sm fr-mr-1w"
@@ -65,7 +65,7 @@ export function CompliancePathOption({
 				</p>
 				{learnMoreHref && (
 					<TrackedLink
-						className="fr-link"
+						className={`fr-link ${styles.learnMore}`}
 						href={learnMoreHref}
 						rel="noopener noreferrer"
 						target="_blank"

@@ -20,23 +20,17 @@ export function getCompliancePathHref(
 
 export function JointEvaluationOption({
 	checked,
-	className,
 	deadline,
 	disabled,
 	onChange,
 }: {
 	checked: boolean;
-	className?: string;
 	deadline: Date;
 	disabled?: boolean;
 	onChange: () => void;
 }) {
-	const elementClassName = ["fr-fieldset__element", className]
-		.filter(Boolean)
-		.join(" ");
-
 	return (
-		<div className={elementClassName}>
+		<div className="fr-fieldset__element">
 			<CompliancePathOption
 				checked={checked}
 				deadline={deadline}
@@ -50,12 +44,12 @@ export function JointEvaluationOption({
 				title="Mettre en place une évaluation conjointe des rémunérations"
 				value="joint_evaluation"
 			>
-				<p className="fr-mb-0">
+				<p>
 					Vous choisissez de procéder à une évaluation conjointe des
 					rémunérations afin d&apos;identifier et de corriger les écarts
 					constatés :
 				</p>
-				<ul className="fr-mt-1w fr-mb-0">
+				<ul>
 					<li>
 						Élaboration du rapport préalable (à déposer sur le portail Egapro)
 					</li>
@@ -95,19 +89,19 @@ export function JustifyOption({
 				title="Justifier les écarts de rémunération ≥ 5 %"
 				value="justify"
 			>
-				<p className="fr-mb-0">
+				<p>
 					Vous avez la possibilité de justifier vos écarts par des critères
 					objectifs et non sexistes :
 				</p>
 				{/* Announcing the CSE steps to a company that has none sends it looking
 				    for a screen it will never have to fill in. */}
 				{cseOpinionRequired ? (
-					<ul className="fr-mt-1w fr-mb-0">
+					<ul>
 						<li>Informer et consulter votre CSE sur cette justification</li>
 						<li>Transmettre l&apos;avis du CSE</li>
 					</ul>
 				) : (
-					<p className="fr-mt-1w fr-mb-0">
+					<p>
 						En l&apos;absence de CSE, aucun avis n&apos;est à transmettre :
 						votre démarche est finalisée dès ce choix.
 					</p>
@@ -142,14 +136,13 @@ export function SecondRoundOptions({
 				onChange={() => setSelectedPath("justify")}
 			/>
 
-			<h2 className="fr-h6 fr-mt-3w fr-mb-0 fr-pl-1w">
+			<h3 className="fr-h6 fr-mt-1w fr-mb-0">
 				Si la justification n&apos;est pas possible par des critères objectifs
 				et non sexistes
-			</h2>
+			</h3>
 
 			<JointEvaluationOption
 				checked={selectedPath === "joint_evaluation"}
-				className="fr-mt-2w"
 				deadline={jointEvaluationDeadline}
 				disabled={disabled}
 				onChange={() => setSelectedPath("joint_evaluation")}
@@ -185,12 +178,12 @@ export function FirstRoundOptions({
 				onChange={() => setSelectedPath("justify")}
 			/>
 
-			<h2 className="fr-h6 fr-mt-3w fr-mb-0 fr-pl-1w">
+			<h3 className="fr-h6 fr-mt-1w fr-mb-0">
 				Si la justification n&apos;est pas possible par des critères objectifs
 				et non sexistes
-			</h2>
+			</h3>
 
-			<div className="fr-fieldset__element fr-mt-2w">
+			<div className="fr-fieldset__element">
 				<CompliancePathOption
 					checked={selectedPath === "corrective_action"}
 					deadline={correctiveActionDeadline}
@@ -204,12 +197,12 @@ export function FirstRoundOptions({
 					title="Effectuer des actions correctives et une seconde déclaration"
 					value="corrective_action"
 				>
-					<p className="fr-mb-0">
+					<p>
 						Vous souhaitez mettre en place des actions correctives, puis
 						recalculer et redéclarer l&apos;indicateur par catégorie
 						de&nbsp;salariés :
 					</p>
-					<ul className="fr-mt-1w fr-mb-0">
+					<ul>
 						<li>
 							Mettre en place des actions correctives par accord ou par plan
 							d&apos;action
@@ -228,7 +221,7 @@ export function FirstRoundOptions({
 							<li>Transmettre l&apos;avis ou les avis du CSE</li>
 						)}
 					</ul>
-					<p className="fr-mt-1w fr-mb-0">
+					<p>
 						Si des écarts non justifiés persistent, vous devez engager une
 						évaluation conjointe des rémunérations.
 					</p>

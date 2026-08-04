@@ -37,7 +37,7 @@ describe("DeclarationSuccessBanner", () => {
 		expect(
 			screen.getByText("Votre déclaration a été transmise"),
 		).toBeInTheDocument();
-		expect(screen.getByText("1 mars 2027")).toBeInTheDocument();
+		expect(screen.getByText("1ᵉʳ mars 2027")).toBeInTheDocument();
 	});
 
 	it("announces the second declaration when it is one", () => {
@@ -85,7 +85,9 @@ describe("DeclarationSuccessBanner", () => {
 	])("links to the recapitulative PDF when available (isSecondDeclaration: %s)", (isSecondDeclaration, label) => {
 		renderBanner({ isSecondDeclaration, pdfDownloadHref: "/pdf/2026" });
 
-		expect(screen.getByRole("link", { name: label })).toHaveAttribute(
+		// `fr-link__detail` lives inside the anchor, so the format is part of the
+		// accessible name — that is the DSFR download-link contract.
+		expect(screen.getByRole("link", { name: `${label} PDF` })).toHaveAttribute(
 			"href",
 			"/pdf/2026",
 		);

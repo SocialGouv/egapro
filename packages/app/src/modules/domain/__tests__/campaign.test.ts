@@ -106,13 +106,13 @@ describe("getWorkforceYear", () => {
 
 describe("getDeclarationDeadline", () => {
 	it("returns 1er juin for the given year", () => {
-		expect(getDeclarationDeadline(2027)).toBe("1\u1D49\u02B3 juin 2027");
+		expect(getDeclarationDeadline(2027)).toBe("1ᵉʳ juin 2027");
 	});
 });
 
 describe("getSecondDeclarationDeadline", () => {
-	it("returns 1 décembre for the given year", () => {
-		expect(getSecondDeclarationDeadline(2027)).toBe("1 décembre 2027");
+	it("returns 1ᵉʳ décembre for the given year", () => {
+		expect(getSecondDeclarationDeadline(2027)).toBe("1ᵉʳ décembre 2027");
 	});
 });
 
