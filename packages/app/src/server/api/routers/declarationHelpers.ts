@@ -1,7 +1,6 @@
 import { and, desc, eq, getTableColumns, lt } from "drizzle-orm";
-
+import type { GipMdsRow } from "~/modules/declaration-remuneration";
 import { computeIndicatorPercentages } from "~/modules/declaration-remuneration/shared/computeIndicatorPercentages";
-import type { GipMdsRow } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import {
 	notCancelledCondition,
 	submittedDeclarationCondition,

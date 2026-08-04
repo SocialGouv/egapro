@@ -1,9 +1,9 @@
-import type { PayGapReferences } from "~/modules/declaration-remuneration/shared/indicatorRowMapping";
 import type {
+	PayGapReferences,
 	Step2Data,
 	Step3Data,
 	Step4Data,
-} from "~/modules/declaration-remuneration/types";
+} from "~/modules/declaration-remuneration";
 import type { declarations } from "~/server/db/schema";
 
 type DeclarationRow = typeof declarations.$inferSelect;
