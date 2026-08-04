@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
@@ -43,6 +44,7 @@ export function MissingInfoModal({
 	cseApplicable,
 }: Props) {
 	const isImpersonating = useIsImpersonating();
+	const router = useRouter();
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const openerTypeRef = useRef<OpenerType>("remuneration");
 	const needsPhone = !userPhone;
@@ -104,6 +106,7 @@ export function MissingInfoModal({
 				const hasCseValue = data.hasCse as boolean;
 				await updateHasCseMutation.mutateAsync({ siren, hasCse: hasCseValue });
 			}
+			router.refresh();
 			if (openerTypeRef.current === "remuneration") {
 				// Register listener BEFORE closing so we catch the dsfr.conceal event
 				const dialog = dialogRef.current;

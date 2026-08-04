@@ -1330,17 +1330,13 @@ describe("adminStatsRouter.getCampaignStats", () => {
 		expect(result.previousYearRate).toBeNull();
 	});
 
-	it("computes the obligation predicate differently for triennial vs non-triennial years (smoke check via call wiring)", async () => {
-		const { result: triennial } = await callStats(
-			{ year: 2027 },
-			[100, 80, 0, 0],
-		);
-		const { result: nonTriennial } = await callStats(
-			{ year: 2026 },
-			[100, 80, 0, 0],
-		);
-		expect(triennial.totalObligated).toBe(100);
-		expect(nonTriennial.totalObligated).toBe(100);
+	it("computes the obligation predicate differently pre/post the V2 scheme year (smoke check via call wiring)", async () => {
+		// From 2027 the SQL predicate widens to ema >= 50 (50-99 become subject);
+		// before 2027 it stays ema >= 100. Both branches must wire the four queries.
+		const { result: postV2 } = await callStats({ year: 2028 }, [100, 80, 0, 0]);
+		const { result: preV2 } = await callStats({ year: 2026 }, [100, 80, 0, 0]);
+		expect(postV2.totalObligated).toBe(100);
+		expect(preV2.totalObligated).toBe(100);
 	});
 
 	it("inflates the size filter when sizeRange covers the voluntary-only bucket (still computes a result)", async () => {

@@ -83,9 +83,6 @@ vi.mock("~/trpc/server", () => ({
 					},
 				],
 			}),
-			getSanctionStatus: vi
-				.fn()
-				.mockResolvedValue({ hasSanction: false, validityDate: null }),
 		},
 		declarationLock: {
 			getActiveLockForCurrentDeclaration: mockGetActiveLock,

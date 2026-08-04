@@ -70,11 +70,15 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 					step4: {
 						annual: {
 							thresholds: ["25000", "32000", "40000"],
+							referenceWomen: 90,
+							referenceMen: 110,
 							womenCounts: [30, 25, 20, 15],
 							menCounts: [20, 25, 30, 35],
 						},
 						hourly: {
 							thresholds: ["13.74", "17.58", "21.98"],
+							referenceWomen: 80,
+							referenceMen: 120,
 							womenCounts: [28, 22, 18, 12],
 							menCounts: [22, 28, 32, 38],
 						},
@@ -106,11 +110,15 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 					step4: {
 						annual: {
 							thresholds: ["25000", "32000", "40000"],
+							referenceWomen: null,
+							referenceMen: null,
 							womenCounts: [30, 25, 20, null],
 							menCounts: [20, 25, 30, null],
 						},
 						hourly: {
 							thresholds: ["13.74", "17.58", "21.98"],
+							referenceWomen: null,
+							referenceMen: null,
 							womenCounts: [28, 22, 18, null],
 							menCounts: [22, 28, 32, null],
 						},
@@ -139,11 +147,15 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 					step4: {
 						annual: {
 							thresholds: [null, null, null],
+							referenceWomen: null,
+							referenceMen: null,
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
 						hourly: {
 							thresholds: [null, null, null],
+							referenceWomen: null,
+							referenceMen: null,
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
@@ -173,11 +185,15 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 					step4: {
 						annual: {
 							thresholds: ["25000", "32000", "40000"],
+							referenceWomen: 200,
+							referenceMen: 0,
 							womenCounts: [50, 50, 50, 50],
 							menCounts: [0, 0, 0, 0],
 						},
 						hourly: {
 							thresholds: ["13.74", "17.58", "21.98"],
+							referenceWomen: 200,
+							referenceMen: 0,
 							womenCounts: [50, 50, 50, 50],
 							menCounts: [0, 0, 0, 0],
 						},
@@ -212,11 +228,15 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 					step4: {
 						annual: {
 							thresholds: ["25000", "32000", "40000"],
+							referenceWomen: 90,
+							referenceMen: 110,
 							womenCounts: [30, 25, 20, 15],
 							menCounts: [20, 25, 30, 35],
 						},
 						hourly: {
 							thresholds: ["13.74", "17.58", "21.98"],
+							referenceWomen: 80,
+							referenceMen: 120,
 							womenCounts: [28, 22, 18, 12],
 							menCounts: [22, 28, 32, 38],
 						},

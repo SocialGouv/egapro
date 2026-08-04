@@ -42,7 +42,9 @@
 		"typecheck": "tsc --noEmit",
 		"generate:fetch-companies": "tsx scripts/fetch-companies.ts",
 		"generate:mock-gip": "tsx scripts/generate-mock-gip-data.ts",
-		"mock:refresh": "tsx scripts/fetch-companies.ts --per-bucket=40 && tsx scripts/generate-mock-gip-data.ts"
+		"mock:refresh": "tsx scripts/fetch-companies.ts --per-bucket=40 && tsx scripts/generate-mock-gip-data.ts",
+		"suit:encode-cert": "node scripts/encode-suit-cert.mjs",
+		"suit:check": "node --env-file-if-exists=.env scripts/check-suit-connection.mjs"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.1029.0",
@@ -71,6 +73,7 @@
 		"redis": "^5.11.0",
 		"server-only": "^0.0.1",
 		"superjson": "^2.2.6",
+		"undici": "^7.24.4",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {

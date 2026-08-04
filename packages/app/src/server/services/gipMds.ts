@@ -5,9 +5,21 @@ import type { GipMdsRow } from "~/modules/declaration-remuneration/shared/gipMds
 import { CSV_TO_SCHEMA_MAP } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import type { DB } from "~/server/db";
 import { campaignDeadlines, companies, gipMdsData } from "~/server/db/schema";
+import { suitAwareFetch } from "./suitClient";
 import { fetchCompanyBySiren } from "./weez";
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+// The CSV is externally supplied: a crafted header could carry ANSI escape
+// sequences that mislead whoever reads the logs. Same shape as the upload audit.
+function sanitizeForLog(value: string): string {
+	let out = "";
+	for (const ch of value) {
+		const code = ch.codePointAt(0) ?? 0;
+		if (code >= 0x20 && code !== 0x7f) out += ch;
+	}
+	return out.slice(0, 255);
+}
 
 /**
  * CSV metadata extracted from the first 2 lines of a GIP MDS file.
@@ -54,6 +66,7 @@ export function parseGipCsv(csvContent: string): {
 
 	const headers = splitCsvLine(lines[2] ?? "").map((h) => h.trim());
 	const rows: Array<Partial<GipMdsRow>> = [];
+	const unknownHeaders = new Set<string>();
 
 	for (let i = 3; i < lines.length; i++) {
 		const line = lines[i];
@@ -67,7 +80,15 @@ export function parseGipCsv(csvContent: string): {
 			if (!header) continue;
 
 			const schemaField = CSV_TO_SCHEMA_MAP[header];
-			if (!schemaField) continue;
+			if (!schemaField) {
+				if (!unknownHeaders.has(header)) {
+					unknownHeaders.add(header);
+					console.warn(
+						`[gip-mds/parse] Unknown CSV header "${sanitizeForLog(header)}" — column ignored. Check the file format against the current GIP schema.`,
+					);
+				}
+				continue;
+			}
 
 			const rawValue = values[j]?.trim() ?? "";
 			if (rawValue === "") continue;
@@ -113,9 +134,14 @@ function yearFromPeriodEnd(periodEnd: string): number {
 
 /**
  * Fetch a GIP MDS CSV file from a URL.
+ *
+ * On SUIT (`/suit/api/externe/egapro/gipmds/latest`) the endpoint requires the
+ * mTLS client certificate; outside production the URL points at an internal
+ * mock, so `suitAwareFetch` attaches the certificate only when the target
+ * really is SUIT.
  */
 export async function fetchGipCsv(url: string): Promise<string> {
-	const response = await fetch(url, {
+	const response = await suitAwareFetch(url, {
 		signal: AbortSignal.timeout(30_000),
 	});
 

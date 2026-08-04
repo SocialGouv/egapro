@@ -12,11 +12,19 @@ export function isTriennialYear(year: number): boolean {
 	);
 }
 
+/**
+ * Whether indicator G is required within a declaration for this workforce and campaign year.
+ * Whether the company must declare at all is `isObligatedForYear` — a voluntary (< 50)
+ * declaration still carries all 7 indicators (2026-07 business arbitrage).
+ */
 export function isIndicatorGRequired(workforce: number, year: number): boolean {
+	// Voluntary tier (< 50): the declaration always carries all 7 indicators
+	// (2026-07 arbitrage). Scheme property with no year cadence, like the >= 250 branch.
+	if (workforce < COMPANY_SIZE_VOLUNTARY_MAX) return true;
 	if (workforce >= INDICATOR_G_ANNUAL_MIN) return true;
 	if (year >= INDICATOR_G_UNIVERSAL_YEAR) {
 		// From 2030 the obligation extends down to every mandatory tier (>= 50), on the triennial cadence.
-		return workforce >= COMPANY_SIZE_VOLUNTARY_MAX && isTriennialYear(year);
+		return isTriennialYear(year);
 	}
 	return workforce >= INDICATOR_G_TRIENNIAL_MIN && isTriennialYear(year);
 }

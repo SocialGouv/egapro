@@ -239,6 +239,23 @@ export function applyAction(
 	);
 }
 
+/** Evaluates a named computation of a ruleset against a facts object (parity locks between the versioned ruleset and the domain functions). */
+export function evaluateComputation(
+	rules: Rules,
+	name: string,
+	facts: Facts,
+): boolean {
+	const computations = (rules.computations ?? {}) as Record<
+		string,
+		ComputationNode
+	>;
+	const computation = computations[name];
+	if (computation === undefined) {
+		throw new Error(`Unknown computation: "${name}"`);
+	}
+	return evaluatePredicate(computation, facts, computations, rules.thresholds);
+}
+
 export function _resetCacheForTests(): void {
 	cache.clear();
 }

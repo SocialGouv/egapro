@@ -16,12 +16,20 @@ export const POST = withAuditedRoute(
 );
 
 async function gipMdsImportHandler(request: Request): Promise<Response> {
+	// Fail closed. Skipping the check when the token is unset would turn this
+	// into an unauthenticated import the day EGAPRO_GIP_MDS_API_URL points at
+	// the real SUIT endpoint in an environment where the secret was forgotten.
 	const token = env.EGAPRO_GIP_MDS_API_TOKEN;
-	if (token) {
-		const authHeader = request.headers.get("authorization");
-		if (authHeader !== `Bearer ${token}`) {
-			return Response.json({ error: "Unauthorized" }, { status: 401 });
-		}
+	if (!token) {
+		console.error(
+			"[gip-mds/import] EGAPRO_GIP_MDS_API_TOKEN is not configured — refusing",
+		);
+		return Response.json({ error: "Unauthorized" }, { status: 401 });
+	}
+
+	const authHeader = request.headers.get("authorization");
+	if (authHeader !== `Bearer ${token}`) {
+		return Response.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
 	const url = env.EGAPRO_GIP_MDS_API_URL;
