@@ -225,8 +225,16 @@ export const env = createEnv({
  * Skipped when env validation is off (`next build` runs with NODE_ENV
  * production and SKIP_ENV_VALIDATION=1, and the secrets are injected at
  * runtime, not at build time).
+ *
+ * Server-only: this module also lands in client bundles (imported through
+ * shared modules), where reading a server-side variable throws — the guard
+ * keeps the check from ever evaluating there.
  */
-if (!process.env.SKIP_ENV_VALIDATION && env.NODE_ENV === "production") {
+if (
+	typeof window === "undefined" &&
+	!process.env.SKIP_ENV_VALIDATION &&
+	env.NODE_ENV === "production"
+) {
 	const missing = [
 		["EGAPRO_PROCONNECT_CLIENT_ID", env.EGAPRO_PROCONNECT_CLIENT_ID],
 		["EGAPRO_PROCONNECT_CLIENT_SECRET", env.EGAPRO_PROCONNECT_CLIENT_SECRET],
