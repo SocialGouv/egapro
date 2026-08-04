@@ -72,3 +72,10 @@
 		box-shadow: none;
 	}
 }
+
+// DSFR 1.14 sets white-space: nowrap on all table cells, which is inherited by
+// .fr-error-text rendered inside a <td>. The message overflows onto adjacent
+// columns. Target only the message to preserve nowrap on numeric data cells.
+.fr-table__content .fr-error-text {
+	white-space: normal;
+}
