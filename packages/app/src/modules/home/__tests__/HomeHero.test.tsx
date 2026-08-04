@@ -20,13 +20,14 @@ describe("HomeHero", () => {
 		).toBeInTheDocument();
 	});
 
+	// /mon-espace enforces the missing-information gate; /declaration-remuneration skips it via callbackUrl
 	it("renders the declaration CTA link", () => {
 		render(<HomeHero />);
 		const link = screen.getByRole("link", {
 			name: /déclarer mes indicateurs/i,
 		});
 		expect(link).toBeInTheDocument();
-		expect(link).toHaveAttribute("href", "/declaration-remuneration");
+		expect(link).toHaveAttribute("href", "/mon-espace");
 	});
 
 	it("renders the info about companies with 50+ employees", () => {
