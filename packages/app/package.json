@@ -73,7 +73,7 @@
 		"redis": "^5.11.0",
 		"server-only": "^0.0.1",
 		"superjson": "^2.2.6",
-		"undici": "^7.24.4",
+		"undici": "^7.29.0",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
