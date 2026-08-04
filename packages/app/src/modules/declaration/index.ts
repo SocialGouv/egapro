@@ -1,6 +1,7 @@
-export type { SaveCompliancePathInput } from "./schemas";
+export type { E2eClockInput, SaveCompliancePathInput } from "./schemas";
 export {
 	declarationHistoryInputSchema,
+	e2eClockSchema,
 	saveCompliancePathInputSchema,
 	saveCompliancePathSchema,
 	submitDeclarationSchema,

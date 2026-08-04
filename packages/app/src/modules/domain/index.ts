@@ -14,6 +14,12 @@ export {
 	isDeadlinePassed,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
+// Campaign clock — test-only override seam behind getCurrentYear (issue #4022)
+export {
+	clearCampaignYearOverride,
+	readCampaignYearOverride,
+	writeCampaignYearOverride,
+} from "./shared/campaignClock";
 // Company obligation
 export { isObligatedForYear } from "./shared/companyObligation";
 // Company size

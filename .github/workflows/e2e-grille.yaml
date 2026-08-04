@@ -1,20 +1,53 @@
-name: 🧪 E2E Tests
+# Nightly acceptance run: rolls the 185-coordinate grid from docs/cahier-de-tests.md.
+#
+# Sharding note — if duration becomes a bottleneck the lever is --shard=i/N in a
+# job matrix (each runner on its own :3000 + docker stack), with the blob reporter
+# and `merge-reports` to reassemble a single HTML/JSON output. Explicit decision
+# not to implement this as long as the run fits within the nightly window.
+
+name: 🧪 Recette grille (nightly)
 
 on:
-  pull_request:
-    branches:
-      - alpha
+  schedule:
+    - cron: "0 2 * * *"
   workflow_dispatch:
+    inputs:
+      annee:
+        description: "Année de campagne"
+        required: false
+        default: "toutes"
+        type: choice
+        options:
+          - toutes
+          - "2027"
+          - "2028"
+          - "2029"
+          - "2030"
+          - "2031"
+          - "2032"
+          - "2033"
+      tranche:
+        description: "Tranche d'effectif"
+        required: false
+        default: "toutes"
+        type: choice
+        options:
+          - toutes
+          - "49"
+          - "99"
+          - "149"
+          - "249"
+          - "250P"
 
 concurrency:
-  group: e2e-${{ github.ref }}
-  cancel-in-progress: true
+  group: e2e-grille
+  cancel-in-progress: false
 
 jobs:
-  e2e:
-    name: "Test e2e"
+  grille:
+    name: "Recette grille"
     runs-on: ubuntu-22.04
-    timeout-minutes: 20
+    timeout-minutes: 130
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5438/egapro
       AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
@@ -25,12 +58,6 @@ jobs:
       EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
       EGAPRO_SUIT_API_URL: ${{ secrets.EGAPRO_SUIT_API_URL }}
       EGAPRO_GATEWAY_SHARED_SECRET: dev-gateway-shared-secret-minimum-32-chars
-      # Test-only campaign-clock seam (#4022). compliance.e2e.ts and
-      # declaration.e2e.ts pin campaign years through withCampaignYear so the
-      # indicator-G branches stay exercised whatever the calendar says; without
-      # this flag /api/e2e-clock 404s by design and those specs fail. The route
-      # stays unreachable in production, which is gated by NODE_ENV on top of
-      # this flag, and the flag is set in no .kontinuous env config.
       EGAPRO_E2E_CLOCK: "true"
       S3_ENDPOINT: http://localhost:9000
       S3_REGION: us-east-1
@@ -119,23 +146,69 @@ jobs:
         run: pnpm build
       - name: Apply database schema
         run: pnpm db:push
-      - name: Run E2E tests
-        run: pnpm test:e2e
+      - name: Run recette grille
+        id: run-grille
+        continue-on-error: true
+        env:
+          ANNEE: ${{ github.event.inputs.annee || 'toutes' }}
+          TRANCHE: ${{ github.event.inputs.tranche || 'toutes' }}
+        run: |
+          set -euo pipefail
+
+          # Compute human-readable scope for the report
+          if [ "$ANNEE" = "toutes" ] && [ "$TRANCHE" = "toutes" ]; then
+            SCOPE="tous les cas (185 coordonnées)"
+          elif [ "$ANNEE" != "toutes" ] && [ "$TRANCHE" = "toutes" ]; then
+            SCOPE="année $ANNEE"
+          elif [ "$ANNEE" = "toutes" ] && [ "$TRANCHE" != "toutes" ]; then
+            SCOPE="tranche $TRANCHE"
+          else
+            SCOPE="année $ANNEE, tranche $TRANCHE"
+          fi
+          echo "RECETTE_SCOPE=$SCOPE" >> "$GITHUB_ENV"
+
+          # Build grep filter and run
+          if [ "$ANNEE" != "toutes" ] && [ "$TRANCHE" != "toutes" ]; then
+            pnpm --filter app test:e2e:grille -- --grep "\\[$ANNEE-$TRANCHE-"
+          elif [ "$ANNEE" != "toutes" ]; then
+            pnpm --filter app test:e2e:grille -- --grep "\\[$ANNEE-"
+          elif [ "$TRANCHE" != "toutes" ]; then
+            pnpm --filter app test:e2e:grille -- --grep "-$TRANCHE-CAS"
+          else
+            pnpm --filter app test:e2e:grille
+          fi
+      - name: Générer le rapport de recette
+        if: always()
+        run: |
+          pnpm --filter app report:grille \
+            --scope "${RECETTE_SCOPE:-tous les cas}" \
+            --commit "${{ github.sha }}" \
+            --report-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
       - name: Stop services
         if: always()
         run: docker compose down
+      - name: Upload rapport de recette
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: grille-recette
+          path: packages/app/playwright-report/grille-recette.md
+          retention-days: 30
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-grille-report
           path: packages/app/playwright-report/
-          retention-days: 7
+          retention-days: 14
       - name: Upload Playwright traces
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-traces
+          name: playwright-grille-traces
           path: packages/app/test-results/
-          retention-days: 7
+          retention-days: 14
           if-no-files-found: ignore
+      - name: Fail if coordinates failed
+        if: steps.run-grille.outcome == 'failure'
+        run: exit 1

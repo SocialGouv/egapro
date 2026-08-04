@@ -46,6 +46,9 @@ describe("getCurrentYear", () => {
 
 	afterEach(() => {
 		vi.useRealTimers();
+		// Never leak the override: every other domain test calls getCurrentYear().
+		delete (globalThis as { __egaproCampaignYear?: number })
+			.__egaproCampaignYear;
 	});
 
 	it("returns the current calendar year", () => {
@@ -56,6 +59,29 @@ describe("getCurrentYear", () => {
 	it("returns the year from the system clock", () => {
 		vi.setSystemTime(new Date("2030-01-01"));
 		expect(getCurrentYear()).toBe(2030);
+	});
+
+	it("honours a numeric globalThis.__egaproCampaignYear override", () => {
+		vi.setSystemTime(new Date("2025-06-15"));
+		(globalThis as { __egaproCampaignYear?: number }).__egaproCampaignYear =
+			2042;
+		expect(getCurrentYear()).toBe(2042);
+	});
+
+	it("ignores a non-numeric override and falls back to the system clock", () => {
+		vi.setSystemTime(new Date("2025-06-15"));
+		(globalThis as { __egaproCampaignYear?: unknown }).__egaproCampaignYear =
+			"2042";
+		expect(getCurrentYear()).toBe(2025);
+	});
+
+	it("falls back to the system clock once the override is cleared", () => {
+		vi.setSystemTime(new Date("2025-06-15"));
+		(globalThis as { __egaproCampaignYear?: number }).__egaproCampaignYear =
+			2042;
+		delete (globalThis as { __egaproCampaignYear?: number })
+			.__egaproCampaignYear;
+		expect(getCurrentYear()).toBe(2025);
 	});
 });
 

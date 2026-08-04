@@ -9,6 +9,9 @@ export default defineConfig({
 	globalSetup: "./src/e2e/global-setup.ts",
 	testDir: "./src/e2e",
 	testMatch: "**/*.e2e.{ts,tsx}",
+	// The 185-coordinate grid (#4022) has its own config and reporter; keep it out
+	// of the PR gate even if a grid file were ever renamed to *.e2e.ts by mistake.
+	testIgnore: "**/grille/**",
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
