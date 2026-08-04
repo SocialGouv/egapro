@@ -142,5 +142,11 @@ echo "ticket #$TICKET → $STATUS_RAW"
 # (/implement task/bug, code-dev, epic_loop), so the board's Start date column
 # is populated automatically. Best-effort: never fail the status move on this.
 if [ "$OPTION_ID" = "47fc9ee4" ]; then
-    bash "$SCRIPT_DIR/set_ticket_date.sh" "$TICKET" start --if-empty >/dev/null 2>&1 || true
+    # Best-effort: a date failure must never fail the status move. But it must
+    # not be silent either — stderr is left open and a warning is emitted, so a
+    # dropped stamp shows up instead of leaving a ticket In progress with an
+    # empty Start date and no trace of why.
+    if ! bash "$SCRIPT_DIR/set_ticket_date.sh" "$TICKET" start --if-empty >/dev/null; then
+        echo "WARNING: ticket #$TICKET moved to In progress but its Start date could not be stamped" >&2
+    fi
 fi

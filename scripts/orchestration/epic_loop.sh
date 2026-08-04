@@ -123,7 +123,9 @@ for N in $EPICS; do
         exit 1
     fi
 
-    bash "$SCRIPT_DIR/set_ticket_status.sh" "$N" "In progress" >/dev/null 2>&1 || true
+    # stderr stays open: the Start date stamp rides on this call, and a silent
+    # failure leaves the ticket In progress with an empty Start date.
+    bash "$SCRIPT_DIR/set_ticket_status.sh" "$N" "In progress" >/dev/null || true
 done
 
 # ---- Helper: ensure worktree exists at the expected path + setup docker stack ----
@@ -453,8 +455,9 @@ while [ $TICK -lt $MAX_TICKS ]; do
         EPIC=$(echo "$entry" | jq -r '.epic')
         BASE=$(echo "$entry" | jq -r '.base_branch')
 
-        # Set ticket 'In progress' on the board (idempotent)
-        bash "$SCRIPT_DIR/set_ticket_status.sh" "$TICKET" "In progress" >/dev/null 2>&1 || true
+        # Set ticket 'In progress' on the board (idempotent). stderr stays open:
+        # the Start date stamp rides on this call and must not fail silently.
+        bash "$SCRIPT_DIR/set_ticket_status.sh" "$TICKET" "In progress" >/dev/null || true
 
         # Provision worktree + docker stack (no-op if already done)
         WT_PATH=$(ensure_worktree "$TICKET" "$INDEX" "$EPIC" "$BASE")
