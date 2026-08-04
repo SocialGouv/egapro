@@ -23,6 +23,11 @@ import {
 test.describe.configure({ mode: "serial" });
 
 const CONFIRMATION_PATH = `${COMPLIANCE_PATH}/confirmation`;
+// Same literal as the unit tests of CompliancePathOptions: an `exact: true`
+// assertion breaks silently on a wording change, and the negative assertion
+// below would then pass for the wrong reason (text absent because renamed).
+const CORRECTIVE_ACTION_TITLE =
+	"Effectuer des actions correctives et une seconde déclaration";
 
 // === GROUP A: No gap — auto-redirects ===
 
@@ -95,7 +100,7 @@ test.describe("[CAS-04] Path 3: gap + hasCse → compliance choice → justify",
 		// Gap + hasCse → compliance choice page
 		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
 		await expect(
-			page.getByText("Actions correctives et seconde déclaration", {
+			page.getByText(CORRECTIVE_ACTION_TITLE, {
 				exact: true,
 			}),
 		).toBeVisible();
@@ -301,7 +306,7 @@ test.describe("[CAS-10] Path 8: gap + corrective action (gap persists) → secon
 			),
 		).toBeVisible();
 		await expect(
-			page.getByText("Actions correctives et seconde déclaration", {
+			page.getByText(CORRECTIVE_ACTION_TITLE, {
 				exact: true,
 			}),
 		).not.toBeVisible();
