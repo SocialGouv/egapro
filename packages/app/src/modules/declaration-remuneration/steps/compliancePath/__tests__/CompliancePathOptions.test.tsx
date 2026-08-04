@@ -19,6 +19,8 @@ const JUSTIFY_CSE_OPINION = "Transmettre l'avis du CSE";
 const CORRECTIVE_CSE_CONSULT =
 	/Informer et consulter votre CSE sur l'exactitude/;
 const CORRECTIVE_CSE_OPINION = "Transmettre l'avis ou les avis du CSE";
+const CORRECTIVE_ACTION_TITLE =
+	"Effectuer des actions correctives et une seconde déclaration";
 
 // An option whose only list items are CSE-gated must drop the whole <ul>:
 // an empty list is invalid content for assistive technologies (RGAA 9.3).
@@ -208,9 +210,7 @@ describe("FirstRoundOptions", () => {
 	])("keeps the non-CSE corrective action steps (cseOpinionRequired: %s)", (cseOpinionRequired) => {
 		renderFirstRoundOptions(cseOpinionRequired);
 
-		expect(
-			screen.getByText("Actions correctives et seconde déclaration"),
-		).toBeInTheDocument();
+		expect(screen.getByText(CORRECTIVE_ACTION_TITLE)).toBeInTheDocument();
 		expect(
 			screen.getByText(
 				"Mettre en place des actions correctives par accord ou par plan d'action",
@@ -224,5 +224,28 @@ describe("FirstRoundOptions", () => {
 		expect(
 			screen.getByText(/Si des écarts non justifiés persistent/),
 		).toBeInTheDocument();
+	});
+
+	it("renders the learn more links at body size, like the reference link above the options", () => {
+		renderFirstRoundOptions(true);
+
+		const learnMoreLinks = screen.getAllByRole("link", {
+			name: /En savoir plus/,
+		});
+
+		expect(learnMoreLinks).toHaveLength(2);
+		for (const link of learnMoreLinks) {
+			expect(link).toHaveClass("fr-link");
+			expect(link).not.toHaveClass("fr-text--sm");
+		}
+	});
+
+	it("keeps « de salariés » on a single line with a non-breaking space", () => {
+		renderFirstRoundOptions(true);
+
+		expect(
+			screen.getByText(/Vous souhaitez mettre en place des actions correctives/)
+				.textContent,
+		).toContain("par catégorie de\u00A0salariés");
 	});
 });

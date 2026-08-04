@@ -8,9 +8,14 @@ describe("formatLongDate", () => {
 		expect(formatLongDate(date)).toBe("10 mars 2026");
 	});
 
-	it("formats January 1st correctly", () => {
+	it("marks the first day of a month with the French ordinal", () => {
 		const date = new Date(2025, 0, 1); // January 1, 2025
-		expect(formatLongDate(date)).toBe("1 janvier 2025");
+		expect(formatLongDate(date)).toBe("1ᵉʳ janvier 2025");
+	});
+
+	it("leaves the ordinal off every other day", () => {
+		expect(formatLongDate(new Date(2025, 0, 11))).toBe("11 janvier 2025");
+		expect(formatLongDate(new Date(2025, 0, 21))).toBe("21 janvier 2025");
 	});
 
 	it("formats December 31st correctly", () => {

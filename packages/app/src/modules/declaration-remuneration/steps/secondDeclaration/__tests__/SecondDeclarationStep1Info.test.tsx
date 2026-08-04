@@ -45,7 +45,7 @@ describe("SecondDeclarationStep1Info", () => {
 				modificationDeadline={modificationDeadline}
 			/>,
 		);
-		expect(screen.getByText(/1 décembre 2027/)).toBeInTheDocument();
+		expect(screen.getByText(/1ᵉʳ décembre 2027/)).toBeInTheDocument();
 	});
 
 	it("displays the declaration date", () => {

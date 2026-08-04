@@ -1,3 +1,19 @@
+// Plain flex, not fr-grid-row--gutters: its negative-margin gutters overflow this row's background.
+.wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+
+	@include respond-from(md) {
+		flex-direction: row;
+	}
+}
+
+.column {
+	flex: 1 1 0;
+	min-width: 0;
+}
+
 .content {
 	display: flex;
 	flex-direction: column;
@@ -12,5 +28,17 @@
 	// Keep the success pictogram at its intrinsic size when the title wraps.
 	> svg {
 		flex-shrink: 0;
+	}
+}
+
+// Figma places the format mention 4px under the link, as its sibling. A plain
+// block on purpose: a flex item would be blockified and DSFR then paints a
+// single full-width underline at the bottom of the anchor instead of one under
+// each line of the label.
+.download {
+	// Last child: FileDownloadLink also renders a screen-reader live region and,
+	// on failure, an error paragraph — neither carries this spacing.
+	> p:last-child {
+		margin-top: 0.25rem;
 	}
 }

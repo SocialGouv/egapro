@@ -49,7 +49,7 @@ async function expectComplianceOptions(
 ): Promise<void> {
 	await test.step("choix du parcours de conformité", async () => {
 		const corrective = page.getByText(
-			"Actions correctives et seconde déclaration",
+			"Effectuer des actions correctives et une seconde déclaration",
 			{ exact: true },
 		);
 		const joint = page.getByText(
