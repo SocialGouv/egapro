@@ -323,11 +323,15 @@ describe("Step1Workforce", () => {
 					step4: {
 						annual: {
 							thresholds: [null, null, null],
+							referenceWomen: null,
+							referenceMen: null,
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
 						hourly: {
 							thresholds: [null, null, null],
+							referenceWomen: null,
+							referenceMen: null,
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
@@ -382,11 +386,15 @@ describe("Step1Workforce", () => {
 					step4: {
 						annual: {
 							thresholds: [null, null, null],
+							referenceWomen: null,
+							referenceMen: null,
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
 						hourly: {
 							thresholds: [null, null, null],
+							referenceWomen: null,
+							referenceMen: null,
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},

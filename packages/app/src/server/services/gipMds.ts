@@ -10,6 +10,17 @@ import { fetchCompanyBySiren } from "./weez";
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
+// The CSV is externally supplied: a crafted header could carry ANSI escape
+// sequences that mislead whoever reads the logs. Same shape as the upload audit.
+function sanitizeForLog(value: string): string {
+	let out = "";
+	for (const ch of value) {
+		const code = ch.codePointAt(0) ?? 0;
+		if (code >= 0x20 && code !== 0x7f) out += ch;
+	}
+	return out.slice(0, 255);
+}
+
 /**
  * CSV metadata extracted from the first 2 lines of a GIP MDS file.
  * Line 1: destinataire;projet;horodatage;date_debut;date_fin;nb_lignes
@@ -55,6 +66,7 @@ export function parseGipCsv(csvContent: string): {
 
 	const headers = splitCsvLine(lines[2] ?? "").map((h) => h.trim());
 	const rows: Array<Partial<GipMdsRow>> = [];
+	const unknownHeaders = new Set<string>();
 
 	for (let i = 3; i < lines.length; i++) {
 		const line = lines[i];
@@ -68,7 +80,15 @@ export function parseGipCsv(csvContent: string): {
 			if (!header) continue;
 
 			const schemaField = CSV_TO_SCHEMA_MAP[header];
-			if (!schemaField) continue;
+			if (!schemaField) {
+				if (!unknownHeaders.has(header)) {
+					unknownHeaders.add(header);
+					console.warn(
+						`[gip-mds/parse] Unknown CSV header "${sanitizeForLog(header)}" — column ignored. Check the file format against the current GIP schema.`,
+					);
+				}
+				continue;
+			}
 
 			const rawValue = values[j]?.trim() ?? "";
 			if (rawValue === "") continue;

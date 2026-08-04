@@ -11,14 +11,51 @@
  * Output: data/mock-gip-mds-edge-cases.csv
  */
 
-// ── Formatting helpers ────────────────────────────────────────────
+import {
+	distributeByLargestRemainder,
+	fmt2,
+	fmt4,
+	proportionMen,
+	proportionWomen,
+} from "./gipMockShared";
 
-function fmt2(n: number): string {
-	return n.toFixed(2).replace(".", ",");
+const QUARTILE_BLOCKS = [
+	{ prefix: "Rem_globale_annuelle", effF: "Effectif_F_rem_annuelle_globale" },
+	{ prefix: "Taux_horaire_global", effF: "Effectif_F_taux_horaire_global" },
+] as const;
+
+function parseCell(value: string | undefined): number | null {
+	if (value === undefined || value === "") return null;
+	const parsed = Number.parseFloat(value.replace(",", "."));
+	return Number.isNaN(parsed) ? null : parsed;
 }
 
-function fmt4(n: number): string {
-	return n.toFixed(4).replace(".", ",");
+// Blocks with no effectif are left untouched, so the "all null" edge cases keep
+// their empty quartile cells rather than gaining fabricated zeroes.
+function finalizeQuartileCounts(row: Record<string, string>): void {
+	for (const { prefix, effF } of QUARTILE_BLOCKS) {
+		const effH = effF.replace("Effectif_F", "Effectif_H");
+		const women = parseCell(row[effF]);
+		const men = parseCell(row[effH]);
+		if (women === null || men === null) continue;
+		const weightF = [1, 2, 3, 4].map(
+			(q) => parseCell(row[`Quartile${q}_${prefix}_proportion_F`]) ?? 0.5,
+		);
+		const womenCounts = distributeByLargestRemainder(women, weightF);
+		const menCounts = distributeByLargestRemainder(
+			men,
+			weightF.map((w) => 1 - w),
+		);
+		for (let i = 0; i < 4; i++) {
+			const q = i + 1;
+			const w = womenCounts[i] ?? 0;
+			const m = menCounts[i] ?? 0;
+			row[`Quartile${q}_${prefix}_nb_F`] = String(w);
+			row[`Quartile${q}_${prefix}_nb_H`] = String(m);
+			row[`Quartile${q}_${prefix}_proportion_F`] = fmt4(proportionWomen(w, m));
+			row[`Quartile${q}_${prefix}_proportion_H`] = fmt4(proportionMen(w, m));
+		}
+	}
 }
 
 /** Empty string = null in CSV (field present but empty). */
@@ -47,23 +84,31 @@ const HEADERS = [
 	"Taux_horaire_variable_moyen_ecart",
 	"Taux_horaire_variable_moyen_F",
 	"Taux_horaire_variable_moyen_H",
-	"Rem_globale_annuelle_médiane_ecart",
-	"Rem_globale_annuelle_médiane_F",
-	"Rem_globale_annuelle_médiane_H",
-	"Taux_horaire_global_médian_ecart",
-	"Taux_globale_annuelle_médiane_F",
-	"Taux_globale_annuelle_médiane_H",
-	"Rem_variable_annuelle_médiane_ecart",
-	"Rem_variable_annuelle_médiane_F",
-	"Rem_variable_annuelle_médiane_H",
-	"Taux_horaire_variable_médian_ecart",
-	"Taux_horaire_variable_médian_F ",
-	"Taux_horaire_variable_médian_H",
+	"Rem_globale_annuelle_mediane_ecart",
+	"Rem_globale_annuelle_mediane_F",
+	"Rem_globale_annuelle_mediane_H",
+	"Taux_horaire_global_median_ecart",
+	"Taux_globale_annuelle_mediane_F",
+	"Taux_globale_annuelle_mediane_H",
+	"Rem_variable_annuelle_mediane_ecart",
+	"Rem_variable_annuelle_mediane_F",
+	"Rem_variable_annuelle_mediane_H",
+	"Taux_horaire_variable_median_ecart",
+	"Taux_horaire_variable_median_F ",
+	"Taux_horaire_variable_median_H",
 	"Proportion_variable_F",
 	"Proportion_variable_H",
 	"Seuil_Q1_Rem_globale",
 	"Seuil_Q2_Rem_globale",
 	"Seuil_Q3_Rem_globale",
+	"Quartile1_Rem_globale_annuelle_nb_F",
+	"Quartile2_Rem_globale_annuelle_nb_F",
+	"Quartile3_Rem_globale_annuelle_nb_F",
+	"Quartile4_Rem_globale_annuelle_nb_F",
+	"Quartile1_Rem_globale_annuelle_nb_H",
+	"Quartile2_Rem_globale_annuelle_nb_H",
+	"Quartile3_Rem_globale_annuelle_nb_H",
+	"Quartile4_Rem_globale_annuelle_nb_H",
 	"Quartile1_Rem_globale_annuelle_proportion_F",
 	"Quartile2_Rem_globale_annuelle_proportion_F",
 	"Quartile3_Rem_globale_annuelle_proportion_F",
@@ -75,6 +120,14 @@ const HEADERS = [
 	"Seuil_Q1_Taux_horaire_global",
 	"Seuil_Q2_Taux_horaire_global",
 	"Seuil_Q3_Taux_horaire_global",
+	"Quartile1_Taux_horaire_global_nb_F",
+	"Quartile2_Taux_horaire_global_nb_F",
+	"Quartile3_Taux_horaire_global_nb_F",
+	"Quartile4_Taux_horaire_global_nb_F",
+	"Quartile1_Taux_horaire_global_nb_H",
+	"Quartile2_Taux_horaire_global_nb_H",
+	"Quartile3_Taux_horaire_global_nb_H",
+	"Quartile4_Taux_horaire_global_nb_H",
 	"Quartile1_Taux_horaire_global_proportion_F",
 	"Quartile2_Taux_horaire_global_proportion_F",
 	"Quartile3_Taux_horaire_global_proportion_F",
@@ -128,19 +181,19 @@ function baseRow(siren: string, ema: string): Record<string, string> {
 		Taux_horaire_variable_moyen_F: fmt2(0.49),
 		Taux_horaire_variable_moyen_H: fmt2(0.55),
 		// Indicator C — Global median
-		Rem_globale_annuelle_médiane_ecart: fmt4(0.04),
-		Rem_globale_annuelle_médiane_F: fmt2(34000),
-		Rem_globale_annuelle_médiane_H: fmt2(35416.67),
-		Taux_horaire_global_médian_ecart: fmt4(0.04),
-		Taux_globale_annuelle_médiane_F: fmt2(18.68),
-		Taux_globale_annuelle_médiane_H: fmt2(19.46),
+		Rem_globale_annuelle_mediane_ecart: fmt4(0.04),
+		Rem_globale_annuelle_mediane_F: fmt2(34000),
+		Rem_globale_annuelle_mediane_H: fmt2(35416.67),
+		Taux_horaire_global_median_ecart: fmt4(0.04),
+		Taux_globale_annuelle_mediane_F: fmt2(18.68),
+		Taux_globale_annuelle_mediane_H: fmt2(19.46),
 		// Indicator D — Variable median
-		Rem_variable_annuelle_médiane_ecart: fmt4(0.08),
-		Rem_variable_annuelle_médiane_F: fmt2(850),
-		Rem_variable_annuelle_médiane_H: fmt2(923.91),
-		Taux_horaire_variable_médian_ecart: fmt4(0.08),
-		"Taux_horaire_variable_médian_F ": fmt2(0.47),
-		Taux_horaire_variable_médian_H: fmt2(0.51),
+		Rem_variable_annuelle_mediane_ecart: fmt4(0.08),
+		Rem_variable_annuelle_mediane_F: fmt2(850),
+		Rem_variable_annuelle_mediane_H: fmt2(923.91),
+		Taux_horaire_variable_median_ecart: fmt4(0.08),
+		"Taux_horaire_variable_median_F ": fmt2(0.47),
+		Taux_horaire_variable_median_H: fmt2(0.51),
 		// Indicator E
 		Proportion_variable_F: fmt4(0.5625),
 		Proportion_variable_H: fmt4(0.6),
@@ -234,18 +287,18 @@ const edgeCases: EdgeCase[] = [
 			Taux_horaire_variable_moyen_ecart: NULL,
 			Taux_horaire_variable_moyen_F: NULL,
 			Taux_horaire_variable_moyen_H: NULL,
-			Rem_globale_annuelle_médiane_ecart: NULL,
-			Rem_globale_annuelle_médiane_F: NULL,
-			Rem_globale_annuelle_médiane_H: NULL,
-			Taux_horaire_global_médian_ecart: NULL,
-			Taux_globale_annuelle_médiane_F: NULL,
-			Taux_globale_annuelle_médiane_H: NULL,
-			Rem_variable_annuelle_médiane_ecart: NULL,
-			Rem_variable_annuelle_médiane_F: NULL,
-			Rem_variable_annuelle_médiane_H: NULL,
-			Taux_horaire_variable_médian_ecart: NULL,
-			"Taux_horaire_variable_médian_F ": NULL,
-			Taux_horaire_variable_médian_H: NULL,
+			Rem_globale_annuelle_mediane_ecart: NULL,
+			Rem_globale_annuelle_mediane_F: NULL,
+			Rem_globale_annuelle_mediane_H: NULL,
+			Taux_horaire_global_median_ecart: NULL,
+			Taux_globale_annuelle_mediane_F: NULL,
+			Taux_globale_annuelle_mediane_H: NULL,
+			Rem_variable_annuelle_mediane_ecart: NULL,
+			Rem_variable_annuelle_mediane_F: NULL,
+			Rem_variable_annuelle_mediane_H: NULL,
+			Taux_horaire_variable_median_ecart: NULL,
+			"Taux_horaire_variable_median_F ": NULL,
+			Taux_horaire_variable_median_H: NULL,
 			Proportion_variable_F: NULL,
 			Proportion_variable_H: NULL,
 			Seuil_Q1_Rem_globale: NULL,
@@ -333,10 +386,10 @@ const edgeCases: EdgeCase[] = [
 			Rem_variable_annuelle_moyenne_H: NULL,
 			Taux_horaire_variable_moyen_ecart: NULL,
 			Taux_horaire_variable_moyen_H: NULL,
-			Rem_variable_annuelle_médiane_ecart: NULL,
-			Rem_variable_annuelle_médiane_H: NULL,
-			Taux_horaire_variable_médian_ecart: NULL,
-			Taux_horaire_variable_médian_H: NULL,
+			Rem_variable_annuelle_mediane_ecart: NULL,
+			Rem_variable_annuelle_mediane_H: NULL,
+			Taux_horaire_variable_median_ecart: NULL,
+			Taux_horaire_variable_median_H: NULL,
 			Proportion_variable_H: fmt4(0),
 		},
 	},
@@ -353,10 +406,10 @@ const edgeCases: EdgeCase[] = [
 			Rem_variable_annuelle_moyenne_F: NULL,
 			Taux_horaire_variable_moyen_ecart: NULL,
 			Taux_horaire_variable_moyen_F: NULL,
-			Rem_variable_annuelle_médiane_ecart: NULL,
-			Rem_variable_annuelle_médiane_F: NULL,
-			Taux_horaire_variable_médian_ecart: NULL,
-			"Taux_horaire_variable_médian_F ": NULL,
+			Rem_variable_annuelle_mediane_ecart: NULL,
+			Rem_variable_annuelle_mediane_F: NULL,
+			Taux_horaire_variable_median_ecart: NULL,
+			"Taux_horaire_variable_median_F ": NULL,
 			Proportion_variable_F: fmt4(0),
 		},
 	},
@@ -385,18 +438,18 @@ const edgeCases: EdgeCase[] = [
 			Taux_horaire_variable_moyen_ecart: fmt4(0),
 			Taux_horaire_variable_moyen_F: fmt2(0.66),
 			Taux_horaire_variable_moyen_H: fmt2(0.66),
-			Rem_globale_annuelle_médiane_ecart: fmt4(0),
-			Rem_globale_annuelle_médiane_F: fmt2(39000),
-			Rem_globale_annuelle_médiane_H: fmt2(39000),
-			Taux_horaire_global_médian_ecart: fmt4(0),
-			Taux_globale_annuelle_médiane_F: fmt2(21.43),
-			Taux_globale_annuelle_médiane_H: fmt2(21.43),
-			Rem_variable_annuelle_médiane_ecart: fmt4(0),
-			Rem_variable_annuelle_médiane_F: fmt2(1100),
-			Rem_variable_annuelle_médiane_H: fmt2(1100),
-			Taux_horaire_variable_médian_ecart: fmt4(0),
-			"Taux_horaire_variable_médian_F ": fmt2(0.6),
-			Taux_horaire_variable_médian_H: fmt2(0.6),
+			Rem_globale_annuelle_mediane_ecart: fmt4(0),
+			Rem_globale_annuelle_mediane_F: fmt2(39000),
+			Rem_globale_annuelle_mediane_H: fmt2(39000),
+			Taux_horaire_global_median_ecart: fmt4(0),
+			Taux_globale_annuelle_mediane_F: fmt2(21.43),
+			Taux_globale_annuelle_mediane_H: fmt2(21.43),
+			Rem_variable_annuelle_mediane_ecart: fmt4(0),
+			Rem_variable_annuelle_mediane_F: fmt2(1100),
+			Rem_variable_annuelle_mediane_H: fmt2(1100),
+			Taux_horaire_variable_median_ecart: fmt4(0),
+			"Taux_horaire_variable_median_F ": fmt2(0.6),
+			Taux_horaire_variable_median_H: fmt2(0.6),
 			Proportion_variable_F: fmt4(0.5333),
 			Proportion_variable_H: fmt4(0.5333),
 			// Quartile proportions: perfect 50/50
@@ -437,18 +490,18 @@ const edgeCases: EdgeCase[] = [
 			Taux_horaire_variable_moyen_ecart: fmt4(-0.5),
 			Taux_horaire_variable_moyen_F: fmt2(1.65),
 			Taux_horaire_variable_moyen_H: fmt2(1.1),
-			Rem_globale_annuelle_médiane_ecart: fmt4(-0.4),
-			Rem_globale_annuelle_médiane_F: fmt2(50000),
-			Rem_globale_annuelle_médiane_H: fmt2(35714.29),
-			Taux_horaire_global_médian_ecart: fmt4(-0.4),
-			Taux_globale_annuelle_médiane_F: fmt2(27.47),
-			Taux_globale_annuelle_médiane_H: fmt2(19.62),
-			Rem_variable_annuelle_médiane_ecart: fmt4(-0.9999),
-			Rem_variable_annuelle_médiane_F: fmt2(2800),
-			Rem_variable_annuelle_médiane_H: fmt2(1400.07),
-			Taux_horaire_variable_médian_ecart: fmt4(-0.9999),
-			"Taux_horaire_variable_médian_F ": fmt2(1.54),
-			Taux_horaire_variable_médian_H: fmt2(0.77),
+			Rem_globale_annuelle_mediane_ecart: fmt4(-0.4),
+			Rem_globale_annuelle_mediane_F: fmt2(50000),
+			Rem_globale_annuelle_mediane_H: fmt2(35714.29),
+			Taux_horaire_global_median_ecart: fmt4(-0.4),
+			Taux_globale_annuelle_mediane_F: fmt2(27.47),
+			Taux_globale_annuelle_mediane_H: fmt2(19.62),
+			Rem_variable_annuelle_mediane_ecart: fmt4(-0.9999),
+			Rem_variable_annuelle_mediane_F: fmt2(2800),
+			Rem_variable_annuelle_mediane_H: fmt2(1400.07),
+			Taux_horaire_variable_median_ecart: fmt4(-0.9999),
+			"Taux_horaire_variable_median_F ": fmt2(1.54),
+			Taux_horaire_variable_median_H: fmt2(0.77),
 		},
 	},
 
@@ -462,10 +515,10 @@ const edgeCases: EdgeCase[] = [
 			Taux_horaire_global_moyen_ecart: NULL,
 			Rem_variable_annuelle_moyenne_ecart: NULL,
 			Taux_horaire_variable_moyen_ecart: NULL,
-			Rem_globale_annuelle_médiane_ecart: NULL,
-			Taux_horaire_global_médian_ecart: NULL,
-			Rem_variable_annuelle_médiane_ecart: NULL,
-			Taux_horaire_variable_médian_ecart: NULL,
+			Rem_globale_annuelle_mediane_ecart: NULL,
+			Taux_horaire_global_median_ecart: NULL,
+			Rem_variable_annuelle_mediane_ecart: NULL,
+			Taux_horaire_variable_median_ecart: NULL,
 		},
 	},
 
@@ -619,14 +672,14 @@ const edgeCases: EdgeCase[] = [
 			Rem_variable_annuelle_moyenne_F: NULL,
 			Taux_horaire_variable_moyen_ecart: NULL,
 			Taux_horaire_variable_moyen_F: NULL,
-			Rem_globale_annuelle_médiane_ecart: NULL,
-			Rem_globale_annuelle_médiane_F: NULL,
-			Taux_horaire_global_médian_ecart: NULL,
-			Taux_globale_annuelle_médiane_F: NULL,
-			Rem_variable_annuelle_médiane_ecart: NULL,
-			Rem_variable_annuelle_médiane_F: NULL,
-			Taux_horaire_variable_médian_ecart: NULL,
-			"Taux_horaire_variable_médian_F ": NULL,
+			Rem_globale_annuelle_mediane_ecart: NULL,
+			Rem_globale_annuelle_mediane_F: NULL,
+			Taux_horaire_global_median_ecart: NULL,
+			Taux_globale_annuelle_mediane_F: NULL,
+			Rem_variable_annuelle_mediane_ecart: NULL,
+			Rem_variable_annuelle_mediane_F: NULL,
+			Taux_horaire_variable_median_ecart: NULL,
+			"Taux_horaire_variable_median_F ": NULL,
 			Proportion_variable_F: fmt4(0),
 			// All quartile proportions: 0% women, 100% men
 			Quartile1_Rem_globale_annuelle_proportion_F: fmt4(0),
@@ -725,18 +778,18 @@ const edgeCases: EdgeCase[] = [
 			Taux_horaire_variable_moyen_ecart: NULL,
 			Taux_horaire_variable_moyen_F: NULL,
 			Taux_horaire_variable_moyen_H: NULL,
-			Taux_horaire_global_médian_ecart: NULL,
-			Taux_globale_annuelle_médiane_F: NULL,
-			Taux_globale_annuelle_médiane_H: NULL,
-			Taux_horaire_variable_médian_ecart: NULL,
-			"Taux_horaire_variable_médian_F ": NULL,
-			Taux_horaire_variable_médian_H: NULL,
+			Taux_horaire_global_median_ecart: NULL,
+			Taux_globale_annuelle_mediane_F: NULL,
+			Taux_globale_annuelle_mediane_H: NULL,
+			Taux_horaire_variable_median_ecart: NULL,
+			"Taux_horaire_variable_median_F ": NULL,
+			Taux_horaire_variable_median_H: NULL,
 			Rem_variable_annuelle_moyenne_ecart: NULL,
 			Rem_variable_annuelle_moyenne_F: NULL,
 			Rem_variable_annuelle_moyenne_H: NULL,
-			Rem_variable_annuelle_médiane_ecart: NULL,
-			Rem_variable_annuelle_médiane_F: NULL,
-			Rem_variable_annuelle_médiane_H: NULL,
+			Rem_variable_annuelle_mediane_ecart: NULL,
+			Rem_variable_annuelle_mediane_F: NULL,
+			Rem_variable_annuelle_mediane_H: NULL,
 			Proportion_variable_F: NULL,
 			Proportion_variable_H: NULL,
 		},
@@ -758,6 +811,7 @@ function generateCsv(): string {
 		for (const [key, value] of Object.entries(ec.overrides)) {
 			row[key] = value;
 		}
+		finalizeQuartileCounts(row);
 		lines.push(toLine(row));
 	}
 
