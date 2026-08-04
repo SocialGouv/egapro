@@ -1,6 +1,7 @@
 import { and, desc, eq, getTableColumns, lt } from "drizzle-orm";
 
 import { computeIndicatorPercentages } from "~/modules/declaration-remuneration/shared/computeIndicatorPercentages";
+import type { PayGapReferences } from "~/modules/declaration-remuneration/shared/indicatorRowMapping";
 import type {
 	Step2Data,
 	Step3Data,
@@ -13,10 +14,12 @@ import {
 import {
 	declarations,
 	employeeCategories,
+	gipMdsData,
 	jobCategories,
 } from "~/server/db/schema";
 
 type DeclarationRow = typeof declarations.$inferSelect;
+type GipMdsRow = typeof gipMdsData.$inferSelect;
 
 export function activeDeclarationFilter(siren: string, year: number) {
 	return and(
@@ -26,20 +29,27 @@ export function activeDeclarationFilter(siren: string, year: number) {
 	);
 }
 
-type PercentagesTx = {
+/** Minimal structural contract for `select().from(table)…limit(n)` on a single table. */
+type SelectTx<Table, Row> = {
 	select: () => {
-		from: (table: typeof declarations) => {
+		from: (table: Table) => {
 			where: (predicate: ReturnType<typeof and>) => {
-				limit: (n: number) => Promise<DeclarationRow[]>;
+				limit: (n: number) => Promise<Row[]>;
 			};
 		};
 	};
-	update: (table: typeof declarations) => {
-		set: (values: Record<string, unknown>) => {
-			where: (predicate: ReturnType<typeof and>) => Promise<unknown>;
+};
+
+type GipTx = SelectTx<typeof gipMdsData, GipMdsRow>;
+
+type PercentagesTx = SelectTx<typeof declarations, DeclarationRow> &
+	GipTx & {
+		update: (table: typeof declarations) => {
+			set: (values: Record<string, unknown>) => {
+				where: (predicate: ReturnType<typeof and>) => Promise<unknown>;
+			};
 		};
 	};
-};
 
 type DraftPurgeTx = PercentagesTx;
 
@@ -54,7 +64,13 @@ export async function applyPercentagesAfterUpdate(
 		.where(activeDeclarationFilter(siren, year))
 		.limit(1);
 	if (!fresh) return;
-	const percentages = computeIndicatorPercentages(fresh);
+	const gipTx: GipTx = tx;
+	const [gip] = await gipTx
+		.select()
+		.from(gipMdsData)
+		.where(and(eq(gipMdsData.siren, siren), eq(gipMdsData.year, year)))
+		.limit(1);
+	const percentages = computeIndicatorPercentages(fresh, gip ?? null);
 	const percentagesForDb = Object.fromEntries(
 		Object.entries(percentages).map(([k, v]) => [
 			k,
@@ -72,6 +88,10 @@ export async function applyPercentagesAfterUpdate(
  * Same mapping regardless of caller — used by the in-flow declaration pages
  * (`etape/[step]/page.tsx`) and the post-submission recap.
  *
+ * `step2Gaps`/`step3Gaps` carry the persisted gap of each row next to the operands it was
+ * computed from, so every read-only surface (recap, PDF, admin) shows the gap that was actually
+ * recorded and published rather than recomputing one that can drift from it.
+ *
  * The `?? ""` (steps 2/3) and `?? undefined` (step 4) are intentional: DB
  * columns are nullable but the form types are `string` and `number?`
  * respectively. The coalescing is the explicit `null → form-shape`
@@ -81,8 +101,54 @@ export function mapToStepData(d: DeclarationRow): {
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
+	step2Gaps: PayGapReferences;
+	step3Gaps: PayGapReferences;
 } {
 	return {
+		step2Gaps: [
+			{
+				women: d.indicatorAAnnualWomen,
+				men: d.indicatorAAnnualMen,
+				gap: d.globalAnnualMeanGap,
+			},
+			{
+				women: d.indicatorAHourlyWomen,
+				men: d.indicatorAHourlyMen,
+				gap: d.globalHourlyMeanGap,
+			},
+			{
+				women: d.indicatorCAnnualWomen,
+				men: d.indicatorCAnnualMen,
+				gap: d.globalAnnualMedianGap,
+			},
+			{
+				women: d.indicatorCHourlyWomen,
+				men: d.indicatorCHourlyMen,
+				gap: d.globalHourlyMedianGap,
+			},
+		],
+		step3Gaps: [
+			{
+				women: d.indicatorBAnnualWomen,
+				men: d.indicatorBAnnualMen,
+				gap: d.variableAnnualMeanGap,
+			},
+			{
+				women: d.indicatorBHourlyWomen,
+				men: d.indicatorBHourlyMen,
+				gap: d.variableHourlyMeanGap,
+			},
+			{
+				women: d.indicatorDAnnualWomen,
+				men: d.indicatorDAnnualMen,
+				gap: d.variableAnnualMedianGap,
+			},
+			{
+				women: d.indicatorDHourlyWomen,
+				men: d.indicatorDHourlyMen,
+				gap: d.variableHourlyMedianGap,
+			},
+		],
 		step2Data: {
 			indicatorAAnnualWomen: d.indicatorAAnnualWomen ?? "",
 			indicatorAAnnualMen: d.indicatorAAnnualMen ?? "",

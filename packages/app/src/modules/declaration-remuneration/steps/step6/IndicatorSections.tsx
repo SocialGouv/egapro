@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
+import type { PayGapReferences } from "~/modules/declaration-remuneration/shared/indicatorRowMapping";
 import stepStyles from "~/modules/declaration-remuneration/steps/Step6Review.module.scss";
 import type {
 	EmployeeCategoryRow,
@@ -7,7 +8,7 @@ import type {
 	Step3Data,
 	Step4Data,
 } from "~/modules/declaration-remuneration/types";
-import { computeGap, formatVariablePayProportion } from "~/modules/domain";
+import { formatVariablePayProportion, resolveGap } from "~/modules/domain";
 import { CardTitle } from "./CardTitle";
 import { GapColumn } from "./GapColumn";
 import { GapSideBySide } from "./GapSideBySide";
@@ -18,6 +19,9 @@ type Props = {
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
+	/** Persisted gaps for steps 2 and 3 — shown as recorded rather than recomputed. */
+	step2Gaps: PayGapReferences;
+	step3Gaps: PayGapReferences;
 	step5Categories: EmployeeCategoryRow[];
 	indicatorGRequired: boolean;
 	totalWomen?: number;
@@ -44,45 +48,55 @@ export function IndicatorSections({
 	step2Data,
 	step3Data,
 	step4Data,
+	step2Gaps,
+	step3Gaps,
 	step5Categories,
 	indicatorGRequired,
 	totalWomen,
 	totalMen,
 	withTooltips = false,
 }: Props) {
-	const annualMeanGap = computeGap(
+	const annualMeanGap = resolveGap(
 		step2Data.indicatorAAnnualWomen,
 		step2Data.indicatorAAnnualMen,
+		step2Gaps[0],
 	);
-	const hourlyMeanGap = computeGap(
+	const hourlyMeanGap = resolveGap(
 		step2Data.indicatorAHourlyWomen,
 		step2Data.indicatorAHourlyMen,
+		step2Gaps[1],
 	);
-	const annualMedianGap = computeGap(
+	const annualMedianGap = resolveGap(
 		step2Data.indicatorCAnnualWomen,
 		step2Data.indicatorCAnnualMen,
+		step2Gaps[2],
 	);
-	const hourlyMedianGap = computeGap(
+	const hourlyMedianGap = resolveGap(
 		step2Data.indicatorCHourlyWomen,
 		step2Data.indicatorCHourlyMen,
+		step2Gaps[3],
 	);
 	const hasStep2Data = Object.values(step2Data).some((v) => v !== "");
 
-	const step3AnnualMeanGap = computeGap(
+	const step3AnnualMeanGap = resolveGap(
 		step3Data.indicatorBAnnualWomen,
 		step3Data.indicatorBAnnualMen,
+		step3Gaps[0],
 	);
-	const step3HourlyMeanGap = computeGap(
+	const step3HourlyMeanGap = resolveGap(
 		step3Data.indicatorBHourlyWomen,
 		step3Data.indicatorBHourlyMen,
+		step3Gaps[1],
 	);
-	const step3AnnualMedianGap = computeGap(
+	const step3AnnualMedianGap = resolveGap(
 		step3Data.indicatorDAnnualWomen,
 		step3Data.indicatorDAnnualMen,
+		step3Gaps[2],
 	);
-	const step3HourlyMedianGap = computeGap(
+	const step3HourlyMedianGap = resolveGap(
 		step3Data.indicatorDHourlyWomen,
 		step3Data.indicatorDHourlyMen,
+		step3Gaps[3],
 	);
 	const hasStep3Data = Object.values(step3Data).some((v) => v !== "");
 

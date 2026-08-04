@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { nullGipStep2, nullGipStep3 } from "~/test/gipGapFixtures";
 import { Step3VariablePay } from "../Step3VariablePay";
 
 const mockMutate = vi.fn();
@@ -360,17 +361,9 @@ describe("Step3VariablePay", () => {
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 80, totalMen: 100 },
-					step2: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-					},
+					step2: nullGipStep2(),
 					step3: {
+						...nullGipStep3(),
 						annualMeanWomen: "5000",
 						annualMeanMen: "7000",
 						hourlyMeanWomen: "2.50",
@@ -420,27 +413,11 @@ describe("Step3VariablePay", () => {
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 80, totalMen: 100 },
-					step2: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-					},
+					step2: nullGipStep2(),
 					step3: {
+						...nullGipStep3(),
 						annualMeanWomen: "900",
 						annualMeanMen: "1000",
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-						beneficiaryCountWomen: null,
-						beneficiaryCountMen: null,
 					},
 					step4: {
 						annual: {
@@ -479,25 +456,10 @@ describe("Step3VariablePay", () => {
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 80, totalMen: 100 },
-					step2: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-					},
+					step2: nullGipStep2(),
 					step3: {
+						...nullGipStep3(),
 						annualMeanWomen: "900",
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
 						beneficiaryCountWomen: 0,
 						beneficiaryCountMen: 0,
 					},

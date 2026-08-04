@@ -1,21 +1,24 @@
 import type { ReactNode } from "react";
 import type { GapDirection } from "~/modules/domain";
 import {
-	computeGap,
 	formatGapCompact,
 	formatVariablePayProportion,
 	gapDirection,
 	gapLevel,
 	gapMagnitude,
+	resolveGap,
 } from "~/modules/domain";
 import type { PayGapRow } from "../types";
 import styles from "./InterpretationCallout.module.scss";
 
+/** Gap shown for one row: the GIP value while untouched, else recomputed from the declared operands. */
+function rowGap(row: PayGapRow): number | null {
+	return resolveGap(row.womenValue, row.menValue, row.gipReference);
+}
+
 /** Returns true when at least one row crosses the regulatory gap threshold (either direction). */
 export function hasHighPayGap(rows: PayGapRow[]): boolean {
-	return rows.some(
-		(r) => gapLevel(computeGap(r.womenValue, r.menValue)) === "high",
-	);
+	return rows.some((r) => gapLevel(rowGap(r)) === "high");
 }
 
 type GapAnalysis = {
@@ -34,17 +37,13 @@ function analyzeGaps(rows: PayGapRow[]): GapAnalysis {
 	const hourlyMean = findRow("Horaire brute moyenne");
 	const hourlyMedian = findRow("Horaire brute médiane");
 
-	const annualMeanGap = annualMean
-		? gapMagnitude(computeGap(annualMean.womenValue, annualMean.menValue))
-		: null;
+	const annualMeanGap = annualMean ? gapMagnitude(rowGap(annualMean)) : null;
 	const annualMedianGap = annualMedian
-		? gapMagnitude(computeGap(annualMedian.womenValue, annualMedian.menValue))
+		? gapMagnitude(rowGap(annualMedian))
 		: null;
-	const hourlyMeanGap = hourlyMean
-		? gapMagnitude(computeGap(hourlyMean.womenValue, hourlyMean.menValue))
-		: null;
+	const hourlyMeanGap = hourlyMean ? gapMagnitude(rowGap(hourlyMean)) : null;
 	const hourlyMedianGap = hourlyMedian
-		? gapMagnitude(computeGap(hourlyMedian.womenValue, hourlyMedian.menValue))
+		? gapMagnitude(rowGap(hourlyMedian))
 		: null;
 
 	const gaps = [annualMeanGap, annualMedianGap, hourlyMeanGap, hourlyMedianGap];

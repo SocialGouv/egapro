@@ -152,6 +152,7 @@ export {
 	formatTotal,
 } from "./shared/format";
 // Gap business rules (calculations & threshold classification)
+export type { GipGapReference } from "./shared/gap";
 export {
 	computeGap,
 	computeGapBetween,
@@ -163,6 +164,8 @@ export {
 	gapRatioToPercent,
 	hasGapsAboveThreshold,
 	hasHighGap,
+	resolveGap,
+	resolveGapRatio,
 } from "./shared/gap";
 // GIP annual average workforce — canonical headcount for obligations & display
 export {

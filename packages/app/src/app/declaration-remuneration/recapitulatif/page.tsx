@@ -51,7 +51,8 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 		if (isDraft(d.status)) notFound();
 	}
 
-	const { step2Data, step3Data, step4Data } = mapToStepData(d);
+	const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =
+		mapToStepData(d);
 
 	// declarations does not store custom period windows — every declaration
 	// covers the full calendar year. The period is derived from d.year.
@@ -110,7 +111,9 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 							isCorrection={isCorrection}
 							referencePeriod={referencePeriod}
 							step2Data={step2Data}
+							step2Gaps={step2Gaps}
 							step3Data={step3Data}
+							step3Gaps={step3Gaps}
 							step4Data={step4Data}
 							step5Categories={step5Categories}
 							step5Source={step5Source}

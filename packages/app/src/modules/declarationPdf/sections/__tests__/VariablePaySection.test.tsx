@@ -28,6 +28,7 @@ vi.mock("../PayGapTable", async () => {
 	};
 });
 
+import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { VariablePaySection } from "../VariablePaySection";
 
 function makeData(
@@ -54,6 +55,8 @@ function makeData(
 		step2Data: emptyStep2Data(),
 		step3Data: { ...emptyStep3Data(), ...step3 },
 		step4Data: emptyStep4Data(),
+		step2Gaps: noPayGapReferences(),
+		step3Gaps: noPayGapReferences(),
 		categories: [],
 		source: null,
 	};

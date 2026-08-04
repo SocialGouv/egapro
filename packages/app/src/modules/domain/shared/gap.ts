@@ -43,6 +43,63 @@ export function computeGap(womenVal: string, menVal: string): number | null {
 	return ((m - w) / m) * 100;
 }
 
+/** The GIP-supplied gap for one indicator block, alongside the operands it was published with. */
+export type GipGapReference = {
+	women: string | null;
+	men: string | null;
+	/** Gap as a ratio (e.g. `"0.0887"`), as delivered in the `*_ecart` column. */
+	gap: string | null;
+};
+
+/** True when the declared value still equals the GIP one, compared numerically so that
+ *  `"1000"` and `"1000.00"` count as unchanged. */
+function matchesGipOperand(value: string, gipValue: string | null): boolean {
+	if (gipValue === null) return false;
+	const declared = parseNumber(value);
+	const gip = parseNumber(gipValue);
+	return !Number.isNaN(declared) && !Number.isNaN(gip) && declared === gip;
+}
+
+/** The GIP gap ratio when both operands are untouched, `null` otherwise (caller recomputes).
+ *
+ *  The GIP computes each `*_ecart` on full-precision values but publishes the operands rounded to
+ *  2 decimals, so recomputing the gap from those operands loses information — up to ~9 points on
+ *  hourly variable pay, where amounts are a fraction of an euro. The GIP gap therefore stays
+ *  authoritative for as long as the declarant has not altered either operand. */
+function gipGapRatioIfUnchanged(
+	womenVal: string,
+	menVal: string,
+	reference: GipGapReference | null | undefined,
+): number | null {
+	if (!reference || reference.gap === null) return null;
+	if (!matchesGipOperand(womenVal, reference.women)) return null;
+	if (!matchesGipOperand(menVal, reference.men)) return null;
+	const ratio = Number(reference.gap);
+	return Number.isNaN(ratio) ? null : ratio;
+}
+
+/** Gap ratio for one indicator: the GIP value while both operands are untouched, else recomputed.
+ *  Counterpart of `computeGapRatio` — see `gipGapRatioIfUnchanged` for why the GIP value wins. */
+export function resolveGapRatio(
+	womenVal: string,
+	menVal: string,
+	reference: GipGapReference | null | undefined,
+): number | null {
+	const fromGip = gipGapRatioIfUnchanged(womenVal, menVal, reference);
+	return fromGip === null ? computeGapRatio(womenVal, menVal) : fromGip;
+}
+
+/** Gap as a signed percentage: the GIP value while both operands are untouched, else recomputed.
+ *  Counterpart of `computeGap` — see `gipGapRatioIfUnchanged` for why the GIP value wins. */
+export function resolveGap(
+	womenVal: string,
+	menVal: string,
+	reference: GipGapReference | null | undefined,
+): number | null {
+	const fromGip = gipGapRatioIfUnchanged(womenVal, menVal, reference);
+	return fromGip === null ? computeGap(womenVal, menVal) : fromGip * 100;
+}
+
 /** Signed gap as a percentage from numeric values: ((men - women) / men) * 100. Null if men is 0. */
 export function computeGapBetween(women: number, men: number): number | null {
 	return men === 0 ? null : ((men - women) / men) * 100;

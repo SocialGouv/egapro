@@ -27,7 +27,11 @@ import { FormErrors } from "../shared/FormErrors";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { gipToStep3 } from "../shared/gipToStepData";
-import { getStep3FieldName, step3ToRows } from "../shared/indicatorRowMapping";
+import {
+	getStep3FieldName,
+	gipPayGapReferences,
+	step3ToRows,
+} from "../shared/indicatorRowMapping";
 import { useLockContext } from "../shared/lock/LockContext";
 import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
@@ -110,7 +114,10 @@ export function Step3VariablePay({
 	);
 
 	const formData = form.watch();
-	const rows = step3ToRows(formData as Step3Data);
+	const rows = step3ToRows(
+		formData as Step3Data,
+		gipPayGapReferences(gipPrefillData?.step3),
+	);
 	const beneficiaryWomen = formData.indicatorEWomen ?? "";
 	const beneficiaryMen = formData.indicatorEMen ?? "";
 

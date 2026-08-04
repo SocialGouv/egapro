@@ -82,7 +82,8 @@ export default async function StepPage({ params }: StepPageProps) {
 		d.totalMen,
 	);
 
-	const { step2Data, step3Data, step4Data } = mapToStepData(d);
+	const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =
+		mapToStepData(d);
 
 	const hasCurrentYearCategories = data.jobCategories.length > 0;
 
@@ -123,7 +124,9 @@ export default async function StepPage({ params }: StepPageProps) {
 				step={step}
 				step1Data={step1Data}
 				step2Data={step2Data}
+				step2Gaps={step2Gaps}
 				step3Data={step3Data}
+				step3Gaps={step3Gaps}
 				step4Data={step4Data}
 				step5Categories={step5Categories}
 			/>

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { DIVERGENT_HOURLY_MEDIAN } from "~/test/gipGapFixtures";
 import { GAP_ALERT_THRESHOLD } from "../shared/constants";
+import type { GipGapReference } from "../shared/gap";
 import {
 	computeGap,
 	computeGapBetween,
@@ -12,6 +14,8 @@ import {
 	gapRatioToPercent,
 	hasGapsAboveThreshold,
 	hasHighGap,
+	resolveGap,
+	resolveGapRatio,
 } from "../shared/gap";
 
 describe("regulatory constants", () => {
@@ -75,6 +79,146 @@ describe("computeGap", () => {
 
 	it("computes 100% gap when women earn 0", () => {
 		expect(computeGap("0", "100")).toBeCloseTo(100);
+	});
+});
+
+describe("resolveGapRatio", () => {
+	const reference = (
+		overrides: Partial<GipGapReference> = {},
+	): GipGapReference => ({
+		women: "1000",
+		men: "1100",
+		gap: "0.0887",
+		...overrides,
+	});
+
+	it("keeps the GIP gap while both operands are untouched", () => {
+		expect(resolveGapRatio("1000", "1100", reference())).toBe(0.0887);
+	});
+
+	it("keeps the GIP gap when an operand is written with a different precision", () => {
+		expect(resolveGapRatio("1000.00", "1100.0", reference())).toBe(0.0887);
+	});
+
+	it("keeps the GIP gap when an operand uses the French decimal comma", () => {
+		expect(resolveGapRatio("1000,00", "1100", reference())).toBe(0.0887);
+	});
+
+	it("recomputes once the women operand is modified", () => {
+		expect(resolveGapRatio("900", "1100", reference())).toBeCloseTo(
+			(1100 - 900) / 1100,
+		);
+	});
+
+	it("recomputes once the men operand is modified", () => {
+		expect(resolveGapRatio("1000", "1200", reference())).toBeCloseTo(
+			(1200 - 1000) / 1200,
+		);
+	});
+
+	it("recomputes when no GIP reference is available", () => {
+		expect(resolveGapRatio("1000", "1100", undefined)).toBeCloseTo(
+			(1100 - 1000) / 1100,
+		);
+	});
+
+	it("recomputes when the GIP reference is null", () => {
+		expect(resolveGapRatio("1000", "1100", null)).toBeCloseTo(
+			(1100 - 1000) / 1100,
+		);
+	});
+
+	it("recomputes when the GIP published no gap for the block", () => {
+		expect(
+			resolveGapRatio("1000", "1100", reference({ gap: null })),
+		).toBeCloseTo((1100 - 1000) / 1100);
+	});
+
+	it("recomputes when the GIP published no women operand", () => {
+		expect(
+			resolveGapRatio("1000", "1100", reference({ women: null })),
+		).toBeCloseTo((1100 - 1000) / 1100);
+	});
+
+	it("recomputes when the GIP published no men operand", () => {
+		expect(
+			resolveGapRatio("1000", "1100", reference({ men: null })),
+		).toBeCloseTo((1100 - 1000) / 1100);
+	});
+
+	it("recomputes when the GIP gap is not a number", () => {
+		expect(
+			resolveGapRatio("1000", "1100", reference({ gap: "N/A" })),
+		).toBeCloseTo((1100 - 1000) / 1100);
+	});
+
+	it("recomputes when the declared operand is not a number", () => {
+		expect(resolveGapRatio("abc", "1100", reference())).toBeNull();
+	});
+
+	it("recomputes when the GIP operand is not a number", () => {
+		expect(
+			resolveGapRatio("1000", "1100", reference({ women: "N/A" })),
+		).toBeCloseTo((1100 - 1000) / 1100);
+	});
+
+	it("returns null when the men operand is zero and no GIP gap applies", () => {
+		expect(resolveGapRatio("100", "0", undefined)).toBeNull();
+	});
+});
+
+describe("resolveGap", () => {
+	it("returns the GIP gap as a signed percentage, not a ratio", () => {
+		expect(
+			resolveGap("1000", "1100", {
+				women: "1000",
+				men: "1100",
+				gap: "0.0887",
+			}),
+		).toBeCloseTo(8.87);
+	});
+
+	it("preserves the sign of a GIP gap favourable to men", () => {
+		expect(
+			resolveGap("1100", "1000", {
+				women: "1100",
+				men: "1000",
+				gap: "-0.0975",
+			}),
+		).toBeCloseTo(-9.75);
+	});
+
+	it("recomputes as a percentage once an operand is modified", () => {
+		expect(
+			resolveGap("900", "1100", {
+				women: "1000",
+				men: "1100",
+				gap: "0.0887",
+			}),
+		).toBeCloseTo(((1100 - 900) / 1100) * 100);
+	});
+
+	it("recomputes as a percentage when no GIP reference is available", () => {
+		expect(resolveGap("100", "200", undefined)).toBeCloseTo(50);
+	});
+
+	it("returns null when the men operand is zero and no GIP gap applies", () => {
+		expect(resolveGap("100", "0", undefined)).toBeNull();
+	});
+
+	// The regression this rule exists for: the GIP computes on full-precision
+	// figures but publishes operands rounded to 2 decimals, so recomputing an
+	// hourly variable rate of a few cents loses the gap entirely.
+	it("keeps a GIP gap that recomputation would flatten to zero", () => {
+		const { women, men, gap } = DIVERGENT_HOURLY_MEDIAN;
+		expect(computeGap(women, men)).toBe(0);
+		expect(resolveGap(women, men, { women, men, gap })).toBeCloseTo(7.19);
+	});
+
+	it("crosses the alert threshold on the GIP gap where recomputation would not", () => {
+		const { women, men, gap } = DIVERGENT_HOURLY_MEDIAN;
+		expect(gapLevel(computeGap(women, men))).toBe("low");
+		expect(gapLevel(resolveGap(women, men, { women, men, gap }))).toBe("high");
 	});
 });
 

@@ -1,16 +1,18 @@
+import type { PayGapReferences } from "~/modules/declaration-remuneration/shared/indicatorRowMapping";
 import type {
 	Step2Data,
 	Step3Data,
 	Step4Data,
 } from "~/modules/declaration-remuneration/types";
+import type { GipGapReference } from "~/modules/domain";
 import {
-	computeGap,
 	computePercentage,
 	computeWorkforceTotal,
 	formatCurrency,
 	formatGap,
 	formatVariablePayProportion,
 	gapLevel,
+	resolveGap,
 	sumQuartileWorkforce,
 } from "~/modules/domain";
 import styles from "./IndicatorTables.module.scss";
@@ -22,12 +24,17 @@ type Props = {
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
+	/** Persisted gaps for steps 2 and 3 — shown as recorded rather than recomputed. */
+	step2Gaps: PayGapReferences;
+	step3Gaps: PayGapReferences;
 };
 
 type GapRow = {
 	label: string;
 	women: string;
 	men: string;
+	/** Gap as persisted on the declaration, shown instead of recomputing it. */
+	reference?: GipGapReference;
 };
 
 function HighGapBadge() {
@@ -84,7 +91,7 @@ function GapTable({
 							</thead>
 							<tbody>
 								{rows.map((row) => {
-									const gap = computeGap(row.women, row.men);
+									const gap = resolveGap(row.women, row.men, row.reference);
 									return (
 										<tr key={row.label}>
 											<th scope="row">{row.label}</th>
@@ -377,27 +384,33 @@ export function IndicatorTables({
 	step2Data,
 	step3Data,
 	step4Data,
+	step2Gaps,
+	step3Gaps,
 }: Props) {
 	const step2Rows: GapRow[] = [
 		{
 			label: "Annuelle brute moyenne",
 			women: step2Data.indicatorAAnnualWomen,
 			men: step2Data.indicatorAAnnualMen,
+			reference: step2Gaps[0],
 		},
 		{
 			label: "Horaire brute moyenne",
 			women: step2Data.indicatorAHourlyWomen,
 			men: step2Data.indicatorAHourlyMen,
+			reference: step2Gaps[1],
 		},
 		{
 			label: "Annuelle brute médiane",
 			women: step2Data.indicatorCAnnualWomen,
 			men: step2Data.indicatorCAnnualMen,
+			reference: step2Gaps[2],
 		},
 		{
 			label: "Horaire brute médiane",
 			women: step2Data.indicatorCHourlyWomen,
 			men: step2Data.indicatorCHourlyMen,
+			reference: step2Gaps[3],
 		},
 	];
 
@@ -406,21 +419,25 @@ export function IndicatorTables({
 			label: "Annuelle brute moyenne",
 			women: step3Data.indicatorBAnnualWomen,
 			men: step3Data.indicatorBAnnualMen,
+			reference: step3Gaps[0],
 		},
 		{
 			label: "Horaire brute moyenne",
 			women: step3Data.indicatorBHourlyWomen,
 			men: step3Data.indicatorBHourlyMen,
+			reference: step3Gaps[1],
 		},
 		{
 			label: "Annuelle brute médiane",
 			women: step3Data.indicatorDAnnualWomen,
 			men: step3Data.indicatorDAnnualMen,
+			reference: step3Gaps[2],
 		},
 		{
 			label: "Horaire brute médiane",
 			women: step3Data.indicatorDHourlyWomen,
 			men: step3Data.indicatorDHourlyMen,
+			reference: step3Gaps[3],
 		},
 	];
 

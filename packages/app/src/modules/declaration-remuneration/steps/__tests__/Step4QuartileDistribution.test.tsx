@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { nullGipStep2, nullGipStep3 } from "~/test/gipGapFixtures";
 import { Step4QuartileDistribution } from "../Step4QuartileDistribution";
 
 const mockMutate = vi.fn();
@@ -335,28 +336,8 @@ describe("Step4QuartileDistribution", () => {
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 100, totalMen: 100 },
-					step2: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-					},
-					step3: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-						beneficiaryCountWomen: null,
-						beneficiaryCountMen: null,
-					},
+					step2: nullGipStep2(),
+					step3: nullGipStep3(),
 					step4: {
 						annual: {
 							thresholds: ["25000", "32000", "40000"],
@@ -396,28 +377,8 @@ describe("Step4QuartileDistribution", () => {
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: null, totalMen: null },
-					step2: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-					},
-					step3: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-						beneficiaryCountWomen: null,
-						beneficiaryCountMen: null,
-					},
+					step2: nullGipStep2(),
+					step3: nullGipStep3(),
 					step4: {
 						annual: {
 							thresholds: [null, null, null],
@@ -519,28 +480,8 @@ describe("Step4QuartileDistribution", () => {
 				declarationYear={2025}
 				gipPrefillData={{
 					step1: { totalWomen: 177, totalMen: 180 },
-					step2: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-					},
-					step3: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-						beneficiaryCountWomen: null,
-						beneficiaryCountMen: null,
-					},
+					step2: nullGipStep2(),
+					step3: nullGipStep3(),
 					step4: {
 						annual: {
 							thresholds: ["25000", "32000", "40000"],

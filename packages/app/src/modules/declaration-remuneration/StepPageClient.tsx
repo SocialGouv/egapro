@@ -14,6 +14,7 @@ import {
 	declarationFunnelDimensions,
 } from "./shared/funnelConfig";
 import type { GipPrefillData } from "./shared/gipMdsMapping";
+import type { PayGapReferences } from "./shared/indicatorRowMapping";
 import { DeclarationModificationClosedAlert } from "./shared/lock/DeclarationModificationClosedAlert";
 import { LockProvider } from "./shared/lock/LockContext";
 import { Step1Workforce } from "./steps/Step1Workforce";
@@ -46,6 +47,8 @@ type StepPageClientProps = {
 	step1Data: Step1Data;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
+	step2Gaps: PayGapReferences;
+	step3Gaps: PayGapReferences;
 	step4Data: Step4Data;
 	step5Categories: EmployeeCategoryRow[];
 	initialSource?: string;
@@ -62,6 +65,8 @@ export function StepPageClient({
 	step1Data,
 	step2Data,
 	step3Data,
+	step2Gaps,
+	step3Gaps,
 	step4Data,
 	step5Categories,
 	initialSource,
@@ -153,7 +158,9 @@ export function StepPageClient({
 						indicatorGRequired={indicatorGRequired}
 						isSubmitted={isDeclarationSubmitted(declaration.status)}
 						step2Data={step2Data}
+						step2Gaps={step2Gaps}
 						step3Data={step3Data}
+						step3Gaps={step3Gaps}
 						step4Data={step4Data}
 						step5Categories={step5Categories}
 						totalMen={declaration.totalMen ?? undefined}

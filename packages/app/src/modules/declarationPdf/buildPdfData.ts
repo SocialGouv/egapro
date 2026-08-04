@@ -132,7 +132,8 @@ export async function buildPdfData(
 			? mapToEmployeeCategoryRows(jobs, empCats, declarationType)
 			: [];
 
-	const { step2Data, step3Data, step4Data } = mapToStepData(declaration);
+	const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =
+		mapToStepData(declaration);
 
 	const displayWorkforce = toDisplayWorkforce(
 		parseGipWorkforce(gip?.workforceEma),
@@ -171,6 +172,8 @@ export async function buildPdfData(
 		step2Data,
 		step3Data,
 		step4Data,
+		step2Gaps,
+		step3Gaps,
 		categories,
 		source,
 	};
