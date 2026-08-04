@@ -4,7 +4,7 @@ import type { CompliancePathValue } from "./constants";
 
 export function getCompliancePathHref(
 	path: CompliancePathValue,
-	hasCse: boolean | null,
+	cseOpinionRequired: boolean,
 ): string {
 	if (path === "corrective_action") {
 		return "/declaration-remuneration/parcours-conformite/etape/1";
@@ -12,10 +12,10 @@ export function getCompliancePathHref(
 	if (path === "joint_evaluation") {
 		return "/declaration-remuneration/parcours-conformite/evaluation-conjointe";
 	}
-	// "justify" has no dedicated page: with a CSE the opinion remains to be
-	// deposited on /avis-cse; without one the FSM already completed the
+	// "justify" has no dedicated page: when an opinion is due it remains to be
+	// deposited on /avis-cse; otherwise the FSM already completed the
 	// démarche (choose_path_*_justify_without_cse) → confirmation page.
-	return getPostComplianceDestination(hasCse);
+	return getPostComplianceDestination(cseOpinionRequired);
 }
 
 export function JointEvaluationOption({

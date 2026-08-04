@@ -101,6 +101,11 @@ export async function CompliancePathPage() {
 
 	const hasChosenPath = data.declaration.firstDeclarationPathChoice !== null;
 
+	const cseOpinionRequired = isCseOpinionRequired({
+		workforce: getObligationWorkforce(company.gipWorkforce),
+		hasCse: company.hasCse,
+	});
+
 	// Skip the choice page only when the user has nothing to (re-)choose:
 	// no current gap and they never picked a path, or they finalised the
 	// procedure without one. When firstDeclarationPathChoice is set, render
@@ -111,7 +116,7 @@ export async function CompliancePathPage() {
 		(state.type === "no_gap" ||
 			isComplianceProcessCompleted(data.declaration.status))
 	) {
-		redirect(getPostComplianceDestination(company.hasCse));
+		redirect(getPostComplianceDestination(cseOpinionRequired));
 	}
 
 	const email = session?.user?.email ?? "";
@@ -135,15 +140,11 @@ export async function CompliancePathPage() {
 		<HydrateClient>
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
-				cseOpinionRequired={isCseOpinionRequired({
-					workforce: getObligationWorkforce(company.gipWorkforce),
-					hasCse: company.hasCse,
-				})}
+				cseOpinionRequired={cseOpinionRequired}
 				currentYear={currentYear}
 				declarationSiren={data.declaration.siren}
 				declarationYear={currentYear}
 				email={email}
-				hasCse={company.hasCse}
 				initialPath={pathChoice ?? undefined}
 				isSecondRound={isSecondRound}
 				pdfDownloadHref={

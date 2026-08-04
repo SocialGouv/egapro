@@ -4,11 +4,16 @@ import {
 	COMPANY_SIZE_VOLUNTARY_MAX,
 } from "./constants";
 
-/** Classify a company by workforce size into its declaration obligation tier. */
+/**
+ * Classify a company by workforce size into its obligation package.
+ * `voluntary` (< 50): voluntary declaration; `mandatory` (50-99): annual declaration
+ * without gap-alert obligations; `mandatory_with_compliance` (>= 100): annual
+ * declaration + CSE opinion + gap-alert (>= 5%) obligations.
+ */
 export function classifyCompanySize(workforce: number): CompanySize {
 	if (workforce < COMPANY_SIZE_VOLUNTARY_MAX) return "voluntary";
-	if (workforce < COMPANY_SIZE_ANNUAL_MIN) return "triennial";
-	return "annual";
+	if (workforce < COMPANY_SIZE_ANNUAL_MIN) return "mandatory";
+	return "mandatory_with_compliance";
 }
 
 /** Returns true if the company is large enough to require CSE opinions (>= 100 employees). */

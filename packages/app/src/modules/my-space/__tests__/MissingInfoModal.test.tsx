@@ -6,8 +6,23 @@ import { mockImpersonatingSession } from "~/test/impersonationMock";
 
 const mockedUseSession = vi.mocked(useSession);
 
-const { updateHasCseAsync } = vi.hoisted(() => ({
+const { updateHasCseAsync, updatePhoneAsync, mockRefresh } = vi.hoisted(() => ({
 	updateHasCseAsync: vi.fn().mockResolvedValue(undefined),
+	updatePhoneAsync: vi.fn().mockResolvedValue(undefined),
+	mockRefresh: vi.fn(),
+}));
+
+// Override the global next/navigation mock (src/test/setup.ts) which recreates a
+// fresh `refresh` fn on every useRouter() call. A stable instance is required to
+// assert router.refresh() is invoked after the mutations resolve (#4056).
+vi.mock("next/navigation", () => ({
+	usePathname: vi.fn(),
+	useRouter: () => ({
+		push: vi.fn(),
+		replace: vi.fn(),
+		back: vi.fn(),
+		refresh: mockRefresh,
+	}),
 }));
 
 vi.mock("~/trpc/react", () => ({
@@ -25,7 +40,7 @@ vi.mock("~/trpc/react", () => ({
 			updatePhone: {
 				useMutation: vi.fn().mockReturnValue({
 					mutate: vi.fn(),
-					mutateAsync: vi.fn().mockResolvedValue(undefined),
+					mutateAsync: updatePhoneAsync,
 					isPending: false,
 				}),
 			},
@@ -301,6 +316,37 @@ describe("MissingInfoModal", () => {
 				siren: "532847196",
 				hasCse: true,
 			});
+		});
+	});
+
+	it("clears the phone field when the dialog is reopened", async () => {
+		const { container } = render(
+			<MissingInfoModal
+				cseApplicable={false}
+				hasCse={null}
+				siren="532847196"
+				userPhone={null}
+			/>,
+		);
+		const dialog = container.querySelector(
+			"#missing-info-modal",
+		) as HTMLDialogElement;
+		const phone = screen.getByLabelText(
+			/Numéro de téléphone/,
+		) as HTMLInputElement;
+
+		fireEvent.change(phone, { target: { value: "0612345678" } });
+		expect(phone.value).not.toBe("");
+
+		// The DSFR runtime toggles the `open` attribute; the MutationObserver in
+		// useDsfrDialogOpen resets the form on each reopen.
+		dialog.setAttribute("open", "");
+
+		await waitFor(() => {
+			expect(
+				(screen.getByLabelText(/Numéro de téléphone/) as HTMLInputElement)
+					.value,
+			).toBe("");
 		});
 	});
 

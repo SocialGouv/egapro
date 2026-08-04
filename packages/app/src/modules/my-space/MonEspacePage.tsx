@@ -18,22 +18,17 @@ export async function MonEspacePage({ siret, userPhone }: Props) {
 	if (siren === null) {
 		redirect("/mon-espace/mes-entreprises");
 	}
-	const [data, sanctionStatus, campaignDeadlines, lockState] =
-		await Promise.all([
-			api.company.getWithDeclarations({ siren }),
-			api.company.getSanctionStatus({ siren }),
-			getCampaignDeadlines(getCurrentYear()),
-			api.declarationLock.getActiveLockForCurrentDeclaration(),
-		]);
-
-	const hasNoSanction = sanctionStatus !== null && !sanctionStatus.hasSanction;
+	const [data, campaignDeadlines, lockState] = await Promise.all([
+		api.company.getWithDeclarations({ siren }),
+		getCampaignDeadlines(getCurrentYear()),
+		api.declarationLock.getActiveLockForCurrentDeclaration(),
+	]);
 
 	return (
 		<CompanyDeclarationsPage
 			campaignDeadlines={campaignDeadlines}
 			company={data.company}
 			declarations={data.declarations}
-			hasNoSanction={hasNoSanction}
 			lockedByOther={lockState.lockedByOther}
 			lockHolder={lockState.holder}
 			userPhone={userPhone}

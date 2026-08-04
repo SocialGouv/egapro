@@ -44,7 +44,7 @@ Ne jamais écrire `Size` / `Estimate` en GraphQL brut : passer par `scripts/orch
 Les deux champs `DATE` donnent une vision de la fenêtre d'implémentation d'un ticket (voir #3956) :
 
 - **Start date** — jour où le ticket entre en implémentation. Écrit automatiquement par `set_ticket_status.sh` sur la transition `→ In progress` (donc via `/implement`, `code-dev` et `epic_loop.sh`), idempotent (le premier passage gagne).
-- **End date** — jour de merge de la PR. Écrit par le workflow `.github/workflows/ticket-end-date.yaml` (résout `<N>` depuis `ticket/<N>-*`).
+- **End date** — jour de merge de la PR. Écrit par le workflow `.github/workflows/ticket-end-date.yaml` (résout `<N>` depuis `ticket/<N>-*`). Écrire un projet V2 d'org exige la permission `organization_projects: write`, que le `GITHUB_TOKEN` par défaut ne peut jamais porter : le workflow passe donc par un token d'App minté par token-bureau, et la demande est explicite (`permissions:` sur l'étape). Les prérequis hors repo (serveur token-bureau ≥ v0.0.10, permission de l'App approuvée côté org) sont détaillés dans l'en-tête du workflow. Le workflow accepte aussi un `workflow_dispatch` (`ticket`, `date`) pour rejouer la pose sans merger de PR.
 
 Ne jamais écrire ces champs en GraphQL brut : passer par `scripts/orchestration/set_ticket_date.sh <ticket> <start|end> [--if-empty] [YYYY-MM-DD]` (write primitive unique). Backfill historique des tickets déjà mergés : `scripts/orchestration/backfill_ticket_dates.sh` (Start = 1ᵉʳ commit de la PR, End = date de merge).
 

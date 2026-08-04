@@ -28,7 +28,7 @@ import {
 	userCompanies,
 } from "~/server/db/schema";
 import { syncCseRequirement } from "~/server/services/cseRequirementSync";
-import { fetchCseBySiren, fetchSanctionBySiren } from "~/server/services/suit";
+import { fetchCseBySiren } from "~/server/services/suit";
 import { fetchCompanyBySiren } from "~/server/services/weez";
 
 async function findUserCompany(db: DB, session: Session, siren: string) {
@@ -315,13 +315,5 @@ export const companyRouter = createTRPCRouter({
 				hasCse: input.hasCse,
 				actorUserId: ctx.session.user.id,
 			});
-		}),
-
-	getSanctionStatus: protectedProcedure
-		.input(sirenInputSchema)
-		.query(async ({ ctx, input }) => {
-			await findUserCompany(ctx.db, ctx.session, input.siren);
-			const result = await fetchSanctionBySiren(input.siren);
-			return result ?? { hasSanction: false, validityDate: null };
 		}),
 });

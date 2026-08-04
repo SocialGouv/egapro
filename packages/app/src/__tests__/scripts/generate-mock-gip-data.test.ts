@@ -48,6 +48,117 @@ function parseCsvRows(csvContent: string): string[][] {
 	return lines.slice(3).map((l) => l.split(";"));
 }
 
+function parseHeaders(csvContent: string): string[] {
+	return (csvContent.split("\n")[2] ?? "").split(";").map((h) => h.trim());
+}
+
+function toNum(value: string | undefined): number | null {
+	if (value === undefined || value === "") return null;
+	const parsed = Number.parseFloat(value.replace(",", "."));
+	return Number.isNaN(parsed) ? null : parsed;
+}
+
+type QuartileBlock = {
+	referenceF: string;
+	referenceH: string;
+	nbF: [string, string, string, string];
+	nbH: [string, string, string, string];
+	proportionF: [string, string, string, string];
+};
+
+const QUARTILE_BLOCKS: QuartileBlock[] = [
+	{
+		referenceF: "Effectif_F_rem_annuelle_globale",
+		referenceH: "Effectif_H_rem_annuelle_globale",
+		nbF: [1, 2, 3, 4].map((q) => `Quartile${q}_Rem_globale_annuelle_nb_F`) as [
+			string,
+			string,
+			string,
+			string,
+		],
+		nbH: [1, 2, 3, 4].map((q) => `Quartile${q}_Rem_globale_annuelle_nb_H`) as [
+			string,
+			string,
+			string,
+			string,
+		],
+		proportionF: [1, 2, 3, 4].map(
+			(q) => `Quartile${q}_Rem_globale_annuelle_proportion_F`,
+		) as [string, string, string, string],
+	},
+	{
+		referenceF: "Effectif_F_taux_horaire_global",
+		referenceH: "Effectif_H_taux_horaire_global",
+		nbF: [1, 2, 3, 4].map((q) => `Quartile${q}_Taux_horaire_global_nb_F`) as [
+			string,
+			string,
+			string,
+			string,
+		],
+		nbH: [1, 2, 3, 4].map((q) => `Quartile${q}_Taux_horaire_global_nb_H`) as [
+			string,
+			string,
+			string,
+			string,
+		],
+		proportionF: [1, 2, 3, 4].map(
+			(q) => `Quartile${q}_Taux_horaire_global_proportion_F`,
+		) as [string, string, string, string],
+	},
+];
+
+/**
+ * Per file and per block, assert nb columns are the source of truth: their
+ * sums equal the block reference headcount and the proportions are derived
+ * from them. Blocks with a null reference or a null nb cell are skipped
+ * (edge-case rows with empty blocks).
+ */
+function assertNbCoherence(fileName: string) {
+	const csv = readFileSync(resolve(DATA_DIR, fileName), "utf-8");
+	const headers = parseHeaders(csv);
+	const col = (name: string) => headers.indexOf(name);
+	const rows = parseCsvRows(csv).filter((r) => r.length > 1);
+
+	for (const row of rows) {
+		const siren = row[0];
+		for (const block of QUARTILE_BLOCKS) {
+			const refF = toNum(row[col(block.referenceF)]);
+			const refH = toNum(row[col(block.referenceH)]);
+			const nbF = block.nbF.map((h) => toNum(row[col(h)]));
+			const nbH = block.nbH.map((h) => toNum(row[col(h)]));
+			const propF = block.proportionF.map((h) => toNum(row[col(h)]));
+
+			const blockIsFilled =
+				refF !== null &&
+				refH !== null &&
+				nbF.every((v) => v !== null) &&
+				nbH.every((v) => v !== null);
+			if (!blockIsFilled) continue;
+
+			const sumF = nbF.reduce<number>((a, v) => a + (v ?? 0), 0);
+			const sumH = nbH.reduce<number>((a, v) => a + (v ?? 0), 0);
+			expect(
+				sumF,
+				`${fileName} SIREN ${siren} ${block.referenceF}: Σ nb_F ${sumF} should equal reference ${refF}`,
+			).toBe(refF);
+			expect(
+				sumH,
+				`${fileName} SIREN ${siren} ${block.referenceH}: Σ nb_H ${sumH} should equal reference ${refH}`,
+			).toBe(refH);
+
+			for (let q = 0; q < 4; q++) {
+				const denom = (nbF[q] ?? 0) + (nbH[q] ?? 0);
+				if (denom === 0) continue;
+				const derived = (nbF[q] ?? 0) / denom;
+				expect(
+					derived,
+					`${fileName} SIREN ${siren} ${block.proportionF[q]}: nb_F/(nb_F+nb_H) should match proportion_F`,
+				).toBeCloseTo(propF[q] ?? 0, 4);
+			}
+		}
+	}
+}
+
 describe("companies.json", () => {
 	it("has a bucket field on every entry", () => {
 		const companies = loadCompanies();
@@ -105,6 +216,33 @@ describe("mock-gip-mds.csv", () => {
 		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
 		const rows = parseCsvRows(csv);
 		expect(rows.length).toBeGreaterThan(0);
+	});
+
+	it("has the v3 header with 87 columns (71 existing + 16 nb)", () => {
+		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
+		expect(parseHeaders(csv)).toHaveLength(87);
+	});
+
+	it("carries the 16 nb quartile headers and the 12 de-accented median headers", () => {
+		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
+		const headers = parseHeaders(csv);
+		for (const block of QUARTILE_BLOCKS) {
+			for (const h of [...block.nbF, ...block.nbH]) {
+				expect(headers, `missing nb header ${h}`).toContain(h);
+			}
+		}
+		for (const h of [
+			"Rem_globale_annuelle_mediane_F",
+			"Taux_horaire_variable_median_H",
+		]) {
+			expect(headers, `missing de-accented median header ${h}`).toContain(h);
+		}
+		expect(headers).not.toContain("Rem_globale_annuelle_médiane_F");
+		expect(headers).not.toContain("Taux_horaire_variable_médian_H");
+	});
+
+	it("has nb counts as source of truth: Σ nb === reference and proportions derived from nb", () => {
+		assertNbCoherence("mock-gip-mds.csv");
 	});
 
 	it("has at least 100 data rows (multi-bucket coverage)", () => {
@@ -211,5 +349,19 @@ describe("mock-gip-mds.csv", () => {
 				).toBeLessThanOrEqual(max);
 			}
 		}
+	});
+});
+
+describe("mock-gip-mds-edge-cases.csv", () => {
+	it("has the v3 header with 87 columns", () => {
+		const csv = readFileSync(
+			resolve(DATA_DIR, "mock-gip-mds-edge-cases.csv"),
+			"utf-8",
+		);
+		expect(parseHeaders(csv)).toHaveLength(87);
+	});
+
+	it("keeps nb counts coherent on filled blocks (empty blocks skipped)", () => {
+		assertNbCoherence("mock-gip-mds-edge-cases.csv");
 	});
 });

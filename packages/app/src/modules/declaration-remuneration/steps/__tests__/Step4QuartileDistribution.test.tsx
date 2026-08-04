@@ -360,11 +360,15 @@ describe("Step4QuartileDistribution", () => {
 					step4: {
 						annual: {
 							thresholds: ["25000", "32000", "40000"],
+							referenceWomen: 90,
+							referenceMen: 110,
 							womenCounts: [30, 25, 20, 15],
 							menCounts: [20, 25, 30, 35],
 						},
 						hourly: {
 							thresholds: ["13.74", "17.58", "21.98"],
+							referenceWomen: 80,
+							referenceMen: 120,
 							womenCounts: [28, 22, 18, 12],
 							menCounts: [22, 28, 32, 38],
 						},
@@ -417,11 +421,15 @@ describe("Step4QuartileDistribution", () => {
 					step4: {
 						annual: {
 							thresholds: [null, null, null],
+							referenceWomen: null,
+							referenceMen: null,
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
 						hourly: {
 							thresholds: [null, null, null],
+							referenceWomen: null,
+							referenceMen: null,
 							womenCounts: [null, null, null, null],
 							menCounts: [null, null, null, null],
 						},
@@ -501,5 +509,94 @@ describe("Step4QuartileDistribution", () => {
 			/>,
 		);
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
+	});
+
+	it("caps each table against its own reference: 160 is rejected in hourly (153) but accepted in annual (177)", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				gipPrefillData={{
+					step1: { totalWomen: 177, totalMen: 180 },
+					step2: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+					},
+					step3: {
+						annualMeanWomen: null,
+						annualMeanMen: null,
+						hourlyMeanWomen: null,
+						hourlyMeanMen: null,
+						annualMedianWomen: null,
+						annualMedianMen: null,
+						hourlyMedianWomen: null,
+						hourlyMedianMen: null,
+						beneficiaryCountWomen: null,
+						beneficiaryCountMen: null,
+					},
+					step4: {
+						annual: {
+							thresholds: ["25000", "32000", "40000"],
+							referenceWomen: 177,
+							referenceMen: 180,
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+						hourly: {
+							thresholds: ["13.74", "17.58", "21.98"],
+							referenceWomen: 153,
+							referenceMen: 196,
+							womenCounts: [null, null, null, null],
+							menCounts: [null, null, null, null],
+						},
+					},
+					confidenceIndex: null,
+					periodEnd: "2026-12-31",
+				}}
+				indicatorGRequired
+				initialData={emptyStep4Data()}
+				maxMen={180}
+				maxWomen={177}
+			/>,
+		);
+
+		const hourlyWomen = screen.getByLabelText(
+			/Nombre de femmes 1er quartile horaire/i,
+		) as HTMLInputElement;
+		await user.clear(hourlyWomen);
+		await user.type(hourlyWomen, "160");
+		expect(
+			screen.getByText(
+				/ne peut pas dépasser l'effectif du fichier GIP pour le taux horaire \(153\)/i,
+			),
+		).toBeInTheDocument();
+		expect(hourlyWomen).not.toHaveValue("160");
+
+		expect(hourlyWomen).toHaveAttribute("aria-invalid", "true");
+		const describedBy = hourlyWomen.getAttribute("aria-describedby");
+		expect(describedBy).toBeTruthy();
+		expect(document.getElementById(describedBy as string)).toHaveTextContent(
+			/ne peut pas dépasser l'effectif du fichier GIP pour le taux horaire \(153\)/i,
+		);
+
+		const annualWomen = screen.getByLabelText(
+			/Nombre de femmes 1er quartile annuel/i,
+		) as HTMLInputElement;
+		await user.clear(annualWomen);
+		await user.type(annualWomen, "160");
+		expect(annualWomen).toHaveValue("160");
+		expect(annualWomen).not.toHaveAttribute("aria-invalid");
+		expect(
+			screen.queryByText(
+				/ne peut pas dépasser l'effectif de l'étape 1 \(177\)/i,
+			),
+		).not.toBeInTheDocument();
 	});
 });

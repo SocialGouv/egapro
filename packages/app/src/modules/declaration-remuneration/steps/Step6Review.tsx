@@ -177,7 +177,7 @@ export function Step6Review({
 				<FormActions
 					nextHref={
 						isSubmitted
-							? getCurrentStageHref(declaration.status, hasCse)
+							? getCurrentStageHref(declaration.status, cseOpinionRequired)
 							: undefined
 					}
 					nextLabel="Suivant"

@@ -83,7 +83,6 @@ function compliancePathChoice(
 			declarationSiren={DECLARATION_SIREN}
 			declarationYear={DECLARATION_YEAR}
 			email="test@example.fr"
-			hasCse={true}
 			{...overrides}
 		/>
 	);
@@ -209,8 +208,8 @@ describe("CompliancePathChoice", () => {
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
 	});
 
-	it("submits justify and navigates to the confirmation page without a CSE", async () => {
-		render(compliancePathChoice({ cseOpinionRequired: false, hasCse: false }));
+	it("submits justify and navigates to the confirmation page when no CSE opinion is due", async () => {
+		render(compliancePathChoice({ cseOpinionRequired: false }));
 		const radio = screen.getByLabelText(
 			"Justifier les écarts de rémunération ≥ 5 %",
 		);
@@ -337,7 +336,6 @@ describe("CompliancePathChoice", () => {
 			render(
 				compliancePathChoice({
 					cseOpinionRequired: false,
-					hasCse: false,
 					isSecondRound,
 				}),
 			);
@@ -364,9 +362,7 @@ describe("CompliancePathChoice", () => {
 		});
 
 		it("hides the corrective-action CSE consultation items when no CSE opinion is required", () => {
-			render(
-				compliancePathChoice({ cseOpinionRequired: false, hasCse: false }),
-			);
+			render(compliancePathChoice({ cseOpinionRequired: false }));
 
 			expect(
 				screen.queryByText(/Informer et consulter votre CSE sur l'exactitude/),
@@ -377,9 +373,7 @@ describe("CompliancePathChoice", () => {
 		});
 
 		it("keeps the non-CSE corrective-action items when no CSE opinion is required", () => {
-			render(
-				compliancePathChoice({ cseOpinionRequired: false, hasCse: false }),
-			);
+			render(compliancePathChoice({ cseOpinionRequired: false }));
 
 			expect(
 				screen.getByText(

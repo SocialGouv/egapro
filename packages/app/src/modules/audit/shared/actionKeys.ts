@@ -92,7 +92,6 @@ export const AUDIT_ACTIONS = {
 	DECLARATION_READ_GIP_DATA: "declaration.read_gip_data",
 	PDF_DECLARATION_DOWNLOAD: "pdf.declaration_download",
 	PDF_TRANSMITTED_DOWNLOAD: "pdf.transmitted_download",
-	PDF_NO_SANCTION_DOWNLOAD: "pdf.no_sanction_download",
 	USER_FILE_DOWNLOAD: "user.file_download",
 
 	// ── Exports & external API consumers ──────────────────
@@ -198,7 +197,6 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_TRANSMITTED_DOWNLOAD]: "read_sensitive",
-	[AUDIT_ACTIONS.PDF_NO_SANCTION_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.USER_FILE_DOWNLOAD]: "read_sensitive",
 
 	[AUDIT_ACTIONS.EXPORT_DOWNLOAD]: "export",

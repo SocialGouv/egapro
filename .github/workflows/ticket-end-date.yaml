@@ -6,30 +6,55 @@ name: 🗓️ Ticket end date
 # the final epic PR (`epic/<N>`) and human non-ticket branches are skipped.
 #
 # Auth: GitHub App token minted by SocialGouv/token-bureau (OIDC), same pattern
-# as release.yml / promote-test-env.yaml.
+# as release.yml / promote-test-env.yaml. Writing an org Project V2 needs the
+# org-level `organization_projects` permission, which the default GITHUB_TOKEN
+# can never carry — hence the App token.
 #
-# PREREQUISITE — the token-bureau token must carry `organization_projects: write`.
-#   Writing an org Project V2 needs the projects scope; the default GITHUB_TOKEN
-#   cannot, and the token-bureau whitelist (infra-apps) must allow it. As of now
-#   the deployed default whitelist is contents/metadata/issues/pull_requests/
-#   deployments — add `organization_projects: write` (default or an egapro
-#   override) in SocialGouv/infra-apps token-bureau values, and ensure the
-#   backing App has "Organization projects: Read and write", or the board write
-#   step 403s.
+# PREREQUISITES (all outside this repo):
+#   1. token-bureau must GRANT the scope. Already configured: SocialGouv/infra-apps
+#      `token-bureau/values.yaml` carries the `SocialGouv/egapro` override with
+#      `organization_projects: write`, deployed since 22/07.
+#   2. The deployed token-bureau server must be >= v0.0.10. Up to v0.0.9 it
+#      re-prefixed the OIDC `repository` claim (already `owner/repo`) with the
+#      owner and looked its config up under `SocialGouv/SocialGouv/egapro`. No
+#      per-repo override ever matched, so the server silently fell back to its
+#      default permission set — the actual cause of the two-week outage (#3956).
+#      Fixed by SocialGouv/token-bureau@7553831 and deployed on 03/08.
+#   3. The backing GitHub App must hold "Organization permissions → Projects:
+#      Read and write", approved by an org owner on the SocialGouv installation.
+#      Adding a permission to an App does NOT grant it retroactively.
+#
+# The `permissions:` input on the token step below is what turns a silent
+# fallback to the default permission set into an explicit refusal at mint time:
+# the request is either honoured or named, never quietly downgraded.
 
 on:
   pull_request:
     types: [closed]
+  # Manual re-run, so the gate can be exercised without merging a real PR.
+  # A manual run is deliberate: it overwrites an existing value (no --if-empty).
+  workflow_dispatch:
+    inputs:
+      ticket:
+        description: "Ticket number to stamp (e.g. 4072)"
+        required: true
+        type: string
+      date:
+        description: "Date to write (YYYY-MM-DD). Defaults to today."
+        required: false
+        type: string
 
 permissions:
+  contents: read # actions/checkout — the repo is public, but don't rely on it
   id-token: write # required for token-bureau OIDC
 
 jobs:
   stamp-end-date:
-    # Only merged PRs, only ticket branches.
+    # pull_request: merged PRs on ticket branches only. workflow_dispatch: always.
     if: >-
-      github.event.pull_request.merged == true &&
-      startsWith(github.event.pull_request.head.ref, 'ticket/')
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'ticket/'))
     runs-on: ubuntu-latest
     steps:
       - name: Get GitHub App Token
@@ -38,6 +63,21 @@ jobs:
         with:
           token-bureau-url: https://token-bureau.fabrique.social.gouv.fr
           audience: socialgouv
+          # Least privilege, and a diagnostic. The historical failure emitted
+          # NONE of the messages below, precisely because the request was
+          # implicit: the server resolved no config, applied its defaults and
+          # minted a token that could not write. Asking explicitly makes each
+          # layer name itself instead:
+          #   "Invalid permission requested: organization_projects"
+          #     -> deployed token-bureau server is older than v0.0.8
+          #   "Permission organization_projects is not allowed for this repository"
+          #     -> the server resolved no override for SocialGouv/egapro and fell
+          #        back to its defaults: stale permissions ConfigMap, or a server
+          #        older than v0.0.10 (repo-key bug, see the header)
+          #   HTTP 422 "permissions requested are not granted to this installation"
+          #     -> the GitHub App installation lacks the org Projects permission
+          # `issues: read` covers the issue lookup done by set_ticket_date.sh.
+          permissions: '{"issues":"read","organization_projects":"write"}'
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -47,12 +87,37 @@ jobs:
           GH_TOKEN: ${{ steps.token.outputs.token }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
           MERGED_AT: ${{ github.event.pull_request.merged_at }}
+          INPUT_TICKET: ${{ inputs.ticket }}
+          INPUT_DATE: ${{ inputs.date }}
         run: |
-          N="$(printf '%s' "$HEAD_REF" | sed -nE 's#^ticket/([0-9]+)-.*#\1#p')"
+          if [ -n "$INPUT_TICKET" ]; then
+            case "$INPUT_TICKET" in
+              *[!0-9]*)
+                echo "ERROR: 'ticket' must be an issue number (got '$INPUT_TICKET')" >&2
+                exit 1
+                ;;
+            esac
+            N="$INPUT_TICKET"
+            STAMP_DATE="$INPUT_DATE"
+            IF_EMPTY=""
+          else
+            N="$(printf '%s' "$HEAD_REF" | sed -nE 's#^ticket/([0-9]+)-.*#\1#p')"
+            STAMP_DATE="$(printf '%s' "$MERGED_AT" | cut -dT -f1)"
+            IF_EMPTY="--if-empty"
+          fi
+
           if [ -z "$N" ]; then
             echo "Head ref '$HEAD_REF' is not a ticket branch — skipping."
             exit 0
           fi
-          MERGE_DATE="$(printf '%s' "$MERGED_AT" | cut -dT -f1)"
-          echo "Stamping End date=$MERGE_DATE on ticket #$N"
-          bash scripts/orchestration/set_ticket_date.sh "$N" end --if-empty "$MERGE_DATE"
+
+          echo "Stamping End date=${STAMP_DATE:-today} on ticket #$N"
+
+          ARGS=("$N" end)
+          if [ -n "$IF_EMPTY" ]; then
+            ARGS+=("$IF_EMPTY")
+          fi
+          if [ -n "$STAMP_DATE" ]; then
+            ARGS+=("$STAMP_DATE")
+          fi
+          bash scripts/orchestration/set_ticket_date.sh "${ARGS[@]}"

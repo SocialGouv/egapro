@@ -26,7 +26,6 @@ type Props = {
 	campaignDeadlines: CampaignDeadlines;
 	company: CompanyDetail;
 	declarations: DeclarationItem[];
-	hasNoSanction: boolean;
 	lockedByOther: boolean;
 	lockHolder: LockHolderDisplay | null;
 	userPhone: string | null;
@@ -52,7 +51,6 @@ export function CompanyDeclarationsPage({
 	campaignDeadlines,
 	company,
 	declarations,
-	hasNoSanction,
 	lockedByOther,
 	lockHolder,
 	userPhone,
@@ -91,7 +89,6 @@ export function CompanyDeclarationsPage({
 				cseApplicable={cseApplicable}
 				declarations={declarations}
 				hasCse={company.hasCse}
-				hasNoSanction={hasNoSanction}
 				userPhone={userPhone}
 			/>
 			<ArchivesSection />

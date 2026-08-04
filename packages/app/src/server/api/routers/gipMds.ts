@@ -1,15 +1,19 @@
 import { TRPCError } from "@trpc/server";
 
 import { env } from "~/env.js";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { fetchGipCsv, importGipCsvToDb } from "~/server/services/gipMds";
 
 export const gipMdsRouter = createTRPCRouter({
 	/**
 	 * Import GIP MDS data from the configured API URL (EGAPRO_GIP_MDS_API_URL).
 	 * Fetches the CSV, parses it, and upserts all rows for the detected year.
+	 *
+	 * Admin-only: the import wipes and re-inserts every `gip_mds_data` row for
+	 * the detected year and calls Weez for each new SIREN. Any authenticated
+	 * declarant must not be able to trigger that.
 	 */
-	importFromUrl: protectedProcedure.mutation(async ({ ctx }) => {
+	importFromUrl: adminProcedure.mutation(async ({ ctx }) => {
 		const url = env.EGAPRO_GIP_MDS_API_URL;
 		if (!url) {
 			throw new TRPCError({

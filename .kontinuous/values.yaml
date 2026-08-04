@@ -37,6 +37,14 @@ app:
         name: "suit"
     - secretRef:
         name: "suit"
+    # Client certificate presented to the SUIT API (mTLS, issue #3911). Kept out
+    # of the `suit` secret above because that one is non-optional: a half-sealed
+    # state there would stop the pod from starting. Optional here, so SUIT calls
+    # simply go out without a client certificate until ops seals the two keys
+    # (EGAPRO_SUIT_CLIENT_CERT_P12_BASE64 / _PASSWORD) into it.
+    - secretRef:
+        name: "suit-client-cert"
+        optional: true
     - secretRef:
         name: "next-auth"
     - configMapRef:

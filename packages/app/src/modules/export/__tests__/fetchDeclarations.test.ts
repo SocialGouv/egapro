@@ -1114,7 +1114,9 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		expect(result.Effectif).toBeNull();
 		expect(result.Parcours_de_conformite_requis).toBe(false);
-		expect(result.Indicateur_G_requis).toBe(false);
+		// Workforce-0 derives from the missing GIP effectif; it lands in the
+		// voluntary (< 50) tier, which files all 7 indicators (#4043).
+		expect(result.Indicateur_G_requis).toBe(true);
 	});
 
 	it("derives the flags from the GIP workforce, never from the Weez value (#3929)", () => {

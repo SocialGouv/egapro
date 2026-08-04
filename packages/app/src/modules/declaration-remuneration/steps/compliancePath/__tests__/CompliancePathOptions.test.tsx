@@ -35,9 +35,8 @@ describe("getCompliancePathHref", () => {
 	it.each([
 		true,
 		false,
-		null,
-	])("routes corrective_action to the second declaration funnel (hasCse: %s)", (hasCse) => {
-		expect(getCompliancePathHref("corrective_action", hasCse)).toBe(
+	])("routes corrective_action to the second declaration funnel (cseOpinionRequired: %s)", (cseOpinionRequired) => {
+		expect(getCompliancePathHref("corrective_action", cseOpinionRequired)).toBe(
 			"/declaration-remuneration/parcours-conformite/etape/1",
 		);
 	});
@@ -45,22 +44,18 @@ describe("getCompliancePathHref", () => {
 	it.each([
 		true,
 		false,
-		null,
-	])("routes joint_evaluation to the joint evaluation form (hasCse: %s)", (hasCse) => {
-		expect(getCompliancePathHref("joint_evaluation", hasCse)).toBe(
+	])("routes joint_evaluation to the joint evaluation form (cseOpinionRequired: %s)", (cseOpinionRequired) => {
+		expect(getCompliancePathHref("joint_evaluation", cseOpinionRequired)).toBe(
 			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
 		);
 	});
 
-	it("routes justify to the CSE opinion page when the company has a CSE", () => {
+	it("routes justify to the CSE opinion page when an opinion is due", () => {
 		expect(getCompliancePathHref("justify", true)).toBe("/avis-cse");
 	});
 
-	it.each([
-		false,
-		null,
-	])("routes justify to the confirmation page without a CSE (hasCse: %s)", (hasCse) => {
-		expect(getCompliancePathHref("justify", hasCse)).toBe(
+	it("routes justify to the confirmation page when no opinion is due", () => {
+		expect(getCompliancePathHref("justify", false)).toBe(
 			"/declaration-remuneration/parcours-conformite/confirmation",
 		);
 	});

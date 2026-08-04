@@ -196,7 +196,6 @@ describe("DraftLoadingGate", () => {
 				declarationSiren="123456789"
 				declarationYear={2026}
 				email="user@example.com"
-				hasCse={true}
 			/>,
 		);
 		expectLoadingState();
@@ -231,10 +230,10 @@ describe("DraftLoadingGate", () => {
 		mockLoadingDraft();
 		const { container } = render(
 			<JointEvaluationForm
+				cseOpinionRequired={false}
 				declarationDate="01/01/2026"
 				declarationSiren="123456789"
 				declarationYear={2026}
-				hasCse={null}
 				jointEvaluationDeadline={new Date("2026-05-01")}
 			/>,
 		);
