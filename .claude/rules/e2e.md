@@ -31,7 +31,11 @@ E2E tests must cover at minimum:
 - Key content/headings are visible
 - Error pages (404, 500, 503) display correct status and messaging
 
-Run `pnpm test:e2e` to execute all E2E tests (requires the dev server running on **port 3000** — the ProConnect test gateway only registers the `:3000` callback, so `auth.setup.ts` fails on any other port; worktree E2E runs must bind the dev server to `PORT=3000` while the docker stack keeps its index-derived ports). Port 3000 being a single global resource, all E2E runs are effectively serialized repo-wide: do not run an epic-end E2E gate (background) and a ticket-mode `e2e-dev` (foreground) at the same time — both fail closed on a busy port, but one of them will have to be re-run. E2E is **not** part of the CI pipeline, so `e2e-dev`'s local run is the authoritative E2E gate before the reviewable PR.
+Run `pnpm test:e2e` to execute all E2E tests (requires the dev server running on **port 3000** — the ProConnect test gateway only registers the `:3000` callback, so `auth.setup.ts` fails on any other port; worktree E2E runs must bind the dev server to `PORT=3000` while the docker stack keeps its index-derived ports). Port 3000 being a single global resource, all E2E runs are effectively serialized repo-wide: do not run an epic-end E2E gate (background) and a ticket-mode `e2e-dev` (foreground) at the same time — both fail closed on a busy port, but one of them will have to be re-run. `e2e.yaml` rejoue aussi la suite en CI sur toute PR ciblant `alpha` (check « Test e2e »), mais le run local d'`e2e-dev` reste la gate qui précède l'ouverture de la PR.
+
+## Contrats de fidélité Figma
+
+La suite E2E porte aussi les **contrats de fidélité visuelle** : `helpers/figmaFidelity.ts` (moteur générique de mesure DOM) + `fixtures/figma/<écran>.ts` (les valeurs du node Figma). L'assertion s'**imbrique** dans le scénario qui atteint déjà l'écran dans le bon état — jamais un tunnel rejoué pour une mesure. C'est la couche de régression permanente que le gate `design-validator` (ponctuel, et dégradable si la session ProConnect manque) ne fournit pas. Discipline d'écriture d'un contrat → `rules/visual-quality-validation.md`.
 
 **Checklist for `e2e-dev` before completing any page-related coverage:**
 1. List all routes in `src/app/**/page.tsx`

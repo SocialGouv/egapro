@@ -23,6 +23,27 @@ Why a gate at all: a structural read of the Figma tree (`code-dev` step 7) verif
 
 Measurement is deterministic and pinpoints the fix; vision catches the long tail measurement can't enumerate. Neither alone is enough — run both.
 
+## Troisième couche : le contrat de fidélité (régression, permanente)
+
+Les deux couches ci-dessus sont un **contrôle ponctuel** : elles jugent l'écran au moment où il est développé, puis disparaissent. Rien n'empêche la dérive de revenir six semaines plus tard — et si le gate se dégrade (session ProConnect indisponible → `VISUAL_DEGRADED`), l'écran part en production sans avoir jamais été rendu. C'est exactement ce qui s'est produit sur #3576.
+
+Le **contrat de fidélité** est la couche qui survit : les valeurs numériques du node Figma sont écrites une fois dans un fichier versionné, puis rejouées contre le DOM à chaque exécution de la suite E2E — donc dans `e2e.yaml` (PR → `alpha`) et dans la gate `e2e-dev` de fin de pipeline.
+
+| Fichier | Rôle |
+|---|---|
+| `packages/app/src/e2e/helpers/figmaFidelity.ts` | Moteur générique : mesure le DOM, compare au contrat, agrège **tous** les écarts et échoue avec un rapport lisible (`élément.propriété : attendu X, obtenu Y`) |
+| `packages/app/src/e2e/fixtures/figma/<écran>.ts` | Le contrat : géométrie, rythme vertical, rampe typographique, couleurs, alignements, copy obligatoire |
+
+Règles d'écriture d'un contrat :
+
+1. **Les valeurs viennent du node Figma, jamais du rendu courant.** Un contrat rempli en lisant le DOM fige les bugs au lieu de les détecter.
+2. **Toute divergence assumée est commentée dans le contrat**, pas silencieusement tolérée : une tolérance sans justification est un contrat qui n'attrape plus rien. Exemple : la largeur de colonne est dérivée de la grille DSFR (`fr-col-lg-8`), pas des 790px du Figma → non assertée, avec la raison écrite.
+3. **Ne pas asserter ce qu'un humain doit arbitrer** (choix d'illustration, ton de la copy, artwork d'icône) — ça reste au `design-validator`.
+4. **Pas de diff de pixels** : la rastérisation des polices varie d'une machine à l'autre. Le contrat porte sur des nombres.
+5. **Imbriquer l'assertion dans le parcours E2E existant** qui atteint déjà l'écran dans le bon état, plutôt que de rejouer un tunnel complet pour une mesure.
+
+Quand un ticket UI touche un écran couvert par un contrat, le contrat fait foi : soit le code s'y conforme, soit le contrat est mis à jour **avec le nouveau node Figma en référence** (`capturedAt` remis à jour).
+
 ## Méthode — espaces verticaux (systématique, jamais à l'œil)
 
 L'écart vertical est l'erreur la plus fréquente et la plus invisible à l'œil. Pour chaque écran :
