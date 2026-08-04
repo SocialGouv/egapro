@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { getWorkforceYearFor } from "~/modules/domain";
 import {
 	getCurrentDbYear,
 	resetDeclarationToDraft,
@@ -41,7 +42,9 @@ test.describe("Declaration workflow", () => {
 		await page.waitForURL("**/declaration-remuneration/etape/**");
 	});
 
-	test("displays step 1 after login", async ({ page }) => {
+	test("displays step 1 with the N-1 reference period after login (#4075)", async ({
+		page,
+	}) => {
 		await expect(
 			page.getByRole("heading", {
 				name: /Déclaration des indicateurs de rémunération/i,
@@ -49,6 +52,18 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 
 		await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
+
+		// #4075: the regulatory reference period is the civil year preceding the
+		// campaign (N-1), not the campaign year. Expectation is derived from
+		// getWorkforceYearFor — never getReferencePeriod, the function the bug
+		// lived in — so reverting the fix turns this red instead of tautologically
+		// tracking it.
+		const referenceYear = getWorkforceYearFor(await getCurrentDbYear());
+		await expect(
+			page.getByText(
+				`Période de référence pour le calcul des indicateurs : 01/01/${referenceYear} - 31/12/${referenceYear}.`,
+			),
+		).toBeVisible();
 	});
 
 	test("navigates through step 1 - Effectifs", async ({ page }) => {
