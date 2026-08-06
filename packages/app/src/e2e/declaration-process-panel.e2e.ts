@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
 import {
@@ -283,6 +283,114 @@ test.describe("Declaration process panel", () => {
 				await expect(cta).toBeVisible();
 				await expect(cta).not.toHaveAttribute("href", /avis-cse/);
 			});
+		});
+	});
+});
+
+// #4083 — the Ressources cell of the same row gated both recap PDFs on the
+// *démarche* status, which computeDeclarationStatus only reports as "done" on the
+// terminal demarche_completed. A submitted declaration therefore lost its recap in
+// the 7 other post-submission FSM states, while the process panel above already
+// linked it. The guard now reads "the declaration is submitted", pinned here end
+// to end — seeded FSM state → server payload → cell count → panel → an endpoint
+// that really returns the PDF — which the DocumentsPanel unit tests cannot observe.
+test.describe("Mon espace — Ressources cell of the rémunération row", () => {
+	test.describe.configure({ mode: "serial" });
+	test.setTimeout(90_000);
+
+	const DOCUMENTS_PANEL_ID = `documents-panel-remuneration-${CURRENT_YEAR}`;
+	const PREFILL_TITLE =
+		"Télécharger les données préremplies (issues des données DSN)";
+	const RECAP_INDICATORS_TITLE =
+		"Télécharger le récapitulatif de la déclaration des indicateurs";
+	const RECAP_TRANSMITTED_TITLE =
+		"Télécharger le récapitulatif des éléments transmis";
+
+	test.beforeAll(async () => {
+		await ensureCurrentYearDeclaration();
+		await resetGipWorkforce();
+		await setCompanyHasCse(true);
+		await setUserPhone("0122334455");
+	});
+
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+	});
+
+	// Scoped to the cell: the panel's own "Fermer" button carries the same
+	// aria-controls, so an unscoped attribute selector matches two elements.
+	function documentsTrigger(page: Page) {
+		return page.locator(`td > button[aria-controls="${DOCUMENTS_PANEL_ID}"]`);
+	}
+
+	async function openDocumentsPanel(page: Page) {
+		await page.goto("/mon-espace");
+		await expect(documentsTrigger(page)).toBeVisible();
+		await waitForDsfrModal(page, DOCUMENTS_PANEL_ID);
+		await clickAndExpectDialogOpen(
+			page,
+			documentsTrigger(page),
+			DOCUMENTS_PANEL_ID,
+		);
+		return page.locator(`#${DOCUMENTS_PANEL_ID}`);
+	}
+
+	test.describe("declaration submitted, démarche still running", () => {
+		test.beforeAll(async () => {
+			await setDeclarationComplianceState({
+				status: "awaiting_compliance_path_choice",
+				currentStep: 6,
+			});
+		});
+
+		test("both recaps sit next to the prefill file, and each endpoint serves a PDF", async ({
+			page,
+		}) => {
+			const panel = await openDocumentsPanel(page);
+
+			await expect(documentsTrigger(page)).toHaveText("Documents (3)");
+
+			const indicatorsHref = `/api/declaration-pdf?year=${CURRENT_YEAR}`;
+			const transmittedHref = `/api/transmitted-pdf?year=${CURRENT_YEAR}`;
+
+			await expect(
+				panel.getByRole("link", { name: PREFILL_TITLE }),
+			).toBeVisible();
+			await expect(
+				panel.getByRole("link", { name: RECAP_INDICATORS_TITLE }),
+			).toHaveAttribute("href", indicatorsHref);
+			await expect(
+				panel.getByRole("link", { name: RECAP_TRANSMITTED_TITLE }),
+			).toHaveAttribute("href", transmittedHref);
+
+			for (const href of [indicatorsHref, transmittedHref]) {
+				const response = await page.request.get(href, { timeout: 30_000 });
+				expect(response.status(), `GET ${href}`).toBe(200);
+				expect(response.headers()["content-type"]).toContain("pdf");
+			}
+		});
+	});
+
+	test.describe("declaration still a draft", () => {
+		test.beforeAll(async () => {
+			await resetDeclarationToDraft();
+		});
+
+		test("only the prefill file is offered — neither recap leaks before submission", async ({
+			page,
+		}) => {
+			const panel = await openDocumentsPanel(page);
+
+			await expect(documentsTrigger(page)).toHaveText("Documents (1)");
+			await expect(
+				panel.getByRole("link", { name: PREFILL_TITLE }),
+			).toBeVisible();
+			await expect(
+				panel.getByRole("link", { name: RECAP_INDICATORS_TITLE }),
+			).toHaveCount(0);
+			await expect(
+				panel.getByRole("link", { name: RECAP_TRANSMITTED_TITLE }),
+			).toHaveCount(0);
 		});
 	});
 });
