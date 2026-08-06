@@ -5,6 +5,7 @@ import { getCurrentYear, getDefaultCampaignDeadlines } from "~/modules/domain";
 import { DeclarationsSection } from "../DeclarationsSection";
 import type { DeclarationItem } from "../types";
 
+const SIREN = "532847196";
 const currentYear = getCurrentYear();
 const campaignDeadlines = getDefaultCampaignDeadlines(currentYear);
 
@@ -23,7 +24,7 @@ const NO_COMPLIANCE = {
 const declarations: DeclarationItem[] = [
 	{
 		type: "remuneration",
-		siren: "532847196",
+		siren: SIREN,
 		year: currentYear,
 		status: "to_complete",
 		currentStep: 0,
@@ -32,7 +33,7 @@ const declarations: DeclarationItem[] = [
 	},
 	{
 		type: "representation",
-		siren: "532847196",
+		siren: SIREN,
 		year: currentYear,
 		status: "to_complete",
 		currentStep: 0,
@@ -41,7 +42,7 @@ const declarations: DeclarationItem[] = [
 	},
 	{
 		type: "remuneration",
-		siren: "532847196",
+		siren: SIREN,
 		year: currentYear - 1,
 		status: "done",
 		currentStep: 6,
@@ -120,6 +121,26 @@ describe("DeclarationsSection", () => {
 		).toBeInTheDocument();
 	});
 
+	it("renders a Documents link for a submitted declaration still in its compliance process", () => {
+		renderSection({
+			declarations: [
+				{
+					type: "remuneration",
+					siren: SIREN,
+					year: currentYear - 1,
+					status: "in_progress",
+					currentStep: 6,
+					updatedAt: new Date("2025-03-15"),
+					...NO_COMPLIANCE,
+					fsmStatus: "awaiting_compliance_path_choice",
+				},
+			],
+		});
+		expect(
+			screen.getByRole("button", { name: "Documents (2)" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders 'Années précédentes' heading when there are past declarations", () => {
 		renderSection();
 		expect(
@@ -158,7 +179,7 @@ describe("DeclarationsSection", () => {
 			{ length: 21 },
 			(_, i) => ({
 				type: "remuneration" as const,
-				siren: "532847196",
+				siren: SIREN,
 				year: currentYear - i,
 				status: "done" as const,
 				currentStep: 6,
@@ -186,7 +207,7 @@ describe("DeclarationsSection", () => {
 			{ length: 15 },
 			(_, i) => ({
 				type: "remuneration" as const,
-				siren: "532847196",
+				siren: SIREN,
 				year: currentYear - i,
 				status: "done" as const,
 				currentStep: 6,
@@ -214,7 +235,7 @@ describe("DeclarationsSection", () => {
 			{ length: 25 },
 			(_, i) => ({
 				type: "remuneration" as const,
-				siren: "532847196",
+				siren: SIREN,
 				year: currentYear - i,
 				status: "done" as const,
 				currentStep: 6,
@@ -255,7 +276,7 @@ describe("DeclarationsSection", () => {
 			{ length: 80 },
 			(_, i) => ({
 				type: "remuneration" as const,
-				siren: "532847196",
+				siren: SIREN,
 				year: currentYear - i,
 				status: "done" as const,
 				currentStep: 6,
@@ -284,7 +305,7 @@ describe("DeclarationsSection", () => {
 			{ length: 25 },
 			(_, i) => ({
 				type: "remuneration" as const,
-				siren: "532847196",
+				siren: SIREN,
 				year: currentYear - i,
 				status: "done" as const,
 				currentStep: 6,
