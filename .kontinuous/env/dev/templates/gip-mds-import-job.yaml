@@ -78,14 +78,26 @@ spec:
             # non-root arbitrary uid
             - name: HOME
               value: /tmp
+            - name: NAMESPACE
+              value: {{ .Values.global.namespace }}
           command:
-            - kubectl
-            - rollout
-            - status
-            - deployment/app
-            - --namespace
-            - {{ .Values.global.namespace }}
-            - --timeout=600s
+            - /bin/sh
+            - -c
+            - |
+              # On a fresh namespace the Job starts before the app Deployment
+              # is even applied: `rollout status` then exits immediately with
+              # NotFound, and each exit burns one backoffLimit retry — the Job
+              # dies before the Deployment exists. Wait for the resource to
+              # appear first (bounded, so a genuinely missing Deployment still
+              # fails rather than hanging forever).
+              for i in $(seq 1 120); do
+                if kubectl get deployment app --namespace "$NAMESPACE" >/dev/null 2>&1; then
+                  break
+                fi
+                echo "waiting for deployment/app to be created..."
+                sleep 5
+              done
+              exec kubectl rollout status deployment/app --namespace "$NAMESPACE" --timeout=600s
           resources:
             requests:
               cpu: 50m

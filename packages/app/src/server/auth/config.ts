@@ -1,11 +1,13 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { headers as nextHeaders } from "next/headers";
 import type { DefaultSession, NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
 import { sirenSchema } from "~/modules/admin/schemas";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { extractSiren, parseSiren } from "~/modules/domain";
+import { devLoginSchema } from "~/modules/login/schemas";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
 import { db } from "~/server/db";
@@ -159,6 +161,74 @@ declare module "next-auth/jwt" {
  */
 const ADMIN_EMAILS: Set<string> = parseAdminEmails(env.ADMIN_EMAILS);
 
+/** Hosts the dev sign-in accepts, port stripped. */
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
+
+/**
+ * True when the request was addressed to this machine. `EGAPRO_DEV_AUTH` and
+ * `NODE_ENV` both come from the same configmap and carry the same level of
+ * trust, so on their own they are one barrier, not two. This check does not
+ * read configuration at all: a request reaching a deployed pod carries that
+ * environment's hostname, never a loopback one.
+ */
+function isLoopbackRequest(headers: Record<string, string> | undefined) {
+	const host = headers?.host ?? headers?.Host;
+	if (!host) return false;
+	// Strip the port, keeping bracketed IPv6 literals intact.
+	const hostname = host.startsWith("[")
+		? host.slice(0, host.indexOf("]") + 1)
+		: (host.split(":")[0] ?? "");
+	return LOOPBACK_HOSTS.has(hostname);
+}
+
+/**
+ * Dev-only sign-in. Trusts whatever email and SIRET the form supplies — it
+ * exists so local dev and the pipeline's browser validators can reach
+ * authenticated screens without the external ProConnect sandbox, and it must
+ * never be reachable in a deployed environment.
+ *
+ * Three guards, only two of which share a trust domain: `EGAPRO_DEV_AUTH`
+ * defaults to false, `getProviders()` throws if it is ever true while
+ * `NODE_ENV` is production, and `authorize()` refuses any request that did
+ * not arrive on a loopback host. The blast radius justifies the redundancy —
+ * `authorize()` validates the *shape* of an identity, never a secret, and the
+ * `jwt` callback grants admin to any email listed in `ADMIN_EMAILS`.
+ *
+ * The returned shape is the same one the ProConnect `profile()` callback
+ * produces, so the `jwt` callback below (user upsert, company linking, admin
+ * flag) runs identically for both providers.
+ */
+function devAuthProvider(): Provider {
+	return CredentialsProvider({
+		id: "dev-auth",
+		name: "Connexion de développement",
+		credentials: {
+			email: { label: "Adresse e-mail", type: "email" },
+			siret: { label: "SIRET", type: "text" },
+		},
+		authorize(credentials, req) {
+			if (!isLoopbackRequest(req?.headers)) return null;
+
+			const parsed = devLoginSchema.safeParse({
+				email: credentials?.email ?? "",
+				siret: credentials?.siret ?? "",
+			});
+			if (!parsed.success) return null;
+
+			const { email, siret } = parsed.data;
+			const localPart = email.split("@")[0] ?? email;
+			return {
+				id: email,
+				name: localPart,
+				email,
+				siret,
+				firstName: localPart,
+				lastName: null,
+			};
+		},
+	});
+}
+
 function getProviders(): Provider[] {
 	const providers: Provider[] = [];
 
@@ -217,6 +287,21 @@ function getProviders(): Provider[] {
 				};
 			},
 		});
+	}
+
+	// Strict `=== true`, never truthiness: with SKIP_ENV_VALIDATION set (every
+	// `next build`) the env helper hands back the raw environment, where the
+	// string "false" is truthy — `EGAPRO_DEV_AUTH=false` at build time would
+	// otherwise take this branch and abort the build.
+	if (env.EGAPRO_DEV_AUTH === true) {
+		// Fail loudly rather than silently registering a password-less
+		// provider on a deployed environment.
+		if (env.NODE_ENV === "production") {
+			throw new Error(
+				"EGAPRO_DEV_AUTH is enabled while NODE_ENV=production — refusing to register the dev sign-in provider.",
+			);
+		}
+		providers.push(devAuthProvider());
 	}
 
 	return providers;

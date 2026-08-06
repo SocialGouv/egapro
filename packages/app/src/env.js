@@ -41,9 +41,25 @@ export const env = createEnv({
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
-		EGAPRO_PROCONNECT_CLIENT_ID: z.string(),
-		EGAPRO_PROCONNECT_CLIENT_SECRET: z.string(),
-		EGAPRO_PROCONNECT_ISSUER: z.string().url(),
+		// ProConnect is the production identity provider. The three values are
+		// optional so a fresh checkout boots without them: `getProviders()`
+		// registers the provider only when all three are present. Requiring
+		// them used to force contributors — and the pipeline's browser
+		// validators, which provision a worktree from scratch — to invent
+		// placeholder values just to satisfy this schema, producing an app
+		// that booted with a sign-in button that could never work.
+		EGAPRO_PROCONNECT_CLIENT_ID: z.string().optional(),
+		EGAPRO_PROCONNECT_CLIENT_SECRET: z.string().optional(),
+		EGAPRO_PROCONNECT_ISSUER: z.string().url().optional(),
+		// Dev-only credentials sign-in, off by default. Registered only when
+		// NODE_ENV is not production — `getProviders()` throws outright if this
+		// is ever true in a production runtime. Parsed as a literal string
+		// rather than `z.coerce.boolean()`, which would turn "false" into true.
+		EGAPRO_DEV_AUTH: z
+			.enum(["true", "false"])
+			.optional()
+			.default("false")
+			.transform((value) => value === "true"),
 		EGAPRO_WEEZ_API_URL: z.string().url(),
 		EGAPRO_SUIT_API_URL: z.string().url(),
 		// Client certificate presented to the SUIT API (mTLS). The .p12 bundle is
@@ -164,6 +180,7 @@ export const env = createEnv({
 		EGAPRO_PROCONNECT_CLIENT_SECRET:
 			process.env.EGAPRO_PROCONNECT_CLIENT_SECRET,
 		EGAPRO_PROCONNECT_ISSUER: process.env.EGAPRO_PROCONNECT_ISSUER,
+		EGAPRO_DEV_AUTH: process.env.EGAPRO_DEV_AUTH,
 		EGAPRO_WEEZ_API_URL: process.env.EGAPRO_WEEZ_API_URL,
 		EGAPRO_SUIT_API_URL: process.env.EGAPRO_SUIT_API_URL,
 		EGAPRO_SUIT_CLIENT_CERT_P12_BASE64:
@@ -213,3 +230,40 @@ export const env = createEnv({
 	 */
 	emptyStringAsUndefined: true,
 });
+
+/**
+ * ProConnect is optional in the schema so a fresh worktree boots without it,
+ * but a production runtime without it is a broken deploy: the app would come
+ * up with an empty provider list, pass its health checks, and leave nobody
+ * able to sign in. Requiring the three values here keeps that failure loud —
+ * the same protection the mandatory schema used to give — without forcing
+ * placeholder values on local checkouts.
+ *
+ * Skipped when env validation is off (`next build` runs with NODE_ENV
+ * production and SKIP_ENV_VALIDATION=1, and the secrets are injected at
+ * runtime, not at build time).
+ *
+ * Server-only: this module also lands in client bundles (imported through
+ * shared modules), where reading a server-side variable throws — the guard
+ * keeps the check from ever evaluating there.
+ */
+if (
+	typeof window === "undefined" &&
+	!process.env.SKIP_ENV_VALIDATION &&
+	env.NODE_ENV === "production"
+) {
+	const missing = [
+		["EGAPRO_PROCONNECT_CLIENT_ID", env.EGAPRO_PROCONNECT_CLIENT_ID],
+		["EGAPRO_PROCONNECT_CLIENT_SECRET", env.EGAPRO_PROCONNECT_CLIENT_SECRET],
+		["EGAPRO_PROCONNECT_ISSUER", env.EGAPRO_PROCONNECT_ISSUER],
+	]
+		.filter(([, value]) => !value)
+		.map(([name]) => name);
+
+	if (missing.length > 0) {
+		throw new Error(
+			`Missing ProConnect configuration in production: ${missing.join(", ")}. ` +
+				"Without it no user can sign in — refusing to start.",
+		);
+	}
+}
