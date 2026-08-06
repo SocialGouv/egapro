@@ -24,7 +24,7 @@
 		"db:seed-dev": "node scripts/seed-dev.mjs",
 		"db:seed-stats": "node scripts/seed-demo-stats.mjs",
 		"db:studio": "drizzle-kit studio",
-		"dev": "node scripts/copy-dsfr.mjs && node scripts/copy-swagger-ui.mjs && next dev --turbo",
+		"dev": "node scripts/copy-dsfr.mjs && node scripts/copy-swagger-ui.mjs && sh scripts/dev.sh",
 		"predev": "pnpm --filter notifications build",
 		"preview": "next build && next start",
 		"start": "next start",
