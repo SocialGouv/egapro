@@ -20,8 +20,8 @@ export function DeclarationSuccessBanner({
 	year,
 }: Props) {
 	return (
-		<div className="fr-grid-row fr-grid-row--gutters fr-p-4w fr-background-alt--blue-france">
-			<div className="fr-col-12 fr-col-md-6">
+		<div className={`fr-p-4w fr-background-alt--blue-france ${styles.wrapper}`}>
+			<div className={styles.column}>
 				<div className={styles.content}>
 					<div className={styles.titleRow}>
 						<DsfrPictogram
@@ -29,7 +29,7 @@ export function DeclarationSuccessBanner({
 							path="/dsfr/artwork/pictograms/system/success.svg"
 							size={44}
 						/>
-						<p className="fr-text--bold fr-text--lg fr-mb-0">
+						<p className="fr-text--bold fr-text--lg fr-text-title--grey fr-mb-0">
 							{isSecondDeclaration
 								? "Votre seconde déclaration a été transmise"
 								: "Votre déclaration a été transmise"}
@@ -40,27 +40,33 @@ export function DeclarationSuccessBanner({
 						<strong>{formatLongDate(modificationDeadline)}</strong>
 					</p>
 					{pdfDownloadHref && (
-						<FileDownloadLink
-							className="fr-link fr-link--download"
-							href={pdfDownloadHref}
-							pendingLabel="Génération du récapitulatif en cours…"
-						>
-							{isSecondDeclaration
-								? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
-								: "Télécharger le récapitulatif de la déclaration des indicateurs"}
-						</FileDownloadLink>
+						<div className={styles.download}>
+							<FileDownloadLink
+								className="fr-link fr-icon-download-line fr-link--icon-right"
+								href={pdfDownloadHref}
+								pendingLabel="Génération du récapitulatif en cours…"
+							>
+								{isSecondDeclaration
+									? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
+									: "Télécharger le récapitulatif de la déclaration des indicateurs"}
+							</FileDownloadLink>
+							{/* The PDF is generated on demand, so only the format is known. */}
+							<p className="fr-text--xs fr-text-mention--grey fr-mb-0">PDF</p>
+						</div>
 					)}
 				</div>
 			</div>
-			<div className="fr-col-12 fr-col-md-6">
-				<div className="fr-p-2w fr-border fr-background-default--grey">
+			<div className={styles.column}>
+				{/* `fr-border` looks like a DSFR utility but does not exist; the real
+				    one is `fr-border-default--grey`. */}
+				<div className="fr-p-2w fr-border-default--grey fr-background-default--grey">
 					<p className="fr-text--sm fr-mb-1w">
 						Un accusé de réception a été envoyé à l'adresse e-mail{" "}
-						<strong>{email}</strong>.
-					</p>
-					<p className="fr-text--sm fr-text--mention-grey fr-mb-2w">
-						Si ce n'est pas le cas, vérifiez vos courriers indésirables ou SPAM.
-						Sinon, cliquez sur le bouton ci-dessous.
+						<strong>{email}</strong>.{" "}
+						<span className="fr-text-mention--grey">
+							Si ce n'est pas le cas, vérifiez vos courriers indésirables ou
+							SPAM. Sinon, cliquez sur le bouton ci-dessous.
+						</span>
 					</p>
 					<ResendReceiptButton
 						kind={isSecondDeclaration ? "secondDeclaration" : "declaration"}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Controller } from "react-hook-form";
 import { TrackedLink } from "~/modules/analytics";
 import { useIsImpersonating } from "~/modules/auth";
@@ -99,6 +99,13 @@ export function CompliancePathChoice({
 	const hasInitialData = !!initialPath;
 	const hasData = hasInitialData || hasDraft;
 
+	// Waits for hydration so the browser doesn't restore scroll on the short placeholder, then re-grow into the taller form.
+	useEffect(() => {
+		if (draftHydrated) {
+			window.scrollTo(0, 0);
+		}
+	}, [draftHydrated]);
+
 	const mutation = api.declaration.saveCompliancePath.useMutation({
 		onSuccess: (_, { path }) => {
 			clearDraft();
@@ -124,15 +131,13 @@ export function CompliancePathChoice({
 	});
 
 	return (
-		<form
-			autoComplete="off"
-			className={common.flexColumnGap2}
-			onSubmit={onSubmit}
-		>
+		<form autoComplete="off" onSubmit={onSubmit}>
 			{/* Read-only mode is enforced per control (disabled radios and submit
 			    button): a fieldset-level `disabled` would hide the content from
 			    some assistive technologies (#3803). */}
-			<fieldset className={common.readOnlyFieldset}>
+			{/* The rhythm class sits on the fieldset: it is the form's only child, so
+			    a gap on the form would never apply. */}
+			<fieldset className={`${common.readOnlyFieldset} ${styles.screen}`}>
 				<legend className="fr-sr-only">Choix du parcours de conformité</legend>
 				<div className={common.flexBetween}>
 					<h1 className="fr-h4 fr-mb-0">
@@ -161,6 +166,11 @@ export function CompliancePathChoice({
 					<CompliancePathReadOnlyAlert reason={readOnlyReason} />
 				) : null}
 
+				<h2 className="fr-h4 fr-mb-0">
+					Parcours de mise en conformité pour l&apos;indicateur par catégorie
+					de&nbsp;salariés
+				</h2>
+
 				<div className={common.flexColumnGap1}>
 					<p className={`fr-mb-0 ${styles.instructions}`}>
 						{isSecondRound
@@ -172,7 +182,7 @@ export function CompliancePathChoice({
 						<p className="fr-mb-1w">
 							Date limite pour choisir un parcours de mise en conformité
 						</p>
-						<p className="fr-text--lg fr-text--bold fr-mb-0">
+						<p className="fr-text--xl fr-text--bold fr-mb-0">
 							{formatLongDate(campaignDeadlines.pathChoiceDeadline)}
 						</p>
 					</div>
@@ -180,10 +190,10 @@ export function CompliancePathChoice({
 
 				<div className={common.dataSection}>
 					<div className={common.flexColumnGapHalf}>
-						<h2 className="fr-h6 fr-mb-0">
+						<h3 className="fr-h6 fr-mb-0">
 							La justification est possible par des critères objectifs et non
 							sexistes
-						</h2>
+						</h3>
 						<p className="fr-mb-0">
 							<TrackedLink
 								className="fr-link"
@@ -204,7 +214,7 @@ export function CompliancePathChoice({
 						render={({ field }) => (
 							<fieldset
 								aria-labelledby="compliance-path-legend"
-								className="fr-fieldset"
+								className={`fr-fieldset ${styles.pathFieldset}`}
 							>
 								<legend className="fr-sr-only" id="compliance-path-legend">
 									Choix du parcours de mise en conformité

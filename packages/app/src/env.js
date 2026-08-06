@@ -102,6 +102,11 @@ export const env = createEnv({
 		// Server-side Matomo base URL for the Reporting API. Falls back to
 		// NEXT_PUBLIC_MATOMO_URL when unset.
 		MATOMO_API_URL: z.url().optional(),
+		// E2E-only clock override (issue #4022). Gates the /api/e2e-clock test
+		// route that pilots the campaign year. Defaults to false and is declared
+		// in NO .kontinuous env config, so the route stays 404 in preproduction
+		// and production regardless of NODE_ENV.
+		EGAPRO_E2E_CLOCK: z.coerce.boolean().optional().default(false),
 		/**
 		 * Comma-separated list of emails that should be granted the admin role
 		 * on login. The flag is then persisted in the `app_user.is_admin` column.
@@ -197,6 +202,7 @@ export const env = createEnv({
 		EGAPRO_GIP_MDS_API_TOKEN: process.env.EGAPRO_GIP_MDS_API_TOKEN,
 		MATOMO_API_TOKEN: process.env.MATOMO_API_TOKEN,
 		MATOMO_API_URL: process.env.MATOMO_API_URL,
+		EGAPRO_E2E_CLOCK: process.env.EGAPRO_E2E_CLOCK,
 		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS:
 			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,

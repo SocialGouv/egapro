@@ -8,4 +8,35 @@
 	.title {
 		color: var(--text-action-high-blue-france);
 	}
+
+	// Figma separates every block of the option body by 16px; DSFR's per-element
+	// margin utilities gave 8px between the intro and the list and left a dangling
+	// 8px under the last card, which has no link to absorb it.
+	.body {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+
+		// The gap is the single source of spacing here: the default paragraph and
+		// list margins would stack on top of it.
+		> * {
+			margin-top: 0;
+			margin-bottom: 0;
+		}
+	}
+
+	// Figma: "MD - Texte standard - Medium" (500), same size as the link under the
+	// section heading. DSFR ships no 500 weight utility.
+	// `align-self` keeps the anchor hugging its label: stretched to the column it
+	// would drag the DSFR link underline across the whole card.
+	.learnMore {
+		align-self: flex-start;
+		font-weight: 500;
+	}
+
+	// DSFR shrink-wraps the radio row to its label; Figma stretches it to the full
+	// card width so the whole row is the pointer target.
+	:global(.fr-radio-group) {
+		max-width: none;
+	}
 }

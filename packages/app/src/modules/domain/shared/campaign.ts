@@ -1,8 +1,12 @@
 import type { CampaignDeadlines } from "../types";
+import { readCampaignYearOverride } from "./campaignClock";
+import { formatLongDate } from "./format";
 
-/** Returns the current calendar year (declaration campaign year). */
+/** Returns the current campaign year: the E2E recette override when a grid run
+ * pinned one (see campaignClock.ts — test-only, inert in production), the
+ * calendar year otherwise. */
 export function getCurrentYear(): number {
-	return new Date().getFullYear();
+	return readCampaignYearOverride() ?? new Date().getFullYear();
 }
 
 /** Returns the workforce/reference year for a given campaign year (N-1: a declaration reports the prior year's data). */
@@ -44,14 +48,14 @@ export function resolveGipReferencePeriod(
 	return `${formatIsoDateToFrench(periodStart)} - ${formatIsoDateToFrench(periodEnd)}`;
 }
 
-/** Returns the declaration modification deadline for a given year. */
+/** Returns the declaration modification deadline for a given year: `"1ᵉʳ juin 2027"`. */
 export function getDeclarationDeadline(year: number): string {
-	return `1\u1D49\u02B3 juin ${year}`;
+	return formatLongDate(new Date(year, 5, 1));
 }
 
-/** Returns the second declaration modification deadline for a given year. */
+/** Returns the second declaration modification deadline for a given year: `"1ᵉʳ décembre 2027"`. */
 export function getSecondDeclarationDeadline(year: number): string {
-	return `1 décembre ${year}`;
+	return formatLongDate(new Date(year, 11, 1));
 }
 
 /** Returns the derived deadline to choose a compliance path (January 1st of the following year). */

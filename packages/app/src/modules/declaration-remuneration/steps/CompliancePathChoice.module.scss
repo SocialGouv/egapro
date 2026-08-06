@@ -4,3 +4,42 @@
 	color: var(--text-title-grey);
 	font-weight: 500;
 }
+
+// Figma spaces every top-level block of the content column by 32px. The DSFR
+// fieldset resets to block flow and none of those blocks carry a margin, so
+// without this the whole screen collapses to zero vertical rhythm.
+.screen {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+
+	// FormActions carries its own `margin-top: 2rem` for block-flow parents; the
+	// flex gap already provides that spacing here and the margin would double it.
+	> :last-child {
+		margin-top: 0;
+	}
+}
+
+// DSFR's fieldset gutters (negative row margin + per-element side padding) exist
+// to align inputs side by side in a grid. Every element here is a full-width
+// card, so the gutters only shift the column off the content edge — and the
+// per-element `margin-bottom` pins the spacing at 16px where Figma asks for 24.
+// The overrides are qualified with the DSFR class they fight: on their own they
+// would tie on specificity and lose to whichever stylesheet loads last.
+:global(.fr-fieldset).pathFieldset {
+	row-gap: 1.5rem;
+	margin: 0;
+	padding: 0;
+
+	> :global(.fr-fieldset__element) {
+		margin-bottom: 0;
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	// The bare section heading is a flex child too, and DSFR would shrink-wrap it
+	// to its text width instead of stretching it across the column.
+	> * {
+		flex: 1 1 100%;
+	}
+}
