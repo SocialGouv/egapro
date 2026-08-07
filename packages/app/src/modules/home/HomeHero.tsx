@@ -39,7 +39,7 @@ export function HomeHero() {
 						</p>
 						<Link
 							className={`fr-btn fr-icon-file-text-line fr-btn--icon-left ${styles.cta}`}
-							href="/declaration-remuneration"
+							href="/mon-espace"
 						>
 							Déclarer mes indicateurs
 						</Link>
