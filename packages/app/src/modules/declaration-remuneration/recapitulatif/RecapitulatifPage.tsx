@@ -199,10 +199,10 @@ export function RecapitulatifPage({
 			</section>
 
 			<Link
-				className={`fr-btn ${isCorrection ? "fr-btn--secondary" : "fr-btn--primary"} ${styles.primaryAction}`}
+				className={`fr-btn fr-btn--secondary ${styles.bottomAction}`}
 				href="/mon-espace"
 			>
-				{isCorrection ? "Mon espace" : "Retour à Mon Espace"}
+				Mon espace
 			</Link>
 		</div>
 	);

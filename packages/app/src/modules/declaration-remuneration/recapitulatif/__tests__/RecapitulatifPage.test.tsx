@@ -61,7 +61,7 @@ describe("RecapitulatifPage", () => {
 		expect(
 			screen.queryByRole("navigation", { name: /vous êtes ici/i }),
 		).not.toBeInTheDocument();
-		// The bottom action is the full "Retour à Mon Espace" button — there is
+		// The bottom action is the full "Mon espace" button — there is
 		// no standalone top "Retour" breadcrumb link.
 		expect(
 			screen.queryByRole("link", { name: "Retour" }),
@@ -375,14 +375,22 @@ describe("RecapitulatifPage", () => {
 		expect(screen.getByText("Accord d'entreprise")).toBeInTheDocument();
 	});
 
-	it("renders primary 'Retour à Mon Espace' button linking to mon-espace", () => {
-		render(<RecapitulatifPage {...defaultProps()} />);
-		const returnLink = screen.getByRole("link", {
-			name: "Retour à Mon Espace",
-		});
+	// The Figma reference shows a single secondary "Mon espace" instance, so the
+	// bottom action must not vary with isCorrection.
+	it.each([
+		false,
+		true,
+	])("renders the same secondary 'Mon espace' bottom action (isCorrection: %s)", (isCorrection) => {
+		render(
+			<RecapitulatifPage {...defaultProps()} isCorrection={isCorrection} />,
+		);
+		const returnLink = screen.getByRole("link", { name: "Mon espace" });
 		expect(returnLink).toHaveAttribute("href", "/mon-espace");
-		expect(returnLink.className).toContain("fr-btn--primary");
-		expect(returnLink.className).not.toContain("fr-btn--secondary");
+		expect(returnLink.className).toContain("fr-btn--secondary");
+		expect(returnLink.className).not.toContain("fr-btn--primary");
+		expect(
+			screen.queryByRole("link", { name: "Retour à Mon Espace" }),
+		).not.toBeInTheDocument();
 	});
 
 	it("does not render its own ResourceBanner (PublicChrome handles it)", () => {
