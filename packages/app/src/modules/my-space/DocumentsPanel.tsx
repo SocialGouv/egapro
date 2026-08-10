@@ -1,6 +1,6 @@
 "use client";
 
-import { getReferenceYearFor } from "~/modules/domain";
+import { getReferenceYearFor, isDeclarationSubmitted } from "~/modules/domain";
 import { DownloadStatusRegion, useDownloadClickGuard } from "~/modules/shared";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { DeclarationItem } from "./types";
@@ -31,7 +31,7 @@ function getResources(declaration: DeclarationItem): DocumentResource[] {
 		});
 	}
 
-	if (declaration.status === "done") {
+	if (isDeclarationSubmitted(declaration.fsmStatus)) {
 		resources.push({
 			title: "Télécharger le récapitulatif de la déclaration des indicateurs",
 			subtitle,

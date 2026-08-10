@@ -1,7 +1,11 @@
 import { act, fireEvent, render, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getReferenceYearFor } from "~/modules/domain";
+import {
+	computeDeclarationStatus,
+	DECLARATION_FSM_STATUSES,
+	getReferenceYearFor,
+} from "~/modules/domain";
 import {
 	failingFetch,
 	getLiveRegion,
@@ -24,16 +28,23 @@ const RECAP_TITLE =
 const TRANSMITTED_TITLE = "Télécharger le récapitulatif des éléments transmis";
 const SECOND_TITLE = "Télécharger le récapitulatif de la seconde déclaration";
 
-function makeDeclaration(
-	overrides: Partial<DeclarationItem> = {},
-): DeclarationItem {
-	return {
+const SUBMITTED_FSM_STATUSES = DECLARATION_FSM_STATUSES.filter(
+	(fsmStatus) => fsmStatus !== "draft",
+);
+const UNSUBMITTED_FSM_STATUSES = [null, "draft"] as const;
+
+// `status` is derived from the FSM state so no fixture can pair a "done" status
+// with a non-terminal fsmStatus — a combination production never produces.
+function makeDeclaration({
+	fsmStatus = "demarche_completed",
+	...overrides
+}: Partial<Omit<DeclarationItem, "status">> = {}): DeclarationItem {
+	const declaration: Omit<DeclarationItem, "status"> = {
 		type: "remuneration",
 		siren: "123456789",
 		year: DECLARATION_YEAR,
-		status: "done",
-		fsmStatus: null,
-		currentStep: 5,
+		fsmStatus,
+		currentStep: fsmStatus === null ? 0 : 6,
 		updatedAt: null,
 		firstDeclarationPathChoice: null,
 		secondDeclarationPathChoice: null,
@@ -44,11 +55,19 @@ function makeDeclaration(
 		hasPrefillData: false,
 		...overrides,
 	};
+
+	return {
+		...declaration,
+		status: computeDeclarationStatus({
+			status: declaration.fsmStatus,
+			currentStep: declaration.currentStep,
+		}),
+	};
 }
 
 // The panel is a closed <dialog>, so its subtree is display:none and role
 // queries must opt into hidden elements.
-function renderPanel(overrides: Partial<DeclarationItem> = {}) {
+function renderPanel(overrides: Partial<Omit<DeclarationItem, "status">> = {}) {
 	const { container } = render(
 		<DocumentsPanel declaration={makeDeclaration(overrides)} />,
 	);
@@ -95,22 +114,37 @@ describe("getDocumentResourceCount", () => {
 		).toBe(0);
 	});
 
-	it("counts no resource for a remuneration declaration still in progress", () => {
-		expect(
-			getDocumentResourceCount(makeDeclaration({ status: "in_progress" })),
-		).toBe(0);
+	it.each(
+		UNSUBMITTED_FSM_STATUSES,
+	)("counts no resource while the declaration is not submitted (%s)", (fsmStatus) => {
+		expect(getDocumentResourceCount(makeDeclaration({ fsmStatus }))).toBe(0);
 	});
 
-	it("counts the prefill resource as soon as DSN data exists", () => {
+	it.each(
+		UNSUBMITTED_FSM_STATUSES,
+	)("counts the prefill resource alone as long as the declaration is not submitted (%s)", (fsmStatus) => {
 		expect(
 			getDocumentResourceCount(
-				makeDeclaration({ status: "in_progress", hasPrefillData: true }),
+				makeDeclaration({ fsmStatus, hasPrefillData: true }),
 			),
 		).toBe(1);
 	});
 
-	it("counts the recap and transmitted resources once the declaration is done", () => {
-		expect(getDocumentResourceCount(makeDeclaration())).toBe(2);
+	it.each(
+		SUBMITTED_FSM_STATUSES,
+	)("counts both recap resources once the declaration is submitted (%s)", (fsmStatus) => {
+		expect(getDocumentResourceCount(makeDeclaration({ fsmStatus }))).toBe(2);
+	});
+
+	it("counts the prefill and both recaps while the compliance path choice is pending", () => {
+		expect(
+			getDocumentResourceCount(
+				makeDeclaration({
+					fsmStatus: "awaiting_compliance_path_choice",
+					hasPrefillData: true,
+				}),
+			),
+		).toBe(3);
 	});
 
 	it("counts every resource when the second declaration was submitted", () => {
@@ -170,7 +204,7 @@ describe("DocumentsPanel", () => {
 		]);
 	});
 
-	it("points each card at its own PDF route and dates it with the workforce year", () => {
+	it("points each card at its own PDF route and dates it with the reference year", () => {
 		const { panel, links } = renderPanel({
 			hasPrefillData: true,
 			hasSubmittedSecondDeclaration: true,
@@ -195,13 +229,25 @@ describe("DocumentsPanel", () => {
 		]);
 	});
 
-	it("omits the recap cards while the declaration is not done", () => {
+	it.each(
+		UNSUBMITTED_FSM_STATUSES,
+	)("omits the recap cards while the declaration is not submitted (%s)", (fsmStatus) => {
+		const { links } = renderPanel({ fsmStatus, hasPrefillData: true });
+
+		expect(links().map((link) => link.textContent)).toEqual([PREFILL_TITLE]);
+	});
+
+	it("offers both recap cards as soon as the declaration is submitted, long before the démarche ends", () => {
 		const { links } = renderPanel({
-			status: "in_progress",
+			fsmStatus: "awaiting_compliance_path_choice",
 			hasPrefillData: true,
 		});
 
-		expect(links().map((link) => link.textContent)).toEqual([PREFILL_TITLE]);
+		expect(links().map((link) => link.textContent)).toEqual([
+			PREFILL_TITLE,
+			RECAP_TITLE,
+			TRANSMITTED_TITLE,
+		]);
 	});
 
 	it("triggers a single fetch for a burst of clicks fired before the re-render", async () => {
