@@ -5,6 +5,12 @@ on:
       - "**"
       - "!dependabot/**"
       - "!master"
+      # Persistent test envs (rgaa-persist, perf-persist) are deployed only by
+      # promote-test-env.yaml, which builds from a release tag — that is what
+      # makes their footer link to the release changelog. A push here would
+      # rebuild them with APP_VERSION=<branch> and break that. Same exclusion
+      # convention as deactivate.yaml.
+      - "!**-persist"
 
 concurrency:
   cancel-in-progress: true

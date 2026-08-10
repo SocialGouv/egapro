@@ -46,6 +46,7 @@ export function FooterBottom() {
 						Paramètres d'affichage
 					</button>
 				</li>
+				<AppVersion />
 			</ul>
 			<div className="fr-footer__bottom-copy">
 				<p>
@@ -59,7 +60,6 @@ export function FooterBottom() {
 						<NewTabNotice />
 					</a>
 				</p>
-				<AppVersion />
 			</div>
 		</div>
 	);

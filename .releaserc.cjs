@@ -86,6 +86,14 @@ module.exports = {
     ["@semantic-release/commit-analyzer", conventionalPreset],
     ["@semantic-release/release-notes-generator", conventionalPreset],
     ...(COMMIT_PLUGIN_BRANCHES.includes(branch) ? commitPlugins : []),
-    "@semantic-release/github",
+    [
+      "@semantic-release/github",
+      {
+        // The default only carries the channel (`released on @alpha`), which
+        // never says which prerelease an issue shipped in. Labels are lodash
+        // templates rendered with the semantic-release context.
+        releasedLabels: ["released <%= nextRelease.gitTag %>"],
+      },
+    ],
   ],
 }

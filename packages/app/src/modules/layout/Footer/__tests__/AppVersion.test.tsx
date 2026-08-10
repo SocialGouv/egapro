@@ -26,6 +26,37 @@ describe("AppVersion", () => {
 		expect(container).toBeEmptyDOMElement();
 	});
 
+	it("renders as a list item so it can sit in the footer bottom link list", async () => {
+		const Comp = await withEnv({
+			NEXT_PUBLIC_APP_VERSION: "v4.0.0-alpha.1",
+			NEXT_PUBLIC_PR_NUMBER: undefined,
+		});
+		render(
+			<ul>
+				<Comp />
+			</ul>,
+		);
+		expect(screen.getByRole("listitem")).toContainElement(
+			screen.getByRole("link"),
+		);
+	});
+
+	it("names the destination in the accessible name, not only in a title", async () => {
+		const Comp = await withEnv({
+			NEXT_PUBLIC_APP_VERSION: "v4.0.0-alpha.1",
+			NEXT_PUBLIC_PR_NUMBER: undefined,
+		});
+		render(
+			<ul>
+				<Comp />
+			</ul>,
+		);
+		const link = screen.getByRole("link", {
+			name: /^Version v4\.0\.0-alpha\.1.*code source sur GitHub/,
+		});
+		expect(link).not.toHaveAttribute("title");
+	});
+
 	it("links to the release page for a git tag (production)", async () => {
 		const Comp = await withEnv({
 			NEXT_PUBLIC_APP_VERSION: "v3.14.0-alpha.11",
