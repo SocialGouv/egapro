@@ -1,3 +1,5 @@
+import type { GipGapReference } from "~/modules/domain";
+
 export type WorkforceRow = {
 	name: string;
 	women: number;
@@ -57,6 +59,8 @@ export type PayGapRow = {
 	label: string;
 	womenValue: string;
 	menValue: string;
+	/** GIP-supplied gap for this row, authoritative while both operands stay untouched. */
+	gipReference?: GipGapReference;
 };
 
 export type EmployeeCategoryRow = {

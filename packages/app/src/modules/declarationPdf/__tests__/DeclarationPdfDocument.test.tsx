@@ -101,6 +101,7 @@ vi.mock("../sections/PayGapTable", async () => {
 	};
 });
 
+import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { DeclarationPdfDocument } from "../DeclarationPdfDocument";
 
 function makeData(
@@ -130,6 +131,8 @@ function makeData(
 		step2Data: emptyStep2Data(),
 		step3Data: emptyStep3Data(),
 		step4Data: emptyStep4Data(),
+		step2Gaps: noPayGapReferences(),
+		step3Gaps: noPayGapReferences(),
 		categories: [makeCategory({ name: "Ouvriers" })],
 		source: "Accord d'entreprise",
 		...overrides,

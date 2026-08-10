@@ -4,10 +4,8 @@ import { notFound } from "next/navigation";
 import { RecapitulatifPage } from "~/modules/declaration-remuneration/recapitulatif";
 import { getReferencePeriod, isDraft } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
-import {
-	mapToEmployeeCategoryRows,
-	mapToStepData,
-} from "~/server/api/routers/declarationHelpers";
+import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
+import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { auth } from "~/server/auth";
 import { getEffectiveSiren } from "~/server/auth/companyAccess";
 import { api } from "~/trpc/server";
@@ -51,7 +49,8 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 		if (isDraft(d.status)) notFound();
 	}
 
-	const { step2Data, step3Data, step4Data } = mapToStepData(d);
+	const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =
+		mapToStepData(d);
 
 	const referencePeriod = getReferencePeriod(d.year);
 
@@ -108,7 +107,9 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 							isCorrection={isCorrection}
 							referencePeriod={referencePeriod}
 							step2Data={step2Data}
+							step2Gaps={step2Gaps}
 							step3Data={step3Data}
+							step3Gaps={step3Gaps}
 							step4Data={step4Data}
 							step5Categories={step5Categories}
 							step5Source={step5Source}

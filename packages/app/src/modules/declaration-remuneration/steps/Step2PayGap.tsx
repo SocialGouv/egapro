@@ -20,7 +20,11 @@ import { FormErrors } from "../shared/FormErrors";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { gipToStep2 } from "../shared/gipToStepData";
-import { getStep2FieldName, step2ToRows } from "../shared/indicatorRowMapping";
+import {
+	getStep2FieldName,
+	gipPayGapReferences,
+	step2ToRows,
+} from "../shared/indicatorRowMapping";
 import { useLockContext } from "../shared/lock/LockContext";
 import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
@@ -98,7 +102,10 @@ export function Step2PayGap({
 	);
 
 	const formData = form.watch();
-	const rows = step2ToRows(formData as Step2Data);
+	const rows = step2ToRows(
+		formData as Step2Data,
+		gipPayGapReferences(gipPrefillData?.step2),
+	);
 
 	const hasData = hasInitialData || hasDraft;
 	const [validationError, setValidationError] = useState<string | null>(null);

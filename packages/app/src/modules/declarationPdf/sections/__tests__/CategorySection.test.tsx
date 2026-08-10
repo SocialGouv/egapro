@@ -15,6 +15,7 @@ vi.mock("@react-pdf/renderer", async () => {
 	};
 });
 
+import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { CategorySection } from "../CategorySection";
 
 function makeData(overrides: Partial<DeclarationPdfData>): DeclarationPdfData {
@@ -38,6 +39,8 @@ function makeData(overrides: Partial<DeclarationPdfData>): DeclarationPdfData {
 		step2Data: {} as DeclarationPdfData["step2Data"],
 		step3Data: {} as DeclarationPdfData["step3Data"],
 		step4Data: { annual: [], hourly: [] },
+		step2Gaps: noPayGapReferences(),
+		step3Gaps: noPayGapReferences(),
 		categories: [],
 		source: null,
 		...overrides,

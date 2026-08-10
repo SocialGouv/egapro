@@ -30,10 +30,8 @@ import {
 	parseGipWorkforce,
 	toDisplayWorkforce,
 } from "~/modules/domain";
-import {
-	mapToEmployeeCategoryRows,
-	mapToStepData,
-} from "~/server/api/routers/declarationHelpers";
+import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
+import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
 	companies,
@@ -420,7 +418,8 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					: [];
 
 			const d = row.declaration;
-			const { step2Data, step3Data, step4Data } = mapToStepData(d);
+			const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =
+				mapToStepData(d);
 			const step5Categories = mapToEmployeeCategoryRows(
 				jobs,
 				empCats,
@@ -450,6 +449,8 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				step2Data,
 				step3Data,
 				step4Data,
+				step2Gaps,
+				step3Gaps,
 				step5Categories,
 				step5Source,
 			};

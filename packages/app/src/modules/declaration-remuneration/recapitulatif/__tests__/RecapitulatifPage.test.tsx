@@ -1,6 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
+import {
+	DIVERGENT_HOURLY_MEDIAN,
+	noPayGapReferences,
+} from "~/test/gipGapFixtures";
 import { RecapitulatifPage } from "../RecapitulatifPage";
 import {
 	defaultCompany,
@@ -191,6 +195,50 @@ describe("RecapitulatifPage", () => {
 		expect(
 			screen.getAllByText("Horaire brute médiane").length,
 		).toBeGreaterThanOrEqual(1);
+	});
+
+	// The recap is a read-only surface: it must print the gap that was recorded
+	// and published, not a fresh recomputation that can drift from it.
+	it("shows the recorded GIP gap rather than recomputing it from the operands", () => {
+		const { women, men, gap } = DIVERGENT_HOURLY_MEDIAN;
+		const gaps = noPayGapReferences();
+		gaps[3] = { women, men, gap };
+
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				step3Data={{
+					...emptyStep3Data(),
+					indicatorDHourlyWomen: women,
+					indicatorDHourlyMen: men,
+				}}
+				step3Gaps={gaps}
+			/>,
+		);
+
+		expect(screen.getByText("7,19 %")).toBeInTheDocument();
+		expect(screen.queryByText("0,00 %")).not.toBeInTheDocument();
+	});
+
+	it("recomputes the recap gap once an operand no longer matches the GIP one", () => {
+		const { women, men, gap } = DIVERGENT_HOURLY_MEDIAN;
+		const gaps = noPayGapReferences();
+		gaps[3] = { women, men, gap };
+
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				step3Data={{
+					...emptyStep3Data(),
+					indicatorDHourlyWomen: women,
+					indicatorDHourlyMen: "0.12",
+				}}
+				step3Gaps={gaps}
+			/>,
+		);
+
+		expect(screen.getByText("16,66 %")).toBeInTheDocument();
+		expect(screen.queryByText("7,19 %")).not.toBeInTheDocument();
 	});
 
 	it("renders proportion table when step3 indicatorE values are present", () => {

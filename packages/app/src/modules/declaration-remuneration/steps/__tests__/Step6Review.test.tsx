@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
+import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { Step6Review } from "../Step6Review";
 
 const mockSubmitMutate = vi.fn();
@@ -99,7 +100,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[
 					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
@@ -120,7 +123,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[
 					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
@@ -140,7 +145,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -157,7 +164,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -177,7 +186,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -192,7 +203,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -222,7 +235,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -237,7 +252,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -253,7 +270,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -278,7 +297,9 @@ describe("Step6Review", () => {
 					indicatorCHourlyWomen: "80",
 					indicatorCHourlyMen: "100",
 				}}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[
 					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
@@ -307,7 +328,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -323,6 +346,7 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={{
 					indicatorBAnnualWomen: "95",
 					indicatorBAnnualMen: "100",
@@ -335,6 +359,7 @@ describe("Step6Review", () => {
 					indicatorEWomen: "45",
 					indicatorEMen: "55",
 				}}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				totalMen={100}
 				totalWomen={90}
@@ -354,7 +379,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={{
 					annual: [
 						{ threshold: "1000", women: 46, men: 54 },
@@ -390,7 +417,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[
 					makeCategory({
@@ -431,7 +460,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -449,7 +480,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired={false}
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -467,7 +500,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -485,7 +520,9 @@ describe("Step6Review", () => {
 				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -508,7 +545,9 @@ describe("Step6Review", () => {
 				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -527,7 +566,9 @@ describe("Step6Review", () => {
 				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -550,7 +591,9 @@ describe("Step6Review", () => {
 				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -579,7 +622,9 @@ describe("Step6Review", () => {
 					indicatorCHourlyWomen: "100",
 					indicatorCHourlyMen: "100",
 				}}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[
 					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
@@ -621,7 +666,9 @@ describe("Step6Review", () => {
 					indicatorCHourlyWomen: "100",
 					indicatorCHourlyMen: "100",
 				}}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -636,7 +683,9 @@ describe("Step6Review", () => {
 				declarationYear={2025}
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[
 					makeCategory({ annualBaseWomen: "110", annualBaseMen: "100" }),
@@ -664,7 +713,9 @@ describe("Step6Review", () => {
 					indicatorCHourlyWomen: "99",
 					indicatorCHourlyMen: "100",
 				}}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[
 					makeCategory({ annualBaseWomen: "98", annualBaseMen: "100" }),
@@ -691,7 +742,9 @@ describe("Step6Review", () => {
 					indicatorCHourlyWomen: "100",
 					indicatorCHourlyMen: "100",
 				}}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[
 					makeCategory({ annualBaseWomen: "98", annualBaseMen: "100" }),
@@ -720,7 +773,9 @@ describe("Step6Review", () => {
 					indicatorCHourlyWomen: "100",
 					indicatorCHourlyMen: "100",
 				}}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[
 					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
@@ -748,7 +803,9 @@ describe("Step6Review", () => {
 					indicatorCHourlyWomen: "100",
 					indicatorCHourlyMen: "100",
 				}}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[
 					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
@@ -775,7 +832,9 @@ describe("Step6Review", () => {
 					indicatorCHourlyWomen: "100",
 					indicatorCHourlyMen: "100",
 				}}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[
 					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
@@ -797,7 +856,9 @@ describe("Step6Review", () => {
 					hasCse={hasCse}
 					indicatorGRequired
 					step2Data={emptyStep2Data()}
+					step2Gaps={noPayGapReferences()}
 					step3Data={emptyStep3Data()}
+					step3Gaps={noPayGapReferences()}
 					step4Data={emptyStep4Data()}
 					step5Categories={[
 						makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),

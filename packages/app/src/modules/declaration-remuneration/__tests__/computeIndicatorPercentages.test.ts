@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { DIVERGENT_HOURLY_MEDIAN, makeGipRow } from "~/test/gipGapFixtures";
 import { computeIndicatorPercentages } from "../shared/computeIndicatorPercentages";
 
 // totalWomen/totalMen are deliberately different from the indicator E
@@ -265,6 +266,120 @@ describe("computeIndicatorPercentages", () => {
 				totalWomen: 3,
 			});
 			expect(result.variableProportionWomen).toBe(0.3333);
+		});
+	});
+
+	describe("GIP gaps — read rather than recomputed", () => {
+		// The GIP row carries the same operands as `nominalRow` but publishes gaps
+		// that a recomputation would never produce, so every assertion below can
+		// tell "read the GIP column" apart from "recomputed from the operands".
+		const gipRow = makeGipRow({
+			globalAnnualMeanWomen: "100",
+			globalAnnualMeanMen: "110",
+			globalAnnualMeanGap: "0.5001",
+			globalHourlyMeanWomen: "20",
+			globalHourlyMeanMen: "22",
+			globalHourlyMeanGap: "0.5002",
+			variableAnnualMeanWomen: "50",
+			variableAnnualMeanMen: "55",
+			variableAnnualMeanGap: "0.5003",
+			variableHourlyMeanWomen: "10",
+			variableHourlyMeanMen: "11",
+			variableHourlyMeanGap: "0.5004",
+			globalAnnualMedianWomen: "95",
+			globalAnnualMedianMen: "105",
+			globalAnnualMedianGap: "0.5005",
+			globalHourlyMedianWomen: "18",
+			globalHourlyMedianMen: "20",
+			globalHourlyMedianGap: "0.5006",
+			variableAnnualMedianWomen: "45",
+			variableAnnualMedianMen: "50",
+			variableAnnualMedianGap: "0.5007",
+			variableHourlyMedianWomen: "9",
+			variableHourlyMedianMen: "10",
+			variableHourlyMedianGap: "0.5008",
+		});
+
+		it("recomputes all 8 gaps when no GIP row is passed", () => {
+			const result = computeIndicatorPercentages(nominalRow);
+			expect(result.globalAnnualMeanGap).toBeCloseTo((110 - 100) / 110);
+			expect(result.variableHourlyMedianGap).toBeCloseTo((10 - 9) / 10);
+		});
+
+		it("recomputes all 8 gaps when the GIP row is null", () => {
+			const result = computeIndicatorPercentages(nominalRow, null);
+			expect(result.globalAnnualMeanGap).toBeCloseTo((110 - 100) / 110);
+			expect(result.variableHourlyMedianGap).toBeCloseTo((10 - 9) / 10);
+		});
+
+		it("reads all 8 gaps from the GIP row while the operands are untouched", () => {
+			const result = computeIndicatorPercentages(nominalRow, gipRow);
+			expect(result.globalAnnualMeanGap).toBe(0.5001);
+			expect(result.globalHourlyMeanGap).toBe(0.5002);
+			expect(result.variableAnnualMeanGap).toBe(0.5003);
+			expect(result.variableHourlyMeanGap).toBe(0.5004);
+			expect(result.globalAnnualMedianGap).toBe(0.5005);
+			expect(result.globalHourlyMedianGap).toBe(0.5006);
+			expect(result.variableAnnualMedianGap).toBe(0.5007);
+			expect(result.variableHourlyMedianGap).toBe(0.5008);
+		});
+
+		it("recomputes only the modified indicator and leaves the other 7 on the GIP value", () => {
+			const result = computeIndicatorPercentages(
+				{ ...nominalRow, indicatorAAnnualWomen: "90" },
+				gipRow,
+			);
+			expect(result.globalAnnualMeanGap).toBeCloseTo((110 - 90) / 110);
+			expect(result.globalHourlyMeanGap).toBe(0.5002);
+			expect(result.variableAnnualMeanGap).toBe(0.5003);
+			expect(result.variableHourlyMeanGap).toBe(0.5004);
+			expect(result.globalAnnualMedianGap).toBe(0.5005);
+			expect(result.globalHourlyMedianGap).toBe(0.5006);
+			expect(result.variableAnnualMedianGap).toBe(0.5007);
+			expect(result.variableHourlyMedianGap).toBe(0.5008);
+		});
+
+		it("keeps the GIP gap when an operand is re-saved with a different precision", () => {
+			const result = computeIndicatorPercentages(
+				{ ...nominalRow, indicatorAAnnualWomen: "100.00" },
+				gipRow,
+			);
+			expect(result.globalAnnualMeanGap).toBe(0.5001);
+		});
+
+		it("recomputes an indicator the GIP row has no gap for", () => {
+			const result = computeIndicatorPercentages(
+				nominalRow,
+				makeGipRow({ ...gipRow, globalAnnualMeanGap: null }),
+			);
+			expect(result.globalAnnualMeanGap).toBeCloseTo((110 - 100) / 110);
+			expect(result.globalHourlyMeanGap).toBe(0.5002);
+		});
+
+		it("returns null for an indicator whose declared operand is missing, GIP row or not", () => {
+			const result = computeIndicatorPercentages(
+				{ ...nominalRow, indicatorAAnnualWomen: null },
+				gipRow,
+			);
+			expect(result.globalAnnualMeanGap).toBeNull();
+		});
+
+		// End-to-end on the real divergence: 0,10 € vs 0,10 € recomputes to a flat
+		// 0 % while the GIP published 7,19 % — the persisted column must show 7,19 %.
+		it("persists the GIP gap where recomputation would flatten it to zero", () => {
+			const result = computeIndicatorPercentages(
+				{
+					...nominalRow,
+					indicatorDHourlyWomen: DIVERGENT_HOURLY_MEDIAN.women,
+					indicatorDHourlyMen: DIVERGENT_HOURLY_MEDIAN.men,
+				},
+				makeGipRow({
+					variableHourlyMedianWomen: DIVERGENT_HOURLY_MEDIAN.women,
+					variableHourlyMedianMen: DIVERGENT_HOURLY_MEDIAN.men,
+					variableHourlyMedianGap: DIVERGENT_HOURLY_MEDIAN.gap,
+				}),
+			);
+			expect(result.variableHourlyMedianGap).toBeCloseTo(0.0719);
 		});
 	});
 });

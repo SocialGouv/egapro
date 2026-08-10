@@ -46,6 +46,7 @@ vi.mock("../steps/Step6Review", () => ({
 	Step6Review: () => <div data-testid="step-6" />,
 }));
 
+import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { StepPageClient } from "../StepPageClient";
 
 const useSessionMock = useSession as unknown as Mock;
@@ -67,6 +68,8 @@ const baseProps = {
 	step2Data: {} as never,
 	step3Data: {} as never,
 	step4Data: {} as never,
+	step2Gaps: noPayGapReferences(),
+	step3Gaps: noPayGapReferences(),
 	step5Categories: [],
 };
 

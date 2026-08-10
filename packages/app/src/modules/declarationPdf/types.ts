@@ -1,5 +1,6 @@
 import type {
 	EmployeeCategoryRow,
+	PayGapReferences,
 	Step2Data,
 	Step3Data,
 	Step4Data,
@@ -33,6 +34,9 @@ export type DeclarationPdfData = {
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
+	/** Persisted gaps for steps 2 and 3 — printed as recorded rather than recomputed. */
+	step2Gaps: PayGapReferences;
+	step3Gaps: PayGapReferences;
 	categories: EmployeeCategoryRow[];
 	source: string | null;
 };

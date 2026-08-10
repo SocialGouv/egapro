@@ -6,6 +6,10 @@ import type {
 	Step3Data,
 	Step4Data,
 } from "~/modules/declaration-remuneration/types";
+import {
+	DIVERGENT_HOURLY_MEDIAN,
+	noPayGapReferences,
+} from "~/test/gipGapFixtures";
 import { IndicatorSections } from "../IndicatorSections";
 
 const emptyStep2Data = (): Step2Data => ({
@@ -48,7 +52,9 @@ describe("IndicatorSections", () => {
 			<IndicatorSections
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={step3WithProportion("95", "80")}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[]}
 				totalMen={100}
@@ -67,7 +73,9 @@ describe("IndicatorSections", () => {
 			<IndicatorSections
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={step3WithProportion("95", "80")}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[]}
 				totalMen={0}
@@ -84,7 +92,9 @@ describe("IndicatorSections", () => {
 			<IndicatorSections
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={step3WithProportion("95", "80")}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[]}
 			/>,
@@ -93,12 +103,71 @@ describe("IndicatorSections", () => {
 		expect(screen.getAllByText("- %")).toHaveLength(2);
 	});
 
+	// Step 6 is the last screen before submitting: the gap reviewed here has to be
+	// the one that will be recorded, so it reads the GIP value like every other
+	// read-only surface instead of recomputing from the rounded operands.
+	it("shows the GIP gap for the row it was published for", () => {
+		const { women, men, gap } = DIVERGENT_HOURLY_MEDIAN;
+		const step3Gaps = noPayGapReferences();
+		step3Gaps[3] = { women, men, gap };
+
+		render(
+			<IndicatorSections
+				indicatorGRequired
+				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
+				step3Data={{
+					...step3WithProportion("95", "80"),
+					indicatorDHourlyWomen: women,
+					indicatorDHourlyMen: men,
+				}}
+				step3Gaps={step3Gaps}
+				step4Data={emptyStep4Data()}
+				step5Categories={[]}
+				totalMen={100}
+				totalWomen={200}
+			/>,
+		);
+
+		expect(screen.getByText("7,19 %")).toBeInTheDocument();
+		expect(screen.queryByText("0,00 %")).not.toBeInTheDocument();
+	});
+
+	it("recomputes the reviewed gap once an operand no longer matches the GIP one", () => {
+		const { women, men, gap } = DIVERGENT_HOURLY_MEDIAN;
+		const step3Gaps = noPayGapReferences();
+		step3Gaps[3] = { women, men, gap };
+
+		render(
+			<IndicatorSections
+				indicatorGRequired
+				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
+				step3Data={{
+					...step3WithProportion("95", "80"),
+					indicatorDHourlyWomen: women,
+					indicatorDHourlyMen: "0.12",
+				}}
+				step3Gaps={step3Gaps}
+				step4Data={emptyStep4Data()}
+				step5Categories={[]}
+				totalMen={100}
+				totalWomen={200}
+			/>,
+		);
+
+		expect(screen.getByText("16,66 %")).toBeInTheDocument();
+		expect(screen.queryByText("7,19 %")).not.toBeInTheDocument();
+	});
+
 	it("renders the per-category indicator section when indicatorGRequired is true", () => {
 		render(
 			<IndicatorSections
 				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={step3WithProportion("95", "80")}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[]}
 			/>,
@@ -117,7 +186,9 @@ describe("IndicatorSections", () => {
 			<IndicatorSections
 				indicatorGRequired={false}
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={step3WithProportion("95", "80")}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[]}
 			/>,

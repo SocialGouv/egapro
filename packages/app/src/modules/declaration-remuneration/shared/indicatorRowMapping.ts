@@ -1,4 +1,6 @@
+import type { GipGapReference } from "~/modules/domain";
 import type { PayGapRow, Step2Data, Step3Data } from "../types";
+import type { GipPrefillData } from "./gipMdsMapping";
 
 const PAY_GAP_LABELS = [
 	"Annuelle brute moyenne",
@@ -6,6 +8,50 @@ const PAY_GAP_LABELS = [
 	"Annuelle brute médiane",
 	"Horaire brute médiane",
 ] as const;
+
+/** Authoritative gaps for the 4 pay-gap rows, in the same order as `PAY_GAP_LABELS`. */
+export type PayGapReferences = [
+	GipGapReference | undefined,
+	GipGapReference | undefined,
+	GipGapReference | undefined,
+	GipGapReference | undefined,
+];
+
+const NO_REFERENCES: PayGapReferences = [
+	undefined,
+	undefined,
+	undefined,
+	undefined,
+];
+
+/** Projects a GIP pre-fill block onto the 4 pay-gap rows. */
+export function gipPayGapReferences(
+	gip: GipPrefillData["step2"] | GipPrefillData["step3"] | null | undefined,
+): PayGapReferences {
+	if (!gip) return NO_REFERENCES;
+	return [
+		{
+			women: gip.annualMeanWomen,
+			men: gip.annualMeanMen,
+			gap: gip.annualMeanGap,
+		},
+		{
+			women: gip.hourlyMeanWomen,
+			men: gip.hourlyMeanMen,
+			gap: gip.hourlyMeanGap,
+		},
+		{
+			women: gip.annualMedianWomen,
+			men: gip.annualMedianMen,
+			gap: gip.annualMedianGap,
+		},
+		{
+			women: gip.hourlyMedianWomen,
+			men: gip.hourlyMedianMen,
+			gap: gip.hourlyMedianGap,
+		},
+	];
+}
 
 type Step2Field = keyof Step2Data;
 type Step3PayGapField = Exclude<
@@ -30,24 +76,32 @@ const STEP3_FIELD_MAP: Array<{
 	{ women: "indicatorDHourlyWomen", men: "indicatorDHourlyMen" },
 ];
 
-export function step2ToRows(data: Step2Data): PayGapRow[] {
+export function step2ToRows(
+	data: Step2Data,
+	references: PayGapReferences = NO_REFERENCES,
+): PayGapRow[] {
 	return PAY_GAP_LABELS.map((label, i) => {
 		const mapping = STEP2_FIELD_MAP[i];
 		return {
 			label,
 			womenValue: mapping ? (data[mapping.women] ?? "") : "",
 			menValue: mapping ? (data[mapping.men] ?? "") : "",
+			gipReference: references[i],
 		};
 	});
 }
 
-export function step3ToRows(data: Step3Data): PayGapRow[] {
+export function step3ToRows(
+	data: Step3Data,
+	references: PayGapReferences = NO_REFERENCES,
+): PayGapRow[] {
 	return PAY_GAP_LABELS.map((label, i) => {
 		const mapping = STEP3_FIELD_MAP[i];
 		return {
 			label,
 			womenValue: mapping ? (data[mapping.women] ?? "") : "",
 			menValue: mapping ? (data[mapping.men] ?? "") : "",
+			gipReference: references[i],
 		};
 	});
 }

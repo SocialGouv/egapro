@@ -1,11 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import { declarations } from "~/server/db/schema";
+import { declarations, gipMdsData } from "~/server/db/schema";
+import { makeGipRow } from "~/test/gipGapFixtures";
 import {
 	activeDeclarationFilter,
+	applyPercentagesAfterUpdate,
 	buildEmployeeCategoryValues,
 	mapToEmployeeCategoryRows,
-	mapToStepData,
 } from "../declarationHelpers";
+import { mapToStepData } from "../declarationStepMapping";
 
 describe("activeDeclarationFilter", () => {
 	it("filters siren, year, and cancelled_at IS NULL", async () => {
@@ -337,6 +339,93 @@ describe("deleteJobAndEmployeeCategories", () => {
 	});
 });
 
+describe("applyPercentagesAfterUpdate", () => {
+	const declarationRow = {
+		indicatorAAnnualWomen: "100",
+		indicatorAAnnualMen: "110",
+		indicatorAHourlyWomen: "20",
+		indicatorAHourlyMen: "22",
+		indicatorBAnnualWomen: "50",
+		indicatorBAnnualMen: "55",
+		indicatorBHourlyWomen: "10",
+		indicatorBHourlyMen: "11",
+		indicatorCAnnualWomen: "95",
+		indicatorCAnnualMen: "105",
+		indicatorCHourlyWomen: "18",
+		indicatorCHourlyMen: "20",
+		indicatorDAnnualWomen: "45",
+		indicatorDAnnualMen: "50",
+		indicatorDHourlyWomen: "9",
+		indicatorDHourlyMen: "10",
+	};
+
+	/**
+	 * A tx whose `select()` dispatches on the table handed to `from()`, so the
+	 * declaration and GIP reads are driven by the data each returns rather than
+	 * by call order.
+	 */
+	function makeTx(gipRows: unknown[]) {
+		const set = vi
+			.fn()
+			.mockReturnValue({ where: vi.fn().mockResolvedValue([]) });
+		const tx = {
+			select: () => ({
+				from: (table: unknown) => ({
+					where: () => ({
+						limit: () =>
+							Promise.resolve(
+								table === gipMdsData ? gipRows : [declarationRow],
+							),
+					}),
+				}),
+			}),
+			update: () => ({ set }),
+		};
+		return { tx, set };
+	}
+
+	it("persists the GIP gaps when a GIP row exists for the siren and year", async () => {
+		const { tx, set } = makeTx([
+			makeGipRow({
+				globalAnnualMeanWomen: "100",
+				globalAnnualMeanMen: "110",
+				globalAnnualMeanGap: "0.4242",
+			}),
+		]);
+
+		await applyPercentagesAfterUpdate(tx as never, "123456789", 2025);
+
+		expect(set).toHaveBeenCalledTimes(1);
+		expect(set.mock.calls[0]?.[0]).toMatchObject({
+			globalAnnualMeanGap: "0.4242",
+		});
+	});
+
+	it("recomputes every gap when the siren has no GIP row", async () => {
+		const { tx, set } = makeTx([]);
+
+		await applyPercentagesAfterUpdate(tx as never, "123456789", 2025);
+
+		expect(set.mock.calls[0]?.[0]).toMatchObject({
+			globalAnnualMeanGap: ((110 - 100) / 110).toString(),
+		});
+	});
+
+	it("writes nothing when the declaration no longer exists", async () => {
+		const set = vi.fn();
+		const tx = {
+			select: () => ({
+				from: () => ({ where: () => ({ limit: () => Promise.resolve([]) }) }),
+			}),
+			update: () => ({ set }),
+		};
+
+		await applyPercentagesAfterUpdate(tx as never, "123456789", 2025);
+
+		expect(set).not.toHaveBeenCalled();
+	});
+});
+
 describe("mapToStepData", () => {
 	// All raw declaration fields default to null. The helper must coerce them
 	// to "" for step2/step3 string values and undefined for step4 numerics.
@@ -388,6 +477,45 @@ describe("mapToStepData", () => {
 		indicatorFHourlyMen3: null,
 		indicatorFHourlyWomen4: null,
 		indicatorFHourlyMen4: null,
+		globalAnnualMeanGap: null,
+		globalHourlyMeanGap: null,
+		globalAnnualMedianGap: null,
+		globalHourlyMedianGap: null,
+		variableAnnualMeanGap: null,
+		variableHourlyMeanGap: null,
+		variableAnnualMedianGap: null,
+		variableHourlyMedianGap: null,
+	};
+
+	// Every operand and gap gets a distinct value so a mis-paired tuple entry
+	// (e.g. the median gap landing on the mean row) fails instead of matching
+	// a look-alike neighbour.
+	const pairedDeclaration: IndicatorRecord = {
+		...emptyDeclaration,
+		indicatorAAnnualWomen: "1000",
+		indicatorAAnnualMen: "1001",
+		globalAnnualMeanGap: "0.0001",
+		indicatorAHourlyWomen: "1002",
+		indicatorAHourlyMen: "1003",
+		globalHourlyMeanGap: "0.0002",
+		indicatorCAnnualWomen: "1004",
+		indicatorCAnnualMen: "1005",
+		globalAnnualMedianGap: "0.0003",
+		indicatorCHourlyWomen: "1006",
+		indicatorCHourlyMen: "1007",
+		globalHourlyMedianGap: "0.0004",
+		indicatorBAnnualWomen: "2000",
+		indicatorBAnnualMen: "2001",
+		variableAnnualMeanGap: "0.0005",
+		indicatorBHourlyWomen: "2002",
+		indicatorBHourlyMen: "2003",
+		variableHourlyMeanGap: "0.0006",
+		indicatorDAnnualWomen: "2004",
+		indicatorDAnnualMen: "2005",
+		variableAnnualMedianGap: "0.0007",
+		indicatorDHourlyWomen: "2006",
+		indicatorDHourlyMen: "2007",
+		variableHourlyMedianGap: "0.0008",
 	};
 
 	it("coerces null indicator values to empty strings for step2 / step3", () => {
@@ -470,5 +598,53 @@ describe("mapToStepData", () => {
 			women: 1,
 			men: 2,
 		});
+	});
+
+	// The persisted gap must travel next to the operands it was computed from,
+	// in the PAY_GAP_LABELS order: annual mean, hourly mean, annual median,
+	// hourly median — step 2 carrying indicators A/C and step 3 indicators B/D.
+	it("pairs each step2 gap with the indicator A/C operands of the same row", () => {
+		const { step2Gaps } = mapToStepData(pairedDeclaration as never);
+
+		expect(step2Gaps).toEqual([
+			{ women: "1000", men: "1001", gap: "0.0001" },
+			{ women: "1002", men: "1003", gap: "0.0002" },
+			{ women: "1004", men: "1005", gap: "0.0003" },
+			{ women: "1006", men: "1007", gap: "0.0004" },
+		]);
+	});
+
+	it("pairs each step3 gap with the indicator B/D operands of the same row", () => {
+		const { step3Gaps } = mapToStepData(pairedDeclaration as never);
+
+		expect(step3Gaps).toEqual([
+			{ women: "2000", men: "2001", gap: "0.0005" },
+			{ women: "2002", men: "2003", gap: "0.0006" },
+			{ women: "2004", men: "2005", gap: "0.0007" },
+			{ women: "2006", men: "2007", gap: "0.0008" },
+		]);
+	});
+
+	it("keeps the gap tuples at 4 entries of nulls when nothing is persisted", () => {
+		const { step2Gaps, step3Gaps } = mapToStepData(emptyDeclaration as never);
+
+		for (const gaps of [step2Gaps, step3Gaps]) {
+			expect(gaps).toHaveLength(4);
+			expect(gaps).toEqual([
+				{ women: null, men: null, gap: null },
+				{ women: null, men: null, gap: null },
+				{ women: null, men: null, gap: null },
+				{ women: null, men: null, gap: null },
+			]);
+		}
+	});
+
+	// The gap references keep the raw null, while the form data coerces to "";
+	// resolving a reference off "" would silently match an empty operand.
+	it("keeps the raw null operand in the gap reference where step2Data coerces to an empty string", () => {
+		const { step2Data, step2Gaps } = mapToStepData(emptyDeclaration as never);
+
+		expect(step2Data.indicatorAAnnualWomen).toBe("");
+		expect(step2Gaps[0]?.women).toBeNull();
 	});
 });

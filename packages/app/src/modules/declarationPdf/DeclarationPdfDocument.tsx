@@ -40,21 +40,25 @@ export function DeclarationPdfDocument({ data }: Props) {
 			label: "Annuelle brute moyenne",
 			women: data.step2Data.indicatorAAnnualWomen,
 			men: data.step2Data.indicatorAAnnualMen,
+			reference: data.step2Gaps[0],
 		},
 		{
 			label: "Horaire brute moyenne",
 			women: data.step2Data.indicatorAHourlyWomen,
 			men: data.step2Data.indicatorAHourlyMen,
+			reference: data.step2Gaps[1],
 		},
 		{
 			label: "Annuelle brute médiane",
 			women: data.step2Data.indicatorCAnnualWomen,
 			men: data.step2Data.indicatorCAnnualMen,
+			reference: data.step2Gaps[2],
 		},
 		{
 			label: "Horaire brute médiane",
 			women: data.step2Data.indicatorCHourlyWomen,
 			men: data.step2Data.indicatorCHourlyMen,
+			reference: data.step2Gaps[3],
 		},
 	];
 

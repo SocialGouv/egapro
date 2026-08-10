@@ -22,6 +22,7 @@ import {
 	declarationFunnelDimensions,
 } from "../shared/funnelConfig";
 import { getPreviousStepHref } from "../shared/funnelSteps";
+import type { PayGapReferences } from "../shared/indicatorRowMapping";
 import { NextStepsBox } from "../shared/NextStepsBox";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
@@ -48,6 +49,8 @@ type Props = {
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
+	step2Gaps: PayGapReferences;
+	step3Gaps: PayGapReferences;
 	step5Categories?: EmployeeCategoryRow[];
 	totalWomen?: number;
 	totalMen?: number;
@@ -63,6 +66,8 @@ export function Step6Review({
 	step2Data,
 	step3Data,
 	step4Data,
+	step2Gaps,
+	step3Gaps,
 	step5Categories = [],
 	totalWomen,
 	totalMen,
@@ -156,7 +161,9 @@ export function Step6Review({
 					<IndicatorSections
 						indicatorGRequired={indicatorGRequired}
 						step2Data={step2Data}
+						step2Gaps={step2Gaps}
 						step3Data={step3Data}
+						step3Gaps={step3Gaps}
 						step4Data={step4Data}
 						step5Categories={step5Categories}
 						totalMen={totalMen}

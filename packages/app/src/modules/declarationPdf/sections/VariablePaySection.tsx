@@ -81,21 +81,25 @@ export function VariablePaySection({ data }: { data: DeclarationPdfData }) {
 			label: "Annuelle brute moyenne",
 			women: data.step3Data.indicatorBAnnualWomen,
 			men: data.step3Data.indicatorBAnnualMen,
+			reference: data.step3Gaps[0],
 		},
 		{
 			label: "Horaire brute moyenne",
 			women: data.step3Data.indicatorBHourlyWomen,
 			men: data.step3Data.indicatorBHourlyMen,
+			reference: data.step3Gaps[1],
 		},
 		{
 			label: "Annuelle brute médiane",
 			women: data.step3Data.indicatorDAnnualWomen,
 			men: data.step3Data.indicatorDAnnualMen,
+			reference: data.step3Gaps[2],
 		},
 		{
 			label: "Horaire brute médiane",
 			women: data.step3Data.indicatorDHourlyWomen,
 			men: data.step3Data.indicatorDHourlyMen,
+			reference: data.step3Gaps[3],
 		},
 	];
 	return (

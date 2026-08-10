@@ -22,6 +22,7 @@ vi.mock("@react-pdf/renderer", async () => {
 	};
 });
 
+import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { QuartileSection } from "../QuartileSection";
 
 function makeData(step4: Step4Data): DeclarationPdfData {
@@ -45,6 +46,8 @@ function makeData(step4: Step4Data): DeclarationPdfData {
 		step2Data: {} as DeclarationPdfData["step2Data"],
 		step3Data: {} as DeclarationPdfData["step3Data"],
 		step4Data: step4,
+		step2Gaps: noPayGapReferences(),
+		step3Gaps: noPayGapReferences(),
 		categories: [makeCategory()],
 		source: null,
 	};

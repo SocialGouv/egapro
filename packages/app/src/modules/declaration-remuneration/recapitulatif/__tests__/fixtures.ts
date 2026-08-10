@@ -1,4 +1,5 @@
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
+import { noPayGapReferences } from "~/test/gipGapFixtures";
 
 export function makeCategory(
 	overrides: Partial<EmployeeCategoryRow> = {},
@@ -78,6 +79,8 @@ export const defaultProps = () => ({
 	step2Data: emptyStep2Data(),
 	step3Data: emptyStep3Data(),
 	step4Data: emptyStep4Data(),
+	step2Gaps: noPayGapReferences(),
+	step3Gaps: noPayGapReferences(),
 	step5Categories: [] as EmployeeCategoryRow[],
 	step5Source: null as string | null,
 });
