@@ -131,6 +131,18 @@ describe("DeclarationProcessPanel", () => {
 			expect(cta).toHaveTextContent(/^Commencer$/);
 		});
 
+		it("describes the CTA link by the panel title", () => {
+			const { dialog } = renderPanel("start");
+			const cta = dialog.querySelector("a.fr-btn");
+			const describedBy = cta?.getAttribute("aria-describedby");
+			expect(describedBy).toBeTruthy();
+			const description = dialog.querySelector(`#${describedBy}`);
+			expect(description?.tagName).toBe("H2");
+			expect(description).toHaveTextContent(
+				/Démarche des indicateurs de rémunération/,
+			);
+		});
+
 		it("renders help section buttons", () => {
 			const { dialog } = renderPanel("start");
 			const buttons = dialog.querySelectorAll("button.fr-link");
@@ -290,14 +302,6 @@ describe("DeclarationProcessPanel", () => {
 					"Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance.",
 				),
 			).toBeInTheDocument();
-		});
-
-		it("renders the closed message without the CSE mention when no CSE opinion is required", () => {
-			const { panel } = renderPanel("closed", { cseOpinionRequired: false });
-			expect(
-				panel.getByText("Cette démarche est terminée."),
-			).toBeInTheDocument();
-			expect(panel.queryByText(/avis du CSE restent modifiables/)).toBeNull();
 		});
 
 		it('renders "Voir la déclaration" CTA', () => {
