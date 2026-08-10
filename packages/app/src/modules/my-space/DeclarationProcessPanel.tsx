@@ -107,7 +107,11 @@ export function DeclarationProcessPanel({
 					<div>
 						<HelpSection />
 						<div className={styles.footer}>
-							<a className="fr-btn" href={ctaHref}>
+							<a
+								aria-describedby={PANEL_TITLE_ID}
+								className="fr-btn"
+								href={ctaHref}
+							>
 								{lockedByOther
 									? "Consulter en lecture seule"
 									: getCtaLabel(variant)}
@@ -122,7 +126,7 @@ export function DeclarationProcessPanel({
 
 function getCtaLabel(variant: PanelVariant): string {
 	if (variant === "closed") return "Voir la déclaration";
-	if (variant === "start") return "Commencer la déclaration";
+	if (variant === "start") return "Commencer";
 	return "Continuer";
 }
 

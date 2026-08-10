@@ -128,7 +128,7 @@ describe("DeclarationProcessPanel", () => {
 				"href",
 				"/declaration-remuneration?siren=532847196",
 			);
-			expect(cta).toHaveTextContent("Commencer la déclaration");
+			expect(cta).toHaveTextContent(/^Commencer$/);
 		});
 
 		it("renders help section buttons", () => {
@@ -292,6 +292,14 @@ describe("DeclarationProcessPanel", () => {
 			).toBeInTheDocument();
 		});
 
+		it("renders the closed message without the CSE mention when no CSE opinion is required", () => {
+			const { panel } = renderPanel("closed", { cseOpinionRequired: false });
+			expect(
+				panel.getByText("Cette démarche est terminée."),
+			).toBeInTheDocument();
+			expect(panel.queryByText(/avis du CSE restent modifiables/)).toBeNull();
+		});
+
 		it('renders "Voir la déclaration" CTA', () => {
 			const { dialog } = renderPanel("closed");
 			const footerCta = dialog.querySelector(".footer a.fr-btn");
@@ -357,7 +365,7 @@ describe("DeclarationProcessPanel", () => {
 			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
 			const cta = ctaLinks[ctaLinks.length - 1];
 			expect(cta).toHaveTextContent("Consulter en lecture seule");
-			expect(cta).not.toHaveTextContent("Commencer la déclaration");
+			expect(cta).not.toHaveTextContent("Commencer");
 		});
 
 		it("keeps the CTA href pointing to the declaration for read-only access", () => {
@@ -395,7 +403,7 @@ describe("DeclarationProcessPanel", () => {
 			const { dialog } = renderPanel("start", { lockedByOther: false });
 			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
 			const cta = ctaLinks[ctaLinks.length - 1];
-			expect(cta).toHaveTextContent("Commencer la déclaration");
+			expect(cta).toHaveTextContent(/^Commencer$/);
 			expect(cta).not.toHaveTextContent("Consulter en lecture seule");
 		});
 	});
