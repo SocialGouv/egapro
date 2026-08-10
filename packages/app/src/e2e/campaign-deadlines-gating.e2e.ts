@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
+import { TEST_USER_PHONE } from "./constants";
 import {
 	resetDeclarationToDraft,
 	setCompanyHasCse,
@@ -56,7 +57,7 @@ test.describe("Campaign deadlines gating", () => {
 	// Phone + CSE flags must be set before login so the JWT picks them up and
 	// the missing-info-modal does not intercept clicks on /mon-espace.
 	async function seedUserProfile() {
-		await setUserPhone("0122334455");
+		await setUserPhone(TEST_USER_PHONE);
 		await setCompanyHasCse(true);
 	}
 

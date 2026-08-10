@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
+import { TEST_USER_PHONE } from "./constants";
 import {
 	deleteCseOpinions,
 	deleteJointEvaluationFiles,
@@ -33,7 +34,7 @@ test.describe("Declaration process panel", () => {
 		await deleteJointEvaluationFiles();
 		await deleteCseOpinions();
 		await setCompanyHasCse(true);
-		await setUserPhone("0122334455");
+		await setUserPhone(TEST_USER_PHONE);
 	});
 
 	test.describe("DB state → variant: closed (compliance completed + CSE deposited)", () => {
@@ -73,7 +74,7 @@ test.describe("Declaration process panel", () => {
 		test.beforeAll(async () => {
 			await resetDeclarationToDraft();
 			await setCompanyHasCse(null);
-			await setUserPhone("0122334455");
+			await setUserPhone(TEST_USER_PHONE);
 		});
 
 		test.afterAll(async () => {
@@ -141,7 +142,7 @@ test.describe("Declaration process panel", () => {
 				await ensureCurrentYearDeclaration();
 				await setGipWorkforce(79);
 				await setCompanyHasCse(false);
-				await setUserPhone("0122334455");
+				await setUserPhone(TEST_USER_PHONE);
 				await resetDeclarationToDraft();
 			});
 
@@ -168,7 +169,7 @@ test.describe("Declaration process panel", () => {
 				await ensureCurrentYearDeclaration();
 				await setGipWorkforce(79);
 				await setCompanyHasCse(false);
-				await setUserPhone("0122334455");
+				await setUserPhone(TEST_USER_PHONE);
 				await setDeclarationComplianceState({
 					status: "demarche_completed",
 					demarcheCompletedAt: new Date(),
@@ -231,7 +232,7 @@ test.describe("Declaration process panel", () => {
 				await ensureCurrentYearDeclaration();
 				await resetGipWorkforce();
 				await setCompanyHasCse(false);
-				await setUserPhone("0122334455");
+				await setUserPhone(TEST_USER_PHONE);
 				await resetDeclarationToDraft();
 			});
 
@@ -254,7 +255,7 @@ test.describe("Declaration process panel", () => {
 				await ensureCurrentYearDeclaration();
 				await resetGipWorkforce();
 				await setCompanyHasCse(false);
-				await setUserPhone("0122334455");
+				await setUserPhone(TEST_USER_PHONE);
 				await setDeclarationComplianceState({
 					status: "demarche_completed",
 					demarcheCompletedAt: new Date(),

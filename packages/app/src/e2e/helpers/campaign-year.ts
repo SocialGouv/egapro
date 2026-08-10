@@ -3,6 +3,7 @@ import {
 	getCurrentDbYear,
 	pushCampaignDeadlinesFarFuture,
 	resetGipWorkforce,
+	setCompanyHasCse,
 	setGipWorkforce,
 } from "./db";
 import { resetCampaignYear as resetCampaignYearData } from "./db-campaign";
@@ -83,16 +84,23 @@ export type CampaignCoordinate = {
  * Run `fn` under a fully isolated campaign-year coordinate (#4067).
  *
  * Pins the clock on both surfaces, wipes any residue of the target year, seeds
- * its deadlines (never a `campaign_start_date` — see pushCampaignDeadlinesFarFuture)
- * and its GIP workforce, then runs the body. The teardown always runs (even when
- * `fn` throws) and double-resets: the coordinate's own year, plus the calendar
- * year as a safety net for any residue a default-year helper wrote inside `fn`
- * (`setCompanyHasCse`, an unpinned `setGipWorkforce`, …). The calendar year is
- * then restored to the baseline the unpinned suite depends on (far-future
+ * its deadlines (never a `campaign_start_date` — see pushCampaignDeadlinesFarFuture),
+ * its GIP workforce and its CSE answer, then runs the body. The teardown always
+ * runs (even when `fn` throws) and double-resets: the coordinate's own year, plus
+ * the calendar year as a safety net for any residue a default-year helper wrote
+ * inside `fn` (`setCompanyHasCse`, an unpinned `setGipWorkforce`, …). The calendar
+ * year is then restored to the baseline the unpinned suite depends on (far-future
  * deadlines + the >= 250 GIP workforce), so a pinned spec never leaves the shared
  * company GIP-less for the next spec file. It leaves no declaration, file, CSE
  * opinion, lock or `has_cse` flag of the coordinate behind — the invariant the
  * grid relies on to chain 185 coordinates without cross-contamination.
+ *
+ * `has_cse` gets its own re-seed on both ends because `resetCampaignYearData`
+ * flattens it (it is not year-scoped) while, since #3952, the funnel layout
+ * bounces to /mon-espace whenever the CSE answer is missing above the threshold:
+ * without it a coordinate could no longer enter the funnel it pins, and would
+ * leave the next spec file unable to enter it either. Coordinates that assert on
+ * a specific answer still override it inside `fn`, as the grid fiches do.
  */
 export async function withCampaignYear(
 	coordinate: CampaignCoordinate,
@@ -103,6 +111,7 @@ export async function withCampaignYear(
 	await resetCampaignYearData(year);
 	await pushCampaignDeadlinesFarFuture(year);
 	await setGipWorkforce(workforce, year);
+	await setCompanyHasCse(true);
 	try {
 		await fn();
 	} finally {
@@ -118,5 +127,6 @@ export async function withCampaignYear(
 			await pushCampaignDeadlinesFarFuture();
 			await resetGipWorkforce();
 		}
+		await setCompanyHasCse(true);
 	}
 }

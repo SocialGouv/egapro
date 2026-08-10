@@ -47,6 +47,21 @@ export function isImpersonatingSiren(
 }
 
 /**
+ * Is the current session an admin actively impersonating a company
+ * ("mimoquage") ?
+ *
+ * Read-only surfaces use it to relax user-data prerequisites an admin cannot
+ * fill in (phone number, CSE answer); write surfaces go through
+ * `assertNotImpersonating` instead.
+ *
+ * Gating on `isAdmin` blocks a crafted session carrying a stray
+ * `impersonation` field.
+ */
+export function isImpersonating(session: Session | null): boolean {
+	return Boolean(session?.user?.isAdmin && session.user.impersonation);
+}
+
+/**
  * Read-only guard for admin impersonation ("mimoquage").
  *
  * When an admin is impersonating a company, every write path (tRPC mutations,
@@ -58,11 +73,7 @@ export function isImpersonatingSiren(
  * Handlers can catch it and translate to HTTP 403.
  */
 export function assertNotImpersonating(session: Session | null): void {
-	// Only admins can mint an impersonation in the JWT (see auth/config.ts).
-	// Gating on `isAdmin` here too keeps this helper consistent with
-	// `isImpersonatingSiren` and prevents a crafted session with a stray
-	// `impersonation` field from blocking a legitimate non-admin user.
-	if (session?.user?.isAdmin && session.user.impersonation) {
+	if (isImpersonating(session)) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
 			message:

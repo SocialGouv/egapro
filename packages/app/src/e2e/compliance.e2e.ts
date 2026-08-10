@@ -425,6 +425,12 @@ test.describe("[ANX-05] Path 13: 50-99 tranche — indicator G gated by the pinn
 // be told to deposit a CSE opinion: the recap "Prochaines étapes" box and the
 // compliance-choice options drop every CSE-opinion mention, while the gap actions
 // and the "Mettre à jour l'existence d'un CSE" escape hatch stay.
+//
+// Only the `false` branch is reachable end to end. Since #3952 the funnel layout
+// intercepts a >= 100 company whose CSE answer is still null and sends it back to
+// /mon-espace to answer, so no journey reaches the recap in that state — that bounce
+// is asserted in missing-info-modal.e2e.ts, and the recap's own null-like-false
+// rendering by Step6Review.test.tsx ("CSE consultation section gating (issue #3945)").
 
 const CSE_OPINION_RECAP_TEXT = /avis du CSE devront être transmis/;
 const CSE_JUSTIFY_PARENTHESIS = /avis à transmettre sur le portail/;
@@ -486,29 +492,6 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion 
 		await expect(
 			page.getByText(/Transmettre l.avis ou les avis du CSE/),
 		).toHaveCount(0);
-	});
-});
-
-test.describe("[#3945] gap + workforce >= 100 + hasCse=null → no CSE opinion mention", () => {
-	test.beforeAll(async () => {
-		await resetDeclarationToDraft();
-		await setCompanyHasCse(null);
-		await setCompanyWorkforce(200);
-	});
-
-	test("step 6 recap treats an unset CSE flag like an absent CSE", async ({
-		page,
-	}) => {
-		test.slow();
-		await reachStep6ComplianceRecap(page);
-
-		await expect(
-			page.getByRole("heading", { name: "Informer et consulter le CSE" }),
-		).toHaveCount(0);
-		await expect(page.getByText(CSE_OPINION_RECAP_TEXT)).toHaveCount(0);
-		await expect(
-			page.getByRole("button", { name: UPDATE_CSE_BUTTON }),
-		).toBeVisible();
 	});
 });
 
