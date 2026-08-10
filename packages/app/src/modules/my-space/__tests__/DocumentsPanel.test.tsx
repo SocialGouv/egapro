@@ -1,7 +1,7 @@
 import { act, fireEvent, render, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getWorkforceYearFor } from "~/modules/domain";
+import { getReferenceYearFor } from "~/modules/domain";
 import {
 	failingFetch,
 	getLiveRegion,
@@ -15,7 +15,7 @@ import {
 import type { DeclarationItem } from "../types";
 
 const DECLARATION_YEAR = 2026;
-const SUBTITLE = `Année ${DECLARATION_YEAR} au titre des données ${getWorkforceYearFor(DECLARATION_YEAR)}`;
+const SUBTITLE = `Année ${DECLARATION_YEAR} au titre des données ${getReferenceYearFor(DECLARATION_YEAR)}`;
 
 const PREFILL_TITLE =
 	"Télécharger les données préremplies (issues des données DSN)";

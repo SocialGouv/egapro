@@ -8,7 +8,7 @@ import {
 	formatShortDate,
 	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getReferencePeriod,
-	getWorkforceYearFor,
+	getReferenceYearFor,
 	isDraft,
 	parseGipWorkforce,
 	toDisplayWorkforce,
@@ -144,7 +144,7 @@ export async function buildPdfData(
 
 	return {
 		year,
-		workforceYear: getWorkforceYearFor(year),
+		workforceYear: getReferenceYearFor(year),
 		isSecondDeclaration: declarationType === "correction",
 		transmittedAt: formatShortDate(transmittedDate),
 		referencePeriod: getReferencePeriod(year),

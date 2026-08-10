@@ -259,8 +259,6 @@ export function Step3VariablePay({
 
 						{gipPrefillData && (
 							<PrefillSource
-								periodEnd={gipPrefillData.periodEnd}
-								periodStart={gipPrefillData.periodStart}
 								tooltipId="tooltip-source-step3-paygap"
 								year={declarationYear}
 							/>
@@ -416,8 +414,6 @@ export function Step3VariablePay({
 
 						{gipPrefillData && (
 							<PrefillSource
-								periodEnd={gipPrefillData.periodEnd}
-								periodStart={gipPrefillData.periodStart}
 								tooltipId="tooltip-source-step3"
 								year={declarationYear}
 							/>

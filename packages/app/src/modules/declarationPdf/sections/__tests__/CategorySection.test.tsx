@@ -23,7 +23,7 @@ function makeData(overrides: Partial<DeclarationPdfData>): DeclarationPdfData {
 		workforceYear: 2025,
 		isSecondDeclaration: false,
 		transmittedAt: "05/03/2026",
-		referencePeriod: "01/01/2026 - 31/12/2026",
+		referencePeriod: "01/01/2025 - 31/12/2025",
 		declarant: { name: "Jean Martin", email: "email@example.fr", phone: "" },
 		company: {
 			name: "Société Démo",

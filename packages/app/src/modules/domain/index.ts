@@ -7,12 +7,11 @@ export {
 	getDefaultCampaignDeadlines,
 	getPathChoiceDeadline,
 	getReferencePeriod,
+	getReferenceYearFor,
 	getRepresentationDeadline,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
-	getWorkforceYearFor,
 	isDeadlinePassed,
-	resolveGipReferencePeriod,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
 // Campaign clock — test-only override seam behind getCurrentYear (issue #4022)

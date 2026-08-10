@@ -1,5 +1,8 @@
 import { expect, type Page, test } from "@playwright/test";
-import { EXPECTED_DECLARATION_TYPES } from "~/modules/domain";
+import {
+	EXPECTED_DECLARATION_TYPES,
+	getReferenceYearFor,
+} from "~/modules/domain";
 import { withCampaignYear } from "./helpers/campaign-year";
 import {
 	getCurrentDbYear,
@@ -37,7 +40,9 @@ test.describe("Declaration workflow", () => {
 		await page.waitForURL("**/declaration-remuneration/etape/**");
 	});
 
-	test("displays step 1 after login", async ({ page }) => {
+	test("displays step 1 with the N-1 reference period after login (#4075)", async ({
+		page,
+	}) => {
 		await expect(
 			page.getByRole("heading", {
 				name: /Déclaration des indicateurs de rémunération/i,
@@ -45,6 +50,16 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 
 		await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
+
+		// Expectation derived from getReferenceYearFor, never getReferencePeriod (the
+		// function the bug lived in), so reverting the fix fails this test instead of
+		// tautologically tracking it.
+		const referenceYear = getReferenceYearFor(await getCurrentDbYear());
+		await expect(
+			page.getByText(
+				`Période de référence pour le calcul des indicateurs : 01/01/${referenceYear} - 31/12/${referenceYear}.`,
+			),
+		).toBeVisible();
 	});
 
 	test("navigates through step 1 - Effectifs", async ({ page }) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { getWorkforceYearFor } from "~/modules/domain";
+import { getReferenceYearFor } from "~/modules/domain";
 import { DownloadStatusRegion, useDownloadClickGuard } from "~/modules/shared";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { DeclarationItem } from "./types";
@@ -21,7 +21,7 @@ function getResources(declaration: DeclarationItem): DocumentResource[] {
 	const resources: DocumentResource[] = [];
 	if (declaration.type !== "remuneration") return resources;
 
-	const subtitle = `Année ${declaration.year} au titre des données ${getWorkforceYearFor(declaration.year)}`;
+	const subtitle = `Année ${declaration.year} au titre des données ${getReferenceYearFor(declaration.year)}`;
 
 	if (declaration.hasPrefillData) {
 		resources.push({

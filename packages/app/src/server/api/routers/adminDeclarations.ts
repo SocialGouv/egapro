@@ -25,6 +25,7 @@ import {
 import { releaseLockSchema } from "~/modules/admin/schemas";
 import {
 	getCurrentYear,
+	getReferencePeriod,
 	isCancelled,
 	parseGipWorkforce,
 	toDisplayWorkforce,
@@ -426,7 +427,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				isCorrection ? "correction" : "initial",
 			);
 			const step5Source = jobs[0]?.source ?? null;
-			const referencePeriod = `01/01/${d.year} - 31/12/${d.year}`;
+			const referencePeriod = getReferencePeriod(d.year);
 			const declarantName = [row.declarantFirstName, row.declarantLastName]
 				.filter(Boolean)
 				.join(" ");

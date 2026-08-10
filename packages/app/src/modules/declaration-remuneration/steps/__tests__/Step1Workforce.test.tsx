@@ -104,7 +104,9 @@ describe("Step1Workforce", () => {
 			/>,
 		);
 		expect(
-			screen.getByText(/Période de référence pour le calcul des indicateurs/),
+			screen.getByText(
+				/Période de référence pour le calcul des indicateurs : 01\/01\/2025 - 31\/12\/2025\./,
+			),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText("Tous les champs sont obligatoires."),

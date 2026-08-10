@@ -1,6 +1,6 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 
-import { getWorkforceYearFor } from "~/modules/domain";
+import { getReferenceYearFor } from "~/modules/domain";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
 import { styles } from "./pdfStyles";
 
@@ -111,7 +111,7 @@ export function PrefillPdfDocument({ data }: Props) {
 						Données préremplies {data.year} (issues des données DSN)
 					</Text>
 					<Text style={styles.subtitle}>
-						Au titre des données {getWorkforceYearFor(data.year)}
+						Au titre des données {getReferenceYearFor(data.year)}
 					</Text>
 					<Text style={styles.companyInfo}>
 						{data.companyName} — SIREN {data.siren}
