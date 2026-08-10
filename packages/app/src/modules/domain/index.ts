@@ -7,12 +7,11 @@ export {
 	getDefaultCampaignDeadlines,
 	getPathChoiceDeadline,
 	getReferencePeriod,
+	getReferenceYearFor,
 	getRepresentationDeadline,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
-	getWorkforceYearFor,
 	isDeadlinePassed,
-	resolveGipReferencePeriod,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
 // Campaign clock — test-only override seam behind getCurrentYear (issue #4022)
@@ -85,6 +84,7 @@ export {
 	isCancelled,
 	isComplianceProcessCompleted,
 	isDeclarationSubmitted,
+	isDeclarationWritingClosed,
 	isDraft,
 	isInComplianceProcess,
 	isSecondDeclarationDeadlineApplicable,
@@ -152,6 +152,7 @@ export {
 	formatTotal,
 } from "./shared/format";
 // Gap business rules (calculations & threshold classification)
+export type { GipGapReference } from "./shared/gap";
 export {
 	computeGap,
 	computeGapBetween,
@@ -163,6 +164,8 @@ export {
 	gapRatioToPercent,
 	hasGapsAboveThreshold,
 	hasHighGap,
+	resolveGap,
+	resolveGapRatio,
 } from "./shared/gap";
 // GIP annual average workforce — canonical headcount for obligations & display
 export {

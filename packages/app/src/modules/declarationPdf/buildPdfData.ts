@@ -8,7 +8,7 @@ import {
 	formatShortDate,
 	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getReferencePeriod,
-	getWorkforceYearFor,
+	getReferenceYearFor,
 	isDraft,
 	parseGipWorkforce,
 	toDisplayWorkforce,
@@ -16,8 +16,8 @@ import {
 import {
 	activeDeclarationFilter,
 	mapToEmployeeCategoryRows,
-	mapToStepData,
 } from "~/server/api/routers/declarationHelpers";
+import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { db } from "~/server/db";
 import {
 	companies,
@@ -132,7 +132,8 @@ export async function buildPdfData(
 			? mapToEmployeeCategoryRows(jobs, empCats, declarationType)
 			: [];
 
-	const { step2Data, step3Data, step4Data } = mapToStepData(declaration);
+	const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =
+		mapToStepData(declaration);
 
 	const displayWorkforce = toDisplayWorkforce(
 		parseGipWorkforce(gip?.workforceEma),
@@ -144,7 +145,7 @@ export async function buildPdfData(
 
 	return {
 		year,
-		workforceYear: getWorkforceYearFor(year),
+		workforceYear: getReferenceYearFor(year),
 		isSecondDeclaration: declarationType === "correction",
 		transmittedAt: formatShortDate(transmittedDate),
 		referencePeriod: getReferencePeriod(year),
@@ -171,6 +172,8 @@ export async function buildPdfData(
 		step2Data,
 		step3Data,
 		step4Data,
+		step2Gaps,
+		step3Gaps,
 		categories,
 		source,
 	};

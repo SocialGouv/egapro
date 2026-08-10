@@ -19,6 +19,7 @@ import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { getPostComplianceDestination } from "../shared/complianceNavigation";
 import { FormActions } from "../shared/FormActions";
+import { FormErrors } from "../shared/FormErrors";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import styles from "./CompliancePathChoice.module.scss";
 import {
@@ -254,6 +255,8 @@ export function CompliancePathChoice({
 						)}
 					/>
 				</div>
+
+				<FormErrors mutationError={mutation.error?.message} />
 
 				<FormActions
 					isSubmitting={mutation.isPending}

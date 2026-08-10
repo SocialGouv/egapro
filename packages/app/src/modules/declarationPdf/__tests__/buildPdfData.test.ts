@@ -183,7 +183,7 @@ describe("buildPdfData", () => {
 		expect(result.year).toBe(2026);
 		expect(result.workforceYear).toBe(2025);
 		expect(result.isSecondDeclaration).toBe(false);
-		expect(result.referencePeriod).toBe("01/01/2026 - 31/12/2026");
+		expect(result.referencePeriod).toBe("01/01/2025 - 31/12/2025");
 		expect(result.transmittedAt).toBe("05/03/2026");
 
 		expect(result.declarant).toEqual({

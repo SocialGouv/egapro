@@ -4,6 +4,7 @@ import {
 	toDisplayWorkforce,
 } from "~/modules/domain";
 import common from "../shared/common.module.scss";
+import type { PayGapReferences } from "../shared/indicatorRowMapping";
 import { formatCategorySource } from "../steps/step5/sources";
 import type {
 	EmployeeCategoryRow,
@@ -35,6 +36,8 @@ type Props = {
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
+	step2Gaps: PayGapReferences;
+	step3Gaps: PayGapReferences;
 	step5Categories: EmployeeCategoryRow[];
 	step5Source: string | null;
 	// Demote the page title when the recap is embedded in a host page that
@@ -80,6 +83,8 @@ export function RecapitulatifPage({
 	step2Data,
 	step3Data,
 	step4Data,
+	step2Gaps,
+	step3Gaps,
 	step5Categories,
 	step5Source,
 	titleTag: TitleTag = "h1",
@@ -154,7 +159,9 @@ export function RecapitulatifPage({
 						<IndicatorTables
 							declarationYear={declarationYear}
 							step2Data={step2Data}
+							step2Gaps={step2Gaps}
 							step3Data={step3Data}
+							step3Gaps={step3Gaps}
 							step4Data={step4Data}
 							totalMen={totalMen}
 							totalWomen={totalWomen}

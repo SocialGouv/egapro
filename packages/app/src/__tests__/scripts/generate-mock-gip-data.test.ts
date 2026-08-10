@@ -159,6 +159,47 @@ function assertNbCoherence(fileName: string) {
 	}
 }
 
+/** Confidence columns the DTS v3 format dropped; the generator must not emit them. */
+const COLUMNS_ABSENT_FROM_V3 = [
+	"indice_suspensions_longues",
+	"indice_suspensions_sans_fin",
+	"indice_arrets_longs",
+	"indice_sup_annee_civile",
+	"indice_ratio_FP",
+];
+
+/** Variable-pay beneficiaries are a subset of the block headcount, per sex. */
+const BENEFICIARY_BLOCKS = [
+	{
+		beneficiaries: "Effectif_F_rem_annuelle_variable",
+		workforce: "Effectif_F_rem_annuelle_globale",
+	},
+	{
+		beneficiaries: "Effectif_H_rem_annuelle_variable",
+		workforce: "Effectif_H_rem_annuelle_globale",
+	},
+];
+
+function assertBeneficiariesWithinWorkforce(fileName: string) {
+	const csv = readFileSync(resolve(DATA_DIR, fileName), "utf-8");
+	const headers = parseHeaders(csv);
+	const col = (name: string) => headers.indexOf(name);
+	const rows = parseCsvRows(csv).filter((r) => r.length > 1);
+
+	for (const row of rows) {
+		const siren = row[0];
+		for (const block of BENEFICIARY_BLOCKS) {
+			const beneficiaries = toNum(row[col(block.beneficiaries)]);
+			const workforce = toNum(row[col(block.workforce)]);
+			if (beneficiaries === null || workforce === null) continue;
+			expect(
+				beneficiaries,
+				`${fileName} SIREN ${siren}: ${block.beneficiaries} ${beneficiaries} should not exceed ${block.workforce} ${workforce}`,
+			).toBeLessThanOrEqual(workforce);
+		}
+	}
+}
+
 describe("companies.json", () => {
 	it("has a bucket field on every entry", () => {
 		const companies = loadCompanies();
@@ -218,9 +259,21 @@ describe("mock-gip-mds.csv", () => {
 		expect(rows.length).toBeGreaterThan(0);
 	});
 
-	it("has the v3 header with 87 columns (71 existing + 16 nb)", () => {
+	it("has the v3 header with 82 columns (66 existing + 16 nb)", () => {
 		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
-		expect(parseHeaders(csv)).toHaveLength(87);
+		expect(parseHeaders(csv)).toHaveLength(82);
+	});
+
+	it("emits none of the 5 confidence columns absent from the v3 format", () => {
+		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
+		const headers = parseHeaders(csv);
+		for (const h of COLUMNS_ABSENT_FROM_V3) {
+			expect(headers, `${h} is not part of the v3 format`).not.toContain(h);
+		}
+	});
+
+	it("never reports more variable-pay beneficiaries than the block headcount", () => {
+		assertBeneficiariesWithinWorkforce("mock-gip-mds.csv");
 	});
 
 	it("carries the 16 nb quartile headers and the 12 de-accented median headers", () => {
@@ -353,15 +406,30 @@ describe("mock-gip-mds.csv", () => {
 });
 
 describe("mock-gip-mds-edge-cases.csv", () => {
-	it("has the v3 header with 87 columns", () => {
+	it("has the v3 header with 82 columns", () => {
 		const csv = readFileSync(
 			resolve(DATA_DIR, "mock-gip-mds-edge-cases.csv"),
 			"utf-8",
 		);
-		expect(parseHeaders(csv)).toHaveLength(87);
+		expect(parseHeaders(csv)).toHaveLength(82);
+	});
+
+	it("emits none of the 5 confidence columns absent from the v3 format", () => {
+		const csv = readFileSync(
+			resolve(DATA_DIR, "mock-gip-mds-edge-cases.csv"),
+			"utf-8",
+		);
+		const headers = parseHeaders(csv);
+		for (const h of COLUMNS_ABSENT_FROM_V3) {
+			expect(headers, `${h} is not part of the v3 format`).not.toContain(h);
+		}
 	});
 
 	it("keeps nb counts coherent on filled blocks (empty blocks skipped)", () => {
 		assertNbCoherence("mock-gip-mds-edge-cases.csv");
+	});
+
+	it("never reports more variable-pay beneficiaries than the block headcount", () => {
+		assertBeneficiariesWithinWorkforce("mock-gip-mds-edge-cases.csv");
 	});
 });

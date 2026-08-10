@@ -23,9 +23,10 @@ const CORRECTIVE_ACTION_TITLE =
 const mockMutate = vi.fn();
 const mockPush = vi.fn();
 
-const { mockSetField, draftRef } = vi.hoisted(() => ({
+const { mockSetField, draftRef, mutationErrorRef } = vi.hoisted(() => ({
 	mockSetField: vi.fn(),
 	draftRef: { current: {} as Record<string, unknown> },
+	mutationErrorRef: { current: null as { message: string } | null },
 }));
 
 vi.mock(
@@ -60,7 +61,7 @@ vi.mock("~/trpc/react", () => ({
 						opts.onSuccess?.(undefined, args);
 					},
 					isPending: false,
-					error: null,
+					error: mutationErrorRef.current,
 				}),
 			},
 		},
@@ -93,6 +94,30 @@ beforeEach(() => {
 	mockPush.mockClear();
 	mockSetField.mockClear();
 	draftRef.current = {};
+	mutationErrorRef.current = null;
+});
+
+// The save mutation had no error surface at all, so a server rejection (a
+// CONFLICT 409 from the lock) left the button inert with zero feedback.
+describe("CompliancePathChoice — mutation error surface", () => {
+	it("renders the rejection as an error alert", () => {
+		mutationErrorRef.current = {
+			message: "Déclaration verrouillée par un autre utilisateur.",
+		};
+		const { container } = render(compliancePathChoice());
+
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent(
+			"Déclaration verrouillée par un autre utilisateur.",
+		);
+		expect(container.querySelector(".fr-alert--error")).toBeInTheDocument();
+	});
+
+	it("renders no error alert while the mutation has not failed", () => {
+		const { container } = render(compliancePathChoice());
+
+		expect(container.querySelector(".fr-alert--error")).not.toBeInTheDocument();
+	});
 });
 
 describe("CompliancePathChoice", () => {

@@ -14,8 +14,9 @@ import {
 	declarationFunnelDimensions,
 } from "./shared/funnelConfig";
 import type { GipPrefillData } from "./shared/gipMdsMapping";
+import type { PayGapReferences } from "./shared/indicatorRowMapping";
 import { DeclarationModificationClosedAlert } from "./shared/lock/DeclarationModificationClosedAlert";
-import { LockProvider } from "./shared/lock/LockContext";
+import { LockProvider, useLockContext } from "./shared/lock/LockContext";
 import { Step1Workforce } from "./steps/Step1Workforce";
 import { Step2PayGap } from "./steps/Step2PayGap";
 import { Step3VariablePay } from "./steps/Step3VariablePay";
@@ -46,6 +47,8 @@ type StepPageClientProps = {
 	step1Data: Step1Data;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
+	step2Gaps: PayGapReferences;
+	step3Gaps: PayGapReferences;
 	step4Data: Step4Data;
 	step5Categories: EmployeeCategoryRow[];
 	initialSource?: string;
@@ -62,6 +65,8 @@ export function StepPageClient({
 	step1Data,
 	step2Data,
 	step3Data,
+	step2Gaps,
+	step3Gaps,
 	step4Data,
 	step5Categories,
 	initialSource,
@@ -84,6 +89,19 @@ export function StepPageClient({
 		[declaration.year, sizeRange],
 	);
 	useFunnelTracking(DECLARATION_FUNNEL, { step, dimensions });
+
+	// The lock is already acquired by the ancestor provider — a second dynamic
+	// one here would re-acquire it and race the heartbeat. This only folds the
+	// funnel-specific `modificationClosed` cutoff into the inherited state.
+	const {
+		holder: lockHolder,
+		isLoading: isLockLoading,
+		isReadOnly: isLockReadOnly,
+		reason: lockReason,
+	} = useLockContext();
+	const isReadOnly = isLockReadOnly || modificationClosed;
+	const reason = modificationClosed ? "modification_closed" : lockReason;
+	const holder = modificationClosed ? null : lockHolder;
 
 	function renderStep() {
 		switch (step) {
@@ -153,7 +171,9 @@ export function StepPageClient({
 						indicatorGRequired={indicatorGRequired}
 						isSubmitted={isDeclarationSubmitted(declaration.status)}
 						step2Data={step2Data}
+						step2Gaps={step2Gaps}
 						step3Data={step3Data}
+						step3Gaps={step3Gaps}
 						step4Data={step4Data}
 						step5Categories={step5Categories}
 						totalMen={declaration.totalMen ?? undefined}
@@ -167,8 +187,10 @@ export function StepPageClient({
 
 	return (
 		<LockProvider
-			declarationId={declaration.id}
-			modificationClosed={modificationClosed}
+			holder={holder}
+			isLoading={isLockLoading}
+			isReadOnly={isReadOnly}
+			reason={reason}
 		>
 			{modificationClosed && modificationDeadline ? (
 				<DeclarationModificationClosedAlert deadline={modificationDeadline} />

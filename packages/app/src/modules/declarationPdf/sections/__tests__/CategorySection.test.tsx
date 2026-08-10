@@ -15,6 +15,7 @@ vi.mock("@react-pdf/renderer", async () => {
 	};
 });
 
+import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { CategorySection } from "../CategorySection";
 
 function makeData(overrides: Partial<DeclarationPdfData>): DeclarationPdfData {
@@ -23,7 +24,7 @@ function makeData(overrides: Partial<DeclarationPdfData>): DeclarationPdfData {
 		workforceYear: 2025,
 		isSecondDeclaration: false,
 		transmittedAt: "05/03/2026",
-		referencePeriod: "01/01/2026 - 31/12/2026",
+		referencePeriod: "01/01/2025 - 31/12/2025",
 		declarant: { name: "Jean Martin", email: "email@example.fr", phone: "" },
 		company: {
 			name: "Société Démo",
@@ -38,6 +39,8 @@ function makeData(overrides: Partial<DeclarationPdfData>): DeclarationPdfData {
 		step2Data: {} as DeclarationPdfData["step2Data"],
 		step3Data: {} as DeclarationPdfData["step3Data"],
 		step4Data: { annual: [], hourly: [] },
+		step2Gaps: noPayGapReferences(),
+		step3Gaps: noPayGapReferences(),
 		categories: [],
 		source: null,
 		...overrides,

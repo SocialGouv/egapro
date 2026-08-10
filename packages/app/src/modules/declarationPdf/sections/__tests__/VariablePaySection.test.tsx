@@ -28,6 +28,7 @@ vi.mock("../PayGapTable", async () => {
 	};
 });
 
+import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { VariablePaySection } from "../VariablePaySection";
 
 function makeData(
@@ -39,7 +40,7 @@ function makeData(
 		workforceYear: 2025,
 		isSecondDeclaration: false,
 		transmittedAt: "05/03/2026",
-		referencePeriod: "01/01/2026 - 31/12/2026",
+		referencePeriod: "01/01/2025 - 31/12/2025",
 		declarant: { name: "Jean Martin", email: "email@example.fr", phone: "" },
 		company: {
 			name: "Société Démo",
@@ -54,6 +55,8 @@ function makeData(
 		step2Data: emptyStep2Data(),
 		step3Data: { ...emptyStep3Data(), ...step3 },
 		step4Data: emptyStep4Data(),
+		step2Gaps: noPayGapReferences(),
+		step3Gaps: noPayGapReferences(),
 		categories: [],
 		source: null,
 	};

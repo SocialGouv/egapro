@@ -1,5 +1,6 @@
 import { Text } from "@react-pdf/renderer";
-import { computeGap, formatCurrency } from "~/modules/domain";
+import type { GipGapReference } from "~/modules/domain";
+import { formatCurrency, resolveGap } from "~/modules/domain";
 import { styles } from "../recapPdfStyles";
 import { GapCell } from "./GapCell";
 import { Cell, Row, Table } from "./tableParts";
@@ -9,6 +10,8 @@ type PayGapTableRow = {
 	label: string;
 	women: string;
 	men: string;
+	/** Gap as persisted on the declaration, shown instead of recomputing it. */
+	reference?: GipGapReference;
 };
 
 function PayGapDataRow({ row }: { row: PayGapTableRow }) {
@@ -26,7 +29,7 @@ function PayGapDataRow({ row }: { row: PayGapTableRow }) {
 				width={PAY_TABLE.value}
 			/>
 			<Cell width={PAY_TABLE.gap}>
-				<GapCell gap={computeGap(row.women, row.men)} />
+				<GapCell gap={resolveGap(row.women, row.men, row.reference)} />
 			</Cell>
 		</Row>
 	);

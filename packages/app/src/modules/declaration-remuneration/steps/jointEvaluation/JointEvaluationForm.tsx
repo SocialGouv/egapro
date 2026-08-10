@@ -8,6 +8,7 @@ import { useReadOnlyGuard } from "~/modules/auth";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
+import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
@@ -194,6 +195,10 @@ export function JointEvaluationForm({
 							</p>
 						</div>
 					</div>
+
+					<FormErrors
+						mutationError={submitJointEvaluationMutation.error?.message}
+					/>
 
 					<div className={`fr-mt-4w ${common.flexBetween}`}>
 						<Link

@@ -231,8 +231,9 @@ function generateRow(company: CompanyData): string[] {
 	const variableWomen = Math.round(
 		totalWomen * variablePayRatio * randBetween(0.8, 1.0),
 	);
-	const variableMen = Math.round(
-		totalMen * variablePayRatio * randBetween(0.9, 1.1),
+	const variableMen = Math.min(
+		totalMen,
+		Math.round(totalMen * variablePayRatio * randBetween(0.9, 1.1)),
 	);
 
 	// Hourly rates (annual / 1820 hours standard)
@@ -370,15 +371,10 @@ function generateRow(company: CompanyData): string[] {
 	const confExo = randBetween(0, 0.5);
 	const confUnit = randBetween(0, 0.3);
 	const confSuspRatio = randBetween(0, 0.3);
-	const confLongSusp = randBetween(0, 0.1);
-	const confNoEndSusp = randBetween(0, 0.05);
 	const confSickRatio = randBetween(0, 0.2);
-	const confLongSick = randBetween(0, 0.95);
 	const confNoSick = randBetween(0, 0.05);
 	const confQuota250 = randBetween(0, 0.3);
 	const confQuota0 = randBetween(0, 0.2);
-	const confMultiYear = randBetween(0, 0.2);
-	const confFpRatio = randBetween(0, 0.95);
 	const confExtRem = randBetween(0, 0.95);
 	const confExtRate = randBetween(0, 0.05);
 
@@ -468,15 +464,10 @@ function generateRow(company: CompanyData): string[] {
 		fmt4(confExo),
 		fmt4(confUnit),
 		fmt4(confSuspRatio),
-		fmt4(confLongSusp),
-		fmt4(confNoEndSusp),
 		fmt4(confSickRatio),
-		fmt4(confLongSick),
 		fmt4(confNoSick),
 		fmt4(confQuota250),
 		fmt4(confQuota0),
-		fmt4(confMultiYear),
-		fmt4(confFpRatio),
 		fmt4(confExtRem),
 		fmt4(confExtRate),
 	];
@@ -561,15 +552,10 @@ const HEADERS = [
 	"indice_nature_exo",
 	"indice_unite",
 	"indice_ratio_suspensions",
-	"indice_suspensions_longues",
-	"indice_suspensions_sans_fin",
 	"indice_ratio_arrets",
-	"indice_arrets_longs",
 	"indice_arrets_0",
 	"indice_quotite250",
 	"indice_quotite0",
-	"indice_sup_annee_civile",
-	"indice_ratio_FP",
 	"indice_rem_extremes",
 	"indice_taux_extremes",
 ];

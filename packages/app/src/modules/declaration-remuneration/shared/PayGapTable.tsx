@@ -1,11 +1,11 @@
 import type { ReactElement } from "react";
 import {
-	computeGap,
 	displayDecimal,
 	formatGap,
 	gapLevel,
 	normalizeDecimalInput,
 	padDecimalOnBlur,
+	resolveGap,
 } from "~/modules/domain";
 import type { PayGapField, PayGapRow } from "../types";
 import common from "./common.module.scss";
@@ -83,7 +83,11 @@ export function PayGapTable({
 							</thead>
 							<tbody>
 								{rows.map((row, i) => {
-									const gap = computeGap(row.womenValue, row.menValue);
+									const gap = resolveGap(
+										row.womenValue,
+										row.menValue,
+										row.gipReference,
+									);
 									const level = gapLevel(gap);
 									return (
 										<tr key={row.label}>

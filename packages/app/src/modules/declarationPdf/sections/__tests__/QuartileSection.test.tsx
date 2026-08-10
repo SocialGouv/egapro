@@ -22,6 +22,7 @@ vi.mock("@react-pdf/renderer", async () => {
 	};
 });
 
+import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { QuartileSection } from "../QuartileSection";
 
 function makeData(step4: Step4Data): DeclarationPdfData {
@@ -30,7 +31,7 @@ function makeData(step4: Step4Data): DeclarationPdfData {
 		workforceYear: 2025,
 		isSecondDeclaration: false,
 		transmittedAt: "05/03/2026",
-		referencePeriod: "01/01/2026 - 31/12/2026",
+		referencePeriod: "01/01/2025 - 31/12/2025",
 		declarant: { name: "", email: "", phone: "" },
 		company: {
 			name: "Société Démo",
@@ -45,6 +46,8 @@ function makeData(step4: Step4Data): DeclarationPdfData {
 		step2Data: {} as DeclarationPdfData["step2Data"],
 		step3Data: {} as DeclarationPdfData["step3Data"],
 		step4Data: step4,
+		step2Gaps: noPayGapReferences(),
+		step3Gaps: noPayGapReferences(),
 		categories: [makeCategory()],
 		source: null,
 	};

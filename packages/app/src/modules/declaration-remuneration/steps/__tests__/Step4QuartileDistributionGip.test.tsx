@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { nullGipStep2, nullGipStep3 } from "~/test/gipGapFixtures";
 import { Step4QuartileDistribution } from "../Step4QuartileDistribution";
 
 const mockMutate = vi.fn();
@@ -33,29 +34,8 @@ const emptyStep4Data = () => ({
 	],
 });
 
-const nullStep2 = {
-	annualMeanWomen: null,
-	annualMeanMen: null,
-	hourlyMeanWomen: null,
-	hourlyMeanMen: null,
-	annualMedianWomen: null,
-	annualMedianMen: null,
-	hourlyMedianWomen: null,
-	hourlyMedianMen: null,
-};
-
-const nullStep3 = {
-	annualMeanWomen: null,
-	annualMeanMen: null,
-	hourlyMeanWomen: null,
-	hourlyMeanMen: null,
-	annualMedianWomen: null,
-	annualMedianMen: null,
-	hourlyMedianWomen: null,
-	hourlyMedianMen: null,
-	beneficiaryCountWomen: null,
-	beneficiaryCountMen: null,
-};
+const nullStep2 = nullGipStep2();
+const nullStep3 = nullGipStep3();
 
 describe("Step4QuartileDistribution — GIP prefill", () => {
 	it("uses gipPrefillData when no initialCategories", () => {

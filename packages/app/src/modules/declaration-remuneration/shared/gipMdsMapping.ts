@@ -34,23 +34,31 @@ export type GipPrefillData = {
 	step2: {
 		annualMeanWomen: string | null;
 		annualMeanMen: string | null;
+		annualMeanGap: string | null;
 		hourlyMeanWomen: string | null;
 		hourlyMeanMen: string | null;
+		hourlyMeanGap: string | null;
 		annualMedianWomen: string | null;
 		annualMedianMen: string | null;
+		annualMedianGap: string | null;
 		hourlyMedianWomen: string | null;
 		hourlyMedianMen: string | null;
+		hourlyMedianGap: string | null;
 	};
 	/** Step 3 — Variable pay (Indicator B mean + Indicator D median + Indicator E beneficiary counts) */
 	step3: {
 		annualMeanWomen: string | null;
 		annualMeanMen: string | null;
+		annualMeanGap: string | null;
 		hourlyMeanWomen: string | null;
 		hourlyMeanMen: string | null;
+		hourlyMeanGap: string | null;
 		annualMedianWomen: string | null;
 		annualMedianMen: string | null;
+		annualMedianGap: string | null;
 		hourlyMedianWomen: string | null;
 		hourlyMedianMen: string | null;
+		hourlyMedianGap: string | null;
 		/** Number of women benefiting from variable pay (integer from GIP workforce column). */
 		beneficiaryCountWomen: number | null;
 		/** Number of men benefiting from variable pay (integer from GIP workforce column). */
@@ -63,9 +71,9 @@ export type GipPrefillData = {
 	};
 	/** Confidence index (0-1, for internal DGT use) */
 	confidenceIndex: string | null;
-	/** Start of the data collection period (e.g. "2026-01-01"), used for "Période de référence" display. */
+	/** Start of the GIP file data-collection window (e.g. "2026-01-01"), shown in the prefill PDF. */
 	periodStart?: string | null;
-	/** End of the data collection period (e.g. "2026-12-31"), used for "Source : DSN" display. */
+	/** End of the GIP file data-collection window (e.g. "2026-12-31"), shown in the prefill PDF. */
 	periodEnd: string | null;
 };
 
@@ -87,22 +95,30 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 		step2: {
 			annualMeanWomen: row.globalAnnualMeanWomen,
 			annualMeanMen: row.globalAnnualMeanMen,
+			annualMeanGap: row.globalAnnualMeanGap,
 			hourlyMeanWomen: row.globalHourlyMeanWomen,
 			hourlyMeanMen: row.globalHourlyMeanMen,
+			hourlyMeanGap: row.globalHourlyMeanGap,
 			annualMedianWomen: row.globalAnnualMedianWomen,
 			annualMedianMen: row.globalAnnualMedianMen,
+			annualMedianGap: row.globalAnnualMedianGap,
 			hourlyMedianWomen: row.globalHourlyMedianWomen,
 			hourlyMedianMen: row.globalHourlyMedianMen,
+			hourlyMedianGap: row.globalHourlyMedianGap,
 		},
 		step3: {
 			annualMeanWomen: row.variableAnnualMeanWomen,
 			annualMeanMen: row.variableAnnualMeanMen,
+			annualMeanGap: row.variableAnnualMeanGap,
 			hourlyMeanWomen: row.variableHourlyMeanWomen,
 			hourlyMeanMen: row.variableHourlyMeanMen,
+			hourlyMeanGap: row.variableHourlyMeanGap,
 			annualMedianWomen: row.variableAnnualMedianWomen,
 			annualMedianMen: row.variableAnnualMedianMen,
+			annualMedianGap: row.variableAnnualMedianGap,
 			hourlyMedianWomen: row.variableHourlyMedianWomen,
 			hourlyMedianMen: row.variableHourlyMedianMen,
+			hourlyMedianGap: row.variableHourlyMedianGap,
 			beneficiaryCountWomen: toInt(row.womenCountAnnualVariable),
 			beneficiaryCountMen: toInt(row.menCountAnnualVariable),
 		},

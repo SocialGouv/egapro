@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { nullGipStep2, nullGipStep3 } from "~/test/gipGapFixtures";
 import { Step1Workforce } from "../Step1Workforce";
 
 const mockMutate = vi.fn();
@@ -104,7 +105,9 @@ describe("Step1Workforce", () => {
 			/>,
 		);
 		expect(
-			screen.getByText(/Période de référence pour le calcul des indicateurs/),
+			screen.getByText(
+				/Période de référence pour le calcul des indicateurs : 01\/01\/2025 - 31\/12\/2025\./,
+			),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText("Tous les champs sont obligatoires."),
@@ -298,28 +301,8 @@ describe("Step1Workforce", () => {
 				declarationYear={2026}
 				gipPrefillData={{
 					step1: { totalWomen: 50, totalMen: 100 },
-					step2: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-					},
-					step3: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-						beneficiaryCountWomen: null,
-						beneficiaryCountMen: null,
-					},
+					step2: nullGipStep2(),
+					step3: nullGipStep3(),
 					step4: {
 						annual: {
 							thresholds: [null, null, null],
@@ -361,28 +344,8 @@ describe("Step1Workforce", () => {
 				declarationYear={2026}
 				gipPrefillData={{
 					step1: { totalWomen: 50, totalMen: 100 },
-					step2: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-					},
-					step3: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-						beneficiaryCountWomen: null,
-						beneficiaryCountMen: null,
-					},
+					step2: nullGipStep2(),
+					step3: nullGipStep3(),
 					step4: {
 						annual: {
 							thresholds: [null, null, null],

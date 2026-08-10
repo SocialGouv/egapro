@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import type { PayGapRow } from "~/modules/declaration-remuneration/types";
+import { DIVERGENT_HOURLY_MEDIAN } from "~/test/gipGapFixtures";
 import {
 	GapInterpretationCallout,
 	hasHighPayGap,
@@ -40,6 +41,15 @@ function makeRows(overrides: {
 			menValue: overrides.hourlyMedianM ?? "",
 		},
 	];
+}
+
+/** Attach the GIP-published gap to one of the standard rows. */
+function withGipReference(
+	rows: PayGapRow[],
+	label: string,
+	gipReference: PayGapRow["gipReference"],
+): PayGapRow[] {
+	return rows.map((r) => (r.label === label ? { ...r, gipReference } : r));
 }
 
 describe("GapInterpretationCallout", () => {
@@ -196,6 +206,71 @@ describe("GapInterpretationCallout", () => {
 		expect(callout).toHaveClass("fr-callout--orange-terre-battue");
 	});
 
+	it("uses orange accent class when only the GIP gap crosses the threshold", () => {
+		const rows = withGipReference(
+			makeRows({
+				annualMeanW: "30000",
+				annualMeanM: "30500",
+				annualMedianW: "30000",
+				annualMedianM: "30200",
+				hourlyMeanW: "15",
+				hourlyMeanM: "15.2",
+				hourlyMedianW: DIVERGENT_HOURLY_MEDIAN.women,
+				hourlyMedianM: DIVERGENT_HOURLY_MEDIAN.men,
+			}),
+			"Horaire brute médiane",
+			DIVERGENT_HOURLY_MEDIAN,
+		);
+
+		const { container } = render(
+			<GapInterpretationCallout rows={rows} variant="payGap" />,
+		);
+
+		expect(container.querySelector(".fr-callout")).toHaveClass(
+			"fr-callout--orange-terre-battue",
+		);
+	});
+
+	it("reads the GIP gap into the prose while the operands are untouched", () => {
+		const rows = withGipReference(
+			makeRows({
+				annualMeanW: "25000",
+				annualMeanM: "30000",
+				annualMedianW: "24000",
+				annualMedianM: "29000",
+				hourlyMeanW: "12",
+				hourlyMeanM: "15",
+			}),
+			"Annuelle brute moyenne",
+			{ women: "25000", men: "30000", gap: "0.2222" },
+		);
+
+		render(<GapInterpretationCallout rows={rows} variant="payGap" />);
+
+		expect(screen.getByText("22,22 %")).toBeInTheDocument();
+		expect(screen.queryByText("16,66 %")).not.toBeInTheDocument();
+	});
+
+	it("falls back to the recomputed gap in the prose once an operand is edited", () => {
+		const rows = withGipReference(
+			makeRows({
+				annualMeanW: "24000",
+				annualMeanM: "30000",
+				annualMedianW: "24000",
+				annualMedianM: "29000",
+				hourlyMeanW: "12",
+				hourlyMeanM: "16",
+			}),
+			"Annuelle brute moyenne",
+			{ women: "25000", men: "30000", gap: "0.2222" },
+		);
+
+		render(<GapInterpretationCallout rows={rows} variant="payGap" />);
+
+		expect(screen.getByText("20,00 %")).toBeInTheDocument();
+		expect(screen.queryByText("22,22 %")).not.toBeInTheDocument();
+	});
+
 	it("uses blue accent class when all gaps are < 5%", () => {
 		const rows = makeRows({
 			annualMeanW: "30000",
@@ -318,5 +393,24 @@ describe("hasHighPayGap", () => {
 			annualMeanM: "30000",
 		});
 		expect(hasHighPayGap(rows)).toBe(true);
+	});
+
+	// Recomputing 0,10 € against 0,10 € yields 0 %, so the row only crosses the
+	// threshold when the GIP's own 7,19 % is read instead.
+	it("returns true on a GIP gap that recomputation would keep below the threshold", () => {
+		const operands = {
+			hourlyMedianW: DIVERGENT_HOURLY_MEDIAN.women,
+			hourlyMedianM: DIVERGENT_HOURLY_MEDIAN.men,
+		};
+		expect(hasHighPayGap(makeRows(operands))).toBe(false);
+		expect(
+			hasHighPayGap(
+				withGipReference(
+					makeRows(operands),
+					"Horaire brute médiane",
+					DIVERGENT_HOURLY_MEDIAN,
+				),
+			),
+		).toBe(true);
 	});
 });

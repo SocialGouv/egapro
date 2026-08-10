@@ -42,6 +42,8 @@ export type {
 } from "./shared/gipMdsMapping";
 export { CSV_TO_SCHEMA_MAP, mapGipToFormData } from "./shared/gipMdsMapping";
 export { getEffectiveGipPrefillData } from "./shared/gipToStepData";
+export type { PayGapReferences } from "./shared/indicatorRowMapping";
+export { gipPayGapReferences } from "./shared/indicatorRowMapping";
 export { DeclarationLockAlert } from "./shared/lock/DeclarationLockAlert";
 export {
 	LockProvider,

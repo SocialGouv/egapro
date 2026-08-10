@@ -1,6 +1,5 @@
 import { CompanyBanner } from "./shared/CompanyBanner";
-import { DeclarationLockAlert } from "./shared/lock/DeclarationLockAlert";
-import type { LockHolder } from "./shared/lock/LockContext";
+import { DeclarationLockAlertGate } from "./shared/lock/DeclarationLockAlertGate";
 import { LockProvider } from "./shared/lock/LockContext";
 
 type CompanyData = {
@@ -14,18 +13,18 @@ type CompanyData = {
 
 type DeclarationLayoutProps = {
 	company: CompanyData;
+	declarationId: string;
 	declarationYear: number;
 	children: React.ReactNode;
-	isReadOnly?: boolean;
-	lockHolder?: LockHolder | null;
+	lockAcquisitionSuspended?: boolean;
 };
 
 export function DeclarationLayout({
 	company,
+	declarationId,
 	declarationYear,
 	children,
-	isReadOnly = false,
-	lockHolder = null,
+	lockAcquisitionSuspended = false,
 }: DeclarationLayoutProps) {
 	return (
 		<main id="content" tabIndex={-1}>
@@ -34,12 +33,13 @@ export function DeclarationLayout({
 				currentPageLabel={`Démarche des indicateurs de rémunération ${declarationYear}`}
 			/>
 			<div className="fr-container fr-py-7w">
-				<LockProvider holder={lockHolder} isReadOnly={isReadOnly}>
+				<LockProvider
+					declarationId={declarationId}
+					modificationClosed={lockAcquisitionSuspended}
+				>
 					<div className="fr-grid-row fr-grid-row--center">
 						<div className="fr-col-12 fr-col-lg-8">
-							{isReadOnly && lockHolder && (
-								<DeclarationLockAlert holder={lockHolder} />
-							)}
+							<DeclarationLockAlertGate />
 							{children}
 						</div>
 					</div>

@@ -5,7 +5,7 @@ import { PrefillSource } from "../PrefillSource";
 
 describe("PrefillSource", () => {
 	it("renders the DSN source text", () => {
-		render(<PrefillSource periodEnd={null} periodStart={null} year={2026} />);
+		render(<PrefillSource year={2026} />);
 
 		expect(screen.getByText(/DSN/)).toBeInTheDocument();
 		expect(
@@ -13,27 +13,21 @@ describe("PrefillSource", () => {
 		).toBeInTheDocument();
 	});
 
-	it("shows the GIP collection window as the reference period", () => {
-		render(
-			<PrefillSource
-				periodEnd="2026-12-31"
-				periodStart="2026-01-01"
-				year={2026}
-			/>,
-		);
+	it("shows the preceding civil year (N-1) as the reference period", () => {
+		render(<PrefillSource year={2026} />);
 
 		expect(screen.getByText(/période de référence/)).toBeInTheDocument();
-		expect(screen.getByText(/01\/01\/2026 - 31\/12\/2026/)).toBeInTheDocument();
+		expect(screen.getByText(/01\/01\/2025 - 31\/12\/2025/)).toBeInTheDocument();
 	});
 
-	it("falls back to the civil year when a period bound is missing", () => {
-		render(<PrefillSource periodEnd={null} periodStart={null} year={2026} />);
+	it("derives the reference period from the campaign year", () => {
+		render(<PrefillSource year={2025} />);
 
-		expect(screen.getByText(/01\/01\/2026 - 31\/12\/2026/)).toBeInTheDocument();
+		expect(screen.getByText(/01\/01\/2024 - 31\/12\/2024/)).toBeInTheDocument();
 	});
 
 	it("renders the tooltip button", () => {
-		render(<PrefillSource periodEnd={null} periodStart={null} year={2026} />);
+		render(<PrefillSource year={2026} />);
 
 		expect(
 			screen.getByRole("button", {

@@ -5,7 +5,7 @@ import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
 } from "~/modules/domain";
-import { getWorkforceYearFor, isDeadlinePassed } from "~/modules/domain";
+import { getReferenceYearFor, isDeadlinePassed } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 
@@ -163,7 +163,7 @@ function Step1Content({
 	variant: PanelVariant;
 	year: number;
 }) {
-	const refYear = getWorkforceYearFor(year);
+	const refYear = getReferenceYearFor(year);
 	const title = (
 		<StepTitle status={status}>
 			Déclaration des indicateurs de rémunération

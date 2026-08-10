@@ -101,6 +101,7 @@ vi.mock("../sections/PayGapTable", async () => {
 	};
 });
 
+import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { DeclarationPdfDocument } from "../DeclarationPdfDocument";
 
 function makeData(
@@ -111,7 +112,7 @@ function makeData(
 		workforceYear: 2025,
 		isSecondDeclaration: false,
 		transmittedAt: "05/03/2026",
-		referencePeriod: "01/01/2026 - 31/12/2026",
+		referencePeriod: "01/01/2025 - 31/12/2025",
 		declarant: {
 			name: "Jean Martin",
 			email: "email@example.fr",
@@ -130,6 +131,8 @@ function makeData(
 		step2Data: emptyStep2Data(),
 		step3Data: emptyStep3Data(),
 		step4Data: emptyStep4Data(),
+		step2Gaps: noPayGapReferences(),
+		step3Gaps: noPayGapReferences(),
 		categories: [makeCategory({ name: "Ouvriers" })],
 		source: "Accord d'entreprise",
 		...overrides,
@@ -171,7 +174,7 @@ describe("DeclarationPdfDocument", () => {
 			screen.getByText("Effectif annuel moyen en 2025"),
 		).toBeInTheDocument();
 		expect(screen.getByText("250")).toBeInTheDocument();
-		expect(screen.getByText("01/01/2026 - 31/12/2026")).toBeInTheDocument();
+		expect(screen.getByText("01/01/2025 - 31/12/2025")).toBeInTheDocument();
 	});
 
 	it("renders every indicator section for an initial declaration", () => {

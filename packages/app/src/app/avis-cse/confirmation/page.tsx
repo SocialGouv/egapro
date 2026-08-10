@@ -5,7 +5,7 @@ import {
 } from "~/modules/analytics";
 import { ConfirmationPage, CSE_FUNNEL } from "~/modules/cseOpinion";
 import { isDeclarationSubmitted } from "~/modules/cseOpinion/confirmationHelpers";
-import { getWorkforceYearFor } from "~/modules/domain";
+import { getReferenceYearFor } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -28,7 +28,7 @@ export default async function CseOpinionConfirmationPage() {
 				dimensions={campaignYearDimension(declarationData.declaration.year)}
 			/>
 			<ConfirmationPage
-				dataYear={getWorkforceYearFor(declarationData.declaration.year)}
+				dataYear={getReferenceYearFor(declarationData.declaration.year)}
 				declarationYear={declarationData.declaration.year}
 				email={session?.user?.email ?? undefined}
 				hasSecondDeclaration={declarationData.hasSubmittedSecondDeclaration}

@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	computeDeclarationStatus,
 	DECLARATION_FSM_STATUSES,
-	getWorkforceYearFor,
+	getReferenceYearFor,
 } from "~/modules/domain";
 import {
 	failingFetch,
@@ -19,7 +19,7 @@ import {
 import type { DeclarationItem } from "../types";
 
 const DECLARATION_YEAR = 2026;
-const SUBTITLE = `Année ${DECLARATION_YEAR} au titre des données ${getWorkforceYearFor(DECLARATION_YEAR)}`;
+const SUBTITLE = `Année ${DECLARATION_YEAR} au titre des données ${getReferenceYearFor(DECLARATION_YEAR)}`;
 
 const PREFILL_TITLE =
 	"Télécharger les données préremplies (issues des données DSN)";
@@ -204,7 +204,7 @@ describe("DocumentsPanel", () => {
 		]);
 	});
 
-	it("points each card at its own PDF route and dates it with the workforce year", () => {
+	it("points each card at its own PDF route and dates it with the reference year", () => {
 		const { panel, links } = renderPanel({
 			hasPrefillData: true,
 			hasSubmittedSecondDeclaration: true,

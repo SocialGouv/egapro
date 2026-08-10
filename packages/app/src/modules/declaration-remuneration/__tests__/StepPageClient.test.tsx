@@ -46,6 +46,7 @@ vi.mock("../steps/Step6Review", () => ({
 	Step6Review: () => <div data-testid="step-6" />,
 }));
 
+import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { StepPageClient } from "../StepPageClient";
 
 const useSessionMock = useSession as unknown as Mock;
@@ -67,6 +68,8 @@ const baseProps = {
 	step2Data: {} as never,
 	step3Data: {} as never,
 	step4Data: {} as never,
+	step2Gaps: noPayGapReferences(),
+	step3Gaps: noPayGapReferences(),
 	step5Categories: [],
 };
 
@@ -102,20 +105,7 @@ describe("StepPageClient — modification closed banner (#3716)", () => {
 		expect(screen.getByTestId("step-1")).toBeInTheDocument();
 	});
 
-	it("does not acquire the collaborative lock when modification is closed", () => {
-		render(
-			<StepPageClient
-				{...baseProps}
-				modificationClosed
-				modificationDeadline={DEADLINE}
-			/>,
-		);
-
-		expect(acquireMutateAsync).not.toHaveBeenCalled();
-	});
-
 	it("does not render the banner when modification is open (the regression: step stays editable)", () => {
-		acquireMutateAsync.mockResolvedValue({ acquired: true, holder: null });
 		render(<StepPageClient {...baseProps} modificationClosed={false} />);
 
 		expect(

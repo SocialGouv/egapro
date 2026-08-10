@@ -1,5 +1,8 @@
 import { expect, type Page, test } from "@playwright/test";
-import { EXPECTED_DECLARATION_TYPES } from "~/modules/domain";
+import {
+	EXPECTED_DECLARATION_TYPES,
+	getReferenceYearFor,
+} from "~/modules/domain";
 import { withCampaignYear } from "./helpers/campaign-year";
 import {
 	getCurrentDbYear,
@@ -37,7 +40,9 @@ test.describe("Declaration workflow", () => {
 		await page.waitForURL("**/declaration-remuneration/etape/**");
 	});
 
-	test("displays step 1 after login", async ({ page }) => {
+	test("displays step 1 with the N-1 reference period after login (#4075)", async ({
+		page,
+	}) => {
 		await expect(
 			page.getByRole("heading", {
 				name: /Déclaration des indicateurs de rémunération/i,
@@ -45,6 +50,16 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 
 		await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
+
+		// Expectation derived from getReferenceYearFor, never getReferencePeriod (the
+		// function the bug lived in), so reverting the fix fails this test instead of
+		// tautologically tracking it.
+		const referenceYear = getReferenceYearFor(await getCurrentDbYear());
+		await expect(
+			page.getByText(
+				`Période de référence pour le calcul des indicateurs : 01/01/${referenceYear} - 31/12/${referenceYear}.`,
+			),
+		).toBeVisible();
 	});
 
 	test("navigates through step 1 - Effectifs", async ({ page }) => {
@@ -231,6 +246,48 @@ test.describe("Declaration workflow", () => {
 		await expect(
 			page.getByText("Le seuil est obligatoire").first(),
 		).toBeVisible();
+	});
+
+	test("step 1 - empty submission errors wrap inside their cell, not onto the next column (#3971)", async ({
+		page,
+	}) => {
+		await goToStep(page, 1);
+
+		// Clear any GIP-prefilled counts so the "empty → required error" path fires.
+		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("");
+		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("");
+
+		await page.getByRole("button", { name: "Suivant" }).click();
+
+		await expect(
+			page.getByText("Veuillez renseigner le nombre de femmes."),
+		).toBeVisible();
+
+		// DSFR 1.14 sets white-space: nowrap on table cells; inherited by
+		// .fr-error-text it painted the message onto the neighbouring column. A
+		// visible message is not enough — the bug kept it visible, just overflowing.
+		// Assert the rendered text extent stays within its owning <td>.
+		const measure = await page.evaluate(() => {
+			const paragraph = document.getElementById("women-error");
+			const cell = paragraph?.closest("td");
+			if (!paragraph || !cell) return null;
+			const range = document.createRange();
+			range.selectNodeContents(paragraph);
+			const textRight = Math.max(
+				...Array.from(range.getClientRects()).map((rect) => rect.right),
+			);
+			return {
+				textRight,
+				cellRight: cell.getBoundingClientRect().right,
+				scrollWidth: paragraph.scrollWidth,
+				clientWidth: paragraph.clientWidth,
+			};
+		});
+
+		if (!measure) throw new Error("step 1 women error paragraph not found");
+		// nowrap would force one line wider than the cell → scrollWidth > clientWidth.
+		expect(measure.scrollWidth).toBeLessThanOrEqual(measure.clientWidth + 1);
+		expect(measure.textRight).toBeLessThanOrEqual(measure.cellRight + 1);
 	});
 
 	test("previous button navigates back", async ({ page }) => {
