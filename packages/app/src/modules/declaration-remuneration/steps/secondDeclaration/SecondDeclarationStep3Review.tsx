@@ -5,6 +5,7 @@ import { useCallback, useRef } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
+import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { NextStepsBox } from "~/modules/declaration-remuneration/shared/NextStepsBox";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { SubmitDeclarationModal } from "~/modules/declaration-remuneration/shared/SubmitDeclarationModal";
@@ -153,6 +154,8 @@ export function SecondDeclarationStep3Review({
 				isSecondDeclaration
 				siren={siren}
 			/>
+
+			<FormErrors mutationError={mutation.error?.message} />
 
 			<FormActions
 				nextLabel="Soumettre"

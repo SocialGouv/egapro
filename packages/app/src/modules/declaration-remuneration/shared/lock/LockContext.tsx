@@ -31,6 +31,7 @@ type StaticLockProviderProps = {
 	isReadOnly?: boolean;
 	reason?: ReadOnlyReason | null;
 	holder?: LockHolder | null;
+	isLoading?: boolean;
 };
 
 type DynamicLockProviderProps = {
@@ -46,6 +47,7 @@ function StaticLockProvider({
 	isReadOnly = false,
 	reason,
 	holder = null,
+	isLoading,
 }: StaticLockProviderProps) {
 	// Impersonation is read-only too, but the layouts feed this provider from
 	// `getLockReadState` (lock only, no impersonation). Fold it in here so the
@@ -62,6 +64,7 @@ function StaticLockProvider({
 				isReadOnly: isReadOnly || isImpersonating,
 				reason: resolvedReason,
 				holder: isImpersonating ? null : holder,
+				isLoading,
 			}}
 		>
 			{children}

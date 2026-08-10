@@ -1,8 +1,23 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { useSession } from "next-auth/react";
+import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
+
+const acquireMutateAsync = vi.fn();
+const heartbeatMutateAsync = vi.fn();
+
+vi.mock("~/trpc/react", () => ({
+	api: {
+		declarationLock: {
+			acquireLock: { useMutation: () => ({ mutateAsync: acquireMutateAsync }) },
+			heartbeat: { useMutation: () => ({ mutateAsync: heartbeatMutateAsync }) },
+		},
+	},
+}));
 
 import { DeclarationLayout } from "../DeclarationLayout";
 import { useLockContext } from "../shared/lock/LockContext";
+
+const useSessionMock = useSession as unknown as Mock;
 
 const company = {
 	name: "Alpha Solutions",
@@ -26,30 +41,45 @@ function LockProbe() {
 	);
 }
 
-describe("DeclarationLayout", () => {
-	it("renders the children inside the banner layout", () => {
-		render(
-			<DeclarationLayout company={company} declarationYear={2024}>
-				<p>Step content</p>
-			</DeclarationLayout>,
-		);
+function declarationLayout(lockAcquisitionSuspended = false) {
+	return (
+		<DeclarationLayout
+			company={company}
+			declarationId="decl-1"
+			declarationYear={2024}
+			lockAcquisitionSuspended={lockAcquisitionSuspended}
+		>
+			<p>Step content</p>
+			<LockProbe />
+		</DeclarationLayout>
+	);
+}
 
-		expect(screen.getByText("Step content")).toBeInTheDocument();
+beforeEach(() => {
+	acquireMutateAsync.mockReset();
+	heartbeatMutateAsync.mockReset();
+	acquireMutateAsync.mockResolvedValue({ acquired: true, holder: null });
+	useSessionMock.mockReturnValue({
+		data: { user: { id: "user-1", impersonation: null } },
+		status: "authenticated",
+	});
+});
+
+describe("DeclarationLayout", () => {
+	it("renders the children inside the banner layout", async () => {
+		render(declarationLayout());
+
+		expect(await screen.findByText("Step content")).toBeInTheDocument();
 	});
 
-	it("shows the lock alert when read-only and a holder is provided", () => {
-		render(
-			<DeclarationLayout
-				company={company}
-				declarationYear={2024}
-				isReadOnly
-				lockHolder={lockHolder}
-			>
-				<p>Step content</p>
-			</DeclarationLayout>,
-		);
+	it("shows the lock alert when the declaration is held by another user", async () => {
+		acquireMutateAsync.mockResolvedValue({
+			acquired: false,
+			holder: lockHolder,
+		});
+		render(declarationLayout());
 
-		expect(screen.getByRole("alert")).toHaveTextContent(
+		expect(await screen.findByRole("alert")).toHaveTextContent(
 			"Déclaration en cours de modification",
 		);
 		expect(
@@ -57,45 +87,73 @@ describe("DeclarationLayout", () => {
 		).toBeInTheDocument();
 	});
 
-	it("does not show the lock alert by default", () => {
-		render(
-			<DeclarationLayout company={company} declarationYear={2024}>
-				<p>Step content</p>
-			</DeclarationLayout>,
-		);
+	it("does not show the lock alert once the lock is acquired", async () => {
+		render(declarationLayout());
 
+		expect(await screen.findByTestId("lock-probe")).toHaveTextContent(
+			"false:none",
+		);
 		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 	});
 
-	it("does not show the lock alert when read-only but no holder is resolved", () => {
-		render(
-			<DeclarationLayout
-				company={company}
-				declarationYear={2024}
-				isReadOnly
-				lockHolder={null}
-			>
-				<p>Step content</p>
-			</DeclarationLayout>,
-		);
+	it("does not show the lock alert when read-only but no holder is resolved", async () => {
+		acquireMutateAsync.mockResolvedValue({ acquired: false, holder: null });
+		render(declarationLayout());
 
+		expect(await screen.findByTestId("lock-probe")).toHaveTextContent(
+			"true:none",
+		);
 		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 	});
 
-	it("provides the lock state to descendant consumers", () => {
-		render(
-			<DeclarationLayout
-				company={company}
-				declarationYear={2024}
-				isReadOnly
-				lockHolder={lockHolder}
-			>
-				<LockProbe />
-			</DeclarationLayout>,
-		);
+	it("provides the lock state to descendant consumers", async () => {
+		acquireMutateAsync.mockResolvedValue({
+			acquired: false,
+			holder: lockHolder,
+		});
+		render(declarationLayout());
 
-		expect(screen.getByTestId("lock-probe")).toHaveTextContent(
+		expect(await screen.findByTestId("lock-probe")).toHaveTextContent(
 			"true:camille.martin@example.fr",
 		);
+	});
+});
+
+// The lock is shared by every page of the `(with-banner)` group, so it may only
+// be skipped once *nothing* under it is writable. The compliance-path pages keep
+// writing for months after `decl1ModificationDeadline` elapses.
+describe("DeclarationLayout — collaborative lock acquisition", () => {
+	it.each([
+		{
+			acquires: true,
+			lockAcquisitionSuspended: false,
+			scenario: "a writable surface remains under the route group",
+		},
+		{
+			acquires: false,
+			lockAcquisitionSuspended: true,
+			scenario: "démarche completed and the modification deadline elapsed",
+		},
+	])("$scenario → acquires: $acquires", async ({
+		acquires,
+		lockAcquisitionSuspended,
+	}) => {
+		render(declarationLayout(lockAcquisitionSuspended));
+		await screen.findByTestId("lock-probe");
+
+		if (acquires) {
+			expect(acquireMutateAsync).toHaveBeenCalledWith({
+				declarationId: "decl-1",
+			});
+		} else {
+			expect(acquireMutateAsync).not.toHaveBeenCalled();
+		}
+	});
+
+	it("keeps the démarche read-only without a holder when the lock is skipped", () => {
+		render(declarationLayout(true));
+
+		expect(screen.getByTestId("lock-probe")).toHaveTextContent("true:none");
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 	});
 });

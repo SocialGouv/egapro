@@ -3,10 +3,10 @@ import {
 	DeclarationLayout,
 	MissingSiret,
 } from "~/modules/declaration-remuneration";
+import { isDeclarationWritingClosed } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { getEffectiveSiren } from "~/server/auth/companyAccess";
-import { db } from "~/server/db";
-import { getLockReadState } from "~/server/services/declarationLockService";
+import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
 
 /**
@@ -36,18 +36,19 @@ export default async function WithBannerLayout({
 	]);
 
 	const declaration = declarationData.declaration;
-	const { isReadOnly, lockHolder } = await getLockReadState(
-		db,
-		declaration.id,
-		session.user.id,
+
+	const deadlines = await getCampaignDeadlines(declaration.year);
+	const lockAcquisitionSuspended = isDeclarationWritingClosed(
+		declaration.status,
+		deadlines.decl1ModificationDeadline,
 	);
 
 	return (
 		<DeclarationLayout
 			company={company}
+			declarationId={declaration.id}
 			declarationYear={declaration.year}
-			isReadOnly={isReadOnly}
-			lockHolder={lockHolder}
+			lockAcquisitionSuspended={lockAcquisitionSuspended}
 		>
 			{children}
 		</DeclarationLayout>

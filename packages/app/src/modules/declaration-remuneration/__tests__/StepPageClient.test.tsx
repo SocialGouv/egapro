@@ -102,20 +102,7 @@ describe("StepPageClient — modification closed banner (#3716)", () => {
 		expect(screen.getByTestId("step-1")).toBeInTheDocument();
 	});
 
-	it("does not acquire the collaborative lock when modification is closed", () => {
-		render(
-			<StepPageClient
-				{...baseProps}
-				modificationClosed
-				modificationDeadline={DEADLINE}
-			/>,
-		);
-
-		expect(acquireMutateAsync).not.toHaveBeenCalled();
-	});
-
 	it("does not render the banner when modification is open (the regression: step stays editable)", () => {
-		acquireMutateAsync.mockResolvedValue({ acquired: true, holder: null });
 		render(<StepPageClient {...baseProps} modificationClosed={false} />);
 
 		expect(
