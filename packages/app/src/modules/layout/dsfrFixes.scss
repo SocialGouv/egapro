@@ -79,3 +79,9 @@
 .fr-table__content .fr-error-text {
 	white-space: normal;
 }
+
+// Doubled selector beats DSFR 1.14's own margin rules regardless of load order.
+.fr-breadcrumb.fr-breadcrumb {
+	margin-top: 0;
+	margin-bottom: 2rem;
+}
