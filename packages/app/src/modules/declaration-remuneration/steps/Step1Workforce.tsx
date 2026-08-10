@@ -303,7 +303,11 @@ export function Step1Workforce({
 																	}
 																	aria-invalid={womenError ? true : undefined}
 																	aria-label="Nombre de femmes"
-																	className={`fr-input ${common.numericInput}${womenError ? "fr-input--error" : ""}`}
+																	className={
+																		womenError
+																			? `fr-input fr-input--error ${common.numericInput}`
+																			: `fr-input ${common.numericInput}`
+																	}
 																	disabled={isImpersonating}
 																	inputMode="numeric"
 																	onChange={handleWomenChange}
@@ -333,7 +337,11 @@ export function Step1Workforce({
 																	}
 																	aria-invalid={menError ? true : undefined}
 																	aria-label="Nombre d'hommes"
-																	className={`fr-input ${common.numericInput}${menError ? "fr-input--error" : ""}`}
+																	className={
+																		menError
+																			? `fr-input fr-input--error ${common.numericInput}`
+																			: `fr-input ${common.numericInput}`
+																	}
 																	disabled={isImpersonating}
 																	inputMode="numeric"
 																	onChange={handleMenChange}

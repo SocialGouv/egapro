@@ -233,6 +233,48 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 	});
 
+	test("step 1 - empty submission errors wrap inside their cell, not onto the next column (#3971)", async ({
+		page,
+	}) => {
+		await goToStep(page, 1);
+
+		// Clear any GIP-prefilled counts so the "empty → required error" path fires.
+		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("");
+		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("");
+
+		await page.getByRole("button", { name: "Suivant" }).click();
+
+		await expect(
+			page.getByText("Veuillez renseigner le nombre de femmes."),
+		).toBeVisible();
+
+		// DSFR 1.14 sets white-space: nowrap on table cells; inherited by
+		// .fr-error-text it painted the message onto the neighbouring column. A
+		// visible message is not enough — the bug kept it visible, just overflowing.
+		// Assert the rendered text extent stays within its owning <td>.
+		const measure = await page.evaluate(() => {
+			const paragraph = document.getElementById("women-error");
+			const cell = paragraph?.closest("td");
+			if (!paragraph || !cell) return null;
+			const range = document.createRange();
+			range.selectNodeContents(paragraph);
+			const textRight = Math.max(
+				...Array.from(range.getClientRects()).map((rect) => rect.right),
+			);
+			return {
+				textRight,
+				cellRight: cell.getBoundingClientRect().right,
+				scrollWidth: paragraph.scrollWidth,
+				clientWidth: paragraph.clientWidth,
+			};
+		});
+
+		if (!measure) throw new Error("step 1 women error paragraph not found");
+		// nowrap would force one line wider than the cell → scrollWidth > clientWidth.
+		expect(measure.scrollWidth).toBeLessThanOrEqual(measure.clientWidth + 1);
+		expect(measure.textRight).toBeLessThanOrEqual(measure.cellRight + 1);
+	});
+
 	test("previous button navigates back", async ({ page }) => {
 		await page.goto("/declaration-remuneration/etape/2");
 
