@@ -73,6 +73,70 @@
 	}
 }
 
+// DSFR anchors the arrow of an enlarged-link tile or card to the bottom of the
+// CARD, and `.fr-grid-row .fr-tile` stretches every tile of a row to the
+// tallest one. So the arrow drifts away from the text it belongs to, by however
+// much that sibling is taller: measured at 0px on the FAQ tile of the home
+// banner but 24px on its two neighbours, and up to 49px on the cards of Mon
+// espace (issue 3454).
+//
+// The Figma puts the arrow on the LAST LINE of the text, flush right. Anchoring
+// it to the text block instead of the card reproduces that at any height, and
+// keeps the row's equal heights untouched.
+//
+// The overlay that extends the click zone is the `::before` of the same link,
+// and it stays anchored to the card: the elements made `relative` here are the
+// text blocks, which are not ancestors of that link.
+$dsfr-icons: "/dsfr/icons";
+
+.fr-tile.fr-enlarge-link:not(.fr-tile--no-icon)
+	.fr-tile__title
+	a:not([target="_blank"])::after,
+.fr-card.fr-enlarge-link:not(.fr-card--no-icon)
+	.fr-card__title
+	a:not([target="_blank"])::after {
+	content: none;
+}
+
+.fr-tile.fr-enlarge-link:not(.fr-tile--no-icon) .fr-tile__detail,
+.fr-card.fr-enlarge-link:not(.fr-card--no-icon) .fr-card__desc,
+.fr-card.fr-enlarge-link:not(.fr-card--no-icon) .fr-card__end {
+	position: relative;
+}
+
+.fr-tile.fr-enlarge-link:not(.fr-tile--no-icon) .fr-tile__detail::after,
+.fr-card.fr-enlarge-link:not(.fr-card--no-icon) .fr-card__desc::after,
+.fr-card.fr-enlarge-link:not(.fr-card--no-icon) .fr-card__end::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	width: 1rem;
+	// One line tall, so the icon centres on the last line rather than sitting
+	// on its baseline.
+	height: 1.5rem;
+	background-color: currentcolor;
+	color: var(--text-action-high-blue-france);
+	mask-image: url("#{$dsfr-icons}/arrows/arrow-right-line.svg");
+	mask-size: 1rem 1rem;
+	mask-position: center;
+	mask-repeat: no-repeat;
+}
+
+// Download variants keep their own glyph.
+.fr-card--download.fr-enlarge-link:not(.fr-card--no-icon) .fr-card__desc::after,
+.fr-card--download.fr-enlarge-link:not(.fr-card--no-icon) .fr-card__end::after,
+.fr-tile--download.fr-enlarge-link:not(.fr-tile--no-icon)
+	.fr-tile__detail::after {
+	mask-image: url("#{$dsfr-icons}/system/download-line.svg");
+}
+
+// When a card carries both blocks the icon belongs to the last one, not to both.
+.fr-card.fr-enlarge-link:not(.fr-card--no-icon)
+	.fr-card__desc:has(~ .fr-card__end)::after {
+	content: none;
+}
+
 // DSFR 1.14 sets white-space: nowrap on all table cells, which is inherited by
 // .fr-error-text rendered inside a <td>. The message overflows onto adjacent
 // columns. Target only the message to preserve nowrap on numeric data cells.
