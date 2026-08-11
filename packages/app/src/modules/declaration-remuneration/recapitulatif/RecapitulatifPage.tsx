@@ -121,7 +121,7 @@ export function RecapitulatifPage({
 
 	return (
 		<div className={common.flexColumnGap2}>
-			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
+			<div className="fr-grid-row fr-grid-row--top fr-grid-row--gutters">
 				<div className="fr-col">
 					<TitleTag className="fr-h4 fr-mb-0">
 						{isCorrection
