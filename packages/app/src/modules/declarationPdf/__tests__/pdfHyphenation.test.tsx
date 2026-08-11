@@ -146,6 +146,8 @@ describe("PDF hyphenation", () => {
 		// 40pt cannot hold "Pourcentage" at any padding. Left to its bundled
 		// en-US patterns, react-pdf cuts it into "Pourcent-" + "age" — the 12th
 		// glyph being the inserted hyphen (issue 4126).
+		// The count is exact rather than an upper bound because the word carries
+		// no ligature pair; pick another word here and that stops holding.
 		const runs = await renderHeaderCell("Pourcentage", 40);
 		const glyphIds = runs.flatMap((run) => run.glyphIds);
 

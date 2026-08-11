@@ -26,6 +26,10 @@ export function extractTextStream(pdf: Buffer): string {
 		if (pdf[contentStart] === 0x0a) contentStart += 1;
 
 		const contentEnd = pdf.indexOf("endstream", contentStart);
+		// Without this guard a truncated buffer yields -1, subarray() slices the
+		// whole file, and the cursor rewinds to 8 — an infinite loop.
+		if (contentEnd === -1) break;
+
 		cursor = contentEnd + "endstream".length;
 
 		try {
