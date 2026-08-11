@@ -8,7 +8,7 @@ function makeRow(overrides: Partial<ExportRow> = {}): ExportRow {
 	return {
 		siren: "123456789",
 		companyName: "ACME Corp",
-		workforce: 250,
+		workforce: "250",
 		nafCode: "62.02",
 		address: "1 rue de Paris, 75001 Paris",
 		hasCse: true,

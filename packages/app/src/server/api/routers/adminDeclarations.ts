@@ -24,11 +24,11 @@ import {
 } from "~/modules/admin/declarations/schemas";
 import { releaseLockSchema } from "~/modules/admin/schemas";
 import {
+	formatWorkforceDisplay,
 	getCurrentYear,
 	getReferencePeriod,
 	isCancelled,
 	parseGipWorkforce,
-	toDisplayWorkforce,
 } from "~/modules/domain";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
@@ -257,7 +257,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 
 			return {
 				...declaration,
-				companyWorkforce: toDisplayWorkforce(
+				companyWorkforce: formatWorkforceDisplay(
 					parseGipWorkforce(companyWorkforceEma),
 				),
 				files: declarationFiles,

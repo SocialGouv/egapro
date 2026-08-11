@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 import {
 	isCompanyDiffusible,
 	type PublicCompanySource,
@@ -167,7 +168,7 @@ describe("toPublicDeclaration", () => {
 			expect(dto[field]).toBeNull();
 		}
 		expect(dto.siren).toBe("123456789");
-		expect(dto.workforceEma).toBe(250);
+		expect(dto.workforceEma).toBe("250");
 	});
 
 	it("keeps siren, year, workforceEma and every indicator for a non-diffusible company", () => {
@@ -179,7 +180,7 @@ describe("toPublicDeclaration", () => {
 
 		expect(nonDiffusible.siren).toBe(companyFixture.siren);
 		expect(nonDiffusible.year).toBe(declarationFixture.year);
-		expect(nonDiffusible.workforceEma).toBe(250);
+		expect(nonDiffusible.workforceEma).toBe("250");
 
 		const indicatorKeys = EXPECTED_DTO_KEYS.filter(
 			(key) =>
@@ -207,7 +208,7 @@ describe("toPublicDeclaration", () => {
 		expect(dto.variableProportionWomen).toBe(0.5625);
 		expect(dto.annualQuartile4ProportionMen).toBe(60);
 		expect(dto.hourlyQuartile1ProportionWomen).toBe(61);
-		expect(dto.workforceEma).toBe(250);
+		expect(dto.workforceEma).toBe("250");
 	});
 
 	it("serves the raw stored gap ratio without scaling it to a percentage", () => {
@@ -234,7 +235,7 @@ describe("toPublicDeclaration", () => {
 		);
 
 		expect(dto.globalAnnualMeanGap).toBeNull();
-		expect(dto.workforceEma).toBeNull();
+		expect(dto.workforceEma).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
 	});
 
 	it("maps non-numeric strings to null", () => {

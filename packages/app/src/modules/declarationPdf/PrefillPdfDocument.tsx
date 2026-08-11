@@ -1,6 +1,10 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 
-import { getReferenceYearFor } from "~/modules/domain";
+import {
+	formatWorkforceDisplay,
+	getReferenceYearFor,
+	parseGipWorkforce,
+} from "~/modules/domain";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
 import { styles } from "./pdfStyles";
 
@@ -91,8 +95,18 @@ const SECTIONS: Section[] = [
 	},
 ];
 
-function formatValue(value: string | number | null | undefined): string {
+// The headcount follows the same rule as every other surface: a company of the
+// voluntary tier is shown its bracket, not its exact figure (issue 3914).
+const WORKFORCE_FIELD = "workforceEma";
+
+function formatValue(
+	key: string,
+	value: string | number | null | undefined,
+): string {
 	if (value === null || value === undefined || value === "") return "—";
+	if (key === WORKFORCE_FIELD) {
+		return formatWorkforceDisplay(parseGipWorkforce(value));
+	}
 	return String(value);
 }
 
@@ -135,7 +149,7 @@ export function PrefillPdfDocument({ data }: Props) {
 								>
 									<Text style={styles.tableCellLabel}>{label}</Text>
 									<Text style={styles.tableCellValue}>
-										{formatValue(data.row[key])}
+										{formatValue(key, data.row[key])}
 									</Text>
 								</View>
 							);
