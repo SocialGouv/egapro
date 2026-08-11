@@ -6,7 +6,6 @@ import {
 	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getObligationWorkforce,
 	parseGipWorkforce,
-	toDisplayWorkforce,
 } from "../shared/gipWorkforce";
 import { formatCount } from "../shared/submissionRate";
 
@@ -54,23 +53,6 @@ describe("getObligationWorkforce", () => {
 	// Downstream obligation consequences (absent company → no obligation;
 	// exact-value comparison for decimal workforces like 99.97) live in the
 	// GIP-workforce describes of demarcheDecisionTable.test.ts (#3975).
-});
-
-describe("toDisplayWorkforce", () => {
-	it("floors the value so 99,97 never displays as 100", () => {
-		expect(toDisplayWorkforce(99.97)).toBe(99);
-		expect(toDisplayWorkforce(70.5)).toBe(70);
-		expect(toDisplayWorkforce(99.999)).toBe(99);
-	});
-
-	it("leaves an integer value unchanged", () => {
-		expect(toDisplayWorkforce(70)).toBe(70);
-		expect(toDisplayWorkforce(0)).toBe(0);
-	});
-
-	it("returns null when the company is absent from the GIP file", () => {
-		expect(toDisplayWorkforce(null)).toBeNull();
-	});
 });
 
 describe("GIP_WORKFORCE_ABSENT_DISPLAY", () => {

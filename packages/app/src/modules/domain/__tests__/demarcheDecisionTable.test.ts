@@ -4,6 +4,7 @@ import {
 	COMPANY_SIZE_ANNUAL_MIN,
 	COMPANY_SIZE_VOLUNTARY_MAX,
 	classifyCompanySize,
+	formatWorkforceDisplay,
 	GAP_ALERT_THRESHOLD,
 	gapLevel,
 	getObligationWorkforce,
@@ -16,7 +17,6 @@ import {
 	isIndicatorGRequired,
 	isTriennialYear,
 	parseGipWorkforce,
-	toDisplayWorkforce,
 } from "~/modules/domain";
 
 // Boundary-focused GIP workforce values (the single obligation source, #3962),
@@ -270,7 +270,9 @@ describe("GIP workforce — single source for the obligations (#3929/#3962)", ()
 		// #3929 class of bug: 99.97 displays as 99 and must NOT trigger the >= 100 obligations.
 		const nearCse = getObligationWorkforce(COMPANY_SIZE_ANNUAL_MIN - 0.03);
 		expect(isCseRequired(nearCse)).toBe(false);
-		expect(toDisplayWorkforce(nearCse)).toBe(COMPANY_SIZE_ANNUAL_MIN - 1);
+		expect(formatWorkforceDisplay(nearCse)).toBe(
+			String(COMPANY_SIZE_ANNUAL_MIN - 1),
+		);
 
 		const nearTriennial = getObligationWorkforce(
 			INDICATOR_G_TRIENNIAL_MIN - 0.5,

@@ -173,7 +173,6 @@ export {
 	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getObligationWorkforce,
 	parseGipWorkforce,
-	toDisplayWorkforce,
 } from "./shared/gipWorkforce";
 // Indicator G — applicability rules (workforce thresholds, triennial cycle, universal year)
 export {

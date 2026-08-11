@@ -18,11 +18,6 @@ export function getObligationWorkforce(gipWorkforce: number | null): number {
 	return gipWorkforce ?? 0;
 }
 
-// Floored so 99,97 never displays as "100" — thresholds compare the exact value.
-export function toDisplayWorkforce(gipWorkforce: number | null): number | null {
-	return gipWorkforce === null ? null : Math.floor(gipWorkforce);
-}
-
 /**
  * Headcount as it is shown to the user.
  *
@@ -32,7 +27,7 @@ export function toDisplayWorkforce(gipWorkforce: number | null): number | null {
  * figure. Only the two cases used to be told apart, and a company at 37 read
  * "37" (issue 3914).
  *
- * The tier is decided on the exact value, not on `toDisplayWorkforce`: 49,8
+ * The tier is decided on the exact value, never on the floored one: 49,8
  * belongs to the voluntary tier and must not surface as "49". A headcount of
  * exactly 50 is outside the tier and keeps its number.
  */
