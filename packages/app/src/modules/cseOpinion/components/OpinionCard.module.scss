@@ -7,7 +7,9 @@
 	// ends up visibly narrower than "Défavorable". The Figma gives the options
 	// of a group equal widths filling the row, which also makes the whole tile
 	// the pointer target rather than just the words.
-	:global(.fr-fieldset__element--inline) {
+	// Scoped to the group's own options: a descendant selector would also stretch
+	// the options of any fieldset a future card variant happens to nest.
+	:global(.fr-fieldset > .fr-fieldset__element--inline) {
 		flex: 1 1 0;
 	}
 }
