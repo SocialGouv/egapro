@@ -27,6 +27,7 @@ export function ConfirmationPage({
 			</h1>
 			<div className={`fr-mb-4w ${styles.successRow}`}>
 				<DsfrPictogram
+					className="fr-artwork--green-emeraude"
 					path="/dsfr/artwork/pictograms/system/success.svg"
 					size={64}
 				/>
@@ -74,13 +75,7 @@ export function ConfirmationPage({
 			</div>
 
 			<FeedbackBanner className="fr-mb-4w" />
-			<div className={formStyles.actions}>
-				<Link
-					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
-					href="/avis-cse/etape/2"
-				>
-					Modifier mes dépôts
-				</Link>
+			<div className={formStyles.actionsEnd}>
 				<Link className="fr-btn" href="/mon-espace">
 					Mon espace
 				</Link>

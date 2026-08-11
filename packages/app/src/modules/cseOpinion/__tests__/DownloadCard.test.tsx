@@ -36,17 +36,28 @@ afterEach(() => {
 });
 
 describe("DownloadCard", () => {
-	it("renders the card as a link to the file with its title and years", () => {
+	it("names the file in a heading link and its years alongside", () => {
 		renderCard();
 
-		const link = screen.getByRole("link");
+		// DSFR download card: the link carries the title only, and the enlarged
+		// click zone is drawn over the whole card in CSS.
+		const link = screen.getByRole("link", {
+			name: "Télécharger l'avis du CSE",
+		});
 		expect(link).toHaveAttribute("href", HREF);
-		expect(link).toHaveTextContent("Télécharger l'avis du CSE");
-		expect(link).toHaveTextContent(
-			`Année ${DECLARATION_YEAR} au titre des données ${DATA_YEAR}`,
-		);
+		expect(link).toHaveAttribute("download");
 		expect(link).not.toHaveAttribute("aria-busy");
 		expect(link).not.toHaveAttribute("aria-disabled");
+
+		expect(
+			screen.getByRole("heading", { name: "Télécharger l'avis du CSE" }),
+		).toContainElement(link);
+		expect(
+			screen.getByText(
+				`Année ${DECLARATION_YEAR} au titre des données ${DATA_YEAR}`,
+			),
+		).toBeInTheDocument();
+		expect(screen.getByText("PDF")).toBeInTheDocument();
 	});
 
 	it("announces the pending state and marks the link busy while downloading", async () => {

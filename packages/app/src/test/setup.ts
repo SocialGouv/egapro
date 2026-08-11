@@ -85,8 +85,14 @@ vi.mock("~/env", () => ({
 
 // Global mock for ~/modules/layout — provides NewTabNotice, Breadcrumb, DsfrPictogram and ResourceBanner passthroughs.
 vi.mock("~/modules/layout", () => ({
-	DsfrPictogram: ({ path }: { path: string }) =>
-		React.createElement("svg", { "aria-hidden": "true", "data-src": path }),
+	// className carries the DSFR colour modifier (fr-artwork--*), so it has to
+	// survive the mock for tests that assert on the artwork's colour.
+	DsfrPictogram: ({ className, path }: { className?: string; path: string }) =>
+		React.createElement("svg", {
+			"aria-hidden": "true",
+			className,
+			"data-src": path,
+		}),
 	ResourceBanner: () =>
 		React.createElement("div", { "data-testid": "resource-banner" }),
 	NewTabNotice: () =>
