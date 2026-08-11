@@ -202,7 +202,7 @@ describe("enqueueReceipt", () => {
 		);
 	});
 
-	it("logs failure and swallows the exception when attachment build throws", async () => {
+	it("still sends the receipt when the attachment cannot be rendered", async () => {
 		mocks.buildDeclarationAttachments.mockRejectedValue(
 			new Error("pdf rendering failed"),
 		);
@@ -211,18 +211,24 @@ describe("enqueueReceipt", () => {
 			enqueueReceipt({ ...baseInput, kind: "declaration" }),
 		).resolves.toBeUndefined();
 
-		expect(mocks.enqueueNotification).not.toHaveBeenCalled();
+		// Losing the PDF is bad; losing the acknowledgement the user is waiting
+		// for is worse — that was the symptom reported in issue 3914.
+		expect(mocks.enqueueNotification).toHaveBeenCalledTimes(1);
+		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
+			expect.not.objectContaining({ attachments: expect.anything() }),
+		);
 		expect(mocks.logAction).toHaveBeenCalledWith(
 			expect.objectContaining({
 				action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
-				status: "failure",
-				errorMessage: "pdf rendering failed",
+				status: "success",
 			}),
 		);
 	});
 
 	it("logs failure with a generic message when a non-Error value is thrown", async () => {
-		mocks.buildDeclarationAttachments.mockRejectedValue("boom");
+		// The enqueue itself throwing is the remaining fatal path: unlike a
+		// missing attachment, there is no degraded send to fall back on.
+		mocks.enqueueNotification.mockRejectedValueOnce("boom");
 
 		await expect(
 			enqueueReceipt({ ...baseInput, kind: "declaration" }),

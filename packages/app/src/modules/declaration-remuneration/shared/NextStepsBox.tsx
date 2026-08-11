@@ -184,7 +184,7 @@ export function NextStepsBox({
 				</div>
 			</div>
 
-			{cseApplicable && <UpdateCseModal siren={siren} />}
+			<UpdateCseModal cseApplicable={cseApplicable} siren={siren} />
 		</>
 	);
 }

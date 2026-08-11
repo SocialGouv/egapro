@@ -4,14 +4,12 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 
 import { formatCategorySource } from "~/modules/declaration-remuneration";
 import {
-	formatCount,
 	formatShortDate,
-	GIP_WORKFORCE_ABSENT_DISPLAY,
+	formatWorkforceDisplay,
 	getReferencePeriod,
 	getReferenceYearFor,
 	isDraft,
 	parseGipWorkforce,
-	toDisplayWorkforce,
 } from "~/modules/domain";
 import {
 	activeDeclarationFilter,
@@ -135,9 +133,7 @@ export async function buildPdfData(
 	const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =
 		mapToStepData(declaration);
 
-	const displayWorkforce = toDisplayWorkforce(
-		parseGipWorkforce(gip?.workforceEma),
-	);
+	const gipWorkforce = parseGipWorkforce(gip?.workforceEma);
 
 	const rawSource = jobs.sort((a, b) => a.categoryIndex - b.categoryIndex)[0]
 		?.source;
@@ -162,10 +158,7 @@ export async function buildPdfData(
 			address: company?.address ?? "",
 			nafCode: company?.nafCode ?? null,
 			nafLabel: company?.nafLabel ?? null,
-			workforceDisplay:
-				displayWorkforce !== null
-					? formatCount(displayWorkforce)
-					: GIP_WORKFORCE_ABSENT_DISPLAY,
+			workforceDisplay: formatWorkforceDisplay(gipWorkforce),
 		},
 		totalWomen: declaration.totalWomen ?? 0,
 		totalMen: declaration.totalMen ?? 0,

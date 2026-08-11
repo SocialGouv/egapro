@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 
+import { COMPANY_SIZE_VOLUNTARY_MAX } from "../shared/constants";
 import {
+	formatWorkforceDisplay,
 	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getObligationWorkforce,
 	parseGipWorkforce,
 	toDisplayWorkforce,
 } from "../shared/gipWorkforce";
+import { formatCount } from "../shared/submissionRate";
 
 describe("parseGipWorkforce", () => {
 	it("parses the numeric(9,2) string returned by the postgres driver", () => {
@@ -72,6 +75,37 @@ describe("toDisplayWorkforce", () => {
 
 describe("GIP_WORKFORCE_ABSENT_DISPLAY", () => {
 	it("is the label shown instead of any Weez/INSEE fallback value", () => {
-		expect(GIP_WORKFORCE_ABSENT_DISPLAY).toBe("< 50");
+		expect(GIP_WORKFORCE_ABSENT_DISPLAY).toBe(
+			`< ${COMPANY_SIZE_VOLUNTARY_MAX}`,
+		);
+	});
+});
+
+describe("formatWorkforceDisplay", () => {
+	it("hides the exact headcount of a voluntary-tier company", () => {
+		// The bug: only an absent company got the bracket, so a company present
+		// in the GIP file with 37 employees read "37" (issue 3914).
+		expect(formatWorkforceDisplay(37)).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(formatWorkforceDisplay(0)).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+	});
+
+	it("keeps a company absent from the GIP file on the same label", () => {
+		expect(formatWorkforceDisplay(null)).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+	});
+
+	it("decides the tier on the exact value, not the floored one", () => {
+		// Flooring first would surface "49" for a company the rule places in the
+		// voluntary tier.
+		expect(formatWorkforceDisplay(49.8)).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+	});
+
+	it("shows the headcount from the threshold upwards, bound excluded", () => {
+		expect(formatWorkforceDisplay(COMPANY_SIZE_VOLUNTARY_MAX)).toBe("50");
+		expect(formatWorkforceDisplay(99.97)).toBe("99");
+		expect(formatWorkforceDisplay(250)).toBe("250");
+	});
+
+	it("groups thousands the French way", () => {
+		expect(formatWorkforceDisplay(12345)).toBe(formatCount(12345));
 	});
 });

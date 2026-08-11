@@ -1,4 +1,5 @@
 import "server-only";
+import * as Sentry from "@sentry/nextjs";
 import { and, eq, isNull } from "drizzle-orm";
 import { enqueueNotification } from "notifications/publisher";
 import type {
@@ -161,6 +162,21 @@ async function buildAttachments(
 	return [];
 }
 
+/**
+ * A receipt that never leaves is invisible: the user reports "I got no e-mail"
+ * and the code alone cannot say why. The audit row keeps the trace queryable per
+ * SIREN, and Sentry raises it instead of letting it die in a swallowed catch.
+ */
+function reportReceiptFailure(
+	error: unknown,
+	context: { stage: "attachments" | "enqueue" } & Record<string, unknown>,
+): void {
+	const message = error instanceof Error ? error.message : String(error);
+
+	Sentry.captureException(error, { extra: context });
+	console.error(`[mail] receipt ${context.stage} failed: ${message}`, context);
+}
+
 export async function enqueueReceipt(
 	input: EnqueueReceiptInput,
 ): Promise<void> {
@@ -170,7 +186,22 @@ export async function enqueueReceipt(
 	try {
 		const context = await readReceiptContext(siren, year);
 		const payload = await buildConfirmationPayload(type, siren, year, context);
-		const attachments = await buildAttachments(kind, siren, year);
+		// Only the declaration receipts carry a PDF, and that PDF is rendered on
+		// the fly. A rendering failure used to sink the whole e-mail, which is
+		// exactly the symptom reported in issue 3914 — the acknowledgement never
+		// arrives. Losing the attachment is bad; losing the acknowledgement is
+		// worse, so the send goes on without it and the failure is reported.
+		const attachments = await buildAttachments(kind, siren, year).catch(
+			(error: unknown) => {
+				reportReceiptFailure(error, {
+					stage: "attachments",
+					kind,
+					siren,
+					year,
+				});
+				return [] as MailAttachment[];
+			},
+		);
 		const result = await enqueueNotification({
 			type,
 			recipientEmail: to,
@@ -196,6 +227,7 @@ export async function enqueueReceipt(
 		});
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Unknown error";
+		reportReceiptFailure(error, { stage: "enqueue", kind, siren, year });
 		void logAction({
 			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
 			status: "failure",

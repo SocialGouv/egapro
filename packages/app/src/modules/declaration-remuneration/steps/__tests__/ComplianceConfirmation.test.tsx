@@ -1,6 +1,20 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("~/trpc/react", () => ({
+	api: {
+		mail: {
+			resendReceipt: {
+				useMutation: () => ({ mutate: vi.fn(), isPending: false }),
+			},
+		},
+	},
+}));
+
+vi.mock("~/server/auth", () => ({
+	auth: vi.fn(async () => ({ user: { email: "declarant@example.fr" } })),
+}));
+
 vi.mock("~/trpc/server", () => ({
 	api: {
 		company: {

@@ -9,11 +9,17 @@ import styles from "./UpdateCseModal.module.scss";
 const MODAL_ID = "update-cse-modal";
 
 type Props = {
+	/**
+	 * Whether the CSE question applies to this company at all. Required rather
+	 * than optional: the server rejects the mutation under the threshold, so a
+	 * caller that forgets the check would offer a control that can only fail.
+	 */
+	cseApplicable: boolean;
 	siren: string;
 };
 
 /** Modal to update CSE presence for a company */
-export function UpdateCseModal({ siren }: Props) {
+export function UpdateCseModal({ cseApplicable, siren }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const [hasCse, setHasCse] = useState<boolean | null>(null);
 	const readOnlyGuard = useReadOnlyGuard();
@@ -32,6 +38,8 @@ export function UpdateCseModal({ siren }: Props) {
 		if (hasCse === null) return;
 		mutation.mutate({ siren, hasCse });
 	}
+
+	if (!cseApplicable) return null;
 
 	return (
 		<dialog

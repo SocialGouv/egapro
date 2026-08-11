@@ -169,6 +169,7 @@ export {
 } from "./shared/gap";
 // GIP annual average workforce — canonical headcount for obligations & display
 export {
+	formatWorkforceDisplay,
 	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getObligationWorkforce,
 	parseGipWorkforce,
