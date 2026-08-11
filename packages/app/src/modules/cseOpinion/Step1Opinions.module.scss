@@ -4,6 +4,12 @@
 	gap: 1.5rem;
 }
 
+// Figma: "MD - Texte standard - Medium" (500). DSFR ships no 500 weight
+// utility — only light (300), regular (400), bold (700) and heavy (900).
+.introText {
+	font-weight: 500;
+}
+
 .readOnlyFieldset {
 	border: none;
 	margin: 0;

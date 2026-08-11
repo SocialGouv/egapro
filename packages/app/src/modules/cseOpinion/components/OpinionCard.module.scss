@@ -2,4 +2,12 @@
 	border: 1px solid var(--border-default-grey);
 	border-radius: 4px;
 	padding: 1rem;
+
+	// DSFR sizes an inline fieldset element to its own label, so "Favorable"
+	// ends up visibly narrower than "Défavorable". The Figma gives the options
+	// of a group equal widths filling the row, which also makes the whole tile
+	// the pointer target rather than just the words.
+	:global(.fr-fieldset__element--inline) {
+		flex: 1 1 0;
+	}
 }
