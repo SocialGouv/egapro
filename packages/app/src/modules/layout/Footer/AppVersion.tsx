@@ -10,16 +10,8 @@ import { NewTabNotice } from "../shared/NewTabNotice";
 const REPOSITORY_URL = "https://github.com/SocialGouv/egapro";
 
 /**
- * Footer release indicator (issue #4020): lets a reviewer know which version
- * of the code a review app is running.
- *
- * - In production: the git tag → links to the release.
- * - On a review app: the branch name → links to the PR when its number is
- *   resolved at build time, otherwise to a branch-scoped PR search.
- * - In local dev / CI without the build var: renders nothing.
- *
- * The version comes from `NEXT_PUBLIC_APP_VERSION` (inlined at build time);
- * the PR number from `NEXT_PUBLIC_PR_NUMBER` (review builds only).
+ * Owns its `<li>` so that an absent version leaves no empty list item — which
+ * would still paint the DSFR separator bar.
  */
 export function AppVersion() {
 	const version = env.NEXT_PUBLIC_APP_VERSION;
@@ -29,18 +21,20 @@ export function AppVersion() {
 	const href = buildHref(version, prNumber);
 
 	return (
-		<p className="fr-footer__bottom-copy">
-			{"Version "}
+		<li className="fr-footer__bottom-item">
 			<a
+				className="fr-footer__bottom-link"
 				href={href}
 				rel="noopener noreferrer"
 				target="_blank"
-				title={`Code source pour la version ${version} - nouvelle fenêtre`}
 			>
-				{version}
+				Version {version}
+				{/* The destination belongs to the accessible name: `title` does not
+				    count as link context under WCAG 2.4.4. */}
+				<span className="fr-sr-only"> : code source sur GitHub</span>
 				<NewTabNotice />
 			</a>
-		</p>
+		</li>
 	);
 }
 
