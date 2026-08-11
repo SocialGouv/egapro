@@ -87,8 +87,6 @@
 // The overlay that extends the click zone is the `::before` of the same link,
 // and it stays anchored to the card: the elements made `relative` here are the
 // text blocks, which are not ancestors of that link.
-$dsfr-icons: "/dsfr/icons";
-
 .fr-tile.fr-enlarge-link:not(.fr-tile--no-icon)
 	.fr-tile__title
 	a:not([target="_blank"])::after,
@@ -98,12 +96,16 @@ $dsfr-icons: "/dsfr/icons";
 	content: none;
 }
 
+// Both text blocks of each component are candidates, since a tile or a card may
+// carry either or both; the icon is then removed from all but the last one.
+.fr-tile.fr-enlarge-link:not(.fr-tile--no-icon) .fr-tile__desc,
 .fr-tile.fr-enlarge-link:not(.fr-tile--no-icon) .fr-tile__detail,
 .fr-card.fr-enlarge-link:not(.fr-card--no-icon) .fr-card__desc,
 .fr-card.fr-enlarge-link:not(.fr-card--no-icon) .fr-card__end {
 	position: relative;
 }
 
+.fr-tile.fr-enlarge-link:not(.fr-tile--no-icon) .fr-tile__desc::after,
 .fr-tile.fr-enlarge-link:not(.fr-tile--no-icon) .fr-tile__detail::after,
 .fr-card.fr-enlarge-link:not(.fr-card--no-icon) .fr-card__desc::after,
 .fr-card.fr-enlarge-link:not(.fr-card--no-icon) .fr-card__end::after {
@@ -115,9 +117,11 @@ $dsfr-icons: "/dsfr/icons";
 	// One line tall, so the icon centres on the last line rather than sitting
 	// on its baseline.
 	height: 1.5rem;
-	background-color: currentcolor;
+	// Set on the pseudo-element itself, so `currentcolor` below resolves to the
+	// action blue and not to the muted colour the text block inherits.
 	color: var(--text-action-high-blue-france);
-	mask-image: url("#{$dsfr-icons}/arrows/arrow-right-line.svg");
+	background-color: currentcolor;
+	mask-image: url("/dsfr/icons/arrows/arrow-right-line.svg");
 	mask-size: 1rem 1rem;
 	mask-position: center;
 	mask-repeat: no-repeat;
@@ -126,12 +130,17 @@ $dsfr-icons: "/dsfr/icons";
 // Download variants keep their own glyph.
 .fr-card--download.fr-enlarge-link:not(.fr-card--no-icon) .fr-card__desc::after,
 .fr-card--download.fr-enlarge-link:not(.fr-card--no-icon) .fr-card__end::after,
+.fr-tile--download.fr-enlarge-link:not(.fr-tile--no-icon) .fr-tile__desc::after,
 .fr-tile--download.fr-enlarge-link:not(.fr-tile--no-icon)
 	.fr-tile__detail::after {
-	mask-image: url("#{$dsfr-icons}/system/download-line.svg");
+	mask-image: url("/dsfr/icons/system/download-line.svg");
 }
 
-// When a card carries both blocks the icon belongs to the last one, not to both.
+// A block followed by another text block is not the last one: only the last
+// carries the icon. `:has()` outranks the rule above on `content`, and the
+// download variants never redeclare `content`, so one icon is drawn either way.
+.fr-tile.fr-enlarge-link:not(.fr-tile--no-icon)
+	.fr-tile__desc:has(~ .fr-tile__detail)::after,
 .fr-card.fr-enlarge-link:not(.fr-card--no-icon)
 	.fr-card__desc:has(~ .fr-card__end)::after {
 	content: none;
