@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 import { CompanyPreviewCard } from "../CompanyPreviewCard";
 
 describe("CompanyPreviewCard", () => {
@@ -20,7 +21,8 @@ describe("CompanyPreviewCard", () => {
 		expect(screen.getByText("123456789")).toBeInTheDocument();
 		expect(screen.getByText("10 Rue de la Paix")).toBeInTheDocument();
 		expect(screen.getByText("62.01Z")).toBeInTheDocument();
-		expect(screen.getByText("42")).toBeInTheDocument();
+		// 42 is voluntary tier: the exact headcount is bracketed here too.
+		expect(screen.getByText(GIP_WORKFORCE_ABSENT_DISPLAY)).toBeInTheDocument();
 	});
 
 	it("omits optional fields when null", () => {
@@ -40,7 +42,7 @@ describe("CompanyPreviewCard", () => {
 		expect(screen.queryByText(/Effectif/)).not.toBeInTheDocument();
 	});
 
-	it("renders workforce of 0", () => {
+	it("brackets a zero headcount rather than hiding the row", () => {
 		render(
 			<CompanyPreviewCard
 				company={{
@@ -52,6 +54,21 @@ describe("CompanyPreviewCard", () => {
 				}}
 			/>,
 		);
-		expect(screen.getByText("0")).toBeInTheDocument();
+		expect(screen.getByText(GIP_WORKFORCE_ABSENT_DISPLAY)).toBeInTheDocument();
+	});
+
+	it("keeps the exact headcount above the voluntary threshold", () => {
+		render(
+			<CompanyPreviewCard
+				company={{
+					siren: "123456789",
+					name: "ACME",
+					address: null,
+					nafCode: null,
+					workforce: 250,
+				}}
+			/>,
+		);
+		expect(screen.getByText("250")).toBeInTheDocument();
 	});
 });
