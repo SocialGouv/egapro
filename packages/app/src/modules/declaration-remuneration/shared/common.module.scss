@@ -31,6 +31,12 @@
 	display: flex;
 	flex-direction: column;
 	gap: 2rem;
+
+	// this container uses flex `gap` (margins add, not collapse) — strip the shared stepper's mt/mb so gaps stay 32px
+	> :global(.fr-stepper) {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
 }
 
 .dataSection {

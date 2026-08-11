@@ -228,11 +228,11 @@ export function Step1Opinions({
 				)}
 
 				{isJointEvaluation ? (
-					<h2 className="fr-h4 fr-mt-5w fr-mb-3w">
+					<h2 className="fr-h4 fr-mt-5w fr-mb-4w">
 						Transmettre l'avis ou les avis du CSE
 					</h2>
 				) : (
-					<h1 className="fr-h4 fr-mb-3w">
+					<h1 className="fr-h4 fr-mb-4w">
 						Transmettre l'avis ou les avis du CSE
 					</h1>
 				)}
