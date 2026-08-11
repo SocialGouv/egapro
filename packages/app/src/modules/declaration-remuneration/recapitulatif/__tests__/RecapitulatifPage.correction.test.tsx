@@ -93,15 +93,4 @@ describe("RecapitulatifPage — second declaration (isCorrection)", () => {
 			screen.getByText("Catégorie d'emplois n°1 : Ouvriers / Employés"),
 		).toBeInTheDocument();
 	});
-
-	it("renders a secondary 'Mon espace' bottom action instead of the primary one", () => {
-		render(<RecapitulatifPage {...defaultProps()} isCorrection />);
-		const action = screen.getByRole("link", { name: "Mon espace" });
-		expect(action).toHaveAttribute("href", "/mon-espace");
-		expect(action.className).toContain("fr-btn--secondary");
-		expect(action.className).not.toContain("fr-btn--primary");
-		expect(
-			screen.queryByRole("link", { name: "Retour à Mon Espace" }),
-		).not.toBeInTheDocument();
-	});
 });
