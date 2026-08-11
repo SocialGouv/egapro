@@ -128,7 +128,19 @@ describe("DeclarationProcessPanel", () => {
 				"href",
 				"/declaration-remuneration?siren=532847196",
 			);
-			expect(cta).toHaveTextContent("Commencer la déclaration");
+			expect(cta).toHaveTextContent(/^Commencer$/);
+		});
+
+		it("describes the CTA link by the panel title", () => {
+			const { dialog } = renderPanel("start");
+			const cta = dialog.querySelector("a.fr-btn");
+			const describedBy = cta?.getAttribute("aria-describedby");
+			expect(describedBy).toBeTruthy();
+			const description = dialog.querySelector(`#${describedBy}`);
+			expect(description?.tagName).toBe("H2");
+			expect(description).toHaveTextContent(
+				/Démarche des indicateurs de rémunération/,
+			);
 		});
 
 		it("renders help section buttons", () => {
@@ -357,7 +369,7 @@ describe("DeclarationProcessPanel", () => {
 			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
 			const cta = ctaLinks[ctaLinks.length - 1];
 			expect(cta).toHaveTextContent("Consulter en lecture seule");
-			expect(cta).not.toHaveTextContent("Commencer la déclaration");
+			expect(cta).not.toHaveTextContent("Commencer");
 		});
 
 		it("keeps the CTA href pointing to the declaration for read-only access", () => {
@@ -395,7 +407,7 @@ describe("DeclarationProcessPanel", () => {
 			const { dialog } = renderPanel("start", { lockedByOther: false });
 			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
 			const cta = ctaLinks[ctaLinks.length - 1];
-			expect(cta).toHaveTextContent("Commencer la déclaration");
+			expect(cta).toHaveTextContent(/^Commencer$/);
 			expect(cta).not.toHaveTextContent("Consulter en lecture seule");
 		});
 	});
