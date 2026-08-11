@@ -1,7 +1,6 @@
 // @vitest-environment node
 
 import { createRequire } from "node:module";
-import { inflateSync } from "node:zlib";
 
 import {
 	Document,
@@ -14,10 +13,14 @@ import {
 import { describe, expect, it } from "vitest";
 
 import { PDF_FONT_FAMILY } from "../pdfFonts";
+import {
+	extractPositionedRuns,
+	extractTextStream,
+	type PositionedRun,
+} from "./helpers/pdfTextStream";
 
 const FONT_SIZE = 100;
 const FRENCH_DIACRITICS = "éèêëàâùûîïôöçÉÈÊÀÇ";
-const GLYPH_ID_LENGTH = 4;
 
 const marianneRegular = createRequire(import.meta.url).resolve(
 	"@gouvfr/dsfr/dist/fonts/Marianne-Regular.woff",
@@ -33,74 +36,6 @@ const styles = StyleSheet.create({
 	sample: { fontSize: FONT_SIZE },
 	superscript: { verticalAlign: "super" },
 });
-
-type PositionedRun = {
-	glyphIds: string[];
-	x: number;
-	y: number;
-};
-
-function extractTextStream(pdf: Buffer): string {
-	const inflateFailures: string[] = [];
-	let cursor = 0;
-
-	while (cursor < pdf.length) {
-		const streamStart = pdf.indexOf("stream", cursor);
-		if (streamStart === -1) break;
-
-		let contentStart = streamStart + "stream".length;
-		if (pdf[contentStart] === 0x0d) contentStart += 1;
-		if (pdf[contentStart] === 0x0a) contentStart += 1;
-
-		const contentEnd = pdf.indexOf("endstream", contentStart);
-		cursor = contentEnd + "endstream".length;
-
-		try {
-			const content = inflateSync(
-				pdf.subarray(contentStart, contentEnd),
-			).toString("latin1");
-			if (content.includes("Tf") && content.includes("TJ")) return content;
-		} catch (error) {
-			inflateFailures.push(`${streamStart}: ${String(error)}`);
-		}
-	}
-
-	throw new Error(
-		`No text content stream found in the rendered PDF (${inflateFailures.length} stream(s) could not be inflated: ${inflateFailures.join(" | ")})`,
-	);
-}
-
-function splitGlyphIds(textShowingOperands: string): string[] {
-	const ids: string[] = [];
-
-	for (const [, hex] of textShowingOperands.matchAll(/<([0-9a-f]+)>/g)) {
-		if (!hex) continue;
-		for (let i = 0; i < hex.length; i += GLYPH_ID_LENGTH) {
-			ids.push(hex.slice(i, i + GLYPH_ID_LENGTH));
-		}
-	}
-
-	return ids;
-}
-
-function extractPositionedRuns(stream: string): PositionedRun[] {
-	const runs: PositionedRun[] = [];
-	let position: { x: number; y: number } | null = null;
-
-	for (const line of stream.split("\n")) {
-		const textMatrix = /^1 0 0 1 (-?[\d.]+) (-?[\d.]+) Tm$/.exec(line);
-		if (textMatrix?.[1] && textMatrix[2]) {
-			position = { x: Number(textMatrix[1]), y: Number(textMatrix[2]) };
-			continue;
-		}
-
-		if (line.startsWith("[<") && position) {
-			runs.push({ glyphIds: splitGlyphIds(line), ...position });
-		}
-	}
-
-	return runs;
-}
 
 async function renderPositionedRuns(
 	content: React.ReactNode,
