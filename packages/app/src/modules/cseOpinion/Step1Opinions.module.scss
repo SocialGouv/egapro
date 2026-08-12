@@ -8,6 +8,9 @@
 // utility — only light (300), regular (400), bold (700) and heavy (900).
 .introText {
 	font-weight: 500;
+	// Figma: "$text-title-grey". DSFR ships the token as a custom property but
+	// no utility class for it — `fr-text-title--grey` does not exist.
+	color: var(--text-title-grey);
 }
 
 .readOnlyFieldset {

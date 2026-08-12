@@ -12,4 +12,11 @@
 	:global(.fr-fieldset > .fr-fieldset__element--inline) {
 		flex: 1 1 0;
 	}
+
+	// Figma spaces the two options by 24px. DSFR's own element padding only
+	// yields 16, and it also aligns the outer tiles with the card edge — so the
+	// missing 8 are added as a column gap rather than by widening that padding.
+	:global(.fr-fieldset) {
+		column-gap: 0.5rem;
+	}
 }
