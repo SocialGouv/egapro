@@ -78,20 +78,24 @@ export type RepresentationPanelVariant =
 	| "submitted"
 	| "closed";
 
-/**
- * Variant for the representation panel. Unlike remuneration, representation
- * has no FSM yet (~/modules/domain) — its progression is the 3-bucket
- * `DeclarationItem.status` computed in `company.ts` from the raw
- * draft/submitted DB status.
- */
+// Representation has no FSM yet — progression is this 3-bucket DeclarationItem.status.
+type RepresentationProgress = "not_started" | "draft" | "submitted";
+
+function getRepresentationProgress(
+	declaration: DeclarationItem | undefined,
+): RepresentationProgress {
+	if (declaration?.status === "done") return "submitted";
+	if (declaration?.status === "in_progress") return "draft";
+	return "not_started";
+}
+
 export function computeRepresentationPanelVariant(
 	declaration: DeclarationItem | undefined,
 	campaignOpen: boolean,
 ): RepresentationPanelVariant {
 	if (!campaignOpen) return "closed";
-	if (declaration?.status === "done") return "submitted";
-	if (declaration?.status === "in_progress") return "draft";
-	return "start";
+	const progress = getRepresentationProgress(declaration);
+	return progress === "not_started" ? "start" : progress;
 }
 
 export function computeRepresentationCtaHref(
@@ -99,10 +103,10 @@ export function computeRepresentationCtaHref(
 	campaignOpen: boolean,
 ): string {
 	if (!campaignOpen) return stepHref(TOTAL_REPRESENTATION_STEPS);
-	if (declaration?.status === "done")
-		return stepHref(TOTAL_REPRESENTATION_STEPS);
-	if (declaration?.status === "in_progress") {
-		return stepHref(Math.max(declaration.currentStep, 1));
+	const progress = getRepresentationProgress(declaration);
+	if (progress === "submitted") return stepHref(TOTAL_REPRESENTATION_STEPS);
+	if (progress === "draft") {
+		return stepHref(Math.max(declaration?.currentStep ?? 1, 1));
 	}
 	return REPRESENTATION_FUNNEL_ROOT;
 }

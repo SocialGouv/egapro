@@ -266,9 +266,7 @@ export const companyRouter = createTRPCRouter({
 					.where(
 						and(
 							eq(representationDeclarations.siren, input.siren),
-							// The représentation funnel stores the *reference* year
-							// (~/app/declaration-representation/page.tsx), not the
-							// campaign year used everywhere else in this router.
+							// The représentation funnel stores the *reference* year, not the campaign year.
 							eq(representationDeclarations.year, getReferenceYearFor(year)),
 						),
 					)
