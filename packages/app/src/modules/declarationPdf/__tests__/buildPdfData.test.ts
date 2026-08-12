@@ -56,6 +56,25 @@ vi.mock("~/server/db/schema", () => ({
 		eventType: "eventType",
 		createdAt: "createdAt",
 	},
+	// Pulled in at module scope by the ~/modules/public-api barrel, which
+	// buildPdfData reaches transitively through server/auth/config.
+	representationDeclarations: {
+		__table: "representationDeclarations",
+		siren: "siren",
+		year: "year",
+		status: "status",
+		referencePeriodStart: "referencePeriodStart",
+		referencePeriodEnd: "referencePeriodEnd",
+		executiveWomenPercent: "executiveWomenPercent",
+		executiveMenPercent: "executiveMenPercent",
+		notComputableReasonExecutives: "notComputableReasonExecutives",
+		memberWomenPercent: "memberWomenPercent",
+		memberMenPercent: "memberMenPercent",
+		notComputableReasonMembers: "notComputableReasonMembers",
+		publishDate: "publishDate",
+		publishUrl: "publishUrl",
+		publishModalities: "publishModalities",
+	},
 }));
 
 vi.mock("~/server/api/routers/declarationHelpers", () => ({
