@@ -67,6 +67,7 @@ export default defineConfig({
 				// Dev-only playground for visually testing the declaration process panel.
 				"src/app/test-panel/**",
 				"src/modules/my-space/PanelPlayground.tsx",
+				"src/modules/declaration-representation/RepresentationPlayground.tsx",
 			],
 			thresholds: {
 				statements: 75,
