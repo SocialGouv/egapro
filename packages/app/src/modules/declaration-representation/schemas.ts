@@ -32,6 +32,15 @@ const percentSchema = z
 	.max(100, "Le pourcentage doit être compris entre 0 et 100.")
 	.multipleOf(0.1, "Le pourcentage ne peut comporter plus d'une décimale.");
 
+export const subjectionSchema = z
+	.object({
+		answer: z.enum(["concerned", "not_concerned"]).nullable(),
+	})
+	.refine((data) => data.answer !== null, {
+		message: "Veuillez sélectionner une option pour continuer.",
+		path: ["answer"],
+	});
+
 export function referencePeriodSchema(year: number) {
 	return z
 		.object({

@@ -15,6 +15,7 @@ const value: RepresentationDraftContextValue = {
 	isSaving: false,
 	isPendingSave: true,
 	isReadOnly: true,
+	registerStepValidator: vi.fn(),
 };
 
 function Consumer() {
