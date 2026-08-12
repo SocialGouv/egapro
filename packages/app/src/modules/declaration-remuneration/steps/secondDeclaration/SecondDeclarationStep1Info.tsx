@@ -7,6 +7,7 @@ import { FormActions } from "~/modules/declaration-remuneration/shared/FormActio
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { formatLongDate } from "~/modules/domain";
 import { BASE_PATH } from "./constants";
+import styles from "./SecondDeclarationStep1Info.module.scss";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 const EMPTY_DB_VALUES = {} as Record<string, never>;
@@ -48,7 +49,7 @@ export function SecondDeclarationStep1Info({
 
 			<SecondDeclarationStepIndicator currentStep={1} />
 
-			<p className="fr-mb-0">
+			<p className={`fr-mb-0 ${common.fontMedium} ${styles.introText}`}>
 				Vous devez mettre en œuvre des <strong>actions correctives</strong> et
 				effectuer une{" "}
 				<strong>
@@ -65,6 +66,7 @@ export function SecondDeclarationStep1Info({
 			<ObligationsCallout />
 
 			<FormActions
+				className="fr-mt-0"
 				nextHref={`${BASE_PATH}/etape/2`}
 				nextLabel="Suivant"
 				previousHref={BASE_PATH}
@@ -81,10 +83,12 @@ function DeadlineBlock({
 	declarationDate: string;
 }) {
 	return (
-		<div className="fr-pl-3w">
-			<p className="fr-mb-0 fr-text--sm fr-text--mention-grey">Date limite</p>
-			<p className="fr-h5 fr-mb-0">{formatLongDate(deadline)}</p>
-			<p className="fr-mb-0 fr-text--sm fr-text--mention-grey">
+		<div className={`fr-highlight ${common.flexColumnGapHalf}`}>
+			<p className="fr-mb-0">Date limite</p>
+			<p className="fr-mb-0 fr-text--lead fr-text--bold">
+				{formatLongDate(deadline)}
+			</p>
+			<p className="fr-mb-0 fr-text-mention--grey">
 				Déclaration effectuée le {declarationDate}
 			</p>
 		</div>
@@ -93,8 +97,8 @@ function DeadlineBlock({
 
 function ObligationsCallout() {
 	return (
-		<div className="fr-callout">
-			<h3 className="fr-callout__title">
+		<div className={`fr-callout ${styles.obligationsCallout}`}>
+			<h3 className="fr-callout__title fr-h6">
 				Ce que vous devez faire dans un délai de 6 mois
 			</h3>
 			<div className="fr-callout__text">
