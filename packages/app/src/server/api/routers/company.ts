@@ -27,6 +27,7 @@ import {
 	declarations,
 	files,
 	gipMdsData,
+	representationDeclarations,
 	userCompanies,
 } from "~/server/db/schema";
 import { syncCseRequirement } from "~/server/services/cseRequirementSync";
@@ -197,6 +198,7 @@ export const companyRouter = createTRPCRouter({
 				prefillRows,
 				eventRows,
 				representationWorkforceHistory,
+				currentYearRepresentationDeclarationRows,
 			] = await Promise.all([
 				ctx.db
 					.select({
@@ -250,6 +252,16 @@ export const companyRouter = createTRPCRouter({
 						),
 					),
 				getRepresentationWorkforceHistory(input.siren, year),
+				ctx.db
+					.select({ year: representationDeclarations.year })
+					.from(representationDeclarations)
+					.where(
+						and(
+							eq(representationDeclarations.siren, input.siren),
+							eq(representationDeclarations.year, year),
+						),
+					)
+					.limit(1),
 			]);
 
 			const yearsWithJointEval = new Set(jointEvalRows.map((r) => r.year));
@@ -265,10 +277,11 @@ export const companyRouter = createTRPCRouter({
 					.map((r) => r.declarationId),
 			);
 
-			const representationVisible = isPresumedSubjectToRepresentation(
-				representationWorkforceHistory,
-				year,
-			);
+			const hasCurrentYearRepresentationDeclaration =
+				currentYearRepresentationDeclarationRows.length > 0;
+			const representationVisible =
+				hasCurrentYearRepresentationDeclaration ||
+				isPresumedSubjectToRepresentation(representationWorkforceHistory, year);
 			const mappedDeclarations = declarationRows.map((d) => ({
 				type: "remuneration" as const,
 				year: d.year,
