@@ -17,6 +17,12 @@ export const COMPUTABLE_EXECUTIVES = {
 	executiveMenPercent: 40,
 } as const;
 
+export const MISMATCHED_EXECUTIVES = {
+	executivesCount: "two_or_more",
+	executiveWomenPercent: 35,
+	executiveMenPercent: 50,
+} as const;
+
 export const NO_EXECUTIVES = { executivesCount: "none" } as const;
 
 export const SINGLE_EXECUTIVE = { executivesCount: "one" } as const;

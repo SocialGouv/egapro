@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type {
 	ExecutivesCount,
@@ -125,7 +125,7 @@ function ExecutiveCountOption({
 }
 
 export function Step2Executives() {
-	const { draft, setDraftValues, year, isReadOnly } =
+	const { draft, setDraftValues, year, isReadOnly, setStepValid } =
 		useRepresentationDraftContext();
 	const [percentInputs, setPercentInputs] = useState<PercentagePairValues>({
 		womenPercent: formatPercent(draft.executiveWomenPercent),
@@ -161,6 +161,12 @@ export function Step2Executives() {
 	const target = getRepresentationTarget(campaignYear);
 	const alertVariantClass =
 		knownVerdict === "compliant" ? "fr-alert--info" : "fr-alert--warning";
+	const isStepValid =
+		draft.executivesCount !== "two_or_more" || knownVerdict !== null;
+
+	useEffect(() => {
+		setStepValid(isStepValid);
+	}, [isStepValid, setStepValid]);
 
 	return (
 		<div>

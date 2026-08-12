@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Stepper } from "./Stepper";
 import { RepresentationDraftProvider } from "./shared/draft/DraftContext";
 import { useRepresentationDraft } from "./shared/draft/useRepresentationDraft";
@@ -31,6 +31,8 @@ export function StepPageClient({
 	const router = useRouter();
 	const [navigationError, setNavigationError] = useState<string | null>(null);
 	const [isAdvancing, setIsAdvancing] = useState(false);
+	const [stepValid, setStepValid] = useState(true);
+	const previousStepRef = useRef(step);
 
 	const { draft, setDraftValues, saveProgress, isSaving, isPendingSave } =
 		useRepresentationDraft({
@@ -39,6 +41,12 @@ export function StepPageClient({
 			initialDraft,
 			enabled: campaignOpen,
 		});
+
+	useEffect(() => {
+		if (previousStepRef.current === step) return;
+		previousStepRef.current = step;
+		setStepValid(true);
+	}, [step]);
 
 	const definition = getStepDefinition(step);
 	const previousHref = getPreviousStepHref(step);
@@ -49,7 +57,7 @@ export function StepPageClient({
 	const StepComponent = definition.Component;
 
 	async function handleNext() {
-		if (nextHref === undefined) return;
+		if (nextHref === undefined || !stepValid) return;
 		setNavigationError(null);
 		setIsAdvancing(true);
 		try {
@@ -74,6 +82,7 @@ export function StepPageClient({
 				isSaving,
 				isPendingSave,
 				isReadOnly: !campaignOpen,
+				setStepValid,
 			}}
 		>
 			<h1 className="fr-h4">
@@ -115,7 +124,7 @@ export function StepPageClient({
 				{nextHref !== undefined && campaignOpen ? (
 					<button
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={isAdvancing}
+						disabled={isAdvancing || !stepValid}
 						onClick={handleNext}
 						type="button"
 					>

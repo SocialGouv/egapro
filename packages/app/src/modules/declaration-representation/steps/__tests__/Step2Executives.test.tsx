@@ -7,6 +7,7 @@ import type { RepresentationDraft } from "~/modules/declaration-representation";
 import { RepresentationDraftProvider } from "~/modules/declaration-representation";
 import {
 	COMPUTABLE_EXECUTIVES,
+	MISMATCHED_EXECUTIVES,
 	REPRESENTATION_YEAR,
 	VALIDATION_MESSAGES,
 } from "~/modules/declaration-representation/__tests__/fixtures";
@@ -32,6 +33,7 @@ type HarnessProps = {
 	initialDraft?: RepresentationDraft;
 	isReadOnly?: boolean;
 	onDraftChange?: (draft: RepresentationDraft) => void;
+	onStepValidChange?: (valid: boolean) => void;
 	year?: number;
 };
 
@@ -39,6 +41,7 @@ function Harness({
 	initialDraft = { currentStep: STEP },
 	isReadOnly = false,
 	onDraftChange,
+	onStepValidChange = () => undefined,
 	year = REPRESENTATION_YEAR,
 }: HarnessProps) {
 	const [draft, setDraft] = useState<RepresentationDraft>(initialDraft);
@@ -57,6 +60,7 @@ function Harness({
 				isReadOnly,
 				isSaving: false,
 				setDraftValues,
+				setStepValid: onStepValidChange,
 				step: STEP,
 				year,
 			}}
@@ -68,10 +72,19 @@ function Harness({
 
 function renderStep(props: HarnessProps = {}) {
 	const onDraftChange = vi.fn<(draft: RepresentationDraft) => void>();
-	render(<Harness {...props} onDraftChange={onDraftChange} />);
+	const onStepValidChange = vi.fn<(valid: boolean) => void>();
+	render(
+		<Harness
+			{...props}
+			onDraftChange={onDraftChange}
+			onStepValidChange={onStepValidChange}
+		/>,
+	);
 	return {
 		lastDraft: () => onDraftChange.mock.lastCall?.[0],
+		lastStepValid: () => onStepValidChange.mock.lastCall?.[0],
 		onDraftChange,
+		onStepValidChange,
 	};
 }
 
@@ -336,6 +349,51 @@ describe("Step2Executives — bascule entre les choix", () => {
 			executivesCount: "two_or_more",
 			executiveWomenPercent: undefined,
 		});
+	});
+});
+
+describe("Step2Executives — validité de l'étape (S6)", () => {
+	it("reports the step as valid when the gap is not computable", async () => {
+		const { lastStepValid } = renderStep();
+
+		await userEvent.click(option(OPTIONS.none));
+
+		expect(lastStepValid()).toBe(true);
+	});
+
+	it("reports the step as invalid while the percentages are incomplete", async () => {
+		const { lastStepValid } = renderStep();
+
+		await userEvent.click(option(OPTIONS.twoOrMore));
+
+		expect(lastStepValid()).toBe(false);
+	});
+
+	it("reports the step as invalid while the sum differs from 100", async () => {
+		const { lastStepValid } = renderStep();
+
+		await enterWomenPercent("35");
+		await retypeMenPercent("45");
+
+		expect(lastStepValid()).toBe(false);
+	});
+
+	it("reports the step as valid again once the sum is back to 100", async () => {
+		const { lastStepValid } = renderStep();
+
+		await enterWomenPercent("35");
+		await retypeMenPercent("45");
+		await retypeMenPercent("65");
+
+		expect(lastStepValid()).toBe(true);
+	});
+
+	it("reports a restored invalid draft as soon as it is mounted", () => {
+		const { lastStepValid } = renderStep({
+			initialDraft: { currentStep: STEP, ...MISMATCHED_EXECUTIVES },
+		});
+
+		expect(lastStepValid()).toBe(false);
 	});
 });
 

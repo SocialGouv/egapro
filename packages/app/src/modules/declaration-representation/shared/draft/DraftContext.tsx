@@ -12,6 +12,7 @@ export type RepresentationDraftContextValue = {
 	isSaving: boolean;
 	isPendingSave: boolean;
 	isReadOnly: boolean;
+	setStepValid: (valid: boolean) => void;
 };
 
 const RepresentationDraftContext =

@@ -29,21 +29,56 @@ vi.mock("~/trpc/react", () => ({
 }));
 
 import { StepPageClient } from "../StepPageClient";
+import type { RepresentationDraft } from "../types";
+import { MISMATCHED_EXECUTIVES, VALIDATION_MESSAGES } from "./fixtures";
 
 const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
 const CLOSED_BANNER = "La campagne de représentation équilibrée est close";
+const TWO_OR_MORE = /^Deux cadres dirigeants ou plus/;
 
-function renderStep({ step = 2, campaignOpen = true, currentStep = 2 } = {}) {
+const SAVED_MISMATCHED_EXECUTIVES: RepresentationDraft = {
+	currentStep: 2,
+	...MISMATCHED_EXECUTIVES,
+};
+
+type RenderStepOptions = {
+	step?: number;
+	campaignOpen?: boolean;
+	currentStep?: number;
+	initialDraft?: RepresentationDraft;
+};
+
+function renderStep({
+	step = 2,
+	campaignOpen = true,
+	currentStep = 2,
+	initialDraft,
+}: RenderStepOptions = {}) {
 	return render(
 		<StepPageClient
 			campaignOpen={campaignOpen}
 			campaignYear={CAMPAIGN_YEAR}
-			initialDraft={{ currentStep }}
+			initialDraft={initialDraft ?? { currentStep }}
 			step={step}
 			year={YEAR}
 		/>,
 	);
+}
+
+function nextButton() {
+	return screen.getByRole("button", { name: "Suivant" });
+}
+
+async function enterWomenPercent(value: string) {
+	await userEvent.click(screen.getByRole("radio", { name: TWO_OR_MORE }));
+	await userEvent.type(screen.getByLabelText(/Femmes/), value);
+}
+
+async function retypeMenPercent(value: string) {
+	await userEvent.clear(screen.getByLabelText(/Hommes/));
+	if (value !== "")
+		await userEvent.type(screen.getByLabelText(/Hommes/), value);
 }
 
 beforeEach(() => {
@@ -160,6 +195,60 @@ describe("StepPageClient — navigation", () => {
 			screen.queryByRole("button", { name: "Suivant" }),
 		).not.toBeInTheDocument();
 		expect(screen.getByRole("link", { name: "Précédent" })).toBeInTheDocument();
+	});
+});
+
+describe("StepPageClient — étape invalide (S6)", () => {
+	it("blocks the next step while the percentages do not sum to 100", async () => {
+		renderStep({ step: 2 });
+
+		await enterWomenPercent("35");
+		await retypeMenPercent("50");
+
+		expect(nextButton()).toBeDisabled();
+
+		await userEvent.click(nextButton());
+
+		expect(mutateAsync).not.toHaveBeenCalled();
+		expect(push).not.toHaveBeenCalled();
+	});
+
+	it("blocks the next step while the percentages are still incomplete", async () => {
+		renderStep({ step: 2 });
+
+		await enterWomenPercent("35");
+		await retypeMenPercent("");
+
+		expect(nextButton()).toBeDisabled();
+	});
+
+	it("re-enables the next step once the sum is corrected to 100", async () => {
+		renderStep({ step: 2 });
+
+		await enterWomenPercent("35");
+		await retypeMenPercent("50");
+		expect(nextButton()).toBeDisabled();
+
+		await retypeMenPercent("65");
+
+		expect(nextButton()).toBeEnabled();
+
+		await userEvent.click(nextButton());
+
+		expect(push).toHaveBeenCalledWith("/declaration-representation/etape/3");
+	});
+
+	it("blocks the next step when the funnel reopens on a saved invalid pair", () => {
+		renderStep({ step: 2, initialDraft: SAVED_MISMATCHED_EXECUTIVES });
+
+		expect(screen.getByText(VALIDATION_MESSAGES.sum)).toBeInTheDocument();
+		expect(nextButton()).toBeDisabled();
+	});
+
+	it("keeps the next step enabled on a step that never reports its validity", () => {
+		renderStep({ step: 3, currentStep: 3 });
+
+		expect(nextButton()).toBeEnabled();
 	});
 });
 
