@@ -562,6 +562,7 @@ export const companiesRelations = relations(companies, ({ many }) => ({
 	userCompanies: many(userCompanies),
 	declarations: many(declarations),
 	gipMdsData: many(gipMdsData),
+	representationDeclarations: many(representationDeclarations),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -712,6 +713,95 @@ export const campaignDeadlines = createTable("campaign_deadline", (d) => ({
 	decl2JustificationDeadline: d.date().notNull(),
 	decl2JointEvaluationDeadline: d.date().notNull(),
 }));
+
+// ── Representation campaign deadlines (configurable per year) ─────
+
+export const representationCampaigns = createTable(
+	"representation_campaign",
+	(d) => ({
+		year: d.integer().notNull().primaryKey(),
+		campaignStartDate: d.date().notNull(),
+		campaignEndDate: d.date().notNull(),
+		declarationDeadline: d.date().notNull(),
+	}),
+);
+
+// ── Representation declaration (art. D. 1142-19) ───────────────────
+
+export const representationNotComputableExecutivesEnum = pgEnum(
+	"representation_not_computable_executives",
+	["aucun_cadre_dirigeant", "un_seul_cadre_dirigeant"],
+);
+
+export const representationNotComputableMembersEnum = pgEnum(
+	"representation_not_computable_members",
+	["aucune_instance_dirigeante"],
+);
+
+export const representationDeclarationStatusEnum = pgEnum(
+	"representation_declaration_status",
+	["draft", "submitted"],
+);
+
+export const representationDeclarations = createTable(
+	"representation_declaration",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		siren: d
+			.varchar({ length: 9 })
+			.notNull()
+			.references(() => companies.siren),
+		year: d.integer().notNull(),
+		declarantId: d.varchar({ length: 255 }).references(() => users.id),
+		legacyDeclarant: d.jsonb(),
+		importedFromV1At: d.timestamp("imported_from_v1_at", {
+			withTimezone: true,
+		}),
+		referencePeriodStart: d.date(),
+		referencePeriodEnd: d.date(),
+		executiveWomenPercent: d.numeric({ precision: 5, scale: 2 }),
+		executiveMenPercent: d.numeric({ precision: 5, scale: 2 }),
+		notComputableReasonExecutives: representationNotComputableExecutivesEnum(),
+		memberWomenPercent: d.numeric({ precision: 5, scale: 2 }),
+		memberMenPercent: d.numeric({ precision: 5, scale: 2 }),
+		notComputableReasonMembers: representationNotComputableMembersEnum(),
+		publishDate: d.date(),
+		publishUrl: d.varchar({ length: 500 }),
+		publishModalities: d.text(),
+		currentStep: d.integer().default(0),
+		status: representationDeclarationStatusEnum().notNull().default("draft"),
+		submittedAt: d.timestamp({ withTimezone: true }),
+		draft: d.jsonb(),
+		draftUpdatedAt: d.timestamp({ withTimezone: true }),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [
+		uniqueIndex("representation_declaration_siren_year_unique").on(
+			t.siren,
+			t.year,
+		),
+		index("representation_declaration_declarant_idx").on(t.declarantId),
+	],
+);
+
+export const representationDeclarationsRelations = relations(
+	representationDeclarations,
+	({ one }) => ({
+		declarant: one(users, {
+			fields: [representationDeclarations.declarantId],
+			references: [users.id],
+		}),
+		company: one(companies, {
+			fields: [representationDeclarations.siren],
+			references: [companies.siren],
+		}),
+	}),
+);
 
 // ── Global settings (singleton) ────────────────────────────────────
 
