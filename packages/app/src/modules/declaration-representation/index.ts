@@ -33,6 +33,7 @@ export {
 	getPreviousStepHref,
 	getStepDefinition,
 	isValidStep,
+	parseStepParam,
 	REPRESENTATION_FUNNEL_ROOT,
 	REPRESENTATION_STEPS,
 	stepHref,

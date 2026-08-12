@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import {
 	getStepDefinition,
-	isValidStep,
+	parseStepParam,
 	representationDraftSchema,
 	StepPageClient,
 	stepHref,
@@ -20,11 +20,12 @@ export async function generateMetadata({
 	params,
 }: StepPageProps): Promise<Metadata> {
 	const { step: stepParam } = await params;
-	const definition = getStepDefinition(Number.parseInt(stepParam, 10));
+	const step = parseStepParam(stepParam);
+	const definition = step === undefined ? undefined : getStepDefinition(step);
 
 	return {
 		title: definition
-			? `Étape ${stepParam} sur ${TOTAL_REPRESENTATION_STEPS} — ${definition.title}`
+			? `Étape ${step} sur ${TOTAL_REPRESENTATION_STEPS} — ${definition.title}`
 			: "Démarche des indicateurs de représentation équilibrée",
 	};
 }
@@ -33,9 +34,9 @@ export default async function RepresentationStepPage({
 	params,
 }: StepPageProps) {
 	const { step: stepParam } = await params;
-	const step = Number.parseInt(stepParam, 10);
+	const step = parseStepParam(stepParam);
 
-	if (!isValidStep(step)) {
+	if (step === undefined) {
 		notFound();
 	}
 

@@ -29,7 +29,10 @@ export function complementPercentage(raw: string): string | undefined {
 }
 
 export function isPercentageInput(raw: string): boolean {
-	return PERCENTAGE_INPUT_PATTERN.test(raw);
+	if (!PERCENTAGE_INPUT_PATTERN.test(raw)) return false;
+	if (raw === "") return true;
+	const value = Number(raw.replace(",", "."));
+	return Number.isFinite(value) && value <= 100;
 }
 
 export function PercentagePairFields({

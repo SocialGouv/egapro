@@ -37,10 +37,10 @@ vi.mock("~/modules/declaration-representation", async (importOriginal) => ({
 	),
 }));
 
-import RepresentationHomePage from "~/app/declaration-representation/page";
 import RepresentationStepPage, {
 	generateMetadata,
 } from "~/app/declaration-representation/etape/[step]/page";
+import RepresentationHomePage from "~/app/declaration-representation/page";
 import type { RepresentationDraft } from "~/modules/declaration-representation";
 import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
 import { api } from "~/trpc/server";

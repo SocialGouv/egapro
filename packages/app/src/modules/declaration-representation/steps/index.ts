@@ -37,6 +37,12 @@ export function isValidStep(step: number): boolean {
 	);
 }
 
+export function parseStepParam(raw: string): number | undefined {
+	if (!/^\d+$/.test(raw)) return undefined;
+	const step = Number.parseInt(raw, 10);
+	return isValidStep(step) ? step : undefined;
+}
+
 export function getStepDefinition(step: number): StepDefinition | undefined {
 	return isValidStep(step) ? REPRESENTATION_STEPS[step - 1] : undefined;
 }
