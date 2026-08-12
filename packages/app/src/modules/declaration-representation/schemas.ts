@@ -1,7 +1,13 @@
 import { z } from "zod";
 
-const TOLERANT_URL_REGEX =
-	/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/i;
+function isTolerantUrl(value: string): boolean {
+	const candidate = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+	try {
+		return new URL(candidate).hostname.includes(".");
+	} catch {
+		return false;
+	}
+}
 
 function parseIsoDate(value: string): Date {
 	return new Date(value);
@@ -104,10 +110,7 @@ export const publicationSchema = z
 					.string()
 					.trim()
 					.min(1, "L'adresse de la page internet est obligatoire.")
-					.regex(
-						TOLERANT_URL_REGEX,
-						"L'adresse de la page internet est invalide.",
-					),
+					.refine(isTolerantUrl, "L'adresse de la page internet est invalide."),
 			}),
 			z.object({
 				hasWebsite: z.literal(false),
