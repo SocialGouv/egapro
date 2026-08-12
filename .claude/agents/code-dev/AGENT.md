@@ -63,6 +63,16 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
 
 2. **Si bug** (issue type Bug ou label `bug`) — appliquer `rules/bug-fix-workflow.md` : implémenter le fix en suivant la root cause posée dans `## Analyse du bug`. **Le test de reproduction est écrit par un autre agent, jamais par toi** : `tu-dev` pour un bug logique/domain/API (test unitaire ou intégration, étape 5.5, prouvé par revert-verify) ; `e2e-dev` pour un bug UI/parcours **s'il le juge assez critique** (test E2E, en fin de pipeline). Pour les bugs de type "visual mismatch Figma ↔ app", il n'y a pas de test automatisé classique (cf. section visual mismatch de `bug-fix-workflow.md`) — la validation est la construction fidèle (étape 7) **puis** le gate `design-validator` (étape 9a-bis) qui re-mesure le rendu contre le Figma.
 
+2bis. **Exécuter la vérification one-shot du correctif (bugs uniquement, BLOCKING)** — l'analyse `## Analyse du bug` contient une section **« Vérification du correctif (one-shot) »**. Tu dois l'**exécuter toi-même** après avoir implémenté le fix (étape 5), et consigner le résultat observé.
+
+   Ce n'est **pas** écrire un test : ta décharge de l'étape 2 (« le test de reproduction est écrit par un autre agent, jamais par toi ») porte sur la **couverture permanente** — les fichiers de test qui rejoueront en CI. La vérification one-shot est une **observation**, éphémère, et elle t'incombe : c'est toi qui as le worktree, le dev server et le fix sous la main.
+
+   Concrètement : dérouler la procédure décrite par `bug-analyst` (URL, étapes, commande, mesure à relever), et relever la valeur **avant** (sur la base, sans ton fix) **et après**. Pour un bug visuel/CSS, la mesure DOM (`getBoundingClientRect` / `getComputedStyle` / `Range.getClientRects`) est la preuve — pas un jugement à l'œil.
+
+   Consigner le résultat dans le **body de la PR** (section « Vérification ») sous forme observable : `<ce qui a été fait>` → `<avant>` / `<après>`. Sans cette trace, aucun relecteur ne peut distinguer un fix vérifié d'un fix plausible.
+
+   **Si la procédure est absente de l'analyse ou inexécutable** (écran inatteignable, état non reproductible) : ne l'invente pas et ne la saute pas silencieusement — logger `VERIFY_DEGRADED`, l'écrire dans le body de la PR, et le signaler dans ton verdict.
+
 3. **Status ticket** → **In progress** via `bash scripts/orchestration/set_ticket_status.sh <N> "In progress"`.
 
 4. **Checkout la branche linkée pré-créée** (la `Working branch` reçue en input). **Ne pas créer une nouvelle branche** — la branche existe déjà sur GitHub, est linkée à l'issue, et c'est sur elle que tu dois pousser :
@@ -319,6 +329,8 @@ Calls `bash scripts/orchestration/log_event.sh code-dev-<N> <EVENT> [msg]`. Logg
 | `ANALYSIS_START` | Étape 1 — début lecture body+commentaires | — |
 | `ANALYSIS_OK` | Étape 1 — spec valide trouvée | `format=<feature\|task\|bug>` |
 | `ANALYSIS_FAIL` | Étape 1 — spec manquant, retour refacto | `reason=<résumé>` |
+| `VERIFY_OK` | Étape 2bis (bug) — vérification one-shot exécutée, avant/après consignés | `before=<val> after=<val>` |
+| `VERIFY_DEGRADED` | Étape 2bis (bug) — procédure absente ou inexécutable, assumé explicitement | `reason=<résumé>` |
 | `DEV_START` | Étape 5 — début implémentation, à chaque retry | `attempt=<K>` |
 | `DEV_OK` | Étape 5 — typecheck vert + code source complet | `attempt=<K>` |
 | `TU_START` | Étape 5.5 — début délégation `tu-dev`, à chaque ré-invocation | `attempt=<K>` |

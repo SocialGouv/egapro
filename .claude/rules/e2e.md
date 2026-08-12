@@ -24,7 +24,9 @@ Contrairement aux TU (nombreux, ciblés, 100% de couverture), on privilégie **p
 
 ## Every page must be tested
 
-Every route in `src/app/` **must** have corresponding E2E tests in `src/e2e/`. When a page is created or modified (by `code-dev`), `e2e-dev` verifies that an E2E test exists for it and updates/nests it if needed.
+Every route in `src/app/` **must** have corresponding E2E tests in `src/e2e/`. When a page is **created**, or when its **parcours** changes (URL, steps, redirections, access conditions), `e2e-dev` verifies that an E2E test exists for it and updates/nests it if needed.
+
+Ce mandat porte sur la **couverture d'un parcours**, pas sur chaque édition d'un fichier de page. Une modification purement **visuelle** (CSS/SCSS, `className`, libellé, espacement) sur une route déjà couverte ne le déclenche **pas**, et il ne prime **jamais** sur le critère de criticité d'`e2e-dev` (voir `.claude/agents/e2e-dev/AGENT.md`, « Philosophie E2E »). Entre « la page est modifiée » et « le parcours change », c'est la criticité qui tranche — un « must » absolu appliqué à toute édition écrase le jugement qu'on demande par ailleurs à l'agent.
 
 E2E tests must cover at minimum:
 - The page renders without errors

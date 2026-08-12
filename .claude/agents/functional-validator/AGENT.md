@@ -23,6 +23,13 @@ You replay the ticket's scenarios on the running app via Playwright MCP. You ver
 
 1. **Fetch** ticket + PR via `gh` CLI.
 2. **Lire les scénarios** — référencés sur l'epic parent (`S1`, `S2`, …).
+
+   **Ticket sans scénarios PO (Task ou Bug standalone)** — c'est le cas normal, pas une anomalie : un Bug n'a ni epic parent ni scénarios `S1`/`S2`. Ton unité de travail devient alors, dans cet ordre :
+   1. la section **« Vérification du correctif (one-shot) »** du commentaire `## Analyse du bug` (ou `## Analyse architecte` pour une Task) — rejoue-la **indépendamment** de `code-dev`, qui l'a déjà exécutée : tu es la seconde paire d'yeux, tu ne le crois pas sur parole ;
+   2. le **comportement attendu** décrit dans le body du ticket ;
+   3. les **contrôles interactifs voisins du changement** — c'est là que se logent les régressions d'un correctif de mise en page : un bouton devenu inatteignable, masqué, ou hors zone de clic.
+
+   **Ne rejoue jamais un parcours complet pour un ticket de cette taille** : cible les écrans touchés par le diff. Et ne rends **jamais** un PASS vide au motif qu'il n'y avait pas de scénario à lire — s'il n'y a vraiment rien d'observable à exercer, dis-le explicitement et justifie-le.
 3. **Vérifier dev server** sur le port assigné (démarrer si besoin).
 4. **Pour chaque scénario** :
    - `mcp__playwright__browser_navigate` vers la route d'entrée

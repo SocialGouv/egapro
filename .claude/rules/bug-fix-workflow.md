@@ -23,7 +23,19 @@ Cette discipline évite deux pièges fréquents :
 
 ### 1. Reproduire
 
-Un test doit reproduire le bug. **Qui l'écrit et quand dépend du type de test** — et ce n'est jamais `code-dev` :
+Deux choses distinctes vivent sous ce mot, et les confondre a déjà coûté cher :
+
+| | **Vérification one-shot** | **Test de non-régression permanent** |
+|---|---|---|
+| But | prouver que le fix fait ce qu'il prétend, maintenant | empêcher le bug de revenir, indéfiniment |
+| Qui | **`code-dev`** (étape 2bis), rejouée par `functional-validator` / `design-validator` | `tu-dev` (TU/intégration) ou `e2e-dev` (E2E) |
+| Quand | pendant l'implémentation | après le fix, prouvé par revert-verify |
+| Durée de vie | éphémère — consignée dans le body de la PR | permanente — committée dans la suite |
+| Obligatoire ? | **toujours** | **non** — soumis au critère de criticité |
+
+La **vérification one-shot est toujours due**, quel que soit le bug : elle est décrite par `bug-analyst` dans son analyse et **exécutée par `code-dev`**, qui consigne l'avant/après observé. Même un bug infra ou un écart purement visuel en a une, fût-elle manuelle. Un bug qui ne reçoit aucun test permanent n'est donc **pas** un bug non vérifié.
+
+Le **test permanent**, lui, n'est jamais écrit par `code-dev`. Qui l'écrit — et s'il est seulement justifié — dépend du type de bug :
 
 - **Bug UI / comportement utilisateur** → test E2E Playwright dans `src/e2e/<feature>.e2e.ts`, écrit par **`e2e-dev`** en fin de pipeline, **uniquement s'il juge le bug assez critique** (parcours critique, fort risque de régression). De préférence imbriqué dans le scénario E2E existant qui couvre le parcours. Un bug mineur / cosmétique / visual-mismatch ne reçoit en général pas d'E2E.
 - **Bug logique métier / domain** → test unitaire Vitest dans `__tests__/` à côté du module, écrit par **`tu-dev`** (étape 5.5).
@@ -49,7 +61,7 @@ Modifier le code pour faire passer le test. Le fix doit cibler la **root cause**
 - `pnpm typecheck` + `pnpm lint:check` verts (côté `code-dev`)
 - La suite **TU + intégration** verte (pas de régression) est garantie par `tu-dev` à l'étape 5.5 — `code-dev` ne lance pas `pnpm test` lui-même. Si `tu-dev` détecte une vraie régression, il rend la main à `code-dev` pour corriger la source.
 - La suite **E2E** verte (pas de régression de parcours) et l'éventuel test de reproduction E2E sont garantis par `e2e-dev` en fin de pipeline.
-- Si le bug touche l'UI : rejouer manuellement le scénario dans le dev server avant de passer en **In review**
+- **La vérification one-shot (étape 1) a été exécutée et consignée** dans le body de la PR, avec la valeur **avant** et **après** — c'est la seule preuve que le fix agit, et elle est due même quand ni `tu-dev` ni `e2e-dev` ne produisent de test permanent. Pour un bug UI, elle se fait dans le dev server, mesure DOM à l'appui plutôt qu'à l'œil.
 
 ### 5. Commit
 
