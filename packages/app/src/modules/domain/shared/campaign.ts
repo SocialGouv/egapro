@@ -1,4 +1,4 @@
-import type { CampaignDeadlines } from "../types";
+import type { CampaignDeadlines, RepresentationCampaign } from "../types";
 import { readCampaignYearOverride } from "./campaignClock";
 import { formatLongDate } from "./format";
 
@@ -58,6 +58,26 @@ export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 		decl2JointEvaluationDeadline: new Date(year + 1, 1, 1),
 		pathChoiceDeadline: getPathChoiceDeadline(year),
 	};
+}
+
+export function getDefaultRepresentationCampaign(
+	campaignYear: number,
+): RepresentationCampaign {
+	return {
+		campaignStartDate: new Date(campaignYear, 0, 1),
+		campaignEndDate: new Date(campaignYear, 11, 31),
+		declarationDeadline: new Date(campaignYear, 2, 1),
+	};
+}
+
+export function isRepresentationCampaignOpen(
+	campaign: RepresentationCampaign,
+	now: Date,
+): boolean {
+	return (
+		now.getTime() >= campaign.campaignStartDate.getTime() &&
+		now.getTime() <= campaign.campaignEndDate.getTime()
+	);
 }
 
 /** Returns true if the given deadline is strictly in the past. */
