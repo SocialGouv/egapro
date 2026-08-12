@@ -85,6 +85,43 @@ describe("auditMiddleware", () => {
 		});
 	});
 
+	it("logs the representation campaign upsert mutation", async () => {
+		const next = vi.fn(async () => ({ success: true }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "adminSettings.upsertRepresentationCampaign",
+			getRawInput: buildGetRawInput({
+				year: 2026,
+				campaignStartDate: "2026-02-01",
+				campaignEndDate: "2026-11-30",
+				declarationDeadline: "2026-04-15",
+			}),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "admin_settings.upsert_representation_campaign",
+			status: "success",
+			metadata: { year: 2026, campaignStartDate: "2026-02-01" },
+		});
+	});
+
+	it("logs the representation campaign read as an opt-in sensitive query", async () => {
+		const next = vi.fn(async () => ({ year: 2026, isDefault: true }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "adminSettings.getRepresentationCampaignByYear",
+			getRawInput: buildGetRawInput({ year: 2026 }),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "admin_settings.get_representation_campaign",
+			status: "success",
+			metadata: { year: 2026 },
+		});
+	});
+
 	it("logs a failed mutation with the error message and re-throws", async () => {
 		const error = new TRPCError({
 			code: "BAD_REQUEST",
