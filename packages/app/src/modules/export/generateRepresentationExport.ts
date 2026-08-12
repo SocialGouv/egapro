@@ -3,7 +3,7 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import ExcelJS from "exceljs";
 
-import { isCompanyDiffusible } from "~/modules/public-api";
+import { isCompanyDiffusible, toNumber } from "~/modules/public-api";
 import type { DB } from "~/server/db";
 import { companies, representationDeclarations } from "~/server/db/schema";
 
@@ -55,12 +55,6 @@ const REPRESENTATION_EXPORT_COLUMNS: Array<{
 	{ key: "publishUrl", header: "Url_publication" },
 	{ key: "publishModalities", header: "Modalites_publication" },
 ];
-
-function toNumber(value: string | null): number | null {
-	if (value === null) return null;
-	const parsed = Number(value);
-	return Number.isNaN(parsed) ? null : parsed;
-}
 
 async function fetchSubmittedRepresentationDeclarations(db: DB) {
 	return db
@@ -122,13 +116,6 @@ function toExportRow(
 	};
 }
 
-/**
- * Build the flat rows for the public representation export: one row per
- * submitted (non-draft) representation declaration. Non-diffusible companies
- * (S28, `isCompanyDiffusible`) keep their SIREN but have identity and
- * location fields blanked. The address never appears, for anyone — the
- * `companies` table is not queried for it.
- */
 export async function buildRepresentationExportRows(
 	db: DB,
 ): Promise<RepresentationExportRow[]> {
@@ -136,10 +123,6 @@ export async function buildRepresentationExportRows(
 	return rows.map(toExportRow);
 }
 
-/**
- * Generate the public representation export XLSX workbook from pre-built
- * rows (single sheet, one row per submitted declaration).
- */
 export async function generateRepresentationXlsx(
 	rows: RepresentationExportRow[],
 ): Promise<Buffer> {
