@@ -11,8 +11,7 @@ import {
 } from "../shared/representation";
 
 describe("regulatory constants", () => {
-	// art. D. 1142-19 — every threshold test below is symbolic, so the literal
-	// values are pinned here to catch a silent drift of the regulation.
+	// art. D. 1142-19 — literals pinned here to catch a silent regulatory drift.
 	it("pins the initial target at 30%", () => {
 		expect(REPRESENTATION_TARGET_INITIAL).toBe(30);
 	});
@@ -114,9 +113,7 @@ describe("getRepresentationCampaignYear", () => {
 });
 
 describe("verdict independence (S16)", () => {
-	// Each indicator carries its own verdict: an aggregated verdict would let a
-	// compliant indicator mask a non-compliant one, so the module surface is
-	// pinned to prove no such helper exists.
+	// An aggregated verdict would let a compliant indicator mask a failing one.
 	it("exposes no aggregated verdict helper", async () => {
 		const representation = await import("../shared/representation");
 		expect(Object.keys(representation).sort()).toEqual([
