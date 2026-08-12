@@ -1,6 +1,10 @@
 // OpenAPI 3.1 specification for the declarations export API.
 
 import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
+import {
+	representationNotComputableExecutivesEnum,
+	representationNotComputableMembersEnum,
+} from "~/server/db/schema";
 
 const declarantSchema = {
 	type: "object",
@@ -548,7 +552,7 @@ const representationSchema = {
 			oneOf: [
 				{
 					type: "string",
-					enum: ["aucun_cadre_dirigeant", "un_seul_cadre_dirigeant"],
+					enum: [...representationNotComputableExecutivesEnum.enumValues],
 				},
 				{ type: "null" },
 			],
@@ -567,7 +571,10 @@ const representationSchema = {
 			description:
 				"Motif de non-calculabilité de l'écart instances dirigeantes. `null` si calculable.",
 			oneOf: [
-				{ type: "string", enum: ["aucune_instance_dirigeante"] },
+				{
+					type: "string",
+					enum: [...representationNotComputableMembersEnum.enumValues],
+				},
 				{ type: "null" },
 			],
 		},
