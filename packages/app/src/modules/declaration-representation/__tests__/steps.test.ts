@@ -10,6 +10,7 @@ import {
 	REPRESENTATION_STEPS,
 	stepHref,
 } from "../steps";
+import { Step3Members } from "../steps/Step3Members";
 import { StepPlaceholder } from "../steps/StepPlaceholder";
 import {
 	REPRESENTATION_STEP_SLUGS,
@@ -31,10 +32,16 @@ describe("REPRESENTATION_STEPS", () => {
 		]);
 	});
 
-	it("renders every step with the placeholder until the step tickets land", () => {
-		for (const step of REPRESENTATION_STEPS) {
-			expect(step.Component).toBe(StepPlaceholder);
-		}
+	it("wires each slug to its own step component, the placeholder covering the steps still to land", () => {
+		expect(
+			REPRESENTATION_STEPS.map((step) => [step.slug, step.Component]),
+		).toEqual([
+			["periode-de-reference", StepPlaceholder],
+			["ecarts-cadres-dirigeants", StepPlaceholder],
+			["ecarts-instances-dirigeantes", Step3Members],
+			["informations-de-publication", StepPlaceholder],
+			["recapitulatif", StepPlaceholder],
+		]);
 	});
 });
 
