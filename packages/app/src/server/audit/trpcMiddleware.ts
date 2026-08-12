@@ -105,6 +105,12 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"declarationDraft.save": AUDIT_ACTIONS.DRAFT_SAVE,
 	"declarationDraft.clear": AUDIT_ACTIONS.DRAFT_CLEAR,
 
+	// ── representation declaration ─────────────────────────
+	"representationDeclaration.get": AUDIT_ACTIONS.REPRESENTATION_GET,
+	"representationDeclaration.saveDraft":
+		AUDIT_ACTIONS.REPRESENTATION_SAVE_DRAFT,
+	"representationDeclaration.submit": AUDIT_ACTIONS.REPRESENTATION_SUBMIT,
+
 	// ── mail ──────────────────────────────────────────────
 	"mail.resendReceipt": AUDIT_ACTIONS.MAIL_RECEIPT_RESEND,
 };
