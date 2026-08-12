@@ -11,10 +11,18 @@ import {
 	REPRESENTATION_YEAR,
 	VALIDATION_MESSAGES,
 } from "~/modules/declaration-representation/__tests__/fixtures";
+import {
+	REPRESENTATION_TARGET_INITIAL,
+	REPRESENTATION_TARGET_RAISED,
+} from "~/modules/domain";
 import { Step2Executives } from "../Step2Executives";
 
 const STEP = 2;
 const RAISED_TARGET_REFERENCE_YEAR = 2028;
+
+const SELECTION_REQUIRED = "Veuillez sélectionner une option pour continuer.";
+
+const ACCORDION_TITLE = "Définition cadre dirigeant et seuil réglementaire";
 
 const OPTIONS = {
 	none: /^Aucun cadre dirigeant/,
@@ -317,9 +325,20 @@ describe("Step2Executives — badge de conformité (S13, S14)", () => {
 
 		await enterWomenPercent("60");
 
+		expect(screen.getByText("Conforme")).toBeInTheDocument();
 		expect(
-			screen.getByText("Conforme").closest("[aria-live='polite']"),
+			screen.getByText(REMINDER.compliant).closest("[aria-live='polite']"),
 		).toHaveAttribute("aria-atomic", "true");
+	});
+
+	it("shows the badge next to the percentage fields it grades", async () => {
+		renderStep();
+
+		await enterWomenPercent("60");
+
+		expect(percentFields().women.closest("fieldset")).toContainElement(
+			screen.getByText("Conforme"),
+		);
 	});
 });
 
@@ -349,6 +368,71 @@ describe("Step2Executives — bascule entre les choix", () => {
 			executivesCount: "two_or_more",
 			executiveWomenPercent: undefined,
 		});
+	});
+});
+
+describe("Step2Executives — sélection obligatoire", () => {
+	it("flags the missing selection as soon as the step is mounted", () => {
+		renderStep();
+
+		expect(screen.getByText(SELECTION_REQUIRED)).toBeInTheDocument();
+	});
+
+	it("exposes the selection error in the accessible name of the radio group", () => {
+		renderStep();
+
+		expect(
+			screen.getByRole("group", {
+				name: /Veuillez sélectionner une option pour continuer/,
+			}),
+		).toBeInTheDocument();
+	});
+
+	it("reports the step as invalid while no option is selected", () => {
+		const { lastStepValid } = renderStep();
+
+		expect(lastStepValid()).toBe(false);
+	});
+
+	it("clears the selection error once an option is picked", async () => {
+		renderStep();
+
+		await userEvent.click(option(OPTIONS.none));
+
+		expect(screen.queryByText(SELECTION_REQUIRED)).not.toBeInTheDocument();
+	});
+
+	it("keeps a restored draft free of the selection error", () => {
+		renderStep({
+			initialDraft: { currentStep: STEP, ...COMPUTABLE_EXECUTIVES },
+		});
+
+		expect(screen.queryByText(SELECTION_REQUIRED)).not.toBeInTheDocument();
+	});
+});
+
+describe("Step2Executives — définition réglementaire", () => {
+	it("offers the definition in a collapsed accordion", () => {
+		renderStep();
+
+		expect(
+			screen.getByRole("button", { name: ACCORDION_TITLE }),
+		).toHaveAttribute("aria-expanded", "false");
+	});
+
+	it("recalls the legal definition and both regulatory thresholds", () => {
+		renderStep();
+
+		expect(
+			screen.getByText(/L\.3111-2 du Code du travail/),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				new RegExp(
+					`quota minimum de ${REPRESENTATION_TARGET_INITIAL} % de chaque sexe.*porté à ${REPRESENTATION_TARGET_RAISED} %`,
+				),
+			),
+		).toBeInTheDocument();
 	});
 });
 

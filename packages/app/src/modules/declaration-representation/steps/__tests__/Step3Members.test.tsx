@@ -70,6 +70,7 @@ function Harness({
 				isSaving: false,
 				isPendingSave: false,
 				isReadOnly,
+				setStepValid: vi.fn(),
 			}}
 		>
 			<Step3Members />

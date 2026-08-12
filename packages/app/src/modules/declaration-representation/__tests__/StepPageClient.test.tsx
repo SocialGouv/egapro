@@ -30,16 +30,27 @@ vi.mock("~/trpc/react", () => ({
 
 import { StepPageClient } from "../StepPageClient";
 import type { RepresentationDraft } from "../types";
-import { MISMATCHED_EXECUTIVES, VALIDATION_MESSAGES } from "./fixtures";
+import {
+	MISMATCHED_EXECUTIVES,
+	NO_EXECUTIVES,
+	VALIDATION_MESSAGES,
+} from "./fixtures";
 
 const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
 const CLOSED_BANNER = "La campagne de représentation équilibrée est close";
 const TWO_OR_MORE = /^Deux cadres dirigeants ou plus/;
+const NONE = /^Aucun cadre dirigeant/;
+const PLACEHOLDER_STEP = 4;
 
 const SAVED_MISMATCHED_EXECUTIVES: RepresentationDraft = {
 	currentStep: 2,
 	...MISMATCHED_EXECUTIVES,
+};
+
+const SAVED_NO_EXECUTIVES: RepresentationDraft = {
+	currentStep: 2,
+	...NO_EXECUTIVES,
 };
 
 type RenderStepOptions = {
@@ -104,7 +115,7 @@ describe("StepPageClient — rendering", () => {
 	});
 
 	it("falls back to the placeholder on a step that has no screen yet", () => {
-		renderStep({ step: 3, currentStep: 3 });
+		renderStep({ step: PLACEHOLDER_STEP, currentStep: PLACEHOLDER_STEP });
 
 		expect(
 			screen.getByText(
@@ -140,14 +151,14 @@ describe("StepPageClient — navigation", () => {
 	});
 
 	it("saves the progress before routing to the next step", async () => {
-		renderStep({ step: 2 });
+		renderStep({ step: 2, initialDraft: SAVED_NO_EXECUTIVES });
 
 		await userEvent.click(screen.getByRole("button", { name: "Suivant" }));
 
 		expect(mutateAsync).toHaveBeenCalledWith({
 			year: YEAR,
 			currentStep: 3,
-			draft: { currentStep: 3 },
+			draft: { currentStep: 3, ...NO_EXECUTIVES },
 		});
 		expect(push).toHaveBeenCalledWith("/declaration-representation/etape/3");
 	});
@@ -160,7 +171,7 @@ describe("StepPageClient — navigation", () => {
 					resolveSave = resolve;
 				}),
 		);
-		renderStep({ step: 2 });
+		renderStep({ step: 2, initialDraft: SAVED_NO_EXECUTIVES });
 
 		await userEvent.click(screen.getByRole("button", { name: "Suivant" }));
 
@@ -177,7 +188,7 @@ describe("StepPageClient — navigation", () => {
 
 	it("keeps the user on the step and explains the failure when the save fails", async () => {
 		mutateAsync.mockRejectedValueOnce(new Error("network"));
-		renderStep({ step: 2 });
+		renderStep({ step: 2, initialDraft: SAVED_NO_EXECUTIVES });
 
 		await userEvent.click(screen.getByRole("button", { name: "Suivant" }));
 
@@ -199,6 +210,53 @@ describe("StepPageClient — navigation", () => {
 });
 
 describe("StepPageClient — étape invalide (S6)", () => {
+	it("blocks the next step while no executives count is selected", async () => {
+		renderStep({ step: 2 });
+
+		expect(nextButton()).toBeDisabled();
+
+		await userEvent.click(nextButton());
+
+		expect(mutateAsync).not.toHaveBeenCalled();
+		expect(push).not.toHaveBeenCalled();
+	});
+
+	it("re-enables the next step as soon as an executives count is selected", async () => {
+		renderStep({ step: 2 });
+
+		await userEvent.click(screen.getByRole("radio", { name: NONE }));
+
+		expect(nextButton()).toBeEnabled();
+
+		await userEvent.click(nextButton());
+
+		expect(push).toHaveBeenCalledWith("/declaration-representation/etape/3");
+	});
+
+	it("resets the validity when the user moves on to another step", () => {
+		const { rerender } = renderStep({ step: 2 });
+
+		expect(nextButton()).toBeDisabled();
+
+		rerender(
+			<StepPageClient
+				campaignOpen
+				campaignYear={CAMPAIGN_YEAR}
+				initialDraft={{ currentStep: PLACEHOLDER_STEP }}
+				step={PLACEHOLDER_STEP}
+				year={YEAR}
+			/>,
+		);
+
+		expect(nextButton()).toBeEnabled();
+	});
+
+	it("blocks the next step when the funnel reopens on a draft with no selection", () => {
+		renderStep({ step: 2, initialDraft: { currentStep: 2 } });
+
+		expect(nextButton()).toBeDisabled();
+	});
+
 	it("blocks the next step while the percentages do not sum to 100", async () => {
 		renderStep({ step: 2 });
 
@@ -246,7 +304,7 @@ describe("StepPageClient — étape invalide (S6)", () => {
 	});
 
 	it("keeps the next step enabled on a step that never reports its validity", () => {
-		renderStep({ step: 3, currentStep: 3 });
+		renderStep({ step: PLACEHOLDER_STEP, currentStep: PLACEHOLDER_STEP });
 
 		expect(nextButton()).toBeEnabled();
 	});

@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
 
@@ -18,6 +19,7 @@ type HarnessProps = {
 	hint?: string;
 	womenLabel?: string;
 	menLabel?: string;
+	trailingContent?: ReactNode;
 };
 
 function Harness(props: HarnessProps = {}) {
@@ -358,5 +360,21 @@ describe("isPercentageInput", () => {
 		"3 5",
 	])("rejects %s", (raw) => {
 		expect(isPercentageInput(raw)).toBe(false);
+	});
+});
+
+describe("PercentagePairFields — contenu additionnel", () => {
+	it("renders the trailing content inside the fieldset holding both inputs", () => {
+		render(<Harness trailingContent={<span>Conforme</span>} />);
+
+		expect(fields().women.closest("fieldset")).toContainElement(
+			screen.getByText("Conforme"),
+		);
+	});
+
+	it("renders no trailing column when no trailing content is given", () => {
+		render(<Harness />);
+
+		expect(screen.queryByText("Conforme")).not.toBeInTheDocument();
 	});
 });
