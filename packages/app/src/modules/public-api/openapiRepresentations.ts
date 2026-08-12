@@ -1,4 +1,13 @@
-import { sirenParam } from "./openapiShared";
+import {
+	buildSearchParameters,
+	corsAllowOriginHeader,
+	invalidParamsResponse,
+	limitOnlyParam,
+	notFoundResponse,
+	publicNonDiffusibleIdentityProperties,
+	serverErrorResponse,
+	sirenParam,
+} from "./openapiShared";
 
 export const publicRepresentationSchema = {
 	type: "object",
@@ -16,45 +25,7 @@ export const publicRepresentationSchema = {
 			description: "Année de référence de la déclaration.",
 			example: 2026,
 		},
-		name: {
-			type: ["string", "null"],
-			description:
-				"Raison sociale. `null` pour les entreprises non diffusibles.",
-			example: "THALES LAS FRANCE SAS",
-		},
-		address: {
-			type: ["string", "null"],
-			description: "Adresse. `null` pour les entreprises non diffusibles.",
-			example: "2 AVENUE GAY-LUSSAC, 78990 ELANCOURT",
-		},
-		region: {
-			type: ["string", "null"],
-			description: "Région. `null` pour les entreprises non diffusibles.",
-			example: "Île-de-France",
-		},
-		departmentCode: {
-			type: ["string", "null"],
-			description:
-				"Code département. `null` pour les entreprises non diffusibles.",
-			example: "78",
-		},
-		departmentLabel: {
-			type: ["string", "null"],
-			description:
-				"Libellé département. `null` pour les entreprises non diffusibles.",
-			example: "Yvelines",
-		},
-		nafCode: {
-			type: ["string", "null"],
-			description: "Code NAF/APE. `null` pour les entreprises non diffusibles.",
-			example: "26.51A",
-		},
-		nafLabel: {
-			type: ["string", "null"],
-			description:
-				"Libellé NAF/APE. `null` pour les entreprises non diffusibles.",
-			example: "Fabrication d'instruments de navigation",
-		},
+		...publicNonDiffusibleIdentityProperties,
 		referencePeriodStart: {
 			type: ["string", "null"],
 			description:
@@ -150,77 +121,16 @@ export const representationsPaths = {
 			summary: "Rechercher des déclarations de représentation équilibrée",
 			description:
 				"Recherche paginée sur les déclarations de représentation équilibrée (art. D. 1142-19) soumises. Les résultats sont filtrables par texte libre, région, département, code NAF et année. Les brouillons ne sont jamais inclus.",
-			parameters: [
-				{
-					name: "q",
-					in: "query",
-					required: false,
-					description:
-						"Texte libre (raison sociale, SIREN). Ignoré si la chaîne est vide.",
-					example: "THALES",
-					schema: { type: "string" },
-				},
-				{
-					name: "region",
-					in: "query",
-					required: false,
-					description:
-						"Filtre par code de région (ex. `11` pour Île-de-France).",
-					example: "11",
-					schema: { type: "string" },
-				},
-				{
-					name: "departement",
-					in: "query",
-					required: false,
-					description: "Filtre par code département (ex. `75` pour Paris).",
-					example: "75",
-					schema: { type: "string" },
-				},
-				{
-					name: "naf",
-					in: "query",
-					required: false,
-					description: "Filtre par code NAF (ex. `26.51A`).",
-					example: "26.51A",
-					schema: { type: "string" },
-				},
-				{
-					name: "year",
-					in: "query",
-					required: false,
-					description: "Filtre par année de référence de la déclaration.",
-					example: 2026,
-					schema: { type: "integer" },
-				},
-				{
-					name: "limit",
-					in: "query",
-					required: false,
-					description:
-						"Nombre de résultats par page. Entre 1 et 100. Défaut : 10.",
-					example: 10,
-					schema: { type: "integer", minimum: 1, maximum: 100, default: 10 },
-				},
-				{
-					name: "offset",
-					in: "query",
-					required: false,
-					description: "Décalage de pagination. Défaut : 0.",
-					example: 0,
-					schema: { type: "integer", minimum: 0, default: 0 },
-				},
-			],
+			parameters: buildSearchParameters({
+				description: "Filtre par année de référence de la déclaration.",
+				example: 2026,
+			}),
 			responses: {
 				"200": {
 					description:
 						"Liste paginée de déclarations de représentation équilibrée.",
 					headers: {
-						"Access-Control-Allow-Origin": {
-							schema: { type: "string" },
-							description:
-								"Toujours `*` — accessible depuis n'importe quelle origine.",
-						},
+						"Access-Control-Allow-Origin": corsAllowOriginHeader,
 					},
 					content: {
 						"application/json": {
@@ -230,22 +140,8 @@ export const representationsPaths = {
 						},
 					},
 				},
-				"400": {
-					description: "Paramètres invalides.",
-					content: {
-						"application/json": {
-							schema: { $ref: "#/components/schemas/Error" },
-						},
-					},
-				},
-				"500": {
-					description: "Erreur serveur.",
-					content: {
-						"application/json": {
-							schema: { $ref: "#/components/schemas/Error" },
-						},
-					},
-				},
+				"400": invalidParamsResponse("Paramètres invalides."),
+				"500": serverErrorResponse,
 			},
 		},
 	},
@@ -256,17 +152,7 @@ export const representationsPaths = {
 				"Lister les déclarations de représentation équilibrée d'une entreprise",
 			description:
 				"Retourne toutes les déclarations de représentation équilibrée soumises pour le SIREN donné, triées par année décroissante. Les brouillons ne sont jamais retournés.",
-			parameters: [
-				sirenParam,
-				{
-					name: "limit",
-					in: "query",
-					required: false,
-					description: "Nombre maximal de résultats. Entre 1 et 100.",
-					example: 10,
-					schema: { type: "integer", minimum: 1, maximum: 100 },
-				},
-			],
+			parameters: [sirenParam, limitOnlyParam],
 			responses: {
 				"200": {
 					description:
@@ -280,22 +166,8 @@ export const representationsPaths = {
 						},
 					},
 				},
-				"400": {
-					description: "SIREN invalide.",
-					content: {
-						"application/json": {
-							schema: { $ref: "#/components/schemas/Error" },
-						},
-					},
-				},
-				"500": {
-					description: "Erreur serveur.",
-					content: {
-						"application/json": {
-							schema: { $ref: "#/components/schemas/Error" },
-						},
-					},
-				},
+				"400": invalidParamsResponse("SIREN invalide."),
+				"500": serverErrorResponse,
 			},
 		},
 	},
@@ -326,30 +198,11 @@ export const representationsPaths = {
 						},
 					},
 				},
-				"400": {
-					description: "SIREN ou année invalide.",
-					content: {
-						"application/json": {
-							schema: { $ref: "#/components/schemas/Error" },
-						},
-					},
-				},
-				"404": {
-					description: "Déclaration non trouvée ou non soumise (brouillon).",
-					content: {
-						"application/json": {
-							schema: { $ref: "#/components/schemas/Error" },
-						},
-					},
-				},
-				"500": {
-					description: "Erreur serveur.",
-					content: {
-						"application/json": {
-							schema: { $ref: "#/components/schemas/Error" },
-						},
-					},
-				},
+				"400": invalidParamsResponse("SIREN ou année invalide."),
+				"404": notFoundResponse(
+					"Déclaration non trouvée ou non soumise (brouillon).",
+				),
+				"500": serverErrorResponse,
 			},
 		},
 	},
