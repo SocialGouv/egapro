@@ -26,7 +26,15 @@ A single comment on the bug issue titled `## Analyse du bug` containing :
 2. **Root cause** — fichier + ligne(s), explication 2-3 phrases
 3. **Fichiers à modifier** — liste explicite (chemins `~/modules/...`, `~/server/...`)
 4. **Fix proposé** — 2-3 lignes, pas de code complet (c'est `code-dev` qui code)
-5. **Test de reproduction** — type (E2E Playwright / Vitest unit / API integration / N/A si visual mismatch) + emplacement suggéré
+5. **Criticité pour la non-régression** — tu **classes**, tu ne **prescris pas** de test :
+   - le parcours touché est-il critique (déclaration, login, conformité, upload) ?
+   - le symptôme est-il **bloquant** pour l'utilisateur, ou seulement visuel / cosmétique ?
+   - le correctif touche-t-il un **utilitaire partagé** (rayon d'impact sur N appelants) ou un seul écran ?
+   - un **TU / test d'intégration** suffirait-il (règle métier, fonction pure) ?
+
+   Conclus par une ligne unique : `Couverture E2E : justifiée | non justifiée | à l'appréciation d'e2e-dev`, plus une phrase de motif. **Le choix final — imbriquer, créer, ou ne rien faire — appartient à `e2e-dev`**, qui décide sur le diff réel. Ne propose donc **ni fichier hôte, ni viewport, ni forme d'assertion, ni seuil** : une spec de test rédigée ici est lue en aval comme une décision déjà prise et court-circuite la gate de criticité de l'agent.
+
+   Ne gonfle pas non plus la taille (`## Complexité`) au titre d'un test E2E qui ne sera peut-être pas écrit : tant que la couverture n'est pas manifestement justifiée, estime le ticket sur le seul correctif.
 6. **Tags suggérés** — `complexe` si > 5 fichiers ou refacto multi-modules
 
 Le **body de l'issue est intact** — l'analyse vit dans un commentaire séparé. `code-dev` lira les deux (description originale + analyse) en mode bug.
@@ -121,7 +129,7 @@ gh issue comment "$BUG_N" --body-file <(cat <<'EOF'
 
 **Fix proposé** : retirer le `.optional()` du schéma `maxThreshold`, propager le message d'erreur via `formState.errors.maxThreshold?.message`.
 
-**Test de reproduction** : E2E Playwright dans `src/e2e/declaration-step4.e2e.ts` — formulaire vide → submit → assert que le message d'erreur DSFR `fr-error-text` apparaît sous le champ.
+**Criticité pour la non-régression** : parcours critique (déclaration), symptôme **bloquant** (l'utilisateur ne voit pas pourquoi son envoi échoue), correctif localisé sur un seul écran, non couvrable en TU (validation rendue par le navigateur). `Couverture E2E : justifiée` — le choix du scénario hôte et de la forme d'assertion revient à `e2e-dev`.
 
 **Tags** : aucun (1 fichier touché, fix simple).
 
