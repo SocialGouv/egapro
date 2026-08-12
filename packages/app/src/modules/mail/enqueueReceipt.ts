@@ -163,18 +163,64 @@ async function buildAttachments(
 }
 
 /**
- * A receipt that never leaves is invisible: the user reports "I got no e-mail"
- * and the code alone cannot say why. The audit row keeps the trace queryable per
- * SIREN, and Sentry raises it instead of letting it die in a swallowed catch.
+ * Raises a receipt failure to Sentry and the server console, then returns the
+ * human-readable reason. It writes no audit row itself — the caller is the one
+ * that owns a row, and carries the returned reason into it so the failure stays
+ * queryable per SIREN in `audit.action_log`.
+ *
+ * A non-Error throw (a rejected string, a plain object) reaches Sentry as
+ * "Non-Error exception captured" and groups unrelated failures together, so it
+ * is wrapped in a real Error and the original value kept as its cause.
  */
 function reportReceiptFailure(
 	error: unknown,
 	context: { stage: "attachments" | "enqueue" } & Record<string, unknown>,
-): void {
+): string {
 	const message = error instanceof Error ? error.message : String(error);
+	const reported =
+		error instanceof Error ? error : new Error(message, { cause: error });
 
-	Sentry.captureException(error, { extra: context });
+	Sentry.captureException(reported, { extra: context });
 	console.error(`[mail] receipt ${context.stage} failed: ${message}`, context);
+
+	return message;
+}
+
+type AttachmentsOutcome = {
+	attachments: MailAttachment[];
+	/** Non-null when the PDF was lost and the receipt is sent without it. */
+	droppedReason: string | null;
+};
+
+/**
+ * Only the declaration receipts carry a PDF, and that PDF is rendered on the
+ * fly. A rendering failure used to sink the whole e-mail, which is exactly the
+ * symptom reported in issue 3914 — the acknowledgement never arrives. Losing
+ * the attachment is bad; losing the acknowledgement is worse, so the send goes
+ * on without it and the reason travels back to the caller, which records it on
+ * the audit row rather than letting the degradation pass for a clean send.
+ */
+async function buildAttachmentsOrDrop(
+	kind: ReceiptKind,
+	siren: string,
+	year: number,
+): Promise<AttachmentsOutcome> {
+	try {
+		return {
+			attachments: await buildAttachments(kind, siren, year),
+			droppedReason: null,
+		};
+	} catch (error) {
+		return {
+			attachments: [],
+			droppedReason: reportReceiptFailure(error, {
+				stage: "attachments",
+				kind,
+				siren,
+				year,
+			}),
+		};
+	}
 }
 
 export async function enqueueReceipt(
@@ -186,21 +232,10 @@ export async function enqueueReceipt(
 	try {
 		const context = await readReceiptContext(siren, year);
 		const payload = await buildConfirmationPayload(type, siren, year, context);
-		// Only the declaration receipts carry a PDF, and that PDF is rendered on
-		// the fly. A rendering failure used to sink the whole e-mail, which is
-		// exactly the symptom reported in issue 3914 — the acknowledgement never
-		// arrives. Losing the attachment is bad; losing the acknowledgement is
-		// worse, so the send goes on without it and the failure is reported.
-		const attachments = await buildAttachments(kind, siren, year).catch(
-			(error: unknown) => {
-				reportReceiptFailure(error, {
-					stage: "attachments",
-					kind,
-					siren,
-					year,
-				});
-				return [] as MailAttachment[];
-			},
+		const { attachments, droppedReason } = await buildAttachmentsOrDrop(
+			kind,
+			siren,
+			year,
 		);
 		const result = await enqueueNotification({
 			type,
@@ -223,7 +258,20 @@ export async function enqueueReceipt(
 						errorMessage:
 							result.status === "error" ? result.error : "queue_unavailable",
 					}),
-			metadata: { type, kind, year, isResend, variant: payload.variant },
+			// A dropped attachment must not read as a clean send: the enqueue did
+			// succeed, so the row stays a success, but the degradation is stamped
+			// on it — `metadata->>'attachmentsDropped'` is what makes "this SIREN
+			// got its receipt without the PDF" answerable from the audit log.
+			metadata: {
+				type,
+				kind,
+				year,
+				isResend,
+				variant: payload.variant,
+				...(droppedReason === null
+					? {}
+					: { attachmentsDropped: true, attachmentsError: droppedReason }),
+			},
 		});
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Unknown error";
