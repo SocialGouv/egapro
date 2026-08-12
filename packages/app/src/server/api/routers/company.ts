@@ -6,6 +6,7 @@ import {
 	getCurrentYear,
 	getObligationWorkforce,
 	isCseRequired,
+	isPresumedSubjectToRepresentation,
 	parseGipWorkforce,
 } from "~/modules/domain";
 import { buildDeclarationList } from "~/modules/my-space/buildDeclarationList";
@@ -19,6 +20,7 @@ import {
 	isImpersonatingSiren,
 } from "~/server/auth/companyAccess";
 import type { DB } from "~/server/db";
+import { getRepresentationWorkforceHistory } from "~/server/db/getRepresentationWorkforceHistory";
 import {
 	companies,
 	declarationStatusHistory,
@@ -187,62 +189,68 @@ export const companyRouter = createTRPCRouter({
 		.input(sirenInputSchema)
 		.query(async ({ ctx, input }) => {
 			const company = await findUserCompany(ctx.db, ctx.session, input.siren);
+			const year = getCurrentYear();
 
-			const [declarationRows, jointEvalRows, prefillRows, eventRows] =
-				await Promise.all([
-					ctx.db
-						.select({
-							id: declarations.id,
-							siren: declarations.siren,
-							year: declarations.year,
-							status: declarations.status,
-							currentStep: declarations.currentStep,
-							updatedAt: declarations.updatedAt,
-							firstDeclarationPathChoice:
-								declarations.firstDeclarationPathChoice,
-							secondDeclarationPathChoice:
-								declarations.secondDeclarationPathChoice,
-							cseRequired: declarations.cseRequired,
-						})
-						.from(declarations)
-						.where(
-							and(
-								eq(declarations.siren, input.siren),
-								isNull(declarations.cancelledAt),
-							),
-						)
-						.orderBy(desc(declarations.year)),
-					ctx.db
-						.select({ year: declarations.year })
-						.from(files)
-						.innerJoin(declarations, eq(files.declarationId, declarations.id))
-						.where(
-							and(
-								eq(declarations.siren, input.siren),
-								eq(files.type, "joint_evaluation"),
-							),
+			const [
+				declarationRows,
+				jointEvalRows,
+				prefillRows,
+				eventRows,
+				representationWorkforceHistory,
+			] = await Promise.all([
+				ctx.db
+					.select({
+						id: declarations.id,
+						siren: declarations.siren,
+						year: declarations.year,
+						status: declarations.status,
+						currentStep: declarations.currentStep,
+						updatedAt: declarations.updatedAt,
+						firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
+						secondDeclarationPathChoice:
+							declarations.secondDeclarationPathChoice,
+						cseRequired: declarations.cseRequired,
+					})
+					.from(declarations)
+					.where(
+						and(
+							eq(declarations.siren, input.siren),
+							isNull(declarations.cancelledAt),
 						),
-					ctx.db
-						.select({ year: gipMdsData.year })
-						.from(gipMdsData)
-						.where(eq(gipMdsData.siren, input.siren)),
-					ctx.db
-						.select({
-							declarationId: declarationStatusHistory.declarationId,
-							eventType: declarationStatusHistory.eventType,
-						})
-						.from(declarationStatusHistory)
-						.innerJoin(
-							declarations,
-							eq(declarationStatusHistory.declarationId, declarations.id),
-						)
-						.where(
-							and(
-								eq(declarations.siren, input.siren),
-								isNull(declarations.cancelledAt),
-							),
+					)
+					.orderBy(desc(declarations.year)),
+				ctx.db
+					.select({ year: declarations.year })
+					.from(files)
+					.innerJoin(declarations, eq(files.declarationId, declarations.id))
+					.where(
+						and(
+							eq(declarations.siren, input.siren),
+							eq(files.type, "joint_evaluation"),
 						),
-				]);
+					),
+				ctx.db
+					.select({ year: gipMdsData.year })
+					.from(gipMdsData)
+					.where(eq(gipMdsData.siren, input.siren)),
+				ctx.db
+					.select({
+						declarationId: declarationStatusHistory.declarationId,
+						eventType: declarationStatusHistory.eventType,
+					})
+					.from(declarationStatusHistory)
+					.innerJoin(
+						declarations,
+						eq(declarationStatusHistory.declarationId, declarations.id),
+					)
+					.where(
+						and(
+							eq(declarations.siren, input.siren),
+							isNull(declarations.cancelledAt),
+						),
+					),
+				getRepresentationWorkforceHistory(input.siren, year),
+			]);
 
 			const yearsWithJointEval = new Set(jointEvalRows.map((r) => r.year));
 			const yearsWithPrefill = new Set(prefillRows.map((r) => r.year));
@@ -257,7 +265,10 @@ export const companyRouter = createTRPCRouter({
 					.map((r) => r.declarationId),
 			);
 
-			const year = getCurrentYear();
+			const representationVisible = isPresumedSubjectToRepresentation(
+				representationWorkforceHistory,
+				year,
+			);
 			const mappedDeclarations = declarationRows.map((d) => ({
 				type: "remuneration" as const,
 				year: d.year,
@@ -282,6 +293,7 @@ export const companyRouter = createTRPCRouter({
 				mappedDeclarations,
 				year,
 				yearsWithPrefill,
+				representationVisible,
 			);
 
 			return { company, declarations: declarationItems };
