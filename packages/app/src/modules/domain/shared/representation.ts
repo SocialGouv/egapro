@@ -1,6 +1,8 @@
 export const REPRESENTATION_TARGET_INITIAL = 30;
 export const REPRESENTATION_TARGET_RAISED = 40;
 export const REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR = 2029;
+export const REPRESENTATION_SUBJECTION_WORKFORCE_MIN = 1000;
+export const REPRESENTATION_SUBJECTION_WINDOW_YEARS = 3;
 
 export type RepresentationComplianceVerdict =
 	| "compliant"
@@ -8,6 +10,8 @@ export type RepresentationComplianceVerdict =
 	| "not_applicable";
 
 export type ExecutivesCount = "none" | "one" | "two_or_more";
+
+export type WorkforceHistoryEntry = { year: number; workforceEma: number };
 
 export function getRepresentationTarget(campaignYear: number): number {
 	return campaignYear >= REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR
@@ -37,4 +41,20 @@ export function deriveExecutivesNotComputableReason(
 
 export function getRepresentationCampaignYear(referenceYear: number): number {
 	return referenceYear + 1;
+}
+
+export function isPresumedSubjectToRepresentation(
+	workforcesByYear: WorkforceHistoryEntry[],
+	referenceYear: number,
+): boolean {
+	const window = workforcesByYear
+		.filter((entry) => entry.year <= referenceYear)
+		.sort((a, b) => b.year - a.year)
+		.slice(0, REPRESENTATION_SUBJECTION_WINDOW_YEARS);
+
+	if (window.length === 0) return true;
+
+	return window.every(
+		(entry) => entry.workforceEma >= REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
+	);
 }

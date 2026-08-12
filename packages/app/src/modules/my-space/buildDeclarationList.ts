@@ -30,6 +30,7 @@ export function buildDeclarationList(
 	dbDeclarations: DbDeclaration[],
 	currentYear: number,
 	yearsWithPrefill: Set<number> = new Set(),
+	representationVisible = true,
 ): DeclarationItem[] {
 	const rows: DeclarationItem[] = [];
 
@@ -54,7 +55,7 @@ export function buildDeclarationList(
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
 				hasPrefillData: existing.hasPrefillData,
 			});
-		} else {
+		} else if (type !== "representation" || representationVisible) {
 			rows.push({
 				type,
 				siren,
