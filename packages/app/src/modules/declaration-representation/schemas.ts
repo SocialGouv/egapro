@@ -42,17 +42,30 @@ export const subjectionSchema = z
 	});
 
 export function referencePeriodSchema(year: number) {
+	const yearMismatchMessage = `La date sélectionnée ne correspond pas à l'année de référence ${year}.`;
+
 	return z
 		.object({
 			referencePeriodStart: z.string().date(),
 			referencePeriodEnd: z.string().date(),
 		})
 		.refine(
+			(period) => {
+				const startYear = parseIsoDate(
+					period.referencePeriodStart,
+				).getUTCFullYear();
+				return startYear === year || startYear === year - 1;
+			},
+			{
+				message: yearMismatchMessage,
+				path: ["referencePeriodStart"],
+			},
+		)
+		.refine(
 			(period) =>
 				parseIsoDate(period.referencePeriodEnd).getUTCFullYear() === year,
 			{
-				message:
-					"L'année de la date de fin de la période de référence doit correspondre à l'année au titre de laquelle les écarts sont calculés.",
+				message: yearMismatchMessage,
 				path: ["referencePeriodEnd"],
 			},
 		)

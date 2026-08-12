@@ -37,6 +37,9 @@ const CAMPAIGN_YEAR = 2026;
 const STEP_1_HREF = "/declaration-representation/etape/1";
 const SELECTION_ERROR = "Veuillez sélectionner une option pour continuer.";
 const NOT_CONCERNED_INFO = /Vous n'êtes pas assujetti à la publication/;
+const SUBJECTION_QUESTION =
+	/Indiquez si votre entreprise emploie au moins 1 000 salariés/;
+const SUBJECTION_FIELDSET_NAME = /Nombre de salariés de l'entreprise/;
 
 function renderScreen() {
 	return render(<SubjectionScreen campaignYear={CAMPAIGN_YEAR} />);
@@ -80,13 +83,26 @@ describe("SubjectionScreen — rendering", () => {
 			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText(
-				/Indiquez si votre entreprise emploie au moins 1 000 salariés/,
-			),
+			screen.getByText(SUBJECTION_QUESTION, { selector: "p" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("group", { name: SUBJECTION_FIELDSET_NAME }),
 		).toBeInTheDocument();
 		expect(concernedRadio()).not.toBeChecked();
 		expect(notConcernedRadio()).not.toBeChecked();
 		expect(screen.getAllByRole("radio")).toHaveLength(2);
+	});
+
+	it("states the question first, before its rationale and the answer options", () => {
+		const { container } = renderScreen();
+
+		const paragraphs = Array.from(container.querySelectorAll("p")).map(
+			(paragraph) => paragraph.textContent ?? "",
+		);
+
+		expect(paragraphs[0]).toMatch(SUBJECTION_QUESTION);
+		expect(paragraphs[1]).toMatch(/Ce seuil détermine/);
+		expect(paragraphs[2]).toMatch(/Tous les champs sont obligatoires/);
 	});
 
 	it("offers a way back to the personal space before any answer", () => {
@@ -109,6 +125,42 @@ describe("SubjectionScreen — no answer selected", () => {
 
 		expect(screen.getByText(SELECTION_ERROR)).toBeInTheDocument();
 		expect(push).not.toHaveBeenCalled();
+	});
+
+	it("keeps the rejected question as the only way forward", async () => {
+		renderScreen();
+
+		await userEvent.click(nextButton());
+
+		expect(
+			screen.queryByRole("link", { name: "Retour" }),
+		).not.toBeInTheDocument();
+		expect(nextButton()).toBeInTheDocument();
+	});
+
+	it("flags both options as erroneous until one is picked", async () => {
+		renderScreen();
+
+		await userEvent.click(nextButton());
+
+		for (const radio of screen.getAllByRole("radio")) {
+			expect(document.querySelector(`label[for="${radio.id}"]`)).toHaveClass(
+				"fr-label--error",
+			);
+		}
+	});
+
+	it("clears the erroneous styling once an option is picked", async () => {
+		renderScreen();
+		await userEvent.click(nextButton());
+
+		await userEvent.click(concernedRadio());
+
+		for (const radio of screen.getAllByRole("radio")) {
+			expect(
+				document.querySelector(`label[for="${radio.id}"]`),
+			).not.toHaveClass("fr-label--error");
+		}
 	});
 
 	it("clears the error as soon as an option is selected", async () => {

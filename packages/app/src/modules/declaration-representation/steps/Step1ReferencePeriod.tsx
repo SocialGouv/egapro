@@ -61,14 +61,14 @@ export function Step1ReferencePeriod() {
 
 	return (
 		<>
-			<p>
+			<p className="fr-text-title--grey">
 				Année de référence : <strong>{year}</strong>
 			</p>
-			<p>
+			<p className="fr-text-title--grey">
 				Sélectionnez la période de l'exercice comptable utilisé pour le calcul
 				des écarts.
 			</p>
-			<p>Tous les champs sont obligatoires.</p>
+			<p className="fr-text-title--grey">Tous les champs sont obligatoires.</p>
 
 			<fieldset className="fr-fieldset">
 				<legend className="fr-sr-only">Dates de la période de référence</legend>

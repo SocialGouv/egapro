@@ -41,7 +41,23 @@ describe("referencePeriodSchema", () => {
 
 		expect(issues(result)).toContainEqual({
 			path: "referencePeriodEnd",
-			message: VALIDATION_MESSAGES.periodYear,
+			message: VALIDATION_MESSAGES.periodYear(YEAR),
+		});
+	});
+
+	it.each([
+		["after the reference year", "2027-04-03"],
+		["on the calendar year right after it", "2026-01-01"],
+		["more than one year before it", "2023-01-02"],
+	])("rejects a start date %s", (_label, start) => {
+		const result = referencePeriodSchema(YEAR).safeParse({
+			referencePeriodStart: start,
+			referencePeriodEnd: VALID_PERIOD.referencePeriodEnd,
+		});
+
+		expect(issues(result)).toContainEqual({
+			path: "referencePeriodStart",
+			message: VALIDATION_MESSAGES.periodYear(YEAR),
 		});
 	});
 

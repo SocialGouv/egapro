@@ -37,8 +37,7 @@ const STEP_2_HREF = "/declaration-representation/etape/2";
 const REQUIRED_MESSAGE = "Sélectionner une date de début ou une date de fin.";
 const TWELVE_MONTHS_MESSAGE =
 	"La période de référence doit couvrir 12 mois consécutifs.";
-const REFERENCE_YEAR_MESSAGE =
-	"L'année de la date de fin de la période de référence doit correspondre à l'année au titre de laquelle les écarts sont calculés.";
+const REFERENCE_YEAR_MESSAGE = `La date sélectionnée ne correspond pas à l'année de référence ${YEAR}.`;
 const VALID_START = "2025-01-01";
 const VALID_END = "2025-12-31";
 
@@ -174,6 +173,18 @@ describe("Step1ReferencePeriod — submit validation", () => {
 		await clickNext();
 
 		expect(screen.getByText(REFERENCE_YEAR_MESSAGE)).toBeInTheDocument();
+		expect(endInput()).toHaveAttribute("aria-invalid", "true");
+		expect(push).not.toHaveBeenCalled();
+	});
+
+	it("rejects a start date whose year cannot open the reference period", async () => {
+		renderStep1();
+
+		fillPeriod({ end: VALID_END, start: "2027-04-03" });
+		await clickNext();
+
+		expect(screen.getByText(REFERENCE_YEAR_MESSAGE)).toBeInTheDocument();
+		expect(startInput()).toHaveAttribute("aria-invalid", "true");
 		expect(push).not.toHaveBeenCalled();
 	});
 

@@ -22,6 +22,7 @@ export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
 	});
 
 	const answer = form.watch("answer");
+	const hasSubjectionError = Boolean(form.formState.errors.answer);
 
 	const onSubmit = form.handleSubmit((data) => {
 		if (data.answer === "concerned") {
@@ -36,14 +37,20 @@ export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
 			</h1>
 			<h2 className="fr-h6">L'entreprise est-elle concernée ?</h2>
 
-			<form onSubmit={onSubmit}>
-				<p>
-					Ce seuil détermine si votre entreprise est tenue de déclarer ses
-					écarts de représentation femmes-hommes parmi les cadres dirigeants et
-					les membres des instances dirigeantes.
-				</p>
-				<p>Tous les champs sont obligatoires.</p>
+			<p className="fr-text-title--grey fr-mt-4w fr-mb-2w">
+				Indiquez si votre entreprise emploie au moins 1 000 salariés durant les
+				trois derniers exercices consécutifs.
+			</p>
+			<p className="fr-text-title--grey fr-mb-2w">
+				Ce seuil détermine si votre entreprise est tenue de déclarer ses écarts
+				de représentation femmes-hommes parmi les cadres dirigeants et les
+				membres des instances dirigeantes.
+			</p>
+			<p className="fr-text-title--grey fr-mb-4w">
+				Tous les champs sont obligatoires.
+			</p>
 
+			<form onSubmit={onSubmit}>
 				<Controller
 					control={form.control}
 					name="answer"
@@ -56,12 +63,8 @@ export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
 									: "fr-fieldset"
 							}
 						>
-							<legend
-								className="fr-fieldset__legend--regular fr-fieldset__legend"
-								id={legendId}
-							>
-								Indiquez si votre entreprise emploie au moins 1 000 salariés
-								durant les trois derniers exercices consécutifs.
+							<legend className="fr-sr-only" id={legendId}>
+								Nombre de salariés de l'entreprise
 							</legend>
 							<div className="fr-fieldset__element">
 								<div className="fr-radio-group">
@@ -72,7 +75,12 @@ export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
 										onChange={() => field.onChange("concerned")}
 										type="radio"
 									/>
-									<label className="fr-label" htmlFor="subjection-concerned">
+									<label
+										className={
+											fieldState.error ? "fr-label fr-label--error" : "fr-label"
+										}
+										htmlFor="subjection-concerned"
+									>
 										1 000 salariés ou plus sur les trois exercices
 										<span className="fr-hint-text">
 											Votre entreprise est tenue de déclarer ses écarts de
@@ -91,7 +99,9 @@ export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
 										type="radio"
 									/>
 									<label
-										className="fr-label"
+										className={
+											fieldState.error ? "fr-label fr-label--error" : "fr-label"
+										}
 										htmlFor="subjection-not-concerned"
 									>
 										Moins de 1 000 salariés sur au moins un exercice
@@ -131,7 +141,7 @@ export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
 				) : null}
 
 				<div className="fr-btns-group fr-btns-group--inline fr-btns-group--right fr-mt-4w">
-					{answer === null ? (
+					{answer === null && !hasSubjectionError ? (
 						<Link className="fr-btn fr-btn--tertiary" href="/mon-espace">
 							Retour
 						</Link>
