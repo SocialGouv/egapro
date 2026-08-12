@@ -227,12 +227,16 @@ export {
 export type {
 	ExecutivesCount,
 	RepresentationComplianceVerdict,
+	WorkforceHistoryEntry,
 } from "./shared/representation";
 export {
 	computeRepresentationVerdict,
 	deriveExecutivesNotComputableReason,
 	getRepresentationCampaignYear,
 	getRepresentationTarget,
+	isPresumedSubjectToRepresentation,
+	REPRESENTATION_SUBJECTION_WINDOW_YEARS,
+	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 	REPRESENTATION_TARGET_INITIAL,
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
