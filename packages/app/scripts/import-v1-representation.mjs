@@ -3,7 +3,102 @@ import { fileURLToPath } from "node:url";
 
 import postgres from "postgres";
 
-import { COUNTIES, REGIONS } from "../src/modules/domain/index.ts";
+import { COUNTIES, REGIONS } from "~/modules/domain";
+
+/** @typedef {import("postgres").Sql} Sql */
+
+/**
+ * @typedef {Object} V1Company
+ * @property {string} siren
+ * @property {string} raison_sociale
+ * @property {string} [adresse]
+ * @property {string} [code_naf]
+ * @property {string} [région]
+ * @property {string} [département]
+ */
+
+/**
+ * @typedef {Object} V1Indicator
+ * @property {number} [pourcentage_femmes_cadres]
+ * @property {number} [pourcentage_hommes_cadres]
+ * @property {string} [motif_non_calculabilité_cadres]
+ * @property {number} [pourcentage_femmes_membres]
+ * @property {number} [pourcentage_hommes_membres]
+ * @property {string} [motif_non_calculabilité_membres]
+ */
+
+/**
+ * @typedef {Object} V1Publication
+ * @property {string} date
+ * @property {string} [url]
+ * @property {string} [modalités]
+ */
+
+/**
+ * @typedef {Object} V1Data
+ * @property {{ email: string, nom: string, prénom: string, téléphone: string }} déclarant
+ * @property {{ année_indicateurs: number, fin_période_référence: string, publication?: V1Publication }} déclaration
+ * @property {V1Company} entreprise
+ * @property {{ représentation_équilibrée: V1Indicator }} indicateurs
+ */
+
+/**
+ * @typedef {Object} V1Row
+ * @property {string} siren
+ * @property {number} year
+ * @property {Date} declared_at
+ * @property {Date} modified_at
+ * @property {V1Data} data
+ */
+
+/**
+ * @typedef {Object} MappedCompany
+ * @property {string} siren
+ * @property {string} name
+ * @property {string | null} address
+ * @property {string | null} nafCode
+ * @property {string | null} region
+ * @property {string | null} departmentCode
+ * @property {string | null} departmentLabel
+ */
+
+/**
+ * @typedef {Object} MappedDeclaration
+ * @property {string} siren
+ * @property {number} year
+ * @property {{ email: string, lastname: string, firstname: string, phone: string }} legacyDeclarant
+ * @property {string} referencePeriodStart
+ * @property {string} referencePeriodEnd
+ * @property {number | null} executiveWomenPercent
+ * @property {number | null} executiveMenPercent
+ * @property {string | null} notComputableReasonExecutives
+ * @property {number | null} memberWomenPercent
+ * @property {number | null} memberMenPercent
+ * @property {string | null} notComputableReasonMembers
+ * @property {string | null} publishDate
+ * @property {string | null} publishUrl
+ * @property {string | null} publishModalities
+ * @property {Date} submittedAt
+ * @property {Date} createdAt
+ * @property {Date} updatedAt
+ */
+
+/**
+ * @typedef {Object} ImportError
+ * @property {string} siren
+ * @property {number} year
+ * @property {string} cause
+ */
+
+/**
+ * @typedef {Object} ImportCounters
+ * @property {number} total
+ * @property {number} imported
+ * @property {number} updated
+ * @property {number} skippedUpToDate
+ * @property {number} skippedNative
+ * @property {ImportError[]} errors
+ */
 
 const USAGE =
 	"Usage: import-v1-representation --from YYYY-MM-DD [--to YYYY-MM-DD] [--dry-run]";
@@ -12,7 +107,18 @@ const NON_DIFFUSIBLE_NAF = "[NON-DIFFUSIBLE]";
 const IMPORTED_DECLARATION_STEP = 5;
 const IMPORTED_DECLARATION_STATUS = "submitted";
 
+/** @type {Record<string, string>} */
+const REGION_LABELS = REGIONS;
+/** @type {Record<string, string>} */
+const DEPARTMENT_LABELS = COUNTIES;
+
+/**
+ * @param {string[]} argv
+ * @param {{ now?: Date }} [options]
+ * @returns {{ from: Date, to: Date, dryRun: boolean }}
+ */
 export function parseCliArgs(argv, { now = new Date() } = {}) {
+	/** @type {{ dryRun: boolean, from?: string, to?: string }} */
 	const flags = { dryRun: false };
 	for (let i = 0; i < argv.length; i++) {
 		const token = argv[i];
@@ -21,7 +127,8 @@ export function parseCliArgs(argv, { now = new Date() } = {}) {
 			continue;
 		}
 		if (token === "--from" || token === "--to") {
-			flags[token.slice(2)] = argv[i + 1];
+			const key = token === "--from" ? "from" : "to";
+			flags[key] = argv[i + 1];
 			i++;
 		}
 	}
@@ -40,6 +147,11 @@ export function parseCliArgs(argv, { now = new Date() } = {}) {
 	return { from, to, dryRun: flags.dryRun };
 }
 
+/**
+ * @param {string} value
+ * @param {string} label
+ * @returns {Date}
+ */
 function parseDateBoundary(value, label) {
 	if (!DATE_PATTERN.test(value)) {
 		throw new Error(`Invalid ${label} date "${value}": expected YYYY-MM-DD`);
@@ -51,6 +163,10 @@ function parseDateBoundary(value, label) {
 	return date;
 }
 
+/**
+ * @param {string} referencePeriodEnd
+ * @returns {string}
+ */
 export function computeReferencePeriodStart(referencePeriodEnd) {
 	const start = new Date(`${referencePeriodEnd}T00:00:00.000Z`);
 	start.setUTCFullYear(start.getUTCFullYear() - 1);
@@ -58,6 +174,10 @@ export function computeReferencePeriodStart(referencePeriodEnd) {
 	return start.toISOString().slice(0, 10);
 }
 
+/**
+ * @param {V1Company} entreprise
+ * @returns {MappedCompany}
+ */
 export function mapCompanyFromV1(entreprise) {
 	const regionCode = entreprise.région ?? null;
 	const departmentCode = entreprise.département ?? null;
@@ -69,12 +189,18 @@ export function mapCompanyFromV1(entreprise) {
 			entreprise.code_naf && entreprise.code_naf !== NON_DIFFUSIBLE_NAF
 				? entreprise.code_naf
 				: null,
-		region: regionCode ? (REGIONS[regionCode] ?? null) : null,
+		region: regionCode ? (REGION_LABELS[regionCode] ?? null) : null,
 		departmentCode,
-		departmentLabel: departmentCode ? (COUNTIES[departmentCode] ?? null) : null,
+		departmentLabel: departmentCode
+			? (DEPARTMENT_LABELS[departmentCode] ?? null)
+			: null,
 	};
 }
 
+/**
+ * @param {V1Row} row
+ * @returns {MappedDeclaration}
+ */
 export function mapDeclarationFromV1(row) {
 	const indicator = row.data.indicateurs.représentation_équilibrée;
 	const publication = row.data.déclaration.publication;
@@ -116,6 +242,10 @@ export function mapDeclarationFromV1(row) {
 	};
 }
 
+/**
+ * @param {Sql} tx
+ * @param {MappedCompany} company
+ */
 async function ensureCompany(tx, company) {
 	await tx`
 		INSERT INTO app_company (
@@ -128,6 +258,10 @@ async function ensureCompany(tx, company) {
 	`;
 }
 
+/**
+ * @param {Sql} tx
+ * @param {MappedDeclaration} declaration
+ */
 async function insertDeclaration(tx, declaration) {
 	await tx`
 		INSERT INTO app_representation_declaration (
@@ -152,6 +286,10 @@ async function insertDeclaration(tx, declaration) {
 	`;
 }
 
+/**
+ * @param {Sql} tx
+ * @param {MappedDeclaration} declaration
+ */
 async function updateDeclaration(tx, declaration) {
 	await tx`
 		UPDATE app_representation_declaration
@@ -173,6 +311,13 @@ async function updateDeclaration(tx, declaration) {
 	`;
 }
 
+/**
+ * @param {Object} args
+ * @param {Sql} args.sql
+ * @param {V1Row} args.row
+ * @param {boolean} args.dryRun
+ * @param {ImportCounters} args.counters
+ */
 async function importRow({ sql, row, dryRun, counters }) {
 	const company = mapCompanyFromV1(row.data.entreprise);
 	const declaration = mapDeclarationFromV1(row);
@@ -203,9 +348,7 @@ async function importRow({ sql, row, dryRun, counters }) {
 	}
 
 	await sql.begin(async (txRaw) => {
-		const tx = /** @type {import("postgres").Sql} */ (
-			/** @type {unknown} */ (txRaw)
-		);
+		const tx = /** @type {Sql} */ (/** @type {unknown} */ (txRaw));
 		await ensureCompany(tx, company);
 		if (existing) {
 			await updateDeclaration(tx, declaration);
@@ -221,6 +364,15 @@ async function importRow({ sql, row, dryRun, counters }) {
 	}
 }
 
+/**
+ * @param {Object} args
+ * @param {Sql} args.legacySql
+ * @param {Sql} args.sql
+ * @param {Date} args.from
+ * @param {Date} args.to
+ * @param {boolean} [args.dryRun]
+ * @returns {Promise<ImportCounters>}
+ */
 export async function runImportV1Representation({
 	legacySql,
 	sql,
@@ -234,6 +386,7 @@ export async function runImportV1Representation({
 		WHERE declared_at >= ${from} AND declared_at < ${to}
 	`;
 
+	/** @type {ImportCounters} */
 	const counters = {
 		total: legacyRows.length,
 		imported: 0,
@@ -245,7 +398,12 @@ export async function runImportV1Representation({
 
 	for (const row of legacyRows) {
 		try {
-			await importRow({ sql, row, dryRun, counters });
+			await importRow({
+				sql,
+				row: /** @type {V1Row} */ (/** @type {unknown} */ (row)),
+				dryRun,
+				counters,
+			});
 		} catch (error) {
 			counters.errors.push({
 				siren: row.siren,
@@ -258,6 +416,11 @@ export async function runImportV1Representation({
 	return counters;
 }
 
+/**
+ * @param {ImportCounters} counters
+ * @param {boolean} dryRun
+ * @returns {string}
+ */
 export function formatReport(counters, dryRun) {
 	const lines = [
 		`${dryRun ? "[dry-run] " : ""}import-v1-representation report`,
@@ -313,7 +476,9 @@ const isMain = (() => {
 
 if (isMain) {
 	let exitCode = 0;
+	/** @type {Sql | undefined} */
 	let sql;
+	/** @type {Sql | undefined} */
 	let legacySql;
 	try {
 		const { from, to, dryRun } = parseCliArgs(process.argv.slice(2));
