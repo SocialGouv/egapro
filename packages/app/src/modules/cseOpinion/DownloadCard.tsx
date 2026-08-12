@@ -16,7 +16,10 @@ export function DownloadCard({ dataYear, href, title, year }: Props) {
 
 	return (
 		<>
-			<div className="fr-card fr-card--download fr-enlarge-link">
+			{/* SM, per the Figma node "Carte / Thème clair / Desktop / SM / Sans
+			    média": 24px padding, 20/28 title, 8px under it. The default size
+			    gives 32px, 22px and 12px. */}
+			<div className="fr-card fr-card--sm fr-card--download fr-enlarge-link">
 				<div className="fr-card__body">
 					<div className="fr-card__content">
 						<h3 className="fr-card__title">
