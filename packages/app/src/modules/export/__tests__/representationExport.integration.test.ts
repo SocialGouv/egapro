@@ -3,8 +3,7 @@ import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { env } from "~/env.js";
 
-// The draft exclusion and the company join are enforced in SQL; a unit test
-// mocks the driver and cannot prove a draft never reaches the export file.
+// Draft exclusion and company join are SQL-enforced: a mocked driver cannot prove them.
 describe("GET /api/public/representations/export — integration (#4155)", () => {
 	let sql!: ReturnType<typeof postgres>;
 
