@@ -235,6 +235,7 @@ export {
 	getRepresentationCampaignYear,
 	getRepresentationTarget,
 	isPresumedSubjectToRepresentation,
+	isRepresentationPublicationRequired,
 	REPRESENTATION_SUBJECTION_WINDOW_YEARS,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 	REPRESENTATION_TARGET_INITIAL,
