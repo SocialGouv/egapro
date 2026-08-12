@@ -2,9 +2,11 @@
 
 import { useId, useState } from "react";
 
+import type { RepresentationComplianceVerdict } from "~/modules/domain";
 import {
 	computeRepresentationVerdict,
 	getRepresentationCampaignYear,
+	parseNumber,
 	REPRESENTATION_TARGET_INITIAL,
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
@@ -20,8 +22,14 @@ function toPercentString(value: number | undefined): string {
 
 function parsePercent(raw: string): number | undefined {
 	if (raw === "") return undefined;
-	const parsed = Number(raw.replace(",", "."));
+	const parsed = parseNumber(raw);
 	return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function isDecidedVerdict(
+	verdict: RepresentationComplianceVerdict | undefined,
+): verdict is "compliant" | "non_compliant" {
+	return verdict === "compliant" || verdict === "non_compliant";
 }
 
 export function Step3Members() {
@@ -32,9 +40,7 @@ export function Step3Members() {
 	const hasManagementBody = draft.hasManagementBody;
 	const campaignYear = getRepresentationCampaignYear(year);
 
-	// Kept as raw strings (not re-derived from the draft on every render): the
-	// draft only stores parsed numbers, which would silently drop an in-progress
-	// decimal separator (e.g. typing "33," would redisplay as "33").
+	// Raw strings, not re-derived from the draft on render (would drop an in-progress decimal separator).
 	const [percentageValues, setPercentageValues] =
 		useState<PercentagePairValues>(() => ({
 			womenPercent: toPercentString(draft.memberWomenPercent),
@@ -126,13 +132,13 @@ export function Step3Members() {
 						readOnly={isReadOnly}
 						values={percentageValues}
 					/>
-					{verdict === "compliant" || verdict === "non_compliant" ? (
-						<div className="fr-mt-2w">
-							<ComplianceBadge verdict={verdict} />
-						</div>
-					) : null}
 				</div>
 			) : null}
+			<div aria-atomic="true" aria-live="polite" className="fr-mt-2w">
+				{isDecidedVerdict(verdict) ? (
+					<ComplianceBadge verdict={verdict} />
+				) : null}
+			</div>
 
 			<section className="fr-accordion fr-mt-4w">
 				<h3 className="fr-accordion__title">
