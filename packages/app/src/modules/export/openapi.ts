@@ -1,6 +1,10 @@
 // OpenAPI 3.1 specification for the declarations export API.
 
 import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
+import {
+	representationNotComputableExecutivesEnum,
+	representationNotComputableMembersEnum,
+} from "~/server/db/schema";
 
 const declarantSchema = {
 	type: "object",
@@ -494,6 +498,100 @@ const declarationSchema = {
 	},
 } as const;
 
+const representationSchema = {
+	type: "object",
+	description:
+		"Déclaration de représentation équilibrée F/H (art. D. 1142-19) — écarts parmi les cadres dirigeants et les membres des instances dirigeantes.",
+	properties: {
+		id: {
+			type: "string",
+			format: "uuid",
+			description: "Identifiant interne de la déclaration (UUID)",
+			example: "11111111-2222-4333-8444-555555555555",
+		},
+		SIREN: {
+			type: "string",
+			description: "SIREN de l'entreprise (9 chiffres)",
+			example: "319159877",
+		},
+		Raison_sociale: {
+			type: ["string", "null"],
+			example: "THALES LAS FRANCE SAS",
+		},
+		Adresse: {
+			type: ["string", "null"],
+			example: "2 AVENUE GAY-LUSSAC, 78990 ELANCOURT",
+		},
+		Code_NAF: {
+			type: ["string", "null"],
+			description: "Code NAF/APE",
+			example: "26.51A",
+		},
+		Région: { type: ["string", "null"], example: "Île-de-France" },
+		Département: { type: ["string", "null"], example: "Yvelines" },
+		Année_référence: {
+			type: "integer",
+			description:
+				"Année de référence des écarts déclarés (N−1 de l'année de campagne).",
+			example: 2026,
+		},
+		Période_référence_début: { type: ["string", "null"], format: "date" },
+		Période_référence_fin: { type: ["string", "null"], format: "date" },
+		Pourcentage_femmes_cadres: {
+			type: ["number", "null"],
+			description:
+				"Part de femmes parmi les cadres dirigeants, entre 0 et 100.",
+		},
+		Pourcentage_hommes_cadres: {
+			type: ["number", "null"],
+			description: "Part d'hommes parmi les cadres dirigeants, entre 0 et 100.",
+		},
+		Motif_non_calculabilité_cadres: {
+			description:
+				"Motif de non-calculabilité de l'écart cadres dirigeants. `null` si calculable.",
+			oneOf: [
+				{
+					type: "string",
+					enum: [...representationNotComputableExecutivesEnum.enumValues],
+				},
+				{ type: "null" },
+			],
+		},
+		Pourcentage_femmes_membres: {
+			type: ["number", "null"],
+			description:
+				"Part de femmes parmi les membres des instances dirigeantes, entre 0 et 100.",
+		},
+		Pourcentage_hommes_membres: {
+			type: ["number", "null"],
+			description:
+				"Part d'hommes parmi les membres des instances dirigeantes, entre 0 et 100.",
+		},
+		Motif_non_calculabilité_membres: {
+			description:
+				"Motif de non-calculabilité de l'écart instances dirigeantes. `null` si calculable.",
+			oneOf: [
+				{
+					type: "string",
+					enum: [...representationNotComputableMembersEnum.enumValues],
+				},
+				{ type: "null" },
+			],
+		},
+		Date_publication: { type: ["string", "null"], format: "date" },
+		URL_publication: { type: ["string", "null"] },
+		Modalités_communication: {
+			type: ["string", "null"],
+			description: "Modalités de communication des résultats aux salariés.",
+		},
+		Date_déclaration: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date de soumission de la déclaration.",
+		},
+	},
+} as const;
+
 const fileMetadataSchema = {
 	type: "object",
 	properties: {
@@ -681,6 +779,85 @@ export const openApiSpec = {
 								},
 							},
 						},
+					},
+				},
+			},
+		},
+		"/api/v1/export/representations": {
+			get: {
+				operationId: "getRepresentations",
+				summary: "Lister les déclarations de représentation équilibrée",
+				description:
+					"Retourne les déclarations de représentation équilibrée F/H (art. D. 1142-19) soumises dont la date de soumission (`Date_déclaration`) est comprise dans l'intervalle [`date_begin`, `date_end`[. Identité et localisation complètes, y compris pour les entreprises non diffusibles (SUIT est un destinataire de contrôle authentifié).",
+				parameters: [
+					{
+						name: "date_begin",
+						in: "query",
+						required: true,
+						description: "Date de début (inclusive). Format YYYY-MM-DD.",
+						example: "2026-03-01",
+						schema: { type: "string", format: "date" },
+					},
+					{
+						name: "date_end",
+						in: "query",
+						required: false,
+						description:
+							"Date de fin (exclusive). Format YYYY-MM-DD. Si omis, retourne uniquement le jour de `date_begin` (équivalent à `date_begin + 1 jour`).",
+						example: "2026-03-24",
+						schema: { type: "string", format: "date" },
+					},
+				],
+				responses: {
+					"200": {
+						description:
+							"Liste des déclarations de représentation équilibrée correspondant à la plage de dates",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										Date_debut: {
+											type: "string",
+											format: "date",
+											example: "2026-03-01",
+										},
+										Date_fin: {
+											type: "string",
+											format: "date",
+											example: "2026-03-24",
+										},
+										Nombre: {
+											type: "integer",
+											description: "Nombre de déclarations retournées",
+											example: 5,
+										},
+										Representations: {
+											type: "array",
+											items: representationSchema,
+										},
+									},
+								},
+							},
+						},
+					},
+					"401": {
+						description:
+							"Clé API manquante ou invalide (renvoyé par la passerelle)",
+						content: { "application/json": { schema: errorSchema } },
+					},
+					"429": {
+						description:
+							"Quota dépassé (rate limit appliqué par la passerelle)",
+						content: { "application/json": { schema: errorSchema } },
+					},
+					"400": {
+						description: "Paramètres invalides",
+						content: { "application/json": { schema: errorSchema } },
+					},
+					"500": {
+						description: "Erreur serveur",
+						content: { "application/json": { schema: errorSchema } },
 					},
 				},
 			},
