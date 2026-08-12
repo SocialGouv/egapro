@@ -5,6 +5,7 @@ import {
 	REPRESENTATION_STEP_SLUGS,
 	TOTAL_REPRESENTATION_STEPS,
 } from "../types";
+import { Step3Members } from "./Step3Members";
 import { StepPlaceholder } from "./StepPlaceholder";
 
 export type StepDefinition = {
@@ -24,11 +25,19 @@ const STEP_TITLES: Record<RepresentationStepSlug, string> = {
 	recapitulatif: "Récapitulatif",
 };
 
+const STEP_COMPONENTS: Record<RepresentationStepSlug, ComponentType> = {
+	"periode-de-reference": StepPlaceholder,
+	"ecarts-cadres-dirigeants": StepPlaceholder,
+	"ecarts-instances-dirigeantes": Step3Members,
+	"informations-de-publication": StepPlaceholder,
+	recapitulatif: StepPlaceholder,
+};
+
 export const REPRESENTATION_STEPS: StepDefinition[] =
 	REPRESENTATION_STEP_SLUGS.map((slug) => ({
 		slug,
 		title: STEP_TITLES[slug],
-		Component: StepPlaceholder,
+		Component: STEP_COMPONENTS[slug],
 	}));
 
 export function isValidStep(step: number): boolean {
