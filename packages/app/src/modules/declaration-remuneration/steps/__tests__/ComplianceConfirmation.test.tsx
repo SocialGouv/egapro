@@ -52,6 +52,16 @@ async function renderConfirmation(company: CompanyShape) {
 }
 
 describe("ComplianceConfirmation", () => {
+	it("marks the completion pictogram as a success rather than an error", async () => {
+		await renderConfirmation(ANY_COMPANY);
+
+		// Without the modifier, the DSFR artwork paints its check in Marianne red
+		// — the twin end-of-journey screen already carried the green one (#3460).
+		expect(
+			document.querySelector(".fr-artwork--green-emeraude"),
+		).toBeInTheDocument();
+	});
+
 	it("renders the confirmation title", async () => {
 		await renderConfirmation(ANY_COMPANY);
 

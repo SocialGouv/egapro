@@ -33,6 +33,7 @@ export async function ComplianceConfirmation() {
 
 			<div className="fr-mt-2w fr-mb-2w">
 				<DsfrPictogram
+					className="fr-artwork--green-emeraude"
 					path="/dsfr/artwork/pictograms/system/success.svg"
 					size={64}
 				/>
