@@ -5,6 +5,11 @@ import {
 	stepHref,
 	TOTAL_REPRESENTATION_STEPS,
 } from "~/modules/declaration-representation";
+import {
+	REPRESENTATION_FUNNEL_ROOT as FUNNEL_ROOT_FROM_SUBMODULE,
+	stepHref as stepHrefFromSubmodule,
+} from "~/modules/declaration-representation/steps";
+import { TOTAL_REPRESENTATION_STEPS as TOTAL_STEPS_FROM_SUBMODULE } from "~/modules/declaration-representation/types";
 import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
 import {
 	computeCtaHref,
@@ -192,5 +197,14 @@ describe("computeRepresentationCtaHref", () => {
 				RECAP_HREF,
 			);
 		}
+	});
+
+	// The source imports the steps/types submodules, not the barrel, to keep the
+	// declaration-remuneration tree out of this client bundle; the hrefs asserted
+	// above come from the barrel, so both must stay the same values.
+	it("reads the same funnel constants through the barrel and the submodules", () => {
+		expect(REPRESENTATION_FUNNEL_ROOT).toBe(FUNNEL_ROOT_FROM_SUBMODULE);
+		expect(TOTAL_REPRESENTATION_STEPS).toBe(TOTAL_STEPS_FROM_SUBMODULE);
+		expect(stepHref).toBe(stepHrefFromSubmodule);
 	});
 });

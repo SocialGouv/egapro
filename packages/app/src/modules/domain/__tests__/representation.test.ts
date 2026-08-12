@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	computeRepresentationDeclarationStatus,
 	computeRepresentationVerdict,
 	deriveExecutivesNotComputableReason,
 	getRepresentationCampaignYear,
@@ -306,6 +307,62 @@ describe("isRepresentationPublicationRequired", () => {
 	});
 });
 
+describe("computeRepresentationDeclarationStatus", () => {
+	it("returns done for a submitted declaration, whatever its current step", () => {
+		expect(
+			computeRepresentationDeclarationStatus({
+				status: "submitted",
+				currentStep: 5,
+			}),
+		).toBe("done");
+		expect(
+			computeRepresentationDeclarationStatus({
+				status: "submitted",
+				currentStep: 0,
+			}),
+		).toBe("done");
+		expect(
+			computeRepresentationDeclarationStatus({
+				status: "submitted",
+				currentStep: null,
+			}),
+		).toBe("done");
+	});
+
+	it("returns to_complete for a draft still on step 0", () => {
+		expect(
+			computeRepresentationDeclarationStatus({
+				status: "draft",
+				currentStep: 0,
+			}),
+		).toBe("to_complete");
+	});
+
+	it("returns to_complete for a draft row carrying no current step", () => {
+		expect(
+			computeRepresentationDeclarationStatus({
+				status: "draft",
+				currentStep: null,
+			}),
+		).toBe("to_complete");
+	});
+
+	it("returns in_progress for a draft past step 0", () => {
+		expect(
+			computeRepresentationDeclarationStatus({
+				status: "draft",
+				currentStep: 1,
+			}),
+		).toBe("in_progress");
+		expect(
+			computeRepresentationDeclarationStatus({
+				status: "draft",
+				currentStep: 4,
+			}),
+		).toBe("in_progress");
+	});
+});
+
 describe("verdict independence (S16)", () => {
 	// An aggregated verdict would let a compliant indicator mask a failing one.
 	it("exposes no aggregated verdict helper", async () => {
@@ -316,6 +373,7 @@ describe("verdict independence (S16)", () => {
 			"REPRESENTATION_TARGET_INITIAL",
 			"REPRESENTATION_TARGET_RAISED",
 			"REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR",
+			"computeRepresentationDeclarationStatus",
 			"computeRepresentationVerdict",
 			"deriveExecutivesNotComputableReason",
 			"getRepresentationCampaignYear",

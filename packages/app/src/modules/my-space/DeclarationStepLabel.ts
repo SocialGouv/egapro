@@ -1,4 +1,5 @@
-import { REPRESENTATION_STEPS } from "~/modules/declaration-representation";
+// Submodule import, not the barrel — the barrel drags declaration-remuneration's (server-touching) tree into this client bundle.
+import { REPRESENTATION_STEPS } from "~/modules/declaration-representation/steps";
 import type {
 	DeclarationFsmStatus,
 	DeclarationStatus,

@@ -1,8 +1,9 @@
+// Submodule imports, not the barrel — the barrel drags declaration-remuneration's (server-touching) tree into this client bundle.
 import {
 	REPRESENTATION_FUNNEL_ROOT,
 	stepHref,
-	TOTAL_REPRESENTATION_STEPS,
-} from "~/modules/declaration-representation";
+} from "~/modules/declaration-representation/steps";
+import { TOTAL_REPRESENTATION_STEPS } from "~/modules/declaration-representation/types";
 import { isCseOpinionResolved } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import type { DeclarationItem } from "./types";

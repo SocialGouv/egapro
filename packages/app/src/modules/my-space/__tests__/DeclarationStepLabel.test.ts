@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { REPRESENTATION_STEPS } from "~/modules/declaration-representation";
+import { REPRESENTATION_STEPS as STEPS_FROM_SUBMODULE } from "~/modules/declaration-representation/steps";
 import type { DeclarationFsmStatus, DeclarationStatus } from "~/modules/domain";
 
 import { getDeclarationProcessStepLabel } from "../DeclarationStepLabel";
@@ -110,6 +111,13 @@ describe("getDeclarationProcessStepLabel", () => {
 			expect(getDeclarationProcessStepLabel(representation("done", 5))).toBe(
 				"Finalisation - Démarche des indicateurs de représentation",
 			);
+		});
+
+		// The source imports the steps submodule, not the barrel, to keep the
+		// declaration-remuneration tree out of this client bundle; the labels
+		// asserted above come from the barrel, so both must stay the same object.
+		it("reads the same steps through the barrel and the steps submodule", () => {
+			expect(REPRESENTATION_STEPS).toBe(STEPS_FROM_SUBMODULE);
 		});
 	});
 });

@@ -3,6 +3,7 @@ import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
 import {
 	computeDeclarationStatus,
+	computeRepresentationDeclarationStatus,
 	getCurrentYear,
 	getObligationWorkforce,
 	getReferenceYearFor,
@@ -314,12 +315,10 @@ export const companyRouter = createTRPCRouter({
 				mappedDeclarations.push({
 					type: "representation" as const,
 					year,
-					status:
-						representationRow.status === "submitted"
-							? "done"
-							: representationCurrentStep === 0
-								? "to_complete"
-								: "in_progress",
+					status: computeRepresentationDeclarationStatus({
+						status: representationRow.status,
+						currentStep: representationRow.currentStep,
+					}),
 					fsmStatus: null,
 					currentStep: representationCurrentStep,
 					updatedAt: representationRow.updatedAt,
