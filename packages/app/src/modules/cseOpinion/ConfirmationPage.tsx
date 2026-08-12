@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { DsfrPictogram } from "~/modules/layout";
 import { ResendReceiptButton } from "~/modules/mail";
-import { DownloadCard } from "~/modules/shared";
+import { DownloadCard } from "~/modules/shared/DownloadCard";
 import { FeedbackBanner } from "~/modules/shared/FeedbackBanner";
 import styles from "./ConfirmationPage.module.scss";
 import formStyles from "./shared/formActions.module.scss";

@@ -6,7 +6,7 @@ import {
 	isCseRequired,
 } from "~/modules/domain";
 import { DsfrPictogram } from "~/modules/layout";
-import { DownloadCard } from "~/modules/shared";
+import { DownloadCard } from "~/modules/shared/DownloadCard";
 import { FeedbackBanner } from "~/modules/shared/FeedbackBanner";
 import { api } from "~/trpc/server";
 import common from "../shared/common.module.scss";
