@@ -853,48 +853,11 @@ export const openApiSpec = {
 					},
 					"400": {
 						description: "Paramètres invalides",
-						content: {
-							"application/json": {
-								schema: {
-									type: "object",
-									properties: {
-										error: {
-											type: "string",
-											example:
-												"Paramètres invalides. 'date_begin' est requis, format YYYY-MM-DD.",
-										},
-										details: {
-											type: "array",
-											description: "Zod validation issues",
-											items: {
-												type: "object",
-												properties: {
-													path: { type: "array", items: { type: "string" } },
-													message: { type: "string" },
-												},
-											},
-										},
-									},
-								},
-							},
-						},
+						content: { "application/json": { schema: errorSchema } },
 					},
 					"500": {
 						description: "Erreur serveur",
-						content: {
-							"application/json": {
-								schema: {
-									type: "object",
-									properties: {
-										error: {
-											type: "string",
-											example:
-												"Erreur lors de la récupération des données de représentation équilibrée",
-										},
-									},
-								},
-							},
-						},
+						content: { "application/json": { schema: errorSchema } },
 					},
 				},
 			},

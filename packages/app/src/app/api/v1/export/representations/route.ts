@@ -1,8 +1,8 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	assembleRepresentation,
-	exportDeclarationsQuerySchema,
 	fetchSubmittedRepresentations,
+	parseExportDateWindow,
 } from "~/modules/export";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { assertGatewaySource } from "~/server/services/gatewaySource";
@@ -50,27 +50,11 @@ async function apiExportRepresentationsHandler(
 	const gatewayError = assertGatewaySource(request);
 	if (gatewayError) return gatewayError;
 
+	const dateWindow = parseExportDateWindow(request);
+	if (dateWindow instanceof Response) return dateWindow;
+
 	try {
-		const url = new URL(request.url);
-		const parsed = exportDeclarationsQuerySchema.safeParse({
-			date_begin: url.searchParams.get("date_begin") ?? undefined,
-			date_end: url.searchParams.get("date_end") ?? undefined,
-		});
-
-		if (!parsed.success) {
-			return Response.json(
-				{
-					error:
-						"Paramètres invalides. 'date_begin' est requis, format YYYY-MM-DD.",
-					details: parsed.error.issues,
-				},
-				{ status: 400 },
-			);
-		}
-
-		const { date_begin } = parsed.data;
-		const dateEnd = parsed.data.date_end ?? getNextDate(date_begin);
-
+		const { date_begin, dateEnd } = dateWindow;
 		const rows = await fetchSubmittedRepresentations(date_begin, dateEnd);
 		const data = rows.map(assembleRepresentation);
 
@@ -96,10 +80,4 @@ async function apiExportRepresentationsHandler(
 			{ status: 500 },
 		);
 	}
-}
-
-function getNextDate(date: string): string {
-	const d = new Date(`${date}T00:00:00Z`);
-	d.setUTCDate(d.getUTCDate() + 1);
-	return d.toISOString().slice(0, 10);
 }

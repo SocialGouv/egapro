@@ -17,6 +17,7 @@ export type { RepresentationRow } from "./fetchRepresentations";
 export {
 	assembleRepresentation,
 	fetchSubmittedRepresentations,
+	parseExportDateWindow,
 } from "./fetchRepresentations";
 export type { RepresentationExportRow } from "./generateRepresentationExport";
 export {
