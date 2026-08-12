@@ -23,6 +23,7 @@ export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
 
 	const answer = form.watch("answer");
 	const hasSubjectionError = Boolean(form.formState.errors.answer);
+	const canGoBack = answer === null && !hasSubjectionError;
 
 	const onSubmit = form.handleSubmit((data) => {
 		if (data.answer === "concerned") {
@@ -141,7 +142,7 @@ export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
 				) : null}
 
 				<div className="fr-btns-group fr-btns-group--inline fr-btns-group--right fr-mt-4w">
-					{answer === null && !hasSubjectionError ? (
+					{canGoBack ? (
 						<Link className="fr-btn fr-btn--tertiary" href="/mon-espace">
 							Retour
 						</Link>
