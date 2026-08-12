@@ -93,7 +93,7 @@ export function isCompanyDiffusible(statutDiffusion: string | null): boolean {
 	return statutDiffusion !== "N";
 }
 
-function toNumber(value: string | null): number | null {
+export function toNumber(value: string | null): number | null {
 	if (value === null) return null;
 	const parsed = Number(value);
 	return Number.isNaN(parsed) ? null : parsed;
