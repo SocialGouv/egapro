@@ -270,7 +270,8 @@ export const declarationsPaths = {
 					name: "region",
 					in: "query",
 					required: false,
-					description: "Filtre par code de région (ex. `11` pour Île-de-France).",
+					description:
+						"Filtre par code de région (ex. `11` pour Île-de-France).",
 					example: "11",
 					schema: { type: "string" },
 				},
@@ -303,7 +304,8 @@ export const declarationsPaths = {
 					name: "limit",
 					in: "query",
 					required: false,
-					description: "Nombre de résultats par page. Entre 1 et 100. Défaut : 10.",
+					description:
+						"Nombre de résultats par page. Entre 1 et 100. Défaut : 10.",
 					example: 10,
 					schema: { type: "integer", minimum: 1, maximum: 100, default: 10 },
 				},

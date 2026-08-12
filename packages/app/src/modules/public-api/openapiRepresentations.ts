@@ -164,7 +164,8 @@ export const representationsPaths = {
 					name: "region",
 					in: "query",
 					required: false,
-					description: "Filtre par code de région (ex. `11` pour Île-de-France).",
+					description:
+						"Filtre par code de région (ex. `11` pour Île-de-France).",
 					example: "11",
 					schema: { type: "string" },
 				},
@@ -196,7 +197,8 @@ export const representationsPaths = {
 					name: "limit",
 					in: "query",
 					required: false,
-					description: "Nombre de résultats par page. Entre 1 et 100. Défaut : 10.",
+					description:
+						"Nombre de résultats par page. Entre 1 et 100. Défaut : 10.",
 					example: 10,
 					schema: { type: "integer", minimum: 1, maximum: 100, default: 10 },
 				},
@@ -211,7 +213,8 @@ export const representationsPaths = {
 			],
 			responses: {
 				"200": {
-					description: "Liste paginée de déclarations de représentation équilibrée.",
+					description:
+						"Liste paginée de déclarations de représentation équilibrée.",
 					headers: {
 						"Access-Control-Allow-Origin": {
 							schema: { type: "string" },
@@ -249,7 +252,8 @@ export const representationsPaths = {
 	"/api/public/representations/{siren}": {
 		get: {
 			operationId: "getPublicRepresentationsBySiren",
-			summary: "Lister les déclarations de représentation équilibrée d'une entreprise",
+			summary:
+				"Lister les déclarations de représentation équilibrée d'une entreprise",
 			description:
 				"Retourne toutes les déclarations de représentation équilibrée soumises pour le SIREN donné, triées par année décroissante. Les brouillons ne sont jamais retournés.",
 			parameters: [

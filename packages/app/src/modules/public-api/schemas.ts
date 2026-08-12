@@ -64,7 +64,8 @@ export const publicSearchResultDTOSchema = z.object({
 
 export type PublicSearchResultDTO = z.infer<typeof publicSearchResultDTOSchema>;
 
-export const publicRepresentationSearchInputSchema = publicSearchQueryParamsSchema;
+export const publicRepresentationSearchInputSchema =
+	publicSearchQueryParamsSchema;
 
 export type PublicRepresentationSearchInput = z.infer<
 	typeof publicRepresentationSearchInputSchema
