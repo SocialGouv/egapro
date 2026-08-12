@@ -51,3 +51,9 @@ export type CampaignDeadlines = {
 	pathChoiceDeadline: Date;
 	pathChoiceRound1Deadline: Date;
 };
+
+export type RepresentationCampaign = {
+	campaignStartDate: Date;
+	campaignEndDate: Date;
+	declarationDeadline: Date;
+};

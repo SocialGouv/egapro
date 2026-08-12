@@ -4,6 +4,7 @@ import {
 	getCurrentYear,
 	getDeclarationDeadline,
 	getDefaultCampaignDeadlines,
+	getDefaultRepresentationCampaign,
 	getPathChoiceDeadline,
 	getPathChoiceRound1Deadline,
 	getReferencePeriod,
@@ -12,6 +13,7 @@ import {
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
 	isDeadlinePassed,
+	isRepresentationCampaignOpen,
 	selectPathChoiceDeadline,
 	shouldRedirectSubmittedToRecap,
 } from "../shared/campaign";
@@ -182,6 +184,75 @@ describe("getDefaultCampaignDeadlines", () => {
 		const deadlines = getDefaultCampaignDeadlines(2027);
 		expect(deadlines.gipPublicationDate).toBeNull();
 		expect(deadlines.campaignStartDate).toBeNull();
+	});
+});
+
+describe("getDefaultRepresentationCampaign", () => {
+	it("opens on January 1st and closes on December 31st of the campaign year", () => {
+		const campaign = getDefaultRepresentationCampaign(2027);
+		expect(campaign.campaignStartDate).toEqual(new Date(2027, 0, 1));
+		expect(campaign.campaignEndDate).toEqual(new Date(2027, 11, 31));
+	});
+
+	it("sets the declaration deadline on March 1st of the campaign year", () => {
+		expect(getDefaultRepresentationCampaign(2027).declarationDeadline).toEqual(
+			new Date(2027, 2, 1),
+		);
+	});
+
+	it("follows the requested campaign year", () => {
+		const campaign = getDefaultRepresentationCampaign(2030);
+		expect(campaign.campaignStartDate).toEqual(new Date(2030, 0, 1));
+		expect(campaign.campaignEndDate).toEqual(new Date(2030, 11, 31));
+		expect(campaign.declarationDeadline).toEqual(new Date(2030, 2, 1));
+	});
+});
+
+describe("isRepresentationCampaignOpen", () => {
+	const campaign = getDefaultRepresentationCampaign(2027);
+
+	it("returns false the day before the campaign starts", () => {
+		expect(isRepresentationCampaignOpen(campaign, new Date(2026, 11, 31))).toBe(
+			false,
+		);
+	});
+
+	it("returns true on the first day of the campaign", () => {
+		expect(isRepresentationCampaignOpen(campaign, new Date(2027, 0, 1))).toBe(
+			true,
+		);
+	});
+
+	it("returns true in the middle of the campaign", () => {
+		expect(isRepresentationCampaignOpen(campaign, new Date(2027, 5, 15))).toBe(
+			true,
+		);
+	});
+
+	it("returns true on the campaign end boundary", () => {
+		expect(isRepresentationCampaignOpen(campaign, new Date(2027, 11, 31))).toBe(
+			true,
+		);
+	});
+
+	it("returns false the day after the campaign ends", () => {
+		expect(isRepresentationCampaignOpen(campaign, new Date(2028, 0, 1))).toBe(
+			false,
+		);
+	});
+
+	it("honours the campaign dates over the default ones", () => {
+		const overridden = {
+			campaignStartDate: new Date(2027, 2, 1),
+			campaignEndDate: new Date(2027, 5, 30),
+			declarationDeadline: new Date(2027, 2, 1),
+		};
+		expect(
+			isRepresentationCampaignOpen(overridden, new Date(2027, 0, 15)),
+		).toBe(false);
+		expect(
+			isRepresentationCampaignOpen(overridden, new Date(2027, 3, 15)),
+		).toBe(true);
 	});
 });
 
