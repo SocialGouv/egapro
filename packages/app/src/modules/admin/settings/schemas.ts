@@ -53,13 +53,13 @@ export type CampaignDeadlinesFormValues = z.output<
 	typeof campaignDeadlinesFormSchema
 >;
 
-export const getCampaignDeadlinesByYearSchema = z.object({
+const campaignYearParamSchema = z.object({
 	year: campaignYearSchema,
 });
 
-export const getRepresentationCampaignByYearSchema = z.object({
-	year: campaignYearSchema,
-});
+export const getCampaignDeadlinesByYearSchema = campaignYearParamSchema;
+
+export const getRepresentationCampaignByYearSchema = campaignYearParamSchema;
 
 export const representationCampaignFormSchema = z
 	.object({

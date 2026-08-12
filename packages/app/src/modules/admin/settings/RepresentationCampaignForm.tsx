@@ -142,6 +142,7 @@ export function RepresentationCampaignForm({ initialYear }: Props) {
 
 				{status === "success" && (
 					<div
+						aria-atomic="true"
 						aria-live="polite"
 						className="fr-alert fr-alert--success fr-alert--sm fr-mt-2w"
 					>
