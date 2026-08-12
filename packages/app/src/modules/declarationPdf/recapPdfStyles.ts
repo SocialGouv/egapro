@@ -180,7 +180,11 @@ export const styles = StyleSheet.create({
 		flexDirection: "row",
 	},
 	cell: {
-		paddingHorizontal: 8,
+		// Figma specifies 8, but the narrowest quartile column is 69.75pt wide:
+		// at 8 the padding eats 23% of it and "Pourcentage" (54.2pt) no longer
+		// fits on one line. 6 buys the 1.5pt it needs — and the same margin for
+		// the "Seuil réglementaire : 5%" hint, which overflowed by 0.29pt.
+		paddingHorizontal: 6,
 		paddingVertical: 4,
 		minHeight: 24,
 		borderRightWidth: 1,
