@@ -43,6 +43,7 @@
 		"test:lighthouse": "lhci collect --url=${LIGHTHOUSE_URL:-http://localhost:3000} && lhci upload && lhci assert",
 		"typecheck": "tsc --noEmit",
 		"generate:fetch-companies": "tsx scripts/fetch-companies.ts",
+		"import:v1-representation": "tsx scripts/import-v1-representation.mjs",
 		"generate:mock-gip": "tsx scripts/generate-mock-gip-data.ts",
 		"mock:refresh": "tsx scripts/fetch-companies.ts --per-bucket=40 && tsx scripts/generate-mock-gip-data.ts",
 		"suit:encode-cert": "node scripts/encode-suit-cert.mjs",
