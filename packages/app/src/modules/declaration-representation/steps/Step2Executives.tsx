@@ -10,14 +10,23 @@ import {
 	computeRepresentationVerdict,
 	getRepresentationCampaignYear,
 	getRepresentationTarget,
+	REPRESENTATION_TARGET_INITIAL,
+	REPRESENTATION_TARGET_RAISED,
+	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 } from "~/modules/domain";
 import { executivesSchema } from "../schemas";
 import { ComplianceBadge } from "../shared/ComplianceBadge";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
 import type { PercentagePairValues } from "../shared/PercentagePairFields";
 import { PercentagePairFields } from "../shared/PercentagePairFields";
+import styles from "./Step2Executives.module.scss";
 
 const EXECUTIVES_COUNT_GROUP_NAME = "executives-count";
+const LEGEND_ID = `${EXECUTIVES_COUNT_GROUP_NAME}-legend`;
+const MESSAGES_ID = `${EXECUTIVES_COUNT_GROUP_NAME}-messages`;
+const ACCORDION_ID = `${EXECUTIVES_COUNT_GROUP_NAME}-definitions`;
+const SELECTION_REQUIRED_MESSAGE =
+	"Veuillez sélectionner une option pour continuer.";
 
 const EXECUTIVES_COUNT_OPTIONS: {
 	value: ExecutivesCount;
@@ -150,6 +159,7 @@ export function Step2Executives() {
 		});
 	}
 
+	const hasSelection = draft.executivesCount !== undefined;
 	const campaignYear = getRepresentationCampaignYear(year);
 	const { sumError, verdict } = evaluateExecutivesGap(
 		draft.executiveWomenPercent,
@@ -159,10 +169,14 @@ export function Step2Executives() {
 	const knownVerdict: "compliant" | "non_compliant" | null =
 		verdict === "compliant" || verdict === "non_compliant" ? verdict : null;
 	const target = getRepresentationTarget(campaignYear);
-	const alertVariantClass =
-		knownVerdict === "compliant" ? "fr-alert--info" : "fr-alert--warning";
+	const reminderClassName =
+		knownVerdict === "compliant"
+			? styles.reminderCompliant
+			: styles.reminderNonCompliant;
 	const isStepValid =
-		draft.executivesCount !== "two_or_more" || knownVerdict !== null;
+		hasSelection &&
+		(draft.executivesCount !== "two_or_more" || knownVerdict !== null);
+	const showSelectionError = !hasSelection;
 
 	useEffect(() => {
 		setStepValid(isStepValid);
@@ -170,14 +184,19 @@ export function Step2Executives() {
 
 	return (
 		<div>
-			<fieldset className="fr-fieldset">
-				<legend className="fr-fieldset__legend--regular fr-fieldset__legend">
+			<fieldset
+				aria-labelledby={`${LEGEND_ID} ${MESSAGES_ID}`}
+				className={`fr-fieldset ${styles.radioGroup} ${showSelectionError ? "fr-fieldset--error" : ""}`}
+				role={showSelectionError ? "group" : undefined}
+			>
+				<legend
+					className={`fr-fieldset__legend--regular fr-fieldset__legend ${styles.legend}`}
+					id={LEGEND_ID}
+				>
 					Indiquez le nombre de cadres dirigeants dans votre entreprise pour
 					déterminer si l'écart de représentation est calculable.
-					<span className="fr-hint-text">
-						Tous les champs sont obligatoires.
-					</span>
 				</legend>
+				<p className="fr-mb-2w">Tous les champs sont obligatoires.</p>
 				{EXECUTIVES_COUNT_OPTIONS.map((option) => (
 					<ExecutiveCountOption
 						checked={draft.executivesCount === option.value}
@@ -190,6 +209,13 @@ export function Step2Executives() {
 						value={option.value}
 					/>
 				))}
+				<div aria-live="polite" className="fr-messages-group" id={MESSAGES_ID}>
+					{showSelectionError ? (
+						<p className="fr-message fr-message--error">
+							{SELECTION_REQUIRED_MESSAGE}
+						</p>
+					) : null}
+				</div>
 			</fieldset>
 
 			{draft.executivesCount === "two_or_more" ? (
@@ -203,29 +229,52 @@ export function Step2Executives() {
 						legend="Indiquez le pourcentage de représentation des femmes et des hommes parmi les cadres dirigeants."
 						onChange={handlePercentChange}
 						readOnly={isReadOnly}
+						trailingContent={
+							knownVerdict ? (
+								<ComplianceBadge verdict={knownVerdict} />
+							) : undefined
+						}
 						values={percentInputs}
 					/>
-					<div aria-atomic="true" aria-live="polite">
-						{knownVerdict ? (
-							<>
-								<div className="fr-mt-2w">
-									<ComplianceBadge verdict={knownVerdict} />
-								</div>
-								<div
-									className={`fr-alert fr-alert--sm fr-mt-2w ${alertVariantClass}`}
-								>
-									<p>
-										<strong>{gapReminderTitle(knownVerdict, target)}</strong>{" "}
-										Depuis le 1er mars 2026, le sexe sous-représenté doit
-										représenter au moins 30 % des cadres dirigeants. À partir du
-										1er mars 2029, ce seuil passera à 40 %.
-									</p>
-								</div>
-							</>
-						) : null}
-					</div>
+					{knownVerdict ? (
+						<div aria-atomic="true" aria-live="polite" className="fr-mt-2w">
+							<div className={`fr-callout ${reminderClassName}`}>
+								<p className="fr-callout__text">
+									<strong>{gapReminderTitle(knownVerdict, target)}</strong>{" "}
+									Depuis le 1er mars 2026, le sexe sous-représenté doit
+									représenter au moins 30 % des cadres dirigeants. À partir du
+									1er mars 2029, ce seuil passera à 40 %.
+								</p>
+							</div>
+						</div>
+					) : null}
 				</div>
 			) : null}
+
+			<section className="fr-accordion fr-mt-4w">
+				<h3 className="fr-accordion__title">
+					<button
+						aria-controls={ACCORDION_ID}
+						aria-expanded="false"
+						className="fr-accordion__btn"
+						type="button"
+					>
+						Définition cadre dirigeant et seuil réglementaire
+					</button>
+				</h3>
+				<div className="fr-collapse" id={ACCORDION_ID}>
+					<p>
+						Sont concernés les cadres dirigeants tels que définis à l'article
+						L.3111-2 du Code du travail.
+					</p>
+					<p>
+						La loi impose un quota minimum de {REPRESENTATION_TARGET_INITIAL} %
+						de chaque sexe parmi les cadres dirigeants, porté à{" "}
+						{REPRESENTATION_TARGET_RAISED} % à compter de la campagne{" "}
+						{REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR}.
+					</p>
+				</div>
+			</section>
 		</div>
 	);
 }
