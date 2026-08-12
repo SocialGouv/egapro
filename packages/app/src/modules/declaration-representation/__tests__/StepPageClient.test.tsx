@@ -64,6 +64,14 @@ describe("StepPageClient — rendering", () => {
 		).toBeInTheDocument();
 		expect(screen.getByText("Étape 2 sur 5")).toBeInTheDocument();
 		expect(
+			screen.getByRole("radio", { name: /^Deux cadres dirigeants ou plus/ }),
+		).toBeInTheDocument();
+	});
+
+	it("falls back to the placeholder on a step that has no screen yet", () => {
+		renderStep({ step: 3, currentStep: 3 });
+
+		expect(
 			screen.getByText(
 				"Cette étape est en construction et sera disponible prochainement.",
 			),

@@ -10,6 +10,7 @@ import {
 	REPRESENTATION_STEPS,
 	stepHref,
 } from "../steps";
+import { Step2Executives } from "../steps/Step2Executives";
 import { Step3Members } from "../steps/Step3Members";
 import { StepPlaceholder } from "../steps/StepPlaceholder";
 import {
@@ -32,16 +33,18 @@ describe("REPRESENTATION_STEPS", () => {
 		]);
 	});
 
-	it("wires each slug to its own step component, the placeholder covering the steps still to land", () => {
+	it("maps each slug to its screen, the placeholder standing in for the pending steps", () => {
 		expect(
-			REPRESENTATION_STEPS.map((step) => [step.slug, step.Component]),
-		).toEqual([
-			["periode-de-reference", StepPlaceholder],
-			["ecarts-cadres-dirigeants", StepPlaceholder],
-			["ecarts-instances-dirigeantes", Step3Members],
-			["informations-de-publication", StepPlaceholder],
-			["recapitulatif", StepPlaceholder],
-		]);
+			Object.fromEntries(
+				REPRESENTATION_STEPS.map((step) => [step.slug, step.Component]),
+			),
+		).toEqual({
+			"ecarts-cadres-dirigeants": Step2Executives,
+			"ecarts-instances-dirigeantes": Step3Members,
+			"informations-de-publication": StepPlaceholder,
+			"periode-de-reference": StepPlaceholder,
+			recapitulatif: StepPlaceholder,
+		});
 	});
 });
 
