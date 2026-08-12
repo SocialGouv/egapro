@@ -75,6 +75,10 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 		AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES,
 	"adminSettings.updateLockTimeout":
 		AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT,
+	"adminSettings.getRepresentationCampaignByYear":
+		AUDIT_ACTIONS.ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN,
+	"adminSettings.upsertRepresentationCampaign":
+		AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN,
 
 	// ── admin stats sensitive reads ──────────────────────
 	"adminStats.getCampaignProgression":
