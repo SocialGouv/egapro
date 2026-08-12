@@ -54,10 +54,10 @@ const publicDeclarationSchema = {
 			example: "Fabrication d'instruments de navigation",
 		},
 		workforceEma: {
-			type: "string",
+			type: ["number", "null"],
 			description:
-				"Effectif moyen annuel (EMA) issu des données GIP-MDS, rendu tel qu'il est affiché à l'usager. Les entreprises du palier volontaire — effectif inférieur à 50, ou absentes des données GIP-MDS — sont regroupées sous la valeur `< 50` plutôt que par leur effectif exact.",
-			example: "7 403",
+				"Effectif moyen annuel (EMA) issu des données GIP-MDS. `null` si non disponible.",
+			example: 7403,
 		},
 		totalWomen: {
 			type: ["integer", "null"],

@@ -22,10 +22,7 @@ export const publicDeclarationDTOSchema = z.object({
 	departmentLabel: z.string().nullable(),
 	nafCode: z.string().nullable(),
 	nafLabel: z.string().nullable(),
-	// Bracketed under the voluntary threshold: a company of that tier is not
-	// identified by its exact headcount (issue 3914). Breaking change from the
-	// numeric field previously exposed.
-	workforceEma: z.string(),
+	workforceEma: z.number().nullable(),
 	totalWomen: z.number().int().nullable(),
 	totalMen: z.number().int().nullable(),
 	globalAnnualMeanGap: z.number().nullable(),

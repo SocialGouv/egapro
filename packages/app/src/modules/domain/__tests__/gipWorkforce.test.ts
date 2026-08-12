@@ -6,6 +6,7 @@ import {
 	GIP_WORKFORCE_ABSENT_DISPLAY,
 	getObligationWorkforce,
 	parseGipWorkforce,
+	toDisplayWorkforce,
 } from "../shared/gipWorkforce";
 import { formatCount } from "../shared/submissionRate";
 
@@ -89,5 +90,30 @@ describe("formatWorkforceDisplay", () => {
 
 	it("groups thousands the French way", () => {
 		expect(formatWorkforceDisplay(12345)).toBe(formatCount(12345));
+	});
+});
+
+describe("toDisplayWorkforce", () => {
+	it("floors the value so 99,97 never displays as 100", () => {
+		expect(toDisplayWorkforce(99.97)).toBe(99);
+		expect(toDisplayWorkforce(70.5)).toBe(70);
+		expect(toDisplayWorkforce(99.999)).toBe(99);
+	});
+
+	it("leaves an integer value unchanged", () => {
+		expect(toDisplayWorkforce(70)).toBe(70);
+		expect(toDisplayWorkforce(0)).toBe(0);
+	});
+
+	it("returns null when the company is absent from the GIP file", () => {
+		expect(toDisplayWorkforce(null)).toBeNull();
+	});
+
+	it("never brackets a voluntary-tier headcount, unlike the user-facing format", () => {
+		// Machine consumers (open-data API, SUIT export) and the back-office are
+		// typed on the number and need the exact figure — bracketing them would
+		// break their contract. Guards against merging the two helpers.
+		expect(toDisplayWorkforce(37)).toBe(37);
+		expect(formatWorkforceDisplay(37)).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
 	});
 });

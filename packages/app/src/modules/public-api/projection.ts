@@ -1,4 +1,3 @@
-import { formatWorkforceDisplay } from "~/modules/domain";
 import { type companies, declarations } from "~/server/db/schema";
 import type { PublicDeclarationDTO } from "./schemas";
 
@@ -119,7 +118,7 @@ export function toPublicDeclaration(
 		departmentLabel: diffusible ? company.departmentLabel : null,
 		nafCode: diffusible ? company.nafCode : null,
 		nafLabel: diffusible ? company.nafLabel : null,
-		workforceEma: formatWorkforceDisplay(toNumber(company.workforceEma)),
+		workforceEma: toNumber(company.workforceEma),
 		totalWomen: declaration.totalWomen,
 		totalMen: declaration.totalMen,
 		globalAnnualMeanGap: toNumber(declaration.globalAnnualMeanGap),

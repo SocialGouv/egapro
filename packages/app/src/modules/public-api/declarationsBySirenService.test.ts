@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 
 const mocks = vi.hoisted(() => ({
 	dbSelect: vi.fn(),
@@ -123,7 +122,7 @@ describe("getPublicDeclarationsBySiren", () => {
 			siren: "123456789",
 			year: 2024,
 			name: "Société Démo",
-			workforceEma: "250",
+			workforceEma: 250,
 			globalAnnualMeanGap: 0.1234,
 		});
 	});
@@ -197,7 +196,7 @@ describe("getPublicDeclarationsBySiren", () => {
 			region: null,
 			departmentCode: null,
 			nafCode: null,
-			workforceEma: GIP_WORKFORCE_ABSENT_DISPLAY,
+			workforceEma: null,
 		});
 	});
 });

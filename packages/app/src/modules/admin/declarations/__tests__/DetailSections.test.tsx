@@ -32,7 +32,7 @@ const declaration: DeclarationDetail = {
 	companyName: "ACME Corp",
 	companyAddress: "123 Rue de Paris",
 	companyNafCode: "6201Z",
-	companyWorkforce: "200",
+	companyWorkforce: 200,
 	companyHasCse: true,
 	declarantEmail: "alice@example.com",
 	declarantFirstName: "Alice",

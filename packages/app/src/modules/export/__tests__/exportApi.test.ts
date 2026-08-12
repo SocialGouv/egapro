@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 
 const mockFetchSubmitted = vi.fn().mockResolvedValue([]);
 const mockFetchIndicatorG = vi.fn().mockResolvedValue(new Map());
@@ -416,7 +415,7 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const decl = (await response.json()).Declarations[0];
-		expect(decl.Effectif).toBe("70");
+		expect(decl.Effectif).toBe(70);
 		expect(decl.Indicateur_G_requis).toBe(false);
 	});
 
@@ -469,7 +468,7 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(response.status).toBe(200);
 		const body = await response.json();
 		expect(body.Nombre).toBe(1);
-		expect(body.Declarations[0].Effectif).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(body.Declarations[0].Effectif).toBeNull();
 		// Workforce-0 (absent from GIP) is in the voluntary (< 50) tier → 7-indicator
 		// volunteering, so indicator G is required (#4043).
 		expect(body.Declarations[0].Indicateur_G_requis).toBe(true);

@@ -16,7 +16,6 @@ export {
 import {
 	computeGapRatio,
 	computeTotal,
-	formatWorkforceDisplay,
 	getObligationWorkforce,
 	hasGapsAboveThreshold,
 	isComplianceProcessRequired,
@@ -24,6 +23,7 @@ import {
 	isCseRequired,
 	isIndicatorGRequired,
 	parseGipWorkforce,
+	toDisplayWorkforce,
 } from "~/modules/domain";
 import type { DeclarationRow } from "./queries";
 import {
@@ -369,7 +369,7 @@ export function assembleDeclaration(
 		id: row.declarationId,
 		SIREN: row.siren,
 		Raison_sociale: row.companyName,
-		Effectif: formatWorkforceDisplay(parseGipWorkforce(row.workforceEma)),
+		Effectif: toDisplayWorkforce(parseGipWorkforce(row.workforceEma)),
 		Code_NAF: row.nafCode,
 		Adresse: row.address,
 		// The CSE field only exists for companies at or above the CSE threshold; legacy sub-100 values are not exported.

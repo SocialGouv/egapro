@@ -3,7 +3,7 @@ export type ExportRow = {
 	// Company
 	siren: string;
 	companyName: string;
-	workforce: string;
+	workforce: number | null;
 	nafCode: string | null;
 	address: string | null;
 	hasCse: boolean | null;

@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 
 const mocks = vi.hoisted(() => ({
 	dbSelect: vi.fn(),
@@ -122,7 +121,7 @@ describe("GET /api/public/declarations/export", () => {
 			siren: "123456789",
 			name: "Société Démo",
 			year: 2023,
-			workforceEma: "250",
+			workforceEma: 250,
 			globalAnnualMeanGap: 10.5,
 		});
 	});
@@ -160,7 +159,7 @@ describe("GET /api/public/declarations/export", () => {
 		expect(row.globalAnnualMeanGap).toBe(10.5);
 	});
 
-	it("treats a null statutDiffusion as diffusible and brackets a missing workforceEma", async () => {
+	it("treats a null statutDiffusion as diffusible and renders a null workforceEma", async () => {
 		setRows([
 			buildRow({
 				siren: "321321321",
@@ -175,18 +174,18 @@ describe("GET /api/public/declarations/export", () => {
 
 		// Absent statut → diffusible → identifying fields kept
 		expect(row.name).toBe("Société Démo");
-		expect(row.workforceEma).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(row.workforceEma).toBeNull();
 	});
 
-	it("emits the bracket for a missing workforceEma in CSV", async () => {
+	it("emits an empty quoted field for a null workforceEma in CSV", async () => {
 		setRows([buildRow({ siren: "321321321", workforceEma: null })]);
 
 		const response = await callGet("?format=csv");
 		const csv = await response.text();
 		const line = csv.split("\n")[1] ?? "";
 
-		// workforceEma is the 10th column (index 9)
-		expect(line.split(";")[9]).toBe(`"${GIP_WORKFORCE_ABSENT_DISPLAY}"`);
+		// workforceEma is the 10th column (index 9), rendered as empty quotes
+		expect(line.split(";")[9]).toBe('""');
 	});
 
 	it("exposes no score, /100 index or indicator-G key in the JSON payload (S6)", async () => {

@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 
 describe("buildExportRows", () => {
 	// Mock DB chain: select().from().innerJoin().leftJoin().innerJoin().where()
@@ -474,7 +473,7 @@ describe("buildExportRows", () => {
 		expect(rows[0]).toMatchObject({
 			createdAt: null,
 			updatedAt: null,
-			workforce: GIP_WORKFORCE_ABSENT_DISPLAY,
+			workforce: null,
 		});
 	});
 
@@ -641,7 +640,7 @@ describe("buildExportRows", () => {
 		const rows = await buildExportRows(mockDb as never, 2027);
 
 		expect(rows[0]).toMatchObject({
-			workforce: "70",
+			workforce: 70,
 			indicatorGRequired: false,
 		});
 	});
@@ -662,7 +661,7 @@ describe("buildExportRows", () => {
 		const rows = await buildExportRows(mockDb as never, 2027);
 
 		expect(rows[0]).toMatchObject({
-			workforce: "99",
+			workforce: 99,
 			complianceProcessRequired: false,
 		});
 	});
@@ -689,7 +688,7 @@ describe("buildExportRows", () => {
 		// (7-indicator volunteering, #4043).
 		expect(rows[0]).toMatchObject({
 			siren: "999999999",
-			workforce: GIP_WORKFORCE_ABSENT_DISPLAY,
+			workforce: null,
 			indicatorGRequired: true,
 			complianceProcessRequired: false,
 		});

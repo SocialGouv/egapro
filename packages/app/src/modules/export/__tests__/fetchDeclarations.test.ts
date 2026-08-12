@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
 
 import type { CseRow, IndicatorGEntry } from "../fetchDeclarations";
 import {
@@ -384,7 +383,7 @@ describe("assembleDeclaration", () => {
 		expect(Object.keys(result)[0]).toBe("id");
 		expect(result.SIREN).toBe("123456789");
 		expect(result.Raison_sociale).toBe("ACME Corp");
-		expect(result.Effectif).toBe("250");
+		expect(result.Effectif).toBe(250);
 		expect(result.CSE_existant).toBe(true);
 		expect(result.Annee).toBe(2027);
 		expect(result.Effectif_F_rem_annuelle_globale).toBe(100);
@@ -402,24 +401,17 @@ describe("assembleDeclaration", () => {
 		expect(
 			assembleDeclaration({ ...baseRow, workforceEma: "99.97" }, [], [])
 				.Effectif,
-		).toBe("99");
+		).toBe(99);
 		expect(
 			assembleDeclaration({ ...baseRow, workforceEma: "70.00" }, [], [])
 				.Effectif,
-		).toBe("70");
+		).toBe(70);
 	});
 
-	it("brackets the Effectif of a voluntary-tier company", () => {
-		// Absent from the GIP file, or present under the threshold: both are the
-		// voluntary tier and are exported as the bracket, not as a headcount
-		// (issue 3914). Breaking change on the export contract.
+	it("exposes a null Effectif when the company is absent from the GIP file", () => {
 		expect(
 			assembleDeclaration({ ...baseRow, workforceEma: null }, [], []).Effectif,
-		).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
-		expect(
-			assembleDeclaration({ ...baseRow, workforceEma: "37.00" }, [], [])
-				.Effectif,
-		).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+		).toBeNull();
 	});
 
 	it("nulls CSE_existant below the CSE threshold even when a legacy hasCse value exists", () => {
@@ -805,7 +797,7 @@ describe("assembleDeclaration", () => {
 		expect(result.Indicateurs.G).toHaveLength(1);
 		expect(result.Indicateurs.G?.[0]?.Effectif_F).toBe(12);
 		expect(result.SIREN).toBe("123456789");
-		expect(result.Effectif).toBe("250");
+		expect(result.Effectif).toBe(250);
 	});
 
 	it("should expose Historique_statuts as empty array when no history (S7)", () => {
@@ -1120,7 +1112,7 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		const result = assembleDeclaration(row, significantInitial, []);
 
-		expect(result.Effectif).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(result.Effectif).toBeNull();
 		expect(result.Parcours_de_conformite_requis).toBe(false);
 		// Workforce-0 derives from the missing GIP effectif; it lands in the
 		// voluntary (< 50) tier, which files all 7 indicators (#4043).
@@ -1132,7 +1124,7 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		const result = assembleDeclaration(row, significantInitial, []);
 
-		expect(result.Effectif).toBe("70");
+		expect(result.Effectif).toBe(70);
 		expect(result.Indicateur_G_requis).toBe(false);
 		expect(result.Parcours_de_conformite_requis).toBe(false);
 	});

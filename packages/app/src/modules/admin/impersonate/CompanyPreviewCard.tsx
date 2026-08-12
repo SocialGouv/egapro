@@ -1,5 +1,3 @@
-import { formatWorkforceDisplay } from "~/modules/domain";
-
 type Props = {
 	company: {
 		siren: string;
@@ -34,13 +32,9 @@ export function CompanyPreviewCard({ company }: Props) {
 								<strong>Code NAF :</strong> {company.nafCode}
 							</p>
 						)}
-						{/* The row stays hidden when the registry has no headcount: here
-						    a missing value means "unknown", not "voluntary tier", so it
-						    must not borrow the bracket label (issue 3914). */}
 						{company.workforce !== null && (
 							<p>
-								<strong>Effectif :</strong>{" "}
-								{formatWorkforceDisplay(company.workforce)}
+								<strong>Effectif :</strong> {company.workforce}
 							</p>
 						)}
 					</div>
