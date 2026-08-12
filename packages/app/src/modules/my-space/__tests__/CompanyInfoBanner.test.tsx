@@ -120,7 +120,9 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: null }} />,
 		);
-		expect(screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY)).toBeInTheDocument();
+		expect(
+			screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
+		).toBeInTheDocument();
 		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
 	});
 
@@ -130,7 +132,9 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 37 }} />,
 		);
-		expect(screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY)).toBeInTheDocument();
+		expect(
+			screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
+		).toBeInTheDocument();
 		expect(screen.queryByText("37")).not.toBeInTheDocument();
 	});
 

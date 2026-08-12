@@ -43,7 +43,9 @@ describe("PrefillPdfDocument", () => {
 	it("shows the bracket instead of the exact headcount below the voluntary threshold", () => {
 		renderPrefill({ workforceEma: "37.00" });
 
-		expect(screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY)).toBeInTheDocument();
+		expect(
+			screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
+		).toBeInTheDocument();
 		expect(screen.queryByText("37")).not.toBeInTheDocument();
 		expect(screen.queryByText("37.00")).not.toBeInTheDocument();
 	});
@@ -55,7 +57,9 @@ describe("PrefillPdfDocument", () => {
 		// answered "unknown" where the other five answer "voluntary tier".
 		renderPrefill({ workforceEma: null });
 
-		expect(screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY)).toBeInTheDocument();
+		expect(
+			screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
+		).toBeInTheDocument();
 	});
 
 	it("keeps the exact headcount at or above the threshold", () => {

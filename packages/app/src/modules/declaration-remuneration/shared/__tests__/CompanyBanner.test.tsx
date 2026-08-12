@@ -65,7 +65,9 @@ describe("CompanyBanner", () => {
 		);
 
 		expect(screen.getByText(/Effectif annuel moyen en/)).toBeInTheDocument();
-		expect(screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY)).toBeInTheDocument();
+		expect(
+			screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
+		).toBeInTheDocument();
 		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
 	});
 
@@ -79,7 +81,9 @@ describe("CompanyBanner", () => {
 			/>,
 		);
 
-		expect(screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY)).toBeInTheDocument();
+		expect(
+			screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
+		).toBeInTheDocument();
 		expect(screen.queryByText("37")).not.toBeInTheDocument();
 	});
 

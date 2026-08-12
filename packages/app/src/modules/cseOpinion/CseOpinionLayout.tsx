@@ -2,7 +2,7 @@ import { DeclarationLockAlert } from "~/modules/declaration-remuneration/shared/
 import type { LockHolder } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import {
-	formatWorkforceDisplay,
+	formatWorkforceForUser,
 	getObligationWorkforce,
 	getWorkforceYear,
 	isCseRequired,
@@ -67,7 +67,7 @@ export function CseOpinionLayout({
 						<div className="fr-col-auto">
 							<p className="fr-mb-0 fr-text--sm">
 								Effectif annuel moyen en {getWorkforceYear()} :{" "}
-								<strong>{formatWorkforceDisplay(company.gipWorkforce)}</strong>
+								<strong>{formatWorkforceForUser(company.gipWorkforce)}</strong>
 							</p>
 						</div>
 						{cseApplicable && (

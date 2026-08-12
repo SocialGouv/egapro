@@ -5,7 +5,7 @@ import { useCallback, useRef } from "react";
 import { Controller } from "react-hook-form";
 
 import {
-	formatWorkforceDisplay,
+	formatWorkforceForUser,
 	getCurrentYear,
 	getObligationWorkforce,
 	isCseRequired,
@@ -195,7 +195,7 @@ function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 				<dl className={styles.infoList}>
 					<InfoRow
 						label={`Effectif annuel moyen en ${CURRENT_YEAR} :`}
-						value={formatWorkforceDisplay(company.gipWorkforce)}
+						value={formatWorkforceForUser(company.gipWorkforce)}
 					/>
 				</dl>
 				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>

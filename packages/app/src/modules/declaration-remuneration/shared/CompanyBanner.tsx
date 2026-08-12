@@ -1,5 +1,5 @@
 import {
-	formatWorkforceDisplay,
+	formatWorkforceForUser,
 	getObligationWorkforce,
 	getWorkforceYear,
 	isCseRequired,
@@ -50,7 +50,7 @@ export function CompanyBanner({
 						<span>
 							{"Effectif annuel moyen en"} {getWorkforceYear()} {":"}
 						</span>
-						<strong>{formatWorkforceDisplay(company.gipWorkforce)}</strong>
+						<strong>{formatWorkforceForUser(company.gipWorkforce)}</strong>
 					</div>
 
 					{cseApplicable && (

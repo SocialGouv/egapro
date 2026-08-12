@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { GIP_WORKFORCE_VOLUNTARY_DISPLAY } from "~/modules/domain";
+
 type TableKey =
 	| "declarations"
 	| "companies"
@@ -238,7 +240,9 @@ describe("buildPdfData", () => {
 		const buildPdfData = await importBuild();
 		const result = await buildPdfData("987654321", 2026, NOW);
 
-		expect(result.company.workforceDisplay).toBe("< 50");
+		expect(result.company.workforceDisplay).toBe(
+			GIP_WORKFORCE_VOLUNTARY_DISPLAY,
+		);
 		expect(result.company.address).toBe("");
 		expect(result.company.nafCode).toBeNull();
 		expect(result.declarant).toEqual({

@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { COMPANY_SIZE_VOLUNTARY_MAX } from "../shared/constants";
 import {
-	formatWorkforceDisplay,
+	floorWorkforce,
+	formatWorkforceForUser,
 	GIP_WORKFORCE_VOLUNTARY_DISPLAY,
 	getObligationWorkforce,
 	parseGipWorkforce,
-	toDisplayWorkforce,
 } from "../shared/gipWorkforce";
 
 describe("parseGipWorkforce", () => {
@@ -63,35 +63,35 @@ describe("GIP_WORKFORCE_VOLUNTARY_DISPLAY", () => {
 	});
 });
 
-describe("formatWorkforceDisplay", () => {
+describe("formatWorkforceForUser", () => {
 	it("hides the exact headcount of a voluntary-tier company", () => {
 		// The bug: only an absent company got the bracket, so a company present
 		// in the GIP file with 37 employees read "37" (issue 3914).
-		expect(formatWorkforceDisplay(37)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
-		expect(formatWorkforceDisplay(0)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
+		expect(formatWorkforceForUser(37)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
+		expect(formatWorkforceForUser(0)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
 	});
 
 	it("keeps a company absent from the GIP file on the same label", () => {
-		expect(formatWorkforceDisplay(null)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
+		expect(formatWorkforceForUser(null)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
 	});
 
 	it("decides the tier on the exact value, not the floored one", () => {
 		// Flooring first would surface "49" for a company the rule places in the
 		// voluntary tier.
-		expect(formatWorkforceDisplay(49.8)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
+		expect(formatWorkforceForUser(49.8)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
 	});
 
 	it("shows the headcount from the threshold upwards, bound excluded", () => {
-		expect(formatWorkforceDisplay(COMPANY_SIZE_VOLUNTARY_MAX)).toBe("50");
-		expect(formatWorkforceDisplay(99.97)).toBe("99");
-		expect(formatWorkforceDisplay(250)).toBe("250");
+		expect(formatWorkforceForUser(COMPANY_SIZE_VOLUNTARY_MAX)).toBe("50");
+		expect(formatWorkforceForUser(99.97)).toBe("99");
+		expect(formatWorkforceForUser(250)).toBe("250");
 	});
 
 	it("brackets a negative headcount instead of surfacing it", () => {
 		// parseGipWorkforce deliberately keeps a negative rather than coercing it,
 		// so a corrupt GIP row reaches this formatter. It belongs to the voluntary
 		// tier and must never read "-1" on a user-facing screen.
-		expect(formatWorkforceDisplay(-1)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
+		expect(formatWorkforceForUser(-1)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
 	});
 
 	it("groups thousands with a narrow no-break space, the French way", () => {
@@ -99,31 +99,31 @@ describe("formatWorkforceDisplay", () => {
 		// the implementation checked against itself. The narrow no-break space is
 		// escaped, not pasted: U+202F is invisible in a diff and a plain space
 		// would silently pass for it.
-		expect(formatWorkforceDisplay(12345)).toBe("12\u202f345");
+		expect(formatWorkforceForUser(12345)).toBe("12\u202f345");
 	});
 });
 
-describe("toDisplayWorkforce", () => {
+describe("floorWorkforce", () => {
 	it("floors the value so 99,97 never displays as 100", () => {
-		expect(toDisplayWorkforce(99.97)).toBe(99);
-		expect(toDisplayWorkforce(70.5)).toBe(70);
-		expect(toDisplayWorkforce(99.999)).toBe(99);
+		expect(floorWorkforce(99.97)).toBe(99);
+		expect(floorWorkforce(70.5)).toBe(70);
+		expect(floorWorkforce(99.999)).toBe(99);
 	});
 
 	it("leaves an integer value unchanged", () => {
-		expect(toDisplayWorkforce(70)).toBe(70);
-		expect(toDisplayWorkforce(0)).toBe(0);
+		expect(floorWorkforce(70)).toBe(70);
+		expect(floorWorkforce(0)).toBe(0);
 	});
 
 	it("returns null when the company is absent from the GIP file", () => {
-		expect(toDisplayWorkforce(null)).toBeNull();
+		expect(floorWorkforce(null)).toBeNull();
 	});
 
 	it("never brackets a voluntary-tier headcount, unlike the user-facing format", () => {
 		// Machine consumers (open-data API, SUIT export) and the back-office are
 		// typed on the number and need the exact figure — bracketing them would
 		// break their contract. Guards against merging the two helpers.
-		expect(toDisplayWorkforce(37)).toBe(37);
-		expect(formatWorkforceDisplay(37)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
+		expect(floorWorkforce(37)).toBe(37);
+		expect(formatWorkforceForUser(37)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
 	});
 });

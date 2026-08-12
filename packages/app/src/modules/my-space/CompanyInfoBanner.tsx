@@ -1,5 +1,5 @@
 import {
-	formatWorkforceDisplay,
+	formatWorkforceForUser,
 	getCurrentYear,
 	getObligationWorkforce,
 	isCseRequired,
@@ -85,7 +85,7 @@ export function CompanyInfoBanner({ company }: Props) {
 					<div className={styles.datapoint}>
 						<dt>Effectif annuel moyen en {currentYear} :</dt>
 						<dd>
-							<strong>{formatWorkforceDisplay(company.gipWorkforce)}</strong>
+							<strong>{formatWorkforceForUser(company.gipWorkforce)}</strong>
 						</dd>
 					</div>
 					{cseApplicable && (

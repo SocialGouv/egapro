@@ -5,6 +5,11 @@ import { formatCount } from "./submissionRate";
 // The one label every user-facing surface shows for the voluntary tier, whether
 // the company is absent from the GIP file or present with a sub-threshold
 // headcount. Named after the tier, not after the absence: both cases land here.
+//
+// The space is a plain one on purpose. A no-break space would keep the operator
+// glued to its number on a narrow reflow, but Testing Library normalises the
+// rendered text and not the needle, so every getByText on this constant would
+// stop matching. Gluing the two together belongs in CSS, not in the value.
 export const GIP_WORKFORCE_VOLUNTARY_DISPLAY = `< ${COMPANY_SIZE_VOLUNTARY_MAX}`;
 
 export function parseGipWorkforce(
@@ -36,9 +41,9 @@ export function getObligationWorkforce(gipWorkforce: number | null): number {
  * rounded down to a figure. A headcount exactly at the threshold is outside the
  * tier and keeps its number.
  *
- * Never use for a machine consumer — see `toDisplayWorkforce`.
+ * Never use for a machine consumer — see `floorWorkforce`.
  */
-export function formatWorkforceDisplay(gipWorkforce: number | null): string {
+export function formatWorkforceForUser(gipWorkforce: number | null): string {
 	if (
 		gipWorkforce === null ||
 		classifyCompanySize(gipWorkforce) === "voluntary"
@@ -54,13 +59,13 @@ export function formatWorkforceDisplay(gipWorkforce: number | null): string {
  * export and the back-office screens. Returns the number itself, never a
  * bracket.
  *
- * Deliberate counterpart of `formatWorkforceDisplay`: these consumers have a
+ * Deliberate counterpart of `formatWorkforceForUser`: these consumers have a
  * typed contract on a numeric headcount, and the back-office needs the exact
  * figure to support the company. Bracketing them would break the contract
  * without versioning it and blind the administrators.
  *
  * Floored so 99,97 never reads as "100" — thresholds compare the exact value.
  */
-export function toDisplayWorkforce(gipWorkforce: number | null): number | null {
+export function floorWorkforce(gipWorkforce: number | null): number | null {
 	return gipWorkforce === null ? null : Math.floor(gipWorkforce);
 }

@@ -42,9 +42,12 @@ export function UpdateCseModal({ cseApplicable, siren }: Props) {
 	if (!cseApplicable) return null;
 
 	return (
+		// No aria-modal here, unlike the other fr-modal dialogs: this one is
+		// rendered inside the always-mounted process panel, and the attribute on a
+		// closed dialog drops the rest of the panel out of the accessibility tree.
+		// The native showModal() already carries the modal semantics.
 		<dialog
 			aria-labelledby="update-cse-modal-title"
-			aria-modal="true"
 			className="fr-modal"
 			id={MODAL_ID}
 			ref={dialogRef}

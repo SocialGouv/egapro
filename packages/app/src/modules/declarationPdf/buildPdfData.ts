@@ -5,7 +5,7 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 import { formatCategorySource } from "~/modules/declaration-remuneration";
 import {
 	formatShortDate,
-	formatWorkforceDisplay,
+	formatWorkforceForUser,
 	getReferencePeriod,
 	getReferenceYearFor,
 	isDraft,
@@ -158,7 +158,7 @@ export async function buildPdfData(
 			address: company?.address ?? "",
 			nafCode: company?.nafCode ?? null,
 			nafLabel: company?.nafLabel ?? null,
-			workforceDisplay: formatWorkforceDisplay(gipWorkforce),
+			workforceDisplay: formatWorkforceForUser(gipWorkforce),
 		},
 		totalWomen: declaration.totalWomen ?? 0,
 		totalMen: declaration.totalMen ?? 0,

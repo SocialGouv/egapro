@@ -4,7 +4,7 @@ import {
 	COMPANY_SIZE_ANNUAL_MIN,
 	COMPANY_SIZE_VOLUNTARY_MAX,
 	classifyCompanySize,
-	formatWorkforceDisplay,
+	formatWorkforceForUser,
 	GAP_ALERT_THRESHOLD,
 	gapLevel,
 	getObligationWorkforce,
@@ -270,7 +270,7 @@ describe("GIP workforce — single source for the obligations (#3929/#3962)", ()
 		// #3929 class of bug: 99.97 displays as 99 and must NOT trigger the >= 100 obligations.
 		const nearCse = getObligationWorkforce(COMPANY_SIZE_ANNUAL_MIN - 0.03);
 		expect(isCseRequired(nearCse)).toBe(false);
-		expect(formatWorkforceDisplay(nearCse)).toBe(
+		expect(formatWorkforceForUser(nearCse)).toBe(
 			String(COMPANY_SIZE_ANNUAL_MIN - 1),
 		);
 

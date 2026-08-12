@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatWorkforceDisplay } from "~/modules/domain";
+import { formatWorkforceForUser } from "~/modules/domain";
 import common from "../shared/common.module.scss";
 import type { PayGapReferences } from "../shared/indicatorRowMapping";
 import { formatCategorySource } from "../steps/step5/sources";
@@ -104,7 +104,7 @@ export function RecapitulatifPage({
 	}
 	companyItems.push({
 		label: `Effectif annuel moyen en ${declarationYear}`,
-		value: formatWorkforceDisplay(company.gipWorkforce),
+		value: formatWorkforceForUser(company.gipWorkforce),
 	});
 
 	const sourceLabel = step5Source ? formatCategorySource(step5Source) : null;

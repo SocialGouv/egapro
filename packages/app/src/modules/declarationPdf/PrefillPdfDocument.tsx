@@ -1,7 +1,7 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 
 import {
-	formatWorkforceDisplay,
+	formatWorkforceForUser,
 	getReferenceYearFor,
 	parseGipWorkforce,
 } from "~/modules/domain";
@@ -109,7 +109,7 @@ function formatValue(
 	// exactly as on the five other surfaces. Falling through to "—" would make
 	// this PDF the lone dissenter.
 	if (key === WORKFORCE_FIELD) {
-		return formatWorkforceDisplay(parseGipWorkforce(value));
+		return formatWorkforceForUser(parseGipWorkforce(value));
 	}
 	if (value === null || value === undefined || value === "") return "—";
 	return String(value);
