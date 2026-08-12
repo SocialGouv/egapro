@@ -38,16 +38,7 @@ export const corsAllowOriginHeader = {
 	description: "Toujours `*` — accessible depuis n'importe quelle origine.",
 } as const;
 
-export function invalidParamsResponse(description: string) {
-	return {
-		description,
-		content: {
-			"application/json": { schema: { $ref: "#/components/schemas/Error" } },
-		},
-	} as const;
-}
-
-export function notFoundResponse(description: string) {
+export function errorResponse(description: string) {
 	return {
 		description,
 		content: {
