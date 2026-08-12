@@ -44,6 +44,7 @@ export function UpdateCseModal({ cseApplicable, siren }: Props) {
 	return (
 		<dialog
 			aria-labelledby="update-cse-modal-title"
+			aria-modal="true"
 			className="fr-modal"
 			id={MODAL_ID}
 			ref={dialogRef}
