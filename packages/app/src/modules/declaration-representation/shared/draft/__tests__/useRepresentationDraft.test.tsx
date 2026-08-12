@@ -21,7 +21,7 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
-import type { RepresentationDraft } from "../../../types";
+import type { RepresentationDraft } from "~/modules/declaration-representation/types";
 import { useRepresentationDraft } from "../useRepresentationDraft";
 
 const YEAR = 2025;
