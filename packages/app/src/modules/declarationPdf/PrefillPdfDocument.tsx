@@ -103,10 +103,15 @@ function formatValue(
 	key: string,
 	value: string | number | null | undefined,
 ): string {
-	if (value === null || value === undefined || value === "") return "—";
+	// Ahead of the empty-value guard on purpose: the column is nullable and the
+	// route only 404s on a missing GIP row, so a present row with no headcount
+	// reaches here — and an unknown headcount is the voluntary tier, "< 50",
+	// exactly as on the five other surfaces. Falling through to "—" would make
+	// this PDF the lone dissenter.
 	if (key === WORKFORCE_FIELD) {
 		return formatWorkforceDisplay(parseGipWorkforce(value));
 	}
+	if (value === null || value === undefined || value === "") return "—";
 	return String(value);
 }
 

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
+import { GIP_WORKFORCE_VOLUNTARY_DISPLAY } from "~/modules/domain";
 import { CompanyInfoBanner } from "../CompanyInfoBanner";
 import type { CompanyDetail } from "../types";
 
@@ -120,7 +120,7 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: null }} />,
 		);
-		expect(screen.getByText(GIP_WORKFORCE_ABSENT_DISPLAY)).toBeInTheDocument();
+		expect(screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY)).toBeInTheDocument();
 		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
 	});
 
@@ -130,7 +130,7 @@ describe("CompanyInfoBanner", () => {
 		render(
 			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 37 }} />,
 		);
-		expect(screen.getByText(GIP_WORKFORCE_ABSENT_DISPLAY)).toBeInTheDocument();
+		expect(screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY)).toBeInTheDocument();
 		expect(screen.queryByText("37")).not.toBeInTheDocument();
 	});
 

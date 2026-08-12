@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { COMPANY_SIZE_VOLUNTARY_MAX } from "../shared/constants";
 import {
 	formatWorkforceDisplay,
-	GIP_WORKFORCE_ABSENT_DISPLAY,
+	GIP_WORKFORCE_VOLUNTARY_DISPLAY,
 	getObligationWorkforce,
 	parseGipWorkforce,
 	toDisplayWorkforce,
@@ -55,9 +55,9 @@ describe("getObligationWorkforce", () => {
 	// GIP-workforce describes of demarcheDecisionTable.test.ts (#3975).
 });
 
-describe("GIP_WORKFORCE_ABSENT_DISPLAY", () => {
+describe("GIP_WORKFORCE_VOLUNTARY_DISPLAY", () => {
 	it("is the label shown instead of any Weez/INSEE fallback value", () => {
-		expect(GIP_WORKFORCE_ABSENT_DISPLAY).toBe(
+		expect(GIP_WORKFORCE_VOLUNTARY_DISPLAY).toBe(
 			`< ${COMPANY_SIZE_VOLUNTARY_MAX}`,
 		);
 	});
@@ -67,18 +67,18 @@ describe("formatWorkforceDisplay", () => {
 	it("hides the exact headcount of a voluntary-tier company", () => {
 		// The bug: only an absent company got the bracket, so a company present
 		// in the GIP file with 37 employees read "37" (issue 3914).
-		expect(formatWorkforceDisplay(37)).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
-		expect(formatWorkforceDisplay(0)).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(formatWorkforceDisplay(37)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
+		expect(formatWorkforceDisplay(0)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
 	});
 
 	it("keeps a company absent from the GIP file on the same label", () => {
-		expect(formatWorkforceDisplay(null)).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(formatWorkforceDisplay(null)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
 	});
 
 	it("decides the tier on the exact value, not the floored one", () => {
 		// Flooring first would surface "49" for a company the rule places in the
 		// voluntary tier.
-		expect(formatWorkforceDisplay(49.8)).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(formatWorkforceDisplay(49.8)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
 	});
 
 	it("shows the headcount from the threshold upwards, bound excluded", () => {
@@ -91,7 +91,7 @@ describe("formatWorkforceDisplay", () => {
 		// parseGipWorkforce deliberately keeps a negative rather than coercing it,
 		// so a corrupt GIP row reaches this formatter. It belongs to the voluntary
 		// tier and must never read "-1" on a user-facing screen.
-		expect(formatWorkforceDisplay(-1)).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(formatWorkforceDisplay(-1)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
 	});
 
 	it("groups thousands with a narrow no-break space, the French way", () => {
@@ -124,6 +124,6 @@ describe("toDisplayWorkforce", () => {
 		// typed on the number and need the exact figure — bracketing them would
 		// break their contract. Guards against merging the two helpers.
 		expect(toDisplayWorkforce(37)).toBe(37);
-		expect(formatWorkforceDisplay(37)).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(formatWorkforceDisplay(37)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
 	});
 });

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
-import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
+import { GIP_WORKFORCE_VOLUNTARY_DISPLAY } from "~/modules/domain";
 import { CseOpinionLayout } from "../CseOpinionLayout";
 
 const company = {
@@ -144,7 +144,7 @@ describe("CseOpinionLayout", () => {
 			</CseOpinionLayout>,
 		);
 
-		expect(container.textContent).toContain(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(container.textContent).toContain(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
 		expect(container.textContent).not.toContain("Existence d'un CSE :");
 	});
 
@@ -160,7 +160,7 @@ describe("CseOpinionLayout", () => {
 			</CseOpinionLayout>,
 		);
 
-		expect(container.textContent).toContain(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(container.textContent).toContain(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
 		expect(screen.queryByText("37")).not.toBeInTheDocument();
 	});
 

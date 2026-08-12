@@ -2,9 +2,10 @@ import { classifyCompanySize } from "./companySize";
 import { COMPANY_SIZE_VOLUNTARY_MAX } from "./constants";
 import { formatCount } from "./submissionRate";
 
-// Absent from the GIP file ⇒ deemed below the voluntary threshold, so user-facing
-// surfaces show the bracket instead of a figure.
-export const GIP_WORKFORCE_ABSENT_DISPLAY = `< ${COMPANY_SIZE_VOLUNTARY_MAX}`;
+// The one label every user-facing surface shows for the voluntary tier, whether
+// the company is absent from the GIP file or present with a sub-threshold
+// headcount. Named after the tier, not after the absence: both cases land here.
+export const GIP_WORKFORCE_VOLUNTARY_DISPLAY = `< ${COMPANY_SIZE_VOLUNTARY_MAX}`;
 
 export function parseGipWorkforce(
 	raw: string | number | null | undefined,
@@ -42,7 +43,7 @@ export function formatWorkforceDisplay(gipWorkforce: number | null): string {
 		gipWorkforce === null ||
 		classifyCompanySize(gipWorkforce) === "voluntary"
 	) {
-		return GIP_WORKFORCE_ABSENT_DISPLAY;
+		return GIP_WORKFORCE_VOLUNTARY_DISPLAY;
 	}
 
 	return formatCount(Math.floor(gipWorkforce));

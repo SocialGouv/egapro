@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { GIP_WORKFORCE_ABSENT_DISPLAY } from "~/modules/domain";
+import { GIP_WORKFORCE_VOLUNTARY_DISPLAY } from "~/modules/domain";
 import {
 	DIVERGENT_HOURLY_MEDIAN,
 	noPayGapReferences,
@@ -456,7 +456,7 @@ describe("RecapitulatifPage", () => {
 		expect(
 			screen.getByText("Effectif annuel moyen en 2025"),
 		).toBeInTheDocument();
-		expect(screen.getByText(GIP_WORKFORCE_ABSENT_DISPLAY)).toBeInTheDocument();
+		expect(screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY)).toBeInTheDocument();
 	});
 
 	it("shows '< 50' instead of the exact headcount when the company is in the GIP file below the threshold", () => {
@@ -468,7 +468,7 @@ describe("RecapitulatifPage", () => {
 				company={{ ...defaultCompany(), gipWorkforce: 37 }}
 			/>,
 		);
-		expect(screen.getByText(GIP_WORKFORCE_ABSENT_DISPLAY)).toBeInTheDocument();
+		expect(screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY)).toBeInTheDocument();
 		expect(screen.queryByText("37")).not.toBeInTheDocument();
 	});
 
