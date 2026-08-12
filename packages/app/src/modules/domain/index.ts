@@ -5,6 +5,7 @@ export {
 	getCurrentYear,
 	getDeclarationDeadline,
 	getDefaultCampaignDeadlines,
+	getDefaultRepresentationCampaign,
 	getPathChoiceDeadline,
 	getReferencePeriod,
 	getReferenceYearFor,
@@ -12,6 +13,7 @@ export {
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
 	isDeadlinePassed,
+	isRepresentationCampaignOpen,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
 // Campaign clock — test-only override seam behind getCurrentYear (issue #4022)
@@ -222,6 +224,20 @@ export {
 	REGIONS,
 	REGIONS_TO_COUNTIES,
 } from "./shared/regions";
+// Representation equilibrium (art. D. 1142-19)
+export type {
+	ExecutivesCount,
+	RepresentationComplianceVerdict,
+} from "./shared/representation";
+export {
+	computeRepresentationVerdict,
+	deriveExecutivesNotComputableReason,
+	getRepresentationCampaignYear,
+	getRepresentationTarget,
+	REPRESENTATION_TARGET_INITIAL,
+	REPRESENTATION_TARGET_RAISED,
+	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
+} from "./shared/representation";
 // Score brackets for public stats distribution chart
 export type { ScoreBracket, ScoreBracketId } from "./shared/scoreBracket";
 export { getScoreBracket, SCORE_BRACKETS } from "./shared/scoreBracket";
@@ -258,5 +274,6 @@ export type {
 	DeclarationType,
 	GapDirection,
 	GapLevel,
+	RepresentationCampaign,
 } from "./types";
 export { DECLARATION_FSM_STATUSES } from "./types";
