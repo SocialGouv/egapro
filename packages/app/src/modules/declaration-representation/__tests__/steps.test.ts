@@ -5,6 +5,7 @@ import {
 	getPreviousStepHref,
 	getStepDefinition,
 	isValidStep,
+	parseStepParam,
 	REPRESENTATION_FUNNEL_ROOT,
 	REPRESENTATION_STEPS,
 	stepHref,
@@ -44,6 +45,33 @@ describe("isValidStep", () => {
 
 	it.each([0, -1, 6, 1.5, Number.NaN])("rejects %s", (step) => {
 		expect(isValidStep(step)).toBe(false);
+	});
+});
+
+describe("parseStepParam", () => {
+	it.each([
+		["1", 1],
+		["5", 5],
+		["01", 1],
+	])("parses the route param %s into step %i", (raw, expected) => {
+		expect(parseStepParam(raw)).toBe(expected);
+	});
+
+	it.each([
+		"0",
+		"6",
+		"-1",
+		"+1",
+		"1.5",
+		"1,5",
+		"1abc",
+		"1e0",
+		"0x2",
+		" 1",
+		"",
+		"abc",
+	])("rejects the route param %s", (raw) => {
+		expect(parseStepParam(raw)).toBeUndefined();
 	});
 });
 

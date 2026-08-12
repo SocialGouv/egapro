@@ -26,8 +26,7 @@ vi.mock("~/trpc/server", () => ({
 	api: { representationDeclaration: { get: vi.fn() } },
 }));
 
-// The step page only decides which step to serve; the client funnel is
-// exercised by StepPageClient.test.tsx.
+// The client funnel itself is exercised by StepPageClient.test.tsx.
 vi.mock("~/modules/declaration-representation", async (importOriginal) => ({
 	...(await importOriginal<
 		typeof import("~/modules/declaration-representation")
@@ -136,11 +135,28 @@ describe("RepresentationHomePage", () => {
 });
 
 describe("RepresentationStepPage — step guard", () => {
-	it.each(["0", "6", "-1", "abc"])("404s on the step %s", async (step) => {
+	it.each([
+		"0",
+		"6",
+		"-1",
+		"+1",
+		"1.5",
+		"1abc",
+		"abc",
+	])("404s on the step %s", async (step) => {
 		mockFunnelState({ currentStep: 5 });
 
 		await expect(renderStepPage(step)).rejects.toThrow("NEXT_NOT_FOUND");
 		expect(getDeclaration).not.toHaveBeenCalled();
+	});
+
+	it("normalises a zero-padded step number", async () => {
+		mockFunnelState({ currentStep: 1 });
+
+		await renderStepPage("01");
+
+		expect(mockNotFound).not.toHaveBeenCalled();
+		expect(stepPageProps().step).toBe(1);
 	});
 });
 
@@ -250,9 +266,23 @@ describe("generateMetadata", () => {
 		});
 	});
 
-	it("falls back to the funnel title on an unknown step", async () => {
+	it("normalises a zero-padded step number in the title", async () => {
 		await expect(
-			generateMetadata({ params: Promise.resolve({ step: "9" }) }),
+			generateMetadata({ params: Promise.resolve({ step: "01" }) }),
+		).resolves.toEqual({
+			title: "Étape 1 sur 5 — Période de référence",
+		});
+	});
+
+	it.each([
+		"9",
+		"0",
+		"1.5",
+		"+1",
+		"abc",
+	])("falls back to the funnel title on the step %s", async (step) => {
+		await expect(
+			generateMetadata({ params: Promise.resolve({ step }) }),
 		).resolves.toEqual({
 			title: "Démarche des indicateurs de représentation équilibrée",
 		});

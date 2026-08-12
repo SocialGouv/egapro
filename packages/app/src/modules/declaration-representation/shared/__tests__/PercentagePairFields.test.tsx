@@ -14,7 +14,7 @@ const LEGEND = "Écarts de représentation parmi les cadres dirigeants";
 
 type HarnessProps = {
 	error?: string;
-	disabled?: boolean;
+	readOnly?: boolean;
 	hint?: string;
 	womenLabel?: string;
 	menLabel?: string;
@@ -40,6 +40,13 @@ function fields() {
 	return {
 		women: screen.getByLabelText(/Femmes/) as HTMLInputElement,
 		men: screen.getByLabelText(/Hommes/) as HTMLInputElement,
+	};
+}
+
+function liveRegions() {
+	return {
+		messages: document.querySelector(".fr-messages-group") as HTMLElement,
+		announcement: document.querySelector(".fr-sr-only") as HTMLElement,
 	};
 }
 
@@ -122,14 +129,30 @@ describe("PercentagePairFields — input filtering", () => {
 		expect(men).toHaveValue("0");
 	});
 
-	it("leaves the other field untouched while the entry is out of the 0–100 range", async () => {
+	it("stops the entry at the last value within the 0–100 range", async () => {
 		render(<Harness />);
 		const { women, men } = fields();
 
 		await userEvent.type(women, "150");
 
-		expect(women).toHaveValue("150");
+		expect(women).toHaveValue("15");
 		expect(men).toHaveValue("85");
+	});
+
+	it("accepts 100 but refuses any entry above the ceiling", async () => {
+		render(<Harness />);
+		const { women, men } = fields();
+
+		await userEvent.type(women, "100");
+		expect(men).toHaveValue("0");
+
+		await userEvent.clear(women);
+		await userEvent.type(women, "101");
+		expect(women).toHaveValue("10");
+
+		await userEvent.clear(women);
+		await userEvent.type(women, "100.5");
+		expect(women).toHaveValue("100.");
 	});
 
 	it("refuses an invalid entry in the men field too", async () => {
@@ -198,6 +221,7 @@ describe("PercentagePairFields — accessibility and states", () => {
 		expect(women).not.toHaveAttribute("aria-describedby");
 		expect(men).not.toHaveAttribute("aria-describedby");
 		expect(women).not.toHaveAttribute("aria-invalid");
+		expect(women).not.toHaveAttribute("aria-disabled");
 	});
 
 	it("wires the error message to both inputs", () => {
@@ -216,12 +240,74 @@ describe("PercentagePairFields — accessibility and states", () => {
 		);
 	});
 
-	it("disables both inputs through the fieldset when read-only", () => {
-		render(<Harness disabled />);
+	it("marks both inputs read-only instead of disabling the fieldset", async () => {
+		render(<Harness readOnly />);
 		const { women, men } = fields();
 
-		expect(women).toBeDisabled();
-		expect(men).toBeDisabled();
+		expect(women).toHaveAttribute("readonly");
+		expect(men).toHaveAttribute("readonly");
+		expect(women).toHaveAttribute("aria-disabled", "true");
+		expect(men).toHaveAttribute("aria-disabled", "true");
+		expect(women).not.toBeDisabled();
+		expect(men).not.toBeDisabled();
+
+		await userEvent.type(women, "35");
+
+		expect(women).toHaveValue("");
+	});
+});
+
+describe("PercentagePairFields — live regions", () => {
+	it("mounts both live regions empty so they stay observed", () => {
+		render(<Harness />);
+		const { messages, announcement } = liveRegions();
+
+		expect(messages).toHaveAttribute("aria-live", "polite");
+		expect(messages).toHaveAttribute("aria-atomic", "true");
+		expect(messages.textContent).toBe("");
+		expect(announcement).toHaveAttribute("aria-live", "polite");
+		expect(announcement.textContent).toBe("");
+	});
+
+	it("hosts the error message inside the already mounted region", () => {
+		render(
+			<Harness error="La somme des pourcentages doit être égale à 100 %." />,
+		);
+
+		expect(liveRegions().messages).toHaveTextContent(
+			"La somme des pourcentages doit être égale à 100 %.",
+		);
+	});
+
+	it("announces the automatically filled counterpart", async () => {
+		render(<Harness />);
+		const { women } = fields();
+
+		await userEvent.type(women, "35");
+
+		expect(liveRegions().announcement).toHaveTextContent(
+			"Hommes : 65 % renseigné automatiquement.",
+		);
+	});
+
+	it("names the counterpart with its custom label", async () => {
+		render(<Harness menLabel="Hommes cadres" womenLabel="Femmes cadres" />);
+
+		await userEvent.type(screen.getByLabelText(/Hommes cadres/), "40");
+
+		expect(liveRegions().announcement).toHaveTextContent(
+			"Femmes cadres : 60 % renseigné automatiquement.",
+		);
+	});
+
+	it("empties the announcement when no counterpart is computed", async () => {
+		render(<Harness />);
+		const { women } = fields();
+
+		await userEvent.type(women, "35");
+		await userEvent.type(women, ".");
+
+		expect(liveRegions().announcement.textContent).toBe("");
 	});
 });
 
@@ -261,7 +347,16 @@ describe("isPercentageInput", () => {
 		expect(isPercentageInput(raw)).toBe(true);
 	});
 
-	it.each(["35.55", "1000", "-5", "abc", "3 5"])("rejects %s", (raw) => {
+	it.each([
+		"35.55",
+		"1000",
+		"101",
+		"100.5",
+		".",
+		"-5",
+		"abc",
+		"3 5",
+	])("rejects %s", (raw) => {
 		expect(isPercentageInput(raw)).toBe(false);
 	});
 });
