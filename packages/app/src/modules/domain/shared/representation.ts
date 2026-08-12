@@ -58,3 +58,10 @@ export function isPresumedSubjectToRepresentation(
 		(entry) => entry.workforceEma >= REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 	);
 }
+
+export function isRepresentationPublicationRequired(
+	executivesCount: ExecutivesCount,
+	hasManagementBody: boolean,
+): boolean {
+	return executivesCount === "two_or_more" || hasManagementBody === true;
+}

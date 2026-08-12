@@ -6,6 +6,7 @@ import {
 	getRepresentationCampaignYear,
 	getRepresentationTarget,
 	isPresumedSubjectToRepresentation,
+	isRepresentationPublicationRequired,
 	REPRESENTATION_SUBJECTION_WINDOW_YEARS,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 	REPRESENTATION_TARGET_INITIAL,
@@ -286,6 +287,25 @@ describe("isPresumedSubjectToRepresentation", () => {
 	});
 });
 
+describe("isRepresentationPublicationRequired", () => {
+	it("requires publication when executives are computable, whatever the management body", () => {
+		expect(isRepresentationPublicationRequired("two_or_more", false)).toBe(
+			true,
+		);
+		expect(isRepresentationPublicationRequired("two_or_more", true)).toBe(true);
+	});
+
+	it("requires publication when a management body exists, whatever the executives count", () => {
+		expect(isRepresentationPublicationRequired("none", true)).toBe(true);
+		expect(isRepresentationPublicationRequired("one", true)).toBe(true);
+	});
+
+	it("does not require publication when no indicator is computable", () => {
+		expect(isRepresentationPublicationRequired("none", false)).toBe(false);
+		expect(isRepresentationPublicationRequired("one", false)).toBe(false);
+	});
+});
+
 describe("verdict independence (S16)", () => {
 	// An aggregated verdict would let a compliant indicator mask a failing one.
 	it("exposes no aggregated verdict helper", async () => {
@@ -301,6 +321,7 @@ describe("verdict independence (S16)", () => {
 			"getRepresentationCampaignYear",
 			"getRepresentationTarget",
 			"isPresumedSubjectToRepresentation",
+			"isRepresentationPublicationRequired",
 		]);
 	});
 
