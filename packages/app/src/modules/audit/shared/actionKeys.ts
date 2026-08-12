@@ -91,6 +91,11 @@ export const AUDIT_ACTIONS = {
 	DRAFT_SAVE: "declaration_draft.save",
 	DRAFT_CLEAR: "declaration_draft.clear",
 
+	// ── Representation declaration ─────────────────────────
+	REPRESENTATION_GET: "representation_declaration.get",
+	REPRESENTATION_SAVE_DRAFT: "representation_declaration.save_draft",
+	REPRESENTATION_SUBMIT: "representation_declaration.submit",
+
 	// ── Sensitive reads ────────────────────────────────────
 	DECLARATION_HISTORY_READ: "declaration_history.read",
 	ADMIN_FILE_DOWNLOAD: "admin.file_download",
@@ -208,6 +213,9 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.DRAFT_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DRAFT_SAVE]: "mutation",
 	[AUDIT_ACTIONS.DRAFT_CLEAR]: "mutation",
+	[AUDIT_ACTIONS.REPRESENTATION_GET]: "read_sensitive",
+	[AUDIT_ACTIONS.REPRESENTATION_SAVE_DRAFT]: "mutation",
+	[AUDIT_ACTIONS.REPRESENTATION_SUBMIT]: "mutation",
 	[AUDIT_ACTIONS.DECLARATION_HISTORY_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PROFILE_READ]: "read_sensitive",
