@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { campaignDeadlinesFormSchema } from "../schemas";
+import {
+	campaignDeadlinesFormSchema,
+	getRepresentationCampaignByYearSchema,
+	representationCampaignFormSchema,
+} from "../schemas";
 
 const validDates = {
 	decl1ModificationDeadline: "2026-06-01",
@@ -92,5 +96,106 @@ describe("campaignDeadlinesFormSchema", () => {
 			decl2ModificationDeadline: "2026-05-01",
 		});
 		expect(result.success).toBe(false);
+	});
+});
+
+const validRepresentationCampaign = {
+	year: 2026,
+	campaignStartDate: "2026-02-01",
+	campaignEndDate: "2026-11-30",
+	declarationDeadline: "2026-04-15",
+};
+
+describe("representationCampaignFormSchema", () => {
+	it("accepts a valid payload", () => {
+		const result = representationCampaignFormSchema.safeParse(
+			validRepresentationCampaign,
+		);
+		expect(result.success).toBe(true);
+	});
+
+	it.each([
+		"campaignStartDate",
+		"campaignEndDate",
+		"declarationDeadline",
+	] as const)("requires %s", (field) => {
+		const result = representationCampaignFormSchema.safeParse({
+			...validRepresentationCampaign,
+			[field]: "",
+		});
+		expect(result.success).toBe(false);
+	});
+
+	it.each([
+		"campaignStartDate",
+		"campaignEndDate",
+		"declarationDeadline",
+	] as const)("rejects a non ISO %s", (field) => {
+		const result = representationCampaignFormSchema.safeParse({
+			...validRepresentationCampaign,
+			[field]: "01/02/2026",
+		});
+		expect(result.success).toBe(false);
+	});
+
+	it("rejects an end date before the start date, flagged on campaignEndDate", () => {
+		const result = representationCampaignFormSchema.safeParse({
+			...validRepresentationCampaign,
+			campaignEndDate: "2026-01-15",
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			const issue = result.error.issues[0];
+			expect(issue?.path).toEqual(["campaignEndDate"]);
+			expect(issue?.message).toBe(
+				"La date de démarrage de la campagne doit être antérieure à la date de clôture.",
+			);
+		}
+	});
+
+	it("rejects an end date equal to the start date", () => {
+		const result = representationCampaignFormSchema.safeParse({
+			...validRepresentationCampaign,
+			campaignEndDate: validRepresentationCampaign.campaignStartDate,
+		});
+		expect(result.success).toBe(false);
+	});
+
+	it("accepts a declaration deadline outside the campaign window", () => {
+		const result = representationCampaignFormSchema.safeParse({
+			...validRepresentationCampaign,
+			declarationDeadline: "2027-01-31",
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it("rejects years below FIRST_DECLARATION_YEAR", () => {
+		const result = representationCampaignFormSchema.safeParse({
+			...validRepresentationCampaign,
+			year: 1999,
+		});
+		expect(result.success).toBe(false);
+	});
+
+	it("rejects years above 2100", () => {
+		const result = representationCampaignFormSchema.safeParse({
+			...validRepresentationCampaign,
+			year: 2101,
+		});
+		expect(result.success).toBe(false);
+	});
+});
+
+describe("getRepresentationCampaignByYearSchema", () => {
+	it("accepts a supported year", () => {
+		expect(
+			getRepresentationCampaignByYearSchema.safeParse({ year: 2026 }).success,
+		).toBe(true);
+	});
+
+	it("rejects a non-integer year", () => {
+		expect(
+			getRepresentationCampaignByYearSchema.safeParse({ year: 2026.5 }).success,
+		).toBe(false);
 	});
 });

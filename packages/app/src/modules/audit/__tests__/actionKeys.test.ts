@@ -28,6 +28,28 @@ describe("AUDIT_ACTIONS", () => {
 		).toBe("mutation");
 	});
 
+	it("maps the representation campaign upsert to a mutation", () => {
+		expect(AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN).toBe(
+			"admin_settings.upsert_representation_campaign",
+		);
+		expect(
+			AUDIT_ACTION_CATEGORIES[
+				AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN
+			],
+		).toBe("mutation");
+	});
+
+	it("maps the representation campaign read to a sensitive read", () => {
+		expect(AUDIT_ACTIONS.ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN).toBe(
+			"admin_settings.get_representation_campaign",
+		);
+		expect(
+			AUDIT_ACTION_CATEGORIES[
+				AUDIT_ACTIONS.ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN
+			],
+		).toBe("read_sensitive");
+	});
+
 	it("maps the declaration lock state read to a sensitive read (holder PII)", () => {
 		expect(AUDIT_ACTIONS.DECLARATION_LOCK_STATE_READ).toBe(
 			"declaration.lock_state_read",

@@ -37,6 +37,14 @@ vi.mock("../LockTimeoutForm", () => ({
 		}),
 }));
 
+vi.mock("../RepresentationCampaignForm", () => ({
+	RepresentationCampaignForm: (props: { initialYear: number }) =>
+		React.createElement("div", {
+			"data-testid": "representation-campaign-form",
+			"data-initial-year": props.initialYear,
+		}),
+}));
+
 import { AdminSettingsPage } from "../AdminSettingsPage";
 
 describe("AdminSettingsPage", () => {
@@ -73,6 +81,28 @@ describe("AdminSettingsPage", () => {
 		expect(deadlines.getAttribute("data-initial-year")).toBe(
 			String(new Date().getFullYear()),
 		);
+	});
+
+	it("seeds the representation campaign form with the current year, independently of the configured deadline years", async () => {
+		getOverviewMock.mockResolvedValue({ configuredYears: [2019, 2020] });
+		getLockTimeoutMock.mockResolvedValue({ timeoutMinutes: 30 });
+		render(await AdminSettingsPage());
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: /campagne représentation équilibrée/i,
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen
+				.getByTestId("campaign-deadlines-form")
+				.getAttribute("data-initial-year"),
+		).toBe("2020");
+		expect(
+			screen
+				.getByTestId("representation-campaign-form")
+				.getAttribute("data-initial-year"),
+		).toBe(String(new Date().getFullYear()));
 	});
 
 	it("renders the lock timeout section seeded with the stored timeout", async () => {
