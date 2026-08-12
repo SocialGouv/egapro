@@ -9,6 +9,7 @@ import { useIsImpersonating } from "~/modules/auth";
 import { hasRequiredDeclarationInfo } from "~/modules/domain";
 import { DECLARATION_PROCESS_PANEL_ID } from "./DeclarationProcessPanel";
 import styles from "./DeclarationsSection.module.scss";
+import { REPRESENTATION_PROCESS_PANEL_ID } from "./RepresentationProcessPanel";
 import type { DeclarationType } from "./types";
 
 const MISSING_INFO_MODAL_ID = "missing-info-modal";
@@ -50,30 +51,26 @@ export function DeclarationLink({
 		);
 	}
 
-	// Remuneration: open the declaration process side panel
-	if (type === "remuneration") {
-		return (
-			<button
-				aria-controls={DECLARATION_PROCESS_PANEL_ID}
-				className={linkClass}
-				data-fr-opened="false"
-				onClick={() =>
-					trackEvent({
-						category: MATOMO_EVENT_CATEGORY.DASHBOARD,
-						action: MATOMO_ACTION.DECLARATION_START,
-						name: type,
-					})
-				}
-				type="button"
-			>
-				{children}
-			</button>
-		);
-	}
+	// Open the declaration process side panel (one per type)
+	const panelId =
+		type === "remuneration"
+			? DECLARATION_PROCESS_PANEL_ID
+			: REPRESENTATION_PROCESS_PANEL_ID;
 
-	// Representation: placeholder (no route yet)
 	return (
-		<button className={linkClass} type="button">
+		<button
+			aria-controls={panelId}
+			className={linkClass}
+			data-fr-opened="false"
+			onClick={() =>
+				trackEvent({
+					category: MATOMO_EVENT_CATEGORY.DASHBOARD,
+					action: MATOMO_ACTION.DECLARATION_START,
+					name: type,
+				})
+			}
+			type="button"
+		>
 			{children}
 		</button>
 	);

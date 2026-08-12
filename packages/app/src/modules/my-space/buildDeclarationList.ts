@@ -9,7 +9,7 @@ import type {
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
 
-type DbDeclaration = {
+export type DbDeclaration = {
 	type: DeclarationType;
 	year: number;
 	status: DeclarationStatus;

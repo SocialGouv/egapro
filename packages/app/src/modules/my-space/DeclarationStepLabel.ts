@@ -1,4 +1,9 @@
-import type { DeclarationFsmStatus, DeclarationType } from "~/modules/domain";
+import { REPRESENTATION_STEPS } from "~/modules/declaration-representation";
+import type {
+	DeclarationFsmStatus,
+	DeclarationStatus,
+	DeclarationType,
+} from "~/modules/domain";
 
 const PROCESS_STEP_LABELS: Record<DeclarationFsmStatus, string> = {
 	draft: "Déclaration des indicateurs de rémunération",
@@ -14,12 +19,31 @@ const PROCESS_STEP_LABELS: Record<DeclarationFsmStatus, string> = {
 	demarche_completed: "Finalisation - Démarche des indicateurs de rémunération",
 };
 
+const REPRESENTATION_START_LABEL = "Vérification de l'assujettissement";
+
+function getRepresentationStepLabel(
+	status: DeclarationStatus,
+	currentStep: number,
+): string {
+	if (status === "done") {
+		return "Finalisation - Démarche des indicateurs de représentation";
+	}
+	if (status === "to_complete") {
+		return REPRESENTATION_START_LABEL;
+	}
+	return (
+		REPRESENTATION_STEPS[currentStep - 1]?.title ?? REPRESENTATION_START_LABEL
+	);
+}
+
 export function getDeclarationProcessStepLabel(d: {
 	type: DeclarationType;
 	fsmStatus: DeclarationFsmStatus | null;
+	status: DeclarationStatus;
+	currentStep: number;
 }): string {
-	// The représentation équilibrée journey has no state machine yet, so every row
-	// sits on its first step: checking whether the company is in scope.
-	if (d.type === "representation") return "Vérification de l'assujettissement";
+	if (d.type === "representation") {
+		return getRepresentationStepLabel(d.status, d.currentStep);
+	}
 	return PROCESS_STEP_LABELS[d.fsmStatus ?? "draft"];
 }
