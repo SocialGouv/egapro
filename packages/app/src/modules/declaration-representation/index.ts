@@ -2,6 +2,7 @@ export { DeclarationLayout } from "./DeclarationLayout";
 export { RepresentationPlayground } from "./RepresentationPlayground";
 export { StepPageClient } from "./StepPageClient";
 export { Stepper } from "./Stepper";
+export { SubjectionScreen } from "./SubjectionScreen";
 export {
 	executivesCountSchema,
 	executivesSchema,
@@ -11,6 +12,7 @@ export {
 	referencePeriodSchema,
 	representationDraftSchema,
 	saveRepresentationDraftSchema,
+	subjectionSchema,
 	submitRepresentationDeclarationSchema,
 	submitRepresentationSchema,
 } from "./schemas";

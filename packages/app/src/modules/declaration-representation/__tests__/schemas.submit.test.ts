@@ -114,11 +114,14 @@ describe("submitRepresentationSchema", () => {
 	});
 
 	it("reports the reference period issue when the year does not match (S4)", () => {
-		const result = submitRepresentationSchema(2026).safeParse(FULL_PAYLOAD);
+		const otherYear = YEAR + 1;
+
+		const result =
+			submitRepresentationSchema(otherYear).safeParse(FULL_PAYLOAD);
 
 		expect(issues(result)).toContainEqual({
 			path: "referencePeriodEnd",
-			message: VALIDATION_MESSAGES.periodYear,
+			message: VALIDATION_MESSAGES.periodYear(otherYear),
 		});
 	});
 
