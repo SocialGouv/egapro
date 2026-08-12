@@ -1,6 +1,7 @@
 "use client";
 
-import { DownloadStatusRegion, useDownloadClickGuard } from "~/modules/shared";
+import { DownloadStatusRegion } from "./DownloadStatusRegion";
+import { useDownloadClickGuard } from "./useDownloadClickGuard";
 
 const PENDING_LABEL = "Téléchargement en cours…";
 
