@@ -127,6 +127,11 @@ export const AUDIT_ACTIONS = {
 	PUBLIC_DECLARATIONS_BY_SIREN: "public_declarations.by_siren",
 	PUBLIC_DECLARATIONS_BY_SIREN_YEAR: "public_declarations.by_siren_year",
 
+	// ── Public representation reads ────────────────────────
+	PUBLIC_REPRESENTATIONS_SEARCH: "public_representations.search",
+	PUBLIC_REPRESENTATIONS_BY_SIREN: "public_representations.by_siren",
+	PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR: "public_representations.by_siren_year",
+
 	// ── System / cron-triggered ────────────────────────────
 	SYSTEM_AUDIT_CLEANUP: "system.audit_cleanup",
 	SYSTEM_DECLARATION_CLEANUP: "system.declaration_cleanup",
@@ -228,6 +233,10 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN]: "read_sensitive",
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN_YEAR]: "read_sensitive",
+
+	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_SEARCH]: "read_sensitive",
+	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN]: "read_sensitive",
+	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR]: "read_sensitive",
 
 	[AUDIT_ACTIONS.SYSTEM_AUDIT_CLEANUP]: "system",
 	[AUDIT_ACTIONS.SYSTEM_DECLARATION_CLEANUP]: "system",
