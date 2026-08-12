@@ -13,6 +13,11 @@ export {
 	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,
 } from "./fetchDeclarations";
+export type { RepresentationRow } from "./fetchRepresentations";
+export {
+	assembleRepresentation,
+	fetchSubmittedRepresentations,
+} from "./fetchRepresentations";
 export type { RepresentationExportRow } from "./generateRepresentationExport";
 export {
 	buildRepresentationExportRows,
