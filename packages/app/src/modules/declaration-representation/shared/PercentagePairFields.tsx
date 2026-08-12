@@ -118,6 +118,7 @@ export function PercentagePairFields({
 							<input
 								aria-describedby={describedBy || undefined}
 								aria-invalid={error ? true : undefined}
+								aria-required="true"
 								className="fr-input"
 								id={womenId}
 								inputMode="decimal"
@@ -137,6 +138,7 @@ export function PercentagePairFields({
 							<input
 								aria-describedby={describedBy || undefined}
 								aria-invalid={error ? true : undefined}
+								aria-required="true"
 								className="fr-input"
 								id={menId}
 								inputMode="decimal"

@@ -10,6 +10,7 @@ import {
 	computeRepresentationVerdict,
 	getRepresentationCampaignYear,
 	getRepresentationTarget,
+	parseNumber,
 	REPRESENTATION_TARGET_INITIAL,
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
@@ -52,7 +53,7 @@ const EXECUTIVES_COUNT_OPTIONS: {
 
 function parsePercent(raw: string): number | undefined {
 	if (raw === "" || raw.endsWith(".") || raw.endsWith(",")) return undefined;
-	const value = Number(raw.replace(",", "."));
+	const value = parseNumber(raw);
 	return Number.isFinite(value) ? value : undefined;
 }
 
@@ -242,8 +243,10 @@ export function Step2Executives() {
 								<p className="fr-callout__text">
 									<strong>{gapReminderTitle(knownVerdict, target)}</strong>{" "}
 									Depuis le 1er mars 2026, le sexe sous-représenté doit
-									représenter au moins 30 % des cadres dirigeants. À partir du
-									1er mars 2029, ce seuil passera à 40 %.
+									représenter au moins {REPRESENTATION_TARGET_INITIAL} % des
+									cadres dirigeants. À partir du 1er mars{" "}
+									{REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR}, ce seuil
+									passera à {REPRESENTATION_TARGET_RAISED} %.
 								</p>
 							</div>
 						</div>

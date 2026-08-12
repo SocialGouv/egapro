@@ -199,6 +199,14 @@ describe("PercentagePairFields — accessibility and states", () => {
 		expect(men).toHaveAttribute("aria-describedby", hint.id);
 	});
 
+	it("flags both percentages as required fields", () => {
+		render(<Harness />);
+		const { women, men } = fields();
+
+		expect(women).toHaveAttribute("aria-required", "true");
+		expect(men).toHaveAttribute("aria-required", "true");
+	});
+
 	it("supports custom labels and hint", () => {
 		render(
 			<Harness
