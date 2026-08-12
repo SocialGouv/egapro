@@ -14,6 +14,23 @@ vi.mock("~/server/db/schema", () => ({
 	companies: { siren: "companies.siren" },
 	campaignDeadlines: { year: "cd.year", publicDataReleaseDate: "cd.release" },
 	gipMdsData: { siren: "gip.siren", year: "gip.year" },
+	// Pulled in at module scope by the ~/modules/public-api barrel.
+	representationDeclarations: {
+		siren: "rd.siren",
+		year: "rd.year",
+		status: "rd.status",
+		referencePeriodStart: "rd.referencePeriodStart",
+		referencePeriodEnd: "rd.referencePeriodEnd",
+		executiveWomenPercent: "rd.executiveWomenPercent",
+		executiveMenPercent: "rd.executiveMenPercent",
+		notComputableReasonExecutives: "rd.notComputableReasonExecutives",
+		memberWomenPercent: "rd.memberWomenPercent",
+		memberMenPercent: "rd.memberMenPercent",
+		notComputableReasonMembers: "rd.notComputableReasonMembers",
+		publishDate: "rd.publishDate",
+		publishUrl: "rd.publishUrl",
+		publishModalities: "rd.publishModalities",
+	},
 }));
 
 vi.mock("drizzle-orm", () => ({
