@@ -5,6 +5,9 @@ import {
 	deriveExecutivesNotComputableReason,
 	getRepresentationCampaignYear,
 	getRepresentationTarget,
+	isPresumedSubjectToRepresentation,
+	REPRESENTATION_SUBJECTION_WINDOW_YEARS,
+	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 	REPRESENTATION_TARGET_INITIAL,
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
@@ -22,6 +25,15 @@ describe("regulatory constants", () => {
 
 	it("pins the raised-target campaign year at 2029", () => {
 		expect(REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR).toBe(2029);
+	});
+
+	// art. L. 1142-11 — "at least 1 000 employees".
+	it("pins the subjection workforce threshold at 1 000", () => {
+		expect(REPRESENTATION_SUBJECTION_WORKFORCE_MIN).toBe(1000);
+	});
+
+	it("pins the subjection window at 3 years", () => {
+		expect(REPRESENTATION_SUBJECTION_WINDOW_YEARS).toBe(3);
 	});
 });
 
@@ -112,11 +124,175 @@ describe("getRepresentationCampaignYear", () => {
 	});
 });
 
+describe("isPresumedSubjectToRepresentation", () => {
+	it("presumes subjection from a single known year above the threshold (S33)", () => {
+		expect(
+			isPresumedSubjectToRepresentation(
+				[{ year: 2026, workforceEma: 1200 }],
+				2026,
+			),
+		).toBe(true);
+	});
+
+	it("presumes subjection when both known years are above the threshold (S34)", () => {
+		expect(
+			isPresumedSubjectToRepresentation(
+				[
+					{ year: 2026, workforceEma: 1200 },
+					{ year: 2025, workforceEma: 1050 },
+				],
+				2026,
+			),
+		).toBe(true);
+	});
+
+	it("presumes subjection when the three known years are above the threshold (S35)", () => {
+		expect(
+			isPresumedSubjectToRepresentation(
+				[
+					{ year: 2026, workforceEma: 1200 },
+					{ year: 2025, workforceEma: 1050 },
+					{ year: 2024, workforceEma: 1400 },
+				],
+				2026,
+			),
+		).toBe(true);
+	});
+
+	it("ignores years older than the three-year sliding window (S35)", () => {
+		expect(
+			isPresumedSubjectToRepresentation(
+				[
+					{ year: 2026, workforceEma: 1200 },
+					{ year: 2025, workforceEma: 1050 },
+					{ year: 2024, workforceEma: 1400 },
+					{ year: 2023, workforceEma: 800 },
+				],
+				2026,
+			),
+		).toBe(true);
+	});
+
+	it("drops the presumption when a single year of the window is below the threshold (S36)", () => {
+		expect(
+			isPresumedSubjectToRepresentation(
+				[
+					{ year: 2026, workforceEma: 1200 },
+					{ year: 2025, workforceEma: 940 },
+					{ year: 2024, workforceEma: 1400 },
+				],
+				2026,
+			),
+		).toBe(false);
+	});
+
+	it("treats the threshold as inclusive at exactly 1 000 (S37)", () => {
+		expect(
+			isPresumedSubjectToRepresentation(
+				[
+					{ year: 2026, workforceEma: 1000 },
+					{ year: 2025, workforceEma: 1000 },
+					{ year: 2024, workforceEma: 1000 },
+				],
+				2026,
+			),
+		).toBe(true);
+	});
+
+	it("compares the exact workforce value, without rounding up (S37)", () => {
+		expect(
+			isPresumedSubjectToRepresentation(
+				[{ year: 2026, workforceEma: 999.99 }],
+				2026,
+			),
+		).toBe(false);
+	});
+
+	it("presumes subjection when no workforce is known (S38)", () => {
+		expect(isPresumedSubjectToRepresentation([], 2026)).toBe(true);
+	});
+
+	// Divergence from `getObligationWorkforce`, which reads a missing GIP record as
+	// a 0 headcount: here an unknown workforce is neutral, never a below-threshold one.
+	it("does not read an unknown workforce as a zero headcount (S38)", () => {
+		expect(isPresumedSubjectToRepresentation([], 2026)).toBe(true);
+		expect(
+			isPresumedSubjectToRepresentation(
+				[{ year: 2026, workforceEma: 0 }],
+				2026,
+			),
+		).toBe(false);
+	});
+
+	it("ignores years more recent than the reference year (S39)", () => {
+		expect(
+			isPresumedSubjectToRepresentation(
+				[
+					{ year: 2027, workforceEma: 500 },
+					{ year: 2026, workforceEma: 1200 },
+				],
+				2026,
+			),
+		).toBe(true);
+	});
+
+	it("stays visible on the available years while the latest vintage is missing (S39)", () => {
+		const knownYears = [
+			{ year: 2025, workforceEma: 1200 },
+			{ year: 2024, workforceEma: 1050 },
+		];
+
+		expect(isPresumedSubjectToRepresentation(knownYears, 2026)).toBe(true);
+	});
+
+	it("re-evaluates on its own once the missing vintage is published (S39)", () => {
+		const knownYears = [
+			{ year: 2025, workforceEma: 1200 },
+			{ year: 2024, workforceEma: 1050 },
+		];
+		const afterPublication = [{ year: 2026, workforceEma: 940 }, ...knownYears];
+
+		expect(isPresumedSubjectToRepresentation(afterPublication, 2026)).toBe(
+			false,
+		);
+	});
+
+	it("orders the window by year regardless of the input order", () => {
+		expect(
+			isPresumedSubjectToRepresentation(
+				[
+					{ year: 2023, workforceEma: 800 },
+					{ year: 2025, workforceEma: 1050 },
+					{ year: 2024, workforceEma: 1400 },
+					{ year: 2026, workforceEma: 1200 },
+				],
+				2026,
+			),
+		).toBe(true);
+	});
+
+	it("does not mutate the caller's workforce list", () => {
+		const workforces = [
+			{ year: 2024, workforceEma: 1400 },
+			{ year: 2026, workforceEma: 1200 },
+		];
+
+		isPresumedSubjectToRepresentation(workforces, 2026);
+
+		expect(workforces).toEqual([
+			{ year: 2024, workforceEma: 1400 },
+			{ year: 2026, workforceEma: 1200 },
+		]);
+	});
+});
+
 describe("verdict independence (S16)", () => {
 	// An aggregated verdict would let a compliant indicator mask a failing one.
 	it("exposes no aggregated verdict helper", async () => {
 		const representation = await import("../shared/representation");
 		expect(Object.keys(representation).sort()).toEqual([
+			"REPRESENTATION_SUBJECTION_WINDOW_YEARS",
+			"REPRESENTATION_SUBJECTION_WORKFORCE_MIN",
 			"REPRESENTATION_TARGET_INITIAL",
 			"REPRESENTATION_TARGET_RAISED",
 			"REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR",
@@ -124,6 +300,7 @@ describe("verdict independence (S16)", () => {
 			"deriveExecutivesNotComputableReason",
 			"getRepresentationCampaignYear",
 			"getRepresentationTarget",
+			"isPresumedSubjectToRepresentation",
 		]);
 	});
 
