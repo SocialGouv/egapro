@@ -28,11 +28,16 @@ test.describe("company edit modal — contact link colour", () => {
 		await page.goto("/mon-espace");
 
 		await waitForDsfrModal(page, MODAL_ID);
-		await clickAndExpectDialogOpen(
-			page,
-			page.locator(`button[aria-controls="${MODAL_ID}"]`),
-			MODAL_ID,
-		);
+
+		// The dialog's own "Fermer"/"Annuler" buttons repeat its aria-controls (DSFR
+		// idiom), so an attribute selector matches three elements. A role locator skips
+		// the closed dialog's hidden subtree and leaves the trigger alone.
+		const editTrigger = page.getByRole("button", {
+			name: "Modifier",
+			exact: true,
+		});
+		await expect(editTrigger).toBeVisible();
+		await clickAndExpectDialogOpen(page, editTrigger, MODAL_ID);
 
 		const contactLink = page
 			.locator(`#${MODAL_ID}`)
