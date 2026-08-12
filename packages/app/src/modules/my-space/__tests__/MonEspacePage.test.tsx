@@ -51,6 +51,15 @@ vi.mock("~/server/db/getCampaignDeadlines", async () => {
 	};
 });
 
+vi.mock("~/server/db/getRepresentationCampaign", async () => {
+	const { getDefaultRepresentationCampaign } = await import("~/modules/domain");
+	return {
+		getRepresentationCampaign: vi
+			.fn()
+			.mockResolvedValue(getDefaultRepresentationCampaign(2026)),
+	};
+});
+
 vi.mock("~/trpc/server", () => ({
 	api: {
 		company: {

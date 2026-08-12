@@ -1,13 +1,23 @@
 import { describe, expect, it } from "vitest";
 
+import {
+	REPRESENTATION_FUNNEL_ROOT,
+	stepHref,
+	TOTAL_REPRESENTATION_STEPS,
+} from "~/modules/declaration-representation";
 import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
 import {
 	computeCtaHref,
 	computePanelVariant,
+	computeRepresentationCtaHref,
+	computeRepresentationPanelVariant,
 } from "../declarationProcessState";
 import type { DeclarationItem } from "../types";
 
 const SIREN = "532847196";
+const RECAP_HREF = stepHref(TOTAL_REPRESENTATION_STEPS);
+const CAMPAIGN_OPEN = true;
+const CAMPAIGN_CLOSED = false;
 
 function makeDeclaration(
 	overrides: Partial<DeclarationItem> = {},
@@ -67,6 +77,119 @@ describe("computeCtaHref", () => {
 		for (const fsmStatus of DECLARATION_FSM_STATUSES) {
 			expect(computeCtaHref(makeDeclaration({ fsmStatus }), SIREN)).toContain(
 				`?siren=${SIREN}`,
+			);
+		}
+	});
+});
+
+function makeRepresentation(
+	overrides: Partial<DeclarationItem> = {},
+): DeclarationItem {
+	return makeDeclaration({
+		type: "representation",
+		fsmStatus: null,
+		status: "to_complete",
+		currentStep: 0,
+		...overrides,
+	});
+}
+
+describe("computeRepresentationPanelVariant", () => {
+	it('returns "start" when no démarche exists yet', () => {
+		expect(computeRepresentationPanelVariant(undefined, CAMPAIGN_OPEN)).toBe(
+			"start",
+		);
+	});
+
+	it('returns "start" for a démarche that is only listed, never opened', () => {
+		expect(
+			computeRepresentationPanelVariant(makeRepresentation(), CAMPAIGN_OPEN),
+		).toBe("start");
+	});
+
+	it('returns "draft" for a démarche in progress', () => {
+		expect(
+			computeRepresentationPanelVariant(
+				makeRepresentation({ status: "in_progress", currentStep: 3 }),
+				CAMPAIGN_OPEN,
+			),
+		).toBe("draft");
+	});
+
+	it('returns "submitted" once the démarche is transmitted', () => {
+		expect(
+			computeRepresentationPanelVariant(
+				makeRepresentation({ status: "done", currentStep: 5 }),
+				CAMPAIGN_OPEN,
+			),
+		).toBe("submitted");
+	});
+
+	it('returns "closed" for every démarche state once the campaign is closed', () => {
+		const declarations = [
+			undefined,
+			makeRepresentation(),
+			makeRepresentation({ status: "in_progress", currentStep: 3 }),
+			makeRepresentation({ status: "done", currentStep: 5 }),
+		];
+		for (const declaration of declarations) {
+			expect(
+				computeRepresentationPanelVariant(declaration, CAMPAIGN_CLOSED),
+			).toBe("closed");
+		}
+	});
+});
+
+describe("computeRepresentationCtaHref", () => {
+	it("sends a company with no démarche to the funnel entry point", () => {
+		expect(computeRepresentationCtaHref(undefined, CAMPAIGN_OPEN)).toBe(
+			REPRESENTATION_FUNNEL_ROOT,
+		);
+	});
+
+	it("sends a listed-but-unopened démarche to the funnel entry point", () => {
+		expect(
+			computeRepresentationCtaHref(makeRepresentation(), CAMPAIGN_OPEN),
+		).toBe(REPRESENTATION_FUNNEL_ROOT);
+	});
+
+	it("resumes a draft on the step it stopped at", () => {
+		expect(
+			computeRepresentationCtaHref(
+				makeRepresentation({ status: "in_progress", currentStep: 3 }),
+				CAMPAIGN_OPEN,
+			),
+		).toBe(stepHref(3));
+	});
+
+	it("resumes on the first step when an in-progress draft has no step yet", () => {
+		expect(
+			computeRepresentationCtaHref(
+				makeRepresentation({ status: "in_progress", currentStep: 0 }),
+				CAMPAIGN_OPEN,
+			),
+		).toBe(stepHref(1));
+	});
+
+	it("sends a transmitted démarche to its recap", () => {
+		expect(
+			computeRepresentationCtaHref(
+				makeRepresentation({ status: "done", currentStep: 5 }),
+				CAMPAIGN_OPEN,
+			),
+		).toBe(RECAP_HREF);
+	});
+
+	it("sends every démarche state to the recap once the campaign is closed", () => {
+		const declarations = [
+			undefined,
+			makeRepresentation(),
+			makeRepresentation({ status: "in_progress", currentStep: 3 }),
+			makeRepresentation({ status: "done", currentStep: 5 }),
+		];
+		for (const declaration of declarations) {
+			expect(computeRepresentationCtaHref(declaration, CAMPAIGN_CLOSED)).toBe(
+				RECAP_HREF,
 			);
 		}
 	});

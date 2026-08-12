@@ -1,13 +1,19 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { getCurrentYear, getDefaultCampaignDeadlines } from "~/modules/domain";
+import type { RepresentationCampaign } from "~/modules/domain";
+import {
+	getCurrentYear,
+	getDefaultCampaignDeadlines,
+	getDefaultRepresentationCampaign,
+} from "~/modules/domain";
 import { DeclarationsSection } from "../DeclarationsSection";
 import type { DeclarationItem } from "../types";
 
 const SIREN = "532847196";
 const currentYear = getCurrentYear();
 const campaignDeadlines = getDefaultCampaignDeadlines(currentYear);
+const representationCampaign = getDefaultRepresentationCampaign(currentYear);
 
 const NO_COMPLIANCE = {
 	fsmStatus: null,
@@ -53,7 +59,10 @@ const declarations: DeclarationItem[] = [
 ];
 
 function renderSection(
-	overrides?: Partial<{ declarations: DeclarationItem[] }>,
+	overrides?: Partial<{
+		declarations: DeclarationItem[];
+		representationCampaign: RepresentationCampaign;
+	}>,
 ) {
 	return render(
 		<DeclarationsSection
@@ -61,6 +70,9 @@ function renderSection(
 			cseApplicable={true}
 			declarations={overrides?.declarations ?? declarations}
 			hasCse={true}
+			representationCampaign={
+				overrides?.representationCampaign ?? representationCampaign
+			}
 			userPhone="0122334455"
 		/>,
 	);
@@ -162,9 +174,57 @@ describe("DeclarationsSection", () => {
 
 	it("shows the first representation step in the 'Étape' column", () => {
 		renderSection();
+		const [currentTable] = screen.getAllByRole("table");
 		expect(
-			screen.getByText("Vérification de l'assujettissement"),
+			within(currentTable as HTMLElement).getByText(
+				"Vérification de l'assujettissement",
+			),
 		).toBeInTheDocument();
+	});
+
+	it("shows the draft step title in the 'Étape' column of an in-progress representation row", () => {
+		renderSection({
+			declarations: [
+				{
+					type: "representation",
+					siren: SIREN,
+					year: currentYear,
+					status: "in_progress",
+					currentStep: 3,
+					updatedAt: new Date("2026-02-10"),
+					...NO_COMPLIANCE,
+				},
+			],
+		});
+		const [currentTable] = screen.getAllByRole("table");
+		expect(
+			within(currentTable as HTMLElement).getByText(
+				"Écarts de représentation - Instances dirigeantes",
+			),
+		).toBeInTheDocument();
+	});
+
+	it("takes the representation deadline from the campaign, not from a fixed 1st of March", () => {
+		renderSection({
+			representationCampaign: {
+				...representationCampaign,
+				declarationDeadline: new Date(currentYear, 3, 15),
+			},
+		});
+		const [currentTable] = screen.getAllByRole("table");
+		expect(
+			within(currentTable as HTMLElement).getByText(`15/04/${currentYear}`),
+		).toBeInTheDocument();
+	});
+
+	it("renders the representation side panel once, wired to the representation link", () => {
+		const { container } = renderSection();
+		expect(
+			container.querySelectorAll("#representation-process-panel"),
+		).toHaveLength(1);
+		expect(
+			screen.getByRole("button", { name: "Représentation" }),
+		).toHaveAttribute("aria-controls", "representation-process-panel");
 	});
 
 	it("does not render the page size selector when there are 20 rows or fewer", () => {

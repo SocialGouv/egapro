@@ -24,7 +24,11 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
-import { getCurrentYear, getDefaultCampaignDeadlines } from "~/modules/domain";
+import {
+	getCurrentYear,
+	getDefaultCampaignDeadlines,
+	getDefaultRepresentationCampaign,
+} from "~/modules/domain";
 import { CompanyDeclarationsPage } from "../CompanyDeclarationsPage";
 import type { CompanyDetail, DeclarationItem } from "../types";
 
@@ -90,6 +94,7 @@ const BASE_PROPS = {
 	declarations,
 	lockedByOther: false,
 	lockHolder: null as LockHolder | null,
+	representationCampaign: getDefaultRepresentationCampaign(currentYear),
 	userPhone: "0122334455" as string | null,
 };
 
