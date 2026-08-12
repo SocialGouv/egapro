@@ -101,6 +101,7 @@ export const AUDIT_ACTIONS = {
 	EXPORT_GENERATE: "export.generate",
 	EXPORT_API_DECLARATIONS: "export.api_declarations",
 	EXPORT_API_FILES: "export.api_files",
+	EXPORT_API_REPRESENTATIONS: "export.api_representations",
 
 	// ── Mail ───────────────────────────────────────────────
 	MAIL_RECEIPT_SEND: "mail.receipt_send",
@@ -208,6 +209,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.EXPORT_GENERATE]: "export",
 	[AUDIT_ACTIONS.EXPORT_API_DECLARATIONS]: "export",
 	[AUDIT_ACTIONS.EXPORT_API_FILES]: "export",
+	[AUDIT_ACTIONS.EXPORT_API_REPRESENTATIONS]: "export",
 
 	[AUDIT_ACTIONS.MAIL_RECEIPT_SEND]: "mutation",
 	[AUDIT_ACTIONS.MAIL_RECEIPT_RESEND]: "mutation",
