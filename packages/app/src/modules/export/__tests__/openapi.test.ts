@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
+import {
+	representationNotComputableExecutivesEnum,
+	representationNotComputableMembersEnum,
+} from "~/server/db/schema";
 import { openApiSpec } from "../openapi";
 
 describe("openApiSpec", () => {
@@ -61,6 +65,89 @@ describe("openApiSpec", () => {
 		expect(details.type).toBe("array");
 		expect(details.items).toBeDefined();
 		expect(details.items.type).toBe("object");
+	});
+
+	describe("representations endpoint", () => {
+		const path = openApiSpec.paths["/api/v1/export/representations"];
+
+		it("should define the representations endpoint", () => {
+			expect(path).toBeDefined();
+			expect(path.get).toBeDefined();
+			expect(path.get.operationId).toBe("getRepresentations");
+		});
+
+		it("should require date_begin and make date_end optional", () => {
+			const params = path.get.parameters;
+			expect(params.find((p) => p.name === "date_begin")?.required).toBe(true);
+			expect(params.find((p) => p.name === "date_end")?.required).toBe(false);
+		});
+
+		it("should define the same response codes as the declarations endpoint", () => {
+			expect(Object.keys(path.get.responses).sort()).toEqual(
+				Object.keys(
+					openApiSpec.paths["/api/v1/export/declarations"].get.responses,
+				).sort(),
+			);
+		});
+
+		it("should document the envelope with a Representations array", () => {
+			const schema =
+				path.get.responses["200"].content["application/json"].schema;
+			expect(Object.keys(schema.properties)).toEqual([
+				"Date_debut",
+				"Date_fin",
+				"Nombre",
+				"Representations",
+			]);
+			expect(schema.properties.Representations.type).toBe("array");
+		});
+
+		it("should document every field the handler emits", () => {
+			const representationSchema =
+				path.get.responses["200"].content["application/json"].schema.properties
+					.Representations.items;
+			expect(Object.keys(representationSchema.properties)).toEqual([
+				"id",
+				"SIREN",
+				"Raison_sociale",
+				"Adresse",
+				"Code_NAF",
+				"Région",
+				"Département",
+				"Année_référence",
+				"Période_référence_début",
+				"Période_référence_fin",
+				"Pourcentage_femmes_cadres",
+				"Pourcentage_hommes_cadres",
+				"Motif_non_calculabilité_cadres",
+				"Pourcentage_femmes_membres",
+				"Pourcentage_hommes_membres",
+				"Motif_non_calculabilité_membres",
+				"Date_publication",
+				"URL_publication",
+				"Modalités_communication",
+				"Date_déclaration",
+			]);
+		});
+
+		it("should mirror the DB enums on the non-computable reasons", () => {
+			const properties =
+				path.get.responses["200"].content["application/json"].schema.properties
+					.Representations.items.properties;
+			const executivesEnum =
+				properties.Motif_non_calculabilité_cadres.oneOf.find(
+					(v) => v.type === "string",
+				);
+			const membersEnum = properties.Motif_non_calculabilité_membres.oneOf.find(
+				(v) => v.type === "string",
+			);
+			expect(
+				executivesEnum && "enum" in executivesEnum && executivesEnum.enum,
+			).toEqual([...representationNotComputableExecutivesEnum.enumValues]);
+			expect(membersEnum && "enum" in membersEnum && membersEnum.enum).toEqual([
+				...representationNotComputableMembersEnum.enumValues,
+			]);
+		});
 	});
 
 	describe("Statut field (declaration FSM status)", () => {
