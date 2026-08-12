@@ -1,3 +1,10 @@
+.contactLink {
+	// scoped to .fr-link to outrank DSFR's `.fr-link { color: ... }` (same specificity, else wins on source order)
+	&:global(.fr-link) {
+		color: var(--text-title-grey);
+	}
+}
+
 .infoList {
 	display: flex;
 	flex-direction: column;

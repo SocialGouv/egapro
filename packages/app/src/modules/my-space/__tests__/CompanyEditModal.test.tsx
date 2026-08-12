@@ -169,6 +169,19 @@ describe("CompanyEditModal", () => {
 		expect(container.textContent).toContain("élections professionnelles");
 	});
 
+	it("points the contact link to the help page in a new tab", () => {
+		render(<CompanyEditModal company={company} />);
+
+		const contactLink = screen.getByRole("link", {
+			name: /nous contacter\s*\(ouvre une nouvelle fenêtre\)/,
+			hidden: true,
+		});
+
+		expect(contactLink).toHaveAttribute("href", "/aide/nous-contacter");
+		expect(contactLink).toHaveAttribute("target", "_blank");
+		expect(contactLink).toHaveAttribute("rel", "noopener noreferrer");
+	});
+
 	it("renders CSE fieldset with legend", () => {
 		const { container } = render(<CompanyEditModal company={company} />);
 
