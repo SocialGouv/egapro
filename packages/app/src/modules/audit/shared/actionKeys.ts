@@ -63,6 +63,10 @@ export const AUDIT_ACTIONS = {
 	// ── Admin settings mutations ──────────────────────────
 	ADMIN_SETTINGS_UPSERT_DEADLINES: "admin_settings.upsert_deadlines",
 	ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT: "admin_settings.update_lock_timeout",
+	ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN:
+		"admin_settings.get_representation_campaign",
+	ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN:
+		"admin_settings.upsert_representation_campaign",
 
 	// ── Admin stats reads ─────────────────────────────────
 	ADMIN_STATS_CAMPAIGN_PROGRESSION: "admin_stats.campaign_progression",
@@ -179,6 +183,8 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT]: "mutation",
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_CAMPAIGN_STATS]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DURATIONS]: "read_sensitive",

@@ -57,6 +57,30 @@ export const getCampaignDeadlinesByYearSchema = z.object({
 	year: campaignYearSchema,
 });
 
+export const getRepresentationCampaignByYearSchema = z.object({
+	year: campaignYearSchema,
+});
+
+export const representationCampaignFormSchema = z
+	.object({
+		year: campaignYearSchema,
+		campaignStartDate: isoDateString,
+		campaignEndDate: isoDateString,
+		declarationDeadline: isoDateString,
+	})
+	.refine((data) => data.campaignStartDate < data.campaignEndDate, {
+		message:
+			"La date de démarrage de la campagne doit être antérieure à la date de clôture.",
+		path: ["campaignEndDate"],
+	});
+
+export type RepresentationCampaignFormInput = z.input<
+	typeof representationCampaignFormSchema
+>;
+export type RepresentationCampaignFormValues = z.output<
+	typeof representationCampaignFormSchema
+>;
+
 export const updateLockTimeoutSchema = z.object({
 	timeoutMinutes: z.number().int().min(1).max(1440),
 });
