@@ -11,6 +11,7 @@ import {
 	deriveExecutivesNotComputableReason,
 	getRepresentationCampaignYear,
 	isRepresentationCampaignOpen,
+	isRepresentationPublicationRequired,
 } from "~/modules/domain";
 import {
 	companyProcedure,
@@ -43,7 +44,33 @@ export const representationDeclarationRouter = createTRPCRouter({
 			const { year } = input;
 
 			const rows = await ctx.db
-				.select()
+				.select({
+					id: representationDeclarations.id,
+					siren: representationDeclarations.siren,
+					year: representationDeclarations.year,
+					declarantId: representationDeclarations.declarantId,
+					referencePeriodStart: representationDeclarations.referencePeriodStart,
+					referencePeriodEnd: representationDeclarations.referencePeriodEnd,
+					executiveWomenPercent:
+						representationDeclarations.executiveWomenPercent,
+					executiveMenPercent: representationDeclarations.executiveMenPercent,
+					notComputableReasonExecutives:
+						representationDeclarations.notComputableReasonExecutives,
+					memberWomenPercent: representationDeclarations.memberWomenPercent,
+					memberMenPercent: representationDeclarations.memberMenPercent,
+					notComputableReasonMembers:
+						representationDeclarations.notComputableReasonMembers,
+					publishDate: representationDeclarations.publishDate,
+					publishUrl: representationDeclarations.publishUrl,
+					publishModalities: representationDeclarations.publishModalities,
+					currentStep: representationDeclarations.currentStep,
+					status: representationDeclarations.status,
+					submittedAt: representationDeclarations.submittedAt,
+					draft: representationDeclarations.draft,
+					draftUpdatedAt: representationDeclarations.draftUpdatedAt,
+					createdAt: representationDeclarations.createdAt,
+					updatedAt: representationDeclarations.updatedAt,
+				})
 				.from(representationDeclarations)
 				.where(
 					and(
@@ -117,9 +144,10 @@ export const representationDeclarationRouter = createTRPCRouter({
 			}
 			const payload = parsed.data;
 
-			const publicationRequired =
-				payload.executivesCount === "two_or_more" ||
-				payload.hasManagementBody === true;
+			const publicationRequired = isRepresentationPublicationRequired(
+				payload.executivesCount,
+				payload.hasManagementBody,
+			);
 
 			const now = new Date();
 			const columns = {

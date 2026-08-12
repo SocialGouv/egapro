@@ -10,8 +10,10 @@ import type {
 	submitRepresentationSchema,
 } from "./schemas";
 
-export type RepresentationDeclarationRow =
-	typeof representationDeclarations.$inferSelect;
+export type RepresentationDeclarationRow = Omit<
+	typeof representationDeclarations.$inferSelect,
+	"legacyDeclarant" | "importedFromV1At"
+>;
 
 export type ReferencePeriodInput = z.infer<
 	ReturnType<typeof referencePeriodSchema>

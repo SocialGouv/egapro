@@ -115,6 +115,18 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"mail.resendReceipt": AUDIT_ACTIONS.MAIL_RECEIPT_RESEND,
 };
 
+/**
+ * Per-path metadata allowlist. When a path is listed here, only these input
+ * keys are kept in `audit.action_log.metadata` — everything else on the raw
+ * input (percentages, free-text fields, etc.) is dropped before sanitization.
+ * Paths not listed keep the default behavior (full sanitized input).
+ */
+const METADATA_ALLOWED_KEYS: Partial<Record<string, readonly string[]>> = {
+	"representationDeclaration.get": ["year"],
+	"representationDeclaration.saveDraft": ["year"],
+	"representationDeclaration.submit": ["year"],
+};
+
 type SessionLike = {
 	user?: {
 		id?: string | null;
@@ -170,7 +182,7 @@ export async function auditMiddleware<TResult>({
 	} catch {
 		rawInput = undefined;
 	}
-	const metadata = sanitizeMetadata(rawInput);
+	const metadata = sanitizeMetadata(rawInput, path);
 
 	try {
 		const result = await next();
@@ -215,13 +227,29 @@ export async function auditMiddleware<TResult>({
  * storage. Recursively walks objects and arrays to drop `undefined` fields
  * and strip obviously-technical sensitive keys at every depth.
  *
+ * When `path` has an entry in {@link METADATA_ALLOWED_KEYS}, only those top-level
+ * input keys are kept before sanitization.
+ *
  * Wraps non-object scalars into `{ value }` so the column can stay typed as
  * `Record<string, unknown>`.
  */
-function sanitizeMetadata(rawInput: unknown): AuditMetadata | null {
+function sanitizeMetadata(
+	rawInput: unknown,
+	path: string,
+): AuditMetadata | null {
 	if (rawInput === undefined || rawInput === null) return null;
 
-	const sanitized = sanitizeValue(rawInput);
+	const allowedKeys = METADATA_ALLOWED_KEYS[path];
+	const scopedInput =
+		allowedKeys && typeof rawInput === "object" && !Array.isArray(rawInput)
+			? Object.fromEntries(
+					allowedKeys
+						.filter((key) => key in (rawInput as Record<string, unknown>))
+						.map((key) => [key, (rawInput as Record<string, unknown>)[key]]),
+				)
+			: rawInput;
+
+	const sanitized = sanitizeValue(scopedInput);
 	if (sanitized === undefined) return null;
 
 	if (

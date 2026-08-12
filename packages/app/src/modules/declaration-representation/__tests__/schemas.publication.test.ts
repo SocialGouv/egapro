@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { publicationSchema } from "~/modules/declaration-representation";
 import {
 	issues,
+	MAX_PUBLISH_MODALITIES_LENGTH,
+	MAX_PUBLISH_URL_LENGTH,
 	OFFLINE_PUBLICATION,
 	WEBSITE_PUBLICATION as VALID_PUBLICATION,
 	VALIDATION_MESSAGES,
@@ -55,6 +57,31 @@ describe("publicationSchema", () => {
 		});
 	});
 
+	it("accepts a URL of exactly the maximum length", () => {
+		const prefix = "https://exemple.fr/";
+		const publishUrl =
+			prefix + "a".repeat(MAX_PUBLISH_URL_LENGTH - prefix.length);
+
+		expect(publishUrl).toHaveLength(MAX_PUBLISH_URL_LENGTH);
+		expect(
+			publicationSchema.safeParse({ ...VALID_PUBLICATION, publishUrl }).success,
+		).toBe(true);
+	});
+
+	it("rejects a URL longer than the maximum length", () => {
+		const prefix = "https://exemple.fr/";
+		const result = publicationSchema.safeParse({
+			...VALID_PUBLICATION,
+			publishUrl:
+				prefix + "a".repeat(MAX_PUBLISH_URL_LENGTH - prefix.length + 1),
+		});
+
+		expect(issues(result)).toContainEqual({
+			path: "publishUrl",
+			message: VALIDATION_MESSAGES.urlTooLong,
+		});
+	});
+
 	it("accepts publication modalities when there is no website", () => {
 		expect(publicationSchema.safeParse(OFFLINE_PUBLICATION).success).toBe(true);
 	});
@@ -68,6 +95,27 @@ describe("publicationSchema", () => {
 		expect(issues(result)).toContainEqual({
 			path: "publishModalities",
 			message: VALIDATION_MESSAGES.modalitiesRequired,
+		});
+	});
+
+	it("accepts publication modalities of exactly the maximum length", () => {
+		const result = publicationSchema.safeParse({
+			...OFFLINE_PUBLICATION,
+			publishModalities: "a".repeat(MAX_PUBLISH_MODALITIES_LENGTH),
+		});
+
+		expect(result.success).toBe(true);
+	});
+
+	it("rejects publication modalities longer than the maximum length", () => {
+		const result = publicationSchema.safeParse({
+			...OFFLINE_PUBLICATION,
+			publishModalities: "a".repeat(MAX_PUBLISH_MODALITIES_LENGTH + 1),
+		});
+
+		expect(issues(result)).toContainEqual({
+			path: "publishModalities",
+			message: VALIDATION_MESSAGES.modalitiesTooLong,
 		});
 	});
 

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isRepresentationPublicationRequired } from "~/modules/domain";
 
 function isTolerantUrl(value: string): boolean {
 	const candidate = /^https?:\/\//i.test(value) ? value : `https://${value}`;
@@ -110,6 +111,7 @@ export const publicationSchema = z
 					.string()
 					.trim()
 					.min(1, "L'adresse de la page internet est obligatoire.")
+					.max(500, "L'adresse de la page internet est trop longue.")
 					.refine(isTolerantUrl, "L'adresse de la page internet est invalide."),
 			}),
 			z.object({
@@ -120,6 +122,10 @@ export const publicationSchema = z
 					.min(
 						1,
 						"La description des modalités de communication est obligatoire.",
+					)
+					.max(
+						5000,
+						"La description des modalités de communication est trop longue.",
 					),
 			}),
 		]),
@@ -128,8 +134,8 @@ export const publicationSchema = z
 const optionalPublicationFieldsSchema = z.object({
 	publishDate: z.string().date().optional(),
 	hasWebsite: z.boolean().optional(),
-	publishUrl: z.string().optional(),
-	publishModalities: z.string().optional(),
+	publishUrl: z.string().max(500).optional(),
+	publishModalities: z.string().max(5000).optional(),
 });
 
 export function submitRepresentationSchema(year: number) {
@@ -138,9 +144,10 @@ export function submitRepresentationSchema(year: number) {
 		.and(membersSchema)
 		.and(optionalPublicationFieldsSchema)
 		.superRefine((data, ctx) => {
-			const publicationRequired =
-				data.executivesCount === "two_or_more" ||
-				data.hasManagementBody === true;
+			const publicationRequired = isRepresentationPublicationRequired(
+				data.executivesCount,
+				data.hasManagementBody,
+			);
 
 			if (!publicationRequired) {
 				if (
@@ -203,8 +210,8 @@ export const representationDraftSchema = z.object({
 	memberMenPercent: z.number().optional(),
 	hasWebsite: z.boolean().optional(),
 	publishDate: z.string().optional(),
-	publishUrl: z.string().optional(),
-	publishModalities: z.string().optional(),
+	publishUrl: z.string().max(500).optional(),
+	publishModalities: z.string().max(5000).optional(),
 });
 
 const yearSchema = z.number().int().gte(2000).lte(2100);

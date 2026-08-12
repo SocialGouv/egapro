@@ -110,6 +110,18 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 		});
 	});
 
+	// The explicit projection is the only guard against leaking the V1 import columns.
+	it("never exposes the V1 import columns to the client", async () => {
+		const caller = createCaller();
+
+		await caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 });
+		const { declaration } = await caller.get({ year: YEAR });
+
+		expect(declaration).not.toBeNull();
+		expect(declaration).not.toHaveProperty("legacyDeclarant");
+		expect(declaration).not.toHaveProperty("importedFromV1At");
+	});
+
 	it("persists a submitted declaration with its derived columns (S19)", async () => {
 		const caller = createCaller();
 

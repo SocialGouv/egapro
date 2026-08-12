@@ -2,6 +2,10 @@ import type { ZodError } from "zod";
 
 export const REPRESENTATION_YEAR = 2025;
 
+export const MAX_PUBLISH_URL_LENGTH = 500;
+
+export const MAX_PUBLISH_MODALITIES_LENGTH = 5000;
+
 export const VALID_REFERENCE_PERIOD = {
 	referencePeriodStart: "2025-01-01",
 	referencePeriodEnd: "2025-12-31",
@@ -59,8 +63,11 @@ export const VALIDATION_MESSAGES = {
 	periodLength: "La période de référence doit couvrir 12 mois consécutifs.",
 	urlRequired: "L'adresse de la page internet est obligatoire.",
 	urlInvalid: "L'adresse de la page internet est invalide.",
+	urlTooLong: "L'adresse de la page internet est trop longue.",
 	modalitiesRequired:
 		"La description des modalités de communication est obligatoire.",
+	modalitiesTooLong:
+		"La description des modalités de communication est trop longue.",
 	publicationNotRequired:
 		"Aucune information de publication n'est requise lorsqu'aucun écart n'est calculable.",
 	publishDateAfterPeriod:
