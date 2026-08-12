@@ -1,11 +1,16 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+// Shared across renders so the resend payload can be asserted; a spy created
+// inside the factory would be a fresh one on every hook call.
+const { resendMutate } = vi.hoisted(() => ({ resendMutate: vi.fn() }));
 
 vi.mock("~/trpc/react", () => ({
 	api: {
 		mail: {
 			resendReceipt: {
-				useMutation: () => ({ mutate: vi.fn(), isPending: false }),
+				useMutation: () => ({ mutate: resendMutate, isPending: false }),
 			},
 		},
 	},
@@ -53,12 +58,16 @@ const ANY_COMPANY: CompanyShape = {
 	hasCse: false,
 };
 
-async function renderConfirmation(company: CompanyShape) {
+async function renderConfirmation(
+	company: CompanyShape,
+	{ hasSubmittedSecondDeclaration = false } = {},
+) {
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
 		declaration: { year: DECLARATION_YEAR, siren: SIREN },
 		jobCategories: [],
 		employeeCategories: [],
 		gipPrefillData: null,
+		hasSubmittedSecondDeclaration,
 	} as never);
 	vi.mocked(api.company.get).mockResolvedValue(company as never);
 
@@ -66,6 +75,10 @@ async function renderConfirmation(company: CompanyShape) {
 }
 
 describe("ComplianceConfirmation", () => {
+	beforeEach(() => {
+		resendMutate.mockClear();
+	});
+
 	it("marks the completion pictogram as a success rather than an error", async () => {
 		await renderConfirmation(ANY_COMPANY);
 
@@ -139,6 +152,49 @@ describe("ComplianceConfirmation", () => {
 				name: /seconde déclaration/,
 			}),
 		).not.toBeInTheDocument();
+	});
+
+	describe("acknowledgement receipt", () => {
+		it("tells the user where the acknowledgement was sent", async () => {
+			// The screen used to give no trace at all that a receipt had been sent,
+			// unlike its twin end-of-funnel screen (issue 3914).
+			await renderConfirmation(ANY_COMPANY);
+
+			expect(
+				screen.getByText(/Un accusé de réception a été envoyé/),
+			).toBeInTheDocument();
+			expect(screen.getByText("declarant@example.fr")).toBeInTheDocument();
+		});
+
+		it("resends the declaration receipt when no second declaration was submitted", async () => {
+			await renderConfirmation(ANY_COMPANY);
+
+			await userEvent.click(
+				screen.getByRole("button", { name: /Renvoyer l'accusé de réception/ }),
+			);
+
+			expect(resendMutate).toHaveBeenCalledWith({
+				kind: "declaration",
+				year: DECLARATION_YEAR,
+			});
+		});
+
+		// Hard-coding "declaration" would resend the round-one receipt to a user who
+		// has since filed a corrective one; the twin screen already branches.
+		it("resends the second declaration receipt once one was submitted", async () => {
+			await renderConfirmation(ANY_COMPANY, {
+				hasSubmittedSecondDeclaration: true,
+			});
+
+			await userEvent.click(
+				screen.getByRole("button", { name: /Renvoyer l'accusé de réception/ }),
+			);
+
+			expect(resendMutate).toHaveBeenCalledWith({
+				kind: "secondDeclaration",
+				year: DECLARATION_YEAR,
+			});
+		});
 	});
 
 	it("renders the feedback banner", async () => {
