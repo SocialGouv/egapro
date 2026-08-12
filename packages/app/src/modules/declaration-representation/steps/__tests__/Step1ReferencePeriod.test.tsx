@@ -38,6 +38,7 @@ const REQUIRED_MESSAGE = "Sélectionner une date de début ou une date de fin.";
 const TWELVE_MONTHS_MESSAGE =
 	"La période de référence doit couvrir 12 mois consécutifs.";
 const REFERENCE_YEAR_MESSAGE = `La date sélectionnée ne correspond pas à l'année de référence ${YEAR}.`;
+const TWELVE_MONTHS_HINT = "La période couvre 12 mois consécutifs.";
 const VALID_START = "2025-01-01";
 const VALID_END = "2025-12-31";
 
@@ -121,6 +122,23 @@ describe("Step1ReferencePeriod — rendering", () => {
 		expect(
 			screen.queryByRole("button", { name: "Suivant" }),
 		).not.toBeInTheDocument();
+	});
+
+	it("announces the date errors but leaves the twelve-month hint silent", async () => {
+		renderStep1();
+
+		expect(
+			screen.getByText(TWELVE_MONTHS_HINT).closest("[aria-live]"),
+		).toBeNull();
+
+		await clickNext();
+
+		expect(
+			screen.getByText(REQUIRED_MESSAGE).closest("[aria-live='polite']"),
+		).not.toBeNull();
+		expect(
+			screen.getByText(TWELVE_MONTHS_HINT).closest("[aria-live]"),
+		).toBeNull();
 	});
 });
 

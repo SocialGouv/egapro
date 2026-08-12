@@ -115,6 +115,19 @@ describe("SubjectionScreen — rendering", () => {
 		expect(screen.queryByText(NOT_CONCERNED_INFO)).not.toBeInTheDocument();
 		expect(screen.queryByText(SELECTION_ERROR)).not.toBeInTheDocument();
 	});
+
+	it.each([
+		["concerned", concernedRadio],
+		["not concerned", notConcernedRadio],
+	])("withdraws the way back once the %s answer is picked", async (_answer, radio) => {
+		renderScreen();
+
+		await userEvent.click(radio());
+
+		expect(
+			screen.queryByRole("link", { name: "Retour" }),
+		).not.toBeInTheDocument();
+	});
 });
 
 describe("SubjectionScreen — no answer selected", () => {

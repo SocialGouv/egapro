@@ -14,6 +14,12 @@ function parseIsoDate(value: string): Date {
 	return new Date(value);
 }
 
+const isoDateStringSchema = z.string().date();
+
+function isValidIsoDate(value: string): boolean {
+	return isoDateStringSchema.safeParse(value).success;
+}
+
 function isTwelveConsecutiveMonths(start: string, end: string): boolean {
 	const startDate = parseIsoDate(start);
 	const expectedEnd = new Date(startDate);
@@ -46,11 +52,12 @@ export function referencePeriodSchema(year: number) {
 
 	return z
 		.object({
-			referencePeriodStart: z.string().date(),
-			referencePeriodEnd: z.string().date(),
+			referencePeriodStart: isoDateStringSchema,
+			referencePeriodEnd: isoDateStringSchema,
 		})
 		.refine(
 			(period) => {
+				if (!isValidIsoDate(period.referencePeriodStart)) return true;
 				const startYear = parseIsoDate(
 					period.referencePeriodStart,
 				).getUTCFullYear();
@@ -62,19 +69,29 @@ export function referencePeriodSchema(year: number) {
 			},
 		)
 		.refine(
-			(period) =>
-				parseIsoDate(period.referencePeriodEnd).getUTCFullYear() === year,
+			(period) => {
+				if (!isValidIsoDate(period.referencePeriodEnd)) return true;
+				return (
+					parseIsoDate(period.referencePeriodEnd).getUTCFullYear() === year
+				);
+			},
 			{
 				message: yearMismatchMessage,
 				path: ["referencePeriodEnd"],
 			},
 		)
 		.refine(
-			(period) =>
-				isTwelveConsecutiveMonths(
+			(period) => {
+				if (
+					!isValidIsoDate(period.referencePeriodStart) ||
+					!isValidIsoDate(period.referencePeriodEnd)
+				)
+					return true;
+				return isTwelveConsecutiveMonths(
 					period.referencePeriodStart,
 					period.referencePeriodEnd,
-				),
+				);
+			},
 			{
 				message: "La période de référence doit couvrir 12 mois consécutifs.",
 				path: ["referencePeriodEnd"],

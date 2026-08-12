@@ -162,7 +162,7 @@ export function Step1ReferencePeriod() {
 				</div>
 			</fieldset>
 
-			<div aria-atomic="true" aria-live="polite" className="fr-messages-group">
+			<div className="fr-messages-group">
 				<p className="fr-message fr-message--info">
 					La période couvre 12 mois consécutifs.
 				</p>
