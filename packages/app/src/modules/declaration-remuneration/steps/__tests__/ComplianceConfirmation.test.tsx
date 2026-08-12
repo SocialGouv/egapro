@@ -91,16 +91,40 @@ describe("ComplianceConfirmation", () => {
 		expect(link).toHaveAttribute("href", "/mon-espace");
 	});
 
-	it("has a download PDF button with year", async () => {
+	it("offers the declaration recap as a download card under its section heading", async () => {
 		await renderConfirmation(ANY_COMPANY);
 
+		// The screen used to expose a bare button, diverging from the twin
+		// end-of-journey screen and from the maquette (#3460, #4029).
+		expect(
+			screen.getByRole("heading", {
+				name: "Documents récapitulatifs de votre déclaration",
+			}),
+		).toBeInTheDocument();
+
 		const link = screen.getByRole("link", {
-			name: /Télécharger le récapitulatif/,
+			name: /Télécharger le récapitulatif de la déclaration des indicateurs/,
 		});
 		expect(link).toHaveAttribute(
 			"href",
 			`/api/declaration-pdf?year=${DECLARATION_YEAR}`,
 		);
+		expect(link).toHaveAttribute("download");
+		expect(
+			screen.getByText(
+				`Année ${DECLARATION_YEAR} au titre des données ${DECLARATION_YEAR - 1}`,
+			),
+		).toBeInTheDocument();
+	});
+
+	it("omits the second declaration card when none was submitted", async () => {
+		await renderConfirmation(ANY_COMPANY);
+
+		expect(
+			screen.queryByRole("link", {
+				name: /seconde déclaration/,
+			}),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the feedback banner", async () => {

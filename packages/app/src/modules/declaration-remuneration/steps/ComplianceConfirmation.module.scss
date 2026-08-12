@@ -1,0 +1,14 @@
+// Mirrors the twin end-of-journey screen (cseOpinion/ConfirmationPage): the
+// success pictogram sits on the same line as its sentence, and the download
+// cards stack with a single gap.
+.successRow {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.downloadCards {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}

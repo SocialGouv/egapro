@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { DsfrPictogram } from "~/modules/layout";
 import { ResendReceiptButton } from "~/modules/mail";
+import { DownloadCard } from "~/modules/shared";
 import { FeedbackBanner } from "~/modules/shared/FeedbackBanner";
 import styles from "./ConfirmationPage.module.scss";
-import { DownloadCard } from "./DownloadCard";
 import formStyles from "./shared/formActions.module.scss";
 
 type Props = {
