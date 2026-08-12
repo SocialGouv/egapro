@@ -1,9 +1,8 @@
 import {
-	GIP_WORKFORCE_ABSENT_DISPLAY,
+	formatWorkforceForUser,
 	getCurrentYear,
 	getObligationWorkforce,
 	isCseRequired,
-	toDisplayWorkforce,
 } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 
@@ -86,11 +85,7 @@ export function CompanyInfoBanner({ company }: Props) {
 					<div className={styles.datapoint}>
 						<dt>Effectif annuel moyen en {currentYear} :</dt>
 						<dd>
-							{company.gipWorkforce === null ? (
-								GIP_WORKFORCE_ABSENT_DISPLAY
-							) : (
-								<strong>{toDisplayWorkforce(company.gipWorkforce)}</strong>
-							)}
+							<strong>{formatWorkforceForUser(company.gipWorkforce)}</strong>
 						</dd>
 					</div>
 					{cseApplicable && (

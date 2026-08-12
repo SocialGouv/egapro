@@ -2,11 +2,10 @@ import { DeclarationLockAlert } from "~/modules/declaration-remuneration/shared/
 import type { LockHolder } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import {
-	GIP_WORKFORCE_ABSENT_DISPLAY,
+	formatWorkforceForUser,
 	getObligationWorkforce,
 	getWorkforceYear,
 	isCseRequired,
-	toDisplayWorkforce,
 } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
@@ -67,14 +66,8 @@ export function CseOpinionLayout({
 						</div>
 						<div className="fr-col-auto">
 							<p className="fr-mb-0 fr-text--sm">
-								{company.gipWorkforce === null ? (
-									GIP_WORKFORCE_ABSENT_DISPLAY
-								) : (
-									<>
-										Effectif annuel moyen en {getWorkforceYear()} :{" "}
-										<strong>{toDisplayWorkforce(company.gipWorkforce)}</strong>
-									</>
-								)}
+								Effectif annuel moyen en {getWorkforceYear()} :{" "}
+								<strong>{formatWorkforceForUser(company.gipWorkforce)}</strong>
 							</p>
 						</div>
 						{cseApplicable && (

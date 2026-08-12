@@ -1,13 +1,13 @@
 import { and, eq, isNotNull, or } from "drizzle-orm";
 
 import {
+	floorWorkforce,
 	getObligationWorkforce,
 	hasGapsAboveThreshold,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isIndicatorGRequired,
 	parseGipWorkforce,
-	toDisplayWorkforce,
 } from "~/modules/domain";
 import type { DB } from "~/server/db";
 import { submittedDeclarationCondition } from "~/server/db/declarationConditions";
@@ -133,7 +133,7 @@ export async function buildExportRows(
 		return {
 			siren: row.siren,
 			companyName: row.companyName,
-			workforce: toDisplayWorkforce(workforce),
+			workforce: floorWorkforce(workforce),
 			nafCode: row.nafCode,
 			address: row.address,
 			hasCse: row.hasCse,

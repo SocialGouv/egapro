@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
 	enqueueNotification: vi.fn(),
 	logAction: vi.fn(),
+	captureException: vi.fn(),
 	buildDeclarationAttachments: vi.fn(),
 	buildSecondDeclarationAttachments: vi.fn(),
 	getCampaignDeadlines: vi.fn(),
@@ -12,6 +13,10 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("notifications/publisher", () => ({
 	enqueueNotification: mocks.enqueueNotification,
+}));
+
+vi.mock("@sentry/nextjs", () => ({
+	captureException: mocks.captureException,
 }));
 
 vi.mock("~/server/audit/log", () => ({
@@ -71,6 +76,13 @@ function stubContext(
 	company: Record<string, unknown> | null = companyRow,
 ) {
 	mocks.dbResults = [row ? [row] : [], company ? [company] : []];
+}
+
+function auditMetadataOf(): Record<string, unknown> {
+	const call = mocks.logAction.mock.calls[0]?.[0] as {
+		metadata?: Record<string, unknown>;
+	};
+	return call?.metadata ?? {};
 }
 
 describe("enqueueReceipt", () => {
@@ -202,7 +214,7 @@ describe("enqueueReceipt", () => {
 		);
 	});
 
-	it("logs failure and swallows the exception when attachment build throws", async () => {
+	it("still sends the receipt when the attachment cannot be rendered", async () => {
 		mocks.buildDeclarationAttachments.mockRejectedValue(
 			new Error("pdf rendering failed"),
 		);
@@ -211,18 +223,93 @@ describe("enqueueReceipt", () => {
 			enqueueReceipt({ ...baseInput, kind: "declaration" }),
 		).resolves.toBeUndefined();
 
-		expect(mocks.enqueueNotification).not.toHaveBeenCalled();
+		// Losing the PDF is bad; losing the acknowledgement the user is waiting
+		// for is worse — that was the symptom reported in issue 3914.
+		expect(mocks.enqueueNotification).toHaveBeenCalledTimes(1);
+		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
+			expect.not.objectContaining({ attachments: expect.anything() }),
+		);
 		expect(mocks.logAction).toHaveBeenCalledWith(
 			expect.objectContaining({
 				action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
-				status: "failure",
+				status: "success",
+			}),
+		);
+	});
+
+	it("stamps the dropped attachment on the audit row instead of passing it off as a clean send", async () => {
+		mocks.buildDeclarationAttachments.mockRejectedValue(
+			new Error("pdf rendering failed"),
+		);
+
+		await enqueueReceipt({ ...baseInput, kind: "declaration" });
+
+		// Sentry alone is not enough: the diagnosis for "I never got my PDF"
+		// starts from audit.action_log filtered on the SIREN, so the degradation
+		// has to be readable there and not only in the exception tracker.
+		expect(mocks.logAction).toHaveBeenCalledTimes(1);
+		expect(auditMetadataOf()).toMatchObject({ attachmentsDropped: true });
+		// The reason is free text, so it goes in the dedicated column rather than
+		// in the jsonb, which a direct logAction call never sanitises.
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "success",
 				errorMessage: "pdf rendering failed",
 			}),
 		);
 	});
 
+	it("leaves no dropped-attachment marker on the audit row of a nominal send", async () => {
+		await enqueueReceipt({ ...baseInput, kind: "declaration" });
+
+		// The marker only means something if it is absent the rest of the time.
+		expect(auditMetadataOf()).not.toHaveProperty("attachmentsDropped");
+		expect(mocks.logAction).not.toHaveBeenCalledWith(
+			expect.objectContaining({ errorMessage: expect.anything() }),
+		);
+	});
+
+	it("keeps the dropped-attachment marker on the audit row when the queue also rejects the receipt", async () => {
+		mocks.buildDeclarationAttachments.mockRejectedValue(
+			new Error("pdf rendering failed"),
+		);
+		mocks.enqueueNotification.mockResolvedValue({
+			status: "error",
+			error: "connection refused",
+		});
+
+		await enqueueReceipt({ ...baseInput, kind: "declaration" });
+
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "failure",
+				errorMessage: "connection refused",
+			}),
+		);
+		expect(auditMetadataOf()).toMatchObject({ attachmentsDropped: true });
+	});
+
+	it("records a non-Error attachment rejection as a real Error so Sentry groups it", async () => {
+		mocks.buildDeclarationAttachments.mockRejectedValue("pdf worker died");
+
+		await enqueueReceipt({ ...baseInput, kind: "declaration" });
+
+		// A bare string reaches Sentry as "Non-Error exception captured" and
+		// lands in one undifferentiated group with every other such throw.
+		const captured = mocks.captureException.mock.calls[0]?.[0] as Error;
+		expect(captured).toBeInstanceOf(Error);
+		expect(captured.message).toBe("pdf worker died");
+		expect(captured.cause).toBe("pdf worker died");
+		expect(auditMetadataOf()).toMatchObject({ attachmentsDropped: true });
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({ errorMessage: "pdf worker died" }),
+		);
+	});
+
 	it("logs failure with a generic message when a non-Error value is thrown", async () => {
-		mocks.buildDeclarationAttachments.mockRejectedValue("boom");
+		// The enqueue itself throwing is the remaining fatal path: unlike a
+		// missing attachment, there is no degraded send to fall back on.
+		mocks.enqueueNotification.mockRejectedValueOnce("boom");
 
 		await expect(
 			enqueueReceipt({ ...baseInput, kind: "declaration" }),

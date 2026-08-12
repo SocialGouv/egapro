@@ -1,9 +1,8 @@
 import {
-	GIP_WORKFORCE_ABSENT_DISPLAY,
+	formatWorkforceForUser,
 	getObligationWorkforce,
 	getWorkforceYear,
 	isCseRequired,
-	toDisplayWorkforce,
 } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
@@ -51,11 +50,7 @@ export function CompanyBanner({
 						<span>
 							{"Effectif annuel moyen en"} {getWorkforceYear()} {":"}
 						</span>
-						<strong>
-							{company.gipWorkforce !== null
-								? toDisplayWorkforce(company.gipWorkforce)
-								: GIP_WORKFORCE_ABSENT_DISPLAY}
-						</strong>
+						<strong>{formatWorkforceForUser(company.gipWorkforce)}</strong>
 					</div>
 
 					{cseApplicable && (

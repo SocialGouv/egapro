@@ -370,6 +370,32 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 		});
 	});
 
+	// Issue 3914: the bracket used to key on "absent from the GIP file", so a
+	// company present in the file under the threshold rendered its exact
+	// headcount. The two cases are one tier and must read the same.
+	test.describe("company present in the GIP file below the voluntary threshold", () => {
+		test.beforeAll(async () => {
+			await setGipWorkforce(37);
+			await resetDeclarationToDraft();
+		});
+
+		test("mon espace brackets the headcount instead of printing it", async ({
+			page,
+		}) => {
+			await page.goto("/mon-espace");
+
+			const companyInfo = page
+				.locator("dl")
+				.filter({ hasText: "Effectif annuel moyen" })
+				.first();
+			await expect(companyInfo).toContainText(
+				`Effectif annuel moyen en ${currentYear} :`,
+			);
+			await expect(companyInfo).toContainText("< 50");
+			await expect(companyInfo).not.toContainText("37");
+		});
+	});
+
 	// GIP workforce of 70 (bracket 50-99): whether indicator G / step 5 applies
 	// flips on the campaign year via isIndicatorGRequired(70, year) — never below
 	// 2030, and only in a triennial year from 2030. Pinning both years keeps the

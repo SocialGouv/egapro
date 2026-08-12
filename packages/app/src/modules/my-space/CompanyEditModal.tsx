@@ -5,11 +5,10 @@ import { useCallback, useRef } from "react";
 import { Controller } from "react-hook-form";
 
 import {
-	GIP_WORKFORCE_ABSENT_DISPLAY,
+	formatWorkforceForUser,
 	getCurrentYear,
 	getObligationWorkforce,
 	isCseRequired,
-	toDisplayWorkforce,
 } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
@@ -196,11 +195,7 @@ function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 				<dl className={styles.infoList}>
 					<InfoRow
 						label={`Effectif annuel moyen en ${CURRENT_YEAR} :`}
-						value={
-							toDisplayWorkforce(company.gipWorkforce)?.toLocaleString(
-								"fr-FR",
-							) ?? GIP_WORKFORCE_ABSENT_DISPLAY
-						}
+						value={formatWorkforceForUser(company.gipWorkforce)}
 					/>
 				</dl>
 				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>

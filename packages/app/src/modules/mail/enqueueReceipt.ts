@@ -1,4 +1,5 @@
 import "server-only";
+import * as Sentry from "@sentry/nextjs";
 import { and, eq, isNull } from "drizzle-orm";
 import { enqueueNotification } from "notifications/publisher";
 import type {
@@ -161,6 +162,67 @@ async function buildAttachments(
 	return [];
 }
 
+/**
+ * Raises a receipt failure to Sentry and the server console, then returns the
+ * human-readable reason. It writes no audit row itself — the caller is the one
+ * that owns a row, and carries the returned reason into it so the failure stays
+ * queryable per SIREN in `audit.action_log`.
+ *
+ * A non-Error throw (a rejected string, a plain object) reaches Sentry as
+ * "Non-Error exception captured" and groups unrelated failures together, so it
+ * is wrapped in a real Error and the original value kept as its cause.
+ */
+function reportReceiptFailure(
+	error: unknown,
+	context: { stage: "attachments" | "enqueue" } & Record<string, unknown>,
+): string {
+	const message = error instanceof Error ? error.message : String(error);
+	const reported =
+		error instanceof Error ? error : new Error(message, { cause: error });
+
+	Sentry.captureException(reported, { extra: context });
+	console.error(`[mail] receipt ${context.stage} failed: ${message}`, context);
+
+	return message;
+}
+
+type AttachmentsOutcome = {
+	attachments: MailAttachment[];
+	/** Non-null when the PDF was lost and the receipt is sent without it. */
+	droppedReason: string | null;
+};
+
+/**
+ * Only the declaration receipts carry a PDF, and that PDF is rendered on the
+ * fly. A rendering failure used to sink the whole e-mail, which is exactly the
+ * symptom reported in issue 3914 — the acknowledgement never arrives. Losing
+ * the attachment is bad; losing the acknowledgement is worse, so the send goes
+ * on without it and the reason travels back to the caller, which records it on
+ * the audit row rather than letting the degradation pass for a clean send.
+ */
+async function buildAttachmentsOrDrop(
+	kind: ReceiptKind,
+	siren: string,
+	year: number,
+): Promise<AttachmentsOutcome> {
+	try {
+		return {
+			attachments: await buildAttachments(kind, siren, year),
+			droppedReason: null,
+		};
+	} catch (error) {
+		return {
+			attachments: [],
+			droppedReason: reportReceiptFailure(error, {
+				stage: "attachments",
+				kind,
+				siren,
+				year,
+			}),
+		};
+	}
+}
+
 export async function enqueueReceipt(
 	input: EnqueueReceiptInput,
 ): Promise<void> {
@@ -170,7 +232,11 @@ export async function enqueueReceipt(
 	try {
 		const context = await readReceiptContext(siren, year);
 		const payload = await buildConfirmationPayload(type, siren, year, context);
-		const attachments = await buildAttachments(kind, siren, year);
+		const { attachments, droppedReason } = await buildAttachmentsOrDrop(
+			kind,
+			siren,
+			year,
+		);
 		const result = await enqueueNotification({
 			type,
 			recipientEmail: to,
@@ -180,6 +246,15 @@ export async function enqueueReceipt(
 			...(attachments.length > 0 ? { attachments } : {}),
 		});
 
+		// A receipt that never left matters more than one that left without its
+		// PDF, so the queue error wins the single error column when both happen.
+		const errorMessage =
+			result.status === "enqueued"
+				? droppedReason
+				: result.status === "error"
+					? result.error
+					: "queue_unavailable";
+
 		void logAction({
 			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
 			status: result.status === "enqueued" ? "success" : "failure",
@@ -188,14 +263,28 @@ export async function enqueueReceipt(
 			siren,
 			...(result.status === "enqueued"
 				? { resourceType: "notification", resourceId: result.id }
-				: {
-						errorMessage:
-							result.status === "error" ? result.error : "queue_unavailable",
-					}),
-			metadata: { type, kind, year, isResend, variant: payload.variant },
+				: {}),
+			// Free text belongs in the dedicated column, not in `metadata`: a direct
+			// logAction call runs no sanitisation on the jsonb, so an exception
+			// message parked there would be one refactor away from carrying
+			// whatever a future throw site interpolates into it.
+			...(errorMessage === null ? {} : { errorMessage }),
+			// A dropped attachment must not read as a clean send: the enqueue did
+			// succeed, so the row stays a success, but the degradation is stamped
+			// on it — `metadata->>'attachmentsDropped'` is what makes "this SIREN
+			// got its receipt without the PDF" answerable from the audit log.
+			metadata: {
+				type,
+				kind,
+				year,
+				isResend,
+				variant: payload.variant,
+				...(droppedReason === null ? {} : { attachmentsDropped: true }),
+			},
 		});
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Unknown error";
+		reportReceiptFailure(error, { stage: "enqueue", kind, siren, year });
 		void logAction({
 			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
 			status: "failure",

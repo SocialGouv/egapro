@@ -169,10 +169,11 @@ export {
 } from "./shared/gap";
 // GIP annual average workforce — canonical headcount for obligations & display
 export {
-	GIP_WORKFORCE_ABSENT_DISPLAY,
+	floorWorkforce,
+	formatWorkforceForUser,
+	GIP_WORKFORCE_VOLUNTARY_DISPLAY,
 	getObligationWorkforce,
 	parseGipWorkforce,
-	toDisplayWorkforce,
 } from "./shared/gipWorkforce";
 // Indicator G — applicability rules (workforce thresholds, triennial cycle, universal year)
 export {
