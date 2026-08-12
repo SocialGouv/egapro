@@ -31,12 +31,6 @@ export type PublicRepresentationCompanySource = Pick<
 	| "statutDiffusion"
 >;
 
-/**
- * Drizzle column selection for the public representation indicators.
- * Spread into `.select({ ...publicRepresentationColumns, ...companyColumns })`
- * across every public-API query surface so the projected columns stay in
- * sync with {@link PublicRepresentationSource}.
- */
 export const publicRepresentationColumns = {
 	year: representationDeclarations.year,
 	referencePeriodStart: representationDeclarations.referencePeriodStart,

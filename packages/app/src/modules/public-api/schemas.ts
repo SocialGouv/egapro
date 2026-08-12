@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const publicSearchInputSchema = z.object({
+const publicSearchQueryParamsSchema = z.object({
 	q: z.string().trim().min(1).optional(),
 	region: z.string().trim().min(1).optional(),
 	departement: z.string().trim().min(1).optional(),
@@ -9,6 +9,8 @@ export const publicSearchInputSchema = z.object({
 	limit: z.number().int().min(1).max(100).default(10),
 	offset: z.number().int().min(0).default(0),
 });
+
+export const publicSearchInputSchema = publicSearchQueryParamsSchema;
 
 export type PublicSearchInput = z.infer<typeof publicSearchInputSchema>;
 
@@ -62,15 +64,7 @@ export const publicSearchResultDTOSchema = z.object({
 
 export type PublicSearchResultDTO = z.infer<typeof publicSearchResultDTOSchema>;
 
-export const publicRepresentationSearchInputSchema = z.object({
-	q: z.string().trim().min(1).optional(),
-	region: z.string().trim().min(1).optional(),
-	departement: z.string().trim().min(1).optional(),
-	naf: z.string().trim().min(1).optional(),
-	year: z.number().int().optional(),
-	limit: z.number().int().min(1).max(100).default(10),
-	offset: z.number().int().min(0).default(0),
-});
+export const publicRepresentationSearchInputSchema = publicSearchQueryParamsSchema;
 
 export type PublicRepresentationSearchInput = z.infer<
 	typeof publicRepresentationSearchInputSchema
