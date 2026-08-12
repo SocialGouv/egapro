@@ -148,6 +148,22 @@ describe("CseOpinionLayout", () => {
 		expect(container.textContent).not.toContain("Existence d'un CSE :");
 	});
 
+	it("shows the GIP unknown label instead of the exact headcount of a company present in the file below the threshold", () => {
+		// Issue 3914: the bracket was keyed on "absent from the GIP file", so a
+		// company present with 37 employees rendered "37".
+		const { container } = render(
+			<CseOpinionLayout
+				company={{ ...company, gipWorkforce: 37 }}
+				declarationYear={2024}
+			>
+				<p>Step content</p>
+			</CseOpinionLayout>,
+		);
+
+		expect(container.textContent).toContain(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(screen.queryByText("37")).not.toBeInTheDocument();
+	});
+
 	it("shows the workforce value and the CSE line when gipWorkforce is 250", () => {
 		const { container } = render(
 			<CseOpinionLayout

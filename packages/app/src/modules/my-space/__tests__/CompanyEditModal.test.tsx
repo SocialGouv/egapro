@@ -109,6 +109,17 @@ describe("CompanyEditModal", () => {
 		expect(container.textContent).not.toContain("100");
 	});
 
+	it("shows the GIP unknown label instead of the exact headcount below the threshold", () => {
+		// Issue 3914: the bracket was keyed on "absent from the GIP file", so a
+		// company present with 37 employees rendered "37".
+		const { container } = render(
+			<CompanyEditModal company={{ ...company, gipWorkforce: 37 }} />,
+		);
+
+		expect(container.textContent).toContain(GIP_WORKFORCE_ABSENT_DISPLAY);
+		expect(screen.queryByText("37")).not.toBeInTheDocument();
+	});
+
 	it("shows the GIP unknown label when gipWorkforce is null", () => {
 		const { container } = render(
 			<CompanyEditModal company={{ ...company, gipWorkforce: null }} />,

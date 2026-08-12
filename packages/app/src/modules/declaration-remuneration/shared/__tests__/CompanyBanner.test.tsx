@@ -69,6 +69,20 @@ describe("CompanyBanner", () => {
 		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
 	});
 
+	it("shows '< 50' instead of the exact headcount of a company present in the GIP file below the threshold", () => {
+		// Issue 3914: the bracket was keyed on "absent from the GIP file", so a
+		// company present with 37 employees rendered "37".
+		render(
+			<CompanyBanner
+				company={{ ...defaultCompany, gipWorkforce: 37 }}
+				currentPageLabel="Déclaration"
+			/>,
+		);
+
+		expect(screen.getByText(GIP_WORKFORCE_ABSENT_DISPLAY)).toBeInTheDocument();
+		expect(screen.queryByText("37")).not.toBeInTheDocument();
+	});
+
 	it("floors a decimal gipWorkforce and hides the CSE datapoint below 100", () => {
 		render(
 			<CompanyBanner

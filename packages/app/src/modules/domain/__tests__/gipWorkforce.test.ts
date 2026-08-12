@@ -8,7 +8,6 @@ import {
 	parseGipWorkforce,
 	toDisplayWorkforce,
 } from "../shared/gipWorkforce";
-import { formatCount } from "../shared/submissionRate";
 
 describe("parseGipWorkforce", () => {
 	it("parses the numeric(9,2) string returned by the postgres driver", () => {
@@ -88,8 +87,19 @@ describe("formatWorkforceDisplay", () => {
 		expect(formatWorkforceDisplay(250)).toBe("250");
 	});
 
-	it("groups thousands the French way", () => {
-		expect(formatWorkforceDisplay(12345)).toBe(formatCount(12345));
+	it("brackets a negative headcount instead of surfacing it", () => {
+		// parseGipWorkforce deliberately keeps a negative rather than coercing it,
+		// so a corrupt GIP row reaches this formatter. It belongs to the voluntary
+		// tier and must never read "-1" on a user-facing screen.
+		expect(formatWorkforceDisplay(-1)).toBe(GIP_WORKFORCE_ABSENT_DISPLAY);
+	});
+
+	it("groups thousands with a narrow no-break space, the French way", () => {
+		// Spelled out rather than compared to formatCount(12345), which would be
+		// the implementation checked against itself. The narrow no-break space is
+		// escaped, not pasted: U+202F is invisible in a diff and a plain space
+		// would silently pass for it.
+		expect(formatWorkforceDisplay(12345)).toBe("12\u202f345");
 	});
 });
 
