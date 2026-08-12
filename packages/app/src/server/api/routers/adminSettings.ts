@@ -3,14 +3,21 @@ import { eq } from "drizzle-orm";
 import {
 	campaignDeadlinesFormSchema,
 	getCampaignDeadlinesByYearSchema,
+	getRepresentationCampaignByYearSchema,
+	representationCampaignFormSchema,
 	updateLockTimeoutSchema,
 } from "~/modules/admin/settings/schemas";
 import {
 	DEFAULT_LOCK_TIMEOUT_MINUTES,
 	getDefaultCampaignDeadlines,
+	getDefaultRepresentationCampaign,
 } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
-import { campaignDeadlines, globalSettings } from "~/server/db/schema";
+import {
+	campaignDeadlines,
+	globalSettings,
+	representationCampaigns,
+} from "~/server/db/schema";
 
 /**
  * Admin / settings router — edits platform-wide global variables.
@@ -153,6 +160,56 @@ export const adminSettingsRouter = createTRPCRouter({
 				target: campaignDeadlines.year,
 				set: values,
 			});
+
+			return { success: true as const };
+		}),
+
+	getRepresentationCampaignByYear: adminProcedure
+		.input(getRepresentationCampaignByYearSchema)
+		.query(async ({ ctx, input }) => {
+			const [row] = await ctx.db
+				.select()
+				.from(representationCampaigns)
+				.where(eq(representationCampaigns.year, input.year))
+				.limit(1);
+
+			if (row) {
+				return {
+					year: row.year,
+					isDefault: false as const,
+					campaignStartDate: row.campaignStartDate,
+					campaignEndDate: row.campaignEndDate,
+					declarationDeadline: row.declarationDeadline,
+				};
+			}
+
+			const defaults = getDefaultRepresentationCampaign(input.year);
+			return {
+				year: input.year,
+				isDefault: true as const,
+				campaignStartDate: toIsoDate(defaults.campaignStartDate),
+				campaignEndDate: toIsoDate(defaults.campaignEndDate),
+				declarationDeadline: toIsoDate(defaults.declarationDeadline),
+			};
+		}),
+
+	upsertRepresentationCampaign: adminProcedure
+		.input(representationCampaignFormSchema)
+		.mutation(async ({ ctx, input }) => {
+			const values = {
+				year: input.year,
+				campaignStartDate: input.campaignStartDate,
+				campaignEndDate: input.campaignEndDate,
+				declarationDeadline: input.declarationDeadline,
+			};
+
+			await ctx.db
+				.insert(representationCampaigns)
+				.values(values)
+				.onConflictDoUpdate({
+					target: representationCampaigns.year,
+					set: values,
+				});
 
 			return { success: true as const };
 		}),
