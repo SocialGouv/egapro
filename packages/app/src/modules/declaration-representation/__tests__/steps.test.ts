@@ -10,6 +10,7 @@ import {
 	REPRESENTATION_STEPS,
 	stepHref,
 } from "../steps";
+import { Step1ReferencePeriod } from "../steps/Step1ReferencePeriod";
 import { Step3Members } from "../steps/Step3Members";
 import { StepPlaceholder } from "../steps/StepPlaceholder";
 import {
@@ -36,7 +37,7 @@ describe("REPRESENTATION_STEPS", () => {
 		expect(
 			REPRESENTATION_STEPS.map((step) => [step.slug, step.Component]),
 		).toEqual([
-			["periode-de-reference", StepPlaceholder],
+			["periode-de-reference", Step1ReferencePeriod],
 			["ecarts-cadres-dirigeants", StepPlaceholder],
 			["ecarts-instances-dirigeantes", Step3Members],
 			["informations-de-publication", StepPlaceholder],

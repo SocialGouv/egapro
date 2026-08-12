@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Stepper } from "./Stepper";
+import type { StepValidator } from "./shared/draft/DraftContext";
 import { RepresentationDraftProvider } from "./shared/draft/DraftContext";
 import { useRepresentationDraft } from "./shared/draft/useRepresentationDraft";
 import {
@@ -40,6 +41,14 @@ export function StepPageClient({
 			enabled: campaignOpen,
 		});
 
+	const stepValidatorRef = useRef<StepValidator | null>(null);
+	const registerStepValidator = useCallback(
+		(validator: StepValidator | null) => {
+			stepValidatorRef.current = validator;
+		},
+		[],
+	);
+
 	const definition = getStepDefinition(step);
 	const previousHref = getPreviousStepHref(step);
 	const nextHref = getNextStepHref(step);
@@ -50,6 +59,10 @@ export function StepPageClient({
 
 	async function handleNext() {
 		if (nextHref === undefined) return;
+		if (stepValidatorRef.current) {
+			const isValid = await stepValidatorRef.current();
+			if (!isValid) return;
+		}
 		setNavigationError(null);
 		setIsAdvancing(true);
 		try {
@@ -74,6 +87,7 @@ export function StepPageClient({
 				isSaving,
 				isPendingSave,
 				isReadOnly: !campaignOpen,
+				registerStepValidator,
 			}}
 		>
 			<h1 className="fr-h4">

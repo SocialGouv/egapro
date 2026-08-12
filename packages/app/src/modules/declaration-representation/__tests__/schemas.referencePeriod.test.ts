@@ -8,6 +8,14 @@ import {
 	REPRESENTATION_YEAR as YEAR,
 } from "./fixtures";
 
+const DATE_FIELDS = ["referencePeriodStart", "referencePeriodEnd"] as const;
+
+const MALFORMED_DATES = [
+	["unreadable", "not-a-date"],
+	["Date-parsable but non-ISO", "01/01/2025"],
+	["ISO-shaped but non-existent", "2025-02-30"],
+] as const;
+
 describe("referencePeriodSchema", () => {
 	it("accepts a calendar year ending in the declaration year", () => {
 		expect(referencePeriodSchema(YEAR).safeParse(VALID_PERIOD).success).toBe(
@@ -41,7 +49,23 @@ describe("referencePeriodSchema", () => {
 
 		expect(issues(result)).toContainEqual({
 			path: "referencePeriodEnd",
-			message: VALIDATION_MESSAGES.periodYear,
+			message: VALIDATION_MESSAGES.periodYear(YEAR),
+		});
+	});
+
+	it.each([
+		["after the reference year", "2027-04-03"],
+		["on the calendar year right after it", "2026-01-01"],
+		["more than one year before it", "2023-01-02"],
+	])("rejects a start date %s", (_label, start) => {
+		const result = referencePeriodSchema(YEAR).safeParse({
+			referencePeriodStart: start,
+			referencePeriodEnd: VALID_PERIOD.referencePeriodEnd,
+		});
+
+		expect(issues(result)).toContainEqual({
+			path: "referencePeriodStart",
+			message: VALIDATION_MESSAGES.periodYear(YEAR),
 		});
 	});
 
@@ -61,12 +85,40 @@ describe("referencePeriodSchema", () => {
 		});
 	});
 
-	it("rejects a date that is not an ISO calendar date", () => {
-		const result = referencePeriodSchema(YEAR).safeParse({
-			referencePeriodStart: "01/01/2025",
-			referencePeriodEnd: "2025-12-31",
-		});
+	it.each(
+		MALFORMED_DATES.flatMap(([shape, value]) =>
+			DATE_FIELDS.map((field) => ({ shape, value, field })),
+		),
+	)("reports a $shape $field once, without stacking the period rules on top", ({
+		value,
+		field,
+	}) => {
+		const reported = issues(
+			referencePeriodSchema(YEAR).safeParse({
+				...VALID_PERIOD,
+				[field]: value,
+			}),
+		);
 
-		expect(result.success).toBe(false);
+		expect(reported).toHaveLength(1);
+		expect(reported[0]?.path).toBe(field);
+		expect([
+			VALIDATION_MESSAGES.periodYear(YEAR),
+			VALIDATION_MESSAGES.periodLength,
+		]).not.toContain(reported[0]?.message);
+	});
+
+	it("reports one error per malformed date when neither can be read", () => {
+		const reported = issues(
+			referencePeriodSchema(YEAR).safeParse({
+				referencePeriodStart: "not-a-date",
+				referencePeriodEnd: "neither-is-this",
+			}),
+		);
+
+		expect(reported.map((issue) => issue.path)).toEqual([
+			"referencePeriodStart",
+			"referencePeriodEnd",
+		]);
 	});
 });
