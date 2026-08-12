@@ -246,8 +246,8 @@ describe("PercentagePairFields — accessibility and states", () => {
 
 		expect(women).toHaveAttribute("readonly");
 		expect(men).toHaveAttribute("readonly");
-		expect(women).toHaveAttribute("aria-disabled", "true");
-		expect(men).toHaveAttribute("aria-disabled", "true");
+		expect(women).not.toHaveAttribute("aria-disabled");
+		expect(men).not.toHaveAttribute("aria-disabled");
 		expect(women).not.toBeDisabled();
 		expect(men).not.toBeDisabled();
 
