@@ -26,16 +26,21 @@ A single comment on the bug issue titled `## Analyse du bug` containing :
 2. **Root cause** — fichier + ligne(s), explication 2-3 phrases
 3. **Fichiers à modifier** — liste explicite (chemins `~/modules/...`, `~/server/...`)
 4. **Fix proposé** — 2-3 lignes, pas de code complet (c'est `code-dev` qui code)
-5. **Criticité pour la non-régression** — tu **classes**, tu ne **prescris pas** de test :
+5. **Vérification du correctif (one-shot, pendant le dev)** — comment prouver, *au moment de l'implémentation*, que le fix fait ce qu'il prétend : étapes de reproduction exactes, URL, commande, mesure à relever, ou « validation visuelle sur le dev server » pour un écart purement visuel. **Toujours renseigné** — même un bug infra ou cosmétique a une procédure de vérification, fût-elle manuelle (cf. `rules/bug-fix-workflow.md` § bugs CI/CD-infra et § écart visuel Figma).
+
+   C'est une **guidance de développement** destinée à `code-dev` : elle est **éphémère**, elle ne survit pas au ticket, et elle n'engage **aucune couverture permanente**. Ne la confonds pas avec le point 6 — un bug peut parfaitement mériter une vérification one-shot soignée et **aucun** test permanent.
+
+6. **Criticité pour la non-régression (test permanent)** — question **distincte** de la précédente : ce bug mérite-t-il un test qui rejouera **en CI, à chaque PR, indéfiniment** ? Tu **classes**, tu ne **prescris pas** :
    - le parcours touché est-il critique (déclaration, login, conformité, upload) ?
    - le symptôme est-il **bloquant** pour l'utilisateur, ou seulement visuel / cosmétique ?
    - le correctif touche-t-il un **utilitaire partagé** (rayon d'impact sur N appelants) ou un seul écran ?
-   - un **TU / test d'intégration** suffirait-il (règle métier, fonction pure) ?
+   - un **TU / test d'intégration** suffirait-il (règle métier, fonction pure) — auquel cas la couverture revient à `tu-dev`, pas à `e2e-dev` ?
 
-   Conclus par une ligne unique : `Couverture E2E : justifiée | non justifiée | à l'appréciation d'e2e-dev`, plus une phrase de motif. **Le choix final — imbriquer, créer, ou ne rien faire — appartient à `e2e-dev`**, qui décide sur le diff réel. Ne propose donc **ni fichier hôte, ni viewport, ni forme d'assertion, ni seuil** : une spec de test rédigée ici est lue en aval comme une décision déjà prise et court-circuite la gate de criticité de l'agent.
+   Conclus par une ligne unique : `Couverture permanente : E2E justifiée | TU/intégration suffisante | non justifiée | à l'appréciation des agents de test`, plus une phrase de motif. **Le choix final — imbriquer, créer, ou ne rien faire — appartient à `e2e-dev`** (E2E) et `tu-dev` (TU/intégration), qui décident sur le diff réel. Ne propose donc **ni fichier hôte, ni viewport, ni forme d'assertion, ni seuil** : une spec de test rédigée ici est lue en aval comme une décision déjà prise et court-circuite leur jugement.
 
-   Ne gonfle pas non plus la taille (`## Complexité`) au titre d'un test E2E qui ne sera peut-être pas écrit : tant que la couverture n'est pas manifestement justifiée, estime le ticket sur le seul correctif.
-6. **Tags suggérés** — `complexe` si > 5 fichiers ou refacto multi-modules
+   Ne gonfle pas non plus la taille (`## Complexité`) au titre d'un test permanent qui ne sera peut-être pas écrit : tant que la couverture permanente n'est pas manifestement justifiée, estime le ticket sur le seul correctif et sa vérification one-shot.
+
+7. **Tags suggérés** — `complexe` si > 5 fichiers ou refacto multi-modules
 
 Le **body de l'issue est intact** — l'analyse vit dans un commentaire séparé. `code-dev` lira les deux (description originale + analyse) en mode bug.
 
@@ -129,7 +134,9 @@ gh issue comment "$BUG_N" --body-file <(cat <<'EOF'
 
 **Fix proposé** : retirer le `.optional()` du schéma `maxThreshold`, propager le message d'erreur via `formState.errors.maxThreshold?.message`.
 
-**Criticité pour la non-régression** : parcours critique (déclaration), symptôme **bloquant** (l'utilisateur ne voit pas pourquoi son envoi échoue), correctif localisé sur un seul écran, non couvrable en TU (validation rendue par le navigateur). `Couverture E2E : justifiée` — le choix du scénario hôte et de la forme d'assertion revient à `e2e-dev`.
+**Vérification du correctif (one-shot)** : sur le dev server, ouvrir `/declaration-remuneration/etape/4`, soumettre le formulaire vide et vérifier qu'un `fr-error-text` apparaît sous le champ — aujourd'hui rien ne s'affiche.
+
+**Criticité pour la non-régression** : parcours critique (déclaration), symptôme **bloquant** (l'utilisateur ne voit pas pourquoi son envoi échoue), correctif localisé sur un seul écran, non couvrable en TU (validation rendue par le navigateur). `Couverture permanente : E2E justifiée` — le choix du scénario hôte et de la forme d'assertion revient à `e2e-dev`.
 
 **Tags** : aucun (1 fichier touché, fix simple).
 
