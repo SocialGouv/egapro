@@ -66,13 +66,15 @@ MAX_PARALLEL="${EPIC_MAX_PARALLEL:-5}"
 # is recovered from PORT=3001+N in packages/app/.env.local. If a worktree was
 # never properly set up, skip it (it'll re-setup on next dispatch).
 declare -A INDEX_BUSY
+declare -A OWNED_INDEX   # ticket -> index of the worktree that already belongs to it
 for i in $(seq 0 $((MAX_PARALLEL - 1))); do
     INDEX_BUSY[$i]=0
 done
 
 while IFS= read -r path; do
     [ -n "$path" ] || continue
-    case "$(basename "$path")" in
+    BASE_NAME="$(basename "$path")"
+    case "$BASE_NAME" in
         egapro-epic*-t*) ;;
         *) continue ;;
     esac
@@ -83,6 +85,13 @@ while IFS= read -r path; do
     IDX=$((PORT_LINE - 3001))
     if [ "$IDX" -ge 0 ] && [ "$IDX" -lt "$MAX_PARALLEL" ]; then
         INDEX_BUSY[$IDX]=1
+        # Remember which ticket owns this worktree. A ticket that failed and was
+        # reset to Todo keeps its worktree (cleanup only happens on squash-merge),
+        # so on re-dispatch it must get *its own* index back — otherwise the slot
+        # counts as busy forever (deadlock once every index is taken) and the
+        # agent would be told a port that its provisioned stack does not serve.
+        OWNED_TID="${BASE_NAME##*-t}"
+        [[ "$OWNED_TID" =~ ^[0-9]+$ ]] && OWNED_INDEX[$OWNED_TID]=$IDX
     fi
 done < <(git worktree list --porcelain 2>/dev/null | awk '/^worktree /{print $2}')
 
@@ -209,13 +218,20 @@ for entry in "${CANDIDATES[@]:-}"; do
     IFS='|' read -r TICKET MODEL EPIC BASE <<< "$entry"
 
     ASSIGNED_IDX=""
-    for i in $(seq 0 $((MAX_PARALLEL - 1))); do
-        if [ "${INDEX_BUSY[$i]}" = "0" ]; then
-            ASSIGNED_IDX=$i
-            INDEX_BUSY[$i]=1
-            break
-        fi
-    done
+    # A ticket that already owns a provisioned worktree reuses its index: the
+    # slot is "busy" because of that very ticket, and its docker stack is wired
+    # to those ports.
+    if [ -n "${OWNED_INDEX[$TICKET]:-}" ]; then
+        ASSIGNED_IDX="${OWNED_INDEX[$TICKET]}"
+    else
+        for i in $(seq 0 $((MAX_PARALLEL - 1))); do
+            if [ "${INDEX_BUSY[$i]}" = "0" ]; then
+                ASSIGNED_IDX=$i
+                INDEX_BUSY[$i]=1
+                break
+            fi
+        done
+    fi
 
     [ -z "$ASSIGNED_IDX" ] && break  # all slots busy, stop dispatching
 
