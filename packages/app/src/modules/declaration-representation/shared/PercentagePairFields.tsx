@@ -97,14 +97,7 @@ export function PercentagePairFields({
 
 	return (
 		<fieldset className={`fr-fieldset ${error ? "fr-fieldset--error" : ""}`}>
-			<legend className="fr-fieldset__legend fr-text--regular">
-				{legend}
-				{hint ? (
-					<span className="fr-hint-text" id={hintId}>
-						{hint}
-					</span>
-				) : null}
-			</legend>
+			<legend className="fr-fieldset__legend fr-text--regular">{legend}</legend>
 			<div className="fr-fieldset__content">
 				<div
 					className={`fr-grid-row fr-grid-row--gutters ${trailingContent ? "fr-grid-row--bottom" : ""}`}
@@ -154,6 +147,11 @@ export function PercentagePairFields({
 					) : null}
 				</div>
 			</div>
+			{hint ? (
+				<p className="fr-message fr-message--info" id={hintId}>
+					{hint}
+				</p>
+			) : null}
 			<div
 				aria-atomic="true"
 				aria-live="polite"

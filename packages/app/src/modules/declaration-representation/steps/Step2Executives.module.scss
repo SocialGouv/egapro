@@ -10,6 +10,15 @@
 	color: var(--text-title-grey);
 }
 
+.radioGroup:global(.fr-fieldset--error) {
+	border-left: 0.25rem solid var(--border-plain-error);
+	padding-left: 1rem;
+}
+
+.radioGroup:global(.fr-fieldset--error) :global(.fr-fieldset__element) {
+	margin-bottom: 17px;
+}
+
 .reminderCompliant:global(.fr-callout) {
 	background-color: var(--background-contrast-info);
 	background-image: linear-gradient(

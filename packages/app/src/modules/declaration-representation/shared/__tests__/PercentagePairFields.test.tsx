@@ -199,6 +199,20 @@ describe("PercentagePairFields — accessibility and states", () => {
 		expect(men).toHaveAttribute("aria-describedby", hint.id);
 	});
 
+	it("reads the hint after the fields instead of inside the legend", () => {
+		render(<Harness />);
+		const { men } = fields();
+
+		const hint = screen.getByText(
+			"La saisie d'un pourcentage calcule automatiquement l'autre.",
+		);
+
+		expect(screen.getByText(LEGEND)).not.toContainElement(hint);
+		expect(
+			men.compareDocumentPosition(hint) & Node.DOCUMENT_POSITION_FOLLOWING,
+		).not.toBe(0);
+	});
+
 	it("flags both percentages as required fields", () => {
 		render(<Harness />);
 		const { women, men } = fields();
