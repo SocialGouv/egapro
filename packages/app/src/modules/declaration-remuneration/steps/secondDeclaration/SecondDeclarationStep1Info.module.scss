@@ -1,0 +1,22 @@
+.introText {
+	color: var(--text-title-grey);
+}
+
+.obligationsCallout {
+	// Qualified with .fr-callout to outrank DSFR's own rule (same specificity, source order would otherwise decide)
+	&:global(.fr-callout) {
+		background-color: var(--background-alt-blue-france);
+		background-image: none;
+		margin-bottom: 0;
+		--title-spacing: 0 0 1rem;
+
+		@include respond-from(md) {
+			padding: 2rem;
+		}
+	}
+
+	:global(.fr-callout__text) {
+		font-size: 1rem;
+		line-height: 1.5rem;
+	}
+}

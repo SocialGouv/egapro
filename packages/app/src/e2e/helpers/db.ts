@@ -223,6 +223,24 @@ export async function setCompanyWorkforce(workforce: number | null) {
 	}
 }
 
+/**
+ * Persist a step-1 workforce on the shared declaration. The funnel reads these
+ * columns to decide whether a step already holds data, so this reaches the
+ * "saved" rendering without replaying the form and waiting on its autosave.
+ */
+export async function setWorkforceCounts(women: number, men: number) {
+	const sql = createConnection();
+	try {
+		await sql`
+			UPDATE app_declaration
+			SET total_women = ${women}, total_men = ${men}
+			WHERE siren = ${TEST_SIREN}
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
 export async function setDeclarationComplianceState(state: {
 	status?: string;
 	currentStep?: number;

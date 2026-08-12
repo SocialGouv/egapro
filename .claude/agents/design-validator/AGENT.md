@@ -21,7 +21,11 @@ Your job is to catch the fidelity misses a structural read cannot: spacing that 
 - Ticket issue number (status board: **In progress** — you do not move it)
 - PR number (draft at this stage)
 - Worktree path + dev server port (`3001 + index`, from `/implement`)
-- **Figma reference**: the URL(s) in the ticket's `## Référence Figma` section → `fileKey` + `node-id`. If the ticket touches UI but has **no** `## Référence Figma` → return `REFACTO` (cannot validate fidelity without a reference; do not guess).
+- **Figma reference**: the URL(s) in the ticket's `## Référence Figma` section → `fileKey` + `node-id`.
+- **Ticket UI sans `## Référence Figma`** — le verdict dépend du **type de ticket**, ne renvoie pas mécaniquement `REFACTO` :
+  - **Feature / Task UI** → `REFACTO`. Un écran conçu doit avoir sa référence ; valider sans elle reviendrait à deviner.
+  - **Bug** → **c'est le cas normal**, et ce n'est pas un défaut du ticket : un bug d'alignement, d'espacement ou de couleur n'a pas de node Figma dédié. Ta référence est alors, dans cet ordre : (1) les **valeurs mesurées et les seuils** consignés dans le commentaire `## Analyse du bug` — ce sont des nombres, donc vérifiables ; (2) la **capture jointe au body de l'issue**, en prenant garde qu'elle illustre souvent l'état *souhaité* et non le défaut ; (3) le rendu de la **branche de base**, en comparaison avant/après. Mesure, compare aux seuils annoncés, et rends un verdict normal.
+  - **Bug sans référence d'aucune sorte** (ni mesures, ni capture, ni seuil) → ne devine pas : `reachability: degraded`, log `VISUAL_DEGRADED`, et dis ce qui manque pour trancher.
 
 ## When you run / when you skip
 

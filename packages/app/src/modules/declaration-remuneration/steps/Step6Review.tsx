@@ -135,7 +135,7 @@ export function Step6Review({
 			    from some assistive technologies (#3803). */}
 			<fieldset className={common.readOnlyFieldset}>
 				<legend className="fr-sr-only">Récapitulatif de la déclaration</legend>
-				<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
+				<div className="fr-grid-row fr-grid-row--top fr-grid-row--gutters">
 					<div className="fr-col">
 						<h1 className="fr-h4 fr-mb-0">
 							Déclaration des indicateurs de rémunération {declarationYear}

@@ -203,7 +203,7 @@ describe("Step1Opinions", () => {
 		expect(screen.getByText("Deuxième déclaration")).toBeInTheDocument();
 	});
 
-	it("hides second declaration section when hasSecondDeclaration is false", () => {
+	it("drops both declaration headings when there is only one declaration", () => {
 		render(
 			<Step1Opinions
 				cseDeadline={cseDeadline}
@@ -213,8 +213,17 @@ describe("Step1Opinions", () => {
 			/>,
 		);
 
-		expect(screen.getByText("Première déclaration")).toBeInTheDocument();
+		// A lone declaration has nothing to be told apart from, so numbering it
+		// only adds noise (issue 3459).
+		expect(screen.queryByText("Première déclaration")).not.toBeInTheDocument();
 		expect(screen.queryByText("Deuxième déclaration")).not.toBeInTheDocument();
+
+		// The section itself stays: only its heading goes.
+		expect(
+			screen.getByText(
+				"Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs",
+			),
+		).toBeInTheDocument();
 	});
 
 	it("renders the submission banner for joint_evaluation path", () => {

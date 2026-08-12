@@ -21,7 +21,7 @@ export function StepTitleRow({
 	devFillDisabled = false,
 }: StepTitleRowProps) {
 	return (
-		<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
+		<div className="fr-grid-row fr-grid-row--top fr-grid-row--gutters">
 			<div className="fr-col">{title}</div>
 			<div className="fr-col-auto">
 				<DevFillButton disabled={devFillDisabled} onFill={onDevFill} />

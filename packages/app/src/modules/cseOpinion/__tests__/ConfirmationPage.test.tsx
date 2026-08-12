@@ -140,7 +140,7 @@ describe("ConfirmationPage", () => {
 			"href",
 			`/api/declaration-pdf?year=${DECLARATION_YEAR}`,
 		);
-		expect(declarationLink).not.toHaveAttribute("download");
+		expect(declarationLink).toHaveAttribute("download");
 
 		const transmittedLink = screen
 			.getByText(/récapitulatif des éléments transmis/)
@@ -149,7 +149,7 @@ describe("ConfirmationPage", () => {
 			"href",
 			`/api/transmitted-pdf?year=${DECLARATION_YEAR}`,
 		);
-		expect(transmittedLink).not.toHaveAttribute("download");
+		expect(transmittedLink).toHaveAttribute("download");
 	});
 
 	it("renders second declaration download card with correction href", () => {
@@ -168,7 +168,7 @@ describe("ConfirmationPage", () => {
 			"href",
 			`/api/declaration-pdf?type=correction&year=${DECLARATION_YEAR}`,
 		);
-		expect(secondDeclLink).not.toHaveAttribute("download");
+		expect(secondDeclLink).toHaveAttribute("download");
 	});
 
 	it("renders the feedback banner with the jedonnemonavis link", () => {
@@ -187,7 +187,7 @@ describe("ConfirmationPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders navigation links", () => {
+	it("closes the funnel on Mon espace alone", () => {
 		render(
 			<ConfirmationPage
 				dataYear={DECLARATION_YEAR - 1}
@@ -195,12 +195,27 @@ describe("ConfirmationPage", () => {
 			/>,
 		);
 
-		const modifyLink = screen.getByRole("link", {
-			name: /Modifier mes dépôts/,
-		});
-		expect(modifyLink).toHaveAttribute("href", "/avis-cse/etape/2");
-
 		const spaceLink = screen.getByRole("link", { name: "Mon espace" });
 		expect(spaceLink).toHaveAttribute("href", "/mon-espace");
+
+		// The démarche is over: sending the user back to the upload step from the
+		// confirmation screen invites them to redo a completed deposit (issue 3460).
+		expect(
+			screen.queryByRole("link", { name: /Modifier mes dépôts/ }),
+		).not.toBeInTheDocument();
+	});
+
+	it("marks the completion pictogram as a success rather than an error", () => {
+		const { container } = render(
+			<ConfirmationPage
+				dataYear={DECLARATION_YEAR - 1}
+				declarationYear={DECLARATION_YEAR}
+			/>,
+		);
+
+		// Without the modifier, the DSFR artwork paints its check in Marianne red.
+		expect(
+			container.querySelector(".fr-artwork--green-emeraude"),
+		).toBeInTheDocument();
 	});
 });

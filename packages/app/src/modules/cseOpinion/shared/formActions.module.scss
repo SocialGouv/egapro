@@ -3,3 +3,11 @@
 	justify-content: space-between;
 	align-items: center;
 }
+
+// The confirmation screen closes the funnel with a single action, so there is
+// nothing to push apart: it hugs the right edge like the "next" button above it.
+.actionsEnd {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+}

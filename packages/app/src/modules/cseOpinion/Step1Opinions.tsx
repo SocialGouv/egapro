@@ -228,29 +228,32 @@ export function Step1Opinions({
 				)}
 
 				{isJointEvaluation ? (
-					<h2 className="fr-h4 fr-mt-5w fr-mb-3w">
+					<h2 className="fr-h4 fr-mt-5w fr-mb-4w">
 						Transmettre l'avis ou les avis du CSE
 					</h2>
 				) : (
-					<h1 className="fr-h4 fr-mb-3w">
+					<h1 className="fr-h4 fr-mb-4w">
 						Transmettre l'avis ou les avis du CSE
 					</h1>
 				)}
 
 				<CseStepIndicator currentStep={1} />
 
-				<p className="fr-text--md fr-mb-2w">
+				<p className={`fr-text--md fr-mb-2w ${styles.introText}`}>
 					Indiquez si le CSE a été consulté et précisez les avis émis avant de
 					soumettre votre déclaration aux services du ministère chargé du
 					Travail.
 				</p>
 				<p className="fr-mb-4w">Tous les champs sont obligatoires.</p>
 
-				{isJointEvaluation ? (
-					<h3 className="fr-h6 fr-mb-3w">Première déclaration</h3>
-				) : (
-					<h2 className="fr-h6 fr-mb-3w">Première déclaration</h2>
-				)}
+				{/* A single declaration has nothing to be told apart from, so the
+				    per-declaration headings only earn their place in pairs. */}
+				{hasSecondDeclaration &&
+					(isJointEvaluation ? (
+						<h3 className="fr-h6 fr-mb-3w">Première déclaration</h3>
+					) : (
+						<h2 className="fr-h6 fr-mb-3w">Première déclaration</h2>
+					))}
 
 				<div className={styles.cardStack}>
 					<AccuracyOpinionCard
