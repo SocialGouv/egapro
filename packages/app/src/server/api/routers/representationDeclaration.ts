@@ -6,7 +6,7 @@ import {
 	saveRepresentationDraftSchema,
 	submitRepresentationDeclarationSchema,
 	submitRepresentationSchema,
-} from "~/modules/declaration-representation";
+} from "~/modules/declaration-representation/schemas";
 import {
 	deriveExecutivesNotComputableReason,
 	getRepresentationCampaignYear,
