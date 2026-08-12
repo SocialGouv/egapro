@@ -246,6 +246,15 @@ export async function enqueueReceipt(
 			...(attachments.length > 0 ? { attachments } : {}),
 		});
 
+		// A receipt that never left matters more than one that left without its
+		// PDF, so the queue error wins the single error column when both happen.
+		const errorMessage =
+			result.status === "enqueued"
+				? droppedReason
+				: result.status === "error"
+					? result.error
+					: "queue_unavailable";
+
 		void logAction({
 			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
 			status: result.status === "enqueued" ? "success" : "failure",
@@ -254,10 +263,12 @@ export async function enqueueReceipt(
 			siren,
 			...(result.status === "enqueued"
 				? { resourceType: "notification", resourceId: result.id }
-				: {
-						errorMessage:
-							result.status === "error" ? result.error : "queue_unavailable",
-					}),
+				: {}),
+			// Free text belongs in the dedicated column, not in `metadata`: a direct
+			// logAction call runs no sanitisation on the jsonb, so an exception
+			// message parked there would be one refactor away from carrying
+			// whatever a future throw site interpolates into it.
+			...(errorMessage === null ? {} : { errorMessage }),
 			// A dropped attachment must not read as a clean send: the enqueue did
 			// succeed, so the row stays a success, but the degradation is stamped
 			// on it — `metadata->>'attachmentsDropped'` is what makes "this SIREN
@@ -268,9 +279,7 @@ export async function enqueueReceipt(
 				year,
 				isResend,
 				variant: payload.variant,
-				...(droppedReason === null
-					? {}
-					: { attachmentsDropped: true, attachmentsError: droppedReason }),
+				...(droppedReason === null ? {} : { attachmentsDropped: true }),
 			},
 		});
 	} catch (error) {

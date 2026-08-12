@@ -248,10 +248,15 @@ describe("enqueueReceipt", () => {
 		// starts from audit.action_log filtered on the SIREN, so the degradation
 		// has to be readable there and not only in the exception tracker.
 		expect(mocks.logAction).toHaveBeenCalledTimes(1);
-		expect(auditMetadataOf()).toMatchObject({
-			attachmentsDropped: true,
-			attachmentsError: "pdf rendering failed",
-		});
+		expect(auditMetadataOf()).toMatchObject({ attachmentsDropped: true });
+		// The reason is free text, so it goes in the dedicated column rather than
+		// in the jsonb, which a direct logAction call never sanitises.
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "success",
+				errorMessage: "pdf rendering failed",
+			}),
+		);
 	});
 
 	it("leaves no dropped-attachment marker on the audit row of a nominal send", async () => {
@@ -259,7 +264,9 @@ describe("enqueueReceipt", () => {
 
 		// The marker only means something if it is absent the rest of the time.
 		expect(auditMetadataOf()).not.toHaveProperty("attachmentsDropped");
-		expect(auditMetadataOf()).not.toHaveProperty("attachmentsError");
+		expect(mocks.logAction).not.toHaveBeenCalledWith(
+			expect.objectContaining({ errorMessage: expect.anything() }),
+		);
 	});
 
 	it("keeps the dropped-attachment marker on the audit row when the queue also rejects the receipt", async () => {
@@ -293,10 +300,10 @@ describe("enqueueReceipt", () => {
 		expect(captured).toBeInstanceOf(Error);
 		expect(captured.message).toBe("pdf worker died");
 		expect(captured.cause).toBe("pdf worker died");
-		expect(auditMetadataOf()).toMatchObject({
-			attachmentsDropped: true,
-			attachmentsError: "pdf worker died",
-		});
+		expect(auditMetadataOf()).toMatchObject({ attachmentsDropped: true });
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({ errorMessage: "pdf worker died" }),
+		);
 	});
 
 	it("logs failure with a generic message when a non-Error value is thrown", async () => {
