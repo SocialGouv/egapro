@@ -52,7 +52,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 EXISTING_WT=$(git -C "$REPO_ROOT" worktree list --porcelain 2>/dev/null \
     | awk -v b="refs/heads/${BRANCH}" '
         /^worktree / { wt = $2 }
-        /^branch / && $2 == b { print wt; exit }
+        /^branch / && $2 == b && !found { print wt; found = 1 }
     ')
 
 if [ -n "$EXISTING_WT" ]; then
