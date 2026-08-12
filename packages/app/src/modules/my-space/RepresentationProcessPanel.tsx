@@ -192,9 +192,7 @@ function StepCircle({
 }
 
 function stepRowClass(status: StepStatus): string {
-	if (status === "complete") return styles.stepRowComplete ?? "";
-	if (status === "current") return styles.stepRowCurrent ?? "";
-	return "";
+	return status === "complete" ? (styles.stepRowComplete ?? "") : "";
 }
 
 function StepTitle({
