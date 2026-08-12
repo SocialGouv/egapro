@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 
-import type { RepresentationDraft } from "../../types";
+import type { RepresentationDraft } from "~/modules/declaration-representation/types";
 
 export type RepresentationDraftContextValue = {
 	year: number;

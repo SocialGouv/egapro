@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-
+import type { RepresentationDraft } from "~/modules/declaration-representation/types";
 import { api } from "~/trpc/react";
-import type { RepresentationDraft } from "../../types";
 
 const DEBOUNCE_MS = 600;
 const VISUAL_DELAY_MS = 400;

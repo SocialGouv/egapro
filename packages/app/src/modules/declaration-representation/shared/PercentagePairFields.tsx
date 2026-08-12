@@ -17,7 +17,7 @@ type PercentagePairFieldsProps = {
 	womenLabel?: string;
 	menLabel?: string;
 	error?: string;
-	disabled?: boolean;
+	readOnly?: boolean;
 };
 
 export function complementPercentage(raw: string): string | undefined {
@@ -43,7 +43,7 @@ export function PercentagePairFields({
 	womenLabel = "Femmes",
 	menLabel = "Hommes",
 	error,
-	disabled = false,
+	readOnly = false,
 }: PercentagePairFieldsProps) {
 	const baseId = useId();
 	const womenId = `${baseId}-women`;
@@ -54,11 +54,17 @@ export function PercentagePairFields({
 		women: false,
 		men: false,
 	});
+	const [announcement, setAnnouncement] = useState("");
 
 	function handleWomenChange(raw: string) {
 		if (!isPercentageInput(raw)) return;
 		setEditedFields((previous) => ({ ...previous, women: true }));
 		const complement = editedFields.men ? undefined : complementPercentage(raw);
+		setAnnouncement(
+			complement === undefined
+				? ""
+				: `${menLabel} : ${complement} % renseigné automatiquement.`,
+		);
 		onChange({
 			womenPercent: raw,
 			menPercent: complement ?? values.menPercent,
@@ -71,6 +77,11 @@ export function PercentagePairFields({
 		const complement = editedFields.women
 			? undefined
 			: complementPercentage(raw);
+		setAnnouncement(
+			complement === undefined
+				? ""
+				: `${womenLabel} : ${complement} % renseigné automatiquement.`,
+		);
 		onChange({
 			womenPercent: complement ?? values.womenPercent,
 			menPercent: raw,
@@ -82,10 +93,7 @@ export function PercentagePairFields({
 		.join(" ");
 
 	return (
-		<fieldset
-			className={`fr-fieldset ${error ? "fr-fieldset--error" : ""}`}
-			disabled={disabled}
-		>
+		<fieldset className={`fr-fieldset ${error ? "fr-fieldset--error" : ""}`}>
 			<legend className="fr-fieldset__legend fr-text--regular">
 				{legend}
 				{hint ? (
@@ -104,11 +112,13 @@ export function PercentagePairFields({
 							</label>
 							<input
 								aria-describedby={describedBy || undefined}
+								aria-disabled={readOnly || undefined}
 								aria-invalid={error ? true : undefined}
 								className="fr-input"
 								id={womenId}
 								inputMode="decimal"
 								onChange={(event) => handleWomenChange(event.target.value)}
+								readOnly={readOnly}
 								type="text"
 								value={values.womenPercent}
 							/>
@@ -122,11 +132,13 @@ export function PercentagePairFields({
 							</label>
 							<input
 								aria-describedby={describedBy || undefined}
+								aria-disabled={readOnly || undefined}
 								aria-invalid={error ? true : undefined}
 								className="fr-input"
 								id={menId}
 								inputMode="decimal"
 								onChange={(event) => handleMenChange(event.target.value)}
+								readOnly={readOnly}
 								type="text"
 								value={values.menPercent}
 							/>
@@ -134,11 +146,17 @@ export function PercentagePairFields({
 					</div>
 				</div>
 			</div>
-			{error ? (
-				<div aria-live="polite" className="fr-messages-group" id={errorId}>
-					<p className="fr-message fr-message--error">{error}</p>
-				</div>
-			) : null}
+			<div
+				aria-atomic="true"
+				aria-live="polite"
+				className="fr-messages-group"
+				id={errorId}
+			>
+				{error ? <p className="fr-message fr-message--error">{error}</p> : null}
+			</div>
+			<p aria-atomic="true" aria-live="polite" className="fr-sr-only">
+				{announcement}
+			</p>
 		</fieldset>
 	);
 }
