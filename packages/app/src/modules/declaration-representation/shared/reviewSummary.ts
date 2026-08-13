@@ -153,11 +153,6 @@ export function describeNonCompliance(
 		: `Vous n'êtes pas conforme concernant les écarts relatifs ${subjects.join(" et ")}.`;
 }
 
-export function formatRepresentationPercent(value: number | undefined): string {
-	if (value === undefined) return "—";
-	return `${value.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`;
-}
-
 export function buildRepresentationSubmitPayload(
 	draft: RepresentationDraft,
 ): Record<string, unknown> {
@@ -178,9 +173,7 @@ export function buildRepresentationSubmitPayload(
 		payload.memberMenPercent = draft.memberMenPercent;
 	}
 
-	// Sending publication keys when no gap is computable is rejected by
-	// `submitRepresentationSchema`, and the draft may still hold values typed
-	// before the declarant went back and made both indicators non-computable.
+	// `submitRepresentationSchema` rejects publication keys when no gap is computable, and the draft may still hold values typed before a back-and-forth.
 	if (isPublicationApplicable(draft)) {
 		payload.publishDate = draft.publishDate;
 		payload.hasWebsite = draft.hasWebsite;

@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 import {
+	formatPercentage,
 	formatShortDate,
 	getRepresentationCampaignYear,
 } from "~/modules/domain";
-import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { useDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { SubmitModal } from "../SubmitModal";
@@ -18,13 +18,12 @@ import type { RepresentationIndicatorSummary } from "../shared/reviewSummary";
 import {
 	buildRepresentationSubmitPayload,
 	describeNonCompliance,
-	formatRepresentationPercent,
 	summarizeRepresentationReview,
 } from "../shared/reviewSummary";
+import { Step5NextSteps } from "./Step5NextSteps";
 import styles from "./Step5Review.module.scss";
 
 const CONFIRMATION_HREF = "/declaration-representation/confirmation";
-const TELEACCORDS_URL = "https://www.teleaccords.travail.gouv.fr";
 
 function formatIsoDate(value: string | undefined): string {
 	return value === undefined ? "—" : formatShortDate(new Date(value));
@@ -44,13 +43,13 @@ function IndicatorCard({
 					<div className={styles.percentage}>
 						<p className="fr-text--sm fr-mb-0">Femmes</p>
 						<p className="fr-text--sm fr-text--bold fr-mb-0">
-							{formatRepresentationPercent(indicator.womenPercent)}
+							{formatPercentage(indicator.womenPercent)}
 						</p>
 					</div>
 					<div className={styles.percentage}>
 						<p className="fr-text--sm fr-mb-0">Hommes</p>
 						<p className="fr-text--sm fr-text--bold fr-mb-0">
-							{formatRepresentationPercent(indicator.menPercent)}
+							{formatPercentage(indicator.menPercent)}
 						</p>
 					</div>
 				</div>
@@ -152,45 +151,7 @@ export function Step5Review() {
 			) : null}
 
 			{nonComplianceSentence === null ? null : (
-				<section className={styles.nextSteps}>
-					<h2 className="fr-h6 fr-mb-0">Prochaines étapes</h2>
-					<div className={styles.badgeRow}>
-						<p className="fr-badge fr-badge--sm fr-badge--warning">
-							Écarts détectés
-						</p>
-					</div>
-					<p className="fr-mb-0">
-						{nonComplianceSentence} Vous devez définir des mesures adéquates et
-						pertinentes de correction, par l&apos;un des deux moyens
-						suivants&nbsp;:
-					</p>
-					<ul className="fr-mb-0">
-						<li>
-							<strong>
-								Par accord collectif, dans le cadre de la négociation
-								obligatoire sur l&apos;égalité professionnelle
-							</strong>
-						</li>
-						<li>
-							<strong>
-								Par décision unilatérale de l&apos;employeur après information -
-								consultation du CSE
-							</strong>
-						</li>
-					</ul>
-					<p className="fr-mb-0">
-						Les documents doivent être déposés sur{" "}
-						<a
-							className="fr-link"
-							href={TELEACCORDS_URL}
-							rel="noopener noreferrer"
-							target="_blank"
-						>
-							TéléAccords
-							<NewTabNotice />
-						</a>
-					</p>
-				</section>
+				<Step5NextSteps summary={nonComplianceSentence} />
 			)}
 
 			{submitMutation.error ? (

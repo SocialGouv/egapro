@@ -4,7 +4,6 @@ export { RepresentationPlayground } from "./RepresentationPlayground";
 export { StepPageClient } from "./StepPageClient";
 export { Stepper } from "./Stepper";
 export { SubjectionScreen } from "./SubjectionScreen";
-export { SubmitModal } from "./SubmitModal";
 export {
 	executivesCountSchema,
 	executivesSchema,
@@ -31,21 +30,6 @@ export {
 	isPercentageInput,
 	PercentagePairFields,
 } from "./shared/PercentagePairFields";
-export type {
-	RepresentationIndicatorKey,
-	RepresentationIndicatorSummary,
-	RepresentationReviewSummary,
-	RepresentationSubmitVariant,
-} from "./shared/reviewSummary";
-export {
-	buildRepresentationSubmitPayload,
-	describeNonCompliance,
-	EXECUTIVES_TITLE,
-	formatRepresentationPercent,
-	isPublicationApplicable,
-	MEMBERS_TITLE,
-	summarizeRepresentationReview,
-} from "./shared/reviewSummary";
 export type { StepDefinition } from "./steps";
 export {
 	getNextStep,

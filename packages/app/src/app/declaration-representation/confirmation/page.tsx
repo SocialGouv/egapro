@@ -6,7 +6,11 @@ import {
 	stepHref,
 	TOTAL_REPRESENTATION_STEPS,
 } from "~/modules/declaration-representation";
-import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
+import {
+	getCurrentYear,
+	getReferenceYearFor,
+	isRepresentationDeclarationSubmitted,
+} from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -23,7 +27,7 @@ export default async function RepresentationConfirmationPage() {
 		api.representationDeclaration.get({ year }),
 	]);
 
-	if (declaration?.status !== "submitted") {
+	if (!isRepresentationDeclarationSubmitted(declaration?.status)) {
 		redirect(stepHref(TOTAL_REPRESENTATION_STEPS));
 	}
 

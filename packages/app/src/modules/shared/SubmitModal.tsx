@@ -32,6 +32,11 @@ export function SubmitModal({
 		onClose();
 	}, [onClose]);
 
+	const handleSubmit = useCallback(() => {
+		if (isPending) return;
+		onSubmit();
+	}, [isPending, onSubmit]);
+
 	return (
 		<dialog
 			aria-labelledby={`${modalId}-title`}
@@ -78,9 +83,10 @@ export function SubmitModal({
 								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
 									<li>
 										<button
+											aria-disabled={isPending || undefined}
 											className="fr-btn"
-											disabled={!certified || isPending}
-											onClick={onSubmit}
+											disabled={!certified}
+											onClick={handleSubmit}
 											type="button"
 										>
 											{isPending ? "Envoi en cours…" : "Valider"}
@@ -96,6 +102,9 @@ export function SubmitModal({
 										</button>
 									</li>
 								</ul>
+								<p aria-live="polite" className="fr-sr-only">
+									{isPending ? "Envoi en cours…" : ""}
+								</p>
 							</div>
 						</div>
 					</div>

@@ -40,8 +40,6 @@ export function Confirmation({
 					Si ce n&apos;est pas le cas, vérifiez vos courriers indésirables ou
 					SPAM. Sinon, cliquez sur le bouton ci-dessous.
 				</p>
-				{/* Both actions land with the PDF & acknowledgement ticket of the epic;
-				    they stay visible so the screen matches its final shape. */}
 				<button
 					aria-disabled="true"
 					className="fr-btn fr-btn--tertiary fr-btn--sm"
