@@ -1,3 +1,4 @@
+export { Confirmation } from "./Confirmation";
 export { DeclarationLayout } from "./DeclarationLayout";
 export { RepresentationPlayground } from "./RepresentationPlayground";
 export { StepPageClient } from "./StepPageClient";

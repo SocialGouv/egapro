@@ -72,6 +72,7 @@ function Harness({
 				isSaving: false,
 				isPendingSave: false,
 				isReadOnly,
+				previousHref: "/declaration-representation/etape/2",
 				registerStepValidator,
 			}}
 		>

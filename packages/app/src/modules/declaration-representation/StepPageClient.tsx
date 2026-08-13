@@ -116,6 +116,7 @@ export function StepPageClient({
 				isSaving,
 				isPendingSave,
 				isReadOnly: !campaignOpen,
+				previousHref,
 				registerStepValidator,
 			}}
 		>
@@ -148,24 +149,26 @@ export function StepPageClient({
 				</div>
 			) : null}
 
-			<div className="fr-btns-group fr-btns-group--inline fr-btns-group--right fr-mt-6w">
-				<Link
-					className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
-					href={previousHref}
-				>
-					Précédent
-				</Link>
-				{nextHref !== undefined && campaignOpen ? (
-					<button
-						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={isAdvancing}
-						onClick={handleNext}
-						type="button"
+			{nextHref === undefined ? null : (
+				<div className="fr-btns-group fr-btns-group--inline fr-btns-group--right fr-mt-6w">
+					<Link
+						className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
+						href={previousHref}
 					>
-						{isAdvancing ? "Enregistrement…" : "Suivant"}
-					</button>
-				) : null}
-			</div>
+						Précédent
+					</Link>
+					{campaignOpen ? (
+						<button
+							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+							disabled={isAdvancing}
+							onClick={handleNext}
+							type="button"
+						>
+							{isAdvancing ? "Enregistrement…" : "Suivant"}
+						</button>
+					) : null}
+				</div>
+			)}
 		</RepresentationDraftProvider>
 	);
 }

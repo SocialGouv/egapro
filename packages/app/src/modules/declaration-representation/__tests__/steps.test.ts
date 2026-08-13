@@ -16,7 +16,7 @@ import { Step1ReferencePeriod } from "../steps/Step1ReferencePeriod";
 import { Step2Executives } from "../steps/Step2Executives";
 import { Step3Members } from "../steps/Step3Members";
 import { Step4Publication } from "../steps/Step4Publication";
-import { StepPlaceholder } from "../steps/StepPlaceholder";
+import { Step5Review } from "../steps/Step5Review";
 import {
 	REPRESENTATION_STEP_SLUGS,
 	TOTAL_REPRESENTATION_STEPS,
@@ -37,7 +37,7 @@ describe("REPRESENTATION_STEPS", () => {
 		]);
 	});
 
-	it("maps each slug to its screen, the placeholder standing in for the pending steps", () => {
+	it("maps each slug to its screen", () => {
 		expect(
 			Object.fromEntries(
 				REPRESENTATION_STEPS.map((step) => [step.slug, step.Component]),
@@ -47,7 +47,7 @@ describe("REPRESENTATION_STEPS", () => {
 			"ecarts-instances-dirigeantes": Step3Members,
 			"informations-de-publication": Step4Publication,
 			"periode-de-reference": Step1ReferencePeriod,
-			recapitulatif: StepPlaceholder,
+			recapitulatif: Step5Review,
 		});
 	});
 });

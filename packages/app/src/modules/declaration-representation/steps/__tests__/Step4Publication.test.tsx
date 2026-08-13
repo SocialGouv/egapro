@@ -51,6 +51,7 @@ function renderStep({
 		isSaving: false,
 		isPendingSave: false,
 		isReadOnly,
+		previousHref: "/declaration-representation/etape/3",
 		registerStepValidator,
 	};
 
