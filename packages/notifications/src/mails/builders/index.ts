@@ -7,5 +7,6 @@ export { buildDeclarationDeadlineReminderMail } from "./declarationDeadlineRemin
 export { buildJointEvaluationReminderMail } from "./jointEvaluationReminder.js";
 export { buildJointEvaluationSubmittedMail } from "./jointEvaluationSubmitted.js";
 export { buildNextCycleHandoverMail } from "./nextCycleHandover.js";
+export { buildRepresentationReceiptMail } from "./representationReceipt.js";
 export { buildSecondDeclarationConfirmationMail } from "./secondDeclarationConfirmation.js";
 export { buildSecondDeclarationReminderMail } from "./secondDeclarationReminder.js";

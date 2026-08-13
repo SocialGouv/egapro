@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { DsfrPictogram } from "~/modules/layout";
+import { ResendReceiptButton } from "~/modules/mail";
+import { FileDownloadLink } from "~/modules/shared";
 import styles from "./Confirmation.module.scss";
 
 type ConfirmationProps = {
@@ -40,14 +42,7 @@ export function Confirmation({
 					Si ce n&apos;est pas le cas, vérifiez vos courriers indésirables ou
 					SPAM. Sinon, cliquez sur le bouton ci-dessous.
 				</p>
-				<button
-					aria-disabled="true"
-					className="fr-btn fr-btn--tertiary fr-btn--sm"
-					disabled
-					type="button"
-				>
-					Renvoyer l&apos;accusé de réception
-				</button>
+				<ResendReceiptButton kind="representation" year={referenceYear} />
 			</div>
 
 			<div className={styles.block}>
@@ -57,14 +52,13 @@ export function Confirmation({
 				<p className="fr-text--sm fr-mb-0">
 					Année {campaignYear} au titre des données {referenceYear}
 				</p>
-				<button
-					aria-disabled="true"
+				<FileDownloadLink
 					className="fr-btn fr-btn--secondary"
-					disabled
-					type="button"
+					href={`/api/representation-pdf?year=${referenceYear}`}
+					pendingLabel="Génération du récapitulatif en cours…"
 				>
 					Télécharger le récapitulatif (PDF)
-				</button>
+				</FileDownloadLink>
 			</div>
 
 			<div>

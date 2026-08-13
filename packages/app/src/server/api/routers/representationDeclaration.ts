@@ -205,6 +205,19 @@ export const representationDeclarationRouter = createTRPCRouter({
 					set: columns,
 				});
 
+			const email = ctx.session.user.email;
+			if (email) {
+				const { enqueueReceipt } = await import("~/modules/mail/server");
+				await enqueueReceipt({
+					kind: "representation",
+					to: email,
+					siren,
+					year,
+					userId: ctx.session.user.id,
+					isResend: false,
+				});
+			}
+
 			return { success: true as const };
 		}),
 });
