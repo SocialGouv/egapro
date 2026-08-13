@@ -200,7 +200,7 @@ describe("representationDeclarationRouter.submit", () => {
 				referencePeriodStart: "2024-01-01",
 				referencePeriodEnd: "2024-12-31",
 			},
-			VALIDATION_MESSAGES.periodYear,
+			VALIDATION_MESSAGES.periodYear(YEAR),
 		],
 	])("rejects %s", async (_label, payload, message) => {
 		const mock = createMockDb();

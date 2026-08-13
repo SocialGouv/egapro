@@ -64,8 +64,8 @@ export const VALIDATION_MESSAGES = {
 	sum: "La somme des pourcentages doit être égale à 100 %.",
 	range: "Le pourcentage doit être compris entre 0 et 100.",
 	decimal: "Le pourcentage ne peut comporter plus d'une décimale.",
-	periodYear:
-		"L'année de la date de fin de la période de référence doit correspondre à l'année au titre de laquelle les écarts sont calculés.",
+	periodYear: (year: number) =>
+		`La date sélectionnée ne correspond pas à l'année de référence ${year}.`,
 	periodLength: "La période de référence doit couvrir 12 mois consécutifs.",
 	urlRequired: "L'adresse de la page internet est obligatoire.",
 	urlInvalid: "L'adresse de la page internet est invalide.",

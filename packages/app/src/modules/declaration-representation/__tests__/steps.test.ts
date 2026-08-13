@@ -10,6 +10,7 @@ import {
 	REPRESENTATION_STEPS,
 	stepHref,
 } from "../steps";
+import { Step1ReferencePeriod } from "../steps/Step1ReferencePeriod";
 import { Step2Executives } from "../steps/Step2Executives";
 import { Step3Members } from "../steps/Step3Members";
 import { StepPlaceholder } from "../steps/StepPlaceholder";
@@ -42,7 +43,7 @@ describe("REPRESENTATION_STEPS", () => {
 			"ecarts-cadres-dirigeants": Step2Executives,
 			"ecarts-instances-dirigeantes": Step3Members,
 			"informations-de-publication": StepPlaceholder,
-			"periode-de-reference": StepPlaceholder,
+			"periode-de-reference": Step1ReferencePeriod,
 			recapitulatif: StepPlaceholder,
 		});
 	});

@@ -19,6 +19,8 @@ const STEP = 3;
 
 const RAISED_TARGET_YEAR = REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR - 1;
 
+const registerStepValidator = vi.fn();
+
 const NON_COMPLIANT_MEMBERS = {
 	hasManagementBody: true,
 	memberWomenPercent: 75,
@@ -70,7 +72,7 @@ function Harness({
 				isSaving: false,
 				isPendingSave: false,
 				isReadOnly,
-				setStepValid: vi.fn(),
+				registerStepValidator,
 			}}
 		>
 			<Step3Members />

@@ -14,6 +14,12 @@ function parseIsoDate(value: string): Date {
 	return new Date(value);
 }
 
+const isoDateStringSchema = z.string().date();
+
+function isValidIsoDate(value: string): boolean {
+	return isoDateStringSchema.safeParse(value).success;
+}
+
 function isTwelveConsecutiveMonths(start: string, end: string): boolean {
 	const startDate = parseIsoDate(start);
 	const expectedEnd = new Date(startDate);
@@ -32,27 +38,60 @@ const percentSchema = z
 	.max(100, "Le pourcentage doit être compris entre 0 et 100.")
 	.multipleOf(0.1, "Le pourcentage ne peut comporter plus d'une décimale.");
 
+export const subjectionSchema = z
+	.object({
+		answer: z.enum(["concerned", "not_concerned"]).nullable(),
+	})
+	.refine((data) => data.answer !== null, {
+		message: "Veuillez sélectionner une option pour continuer.",
+		path: ["answer"],
+	});
+
 export function referencePeriodSchema(year: number) {
+	const yearMismatchMessage = `La date sélectionnée ne correspond pas à l'année de référence ${year}.`;
+
 	return z
 		.object({
-			referencePeriodStart: z.string().date(),
-			referencePeriodEnd: z.string().date(),
+			referencePeriodStart: isoDateStringSchema,
+			referencePeriodEnd: isoDateStringSchema,
 		})
 		.refine(
-			(period) =>
-				parseIsoDate(period.referencePeriodEnd).getUTCFullYear() === year,
+			(period) => {
+				if (!isValidIsoDate(period.referencePeriodStart)) return true;
+				const startYear = parseIsoDate(
+					period.referencePeriodStart,
+				).getUTCFullYear();
+				return startYear === year || startYear === year - 1;
+			},
 			{
-				message:
-					"L'année de la date de fin de la période de référence doit correspondre à l'année au titre de laquelle les écarts sont calculés.",
+				message: yearMismatchMessage,
+				path: ["referencePeriodStart"],
+			},
+		)
+		.refine(
+			(period) => {
+				if (!isValidIsoDate(period.referencePeriodEnd)) return true;
+				return (
+					parseIsoDate(period.referencePeriodEnd).getUTCFullYear() === year
+				);
+			},
+			{
+				message: yearMismatchMessage,
 				path: ["referencePeriodEnd"],
 			},
 		)
 		.refine(
-			(period) =>
-				isTwelveConsecutiveMonths(
+			(period) => {
+				if (
+					!isValidIsoDate(period.referencePeriodStart) ||
+					!isValidIsoDate(period.referencePeriodEnd)
+				)
+					return true;
+				return isTwelveConsecutiveMonths(
 					period.referencePeriodStart,
 					period.referencePeriodEnd,
-				),
+				);
+			},
 			{
 				message: "La période de référence doit couvrir 12 mois consécutifs.",
 				path: ["referencePeriodEnd"],

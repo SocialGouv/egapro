@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Stepper } from "./Stepper";
+import type { StepValidator } from "./shared/draft/DraftContext";
 import { RepresentationDraftProvider } from "./shared/draft/DraftContext";
 import { useRepresentationDraft } from "./shared/draft/useRepresentationDraft";
 import {
@@ -31,8 +32,6 @@ export function StepPageClient({
 	const router = useRouter();
 	const [navigationError, setNavigationError] = useState<string | null>(null);
 	const [isAdvancing, setIsAdvancing] = useState(false);
-	const [stepValid, setStepValid] = useState(true);
-	const previousStepRef = useRef(step);
 
 	const { draft, setDraftValues, saveProgress, isSaving, isPendingSave } =
 		useRepresentationDraft({
@@ -42,11 +41,13 @@ export function StepPageClient({
 			enabled: campaignOpen,
 		});
 
-	useEffect(() => {
-		if (previousStepRef.current === step) return;
-		previousStepRef.current = step;
-		setStepValid(true);
-	}, [step]);
+	const stepValidatorRef = useRef<StepValidator | null>(null);
+	const registerStepValidator = useCallback(
+		(validator: StepValidator | null) => {
+			stepValidatorRef.current = validator;
+		},
+		[],
+	);
 
 	const definition = getStepDefinition(step);
 	const previousHref = getPreviousStepHref(step);
@@ -57,7 +58,11 @@ export function StepPageClient({
 	const StepComponent = definition.Component;
 
 	async function handleNext() {
-		if (nextHref === undefined || !stepValid) return;
+		if (nextHref === undefined) return;
+		if (stepValidatorRef.current) {
+			const isValid = await stepValidatorRef.current();
+			if (!isValid) return;
+		}
 		setNavigationError(null);
 		setIsAdvancing(true);
 		try {
@@ -82,7 +87,7 @@ export function StepPageClient({
 				isSaving,
 				isPendingSave,
 				isReadOnly: !campaignOpen,
-				setStepValid,
+				registerStepValidator,
 			}}
 		>
 			<h1 className="fr-h4">
@@ -124,7 +129,7 @@ export function StepPageClient({
 				{nextHref !== undefined && campaignOpen ? (
 					<button
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={isAdvancing || !stepValid}
+						disabled={isAdvancing}
 						onClick={handleNext}
 						type="button"
 					>

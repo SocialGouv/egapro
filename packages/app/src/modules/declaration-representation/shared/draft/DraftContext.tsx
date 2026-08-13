@@ -4,6 +4,8 @@ import { createContext, useContext } from "react";
 
 import type { RepresentationDraft } from "~/modules/declaration-representation/types";
 
+export type StepValidator = () => boolean | Promise<boolean>;
+
 export type RepresentationDraftContextValue = {
 	year: number;
 	step: number;
@@ -12,7 +14,7 @@ export type RepresentationDraftContextValue = {
 	isSaving: boolean;
 	isPendingSave: boolean;
 	isReadOnly: boolean;
-	setStepValid: (valid: boolean) => void;
+	registerStepValidator: (validator: StepValidator | null) => void;
 };
 
 const RepresentationDraftContext =

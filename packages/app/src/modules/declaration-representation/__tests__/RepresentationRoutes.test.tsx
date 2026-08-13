@@ -98,15 +98,20 @@ describe("RepresentationHomePage", () => {
 		expect(getDeclaration).toHaveBeenCalledWith({ year: YEAR });
 	});
 
-	it("serves the entry screen when no draft has been started", async () => {
+	it("serves the subjection screen when no draft has been started", async () => {
 		mockFunnelState();
 
 		render(await RepresentationHomePage());
 
 		expect(mockRedirect).not.toHaveBeenCalled();
 		expect(
-			screen.getByRole("link", { name: "Commencer la démarche" }),
-		).toHaveAttribute("href", "/declaration-representation/etape/1");
+			screen.getByRole("heading", {
+				level: 2,
+				name: "L'entreprise est-elle concernée ?",
+			}),
+		).toBeInTheDocument();
+		expect(screen.getAllByRole("radio")).toHaveLength(2);
+		expect(screen.getByRole("button", { name: "Suivant" })).toBeInTheDocument();
 	});
 
 	it("keeps serving the entry screen when the draft has not reached a step yet", async () => {

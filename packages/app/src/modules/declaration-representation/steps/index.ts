@@ -5,6 +5,7 @@ import {
 	REPRESENTATION_STEP_SLUGS,
 	TOTAL_REPRESENTATION_STEPS,
 } from "../types";
+import { Step1ReferencePeriod } from "./Step1ReferencePeriod";
 import { Step2Executives } from "./Step2Executives";
 import { Step3Members } from "./Step3Members";
 import { StepPlaceholder } from "./StepPlaceholder";
@@ -27,7 +28,7 @@ const STEP_TITLES: Record<RepresentationStepSlug, string> = {
 };
 
 const STEP_COMPONENTS: Record<RepresentationStepSlug, ComponentType> = {
-	"periode-de-reference": StepPlaceholder,
+	"periode-de-reference": Step1ReferencePeriod,
 	"ecarts-cadres-dirigeants": Step2Executives,
 	"ecarts-instances-dirigeantes": Step3Members,
 	"informations-de-publication": StepPlaceholder,
