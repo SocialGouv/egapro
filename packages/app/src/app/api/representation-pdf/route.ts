@@ -38,8 +38,9 @@ export const GET = withAuditedRoute(
 		const siren = extractSiren(session.user.siret);
 		const url = new URL(request.url);
 		const yearParam = url.searchParams.get("year");
-		const year = yearParam
-			? Number.parseInt(yearParam, 10)
+		const parsedYear = yearParam ? Number.parseInt(yearParam, 10) : Number.NaN;
+		const year = Number.isInteger(parsedYear)
+			? parsedYear
 			: getReferenceYearFor(getCurrentYear());
 
 		try {
