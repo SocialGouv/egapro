@@ -231,6 +231,7 @@ export type {
 	WorkforceHistoryEntry,
 } from "./shared/representation";
 export {
+	computeRepresentationDeclarationStatus,
 	computeRepresentationVerdict,
 	deriveExecutivesNotComputableReason,
 	getRepresentationCampaignYear,

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
 import {
 	companies,
 	declarationStatusHistory,
@@ -115,8 +115,21 @@ function makeDeclRow(year: number) {
 	};
 }
 
-function makeRepresentationDeclarationRow(year: number) {
-	return { year };
+/** Shaped like the router's select: the mock builder does not filter, so the
+ * reference year the row is stored under is asserted on the query instead. */
+function makeRepresentationDeclarationRow(
+	overrides: Partial<{
+		status: "draft" | "submitted";
+		currentStep: number | null;
+		updatedAt: Date | null;
+	}> = {},
+) {
+	return {
+		status: "draft" as const,
+		currentStep: 0,
+		updatedAt: null,
+		...overrides,
+	};
 }
 
 /** Flattens a Drizzle `and(eq(col, value), …)` condition into a
@@ -264,9 +277,7 @@ describe("companyRouter.getWithDeclarations", () => {
 			workforceBelowThreshold,
 		);
 		const { caller } = await makeCaller({
-			representationDeclarationRows: [
-				makeRepresentationDeclarationRow(getCurrentYear()),
-			],
+			representationDeclarationRows: [makeRepresentationDeclarationRow()],
 		});
 
 		const result = await caller.getWithDeclarations({ siren: SIREN });
@@ -294,9 +305,7 @@ describe("companyRouter.getWithDeclarations", () => {
 			workforceAboveThreshold,
 		);
 		const { caller } = await makeCaller({
-			representationDeclarationRows: [
-				makeRepresentationDeclarationRow(getCurrentYear()),
-			],
+			representationDeclarationRows: [makeRepresentationDeclarationRow()],
 		});
 
 		const result = await caller.getWithDeclarations({ siren: SIREN });
@@ -306,11 +315,9 @@ describe("companyRouter.getWithDeclarations", () => {
 		).toHaveLength(1);
 	});
 
-	it("scopes the existing-declaration lookup to the company and the current year", async () => {
+	it("scopes the existing-declaration lookup to the company and the reference year", async () => {
 		const { caller, queries } = await makeCaller({
-			representationDeclarationRows: [
-				makeRepresentationDeclarationRow(getCurrentYear()),
-			],
+			representationDeclarationRows: [makeRepresentationDeclarationRow()],
 		});
 
 		await caller.getWithDeclarations({ siren: SIREN });
@@ -318,26 +325,50 @@ describe("companyRouter.getWithDeclarations", () => {
 		const query = findQuery(queries, representationDeclarations);
 		const filters = collectEqualityFilters(query?.where);
 		expect(filters.get(representationDeclarations.siren)).toBe(SIREN);
-		expect(filters.get(representationDeclarations.year)).toBe(getCurrentYear());
+		// The représentation funnel stores the reference year (N-1), not the
+		// campaign year: filtering on the campaign year never matches a real row.
+		expect(filters.get(representationDeclarations.year)).toBe(
+			getReferenceYearFor(getCurrentYear()),
+		);
+		expect(filters.get(representationDeclarations.year)).not.toBe(
+			getCurrentYear(),
+		);
 		// Exactly two filters: no status predicate, so a draft counts as much as a
 		// submitted declaration — the line must never disappear once started.
 		expect(filters.size).toBe(2);
 	});
 
-	it("shows the existing representation declaration with the generic stub state", async () => {
+	it("shows the stub state when the démarche is only offered, with no row yet", async () => {
+		getRepresentationWorkforceHistoryMock.mockResolvedValue(
+			workforceAboveThreshold,
+		);
+		const { caller } = await makeCaller({ representationDeclarationRows: [] });
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "representation"),
+		).toMatchObject({
+			year: getCurrentYear(),
+			status: "to_complete",
+			fsmStatus: null,
+			currentStep: 0,
+			updatedAt: null,
+		});
+	});
+
+	it("keeps a started draft at 'to_complete' until it leaves the subjection check", async () => {
 		getRepresentationWorkforceHistoryMock.mockResolvedValue(
 			workforceBelowThreshold,
 		);
 		const { caller } = await makeCaller({
 			representationDeclarationRows: [
-				makeRepresentationDeclarationRow(getCurrentYear()),
+				makeRepresentationDeclarationRow({ status: "draft", currentStep: 0 }),
 			],
 		});
 
 		const result = await caller.getWithDeclarations({ siren: SIREN });
 
-		// Visibility only: mapping the representation state machine onto the row is
-		// owned by the "panneau latéral & activation" ticket, not this one.
 		expect(
 			result.declarations.find((d) => d.type === "representation"),
 		).toMatchObject({
@@ -346,5 +377,94 @@ describe("companyRouter.getWithDeclarations", () => {
 			fsmStatus: null,
 			currentStep: 0,
 		});
+	});
+
+	it("maps a draft past the subjection check to 'in_progress' on its current step", async () => {
+		const updatedAt = new Date("2026-02-10T09:00:00.000Z");
+		getRepresentationWorkforceHistoryMock.mockResolvedValue(
+			workforceBelowThreshold,
+		);
+		const { caller } = await makeCaller({
+			representationDeclarationRows: [
+				makeRepresentationDeclarationRow({
+					status: "draft",
+					currentStep: 3,
+					updatedAt,
+				}),
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "representation"),
+		).toMatchObject({
+			year: getCurrentYear(),
+			status: "in_progress",
+			fsmStatus: null,
+			currentStep: 3,
+			updatedAt,
+		});
+	});
+
+	it("maps a submitted row to 'done'", async () => {
+		getRepresentationWorkforceHistoryMock.mockResolvedValue(
+			workforceBelowThreshold,
+		);
+		const { caller } = await makeCaller({
+			representationDeclarationRows: [
+				makeRepresentationDeclarationRow({
+					status: "submitted",
+					currentStep: 5,
+				}),
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "representation"),
+		).toMatchObject({
+			year: getCurrentYear(),
+			status: "done",
+			fsmStatus: null,
+			currentStep: 5,
+		});
+	});
+
+	it("keeps the démarche listed under the campaign year, not the stored reference year", async () => {
+		getRepresentationWorkforceHistoryMock.mockResolvedValue(
+			workforceBelowThreshold,
+		);
+		const { caller } = await makeCaller({
+			representationDeclarationRows: [
+				makeRepresentationDeclarationRow({ status: "draft", currentStep: 3 }),
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		const representation = result.declarations.filter(
+			(d) => d.type === "representation",
+		);
+		expect(representation).toHaveLength(1);
+		expect(representation[0]?.year).toBe(getCurrentYear());
+	});
+
+	it("falls back to step 0 when the row carries no current step", async () => {
+		getRepresentationWorkforceHistoryMock.mockResolvedValue(
+			workforceBelowThreshold,
+		);
+		const { caller } = await makeCaller({
+			representationDeclarationRows: [
+				makeRepresentationDeclarationRow({ currentStep: null }),
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "representation"),
+		).toMatchObject({ status: "to_complete", currentStep: 0 });
 	});
 });
