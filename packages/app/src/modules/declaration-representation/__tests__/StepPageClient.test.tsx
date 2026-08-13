@@ -42,6 +42,8 @@ const CLOSED_BANNER = "La campagne de représentation équilibrée est close";
 const TWO_OR_MORE = /^Deux cadres dirigeants ou plus/;
 const NONE = /^Aucun cadre dirigeant/;
 const PLACEHOLDER_STEP = 4;
+const STEP_3_HREF = "/declaration-representation/etape/3";
+const STEP_5_HREF = "/declaration-representation/etape/5";
 
 const SAVED_MISMATCHED_EXECUTIVES: RepresentationDraft = {
 	currentStep: 2,
@@ -160,7 +162,7 @@ describe("StepPageClient — navigation", () => {
 			currentStep: 3,
 			draft: { currentStep: 3, ...NO_EXECUTIVES },
 		});
-		expect(push).toHaveBeenCalledWith("/declaration-representation/etape/3");
+		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
 	});
 
 	it("disables the button while the progress is being saved", async () => {
@@ -183,7 +185,7 @@ describe("StepPageClient — navigation", () => {
 			resolveSave();
 		});
 
-		expect(push).toHaveBeenCalledWith("/declaration-representation/etape/3");
+		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
 	});
 
 	it("keeps the user on the step and explains the failure when the save fails", async () => {
@@ -211,32 +213,30 @@ describe("StepPageClient — navigation", () => {
 
 describe("StepPageClient — étape invalide (S6)", () => {
 	it("blocks the next step while no executives count is selected", async () => {
-		renderStep({ step: 2 });
-
-		expect(nextButton()).toBeDisabled();
+		renderStep({ step: 2, initialDraft: { currentStep: 2 } });
 
 		await userEvent.click(nextButton());
 
+		expect(
+			screen.getByText(VALIDATION_MESSAGES.selectionRequired),
+		).toBeInTheDocument();
 		expect(mutateAsync).not.toHaveBeenCalled();
 		expect(push).not.toHaveBeenCalled();
 	});
 
-	it("re-enables the next step as soon as an executives count is selected", async () => {
+	it("advances as soon as an executives count is selected", async () => {
 		renderStep({ step: 2 });
 
 		await userEvent.click(screen.getByRole("radio", { name: NONE }));
-
-		expect(nextButton()).toBeEnabled();
-
 		await userEvent.click(nextButton());
 
-		expect(push).toHaveBeenCalledWith("/declaration-representation/etape/3");
+		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
 	});
 
-	it("resets the validity when the user moves on to another step", () => {
+	it("stops blocking once the invalid step is left behind", async () => {
 		const { rerender } = renderStep({ step: 2 });
-
-		expect(nextButton()).toBeDisabled();
+		await userEvent.click(nextButton());
+		expect(push).not.toHaveBeenCalled();
 
 		rerender(
 			<StepPageClient
@@ -247,14 +247,9 @@ describe("StepPageClient — étape invalide (S6)", () => {
 				year={YEAR}
 			/>,
 		);
+		await userEvent.click(nextButton());
 
-		expect(nextButton()).toBeEnabled();
-	});
-
-	it("blocks the next step when the funnel reopens on a draft with no selection", () => {
-		renderStep({ step: 2, initialDraft: { currentStep: 2 } });
-
-		expect(nextButton()).toBeDisabled();
+		expect(push).toHaveBeenCalledWith(STEP_5_HREF);
 	});
 
 	it("blocks the next step while the percentages do not sum to 100", async () => {
@@ -262,11 +257,9 @@ describe("StepPageClient — étape invalide (S6)", () => {
 
 		await enterWomenPercent("35");
 		await retypeMenPercent("50");
-
-		expect(nextButton()).toBeDisabled();
-
 		await userEvent.click(nextButton());
 
+		expect(screen.getByText(VALIDATION_MESSAGES.sum)).toBeInTheDocument();
 		expect(mutateAsync).not.toHaveBeenCalled();
 		expect(push).not.toHaveBeenCalled();
 	});
@@ -276,37 +269,43 @@ describe("StepPageClient — étape invalide (S6)", () => {
 
 		await enterWomenPercent("35");
 		await retypeMenPercent("");
+		await userEvent.click(nextButton());
 
-		expect(nextButton()).toBeDisabled();
+		expect(mutateAsync).not.toHaveBeenCalled();
+		expect(push).not.toHaveBeenCalled();
 	});
 
-	it("re-enables the next step once the sum is corrected to 100", async () => {
+	it("advances once the sum is corrected to 100", async () => {
 		renderStep({ step: 2 });
 
 		await enterWomenPercent("35");
 		await retypeMenPercent("50");
-		expect(nextButton()).toBeDisabled();
+		await userEvent.click(nextButton());
+		expect(push).not.toHaveBeenCalled();
 
 		await retypeMenPercent("65");
-
-		expect(nextButton()).toBeEnabled();
-
 		await userEvent.click(nextButton());
 
-		expect(push).toHaveBeenCalledWith("/declaration-representation/etape/3");
+		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
 	});
 
-	it("blocks the next step when the funnel reopens on a saved invalid pair", () => {
+	it("blocks the next step when the funnel reopens on a saved invalid pair", async () => {
 		renderStep({ step: 2, initialDraft: SAVED_MISMATCHED_EXECUTIVES });
 
 		expect(screen.getByText(VALIDATION_MESSAGES.sum)).toBeInTheDocument();
-		expect(nextButton()).toBeDisabled();
+
+		await userEvent.click(nextButton());
+
+		expect(mutateAsync).not.toHaveBeenCalled();
+		expect(push).not.toHaveBeenCalled();
 	});
 
-	it("keeps the next step enabled on a step that never reports its validity", () => {
+	it("advances on a step that never reports its validity", async () => {
 		renderStep({ step: PLACEHOLDER_STEP, currentStep: PLACEHOLDER_STEP });
 
-		expect(nextButton()).toBeEnabled();
+		await userEvent.click(nextButton());
+
+		expect(push).toHaveBeenCalledWith(STEP_5_HREF);
 	});
 });
 

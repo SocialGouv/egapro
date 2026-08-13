@@ -52,15 +52,17 @@ import { StepPageClient } from "~/modules/declaration-representation";
 
 const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
-const STEP_3_HREF = "/declaration-representation/etape/3";
+// Step still backed by StepPlaceholder, so the mock below drives the whole step.
+const PLACEHOLDER_STEP = 4;
+const NEXT_STEP_HREF = "/declaration-representation/etape/5";
 
 function renderStep() {
 	return render(
 		<StepPageClient
 			campaignOpen
 			campaignYear={CAMPAIGN_YEAR}
-			initialDraft={{ currentStep: 2 }}
-			step={2}
+			initialDraft={{ currentStep: PLACEHOLDER_STEP }}
+			step={PLACEHOLDER_STEP}
 			year={YEAR}
 		/>,
 	);
@@ -83,7 +85,7 @@ describe("StepPageClient — step validator", () => {
 		await clickNext();
 
 		expect(mutateAsync).toHaveBeenCalledOnce();
-		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
+		expect(push).toHaveBeenCalledWith(NEXT_STEP_HREF);
 	});
 
 	it("advances when the registered validator accepts the step", async () => {
@@ -95,7 +97,7 @@ describe("StepPageClient — step validator", () => {
 
 		expect(validate).toHaveBeenCalledOnce();
 		expect(mutateAsync).toHaveBeenCalledOnce();
-		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
+		expect(push).toHaveBeenCalledWith(NEXT_STEP_HREF);
 	});
 
 	it("saves nothing and stays on the step when the validator rejects it", async () => {
@@ -130,6 +132,6 @@ describe("StepPageClient — step validator", () => {
 		await clickNext();
 
 		expect(validate).toHaveBeenCalledTimes(2);
-		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
+		expect(push).toHaveBeenCalledWith(NEXT_STEP_HREF);
 	});
 });

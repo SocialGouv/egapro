@@ -135,7 +135,7 @@ function ExecutiveCountOption({
 }
 
 export function Step2Executives() {
-	const { draft, setDraftValues, year, isReadOnly, setStepValid } =
+	const { draft, setDraftValues, year, isReadOnly, registerStepValidator } =
 		useRepresentationDraftContext();
 	const [percentInputs, setPercentInputs] = useState<PercentagePairValues>({
 		womenPercent: formatPercent(draft.executiveWomenPercent),
@@ -180,8 +180,9 @@ export function Step2Executives() {
 	const showSelectionError = !hasSelection;
 
 	useEffect(() => {
-		setStepValid(isStepValid);
-	}, [isStepValid, setStepValid]);
+		registerStepValidator(() => isStepValid);
+		return () => registerStepValidator(null);
+	}, [isStepValid, registerStepValidator]);
 
 	return (
 		<div>
@@ -210,7 +211,12 @@ export function Step2Executives() {
 						value={option.value}
 					/>
 				))}
-				<div aria-live="polite" className="fr-messages-group" id={MESSAGES_ID}>
+				<div
+					aria-atomic="true"
+					aria-live="polite"
+					className="fr-messages-group"
+					id={MESSAGES_ID}
+				>
 					{showSelectionError ? (
 						<p className="fr-message fr-message--error">
 							{SELECTION_REQUIRED_MESSAGE}
@@ -237,8 +243,8 @@ export function Step2Executives() {
 						}
 						values={percentInputs}
 					/>
-					{knownVerdict ? (
-						<div aria-atomic="true" aria-live="polite" className="fr-mt-2w">
+					<div aria-atomic="true" aria-live="polite" className="fr-mt-2w">
+						{knownVerdict ? (
 							<div className={`fr-callout ${reminderClassName}`}>
 								<p className="fr-callout__text">
 									<strong>{gapReminderTitle(knownVerdict, target)}</strong>{" "}
@@ -249,8 +255,8 @@ export function Step2Executives() {
 									passera à {REPRESENTATION_TARGET_RAISED} %.
 								</p>
 							</div>
-						</div>
-					) : null}
+						) : null}
+					</div>
 				</div>
 			) : null}
 

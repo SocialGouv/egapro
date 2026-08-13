@@ -61,6 +61,7 @@ export const NOT_COMPUTABLE_PAYLOAD = {
 };
 
 export const VALIDATION_MESSAGES = {
+	selectionRequired: "Veuillez sélectionner une option pour continuer.",
 	sum: "La somme des pourcentages doit être égale à 100 %.",
 	range: "Le pourcentage doit être compris entre 0 et 100.",
 	decimal: "Le pourcentage ne peut comporter plus d'une décimale.",
