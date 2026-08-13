@@ -395,3 +395,149 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 		});
 	});
 });
+
+// #3662 — three layout contracts of the side panel, none of which a unit test can
+// hold: the rhythm below only exists once `space-between` has no free space left
+// to distribute, the link underline is a `background-size: 100% 1px` gradient
+// painted across the button box, and the step connector is a `::before`. jsdom
+// resolves no geometry at all, so asserting the class names would only restate
+// the fix. Measured here in a real browser instead.
+const RHYTHM_FLOOR = 32; // .panelContent's 2rem gap
+const GREY_CONNECTOR = "rgb(221, 221, 221)"; // --border-default-grey
+const GREEN_CONNECTOR = "rgb(24, 117, 60)"; // --background-flat-success
+
+test.describe("Declaration process panel — layout", () => {
+	test.describe.configure({ mode: "serial" });
+	test.setTimeout(90_000);
+
+	test.beforeAll(async () => {
+		await ensureCurrentYearDeclaration();
+		await resetGipWorkforce();
+		await setCompanyHasCse(true);
+		await setUserPhone(TEST_USER_PHONE);
+		// compliance_choice is the one variant whose stepper carries a step *in
+		// progress* that is still followed by another one — without that, the
+		// connector these assertions are about would not be drawn at all.
+		await setDeclarationComplianceState({
+			status: "awaiting_compliance_path_choice",
+		});
+	});
+
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+	});
+
+	test("keeps its rhythm, its link widths and its connector colours", async ({
+		page,
+	}) => {
+		// Deliberately short: with spare vertical room `space-between` spreads the
+		// two blocks apart on its own and the `gap` is never exercised, so the
+		// collapse this pins can only be reproduced on a panel the content fills.
+		await page.setViewportSize({ width: 1280, height: 720 });
+		await page.goto("/mon-espace");
+		await waitForDsfrModal(page, PANEL_ID);
+		const remuButton = page.getByRole("button", { name: "Rémunération" });
+		await expect(remuButton.first()).toBeVisible();
+		await clickAndExpectDialogOpen(page, remuButton.first(), PANEL_ID);
+
+		const panel = page.locator(`#${PANEL_ID}`);
+
+		await test.step("the help block stays 2rem below the content", async () => {
+			const measured = await panel
+				.getByText("Pour vous aider")
+				.evaluate((heading) => {
+					const helpBlock = heading.parentElement?.parentElement;
+					const contentBlock = helpBlock?.previousElementSibling;
+					const scroller = helpBlock?.parentElement;
+					if (!helpBlock || !contentBlock || !scroller) {
+						throw new Error(
+							"the panel must stack a content block above a help block",
+						);
+					}
+					return {
+						overflowing: scroller.scrollHeight > scroller.clientHeight,
+						gap: Math.round(
+							helpBlock.getBoundingClientRect().top -
+								contentBlock.getBoundingClientRect().bottom,
+						),
+					};
+				});
+
+			// Guard, not decoration: on a panel with room to spare the gap below
+			// would clear 32px even with the bug in place, and this contract would
+			// pass without ever touching what it claims to cover.
+			expect(
+				measured.overflowing,
+				"the seeded panel must overflow for this contract to bite",
+			).toBe(true);
+			expect(measured.gap).toBeGreaterThanOrEqual(RHYTHM_FLOOR);
+		});
+
+		await test.step("each help link is only as wide as its own text", async () => {
+			for (const label of ["Détail des étapes", "Centre d'aide"]) {
+				const measured = await panel
+					.getByRole("button", { name: label })
+					.evaluate((button) => {
+						const column = button.parentElement;
+						if (!column) {
+							throw new Error("the link must sit in the help links column");
+						}
+						const range = document.createRange();
+						range.selectNodeContents(button);
+						return {
+							box: button.getBoundingClientRect().width,
+							text: range.getBoundingClientRect().width,
+							column: column.getBoundingClientRect().width,
+						};
+					});
+
+				// The underline spans the button box, so the box width *is* the
+				// underline width — that is the whole symptom.
+				expect(
+					Math.abs(measured.box - measured.text),
+					`"${label}" underline overshoot`,
+				).toBeLessThanOrEqual(1);
+				// And the column really was wider, so stretching was on the table.
+				expect(measured.box, `"${label}" vs its column`).toBeLessThan(
+					measured.column,
+				);
+			}
+		});
+
+		await test.step("no step connector is blue", async () => {
+			const rows = await panel.evaluate((element) => {
+				const STATUSES = ["Étape terminée", "Étape en cours", "Étape à venir"];
+				return Array.from(element.querySelectorAll(".fr-sr-only"))
+					.filter((label) => STATUSES.includes(label.textContent?.trim() ?? ""))
+					.map((label) => {
+						const row = label.parentElement?.parentElement;
+						if (!row?.parentElement) {
+							throw new Error("a step circle must sit inside a step row");
+						}
+						return {
+							status: label.textContent?.trim() ?? "",
+							// The connector is drawn by a `:not(:last-child)::before`.
+							hasConnector: row !== row.parentElement.lastElementChild,
+							colour: getComputedStyle(row, "::before").backgroundColor,
+						};
+					});
+			});
+
+			const current = rows.find((row) => row.status === "Étape en cours");
+			expect(
+				current?.hasConnector,
+				"the step in progress must own the connector under test",
+			).toBe(true);
+			expect(current?.colour, "the connector of the step in progress").toBe(
+				GREY_CONNECTOR,
+			);
+
+			for (const row of rows.filter((candidate) => candidate.hasConnector)) {
+				expect(
+					[GREY_CONNECTOR, GREEN_CONNECTOR],
+					`connector of "${row.status}"`,
+				).toContain(row.colour);
+			}
+		});
+	});
+});
