@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useId, useState } from "react";
 
 const PERCENTAGE_INPUT_PATTERN = /^\d{0,3}([.,]\d?)?$/;
@@ -18,6 +19,7 @@ type PercentagePairFieldsProps = {
 	menLabel?: string;
 	error?: string;
 	readOnly?: boolean;
+	trailingContent?: ReactNode;
 };
 
 export function complementPercentage(raw: string): string | undefined {
@@ -44,6 +46,7 @@ export function PercentagePairFields({
 	menLabel = "Hommes",
 	error,
 	readOnly = false,
+	trailingContent,
 }: PercentagePairFieldsProps) {
 	const baseId = useId();
 	const womenId = `${baseId}-women`;
@@ -94,16 +97,11 @@ export function PercentagePairFields({
 
 	return (
 		<fieldset className={`fr-fieldset ${error ? "fr-fieldset--error" : ""}`}>
-			<legend className="fr-fieldset__legend fr-text--regular">
-				{legend}
-				{hint ? (
-					<span className="fr-hint-text" id={hintId}>
-						{hint}
-					</span>
-				) : null}
-			</legend>
+			<legend className="fr-fieldset__legend fr-text--regular">{legend}</legend>
 			<div className="fr-fieldset__content">
-				<div className="fr-grid-row fr-grid-row--gutters">
+				<div
+					className={`fr-grid-row fr-grid-row--gutters ${trailingContent ? "fr-grid-row--bottom" : ""}`}
+				>
 					<div className="fr-col-12 fr-col-sm-4">
 						<div className="fr-input-group">
 							<label className="fr-label" htmlFor={womenId}>
@@ -113,6 +111,7 @@ export function PercentagePairFields({
 							<input
 								aria-describedby={describedBy || undefined}
 								aria-invalid={error ? true : undefined}
+								aria-required="true"
 								className="fr-input"
 								id={womenId}
 								inputMode="decimal"
@@ -132,6 +131,7 @@ export function PercentagePairFields({
 							<input
 								aria-describedby={describedBy || undefined}
 								aria-invalid={error ? true : undefined}
+								aria-required="true"
 								className="fr-input"
 								id={menId}
 								inputMode="decimal"
@@ -142,8 +142,16 @@ export function PercentagePairFields({
 							/>
 						</div>
 					</div>
+					{trailingContent ? (
+						<div className="fr-col-12 fr-col-sm-4">{trailingContent}</div>
+					) : null}
 				</div>
 			</div>
+			{hint ? (
+				<p className="fr-message fr-message--info" id={hintId}>
+					{hint}
+				</p>
+			) : null}
 			<div
 				aria-atomic="true"
 				aria-live="polite"
