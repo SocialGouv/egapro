@@ -15,6 +15,7 @@ const value: RepresentationDraftContextValue = {
 	isSaving: false,
 	isPendingSave: true,
 	isReadOnly: true,
+	previousHref: "/declaration-representation/etape/1",
 	registerStepValidator: vi.fn(),
 };
 

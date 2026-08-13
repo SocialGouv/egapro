@@ -14,6 +14,7 @@ export type RepresentationDraftContextValue = {
 	isSaving: boolean;
 	isPendingSave: boolean;
 	isReadOnly: boolean;
+	previousHref: string;
 	registerStepValidator: (validator: StepValidator | null) => void;
 };
 

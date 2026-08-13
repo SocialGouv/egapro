@@ -2,11 +2,12 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { push, replace, mutate, mutateAsync } = vi.hoisted(() => ({
+const { push, replace, mutate, mutateAsync, submitMutate } = vi.hoisted(() => ({
 	push: vi.fn(),
 	replace: vi.fn(),
 	mutate: vi.fn(),
 	mutateAsync: vi.fn(),
+	submitMutate: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -24,6 +25,13 @@ vi.mock("~/trpc/react", () => ({
 		representationDeclaration: {
 			saveDraft: {
 				useMutation: () => ({ mutate, mutateAsync, isPending: false }),
+			},
+			submit: {
+				useMutation: () => ({
+					mutate: submitMutate,
+					isPending: false,
+					error: null,
+				}),
 			},
 		},
 	},
@@ -125,13 +133,14 @@ describe("StepPageClient — rendering", () => {
 		).toBeInTheDocument();
 	});
 
-	it("falls back to the placeholder on a step that has no screen yet", () => {
+	it("renders the summary screen on the last step", () => {
 		renderStep({ step: SUMMARY_STEP, currentStep: SUMMARY_STEP });
 
 		expect(
-			screen.getByText(
-				"Cette étape est en construction et sera disponible prochainement.",
-			),
+			screen.getByText(/Vérifiez les informations avant de soumettre/),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Soumettre" }),
 		).toBeInTheDocument();
 	});
 

@@ -63,6 +63,12 @@ export function formatCurrency(value?: string | null): string {
 	return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} €`;
 }
 
+/** Format an already-computed percentage: `35` → `"35 %"`, `12.5` → `"12,5 %"`. Returns `"—"` for nullish values. */
+export function formatPercentage(value: number | null | undefined): string {
+	if (value === null || value === undefined) return "—";
+	return `${value.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`;
+}
+
 /** Compute count/total as a formatted percentage string. Both arguments are numbers. */
 export function computePercentage(count: number, total: number): string {
 	if (total === 0) return "- %";

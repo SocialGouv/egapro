@@ -9,7 +9,7 @@ import { Step1ReferencePeriod } from "./Step1ReferencePeriod";
 import { Step2Executives } from "./Step2Executives";
 import { Step3Members } from "./Step3Members";
 import { Step4Publication } from "./Step4Publication";
-import { StepPlaceholder } from "./StepPlaceholder";
+import { Step5Review } from "./Step5Review";
 
 export type StepDefinition = {
 	slug: RepresentationStepSlug;
@@ -36,7 +36,7 @@ const STEP_COMPONENTS: Record<RepresentationStepSlug, ComponentType> = {
 	"ecarts-cadres-dirigeants": Step2Executives,
 	"ecarts-instances-dirigeantes": Step3Members,
 	"informations-de-publication": Step4Publication,
-	recapitulatif: StepPlaceholder,
+	recapitulatif: Step5Review,
 };
 
 export const REPRESENTATION_STEPS: StepDefinition[] =

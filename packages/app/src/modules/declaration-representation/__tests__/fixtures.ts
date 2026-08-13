@@ -1,6 +1,11 @@
 import type { ZodError } from "zod";
 
+import { getRepresentationCampaignYear } from "~/modules/domain";
+
 export const REPRESENTATION_YEAR = 2025;
+
+export const REPRESENTATION_CAMPAIGN_YEAR =
+	getRepresentationCampaignYear(REPRESENTATION_YEAR);
 
 export const MAX_PUBLISH_URL_LENGTH = 500;
 
@@ -23,6 +28,12 @@ export const MISMATCHED_EXECUTIVES = {
 	executiveMenPercent: 50,
 } as const;
 
+export const NON_COMPLIANT_EXECUTIVES = {
+	executivesCount: "two_or_more",
+	executiveWomenPercent: 80,
+	executiveMenPercent: 20,
+} as const;
+
 export const NO_EXECUTIVES = { executivesCount: "none" } as const;
 
 export const SINGLE_EXECUTIVE = { executivesCount: "one" } as const;
@@ -31,6 +42,12 @@ export const COMPUTABLE_MEMBERS = {
 	hasManagementBody: true,
 	memberWomenPercent: 55,
 	memberMenPercent: 45,
+} as const;
+
+export const NON_COMPLIANT_MEMBERS = {
+	hasManagementBody: true,
+	memberWomenPercent: 25,
+	memberMenPercent: 75,
 } as const;
 
 export const NO_MANAGEMENT_BODY = { hasManagementBody: false } as const;
