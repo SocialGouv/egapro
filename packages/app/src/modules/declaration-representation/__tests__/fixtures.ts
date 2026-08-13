@@ -79,7 +79,13 @@ export const VALIDATION_MESSAGES = {
 		"Aucune information de publication n'est requise lorsqu'aucun écart n'est calculable.",
 	publishDateAfterPeriod:
 		"La date de publication doit être postérieure à la fin de la période de référence.",
+	publishDateRequired:
+		"Indiquez la date de publication des écarts calculables.",
+	websiteAnswerRequired:
+		"Précisez si l'entreprise a un site Internet pour publier les écarts calculables.",
 } as const;
+
+export const ZOD_UNTRANSLATED_MESSAGE = "Invalid input";
 
 export function issues(result: { success: boolean; error?: ZodError }) {
 	return (

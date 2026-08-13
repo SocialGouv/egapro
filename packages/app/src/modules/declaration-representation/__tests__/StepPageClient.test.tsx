@@ -2,8 +2,9 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { push, mutate, mutateAsync } = vi.hoisted(() => ({
+const { push, replace, mutate, mutateAsync } = vi.hoisted(() => ({
 	push: vi.fn(),
+	replace: vi.fn(),
 	mutate: vi.fn(),
 	mutateAsync: vi.fn(),
 }));
@@ -12,7 +13,7 @@ vi.mock("next/navigation", () => ({
 	usePathname: vi.fn(),
 	useRouter: () => ({
 		push,
-		replace: vi.fn(),
+		replace,
 		back: vi.fn(),
 		refresh: vi.fn(),
 	}),
@@ -31,9 +32,13 @@ vi.mock("~/trpc/react", () => ({
 import { StepPageClient } from "../StepPageClient";
 import type { RepresentationDraft } from "../types";
 import {
+	COMPUTABLE_EXECUTIVES,
 	MISMATCHED_EXECUTIVES,
 	NO_EXECUTIVES,
+	NO_MANAGEMENT_BODY,
+	VALID_REFERENCE_PERIOD,
 	VALIDATION_MESSAGES,
+	WEBSITE_PUBLICATION,
 } from "./fixtures";
 
 const CAMPAIGN_YEAR = 2026;
@@ -41,9 +46,12 @@ const YEAR = 2025;
 const CLOSED_BANNER = "La campagne de représentation équilibrée est close";
 const TWO_OR_MORE = /^Deux cadres dirigeants ou plus/;
 const NONE = /^Aucun cadre dirigeant/;
-const PLACEHOLDER_STEP = 4;
+const NO_MANAGEMENT_BODY_LABEL = /^Aucune instance dirigeante/;
+const SUMMARY_STEP = 5;
 const STEP_3_HREF = "/declaration-representation/etape/3";
+const STEP_4_HREF = "/declaration-representation/etape/4";
 const STEP_5_HREF = "/declaration-representation/etape/5";
+const NO_COMPUTABLE_GAP = { ...NO_EXECUTIVES, ...NO_MANAGEMENT_BODY };
 
 const SAVED_MISMATCHED_EXECUTIVES: RepresentationDraft = {
 	currentStep: 2,
@@ -96,6 +104,7 @@ async function retypeMenPercent(value: string) {
 
 beforeEach(() => {
 	push.mockReset();
+	replace.mockReset();
 	mutate.mockReset();
 	mutateAsync.mockReset().mockResolvedValue(undefined);
 });
@@ -117,7 +126,7 @@ describe("StepPageClient — rendering", () => {
 	});
 
 	it("falls back to the placeholder on a step that has no screen yet", () => {
-		renderStep({ step: PLACEHOLDER_STEP, currentStep: PLACEHOLDER_STEP });
+		renderStep({ step: SUMMARY_STEP, currentStep: SUMMARY_STEP });
 
 		expect(
 			screen.getByText(
@@ -242,14 +251,17 @@ describe("StepPageClient — étape invalide (S6)", () => {
 			<StepPageClient
 				campaignOpen
 				campaignYear={CAMPAIGN_YEAR}
-				initialDraft={{ currentStep: PLACEHOLDER_STEP }}
-				step={PLACEHOLDER_STEP}
+				initialDraft={{ currentStep: 3 }}
+				step={3}
 				year={YEAR}
 			/>,
 		);
+		await userEvent.click(
+			screen.getByRole("radio", { name: NO_MANAGEMENT_BODY_LABEL }),
+		);
 		await userEvent.click(nextButton());
 
-		expect(push).toHaveBeenCalledWith(STEP_5_HREF);
+		expect(push).toHaveBeenCalledWith(STEP_4_HREF);
 	});
 
 	it("blocks the next step while the percentages do not sum to 100", async () => {
@@ -299,9 +311,91 @@ describe("StepPageClient — étape invalide (S6)", () => {
 		expect(mutateAsync).not.toHaveBeenCalled();
 		expect(push).not.toHaveBeenCalled();
 	});
+});
 
-	it("advances on a step that never reports its validity", async () => {
-		renderStep({ step: PLACEHOLDER_STEP, currentStep: PLACEHOLDER_STEP });
+describe("StepPageClient — publication step skipped (S12)", () => {
+	const PUBLICATION_REQUIRED: RepresentationDraft = {
+		currentStep: 4,
+		...VALID_REFERENCE_PERIOD,
+		...COMPUTABLE_EXECUTIVES,
+		...NO_MANAGEMENT_BODY,
+	};
+
+	function publicationDateField() {
+		return screen.queryByLabelText(
+			/Date de publication des écarts calculables/,
+		);
+	}
+
+	it("jumps from the gaps step straight to the summary when no gap is computable", async () => {
+		renderStep({
+			step: 3,
+			initialDraft: { currentStep: 3, ...NO_COMPUTABLE_GAP },
+		});
+
+		await userEvent.click(nextButton());
+
+		expect(mutateAsync).toHaveBeenCalledWith({
+			year: YEAR,
+			currentStep: 5,
+			draft: { currentStep: 5, ...NO_COMPUTABLE_GAP },
+		});
+		expect(push).toHaveBeenCalledWith(STEP_5_HREF);
+	});
+
+	it("links the summary back to the gaps step", () => {
+		renderStep({
+			step: 5,
+			initialDraft: { currentStep: 5, ...NO_COMPUTABLE_GAP },
+		});
+
+		expect(screen.getByRole("link", { name: "Précédent" })).toHaveAttribute(
+			"href",
+			STEP_3_HREF,
+		);
+	});
+
+	it("redirects to the summary when the publication step is opened directly", () => {
+		const { container } = renderStep({
+			step: 4,
+			initialDraft: { currentStep: 4, ...NO_COMPUTABLE_GAP },
+		});
+
+		expect(replace).toHaveBeenCalledWith(STEP_5_HREF);
+		expect(container).toBeEmptyDOMElement();
+	});
+
+	it("presents the publication step as soon as one gap is computable", () => {
+		renderStep({ step: 4, initialDraft: PUBLICATION_REQUIRED });
+
+		expect(replace).not.toHaveBeenCalled();
+		expect(publicationDateField()).toBeInTheDocument();
+	});
+
+	it("presents the publication step while the computable gaps are still unknown", () => {
+		renderStep({ step: 4, currentStep: 4 });
+
+		expect(replace).not.toHaveBeenCalled();
+		expect(publicationDateField()).toBeInTheDocument();
+	});
+
+	it("keeps the user on the publication step while its guard rejects the entries", async () => {
+		renderStep({ step: 4, initialDraft: PUBLICATION_REQUIRED });
+
+		await userEvent.click(nextButton());
+
+		expect(
+			screen.getByText(VALIDATION_MESSAGES.publishDateRequired),
+		).toBeInTheDocument();
+		expect(mutateAsync).not.toHaveBeenCalled();
+		expect(push).not.toHaveBeenCalled();
+	});
+
+	it("advances to the summary once the publication step is complete", async () => {
+		renderStep({
+			step: 4,
+			initialDraft: { ...PUBLICATION_REQUIRED, ...WEBSITE_PUBLICATION },
+		});
 
 		await userEvent.click(nextButton());
 
