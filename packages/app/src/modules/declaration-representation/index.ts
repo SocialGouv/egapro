@@ -31,10 +31,12 @@ export {
 } from "./shared/PercentagePairFields";
 export type { StepDefinition } from "./steps";
 export {
+	getNextStep,
 	getNextStepHref,
 	getPreviousStepHref,
 	getStepDefinition,
 	isValidStep,
+	PUBLICATION_STEP_NUMBER,
 	parseStepParam,
 	REPRESENTATION_FUNNEL_ROOT,
 	REPRESENTATION_STEPS,

@@ -2,15 +2,19 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { isRepresentationPublicationRequired } from "~/modules/domain";
 import { Stepper } from "./Stepper";
 import type { StepValidator } from "./shared/draft/DraftContext";
 import { RepresentationDraftProvider } from "./shared/draft/DraftContext";
 import { useRepresentationDraft } from "./shared/draft/useRepresentationDraft";
 import {
+	getNextStep,
 	getNextStepHref,
 	getPreviousStepHref,
 	getStepDefinition,
+	PUBLICATION_STEP_NUMBER,
+	stepHref,
 } from "./steps";
 import type { RepresentationDraft } from "./types";
 
@@ -21,6 +25,19 @@ type StepPageClientProps = {
 	initialDraft: RepresentationDraft;
 	campaignOpen: boolean;
 };
+
+function isPublicationStepRequired(draft: RepresentationDraft): boolean {
+	if (
+		draft.executivesCount === undefined ||
+		draft.hasManagementBody === undefined
+	) {
+		return true;
+	}
+	return isRepresentationPublicationRequired(
+		draft.executivesCount,
+		draft.hasManagementBody,
+	);
+}
 
 export function StepPageClient({
 	step,
@@ -49,16 +66,28 @@ export function StepPageClient({
 		[],
 	);
 
+	const skipPublicationStep = !isPublicationStepRequired(draft);
 	const definition = getStepDefinition(step);
-	const previousHref = getPreviousStepHref(step);
-	const nextHref = getNextStepHref(step);
+	const previousHref = getPreviousStepHref(step, skipPublicationStep);
+	const nextHref = getNextStepHref(step, skipPublicationStep);
+	const bypassHref = getNextStepHref(PUBLICATION_STEP_NUMBER - 1, true);
+	const mustBypassPublicationStep =
+		step === PUBLICATION_STEP_NUMBER && skipPublicationStep;
+
+	useEffect(() => {
+		if (mustBypassPublicationStep && bypassHref !== undefined) {
+			router.replace(bypassHref);
+		}
+	}, [mustBypassPublicationStep, bypassHref, router]);
 
 	if (definition === undefined) return null;
+	if (mustBypassPublicationStep) return null;
 
 	const StepComponent = definition.Component;
 
 	async function handleNext() {
-		if (nextHref === undefined) return;
+		const nextStep = getNextStep(step, skipPublicationStep);
+		if (nextStep === undefined) return;
 		if (stepValidatorRef.current) {
 			const isValid = await stepValidatorRef.current();
 			if (!isValid) return;
@@ -66,8 +95,8 @@ export function StepPageClient({
 		setNavigationError(null);
 		setIsAdvancing(true);
 		try {
-			await saveProgress(step + 1);
-			router.push(nextHref);
+			await saveProgress(nextStep);
+			router.push(stepHref(nextStep));
 		} catch {
 			setNavigationError(
 				"L'enregistrement de votre progression a échoué. Veuillez réessayer.",
