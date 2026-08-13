@@ -29,21 +29,69 @@ vi.mock("~/trpc/react", () => ({
 }));
 
 import { StepPageClient } from "../StepPageClient";
+import type { RepresentationDraft } from "../types";
+import {
+	MISMATCHED_EXECUTIVES,
+	NO_EXECUTIVES,
+	VALIDATION_MESSAGES,
+} from "./fixtures";
 
 const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
 const CLOSED_BANNER = "La campagne de représentation équilibrée est close";
+const TWO_OR_MORE = /^Deux cadres dirigeants ou plus/;
+const NONE = /^Aucun cadre dirigeant/;
+const PLACEHOLDER_STEP = 4;
+const STEP_3_HREF = "/declaration-representation/etape/3";
+const STEP_5_HREF = "/declaration-representation/etape/5";
 
-function renderStep({ step = 2, campaignOpen = true, currentStep = 2 } = {}) {
+const SAVED_MISMATCHED_EXECUTIVES: RepresentationDraft = {
+	currentStep: 2,
+	...MISMATCHED_EXECUTIVES,
+};
+
+const SAVED_NO_EXECUTIVES: RepresentationDraft = {
+	currentStep: 2,
+	...NO_EXECUTIVES,
+};
+
+type RenderStepOptions = {
+	step?: number;
+	campaignOpen?: boolean;
+	currentStep?: number;
+	initialDraft?: RepresentationDraft;
+};
+
+function renderStep({
+	step = 2,
+	campaignOpen = true,
+	currentStep = 2,
+	initialDraft,
+}: RenderStepOptions = {}) {
 	return render(
 		<StepPageClient
 			campaignOpen={campaignOpen}
 			campaignYear={CAMPAIGN_YEAR}
-			initialDraft={{ currentStep }}
+			initialDraft={initialDraft ?? { currentStep }}
 			step={step}
 			year={YEAR}
 		/>,
 	);
+}
+
+function nextButton() {
+	return screen.getByRole("button", { name: "Suivant" });
+}
+
+async function enterWomenPercent(value: string) {
+	await userEvent.click(screen.getByRole("radio", { name: TWO_OR_MORE }));
+	await userEvent.type(screen.getByLabelText(/Femmes/), value);
+}
+
+async function retypeMenPercent(value: string) {
+	await userEvent.clear(screen.getByLabelText(/Hommes/));
+	if (value !== "")
+		await userEvent.type(screen.getByLabelText(/Hommes/), value);
 }
 
 beforeEach(() => {
@@ -63,6 +111,14 @@ describe("StepPageClient — rendering", () => {
 			}),
 		).toBeInTheDocument();
 		expect(screen.getByText("Étape 2 sur 5")).toBeInTheDocument();
+		expect(
+			screen.getByRole("radio", { name: /^Deux cadres dirigeants ou plus/ }),
+		).toBeInTheDocument();
+	});
+
+	it("falls back to the placeholder on a step that has no screen yet", () => {
+		renderStep({ step: PLACEHOLDER_STEP, currentStep: PLACEHOLDER_STEP });
+
 		expect(
 			screen.getByText(
 				"Cette étape est en construction et sera disponible prochainement.",
@@ -97,16 +153,16 @@ describe("StepPageClient — navigation", () => {
 	});
 
 	it("saves the progress before routing to the next step", async () => {
-		renderStep({ step: 2 });
+		renderStep({ step: 2, initialDraft: SAVED_NO_EXECUTIVES });
 
 		await userEvent.click(screen.getByRole("button", { name: "Suivant" }));
 
 		expect(mutateAsync).toHaveBeenCalledWith({
 			year: YEAR,
 			currentStep: 3,
-			draft: { currentStep: 3 },
+			draft: { currentStep: 3, ...NO_EXECUTIVES },
 		});
-		expect(push).toHaveBeenCalledWith("/declaration-representation/etape/3");
+		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
 	});
 
 	it("disables the button while the progress is being saved", async () => {
@@ -117,7 +173,7 @@ describe("StepPageClient — navigation", () => {
 					resolveSave = resolve;
 				}),
 		);
-		renderStep({ step: 2 });
+		renderStep({ step: 2, initialDraft: SAVED_NO_EXECUTIVES });
 
 		await userEvent.click(screen.getByRole("button", { name: "Suivant" }));
 
@@ -129,12 +185,12 @@ describe("StepPageClient — navigation", () => {
 			resolveSave();
 		});
 
-		expect(push).toHaveBeenCalledWith("/declaration-representation/etape/3");
+		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
 	});
 
 	it("keeps the user on the step and explains the failure when the save fails", async () => {
 		mutateAsync.mockRejectedValueOnce(new Error("network"));
-		renderStep({ step: 2 });
+		renderStep({ step: 2, initialDraft: SAVED_NO_EXECUTIVES });
 
 		await userEvent.click(screen.getByRole("button", { name: "Suivant" }));
 
@@ -152,6 +208,104 @@ describe("StepPageClient — navigation", () => {
 			screen.queryByRole("button", { name: "Suivant" }),
 		).not.toBeInTheDocument();
 		expect(screen.getByRole("link", { name: "Précédent" })).toBeInTheDocument();
+	});
+});
+
+describe("StepPageClient — étape invalide (S6)", () => {
+	it("blocks the next step while no executives count is selected", async () => {
+		renderStep({ step: 2, initialDraft: { currentStep: 2 } });
+
+		await userEvent.click(nextButton());
+
+		expect(
+			screen.getByText(VALIDATION_MESSAGES.selectionRequired),
+		).toBeInTheDocument();
+		expect(mutateAsync).not.toHaveBeenCalled();
+		expect(push).not.toHaveBeenCalled();
+	});
+
+	it("advances as soon as an executives count is selected", async () => {
+		renderStep({ step: 2 });
+
+		await userEvent.click(screen.getByRole("radio", { name: NONE }));
+		await userEvent.click(nextButton());
+
+		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
+	});
+
+	it("stops blocking once the invalid step is left behind", async () => {
+		const { rerender } = renderStep({ step: 2 });
+		await userEvent.click(nextButton());
+		expect(push).not.toHaveBeenCalled();
+
+		rerender(
+			<StepPageClient
+				campaignOpen
+				campaignYear={CAMPAIGN_YEAR}
+				initialDraft={{ currentStep: PLACEHOLDER_STEP }}
+				step={PLACEHOLDER_STEP}
+				year={YEAR}
+			/>,
+		);
+		await userEvent.click(nextButton());
+
+		expect(push).toHaveBeenCalledWith(STEP_5_HREF);
+	});
+
+	it("blocks the next step while the percentages do not sum to 100", async () => {
+		renderStep({ step: 2 });
+
+		await enterWomenPercent("35");
+		await retypeMenPercent("50");
+		await userEvent.click(nextButton());
+
+		expect(screen.getByText(VALIDATION_MESSAGES.sum)).toBeInTheDocument();
+		expect(mutateAsync).not.toHaveBeenCalled();
+		expect(push).not.toHaveBeenCalled();
+	});
+
+	it("blocks the next step while the percentages are still incomplete", async () => {
+		renderStep({ step: 2 });
+
+		await enterWomenPercent("35");
+		await retypeMenPercent("");
+		await userEvent.click(nextButton());
+
+		expect(mutateAsync).not.toHaveBeenCalled();
+		expect(push).not.toHaveBeenCalled();
+	});
+
+	it("advances once the sum is corrected to 100", async () => {
+		renderStep({ step: 2 });
+
+		await enterWomenPercent("35");
+		await retypeMenPercent("50");
+		await userEvent.click(nextButton());
+		expect(push).not.toHaveBeenCalled();
+
+		await retypeMenPercent("65");
+		await userEvent.click(nextButton());
+
+		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
+	});
+
+	it("blocks the next step when the funnel reopens on a saved invalid pair", async () => {
+		renderStep({ step: 2, initialDraft: SAVED_MISMATCHED_EXECUTIVES });
+
+		expect(screen.getByText(VALIDATION_MESSAGES.sum)).toBeInTheDocument();
+
+		await userEvent.click(nextButton());
+
+		expect(mutateAsync).not.toHaveBeenCalled();
+		expect(push).not.toHaveBeenCalled();
+	});
+
+	it("advances on a step that never reports its validity", async () => {
+		renderStep({ step: PLACEHOLDER_STEP, currentStep: PLACEHOLDER_STEP });
+
+		await userEvent.click(nextButton());
+
+		expect(push).toHaveBeenCalledWith(STEP_5_HREF);
 	});
 });
 

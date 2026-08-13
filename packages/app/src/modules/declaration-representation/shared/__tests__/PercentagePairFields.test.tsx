@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
 
@@ -18,6 +19,7 @@ type HarnessProps = {
 	hint?: string;
 	womenLabel?: string;
 	menLabel?: string;
+	trailingContent?: ReactNode;
 };
 
 function Harness(props: HarnessProps = {}) {
@@ -197,6 +199,28 @@ describe("PercentagePairFields — accessibility and states", () => {
 		expect(men).toHaveAttribute("aria-describedby", hint.id);
 	});
 
+	it("reads the hint after the fields instead of inside the legend", () => {
+		render(<Harness />);
+		const { men } = fields();
+
+		const hint = screen.getByText(
+			"La saisie d'un pourcentage calcule automatiquement l'autre.",
+		);
+
+		expect(screen.getByText(LEGEND)).not.toContainElement(hint);
+		expect(
+			men.compareDocumentPosition(hint) & Node.DOCUMENT_POSITION_FOLLOWING,
+		).not.toBe(0);
+	});
+
+	it("flags both percentages as required fields", () => {
+		render(<Harness />);
+		const { women, men } = fields();
+
+		expect(women).toHaveAttribute("aria-required", "true");
+		expect(men).toHaveAttribute("aria-required", "true");
+	});
+
 	it("supports custom labels and hint", () => {
 		render(
 			<Harness
@@ -358,5 +382,21 @@ describe("isPercentageInput", () => {
 		"3 5",
 	])("rejects %s", (raw) => {
 		expect(isPercentageInput(raw)).toBe(false);
+	});
+});
+
+describe("PercentagePairFields — contenu additionnel", () => {
+	it("renders the trailing content inside the fieldset holding both inputs", () => {
+		render(<Harness trailingContent={<span>Conforme</span>} />);
+
+		expect(fields().women.closest("fieldset")).toContainElement(
+			screen.getByText("Conforme"),
+		);
+	});
+
+	it("renders no trailing column when no trailing content is given", () => {
+		render(<Harness />);
+
+		expect(screen.queryByText("Conforme")).not.toBeInTheDocument();
 	});
 });
