@@ -8,6 +8,7 @@ type Props = {
 	description: React.ReactNode;
 	certifyLabel: string;
 	certifyInputId: string;
+	isPending?: boolean;
 	modalRef: React.RefObject<HTMLDialogElement | null>;
 	onClose: () => void;
 	onSubmit: () => void;
@@ -19,6 +20,7 @@ export function SubmitModal({
 	description,
 	certifyLabel,
 	certifyInputId,
+	isPending = false,
 	modalRef,
 	onClose,
 	onSubmit,
@@ -77,11 +79,11 @@ export function SubmitModal({
 									<li>
 										<button
 											className="fr-btn"
-											disabled={!certified}
+											disabled={!certified || isPending}
 											onClick={onSubmit}
 											type="button"
 										>
-											Valider
+											{isPending ? "Envoi en cours…" : "Valider"}
 										</button>
 									</li>
 									<li>
