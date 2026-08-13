@@ -19,6 +19,11 @@ import { PUBLICATION_STEP_NUMBER } from "~/modules/declaration-representation/st
 import type { RepresentationDraft } from "~/modules/declaration-representation/types";
 import { Step4Publication } from "../Step4Publication";
 
+const ACCORDION_TITLE = "Obligation de transparence";
+
+const LEARN_MORE_HREF =
+	"https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle";
+
 const setDraftValues = vi.fn();
 
 let latestValidator: StepValidator | null = null;
@@ -70,6 +75,10 @@ function urlField() {
 
 function modalitiesField() {
 	return screen.queryByLabelText(/modalités de communication/);
+}
+
+function accordionTrigger() {
+	return screen.getByRole("button", { name: ACCORDION_TITLE });
 }
 
 async function runStepValidator(): Promise<boolean> {
@@ -320,5 +329,59 @@ describe("Step4Publication — publication date after the reference period (S11)
 		});
 
 		expect(await runStepValidator()).toBe(true);
+	});
+});
+
+describe("Step4Publication — obligation de transparence", () => {
+	it("offers the obligation in a collapsed accordion", () => {
+		renderStep();
+
+		expect(accordionTrigger()).toHaveAttribute("aria-expanded", "false");
+	});
+
+	it("wires the accordion button to the panel holding the obligation", () => {
+		renderStep();
+
+		const panelId = accordionTrigger().getAttribute("aria-controls");
+
+		expect(document.getElementById(panelId ?? "")).toContainElement(
+			screen.getByText(/par tout moyen/),
+		);
+	});
+
+	it("recalls the yearly publication duty and the fallback without a website", () => {
+		renderStep();
+
+		expect(
+			screen.getByText(
+				/au plus tard le 1er mars.*visible et lisible sur leur site internet/,
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				/porter ces informations à la connaissance des salariés par tout moyen/,
+			),
+		).toBeInTheDocument();
+	});
+
+	it("points to the ministry page in a new tab", () => {
+		renderStep();
+
+		const link = screen.getByRole("link", {
+			name: /En savoir plus.*nouvelle fenêtre/i,
+		});
+
+		expect(link).toHaveAttribute("href", LEARN_MORE_HREF);
+		expect(link).toHaveAttribute("target", "_blank");
+		expect(link).toHaveAttribute("rel", "noopener noreferrer");
+	});
+
+	it("keeps the obligation available whichever publication channel is picked", async () => {
+		renderStep();
+
+		await userEvent.click(screen.getByLabelText("Non"));
+
+		expect(modalitiesField()).toBeInTheDocument();
+		expect(accordionTrigger()).toBeInTheDocument();
 	});
 });

@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useId } from "react";
 import { Controller } from "react-hook-form";
 
+import { TrackedLink } from "~/modules/analytics";
+import { NewTabNotice } from "~/modules/layout";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { publicationSchema } from "../schemas";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
@@ -30,6 +32,7 @@ export function Step4Publication() {
 	const urlMessagesId = `${urlId}-messages`;
 	const modalitiesId = `${baseId}-modalities`;
 	const modalitiesMessagesId = `${modalitiesId}-messages`;
+	const accordionId = `${baseId}-transparency-obligation`;
 
 	const form = useZodForm(publicationSchema, {
 		defaultValues: {
@@ -255,6 +258,40 @@ export function Step4Publication() {
 					</div>
 				</div>
 			) : null}
+
+			<section className="fr-accordion fr-mt-4w">
+				<h3 className="fr-accordion__title">
+					<button
+						aria-controls={accordionId}
+						aria-expanded="false"
+						className="fr-accordion__btn"
+						type="button"
+					>
+						Obligation de transparence
+					</button>
+				</h3>
+				<div className="fr-collapse" id={accordionId}>
+					<p>
+						Les entreprises doivent publier chaque année, au plus tard le 1er
+						mars, leurs écarts éventuels de représentation femmes-hommes pour
+						les cadres dirigeants et au sein des instances dirigeantes de
+						manière visible et lisible sur leur site internet, et les laisser en
+						ligne jusqu'à la publication de leurs écarts l'année suivante. Si
+						l'entreprise ne dispose pas de site internet, elle doit porter ces
+						informations à la connaissance des salariés par tout moyen.
+					</p>
+					<TrackedLink
+						className="fr-link"
+						href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
+						rel="noopener noreferrer"
+						target="_blank"
+						trackingId="representation_publication_transparency_obligation"
+					>
+						En savoir plus
+						<NewTabNotice />
+					</TrackedLink>
+				</div>
+			</section>
 		</div>
 	);
 }
