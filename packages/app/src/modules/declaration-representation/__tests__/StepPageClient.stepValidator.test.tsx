@@ -29,13 +29,13 @@ vi.mock("~/trpc/react", () => ({
 }));
 
 // Stands in for any funnel step wired to the shared validator extension point.
-vi.mock("../steps/StepPlaceholder", async () => {
+vi.mock("../steps/Step4Publication", async () => {
 	const { useEffect } = await import("react");
 	const { useRepresentationDraftContext } = await import(
 		"../shared/draft/DraftContext"
 	);
 	return {
-		StepPlaceholder: function ValidatedStep() {
+		Step4Publication: function ValidatedStep() {
 			const { registerStepValidator } = useRepresentationDraftContext();
 			useEffect(() => {
 				registerStepValidator(
@@ -52,8 +52,7 @@ import { StepPageClient } from "~/modules/declaration-representation";
 
 const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
-// Step still backed by StepPlaceholder, so the mock below drives the whole step.
-const PLACEHOLDER_STEP = 4;
+const VALIDATED_STEP = 4;
 const NEXT_STEP_HREF = "/declaration-representation/etape/5";
 
 function renderStep() {
@@ -61,8 +60,8 @@ function renderStep() {
 		<StepPageClient
 			campaignOpen
 			campaignYear={CAMPAIGN_YEAR}
-			initialDraft={{ currentStep: PLACEHOLDER_STEP }}
-			step={PLACEHOLDER_STEP}
+			initialDraft={{ currentStep: VALIDATED_STEP }}
+			step={VALIDATED_STEP}
 			year={YEAR}
 		/>,
 	);
