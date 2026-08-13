@@ -7,6 +7,7 @@ import {
 	getRepresentationCampaignYear,
 	getRepresentationTarget,
 	isPresumedSubjectToRepresentation,
+	isRepresentationDeclarationSubmitted,
 	isRepresentationPublicationRequired,
 	REPRESENTATION_SUBJECTION_WINDOW_YEARS,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
@@ -307,6 +308,20 @@ describe("isRepresentationPublicationRequired", () => {
 	});
 });
 
+describe("isRepresentationDeclarationSubmitted", () => {
+	it("recognises a submitted declaration", () => {
+		expect(isRepresentationDeclarationSubmitted("submitted")).toBe(true);
+	});
+
+	it("rejects a draft declaration", () => {
+		expect(isRepresentationDeclarationSubmitted("draft")).toBe(false);
+	});
+
+	it.each([null, undefined])("rejects a missing declaration (%s)", (status) => {
+		expect(isRepresentationDeclarationSubmitted(status)).toBe(false);
+	});
+});
+
 describe("computeRepresentationDeclarationStatus", () => {
 	it("returns done for a submitted declaration, whatever its current step", () => {
 		expect(
@@ -379,6 +394,7 @@ describe("verdict independence (S16)", () => {
 			"getRepresentationCampaignYear",
 			"getRepresentationTarget",
 			"isPresumedSubjectToRepresentation",
+			"isRepresentationDeclarationSubmitted",
 			"isRepresentationPublicationRequired",
 		]);
 	});

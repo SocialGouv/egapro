@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { RepresentationSubmitVariant } from "~/modules/declaration-representation/shared/reviewSummary";
 import { SubmitModal } from "../SubmitModal";
 import { REPRESENTATION_CAMPAIGN_YEAR } from "./fixtures";
+import { certifyModal, modalButton, modalLiveRegion } from "./modalQueries";
 
 const onClose = vi.fn();
 const onSubmit = vi.fn();
@@ -26,16 +27,6 @@ function renderModal({
 			variant={variant}
 		/>,
 	);
-}
-
-// The DSFR runtime is absent in jsdom, so the <dialog> stays closed and its
-// content sits outside the accessibility tree.
-function modalButton(name: string) {
-	return screen.getByRole("button", { hidden: true, name });
-}
-
-function certifyCheckbox() {
-	return screen.getByRole("checkbox", { hidden: true });
 }
 
 beforeEach(() => {
@@ -97,20 +88,47 @@ describe("SubmitModal — confirmation", () => {
 
 		expect(modalButton("Valider")).toBeDisabled();
 
-		await userEvent.click(certifyCheckbox());
+		await certifyModal();
 		await userEvent.click(modalButton("Valider"));
 
 		expect(onSubmit).toHaveBeenCalledTimes(1);
 	});
 
-	it("keeps the certification locked out while the submission is in flight", async () => {
+	// RGAA 7.5/12.8: a `disabled` button drops out of the tab order mid-submission and strands the keyboard focus.
+	it("keeps the validation focusable but inert while the submission is in flight", async () => {
 		renderModal({ isPending: true });
 
-		await userEvent.click(certifyCheckbox());
+		await certifyModal();
+		const button = modalButton("Envoi en cours…");
 
-		expect(modalButton("Envoi en cours…")).toBeDisabled();
+		expect(button).not.toBeDisabled();
+		expect(button).toHaveAttribute("aria-disabled", "true");
 		expect(screen.queryByText("Valider")).not.toBeInTheDocument();
 		expect(onSubmit).not.toHaveBeenCalled();
+	});
+
+	it("ignores a second validation fired while the submission is in flight", async () => {
+		renderModal({ isPending: true });
+
+		await certifyModal();
+		await userEvent.click(modalButton("Envoi en cours…"));
+		await userEvent.click(modalButton("Envoi en cours…"));
+
+		expect(onSubmit).not.toHaveBeenCalled();
+	});
+
+	it("announces the ongoing submission in a polite live region", async () => {
+		const { container } = renderModal({ isPending: true });
+
+		await certifyModal();
+
+		expect(modalLiveRegion(container)).toHaveTextContent("Envoi en cours…");
+	});
+
+	it("keeps the live region silent outside a submission", () => {
+		const { container } = renderModal();
+
+		expect(modalLiveRegion(container)).toBeEmptyDOMElement();
 	});
 
 	it("gives up on the submission from the cancel button", async () => {

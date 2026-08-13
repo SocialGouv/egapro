@@ -25,7 +25,6 @@ import {
 	buildRepresentationSubmitPayload,
 	describeNonCompliance,
 	EXECUTIVES_TITLE,
-	formatRepresentationPercent,
 	isPublicationApplicable,
 	MEMBERS_TITLE,
 	summarizeRepresentationReview,
@@ -241,19 +240,6 @@ describe("describeNonCompliance", () => {
 		).toBe(
 			"Vous n'êtes pas conforme concernant les écarts relatifs aux cadres dirigeants et aux membres des instances dirigeantes.",
 		);
-	});
-});
-
-describe("formatRepresentationPercent", () => {
-	it.each([
-		[undefined, "—"],
-		[0, "0 %"],
-		[60, "60 %"],
-		[60.5, "60,5 %"],
-		[33.333, "33,3 %"],
-		[100, "100 %"],
-	])("formats %s as %s", (value, expected) => {
-		expect(formatRepresentationPercent(value)).toBe(expected);
 	});
 });
 

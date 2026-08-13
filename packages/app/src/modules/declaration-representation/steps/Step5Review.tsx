@@ -87,7 +87,6 @@ export function Step5Review() {
 	});
 
 	const handleConfirm = useCallback(() => {
-		if (submitMutation.isPending) return;
 		submitMutation.mutate({
 			year,
 			payload: buildRepresentationSubmitPayload(draft),
