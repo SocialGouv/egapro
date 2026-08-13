@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { DsfrPictogram } from "~/modules/layout";
 import { ResendReceiptButton } from "~/modules/mail";
-import { FileDownloadLink } from "~/modules/shared/FileDownloadLink";
+import { DownloadCard } from "~/modules/shared/DownloadCard";
 import styles from "./Confirmation.module.scss";
 
 type ConfirmationProps = {
@@ -45,21 +45,14 @@ export function Confirmation({
 				<ResendReceiptButton kind="representation" year={referenceYear} />
 			</div>
 
-			<div className={styles.block}>
-				<h2 className="fr-h6 fr-mb-0">
-					Télécharger le récapitulatif de la déclaration
-				</h2>
-				<p className="fr-text--sm fr-mb-0">
-					Année {campaignYear} au titre des données {referenceYear}
-				</p>
-				<FileDownloadLink
-					className="fr-btn fr-btn--secondary"
-					href={`/api/representation-pdf?year=${referenceYear}`}
-					pendingLabel="Génération du récapitulatif en cours…"
-				>
-					Télécharger le récapitulatif (PDF)
-				</FileDownloadLink>
-			</div>
+			{/* Visually hidden: bridges h1 → h3 (DownloadCard's own title) without adding a visible heading the Figma frame doesn't show. */}
+			<h2 className="fr-sr-only">Documents récapitulatifs de la déclaration</h2>
+			<DownloadCard
+				dataYear={referenceYear}
+				href={`/api/representation-pdf?year=${referenceYear}`}
+				title="Télécharger le récapitulatif de la déclaration"
+				year={campaignYear}
+			/>
 
 			<div>
 				<Link className="fr-btn" href="/mon-espace">

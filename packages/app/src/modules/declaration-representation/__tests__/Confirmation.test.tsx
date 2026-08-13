@@ -40,7 +40,7 @@ function renderConfirmation({
 
 function pdfLink() {
 	return screen.getByRole("link", {
-		name: "Télécharger le récapitulatif (PDF)",
+		name: "Télécharger le récapitulatif de la déclaration",
 	});
 }
 
@@ -82,6 +82,23 @@ describe("Confirmation — fin de démarche", () => {
 		expect(screen.getByText("renseignée sur votre compte")).toBeInTheDocument();
 	});
 
+	it("nests the recap card under a section heading, skipping no level", () => {
+		renderConfirmation();
+
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "Documents récapitulatifs de la déclaration",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Télécharger le récapitulatif de la déclaration",
+			}),
+		).toContainElement(pdfLink());
+	});
+
 	it("recalls the campaign and the reference year of the recap", () => {
 		renderConfirmation();
 
@@ -110,11 +127,14 @@ describe("Confirmation — actions de fin de parcours", () => {
 	it("downloads the recap of the reference year from the representation route (S20)", () => {
 		renderConfirmation();
 
-		expect(pdfLink()).toHaveAttribute(
+		const link = pdfLink();
+
+		expect(link).toHaveAttribute(
 			"href",
 			`/api/representation-pdf?year=${REPRESENTATION_YEAR}`,
 		);
-		expect(pdfLink()).not.toHaveAttribute("aria-disabled");
+		expect(link).toHaveAttribute("download");
+		expect(link).not.toHaveAttribute("aria-disabled");
 	});
 
 	it("offers an actionable acknowledgement resend", () => {

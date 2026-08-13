@@ -345,7 +345,9 @@ describe("RepresentationConfirmationPage", () => {
 		render(await RepresentationConfirmationPage());
 
 		expect(
-			screen.getByRole("link", { name: "Télécharger le récapitulatif (PDF)" }),
+			screen.getByRole("link", {
+				name: "Télécharger le récapitulatif de la déclaration",
+			}),
 		).toHaveAttribute("href", `/api/representation-pdf?year=${YEAR}`);
 		expect(
 			screen.getByRole("button", { name: "Renvoyer l'accusé de réception" }),
