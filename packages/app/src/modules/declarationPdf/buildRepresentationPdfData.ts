@@ -5,6 +5,7 @@ import {
 	computeRepresentationVerdict,
 	type ExecutivesCount,
 	getRepresentationCampaignYear,
+	isRepresentationDeclarationSubmitted,
 	isRepresentationPublicationRequired,
 	type RepresentationComplianceVerdict,
 } from "~/modules/domain";
@@ -76,7 +77,10 @@ export async function buildRepresentationPdfData(
 			.limit(1),
 	]);
 
-	if (!declaration || declaration.status !== "submitted") {
+	if (
+		!declaration ||
+		!isRepresentationDeclarationSubmitted(declaration.status)
+	) {
 		throw new RepresentationDeclarationNotFoundError();
 	}
 
