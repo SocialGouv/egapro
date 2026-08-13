@@ -52,14 +52,18 @@ function IndicatorCard({
 							{formatPercentage(indicator.menPercent)}
 						</p>
 					</div>
+					<div className={styles.badgeRow}>
+						<ComplianceBadge verdict={indicator.verdict} />
+					</div>
 				</div>
 			) : (
-				<p className="fr-text--sm fr-mb-0">{indicator.notComputableReason}</p>
+				<>
+					<p className="fr-text--sm fr-mb-0">{indicator.notComputableReason}</p>
+					<div className={styles.badgeRow}>
+						<ComplianceBadge verdict={indicator.verdict} />
+					</div>
+				</>
 			)}
-
-			<div className={styles.badgeRow}>
-				<ComplianceBadge verdict={indicator.verdict} />
-			</div>
 		</div>
 	);
 }

@@ -64,6 +64,12 @@
 	width: 100px;
 }
 
+// Figma spec ("Section Content" = row / align-items flex-end / gap 8px): the
+// verdict badge sits on the values row, filling the space after Hommes.
+.percentages .badgeRow {
+	flex: 1;
+}
+
 .nextSteps {
 	display: flex;
 	flex-direction: column;
