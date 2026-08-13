@@ -8,6 +8,7 @@ import {
 import { Step1ReferencePeriod } from "./Step1ReferencePeriod";
 import { Step2Executives } from "./Step2Executives";
 import { Step3Members } from "./Step3Members";
+import { Step4Publication } from "./Step4Publication";
 import { StepPlaceholder } from "./StepPlaceholder";
 
 export type StepDefinition = {
@@ -17,6 +18,9 @@ export type StepDefinition = {
 };
 
 export const REPRESENTATION_FUNNEL_ROOT = "/declaration-representation";
+
+export const PUBLICATION_STEP_NUMBER =
+	REPRESENTATION_STEP_SLUGS.indexOf("informations-de-publication") + 1;
 
 const STEP_TITLES: Record<RepresentationStepSlug, string> = {
 	"periode-de-reference": "Période de référence",
@@ -31,7 +35,7 @@ const STEP_COMPONENTS: Record<RepresentationStepSlug, ComponentType> = {
 	"periode-de-reference": Step1ReferencePeriod,
 	"ecarts-cadres-dirigeants": Step2Executives,
 	"ecarts-instances-dirigeantes": Step3Members,
-	"informations-de-publication": StepPlaceholder,
+	"informations-de-publication": Step4Publication,
 	recapitulatif: StepPlaceholder,
 };
 
@@ -62,10 +66,35 @@ export function stepHref(step: number): string {
 	return `${REPRESENTATION_FUNNEL_ROOT}/etape/${step}`;
 }
 
-export function getPreviousStepHref(step: number): string {
-	return step <= 1 ? REPRESENTATION_FUNNEL_ROOT : stepHref(step - 1);
+export function getPreviousStepHref(
+	step: number,
+	skipPublicationStep = false,
+): string {
+	if (step <= 1) return REPRESENTATION_FUNNEL_ROOT;
+	const candidate = step - 1;
+	const previous =
+		skipPublicationStep && candidate === PUBLICATION_STEP_NUMBER
+			? candidate - 1
+			: candidate;
+	return previous < 1 ? REPRESENTATION_FUNNEL_ROOT : stepHref(previous);
 }
 
-export function getNextStepHref(step: number): string | undefined {
-	return step >= TOTAL_REPRESENTATION_STEPS ? undefined : stepHref(step + 1);
+export function getNextStep(
+	step: number,
+	skipPublicationStep = false,
+): number | undefined {
+	const candidate = step + 1;
+	const next =
+		skipPublicationStep && candidate === PUBLICATION_STEP_NUMBER
+			? candidate + 1
+			: candidate;
+	return next > TOTAL_REPRESENTATION_STEPS ? undefined : next;
+}
+
+export function getNextStepHref(
+	step: number,
+	skipPublicationStep = false,
+): string | undefined {
+	const next = getNextStep(step, skipPublicationStep);
+	return next === undefined ? undefined : stepHref(next);
 }
