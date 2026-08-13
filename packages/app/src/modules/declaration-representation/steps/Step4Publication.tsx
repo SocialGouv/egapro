@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId } from "react";
 import { Controller } from "react-hook-form";
 
 import { TrackedLink } from "~/modules/analytics";
-import { NewTabNotice } from "~/modules/layout";
+import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { publicationSchema } from "../schemas";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
