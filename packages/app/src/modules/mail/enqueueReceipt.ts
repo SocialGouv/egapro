@@ -31,7 +31,8 @@ export type ReceiptKind =
 	| "declaration"
 	| "secondDeclaration"
 	| "cseOpinion"
-	| "jointEvaluation";
+	| "jointEvaluation"
+	| "representation";
 
 export type EnqueueReceiptInput = {
 	kind: ReceiptKind;
@@ -47,6 +48,7 @@ const KIND_TO_TYPE = {
 	secondDeclaration: "second_declaration_confirmation",
 	cseOpinion: "cse_opinion_receipt",
 	jointEvaluation: "joint_evaluation_submitted",
+	representation: "representation_receipt",
 } as const satisfies Record<ReceiptKind, NotificationType>;
 
 type ConfirmationType = (typeof KIND_TO_TYPE)[ReceiptKind];
@@ -151,6 +153,9 @@ async function buildConfirmationPayload(
 					hasGapAboveThreshold: context.hasGapAboveThreshold,
 				}),
 			};
+		}
+		case "representation_receipt": {
+			return base;
 		}
 	}
 }
@@ -283,7 +288,7 @@ export async function enqueueReceipt(
 				kind,
 				year,
 				isResend,
-				variant: payload.variant,
+				...("variant" in payload ? { variant: payload.variant } : {}),
 				...(droppedReason === null ? {} : { attachmentsDropped: true }),
 			},
 		});

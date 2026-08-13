@@ -260,6 +260,13 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 				ORDER BY action
 			`;
 			expect([...rows]).toEqual([
+				// The submission acknowledgement is enqueued by `submit` itself, so
+				// its own audit row belongs to the same procedure run.
+				{
+					action: "notification.enqueue",
+					category: "mutation",
+					siren: SIREN,
+				},
 				{
 					action: "representation_declaration.get",
 					category: "read_sensitive",

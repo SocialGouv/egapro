@@ -1,4 +1,12 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mocks = vi.hoisted(() => ({
+	enqueueReceipt: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("~/modules/mail/server", () => ({
+	enqueueReceipt: mocks.enqueueReceipt,
+}));
 
 import {
 	COMPUTABLE_EXECUTIVES,
@@ -14,6 +22,7 @@ import {
 	REPRESENTATION_YEAR as YEAR,
 } from "~/modules/declaration-representation/__tests__/fixtures";
 import {
+	buildSession,
 	CLOSED_CAMPAIGN,
 	CLOSED_MESSAGE,
 	conflictSet,
@@ -233,5 +242,66 @@ describe("representationDeclarationRouter.submit", () => {
 			message: IMPERSONATION_MESSAGE,
 		});
 		expect(mock.insert).not.toHaveBeenCalled();
+	});
+
+	describe("accusé de réception", () => {
+		beforeEach(() => {
+			mocks.enqueueReceipt.mockClear().mockResolvedValue(undefined);
+		});
+
+		it("acknowledges the transmission to the declarant (S20)", async () => {
+			const mock = createMockDb();
+
+			await submit(mock, FULL_PAYLOAD);
+
+			expect(mocks.enqueueReceipt).toHaveBeenCalledWith({
+				kind: "representation",
+				to: "declarant@exemple.fr",
+				siren: SIREN,
+				year: YEAR,
+				userId: USER_ID,
+				isResend: false,
+			});
+		});
+
+		it("stores the declaration before acknowledging it", async () => {
+			const mock = createMockDb();
+
+			await submit(mock, FULL_PAYLOAD);
+
+			expect(mock.onConflictDoUpdate).toHaveBeenCalledBefore(
+				mocks.enqueueReceipt,
+			);
+		});
+
+		it("skips the acknowledgement when the account carries no e-mail", async () => {
+			const mock = createMockDb();
+
+			await submit(mock, FULL_PAYLOAD, buildSession({ email: null }));
+
+			expect(mock.insert).toHaveBeenCalled();
+			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+		});
+
+		it("sends no acknowledgement when the payload is rejected", async () => {
+			const mock = createMockDb();
+
+			await expect(
+				submit(mock, { ...FULL_PAYLOAD, executiveMenPercent: 30 }),
+			).rejects.toMatchObject({ code: "BAD_REQUEST" });
+
+			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+		});
+
+		it("sends no acknowledgement once the campaign is closed", async () => {
+			mockGetRepresentationCampaign.mockResolvedValue(CLOSED_CAMPAIGN);
+			const mock = createMockDb();
+
+			await expect(submit(mock, FULL_PAYLOAD)).rejects.toMatchObject({
+				code: "FORBIDDEN",
+			});
+
+			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+		});
 	});
 });
