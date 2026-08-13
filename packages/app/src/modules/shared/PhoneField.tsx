@@ -30,13 +30,14 @@ export function PhoneField({
 			className={`${error ? "fr-input-group fr-input-group--error" : "fr-input-group"}${className ? ` ${className}` : ""}`}
 		>
 			<label className="fr-label" htmlFor={inputId}>
-				Numéro de téléphone (obligatoire)
+				Numéro de téléphone
 				<span className="fr-hint-text">
 					Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55
 				</span>
 			</label>
 			<input
 				aria-describedby={messagesId}
+				aria-invalid={error ? "true" : undefined}
 				aria-required="true"
 				autoComplete="tel"
 				className="fr-input"
@@ -45,7 +46,12 @@ export function PhoneField({
 				{...registration}
 				onChange={handleChange}
 			/>
-			<div aria-live="polite" className="fr-messages-group" id={messagesId}>
+			<div
+				aria-atomic="true"
+				aria-live="polite"
+				className="fr-messages-group"
+				id={messagesId}
+			>
 				{error && <p className="fr-message fr-message--error">{error}</p>}
 			</div>
 		</div>

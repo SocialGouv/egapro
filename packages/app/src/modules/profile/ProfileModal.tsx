@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useId, useRef } from "react";
+import { useCallback, useRef } from "react";
+import type { UseFormRegisterReturn } from "react-hook-form";
 
 import { getDsfrModal } from "~/modules/shared";
 import { PhoneField } from "~/modules/shared/PhoneField";
@@ -8,26 +9,26 @@ import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import styles from "./ProfileModal.module.scss";
-import { updatePhoneSchema } from "./schemas";
+import { updateProfileSchema } from "./schemas";
 
 const MODAL_ID = "profile-modal";
 const MODAL_TITLE_ID = "profile-modal-title";
 
-/** DSFR modal displaying user profile with editable phone field. */
+/** DSFR modal displaying the declarant profile with editable identity fields. */
 export function ProfileModal() {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 
-	const form = useZodForm(updatePhoneSchema, {
-		defaultValues: { phone: "" },
+	const form = useZodForm(updateProfileSchema, {
+		defaultValues: { firstName: "", lastName: "", phone: "" },
 	});
 
-	const phoneError = form.formState.errors.phone?.message ?? null;
+	const { errors } = form.formState;
 
 	const profileQuery = api.profile.get.useQuery(undefined, {
 		enabled: false,
 	});
 
-	const updatePhoneMutation = api.profile.updatePhone.useMutation({
+	const updateProfileMutation = api.profile.updateProfile.useMutation({
 		onSuccess: () => {
 			closeModal();
 		},
@@ -43,8 +44,11 @@ export function ProfileModal() {
 			.refetch()
 			.then((result) => {
 				if (result.data) {
-					form.setValue("phone", result.data.phone ?? "");
-					form.clearErrors();
+					form.reset({
+						firstName: result.data.firstName ?? "",
+						lastName: result.data.lastName ?? "",
+						phone: result.data.phone ?? "",
+					});
 				}
 			})
 			.catch(() => {
@@ -55,12 +59,13 @@ export function ProfileModal() {
 	useDsfrDialogOpen(dialogRef, handleDialogOpen);
 
 	const onSubmit = form.handleSubmit((data) => {
-		updatePhoneMutation.mutate(data);
+		updateProfileMutation.mutate(data);
 	});
 
 	return (
 		<dialog
 			aria-labelledby={MODAL_TITLE_ID}
+			aria-modal="true"
 			className="fr-modal"
 			id={MODAL_ID}
 			ref={dialogRef}
@@ -80,7 +85,7 @@ export function ProfileModal() {
 								</button>
 							</div>
 							<div className="fr-modal__content">
-								<div className="fr-grid-row fr-grid-row--middle">
+								<div className="fr-grid-row fr-grid-row--middle fr-mb-4w">
 									<div className="fr-col">
 										<h2 className="fr-modal__title fr-mb-0" id={MODAL_TITLE_ID}>
 											Mon profil
@@ -104,39 +109,44 @@ export function ProfileModal() {
 										</span>
 									</div>
 								</div>
-								<p className="fr-text--regular fr-text-title--grey fr-mb-1w">
-									Les informations sont issues de votre compte ProConnect. Merci
-									de vérifier les données affichées et de compléter les
-									informations manquantes si nécessaire.
+								<p className="fr-text--regular fr-text-title--grey fr-mb-2w">
+									Vérifier les données affichées et compléter les informations
+									manquantes si nécessaire.
 								</p>
-								<p className="fr-text--regular fr-text-title--grey fr-mb-3w">
+								<p className="fr-text--regular fr-text-title--grey fr-mb-4w">
 									Tous les champs sont obligatoires.
 								</p>
 								<form autoComplete="off" id="profile-form" onSubmit={onSubmit}>
-									<div className="fr-grid-row fr-grid-row--gutters fr-mb-3w">
+									<div className="fr-grid-row fr-grid-row--gutters fr-mb-4w">
 										<div className="fr-col-12 fr-col-md-6">
-											<ReadonlyField
+											<IdentityField
+												error={errors.lastName?.message ?? null}
+												inputId="profile-last-name"
 												label="Nom"
-												value={profileQuery.data?.lastName}
+												registration={form.register("lastName")}
 											/>
 										</div>
 										<div className="fr-col-12 fr-col-md-6">
-											<ReadonlyField
+											<IdentityField
+												error={errors.firstName?.message ?? null}
+												inputId="profile-first-name"
 												label="Prénom"
-												value={profileQuery.data?.firstName}
+												registration={form.register("firstName")}
 											/>
 										</div>
 									</div>
-									<div className={`fr-mb-3w ${styles.narrowField}`}>
-										<ReadonlyField
-											label="Email du déclarant"
-											showEditIcon={false}
-											value={profileQuery.data?.email}
-										/>
+									<div className={`fr-mb-4w ${styles.emailBlock}`}>
+										<p className="fr-mb-0">
+											E-mail :{" "}
+											<strong>{profileQuery.data?.email || "—"}</strong>
+										</p>
+										<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
+											Source : ProConnect.
+										</p>
 									</div>
 									<PhoneField
 										className={styles.narrowField}
-										error={phoneError}
+										error={errors.phone?.message ?? null}
 										inputId="profile-phone"
 										registration={form.register("phone")}
 									/>
@@ -147,7 +157,7 @@ export function ProfileModal() {
 									<li>
 										<button
 											className="fr-btn"
-											disabled={updatePhoneMutation.isPending}
+											disabled={updateProfileMutation.isPending}
 											form="profile-form"
 											type="submit"
 										>
@@ -173,32 +183,46 @@ export function ProfileModal() {
 	);
 }
 
-type ReadonlyFieldProps = {
+type IdentityFieldProps = {
+	error: string | null;
+	inputId: string;
 	label: string;
-	showEditIcon?: boolean;
-	value: string | null | undefined;
+	registration: UseFormRegisterReturn;
 };
 
-function ReadonlyField({
+function IdentityField({
+	error,
+	inputId,
 	label,
-	showEditIcon = true,
-	value,
-}: ReadonlyFieldProps) {
-	const fieldId = useId();
+	registration,
+}: IdentityFieldProps) {
+	const messagesId = `${inputId}-messages`;
 	return (
-		<div className={styles.readonlyField}>
-			<label className={styles.readonlyLabel} htmlFor={fieldId}>
-				<span>{label}</span>
-				{showEditIcon && (
-					<span aria-hidden="true" className="fr-icon-edit-line fr-icon--sm" />
-				)}
+		<div
+			className={
+				error ? "fr-input-group fr-input-group--error" : "fr-input-group"
+			}
+		>
+			<label className="fr-label" htmlFor={inputId}>
+				{label}
 			</label>
 			<input
-				className={styles.readonlyValue}
-				id={fieldId}
-				readOnly
-				value={value || "—"}
+				aria-describedby={messagesId}
+				aria-invalid={error ? "true" : undefined}
+				aria-required="true"
+				className="fr-input"
+				id={inputId}
+				type="text"
+				{...registration}
 			/>
+			<div
+				aria-atomic="true"
+				aria-live="polite"
+				className="fr-messages-group"
+				id={messagesId}
+			>
+				{error && <p className="fr-message fr-message--error">{error}</p>}
+			</div>
 		</div>
 	);
 }

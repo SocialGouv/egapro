@@ -1,6 +1,6 @@
 import type { Account, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockFindFirst = vi.fn();
 const mockInsert = vi.fn();
@@ -51,6 +51,13 @@ function callSession(params: Record<string, unknown>) {
 }
 
 describe("auth config", () => {
+	beforeEach(() => {
+		mockFindFirst.mockReset();
+		mockInsert.mockReset();
+		mockUpdate.mockReset();
+		mockTransaction.mockReset();
+	});
+
 	describe("jwt callback", () => {
 		it("upserts user and populates token on sign-in (existing user)", async () => {
 			const dbUser = {
@@ -150,6 +157,129 @@ describe("auth config", () => {
 			expect(result.siret).toBe("12345678901234");
 			expect(result.phone).toBe("0123456789");
 			expect(result.id_token).toBe("stored-token");
+		});
+	});
+
+	const DECLARANT_EMAIL = "declarant@example.fr";
+
+	const proconnectUser = {
+		id: "proconnect-sub",
+		email: DECLARANT_EMAIL,
+		name: "Alice Martin",
+		firstName: "Alice",
+		lastName: "Martin",
+	} as User & { firstName: string; lastName: string };
+
+	const namelessProconnectUser = {
+		id: "proconnect-sub",
+		email: DECLARANT_EMAIL,
+	} as User;
+
+	function signIn(
+		existingUser: Record<string, unknown>,
+		user: User = proconnectUser,
+		token: JWT = { sub: "sub-123" } as JWT,
+	) {
+		mockFindFirst.mockResolvedValue({
+			id: "uuid-123",
+			phone: null,
+			isAdmin: false,
+			...existingUser,
+		});
+		return callJwt({
+			token,
+			user,
+			account: {} as Account,
+			trigger: "signIn",
+		});
+	}
+
+	describe("jwt callback — ProConnect identity seeding", () => {
+		function armUpdate() {
+			const where = vi.fn().mockResolvedValue(undefined);
+			const set = vi.fn().mockReturnValue({ where });
+			mockUpdate.mockReturnValue({ set });
+			return set;
+		}
+
+		it("seeds both names when the DB row carries none", async () => {
+			const set = armUpdate();
+
+			await signIn({ firstName: null, lastName: null });
+
+			expect(set).toHaveBeenCalledWith({
+				firstName: "Alice",
+				lastName: "Martin",
+			});
+		});
+
+		it("seeds only the half that is missing", async () => {
+			const set = armUpdate();
+
+			await signIn({ firstName: "Camille", lastName: null });
+
+			expect(set).toHaveBeenCalledWith({ lastName: "Martin" });
+		});
+
+		it("never overwrites a name already stored, so a Mon profil edit survives the next login", async () => {
+			armUpdate();
+
+			await signIn({ firstName: "Camille", lastName: "Durand" });
+
+			expect(mockUpdate).not.toHaveBeenCalled();
+		});
+
+		it("leaves the DB row untouched when ProConnect sends no name", async () => {
+			armUpdate();
+
+			await signIn({ firstName: null, lastName: null }, namelessProconnectUser);
+
+			expect(mockUpdate).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("jwt callback — display name", () => {
+		it("derives the display name from the DB row, overriding the ProConnect one", async () => {
+			const result = await signIn(
+				{ firstName: "Camille", lastName: "Durand" },
+				proconnectUser,
+				{ sub: "sub-123", name: "Alice Martin" } as JWT,
+			);
+
+			expect(result.name).toBe("Camille Durand");
+		});
+
+		it("orders the display name as firstName then lastName", async () => {
+			const result = await signIn(
+				{ firstName: "Martin", lastName: "Camille" },
+				namelessProconnectUser,
+			);
+
+			expect(result.name).toBe("Martin Camille");
+		});
+
+		it("reflects the name just seeded from ProConnect on a first login", async () => {
+			const result = await signIn({ firstName: null, lastName: null });
+
+			expect(result.name).toBe("Alice Martin");
+		});
+
+		it.each([
+			["firstName", { firstName: "Camille", lastName: null }, "Camille"],
+			["lastName", { firstName: null, lastName: "Durand" }, "Durand"],
+		])("joins without a stray space when only %s is stored", async (_field, existingUser, expected) => {
+			const result = await signIn(existingUser, namelessProconnectUser);
+
+			expect(result.name).toBe(expected);
+		});
+
+		it("falls back to the e-mail when the DB row carries no name", async () => {
+			const result = await signIn(
+				{ firstName: null, lastName: null },
+				namelessProconnectUser,
+			);
+
+			expect(result.name).toBe(DECLARANT_EMAIL);
 		});
 	});
 

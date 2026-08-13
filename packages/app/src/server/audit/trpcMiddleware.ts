@@ -51,6 +51,7 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 
 	// ── profile mutations + sensitive read ─────────────────
 	"profile.updatePhone": AUDIT_ACTIONS.PROFILE_UPDATE_PHONE,
+	"profile.updateProfile": AUDIT_ACTIONS.PROFILE_UPDATE,
 	"profile.get": AUDIT_ACTIONS.PROFILE_READ,
 
 	// ── admin sensitive reads ─────────────────────────────
@@ -270,4 +271,8 @@ const SENSITIVE_KEYS = new Set([
 	"access_key",
 	"private_key",
 	"data",
+	// Identity PII: the row already carries user_email, and audit-logging.md
+	// forbids duplicating PII that is not the email or the siren.
+	"firstname",
+	"lastname",
 ]);

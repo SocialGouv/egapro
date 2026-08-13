@@ -115,6 +115,26 @@ describe("MissingInfoModal", () => {
 		).toBeInTheDocument();
 	});
 
+	// The shared PhoneField label carries no "(obligatoire)" suffix, so this
+	// sentence is what states the obligation on this screen.
+	it("states that every field is required", () => {
+		render(
+			<MissingInfoModal
+				cseApplicable={true}
+				hasCse={null}
+				siren="532847196"
+				userPhone={null}
+			/>,
+		);
+		expect(
+			screen.getByText("Tous les champs sont obligatoires."),
+		).toBeInTheDocument();
+		expect(screen.getByLabelText(/Numéro de téléphone/)).toHaveAttribute(
+			"aria-required",
+			"true",
+		);
+	});
+
 	it("renders phone field when userPhone is null", () => {
 		render(
 			<MissingInfoModal
