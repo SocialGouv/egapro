@@ -120,6 +120,7 @@ export function Step4Publication() {
 					{...form.register("publishDate")}
 				/>
 				<div
+					aria-atomic="true"
 					aria-live="polite"
 					className="fr-messages-group"
 					id={dateMessagesId}
@@ -183,6 +184,7 @@ export function Step4Publication() {
 					)}
 				/>
 				<div
+					aria-atomic="true"
 					aria-live="polite"
 					className="fr-messages-group"
 					id={websiteMessagesId}
@@ -212,6 +214,7 @@ export function Step4Publication() {
 						{...form.register("publishUrl")}
 					/>
 					<div
+						aria-atomic="true"
 						aria-live="polite"
 						className="fr-messages-group"
 						id={urlMessagesId}
@@ -241,6 +244,7 @@ export function Step4Publication() {
 						{...form.register("publishModalities")}
 					/>
 					<div
+						aria-atomic="true"
 						aria-live="polite"
 						className="fr-messages-group"
 						id={modalitiesMessagesId}
