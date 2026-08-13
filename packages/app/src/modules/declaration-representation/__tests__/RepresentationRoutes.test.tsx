@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockRedirect, mockNotFound } = vi.hoisted(() => ({
+const { mockRedirect, mockNotFound, mockAuth } = vi.hoisted(() => ({
+	mockAuth: vi.fn(),
 	mockRedirect: vi.fn<(url: string) => never>().mockImplementation(() => {
 		throw new Error("NEXT_REDIRECT");
 	}),
@@ -26,6 +27,8 @@ vi.mock("~/trpc/server", () => ({
 	api: { representationDeclaration: { get: vi.fn() } },
 }));
 
+vi.mock("~/server/auth", () => ({ auth: mockAuth }));
+
 // The client funnel itself is exercised by StepPageClient.test.tsx.
 vi.mock("~/modules/declaration-representation", async (importOriginal) => ({
 	...(await importOriginal<
@@ -36,6 +39,7 @@ vi.mock("~/modules/declaration-representation", async (importOriginal) => ({
 	),
 }));
 
+import RepresentationConfirmationPage from "~/app/declaration-representation/confirmation/page";
 import RepresentationStepPage, {
 	generateMetadata,
 } from "~/app/declaration-representation/etape/[step]/page";
@@ -47,6 +51,7 @@ import { api } from "~/trpc/server";
 const CAMPAIGN_YEAR = getCurrentYear();
 const YEAR = getReferenceYearFor(CAMPAIGN_YEAR);
 const STEP_5_HREF = "/declaration-representation/etape/5";
+const DECLARANT_EMAIL = "declarant@example.fr";
 
 const getDeclaration = vi.mocked(api.representationDeclaration.get);
 
@@ -86,6 +91,7 @@ async function renderStepPage(step: string) {
 beforeEach(() => {
 	mockRedirect.mockClear();
 	mockNotFound.mockClear();
+	mockAuth.mockReset().mockResolvedValue(null);
 	getDeclaration.mockReset();
 });
 
@@ -291,5 +297,53 @@ describe("generateMetadata", () => {
 		).resolves.toEqual({
 			title: "Démarche des indicateurs de représentation équilibrée",
 		});
+	});
+});
+
+describe("RepresentationConfirmationPage", () => {
+	function mockSubmittedState(status: "draft" | "submitted") {
+		getDeclaration.mockResolvedValue({
+			campaignOpen: true,
+			declaration: { currentStep: 5, draft: null, status },
+		} as never);
+	}
+
+	it("congratulates the declarant on a submitted declaration (S19)", async () => {
+		mockSubmittedState("submitted");
+		mockAuth.mockResolvedValue({ user: { email: DECLARANT_EMAIL } });
+
+		render(await RepresentationConfirmationPage());
+
+		expect(mockRedirect).not.toHaveBeenCalled();
+		expect(
+			screen.getByText(/Votre parcours .* est désormais terminé/),
+		).toBeInTheDocument();
+		expect(screen.getByText(DECLARANT_EMAIL)).toBeInTheDocument();
+	});
+
+	it("falls back on the account address without a session e-mail", async () => {
+		mockSubmittedState("submitted");
+
+		render(await RepresentationConfirmationPage());
+
+		expect(screen.getByText("renseignée sur votre compte")).toBeInTheDocument();
+	});
+
+	it("sends a declaration still in draft back to the summary", async () => {
+		mockSubmittedState("draft");
+
+		await expect(RepresentationConfirmationPage()).rejects.toThrow(
+			"NEXT_REDIRECT",
+		);
+		expect(mockRedirect).toHaveBeenCalledWith(STEP_5_HREF);
+	});
+
+	it("sends a declarant with no declaration back to the summary", async () => {
+		mockFunnelState();
+
+		await expect(RepresentationConfirmationPage()).rejects.toThrow(
+			"NEXT_REDIRECT",
+		);
+		expect(mockRedirect).toHaveBeenCalledWith(STEP_5_HREF);
 	});
 });
