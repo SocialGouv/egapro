@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { DsfrPictogram } from "~/modules/layout";
 import { ResendReceiptButton } from "~/modules/mail";
-import { FileDownloadLink } from "~/modules/shared";
+import { FileDownloadLink } from "~/modules/shared/FileDownloadLink";
 import styles from "./Confirmation.module.scss";
 
 type ConfirmationProps = {
