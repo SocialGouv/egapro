@@ -8,7 +8,6 @@ import {
 	isIndicatorGRequired,
 } from "~/modules/domain";
 
-import { ArchivesSection } from "./ArchivesSection";
 import { CompanyEditModal } from "./CompanyEditModal";
 import { CompanyInfoBanner } from "./CompanyInfoBanner";
 import { DeclarationProcessPanel } from "./DeclarationProcessPanel";
@@ -91,7 +90,6 @@ export function CompanyDeclarationsPage({
 				hasCse={company.hasCse}
 				userPhone={userPhone}
 			/>
-			<ArchivesSection />
 			<CompanyEditModal company={company} />
 			<MissingInfoModal
 				cseApplicable={cseApplicable}

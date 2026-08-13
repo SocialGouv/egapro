@@ -41,41 +41,32 @@ const company: CompanyDetail = {
 const currentYear = getCurrentYear();
 const campaignDeadlines = getDefaultCampaignDeadlines(currentYear);
 
+function makeDeclaration(
+	type: DeclarationItem["type"],
+	overrides: Partial<DeclarationItem> = {},
+): DeclarationItem {
+	return {
+		type,
+		siren: "532847196",
+		year: currentYear,
+		status: "to_complete",
+		fsmStatus: null,
+		currentStep: 0,
+		updatedAt: null,
+		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: null,
+		hasSubmittedSecondDeclaration: false,
+		hasSubmittedCseOpinion: false,
+		cseRequired: false,
+		hasJointEvaluationFile: false,
+		hasPrefillData: false,
+		...overrides,
+	};
+}
+
 const declarations: DeclarationItem[] = [
-	{
-		type: "remuneration",
-		siren: "532847196",
-		year: currentYear,
-		status: "to_complete",
-		fsmStatus: null,
-		currentStep: 0,
-		updatedAt: null,
-		firstDeclarationPathChoice: null,
-		secondDeclarationPathChoice: null,
-		hasSubmittedSecondDeclaration: false,
-
-		hasSubmittedCseOpinion: false,
-		cseRequired: false,
-		hasJointEvaluationFile: false,
-		hasPrefillData: false,
-	},
-	{
-		type: "representation",
-		siren: "532847196",
-		year: currentYear,
-		status: "to_complete",
-		fsmStatus: null,
-		currentStep: 0,
-		updatedAt: null,
-		firstDeclarationPathChoice: null,
-		secondDeclarationPathChoice: null,
-		hasSubmittedSecondDeclaration: false,
-
-		hasSubmittedCseOpinion: false,
-		cseRequired: false,
-		hasJointEvaluationFile: false,
-		hasPrefillData: false,
-	},
+	makeDeclaration("remuneration"),
+	makeDeclaration("representation"),
 ];
 
 type LockHolder = {
@@ -119,9 +110,34 @@ describe("CompanyDeclarationsPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the 'Archives' section", () => {
+	it("does not render the 'Archives' section", () => {
 		renderPage();
-		expect(screen.getByText("Archives")).toBeInTheDocument();
+		expect(screen.queryByText("Archives")).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", {
+				name: "Demander une déclaration archivée",
+			}),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders the last action date of the current year remuneration declaration", () => {
+		renderPage({
+			declarations: [
+				makeDeclaration("remuneration", { updatedAt: new Date(2026, 2, 12) }),
+				makeDeclaration("representation"),
+			],
+		});
+		expect(
+			screen.getByText("Dernière action le 12 mars 2026"),
+		).toBeInTheDocument();
+	});
+
+	it("renders without a last action date when there is no declaration", () => {
+		renderPage({ declarations: [] });
+		expect(
+			screen.getByRole("heading", { level: 1, name: "Alpha Solutions" }),
+		).toBeInTheDocument();
+		expect(screen.queryByText(/Dernière action le/)).not.toBeInTheDocument();
 	});
 
 	it("always renders MissingInfoModal so DSFR conceal/disclose chain works", () => {
