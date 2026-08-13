@@ -27,6 +27,16 @@ vi.mock("~/trpc/server", () => ({
 	api: { representationDeclaration: { get: vi.fn() } },
 }));
 
+vi.mock("~/trpc/react", () => ({
+	api: {
+		mail: {
+			resendReceipt: {
+				useMutation: () => ({ mutate: vi.fn(), isPending: false }),
+			},
+		},
+	},
+}));
+
 vi.mock("~/server/auth", () => ({ auth: mockAuth }));
 
 // The client funnel itself is exercised by StepPageClient.test.tsx.
@@ -327,6 +337,19 @@ describe("RepresentationConfirmationPage", () => {
 		render(await RepresentationConfirmationPage());
 
 		expect(screen.getByText("renseignée sur votre compte")).toBeInTheDocument();
+	});
+
+	it("hands the reference year to the recap download and the resend button (S20)", async () => {
+		mockSubmittedState("submitted");
+
+		render(await RepresentationConfirmationPage());
+
+		expect(
+			screen.getByRole("link", { name: "Télécharger le récapitulatif (PDF)" }),
+		).toHaveAttribute("href", `/api/representation-pdf?year=${YEAR}`);
+		expect(
+			screen.getByRole("button", { name: "Renvoyer l'accusé de réception" }),
+		).toBeEnabled();
 	});
 
 	it("sends a declaration still in draft back to the summary", async () => {

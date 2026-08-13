@@ -182,6 +182,41 @@ describe("enqueueReceipt", () => {
 		expect(call.attachments).toBeUndefined();
 	});
 
+	it("maps representation to representation_receipt without attachments", async () => {
+		await enqueueReceipt({ ...baseInput, kind: "representation" });
+
+		expect(mocks.buildDeclarationAttachments).not.toHaveBeenCalled();
+		expect(mocks.buildSecondDeclarationAttachments).not.toHaveBeenCalled();
+		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				type: "representation_receipt",
+				payload: {
+					siren: "552100554",
+					year: 2025,
+					raisonSociale: "Société Démo",
+				},
+			}),
+		);
+		const call = mocks.enqueueNotification.mock.calls[0]?.[0] as {
+			attachments?: unknown;
+		};
+		expect(call.attachments).toBeUndefined();
+	});
+
+	it("keeps the variant out of the audit row of a receipt that has none", async () => {
+		await enqueueReceipt({ ...baseInput, kind: "representation" });
+
+		// The representation receipt is the only one with a variant-free payload:
+		// stamping `variant: undefined` on the jsonb would make it unqueryable.
+		expect(auditMetadataOf()).not.toHaveProperty("variant");
+		expect(auditMetadataOf()).toMatchObject({
+			type: "representation_receipt",
+			kind: "representation",
+			year: 2025,
+			isResend: false,
+		});
+	});
+
 	it("logs failure with errorMessage when publisher returns error", async () => {
 		mocks.enqueueNotification.mockResolvedValue({
 			status: "error",

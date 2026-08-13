@@ -51,6 +51,11 @@ const PAYLOADS: NotificationPayloadMap = {
 		variant: "completed",
 		raisonSociale: RAISON_SOCIALE,
 	},
+	representation_receipt: {
+		siren: SIREN,
+		year: YEAR,
+		raisonSociale: RAISON_SOCIALE,
+	},
 	cycle_opening_info: { siren: SIREN, year: YEAR, deadline: DEADLINE },
 	declaration_deadline_reminder: {
 		siren: SIREN,
@@ -284,6 +289,50 @@ describe("per-type rendering details", () => {
 				raisonSociale: RAISON_SOCIALE,
 			}),
 		).rejects.toThrow(/Unknown joint_evaluation_submitted variant/);
+	});
+
+	it("representation_receipt acknowledges the balanced representation declaration", async () => {
+		const mail = await buildMail("representation_receipt", {
+			siren: SIREN,
+			year: YEAR,
+			raisonSociale: RAISON_SOCIALE,
+		});
+
+		expect(mail.subject).toBe(
+			"Egapro - Représentation équilibrée : accusé de réception",
+		);
+		expect(mail.html).toContain(
+			"la déclaration des indicateurs de représentation équilibrée",
+		);
+		expect(mail.html).toContain(RAISON_SOCIALE);
+		expect(mail.html).toContain("SIREN :");
+		expect(mail.html).toContain(SIREN);
+		expect(mail.html).toContain(String(YEAR));
+		expect(mail.html).toContain("accuse réception de cette transmission");
+		expect(mail.html).toContain("démarche est désormais terminée");
+	});
+
+	it("representation_receipt closes the journey on the user space without any CSE follow-up", async () => {
+		const mail = await buildMail("representation_receipt", {
+			siren: SIREN,
+			year: YEAR,
+			raisonSociale: RAISON_SOCIALE,
+		});
+
+		expect(mail.html).toContain("Mon espace");
+		expect(mail.html).toContain(getMySpaceUrl());
+		expect(mail.html).not.toContain("/avis-cse");
+		expect(mail.html).not.toContain("/declaration-remuneration");
+	});
+
+	it("representation_receipt escapes the raisonSociale", async () => {
+		const mail = await buildMail("representation_receipt", {
+			siren: SIREN,
+			year: YEAR,
+			raisonSociale: "<script>alert(1)</script>",
+		});
+
+		expect(mail.html).not.toContain("<script>alert(1)</script>");
 	});
 
 	it("cycle_opening_info announces the declaration period", async () => {
