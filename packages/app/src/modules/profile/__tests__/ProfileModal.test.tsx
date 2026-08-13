@@ -86,6 +86,27 @@ describe("ProfileModal", () => {
 		).toBeInTheDocument();
 	});
 
+	it("renders the obligatory-fields mention right after the description paragraph", () => {
+		render(<ProfileModal />);
+		const description = screen.getByText(
+			/Les informations sont issues de votre compte ProConnect/,
+		);
+		const mention = screen.getByText("Tous les champs sont obligatoires.");
+		expect(description.nextElementSibling).toBe(mention);
+	});
+
+	it("renders both intro paragraphs in the title grey of their host label", () => {
+		render(<ProfileModal />);
+		expect(
+			screen.getByText(
+				/Les informations sont issues de votre compte ProConnect/,
+			),
+		).toHaveClass("fr-text-title--grey");
+		expect(screen.getByText("Tous les champs sont obligatoires.")).toHaveClass(
+			"fr-text-title--grey",
+		);
+	});
+
 	it("renders the close button", () => {
 		render(<ProfileModal />);
 		const closeButton = screen.getByTitle("Fermer");
@@ -156,6 +177,20 @@ describe("ProfileModal", () => {
 		expect(
 			screen.getByRole("button", { name: "Annuler", ...hiddenOpt }),
 		).toHaveAttribute("aria-controls", "profile-modal");
+	});
+
+	it("refetches the profile and discards unsaved phone edits when the dialog reopens", async () => {
+		render(<ProfileModal />);
+		fireEvent.change(getPhoneInput(), { target: { value: "09 99 99 99 99" } });
+
+		document.getElementById("profile-modal")?.setAttribute("open", "");
+
+		await waitFor(() => {
+			expect(mockRefetch).toHaveBeenCalled();
+		});
+		await waitFor(() => {
+			expect(getPhoneInput()).toHaveValue("01 22 33 44 55");
+		});
 	});
 
 	it("shows validation error when submitting empty phone", async () => {

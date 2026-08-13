@@ -231,8 +231,7 @@ function CseRadioGroup({ hasCse, setHasCse }: CseRadioGroupProps) {
 	return (
 		<fieldset className={`fr-fieldset ${styles.cseFieldset}`}>
 			<legend className="fr-fieldset__legend--regular fr-fieldset__legend">
-				Existence d'un CSE{" "}
-				<span className={styles.requiredHint}>(obligatoire)</span>
+				Existence d'un CSE (obligatoire)
 			</legend>
 			<div className="fr-fieldset__element fr-fieldset__element--inline">
 				<div className="fr-radio-group fr-radio-rich">

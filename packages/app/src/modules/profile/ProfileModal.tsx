@@ -104,10 +104,13 @@ export function ProfileModal() {
 										</span>
 									</div>
 								</div>
-								<p className="fr-text--regular fr-mb-3w">
+								<p className="fr-text--regular fr-text-title--grey fr-mb-1w">
 									Les informations sont issues de votre compte ProConnect. Merci
 									de vérifier les données affichées et de compléter les
 									informations manquantes si nécessaire.
+								</p>
+								<p className="fr-text--regular fr-text-title--grey fr-mb-3w">
+									Tous les champs sont obligatoires.
 								</p>
 								<form autoComplete="off" id="profile-form" onSubmit={onSubmit}>
 									<div className="fr-grid-row fr-grid-row--gutters fr-mb-3w">
