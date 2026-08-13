@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { getCurrentYear, parseSiren } from "~/modules/domain";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
+import { getRepresentationCampaign } from "~/server/db/getRepresentationCampaign";
 import { api } from "~/trpc/server";
 
 import { CompanyDeclarationsPage } from "./CompanyDeclarationsPage";
@@ -18,11 +19,13 @@ export async function MonEspacePage({ siret, userPhone }: Props) {
 	if (siren === null) {
 		redirect("/mon-espace/mes-entreprises");
 	}
-	const [data, campaignDeadlines, lockState] = await Promise.all([
-		api.company.getWithDeclarations({ siren }),
-		getCampaignDeadlines(getCurrentYear()),
-		api.declarationLock.getActiveLockForCurrentDeclaration(),
-	]);
+	const [data, campaignDeadlines, representationCampaign, lockState] =
+		await Promise.all([
+			api.company.getWithDeclarations({ siren }),
+			getCampaignDeadlines(getCurrentYear()),
+			getRepresentationCampaign(getCurrentYear()),
+			api.declarationLock.getActiveLockForCurrentDeclaration(),
+		]);
 
 	return (
 		<CompanyDeclarationsPage
@@ -31,6 +34,7 @@ export async function MonEspacePage({ siret, userPhone }: Props) {
 			declarations={data.declarations}
 			lockedByOther={lockState.lockedByOther}
 			lockHolder={lockState.holder}
+			representationCampaign={representationCampaign}
 			userPhone={userPhone}
 		/>
 	);

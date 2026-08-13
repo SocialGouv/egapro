@@ -1,3 +1,5 @@
+import type { DeclarationStatus } from "../types";
+
 export const REPRESENTATION_TARGET_INITIAL = 30;
 export const REPRESENTATION_TARGET_RAISED = 40;
 export const REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR = 2029;
@@ -64,4 +66,12 @@ export function isRepresentationPublicationRequired(
 	hasManagementBody: boolean,
 ): boolean {
 	return executivesCount === "two_or_more" || hasManagementBody === true;
+}
+
+export function computeRepresentationDeclarationStatus(declaration: {
+	status: "draft" | "submitted";
+	currentStep: number | null;
+}): DeclarationStatus {
+	if (declaration.status === "submitted") return "done";
+	return (declaration.currentStep ?? 0) === 0 ? "to_complete" : "in_progress";
 }

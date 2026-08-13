@@ -3,13 +3,18 @@ import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
 import {
 	computeDeclarationStatus,
+	computeRepresentationDeclarationStatus,
 	getCurrentYear,
 	getObligationWorkforce,
+	getReferenceYearFor,
 	isCseRequired,
 	isPresumedSubjectToRepresentation,
 	parseGipWorkforce,
 } from "~/modules/domain";
-import { buildDeclarationList } from "~/modules/my-space/buildDeclarationList";
+import {
+	buildDeclarationList,
+	type DbDeclaration,
+} from "~/modules/my-space/buildDeclarationList";
 import {
 	sirenInputSchema,
 	updateHasCseSchema,
@@ -253,12 +258,17 @@ export const companyRouter = createTRPCRouter({
 					),
 				getRepresentationWorkforceHistory(input.siren, year),
 				ctx.db
-					.select({ year: representationDeclarations.year })
+					.select({
+						status: representationDeclarations.status,
+						currentStep: representationDeclarations.currentStep,
+						updatedAt: representationDeclarations.updatedAt,
+					})
 					.from(representationDeclarations)
 					.where(
 						and(
 							eq(representationDeclarations.siren, input.siren),
-							eq(representationDeclarations.year, year),
+							// The représentation funnel stores the *reference* year, not the campaign year.
+							eq(representationDeclarations.year, getReferenceYearFor(year)),
 						),
 					)
 					.limit(1),
@@ -277,12 +287,11 @@ export const companyRouter = createTRPCRouter({
 					.map((r) => r.declarationId),
 			);
 
-			const hasCurrentYearRepresentationDeclaration =
-				currentYearRepresentationDeclarationRows.length > 0;
+			const representationRow = currentYearRepresentationDeclarationRows[0];
 			const representationVisible =
-				hasCurrentYearRepresentationDeclaration ||
+				representationRow !== undefined ||
 				isPresumedSubjectToRepresentation(representationWorkforceHistory, year);
-			const mappedDeclarations = declarationRows.map((d) => ({
+			const mappedDeclarations: DbDeclaration[] = declarationRows.map((d) => ({
 				type: "remuneration" as const,
 				year: d.year,
 				status: computeDeclarationStatus({
@@ -300,6 +309,28 @@ export const companyRouter = createTRPCRouter({
 				hasJointEvaluationFile: yearsWithJointEval.has(d.year),
 				hasPrefillData: yearsWithPrefill.has(d.year),
 			}));
+
+			if (representationRow) {
+				const representationCurrentStep = representationRow.currentStep ?? 0;
+				mappedDeclarations.push({
+					type: "representation" as const,
+					year,
+					status: computeRepresentationDeclarationStatus({
+						status: representationRow.status,
+						currentStep: representationRow.currentStep,
+					}),
+					fsmStatus: null,
+					currentStep: representationCurrentStep,
+					updatedAt: representationRow.updatedAt,
+					firstDeclarationPathChoice: null,
+					secondDeclarationPathChoice: null,
+					hasSubmittedSecondDeclaration: false,
+					hasSubmittedCseOpinion: false,
+					cseRequired: false,
+					hasJointEvaluationFile: false,
+					hasPrefillData: false,
+				});
+			}
 
 			const declarationItems = buildDeclarationList(
 				input.siren,
