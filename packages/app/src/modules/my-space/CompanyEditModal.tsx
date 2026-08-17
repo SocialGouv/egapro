@@ -10,8 +10,8 @@ import {
 	getWorkforceYear,
 	isCseRequired,
 } from "~/modules/domain";
-import { getDsfrModal } from "~/modules/shared";
-import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
+import { NewTabNotice } from "~/modules/layout";
+import { getDsfrModal, useDsfrDialogOpen } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import styles from "./CompanyEditModal.module.scss";
 import { formatSiren } from "./formatSiren";
@@ -127,10 +127,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 										target="_blank"
 									>
 										nous contacter
-										<span className="fr-sr-only">
-											{" "}
-											(ouvre une nouvelle fenêtre)
-										</span>
+										<NewTabNotice />
 									</a>
 									.
 								</p>
