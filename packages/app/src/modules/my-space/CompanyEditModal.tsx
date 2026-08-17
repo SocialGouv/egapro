@@ -10,7 +10,7 @@ import {
 	getWorkforceYear,
 	isCseRequired,
 } from "~/modules/domain";
-import { NewTabNotice } from "~/modules/layout";
+import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { getDsfrModal, useDsfrDialogOpen } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import styles from "./CompanyEditModal.module.scss";
