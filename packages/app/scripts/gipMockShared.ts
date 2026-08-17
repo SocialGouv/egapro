@@ -49,7 +49,7 @@ export function gapFromRounded(
 	roundedF: string | undefined,
 	roundedH: string | undefined,
 ): number | null {
-	if (!roundedF || !roundedH || roundedF === "" || roundedH === "") return null;
+	if (!roundedF || !roundedH) return null;
 	const f = Number.parseFloat(roundedF.replace(",", "."));
 	const h = Number.parseFloat(roundedH.replace(",", "."));
 	if (Number.isNaN(f) || Number.isNaN(h) || h === 0) return null;
@@ -104,6 +104,8 @@ const ECART_PAIRS: [string, string, string][] = [
  * Skips ecart columns that are already absent/empty — they are intentionally
  * null (e.g. edge cases where the gap is declared non-computable despite
  * operands being present).
+ * Clears an ecart whose operands are absent: a gap that cannot be derived from
+ * the published operands would break the coherence this function enforces.
  */
 export function recomputeEcarts(row: Record<string, string>): void {
 	for (const [ecartCol, colF, colH] of ECART_PAIRS) {
@@ -111,7 +113,7 @@ export function recomputeEcarts(row: Record<string, string>): void {
 		if (current === undefined || current === "") continue;
 		const f = row[colF];
 		const h = row[colH];
-		if (!f || !h || f === "" || h === "") {
+		if (!f || !h) {
 			row[ecartCol] = "";
 			continue;
 		}
