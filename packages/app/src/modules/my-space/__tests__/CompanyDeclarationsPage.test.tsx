@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -110,9 +110,11 @@ describe("CompanyDeclarationsPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("does not render the 'Archives' section", () => {
+	it("hides the 'Archives' section while archives are unavailable", () => {
 		renderPage();
-		expect(screen.queryByText("Archives")).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("heading", { level: 2, name: "Archives" }),
+		).not.toBeInTheDocument();
 		expect(
 			screen.queryByRole("button", {
 				name: "Demander une déclaration archivée",
@@ -171,5 +173,38 @@ describe("CompanyDeclarationsPage", () => {
 		expect(alert).toBeInTheDocument();
 		expect(alert).toHaveTextContent("Déclaration en cours de modification");
 		expect(alert).toHaveTextContent("Alice Martin");
+	});
+});
+
+describe("CompanyDeclarationsPage when archives are available", () => {
+	// `hasArchives` is a module-level const — re-import the page to flip it.
+	async function renderPageWithArchives() {
+		vi.resetModules();
+		vi.doMock("../archivesAvailability", () => ({ hasArchives: true }));
+		const { CompanyDeclarationsPage: PageWithArchives } = await import(
+			"../CompanyDeclarationsPage"
+		);
+		return render(<PageWithArchives {...BASE_PROPS} />);
+	}
+
+	afterEach(() => {
+		vi.doUnmock("../archivesAvailability");
+		vi.resetModules();
+	});
+
+	it("renders the 'Archives' section heading", async () => {
+		await renderPageWithArchives();
+		expect(
+			screen.getByRole("heading", { level: 2, name: "Archives" }),
+		).toBeInTheDocument();
+	});
+
+	it("renders the archived declaration request button", async () => {
+		await renderPageWithArchives();
+		expect(
+			screen.getByRole("button", {
+				name: "Demander une déclaration archivée",
+			}),
+		).toBeInTheDocument();
 	});
 });
