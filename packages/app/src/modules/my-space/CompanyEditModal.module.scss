@@ -1,5 +1,6 @@
 .contactLink {
-	// scoped to .fr-link to outrank DSFR's `.fr-link { color: ... }` (same specificity, else wins on source order)
+	// :global(.fr-link) raises specificity to (0,2,0), deterministically outranking
+	// DSFR's `.fr-link` (0,1,0) regardless of stylesheet load order.
 	&:global(.fr-link) {
 		color: var(--text-title-grey);
 	}

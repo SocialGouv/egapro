@@ -30,6 +30,7 @@ vi.mock("~/trpc/react", () => ({
 }));
 
 import { CompanyEditModal } from "../CompanyEditModal";
+import styles from "../CompanyEditModal.module.scss";
 
 const company = {
 	siren: "532847196",
@@ -180,6 +181,7 @@ describe("CompanyEditModal", () => {
 		expect(contactLink).toHaveAttribute("href", "/aide/nous-contacter");
 		expect(contactLink).toHaveAttribute("target", "_blank");
 		expect(contactLink).toHaveAttribute("rel", "noopener noreferrer");
+		expect(contactLink).toHaveClass(styles.contactLink ?? "");
 	});
 
 	it("renders CSE fieldset with legend", () => {
