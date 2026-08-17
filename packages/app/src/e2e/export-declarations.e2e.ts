@@ -7,11 +7,15 @@ import { completeDeclaration } from "./helpers/declaration-flows";
  * End-to-end test for the SUIT declarations export contract
  * (`GET /api/v1/export/declarations`).
  *
- * Non-regression guard for #3942: the indicator G (indicateur 7) categories
- * used to serialize only the raw declared amounts, never the computed pay
- * gaps. This exercises the full HTTP + gateway auth + DB + serialization
- * chain against a real running server to prove the six `*_ecart` fields are
- * now emitted per category — something the DB-mocking unit tests cannot.
+ * Non-regression guard for #3942 and #4205: the indicator G (indicateur 7)
+ * categories used to serialize only the raw declared amounts, never the
+ * computed pay gaps. #3942 added the per-category `*_ecart` fields; #4205
+ * then deliberately dropped the two `*_total_ecart` fields (the total-row gap
+ * was removed from the declaration UI as it is decorative and enters no
+ * business rule), leaving four `*_ecart` fields per category. This exercises
+ * the full HTTP + gateway auth + DB + serialization chain against a real
+ * running server to prove the four fields are emitted — and the two total
+ * fields are absent — something the DB-mocking unit tests cannot.
  *
  * A declaration is submitted through the real 6-step funnel so the indicator
  * G category carries known base amounts (women 1000 / men 1100), then read
@@ -26,13 +30,18 @@ test.describe.configure({ mode: "serial" });
 // the `X-Gateway-Forwarded` header. Not a secret.
 const DEV_GATEWAY_SHARED_SECRET = "dev-gateway-shared-secret-minimum-32-chars";
 
-// The six computed gap fields the export must expose per indicator G category.
+// The four computed gap fields the export must expose per indicator G category.
 const ECART_KEYS = [
 	"Rem_annuelle_base_ecart",
 	"Rem_annuelle_variable_ecart",
-	"Rem_annuelle_total_ecart",
 	"Taux_horaire_base_ecart",
 	"Taux_horaire_variable_ecart",
+] as const;
+
+// Dropped in #4205: the total-row gap is decorative and enters no business
+// rule, so the export contract no longer exposes these two fields.
+const REMOVED_ECART_KEYS = [
+	"Rem_annuelle_total_ecart",
 	"Taux_horaire_total_ecart",
 ] as const;
 
@@ -53,7 +62,7 @@ test.describe("SUIT declarations export — indicator G computed gaps", () => {
 		await resetDeclarationToDraft();
 	});
 
-	test("emits the six *_ecart fields per indicator G category with the signed (H−F)/H convention", async ({
+	test("emits the four *_ecart fields per indicator G category with the signed (H−F)/H convention and no total gap", async ({
 		page,
 		browser,
 	}) => {
@@ -78,10 +87,15 @@ test.describe("SUIT declarations export — indicator G computed gaps", () => {
 			expect(Array.isArray(categories)).toBe(true);
 			expect(categories.length).toBeGreaterThan(0);
 
-			// Every category must carry the six computed-gap fields (the bug: absent).
+			// Every category must carry the four computed-gap fields (the #3942
+			// bug: absent) and must NOT carry the two total-gap fields dropped
+			// in #4205 (regression guard for the deliberate contract change).
 			for (const category of categories) {
 				for (const key of ECART_KEYS) {
 					expect(category).toHaveProperty(key);
+				}
+				for (const key of REMOVED_ECART_KEYS) {
+					expect(category).not.toHaveProperty(key);
 				}
 			}
 
@@ -96,9 +110,8 @@ test.describe("SUIT declarations export — indicator G computed gaps", () => {
 			);
 			expect(filled).toBeDefined();
 
-			// Every measure carries the same pair, so every gap is the same:
-			// (1100 − 1000) / 1100 = 0.0909, rounded to 4 decimals. The totals
-			// (base + variable) scale identically: (2200 − 2000) / 2200.
+			// Every measure carries the same pair, so every remaining gap is the
+			// same: (1100 − 1000) / 1100 = 0.0909, rounded to 4 decimals.
 			for (const key of ECART_KEYS) {
 				expect(filled[key]).toBe(0.0909);
 			}
