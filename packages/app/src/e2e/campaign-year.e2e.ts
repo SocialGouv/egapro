@@ -46,11 +46,12 @@ test.describe("Campaign clock — pilotable campaign year", () => {
 		await pinCampaignYear(page, PINNED_YEAR);
 
 		// Server surface: CompanyInfoBanner is a Server Component whose workforce
-		// label is rendered from the server-side getCurrentYear().
+		// label is rendered from the server-side getWorkforceYear() = N-1, so a
+		// campaign pinned on PINNED_YEAR shows the prior calendar year.
 		await page.goto("/mon-espace");
 		await expect(
 			page.locator("dl").filter({ hasText: "Effectif annuel moyen" }).first(),
-		).toContainText(`Effectif annuel moyen en ${PINNED_YEAR} :`);
+		).toContainText(`Effectif annuel moyen en ${PINNED_YEAR - 1} :`);
 
 		// Browser surface: the campaign-year <select> lists years up to
 		// getCurrentYear() + 10, computed inside a client component. The pinned
