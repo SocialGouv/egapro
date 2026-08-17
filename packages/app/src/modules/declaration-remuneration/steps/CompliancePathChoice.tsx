@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import { TrackedLink } from "~/modules/analytics";
 import { useIsImpersonating } from "~/modules/auth";
@@ -99,13 +99,6 @@ export function CompliancePathChoice({
 	const selectedPath = form.watch("path");
 	const hasInitialData = !!initialPath;
 	const hasData = hasInitialData || hasDraft;
-
-	// Waits for hydration so the browser doesn't restore scroll on the short placeholder, then re-grow into the taller form.
-	useEffect(() => {
-		if (draftHydrated) {
-			window.scrollTo(0, 0);
-		}
-	}, [draftHydrated]);
 
 	const mutation = api.declaration.saveCompliancePath.useMutation({
 		onSuccess: (_, { path }) => {
