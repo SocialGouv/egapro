@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
 	CATEGORY_NAME_MAX_LENGTH,
@@ -95,5 +95,40 @@ describe("CategoryAccordionItem — name length cap (#3943)", () => {
 			"aria-describedby",
 			"cat-0-name-hint cat-0-name-error",
 		);
+	});
+});
+
+describe("CategoryAccordionItem — Total row gap (#4205)", () => {
+	function totalRowGapCells() {
+		return screen.getAllByRole("rowheader", { name: "Total" }).map(
+			(th) =>
+				within(th.parentElement as HTMLElement)
+					.getAllByRole("cell")
+					.at(-1) as HTMLElement,
+		);
+	}
+
+	it("keeps a gap badge on base/variable rows but not on the Total row", () => {
+		renderItem({
+			category: {
+				...category,
+				annualBaseWomen: "24000",
+				annualBaseMen: "25500",
+				annualVariableWomen: "1200",
+				annualVariableMen: "1500",
+				hourlyBaseWomen: "12.50",
+				hourlyBaseMen: "13.20",
+				hourlyVariableWomen: "0.62",
+				hourlyVariableMen: "0.78",
+			},
+		});
+
+		const totalCells = totalRowGapCells();
+		expect(totalCells.length).toBeGreaterThanOrEqual(2);
+		for (const cell of totalCells) {
+			expect(cell).toHaveTextContent("Non applicable");
+			expect(cell).not.toHaveTextContent("%");
+			expect(within(cell).queryByText("élevé")).toBeNull();
+		}
 	});
 });

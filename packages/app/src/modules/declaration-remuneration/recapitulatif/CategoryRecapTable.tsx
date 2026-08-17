@@ -1,7 +1,6 @@
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
 	computeGap,
-	computeGapBetween,
 	computeTotal,
 	computeWorkforceTotal,
 	formatCurrency,
@@ -64,10 +63,6 @@ export function CategoryRecapTable({
 		category.annualVariableWomen ?? "",
 		category.annualVariableMen ?? "",
 	);
-	const annualTotalGap =
-		annualWomenSum !== null && annualMenSum !== null
-			? computeGapBetween(annualWomenSum, annualMenSum)
-			: null;
 
 	const hourlyBaseGap = computeGap(
 		category.hourlyBaseWomen ?? "",
@@ -77,10 +72,6 @@ export function CategoryRecapTable({
 		category.hourlyVariableWomen ?? "",
 		category.hourlyVariableMen ?? "",
 	);
-	const hourlyTotalGap =
-		hourlyWomenSum !== null && hourlyMenSum !== null
-			? computeGapBetween(hourlyWomenSum, hourlyMenSum)
-			: null;
 
 	const heading = `Catégorie d'emplois n°${index + 1}${category.name ? ` : ${category.name}` : ""}`;
 
@@ -95,7 +86,9 @@ export function CategoryRecapTable({
 								<caption>{`${heading} – ${declarationYear}`}</caption>
 								<thead>
 									<tr>
-										<th scope="col" />
+										<th scope="col">
+											<span className="fr-sr-only">Donnée</span>
+										</th>
 										<th scope="col">Femmes</th>
 										<th scope="col">Hommes</th>
 										<th scope="col">
@@ -162,8 +155,8 @@ export function CategoryRecapTable({
 										<td className={indicatorStyles.numeric}>
 											<strong>{formatTotal(annualMenSum, "€")}</strong>
 										</td>
-										<td className={indicatorStyles.gapNumeric}>
-											<GapCell gap={annualTotalGap} />
+										<td>
+											<span className="fr-sr-only">Non applicable</span>
 										</td>
 									</tr>
 
@@ -208,8 +201,8 @@ export function CategoryRecapTable({
 										<td className={indicatorStyles.numeric}>
 											<strong>{formatTotal(hourlyMenSum, "€")}</strong>
 										</td>
-										<td className={indicatorStyles.gapNumeric}>
-											<GapCell gap={hourlyTotalGap} />
+										<td>
+											<span className="fr-sr-only">Non applicable</span>
 										</td>
 									</tr>
 								</tbody>
