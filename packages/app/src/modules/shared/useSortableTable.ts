@@ -3,6 +3,8 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
+import { scrollToTop } from "./scrollToTop";
+
 type SortOrder = "asc" | "desc";
 
 type Params = {
@@ -32,7 +34,7 @@ export function useSortableTable({ basePath, sortBy, sortOrder }: Params) {
 			}
 			params.set("page", "1");
 			router.push(`${basePath}?${params.toString()}`);
-			window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+			scrollToTop();
 		},
 		[basePath, router, searchParams, sortBy, sortOrder],
 	);
@@ -42,7 +44,7 @@ export function useSortableTable({ basePath, sortBy, sortOrder }: Params) {
 			const params = new URLSearchParams(searchParams.toString());
 			params.set("page", String(newPage));
 			router.push(`${basePath}?${params.toString()}`);
-			window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+			scrollToTop();
 		},
 		[basePath, router, searchParams],
 	);

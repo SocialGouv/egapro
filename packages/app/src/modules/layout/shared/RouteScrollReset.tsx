@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { scrollToTop } from "~/modules/shared/scrollToTop";
 
 export function RouteScrollReset() {
 	const pathname = usePathname();
@@ -9,9 +10,10 @@ export function RouteScrollReset() {
 
 	useEffect(() => {
 		if (prevPathname.current === pathname) return;
-		prevPathname.current = pathname;
 		if (window.location.hash) return;
-		window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+		prevPathname.current = pathname;
+		scrollToTop();
+		// Host layout must render <main id="content">, else this silently no-ops.
 		document.getElementById("content")?.focus({ preventScroll: true });
 	}, [pathname]);
 
