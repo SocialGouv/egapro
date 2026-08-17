@@ -398,9 +398,12 @@ export const authConfig = {
 					}
 					dbUser = inserted;
 				} else {
+					// ProConnect only seeds a name the DB does not have yet.
 					const updates: Record<string, string | null> = {};
-					if (profileData.firstName) updates.firstName = profileData.firstName;
-					if (profileData.lastName) updates.lastName = profileData.lastName;
+					if (profileData.firstName && !existingUser.firstName)
+						updates.firstName = profileData.firstName;
+					if (profileData.lastName && !existingUser.lastName)
+						updates.lastName = profileData.lastName;
 
 					if (Object.keys(updates).length > 0) {
 						await db
@@ -477,6 +480,10 @@ export const authConfig = {
 				}
 
 				token.id = dbUser.id;
+				// The DB wins over the ProConnect name NextAuth put on the token.
+				token.name =
+					[dbUser.firstName, dbUser.lastName].filter(Boolean).join(" ") ||
+					email;
 				token.siret = profileData.siret ?? null;
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;

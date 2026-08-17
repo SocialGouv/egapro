@@ -188,6 +188,14 @@ describe("CompanyEditModal", () => {
 		expect(screen.getByLabelText("Non", { exact: true })).toBeInTheDocument();
 	});
 
+	it("renders the obligatory mention as plain legend text so it inherits the label typography", () => {
+		const { container } = render(<CompanyEditModal company={company} />);
+
+		const legend = container.querySelector("legend");
+		expect(legend).toHaveTextContent("Existence d'un CSE (obligatoire)");
+		expect(legend?.childElementCount).toBe(0);
+	});
+
 	describe("when the CSE is not applicable (gipWorkforce below 100 or unknown)", () => {
 		it("hides the CSE fieldset and the Enregistrer button, and shows a Fermer button", () => {
 			const { container } = render(

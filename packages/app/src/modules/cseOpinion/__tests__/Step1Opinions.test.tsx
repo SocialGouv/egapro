@@ -181,6 +181,16 @@ describe("Step1Opinions", () => {
 		expect(heading).toHaveTextContent("Transmettre l'avis ou les avis du CSE");
 	});
 
+	it("renders the obligatory-fields mention in the title grey of the intro text", () => {
+		render(
+			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,
+		);
+
+		expect(screen.getByText("Tous les champs sont obligatoires.")).toHaveClass(
+			"fr-text-title--grey",
+		);
+	});
+
 	it("renders the stepper at step 1", () => {
 		render(
 			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,

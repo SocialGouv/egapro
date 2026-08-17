@@ -244,7 +244,9 @@ export function Step1Opinions({
 					soumettre votre déclaration aux services du ministère chargé du
 					Travail.
 				</p>
-				<p className="fr-mb-4w">Tous les champs sont obligatoires.</p>
+				<p className="fr-mb-4w fr-text-title--grey">
+					Tous les champs sont obligatoires.
+				</p>
 
 				{/* A single declaration has nothing to be told apart from, so the
 				    per-declaration headings only earn their place in pairs. */}

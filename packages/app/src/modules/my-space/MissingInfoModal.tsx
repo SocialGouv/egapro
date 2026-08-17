@@ -170,6 +170,9 @@ export function MissingInfoModal({
 						<p className="fr-text--regular fr-mb-3w">
 							{getDescription(needsPhone, needsCse)}
 						</p>
+						<p className="fr-text--regular fr-text-title--grey fr-mb-3w">
+							Tous les champs sont obligatoires.
+						</p>
 						{needsPhone && (
 							<PhoneField
 								error={phoneError}

@@ -32,11 +32,6 @@
 	gap: 0.5rem;
 }
 
-.requiredHint {
-	font-size: 0.875rem;
-	color: var(--text-mention-grey);
-}
-
 .cseFieldset {
 	// A non-zero flex-basis keeps both rich radios at equal widths on wide
 	// screens (same rendering as flex-basis 0) but lets them wrap on their own
