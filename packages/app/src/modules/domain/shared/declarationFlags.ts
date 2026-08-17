@@ -1,3 +1,4 @@
+import type { DeclarationFsmStatus } from "../types";
 import { COMPANY_SIZE_ANNUAL_MIN } from "./constants";
 import {
 	type DeclarationStatusEvent,
@@ -23,6 +24,38 @@ export type CseOpinionRequiredInput = {
  */
 export function isCseOpinionRequired(input: CseOpinionRequiredInput): boolean {
 	return input.workforce >= COMPANY_SIZE_ANNUAL_MIN && input.hasCse === true;
+}
+
+export type CseReconciliationInput = CseOpinionRequiredInput & {
+	status: DeclarationFsmStatus;
+	storedCseRequired: boolean;
+};
+
+/**
+ * What a démarche owes when its stored CSE requirement no longer matches the
+ * company's current headcount and CSE answer.
+ *
+ * `release` is the case the snapshot cannot recover from on its own: the
+ * démarche is parked on the CSE step, the opinion is no longer owed, and only a
+ * FSM transition gets it out. Everywhere else the snapshot is simply stale and
+ * refreshing it is enough, because the engine reads it downstream.
+ *
+ * Kept here rather than in the sync service so the per-company path and the
+ * post-import batch decide from the same rule — the batch selects a superset in
+ * SQL and asks this function, instead of re-expressing the rule as a predicate
+ * that could drift from it.
+ */
+export type CseReconciliationOutcome = "none" | "refresh-snapshot" | "release";
+
+export function resolveCseReconciliation(
+	input: CseReconciliationInput,
+): CseReconciliationOutcome {
+	const cseRequired = isCseOpinionRequired(input);
+	if (input.storedCseRequired === cseRequired) return "none";
+	if (cseRequired || input.status !== "awaiting_cse_opinion") {
+		return "refresh-snapshot";
+	}
+	return "release";
 }
 
 export type ComplianceProcessRequiredInput = {

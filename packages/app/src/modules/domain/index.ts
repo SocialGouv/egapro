@@ -61,12 +61,15 @@ export type {
 	ComplianceProcessRequiredInput,
 	ComplianceProcessRevisionRequiredInput,
 	CseOpinionRequiredInput,
+	CseReconciliationInput,
+	CseReconciliationOutcome,
 	DeclarationForFlags,
 } from "./shared/declarationFlags";
 export {
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isCseOpinionRequired,
+	resolveCseReconciliation,
 } from "./shared/declarationFlags";
 // Declaration edit lock constants
 export {
