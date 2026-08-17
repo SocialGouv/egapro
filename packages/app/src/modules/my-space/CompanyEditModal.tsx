@@ -1,16 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
 
 import {
 	formatWorkforceForUser,
-	getCurrentYear,
 	getObligationWorkforce,
+	getWorkforceYear,
 	isCseRequired,
 } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
+import { useDsfrDialogOpen } from "~/modules/shared/useDsfrDialogOpen";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import styles from "./CompanyEditModal.module.scss";
 import { formatSiren } from "./formatSiren";
@@ -19,7 +20,7 @@ import { useUpdateHasCse } from "./useUpdateHasCse";
 
 export const MODAL_ID = "company-edit-modal";
 const MODAL_TITLE_ID = "company-edit-modal-title";
-const CURRENT_YEAR = getCurrentYear();
+const WORKFORCE_YEAR = getWorkforceYear();
 
 type Props = {
 	company: {
@@ -48,10 +49,23 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 
 	const hasCse = form.watch("hasCse");
 
+	const [submitError, setSubmitError] = useState<string | null>(null);
+
 	const closeModal = useCallback(() => {
 		const dialog = dialogRef.current;
 		if (dialog) getDsfrModal(dialog)?.conceal();
 	}, []);
+
+	useDsfrDialogOpen(
+		dialogRef,
+		useCallback(() => {
+			form.reset({
+				siren: initialCompany.siren,
+				hasCse: initialCompany.hasCse ?? undefined,
+			});
+			setSubmitError(null);
+		}, [form, initialCompany]),
+	);
 
 	const updateHasCseMutation = useUpdateHasCse({
 		onSuccess: () => {
@@ -60,9 +74,19 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 		},
 	});
 
-	const onSubmit = form.handleSubmit((data) => {
+	const onSubmit = form.handleSubmit(async (data) => {
 		if (data.hasCse === undefined) return;
-		updateHasCseMutation.mutate({ siren: data.siren, hasCse: data.hasCse });
+		try {
+			setSubmitError(null);
+			await updateHasCseMutation.mutateAsync({
+				siren: data.siren,
+				hasCse: data.hasCse,
+			});
+		} catch {
+			setSubmitError(
+				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
+			);
+		}
 	});
 
 	return (
@@ -93,7 +117,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 								</h2>
 								<p className="fr-mb-4w">
 									{cseApplicable
-										? "Vérifier les données affichées et compléter l'information manquantes sur l'existence d'un CSE si nécessaire."
+										? "Vérifier les données affichées et compléter l'information sur l'existence d'un CSE si nécessaire."
 										: "Vérifier les données affichées."}{" "}
 									Si vous constatez une erreur, veuillez{" "}
 									<a
@@ -130,6 +154,14 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 										/>
 									)}
 								</form>
+								{submitError && (
+									<div
+										className="fr-alert fr-alert--error fr-mt-2w"
+										role="alert"
+									>
+										<p>{submitError}</p>
+									</div>
+								)}
 							</div>
 							<div className="fr-modal__footer">
 								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
@@ -143,7 +175,9 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 												form="company-edit-form"
 												type="submit"
 											>
-												Enregistrer
+												{updateHasCseMutation.isPending
+													? "Enregistrement…"
+													: "Enregistrer"}
 											</button>
 										</li>
 									)}
@@ -194,12 +228,12 @@ function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 			<div className={`fr-mb-4w ${styles.section}`}>
 				<dl className={styles.infoList}>
 					<InfoRow
-						label={`Effectif annuel moyen en ${CURRENT_YEAR} :`}
+						label={`Effectif annuel moyen en ${WORKFORCE_YEAR} :`}
 						value={formatWorkforceForUser(company.gipWorkforce)}
 					/>
 				</dl>
 				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
-					Source : GIP-MDS (DSN — Déclarations sociales nominatives).
+					Source : DSN (Déclarations Sociales Nominatives).
 				</p>
 			</div>
 		</>
