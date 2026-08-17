@@ -1,4 +1,11 @@
+import { getTableName } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import {
+	COMPANY_SIZE_ANNUAL_MIN,
+	COMPANY_SIZE_VOLUNTARY_MAX,
+} from "~/modules/domain";
+import { companies, declarations, gipMdsData } from "~/server/db/schema";
 
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
@@ -32,10 +39,16 @@ vi.mock("~/server/services/matomo", () => ({
 type SelectChain = {
 	from: ReturnType<typeof vi.fn>;
 	innerJoin: ReturnType<typeof vi.fn>;
+	leftJoin: ReturnType<typeof vi.fn>;
 	where: ReturnType<typeof vi.fn>;
 	groupBy: ReturnType<typeof vi.fn>;
 	orderBy: ReturnType<typeof vi.fn>;
 };
+
+/** Names of the tables a mocked join spy was handed, in call order. */
+function joinedTableNames(spy: ReturnType<typeof vi.fn>): string[] {
+	return spy.mock.calls.map(([table]) => getTableName(table));
+}
 
 type StepRow = {
 	step: number;
@@ -89,6 +102,7 @@ function buildDb(
 	const chain: SelectChain = {
 		from: vi.fn().mockReturnThis(),
 		innerJoin: vi.fn().mockReturnThis(),
+		leftJoin: vi.fn().mockReturnThis(),
 		where: vi.fn().mockReturnThis(),
 		groupBy: vi.fn().mockReturnThis(),
 		orderBy,
@@ -265,7 +279,7 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 		]);
 	});
 
-	it("joins history → declarations always, and additionally on companies when a sizeRange filter is provided", async () => {
+	it("joins history → declarations only, and no workforce table, without a sizeRange filter", async () => {
 		const db = buildDb([]);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
@@ -275,17 +289,64 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 		} as never);
 
 		await caller.getCampaignProgression({ years: [2026] });
-		expect(db.__chain.innerJoin).toHaveBeenCalledTimes(1);
 
-		db.__chain.innerJoin.mockClear();
+		expect(joinedTableNames(db.__chain.innerJoin)).toEqual([
+			getTableName(declarations),
+		]);
+		expect(db.__chain.leftJoin).not.toHaveBeenCalled();
+	});
+
+	// Counting the joins would keep passing whichever table is joined: the whole
+	// point of the fix is that the workforce comes from the GIP file, not from
+	// the Weez/INSEE `company.workforce`.
+	it("scopes a sizeRange filter on the GIP table, never on companies", async () => {
+		const db = buildDb([]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
 		await caller.getCampaignProgression({
 			years: [2026],
 			sizeRange: "50-99",
 		});
-		expect(db.__chain.innerJoin).toHaveBeenCalledTimes(2);
+
+		expect(joinedTableNames(db.__chain.leftJoin)).toEqual([
+			getTableName(gipMdsData),
+		]);
+		expect(joinedTableNames(db.__chain.innerJoin)).not.toContain(
+			getTableName(companies),
+		);
+		expect(flattenSql(db.__chain.where.mock.calls[0]?.[0])).toMatch(
+			/floor\(\s*workforceEma\s*\)\s*BETWEEN\s+50\s+AND\s+99/,
+		);
 	});
 
-	it("uses gte (open-ended) workforce filter when sizeRange is 250+", async () => {
+	// LEFT and not INNER: a company absent from the GIP file must fall out of the
+	// bucket through NULL propagation, not be dropped from the query altogether.
+	it("joins the GIP table on the left so an absent company only leaves the bucket", async () => {
+		const db = buildDb([]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCampaignProgression({
+			years: [2026],
+			sizeRange: "50-99",
+		});
+
+		expect(db.__chain.leftJoin).toHaveBeenCalledTimes(1);
+		expect(flattenSql(db.__chain.where.mock.calls[0]?.[0])).not.toMatch(
+			/coalesce/i,
+		);
+	});
+
+	it("uses an open-ended GIP workforce filter when sizeRange is 250+", async () => {
 		const db = buildDb([]);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
@@ -298,7 +359,13 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 			years: [2026],
 			sizeRange: "250+",
 		});
-		expect(db.__chain.innerJoin).toHaveBeenCalledTimes(2);
+
+		expect(joinedTableNames(db.__chain.leftJoin)).toEqual([
+			getTableName(gipMdsData),
+		]);
+		const whereSql = flattenSql(db.__chain.where.mock.calls[0]?.[0]);
+		expect(whereSql).toMatch(/floor\(\s*workforceEma\s*\)\s*>=\s*250/);
+		expect(whereSql).not.toMatch(/BETWEEN/i);
 	});
 
 	it("validates the years array (min 1, max 5)", async () => {
@@ -469,7 +536,9 @@ describe("adminStatsRouter.getStepDurations", () => {
 		expect(step3?.p90Days).toBeNull();
 	});
 
-	it("passes a workforce filter into the SQL when sizeRange is provided (S5)", async () => {
+	// Asserting only the number of `execute` calls would pass whatever predicate
+	// the query carries — including none, or one reading `company.workforce`.
+	it("filters the wizard CTE on the floored GIP workforce when sizeRange is provided (S5)", async () => {
 		const db = buildDb([], []);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
@@ -479,7 +548,26 @@ describe("adminStatsRouter.getStepDurations", () => {
 		} as never);
 
 		await caller.getStepDurations({ year: 2025, sizeRange: "250+" });
-		expect(db.execute).toHaveBeenCalledTimes(5);
+
+		const wizardSql = flattenSql(db.execute.mock.calls[0]?.[0]);
+		expect(wizardSql).toMatch(/LEFT JOIN/i);
+		expect(wizardSql).toMatch(/floor\(\s*workforceEma\s*\)\s*>=\s*250/);
+	});
+
+	it("leaves the wizard CTE unbucketed when no sizeRange is provided (S5)", async () => {
+		const db = buildDb([], []);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDurations({ year: 2025 });
+
+		const wizardSql = flattenSql(db.execute.mock.calls[0]?.[0]);
+		expect(wizardSql).toMatch(/AND\s+TRUE/);
+		expect(wizardSql).not.toMatch(/BETWEEN/i);
 	});
 
 	it("validates the year input bounds", async () => {
@@ -1732,7 +1820,10 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 		]);
 	});
 
-	it("S-K19-10: CSE funnel SQL scopes the base to companies.has_cse = true", async () => {
+	// The CSE answer is only collectable since the 100-employee guard: scoping
+	// the base to `has_cse = true` alone counts the legacy answers of companies
+	// that are no longer subject to the obligation (#4185).
+	it("S-K19-10: CSE funnel SQL scopes the base to companies.has_cse = true AND the CSE headcount threshold", async () => {
 		const db = buildFunnelDb();
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
@@ -1746,9 +1837,56 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 		const cseSqlText = flattenSql(db.execute.mock.calls[3]?.[0]);
 		expect(cseSqlText).toMatch(/hasCse/);
 		expect(cseSqlText).toMatch(/hasCse[^=]*=\s*true/);
+		expect(cseSqlText).toMatch(
+			new RegExp(
+				`floor\\(\\s*workforceEma\\s*\\)\\s*>=\\s*${COMPANY_SIZE_ANNUAL_MIN}`,
+			),
+		);
 
 		const mainSqlText = flattenSql(db.execute.mock.calls[0]?.[0]);
 		expect(mainSqlText).not.toMatch(/hasCse/);
+	});
+
+	// `isCseRequired` (>= 100, year-agnostic), not `isObligatedForYear` (>= 50
+	// under the V2 scheme): two different rules over the same input, and the
+	// looser one would let the legacy answers back in.
+	it("S-K19-10b: CSE funnel SQL bounds on the CSE threshold, not on the declaration-obligation one", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCompletionFunnel({ year: 2026 });
+
+		const cseSqlText = flattenSql(db.execute.mock.calls[3]?.[0]);
+		expect(cseSqlText).not.toMatch(
+			new RegExp(
+				`floor\\(\\s*workforceEma\\s*\\)\\s*>=\\s*${COMPANY_SIZE_VOLUNTARY_MAX}`,
+			),
+		);
+	});
+
+	it("S-K19-10c: the CSE headcount bound is absent from the three other funnels", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCompletionFunnel({ year: 2026 });
+
+		for (const index of [0, 1, 2]) {
+			expect(flattenSql(db.execute.mock.calls[index]?.[0])).not.toMatch(
+				new RegExp(
+					`floor\\(\\s*workforceEma\\s*\\)\\s*>=\\s*${COMPANY_SIZE_ANNUAL_MIN}`,
+				),
+			);
+		}
 	});
 
 	it("S-K19-11: CSE funnel SQL excludes cancelled declarations", async () => {
@@ -1776,8 +1914,11 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 			headers: new Headers(),
 		} as never);
 		await callerNoSize.getCompletionFunnel({ year: 2026 });
+		// `workforce_ema` is now permanently present (join + CSE threshold), so
+		// the bucket predicate itself is what tells the two calls apart.
 		const cseWithoutSize = flattenSql(dbWithoutSize.execute.mock.calls[3]?.[0]);
-		expect(cseWithoutSize).not.toMatch(/workforce/i);
+		expect(cseWithoutSize).not.toMatch(/BETWEEN/i);
+		expect(cseWithoutSize).toMatch(/AND\s+TRUE/);
 
 		const dbWithSize = buildFunnelDb();
 		const callerSize = adminStatsRouter.createCaller({
@@ -1790,7 +1931,9 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 			sizeRange: "100-149",
 		});
 		const cseWithSize = flattenSql(dbWithSize.execute.mock.calls[3]?.[0]);
-		expect(cseWithSize).toMatch(/workforce/i);
+		expect(cseWithSize).toMatch(
+			/floor\(\s*workforceEma\s*\)\s*BETWEEN\s+100\s+AND\s+149/,
+		);
 	});
 
 	it("coerces SQL numeric strings to numbers (pg sometimes returns COUNT(...) as a string)", async () => {

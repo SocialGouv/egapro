@@ -4,6 +4,7 @@ import {
 	COMPANY_SIZE_RANGES,
 	classifyCompanySize,
 	getCompanySizeRange,
+	getOptionalCompanySizeRange,
 	isCseRequired,
 } from "../shared/companySize";
 import {
@@ -93,6 +94,27 @@ describe("getCompanySizeRange", () => {
 		expect(getCompanySizeRange(249)).toBe("150-249");
 		expect(getCompanySizeRange(250)).toBe("250+");
 		expect(getCompanySizeRange(10000)).toBe("250+");
+	});
+});
+
+describe("getOptionalCompanySizeRange", () => {
+	it("maps a known workforce to the same bucket as getCompanySizeRange", () => {
+		for (const workforce of [0, 49, 50, 99, 100, 149, 150, 249, 250, 10000]) {
+			expect(getOptionalCompanySizeRange(workforce)).toBe(
+				getCompanySizeRange(workforce),
+			);
+		}
+	});
+
+	it("puts an unknown workforce in no bucket at all", () => {
+		expect(getOptionalCompanySizeRange(null)).toBeUndefined();
+	});
+
+	// An unknown headcount folded into `<50` would assert a size the source does
+	// not give — the mistake `coalesce(workforce_ema, 0)` makes on the SQL side.
+	it("never folds an unknown workforce into the smallest bucket", () => {
+		expect(getOptionalCompanySizeRange(null)).not.toBe("<50");
+		expect(getOptionalCompanySizeRange(0)).toBe("<50");
 	});
 });
 
