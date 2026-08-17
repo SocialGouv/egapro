@@ -200,6 +200,92 @@ function assertBeneficiariesWithinWorkforce(fileName: string) {
 	}
 }
 
+/**
+ * The 8 GIP `*_ecart` columns and the rounded operand pair each is derived
+ * from. Operand names are used as parsed by `parseHeaders` (trailing spaces
+ * trimmed, e.g. the raw `Taux_horaire_variable_median_F ` header).
+ */
+const ECART_PAIRS: {
+	ecart: string;
+	womenOperand: string;
+	menOperand: string;
+}[] = [
+	{
+		ecart: "Rem_globale_annuelle_moyenne_ecart",
+		womenOperand: "Rem_globale_annuelle_moyenne_F",
+		menOperand: "Rem_globale_annuelle_moyenne_H",
+	},
+	{
+		ecart: "Taux_horaire_global_moyen_ecart",
+		womenOperand: "Taux_horaire_global_moyen_F",
+		menOperand: "Taux_horaire_global_moyen_H",
+	},
+	{
+		ecart: "Rem_variable_annuelle_moyenne_ecart",
+		womenOperand: "Rem_variable_annuelle_moyenne_F",
+		menOperand: "Rem_variable_annuelle_moyenne_H",
+	},
+	{
+		ecart: "Taux_horaire_variable_moyen_ecart",
+		womenOperand: "Taux_horaire_variable_moyen_F",
+		menOperand: "Taux_horaire_variable_moyen_H",
+	},
+	{
+		ecart: "Rem_globale_annuelle_mediane_ecart",
+		womenOperand: "Rem_globale_annuelle_mediane_F",
+		menOperand: "Rem_globale_annuelle_mediane_H",
+	},
+	{
+		ecart: "Taux_horaire_global_median_ecart",
+		womenOperand: "Taux_globale_annuelle_mediane_F",
+		menOperand: "Taux_globale_annuelle_mediane_H",
+	},
+	{
+		ecart: "Rem_variable_annuelle_mediane_ecart",
+		womenOperand: "Rem_variable_annuelle_mediane_F",
+		menOperand: "Rem_variable_annuelle_mediane_H",
+	},
+	{
+		ecart: "Taux_horaire_variable_median_ecart",
+		womenOperand: "Taux_horaire_variable_median_F",
+		menOperand: "Taux_horaire_variable_median_H",
+	},
+];
+
+// A gap stored on 4 decimals can only deviate from (H - F) / H by at most half
+// a unit in the 4th decimal — 5e-5 — since the operands are already rounded and
+// the ecart is `fmt4`-rounded. The pre-fix bug computed ecarts on full-precision
+// operands, drifting well past this bound.
+const ECART_ROUNDING_TOLERANCE = 5e-5;
+
+/**
+ * Every `*_ecart` column must equal `(H - F) / H` recomputed from its own
+ * rounded operands (within the 4-decimal rounding tolerance). Pairs where any
+ * of the three cells is null/empty, or where H is 0, are skipped.
+ */
+function assertEcartsDerivedFromRoundedOperands(fileName: string) {
+	const csv = readFileSync(resolve(DATA_DIR, fileName), "utf-8");
+	const headers = parseHeaders(csv);
+	const col = (name: string) => headers.indexOf(name);
+	const rows = parseCsvRows(csv).filter((r) => r.length > 1);
+
+	for (const row of rows) {
+		const siren = row[0];
+		for (const pair of ECART_PAIRS) {
+			const ecart = toNum(row[col(pair.ecart)]);
+			const women = toNum(row[col(pair.womenOperand)]);
+			const men = toNum(row[col(pair.menOperand)]);
+			if (ecart === null || women === null || men === null || men === 0)
+				continue;
+			const recomputed = (men - women) / men;
+			expect(
+				Math.abs(ecart - recomputed),
+				`${fileName} SIREN ${siren} ${pair.ecart}: ${ecart} should equal (H-F)/H=${recomputed} from rounded operands ${women}/${men}`,
+			).toBeLessThanOrEqual(ECART_ROUNDING_TOLERANCE);
+		}
+	}
+}
+
 describe("companies.json", () => {
 	it("has a bucket field on every entry", () => {
 		const companies = loadCompanies();
@@ -296,6 +382,33 @@ describe("mock-gip-mds.csv", () => {
 
 	it("has nb counts as source of truth: Σ nb === reference and proportions derived from nb", () => {
 		assertNbCoherence("mock-gip-mds.csv");
+	});
+
+	it("derives every *_ecart from its own rounded operands (ecart = (H-F)/H)", () => {
+		assertEcartsDerivedFromRoundedOperands("mock-gip-mds.csv");
+	});
+
+	it("no longer duplicates the annual gap into the hourly gap (hours model breaks the tie)", () => {
+		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
+		const headers = parseHeaders(csv);
+		const col = (name: string) => headers.indexOf(name);
+		const rows = parseCsvRows(csv).filter((r) => r.length > 1);
+
+		let comparable = 0;
+		let distinct = 0;
+		for (const row of rows) {
+			const hourly = toNum(row[col("Taux_horaire_global_moyen_ecart")]);
+			const annual = toNum(row[col("Rem_globale_annuelle_moyenne_ecart")]);
+			if (hourly === null || annual === null) continue;
+			comparable++;
+			if (Math.abs(hourly - annual) >= ECART_ROUNDING_TOLERANCE) distinct++;
+		}
+
+		expect(comparable).toBeGreaterThan(0);
+		expect(
+			distinct / comparable,
+			`hourly mean gap duplicates the annual mean gap on ${comparable - distinct}/${comparable} rows`,
+		).toBeGreaterThan(0.9);
 	});
 
 	it("has at least 100 data rows (multi-bucket coverage)", () => {
@@ -427,6 +540,10 @@ describe("mock-gip-mds-edge-cases.csv", () => {
 
 	it("keeps nb counts coherent on filled blocks (empty blocks skipped)", () => {
 		assertNbCoherence("mock-gip-mds-edge-cases.csv");
+	});
+
+	it("derives every present *_ecart from its own rounded operands", () => {
+		assertEcartsDerivedFromRoundedOperands("mock-gip-mds-edge-cases.csv");
 	});
 
 	it("never reports more variable-pay beneficiaries than the block headcount", () => {

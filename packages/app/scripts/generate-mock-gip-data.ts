@@ -14,7 +14,7 @@
  * The generated CSV follows the exact GIP MDS format:
  * - Line 1: metadata headers
  * - Line 2: metadata values
- * - Line 3: column headers (87 columns)
+ * - Line 3: column headers (82 columns)
  * - Lines 4+: data rows (one per SIREN)
  */
 
@@ -22,6 +22,7 @@ import {
 	distributeByLargestRemainder,
 	fmt2,
 	fmt4,
+	gapFromRounded,
 	proportionMen,
 	proportionWomen,
 } from "./gipMockShared";
@@ -236,45 +237,57 @@ function generateRow(company: CompanyData): string[] {
 		Math.round(totalMen * variablePayRatio * randBetween(0.9, 1.1)),
 	);
 
-	// Hourly rates (annual / 1820 hours standard)
-	const hourlyWomenRate = baseSalaryWomen / 1820;
-	const hourlyMenRate = baseSalaryMen / 1820;
+	// Hours model — women work 93-100% of men's hours (part-time more frequent)
+	const hoursH = randBetween(1800, 1850);
+	const hoursW = hoursH * randBetween(0.93, 1.0);
 
-	// Gaps (as proportion: (men - women) / men)
-	const annualMeanGap = (baseSalaryMen - baseSalaryWomen) / baseSalaryMen;
-	const hourlyMeanGap = (hourlyMenRate - hourlyWomenRate) / hourlyMenRate;
+	const annualWomenFmt = fmt2(baseSalaryWomen);
+	const annualMenFmt = fmt2(baseSalaryMen);
+	const annualMeanGap = gapFromRounded(annualWomenFmt, annualMenFmt) ?? 0;
+
+	// Global mean — hourly (sex-specific hours give a distinct ratio from annual)
+	const hourlyWomenFmt = fmt2(baseSalaryWomen / hoursW);
+	const hourlyMenFmt = fmt2(baseSalaryMen / hoursH);
+	const hourlyMeanGap = gapFromRounded(hourlyWomenFmt, hourlyMenFmt) ?? 0;
 
 	// Median: slight deviation from mean
 	const medianFactor = randBetween(0.92, 1.08);
 	const annualMedianWomen = baseSalaryWomen * medianFactor;
 	const annualMedianMen =
 		baseSalaryMen * medianFactor * randBetween(0.98, 1.02);
+	const annualMedianWomenFmt = fmt2(annualMedianWomen);
+	const annualMedianMenFmt = fmt2(annualMedianMen);
 	const annualMedianGap =
-		(annualMedianMen - annualMedianWomen) / annualMedianMen;
+		gapFromRounded(annualMedianWomenFmt, annualMedianMenFmt) ?? 0;
 
-	const hourlyMedianWomen = hourlyWomenRate * medianFactor;
-	const hourlyMedianMen =
-		hourlyMenRate * medianFactor * randBetween(0.98, 1.02);
+	const hourlyMedianWomenFmt = fmt2(annualMedianWomen / hoursW);
+	const hourlyMedianMenFmt = fmt2(annualMedianMen / hoursH);
 	const hourlyMedianGap =
-		(hourlyMedianMen - hourlyMedianWomen) / hourlyMedianMen;
+		gapFromRounded(hourlyMedianWomenFmt, hourlyMedianMenFmt) ?? 0;
 
-	// Variable pay gaps
+	const variableAnnualWomenFmt = fmt2(variableAmountWomen);
+	const variableAnnualMenFmt = fmt2(variableAmountMen);
 	const variableAnnualMeanGap =
-		(variableAmountMen - variableAmountWomen) / variableAmountMen;
-	const variableHourlyWomen = variableAmountWomen / 1820;
-	const variableHourlyMen = variableAmountMen / 1820;
+		gapFromRounded(variableAnnualWomenFmt, variableAnnualMenFmt) ?? 0;
+
+	const variableHourlyWomenFmt = fmt2(variableAmountWomen / hoursW);
+	const variableHourlyMenFmt = fmt2(variableAmountMen / hoursH);
 	const variableHourlyMeanGap =
-		(variableHourlyMen - variableHourlyWomen) / variableHourlyMen;
+		gapFromRounded(variableHourlyWomenFmt, variableHourlyMenFmt) ?? 0;
 
 	const variableMedianWomen = variableAmountWomen * randBetween(0.85, 1.15);
 	const variableMedianMen = variableAmountMen * randBetween(0.85, 1.15);
+	const variableAnnualMedianWomenFmt = fmt2(variableMedianWomen);
+	const variableAnnualMedianMenFmt = fmt2(variableMedianMen);
 	const variableAnnualMedianGap =
-		(variableMedianMen - variableMedianWomen) / variableMedianMen;
-	const variableHourlyMedianWomen = variableMedianWomen / 1820;
-	const variableHourlyMedianMen = variableMedianMen / 1820;
+		gapFromRounded(variableAnnualMedianWomenFmt, variableAnnualMedianMenFmt) ??
+		0;
+
+	const variableHourlyMedianWomenFmt = fmt2(variableMedianWomen / hoursW);
+	const variableHourlyMedianMenFmt = fmt2(variableMedianMen / hoursH);
 	const variableHourlyMedianGap =
-		(variableHourlyMedianMen - variableHourlyMedianWomen) /
-		variableHourlyMedianMen;
+		gapFromRounded(variableHourlyMedianWomenFmt, variableHourlyMedianMenFmt) ??
+		0;
 
 	// Variable pay proportions
 	const proportionVariableWomen =
@@ -311,10 +324,15 @@ function generateRow(company: CompanyData): string[] {
 		),
 	);
 
-	// Hourly quartile thresholds — Q1-Q3 only
-	const hq1 = q1Threshold / 1820;
-	const hq2 = q2Threshold / 1820;
-	const hq3 = q3Threshold / 1820;
+	// Hourly quartile thresholds — population-weighted average hours (unbiased)
+	const totalHourly = hourlyMen + hourlyWomen;
+	const avgHours =
+		totalHourly > 0
+			? (hoursH * hourlyMen + hoursW * hourlyWomen) / totalHourly
+			: (hoursH + hoursW) / 2;
+	const hq1 = q1Threshold / avgHours;
+	const hq2 = q2Threshold / avgHours;
+	const hq3 = q3Threshold / avgHours;
 
 	// Hourly quartile proportions (slight variation from annual)
 	const hq1WomenProp = Math.min(
@@ -378,7 +396,6 @@ function generateRow(company: CompanyData): string[] {
 	const confExtRem = randBetween(0, 0.95);
 	const confExtRate = randBetween(0, 0.05);
 
-	// Build the row (87 fields in CSV order)
 	return [
 		siren,
 		fmt2(workforce),
@@ -390,32 +407,32 @@ function generateRow(company: CompanyData): string[] {
 		String(variableWomen),
 		// Indicator A — Global mean
 		fmt4(annualMeanGap),
-		fmt2(baseSalaryWomen),
-		fmt2(baseSalaryMen),
+		annualWomenFmt,
+		annualMenFmt,
 		fmt4(hourlyMeanGap),
-		fmt2(hourlyWomenRate),
-		fmt2(hourlyMenRate),
+		hourlyWomenFmt,
+		hourlyMenFmt,
 		// Indicator B — Variable mean
 		fmt4(variableAnnualMeanGap),
-		fmt2(variableAmountWomen),
-		fmt2(variableAmountMen),
+		variableAnnualWomenFmt,
+		variableAnnualMenFmt,
 		fmt4(variableHourlyMeanGap),
-		fmt2(variableHourlyWomen),
-		fmt2(variableHourlyMen),
+		variableHourlyWomenFmt,
+		variableHourlyMenFmt,
 		// Indicator C — Global median
 		fmt4(annualMedianGap),
-		fmt2(annualMedianWomen),
-		fmt2(annualMedianMen),
+		annualMedianWomenFmt,
+		annualMedianMenFmt,
 		fmt4(hourlyMedianGap),
-		fmt2(hourlyMedianWomen),
-		fmt2(hourlyMedianMen),
+		hourlyMedianWomenFmt,
+		hourlyMedianMenFmt,
 		// Indicator D — Variable median
 		fmt4(variableAnnualMedianGap),
-		fmt2(variableMedianWomen),
-		fmt2(variableMedianMen),
+		variableAnnualMedianWomenFmt,
+		variableAnnualMedianMenFmt,
 		fmt4(variableHourlyMedianGap),
-		fmt2(variableHourlyMedianWomen),
-		fmt2(variableHourlyMedianMen),
+		variableHourlyMedianWomenFmt,
+		variableHourlyMedianMenFmt,
 		// Indicator E — Variable pay proportions
 		fmt4(proportionVariableWomen),
 		fmt4(proportionVariableMen),

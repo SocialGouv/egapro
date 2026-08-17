@@ -44,12 +44,14 @@ export function nullGipStep3(): GipPrefillData["step3"] {
 }
 
 /**
- * Hourly variable pay of SIREN 500492004, taken verbatim from
- * `data/mock-gip-mds.csv`. Both operands round to the same 0,10 €/h, so
- * recomputing yields a 0 % gap while the GIP — which computed it on
- * full-precision figures — publishes 7,19 %, above the 5 % alert threshold.
+ * Representative fixture for the case where both operands round to the same
+ * value (0,10 €/h) yet the GIP — which computed the gap on full-precision
+ * figures — publishes 7,19 %, above the 5 % alert threshold. Recomputing
+ * from the published operands yields 0 %, so reading the GIP gap is essential.
  * The single most load-bearing fixture of this behaviour: reading versus
  * recomputing flips the "écart significatif" badge.
+ * Values are independently maintained; they no longer appear verbatim in the
+ * generated mock CSV (which now enforces ecart = f(rounded operands)).
  */
 export const DIVERGENT_HOURLY_MEDIAN = {
 	women: "0.10",
@@ -57,7 +59,11 @@ export const DIVERGENT_HOURLY_MEDIAN = {
 	gap: "0.0719",
 } as const;
 
-/** Same row, mean block: GIP 18,44 % vs 18,18 % recomputed from 0,09 / 0,11. */
+/**
+ * Representative fixture: mean block where the GIP-published gap (18,44 %)
+ * diverges from the recomputed value (18,18 %) derived from the rounded
+ * operands 0,09 / 0,11. Values are independently maintained.
+ */
 export const DIVERGENT_HOURLY_MEAN = {
 	women: "0.09",
 	men: "0.11",
