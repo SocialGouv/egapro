@@ -27,6 +27,7 @@ export {
 	COMPANY_SIZE_RANGES,
 	classifyCompanySize,
 	getCompanySizeRange,
+	getOptionalCompanySizeRange,
 	isCseRequired,
 } from "./shared/companySize";
 // Global score computation (sum of sub-scores from the EgaPro index)

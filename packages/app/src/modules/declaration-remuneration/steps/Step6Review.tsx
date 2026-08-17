@@ -5,8 +5,8 @@ import { useCallback, useRef } from "react";
 import { trackFunnelComplete } from "~/modules/analytics";
 import type { DeclarationFsmStatus } from "~/modules/domain";
 import {
-	getCompanySizeRange,
 	getObligationWorkforce,
+	getOptionalCompanySizeRange,
 	hasGapsAboveThreshold,
 	isComplianceProcessRequired,
 	isCseOpinionRequired,
@@ -87,9 +87,7 @@ export function Step6Review({
 				DECLARATION_FUNNEL,
 				declarationFunnelDimensions(
 					declarationYear,
-					companyWorkforce !== null
-						? getCompanySizeRange(companyWorkforce)
-						: undefined,
+					getOptionalCompanySizeRange(companyWorkforce),
 				),
 			);
 			router.push("/declaration-remuneration/parcours-conformite");

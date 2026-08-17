@@ -56,6 +56,7 @@ export const AUDIT_ACTIONS = {
 	ADMIN_DECLARATIONS_SEARCH: "admin_declarations.search",
 	ADMIN_DECLARATION_GET_BY_ID: "admin_declarations.get_by_id",
 	ADMIN_DECLARATIONS_GET_RECAP: "admin_declarations.get_recap",
+	ADMIN_SEARCH_COMPANY: "admin.search_company",
 
 	// ── Admin declaration mutations ───────────────────────
 	ADMIN_DECLARATION_CANCEL: "admin_declaration.cancel",
@@ -174,6 +175,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.ADMIN_DECLARATIONS_SEARCH]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_DECLARATIONS_GET_RECAP]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_SEARCH_COMPANY]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT]: "mutation",

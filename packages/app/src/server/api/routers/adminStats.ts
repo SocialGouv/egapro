@@ -1,4 +1,4 @@
-import { and, between, eq, gte, inArray, type SQL, sql } from "drizzle-orm";
+import { and, eq, inArray, type SQL, sql } from "drizzle-orm";
 
 import {
 	getCampaignProgressionSchema,
@@ -116,6 +116,36 @@ function obligationWorkforceFilter(
 	return sql`(${bucket}) AND ${baseObligation}`;
 }
 
+// The GIP file is the single source of the headcount across the admin layer, so
+// every workforce predicate below reads `workforce_ema` rather than the Weez /
+// INSEE `company.workforce`. LEFT on purpose: a company absent from the file has
+// no headcount, and letting the NULL propagate keeps it out of the workforce
+// filters without dropping it from the unfiltered totals, which an INNER JOIN
+// would do.
+const gipWorkforceJoin = sql`LEFT JOIN ${gipMdsData}
+				ON ${gipMdsData.siren} = ${declarations.siren}
+				AND ${gipMdsData.year} = ${declarations.year}`;
+
+// Mirrors `getOptionalCompanySizeRange` (domain) as a SQL predicate, on the GIP
+// headcount floored the way `floorWorkforce` (domain) floors it. An unknown
+// headcount belongs to no bucket: the NULL propagates through the comparison and
+// the row leaves the filter, rather than being folded into the smallest bucket.
+function gipSizeRangeFilter(sizeRange: CompanySizeRange | undefined): SQL {
+	if (!sizeRange) return sql`TRUE`;
+
+	const { min, max } = COMPANY_SIZE_RANGES[sizeRange];
+	const ema = sql<number>`floor(${gipMdsData.workforceEma})`;
+	return max === null
+		? sql`${ema} >= ${min}`
+		: sql`${ema} BETWEEN ${min} AND ${max}`;
+}
+
+// Mirrors `isCseRequired` (domain) as a SQL predicate: >= 100 employees, with no
+// dependency on the campaign year. Deliberately not `obligationWorkforceFilter`,
+// which mirrors `isObligatedForYear` and drops to >= 50 under the V2 scheme —
+// two different rules over the same input. Floored like `floorWorkforce`.
+const cseRequiredWorkforceFilter = sql`floor(${gipMdsData.workforceEma}) >= ${COMPANY_SIZE_ANNUAL_MIN}`;
+
 type AggregatedMilestone = {
 	sample_size: number | string;
 	completed_sample_size: number | string;
@@ -171,12 +201,7 @@ export const adminStatsRouter = createTRPCRouter({
 			];
 
 			if (input.sizeRange) {
-				const { min, max } = COMPANY_SIZE_RANGES[input.sizeRange];
-				filters.push(
-					max === null
-						? gte(companies.workforce, min)
-						: between(companies.workforce, min, max),
-				);
+				filters.push(gipSizeRangeFilter(input.sizeRange));
 			}
 
 			const dayExpr = sql<string>`to_char(${declarationStatusHistory.createdAt}, 'YYYY-MM-DD')`;
@@ -194,7 +219,13 @@ export const adminStatsRouter = createTRPCRouter({
 				);
 
 			const scoped = input.sizeRange
-				? query.innerJoin(companies, eq(declarations.siren, companies.siren))
+				? query.leftJoin(
+						gipMdsData,
+						and(
+							eq(gipMdsData.siren, declarations.siren),
+							eq(gipMdsData.year, declarations.year),
+						) as SQL,
+					)
 				: query;
 
 			const rows = await scoped
@@ -297,13 +328,7 @@ export const adminStatsRouter = createTRPCRouter({
 	getStepDurations: adminProcedure
 		.input(getStepDurationsSchema)
 		.query(async ({ ctx, input }): Promise<StepDurationRow[]> => {
-			const sizeFilterSql = (() => {
-				if (!input.sizeRange) return sql`TRUE`;
-				const { min, max } = COMPANY_SIZE_RANGES[input.sizeRange];
-				return max === null
-					? sql`${companies.workforce} >= ${min}`
-					: sql`${companies.workforce} BETWEEN ${min} AND ${max}`;
-			})();
+			const sizeFilterSql = gipSizeRangeFilter(input.sizeRange);
 
 			const wizardRowsRaw = await ctx.db.execute<{
 				step: number;
@@ -326,6 +351,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = ${declarationStatusHistory.declarationId}
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarationStatusHistory.eventType} = 'step_change'
 						AND ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
@@ -419,6 +445,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = s.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -452,6 +479,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = s.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -492,6 +520,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = s.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -531,6 +560,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = s.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -595,13 +625,7 @@ export const adminStatsRouter = createTRPCRouter({
 	getStepDropoffRate: adminProcedure
 		.input(getStepDropoffRateSchema)
 		.query(async ({ ctx, input }): Promise<StepDropoffRow[]> => {
-			const sizeFilterSql = (() => {
-				if (!input.sizeRange) return sql`TRUE`;
-				const { min, max } = COMPANY_SIZE_RANGES[input.sizeRange];
-				return max === null
-					? sql`${companies.workforce} >= ${min}`
-					: sql`${companies.workforce} BETWEEN ${min} AND ${max}`;
-			})();
+			const sizeFilterSql = gipSizeRangeFilter(input.sizeRange);
 
 			const wizardRawRows = await ctx.db.execute<{
 				step: number | string;
@@ -633,6 +657,7 @@ export const adminStatsRouter = createTRPCRouter({
 					ON ${declarations.id} = lsc.declaration_id
 				INNER JOIN ${companies}
 					ON ${companies.siren} = ${declarations.siren}
+				${gipWorkforceJoin}
 				WHERE ${declarations.year} = ${input.year}
 					AND ${declarations.cancelledAt} IS NULL
 					AND lsc.step < ${WIZARD_TERMINAL_STEP}
@@ -690,6 +715,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = h.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE h.event_type = 'submit'
 						AND ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
@@ -704,6 +730,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = h.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE h.event_type = 'path_choice'
 						AND h.round = 1
 						AND h.value = 'corrective_action'
@@ -720,6 +747,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = h.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE h.event_type = 'path_choice'
 						AND h.round = 1
 						AND h.value = 'joint_evaluation'
@@ -736,6 +764,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = h.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE h.event_type = 'second_declaration_submit'
 						AND h.round = 2
 						AND ${declarations.year} = ${input.year}
@@ -751,6 +780,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = h.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE h.event_type = 'path_choice'
 						AND h.round = 2
 						AND ${declarations.year} = ${input.year}
@@ -765,6 +795,7 @@ export const adminStatsRouter = createTRPCRouter({
 					FROM ${declarations}
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.cseRequired} = true
 						AND ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
@@ -801,6 +832,7 @@ export const adminStatsRouter = createTRPCRouter({
 				FROM ${declarations}
 				INNER JOIN ${companies}
 					ON ${companies.siren} = ${declarations.siren}
+				${gipWorkforceJoin}
 				LEFT JOIN latest_activity la
 					ON la.declaration_id = ${declarations.id}
 				WHERE ${declarations.year} = ${input.year}
@@ -857,13 +889,7 @@ export const adminStatsRouter = createTRPCRouter({
 	getCompletionFunnel: adminProcedure
 		.input(getCompletionFunnelSchema)
 		.query(async ({ ctx, input }): Promise<CompletionFunnelOutput> => {
-			const sizeFilterSql = (() => {
-				if (!input.sizeRange) return sql`TRUE`;
-				const { min, max } = COMPANY_SIZE_RANGES[input.sizeRange];
-				return max === null
-					? sql`${companies.workforce} >= ${min}`
-					: sql`${companies.workforce} BETWEEN ${min} AND ${max}`;
-			})();
+			const sizeFilterSql = gipSizeRangeFilter(input.sizeRange);
 
 			const mainFunnelPromise = ctx.db.execute<{
 				draft_started: number | string;
@@ -876,6 +902,7 @@ export const adminStatsRouter = createTRPCRouter({
 					FROM ${declarations}
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -899,6 +926,7 @@ export const adminStatsRouter = createTRPCRouter({
 					FROM ${declarations}
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -933,6 +961,7 @@ export const adminStatsRouter = createTRPCRouter({
 					FROM ${declarations}
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -966,9 +995,11 @@ export const adminStatsRouter = createTRPCRouter({
 					FROM ${declarations}
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${companies.hasCse} = true
+						AND ${cseRequiredWorkforceFilter}
 						AND ${sizeFilterSql}
 				)
 				SELECT

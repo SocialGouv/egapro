@@ -105,7 +105,10 @@ export type FunnelRow = {
  * - `mainFunnel`: all declarations of the year.
  * - `complianceFunnel`: sub-population that crossed the alert threshold.
  * - `revisionFunnel`: sub-population that re-entered a revision cycle.
- * - `cseFunnel`: declarations whose company has a CSE (`companies.has_cse = true`).
+ * - `cseFunnel`: declarations whose company has a CSE (`companies.has_cse = true`)
+ *   and is actually subject to the CSE obligation — the GIP headcount of the
+ *   year is at least `COMPANY_SIZE_ANNUAL_MIN`. Without that bound, answers
+ *   inherited from before the threshold guard would still be counted.
  */
 export type CompletionFunnelOutput = {
 	mainFunnel: FunnelRow[];
