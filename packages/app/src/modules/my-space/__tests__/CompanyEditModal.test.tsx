@@ -30,6 +30,7 @@ vi.mock("~/trpc/react", () => ({
 }));
 
 import { CompanyEditModal } from "../CompanyEditModal";
+import styles from "../CompanyEditModal.module.scss";
 
 const company = {
 	siren: "532847196",
@@ -178,6 +179,20 @@ describe("CompanyEditModal", () => {
 			"Source : GIP-MDS (DSN — Déclarations sociales nominatives).",
 		);
 		expect(container.textContent).toContain("élections professionnelles");
+	});
+
+	it("points the contact link to the help page in a new tab", () => {
+		render(<CompanyEditModal company={company} />);
+
+		const contactLink = screen.getByRole("link", {
+			name: /nous contacter\s*\(ouvre une nouvelle fenêtre\)/,
+			hidden: true,
+		});
+
+		expect(contactLink).toHaveAttribute("href", "/aide/nous-contacter");
+		expect(contactLink).toHaveAttribute("target", "_blank");
+		expect(contactLink).toHaveAttribute("rel", "noopener noreferrer");
+		expect(contactLink).toHaveClass(styles.contactLink ?? "");
 	});
 
 	it("renders CSE fieldset with legend", () => {

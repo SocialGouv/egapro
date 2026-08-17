@@ -1,3 +1,11 @@
+.contactLink {
+	// :global(.fr-link) raises specificity to (0,2,0), deterministically outranking
+	// DSFR's `.fr-link` (0,1,0) regardless of stylesheet load order.
+	&:global(.fr-link) {
+		color: var(--text-title-grey);
+	}
+}
+
 .infoList {
 	display: flex;
 	flex-direction: column;

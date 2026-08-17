@@ -97,7 +97,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 										: "Vérifier les données affichées."}{" "}
 									Si vous constatez une erreur, veuillez{" "}
 									<a
-										className="fr-link fr-icon-external-link-line fr-link--icon-right"
+										className={`fr-link fr-icon-external-link-line fr-link--icon-right ${styles.contactLink}`}
 										href="/aide/nous-contacter"
 										rel="noopener noreferrer"
 										target="_blank"
