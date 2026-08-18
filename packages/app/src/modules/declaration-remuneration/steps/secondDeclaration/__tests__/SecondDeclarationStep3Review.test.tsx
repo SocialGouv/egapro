@@ -335,7 +335,7 @@ describe("SecondDeclarationStep3Review", () => {
 			).toBeInTheDocument();
 		});
 
-		it("shows the CSE consultation section when cseOpinionRequired is true", () => {
+		it("shows the CSE consultation section and renders the joint evaluation bullet without the 'Soit' prefix when cseOpinionRequired is true", () => {
 			renderStep3({
 				cseOpinionRequired: true,
 				secondDeclarationCategories: highGapCategories,
@@ -361,13 +361,6 @@ describe("SecondDeclarationStep3Review", () => {
 					/vous devez informer et consulter le CSE sur cette justification/,
 				),
 			).toBeInTheDocument();
-		});
-
-		it("renders the joint evaluation bullet without the 'Soit' prefix and omits the corrective-actions bullet in the second declaration", () => {
-			renderStep3({
-				cseOpinionRequired: true,
-				secondDeclarationCategories: highGapCategories,
-			});
 
 			expect(
 				screen.getByText("Réaliser une évaluation conjointe des rémunérations"),

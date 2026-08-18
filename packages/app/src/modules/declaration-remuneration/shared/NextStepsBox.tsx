@@ -113,8 +113,9 @@ export function NextStepsBox({
 								</strong>{" "}
 								Si vous choisissez ce parcours, vous devez informer et consulter
 								le CSE sur cette justification
-								{cseOpinionRequired &&
-									" (avis à transmettre lors de la dernière étape de la démarche)"}
+								{cseOpinionRequired
+									? " (avis à transmettre lors de la dernière étape de la démarche)."
+									: "."}
 							</li>
 						</ul>
 						<p className="fr-mb-0">
