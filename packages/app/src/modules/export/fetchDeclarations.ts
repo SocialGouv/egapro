@@ -15,7 +15,6 @@ export {
 
 import {
 	computeGapRatio,
-	computeTotal,
 	floorWorkforce,
 	getObligationWorkforce,
 	hasGapsAboveThreshold,
@@ -242,18 +241,6 @@ function roundRatio(r: number | null): number | null {
 	return r === null ? null : Math.round(r * 10000) / 10000;
 }
 
-function computeTotalGapRatio(
-	baseW: string | null,
-	varW: string | null,
-	baseM: string | null,
-	varM: string | null,
-): number | null {
-	const w = computeTotal(baseW ?? "", varW ?? "");
-	const m = computeTotal(baseM ?? "", varM ?? "");
-	if (w === null || m === null || m === 0) return null;
-	return (m - w) / m;
-}
-
 function toIndicatorGCategory(entry: IndicatorGEntry) {
 	const {
 		annualBaseWomen: abW,
@@ -281,15 +268,9 @@ function toIndicatorGCategory(entry: IndicatorGEntry) {
 		Rem_annuelle_variable_ecart: roundRatio(
 			computeGapRatio(avW ?? "", avM ?? ""),
 		),
-		Rem_annuelle_total_ecart: roundRatio(
-			computeTotalGapRatio(abW, avW, abM, avM),
-		),
 		Taux_horaire_base_ecart: roundRatio(computeGapRatio(hbW ?? "", hbM ?? "")),
 		Taux_horaire_variable_ecart: roundRatio(
 			computeGapRatio(hvW ?? "", hvM ?? ""),
-		),
-		Taux_horaire_total_ecart: roundRatio(
-			computeTotalGapRatio(hbW, hvW, hbM, hvM),
 		),
 	};
 }

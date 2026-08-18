@@ -125,7 +125,7 @@ describe("CategoryRecapTable", () => {
 		expect(screen.queryByText("élevé")).not.toBeInTheDocument();
 	});
 
-	it("computes annual and hourly total gaps from base + variable components", () => {
+	it("flags 'élevé' badges on base/variable rows without computing a Total gap (#4205)", () => {
 		render(
 			<CategoryRecapTable
 				category={makeCategory({
@@ -142,25 +142,32 @@ describe("CategoryRecapTable", () => {
 				index={0}
 			/>,
 		);
-		// Annual total gap: |((35000 - 32000) / 35000) * 100| = 8,6 % → élevé.
-		// Hourly total gap: |((22 - 19) / 22) * 100| = 13,6 % → élevé.
-		expect(screen.getAllByText("élevé").length).toBeGreaterThanOrEqual(2);
-		expect(screen.getAllByRole("row").length).toBeGreaterThan(0);
+		// Annual base 6,25 % + variable 33 % + hourly base 10 % + hourly variable 50 %
+		// → 4 base/variable badges, none from the (removed) Total gap.
+		expect(screen.getAllByText("élevé")).toHaveLength(4);
 	});
 
-	it("renders '- %' for the total gap when the men total is zero", () => {
+	it("renders no Total gap value, only the 'Non applicable' alternative (#4205)", () => {
 		render(
 			<CategoryRecapTable
 				category={makeCategory({
-					annualBaseWomen: "1000",
-					annualBaseMen: "0",
+					annualBaseWomen: "90",
+					annualBaseMen: "100",
+					annualVariableWomen: "40",
+					annualVariableMen: "50",
+					hourlyBaseWomen: "18",
+					hourlyBaseMen: "20",
+					hourlyVariableWomen: "1",
+					hourlyVariableMen: "2",
 				})}
 				declarationYear={2025}
 				index={0}
 			/>,
 		);
-		const [annualTotalGapCell, hourlyTotalGapCell] = totalRowGapCell();
-		expect(annualTotalGapCell).toHaveTextContent("- %");
-		expect(hourlyTotalGapCell).toHaveTextContent("- %");
+		for (const cell of totalRowGapCell()) {
+			expect(cell).toHaveTextContent("Non applicable");
+			expect(cell).not.toHaveTextContent("%");
+			expect(within(cell as HTMLElement).queryByText("élevé")).toBeNull();
+		}
 	});
 });

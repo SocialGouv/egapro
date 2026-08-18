@@ -42,11 +42,6 @@ const indicatorGCategorySchema = {
 			description:
 				"Écart de rémunération annuelle variable : ratio signé (H−F)/H, arrondi à 4 décimales. Null si données manquantes ou effectif H nul.",
 		},
-		Rem_annuelle_total_ecart: {
-			type: ["number", "null"],
-			description:
-				"Écart de rémunération annuelle totale (base + variable) : ratio signé (H−F)/H, arrondi à 4 décimales. Null si données manquantes ou effectif H nul.",
-		},
 		Taux_horaire_base_ecart: {
 			type: ["number", "null"],
 			description:
@@ -56,11 +51,6 @@ const indicatorGCategorySchema = {
 			type: ["number", "null"],
 			description:
 				"Écart de taux horaire variable : ratio signé (H−F)/H, arrondi à 4 décimales. Null si données manquantes ou effectif H nul.",
-		},
-		Taux_horaire_total_ecart: {
-			type: ["number", "null"],
-			description:
-				"Écart de taux horaire total (base + variable) : ratio signé (H−F)/H, arrondi à 4 décimales. Null si données manquantes ou effectif H nul.",
 		},
 	},
 } as const;

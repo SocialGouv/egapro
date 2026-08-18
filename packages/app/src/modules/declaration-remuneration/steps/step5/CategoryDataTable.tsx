@@ -158,10 +158,6 @@ function RemunerationTable({
 		cat[fields.variableWomen],
 	);
 	const totalMen = computeTotal(cat[fields.baseMen], cat[fields.variableMen]);
-	const totalGap =
-		totalWomen !== null && totalMen !== null
-			? computeGap(totalWomen.toString(), totalMen.toString())
-			: null;
 
 	const scopeId = scope === "annuel" ? "annual" : "hourly";
 	const variableScope = scope === "annuel" ? "annuelles" : "horaires";
@@ -247,7 +243,7 @@ function RemunerationTable({
 							{formatTotal(totalMen, "€")}
 						</td>
 						<td className={stepStyles.gapCell}>
-							<GapBadge gap={totalGap} layout="cell" />
+							<span className="fr-sr-only">Non applicable</span>
 						</td>
 					</tr>
 				</tbody>
