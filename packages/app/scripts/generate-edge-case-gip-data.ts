@@ -17,6 +17,7 @@ import {
 	fmt4,
 	proportionMen,
 	proportionWomen,
+	recomputeEcarts,
 } from "./gipMockShared";
 
 const QUARTILE_BLOCKS = [
@@ -792,6 +793,7 @@ function generateCsv(): string {
 			row[key] = value;
 		}
 		finalizeQuartileCounts(row);
+		recomputeEcarts(row);
 		lines.push(toLine(row));
 	}
 
