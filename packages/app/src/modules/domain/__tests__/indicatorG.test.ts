@@ -171,6 +171,6 @@ describe("#4240 — 2026 recette bridge aligns 2026 on the 2027 rules", () => {
 		// Idempotent: aligning the already-aligned year is a fixed point.
 		expect(
 			alignCampaignYear(alignCampaignYear(CAMPAIGN_YEAR_ALIGNED_ON_V2)),
-		).toBe(alignCampaignYear(CAMPAIGN_YEAR_ALIGNED_ON_V2));
+		).toBe(V2_FIRST_CAMPAIGN_YEAR);
 	});
 });
