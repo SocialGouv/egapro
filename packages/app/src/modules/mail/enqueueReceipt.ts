@@ -121,9 +121,7 @@ async function buildConfirmationPayload(
 				cseRequired: context.cseRequired,
 			});
 			if (variant === "path_to_select") {
-				// The first declaration acknowledges round 1 (July 1st of the
-				// campaign year); the second declaration acknowledges round 2, whose
-				// administrable deadline lives in the campaign config.
+				// The first declaration acknowledges round 1, the second round 2.
 				const complianceDeadline =
 					type === "declaration_confirmation"
 						? getPathChoiceRound1Deadline(year)

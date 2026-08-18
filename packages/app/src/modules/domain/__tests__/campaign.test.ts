@@ -131,8 +131,6 @@ describe("getPathChoiceRound1Deadline", () => {
 	it("stays within the campaign year, unlike the round-2 deadline", () => {
 		const year = 2027;
 		expect(getPathChoiceRound1Deadline(year)).toEqual(new Date(year, 6, 1));
-		// Round 1 is July 1st of N; round 2 is January 1st of N+1 — they must not
-		// collapse onto the same date.
 		expect(getPathChoiceRound1Deadline(year)).not.toEqual(
 			getPathChoiceDeadline(year),
 		);

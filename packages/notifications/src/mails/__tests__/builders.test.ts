@@ -499,8 +499,7 @@ describe("declaration_confirmation variants", () => {
 		expect(mail.subject).toBe("Egapro - Transmission de la déclaration");
 		expect(mail.html).toContain("Sélectionner le parcours");
 		expect(mail.html).toContain("supérieurs ou égaux à 5 %");
-		// The ISO input is rendered through the French formatter, not interpolated
-		// raw — the verbatim ISO leaking into the mail was the reported bug.
+		// The verbatim ISO leaking into the mail was the reported bug.
 		expect(mail.html).toContain(COMPLIANCE_DEADLINE_FR);
 		expect(mail.html).not.toContain(COMPLIANCE_DEADLINE);
 		expect(mail.html).toContain(`href="${compliancePathUrl}"`);

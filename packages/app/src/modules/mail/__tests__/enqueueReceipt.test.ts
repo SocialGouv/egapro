@@ -394,8 +394,6 @@ describe("enqueueReceipt — variant derivation", () => {
 		await enqueueReceipt({ ...baseInput, kind: "declaration" });
 
 		expect(payloadOf().variant).toBe("path_to_select");
-		// Round 1 is the July 1st derived deadline, computed from the campaign year
-		// itself — not the administrable round-2 deadline in the campaign config.
 		expect(payloadOf().complianceDeadline).toBe(
 			getPathChoiceRound1Deadline(2025).toISOString(),
 		);
