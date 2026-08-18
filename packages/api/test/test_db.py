@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from uuid import UUID
 
 import pytest
 
@@ -30,6 +31,13 @@ async def test_simulation_create():
     async with db.table.pool.acquire() as conn:
         count = await conn.fetchval("SELECT COUNT(*) FROM simulation WHERE id=$1", uuid)
     assert count == 1
+
+
+async def test_simulation_create_uses_random_uuid():
+    # Simulation ids are the only thing keeping a simulation private, they
+    # must not be derived from a timestamp and a MAC address.
+    uid = await db.simulation.create({"foo": "baré"})
+    assert UUID(uid).version == 4
 
 
 async def test_simulation_get():

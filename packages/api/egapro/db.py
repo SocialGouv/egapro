@@ -466,7 +466,7 @@ class simulation(table):
 
     @classmethod
     async def create(cls, data):
-        uid = str(uuid.uuid1())
+        uid = str(uuid.uuid4())
         try:
             await cls.get(uid)
         except NoData:
