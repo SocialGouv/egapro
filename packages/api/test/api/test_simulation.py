@@ -324,7 +324,9 @@ async def test_send_code_endpoint(client, monkeypatch, body):
     assert recipient == "foo@bar.org"
 
 
-async def test_put_simulation_set_cookie_if_email_is_given(client, monkeypatch):
+async def test_put_simulation_never_sets_session_cookie(client):
+    # Non regression: saving a simulation is an anonymous operation, it must
+    # not return any credential, whatever the body contains.
     resp = await client.put(
         "/simulation/12345678-1234-5678-9012-123456789012", body={"foo": "bar"}
     )
@@ -342,7 +344,31 @@ async def test_put_simulation_set_cookie_if_email_is_given(client, monkeypatch):
         body=body,
     )
     assert resp.status == 200
-    assert resp.cookies["api-key"]
+    assert not resp.cookies
+
+
+async def test_put_simulation_does_not_grant_access_to_protected_endpoints(
+    client, monkeypatch
+):
+    monkeypatch.setattr("egapro.config.STAFF", ["staff@email.com"])
+    client.logout()
+
+    body = {
+        "data": {
+            "informationsDeclarant": {"email": "staff@email.com"},
+            "declaration": {"formValidated": "Valid"},
+        }
+    }
+    resp = await client.put(
+        "/simulation/12345678-1234-5678-9012-123456789012",
+        body=body,
+    )
+    assert resp.status == 200
+    assert not resp.cookies
+
+    # Nothing was handed out, the caller is still anonymous.
+    resp = await client.get("/me")
+    assert resp.status == 401
 
 
 async def test_put_simulation_with_empty_body(client):
