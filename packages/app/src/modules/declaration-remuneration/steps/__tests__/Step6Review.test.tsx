@@ -882,10 +882,10 @@ describe("Step6Review", () => {
 				screen.queryByText(/obligatoirement informer et consulter le CSE/),
 			).not.toBeInTheDocument();
 			expect(
-				screen.queryByText(/avis du CSE devront être transmis sur le portail/),
+				screen.queryByText(/avis du CSE devra être transmis/),
 			).not.toBeInTheDocument();
 			expect(
-				screen.queryByText(/avis à transmettre sur le portail/),
+				screen.queryByText(/avis à transmettre lors de la dernière étape/),
 			).not.toBeInTheDocument();
 
 			expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
@@ -897,6 +897,23 @@ describe("Step6Review", () => {
 					name: "Mettre à jour l'existence d'un CSE",
 				}),
 			).toBeInTheDocument();
+
+			expect(
+				screen.getByText(/À la suite de l'analyse de vos données/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					/vous devez informer et consulter le CSE sur cette justification/,
+				),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(/Soit mettre en place des actions correctives/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					"Soit réaliser une évaluation conjointe des rémunérations",
+				),
+			).toBeInTheDocument();
 		});
 
 		it("shows the CSE consultation section when hasCse is true", () => {
@@ -906,10 +923,27 @@ describe("Step6Review", () => {
 				screen.getByRole("heading", { name: "Informer et consulter le CSE" }),
 			).toBeInTheDocument();
 			expect(
-				screen.getByText(/avis du CSE devront être transmis sur le portail/),
+				screen.getByText(/avis du CSE devra être transmis/),
 			).toBeInTheDocument();
 			expect(
-				screen.getByText(/avis à transmettre sur le portail/),
+				screen.getByText(/avis à transmettre lors de la dernière étape/),
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByText(/À la suite de l'analyse de vos données/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					/vous devez informer et consulter le CSE sur cette justification/,
+				),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(/Soit mettre en place des actions correctives/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					"Soit réaliser une évaluation conjointe des rémunérations",
+				),
 			).toBeInTheDocument();
 		});
 	});
