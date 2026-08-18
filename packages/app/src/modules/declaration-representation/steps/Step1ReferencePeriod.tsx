@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { formatShortDate } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
-import { referencePeriodSchema } from "../schemas";
+import { computePeriodEnd, computePeriodStart, referencePeriodSchema } from "../schemas";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
 
 const REQUIRED_DATES_MESSAGE =
@@ -22,6 +23,7 @@ export function Step1ReferencePeriod() {
 	const referencePeriodStart = form.watch("referencePeriodStart") ?? "";
 	const referencePeriodEnd = form.watch("referencePeriodEnd") ?? "";
 	const { errors } = form.formState;
+	const [announcement, setAnnouncement] = useState("");
 
 	useEffect(() => {
 		registerStepValidator(async () => {
@@ -41,22 +43,40 @@ export function Step1ReferencePeriod() {
 		return () => registerStepValidator(null);
 	}, [form, registerStepValidator]);
 
+	// The period always spans 12 consecutive months: filling one date derives
+	// the other. The auto-fill is announced to screen readers like the linked
+	// women/men percentage fields (accessibility pre-audit requirement).
 	function handleStartChange(event: React.ChangeEvent<HTMLInputElement>) {
 		const value = event.target.value;
+		const end = value === "" ? "" : (computePeriodEnd(value) ?? referencePeriodEnd);
 		form.setValue("referencePeriodStart", value);
+		form.setValue("referencePeriodEnd", end);
 		setDraftValues({
-			referencePeriodEnd,
+			referencePeriodEnd: end,
 			referencePeriodStart: value,
 		});
+		setAnnouncement(
+			value === "" || computePeriodEnd(value) === undefined
+				? ""
+				: `Date de fin : ${formatShortDate(new Date(end))} renseignée automatiquement.`,
+		);
 	}
 
 	function handleEndChange(event: React.ChangeEvent<HTMLInputElement>) {
 		const value = event.target.value;
+		const start =
+			value === "" ? "" : (computePeriodStart(value) ?? referencePeriodStart);
 		form.setValue("referencePeriodEnd", value);
+		form.setValue("referencePeriodStart", start);
 		setDraftValues({
 			referencePeriodEnd: value,
-			referencePeriodStart,
+			referencePeriodStart: start,
 		});
+		setAnnouncement(
+			value === "" || computePeriodStart(value) === undefined
+				? ""
+				: `Date de début : ${formatShortDate(new Date(start))} renseignée automatiquement.`,
+		);
 	}
 
 	return (
@@ -164,9 +184,13 @@ export function Step1ReferencePeriod() {
 
 			<div className="fr-messages-group">
 				<p className="fr-message fr-message--info">
-					La période couvre 12 mois consécutifs.
+					La période couvre 12 mois consécutifs : la date de fin est calculée
+					automatiquement à partir de la date de début, et inversement.
 				</p>
 			</div>
+			<p aria-atomic="true" aria-live="polite" className="fr-sr-only">
+				{announcement}
+			</p>
 		</>
 	);
 }

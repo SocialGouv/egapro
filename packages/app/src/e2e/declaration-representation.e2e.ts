@@ -180,24 +180,23 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 		await test.step("step 1 — reference period", async () => {
 			await expectOnStep(page, 1, "Période de référence");
 
-			// A period that does not span 12 months is refused client-side: the guard
-			// runs before saveDraft, so a rejected step never advances the URL.
-			await page
-				.locator("#reference-period-start")
-				.fill(`${referenceYear}-01-01`);
+			// The two dates are linked (12 consecutive months): filling one derives
+			// the other. An end date outside the reference year is still refused
+			// client-side: the guard runs before saveDraft, so a rejected step
+			// never advances the URL.
 			await page
 				.locator("#reference-period-end")
-				.fill(`${referenceYear}-06-30`);
+				.fill(`${referenceYear - 1}-12-31`);
 			await goNext(page);
 			await expect(
 				page.getByText(
-					"La période de référence doit couvrir 12 mois consécutifs.",
+					/La date sélectionnée ne correspond pas à l'année de référence/,
 				),
 			).toBeVisible();
 
 			await page
-				.locator("#reference-period-end")
-				.fill(`${referenceYear}-12-31`);
+				.locator("#reference-period-start")
+				.fill(`${referenceYear}-01-01`);
 			await goNext(page);
 		});
 

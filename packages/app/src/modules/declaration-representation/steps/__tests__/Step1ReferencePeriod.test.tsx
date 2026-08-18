@@ -35,10 +35,9 @@ const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
 const STEP_2_HREF = "/declaration-representation/etape/2";
 const REQUIRED_MESSAGE = "Sélectionner une date de début ou une date de fin.";
-const TWELVE_MONTHS_MESSAGE =
-	"La période de référence doit couvrir 12 mois consécutifs.";
 const REFERENCE_YEAR_MESSAGE = `La date sélectionnée ne correspond pas à l'année de référence ${YEAR}.`;
-const TWELVE_MONTHS_HINT = "La période couvre 12 mois consécutifs.";
+const TWELVE_MONTHS_HINT =
+	"La période couvre 12 mois consécutifs : la date de fin est calculée automatiquement à partir de la date de début, et inversement.";
 const VALID_START = "2025-01-01";
 const VALID_END = "2025-12-31";
 
@@ -142,6 +141,57 @@ describe("Step1ReferencePeriod — rendering", () => {
 	});
 });
 
+describe("Step1ReferencePeriod — auto-fill", () => {
+	it("derives the end date from the start date and announces it", () => {
+		renderStep1();
+
+		fillPeriod({ start: VALID_START });
+
+		expect(endInput()).toHaveValue(VALID_END);
+		expect(
+			screen.getByText("Date de fin : 31/12/2025 renseignée automatiquement."),
+		).toBeInTheDocument();
+	});
+
+	it("derives the start date from the end date and announces it", () => {
+		renderStep1();
+
+		fillPeriod({ end: VALID_END });
+
+		expect(startInput()).toHaveValue(VALID_START);
+		expect(
+			screen.getByText(
+				"Date de début : 01/01/2025 renseignée automatiquement.",
+			),
+		).toBeInTheDocument();
+	});
+
+	it("derives the day before the anniversary for a leap-day start", () => {
+		renderStep1();
+
+		fillPeriod({ start: "2024-02-29" });
+
+		expect(endInput()).toHaveValue("2025-02-28");
+	});
+
+	it("round-trips a leap-day period from the end date", () => {
+		renderStep1();
+
+		fillPeriod({ end: "2025-02-28" });
+
+		expect(startInput()).toHaveValue("2024-02-29");
+	});
+
+	it("clears the other date when a date is emptied", () => {
+		renderStep1();
+
+		fillPeriod({ start: VALID_START });
+		fillPeriod({ start: "" });
+
+		expect(endInput()).toHaveValue("");
+	});
+});
+
 describe("Step1ReferencePeriod — submit validation", () => {
 	it("requires both dates before advancing", async () => {
 		renderStep1();
@@ -153,41 +203,10 @@ describe("Step1ReferencePeriod — submit validation", () => {
 		expect(push).not.toHaveBeenCalled();
 	});
 
-	it("requires the end date when only the start date is filled", async () => {
+	it("rejects an end date outside the reference year", async () => {
 		renderStep1();
 
-		fillPeriod({ start: VALID_START });
-		await clickNext();
-
-		expect(screen.getByText(REQUIRED_MESSAGE)).toBeInTheDocument();
-		expect(push).not.toHaveBeenCalled();
-	});
-
-	it("requires the start date when only the end date is filled", async () => {
-		renderStep1();
-
-		fillPeriod({ end: VALID_END });
-		await clickNext();
-
-		expect(screen.getByText(REQUIRED_MESSAGE)).toBeInTheDocument();
-		expect(push).not.toHaveBeenCalled();
-	});
-
-	it("rejects a period shorter than twelve consecutive months", async () => {
-		renderStep1();
-
-		fillPeriod({ end: VALID_END, start: "2025-02-01" });
-		await clickNext();
-
-		expect(screen.getByText(TWELVE_MONTHS_MESSAGE)).toBeInTheDocument();
-		expect(mutateAsync).not.toHaveBeenCalled();
-		expect(push).not.toHaveBeenCalled();
-	});
-
-	it("rejects a period ending outside the reference year", async () => {
-		renderStep1();
-
-		fillPeriod({ end: "2024-12-31", start: "2024-01-01" });
+		fillPeriod({ end: "2024-12-31" });
 		await clickNext();
 
 		expect(screen.getByText(REFERENCE_YEAR_MESSAGE)).toBeInTheDocument();
@@ -198,23 +217,27 @@ describe("Step1ReferencePeriod — submit validation", () => {
 	it("rejects a start date whose year cannot open the reference period", async () => {
 		renderStep1();
 
-		fillPeriod({ end: VALID_END, start: "2027-04-03" });
+		fillPeriod({ start: "2027-04-03" });
 		await clickNext();
 
-		expect(screen.getByText(REFERENCE_YEAR_MESSAGE)).toBeInTheDocument();
+		// The derived end date (2028-04-02) is out of range too, so the same
+		// message shows under both fields.
+		expect(screen.getAllByText(REFERENCE_YEAR_MESSAGE)).not.toHaveLength(0);
 		expect(startInput()).toHaveAttribute("aria-invalid", "true");
 		expect(push).not.toHaveBeenCalled();
 	});
 
 	it("advances once a rejected period has been corrected", async () => {
 		renderStep1();
-		fillPeriod({ end: VALID_END, start: "2025-02-01" });
+		fillPeriod({ start: "2027-04-03" });
 		await clickNext();
 
 		fillPeriod({ start: VALID_START });
 		await clickNext();
 
-		expect(screen.queryByText(TWELVE_MONTHS_MESSAGE)).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(REFERENCE_YEAR_MESSAGE),
+		).not.toBeInTheDocument();
 		expect(screen.queryByText(REQUIRED_MESSAGE)).not.toBeInTheDocument();
 		expect(push).toHaveBeenCalledWith(STEP_2_HREF);
 	});

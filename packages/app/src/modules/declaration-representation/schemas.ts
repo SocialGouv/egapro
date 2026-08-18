@@ -28,6 +28,35 @@ function isTwelveConsecutiveMonths(start: string, end: string): boolean {
 	return parseIsoDate(end).getTime() === expectedEnd.getTime();
 }
 
+function toIsoDateString(date: Date): string {
+	return date.toISOString().slice(0, 10);
+}
+
+/**
+ * The end date 12 consecutive months after `start`: the day before its first
+ * anniversary. Mirrors `isTwelveConsecutiveMonths`, so an auto-filled end date
+ * always satisfies the schema. Returns `undefined` for an invalid start.
+ */
+export function computePeriodEnd(start: string): string | undefined {
+	if (!isValidIsoDate(start)) return undefined;
+	const end = parseIsoDate(start);
+	end.setUTCFullYear(end.getUTCFullYear() + 1);
+	end.setUTCDate(end.getUTCDate() - 1);
+	return toIsoDateString(end);
+}
+
+/**
+ * Inverse of `computePeriodEnd` (year first, then day, so leap-day periods
+ * round-trip: 2025-02-28 → 2024-02-29). Returns `undefined` for an invalid end.
+ */
+export function computePeriodStart(end: string): string | undefined {
+	if (!isValidIsoDate(end)) return undefined;
+	const start = parseIsoDate(end);
+	start.setUTCFullYear(start.getUTCFullYear() - 1);
+	start.setUTCDate(start.getUTCDate() + 1);
+	return toIsoDateString(start);
+}
+
 function sumsToOneHundred(a: number, b: number): boolean {
 	return Math.round((a + b) * 10) / 10 === 100;
 }
