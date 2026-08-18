@@ -505,6 +505,17 @@ describe("declaration_confirmation variants", () => {
 		expect(mail.html).toContain(`href="${compliancePathUrl}"`);
 		expect(mail.html).toContain(`>${loginUrl}<`);
 	});
+
+	it("path_to_select: requires the compliance deadline", async () => {
+		await expect(
+			buildMail("declaration_confirmation", {
+				siren: SIREN,
+				year: YEAR,
+				variant: "path_to_select",
+				raisonSociale: RAISON_SOCIALE,
+			}),
+		).rejects.toThrow(/complianceDeadline is required/);
+	});
 });
 
 describe("cse_opinion_receipt variants", () => {

@@ -84,6 +84,11 @@ export const buildDeclarationConfirmationMail: MailBuilder<
 			return { subject, html, text };
 		}
 		case "path_to_select": {
+			if (!complianceDeadline) {
+				throw new Error(
+					"complianceDeadline is required for path_to_select variant",
+				);
+			}
 			const formattedDeadline = formatFrenchDate(complianceDeadline);
 			const subject = "Egapro - Transmission de la déclaration";
 			const previewText =
