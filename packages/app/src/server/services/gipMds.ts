@@ -5,6 +5,7 @@ import type { GipMdsRow } from "~/modules/declaration-remuneration/shared/gipMds
 import { CSV_TO_SCHEMA_MAP } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import type { DB } from "~/server/db";
 import { campaignDeadlines, companies, gipMdsData } from "~/server/db/schema";
+import { reconcileCseRequirementForYear } from "./cseRequirementSync";
 import { suitAwareFetch } from "./suitClient";
 import { fetchCompanyBySiren } from "./weez";
 
@@ -248,6 +249,10 @@ export type GipImportResult = {
 	gipPublicationDate: string | null;
 	gipPublicationDateUpdated: boolean;
 	gipPublicationDateSkipReason?: GipPublicationSkipReason;
+	/** Démarches whose CSE requirement the import realigned. */
+	reconciled: number;
+	/** Démarches the reconciliation could not realign; the import still stands. */
+	failed: number;
 };
 
 /**
@@ -265,11 +270,15 @@ export async function importGipCsvToDb(
 	const year = yearFromPeriodEnd(metadata.periodEnd);
 
 	if (rows.length === 0) {
+		// An empty file leaves every headcount untouched, so nothing can have
+		// become stale — the reconciliation would have no candidate to find.
 		return {
 			year,
 			rowCount: 0,
 			gipPublicationDate: null,
 			gipPublicationDateUpdated: false,
+			reconciled: 0,
+			failed: 0,
 		};
 	}
 
@@ -344,9 +353,15 @@ export async function importGipCsvToDb(
 		},
 	);
 
+	// After the commit, never inside it: the reconciliation reads the headcounts
+	// this import just wrote, and a failure to realign a démarche must not roll
+	// back the import itself.
+	const reconciliation = await reconcileCseRequirementForYear({ db, year });
+
 	return {
 		year,
 		rowCount: rows.length,
 		...publicationOutcome,
+		...reconciliation,
 	};
 }

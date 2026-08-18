@@ -4,6 +4,7 @@ import { COMPANY_SIZE_ANNUAL_MIN } from "../shared/constants";
 import {
 	isComplianceProcessRequired,
 	isCseOpinionRequired,
+	resolveCseReconciliation,
 } from "../shared/declarationFlags";
 
 // Composed behavior (nominal, G guard, gap guard, revision boundaries) lives in
@@ -106,5 +107,88 @@ describe("isCseOpinionRequired", () => {
 				hasCse: true,
 			}),
 		).toBe(true);
+	});
+});
+
+// The reconciliation exists because the CSE requirement is snapshotted at
+// submission: when the GIP file later moves a company across the threshold, the
+// snapshot goes stale and only this rule says what the démarche owes (#4184).
+describe("resolveCseReconciliation", () => {
+	const parked = {
+		status: "awaiting_cse_opinion",
+		storedCseRequired: true,
+	} as const;
+
+	it("does nothing while the snapshot still matches the live answer", () => {
+		expect(
+			resolveCseReconciliation({ ...parked, workforce: 250, hasCse: true }),
+		).toBe("none");
+	});
+
+	it("releases a démarche parked on the CSE step once the headcount drops", () => {
+		expect(
+			resolveCseReconciliation({ ...parked, workforce: 87, hasCse: true }),
+		).toBe("release");
+	});
+
+	it("releases it too when the company left the GIP file", () => {
+		// A missing GIP row reads as a 0 headcount upstream, so the absence and a
+		// drop below the threshold are the same case — not two.
+		expect(
+			resolveCseReconciliation({ ...parked, workforce: 0, hasCse: true }),
+		).toBe("release");
+	});
+
+	it("releases it when the company answers it has no CSE", () => {
+		expect(
+			resolveCseReconciliation({ ...parked, workforce: 250, hasCse: false }),
+		).toBe("release");
+	});
+
+	it("keeps the démarche at the exact threshold", () => {
+		expect(
+			resolveCseReconciliation({
+				...parked,
+				workforce: COMPANY_SIZE_ANNUAL_MIN,
+				hasCse: true,
+			}),
+		).toBe("none");
+	});
+
+	it("only refreshes the snapshot away from the CSE step", () => {
+		// Elsewhere the engine reads the snapshot downstream, so realigning the
+		// column is enough — no transition to force.
+		expect(
+			resolveCseReconciliation({
+				status: "demarche_completed",
+				storedCseRequired: true,
+				workforce: 87,
+				hasCse: true,
+			}),
+		).toBe("refresh-snapshot");
+	});
+
+	it("refreshes the snapshot when a company becomes subject again", () => {
+		// The opposite direction needs no transition: the engine already accepts
+		// submit_cse_opinion from demarche_completed.
+		expect(
+			resolveCseReconciliation({
+				status: "demarche_completed",
+				storedCseRequired: false,
+				workforce: 250,
+				hasCse: true,
+			}),
+		).toBe("refresh-snapshot");
+	});
+
+	it("never releases a démarche that still owes its opinion", () => {
+		expect(
+			resolveCseReconciliation({
+				status: "awaiting_cse_opinion",
+				storedCseRequired: false,
+				workforce: 250,
+				hasCse: true,
+			}),
+		).toBe("refresh-snapshot");
 	});
 });
