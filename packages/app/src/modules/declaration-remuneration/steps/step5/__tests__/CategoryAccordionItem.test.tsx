@@ -124,7 +124,7 @@ describe("CategoryAccordionItem — Total row gap (#4205)", () => {
 		});
 
 		const totalCells = totalRowGapCells();
-		expect(totalCells.length).toBeGreaterThanOrEqual(2);
+		expect(totalCells).toHaveLength(2);
 		for (const cell of totalCells) {
 			expect(cell).toHaveTextContent("Non applicable");
 			expect(cell).not.toHaveTextContent("%");
