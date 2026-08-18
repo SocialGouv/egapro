@@ -172,8 +172,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
       ultra11y:
-        specifier: 5.11.1
-        version: 5.11.1
+        specifier: 5.11.2
+        version: 5.11.2
       vite-tsconfig-paths:
         specifier: ^6.1.1
         version: 6.1.1(typescript@6.0.2)(vite@7.3.1(@types/node@25.6.0)(sass@1.99.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -6333,8 +6333,8 @@ packages:
     engines: {node: '>=0.8.0'}
     hasBin: true
 
-  ultra11y@5.11.1:
-    resolution: {integrity: sha512-7wrcXMMoTzSrvXfv+1Jo4n+NIaPKTpThXp7xtgY45obCHfx4LSAUJa9Z3O1xnbyunwoGQdy4kvujaBJZc4hbZA==}
+  ultra11y@5.11.2:
+    resolution: {integrity: sha512-Mw8X835qnygV5HiMvFxbtTG4e7Qn44U49AMpQKkq+cenLowsmfe1rKGWJNpnvB6SKXFgGlXIsz4RU1syPASIHA==}
     engines: {node: '>=22.18.0'}
     hasBin: true
 
@@ -13260,7 +13260,7 @@ snapshots:
   uglify-js@3.19.3:
     optional: true
 
-  ultra11y@5.11.1:
+  ultra11y@5.11.2:
     dependencies:
       '@babel/parser': 8.0.4
       domhandler: 6.0.1
