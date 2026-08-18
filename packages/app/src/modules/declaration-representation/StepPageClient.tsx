@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isRepresentationPublicationRequired } from "~/modules/domain";
+import styles from "./StepPageClient.module.scss";
 import { Stepper } from "./Stepper";
 import type { StepValidator } from "./shared/draft/DraftContext";
 import { RepresentationDraftProvider } from "./shared/draft/DraftContext";
@@ -150,7 +151,7 @@ export function StepPageClient({
 			) : null}
 
 			{nextHref === undefined ? null : (
-				<div className="fr-btns-group fr-btns-group--inline fr-btns-group--right fr-mt-6w">
+				<div className={styles.actions}>
 					<Link
 						className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
 						href={previousHref}

@@ -170,6 +170,16 @@ describe("StepPageClient — navigation", () => {
 		);
 	});
 
+	it("keeps the navigation out of a .fr-btns-group so labels stay full width", () => {
+		const { container } = renderStep({ step: 2, currentStep: 2 });
+
+		// DSFR 1.14 clamps any icon-carrying .fr-btn inside a .fr-btns-group to
+		// an icon-only 2.5rem box, truncating the "Suivant" / "Précédent" labels.
+		const previous = screen.getByRole("link", { name: "Précédent" });
+		expect(container.querySelector(".fr-btns-group")).toBeNull();
+		expect(previous.parentElement).toContainElement(nextButton());
+	});
+
 	it("saves the progress before routing to the next step", async () => {
 		renderStep({ step: 2, initialDraft: SAVED_NO_EXECUTIVES });
 

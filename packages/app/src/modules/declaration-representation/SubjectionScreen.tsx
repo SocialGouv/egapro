@@ -22,8 +22,6 @@ export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
 	});
 
 	const answer = form.watch("answer");
-	const hasSubjectionError = Boolean(form.formState.errors.answer);
-	const canGoBack = answer === null && !hasSubjectionError;
 
 	const onSubmit = form.handleSubmit((data) => {
 		if (data.answer === "concerned") {
@@ -141,25 +139,27 @@ export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
 					</div>
 				) : null}
 
-				<div className="fr-btns-group fr-btns-group--inline fr-btns-group--right fr-mt-4w">
-					{canGoBack ? (
-						<Link className="fr-btn fr-btn--tertiary" href="/mon-espace">
-							Retour
-						</Link>
-					) : null}
+				{/* fr-btns-group--icon-right: without it, DSFR 1.14 treats any
+				    icon-carrying .fr-btn in a group as icon-only and clamps it to
+				    2.5rem, truncating the "Suivant" label. */}
+				<ul className="fr-btns-group fr-btns-group--inline fr-btns-group--icon-right fr-btns-group--right fr-mt-4w">
 					{answer === "not_concerned" ? (
-						<Link className="fr-btn" href="/mon-espace">
-							Valider
-						</Link>
+						<li>
+							<Link className="fr-btn" href="/mon-espace">
+								Valider
+							</Link>
+						</li>
 					) : (
-						<button
-							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-							type="submit"
-						>
-							Suivant
-						</button>
+						<li>
+							<button
+								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+								type="submit"
+							>
+								Suivant
+							</button>
+						</li>
 					)}
-				</div>
+				</ul>
 			</form>
 		</>
 	);

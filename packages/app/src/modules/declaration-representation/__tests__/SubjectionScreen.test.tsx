@@ -105,28 +105,26 @@ describe("SubjectionScreen — rendering", () => {
 		expect(paragraphs[2]).toMatch(/Tous les champs sont obligatoires/);
 	});
 
-	it("offers a way back to the personal space before any answer", () => {
+	it("offers no way back: the funnel entry is the only navigation", () => {
 		renderScreen();
-
-		expect(screen.getByRole("link", { name: "Retour" })).toHaveAttribute(
-			"href",
-			"/mon-espace",
-		);
-		expect(screen.queryByText(NOT_CONCERNED_INFO)).not.toBeInTheDocument();
-		expect(screen.queryByText(SELECTION_ERROR)).not.toBeInTheDocument();
-	});
-
-	it.each([
-		["concerned", concernedRadio],
-		["not concerned", notConcernedRadio],
-	])("withdraws the way back once the %s answer is picked", async (_answer, radio) => {
-		renderScreen();
-
-		await userEvent.click(radio());
 
 		expect(
 			screen.queryByRole("link", { name: "Retour" }),
 		).not.toBeInTheDocument();
+		expect(nextButton()).toBeInTheDocument();
+		expect(screen.queryByText(NOT_CONCERNED_INFO)).not.toBeInTheDocument();
+		expect(screen.queryByText(SELECTION_ERROR)).not.toBeInTheDocument();
+	});
+
+	it("declares the group icon side so DSFR keeps the button full width", () => {
+		const { container } = renderScreen();
+
+		// DSFR 1.14 clamps icon-carrying buttons of a group to an icon-only
+		// 2.5rem box unless the group declares fr-btns-group--icon-*.
+		const actions = container.querySelector(".fr-btns-group");
+		expect(actions?.tagName).toBe("UL");
+		expect(actions).toHaveClass("fr-btns-group--icon-right");
+		expect(nextButton().parentElement).toHaveRole("listitem");
 	});
 });
 
@@ -140,14 +138,11 @@ describe("SubjectionScreen — no answer selected", () => {
 		expect(push).not.toHaveBeenCalled();
 	});
 
-	it("keeps the rejected question as the only way forward", async () => {
+	it("keeps the way forward after rejecting the question", async () => {
 		renderScreen();
 
 		await userEvent.click(nextButton());
 
-		expect(
-			screen.queryByRole("link", { name: "Retour" }),
-		).not.toBeInTheDocument();
 		expect(nextButton()).toBeInTheDocument();
 	});
 
