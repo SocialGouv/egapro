@@ -56,14 +56,7 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
-      - name: Restore CI build cache
-        id: cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ./*
-          key: "${{ github.sha }}"
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
       - name: Install Chromium manually (bypass Playwright extractor)
         shell: bash
@@ -106,16 +99,31 @@ jobs:
             "chromium_headless_shell-${CHROMIUM_VERSION}" \
             "chrome-headless-shell-linux64" \
             "chrome-headless-shell-linux64"
+      # Même retry que dans a11y.yaml, et pour la même raison : `install-deps` est un
+      # `apt-get install`, et une tentative unique sous 5 minutes est un tirage au sort quand le
+      # miroir est lent (mesuré : le job a11y a expiré à 5:00 pile sur un commit où celui-ci
+      # passait). Les deux workflows partagent volontairement ce bloc d'infrastructure — les
+      # désaligner, c'est laisser le flake dans celui qu'on n'a pas corrigé.
       - name: Install Playwright system dependencies
-        run: pnpm --filter app exec playwright install-deps chromium
-        timeout-minutes: 5
+        timeout-minutes: 14
         env:
           DEBIAN_FRONTEND: noninteractive
           NEEDRESTART_MODE: a
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if timeout 240 pnpm --filter app exec playwright install-deps chromium; then
+              echo "playwright install-deps: ok (tentative $attempt)"
+              exit 0
+            fi
+            echo "::warning::playwright install-deps a échoué ou expiré (tentative $attempt/3) — nouvelle tentative"
+            sudo apt-get clean || true
+          done
+          echo "::error::playwright install-deps a échoué après 3 tentatives"
+          exit 1
       - name: Start services
         run: docker compose up -d
       - name: Build
-        if: steps.cache.outputs.cache-hit != 'true'
         run: pnpm build
       - name: Apply database schema
         run: pnpm db:push

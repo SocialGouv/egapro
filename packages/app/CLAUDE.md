@@ -11,7 +11,7 @@ All quality checks are **automatic** — no manual commands needed:
 
 - **Lint/format**: auto-applied by the `auto-lint` hook after each edit and Bash command
 - **Forbidden patterns**: blocked by the `block-bad-patterns` hook before edits (13 patterns including domain layer violations)
-- **Post-task gates**: 4 parallel agents run automatically after every task: `validator` (typecheck + test + lint), `structural-auditor` (17 rules), `rgaa-auditor` (RGAA 4.1.2 / WCAG 2.2 AA via **ultra11y**, on .tsx), `security-auditor` (OWASP on server files)
+- **Post-task gates**: 4 parallel agents run automatically after every task: `validator` (typecheck + test + lint), `structural-auditor` (17 rules), `rgaa-auditor` (lance le skill ultra11y `review-a11y` — RGAA 4.1.2 / WCAG 2.2 AA, on .tsx), `security-auditor` (OWASP on server files)
 
 See `.claude/rules/automation.md` for full details.
 
@@ -221,7 +221,11 @@ Cascade: 1) DSFR classes → 2) DSFR utilities + CSS custom properties → 3) Sc
 
 ## Accessibility (RGAA 4.1.2 / WCAG 2.2 AA)
 
-> **Canonical rule → [`.claude/rules/rgaa.md`](../../.claude/rules/rgaa.md)** — all accessibility goes through a single dispositif, **ultra11y** (vendored at `.claude/skills/ultra11y/`, committed so every dev has it), declined into complementary tiers: static (`pnpm --filter app test:a11y`, run automatically in CI on every push/PR) + judgment (the `rgaa-auditor` agent) + rendered (Lighthouse 100%) + authoring hook. No parallel a11y system.
+> **Canonical rule → [`.claude/rules/rgaa.md`](../../.claude/rules/rgaa.md)** — accessibility has exactly **two** surfaces, both ultra11y: the `rgaa-auditor` agent, which runs the `review-a11y` skill on the code under change, and the `a11y.yaml` workflow, which runs the Action (blocking static gate; plus a Playwright page sweep that decides the rendered criteria and has its judgment criteria adjudicated by a Claude Code pass). No parallel a11y system — Lighthouse reports a score as a warning, and the edit hook enforces DSFR/Next rules that happen to help.
+>
+> While developing, `pnpm --filter app a11y:dev` starts the ultra11y side-car (dashboard on `http://127.0.0.1:4111`); `pnpm exec ultra11y dev --next` writes the overlay component to mount. Optional — the gate is the agent and the workflow.
+>
+> RGAA is a **per-page** norm: the normative sample is declared in `.ultra11yrc.json` (`sample.pages`), and its ids must match the `as` passed to `checkA11y` in `src/e2e/a11y/`. `audit` is always WCAG-keyed and ignores `--standard` — chain `report --standard rgaa` for an RGAA-keyed artifact.
 
 ### Mandatory checklist (extract — full rules in the canonical rule)
 
@@ -404,7 +408,7 @@ pnpm test:e2e     # Playwright E2E tests (requires dev server on port 3000)
 pnpm test:lighthouse  # Lighthouse CI audit (requires dev server on port 3000)
 ```
 
-Both `pnpm test:e2e` and `pnpm test:lighthouse` require `pnpm dev` running on port 3000. Lighthouse accessibility must score **100%**.
+Both `pnpm test:e2e` and `pnpm test:lighthouse` require `pnpm dev` running on port 3000. Lighthouse's accessibility score is a warning, not a gate — accessibility is ultra11y's (`rgaa-auditor` + `a11y.yaml`).
 
 ### Lint & Format (Biome)
 

@@ -6,6 +6,14 @@
 		"useIgnoreFile": true,
 		"clientKind": "git"
 	},
+	"files": {
+		// Le registre de verdicts ultra11y est GÉNÉRÉ par le moteur (JSON à 2 espaces) et
+		// versionné pour que la CI le rejoue. Biome suit .gitignore, et le registre y est
+		// explicitement dé-ignoré : sans cette exclusion, `format:check` échouerait à chaque
+		// régénération parce que ce dépôt formate en tabulations. Un artefact généré n'a rien à
+		// faire dans le formateur du projet — même raison que le rapport Playwright.
+		"includes": ["**", "!**/.ultra11y/**"]
+	},
 	"assist": {
 		"enabled": true,
 		"actions": {

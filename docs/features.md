@@ -323,7 +323,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 **Règles métier-clés** :
 
 - Pages **statiques** (pas de BDD), contenu maintenu manuellement dans le code.
-- Le score Lighthouse RGAA cible **100%** (configuré comme seuil bloquant dans `.lighthouserc.json`).
+- L'accessibilité est auditée par ultra11y (agent `rgaa-auditor` + workflow `a11y.yaml`) ; Lighthouse en rapporte un score indicatif, en avertissement.
 - La politique de confidentialité `/donnees-personnelles` correspond au dispositif de **conservation limitée** appliqué techniquement par la purge RGPD des déclarations (voir §12.8).
 
 ---

@@ -1,0 +1,7 @@
+{
+  "tool": "ultra11y",
+  "kind": "undecidable",
+  "standard": "rgaa",
+  "_comment": "Les critères RGAA que ce projet déclare ne pas pouvoir trancher, chacun avec son motif. Une liste NOMMÉE, jamais un seuil : un pourcentage laisserait passer exactement les critères que personne n'a su décider. Une entrée sans motif fait échouer la porte, et une entrée dont le critère porte désormais un verdict la fait échouer aussi — une exception ne doit pas survivre à ce qu'elle excusait. Vide, c'est la cible.",
+  "entries": []
+}

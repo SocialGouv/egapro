@@ -213,15 +213,9 @@ grep -rn 'toLocaleString.*fr-FR\|toLocaleString.*"fr"' src/ --include="*.ts" --i
 
 > **Principle** (see `rules/code-quality.md` § Domain layer — *Single source of truth*): a business rule lives in **one** domain function; any inline copy is a `[WARN]`/`[ERROR]` because it drifts the day the regulation changes. When two call sites need different intents from the same inputs, each intent is its own **named** domain function — not look-alike inline code.
 
-#### 2.16 Accessibility (quick check)
+#### 2.16 Accessibility — not yours
 
-For changed `.tsx` files:
-
-- `<input>` without associated `<label>` → **[ERROR]**
-- `target="_blank"` without `<NewTabNotice />` → **[ERROR]**
-- Decorative icon without `aria-hidden="true"` → **[WARN]**
-- Heading hierarchy skipping levels → **[ERROR]**
-- Form groups without `<fieldset>` + `<legend>` → **[WARN]**
+Accessibility is audited by `rgaa-auditor`, which runs the ultra11y `review-a11y` skill, and by the ultra11y GitHub Action. **Report nothing here.** Five hand-rolled rules used to live at this number — label, `NewTabNotice`, `aria-hidden`, heading levels, `fieldset`/`legend` — restating from memory what an engine already decides from the source. Two rule sets on one subject drift, and the one without an engine is the one that invents non-conformities.
 
 #### 2.17 No comments in newly written code
 

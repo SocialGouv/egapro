@@ -1,0 +1,1042 @@
+{
+  "tool": "ultra11y",
+  "kind": "verdict-ledger",
+  "schemaVersion": 2,
+  "standard": "rgaa",
+  "entries": [
+    {
+      "criteriaId": "1.2",
+      "verdict": "C",
+      "justification": "Les images decoratives harvestees (pictogrammes DSFR, illustrations) portent alt vide et/ou aria-hidden=true, correctement retirees de l'arbre d'accessibilite. Les elements informatifs (graphiques role=img+aria-label, img alt='Je donne mon avis') sont hors perimetre de ce critere (decoratif vs informatif).",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/aide/dom.html",
+          "line": 2,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorative\" href=\"/dsfr/artwork/pictograms/docu"
+        },
+        {
+          "file": ".ultra11y/pages/aide/dom.html",
+          "line": 2,
+          "selector": "img.fr-responsive-img",
+          "snippet": "<img alt=\"\" loading=\"lazy\" width=\"400\" height=\"200\" decoding=\"async\" data-nimg=\"1\" class=\"fr-responsive-img AideResourceCards-module-scss-module__g8vk6q__contai"
+        },
+        {
+          "file": ".ultra11y/pages/declaration-etape-5/dom.html",
+          "line": 2,
+          "selector": "img",
+          "snippet": "<img alt=\"\" aria-hidden=\"true\" loading=\"lazy\" width=\"24\" height=\"24\" decoding=\"async\" data-nimg=\"1\" src=\"/assets/declaration-remuneration/cloud-check.svg\" style"
+        }
+      ],
+      "evidenceFingerprint": "sha256:cbaa70ac1e56598c86d658d5749a6f44",
+      "evidenceCount": 79,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "1.3",
+      "verdict": "C",
+      "justification": "Les images informatives harvestees portent une alternative textuelle pertinente et verifiee contre la source: img alt='Je donne mon avis' (illustration du parcours avis CSE) et les graphiques role=img avec aria-label reproduisant fidelement le libelle de la constante caption/CHART_CAPTION du composant (verifie dans CampaignProgressionChart.tsx et StatsDashboard.tsx, ex. 'Courbe de progression cumulative des declarations soumises par annee.').",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/avis-cse-confirmation/dom.html",
+          "line": 2,
+          "selector": "img",
+          "snippet": "<img alt=\"Je donne mon avis\" loading=\"lazy\" width=\"200\" height=\"85\" decoding=\"async\" data-nimg=\"1\" style=\"color:transparent\" src=\"/assets/images/je-donne-mon-av"
+        },
+        {
+          "file": ".ultra11y/pages/admin-stats/dom.html",
+          "line": 2,
+          "selector": "div.CompletionFunnelChart-module-scss-module__fAAmTa__chartContainer",
+          "snippet": "<div aria-label=\"Funnel parcours conformité — déclarations avec écart ≥ 5 %\" class=\"CompletionFunnelChart-module-scss-module__fAAmTa__chartContainer\" role=\"img\""
+        }
+      ],
+      "evidenceFingerprint": "sha256:cbaa70ac1e56598c86d658d5749a6f44",
+      "evidenceCount": 79,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "1.4",
+      "verdict": "NA",
+      "justification": "Aucun CAPTCHA ni image-test n'est present dans l'application (aucune fonctionnalite anti-robot visuelle dans egapro). L'evidence harvestee (svg decoratifs, img d'illustration, canvas/graphiques) ne concerne aucun CAPTCHA/image-test.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/aide/dom.html",
+          "line": 2,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorative\" href=\"/dsfr/artwork/pictograms/docu"
+        },
+        {
+          "file": ".ultra11y/pages/admin-stats/dom.html",
+          "line": 2,
+          "selector": "canvas",
+          "snippet": "<canvas data-zr-dom-id=\"zr_0.0\" width=\"428\" height=\"300\" style=\"position: absolute; left: 0px; top: 0px; width: 428px; height: 300px; user-select: none; -webkit"
+        }
+      ],
+      "evidenceFingerprint": "sha256:5004834ad357b79f99c26d5da2b8910f",
+      "evidenceCount": 11,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "1.5",
+      "verdict": "NA",
+      "justification": "Aucun CAPTCHA n'est present dans l'application (confirme par l'absence de tout mecanisme anti-robot visuel dans le code source), donc aucune solution d'acces alternatif n'est requise.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/aide/dom.html",
+          "line": 2,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorative\" href=\"/dsfr/artwork/pictograms/docu"
+        }
+      ],
+      "evidenceFingerprint": "sha256:5004834ad357b79f99c26d5da2b8910f",
+      "evidenceCount": 11,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "1.6",
+      "verdict": "C",
+      "justification": "Verifie dans src/modules/admin/stats/StatsDashboard.tsx: chaque graphique (CompletionFunnelChart, CampaignProgressionChart) est suivi immediatement dans le DOM par le tableau de donnees equivalent portant le meme caption (ex. lignes 353-361: CompletionFunnelChart puis CompletionFunnelTable avec caption identique), et le figcaption sr-only du graphique reference explicitement ce tableau adjacent ('Les donnees equivalentes sont disponibles dans le tableau ci-dessous'), satisfaisant la condition de description detaillee adjacente.",
+      "citations": [
+        {
+          "file": "src/modules/admin/stats/CampaignProgressionChart.tsx",
+          "line": 145,
+          "selector": "div.{styles.chartContainer}",
+          "snippet": "<div aria-label={CHART_CAPTION} className={styles.chartContainer} role=\"img\" >"
+        },
+        {
+          "file": "src/modules/admin/stats/CompletionFunnelChart.tsx",
+          "line": 268,
+          "selector": "div.{styles.chartContainer}",
+          "snippet": "<div aria-label={caption} className={styles.chartContainer} role=\"img\">"
+        }
+      ],
+      "evidenceFingerprint": "sha256:5004834ad357b79f99c26d5da2b8910f",
+      "evidenceCount": 11,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "1.7",
+      "verdict": "C",
+      "justification": "La description detaillee (tableau de donnees StatsDashboard.tsx adjacent a chaque graphique, meme caption) est pertinente: elle reprend exactement les memes donnees chiffrees que le graphique visuel, verifie sur CompletionFunnelChart+CompletionFunnelTable dans StatsDashboard.tsx (lignes 343-362).",
+      "citations": [
+        {
+          "file": "src/modules/admin/stats/CampaignProgressionChart.tsx",
+          "line": 145,
+          "selector": "div.{styles.chartContainer}",
+          "snippet": "<div aria-label={CHART_CAPTION} className={styles.chartContainer} role=\"img\" >"
+        }
+      ],
+      "evidenceFingerprint": "sha256:5004834ad357b79f99c26d5da2b8910f",
+      "evidenceCount": 11,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "1.8",
+      "verdict": "NA",
+      "justification": "Aucune image texte porteuse d'information n'existe dans l'application: les images harvestees sont des pictogrammes/illustrations SVG (fr-artwork, cloud-check.svg, je-donne-mon-avis.svg) sans texte incorpore, et les graphiques sont rendus en canvas/SVG avec libelles fournis via aria-label (pas du texte-image). Rien a remplacer par du texte stylise.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/avis-cse-confirmation/dom.html",
+          "line": 2,
+          "selector": "img",
+          "snippet": "<img alt=\"Je donne mon avis\" loading=\"lazy\" width=\"200\" height=\"85\" decoding=\"async\" data-nimg=\"1\" style=\"color:transparent\" src=\"/assets/images/je-donne-mon-av"
+        }
+      ],
+      "evidenceFingerprint": "sha256:5004834ad357b79f99c26d5da2b8910f",
+      "evidenceCount": 11,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "1.9",
+      "verdict": "C",
+      "justification": "Les graphiques statistiques (CampaignProgressionChart, CompletionFunnelChart, etc.) associent l'image (div role=img) et sa legende via un <figure> natif contenant un <figcaption>, technique native suffisante pour associer image et legende (verifie dans CampaignProgressionChart.tsx lignes 140-148 et CompletionFunnelChart.tsx lignes 262-276).",
+      "citations": [
+        {
+          "file": "src/modules/admin/stats/CampaignProgressionChart.tsx",
+          "line": 145,
+          "selector": "div.{styles.chartContainer}",
+          "snippet": "<div aria-label={CHART_CAPTION} className={styles.chartContainer} role=\"img\" >"
+        },
+        {
+          "file": "src/modules/admin/stats/CompletionFunnelChart.tsx",
+          "line": 268,
+          "selector": "div.{styles.chartContainer}",
+          "snippet": "<div aria-label={caption} className={styles.chartContainer} role=\"img\">"
+        }
+      ],
+      "evidenceFingerprint": "sha256:cbaa70ac1e56598c86d658d5749a6f44",
+      "evidenceCount": 79,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "2.1",
+      "verdict": "manual",
+      "reason": "undecidable",
+      "evidenceFingerprint": "sha256:2201966be7ebff5664e347b64fa4b3ec",
+      "evidenceCount": 68,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "2.2",
+      "verdict": "manual",
+      "reason": "undecidable",
+      "evidenceFingerprint": "sha256:2201966be7ebff5664e347b64fa4b3ec",
+      "evidenceCount": 68,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "3.1",
+      "verdict": "manual",
+      "reason": "needs-rendered-dom",
+      "evidenceFingerprint": "sha256:f3389d7076899d79b89084e3061f8121",
+      "evidenceCount": 128,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "4.7",
+      "verdict": "NA",
+      "justification": "Aucun media temporel (video/audio, seul ou synchronise) n'existe dans l'application: recherche exhaustive de <video>/<audio>/<object>/<embed>/<applet> dans packages/app/src sans resultat. L'evidence harvestee (svg/canvas/img) ne concerne aucun media temporel.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/aide/dom.html",
+          "line": 2,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorative\" href=\"/dsfr/artwork/pictograms/docu"
+        }
+      ],
+      "evidenceFingerprint": "sha256:5004834ad357b79f99c26d5da2b8910f",
+      "evidenceCount": 11,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "4.8",
+      "verdict": "NA",
+      "justification": "Aucun media non temporel (object/embed/applet type plugin) n'existe dans l'application: recherche exhaustive sans resultat sur <object>/<embed>/<applet> dans packages/app/src. L'evidence harvestee ne concerne aucun media non temporel.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/admin-stats/dom.html",
+          "line": 2,
+          "selector": "canvas",
+          "snippet": "<canvas data-zr-dom-id=\"zr_0.0\" width=\"428\" height=\"300\" style=\"position: absolute; left: 0px; top: 0px; width: 428px; height: 300px; user-select: none; -webkit"
+        }
+      ],
+      "evidenceFingerprint": "sha256:5004834ad357b79f99c26d5da2b8910f",
+      "evidenceCount": 11,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "4.9",
+      "verdict": "NA",
+      "justification": "Aucun media non temporel n'existe dans l'application (cf. absence confirmee de <object>/<embed>/<applet> dans packages/app/src), donc aucune alternative de media non temporel a evaluer.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/admin-stats/dom.html",
+          "line": 2,
+          "selector": "canvas",
+          "snippet": "<canvas data-zr-dom-id=\"zr_0.0\" width=\"428\" height=\"300\" style=\"position: absolute; left: 0px; top: 0px; width: 428px; height: 300px; user-select: none; -webkit"
+        }
+      ],
+      "evidenceFingerprint": "sha256:5004834ad357b79f99c26d5da2b8910f",
+      "evidenceCount": 11,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "4.11",
+      "verdict": "NA",
+      "justification": "Aucun media temporel n'existe dans l'application (absence confirmee de <video>/<audio> dans packages/app/src), donc aucun controle clavier de media temporel a evaluer.",
+      "evidenceFingerprint": "sha256:13616aa321f7113edd9493633a4649d6",
+      "evidenceCount": 9,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "4.12",
+      "verdict": "NA",
+      "justification": "Aucun media non temporel n'existe dans l'application (absence confirmee de <object>/<embed>/<applet> dans packages/app/src), donc aucun controle clavier de media non temporel a evaluer.",
+      "evidenceFingerprint": "sha256:13616aa321f7113edd9493633a4649d6",
+      "evidenceCount": 9,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "4.13",
+      "verdict": "NA",
+      "justification": "Aucun media temporel ou non temporel (video/audio/object/embed) n'existe dans l'application (recherche exhaustive negative dans packages/app/src). Le critere ne s'applique qu'aux medias temporels/non temporels, absents ici; les composants d'interface courants (nav, dialog, menu) sont couverts par 7.1, hors perimetre 4.13.",
+      "evidenceFingerprint": "sha256:2201966be7ebff5664e347b64fa4b3ec",
+      "evidenceCount": 68,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "5.1",
+      "verdict": "NC",
+      "findings": [
+        {
+          "file": "src/modules/cseOpinion/components/ContentTypeMatrix.tsx",
+          "line": 57,
+          "selector": "caption.fr-sr-only",
+          "message": "Tableau complexe (en-tetes scope=col ET scope=row + attribut headers explicite pour associer chaque cellule, ligne 133) dont la seule caption est une instruction d'usage ('Associez chaque fichier depose aux types de contenu requis.') et non un resume de la structure du tableau (colonnes/regroupements de lignes) comme l'exige le test 5.1.1.",
+          "snippet": "<caption className=\"fr-sr-only\">",
+          "severity": "moderate",
+          "normativeRef": "5.1.1"
+        },
+        {
+          "file": "src/modules/declaration-remuneration/steps/step5/CategoryDataTable.tsx",
+          "line": 93,
+          "selector": "th.scope=col / th.scope=row",
+          "message": "Tableau complexe a deux dimensions d'en-tetes (scope=col lignes 93-98, scope=row lignes 185/210/242) sans aucun resume disponible (pas d'aria-describedby, ni figure/figcaption, ni details dans caption) decrivant la structure du tableau.",
+          "snippet": "<th scope=\"row\">Salaire de base</th>",
+          "severity": "moderate",
+          "normativeRef": "5.1.1"
+        }
+      ],
+      "evidenceFingerprint": "sha256:84ba9e8c9e5c93da5c64529e5704aaa1",
+      "evidenceCount": 48,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "5.3",
+      "verdict": "NA",
+      "justification": "Tous les <table> harvestes (DataTable, PayGapTable, DsfrTable, CategoryDataTable, ContentTypeMatrix, DeclarationTable, ReferentTable) sont des tableaux de donnees semantiques avec en-tetes th/scope, pas des tableaux de mise en forme (aucun usage de <table> a but de layout CSS trouve dans packages/app/src). Le critere ne s'applique donc a aucun tableau de l'application.",
+      "citations": [
+        {
+          "file": "src/modules/declaration-remuneration/shared/DataTable.tsx",
+          "line": 47,
+          "selector": "table",
+          "snippet": "<table>"
+        }
+      ],
+      "evidenceFingerprint": "sha256:84ba9e8c9e5c93da5c64529e5704aaa1",
+      "evidenceCount": 48,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "5.6",
+      "verdict": "C",
+      "justification": "Les en-tetes de colonne et de ligne sont correctement declares via th scope=col / scope=row, verifie sur PayGapTable.tsx (lignes 72-75, scope=col), CategoryDataTable.tsx (scope=col lignes 93-98, scope=row lignes 185/210/242) et ContentTypeMatrix.tsx (scope=col ligne 62, scope=row ligne 104), et sur les tableaux admin (DeclarationTable.tsx, ReferentTable.tsx).",
+      "citations": [
+        {
+          "file": "src/modules/declaration-remuneration/steps/step5/CategoryDataTable.tsx",
+          "line": 185,
+          "selector": "th.scope=row",
+          "snippet": "<th scope=\"row\">Salaire de base</th>"
+        }
+      ],
+      "evidenceFingerprint": "sha256:84ba9e8c9e5c93da5c64529e5704aaa1",
+      "evidenceCount": 48,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "5.7",
+      "verdict": "C",
+      "justification": "Pour les tableaux complexes (ContentTypeMatrix.tsx), la technique appropriee headers/id est utilisee: chaque cellule de donnees porte un attribut headers referencant les id des en-tetes de colonne ET de ligne concernes (ligne 133: headers={`${fileHeaderId} ${columnHeaderId(column)}`}), conforme a la technique requise pour les tableaux a en-tetes bidimensionnels. Les tableaux simples utilisent scope=col/row (suffisant hors cas complexe).",
+      "citations": [
+        {
+          "file": "src/modules/cseOpinion/components/ContentTypeMatrix.tsx",
+          "line": 133,
+          "selector": "input.headers",
+          "snippet": "headers={`${fileHeaderId} ${columnHeaderId(column)}`}"
+        }
+      ],
+      "evidenceFingerprint": "sha256:84ba9e8c9e5c93da5c64529e5704aaa1",
+      "evidenceCount": 48,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "5.8",
+      "verdict": "NA",
+      "justification": "Aucun tableau de mise en forme (layout table) n'existe dans l'application: tous les <table> harvestes sont des tableaux de donnees semantiques (th/scope presents). Le critere ne s'applique a aucun element.",
+      "citations": [
+        {
+          "file": "src/modules/declaration-remuneration/shared/DataTable.tsx",
+          "line": 47,
+          "selector": "table",
+          "snippet": "<table>"
+        }
+      ],
+      "evidenceFingerprint": "sha256:84ba9e8c9e5c93da5c64529e5704aaa1",
+      "evidenceCount": 48,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "6.1",
+      "verdict": "C",
+      "justification": "Les liens harvestes portent un intitule explicite comprehensible seul ou avec le contexte immediat: liens footer nommes par leur domaine de destination (info.gouv.fr, service-public.fr...), 'Se deconnecter', 'Retour a l'accueil', liens avec aria-label dynamique descriptif ('Voir la declaration du {date}'). Les liens externes (target=_blank) sont completes par NewTabNotice (texte sr-only) annoncant l'ouverture d'un nouvel onglet.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Footer/FooterBody.tsx",
+          "line": 29,
+          "selector": "a.fr-footer__content-link",
+          "snippet": "<a className=\"fr-footer__content-link\" href=\"https://info.gouv.fr\" rel=\"noopener noreferrer\" target=\"_blank\" >"
+        },
+        {
+          "file": "src/modules/admin/declarations/SiblingDeclarationsSection.tsx",
+          "line": 27,
+          "selector": "Link",
+          "snippet": "<Link aria-label={`Voir la déclaration du ${formatShortDateTime(sibling.updatedAt)}`} href={`/admin/declarations/${sibling.id}`} >"
+        }
+      ],
+      "evidenceFingerprint": "sha256:c0ad92ab6579725dfe546bc501548a92",
+      "evidenceCount": 127,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "6.2",
+      "verdict": "C",
+      "justification": "Tous les liens harvestes ont un intitule non vide entre <a> et </a> ou un nom accessible equivalent (aria-label), confirme par l'echantillon (liens footer, boutons de deconnexion, liens de telechargement avec aria-label).",
+      "citations": [
+        {
+          "file": "src/modules/layout/Footer/FooterBottom.tsx",
+          "line": 54,
+          "selector": "a",
+          "snippet": "<a href=\"https://github.com/etalab/licence-ouverte/blob/master/LO.md\" rel=\"noopener noreferrer\" target=\"_blank\" >"
+        }
+      ],
+      "evidenceFingerprint": "sha256:c0ad92ab6579725dfe546bc501548a92",
+      "evidenceCount": 127,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "7.1",
+      "verdict": "C",
+      "justification": "Les composants d'interface pilotes par script exposent nom/role/etat via une API d'accessibilite standard: modales avec role=dialog+aria-modal+aria-labelledby (ThemeModal.tsx, SubmitModal.tsx), menu avec role=menu/menuitem (UserAccountMenu.tsx), bouton d'expansion avec aria-expanded/aria-controls (sidemenu, mobile menu), tri de colonne avec aria-sort (DeclarationTable.tsx). Aucun div/span clickable non semantique trouve (recherche negative sur onClick sur div/span dans packages/app/src).",
+      "citations": [
+        {
+          "file": "src/modules/layout/Footer/ThemeModal.tsx",
+          "line": 9,
+          "selector": "div#fr-theme-modal.fr-modal",
+          "snippet": "<div aria-labelledby=\"fr-theme-modal-title\" aria-modal=\"true\" className=\"fr-modal\" id=\"fr-theme-modal\" role=\"dialog\" >"
+        },
+        {
+          "file": "src/modules/layout/Header/UserAccountMenu.tsx",
+          "line": 139,
+          "selector": "div.{styles.menu}",
+          "snippet": "<div aria-labelledby=\"user-account-menu-button\" className={styles.menu} role=\"menu\" >"
+        }
+      ],
+      "evidenceFingerprint": "sha256:4df31d00590093b2e4f496b9cbebc68a",
+      "evidenceCount": 72,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "7.2",
+      "verdict": "manual",
+      "reason": "undecidable",
+      "evidenceFingerprint": "sha256:cbaa70ac1e56598c86d658d5749a6f44",
+      "evidenceCount": 79,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "7.3",
+      "verdict": "manual",
+      "reason": "needs-rendered-dom",
+      "evidenceFingerprint": "sha256:13616aa321f7113edd9493633a4649d6",
+      "evidenceCount": 9,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "7.4",
+      "verdict": "C",
+      "justification": "Les gestionnaires onChange harvestes ne font que mettre a jour un etat local (React useState/formulaire) ou un filtre — aucun n'initie de navigation, soumission ou changement de fenetre directement depuis le changement de valeur. Les changements de contexte reels (navigation, soumission) sont toujours declenches par une action explicite (bouton/lien), conforme au test 7.4.1.",
+      "citations": [
+        {
+          "file": "src/modules/admin/settings/CampaignDeadlinesForm.tsx",
+          "line": 122,
+          "selector": "handler",
+          "snippet": "onChange={(e) => setSelectedYear(Number(e.target.value))}"
+        },
+        {
+          "file": "src/modules/declaration-remuneration/shared/SubmitDeclarationModal.tsx",
+          "line": 65,
+          "selector": "handler",
+          "snippet": "onChange={(e) => setCertified(e.target.checked)}"
+        }
+      ],
+      "evidenceFingerprint": "sha256:0067177813d2056fbf3efa3833bc52da",
+      "evidenceCount": 54,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "8.1",
+      "verdict": "manual",
+      "reason": "undecidable",
+      "evidenceFingerprint": "sha256:7ce7e45f1b984550f09f05bea0b9aa3d",
+      "evidenceCount": 1,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "8.2",
+      "verdict": "manual",
+      "reason": "undecidable",
+      "evidenceFingerprint": "sha256:2201966be7ebff5664e347b64fa4b3ec",
+      "evidenceCount": 68,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "8.4",
+      "verdict": "C",
+      "justification": "L'element <html lang=\"fr\"> est present sur toutes les pages harvestees et le code de langue 'fr' est valide et pertinent: le contenu textuel du site (visible dans tous les extraits harvestes) est redige en francais, conforme a la politique linguistique du projet (site en francais).",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/admin-declarations/dom.html",
+          "line": 2,
+          "selector": "html",
+          "snippet": "<html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, i"
+        }
+      ],
+      "evidenceFingerprint": "sha256:c38d8e6e141176f3bb461d913ff80115",
+      "evidenceCount": 1,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "8.6",
+      "verdict": "C",
+      "justification": "Les titres de page (<title>) harvestes sont tous pertinents, uniques et decrivent precisement le contenu de la page (ex. 'Etape 1 sur 6 — Effectifs physiques...', 'Liste des referents — Egapro', 'Aide et ressources — Egapro'). Note: l'entree vide '<title></title>' de la page 'stats' correspond a un element SVG interne du graphique recharts, pas au titre de document HTML (<head><title>), donc hors perimetre de ce critere.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/declaration-etape-1/dom.html",
+          "line": 2,
+          "selector": "title",
+          "snippet": "<title>Étape 1 sur 6 — Effectifs physiques pris en compte pour le calcul des indicateurs — Egapro</title>"
+        },
+        {
+          "file": ".ultra11y/pages/referents/dom.html",
+          "line": 2,
+          "selector": "title",
+          "snippet": "<title>Référents Égalité Professionnelle — Egapro</title>"
+        }
+      ],
+      "evidenceFingerprint": "sha256:40cb977f81a0c92bfdeda6e57c4064fc",
+      "evidenceCount": 36,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "8.7",
+      "verdict": "C",
+      "justification": "Les 'passages en langue etrangere' signales par le harvester sont en realite tous soit du francais courant (ex. 'Ministere du travail et des solidarites', 'Mon espace'), soit des mots d'usage courant exemptes par la note technique (ex. 'Version' dans AppVersion.tsx), soit des faux positifs provenant de commentaires de code (JSX comments) sans texte affiche a l'utilisateur. Aucun passage reellement redige dans une langue differente du francais par defaut n'a ete identifie sur le site.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Footer/AppVersion.tsx",
+          "line": 25,
+          "selector": "a.fr-footer__bottom-link",
+          "snippet": "<a className=\"fr-footer__bottom-link\" href={href} rel=\"noopener noreferrer\" target=\"_blank\" >"
+        }
+      ],
+      "evidenceFingerprint": "sha256:71ae7a2c96ec22669068cbbee00d2bfe",
+      "evidenceCount": 31,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "8.8",
+      "verdict": "NA",
+      "justification": "Aucun changement de langue reel n'existe dans le contenu du site (cf. constat 8.7: tous les passages signales sont du francais ou des faux positifs), donc aucun code de langue de changement a evaluer.",
+      "evidenceFingerprint": "sha256:71ae7a2c96ec22669068cbbee00d2bfe",
+      "evidenceCount": 31,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "8.9",
+      "verdict": "C",
+      "justification": "Les balises harvestees sont utilisees pour leur semantique reelle et non a des fins de presentation: <h1> pour les titres de page/modale ('Connexion de developpement', 'Parametres d'affichage'), <ol>/<ul> pour les listes de navigation/contenu (breadcrumb, footer, nav), pas de fausse mise en forme via balises structurelles.",
+      "citations": [
+        {
+          "file": "src/app/dev-login/page.tsx",
+          "line": 32,
+          "selector": "h1",
+          "snippet": "<h1>Connexion de développement</h1>"
+        },
+        {
+          "file": "src/modules/layout/Breadcrumb.tsx",
+          "line": 36,
+          "selector": "ol.fr-breadcrumb__list",
+          "snippet": "<ol className=\"fr-breadcrumb__list\">"
+        }
+      ],
+      "evidenceFingerprint": "sha256:3e9e621072333641af9e0f2246a342fa",
+      "evidenceCount": 488,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "8.10",
+      "verdict": "NA",
+      "justification": "Aucun texte bidirectionnel (arabe/hebreu) n'existe dans le contenu du site (plateforme francaise monolingue). L'evidence harvestee concerne exclusivement des reordonnancements CSS (flexDirection: row-reverse sur des groupes de boutons), qui relevent de l'ordre visuel de composants d'interface et non du sens de lecture d'un texte au sens du critere 8.10 (attribut dir). Aucun changement de sens de lecture au sens RGAA n'est present.",
+      "evidenceFingerprint": "sha256:c78a3b595c0a656e8761008b14e2709a",
+      "evidenceCount": 75,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "9.1",
+      "verdict": "C",
+      "justification": "Les titres harvestes sont structures avec des balises <hx> semantiques (h1 pour le titre principal ou de modale, h2/h3 pour les sections) et leur contenu est pertinent, verifie sur plusieurs pages (h1 'Connexion de developpement', h1 'Parametres d'affichage' dans la modale ThemeModal).",
+      "citations": [
+        {
+          "file": "src/app/dev-login/page.tsx",
+          "line": 32,
+          "selector": "h1",
+          "snippet": "<h1>Connexion de développement</h1>"
+        },
+        {
+          "file": "src/modules/layout/Footer/ThemeModal.tsx",
+          "line": 31,
+          "selector": "h1#fr-theme-modal-title.fr-modal__title",
+          "snippet": "<h1 class=\"fr-modal__title\" id=\"fr-theme-modal-title\"><span aria-hidden=\"true\" class=\"fr-icon-theme-fill fr-icon--lg\"></span>Paramètres d'affichage</h1>"
+        }
+      ],
+      "evidenceFingerprint": "sha256:d7069abf41a27dc150c21f36477ccab9",
+      "evidenceCount": 464,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "9.2",
+      "verdict": "C",
+      "justification": "La structure de document utilise les balises semantiques attendues: <header> (Header/index.tsx), <nav> pour chaque zone de navigation avec aria-label distinct evitant l'ambiguite (breadcrumb 'vous etes ici :', header navbar 'Acces rapides', navigation principale 'Menu principal'), <main id=\"content\" tabindex=\"-1\"> unique par page (cible du lien d'evitement), <footer id=\"footer\">.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Header/Navigation.tsx",
+          "line": 7,
+          "selector": "nav#navigation-main.fr-nav",
+          "snippet": "<nav aria-label=\"Menu principal\" className=\"fr-nav\" id=\"navigation-main\">"
+        },
+        {
+          "file": ".ultra11y/pages/admin-declarations/dom.html",
+          "line": 2,
+          "selector": "main#content.AdminShell-module-scss-module__0vPCMq__content",
+          "snippet": "<main class=\"AdminShell-module-scss-module__0vPCMq__content\" id=\"content\" tabindex=\"-1\"><div class=\"fr-container fr-py-4w\"><h1 class=\"fr-h3 fr-mb-4w\">Déclaratio"
+        }
+      ],
+      "evidenceFingerprint": "sha256:d601d013056391febd06f3e1d639210b",
+      "evidenceCount": 26,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "9.3",
+      "verdict": "C",
+      "justification": "Les regroupements visuels de type liste utilisent les balises HTML natives <ul>/<ol> avec des <li> (breadcrumb ol.fr-breadcrumb__list, footer ul.fr-footer__content-list, navigation ul.fr-nav__list), conforme au test 9.3.1/9.3.2.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Breadcrumb.tsx",
+          "line": 36,
+          "selector": "ol.fr-breadcrumb__list",
+          "snippet": "<ol className=\"fr-breadcrumb__list\">"
+        },
+        {
+          "file": "src/modules/layout/Footer/FooterBody.tsx",
+          "line": 27,
+          "selector": "ul.fr-footer__content-list",
+          "snippet": "<ul className=\"fr-footer__content-list\">"
+        }
+      ],
+      "evidenceFingerprint": "sha256:2f3bfb1b16ec66ffb64b42d6ea0e0735",
+      "evidenceCount": 125,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "9.4",
+      "verdict": "NA",
+      "justification": "egapro est une plateforme transactionnelle de declaration administrative (formulaires, tableaux de bord, listes) sans contenu editorial de type citation/temoignage. Aucun passage de texte visuellement presente comme une citation courte ou un bloc de citation n'a ete identifie dans l'echantillon harveste.",
+      "evidenceFingerprint": "sha256:3e9e621072333641af9e0f2246a342fa",
+      "evidenceCount": 488,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "10.8",
+      "verdict": "C",
+      "justification": "Les contenus caches suivent la convention correcte du projet: aria-hidden=true sur les icones/svg purement decoratifs (fr-icon-*, svg.fr-artwork), tandis que les spans fr-sr-only (destines a etre restitues par les technologies d'assistance, ex. NewTabNotice '(ouvre une nouvelle fenetre)', titres de section sr-only) ne portent jamais aria-hidden. Aucune confusion entre les deux mecanismes n'a ete identifiee.",
+      "citations": [
+        {
+          "file": "src/modules/layout/shared/NewTabNotice.tsx",
+          "line": 3,
+          "selector": "span.fr-sr-only",
+          "snippet": "<span class=\"fr-sr-only\"> (ouvre une nouvelle fenêtre)</span></a></li><li><a class=\"fr-link fr-icon-external-link-line fr-link--icon-right\" href=\"https://www.le"
+        },
+        {
+          "file": "src/modules/layout/shared/DsfrPictogram.tsx",
+          "line": 15,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorative\" href=\"/dsfr/artwork/pictograms/docu"
+        }
+      ],
+      "evidenceFingerprint": "sha256:0dcf0dca7303f56089ec3548bc6ddade",
+      "evidenceCount": 175,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "10.9",
+      "verdict": "C",
+      "justification": "Les passages signales par le detecteur heuristique ('cliquez sur le bouton ci-dessous', 'Choisissez une annee dans la liste') referencent des elements (bouton, liste) qui portent chacun un intitule textuel propre (verifie ailleurs dans l'evidence: labels/aria-label sur les boutons et selects concernes) — la position/forme n'est donc jamais le seul vecteur d'information, ces formulations restent des references d'usage courant en plus du libelle reel du composant.",
+      "citations": [
+        {
+          "file": "src/modules/cseOpinion/components/SubmissionBanner.tsx",
+          "line": 43,
+          "selector": "text",
+          "snippet": "Sinon, cliquez sur le bouton ci-dessous."
+        },
+        {
+          "file": "src/modules/admin/settings/CampaignDeadlinesForm.tsx",
+          "line": 115,
+          "selector": "text",
+          "snippet": "Choisissez une année dans la liste. Les champs ci-dessous"
+        }
+      ],
+      "evidenceFingerprint": "sha256:32302d79b6cc92cb065b637352555726",
+      "evidenceCount": 22,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "10.10",
+      "verdict": "C",
+      "justification": "Les references par position/forme des composants sont accompagnees d'un libelle textuel propre a chaque composant reference (bouton, select), rendant la mise en oeuvre pertinente et non ambigue meme sans percevoir la position/forme.",
+      "citations": [
+        {
+          "file": "src/modules/cseOpinion/components/SubmissionBanner.tsx",
+          "line": 43,
+          "selector": "text",
+          "snippet": "Sinon, cliquez sur le bouton ci-dessous."
+        }
+      ],
+      "evidenceFingerprint": "sha256:32302d79b6cc92cb065b637352555726",
+      "evidenceCount": 22,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "11.1",
+      "verdict": "C",
+      "justification": "Chaque champ de formulaire harveste possede une etiquette: <label for=...> associe par id (radios de theme), ou aria-label direct sur l'input (ex. 'Nombre de femmes'), conforme au projet qui impose react-hook-form + useZodForm avec label htmlFor systematique.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/aide/dom.html",
+          "line": 2,
+          "selector": "input#fr-radio-theme-light",
+          "snippet": "<input id=\"fr-radio-theme-light\" type=\"radio\" name=\"fr-radios-theme\" value=\"light\"><label class=\"fr-label\" for=\"fr-radio-theme-light\">Thème clair</label></div><"
+        }
+      ],
+      "evidenceFingerprint": "sha256:fc62a77e45451b2aeef95db20baefea2",
+      "evidenceCount": 127,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "11.2",
+      "verdict": "C",
+      "justification": "Les etiquettes harvestees decrivent avec precision la fonction exacte du champ ('Thème clair', 'Favorable', 'Défavorable', 'Date de l'avis rendu par le CSE', 'Nombre de femmes'), sans ambiguite.",
+      "citations": [
+        {
+          "file": "src/modules/cseOpinion/components/AccuracyOpinionCard.tsx",
+          "line": 41,
+          "selector": "input#{`${id}-favorable`}",
+          "snippet": "<input checked={opinion === \"favorable\"} disabled={readOnly} id={`${id}-favorable`} name={`${id}-opinion`} onChange={() =>"
+        }
+      ],
+      "evidenceFingerprint": "sha256:fc62a77e45451b2aeef95db20baefea2",
+      "evidenceCount": 127,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "11.3",
+      "verdict": "C",
+      "justification": "Les champs de meme fonction reutilises via des composants partages (PhoneField, ReferentFormFields pour le SIREN/nom/region, DevLoginForm/ImpersonateForm pour le SIREN) portent une etiquette identique et coherente a chaque occurrence, garantissant la coherence terminologique dans et entre les pages.",
+      "citations": [
+        {
+          "file": "src/modules/admin/impersonate/ImpersonateForm.tsx",
+          "line": 74,
+          "selector": "input#impersonate-siren.fr-input",
+          "snippet": "<input aria-describedby={ sirenError ? \"impersonate-siren-error\" : undefined } aria-invalid={Boolean(sirenError)} aria-required=\""
+        }
+      ],
+      "evidenceFingerprint": "sha256:bbe91ff6bf2969325f36e55719f2eeb6",
+      "evidenceCount": 135,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "11.4",
+      "verdict": "C",
+      "justification": "Le motif DSFR fr-label place systematiquement l'etiquette immediatement au-dessus/avant le champ (input.fr-input) dans le flux visuel et le code source, et au-dessous/a droite pour les radios/checkbox (fr-radio-group), conforme aux tests 11.4.2/11.4.3.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/aide/dom.html",
+          "line": 2,
+          "selector": "input#fr-radio-theme-light",
+          "snippet": "<input id=\"fr-radio-theme-light\" type=\"radio\" name=\"fr-radios-theme\" value=\"light\"><label class=\"fr-label\" for=\"fr-radio-theme-light\">Thème clair</label></div><"
+        }
+      ],
+      "evidenceFingerprint": "sha256:fc62a77e45451b2aeef95db20baefea2",
+      "evidenceCount": 127,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "11.8",
+      "verdict": "NA",
+      "justification": "Aucun <select> de l'application ne presente d'items necessitant un regroupement par nature (listes plates: annees de campagne, regions, sources de donnees) — aucune hierarchie categorielle n'est requise, donc aucun regroupement optgroup n'est necessaire.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/declaration-etape-5/dom.html",
+          "line": 2,
+          "selector": "select#source-select.fr-select",
+          "snippet": "<select aria-invalid=\"false\" class=\"fr-select\" id=\"source-select\" name=\"source\"><option disabled=\"\" value=\"\">Sélectionner une option</option><option value=\"acco"
+        }
+      ],
+      "evidenceFingerprint": "sha256:fc62a77e45451b2aeef95db20baefea2",
+      "evidenceCount": 127,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "11.10",
+      "verdict": "C",
+      "justification": "Les champs obligatoires portent aria-required=true ou required avant validation (ex. cse-submit-certify, impersonate-siren, profile-phone), et les erreurs de champ obligatoire sont signalees via aria-invalid + un message d'erreur visible associe par aria-describedby (FormErrors.tsx), conforme aux tests 11.10.1/11.10.3.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/admin-impersonate/dom.html",
+          "line": 2,
+          "selector": "input#impersonate-siren.fr-input",
+          "snippet": "<input aria-invalid=\"false\" aria-required=\"true\" autocomplete=\"off\" class=\"fr-input\" id=\"impersonate-siren\" inputmode=\"numeric\" list=\"impersonate-siren-list\" ty"
+        }
+      ],
+      "evidenceFingerprint": "sha256:6b07e2a4e4f6f8b97e114ac6ff13156f",
+      "evidenceCount": 180,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "12.1",
+      "verdict": "C",
+      "justification": "L'ensemble de pages dispose d'au moins deux systemes de navigation distincts: un menu de navigation principal (nav#navigation-main, aria-label='Menu principal') et une page 'plan du site' (/plan-du-site, verifiee dans src/app/plan-du-site/page.tsx), satisfaisant la premiere condition alternative du test 12.1.1.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Header/Navigation.tsx",
+          "line": 7,
+          "selector": "nav#navigation-main.fr-nav",
+          "snippet": "<nav aria-label=\"Menu principal\" className=\"fr-nav\" id=\"navigation-main\">"
+        }
+      ],
+      "evidenceFingerprint": "sha256:13f474ca172f354e87403a8ccdfecae7",
+      "evidenceCount": 21,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "12.5",
+      "verdict": "NA",
+      "justification": "Le critere 12.1 est deja satisfait par la combinaison menu+plan du site; la fonctionnalite de recherche d'entreprise (HomeSearchForm) n'est presente que sur la page d'accueil et ne constitue pas un 'moteur de recherche' au sens du contenu du site (c'est une recherche metier ponctuelle, pas une recherche documentaire sitewide) — le critere n'a donc pas d'objet applicable au sens de 12.1/12.5.",
+      "evidenceFingerprint": "sha256:7fc1c895fe40988d680cb6e01755d0de",
+      "evidenceCount": 102,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "12.6",
+      "verdict": "C",
+      "justification": "Les zones de regroupement portent chacune un role landmark natif distinctement etiquete: header (Header/index.tsx), nav avec aria-label ('vous etes ici :', 'Acces rapides', 'Menu principal'), main#content atteignable via le lien d'evitement (SkipLinks), footer#footer. Chaque zone peut donc etre atteinte/evitee.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/aide/dom.html",
+          "line": 2,
+          "selector": "nav.fr-breadcrumb",
+          "snippet": "<nav aria-label=\"vous êtes ici :\" class=\"fr-breadcrumb\" data-fr-js-breadcrumb=\"true\"><button aria-controls=\"breadcrumb-_R_5bsnmtb_\" aria-expanded=\"false\" class="
+        }
+      ],
+      "evidenceFingerprint": "sha256:d601d013056391febd06f3e1d639210b",
+      "evidenceCount": 26,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "12.7",
+      "verdict": "C",
+      "justification": "SkipLinks (rendu en premier enfant de <body> via layout.tsx) fournit un lien 'Contenu' vers #content, cible du <main id=\"content\" tabindex=\"-1\">; ce lien d'evitement est present sur toutes les pages via le layout partage, a la meme place et dans le meme ordre relatif, et fonctionnel.",
+      "citations": [
+        {
+          "file": "src/modules/layout/shared/SkipLinks.tsx",
+          "line": 21,
+          "selector": "nav.fr-container",
+          "snippet": "<nav aria-label=\"Accès rapide\" class=\"fr-container\"><ul class=\"fr-skiplinks__list\"><li><a class=\"fr-link\" href=\"#content\">Contenu</a></li></ul></nav></div><head"
+        }
+      ],
+      "evidenceFingerprint": "sha256:d601d013056391febd06f3e1d639210b",
+      "evidenceCount": 26,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "12.9",
+      "verdict": "manual",
+      "reason": "needs-rendered-dom",
+      "evidenceFingerprint": "sha256:13616aa321f7113edd9493633a4649d6",
+      "evidenceCount": 9,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.1",
+      "verdict": "NA",
+      "justification": "Aucun procede de rafraichissement automatique, de redirection meta/script, ni de limite de session modifiant le contenu n'existe: le seul minuteur applicatif harveste (CopyEmailButton.tsx) reinitialise apres 2s un etat visuel de confirmation ('copie !') sans modifier le contenu porteur d'information ni la session; le second est un mecanisme interne de streaming React ($RC, non lie a une limite de temps utilisateur).",
+      "citations": [
+        {
+          "file": "src/modules/aide/CopyEmailButton.tsx",
+          "line": 29,
+          "selector": "timer",
+          "snippet": "timerRef.current = setTimeout(() => setState(\"idle\"), 2000);"
+        }
+      ],
+      "evidenceFingerprint": "sha256:8382c9dcf2e691df9bb1bdca5c9da314",
+      "evidenceCount": 2,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.2",
+      "verdict": "C",
+      "justification": "Les gestionnaires harvestes sont tous des onChange de mise a jour d'etat, jamais des ouvertures de fenetre (window.open); les liens target=_blank observes ailleurs ne s'ouvrent que sur action explicite de clic de l'utilisateur, jamais automatiquement au chargement.",
+      "citations": [
+        {
+          "file": "src/modules/cseOpinion/components/AccuracyOpinionCard.tsx",
+          "line": 46,
+          "selector": "handler",
+          "snippet": "onChange={() => onOpinionChange(\"favorable\")}"
+        }
+      ],
+      "evidenceFingerprint": "sha256:0067177813d2056fbf3efa3833bc52da",
+      "evidenceCount": 54,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.3",
+      "verdict": "manual",
+      "reason": "undecidable",
+      "evidenceFingerprint": "sha256:cdefeb84cc6cd0d7a3d11fcb6a2c3342",
+      "evidenceCount": 1,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.4",
+      "verdict": "manual",
+      "reason": "undecidable",
+      "evidenceFingerprint": "sha256:cdefeb84cc6cd0d7a3d11fcb6a2c3342",
+      "evidenceCount": 1,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.5",
+      "verdict": "NA",
+      "justification": "Aucun contenu cryptique (art ASCII, emoticone, syntaxe cryptique) n'a ete identifie dans l'application: l'evidence harvestee (svg/img decoratifs, graphiques) ne comporte aucun tel contenu textuel.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/aide/dom.html",
+          "line": 2,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorative\" href=\"/dsfr/artwork/pictograms/docu"
+        }
+      ],
+      "evidenceFingerprint": "sha256:5004834ad357b79f99c26d5da2b8910f",
+      "evidenceCount": 11,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.6",
+      "verdict": "NA",
+      "justification": "Aucun contenu cryptique n'existe dans l'application (cf. constat 13.5), donc aucune pertinence d'alternative a evaluer.",
+      "evidenceFingerprint": "sha256:5004834ad357b79f99c26d5da2b8910f",
+      "evidenceCount": 11,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.7",
+      "verdict": "NA",
+      "justification": "L'evidence harvestee ('motion') correspond uniquement a des appels requestAnimationFrame utilises pour du positionnement/focus programmatique (attente de stabilisation du DOM avant focus, ex. MobileUserBlock.tsx, Step4QuartileDistribution.tsx) — aucun effet visuel de flash ou de changement brusque de luminosite (animation CSS clignotante, strobe) n'existe dans le code source.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Header/MobileUserBlock.tsx",
+          "line": 70,
+          "selector": "motion",
+          "snippet": "frame = window.requestAnimationFrame(settle);"
+        }
+      ],
+      "evidenceFingerprint": "sha256:c7872cf3999a7f09a0706c6a6e5efda9",
+      "evidenceCount": 7,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.8",
+      "verdict": "NA",
+      "justification": "L'evidence harvestee ('motion'/'timer') correspond a des appels requestAnimationFrame de positionnement de focus et a un minuteur de reinitialisation d'etat de bouton (2s) — aucun contenu en mouvement, defilant ou clignotant de maniere continue n'existe dans l'application.",
+      "citations": [
+        {
+          "file": "src/modules/aide/CopyEmailButton.tsx",
+          "line": 29,
+          "selector": "timer",
+          "snippet": "timerRef.current = setTimeout(() => setState(\"idle\"), 2000);"
+        }
+      ],
+      "evidenceFingerprint": "sha256:f740db41b27377b351d4bf6bcbb7382d",
+      "evidenceCount": 9,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.11",
+      "verdict": "C",
+      "justification": "Les elements interactifs harvestes utilisent onClick (declenchement au relachement du dispositif de pointage, evenement 'click' natif), jamais onMouseDown/onPointerDown pour executer l'action; aucune action n'est declenchee a la pression, satisfaisant la premiere condition alternative du test 13.11.1.",
+      "citations": [
+        {
+          "file": "src/modules/layout/shared/NavLink.tsx",
+          "line": 19,
+          "selector": "Link.{className}",
+          "snippet": "<Link aria-current={isActive ? \"page\" : undefined} className={className} href={href} onClick={onClick} >"
+        }
+      ],
+      "evidenceFingerprint": "sha256:c9ce902958b0155b418fc04a02334926",
+      "evidenceCount": 4,
+      "date": "2026-08-18",
+      "decidedBy": "agent"
+    }
+  ]
+}

@@ -97,4 +97,4 @@ Protocole côté `code-dev` :
    - Re-lire le node Figma via `mcp__figma__get_design_context` et confirmer que chaque propriété est maintenant alignée
    - `mcp__figma__get_screenshot` uniquement pour les cas ambigus (typiquement bold cell-by-cell sur tableaux où l'API ne révèle que le style dominant)
 4. **Inclure des screenshots dev server** (desktop + mobile) dans le body de la PR — c'est le signal visuel pour la review humaine
-5. **Pas de test E2E de record** sur le pixel-perfect : Lighthouse couvre l'a11y, la fidélité visuelle reste en revue humaine + check structurel agent
+5. **Pas de test E2E de record** sur le pixel-perfect : ultra11y couvre l'a11y (agent `rgaa-auditor` + workflow `a11y.yaml`), la fidélité visuelle reste en revue humaine + check structurel agent

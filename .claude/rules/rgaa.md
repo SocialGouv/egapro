@@ -1,70 +1,157 @@
----
-paths:
-  - "src/**/*.tsx"
-  - "src/**/*.scss"
----
-
-> **Used by**: `code-dev` (écriture composants + styles), `rgaa-auditor` (gate a11y), `review-fixer`, `design-validator` (déféré). Auto-chargé via `paths:`. **Règle canonique d'accessibilité du projet** — les autres docs (`CLAUDE.md`, `packages/app/CLAUDE.md`, `automation.md`) y renvoient.
-
 # Accessibilité — RGAA 4.1.2 / WCAG 2.2 AA
 
-egapro est une plateforme de l'État : le niveau de conformité visé est **RGAA 4.1.2** (13 thématiques / 106 critères), socle technique **WCAG 2.2 niveau AA**. C'est une **exigence first-class**, au même titre que la sécurité ou les règles métier — pas une amélioration optionnelle.
+> **Used by**: `rgaa-auditor`, `code-dev`, `review-fixer`, et toute session qui touche du `.tsx`.
 
-## Le système a11y du projet : ultra11y
+egapro est une plateforme de l'État : le niveau visé est **RGAA 4.1.2** (13 thématiques, 106 critères), socle technique **WCAG 2.2 niveau AA**. Exigence first-class, au même titre que la sécurité — pas une amélioration optionnelle.
 
-L'outil d'accessibilité du projet est **ultra11y**, vendoré dans le repo à **`.claude/skills/ultra11y/`** — committé pour que **tous les devs** l'aient automatiquement (skill projet-scopé + moteur CLI zéro-dép, pas d'install par dev). Source : `github.com/maxgfr/ultra11y` (v2.14.0, MIT).
+## Un seul dispositif : ultra11y
 
-**Toute la logique d'accessibilité passe par le dispositif ultra11y** — il n'y a pas de système a11y parallèle. Le dispositif se décline en tiers complémentaires : le **moteur** (`node .claude/skills/ultra11y/scripts/ultra11y.mjs`) fait la détection mécanique WCAG statique et rattache chaque non-conformité au bon critère ; **l'IA adjuge** les critères de jugement (pertinence des `alt`, intitulé de lien en contexte, ordre de lecture, logique clavier/focus) ; et les critères « au rendu » (contraste/zoom/reflow/focus visible), non statiquement décidables, sont routés vers le **tier rendu du dispositif**, assuré en CI par la gate Lighthouse a11y 100 %. Jamais de statut « conforme » sans verdict enregistré et gaté.
+L'outil est **ultra11y** (`github.com/maxgfr/ultra11y`, MIT). Il n'y a **pas** de second système d'accessibilité dans ce dépôt, et c'est délibéré : deux jeux de règles sur un même sujet divergent, et celui qui n'a pas de moteur derrière lui est celui qui invente des non-conformités.
 
-| Besoin | Commande (depuis `packages/app`) |
+Il se décline en **deux surfaces**, et deux seulement.
+
+### 1. La revue, par un sous-agent
+
+L'agent **`rgaa-auditor`** lance le skill **`review-a11y`** sur le code sous changement, et rend son verdict. C'est tout ce qu'il fait — il ne recopie ni grille de critères ni liste de règles. Le skill cadre l'audit sur le diff, lance le moteur, réfute les faux positifs, tranche les critères de jugement depuis la source et nomme les critères de rendu comme risques résiduels.
+
+Le skill vient du **plugin**, déclaré dans `.claude/settings.json` (`extraKnownMarketplaces` + `enabledPlugins`) : la marketplace s'enregistre dès qu'un dev fait confiance au dossier, puis une commande, une fois — `claude plugin install ultra11y@ultra11y`. Le plugin apporte aussi le skill **`ultra11y`** (audits complets, rapports de conformité) et un hook `PreToolUse` qui arrête un `git commit` / `git push` / `gh pr create` porteur de non-conformités.
+
+Coupe-circuits du hook : `SKIP_A11Y=1` (une commande), `ULTRA11Y_HOOK=off` (une session), `"hook": { "failOn": "off" }` dans `.ultra11yrc.json` (le dépôt).
+
+### 2. L'analyse, par la GitHub Action
+
+`.github/workflows/a11y.yaml`, trois jobs, tous portés par `maxgfr/ultra11y@v5.x` :
+
+| Job | Quand | Ce qu'il fait |
+|---|---|---|
+| `a11y-gate` | push + PR | Audit statique JSX/TSX du package. **Bloquant** (`fail-on: blocking`). SARIF + annotations + commentaire de PR sticky (`comment-kind: digest` — les défauts distincts, actionnables en revue). |
+| `a11y-pages` | PR → `alpha`, hebdo, manuel | La suite Playwright `src/e2e/a11y/` enregistre **35 pages** en épinglant l'état applicatif que chaque écran de tunnel exige ; l'Action réingère les instantanés et décide les critères **au rendu** depuis eux (contraste calculé, information par la couleur, contraste des composants, visibilité du focus, verrou d'orientation), **rejoue le registre de verdicts** pour les critères de jugement, et — hors PR seulement — fait adjuger le reste par une passe Claude Code (secret `CLAUDE_CODE_OAUTH_TOKEN`). Poste son propre commentaire de PR (`comment-kind: pages`) : une ligne par page avec sa base et ses compteurs (conformes / non conformes / à évaluer), puis les critères non conformes de chaque page en échec. Pas de pourcentage — un taux sur les seuls critères décidés se lit comme une note de page ; il reste dans la fiche de l'artefact, avec sa couverture. Les constats ne bloquent pas — on mesure. Une panne, si. |
+| `a11y-report` | hebdo, manuel | Rapport RGAA daté, sans navigateur. Le plancher garanti si `a11y-pages` tombe — et il rejoue le registre, donc il n'est plus amputé de ses critères de jugement. |
+
+`gate-adjudicated` reste à `false` : la gate ré-audite la **source**, donc le rouge/vert reste une fonction pure du commit, quoi qu'un modèle ait dit.
+
+### Le registre de verdicts : comment la CI rend la grille complète, sans modèle
+
+`packages/app/.ultra11y/verdicts/rgaa.json` est **versionné** (une exception explicite dans
+`packages/app/.gitignore`, qui ignore tout le reste de `.ultra11y/`). Il contient un verdict par
+critère de jugement déjà tranché : son statut, sa justification, ses citations, et une
+**empreinte de l'évidence** contre laquelle il a été rendu.
+
+Les trois jobs le **rejouent** (`ledger:`). Ce n'est pas un cache : chaque verdict repasse la
+même porte que le jour où il a été écrit — mêmes contrôles de couverture dans les deux sens,
+mêmes citations à prouver contre l'évidence propre du critère, même re-grounding du `file:line`
+contre la source réelle. Un verdict qu'on ne peut plus prouver est refusé en CI exactement comme
+il le serait en session.
+
+Trois propriétés à connaître :
+
+| Propriété | Conséquence |
 |---|---|
-| Gate CI statique (bloquant) | `pnpm --filter app test:a11y` |
-| Rapport RGAA complet | `pnpm --filter app a11y:report` → `audits/rgaa-*.md` |
-| Sens d'un critère | `node ../../.claude/skills/ultra11y/scripts/ultra11y.mjs criteria --standard rgaa 8.3` |
+| **Un verdict périmé est écarté, jamais reconduit** | Quand le code sous un critère change, l'évidence change, l'empreinte ne correspond plus : le critère retourne « à évaluer » en le disant (date d'enregistrement + les deux comptes d'évidence). Le log nomme chaque critère périmé ou absent. |
+| **Un reformatage n'est pas un changement** | L'empreinte ignore les numéros de ligne, et le rejeu **ré-ancre** les citations sur les lignes du jour. Ajouter un commentaire en tête de fichier n'invalide pas les verdicts qu'il contient. |
+| **Un registre absent ou refusé ne casse rien** | Warning, jamais échec : les critères restent « à évaluer », là où ils seraient sans registre. |
 
-Voir la doc du skill : `.claude/skills/ultra11y/SKILL.md` + `references/*.md` (`judgment.md`, `focus-and-logic.md`, `false-positives.md`).
+**Qui le remplit.** L'adjudication (`adjudicate: agent`) ne tourne plus que sur les runs **hebdo
+et manuel**, et seulement sur ce que le registre ne couvre pas — le rejeu passe avant. Sur une
+**PR**, `adjudicate: none` : la grille est complète, déterministe et **gratuite**. Le registre
+rafraîchi sort dans l'artefact `ultra11y-verdicts-rgaa`, à relire puis committer (la CI ne pousse
+pas elle-même sur une branche protégée pour un fichier de verdicts).
 
-## Vérification (socle) — les 4 tiers du dispositif ultra11y
+En local, la même chose sans CI, depuis `packages/app` :
 
-Toute la vérification a11y relève du dispositif ultra11y, décliné en 4 tiers complémentaires (aucun n'est un système parallèle) :
+```bash
+pnpm exec ultra11y audit src --jsx --graph --standard rgaa --out audits
+pnpm exec ultra11y verify --manual --in audits/audit-latest.json --out audits --standard rgaa
+# … trancher chaque critère (le skill `ultra11y` le pilote) …
+pnpm exec ultra11y verify --apply audits/ADJUDICATE.todo.json --in audits/audit-latest.json \
+  --out audits --standard rgaa --ledger .ultra11y/verdicts/rgaa.json
+```
 
-1. **Tier statique — `pnpm --filter app test:a11y`** : moteur ultra11y (`--fail-on blocking`), lancé **automatiquement** en CI (`.github/workflows/a11y.yaml`, sur chaque push/PR) et en local. Aucune NC bloquante ne doit passer.
-2. **Tier jugement — `rgaa-auditor`** : gate agent après chaque tâche sur les `.tsx` modifiés (pilote ultra11y + adjuge les critères de jugement). Read-only.
-3. **Tier rendu — Lighthouse a11y = 100 %** : `pnpm --filter app test:lighthouse` (seuil bloquant CI dans `.lighthouserc.json`, workflow `lighthouse.yaml`) — couvre les critères « au rendu » (contraste/zoom/reflow/focus visible) que le moteur statique ne peut décider.
-4. **Tier écriture — hook `block-bad-patterns.sh`** : bloque à la frappe les anti-patterns (`<img>` brut, `style={}`, `role` redondant, `<svg>` inline…).
+Le test de parité, celui qui compte : rejouer le registre sur un audit **frais** doit rendre la
+**même grille** que la passe adjugée. Vérifié sur le moteur (`tests/ledger.test.ts`) et de bout
+en bout en pack RGAA.
 
-## Règles while-writing (natif d'abord, ARIA en dernier)
+### Le fold est fail-closed PAR VERDICT (5.4.0)
 
-**Structure & landmarks**
-- Landmarks sémantiques : `<header>`, `<nav>`, `<main id="content" tabindex="-1">`, `<footer>`. Un seul `<main>` par page. **Jamais** de `role` redondant (`role="navigation"` sur `<nav>` interdit).
-- Liens d'évitement : `SkipLinks` en premier enfant du `<body>` ; toute ancre (`#content`, `#footer`) doit avoir une cible valide, sinon ne pas proposer le lien.
-- Hiérarchie de titres continue (pas de saut h1→h3). Apparence via classes `fr-h*`, pas via le niveau de titre. Section sans titre visible → titre `fr-sr-only`.
-- Listes de couples intitulé/valeur → `<dl><dt><dd>`.
+Un verdict refusé coûte **son seul critère** — qui reste « à évaluer » en portant le motif du
+refus — et laisse tous les autres passer. Aucun contrôle n'a été assoupli ; c'est le rayon
+d'explosion qui change. Le défaut mesuré : un run avait rempli 95 verdicts sur 96 correctement,
+un seul revenait `null`, et le fold au niveau du FICHIER a jeté les 96 — donc 16,16 $ pour
+publier « à évaluer » sur toute la grille, dans un job qui se déclarait vert. `--strict` restaure
+l'ancien comportement pour qui veut le tout-ou-rien.
 
-**Tableaux**
-- Tableau de données → `<caption>` (masquable `fr-sr-only` / `fr-table--no-caption`) ou `aria-labelledby` vers un titre existant ; en-têtes `<th scope="col|row">`.
-- Cellule de donnée vide restituée « vide » → texte `fr-sr-only` (ou tiret significatif). Ne pas vider un `<th>`.
+### L'adjudication : ce qu'elle coûte, et le défaut corrigé en 5.3.4
 
-**Formulaires**
-- Chaque `<input>` a un `<label>` associé (`htmlFor`/`id`). Champs de même nature regroupés → `<fieldset>` + `<legend>` (masquable `fr-sr-only`).
-- Champ obligatoire → `aria-required="true"` (placé **avant** le spread `{...register()}`), pas seulement « (obligatoire) » visuel.
-- Erreur → `aria-invalid="true"` conditionnel + `aria-describedby` vers l'id du message ; pas d'`aria-invalid` en l'absence d'erreur.
-- Autocomplétion : renseigner `autocomplete` selon la finalité (`tel`, `email`, `name`…).
-- Lecture seule : `<label>` + `<input readonly>` (pas `<span>`/`<div>`). Éviter `<fieldset disabled>` qui masque le contenu aux AT (NC 10.8) — préférer des `readOnly`/`aria-disabled` par champ.
+Trois runs successifs du même job, sur cette branche :
 
-**Scripts / états dynamiques**
-- Nom/rôle/valeur exposés : `aria-sort` sur `<th>` triables (glyphe `aria-hidden`), `aria-expanded` sur les déclencheurs, `aria-modal="true"` + `role="dialog"` + `aria-labelledby` sur les modales.
-- Régions live : **erreur d'action serveur** → `role="alert"` **seul** (implique `assertive`) ; **info / validation / async** → `aria-live="polite"` + `aria-atomic="true"`. Jamais les deux déclarations en même temps.
-- Une valeur mise à jour à distance du focus (total recalculé, statut) → région `aria-live` stable présente au chargement.
-- Aucun focusable sous `aria-hidden="true"` (piège pour lecteur d'écran). Focus visible et ordre de tabulation logique (pas de `tabindex > 0`).
+| run | coût de la passe agent | résultat |
+|---|---:|---|
+| `32023486480` | **19,81 $** | appliquée (41 critères tranchés, 56 laissés « à évaluer ») |
+| `32033274059` | **21,20 $** | **rejetée** (2 verdicts invalides) |
+| `32061739065` | **16,16 $** | **rejetée** (96 verdicts `null` — l'agent n'avait rien écrit) |
 
-**Liens & images**
-- Intitulés de liens explicites et distincts ; lien de téléchargement → format dans le nom accessible (ex. « … (PDF) »). `target="_blank"` → `<NewTabNotice />`.
-- Images via `import Image from "next/image"` (`<img>` brut bloqué par hook), `alt` descriptif (ou `alt=""` si décoratif). Icônes décoratives `aria-hidden="true"`. Graphique porteur d'information → `<div role="img" aria-label={…}>`.
+**Le défaut, trouvé et corrigé en amont (ultra11y 5.3.4).** L'Action donne à l'agent
+`Read,Grep,Glob,Edit,Write` et **pas de shell**, puis le renvoyait au RUNBOOK, qui dit de
+remplir les verdicts *dans* `ADJUDICATE.todo.json` et de lancer `verify --apply`. Sous RGAA ce
+fichier fait **536 Ko** (96 critères, 1590 ancres d'évidence) : la consigne était donc 96
+éditions exactes dans un demi-mégaoctet, et chaque commande prescrite était refusée — 17 refus
+de permission, 75 tours sur 424, fichier intact. Le fold étant fail-closed, il a correctement
+tout jeté. `verify --manual` écrit désormais aussi un fichier **verdicts seuls** (37 Ko) et une
+fiche par critère (quelques Ko) ; `verify --apply` accepte les deux et **ré-dérive l'évidence
+depuis l'audit**, donc le gate est identique — mêmes contrôles de couverture, mêmes citations à
+prouver, mêmes refus.
 
-**Présentation**
-- Pas de `style={}` (bloqué par hook) ni couleur en dur ; classes DSFR / custom properties / SCSS module. Contenu lisible et non tronqué à 200 % de zoom, en reflow 320 px, et sous surcharge d'espacement (attention aux inputs dans des cellules de tableau).
+**Ce que 5.4.0 change, et ce qui reste vrai :**
 
-## Périmètre & pérennité
+1. **Le coût de 16 à 21 $ par run ne se paie plus sur une PR.** C'était l'arbitrage à trancher ;
+   le registre le supprime plutôt que de l'arbitrer — la PR rejoue, seuls les runs hebdo et
+   manuel adjugent, et seulement ce que le registre ne couvre pas.
+2. **Un seul verdict invalide ne jette plus l'adjudication entière** (fold par verdict). Le
+   critère refusé reste « à évaluer » **en portant le motif du refus**, ce qui est aussi ce qui
+   rend le rapport lisible : plus une case vide, mais une raison.
+3. **Un job vert ne veut toujours pas dire « tout a été évalué ».** Lire `applied:` / `rejected:`
+   dans le log, les avertissements « périmé » et « absent du registre », ou la colonne
+   « À évaluer » du commentaire.
 
-Le dispositif ultra11y remplace l'ancienne suite Playwright RGAA (`playwright.rgaa.config.ts`, `src/e2e/rgaa-audit.spec.ts` + `@axe-core/playwright`, harnais de collecte qui n'assertait rien) et les workflows `rgaa-audit.yaml` (audit quotidien → wiki) + `claude-revue-rgaa.yml`, tous supprimés. **Toute l'accessibilité passe désormais par ce seul dispositif, entièrement automatique** : tier statique (moteur ultra11y en CI, gate bloquante sur chaque push/PR) + tier jugement (`rgaa-auditor`) + tier rendu (Lighthouse a11y 100 %) + tier écriture (hook). Aucun système a11y parallèle, aucun scan Playwright/`.auth` à lancer à la main. Resync du moteur vendoré : `cp ~/.agents/skills/ultra11y/scripts/ultra11y.mjs .claude/skills/ultra11y/scripts/` (ou `npx skills add maxgfr/ultra11y` puis copie).
+## Ce qui n'est PAS le dispositif
+
+- **Lighthouse** mesure un score d'accessibilité et le rapporte en `warn`. Ce n'est pas une gate RGAA : sa notion d'accessibilité n'est pas celle des 106 critères, et deux seuils concurrents sur un même sujet donnent deux verdicts qu'il faut ensuite réconcilier à la main.
+- **`block-bad-patterns.sh`** interdit `<img>` brut, `<svg>` inline, `style={}` et les couleurs en dur. Ce sont des règles **DSFR et Next**, qui servent aussi l'accessibilité — pas un tier d'accessibilité. Elles restent, sous ce titre-là.
+- **`structural-auditor`** ne rapporte plus rien sur l'accessibilité.
+
+## Écrire accessible
+
+Les règles ne sont pas recopiées ici : elles vivent dans les données de standards d'ultra11y, et le skill `ultra11y` les sert par critère (`criteria --standard rgaa 8.3`, `guidance`, `glossary`). Demande-lui plutôt que de te fier à une liste de mémoire.
+
+Le seul principe qui mérite d'être répété, parce qu'il décide de tout le reste : **HTML natif d'abord, ARIA en dernier**. Un `<button>` est accessible ; un `<div role="button">` demande d'écrire à la main le focus, le clavier et l'état, et de ne jamais se tromper. Ne double jamais une sémantique implicite (`role="navigation"` sur `<nav>` est faux, pas redondant).
+
+## Les deux dépendances, et pourquoi elles ne sont pas mortes
+
+`packages/app/package.json` porte deux devDependencies qu'aucun `import` du dépôt ne cite. Les deux sont chargées, et j'ai déjà supprimé la seconde en la croyant morte :
+
+- **`ultra11y`** — le binaire (`pnpm exec ultra11y`) et le plugin Playwright (`ultra11y/playwright`, utilisé par `src/e2e/a11y/snapshot.ts`).
+- **`@axe-core/playwright`** — **aucun import, et pourtant indispensable**. Le moteur ne l'importe pas non plus : il teste s'il se *résout* (`localAvailable`). Si `@playwright/test` **et** `@axe-core/playwright` se résolvent, `scan` utilise le tier navigateur **local** ; sinon il bascule sur Docker, qui ne sait pas porter de session et refuse alors un balayage authentifié. C'est ce qui décide le contraste calculé, le focus visible, le zoom, le reflow et les régions live. Le retirer ne casse aucun `import` — ça dégrade silencieusement l'audit.
+
+Vérifier en une commande, depuis `packages/app` :
+
+```bash
+pnpm exec ultra11y scan <une-page.html> --runtime local --json | head -3
+# doit afficher  "engine": "axe-core@playwright (local)"  — pas "(docker)"
+```
+
+## Bump de version
+
+Deux pins délibérés, à bouger ensemble :
+
+```bash
+pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
+# puis aligner `maxgfr/ultra11y@v<version>` dans .github/workflows/a11y.yaml
+# le plugin se met à jour tout seul depuis sa marketplace
+```
+
+Les deux sont sur **5.4.0**. À noter si un bump échoue : la publication npm de la 5.3.0 est
+tombée sur la signature de provenance (`CA_CREATE_SIGNING_CERTIFICATE_ERROR`, 403 du CA) alors
+que l'échange OIDC avait réussi, et semantic-release ne republie pas un tag existant — le tag
+`v5.3.0` existe donc sans version npm correspondante. C'était transitoire : le commit suivant
+a publié normalement. Si ça se reproduit, le contournement est un nouveau commit releasable,
+pas une republication.
