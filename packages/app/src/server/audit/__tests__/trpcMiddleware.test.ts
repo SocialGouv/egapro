@@ -126,6 +126,40 @@ describe("auditMiddleware", () => {
 		});
 	});
 
+	it("logs the profile update mutation (profile.updateProfile)", async () => {
+		const next = vi.fn(async () => ({ success: true }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "profile.updateProfile",
+			getRawInput: buildGetRawInput({
+				firstName: "Julien",
+				lastName: "Martin",
+				phone: "+33122334455",
+			}),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "profile.update",
+			status: "success",
+		});
+	});
+
+	it("keeps the phone-only profile mutation on its own action key", async () => {
+		const next = vi.fn(async () => ({ success: true }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "profile.updatePhone",
+			getRawInput: buildGetRawInput({ phone: "+33122334455" }),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "profile.update_phone",
+			status: "success",
+		});
+	});
+
 	it("logs sensitive query reads (declaration.getOrCreate)", async () => {
 		const next = vi.fn(async () => ({ declaration: {} }));
 		await auditMiddleware({
@@ -195,6 +229,64 @@ describe("auditMiddleware", () => {
 			credentials: { expiresIn: 3600 },
 			items: [{ name: "ok" }, { name: "ok2" }],
 		});
+	});
+
+	// audit-logging.md forbids duplicating PII that is not already carried by
+	// user_email or siren — the identity of a profile update must never reach
+	// the 365-day `mutation` retention bucket.
+	it("strips the identity PII of a profile update and keeps the rest", async () => {
+		const next = vi.fn(async () => ({ success: true }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "profile.updateProfile",
+			getRawInput: buildGetRawInput({
+				firstName: "Julien",
+				lastName: "Martin",
+				phone: "+33122334455",
+			}),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({
+			phone: "+33122334455",
+		});
+	});
+
+	it("strips the identity keys whatever their casing", async () => {
+		const next = vi.fn(async () => ({ success: true }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "profile.updateProfile",
+			getRawInput: buildGetRawInput({
+				FirstName: "Julien",
+				LASTNAME: "Martin",
+				phone: "+33122334455",
+			}),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({
+			phone: "+33122334455",
+		});
+	});
+
+	it("logs a null metadata rather than an empty object when every key is stripped", async () => {
+		const next = vi.fn(async () => ({ success: true }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "profile.updateProfile",
+			getRawInput: buildGetRawInput({
+				firstName: "Julien",
+				lastName: "Martin",
+			}),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "profile.update",
+			status: "success",
+		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toBeNull();
 	});
 
 	it("returns null metadata when input is empty", async () => {

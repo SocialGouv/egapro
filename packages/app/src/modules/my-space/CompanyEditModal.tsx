@@ -121,7 +121,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 										: "Vérifier les données affichées."}{" "}
 									Si vous constatez une erreur, veuillez{" "}
 									<a
-										className="fr-link fr-icon-external-link-line fr-link--icon-right"
+										className={`fr-link fr-icon-external-link-line fr-link--icon-right ${styles.contactLink}`}
 										href="/aide/nous-contacter"
 										rel="noopener noreferrer"
 										target="_blank"
@@ -262,8 +262,7 @@ function CseRadioGroup({ hasCse, setHasCse }: CseRadioGroupProps) {
 	return (
 		<fieldset className={`fr-fieldset ${styles.cseFieldset}`}>
 			<legend className="fr-fieldset__legend--regular fr-fieldset__legend">
-				Existence d'un CSE{" "}
-				<span className={styles.requiredHint}>(obligatoire)</span>
+				Existence d'un CSE (obligatoire)
 			</legend>
 			<div className="fr-fieldset__element fr-fieldset__element--inline">
 				<div className="fr-radio-group fr-radio-rich">

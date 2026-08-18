@@ -1,2 +1,2 @@
 export { ProfileModal } from "./ProfileModal";
-export { updatePhoneSchema } from "./schemas";
+export { updatePhoneSchema, updateProfileSchema } from "./schemas";

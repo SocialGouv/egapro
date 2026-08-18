@@ -97,7 +97,6 @@ export function VerticalStepper({
 
 function stepRowClass(status: StepStatus): string {
 	if (status === "complete") return styles.stepRowComplete ?? "";
-	if (status === "current") return styles.stepRowCurrent ?? "";
 	return "";
 }
 

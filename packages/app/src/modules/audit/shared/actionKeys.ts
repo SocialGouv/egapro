@@ -48,6 +48,7 @@ export const AUDIT_ACTIONS = {
 
 	// ── Profile mutations ──────────────────────────────────
 	PROFILE_UPDATE_PHONE: "profile.update_phone",
+	PROFILE_UPDATE: "profile.update",
 
 	// ── GIP MDS ────────────────────────────────────────────
 	GIP_MDS_IMPORT: "gip_mds.import",
@@ -168,6 +169,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE]: "mutation",
 
 	[AUDIT_ACTIONS.PROFILE_UPDATE_PHONE]: "mutation",
+	[AUDIT_ACTIONS.PROFILE_UPDATE]: "mutation",
 
 	[AUDIT_ACTIONS.GIP_MDS_IMPORT]: "system",
 

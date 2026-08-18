@@ -45,6 +45,7 @@ vi.mock("~/trpc/react", () => ({
 }));
 
 import { CompanyEditModal } from "../CompanyEditModal";
+import styles from "../CompanyEditModal.module.scss";
 
 const company = {
 	siren: "532847196",
@@ -319,12 +320,34 @@ describe("CompanyEditModal", () => {
 		expect(container.textContent).not.toContain("l'information manquantes");
 	});
 
+	it("points the contact link to the help page in a new tab", () => {
+		render(<CompanyEditModal company={company} />);
+
+		const contactLink = screen.getByRole("link", {
+			name: /nous contacter\s*\(ouvre une nouvelle fenêtre\)/,
+			hidden: true,
+		});
+
+		expect(contactLink).toHaveAttribute("href", "/aide/nous-contacter");
+		expect(contactLink).toHaveAttribute("target", "_blank");
+		expect(contactLink).toHaveAttribute("rel", "noopener noreferrer");
+		expect(contactLink).toHaveClass(styles.contactLink ?? "");
+	});
+
 	it("renders CSE fieldset with legend", () => {
 		const { container } = render(<CompanyEditModal company={company} />);
 
 		expect(container.textContent).toContain("Existence d'un CSE (obligatoire)");
 		expect(screen.getByLabelText("Oui", { exact: true })).toBeInTheDocument();
 		expect(screen.getByLabelText("Non", { exact: true })).toBeInTheDocument();
+	});
+
+	it("renders the obligatory mention as plain legend text so it inherits the label typography", () => {
+		const { container } = render(<CompanyEditModal company={company} />);
+
+		const legend = container.querySelector("legend");
+		expect(legend).toHaveTextContent("Existence d'un CSE (obligatoire)");
+		expect(legend?.childElementCount).toBe(0);
 	});
 
 	describe("when the CSE is not applicable (gipWorkforce below 100 or unknown)", () => {
