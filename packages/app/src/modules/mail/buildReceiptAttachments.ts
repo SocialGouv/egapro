@@ -41,10 +41,11 @@ export async function buildDeclarationAttachments(
 	siren: string,
 	year: number,
 ): Promise<MailAttachment[]> {
-	return Promise.all([
-		renderDeclarationPdf(siren, year, "initial"),
-		renderTransmittedPdf(siren, year),
-	]);
+	// The "éléments transmis" recap is structurally empty at first declaration
+	// (no CSE opinion nor joint evaluation deposited yet), so only the
+	// declaration recap is attached here. The transmitted recap stays available
+	// on demand and in the second-declaration receipt.
+	return Promise.all([renderDeclarationPdf(siren, year, "initial")]);
 }
 
 export async function buildSecondDeclarationAttachments(

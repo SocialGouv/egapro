@@ -11,7 +11,11 @@ import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/d
 import { useDraftAutoSave } from "~/modules/declaration-remuneration/shared/draft/useDraftAutoSave";
 import { useDraftHydration } from "~/modules/declaration-remuneration/shared/draft/useDraftHydration";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
-import { type CampaignDeadlines, formatLongDate } from "~/modules/domain";
+import {
+	type CampaignDeadlines,
+	formatLongDate,
+	getPathChoiceRound1Deadline,
+} from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { scrollToTop } from "~/modules/shared/scrollToTop";
 import { useZodForm } from "~/modules/shared/useZodForm";
@@ -185,7 +189,11 @@ export function CompliancePathChoice({
 							Date limite pour choisir un parcours de mise en conformité
 						</p>
 						<p className="fr-text--xl fr-text--bold fr-mb-0">
-							{formatLongDate(campaignDeadlines.pathChoiceDeadline)}
+							{formatLongDate(
+								isSecondRound
+									? campaignDeadlines.pathChoiceDeadline
+									: getPathChoiceRound1Deadline(currentYear),
+							)}
 						</p>
 					</div>
 				</div>

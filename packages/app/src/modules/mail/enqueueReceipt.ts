@@ -8,6 +8,7 @@ import type {
 } from "notifications/queue";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
+	getPathChoiceRound1Deadline,
 	hasStartedSecondDeclaration,
 	isInComplianceProcess,
 } from "~/modules/domain";
@@ -120,11 +121,17 @@ async function buildConfirmationPayload(
 				cseRequired: context.cseRequired,
 			});
 			if (variant === "path_to_select") {
-				const deadlines = await getCampaignDeadlines(year);
+				// The first declaration acknowledges round 1 (July 1st of the
+				// campaign year); the second declaration acknowledges round 2, whose
+				// administrable deadline lives in the campaign config.
+				const complianceDeadline =
+					type === "declaration_confirmation"
+						? getPathChoiceRound1Deadline(year)
+						: (await getCampaignDeadlines(year)).pathChoiceDeadline;
 				return {
 					...base,
 					variant,
-					complianceDeadline: deadlines.pathChoiceDeadline.toISOString(),
+					complianceDeadline: complianceDeadline.toISOString(),
 				};
 			}
 			return { ...base, variant };
