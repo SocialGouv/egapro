@@ -5,6 +5,7 @@ import {
 	getDeclarationDeadline,
 	getDefaultCampaignDeadlines,
 	getPathChoiceDeadline,
+	getPathChoiceRound1Deadline,
 	getReferencePeriod,
 	getReferenceYearFor,
 	getRepresentationDeadline,
@@ -119,6 +120,22 @@ describe("getPathChoiceDeadline", () => {
 
 	it("rolls over the year boundary", () => {
 		expect(getPathChoiceDeadline(2026)).toEqual(new Date(2027, 0, 1));
+	});
+});
+
+describe("getPathChoiceRound1Deadline", () => {
+	it("returns July 1st of the campaign year", () => {
+		expect(getPathChoiceRound1Deadline(2026)).toEqual(new Date(2026, 6, 1));
+	});
+
+	it("stays within the campaign year, unlike the round-2 deadline", () => {
+		const year = 2027;
+		expect(getPathChoiceRound1Deadline(year)).toEqual(new Date(year, 6, 1));
+		// Round 1 is July 1st of N; round 2 is January 1st of N+1 — they must not
+		// collapse onto the same date.
+		expect(getPathChoiceRound1Deadline(year)).not.toEqual(
+			getPathChoiceDeadline(year),
+		);
 	});
 });
 
