@@ -1,6 +1,7 @@
 import { and, eq, type SQL, sql } from "drizzle-orm";
 
 import {
+	alignCampaignYear,
 	COMPANY_SIZE_ANNUAL_MIN,
 	COMPANY_SIZE_VOLUNTARY_MAX,
 	computeRate,
@@ -38,7 +39,7 @@ type ScoreDistribution = {
 // since the V2 scheme (V2_FIRST_CAMPAIGN_YEAR), >= 100 for earlier years.
 function buildObligationFilter(year: number): SQL {
 	const ema = sql<number>`floor(${gipMdsData.workforceEma})`;
-	return year >= V2_FIRST_CAMPAIGN_YEAR
+	return alignCampaignYear(year) >= V2_FIRST_CAMPAIGN_YEAR
 		? sql`${ema} >= ${COMPANY_SIZE_VOLUNTARY_MAX}`
 		: sql`${ema} >= ${COMPANY_SIZE_ANNUAL_MIN}`;
 }

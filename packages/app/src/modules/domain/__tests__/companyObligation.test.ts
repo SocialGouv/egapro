@@ -32,9 +32,13 @@ describe("isObligatedForYear", () => {
 			expect(isObligatedForYear(60, 2029)).toBe(true);
 		});
 
-		it("is not subject before the V2 scheme (2026, pinned 2018)", () => {
-			expect(isObligatedForYear(60, 2026)).toBe(false);
+		it("is not subject on pre-V2 years", () => {
 			expect(isObligatedForYear(60, 2018)).toBe(false);
+		});
+
+		// #4240 recette bridge: 2026 plays the first V2 campaign's rules.
+		it("is subject in 2026, aligned on the first V2 campaign", () => {
+			expect(isObligatedForYear(60, 2026)).toBe(true);
 		});
 	});
 
