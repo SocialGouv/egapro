@@ -37,6 +37,17 @@ export const COMPANY_SIZE_RANGES: Record<
 	"250+": { min: 250, max: null, label: "250 salariés et plus" },
 };
 
+/**
+ * Map a workforce headcount to its `CompanySizeRange` bucket key, for a headcount
+ * that may be unknown. An unknown headcount belongs to no bucket: it is never
+ * folded into `<50`, which would assert a size the source does not give.
+ */
+export function getOptionalCompanySizeRange(
+	workforce: number | null,
+): CompanySizeRange | undefined {
+	return workforce === null ? undefined : getCompanySizeRange(workforce);
+}
+
 /** Map a workforce headcount to its `CompanySizeRange` bucket key. */
 export function getCompanySizeRange(workforce: number): CompanySizeRange {
 	const entry = (

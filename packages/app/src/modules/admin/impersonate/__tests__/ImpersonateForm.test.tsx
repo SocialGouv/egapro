@@ -97,6 +97,7 @@ describe("ImpersonateForm", () => {
 			address: null,
 			nafCode: null,
 			workforce: null,
+			workforceYear: 2026,
 		};
 		const update = vi.fn().mockResolvedValue(undefined);
 		useSessionMock.mockReturnValue({

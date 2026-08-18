@@ -4,8 +4,8 @@ import { useMemo } from "react";
 import { useFunnelTracking } from "~/modules/analytics";
 import type { DeclarationFsmStatus } from "~/modules/domain";
 import {
-	getCompanySizeRange,
 	getObligationWorkforce,
+	getOptionalCompanySizeRange,
 	isDeclarationSubmitted,
 	isIndicatorGRequired,
 } from "~/modules/domain";
@@ -74,10 +74,7 @@ export function StepPageClient({
 	modificationClosed = false,
 	modificationDeadline,
 }: StepPageClientProps) {
-	const sizeRange =
-		companyWorkforce !== null
-			? getCompanySizeRange(companyWorkforce)
-			: undefined;
+	const sizeRange = getOptionalCompanySizeRange(companyWorkforce);
 
 	const indicatorGRequired = isIndicatorGRequired(
 		getObligationWorkforce(companyWorkforce),

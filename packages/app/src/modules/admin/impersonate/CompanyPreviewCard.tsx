@@ -4,7 +4,10 @@ type Props = {
 		name: string;
 		address: string | null;
 		nafCode: string | null;
+		// Exact GIP headcount, `null` when the company is absent from the file of
+		// `workforceYear` — rendered as an absence, never as a bracketed tier.
 		workforce: number | null;
+		workforceYear: number;
 	};
 };
 
@@ -32,11 +35,12 @@ export function CompanyPreviewCard({ company }: Props) {
 								<strong>Code NAF :</strong> {company.nafCode}
 							</p>
 						)}
-						{company.workforce !== null && (
-							<p>
-								<strong>Effectif :</strong> {company.workforce}
-							</p>
-						)}
+						<p>
+							<strong>
+								Effectif annuel moyen en {company.workforceYear} :
+							</strong>{" "}
+							{company.workforce ?? "—"}
+						</p>
 					</div>
 				</div>
 			</div>
