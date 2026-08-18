@@ -1,3 +1,11 @@
+## [3.18.5](https://github.com/SocialGouv/egapro/compare/v3.18.4...v3.18.5) (2026-08-18)
+
+
+### Bug Fixes
+
+* **declaration:** vérifie l'ownership sur oldSiren avant suppression dans updateCompanyInfos ([#4238](https://github.com/SocialGouv/egapro/issues/4238)) ([da97fe9](https://github.com/SocialGouv/egapro/commit/da97fe9b2c328c6e96d28fbb54917b5eca9dab05))
+* **mon-espace:** contrôle d'accès owner/staff sur la gestion des responsables ([#4237](https://github.com/SocialGouv/egapro/issues/4237)) ([f8ee83c](https://github.com/SocialGouv/egapro/commit/f8ee83c1a22e5a0f36f02b6bcb23bf2b2d9d4576))
+
 ## [3.18.4](https://github.com/SocialGouv/egapro/compare/v3.18.3...v3.18.4) (2026-07-08)
 
 
