@@ -9,6 +9,7 @@ import {
 } from "~/modules/domain";
 
 import { ArchivesSection } from "./ArchivesSection";
+import { hasArchives } from "./archivesAvailability";
 import { CompanyEditModal } from "./CompanyEditModal";
 import { CompanyInfoBanner } from "./CompanyInfoBanner";
 import { DeclarationProcessPanel } from "./DeclarationProcessPanel";
@@ -91,7 +92,7 @@ export function CompanyDeclarationsPage({
 				hasCse={company.hasCse}
 				userPhone={userPhone}
 			/>
-			<ArchivesSection />
+			{hasArchives && <ArchivesSection />}
 			<CompanyEditModal company={company} />
 			<MissingInfoModal
 				cseApplicable={cseApplicable}
