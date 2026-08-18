@@ -106,7 +106,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
-        uses: maxgfr/ultra11y@v5.10.1
+        uses: maxgfr/ultra11y@v5.11.1
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -367,7 +367,7 @@ jobs:
       # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
       # page, crops de preuve, HTML, commentaire de PR.
       - name: ultra11y — audit, rapport page par page et adjudication
-        uses: maxgfr/ultra11y@v5.10.1
+        uses: maxgfr/ultra11y@v5.11.1
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
@@ -397,6 +397,15 @@ jobs:
           # l'adjudication pour RAFRAÎCHIR le registre (critères périmés ou jamais tranchés) ;
           # le registre mis à jour part dans l'artefact, à committer après relecture.
           adjudicate: agent
+          # TROIS PASSES, et un budget de tours large. Mesuré : l'adjudicateur s'est arrêté à
+          # 22 tours sur 228, sans erreur, en laissant 42 critères `verdict: null` — une passe
+          # unique n'a aucun moyen d'y revenir, et le job finit vert sur une grille que
+          # personne n'a remplie. Chaque passe supplémentaire ne reprend que ce qui est ENCORE
+          # indécis (jamais atteint, ou jugé puis refusé par la porte en portant son motif),
+          # donc elle coûte le reliquat et rien d'autre — et un run qui a tout décidé saute les
+          # suivantes avant d'invoquer le moindre modèle.
+          adjudicate-passes: "3"
+          adjudicate-max-turns: "600"
           # La gate ré-audite la source : un verdict de modèle ne peut pas faire rougir la CI.
           gate-adjudicated: "false"
           fail-on: "" # le verdict d'accessibilité ne bloque pas — on mesure
@@ -531,7 +540,7 @@ jobs:
       # pour rendre une grille complète. Payer une adjudication ici resterait inutile (c'est
       # a11y-pages qui rafraîchit), donc `adjudicate` reste à son défaut `none`.
       - name: ultra11y — rapport RGAA
-        uses: maxgfr/ultra11y@v5.10.1
+        uses: maxgfr/ultra11y@v5.11.1
         with:
           working-directory: packages/app
           paths: src
