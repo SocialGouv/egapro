@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { formatShortDate } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
-import { computePeriodEnd, computePeriodStart, referencePeriodSchema } from "../schemas";
+import {
+	computePeriodEnd,
+	computePeriodStart,
+	referencePeriodSchema,
+} from "../schemas";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
 
 const REQUIRED_DATES_MESSAGE =
@@ -48,7 +52,8 @@ export function Step1ReferencePeriod() {
 	// women/men percentage fields (accessibility pre-audit requirement).
 	function handleStartChange(event: React.ChangeEvent<HTMLInputElement>) {
 		const value = event.target.value;
-		const end = value === "" ? "" : (computePeriodEnd(value) ?? referencePeriodEnd);
+		const end =
+			value === "" ? "" : (computePeriodEnd(value) ?? referencePeriodEnd);
 		form.setValue("referencePeriodStart", value);
 		form.setValue("referencePeriodEnd", end);
 		setDraftValues({

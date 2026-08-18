@@ -235,9 +235,7 @@ describe("Step1ReferencePeriod — submit validation", () => {
 		fillPeriod({ start: VALID_START });
 		await clickNext();
 
-		expect(
-			screen.queryByText(REFERENCE_YEAR_MESSAGE),
-		).not.toBeInTheDocument();
+		expect(screen.queryByText(REFERENCE_YEAR_MESSAGE)).not.toBeInTheDocument();
 		expect(screen.queryByText(REQUIRED_MESSAGE)).not.toBeInTheDocument();
 		expect(push).toHaveBeenCalledWith(STEP_2_HREF);
 	});
