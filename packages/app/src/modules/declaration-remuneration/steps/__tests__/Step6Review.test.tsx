@@ -882,7 +882,7 @@ describe("Step6Review", () => {
 				screen.queryByText(/obligatoirement informer et consulter le CSE/),
 			).not.toBeInTheDocument();
 			expect(
-				screen.queryByText(/avis du CSE devra être transmis/),
+				screen.queryByText(/L'avis du CSE devra être transmis/),
 			).not.toBeInTheDocument();
 			expect(
 				screen.queryByText(/avis à transmettre lors de la dernière étape/),
@@ -923,7 +923,7 @@ describe("Step6Review", () => {
 				screen.getByRole("heading", { name: "Informer et consulter le CSE" }),
 			).toBeInTheDocument();
 			expect(
-				screen.getByText(/avis du CSE devra être transmis/),
+				screen.getByText(/L'avis du CSE devra être transmis/),
 			).toBeInTheDocument();
 			expect(
 				screen.getByText(/avis à transmettre lors de la dernière étape/),
