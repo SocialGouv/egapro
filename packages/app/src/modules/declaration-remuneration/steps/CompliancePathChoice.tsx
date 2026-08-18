@@ -13,6 +13,7 @@ import { useDraftHydration } from "~/modules/declaration-remuneration/shared/dra
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { type CampaignDeadlines, formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
+import { scrollToTop } from "~/modules/shared/scrollToTop";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
@@ -100,10 +101,10 @@ export function CompliancePathChoice({
 	const hasInitialData = !!initialPath;
 	const hasData = hasInitialData || hasDraft;
 
-	// Waits for hydration so the browser doesn't restore scroll on the short placeholder, then re-grow into the taller form.
+	// RouteScrollReset is silent on first render, so a reload still needs this: the browser restores scroll on the short placeholder before the form grows.
 	useEffect(() => {
 		if (draftHydrated) {
-			window.scrollTo(0, 0);
+			scrollToTop();
 		}
 	}, [draftHydrated]);
 

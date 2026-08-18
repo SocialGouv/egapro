@@ -95,6 +95,7 @@ vi.mock("~/modules/layout", () => ({
 		}),
 	ResourceBanner: () =>
 		React.createElement("div", { "data-testid": "resource-banner" }),
+	RouteScrollReset: () => null,
 	NewTabNotice: () =>
 		React.createElement(
 			"span",

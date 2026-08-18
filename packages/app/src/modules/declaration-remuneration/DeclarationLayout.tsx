@@ -1,3 +1,5 @@
+import { RouteScrollReset } from "~/modules/layout";
+
 import { CompanyBanner } from "./shared/CompanyBanner";
 import { DeclarationLockAlertGate } from "./shared/lock/DeclarationLockAlertGate";
 import { LockProvider } from "./shared/lock/LockContext";
@@ -28,6 +30,7 @@ export function DeclarationLayout({
 }: DeclarationLayoutProps) {
 	return (
 		<main id="content" tabIndex={-1}>
+			<RouteScrollReset />
 			<CompanyBanner
 				company={company}
 				currentPageLabel={`Démarche des indicateurs de rémunération ${declarationYear}`}

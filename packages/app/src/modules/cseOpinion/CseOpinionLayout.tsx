@@ -7,7 +7,7 @@ import {
 	getWorkforceYear,
 	isCseRequired,
 } from "~/modules/domain";
-import { Breadcrumb } from "~/modules/layout";
+import { Breadcrumb, RouteScrollReset } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
 
 import styles from "./CseOpinionLayout.module.scss";
@@ -40,6 +40,7 @@ export function CseOpinionLayout({
 
 	return (
 		<main id="content" tabIndex={-1}>
+			<RouteScrollReset />
 			<div className={`fr-py-3w ${styles.banner}`}>
 				<div className="fr-container">
 					<Breadcrumb
