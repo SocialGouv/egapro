@@ -1,7 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { GIP_WORKFORCE_VOLUNTARY_DISPLAY } from "~/modules/domain";
+import {
+	GIP_WORKFORCE_VOLUNTARY_DISPLAY,
+	getWorkforceYear,
+} from "~/modules/domain";
 import { CompanyInfoBanner } from "../CompanyInfoBanner";
 import type { CompanyDetail } from "../types";
 
@@ -89,6 +92,13 @@ describe("CompanyInfoBanner", () => {
 			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 150 }} />,
 		);
 		expect(screen.getByText("150")).toBeInTheDocument();
+	});
+
+	it("labels the workforce with the N-1 reference year, not the current campaign year", () => {
+		render(<CompanyInfoBanner company={baseCompany} />);
+		expect(
+			screen.getByText(`Effectif annuel moyen en ${getWorkforceYear()} :`),
+		).toBeInTheDocument();
 	});
 
 	it("renders 'À compléter' badge when hasCse is null", () => {

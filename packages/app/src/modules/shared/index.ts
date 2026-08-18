@@ -34,6 +34,7 @@ export {
 	isNativeClick,
 	useDownloadClickGuard,
 } from "./useDownloadClickGuard";
+export { useDsfrDialogOpen } from "./useDsfrDialogOpen";
 export { useDsfrModal } from "./useDsfrModal";
 export { useFileUploadForm } from "./useFileUploadForm";
 export { useZodForm } from "./useZodForm";

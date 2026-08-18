@@ -345,7 +345,7 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 				.filter({ hasText: "Effectif annuel moyen" })
 				.first();
 			await expect(companyInfo).toContainText(
-				`Effectif annuel moyen en ${currentYear} :`,
+				`Effectif annuel moyen en ${currentYear - 1} :`,
 			);
 			await expect(companyInfo).toContainText("< 50");
 			await expect(companyInfo).not.toContainText("Existence d'un CSE");
@@ -389,7 +389,7 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 				.filter({ hasText: "Effectif annuel moyen" })
 				.first();
 			await expect(companyInfo).toContainText(
-				`Effectif annuel moyen en ${currentYear} :`,
+				`Effectif annuel moyen en ${currentYear - 1} :`,
 			);
 			await expect(companyInfo).toContainText("< 50");
 			await expect(companyInfo).not.toContainText("37");

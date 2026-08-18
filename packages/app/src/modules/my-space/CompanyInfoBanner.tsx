@@ -1,7 +1,7 @@
 import {
 	formatWorkforceForUser,
-	getCurrentYear,
 	getObligationWorkforce,
+	getWorkforceYear,
 	isCseRequired,
 } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
@@ -18,7 +18,7 @@ type Props = {
 };
 
 export function CompanyInfoBanner({ company }: Props) {
-	const currentYear = getCurrentYear();
+	const workforceYear = getWorkforceYear();
 	const obligationWorkforce = getObligationWorkforce(company.gipWorkforce);
 	// The CSE field is the only editable datapoint and it starts at 100, so below
 	// that threshold the modal has nothing to offer and the entry point is hidden.
@@ -83,7 +83,7 @@ export function CompanyInfoBanner({ company }: Props) {
 						</div>
 					)}
 					<div className={styles.datapoint}>
-						<dt>Effectif annuel moyen en {currentYear} :</dt>
+						<dt>Effectif annuel moyen en {workforceYear} :</dt>
 						<dd>
 							<strong>{formatWorkforceForUser(company.gipWorkforce)}</strong>
 						</dd>
