@@ -22,6 +22,18 @@ export async function updateCompanyInfos(
     staff: true,
   });
 
+  // Si oldSiren est fourni (changement de SIREN), vérifier également l'autorisation sur l'ancien SIREN
+  // avant de supprimer la déclaration associée.
+  if (oldSiren && oldSiren !== declaration.commencer?.siren) {
+    await assertServerSession({
+      owner: {
+        check: oldSiren,
+        message: "Not authorized to delete the declaration for the original Siren.",
+      },
+      staff: true,
+    });
+  }
+
   try {
     const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
     await useCase.execute({ declaration, override: session?.user?.staff });
