@@ -20,7 +20,6 @@ import { useUpdateHasCse } from "./useUpdateHasCse";
 
 export const MODAL_ID = "company-edit-modal";
 const MODAL_TITLE_ID = "company-edit-modal-title";
-const WORKFORCE_YEAR = getWorkforceYear();
 
 type Props = {
 	company: {
@@ -64,7 +63,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 				hasCse: initialCompany.hasCse ?? undefined,
 			});
 			setSubmitError(null);
-		}, [form, initialCompany]),
+		}, [form, initialCompany.siren, initialCompany.hasCse]),
 	);
 
 	const updateHasCseMutation = useUpdateHasCse({
@@ -150,15 +149,15 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 											)}
 										/>
 									)}
+									{submitError && (
+										<div
+											className="fr-alert fr-alert--error fr-mt-2w"
+											role="alert"
+										>
+											<p>{submitError}</p>
+										</div>
+									)}
 								</form>
-								{submitError && (
-									<div
-										className="fr-alert fr-alert--error fr-mt-2w"
-										role="alert"
-									>
-										<p>{submitError}</p>
-									</div>
-								)}
 							</div>
 							<div className="fr-modal__footer">
 								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
@@ -208,6 +207,8 @@ type CompanyReadonlySectionProps = {
 };
 
 function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
+	const workforceYear = getWorkforceYear();
+
 	return (
 		<>
 			<div className={`fr-mb-4w ${styles.section}`}>
@@ -225,7 +226,7 @@ function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 			<div className={`fr-mb-4w ${styles.section}`}>
 				<dl className={styles.infoList}>
 					<InfoRow
-						label={`Effectif annuel moyen en ${WORKFORCE_YEAR} :`}
+						label={`Effectif annuel moyen en ${workforceYear} :`}
 						value={formatWorkforceForUser(company.gipWorkforce)}
 					/>
 				</dl>

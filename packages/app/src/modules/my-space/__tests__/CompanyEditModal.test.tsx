@@ -232,6 +232,7 @@ describe("CompanyEditModal", () => {
 			"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
 		);
 		expect(alert.className).toContain("fr-alert--error");
+		expect(form).toContainElement(alert);
 	});
 
 	it("clears the error alert on a subsequent successful submit", async () => {
