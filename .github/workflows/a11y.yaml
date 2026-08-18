@@ -154,7 +154,13 @@ jobs:
     # Depuis le registre de verdicts, une PR ne paie plus d'adjudication du tout (elle rejoue),
     # donc ce budget ne sert plus qu'aux runs hebdo et manuels, les seuls à faire trancher les
     # critères périmés ou jamais tranchés.
-    timeout-minutes: 75
+    # TROIS PASSES D'ADJUDICATION NE TIENNENT PAS EN 75 MINUTES. Mesuré : le job a été coupé
+    # à 75:00 pile en pleine adjudication, et un job annulé emporte le rapport ET l'artefact —
+    # ce que `continue-on-error` n'absorbe pas. Le budget est donc calé sur le pire cas :
+    # ~20 min d'infrastructure (build, base, navigateur), ~10 min de balayage, puis jusqu'à
+    # trois passes de modèle. Large exprès : un job qui finit trop tôt ne coûte rien, un job
+    # coupé coûte le livrable entier.
+    timeout-minutes: 300
     # Ce tier MESURE : `fail-on: ""` sur l'Action, donc aucun constat d'accessibilité ne fait
     # rougir la PR. Ce n'est pas la même chose que masquer le job. `continue-on-error` au
     # niveau du JOB avalait aussi les pannes d'infra — build, base, ProConnect, crash de
