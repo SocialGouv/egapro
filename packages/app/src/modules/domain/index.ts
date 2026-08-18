@@ -14,6 +14,11 @@ export {
 	isDeadlinePassed,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
+// Campaign alignment — temporary recette bridge mapping 2026 → 2027, delete when 2027 arrives
+export {
+	alignCampaignYear,
+	CAMPAIGN_YEAR_ALIGNED_ON_V2,
+} from "./shared/campaignAlignment";
 // Campaign clock — test-only override seam behind getCurrentYear (issue #4022)
 export {
 	clearCampaignYearOverride,
