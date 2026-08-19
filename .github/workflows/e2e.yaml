@@ -108,7 +108,7 @@ jobs:
             "chrome-headless-shell-linux64"
       - name: Install Playwright system dependencies
         run: pnpm --filter app exec playwright install-deps chromium
-        timeout-minutes: 5
+        timeout-minutes: 15
         env:
           DEBIAN_FRONTEND: noninteractive
           NEEDRESTART_MODE: a
