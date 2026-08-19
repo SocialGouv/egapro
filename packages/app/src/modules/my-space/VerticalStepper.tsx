@@ -5,7 +5,11 @@ import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
 } from "~/modules/domain";
-import { getReferenceYearFor, isDeadlinePassed } from "~/modules/domain";
+import {
+	getReferenceYearFor,
+	isDeadlinePassed,
+	selectPathChoiceDeadline,
+} from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 
@@ -242,9 +246,10 @@ function Step2Content({
 	}
 
 	if (variant === "compliance_choice") {
-		const pathChoiceDeadline = secondDeclarationSubmitted
-			? campaignDeadlines.pathChoiceDeadline
-			: campaignDeadlines.pathChoiceRound1Deadline;
+		const pathChoiceDeadline = selectPathChoiceDeadline(
+			campaignDeadlines,
+			secondDeclarationSubmitted,
+		);
 		return (
 			<div className={styles.stepContent}>
 				{title}

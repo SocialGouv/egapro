@@ -12,6 +12,7 @@ import {
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
 	isDeadlinePassed,
+	selectPathChoiceDeadline,
 	shouldRedirectSubmittedToRecap,
 } from "../shared/campaign";
 
@@ -134,6 +135,25 @@ describe("getPathChoiceRound1Deadline", () => {
 		expect(getPathChoiceRound1Deadline(year)).not.toEqual(
 			getPathChoiceDeadline(year),
 		);
+	});
+});
+
+describe("selectPathChoiceDeadline", () => {
+	const ROUND_1_DEADLINE = new Date("2027-05-15T00:00:00");
+	const ROUND_2_DEADLINE = new Date("2027-11-20T00:00:00");
+	// Values that differ from the derived defaults prove the selector reads the given deadlines instead of recomputing them.
+	const deadlines = {
+		...getDefaultCampaignDeadlines(2027),
+		pathChoiceRound1Deadline: ROUND_1_DEADLINE,
+		pathChoiceDeadline: ROUND_2_DEADLINE,
+	};
+
+	it("returns the round-1 deadline when the company is not in the second round", () => {
+		expect(selectPathChoiceDeadline(deadlines, false)).toBe(ROUND_1_DEADLINE);
+	});
+
+	it("returns the round-2 deadline when the company is in the second round", () => {
+		expect(selectPathChoiceDeadline(deadlines, true)).toBe(ROUND_2_DEADLINE);
 	});
 });
 

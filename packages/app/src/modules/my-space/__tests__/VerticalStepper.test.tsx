@@ -10,9 +10,7 @@ import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
 const FUTURE_YEAR = 2099;
 const PAST_YEAR = 2020;
 
-// `OrdinalLongDate` formats in UTC, so the rendered string is timezone-sensitive.
-// Deriving the expected label through the same component keeps the deadline
-// assertions robust to the runner's timezone.
+// `OrdinalLongDate` formats in UTC, so a hardcoded label would break on other timezones.
 function longDateText(date: Date): string {
 	const { container } = render(<OrdinalLongDate date={date} />);
 	return container.textContent ?? "";
