@@ -199,29 +199,33 @@ export function Step2Executives() {
 					déterminer si l'écart de représentation est calculable.
 				</legend>
 				<p className="fr-mb-2w">Tous les champs sont obligatoires.</p>
-				{EXECUTIVES_COUNT_OPTIONS.map((option) => (
-					<ExecutiveCountOption
-						checked={draft.executivesCount === option.value}
-						disabled={isReadOnly}
-						hint={option.hint}
-						id={`${EXECUTIVES_COUNT_GROUP_NAME}-${option.value}`}
-						key={option.value}
-						label={option.label}
-						onSelect={() => handleCountChange(option.value)}
-						value={option.value}
-					/>
-				))}
 				<div
-					aria-atomic="true"
-					aria-live="polite"
-					className="fr-messages-group"
-					id={MESSAGES_ID}
+					className={`${styles.radioZone} ${showSelectionError ? styles.radioZoneError : ""}`}
 				>
-					{showSelectionError ? (
-						<p className="fr-message fr-message--error">
-							{SELECTION_REQUIRED_MESSAGE}
-						</p>
-					) : null}
+					{EXECUTIVES_COUNT_OPTIONS.map((option) => (
+						<ExecutiveCountOption
+							checked={draft.executivesCount === option.value}
+							disabled={isReadOnly}
+							hint={option.hint}
+							id={`${EXECUTIVES_COUNT_GROUP_NAME}-${option.value}`}
+							key={option.value}
+							label={option.label}
+							onSelect={() => handleCountChange(option.value)}
+							value={option.value}
+						/>
+					))}
+					<div
+						aria-atomic="true"
+						aria-live="polite"
+						className="fr-messages-group"
+						id={MESSAGES_ID}
+					>
+						{showSelectionError ? (
+							<p className="fr-message fr-message--error">
+								{SELECTION_REQUIRED_MESSAGE}
+							</p>
+						) : null}
+					</div>
 				</div>
 			</fieldset>
 

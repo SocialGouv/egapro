@@ -6,17 +6,23 @@
 	margin-bottom: 1.5rem;
 }
 
+.radioGroup:global(.fr-fieldset--error) {
+	background-image: none;
+}
+
 .radioGroup:global(.fr-fieldset--error) .legend {
+	background-image: none;
 	color: var(--text-title-grey);
 }
 
-.radioGroup:global(.fr-fieldset--error) {
-	border-left: 0.25rem solid var(--border-plain-error);
-	padding-left: 1rem;
+.radioZone {
+	flex: 1 1 100%;
+	max-width: 100%;
 }
 
-.radioGroup:global(.fr-fieldset--error) :global(.fr-fieldset__element) {
-	margin-bottom: 17px;
+.radioZoneError {
+	border-left: 2px solid var(--border-plain-error);
+	padding-left: 1rem;
 }
 
 .reminderCompliant:global(.fr-callout) {
