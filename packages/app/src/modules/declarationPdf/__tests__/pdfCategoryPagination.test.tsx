@@ -143,13 +143,15 @@ describe("PDF category pagination", () => {
 	it("never leaves a category or section banner at the bottom of a page", async () => {
 		const offenders: { filler: number; banners: string[] }[] = [];
 
-		for (let fillerHeight = 560; fillerHeight <= 700; fillerHeight += 1) {
+		// Step 3pt: the regression spans ~75pt of filler, so a coarser sweep still
+		// samples it dozens of times while keeping the render count affordable.
+		for (let fillerHeight = 560; fillerHeight <= 700; fillerHeight += 3) {
 			const banners = orphanedBanners(await renderWithFiller(fillerHeight));
 			if (banners.length > 0) offenders.push({ filler: fillerHeight, banners });
 		}
 
 		expect(offenders).toEqual([]);
-	}, 30_000); // 141 full PDF renders on real fonts — well over the 5s default.
+	}, 120_000); // 47 full PDF renders on real fonts, slower again under coverage.
 
 	it("keeps each category heading on the same page as its effectif table", async () => {
 		// At this filler the first category no longer fits: wrap={false} must hold.
