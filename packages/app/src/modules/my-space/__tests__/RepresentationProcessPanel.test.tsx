@@ -99,8 +99,12 @@ describe("RepresentationProcessPanel", () => {
 	it("renders the Rixain reminder with both representation targets", () => {
 		const { panel } = renderPanel();
 		expect(panel.getByText(/loi Rixain/)).toBeInTheDocument();
-		expect(panel.getByText("30 % minimum de chaque sexe")).toBeInTheDocument();
-		expect(panel.getByText("40 % minimum de chaque sexe")).toBeInTheDocument();
+		expect(
+			panel.getByText("30 % minimum de chaque sexe depuis le 1ᵉʳ mars 2026"),
+		).toBeInTheDocument();
+		expect(
+			panel.getByText("40 % minimum de chaque sexe à compter du 1ᵉʳ mars 2029"),
+		).toBeInTheDocument();
 	});
 
 	it("renders the campaign deadline on the declaration step", () => {
