@@ -111,13 +111,37 @@ jobs:
           NEEDRESTART_MODE: a
         run: |
           set -euo pipefail
+          # LE VERROU, PAS LE MIROIR.
+          #
+          # Mesuré sur le run 32290208703 : les trois tentatives ont échoué en CINQ SECONDES,
+          # toutes sur « Could not get lock /var/lib/dpkg/lock-frontend. It is held by process
+          # 2558 (apt-get) ». Ce n'est pas un miroir lent, c'est le timer `unattended-upgrades`
+          # d'Ubuntu qui démarre sur un runner frais et tient apt une minute ou deux. Une boucle
+          # de retry sans attente relance le même tirage trois fois de suite, en quelques
+          # secondes, puis déclare une dépendance cassée — le retry ne servait à rien contre la
+          # seule panne qu'il rencontre vraiment.
+          #
+          # On coupe donc le travail de fond, puis on ATTEND le verrou, puis seulement on tente.
+          sudo systemctl stop apt-daily.service apt-daily-upgrade.service unattended-upgrades.service 2>/dev/null || true
+          sudo systemctl kill --kill-who=all apt-daily.service apt-daily-upgrade.service 2>/dev/null || true
+          wait_for_apt() {
+            for _ in $(seq 1 60); do
+              sudo fuser /var/lib/dpkg/lock-frontend /var/cache/apt/archives/lock >/dev/null 2>&1 || return 0
+              sleep 2
+            done
+            echo "::warning::le verrou apt est encore tenu après 120 s — on tente quand même"
+          }
           for attempt in 1 2 3; do
+            wait_for_apt
             if timeout 240 pnpm --filter app exec playwright install-deps chromium; then
               echo "playwright install-deps: ok (tentative $attempt)"
               exit 0
             fi
             echo "::warning::playwright install-deps a échoué ou expiré (tentative $attempt/3) — nouvelle tentative"
             sudo apt-get clean || true
+            # Un vrai délai : sans lui les trois tentatives tiennent dans le temps que met un
+            # apt de fond à ne pas avoir fini.
+            sleep 15
           done
           echo "::error::playwright install-deps a échoué après 3 tentatives"
           exit 1
