@@ -8,6 +8,7 @@ import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { publicationSchema } from "../schemas";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
+import styles from "./Step4Publication.module.scss";
 
 type PublicationFieldErrors = Partial<
 	Record<
@@ -100,13 +101,15 @@ export function Step4Publication() {
 
 	return (
 		<div>
-			<p className="fr-mb-2w">
+			<p className={`fr-mb-2w ${styles.intro}`}>
 				Vous devez publier vos écarts chaque année, au plus tard le 1er mars.
 			</p>
-			<p className="fr-mb-4w">Tous les champs sont obligatoires.</p>
+			<p className={`fr-mb-2w ${styles.mandatory}`}>
+				Tous les champs sont obligatoires.
+			</p>
 
 			<div
-				className={`fr-input-group fr-mb-4w ${dateError ? "fr-input-group--error" : ""}`}
+				className={`fr-input-group fr-mb-4w ${styles.dateField} ${dateError ? "fr-input-group--error" : ""}`}
 			>
 				<label className="fr-label" htmlFor={dateId}>
 					Date de publication des écarts calculables
