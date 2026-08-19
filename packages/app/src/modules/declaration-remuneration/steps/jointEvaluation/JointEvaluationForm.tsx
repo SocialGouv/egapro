@@ -80,15 +80,13 @@ export function JointEvaluationForm({
 
 	return (
 		<>
-			<form
-				autoComplete="off"
-				className={common.flexColumnGap2}
-				onSubmit={handleSubmit}
-			>
+			<form autoComplete="off" onSubmit={handleSubmit}>
 				{/* Read-only mode is enforced per control (disabled upload and submit
 				    button): a fieldset-level `disabled` would hide the content from
 				    some assistive technologies (#3803). */}
-				<fieldset className={common.readOnlyFieldset}>
+				<fieldset
+					className={`${common.readOnlyFieldset} ${common.flexColumnGap2}`}
+				>
 					<legend className="fr-sr-only">
 						Évaluation conjointe des rémunérations
 					</legend>
@@ -127,8 +125,8 @@ export function JointEvaluationForm({
 					</p>
 
 					<div className="fr-highlight">
-						<p className="fr-mb-1v fr-text--md">Date limite</p>
-						<p className="fr-h6 fr-mb-1v">
+						<p className="fr-mb-2v fr-text--md">Date limite</p>
+						<p className="fr-h6 fr-mb-2v">
 							{formatLongDate(jointEvaluationDeadline)}
 						</p>
 						<p className="fr-mb-0 fr-text--sm fr-text--mention-grey">
@@ -140,7 +138,7 @@ export function JointEvaluationForm({
 						<label className="fr-label" htmlFor="joint-evaluation-file-upload">
 							Veuillez importer/déposer le rapport de l&apos;évaluation
 							conjointe.
-							<span className="fr-hint-text">
+							<span className="fr-hint-text fr-mt-1v">
 								Taille maximale : 10 Mo. Format supporté : pdf.
 							</span>
 						</label>
@@ -159,7 +157,7 @@ export function JointEvaluationForm({
 
 					<div>
 						<div className={styles.panelBlue}>
-							<h3 className="fr-h6">
+							<h3 className="fr-h6 fr-mb-2w">
 								Ce que vous devez faire dans un délai de 2 mois
 							</h3>
 							<ul className="fr-mb-0">
@@ -170,7 +168,7 @@ export function JointEvaluationForm({
 							</ul>
 						</div>
 						<div className={styles.panelWhite}>
-							<h3 className="fr-h6">Après dépôt du rapport</h3>
+							<h3 className="fr-h6 fr-mb-2w">Après dépôt du rapport</h3>
 							<ul className="fr-mb-2w">
 								<li>
 									Réaliser l&apos;analyse conjointe et définir des actions
@@ -200,7 +198,7 @@ export function JointEvaluationForm({
 						mutationError={submitJointEvaluationMutation.error?.message}
 					/>
 
-					<div className={`fr-mt-4w ${common.flexBetween}`}>
+					<div className={common.flexBetween}>
 						<Link
 							className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
 							href="/declaration-remuneration/parcours-conformite"

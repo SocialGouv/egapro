@@ -157,25 +157,27 @@ export function FileUpload({
 				ref={dropzoneRef}
 			>
 				<span aria-hidden="true" className="fr-icon-file-add-fill" />
-				<span>
-					<button
-						className={styles.selectButton}
-						disabled={!canAddMore}
-						onClick={() => fileInputRef.current?.click()}
-						type="button"
-					>
-						{maxFileCount === 1
-							? "Sélectionner un fichier"
-							: "Sélectionner des fichiers"}
-						<span
-							aria-hidden="true"
-							className="fr-icon-upload-line fr-icon--sm"
-						/>
-					</button>
-				</span>
-				<p className="fr-text--sm fr-mb-0">
-					{maxFileCount === 1 ? "ou glisser-le ici" : "ou glisser-les ici"}
-				</p>
+				<div className={styles.dropzoneActions}>
+					<span>
+						<button
+							className={styles.selectButton}
+							disabled={!canAddMore}
+							onClick={() => fileInputRef.current?.click()}
+							type="button"
+						>
+							{maxFileCount === 1
+								? "Sélectionner un fichier"
+								: "Sélectionner des fichiers"}
+							<span
+								aria-hidden="true"
+								className="fr-icon-upload-line fr-icon--sm"
+							/>
+						</button>
+					</span>
+					<p className="fr-text--sm fr-mb-0">
+						{maxFileCount === 1 ? "ou glisser-le ici" : "ou glisser-les ici"}
+					</p>
+				</div>
 			</section>
 
 			{selectedFiles.map((file, index) => (
@@ -224,7 +226,7 @@ export function FileUpload({
 
 			<div
 				aria-live="polite"
-				className="fr-messages-group fr-mt-1w"
+				className={`fr-messages-group ${styles.messagesGroup}`}
 				id={messagesId}
 			>
 				{error && <p className="fr-message fr-message--error">{error}</p>}
