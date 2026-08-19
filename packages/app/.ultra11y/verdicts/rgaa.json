@@ -858,6 +858,34 @@
       "decidedBy": "agent"
     },
     {
+      "criteriaId": "12.3",
+      "verdict": "NC",
+      "justification": "Tests 12.3.2 et 12.3.3 satisfaits : les 9 liens du plan du site pointent tous vers une route existante de packages/app/src/app (/, /aide, /faq, /login, /mentions-legales, /donnees-personnelles, /gestion-des-cookies, /declaration-accessibilite, /plan-du-site) et leur intitulé correspond à la destination. Test 12.3.1 en échec : la liste « Pages principales » n'est pas représentative de l'architecture générale du site. Elle omet « Observatoire » (/index-egapro/recherche), qui est l'une des deux seules entrées du menu principal (src/modules/layout/Header/Navigation.tsx:17), ainsi que les sections publiques « Référents égalité professionnelle » (/referents) et « Statistiques publiques » (/stats), toutes deux présentes comme pages à part entière du périmètre audité. Un plan du site qui ne cite aucune de ces trois branches ne décrit pas l'architecture du site.",
+      "citations": [
+        {
+          "file": "src/modules/legal/SitemapPage.tsx",
+          "line": 17,
+          "selector": "ul.fr-raw-list",
+          "snippet": "<ul className=\"fr-raw-list fr-mb-4w\">"
+        }
+      ],
+      "findings": [
+        {
+          "file": "src/modules/legal/SitemapPage.tsx",
+          "line": 17,
+          "selector": "ul.fr-raw-list",
+          "snippet": "<ul className=\"fr-raw-list fr-mb-4w\">",
+          "message": "La liste « Pages principales » du plan du site ne cite ni l'Observatoire (/index-egapro/recherche, entrée du menu principal) ni les sections publiques /referents et /stats — elle n'est donc pas représentative de l'architecture générale du site (test 12.3.1).",
+          "normativeRef": "12.3.1",
+          "severity": "majeur"
+        }
+      ],
+      "evidenceFingerprint": "sha256:20cd72b94f1261a9d213c5bb4dd19c52",
+      "evidenceCount": 13,
+      "date": "2026-08-19",
+      "decidedBy": "agent"
+    },
+    {
       "criteriaId": "12.5",
       "verdict": "NA",
       "justification": "Le critere 12.1 est deja satisfait par la combinaison menu+plan du site; la fonctionnalite de recherche d'entreprise (HomeSearchForm) n'est presente que sur la page d'accueil et ne constitue pas un 'moteur de recherche' au sens du contenu du site (c'est une recherche metier ponctuelle, pas une recherche documentaire sitewide) — le critere n'a donc pas d'objet applicable au sens de 12.1/12.5.",
