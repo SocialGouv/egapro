@@ -289,51 +289,51 @@ jobs:
       # échoue toujours. Le `timeout` par tentative est ce qui rend le retry possible — sans
       # lui, la première tentative consommerait tout le budget du step.
       - name: Install Playwright system dependencies
-        timeout-minutes: 20
+        timeout-minutes: 14
         env:
           DEBIAN_FRONTEND: noninteractive
           NEEDRESTART_MODE: a
         run: |
           set -euo pipefail
-          # RENDRE APT PATIENT, PLUTÔT QUE DE COURIR APRÈS SES VERROUS.
+          # APT SUR LE MIROIR AZURE EST CE QUI PEND — trois mesures pour en arriver là.
           #
-          # Deux mesures successives, et la seconde a corrigé la première :
+          #  1. run 32290208703 : trois tentatives en CINQ SECONDES sur `dpkg/lock-frontend`.
+          #     La boucle de retry ne dormait pas : elle relançait le même tirage.
+          #  2. run 32296197686 : avec une attente, l'étape patiente quatre minutes puis meurt
+          #     sur un TROISIÈME verrou, `/var/lib/apt/lists/lock`, non surveillé.
+          #  3. run 32296977647 : avec `DPkg::Lock::Timeout`, la tentative 1 tourne SEPT MINUTES
+          #     sans rendre la main (le timeout fonctionne, apt attend) avant d'être coupée, et
+          #     la tentative 2 échoue en cinq secondes sur ce même verrou de `lists` — que
+          #     `DPkg::Lock::Timeout` ne couvre pas. Le processus 2077 le tenait depuis plus de
+          #     dix minutes : un `apt-get update` de fond bloqué sur le miroir Azure.
           #
-          #  - run 32290208703 : les trois tentatives ont échoué en CINQ SECONDES, sur « Could
-          #    not get lock /var/lib/dpkg/lock-frontend, held by process 2558 (apt-get) ». Ce
-          #    n'est pas un miroir lent, c'est le timer `unattended-upgrades` d'Ubuntu qui tient
-          #    apt sur un runner frais. Une boucle de retry sans attente relance le même tirage
-          #    trois fois et déclare une dépendance cassée.
-          #  - run 32296197686, après avoir ajouté une attente : l'étape a bien patienté quatre
-          #    minutes, puis a échoué sur un TROISIÈME verrou — `/var/lib/apt/lists/lock`, celui
-          #    que prend `apt-get update` — que la boucle ne surveillait pas.
+          # C'est le même diagnostic que maxgfr/ultra11y@7090f62 (« apt on the Azure mirror is
+          # what hangs »), et la même conclusion : on ne fait pas dépendre un livrable d'apt.
           #
-          # Surveiller les verrous un par un est une course qu'on perd à chaque nouveau chemin.
-          # `DPkg::Lock::Timeout` fait attendre apt LUI-MÊME, y compris l'apt qu'invoque
-          # `playwright install-deps`, sur tous ses verrous et sans que rien ici ait à les
-          # connaître. L'attente explicite reste en ceinture, élargie aux trois chemins.
+          # Deux lignes de défense. D'abord on libère le verrou pour de bon — c'est une VM
+          # jetable, le processus qu'on tue est un updater de fond dont ce job n'a aucun besoin.
+          # Ensuite, si `install-deps` échoue quand même, on CONTINUE : l'image ubuntu-22.04
+          # embarque Chrome et donc les bibliothèques partagées que Playwright réclame, et la
+          # vraie preuve n'est pas ce qu'apt a répondu — c'est que le navigateur démarre, ce que
+          # les étapes suivantes vérifient immédiatement. Un miroir injoignable ne doit pas se
+          # présenter comme un échec de tests.
           echo 'DPkg::Lock::Timeout "600";' | sudo tee /etc/apt/apt.conf.d/99-ultra11y-lock-timeout > /dev/null
           sudo systemctl stop apt-daily.service apt-daily-upgrade.service unattended-upgrades.service 2>/dev/null || true
           sudo systemctl kill --kill-who=all apt-daily.service apt-daily-upgrade.service 2>/dev/null || true
-          wait_for_apt() {
-            for _ in $(seq 1 90); do
-              sudo fuser /var/lib/dpkg/lock-frontend /var/cache/apt/archives/lock /var/lib/apt/lists/lock >/dev/null 2>&1 || return 0
-              sleep 2
-            done
-            echo "::warning::un verrou apt est encore tenu après 180 s — on tente quand même, apt attendra de son côté"
-          }
+          sudo pkill -9 -f 'apt-get|apt\.systemd\.daily|unattended-upgrade' 2>/dev/null || true
+          sudo rm -f /var/lib/apt/lists/lock /var/cache/apt/archives/lock /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend
+          sudo dpkg --configure -a > /dev/null 2>&1 || true
           for attempt in 1 2; do
-            wait_for_apt
-            if timeout 420 pnpm --filter app exec playwright install-deps chromium; then
+            if timeout 300 pnpm --filter app exec playwright install-deps chromium; then
               echo "playwright install-deps: ok (tentative $attempt)"
               exit 0
             fi
-            echo "::warning::playwright install-deps a échoué ou expiré (tentative $attempt/2) — nouvelle tentative"
+            echo "::warning::playwright install-deps a échoué ou expiré (tentative $attempt/2)"
             sudo apt-get clean || true
             sleep 20
           done
-          echo "::error::playwright install-deps a échoué après 2 tentatives"
-          exit 1
+          echo "::warning::playwright install-deps n'a pas abouti (apt injoignable ou verrouillé). On continue : l'image du runner embarque déjà Chrome et ses bibliothèques partagées, et le lancement du navigateur, juste après, est la vraie vérification."
+          exit 0
       - name: Start services
         run: docker compose up -d
       - name: Build
