@@ -116,6 +116,44 @@ function spy() {
 	return vi.fn<(values: Partial<RepresentationDraft>) => void>();
 }
 
+describe("Step3Members — sélection obligatoire", () => {
+	it("affiche l'erreur de sélection dès le montage de l'étape", () => {
+		render(<Harness />);
+
+		expect(
+			screen.getByText(VALIDATION_MESSAGES.selectionRequired),
+		).toBeInTheDocument();
+	});
+
+	it("expose l'erreur dans le nom accessible du groupe de radios", () => {
+		render(<Harness />);
+
+		expect(
+			screen.getByRole("group", {
+				name: /Veuillez sélectionner une option pour continuer/,
+			}),
+		).toBeInTheDocument();
+	});
+
+	it("efface l'erreur dès qu'une option est choisie", async () => {
+		render(<Harness />);
+
+		await userEvent.click(noneRadio());
+
+		expect(
+			screen.queryByText(VALIDATION_MESSAGES.selectionRequired),
+		).not.toBeInTheDocument();
+	});
+
+	it("n'affiche pas l'erreur pour un brouillon restauré", () => {
+		render(<Harness draft={{ hasManagementBody: false }} />);
+
+		expect(
+			screen.queryByText(VALIDATION_MESSAGES.selectionRequired),
+		).not.toBeInTheDocument();
+	});
+});
+
 describe("Step3Members — existence d'instances dirigeantes (S8)", () => {
 	it("n'affiche ni champ de pourcentage ni badge tant qu'aucun choix n'est fait", () => {
 		render(<Harness />);

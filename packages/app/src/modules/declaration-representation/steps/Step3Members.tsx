@@ -16,6 +16,10 @@ import { ComplianceBadge } from "../shared/ComplianceBadge";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
 import type { PercentagePairValues } from "../shared/PercentagePairFields";
 import { PercentagePairFields } from "../shared/PercentagePairFields";
+import styles from "./Step3Members.module.scss";
+
+const SELECTION_REQUIRED_MESSAGE =
+	"Veuillez sélectionner une option pour continuer.";
 
 function toPercentString(value: number | undefined): string {
 	return value === undefined ? "" : String(value);
@@ -64,6 +68,8 @@ export function Step3Members() {
 
 	const hasManagementBody = draft.hasManagementBody;
 	const campaignYear = getRepresentationCampaignYear(year);
+	const legendId = `${baseId}-legend`;
+	const messagesId = `${baseId}-messages`;
 
 	// Raw strings, not re-derived from the draft on render (would drop an in-progress decimal separator).
 	const [percentageValues, setPercentageValues] =
@@ -105,6 +111,7 @@ export function Step3Members() {
 	const isStepValid =
 		hasManagementBody !== undefined &&
 		(hasManagementBody === false || decidedVerdict !== undefined);
+	const showSelectionError = hasManagementBody === undefined;
 
 	useEffect(() => {
 		registerStepValidator(() => isStepValid);
@@ -113,45 +120,68 @@ export function Step3Members() {
 
 	return (
 		<div className="fr-mb-4w">
-			<fieldset className="fr-fieldset">
-				<legend className="fr-fieldset__legend--regular fr-fieldset__legend">
+			<fieldset
+				aria-labelledby={`${legendId} ${messagesId}`}
+				className={`fr-fieldset ${styles.radioGroup} ${showSelectionError ? "fr-fieldset--error" : ""}`}
+				role={showSelectionError ? "group" : undefined}
+			>
+				<legend
+					className={`fr-fieldset__legend--regular fr-fieldset__legend ${styles.legend}`}
+					id={legendId}
+				>
 					Indiquez si votre entreprise a mis en place une ou plusieurs instances
 					dirigeantes pour déterminer si l'écart de représentation est
 					calculable.
 				</legend>
 				<p className="fr-mb-2w">Tous les champs sont obligatoires.</p>
-				<div className="fr-fieldset__element">
-					<div className="fr-radio-group fr-radio-rich">
-						<input
-							checked={hasManagementBody === false}
-							disabled={isReadOnly}
-							id={`${baseId}-none`}
-							name={`${baseId}-has-management-body`}
-							onChange={() => handleSelect(false)}
-							type="radio"
-						/>
-						<label className="fr-label" htmlFor={`${baseId}-none`}>
-							Aucune instance dirigeante
-							<span className="fr-hint-text">
-								L'écart ne peut pas être calculé.
-							</span>
-						</label>
+				<div
+					className={`${styles.radioZone} ${showSelectionError ? styles.radioZoneError : ""}`}
+				>
+					<div className="fr-fieldset__element">
+						<div className="fr-radio-group fr-radio-rich">
+							<input
+								checked={hasManagementBody === false}
+								disabled={isReadOnly}
+								id={`${baseId}-none`}
+								name={`${baseId}-has-management-body`}
+								onChange={() => handleSelect(false)}
+								type="radio"
+							/>
+							<label className="fr-label" htmlFor={`${baseId}-none`}>
+								Aucune instance dirigeante
+								<span className="fr-hint-text">
+									L'écart ne peut pas être calculé.
+								</span>
+							</label>
+						</div>
 					</div>
-				</div>
-				<div className="fr-fieldset__element">
-					<div className="fr-radio-group fr-radio-rich">
-						<input
-							checked={hasManagementBody === true}
-							disabled={isReadOnly}
-							id={`${baseId}-some`}
-							name={`${baseId}-has-management-body`}
-							onChange={() => handleSelect(true)}
-							type="radio"
-						/>
-						<label className="fr-label" htmlFor={`${baseId}-some`}>
-							Au moins une instance dirigeante
-							<span className="fr-hint-text">L'écart doit être calculé.</span>
-						</label>
+					<div className="fr-fieldset__element">
+						<div className="fr-radio-group fr-radio-rich">
+							<input
+								checked={hasManagementBody === true}
+								disabled={isReadOnly}
+								id={`${baseId}-some`}
+								name={`${baseId}-has-management-body`}
+								onChange={() => handleSelect(true)}
+								type="radio"
+							/>
+							<label className="fr-label" htmlFor={`${baseId}-some`}>
+								Au moins une instance dirigeante
+								<span className="fr-hint-text">L'écart doit être calculé.</span>
+							</label>
+						</div>
+					</div>
+					<div
+						aria-atomic="true"
+						aria-live="polite"
+						className="fr-messages-group"
+						id={messagesId}
+					>
+						{showSelectionError ? (
+							<p className="fr-message fr-message--error">
+								{SELECTION_REQUIRED_MESSAGE}
+							</p>
+						) : null}
 					</div>
 				</div>
 			</fieldset>
