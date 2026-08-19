@@ -321,7 +321,7 @@ describe("SecondDeclarationStep3Review", () => {
 				screen.queryByText(/obligatoirement informer et consulter le CSE/),
 			).not.toBeInTheDocument();
 			expect(
-				screen.queryByText(/avis à transmettre sur le portail/),
+				screen.queryByText(/avis à transmettre lors de la dernière étape/),
 			).not.toBeInTheDocument();
 
 			expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
@@ -335,7 +335,7 @@ describe("SecondDeclarationStep3Review", () => {
 			).toBeInTheDocument();
 		});
 
-		it("shows the CSE consultation section when cseOpinionRequired is true", () => {
+		it("shows the CSE consultation section and renders the joint evaluation bullet without the 'Soit' prefix when cseOpinionRequired is true", () => {
 			renderStep3({
 				cseOpinionRequired: true,
 				secondDeclarationCategories: highGapCategories,
@@ -345,13 +345,32 @@ describe("SecondDeclarationStep3Review", () => {
 				screen.getByRole("heading", { name: "Informer et consulter le CSE" }),
 			).toBeInTheDocument();
 			expect(
-				screen.getByText(/avis à transmettre sur le portail/),
+				screen.getByText(/avis à transmettre lors de la dernière étape/),
 			).toBeInTheDocument();
 			expect(
 				screen.getByRole("button", {
 					name: "Mettre à jour l'existence d'un CSE",
 				}),
 			).toBeInTheDocument();
+
+			expect(
+				screen.getByText(/À la suite de l'analyse de vos données/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					/vous devez informer et consulter le CSE sur cette justification/,
+				),
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByText("Réaliser une évaluation conjointe des rémunérations"),
+			).toBeInTheDocument();
+			expect(
+				screen.queryByText(/Soit réaliser une évaluation conjointe/),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(/mettre en place des actions correctives/),
+			).not.toBeInTheDocument();
 		});
 	});
 
