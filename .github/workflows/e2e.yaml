@@ -105,45 +105,50 @@ jobs:
       # passait). Les deux workflows partagent volontairement ce bloc d'infrastructure — les
       # désaligner, c'est laisser le flake dans celui qu'on n'a pas corrigé.
       - name: Install Playwright system dependencies
-        timeout-minutes: 14
+        timeout-minutes: 20
         env:
           DEBIAN_FRONTEND: noninteractive
           NEEDRESTART_MODE: a
         run: |
           set -euo pipefail
-          # LE VERROU, PAS LE MIROIR.
+          # RENDRE APT PATIENT, PLUTÔT QUE DE COURIR APRÈS SES VERROUS.
           #
-          # Mesuré sur le run 32290208703 : les trois tentatives ont échoué en CINQ SECONDES,
-          # toutes sur « Could not get lock /var/lib/dpkg/lock-frontend. It is held by process
-          # 2558 (apt-get) ». Ce n'est pas un miroir lent, c'est le timer `unattended-upgrades`
-          # d'Ubuntu qui démarre sur un runner frais et tient apt une minute ou deux. Une boucle
-          # de retry sans attente relance le même tirage trois fois de suite, en quelques
-          # secondes, puis déclare une dépendance cassée — le retry ne servait à rien contre la
-          # seule panne qu'il rencontre vraiment.
+          # Deux mesures successives, et la seconde a corrigé la première :
           #
-          # On coupe donc le travail de fond, puis on ATTEND le verrou, puis seulement on tente.
+          #  - run 32290208703 : les trois tentatives ont échoué en CINQ SECONDES, sur « Could
+          #    not get lock /var/lib/dpkg/lock-frontend, held by process 2558 (apt-get) ». Ce
+          #    n'est pas un miroir lent, c'est le timer `unattended-upgrades` d'Ubuntu qui tient
+          #    apt sur un runner frais. Une boucle de retry sans attente relance le même tirage
+          #    trois fois et déclare une dépendance cassée.
+          #  - run 32296197686, après avoir ajouté une attente : l'étape a bien patienté quatre
+          #    minutes, puis a échoué sur un TROISIÈME verrou — `/var/lib/apt/lists/lock`, celui
+          #    que prend `apt-get update` — que la boucle ne surveillait pas.
+          #
+          # Surveiller les verrous un par un est une course qu'on perd à chaque nouveau chemin.
+          # `DPkg::Lock::Timeout` fait attendre apt LUI-MÊME, y compris l'apt qu'invoque
+          # `playwright install-deps`, sur tous ses verrous et sans que rien ici ait à les
+          # connaître. L'attente explicite reste en ceinture, élargie aux trois chemins.
+          echo 'DPkg::Lock::Timeout "600";' | sudo tee /etc/apt/apt.conf.d/99-ultra11y-lock-timeout > /dev/null
           sudo systemctl stop apt-daily.service apt-daily-upgrade.service unattended-upgrades.service 2>/dev/null || true
           sudo systemctl kill --kill-who=all apt-daily.service apt-daily-upgrade.service 2>/dev/null || true
           wait_for_apt() {
-            for _ in $(seq 1 60); do
-              sudo fuser /var/lib/dpkg/lock-frontend /var/cache/apt/archives/lock >/dev/null 2>&1 || return 0
+            for _ in $(seq 1 90); do
+              sudo fuser /var/lib/dpkg/lock-frontend /var/cache/apt/archives/lock /var/lib/apt/lists/lock >/dev/null 2>&1 || return 0
               sleep 2
             done
-            echo "::warning::le verrou apt est encore tenu après 120 s — on tente quand même"
+            echo "::warning::un verrou apt est encore tenu après 180 s — on tente quand même, apt attendra de son côté"
           }
-          for attempt in 1 2 3; do
+          for attempt in 1 2; do
             wait_for_apt
-            if timeout 240 pnpm --filter app exec playwright install-deps chromium; then
+            if timeout 420 pnpm --filter app exec playwright install-deps chromium; then
               echo "playwright install-deps: ok (tentative $attempt)"
               exit 0
             fi
-            echo "::warning::playwright install-deps a échoué ou expiré (tentative $attempt/3) — nouvelle tentative"
+            echo "::warning::playwright install-deps a échoué ou expiré (tentative $attempt/2) — nouvelle tentative"
             sudo apt-get clean || true
-            # Un vrai délai : sans lui les trois tentatives tiennent dans le temps que met un
-            # apt de fond à ne pas avoir fini.
-            sleep 15
+            sleep 20
           done
-          echo "::error::playwright install-deps a échoué après 3 tentatives"
+          echo "::error::playwright install-deps a échoué après 2 tentatives"
           exit 1
       - name: Start services
         run: docker compose up -d
