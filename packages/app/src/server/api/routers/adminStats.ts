@@ -24,6 +24,7 @@ import type {
 	UsersPerCompany,
 } from "~/modules/admin/stats/types";
 import {
+	alignCampaignYear,
 	COMPANY_SIZE_ANNUAL_MIN,
 	COMPANY_SIZE_RANGES,
 	COMPANY_SIZE_VOLUNTARY_MAX,
@@ -102,7 +103,7 @@ function obligationWorkforceFilter(
 ): SQL {
 	const ema = sql<number>`floor(${gipMdsData.workforceEma})`;
 	const baseObligation =
-		year >= V2_FIRST_CAMPAIGN_YEAR
+		alignCampaignYear(year) >= V2_FIRST_CAMPAIGN_YEAR
 			? sql`${ema} >= ${COMPANY_SIZE_VOLUNTARY_MAX}`
 			: sql`${ema} >= ${COMPANY_SIZE_ANNUAL_MIN}`;
 

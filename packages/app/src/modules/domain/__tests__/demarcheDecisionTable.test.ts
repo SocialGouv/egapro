@@ -226,7 +226,9 @@ describe("size boundaries (named domain constants)", () => {
 	});
 
 	it("isTriennialYear: triennial cycle starting at INDICATOR_G_TRIENNIAL_BASE_YEAR", () => {
-		expect(isTriennialYear(INDICATOR_G_TRIENNIAL_BASE_YEAR - 1)).toBe(false);
+		// base − 2 = 2025 is pre-base and off-cadence: the recette bridge only lifts
+		// 2026 (base − 1) onto the 2027 rules, so 2025 stays excluded.
+		expect(isTriennialYear(INDICATOR_G_TRIENNIAL_BASE_YEAR - 2)).toBe(false);
 		expect(isTriennialYear(INDICATOR_G_TRIENNIAL_BASE_YEAR)).toBe(true);
 		expect(isTriennialYear(INDICATOR_G_TRIENNIAL_BASE_YEAR + 1)).toBe(false);
 		expect(isTriennialYear(INDICATOR_G_TRIENNIAL_BASE_YEAR + 3)).toBe(true);
