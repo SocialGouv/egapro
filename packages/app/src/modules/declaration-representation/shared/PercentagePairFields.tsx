@@ -3,6 +3,8 @@
 import type { ReactNode } from "react";
 import { useId, useState } from "react";
 
+import styles from "./PercentagePairFields.module.scss";
+
 const PERCENTAGE_INPUT_PATTERN = /^\d{0,3}([.,]\d?)?$/;
 
 export type PercentagePairValues = {
@@ -89,58 +91,66 @@ export function PercentagePairFields({
 
 	return (
 		<fieldset className={`fr-fieldset ${error ? "fr-fieldset--error" : ""}`}>
-			<legend className="fr-fieldset__legend fr-text--regular">{legend}</legend>
+			<legend className={`fr-fieldset__legend ${styles.legend}`}>
+				{legend}
+			</legend>
 			<div className="fr-fieldset__content">
-				<div
-					className={`fr-grid-row fr-grid-row--gutters ${trailingContent ? "fr-grid-row--bottom" : ""}`}
-				>
-					<div className="fr-col-12 fr-col-sm-4">
+				<div className={styles.fieldsRow}>
+					<div className={styles.field}>
 						<div className="fr-input-group">
 							<label className="fr-label" htmlFor={womenId}>
 								{womenLabel}
-								<span className="fr-hint-text">En pourcentage</span>
+								<span className="fr-sr-only">(en pourcentage)</span>
 							</label>
-							<input
-								aria-describedby={describedBy || undefined}
-								aria-invalid={error ? true : undefined}
-								aria-required="true"
-								className="fr-input"
-								id={womenId}
-								inputMode="decimal"
-								onChange={(event) => handleWomenChange(event.target.value)}
-								readOnly={readOnly}
-								type="text"
-								value={values.womenPercent}
-							/>
+							<div className={styles.inputWithUnit}>
+								<input
+									aria-describedby={describedBy || undefined}
+									aria-invalid={error ? true : undefined}
+									aria-required="true"
+									className="fr-input"
+									id={womenId}
+									inputMode="decimal"
+									onChange={(event) => handleWomenChange(event.target.value)}
+									readOnly={readOnly}
+									type="text"
+									value={values.womenPercent}
+								/>
+								<span aria-hidden="true" className={styles.unit}>
+									%
+								</span>
+							</div>
 						</div>
 					</div>
-					<div className="fr-col-12 fr-col-sm-4">
+					<div className={styles.field}>
 						<div className="fr-input-group">
 							<label className="fr-label" htmlFor={menId}>
 								{menLabel}
-								<span className="fr-hint-text">En pourcentage</span>
+								<span className="fr-sr-only">(en pourcentage)</span>
 							</label>
-							<input
-								aria-describedby={describedBy || undefined}
-								aria-invalid={error ? true : undefined}
-								aria-required="true"
-								className="fr-input"
-								id={menId}
-								inputMode="decimal"
-								onChange={(event) => handleMenChange(event.target.value)}
-								readOnly={readOnly}
-								type="text"
-								value={values.menPercent}
-							/>
+							<div className={styles.inputWithUnit}>
+								<input
+									aria-describedby={describedBy || undefined}
+									aria-invalid={error ? true : undefined}
+									aria-required="true"
+									className="fr-input"
+									id={menId}
+									inputMode="decimal"
+									onChange={(event) => handleMenChange(event.target.value)}
+									readOnly={readOnly}
+									type="text"
+									value={values.menPercent}
+								/>
+								<span aria-hidden="true" className={styles.unit}>
+									%
+								</span>
+							</div>
 						</div>
 					</div>
-					{trailingContent ? (
-						<div className="fr-col-12 fr-col-sm-4">{trailingContent}</div>
-					) : null}
+					{trailingContent ? <div>{trailingContent}</div> : null}
 				</div>
 			</div>
 			{hint ? (
-				<p className="fr-message fr-message--info" id={hintId}>
+				<p className={`fr-message fr-message--info ${styles.hint}`} id={hintId}>
 					{hint}
 				</p>
 			) : null}

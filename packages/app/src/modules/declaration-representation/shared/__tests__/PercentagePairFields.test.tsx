@@ -48,7 +48,9 @@ function fields() {
 function liveRegions() {
 	return {
 		messages: document.querySelector(".fr-messages-group") as HTMLElement,
-		announcement: document.querySelector(".fr-sr-only") as HTMLElement,
+		announcement: document.querySelector(
+			"p.fr-sr-only[aria-live]",
+		) as HTMLElement,
 	};
 }
 
