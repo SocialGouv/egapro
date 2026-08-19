@@ -1,10 +1,7 @@
 // @vitest-environment node
 
-import { createRequire } from "node:module";
-
 import {
 	Document,
-	Font,
 	Page,
 	renderToBuffer,
 	StyleSheet,
@@ -18,18 +15,12 @@ import {
 	extractTextStream,
 	type PositionedRun,
 } from "./helpers/pdfTextStream";
+import { registerPdfFonts } from "./helpers/registerPdfFonts";
 
 const FONT_SIZE = 100;
 const FRENCH_DIACRITICS = "éèêëàâùûîïôöçÉÈÊÀÇ";
 
-const marianneRegular = createRequire(import.meta.url).resolve(
-	"@gouvfr/dsfr/dist/fonts/Marianne-Regular.woff",
-);
-
-Font.register({
-	family: PDF_FONT_FAMILY,
-	fonts: [{ src: marianneRegular, fontWeight: 400 }],
-});
+registerPdfFonts();
 
 const styles = StyleSheet.create({
 	page: { fontFamily: PDF_FONT_FAMILY, padding: 0 },

@@ -135,9 +135,9 @@ function CategoryBlock({
 }) {
 	const heading = `Catégorie d'emplois n°${index + 1}${category.name ? ` : ${category.name}` : ""}`;
 	return (
-		<View style={styles.categoryBlock}>
-			<CategoryBanner title={heading} />
+		<>
 			<View wrap={false}>
+				<CategoryBanner title={heading} />
 				<SubTitle title="Effectifs physiques" />
 				<EffectifTable category={category} />
 			</View>
@@ -159,13 +159,13 @@ function CategoryBlock({
 					variableWomen={category.hourlyVariableWomen}
 				/>
 			</View>
-		</View>
+		</>
 	);
 }
 
 export function CategorySection({ data }: { data: DeclarationPdfData }) {
 	return (
-		<View>
+		<>
 			<View minPresenceAhead={80} wrap={false}>
 				<SectionBanner title="Écart de rémunération par catégories de salariés" />
 				{data.categories.length > 0 ? (
@@ -188,6 +188,6 @@ export function CategorySection({ data }: { data: DeclarationPdfData }) {
 					key={category.name}
 				/>
 			))}
-		</View>
+		</>
 	);
 }
