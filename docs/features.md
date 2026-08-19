@@ -337,7 +337,7 @@ L'application génère plusieurs documents officiels et expose une API publique 
 | Type | Quand | Module |
 |---|---|---|
 | `DeclarationPdfDocument` | Pre-fill / aperçu | `~/modules/declarationPdf` |
-| `TransmittedPdfDocument` | Reçu officiel après soumission | `~/modules/declarationPdf` |
+| `TransmittedPdfDocument` | Récapitulatif des avis CSE et de l'évaluation conjointe transmis | `~/modules/declarationPdf` |
 
 Téléchargement déclenché depuis :
 

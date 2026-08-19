@@ -5,6 +5,7 @@ import type { CampaignDeadlines } from "~/modules/domain";
 import {
 	getDefaultCampaignDeadlines,
 	getPathChoiceDeadline,
+	getPathChoiceRound1Deadline,
 } from "~/modules/domain";
 
 import { db } from ".";
@@ -47,6 +48,7 @@ export const getCampaignDeadlines = cache(
 			decl2JustificationDeadline: parseDate(row.decl2JustificationDeadline),
 			decl2JointEvaluationDeadline: parseDate(row.decl2JointEvaluationDeadline),
 			pathChoiceDeadline: getPathChoiceDeadline(year),
+			pathChoiceRound1Deadline: getPathChoiceRound1Deadline(year),
 		};
 	},
 );

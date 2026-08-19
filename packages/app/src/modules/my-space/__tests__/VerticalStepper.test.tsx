@@ -1,6 +1,7 @@
 import { render, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { OrdinalLongDate } from "~/modules/declaration-remuneration/shared/OrdinalLongDate";
 import type { DeclarationDisplayContext } from "~/modules/domain";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import type { PanelVariant } from "../DeclarationProcessPanel";
@@ -8,6 +9,14 @@ import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
 
 const FUTURE_YEAR = 2099;
 const PAST_YEAR = 2020;
+
+// `OrdinalLongDate` formats in UTC, so the rendered string is timezone-sensitive.
+// Deriving the expected label through the same component keeps the deadline
+// assertions robust to the runner's timezone.
+function longDateText(date: Date): string {
+	const { container } = render(<OrdinalLongDate date={date} />);
+	return container.textContent ?? "";
+}
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
 
@@ -148,6 +157,36 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(
 				panel.queryByText("Votre seconde déclaration a été transmise"),
 			).not.toBeInTheDocument();
+		});
+
+		it("shows the round-1 path-choice deadline while the second declaration is not submitted", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("compliance_choice", {
+				campaignDeadlines: deadlines,
+				hasSubmittedSecondDeclaration: false,
+			});
+
+			const deadlineRow = panel.getByText(/^Échéance :/);
+			expect(deadlineRow).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.pathChoiceRound1Deadline)}`,
+			);
+			expect(deadlineRow).not.toHaveTextContent(
+				longDateText(deadlines.decl2ModificationDeadline),
+			);
+		});
+
+		it("shows the round-2 path-choice deadline once the second declaration is submitted", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("compliance_choice", {
+				campaignDeadlines: deadlines,
+				displayContext: makeDisplayContext("corrective_action"),
+				hasSubmittedSecondDeclaration: true,
+			});
+
+			const deadlineRow = panel.getByText(/^Échéance :/);
+			expect(deadlineRow).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.pathChoiceDeadline)}`,
+			);
 		});
 	});
 

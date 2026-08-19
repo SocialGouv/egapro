@@ -62,6 +62,7 @@ export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 		decl2JustificationDeadline: new Date(year, 11, 1),
 		decl2JointEvaluationDeadline: new Date(year + 1, 1, 1),
 		pathChoiceDeadline: getPathChoiceDeadline(year),
+		pathChoiceRound1Deadline: getPathChoiceRound1Deadline(year),
 	};
 }
 

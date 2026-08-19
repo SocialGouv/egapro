@@ -242,6 +242,9 @@ function Step2Content({
 	}
 
 	if (variant === "compliance_choice") {
+		const pathChoiceDeadline = secondDeclarationSubmitted
+			? campaignDeadlines.pathChoiceDeadline
+			: campaignDeadlines.pathChoiceRound1Deadline;
 		return (
 			<div className={styles.stepContent}>
 				{title}
@@ -253,7 +256,7 @@ function Step2Content({
 						viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}&type=correction`}
 					/>
 				)}
-				<DeadlineRow date={campaignDeadlines.decl2ModificationDeadline} />
+				<DeadlineRow date={pathChoiceDeadline} />
 			</div>
 		);
 	}
