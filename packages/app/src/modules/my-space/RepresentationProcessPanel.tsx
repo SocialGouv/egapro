@@ -145,8 +145,10 @@ function RixainAlert() {
 				La loi Rixain (n° 2021-1774) impose aux entreprises de 1 000 salariés et
 				plus, pendant trois années consécutives, de publier chaque année les
 				écarts de représentation entre les femmes et les hommes parmi les cadres
-				dirigeants et au sein des instances dirigeantes. Par ailleurs, les
-				seuils à atteindre sont de{" "}
+				dirigeants et au sein des instances dirigeantes.
+			</p>
+			<p>
+				Par ailleurs, les seuils à atteindre sont de{" "}
 				<strong>
 					{REPRESENTATION_TARGET_INITIAL} % minimum de chaque sexe depuis le 1ᵉʳ
 					mars 2026
