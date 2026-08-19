@@ -5,7 +5,6 @@ import {
 	hasGapsAboveThreshold,
 	isComplianceProcessCompleted,
 	isCseOpinionRequired,
-	isDeadlinePassed,
 	isDraft,
 } from "~/modules/domain";
 import { auth } from "~/server/auth";
@@ -50,8 +49,6 @@ export function getCompliancePathReadOnlyReason(params: {
 	hasSubmittedSecondDeclaration: boolean;
 	hasSubmittedCseOpinion: boolean;
 	hasSubmittedJointEvaluation: boolean;
-	pathChoiceDeadline: Date;
-	now?: Date;
 }): CompliancePathReadOnlyReason | null {
 	const {
 		status,
@@ -59,8 +56,6 @@ export function getCompliancePathReadOnlyReason(params: {
 		hasSubmittedSecondDeclaration,
 		hasSubmittedCseOpinion,
 		hasSubmittedJointEvaluation,
-		pathChoiceDeadline,
-		now,
 	} = params;
 
 	if (isComplianceProcessCompleted(status)) return "demarche_completed";
@@ -70,8 +65,6 @@ export function getCompliancePathReadOnlyReason(params: {
 		return "second_declaration_submitted";
 	if (pathChoice === "joint_evaluation" && hasSubmittedJointEvaluation)
 		return "joint_evaluation_submitted";
-	if (isDeadlinePassed(pathChoiceDeadline, now))
-		return "path_choice_deadline_passed";
 	return null;
 }
 
@@ -133,7 +126,6 @@ export async function CompliancePathPage() {
 		hasSubmittedSecondDeclaration: data.hasSubmittedSecondDeclaration,
 		hasSubmittedCseOpinion: data.hasSubmittedCseOpinion,
 		hasSubmittedJointEvaluation: data.hasSubmittedJointEvaluation,
-		pathChoiceDeadline: campaignDeadlines.pathChoiceDeadline,
 	});
 
 	return (

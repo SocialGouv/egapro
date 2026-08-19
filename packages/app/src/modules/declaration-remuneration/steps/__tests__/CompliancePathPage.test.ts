@@ -84,8 +84,6 @@ describe("getCompliancePathReadOnlyReason", () => {
 		hasSubmittedSecondDeclaration: false,
 		hasSubmittedCseOpinion: false,
 		hasSubmittedJointEvaluation: false,
-		pathChoiceDeadline: new Date("2026-12-01T00:00:00"),
-		now: new Date("2026-06-15T00:00:00"),
 	} satisfies Parameters<typeof getCompliancePathReadOnlyReason>[0];
 
 	it("returns null when no condition is met", () => {
@@ -165,40 +163,6 @@ describe("getCompliancePathReadOnlyReason", () => {
 				pathChoice: "joint_evaluation",
 			}),
 		).toBeNull();
-	});
-
-	it("returns path_choice_deadline_passed once the deadline is in the past", () => {
-		expect(
-			getCompliancePathReadOnlyReason({
-				...baseParams,
-				pathChoice: "justify",
-				pathChoiceDeadline: new Date("2026-06-01T00:00:00"),
-				now: new Date("2026-06-02T00:00:00"),
-			}),
-		).toBe("path_choice_deadline_passed");
-	});
-
-	it("prioritises a submitted next step over a passed deadline", () => {
-		expect(
-			getCompliancePathReadOnlyReason({
-				...baseParams,
-				pathChoice: "justify",
-				hasSubmittedCseOpinion: true,
-				pathChoiceDeadline: new Date("2026-06-01T00:00:00"),
-				now: new Date("2026-06-02T00:00:00"),
-			}),
-		).toBe("cse_opinion_submitted");
-	});
-
-	it("returns path_choice_deadline_passed even without a chosen path", () => {
-		expect(
-			getCompliancePathReadOnlyReason({
-				...baseParams,
-				pathChoice: null,
-				pathChoiceDeadline: new Date("2026-06-01T00:00:00"),
-				now: new Date("2026-06-02T00:00:00"),
-			}),
-		).toBe("path_choice_deadline_passed");
 	});
 
 	it("does not lock the second-round revision choice when only the first-round second declaration was submitted", () => {

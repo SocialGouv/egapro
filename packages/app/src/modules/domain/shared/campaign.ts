@@ -56,7 +56,7 @@ export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 		gipPublicationDate: null,
 		campaignStartDate: null,
 		decl1ModificationDeadline: new Date(year, 5, 1),
-		decl1JustificationDeadline: new Date(year, 5, 1),
+		decl1JustificationDeadline: new Date(year + 1, 2, 1),
 		decl1JointEvaluationDeadline: new Date(year, 7, 1),
 		decl2ModificationDeadline: new Date(year, 11, 1),
 		decl2JustificationDeadline: new Date(year, 11, 1),
