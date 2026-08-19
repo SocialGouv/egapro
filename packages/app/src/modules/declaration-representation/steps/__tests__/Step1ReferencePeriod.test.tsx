@@ -36,8 +36,7 @@ const YEAR = 2025;
 const STEP_2_HREF = "/declaration-representation/etape/2";
 const REQUIRED_MESSAGE = "Sélectionner une date de début ou une date de fin.";
 const REFERENCE_YEAR_MESSAGE = `La date sélectionnée ne correspond pas à l'année de référence ${YEAR}.`;
-const TWELVE_MONTHS_HINT =
-	"La période couvre 12 mois consécutifs : la date de fin est calculée automatiquement à partir de la date de début, et inversement.";
+const TWELVE_MONTHS_HINT = "La période couvre 12 mois consécutifs.";
 const VALID_START = "2025-01-01";
 const VALID_END = "2025-12-31";
 

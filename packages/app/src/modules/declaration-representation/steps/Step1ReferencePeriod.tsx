@@ -189,8 +189,7 @@ export function Step1ReferencePeriod() {
 
 			<div className="fr-messages-group">
 				<p className="fr-message fr-message--info">
-					La période couvre 12 mois consécutifs : la date de fin est calculée
-					automatiquement à partir de la date de début, et inversement.
+					La période couvre 12 mois consécutifs.
 				</p>
 			</div>
 			<p aria-atomic="true" aria-live="polite" className="fr-sr-only">
