@@ -4,13 +4,22 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 # Le moteur est EMBARQUÉ dans l'Action : rien à installer, et aucune version à maintenir
 # alignée côté repo. Trois tiers :
 #
-#   a11y-gate    CODE     — audit statique JSX/TSX du package. Bloquant.
+#   a11y-gate    CODE     — audit statique JSX/TSX du package. Bloquant, et MUET : il ne
+#                           produit ni rapport, ni artefact, ni commentaire. Il fait rougir ou
+#                           verdir, et laisse les annotations en ligne et le SARIF sur la diff.
 #   a11y-pages   RENDU    — la suite Playwright dédiée balaye les pages, en épinglant l'état
 #                           applicatif que chaque écran de tunnel exige ; l'Action réingère
-#                           les instantanés et produit le rapport page par page, les crops de
-#                           preuve et l'adjudication IA des critères de jugement.
-#                           Les CONSTATS ne bloquent pas — on mesure. Une panne, si.
-#   a11y-report  RAPPORT  — rapport RGAA hebdomadaire complet (artefact), sans navigateur.
+#                           les instantanés, tourne le MÊME audit du code, et produit LE
+#                           rapport page par page, les crops de preuve, l'adjudication IA des
+#                           critères de jugement, LE commentaire et LE livrable.
+#                           Les CONSTATS ne bloquent pas — on mesure. Une panne, si ; et
+#                           depuis `require-decided: pages`, une grille incomplète aussi.
+#
+# Il n'y a plus de `a11y-report` hebdomadaire séparé : `a11y-pages` tourne déjà sur `schedule`
+# et sur `workflow_dispatch`, et produit le même livrable AVEC le navigateur, donc en mieux.
+# Ce qu'on perd en le supprimant, dit franchement : le plancher « sans docker, sans base, sans
+# navigateur » qui sortait un rapport daté même quand la stack tombait. C'est le prix du
+# livrable unique, et `require-sample` fait déjà rougir un balayage amputé.
 #
 # Le tier LIGHTHOUSE (score a11y 100 %) reste dans lighthouse.yaml.
 #
@@ -53,11 +62,17 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 #
 # CE QUE LE REGISTRE NE FAIT PAS : rendre la grille complète à lui seul.
 #
-# Le rejeu couvre ce qui a déjà été tranché. Il reste, à chaque run, des critères que personne
-# n'a encore décidés — et une part que le moteur ne décidera jamais sans navigateur ni modèle.
-# `require-decided` est donc à `false` : ce tier MESURE et publie, il ne fait pas rougir la PR.
-# Ce qu'il faut lire pour savoir où en est la grille : la colonne « À évaluer » du commentaire,
-# le `::warning::` du log, la fiche par page du livrable. Voir le commentaire de l'input.
+# Le rejeu couvre ce qui a déjà été tranché. Ce qui a fermé le reste n'est pas le registre mais
+# le MOTEUR : il décide désormais par page ce qu'il a mesuré par page, au lieu de ne savoir que
+# répéter le verdict du run. Un critère non conforme sur une route est tranché POUR LE RUN, et
+# sur les trente-six autres — celles que les mêmes sondes venaient de zoomer, de reflower, de
+# parcourir au clavier — il retombait « à évaluer ». Mesuré sur l'audit réel de cette PR : 9
+# critères ouverts sur la page d'accueil, dont 7 exactement de cette forme. Ils tombent.
+#
+# `require-decided` est donc passé à `pages`, et ce tier peut rougir : le zéro « à évaluer » est
+# une invariante gardée, pas un affichage. Ce qui reste ouvert est NOMMÉ — dans le commentaire,
+# dans le log, dans la fiche par page — et se ferme par l'adjudication ou par une entrée motivée
+# dans `undecidable.json`.
 #
 # CE QUE L'AMONT A CORRIGÉ EN 5.8.0, et qui se voit ici :
 #   - une sonde `hover` sans timeout suspendait le test appelant jusqu'à sa mort à 120 s. Deux
@@ -106,7 +121,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
-        uses: maxgfr/ultra11y@v5.14.2
+        uses: maxgfr/ultra11y@feat/single-a11y-deliverable
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -126,11 +141,23 @@ jobs:
           # verdict adjugé ne peut ni faire rougir ni faire verdir ce job.
           ledger: .ultra11y/verdicts/rgaa.json
           fail-on: blocking
-          comment: "true"
-          artifact-name: ultra11y-part-code
-          # Le commentaire doit envoyer son lecteur vers le livrable qui SURVIT au run : la
-          # partie ci-dessus est supprimée par `a11y-bundle` au moment de la fusion.
-          report-artifact: ultra11y-rgaa
+          # CETTE GATE NE PRODUIT PLUS RIEN — elle fait rougir ou verdir, c'est tout.
+          #
+          # Elle postait un commentaire et uploadait un rapport complet, et `a11y-pages` aussi :
+          # deux commentaires sticky sur la PR et deux arborescences de rapport dans le ZIP,
+          # dont un lecteur qui veut « le rapport d'accessibilité de ce run » devait deviner
+          # laquelle ouvrir. Pire, le sien était FAUX par construction : sans instantané de page
+          # il annonçait 92 % (15/106) avec 91 critères « à évaluer » là où le tier page en
+          # décidait 104 sur 106 — le même dépôt, le même commit, deux chiffres.
+          #
+          # Rien n'est perdu : `a11y-pages` tourne le MÊME audit du code (`paths: src`, `--jsx`,
+          # `--graph`) avant d'y fondre les instantanés, donc son livrable contient tout ce que
+          # celui-ci portait, et ses constats non rattachés à une page ont désormais leur propre
+          # bloc dans le commentaire. Ce job garde les annotations en ligne et le SARIF, qui
+          # s'affichent sur la diff et ne sont pas des livrables.
+          report: "false"
+          html: "false"
+          comment: "false"
 
   a11y-pages:
     name: "RGAA · rapport page par page (non bloquant)"
@@ -142,8 +169,9 @@ jobs:
     # TOUTES les PR, et pas seulement celles qui visent `alpha` : une PR vers `beta` ou
     # `master` touche le même code et mérite la même revue. Plus les push (alpha/beta/master),
     # le run hebdomadaire et le déclenchement manuel — autrement dit, partout où ce workflow
-    # tourne. Le job est un AUDIT (`fail-on: ""`, `require-decided: "false"`), donc l'élargir
-    # ne peut pas faire rougir une PR ; ça coûte du temps de runner, pas du rouge.
+    # tourne. Les CONSTATS d'accessibilité ne font toujours pas rougir (`fail-on: ""`) ; ce qui
+    # rougit maintenant, c'est une grille incomplète (`require-decided: pages`) ou un balayage
+    # amputé (`require-sample`) — deux faits sur la QUALITÉ DU RUN, pas sur le code audité.
     runs-on: ubuntu-22.04
     # Mesuré : 34 min pour 17 pages et une adjudication plafonnée à 60 tours ; 40 min pour le
     # run complet. Le balayage enregistre aujourd'hui **35 pages** (les 24 de l'échantillon
@@ -348,13 +376,16 @@ jobs:
             #
             # `a11y-bundle` fusionne les `ultra11y-part-*` en un seul `ultra11y-rgaa` avec
             # `delete-merged: true` : au moment où cette étape tourne, la partie qui portait le
-            # registre n'existe plus. Chercher `ultra11y-part-verdicts` ne rate donc pas un run
-            # de temps en temps — ça rate TOUS les runs, en silence, et la grille repart vide à
-            # chaque fois. On lit le livrable, où `rgaa.json` se retrouve à la racine.
+            # registre n'existe plus sous son propre nom. On lit donc le LIVRABLE, où l'Action a
+            # recopié le registre à côté du rapport (`verdicts-rgaa.json`). Les noms précédents
+            # sont essayés ensuite, pour un livrable produit avant ce changement.
             gh run download "$run_id" -n ultra11y-rgaa -D "$tmp" 2>/dev/null || continue
             # Une partie par répertoire depuis `separate-directories` ; on accepte encore la
             # racine, pour un livrable produit avant ce changement.
-            led="$tmp/ultra11y-part-verdicts/rgaa.json"
+            led="$tmp/ultra11y-part-rgaa/verdicts-rgaa.json"
+            # Les noms qu'ont portés les livrables précédents, dans l'ordre où on les a eus.
+            [ -f "$led" ] || led="$tmp/ultra11y-part-pages/verdicts-rgaa.json"
+            [ -f "$led" ] || led="$tmp/ultra11y-part-verdicts/rgaa.json"
             [ -f "$led" ] || led="$tmp/rgaa.json"
             [ -f "$led" ] || continue
             n=$(node -p "try{JSON.parse(require('fs').readFileSync('$led','utf8')).entries.length}catch{0}")
@@ -373,7 +404,7 @@ jobs:
       # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
       # page, crops de preuve, HTML, commentaire de PR.
       - name: ultra11y — audit, rapport page par page et adjudication
-        uses: maxgfr/ultra11y@v5.14.2
+        uses: maxgfr/ultra11y@feat/single-a11y-deliverable
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
@@ -415,35 +446,32 @@ jobs:
           # La gate ré-audite la source : un verdict de modèle ne peut pas faire rougir la CI.
           gate-adjudicated: "false"
           fail-on: "" # le verdict d'accessibilité ne bloque pas — on mesure
-          # LA COMPLÉTUDE EST MESURÉE, PAS IMPOSÉE — pour l'instant.
+          # LA COMPLÉTUDE EST DÉSORMAIS IMPOSÉE, ET PAR PAGE.
           #
-          # `require-decided: "true"` rendait ce job rouge tant que la grille n'était pas
-          # complète. L'intention était juste : `fail-on` porte sur les non-conformités, donc
-          # un run qui ne trouve rien à redire est vert y compris quand il n'a rien décidé, et
-          # un lecteur qui fait confiance à la pastille verte lit alors une grille que personne
-          # n'a remplie.
+          # `require-decided: "true"` ne portait que sur la grille DU RUN, et les deux questions
+          # se séparent exactement là où ça compte : un critère non conforme quelque part est
+          # TRANCHÉ pour le run, et sur les pages où le défaut n'apparaît pas il peut n'être le
+          # verdict de personne. Mesuré sur ce dépôt : 104/106 décidés pour le run, et 8 à 11
+          # ouverts sur CHACUNE des 37 pages — une porte verte au-dessus d'un livrable rempli à
+          # 90 %.
           #
-          # Mais une porte qui ne peut pas s'ouvrir n'est pas une porte : elle était rouge à
-          # CHAQUE run de PR, parce que le registre ne pouvait pas s'amorcer (adjudication
-          # coupée sur PR, artefact cherché sur la mauvaise branche) et parce qu'une part des
-          # critères ne se tranche qu'avec un modèle en boucle. Un contrôle toujours rouge est
-          # un contrôle qu'on apprend à ignorer — exactement ce que la porte existait pour
-          # empêcher. Ce tier est donc un AUDIT : il publie la grille, dit combien de critères
-          # restent « à évaluer », et ne fait pas rougir la PR.
+          # `pages` tient chaque grille de page à la même barre, qui est celle sur laquelle un
+          # bilan page par page se juge réellement. Elle est atteignable depuis que le moteur
+          # décide par page ce qu'il a MESURÉ par page (`scope.pageCoverage`) : sur l'audit réel
+          # de cette PR, les 9 « à évaluer » de la page d'accueil tombent à 2 — 11.9 et 12.3, les
+          # deux que l'adjudicateur a explicitement déclarés indécidables.
           #
-          # Ce qui reste lisible sans la porte : le `::warning::` dans le log, la colonne
-          # « À évaluer » du commentaire de PR, et la fiche par page de l'artefact.
-          #
-          # `undecidable-file` reste câblé et versionné : c'est là qu'iront, NOMMÉMENT et avec
-          # leur motif, les critères que personne ne peut trancher, le jour où l'on rallumera
-          # la porte. Une liste, jamais un seuil — un pourcentage laisse passer exactement les
-          # critères que personne n'a su décider.
-          require-decided: "false"
+          # Ce que ça change pour la PR : ce job peut maintenant rougir. C'est voulu, et c'est la
+          # seule chose qui rende le zéro tenable — sans porte, « à évaluer » redevient une
+          # colonne qu'on apprend à ignorer. Les deux issues sont ouvertes et nommées : faire
+          # trancher 11.9 et 12.3 par l'adjudication, ou les déclarer dans `undecidable.json`
+          # avec leur motif. Jamais un seuil.
+          require-decided: pages
           undecidable-file: .ultra11y/undecidable.json
           # LA COUVERTURE, elle, bloque — et c'est la seule chose qui bloque ici.
           #
-          # `require-decided` porte sur les CRITÈRES et reste à false : ce tier mesure. Celle-ci
-          # porte sur les PAGES, et c'est une question différente : le balayage a-t-il regardé
+          # `require-decided` porte sur les CRITÈRES ; celle-ci porte sur les PAGES, et c'est
+          # une question différente, un cran en amont : le balayage a-t-il seulement regardé
           # les 24 pages que `.ultra11yrc.json` déclare ? Mesuré sur le run 32135566667 : une
           # sonde suspendue a tué deux specs, le groupe série en a emporté quinze autres, et le
           # rapport RGAA est sorti avec 20 pages sur 35 — vert, sans nommer une seule des
@@ -454,43 +482,34 @@ jobs:
           # mais il doit coûter le vert. La step garde donc son masque, et la perte devient
           # visible ici, nommément.
           require-sample: "true"
-          # Le commentaire page par page, sous SON PROPRE marqueur sticky (`comment-kind`).
-          # Les deux jobs ont longtemps posté sous le même marqueur, donc celui-ci écrasait
-          # celui de la gate — mesuré : le commentaire affichait 337 fichiers / 684 occurrences
-          # (le tier page) et la gate code avait disparu. Le tier page a été muselé, et un
-          # rapport RGAA page par page a tourné vert pendant des semaines sans que personne ne
-          # le lise. Les marqueurs sont maintenant distincts (et ni l'un ni l'autre n'est une
-          # sous-chaîne de l'autre, parce que la recherche se fait par `includes`), donc les
-          # deux commentaires coexistent : la gate garde son digest de défauts actionnables,
-          # celui-ci porte la grille par page.
+          # LE SEUL COMMENTAIRE DE LA PR, et c'est le bilan page par page.
           #
-          # Ce n'est pas le même document : une ligne par page avec sa base, son taux ET son
-          # dénominateur, puis un bloc replié par page en échec listant ses critères non
-          # conformes. La grille complète — 106 critères × 35 pages, avec les captures — reste
-          # dans l'artefact, où elle est lisible.
+          # Il y en avait deux : le digest de la gate code et cette grille. Deux documents sur
+          # un même run, qui ne s'accordaient même pas sur le taux, et un lecteur qui devait
+          # choisir. La gate ne commente plus (voir son bloc plus haut), donc ce document doit
+          # se suffire — et il le fait depuis l'amont : les constats qu'aucune page ne peut
+          # revendiquer (code partagé, fichier hors routes) y ont maintenant leur propre bloc,
+          # avec fichier, ligne et description, au lieu d'être seulement comptés en une phrase.
+          #
+          # Ce qu'il porte : une ligne par page avec sa base, ses C, ses NC et ses sévérités ;
+          # la grille complète repliée ; puis un bloc par page en échec, ses non-conformités
+          # séparées en BLOQUANTES et NON BLOQUANTES. Plus de colonne « À évaluer » : un nombre
+          # dans une colonne est ce qu'un lecteur apprend à sauter (mesuré : chaque ligne
+          # affichait 9 pendant des semaines). Ce qui reste ouvert est NOMMÉ, dans un bloc qui
+          # disparaît entièrement quand la grille est complète — et `require-decided: pages`
+          # ci-dessus fait rougir tant qu'il ne l'est pas.
           comment: "true"
           comment-kind: pages
-          artifact-name: ultra11y-part-pages
+          artifact-name: ultra11y-part-rgaa
           # Le commentaire doit envoyer son lecteur vers le livrable qui SURVIT au run : la
           # partie ci-dessus est supprimée par `a11y-bundle` au moment de la fusion.
           report-artifact: ultra11y-rgaa
-      # Le registre RAFRAÎCHI, sur le seul chemin qui l'enrichit (hebdo / manuel). Il est
-      # versionné : ce job ne peut pas le committer lui-même — le run planifié tourne sur la ref
-      # par défaut, et un job CI qui pousse sur une branche protégée est une porte qu'on n'ouvre
-      # pas pour un fichier de verdicts. Il sort donc en artefact, à relire puis committer, ce
-      # qui est aussi la bonne place pour la relecture : un verdict est une affirmation sur ce
-      # dépôt, elle se relit en revue comme le reste.
-      # Sur TOUS les événements, PR comprises, depuis que la PR adjuge elle aussi : c'est
-      # exactement le run qui vient d'enrichir le registre qui doit le rendre disponible, sans
-      # quoi ce qu'il a payé est perdu à la fin du job.
-      - name: Upload du registre de verdicts rafraîchi
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: ultra11y-part-verdicts
-          path: packages/app/.ultra11y/verdicts/rgaa.json
-          retention-days: 30
-          if-no-files-found: warn
+      # LE REGISTRE RAFRAÎCHI VOYAGE DÉJÀ DANS LE LIVRABLE. L'Action le recopie elle-même
+      # à côté du rapport (`audits/verdicts-rgaa.json`) dès que `ledger:` est câblé, donc
+      # l'uploader une seconde fois sous son propre nom ne faisait qu'ajouter une partie de
+      # plus à fusionner — exactement ce que « un seul livrable » cherche à supprimer.
+      # Il reste à relire puis committer : un verdict est une affirmation sur ce dépôt, elle
+      # se relit en revue comme le reste.
       # Sans ça, un échec est aussi un échec non diagnosticable — `e2e.yaml` remonte les mêmes.
       - name: Upload du rapport Playwright a11y
         uses: actions/upload-artifact@v4
@@ -506,26 +525,30 @@ jobs:
         if: always()
         run: docker compose down
 
-  # UN SEUL LIVRABLE PAR RUN.
+  # UN SEUL LIVRABLE PAR RUN — et, depuis ce changement, un seul RAPPORT dedans.
   #
   # Trois jobs produisaient cinq artefacts — l'audit du code, le rapport page par page, le
   # registre de verdicts, le rapport Playwright, le rapport hebdomadaire — et un lecteur qui
   # veut « le rapport d'accessibilité de ce run » devait deviner lequel télécharger, puis en
-  # ouvrir plusieurs pour recoller les morceaux. Chaque producteur écrit donc une PARTIE
-  # (`ultra11y-part-*`) et ce job les fusionne en un seul ZIP.
+  # ouvrir plusieurs pour recoller les morceaux. La fusion réglait le nombre d'artefacts et
+  # pas le problème : le ZIP contenait toujours DEUX arborescences de rapport complètes, qui
+  # ne s'accordaient pas sur le taux.
   #
-  # `delete-merged: true` : les parties disparaissent, il ne reste que `ultra11y-rgaa`. Sans
-  # ça on aurait six artefacts au lieu de cinq, ce qui est l'inverse du but.
+  # Il n'en reste qu'un producteur de rapport (`a11y-pages`) ; ce job fusionne sa partie avec
+  # le rapport Playwright, gardé à part parce que c'est du DIAGNOSTIC de suite de tests et non
+  # un livrable d'accessibilité — quand un écran coince, c'est là qu'on va voir pourquoi.
   #
-  # `if: always()` et `needs` sur les trois jobs : un tier qui échoue ou qui ne tourne pas sur
-  # cet événement (le hebdo sur une PR, la gate sur un `schedule`) ne doit pas emporter le
-  # livrable des autres. `actions/upload-artifact/merge` ne trouvant AUCUNE partie échoue par
-  # défaut — d'où `continue-on-error`, parce qu'un run sans artefact est un fait, pas une
-  # panne : c'est le cas d'un `push` sur alpha, où seule la gate tourne et où elle peut avoir
-  # été coupée par un `paths-ignore` en amont.
+  # `delete-merged: true` : les parties disparaissent, il ne reste que `ultra11y-rgaa`.
+  # `separate-directories: true` : chaque partie garde son répertoire, sans quoi une fusion à
+  # plat en détruit une (mesuré : le livrable est tombé de 4,4 Mo à 384 Ko).
+  #
+  # `if: always()` : un tier qui échoue ne doit pas emporter le livrable de l'autre.
+  # `actions/upload-artifact/merge` ne trouvant AUCUNE partie échoue par défaut — d'où
+  # `continue-on-error`, parce qu'un run sans artefact est un fait, pas une panne : c'est le
+  # cas d'un `push` sur alpha, où seule la gate tourne, et où elle ne produit plus rien.
   a11y-bundle:
     name: "RGAA · livrable unique"
-    needs: [a11y-gate, a11y-pages, a11y-report]
+    needs: [a11y-gate, a11y-pages]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -535,40 +558,6 @@ jobs:
         with:
           name: ultra11y-rgaa
           pattern: ultra11y-part-*
-          # UN RÉPERTOIRE PAR PARTIE, sans quoi la fusion en détruit une.
-          #
-          # Les parties « code » et « pages » portent toutes deux `audit-latest.json`,
-          # `index.html` et le rapport Markdown À LA RACINE : fusionnées à plat, l'une écrase
-          # l'autre. Mesuré : le livrable est tombé de 4,4 Mo à 384 Ko, et il ne restait que
-          # l'audit du code — plus de `pages/`, plus de captures, plus de worklist
-          # d'adjudication. Le job était vert, le rapport page par page avait disparu.
           separate-directories: true
           delete-merged: true
           retention-days: 30
-
-  a11y-report:
-    name: "RGAA · rapport de conformité hebdomadaire (artefact)"
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      # Le plancher garanti : pas de docker, pas de base, pas de navigateur. Si a11y-pages
-      # tombe (stack, ProConnect), le livrable RGAA daté sort quand même — et il n'est plus
-      # amputé de ses critères de jugement, puisque le registre les porte. C'est tout l'intérêt
-      # d'un registre versionné : le plancher n'a plus besoin d'un navigateur NI d'un modèle
-      # pour rendre une grille complète. Payer une adjudication ici resterait inutile (c'est
-      # a11y-pages qui rafraîchit), donc `adjudicate` reste à son défaut `none`.
-      - name: ultra11y — rapport RGAA
-        uses: maxgfr/ultra11y@v5.14.2
-        with:
-          working-directory: packages/app
-          paths: src
-          since: ""
-          jsx: "true"
-          graph: "true"
-          standard: rgaa
-          lang: fr
-          ledger: .ultra11y/verdicts/rgaa.json
-          fail-on: "" # report-only
-          artifact-name: ultra11y-part-weekly
