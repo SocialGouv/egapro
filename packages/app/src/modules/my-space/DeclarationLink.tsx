@@ -12,7 +12,7 @@ import styles from "./DeclarationsSection.module.scss";
 import type { DeclarationType } from "./types";
 
 const MISSING_INFO_MODAL_ID = "missing-info-modal";
-const linkClass = `fr-link ${styles.linkUnderlined}`;
+const linkClass = `fr-link fr-link--sm ${styles.linkUnderlined}`;
 
 type Props = {
 	type: DeclarationType;

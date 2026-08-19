@@ -218,7 +218,7 @@ function DeclarationsTable({
 													<>
 														<button
 															aria-controls={getDocumentsPanelId(declaration)}
-															className={`fr-link ${styles.linkUnderlined}`}
+															className={`fr-link fr-link--sm ${styles.linkUnderlined}`}
 															data-fr-opened="false"
 															type="button"
 														>

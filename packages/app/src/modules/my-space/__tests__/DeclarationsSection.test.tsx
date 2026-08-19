@@ -160,6 +160,17 @@ describe("DeclarationsSection", () => {
 		expect(represButtons).toHaveLength(1);
 	});
 
+	it("uses DSFR SM (14px) link size on every table link", () => {
+		renderSection();
+		const tableLinks = screen.getAllByRole("button", {
+			name: /^(Rémunération|Représentation|Documents \(\d+\))$/,
+		});
+		expect(tableLinks.length).toBeGreaterThan(0);
+		for (const link of tableLinks) {
+			expect(link).toHaveClass("fr-link", "fr-link--sm");
+		}
+	});
+
 	it("shows the first representation step in the 'Étape' column", () => {
 		renderSection();
 		expect(
