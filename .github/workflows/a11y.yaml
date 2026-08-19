@@ -106,7 +106,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
-        uses: maxgfr/ultra11y@v5.14.0
+        uses: maxgfr/ultra11y@v5.14.2
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -373,7 +373,7 @@ jobs:
       # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
       # page, crops de preuve, HTML, commentaire de PR.
       - name: ultra11y — audit, rapport page par page et adjudication
-        uses: maxgfr/ultra11y@v5.14.0
+        uses: maxgfr/ultra11y@v5.14.2
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
@@ -560,7 +560,7 @@ jobs:
       # pour rendre une grille complète. Payer une adjudication ici resterait inutile (c'est
       # a11y-pages qui rafraîchit), donc `adjudicate` reste à son défaut `none`.
       - name: ultra11y — rapport RGAA
-        uses: maxgfr/ultra11y@v5.14.0
+        uses: maxgfr/ultra11y@v5.14.2
         with:
           working-directory: packages/app
           paths: src
